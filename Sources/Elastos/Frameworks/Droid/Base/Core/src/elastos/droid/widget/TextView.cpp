@@ -493,10 +493,12 @@ CharWrapper::CharWrapper(
     : mStart(start)
     , mLength(len)
 {
-    if (chars != NULL)
+    if (chars != NULL) {
         mChars = chars->Clone();
-    else
+    }
+    else {
         mChars = NULL;
+    }
 }
 
 void CharWrapper::Set(
@@ -504,10 +506,12 @@ void CharWrapper::Set(
     /* [in] */ Int32 start,
     /* [in] */ Int32 len)
 {
-    if (chars != NULL)
+    if (chars != NULL) {
         mChars = chars->Clone();
-    else
+    }
+    else {
         mChars = NULL;
+    }
     mStart = start;
     mLength = len;
 }
@@ -636,7 +640,7 @@ ECode CharWrapper::MeasureText(
 ECode CharWrapper::GetTextWidths(
     /* [in] */ Int32 start,
     /* [in] */ Int32 end,
-    /* [in] */ ArrayOf<Float>* widths,
+    /* [out] */ ArrayOf<Float>* widths,
     /* [in] */ IPaint* p,
     /* [out] */ Int32* count)
 {
@@ -658,7 +662,7 @@ ECode CharWrapper::GetTextRunAdvances(
     /* [in] */ Int32 contextStart,
     /* [in] */ Int32 contextEnd,
     /* [in] */ Boolean isRtl,
-    /* [in] */ ArrayOf<Float>* advances,
+    /* [out] */ ArrayOf<Float>* advances,
     /* [in] */ Int32 advancesIndex,
     /* [in] */ IPaint* p,
     /* [out] */ Float* advance)
@@ -803,11 +807,12 @@ void Marquee::Tick()
     AutoPtr<IInterface> obj;
     mView->Resolve(EIID_IInterface, (IInterface**)&obj);
     if (obj != NULL) {
+        IView* view = IView::Probe(obj);
         TextView* textView = (TextView*)ITextView::Probe(obj);
         if (textView != NULL) {
             Boolean isFocused, isSelected;
-            if ((IView::Probe(textView)->IsFocused(&isFocused), isFocused)
-                || (IView::Probe(textView)->IsSelected(&isSelected), isSelected)) {
+            if ((view->IsFocused(&isFocused), isFocused)
+                || (view->IsSelected(&isSelected), isSelected)) {
                 Int64 currentMs;
                 mChoreographer->GetFrameTime(&currentMs);
                 Int64 deltaMs = currentMs - mLastAnimationMs;
@@ -2474,12 +2479,11 @@ void TextView::SetKeyListenerOnly(
     if (input != TO_EDITOR(mEditor)->mKeyListener) {
         TO_EDITOR(mEditor)->mKeyListener = input;
 
-        AutoPtr<IEditable> editable = IEditable::Probe(mText);
-        if (input != NULL && NULL == editable) {
+        if (input != NULL && NULL == IEditable::Probe(mText)) {
             SetText(mText);
         }
 
-        editable = IEditable::Probe(mText);
+        AutoPtr<IEditable> editable = IEditable::Probe(mText);
         SetFilters(editable, mFilters);
     }
 }
@@ -2559,7 +2563,7 @@ ECode TextView::SetTransformationMethod(
     if (method2) {
         Boolean isTextSelectable;
         IsTextSelectable(&isTextSelectable);
-        mAllowTransformationLengthChange = !isTextSelectable && !(IEditText::Probe(mText.Get()));
+        mAllowTransformationLengthChange = !isTextSelectable && !(IEditText::Probe(mText));
         method2->SetLengthChangesAllowed(mAllowTransformationLengthChange);
     }
     else {
@@ -4222,8 +4226,7 @@ ECode TextView::Append(
     /* [in] */ Int32 start,
     /* [in] */ Int32 end)
 {
-    AutoPtr<IEditable> editable = IEditable::Probe(mText);
-    if (!editable) {
+    if (IEditable::Probe(mText) == NULL) {
         SetText(mText, BufferType_EDITABLE);
     }
     AutoPtr<IEditable> result = IEditable::Probe(mText);
@@ -4453,7 +4456,8 @@ void TextView::OnRestoreInstanceState(
     }
 
     if (ss->mSelStart >= 0 && ss->mSelEnd >= 0) {
-        if (ISpannable::Probe(mText) != NULL) {
+        ISpannable* saText = ISpannable::Probe(mText);
+        if (saText != NULL) {
             Int32 len;
             mText->GetLength(&len);
 
@@ -4468,8 +4472,7 @@ void TextView::OnRestoreInstanceState(
                         ss->mSelStart, ss->mSelEnd, restored.string(), TO_CSTR(mText));
             }
             else {
-                Selection::SetSelection(ISpannable::Probe(mText),
-                        ss->mSelStart, ss->mSelEnd);
+                Selection::SetSelection(saText, ss->mSelStart, ss->mSelEnd);
 
                 if (ss->mFrozenWithFocus) {
                     CreateEditorIfNeeded();
@@ -4919,13 +4922,14 @@ ECode TextView::SetInputType(
 
     AutoPtr<IPasswordTransformationMethod> ptm;
     CPasswordTransformationMethod::GetInstance((IPasswordTransformationMethod**)&ptm);
+    ITransformationMethod* _ptm = ITransformationMethod::Probe(ptm);
     String nullStr;
     if (isPassword) {
-         SetTransformationMethod(ITransformationMethod::Probe(ptm));
-         SetTypefaceFromAttrs(nullStr /* fontFamily */, MONOSPACE, 0);
+        SetTransformationMethod(_ptm);
+        SetTypefaceFromAttrs(nullStr /* fontFamily */, MONOSPACE, 0);
     }
     else if (isVisiblePassword) {
-        if (mTransformation.Get() == ITransformationMethod::Probe(ptm)) {
+        if (mTransformation.Get() == _ptm) {
             forceUpdate = TRUE;
         }
         SetTypefaceFromAttrs(nullStr /* fontFamily */, MONOSPACE, 0);
@@ -4933,7 +4937,7 @@ ECode TextView::SetInputType(
     else if (wasPassword || wasVisiblePassword) {
         // not in password mode, clean up typeface and transformation
         SetTypefaceFromAttrs(nullStr /* fontFamily */, -1, -1);
-        if (mTransformation.Get() == ITransformationMethod::Probe(ptm)) {
+        if (mTransformation.Get() == _ptm) {
             forceUpdate = TRUE;
         }
     }
@@ -6596,16 +6600,11 @@ ECode TextView::OnKeyMultiple(
     if (which == 1) {
         Boolean res;
         AutoPtr<Editor> editor = TO_EDITOR(mEditor);
-        editor->mKeyListener->OnKeyUp(
-            this, IEditable::Probe(mText),
-            keyCode, up, &res);
+        IEditable* _text = IEditable::Probe(mText);
+        editor->mKeyListener->OnKeyUp(this, _text, keyCode, up, &res);
         while (--repeatCount > 0) {
-            editor->mKeyListener->OnKeyDown(
-                this, IEditable::Probe(mText),
-                keyCode, down, &res);
-            editor->mKeyListener->OnKeyUp(
-                this, IEditable::Probe(mText),
-                keyCode, up, &res);
+            editor->mKeyListener->OnKeyDown(this, _text, keyCode, down, &res);
+            editor->mKeyListener->OnKeyUp(this, _text, keyCode, up, &res);
         }
         HideErrorIfUnchanged();
     }
@@ -6747,12 +6746,14 @@ Int32 TextView::DoKeyDown(
     if (mEditor != NULL && TO_EDITOR(mEditor)->mKeyListener != NULL) {
         AutoPtr<Editor> editor = TO_EDITOR(mEditor);
 
+        IEditable* _text = IEditable::Probe(mText);
+
         Boolean doDown = TRUE;
         if (otherEvent != NULL) {
             //try {
             BeginBatchEdit();
             Boolean handled = FALSE;
-            editor->mKeyListener->OnKeyOther(this, IEditable::Probe(mText), otherEvent, &handled);
+            editor->mKeyListener->OnKeyOther(this, _text, otherEvent, &handled);
             HideErrorIfUnchanged();
             doDown = FALSE;
             if (handled) {
@@ -6769,7 +6770,7 @@ Int32 TextView::DoKeyDown(
         if (doDown) {
             BeginBatchEdit();
             Boolean handled;
-            editor->mKeyListener->OnKeyDown(this, IEditable::Probe(mText), keyCode, event, &handled);
+            editor->mKeyListener->OnKeyDown(this, _text, keyCode, event, &handled);
             EndBatchEdit();
             HideErrorIfUnchanged();
             if (handled) return 1;
@@ -7240,12 +7241,12 @@ ECode TextView::OnPrivateIMECommand(
 void TextView::NullLayouts()
 {
     if (mLayout != NULL && IBoringLayout::Probe(mLayout) != NULL
-        && mSavedLayout == NULL) {
+            && mSavedLayout == NULL) {
         mSavedLayout = IBoringLayout::Probe(mLayout);
     }
 
     if (mHintLayout != NULL && IBoringLayout::Probe(mHintLayout) != NULL
-        && mSavedHintLayout == NULL) {
+            && mSavedHintLayout == NULL) {
         mSavedHintLayout = IBoringLayout::Probe(mHintLayout);
     }
 
@@ -7624,9 +7625,11 @@ Boolean TextView::CompressText(
     Boolean isHardwareAccelerated;
     if (IsHardwareAccelerated(&isHardwareAccelerated), isHardwareAccelerated) return FALSE;
 
+    IPaint* _paint = IPaint::Probe(mTextPaint);
+
     // Only compress the text if it hasn't been compressed by the previous pass
     Float scaleX;
-    IPaint::Probe(mTextPaint)->GetTextScaleX(&scaleX);
+    _paint->GetTextScaleX(&scaleX);
     Int32 linecount;
     if (width > 0.0f && mLayout != NULL && (GetLineCount(&linecount), linecount) == 1 && !mUserSetTextScaleX &&
             scaleX == 1.0f) {
@@ -7634,7 +7637,7 @@ Boolean TextView::CompressText(
         mLayout->GetLineWidth(0, &textWidth);
         Float overflow = (textWidth + 1.0f - width) / width;
         if (overflow > 0.0f && overflow <= Marquee::MARQUEE_DELTA_MAX) {
-            IPaint::Probe(mTextPaint)->SetTextScaleX(1.0f - overflow - 0.005f);
+            _paint->SetTextScaleX(1.0f - overflow - 0.005f);
             AutoPtr<IRunnable> runnable = new CompressTextRunnable(this);
             Boolean isPost;
             Post(runnable, &isPost);

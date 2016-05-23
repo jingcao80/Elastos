@@ -1,5 +1,6 @@
 
 #include "elastos/droid/animation/TimeAnimator.h"
+#include "elastos/droid/animation/CTimeAnimator.h"
 
 namespace Elastos {
 namespace Droid {
@@ -62,7 +63,7 @@ ECode TimeAnimator::Clone(
 {
     VALIDATE_NOT_NULL(object)
 
-    AutoPtr<ITimeAnimator> newObject = new TimeAnimator();
+    AutoPtr<ITimeAnimator> newObject = new CTimeAnimator();
     CloneImpl(newObject);
 
     *object = newObject;

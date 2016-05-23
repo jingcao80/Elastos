@@ -71,11 +71,15 @@ namespace Widget {
 //==============================================================================
 //              SuggestionInfo
 //==============================================================================
+
+class Editor;
+
 class SuggestionInfo
     : public Object
 {
 public:
-    SuggestionInfo();
+    SuggestionInfo(
+        /* [in] */ Editor* host);
 
     // range of actual suggestion within text
     Int32 mSuggestionStart;
@@ -89,6 +93,8 @@ public:
 
     AutoPtr<ISpannableStringBuilder> mText;
     AutoPtr<ITextAppearanceSpan> mHighlightSpan;
+
+    Editor* mHost;
 };
 
 } // namespace Widget
@@ -460,8 +466,6 @@ private:
         /* [in] */ Int32 unionStart,
         /* [in] */ Int32 unionEnd);
 
-    CARAPI_(void) QuickSort(ArrayOf<ISuggestionSpan*>* array, Int32 low, Int32 high);
-
 private:
     friend class SuggestionSpanComparator;
     friend class CustomPopupWindow;
@@ -667,9 +671,9 @@ protected:
 
 private:
     // Touch-up filter: number of previous positions remembered
-    static const Int32 HISTORY_SIZE = 5;
-    static const Int32 TOUCH_UP_FILTER_DELAY_AFTER = 150;
-    static const Int32 TOUCH_UP_FILTER_DELAY_BEFORE = 350;
+    static const Int32 HISTORY_SIZE;
+    static const Int32 TOUCH_UP_FILTER_DELAY_AFTER;
+    static const Int32 TOUCH_UP_FILTER_DELAY_BEFORE;
 
     AutoPtr<IPopupWindow> mContainer;
 
@@ -1011,8 +1015,8 @@ public:
 private:
     // 3 handles
     // 3 ActionPopup [replace, suggestion, easyedit] (suggestionsPopup first hides the others)
-    static const Int32 MAXIMUM_NUMBER_OF_LISTENERS = 7;
-    AutoPtr<ArrayOf<ITextViewPositionListener *> > mPositionListeners;//new TextViewPositionListener[MAXIMUM_NUMBER_OF_LISTENERS];
+    static const Int32 MAXIMUM_NUMBER_OF_LISTENERS;
+    AutoPtr<ArrayOf<ITextViewPositionListener*> > mPositionListeners;//new TextViewPositionListener[MAXIMUM_NUMBER_OF_LISTENERS];
     AutoPtr<ArrayOf<Boolean> > mCanMove;//new boolean[MAXIMUM_NUMBER_OF_LISTENERS];
     Boolean mPositionHasChanged;// = true;
     // Absolute position of the TextView with respect to its parent window
@@ -1057,7 +1061,7 @@ private:
     Int32 mEnd;
     Int64 mFadingStartTime;
     AutoPtr<IRectF> mTempRectF;
-    static const Int32 FADE_OUT_DURATION = 400;
+    static const Int32 FADE_OUT_DURATION;
     Editor* mEditor;
 };
 
@@ -1172,8 +1176,11 @@ private:
 //==============================================================================
 class TextModifyOperation
     : public UndoOperation
+    , public ITextModifyOperation
 {
 public:
+    CAR_INTERFACE_DECL();
+
     TextModifyOperation();
 
     CARAPI constructor(
@@ -1643,6 +1650,7 @@ private:
     friend class ActionPopupWindow;
     friend class HandleView;
     friend class InsertionHandleView;
+    friend class SuggestionInfo;
     friend class SelectionStartHandleView;
     friend class SelectionEndHandleView;
     friend class InsertionPointCursorController;

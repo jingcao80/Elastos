@@ -363,7 +363,7 @@ ECode ObjectAnimator::Clone(
     /* [out] */ IInterface** object)
 {
     VALIDATE_NOT_NULL(object);
-    AutoPtr<IObjectAnimator> newObject = new ObjectAnimator();
+    AutoPtr<IObjectAnimator> newObject = new CObjectAnimator();
     CloneImpl(newObject);
     *object = newObject;
     REFCOUNT_ADD(*object);

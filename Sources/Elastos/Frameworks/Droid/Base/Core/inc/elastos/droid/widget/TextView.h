@@ -231,7 +231,7 @@ public:
     CARAPI GetTextWidths(
         /* [in] */ Int32 start,
         /* [in] */ Int32 end,
-        /* [in] */ ArrayOf<Float>* widths,
+        /* [out] */ ArrayOf<Float>* widths,
         /* [in] */ IPaint* p,
         /* [out] */ Int32* count);
 
@@ -241,7 +241,7 @@ public:
         /* [in] */ Int32 contextStart,
         /* [in] */ Int32 contextEnd,
         /* [in] */ Boolean isRtl,
-        /* [in] */ ArrayOf<Float>* advances,
+        /* [out] */ ArrayOf<Float>* advances,
         /* [in] */ Int32 advancesIndex,
         /* [in] */ IPaint* p,
         /* [out] */ Float* advance);

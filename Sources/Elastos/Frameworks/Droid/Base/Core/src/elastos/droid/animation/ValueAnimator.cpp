@@ -969,7 +969,7 @@ ECode ValueAnimator::Clone(
 {
     VALIDATE_NOT_NULL(object)
 
-    AutoPtr<IValueAnimator> newObject = new ValueAnimator();
+    AutoPtr<IValueAnimator> newObject = new CValueAnimator();
 
     CloneImpl(newObject);
     *object = newObject;
