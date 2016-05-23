@@ -10,3 +10,4 @@ INCLUDES += $(MAKEDIR)/../../../../inc/
 
 SOURCES += BaseObj.cpp
 SOURCES += Allocation.cpp
+SOURCES += RenderScript.cpp

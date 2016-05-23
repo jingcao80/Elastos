@@ -20,7 +20,7 @@ public:
         /* [in] */ Int64 id,
         /* [in] */ RenderScript* rs);
 
-    ~BaseObj();
+    virtual ~BaseObj();
 
     CAR_INTERFACE_DECL()
 

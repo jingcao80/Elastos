@@ -5,9 +5,11 @@
 #include "elastos/droid/renderscript/BaseObj.h"
 #include "elastos/droid/renderscript/Type.h"
 #include "elastos/droid/renderscript/Element.h"
+#include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::IBitmapFactoryOptions;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -764,12 +766,12 @@ public:
         /* [in] */ Int32 count,
         /* [out] */ IAllocation** allocation);
 
-    ElementFromBitmap(
+    static CARAPI ElementFromBitmap(
         /* [in] */ IRenderScript* rs,
         /* [in] */ IBitmap* b,
         /* [out] */ IElement** e);
 
-    TypeFromBitmap(
+    static CARAPI TypeFromBitmap(
         /* [in] */ IRenderScript* rs,
         /* [in] */ IBitmap* b,
         /* [in] */ AllocationMipmapControl mip,
@@ -1065,6 +1067,9 @@ private:
         /* [in] */ Element::DataType* dt,
         /* [in] */ Int32 arrayLen);
 
+    static CARAPI_(void) SendBufferNotification(
+        /* [in] */ Int64 id);
+
 private:
     AutoPtr<Type> mType;
     AutoPtr<IBitmap> mBitmap;
@@ -1087,7 +1092,8 @@ private:
     Int32 mCurrentDimY;
     Int32 mCurrentDimZ;
     Int32 mCurrentCount;
-    static HashMap<Int64, AutoPtr<Allocation> > mAllocationMap;
+    static HashMap<Int64, AutoPtr<Allocation> > sAllocationMap;
+    static Object sAllocationMapLock;
     AutoPtr<IOnBufferAvailableListener> mBufferNotifier;
 
     // creation
