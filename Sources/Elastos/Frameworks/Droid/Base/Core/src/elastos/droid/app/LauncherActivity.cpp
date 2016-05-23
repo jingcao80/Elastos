@@ -16,6 +16,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Pm::IComponentInfo;
@@ -524,7 +526,7 @@ ECode LauncherActivity::ArrayFilter::PerformFiltering(
 
     if (mHost->mOriginalValues == NULL) {
         Object& obj = mHost->mLock;
-        synchronized(obj) {
+        {    AutoLock syncLock(obj);
             CArrayList::New((IArrayList**)&mHost->mOriginalValues);
         }
     }
@@ -536,7 +538,7 @@ ECode LauncherActivity::ArrayFilter::PerformFiltering(
 
     if (length == 0) {
         Object& obj = mHost->mLock;
-        synchronized(obj) {
+        {    AutoLock syncLock(obj);
             AutoPtr<IArrayList> list;
             CArrayList::New(ICollection::Probe(mHost->mOriginalValues), (IArrayList**)&list);
 

@@ -39,6 +39,8 @@
 
 #include <dlfcn.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using namespace Elastos;
 
 using Elastos::Core::StringUtils;
@@ -141,7 +143,7 @@ public:
 void lockTest()
 {
     AutoPtr<AutoLockTest> lock = new AutoLockTest();
-    synchronized(lock->mLock) {
+    {    AutoLock syncLock(lock->mLock);
         Int32 i = 0;
         ++i;
     }

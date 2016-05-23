@@ -14,6 +14,8 @@
 #include "CString.h"
 #include "HeapBufferIterator.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::Math;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
@@ -147,7 +149,7 @@ ECode ZipFile::RAFStream::Fill(
     CInflater* inf = (CInflater*)inflater;
     using Elastos::Core::Math;
 
-    synchronized (inf) {
+    {    AutoLock syncLock(inf);
         AutoPtr<IFileDescriptor> fd;
         mSharedRaf->GetFD((IFileDescriptor**)&fd);
         Int32 len = Math::Min((Int32) (mEndOffset - mOffset), nativeEndBufSize);

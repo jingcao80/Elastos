@@ -18,6 +18,8 @@
 #include <elastos/droid/server/IoThread.h>
 #include <Elastos.Droid.App.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::View::IInputChannelHelper;
 using Elastos::Droid::View::CInputChannelHelper;
 using Elastos::Core::CString;
@@ -126,7 +128,7 @@ ECode TvInputManagerService::BinderService::GetTvInputList(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         do {
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
@@ -161,7 +163,7 @@ ECode TvInputManagerService::BinderService::GetTvInputInfo(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         do {
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
@@ -192,7 +194,7 @@ ECode TvInputManagerService::BinderService::GetTvContentRatingSystemList(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         do {
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
@@ -216,7 +218,7 @@ ECode TvInputManagerService::BinderService::RegisterCallback(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         do {
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
@@ -259,7 +261,7 @@ ECode TvInputManagerService::BinderService::UnregisterCallback(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         do {
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
@@ -286,7 +288,7 @@ ECode TvInputManagerService::BinderService::IsParentalControlsEnabled(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         do {
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
@@ -311,7 +313,7 @@ ECode TvInputManagerService::BinderService::SetParentalControlsEnabled(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         do {
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
@@ -339,7 +341,7 @@ ECode TvInputManagerService::BinderService::IsRatingBlocked(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         do {
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
@@ -371,7 +373,7 @@ ECode TvInputManagerService::BinderService::GetBlockedRatings(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         do {
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
@@ -405,7 +407,7 @@ ECode TvInputManagerService::BinderService::AddBlockedRating(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         do {
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
@@ -435,7 +437,7 @@ ECode TvInputManagerService::BinderService::RemoveBlockedRating(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         do {
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
@@ -480,7 +482,7 @@ ECode TvInputManagerService::BinderService::CreateSession(
     // try {
     ECode ec;
     do {
-        synchronized(mHost->mLock) {
+        {    AutoLock syncLock(mHost->mLock);
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
             if (FAILED(ec)) break;
@@ -546,7 +548,7 @@ ECode TvInputManagerService::BinderService::ReleaseSession(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         ec = mHost->ReleaseSessionLocked(sessionToken, callingUid, resolvedUserId);
     }
     // } finally {
@@ -569,7 +571,7 @@ ECode TvInputManagerService::BinderService::SetMainSession(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         do {
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
@@ -612,7 +614,7 @@ ECode TvInputManagerService::BinderService::SetSurface(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         do {
             // try {
             do {
@@ -668,7 +670,7 @@ ECode TvInputManagerService::BinderService::DispatchSurfaceChanged(
     // try {
     ECode ec;
     do {
-        synchronized(mHost->mLock) {
+        {    AutoLock syncLock(mHost->mLock);
             // try {
             do {
                 AutoPtr<SessionState> sessionState;
@@ -718,7 +720,7 @@ ECode TvInputManagerService::BinderService::SetVolume(
     // try {
     ECode ec;
     do {
-        synchronized(mHost->mLock) {
+        {    AutoLock syncLock(mHost->mLock);
             // try {
             do {
                 AutoPtr<SessionState> sessionState;
@@ -769,7 +771,7 @@ ECode TvInputManagerService::BinderService::Tune(
     // try {
     ECode ec;
     do {
-        synchronized(mHost->mLock) {
+        {    AutoLock syncLock(mHost->mLock);
             // try {
             do {
                 AutoPtr<IITvInputSession> session;
@@ -840,7 +842,7 @@ ECode TvInputManagerService::BinderService::RequestUnblockContent(
     // try {
     ECode ec;
     do {
-        synchronized(mHost->mLock) {
+        {    AutoLock syncLock(mHost->mLock);
             // try {
             AutoPtr<IITvInputSession> tvInputSession;
             ec = mHost->GetSessionLocked(sessionToken, callingUid, resolvedUserId, (IITvInputSession**)&tvInputSession);
@@ -873,7 +875,7 @@ ECode TvInputManagerService::BinderService::SetCaptionEnabled(
     // try {
     ECode ec;
     do {
-        synchronized(mHost->mLock) {
+        {    AutoLock syncLock(mHost->mLock);
             // try {
             do {
                 AutoPtr<IITvInputSession> tvInputSession;
@@ -909,7 +911,7 @@ ECode TvInputManagerService::BinderService::SelectTrack(
     // try {
     ECode ec;
     do {
-        synchronized(mHost->mLock) {
+        {    AutoLock syncLock(mHost->mLock);
             // try {
             do {
                 AutoPtr<IITvInputSession> tvInputSession;
@@ -945,7 +947,7 @@ ECode TvInputManagerService::BinderService::SendAppPrivateCommand(
     // try {
     ECode ec;
     do {
-        synchronized(mHost->mLock) {
+        {    AutoLock syncLock(mHost->mLock);
             // try {
             do {
                 AutoPtr<IITvInputSession> tvInputSession;
@@ -980,7 +982,7 @@ ECode TvInputManagerService::BinderService::CreateOverlayView(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         // try {
         do {
             AutoPtr<IITvInputSession> tvInputSession;
@@ -1013,7 +1015,7 @@ ECode TvInputManagerService::BinderService::RelayoutOverlayView(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         // try {
         do {
             AutoPtr<IITvInputSession> tvInputSession;
@@ -1045,7 +1047,7 @@ ECode TvInputManagerService::BinderService::RemoveOverlayView(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     ECode ec;
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         // try {
         do {
             AutoPtr<IITvInputSession> tvInputSession;
@@ -1194,7 +1196,7 @@ ECode TvInputManagerService::BinderService::CaptureFrame(
     ECode ec;
     do {
         String hardwareInputId = String(NULL);
-        synchronized(mHost->mLock) {
+        {    AutoLock syncLock(mHost->mLock);
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
             if (FAILED(ec)) break;
@@ -1242,7 +1244,7 @@ ECode TvInputManagerService::BinderService::IsSingleSessionActive(
     // try {
     ECode ec;
     do {
-        synchronized(mHost->mLock) {
+        {    AutoLock syncLock(mHost->mLock);
             AutoPtr<UserState> userState;
             ec = mHost->GetUserStateLocked(resolvedUserId, (UserState**)&userState);
             if (FAILED(ec)) break;
@@ -1287,7 +1289,7 @@ ECode TvInputManagerService::BinderService::Dump(
         IPrintWriter::Probe(pw)->Println(s);
         return NOERROR;
     }
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         String s;
         s.AppendFormat("User Ids (Current user: %d):", mHost->mCurrentUserId);
         IPrintWriter::Probe(pw)->Println(s);
@@ -1471,7 +1473,7 @@ ECode TvInputManagerService::ClientState::IsEmpty(
 
 ECode TvInputManagerService::ClientState::ProxyDied()
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         AutoPtr<UserState> userState;
         mHost->GetUserStateLocked(mUserId, (UserState**)&userState);
         // DO NOT remove the client state of clientStateMap in this method. It will be
@@ -1552,7 +1554,7 @@ TvInputManagerService::SessionState::SessionState(
 
 ECode TvInputManagerService::SessionState::ProxyDied()
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         mSession = NULL;
         if (mClient != NULL) {
             // try {
@@ -1614,7 +1616,7 @@ ECode TvInputManagerService::InputServiceConnection::OnServiceConnected(
     if (DEBUG) {
         Slogger::D(TAG, "onServiceConnected(component=%s)", TO_CSTR(component));
     }
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         AutoPtr<UserState> userState;
         mHost->GetUserStateLocked(mUserId, (UserState**)&userState);
         AutoPtr<IInterface> obj;
@@ -1703,7 +1705,7 @@ ECode TvInputManagerService::InputServiceConnection::OnServiceDisconnected(
                 TO_CSTR(mComponent), TO_CSTR(component));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         AutoPtr<UserState> userState;
         mHost->GetUserStateLocked(mUserId, (UserState**)&userState);
         AutoPtr<IInterface> obj;
@@ -1787,7 +1789,7 @@ ECode TvInputManagerService::ServiceCallback::AddHardwareTvInput(
 {
     EnsureHardwarePermission();
     EnsureValidInput(inputInfo);
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         mHost->mTvInputHardwareManager->AddHardwareTvInput(deviceId, inputInfo);
         AddTvInputLocked(inputInfo);
     }
@@ -1800,7 +1802,7 @@ ECode TvInputManagerService::ServiceCallback::AddHdmiTvInput(
 {
     EnsureHardwarePermission();
     EnsureValidInput(inputInfo);
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         mHost->mTvInputHardwareManager->AddHdmiTvInput(id, inputInfo);
         AddTvInputLocked(inputInfo);
     }
@@ -1811,7 +1813,7 @@ ECode TvInputManagerService::ServiceCallback::RemoveTvInput(
     /* [in] */ const String& inputId)
 {
     EnsureHardwarePermission();
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         AutoPtr<ServiceState> serviceState;
         mHost->GetServiceStateLocked(mComponent, mUserId, (ServiceState**)&serviceState);
         Boolean removed = FALSE;
@@ -1864,7 +1866,7 @@ ECode TvInputManagerService::SessionCallback::OnSessionCreated(
     if (DEBUG) {
         Slogger::D(TAG, "onSessionCreated(inputId=%s)", Ptr(mSessionState->mInfo)->Func(ITvInputInfo::GetId).string());
     }
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         mSessionState->mSession = session;
         mSessionState->mHardwareSessionToken = harewareSessionToken;
         Boolean b;
@@ -1939,7 +1941,7 @@ ECode TvInputManagerService::SessionCallback::AddSessionTokenToClientStateLocked
 ECode TvInputManagerService::SessionCallback::OnChannelRetuned(
     /* [in] */ IUri* channelUri)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         if (DEBUG) {
             Slogger::D(TAG, "onChannelRetuned(%s)", TO_CSTR(channelUri));
         }
@@ -1968,7 +1970,7 @@ ECode TvInputManagerService::SessionCallback::OnChannelRetuned(
 ECode TvInputManagerService::SessionCallback::OnTracksChanged(
     /* [in] */ IList* tracks)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         if (DEBUG) {
             Slogger::D(TAG, "onTracksChanged(%s)", TO_CSTR(tracks));
         }
@@ -1994,7 +1996,7 @@ ECode TvInputManagerService::SessionCallback::OnTrackSelected(
     /* [in] */ Int32 type,
     /* [in] */ const String& trackId)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         if (DEBUG) {
             Slogger::D(TAG, "onTrackSelected(type=%d, trackId=%s)", type, trackId.string());
         }
@@ -2018,7 +2020,7 @@ ECode TvInputManagerService::SessionCallback::OnTrackSelected(
 
 ECode TvInputManagerService::SessionCallback::OnVideoAvailable()
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         if (DEBUG) {
             Slogger::D(TAG, "onVideoAvailable()");
         }
@@ -2043,7 +2045,7 @@ ECode TvInputManagerService::SessionCallback::OnVideoAvailable()
 ECode TvInputManagerService::SessionCallback::OnVideoUnavailable(
     /* [in] */ Int32 reason)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         if (DEBUG) {
             Slogger::D(TAG, "onVideoUnavailable(%d)", reason);
         }
@@ -2067,7 +2069,7 @@ ECode TvInputManagerService::SessionCallback::OnVideoUnavailable(
 
 ECode TvInputManagerService::SessionCallback::OnContentAllowed()
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         if (DEBUG) {
             Slogger::D(TAG, "onContentAllowed()");
         }
@@ -2092,7 +2094,7 @@ ECode TvInputManagerService::SessionCallback::OnContentAllowed()
 ECode TvInputManagerService::SessionCallback::OnContentBlocked(
     /* [in] */ const String& rating)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         if (DEBUG) {
             Slogger::D(TAG, "onContentBlocked()");
         }
@@ -2120,7 +2122,7 @@ ECode TvInputManagerService::SessionCallback::OnLayoutSurface(
     /* [in] */ Int32 right,
     /* [in] */ Int32 bottom)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         if (DEBUG) {
             Slogger::D(TAG, "onLayoutSurface (left=%d, top=%d, right=%d, bottom=%d,)",
                 left, top, right, bottom);
@@ -2148,7 +2150,7 @@ ECode TvInputManagerService::SessionCallback::OnSessionEvent(
     /* [in] */ const String& eventType,
     /* [in] */ IBundle* eventArgs)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         if (DEBUG) {
             Slogger::D(TAG, "onEvent(what=%s, data=%s)", eventType.string(), TO_CSTR(eventArgs));
         }
@@ -2321,7 +2323,7 @@ ECode TvInputManagerService::HardwareListener::OnStateChanged(
     /* [in] */ const String& inputId,
     /* [in] */ Int32 state)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         mHost->SetStateLocked(inputId, state, mHost->mCurrentUserId);
     }
     return NOERROR;
@@ -2330,7 +2332,7 @@ ECode TvInputManagerService::HardwareListener::OnStateChanged(
 ECode TvInputManagerService::HardwareListener::OnHardwareDeviceAdded(
     /* [in] */ ITvInputHardwareInfo* info)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         AutoPtr<UserState> userState;
         mHost->GetUserStateLocked(mHost->mCurrentUserId, (UserState**)&userState);
         // Broadcast the event to all hardware inputs.
@@ -2356,7 +2358,7 @@ ECode TvInputManagerService::HardwareListener::OnHardwareDeviceAdded(
 ECode TvInputManagerService::HardwareListener::OnHardwareDeviceRemoved(
     /* [in] */ ITvInputHardwareInfo* info)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         AutoPtr<UserState> userState;
         mHost->GetUserStateLocked(mHost->mCurrentUserId, (UserState**)&userState);
         // Broadcast the event to all hardware inputs.
@@ -2382,7 +2384,7 @@ ECode TvInputManagerService::HardwareListener::OnHardwareDeviceRemoved(
 ECode TvInputManagerService::HardwareListener::OnHdmiDeviceAdded(
     /* [in] */ IHdmiDeviceInfo* deviceInfo)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         AutoPtr<UserState> userState;
         mHost->GetUserStateLocked(mHost->mCurrentUserId, (UserState**)&userState);
         // Broadcast the event to all hardware inputs.
@@ -2408,7 +2410,7 @@ ECode TvInputManagerService::HardwareListener::OnHdmiDeviceAdded(
 ECode TvInputManagerService::HardwareListener::OnHdmiDeviceRemoved(
     /* [in] */ IHdmiDeviceInfo* deviceInfo)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         AutoPtr<UserState> userState;
         mHost->GetUserStateLocked(mHost->mCurrentUserId, (UserState**)&userState);
         // Broadcast the event to all hardware inputs.
@@ -2435,7 +2437,7 @@ ECode TvInputManagerService::HardwareListener::OnHdmiDeviceUpdated(
     /* [in] */ const String& inputId,
     /* [in] */ IHdmiDeviceInfo* deviceInfo)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         AutoPtr<IInteger32> state;
         switch (Ptr(deviceInfo)->Func(deviceInfo->GetDevicePowerStatus)) {
             case IHdmiControlManager::POWER_STATUS_ON:
@@ -2474,7 +2476,7 @@ TvInputManagerService::InnerSub_ProxyDeathRecipient::InnerSub_ProxyDeathRecipien
 
 ECode TvInputManagerService::InnerSub_ProxyDeathRecipient::ProxyDied()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mUserState->mCallbackSet != NULL) {
             mUserState->mCallbackSet->Remove(mCallback);
         }
@@ -2493,7 +2495,7 @@ TvInputManagerService::InnerSub_PackageMonitor::InnerSub_PackageMonitor(
 ECode TvInputManagerService::InnerSub_PackageMonitor::BuildTvInputList(
     /* [in] */ ArrayOf<String>* packages)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         Int32 userId;
         GetChangingUserId(&userId);
         mHost->BuildTvInputListLocked(userId, packages);
@@ -2568,7 +2570,7 @@ ECode TvInputManagerService::InnerSub_PackageMonitor::OnPackageRemoved(
     /* [in] */ const String& packageName,
     /* [in] */ Int32 uid)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         Int32 userId;
         GetChangingUserId(&userId);
         AutoPtr<UserState> userState;
@@ -2670,7 +2672,7 @@ ECode TvInputManagerService::constructor(
     mWatchLogHandler->constructor(mContentResolver, looper);
     mTvInputHardwareManager = new TvInputHardwareManager();
     mTvInputHardwareManager->constructor(context, new HardwareListener(this));
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mUserStates->Put(mCurrentUserId, TO_IINTERFACE(new UserState(mContext, mCurrentUserId)));
     }
     return NOERROR;
@@ -2688,7 +2690,7 @@ ECode TvInputManagerService::OnBootPhase(
     if (phase == ISystemService::PHASE_SYSTEM_SERVICES_READY) {
         RegisterBroadcastReceivers();
     } else if (phase == ISystemService::PHASE_THIRD_PARTY_APPS_CAN_START) {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             BuildTvInputListLocked(mCurrentUserId, NULL);
             BuildTvContentRatingSystemListLocked(mCurrentUserId);
         }
@@ -2898,7 +2900,7 @@ ECode TvInputManagerService::BuildTvContentRatingSystemListLocked(
 ECode TvInputManagerService::SwitchUser(
     /* [in] */ Int32 userId)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mCurrentUserId == userId) {
             return NOERROR;
         }
@@ -2921,7 +2923,7 @@ ECode TvInputManagerService::SwitchUser(
 ECode TvInputManagerService::RemoveUser(
     /* [in] */ Int32 userId)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mUserStates->Get(userId, (IInterface**)&obj);
         AutoPtr<UserState> userState = (UserState*) IObject::Probe(obj);

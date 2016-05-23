@@ -684,7 +684,7 @@ public class DockService extends Service implements ServiceListener {
     // TODO: move to background thread to fix strict mode warnings
     private void HandleBtStateChange(Intent intent, Int32 startId) {
         Int32 btState = intent->GetIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             If(DEBUG) Logger::D(TAG, "BtState = " + btState + " mPendingDevice = " + mPendingDevice);
             if (btState == BluetoothAdapter.STATE_ON) {
                 HandleBluetoothStateOn(startId);

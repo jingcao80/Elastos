@@ -67,6 +67,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <sys/reboot.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::CActivityManager;
 using Elastos::Droid::App::CActivityManagerHelper;
@@ -1091,7 +1093,7 @@ ECode PhoneWindowManager::QuickBootPowerLongPressRunnable::Run()
 
     //     public void onReceive(Context context, Intent intent) {
 
-    //         synchronized (mQuickBootLock) {
+    //         {    AutoLock syncLock(mQuickBootLock);
     //             mQuickBootLock.notifyAll();
     //         }
     //     }
@@ -1101,7 +1103,7 @@ ECode PhoneWindowManager::QuickBootPowerLongPressRunnable::Run()
     // mContext.registerReceiver(broadcastReceiver,filter,
     //         "android.permission.DEVICE_POWER",null);
 
-    // synchronized (mQuickBootLock) {
+    // {    AutoLock syncLock(mQuickBootLock);
     //     try {
     //         mQuickBootLock.wait(QUICKBOOT_LAUNCH_TIMEOUT);
     //     } catch (InterruptedException e) {

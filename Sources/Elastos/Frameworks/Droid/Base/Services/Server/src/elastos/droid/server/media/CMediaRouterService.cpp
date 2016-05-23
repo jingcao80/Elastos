@@ -8,6 +8,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::Content::IIntentFilter;
@@ -1140,7 +1142,7 @@ void CMediaRouterService::SystemRunning()
 
 ECode CMediaRouterService::Monitor()
 {
-    synchronized (mLock) { /* check for deadlock */ }
+    {    AutoLock syncLock(mLock); /* check for deadlock */ }
     return NOERROR;
 }
 
@@ -1173,7 +1175,7 @@ ECode CMediaRouterService::RegisterClientAsUser(
     Boolean trusted = perm == IPackageManager::PERMISSION_GRANTED;
     Int64 token = Binder::ClearCallingIdentity();
     // try {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         RegisterClientLocked(client, pid, packageName, resolvedUserId, trusted);
     }
     // } finally {
@@ -1193,7 +1195,7 @@ ECode CMediaRouterService::UnregisterClient(
 
     Int64 token = Binder::ClearCallingIdentity();
     // try {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         UnregisterClientLocked(client, FALSE);
     }
     // } finally {
@@ -1216,7 +1218,7 @@ ECode CMediaRouterService::GetState(
 
     Int64 token = Binder::ClearCallingIdentity();
     // try {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IMediaRouterClientState> temp = GetStateLocked(client);
         *result = temp;
         REFCOUNT_ADD(*result)
@@ -1240,7 +1242,7 @@ ECode CMediaRouterService::SetDiscoveryRequest(
 
     Int64 token = Binder::ClearCallingIdentity();
     // try {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         SetDiscoveryRequestLocked(client, routeTypes, activeScan);
     }
     // } finally {
@@ -1262,7 +1264,7 @@ ECode CMediaRouterService::SetSelectedRoute(
 
     Int64 token = Binder::ClearCallingIdentity();
     // try {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         SetSelectedRouteLocked(client, routeId, isExplicit);
     }
     // } finally {
@@ -1288,7 +1290,7 @@ ECode CMediaRouterService::RequestSetVolume(
 
     Int64 token = Binder::ClearCallingIdentity();
     // try {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         RequestSetVolumeLocked(client, routeId, volume);
     }
     // } finally {
@@ -1314,7 +1316,7 @@ ECode CMediaRouterService::RequestUpdateVolume(
 
     Int64 token = Binder::ClearCallingIdentity();
     // try {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         RequestUpdateVolumeLocked(client, routeId, direction);
     }
     // } finally {
@@ -1326,7 +1328,7 @@ ECode CMediaRouterService::RequestUpdateVolume(
 
 void CMediaRouterService::SwitchUser()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IActivityManagerHelper> helper;
         CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
         Int32 userId;
@@ -1358,7 +1360,7 @@ void CMediaRouterService::SwitchUser()
 void CMediaRouterService::ClientDied(
     /* [in] */ ClientRecord* clientRecord)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         UnregisterClientLocked(clientRecord->mClient, TRUE);
     }
 }

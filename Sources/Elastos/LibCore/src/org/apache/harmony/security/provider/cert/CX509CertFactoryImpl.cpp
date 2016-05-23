@@ -2,6 +2,9 @@
 #include "CX509CertFactoryImpl.h"
 #include <cmdef.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Org {
 namespace Apache {
 namespace Harmony {
@@ -731,8 +734,7 @@ ECode CX509CertFactoryImpl::GetCertificate(
         return E_CERTIFICATE_EXCEPTION;
     }
     //Todo later
-    //synchronized (CERT_CACHE)
-    {
+    //{    AutoLock syncLock(CERT_CACHE);
         Int64 hash;
         Boolean isContains;
         CERT_CACHE->GetHash(encoding, &hash);
@@ -759,8 +761,7 @@ ECode CX509CertFactoryImpl::GetCertificate(
     /* [in] */ IInputStream* inStream,
     /* [out] */ ICertificate** cert)
 {
-        //synchronized (CERT_CACHE)
-    {
+        //{    AutoLock syncLock(CERT_CACHE);
         VALIDATE_NOT_NULL(cert)
         inStream->Mark(CERT_CACHE_SEED_LENGTH);
         // read the prefix of the encoding
@@ -820,8 +821,7 @@ ECode CX509CertFactoryImpl::GetCRL(
         //throw new CRLException("encoding.length < CRL_CACHE_SEED_LENGTH");
         return E_CRL_EXCEPTION;
     }
-    //synchronized (CRL_CACHE)
-    {
+    //{    AutoLock syncLock(CRL_CACHE);
         Int64 hash;
         CRL_CACHE->GetHash(encoding, &hash);
         Boolean isContains;

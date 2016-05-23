@@ -5,6 +5,8 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
 using Libcore::Utility::EmptyArray;
 using Elastos::Utility::EIID_IMap;
@@ -247,7 +249,7 @@ ECode CArrayMap::AllocArrays(
     }
 
     if (size == (BASE_SIZE * 2)) {
-        synchronized(sLock) {
+        {    AutoLock syncLock(sLock);
             if (sTwiceBaseCache != NULL) {
                 AutoPtr<ArrayOf<IInterface*> > array = sTwiceBaseCache;
                 mArray = array;
@@ -265,7 +267,7 @@ ECode CArrayMap::AllocArrays(
         }
     }
     else if (size == BASE_SIZE) {
-        synchronized(sLock) {
+        {    AutoLock syncLock(sLock);
             if (sBaseCache != NULL) {
                 AutoPtr<ArrayOf<IInterface*> > array = sBaseCache;
                 mArray = array;
@@ -294,7 +296,7 @@ ECode CArrayMap::FreeArrays(
     /* [in] */ Int32 size)
 {
     if (hashes->GetLength() == (BASE_SIZE * 2)) {
-        synchronized(sLock) {
+        {    AutoLock syncLock(sLock);
             if (sTwiceBaseCacheSize < CACHE_SIZE) {
                 AutoPtr<IInterface> oe = (IObject*)new ObjectsEntry(sTwiceBaseCache.Get());
                 AutoPtr<IInterface> he = (IObject*)new HashesEntry(hashes);
@@ -311,7 +313,7 @@ ECode CArrayMap::FreeArrays(
         }
     }
     else if (hashes->GetLength() == BASE_SIZE) {
-        synchronized(sLock) {
+        {    AutoLock syncLock(sLock);
             if (sBaseCacheSize < CACHE_SIZE) {
                 AutoPtr<IInterface> oe = (IObject*)new ObjectsEntry(sBaseCache.Get());
                 AutoPtr<IInterface> he = (IObject*)new HashesEntry(hashes);

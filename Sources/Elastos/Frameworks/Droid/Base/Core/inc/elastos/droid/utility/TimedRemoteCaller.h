@@ -82,7 +82,7 @@ public:
         VALIDATE_NOT_NULL(result)
         *result = NULL;
 
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             Boolean success = WaitForResultTimedLocked(sequence);
             if (!success) {
                 //throw new TimeoutException("No reponse for sequence: " + sequence);
@@ -101,7 +101,7 @@ public:
         /* [in] */ T* result,
         /* [in] */ Int32 sequence)
     {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             if (sequence == mAwaitedSequence) {
                 mReceivedSequence = sequence;
                 mResult = result;

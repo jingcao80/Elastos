@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Telephony::I*;
 using Elastos::Droid::Telephony::ITelephonyManager;
@@ -60,7 +62,7 @@ public class TelephonyDevController extends Handler {
     }
 
     public static TelephonyDevController Create() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (sTelephonyDevController != NULL) {
                 throw new RuntimeException("TelephonyDevController already created!?!");
             }
@@ -70,7 +72,7 @@ public class TelephonyDevController extends Handler {
     }
 
     public static TelephonyDevController GetInstance() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (sTelephonyDevController == NULL) {
                 throw new RuntimeException("TelephonyDevController not yet created!?!");
             }
@@ -147,7 +149,7 @@ public class TelephonyDevController extends Handler {
     private static void UpdateOrInsert(HardwareConfig hw, ArrayList<HardwareConfig> list) {
         Int32 size;
         HardwareConfig item;
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             size = list->Size();
             For (Int32 i = 0 ; i < size ; i++) {
                 item = list->Get(i);
@@ -191,7 +193,7 @@ public class TelephonyDevController extends Handler {
      * get total number of registered modem.
      */
     public static Int32 GetModemCount() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Int32 count = mModems->Size();
             If (DBG) Logd("getModemCount: " + count);
             return count;
@@ -202,7 +204,7 @@ public class TelephonyDevController extends Handler {
      * get modem at index 'index'.
      */
     public HardwareConfig GetModem(Int32 index) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mModems->IsEmpty()) {
                 Loge("getModem: no registered modem device?!?");
                 return NULL;
@@ -222,7 +224,7 @@ public class TelephonyDevController extends Handler {
      * get total number of registered sims.
      */
     public Int32 GetSimCount() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Int32 count = mSims->Size();
             If (DBG) Logd("getSimCount: " + count);
             return count;
@@ -233,7 +235,7 @@ public class TelephonyDevController extends Handler {
      * get sim at index 'index'.
      */
     public HardwareConfig GetSim(Int32 index) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mSims->IsEmpty()) {
                 Loge("getSim: no registered sim device?!?");
                 return NULL;
@@ -253,7 +255,7 @@ public class TelephonyDevController extends Handler {
      * get modem associated with sim index 'simIndex'.
      */
     public HardwareConfig GetModemForSim(Int32 simIndex) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mModems->IsEmpty() || mSims->IsEmpty()) {
                 Loge("getModemForSim: no registered modem/sim device?!?");
                 return NULL;
@@ -281,7 +283,7 @@ public class TelephonyDevController extends Handler {
      * get all sim's associated with modem at index 'modemIndex'.
      */
     public ArrayList<HardwareConfig> GetAllSimsForModem(Int32 modemIndex) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mSims->IsEmpty()) {
                 Loge("getAllSimsForModem: no registered sim device?!?");
                 return NULL;
@@ -309,7 +311,7 @@ public class TelephonyDevController extends Handler {
      * get all modem's registered.
      */
     public ArrayList<HardwareConfig> GetAllModems() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             ArrayList<HardwareConfig> modems = new ArrayList<HardwareConfig>();
             If (mModems->IsEmpty()) {
                 If (DBG) Logd("getAllModems: empty list.");
@@ -327,7 +329,7 @@ public class TelephonyDevController extends Handler {
      * get all sim's registered.
      */
     public ArrayList<HardwareConfig> GetAllSims() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             ArrayList<HardwareConfig> sims = new ArrayList<HardwareConfig>();
             If (mSims->IsEmpty()) {
                 If (DBG) Logd("getAllSims: empty list.");

@@ -40,6 +40,8 @@
 #include <elastos/utility/logging/Slogger.h>
 
 // using Elastos::Droid::Hardware::Hdmi::CHdmiDeviceInfo;
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
@@ -372,7 +374,7 @@ ECode HdmiCecLocalDeviceTv::GetPrevPortId(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         *result = mPrevPortId;
     }
     return NOERROR;
@@ -381,7 +383,7 @@ ECode HdmiCecLocalDeviceTv::GetPrevPortId(
 ECode HdmiCecLocalDeviceTv::SetPrevPortId(
     /* [in] */ Int32 portId)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mPrevPortId = portId;
     }
     return NOERROR;
@@ -1088,7 +1090,7 @@ ECode HdmiCecLocalDeviceTv::SetSystemAudioMode(
         ((HdmiControlService*)mService.Get())->WriteBooleanSetting(ISettingsGlobal::HDMI_SYSTEM_AUDIO_ENABLED, on);
     }
     UpdateAudioManagerForSystemAudio(on);
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mSystemAudioActivated != on) {
             mSystemAudioActivated = on;
             ((HdmiControlService*)mService.Get())->AnnounceSystemAudioModeChange(on);
@@ -1119,7 +1121,7 @@ ECode HdmiCecLocalDeviceTv::IsSystemAudioActivated(
         *result = FALSE;
         return NOERROR;
     }
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         *result = mSystemAudioActivated;
     }
     return NOERROR;
@@ -1272,7 +1274,7 @@ ECode HdmiCecLocalDeviceTv::SetAudioStatus(
     /* [in] */ Boolean mute,
     /* [in] */ Int32 volume)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mSystemAudioMute = mute;
         mSystemAudioVolume = volume;
         AutoPtr<IAudioManager> audioManager;
@@ -1303,7 +1305,7 @@ ECode HdmiCecLocalDeviceTv::ChangeVolume(
     Int32 targetVolume = curVolume + delta;
     Int32 cecVolume;
     VolumeControlAction::ScaleToCecVolume(targetVolume, maxVolume, &cecVolume);
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         // If new volume is the same as current system audio volume, just ignore it.
         // Note that UNKNOWN_VOLUME is not in range of cec volume scale.
         if (cecVolume == mSystemAudioVolume) {
@@ -1339,7 +1341,7 @@ ECode HdmiCecLocalDeviceTv::ChangeMute(
 {
     AssertRunOnServiceThread();
     HdmiLogger::Debug("[A]:Change mute:%s", mute ? "true" : "false");
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mSystemAudioMute == mute) {
             HdmiLogger::Debug("No need to change mute.");
             return NOERROR;
@@ -1690,7 +1692,7 @@ ECode HdmiCecLocalDeviceTv::UpdateSafeDeviceInfoList()
     AutoPtr<IList> copiedDevices = HdmiUtils::SparseArrayToList(mDeviceInfos);
     AutoPtr<IList> externalInputs;
     GetInputDevices((IList**)&externalInputs);
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mSafeAllDeviceInfos = copiedDevices;
         mSafeExternalInputs = externalInputs;
     }
@@ -1881,7 +1883,7 @@ ECode HdmiCecLocalDeviceTv::GetSafeCecDeviceInfo(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FOR_EACH(it, mSafeAllDeviceInfos) {
             AutoPtr<IInterface> obj;
             it->GetNext((IInterface**)&obj);

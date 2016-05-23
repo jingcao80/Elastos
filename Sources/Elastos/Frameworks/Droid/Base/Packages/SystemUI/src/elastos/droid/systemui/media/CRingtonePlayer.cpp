@@ -5,6 +5,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Media::CRingtone;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Utility::Logging::Logger;
@@ -37,7 +39,7 @@ CRingtonePlayer::Client::Client(
 ECode CRingtonePlayer::Client::ProxyDied()
 {
     if (LOGD) Logger::D(TAG, "binderDied() token = %p", mToken.Get());
-    synchronized (mHost->mClients) {
+    {    AutoLock syncLock(mHost->mClients);
         mHost->mClients->Remove(mToken);
     }
     return mRingtone->Stop();

@@ -7,6 +7,8 @@
 #include "elastos/droid/app/AppGlobals.h"
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Pm::IPackageInfo;
@@ -287,7 +289,7 @@ ECode CLauncherAppsImpl::constructor(
 ECode CLauncherAppsImpl::AddOnAppsChangedListener(
     /* [in] */ IOnAppsChangedListener* listener)
 {
-    synchronized (mListenersLock) {
+    {    AutoLock syncLock(mListenersLock);
         if (DEBUG) {
             Logger::D(TAG, "Adding listener from %p", Binder::GetCallingUserHandle().Get());
         }
@@ -309,7 +311,7 @@ ECode CLauncherAppsImpl::AddOnAppsChangedListener(
 ECode CLauncherAppsImpl::RemoveOnAppsChangedListener(
     /* [in] */ IOnAppsChangedListener* listener)
 {
-    synchronized (mListenersLock) {
+    {    AutoLock syncLock(mListenersLock);
         if (DEBUG) {
             Logger::D(TAG, "Removing listener from %p", Binder::GetCallingUserHandle().Get());
         }
@@ -338,7 +340,7 @@ void CLauncherAppsImpl::StopWatchingPackageBroadcasts()
 
 void CLauncherAppsImpl::CheckCallbackCount()
 {
-    synchronized (mListenersLock) {
+    {    AutoLock syncLock(mListenersLock);
         Int32 count;
         mListeners->GetRegisteredCallbackCount(&count);
         if (DEBUG) {

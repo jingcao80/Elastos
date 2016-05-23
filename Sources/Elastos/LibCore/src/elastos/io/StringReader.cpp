@@ -4,6 +4,8 @@
 #include "AutoLock.h"
 #include "Arrays.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::Character;
 using Elastos::Utility::Arrays;
 
@@ -113,7 +115,7 @@ ECode StringReader::Read(
     VALIDATE_NOT_NULL(buffer)
     assert(mLock != NULL);
 
-    synchronized(mLock){
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(CheckNotClosed());
         FAIL_RETURN(Arrays::CheckOffsetAndCount(buffer->GetLength(), offset, count));
         if (0 == count) {

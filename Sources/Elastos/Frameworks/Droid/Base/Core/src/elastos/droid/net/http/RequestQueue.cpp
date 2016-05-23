@@ -27,6 +27,8 @@
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IBroadcastReceiver;
@@ -112,7 +114,7 @@ ECode RequestQueue::ActivePool::Shutdown()
 
 ECode RequestQueue::ActivePool::StartConnectionThread()
 {
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         mHost->Notify();
     }
     return NOERROR;
@@ -190,7 +192,7 @@ ECode RequestQueue::ActivePool::GetThread(
 {
     VALIDATE_NOT_NULL(thread);
 
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         for (Int32 i = 0; i < mThreads->GetLength(); i++) {
             ConnectionThread* ct = (*mThreads)[i];
             Connection* connection = (Connection*)ct->mConnection.Get();
@@ -333,7 +335,7 @@ ECode RequestQueue::constructor(
 
 ECode RequestQueue::EnablePlatformNotifications()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (HttpLog::LOGV) {
             HttpLog::V(String("RequestQueue.enablePlatformNotifications() network"));
         }
@@ -353,7 +355,7 @@ ECode RequestQueue::EnablePlatformNotifications()
 
 ECode RequestQueue::DisablePlatformNotifications()
 {
-    synchronized(this){
+    {    AutoLock syncLock(this);
         if (HttpLog::LOGV) {
             HttpLog::V(String("RequestQueue.disablePlatformNotifications() network"));
         }
@@ -537,7 +539,7 @@ ECode RequestQueue::RequestsPending(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = !Ptr(mPending)->Func(ILinkedHashMap::IsEmpty);
     }
     return NOERROR;
@@ -545,7 +547,7 @@ ECode RequestQueue::RequestsPending(
 
 ECode RequestQueue::Dump()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         HttpLog::V(String("dump()"));
         StringBuilder dump;
         Int32 count = 0;
@@ -600,7 +602,7 @@ ECode RequestQueue::GetRequest(
 {
     VALIDATE_NOT_NULL(req);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
 
         AutoPtr<IRequest> ret;
 
@@ -622,7 +624,7 @@ ECode RequestQueue::GetRequest(
 {
     VALIDATE_NOT_NULL(req);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IRequest> ret;
 
         Boolean isContain;
@@ -657,7 +659,7 @@ ECode RequestQueue::HaveRequest(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mPending->ContainsKey(IInterface::Probe(host), result);
     }
     return NOERROR;
@@ -678,7 +680,7 @@ ECode RequestQueue::QueueRequest(
     /* [in] */ IRequest* request,
     /* [in] */ Boolean head)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IHttpHost> host = ((Request*)request)->mProxyHost == NULL
             ? ((Request*)request)->mHost : ((Request*)request)->mProxyHost;
         AutoPtr<ILinkedList> reqList;

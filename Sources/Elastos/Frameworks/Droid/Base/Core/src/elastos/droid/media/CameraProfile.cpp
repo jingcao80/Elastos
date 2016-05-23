@@ -7,6 +7,8 @@
 #include <elastos/utility/Arrays.h>
 #include <media/MediaProfiles.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::CHardwareCamera;
 using Elastos::Droid::Hardware::HardwareCamera;
 using Elastos::Droid::Hardware::IHardwareCameraInfo;
@@ -53,7 +55,7 @@ ECode CameraProfile::GetJpegEncodingQualityParameter(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    synchronized(mCacheLock) {
+    {    AutoLock syncLock(mCacheLock);
         AutoPtr<ArrayOf<Int32> > levels = sCache[cameraId];
         if (levels == NULL) {
             levels = GetImageEncodingQualityLevels(cameraId);

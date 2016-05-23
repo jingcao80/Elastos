@@ -5,6 +5,8 @@
 #include "elastos/droid/internal/utility/ArrayUtils.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Core::AutoLock;
 
@@ -19,7 +21,7 @@ AutoPtr< ArrayOf<Char32> > TemporaryBuffer::Obtain(
 {
     AutoPtr< ArrayOf<Char32> > buf;
 
-    synchronized(sObject) {
+    {    AutoLock syncLock(sObject);
         buf = sTemp;
         sTemp = NULL;
     }
@@ -36,7 +38,7 @@ void TemporaryBuffer::Recycle(
 {
     if (temp->GetLength() > 1000) return;
 
-    synchronized(sObject) {
+    {    AutoLock syncLock(sObject);
         sTemp = temp;
     }
 }

@@ -31,6 +31,8 @@
 package com.android.internal.telephony;
 
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Telephony::IRlog;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
@@ -90,7 +92,7 @@ class SubscriptionHelper extends Handler {
 
 
     public static SubscriptionHelper Init(Context c, CommandsInterface[] ci) {
-        Synchronized (SubscriptionHelper.class) {
+        {    AutoLock syncLock(SubscriptionHelper.class);
             If (sInstance == NULL) {
                 sInstance = new SubscriptionHelper(c, ci);
             } else {

@@ -22,6 +22,8 @@
 #include <sqlite3.h>
 //#include <sqlite3_android.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CArrayMap;
@@ -133,7 +135,7 @@ void SQLiteDatabase::Dispose(
     /* [in] */ Boolean finalized)
 {
     AutoPtr<SQLiteConnectionPool> pool;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mCloseGuardLocked != NULL) {
             if (finalized) {
                 mCloseGuardLocked->WarnIfOpen();
@@ -146,7 +148,7 @@ void SQLiteDatabase::Dispose(
     }
 
     if (!finalized) {
-        synchronized(sActiveDatabasesLock) {
+        {    AutoLock syncLock(sActiveDatabasesLock);
             sActiveDatabases.Erase(this);
         }
         if (pool != NULL) {
@@ -169,7 +171,7 @@ ECode SQLiteDatabase::SetLockingEnabled(
 String SQLiteDatabase::GetLabel()
 {
     String lable;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         lable = mConfigurationLocked->mLabel;
     }
     return lable;
@@ -208,7 +210,7 @@ ECode SQLiteDatabase::CreateSession(
     *session = NULL;
 
     AutoPtr<SQLiteConnectionPool> pool;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotOpenLocked());
         pool = mConnectionPoolLocked;
     }
@@ -515,7 +517,7 @@ ECode SQLiteDatabase::DeleteDatabase(
 ECode SQLiteDatabase::ReopenReadWrite()
 {
     ECode ec = NOERROR;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotOpenLocked())
 
         if (!IsReadOnlyLocked()) {
@@ -557,13 +559,13 @@ ECode SQLiteDatabase::Open()
 
 ECode SQLiteDatabase::OpenInner()
 {
-    synchronized(mLock){
+    {    AutoLock syncLock(mLock);
         assert(mConnectionPoolLocked == NULL);
         FAIL_RETURN(SQLiteConnectionPool::Open(mConfigurationLocked, (SQLiteConnectionPool**)&mConnectionPoolLocked));
         mCloseGuardLocked->Open(String("SQLiteDatabase::Close"));
     }
 
-    synchronized(sActiveDatabasesLock) {
+    {    AutoLock syncLock(sActiveDatabasesLock);
         sActiveDatabases[this] = NULL;
     }
     return NOERROR;
@@ -587,7 +589,7 @@ ECode SQLiteDatabase::AddCustomFunction(
     AutoPtr<SQLiteCustomFunction> wrapper = new SQLiteCustomFunction(name, numArgs, function);
 
     ECode ec = NOERROR;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotOpenLocked())
 
         mConfigurationLocked->mCustomFunctions.PushBack(wrapper);
@@ -1203,7 +1205,7 @@ ECode SQLiteDatabase::ExecuteSql(
     Int32 type = DatabaseUtils::GetSqlStatementType(sql);
     if (type == DatabaseUtils_STATEMENT_ATTACH) {
         Boolean disableWal = FALSE;
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             if (!mHasAttachedDbsLocked) {
                 mHasAttachedDbsLocked = TRUE;
                 disableWal = TRUE;
@@ -1237,7 +1239,7 @@ ECode SQLiteDatabase::IsReadOnly(
     /* [out] */ Boolean* isReadOnly)
 {
     VALIDATE_NOT_NULL(isReadOnly);
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         *isReadOnly = IsReadOnlyLocked();
     }
     return NOERROR;
@@ -1246,7 +1248,7 @@ ECode SQLiteDatabase::IsReadOnly(
 Boolean SQLiteDatabase::IsReadOnlyLocked()
 {
     Boolean ret = FALSE;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         ret = (mConfigurationLocked->mOpenFlags & OPEN_READ_MASK) == OPEN_READONLY;
     }
     return ret;
@@ -1256,7 +1258,7 @@ ECode SQLiteDatabase::IsInMemoryDatabase(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         *result = mConfigurationLocked->IsInMemoryDb();
     }
     return NOERROR;
@@ -1266,7 +1268,7 @@ ECode SQLiteDatabase::IsOpen(
     /* [out] */ Boolean* isOpen)
 {
     VALIDATE_NOT_NULL(isOpen);
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         *isOpen = mConnectionPoolLocked != NULL;
     }
     return NOERROR;
@@ -1287,7 +1289,7 @@ ECode SQLiteDatabase::GetPath(
     /* [out] */ String* path)
 {
     VALIDATE_NOT_NULL(path);
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         *path = mConfigurationLocked->mPath;
     }
     return NOERROR;
@@ -1303,7 +1305,7 @@ ECode SQLiteDatabase::SetLocale(
     }
 
     ECode ec = NOERROR;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotOpenLocked())
 
         AutoPtr<ILocale> oldLocale = mConfigurationLocked->mLocale;
@@ -1330,7 +1332,7 @@ ECode SQLiteDatabase::SetMaxSqlCacheSize(
     }
 
     ECode ec = NOERROR;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotOpenLocked())
 
         Int32 oldMaxSqlCacheSize = mConfigurationLocked->mMaxSqlCacheSize;
@@ -1351,7 +1353,7 @@ ECode SQLiteDatabase::SetForeignKeyConstraintsEnabled(
     /* [in] */ Boolean enable)
 {
     ECode ec = NOERROR;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotOpenLocked())
 
         if (mConfigurationLocked->mForeignKeyConstraintsEnabled == enable) {
@@ -1377,7 +1379,7 @@ ECode SQLiteDatabase::EnableWriteAheadLogging(
     VALIDATE_NOT_NULL(result);
 
     ECode ec = NOERROR;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotOpenLocked())
 
         if ((mConfigurationLocked->mOpenFlags & ENABLE_WRITE_AHEAD_LOGGING) != 0) {
@@ -1427,7 +1429,7 @@ ECode SQLiteDatabase::EnableWriteAheadLogging(
 ECode SQLiteDatabase::DisableWriteAheadLogging()
 {
     ECode ec = NOERROR;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotOpenLocked())
 
         if ((mConfigurationLocked->mOpenFlags & ENABLE_WRITE_AHEAD_LOGGING) == 0) {
@@ -1450,7 +1452,7 @@ ECode SQLiteDatabase::IsWriteAheadLoggingEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotOpenLocked())
         *result = (mConfigurationLocked->mOpenFlags & ENABLE_WRITE_AHEAD_LOGGING) != 0;
     }
@@ -1471,7 +1473,7 @@ AutoPtr< List<AutoPtr<SQLiteDebug::DbStats> > > SQLiteDatabase::GetDbStats()
 void SQLiteDatabase::CollectDbStats(
     /* [in] */ List<AutoPtr<SQLiteDebug::DbStats> >* dbStatsList)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mConnectionPoolLocked != NULL) {
             mConnectionPoolLocked->CollectDbStats(dbStatsList);
         }
@@ -1481,7 +1483,7 @@ void SQLiteDatabase::CollectDbStats(
 AutoPtr<List<AutoPtr<SQLiteDatabase> > > SQLiteDatabase::GetActiveDatabases()
 {
     AutoPtr<List<AutoPtr<SQLiteDatabase> > > databases = new List<AutoPtr<SQLiteDatabase> >();
-    synchronized(sActiveDatabasesLock) {
+    {    AutoLock syncLock(sActiveDatabasesLock);
         HashMap<AutoPtr<SQLiteDatabase>, AutoPtr<IInterface> >::Iterator it;
         for (it = sActiveDatabases.Begin(); it != sActiveDatabases.End(); ++it) {
             databases->PushBack(it->mFirst);
@@ -1506,7 +1508,7 @@ void SQLiteDatabase::Dump(
     /* [in] */ IPrinter* printer,
     /* [in] */ Boolean verbose)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mConnectionPoolLocked != NULL) {
             printer->Println(String(""));
             mConnectionPoolLocked->Dump(printer, verbose);
@@ -1522,7 +1524,7 @@ ECode SQLiteDatabase::GetAttachedDbs(
 
     AutoPtr<IMap> attachedDbs;
     CArrayMap::New((IMap**)&attachedDbs);
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mConnectionPoolLocked == NULL) {
             // not open
             return NOERROR;

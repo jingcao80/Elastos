@@ -3,6 +3,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Content::Res::CConfiguration;
@@ -73,7 +75,7 @@ AttributeCache::~AttributeCache()
 void AttributeCache::UpdateConfiguration(
     /* [in] */ IConfiguration* config)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 changes;
         mConfiguration->UpdateFrom(config, &changes);
         if ((changes & ~(IActivityInfo::CONFIG_FONT_SCALE |
@@ -87,7 +89,7 @@ void AttributeCache::UpdateConfiguration(
 void AttributeCache::RemovePackage(
     /* [in] */ const String& packageName)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ICharSequence> csq = CoreUtils::Convert(packageName);
         mPackages->Remove(csq.Get());
     }
@@ -100,7 +102,7 @@ AutoPtr<Entry> AttributeCache::Get(
     /* [in] */ Int32 userId)
 {
     AutoPtr<Entry> ent;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ICharSequence> csq = CoreUtils::Convert(packageName);
         AutoPtr<IInterface> obj;
         mPackages->Get(csq.Get(), (IInterface**)&obj);

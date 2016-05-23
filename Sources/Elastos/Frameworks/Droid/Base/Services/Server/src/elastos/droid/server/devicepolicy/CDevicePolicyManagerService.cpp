@@ -51,6 +51,8 @@
 // using Elastos::Droid::Os::CEnvironment;
 // using Elastos::Droid::Os::CServiceManager;
 // using Elastos::Droid::Utility::CPrintWriterPrinter;
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::AccessibilityService::IAccessibilityServiceInfo;
 using Elastos::Droid::Accounts::CAccountManagerHelper;
 using Elastos::Droid::Accounts::IAccount;
@@ -237,7 +239,7 @@ ECode CDevicePolicyManagerService::ActiveAdminLockedReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         AutoPtr<IUserHandle> uHandle = mAdmin->GetUserHandle();
         Int32 userHandle;
         uHandle->GetIdentifier(&userHandle);
@@ -317,7 +319,7 @@ ECode CDevicePolicyManagerService::DevicePolicyReceiver::OnReceive(
             || action.Equals(IIntent::ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
         if (action.Equals(IIntent::ACTION_USER_STARTED)) {
             // Reset the policy data
-            synchronized(mHost) {
+            {    AutoLock syncLock(mHost);
                 mHost->mUserData->Remove(userHandle);
             }
         }
@@ -1386,7 +1388,7 @@ ECode CDevicePolicyManagerService::LocalService::GetCrossProfileWidgetProviders(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         if (mHost->mDeviceOwner == NULL) {
             AutoPtr<ICollections> collectionsHelper;
             CCollections::AcquireSingleton((ICollections**)&collectionsHelper);
@@ -1419,7 +1421,7 @@ ECode CDevicePolicyManagerService::LocalService::GetCrossProfileWidgetProviders(
 ECode CDevicePolicyManagerService::LocalService::AddOnCrossProfileWidgetProvidersChangeListener(
     /* [in] */ IDevicePolicyManagerInternalOnCrossProfileWidgetProvidersChangeListener* listener)
 {
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         if (mWidgetProviderListeners == NULL) {
             CArrayList::New((IList**)&mWidgetProviderListeners);
         }
@@ -1437,7 +1439,7 @@ ECode CDevicePolicyManagerService::LocalService::NotifyCrossProfileProvidersChan
     /* [in] */ IList* packages)
 {
     AutoPtr<IList> listeners;
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         CArrayList::New(ICollection::Probe(mWidgetProviderListeners), (IList**)&listeners);
     }
     Int32 listenerCount;
@@ -1567,7 +1569,7 @@ ECode CDevicePolicyManagerService::SetPasswordQuality(
     FAIL_RETURN(ValidateQualityConstant(quality))
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -1596,7 +1598,7 @@ ECode CDevicePolicyManagerService::GetPasswordQuality(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 mode = IDevicePolicyManager::PASSWORD_QUALITY_UNSPECIFIED;
 
         if (who != NULL) {
@@ -1651,7 +1653,7 @@ ECode CDevicePolicyManagerService::SetPasswordMinimumLength(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Slogger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -1681,7 +1683,7 @@ ECode CDevicePolicyManagerService::GetPasswordMinimumLength(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 length = 0;
 
         if (who != NULL) {
@@ -1735,7 +1737,7 @@ ECode CDevicePolicyManagerService::SetPasswordMinimumUpperCase(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Slogger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -1766,7 +1768,7 @@ ECode CDevicePolicyManagerService::GetPasswordMinimumUpperCase(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 length = 0;
 
         if (who != NULL) {
@@ -1817,7 +1819,7 @@ ECode CDevicePolicyManagerService::SetPasswordMinimumLowerCase(
 {
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Slogger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -1847,7 +1849,7 @@ ECode CDevicePolicyManagerService::GetPasswordMinimumLowerCase(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<DevicePolicyData> policy = GetUserData(userHandle);
         Int32 length = 0;
 
@@ -1902,7 +1904,7 @@ ECode CDevicePolicyManagerService::SetPasswordMinimumLetters(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -1932,7 +1934,7 @@ ECode CDevicePolicyManagerService::GetPasswordMinimumLetters(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 length = 0;
 
         if (who != NULL) {
@@ -1986,7 +1988,7 @@ ECode CDevicePolicyManagerService::SetPasswordMinimumNumeric(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -2015,7 +2017,7 @@ ECode CDevicePolicyManagerService::GetPasswordMinimumNumeric(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 length = 0;
 
         if (who != NULL) {
@@ -2069,7 +2071,7 @@ ECode CDevicePolicyManagerService::SetPasswordMinimumSymbols(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -2098,7 +2100,7 @@ ECode CDevicePolicyManagerService::GetPasswordMinimumSymbols(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
 
         Int32 length = 0;
         if (who != NULL) {
@@ -2152,7 +2154,7 @@ ECode CDevicePolicyManagerService::SetPasswordMinimumNonLetter(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -2181,7 +2183,7 @@ ECode CDevicePolicyManagerService::GetPasswordMinimumNonLetter(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 length = 0;
 
         if (who != NULL) {
@@ -2235,7 +2237,7 @@ ECode CDevicePolicyManagerService::SetPasswordHistoryLength(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -2265,7 +2267,7 @@ ECode CDevicePolicyManagerService::GetPasswordHistoryLength(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 length = 0;
 
         if (who != NULL) {
@@ -2319,7 +2321,7 @@ ECode CDevicePolicyManagerService::SetPasswordExpirationTimeout(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -2371,7 +2373,7 @@ ECode CDevicePolicyManagerService::GetPasswordExpirationTimeout(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int64 timeout = 0L;
 
         if (who != NULL) {
@@ -2423,7 +2425,7 @@ ECode CDevicePolicyManagerService::AddCrossProfileWidgetProvider(
     const Int32 userId = UserHandle::GetCallingUserId();
     AutoPtr<IList> changedProviders;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> activeAdmin;
         GetActiveAdminForCallerLocked(admin,
                 IDeviceAdminInfo::USES_POLICY_PROFILE_OWNER, (ActiveAdmin**)&activeAdmin);
@@ -2458,7 +2460,7 @@ ECode CDevicePolicyManagerService::RemoveCrossProfileWidgetProvider(
     const Int32 userId = UserHandle::GetCallingUserId();
     AutoPtr<IList> changedProviders;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> activeAdmin;
         GetActiveAdminForCallerLocked(admin,
                 IDeviceAdminInfo::USES_POLICY_PROFILE_OWNER, (ActiveAdmin**)&activeAdmin);
@@ -2490,7 +2492,7 @@ ECode CDevicePolicyManagerService::GetCrossProfileWidgetProviders(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> activeAdmin;
         GetActiveAdminForCallerLocked(admin,
                 IDeviceAdminInfo::USES_POLICY_PROFILE_OWNER, (ActiveAdmin**)&activeAdmin);
@@ -2522,7 +2524,7 @@ ECode CDevicePolicyManagerService::GetPasswordExpiration(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *password = GetPasswordExpirationLocked(who, userHandle);
     }
     return NOERROR;
@@ -2539,7 +2541,7 @@ ECode CDevicePolicyManagerService::IsActivePasswordSufficient(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // The active password is stored in the user that runs the launcher
         // If the user this is called from is part of a profile group, that is the parent
         // of the group.
@@ -2601,7 +2603,7 @@ ECode CDevicePolicyManagerService::GetCurrentFailedPasswordAttempts(
 {
     VALIDATE_NOT_NULL(password)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // This API can only be called by an active device admin,
         // so try to retrieve it to check that the caller is one.
         AutoPtr<ActiveAdmin> ap;
@@ -2628,7 +2630,7 @@ ECode CDevicePolicyManagerService::SetMaximumFailedPasswordsForWipe(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -2660,7 +2662,7 @@ ECode CDevicePolicyManagerService::GetMaximumFailedPasswordsForWipe(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> admin = (who != NULL) ? GetActiveAdminUncheckedLocked(who, userHandle)
                 : GetAdminWithMinimumFailedPasswordsForWipeLocked(userHandle);
         *password = admin != NULL ? admin->mMaximumFailedPasswordsForWipe : 0;
@@ -2726,7 +2728,7 @@ ECode CDevicePolicyManagerService::ResetPassword(
     EnforceNotManagedProfile(userHandle, String("reset the password"));
 
     Int32 quality;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
 
         // This api can only be called by an active device admin,
         // so try to retrieve it to check that the caller is one.
@@ -2885,7 +2887,7 @@ ECode CDevicePolicyManagerService::ResetPassword(
     if (requireEntry) {
         utils->RequireCredentialEntry(IUserHandle::USER_ALL);
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 newOwner = requireEntry ? callingUid : -1;
         if (policy->mPasswordOwner != newOwner) {
             policy->mPasswordOwner = newOwner;
@@ -2908,7 +2910,7 @@ ECode CDevicePolicyManagerService::SetMaximumTimeToLock(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -2940,7 +2942,7 @@ ECode CDevicePolicyManagerService::GetMaximumTimeToLock(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int64 time = 0;
         if (who != NULL) {
             AutoPtr<ActiveAdmin> admin = GetActiveAdminUncheckedLocked(who, userHandle);
@@ -2991,7 +2993,7 @@ ECode CDevicePolicyManagerService::LockNow()
     if (!mHasFeature) {
         return NOERROR;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // This API can only be called by an active device admin,
         // so try to retrieve it to check that the caller is one.
         AutoPtr<ActiveAdmin> admin;
@@ -3011,7 +3013,7 @@ ECode CDevicePolicyManagerService::WipeData(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // This API can only be called by an active device admin,
         // so try to retrieve it to check that the caller is one.
         AutoPtr<ActiveAdmin> admin;
@@ -3057,7 +3059,7 @@ ECode CDevicePolicyManagerService::SetGlobalProxy(
 
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -3146,7 +3148,7 @@ ECode CDevicePolicyManagerService::GetGlobalProxyAdmin(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
     {
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             AutoPtr<DevicePolicyData> policy = GetUserData(IUserHandle::USER_OWNER);
             // Scan through active admins and find if anyone has already
             // set the global proxy.
@@ -3173,7 +3175,7 @@ ECode CDevicePolicyManagerService::SetRecommendedGlobalProxy(
     /* [in] */ IComponentName* who,
     /* [in] */ IProxyInfo* proxyInfo)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> objNoUse;
         GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_DEVICE_OWNER, (ActiveAdmin**)&objNoUse);
     }
@@ -3208,7 +3210,7 @@ ECode CDevicePolicyManagerService::SetStorageEncryption(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // Check for permissions
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
@@ -3280,7 +3282,7 @@ ECode CDevicePolicyManagerService::GetStorageEncryption(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // Check for permissions if a particular caller is specified
         if (who != NULL) {
             // When checking for a single caller, status is based on caller's request
@@ -3332,7 +3334,7 @@ ECode CDevicePolicyManagerService::SetCameraDisabled(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -3363,7 +3365,7 @@ ECode CDevicePolicyManagerService::GetCameraDisabled(
         *result = FALSE;
         return NOERROR;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who != NULL) {
             AutoPtr<ActiveAdmin> admin = GetActiveAdminUncheckedLocked(who, userHandle);
             if (admin == NULL) return NOERROR;
@@ -3400,7 +3402,7 @@ ECode CDevicePolicyManagerService::SetKeyguardDisabledFeatures(
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
     EnforceNotManagedProfile(userHandle, String("disable keyguard features"));
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -3429,7 +3431,7 @@ ECode CDevicePolicyManagerService::GetKeyguardDisabledFeatures(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who != NULL) {
             AutoPtr<ActiveAdmin> admin = GetActiveAdminUncheckedLocked(who, userHandle);
 
@@ -3475,7 +3477,7 @@ ECode CDevicePolicyManagerService::SetDeviceOwner(
         Logger::E(LOG__TAG, "Invalid package name %s for device owner", packageName.string());
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (!AllowedToSetDeviceOwnerOnDevice()) {
             Logger::E(LOG__TAG, "Trying to set device owner but device is already provisioned.");
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -3513,7 +3515,7 @@ ECode CDevicePolicyManagerService::IsDeviceOwner(
         *result = FALSE;
         return NOERROR;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean hasDeviceOwner;
         mDeviceOwner->HasDeviceOwner(&hasDeviceOwner);
         String name;
@@ -3532,7 +3534,7 @@ ECode CDevicePolicyManagerService::GetDeviceOwner(
         *result = String(NULL);
         return NOERROR;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean hasDeviceOwner;
         mDeviceOwner->HasDeviceOwner(&hasDeviceOwner);
         if (mDeviceOwner != NULL && hasDeviceOwner) {
@@ -3551,7 +3553,7 @@ ECode CDevicePolicyManagerService::GetDeviceOwnerName(
         return NOERROR;
     }
     mContext->EnforceCallingOrSelfPermission(Manifest::permission::MANAGE_USERS, String(NULL));
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mDeviceOwner != NULL) {
             return mDeviceOwner->GetDeviceOwnerName(result);
         }
@@ -3673,7 +3675,7 @@ ECode CDevicePolicyManagerService::ClearDeviceOwner(
         Logger::E(LOG__TAG, "clearDeviceOwner can only be called by the device owner");
         return E_SECURITY_EXCEPTION;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int64 ident = Binder::ClearCallingIdentity();
         // try {
         do {
@@ -3725,7 +3727,7 @@ ECode CDevicePolicyManagerService::SetProfileOwner(
         Logger::E(LOG__TAG, "Component %s not installed for userId:%d", TO_CSTR(who), userHandle);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // Only SYSTEM_UID can override the userSetupComplete
         if (UserHandle::GetAppId(Binder::GetCallingUid()) != IProcess::SYSTEM_UID
                 && HasUserSetupCompleted(userHandle)) {
@@ -3762,7 +3764,7 @@ ECode CDevicePolicyManagerService::ClearProfileOwner(
     AutoPtr<ActiveAdmin> objNoUse;
     GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_PROFILE_OWNER, (ActiveAdmin**)&objNoUse);
     ECode ec;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int64 ident = Binder::ClearCallingIdentity();
         // try {
         do {
@@ -3833,7 +3835,7 @@ ECode CDevicePolicyManagerService::SetProfileEnabled(
     }
     const Int32 userHandle = UserHandle::GetCallingUserId();
     ECode ec;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // Check for permissions
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
@@ -3906,7 +3908,7 @@ ECode CDevicePolicyManagerService::GetProfileOwner(
         return NOERROR;
     }
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mDeviceOwner != NULL) {
             return mDeviceOwner->GetProfileOwnerComponent(userHandle, result);
         }
@@ -3952,7 +3954,7 @@ ECode CDevicePolicyManagerService::GetProfileOwnerName(
     }
     mContext->EnforceCallingOrSelfPermission(Manifest::permission::MANAGE_USERS, String(NULL));
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mDeviceOwner != NULL) {
             return mDeviceOwner->GetProfileOwnerName(userHandle, result);
         }
@@ -4008,7 +4010,7 @@ ECode CDevicePolicyManagerService::SetActiveAdmin(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int64 ident = Binder::ClearCallingIdentity();
 
         if (!refreshing && GetActiveAdminUncheckedLocked(adminReceiver, userHandle) != NULL) {
@@ -4064,7 +4066,7 @@ ECode CDevicePolicyManagerService::IsAdminActive(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> admin = GetActiveAdminUncheckedLocked(adminReceiver, userHandle);
         *isActive = admin != NULL;
     }
@@ -4086,7 +4088,7 @@ ECode CDevicePolicyManagerService::GetActiveAdmins(
 
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<DevicePolicyData> policy = GetUserData(userHandle);
         Int32 N;
         policy->mAdminList->GetSize(&N);
@@ -4123,7 +4125,7 @@ ECode CDevicePolicyManagerService::PackageHasActiveAdmins(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<DevicePolicyData> policy = GetUserData(userHandle);
         Int32 N;
         policy->mAdminList->GetSize(&N);
@@ -4152,7 +4154,7 @@ ECode CDevicePolicyManagerService::GetRemoveWarning(
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::BIND_DEVICE_ADMIN, String(NULL)))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> admin = GetActiveAdminUncheckedLocked(comp, userHandle);
         if (admin == NULL) {
             result->SendResult(NULL);
@@ -4184,7 +4186,7 @@ ECode CDevicePolicyManagerService::RemoveActiveAdmin(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> admin = GetActiveAdminUncheckedLocked(adminReceiver, userHandle);
         if (admin == NULL) {
             return NOERROR;
@@ -4224,7 +4226,7 @@ ECode CDevicePolicyManagerService::HasGrantedPolicy(
     }
    FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> administrator = GetActiveAdminUncheckedLocked(adminReceiver, userHandle);
         if (administrator == NULL) {
             Logger::E(LOG__TAG, "No active admin %s", TO_CSTR(adminReceiver));
@@ -4258,7 +4260,7 @@ ECode CDevicePolicyManagerService::SetActivePasswordState(
     ValidateQualityConstant(quality);
 
     ECode ec;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (p->mActivePasswordQuality != quality || p->mActivePasswordLength != length
                 || p->mFailedPasswordAttempts != 0 || p->mActivePasswordLetters != letters
                 || p->mActivePasswordUpperCase != uppercase
@@ -4306,7 +4308,7 @@ ECode CDevicePolicyManagerService::ReportFailedPasswordAttempt(
     do {
         Boolean wipeData = FALSE;
         Int32 identifier = 0;
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             AutoPtr<DevicePolicyData> policy = GetUserData(userHandle);
             policy->mFailedPasswordAttempts++;
             ec = SaveSettingsLocked(userHandle);
@@ -4347,7 +4349,7 @@ ECode CDevicePolicyManagerService::ReportSuccessfulPasswordAttempt(
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::BIND_DEVICE_ADMIN, String(NULL)))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<DevicePolicyData> policy = GetUserData(userHandle);
         if (policy->mFailedPasswordAttempts != 0 || policy->mPasswordOwner >= 0) {
             Int64 ident = Binder::ClearCallingIdentity();
@@ -4468,7 +4470,7 @@ void CDevicePolicyManagerService::CleanUpOldUsers()
     // before reboot
     AutoPtr<ISet> usersWithProfileOwners;
     AutoPtr<ISet> usersWithData;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mDeviceOwner != NULL)
             mDeviceOwner->GetProfileOwnerKeys((ISet**)&usersWithProfileOwners);
         else
@@ -4736,7 +4738,7 @@ ECode CDevicePolicyManagerService::GetActiveAdminForCallerLocked(
 AutoPtr<CDevicePolicyManagerService::DevicePolicyData> CDevicePolicyManagerService::GetUserData(
     /* [in] */ Int32 userHandle)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mUserData->Get(userHandle, (IInterface**)&obj);
         AutoPtr<DevicePolicyData> policy = (DevicePolicyData*) IObject::Probe(obj);
@@ -4753,7 +4755,7 @@ AutoPtr<CDevicePolicyManagerService::DevicePolicyData> CDevicePolicyManagerServi
 void CDevicePolicyManagerService::RemoveUserData(
     /* [in] */ Int32 userHandle)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
 
         if (userHandle == IUserHandle::USER_OWNER) {
             Slogger::W(LOG__TAG, "Tried to remove device policy file for user 0! Ignoring.");
@@ -4793,7 +4795,7 @@ void CDevicePolicyManagerService::RemoveUserData(
 
 void CDevicePolicyManagerService::LoadDeviceOwner()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         DeviceOwner::Load((DeviceOwner**)&mDeviceOwner);
     }
 }
@@ -5331,7 +5333,7 @@ ECode CDevicePolicyManagerService::SetScreenCaptureDisabled(
         return NOERROR;
     }
     EnforceCrossUserPermission(userHandle);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -5359,7 +5361,7 @@ ECode CDevicePolicyManagerService::GetScreenCaptureDisabled(
         *result = FALSE;
         return NOERROR;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who != NULL) {
             AutoPtr<ActiveAdmin> admin = GetActiveAdminUncheckedLocked(who, userHandle);
             *result = (admin != NULL) ? admin->mDisableScreenCapture : FALSE;
@@ -5413,7 +5415,7 @@ ECode CDevicePolicyManagerService::SetAutoTimeRequired(
         return NOERROR;
     }
     EnforceCrossUserPermission(userHandle);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -5457,7 +5459,7 @@ ECode CDevicePolicyManagerService::GetAutoTimeRequired(
         *result = FALSE;
         return NOERROR;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> deviceOwner = GetDeviceOwnerAdmin();
         *result = (deviceOwner != NULL) ? deviceOwner->mRequireAutoTime : FALSE;
     }
@@ -5835,7 +5837,7 @@ void CDevicePolicyManagerService::ValidatePasswordOwnerLocked(
 void CDevicePolicyManagerService::HandlePasswordExpirationNotification(
     /* [in] */ Int32 userHandle)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ISystem> system;
         CSystem::AcquireSingleton((ISystem**)&system);
         Int64 now;
@@ -5974,7 +5976,7 @@ ECode CDevicePolicyManagerService::EnforceCanManageCaCerts(
     if (who == NULL) {
         mContext->EnforceCallingOrSelfPermission(Manifest::permission::MANAGE_CA_CERTIFICATES, String(NULL));
     } else {
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             AutoPtr<ActiveAdmin> objNoUse;
             GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_PROFILE_OWNER, (ActiveAdmin**)&objNoUse);
         }
@@ -6147,7 +6149,7 @@ ECode CDevicePolicyManagerService::InstallKeyPair(
         Logger::E(LOG__TAG, "ComponentName is null");
         return E_NULL_POINTER_EXCEPTION;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> objNoUse;
         GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_PROFILE_OWNER, (ActiveAdmin**)&objNoUse);
     }
@@ -6260,7 +6262,7 @@ void CDevicePolicyManagerService::Dump(
     assert(0);
     // CPrintWriterPrinter::New(pw, (IPrinter**)&p);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         p->Println(String("Current Device Policy Manager state:"));
 
         Int32 userCount;
@@ -6356,7 +6358,7 @@ ECode CDevicePolicyManagerService::AddPersistentPreferredActivity(
     /* [in] */ IComponentName* activity)
 {
     const Int32 userHandle = UserHandle::GetCallingUserId();
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -6385,7 +6387,7 @@ ECode CDevicePolicyManagerService::ClearPackagePersistentPreferredActivities(
     /* [in] */ const String& packageName)
 {
     const Int32 userHandle = UserHandle::GetCallingUserId();
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -6416,7 +6418,7 @@ ECode CDevicePolicyManagerService::SetApplicationRestrictions(
 {
     AutoPtr<IUserHandle> userHandle;
     CUserHandle::New(UserHandle::GetCallingUserId(), (IUserHandle**)&userHandle);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -6448,7 +6450,7 @@ ECode CDevicePolicyManagerService::SetTrustAgentFeaturesEnabled(
     }
     EnforceCrossUserPermission(userHandle);
     EnforceNotManagedProfile(userHandle, String("manage trust agent features"));
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (admin == NULL) {
             Logger::E(LOG__TAG, "admin is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -6484,7 +6486,7 @@ ECode CDevicePolicyManagerService::GetTrustAgentFeaturesEnabled(
         return NOERROR;
     }
     EnforceCrossUserPermission(userHandle);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (agent == NULL) {
             Logger::E(LOG__TAG, "agent is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -6565,7 +6567,7 @@ ECode CDevicePolicyManagerService::SetRestrictionsProvider(
     /* [in] */ IComponentName* who,
     /* [in] */ IComponentName* permissionProvider)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -6587,7 +6589,7 @@ ECode CDevicePolicyManagerService::GetRestrictionsProvider(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (Binder::GetCallingUid() != IProcess::SYSTEM_UID) {
             Logger::E(LOG__TAG, "Only the system can query the permission provider");
             return E_SECURITY_EXCEPTION;
@@ -6605,7 +6607,7 @@ ECode CDevicePolicyManagerService::AddCrossProfileIntentFilter(
     /* [in] */ Int32 flags)
 {
     Int32 callingUserId = UserHandle::GetCallingUserId();
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -6656,7 +6658,7 @@ ECode CDevicePolicyManagerService::ClearCrossProfileIntentFilters(
     /* [in] */ IComponentName* who)
 {
     Int32 callingUserId = UserHandle::GetCallingUserId();
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -6839,7 +6841,7 @@ ECode CDevicePolicyManagerService::SetPermittedAccessibilityServices(
             }
         }
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> admin;
         GetActiveAdminForCallerLocked(who,
                 IDeviceAdminInfo::USES_POLICY_PROFILE_OWNER,
@@ -6866,7 +6868,7 @@ ECode CDevicePolicyManagerService::GetPermittedAccessibilityServices(
         Logger::E(LOG__TAG, "ComponentName is null");
         return E_NULL_POINTER_EXCEPTION;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> admin;
         GetActiveAdminForCallerLocked(who,
                 IDeviceAdminInfo::USES_POLICY_PROFILE_OWNER,
@@ -6888,7 +6890,7 @@ ECode CDevicePolicyManagerService::GetPermittedAccessibilityServicesForUser(
         return NOERROR;
     }
     AutoPtr<IList> result;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // If we have multiple profiles we return the intersection of the
         // permitted lists. This can happen in cases where we have a device
         // and profile owner.
@@ -7105,7 +7107,7 @@ ECode CDevicePolicyManagerService::SetPermittedInputMethods(
             }
         }
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> admin;
         GetActiveAdminForCallerLocked(who,
                 IDeviceAdminInfo::USES_POLICY_PROFILE_OWNER,
@@ -7131,7 +7133,7 @@ ECode CDevicePolicyManagerService::GetPermittedInputMethods(
         Logger::E(LOG__TAG, "ComponentName is null");
         return E_NULL_POINTER_EXCEPTION;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> admin;
         GetActiveAdminForCallerLocked(who,
                 IDeviceAdminInfo::USES_POLICY_PROFILE_OWNER,
@@ -7164,7 +7166,7 @@ ECode CDevicePolicyManagerService::GetPermittedInputMethodsForCurrentUser(
     // }
     Int32 userId;
     currentUser->GetId(&userId);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IList> result;
         // If we have multiple profiles we return the intersection of the
         // permitted lists. This can happen in cases where we have a device
@@ -7265,7 +7267,7 @@ ECode CDevicePolicyManagerService::CreateUser(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -7361,7 +7363,7 @@ ECode CDevicePolicyManagerService::RemoveUser(
     /* [in] */ IUserHandle* userHandle,
     /* [out] */ Boolean* result)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -7390,7 +7392,7 @@ ECode CDevicePolicyManagerService::SwitchUser(
     /* [in] */ IUserHandle* userHandle,
     /* [out] */ Boolean* result)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -7434,7 +7436,7 @@ ECode CDevicePolicyManagerService::GetApplicationRestrictions(
 
     AutoPtr<IUserHandle> userHandle;
     CUserHandle::New(UserHandle::GetCallingUserId(), (IUserHandle**)&userHandle);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -7464,7 +7466,7 @@ ECode CDevicePolicyManagerService::SetUserRestriction(
     CUserHandle::New(UserHandle::GetCallingUserId(), (IUserHandle**)&user);
     Int32 userHandle;
     user->GetIdentifier(&userHandle);;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -7628,7 +7630,7 @@ ECode CDevicePolicyManagerService::SetApplicationHidden(
     *result = FALSE;
 
     Int32 callingUserId = UserHandle::GetCallingUserId();
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -7666,7 +7668,7 @@ ECode CDevicePolicyManagerService::IsApplicationHidden(
     *result = FALSE;
 
     Int32 callingUserId = UserHandle::GetCallingUserId();
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -7699,7 +7701,7 @@ ECode CDevicePolicyManagerService::EnableSystemApp(
     /* [in] */ IComponentName* who,
     /* [in] */ const String& packageName)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -7765,7 +7767,7 @@ ECode CDevicePolicyManagerService::EnableSystemAppWithIntent(
     /* [in] */ IIntent* intent,
     /* [out] */ Int32* result)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -7883,7 +7885,7 @@ ECode CDevicePolicyManagerService::SetAccountManagementDisabled(
     if (!mHasFeature) {
         return NOERROR;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -7919,7 +7921,7 @@ ECode CDevicePolicyManagerService::GetAccountTypesWithManagementDisabledAsUser(
         *result = NULL;
         return NOERROR;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<DevicePolicyData> policy = GetUserData(userId);
         Int32 N;
         policy->mAdminList->GetSize(&N);
@@ -7953,7 +7955,7 @@ ECode CDevicePolicyManagerService::SetUninstallBlocked(
     /* [in] */ Boolean uninstallBlocked)
 {
     const Int32 userId = UserHandle::GetCallingUserId();
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -7990,7 +7992,7 @@ ECode CDevicePolicyManagerService::IsUninstallBlocked(
     *result = FALSE;
 
     const Int32 userId = UserHandle::GetCallingUserId();
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -8026,7 +8028,7 @@ ECode CDevicePolicyManagerService::SetCrossProfileCallerIdDisabled(
     if (!mHasFeature) {
         return NOERROR;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -8054,7 +8056,7 @@ ECode CDevicePolicyManagerService::GetCrossProfileCallerIdDisabled(
         *result = FALSE;
         return NOERROR;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -8076,7 +8078,7 @@ ECode CDevicePolicyManagerService::GetCrossProfileCallerIdDisabledForUser(
 
     // TODO: Should there be a check to make sure this relationship is within a profile group?
     //enforceSystemProcess("getCrossProfileCallerIdDisabled can only be called by system");
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ActiveAdmin> admin = GetProfileOwnerAdmin(userId);
         *result = (admin != NULL) ? admin->mDisableCallerId : FALSE;
     }
@@ -8087,7 +8089,7 @@ ECode CDevicePolicyManagerService::SetLockTaskPackages(
     /* [in] */ IComponentName* who,
     /* [in] */ ArrayOf<String>* packages)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -8117,7 +8119,7 @@ ECode CDevicePolicyManagerService::GetLockTaskPackages(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -8151,7 +8153,7 @@ ECode CDevicePolicyManagerService::IsLockTaskPermitted(
     Int32 uid = Binder::GetCallingUid();
     Int32 userHandle = UserHandle::GetUserId(uid);
     AutoPtr<DevicePolicyData> policy = GetUserData(userHandle);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 size;
         policy->mLockTaskPackages->GetSize(&size);
         for (Int32 i = 0; i < size; i++) {
@@ -8180,7 +8182,7 @@ ECode CDevicePolicyManagerService::NotifyLockTaskModeChanged(
         Logger::E(LOG__TAG, "notifyLockTaskModeChanged can only be called by system");
         return E_SECURITY_EXCEPTION;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<DevicePolicyData> policy = GetUserData(userHandle);
         AutoPtr<IBundle> adminExtras;
         CBundle::New((IBundle**)&adminExtras);
@@ -8218,7 +8220,7 @@ ECode CDevicePolicyManagerService::SetGlobalSetting(
 {
     AutoPtr<IContentResolver> contentResolver;
     mContext->GetContentResolver((IContentResolver**)&contentResolver);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -8251,7 +8253,7 @@ ECode CDevicePolicyManagerService::SetSecureSetting(
     Int32 callingUserId = UserHandle::GetCallingUserId();
     AutoPtr<IContentResolver> contentResolver;
     mContext->GetContentResolver((IContentResolver**)&contentResolver);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -8297,7 +8299,7 @@ ECode CDevicePolicyManagerService::SetMasterVolumeMuted(
 {
     AutoPtr<IContentResolver> contentResolver;
     mContext->GetContentResolver((IContentResolver**)&contentResolver);;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;
@@ -8336,7 +8338,7 @@ ECode CDevicePolicyManagerService::IsMasterVolumeMuted(
 
     AutoPtr<IContentResolver> contentResolver;
     mContext->GetContentResolver((IContentResolver**)&contentResolver);;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (who == NULL) {
             Logger::E(LOG__TAG, "ComponentName is null");
             return E_NULL_POINTER_EXCEPTION;

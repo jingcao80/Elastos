@@ -11,6 +11,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Internal::App::CProcessStats;
 using Elastos::Droid::Internal::App::CProcessStatsHelper;
@@ -320,7 +322,7 @@ void CProcessStatsService::WriteStateLocked(
     /* [in] */ Boolean sync,
     /* [in] */ Boolean commit)
 {
-    synchronized (mPendingWriteLock) {
+    {    AutoLock syncLock(mPendingWriteLock);
         Int64 now = SystemClock::GetUptimeMillis();
         if (mPendingWrite == NULL || !mPendingWriteCommitted) {
             mPendingWrite = NULL;
@@ -385,7 +387,7 @@ void CProcessStatsService::PerformWriteState()
     }
     AutoPtr<IParcel> data;
     AutoPtr<IAtomicFile> file;
-    synchronized (mPendingWriteLock) {
+    {    AutoLock syncLock(mPendingWriteLock);
         data = mPendingWrite;
         file = mPendingWriteFile;
         mPendingWriteCommitted = FALSE;
@@ -686,12 +688,14 @@ ECode CProcessStatsService::GetCurrentStats(
             Manifest::permission::PACKAGE_USAGE_STATS, String(NULL)));
     AutoPtr<IParcel> current;// = Parcel.obtain();
     CParcel::New((IParcel**)&current);
-    synchronized (mAm) {
+    {
+        AutoLock syncLock(mAm);
         Int64 now = SystemClock::GetUptimeMillis();
         mProcessStats->SetTimePeriodEndRealtime(SystemClock::GetElapsedRealtime());
         mProcessStats->SetTimePeriodEndUptime(now);
-        if (FAILED(mProcessStats->WriteToParcel(current, now)))
-            break;
+        ECode ec = mProcessStats->WriteToParcel(current, now);
+        if (FAILED(ec))
+            return ec;
     }
     mWriteLock->Lock();
     do {
@@ -732,14 +736,15 @@ ECode CProcessStatsService::GetStatsOverTime(
     AutoPtr<IParcel> current;// = Parcel.obtain();
     CParcel::New((IParcel**)&current);
     Int64 curTime = 0;
-    synchronized (mAm) {
+    {
+        AutoLock syncLock(mAm);
         Int64 now = SystemClock::GetUptimeMillis();
         Int64 endRealtime = SystemClock::GetElapsedRealtime();
         mProcessStats->SetTimePeriodEndRealtime(endRealtime);
         mProcessStats->SetTimePeriodEndUptime(now);
         ECode ec = mProcessStats->WriteToParcel(current, now);
         if (FAILED(ec))
-            break;
+            return ec;
         Int64 startRealtime;
         mProcessStats->GetTimePeriodStartRealtime(&startRealtime);
         curTime = endRealtime - startRealtime;
@@ -826,7 +831,7 @@ ECode CProcessStatsService::GetCurrentMemoryState(
     /* [out] */ Int32* state)
 {
     VALIDATE_NOT_NULL(state)
-    synchronized (mAm) {
+    {    AutoLock syncLock(mAm);
         *state = mLastMemOnlyState;
     }
     return NOERROR;
@@ -1191,7 +1196,7 @@ void CProcessStatsService::DumpInner(
             }
         }
         pw->Println();
-        synchronized (mAm) {
+        {    AutoLock syncLock(mAm);
             DumpFilteredProcessesCsvLocked(pw, String(NULL),
                     csvSepScreenStats, csvScreenStats, csvSepMemStats, csvMemStats,
                     csvSepProcStats, csvProcStats, now, reqPackage);
@@ -1380,7 +1385,7 @@ void CProcessStatsService::DumpInner(
                     dumpDetails, dumpFullDetails, dumpAll, activeOnly);
             sepNeeded = TRUE;
         }
-        synchronized (mAm) {
+        {    AutoLock syncLock(mAm);
             if (isCompact) {
                 mProcessStats->DumpCheckinLocked(pw, reqPackage);
             }

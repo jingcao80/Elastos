@@ -21,6 +21,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::CWallpaperManager;
 using Elastos::Droid::App::CWallpaperManagerHelper;
@@ -192,7 +194,7 @@ ECode CThemeService::ResourceProcessingHandler::HandleMessage(
                 AutoPtr<IInterface> pkgName;
                 msg->GetObj((IInterface**)&pkgName);
                 Boolean flag = FALSE;
-                synchronized(mThemesToProcessQueue) {
+                {    AutoLock syncLock(mThemesToProcessQueue);
                     if (mThemesToProcessQueue->Contains(pkgName, &flag), !flag) {
                         String str;
                         ICharSequence* cs = ICharSequence::Probe(pkgName);
@@ -211,7 +213,7 @@ ECode CThemeService::ResourceProcessingHandler::HandleMessage(
         case MESSAGE_DEQUEUE_AND_PROCESS_THEME:
             {
                 AutoPtr<IInterface> pkgName;
-                synchronized(mThemesToProcessQueue) {
+                {    AutoLock syncLock(mThemesToProcessQueue);
                     mThemesToProcessQueue->Get(0, (IInterface**)&pkgName);
                 }
                 if (pkgName != NULL) {
@@ -239,7 +241,7 @@ ECode CThemeService::ResourceProcessingHandler::HandleMessage(
                     }
                     mHost->SendThemeResourcesCachedBroadcast(str, result);
 
-                    synchronized(mThemesToProcessQueue) {
+                    {    AutoLock syncLock(mThemesToProcessQueue);
                         mThemesToProcessQueue->Remove(0);
                         Int32 size;
                         Boolean flag = FALSE;
@@ -684,7 +686,7 @@ void CThemeService::DoApplyTheme(
     /* [in] */ IThemeChangeRequest* request,
     /* [in] */ Boolean removePerAppTheme)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mProgress = 0;
     }
 
@@ -1508,7 +1510,7 @@ void CThemeService::PostFinish(
     /* [in] */ IThemeChangeRequest* request,
     /* [in] */ Int64 updateTime)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mProgress = 0;
     }
 
@@ -1583,7 +1585,7 @@ void CThemeService::BroadcastThemeChange(
 void CThemeService::IncrementProgress(
     /* [in] */ Int32 increment)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mProgress += increment;
         if (mProgress > 100) mProgress = 100;
     }
@@ -1624,7 +1626,7 @@ ECode CThemeService::RequestThemeChange(
      * TODO: create a callback that can be sent to any ThemeChangeListeners to notify them that
      * the theme will be applied once the processing is done.
      */
-    synchronized(mThemesToProcessQueue) {
+    {    AutoLock syncLock(mThemesToProcessQueue);
         AutoPtr<IMap> componentMap;
         request->GetThemeComponentsMap((IMap**)&componentMap);
         AutoPtr<ISet> keySet;
@@ -1691,7 +1693,7 @@ ECode CThemeService::GetProgress(
 {
     VALIDATE_NOT_NULL(result);
     mContext->EnforceCallingOrSelfPermission(Manifest::permission::ACCESS_THEME_MANAGER, String(NULL));
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = mProgress;
         return NOERROR;
     }
@@ -1782,7 +1784,7 @@ ECode CThemeService::IsThemeBeingProcessed(
     VALIDATE_NOT_NULL(result);
     mContext->EnforceCallingOrSelfPermission(
             Manifest::permission::ACCESS_THEME_MANAGER, String(NULL));
-    synchronized(mThemesToProcessQueue) {
+    {    AutoLock syncLock(mThemesToProcessQueue);
         Boolean flag = FALSE;
         mThemesToProcessQueue->Contains(StringUtils::ParseCharSequence(themePkgName), &flag);
         *result = flag;

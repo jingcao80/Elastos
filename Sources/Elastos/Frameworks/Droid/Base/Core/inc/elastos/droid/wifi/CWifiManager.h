@@ -121,7 +121,7 @@ public:
 
         // public String toString() {
         //     String s1, s2, s3;
-        //     synchronized (mBinder) {
+        //     {    AutoLock syncLock(mBinder);
         //         s1 = Integer.toHexString(System.identityHashCode(this));
         //         s2 = mHeld ? "held; " : "";
         //         if (mRefCounted) {
@@ -242,7 +242,7 @@ public:
 
         // public String toString() {
         //     String s1, s2, s3;
-        //     synchronized (mBinder) {
+        //     {    AutoLock syncLock(mBinder);
         //         s1 = Integer.toHexString(System.identityHashCode(this));
         //         s2 = mHeld ? "held; " : "";
         //         if (mRefCounted) {

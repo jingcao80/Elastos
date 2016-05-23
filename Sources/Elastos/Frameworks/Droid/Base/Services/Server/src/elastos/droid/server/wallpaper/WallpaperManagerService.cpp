@@ -18,6 +18,8 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::App::CContextImpl;
@@ -142,7 +144,7 @@ ECode WallpaperManagerService::WallpaperObserver::OnEvent(
     if (path.IsNull()) {
         return E_NULL_POINTER_EXCEPTION;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IFile> changedFile;
         CFile::New(mWallpaperDir, path, (IFile**)&changedFile);
         Boolean isEquals;
@@ -257,7 +259,7 @@ ECode WallpaperManagerService::WallpaperConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
     /* [in] */ IBinder* service)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<WallpaperData> _mWallpaper = (WallpaperData*)mWallpaper.Get();
         if ((_mWallpaper->mConnection).Get() == this) {
             mService = IIWallpaperService::Probe(service);
@@ -275,7 +277,7 @@ ECode WallpaperManagerService::WallpaperConnection::OnServiceConnected(
 ECode WallpaperManagerService::WallpaperConnection::OnServiceDisconnected(
     /* [in] */ IComponentName* name)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mService = NULL;
         mEngine = NULL;
         AutoPtr<WallpaperData> _mWallpaper = (WallpaperData*)mWallpaper.Get();
@@ -309,7 +311,7 @@ ECode WallpaperManagerService::WallpaperConnection::OnServiceDisconnected(
 ECode WallpaperManagerService::WallpaperConnection::AttachEngine(
     /* [in] */ IIWallpaperEngine* engine)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<WallpaperData> _mWallpaper = (WallpaperData*)mWallpaper.Get();
         mEngine = engine;
         if (mDimensionsChanged) {
@@ -335,7 +337,7 @@ ECode WallpaperManagerService::WallpaperConnection::AttachEngine(
 ECode WallpaperManagerService::WallpaperConnection::EngineShown(
     /* [in] */ IIWallpaperEngine* engine)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mReply != NULL) {
             AutoPtr<IBinderHelper> bh;
             CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
@@ -357,7 +359,7 @@ ECode WallpaperManagerService::WallpaperConnection::SetWallpaper(
     /* [out] */ IParcelFileDescriptor** descriptor)
 {
     VALIDATE_NOT_NULL(descriptor)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<WallpaperData> _mWallpaper = (WallpaperData*)mWallpaper.Get();
         if ((_mWallpaper->mConnection).Get() == this) {
             return mHost->UpdateWallpaperBitmapLocked(name, mWallpaper, descriptor);
@@ -381,7 +383,7 @@ ECode WallpaperManagerService::MyPackageMonitor::OnPackageUpdateFinished(
     /* [in] */ const String& packageName,
     /* [in] */  Int32 uid)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 userId;
         GetChangingUserId(&userId);
         if (mHost->mCurrentUserId != userId) {
@@ -413,7 +415,7 @@ ECode WallpaperManagerService::MyPackageMonitor::OnPackageUpdateFinished(
 ECode WallpaperManagerService::MyPackageMonitor::OnPackageModified(
     /* [in] */ const String& packageName)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 userId;
         GetChangingUserId(&userId);
         if (mHost->mCurrentUserId != userId) {
@@ -440,7 +442,7 @@ ECode WallpaperManagerService::MyPackageMonitor::OnPackageUpdateStarted(
     /* [in] */ const String& packageName,
     /* [in] */  Int32 uid)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 userId;
         GetChangingUserId(&userId);
         if (mHost->mCurrentUserId != userId) {
@@ -469,7 +471,7 @@ ECode WallpaperManagerService::MyPackageMonitor::OnHandleForceStop(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 userId;
         GetChangingUserId(&userId);
         if (mHost->mCurrentUserId != userId) {
@@ -493,7 +495,7 @@ ECode WallpaperManagerService::MyPackageMonitor::OnHandleForceStop(
 
 ECode WallpaperManagerService::MyPackageMonitor::OnSomePackagesChanged()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 userId;
         GetChangingUserId(&userId);
         if (mHost->mCurrentUserId != userId) {
@@ -765,7 +767,7 @@ ECode WallpaperManagerService::GetName(
         Slogger::E(TAG, "getName() can only be called from the system process");
         return E_RUNTIME_EXCEPTION;
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mWallpaperMap->Get(0, (IInterface**)&obj);
         AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
@@ -780,7 +782,7 @@ ECode WallpaperManagerService::OnStoppingUser(
     /* [in] */ Int32 userId)
 {
     if (userId < 1) return E_NULL_POINTER_EXCEPTION;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mWallpaperMap->Get(userId, (IInterface**)&obj);
         AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
@@ -801,7 +803,7 @@ ECode WallpaperManagerService::OnRemoveUser(
     /* [in] */ Int32 userId)
 {
     if (userId < 1) return E_NULL_POINTER_EXCEPTION;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         OnStoppingUser(userId);
         AutoPtr<IFile> file;
         GetWallpaperDir(userId, (IFile**)&file);
@@ -826,7 +828,7 @@ ECode WallpaperManagerService::SwitchUser(
     /* [in] */ Int32 userId,
     /* [in] */ IIRemoteCallback* reply)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mCurrentUserId = userId;
         AutoPtr<IInterface> obj;
         mWallpaperMap->Get(userId, (IInterface**)&obj);
@@ -862,7 +864,7 @@ ECode WallpaperManagerService::SwitchWallpaper(
     /* [in] */ IWallpaperData* wallpaper,
     /* [in] */ IIRemoteCallback* reply)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // RuntimeException e = null;
         // try {
         AutoPtr<WallpaperData> _wallpaper = (WallpaperData*)wallpaper;
@@ -886,7 +888,7 @@ ECode WallpaperManagerService::SwitchWallpaper(
 ECode WallpaperManagerService::ClearWallpaper()
 {
     if (DEBUG) Slogger::V(TAG, "clearWallpaper");
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IUserHandleHelper> uhh;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
         Int32 userId;
@@ -952,7 +954,7 @@ ECode WallpaperManagerService::ClearWallpaperLocked(
 ECode WallpaperManagerService::ClearKeyguardWallpaper()
 {
     if (DEBUG) Slogger::V(TAG, "clearWallpaper");
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IUserHandleHelper> uhh;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
         Int32 userId;
@@ -1002,7 +1004,7 @@ ECode WallpaperManagerService::HasNamedWallpaper(
     /* [out] */ Boolean* hasNamedWallpaper)
 {
     VALIDATE_NOT_NULL(hasNamedWallpaper)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IBinderHelper> bh;
         CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
         Int64 ident;
@@ -1066,7 +1068,7 @@ ECode WallpaperManagerService::SetDimensionHints(
     /* [in] */ Int32 height)
 {
     CheckPermission(Manifest::permission::SET_WALLPAPER_HINTS);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IUserHandleHelper> uhh;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
         Int32 userId;
@@ -1120,7 +1122,7 @@ ECode WallpaperManagerService::GetWidthHint(
     /* [out] */ Int32* widthHint)
 {
     VALIDATE_NOT_NULL(widthHint)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IUserHandleHelper> uhh;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
         Int32 userId;
@@ -1138,7 +1140,7 @@ ECode WallpaperManagerService::GetHeightHint(
     /* [out] */ Int32* heightHint)
 {
     VALIDATE_NOT_NULL(heightHint)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IUserHandleHelper> uhh;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
         Int32 userId;
@@ -1156,7 +1158,7 @@ ECode WallpaperManagerService::SetDisplayPadding(
     /* [in] */ IRect* padding)
 {
     CheckPermission(Manifest::permission::SET_WALLPAPER_HINTS);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IUserHandleHelper> uhh;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
         Int32 userId;
@@ -1213,7 +1215,7 @@ ECode WallpaperManagerService::GetWallpaper(
 {
     VALIDATE_NOT_NULL(outParams)
     VALIDATE_NOT_NULL(descriptor)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // This returns the current user's wallpaper, if called by a system service. Else it
         // returns the wallpaper for the calling user.
         AutoPtr<IBinderHelper> bh;
@@ -1275,7 +1277,7 @@ ECode WallpaperManagerService::GetKeyguardWallpaper(
 {
     VALIDATE_NOT_NULL(descriptor)
     *descriptor = NULL;
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         Int32 wallpaperUserId = mCurrentUserId;
         AutoPtr<KeyguardWallpaperData> wallpaper;
         HashMap<Int32, AutoPtr<KeyguardWallpaperData> >::Iterator it = mKeyguardWallpaperMap.Find(wallpaperUserId);
@@ -1317,7 +1319,7 @@ ECode WallpaperManagerService::GetWallpaperInfo(
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
     Int32 userId;
     uhh->GetCallingUserId(&userId);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mWallpaperMap->Get(userId, (IInterface**)&obj);
         AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
@@ -1341,7 +1343,7 @@ ECode WallpaperManagerService::IsKeyguardWallpaperSet(
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId;
     helper->GetCallingUserId(&userId);
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         AutoPtr<KeyguardWallpaperData> data;
         HashMap<Int32, AutoPtr<KeyguardWallpaperData> >::Iterator it = mKeyguardWallpaperMap.Find(userId);
         if (it != mKeyguardWallpaperMap.End()) {
@@ -1357,7 +1359,7 @@ ECode WallpaperManagerService::SetWallpaper(
     /* [out] */ IParcelFileDescriptor** descriptor)
 {
     CheckPermission(Manifest::permission::SET_WALLPAPER);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (DEBUG) Slogger::V(TAG, "setWallpaper");
         AutoPtr<IUserHandleHelper> uhh;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
@@ -1442,7 +1444,7 @@ ECode WallpaperManagerService::SetKeyguardWallpaper(
     VALIDATE_NOT_NULL(descriptor)
     *descriptor = NULL;
     FAIL_RETURN(CheckPermission(Elastos::Droid::Manifest::permission::SET_KEYGUARD_WALLPAPER))
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (DEBUG) Slogger::V(TAG, "setKeyguardWallpaper");
         AutoPtr<IUserHandleHelper> helper;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
@@ -1515,7 +1517,7 @@ ECode WallpaperManagerService::SetWallpaperComponent(
     /* [in] */ IComponentName* name)
 {
     CheckPermission(Manifest::permission::SET_WALLPAPER_COMPONENT);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (DEBUG) {
             String str;
             IObject::Probe(name)->ToString(&str);
@@ -2335,7 +2337,7 @@ ECode WallpaperManagerService::SettingsRestored()
     if (DEBUG) Slogger::V(TAG, "settingsRestored");
     AutoPtr<IWallpaperData> wallpaper;
     Boolean success = FALSE;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         LoadSettingsLocked(0);
         AutoPtr<IInterface> wallpaperobj;
         mWallpaperMap->Get(0, (IInterface**)&wallpaperobj);
@@ -2385,7 +2387,7 @@ ECode WallpaperManagerService::SettingsRestored()
         f->Delete();
     }
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         SaveSettingsLocked((WallpaperData*)wallpaper.Get());
     }
     return NOERROR;

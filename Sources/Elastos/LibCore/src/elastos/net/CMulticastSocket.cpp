@@ -10,6 +10,8 @@
 #include "CPlainDatagramSocketImpl.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IBoolean;
@@ -381,7 +383,7 @@ ECode CMulticastSocket::CreateSocket(
     /* [in] */ Int32 aPort,
     /* [in] */ IInetAddress* addr)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mFactory != NULL) {
             mFactory->CreateDatagramSocketImpl((IDatagramSocketImpl**)&mImpl);
         }

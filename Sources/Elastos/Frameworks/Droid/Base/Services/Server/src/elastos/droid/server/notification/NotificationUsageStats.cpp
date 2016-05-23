@@ -8,6 +8,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::App::INotificationAction;
 using Elastos::Droid::Content::CContentValues;
@@ -847,7 +849,7 @@ NotificationUsageStats::~NotificationUsageStats()
 void NotificationUsageStats::RegisterPostedByApp(
     /* [in] */ NotificationRecord* notification)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         notification->mStats = new SingleNotificationStats();
         notification->mStats->mPosttimeElapsedMs = SystemClock::GetElapsedRealtime();
         AutoPtr< ArrayOf<AggregatedStats*> > args = GetAggregatedStatsLocked(notification);
@@ -876,7 +878,7 @@ void NotificationUsageStats::RegisterUpdatedByApp(
 void NotificationUsageStats::RegisterRemovedByApp(
     /* [in] */ NotificationRecord* notification)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         notification->mStats->OnRemoved();
         AutoPtr< ArrayOf<AggregatedStats*> > args = GetAggregatedStatsLocked(notification);
         for (Int32 i = 0; i < args->GetLength(); i++) {
@@ -893,7 +895,7 @@ void NotificationUsageStats::RegisterRemovedByApp(
 void NotificationUsageStats::RegisterDismissedByUser(
     /* [in] */ NotificationRecord* notification)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         notification->mStats->OnDismiss();
         AutoPtr< ArrayOf<AggregatedStats*> > args = GetAggregatedStatsLocked(notification);
         for (Int32 i = 0; i < args->GetLength(); i++) {
@@ -910,7 +912,7 @@ void NotificationUsageStats::RegisterDismissedByUser(
 void NotificationUsageStats::RegisterClickedByUser(
     /* [in] */ NotificationRecord* notification)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         notification->mStats->OnClick();
         AutoPtr< ArrayOf<AggregatedStats*> > args = GetAggregatedStatsLocked(notification);
         for (Int32 i = 0; i < args->GetLength(); i++) {
@@ -926,7 +928,7 @@ void NotificationUsageStats::RegisterClickedByUser(
 void NotificationUsageStats::RegisterCancelDueToClick(
     /* [in] */ NotificationRecord* notification)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         notification->mStats->OnCancel();
         AutoPtr< ArrayOf<AggregatedStats*> > args = GetAggregatedStatsLocked(notification);
         for (Int32 i = 0; i < args->GetLength(); i++) {
@@ -939,7 +941,7 @@ void NotificationUsageStats::RegisterCancelDueToClick(
 void NotificationUsageStats::RegisterCancelUnknown(
     /* [in] */ NotificationRecord* notification)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         notification->mStats->OnCancel();
         AutoPtr< ArrayOf<AggregatedStats*> > args = GetAggregatedStatsLocked(notification);
         for (Int32 i = 0; i < args->GetLength(); i++) {
@@ -1000,7 +1002,7 @@ void NotificationUsageStats::Dump(
     /* [in] */ const String& indent,
     /* [in] */ DumpFilter* filter)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (ENABLE_AGGREGATED_IN_MEMORY_STATS) {
             AutoPtr<ICollection> value;
             mStats->GetValues((ICollection**)&value);

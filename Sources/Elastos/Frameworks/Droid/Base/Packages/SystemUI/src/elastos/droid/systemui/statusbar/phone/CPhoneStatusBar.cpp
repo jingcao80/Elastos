@@ -30,6 +30,8 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::CStatusBarManagerHelper;
@@ -2820,7 +2822,7 @@ ECode CPhoneStatusBar::FindAndUpdateMediaNotifications()
 {
     Boolean metaDataChanged = FALSE;
 
-    synchronized (mNotificationData) {
+    {    AutoLock syncLock(mNotificationData);
         AutoPtr<IArrayList> activeNotifications;  /*<INotificationDataEntry*/
         mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
         Int32 N = 0;
@@ -4163,7 +4165,7 @@ ECode CPhoneStatusBar::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    synchronized (mQueueLock) {
+    {    AutoLock syncLock(mQueueLock);
         pw->Println(String("Current Status Bar state:"));
         pw->Println(String("  mExpandedVisible=") + StringUtils::ToString(mExpandedVisible)
                 + ", mTrackingPosition=" + StringUtils::ToString(mTrackingPosition));
@@ -4267,7 +4269,7 @@ ECode CPhoneStatusBar::Dump(
     DozeLog::Dump(pw);
 
     if (DUMPTRUCK) {
-        synchronized (mNotificationData) {
+        {    AutoLock syncLock(mNotificationData);
             mNotificationData->Dump(pw, String("  "));
         }
 

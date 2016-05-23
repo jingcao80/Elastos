@@ -4,6 +4,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::View::IInputDevice;
 using Elastos::Droid::View::IMotionEvent;
@@ -36,7 +38,7 @@ ECode PointerEventDispatcher::OnInputEvent(
             && (event->GetSource(&source), (source & IInputDevice::SOURCE_CLASS_POINTER) != 0)) {
         AutoPtr<IMotionEvent> motionEvent = IMotionEvent::Probe(event);
         AutoPtr< ArrayOf<IPointerEventListener*> > listeners;
-        synchronized (mListenersLock) {
+        {    AutoLock syncLock(mListenersLock);
             if (mListenersArray == NULL) {
                 mListenersArray = ArrayOf<IPointerEventListener*>::Alloc(mListeners.GetSize());
                 List<AutoPtr<IPointerEventListener> >::Iterator it = mListeners.Begin();
@@ -60,7 +62,7 @@ ECode PointerEventDispatcher::OnInputEvent(
 ECode PointerEventDispatcher::RegisterInputEventListener(
     /* [in] */ IPointerEventListener* listener)
 {
-    synchronized (mListenersLock) {
+    {    AutoLock syncLock(mListenersLock);
         AutoPtr<IPointerEventListener> temp = listener;
         List<AutoPtr<IPointerEventListener> >::Iterator it = Find(mListeners.Begin(), mListeners.End(), temp);
         if (it != mListeners.End()) {
@@ -76,7 +78,7 @@ ECode PointerEventDispatcher::RegisterInputEventListener(
 ECode PointerEventDispatcher::UnregisterInputEventListener(
     /* [in] */ IPointerEventListener* listener)
 {
-    synchronized (mListenersLock) {
+    {    AutoLock syncLock(mListenersLock);
         AutoPtr<IPointerEventListener> temp = listener;
         List<AutoPtr<IPointerEventListener> >::Iterator it = Find(mListeners.Begin(), mListeners.End(), temp);
         if (it == mListeners.End()) {

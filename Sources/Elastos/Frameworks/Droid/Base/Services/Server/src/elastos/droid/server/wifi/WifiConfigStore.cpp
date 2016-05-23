@@ -18,6 +18,8 @@
 #include "elastos/core/CoreUtils.h"
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Net::IpConfigurationIpAssignment;
@@ -1248,7 +1250,7 @@ ECode WifiConfigStore::EnableNetwork(
     } else {
         if (VDBG) LocalLog(String("enableNetwork(disableOthers=false) "), netId);
         AutoPtr<IWifiConfiguration> enabledNetwork;
-        synchronized(mConfiguredNetworks) {
+        {    AutoLock syncLock(mConfiguredNetworks);
             AutoPtr<IInterface> obj;
             mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
             enabledNetwork = IWifiConfiguration::Probe(obj);
@@ -5575,7 +5577,7 @@ void WifiConfigStore::LocalLog(
     }
 
     AutoPtr<IWifiConfiguration> config;
-    synchronized(mConfiguredNetworks) {
+    {    AutoLock syncLock(mConfiguredNetworks);
         AutoPtr<IInterface> p;
         mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&p);
         config = IWifiConfiguration::Probe(p);

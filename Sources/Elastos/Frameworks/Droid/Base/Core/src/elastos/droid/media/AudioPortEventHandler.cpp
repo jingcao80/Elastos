@@ -5,6 +5,8 @@
 
 #include <media/AudioSystem.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::Looper;
 using Elastos::Utility::Logging::Logger;
@@ -82,7 +84,7 @@ ECode AudioPortEventHandler::EventHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     AutoPtr<IArrayList> listeners;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 what;
         msg->GetWhat(&what);
         if (what == AUDIOPORT_EVENT_NEW_LISTENER) {
@@ -216,7 +218,7 @@ ECode AudioPortEventHandler::constructor(
 ECode AudioPortEventHandler::RegisterListener(
     /* [in] */ IAudioManagerOnAudioPortUpdateListener* l)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mListeners->Add(l);
     }
     if (mHandler != NULL) {
@@ -231,7 +233,7 @@ ECode AudioPortEventHandler::RegisterListener(
 ECode AudioPortEventHandler::UnregisterListener(
     /* [in] */ IAudioManagerOnAudioPortUpdateListener* l)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mListeners->Remove(l);
     }
     return NOERROR;

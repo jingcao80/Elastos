@@ -1,6 +1,9 @@
 
 #include "DialerDatabaseHelper.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Elastos{
 namespace Apps{
 namespace Dialer {
@@ -830,7 +833,7 @@ ECode DialerDatabaseHelper::UpdateSmartDialDatabase()
     AutoPtr<ISQLiteDatabase> db;
     GetWritableDatabase((ISQLiteDatabase**)&db);
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (DEBUG) {
             Logger::V(TAG, "Starting to update database");
         }

@@ -6,6 +6,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/etl/List.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Utility::CArrayMap;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
@@ -50,7 +52,7 @@ ECode SensorManager::GetSensorList(
     AutoPtr<ArrayOf<ISensor*> > fullList;
     GetFullSensorList((ArrayOf<ISensor*>**)&fullList);
 
-    synchronized(mSensorListByTypeLock) {
+    {    AutoLock syncLock(mSensorListByTypeLock);
         AutoPtr<IInteger32> key;
         CInteger32::New(type, (IInteger32**)&key);
         AutoPtr<IInterface> value;
@@ -373,7 +375,7 @@ ECode SensorManager::RemapCoordinateSystem(
     VALIDATE_NOT_NULL(state);
 
     if (inR == outR) {
-        synchronized(mTempMatrixLock) {
+        {    AutoLock syncLock(mTempMatrixLock);
             // we don't expect to have a lot of contention
             if (RemapCoordinateSystemImpl(inR, X, Y, mTempMatrix)) {
                 const Int32 size = outR->GetLength();
@@ -671,7 +673,7 @@ ECode SensorManager::CancelTriggerSensor(
 
 AutoPtr<LegacySensorManager> SensorManager::GetLegacySensorManager()
 {
-    synchronized(mSensorListByTypeLock) {
+    {    AutoLock syncLock(mSensorListByTypeLock);
         if (mLegacySensorManager == NULL) {
             // Log.i(TAG, "This application is using deprecated SensorManager API which will "
             //         + "be removed someday.  Please consider switching to the new API.");

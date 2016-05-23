@@ -3,6 +3,8 @@
 #include "CLinkedHashMap.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::CLinkedHashMap;
 using Elastos::Utility::IMapEntry;
 
@@ -46,7 +48,7 @@ ECode BasicLruCache::Get(
 {
     VALIDATE_NOT_NULL(ouface)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (key == NULL) {
             // throw new NullPointerException("key == null");
             return E_NULL_POINTER_EXCEPTION;
@@ -80,7 +82,7 @@ ECode BasicLruCache::Put(
 {
     VALIDATE_NOT_NULL(outface);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (key == NULL || value == NULL) {
             if (outface) {
                 *outface = NULL;
@@ -100,7 +102,7 @@ ECode BasicLruCache::Snapshot(
 {
     VALIDATE_NOT_NULL(outmap)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IMap> res;
         FAIL_RETURN(CLinkedHashMap::New(mMap, (IMap**)&res));
         *outmap = res;
@@ -111,7 +113,7 @@ ECode BasicLruCache::Snapshot(
 
 ECode BasicLruCache::EvictAll()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         TrimToSize(0);
     }
     return NOERROR;

@@ -6,6 +6,8 @@
 #include "StringBuilder.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::EIID_ICloneable;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Arrays;
@@ -29,7 +31,7 @@ ECode Vector::Enumeration::HasMoreElements(
 ECode Vector::Enumeration::GetNextElement(
     /* [out] */ IInterface** out)
 {
-    synchronized(mOwner) {
+    {    AutoLock syncLock(mOwner);
         if (mPos < mOwner->mElementCount) {
             AutoPtr< ArrayOf<IInterface*> > a = mOwner->mElementData;
             *out = (*a)[mPos++];
@@ -116,7 +118,7 @@ ECode Vector::Add(
     /* [out] */ Boolean* modified)
 {
     VALIDATE_NOT_NULL(modified)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (mElementCount == mElementData->GetLength()) {
             GrowByOne();
         }
@@ -148,7 +150,7 @@ ECode Vector::AddAll(
     VALIDATE_NOT_NULL(modified);
     *modified = FALSE;
     VALIDATE_NOT_NULL(collection);
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (location >= 0 && location <= mElementCount) {
             Int32 size;
             collection->GetSize(&size);
@@ -191,7 +193,7 @@ ECode Vector::AddAll(
 ECode Vector::AddElement(
     /* [in] */ IInterface* object)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (mElementCount == mElementData->GetLength()) {
             GrowByOne();
         }
@@ -205,7 +207,7 @@ ECode Vector::GetCapacity(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         *value = mElementData->GetLength();
     }
     return NOERROR;
@@ -239,7 +241,7 @@ ECode Vector::ContainsAll(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         AbstractList::ContainsAll(collection, result);
     }
     return NOERROR;
@@ -249,7 +251,7 @@ ECode Vector::CopyInto(
     /* [in] */ ArrayOf<IInterface*>* elements)
 {
     VALIDATE_NOT_NULL(elements);
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         elements->Copy(mElementData, mElementCount);
     }
     return NOERROR;
@@ -260,7 +262,7 @@ ECode Vector::ElementAt(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (location >= 0 && location < mElementCount) {
             *outface = (*mElementData)[location];
             REFCOUNT_ADD(*outface);
@@ -282,7 +284,7 @@ ECode Vector::GetElements(
 ECode Vector::EnsureCapacity(
     /* [in] */ Int32 minimumCapacity)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (mElementData->GetLength() < minimumCapacity) {
             Int32 next = (mCapacityIncrement <= 0 ? mElementData->GetLength()
                     : mCapacityIncrement)
@@ -300,7 +302,7 @@ ECode Vector::Equals(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (TO_IINTERFACE(this) == object) {
             *result = TRUE;
             return NOERROR;
@@ -338,7 +340,7 @@ ECode Vector::FirstElement(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (mElementCount > 0) {
             *outface = (*mElementData)[0];
             REFCOUNT_ADD(*outface);
@@ -414,7 +416,7 @@ ECode Vector::GetHashCode(
 {
     VALIDATE_NOT_NULL(hashCode)
 
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         Int32 result = 1;
         for (Int32 i = 0; i < mElementCount; i++) {
             result = (31 * result)
@@ -443,7 +445,7 @@ ECode Vector::IndexOf(
         *value = -1;
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (object != NULL) {
             for (Int32 i = location; i < mElementCount; i++) {
                 if (Object::Equals(object, (*mElementData)[i])) {
@@ -469,7 +471,7 @@ ECode Vector::InsertElementAt(
     /* [in] */ IInterface* object,
     /* [in] */ Int32 location)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (location >= 0 && location <= mElementCount) {
             if (mElementCount == mElementData->GetLength()) {
                 GrowByOne();
@@ -491,7 +493,7 @@ ECode Vector::IsEmpty(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         *result = (mElementCount == 0);
     }
     return NOERROR;
@@ -501,7 +503,7 @@ ECode Vector::LastElement(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (mElementCount == 0 || mElementData->GetLength() < mElementCount) {
             return E_NO_SUCH_ELEMENT_EXCEPTION;
         }
@@ -526,7 +528,7 @@ ECode Vector::LastIndexOf(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (location >= 0 && location < mElementCount) {
             if (object != NULL) {
                 for (Int32 i = location; i >= 0; i--) {
@@ -562,7 +564,7 @@ ECode Vector::Remove(
     /* [out] */ IInterface** object)
 {
     VALIDATE_NOT_NULL(object)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (location >= 0 && location < mElementCount) {
             AutoPtr<IInterface> result = (*mElementData)[location];
             mElementCount--;
@@ -605,7 +607,7 @@ ECode Vector::RemoveAll(
     /* [out] */ Boolean* modified)
 {
     VALIDATE_NOT_NULL(modified)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         AbstractList::RemoveAll(collection, modified);
     }
     return NOERROR;
@@ -613,7 +615,7 @@ ECode Vector::RemoveAll(
 
 ECode Vector::RemoveAllElements()
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         for (Int32 i = 0; i < mElementCount; i++) {
             mElementData->Set(i, NULL);
         }
@@ -628,7 +630,7 @@ ECode Vector::RemoveElement(
     /* [out] */ Boolean* value)
 {
     VALIDATE_NOT_NULL(value);
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         Int32 index;
         IndexOf(object, 0, &index);
         if (index == -1) {
@@ -652,7 +654,7 @@ ECode Vector::RemoveElement(
 ECode Vector::RemoveElementAt(
     /* [in] */ Int32 location)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (location >= 0 && location < mElementCount) {
             mElementCount--;
             Int32 size = mElementCount - location;
@@ -706,7 +708,7 @@ ECode Vector::RetainAll(
     /* [out] */ Boolean* modified)
 {
     VALIDATE_NOT_NULL(modified)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         AbstractList::RetainAll(collection, modified);
     }
     return NOERROR;
@@ -725,7 +727,7 @@ ECode Vector::Set(
     /* [out] */ IInterface** prevObject)
 {
     VALIDATE_NOT_NULL(prevObject)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (location >= 0 && location < mElementCount) {
             AutoPtr<IInterface> result = (*mElementData)[location];
             mElementData->Set(location, object);
@@ -741,7 +743,7 @@ ECode Vector::SetElementAt(
     /* [in] */ IInterface* object,
     /* [in] */ Int32 location)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (location >=0 && location < mElementCount) {
             mElementData->Set(location, object);
             return NOERROR;
@@ -753,7 +755,7 @@ ECode Vector::SetElementAt(
 ECode Vector::SetSize(
     /* [in] */ Int32 length)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (length == mElementCount){
             return NOERROR;
         }
@@ -772,7 +774,7 @@ ECode Vector::GetSize(
     /* [out] */ Int32* size)
 {
     VALIDATE_NOT_NULL(size)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         *size = mElementCount;
     }
     return NOERROR;
@@ -784,7 +786,7 @@ ECode Vector::GetSubList(
     /* [out] */ IList** subList)
 {
     VALIDATE_NOT_NULL(subList)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IList> ssList;
         AbstractList::GetSubList(start, end, (IList**)&ssList);
         *subList = new Collections::SynchronizedRandomAccessList(ssList, this);
@@ -816,7 +818,7 @@ ECode Vector::ToArray(
     /* [out, callee] */ ArrayOf<IInterface*>** array)
 {
     VALIDATE_NOT_NULL(array)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         AutoPtr< ArrayOf<IInterface*> > result = ArrayOf<IInterface*>::Alloc(mElementCount);
         result->Copy(mElementData, mElementCount);
         *array = result;
@@ -830,7 +832,7 @@ ECode Vector::ToArray(
     /* [out, callee] */ ArrayOf<IInterface*>** outArray)
 {
     VALIDATE_NOT_NULL(outArray)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         AutoPtr< ArrayOf<IInterface*> > contents = inArray;
         if (mElementCount > contents->GetLength()) {
             contents = ArrayOf<IInterface*>::Alloc(mElementCount);
@@ -848,7 +850,7 @@ ECode Vector::ToArray(
 CARAPI Vector::ToString(
     /* [out] */ String* result)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (mElementCount == 0) {
             *result = String("[]");
             return NOERROR;
@@ -881,7 +883,7 @@ CARAPI Vector::ToString(
 
 ECode Vector::TrimToSize()
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (mElementData->GetLength() != mElementCount) {
             Grow(mElementCount);
         }
@@ -892,7 +894,7 @@ ECode Vector::TrimToSize()
 ECode Vector::WriteObject(
     /* [in] */ IObjectOutputStream* stream)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         stream->DefaultWriteObject();
     }
 

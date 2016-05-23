@@ -5,6 +5,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Media::EIID_IIRingtonePlayer;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::EIID_IBinder;
@@ -39,7 +41,7 @@ ECode CMyRingtonePlayer::Play( // throws RemoteException
             Binder::GetCallingUid());
     }
     AutoPtr<CRingtonePlayer::Client> client;
-    synchronized(mHost->mClients) {
+    {    AutoLock syncLock(mHost->mClients);
         AutoPtr<IInterface> clientObj;
         mHost->mClients->Get(token, (IInterface**)&clientObj);
         client = (CRingtonePlayer::Client*)(IObject::Probe(clientObj));
@@ -59,7 +61,7 @@ ECode CMyRingtonePlayer::Stop(
 {
     if (mHost->LOGD) Logger::D(mHost->TAG, "stop(token=%p)", token);
     AutoPtr<CRingtonePlayer::Client> client;
-    synchronized(mHost->mClients) {
+    {    AutoLock syncLock(mHost->mClients);
         AutoPtr<IInterface> obj;
         mHost->mClients->Remove(token, (IInterface**)&obj);
         client = (CRingtonePlayer::Client*)(IObject::Probe(obj));
@@ -82,7 +84,7 @@ ECode CMyRingtonePlayer::IsPlaying(
     VALIDATE_NOT_NULL(result)
     if (mHost->LOGD) Logger::D(mHost->TAG, "isPlaying(token=%p)", token);
     AutoPtr<CRingtonePlayer::Client> client;
-    synchronized(mHost->mClients) {
+    {    AutoLock syncLock(mHost->mClients);
         AutoPtr<IInterface> obj;
         mHost->mClients->Get(token, (IInterface**)&obj);
         client = (CRingtonePlayer::Client*)(IObject::Probe(obj));

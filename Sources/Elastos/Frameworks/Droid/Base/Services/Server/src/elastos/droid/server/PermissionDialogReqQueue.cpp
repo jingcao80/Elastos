@@ -1,6 +1,8 @@
 #include "elastos/droid/server/PermissionDialogReqQueue.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::AutoLock;
 
 namespace Elastos {
@@ -17,7 +19,7 @@ PermissionDialogReqQueue::PermissionDialogReq::PermissionDialogReq()
 void PermissionDialogReqQueue::PermissionDialogReq::Set(
     /* [in] */ Int32 res)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
     mHasResult = TRUE;
     mResult = res;
     assert(0 && "TODO");
@@ -27,7 +29,7 @@ void PermissionDialogReqQueue::PermissionDialogReq::Set(
 
 Int32 PermissionDialogReqQueue::PermissionDialogReq::Get()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         while (!mHasResult) {
             // try {
             assert(0 && "TODO");
@@ -62,7 +64,7 @@ void PermissionDialogReqQueue::SetDialog(
 void PermissionDialogReqQueue::Register(
     /* [in] */ PermissionDialogReq* res)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mResultList->PushBack(res);
     }
 }
@@ -70,7 +72,7 @@ void PermissionDialogReqQueue::Register(
 void PermissionDialogReqQueue::NotifyAll(
     /* [in] */ Int32 mode)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         while (mResultList->GetSize() != 0) {
             AutoPtr<PermissionDialogReq> res = (*mResultList)[0];
             res->Set(mode);

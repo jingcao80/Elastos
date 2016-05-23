@@ -3,6 +3,8 @@
 #include "AutoLock.h"
 #include "PipedInputStream.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::ISynchronize;
 
 namespace Elastos {
@@ -40,7 +42,7 @@ ECode PipedOutputStream::Connect(
     if (NULL == stream) {
         return E_NULL_POINTER_EXCEPTION;
     }
-    synchronized (stream) {
+    {    AutoLock syncLock(stream);
         if (mTarget != NULL) {
             return E_IO_EXCEPTION;
         }
@@ -62,7 +64,7 @@ ECode PipedOutputStream::Flush()
         return NOERROR;
     }
 
-    synchronized (stream) {
+    {    AutoLock syncLock(stream);
         FAIL_RETURN(ISynchronize::Probe(stream)->NotifyAll());
     }
     return NOERROR;

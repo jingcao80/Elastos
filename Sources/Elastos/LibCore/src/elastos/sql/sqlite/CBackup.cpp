@@ -3,6 +3,9 @@
 #include "AutoLock.h"
 #include "sqlitejni.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Elastos {
 namespace Sql {
 namespace SQLite {
@@ -24,7 +27,7 @@ CBackup::~CBackup()
 ECode CBackup::Finish()
 {
     ECode ec = NOERROR;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ec = NativeFinalize();
     }
     return ec;
@@ -33,7 +36,7 @@ ECode CBackup::Finish()
 ECode CBackup::Finalize()
 {
     ECode ec = NOERROR;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ec = NativeFinalize();
     }
     return ec;
@@ -46,7 +49,7 @@ ECode CBackup::Step(
     VALIDATE_NOT_NULL(isCompleted)
 
     ECode ec = NOERROR;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ec = NativeStep(n, isCompleted);
     }
 
@@ -56,7 +59,7 @@ ECode CBackup::Step(
 ECode CBackup::Backup()
 {
     ECode ec = NOERROR;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean res = FALSE;
         ec = NativeStep(-1, &res);
     }
@@ -69,7 +72,7 @@ ECode CBackup::Remaining(
 {
     VALIDATE_NOT_NULL(number)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *number = NativeRemaining();
     }
 
@@ -81,7 +84,7 @@ ECode CBackup::Pagecount(
 {
     VALIDATE_NOT_NULL(number)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *number = NativePagecount();
     }
 

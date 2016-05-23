@@ -1,6 +1,8 @@
 
 #include "CountryDetector.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IPendingIntentHelper;
 using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::Location::IGeocoderHelper;
@@ -141,7 +143,7 @@ AutoPtr<ICountryDetector> CountryDetector::GetInstanceForTest(
 CARAPI_(AutoPtr<ICountryDetector>) CountryDetector::GetInstance(
     /* [in] */ IContext* context)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (sInstance == NULL) {
             AutoPtr<IContext> appContext;
             context->GetApplicationContext((IContext**)&appContext);

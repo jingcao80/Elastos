@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.cdma;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
 using Elastos::Droid::Internal::Telephony::IMccTable;
@@ -132,7 +134,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         case EVENT_ALL_DATA_DISCONNECTED:
             Int64 dds = SubscriptionManager->GetDefaultDataSubId();
             ProxyController->GetInstance()->UnregisterForAllDataDisconnected(dds, this);
-            Synchronized(this) {
+            {    AutoLock syncLock(this);
                 If (mPendingRadioPowerOffAfterDataOff) {
                     If (DBG) Log("EVENT_ALL_DATA_DISCONNECTED, turn radio off now.");
                     HangupAndPowerOff();
@@ -604,7 +606,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         }
 
         ArrayList<CellInfo> arrayCi = new ArrayList<CellInfo>();
-        Synchronized(mCellInfo) {
+        {    AutoLock syncLock(mCellInfo);
             CellInfoLte cil = (CellInfoLte)mCellInfo;
 
             Boolean cidChanged = ! mNewCellIdentityLte->Equals(mLasteCellIdentityLte);
@@ -635,7 +637,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         }
         Boolean ssChanged = super->OnSignalStrengthResult(ar, isGsm);
 
-        Synchronized (mCellInfo) {
+        {    AutoLock syncLock(mCellInfo);
             If (mSS->GetRilDataRadioTechnology() == ServiceState.RIL_RADIO_TECHNOLOGY_LTE) {
                 mCellInfoLte->SetTimeStamp(SystemClock->ElapsedRealtime() * 1000);
                 mCellInfoLte->SetTimeStampType(CellInfo.TIMESTAMP_TYPE_JAVA_RIL);
@@ -697,7 +699,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         } else {
             ArrayList<CellInfo> arrayList = new ArrayList<CellInfo>();
             CellInfo ci;
-            Synchronized(mCellInfo) {
+            {    AutoLock syncLock(mCellInfo);
                 arrayList->Add(mCellInfoLte);
             }
             If (DBG) Log ("getAllCellInfo: arrayList=" + arrayList);
@@ -722,7 +724,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
      */
     //@Override
     CARAPI PowerOffRadioSafely(DcTrackerBase dcTracker) {
-        Synchronized (this) {
+        {    AutoLock syncLock(this);
             If (!mPendingRadioPowerOffAfterDataOff) {
                 Int64 dds = SubscriptionManager->GetDefaultDataSubId();
                 // To minimize race conditions we call cleanUpAllConnections on

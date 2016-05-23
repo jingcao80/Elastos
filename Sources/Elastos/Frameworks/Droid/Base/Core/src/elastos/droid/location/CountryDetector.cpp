@@ -4,6 +4,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Logger;
@@ -86,7 +88,7 @@ ECode CountryDetector::AddCountryListener(
     /* [in] */ ICountryListener* listener,
     /* [in] */ ILooper* looper)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean isContained;
         mListeners->ContainsKey(listener, &isContained);
         if (!isContained) {
@@ -106,7 +108,7 @@ ECode CountryDetector::AddCountryListener(
 ECode CountryDetector::RemoveCountryListener(
     /* [in] */ ICountryListener* listener)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mListeners->Get(listener, (IInterface**)&obj);
         AutoPtr<IICountryListener> transport = IICountryListener::Probe(obj);

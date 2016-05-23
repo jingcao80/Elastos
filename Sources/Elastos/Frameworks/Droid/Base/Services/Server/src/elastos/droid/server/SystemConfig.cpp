@@ -7,6 +7,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Pm::CFeatureInfo;
 using Elastos::Droid::Content::Pm::CSignature;
 using Elastos::Droid::Os::Process;
@@ -38,7 +40,7 @@ AutoPtr<SystemConfig> SystemConfig::sInstance;
 
 AutoPtr<SystemConfig> SystemConfig::GetInstance()
 {
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         if (sInstance == NULL) {
             sInstance = new SystemConfig();
         }

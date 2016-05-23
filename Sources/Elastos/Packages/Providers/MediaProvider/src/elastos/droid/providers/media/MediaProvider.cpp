@@ -34,6 +34,8 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Object.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ISearchManager;
 using Elastos::Droid::Content::CContentUris;
 using Elastos::Droid::Content::CContentValues;
@@ -685,7 +687,7 @@ ECode MediaProvider::MyBroadcastReceiver::OnReceive(
             // entries for that storage from the files table.
             AutoPtr<IDatabaseHelper> database;
 
-            synchronized(mDatabases) {
+            {    AutoLock syncLock(mDatabases);
                 // This synchronized block is limited to avoid a potential deadlock
                 // with bulkInsert() method.
                 AutoPtr<IInterface> obj;
@@ -813,7 +815,7 @@ ECode MediaProvider::MyMtpServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
     /* [in] */ IBinder* service)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj = TO_IINTERFACE(service);
         mMtpService = IIMtpService::Probe(obj);
         return NOERROR;
@@ -823,7 +825,7 @@ ECode MediaProvider::MyMtpServiceConnection::OnServiceConnected(
 ECode MediaProvider::MyMtpServiceConnection::OnServiceDisconnected(
     /* [in] */ IComponentName* name)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
       mMtpService = NULL;
     }
     return NOERROR;
@@ -850,7 +852,7 @@ ECode MediaProvider::MyHandler::HandleMessage(
     msg->GetWhat(&what);
 
    if (what == IMAGE_THUMB) {
-       synchronized(mMediaThumbQueue) {
+       {    AutoLock syncLock(mMediaThumbQueue);
           AutoPtr<IInterface> obj;
           mMediaThumbQueue->Poll((IInterface**)&obj);
           mCurrentThumbRequest = IMediaThumbRequest::Probe(obj);
@@ -868,7 +870,7 @@ ECode MediaProvider::MyHandler::HandleMessage(
             if (flag && length > 0) {
                 mCurrentThumbRequest->Execute();
                 // Check if more requests for the same image are queued.
-                synchronized(mMediaThumbQueue) {
+                {    AutoLock syncLock(mMediaThumbQueue);
                     AutoPtr<ArrayOf<IInterface*> > mediaThumbs;
                     mMediaThumbQueue->ToArray((ArrayOf<IInterface*>**)&mediaThumbs);
                     Int32 length = mediaThumbs->GetLength();
@@ -889,7 +891,7 @@ ECode MediaProvider::MyHandler::HandleMessage(
                }
            } else {
               // original file hasn't been stored yet
-              synchronized(mMediaThumbQueue) {
+              {    AutoLock syncLock(mMediaThumbQueue);
                   Slogger::W(TAG, "original file hasn't been stored yet: %s", (((MediaThumbRequest*)mCurrentThumbRequest.Get())->mPath).string());
               }
             }
@@ -911,7 +913,7 @@ ECode MediaProvider::MyHandler::HandleMessage(
                 */
                // Log.w(TAG, err);
            // } finally {
-              synchronized(mCurrentThumbRequest) {
+              {    AutoLock syncLock(mCurrentThumbRequest);
                   ((MediaThumbRequest*)mCurrentThumbRequest.Get())->mState = DONE;
                   assert(0 && "TODO");
                   // mCurrentThumbRequest->NotifyAll();
@@ -921,7 +923,7 @@ ECode MediaProvider::MyHandler::HandleMessage(
     } else if (what == MediaProvider::ALBUM_THUMB) {
         AutoPtr<IThumbData> d;
         AutoPtr<IInterface> obj;
-        synchronized(mThumbRequestStack) {
+        {    AutoLock syncLock(mThumbRequestStack);
             mThumbRequestStack->Peek((IInterface**)&obj);
             d = IThumbData::Probe(obj);
         }
@@ -929,7 +931,7 @@ ECode MediaProvider::MyHandler::HandleMessage(
         AutoPtr<IIoUtils> ioUtils;
         CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
         ioUtils->CloseQuietly(ICloseable::Probe(mHost->MakeThumbInternal((ThumbData*)d.Get()).Get()));
-        synchronized(mPendingThumbs) {
+        {    AutoLock syncLock(mPendingThumbs);
             mPendingThumbs->Remove(StringUtils::ParseCharSequence(((ThumbData*)d.Get())->mPath).Get());
         }
       }
@@ -2796,10 +2798,10 @@ Boolean MediaProvider::QueryThumbnail(
            // return false;
        // }
 
-        synchronized(mMediaThumbQueue) {
+        {    AutoLock syncLock(mMediaThumbQueue);
             if (mCurrentThumbRequest != NULL &&
                 MatchThumbRequest((MediaThumbRequest*)(mCurrentThumbRequest.Get()), pid, id, gid, isVideo)) {
-                synchronized(mCurrentThumbRequest) {
+                {    AutoLock syncLock(mCurrentThumbRequest);
                     ((MediaThumbRequest*)mCurrentThumbRequest.Get())->mState = CANCEL;
                    assert(0 && "TODO");
                    // mCurrentThumbRequest->NotifyAll();
@@ -2999,7 +3001,7 @@ ECode MediaProvider::EnsureFile(
 void MediaProvider::SendObjectAdded(
     /* [in] */ Int64 objectHandle)
 {
-    synchronized(mMtpServiceConnection) {
+    {    AutoLock syncLock(mMtpServiceConnection);
         if (mMtpService != NULL) {
            // try {
             mMtpService->SendObjectAdded((Int32)objectHandle);
@@ -3014,7 +3016,7 @@ void MediaProvider::SendObjectAdded(
 void MediaProvider::SendObjectRemoved(
     /* [in] */ Int64 objectHandle)
 {
-    synchronized(mMtpServiceConnection) {
+    {    AutoLock syncLock(mMtpServiceConnection);
         if (mMtpService != NULL) {
            // try {
                 ECode ec = mMtpService->SendObjectRemoved((Int32)objectHandle);
@@ -3440,7 +3442,7 @@ ECode MediaProvider::InsertFile(
             HashMap<String, Int64> artistCache = helper->mArtistCache;
             String path;
             values->GetAsString(IMediaStoreMediaColumns::DATA, &path);
-            // synchronized(artistCache) {
+            // {    AutoLock syncLock(artistCache);
                 Int64 temp = artistCache[s];
                 AutoPtr<IInteger64> itmp = CoreUtils::Convert(temp);
                 if (itmp == NULL) {
@@ -3464,7 +3466,7 @@ ECode MediaProvider::InsertFile(
            values->Remove(String("album"));
            Int64 albumRowId;
            HashMap<String, Int64> albumCache = helper->mAlbumCache;
-           // synchronized(albumCache) {
+           // {    AutoLock syncLock(albumCache);
                 Int32 albumhash = 0;
                 if (!albumartist.IsNull()) {
                    albumhash = albumartist.GetHashCode();
@@ -4188,7 +4190,7 @@ ECode MediaProvider::InsertInternal(
         }
 
         case MTP_CONNECTED:
-            synchronized(mMtpServiceConnection) {
+            {    AutoLock syncLock(mMtpServiceConnection);
                if (mMtpService == NULL) {
                    AutoPtr<IContext> context;
                    GetContext((IContext**)&context);
@@ -4593,7 +4595,7 @@ ECode MediaProvider::Update(
     }
 
     Boolean flag = FALSE;
-    // synchronized(sGetTableAndWhereParam) {
+    // {    AutoLock syncLock(sGetTableAndWhereParam);
        AutoPtr<IIoUtils> ioUtils;
        CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
        GetTableAndWhere(uri, match, userWhere, sGetTableAndWhereParam.Get());//
@@ -4699,7 +4701,7 @@ ECode MediaProvider::Update(
                    if (!artist.IsNull()) {
                        Int64 artistRowId;
                        HashMap<String, Int64> artistCache = ((DatabaseHelper*)helper.Get())->mArtistCache;
-                       // synchronized(artistCache) {
+                       // {    AutoLock syncLock(artistCache);
                            Int64 temp = artistCache[artist];
                            AutoPtr<IInteger64> it = CoreUtils::Convert(temp);
                            if (it == NULL) {
@@ -4761,7 +4763,7 @@ ECode MediaProvider::Update(
                        String s = so;
                        Int64 albumRowId;
                        HashMap<String, Int64> albumCache = ((DatabaseHelper*)helper.Get())->mAlbumCache;
-                       // synchronized(albumCache) {
+                       // {    AutoLock syncLock(albumCache);
                            String cacheName = s + albumHash;
                            Int64 temp = albumCache[cacheName];
                            AutoPtr<IInteger64> ig = CoreUtils::Convert(temp);
@@ -5407,7 +5409,7 @@ void MediaProvider::MakeThumbAsync(
     /* [in] */ const String& path,
     /* [in] */ Int64 album_id)
 {
-    synchronized(mPendingThumbs) {
+    {    AutoLock syncLock(mPendingThumbs);
       Boolean flag = FALSE;
       mPendingThumbs->Contains(StringUtils::ParseCharSequence(path).Get(), &flag);
 
@@ -5436,7 +5438,7 @@ void MediaProvider::MakeThumbAsync(
     // The idea behind this is that the most recently requested thumbnails
     // are most likely the ones still in the user's view, whereas those
     // requested earlier may have already scrolled off.
-    // synchronized(mThumbRequestStack) {
+    // {    AutoLock syncLock(mThumbRequestStack);
        mThumbRequestStack->Push((IThumbData*)(d.Get()));
     // }
 
@@ -5500,7 +5502,7 @@ Boolean MediaProvider::WaitForThumbnailReady(
            AutoPtr<MediaThumbRequest> req = RequestMediaThumbnail(path, origUri,
                    MediaThumbRequest::PRIORITY_HIGH, magic);
            if (req != NULL) {
-               synchronized(req) {
+               {    AutoLock syncLock(req);
                    // try {
                        while (req->mState == WAIT) {
                            assert(0 && "TODO");
@@ -6511,7 +6513,7 @@ AutoPtr<MediaThumbRequest> MediaProvider::RequestMediaThumbnail(
     /* [in] */ Int32 priority,
     /* [in] */ Int64 magic)
 {
-    synchronized(mMediaThumbQueue) {
+    {    AutoLock syncLock(mMediaThumbQueue);
        AutoPtr<MediaThumbRequest> req;
        // try {
            AutoPtr<IContext> context;
@@ -6579,7 +6581,7 @@ ECode MediaProvider::Delete(
        DetachVolume(uri);
        count = 1;
     } else if (match == MTP_CONNECTED) {
-       synchronized(mMtpServiceConnection) {
+       {    AutoLock syncLock(mMtpServiceConnection);
            if (mMtpService != NULL) {
                // MTP has disconnected, so release our connection to MtpService//
 
@@ -6607,7 +6609,7 @@ ECode MediaProvider::Delete(
        AutoPtr<ISQLiteDatabase> db;
        ((DatabaseHelper*)database.Get())->GetWritableDatabase((ISQLiteDatabase**)&db);
 
-       synchronized(sGetTableAndWhereParam) {
+       {    AutoLock syncLock(sGetTableAndWhereParam);
            AutoPtr<ICursor> c;
            GetTableAndWhere(uri, match, userWhere, sGetTableAndWhereParam.Get());
            if (sGetTableAndWhereParam->mTable.Equals(String("files"))) {
@@ -6830,7 +6832,7 @@ AutoPtr<ArrayOf<Byte> > MediaProvider::GetCompressedAlbumArt(
                AutoPtr<ICharSequence> key;
                AutoPtr<ICharSequence> value;
                AutoPtr<IInterface> obj;
-               synchronized(sFolderArtMap) {
+               {    AutoLock syncLock(sFolderArtMap);
                     key = StringUtils::ParseCharSequence(artPath);
                     sFolderArtMap->ContainsKey(key.Get(), &flag);
                     if (flag) {
@@ -7334,7 +7336,7 @@ AutoPtr<IUri> MediaProvider::AttachVolume(
 
     AutoPtr<IUriHelper> uh;
     CUriHelper::AcquireSingleton((IUriHelper**)&uh);
-    synchronized(mDatabases) {
+    {    AutoLock syncLock(mDatabases);
        Boolean flag = FALSE;
        AutoPtr<IUri> uri;
        AutoPtr<IInterface> obj;
@@ -7523,7 +7525,7 @@ ECode MediaProvider::GetDatabaseForUri(
     /* [in] */ IUri* uri,
     /* [out] */ IDatabaseHelper** result)
 {
-    synchronized(mDatabases) {
+    {    AutoLock syncLock(mDatabases);
         AutoPtr<IList> segments;
         uri->GetPathSegments((IList**)&segments);
         Int32 size;
@@ -7597,7 +7599,7 @@ void MediaProvider::DetachVolume(
        //         "There is no volume named " + volume);
     }
 
-    synchronized(mDatabases) {
+    {    AutoLock syncLock(mDatabases);
        AutoPtr<IInterface> obj;
        mDatabases->Get(StringUtils::ParseCharSequence(volume).Get(), (IInterface**)&obj);
        AutoPtr<IDatabaseHelper> database = IDatabaseHelper::Probe(obj);

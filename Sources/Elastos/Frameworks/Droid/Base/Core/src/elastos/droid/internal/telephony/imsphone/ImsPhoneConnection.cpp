@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.imsphone;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IAsyncResult;
@@ -569,7 +571,7 @@ public class ImsPhoneConnection extends Connection {
 
     void
     ReleaseWakeLock() {
-        Synchronized(mPartialWakeLock) {
+        {    AutoLock syncLock(mPartialWakeLock);
             If (mPartialWakeLock->IsHeld()) {
                 Rlog->D(LOG_TAG, "releaseWakeLock");
                 mPartialWakeLock->Release();

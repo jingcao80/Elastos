@@ -5,6 +5,8 @@
 #include "Thread.h"
 #include "CPathClassLoader.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::Thread;
 using Elastos::Core::CPathClassLoader;
 using Elastos::Core::CSystem;
@@ -136,7 +138,7 @@ ECode SchemaFactoryFinder::_NewFactory(
     // // try to read from $java.home/lib/jaxp.properties
     // try {
     //     if(firstTime){
-    //         synchronized(cacheProps){
+    //         {    AutoLock syncLock(cacheProps);
     //             if(firstTime){
     //                 File f=new File( configFile );
     //                 firstTime = false;

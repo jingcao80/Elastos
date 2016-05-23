@@ -8,6 +8,8 @@
 #include "Collections.h"
 #include "CArrayList.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringUtils;
 using Elastos::IO::IFlushable;
@@ -82,7 +84,7 @@ ECode CDriverManager::DeregisterDriver(
         return E_SECURITY_EXCEPTION;
     }
 
-    synchronized(mTheDriversLock) {
+    {    AutoLock syncLock(mTheDriversLock);
         AutoPtr<IDriver> d = driver;
         mTheDrivers.Remove(d);
     }
@@ -116,7 +118,7 @@ ECode CDriverManager::GetConnection(
         return E_SQL_EXCEPTION;
     }
 
-    synchronized(mTheDriversLock) {
+    {    AutoLock syncLock(mTheDriversLock);
         /*
          * Loop over the drivers in the DriverSet checking to see if one can
          * open a connection to the supplied URL - return the first
@@ -168,7 +170,7 @@ ECode CDriverManager::GetDriver(
 
     AutoPtr<IClassLoader> callerClassLoader  ;//= VMStack.getCallingClassLoader();
     assert(0 && "TODO");
-    synchronized(mTheDriversLock) {
+    {    AutoLock syncLock(mTheDriversLock);
         /*
          * Loop over the drivers in the DriverSet checking to see if one
          * does understand the supplied URL - return the first driver which
@@ -204,7 +206,7 @@ ECode CDriverManager::GetDrivers(
      */
     AutoPtr<IClassLoader> callerClassLoader ; //= VMStack.getCallingClassLoader();
     assert(0 && "TODO");
-    synchronized(mTheDriversLock) {
+    {    AutoLock syncLock(mTheDriversLock);
         AutoPtr<ICollection> result;
         CArrayList::New((ICollection**)&result);
         List<AutoPtr<IDriver> >::Iterator iter = mTheDrivers.Begin();
@@ -268,7 +270,7 @@ ECode CDriverManager::RegisterDriver(
     if (driver == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
-    synchronized(mTheDriversLock) {
+    {    AutoLock syncLock(mTheDriversLock);
         mTheDrivers.PushBack(driver);
     }
     return NOERROR;

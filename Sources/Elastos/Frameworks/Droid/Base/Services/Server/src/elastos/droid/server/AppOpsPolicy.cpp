@@ -7,6 +7,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include "elastos/droid/internal/utility/XmlUtils.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::App::IAppOpsManagerHelper;
 using Elastos::Droid::App::CAppOpsManagerHelper;
@@ -126,7 +128,7 @@ Int32 AppOpsPolicy::StringToControl(
 ECode AppOpsPolicy::ReadPolicy()
 {
     AutoPtr<IFileInputStream> stream;
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         ECode ec = CFileInputStream::New(mFile, (IFileInputStream**)&stream);
         if (FAILED(ec)) {
             Slogger::I(TAG, "App ops policy file (%s) not found; Skipping.", TO_CSTR(mFile));

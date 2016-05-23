@@ -2,6 +2,9 @@
 #include "CStack.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Elastos {
 namespace Utility {
 
@@ -315,7 +318,7 @@ ECode CStack::Peek(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (mElementCount == 0 || mElementData->GetLength() < mElementCount) {
             return E_EMPTY_STACK_EXCEPTION;
         }
@@ -330,7 +333,7 @@ ECode CStack::Pop(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (mElementCount == 0) {
             return E_EMPTY_STACK_EXCEPTION;
         }
@@ -355,7 +358,7 @@ ECode CStack::Search(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         AutoPtr< ArrayOf<IInterface*> > dumpArray = mElementData;
         Int32 size = mElementCount;
         if (o != NULL) {

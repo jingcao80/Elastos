@@ -11,6 +11,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::AlertDialog;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
@@ -295,7 +297,7 @@ ECode VolumePanel::SafetyWarning::OnDismiss(
 
 ECode VolumePanel::SafetyWarning::CleanUp()
 {
-    synchronized(VolumePanel::sSafetyWarningLock) {
+    {    AutoLock syncLock(VolumePanel::sSafetyWarningLock);
         sSafetyWarning = NULL;
     }
     mVolumePanel->ForceTimeout(0);
@@ -1301,7 +1303,7 @@ ECode VolumePanel::PostVolumeChanged(
     Boolean result;
     HasMessages(MSG_VOLUME_CHANGED, &result);
     if (result) return E_NULL_POINTER_EXCEPTION;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mStreamControls == NULL) {
             CreateSliders();
         }
@@ -1320,7 +1322,7 @@ ECode VolumePanel::PostRemoteVolumeChanged(
     Boolean result;
     HasMessages(MSG_REMOTE_VOLUME_CHANGED, &result);
     if (result) return E_NULL_POINTER_EXCEPTION;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mStreamControls == NULL) {
             CreateSliders();
         }
@@ -1368,7 +1370,7 @@ ECode VolumePanel::PostMuteChanged(
     Boolean result;
     HasMessages(MSG_VOLUME_CHANGED, &result);
     if (result) return E_NULL_POINTER_EXCEPTION;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mStreamControls == NULL) {
             CreateSliders();
         }
@@ -1422,7 +1424,7 @@ ECode VolumePanel::OnVolumeChanged(
     if (LOGD) Logger::D(mTag, "onVolumeChanged(streamType: %d, flags: %d)", streamType, flags);
 
     if ((flags & IAudioManager::FLAG_SHOW_UI) != 0) {
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             if (mActiveStreamType != streamType) {
                 ReorderSliders(streamType);
             }
@@ -1668,7 +1670,7 @@ ECode VolumePanel::OnPlaySound(
         OnStopSounds();
     }
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IToneGenerator> toneGen = GetOrCreateToneGenerator(streamType);
         if (toneGen != NULL) {
             Boolean start;
@@ -1684,7 +1686,7 @@ ECode VolumePanel::OnPlaySound(
 
 ECode VolumePanel::OnStopSounds()
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IAudioSystem> as;
         CAudioSystem::AcquireSingleton((IAudioSystem**)&as);
         Int32 numStreamTypes;
@@ -1719,7 +1721,7 @@ ECode VolumePanel::OnRemoteVolumeChanged(
     if (LOGD) Logger::D(mTag, "onRemoteVolumeChanged(controller:%s, flags: %d)", TO_CSTR(controller),flags);
 
     if (((flags & IAudioManager::FLAG_SHOW_UI) != 0) || IsShowing()) {
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             if (mActiveStreamType != STREAM_REMOTE_MUSIC) {
                 ReorderSliders(STREAM_REMOTE_MUSIC);
             }
@@ -1770,7 +1772,7 @@ ECode VolumePanel::OnSliderVisibilityChanged(
     /* [in] */ Int32 streamType,
     /* [in] */ Int32 visible)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (LOGD) Logger::D(mTag, "onSliderVisibilityChanged(stream=%d, visi=%d)",streamType,visible);
         Boolean isVisible = (visible == 1);
         for (Int32 i = STREAMS->GetLength() - 1 ; i >= 0 ; i--) {
@@ -1792,7 +1794,7 @@ ECode VolumePanel::OnDisplaySafeVolumeWarning(
 {
     if ((flags & (IAudioManager::FLAG_SHOW_UI
         | IAudioManager::FLAG_SHOW_UI_WARNINGS)) != 0 || IsShowing()) {
-        synchronized(sSafetyWarningLock) {
+        {    AutoLock syncLock(sSafetyWarningLock);
             if (sSafetyWarning != NULL) {
                 return E_NULL_POINTER_EXCEPTION;
             }
@@ -1827,7 +1829,7 @@ AutoPtr<IToneGenerator> VolumePanel::GetOrCreateToneGenerator(
             return NULL;
         }
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if ((*mToneGenerators)[streamType] == NULL) {
             ECode ec = CToneGenerator::New(streamType, MAX_VOLUME, (IToneGenerator**)(&(*mToneGenerators)[streamType]));
             if (FAILED(ec)) {
@@ -1860,7 +1862,7 @@ void VolumePanel::SetMusicIcon(
 
 ECode VolumePanel::OnFreeResources()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         for (Int32 i = mToneGenerators->GetLength() - 1; i >= 0; i--) {
             if ((*mToneGenerators)[i] != NULL) {
                 // (*mToneGenerators)[i].release();
@@ -1922,7 +1924,7 @@ ECode VolumePanel::HandleMessage(
                     mCallback->OnVisible(FALSE);
                 }
             }
-            synchronized(sSafetyWarningLock) {
+            {    AutoLock syncLock(sSafetyWarningLock);
                 if (sSafetyWarning != NULL) {
                     if (LOGD) Logger::D(mTag, "SafetyWarning timeout");
                     IDialogInterface::Probe(sSafetyWarning)->Dismiss();

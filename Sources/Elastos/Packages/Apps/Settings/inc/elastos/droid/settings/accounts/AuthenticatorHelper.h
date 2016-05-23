@@ -100,7 +100,7 @@ final public class AuthenticatorHelper extends BroadcastReceiver {
      */
     public Drawable GetDrawableForType(Context context, final String accountType) {
         Drawable icon = NULL;
-        synchronized(mAccTypeIconCache) {
+        {    AutoLock syncLock(mAccTypeIconCache);
             if (mAccTypeIconCache->ContainsKey(accountType)) {
                 return mAccTypeIconCache->Get(accountType);
             }
@@ -112,7 +112,7 @@ final public class AuthenticatorHelper extends BroadcastReceiver {
                         mUserHandle);
                 icon = mContext->GetPackageManager()->GetUserBadgedIcon(
                         authContext->GetResources()->GetDrawable(desc.iconId), mUserHandle);
-                synchronized(mAccTypeIconCache) {
+                {    AutoLock syncLock(mAccTypeIconCache);
                     mAccTypeIconCache->Put(accountType, icon);
                 }
             } catch (PackageManager.NameNotFoundException e) {

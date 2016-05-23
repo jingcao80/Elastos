@@ -4,6 +4,8 @@
 #include "elastos/droid/os/SystemClock.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::ConditionVariable;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Core::AutoLock;
@@ -27,7 +29,7 @@ ECode ResettableTimeout::T::Run()
     mHost->mLock->Open();
     while (TRUE) {
         Int64 diff = 0;
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             diff = mHost->mOffAt - SystemClock::GetUptimeMillis();
             if (diff <= 0) {
                 mHost->mOffCalled = TRUE;
@@ -61,7 +63,7 @@ ResettableTimeout::ResettableTimeout()
 ECode ResettableTimeout::Go(
     /* [in] */ Int64 milliseconds)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mOffAt = SystemClock::GetUptimeMillis() + milliseconds;
 
         Boolean alreadyOn;
@@ -91,7 +93,7 @@ ECode ResettableTimeout::Go(
 
 ECode ResettableTimeout::Cancel()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mOffAt = 0;
         if (mThread != NULL) {
             mThread->Interrupt();

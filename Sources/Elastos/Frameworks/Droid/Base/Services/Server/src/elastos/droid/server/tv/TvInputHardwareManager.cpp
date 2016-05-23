@@ -15,6 +15,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CObject;
 using Elastos::Core::EIID_IRunnable;
@@ -211,7 +213,7 @@ ECode TvInputHardwareManager::Connection::GetOnFirstFrameCapturedLocked(
 
 ECode TvInputHardwareManager::Connection::ProxyDied()
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         return ResetLocked(NULL, NULL, NULL, NULL, NULL);
     }
     return NOERROR;
@@ -230,7 +232,7 @@ TvInputHardwareManager::TvInputHardwareImpl::InnerSub_AudioManagerOnAudioPortUpd
 ECode TvInputHardwareManager::TvInputHardwareImpl::InnerSub_AudioManagerOnAudioPortUpdateListener::OnAudioPortListUpdate(
     /* [in] */ ArrayOf<IAudioPort*>* portList)
 {
-    synchronized(mHost->mImplLock) {
+    {    AutoLock syncLock(mHost->mImplLock);
         return mHost->UpdateAudioConfigLocked();
     }
     return NOERROR;
@@ -245,7 +247,7 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::InnerSub_AudioManagerOnAudioP
 
 ECode TvInputHardwareManager::TvInputHardwareImpl::InnerSub_AudioManagerOnAudioPortUpdateListener::OnServiceDied()
 {
-    synchronized(mHost->mImplLock) {
+    {    AutoLock syncLock(mHost->mImplLock);
         mHost->mAudioSource = NULL;
         mHost->mAudioSink = NULL;
         mHost->mAudioPatch = NULL;
@@ -342,7 +344,7 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::FindAudioDevicePort(
 
 ECode TvInputHardwareManager::TvInputHardwareImpl::ReleaseRes()
 {
-    synchronized(mImplLock) {
+    {    AutoLock syncLock(mImplLock);
         mHost->mAudioManager->UnregisterAudioPortUpdateListener(mAudioListener);
         if (mAudioPatch != NULL) {
             Int32 iNoUse;
@@ -362,7 +364,7 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::SetSurface(
     VALIDATE_NOT_NULL(rev)
     *rev = FALSE;
 
-    synchronized(mImplLock) {
+    {    AutoLock syncLock(mImplLock);
         if (mReleased) {
             Logger::E(TAG, "Device already released.");
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -495,7 +497,7 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::UpdateAudioConfigLocked()
 ECode TvInputHardwareManager::TvInputHardwareImpl::SetStreamVolume(
     /* [in] */ Float volume)
 {
-    synchronized(mImplLock) {
+    {    AutoLock syncLock(mImplLock);
         if (mReleased) {
             Logger::E(TAG, "Device already released.");
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -513,7 +515,7 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::DispatchKeyEventToHdmi(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    synchronized(mImplLock) {
+    {    AutoLock syncLock(mImplLock);
         if (mReleased) {
             Logger::E(TAG, "Device already released.");
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -536,7 +538,7 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::StartCapture(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    synchronized(mImplLock) {
+    {    AutoLock syncLock(mImplLock);
         if (mReleased) {
             *result = FALSE;
             return NOERROR;
@@ -564,7 +566,7 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::StopCapture(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    synchronized(mImplLock) {
+    {    AutoLock syncLock(mImplLock);
         if (mReleased) {
             *result = FALSE;
             return NOERROR;
@@ -633,7 +635,7 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::UpdateAudioSinkLocked(
 
 ECode TvInputHardwareManager::TvInputHardwareImpl::HandleAudioSinkUpdated()
 {
-    synchronized(mImplLock) {
+    {    AutoLock syncLock(mImplLock);
         UpdateAudioConfigLocked();
     }
     return NOERROR;
@@ -646,7 +648,7 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::OverrideAudioSink(
     /* [in] */ Int32 channelMask,
     /* [in] */ Int32 format)
 {
-    synchronized(mImplLock) {
+    {    AutoLock syncLock(mImplLock);
         mOverrideAudioType = audioType;
         mOverrideAudioAddress = audioAddress;
         mDesiredSamplingRate = samplingRate;
@@ -746,7 +748,7 @@ TvInputHardwareManager::HdmiHotplugEventListener::HdmiHotplugEventListener(
 ECode TvInputHardwareManager::HdmiHotplugEventListener::OnReceived(
     /* [in] */ IHdmiHotplugEvent* event)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         mHost->mHdmiStateMap->Put(Ptr(event)->Func(event->GetPort), Ptr(event)->Func(event->IsConnected));
         AutoPtr<ITvInputHardwareInfo> hardwareInfo;
         mHost->FindHardwareInfoForHdmiPortLocked(Ptr(event)->Func(event->GetPort), (ITvInputHardwareInfo**)&hardwareInfo);
@@ -789,7 +791,7 @@ ECode TvInputHardwareManager::HdmiDeviceEventListener::OnStatusChanged(
     /* [in] */ IHdmiDeviceInfo* deviceInfo,
     /* [in] */ Int32 status)
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         Int32 messageType = 0;
         AutoPtr<IObject> obj;
         switch (status) {
@@ -998,7 +1000,7 @@ ECode TvInputHardwareManager::OnDeviceAvailable(
     /* [in] */ ITvInputHardwareInfo* info,
     /* [in] */ ArrayOf<ITvStreamConfig*>* configs)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<Connection> connection = new Connection(this);
         connection->constructor(info);
         connection->UpdateConfigsLocked(configs);
@@ -1031,7 +1033,7 @@ ECode TvInputHardwareManager::BuildHardwareListLocked()
 ECode TvInputHardwareManager::OnDeviceUnavailable(
     /* [in] */ Int32 deviceId)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mConnections->Get(deviceId, (IInterface**)&obj);
         AutoPtr<Connection> connection = (Connection*)IProxyDeathRecipient::Probe(obj);
@@ -1069,7 +1071,7 @@ ECode TvInputHardwareManager::OnStreamConfigurationChanged(
     /* [in] */ Int32 deviceId,
     /* [in] */ ArrayOf<ITvStreamConfig*>* configs)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mConnections->Get(deviceId, (IInterface**)&obj);
         AutoPtr<Connection> connection = (Connection*) IProxyDeathRecipient::Probe(obj);
@@ -1097,7 +1099,7 @@ ECode TvInputHardwareManager::OnFirstFrameCaptured(
     /* [in] */ Int32 deviceId,
     /* [in] */ Int32 streamId)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mConnections->Get(deviceId, (IInterface**)&obj);
         AutoPtr<Connection> connection = (Connection*)IProxyDeathRecipient::Probe(obj);
@@ -1118,7 +1120,7 @@ ECode TvInputHardwareManager::OnFirstFrameCaptured(
 ECode TvInputHardwareManager::GetHardwareList(
     /* [out] */ IList** result)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<ICollections> helper;
         CCollections::AcquireSingleton((ICollections**)&helper);
         return helper->UnmodifiableList(mHardwareList, result);
@@ -1129,7 +1131,7 @@ ECode TvInputHardwareManager::GetHardwareList(
 ECode TvInputHardwareManager::GetHdmiDeviceList(
     /* [out] */ IList** result)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<ICollections> helper;
         CCollections::AcquireSingleton((ICollections**)&helper);
         return helper->UnmodifiableList(mHdmiDeviceList, result);
@@ -1176,7 +1178,7 @@ ECode TvInputHardwareManager::AddHardwareTvInput(
     /* [in] */ Int32 deviceId,
     /* [in] */ ITvInputInfo* info)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mHardwareInputIdMap->Get(deviceId, (IInterface**)&obj);
         AutoPtr<ICharSequence> oldInputId = ICharSequence::Probe(obj);
@@ -1243,7 +1245,7 @@ ECode TvInputHardwareManager::AddHdmiTvInput(
         Logger::E(TAG, "info (%s) has non-HDMI type.", TO_CSTR(info));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         String parentId;
         info->GetParentId(&parentId);
         Int32 parentIndex;
@@ -1272,7 +1274,7 @@ ECode TvInputHardwareManager::AddHdmiTvInput(
 ECode TvInputHardwareManager::RemoveTvInput(
     /* [in] */ const String& inputId)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mInputMap->Remove(StringUtils::ParseCharSequence(inputId));
         Int32 hardwareIndex;
         IndexOfEqualValue(mHardwareInputIdMap, StringUtils::ParseCharSequence(inputId), &hardwareIndex);
@@ -1302,7 +1304,7 @@ ECode TvInputHardwareManager::AcquireHardware(
     if (callback == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mConnections->Get(deviceId, (IInterface**)&obj);
         AutoPtr<Connection> connection = (Connection*)IProxyDeathRecipient::Probe(obj);
@@ -1343,7 +1345,7 @@ ECode TvInputHardwareManager::ReleaseHardware(
     /* [in] */ Int32 callingUid,
     /* [in] */ Int32 resolvedUserId)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mConnections->Get(deviceId, (IInterface**)&obj);
         AutoPtr<Connection> connection = (Connection*) IObject::Probe(obj);
@@ -1408,7 +1410,7 @@ ECode TvInputHardwareManager::GetAvailableTvStreamConfigList(
 
     AutoPtr<IList> configsList;
     CArrayList::New((IList**)&configsList);
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         Int32 deviceId;
         FindDeviceIdForInputIdLocked(inputId, &deviceId);
         if (deviceId < 0) {
@@ -1439,7 +1441,7 @@ ECode TvInputHardwareManager::CaptureFrame(
 {
     VALIDATE_NOT_NULL(rev)
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         Int32 deviceId;
         FindDeviceIdForInputIdLocked(inputId, &deviceId);
         if (deviceId < 0) {

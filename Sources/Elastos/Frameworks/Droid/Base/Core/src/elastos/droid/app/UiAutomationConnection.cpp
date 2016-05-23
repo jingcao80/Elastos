@@ -13,6 +13,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::AccessibilityService::IAccessibilityServiceInfo;
 using Elastos::Droid::AccessibilityService::CAccessibilityServiceInfo;
 using Elastos::Droid::Content::IContext;
@@ -76,7 +78,7 @@ ECode UiAutomationConnection::Connect(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfShutdownLocked())
         if (IsConnectedLocked()) {
             Logger::E(TAG, "IllegalArgumentException: Already connected.!");
@@ -91,7 +93,7 @@ ECode UiAutomationConnection::Connect(
 
 ECode UiAutomationConnection::Disconnect()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCalledByNotTrustedUidLocked())
         FAIL_RETURN(ThrowIfShutdownLocked())
         if (!IsConnectedLocked()) {
@@ -113,7 +115,7 @@ ECode UiAutomationConnection::InjectInputEvent(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCalledByNotTrustedUidLocked())
         FAIL_RETURN(ThrowIfShutdownLocked())
         FAIL_RETURN(ThrowIfNotConnectedLocked())
@@ -135,7 +137,7 @@ ECode UiAutomationConnection::SetRotation(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCalledByNotTrustedUidLocked())
         FAIL_RETURN(ThrowIfShutdownLocked())
         FAIL_RETURN(ThrowIfNotConnectedLocked())
@@ -167,7 +169,7 @@ ECode UiAutomationConnection::TakeScreenshot(
     VALIDATE_NOT_NULL(bmp)
     *bmp = NULL;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCalledByNotTrustedUidLocked())
         FAIL_RETURN(ThrowIfShutdownLocked())
         FAIL_RETURN(ThrowIfNotConnectedLocked())
@@ -190,7 +192,7 @@ ECode UiAutomationConnection::ClearWindowContentFrameStats(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCalledByNotTrustedUidLocked())
         FAIL_RETURN(ThrowIfShutdownLocked())
         FAIL_RETURN(ThrowIfNotConnectedLocked())
@@ -216,7 +218,7 @@ ECode UiAutomationConnection::GetWindowContentFrameStats(
     VALIDATE_NOT_NULL(stats)
     *stats = NULL;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCalledByNotTrustedUidLocked())
         FAIL_RETURN(ThrowIfShutdownLocked())
         FAIL_RETURN(ThrowIfNotConnectedLocked())
@@ -237,7 +239,7 @@ ECode UiAutomationConnection::GetWindowContentFrameStats(
 
 ECode UiAutomationConnection::ClearWindowAnimationFrameStats()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCalledByNotTrustedUidLocked())
         FAIL_RETURN(ThrowIfShutdownLocked())
         FAIL_RETURN(ThrowIfNotConnectedLocked())
@@ -258,7 +260,7 @@ ECode UiAutomationConnection::GetWindowAnimationFrameStats(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCalledByNotTrustedUidLocked())
         FAIL_RETURN(ThrowIfShutdownLocked())
         FAIL_RETURN(ThrowIfNotConnectedLocked())
@@ -281,7 +283,7 @@ ECode UiAutomationConnection::ExecuteShellCommand(
     /* [in] */ const String& command,
     /* [in] */ IParcelFileDescriptor* sink)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCalledByNotTrustedUidLocked())
         FAIL_RETURN(ThrowIfShutdownLocked())
         FAIL_RETURN(ThrowIfNotConnectedLocked())
@@ -327,7 +329,7 @@ _EXIT_:
 
 ECode UiAutomationConnection::Shutdown()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (IsConnectedLocked()) {
             FAIL_RETURN(ThrowIfCalledByNotTrustedUidLocked())
         }

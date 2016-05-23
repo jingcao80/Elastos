@@ -8,6 +8,9 @@
 #include "cutils/log.h"
 #endif
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Elastos {
 namespace Core {
 
@@ -1086,7 +1089,7 @@ ECode Thread::PushInterruptAction(
     /* [in] */ IRunnable* interruptAction)
 {
     assert(0 && "TODO");
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     interruptActions.add(interruptAction);
     // }
 
@@ -1101,7 +1104,7 @@ ECode Thread::PopInterruptAction(
     /* [in] */ IRunnable* interruptAction)
 {
     assert(0 && "TODO");
-    // synchronized (interruptActions) {
+    // {    AutoLock syncLock(interruptActions);
     //     Runnable removed = interruptActions.remove(interruptActions.size() - 1);
     //     if (interruptAction != removed) {
     //         throw new IllegalArgumentException(

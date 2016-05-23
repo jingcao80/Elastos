@@ -5,6 +5,8 @@
 #include "elastos/droid/os/CHandlerThread.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CHandlerThread;
 using Elastos::Droid::Os::IProcess;
@@ -123,7 +125,7 @@ Filter::Filter()
 ECode Filter::SetDelayer(
     /* [in] */ IFilterDelayer* delayer)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mDelayer = delayer;
     }
     return NOERROR;
@@ -139,7 +141,7 @@ ECode Filter::DoFilter(
     /* [in] */ ICharSequence* constraint,
     /* [in] */ IFilterListener* listener)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mThreadHandler == NULL) {
             AutoPtr<IHandlerThread> thread;
             CHandlerThread::New(THREAD_NAME, IProcess::THREAD_PRIORITY_BACKGROUND,
@@ -208,7 +210,7 @@ ECode Filter::HandleFilterMessage(
     mResultHandler->ObtainMessage(FILTER_TOKEN, args->Probe(EIID_IInterface), (IMessage**)&message);
     message->SendToTarget();
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mThreadHandler != NULL) {
             AutoPtr<IMessage> finishMessage;
             mThreadHandler->ObtainMessage(FINISH_TOKEN, (IMessage**)&finishMessage);
@@ -222,7 +224,7 @@ ECode Filter::HandleFilterMessage(
 
 ECode Filter::HandleFinishMessage()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mThreadHandler != NULL) {
             AutoPtr<ILooper> looper;
             mThreadHandler->GetLooper((ILooper**)&looper);

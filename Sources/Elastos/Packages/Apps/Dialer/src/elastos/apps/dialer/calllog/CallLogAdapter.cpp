@@ -1,5 +1,8 @@
 #include "CallLogAdapter.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Elastos{
 namespace Apps{
 namespace Dialer {
@@ -255,7 +258,7 @@ ECode CallLogAdapter::QueryThread::Run()
         // Obtain next request, if any is available.
         // Keep synchronized section small.
         AutoPtr<ICallLogAdapterContactInfoRequest> req;
-        synchronized(mHost->mRequestsLock) {
+        {    AutoLock syncLock(mHost->mRequestsLock);
             Boolean isEmpty = TRUE;
             if (mHost->mRequests->IsEmpty(&isEmpty), !isEmpty) {
                 AutoPtr<IInterface> item;
@@ -283,7 +286,7 @@ ECode CallLogAdapter::QueryThread::Run()
             // thread is no longer needed (as indicated by being
             // interrupted).
             // try {
-            synchronized(mHost->mRequestsLock) {
+            {    AutoLock syncLock(mHost->mRequestsLock);
                 mHost->mRequests->Wait(1000);
             }
             // } catch (InterruptedException ie) {
@@ -471,7 +474,7 @@ ECode CallLogAdapter::IsEmpty(
 
 void CallLogAdapter::StartRequestProcessing()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // For unit-testing.
         if (mRequestProcessingDisabled) return;
 
@@ -486,7 +489,7 @@ void CallLogAdapter::StartRequestProcessing()
 
 ECode CallLogAdapter::StopRequestProcessing()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // Remove any pending requests to start the processing thread.
         mHandler->RemoveMessages(START_THREAD);
         if (mCallerIdThread != NULL) {
@@ -529,7 +532,7 @@ void CallLogAdapter::EnqueueRequest(
 {
     AutoPtr<ContactInfoRequest> request = new ContactInfoRequest(
         number, countryIso, callLogInfo, &request);
-    synchronized(mRequestsLock) {
+    {    AutoLock syncLock(mRequestsLock);
         Boolean result;
         mRequests->Contains((ICallLogAdapterContactInfoRequest*)request, &result);
         if (!result) {

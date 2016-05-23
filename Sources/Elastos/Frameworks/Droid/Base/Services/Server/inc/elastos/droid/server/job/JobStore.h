@@ -79,7 +79,7 @@ public class JobStore {
 
     /** Used by the {@link JobSchedulerService} to instantiate the JobStore. */
     static JobStore InitAndGet(JobSchedulerService jobManagerService) {
-        synchronized(sSingletonLock) {
+        {    AutoLock syncLock(sSingletonLock);
             if (sSingleton == NULL) {
                 sSingleton = new JobStore(jobManagerService->GetContext(),
                         Environment->GetDataDirectory());
@@ -272,7 +272,7 @@ public class JobStore {
         CARAPI Run() {
             final Int64 startElapsed = SystemClock->ElapsedRealtime();
             List<JobStatus> mStoreCopy = new ArrayList<JobStatus>();
-            synchronized(JobStore.this) {
+            {    AutoLock syncLock(JobStore.this);
                 // Copy over the jobs so we can release the lock before writing.
                 for (Int32 i=0; i<mJobSet->Size(); i++) {
                     JobStatus jobStatus = mJobSet->ValueAt(i);
@@ -423,7 +423,7 @@ public class JobStore {
             try {
                 List<JobStatus> jobs;
                 FileInputStream fis = mJobsFile->OpenRead();
-                synchronized(JobStore.this) {
+                {    AutoLock syncLock(JobStore.this);
                     jobs = ReadJobMapImpl(fis);
                     if (jobs != NULL) {
                         for (Int32 i=0; i<jobs->Size(); i++) {

@@ -8,6 +8,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Droid::Os::ILooperHelper;
@@ -75,7 +77,7 @@ ECode CleanupReference::LazyHolder::InnerHandler::HandleMessage(
         Slogger::D(TAG, log);
     }
 
-    synchronized(sCleanupMonitor) {
+    {    AutoLock syncLock(sCleanupMonitor);
         // Always run the cleanup loop here even when adding or removing refs, to avoid
         // falling behind on rapid garbage allocation inner loops.
         assert(0);
@@ -126,7 +128,7 @@ ECode CleanupReference::InnerThread::Run()
                 Slogger::D(TAG, "removed one ref from GC queue");
             }
 
-            synchronized(sCleanupMonitor) {
+            {    AutoLock syncLock(sCleanupMonitor);
                 AutoPtr<IMessageHelper> helper;
                 CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
                 AutoPtr<IMessage> msg;

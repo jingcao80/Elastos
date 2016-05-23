@@ -3,6 +3,9 @@
 #include "AutoLock.h"
 #include "PipedReader.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Elastos {
 namespace IO {
 
@@ -39,7 +42,7 @@ ECode PipedWriter::Connect(
         // throw new NullPointerException("reader == null");
         return E_NULL_POINTER_EXCEPTION;
     }
-    synchronized (reader) {
+    {    AutoLock syncLock(reader);
         if (mDestination != NULL) {
             // throw new IOException("Pipe already connected");
             return E_IO_EXCEPTION;
@@ -62,7 +65,7 @@ ECode PipedWriter::Flush()
         return NOERROR;
     }
 
-    synchronized (reader) {
+    {    AutoLock syncLock(reader);
         Boolean is_closed;
         ((PipedReader*)(reader.Get()))->IsClosed(&is_closed);
         if (is_closed) {

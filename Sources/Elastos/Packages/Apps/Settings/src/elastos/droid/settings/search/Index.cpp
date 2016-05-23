@@ -23,6 +23,8 @@
 #include "../R.h"
 #include "elastos/droid/R.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::CContentValues;
@@ -779,7 +781,7 @@ ECode Index::GetNonIndexablesKeys(
 void Index::AddIndexableData(
     /* [in] */ ISearchIndexableData* data)
 {
-    synchronized(mDataToProcess) {
+    {    AutoLock syncLock(mDataToProcess);
         mDataToProcess->mDataToUpdate->Add(data);
     }
 }
@@ -787,7 +789,7 @@ void Index::AddIndexableData(
 void Index::AddIndexableData(
     /* [in] */ ArrayOf<ISearchIndexableResource*>* array)
 {
-    synchronized(mDataToProcess) {
+    {    AutoLock syncLock(mDataToProcess);
         const Int32 count = array->GetLength();
         for (Int32 n = 0; n < count; n++) {
             mDataToProcess->mDataToUpdate->Add((*array)[n]);
@@ -798,7 +800,7 @@ void Index::AddIndexableData(
 void Index::DeleteIndexableData(
     /* [in] */ ISearchIndexableData* data)
 {
-    synchronized(mDataToProcess) {
+    {    AutoLock syncLock(mDataToProcess);
         mDataToProcess->mDataToDelete->Add(data);
     }
 }
@@ -807,7 +809,7 @@ void Index::AddNonIndexableKeys(
     /* [in] */ const String& authority,
     /* [in] */ IList* keys) //List<String>
 {
-    synchronized(mDataToProcess) {
+    {    AutoLock syncLock(mDataToProcess);
         mDataToProcess->mNonIndexableKeys->Put(CoreUtils::Convert(authority), keys);
     }
 }
@@ -994,7 +996,7 @@ AutoPtr<IUri> Index::BuildUriForNonIndexableKeys(
 
 void Index::UpdateInternal()
 {
-    synchronized(mDataToProcess) {
+    {    AutoLock syncLock(mDataToProcess);
         AutoPtr<UpdateIndexTask> task = new UpdateIndexTask(this);
         AutoPtr<UpdateData> copy = mDataToProcess->Copy();
 

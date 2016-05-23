@@ -6,6 +6,8 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Logger;
@@ -67,7 +69,7 @@ AutoPtr<BatteryStatusManager> BatteryStatusManager::GetInstance(
 Boolean BatteryStatusManager::Start(
   /* [in] */ Handle64 nativePtr)
 {
-    synchronized(mNativePtrLock) {
+    {    AutoLock syncLock(mNativePtrLock);
         AutoPtr<IIntent> stickyIntent;
         if (!mEnabled && (mAppContext->RegisterReceiver(mReceiver, mFilter, (IIntent**)&stickyIntent), stickyIntent) != NULL) {
             // success
@@ -84,7 +86,7 @@ Boolean BatteryStatusManager::Start(
 //@CalledByNative
 void BatteryStatusManager::Stop()
 {
-    synchronized(mNativePtrLock) {
+    {    AutoLock syncLock(mNativePtrLock);
         if (mEnabled) {
             mAppContext->UnregisterReceiver(mReceiver);
             mNativePtr = 0;
@@ -156,7 +158,7 @@ void BatteryStatusManager::GotBatteryStatus(
   /* [in] */ Double dischargingTime,
   /* [in] */ Double level)
 {
-    synchronized(mNativePtrLock) {
+    {    AutoLock syncLock(mNativePtrLock);
         if (mNativePtr != 0) {
             NativeGotBatteryStatus(mNativePtr, charging, chargingTime, dischargingTime, level);
         }

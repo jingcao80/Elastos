@@ -6,6 +6,8 @@
 #include "elastos/droid/widget/ExpandableListView.h"
 #include "elastos/core/AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Widget::CExpandableListPosition;
 using Elastos::Droid::Widget::EIID_IExpandableListPosition;
 using Elastos::Droid::Widget::ExpandableListView;
@@ -134,7 +136,7 @@ AutoPtr<ExpandableListPosition> ExpandableListPosition::Obtain(
 ECode ExpandableListPosition::Recycle()
 {
     // ==================before translated======================
-    // synchronized (sPool) {
+    // {    AutoLock syncLock(sPool);
     //     if (sPool.size() < MAX_POOL_SIZE) {
     //         sPool.add(this);
     //     }
@@ -168,7 +170,7 @@ AutoPtr<ExpandableListPosition> ExpandableListPosition::GetRecycledOrCreate()
 {
     // ==================before translated======================
     // ExpandableListPosition elp;
-    // synchronized (sPool) {
+    // {    AutoLock syncLock(sPool);
     //     if (sPool.size() > 0) {
     //         elp = sPool.remove(0);
     //     } else {

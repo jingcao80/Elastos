@@ -9,6 +9,8 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
 using Elastos::Core::EIID_IInteger32;
 using Elastos::Core::IInteger32;
@@ -88,7 +90,7 @@ ECode NetworkInfo::constructor(
     /* [in] */ INetworkInfo* source)
 {
     if (source != NULL) {
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             source->GetType(&mNetworkType);
             source->GetSubtype(&mSubtype);
             source->GetTypeName(&mTypeName);
@@ -111,7 +113,7 @@ ECode NetworkInfo::GetType(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = mNetworkType;
     }
     return NOERROR;
@@ -120,7 +122,7 @@ ECode NetworkInfo::GetType(
 ECode NetworkInfo::SetType(
     /* [in] */ Int32 type)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mNetworkType = type;
     }
     return NOERROR;
@@ -131,7 +133,7 @@ ECode NetworkInfo::GetSubtype(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = mSubtype;
     }
     return NOERROR;
@@ -141,7 +143,7 @@ ECode NetworkInfo::SetSubtype(
     /* [in] */ Int32 subtype,
     /* [in] */ const String& subtypeName)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mSubtype = subtype;
         mSubtypeName = subtypeName;
     }
@@ -153,7 +155,7 @@ ECode NetworkInfo::GetTypeName(
 {
     VALIDATE_NOT_NULL(name);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *name = mTypeName;
     }
     return NOERROR;
@@ -164,7 +166,7 @@ ECode NetworkInfo::GetSubtypeName(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = mSubtypeName;
     }
     return NOERROR;
@@ -175,7 +177,7 @@ ECode NetworkInfo::IsConnectedOrConnecting(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = ((mState == NetworkInfoState_CONNECTED) || mState == (NetworkInfoState_CONNECTING));
     }
     return NOERROR;
@@ -186,7 +188,7 @@ ECode NetworkInfo::IsConnected(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = (mState == NetworkInfoState_CONNECTED);
     }
     return NOERROR;
@@ -197,7 +199,7 @@ ECode NetworkInfo::IsAvailable(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = mIsAvailable;
     }
     return NOERROR;
@@ -206,7 +208,7 @@ ECode NetworkInfo::IsAvailable(
 ECode NetworkInfo::SetIsAvailable(
     /* [in] */ Boolean isAvailable)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mIsAvailable = isAvailable;
     }
     return NOERROR;
@@ -217,7 +219,7 @@ ECode NetworkInfo::IsFailover(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = mIsFailover;
     }
     return NOERROR;
@@ -226,7 +228,7 @@ ECode NetworkInfo::IsFailover(
 ECode NetworkInfo::SetFailover(
     /* [in] */ Boolean isFailover)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mIsFailover = isFailover;
     }
     return NOERROR;
@@ -237,7 +239,7 @@ ECode NetworkInfo::IsRoaming(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = mIsRoaming;
     }
     return NOERROR;
@@ -246,7 +248,7 @@ ECode NetworkInfo::IsRoaming(
 ECode NetworkInfo::SetRoaming(
     /* [in] */ Boolean isRoaming)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mIsRoaming = isRoaming;
     }
     return NOERROR;
@@ -257,7 +259,7 @@ ECode NetworkInfo::IsConnectedToProvisioningNetwork(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = mIsConnectedToProvisioningNetwork;
     }
     return NOERROR;
@@ -266,7 +268,7 @@ ECode NetworkInfo::IsConnectedToProvisioningNetwork(
 ECode NetworkInfo::SetIsConnectedToProvisioningNetwork(
     /* [in] */ Boolean val)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mIsConnectedToProvisioningNetwork = val;
     }
     return NOERROR;
@@ -277,7 +279,7 @@ ECode NetworkInfo::GetState(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = mState;
     }
     return NOERROR;
@@ -288,7 +290,7 @@ ECode NetworkInfo::GetDetailedState(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = mDetailedState;
     }
     return NOERROR;
@@ -299,7 +301,7 @@ ECode NetworkInfo::SetDetailedState(
     /* [in] */ const String& reason,
     /* [in] */ const String& extraInfo)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mDetailedState = detailedState;
         Int32 num = detailedState;
         mState = mStateMap[num];
@@ -312,7 +314,7 @@ ECode NetworkInfo::SetDetailedState(
 ECode NetworkInfo::SetExtraInfo(
     /* [in] */ const String& extraInfo)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mExtraInfo = extraInfo;
     }
     return NOERROR;
@@ -323,7 +325,7 @@ ECode NetworkInfo::GetReason(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = mReason;
     }
     return NOERROR;
@@ -334,7 +336,7 @@ ECode NetworkInfo::GetExtraInfo(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = mExtraInfo;
     }
     return NOERROR;
@@ -345,7 +347,7 @@ ECode NetworkInfo::ToString(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         StringBuilder builder("[");
         builder.Append("type: ");
         String str;
@@ -402,7 +404,7 @@ ECode NetworkInfo::ReadFromParcel(
 ECode NetworkInfo::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         dest->WriteInt32(mNetworkType);
         dest->WriteInt32(mSubtype);
         dest->WriteString(mTypeName);

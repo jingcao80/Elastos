@@ -276,7 +276,7 @@ final class BluetoothDiscoverableEnabler implements Preference.OnPreferenceClick
         Int32 timeLeft = (Int32) ((endTimestamp - currentTimestamp) / 1000L);
         UpdateTimerDisplay(timeLeft);
 
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             mUiHandler->RemoveCallbacks(mUpdateCountdownSummaryRunnable);
             mUiHandler->PostDelayed(mUpdateCountdownSummaryRunnable, 1000);
         }

@@ -10,6 +10,8 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::EIID_ICancellationSignalOnCancelListener;
 using Elastos::Core::Thread;
@@ -114,7 +116,7 @@ ECode SQLiteConnectionPool::Dispose(
         // when finalized because we don't know what state the connections
         // themselves will be in.  The finalizer is really just here for CloseGuard.
         // The connections will take care of themselves when their own finalizers run.
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             FAIL_RETURN(ThrowIfClosedLocked())
 
             mIsOpen = FALSE;
@@ -142,7 +144,7 @@ ECode SQLiteConnectionPool::Reconfigure(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfClosedLocked())
 
         Boolean walModeChanged = ((configuration->mOpenFlags ^ mConfiguration->mOpenFlags)
@@ -225,7 +227,7 @@ ECode SQLiteConnectionPool::AcquireConnection(
 ECode SQLiteConnectionPool::ReleaseConnection(
     /* [in] */ SQLiteConnection* connection)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AcquiredConnectionStatus status;
         HashMap<AutoPtr<SQLiteConnection>, AcquiredConnectionStatus>::Iterator it = mAcquiredConnections.Find(connection);
         if (it == mAcquiredConnections.End()) {
@@ -322,7 +324,7 @@ ECode SQLiteConnectionPool::ShouldYieldConnection(
 void SQLiteConnectionPool::CollectDbStats(
     /* [in] */ List<AutoPtr<SQLiteDebug::DbStats> >* dbStatsList)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mAvailablePrimaryConnection != NULL) {
             mAvailablePrimaryConnection->CollectDbStats(dbStatsList);
         }
@@ -529,7 +531,7 @@ ECode SQLiteConnectionPool::WaitForConnection(
 
     AutoPtr<ConnectionWaiter> waiter;
     Int32 nonce = 0;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfClosedLocked())
 
         // Try to acquire a connection.

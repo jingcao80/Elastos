@@ -13,6 +13,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Process;
@@ -121,7 +123,7 @@ ECode SpellCheckerService::Session::OnGetSentenceSuggestionsMultiple(
         Logger::D(TAG, "onGetSentenceSuggestionsMultiple: + %d, %d", textInfos->GetLength(), suggestionsLimit);
     }
     if (mSentenceLevelAdapter == NULL) {
-        synchronized(this){
+        {    AutoLock syncLock(this);
             if (mSentenceLevelAdapter == NULL) {
                 String localeStr;
                 GetLocale(&localeStr);

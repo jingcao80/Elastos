@@ -51,7 +51,7 @@ public class BatteryEntry {
         CARAPI Run() {
             while (TRUE) {
                 BatteryEntry be;
-                synchronized(mRequestQueue) {
+                {    AutoLock syncLock(mRequestQueue);
                     if (mRequestQueue->IsEmpty() || mAbort) {
                         if (sHandler != NULL) {
                             sHandler->SendEmptyMessage(MSG_REPORT_FULLY_DRAWN);
@@ -70,7 +70,7 @@ public class BatteryEntry {
 
     public static void StartRequestQueue() {
         if (sHandler != NULL) {
-            synchronized(mRequestQueue) {
+            {    AutoLock syncLock(mRequestQueue);
                 if (!mRequestQueue->IsEmpty()) {
                     if (mRequestThread != NULL) {
                         mRequestThread->Abort();
@@ -85,7 +85,7 @@ public class BatteryEntry {
     }
 
     public static void StopRequestQueue() {
-        synchronized(mRequestQueue) {
+        {    AutoLock syncLock(mRequestQueue);
             if (mRequestThread != NULL) {
                 mRequestThread->Abort();
                 mRequestThread = NULL;
@@ -219,7 +219,7 @@ public class BatteryEntry {
             //name = packages[0];
         }
         if (sHandler != NULL) {
-            synchronized(mRequestQueue) {
+            {    AutoLock syncLock(mRequestQueue);
                 mRequestQueue->Add(this);
             }
         }

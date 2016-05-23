@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.cdma;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivityManagerNative;
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::IContext;
@@ -111,7 +113,7 @@ public class CDMALTEPhone extends CDMAPhone {
 
     //@Override
     CARAPI Dispose() {
-        Synchronized(PhoneProxy.lockForRadioTechnologyChange) {
+        {    AutoLock syncLock(PhoneProxy.lockForRadioTechnologyChange);
             If (mSimRecords != NULL) {
                 mSimRecords->UnregisterForRecordsLoaded(this);
             }

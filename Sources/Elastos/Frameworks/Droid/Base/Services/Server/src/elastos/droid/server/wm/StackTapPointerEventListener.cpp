@@ -3,6 +3,8 @@
 #include "elastos/droid/server/wm/DisplayContent.h"
 #include <elastos/core/Math.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::CRegion;
 using Elastos::Droid::View::EIID_IPointerEventListener;
 
@@ -77,7 +79,7 @@ ECode StackTapPointerEventListener::OnPointerEvent(
                 motionEvent->GetY(index, &ey);
                 Int32 x = (Int32)ex;
                 Int32 y = (Int32)ey;
-                synchronized(this) {
+                {    AutoLock syncLock(this);
                     Int64 eventTime, downTime;
                     IInputEvent::Probe(motionEvent)->GetEventTime(&eventTime);
                     motionEvent->GetDownTime(&downTime);
@@ -103,7 +105,7 @@ ECode StackTapPointerEventListener::OnPointerEvent(
 void StackTapPointerEventListener::SetTouchExcludeRegion(
     /* [in] */ IRegion* newRegion)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         Boolean result;
         mTouchExcludeRegion->Set(newRegion, &result);
     }

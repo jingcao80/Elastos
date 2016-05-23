@@ -4,6 +4,8 @@
 #include "elastos/utility/CHashMap.h"
 #include "elastos/utility/logging/Logger.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::ISet;
 using Elastos::Utility::IIterator;
@@ -27,7 +29,7 @@ ECode BasicCredentialsProvider::SetCredentials(
     /* [in] */ IAuthScope* authscope,
     /* [in] */ ICredentials* credentials)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (authscope == NULL) {
             Logger::E("BasicCredentialsProvider", "Authentication scope may not be null");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -81,7 +83,7 @@ ECode BasicCredentialsProvider::GetCredentials(
 {
     VALIDATE_NOT_NULL(credentials)
     *credentials = NULL;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (authscope == NULL) {
             Logger::E("BasicCredentialsProvider", "Authentication scope may not be null");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -103,7 +105,7 @@ ECode BasicCredentialsProvider::ToString(
 
 ECode BasicCredentialsProvider::Clear()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mCredMap->Clear();
     }
     return NOERROR;

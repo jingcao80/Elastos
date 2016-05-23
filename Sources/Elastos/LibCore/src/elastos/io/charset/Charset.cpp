@@ -12,6 +12,8 @@
 #include "CHashMap.h"
 #include "CHashSet.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::CString;
@@ -127,7 +129,7 @@ ECode Charset::ForName(
 
     // Is this charset in our cache?
     AutoPtr<ICharset> cs;
-    synchronized (CACHED_CHARSETS) {
+    {    AutoLock syncLock(CACHED_CHARSETS);
         AutoPtr<IInterface> outface;
         CACHED_CHARSETS->Get(CoreUtils::Convert(charsetName), (IInterface**)&outface);
         cs = ICharset::Probe(outface);
@@ -388,7 +390,7 @@ ECode Charset::CacheCharset(
     *charset = NULL;
     VALIDATE_NOT_NULL(cs);
 
-    synchronized (CACHED_CHARSETS) {
+    {    AutoLock syncLock(CACHED_CHARSETS);
         // Get the canonical name for this charset, and the canonical instance from the table.
         String canonicalName;
         cs->GetName(&canonicalName);

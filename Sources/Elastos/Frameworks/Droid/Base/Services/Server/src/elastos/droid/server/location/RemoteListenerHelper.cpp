@@ -5,6 +5,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Internal::Utility::CPreconditions;
 using Elastos::Droid::Internal::Utility::IPreconditions;
 using Elastos::Droid::Os::IBinder;
@@ -76,7 +78,7 @@ ECode RemoteListenerHelper::AddListener(
 
     AutoPtr<IBinder> binder = IBinder::Probe(listener);
     AutoPtr<LinkedListener> deathListener = new LinkedListener(listener, this);
-    synchronized(mListenerMap) {
+    {    AutoLock syncLock(mListenerMap);
         Boolean isContained;
         if (mListenerMap->ContainsKey(binder, &isContained), isContained) {
             // listener already added
@@ -131,7 +133,7 @@ ECode RemoteListenerHelper::RemoveListener(
 
     AutoPtr<IBinder> binder = IBinder::Probe(listener);
     AutoPtr<LinkedListener> linkedListener;
-    synchronized(mListenerMap) {
+    {    AutoLock syncLock(mListenerMap);
         AutoPtr<IInterface> value;
         mListenerMap->Remove(binder, (IInterface**)&value);
         linkedListener = (LinkedListener*)(IObject::Probe(value));
@@ -165,7 +167,7 @@ ECode RemoteListenerHelper::Foreach(
     /* [in] */ IListenerOperation* operation)
 {
     AutoPtr<ICollection> linkedListeners;
-    synchronized(mListenerMap) {
+    {    AutoLock syncLock(mListenerMap);
         AutoPtr<ICollection> values;
         mListenerMap->GetValues((ICollection**)&values);
         CArrayList::New(values.Get(), (ICollection**)&linkedListeners);

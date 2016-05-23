@@ -19,6 +19,8 @@
 #include <binder/IServiceManager.h>
 #include <binder/Parcel.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Bluetooth::EIID_IBluetoothProfileServiceListener;
 using Elastos::Droid::Bluetooth::IBluetoothProfile;
 using Elastos::Droid::Bluetooth::IBluetoothAdapter;
@@ -1434,7 +1436,7 @@ ECode BatteryStatsService::Dump(
         if (isRealCheckin) {
             // For a real checkin, first we want to prefer to use the last complete checkin
             // file if there is one.
-            // synchronized (mStats.mCheckinFile) {
+            // {    AutoLock syncLock(mStats.mCheckinFile);
             //     if (mStats.mCheckinFile.exists()) {
             //         try {
             //             byte[] raw = mStats.mCheckinFile.readFully();

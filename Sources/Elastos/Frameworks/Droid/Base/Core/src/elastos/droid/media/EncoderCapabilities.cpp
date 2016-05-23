@@ -3,6 +3,8 @@
 #include <elastos/core/AutoLock.h>
 #include <media/MediaProfiles.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IArrayList;
 
@@ -19,7 +21,7 @@ Boolean EncoderCapabilities::InitStatic()
 {
     // System.loadLibrary("media_jni");
     // ALOGV("native_init");
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         if (sssProfiles == NULL) {
             sssProfiles = android::MediaProfiles::getInstance();
         }

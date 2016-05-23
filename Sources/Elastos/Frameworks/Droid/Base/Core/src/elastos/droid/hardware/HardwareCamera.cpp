@@ -27,6 +27,8 @@
 #include <utils/Errors.h>
 #include <elastos/core/CoreUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CActivityThread;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::CRect;
@@ -167,7 +169,7 @@ android::sp<android::Camera> HardwareCamera::get_native_camera(
     /* [in] */ JNICameraContext** pContext)
 {
     android::sp<android::Camera> camera;
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         JNICameraContext* context = reinterpret_cast<JNICameraContext*>(thiz->mNativeContext)/*(env->GetIntField(thiz, fields.context))*/;
         if (context != NULL) {
             camera = context->getCamera();
@@ -2770,7 +2772,7 @@ ECode HardwareCamera::StopPreview()
     mPostviewCallback = NULL;
     mJpegCallback = NULL;
 
-    synchronized(mAutoFocusCallbackLock) {
+    {    AutoLock syncLock(mAutoFocusCallbackLock);
         mAutoFocusCallback = NULL;
     }
 
@@ -2871,7 +2873,7 @@ void HardwareCamera::PostEventFromNative(
 ECode HardwareCamera::AutoFocus(
     /* [in] */ IAutoFocusCallback* cb)
 {
-    synchronized(mAutoFocusCallbackLock) {
+    {    AutoLock syncLock(mAutoFocusCallbackLock);
         mAutoFocusCallback = cb;
     }
     native_autoFocus();
@@ -2880,7 +2882,7 @@ ECode HardwareCamera::AutoFocus(
 
 ECode HardwareCamera::CancelAutoFocus()
 {
-    synchronized(mAutoFocusCallbackLock) {
+    {    AutoLock syncLock(mAutoFocusCallbackLock);
         mAutoFocusCallback = NULL;
     }
     native_cancelAutoFocus();

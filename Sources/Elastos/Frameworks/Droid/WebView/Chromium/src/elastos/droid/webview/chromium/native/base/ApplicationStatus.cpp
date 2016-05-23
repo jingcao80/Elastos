@@ -8,6 +8,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::EIID_IActivityLifecycleCallbacks;
 using Elastos::Droid::Content::EIID_IContext;
 using Elastos::Droid::Content::Pm::CActivityInfo;
@@ -246,7 +248,7 @@ void ApplicationStatus::OnStateChange(
     }
 
     // Invalidate the cached application state.
-    synchronized(sCachedApplicationStateLock) {
+    {    AutoLock syncLock(sCachedApplicationStateLock);
         sCachedApplicationState = NULL;
     }
 
@@ -415,7 +417,7 @@ Int32 ApplicationStatus::GetStateForActivity(
  */
 Int32 ApplicationStatus::GetStateForApplication()
 {
-    synchronized(sCachedApplicationStateLock) {
+    {    AutoLock syncLock(sCachedApplicationStateLock);
         if (sCachedApplicationState == NULL) {
             CInteger32::New(DetermineApplicationState(), (IInteger32**)&sCachedApplicationState);
         }

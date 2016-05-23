@@ -6,6 +6,8 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::CVector;
 using Elastos::Utility::ILocaleHelper;
@@ -150,7 +152,7 @@ ECode SubtitleController::GetTracks(
     VALIDATE_NOT_NULL(result);
     Int32 size;
     mTracks->GetSize(&size);
-    synchronized(mTracks) {
+    {    AutoLock syncLock(mTracks);
         AutoPtr<ArrayOf<ISubtitleTrack*> > tracks = ArrayOf<ISubtitleTrack*>::Alloc(size);
         mTracks->ToArray((ArrayOf<IInterface *>**)&tracks);
         *result = tracks;
@@ -247,7 +249,7 @@ ECode SubtitleController::GetDefaultTrack(
     mCaptioningManager->IsEnabled(&flag);
     Boolean selectForced = !flag;
 
-    synchronized(mTracks) {
+    {    AutoLock syncLock(mTracks);
         Int32 size;
         mTracks->GetSize(&size);
         AutoPtr<IInterface> interf;
@@ -374,7 +376,7 @@ ECode SubtitleController::AddTrack(
     VALIDATE_NOT_NULL(result);
     Int32 size;
     mRenderers->GetSize(&size);
-    synchronized(mRenderers) {
+    {    AutoLock syncLock(mRenderers);
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> ife;
             mRenderers->Get(i, (IInterface**)&ife);
@@ -445,7 +447,7 @@ void SubtitleController::DoHide()
 ECode SubtitleController::RegisterRenderer(
     /* [in] */ ISubtitleControllerRenderer* renderer)
 {
-    synchronized(mRenderers) {
+    {    AutoLock syncLock(mRenderers);
     // TODO how to get available renderers in the system
     Boolean flag = FALSE;
     mRenderers->Contains(renderer, &flag);
@@ -464,7 +466,7 @@ ECode SubtitleController::HasRendererFor(
     VALIDATE_NOT_NULL(result);
     Int32 size;
     mRenderers->GetSize(&size);
-    synchronized(mRenderers) {
+    {    AutoLock syncLock(mRenderers);
         // TODO how to get available renderers in the system
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> interf;

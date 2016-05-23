@@ -8,6 +8,8 @@
 #include "elastos/utility/CTimeZoneHelper.h"
 #include "elastos/utility/logging/Logger.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Text::ISimpleDateFormat;
@@ -54,8 +56,7 @@ ECode HttpDateGenerator::GetCurrentDate(
     /* [out] */ String* date)
 {
     VALIDATE_NOT_NULL(date)
-    synchronized(this)
-    {
+    {    AutoLock syncLock(this);
         Int64 now;
         AutoPtr<ISystem> system;
         CSystem::AcquireSingleton((ISystem**)&system);

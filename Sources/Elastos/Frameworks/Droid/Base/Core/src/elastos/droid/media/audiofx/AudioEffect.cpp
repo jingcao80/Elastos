@@ -14,6 +14,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::IByte;
 using Elastos::Core::CByte;
 using Elastos::Core::EIID_IByte;
@@ -66,7 +68,7 @@ ECode AudioEffect::NativeEventHandler::HandleMessage(
     switch (what) {
         case IAudioEffect::NATIVE_EVENT_ENABLED_STATUS:
             {
-                synchronized(lock);
+                AutoLock syncLock(lock);
                 enableStatusChangeListener = mAudioEffect->mEnableStatusChangeListener;
             }
             if (enableStatusChangeListener != NULL) {
@@ -75,7 +77,7 @@ ECode AudioEffect::NativeEventHandler::HandleMessage(
             break;
         case IAudioEffect::NATIVE_EVENT_CONTROL_STATUS:
             {
-                synchronized(lock);
+                AutoLock syncLock(lock);
                 controlStatusChangeListener = mAudioEffect->mControlChangeStatusListener;
             }
             if (controlStatusChangeListener != NULL) {
@@ -84,7 +86,7 @@ ECode AudioEffect::NativeEventHandler::HandleMessage(
             break;
         case IAudioEffect::NATIVE_EVENT_PARAMETER_CHANGED:
             {
-                synchronized(lock);
+                AutoLock syncLock(lock);
                 parameterChangeListener = mAudioEffect->mParameterChangeListener;
             }
             if (parameterChangeListener != NULL) {
@@ -203,14 +205,14 @@ ECode AudioEffect::constructor(
     mId = (*id)[0];
     mDescriptor = (*desc)[0];
 
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     mState = IAudioEffect::STATE_INITIALIZED;
     return NOERROR;
 }
 
 ECode AudioEffect::ReleaseResources()
 {
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     NativeRelease();
     mState = IAudioEffect::STATE_UNINITIALIZED;
     return NOERROR;
@@ -689,7 +691,7 @@ ECode AudioEffect::HasControl(
 ECode AudioEffect::SetEnableStatusListener(
     /* [in] */ IAudioEffectOnEnableStatusChangeListener* listener)
 {
-    synchronized(mListenerLock);
+    AutoLock syncLock(mListenerLock);
     mEnableStatusChangeListener = listener;
     if ((listener != NULL) && (mNativeEventHandler == NULL)) {
         CreateNativeEventHandler();
@@ -700,7 +702,7 @@ ECode AudioEffect::SetEnableStatusListener(
 ECode AudioEffect::SetControlStatusListener(
     /* [in] */ IAudioEffectOnControlStatusChangeListener* listener)
 {
-    synchronized(mListenerLock);
+    AutoLock syncLock(mListenerLock);
     mControlChangeStatusListener = listener;
     if ((listener != NULL) && (mNativeEventHandler == NULL)) {
         CreateNativeEventHandler();
@@ -711,7 +713,7 @@ ECode AudioEffect::SetControlStatusListener(
 ECode AudioEffect::SetParameterListener(
     /* [in] */ IAudioEffectOnParameterChangeListener* listener)
 {
-    synchronized(mListenerLock);
+    AutoLock syncLock(mListenerLock);
     mParameterChangeListener = listener;
     if ((listener != NULL) && (mNativeEventHandler == NULL)) {
         CreateNativeEventHandler();
@@ -1387,7 +1389,7 @@ AutoPtr<ArrayOf<IAudioEffectDescriptor* > > AudioEffect::NativeQueryPreProcessin
 ECode AudioEffect::CheckState(
     /* [in] */ const String& methodName)
 {
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     if (mState != IAudioEffect::STATE_INITIALIZED) {
        // throw (new IllegalStateException(methodName
        //         + " called on uninitialized AudioEffect."));

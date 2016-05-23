@@ -14,6 +14,8 @@
 #include <Elastos.Droid.Provider.h>
 #include <Elastos.Droid.Service.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::Binder;
@@ -417,7 +419,7 @@ ECode UiModeManagerService::ToString(
 }
 
 // void dumpImpl(PrintWriter pw) {
-//     synchronized (mLock) {
+//     {    AutoLock syncLock(mLock);
 //         pw.println("Current UI Mode Service state:");
 //         pw.print("  mDockState="); pw.print(mDockState);
 //                 pw.print(" mLastBroadcastState="); pw.println(mLastBroadcastState);

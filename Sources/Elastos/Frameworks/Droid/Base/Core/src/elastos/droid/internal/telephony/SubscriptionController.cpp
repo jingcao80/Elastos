@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Os::IAsyncResult;
@@ -150,7 +152,7 @@ public class SubscriptionController extends ISub.Stub {
             Switch (msg.what) {
                 case EVENT_WRITE_MSISDN_DONE:
                     ar = (AsyncResult) msg.obj;
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         mSuccess = (ar.exception == NULL);
                         Logd("EVENT_WRITE_MSISDN_DONE, mSuccess = "+mSuccess);
                         mLock->NotifyAll();
@@ -176,7 +178,7 @@ public class SubscriptionController extends ISub.Stub {
     private static const Int32 DUMMY_SUB_ID = -1;
 
     public static SubscriptionController Init(Phone phone) {
-        Synchronized (SubscriptionController.class) {
+        {    AutoLock syncLock(SubscriptionController.class);
             If (sInstance == NULL) {
                 sInstance = new SubscriptionController(phone);
             } else {
@@ -187,7 +189,7 @@ public class SubscriptionController extends ISub.Stub {
     }
 
     public static SubscriptionController Init(Context c, CommandsInterface[] ci) {
-        Synchronized (SubscriptionController.class) {
+        {    AutoLock syncLock(SubscriptionController.class);
             If (sInstance == NULL) {
                 sInstance = new SubscriptionController(c);
             } else {
@@ -842,7 +844,7 @@ public class SubscriptionController extends ISub.Stub {
         Phone phone = sProxyPhones[phoneId];
         String alphaTag = TelephonyManager->GetDefault()->GetLine1AlphaTagForSubscriber(subId);
 
-        Synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             mSuccess = FALSE;
             Message response = mHandler->ObtainMessage(EVENT_WRITE_MSISDN_DONE);
 

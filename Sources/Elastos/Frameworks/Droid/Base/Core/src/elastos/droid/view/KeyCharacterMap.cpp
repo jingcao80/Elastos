@@ -16,6 +16,8 @@
 #include <binder/Parcel.h>
 #include <input/KeyCharacterMap.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Input::CInputManager;
 using Elastos::Droid::Hardware::Input::IInputManager;
 using Elastos::Droid::Utility::CSparseInt32Array;
@@ -220,7 +222,7 @@ ECode KeyCharacterMap::FallbackAction::constructor()
 AutoPtr<KeyCharacterMap::FallbackAction> KeyCharacterMap::FallbackAction::Obtain()
 {
     AutoPtr<FallbackAction> target;
-    synchronized(sRecycleLock){
+    {    AutoLock syncLock(sRecycleLock);
         if (sRecycleBin == NULL) {
             target = new FallbackAction();
         }
@@ -237,7 +239,7 @@ AutoPtr<KeyCharacterMap::FallbackAction> KeyCharacterMap::FallbackAction::Obtain
 
 KeyCharacterMap::FallbackAction::Recycle()
 {
-    synchronized(sRecycleLock) {
+    {    AutoLock syncLock(sRecycleLock);
         if (sRecycledCount < MAX_RECYCLED) {
             mNext = sRecycleBin;
             sRecycleBin = this;
@@ -538,7 +540,7 @@ Int32 KeyCharacterMap::GetDeadChar(
 
     Int32 combination = (combining << 16) | c;
     Int32 combined;
-    synchronized(sDeadKeyCacheLock) {
+    {    AutoLock syncLock(sDeadKeyCacheLock);
         sDeadKeyCache->Get(combination, -1, &combined);
         if (combined == -1) {
             sDeadKeyBuilder->SetLength(0);

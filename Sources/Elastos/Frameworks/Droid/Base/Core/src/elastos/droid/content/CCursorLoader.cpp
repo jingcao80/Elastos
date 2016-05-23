@@ -6,6 +6,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/Arrays.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Database::IContentObserver;
 
 using Elastos::Utility::Arrays;
@@ -301,7 +303,7 @@ ECode CCursorLoader::LoadInBackground(
     mCancellationSignal = NULL;
     return NOERROR;
     // } finally {
-    //     synchronized(this) {
+    //     {    AutoLock syncLock(this);
     //         mCancellationSignal = null;
     //     }
     // }

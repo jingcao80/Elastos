@@ -4,6 +4,9 @@
 #include "elastos/droid/os/CMessage.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Elastos {
 namespace Droid {
 namespace Os {
@@ -137,7 +140,7 @@ Void Broadcaster::CancelRequest(
 
 Void Broadcaster::DumpRegistrations()
 {
-    // synchronized(this) {
+    // {    AutoLock syncLock(this);
     //     Registration start = mReg;
     //     System.out.println("Broadcaster " + this + " {");
     //     if (start != NULL) {

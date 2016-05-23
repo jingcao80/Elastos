@@ -15,6 +15,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::Backup::IIBackupManager;
 using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::App::IPendingIntentHelper;
@@ -1880,7 +1882,7 @@ ECode WifiStateMachine::ConnectModeState::ProcessMessage(
             }
             if (!bssid.IsNull()) {
                 // If we have a BSSID, tell configStore to black list it
-                synchronized(mHost->mScanResultCache) {
+                {    AutoLock syncLock(mHost->mScanResultCache);
                     mHost->mWifiConfigStore->HandleBSSIDBlackList
                             (mHost->mLastNetworkId, bssid, FALSE, &mHost->didBlackListBSSID);
                 }
@@ -1903,7 +1905,7 @@ ECode WifiStateMachine::ConnectModeState::ProcessMessage(
             message->GetArg1(&arg1);
             mHost->Loge(String("ConnectModeState SSID state=") + en + " nid="
                     + StringUtils::ToString(arg1) + " [" + substr + "]");
-            synchronized(mHost->mScanResultCache) {
+            {    AutoLock syncLock(mHost->mScanResultCache);
                 String str;
                 mHost->mWifiInfo->GetBSSID(&str);
                 mHost->mWifiConfigStore->HandleSSIDStateChange(arg1, what ==
@@ -2455,7 +2457,7 @@ ECode WifiStateMachine::ConnectModeState::ProcessMessage(
                                 + StringUtils::ToString(networkUpdateResult->GetNetworkId()));
                 }
 
-                synchronized(mHost->mScanResultCache) {
+                {    AutoLock syncLock(mHost->mScanResultCache);
                     /**
                      * If the command comes from WifiManager, then
                      * tell autojoin the user did try to modify and save that network,
@@ -5365,7 +5367,7 @@ ECode WifiStateMachine::SyncGetBatchedScanResultsList(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result)
-    synchronized (mBatchedScanResults) {
+    {    AutoLock syncLock(mBatchedScanResults);
         Int32 size;
         mBatchedScanResults->GetSize(&size);
         AutoPtr<IArrayList> batchedScanList;
@@ -5623,7 +5625,7 @@ ECode WifiStateMachine::SyncGetDhcpResults(
     /* [out] */ IDhcpResults** result)
 {
     VALIDATE_NOT_NULL(result)
-    synchronized (mDhcpResultsLock) {
+    {    AutoLock syncLock(mDhcpResultsLock);
         CDhcpResults::New(mDhcpResults, result);
     }
     return NOERROR;
@@ -5653,7 +5655,7 @@ ECode WifiStateMachine::SyncGetScanResultsList(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result)
-    synchronized (mScanResultCache) {
+    {    AutoLock syncLock(mScanResultCache);
         AutoPtr<IArrayList> scanList;
         CArrayList::New((IArrayList**)&scanList);
         Int32 size;
@@ -5994,7 +5996,7 @@ ECode WifiStateMachine::SyncSaveConfig(
 ECode WifiStateMachine::UpdateBatteryWorkSource(
     /* [in] */ IWorkSource* newSource)
 {
-    synchronized (mRunningWifiUids) {
+    {    AutoLock syncLock(mRunningWifiUids);
         // try {
         if (newSource != NULL) {
             mRunningWifiUids->Set(newSource);
@@ -7991,7 +7993,7 @@ void WifiStateMachine::RetrieveBatchedScanData()
     CIntent::New(IWifiManager::BATCHED_SCAN_RESULTS_AVAILABLE_ACTION, (IIntent**)&intent);
     intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
 
-    synchronized (mBatchedScanResults) {
+    {    AutoLock syncLock(mBatchedScanResults);
         mBatchedScanResults->Clear();
         AutoPtr<IBatchedScanResult> batchedScanResult;
         CBatchedScanResult::New((IBatchedScanResult**)&batchedScanResult);
@@ -8416,7 +8418,7 @@ void WifiStateMachine::HandleBSSIDBlacklist(
             + StringUtils::BooleanToString(enable));
     if (bssid != NULL) {
         // Tell configStore to black list it
-        synchronized(mScanResultCache) {
+        {    AutoLock syncLock(mScanResultCache);
             mWifiAutoJoinController->HandleBSSIDBlackList( enable, bssid, reason );
             mWifiConfigStore->HandleDisabledAPs( enable, bssid, reason );
         }
@@ -8879,7 +8881,7 @@ void WifiStateMachine::SetScanResults()
     // note that all these splits and substrings keep references to the original
     // huge string buffer while the amount we really want is generally pretty small
     // so make copies instead (one example b/11087956 wasted 400k of heap here).
-    synchronized(mScanResultCache) {
+    {    AutoLock syncLock(mScanResultCache);
         CArrayList::New((IArrayList**)&mScanResults);
         AutoPtr<ArrayOf<String> > lines;
         StringUtils::Split(scanResults, String("\n"), (ArrayOf<String>**)&lines);
@@ -9009,7 +9011,7 @@ void WifiStateMachine::SetScanResults()
     }
 
     if (mWifiConfigStore->enableAutoJoinWhenAssociated) {
-        synchronized(mScanResultCache) {
+        {    AutoLock syncLock(mScanResultCache);
             // AutoJoincontroller will directly acces the scan result list and update it with
             // ScanResult status
             mWifiAutoJoinController->NewSupplicantResults(attemptAutoJoin, &mNumScanResultsKnown);
@@ -9565,7 +9567,7 @@ void WifiStateMachine::UpdateLinkProperties(
     }
 
     // IPv4 routes, DNS servers and domains come from mDhcpResults.
-    synchronized (mDhcpResultsLock) {
+    {    AutoLock syncLock(mDhcpResultsLock);
         // Even when we're using static configuration, we don't need to look at the config
         // store, because static IP configuration also populates mDhcpResults.
         if ((mDhcpResults != NULL) && (lp->HasIPv4Address(&b), b)) {
@@ -9733,7 +9735,7 @@ void WifiStateMachine::UpdateLinkProperties(
 void WifiStateMachine::ClearLinkProperties()
 {
      // Clear the link properties obtained from DHCP and netlink.
-     synchronized (mDhcpResultsLock) {
+     {    AutoLock syncLock(mDhcpResultsLock);
          if (mDhcpResults != NULL) {
              mDhcpResults->Clear();
          }
@@ -10057,7 +10059,7 @@ void WifiStateMachine::HandleIPv4Success(
         //Logger::E("link address " + dhcpResults.ipAddress);
     }
 
-    synchronized (mDhcpResultsLock) {
+    {    AutoLock syncLock(mDhcpResultsLock);
         mDhcpResults = dhcpResults;
     }
 
@@ -10134,7 +10136,7 @@ void WifiStateMachine::HandleSuccessfulIpConfiguration()
 void WifiStateMachine::HandleIPv4Failure(
     /* [in] */ Int32 reason)
 {
-    synchronized(mDhcpResultsLock) {
+    {    AutoLock syncLock(mDhcpResultsLock);
          if (mDhcpResults != NULL) {
              mDhcpResults->Clear();
          }

@@ -19,6 +19,8 @@
 
 package com.android.internal.telephony.gsm;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::ISharedPreferences;
@@ -233,7 +235,7 @@ public class GSMPhone extends PhoneBase {
 
     //@Override
     CARAPI Dispose() {
-        Synchronized(PhoneProxy.lockForRadioTechnologyChange) {
+        {    AutoLock syncLock(PhoneProxy.lockForRadioTechnologyChange);
             super->Dispose();
 
             //Unregister from all former registered events

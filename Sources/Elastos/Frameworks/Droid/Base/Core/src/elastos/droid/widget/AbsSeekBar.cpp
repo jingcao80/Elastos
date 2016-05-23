@@ -9,6 +9,8 @@
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::ObjectAnimator;
 using Elastos::Droid::Graphics::CRect;
@@ -306,7 +308,7 @@ ECode AbsSeekBar::GetKeyProgressIncrement(
 ECode AbsSeekBar::SetMax(
     /* [in] */ Int32 max)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ProgressBar::SetMax(max);
 
         Int32 max;
@@ -523,7 +525,7 @@ ECode AbsSeekBar::OnResolveDrawables(
 void AbsSeekBar::OnDraw(
     /* [in] */ ICanvas* canvas)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ProgressBar::OnDraw(canvas);
         DrawThumb(canvas);
     }
@@ -576,7 +578,7 @@ void AbsSeekBar::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IDrawable> d = GetCurrentDrawable();
 
         Int32 h;

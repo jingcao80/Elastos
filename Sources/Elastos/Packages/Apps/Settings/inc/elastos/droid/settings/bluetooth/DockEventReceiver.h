@@ -122,7 +122,7 @@ public class DockEventReceiver extends BroadcastReceiver {
      * the wake lock before returning to ensure that the service will run.
      */
     private static void BeginStartingService(Context context, Intent intent) {
-        synchronized(sStartingServiceSync) {
+        {    AutoLock syncLock(sStartingServiceSync);
             if (sStartingService == NULL) {
                 PowerManager pm = (PowerManager) context->GetSystemService(Context.POWER_SERVICE);
                 sStartingService = pm->NewWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -142,7 +142,7 @@ public class DockEventReceiver extends BroadcastReceiver {
      * releasing the wake lock if the service is now stopping.
      */
     public static void FinishStartingService(Service service, Int32 startId) {
-        synchronized(sStartingServiceSync) {
+        {    AutoLock syncLock(sStartingServiceSync);
             if (sStartingService != NULL) {
                 if (DEBUG) Logger::D(TAG, "stopSelf id = " + startId);
                 if (service->StopSelfResult(startId)) {

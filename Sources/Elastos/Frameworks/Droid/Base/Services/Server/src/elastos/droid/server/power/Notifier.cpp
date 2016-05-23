@@ -11,6 +11,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::IAppOpsManagerHelper;
 using Elastos::Droid::App::CAppOpsManagerHelper;
@@ -332,7 +334,7 @@ void Notifier::OnInteractiveStateChangeStarted(
         Slogger::D(TAG, "onInteractiveChangeStarted: interactive=%d, reason=%d", interactive , reason);
     }
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (interactive) {
             // Waking up...
             if (mActualPowerState != POWER_STATE_AWAKE) {
@@ -366,7 +368,7 @@ void Notifier::OnInteractiveStateChangeFinished(
         Slogger::D(TAG, "onInteractiveChangeFinished");
     }
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (!interactive) {
             // Finished going to sleep...
             // This is a good time to make transitions that we don't want the user to see,
@@ -409,7 +411,7 @@ void Notifier::OnUserActivity(
     //     // Ignore
     // }
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (!mUserActivityPending) {
             mUserActivityPending = TRUE;
             AutoPtr<IMessage> msg;
@@ -452,7 +454,7 @@ void Notifier::FinishPendingBroadcastLocked()
 
 void Notifier::SendUserActivity()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (!mUserActivityPending) {
             return;
         }
@@ -465,7 +467,7 @@ void Notifier::SendUserActivity()
 void Notifier::SendNextBroadcast()
 {
     Int32 powerState;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mBroadcastedPowerState == POWER_STATE_UNKNOWN) {
             // Broadcasted power state is unknown.  Send wake up.
             mPendingWakeUpBroadcast = FALSE;

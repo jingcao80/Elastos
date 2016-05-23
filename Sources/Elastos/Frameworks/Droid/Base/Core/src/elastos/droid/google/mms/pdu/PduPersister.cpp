@@ -17,6 +17,8 @@
 
 package com.google.android.mms.pdu;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using com::Google::Android::Mms::IContentType;
 using com::Google::Android::Mms::Utility::IDownloadDrmHelper;
 using com::Google::Android::Mms::Utility::IDrmConvertSession;
@@ -525,7 +527,7 @@ public class PduPersister {
         Int32 msgBox = 0;
         Int64 threadId = -1;
         try {
-            Synchronized(PDU_CACHE_INSTANCE) {
+            {    AutoLock syncLock(PDU_CACHE_INSTANCE);
                 If (PDU_CACHE_INSTANCE->IsUpdating(uri)) {
                     If (LOCAL_LOGV) {
                         Logger::V(TAG, "load: " + uri + " blocked by IsUpdating()");
@@ -661,7 +663,7 @@ public class PduPersister {
                         "Unrecognized PDU type: " + Integer->ToHexString(msgType));
             }
         } finally {
-            Synchronized(PDU_CACHE_INSTANCE) {
+            {    AutoLock syncLock(PDU_CACHE_INSTANCE);
                 If (pdu != NULL) {
                     Assert(PDU_CACHE_INSTANCE->Get(uri) == NULL);
                     // Update the cache entry with the real info
@@ -978,7 +980,7 @@ public class PduPersister {
      * @throws MmsException Bad URI or updating failed.
      */
     CARAPI UpdateHeaders(Uri uri, SendReq sendReq) {
-        Synchronized(PDU_CACHE_INSTANCE) {
+        {    AutoLock syncLock(PDU_CACHE_INSTANCE);
             // If the cache item is getting updated, wait until it's done updating before
             // purging it.
             If (PDU_CACHE_INSTANCE->IsUpdating(uri)) {
@@ -1148,7 +1150,7 @@ public class PduPersister {
             throws MmsException {
         try {
             PduCacheEntry cacheEntry;
-            Synchronized(PDU_CACHE_INSTANCE) {
+            {    AutoLock syncLock(PDU_CACHE_INSTANCE);
                 If (PDU_CACHE_INSTANCE->IsUpdating(uri)) {
                     If (LOCAL_LOGV) {
                         Logger::V(TAG, "updateParts: " + uri + " blocked by IsUpdating()");
@@ -1212,7 +1214,7 @@ public class PduPersister {
                 UpdatePart(e->GetKey(), e->GetValue(), preOpenedFiles);
             }
         } finally {
-            Synchronized(PDU_CACHE_INSTANCE) {
+            {    AutoLock syncLock(PDU_CACHE_INSTANCE);
                 PDU_CACHE_INSTANCE->SetUpdating(uri, FALSE);
                 PDU_CACHE_INSTANCE->NotifyAll();
             }
@@ -1253,7 +1255,7 @@ public class PduPersister {
                     + "content://mms/drafts, content://mms/outbox, "
                     + "content://mms/temp.");
         }
-        Synchronized(PDU_CACHE_INSTANCE) {
+        {    AutoLock syncLock(PDU_CACHE_INSTANCE);
             // If the cache item is getting updated, wait until it's done updating before
             // purging it.
             If (PDU_CACHE_INSTANCE->IsUpdating(uri)) {

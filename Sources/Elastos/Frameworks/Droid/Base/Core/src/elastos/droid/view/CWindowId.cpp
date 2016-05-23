@@ -11,6 +11,8 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::StringBuilder;
@@ -44,7 +46,7 @@ ECode CWindowId::RegisterFocusObserver(
 {
     WindowIdFocusObserver* observer = (WindowIdFocusObserver*)_observer;
     AutoPtr<IHashMap> map = observer->mRegistrations;
-    synchronized(map) {
+    {    AutoLock syncLock(map);
         Boolean contains = FALSE;
         if (map->ContainsKey(IBinder::Probe(mToken), &contains), contains) {
             // throw new IllegalStateException(
@@ -65,7 +67,7 @@ ECode CWindowId::UnregisterFocusObserver(
 {
     WindowIdFocusObserver* observer = (WindowIdFocusObserver*)_observer;
     AutoPtr<IHashMap> map = observer->mRegistrations;
-    synchronized(map) {
+    {    AutoLock syncLock(map);
         AutoPtr<IInterface> obj;
         map->Remove(IBinder::Probe(mToken), (IInterface**)&obj);
         if (obj.Get() == NULL) {

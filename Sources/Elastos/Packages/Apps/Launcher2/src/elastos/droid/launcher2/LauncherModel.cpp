@@ -23,6 +23,8 @@
 #include <elastos/utility/Arrays.h>
 #include "R.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ISearchManager;
 using Elastos::Droid::AppWidget::IAppWidgetManager;
 using Elastos::Droid::AppWidget::CAppWidgetManagerHelper;
@@ -256,7 +258,7 @@ LauncherModel::MyRunnable2::MyRunnable2(
 
 ECode LauncherModel::MyRunnable2::Run()
 {
-    synchronized(LauncherModel::sBgLock) {
+    {    AutoLock syncLock(LauncherModel::sBgLock);
         LauncherModel::CheckItemInfoLocked(mItemId, mItem);
     }
     return NOERROR;
@@ -282,7 +284,7 @@ ECode LauncherModel::MyRunnable3::Run()
     mCr->Update(mUri, mValues, String(NULL), NULL, &tmp);
 
     // Lock on mBgLock *after* the db operation
-    synchronized(LauncherModel::sBgLock) {
+    {    AutoLock syncLock(LauncherModel::sBgLock);
         CheckItemInfoLocked(mItemId, mItem);
 
         if (mItem->mContainer != LauncherSettings::Favorites::CONTAINER_DESKTOP &&
@@ -347,7 +349,7 @@ LauncherModel::MyRunnable4::MyRunnable4(
 
 ECode LauncherModel::MyRunnable4::Run()
 {
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         NotifyAll();
         mHost->mFlushingWorkerThread = FALSE;
     }
@@ -401,7 +403,7 @@ ECode LauncherModel::MyRunnable5::Run()
             LauncherSettings::Favorites::CONTENT_URI_NO_NOTIFICATION, mValues, (IUri**)&tmp);
 
     // Lock on mBgLock *after* the db operation
-    synchronized(LauncherModel::sBgLock) {
+    {    AutoLock syncLock(LauncherModel::sBgLock);
         CheckItemInfoLocked(mItem->mId, mItem/*, stackTrace*/);
         AutoPtr<IInteger64> value = CoreUtils::Convert(mItem->mId);
         LauncherModel::sBgItemsIdMap->Put(value, TO_IINTERFACE(mItem));
@@ -480,7 +482,7 @@ ECode LauncherModel::MyRunnable6::Run()
     mCr->Delete(mUriToDelete, String(NULL), NULL, &tmp);
 
     // Lock on mBgLock *after* the db operation
-    synchronized(LauncherModel::sBgLock) {
+    {    AutoLock syncLock(LauncherModel::sBgLock);
         switch (mItem->mItemType) {
             case LauncherSettings::Favorites::ITEM_TYPE_FOLDER:
             {
@@ -540,7 +542,7 @@ ECode LauncherModel::MyRunnable7::Run()
     LauncherSettings::Favorites::GetContentUri(mInfo->mId, FALSE, (IUri**)&uri);
     mCr->Delete(uri, String(NULL), NULL, &tmp);
     // Lock on mBgLock *after* the db operation
-    synchronized(LauncherModel::sBgLock) {
+    {    AutoLock syncLock(LauncherModel::sBgLock);
         AutoPtr<IInteger64> value = CoreUtils::Convert(mInfo->mId);
         LauncherModel::sBgItemsIdMap->Remove(TO_IINTERFACE(value));
         LauncherModel::sBgFolders->Remove(TO_IINTERFACE(value));
@@ -555,7 +557,7 @@ ECode LauncherModel::MyRunnable7::Run()
     mCr->Delete(LauncherSettings::Favorites::CONTENT_URI_NO_NOTIFICATION,
             sb.ToString(), NULL, &tmp);
     // Lock on mBgLock *after* the db operation
-    synchronized(LauncherModel::sBgLock) {
+    {    AutoLock syncLock(LauncherModel::sBgLock);
         Int32 size;
         mInfo->mContents->GetSize(&size);
         for (Int32 i = 0; i < size; i++) {
@@ -658,7 +660,7 @@ LauncherModel::LoaderTask::MyRunnable8::MyRunnable8(
 
 ECode LauncherModel::LoaderTask::MyRunnable8::Run()
 {
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         mHost->mLoadAndBindStepFinished = TRUE;
         if (DEBUG_LOADERS) {
             Slogger::D(TAG, "done with previous binding step");
@@ -1082,7 +1084,7 @@ void LauncherModel::LoaderTask::LoadAndBindWorkspace()
 
     if (!mHost->mWorkspaceLoaded) {
         LoadWorkspace();
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             if (mStopped) {
                 return;
             }
@@ -1099,7 +1101,7 @@ void LauncherModel::LoaderTask::WaitForIdle()
     // Wait until the either we're stopped or the other threads are done.
     // This way we don't start loading all apps until the workspace has settled
     // down.
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int64 workspaceWaitTime = DEBUG_LOADERS ? SystemClock::GetUptimeMillis() : 0;
 
         AutoPtr<IRunnable> run = new MyRunnable8(this);
@@ -1142,7 +1144,7 @@ ECode LauncherModel::LoaderTask::RunBindSynchronousPage(
         Slogger::E("LauncherModel::LoaderTask", "Expecting AllApps and Workspace to be loaded");
         return E_RUNTIME_EXCEPTION;
     }
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         if (mHost->mIsLoaderTaskRunning) {
             // Ensure that we are never running the background loading at this point since
             // we also touch the background collections
@@ -1172,14 +1174,14 @@ ECode LauncherModel::LoaderTask::RunBindSynchronousPage(
 
 ECode LauncherModel::LoaderTask::Run()
 {
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         mHost->mIsLoaderTaskRunning = TRUE;
     }
 
     keep_running: {
         // Elevate priority when Home launches for the first time to avoid
         // starving at boot time. Staring at a blank home is not cool.
-        synchronized(mHost->mLock) {
+        {    AutoLock syncLock(mHost->mLock);
             if (DEBUG_LOADERS) {
                 StringBuilder sb;
                 sb += "Setting thread priority to ";
@@ -1205,7 +1207,7 @@ ECode LauncherModel::LoaderTask::Run()
 
         // Whew! Hard work done.  Slow us down, and wait until the UI thread has
         // settled down.
-        synchronized(mHost->mLock) {
+        {    AutoLock syncLock(mHost->mLock);
             if (mIsLaunching) {
                 if (DEBUG_LOADERS) {
                     Slogger::D(TAG, "Setting thread priority to BACKGROUND");
@@ -1222,7 +1224,7 @@ ECode LauncherModel::LoaderTask::Run()
         LoadAndBindAllApps();
 
         // Restore the default thread priority after we are done loading items
-        synchronized(mHost->mLock) {
+        {    AutoLock syncLock(mHost->mLock);
             Process::SetThreadPriority(IProcess::THREAD_PRIORITY_DEFAULT);
         }
     }
@@ -1231,7 +1233,7 @@ ECode LauncherModel::LoaderTask::Run()
     if (DEBUG_LOADERS) {
         Slogger::D(TAG, "Comparing loaded icons to database icons");
     }
-    synchronized(sBgLock) {
+    {    AutoLock syncLock(sBgLock);
         AutoPtr<ISet> fkeyset;
         sBgDbIconCache->GetKeySet((ISet**)&fkeyset);
         AutoPtr<IIterator> fit;
@@ -1263,7 +1265,7 @@ ECode LauncherModel::LoaderTask::Run()
     // callback runnables are done.
     mContext = NULL;
 
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         // If we are still the last one to be scheduled, remove ourselves.
         if (TO_IINTERFACE(mHost->mLoaderTask) == TO_IINTERFACE(this)) {
             mHost->mLoaderTask = NULL;
@@ -1275,7 +1277,7 @@ ECode LauncherModel::LoaderTask::Run()
 
 ECode LauncherModel::LoaderTask::StopLocked()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mStopped = TRUE;
         Notify();
     }
@@ -1288,7 +1290,7 @@ ECode LauncherModel::LoaderTask::TryGetCallbacks(
 {
     VALIDATE_NOT_NULL(newCallbacks);
 
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         if (mStopped) {
             *newCallbacks = NULL;
             return NOERROR;
@@ -1425,7 +1427,7 @@ void LauncherModel::LoaderTask::LoadWorkspace()
     // mHost->mApp->GetLauncherProvider((ILauncherProvider**)&provider);
     // provider->LoadDefaultFavoritesIfNecessary(0, FALSE);
 
-    synchronized(sBgLock) {
+    {    AutoLock syncLock(sBgLock);
         sBgWorkspaceItems->Clear();
         sBgAppWidgets->Clear();
         sBgFolders->Clear();
@@ -2071,7 +2073,7 @@ void LauncherModel::LoaderTask::BindWorkspace(
     CHashMap::New((IHashMap**)&folders);
     AutoPtr<IHashMap> itemsIdMap;
     CHashMap::New((IHashMap**)&itemsIdMap);
-    synchronized(sBgLock) {
+    {    AutoLock syncLock(sBgLock);
         workspaceItems->AddAll(ICollection::Probe(sBgWorkspaceItems));
         appWidgets->AddAll(ICollection::Probe(sBgAppWidgets));
         folders->PutAll(IMap::Probe(sBgFolders));
@@ -2136,7 +2138,7 @@ void LauncherModel::LoaderTask::LoadAndBindAllApps()
     }
     if (!mHost->mAllAppsLoaded) {
         LoadAllAppsByBatch();
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             if (mStopped) {
                 return;
             }
@@ -2321,7 +2323,7 @@ void LauncherModel::LoaderTask::LoadAllAppsByBatch()
 
 ECode LauncherModel::LoaderTask::DumpState()
 {
-    synchronized(sBgLock) {
+    {    AutoLock syncLock(sBgLock);
         StringBuilder sb1;
         sb1 += "mLoaderTask.mContext=";
         sb1 += TO_STR(mContext);
@@ -2783,7 +2785,7 @@ ECode LauncherModel::UnbindWorkspaceItemsOnMainThread()
     CArrayList::New((IArrayList**)&tmpWorkspaceItems);
     AutoPtr<IArrayList> tmpAppWidgets;
     CArrayList::New((IArrayList**)&tmpAppWidgets);
-    synchronized(sBgLock) {
+    {    AutoLock syncLock(sBgLock);
         tmpWorkspaceItems->AddAll(ICollection::Probe(sBgWorkspaceItems));
         tmpAppWidgets->AddAll(ICollection::Probe(sBgAppWidgets));
     }
@@ -2905,10 +2907,10 @@ ECode LauncherModel::FlushWorkerThread()
     mFlushingWorkerThread = TRUE;
     AutoPtr<IRunnable> waiter = new MyRunnable4(this);
 
-    synchronized(waiter) {
+    {    AutoLock syncLock(waiter);
         RunOnWorkerThread(waiter);
         if (mLoaderTask != NULL) {
-            synchronized(mLoaderTask) {
+            {    AutoLock syncLock(mLoaderTask);
                 mLoaderTask->Notify();
             }
         }
@@ -3364,7 +3366,7 @@ ECode LauncherModel::DeleteFolderContentsFromDatabase(
 ECode LauncherModel::Initialize(
     /* [in] */ ILauncherModelCallbacks* _callbacks)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(_callbacks);
         wrs->GetWeakReference((IWeakReference**)&mCallbacks);
     }
@@ -3449,7 +3451,7 @@ ECode LauncherModel::ResetLoadedState(
     /* [in] */ Boolean resetAllAppsLoaded,
     /* [in] */ Boolean resetWorkspaceLoaded)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         // Stop any existing loaders first, so they don't set mAllAppsLoaded or
         // mWorkspaceLoaded to true later
         StopLoaderLocked();
@@ -3499,7 +3501,7 @@ ECode LauncherModel::StartLoader(
     /* [in] */ Boolean isLaunching,
     /* [in] */ Int32 synchronousBindPage)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (DEBUG_LOADERS) {
             Slogger::D(TAG, "startLoader isLaunching=" + isLaunching);
         }
@@ -3553,7 +3555,7 @@ ECode LauncherModel::BindRemainingSynchronousPages()
 
 ECode LauncherModel::StopLoader()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mLoaderTask != NULL) {
             mLoaderTask->StopLocked();
         }
@@ -3577,7 +3579,7 @@ ECode LauncherModel::IsLoadingWorkspace(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mLoaderTask != NULL) {
             return mLoaderTask->IsLoadingWorkspace(result);
         }
@@ -3751,7 +3753,7 @@ ECode LauncherModel::GetWorkspaceShortcutItemInfosWithIntent(
 
     AutoPtr<IArrayList> items;
     CArrayList::New((IArrayList**)&items);
-    synchronized(sBgLock) {
+    {    AutoLock syncLock(sBgLock);
         Int32 size;
         sBgWorkspaceItems->GetSize(&size);
         for (Int32 i = 0; i < size; i++) {

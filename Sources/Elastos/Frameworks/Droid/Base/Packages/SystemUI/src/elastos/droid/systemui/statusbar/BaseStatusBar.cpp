@@ -20,6 +20,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::CActivityManager;
 using Elastos::Droid::App::CActivityManagerHelper;
@@ -939,8 +941,7 @@ ECode BaseStatusBar::IsDeviceProvisioned(
 
 void BaseStatusBar::UpdateCurrentProfilesCache()
 {
-    synchronized(mCurrentProfiles)
-    {
+    {    AutoLock syncLock(mCurrentProfiles);
         mCurrentProfiles->Clear();
         if (mUserManager != NULL) {
             AutoPtr<IList> lists;
@@ -1256,7 +1257,7 @@ ECode BaseStatusBar::IsNotificationForCurrentProfiles(
         Logger::V(TAG, "%s: current userid: %d, notification userid: %d",
                 n, thisUserId, notificationUserId);
     }
-    synchronized (mCurrentProfiles) {
+    {    AutoLock syncLock(mCurrentProfiles);
         AutoPtr<IInterface> obj;
         mCurrentProfiles->Get(notificationUserId, (IInterface**)&obj);
         *result = notificationUserId == IUserHandle::USER_ALL

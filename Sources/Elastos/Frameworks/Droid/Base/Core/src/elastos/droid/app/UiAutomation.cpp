@@ -16,6 +16,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::ParcelFileDescriptor;
 using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::Droid::Os::SystemClock;
@@ -58,7 +60,7 @@ ECode UiAutomation::InnerAccessibilityServiceCallbacks::OnSetConnectionId(
     /* [in] */ Int32 connectionId)
 {
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         mHost->mConnectionId = connectionId;
         mHost->mLock.NotifyAll();
     }
@@ -91,7 +93,7 @@ ECode UiAutomation::InnerAccessibilityServiceCallbacks::OnAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         event->GetEventTime(&mHost->mLastEventTimeMillis);
         if (mHost->mWaitingForEventDelivery) {
             AutoPtr<IAccessibilityEvent> ae;
@@ -172,7 +174,7 @@ ECode UiAutomation::constructor(
 
 ECode UiAutomation::Connect()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfConnectedLocked())
         if (mIsConnecting) {
             return NOERROR;
@@ -188,7 +190,7 @@ ECode UiAutomation::Connect()
         return E_RUNTIME_EXCEPTION;
     }
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         Int64 startTimeMillis = SystemClock::GetUptimeMillis();
         // try {
             while (TRUE) {
@@ -216,7 +218,7 @@ ECode UiAutomation::Connect()
 
 ECode UiAutomation::Disconnect()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mIsConnecting) {
             Logger::E(TAG, "Cannot call disconnect() while connecting!");
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -238,7 +240,7 @@ ECode UiAutomation::GetConnectionId(
     /* [out] */ Int32* id)
 {
     VALIDATE_NOT_NULL(id)
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
         *id = mConnectionId;
     }
@@ -248,7 +250,7 @@ ECode UiAutomation::GetConnectionId(
 ECode UiAutomation::SetOnAccessibilityEventListener(
     /* [in] */ IOnAccessibilityEventListener* listener)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mOnAccessibilityEventListener = listener;
     }
     return NOERROR;
@@ -262,7 +264,7 @@ ECode UiAutomation::PerformGlobalAction(
     *result = FALSE;
 
     AutoPtr<IIAccessibilityServiceConnection> connection;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
         CAccessibilityInteractionClient::GetInstance()->GetConnection(mConnectionId,
             (IIAccessibilityServiceConnection**)&connection);
@@ -296,7 +298,7 @@ ECode UiAutomation::GetServiceInfo(
     *info = NULL;
 
     AutoPtr<IIAccessibilityServiceConnection> connection;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
         CAccessibilityInteractionClient::GetInstance()->GetConnection(mConnectionId,
             (IIAccessibilityServiceConnection**)&connection);
@@ -316,7 +318,7 @@ ECode UiAutomation::SetServiceInfo(
     /* [in] */ IAccessibilityServiceInfo* info)
 {
     AutoPtr<IIAccessibilityServiceConnection> connection;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
         CAccessibilityInteractionClient::GetInstance()->ClearCache();
         CAccessibilityInteractionClient::GetInstance()->GetConnection(mConnectionId,
@@ -340,7 +342,7 @@ ECode UiAutomation::GetWindows(
     *windows = NULL;
 
     Int32 connectionId = 0;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
         connectionId = mConnectionId;
     }
@@ -355,7 +357,7 @@ ECode UiAutomation::GetRootInActiveWindow(
     *info = NULL;
 
     Int32 connectionId = 0;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
         connectionId = mConnectionId;
     }
@@ -371,7 +373,7 @@ ECode UiAutomation::InjectInputEvent(
     VALIDATE_NOT_NULL(result)
     result = FALSE;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
     }
     // try {
@@ -394,7 +396,7 @@ ECode UiAutomation::SetRotation(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
     }
     switch (rotation) {
@@ -431,7 +433,7 @@ ECode UiAutomation::ExecuteAndWaitForEvent(
     *result = NULL;
 
     // Acquire the lock and prepare for receiving events.
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
         mEventQueue->Clear();
         // Prepare to wait for an event.
@@ -448,7 +450,7 @@ ECode UiAutomation::ExecuteAndWaitForEvent(
     command->Run();
 
     // Acquire the lock and wait for the event.
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         // try {
             // Wait for the event.
             Int64 startTimeMillis = SystemClock::GetUptimeMillis();
@@ -498,7 +500,7 @@ ECode UiAutomation::WaitForIdle(
     /* [in] */ Int64 idleTimeoutMillis,
     /* [in] */ Int64 globalTimeoutMillis)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
 
         Int64 startTimeMillis = SystemClock::GetUptimeMillis();
@@ -539,7 +541,7 @@ ECode UiAutomation::TakeScreenshot(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
     }
     AutoPtr<IDisplay> display;
@@ -622,7 +624,7 @@ ECode UiAutomation::TakeScreenshot(
 ECode UiAutomation::SetRunAsMonkey(
     /* [in] */ Boolean enable)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
     }
     // try {
@@ -643,7 +645,7 @@ ECode UiAutomation::ClearWindowContentFrameStats(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
     }
     // try {
@@ -668,7 +670,7 @@ ECode UiAutomation::GetWindowContentFrameStats(
     VALIDATE_NOT_NULL(stats)
     *stats = NULL;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
     }
     // try {
@@ -685,7 +687,7 @@ ECode UiAutomation::GetWindowContentFrameStats(
 
 ECode UiAutomation::ClearWindowAnimationFrameStats()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
     }
     //try {
@@ -707,7 +709,7 @@ ECode UiAutomation::GetWindowAnimationFrameStats(
     VALIDATE_NOT_NULL(stats)
     *stats = NULL;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
     }
     // try {
@@ -730,7 +732,7 @@ ECode UiAutomation::ExecuteShellCommand(
     VALIDATE_NOT_NULL(pfd)
     *pfd = NULL;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
     }
 

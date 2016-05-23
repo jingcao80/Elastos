@@ -12,6 +12,8 @@
 #include "OsConstants.h"
 #include <cutils/log.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IBoolean;
@@ -157,7 +159,7 @@ ECode DatagramSocket::CreateSocket(
     /* [in] */ Int32 aPort,
     /* [in] */ IInetAddress* addr)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mImpl = NULL;
         if (mFactory != NULL) {
             mFactory->CreateDatagramSocketImpl((IDatagramSocketImpl**)&mImpl);
@@ -241,7 +243,7 @@ ECode DatagramSocket::GetReceiveBufferSize(
 {
     VALIDATE_NOT_NULL(size);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         FAIL_RETURN(CheckOpen());
         AutoPtr<IInterface> optVal;
         ISocketOptions* option = ISocketOptions::Probe(mImpl);
@@ -256,7 +258,7 @@ ECode DatagramSocket::GetSendBufferSize(
 {
     VALIDATE_NOT_NULL(size);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         FAIL_RETURN(CheckOpen());
         AutoPtr<IInterface> optVal;
         ISocketOptions* option = ISocketOptions::Probe(mImpl);
@@ -271,7 +273,7 @@ ECode DatagramSocket::GetSoTimeout(
 {
     VALIDATE_NOT_NULL(timeout);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         FAIL_RETURN(CheckOpen());
         AutoPtr<IInterface> optVal;
         ISocketOptions* option = ISocketOptions::Probe(mImpl);
@@ -284,7 +286,7 @@ ECode DatagramSocket::GetSoTimeout(
 ECode DatagramSocket::Receive(
     /* [in] */ IDatagramPacket* pack)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         FAIL_RETURN(CheckOpen());
         FAIL_RETURN(EnsureBound());
         if (pack == NULL) {
@@ -360,7 +362,7 @@ ECode DatagramSocket::SetNetworkInterface(
 ECode DatagramSocket::SetSendBufferSize(
     /* [in] */ Int32 size)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (size < 1) {
             ALOGD("Error in DatagramSocket: send buffer size < 1!");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -377,7 +379,7 @@ ECode DatagramSocket::SetSendBufferSize(
 ECode DatagramSocket::SetReceiveBufferSize(
     /* [in] */ Int32 size)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (size < 1) {
             ALOGD("Error in DatagramSocket: receive buffer size < 1!");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -394,7 +396,7 @@ ECode DatagramSocket::SetReceiveBufferSize(
 ECode DatagramSocket::SetSoTimeout(
     /* [in] */ Int32 timeout)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (timeout < 0) {
             ALOGD("Error in DatagramSocket: timeout < 0!");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -411,7 +413,7 @@ ECode DatagramSocket::SetSoTimeout(
 ECode DatagramSocket::SetDatagramSocketImplFactory(
     /* [in] */ IDatagramSocketImplFactory* fac)
 {
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         if (mFactory != NULL) {
             ALOGD("Error in DatagramSocket: Factory already set!");
             return E_SOCKET_EXCEPTION;
@@ -501,7 +503,7 @@ ECode DatagramSocket::Connect(
         return E_SOCKET_EXCEPTION;
     }
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(CheckOpen());
         FAIL_RETURN(EnsureBound());
 

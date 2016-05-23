@@ -12,6 +12,8 @@
 #include "Elastos.Droid.Utility.h"
 #include <Elastos.CoreLibrary.Utility.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::IComparator;
 using Elastos::Core::EIID_IComparator;
 using Elastos::Droid::Content::IContentResolver;
@@ -804,7 +806,7 @@ ECode TtsEngines::UpdateLocalePrefForEngine(
     /* [in] */ const String& engineName,
     /* [in] */ ILocale* newLocale)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
 
         AutoPtr<IContentResolver> cr;
         mContext->GetContentResolver((IContentResolver**)&cr);

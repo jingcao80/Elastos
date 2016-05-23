@@ -19,6 +19,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Utility::IProtocol;
 using Elastos::Droid::Os::Handler;
@@ -164,7 +166,7 @@ ECode HttpsConnection::InitializeEngine(
     // FAIL_RETURN(sslContext->EngineGetClientSessionContext((IClientSessionContext**)&context));
     // FAIL_RETURN(context->SetPersistentCache(cache));
 
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         // TODO: Waiting for OpenSSLContextImpl
         assert(0);
         // FAIL_RETURN(sslContext->EngineGetSocketFactory((ISSLSocketFactory**)&sSslSocketFactory));
@@ -379,7 +381,7 @@ ECode HttpsConnection::OpenConnection(
         // then check if we're still suspended and only wait if we actually
         // need to.
         {
-            synchronized(mSuspendLock) {
+            {    AutoLock syncLock(mSuspendLock);
                 mSuspended = TRUE;
             }
         }
@@ -396,7 +398,7 @@ ECode HttpsConnection::OpenConnection(
         }
 
         {
-            synchronized(mSuspendLock) {
+            {    AutoLock syncLock(mSuspendLock);
                 if (mSuspended) {
                     // Put a limit on how long we are waiting; if the timeout
                     // expires (which should never happen unless you choose
@@ -474,7 +476,7 @@ ECode HttpsConnection::RestartConnection(
         HttpLog::V(String("HttpsConnection.restartConnection(): proceed: ") + StringUtils::BooleanToString(proceed));
     }
 
-    synchronized(mSuspendLock) {
+    {    AutoLock syncLock(mSuspendLock);
         if (mSuspended) {
             mSuspended = FALSE;
             mAborted = !proceed;

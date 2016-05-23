@@ -11,6 +11,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IUserHandle;
@@ -68,7 +70,7 @@ void LocationBlacklist::ReloadBlacklistLocked()
 }
 void LocationBlacklist::ReloadBlacklist()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ReloadBlacklistLocked();
     }
 }
@@ -76,7 +78,7 @@ ECode LocationBlacklist::IsBlacklisted(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 length = mBlacklist->GetLength();
         for (Int32 i = 0; i < length; i++) {
             if (packageName.StartWith((*mBlacklist)[i])) {
@@ -100,7 +102,7 @@ ECode LocationBlacklist::IsBlacklisted(
 Boolean LocationBlacklist::InWhitelist(
     /* [in] */ const String& pkg)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 length = mWhitelist->GetLength();
         for (Int32 i = 0; i < length; i++) {
             if (pkg.StartWith((*mWhitelist)[i])) return TRUE;
@@ -118,7 +120,7 @@ ECode LocationBlacklist::OnChange(
 ECode LocationBlacklist::SwitchUser(
     /* [in] */ Int32 userId)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mCurrentUserId = userId;
         ReloadBlacklistLocked();
     }
@@ -129,7 +131,7 @@ AutoPtr<ArrayOf<String> > LocationBlacklist::GetStringArrayLocked(
     /* [in] */ const String& key)
 {
     String flatString;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IContentResolver> cr;
         mContext->GetContentResolver((IContentResolver**)&cr);
         AutoPtr<ISettingsSecure> settingsSecure;

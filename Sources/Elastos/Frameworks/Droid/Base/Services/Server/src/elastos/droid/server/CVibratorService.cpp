@@ -23,6 +23,8 @@
 #include <Elastos.Droid.Internal.h>
 #include <hardware_legacy/vibrator.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::Process;
@@ -481,7 +483,7 @@ ECode CVibratorService::Vibrate(
     AutoPtr<Vibration> vib = new Vibration(token, milliseconds, usageHint, uid, opPkg, this);
 
     Int64 ident = Binder::ClearCallingIdentity();
-    synchronized(mVibrationsLock) {
+    {    AutoLock syncLock(mVibrationsLock);
         RemoveVibrationLocked(token);
         DoCancelVibrateLocked();
         mCurrentVibration = vib;
@@ -800,7 +802,7 @@ Boolean CVibratorService::DoVibratorExists() {
     // information to decide whether to enable certain features so they expect the
     // result of hasVibrator() to be constant.  For now, just report whether
     // the device has a built-in vibrator.
-    //synchronized(mInputDeviceVibrators) {
+    //{    AutoLock syncLock(mInputDeviceVibrators);
     //    return !mInputDeviceVibrators.isEmpty() || vibratorExists();
     //}
     return VibratorExists();

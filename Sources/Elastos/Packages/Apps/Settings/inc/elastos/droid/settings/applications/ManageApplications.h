@@ -84,12 +84,12 @@ using Elastos::Utility::IList;
 final class CanBeOnSdCardChecker {
     final IPackageManager mPm;
     Int32 mInstallLocation;
-    
+
     CanBeOnSdCardChecker() {
         mPm = IPackageManager.Stub->AsInterface(
                 ServiceManager->GetService("package"));
     }
-    
+
     void Init() {
         try {
             mInstallLocation = mPm->GetInstallLocation();
@@ -98,7 +98,7 @@ final class CanBeOnSdCardChecker {
             return;
         }
     }
-    
+
     Boolean Check(ApplicationInfo info) {
         Boolean canBe = FALSE;
         if ((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
@@ -172,7 +172,7 @@ public class ManageApplications extends Fragment implements
     public static const Int32 RESET_APP_PREFERENCES = MENU_OPTIONS_BASE + 8;
     // sort order
     private Int32 mSortOrder = SORT_ORDER_ALPHA;
-    
+
     private ApplicationsState mApplicationsState;
 
     public static class TabInfo implements OnItemClickListener {
@@ -202,7 +202,7 @@ public class ManageApplications extends Fragment implements
         private ListView mListView;
         // Custom view used to display running processes
         private RunningProcessesView mRunningProcessesView;
-        
+
         //private LinearColorBar mColorBar;
         //private TextView mStorageChartLabel;
         //private TextView mUsedStorageText;
@@ -456,12 +456,12 @@ public class ManageApplications extends Fragment implements
     // Size resource used for packages whose size computation failed for some reason
     CharSequence mInvalidSizeStr;
     private CharSequence mComputingSizeStr;
-    
+
     // layout inflater object used to inflate views
     private LayoutInflater mInflater;
-    
+
     private String mCurrentPkgName;
-    
+
     private Menu mOptionsMenu;
 
     // These are for keeping track of activity and spinner switch state.
@@ -475,7 +475,7 @@ public class ManageApplications extends Fragment implements
     static const Int32 LIST_TYPE_DISABLED = 4;
 
     private Boolean mShowBackground = FALSE;
-    
+
     private Int32 mDefaultListType = -1;
 
     private ViewGroup mContentContainer;
@@ -494,7 +494,7 @@ public class ManageApplications extends Fragment implements
         public Int32 GetCount() {
             return mNumTabs;
         }
-        
+
         //@Override
         public Object InstantiateItem(ViewGroup container, Int32 position) {
             TabInfo tab = mTabs->Get(position);
@@ -625,7 +625,7 @@ public class ManageApplications extends Fragment implements
             mLastSortMode = sort;
             Rebuild(TRUE);
         }
-        
+
         CARAPI Rebuild(Boolean eraseold) {
             if (DEBUG) Logger::I(TAG, "Rebuilding app list...");
             ApplicationsState.AppFilter filterObj;
@@ -754,7 +754,7 @@ public class ManageApplications extends Fragment implements
             for (Int32 i=0; i<mActive->Size(); i++) {
                 AppViewHolder holder = (AppViewHolder)mActive->Get(i).GetTag();
                 if (holder.entry.info.packageName->Equals(packageName)) {
-                    synchronized(holder.entry) {
+                    {    AutoLock syncLock(holder.entry);
                         holder->UpdateSizeText(mTab.mInvalidSizeStr, mWhichSize);
                     }
                     if (holder.entry.info.packageName->Equals(mTab.mOwner.mCurrentPkgName)
@@ -778,15 +778,15 @@ public class ManageApplications extends Fragment implements
             }
             mTab->UpdateStorageUsage();
         }
-        
+
         public Int32 GetCount() {
             return mEntries != NULL ? mEntries->Size() : 0;
         }
-        
+
         public Object GetItem(Int32 position) {
             return mEntries->Get(position);
         }
-        
+
         public ApplicationsState.AppEntry GetAppEntry(Int32 position) {
             return mEntries->Get(position);
         }
@@ -794,7 +794,7 @@ public class ManageApplications extends Fragment implements
         public Int64 GetItemId(Int32 position) {
             return mEntries->Get(position).id;
         }
-        
+
         public View GetView(Int32 position, View convertView, ViewGroup parent) {
             // A ViewHolder keeps references to children views to avoid unnecessary calls
             // to FindViewById() on each row.
@@ -803,7 +803,7 @@ public class ManageApplications extends Fragment implements
 
             // Bind the data efficiently with the holder
             ApplicationsState.AppEntry entry = mEntries->Get(position);
-            synchronized(entry) {
+            {    AutoLock syncLock(entry);
                 holder.entry = entry;
                 if (entry.label != NULL) {
                     holder.appName->SetText(entry.label);
@@ -1082,7 +1082,7 @@ public class ManageApplications extends Fragment implements
         sa->StartPreferencePanel(InstalledAppDetails.class->GetName(), args,
                 R::string::application_info_label, NULL, this, INSTALLED_APP_DETAILS);
     }
-    
+
     //@Override
     CARAPI OnCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         mOptionsMenu = menu;
@@ -1102,12 +1102,12 @@ public class ManageApplications extends Fragment implements
                 .SetShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         UpdateOptionsMenu();
     }
-    
+
     //@Override
     CARAPI OnPrepareOptionsMenu(Menu menu) {
         UpdateOptionsMenu();
     }
-    
+
     //@Override
     CARAPI OnDestroyOptionsMenu() {
         mOptionsMenu = NULL;
@@ -1123,7 +1123,7 @@ public class ManageApplications extends Fragment implements
         if (mOptionsMenu == NULL) {
             return;
         }
-        
+
         /*
          * The running processes screen doesn't use the mApplicationsAdapter
          * so bringing up this menu in that case doesn't make any sense.
@@ -1265,7 +1265,7 @@ public class ManageApplications extends Fragment implements
         UpdateOptionsMenu();
         return TRUE;
     }
-    
+
     CARAPI OnItemClick(TabInfo tab, AdapterView<?> parent, View view, Int32 position,
             Int64 id) {
         if (tab.mApplications != NULL && tab.mApplications->GetCount() > position) {

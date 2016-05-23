@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.imsphone;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
 using Elastos::Utility::IArrayList;
@@ -332,7 +334,7 @@ public class ImsPhoneCallTracker extends CallTracker {
 
         mClirMode = clirMode;
 
-        Synchronized (mSyncHold) {
+        {    AutoLock syncLock(mSyncHold);
             If (holdBeforeDial) {
                 fgState = mForegroundCall->GetState();
                 bgState = mBackgroundCall->GetState();
@@ -1121,7 +1123,7 @@ public class ImsPhoneCallTracker extends CallTracker {
         CARAPI OnCallHeld(ImsCall imsCall) {
             If (DBG) Log("onCallHeld");
 
-            Synchronized (mSyncHold) {
+            {    AutoLock syncLock(mSyncHold);
                 ImsPhoneCall.State oldState = mBackgroundCall->GetState();
                 ProcessCallStateChange(imsCall, ImsPhoneCall.State.HOLDING,
                         DisconnectCause.NOT_DISCONNECTED);
@@ -1152,7 +1154,7 @@ public class ImsPhoneCallTracker extends CallTracker {
         CARAPI OnCallHoldFailed(ImsCall imsCall, ImsReasonInfo reasonInfo) {
             If (DBG) Log("onCallHoldFailed reasonCode=" + reasonInfo->GetCode());
 
-            Synchronized (mSyncHold) {
+            {    AutoLock syncLock(mSyncHold);
                 ImsPhoneCall.State bgState = mBackgroundCall->GetState();
                 If (reasonInfo->GetCode() == ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED) {
                     // disconnected while processing hold

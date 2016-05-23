@@ -15,6 +15,8 @@
 #include <elastos/core/Object.h>
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IConfiguration;
@@ -72,7 +74,7 @@ Boolean DateFormat::Is24HourFormat(
         res->GetConfiguration((IConfiguration**)&config);
         AutoPtr<ILocale> locale;
         config->GetLocale((ILocale**)&locale);
-        synchronized(sLocaleLock) {
+        {    AutoLock syncLock(sLocaleLock);
             Boolean bIs24HourLocale;
             if (sIs24HourLocale != NULL &&
                     (sIs24HourLocale->Equals(locale, &bIs24HourLocale), bIs24HourLocale)) {
@@ -100,7 +102,7 @@ Boolean DateFormat::Is24HourFormat(
             value = "12";
         }
 
-        synchronized(sLocaleLock){
+        {    AutoLock syncLock(sLocaleLock);
             sIs24HourLocale = locale;
             sIs24Hour = value.Equals("24");
         }

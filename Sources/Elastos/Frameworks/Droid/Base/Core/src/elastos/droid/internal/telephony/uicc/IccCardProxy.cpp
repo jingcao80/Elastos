@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.uicc;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using static android::Manifest::Permission::IREAD_PHONE_STATE;
 
 using Elastos::Droid::App::IActivityManagerNative;
@@ -151,7 +153,7 @@ public class IccCardProxy extends Handler implements IccCard {
     }
 
     CARAPI Dispose() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Log("Disposing");
             //Cleanup icc references
             mUiccController->UnregisterForIccChanged(this);
@@ -167,7 +169,7 @@ public class IccCardProxy extends Handler implements IccCard {
      * voice radio technology only!
      */
     CARAPI SetVoiceRadioTech(Int32 radioTech) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (DBG) {
                 Log("Setting radio tech " + ServiceState->RilRadioTechnologyToString(radioTech));
             }
@@ -215,7 +217,7 @@ public class IccCardProxy extends Handler implements IccCard {
      * NV in which case we shouldn't broadcast any sim states changes.
      */
     private void UpdateQuietMode() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Boolean oldQuietMode = mQuietMode;
             Boolean newQuietMode;
             // "config_lte_capable" is set to TRUE when the device is
@@ -412,7 +414,7 @@ public class IccCardProxy extends Handler implements IccCard {
     }
 
     private void UpdateIccAvailability() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             UiccCard newCard = mUiccController->GetUiccCard(mCardIndex);
             CardState state = CardState.CARDSTATE_ABSENT;
             UiccCardApplication newApp = NULL;
@@ -530,7 +532,7 @@ public class IccCardProxy extends Handler implements IccCard {
     }
 
     private void BroadcastIccStateChangedIntent(String value, String reason) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mCardIndex == NULL) {
                 Loge("broadcastIccStateChangedIntent: Card Index is not set; Return!!");
                 return;
@@ -556,7 +558,7 @@ public class IccCardProxy extends Handler implements IccCard {
     }
 
     private void SetExternalState(State newState, Boolean override) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mCardIndex == NULL) {
                 Loge("setExternalState: Card Index is not set; Return!!");
                 return;
@@ -577,7 +579,7 @@ public class IccCardProxy extends Handler implements IccCard {
     }
 
     private void ProcessLockedState() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mUiccApplication == NULL) {
                 //Don't need to do anything if non-existent application is locked
                 return;
@@ -612,7 +614,7 @@ public class IccCardProxy extends Handler implements IccCard {
     }
 
     public Boolean GetIccRecordsLoaded() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mIccRecords != NULL) {
                 return mIccRecords->GetRecordsLoaded();
             }
@@ -652,21 +654,21 @@ public class IccCardProxy extends Handler implements IccCard {
     /* IccCard interface implementation */
     //@Override
     public State GetState() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mExternalState;
         }
     }
 
     //@Override
     public IccRecords GetIccRecords() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mIccRecords;
         }
     }
 
     //@Override
     public IccFileHandler GetIccFileHandler() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mUiccApplication != NULL) {
                 return mUiccApplication->GetIccFileHandler();
             }
@@ -679,7 +681,7 @@ public class IccCardProxy extends Handler implements IccCard {
      */
     //@Override
     CARAPI RegisterForAbsent(Handler h, Int32 what, Object obj) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Registrant r = new Registrant (h, what, obj);
 
             mAbsentRegistrants->Add(r);
@@ -692,7 +694,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     CARAPI UnregisterForAbsent(Handler h) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mAbsentRegistrants->Remove(h);
         }
     }
@@ -702,7 +704,7 @@ public class IccCardProxy extends Handler implements IccCard {
      */
     //@Override
     CARAPI RegisterForPersoLocked(Handler h, Int32 what, Object obj) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Registrant r = new Registrant (h, what, obj);
 
             mPersoLockedRegistrants->Add(r);
@@ -715,7 +717,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     CARAPI UnregisterForPersoLocked(Handler h) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mPersoLockedRegistrants->Remove(h);
         }
     }
@@ -725,7 +727,7 @@ public class IccCardProxy extends Handler implements IccCard {
      */
     //@Override
     CARAPI RegisterForLocked(Handler h, Int32 what, Object obj) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Registrant r = new Registrant (h, what, obj);
 
             mPinLockedRegistrants->Add(r);
@@ -738,14 +740,14 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     CARAPI UnregisterForLocked(Handler h) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mPinLockedRegistrants->Remove(h);
         }
     }
 
     //@Override
     CARAPI SupplyPin(String pin, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mUiccApplication != NULL) {
                 mUiccApplication->SupplyPin(pin, onComplete);
             } else If (onComplete != NULL) {
@@ -759,7 +761,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     CARAPI SupplyPuk(String puk, String newPin, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mUiccApplication != NULL) {
                 mUiccApplication->SupplyPuk(puk, newPin, onComplete);
             } else If (onComplete != NULL) {
@@ -773,7 +775,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     CARAPI SupplyPin2(String pin2, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mUiccApplication != NULL) {
                 mUiccApplication->SupplyPin2(pin2, onComplete);
             } else If (onComplete != NULL) {
@@ -787,7 +789,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     CARAPI SupplyPuk2(String puk2, String newPin2, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mUiccApplication != NULL) {
                 mUiccApplication->SupplyPuk2(puk2, newPin2, onComplete);
             } else If (onComplete != NULL) {
@@ -801,7 +803,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     CARAPI SupplyDepersonalization(String pin, String type, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mUiccApplication != NULL) {
                 mUiccApplication->SupplyDepersonalization(pin, type, onComplete);
             } else If (onComplete != NULL) {
@@ -815,7 +817,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     public Boolean GetIccLockEnabled() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             /* defaults to FALSE, if ICC is absent/deactivated */
             Boolean retValue = mUiccApplication != NULL ?
                     mUiccApplication->GetIccLockEnabled() : FALSE;
@@ -825,7 +827,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     public Boolean GetIccFdnEnabled() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Boolean retValue = mUiccApplication != NULL ?
                     mUiccApplication->GetIccFdnEnabled() : FALSE;
             return retValue;
@@ -851,7 +853,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     CARAPI SetIccLockEnabled(Boolean enabled, String password, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mUiccApplication != NULL) {
                 mUiccApplication->SetIccLockEnabled(enabled, password, onComplete);
             } else If (onComplete != NULL) {
@@ -865,7 +867,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     CARAPI SetIccFdnEnabled(Boolean enabled, String password, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mUiccApplication != NULL) {
                 mUiccApplication->SetIccFdnEnabled(enabled, password, onComplete);
             } else If (onComplete != NULL) {
@@ -879,7 +881,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     CARAPI ChangeIccLockPassword(String oldPassword, String newPassword, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mUiccApplication != NULL) {
                 mUiccApplication->ChangeIccLockPassword(oldPassword, newPassword, onComplete);
             } else If (onComplete != NULL) {
@@ -893,7 +895,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     CARAPI ChangeIccFdnPassword(String oldPassword, String newPassword, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mUiccApplication != NULL) {
                 mUiccApplication->ChangeIccFdnPassword(oldPassword, newPassword, onComplete);
             } else If (onComplete != NULL) {
@@ -907,7 +909,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     public String GetServiceProviderName() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mIccRecords != NULL) {
                 return mIccRecords->GetServiceProviderName();
             }
@@ -917,7 +919,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     public Boolean IsApplicationOnIcc(IccCardApplicationStatus.AppType type) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Boolean retValue = mUiccCard != NULL ? mUiccCard->IsApplicationOnIcc(type) : FALSE;
             return retValue;
         }
@@ -925,7 +927,7 @@ public class IccCardProxy extends Handler implements IccCard {
 
     //@Override
     public Boolean HasIccCard() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mUiccCard != NULL && mUiccCard->GetCardState() != CardState.CARDSTATE_ABSENT) {
                 return TRUE;
             }

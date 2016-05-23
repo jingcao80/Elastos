@@ -146,7 +146,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
      * @return True if the job is valid and is running. False if the job cannot be executed.
      */
     Boolean ExecuteRunnableJob(JobStatus job) {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             if (!mAvailable) {
                 Slogger::E(TAG, "Starting new runnable but context is unavailable > Error.");
                 return FALSE;
@@ -189,7 +189,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
      * stop executing.
      */
     JobStatus GetRunningJob() {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             return mRunningJob;
         }
     }
@@ -203,7 +203,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
      * @return Whether this context is available to handle incoming work.
      */
     Boolean IsAvailable() {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             return mAvailable;
         }
     }
@@ -523,7 +523,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
          */
         private void CloseAndCleanupJobH(Boolean reschedule) {
             final JobStatus completedJob = mRunningJob;
-            synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 try {
                     mBatteryStats->NoteJobFinish(mRunningJob->GetName(), mRunningJob->GetUid());
                 } catch (RemoteException e) {

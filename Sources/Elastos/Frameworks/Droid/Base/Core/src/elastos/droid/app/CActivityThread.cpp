@@ -50,6 +50,8 @@
 #include <unistd.h>
 
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::App::Backup::EIID_IBackupAgent;
 using Elastos::Droid::App::CInstrumentation;
@@ -1657,7 +1659,7 @@ ECode CActivityThread::GetSystemContext(
 {
     VALIDATE_NOT_NULL(ctx);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mSystemContext == NULL) {
             mSystemContext = CContextImpl::CreateSystemContext(this);
         }
@@ -1672,7 +1674,7 @@ ECode CActivityThread::InstallSystemApplicationInfo(
     /* [in] */ IApplicationInfo* info,
     /* [in] */ IClassLoader* classLoader)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IContextImpl> ctx;
         GetSystemContext((IContextImpl**)&ctx);
         CContextImpl* cctx = (CContextImpl*)ctx.Get();
@@ -4881,7 +4883,7 @@ ECode CActivityThread::HandleDispatchPackageBroadcast(
 {
     Boolean hasPkgInfo = FALSE;
     if (packages != NULL) {
-        synchronized (mResourcesManager) {
+        {    AutoLock syncLock(mResourcesManager);
             for (Int32 i = packages->GetLength() - 1; i >= 0; --i) {
                 //Slogger::I(TAG, "Cleaning old package: %s", (*packages)[i].string());
                 if (!hasPkgInfo) {
@@ -5874,7 +5876,7 @@ ECode CActivityThread::HandleUnstableProviderDiedLocked(
 ECode CActivityThread::AppNotRespondingViaProvider(
         /* [in] */ IBinder* provider)
 {
-    synchronized(mProviderMapLock){
+    {    AutoLock syncLock(mProviderMapLock);
         HashMap< AutoPtr<IBinder>, AutoPtr<ProviderRefCount> >::Iterator it;
         AutoPtr<IBinder> tmp = provider;
         it = mProviderRefCountMap.Find(tmp);

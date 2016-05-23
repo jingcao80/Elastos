@@ -3,6 +3,8 @@
 #include "CMac.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Security::ISecurity;
 
 namespace Elastosx {
@@ -386,7 +388,7 @@ ECode CMac::GetSpi(
 {
     VALIDATE_NOT_NULL(spi)
     *spi = NULL;
-    synchronized (mInitLock) {
+    {    AutoLock syncLock(mInitLock);
         if (mSpiImpl != NULL && mProvider != NULL && key == NULL) {
             *spi = mSpiImpl;
             REFCOUNT_ADD(*spi)

@@ -10,6 +10,8 @@
 #include <elastos/utility/regex/Pattern.h>
 #include <elastos/core/StringUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::ILinkedList;
 using Elastos::Utility::CLinkedList;
 using Elastos::Utility::Logging::Slogger;
@@ -649,7 +651,7 @@ ECode TtmlTrack::OnData(
     String str(*data);
 
     // implement intermixing restriction for TTML.
-    synchronized(mParser) {
+    {    AutoLock syncLock(mParser);
         if (mCurrentRunID != NULL && runID != mCurrentRunID) {
             Slogger::E("TtmlTrack", "Run #%ld in progress.  Cannot process run #%d", mCurrentRunID, runID);
             return E_ILLEGAL_STATE_EXCEPTION;

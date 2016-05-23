@@ -70,7 +70,7 @@ class VoiceInteractionManagerServiceImpl {
         //@Override
         CARAPI OnReceive(Context context, Intent intent) {
             if (IIntent::ACTION_CLOSE_SYSTEM_DIALOGS->Equals(intent->GetAction())) {
-                synchronized(mLock) {
+                {    AutoLock syncLock(mLock);
                     if (mActiveSession != NULL && mActiveSession.mSession != NULL) {
                         try {
                             mActiveSession.mSession->CloseSystemDialogs();
@@ -85,7 +85,7 @@ class VoiceInteractionManagerServiceImpl {
     final ServiceConnection mConnection = new ServiceConnection() {
         //@Override
         CARAPI OnServiceConnected(ComponentName name, IBinder service) {
-            synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 mService = IVoiceInteractionService.Stub->AsInterface(service);
                 try {
                     mService->Ready();
@@ -128,7 +128,7 @@ class VoiceInteractionManagerServiceImpl {
 
         //@Override
         CARAPI OnServiceConnected(ComponentName name, IBinder service) {
-            synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 mService = IVoiceInteractionSessionService.Stub->AsInterface(service);
                 if (mActiveSession == this) {
                     try {

@@ -17,6 +17,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IAlarmManager;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::App::IPendingIntentHelper;
@@ -148,7 +150,7 @@ ECode CDownloadService::HandlerCallback::HandleMessage(
     // TODO: handle media scanner timeouts
 
     Boolean isActive = FALSE;
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         isActive = mHost->UpdateLocked();
     }
 
@@ -617,7 +619,7 @@ ECode CDownloadService::Dump(
 {
     AutoPtr<IIndentingPrintWriter> pw;
     CIndentingPrintWriter::New(IWriter::Probe(writer), String("  "), (IIndentingPrintWriter**)&pw);
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ISet> s;
         mDownloads->GetKeySet((ISet**)&s);
         AutoPtr<IList> ids;

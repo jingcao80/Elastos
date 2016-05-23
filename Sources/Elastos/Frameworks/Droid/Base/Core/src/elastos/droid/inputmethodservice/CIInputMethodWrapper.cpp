@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::InputMethodService::CIInputMethodSessionWrapper;
@@ -136,7 +138,7 @@ ECode CIInputMethodWrapper::ExecuteMessage(
             // } catch (RuntimeException e) {
             //     ((PrintWriter)args->mArg2).println("Exception: " + e);
             // }
-            // synchronized(args->mArg4) {
+            // {    AutoLock syncLock(args->mArg4);
             //     ((CountDownLatch)args->mArg4).countDown();
             // }
             args->Recycle();

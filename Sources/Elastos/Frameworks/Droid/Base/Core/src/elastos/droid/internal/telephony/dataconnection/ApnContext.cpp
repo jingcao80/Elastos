@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.dataconnection;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::INetworkConfig;
@@ -247,7 +249,7 @@ public class ApnContext {
     }
 
     CARAPI IncRefCount() {
-        Synchronized (mRefCountLock) {
+        {    AutoLock syncLock(mRefCountLock);
             If (mRefCount++ == 0) {
                 mDcTracker->SetEnabled(mDcTracker->ApnTypeToId(mApnType), TRUE);
             }
@@ -255,7 +257,7 @@ public class ApnContext {
     }
 
     CARAPI DecRefCount() {
-        Synchronized (mRefCountLock) {
+        {    AutoLock syncLock(mRefCountLock);
             If ((mRefCount > 0) && (mRefCount-- == 1)) {
                 mDcTracker->SetEnabled(mDcTracker->ApnTypeToId(mApnType), FALSE);
             } else {

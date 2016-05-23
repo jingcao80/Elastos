@@ -6,6 +6,8 @@
 #include "elastos/droid/os/UserHandle.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::UserHandle;
 
 namespace Elastos {
@@ -60,7 +62,7 @@ ECode ContentObserver::GetContentObserver(
 {
     VALIDATE_NOT_NULL(contentObserver)
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mTransport == NULL) {
             CContentObserverTransport::New(this, (IContentObserverTransport**)&mTransport);
         }
@@ -75,7 +77,7 @@ ECode ContentObserver::ReleaseContentObserver(
 {
     VALIDATE_NOT_NULL(contentObserver)
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IContentObserverTransport> oldTransport = mTransport;
         if (oldTransport != NULL) {
             oldTransport->ReleaseContentObserver();

@@ -45,6 +45,8 @@
 #include <linux/route.h>
 #include <linux/ipv6_route.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::UserHandle;
@@ -1475,7 +1477,7 @@ ECode Vpn::OnUserAdded(
     /* [in] */ Int32 userHandle)
 {
     // If the user is restricted tie them to the owner's VPN
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IUserManagerHelper> helper;
         CUserManagerHelper::AcquireSingleton((IUserManagerHelper**)&helper);
         AutoPtr<IUserManager> mgr;
@@ -1506,7 +1508,7 @@ ECode Vpn::OnUserRemoved(
 {
     // clean up if restricted
     ECode ec = NOERROR;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IUserManagerHelper> helper;
         CUserManagerHelper::AcquireSingleton((IUserManagerHelper**)&helper);
         AutoPtr<IUserManager> mgr;

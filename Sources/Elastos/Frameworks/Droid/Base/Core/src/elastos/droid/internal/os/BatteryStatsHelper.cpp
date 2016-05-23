@@ -17,6 +17,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Hardware::ISensor;
@@ -247,7 +249,7 @@ AutoPtr<IBatteryStats> BatteryStatsHelper::StatsFromFile(
     /* [in] */ IContext* context,
     /* [in] */ const String& fname)
 {
-    synchronized (sFileXfer) {
+    {    AutoLock syncLock(sFileXfer);
         AutoPtr<IFile> path = MakeFilePath(context, fname);
         AutoPtr<IInterface> value;
         IMap::Probe(sFileXfer)->Get(path, (IInterface**)&value);

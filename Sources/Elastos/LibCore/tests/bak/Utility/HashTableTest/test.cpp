@@ -432,7 +432,7 @@ int CTest::test_isEmpty(int argc, char* argv[])
     // };
     // t1.start();
     for (int i = 1; i < 10000; i++) {
-        // synchronized (ht) {
+        // {    AutoLock syncLock(ht);
         AutoPtr<ICharSequence> seq;
         CString::New(StringUtils::Int32ToString(i - 1), (ICharSequence**)&seq);
         ht->Remove(seq, (IInterface**)&outface);
@@ -776,7 +776,7 @@ int CTest::test_size(int argc, char* argv[])
     // };
     // t1.start();
     // for (int i = 1; i < 10000; i++) {
-    //     synchronized (ht) {
+    //     {    AutoLock syncLock(ht);
     //         ht.remove(String.valueOf(i - 1));
     //         ht.put(String.valueOf(i), "");
     //     }

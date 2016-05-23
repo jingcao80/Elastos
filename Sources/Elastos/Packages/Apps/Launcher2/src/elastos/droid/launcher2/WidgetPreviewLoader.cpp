@@ -13,6 +13,8 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IApplication;
 using Elastos::Droid::Content::CContentValues;
@@ -263,7 +265,7 @@ ECode WidgetPreviewLoader::MyAsyncTask2::DoInBackground(
         *result = NULL;
         return NOERROR;
     }
-    synchronized(sInvalidPackagesLock) {
+    {    AutoLock syncLock(sInvalidPackagesLock);
         AutoPtr<ICharSequence> obj = CoreUtils::Convert(mPackageName);
         sInvalidPackages->Remove(TO_IINTERFACE(obj));
     }
@@ -476,7 +478,7 @@ ECode WidgetPreviewLoader::GetPreview(
     String name = GetObjectName(o);
     // check if the package is valid
     Boolean packageValid = TRUE;
-    synchronized(sInvalidPackagesLock) {
+    {    AutoLock syncLock(sInvalidPackagesLock);
         String pname = GetObjectPackage(o);
         AutoPtr<ICharSequence> obj = CoreUtils::Convert(pname);
         sInvalidPackages->Contains(TO_IINTERFACE(obj), &packageValid);
@@ -487,7 +489,7 @@ ECode WidgetPreviewLoader::GetPreview(
         return NOERROR;
     }
     if (packageValid) {
-        synchronized(mLoadedPreviewsLock) {
+        {    AutoLock syncLock(mLoadedPreviewsLock);
             // check if it exists in our existing cache
             Boolean hasKey;
             AutoPtr<ICharSequence> obj = CoreUtils::Convert(name);
@@ -509,7 +511,7 @@ ECode WidgetPreviewLoader::GetPreview(
     }
 
     AutoPtr<IBitmap> unusedBitmap;
-    synchronized(mUnusedBitmapsLock) {
+    {    AutoLock syncLock(mUnusedBitmapsLock);
         // not in cache; we need to load it from the db
         Boolean isMutable;
         Int32 width;
@@ -546,7 +548,7 @@ ECode WidgetPreviewLoader::GetPreview(
     }
 
     if (preview != NULL) {
-        synchronized(mLoadedPreviewsLock) {
+        {    AutoLock syncLock(mLoadedPreviewsLock);
             AutoPtr<IWeakReference> wr;
             IWeakReferenceSource::Probe(preview)->GetWeakReference((IWeakReference**)&wr);
             AutoPtr<ICharSequence> obj = CoreUtils::Convert(name);
@@ -568,7 +570,7 @@ ECode WidgetPreviewLoader::GetPreview(
             return E_RUNTIME_EXCEPTION;
         }
 
-        synchronized(mLoadedPreviewsLock) {
+        {    AutoLock syncLock(mLoadedPreviewsLock);
             AutoPtr<IWeakReference> wr;
             IWeakReferenceSource::Probe(preview)->GetWeakReference((IWeakReference**)&wr);
             AutoPtr<ICharSequence> obj = CoreUtils::Convert(name);
@@ -591,7 +593,7 @@ ECode WidgetPreviewLoader::RecycleBitmap(
     /* [in] */ IBitmap* bitmapToRecycle)
 {
     String name = GetObjectName(o);
-    synchronized (mLoadedPreviewsLock) {
+    {    AutoLock syncLock(mLoadedPreviewsLock);
         Boolean hasKey;
         AutoPtr<ICharSequence> obj = CoreUtils::Convert(name);
         mLoadedPreviews->ContainsKey(TO_IINTERFACE(obj), &hasKey);
@@ -607,7 +609,7 @@ ECode WidgetPreviewLoader::RecycleBitmap(
                 mLoadedPreviews->Remove(TO_IINTERFACE(obj));
                 Boolean res;
                 if (bitmapToRecycle->IsMutable(&res), res) {
-                    synchronized (mUnusedBitmapsLock) {
+                    {    AutoLock syncLock(mUnusedBitmapsLock);
                         mUnusedBitmaps->Add(TO_IINTERFACE(b));
                     }
                 }
@@ -739,7 +741,7 @@ ECode WidgetPreviewLoader::RemoveFromDb(
     /* [in] */ CacheDb* cacheDb,
     /* [in] */ const String& packageName)
 {
-    synchronized(sInvalidPackagesLock) {
+    {    AutoLock syncLock(sInvalidPackagesLock);
         AutoPtr<ICharSequence> obj = CoreUtils::Convert(packageName);
         sInvalidPackages->Add(TO_IINTERFACE(obj));
     }

@@ -13,6 +13,8 @@
 #include <unicode/dtitvfmt.h>
 #include <ElStringByteSink.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::IInteger64;
 using Elastos::Core::CInteger64;
 using Elastos::Utility::CLocale;
@@ -100,7 +102,7 @@ String DateIntervalFormat::FormatDateRange(
 
     String skeleton = ToSkeleton(startCallendar, endCallendar, flags);
     String rev;
-    synchronized(CACHED_FORMATTERS) {
+    {    AutoLock syncLock(CACHED_FORMATTERS);
         String s;
         locale->ToString(&s);
         String id;

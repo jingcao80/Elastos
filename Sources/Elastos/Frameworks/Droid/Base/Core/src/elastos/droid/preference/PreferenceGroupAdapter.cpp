@@ -8,6 +8,8 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Preference::IPreference;
 using Elastos::Droid::View::CViewGroupLayoutParams;
@@ -189,7 +191,7 @@ ECode PreferenceGroupAdapter::constructor(
 
 void PreferenceGroupAdapter::SyncMyPreferences()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mIsSyncing) {
             return;
         }
@@ -208,7 +210,7 @@ void PreferenceGroupAdapter::SyncMyPreferences()
 
     BaseAdapter::NotifyDataSetChanged();
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mIsSyncing = FALSE;
         mLock.NotifyAll();
     }

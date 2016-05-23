@@ -16,6 +16,8 @@
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::Instrumentation;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IDialogInterface;
@@ -756,7 +758,7 @@ ECode VoiceInteractionSession::NewRequest(
     /* [out] */ IVoiceInteractionSessionRequest** request)
 {
     VALIDATE_NOT_NULL(request)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IVoiceInteractionSessionRequest> req;
         CVoiceInteractionSessionRequest::New(callback, this, (IVoiceInteractionSessionRequest**)&req);
         AutoPtr<Request> _req = (Request*)req.Get();
@@ -772,7 +774,7 @@ ECode VoiceInteractionSession::RemoveRequest(
     /* [out] */ IVoiceInteractionSessionRequest** request)
 {
     VALIDATE_NOT_NULL(request)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mActiveRequests->Get(reqInterface, (IInterface**)&obj);
         AutoPtr<IVoiceInteractionSessionRequest> req = IVoiceInteractionSessionRequest::Probe(obj);

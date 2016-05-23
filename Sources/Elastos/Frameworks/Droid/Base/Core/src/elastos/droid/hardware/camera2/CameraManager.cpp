@@ -23,6 +23,8 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Camera2::CCameraCharacteristics;
 using Elastos::Droid::Hardware::Camera2::Legacy::CameraDeviceUserShim;
 using Elastos::Droid::Hardware::Camera2::Legacy::LegacyMetadataMapper;
@@ -108,7 +110,7 @@ CAR_INTERFACE_IMPL(CameraManager::CameraServiceDeathListener, Object, IProxyDeat
 ECode CameraManager::CameraServiceDeathListener::ProxyDied()
 {
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         mHost->mCameraService = NULL;
         // Tell listeners that the cameras are _available_, because any existing clients
         // will have gotten disconnected. This is optimistic under the assumption that the
@@ -232,7 +234,7 @@ ECode CameraManager::CameraServiceListener::OnStatusChanged(
     /* [in] */ Int32 cameraId)
 {
     Object& lock =  mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         return OnStatusChangedLocked(status, StringUtils::ToString(cameraId));
     }
     return NOERROR;
@@ -350,7 +352,7 @@ ECode CameraManager::constructor()
 ECode CameraManager::constructor(
     /* [in] */ IContext* context)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mContext = context;
 
         ConnectCameraServiceLocked();
@@ -364,7 +366,7 @@ ECode CameraManager::GetCameraIdList(
     VALIDATE_NOT_NULL(outarr);
     *outarr = NULL;
 
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         // ID list creation handles various known failures in device enumeration, so only
         // exceptions it'll throw are unexpected, and should be propagated upward.
         AutoPtr<IArrayList> list;
@@ -400,7 +402,7 @@ ECode CameraManager::RegisterAvailabilityCallback(
         CHandler::New(looper, (IHandler**)&handler);
     }
 
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mCallbackMap->Put(TO_IINTERFACE(ccallback), TO_IINTERFACE(handler), (IInterface**)&obj);
         AutoPtr<IHandler> oldHandler = IHandler::Probe(obj);
@@ -415,7 +417,7 @@ ECode CameraManager::RegisterAvailabilityCallback(
 ECode CameraManager::UnregisterAvailabilityCallback(
     /* [in] */ ICameraManagerAvailabilityCallback* ccallback)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         mCallbackMap->Remove(TO_IINTERFACE(ccallback));
     }
     return NOERROR;
@@ -430,7 +432,7 @@ ECode CameraManager::GetCameraCharacteristics(
 
     AutoPtr<ICameraCharacteristics> characteristics;
 
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IArrayList> list;
         GetOrCreateDeviceIdListLocked((IArrayList**)&list);
         Boolean result;
@@ -529,7 +531,7 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
     AutoPtr<ICameraDevice> device;
     //try {
 
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
 
         AutoPtr<IICameraDeviceUser> cameraUser;
         AutoPtr<ICameraDeviceImpl> deviceImpl;

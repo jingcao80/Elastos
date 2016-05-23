@@ -574,19 +574,19 @@ final class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> {
     }
 
     void RegisterCallback(Callback callback) {
-        synchronized(mCallbacks) {
+        {    AutoLock syncLock(mCallbacks);
             mCallbacks->Add(callback);
         }
     }
 
     void UnregisterCallback(Callback callback) {
-        synchronized(mCallbacks) {
+        {    AutoLock syncLock(mCallbacks);
             mCallbacks->Remove(callback);
         }
     }
 
     private void DispatchAttributesChanged() {
-        synchronized(mCallbacks) {
+        {    AutoLock syncLock(mCallbacks);
             for (Callback callback : mCallbacks) {
                 callback->OnDeviceAttributesChanged();
             }

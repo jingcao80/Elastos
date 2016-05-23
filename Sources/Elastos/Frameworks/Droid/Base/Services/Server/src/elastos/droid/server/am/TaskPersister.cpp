@@ -16,6 +16,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::BitmapCompressFormat_PNG;
 using Elastos::Droid::Graphics::CBitmapFactory;
 using Elastos::Droid::Graphics::IBitmapFactory;
@@ -85,14 +87,14 @@ ECode TaskPersister::LazyTaskWriterThread::Run()
         // call RemoveObsoleteFiles every time through the loop, only the last time before
         // going to sleep. The risk is that we call RemoveObsoleteFiles() successively.
         Boolean probablyDone = FALSE;
-        synchronized (mHost) {
+        {    AutoLock syncLock(mHost);
             probablyDone = mHost->mWriteQueue.IsEmpty();
         }
         CActivityManagerService* service = mHost->mService;
         if (probablyDone) {
             if (DEBUG) Slogger::D(TAG, "Looking for obsolete files.");
             persistentTaskIds->Clear();
-            synchronized (service) {
+            {    AutoLock syncLock(service);
                 AutoPtr<List<AutoPtr<TaskRecord> > > tasks = service->mRecentTasks;
                 // if (DEBUG) Slogger::D(TAG, "mRecents=" + tasks);
                 List<AutoPtr<TaskRecord> >::ReverseIterator riter;
@@ -116,7 +118,7 @@ ECode TaskPersister::LazyTaskWriterThread::Run()
 
         // If mNextWriteTime, then don't delay between each call to saveToXml().
         AutoPtr<WriteQueueItem> item;
-        synchronized (mHost) {
+        {    AutoLock syncLock(mHost);
             if (mHost->mNextWriteTime != FLUSH_QUEUE) {
                 // The next write we don't have to wait so Int64.
                 mHost->mNextWriteTime = SystemClock::GetUptimeMillis() + INTER_WRITE_DELAY_MS;
@@ -184,7 +186,7 @@ ECode TaskPersister::LazyTaskWriterThread::Run()
             AutoPtr<IStringWriter> stringWriter;
             TaskRecord* task = ((TaskWriteQueueItem*)item.Get())->mTask;
             if (DEBUG) Slogger::D(TAG, "Writing task=%s", task->ToString().string());
-            synchronized (service) {
+            {    AutoLock syncLock(service);
                 if (task->mInRecents) {
                     // Still there.
                     if (DEBUG) Slogger::D(TAG, "Saving task=%s", task->ToString().string());
@@ -301,7 +303,7 @@ void TaskPersister::RemoveThumbnails(
 void TaskPersister::YieldIfQueueTooDeep()
 {
     Boolean stall = FALSE;
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (mNextWriteTime == FLUSH_QUEUE) {
             stall = TRUE;
         }
@@ -315,7 +317,7 @@ void TaskPersister::Wakeup(
     /* [in] */ TaskRecord* task,
     /* [in] */ Boolean flush)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (task != NULL) {
             List<AutoPtr<WriteQueueItem> >::ReverseIterator riter;
             for (riter = mWriteQueue.RBegin(); riter != mWriteQueue.REnd(); ++riter) {
@@ -354,7 +356,7 @@ void TaskPersister::Wakeup(
 
 void TaskPersister::Flush()
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         mNextWriteTime = FLUSH_QUEUE;
         NotifyAll();
         do {
@@ -367,7 +369,7 @@ void TaskPersister::SaveImage(
     /* [in] */ IBitmap* image,
     /* [in] */ const String& filename)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         List<AutoPtr<WriteQueueItem> >::ReverseIterator riter;
         for (riter = mWriteQueue.RBegin(); riter != mWriteQueue.REnd(); ++riter) {
             AutoPtr<WriteQueueItem> item = *riter;
@@ -411,7 +413,7 @@ AutoPtr<IBitmap> TaskPersister::GetTaskDescriptionIcon(
 AutoPtr<IBitmap> TaskPersister::GetImageFromWriteQueue(
     /* [in] */ const String& filename)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         List<AutoPtr<WriteQueueItem> >::ReverseIterator riter;
         for (riter = mWriteQueue.RBegin(); riter != mWriteQueue.REnd(); ++riter) {
             AutoPtr<WriteQueueItem> item = *riter;

@@ -3,6 +3,8 @@
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/Manifest.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::CIntentFilter;
@@ -218,7 +220,7 @@ ECode CSearchManagerService::GetSearchables(
     // } finally {
     //     Binder.restoreCallingIdentity(origId);
     // }
-    synchronized(mSearchables) {
+    {    AutoLock syncLock(mSearchables);
         Iterator it = mSearchables.Find(userId);
         if ((it != mSearchables.End()) && it->mSecond != NULL) {
             *rst = it->mSecond;

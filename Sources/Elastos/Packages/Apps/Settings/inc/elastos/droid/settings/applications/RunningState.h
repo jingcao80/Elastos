@@ -87,27 +87,27 @@ public class RunningState {
     // entry.
     final SparseArray<HashMap<String, ProcessItem>> mServiceProcessesByName
             = new SparseArray<HashMap<String, ProcessItem>>();
-    
+
     // Processes that are hosting a service we are interested in, organized
     // by their pid.  These disappear and re-appear as services are restarted.
     final SparseArray<ProcessItem> mServiceProcessesByPid
             = new SparseArray<ProcessItem>();
-    
+
     // Used to sort the interesting processes.
     final ServiceProcessComparator mServiceProcessComparator
             = new ServiceProcessComparator();
-    
+
     // Additional interesting processes to be shown to the user, even if
     // there is no service running in them.
     final ArrayList<ProcessItem> mInterestingProcesses = new ArrayList<ProcessItem>();
-    
+
     // All currently running processes, for finding dependencies etc.
     final SparseArray<ProcessItem> mRunningProcesses
             = new SparseArray<ProcessItem>();
-    
+
     // The processes associated with services, in sorted order.
     final ArrayList<ProcessItem> mProcessItems = new ArrayList<ProcessItem>();
-    
+
     // All processes, used for retrieving memory information.
     final ArrayList<ProcessItem> mAllProcessItems = new ArrayList<ProcessItem>();
 
@@ -195,11 +195,11 @@ public class RunningState {
     };
 
     // ----- following protected by mLock -----
-    
+
     // Lock for protecting the state that will be shared between the
     // background update thread and the UI thread.
     final Object mLock = new Object();
-    
+
     Boolean mResumed;
     Boolean mHaveData;
     Boolean mWatchingBackgroundItems;
@@ -208,7 +208,7 @@ public class RunningState {
     ArrayList<MergedItem> mMergedItems = new ArrayList<MergedItem>();
     ArrayList<MergedItem> mBackgroundItems = new ArrayList<MergedItem>();
     ArrayList<MergedItem> mUserBackgroundItems = new ArrayList<MergedItem>();
-    
+
     Int32 mNumBackgroundProcesses;
     Int64 mBackgroundProcessMemory;
     Int32 mNumForegroundProcesses;
@@ -231,7 +231,7 @@ public class RunningState {
                     Reset();
                     break;
                 case MSG_UPDATE_CONTENTS:
-                    synchronized(mLock) {
+                    {    AutoLock syncLock(mLock);
                         if (!mResumed) {
                             return;
                         }
@@ -261,7 +261,7 @@ public class RunningState {
                             : OnRefreshUiListener.REFRESH_DATA;
                     break;
                 case MSG_UPDATE_TIME:
-                    synchronized(mLock) {
+                    {    AutoLock syncLock(mLock);
                         if (!mResumed) {
                             return;
                         }
@@ -332,9 +332,9 @@ public class RunningState {
         ActivityManager.RunningServiceInfo mRunningService;
         ServiceInfo mServiceInfo;
         Boolean mShownAsStarted;
-        
+
         MergedItem mMergedItem;
-        
+
         public ServiceItem(Int32 userId) {
             Super(FALSE, userId);
         }
@@ -345,17 +345,17 @@ public class RunningState {
                 = new HashMap<ComponentName, ServiceItem>();
         final SparseArray<ProcessItem> mDependentProcesses
                 = new SparseArray<ProcessItem>();
-        
+
         final Int32 mUid;
         final String mProcessName;
         Int32 mPid;
-        
+
         ProcessItem mClient;
         Int32 mLastNumDependentProcesses;
-        
+
         Int32 mRunningSeq;
         ActivityManager.RunningAppProcessInfo mRunningProcessInfo;
-        
+
         MergedItem mMergedItem;
 
         Boolean mInteresting;
@@ -364,7 +364,7 @@ public class RunningState {
         Boolean mIsSystem;
         Boolean mIsStarted;
         Int64 mActiveSince;
-        
+
         public ProcessItem(Context context, Int32 uid, String processName) {
             Super(TRUE, UserHandle->GetUserId(uid));
             mDescription = context->GetResources()->GetString(
@@ -372,12 +372,12 @@ public class RunningState {
             mUid = uid;
             mProcessName = processName;
         }
-        
+
         void EnsureLabel(PackageManager pm) {
             if (mLabel != NULL) {
                 return;
             }
-            
+
             try {
                 ApplicationInfo ai = pm->GetApplicationInfo(mProcessName,
                         PackageManager.GET_UNINSTALLED_PACKAGES);
@@ -389,11 +389,11 @@ public class RunningState {
                 }
             } catch (PackageManager.NameNotFoundException e) {
             }
-            
+
             // If we couldn't get information about the overall
             // process, try to find something about the uid.
             String[] pkgs = pm->GetPackagesForUid(mUid);
-            
+
             // If there is one package with this uid, that is what we want.
             if (pkgs.length == 1) {
                 try {
@@ -406,7 +406,7 @@ public class RunningState {
                 } catch (PackageManager.NameNotFoundException e) {
                 }
             }
-            
+
             // If there are multiple, see if one gives us the official name
             // for this uid.
             for (String name : pkgs) {
@@ -425,7 +425,7 @@ public class RunningState {
                 } catch (PackageManager.NameNotFoundException e) {
                 }
             }
-            
+
             // If still don't have anything to display, just use the
             // service info.
             if (mServices->Size() > 0) {
@@ -436,7 +436,7 @@ public class RunningState {
                 mLabel = mDisplayLabel->ToString();
                 return;
             }
-            
+
             // Finally... whatever, just pick the first package's name.
             try {
                 ApplicationInfo ai = pm->GetApplicationInfo(pkgs[0],
@@ -504,10 +504,10 @@ public class RunningState {
                 si.mDescription = context->GetResources()->GetString(
                         R::string::service_started_by_app);
             }
-            
+
             return changed;
         }
-        
+
         Boolean UpdateSize(Context context, Int64 pss, Int32 curSeq) {
             mSize = pss * 1024;
             if (mCurSeq == curSeq) {
@@ -523,7 +523,7 @@ public class RunningState {
             }
             return FALSE;
         }
-        
+
         Boolean BuildDependencyChain(Context context, PackageManager pm, Int32 curSeq) {
             final Int32 NP = mDependentProcesses->Size();
             Boolean changed = FALSE;
@@ -537,15 +537,15 @@ public class RunningState {
                 proc->EnsureLabel(pm);
                 changed |= proc->BuildDependencyChain(context, pm, curSeq);
             }
-            
+
             if (mLastNumDependentProcesses != mDependentProcesses->Size()) {
                 changed = TRUE;
                 mLastNumDependentProcesses = mDependentProcesses->Size();
             }
-            
+
             return changed;
         }
-        
+
         void AddDependentProcesses(ArrayList<BaseItem> dest,
                 ArrayList<ProcessItem> destProc) {
             final Int32 NP = mDependentProcesses->Size();
@@ -566,7 +566,7 @@ public class RunningState {
         final ArrayList<ProcessItem> mOtherProcesses = new ArrayList<ProcessItem>();
         final ArrayList<ServiceItem> mServices = new ArrayList<ServiceItem>();
         final ArrayList<MergedItem> mChildren = new ArrayList<MergedItem>();
-        
+
         private Int32 mLastNumProcesses = -1, mLastNumServices = -1;
 
         MergedItem(Int32 userId) {
@@ -621,12 +621,12 @@ public class RunningState {
                 mPackageInfo = mProcess.mPackageInfo;
                 mDisplayLabel = mProcess.mDisplayLabel;
                 mLabel = mProcess.mLabel;
-                
+
                 if (!mBackground) {
                     SetDescription(context, (mProcess.mPid > 0 ? 1 : 0) + mOtherProcesses->Size(),
                             mServices->Size());
                 }
-                
+
                 mActiveSince = -1;
                 for (Int32 i=0; i<mServices->Size(); i++) {
                     ServiceItem si = mServices->Get(i);
@@ -638,7 +638,7 @@ public class RunningState {
 
             return FALSE;
         }
-        
+
         Boolean UpdateSize(Context context) {
             if (mUser != NULL) {
                 mSize = 0;
@@ -653,7 +653,7 @@ public class RunningState {
                     mSize += mOtherProcesses->Get(i).mSize;
                 }
             }
-            
+
             String sizeStr = Formatter->FormatShortFileSize(
                     context, mSize);
             if (!sizeStr->Equals(mSizeStr)){
@@ -706,7 +706,7 @@ public class RunningState {
             return 0;
         }
     }
-    
+
     static CharSequence MakeLabel(PackageManager pm,
             String className, PackageItemInfo item) {
         if (item != NULL && (item.labelRes != 0
@@ -716,7 +716,7 @@ public class RunningState {
                 return label;
             }
         }
-        
+
         String label = className;
         Int32 tail = label->LastIndexOf('.');
         if (tail >= 0) {
@@ -724,9 +724,9 @@ public class RunningState {
         }
         return label;
     }
-    
+
     static RunningState GetInstance(Context context) {
-        synchronized(sGlobalLock) {
+        {    AutoLock syncLock(sGlobalLock);
             if (sInstance == NULL) {
                 sInstance = new RunningState(context);
             }
@@ -747,7 +747,7 @@ public class RunningState {
     }
 
     void Resume(OnRefreshUiListener listener) {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             mResumed = TRUE;
             mRefreshUiListener = listener;
             if (mInterestingConfigChanges->ApplyNewConfig(mApplicationContext->GetResources())) {
@@ -764,20 +764,20 @@ public class RunningState {
     }
 
     void UpdateNow() {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             mBackgroundHandler->RemoveMessages(MSG_UPDATE_CONTENTS);
             mBackgroundHandler->SendEmptyMessage(MSG_UPDATE_CONTENTS);
         }
     }
 
     Boolean HasData() {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             return mHaveData;
         }
     }
 
     void WaitForData() {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             while (!mHaveData) {
                 try {
                     mLock->Wait(0);
@@ -788,7 +788,7 @@ public class RunningState {
     }
 
     void Pause() {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             mResumed = FALSE;
             mRefreshUiListener = NULL;
             mHandler->RemoveMessages(MSG_UPDATE_TIME);
@@ -854,14 +854,14 @@ public class RunningState {
 
     private Boolean Update(Context context, ActivityManager am) {
         final PackageManager pm = context->GetPackageManager();
-        
+
         mSequence++;
-        
+
         Boolean changed = FALSE;
 
         // Retrieve list of services, filtering out anything that definitely
         // won't be shown in the UI.
-        List<ActivityManager.RunningServiceInfo> services 
+        List<ActivityManager.RunningServiceInfo> services
                 = am->GetRunningServices(MAX_SERVICES);
         Int32 NS = services != NULL ? services->Size() : 0;
         for (Int32 i=0; i<NS; i++) {
@@ -960,7 +960,7 @@ public class RunningState {
                 proc = new ProcessItem(context, si.uid, si.process);
                 procs->Put(si.process, proc);
             }
-            
+
             if (proc.mCurSeq != mSequence) {
                 Int32 pid = si.restarting == 0 ? si.pid : 0;
                 if (pid != proc.mPid) {
@@ -980,7 +980,7 @@ public class RunningState {
             }
             changed |= proc->UpdateService(context, si);
         }
-        
+
         // Now update the map of other processes that are running (but
         // don't have services actively running inside them).
         for (Int32 i=0; i<NP; i++) {
@@ -999,7 +999,7 @@ public class RunningState {
                 }
                 proc.mDependentProcesses->Clear();
             }
-            
+
             if (IsInterestingProcess(pi)) {
                 if (!mInterestingProcesses->Contains(proc)) {
                     changed = TRUE;
@@ -1011,7 +1011,7 @@ public class RunningState {
             } else {
                 proc.mInteresting = FALSE;
             }
-            
+
             proc.mRunningSeq = mSequence;
             proc.mRunningProcessInfo = pi;
         }
@@ -1044,7 +1044,7 @@ public class RunningState {
                 NRP--;
             }
         }
-        
+
         // Remove any old interesting processes.
         Int32 NHP = mInterestingProcesses->Size();
         for (Int32 i=0; i<NHP; i++) {
@@ -1056,7 +1056,7 @@ public class RunningState {
                 NHP--;
             }
         }
-        
+
         // Follow the tree from all primary service processes to all
         // processes they are dependent on, marking these processes as
         // still being active and determining if anything has changed.
@@ -1067,7 +1067,7 @@ public class RunningState {
                 changed |= proc->BuildDependencyChain(context, pm, mSequence);
             }
         }
-        
+
         // Look for services and their primary processes that no longer exist...
         ArrayList<Integer> uidToDelete = NULL;
         for (Int32 i=0; i<mServiceProcessesByName->Size(); i++) {
@@ -1106,7 +1106,7 @@ public class RunningState {
                 }
             }
         }
-        
+
         if (uidToDelete != NULL) {
             for (Int32 i = 0; i < uidToDelete->Size(); i++) {
                 Int32 uid = uidToDelete->Get(i);
@@ -1139,9 +1139,9 @@ public class RunningState {
                     sortedProcesses->Add(pi);
                 }
             }
-            
+
             Collections->Sort(sortedProcesses, mServiceProcessComparator);
-            
+
             ArrayList<BaseItem> newItems = new ArrayList<BaseItem>();
             ArrayList<MergedItem> newMergedItems = new ArrayList<MergedItem>();
             SparseArray<MergedItem> otherUsers = NULL;
@@ -1149,7 +1149,7 @@ public class RunningState {
             for (Int32 i=0; i<sortedProcesses->Size(); i++) {
                 ProcessItem pi = sortedProcesses->Get(i);
                 pi.mNeedDivider = FALSE;
-                
+
                 Int32 firstProc = mProcessItems->Size();
                 // First add processes we are dependent on.
                 pi->AddDependentProcesses(newItems, mProcessItems);
@@ -1158,7 +1158,7 @@ public class RunningState {
                 if (pi.mPid > 0) {
                     mProcessItems->Add(pi);
                 }
-                
+
                 // Now add the services running in it.
                 MergedItem mergedItem = NULL;
                 Boolean haveAllMerged = FALSE;
@@ -1176,7 +1176,7 @@ public class RunningState {
                         haveAllMerged = FALSE;
                     }
                 }
-                
+
                 if (!haveAllMerged || mergedItem == NULL
                         || mergedItem.mServices->Size() != pi.mServices->Size()) {
                     // Whoops, we need to build a new MergedItem!
@@ -1191,7 +1191,7 @@ public class RunningState {
                         mergedItem.mOtherProcesses->Add(mProcessItems->Get(mpi));
                     }
                 }
-                
+
                 mergedItem->Update(context, FALSE);
                 if (mergedItem.mUserId != mMyUserId) {
                     AddOtherUserItem(context, newMergedItems, mOtherUserMergedItems, mergedItem);
@@ -1231,12 +1231,12 @@ public class RunningState {
                 }
             }
 
-            synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 mItems = newItems;
                 mMergedItems = newMergedItems;
             }
         }
-        
+
         // Count number of interesting other (non-active) processes, and
         // build a list of all processes we will retrieve memory for.
         mAllProcessItems->Clear();
@@ -1266,7 +1266,7 @@ public class RunningState {
                 numServiceProcesses++;
             }
         }
-        
+
         Int64 backgroundProcessMemory = 0;
         Int64 foregroundProcessMemory = 0;
         Int64 serviceProcessMemory = 0;
@@ -1323,7 +1323,7 @@ public class RunningState {
             }
         } catch (RemoteException e) {
         }
-        
+
         if (newBackgroundItems == NULL) {
             // One or more at the bottom may no longer exist.
             if (mBackgroundItems->Size() > numBackgroundProcesses) {
@@ -1372,8 +1372,8 @@ public class RunningState {
         for (Int32 i=0; i<mMergedItems->Size(); i++) {
             mMergedItems->Get(i).UpdateSize(context);
         }
-        
-        synchronized(mLock) {
+
+        {    AutoLock syncLock(mLock);
             mNumBackgroundProcesses = numBackgroundProcesses;
             mNumForegroundProcesses = numForegroundProcesses;
             mNumServiceProcesses = numServiceProcesses;
@@ -1392,30 +1392,30 @@ public class RunningState {
                 mLock->NotifyAll();
             }
         }
-        
+
         return changed;
     }
-    
+
     ArrayList<BaseItem> GetCurrentItems() {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             return mItems;
         }
     }
-    
+
     void SetWatchingBackgroundItems(Boolean watching) {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             mWatchingBackgroundItems = watching;
         }
     }
 
     ArrayList<MergedItem> GetCurrentMergedItems() {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             return mMergedItems;
         }
     }
 
     ArrayList<MergedItem> GetCurrentBackgroundItems() {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             return mUserBackgroundItems;
         }
     }

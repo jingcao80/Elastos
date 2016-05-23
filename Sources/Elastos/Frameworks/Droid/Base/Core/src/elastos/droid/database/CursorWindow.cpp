@@ -13,6 +13,8 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::Binder;
@@ -1051,7 +1053,7 @@ void CursorWindow::RecordNewWindow(
     /* [in] */ Int32 pid,
     /* [in] */ Int64 window)
 {
-    synchronized(sWindowToPidMapLock) {
+    {    AutoLock syncLock(sWindowToPidMapLock);
         sWindowToPidMap[window] = pid;
         // if (Log.isLoggable(STATS_TAG, Log.VERBOSE)) {
         //     Log.i(STATS_TAG, "Created a new Cursor. " + printStats());
@@ -1062,7 +1064,7 @@ void CursorWindow::RecordNewWindow(
 void CursorWindow::RecordClosingOfWindow(
     /* [in] */ Int64 window)
 {
-    synchronized(sWindowToPidMapLock) {
+    {    AutoLock syncLock(sWindowToPidMapLock);
         if (sWindowToPidMap.IsEmpty()) {
             // this means we are not in the ContentProvider.
             return;
@@ -1078,7 +1080,7 @@ String CursorWindow::PrintStats()
     Int32 total = 0;
     HashMap<Int32, Int32> pidCounts;
 
-    synchronized(sWindowToPidMapLock) {
+    {    AutoLock syncLock(sWindowToPidMapLock);
         if (sWindowToPidMap.IsEmpty()) {
             // this means we are not in the ContentProvider.
             return String("");

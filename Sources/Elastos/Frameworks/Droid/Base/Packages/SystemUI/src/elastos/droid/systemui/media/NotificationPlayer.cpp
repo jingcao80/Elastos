@@ -6,6 +6,8 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
 using Elastos::Droid::Media::CAudioAttributesHelper;
 using Elastos::Droid::Media::CMediaPlayer;
@@ -71,7 +73,7 @@ ECode NotificationPlayer::CreationAndCompletionThread::Run()
 {
     Looper::Prepare();
     mHost->mLooper = Looper::GetMyLooper();
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> amObj;
         mCmd->mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&amObj);
         AutoPtr<IAudioManager> audioManager = IAudioManager::Probe(amObj);
@@ -88,7 +90,7 @@ ECode NotificationPlayer::CreationAndCompletionThread::Run()
             Boolean isMusicActiveRemotely;
             audioManager->IsMusicActiveRemotely(&isMusicActiveRemotely);
             if (!isMusicActiveRemotely) {
-                synchronized(mHost->mQueueAudioFocusLock) {
+                {    AutoLock syncLock(mHost->mQueueAudioFocusLock);
                     if (mHost->mAudioManagerWithAudioFocus == NULL) {
                         if (mDebug) Logger::D(mHost->mTag, "requesting AudioFocus");
                         AutoPtr<IAudioAttributesHelper> aah;
@@ -149,7 +151,7 @@ ECode NotificationPlayer::CmdThread::Run()
 {
     while (TRUE) {
         AutoPtr<Command> cmd;
-        synchronized(mHost->mCmdQueue) {
+        {    AutoLock syncLock(mHost->mCmdQueue);
             if (mHost->mDebug) Logger::D(mHost->mTag, "RemoveFirst");
             AutoPtr<IInterface> obj;
             mHost->mCmdQueue->RemoveFirst((IInterface**)&obj);
@@ -171,7 +173,7 @@ ECode NotificationPlayer::CmdThread::Run()
                 mHost->mPlayer->Stop();
                 mHost->mPlayer->Release();
                 mHost->mPlayer = NULL;
-                synchronized(mHost->mQueueAudioFocusLock) {
+                {    AutoLock syncLock(mHost->mQueueAudioFocusLock);
                     if (mHost->mAudioManagerWithAudioFocus != NULL) {
                         Int32 result;
                         mHost->mAudioManagerWithAudioFocus->AbandonAudioFocus(NULL, &result);
@@ -192,7 +194,7 @@ ECode NotificationPlayer::CmdThread::Run()
             }
             break;
         }
-        synchronized (mHost->mCmdQueue) {
+        {    AutoLock syncLock(mHost->mCmdQueue);
             Int32 size;
             mHost->mCmdQueue->GetSize(&size);
             if (size == 0) {
@@ -238,7 +240,7 @@ void NotificationPlayer::StartSound(
     //-----------------------------------
     // This is were we deviate from the AsyncPlayer implementation and create the
     // MediaPlayer in a new thread with which we're synchronized
-    synchronized(mCompletionHandlingLock) {
+    {    AutoLock syncLock(mCompletionHandlingLock);
         // if another sound was already playing, it doesn't matter we won't get notified
         // of the completion, since only the completion notification of the last sound
         // matters
@@ -251,7 +253,7 @@ void NotificationPlayer::StartSound(
             mLooper->Quit();
         }
         mCompletionThread = new CreationAndCompletionThread(cmd, this);
-        synchronized(mCompletionThread) {
+        {    AutoLock syncLock(mCompletionThread);
             mCompletionThread->Start();
             mCompletionThread->Wait();
         }
@@ -271,7 +273,7 @@ void NotificationPlayer::StartSound(
 ECode NotificationPlayer::OnCompletion(
     /* [in] */ IMediaPlayer* mp)
 {
-    synchronized(mQueueAudioFocusLock) {
+    {    AutoLock syncLock(mQueueAudioFocusLock);
         if (mAudioManagerWithAudioFocus != NULL) {
             if (mDebug) Logger::D(mTag, "onCompletion() abandonning AudioFocus");
             Int32 aaf;
@@ -283,11 +285,11 @@ ECode NotificationPlayer::OnCompletion(
         }
     }
     // if there are no more sounds to play, end the Looper to listen for media completion
-    synchronized (mCmdQueue) {
+    {    AutoLock syncLock(mCmdQueue);
         Int32 size;
         mCmdQueue->GetSize(&size);
         if (size == 0) {
-            synchronized(mCompletionHandlingLock) {
+            {    AutoLock syncLock(mCompletionHandlingLock);
                 if(mLooper != NULL) {
                     mLooper->Quit();
                 }
@@ -316,7 +318,7 @@ ECode NotificationPlayer::Play(
     AutoPtr<IAudioAttributes> aa;
     aab->Build((IAudioAttributes**)&aa);
     cmd->mAttributes = aa;
-    synchronized(mCmdQueue) {
+    {    AutoLock syncLock(mCmdQueue);
         EnqueueLocked(cmd);
         mState = PLAY;
     }
@@ -336,7 +338,7 @@ ECode NotificationPlayer::Play(
     cmd->mUri = uri;
     cmd->mLooping = looping;
     cmd->mAttributes = attributes;
-    synchronized (mCmdQueue) {
+    {    AutoLock syncLock(mCmdQueue);
         EnqueueLocked(cmd);
         mState = PLAY;
     }
@@ -345,7 +347,7 @@ ECode NotificationPlayer::Play(
 
 ECode NotificationPlayer::Stop()
 {
-    synchronized (mCmdQueue) {
+    {    AutoLock syncLock(mCmdQueue);
         // This check allows stop to be called multiple times without starting
         // a thread that ends up doing nothing.
         if (mState != STOP) {

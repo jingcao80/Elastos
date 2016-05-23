@@ -7,6 +7,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::IUUIDHelper;
 using Elastos::Utility::CUUIDHelper;
 using Elastos::Utility::Logging::Logger;
@@ -41,7 +43,7 @@ ECode CVirtualizer::BaseParameterListener::OnParameterChange(
     AutoPtr<IVirtualizerOnParameterChangeListener> l;
     {
         Object& lock = mHost->mParamListenerLock;
-        synchronized(lock);
+        AutoLock syncLock(lock);
         if (mHost->mParamListener != NULL) {
             l = mHost->mParamListener;
         }
@@ -214,7 +216,7 @@ ECode CVirtualizer::GetVirtualizationMode(
 ECode CVirtualizer::SetParameterListener(
     /* [in] */ IVirtualizerOnParameterChangeListener* listener)
 {
-    synchronized(mParamListenerLock);
+    AutoLock syncLock(mParamListenerLock);
     if (mParamListener != NULL) {
         mParamListener = listener;
         mBaseParamListener = new BaseParameterListener(this);

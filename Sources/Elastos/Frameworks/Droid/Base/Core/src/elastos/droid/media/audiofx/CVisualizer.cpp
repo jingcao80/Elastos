@@ -6,6 +6,8 @@
 
 #include <media/Visualizer.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::IByte;
 using Elastos::Core::CByte;
 using Elastos::Core::EIID_IByte;
@@ -68,7 +70,7 @@ void CVisualizer::NativeEventHandler::HandleCaptureMessage(
     AutoPtr<IVisualizerOnDataCaptureListener> l;
     {
         Object& lock = mVisualizer->mListenerLock;
-        synchronized(lock);
+        AutoLock syncLock(lock);
         l = mVisualizer->mCaptureListener;
     }
     if (l != NULL) {
@@ -113,7 +115,7 @@ void CVisualizer::NativeEventHandler::HandleServerDiedMessage(
     AutoPtr<IVisualizerOnServerDiedListener> l;
     {
         Object& lock = mVisualizer->mListenerLock;
-        synchronized(lock);
+        AutoLock syncLock(lock);
         l = mVisualizer->mServerDiedListener;
     }
     if (l != NULL)
@@ -136,7 +138,7 @@ ECode CVisualizer::constructor(
     /* [in] */ Int32 audioSession)
 {
     AutoPtr<ArrayOf<Int32> > id = ArrayOf<Int32>::Alloc(1);
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     mState = IVisualizer::STATE_UNINITIALIZED;
 
     // native initialization
@@ -164,7 +166,7 @@ ECode CVisualizer::constructor(
 
 ECode CVisualizer::ReleaseResources()
 {
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     Native_Release();
     mState = IVisualizer::STATE_UNINITIALIZED;
     return NOERROR;
@@ -176,7 +178,7 @@ ECode CVisualizer::SetEnabled(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     if (mState == IVisualizer::STATE_UNINITIALIZED) {
        // throw(new IllegalStateException("setEnabled() called in wrong state: "+mState));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -198,7 +200,7 @@ ECode CVisualizer::GetEnabled(
 {
     VALIDATE_NOT_NULL(enabled);
 
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     if (mState == IVisualizer::STATE_UNINITIALIZED) {
         // throw(new IllegalStateException("getEnabled() called in wrong state: "+mState));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -231,7 +233,7 @@ ECode CVisualizer::SetCaptureSize(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     if (mState == IVisualizer::STATE_INITIALIZED) {
         // throw(new IllegalStateException("setCaptureSize() called in wrong state: "+mState));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -246,7 +248,7 @@ ECode CVisualizer::GetCaptureSize(
 {
     VALIDATE_NOT_NULL(captureSize);
 
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     if (mState == IVisualizer::STATE_UNINITIALIZED) {
         // throw(new IllegalStateException("getCaptureSize() called in wrong state: "+mState));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -261,7 +263,7 @@ ECode CVisualizer::SetScalingMode(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     if (mState == STATE_UNINITIALIZED) {
         // throw(new IllegalStateException("setScalingMode() called in wrong state: "+ mState));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -275,7 +277,7 @@ ECode CVisualizer::GetScalingMode(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     if (mState == STATE_UNINITIALIZED) {
         // throw(new IllegalStateException("getScalingMode() called in wrong state: " + mState));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -289,7 +291,7 @@ CARAPI CVisualizer::SetMeasurementMode(
     /* [in] */ Int32 mode,
     /* [out] */ Int32* result)
 {
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     if (mState == IVisualizer::STATE_UNINITIALIZED) {
         // throw(new IllegalStateException("setMeasurementMode() called in wrong state: "
         //         + mState));
@@ -302,7 +304,7 @@ CARAPI CVisualizer::SetMeasurementMode(
 CARAPI CVisualizer::GetMeasurementMode(
     /* [out] */ Int32* result)
 {
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     if (mState == IVisualizer::STATE_UNINITIALIZED) {
         // throw(new IllegalStateException("getMeasurementMode() called in wrong state: "
         //         + mState));
@@ -317,7 +319,7 @@ ECode CVisualizer::GetSamplingRate(
 {
     VALIDATE_NOT_NULL(samplingRate);
 
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     if (mState == IVisualizer::STATE_UNINITIALIZED) {
         // throw(new IllegalStateException("getSamplingRate() called in wrong state: "+mState));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -332,7 +334,7 @@ ECode CVisualizer::GetWaveForm(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     if (mState == IVisualizer::STATE_ENABLED) {
         // throw(new IllegalStateException("getWaveForm() called in wrong state: "+mState));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -348,7 +350,7 @@ ECode CVisualizer::GetFft(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     if (mState == IVisualizer::STATE_ENABLED) {
         // throw(new IllegalStateException("getFft() called in wrong state: "+mState));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -368,7 +370,7 @@ ECode CVisualizer::GetMeasurementPeakRms(
         *result = IVisualizer::ERROR_BAD_VALUE;
         return NOERROR;
     }
-    synchronized(mStateLock);
+    AutoLock syncLock(mStateLock);
     if (mState != IVisualizer::STATE_ENABLED) {
         // throw (new IllegalStateException("getMeasurementPeakRms() called in wrong state: "
         //         + mState));
@@ -387,7 +389,7 @@ ECode CVisualizer::SetDataCaptureListener(
 {
     VALIDATE_NOT_NULL(result);
     {
-        synchronized(mListenerLock);
+        AutoLock syncLock(mListenerLock);
         mCaptureListener = listener;
     }
     if (listener == NULL) {
@@ -423,7 +425,7 @@ ECode CVisualizer::SetServerDiedListener(
     /* [in] */ IVisualizerOnServerDiedListener* listener,
     /* [out] */ Int32* result)
 {
-    synchronized(mListenerLock);
+    AutoLock syncLock(mListenerLock);
     mServerDiedListener = listener;
     *result = SUCCESS;
     return NOERROR;

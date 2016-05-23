@@ -7,6 +7,8 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CActivityManagerTaskDescription;
 using Elastos::Droid::App::IActivityManagerRecentTaskInfo;
 using Elastos::Droid::Content::IComponentCallbacks2;
@@ -78,7 +80,7 @@ void RecentsTaskLoader::TaskResourceLoadQueue::AddTasks(
             IQueue::Probe(mQueue)->Add(t);
         }
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         NotifyAll();
     }
 }
@@ -90,7 +92,7 @@ void RecentsTaskLoader::TaskResourceLoadQueue::AddTask(
     if (IQueue::Probe(mQueue)->Contains(t, &b), !b) {
         IQueue::Probe(mQueue)->Add(t);
     }
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         NotifyAll();
     }
 }
@@ -158,7 +160,7 @@ void RecentsTaskLoader::TaskResourceLoader::Start(
     mCancelled = FALSE;
     mSystemServicesProxy = new SystemServicesProxy(context);
     // Notify the load thread to start loading
-    synchronized(mLoadThread) {
+    {    AutoLock syncLock(mLoadThread);
         ISynchronize::Probe(mLoadThread)->NotifyAll();
     }
 }
@@ -183,7 +185,7 @@ ECode RecentsTaskLoader::TaskResourceLoader::Run()
             // when we call stop()
             mContext = NULL;
             // If we are cancelled, then wait until we are started again
-            synchronized(mLoadThread) {
+            {    AutoLock syncLock(mLoadThread);
                 ECode ec = ISynchronize::Probe(mLoadThread)->Wait();
                 if (FAILED(ec)) {
                     return E_INTERRUPTED_EXCEPTION;
@@ -250,7 +252,7 @@ ECode RecentsTaskLoader::TaskResourceLoader::Run()
 
             // If there are no other items in the list, then just wait until something is added
             if (!mCancelled && mLoadQueue->IsEmpty()) {
-                synchronized(mLoadQueue) {
+                {    AutoLock syncLock(mLoadQueue);
                     mWaitingOnLoadQueue = TRUE;
                     ECode ec = mLoadQueue->Wait();
                     if (FAILED(ec)) {

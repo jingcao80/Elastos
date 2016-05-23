@@ -13,6 +13,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Thread.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IProcess;
@@ -54,7 +56,7 @@ ECode ConnectionThread::constructor(
 
 ECode ConnectionThread::RequestStop()
 {
-    synchronized(mRequestFeeder) {
+    {    AutoLock syncLock(mRequestFeeder);
         mRunning = FALSE;
         ISynchronize::Probe(mRequestFeeder)->Notify();
     }
@@ -86,7 +88,7 @@ ECode ConnectionThread::Run()
 
         /* wait for work */
         if (request == NULL) {
-            synchronized(mRequestFeeder) {
+            {    AutoLock syncLock(mRequestFeeder);
                 if (HttpLog::LOGV) HttpLog::V("ConnectionThread: Waiting for work");
                 mWaiting = TRUE;
                 ISynchronize::Probe(mRequestFeeder)->Wait();

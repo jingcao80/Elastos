@@ -20,6 +20,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IconPackHelper;
 using Elastos::Droid::Content::Pm::IActivityInfoHelper;
 using Elastos::Droid::Content::Pm::IActivityInfo;
@@ -959,7 +961,7 @@ ECode CResources::GetDrawable(
     }
 
     AutoPtr<ITypedValue> value;
-    synchronized(mAccessLock) {
+    {    AutoLock syncLock(mAccessLock);
         value = (ITypedValue*)mTmpValue.Get();
         if (value == NULL) {
             CTypedValue::New((ITypedValue**)&value);
@@ -1001,7 +1003,7 @@ ECode CResources::GetDrawable(
     //     }
     // }
 
-    synchronized(mAccessLock) {
+    {    AutoLock syncLock(mAccessLock);
         if (mTmpValue == NULL) {
             mTmpValue = (CTypedValue*)value.Get();
         }
@@ -1082,7 +1084,7 @@ ECode CResources::GetDrawableForDensity(
     AutoPtr<IDrawable> res;
     LoadDrawable(value, id, theme, (IDrawable**)&res);
 
-    synchronized(mAccessLock) {
+    {    AutoLock syncLock(mAccessLock);
         if (mTmpValue == NULL) {
             mTmpValue = (CTypedValue*)value.Get();
         }
@@ -1117,7 +1119,7 @@ ECode CResources::GetColor(
 
     AutoPtr<ITypedValue> value;
 
-    synchronized(mAccessLock) {
+    {    AutoLock syncLock(mAccessLock);
         value = (ITypedValue*)mTmpValue.Get();
         if (value == NULL) {
             CTypedValue::New((ITypedValue**)&value);
@@ -1141,7 +1143,7 @@ ECode CResources::GetColor(
 
     AutoPtr<IColorStateList> csl;
     ASSERT_SUCCEEDED(LoadColorStateList(value, id, (IColorStateList**)&csl));
-    synchronized(mAccessLock) {
+    {    AutoLock syncLock(mAccessLock);
         if (mTmpValue == NULL) {
             mTmpValue = (CTypedValue*)value.Get();
         }
@@ -1157,7 +1159,7 @@ ECode CResources::GetColorStateList(
 
     AutoPtr<ITypedValue> value;
 
-    synchronized(mAccessLock) {
+    {    AutoLock syncLock(mAccessLock);
         value = (ITypedValue*)mTmpValue.Get();
         if (value == NULL) {
             CTypedValue::New((ITypedValue**)&value);
@@ -1171,7 +1173,7 @@ ECode CResources::GetColorStateList(
 
     AutoPtr<IColorStateList> csl;
     ASSERT_SUCCEEDED(LoadColorStateList(value, id, (IColorStateList**)&csl));
-    synchronized(mAccessLock) {
+    {    AutoLock syncLock(mAccessLock);
         if (mTmpValue == NULL) {
             mTmpValue = (CTypedValue*)value.Get();
         }
@@ -1289,7 +1291,7 @@ ECode CResources::OpenRawResource(
     VALIDATE_NOT_NULL(res);
 
     AutoPtr<ITypedValue> value;
-    synchronized(mAccessLock) {
+    {    AutoLock syncLock(mAccessLock);
         value = (ITypedValue*)mTmpValue.Get();
         if (value == NULL) {
             CTypedValue::New((ITypedValue**)&value);
@@ -1301,7 +1303,7 @@ ECode CResources::OpenRawResource(
 
     AutoPtr<IInputStream> is;
     OpenRawResource(id, value, (IInputStream**)&is);
-    synchronized(mAccessLock) {
+    {    AutoLock syncLock(mAccessLock);
         if (mTmpValue == NULL) {
             mTmpValue = (CTypedValue*)value.Get();
         }
@@ -1341,7 +1343,7 @@ ECode CResources::OpenRawResourceFd(
     VALIDATE_NOT_NULL(des);
 
     AutoPtr<ITypedValue> value;
-    synchronized(mAccessLock) {
+    {    AutoLock syncLock(mAccessLock);
         value = mTmpValue;
         if (value == NULL) {
             CTypedValue::New((ITypedValue**)&value);
@@ -1366,7 +1368,7 @@ ECode CResources::OpenRawResourceFd(
 //        rnf.initCause(e);
 //        throw rnf;
 //    }
-    synchronized(mAccessLock) {
+    {    AutoLock syncLock(mAccessLock);
         if (mTmpValue == NULL) {
             mTmpValue = (CTypedValue*)value.Get();
         }
@@ -2125,7 +2127,7 @@ Boolean CResources::VerifyPreloadConfig(
 
 ECode CResources::UpdateStringCache()
 {
-    synchronized (mAccessLock) {
+    {    AutoLock syncLock(mAccessLock);
         mAssets->RecreateStringBlocks();
     }
     return NOERROR;
@@ -2276,7 +2278,7 @@ ECode CResources::CacheDrawable(
         }
     }
     else {
-        synchronized(mAccessLock) {
+        {    AutoLock syncLock(mAccessLock);
             String themeKey("");
             if (theme != NULL) {
                 themeKey = ((CResources::Theme*)theme)->mKey;
@@ -2375,7 +2377,7 @@ AutoPtr<IDrawable> CResources::GetCachedDrawable(
     /* [in] */ Int64 key,
     /* [in] */ IResourcesTheme* theme)
 {
-    synchronized(mAccessLock) {
+    {    AutoLock syncLock(mAccessLock);
         String themeKey("");
         if (theme != NULL) {
             themeKey = ((CResources::Theme*)theme)->mKey;
@@ -2720,7 +2722,7 @@ ECode CResources::LoadXmlResourceParser(
 ECode CResources::RecycleCachedStyledAttributes(
     /* [in] */ CTypedArray* attrs)
 {
-    synchronized(mAccessLock) {
+    {    AutoLock syncLock(mAccessLock);
         AutoPtr<CTypedArray> cached = mCachedStyledAttributes;
         if (cached == NULL || cached->mData->GetLength() < attrs->mData->GetLength()) {
             mCachedStyledAttributes = attrs;

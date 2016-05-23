@@ -51,7 +51,7 @@ public class UidDetailProvider {
     }
 
     CARAPI ClearCache() {
-        synchronized(mUidDetailCache) {
+        {    AutoLock syncLock(mUidDetailCache);
             mUidDetailCache->Clear();
         }
     }
@@ -62,7 +62,7 @@ public class UidDetailProvider {
     public UidDetail GetUidDetail(Int32 uid, Boolean blocking) {
         UidDetail detail;
 
-        synchronized(mUidDetailCache) {
+        {    AutoLock syncLock(mUidDetailCache);
             detail = mUidDetailCache->Get(uid);
         }
 
@@ -74,7 +74,7 @@ public class UidDetailProvider {
 
         detail = BuildUidDetail(uid);
 
-        synchronized(mUidDetailCache) {
+        {    AutoLock syncLock(mUidDetailCache);
             mUidDetailCache->Put(uid, detail);
         }
 

@@ -3,6 +3,8 @@
 #include "StringUtils.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::IO::Charset::Charset;
 using Elastos::IO::EIID_ICloseable;
@@ -109,7 +111,7 @@ ECode CStrictLineReader::constructor(
 ECode CStrictLineReader::ReadLine(
     /* [out] */ String* line)
 {
-    // synchronized (in) {
+    // {    AutoLock syncLock(in);
     AutoLock lock(mLockIn);
     if (mBuf == NULL) {
         return E_IO_EXCEPTION;

@@ -17,6 +17,8 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::CComponentName;
@@ -937,7 +939,7 @@ ECode InputMethodAndLanguageSettings::OnPreferenceChange(
 
 void InputMethodAndLanguageSettings::UpdateInputMethodPreferenceViews()
 {
-    synchronized(mInputMethodPreferenceList) {
+    {    AutoLock syncLock(mInputMethodPreferenceList);
         // Clear existing "InputMethodPreference"s
         Int32 size;
         mInputMethodPreferenceList->GetSize(&size);
@@ -1153,7 +1155,7 @@ void InputMethodAndLanguageSettings::UpdateCurrentImeName()
         AutoPtr<ICharSequence> curIme =
                 mInputMethodSettingValues->GetCurrentInputMethodName(context);
         if (!TextUtils::IsEmpty(curIme)) {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 curPref->SetSummary(curIme);
             }
         }

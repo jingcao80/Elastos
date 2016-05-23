@@ -10,6 +10,8 @@
 #include "AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Sql::SQLite::CFunctionContext;
 using Elastos::Sql::SQLite::CVm;
@@ -637,7 +639,7 @@ ECode Database::ErrorMessage(
     /* [out] */ String * str)
 {
     VALIDATE_NOT_NULL(str);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *str = _Errmsg();
     }
 
@@ -672,7 +674,7 @@ ECode Database::Backup(
     /* [out] */ IBackup ** backup)
 {
     VALIDATE_NOT_NULL(backup);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IBackup> b;
         CBackup::New((IBackup**)&b);
         _Backup(b, dest, destName, (IDatabase *)(this->Probe(EIID_IDatabase)), srcName);
@@ -687,7 +689,7 @@ ECode Database::Profile(
     /* [in] */ IProfile* r)
 {
     ECode ec = NOERROR;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ec = _Profile(r);
     }
     return ec;
@@ -700,7 +702,7 @@ ECode Database::DbStatus(
     /* [out] */ Int32 * status)
 {
     VALIDATE_NOT_NULL(status);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *status = _DbStatus(op, info, flag);
     }
     return NOERROR;
@@ -711,7 +713,7 @@ ECode Database::Compile(
     /* [out] */ IVm ** ivm)
 {
     VALIDATE_NOT_NULL(ivm);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IVm> vm;
         CVm::New((IVm**)&vm);
         Vm_compile(sql, vm);
@@ -728,7 +730,7 @@ ECode Database::Compile(
     /* [out] */ IVm ** ivm)
 {
     VALIDATE_NOT_NULL(ivm);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IVm> vm;
         CVm::New((IVm**)&vm);
         Vm_compile_args(sql, vm, args);
@@ -744,7 +746,7 @@ ECode Database::Prepare(
 {
     VALIDATE_NOT_NULL(st);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IStmt> stmt;
         CStmt::New((IStmt**)&stmt);
         FAIL_RETURN(Stmt_prepare(sql, stmt));
@@ -765,7 +767,7 @@ ECode Database::OpenBlob(
 {
     VALIDATE_NOT_NULL(blob);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IBlob> bl;
         CBlob::New((IBlob**)&bl);
         _OpenBlob(db, table, column, row, rw, bl);

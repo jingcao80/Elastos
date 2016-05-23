@@ -124,7 +124,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return STATUS_ERROR;
         }
 
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             if (DBG) {
                 Slogger::D(TAG, "startRecognition for keyphraseId=" + keyphraseId
                         + " soundModel=" + soundModel + ", listener=" + listener->AsBinder()
@@ -243,7 +243,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return STATUS_ERROR;
         }
 
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             if (DBG) {
                 Slogger::D(TAG, "stopRecognition for keyphraseId=" + keyphraseId
                         + ", listener=" + listener->AsBinder());
@@ -292,7 +292,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
      * Stops all recognitions active currently and clears the internal state.
      */
     void StopAllRecognitions() {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             if (moduleProperties == NULL || mModule == NULL) {
                 return;
             }
@@ -321,7 +321,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
 
         if (DBG) Slogger::D(TAG, "onRecognition: " + event);
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             if (mActiveListener == NULL) {
                 Slogger::W(TAG, "received onRecognition event without any listener for it");
                 return;
@@ -348,7 +348,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
         if (DBG) Slogger::D(TAG, "onSoundModelUpdate: " + event);
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             OnSoundModelUpdatedLocked(event);
         }
     }
@@ -356,7 +356,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     //@Override
     CARAPI OnServiceStateChange(Int32 state) {
         if (DBG) Slogger::D(TAG, "onServiceStateChange, state: " + state);
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             OnServiceStateChangedLocked(SoundTrigger.SERVICE_STATE_DISABLED == state);
         }
     }
@@ -364,7 +364,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     //@Override
     CARAPI OnServiceDied() {
         Slogger::E(TAG, "onServiceDied!!");
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             OnServiceDiedLocked();
         }
     }
@@ -554,7 +554,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         //@Override
         CARAPI OnCallStateChanged(Int32 state, String arg1) {
             if (DBG) Slogger::D(TAG, "onCallStateChanged: " + state);
-            synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 OnCallStateChangedLocked(TelephonyManager.CALL_STATE_IDLE != state);
             }
         }
@@ -568,14 +568,14 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
             Boolean active = mPowerManager->IsPowerSaveMode();
             if (DBG) Slogger::D(TAG, "onPowerSaveModeChanged: " + active);
-            synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 OnPowerSaveModeChangedLocked(active);
             }
         }
     }
 
     void Dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             pw->Print("  module properties=");
             pw->Println(moduleProperties == NULL ? "NULL" : moduleProperties);
             pw->Print("  keyphrase ID="); pw->Println(mKeyphraseId);

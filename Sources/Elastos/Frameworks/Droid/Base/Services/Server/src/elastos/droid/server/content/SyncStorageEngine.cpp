@@ -19,6 +19,8 @@
 #include <Elastos.Droid.Internal.h>
 #include <Elastos.CoreLibrary.External.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IProcess;
@@ -587,12 +589,12 @@ ECode SyncStorageEngine::HandleMessage(
     Int32 what;
     msg->GetWhat(&what);
     if (what == MSG_WRITE_STATUS) {
-        synchronized(mAuthoritiesLock) {
+        {    AutoLock syncLock(mAuthoritiesLock);
             WriteStatusLocked();
         }
     }
     else if (what == MSG_WRITE_STATISTICS) {
-        synchronized(mAuthoritiesLock) {
+        {    AutoLock syncLock(mAuthoritiesLock);
             WriteStatisticsLocked();
         }
     }
@@ -608,7 +610,7 @@ void SyncStorageEngine::AddStatusChangeListener(
     /* [in] */ Int32 mask,
     /* [in] */ IISyncStatusObserver* callback)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         AutoPtr<IInteger32> ii = CoreUtils::Convert(mask);
         Boolean result;
         mChangeListeners->Register(
@@ -619,7 +621,7 @@ void SyncStorageEngine::AddStatusChangeListener(
 void SyncStorageEngine::RemoveStatusChangeListener(
     /* [in] */ IISyncStatusObserver* callback)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         Boolean result;
         mChangeListeners->Unregister(callback, &result);
     }
@@ -647,7 +649,7 @@ void SyncStorageEngine::ReportChange(
     /* [in] */ Int32 which)
 {
     AutoPtr< List<AutoPtr<IISyncStatusObserver> > > reports;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         Int32 i;
         mChangeListeners->BeginBroadcast(&i);
         while (i > 0) {
@@ -695,7 +697,7 @@ Boolean SyncStorageEngine::GetSyncAutomatically(
     /* [in] */ Int32 userId,
     /* [in] */ const String& providerName)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         if (account != NULL) {
             AutoPtr<EndPoint> ep = new EndPoint(account, providerName, userId);
             AutoPtr<AuthorityInfo> authority = GetAuthorityLocked(
@@ -728,7 +730,7 @@ void SyncStorageEngine::SetSyncAutomatically(
     //             + ", user " + userId + " -> " + sync);
     // }
 
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         AutoPtr<EndPoint> ep = new EndPoint(account, providerName, userId);
         AutoPtr<AuthorityInfo> authority = GetOrCreateAuthorityLocked(
              ep, -1 /* ident */, FALSE);
@@ -755,7 +757,7 @@ Int32 SyncStorageEngine::GetIsSyncable(
     /* [in] */ Int32 userId,
     /* [in] */ const String& providerName)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         if (account != NULL) {
             AutoPtr<EndPoint> ep = new EndPoint(account, providerName, userId);
             AutoPtr<AuthorityInfo> authority = GetAuthorityLocked(
@@ -795,7 +797,7 @@ Boolean SyncStorageEngine::GetIsTargetServiceActive(
     /* [in] */ IComponentName* cname,
     /* [in] */ Int32 userId)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         if (cname != NULL) {
             AutoPtr<EndPoint> ep = new EndPoint(cname, userId);
             AutoPtr<AuthorityInfo> authority = GetAuthorityLocked(
@@ -823,7 +825,7 @@ void SyncStorageEngine::SetSyncableStateForEndPoint(
     /* [in] */ Int32 syncable)
 {
     AutoPtr<AuthorityInfo> aInfo;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         aInfo = GetOrCreateAuthorityLocked(target, -1, FALSE);
         if (syncable > 1) {
             syncable = 1;
@@ -855,7 +857,7 @@ AutoPtr< Pair<Int64, Int64> > SyncStorageEngine::GetBackoff(
     /* [in] */ EndPoint* info)
 {
     AutoPtr< Pair<Int64, Int64> > result;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         AutoPtr<AuthorityInfo> authority = GetAuthorityLocked(info, String("GetBackoff"));
         if (authority.Get() != NULL) {
             assert(0 && "TODO");
@@ -875,7 +877,7 @@ void SyncStorageEngine::SetBackoff(
     //             + " -> nextSyncTime " + nextSyncTime + ", nextDelay " + nextDelay);
     // }
     Boolean changed;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         if (info->mTarget_provider
                 && (info->mAccount == NULL || info->mProvider == NULL)) {
             // Do more work for a provider sync if the provided info has specified all
@@ -951,7 +953,7 @@ void SyncStorageEngine::ClearAllBackoffsLocked(
     /* [in] */ SyncQueue* syncQueue)
 {
     Boolean changed = FALSE;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         // Clear backoff for all sync adapters.
         AccountInfo* accountInfo;
         AuthorityInfo* authorityInfo;
@@ -1007,7 +1009,7 @@ void SyncStorageEngine::ClearAllBackoffsLocked(
 Int64 SyncStorageEngine::GetDelayUntilTime(
     /* [in] */ EndPoint* info)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         AutoPtr<AuthorityInfo> authority = GetAuthorityLocked(info, String("getDelayUntil"));
         if (authority != NULL) {
             return authority->mDelayUntil;
@@ -1024,7 +1026,7 @@ void SyncStorageEngine::SetDelayUntilTime(
     //     Log.v(TAG, "setDelayUntil: " + info
     //             + " -> delayUntil " + delayUntil);
     // }
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         AutoPtr<AuthorityInfo> authority = GetOrCreateAuthorityLocked(info, -1, TRUE);
         if (authority->mDelayUntil == delayUntil) {
             return;
@@ -1045,7 +1047,7 @@ void SyncStorageEngine::UpdateOrAddPeriodicSync(
     //             + " -> period " + period + ", flex " + flextime + ", extras "
     //             + extras.toString());
     // }
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         if (period <= 0) {
             Logger::E(TAG, "period < 0, should never happen in UpdateOrAddPeriodicSync");
         }
@@ -1111,7 +1113,7 @@ void SyncStorageEngine::RemovePeriodicSync(
     /* [in] */ EndPoint* info,
     /* [in] */ IBundle* extras)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         AutoPtr<AuthorityInfo> authority = GetOrCreateAuthorityLocked(info, -1, FALSE);
         // Remove any periodic syncs that match the target and extras.
         HashMap<Int32, AutoPtr<ISyncStatusInfo> >::Iterator it = mSyncStatus.Find(authority->mIdent);
@@ -1155,7 +1157,7 @@ AutoPtr<List<AutoPtr<IPeriodicSync> > > SyncStorageEngine::GetPeriodicSyncs(
     /* [in] */ EndPoint* info)
 {
     AutoPtr<List<AutoPtr<IPeriodicSync> > > syncs = new List<AutoPtr<IPeriodicSync> >();
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         AutoPtr<AuthorityInfo> authorityInfo = GetAuthorityLocked(info, String("GetPeriodicSyncs"));
         if (authorityInfo != NULL) {
             List<AutoPtr<IPeriodicSync> >::Iterator it;
@@ -1176,7 +1178,7 @@ void SyncStorageEngine::SetMasterSyncAutomatically(
     /* [in] */ Boolean flag,
     /* [in] */ Int32 userId)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         HashMap<Int32, Boolean>::Iterator it = mMasterSyncAutomatically.Find(userId);
         if (it != mMasterSyncAutomatically.End() && it->mSecond == flag) {
             return;
@@ -1203,7 +1205,7 @@ Boolean SyncStorageEngine::GetMasterSyncAutomatically(
     /* [in] */ Int32 userId)
 {
     Boolean bval = FALSE;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         HashMap<Int32, Boolean>::Iterator it = mMasterSyncAutomatically.Find(userId);
         if (it != mMasterSyncAutomatically.End()) {
             bval = it->mSecond;
@@ -1220,7 +1222,7 @@ AutoPtr<AuthorityInfo> SyncStorageEngine::GetAuthority(
     /* [in] */ Int32 authorityId)
 {
     AutoPtr<AuthorityInfo> ai;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         HashMap<Int32, AutoPtr<AuthorityInfo> >::Iterator it = mAuthorities.Find(authorityId);
         if (it != mAuthorities.End()) {
             ai = it->mSecond;
@@ -1232,7 +1234,7 @@ AutoPtr<AuthorityInfo> SyncStorageEngine::GetAuthority(
 Boolean SyncStorageEngine::IsSyncActive(
     /* [in] */ EndPoint* info)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         AutoPtr<List<AutoPtr<ISyncInfo> > > list = GetCurrentSyncs(info->mUserId);
         List<AutoPtr<ISyncInfo> >::Iterator it;
         Int32 id;
@@ -1252,7 +1254,7 @@ AutoPtr<PendingOperation> SyncStorageEngine::InsertIntoPending(
     /* [in] */ SyncOperation* op)
 {
     AutoPtr<PendingOperation> pop;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         // if (Log.isLoggable(TAG, Log.VERBOSE)) {
         //     Log.v(TAG, "InsertIntoPending: authority=" + op->mTarget
         //             + " extras=" + op->mExtras);
@@ -1279,7 +1281,7 @@ Boolean SyncStorageEngine::DeleteFromPending(
     /* [in] */ PendingOperation* op)
 {
     Boolean res = FALSE;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         // if (Log.isLoggable(TAG, Log.VERBOSE)) {
         //     Log.v(TAG, "DeleteFromPending: account=" + op.toString());
         // }
@@ -1330,7 +1332,7 @@ Boolean SyncStorageEngine::DeleteFromPending(
 AutoPtr<List<AutoPtr<PendingOperation> > > SyncStorageEngine::GetPendingOperations()
 {
     AutoPtr<List<AutoPtr<PendingOperation> > > list;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         list = new List<AutoPtr<PendingOperation> >(mPendingOperations);
     }
     return list;
@@ -1339,7 +1341,7 @@ AutoPtr<List<AutoPtr<PendingOperation> > > SyncStorageEngine::GetPendingOperatio
 Int32 SyncStorageEngine::GetPendingOperationCount()
 {
     Int32 size = 0;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         size = mPendingOperations.GetSize();
     }
     return size;
@@ -1362,7 +1364,7 @@ void SyncStorageEngine::DoDatabaseCleanup(
     /* [in] */ ArrayOf<IAccount*>* accounts,
     /* [in] */ Int32 userId)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         // if (Log.isLoggable(TAG, Log.VERBOSE)) {
         //     Log.v(TAG, "Updating for new accounts...");
         // }
@@ -1437,7 +1439,7 @@ AutoPtr<ISyncInfo> SyncStorageEngine::AddActiveSync(
 {
     SyncManager::ActiveSyncContext* activeSyncContext = (SyncManager::ActiveSyncContext*)activeSyncContextObj;
     AutoPtr<ISyncInfo> syncInfo;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         // if (Log.isLoggable(TAG, Log.VERBOSE)) {
         //     Log.v(TAG, "setActiveSync: account="
         //         + " auth=" + activeSyncContext.mSyncOperation->mTarget
@@ -1467,7 +1469,7 @@ void SyncStorageEngine::RemoveActiveSync(
     /* [in] */ ISyncInfo* syncInfo,
     /* [in] */ Int32 userId)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         // if (Log.isLoggable(TAG, Log.VERBOSE)) {
         //     Log.v(TAG, "RemoveActiveSync: account=" + syncInfo->mAccount
         //             + " user=" + userId
@@ -1495,7 +1497,7 @@ Int64 SyncStorageEngine::InsertStartSyncEvent(
     /* [in] */ Int64 now)
 {
     Int64 id;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         // if (Log.isLoggable(TAG, Log.VERBOSE)) {
         //     Log.v(TAG, "InsertStartSyncEvent: " + op);
         // }
@@ -1532,7 +1534,7 @@ void SyncStorageEngine::StopSyncEvent(
     /* [in] */ Int64 downstreamActivity,
     /* [in] */ Int64 upstreamActivity)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         // if (Log.isLoggable(TAG, Log.VERBOSE)) {
         //     Log.v(TAG, "StopSyncEvent: historyId=" + historyId);
         // }
@@ -1668,7 +1670,7 @@ AutoPtr<List<AutoPtr<ISyncInfo> > > SyncStorageEngine::GetCurrentSyncs(
     /* [in] */ Int32 userId)
 {
     AutoPtr<List<AutoPtr<ISyncInfo> > > list;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         list = GetCurrentSyncsLocked(userId);
     }
     return list;
@@ -1680,7 +1682,7 @@ AutoPtr<IList> SyncStorageEngine::GetCurrentSyncsCopy(
     AutoPtr<IList> syncsCopy;
     CArrayList::New((IList**)&syncsCopy);
 
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         AutoPtr<List<AutoPtr<ISyncInfo> > > syncs = GetCurrentSyncsLocked(userId);
         List<AutoPtr<ISyncInfo> >::Iterator it;
         for (it = syncs->Begin(); it != syncs->End(); ++it) {
@@ -1712,7 +1714,7 @@ AutoPtr<List<AutoPtr<ISyncInfo> > > SyncStorageEngine::GetCurrentSyncsLocked(
 AutoPtr<List<AutoPtr<ISyncStatusInfo> > > SyncStorageEngine::GetSyncStatus()
 {
     AutoPtr<List<AutoPtr<ISyncStatusInfo> > > ops;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         Int32 N = mSyncStatus.GetSize();
         ops = new List<AutoPtr<ISyncStatusInfo> >(N);
 
@@ -1727,7 +1729,7 @@ AutoPtr<List<AutoPtr<ISyncStatusInfo> > > SyncStorageEngine::GetSyncStatus()
 AutoPtr<AuthoritySyncStatusPair> SyncStorageEngine::GetCopyOfAuthorityWithSyncStatus(
     /* [in] */ EndPoint* info)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         AutoPtr<AuthorityInfo> authorityInfo = GetOrCreateAuthorityLocked(
             info,
             -1 /* assign a new identifier if creating a new target */,
@@ -1740,7 +1742,7 @@ AutoPtr<AuthoritySyncStatusPair> SyncStorageEngine::GetCopyOfAuthorityWithSyncSt
 AutoPtr<List<AutoPtr<AuthoritySyncStatusPair> > > SyncStorageEngine::GetCopyOfAllAuthoritiesWithSyncStatus()
 {
     AutoPtr<List<AutoPtr<AuthoritySyncStatusPair> > > infos;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         infos = new List<AutoPtr<AuthoritySyncStatusPair> >(mAuthorities.GetSize());
         HashMap<Int32, AutoPtr<AuthorityInfo> >::Iterator it;
         for (it = mAuthorities.Begin(); it != mAuthorities.End(); ++it) {
@@ -1761,7 +1763,7 @@ AutoPtr<ISyncStatusInfo> SyncStorageEngine::GetStatusByAuthority(
         return NULL;
     }
 
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         ISyncStatusInfo* cur;
         AutoPtr<AuthorityInfo> ainfo;
         Int32 ival;
@@ -1785,7 +1787,7 @@ AutoPtr<ISyncStatusInfo> SyncStorageEngine::GetStatusByAuthority(
 Boolean SyncStorageEngine::IsSyncPending(
     /* [in] */ EndPoint* info)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         ISyncStatusInfo* cur;
         Int32 ival;
         Boolean bval;
@@ -1818,7 +1820,7 @@ Boolean SyncStorageEngine::IsSyncPending(
 AutoPtr<List<AutoPtr<SyncHistoryItem> > > SyncStorageEngine::GetSyncHistory()
 {
     AutoPtr<List<AutoPtr<SyncHistoryItem> > > items;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         items = new List<AutoPtr<SyncHistoryItem> >(mSyncHistory);
     }
     return items;
@@ -1827,7 +1829,7 @@ AutoPtr<List<AutoPtr<SyncHistoryItem> > > SyncStorageEngine::GetSyncHistory()
 AutoPtr<ArrayOf<DayStats*> > SyncStorageEngine::GetDayStatistics()
 {
     AutoPtr<ArrayOf<DayStats*> > ds;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         ds = mDayStats->Clone();
     }
     return ds;
@@ -2012,7 +2014,7 @@ AutoPtr<AuthorityInfo> SyncStorageEngine::CreateAuthorityLocked(
 void SyncStorageEngine::RemoveAuthority(
     /* [in] */ EndPoint* info)
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         if (info->mTarget_provider) {
             RemoveAuthorityLocked(info->mAccount, info->mUserId, info->mProvider, TRUE /* doWrite */);
         }
@@ -2086,7 +2088,7 @@ void SyncStorageEngine::SetPeriodicSyncTime(
 {
     Boolean found = FALSE;
     AutoPtr<AuthorityInfo> authorityInfo;
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         HashMap<Int32, AutoPtr<AuthorityInfo> >::Iterator it = mAuthorities.Find(authorityId);
         if (it != mAuthorities.End()) {
             authorityInfo = it->mSecond;
@@ -2131,7 +2133,7 @@ AutoPtr<ISyncStatusInfo> SyncStorageEngine::GetOrCreateSyncStatusLocked(
 
 void SyncStorageEngine::WriteAllState()
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         // Account info is always written so no need to do it here.
 
         if (mNumPendingFinished > 0) {
@@ -2147,7 +2149,7 @@ void SyncStorageEngine::WriteAllState()
 
 void SyncStorageEngine::ClearAndReadState()
 {
-    synchronized(mAuthoritiesLock) {
+    {    AutoLock syncLock(mAuthoritiesLock);
         mAuthorities.Clear();
         mAccounts.Clear();
         mServices.Clear();

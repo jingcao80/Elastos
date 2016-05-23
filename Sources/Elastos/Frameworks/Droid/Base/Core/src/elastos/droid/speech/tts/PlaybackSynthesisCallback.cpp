@@ -6,6 +6,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
@@ -46,7 +48,7 @@ ECode PlaybackSynthesisCallback::Stop()
     }
 
     AutoPtr<SynthesisPlaybackQueueItem> item;
-    synchronized(mStateLock) {
+    {    AutoLock syncLock(mStateLock);
         if (mDone) {
             return NOERROR;
         }
@@ -93,7 +95,7 @@ ECode PlaybackSynthesisCallback::GetMaxBufferSize(
 ECode PlaybackSynthesisCallback::HasStarted(
     /* [out] */ Boolean* ret)
 {
-    synchronized (mStateLock) {
+    {    AutoLock syncLock(mStateLock);
         if (mItem != NULL) {
             *ret = TRUE;
         } else {
@@ -107,7 +109,7 @@ ECode PlaybackSynthesisCallback::HasStarted(
 ECode PlaybackSynthesisCallback::HasFinished(
     /* [out] */ Boolean* ret)
 {
-    synchronized (mStateLock) {
+    {    AutoLock syncLock(mStateLock);
         *ret = mDone;
     }
 
@@ -125,7 +127,7 @@ ECode PlaybackSynthesisCallback::Start(
         Logger::D(TAG, "start(%d, %d, %d)\n", sampleRateInHz, audioFormat, channelCount);
     }
 
-    synchronized (mStateLock) {
+    {    AutoLock syncLock(mStateLock);
         Int32 channelConfig = BlockingAudioTrack::GetChannelConfig(channelCount);
         if (channelConfig == 0) {
             //Java:    Log.e(TAG, "Unsupported number of channels :" + channelCount);
@@ -277,7 +279,7 @@ ECode PlaybackSynthesisCallback::Error(
         //Java:    Log.d(TAG, "error() [will call stop]");
         Logger::D(TAG, String("error() [will call stop]\n") );
     }
-    synchronized(mStateLock) {
+    {    AutoLock syncLock(mStateLock);
         if (mDone) {
             return NOERROR;
         }

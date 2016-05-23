@@ -12,6 +12,8 @@
 #include <utils/misc.h>
 #include <utils/Log.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Os::EIID_IBinder;
@@ -66,7 +68,7 @@ void LightImpl::SetBrightness(
     /* [in] */ Int32 brightness,
     /* [in] */ Int32 brightnessMode)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         Int32 color = brightness & 0x000000ff;
         color = 0xff000000 | (color << 16) | (color << 8) | color;
         SetLightLocked(color, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
@@ -76,7 +78,7 @@ void LightImpl::SetBrightness(
 void LightImpl::SetColor(
     /* [in] */ Int32 color)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         SetLightLocked(color, LIGHT_FLASH_NONE, 0, 0, 0);
     }
 }
@@ -87,7 +89,7 @@ void LightImpl::SetFlashing(
     /* [in] */ Int32 onMS,
     /* [in] */ Int32 offMS)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         SetLightLocked(color, mode, onMS, offMS, BRIGHTNESS_MODE_USER);
     }
 }
@@ -101,7 +103,7 @@ void LightImpl::Pulse(
     /* [in] */ Int32 color,
     /* [in] */ Int32 onMS)
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (mColor == 0 && !mFlashing) {
             SetLightLocked(color, LIGHT_FLASH_HARDWARE, onMS, 1000, BRIGHTNESS_MODE_USER);
 
@@ -117,14 +119,14 @@ void LightImpl::Pulse(
 
 void LightImpl::TurnOff()
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         SetLightLocked(0, LIGHT_FLASH_NONE, 0, 0, 0);
     }
 }
 
 void LightImpl::StopFlashing()
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         SetLightLocked(mColor, LIGHT_FLASH_NONE, 0, 0, BRIGHTNESS_MODE_USER);
     }
 }

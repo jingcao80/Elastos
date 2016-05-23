@@ -3,6 +3,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -23,7 +25,7 @@ void SQLiteClosable::OnAllReferencesReleasedFromContainer()
 
 ECode SQLiteClosable::AcquireReference()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mReferenceCount <= 0) {
             // throw new IllegalStateException(
             //                 "attempt to re-open an already-closed object: " + this);
@@ -39,7 +41,7 @@ ECode SQLiteClosable::ReleaseReference()
 {
     Boolean refCountIsZero = FALSE;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         refCountIsZero = --mReferenceCount == 0;
     }
 
@@ -54,7 +56,7 @@ ECode SQLiteClosable::ReleaseReferenceFromContainer()
 {
     Boolean refCountIsZero = FALSE;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         refCountIsZero = --mReferenceCount == 0;
     }
 

@@ -11,6 +11,8 @@
 #include "CStreams.h"
 #include "CCloseGuard.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::CCloseGuard;
 using Elastos::Droid::System::OsConstants;
 using Libcore::IO::ILibcore;
@@ -95,7 +97,7 @@ ECode FileInputStream::Available(
 ECode FileInputStream::Close()
 {
     mGuard->Close();
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (mChannel != NULL) {
             ICloseable::Probe(mChannel)->Close();
         }

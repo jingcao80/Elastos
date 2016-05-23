@@ -10,6 +10,8 @@
 #include <elastos/core/ClassLoader.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::CSurfaceTexture;
 using Elastos::Droid::Hardware::Camera2::CameraCharacteristics;
 using Elastos::Droid::Hardware::Camera2::CaptureRequest;
@@ -128,7 +130,7 @@ FlashlightController::KillFlashlightRunnable::KillFlashlightRunnable(
 
 ECode FlashlightController::KillFlashlightRunnable::Run()
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         mHost->mFlashlightEnabled = FALSE;
     }
     mHost->UpdateFlashlight(TRUE /* forceDisable */);
@@ -165,7 +167,7 @@ void FlashlightController::AvailabilityCallback::SetCameraAvailable(
     /* [in] */ Boolean available)
 {
     Boolean changed;
-    synchronized (mHost) {
+    {    AutoLock syncLock(mHost);
         changed = mHost->mCameraAvailable != available;
         mHost->mCameraAvailable = available;
     }
@@ -221,7 +223,7 @@ ECode FlashlightController::SetFlashlight(
 ECode FlashlightController::KillFlashlight()
 {
     Boolean enabled;
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         enabled = mFlashlightEnabled;
     }
     if (enabled) {
@@ -243,7 +245,7 @@ ECode FlashlightController::IsAvailable(
 ECode FlashlightController::AddListener(
     /* [in] */ IFlashlightListener* l)
 {
-    synchronized (mListeners) {
+    {    AutoLock syncLock(mListeners);
         CleanUpListenersLocked(l);
         AutoPtr<IWeakReference> wr;
         IWeakReferenceSource::Probe(l)->GetWeakReference((IWeakReference**)&wr);
@@ -255,7 +257,7 @@ ECode FlashlightController::AddListener(
 ECode FlashlightController::RemoveListener(
     /* [in] */ IFlashlightListener* l)
 {
-    synchronized (mListeners) {
+    {    AutoLock syncLock(mListeners);
         CleanUpListenersLocked(l);
     }
     return NOERROR;
@@ -384,7 +386,7 @@ void FlashlightController::UpdateFlashlight(
     ECode ec = NOERROR;
     do {
         Boolean enabled;
-        synchronized (this) {
+        {    AutoLock syncLock(this);
             enabled = mFlashlightEnabled && !forceDisable;
         }
         if (enabled) {
@@ -452,7 +454,7 @@ void FlashlightController::Teardown()
 
 void FlashlightController::HandleError()
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         mFlashlightEnabled = FALSE;
     }
     DispatchError();
@@ -480,7 +482,7 @@ void FlashlightController::DispatchListeners(
     /* [in] */ Int32 message,
     /* [in] */ Boolean argument)
 {
-    synchronized (mListeners) {
+    {    AutoLock syncLock(mListeners);
         Int32 N = 0;
         mListeners->GetSize(&N);
         Boolean cleanup = FALSE;

@@ -7,6 +7,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::EIID_IHandlerCallback;
@@ -361,7 +363,7 @@ ECode CPackageInstaller::RegisterSessionCallback(
     }
 
     ISynchronize* sync = ISynchronize::Probe(mDelegates);
-    synchronized(sync) {
+    {    AutoLock syncLock(sync);
         AutoPtr<ILooper> looper;
         handler->GetLooper((ILooper**)&looper);
         AutoPtr<SessionCallbackDelegate> delegate = new SessionCallbackDelegate(callback, looper);
@@ -385,7 +387,7 @@ ECode CPackageInstaller::UnregisterSessionCallback(
     /* [in] */ IPackageInstallerSessionCallback* callback)
 {
     ISynchronize* sync = ISynchronize::Probe(mDelegates);
-    synchronized(sync) {
+    {    AutoLock syncLock(sync);
         AutoPtr<IIterator> it;
         mDelegates->GetIterator((IIterator**)&it);
         SessionCallbackDelegate* delegate;

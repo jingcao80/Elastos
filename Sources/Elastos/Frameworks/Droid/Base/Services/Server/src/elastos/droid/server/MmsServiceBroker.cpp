@@ -3,6 +3,8 @@
 #include <elastos/droid/Manifest.h>
 #include <elastos/droid/os/Binder.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::Binder;
 
@@ -431,7 +433,7 @@ ECode MmsServiceBroker::Connection::OnServiceConnected(
 {
     Slogger::I(TAG, "MmsService connected");
     ISynchronize* sync = ISynchronize::Probe(mHost);
-    synchronized(sync) {
+    {    AutoLock syncLock(sync);
         mHost->mService = IIMms::Probe(service);
         sync->NotifyAll();
     }
@@ -444,7 +446,7 @@ ECode MmsServiceBroker::Connection::OnServiceDisconnected(
 {
     Slogger::I(TAG, "MmsService unexpectedly disconnected");
     ISynchronize* sync = ISynchronize::Probe(mHost);
-    synchronized(sync) {
+    {    AutoLock syncLock(sync);
         mHost->mService = NULL;
         sync->NotifyAll();
     }
@@ -491,7 +493,7 @@ ECode MmsServiceBroker::TryConnecting()
 {
     ECode ec = NOERROR;
     Slogger::I(TAG, "Connecting to MmsService");
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mService != NULL) {
             Slogger::D(TAG, "Already connected");
             return;
@@ -514,7 +516,7 @@ ECode MmsServiceBroker::TryConnecting()
 
 ECode MmsServiceBroker::EnsureService()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mService == NULL) {
             // Service is not connected. Try blocking connecting.
             Slogger::W(TAG, "MmsService not connected. Try connecting...");

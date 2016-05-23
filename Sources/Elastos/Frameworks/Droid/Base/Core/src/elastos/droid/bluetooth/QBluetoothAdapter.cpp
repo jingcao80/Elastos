@@ -7,6 +7,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Core::AutoLock;
 
@@ -218,7 +220,7 @@ ECode QBluetoothAdapter::BluetoothManagerCallback::constructor(
 ECode QBluetoothAdapter::BluetoothManagerCallback::OnBluetoothServiceUp(
         /* [in] */ IIBluetooth* bluetoothService)
 {
-    // synchronized (mManagerCallback) {
+    // {    AutoLock syncLock(mManagerCallback);
     AutoLock lock(*this);
         //initialize the global params again
     mAdapter->mService = bluetoothService;
@@ -243,7 +245,7 @@ ECode QBluetoothAdapter::BluetoothManagerCallback::OnBluetoothServiceUp(
 
 ECode QBluetoothAdapter::BluetoothManagerCallback::OnBluetoothServiceDown()
 {
-    // synchronized (mManagerCallback) {
+    // {    AutoLock syncLock(mManagerCallback);
     AutoLock lock(*this);
         //initialize the global params again
     mAdapter->mService = NULL;
@@ -282,7 +284,7 @@ ECode QBluetoothAdapter::QBluetoothManagerCallback::constructor(
 ECode QBluetoothAdapter::QBluetoothManagerCallback::OnQBluetoothServiceUp(
     /* [in] */ IIQBluetooth* qcbluetoothService)
 {
-    // synchronized (mManagerCallback) {
+    // {    AutoLock syncLock(mManagerCallback);
     AutoLock lock(*this);
         //initialize the global params again
     mAdapter->mQService = qcbluetoothService;
@@ -307,7 +309,7 @@ ECode QBluetoothAdapter::QBluetoothManagerCallback::OnQBluetoothServiceUp(
 
 ECode QBluetoothAdapter::QBluetoothManagerCallback::OnQBluetoothServiceDown()
 {
-    // synchronized (mManagerCallback) {
+    // {    AutoLock syncLock(mManagerCallback);
     AutoLock lock(*this);
         //initialize the global params again
     mAdapter->mQService = NULL;
@@ -399,7 +401,7 @@ ECode QBluetoothAdapter::RegisterLppClient(
     /* [out] */ Boolean* result)
 {
     AutoLock lock(mMapLock);
-    // synchronized(mLppClients) {
+    // {    AutoLock syncLock(mLppClients);
     if (add) {
         if(mLppClients->Find(client) != mLppClients->End()) {
             SLOGGERE(TAG, "Lpp Client has been already registered");

@@ -3,6 +3,8 @@
 #include <elastos/core/AutoLock.h>
 #include <Elastos.CoreLibrary.Utility.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::IUUIDHelper;
 using Elastos::Utility::CUUIDHelper;
 
@@ -29,7 +31,7 @@ ECode CEqualizer::BaseParameterListener::OnParameterChange(
     AutoPtr<IEqualizerOnParameterChangeListener> l;
     {
         Object& lock = mHost->mParamListenerLock;
-        synchronized(lock);
+        AutoLock syncLock(lock);
         if (mHost->mParamListener != NULL) {
             l = mHost->mParamListener;
         }
@@ -288,7 +290,7 @@ ECode CEqualizer::GetPresetName(
 ECode CEqualizer::SetParameterListener(
     /* [in] */ IEqualizerOnParameterChangeListener* listener)
 {
-    synchronized(mParamListenerLock);
+    AutoLock syncLock(mParamListenerLock);
     if (mParamListener != NULL) {
         mParamListener = listener;
         mBaseParamListener = new BaseParameterListener(this);

@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.uicc;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 
@@ -113,7 +115,7 @@ public class UiccController extends Handler {
 
 /*
     public static UiccController Make(Context c, CommandsInterface ci) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mInstance != NULL) {
                 throw new RuntimeException("UiccController->Make() should only be called once");
             }
@@ -124,7 +126,7 @@ public class UiccController extends Handler {
 */
 
     public static UiccController Make(Context c, CommandsInterface[] ci) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mInstance != NULL) {
                 throw new RuntimeException("MSimUiccController->Make() should only be called once");
             }
@@ -161,7 +163,7 @@ public class UiccController extends Handler {
     }
 
     public static UiccController GetInstance() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mInstance == NULL) {
                 throw new RuntimeException(
                         "UiccController.getInstance can't be called before Make()");
@@ -175,7 +177,7 @@ public class UiccController extends Handler {
     }
 
     public UiccCard GetUiccCard(Int32 slotId) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (IsValidCardIndex(slotId)) {
                 return mUiccCards[slotId];
             }
@@ -186,7 +188,7 @@ public class UiccController extends Handler {
     public UiccCard[] GetUiccCards() {
         // Return cloned array since we don't want to give out reference
         // to internal data structure.
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mUiccCards->Clone();
         }
     }
@@ -200,7 +202,7 @@ public class UiccController extends Handler {
 /*
     // Easy to use API
     public IccRecords GetIccRecords(Int32 family) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mUiccCard != NULL) {
                 UiccCardApplication app = mUiccCard->GetApplication(family);
                 If (app != NULL) {
@@ -214,7 +216,7 @@ public class UiccController extends Handler {
 
     // Easy to use API
     public IccRecords GetIccRecords(Int32 slotId, Int32 family) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             UiccCardApplication app = GetUiccCardApplication(slotId, family);
             If (app != NULL) {
                 return app->GetIccRecords();
@@ -226,7 +228,7 @@ public class UiccController extends Handler {
 /*
     // Easy to use API
     public IccFileHandler GetIccFileHandler(Int32 family) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mUiccCard != NULL) {
                 UiccCardApplication app = mUiccCard->GetApplication(family);
                 If (app != NULL) {
@@ -240,7 +242,7 @@ public class UiccController extends Handler {
 
     // Easy to use API
     public IccFileHandler GetIccFileHandler(Int32 slotId, Int32 family) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             UiccCardApplication app = GetUiccCardApplication(slotId, family);
             If (app != NULL) {
                 return app->GetIccFileHandler();
@@ -264,7 +266,7 @@ public class UiccController extends Handler {
 
     //Notifies when card status changes
     CARAPI RegisterForIccChanged(Handler h, Int32 what, Object obj) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Registrant r = new Registrant (h, what, obj);
             mIccChangedRegistrants->Add(r);
             //Notify registrant right after registering, so that it will get the latest ICC status,
@@ -274,14 +276,14 @@ public class UiccController extends Handler {
     }
 
     CARAPI UnregisterForIccChanged(Handler h) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mIccChangedRegistrants->Remove(h);
         }
     }
 
     //@Override
     CARAPI HandleMessage (Message msg) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Integer index = GetCiIndex(msg);
 
             If (index < 0 || index >= mCis.length) {
@@ -405,7 +407,7 @@ public class UiccController extends Handler {
 */
     // Easy to use API
     public UiccCardApplication GetUiccCardApplication(Int32 slotId, Int32 family) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (IsValidCardIndex(slotId)) {
                 UiccCard c = mUiccCards[slotId];
                 If (c != NULL) {

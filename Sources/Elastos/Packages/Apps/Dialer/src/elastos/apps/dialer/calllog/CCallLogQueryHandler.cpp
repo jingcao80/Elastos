@@ -1,6 +1,8 @@
 
 #include "CCallLogQueryHandler.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IStringBuilder;
 using Elastos::Core::CStringBuilder;
@@ -292,7 +294,7 @@ ECode CCallLogQueryHandler::OnNotNullableQueryComplete(
     /* [in] */ IInterface* cookie,
     /* [in] */ ICursor* cursor)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (cursor == NULL) {
             return NOERROR;
         }

@@ -119,7 +119,15 @@ ECode AbsActionBarView::InnerShowOverflowMenuRunnable::Run()
 //=====================================================================
 //                           AbsActionBarView
 //=====================================================================
-const AutoPtr<ITimeInterpolator> AbsActionBarView::sAlphaInterpolator = AbsActionBarView::InitAlphaInterpolator();
+static AutoPtr<ITimeInterpolator> InitAlphaInterpolator()
+{
+    AutoPtr<IDecelerateInterpolator> resultTmp;
+    CDecelerateInterpolator::New((IDecelerateInterpolator**)&resultTmp);
+    AutoPtr<ITimeInterpolator> result = ITimeInterpolator::Probe(resultTmp);
+    return result;
+}
+
+const AutoPtr<ITimeInterpolator> AbsActionBarView::sAlphaInterpolator = InitAlphaInterpolator();
 const Int32 AbsActionBarView::FADE_DURATION;
 
 CAR_INTERFACE_IMPL(AbsActionBarView, ViewGroup, IAbsActionBarView)
@@ -129,7 +137,6 @@ AbsActionBarView::AbsActionBarView()
     , mSplitWhenNarrow(FALSE)
     , mContentHeight(0)
 {
-    mVisAnimListener = new VisibilityAnimListener(this);
 }
 
 ECode AbsActionBarView::constructor(
@@ -160,6 +167,9 @@ ECode AbsActionBarView::constructor(
     /* [in] */ Int32 defStyleRes)
 {
     ViewGroup::constructor(context, attrs, defStyleAttr, defStyleRes);
+
+    mVisAnimListener = new VisibilityAnimListener(this);
+
     AutoPtr<ITypedValue> tv;
     CTypedValue::New((ITypedValue**)&tv);
 
@@ -490,13 +500,6 @@ ECode AbsActionBarView::OnLayout(
     return NOERROR;
 }
 
-AutoPtr<ITimeInterpolator> AbsActionBarView::InitAlphaInterpolator()
-{
-    AutoPtr<IDecelerateInterpolator> resultTmp;
-    CDecelerateInterpolator::New((IDecelerateInterpolator**)&resultTmp);
-    AutoPtr<ITimeInterpolator> result = ITimeInterpolator::Probe(resultTmp);
-    return result;
-}
 
 } // namespace Widget
 } // namespace Internal

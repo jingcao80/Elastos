@@ -7,6 +7,8 @@
 #include "CMessageDigestHelper.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::EIID_IComparable;
@@ -100,7 +102,7 @@ ECode CUUID::RandomUUID(
     *uuid = NULL;
 
     // lock on the class to protect lazy init
-    synchronized (sRngLock) {
+    {    AutoLock syncLock(sRngLock);
         if (sRng == NULL) {
             assert(0);
             //TODO CSecureRandom::New((ISecureRandom**)&sRng);

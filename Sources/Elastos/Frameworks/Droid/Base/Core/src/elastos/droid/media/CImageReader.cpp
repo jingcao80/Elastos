@@ -13,6 +13,8 @@
 #include <utils/misc.h>
 #include <utils/String8.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::IImageFormat;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Os::Looper;
@@ -692,7 +694,7 @@ ECode CImageReader::ListenerHandler::HandleMessage(
 {
     AutoPtr<IImageReaderOnImageAvailableListener> listener;
     Object& lock = mHost->mListenerLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         listener = mHost->mListener;
     }
     if (listener != NULL) {
@@ -1189,7 +1191,7 @@ ECode CImageReader::SetOnImageAvailableListener(
     /* [in] */ IImageReaderOnImageAvailableListener* listener,
     /* [in] */ IHandler* handler)
 {
-    synchronized(mListenerLock) {
+    {    AutoLock syncLock(mListenerLock);
         if (listener != NULL) {
             AutoPtr<ILooper> looper;
             if (handler != NULL) {
@@ -1323,7 +1325,7 @@ void CImageReader::PostEventFromNative(
 
     AutoPtr<IHandler> handler;
     Object& lock = cir->mListenerLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         handler = cir->mListenerHandler;
     }
     if (handler != NULL) {

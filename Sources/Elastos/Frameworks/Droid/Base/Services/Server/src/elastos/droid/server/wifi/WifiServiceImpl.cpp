@@ -19,6 +19,8 @@
 #include "elastos/core/CoreUtils.h"
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::Bluetooth::IBluetoothAdapter;
@@ -960,7 +962,7 @@ ECode WifiServiceImpl::RequestBatchedScan(
         return NOERROR;
     }
     AutoPtr<BatchedScanRequest> r = new BatchedScanRequest(this, batchedScanSettings, binder, workSource);
-    synchronized(mBatchedScanners) {
+    {    AutoLock syncLock(mBatchedScanners);
         mBatchedScanners->Add(TO_IINTERFACE(r));
         ResolveBatchedScannersLocked();
     }
@@ -1694,7 +1696,7 @@ ECode WifiServiceImpl::AcquireWifiLock(
         ws = nws;
     }
     AutoPtr<WifiLock> wifiLock = new WifiLock(this, lockMode, tag, binder, ws);
-    synchronized (mLocks) {
+    {    AutoLock syncLock(mLocks);
         return AcquireWifiLockLocked(wifiLock);
     }
     return NOERROR;
@@ -1725,7 +1727,7 @@ ECode WifiServiceImpl::UpdateWifiLockWorkSource(
     Int64 ident;
     binderHelper->ClearCallingIdentity(&ident);
     //try {
-    synchronized (mLocks) {
+    {    AutoLock syncLock(mLocks);
         Int32 index = mLocks->FindLockByBinder(lock);
         if (index < 0) {
             //throw new IllegalArgumentException("Wifi lock not active");
@@ -1754,7 +1756,7 @@ ECode WifiServiceImpl::ReleaseWifiLock(
 {
     VALIDATE_NOT_NULL(result);
     mContext->EnforceCallingOrSelfPermission(Manifest::permission::WAKE_LOCK, String(NULL));
-    synchronized (mLocks) {
+    {    AutoLock syncLock(mLocks);
          *result = ReleaseWifiLockLocked(lock);
     }
     return NOERROR;
@@ -1764,7 +1766,7 @@ ECode WifiServiceImpl::InitializeMulticastFiltering()
 {
     EnforceMulticastChangePermission();
 
-    synchronized (mMulticasters) {
+    {    AutoLock syncLock(mMulticasters);
         // if anybody had requested filters be off, leave off
         Int32 size;
         mMulticasters->GetSize(&size);
@@ -1784,7 +1786,7 @@ ECode WifiServiceImpl::AcquireMulticastLock(
     VALIDATE_NOT_NULL(binder);
     EnforceMulticastChangePermission();
 
-    synchronized (mMulticasters) {
+    {    AutoLock syncLock(mMulticasters);
         mMulticastEnabled++;
         AutoPtr<Multicaster> multicaster = new Multicaster(this, tag, binder);
         mMulticasters->Add(TO_IINTERFACE(multicaster));
@@ -1818,7 +1820,7 @@ ECode WifiServiceImpl::ReleaseMulticastLock()
     CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
     Int32 uid;
     binderHelper->GetCallingUid(&uid);
-    synchronized (mMulticasters) {
+    {    AutoLock syncLock(mMulticasters);
         mMulticastDisabled++;
         Int32 size;
         mMulticasters->GetSize(&size);
@@ -1843,7 +1845,7 @@ ECode WifiServiceImpl::IsMulticastEnabled(
     VALIDATE_NOT_NULL(result);
     EnforceAccessPermission();
 
-    synchronized (mMulticasters) {
+    {    AutoLock syncLock(mMulticasters);
         Int32 size;
         mMulticasters->GetSize(&size);
         *result = (size > 0);
@@ -1990,7 +1992,7 @@ void WifiServiceImpl::StopBatchedScan(
 {
     AutoPtr<IArrayList> found;
     CArrayList::New((IArrayList**)&found);
-    synchronized(mBatchedScanners) {
+    {    AutoLock syncLock(mBatchedScanners);
         Int32 size;
         mBatchedScanners->GetSize(&size);
         for (Int32 i = 0; i < size; ++i) {

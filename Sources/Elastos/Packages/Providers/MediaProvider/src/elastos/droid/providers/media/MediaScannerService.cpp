@@ -17,6 +17,8 @@
 #include <elastos/core/Thread.h>
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IService;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CContentValues;
@@ -213,7 +215,7 @@ ECode MediaScannerService::OnStartCommand(
     /* [out] */ Int32* result)
 {
     while (mServiceHandler == NULL) {
-        // synchronized(this) {
+        // {    AutoLock syncLock(this);
             // try {
                 assert(0 && "TODO");
                 // Wait(100);
@@ -246,7 +248,7 @@ ECode MediaScannerService::OnDestroy()
 {
     // Make sure thread has started before telling it to quit.
     while (mServiceLooper == NULL) {
-        // synchronized(this) {
+        // {    AutoLock syncLock(this);
             // try {
             assert(0 && "TODO");
                 // Wait(100);

@@ -25,6 +25,8 @@
 extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
 extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Os::ParcelFileDescriptor;
@@ -475,7 +477,7 @@ void CAssetManager::EnsureStringBlocks()
 
 void CAssetManager::RecreateStringBlocks()
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         MakeStringBlocks(sSystem->mStringBlocks);
     }
 }
@@ -1005,7 +1007,7 @@ ECode CAssetManager::AddOverlayPath(
     VALIDATE_NOT_NULL(result)
     *result = 0;
 
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if(idmapPath.IsNull()) {
             return NOERROR;
         }
@@ -1055,7 +1057,7 @@ ECode CAssetManager::AddCommonOverlayPath(
     VALIDATE_NOT_NULL(result)
     *result = 0;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IFile> file;
         CFile::New(themeApkPath, (IFile**)&file);
         Boolean exists;
@@ -1105,7 +1107,7 @@ ECode CAssetManager::AddIconPath(
     VALIDATE_NOT_NULL(result)
     *result = 0;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if(idmapPath.IsNull()) {
             return NOERROR;
         }
@@ -1143,7 +1145,7 @@ ECode CAssetManager::RemoveOverlayPath(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (packageName.IsNull()) {
             return E_NULL_POINTER_EXCEPTION;
         }

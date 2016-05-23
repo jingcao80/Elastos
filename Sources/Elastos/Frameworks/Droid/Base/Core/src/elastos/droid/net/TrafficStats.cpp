@@ -26,6 +26,8 @@
 #include <utils/misc.h>
 #include <utils/Log.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::Backup::IBackupManager;
 using Elastos::Droid::App::IDownloadManager;
 using Elastos::Droid::Content::IContext;
@@ -181,7 +183,7 @@ static int parseUidStats(const uint32_t uid, struct Stats* stats) {
 
 AutoPtr<IINetworkStatsService> TrafficStats::GetStatsService()
 {
-    synchronized(sProfilingLock) {
+    {    AutoLock syncLock(sProfilingLock);
         if (sStatsService!=NULL)
             return sStatsService;
 
@@ -252,7 +254,7 @@ ECode TrafficStats::UntagSocket(
 ECode TrafficStats::StartDataProfiling(
     /* [in] */ IContext* context)
 {
-    synchronized(sProfilingLock) {
+    {    AutoLock syncLock(sProfilingLock);
         if (sActiveProfilingStart != NULL) {
             Slogger::E("TrafficStats", "already profiling data");
             return E_RUNTIME_EXCEPTION;
@@ -269,7 +271,7 @@ ECode TrafficStats::StopDataProfiling(
     /* [out] */ INetworkStats** result)
 {
     VALIDATE_NOT_NULL(result);
-    synchronized(sProfilingLock) {
+    {    AutoLock syncLock(sProfilingLock);
         if (sActiveProfilingStart == NULL) {
             Slogger::E("TrafficStats", "not profiling data");
             return E_RUNTIME_EXCEPTION;

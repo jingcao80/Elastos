@@ -18,6 +18,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Graphics::Typeface;
 using Elastos::Droid::Os::CHandler;
@@ -504,7 +506,7 @@ ECode CaptioningManager::GetUserStyle(
 ECode CaptioningManager::AddCaptioningChangeListener(
     /* [in] */ ICaptioningManagerCaptioningChangeListener* listener)
 {
-    synchronized(mListeners) {
+    {    AutoLock syncLock(mListeners);
         Boolean res;
         if (mListeners->IsEmpty(&res), res) {
             RegisterObserver(ISettingsSecure::ACCESSIBILITY_CAPTIONING_ENABLED);
@@ -535,7 +537,7 @@ void CaptioningManager::RegisterObserver(
 ECode CaptioningManager::RemoveCaptioningChangeListener(
     /* [in] */ ICaptioningManagerCaptioningChangeListener* listener)
 {
-    synchronized(mListeners) {
+    {    AutoLock syncLock(mListeners);
         mListeners->Remove(listener);
 
         Boolean res;
@@ -550,7 +552,7 @@ void CaptioningManager::NotifyEnabledChanged()
 {
     Boolean enabled;
     IsEnabled(&enabled);
-    synchronized(mListeners) {
+    {    AutoLock syncLock(mListeners);
         Int32 size;
         mListeners->GetSize(&size);
         for(Int32 i = 0; i < size; i++) {
@@ -567,7 +569,7 @@ void CaptioningManager::NotifyUserStyleChanged()
 {
     AutoPtr<ICaptioningManagerCaptionStyle> userStyle;
     GetUserStyle((ICaptioningManagerCaptionStyle**)&userStyle);
-    synchronized(mListeners) {
+    {    AutoLock syncLock(mListeners);
         Int32 size;
         mListeners->GetSize(&size);
         for(Int32 i = 0; i < size; i++) {
@@ -584,7 +586,7 @@ void CaptioningManager::NotifyLocaleChanged()
 {
     AutoPtr<ILocale> locale;
     GetLocale((ILocale**)&locale);
-    synchronized(mListeners) {
+    {    AutoLock syncLock(mListeners);
         Int32 size;
         mListeners->GetSize(&size);
         for(Int32 i = 0; i < size; i++) {
@@ -601,7 +603,7 @@ void CaptioningManager::NotifyFontScaleChanged()
 {
     Float fontScale;
     GetFontScale(&fontScale);
-    synchronized(mListeners) {
+    {    AutoLock syncLock(mListeners);
         Int32 size;
         mListeners->GetSize(&size);
         for(Int32 i = 0; i < size; i++) {

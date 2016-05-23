@@ -6,6 +6,8 @@
 #include "elastos/droid/os/ServiceManager.h"
 #include <elastos/core/Math.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::View::EIID_IRotationWatcher;
 
@@ -273,7 +275,7 @@ LegacySensorManager::LegacySensorManager(
     mSensorManager = sensorManager;
 
     assert(0);
-    //synchronized(SensorManager::mLock) {
+    //{    AutoLock syncLock(SensorManager::mLock);
         assert(mSensorManager != NULL);
         if (!sInitialized) {
             sWindowManager = IIWindowManager::Probe(ServiceManager::GetService(String("window")));
@@ -366,7 +368,7 @@ Boolean LegacySensorManager::RegisterLegacyListener(
             // that the invariants around listeners are maintained.  This is safe
             // because neither RegisterLegacyListener nor UnregisterLegacyListener
             // are called reentrantly while sensors are being registered or unregistered.
-            synchronized(mLegacyListenersMapLock) {
+            {    AutoLock syncLock(mLegacyListenersMapLock);
                 AutoPtr<ISensorListener> l = listener;
 
                 // If we don't already have one, create a LegacyListener
@@ -434,7 +436,7 @@ void LegacySensorManager::UnregisterLegacyListener(
             // that the invariants around listeners are maintained.  This is safe
             // because neither RegisterLegacyListener nor UnregisterLegacyListener
             // are called re-entrantly while sensors are being registered or unregistered.
-            synchronized(mLegacyListenersMapLock) {
+            {    AutoLock syncLock(mLegacyListenersMapLock);
                 AutoPtr<ISensorListener> l = listener;
                 // do we know about this listener?
                 HashMap<AutoPtr<ISensorListener>, AutoPtr<LegacyListener> >::Iterator it;
@@ -465,7 +467,7 @@ void LegacySensorManager::OnRotationChanged(
     /* [in] */ Int32 rotation)
 {
     assert(0);
-    //synchronized(SensorManager::mLock) {
+    //{    AutoLock syncLock(SensorManager::mLock);
         sRotation  = rotation;
     //}
 }
@@ -473,7 +475,7 @@ void LegacySensorManager::OnRotationChanged(
 Int32 LegacySensorManager::GetRotation()
 {
     assert(0);
-    //synchronized(SensorManager::mLock) {
+    //{    AutoLock syncLock(SensorManager::mLock);
         return sRotation;
     //}
 }

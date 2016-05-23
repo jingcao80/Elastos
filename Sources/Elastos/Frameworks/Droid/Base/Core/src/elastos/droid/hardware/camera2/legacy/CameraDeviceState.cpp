@@ -4,6 +4,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraDeviceImplCameraDeviceCallbacks;
 using Elastos::Utility::Logging::Slogger;
 
@@ -118,7 +120,7 @@ CameraDeviceState::CameraDeviceState()
 CARAPI CameraDeviceState::SetError(
     /* [in] */ Int32 error)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mCurrentError = error;
         return DoStateTransition(STATE_ERROR);
     }
@@ -131,7 +133,7 @@ CARAPI CameraDeviceState::SetConfiguring(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         DoStateTransition(STATE_CONFIGURING);
         *value = mCurrentError == NO_CAPTURE_ERROR;
         return NOERROR;
@@ -145,7 +147,7 @@ CARAPI CameraDeviceState::SetIdle(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         DoStateTransition(STATE_IDLE);
         *value = mCurrentError == NO_CAPTURE_ERROR;
         return NOERROR;
@@ -162,7 +164,7 @@ CARAPI CameraDeviceState::SetCaptureStart(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mCurrentRequest = request;
         DoStateTransition(STATE_CAPTURING, timestamp, captureError);
         *value = mCurrentError == NO_CAPTURE_ERROR;
@@ -180,7 +182,7 @@ CARAPI CameraDeviceState::SetCaptureResult(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mCurrentState != STATE_CAPTURING) {
             Slogger::E(TAG, "Cannot receive result while in state: %d", mCurrentState);
             mCurrentError = ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE;
@@ -211,7 +213,7 @@ CARAPI CameraDeviceState::SetCameraDeviceCallbacks(
     /* [in] */ IHandler* handler,
     /* [in] */ ICameraDeviceStateListener* listener)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mCurrentHandler = handler;
         mCurrentListener = listener;
     }

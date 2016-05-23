@@ -21,6 +21,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <drm/DrmManagerClient.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::CContentValues;
 using Elastos::Droid::Content::IContentResolver;
@@ -720,7 +722,7 @@ void CDownloadThread::CheckConnectivity()
 
 void CDownloadThread::CheckPausedOrCanceled()
 {
-    synchronized (mInfo) {
+    {    AutoLock syncLock(mInfo);
         AutoPtr<CDownloadInfo> _mInfo = (CDownloadInfo*)mInfo.Get();
         if (_mInfo->mControl == IDownloadsImpl::CONTROL_PAUSED) {
             // throw new StopRequestException(

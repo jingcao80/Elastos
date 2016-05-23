@@ -4,6 +4,8 @@
 #include <elastos/utility/etl/Algorithm.h>
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -20,7 +22,7 @@ ECode Observable::RegisterObserver(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    synchronized(mObserversLock) {
+    {    AutoLock syncLock(mObserversLock);
         List< AutoPtr<IInterface> >::Iterator it =
                 Find(mObservers.Begin(), mObservers.End(), AutoPtr<IInterface>(observer));
         if (it != mObservers.End()) {
@@ -42,7 +44,7 @@ ECode Observable::UnregisterObserver(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    synchronized(mObserversLock) {
+    {    AutoLock syncLock(mObserversLock);
         List< AutoPtr<IInterface> >::Iterator it =
                 Find(mObservers.Begin(), mObservers.End(), AutoPtr<IInterface>(observer));
         if (it == mObservers.End()) {
@@ -58,7 +60,7 @@ ECode Observable::UnregisterObserver(
 
 ECode Observable::UnregisterAll()
 {
-    synchronized(mObserversLock) {
+    {    AutoLock syncLock(mObserversLock);
         mObservers.Clear();
     }
     return NOERROR;

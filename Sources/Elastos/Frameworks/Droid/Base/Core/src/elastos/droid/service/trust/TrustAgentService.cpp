@@ -5,6 +5,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
@@ -51,7 +53,7 @@ ECode TrustAgentService::MHandler::HandleMessage(
             msg->GetObj((IInterface**)&token);
             Boolean result;
             mHost->OnSetTrustAgentFeaturesEnabled(features, &result);
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 ECode ec = mHost->mCallback->OnSetTrustAgentFeaturesEnabledCompleted(result, IBinder::Probe(token));
                 if (FAILED(ec)) {
                     mHost->OnError(String("calling onSetTrustAgentFeaturesEnabledCompleted()"));
@@ -128,7 +130,7 @@ ECode TrustAgentService::TrustAgentServiceWrapper::OnTrustTimeout()
 ECode TrustAgentService::TrustAgentServiceWrapper::SetCallback(
     /* [in] */ IITrustAgentServiceCallback* callback)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mHost->mCallback = callback;
         // The managingTrust property is false implicitly on the server-side, so we only
         // need to set it here if the agent has decided to manage trust.
@@ -245,7 +247,7 @@ ECode TrustAgentService::GrantTrust(
     /* [in] */ Int64 durationMs,
     /* [in] */ Boolean initiatedByUser)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (!mManagingTrust) {
             Logger::E(TAG, "Cannot grant trust if agent is not managing trust. Call setManagingTrust(true) first.");
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -268,7 +270,7 @@ ECode TrustAgentService::GrantTrust(
 
 ECode TrustAgentService::RevokeTrust()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mPendingGrantTrustTask != NULL) {
             mPendingGrantTrustTask = NULL;
         }
@@ -286,7 +288,7 @@ ECode TrustAgentService::RevokeTrust()
 ECode TrustAgentService::SetManagingTrust(
     /* [in] */ Boolean managingTrust)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mManagingTrust != managingTrust) {
             mManagingTrust = managingTrust;
             if (mCallback != NULL) {

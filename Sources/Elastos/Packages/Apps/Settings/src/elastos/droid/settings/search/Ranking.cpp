@@ -2,6 +2,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IInteger32;
 using Elastos::Utility::CHashMap;
@@ -198,7 +200,7 @@ Int32 Ranking::GetRankForClassName(
 Int32 Ranking::GetBaseRankForAuthority(
     /* [in] */ const String& authority)
 {
-    synchronized(sBaseRankMap) {
+    {    AutoLock syncLock(sBaseRankMap);
         AutoPtr<IInterface> obj;
         sBaseRankMap->Get(CoreUtils::Convert(authority), (IInterface**)&obj);
         AutoPtr<IInteger32> base = IInteger32::Probe(obj);

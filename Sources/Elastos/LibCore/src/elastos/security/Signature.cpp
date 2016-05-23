@@ -6,6 +6,8 @@
 #include "utility/logging/Logger.h"
 #include "org/apache/harmony/security/fortress/CEngine.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
 using Elastos::Security::Cert::IX509Certificate;
@@ -164,7 +166,7 @@ private:
         /* [in] */ IKey* key,
         /* [out] */ SignatureSpi** spi)
     {
-        synchronized(mInitLock) {
+        {    AutoLock syncLock(mInitLock);
             if (mSpiImpl != NULL && key == NULL) {
                 *spi = mSpiImpl;
                 REFCOUNT_ADD(*spi);

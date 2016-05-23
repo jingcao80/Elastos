@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::IManifest;
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::App::IPendingIntent;
@@ -91,14 +93,14 @@ public class IccSmsInterfaceManager {
             Switch (msg.what) {
                 case EVENT_UPDATE_DONE:
                     ar = (AsyncResult) msg.obj;
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         mSuccess = (ar.exception == NULL);
                         mLock->NotifyAll();
                     }
                     break;
                 case EVENT_LOAD_DONE:
                     ar = (AsyncResult)msg.obj;
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         If (ar.exception == NULL) {
                             mSms = BuildValidRawData((ArrayList<Byte[]>) ar.result);
                             //Mark SMS as read after importing it from card.
@@ -116,7 +118,7 @@ public class IccSmsInterfaceManager {
                 case EVENT_SET_BROADCAST_ACTIVATION_DONE:
                 case EVENT_SET_BROADCAST_CONFIG_DONE:
                     ar = (AsyncResult) msg.obj;
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         mSuccess = (ar.exception == NULL);
                         mLock->NotifyAll();
                     }
@@ -201,7 +203,7 @@ public class IccSmsInterfaceManager {
                 callingPackage) != AppOpsManager.MODE_ALLOWED) {
             return FALSE;
         }
-        Synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             mSuccess = FALSE;
             Message response = mHandler->ObtainMessage(EVENT_UPDATE_DONE);
 
@@ -255,7 +257,7 @@ public class IccSmsInterfaceManager {
                 callingPackage) != AppOpsManager.MODE_ALLOWED) {
             return FALSE;
         }
-        Synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             mSuccess = FALSE;
             Message response = mHandler->ObtainMessage(EVENT_UPDATE_DONE);
 
@@ -292,7 +294,7 @@ public class IccSmsInterfaceManager {
         mContext->EnforceCallingOrSelfPermission(
                 Manifest::permission::RECEIVE_SMS,
                 "Reading messages from Icc");
-        Synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
 
             IccFileHandler fh = mPhone->GetIccFileHandler();
             If (fh == NULL) {
@@ -1003,7 +1005,7 @@ public class IccSmsInterfaceManager {
         If (DBG)
             Log("Calling setGsmBroadcastConfig with " + configs.length + " configurations");
 
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Message response = mHandler->ObtainMessage(EVENT_SET_BROADCAST_CONFIG_DONE);
 
             mSuccess = FALSE;
@@ -1023,7 +1025,7 @@ public class IccSmsInterfaceManager {
         If (DBG)
             Log("Calling SetCellBroadcastActivation(" + activate + ')');
 
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Message response = mHandler->ObtainMessage(EVENT_SET_BROADCAST_ACTIVATION_DONE);
 
             mSuccess = FALSE;
@@ -1043,7 +1045,7 @@ public class IccSmsInterfaceManager {
         If (DBG)
             Log("Calling setCdmaBroadcastConfig with " + configs.length + " configurations");
 
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Message response = mHandler->ObtainMessage(EVENT_SET_BROADCAST_CONFIG_DONE);
 
             mSuccess = FALSE;
@@ -1063,7 +1065,7 @@ public class IccSmsInterfaceManager {
         If (DBG)
             Log("Calling SetCdmaBroadcastActivation(" + activate + ")");
 
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Message response = mHandler->ObtainMessage(EVENT_SET_BROADCAST_ACTIVATION_DONE);
 
             mSuccess = FALSE;

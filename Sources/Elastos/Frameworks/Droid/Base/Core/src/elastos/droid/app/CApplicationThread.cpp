@@ -16,6 +16,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/CoreUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::UserHandle;
@@ -853,7 +855,7 @@ ECode CApplicationThread::UpdateProcessState(
     /* [in] */ Int32 processState,
     /* [in] */ Boolean fromIpc)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mLastProcessState != processState) {
             mLastProcessState = processState;
             // Update Dalvik state based on ActivityManager.PROCESS_STATE_* constants.

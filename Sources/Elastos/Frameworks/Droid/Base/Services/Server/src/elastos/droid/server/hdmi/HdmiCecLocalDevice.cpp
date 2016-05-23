@@ -23,6 +23,8 @@
 #include <elastos/core/AutoLock.h>
 #include <Elastos.CoreLibrary.IO.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Input::CInputManagerHelper;
 using Elastos::Droid::Hardware::Input::IInputManagerHelper;
 using Elastos::Droid::View::IKeyEventHelper;
@@ -1211,7 +1213,7 @@ ECode HdmiCecLocalDevice::GetActiveSource(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         *result = mActiveSource;
         REFCOUNT_ADD(*result)
     }
@@ -1239,7 +1241,7 @@ ECode HdmiCecLocalDevice::SetActiveSource(
     /* [in] */ Int32 logicalAddress,
     /* [in] */ Int32 physicalAddress)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         ((ActiveSource*) mActiveSource.Get())->mLogicalAddress = logicalAddress;
         ((ActiveSource*) mActiveSource.Get())->mPhysicalAddress = physicalAddress;
     }
@@ -1252,7 +1254,7 @@ ECode HdmiCecLocalDevice::GetActivePath(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         *result = mActiveRoutingPath;
     }
     return NOERROR;
@@ -1261,7 +1263,7 @@ ECode HdmiCecLocalDevice::GetActivePath(
 ECode HdmiCecLocalDevice::SetActivePath(
     /* [in] */ Int32 path)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mActiveRoutingPath = path;
     }
     Int32 portId;
@@ -1275,7 +1277,7 @@ ECode HdmiCecLocalDevice::GetActivePortId(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         return ((HdmiControlService*)mService.Get())->PathToPortId(mActiveRoutingPath, result);
     }
     return NOERROR;

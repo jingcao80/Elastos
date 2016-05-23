@@ -15,6 +15,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IDownloadManager;
 using Elastos::Droid::App::IDownloadManagerRequest;
 using Elastos::Droid::Content::IIntentHelper;
@@ -137,7 +139,7 @@ ECode CDownloadInfo::Reader::UpdateFromDatabase(
     _info->mBypassRecommendedSizeLimit =
             GetInt32(IDownloadsImpl::COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
 
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         _info->mControl = GetInt32(IDownloadsImpl::COLUMN_CONTROL);
     }
     return NOERROR;
@@ -498,7 +500,7 @@ ECode CDownloadInfo::StartDownloadIfReady(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         Boolean isReady = IsReadyToDownload();
         Boolean bIsDone = FALSE;
         Boolean isActive = mSubmittedTask != NULL && !(mSubmittedTask->IsDone(&bIsDone), bIsDone);
@@ -530,7 +532,7 @@ ECode CDownloadInfo::StartScanIfReady(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         Boolean isReady = FALSE;
         ShouldScanFile(&isReady);
         if (isReady) {

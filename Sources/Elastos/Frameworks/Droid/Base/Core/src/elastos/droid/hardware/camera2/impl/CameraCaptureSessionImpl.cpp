@@ -15,6 +15,8 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Camera2::Impl::CCallbackProxiesSessionStateCallbackProxy;
 using Elastos::Droid::Hardware::Camera2::Impl::CCallbackProxiesDeviceCaptureCallbackProxy;
 using Elastos::Droid::Hardware::Camera2::Utils::CTaskDrainer;
@@ -81,7 +83,7 @@ ECode CameraCaptureSessionImpl::AbortDrainListener::OnDrained()
     if (mHost->VERBOSE) {
         Slogger::V(mHost->TAG, "%s onAbortDrained", mHost->mIdString.string());
     }
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         /*
          * Any queued aborts have now completed.
          *
@@ -113,8 +115,8 @@ ECode CameraCaptureSessionImpl::IdleDrainListener::OnDrained()
     // without causing a deadlock
     CameraDeviceImpl* impl = (CameraDeviceImpl*)(mHost->mDeviceImpl.Get());
     Object& lock = impl->mInterfaceLock;
-    synchronized(lock) {
-        synchronized(mHost) {
+    {    AutoLock syncLock(lock);
+        {    AutoLock syncLock(mHost);
             /*
              * The device is now IDLE, and has settled. It will not transition to
              * ACTIVE or BUSY again by itself.
@@ -173,7 +175,7 @@ ECode CameraCaptureSessionImpl::UnconfigureDrainListener::OnDrained()
     if (mHost->VERBOSE) {
         Slogger::V(TAG, "%s onUnconfigureDrained", mHost->mIdString.string());
     }
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         // The device has finished unconfiguring. It's now fully closed.
         return mHost->mStateCallback->OnClosed(mHost);
     }
@@ -241,7 +243,7 @@ ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnIdle(
         Slogger::V(TAG, "%s onIdle", mHost->mIdString.string());
     }
 
-    synchronized (mSession) {
+    {    AutoLock syncLock(mSession);
         isAborting = mHost->mAborting;
     }
 
@@ -259,7 +261,7 @@ ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnIdle(
     if (mBusy && isAborting) {
         mHost->mAbortDrainer->TaskFinished();
 
-        synchronized (mSession) {
+        {    AutoLock syncLock(mSession);
             mHost->mAborting = FALSE;
         }
     }
@@ -296,7 +298,7 @@ ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnUnconfigured(
     if (mHost->VERBOSE) {
         Slogger::V(mHost->TAG, "%d onUnconfigured", mHost->mIdString.string());
     }
-    synchronized (mSession) {
+    {    AutoLock syncLock(mSession);
         // Ignore #onUnconfigured before #close is called.
         //
         // Normally, this is reached when this session is closed and no immediate other
@@ -463,7 +465,7 @@ ECode CameraCaptureSessionImpl::Capture(
     VALIDATE_NOT_NULL(value)
     *value = 0;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (request == NULL) {
             //throw new IllegalArgumentException("request must not be null");
             Slogger::E(TAG, "request must not be null");
@@ -498,7 +500,7 @@ ECode CameraCaptureSessionImpl::CaptureBurst(
     VALIDATE_NOT_NULL(value)
     *value = 0;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean res;
         if (requests == NULL) {
             //throw new IllegalArgumentException("requests must not be null");
@@ -540,7 +542,7 @@ ECode CameraCaptureSessionImpl::SetRepeatingRequest(
     VALIDATE_NOT_NULL(value)
     *value = 0;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (request == NULL) {
             //throw new IllegalArgumentException("request must not be null");
             Slogger::E(TAG, "request must not be null");
@@ -575,7 +577,7 @@ ECode CameraCaptureSessionImpl::SetRepeatingBurst(
     VALIDATE_NOT_NULL(value)
     *value = 0;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean res;
         if (requests == NULL) {
             //throw new IllegalArgumentException("requests must not be null");
@@ -610,7 +612,7 @@ ECode CameraCaptureSessionImpl::SetRepeatingBurst(
 
 ECode CameraCaptureSessionImpl::StopRepeating()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         FAIL_RETURN(CheckNotClosed())
 
         if (VERBOSE) {
@@ -624,7 +626,7 @@ ECode CameraCaptureSessionImpl::StopRepeating()
 
 ECode CameraCaptureSessionImpl::AbortCaptures()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         FAIL_RETURN(CheckNotClosed())
 
         if (VERBOSE) {
@@ -647,7 +649,7 @@ ECode CameraCaptureSessionImpl::AbortCaptures()
 
 ECode CameraCaptureSessionImpl::ReplaceSessionClose()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         /*
          * In order for creating new sessions to be fast, the new session should be created
          * before the old session is closed.
@@ -682,7 +684,7 @@ ECode CameraCaptureSessionImpl::ReplaceSessionClose()
 
 ECode CameraCaptureSessionImpl::Close()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mClosed) {
             if (VERBOSE) {
                 Slogger::V(TAG, "%s close - reentering", mIdString.string());

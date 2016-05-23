@@ -14,6 +14,8 @@
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IInteger32;
 using Elastos::Droid::Content::CIntent;
@@ -256,7 +258,7 @@ ECode CNetworkScoreService::RegisterNetworkScoreCache(
     /* [in] */ IINetworkScoreCache* scoreCache)
 {
     mContext->EnforceCallingOrSelfPermission(Manifest::permission::BROADCAST_SCORE_NETWORKS, TAG);
-    synchronized(mScoreCaches) {
+    {    AutoLock syncLock(mScoreCaches);
         Boolean containsKey;
         AutoPtr<IInteger32> key;
         CInteger32::New(networkType, (IInteger32**)&key);
@@ -314,7 +316,7 @@ ECode CNetworkScoreService::Dump(
 AutoPtr<ISet> CNetworkScoreService::GetScoreCaches()
 {
     AutoPtr<ISet> rev;
-    synchronized(mScoreCaches) {
+    {    AutoLock syncLock(mScoreCaches);
         CHashSet::New(Ptr(mScoreCaches)->Func(mScoreCaches->GetValues), (ISet**)&rev);
     }
     return rev;

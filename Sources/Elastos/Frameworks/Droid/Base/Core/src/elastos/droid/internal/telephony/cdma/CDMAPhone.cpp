@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.cdma;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivityManagerNative;
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::IContext;
@@ -234,7 +236,7 @@ public class CDMAPhone extends PhoneBase {
 
     //@Override
     CARAPI Dispose() {
-        Synchronized(PhoneProxy.lockForRadioTechnologyChange) {
+        {    AutoLock syncLock(PhoneProxy.lockForRadioTechnologyChange);
             super->Dispose();
             Log("dispose");
 

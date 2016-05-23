@@ -13,6 +13,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntent;
@@ -138,7 +140,7 @@ ECode PersistentDataStore::IsRatingBlocked(
     VALIDATE_NOT_NULL(result)
 
     LoadIfNeeded();
-    synchronized(mBlockedRatings) {
+    {    AutoLock syncLock(mBlockedRatings);
         FOR_EACH(iter, mBlockedRatings) {
             AutoPtr<ITvContentRating> blcokedRating = ITvContentRating::Probe(Ptr(iter)->Func(iter->GetNext));
             Boolean b;
@@ -390,7 +392,7 @@ ECode PersistentDataStore::SaveToXml(
     serializer->SetFeature(String("http://xmlpull.org/v1/doc/features.html#indent-output"), TRUE);
     serializer->WriteStartTag(String(NULL), TAG_TV_INPUT_MANAGER_STATE);
     serializer->WriteStartTag(String(NULL), TAG_BLOCKED_RATINGS);
-    synchronized(mBlockedRatings) {
+    {    AutoLock syncLock(mBlockedRatings);
         FOR_EACH(iter, mBlockedRatings) {
             AutoPtr<ITvContentRating> rating = ITvContentRating::Probe(Ptr(iter)->Func(iter->GetNext));
             serializer->WriteStartTag(String(NULL), TAG_RATING);

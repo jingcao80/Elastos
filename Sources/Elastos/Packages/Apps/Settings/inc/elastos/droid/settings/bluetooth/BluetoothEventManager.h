@@ -96,14 +96,14 @@ final class BluetoothEventManager {
 
     /** Register to start receiving callbacks for Bluetooth events. */
     void RegisterCallback(BluetoothCallback callback) {
-        synchronized(mCallbacks) {
+        {    AutoLock syncLock(mCallbacks);
             mCallbacks->Add(callback);
         }
     }
 
     /** Unregister to stop receiving callbacks for Bluetooth events. */
     void UnregisterCallback(BluetoothCallback callback) {
-        synchronized(mCallbacks) {
+        {    AutoLock syncLock(mCallbacks);
             mCallbacks->Remove(callback);
         }
     }
@@ -146,7 +146,7 @@ final class BluetoothEventManager {
             // update local profiles and get paired devices
             mLocalAdapter->SetBluetoothStateInt(state);
             // send callback to update UI and possibly start scanning
-            synchronized(mCallbacks) {
+            {    AutoLock syncLock(mCallbacks);
                 for (BluetoothCallback callback : mCallbacks) {
                     callback->OnBluetoothStateChanged(state);
                 }
@@ -164,7 +164,7 @@ final class BluetoothEventManager {
         }
         CARAPI OnReceive(Context context, Intent intent,
                 BluetoothDevice device) {
-            synchronized(mCallbacks) {
+            {    AutoLock syncLock(mCallbacks);
                 for (BluetoothCallback callback : mCallbacks) {
                     callback->OnScanningStateChanged(mStarted);
                 }
@@ -198,7 +198,7 @@ final class BluetoothEventManager {
     }
 
     private void DispatchDeviceAdded(CachedBluetoothDevice cachedDevice) {
-        synchronized(mCallbacks) {
+        {    AutoLock syncLock(mCallbacks);
             for (BluetoothCallback callback : mCallbacks) {
                 callback->OnDeviceAdded(cachedDevice);
             }
@@ -214,7 +214,7 @@ final class BluetoothEventManager {
                 return;
             }
             if (CachedBluetoothDeviceManager->OnDeviceDisappeared(cachedDevice)) {
-                synchronized(mCallbacks) {
+                {    AutoLock syncLock(mCallbacks);
                     for (BluetoothCallback callback : mCallbacks) {
                         callback->OnDeviceDeleted(cachedDevice);
                     }
@@ -256,7 +256,7 @@ final class BluetoothEventManager {
                 }
             }
 
-            synchronized(mCallbacks) {
+            {    AutoLock syncLock(mCallbacks);
                 for (BluetoothCallback callback : mCallbacks) {
                     callback->OnDeviceBondStateChanged(cachedDevice, bondState);
                 }

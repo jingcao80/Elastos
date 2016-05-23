@@ -7,6 +7,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CComponentNameHelper;
 using Elastos::Droid::Content::IComponentNameHelper;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
@@ -515,7 +517,7 @@ Boolean ProviderMap::DumpProvider(
     List<AutoPtr<ContentProviderRecord> > allProviders;
     List<AutoPtr<ContentProviderRecord> > providers;
 
-    synchronized (mAm) {
+    {    AutoLock syncLock(mAm);
         ClassRecordIterator crit = mSingletonByClass.Begin();
         for (; crit != mSingletonByClass.End(); ++crit) {
             allProviders.PushBack(crit->mSecond);
@@ -600,7 +602,7 @@ void ProviderMap::DumpProvider(
     /* [in] */ Boolean dumpAll)
 {
     String innerPrefix = prefix + "  ";
-    synchronized (mAm) {
+    {    AutoLock syncLock(mAm);
         pw->Print(prefix);
         pw->Print(String("PROVIDER "));
         pw->Print(r->ToString());

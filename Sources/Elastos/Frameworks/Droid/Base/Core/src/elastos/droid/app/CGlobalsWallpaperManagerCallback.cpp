@@ -11,6 +11,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IParcelFileDescriptor;
@@ -63,7 +65,7 @@ ECode CGlobalsWallpaperManagerCallback::OnWallpaperChanged()
      * to null so if the user requests the wallpaper again then we'll
      * fetch it.
      */
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mWallpaper = NULL;
         mDefaultWallpaper = NULL;
     }
@@ -72,7 +74,7 @@ ECode CGlobalsWallpaperManagerCallback::OnWallpaperChanged()
 
 ECode CGlobalsWallpaperManagerCallback::OnKeyguardWallpaperChanged()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mKeyguardWallpaper = NULL;
     }
     return NOERROR;
@@ -110,7 +112,7 @@ AutoPtr<IBitmap> CGlobalsWallpaperManagerCallback::PeekWallpaperBitmap(
 AutoPtr<IBitmap> CGlobalsWallpaperManagerCallback::PeekKeyguardWallpaperBitmap(
     /* [in] */ IContext* context)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mKeyguardWallpaper != NULL) {
             return mKeyguardWallpaper;
         }
@@ -133,7 +135,7 @@ void CGlobalsWallpaperManagerCallback::ForgetLoadedWallpaper()
 
 void CGlobalsWallpaperManagerCallback::ForgetLoadedKeyguardWallpaper()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mKeyguardWallpaper = NULL;
     }
 }
@@ -253,7 +255,7 @@ ECode CGlobalsWallpaperManagerCallback::ToString(
 
 void CGlobalsWallpaperManagerCallback::ClearKeyguardWallpaper()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // try {
         mService->ClearKeyguardWallpaper();
         // } catch (RemoteException e) {

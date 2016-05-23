@@ -23,6 +23,8 @@ extern "C" {
 }
 #endif
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Text::CParsePosition;
 using Elastos::Text::IParsePosition;
 using Elastos::Text::CSimpleDateFormat;
@@ -348,7 +350,7 @@ void CExifInterface::LoadAttributes() // throws IOException
     mAttributes.Clear();
 
     String attrStr;
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         attrStr = GetAttributesNative(mFilename);
     }
 
@@ -415,7 +417,7 @@ ECode CExifInterface::SaveAttributes() //throws IOException
     }
 
     String s = sb.ToString();
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         SaveAttributesNative(mFilename, s);
         CommitChangesNative(mFilename);
     }
@@ -436,7 +438,7 @@ ECode CExifInterface::GetThumbnail(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         AutoPtr<ArrayOf<Byte> > thumbnail = GetThumbnailNative(mFilename);
         *result = thumbnail;
         REFCOUNT_ADD(*result);
@@ -447,7 +449,7 @@ ECode CExifInterface::GetThumbnail(
 ECode CExifInterface::GetThumbnailRange(
     /* [out, callee] */ ArrayOf<Int64>** result)
 {
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         AutoPtr<ArrayOf<Int64> > range = GetThumbnailRangeNative(mFilename);
         *result = range;
         REFCOUNT_ADD(*result)

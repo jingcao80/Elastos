@@ -5,6 +5,8 @@
 #include "SSLContext.h"
 #include <elastos/core/Thread.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::Thread;
 using Elastos::Core::IThread;
 using Elastos::Core::IClassLoader;
@@ -26,7 +28,7 @@ ECode SSLServerSocketFactory::GetDefault(
 {
     VALIDATE_NOT_NULL(factory)
 
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         Int32 newCacheVersion;
         assert(0 && "TODO");
         //TODO: Services::GetCacheVersion(&newCacheVersion);

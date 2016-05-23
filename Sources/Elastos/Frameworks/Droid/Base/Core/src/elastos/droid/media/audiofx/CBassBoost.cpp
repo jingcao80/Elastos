@@ -3,6 +3,8 @@
 #include "elastos/droid/media/audiofx/CBassBoostSettings.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::IUUIDHelper;
 using Elastos::Utility::CUUIDHelper;
 
@@ -28,7 +30,7 @@ ECode CBassBoost::BaseParameterListener::OnParameterChange(
     AutoPtr<IBassBoostOnParameterChangeListener> l;
     {
         Object& lock = mHost->mParamListenerLock;
-        synchronized(lock);
+        AutoLock syncLock(lock);
         if (mHost->mParamListener != NULL) {
             l = mHost->mParamListener;
         }
@@ -113,7 +115,7 @@ ECode CBassBoost::GetRoundedStrength(
 ECode CBassBoost::SetParameterListener(
     /* [in] */ IBassBoostOnParameterChangeListener* listener)
 {
-    synchronized(mParamListenerLock);
+    AutoLock syncLock(mParamListenerLock);
     if (mParamListener != NULL) {
         mParamListener = listener;
         mBaseParamListener = new BaseParameterListener(this);

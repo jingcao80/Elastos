@@ -4,6 +4,8 @@
 #include "utility/logging/Slogger.h"
 #include "CPathClassLoader.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::CSystem;
 using Elastos::Core::CPathClassLoader;
 using Elastos::Utility::IProperties;
@@ -66,7 +68,7 @@ ECode FactoryFinder::Find(
     //     String configFile = javah + File.separator + "lib" + File.separator + "jaxp.properties";
     //     String factoryClassName = null;
     //     if (firstTime) {
-    //         synchronized (cacheProps) {
+    //         {    AutoLock syncLock(cacheProps);
     //             if (firstTime) {
     //                 File f = new File(configFile);
     //                 firstTime = false;

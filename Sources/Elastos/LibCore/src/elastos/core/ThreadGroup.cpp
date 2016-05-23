@@ -2,6 +2,9 @@
 #include "ThreadGroup.h"
 #include "Thread.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Elastos {
 namespace Core {
 
@@ -458,7 +461,7 @@ void ThreadGroup::ListImpl(
     //System.out.println(this.toString());
 
     // Print the children threads, with 1 extra indentation
-    // synchronized (this.childrenThreadsLock) {
+    // {    AutoLock syncLock(this.childrenThreadsLock);
     //     for (int i = 0; i < numThreads; i++) {
     //         // children get an extra indentation, 4 spaces for each level
     //         for (int j = 0; j <= levels; j++) {

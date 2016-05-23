@@ -29,6 +29,8 @@
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Camera2::Legacy::LegacyCameraDevice;
 using Elastos::Droid::Hardware::Camera2::Legacy::CLegacyResultMapper;
 using Elastos::Droid::Hardware::Camera2::Legacy::CGLThreadManager;
@@ -110,7 +112,7 @@ ECode RequestThreadManager::RequestThreadManagerFpsCounter::constructor(
 
 ECode RequestThreadManager::RequestThreadManagerFpsCounter::CountFrame()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mFrameCount++;
         Int64 nextTime = SystemClock::GetElapsedRealtimeNanos();
         if (mLastTime == 0) {
@@ -132,7 +134,7 @@ ECode RequestThreadManager::RequestThreadManagerFpsCounter::CheckFps(
     VALIDATE_NOT_NULL(result);
     *result = 0;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = mLastFps;
     }
     return NOERROR;
@@ -140,7 +142,7 @@ ECode RequestThreadManager::RequestThreadManagerFpsCounter::CheckFps(
 
 ECode RequestThreadManager::RequestThreadManagerFpsCounter::StaggeredLog()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mLastTime > mLastPrintTime + 5 * NANO_PER_SECOND) {
             mLastPrintTime = mLastTime;
             StringBuilder sb;
@@ -156,7 +158,7 @@ ECode RequestThreadManager::RequestThreadManagerFpsCounter::StaggeredLog()
 
 ECode RequestThreadManager::RequestThreadManagerFpsCounter::CountAndLog()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         CountFrame();
         StaggeredLog();
     }
@@ -436,7 +438,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                 //}
 
                 Object& lock = mHost->mIdleLock;
-                synchronized(lock) {
+                {    AutoLock syncLock(lock);
                     // Retry the the request queue.
                     mHost->mRequestQueue->GetNext((IPair**)&nextBurst);
 
@@ -1448,7 +1450,7 @@ ECode RequestThreadManager::SubmitCaptureRequests(
     AutoPtr<IHandler> handler;
     mRequestThread->WaitAndGetHandler((IHandler**)&handler);
     Int32 ret;
-    synchronized(mIdleLock) {
+    {    AutoLock syncLock(mIdleLock);
         mRequestQueue->Submit(requests, repeating, frameNumber, &ret);
         Boolean result;
         handler->SendEmptyMessage(MSG_SUBMIT_CAPTURE_REQUEST, &result);

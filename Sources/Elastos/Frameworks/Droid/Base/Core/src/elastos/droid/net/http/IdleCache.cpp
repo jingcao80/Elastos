@@ -10,6 +10,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Thread.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::SystemClock;
@@ -44,7 +46,7 @@ ECode IdleCache::IdleReaper::Run()
     //         Elastos::os::Process::THREAD_PRIORITY_BACKGROUND);
 
     {
-        synchronized(mHost) {
+        {    AutoLock syncLock(mHost);
 
             while (check < EMPTY_CHECK_MAX) {
                 Wait(CHECK_INTERVAL);
@@ -105,7 +107,7 @@ ECode IdleCache::CacheConnection(
     VALIDATE_NOT_NULL(result)
 
     Boolean ret = FALSE;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
 
 
         if (HttpLog::LOGV) {
@@ -141,7 +143,7 @@ ECode IdleCache::GetConnection(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
 
         Connection* ret = NULL;
 
@@ -168,7 +170,7 @@ ECode IdleCache::GetConnection(
 
 ECode IdleCache::Clear()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
 
         for (Int32 i = 0; mCount > 0 && i < IDLE_CACHE_MAX; i++) {
             Entry* entry = (*mEntries)[i];
@@ -185,7 +187,7 @@ ECode IdleCache::Clear()
 
 ECode IdleCache::ClearIdle()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
 
         if (mCount > 0) {
             Int64 time = SystemClock::GetUptimeMillis();

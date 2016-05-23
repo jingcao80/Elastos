@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.uicc;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IHandler;
@@ -132,7 +134,7 @@ public class IsimUiccRecords extends IccRecords implements IsimRecords {
                             Log("Failed to parse ISIM AKA contents: " + e);
                         }
                     }
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         mLock->NotifyAll();
                     }
 
@@ -395,7 +397,7 @@ public class IsimUiccRecords extends IccRecords implements IsimRecords {
     public String GetIsimChallengeResponse(String nonce){
         If (DBG) Log("getIsimChallengeResponse-nonce:"+nonce);
         try {
-            Synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 mCi->RequestIsimAuthentication(nonce,ObtainMessage(EVENT_AKA_AUTHENTICATE_DONE));
                 try {
                     mLock->Wait();

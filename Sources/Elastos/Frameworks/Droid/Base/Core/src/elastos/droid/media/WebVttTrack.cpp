@@ -5,6 +5,8 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::AutoLock;
 using Elastos::Core::IInteger64;
 using Elastos::Core::StringUtils;
@@ -55,7 +57,7 @@ ECode WebVttTrack::OnData(
         String str(*data);
 
         // implement intermixing restriction for WebVTT only for now
-        synchronized(mParser) {
+        {    AutoLock syncLock(mParser);
             if (/*mCurrentRunID != null && */runID != mCurrentRunID) {
                 Slogger::E(TAG, "Run #%ld in progress.  Cannot process run #%ld", mCurrentRunID, runID);
                 return E_ILLEGAL_STATE_EXCEPTION;
@@ -78,7 +80,7 @@ ECode WebVttTrack::OnData(
 ECode WebVttTrack::OnCueParsed(
     /* [in] */ ITextTrackCue* cue)
 {
-    synchronized (mParser) {
+    {    AutoLock syncLock(mParser);
         String regionId;
         cue->GetRegionId(&regionId);
         // resolve region
@@ -172,7 +174,7 @@ ECode WebVttTrack::OnRegionParsed(
 {
     String id;
     region->GetId(&id);
-    synchronized(mParser) {
+    {    AutoLock syncLock(mParser);
         mRegions[id] = region;
     }
     return NOERROR;

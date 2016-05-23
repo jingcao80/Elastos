@@ -6,6 +6,8 @@
 #include "CAtomicBoolean.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::Thread;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Utility::CHashSet;
@@ -126,7 +128,7 @@ ECode AbstractSelector::End()
 ECode AbstractSelector::Cancel(
     /* [in] */ ISelectionKey* key)
 {
-    synchronized (mCancelledKeySet) {
+    {    AutoLock syncLock(mCancelledKeySet);
         Boolean isflag = FALSE;
         mCancelledKeySet->Add(key, &isflag);
     }

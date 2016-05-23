@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.cdma;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Internal::Telephony::I*;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IAsyncResult;
@@ -751,7 +753,7 @@ public class CdmaConnection extends Connection {
     private void SetPostDialState(PostDialState s) {
         If (s == PostDialState.STARTED ||
                 s == PostDialState.PAUSE) {
-            Synchronized (mPartialWakeLock) {
+            {    AutoLock syncLock(mPartialWakeLock);
                 If (mPartialWakeLock->IsHeld()) {
                     mHandler->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
                 } else {
@@ -779,7 +781,7 @@ public class CdmaConnection extends Connection {
     }
 
     private void ReleaseWakeLock() {
-        Synchronized (mPartialWakeLock) {
+        {    AutoLock syncLock(mPartialWakeLock);
             If (mPartialWakeLock->IsHeld()) {
                 Log("releaseWakeLock");
                 mPartialWakeLock->Release();

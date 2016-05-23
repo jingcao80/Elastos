@@ -6,6 +6,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::IO::IOutputStream;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IByteArrayOutputStream;
@@ -72,7 +74,7 @@ ECode CInputMethodSubtypeArray::WriteToParcel(
     AutoPtr<ArrayOf<Byte> > compressedData = mCompressedData;
     Int32 decompressedSize = mDecompressedSize;
     if (compressedData == NULL && decompressedSize == 0) {
-        synchronized(mLockObject) {
+        {    AutoLock syncLock(mLockObject);
             compressedData = mCompressedData;
             decompressedSize = mDecompressedSize;
             if (compressedData == NULL && decompressedSize == 0) {
@@ -114,7 +116,7 @@ ECode CInputMethodSubtypeArray::Get(
     }
     AutoPtr<ArrayOf<IInputMethodSubtype*> > instance = mInstance;
     if (instance == NULL) {
-        synchronized(mLockObject) {
+        {    AutoLock syncLock(mLockObject);
             instance = mInstance;
             if (instance == NULL) {
                 AutoPtr<ArrayOf<Byte> > decompressedData =

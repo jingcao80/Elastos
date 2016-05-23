@@ -368,7 +368,7 @@ public class UserSettings extends SettingsPreferenceFragment
     }
 
     private void OnAddUserClicked(Int32 userType) {
-        synchronized(mUserLock) {
+        {    AutoLock syncLock(mUserLock);
             if (mRemovingUserId == -1 && !mAddingUser) {
                 switch (userType) {
                 case USER_TYPE_USER:
@@ -387,7 +387,7 @@ public class UserSettings extends SettingsPreferenceFragment
     }
 
     private void OnRemoveUserClicked(Int32 userId) {
-        synchronized(mUserLock) {
+        {    AutoLock syncLock(mUserLock);
             if (mRemovingUserId == -1 && !mAddingUser) {
                 mRemovingUserId = userId;
                 ShowDialog(DIALOG_CONFIRM_REMOVE);
@@ -637,7 +637,7 @@ public class UserSettings extends SettingsPreferenceFragment
         } else {
             new Thread() {
                 CARAPI Run() {
-                    synchronized(mUserLock) {
+                    {    AutoLock syncLock(mUserLock);
                         mUserManager->RemoveUser(mRemovingUserId);
                         mHandler->SendEmptyMessage(MESSAGE_UPDATE_LIST);
                     }
@@ -657,7 +657,7 @@ public class UserSettings extends SettingsPreferenceFragment
     }
 
     private void AddUserNow(final Int32 userType) {
-        synchronized(mUserLock) {
+        {    AutoLock syncLock(mUserLock);
             mAddingUser = TRUE;
             //UpdateUserList();
             new Thread() {
@@ -669,7 +669,7 @@ public class UserSettings extends SettingsPreferenceFragment
                     } else {
                         user = CreateLimitedUser();
                     }
-                    synchronized(mUserLock) {
+                    {    AutoLock syncLock(mUserLock);
                         mAddingUser = FALSE;
                         if (userType == USER_TYPE_USER) {
                             mHandler->SendEmptyMessage(MESSAGE_UPDATE_LIST);
@@ -960,7 +960,7 @@ public class UserSettings extends SettingsPreferenceFragment
 
     //@Override
     CARAPI OnDismiss(DialogInterface dialog) {
-        synchronized(mUserLock) {
+        {    AutoLock syncLock(mUserLock);
             mAddingUser = FALSE;
             mRemovingUserId = -1;
             UpdateUserList();

@@ -19,6 +19,8 @@
 
 package com.android.internal.telephony;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using static com::Android::Internal::Telephony::RILConstants::I*;
 using static android::Telephony::TelephonyManager::INETWORK_TYPE_UNKNOWN;
 using static android::Telephony::TelephonyManager::INETWORK_TYPE_EDGE;
@@ -121,7 +123,7 @@ class RILRequest {
     static RILRequest Obtain(Int32 request, Message result) {
         RILRequest rr = NULL;
 
-        Synchronized(sPoolSync) {
+        {    AutoLock syncLock(sPoolSync);
             If (sPool != NULL) {
                 rr = sPool;
                 sPool = rr.mNext;
@@ -157,7 +159,7 @@ class RILRequest {
      * Note: This should only be called once per use.
      */
     void Release() {
-        Synchronized (sPoolSync) {
+        {    AutoLock syncLock(sPoolSync);
             If (sPoolSize < MAX_POOL_SIZE) {
                 mNext = sPool;
                 sPool = this;
@@ -359,7 +361,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
                             return;
                         }
 
-                        Synchronized (mRequestList) {
+                        {    AutoLock syncLock(mRequestList);
                             mRequestList->Append(rr.mSerial, rr);
                         }
 
@@ -420,7 +422,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
                     // Note: Keep mRequestList so that delayed response
                     // can still be handled when response finally comes.
 
-                    Synchronized (mRequestList) {
+                    {    AutoLock syncLock(mRequestList);
                         If (ClearWakeLock()) {
                             If (RILJ_LOGD) {
                                 Int32 count = mRequestList->Size();
@@ -2542,7 +2544,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
 
     private void
     AcquireWakeLock() {
-        Synchronized (mWakeLock) {
+        {    AutoLock syncLock(mWakeLock);
             mWakeLock->Acquire();
             mWakeLockCount++;
 
@@ -2554,7 +2556,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
 
     private void
     DecrementWakeLock() {
-        Synchronized (mWakeLock) {
+        {    AutoLock syncLock(mWakeLock);
             If (mWakeLockCount > 1) {
                 mWakeLockCount--;
             } else {
@@ -2568,7 +2570,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
     // TRUE if we had the wakelock
     private Boolean
     ClearWakeLock() {
-        Synchronized (mWakeLock) {
+        {    AutoLock syncLock(mWakeLock);
             If (mWakeLockCount == 0 && mWakeLock->IsHeld() == FALSE) return FALSE;
             Rlog->D(RILJ_LOG_TAG, "NOTE: mWakeLockCount is " + mWakeLockCount + "at time of clearing");
             mWakeLockCount = 0;
@@ -2619,7 +2621,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
      */
     protected void ClearRequestList(Int32 error, Boolean loggable) {
         RILRequest rr;
-        Synchronized (mRequestList) {
+        {    AutoLock syncLock(mRequestList);
             Int32 count = mRequestList->Size();
             If (RILJ_LOGD && loggable) {
                 Rlog->D(RILJ_LOG_TAG, "clearRequestList " +
@@ -2643,7 +2645,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
 
     protected RILRequest FindAndRemoveRequestFromList(Int32 serial) {
         RILRequest rr = NULL;
-        Synchronized (mRequestList) {
+        {    AutoLock syncLock(mRequestList);
             rr = mRequestList->Get(serial);
             If (rr != NULL) {
                 mRequestList->Remove(serial);
@@ -4906,8 +4908,8 @@ public class RIL extends BaseCommands implements CommandsInterface {
         pw->Println(" mReceiver=" + mReceiver);
         pw->Println(" mWakeLock=" + mWakeLock);
         pw->Println(" mWakeLockTimeout=" + mWakeLockTimeout);
-        Synchronized (mRequestList) {
-            Synchronized (mWakeLock) {
+        {    AutoLock syncLock(mRequestList);
+            {    AutoLock syncLock(mWakeLock);
                 pw->Println(" mWakeLockCount=" + mWakeLockCount);
             }
             Int32 count = mRequestList->Size();

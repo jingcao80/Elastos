@@ -2,6 +2,8 @@
 #include "elastos/droid/server/UiThread.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::CHandler;
@@ -32,7 +34,7 @@ void FgThread::EnsureThreadLocked()
 AutoPtr<FgThread> FgThread::Get()
 {
     Object& lock = UiThread::sLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         EnsureThreadLocked();
     }
     return sInstance;
@@ -41,7 +43,7 @@ AutoPtr<FgThread> FgThread::Get()
 AutoPtr<IHandler> FgThread::GetHandler()
 {
     Object& lock = UiThread::sLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         EnsureThreadLocked();
     }
     return sHandler;

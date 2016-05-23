@@ -18,6 +18,8 @@
 #include <elastos/core/Thread.h>
 #include <elastos/utility/etl/List.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Utility::IProtocol;
 using Elastos::Droid::Os::Handler;
@@ -322,7 +324,7 @@ Boolean Connection::ClearPipe(
     Boolean empty = TRUE;
     if (HttpLog::LOGV) HttpLog::V(
             "Connection.clearPipe(): clearing pipe %d", pipe.GetSize());
-    synchronized(mRequestFeeder) {
+    {    AutoLock syncLock(mRequestFeeder);
         Request* tReq;
 
         List<Request*>::Iterator itor;

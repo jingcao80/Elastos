@@ -9,6 +9,8 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::CResourcesHelper;
@@ -750,7 +752,7 @@ AutoPtr<ICharSequence> DateUtils::GetRelativeTimeSpanString(
     system->GetCurrentTimeMillis(&now);
     Int64 span = Elastos::Core::Math::Abs(now - millis);
 
-    synchronized(sLockDateUtilsClass) {
+    {    AutoLock syncLock(sLockDateUtilsClass);
         if (sNowTime == NULL) {
             CTime::New((ITime**)&sNowTime);
         }

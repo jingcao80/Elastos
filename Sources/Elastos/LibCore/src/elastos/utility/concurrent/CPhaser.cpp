@@ -8,6 +8,8 @@
 #include "CAtomicReference.h"
 #include "CForkJoinPool.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::Thread;
 using Elastos::Core::ISystem;
 using Elastos::Core::Math;
@@ -170,7 +172,7 @@ Int32 CPhaser::DoRegister(
         //         break;
         // }
         // else {
-        //     synchronized (this) {               // 1st sub registration
+        //     {    AutoLock syncLock(this);               // 1st sub registration
         //         if (state == s) {               // recheck under lock
         //             phase = parent.doRegister(1);
         //             if (phase < 0)

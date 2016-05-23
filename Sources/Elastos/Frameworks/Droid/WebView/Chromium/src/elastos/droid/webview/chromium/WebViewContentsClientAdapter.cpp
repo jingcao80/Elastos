@@ -26,6 +26,8 @@
 #include "elastos/core/CoreUtils.h"
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CIntentHelper;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentHelper;
@@ -236,7 +238,7 @@ ECode WebViewContentsClientAdapter::PermissionRequestAdapter::GetResources(
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
-    // synchronized(this) {
+    // {    AutoLock syncLock(this);
     //     if (mResources == null) {
     //         mResources = toPermissionResources(mAwPermissionRequest.getResources());
     //     }

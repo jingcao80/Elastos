@@ -19,6 +19,8 @@
 
 package com.android.internal.telephony;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
@@ -448,7 +450,7 @@ public abstract class PhoneBase extends Handler implements Phone {
 
     //@Override
     CARAPI Dispose() {
-        Synchronized(PhoneProxy.lockForRadioTechnologyChange) {
+        {    AutoLock syncLock(PhoneProxy.lockForRadioTechnologyChange);
             mContext->UnregisterReceiver(mImsIntentReceiver);
             mCi->UnSetOnCallRing(this);
             // Must cleanup all connectionS and needs to use sendMessage!
@@ -1954,7 +1956,7 @@ public abstract class PhoneBase extends Handler implements Phone {
 
     //@Override
     public ImsPhone RelinquishOwnershipOfImsPhone() {
-        Synchronized (mImsLock) {
+        {    AutoLock syncLock(mImsLock);
             If (mImsPhone == NULL)
                 return NULL;
 
@@ -1970,7 +1972,7 @@ public abstract class PhoneBase extends Handler implements Phone {
 
     //@Override
     CARAPI AcquireOwnershipOfImsPhone(ImsPhone imsPhone) {
-        Synchronized (mImsLock) {
+        {    AutoLock syncLock(mImsLock);
             If (imsPhone == NULL)
                 return;
 
@@ -1995,7 +1997,7 @@ public abstract class PhoneBase extends Handler implements Phone {
     }
 
     protected void UpdateImsPhone() {
-        Synchronized (mImsLock) {
+        {    AutoLock syncLock(mImsLock);
             Rlog->D(LOG_TAG, "updateImsPhone"
                     + " mImsServiceReady=" + mImsServiceReady);
 

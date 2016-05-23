@@ -19,6 +19,8 @@
 #include <elastos/core/StringUtils.h>
 #include <media/SoundPool.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CActivityThread;
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::Content::IContext;
@@ -443,7 +445,7 @@ ECode CSoundPool::SoundPoolImpl::SetRate(
 ECode CSoundPool::SoundPoolImpl::SetOnLoadCompleteListener(
     /* [in] */ ISoundPoolOnLoadCompleteListener* listener)
 {
-    synchronized(mLock){
+    {    AutoLock syncLock(mLock);
         if (listener != NULL) {
             // setup message handler
             AutoPtr<ILooper> looper = Looper::GetMyLooper();

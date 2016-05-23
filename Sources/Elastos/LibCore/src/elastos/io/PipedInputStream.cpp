@@ -4,6 +4,8 @@
 #include "CThread.h"
 #include "Arrays.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::CThread;
 using Elastos::Utility::Arrays;
 
@@ -47,7 +49,7 @@ ECode PipedInputStream::Available(
 {
     VALIDATE_NOT_NULL(rev)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (NULL == mBuffer || -1 == mIn) {
             *rev = 0;
         } else {
@@ -59,7 +61,7 @@ ECode PipedInputStream::Available(
 
 ECode PipedInputStream::Close()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mBuffer = NULL;
         FAIL_RETURN(NotifyAll());
     }
@@ -76,7 +78,7 @@ ECode PipedInputStream::Connect(
 
  ECode PipedInputStream::EstablishConnection()
  {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mIsConnected) {
             // throw new IOException("Pipe already connected");
             return E_IO_EXCEPTION;
@@ -94,7 +96,7 @@ ECode PipedInputStream::Read(
 {
     VALIDATE_NOT_NULL(rev)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (!mIsConnected) {
             // throw new IOException("Not connected");
             return E_IO_EXCEPTION;
@@ -157,7 +159,7 @@ ECode PipedInputStream::Read(
 {
     VALIDATE_NOT_NULL(bytes)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         FAIL_RETURN(Arrays::CheckOffsetAndCount(bytes->GetLength(), byteOffset, byteCount));
         if (0 == byteCount) {
             *rev = 0;
@@ -245,7 +247,7 @@ ECode PipedInputStream::Read(
 
 ECode PipedInputStream::Done()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mIsClosed = true;
         FAIL_RETURN(NotifyAll());
     }
@@ -255,7 +257,7 @@ ECode PipedInputStream::Done()
 ECode PipedInputStream::Receive(
     /* [in] */ Int32 oneByte)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (NULL == mBuffer || mIsClosed) {
             // throw new IOException("Pipe is closed");
             return E_IO_EXCEPTION;

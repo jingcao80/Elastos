@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.cdma;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Concurrent::Atomic::IAtomicInteger;
 
 using Elastos::Droid::Internal::Telephony::ICommandsInterface;
@@ -76,7 +78,7 @@ public class CdmaSubscriptionSourceManager extends Handler {
      */
     public static CdmaSubscriptionSourceManager GetInstance(Context context,
             CommandsInterface ci, Handler h, Int32 what, Object obj) {
-        Synchronized (sReferenceCountMonitor) {
+        {    AutoLock syncLock(sReferenceCountMonitor);
             If (NULL == sInstance) {
                 sInstance = new CdmaSubscriptionSourceManager(context, ci);
             }
@@ -91,7 +93,7 @@ public class CdmaSubscriptionSourceManager extends Handler {
      */
     CARAPI Dispose(Handler h) {
         mCdmaSubscriptionSourceChangedRegistrants->Remove(h);
-        Synchronized (sReferenceCountMonitor) {
+        {    AutoLock syncLock(sReferenceCountMonitor);
             sReferenceCount--;
             If (sReferenceCount <= 0) {
                 mCi->UnregisterForCdmaSubscriptionChanged(this);

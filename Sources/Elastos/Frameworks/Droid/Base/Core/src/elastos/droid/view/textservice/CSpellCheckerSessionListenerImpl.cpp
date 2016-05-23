@@ -12,6 +12,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::CMessage;
 using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Os::CMessageHelper;
@@ -120,7 +122,7 @@ void CSpellCheckerSessionListenerImpl::ProcessTask(
     if (scp->mWhat == TASK_CLOSE) {
         // If we are closing, we want to clean up our state now even
         // if it is pending as an async operation.
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             mISpellCheckerSession = NULL;
             mHandler = NULL;
             if (mThread != NULL) {
@@ -136,7 +138,7 @@ void CSpellCheckerSessionListenerImpl::ProcessTask(
 ECode CSpellCheckerSessionListenerImpl::OnServiceConnected(
     /* [in] */ IISpellCheckerSession* session)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mISpellCheckerSession = session;
         assert(0 && "TODO");
         // if (session->AsBinder() instanceof Binder && mThread == NULL) {
@@ -223,7 +225,7 @@ void CSpellCheckerSessionListenerImpl::ProcessOrEnqueueTask(
         Logger::D(TAG, "process or enqueue task: %p", mISpellCheckerSession.Get());
     }
     AutoPtr<IISpellCheckerSession> session;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         session = mISpellCheckerSession;
         if (session == NULL) {
             AutoPtr<SpellCheckerParams> closeTask;

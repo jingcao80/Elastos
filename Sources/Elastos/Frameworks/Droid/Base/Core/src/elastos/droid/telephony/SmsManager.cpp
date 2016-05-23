@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivityThread;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContentValues;
@@ -696,7 +698,7 @@ public class SmsManager {
      */
     public static SmsManager GetSmsManagerForSubscriber(Int64 subId) {
         // TODO(shri): Add javadoc link once SubscriptionManager is made public api
-        Synchronized(sLockObject) {
+        {    AutoLock syncLock(sLockObject);
             SmsManager smsManager = sSubInstances->Get(subId);
             If (smsManager == NULL) {
                 smsManager = new SmsManager(subId);

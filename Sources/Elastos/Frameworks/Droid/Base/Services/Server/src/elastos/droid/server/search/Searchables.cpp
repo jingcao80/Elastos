@@ -2,6 +2,8 @@
 #include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/text/TextUtils.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBinderHelper;
 using Elastos::Droid::Os::CBinderHelper;
@@ -49,7 +51,7 @@ ECode Searchables::GetSearchableInfo(
 
     // Step 1.  Is the result already hashed?  (case 1)
     AutoPtr<ISearchableInfo> result;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mSearchablesMap->Get(TO_IINTERFACE(activity), (IInterface**)&obj);
         result = ISearchableInfo::Probe(obj);
@@ -115,7 +117,7 @@ ECode Searchables::GetSearchableInfo(
 
         // Now try the referred activity, and if found, cache
         // it against the original name so we can skip the check
-        synchronized (this) {
+        {    AutoLock syncLock(this);
             AutoPtr<IInterface> obj;
             mSearchablesMap->Get(TO_IINTERFACE(referredActivity), (IInterface**)&obj);
             result = ISearchableInfo::Probe(obj);
@@ -228,7 +230,7 @@ ECode Searchables::BuildSearchableList()
         FindWebSearchActivity(newGlobalSearchActivity, (IComponentName**)&newWebSearchActivity);
 
         // Store a consistent set of new values
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             mSearchablesMap = newSearchablesMap;
             mSearchablesList = newSearchablesList;
             mSearchablesInGlobalSearchList = newSearchablesInGlobalSearchList;

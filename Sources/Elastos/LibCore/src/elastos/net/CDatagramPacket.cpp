@@ -3,6 +3,9 @@
 #include "CInetSocketAddress.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Elastos {
 namespace Net {
 
@@ -82,7 +85,7 @@ ECode CDatagramPacket::GetAddress(
 {
     VALIDATE_NOT_NULL(address);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *address = mAddress;
         REFCOUNT_ADD(*address);
     }
@@ -94,7 +97,7 @@ ECode CDatagramPacket::GetData(
 {
     VALIDATE_NOT_NULL(data);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *data = mData;
         REFCOUNT_ADD(*data);
     }
@@ -106,7 +109,7 @@ ECode CDatagramPacket::GetLength(
 {
     VALIDATE_NOT_NULL(length);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *length = mLength;
     }
     return NOERROR;
@@ -117,7 +120,7 @@ ECode CDatagramPacket::GetOffset(
 {
     VALIDATE_NOT_NULL(offset);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *offset = mOffset;
     }
     return NOERROR;
@@ -141,7 +144,7 @@ ECode CDatagramPacket::GetPort(
 {
     VALIDATE_NOT_NULL(port);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *port = mPort;
     }
     return NOERROR;
@@ -150,7 +153,7 @@ ECode CDatagramPacket::GetPort(
 ECode CDatagramPacket::SetAddress(
     /* [in] */ IInetAddress* addr)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mAddress = addr;
     }
     return NOERROR;
@@ -162,7 +165,7 @@ ECode CDatagramPacket::SetData(
     /* [in] */ Int32 aLength)
 {
     assert(buf);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (0 > anOffset || anOffset > buf->GetLength() || 0 > aLength
                 || aLength > buf->GetLength() - anOffset) {
             //throw new IllegalArgumentException();
@@ -181,7 +184,7 @@ ECode CDatagramPacket::SetData(
     /* [in] */ ArrayOf<Byte>* buf)
 {
     assert(buf);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mLength = buf->GetLength(); // This will check for null
         mUserSuppliedLength = mLength;
         mData = buf;
@@ -193,7 +196,7 @@ ECode CDatagramPacket::SetData(
 ECode CDatagramPacket::SetLength(
     /* [in] */ Int32 len)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (0 > len || mOffset + len > mData->GetLength()) {
             //throw new IndexOutOfBoundsException();
             return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
@@ -207,7 +210,7 @@ ECode CDatagramPacket::SetLength(
 ECode CDatagramPacket::SetPort(
     /* [in] */ Int32 aPort)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (aPort < 0 || aPort > 65535) {
             //throw new IllegalArgumentException("Port out of range: " + aPort);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -222,7 +225,7 @@ ECode CDatagramPacket::GetSocketAddress(
 {
     VALIDATE_NOT_NULL(sockAddr);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInetAddress> addr;
         GetAddress((IInetAddress**)&addr);
         Int32 port;
@@ -238,7 +241,7 @@ ECode CDatagramPacket::GetSocketAddress(
 ECode CDatagramPacket::SetSocketAddress(
     /* [in] */ ISocketAddress* sockAddr)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (sockAddr == NULL || IInetSocketAddress::Probe(sockAddr) == NULL) {
             //throw new IllegalArgumentException("Socket address not an InetSocketAddress: " +
                     //(sockAddr == null ? null : sockAddr.getClass()));

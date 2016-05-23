@@ -28,6 +28,8 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::Fragment;
 using Elastos::Droid::Content::CIntent;
@@ -1068,7 +1070,7 @@ ECode Instrumentation::CallActivityOnDestroy(
       // TODO: the following block causes intermittent hangs when using startActivity
       // temporarily comment out until root cause is fixed (bug 2630683)
 //      if (mWaitingActivities != null) {
-//          synchronized(mSync) {
+//          {    AutoLock syncLock(mSync);
 //              final int N = mWaitingActivities->size();
 //              for (int i=0; i<N; i++) {
 //                  final ActivityWaiter aw = mWaitingActivities->get(i);

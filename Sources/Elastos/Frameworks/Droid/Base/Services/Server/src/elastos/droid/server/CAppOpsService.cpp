@@ -18,6 +18,8 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::App::AppOpsManager;
 using Elastos::Droid::Os::Process;
@@ -110,7 +112,7 @@ CAppOpsService::WriteRunner::WriteRunner(
 
 ECode CAppOpsService::WriteRunner::Run()
 {
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         mHost->mWriteScheduled = FALSE;
         AutoPtr<AsyncTask> task = (AsyncTask*)new WriteStateTask(mHost);
         return task->ExecuteOnExecutor(AsyncTask::THREAD_POOL_EXECUTOR, NULL);
@@ -161,7 +163,7 @@ ECode CAppOpsService::AskRunnable::Run()
 {
     assert(0 && "TODO");
     // AutoPtr<IPermissionDialog> permDialog;
-    // synchronized (AppOpsService.this) {
+    // {    AutoLock syncLock(AppOpsService.this);
     //     Logger::E(TAG, "Creating dialog box");
     //     mOp->mDialogReqQueue->Register(request);
     //     if (mOp->mDialogReqQueue->GetDialog() == NULL) {
@@ -311,7 +313,7 @@ ECode CAppOpsService::ClientState::ToString(
 //@Override
 ECode CAppOpsService::ClientState::ProxyDied()
 {
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         Int32 size;
         mStartedOps->GetSize(&size);
         for (Int32 i = size - 1; i >= 0; i--) {
@@ -428,7 +430,7 @@ ECode CAppOpsService::Publish(
 ECode CAppOpsService::SystemReady()
 {
     ECode ec = NOERROR;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IPackageManager> pm;
         mContext->GetPackageManager((IPackageManager**)&pm);
         Boolean changed = FALSE;
@@ -539,7 +541,7 @@ ECode CAppOpsService::PackageRemoved(
     /* [in] */ Int32 uid,
     /* [in] */ const String& packageName)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mUidOps->Get(uid, (IInterface**)&obj);
         if (obj != NULL) {
@@ -563,7 +565,7 @@ ECode CAppOpsService::PackageRemoved(
 ECode CAppOpsService::UidRemoved(
     /* [in] */ Int32 uid)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 index;
         mUidOps->IndexOfKey(uid, &index);
         if (index >= 0) {
@@ -578,7 +580,7 @@ ECode CAppOpsService::Shutdown()
 {
     Slogger::W(TAG, "Writing app ops before shutdown...");
     Boolean doWrite = FALSE;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mWriteScheduled) {
             mWriteScheduled = FALSE;
             doWrite = TRUE;
@@ -642,7 +644,7 @@ ECode CAppOpsService::GetPackagesForOps(
         Binder::GetCallingPid(), Binder::GetCallingUid(), String(NULL)))
 
     AutoPtr<IArrayList> res;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean hasNext;
         Int32 size;
         mUidOps->GetSize(&size);
@@ -693,7 +695,7 @@ ECode CAppOpsService::GetOpsForPackage(
     FAIL_RETURN(mContext->EnforcePermission(Manifest::permission::GET_APP_OPS_STATS,
         Binder::GetCallingPid(), Binder::GetCallingUid(), String(NULL)))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<Ops> pkgOps = GetOpsLocked(uid, packageName, FALSE);
         if (pkgOps == NULL) {
             return NOERROR;
@@ -762,7 +764,7 @@ ECode CAppOpsService::SetMode(
     FAIL_RETURN(VerifyIncomingOp(code))
     AutoPtr<IArrayList> repCbs; //ArrayList<Callback>
     aom->OpToSwitch(inCode, &code);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<Op> op = GetOpLocked(code, uid, packageName, TRUE);
         if (op != NULL) {
             if (op->mMode != mode) {
@@ -863,7 +865,7 @@ ECode CAppOpsService::ResetAllModes()
     CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
 
     AutoPtr<IHashMap> callbacks;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean changed = FALSE;
         Int32 size, pkgOpsSize;
         mUidOps->GetSize(&size);
@@ -973,7 +975,7 @@ ECode CAppOpsService::StartWatchingMode(
     /* [in] */ IIAppOpsCallback* callback)
 {
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IAppOpsManagerHelper> aom;
         CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
 
@@ -1017,7 +1019,7 @@ ECode CAppOpsService::StartWatchingMode(
 ECode CAppOpsService::StopWatchingMode(
     /* [in] */ IIAppOpsCallback* callback)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         IBinder* binder = IBinder::Probe(callback);
         AutoPtr<IInterface> obj;
         mModeWatchers->Remove(binder, (IInterface**)&obj);
@@ -1059,7 +1061,7 @@ ECode CAppOpsService::GetToken(
 {
     VALIDATE_NOT_NULL(token)
     *token = NULL;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mClients->Get(clientToken, (IInterface**)&obj);
         AutoPtr<ClientState> cs = (ClientState*)IObject::Probe(obj);
@@ -1089,7 +1091,7 @@ ECode CAppOpsService::CheckOperation(
     AutoPtr<IAppOpsManagerHelper> aom;
     CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (IsOpRestricted(uid, code, packageName)) {
             *result = IAppOpsManager::MODE_IGNORED;
             return NOERROR;
@@ -1117,7 +1119,7 @@ ECode CAppOpsService::CheckAudioOperation(
 {
     VALIDATE_NOT_NULL(result)
     *result = IAppOpsManager::MODE_ERRORED;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 mode = CheckRestrictionLocked(code, usage, uid, packageName);
         if (mode != IAppOpsManager::MODE_ALLOWED) {
             *result = mode;
@@ -1167,7 +1169,7 @@ ECode CAppOpsService::SetAudioRestriction(
 {
     FAIL_RETURN(VerifyIncomingUid(uid))
     FAIL_RETURN(VerifyIncomingOp(code))
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mAudioRestrictions->Get(code, (IInterface**)&obj);
         AutoPtr<ISparseArray> usageRestrictions = ISparseArray::Probe(obj);
@@ -1204,7 +1206,7 @@ ECode CAppOpsService::CheckPackage(
     VALIDATE_NOT_NULL(mode)
     *mode = IAppOpsManager::MODE_ERRORED;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (GetOpsRawLocked(uid, packageName, TRUE) != NULL) {
             *mode = IAppOpsManager::MODE_ALLOWED;
         }
@@ -1228,7 +1230,7 @@ ECode CAppOpsService::NoteOperation(
 
     AutoPtr<IAppOpsManagerHelper> aom;
     CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<Ops> ops = GetOpsLocked(uid, packageName, TRUE);
         if (ops == NULL) {
             if (DEBUG)  {
@@ -1324,7 +1326,7 @@ ECode CAppOpsService::StartOperation(
     AutoPtr<IAppOpsManagerHelper> aom;
     CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
     ClientState* client = (ClientState*)token;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<Ops> ops = GetOpsLocked(uid, packageName, TRUE);
         if (ops == NULL) {
             if (DEBUG) {
@@ -1407,7 +1409,7 @@ ECode CAppOpsService::FinishOperation(
     FAIL_RETURN(VerifyIncomingUid(uid))
     FAIL_RETURN(VerifyIncomingOp(code))
     ClientState* client = (ClientState*)token;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<Op> op = GetOpLocked(code, uid, packageName, TRUE);
         if (op == NULL) {
             return NOERROR;
@@ -1648,7 +1650,7 @@ Boolean CAppOpsService::IsOpRestricted(
             CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
             aom->OpAllowSystemBypassRestriction(code, &bval);
             if (bval) {
-                synchronized(this) {
+                {    AutoLock syncLock(this);
                     AutoPtr<Ops> ops = GetOpsLocked(uid, packageName, TRUE);
                     if ((ops != NULL) && ops->mIsPrivileged) {
                         return FALSE;
@@ -1665,8 +1667,8 @@ Boolean CAppOpsService::IsOpRestricted(
 void CAppOpsService::ReadState()
 {
     ISynchronize* synObj = ISynchronize::Probe(mFile);
-    synchronized(synObj) {
-        synchronized(this) {
+    {    AutoLock syncLock(synObj);
+        {    AutoLock syncLock(this);
             AutoPtr<IFileInputStream> stream;
             ECode ec = mFile->OpenRead((IFileInputStream**)&stream);
             if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
@@ -1913,7 +1915,7 @@ ECode CAppOpsService::WriteState()
     ECode ec = NOERROR;
 
     ISynchronize* synObj = ISynchronize::Probe(mFile);
-    synchronized(synObj) {
+    {    AutoLock syncLock(synObj);
         AutoPtr<IList> allOps; //<IAppOpsManagerPackageOps>
         GetPackagesForOps(NULL, (IList**)&allOps);
 
@@ -2058,7 +2060,7 @@ ECode CAppOpsService::Dump(
     // AutoPtr<IAppOpsManagerHelper> aom;
     // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
 
-    // synchronized(this) {
+    // {    AutoLock syncLock(this);
     //     pw->Println("Current AppOps Service state:");
     //     Int64 now = System->GetCurrentTimeMillis();
     //     Boolean needSep = FALSE;
@@ -2278,7 +2280,7 @@ ECode CAppOpsService::ResetCounters()
     FAIL_RETURN(mContext->EnforcePermission(Manifest::permission::UPDATE_APP_OPS_STATS,
         Binder::GetCallingPid(), Binder::GetCallingUid(), String(NULL)))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 size;
         mUidOps->GetSize(&size);
         for (Int32 i = 0; i < size; i++) {
@@ -2472,7 +2474,7 @@ ECode CAppOpsService::NotifyOperation(
     AutoPtr<IArrayList> repCbs;
     Int32 switchCode = 0;
     helper->OpToSwitch(code, &switchCode);
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         RecordOperationLocked(code, uid, packageName, mode);
         AutoPtr<Op> op = GetOpLocked(switchCode, uid, packageName, TRUE);
         if (op != NULL) {

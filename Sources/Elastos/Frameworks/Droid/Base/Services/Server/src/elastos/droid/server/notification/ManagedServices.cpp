@@ -15,6 +15,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IPendingIntent;
@@ -248,7 +250,7 @@ void ManagedServices::UserProfiles::UpdateCache(
         helper->GetCurrentUser(&currentUserId);
         AutoPtr<IList> profiles;
         userManager->GetProfiles(currentUserId, (IList**)&profiles);
-        synchronized(mCurrentProfiles) {
+        {    AutoLock syncLock(mCurrentProfiles);
             mCurrentProfiles->Clear();
             Int32 size;
             profiles->GetSize(&size);
@@ -266,7 +268,7 @@ void ManagedServices::UserProfiles::UpdateCache(
 
 AutoPtr< ArrayOf<Int32> > ManagedServices::UserProfiles::GetCurrentProfileIds()
 {
-    synchronized(mCurrentProfiles) {
+    {    AutoLock syncLock(mCurrentProfiles);
         Int32 N;
         mCurrentProfiles->GetSize(&N);
         AutoPtr< ArrayOf<Int32> > users = ArrayOf<Int32>::Alloc(N);
@@ -284,7 +286,7 @@ Boolean ManagedServices::UserProfiles::IsCurrentProfile(
     /* [in] */ Int32 userId)
 {
     AutoPtr<IInterface> obj;
-    synchronized(mCurrentProfiles) {
+    {    AutoLock syncLock(mCurrentProfiles);
         mCurrentProfiles->Get(userId, (IInterface**)&obj);
     }
     return obj != NULL;
@@ -366,7 +368,7 @@ ECode ManagedServices::MyServiceConnection::OnServiceConnected(
 {
     Boolean added = FALSE;
     AutoPtr<ManagedServiceInfo> info;
-    synchronized(mHost->mMutex) {
+    {    AutoLock syncLock(mHost->mMutex);
         mHost->mServicesBinding->Remove(CoreUtils::Convert(mServicesBindingTag));
         // try {
         mService = TO_IINTERFACE(binder);
@@ -742,7 +744,7 @@ ECode ManagedServices::RebindServices()
     AutoPtr<ISparseArray> toAdd;
     CSparseArray::New((ISparseArray**)&toAdd);
 
-    synchronized(mMutex) {
+    {    AutoLock syncLock(mMutex);
         // Unbind automatically bound services, retain system services.
         Int32 size;
         mServices->GetSize(&size);
@@ -836,7 +838,7 @@ ECode ManagedServices::RegisterService(
         Slogger::V(TAG, "registerService: %p u=%d", name, userid);
     }
 
-    synchronized(mMutex) {
+    {    AutoLock syncLock(mMutex);
         String str;
         name->ToString(&str);
         StringBuilder builder;
@@ -929,7 +931,7 @@ ECode ManagedServices::UnregisterService(
     /* [in] */ IComponentName* name,
     /* [in] */ Int32 userid)
 {
-    synchronized(mMutex) {
+    {    AutoLock syncLock(mMutex);
         Int32 N;
         mServices->GetSize(&N);
         for (Int32 i = N-1; i >= 0; i--) {
@@ -966,7 +968,7 @@ AutoPtr<ManagedServices::ManagedServiceInfo> ManagedServices::RemoveServiceImpl(
         Slogger::D(TAG, "removeServiceImpl service=%p u=%d", service, userid);
     }
     AutoPtr<ManagedServiceInfo> serviceInfo;
-    synchronized(mMutex) {
+    {    AutoLock syncLock(mMutex);
         Int32 N;
         mServices->GetSize(&N);
         for (Int32 i = N-1; i >= 0; i--) {
@@ -1015,7 +1017,7 @@ ECode ManagedServices::RegisterServiceImpl(
     VALIDATE_NOT_NULL(_info);
     *_info = NULL;
 
-    synchronized(mMutex) {
+    {    AutoLock syncLock(mMutex);
         // try {
         AutoPtr<ManagedServiceInfo> info = NewServiceInfo(service, component, userid,
                 TRUE /*isSystem*/, NULL, Build::VERSION_CODES::LOLLIPOP);

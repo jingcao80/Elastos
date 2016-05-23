@@ -30,6 +30,8 @@
 
 package com.android.internal.telephony.cat;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Telephony::ITelephonyManager;
 
@@ -84,7 +86,7 @@ public class CatServiceFactory {
             }
         }
 
-        Synchronized (sInstanceLock) {
+        {    AutoLock syncLock(sInstanceLock);
             If (fh == NULL) return NULL;
 
             If (sCatServices[slotId] == NULL) {

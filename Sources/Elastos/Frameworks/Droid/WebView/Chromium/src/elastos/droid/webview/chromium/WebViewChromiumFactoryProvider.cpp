@@ -28,6 +28,8 @@
 #include "elastos/core/Thread.h"
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::CActivityThreadHelper;
 using Elastos::Droid::App::IActivityManagerHelper;
@@ -114,7 +116,7 @@ WebViewChromiumFactoryProvider::InnerStartChromiumLockedRunnable::InnerStartChro
 ECode WebViewChromiumFactoryProvider::InnerStartChromiumLockedRunnable::Run()
 {
     // ==================before translated======================
-    // synchronized(mLock) {
+    // {    AutoLock syncLock(mLock);
     //     startChromiumLocked();
     // }
 
@@ -323,7 +325,7 @@ ECode WebViewChromiumFactoryProvider::StartYourEngines(
     /* [in] */ Boolean onMainThread)
 {
     // ==================before translated======================
-    // synchronized(mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureChromiumStartedLocked(onMainThread);
     //
     // }
@@ -338,7 +340,7 @@ ECode WebViewChromiumFactoryProvider::GetBrowserContext(
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
-    // synchronized(mLock) {
+    // {    AutoLock syncLock(mLock);
     //     return getBrowserContextLocked();
     // }
 
@@ -354,7 +356,7 @@ ECode WebViewChromiumFactoryProvider::GetStatics(
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
-    // synchronized(mLock) {
+    // {    AutoLock syncLock(mLock);
     //     if (mStaticMethods == null) {
     //         // TODO: Optimization potential: most these methods only need the native library
     //         // loaded and initialized, not the entire browser process started.
@@ -432,7 +434,7 @@ ECode WebViewChromiumFactoryProvider::CreateWebView(
     // ==================before translated======================
     // WebViewChromium wvc = new WebViewChromium(this, webView, privateAccess);
     //
-    // synchronized(mLock) {
+    // {    AutoLock syncLock(mLock);
     //     if (mWebViewsToStart != null) {
     //         mWebViewsToStart.add(new WeakReference<WebViewChromium>(wvc));
     //     }
@@ -459,7 +461,7 @@ ECode WebViewChromiumFactoryProvider::GetGeolocationPermissions(
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
-    // synchronized(mLock) {
+    // {    AutoLock syncLock(mLock);
     //     if (mGeolocationPermissions == null) {
     //         ensureChromiumStartedLocked(true);
     //         mGeolocationPermissions = new GeolocationPermissionsAdapter(
@@ -485,7 +487,7 @@ ECode WebViewChromiumFactoryProvider::GetCookieManager(
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
-    // synchronized(mLock) {
+    // {    AutoLock syncLock(mLock);
     //     if (mCookieManager == null) {
     //         if (!mStarted) {
     //             // We can use CookieManager without starting Chromium; the native code
@@ -527,7 +529,7 @@ ECode WebViewChromiumFactoryProvider::GetWebIconDatabase(
     /* [out] */ IWebIconDatabase** result)
 {
     // ==================before translated======================
-    // synchronized(mLock) {
+    // {    AutoLock syncLock(mLock);
     //     if (mWebIconDatabase == null) {
     //         ensureChromiumStartedLocked(true);
     //         mWebIconDatabase = new WebIconDatabaseAdapter();
@@ -550,7 +552,7 @@ ECode WebViewChromiumFactoryProvider::GetWebStorage(
     /* [out] */ IWebStorage** result)
 {
     // ==================before translated======================
-    // synchronized(mLock) {
+    // {    AutoLock syncLock(mLock);
     //     if (mWebStorage == null) {
     //         ensureChromiumStartedLocked(true);
     //         mWebStorage = new WebStorageAdapter(AwQuotaManagerBridge.getInstance());
@@ -575,7 +577,7 @@ ECode WebViewChromiumFactoryProvider::GetWebViewDatabase(
     /* [out] */ IWebViewDatabase** result)
 {
     // ==================before translated======================
-    // synchronized(mLock) {
+    // {    AutoLock syncLock(mLock);
     //     if (mWebViewDatabase == null) {
     //         ensureChromiumStartedLocked(true);
     //         AwBrowserContext browserContext = getBrowserContextLocked();
@@ -671,7 +673,7 @@ ECode WebViewChromiumFactoryProvider::EnsureChromiumStartedLocked(
     // ThreadUtils.postOnUiThread(new Runnable() {
     //     @Override
     //     public void run() {
-    //         synchronized(mLock) {
+    //         {    AutoLock syncLock(mLock);
     //             startChromiumLocked();
     //         }
     //     }

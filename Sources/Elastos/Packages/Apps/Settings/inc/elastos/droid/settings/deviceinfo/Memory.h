@@ -364,7 +364,7 @@ public class Memory extends SettingsPreferenceFragment implements Indexable {
 
         //@Override
         CARAPI OnRemoveCompleted(final String packageName, final Boolean succeeded) {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 if (--mRemaining == 0) {
                     mTarget->OnCacheCleared();
                 }

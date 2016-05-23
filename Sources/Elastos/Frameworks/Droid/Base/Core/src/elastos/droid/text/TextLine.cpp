@@ -9,6 +9,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::IRectF;
 using Elastos::Droid::Graphics::CRectF;
 using Elastos::Droid::Graphics::IBitmap;
@@ -90,7 +92,7 @@ AutoPtr<TextLine> TextLine::Recycle(
         tl->mReplacementSpanSpanSet->Recycle();
     }
 
-    synchronized(sCachedLock) {
+    {    AutoLock syncLock(sCachedLock);
         for (Int32 i = 0; i < sCached->GetLength(); ++i) {
             if ((*sCached)[i] == NULL) {
                 sCached->Set(i, tl);

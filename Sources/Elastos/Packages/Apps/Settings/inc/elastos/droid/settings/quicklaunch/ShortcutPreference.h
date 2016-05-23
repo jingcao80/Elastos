@@ -31,7 +31,7 @@ using Elastos::Droid::Widget::ITextView;
 public class ShortcutPreference extends Preference implements Comparable<Preference> {
 
     private static Object sStaticVarsLock = new Object();
-    
+
     // These static fields are used across all instances of ShortcutPreference.
     // There will be many ShortcutPreference instances (~36 for US).
     private static String STRING_ASSIGN_APPLICATION;
@@ -42,26 +42,26 @@ public class ShortcutPreference extends Preference implements Comparable<Prefere
     private static ColorStateList sDimTitleColor;
     private static ColorStateList sRegularSummaryColor;
     private static ColorStateList sDimSummaryColor;
-    
+
     private Char32 mShortcut;
     private Boolean mHasBookmark;
-    
+
     public ShortcutPreference(Context context, Char32 shortcut) {
         Super(context);
 
-        synchronized(sStaticVarsLock) {
+        {    AutoLock syncLock(sStaticVarsLock);
             // Init statics. This should only happen for the first ShortcutPreference created,
             // the rest will already have them initialized.
             if (STRING_ASSIGN_APPLICATION == NULL) {
                 STRING_ASSIGN_APPLICATION = context->GetString(R::string::quick_launch_assign_application);
                 STRING_NO_SHORTCUT = context->GetString(R::string::quick_launch_no_shortcut);
-    
+
                 TypedValue outValue = new TypedValue();
                 context->GetTheme()->ResolveAttribute(android.R.attr.disabledAlpha, outValue, TRUE);
                 sDimAlpha = (Int32) (outValue->GetFloat() * 255);
             }
         }
-        
+
         mShortcut = shortcut;
 
         SetWidgetLayoutResource(R.layout.preference_widget_shortcut);
@@ -102,40 +102,40 @@ public class ShortcutPreference extends Preference implements Comparable<Prefere
     //@Override
     protected void OnBindView(View view) {
         super->OnBindView(view);
-        
+
         TextView shortcutView = (TextView) view->FindViewById(R.id.shortcut);
         if (shortcutView != NULL) {
             shortcutView->SetText(String->ValueOf(mShortcut));
         }
-    
+
         TextView titleView = (TextView) view->FindViewById(android.R.id.title);
 
-        synchronized(sStaticVarsLock) {
+        {    AutoLock syncLock(sStaticVarsLock);
             if (sRegularTitleColor == NULL) {
                 sRegularTitleColor = titleView->GetTextColors();
                 sDimTitleColor = sRegularTitleColor->WithAlpha(sDimAlpha);
             }
         }
-        
+
         ColorStateList color = mHasBookmark ? sRegularTitleColor : sDimTitleColor;
         if (color != NULL) {
             titleView->SetTextColor(color);
         }
-        
+
         TextView summaryView = (TextView) view->FindViewById(android.R.id.summary);
 
-        synchronized(sStaticVarsLock) {
+        {    AutoLock syncLock(sStaticVarsLock);
             if (sRegularSummaryColor == NULL) {
                 sRegularSummaryColor = summaryView->GetTextColors();
                 sDimSummaryColor = sRegularSummaryColor->WithAlpha(sDimAlpha);
             }
         }
-        
+
         color = mHasBookmark ? sRegularSummaryColor : sDimSummaryColor;
         if (color != NULL) {
             summaryView->SetTextColor(color);
         }
-        
+
     }
 
     public Int32 CompareTo(Preference another) {
@@ -147,5 +147,5 @@ public class ShortcutPreference extends Preference implements Comparable<Prefere
         else if (Character->IsDigit(other) && Character->IsLetter(mShortcut)) return -1;
         else return mShortcut - other;
     }
-    
+
 }

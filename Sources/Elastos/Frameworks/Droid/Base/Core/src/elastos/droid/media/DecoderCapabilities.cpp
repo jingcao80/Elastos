@@ -4,6 +4,8 @@
 #include <elastos/utility/etl/List.h>
 #include <media/MediaProfiles.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Etl::List;
 
 namespace Elastos {
@@ -64,7 +66,7 @@ ECode DecoderCapabilities::GetAudioDecoders(
 void DecoderCapabilities::Native_init()
 {
     // ALOGV("native_init");
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         if (ssProfiles == NULL) {
             ssProfiles = android::MediaProfiles::getInstance();
         }

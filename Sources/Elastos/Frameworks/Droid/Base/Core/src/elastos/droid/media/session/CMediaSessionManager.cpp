@@ -8,6 +8,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::IBinder;
@@ -182,7 +184,7 @@ ECode CMediaSessionManager::AddOnActiveSessionsChangedListener(
     if (handler == NULL) {
         CHandler::New((IHandler**)&handler);
     }
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         IMap::Probe(mListeners)->Get(sessionListener, (IInterface**)&obj);
         AutoPtr<SessionsChangedWrapper> wrapper = (SessionsChangedWrapper*)(IObject*)obj.Get();
@@ -208,7 +210,7 @@ ECode CMediaSessionManager::RemoveOnActiveSessionsChangedListener(
         // throw new IllegalArgumentException("listener may not be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         IMap::Probe(mListeners)->Remove(listener, (IInterface**)&obj);
         AutoPtr<SessionsChangedWrapper> wrapper = (SessionsChangedWrapper*)(IObject*)obj.Get();

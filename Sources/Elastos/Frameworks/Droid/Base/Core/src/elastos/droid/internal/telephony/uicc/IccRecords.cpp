@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.uicc;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Telephony::ITelephonyManager;
@@ -524,7 +526,7 @@ public abstract class IccRecords extends Handler implements IccConstants {
                         Loge("Failed to parse ICC SIM AKA contents: " + e);
                     }
                 }
-                Synchronized (mLock) {
+                {    AutoLock syncLock(mLock);
                     mLock->NotifyAll();
                 }
 
@@ -755,7 +757,7 @@ public abstract class IccRecords extends Handler implements IccConstants {
         If (DBG) Log("getIccSimChallengeResponse:");
 
         try {
-            Synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 CommandsInterface ci = mCi;
                 UiccCardApplication parentApp = mParentApp;
                 If (ci != NULL && parentApp != NULL) {

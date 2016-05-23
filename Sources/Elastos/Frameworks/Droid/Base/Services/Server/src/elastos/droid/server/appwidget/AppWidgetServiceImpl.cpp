@@ -19,6 +19,8 @@
 #include "elastos/utility/logging/Slogger.h"
 
 //using Elastos::Droid::App::Admin::CDevicePolicyManager;
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::App::CPendingIntentHelper;
@@ -703,7 +705,7 @@ ECode AppWidgetServiceImpl::SecurityPolicy::IsCallerBindAppWidgetWhiteListedLock
     //     throw new IllegalArgumentException("No package " + packageName
     //             + " for user " + userId);
     // }
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     Pair<Integer, String> packageId = Pair.create(userId, packageName);
@@ -722,7 +724,7 @@ ECode AppWidgetServiceImpl::SecurityPolicy::IsCallerBindAppWidgetWhiteListedLock
     if (packageUid < 0) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    //synchronized (this) {
+    //{    AutoLock syncLock(this);
         mOwner->EnsureGroupStateLoadedLocked(userId);
         AutoPtr<IPairHelper> pairHelper;
         CPairHelper::AcquireSingleton((IPairHelper**)&pairHelper);
@@ -1317,13 +1319,13 @@ AppWidgetServiceImpl::SaveStateRunnable::SaveStateRunnable(
 ECode AppWidgetServiceImpl::SaveStateRunnable::Run()
 {
     // ==================before translated======================
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(mUserId);
     //     saveStateLocked(mUserId);
     // }
 
     assert(0);
-    //synchronized(this) {
+    //{    AutoLock syncLock(this);
         mOwner->EnsureGroupStateLoadedLocked(mUserId);
         mOwner->SaveStateLocked(mUserId);
     //}
@@ -1371,7 +1373,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::GetWidgetParticipants(
     // }
     //
     // HashSet<String> packages = new HashSet<>();
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     final int N = mWidgets.size();
     //     for (int i = 0; i < N; i++) {
     //         Widget widget = mWidgets.get(i);
@@ -1395,7 +1397,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::GetWidgetParticipants(
     }
 
     CArrayList::New(result);
-    //synchronized (this) {
+    //{    AutoLock syncLock(this);
         Int32 N = 0;
         mOwner->mWidgets->GetSize(&N);
 
@@ -1444,7 +1446,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::GetWidgetState(
     // }
     //
     // ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     // Preflight: if this app neither hosts nor provides any live widgets
     //     // we have no work to do.
     //     if (!packageNeedsWidgetBackupLocked(backedupPackage, userId)) {
@@ -1522,7 +1524,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::GetWidgetState(
     // need export: AutoPtr<ByteArrayOutputStream> stream = new ByteArrayOutputStream();
     // stream->constructor();
 
-    //synchronized (this) {
+    //{    AutoLock syncLock(this);
         if (!PackageNeedsWidgetBackupLocked(backedupPackage, userId)) {
             *result = NULL;
             return NOERROR;
@@ -1616,7 +1618,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreStarting(
     //     Slog.i(TAG, "Restore starting for user: " + userId);
     // }
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     // We're starting a new "system" restore operation, so any widget restore
     //     // state that we see from here on is intended to replace the current
     //     // widget configuration of any/all of the affected apps.
@@ -1629,7 +1631,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreStarting(
         Slogger::I(TAG, String("Restore starting for user: ") + StringUtils::ToString(userId));
     }
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         // We're starting a new "system" restore operation, so any widget restore
         // state that we see from here on is intended to replace the current
         // widget configuration of any/all of the affected apps.
@@ -1663,7 +1665,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
     //     XmlPullParser parser = Xml.newPullParser();
     //     parser.setInput(stream, null);
     //
-    //     synchronized (mLock) {
+    //     {    AutoLock syncLock(mLock);
     //         int type;
     //         do {
     //             type = parser.next();
@@ -1819,7 +1821,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
         Xml::NewPullParser((IXmlPullParser**)&parser);
         //parser->SetInput(IInputStream::Probe(stream), String(""));
 
-        //synchronized (mLock) {
+        //{    AutoLock syncLock(mLock);
             Int32 type = 0;
             do {
                 parser->Next(&type);
@@ -1976,7 +1978,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreFinished(
     // }
     //
     // final UserHandle userHandle = new UserHandle(userId);
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     // Build the providers' broadcasts and send them off
     //     Set<Map.Entry<Provider, ArrayList<RestoreUpdateRecord>>> providerEntries
     //             = mUpdatesByProvider.entrySet();
@@ -2053,7 +2055,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreFinished(
 
     AutoPtr<IUserHandle> userHandle;
     CUserHandle::New(userId, (IUserHandle**)&userHandle);
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         AutoPtr<ISet> providerEntries;
         mUpdatesByProvider->GetEntrySet((ISet**)&providerEntries);
         AutoPtr<IIterator> itor;
@@ -2934,7 +2936,7 @@ ECode AppWidgetServiceImpl::Dump(
     //                                         + Binder.getCallingPid()
     //                                         + ", uid=" + Binder.getCallingUid());
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     int N = mProviders.size();
     //     pw.println("Providers:");
     //     for (int i = 0; i < N; i++) {
@@ -2971,7 +2973,7 @@ ECode AppWidgetServiceImpl::Dump(
         + String(", uid=") + StringUtils::ToString(Binder::GetCallingUid()));
 
     assert(0);
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         Int32 N = 0;
         mProviders->GetSize(&N);
         pw->Println(String("Providers:"));
@@ -3043,7 +3045,7 @@ ECode AppWidgetServiceImpl::StartListening(
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
         AutoPtr<HostId> id = new HostId(Binder::GetCallingUid(), hostId, callingPackage);
         AutoPtr<Host> host = LookupOrAddHostLocked(id);
@@ -3083,7 +3085,7 @@ ECode AppWidgetServiceImpl::StopListening(
     // // Make sure the package runs under the caller uid.
     // mSecurityPolicy.enforceCallFromPackage(callingPackage);
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     // NOTE: The lookup is enforcing security across users by making
@@ -3108,7 +3110,7 @@ ECode AppWidgetServiceImpl::StopListening(
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -3139,7 +3141,7 @@ ECode AppWidgetServiceImpl::AllocateAppWidgetId(
     // // Make sure the package runs under the caller uid.
     // mSecurityPolicy.enforceCallFromPackage(callingPackage);
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     if (mNextAppWidgetIds.indexOfKey(userId) < 0) {
@@ -3181,7 +3183,7 @@ ECode AppWidgetServiceImpl::AllocateAppWidgetId(
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
         Int32 idxOfKey = 0;
         mNextAppWidgetIds->IndexOfKey(userId, &idxOfKey);
@@ -3227,7 +3229,7 @@ ECode AppWidgetServiceImpl::DeleteAppWidgetId(
     // // Make sure the package runs under the caller uid.
     // mSecurityPolicy.enforceCallFromPackage(callingPackage);
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     // NOTE: The lookup is enforcing security across users by making
@@ -3260,7 +3262,7 @@ ECode AppWidgetServiceImpl::DeleteAppWidgetId(
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -3296,7 +3298,7 @@ ECode AppWidgetServiceImpl::HasBindAppWidgetPermission(
     // // A special permission is required for managing white listing.
     // mSecurityPolicy.enforceModifyAppWidgetBindPermissions(packageName);
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     // The grants are stored in user state wich gets the grant.
     //     ensureGroupStateLoadedLocked(grantId);
     //
@@ -3320,7 +3322,7 @@ ECode AppWidgetServiceImpl::HasBindAppWidgetPermission(
     // A special permission is required for managing white listing.
     mSecurityPolicy->EnforceModifyAppWidgetBindPermissions(packageName);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         // The grants are stored in user state wich gets the grant.
         EnsureGroupStateLoadedLocked(grantId);
 
@@ -3356,7 +3358,7 @@ ECode AppWidgetServiceImpl::SetBindAppWidgetPermission(
     // // A special permission is required for managing white listing.
     // mSecurityPolicy.enforceModifyAppWidgetBindPermissions(packageName);
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     // The grants are stored in user state wich gets the grant.
     //     ensureGroupStateLoadedLocked(grantId);
     //
@@ -3386,7 +3388,7 @@ ECode AppWidgetServiceImpl::SetBindAppWidgetPermission(
     // A special permission is required for managing white listing.
     mSecurityPolicy->EnforceModifyAppWidgetBindPermissions(packageName);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         // The grants are stored in user state wich gets the grant.
         EnsureGroupStateLoadedLocked(grantId);
 
@@ -3431,7 +3433,7 @@ ECode AppWidgetServiceImpl::CreateAppWidgetConfigIntentSender(
     // // Make sure the package runs under the caller uid.
     // mSecurityPolicy.enforceCallFromPackage(callingPackage);
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     // NOTE: The lookup is enforcing security across users by making
@@ -3476,7 +3478,7 @@ ECode AppWidgetServiceImpl::CreateAppWidgetConfigIntentSender(
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -3555,7 +3557,7 @@ ECode AppWidgetServiceImpl::BindAppWidgetId(
     //     return false;
     // }
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     // A special permission or white listing is required to bind widgets.
@@ -3668,7 +3670,7 @@ ECode AppWidgetServiceImpl::BindAppWidgetId(
         return NOERROR;
     }
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // A special permission or white listing is required to bind widgets.
@@ -3791,7 +3793,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetIds(
     // // Make sure the package runs under the caller uid.
     // mSecurityPolicy.enforceCallFromPackage(componentName.getPackageName());
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     // NOTE: The lookup is enforcing security across users by making
@@ -3819,7 +3821,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetIds(
     componentName->GetPackageName(&packageName);
     mSecurityPolicy->EnforceCallFromPackage(packageName);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -3854,7 +3856,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetIdsForHost(
     // // Make sure the package runs under the caller uid.
     // mSecurityPolicy.enforceCallFromPackage(callingPackage);
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     // NOTE: The lookup is enforcing security across users by making
@@ -3880,7 +3882,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetIdsForHost(
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -3917,7 +3919,7 @@ ECode AppWidgetServiceImpl::BindRemoteViewsService(
     // // Make sure the package runs under the caller uid.
     // mSecurityPolicy.enforceCallFromPackage(callingPackage);
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     // NOTE: The lookup is enforcing security across users by making
@@ -3992,7 +3994,7 @@ ECode AppWidgetServiceImpl::BindRemoteViewsService(
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -4098,7 +4100,7 @@ ECode AppWidgetServiceImpl::UnbindRemoteViewsService(
     // // Make sure the package runs under the caller uid.
     // mSecurityPolicy.enforceCallFromPackage(callingPackage);
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     // Unbind from the RemoteViewsService (which will trigger a callback to the bound
@@ -4138,7 +4140,7 @@ ECode AppWidgetServiceImpl::UnbindRemoteViewsService(
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // Unbind from the RemoteViewsService (which will trigger a callback to the bound
@@ -4193,7 +4195,7 @@ ECode AppWidgetServiceImpl::DeleteHost(
     // // Make sure the package runs under the caller uid.
     // mSecurityPolicy.enforceCallFromPackage(callingPackage);
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     // NOTE: The lookup is enforcing security across users by making
@@ -4226,7 +4228,7 @@ ECode AppWidgetServiceImpl::DeleteHost(
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -4257,7 +4259,7 @@ ECode AppWidgetServiceImpl::DeleteAllHosts()
     //     Slog.i(TAG, "deleteAllHosts() " + userId);
     // }
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     boolean changed = false;
@@ -4290,7 +4292,7 @@ ECode AppWidgetServiceImpl::DeleteAllHosts()
         Slogger::I(TAG, String("deleteAllHosts() ") + StringUtils::ToString(userId));
     }
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
         Boolean changed = false;
         Int32 N = 0;
@@ -4335,7 +4337,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetInfo(
     // // Make sure the package runs under the caller uid.
     // mSecurityPolicy.enforceCallFromPackage(callingPackage);
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     // NOTE: The lookup is enforcing security across users by making
@@ -4361,7 +4363,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetInfo(
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -4397,7 +4399,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetViews(
     // // Make sure the package runs under the caller uid.
     // mSecurityPolicy.enforceCallFromPackage(callingPackage);
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     // NOTE: The lookup is enforcing security across users by making
@@ -4423,7 +4425,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetViews(
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -4459,7 +4461,7 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetOptions(
     // // Make sure the package runs under the caller uid.
     // mSecurityPolicy.enforceCallFromPackage(callingPackage);
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     // NOTE: The lookup is enforcing security across users by making
@@ -4491,7 +4493,7 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetOptions(
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -4529,7 +4531,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetOptions(
     // // Make sure the package runs under the caller uid.
     // mSecurityPolicy.enforceCallFromPackage(callingPackage);
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     // NOTE: The lookup is enforcing security across users by making
@@ -4555,7 +4557,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetOptions(
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -4649,7 +4651,7 @@ ECode AppWidgetServiceImpl::NotifyAppWidgetViewDataChanged(
     //     return;
     // }
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     final int N = appWidgetIds.length;
@@ -4682,7 +4684,7 @@ ECode AppWidgetServiceImpl::NotifyAppWidgetViewDataChanged(
         return NOERROR;
     }
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
         Int32 N = appWidgetIds->GetLength();
         Int32 appWidgetId = 0;
@@ -4719,7 +4721,7 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetProvider(
     // // Make sure the package runs under the caller uid.
     // mSecurityPolicy.enforceCallFromPackage(componentName.getPackageName());
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     // NOTE: The lookup is enforcing security across users by making
@@ -4753,7 +4755,7 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetProvider(
     componentName->GetPackageName(&packageName);
     mSecurityPolicy->EnforceCallFromPackage(packageName);
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -4801,7 +4803,7 @@ ECode AppWidgetServiceImpl::GetInstalledProvidersForProfile(
     //     return null;
     // }
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     ArrayList<AppWidgetProviderInfo> result = null;
@@ -4844,7 +4846,7 @@ ECode AppWidgetServiceImpl::GetInstalledProvidersForProfile(
         return NOERROR;
     }
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
         Int32 providerCount = 0;
         mProviders->GetSize(&providerCount);
@@ -4971,7 +4973,7 @@ ECode AppWidgetServiceImpl::OnCrossProfileWidgetProvidersChanged(
     // // the group parent as only the parent can add widgets from the
     // // profile and not the other way around.
     // if (parentId != userId) {
-    //     synchronized (mLock) {
+    //     {    AutoLock syncLock(mLock);
     //         boolean providersChanged = false;
     //
     //         final int packageCount = packages.size();
@@ -4994,7 +4996,7 @@ ECode AppWidgetServiceImpl::OnCrossProfileWidgetProvidersChanged(
     // the group parent as only the parent can add widgets from the
     // profile and not the other way around.
     if (parentId != userId) {
-        //synchronized (mLock) {
+        //{    AutoLock syncLock(mLock);
             Boolean providersChanged = false;
             Int32 packageCount = 0;
             String packageName;
@@ -5156,7 +5158,7 @@ void AppWidgetServiceImpl::OnConfigurationChanged()
     // if (revised == null || mLocale == null || !revised.equals(mLocale)) {
     //     mLocale = revised;
     //
-    //     synchronized (mLock) {
+    //     {    AutoLock syncLock(mLock);
     //         SparseIntArray changedGroups = null;
     //
     //         // Note: updateProvidersForPackageLocked() may remove providers, so we must copy the
@@ -5216,7 +5218,7 @@ void AppWidgetServiceImpl::OnConfigurationChanged()
         mLocale = NULL;
         mLocale = revised;
 
-        //synchronized (mLock) {
+        //{    AutoLock syncLock(mLock);
             AutoPtr<ISparseInt32Array> changedGroups;
 
             // Note: updateProvidersForPackageLocked() may remove providers, so we must copy the
@@ -5303,7 +5305,7 @@ void AppWidgetServiceImpl::OnPackageBroadcastReceived(
     //     return;
     // }
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     Bundle extras = intent.getExtras();
@@ -5382,7 +5384,7 @@ void AppWidgetServiceImpl::OnPackageBroadcastReceived(
         return;
     }
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
         AutoPtr<IBundle> extras;
         intent->GetExtras((IBundle**)&extras);
@@ -5536,7 +5538,7 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetIds(
     //             + ", max: " + mMaxWidgetBitmapMemory + ")");
     // }
     //
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     final int N = appWidgetIds.length;
@@ -5572,7 +5574,7 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetIds(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
         Int32 N = appWidgetIds->GetLength();
         Int32 appWidgetId = 0;
@@ -6076,7 +6078,7 @@ void AppWidgetServiceImpl::HandleNotifyAppWidgetViewDataChanged(
     //
     // // If the host is unavailable, then we call the associated
     // // RemoteViewsFactory.onDataSetChanged() directly
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     if (callbacks == null) {
     //         host.callbacks = null;
     //
@@ -6122,7 +6124,7 @@ void AppWidgetServiceImpl::HandleNotifyAppWidgetViewDataChanged(
 
     // If the host is unavailable, then we call the associated
     // RemoteViewsFactory.onDataSetChanged() directly
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         if (callbacks == NULL) {
             host->mCallbacks = NULL;
 
@@ -6222,7 +6224,7 @@ void AppWidgetServiceImpl::HandleNotifyUpdateAppWidget(
     // try {
     //     callbacks.updateAppWidget(appWidgetId, views);
     // } catch (RemoteException re) {
-    //     synchronized (mLock) {
+    //     {    AutoLock syncLock(mLock);
     //         Slog.e(TAG, "Widget host dead: " + host.id, re);
     //         host.callbacks = null;
     //     }
@@ -6231,7 +6233,7 @@ void AppWidgetServiceImpl::HandleNotifyUpdateAppWidget(
     //try {
         callbacks->UpdateAppWidget(appWidgetId, views);
     //} catch (RemoteException re) {
-        //synchronized (mLock) {
+        //{    AutoLock syncLock(mLock);
         //    Slog.e(TAG, "Widget host dead: " + host.id, re);
         //    host.callbacks = null;
         //}
@@ -6287,7 +6289,7 @@ void AppWidgetServiceImpl::HandleNotifyProviderChanged(
     // try {
     //     callbacks.providerChanged(appWidgetId, info);
     // } catch (RemoteException re) {
-    //     synchronized (mLock){
+    //     {    AutoLock syncLock(mLock);
     //         Slog.e(TAG, "Widget host dead: " + host.id, re);
     //         host.callbacks = null;
     //     }
@@ -6296,7 +6298,7 @@ void AppWidgetServiceImpl::HandleNotifyProviderChanged(
     //try {
         callbacks->ProviderChanged(appWidgetId, info);
     //} catch (RemoteException re) {
-        //synchronized (mLock){
+        //{    AutoLock syncLock(mLock);
         //    Slog.e(TAG, "Widget host dead: " + host.id, re);
         //    host.callbacks = null;
         //}
@@ -6392,7 +6394,7 @@ void AppWidgetServiceImpl::HandleNotifyProvidersChanged(
     // try {
     //     callbacks.providersChanged();
     // } catch (RemoteException re) {
-    //     synchronized (mLock) {
+    //     {    AutoLock syncLock(mLock);
     //         Slog.e(TAG, "Widget host dead: " + host.id, re);
     //         host.callbacks = null;
     //     }
@@ -6401,7 +6403,7 @@ void AppWidgetServiceImpl::HandleNotifyProvidersChanged(
     //try {
         callbacks->ProvidersChanged();
     //} catch (RemoteException re) {
-        //synchronized (mLock) {
+        //{    AutoLock syncLock(mLock);
         //    Slog.e(TAG, "Widget host dead: " + host.id, re);
         //    host.callbacks = null;
         //}
@@ -7621,7 +7623,7 @@ void AppWidgetServiceImpl::OnUserStarted(
     /* [in] */ Int32 userId)
 {
     // ==================before translated======================
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     ensureGroupStateLoadedLocked(userId);
     //
     //     final int N = mProviders.size();
@@ -7642,7 +7644,7 @@ void AppWidgetServiceImpl::OnUserStarted(
     //     }
     // }
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
         Int32 N = 0;
         mProviders->GetSize(&N);
@@ -8426,7 +8428,7 @@ void AppWidgetServiceImpl::OnUserStopped(
     /* [in] */ Int32 userId)
 {
     // ==================before translated======================
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     boolean providersChanged = false;
     //     boolean crossProfileWidgetsChanged = false;
     //
@@ -8507,7 +8509,7 @@ void AppWidgetServiceImpl::OnUserStopped(
     //     }
     // }
 
-    //synchronized (mLock) {
+    //{    AutoLock syncLock(mLock);
         Boolean providersChanged = FALSE;
         Boolean crossProfileWidgetsChanged = FALSE;
 

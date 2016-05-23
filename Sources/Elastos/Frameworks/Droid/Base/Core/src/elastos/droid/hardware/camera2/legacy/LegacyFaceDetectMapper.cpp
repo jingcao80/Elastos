@@ -15,6 +15,8 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Camera2::Utils::ListUtils;
 using Elastos::Droid::Hardware::Camera2::Utils::ParamsUtils;
 using Elastos::Droid::Hardware::Camera2::Params::IFace;
@@ -53,7 +55,7 @@ ECode LegacyFaceDetectMapper::MyListener::OnFaceDetection(
 {
     Int32 lengthFaces = faces == NULL ? 0 : faces->GetLength();
     Object& _lock = mHost->mLock;
-    synchronized (_lock) {
+    {    AutoLock syncLock(_lock);
         if (mHost->mFaceDetectEnabled) {
             mHost->mFaces = faces;
         }
@@ -167,7 +169,7 @@ ECode LegacyFaceDetectMapper::ProcessFaceDetectMode(
 
     Boolean enableFaceDetect = (fdMode != ICameraMetadata::STATISTICS_FACE_DETECT_MODE_OFF)
             || (sceneMode == ICameraMetadata::CONTROL_SCENE_MODE_FACE_PRIORITY);
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         // Enable/disable face detection if it's changed since last time
         if (enableFaceDetect != mFaceDetectEnabled) {
             if (enableFaceDetect) {
@@ -206,7 +208,7 @@ ECode LegacyFaceDetectMapper::MapResultFaces(
     AutoPtr<ArrayOf<ICameraFace*> > previousFaces;
     Int32 fdMode = 0;
     Boolean fdScenePriority = FALSE;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         fdMode = mFaceDetectReporting ?
                 ICameraMetadata::STATISTICS_FACE_DETECT_MODE_SIMPLE :
                 ICameraMetadata::STATISTICS_FACE_DETECT_MODE_OFF;

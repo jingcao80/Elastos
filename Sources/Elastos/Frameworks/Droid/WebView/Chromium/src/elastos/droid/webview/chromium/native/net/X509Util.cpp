@@ -15,6 +15,8 @@
 #include "elastos/core/IntegralToString.h"
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IBroadcastReceiver;
@@ -205,7 +207,7 @@ ECode X509Util::AddTestRootCertificate(
     // ==================before translated======================
     // ensureInitialized();
     // X509Certificate rootCert = createCertificateFromBytes(rootCertBytes);
-    // synchronized(sLock) {
+    // {    AutoLock syncLock(sLock);
     //     sTestKeyStore.setCertificateEntry(
     //             "root_cert_" + Integer.toString(sTestKeyStore.size()), rootCert);
     //     reloadTestTrustManager();
@@ -230,7 +232,7 @@ ECode X509Util::ClearTestRootCertificates()
 {
     // ==================before translated======================
     // ensureInitialized();
-    // synchronized(sLock) {
+    // {    AutoLock syncLock(sLock);
     //     try {
     //         sTestKeyStore.load(null);
     //         reloadTestTrustManager();
@@ -356,7 +358,7 @@ AutoPtr<ElastosCertVerifyResult> X509Util::VerifyServerCertificates(
     //     return new AndroidCertVerifyResult(CertVerifyStatusAndroid.VERIFY_FAILED);
     // }
     //
-    // synchronized(sLock) {
+    // {    AutoLock syncLock(sLock);
     //     // If no trust manager was found, fail without crashing on the null pointer.
     //     if (sDefaultTrustManager == null)
     //         return new AndroidCertVerifyResult(CertVerifyStatusAndroid.VERIFY_FAILED);
@@ -481,7 +483,7 @@ ECode X509Util::SetDisableNativeCodeForTest(
 ECode X509Util::EnsureInitialized()
 {
     // ==================before translated======================
-    // synchronized(sLock) {
+    // {    AutoLock syncLock(sLock);
     //     if (sCertificateFactory == null) {
     //         sCertificateFactory = CertificateFactory.getInstance("X.509");
     //     }

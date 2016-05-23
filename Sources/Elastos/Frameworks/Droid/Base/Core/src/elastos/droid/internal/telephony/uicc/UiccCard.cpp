@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.uicc;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using static android::Manifest::Permission::IREAD_PHONE_STATE;
 using Elastos::Droid::App::IActivityManagerNative;
 using Elastos::Droid::App::IAlertDialog;
@@ -110,7 +112,7 @@ public class UiccCard {
     }
 
     CARAPI Dispose() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (DBG) Log("Disposing card");
             If (mCatService != NULL) CatServiceFactory->DisposeCatService(mSlotId);
             For (UiccCardApplication app : mUiccApplications) {
@@ -126,7 +128,7 @@ public class UiccCard {
     }
 
     CARAPI Update(Context c, CommandsInterface ci, IccCardStatus ics) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mDestroyed) {
                 Loge("Updated after destroyed! Fix me!");
                 return;
@@ -256,7 +258,7 @@ public class UiccCard {
      * Notifies handler of any transition into State.ABSENT
      */
     CARAPI RegisterForAbsent(Handler h, Int32 what, Object obj) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Registrant r = new Registrant (h, what, obj);
 
             mAbsentRegistrants->Add(r);
@@ -268,7 +270,7 @@ public class UiccCard {
     }
 
     CARAPI UnregisterForAbsent(Handler h) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mAbsentRegistrants->Remove(h);
         }
     }
@@ -277,7 +279,7 @@ public class UiccCard {
      * Notifies handler when carrier privilege rules are loaded.
      */
     CARAPI RegisterForCarrierPrivilegeRulesLoaded(Handler h, Int32 what, Object obj) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Registrant r = new Registrant (h, what, obj);
 
             mCarrierPrivilegeRegistrants->Add(r);
@@ -289,7 +291,7 @@ public class UiccCard {
     }
 
     CARAPI UnregisterForCarrierPrivilegeRulesLoaded(Handler h) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mCarrierPrivilegeRegistrants->Remove(h);
         }
     }
@@ -305,7 +307,7 @@ public class UiccCard {
         }
         Log("onIccSwap: isHotSwapSupported is FALSE, prompt for rebooting");
 
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             // TODO: Here we assume the device can't handle SIM hot-swap
             //      and has to reboot. We may want to add a property,
             //      e.g. REBOOT_ON_SIM_SWAP, to indicate if modem support
@@ -319,7 +321,7 @@ public class UiccCard {
             listener = new DialogInterface->OnClickListener() {
                 //@Override
                 CARAPI OnClick(DialogInterface dialog, Int32 which) {
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         If (which == DialogInterface.BUTTON_POSITIVE) {
                             If (DBG) Log("Reboot due to SIM swap");
                             PowerManager pm = (PowerManager) mContext
@@ -389,13 +391,13 @@ public class UiccCard {
     };
 
     private void OnCarrierPriviligesLoadedMessage() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mCarrierPrivilegeRegistrants->NotifyRegistrants();
         }
     }
 
     public Boolean IsApplicationOnIcc(IccCardApplicationStatus.AppType type) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             For (Int32 i = 0 ; i < mUiccApplications.length; i++) {
                 If (mUiccApplications[i] != NULL && mUiccApplications[i].GetType() == type) {
                     return TRUE;
@@ -406,25 +408,25 @@ public class UiccCard {
     }
 
     public CardState GetCardState() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mCardState;
         }
     }
 
     public PinState GetUniversalPinState() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mUniversalPinState;
         }
     }
 
     public Int32 GetSlotId() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mSlotId;
         }
     }
 
     public UiccCardApplication GetApplication(Int32 family) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Int32 index = IccCardStatus.CARD_MAX_APPS;
             Switch (family) {
                 case UiccController.APP_FAM_3GPP:
@@ -445,7 +447,7 @@ public class UiccCard {
     }
 
     public UiccCardApplication GetApplicationIndex(Int32 index) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (index >= 0 && index < mUiccApplications.length) {
                 return mUiccApplications[index];
             }
@@ -460,7 +462,7 @@ public class UiccCard {
      * @return application corresponding to type or a NULL if no match found
      */
     public UiccCardApplication GetApplicationByType(Int32 type) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             For (Int32 i = 0 ; i < mUiccApplications.length; i++) {
                 If (mUiccApplications[i] != NULL &&
                         mUiccApplications[i].GetType()->Ordinal() == type) {

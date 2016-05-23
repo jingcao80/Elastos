@@ -7,6 +7,8 @@
 #include <elastos/core/AutoLock.h>
 #include <Elastos.Droid.Content.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::EIID_IBinder;
@@ -54,7 +56,7 @@ ECode WebViewUpdateService::BinderService::NotifyRelroCreationCompleted(
         return NOERROR;
     }
 
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         if (is64Bit) {
             mHost->mRelroReady64Bit = TRUE;
         } else {
@@ -85,7 +87,7 @@ ECode WebViewUpdateService::BinderService::WaitForRelroCreationCompleted(
     Int64 NS_PER_MS = 1000000;
     Int64 timeoutTimeMs = nt / NS_PER_MS + WAIT_TIMEOUT_MS;
     Boolean relroReady = (is64Bit ? mHost->mRelroReady64Bit : mHost->mRelroReady32Bit);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         while (!relroReady) {
             system->GetNanoTime(&nt);
             Int64 timeNowMs = nt / NS_PER_MS;
@@ -164,7 +166,7 @@ void WebViewUpdateService::OnWebViewUpdateInstalled()
 {
     Slogger::D(TAG, "WebView Package updated!");
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mRelroReady32Bit = FALSE;
         mRelroReady64Bit = FALSE;
     }

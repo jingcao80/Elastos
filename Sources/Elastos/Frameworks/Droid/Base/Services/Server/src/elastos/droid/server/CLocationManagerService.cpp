@@ -31,6 +31,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::EIID_IAppOpsManagerOnOpChangedInternalListener;
 using Elastos::Droid::App::EIID_IPendingIntentOnFinished;
 using Elastos::Droid::App::IAppOpsManagerOnOpChangedListener;
@@ -157,7 +159,7 @@ ECode CLocationManagerService::AppOpsManagerOnOpChangedInternalListener::OnOpCha
     /* [in] */ Int32 op,
     /* [in] */ const String& packageName)
 {
-    synchronized (mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         AutoPtr<ICollection> cl;
         mHost->mReceivers->GetValues((ICollection**)&cl);
         AutoPtr<IIterator> it;
@@ -200,7 +202,7 @@ ECode CLocationManagerService::MyContentObserver::constructor(
 ECode CLocationManagerService::MyContentObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         mHost->UpdateProvidersLocked();
     }
     return NOERROR;
@@ -275,7 +277,7 @@ ECode CLocationManagerService::LocationPackageMonitor::OnPackageDisappeared(
     /* [in] */ Int32 reason)
 {
     // remove all receivers associated with this package name
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IArrayList> deadReceivers;
 
         AutoPtr<ICollection> cl;
@@ -925,7 +927,7 @@ void CLocationManagerService::UpdateUserProfiles(
 {
     AutoPtr<IList> profiles;
     mUserManager->GetProfiles(currentUserId, (IList**)&profiles);
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         Int32 size = 0;
         profiles->GetSize(&size);
         mCurrentUserProfiles = ArrayOf<Int32>::Alloc(size);
@@ -941,7 +943,7 @@ void CLocationManagerService::UpdateUserProfiles(
 Boolean CLocationManagerService::IsCurrentProfile(
     /* [in] */ Int32 userId)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         for (Int32 i = 0; i < mCurrentUserProfiles->GetLength(); i++) {
             if ((*mCurrentUserProfiles)[i] == userId) {
                 return TRUE;
@@ -3540,7 +3542,7 @@ void CLocationManagerService::Dump(
         return;
     }
 
-    // synchronized (mLock) {
+    // {    AutoLock syncLock(mLock);
     //     pw->Println("Current Location Manager state:");
     //     pw->Println("  Location Listeners:");
     //     for (Receiver receiver : mReceivers.values()) {

@@ -7,6 +7,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Core::StringBuilder;
@@ -58,7 +60,7 @@ ECode CAsyncPlayer::MyThread::Run()
     while (TRUE) {
         AutoPtr<Command> cmd;
         AutoPtr<ILinkedList> lock = mOwner->mCmdQueue.Get();
-        synchronized(lock) {
+        {    AutoLock syncLock(lock);
             if (mOwner->mDebug) Logger::D(mOwner->mTag, "RemoveFirst");
             AutoPtr<IInterface> obj;
             mOwner->mCmdQueue->RemoveFirst((IInterface**)&obj);
@@ -91,7 +93,7 @@ ECode CAsyncPlayer::MyThread::Run()
             }
         }
 
-        synchronized(lock) {
+        {    AutoLock syncLock(lock);
             Boolean b;
             mOwner->mCmdQueue->IsEmpty(&b);
             if (b) {
@@ -198,7 +200,7 @@ ECode CAsyncPlayer::Play(
     cmd->mLooping = looping;
     cmd->mStream = stream;
 
-    synchronized(mCmdQueue) {
+    {    AutoLock syncLock(mCmdQueue);
         EnqueueLocked(cmd);
         mState = PLAY;
     }
@@ -207,7 +209,7 @@ ECode CAsyncPlayer::Play(
 
 ECode CAsyncPlayer::Stop()
 {
-    synchronized(mCmdQueue) {
+    {    AutoLock syncLock(mCmdQueue);
 
         // This check allows stop to be called multiple times without starting
         // a thread that ends up doing nothing.

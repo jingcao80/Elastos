@@ -22,6 +22,8 @@
 #include <utils/Errors.h>
 #include <utils/String8.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -624,7 +626,7 @@ ECode AudioSystem::GetParameters(
 ECode AudioSystem::SetErrorCallback(
     /* [in] */ IAudioSystemErrorCallback* cb)
 {
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         sErrorCallback = cb;
         if (cb != NULL) {
             Int32 val;
@@ -1354,7 +1356,7 @@ void AudioSystem::ErrorCallbackFromNative(
 {
     if (DBG) Logger::E("AudioSystem", "ErrorCallbackFromNative error: %d", error);
     AutoPtr<IAudioSystemErrorCallback> errorCallback;
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         if (sErrorCallback != NULL) {
             errorCallback = sErrorCallback;
         }

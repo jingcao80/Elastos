@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using static com::Android::Internal::Telephony::TelephonyProperties::IPROPERTY_DEFAULT_SUBSCRIPTION;
 
 using Elastos::Droid::Content::IComponentName;
@@ -81,7 +83,7 @@ public class PhoneFactory {
      * instances
      */
     public static void MakeDefaultPhone(Context context) {
-        Synchronized (sLockProxyPhones) {
+        {    AutoLock syncLock(sLockProxyPhones);
             If (!sMadeDefaults) {
                 sContext = context;
 
@@ -237,7 +239,7 @@ public class PhoneFactory {
 
     public static Phone GetCdmaPhone(Int32 phoneId) {
         Phone phone;
-        Synchronized(PhoneProxy.lockForRadioTechnologyChange) {
+        {    AutoLock syncLock(PhoneProxy.lockForRadioTechnologyChange);
             phone = new CDMALTEPhone(sContext, sCommandsInterfaces[phoneId],
                     sPhoneNotifier, phoneId);
         }
@@ -245,7 +247,7 @@ public class PhoneFactory {
     }
 
     public static Phone GetGsmPhone(Int32 phoneId) {
-        Synchronized(PhoneProxy.lockForRadioTechnologyChange) {
+        {    AutoLock syncLock(PhoneProxy.lockForRadioTechnologyChange);
             Phone phone = new GSMPhone(sContext, sCommandsInterfaces[phoneId],
                     sPhoneNotifier, phoneId);
             return phone;
@@ -261,7 +263,7 @@ public class PhoneFactory {
     }
 
     public static Phone GetDefaultPhone() {
-        Synchronized (sLockProxyPhones) {
+        {    AutoLock syncLock(sLockProxyPhones);
             If (!sMadeDefaults) {
                 throw new IllegalStateException("Default phones haven't been made yet!");
             }
@@ -271,7 +273,7 @@ public class PhoneFactory {
 
     public static Phone GetPhone(Int32 phoneId) {
         Phone phone;
-        Synchronized (sLockProxyPhones) {
+        {    AutoLock syncLock(sLockProxyPhones);
             If (!sMadeDefaults) {
                 throw new IllegalStateException("Default phones haven't been made yet!");
                 // CAF_MSIM FIXME need to introduce default phone id ?
@@ -290,7 +292,7 @@ public class PhoneFactory {
     }
 
     public static Phone[] GetPhones() {
-        Synchronized (sLockProxyPhones) {
+        {    AutoLock syncLock(sLockProxyPhones);
             If (!sMadeDefaults) {
                 throw new IllegalStateException("Default phones haven't been made yet!");
             }
@@ -303,7 +305,7 @@ public class PhoneFactory {
             throw new IllegalStateException("Default phones haven't been made yet!");
         }
         Phone phone;
-        Synchronized(PhoneProxy.lockForRadioTechnologyChange) {
+        {    AutoLock syncLock(PhoneProxy.lockForRadioTechnologyChange);
             Switch (TelephonyManager->GetLteOnCdmaModeStatic()) {
                 case PhoneConstants.LTE_ON_CDMA_TRUE: {
                     phone = new CDMALTEPhone(sContext, sCommandsInterface, sPhoneNotifier);
@@ -349,7 +351,7 @@ public class PhoneFactory {
         SystemProperties->Set(PROPERTY_DEFAULT_SUBSCRIPTION, Integer->ToString(subId));
         Int32 phoneId = SubscriptionController->GetInstance()->GetPhoneId(subId);
 
-        Synchronized (sLockProxyPhones) {
+        {    AutoLock syncLock(sLockProxyPhones);
             // Set the default phone in base class
             If (phoneId >= 0 && phoneId < sProxyPhones.length) {
                 sProxyPhone = sProxyPhones[phoneId];

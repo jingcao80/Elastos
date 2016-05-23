@@ -14,6 +14,8 @@
 #include "CInputStreamReader.h"
 #include "IoUtils.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::CProperties;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Core::StringBuilder;
@@ -195,7 +197,7 @@ ECode CXPathFactoryFinder::_newFactory(
     // try to read from $java.home/lib/jaxp.properties
     //try {
         if(firstTime){
-            //synchronized(cacheProps){
+            //{    AutoLock syncLock(cacheProps);
             AutoLock lock(this);
             if(firstTime){
                 AutoPtr<IFile> f;

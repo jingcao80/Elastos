@@ -18,6 +18,8 @@
 
 package com.android.internal.telephony.dataconnection;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IAlarmManager;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::App::IProgressDialog;
@@ -1070,7 +1072,7 @@ public class DcTracker extends DcTrackerBase {
      */
     //@Override
     public Boolean GetAnyDataEnabled() {
-        Synchronized (mDataEnabledLock) {
+        {    AutoLock syncLock(mDataEnabledLock);
             If (!(mInternalDataEnabled && mUserDataEnabled && sPolicyDataEnabled)) return FALSE;
             For (ApnContext apnContext : mApnContexts->Values()) {
                 // Make sure we don't have a context that is going down
@@ -1084,7 +1086,7 @@ public class DcTracker extends DcTrackerBase {
     }
 
     public Boolean GetAnyDataEnabled(Boolean checkUserDataEnabled) {
-        Synchronized (mDataEnabledLock) {
+        {    AutoLock syncLock(mDataEnabledLock);
             If (!(mInternalDataEnabled && (!checkUserDataEnabled || mUserDataEnabled)
                         && (!checkUserDataEnabled || sPolicyDataEnabled)))
                 return FALSE;
@@ -1153,7 +1155,7 @@ public class DcTracker extends DcTrackerBase {
     //@Override
     protected Boolean IsDataAllowed() {
         final Boolean internalDataEnabled;
-        Synchronized (mDataEnabledLock) {
+        {    AutoLock syncLock(mDataEnabledLock);
             internalDataEnabled = mInternalDataEnabled;
         }
 
@@ -3482,7 +3484,7 @@ public class DcTracker extends DcTrackerBase {
     protected void OnSetInternalDataEnabled(Boolean enabled, Message onCompleteMsg) {
         Boolean sendOnComplete = TRUE;
 
-        Synchronized (mDataEnabledLock) {
+        {    AutoLock syncLock(mDataEnabledLock);
             mInternalDataEnabled = enabled;
             If (enabled) {
                 Log("onSetInternalDataEnabled: changed to enabled, try to setup data call");

@@ -2,6 +2,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Location::CCountry;
 using Elastos::Droid::Location::CGeocoder;
 using Elastos::Droid::Location::EIID_ILocationListener;
@@ -217,7 +219,7 @@ ECode LocationBasedCountryDetector::DetectCountry(
     /* [out] */ ICountry** country)
 {
     VALIDATE_NOT_NULL(country)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mLocationListeners  != NULL) {
             return E_ILLEGAL_STATE_EXCEPTION;
         }
@@ -255,7 +257,7 @@ ECode LocationBasedCountryDetector::DetectCountry(
 
 ECode LocationBasedCountryDetector::Stop()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mLocationListeners != NULL) {
             Int32 size;
             mLocationListeners->GetSize(&size);
@@ -277,7 +279,7 @@ ECode LocationBasedCountryDetector::Stop()
 void LocationBasedCountryDetector::QueryCountryCode(
     /* [in] */ ILocation* location)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (location == NULL) {
             NotifyListener(NULL);
             return;

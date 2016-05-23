@@ -11,6 +11,8 @@
 #include <elastos/core/AutoLock.h>
 #include <Elastos.CoreLibrary.Utility.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::CLocale;
 using Elastos::Core::CString;
@@ -1024,7 +1026,7 @@ ECode TextToSpeech::SetAudioAttributes(
     VALIDATE_NOT_NULL(ret)
     assert(0 && "TODO");
     // if (audioAttributes != null) {
-    //     synchronized (mStartLock) {
+    //     {    AutoLock syncLock(mStartLock);
     //         mParams.putParcelable(Engine.KEY_PARAM_AUDIO_ATTRIBUTES,
     //             audioAttributes);
     //     }

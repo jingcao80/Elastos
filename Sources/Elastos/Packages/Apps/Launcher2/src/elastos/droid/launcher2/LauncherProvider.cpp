@@ -20,6 +20,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ISearchManager;
 using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
 using Elastos::Droid::AppWidget::CAppWidgetHost;
@@ -2017,7 +2019,7 @@ ECode LauncherProvider::LoadDefaultFavoritesIfNecessary(
     /* [in] */ Int32 origWorkspaceResId,
     /* [in] */ Boolean overridePrevious)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         String spKey;
         LauncherApplication::GetSharedPreferencesKey(&spKey);
         AutoPtr<IContext> context;

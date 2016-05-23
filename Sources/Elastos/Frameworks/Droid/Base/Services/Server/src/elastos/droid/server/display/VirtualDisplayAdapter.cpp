@@ -7,6 +7,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Hardware::Display::IDisplayManager;
 using Elastos::Droid::Media::Projection::EIID_IIMediaProjectionCallback;
@@ -49,7 +51,7 @@ ECode VirtualDisplayAdapter::MediaProjectionCallback::constructor(
 ECode VirtualDisplayAdapter::MediaProjectionCallback::OnStop()
 {
     Object* obj = mDisplayAdapter->GetSyncRoot();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         mDisplayAdapter->HandleMediaProjectionStoppedLocked(mAppToken);
     }
     return NOERROR;
@@ -162,7 +164,7 @@ VirtualDisplayAdapter::VirtualDisplayDevice::VirtualDisplayDevice(
 ECode VirtualDisplayAdapter::VirtualDisplayDevice::ProxyDied()
 {
     Object* obj = mHost->GetSyncRoot();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         if (mSurface.Get() != NULL) {
             mHost->HandleProxyDiedLocked(mAppToken);
         }

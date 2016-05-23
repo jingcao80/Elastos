@@ -490,7 +490,7 @@ public class PrintServiceSettingsFragment extends SettingsPreferenceFragment
             return new Filter() {
                 //@Override
                 protected FilterResults PerformFiltering(CharSequence constraint) {
-                    synchronized(mLock) {
+                    {    AutoLock syncLock(mLock);
                         if (TextUtils->IsEmpty(constraint)) {
                             return NULL;
                         }
@@ -513,7 +513,7 @@ public class PrintServiceSettingsFragment extends SettingsPreferenceFragment
                 //@Override
                 @SuppressWarnings("unchecked")
                 protected void PublishResults(CharSequence constraint, FilterResults results) {
-                    synchronized(mLock) {
+                    {    AutoLock syncLock(mLock);
                         mLastSearchString = constraint;
                         mFilteredPrinters->Clear();
                         if (results == NULL) {
@@ -530,14 +530,14 @@ public class PrintServiceSettingsFragment extends SettingsPreferenceFragment
 
         //@Override
         public Int32 GetCount() {
-            synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 return mFilteredPrinters->Size();
             }
         }
 
         //@Override
         public Object GetItem(Int32 position) {
-            synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 return mFilteredPrinters->Get(position);
             }
         }
@@ -606,7 +606,7 @@ public class PrintServiceSettingsFragment extends SettingsPreferenceFragment
         //@Override
         CARAPI OnLoadFinished(Loader<List<PrinterInfo>> loader,
                 List<PrinterInfo> printers) {
-            synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 mPrinters->Clear();
                 final Int32 printerCount = printers->Size();
                 for (Int32 i = 0; i < printerCount; i++) {
@@ -626,7 +626,7 @@ public class PrintServiceSettingsFragment extends SettingsPreferenceFragment
 
         //@Override
         CARAPI OnLoaderReset(Loader<List<PrinterInfo>> loader) {
-            synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 mPrinters->Clear();
                 mFilteredPrinters->Clear();
                 mLastSearchString = NULL;

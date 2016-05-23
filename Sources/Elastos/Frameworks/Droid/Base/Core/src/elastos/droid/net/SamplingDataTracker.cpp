@@ -9,6 +9,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Utility::ISlog;
 
@@ -150,7 +152,7 @@ _ERR_EXIT_:
 ECode SamplingDataTracker::StartSampling(
     /* [in] */ ISamplingDataTrackerSamplingSnapshot* s)
 {
-    synchronized(SAMPLING_DATA_LOCK) {
+    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
         mLastSample = s;
     }
     return NOERROR;
@@ -159,7 +161,7 @@ ECode SamplingDataTracker::StartSampling(
 ECode SamplingDataTracker::StopSampling(
     /* [in] */ ISamplingDataTrackerSamplingSnapshot* s)
 {
-    synchronized(SAMPLING_DATA_LOCK) {
+    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
         if (mLastSample != NULL) {
             Int64 sampledPacketCount;
             GetSampledPacketCount(mLastSample, s, &sampledPacketCount);
@@ -179,7 +181,7 @@ ECode SamplingDataTracker::StopSampling(
 ECode SamplingDataTracker::ResetSamplingData()
 {
     if (DBG) Slogger::D(TAG, "Resetting sampled network data");
-    synchronized(SAMPLING_DATA_LOCK) {
+    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
         // We could just take another sample here and treat it as an
         // 'ending sample' effectively shortening sampling interval, but that
         // requires extra work (specifically, reading the sample needs to be
@@ -194,7 +196,7 @@ ECode SamplingDataTracker::GetSampledTxByteCount(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(SAMPLING_DATA_LOCK) {
+    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
         if (mBeginningSample != NULL && mEndingSample != NULL) {
             *result = Ptr(mEndingSample)->Func(mEndingSample->GetTxByteCount) - Ptr(mBeginningSample)->Func(mBeginningSample->GetTxByteCount);
             return NOERROR;
@@ -211,7 +213,7 @@ ECode SamplingDataTracker::GetSampledTxPacketCount(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(SAMPLING_DATA_LOCK) {
+    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
         if (mBeginningSample != NULL && mEndingSample != NULL) {
             *result = Ptr(mEndingSample)->Func(mEndingSample->GetTxPacketCount) - Ptr(mBeginningSample)->Func(mBeginningSample->GetTxPacketCount);
             return NOERROR;
@@ -228,7 +230,7 @@ ECode SamplingDataTracker::GetSampledTxPacketErrorCount(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(SAMPLING_DATA_LOCK) {
+    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
         if (mBeginningSample != NULL && mEndingSample != NULL) {
             *result = Ptr(mEndingSample)->Func(mEndingSample->GetTxPacketErrorCount) - Ptr(mBeginningSample)->Func(mBeginningSample->GetTxPacketErrorCount);
             return NOERROR;
@@ -245,7 +247,7 @@ ECode SamplingDataTracker::GetSampledRxByteCount(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(SAMPLING_DATA_LOCK) {
+    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
         if (mBeginningSample != NULL && mEndingSample != NULL) {
             *result = Ptr(mEndingSample)->Func(mEndingSample->GetRxByteCount) - Ptr(mBeginningSample)->Func(mBeginningSample->GetRxByteCount);
             return NOERROR;
@@ -262,7 +264,7 @@ ECode SamplingDataTracker::GetSampledRxPacketCount(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(SAMPLING_DATA_LOCK) {
+    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
         if (mBeginningSample != NULL && mEndingSample != NULL) {
             *result = Ptr(mEndingSample)->Func(mEndingSample->GetRxPacketCount) - Ptr(mBeginningSample)->Func(mBeginningSample->GetRxPacketCount);
             return NOERROR;
@@ -325,7 +327,7 @@ ECode SamplingDataTracker::GetSampledRxPacketErrorCount(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(SAMPLING_DATA_LOCK) {
+    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
         if (mBeginningSample != NULL && mEndingSample != NULL) {
             *result = Ptr(mEndingSample)->Func(mEndingSample->GetRxPacketErrorCount) - Ptr(mBeginningSample)->Func(mBeginningSample->GetRxPacketErrorCount);
             return NOERROR;
@@ -342,7 +344,7 @@ ECode SamplingDataTracker::GetSampleTimestamp(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(SAMPLING_DATA_LOCK) {
+    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
         if (mEndingSample != NULL) {
             *result = Ptr(mEndingSample)->Func(mEndingSample->GetTimestamp);
             return NOERROR;
@@ -359,7 +361,7 @@ ECode SamplingDataTracker::GetSampleDuration(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(SAMPLING_DATA_LOCK) {
+    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
         if (mBeginningSample != NULL && mEndingSample != NULL) {
             *result = (int) (Ptr(mEndingSample)->Func(mEndingSample->GetTimestamp) - Ptr(mBeginningSample)->Func(mBeginningSample->GetTimestamp));
             return NOERROR;
@@ -374,7 +376,7 @@ ECode SamplingDataTracker::GetSampleDuration(
 ECode SamplingDataTracker::SetCommonLinkQualityInfoFields(
     /* [in] */ ILinkQualityInfo* li)
 {
-    synchronized(SAMPLING_DATA_LOCK) {
+    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
         li->SetLastDataSampleTime(Ptr(this)->Func(this->GetSampleTimestamp));
         li->SetDataSampleDuration(Ptr(this)->Func(this->GetSampleDuration));
         li->SetPacketCount(Ptr(this)->Func(this->GetSampledPacketCount));

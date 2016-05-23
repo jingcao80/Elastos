@@ -2,6 +2,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 // using Elastos::Droid::Hardware::Location::EIID_IGeofenceHardwareService;
@@ -44,7 +46,7 @@ ECode GeofenceProxy::MyServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
     /* [in] */ IBinder* service)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mHost->mGeofenceHardware = IIGeofenceHardware::Probe(service);
         Boolean result;
         mHost->mHandler->SendEmptyMessage(GEOFENCE_HARDWARE_CONNECTED, &result);
@@ -55,7 +57,7 @@ ECode GeofenceProxy::MyServiceConnection::OnServiceConnected(
 ECode GeofenceProxy::MyServiceConnection::OnServiceDisconnected(
     /* [in] */ IComponentName* name)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mHost->mGeofenceHardware = NULL;
         Boolean result;
         mHost->mHandler->SendEmptyMessage(GEOFENCE_HARDWARE_DISCONNECTED, &result);
@@ -79,7 +81,7 @@ ECode GeofenceProxy::MyHandler::HandleMessage(
     msg->GetWhat(&what);
     switch (what) {
         case GEOFENCE_PROVIDER_CONNECTED:
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 if (mHost->mGeofenceHardware != NULL) {
                     mHost->SetGeofenceHardwareInProviderLocked();
                 }
@@ -88,7 +90,7 @@ ECode GeofenceProxy::MyHandler::HandleMessage(
             }
             break;
         case GEOFENCE_HARDWARE_CONNECTED:
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 // Theoretically this won't happen because once the GeofenceHardwareService
                 // is connected to, we won't lose connection to it because it's a system
                 // service. But this check does make the code more robust.
@@ -100,7 +102,7 @@ ECode GeofenceProxy::MyHandler::HandleMessage(
             }
             break;
         case GEOFENCE_HARDWARE_DISCONNECTED:
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 if (mHost->mGeofenceHardware == NULL) {
                     mHost->SetGeofenceHardwareInProviderLocked();
                 }

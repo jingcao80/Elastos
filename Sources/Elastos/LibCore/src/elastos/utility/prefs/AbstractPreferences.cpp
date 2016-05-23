@@ -9,6 +9,8 @@
 #include "EmptyArray.h"
 #include "StringUtils.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Libcore::IO::CBase64;
 using Libcore::IO::IBase64;
 using Libcore::Utility::EmptyArray;
@@ -111,7 +113,7 @@ ECode AbstractPreferences::GetChild(
 {
     VALIDATE_NOT_NULL(apfs);
     *apfs = NULL;
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(CheckState());
         AutoPtr<AbstractPreferences> result;
         AutoPtr<ArrayOf<String> > childrenNames;
@@ -158,7 +160,7 @@ ECode AbstractPreferences::GetChildrenNames(
     /* [out, callee] */ ArrayOf<String>** values) /*throws BackingStoreException*/
 {
     VALIDATE_NOT_NULL(values);
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(CheckState());
         AutoPtr<ITreeSet> result;
         CTreeSet::New((ITreeSet**)&result);
@@ -202,7 +204,7 @@ ECode AbstractPreferences::GetChildrenNames(
 
 ECode AbstractPreferences::Clear() /*throws BackingStoreException */
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<ArrayOf<String> > keys;
         FAIL_RETURN(GetKeys((ArrayOf<String>**)&keys));
         String key;
@@ -237,7 +239,7 @@ ECode AbstractPreferences::ExportSubtree(
 
 ECode AbstractPreferences::Flush() /*throws BackingStoreException */
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(FlushSpi());
     }
 
@@ -262,7 +264,7 @@ ECode AbstractPreferences::Get(
     }
 
     String result;
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(CheckState());
         // try {
         result = GetSpi(key);
@@ -439,7 +441,7 @@ ECode AbstractPreferences::GetKeys(
 {
     VALIDATE_NOT_NULL(keys);
     ECode ec = NOERROR;
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(CheckState());
         ec = KeysSpi(keys);
     }
@@ -461,7 +463,7 @@ ECode AbstractPreferences::GetNode(
     VALIDATE_NOT_NULL(pfs);
     AutoPtr<AbstractPreferences> startNode;
     String name(_name);
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         CheckState();
         ValidateName(name);
         if (name.IsEmpty()) {
@@ -581,7 +583,7 @@ ECode AbstractPreferences::IsNodeExists(
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<AbstractPreferences> startNode;
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (IsRemoved()) {
             if (name.IsEmpty()) {
                 return NOERROR;
@@ -650,7 +652,7 @@ ECode AbstractPreferences::Put(
         // throw new IllegalArgumentException();
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(CheckState());
         PutSpi(key, value);
     }
@@ -707,7 +709,7 @@ ECode AbstractPreferences::PutInt64(
 ECode AbstractPreferences::Remove(
     /* [in] */ const String& key)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(CheckState());
         RemoveSpi(key);
     }
@@ -722,7 +724,7 @@ ECode AbstractPreferences::RemoveNode() /*throws BackingStoreException */
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     AutoPtr<Object> lock = &mParentPref->mLock;
-    synchronized (lock) {
+    {    AutoLock syncLock(lock);
         FAIL_RETURN(RemoveNodeImpl());
     }
     return NOERROR;
@@ -730,7 +732,7 @@ ECode AbstractPreferences::RemoveNode() /*throws BackingStoreException */
 
 ECode AbstractPreferences::RemoveNodeImpl()/* throws BackingStoreException */
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(CheckState());
         AutoPtr<ArrayOf<String> > childrenNames;
         FAIL_RETURN(ChildrenNamesSpi((ArrayOf<String>**)&childrenNames));
@@ -768,7 +770,7 @@ ECode AbstractPreferences::AddNodeChangeListener(
         return E_NULL_POINTER_EXCEPTION;
     }
     FAIL_RETURN(CheckState());
-    synchronized (mNodeChangeListeners) {
+    {    AutoLock syncLock(mNodeChangeListeners);
         IList::Probe(mNodeChangeListeners)->Add(ncl);
     }
     return NOERROR;
@@ -782,7 +784,7 @@ ECode AbstractPreferences::AddPreferenceChangeListener(
         return E_NULL_POINTER_EXCEPTION;
     }
     FAIL_RETURN(CheckState());
-    synchronized (mPreferenceChangeListeners) {
+    {    AutoLock syncLock(mPreferenceChangeListeners);
         IList::Probe(mPreferenceChangeListeners)->Add(pcl);
     }
     return NOERROR;
@@ -792,7 +794,7 @@ ECode AbstractPreferences::RemoveNodeChangeListener(
     /* [in] */ INodeChangeListener* ncl)
 {
     FAIL_RETURN(CheckState());
-    synchronized (mNodeChangeListeners) {
+    {    AutoLock syncLock(mNodeChangeListeners);
         Int32 pos;
         IList::Probe(mNodeChangeListeners)->IndexOf(ncl, &pos);
         if (pos == -1) {
@@ -809,7 +811,7 @@ ECode AbstractPreferences::RemovePreferenceChangeListener(
     /* [in] */ IPreferenceChangeListener* pcl)
 {
     FAIL_RETURN(CheckState());
-    synchronized (mPreferenceChangeListeners) {
+    {    AutoLock syncLock(mPreferenceChangeListeners);
         Int32 pos;
         IList::Probe(mPreferenceChangeListeners)->IndexOf(pcl, &pos);
         if (pos == -1) {
@@ -824,7 +826,7 @@ ECode AbstractPreferences::RemovePreferenceChangeListener(
 
 ECode AbstractPreferences::Sync() /*throws BackingStoreException*/
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(CheckState());
         FAIL_RETURN(SyncSpi());
     }
@@ -857,7 +859,7 @@ void AbstractPreferences::NotifyChildAdded(
 {
     AutoPtr<NodeChangeEvent> nce = new NodeAddEvent();
     nce->constructor(this, child);
-    synchronized (sEvents) {
+    {    AutoLock syncLock(sEvents);
         sEvents->Add(nce->Probe(EIID_IInterface));
         ISynchronize::Probe(sEvents)->NotifyAll();
     }
@@ -868,7 +870,7 @@ void AbstractPreferences::NotifyChildRemoved(
 {
     AutoPtr<NodeChangeEvent> nce = new NodeRemoveEvent();
     nce->constructor(this, child);
-    synchronized (sEvents) {
+    {    AutoLock syncLock(sEvents);
         sEvents->Add(nce->Probe(EIID_IInterface));
         ISynchronize::Probe(sEvents)->NotifyAll();
     }
@@ -881,7 +883,7 @@ void AbstractPreferences::NotifyPreferenceChange(
     //TODO
     assert(0);
     // AutoPtr<PreferenceChangeEvent> pce = new PreferenceChangeEvent(this, key, newValue);
-    // synchronized (sEvents) {
+    // {    AutoLock syncLock(sEvents);
     //     sEvents->Add(nce->Probe(EIID_IInterface));
     //     ISynchronize::Probe(sEvents)->NotifyAll();
     // }

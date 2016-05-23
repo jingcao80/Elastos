@@ -1379,7 +1379,7 @@ public class DataUsageSummary extends HighlightingFragment implements Indexable 
     public static String FormatDateRange(Context context, Int64 start, Int64 end) {
         final Int32 flags = FORMAT_SHOW_DATE | FORMAT_ABBREV_MONTH;
 
-        synchronized(sBuilder) {
+        {    AutoLock syncLock(sBuilder);
             sBuilder->SetLength(0);
             return DateUtils->FormatDateRange(context, sFormatter, start, end, flags, NULL)
                     .ToString();

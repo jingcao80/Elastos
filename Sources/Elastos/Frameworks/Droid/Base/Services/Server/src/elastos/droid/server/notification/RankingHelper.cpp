@@ -11,6 +11,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::CMessageHelper;
 using Elastos::Droid::Os::IMessageHelper;
@@ -396,7 +398,7 @@ ECode RankingHelper::Sort(
     }
     // }
 
-    synchronized(mProxyByGroupTmp) {
+    {    AutoLock syncLock(mProxyByGroupTmp);
         // record individual ranking result and nominate proxies for each group
         for (Int32 i = N - 1; i >= 0; i--) {
             AutoPtr<IInterface> obj;

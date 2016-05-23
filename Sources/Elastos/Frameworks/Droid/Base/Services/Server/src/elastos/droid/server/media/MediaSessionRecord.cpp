@@ -7,6 +7,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
@@ -659,7 +661,7 @@ ECode MediaSessionRecord::ProxyDied()
 
 void MediaSessionRecord::OnDestroy()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (mDestroyed) {
             return;
         }
@@ -707,7 +709,7 @@ String MediaSessionRecord::GetShortMetadataString()
 
 void MediaSessionRecord::PushPlaybackStateUpdate()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (mDestroyed) {
             return;
         }
@@ -737,7 +739,7 @@ void MediaSessionRecord::PushPlaybackStateUpdate()
 
 void MediaSessionRecord::PushMetadataUpdate()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (mDestroyed) {
             return;
         }
@@ -767,7 +769,7 @@ void MediaSessionRecord::PushMetadataUpdate()
 
 void MediaSessionRecord::PushQueueUpdate()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (mDestroyed) {
             return;
         }
@@ -797,7 +799,7 @@ void MediaSessionRecord::PushQueueUpdate()
 
 void MediaSessionRecord::PushQueueTitleUpdate()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (mDestroyed) {
             return;
         }
@@ -827,7 +829,7 @@ void MediaSessionRecord::PushQueueTitleUpdate()
 
 void MediaSessionRecord::PushExtrasUpdate()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (mDestroyed) {
             return;
         }
@@ -857,7 +859,7 @@ void MediaSessionRecord::PushExtrasUpdate()
 
 void MediaSessionRecord::PushVolumeUpdate()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (mDestroyed) {
             return;
         }
@@ -889,7 +891,7 @@ void MediaSessionRecord::PushEvent(
     /* [in] */ const String& event,
     /* [in] */ IBundle* data)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (mDestroyed) {
             return;
         }
@@ -919,7 +921,7 @@ void MediaSessionRecord::PushEvent(
 
 void MediaSessionRecord::PushSessionDestroyed()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         // This is the only method that may be (and can only be) called
         // after the session is destroyed.
         if (!mDestroyed) {
@@ -954,7 +956,7 @@ AutoPtr<IPlaybackState> MediaSessionRecord::GetStateWithUpdatedPosition()
 {
     AutoPtr<IPlaybackState> state;
     Int64 duration = -1;
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         state = mPlaybackState;
         Boolean containsKey;
         if (mMetadata != NULL &&

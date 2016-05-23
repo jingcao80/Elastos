@@ -4,6 +4,8 @@
 #include "StringBuilder.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringBuilder;
 
@@ -170,7 +172,7 @@ ECode Timer::TimerImpl::Run()
 
     while (TRUE) {
         AutoPtr<ITimerTask> task;
-        synchronized (this) {
+        {    AutoLock syncLock(this);
             // need to check cancelled inside the synchronized block
             if (mCancelled) {
                 return NOERROR;
@@ -274,7 +276,7 @@ ECode Timer::TimerImpl::Run()
             taskCompletedNormally = TRUE;
         }
         if (!taskCompletedNormally) {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 mCancelled = TRUE;
             }
         }
@@ -292,7 +294,7 @@ void Timer::TimerImpl::InsertTask(
 
 void Timer::TimerImpl::Cancel()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mCancelled = TRUE;
         mTasks->Reset();
         Notify();

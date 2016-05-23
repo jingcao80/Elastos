@@ -10,6 +10,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Soundtrigger::CSoundTriggerKeyphraseRecognitionExtra;
 using Elastos::Droid::Hardware::Soundtrigger::CSoundTriggerRecognitionConfig;
 using Elastos::Droid::Hardware::Soundtrigger::EIID_IIRecognitionStatusCallback;
@@ -177,7 +179,7 @@ AlwaysOnHotwordDetector::MyHandler::MyHandler(
 ECode AlwaysOnHotwordDetector::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mHost->mAvailability == AlwaysOnHotwordDetector::STATE_INVALID) {
             Int32 what;
             msg->GetWhat(&what);
@@ -249,7 +251,7 @@ ECode AlwaysOnHotwordDetector::RefreshAvailabiltyTask::DoInBackground(
         }
     }
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (AlwaysOnHotwordDetector::DBG) {
             Slogger::D(AlwaysOnHotwordDetector::TAG, "Hotword availability changed from %d -> %d", mHost->mAvailability, availability);
         }
@@ -264,7 +266,7 @@ ECode AlwaysOnHotwordDetector::RefreshAvailabiltyTask::InternalGetInitialAvailab
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // This detector has already been invalidated.
         if (mHost->mAvailability == AlwaysOnHotwordDetector::STATE_INVALID) {
             *result = AlwaysOnHotwordDetector::STATE_INVALID;
@@ -371,7 +373,7 @@ ECode AlwaysOnHotwordDetector::GetSupportedRecognitionModes(
 {
     VALIDATE_NOT_NULL(srm)
     if (DBG) Slogger::D(TAG, "getSupportedRecognitionModes()");
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         return GetSupportedRecognitionModesLocked(srm);
     }
     return NOERROR;
@@ -404,7 +406,7 @@ ECode AlwaysOnHotwordDetector::StartRecognition(/*@RecognitionFlags*/
 {
     VALIDATE_NOT_NULL(result)
     if (DBG) Slogger::D(TAG, "startRecognition(%d)", recognitionFlags);
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mAvailability == STATE_INVALID) {
             Slogger::E(TAG, "startRecognition called on an invalid detector");
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -428,7 +430,7 @@ ECode AlwaysOnHotwordDetector::StopRecognition(
 {
     VALIDATE_NOT_NULL(result)
     if (DBG) Slogger::D(TAG, "stopRecognition()");
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mAvailability == STATE_INVALID) {
             Slogger::E(TAG, "stopRecognition called on an invalid detector");
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -453,7 +455,7 @@ ECode AlwaysOnHotwordDetector::CreateEnrollIntent(
 {
     VALIDATE_NOT_NULL(intent)
     if (DBG) Slogger::D(TAG, "createEnrollIntent");
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         return GetManageIntentLocked(IAlwaysOnHotwordDetector::MANAGE_ACTION_ENROLL, intent);
     }
     return NOERROR;
@@ -464,7 +466,7 @@ ECode AlwaysOnHotwordDetector::CreateUnEnrollIntent(
 {
     VALIDATE_NOT_NULL(intent)
     if (DBG) Slogger::D(TAG, "createUnEnrollIntent");
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         return GetManageIntentLocked(IAlwaysOnHotwordDetector::MANAGE_ACTION_UN_ENROLL, intent);
     }
     return NOERROR;
@@ -475,7 +477,7 @@ ECode AlwaysOnHotwordDetector::CreateReEnrollIntent(
 {
     VALIDATE_NOT_NULL(intent)
     if (DBG) Slogger::D(TAG, "createReEnrollIntent");
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         return GetManageIntentLocked(IAlwaysOnHotwordDetector::MANAGE_ACTION_RE_ENROLL, intent);
     }
     return NOERROR;
@@ -503,7 +505,7 @@ ECode AlwaysOnHotwordDetector::GetManageIntentLocked(
 
 ECode AlwaysOnHotwordDetector::Invalidate()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mAvailability = STATE_INVALID;
         NotifyStateChangedLocked();
     }
@@ -512,7 +514,7 @@ ECode AlwaysOnHotwordDetector::Invalidate()
 
 ECode AlwaysOnHotwordDetector::OnSoundModelsChanged()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mAvailability == STATE_INVALID
                 || mAvailability == IAlwaysOnHotwordDetector::STATE_HARDWARE_UNAVAILABLE
                 || mAvailability == IAlwaysOnHotwordDetector::STATE_KEYPHRASE_UNSUPPORTED) {

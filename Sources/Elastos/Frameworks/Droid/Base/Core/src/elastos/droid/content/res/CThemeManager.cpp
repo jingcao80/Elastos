@@ -7,6 +7,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Core::ICharSequence;
@@ -48,7 +50,7 @@ ECode CThemeManager::constructor(
 ECode CThemeManager::AddClient(
     /* [in] */ IThemeChangeListener* listener)
 {
-    synchronized (mChangeListenersLock) {
+    {    AutoLock syncLock(mChangeListenersLock);
         if (mChangeListeners.Find(listener) != mChangeListeners.End()) {
             Logger::E(TAG, "Client was already added ");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -70,7 +72,7 @@ ECode CThemeManager::AddClient(
 ECode CThemeManager::RemoveClient(
     /* [in] */ IThemeChangeListener* listener)
 {
-    synchronized (mChangeListenersLock) {
+    {    AutoLock syncLock(mChangeListenersLock);
         mChangeListeners.Erase(listener);
         if (mChangeListeners.IsEmpty()) {
             // try {
@@ -106,7 +108,7 @@ ECode CThemeManager::OnClientDestroyed(
 ECode CThemeManager::RegisterProcessingListener(
     /* [in] */ IThemeProcessingListener* listener)
 {
-    synchronized (mProcessingListenersLock) {
+    {    AutoLock syncLock(mProcessingListenersLock);
         if (mProcessingListeners.Find(listener) != mProcessingListeners.End()) {
             Logger::E(TAG, "Listener was already added ");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -128,7 +130,7 @@ ECode CThemeManager::RegisterProcessingListener(
 ECode CThemeManager::UnregisterProcessingListener(
     /* [in] */ IThemeProcessingListener* listener)
 {
-    synchronized (mProcessingListenersLock) {
+    {    AutoLock syncLock(mProcessingListenersLock);
         mProcessingListeners.Erase(listener);
         if (mProcessingListeners.IsEmpty()) {
             // try {

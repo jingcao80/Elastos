@@ -10,6 +10,8 @@
 #include <elastos/utility/etl/HashSet.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
@@ -203,7 +205,7 @@ ECode PreferenceManager::GetNextId(
     /* [out] */ Int64* id)
 {
     VALIDATE_NOT_NULL(id)
-    synchronized(this){
+    {    AutoLock syncLock(this);
         *id = mNextId++;
     }
     return NOERROR;
@@ -431,7 +433,7 @@ ECode PreferenceManager::GetContext(
 ECode PreferenceManager::RegisterOnActivityResultListener(
     /* [in] */ IPreferenceManagerOnActivityResultListener* listener)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mActivityResultListeners == NULL) {
             mActivityResultListeners = new List<AutoPtr<IPreferenceManagerOnActivityResultListener> >();
         }
@@ -449,7 +451,7 @@ ECode PreferenceManager::RegisterOnActivityResultListener(
 ECode PreferenceManager::UnregisterOnActivityResultListener(
     /* [in] */ IPreferenceManagerOnActivityResultListener* listener)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mActivityResultListeners != NULL) {
             mActivityResultListeners->Remove(listener);
         }
@@ -464,7 +466,7 @@ ECode PreferenceManager::DispatchActivityResult(
 {
     AutoPtr<List< AutoPtr<IPreferenceManagerOnActivityResultListener> > > list;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mActivityResultListeners == NULL) {
             return NOERROR;
         }
@@ -485,7 +487,7 @@ ECode PreferenceManager::DispatchActivityResult(
 ECode PreferenceManager::RegisterOnActivityStopListener(
     /* [in] */ IPreferenceManagerOnActivityStopListener* listener)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mActivityStopListeners == NULL) {
             mActivityStopListeners = new List<AutoPtr<IPreferenceManagerOnActivityStopListener> >();
         }
@@ -503,7 +505,7 @@ ECode PreferenceManager::RegisterOnActivityStopListener(
 ECode PreferenceManager::UnregisterOnActivityStopListener(
     /* [in] */ IPreferenceManagerOnActivityStopListener* listener)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mActivityStopListeners != NULL) {
             mActivityStopListeners->Remove(listener);
         }
@@ -515,7 +517,7 @@ ECode PreferenceManager::DispatchActivityStop()
 {
     AutoPtr<List<AutoPtr<IPreferenceManagerOnActivityStopListener> > > list;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mActivityStopListeners == NULL) return NOERROR;
         list = new List<AutoPtr<IPreferenceManagerOnActivityStopListener> >(*mActivityStopListeners);
     }
@@ -530,7 +532,7 @@ ECode PreferenceManager::DispatchActivityStop()
 ECode PreferenceManager::RegisterOnActivityDestroyListener(
     /* [in] */ IPreferenceManagerOnActivityDestroyListener* listener)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mActivityDestroyListeners == NULL) {
             mActivityDestroyListeners = new List<AutoPtr<IPreferenceManagerOnActivityDestroyListener> >();
         }
@@ -548,7 +550,7 @@ ECode PreferenceManager::RegisterOnActivityDestroyListener(
 ECode PreferenceManager::UnregisterOnActivityDestroyListener(
     /* [in] */ IPreferenceManagerOnActivityDestroyListener* listener)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mActivityDestroyListeners != NULL) {
             mActivityDestroyListeners->Remove(listener);
         }
@@ -560,7 +562,7 @@ ECode PreferenceManager::DispatchActivityDestroy()
 {
     AutoPtr<List<AutoPtr<IPreferenceManagerOnActivityDestroyListener> > > list;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mActivityDestroyListeners != NULL) {
             list = new List<AutoPtr<IPreferenceManagerOnActivityDestroyListener> >(*mActivityDestroyListeners);
         }
@@ -582,7 +584,7 @@ ECode PreferenceManager::GetNextRequestCode(
     /* [out] */ Int32* code)
 {
     VALIDATE_NOT_NULL(code)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *code = mNextRequestCode++;
     }
     return NOERROR;
@@ -591,7 +593,7 @@ ECode PreferenceManager::GetNextRequestCode(
 ECode PreferenceManager::AddPreferencesScreen(
     /* [in] */ IDialogInterface* screen)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mPreferencesScreens == NULL) {
             mPreferencesScreens = new List<AutoPtr<IDialogInterface> >();
         }
@@ -604,7 +606,7 @@ ECode PreferenceManager::AddPreferencesScreen(
 ECode PreferenceManager::RemovePreferencesScreen(
     /* [in] */ IDialogInterface* screen)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mPreferencesScreens == NULL) {
             return NOERROR;
         }
@@ -626,7 +628,7 @@ void PreferenceManager::DismissAllScreens()
      // Remove any of the previously shown preferences screens
     AutoPtr<List<AutoPtr<IDialogInterface> > > screensToDismiss;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mPreferencesScreens == NULL) {
             return;
         }

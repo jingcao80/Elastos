@@ -43,7 +43,7 @@ namespace Utility {
  *
  * <p>This class is thread-safe. Perform multiple cache operations atomically by
  * synchronizing on the cache: <pre>   {@code
- *   synchronized(cache) {
+ *   {    AutoLock syncLock(cache);
  *     if (cache.get(key) == null) {
  *         cache.put(key, value);
  *     }
@@ -267,7 +267,7 @@ void LruCache<K, V>::Resize(
         // throw new IllegalArgumentException("maxSize <= 0");
     }
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mMaxSize = maxSize;
     }
 
@@ -285,7 +285,7 @@ V LruCache<K, V>::Get(
     }
 
     V mapValue;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         typename HashMap<K, V>::Iterator it = mMap.Find(key);
         if (it != mMap.End()) {
             mapValue = it->mSecond;
@@ -310,7 +310,7 @@ V LruCache<K, V>::Get(
         return (V)NULL;
     }
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mCreateCount++;
         mapValue = mMap[key];
         if (mapValue == NULL) {
@@ -341,7 +341,7 @@ V LruCache<K, V>::Put(
     }
 
     V previous;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mPutCount++;
         mSize += SafeSizeOf(key, value);
 
@@ -414,7 +414,7 @@ V LruCache<K, V>::Remove(
     }
 
     V previous;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         typename HashMap<K, V>::Iterator it = mMap.Find(key);
         if (it != mMap.End()) {
             previous = it->mSecond;

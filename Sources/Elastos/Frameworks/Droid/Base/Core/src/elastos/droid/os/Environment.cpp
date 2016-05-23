@@ -14,6 +14,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Droid::Os::Storage::CStorageManagerHelper;
@@ -142,7 +144,7 @@ AutoPtr<IStorageVolume> Environment::sNoEmulatedVolume;
 AutoPtr<IStorageVolume> Environment::GetNoEmulatedVolume()
 {
     if (!sNoEmulatedVolume) {
-        synchronized(sLock) {
+        {    AutoLock syncLock(sLock);
             if (!sNoEmulatedVolume) {
                 // try {
                 AutoPtr<IInterface> obj = ServiceManager::GetService(String("mount"));

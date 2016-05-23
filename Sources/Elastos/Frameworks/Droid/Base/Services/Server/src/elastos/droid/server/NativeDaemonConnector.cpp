@@ -16,6 +16,8 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CHandlerThread;
 using Elastos::Droid::Os::EIID_IHandlerCallback;
@@ -481,7 +483,7 @@ _EXIT_:
 //        loge("Communications error: " + ex);
 //        throw ex;
 //    } finally {
-//        synchronized(mDaemonLock) {
+//        {    AutoLock syncLock(mDaemonLock);
 //            if (mOutputStream != NULL) {
 //                try {
 //                    loge("closing stream for " + mSocket);

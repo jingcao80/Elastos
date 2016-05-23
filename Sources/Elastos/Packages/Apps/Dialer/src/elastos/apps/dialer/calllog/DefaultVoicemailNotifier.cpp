@@ -1,6 +1,8 @@
 
 #include "DefaultVoicemailNotifier.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::App::IPendingIntentHelper;
 using Elastos::Droid::App::CPendingIntentHelper;
@@ -210,7 +212,7 @@ DefaultVoicemailNotifier::DefaultVoicemailNotifier(
 AutoPtr<IDefaultVoicemailNotifier> DefaultVoicemailNotifier::GetInstance(
     /* [in] */ IContext* context)
 {
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         if (sInstance == NULL) {
             AutoPtr<IInterface> service;
             context->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&service);

@@ -16,6 +16,8 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Animation::CLayoutTransition;
 using Elastos::Droid::Animation::EIID_IAnimatorListener;
 using Elastos::Droid::Animation::ITimeInterpolator;
@@ -917,7 +919,7 @@ void RecentsPanelView::UpdateThumbnail(
 ECode RecentsPanelView::OnTaskThumbnailLoaded(
     /* [in] */ ITaskDescription* td)
 {
-    synchronized(td) {
+    {    AutoLock syncLock(td);
         if (mRecentsContainer != NULL) {
             AutoPtr<IViewGroup> container = IViewGroup::Probe(mRecentsContainer);
             AutoPtr<IRecentsPanelViewRecentsScrollView> scrollView =

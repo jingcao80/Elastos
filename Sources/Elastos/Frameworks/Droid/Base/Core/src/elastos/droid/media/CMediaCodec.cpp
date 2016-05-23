@@ -22,6 +22,8 @@
 #include <media/stagefright/MediaErrors.h>
 #include <system/window.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::Looper;
@@ -739,7 +741,7 @@ void CMediaCodec::EventHandler::HandleCallback(
             Int32 index;
             msg->GetArg2(&index);
             Object& lock = mCodec->mBufferLock;
-            synchronized(lock) {
+            {    AutoLock syncLock(lock);
                 mCodec->ValidateInputByteBuffer(mCodec->mCachedInputBuffers, index);
             }
             mCodec->mCallback->OnInputBufferAvailable(mCodec, index);
@@ -754,7 +756,7 @@ void CMediaCodec::EventHandler::HandleCallback(
             msg->GetObj((IInterface**)&obj);
             AutoPtr<IMediaCodecBufferInfo> info = IMediaCodecBufferInfo::Probe(obj);
             Object& lock = mCodec->mBufferLock;
-            synchronized(lock) {
+            {    AutoLock syncLock(lock);
                 mCodec->ValidateOutputByteBuffer(mCodec->mCachedOutputBuffers, index, info);
             }
             mCodec->mCallback->OnOutputBufferAvailable(
@@ -1047,7 +1049,7 @@ ECode CMediaCodec::CreateInputSurface(
 ECode CMediaCodec::Start()
 {
     NativeStart();
-    synchronized(mBufferLock) {
+    {    AutoLock syncLock(mBufferLock);
         CacheBuffers(TRUE /* input */);
         CacheBuffers(FALSE /* input */);
     }
@@ -1068,7 +1070,7 @@ ECode CMediaCodec::Stop()
 
 ECode CMediaCodec::Flush()
 {
-    synchronized(mBufferLock) {
+    {    AutoLock syncLock(mBufferLock);
         InvalidateByteBuffers(mCachedInputBuffers);
         InvalidateByteBuffers(mCachedOutputBuffers);
         mDequeuedInputBuffers->Clear();
@@ -1085,7 +1087,7 @@ ECode CMediaCodec::QueueInputBuffer(
     /* [in] */ Int64 presentationTimeUs,
     /* [in] */ Int32 flags)
 {
-    synchronized(mBufferLock) {
+    {    AutoLock syncLock(mBufferLock);
         InvalidateByteBuffer(mCachedInputBuffers, index);
         mDequeuedInputBuffers->Remove(index);
     }
@@ -1106,7 +1108,7 @@ ECode CMediaCodec::QueueSecureInputBuffer(
     /* [in] */ Int64 presentationTimeUs,
     /* [in] */ Int32 flags)
 {
-    synchronized(mBufferLock) {
+    {    AutoLock syncLock(mBufferLock);
         InvalidateByteBuffer(mCachedInputBuffers, index);
         mDequeuedInputBuffers->Remove(index);
     }
@@ -1127,7 +1129,7 @@ ECode CMediaCodec::DequeueInputBuffer(
     VALIDATE_NOT_NULL(result)
     Int32 res = NativeDequeueInputBuffer(timeoutUs);
     if (res >= 0) {
-        synchronized(mBufferLock) {
+        {    AutoLock syncLock(mBufferLock);
             ValidateInputByteBuffer(mCachedInputBuffers, res);
         }
     }
@@ -1142,7 +1144,7 @@ ECode CMediaCodec::DequeueOutputBuffer(
 {
     VALIDATE_NOT_NULL(result)
     Int32 res = NativeDequeueOutputBuffer(info, timeoutUs);
-    synchronized(mBufferLock) {
+    {    AutoLock syncLock(mBufferLock);
         if (res == IMediaCodec::INFO_OUTPUT_BUFFERS_CHANGED) {
             CacheBuffers(FALSE /* input */);
         }
@@ -1158,7 +1160,7 @@ ECode CMediaCodec::ReleaseOutputBuffer(
     /* [in] */ Int32 index,
     /* [in] */ Boolean render)
 {
-    synchronized(mBufferLock) {
+    {    AutoLock syncLock(mBufferLock);
         InvalidateByteBuffer(mCachedOutputBuffers, index);
         mDequeuedOutputBuffers->Remove(index);
     }
@@ -1170,7 +1172,7 @@ ECode CMediaCodec::ReleaseOutputBuffer(
     /* [in] */ Int32 index,
     /* [in] */ Int64 renderTimestampNs)
 {
-    synchronized(mBufferLock) {
+    {    AutoLock syncLock(mBufferLock);
         InvalidateByteBuffer(mCachedOutputBuffers, index);
         mDequeuedOutputBuffers->Remove(index);
     }
@@ -1260,7 +1262,7 @@ ECode CMediaCodec::GetInputBuffer(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IByteBuffer> newBuffer = NativeGetBuffer(TRUE /* input */, index);
-    synchronized(mBufferLock) {
+    {    AutoLock syncLock(mBufferLock);
         InvalidateByteBuffer(mCachedInputBuffers, index);
         mDequeuedInputBuffers->Put(index, newBuffer);
     }
@@ -1275,7 +1277,7 @@ ECode CMediaCodec::GetInputImage(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IImage> newImage = NativeGetImage(TRUE /* input */, index);
-    synchronized(mBufferLock) {
+    {    AutoLock syncLock(mBufferLock);
         InvalidateByteBuffer(mCachedInputBuffers, index);
         mDequeuedInputBuffers->Put(index, newImage);
     }
@@ -1290,7 +1292,7 @@ ECode CMediaCodec::GetOutputBuffer(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IByteBuffer> newBuffer = NativeGetBuffer(FALSE /* input */, index);
-    synchronized(mBufferLock) {
+    {    AutoLock syncLock(mBufferLock);
         InvalidateByteBuffer(mCachedOutputBuffers, index);
         mDequeuedOutputBuffers->Put(index, newBuffer);
     }
@@ -1305,7 +1307,7 @@ ECode CMediaCodec::GetOutputImage(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IImage> newImage = NativeGetImage(FALSE /* input */, index);
-    synchronized(mBufferLock) {
+    {    AutoLock syncLock(mBufferLock);
         InvalidateByteBuffer(mCachedOutputBuffers, index);
         mDequeuedOutputBuffers->Put(index, newImage);
     }
@@ -1879,7 +1881,7 @@ void CMediaCodec::RevalidateByteBuffer(
     /* [in] */ ArrayOf<IByteBuffer*>* buffers,
     /* [in] */ Int32 index)
 {
-    synchronized(mBufferLock) {
+    {    AutoLock syncLock(mBufferLock);
         if (buffers != NULL && index >= 0 && index < buffers->GetLength()) {
             AutoPtr<IByteBuffer> buffer = (*buffers)[index];
             if (buffer != NULL) {
@@ -1944,7 +1946,7 @@ void CMediaCodec::FreeByteBuffers(
 
 void CMediaCodec::FreeAllTrackedBuffers()
 {
-    synchronized(mBufferLock) {
+    {    AutoLock syncLock(mBufferLock);
         FreeByteBuffers(mCachedInputBuffers);
         FreeByteBuffers(mCachedOutputBuffers);
         mCachedInputBuffers = NULL;

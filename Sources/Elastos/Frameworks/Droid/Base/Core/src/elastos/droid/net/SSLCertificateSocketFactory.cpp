@@ -9,6 +9,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Net::ISSLCertificateSocketFactory;
 using Elastos::Droid::Net::ISSLSessionCache;
 using Elastos::Droid::Os::ISystemProperties;
@@ -250,7 +252,7 @@ Boolean SSLCertificateSocketFactory::IsSslCheckRelaxed()
 
 AutoPtr<ISSLSocketFactory> SSLCertificateSocketFactory::GetDelegate()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // Relax the SSL check if instructed (for this factory, or systemwide)
         if (!mSecure || IsSslCheckRelaxed()) {
             if (mInsecureFactory == NULL) {

@@ -12,6 +12,8 @@
 #include <Elastos.Droid.Provider.h>
 #include <Elastos.CoreLibrary.IO.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::EIID_IBinder;
@@ -64,7 +66,7 @@ ECode DockObserver::BinderService::Dump(
 
     // long ident = Binder.clearCallingIdentity();
     // try {
-    //     synchronized (mLock) {
+    //     {    AutoLock syncLock(mLock);
     //         if (args == NULL || args.length == 0 || "-a".equals(args[0])) {
     //             pw.println("Current Dock Observer Service state:");
     //             if (mUpdatesStopped) {
@@ -211,7 +213,7 @@ ECode DockObserver::OnBootPhase(
     /* [in] */ Int32 phase)
 {
     if (phase == PHASE_ACTIVITY_MANAGER_READY) {
-        synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mSystemReady = TRUE;
 
             // don't bother broadcasting undocked here
@@ -225,7 +227,7 @@ ECode DockObserver::OnBootPhase(
 
 ECode DockObserver::Init()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
 
         AutoPtr<ArrayOf<Char32> > buffer = ArrayOf<Char32>::Alloc(1024);
         Int32 len, ival;
@@ -290,7 +292,7 @@ ECode DockObserver::UpdateLocked()
 
 ECode DockObserver::HandleDockStateChange()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         Slogger::I(TAG, "Dock state changed from %d to %d",
             mPreviousDockState, mReportedDockState);
         Int32 previousDockState = mPreviousDockState;

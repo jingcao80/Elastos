@@ -9,6 +9,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::Handler;
 
 using Com::Squareup::Okhttp::IOkHttpClient;
@@ -89,7 +91,7 @@ ECode Network::GetSocketFactory(
     VALIDATE_NOT_NULL(result)
 
     if (mNetworkBoundSocketFactory == NULL) {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             if (mNetworkBoundSocketFactory == NULL) {
                 mNetworkBoundSocketFactory = new NetworkBoundSocketFactory(mNetId, this);
             }
@@ -100,7 +102,7 @@ ECode Network::GetSocketFactory(
 
 ECode Network::MaybeInitHttpClient()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mHostResolver == NULL) {
             // TODO: Waiting for HostResolver
             assert(0);

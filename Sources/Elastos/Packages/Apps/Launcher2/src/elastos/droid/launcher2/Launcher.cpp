@@ -42,6 +42,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Accounts::IAccount;
 using Elastos::Droid::Accounts::IAccountManager;
 using Elastos::Droid::Accounts::IAccountManagerHelper;
@@ -1503,7 +1505,7 @@ ECode Launcher::GetScreen(
 {
     VALIDATE_NOT_NULL(screen);
 
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         *screen = sScreen;
     }
     return NOERROR;
@@ -1512,7 +1514,7 @@ ECode Launcher::GetScreen(
 ECode Launcher::SetScreen(
     /* [in] */ Int32 screen)
 {
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         sScreen = screen;
     }
     return NOERROR;

@@ -51,7 +51,7 @@ public class IdleController extends StateController {
     private static volatile IdleController sController;
 
     public static IdleController Get(JobSchedulerService service) {
-        synchronized(sCreationLock) {
+        {    AutoLock syncLock(sCreationLock);
             if (sController == NULL) {
                 sController = new IdleController(service, service->GetContext());
             }
@@ -70,7 +70,7 @@ public class IdleController extends StateController {
     //@Override
     CARAPI MaybeStartTrackingJob(JobStatus taskStatus) {
         if (taskStatus->HasIdleConstraint()) {
-            synchronized(mTrackedTasks) {
+            {    AutoLock syncLock(mTrackedTasks);
                 mTrackedTasks->Add(taskStatus);
                 taskStatus.idleConstraintSatisfied->Set(mIdleTracker->IsIdle());
             }
@@ -79,7 +79,7 @@ public class IdleController extends StateController {
 
     //@Override
     CARAPI MaybeStopTrackingJob(JobStatus taskStatus) {
-        synchronized(mTrackedTasks) {
+        {    AutoLock syncLock(mTrackedTasks);
             mTrackedTasks->Remove(taskStatus);
         }
     }
@@ -88,7 +88,7 @@ public class IdleController extends StateController {
      * Interaction with the task manager service
      */
     void ReportNewIdleState(Boolean isIdle) {
-        synchronized(mTrackedTasks) {
+        {    AutoLock syncLock(mTrackedTasks);
             for (JobStatus task : mTrackedTasks) {
                 task.idleConstraintSatisfied->Set(isIdle);
             }
@@ -187,7 +187,7 @@ public class IdleController extends StateController {
 
     //@Override
     CARAPI DumpControllerState(PrintWriter pw) {
-        synchronized(mTrackedTasks) {
+        {    AutoLock syncLock(mTrackedTasks);
             pw->Print("Idle: ");
             pw->Println(mIdleTracker->IsIdle() ? "TRUE" : "FALSE");
             pw->Println(mTrackedTasks->Size());

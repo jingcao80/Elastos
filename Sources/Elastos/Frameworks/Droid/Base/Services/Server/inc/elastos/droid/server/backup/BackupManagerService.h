@@ -368,7 +368,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                         + " is=" + isProvisioned + " now=" + mProvisioned);
             }
 
-            synchronized(mQueueLock) {
+            {    AutoLock syncLock(mQueueLock);
                 if (mProvisioned && !wasProvisioned && mEnabled) {
                     // we're now good to go, so start the backup alarms
                     if (MORE_DEBUG) Slogger::D(TAG, "Now provisioned, so starting backups");
@@ -596,7 +596,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     Int32 GenerateToken() {
         Int32 token;
         do {
-            synchronized(mTokenGenerator) {
+            {    AutoLock syncLock(mTokenGenerator);
                 token = mTokenGenerator->NextInt();
             }
         } while (token < 0);
@@ -652,7 +652,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 IBackupTransport transport = GetTransport(mCurrentTransport);
                 if (transport == NULL) {
                     Slogger::V(TAG, "Backup requested but no transport available");
-                    synchronized(mQueueLock) {
+                    {    AutoLock syncLock(mQueueLock);
                         mBackupRunning = FALSE;
                     }
                     mWakelock->Release();
@@ -662,7 +662,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 // snapshot the pending-backup set and work on that
                 ArrayList<BackupRequest> queue = new ArrayList<BackupRequest>();
                 File oldJournal = mJournal;
-                synchronized(mQueueLock) {
+                {    AutoLock syncLock(mQueueLock);
                     // Do we have any work to do?  Construct the work queue
                     // then release the synchronization lock to actually run
                     // the backup.
@@ -706,7 +706,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
                 if (!staged) {
                     // if we didn't actually hand off the wakelock, rewind until next time
-                    synchronized(mQueueLock) {
+                    {    AutoLock syncLock(mQueueLock);
                         mBackupRunning = FALSE;
                     }
                     mWakelock->Release();
@@ -803,7 +803,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 HashSet<String> queue;
 
                 // Snapshot the pending-init queue and work on that
-                synchronized(mQueueLock) {
+                {    AutoLock syncLock(mQueueLock);
                     queue = new HashSet<String>(mPendingInits);
                     mPendingInits->Clear();
                 }
@@ -814,7 +814,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
             case MSG_RETRY_INIT:
             {
-                synchronized(mQueueLock) {
+                {    AutoLock syncLock(mQueueLock);
                     RecordInitPendingLocked(msg.arg1 != 0, (String)msg.obj);
                     mAlarmManager->Set(AlarmManager.RTC_WAKEUP, System->CurrentTimeMillis(),
                             mRunInitIntent);
@@ -830,7 +830,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 try {
                     sets = params.transport->GetAvailableRestoreSets();
                     // cache the result in the active session
-                    synchronized(params.session) {
+                    {    AutoLock syncLock(params.session);
                         params.session.mRestoreSets = sets;
                     }
                     if (sets == NULL) EventLog->WriteEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
@@ -864,7 +864,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
             case MSG_RESTORE_TIMEOUT:
             {
-                synchronized(BackupManagerService.this) {
+                {    AutoLock syncLock(BackupManagerService.this);
                     if (mActiveRestoreSession != NULL) {
                         // Client app left the restore session dangling.  We know that it
                         // can't be in the middle of an actual restore operation because
@@ -881,7 +881,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
             case MSG_FULL_CONFIRMATION_TIMEOUT:
             {
-                synchronized(mFullConfirmations) {
+                {    AutoLock syncLock(mFullConfirmations);
                     FullParams params = mFullConfirmations->Get(msg.arg1);
                     if (params != NULL) {
                         Slogger::I(TAG, "Full backup/restore timed out waiting for user confirmation");
@@ -920,7 +920,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     // ----- Debug-only backup operation trace -----
     void AddBackupTrace(String s) {
         if (DEBUG_BACKUP_TRACE) {
-            synchronized(mBackupTrace) {
+            {    AutoLock syncLock(mBackupTrace);
                 mBackupTrace->Add(s);
             }
         }
@@ -928,7 +928,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     void ClearBackupTrace() {
         if (DEBUG_BACKUP_TRACE) {
-            synchronized(mBackupTrace) {
+            {    AutoLock syncLock(mBackupTrace);
                 mBackupTrace->Clear();
             }
         }
@@ -1054,7 +1054,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         // Build our mapping of uid to backup client services.  This implicitly
         // schedules a backup pass on the Package Manager metadata the first
         // time anything needs to be backed up.
-        synchronized(mBackupParticipants) {
+        {    AutoLock syncLock(mBackupParticipants);
             AddPackageParticipantsLocked(NULL);
         }
 
@@ -1094,7 +1094,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     private class RunBackupReceiver extends BroadcastReceiver {
         CARAPI OnReceive(Context context, Intent intent) {
             if (RUN_BACKUP_ACTION->Equals(intent->GetAction())) {
-                synchronized(mQueueLock) {
+                {    AutoLock syncLock(mQueueLock);
                     if (mPendingInits->Size() > 0) {
                         // If there are pending init operations, we process those
                         // and then settle into the usual periodic backup schedule.
@@ -1135,7 +1135,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     private class RunInitializeReceiver extends BroadcastReceiver {
         CARAPI OnReceive(Context context, Intent intent) {
             if (RUN_INITIALIZE_ACTION->Equals(intent->GetAction())) {
-                synchronized(mQueueLock) {
+                {    AutoLock syncLock(mQueueLock);
                     if (DEBUG) Slogger::V(TAG, "Running a device init");
 
                     // Acquire the wakelock and pass it to the init thread.  it will
@@ -1248,7 +1248,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     private ArrayList<FullBackupEntry> ReadFullBackupSchedule() {
         ArrayList<FullBackupEntry> schedule = NULL;
-        synchronized(mQueueLock) {
+        {    AutoLock syncLock(mQueueLock);
             if (mFullBackupScheduleFile->Exists()) {
                 FileInputStream fstream = NULL;
                 BufferedInputStream bufStream = NULL;
@@ -1304,7 +1304,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     Runnable mFullBackupScheduleWriter = new Runnable() {
         //@Override CARAPI Run() {
-            synchronized(mQueueLock) {
+            {    AutoLock syncLock(mQueueLock);
                 try {
                     ByteArrayOutputStream bufStream = new ByteArrayOutputStream(4096);
                     DataOutputStream bufOut = new DataOutputStream(bufStream);
@@ -1608,7 +1608,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     // the backend data has been wiped [due to idle expiry, for example],
     // so we must re-upload all saved settings.
     void ResetBackupState(File stateFileDir) {
-        synchronized(mQueueLock) {
+        {    AutoLock syncLock(mQueueLock);
             // Wipe the "what we've ever backed up" tracking
             mEverStoredApps->Clear();
             mEverStored->Delete();
@@ -1626,7 +1626,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
 
         // Enqueue a new backup of every participant
-        synchronized(mBackupParticipants) {
+        {    AutoLock syncLock(mBackupParticipants);
             final Int32 N = mBackupParticipants->Size();
             for (Int32 i=0; i<N; i++) {
                 HashSet<String> participants = mBackupParticipants->ValueAt(i);
@@ -1642,7 +1642,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     // Add a transport to our set of available backends.  If 'transport' is NULL, this
     // is an unregistration, and the transport's entry is removed from our bookkeeping.
     private void RegisterTransport(String name, String component, IBackupTransport transport) {
-        synchronized(mTransports) {
+        {    AutoLock syncLock(mTransports);
             if (DEBUG) Slogger::V(TAG, "Registering transport "
                     + component + "::" + name + " = " + transport);
             if (transport != NULL) {
@@ -1666,7 +1666,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
             File initSentinel = new File(stateDir, INIT_SENTINEL_FILE_NAME);
             if (initSentinel->Exists()) {
-                synchronized(mQueueLock) {
+                {    AutoLock syncLock(mQueueLock);
                     mPendingInits->Add(transportName);
 
                     // TODO: pick a better starting time than now + 1 minute
@@ -1714,7 +1714,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                             Slogger::I(TAG, "Package " + pkgName + " changed; rechecking");
                         }
                         // unbind existing possibly-stale connections to that package's transports
-                        synchronized(mTransports) {
+                        {    AutoLock syncLock(mTransports);
                             TransportConnection conn = mTransportConnections->Get(pkgName);
                             if (conn != NULL) {
                                 final ServiceInfo svc = conn.mTransport;
@@ -1757,7 +1757,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
             final Int32 uid = extras->GetInt(Intent.EXTRA_UID);
             if (added) {
-                synchronized(mBackupParticipants) {
+                {    AutoLock syncLock(mBackupParticipants);
                     if (replacing) {
                         // This is the package-replaced case; we just remove the entry
                         // under the old uid and fall through to re-add.
@@ -1777,7 +1777,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
                         // Transport maintenance: rebind to known existing transports that have
                         // just been updated; and bind to any newly-installed transport services.
-                        synchronized(mTransports) {
+                        {    AutoLock syncLock(mTransports);
                             final TransportConnection conn = mTransportConnections->Get(packageName);
                             if (conn != NULL) {
                                 if (MORE_DEBUG) {
@@ -1801,7 +1801,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 if (replacing) {
                     // The package is being updated.  We'll receive a PACKAGE_ADDED shortly.
                 } else {
-                    synchronized(mBackupParticipants) {
+                    {    AutoLock syncLock(mBackupParticipants);
                         RemovePackageParticipantsLocked(pkgList, uid);
                     }
                 }
@@ -1878,7 +1878,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         intent->SetComponent(svcName);
 
         TransportConnection connection;
-        synchronized(mTransports) {
+        {    AutoLock syncLock(mTransports);
             connection = mTransportConnections->Get(transport.packageName);
             if (NULL == connection) {
                 connection = new TransportConnection(transport);
@@ -2007,7 +2007,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     void LogBackupComplete(String packageName) {
         if (packageName->Equals(PACKAGE_MANAGER_SENTINEL)) return;
 
-        synchronized(mEverStoredApps) {
+        {    AutoLock syncLock(mEverStoredApps);
             if (!mEverStoredApps->Add(packageName)) return;
 
             RandomAccessFile out = NULL;
@@ -2028,7 +2028,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         if (DEBUG) Slogger::V(TAG, "Removing backed-up knowledge of " + packageName);
         if (MORE_DEBUG) Slogger::V(TAG, "New set:");
 
-        synchronized(mEverStoredApps) {
+        {    AutoLock syncLock(mEverStoredApps);
             // Rewrite the file and rename to overwrite.  If we reboot in the middle,
             // we'll recognize on initialization time that the package no longer
             // exists and fix it up then.
@@ -2094,7 +2094,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     // Return the given transport
     private IBackupTransport GetTransport(String transportName) {
-        synchronized(mTransports) {
+        {    AutoLock syncLock(mTransports);
             IBackupTransport transport = mTransports->Get(transportName);
             if (transport == NULL) {
                 Slogger::W(TAG, "Requested unavailable transport: " + transportName);
@@ -2106,7 +2106,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     // fire off a backup agent, blocking until it attaches or times out
     IBackupAgent BindToAgentSynchronous(ApplicationInfo app, Int32 mode) {
         IBackupAgent agent = NULL;
-        Synchronized(mAgentConnectLock) {
+        {    AutoLock syncLock(mAgentConnectLock);
             mConnecting = TRUE;
             mConnectedAgent = NULL;
             try {
@@ -2161,7 +2161,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         ClearDataObserver observer = new ClearDataObserver();
 
-        Synchronized(mClearDataLock) {
+        {    AutoLock syncLock(mClearDataLock);
             mClearingData = TRUE;
             try {
                 mActivityManager->ClearApplicationUserData(packageName, observer, 0);
@@ -2184,7 +2184,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     class ClearDataObserver extends IPackageDataObserver.Stub {
         CARAPI OnRemoveCompleted(String packageName, Boolean succeeded) {
-            Synchronized(mClearDataLock) {
+            {    AutoLock syncLock(mClearDataLock);
                 mClearingData = FALSE;
                 mClearDataLock->NotifyAll();
             }
@@ -2195,7 +2195,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     // the active set if possible, else the ancestral one.  Returns zero if none available.
     Int64 GetAvailableRestoreToken(String packageName) {
         Int64 token = mAncestralToken;
-        synchronized(mQueueLock) {
+        {    AutoLock syncLock(mQueueLock);
             if (mEverStoredApps->Contains(packageName)) {
                 token = mCurrentToken;
             }
@@ -2220,7 +2220,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     void PrepareOperationTimeout(Int32 token, Int64 interval, BackupRestoreTask callback) {
         if (MORE_DEBUG) Slogger::V(TAG, "starting timeout: token=" + Integer->ToHexString(token)
                 + " interval=" + interval);
-        synchronized(mCurrentOpLock) {
+        {    AutoLock syncLock(mCurrentOpLock);
             mCurrentOperations->Put(token, new Operation(OP_PENDING, callback));
 
             Message msg = mBackupHandler->ObtainMessage(MSG_TIMEOUT, token, 0, callback);
@@ -2234,7 +2234,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 + Integer->ToHexString(token));
         Int32 finalState = OP_PENDING;
         Operation op = NULL;
-        synchronized(mCurrentOpLock) {
+        {    AutoLock syncLock(mCurrentOpLock);
             while (TRUE) {
                 op = mCurrentOperations->Get(token);
                 if (op == NULL) {
@@ -2264,7 +2264,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     void HandleTimeout(Int32 token, Object obj) {
         // Notify any synchronous waiters
         Operation op = NULL;
-        synchronized(mCurrentOpLock) {
+        {    AutoLock syncLock(mCurrentOpLock);
             op = mCurrentOperations->Get(token);
             if (MORE_DEBUG) {
                 if (op == NULL) Slogger::W(TAG, "Timeout of token " + Integer->ToHexString(token)
@@ -2587,7 +2587,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             // Set up the next backup pass - at this point we can set mBackupRunning
             // to FALSE to allow another pass to fire, because we're done with the
             // state machine sequence and the wakelock is refcounted.
-            synchronized(mQueueLock) {
+            {    AutoLock syncLock(mQueueLock);
                 mBackupRunning = FALSE;
                 if (mStatus == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
                     // Make sure we back up everything and perform the one-time init
@@ -2857,7 +2857,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             try { if (mSavedState != NULL) mSavedState->Close(); } catch (IOException e) {}
             try { if (mBackupData != NULL) mBackupData->Close(); } catch (IOException e) {}
             try { if (mNewState != NULL) mNewState->Close(); } catch (IOException e) {}
-            synchronized(mCurrentOpLock) {
+            {    AutoLock syncLock(mCurrentOpLock);
                 // Current-operation callback handling requires the validity of these various
                 // bits of internal state as an invariant of the operation still being live.
                 // This means we make sure to clear all of the state in unison inside the lock.
@@ -2876,7 +2876,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         void RestartBackupAlarm() {
             AddBackupTrace("setting backup trigger");
-            synchronized(mQueueLock) {
+            {    AutoLock syncLock(mQueueLock);
                 try {
                     StartBackupAlarmsLocked(mTransport->RequestBackupTime());
                 } catch (RemoteException e) { /* cannot happen */ }
@@ -2958,7 +2958,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
 
         private void WaitForConnection() {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 while (mService == NULL) {
                     if (DEBUG) Slogger::I(TAG, "...waiting for OBB service binding...");
                     try {
@@ -2971,7 +2971,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         //@Override
         CARAPI OnServiceConnected(ComponentName name, IBinder service) {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 mService = IObbBackupService.Stub->AsInterface(service);
                 if (DEBUG) Slogger::I(TAG, "OBB service connection " + mService
                         + " connected on " + this);
@@ -2981,7 +2981,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         //@Override
         CARAPI OnServiceDisconnected(ComponentName name) {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 mService = NULL;
                 if (DEBUG) Slogger::I(TAG, "OBB service connection disconnected on " + this);
                 this->NotifyAll();
@@ -3689,10 +3689,10 @@ public class BackupManagerService extends IBackupManager.Stub {
                 } catch (IOException e) {
                     /* nothing we can do about this */
                 }
-                synchronized(mCurrentOpLock) {
+                {    AutoLock syncLock(mCurrentOpLock);
                     mCurrentOperations->Clear();
                 }
-                synchronized(mLatch) {
+                {    AutoLock syncLock(mLatch);
                     mLatch->Set(TRUE);
                     mLatch->NotifyAll();
                 }
@@ -3904,11 +3904,11 @@ public class BackupManagerService extends IBackupManager.Stub {
                     mJob->FinishBackupPass();
                 }
 
-                synchronized(mQueueLock) {
+                {    AutoLock syncLock(mQueueLock);
                     mRunningFullBackupTask = NULL;
                 }
 
-                synchronized(mLatch) {
+                {    AutoLock syncLock(mLatch);
                     mLatch->Set(TRUE);
                     mLatch->NotifyAll();
                 }
@@ -3969,7 +3969,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 } catch (Exception e) {
                     Slogger::E(TAG, "Exception during full package backup of " + mTarget);
                 } finally {
-                    synchronized(mLatch) {
+                    {    AutoLock syncLock(mLatch);
                         mLatch->Set(TRUE);
                         mLatch->NotifyAll();
                     }
@@ -3990,7 +3990,7 @@ public class BackupManagerService extends IBackupManager.Stub {
      * Schedule a job to tell us when it's a good time to run a full backup
      */
     void ScheduleNextFullBackupJob() {
-        synchronized(mQueueLock) {
+        {    AutoLock syncLock(mQueueLock);
             if (mFullBackupQueue->Size() > 0) {
                 // schedule the next job at the point in the future when the least-recently
                 // backed up app comes due for backup again; or immediately if it's already
@@ -4018,7 +4018,7 @@ public class BackupManagerService extends IBackupManager.Stub {
      */
     void EnqueueFullBackup(String packageName, Int64 lastBackedUp) {
         FullBackupEntry newEntry = new FullBackupEntry(packageName, lastBackedUp);
-        synchronized(mQueueLock) {
+        {    AutoLock syncLock(mQueueLock);
             Int32 N = mFullBackupQueue->Size();
             // First, sanity check that we aren't adding a duplicate.  Slow but
             // straightforward; we'll have at most on the order of a few hundred
@@ -4069,7 +4069,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
 
         // Great; we're able to run full backup jobs now.  See if we have any work to do.
-        synchronized(mQueueLock) {
+        {    AutoLock syncLock(mQueueLock);
             if (mRunningFullBackupTask != NULL) {
                 Slogger::E(TAG, "Backup triggered but one already/still running!");
                 return FALSE;
@@ -4114,7 +4114,7 @@ public class BackupManagerService extends IBackupManager.Stub {
     // The job scheduler says our constraints don't hold any more,
     // so tear down any ongoing backup task right away.
     void EndFullBackup() {
-        synchronized(mQueueLock) {
+        {    AutoLock syncLock(mQueueLock);
             if (mRunningFullBackupTask != NULL) {
                 if (DEBUG_SCHEDULING) {
                     Slogger::I(TAG, "Telling running backup to stop");
@@ -4141,14 +4141,14 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
 
         CARAPI SetRunning(Boolean stillRunning) {
-            synchronized(mRunning) {
+            {    AutoLock syncLock(mRunning);
                 mRunning->Set(stillRunning);
                 mRunning->NotifyAll();
             }
         }
 
         public Int32 WaitForResult() {
-            synchronized(mRunning) {
+            {    AutoLock syncLock(mRunning);
                 while (IsRunning()) {
                     try {
                         mRunning->Wait();
@@ -4663,13 +4663,13 @@ public class BackupManagerService extends IBackupManager.Stub {
             Int32 mResult;
 
             CARAPI Reset() {
-                synchronized(mDone) {
+                {    AutoLock syncLock(mDone);
                     mDone->Set(FALSE);
                 }
             }
 
             CARAPI WaitForCompletion() {
-                synchronized(mDone) {
+                {    AutoLock syncLock(mDone);
                     while (mDone->Get() == FALSE) {
                         try {
                             mDone->Wait();
@@ -4685,7 +4685,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             //@Override
             CARAPI PackageInstalled(String packageName, Int32 returnCode)
                     throws RemoteException {
-                synchronized(mDone) {
+                {    AutoLock syncLock(mDone);
                     mResult = returnCode;
                     mPackageName = packageName;
                     mDone->Set(TRUE);
@@ -4699,13 +4699,13 @@ public class BackupManagerService extends IBackupManager.Stub {
             Int32 mResult;
 
             CARAPI Reset() {
-                synchronized(mDone) {
+                {    AutoLock syncLock(mDone);
                     mDone->Set(FALSE);
                 }
             }
 
             CARAPI WaitForCompletion() {
-                synchronized(mDone) {
+                {    AutoLock syncLock(mDone);
                     while (mDone->Get() == FALSE) {
                         try {
                             mDone->Wait();
@@ -4716,7 +4716,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
             //@Override
             CARAPI PackageDeleted(String packageName, Int32 returnCode) throws RemoteException {
-                synchronized(mDone) {
+                {    AutoLock syncLock(mDone);
                     mResult = returnCode;
                     mDone->Set(TRUE);
                     mDone->NotifyAll();
@@ -5560,10 +5560,10 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
                     Slogger::W(TAG, "Close of restore data pipe threw", e);
                     /* nothing we can do about this */
                 }
-                synchronized(mCurrentOpLock) {
+                {    AutoLock syncLock(mCurrentOpLock);
                     mCurrentOperations->Clear();
                 }
-                synchronized(mLatchObject) {
+                {    AutoLock syncLock(mLatchObject);
                     mLatchObject->Set(TRUE);
                     mLatchObject->NotifyAll();
                 }
@@ -6007,13 +6007,13 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
             Int32 mResult;
 
             CARAPI Reset() {
-                synchronized(mDone) {
+                {    AutoLock syncLock(mDone);
                     mDone->Set(FALSE);
                 }
             }
 
             CARAPI WaitForCompletion() {
-                synchronized(mDone) {
+                {    AutoLock syncLock(mDone);
                     while (mDone->Get() == FALSE) {
                         try {
                             mDone->Wait();
@@ -6029,7 +6029,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
             //@Override
             CARAPI PackageInstalled(String packageName, Int32 returnCode)
                     throws RemoteException {
-                synchronized(mDone) {
+                {    AutoLock syncLock(mDone);
                     mResult = returnCode;
                     mPackageName = packageName;
                     mDone->Set(TRUE);
@@ -6043,13 +6043,13 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
             Int32 mResult;
 
             CARAPI Reset() {
-                synchronized(mDone) {
+                {    AutoLock syncLock(mDone);
                     mDone->Set(FALSE);
                 }
             }
 
             CARAPI WaitForCompletion() {
-                synchronized(mDone) {
+                {    AutoLock syncLock(mDone);
                     while (mDone->Get() == FALSE) {
                         try {
                             mDone->Wait();
@@ -6060,7 +6060,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
 
             //@Override
             CARAPI PackageDeleted(String packageName, Int32 returnCode) throws RemoteException {
-                synchronized(mDone) {
+                {    AutoLock syncLock(mDone);
                     mResult = returnCode;
                     mDone->Set(TRUE);
                     mDone->NotifyAll();
@@ -7730,7 +7730,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
             // The caller is responsible for reestablishing the state machine; our
             // responsibility here is to clear the decks for whatever comes next.
             mBackupHandler->RemoveMessages(MSG_TIMEOUT, this);
-            synchronized(mCurrentOpLock) {
+            {    AutoLock syncLock(mCurrentOpLock);
                 mCurrentOperations->Clear();
             }
         }
@@ -7920,7 +7920,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
                         EventLog->WriteEvent(EventLogTags.BACKUP_INITIALIZE);
                         ResetBackupState(new File(mBaseStateDir, transport->TransportDirName()));
                         EventLog->WriteEvent(EventLogTags.BACKUP_SUCCESS, 0, millis);
-                        synchronized(mQueueLock) {
+                        {    AutoLock syncLock(mQueueLock);
                             RecordInitPendingLocked(FALSE, transportName);
                         }
                     } else {
@@ -7928,7 +7928,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
                         // after a suitable interval
                         Slogger::E(TAG, "Transport error in InitializeDevice()");
                         EventLog->WriteEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, "(initialize)");
-                        synchronized(mQueueLock) {
+                        {    AutoLock syncLock(mQueueLock);
                             RecordInitPendingLocked(TRUE, transportName);
                         }
                         // do this via another alarm to make sure of the wakelock states
@@ -7967,7 +7967,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
             return;
         }
 
-        synchronized(mQueueLock) {
+        {    AutoLock syncLock(mQueueLock);
             // Note that this client has made data changes that need to be backed up
             if (targets->Contains(packageName)) {
                 // Add the caller to the set of pending backups.  If there is
@@ -7999,7 +7999,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
         // backup of its own data.
         if ((mContext->CheckPermission(Manifest::permission::BACKUP, Binder->GetCallingPid(),
                 Binder->GetCallingUid())) == PackageManager.PERMISSION_DENIED) {
-            synchronized(mBackupParticipants) {
+            {    AutoLock syncLock(mBackupParticipants);
                 return mBackupParticipants->Get(Binder->GetCallingUid());
             }
         }
@@ -8007,7 +8007,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
         // a caller with full permission can ask to back up any participating app
         // !!! TODO: allow backup of ANY app?
         HashSet<String> targets = new HashSet<String>();
-        synchronized(mBackupParticipants) {
+        {    AutoLock syncLock(mBackupParticipants);
             Int32 N = mBackupParticipants->Size();
             for (Int32 i = 0; i < N; i++) {
                 HashSet<String> s = mBackupParticipants->ValueAt(i);
@@ -8099,7 +8099,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
             // found it; fire off the clear request
             if (DEBUG) Slogger::V(TAG, "Found the app - running clear process");
             mBackupHandler->RemoveMessages(MSG_RETRY_CLEAR);
-            synchronized(mQueueLock) {
+            {    AutoLock syncLock(mQueueLock);
                 final IBackupTransport transport = GetTransport(transportName);
                 if (transport == NULL) {
                     // transport is currently unavailable -- make sure to retry
@@ -8124,7 +8124,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
         mContext->EnforceCallingOrSelfPermission(Manifest::permission::BACKUP, "backupNow");
 
         if (DEBUG) Slogger::V(TAG, "Scheduling immediate backup pass");
-        synchronized(mQueueLock) {
+        {    AutoLock syncLock(mQueueLock);
             // Because the alarms we are using can jitter, and we want an *immediate*
             // backup pass to happen, we restart the timer beginning with "next time,"
             // then manually fire the backup trigger intent ourselves.
@@ -8189,7 +8189,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
             FullBackupParams params = new FullBackupParams(fd, includeApks, includeObbs,
                     includeShared, doWidgets, doAllApps, includeSystem, compress, pkgList);
             final Int32 token = GenerateToken();
-            synchronized(mFullConfirmations) {
+            {    AutoLock syncLock(mFullConfirmations);
                 mFullConfirmations->Put(token, params);
             }
 
@@ -8239,7 +8239,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
         PerformFullTransportBackupTask task =
                 new PerformFullTransportBackupTask(NULL, pkgNames, FALSE, NULL, latch);
         (new Thread(task, "full-transport-master")).Start();
-        synchronized(latch) {
+        {    AutoLock syncLock(latch);
             try {
                 while (latch->Get() == FALSE) {
                     latch->Wait();
@@ -8274,7 +8274,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
 
             FullRestoreParams params = new FullRestoreParams(fd);
             final Int32 token = GenerateToken();
-            synchronized(mFullConfirmations) {
+            {    AutoLock syncLock(mFullConfirmations);
                 mFullConfirmations->Put(token, params);
             }
 
@@ -8329,7 +8329,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
     }
 
     void WaitForCompletion(FullParams params) {
-        synchronized(params.latch) {
+        {    AutoLock syncLock(params.latch);
             while (params.latch->Get() == FALSE) {
                 try {
                     params.latch->Wait();
@@ -8339,7 +8339,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
     }
 
     void SignalFullBackupRestoreCompletion(FullParams params) {
-        synchronized(params.latch) {
+        {    AutoLock syncLock(params.latch);
             params.latch->Set(TRUE);
             params.latch->NotifyAll();
         }
@@ -8361,7 +8361,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
         try {
 
             FullParams params;
-            synchronized(mFullConfirmations) {
+            {    AutoLock syncLock(mFullConfirmations);
                 params = mFullConfirmations->Get(token);
                 if (params != NULL) {
                     mBackupHandler->RemoveMessages(MSG_FULL_CONFIRMATION_TIMEOUT, params);
@@ -8406,13 +8406,13 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
         Int64 oldId = Binder->ClearCallingIdentity();
         try {
             Boolean wasEnabled = mEnabled;
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 Settings.Secure->PutInt(mContext->GetContentResolver(),
                         Settings.Secure.BACKUP_ENABLED, enable ? 1 : 0);
                 mEnabled = enable;
             }
 
-            synchronized(mQueueLock) {
+            {    AutoLock syncLock(mQueueLock);
                 if (enable && !wasEnabled && mProvisioned) {
                     // if we've just been enabled, start scheduling backup passes
                     StartBackupAlarmsLocked(BACKUP_INTERVAL);
@@ -8430,7 +8430,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
                         // NOTE: we currently flush every registered transport, not just
                         // the currently-active one.
                         HashSet<String> allTransports;
-                        synchronized(mTransports) {
+                        {    AutoLock syncLock(mTransports);
                             allTransports = new HashSet<String>(mTransports->KeySet());
                         }
                         // build the set of transports for which we are posting an init
@@ -8456,7 +8456,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
 
         final Int64 oldId = Binder->ClearCallingIdentity();
         try {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 Settings.Secure->PutInt(mContext->GetContentResolver(),
                         Settings.Secure.BACKUP_AUTO_RESTORE, doAutoRestore ? 1 : 0);
                 mAutoRestore = doAutoRestore;
@@ -8526,7 +8526,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
         mContext->EnforceCallingOrSelfPermission(Manifest::permission::BACKUP,
                 "selectBackupTransport");
 
-        synchronized(mTransports) {
+        {    AutoLock syncLock(mTransports);
             final Int64 oldId = Binder->ClearCallingIdentity();
             try {
                 String prevTransport = mCurrentTransport;
@@ -8549,7 +8549,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
         mContext->EnforceCallingOrSelfPermission(Manifest::permission::BACKUP,
                 "getConfigurationIntent");
 
-        synchronized(mTransports) {
+        {    AutoLock syncLock(mTransports);
             final IBackupTransport transport = mTransports->Get(transportName);
             if (transport != NULL) {
                 try {
@@ -8575,7 +8575,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
         mContext->EnforceCallingOrSelfPermission(Manifest::permission::BACKUP,
                 "getDestinationString");
 
-        synchronized(mTransports) {
+        {    AutoLock syncLock(mTransports);
             final IBackupTransport transport = mTransports->Get(transportName);
             if (transport != NULL) {
                 try {
@@ -8596,7 +8596,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
         mContext->EnforceCallingOrSelfPermission(Manifest::permission::BACKUP,
                 "getDataManagementIntent");
 
-        synchronized(mTransports) {
+        {    AutoLock syncLock(mTransports);
             final IBackupTransport transport = mTransports->Get(transportName);
             if (transport != NULL) {
                 try {
@@ -8619,7 +8619,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
         mContext->EnforceCallingOrSelfPermission(Manifest::permission::BACKUP,
                 "getDataManagementLabel");
 
-        synchronized(mTransports) {
+        {    AutoLock syncLock(mTransports);
             final IBackupTransport transport = mTransports->Get(transportName);
             if (transport != NULL) {
                 try {
@@ -8638,7 +8638,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
     // Callback: a requested backup agent has been instantiated.  This should only
     // be called from the Activity Manager.
     CARAPI AgentConnected(String packageName, IBinder agentBinder) {
-        Synchronized(mAgentConnectLock) {
+        {    AutoLock syncLock(mAgentConnectLock);
             if (Binder->GetCallingUid() == Process.SYSTEM_UID) {
                 Slogger::D(TAG, "agentConnected pkg=" + packageName + " agent=" + agentBinder);
                 IBackupAgent agent = IBackupAgent.Stub->AsInterface(agentBinder);
@@ -8657,7 +8657,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
     // will be NULL.  This should only be called from the Activity Manager.
     CARAPI AgentDisconnected(String packageName) {
         // TODO: handle backup being interrupted
-        Synchronized(mAgentConnectLock) {
+        {    AutoLock syncLock(mAgentConnectLock);
             if (Binder->GetCallingUid() == Process.SYSTEM_UID) {
                 mConnectedAgent = NULL;
                 mConnecting = FALSE;
@@ -8777,7 +8777,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
             if (DEBUG) Slogger::D(TAG, "restoring self on current transport; no permission needed");
         }
 
-        Synchronized(this) {
+        {    AutoLock syncLock(this);
             if (mActiveRestoreSession != NULL) {
                 Slogger::D(TAG, "Restore session requested but one already active");
                 return NULL;
@@ -8789,7 +8789,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
     }
 
     void ClearRestoreSession(ActiveRestoreSession currentSession) {
-        Synchronized(this) {
+        {    AutoLock syncLock(this);
             if (currentSession != mActiveRestoreSession) {
                 Slogger::E(TAG, "ending non-current restore session");
             } else {
@@ -8806,7 +8806,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
     CARAPI OpComplete(Int32 token) {
         if (MORE_DEBUG) Slogger::V(TAG, "opComplete: " + Integer->ToHexString(token));
         Operation op = NULL;
-        synchronized(mCurrentOpLock) {
+        {    AutoLock syncLock(mCurrentOpLock);
             op = mCurrentOperations->Get(token);
             if (op != NULL) {
                 op.state = OP_ACKNOWLEDGED;
@@ -8919,7 +8919,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
                 return -1;
             }
 
-            synchronized(mQueueLock) {
+            {    AutoLock syncLock(mQueueLock);
                 for (Int32 i = 0; i < mRestoreSets.length; i++) {
                     if (token == mRestoreSets[i].token) {
                         // Real work, so stop the session timeout until we finalize the restore
@@ -9001,7 +9001,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
                 return -1;
             }
 
-            synchronized(mQueueLock) {
+            {    AutoLock syncLock(mQueueLock);
                 for (Int32 i = 0; i < mRestoreSets.length; i++) {
                     if (token == mRestoreSets[i].token) {
                         // Stop the session timeout until we finalize the restore
@@ -9116,7 +9116,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
 
             CARAPI Run() {
                 // clean up the session's bookkeeping
-                synchronized(mSession) {
+                {    AutoLock syncLock(mSession);
                     try {
                         if (mSession.mRestoreTransport != NULL) {
                             mSession.mRestoreTransport->FinishRestore();
@@ -9187,7 +9187,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
     }
 
     private void DumpInternal(PrintWriter pw) {
-        synchronized(mQueueLock) {
+        {    AutoLock syncLock(mQueueLock);
             pw->Println("Backup Manager is " + (mEnabled ? "enabled" : "disabled")
                     + " / " + (!mProvisioned ? "not " : "") + "provisioned / "
                     + (this.mPendingInits->Size() == 0 ? "not " : "") + "pending init");
@@ -9223,7 +9223,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
             }
 
             if (DEBUG_BACKUP_TRACE) {
-                synchronized(mBackupTrace) {
+                {    AutoLock syncLock(mBackupTrace);
                     if (!mBackupTrace->IsEmpty()) {
                         pw->Println("Most recent backup trace:");
                         for (String s : mBackupTrace) {

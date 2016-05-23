@@ -42,6 +42,8 @@
 #include "elastos/droid/widget/CListView.h"
 #include "elastos/droid/internal/widget/EditableInputConnection.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
@@ -3821,8 +3823,7 @@ Boolean Editor::IsPositionVisible(
     /* [in] */ Float positionX,
     /* [in] */ Float positionY)
 {
-    synchronized(TEMP_POSITION_OBJECT)
-    {
+    {    AutoLock syncLock(TEMP_POSITION_OBJECT);
         AutoLock lock(mTempPositionLock);
         AutoPtr<ArrayOf<Float> > position = TEMP_POSITION;
         (*position)[0] = positionX;

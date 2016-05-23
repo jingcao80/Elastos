@@ -21,6 +21,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/etl/Set.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Pm::IPackageInstallerSessionParams;
@@ -109,7 +111,7 @@ ECode CPackageInstallerService::StageFilter::Accept(
 ECode CPackageInstallerService::WriteSessionsRunnable::Run()
 {
     Object& lock = mHost->mSessionsLock;
-    synchronized (lock) {
+    {    AutoLock syncLock(lock);
         mHost->WriteSessionsLocked();
     }
     return NOERROR;
@@ -369,7 +371,7 @@ void CPackageInstallerService::Callbacks::NotifySessionFinished(
 ECode InternalCallback::SessionFinishedRunnable::Run()
 {
     Object& lock = mHost->mSessionsLock;
-    synchronized (lock) {
+    {    AutoLock syncLock(lock);
         mHost->mSessions.Erase(mSession->mSessionId);
         mHost->mHistoricalSessions[mSession->mSessionId] = mSession;
 
@@ -436,7 +438,7 @@ void InternalCallback::OnSessionSealedBlocking(
     // session as being sealed, since we never want to allow mutation
     // after sealing.
     Object& lock = mHost->mSessionsLock;
-    synchronized (lock) {
+    {    AutoLock syncLock(lock);
         mHost->WriteSessionsLocked();
     }
 }
@@ -521,7 +523,7 @@ ECode CPackageInstallerService::constructor(
     Boolean result;
     mSessionsDir->Mkdirs(&result);
 
-    synchronized (mSessionsLock) {
+    {    AutoLock syncLock(mSessionsLock);
         ReadSessionsLocked();
         AutoPtr<ArrayOf<IFile*> > files;
         mStagingDir->ListFiles((ArrayOf<IFile*>**)&files);
@@ -570,7 +572,7 @@ ECode CPackageInstallerService::constructor(
 
 void CPackageInstallerService::OnSecureContainersAvailable()
 {
-    synchronized (mSessionsLock) {
+    {    AutoLock syncLock(mSessionsLock);
         HashSet<String> unclaimed;
         AutoPtr<IPackageHelper> helper;
         CPackageHelper::AcquireSingleton((IPackageHelper**)&helper);
@@ -622,7 +624,7 @@ ECode CPackageInstallerService::AllocateInternalStageDirLegacy(
 {
     VALIDATE_NOT_NULL(dir)
     *dir = NULL;
-    synchronized (mSessionsLock) {
+    {    AutoLock syncLock(mSessionsLock);
         // try {
         Int32 sessionId;
         if (FAILED(AllocateSessionIdLocked(&sessionId))) {
@@ -643,7 +645,7 @@ ECode CPackageInstallerService::AllocateInternalStageDirLegacy(
 String CPackageInstallerService::AllocateExternalStageCidLegacy()
 {
     String value;
-    synchronized (mSessionsLock) {
+    {    AutoLock syncLock(mSessionsLock);
         Int32 sessionId;
         AllocateSessionIdLocked(&sessionId);
         mLegacySessions[sessionId] = TRUE;
@@ -1091,7 +1093,7 @@ ECode CPackageInstallerService::CreateSessionInternal(
 
     Int32 sessionId;
     AutoPtr<CPackageInstallerSession> session;
-    synchronized (mSessionsLock) {
+    {    AutoLock syncLock(mSessionsLock);
         // Sanity check that installer isn't going crazy
         Int32 activeCount = GetSessionCount(mSessions, callingUid);
         if (activeCount >= MAX_ACTIVE_SESSIONS) {
@@ -1141,7 +1143,7 @@ ECode CPackageInstallerService::UpdateSessionAppIcon(
     /* [in] */ IBitmap* _appIcon)
 {
     AutoPtr<IBitmap> appIcon = _appIcon;
-    synchronized (mSessionsLock) {
+    {    AutoLock syncLock(mSessionsLock);
         AutoPtr<CPackageInstallerSession> session;
         HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Find(sessionId);
         if (it != mSessions.End()) {
@@ -1181,7 +1183,7 @@ ECode CPackageInstallerService::UpdateSessionAppLabel(
     /* [in] */ Int32 sessionId,
     /* [in] */ const String& appLabel)
 {
-    synchronized (mSessionsLock) {
+    {    AutoLock syncLock(mSessionsLock);
         AutoPtr<CPackageInstallerSession> session;
         HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Find(sessionId);
         if (it != mSessions.End()) {
@@ -1202,7 +1204,7 @@ ECode CPackageInstallerService::UpdateSessionAppLabel(
 ECode CPackageInstallerService::AbandonSession(
     /* [in] */ Int32 sessionId)
 {
-    synchronized (mSessionsLock) {
+    {    AutoLock syncLock(mSessionsLock);
         AutoPtr<CPackageInstallerSession> session;
         HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Find(sessionId);
         if (it != mSessions.End()) {
@@ -1234,7 +1236,7 @@ ECode CPackageInstallerService::OpenSessionInternal(
     /* [out] */ IIPackageInstallerSession** s)
 {
     VALIDATE_NOT_NULL(s)
-    synchronized (mSessionsLock) {
+    {    AutoLock syncLock(mSessionsLock);
         AutoPtr<CPackageInstallerSession> session;
         HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Find(sessionId);
         if (it != mSessions.End()) {
@@ -1345,7 +1347,7 @@ ECode CPackageInstallerService::GetSessionInfo(
 {
     VALIDATE_NOT_NULL(info)
     *info = NULL;
-    synchronized (mSessionsLock) {
+    {    AutoLock syncLock(mSessionsLock);
         AutoPtr<CPackageInstallerSession> session;
         HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Find(sessionId);
         if (it != mSessions.End()) {
@@ -1372,7 +1374,7 @@ ECode CPackageInstallerService::GetAllSessions(
 
     AutoPtr<IList> result;
     CArrayList::New((IList**)&result);
-    synchronized (mSessionsLock) {
+    {    AutoLock syncLock(mSessionsLock);
         HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Begin();
         for (; it != mSessions.End(); ++it) {
             AutoPtr<CPackageInstallerSession> session = it->mSecond;
@@ -1399,7 +1401,7 @@ ECode CPackageInstallerService::GetMySessions(
 
     AutoPtr<IList> result;
     CArrayList::New((IList**)&result);
-    synchronized (mSessionsLock) {
+    {    AutoLock syncLock(mSessionsLock);
         HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Begin();
         for (; it != mSessions.End(); ++it) {
             AutoPtr<CPackageInstallerSession> session = it->mSecond;
@@ -1459,7 +1461,7 @@ ECode CPackageInstallerService::SetPermissionsResult(
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::INSTALL_PACKAGES, TAG))
 
-    synchronized (mSessionsLock) {
+    {    AutoLock syncLock(mSessionsLock);
         AutoPtr<CPackageInstallerSession> session;
         HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Find(sessionId);
         if (it != mSessions.End()) {

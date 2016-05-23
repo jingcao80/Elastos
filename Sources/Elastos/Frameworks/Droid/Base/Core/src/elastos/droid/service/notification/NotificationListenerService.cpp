@@ -9,6 +9,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CNotificationBuilder;
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::App::INotificationBuilder;
@@ -455,7 +457,7 @@ ECode NotificationListenerService::INotificationListenerWrapper::OnNotificationP
     CNotificationBuilder::Rebuild(context, notification);
 
     // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mHost->ApplyUpdate(update);
         // try {
         mHost->OnNotificationPosted(sbn, mHost->mRankingMap);
@@ -477,7 +479,7 @@ ECode NotificationListenerService::INotificationListenerWrapper::OnNotificationR
         return E_REMOTE_EXCEPTION;
     }
     // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mHost->ApplyUpdate(update);
         // try {
         mHost->OnNotificationRemoved(sbn, mHost->mRankingMap);
@@ -492,7 +494,7 @@ ECode NotificationListenerService::INotificationListenerWrapper::OnListenerConne
     /* [in] */ INotificationRankingUpdate* update)
 {
     // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mHost->ApplyUpdate(update);
         // try {
         mHost->OnListenerConnected();
@@ -507,7 +509,7 @@ ECode NotificationListenerService::INotificationListenerWrapper::OnNotificationR
     /* [in] */ INotificationRankingUpdate* update)
 {
     // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mHost->ApplyUpdate(update);
         // try {
         mHost->OnNotificationRankingUpdate(mHost->mRankingMap);
@@ -677,7 +679,7 @@ ECode NotificationListenerService::RankingMap::ReadFromParcel(
 Int32 NotificationListenerService::RankingMap::GetRank(
     /* [in] */ const String& key)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mRanks == NULL) {
             BuildRanksLocked();
         }
@@ -707,7 +709,7 @@ Boolean NotificationListenerService::RankingMap::IsAmbient(
 Boolean NotificationListenerService::RankingMap::IsIntercepted(
     /* [in] */ const String& key)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mIntercepted == NULL) {
             BuildInterceptedSetLocked();
         }
@@ -722,7 +724,7 @@ Boolean NotificationListenerService::RankingMap::IsIntercepted(
 Int32 NotificationListenerService::RankingMap::GetVisibilityOverride(
     /* [in] */ const String& key)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mVisibilityOverrides == NULL) {
             BuildVisibilityOverridesLocked();
         }

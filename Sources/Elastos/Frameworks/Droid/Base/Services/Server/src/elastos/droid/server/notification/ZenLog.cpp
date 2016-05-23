@@ -10,6 +10,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Provider::ISettingsGlobal;
@@ -269,7 +271,7 @@ void ZenLog::Append(
     /* [in] */ Int32 type,
     /* [in] */ const String& msg)
 {
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         AutoPtr<ISystem> sys;
         CSystem::AcquireSingleton((ISystem**)&sys);
         sys->GetCurrentTimeMillis(&(*TIMES)[sNext]);
@@ -291,7 +293,7 @@ void ZenLog::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ const String& prefix)
 {
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         const Int32 start = (sNext - sSize + SIZE) % SIZE;
         for (Int32 i = 0; i < sSize; i++) {
             const Int32 j = (start + i) % SIZE;

@@ -5,6 +5,8 @@
 #include <sys/wait.h>
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Sql::SQLite::ITableResult;
 
 namespace Elastos {
@@ -255,7 +257,7 @@ ECode JDBCStatement::ExecuteQuery(
                         ms = 1000;
                     }
 
-                    synchronized(this) {
+                    {    AutoLock syncLock(this);
                         Wait(ms);
                     }
                     // }

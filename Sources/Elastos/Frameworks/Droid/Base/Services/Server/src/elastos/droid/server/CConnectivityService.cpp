@@ -38,6 +38,8 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::CBundle;
@@ -617,7 +619,7 @@ ECode CConnectivityService::InternalHandler::HandleMessage(
         case CConnectivityService::EVENT_CLEAR_NET_TRANSITION_WAKELOCK: {
             String causedBy;
             ISynchronize* syncObj = (ISynchronize*)mHost->Probe(EIID_ISynchronize);
-            synchronized(syncObj) {
+            {    AutoLock syncLock(syncObj);
                 Boolean bval;
                 if (arg1 == mHost->mNetTransitionWakeLockSerialNumber
                     && (mHost->mNetTransitionWakeLock->IsHeld(&bval), bval)) {
@@ -790,7 +792,7 @@ ECode CConnectivityService::NetworkStateTrackerHandler::HandleMessage(
                         nai->Name().string(), nai->mCreated);
                 }
                 AutoPtr<ILinkProperties> oldLp = nai->mLinkProperties;
-                synchronized(nai) {
+                {    AutoLock syncLock(nai);
                     nai->mLinkProperties = ILinkProperties::Probe(obj);
                 }
                 if (nai->mCreated) {
@@ -943,7 +945,7 @@ ECode CConnectivityService::NetworkStateTrackerHandler::HandleMessage(
             else {
                 AutoPtr<NetworkAgentInfo> nai;
                 ISynchronize* syncObj = (ISynchronize*)mHost->mNetworkForNetId->Probe(EIID_ISynchronize);
-                synchronized(syncObj) {
+                {    AutoLock syncLock(syncObj);
                     AutoPtr<IInterface> obj;
                     mHost->mNetworkForNetId->Get(arg2, (IInterface**)&obj);;
                     nai = (NetworkAgentInfo*)INetworkAgentInfo::Probe(obj);
@@ -1347,7 +1349,7 @@ ECode CConnectivityService::AssignNextNetId(
 {
     NetworkAgentInfo* nai = (NetworkAgentInfo*)naiObj;
     ISynchronize* syncObj = (ISynchronize*)mNetworkForNetId->Probe(EIID_ISynchronize);
-    synchronized(syncObj) {
+    {    AutoLock syncLock(syncObj);
         for (Int32 i = MIN_NET_ID; i <= MAX_NET_ID; i++) {
             Int32 netId = mNextNetId;
             if (++mNextNetId > MAX_NET_ID) mNextNetId = MIN_NET_ID;
@@ -1624,7 +1626,7 @@ ECode CConnectivityService::GetNetworkInfoForNetwork(
     Int32 uid = Binder::GetCallingUid();
     AutoPtr<INetworkAgentInfo> nai;
     ISynchronize* syncObj = (ISynchronize*)mNetworkForNetId->Probe(EIID_ISynchronize);
-    synchronized(syncObj) {
+    {    AutoLock syncLock(syncObj);
         Int32 id;
         network->GetNetId(&id);
         AutoPtr<IInterface> obj;
@@ -1633,7 +1635,7 @@ ECode CConnectivityService::GetNetworkInfoForNetwork(
     }
     if (nai == NULL) return NOERROR;
     NetworkAgentInfo* naiObj = (NetworkAgentInfo*)nai.Get();
-    synchronized(naiObj) {
+    {    AutoLock syncLock(naiObj);
         if (naiObj->mNetworkInfo == NULL) return NOERROR;
         AutoPtr<INetworkInfo> ni = GetFilteredNetworkInfo(nai, uid);
         *info = ni;
@@ -1701,7 +1703,7 @@ ECode CConnectivityService::GetAllNetworks(
 
     AutoPtr< ArrayOf<INetwork*> > array;
     ISynchronize* syncObj = (ISynchronize*)mNetworkForNetId->Probe(EIID_ISynchronize);
-    synchronized(syncObj) {
+    {    AutoLock syncLock(syncObj);
         Int32 size = 0;
         mNetworkForNetId->GetSize(&size);
         array = ArrayOf<INetwork*>::Alloc(size);
@@ -1768,7 +1770,7 @@ ECode CConnectivityService::GetLinkProperties(
     FAIL_RETURN(EnforceInternetPermission())
     AutoPtr<NetworkAgentInfo> nai;
     ISynchronize* syncObj = (ISynchronize*)mNetworkForNetId->Probe(EIID_ISynchronize);
-    synchronized(syncObj) {
+    {    AutoLock syncLock(syncObj);
         Int32 id;
         network->GetNetId(&id);
         AutoPtr<IInterface> obj;
@@ -1777,7 +1779,7 @@ ECode CConnectivityService::GetLinkProperties(
     }
 
     if (nai != NULL) {
-        synchronized(nai) {
+        {    AutoLock syncLock(nai);
             return CLinkProperties::New(nai->mLinkProperties, properties);
         }
     }
@@ -1794,7 +1796,7 @@ ECode CConnectivityService::GetNetworkCapabilities(
 
     AutoPtr<NetworkAgentInfo> nai;
     ISynchronize* syncObj = (ISynchronize*)mNetworkForNetId->Probe(EIID_ISynchronize);
-    synchronized(syncObj) {
+    {    AutoLock syncLock(syncObj);
         Int32 id;
         network->GetNetId(&id);
         AutoPtr<IInterface> obj;
@@ -1802,7 +1804,7 @@ ECode CConnectivityService::GetNetworkCapabilities(
         nai = (NetworkAgentInfo*)INetworkAgentInfo::Probe(obj);
     }
     if (nai != NULL) {
-        synchronized(nai) {
+        {    AutoLock syncLock(nai);
             return CNetworkCapabilities::New(nai->mNetworkCapabilities, result);
         }
     }
@@ -1949,7 +1951,7 @@ ECode CConnectivityService::RequestRouteToHostAddress(
 
     NetworkInfoDetailedState netState;
     NetworkAgentInfo* naiObj = (NetworkAgentInfo*)nai.Get();
-    synchronized(naiObj) {
+    {    AutoLock syncLock(naiObj);
         naiObj->mNetworkInfo->GetDetailedState(&netState);
     }
 
@@ -1967,7 +1969,7 @@ ECode CConnectivityService::RequestRouteToHostAddress(
 
     AutoPtr<ILinkProperties> lp;
     Int32 netId;
-    synchronized(naiObj) {
+    {    AutoLock syncLock(naiObj);
         lp = naiObj->mLinkProperties;
         naiObj->mNetwork->GetNetId(&netId);
     }
@@ -2106,7 +2108,7 @@ void CConnectivityService::HandleAsyncChannelHalfConnect(
             NetworkAgentInfo* nai = (NetworkAgentInfo*)INetworkAgentInfo::Probe(tmp);
             if (nai != NULL) {
                 ISynchronize* syncObj = (ISynchronize*)mNetworkForNetId->Probe(EIID_ISynchronize);
-                synchronized(syncObj) {
+                {    AutoLock syncLock(syncObj);
                     Int32 id;
                     nai->mNetwork->GetNetId(&id);
                     mNetworkForNetId->Remove(id);
@@ -2164,7 +2166,7 @@ void CConnectivityService::HandleAsyncChannelDisconnected(
         Int32 id ;
         nai->mNetwork->GetNetId(&id);
         ISynchronize* syncObj = (ISynchronize*)mNetworkForNetId->Probe(EIID_ISynchronize);
-        synchronized(syncObj) {
+        {    AutoLock syncLock(syncObj);
             mNetworkForNetId->Remove(id);
         }
 
@@ -3018,7 +3020,7 @@ void CConnectivityService::Dump(
     // pw.println();
 
     //ISynchronize* syncObj = this;
-    // synchronized(syncObj) {
+    // {    AutoLock syncLock(syncObj);
     //     pw.println("NetworkTransitionWakeLock is currently " +
     //             (mNetTransitionWakeLock.isHeld() ? "" : "not ") + "held.");
     //     pw.println("It was last requested for "+mNetTransitionWakeLockCausedBy);
@@ -3046,7 +3048,7 @@ Boolean CConnectivityService::IsLiveNetworkAgent(
     if (nai->mNetwork == NULL) return FALSE;
     AutoPtr<NetworkAgentInfo> officialNai;
     ISynchronize* syncObj = (ISynchronize*)mNetworkForNetId->Probe(EIID_ISynchronize);
-    synchronized(syncObj) {
+    {    AutoLock syncLock(syncObj);
         Int32 netId;
         nai->mNetwork->GetNetId(&netId);
         AutoPtr<IInterface> obj;
@@ -3352,7 +3354,7 @@ ECode CConnectivityService::ReportBadNetwork(
     Int32 uid = Binder::GetCallingUid();
     AutoPtr<NetworkAgentInfo> nai;
     ISynchronize* syncObj = (ISynchronize*)mNetworkForNetId->Probe(EIID_ISynchronize);
-    synchronized(syncObj) {
+    {    AutoLock syncLock(syncObj);
         Int32 netId;
         network->GetNetId(&netId);
         AutoPtr<IInterface> obj;
@@ -3361,7 +3363,7 @@ ECode CConnectivityService::ReportBadNetwork(
     }
     if (nai == NULL) return NOERROR;
     if (DBG) Slogger::D(TAG, "reportBadNetwork(%s) by %d", nai->Name().string(), uid);
-    synchronized(nai) {
+    {    AutoLock syncLock(nai);
         // Validating an uncreated network could result in a call to RematchNetworkAndRequests()
         // which isn't meant to work on uncreated networks.
         if (!nai->mCreated) return NOERROR;
@@ -3383,7 +3385,7 @@ ECode CConnectivityService::GetProxy(
     // so this API change wouldn't have a benifit.  It also breaks the passing
     // of proxy info to all the JVMs.
     // FAIL_RETURN(EnforceAccessPermission())
-    synchronized(mProxyLock) {
+    {    AutoLock syncLock(mProxyLock);
         AutoPtr<IProxyInfo> ret = mGlobalProxy;
         if ((ret == NULL) && !mDefaultProxyDisabled) ret = mDefaultProxy;
         *proxyInfo = ret;
@@ -3397,7 +3399,7 @@ ECode CConnectivityService::SetGlobalProxy(
 {
     FAIL_RETURN(EnforceConnectivityInternalPermission())
 
-    synchronized(mProxyLock) {
+    {    AutoLock syncLock(mProxyLock);
         if (proxyProperties == mGlobalProxy) return NOERROR;
         if (proxyProperties != NULL && Object::Equals(proxyProperties, mGlobalProxy)) return NOERROR;
         if (mGlobalProxy != NULL && Object::Equals(mGlobalProxy, proxyProperties)) return NOERROR;
@@ -3486,7 +3488,7 @@ void CConnectivityService::LoadGlobalProxy()
             return;
         }
 
-        synchronized(mProxyLock) {
+        {    AutoLock syncLock(mProxyLock);
             mGlobalProxy = proxyProperties;
         }
     }
@@ -3501,7 +3503,7 @@ ECode CConnectivityService::GetGlobalProxy(
     // so this API change wouldn't have a benifit.  It also breaks the passing
     // of proxy info to all the JVMs.
     // FAIL_RETURN(EnforceAccessPermission())
-    synchronized(mProxyLock) {
+    {    AutoLock syncLock(mProxyLock);
         *proxyProperties = mGlobalProxy;
         REFCOUNT_ADD(*proxyProperties)
     }
@@ -3527,7 +3529,7 @@ void CConnectivityService::HandleApplyDefaultProxy(
     }
 
     Boolean bval;
-    synchronized(mProxyLock) {
+    {    AutoLock syncLock(mProxyLock);
         if (mDefaultProxy != NULL && Object::Equals(mDefaultProxy, proxy)) return;
         if (mDefaultProxy == proxy) return; // catches repeated nulls
         if (proxy != NULL && (proxy->IsValid(&bval), !bval)) {
@@ -3679,7 +3681,7 @@ ECode CConnectivityService::PrepareVpn(
 
     FAIL_RETURN(ThrowIfLockdownEnabled())
     Int32 user = UserHandle::GetUserId(Binder::GetCallingUid());
-    synchronized(mVpnsLock) {
+    {    AutoLock syncLock(mVpnsLock);
         HashMap<Int32, AutoPtr<Vpn> >::Iterator it = mVpns.Find(user);
         if (it != mVpns.End()) {
             AutoPtr<Vpn> vpn = it->mSecond;
@@ -3693,7 +3695,7 @@ ECode CConnectivityService::SetVpnPackageAuthorization(
     /* [in] */ Boolean authorized)
 {
     Int32 user = UserHandle::GetUserId(Binder::GetCallingUid());
-    synchronized(mVpnsLock) {
+    {    AutoLock syncLock(mVpnsLock);
         HashMap<Int32, AutoPtr<Vpn> >::Iterator it = mVpns.Find(user);
         if (it != mVpns.End()) {
             AutoPtr<Vpn> vpn = it->mSecond;
@@ -3711,7 +3713,7 @@ ECode CConnectivityService::EstablishVpn(
     *fd = NULL;
 
     Int32 user = UserHandle::GetUserId(Binder::GetCallingUid());
-    synchronized(mVpnsLock) {
+    {    AutoLock syncLock(mVpnsLock);
         HashMap<Int32, AutoPtr<Vpn> >::Iterator it = mVpns.Find(user);
         if (it != mVpns.End()) {
             AutoPtr<Vpn> vpn = it->mSecond;
@@ -3733,7 +3735,7 @@ ECode CConnectivityService::StartLegacyVpn(
     }
 
     Int32 user = UserHandle::GetUserId(Binder::GetCallingUid());
-    synchronized(mVpnsLock) {
+    {    AutoLock syncLock(mVpnsLock);
         HashMap<Int32, AutoPtr<Vpn> >::Iterator it = mVpns.Find(user);
         if (it != mVpns.End()) {
             AutoPtr<Vpn> vpn = it->mSecond;
@@ -3751,7 +3753,7 @@ ECode CConnectivityService::GetLegacyVpnInfo(
 
     FAIL_RETURN(ThrowIfLockdownEnabled());
     Int32 user = UserHandle::GetUserId(Binder::GetCallingUid());
-    synchronized(mVpnsLock) {
+    {    AutoLock syncLock(mVpnsLock);
         HashMap<Int32, AutoPtr<Vpn> >::Iterator it = mVpns.Find(user);
         if (it != mVpns.End()) {
             AutoPtr<Vpn> vpn = it->mSecond;
@@ -3768,7 +3770,7 @@ ECode CConnectivityService::GetVpnConfig(
     *config = NULL;
 
     Int32 user = UserHandle::GetUserId(Binder::GetCallingUid());
-    synchronized(mVpnsLock) {
+    {    AutoLock syncLock(mVpnsLock);
         HashMap<Int32, AutoPtr<Vpn> >::Iterator it = mVpns.Find(user);
         if (it != mVpns.End()) {
             AutoPtr<Vpn> vpn = it->mSecond;
@@ -3813,7 +3815,7 @@ ECode CConnectivityService::UpdateLockdownVpn(
         helper->Decode(profileName, value, (IVpnProfile**)&profile);
 
         Int32 user = UserHandle::GetUserId(Binder::GetCallingUid());
-        synchronized(mVpnsLock) {
+        {    AutoLock syncLock(mVpnsLock);
             AutoPtr<Vpn> vpn;
             HashMap<Int32, AutoPtr<Vpn> >::Iterator it = mVpns.Find(user);
             if (it != mVpns.End()) {
@@ -3897,7 +3899,7 @@ ECode CConnectivityService::FindConnectionTypeForIface(
     if (TextUtils::IsEmpty(iface)) return NOERROR;
 
     ISynchronize* syncObj = (ISynchronize*)mNetworkForNetId->Probe(EIID_ISynchronize);
-    synchronized(syncObj) {
+    {    AutoLock syncLock(syncObj);
         Int32 size;
         mNetworkForNetId->GetSize(&size);
         for (Int32 i = 0; i < size; i++) {
@@ -4241,7 +4243,7 @@ ECode CConnectivityService::SetAirplaneMode(
 void CConnectivityService::OnUserStart(
     /* [in] */ Int32 userId)
 {
-    synchronized(mVpnsLock) {
+    {    AutoLock syncLock(mVpnsLock);
         AutoPtr<Vpn> userVpn;
         HashMap<Int32, AutoPtr<Vpn> >::Iterator it = mVpns.Find(userId);
         if (it != mVpns.End()) {
@@ -4259,7 +4261,7 @@ void CConnectivityService::OnUserStart(
 void CConnectivityService::OnUserStop(
     /* [in] */ Int32 userId)
 {
-    synchronized(mVpnsLock) {
+    {    AutoLock syncLock(mVpnsLock);
         AutoPtr<Vpn> userVpn;
         HashMap<Int32, AutoPtr<Vpn> >::Iterator it = mVpns.Find(userId);
         if (it == mVpns.End()) {
@@ -4441,7 +4443,7 @@ ECode CConnectivityService::RequestNetwork(
     if (bval == FALSE) {
         Int32 uidRules = INetworkPolicyManager::RULE_ALLOW_ALL;
         Int32 uid = Binder::GetCallingUid();
-        synchronized(mRulesLock) {
+        {    AutoLock syncLock(mRulesLock);
             HashMap<Int32, Int32>::Iterator it = mUidRules.Find(uid);
             if (it != mUidRules.End()) {
                 uidRules = it->mSecond;
@@ -4626,7 +4628,7 @@ ECode CConnectivityService::RegisterNetworkAgent(
         ni, lp, nc, currentScore, mContext, mTrackerHandler, nm);
 
     ISynchronize* syncObj = this;
-    synchronized(syncObj) {
+    {    AutoLock syncLock(syncObj);
         nai->mNetworkMonitor->mSystemReady = mSystemReady;
     }
     if (DBG) Slogger::D(TAG, "RegisterNetworkAgent %s", TO_CSTR(nai));
@@ -4953,7 +4955,7 @@ void CConnectivityService::UpdateCapabilities(
     NetworkAgentInfo* networkAgent = (NetworkAgentInfo*)nai;
     if (!Object::Equals(networkAgent->mNetworkCapabilities, networkCapabilities)) {
         ISynchronize* syncObj = (ISynchronize*)networkAgent->Probe(EIID_ISynchronize);
-        synchronized(syncObj) {
+        {    AutoLock syncLock(syncObj);
             networkAgent->mNetworkCapabilities = networkCapabilities;
         }
         NotifyNetworkCallbacks(networkAgent, IConnectivityManager::CALLBACK_CAP_CHANGED);
@@ -5326,7 +5328,7 @@ void CConnectivityService::RematchNetworkAndRequests(
             // Notify system services that this network is up.
             MakeDefault(newNetwork);
             ISynchronize* syncObj = this;
-            synchronized(syncObj) {
+            {    AutoLock syncLock(syncObj);
                 // have a new default network, release the transition wakelock in
                 // a second if it's held.  The second pause is to allow apps
                 // to reconnect over the new network
@@ -5476,7 +5478,7 @@ void CConnectivityService::UpdateNetworkInfo(
     newInfo->GetState(&state);
     AutoPtr<INetworkInfo> oldInfo;
     ISynchronize* syncObj = ISynchronize::Probe(nai);
-    synchronized(syncObj) {
+    {    AutoLock syncLock(syncObj);
         oldInfo = networkAgent->mNetworkInfo;
         networkAgent->mNetworkInfo = newInfo;
     }
@@ -5527,7 +5529,7 @@ void CConnectivityService::UpdateNetworkInfo(
         networkAgent->mNetworkMonitor->SendMessage(NetworkMonitor::CMD_NETWORK_CONNECTED);
         if (networkAgent->IsVPN(&bval), bval) {
             // Temporarily disable the default proxy (not global).
-            synchronized(mProxyLock) {
+            {    AutoLock syncLock(mProxyLock);
                 if (!mDefaultProxyDisabled) {
                     mDefaultProxyDisabled = TRUE;
                     if (mGlobalProxy == NULL && mDefaultProxy != NULL) {
@@ -5561,7 +5563,7 @@ void CConnectivityService::UpdateNetworkInfo(
         Boolean bval;
         networkAgent->mAsyncChannel->Disconnect();
         if (networkAgent->IsVPN(&bval), bval) {
-            synchronized(mProxyLock) {
+            {    AutoLock syncLock(mProxyLock);
                 if (mDefaultProxyDisabled) {
                     mDefaultProxyDisabled = FALSE;
                     if (mGlobalProxy == NULL && mDefaultProxy != NULL) {
@@ -5731,7 +5733,7 @@ AutoPtr<ILinkProperties> CConnectivityService::GetLinkPropertiesForTypeInternal(
     AutoPtr<NetworkAgentInfo> nai = (NetworkAgentInfo*)mLegacyTypeTracker->GetNetworkForType(networkType).Get();
     if (nai != NULL) {
         ISynchronize* syncObj = (ISynchronize*)nai->Probe(EIID_ISynchronize);
-        synchronized(syncObj) {
+        {    AutoLock syncLock(syncObj);
             CLinkProperties::New(nai->mLinkProperties, (ILinkProperties**)&result);
             return result;
         }
@@ -5774,7 +5776,7 @@ AutoPtr<INetworkCapabilities> CConnectivityService::GetNetworkCapabilitiesForTyp
     AutoPtr<INetworkCapabilities> netCap;
     if (nai != NULL) {
         ISynchronize* syncObj = (ISynchronize*)nai->Probe(EIID_ISynchronize);
-        synchronized(syncObj) {
+        {    AutoLock syncLock(syncObj);
             CNetworkCapabilities::New(nai->mNetworkCapabilities, (INetworkCapabilities**)&netCap);
             return netCap;
         }
@@ -5793,7 +5795,7 @@ ECode CConnectivityService::AddVpnAddress(
     *result = FALSE;
     FAIL_RETURN(ThrowIfLockdownEnabled())
     Int32 user = UserHandle::GetUserId(Binder::GetCallingUid());
-    synchronized(mVpnsLock) {
+    {    AutoLock syncLock(mVpnsLock);
         HashMap<Int32, AutoPtr<Vpn> >::Iterator it = mVpns.Find(user);
         if (it != mVpns.End()) {
             AutoPtr<Vpn> vpn = it->mSecond;
@@ -5812,7 +5814,7 @@ ECode CConnectivityService::RemoveVpnAddress(
     *result = FALSE;
     FAIL_RETURN(ThrowIfLockdownEnabled())
     Int32 user = UserHandle::GetUserId(Binder::GetCallingUid());
-    synchronized(mVpnsLock) {
+    {    AutoLock syncLock(mVpnsLock);
         HashMap<Int32, AutoPtr<Vpn> >::Iterator it = mVpns.Find(user);
         if (it != mVpns.End()) {
             AutoPtr<Vpn> vpn = it->mSecond;

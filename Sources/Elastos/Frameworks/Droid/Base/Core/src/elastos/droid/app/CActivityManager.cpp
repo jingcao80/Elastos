@@ -23,6 +23,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Build;
@@ -314,7 +316,7 @@ ECode CActivityManager::GetAppTaskThumbnailSize(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         FAIL_RETURN(EnsureAppTaskThumbnailSizeLocked())
         Int32 x, y;
         mAppTaskThumbnailSize->GetX(&x);
@@ -354,7 +356,7 @@ ECode CActivityManager::AddAppTask(
     *value = 0;
 
     AutoPtr<IPoint> size;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         FAIL_RETURN(EnsureAppTaskThumbnailSizeLocked())
         size = mAppTaskThumbnailSize;
     }

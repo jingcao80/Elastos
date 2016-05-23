@@ -10,6 +10,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/Objects.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Provider::ISettings;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::ISettingsSecure;
@@ -197,7 +199,7 @@ void ConditionProviders::Dump(
     /* [in] */ DumpFilter* filter)
 {
     ManagedServices::Dump(pw, filter);
-    synchronized(mMutex) {
+    {    AutoLock syncLock(mMutex);
         Int32 size;
         if (filter == NULL) {
             pw->Print(String("    mListeners("));
@@ -260,7 +262,7 @@ ECode ConditionProviders::OnServiceAdded(
     // } catch (RemoteException e) {
     //     // we tried
     // }
-    synchronized(mMutex) {
+    {    AutoLock syncLock(mMutex);
         Boolean res;
         if (IObject::Probe(info->mComponent)->Equals(mExitConditionComponent, &res), res) {
             // ensure record exists, we'll wire it up and subscribe below
@@ -317,7 +319,7 @@ AutoPtr<ManagedServices::ManagedServiceInfo> ConditionProviders::CheckServiceTok
     /* [in] */ IIConditionProvider* provider)
 {
     AutoPtr<ManagedServiceInfo> info;
-    synchronized(mMutex) {
+    {    AutoLock syncLock(mMutex);
         CheckServiceTokenLocked(provider, (ManagedServiceInfo**)&info);
         return info;
     }
@@ -328,7 +330,7 @@ void ConditionProviders::RequestZenModeConditions(
     /* [in] */ IIConditionListener* callback,
     /* [in] */ Int32 relevance)
 {
-    synchronized(mMutex) {
+    {    AutoLock syncLock(mMutex);
         AutoPtr<IConditionHelper> helper;
         CConditionHelper::AcquireSingleton((IConditionHelper**)&helper);
         String str;
@@ -424,7 +426,7 @@ ECode ConditionProviders::NotifyConditions(
     /* [in] */ ManagedServiceInfo* info,
     /* [in] */ ArrayOf<ICondition*>* conditions)
 {
-    synchronized(mMutex) {
+    {    AutoLock syncLock(mMutex);
         if (DEBUG) {
             if (conditions == NULL) {
                 Slogger::D(TAG, "notifyConditions pkg=%s info=%p conditions=%p",
@@ -516,7 +518,7 @@ void ConditionProviders::SetZenModeCondition(
     /* [in] */ const String& reason)
 {
     if (DEBUG) Slogger::D(TAG, "setZenModeCondition %p", condition);
-    synchronized(mMutex) {
+    {    AutoLock syncLock(mMutex);
         AutoPtr<IUri> id;
         condition->GetId((IUri**)&id);
         AutoPtr<IComponentName> conditionComponent;
@@ -634,7 +636,7 @@ void ConditionProviders::SetAutomaticZenModeConditions(
         }
     }
 
-    synchronized(mMutex) {
+    {    AutoLock syncLock(mMutex);
         Int32 size = 0;
         if (conditionIds != NULL) {
             size = conditionIds->GetLength();
@@ -676,7 +678,7 @@ void ConditionProviders::SetAutomaticZenModeConditions(
 AutoPtr< ArrayOf<ICondition*> > ConditionProviders::GetAutomaticZenModeConditions()
 {
     AutoPtr< ArrayOf<ICondition*> > result;
-    synchronized(mMutex) {
+    {    AutoLock syncLock(mMutex);
         Int32 N;
         mRecords->GetSize(&N);
         AutoPtr<IArrayList> rt;
@@ -783,7 +785,7 @@ void ConditionProviders::LoadZenConfig()
         if (DEBUG) Slogger::D(TAG, "loadZenConfig: no config");
         return;
     }
-    synchronized(mMutex) {
+    {    AutoLock syncLock(mMutex);
         AutoPtr<ICondition> exitCondition;
         config->GetExitCondition((ICondition**)&exitCondition);
         const Boolean changingExit = !Objects::Equals(mExitCondition, exitCondition);

@@ -14,6 +14,8 @@
 #include "CountedCompleter.h"
 #include "CThreadLocalRandom.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -526,7 +528,7 @@ Int32 CForkJoinPool::AcquirePlock()
     //             --spins;
     //     }
     //     else if (U.compareAndSwapInt(this, PLOCK, ps, ps | PL_SIGNAL)) {
-    //         synchronized (this) {
+    //         {    AutoLock syncLock(this);
     //             if ((plock & PL_SIGNAL) != 0) {
     //                 try {
     //                     wait();
@@ -548,7 +550,8 @@ void CForkJoinPool::ReleasePlock(
     /* [in] */ Int32 ps)
 {
     mPlock = ps;
-    synchronized (this) { NotifyAll(); }
+    AutoLock syncLock(this);
+    NotifyAll();
 }
 
 void CForkJoinPool::TryAddWorker()
@@ -1150,7 +1153,7 @@ Int32 CForkJoinPool::AwaitJoin(
     //                 cc = ctl;
     //             else {
     //                 if (task.trySetSignal() && (s = task.status) >= 0) {
-    //                     synchronized (task) {
+    //                     {    AutoLock syncLock(task);
     //                         if (task.status >= 0) {
     //                             try {                // see ForkJoinTask
     //                                 task.wait();     //  for explanation
@@ -1305,7 +1308,7 @@ Boolean CForkJoinPool::TryTerminate(
     // for (long c;;) {
     //     if (((c = ctl) & STOP_BIT) != 0) {     // already terminating
     //         if ((short)(c >>> TC_SHIFT) + parallelism <= 0) {
-    //             synchronized (this) {
+    //             {    AutoLock syncLock(this);
     //                 notifyAll();               // signal when 0 workers
     //             }
     //         }
@@ -1970,7 +1973,7 @@ ECode CForkJoinPool::AwaitTermination(
     Int64 nas;
     system->GetNanoTime(&nas);
     Int64 deadline = nas + nanos;
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         for (;;) {
             Boolean b2 = FALSE;
             if ((IsTerminated(&b2), b2)) {

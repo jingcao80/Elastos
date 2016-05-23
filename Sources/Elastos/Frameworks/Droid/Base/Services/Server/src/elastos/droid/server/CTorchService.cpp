@@ -9,6 +9,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::CSurfaceTexture;
 using Elastos::Droid::Hardware::EIID_IITorchService;
 using Elastos::Droid::Os::Binder;
@@ -89,7 +91,7 @@ CTorchService::KillRunnable::KillRunnable(
 
 ECode CTorchService::KillRunnable::Run()
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         mHost->mTorchEnabled = FALSE;
     }
     mHost->UpdateFlashlight(TRUE /* forceDisable */);
@@ -207,7 +209,7 @@ ECode CTorchService::CameraManagerAvailabilityCallback::SetTorchAvailable(
     /* [in] */ Boolean available)
 {
     Boolean oldAvailable;
-    synchronized (mHost) {
+    {    AutoLock syncLock(mHost);
         oldAvailable = mHost->mTorchAvailable;
         mHost->mTorchAvailable = available;
     }
@@ -234,7 +236,7 @@ CTorchService::BinderDeathRecipient::BinderDeathRecipient(
 
 ECode CTorchService::BinderDeathRecipient::ProxyDied()
 {
-    synchronized (mHost->mCamerasInUse) {
+    {    AutoLock syncLock(mHost->mCamerasInUse);
         if (DEBUG) Logger::D(TAG, "Camera %d client died", mCameraId);
         mHost->RemoveCameraUserLocked(mToken, mCameraId);
     }
@@ -294,7 +296,7 @@ ECode CTorchService::OnCameraOpened(
     if (DEBUG) Logger::D(TAG, "onCameraOpened(token= %p, cameraId=%d)", token, cameraId);
     Boolean needTorchShutdown = FALSE;
 
-    synchronized (mCamerasInUse) {
+    {    AutoLock syncLock(mCamerasInUse);
         if (mTorchAppUid != -1 && Binder::GetCallingUid() == mTorchAppUid) {
             if (DEBUG) Logger::D(TAG, "Camera was opened by torch app");
             mTorchCameraId = cameraId;
@@ -323,7 +325,7 @@ ECode CTorchService::OnCameraOpened(
         AutoPtr<BinderDeathRecipient> p = new BinderDeathRecipient(token, cameraId, this);
         proxy->LinkToDeath(p, 0);
     }
-    synchronized (mCamerasInUse) {
+    {    AutoLock syncLock(mCamerasInUse);
         AutoPtr<CameraUserRecord> p = new CameraUserRecord(token);
         mCamerasInUse->Put(cameraId, (IInterface*)(IObject*)p.Get());
     }
@@ -335,7 +337,7 @@ ECode CTorchService::OnCameraClosed(
     /* [in] */ Int32 cameraId)
 {
     if (DEBUG) Logger::D(TAG, "onCameraClosed(token=%p, cameraId=%d)", token, cameraId);
-    synchronized (mCamerasInUse) {
+    {    AutoLock syncLock(mCamerasInUse);
         RemoveCameraUserLocked(token, cameraId);
     }
     return NOERROR;
@@ -504,7 +506,7 @@ void CTorchService::UpdateFlashlight(
     /* [in] */ Boolean forceDisable)
 {
     Boolean enabled;
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         enabled = mTorchEnabled && !forceDisable;
     }
     if (enabled) {
@@ -571,7 +573,7 @@ void CTorchService::TeardownTorch()
 
 void CTorchService::HandleError()
 {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         mTorchEnabled = FALSE;
     }
     DispatchError();
@@ -600,7 +602,7 @@ void CTorchService::DispatchListeners(
     /* [in] */ Int32 message,
     /* [in] */ Boolean argument)
 {
-    synchronized (mListeners) {
+    {    AutoLock syncLock(mListeners);
         Int32 N = 0;
         mListeners->BeginBroadcast(&N);
         for(Int32 i = 0; i < N; i++) {

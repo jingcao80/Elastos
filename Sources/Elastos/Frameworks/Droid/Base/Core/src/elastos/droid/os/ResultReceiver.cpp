@@ -4,6 +4,8 @@
 #include "elastos/droid/os/ResultReceiver.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Internal::Os::EIID_IIResultReceiver;
 
 namespace Elastos {
@@ -121,7 +123,7 @@ ECode ResultReceiver::ReadFromParcel(
 ECode ResultReceiver::WriteToParcel(
     /* [in] */ IParcel* out)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mReceiver == NULL) {
             AutoPtr<IWeakReference> wr;
             GetWeakReference((IWeakReference**)&wr);

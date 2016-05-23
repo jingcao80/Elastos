@@ -204,14 +204,14 @@ public class VoiceInteractionManagerService extends SystemService {
                     UserHandle.ALL, TRUE);
             new SettingsObserver(UiThread->GetHandler());
 
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 mCurUser = ActivityManager->GetCurrentUser();
                 SwitchImplementationIfNeededLocked(FALSE);
             }
         }
 
         CARAPI SwitchUser(Int32 userHandle) {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 mCurUser = userHandle;
                 SwitchImplementationIfNeededLocked(FALSE);
             }
@@ -366,7 +366,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         //@Override
         CARAPI StartSession(IVoiceInteractionService service, Bundle args) {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 if (mImpl == NULL || mImpl.mService == NULL
                         || service->AsBinder() != mImpl.mService->AsBinder()) {
                     throw new SecurityException(
@@ -386,7 +386,7 @@ public class VoiceInteractionManagerService extends SystemService {
         //@Override
         public Boolean DeliverNewSession(IBinder token, IVoiceInteractionSession session,
                 IVoiceInteractor interactor) {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 if (mImpl == NULL) {
                     throw new SecurityException(
                             "deliverNewSession without running voice interaction service");
@@ -405,7 +405,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         //@Override
         public Int32 StartVoiceActivity(IBinder token, Intent intent, String resolvedType) {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 if (mImpl == NULL) {
                     Slogger::W(TAG, "startVoiceActivity without running voice interaction service");
                     return ActivityManager.START_CANCELED;
@@ -427,7 +427,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         //@Override
         CARAPI Finish(IBinder token) {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 if (mImpl == NULL) {
                     Slogger::W(TAG, "finish without running voice interaction service");
                     return;
@@ -447,7 +447,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         //@Override
         public KeyphraseSoundModel GetKeyphraseSoundModel(Int32 keyphraseId, String bcp47Locale) {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 if (mContext->CheckCallingPermission(Manifest::permission::MANAGE_VOICE_KEYPHRASES)
                         != PackageManager.PERMISSION_GRANTED) {
                     throw new SecurityException("Caller does not hold the permission "
@@ -470,7 +470,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         //@Override
         public Int32 UpdateKeyphraseSoundModel(KeyphraseSoundModel model) {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 if (mContext->CheckCallingPermission(Manifest::permission::MANAGE_VOICE_KEYPHRASES)
                         != PackageManager.PERMISSION_GRANTED) {
                     throw new SecurityException("Caller does not hold the permission "
@@ -484,7 +484,7 @@ public class VoiceInteractionManagerService extends SystemService {
             final Int64 caller = Binder->ClearCallingIdentity();
             try {
                 if (mDbHelper->UpdateKeyphraseSoundModel(model)) {
-                    synchronized(this) {
+                    {    AutoLock syncLock(this);
                         // Notify the voice interaction service of a change in sound models.
                         if (mImpl != NULL && mImpl.mService != NULL) {
                             mImpl->NotifySoundModelsChangedLocked();
@@ -501,7 +501,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         //@Override
         public Int32 DeleteKeyphraseSoundModel(Int32 keyphraseId, String bcp47Locale) {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 if (mContext->CheckCallingPermission(Manifest::permission::MANAGE_VOICE_KEYPHRASES)
                         != PackageManager.PERMISSION_GRANTED) {
                     throw new SecurityException("Caller does not hold the permission "
@@ -522,7 +522,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 return deleted ? SoundTriggerHelper.STATUS_OK : SoundTriggerHelper.STATUS_ERROR;
             } finally {
                 if (deleted) {
-                    synchronized(this) {
+                    {    AutoLock syncLock(this);
                         // Notify the voice interaction service of a change in sound models.
                         if (mImpl != NULL && mImpl.mService != NULL) {
                             mImpl->NotifySoundModelsChangedLocked();
@@ -537,7 +537,7 @@ public class VoiceInteractionManagerService extends SystemService {
         //@Override
         public Boolean IsEnrolledForKeyphrase(IVoiceInteractionService service, Int32 keyphraseId,
                 String bcp47Locale) {
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 if (mImpl == NULL || mImpl.mService == NULL
                         || service->AsBinder() != mImpl.mService->AsBinder()) {
                     throw new SecurityException(
@@ -563,7 +563,7 @@ public class VoiceInteractionManagerService extends SystemService {
         //@Override
         public ModuleProperties GetDspModuleProperties(IVoiceInteractionService service) {
             // Allow the call if this is the current voice interaction service.
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 if (mImpl == NULL || mImpl.mService == NULL
                         || service == NULL || service->AsBinder() != mImpl.mService->AsBinder()) {
                     throw new SecurityException(
@@ -584,7 +584,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 String bcp47Locale, IRecognitionStatusCallback callback,
                 RecognitionConfig recognitionConfig) {
             // Allow the call if this is the current voice interaction service.
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 if (mImpl == NULL || mImpl.mService == NULL
                         || service == NULL || service->AsBinder() != mImpl.mService->AsBinder()) {
                     throw new SecurityException(
@@ -619,7 +619,7 @@ public class VoiceInteractionManagerService extends SystemService {
         public Int32 StopRecognition(IVoiceInteractionService service, Int32 keyphraseId,
                 IRecognitionStatusCallback callback) {
             // Allow the call if this is the current voice interaction service.
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 if (mImpl == NULL || mImpl.mService == NULL
                         || service == NULL || service->AsBinder() != mImpl.mService->AsBinder()) {
                     throw new SecurityException(
@@ -644,7 +644,7 @@ public class VoiceInteractionManagerService extends SystemService {
                         + ", uid=" + Binder->GetCallingUid());
                 return;
             }
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 pw->Println("VOICE INTERACTION MANAGER (dumpsys voiceinteraction)\n");
                 if (mImpl == NULL) {
                     pw->Println("  (No active implementation)");
@@ -664,7 +664,7 @@ public class VoiceInteractionManagerService extends SystemService {
             }
 
             //@Override CARAPI OnChange(Boolean selfChange) {
-                synchronized(VoiceInteractionManagerServiceStub.this) {
+                {    AutoLock syncLock(VoiceInteractionManagerServiceStub.this);
                     SwitchImplementationIfNeededLocked(FALSE);
                 }
             }

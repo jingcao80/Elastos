@@ -17,6 +17,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Pm::CPackageInstallerSessionInfo;
 using Elastos::Droid::Content::Pm::CParceledListSlice;
@@ -86,7 +88,7 @@ ECode CPackageInstallerSession::MyHandlerCallBack::HandleMessage(
     VALIDATE_NOT_NULL(result)
 
     Object& lock = mHost->mLock;
-    synchronized (lock) {
+    {    AutoLock syncLock(lock);
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
         if (obj != NULL) {
@@ -201,7 +203,7 @@ AutoPtr<IPackageInstallerSessionInfo> CPackageInstallerSession::GenerateInfo()
 {
     AutoPtr<IPackageInstallerSessionInfo> info;
     CPackageInstallerSessionInfo::New((IPackageInstallerSessionInfo**)&info);
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         info->SetSessionId(mSessionId);
         info->SetInstallerPackageName(mInstallerPackageName);
         String absolutePath(NULL);
@@ -251,7 +253,7 @@ Boolean CPackageInstallerSession::IsSealed()
 ECode CPackageInstallerSession::AssertPreparedAndNotSealed(
     /* [in] */ const String& cookie)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (!mPrepared) {
             Slogger::E(TAG, "%s before prepared", cookie.string());
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -270,7 +272,7 @@ ECode CPackageInstallerSession::ResolveStageDir(
     VALIDATE_NOT_NULL(dir)
     *dir = NULL;
 
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (mResolvedStageDir == NULL) {
             if (mStageDir != NULL) {
                 mResolvedStageDir = mStageDir;
@@ -299,7 +301,7 @@ ECode CPackageInstallerSession::ResolveStageDir(
 ECode CPackageInstallerSession::SetClientProgress(
     /* [in] */ Float progress)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         // Always publish first staging movement
         Boolean forcePublish = (mClientProgress == 0);
         mClientProgress = progress;
@@ -311,7 +313,7 @@ ECode CPackageInstallerSession::SetClientProgress(
 ECode CPackageInstallerSession::AddClientProgress(
     /* [in] */ Float progress)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         SetClientProgress(mClientProgress + progress);
     }
     return NOERROR;
@@ -372,7 +374,7 @@ ECode CPackageInstallerSession::OpenWriteInternal(
     // then do heavy disk allocation outside the lock, but this open pipe
     // will block any attempted install transitions.
     AutoPtr<IFileBridge> bridge;
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(AssertPreparedAndNotSealed(String("openWrite")))
 
         CFileBridge::New((IFileBridge**)&bridge);
@@ -507,7 +509,7 @@ ECode CPackageInstallerSession::Commit(
     }
 
     Boolean wasSealed;
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         wasSealed = mSealed;
         if (!mSealed) {
             // Verify that all writers are hands-off
@@ -1169,7 +1171,7 @@ ECode CPackageInstallerSession::Open()
         mCallback->OnSessionActiveChanged(this, TRUE);
     }
 
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (!mPrepared) {
             if (mStageDir != NULL) {
                 FAIL_RETURN(CPackageInstallerService::PrepareInternalStageDir(mStageDir))
@@ -1232,7 +1234,7 @@ void CPackageInstallerSession::DispatchSessionFinished(
 
 void CPackageInstallerSession::DestroyInternal()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         mSealed = TRUE;
         mDestroyed = TRUE;
 

@@ -9,6 +9,8 @@
 #include <elastos/core/CoreUtils.h>
 #include "elastos/core/AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Utility::CPair;
 using Elastos::Utility::CVector;
 using Elastos::Utility::EIID_IIterable;
@@ -521,7 +523,7 @@ ECode SubtitleTrack::SubTrackRunnable::Run()
     // even with synchronized, it is possible that we are going
     // to do multiple updates as the runnable could be already
     // running.
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mHost->mRunnable = NULL;
         mHost->UpdateActiveCues(TRUE, mThenMs);
         mHost->UpdateView(mHost->mActiveCues.Get());
@@ -572,7 +574,7 @@ ECode SubtitleTrack::OnTimedEvent(
     /* [in] */ Int64 timeUs)
 {
     if (DEBUG) Slogger::E(TAG, "onTimedEvent %ld", timeUs);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int64 timeMs = timeUs / 1000;
         UpdateActiveCues(FALSE, timeMs);
         TakeTime(timeMs);
@@ -588,7 +590,7 @@ ECode SubtitleTrack::OnSeek(
     /* [in] */ Int64 timeUs)
 {
     if (DEBUG) Slogger::E(TAG, "onSeek %ld", timeUs);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int64 timeMs = timeUs / 1000;
         UpdateActiveCues(TRUE, timeMs);
         TakeTime(timeMs);
@@ -602,7 +604,7 @@ ECode SubtitleTrack::OnSeek(
  */
 ECode SubtitleTrack::OnStop()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (DEBUG) Slogger::E(TAG, "onStop");
         ClearActiveCues();
         mLastTimeMs = -1;

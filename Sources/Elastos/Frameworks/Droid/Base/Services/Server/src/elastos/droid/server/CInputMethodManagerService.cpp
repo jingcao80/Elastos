@@ -35,6 +35,8 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::App::IDialog;
 using Elastos::Droid::App::AppGlobals;
@@ -326,7 +328,7 @@ ECode CInputMethodManagerService::SettingsObserver::OnChange(
 {
     AutoPtr<IUri> showImeUri;
     Settings::Secure::GetUriFor(ISettingsSecure::SHOW_IME_WITH_HARD_KEYBOARD, (IUri**)&showImeUri);
-    synchronized(mHost->mMethodMap.Get()) {
+    {    AutoLock syncLock(mHost->mMethodMap.Get());
         if (Object::Equals(showImeUri, uri)) {
             mHost->UpdateKeyboardFromSettingsLocked();
         }
@@ -1209,7 +1211,7 @@ ECode CInputMethodManagerService::constructor(
     UpdateCurrentProfileIds();
     mFileManager = new InputMethodFileManager(mMethodMap, userId, this);
 
-    synchronized(mMethodMap.Get()) {
+    {    AutoLock syncLock(mMethodMap.Get());
         AutoPtr<IInputMethodSubtypeSwitchingControllerHelper> helper;
         CInputMethodSubtypeSwitchingControllerHelper::AcquireSingleton(
             (IInputMethodSubtypeSwitchingControllerHelper**)&helper);
@@ -1225,7 +1227,7 @@ ECode CInputMethodManagerService::constructor(
     }
     mImeSelectedOnBoot = !TextUtils::IsEmpty(defaultImiId);
 
-    synchronized(mMethodMap.Get()) {
+    {    AutoLock syncLock(mMethodMap.Get());
         BuildInputMethodListLocked(mMethodList, mMethodMap,
             !mImeSelectedOnBoot /* resetDefaultEnabledIme */);
     }
@@ -1233,13 +1235,13 @@ ECode CInputMethodManagerService::constructor(
 
    if (!mImeSelectedOnBoot) {
         Slogger::W(TAG, "No IME selected. Choose the most applicable IME.");
-        synchronized(mMethodMap.Get()) {
+        {    AutoLock syncLock(mMethodMap.Get());
             ResetDefaultImeLocked(context);
         }
    }
     mSettingsObserver = new SettingsObserver();
     mSettingsObserver->constructor(mHandler, this);
-    synchronized(mMethodMap.Get()) {
+    {    AutoLock syncLock(mMethodMap.Get());
         UpdateFromSettingsLocked(TRUE);
     }
 
@@ -3397,7 +3399,7 @@ ECode CInputMethodManagerService::ShouldOfferSwitchingToNextInputMethod(
     if (!CalledFromValidUser()) {
         return NOERROR;
     }
-    synchronized(mMethodMap.Get()) {
+    {    AutoLock syncLock(mMethodMap.Get());
         if (!CalledWithValidToken(token)) {
             Int32 uid = Binder::GetCallingUid();
             Slogger::E(TAG, "Ignoring shouldOfferSwitchingToNextInputMethod due to an invalid "
@@ -3531,7 +3533,7 @@ ECode CInputMethodManagerService::NotifyUserAction(
     if (DEBUG) {
         Slogger::D(TAG, "Got the notification of a user action. sequenceNumber:%d", sequenceNumber);
     }
-    synchronized(mMethodMap.Get()) {
+    {    AutoLock syncLock(mMethodMap.Get());
         if (mCurUserActionNotificationSequenceNumber != sequenceNumber) {
             if (DEBUG) {
                 Slogger::D(TAG, "Ignoring the user action notification due to the sequence number "
@@ -3554,7 +3556,7 @@ ECode CInputMethodManagerService::SetInputMethodWithSubtypeId(
     /* [in] */ const String& id,
     /* [in] */ Int32 subtypeId)
 {
-    synchronized(mMethodMap.Get()) {
+    {    AutoLock syncLock(mMethodMap.Get());
         return SetInputMethodWithSubtypeIdLocked(token, id, subtypeId);
     }
     return NOERROR;
@@ -3873,7 +3875,7 @@ void CInputMethodManagerService::ShowInputMethodMenuInternal(
     // int lastInputMethodSubtypeId = mSettings.getSelectedInputMethodSubtypeId(lastInputMethodId);
     // if (DEBUG) Slog.v(TAG, "Current IME: " + lastInputMethodId);
 
-    // synchronized (mMethodMap) {
+    // {    AutoLock syncLock(mMethodMap);
     //     final HashMap<InputMethodInfo, List<InputMethodSubtype>> immis =
     //             mSettings.getExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked(
     //                     mContext);
@@ -3958,7 +3960,7 @@ void CInputMethodManagerService::ShowInputMethodMenuInternal(
     //     final OnClickListener choiceListener = new OnClickListener() {
     //         @Override
     //         public void onClick(final DialogInterface dialog, final int which) {
-    //             synchronized (mMethodMap) {
+    //             {    AutoLock syncLock(mMethodMap);
     //                 if (mIms == null || mIms.length <= which || mSubtypeIds == null
     //                         || mSubtypeIds.length <= which) {
     //                     return;
@@ -4508,7 +4510,7 @@ ECode CInputMethodManagerService::ToString(
 
 //     final Printer p = new PrintWriterPrinter(pw);
 
-//     synchronized(mMethodMap) {
+//     {    AutoLock syncLock(mMethodMap);
 //         p.println("Current Input Method Manager state:");
 //         int N = mMethodList->size();
 //         p.println("  Input Methods:");

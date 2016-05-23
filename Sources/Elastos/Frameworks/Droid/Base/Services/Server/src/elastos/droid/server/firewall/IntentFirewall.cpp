@@ -13,6 +13,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Droid::Os::CEnvironment;
 using Elastos::Droid::Os::IEnvironment;
@@ -609,7 +611,7 @@ void IntentFirewall::ReadRulesDir(
             " B:" + resolvers[TYPE_BROADCAST].FilterSet()->Size() +
             " S:" + resolvers[TYPE_SERVICE].FilterSet()->Size() + ")");
 
-    Synchronized(mAms->GetAMSLock()) {
+    {    AutoLock syncLock(mAms->GetAMSLock());
         mActivityResolver = resolvers[TYPE_ACTIVITY];
         mBroadcastResolver = resolvers[TYPE_BROADCAST];
         mServiceResolver = resolvers[TYPE_SERVICE];

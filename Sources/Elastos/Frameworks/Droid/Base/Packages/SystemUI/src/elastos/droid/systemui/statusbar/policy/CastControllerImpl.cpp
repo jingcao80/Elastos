@@ -10,6 +10,8 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
@@ -173,7 +175,7 @@ ECode CastControllerImpl::AddCallback(
 {
     mCallbacks->Add(callback);
     FireOnCastDevicesChanged(callback);
-    synchronized (mDiscoveringLock) {
+    {    AutoLock syncLock(mDiscoveringLock);
         HandleDiscoveryChangeLocked();
     }
     return NOERROR;
@@ -183,7 +185,7 @@ ECode CastControllerImpl::RemoveCallback(
     /* [in] */ ICastControllerCallback* callback)
 {
     mCallbacks->Remove(callback);
-    synchronized (mDiscoveringLock) {
+    {    AutoLock syncLock(mDiscoveringLock);
         HandleDiscoveryChangeLocked();
     }
     return NOERROR;
@@ -192,7 +194,7 @@ ECode CastControllerImpl::RemoveCallback(
 ECode CastControllerImpl::SetDiscovering(
     /* [in] */ Boolean request)
 {
-    synchronized (mDiscoveringLock) {
+    {    AutoLock syncLock(mDiscoveringLock);
         if (mDiscovering == request) return NOERROR;
         mDiscovering = request;
         if (DEBUG) Logger::D(TAG, "setDiscovering: %d", request);
@@ -242,7 +244,7 @@ ECode CastControllerImpl::GetCastDevices(
     VALIDATE_NOT_NULL(result);
     AutoPtr<IArraySet> devices;  /*<CastDevice*/
     CArraySet::New((IArraySet**)&devices);
-    synchronized (mProjectionLock) {
+    {    AutoLock syncLock(mProjectionLock);
         if (mProjection != NULL) {
             AutoPtr<CastDevice> device = new CastDevice();
             String value;
@@ -259,7 +261,7 @@ ECode CastControllerImpl::GetCastDevices(
             return NOERROR;
         }
     }
-    synchronized(IObject::Probe(mRoutes)) {
+    {    AutoLock syncLock(IObject::Probe(mRoutes));
         AutoPtr<ICollection> collection;
         mRoutes->GetValues((ICollection**)&collection);
         AutoPtr<IIterator> ator;
@@ -367,7 +369,7 @@ void CastControllerImpl::SetProjection(
 {
     Boolean changed = FALSE;
     AutoPtr<IMediaProjectionInfo> oldProjection = mProjection;
-    synchronized (mProjectionLock) {
+    {    AutoLock syncLock(mProjectionLock);
         Boolean isCurrent = FALSE;
         IObject::Probe(projection)->Equals(mProjection, &isCurrent);
         if (started && !isCurrent) {
@@ -417,7 +419,7 @@ void CastControllerImpl::UpdateRemoteDisplays()
         return;
     }
 
-    synchronized(mRoutes) {
+    {    AutoLock syncLock(mRoutes);
         mRoutes->Clear();
         Int32 n = 0;
         mMediaRouter->GetRouteCount(&n);

@@ -17,6 +17,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IActivityManagerHelper;
 // using Elastos::Droid::App::Backup::CBackupManager;
@@ -358,7 +360,7 @@ ECode SettingsProvider::SettingsFileObserver::OnEvent(
     /* [in] */ const String& path)
 {
     AutoPtr<IAtomicInteger32> mutationCount;
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         AutoPtr<IInterface> obj;
         mHost->sKnownMutationsInFlight->Get(mUserHandle, (IInterface**)&obj);
         mutationCount = IAtomicInteger32::Probe(obj);
@@ -416,7 +418,7 @@ SettingsProvider::SettingsCache::SettingsCache(
 
 Boolean SettingsProvider::SettingsCache::FullyMatchesDisk()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         return mCacheFullyMatchesDisk;
     }
     return FALSE;
@@ -425,7 +427,7 @@ Boolean SettingsProvider::SettingsCache::FullyMatchesDisk()
 void SettingsProvider::SettingsCache::SetFullyMatchesDisk(
     /* [in] */ Boolean value)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mCacheFullyMatchesDisk = value;
     }
 }
@@ -485,7 +487,7 @@ void SettingsProvider::SettingsCache::Populate(
     /* [in] */ const String& name,
     /* [in] */ const String& value)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (value.IsNull() || (Int32)value.GetLength() <= MAX_CACHE_ENTRY_SIZE) {
             AutoPtr<IBundleHelper> helper;
             CBundleHelper::AcquireSingleton((IBundleHelper**)&helper);
@@ -505,7 +507,7 @@ Boolean SettingsProvider::SettingsCache::IsRedundantSetValue(
     /* [in] */ const String& value)
 {
     if (cache == NULL) return FALSE;
-    synchronized(cache) {
+    {    AutoLock syncLock(cache);
         AutoPtr<IBundle> bundle = cache->Get(name);
         if (bundle == NULL) return FALSE;
         String oldValue;
@@ -764,7 +766,7 @@ ECode SettingsProvider::OnCreate(
 void SettingsProvider::OnUserRemoved(
     /* [in] */ Int32 userHandle)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // the db file itself will be deleted automatically, but we need to tear down
         // our caches and other internal bookkeeping.
         AutoPtr<IInterface> obj;
@@ -785,7 +787,7 @@ void SettingsProvider::OnUserRemoved(
 
 void SettingsProvider::OnProfilesChanged()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mUserManager->GetProfiles(IUserHandle::USER_OWNER, (IList**)&mManagedProfiles);
         if (mManagedProfiles != NULL) {
             // Remove the primary user from the list
@@ -822,7 +824,7 @@ void SettingsProvider::EstablishDbTracking(
 
     AutoPtr<DatabaseHelper> dbhelper;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mOpenHelpers->Get(userHandle, (IInterface**)&obj);
         dbhelper = (DatabaseHelper*)ISQLiteOpenHelper::Probe(obj);
@@ -854,7 +856,7 @@ void SettingsProvider::EstablishDbTracking(
     // keeping our caches in sync.  We synchronize the observer set
     // separately, and of course it has to run after the db file
     // itself was set up by the DatabaseHelper.
-    synchronized(sObserverInstances) {
+    {    AutoLock syncLock(sObserverInstances);
         AutoPtr<IInterface> obj;
         sObserverInstances->Get(userHandle, (IInterface**)&obj);
         if (obj == NULL) {
@@ -882,7 +884,7 @@ void SettingsProvider::FullyPopulateCaches(
     /* [in] */ Int32 userHandle)
 {
     AutoPtr<DatabaseHelper> dbHelper;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mOpenHelpers->Get(userHandle, (IInterface**)&obj);
         dbHelper = (DatabaseHelper*)ISQLiteOpenHelper::Probe(obj);
@@ -922,7 +924,7 @@ void SettingsProvider::FullyPopulateCache(
     db->Query(table, args, String(NULL), NULL, String(NULL), String(NULL), String(NULL),
             String("") + StringUtils::ToString(MAX_CACHE_ENTRIES + 1), (ICursor**)&c);
     // try {
-    synchronized(cache) {
+    {    AutoLock syncLock(cache);
         cache->EvictAll();
         cache->SetFullyMatchesDisk(TRUE);  // optimistic
         Int32 rows = 0;
@@ -1069,7 +1071,7 @@ ECode SettingsProvider::GetOrEstablishDatabase(
     Int64 oldId = Binder::ClearCallingIdentity();
     // try {
     AutoPtr<DatabaseHelper> dbHelper;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mOpenHelpers->Get(callingUser, (IInterface**)&obj);
         dbHelper = (DatabaseHelper*)ISQLiteOpenHelper::Probe(obj);
@@ -1077,7 +1079,7 @@ ECode SettingsProvider::GetOrEstablishDatabase(
 
     if (NULL == dbHelper) {
         EstablishDbTracking(callingUser);
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             AutoPtr<IInterface> obj;
             mOpenHelpers->Get(callingUser, (IInterface**)&obj);
             dbHelper = (DatabaseHelper*)ISQLiteOpenHelper::Probe(obj);
@@ -1115,7 +1117,7 @@ void SettingsProvider::InvalidateCache(
     if (cache == NULL) {
         return;
     }
-    synchronized(cache) {
+    {    AutoLock syncLock(cache);
         cache->EvictAll();
         cache->mCacheFullyMatchesDisk = FALSE;
     }
@@ -1124,7 +1126,7 @@ void SettingsProvider::InvalidateCache(
 Boolean SettingsProvider::IsManagedProfile(
     /* [in] */ Int32 callingUser)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mManagedProfiles == NULL) return FALSE;
         Int32 size;
         mManagedProfiles->GetSize(&size);
@@ -1420,7 +1422,7 @@ AutoPtr<IBundle> SettingsProvider::LookupValue(
         Logger::E(TAG, "cache is null for user %d : key=%s", userId, key.string());
         return NULL;
     }
-    synchronized(cache) {
+    {    AutoLock syncLock(cache);
         AutoPtr<IBundle> value = cache->Get(key);
         if (value != NULL) {
             if (value != TOO_LARGE_TO_CACHE_MARKER) {
@@ -1612,7 +1614,7 @@ ECode SettingsProvider::BulkInsert(
     AutoPtr<SettingsCache> cache = CacheForTable(callingUser, args->mTable);
 
     AutoPtr<IAtomicInteger32> mutationCount;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         sKnownMutationsInFlight->Get(callingUser, (IInterface**)&obj);
         mutationCount = IAtomicInteger32::Probe(obj);
@@ -1836,7 +1838,7 @@ ECode SettingsProvider::InsertForUser(
     }
 
     AutoPtr<IAtomicInteger32> mutationCount;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         sKnownMutationsInFlight->Get(callingUser, (IInterface**)&obj);
         mutationCount = IAtomicInteger32::Probe(obj);
@@ -1905,7 +1907,7 @@ ECode SettingsProvider::Delete(
     FAIL_RETURN(CheckWritePermissions(args))
 
     AutoPtr<IAtomicInteger32> mutationCount;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         sKnownMutationsInFlight->Get(callingUser, (IInterface**)&obj);
         mutationCount = IAtomicInteger32::Probe(obj);
@@ -1970,7 +1972,7 @@ ECode SettingsProvider::Update(
     FAIL_RETURN(CheckUserRestrictions(str, callingUser));
 
     AutoPtr<IAtomicInteger32> mutationCount;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         sKnownMutationsInFlight->Get(callingUser, (IInterface**)&obj);
         mutationCount = IAtomicInteger32::Probe(obj);

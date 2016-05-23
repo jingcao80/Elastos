@@ -17,6 +17,8 @@
 #include <Elastos.Droid.Bluetooth.h>
 #include <Elastos.CoreLibrary.Utility.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::Looper;
@@ -1494,7 +1496,7 @@ void CBluetoothManagerService::SendEnableMsg(
 Boolean CBluetoothManagerService::CanUnbindBluetoothService()
 {
     assert(0 && "TODO");
-    // synchronized(mConnection) {
+    // {    AutoLock syncLock(mConnection);
     //     //Only unbind with mEnable flag not set
     //     //For race condition: disable and enable back-to-back
     //     //Avoid unbind right after enable due to callback from disable
@@ -1613,7 +1615,7 @@ ECode CBluetoothManagerService::GetQBluetooth(
 void CBluetoothManagerService::RecoverBluetoothServiceFromError()
 {
     Slogger::E(TAG,"RecoverBluetoothServiceFromError");
-    synchronized (mConnection) {
+    {    AutoLock syncLock(mConnection);
         if (mBluetooth != NULL) {
             //Unregister callback object
             ECode ec = mBluetooth->UnregisterCallback(mBluetoothCallback);
@@ -1632,7 +1634,7 @@ void CBluetoothManagerService::RecoverBluetoothServiceFromError()
 
     SendBluetoothServiceDownCallback();
     SendQBluetoothServiceDownCallback();
-    synchronized (mConnection) {
+    {    AutoLock syncLock(mConnection);
         if (mBluetooth != NULL) {
             mBluetooth = NULL;
             if(mQBluetooth != NULL) {

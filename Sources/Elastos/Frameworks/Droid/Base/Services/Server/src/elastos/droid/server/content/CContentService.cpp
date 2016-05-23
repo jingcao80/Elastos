@@ -12,6 +12,8 @@
 #include <Elastos.Droid.Database.h>
 #include <Elastos.Droid.Net.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IActivityManagerHelper;
@@ -423,7 +425,7 @@ ECode CContentService::Dump(
     //     }
     //     pw.println();
     //     pw.println("Observer tree:");
-    //     synchronized (mRootNode) {
+    //     {    AutoLock syncLock(mRootNode);
     //         int[] counts = new int[2];
     //         final SparseIntArray pidCounts = new SparseIntArray();
     //         mRootNode.dumpLocked(fd, pw, args, "", "  ", counts, pidCounts);
@@ -603,7 +605,7 @@ ECode CContentService::NotifyChange(
         //     Log.v(TAG, "Notified " + oc.mObserver + " of " + "update at " + uri);
         // }
         // } catch (RemoteException ex) {
-        //     synchronized(mRootNode) {
+        //     {    AutoLock syncLock(mRootNode);
         //         Log.w(TAG, "Found dead observer, removing");
         //         IBinder binder = oc.mObserver.asBinder();
         //         final ArrayList<ObserverNode.ObserverEntry> list

@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.imsphone;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Telephony::IRlog;
 using Elastos::Droid::Telephony::IDisconnectCause;
@@ -317,7 +319,7 @@ public class ImsPhoneCall extends Call {
     }
 
     void SwitchWith(ImsPhoneCall that) {
-        Synchronized (ImsPhoneCall.class) {
+        {    AutoLock syncLock(ImsPhoneCall.class);
             ImsPhoneCall tmp = new ImsPhoneCall();
             tmp->TakeOver(this);
             this->TakeOver(that);

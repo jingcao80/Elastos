@@ -9,6 +9,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Location::CLocation;
 using Elastos::Droid::Net::IUri;
@@ -89,7 +91,7 @@ LocationFudger::LocationFudger(
     cr->RegisterContentObserver(uri.Get(), FALSE, mSettingsObserver);
 
     Float accuracy = LoadCoarseAccuracy();
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         SetAccuracyInMetersLocked(accuracy);
         mOffsetLatitudeMeters = NextOffsetLocked();
         mOffsetLongitudeMeters = NextOffsetLocked();
@@ -104,7 +106,7 @@ ECode LocationFudger::GetOrCreate(
     VALIDATE_NOT_NULL(outLocation)
     *outLocation = NULL;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ILocation> coarse;
         location->GetExtraLocation(ILocation::EXTRA_COARSE_LOCATION, (ILocation**)&coarse);
         if (coarse == NULL) {
@@ -310,7 +312,7 @@ void LocationFudger::SetAccuracyInMetersLocked(
 void LocationFudger::SetAccuracyInMeters(
     /* [in] */ Float accuracyInMeters)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         SetAccuracyInMetersLocked(accuracyInMeters);
     }
 }

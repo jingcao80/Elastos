@@ -7,6 +7,8 @@
 #include "elastos/droid/R.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IResourcesHelper;
 using Elastos::Droid::Content::Res::CResourcesHelper;
@@ -60,7 +62,7 @@ CTimeFormatter::~CTimeFormatter()
 
 ECode CTimeFormatter::constructor()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
 
         AutoPtr<ILocaleHelper> localeHelper;
         CLocaleHelper::AcquireSingleton((ILocaleHelper**)&localeHelper);

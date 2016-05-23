@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.gsm;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
@@ -150,7 +152,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
     }
 
     public ArrayList<AdnRecord> LoadEfFilesFromUsim() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (!mPhoneBookRecords->IsEmpty()) {
                 If (mRefreshCache) {
                     mRefreshCache = FALSE;
@@ -358,7 +360,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
             mSuccess = TRUE;
         }
         If (mSuccess) {
-            Synchronized (mLock) {
+            {    AutoLock syncLock(mLock);
                 mFh->GetEFLinearRecordSize(efid,
                         ObtainMessage(EVENT_EF_EMAIL_RECORD_SIZE_DONE, adnRecNum, efid, emails));
                 try {
@@ -399,7 +401,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
         } else {
             mSuccess = TRUE;
         }
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mFh->GetEFLinearRecordSize(efid,
                     ObtainMessage(EVENT_EF_ANR_RECORD_SIZE_DONE, adnRecNum, efid, anrs));
             try {
@@ -436,7 +438,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
         }
         Log("updateIapFile  efid=" + efid + ", recordNumber= " + recordNumber + ", adnRecNum="
                 + adnRecNum);
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mFh->GetEFLinearRecordSize(efid,
                     ObtainMessage(EVENT_EF_IAP_RECORD_SIZE_DONE, adnRecNum, recordNumber, tag));
             try {
@@ -939,7 +941,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                 If (ar.exception == NULL) {
                     CreatePbrFile((ArrayList<Byte[]>) ar.result);
                 }
-                Synchronized (mLock) {
+                {    AutoLock syncLock(mLock);
                     mLock->Notify();
                 }
                 break;
@@ -954,7 +956,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                 } else {
                     Log("can't load USIM ADN records");
                 }
-                Synchronized (mLock) {
+                {    AutoLock syncLock(mLock);
                     mLock->Notify();
                 }
                 break;
@@ -965,7 +967,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                 If (ar.exception == NULL) {
                     mIapFileRecord->Put(pbrIndex, (ArrayList<Byte[]>) ar.result);
                 }
-                Synchronized (mLock) {
+                {    AutoLock syncLock(mLock);
                     mLock->Notify();
                 }
                 break;
@@ -985,7 +987,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                     Log("handlemessage EVENT_EMAIL_LOAD_DONE size is: "
                             + mEmailFileRecord->Get(pbrIndex).Size());
                 }
-                Synchronized (mLock) {
+                {    AutoLock syncLock(mLock);
                     mLock->Notify();
                 }
                 break;
@@ -1005,7 +1007,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                     Log("handlemessage EVENT_ANR_LOAD_DONE size is: "
                             + mAnrFileRecord->Get(pbrIndex).Size());
                 }
-                Synchronized (mLock) {
+                {    AutoLock syncLock(mLock);
                     mLock->Notify();
                 }
                 break;
@@ -1025,7 +1027,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                 }
                 If (ar.exception != NULL) {
                     mSuccess = FALSE;
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         mLock->Notify();
                     }
                     return;
@@ -1034,7 +1036,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                 recordNumber = GetEmailRecNumber(adnRecIndex, mPhoneBookRecords->Size(), oldEmail);
                 If (recordSize.length != 3 || recordNumber > recordSize[2] || recordNumber <= 0) {
                     mSuccess = FALSE;
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         mLock->Notify();
                     }
                     return;
@@ -1081,7 +1083,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                 }
                 If (ar.exception != NULL) {
                     mSuccess = FALSE;
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         mLock->Notify();
                     }
                     return;
@@ -1090,7 +1092,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                 recordNumber = GetAnrRecNumber(adnRecIndex, mPhoneBookRecords->Size(), oldAnr);
                 If (recordSize.length != 3 || recordNumber > recordSize[2] || recordNumber <= 0) {
                     mSuccess = FALSE;
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         mLock->Notify();
                     }
                     return;
@@ -1098,7 +1100,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                 data = BuildAnrData(recordSize[0], adnRecIndex, newAnr);
                 If (data == NULL) {
                     mSuccess = FALSE;
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         mLock->Notify();
                     }
                     return;
@@ -1151,7 +1153,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                     }
                     mEmailFlags->Get(pbrIndex).Set(recordNumber - 1, 0);
                 }
-                Synchronized (mLock) {
+                {    AutoLock syncLock(mLock);
                     mLock->Notify();
                 }
                 break;
@@ -1177,7 +1179,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                     }
                     mAnrFlags->Get(pbrIndex).Set(recordNumber - 1, 0);
                 }
-                Synchronized (mLock) {
+                {    AutoLock syncLock(mLock);
                     mLock->Notify();
                 }
                 break;
@@ -1191,7 +1193,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                 Int32 tag = (Integer) ar.userObj;
                 If (ar.exception != NULL) {
                     mSuccess = FALSE;
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         mLock->Notify();
                     }
                     return;
@@ -1208,7 +1210,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
                 If (recordSize.length != 3 || recordIndex + 1 > recordSize[2]
                         || recordNumber == 0) {
                     mSuccess = FALSE;
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         mLock->Notify();
                     }
                     return;
@@ -1254,7 +1256,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
 
                 mIapFileRecord->Get(pbrIndex).Set(recordIndex, data);
                 Log("the iap email recordNumber is :" + data[mEmailTagNumberInIap]);
-                Synchronized (mLock) {
+                {    AutoLock syncLock(mLock);
                     mLock->Notify();
                 }
                 break;

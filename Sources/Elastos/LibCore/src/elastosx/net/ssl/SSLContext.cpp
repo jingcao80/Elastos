@@ -3,6 +3,9 @@
 #include "SSLContext.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Elastosx {
 namespace Net {
 namespace Ssl {
@@ -19,7 +22,7 @@ ECode SSLContext::GetDefault(
 {
     VALIDATE_NOT_NULL(context)
 
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (sDEFAULT == NULL) {
             FAIL_RETURN(SSLContext::GetInstance(String("Default"), (ISSLContext**)&sDEFAULT))
         }
@@ -37,7 +40,7 @@ ECode SSLContext::SetDefault(
         //throw new NullPointerException("sslContext == null");
         return E_NULL_POINTER_EXCEPTION;
     }
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         sDEFAULT = sslContext;
     }
     return NOERROR;

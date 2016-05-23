@@ -8,6 +8,8 @@
 #include "elastos/droid/utility/CDisplayMetrics.h"
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContextWrapper;
@@ -324,7 +326,7 @@ ECode ActivityView::ActivityContainerWrapper::InjectEvent(
 
 ECode ActivityView::ActivityContainerWrapper::ReleaseResources()
 {
-    synchronized(mGuard) {
+    {    AutoLock syncLock(mGuard);
         if (mOpened) {
             if (ActivityView::DEBUG)
                 Logger::V("ActivityView", "ActivityContainerWrapper: release called");

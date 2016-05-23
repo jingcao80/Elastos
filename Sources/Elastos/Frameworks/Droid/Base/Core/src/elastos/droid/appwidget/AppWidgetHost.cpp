@@ -9,6 +9,8 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::IIntentSender;
 using Elastos::Droid::Internal::AppWidget::EIID_IIAppWidgetHost;
@@ -190,7 +192,7 @@ ECode AppWidgetHost::constructor(
 
 void AppWidgetHost::BindService()
 {
-    synchronized(sServiceLock) {
+    {    AutoLock syncLock(sServiceLock);
         if (sService == NULL) {
             sService = IIAppWidgetService::Probe(ServiceManager::GetService(IContext::APPWIDGET_SERVICE));
         }
@@ -344,7 +346,7 @@ Boolean AppWidgetHost::IsLocalBinder()
 ECode AppWidgetHost::DeleteAppWidgetId(
     /* [in] */ Int32 appWidgetId)
 {
-    synchronized(mViewsLock) {
+    {    AutoLock syncLock(mViewsLock);
         mViews->Remove(CoreUtils::Convert(appWidgetId));
         // try {
         String packageName;
@@ -408,7 +410,7 @@ ECode AppWidgetHost::CreateView(
     AutoPtr<IAppWidgetHostView> view = OnCreateView(mContext, appWidgetId, appWidget);
     view->SetOnClickHandler(mOnClickHandler);
     view->SetAppWidget(appWidgetId, appWidget);
-    synchronized(mViewsLock) {
+    {    AutoLock syncLock(mViewsLock);
         mViews->Put(CoreUtils::Convert(appWidgetId), view);
     }
 
@@ -465,7 +467,7 @@ void AppWidgetHost::OnProviderChanged(
     minResizeHeight = CTypedValue::ComplexToDimensionPixelSize(minResizeHeight, mDisplayMetrics);
     app->SetMinResizeHeight(minResizeHeight);
 
-    synchronized(mViewsLock) {
+    {    AutoLock syncLock(mViewsLock);
         AutoPtr<IInterface> obj;
         mViews->Get(CoreUtils::Convert(appWidgetId), (IInterface**)&obj);
         v = IAppWidgetHostView::Probe(obj);
@@ -486,7 +488,7 @@ ECode AppWidgetHost::UpdateAppWidgetView(
     /* [in] */ IRemoteViews* views)
 {
     AutoPtr<IAppWidgetHostView> v;
-    synchronized(mViewsLock) {
+    {    AutoLock syncLock(mViewsLock);
         AutoPtr<IInterface> obj;
         mViews->Get(CoreUtils::Convert(appWidgetId), (IInterface**)&obj);
         v = IAppWidgetHostView::Probe(obj);
@@ -503,7 +505,7 @@ ECode AppWidgetHost::ViewDataChanged(
     /* [in] */ Int32 viewId)
 {
     AutoPtr<IAppWidgetHostView> v;
-    synchronized(mViewsLock) {
+    {    AutoLock syncLock(mViewsLock);
         AutoPtr<IInterface> obj;
         mViews->Get(CoreUtils::Convert(appWidgetId), (IInterface**)&obj);
         v = IAppWidgetHostView::Probe(obj);

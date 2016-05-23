@@ -14,6 +14,8 @@
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::CoreUtils;
@@ -343,7 +345,7 @@ ECode CInputMethodSubtype::GetDisplayName(
 AutoPtr< HashMap<String, String> > CInputMethodSubtype::GetExtraValueHashMap()
 {
     if (mExtraValueHashMapCache == NULL) {
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             if (mExtraValueHashMapCache == NULL) {
                 mExtraValueHashMapCache = new HashMap<String, String>(10);
                 AutoPtr< ArrayOf<String> > pairs;

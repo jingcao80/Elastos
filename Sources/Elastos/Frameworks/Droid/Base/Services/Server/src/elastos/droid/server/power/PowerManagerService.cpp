@@ -27,6 +27,8 @@
 #include <utils/Log.h>
 #include <utils/Errors.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::App::IActivityManagerRunningAppProcessInfo;
 using Elastos::Droid::Content::CIntentFilter;
@@ -217,7 +219,7 @@ ECode PowerManagerService::BinderService::UpdateBlockedUids(
         return NOERROR;
     }
 
-    synchronized(mHost->mLock) {
+    {    AutoLock syncLock(mHost->mLock);
         if(isBlocked) {
             AutoPtr<IInteger32> integer;
             CInteger32::New(uid, (IInteger32**)&integer);
@@ -554,7 +556,7 @@ ECode PowerManagerService::BinderService::UserActivity(
         // Now we require the DEVICE_POWER permission.  Log a warning and ignore the
         // request instead of throwing a SecurityException so we don't break old apps.
         Object& lock = mHost->mLock;
-        synchronized(lock) {
+        {    AutoLock syncLock(lock);
             if (now >= mHost->mLastWarningAboutUserActivityPermission + (5 * 60 * 1000)) {
                 mHost->mLastWarningAboutUserActivityPermission = now;
                 Slogger::W(TAG, "Ignoring call to PowerManager.userActivity() because the caller does not have DEVICE_POWER permission.  Please fix your app!   pid=%d uid=%d"
@@ -924,7 +926,7 @@ ECode PowerManagerService::BatteryReceiver::OnReceive(
     /* [in] */ IIntent* intent)
 {
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         mHost->HandleBatteryStateChangedLocked();
     }
     return NOERROR;
@@ -944,7 +946,7 @@ ECode PowerManagerService::DreamReceiver::OnReceive(
     /* [in] */ IIntent* intent)
 {
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         mHost->ScheduleSandmanLocked();
     }
     return NOERROR;
@@ -964,7 +966,7 @@ ECode PowerManagerService::UserSwitchedReceiver::OnReceive(
     /* [in] */ IIntent* intent)
 {
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         mHost->HandleSettingsChangedLocked();
     }
     return NOERROR;
@@ -984,7 +986,7 @@ ECode PowerManagerService::DockReceiver::OnReceive(
     /* [in] */ IIntent* intent)
 {
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         Int32 dockState;
         intent->GetInt32Extra(IIntent::EXTRA_DOCK_STATE,
                 IIntent::EXTRA_DOCK_STATE_UNDOCKED, &dockState);
@@ -1015,7 +1017,7 @@ ECode PowerManagerService::SettingsObserver::OnChange(
     /* [in] */ IUri* uri)
 {
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         mHost->HandleSettingsChangedLocked();
     }
     return NOERROR;
@@ -1238,7 +1240,7 @@ PowerManagerService::SuspendBlockerImpl::~SuspendBlockerImpl()
 
 ECode PowerManagerService::SuspendBlockerImpl::AcquireBlocker()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mReferenceCount += 1;
         if (mReferenceCount == 1) {
             if (DEBUG_SPEW) {
@@ -1253,7 +1255,7 @@ ECode PowerManagerService::SuspendBlockerImpl::AcquireBlocker()
 
 ECode PowerManagerService::SuspendBlockerImpl::ReleaseBlocker()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mReferenceCount -= 1;
         if (mReferenceCount == 0) {
             if (DEBUG_SPEW) {
@@ -1278,7 +1280,7 @@ ECode PowerManagerService::SuspendBlockerImpl::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         StringBuilder buider;
         buider += mName;
         buider += ": ref count=";
@@ -1364,7 +1366,7 @@ ECode PowerManagerService::LocalService::GetLowPowerModeEnabled(
     VALIDATE_NOT_NULL(result);
 
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         *result = mHost->mLowPowerModeEnabled;
         return NOERROR;
     }
@@ -1375,7 +1377,7 @@ ECode PowerManagerService::LocalService::RegisterLowPowerModeObserver(
     /* [in] */ ILowPowerModeListener* listener)
 {
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         mHost->mLowPowerModeListeners->Add(listener);
     }
     return NOERROR;
@@ -1402,7 +1404,7 @@ ECode PowerManagerService::UpdateLowPowerModeLockedRunnable::Run()
     // ArrayList<ILowPowerModeListener> listeners;
     AutoPtr<IArrayList> listeners;
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         CArrayList::New(ICollection::Probe(mHost->mLowPowerModeListeners), (IArrayList**)&listeners);
     }
     Int32 size;
@@ -1437,7 +1439,7 @@ PowerManagerService::MyDisplayPowerCallbacks::MyDisplayPowerCallbacks(
 ECode PowerManagerService::MyDisplayPowerCallbacks::OnStateChanged()
 {
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         mHost->mDirty |= PowerManagerService::DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED;
         mHost->UpdatePowerStateLocked();
     }
@@ -1447,7 +1449,7 @@ ECode PowerManagerService::MyDisplayPowerCallbacks::OnStateChanged()
 ECode PowerManagerService::MyDisplayPowerCallbacks::OnProximityPositive()
 {
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         mHost->mProximityPositive = TRUE;
         mHost->mDirty |= PowerManagerService::DIRTY_PROXIMITY_POSITIVE;
         mHost->UpdatePowerStateLocked();
@@ -1458,7 +1460,7 @@ ECode PowerManagerService::MyDisplayPowerCallbacks::OnProximityPositive()
 ECode PowerManagerService::MyDisplayPowerCallbacks::OnProximityNegative()
 {
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         mHost->mProximityPositive = FALSE;
         mHost->mDirty |= PowerManagerService::DIRTY_PROXIMITY_POSITIVE;
         mHost->UserActivityNoUpdateLocked(SystemClock::GetUptimeMillis(),
@@ -1475,7 +1477,7 @@ ECode PowerManagerService::MyDisplayPowerCallbacks::OnDisplayStateChange(
     // where the display's power state is coupled to suspend or to the power HAL.
     // The order of operations matters here.
     Object& lock = mHost->mLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         if (mDisplayState != state) {
             mDisplayState = state;
             if (state == IDisplay::STATE_OFF) {
@@ -1514,7 +1516,7 @@ ECode PowerManagerService::MyDisplayPowerCallbacks::ToString(
 {
     VALIDATE_NOT_NULL(str);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         assert(0 && "TODO");
         *str = "state="; /* + Display::StateToString(mDisplayState)*/;
         return NOERROR;
@@ -1539,7 +1541,7 @@ PowerManagerService::ShutdownOrRebootRunnable::ShutdownOrRebootRunnable(
 
 ECode PowerManagerService::ShutdownOrRebootRunnable::Run()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mShutdown) {
             ShutdownThread::Shutdown(mContext, mConfirm);
         }
@@ -1684,7 +1686,7 @@ ECode PowerManagerService::constructor(
     mSensorManager->GetDefaultSensor(ISensor::TYPE_PROXIMITY, (ISensor**)&mProximitySensor);
     mPerformanceManager = new PerformanceManager(context);
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mWakeLockSuspendBlocker = CreateSuspendBlockerLocked(String("PowerManagerService.WakeLocks"));
         mDisplaySuspendBlocker = CreateSuspendBlockerLocked(String("PowerManagerService.Display"));
         mDisplaySuspendBlocker->AcquireBlocker();
@@ -1722,7 +1724,7 @@ ECode PowerManagerService::OnStart()
 ECode PowerManagerService::OnBootPhase(
     /* [in] */ Int32 phase)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (phase == ISystemService::PHASE_BOOT_COMPLETED) {
             const Int64 now = SystemClock::GetUptimeMillis();
             mBootCompleted = TRUE;
@@ -1738,7 +1740,7 @@ ECode PowerManagerService::OnBootPhase(
 ECode PowerManagerService::SystemReady(
     /* [in] */ IIAppOpsService* appOps)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mSystemReady = TRUE;
         mAppOps = appOps;
         AutoPtr<IInterface> obj = GetLocalService(EIID_IDreamManagerInternal);
@@ -2138,7 +2140,7 @@ ECode PowerManagerService::AcquireWakeLockInternal(
     /* [in] */ Int32 uid,
     /* [in] */ Int32 pid)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IInteger32> integer;
         CInteger32::New(uid, (IInteger32**)&integer);
         Boolean contains;
@@ -2223,7 +2225,7 @@ void PowerManagerService::ReleaseWakeLockInternal(
     /* [in] */ IBinder* lock,
     /* [in] */ Int32 flags)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         Int32 index = FindWakeLockIndexLocked(lock);
         if (index < 0) {
             if (DEBUG_SPEW) {
@@ -2257,7 +2259,7 @@ void PowerManagerService::ReleaseWakeLockInternal(
 void PowerManagerService::HandleWakeLockDeath(
     /* [in] */ WakeLock* wakeLock)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (DEBUG_SPEW) {
             Slogger::D(TAG, "handleWakeLockDeath: lock=%d [%s]",
                     Objects::GetHashCode(wakeLock->mLock), wakeLock->mTag.string());
@@ -2303,7 +2305,7 @@ ECode PowerManagerService::UpdateWakeLockWorkSourceInternal(
     /* [in] */ const String& historyTag,
     /* [in] */ Int32 callingUid)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         Int32 index = FindWakeLockIndexLocked(lock);
         AutoPtr<ISystemProperties> sp;
         CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
@@ -2428,7 +2430,7 @@ void PowerManagerService::NotifyWakeLockReleasedLocked(
 Boolean PowerManagerService::IsWakeLockLevelSupportedInternal(
     /* [in] */ Int32 level)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         switch (level) {
             case IPowerManager::PARTIAL_WAKE_LOCK:
             case IPowerManager::SCREEN_DIM_WAKE_LOCK:
@@ -2491,7 +2493,7 @@ void PowerManagerService::UserActivityInternal(
     /* [in] */ Int32 flags,
     /* [in] */ Int32 uid)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (UserActivityNoUpdateLocked(eventTime, event, flags, uid)) {
             UpdatePowerStateLocked();
         }
@@ -2560,7 +2562,7 @@ void PowerManagerService::WakeUpInternal(
     /* [in] */ Int64 eventTime,
     /* [in] */ Int32 uid)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (WakeUpNoUpdateLocked(eventTime, uid)) {
             UpdatePowerStateLocked();
         }
@@ -2629,7 +2631,7 @@ void PowerManagerService::GoToSleepInternal(
     /* [in] */ Int32 flags,
     /* [in] */ Int32 uid)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (GoToSleepNoUpdateLocked(eventTime, reason, flags, uid)) {
             UpdatePowerStateLocked();
         }
@@ -2717,7 +2719,7 @@ void PowerManagerService::NapInternal(
     /* [in] */ Int64 eventTime,
     /* [in] */ Int32 uid)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (NapNoUpdateLocked(eventTime, uid)) {
             UpdatePowerStateLocked();
         }
@@ -3161,7 +3163,7 @@ void PowerManagerService::UpdateUserActivitySummaryLocked(
 void PowerManagerService::HandleUserActivityTimeout()
 {
     // runs on handler thread
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (DEBUG_SPEW) {
             Slogger::D(TAG, "handleUserActivityTimeout");
         }
@@ -3286,7 +3288,7 @@ void PowerManagerService::HandleSandman()
     // Handle preconditions.
     Boolean startDreaming;
     Int32 wakefulness;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mSandmanScheduled = FALSE;
         wakefulness = mWakefulness;
         if (mSandmanSummoned && mDisplayReady) {
@@ -3315,7 +3317,7 @@ void PowerManagerService::HandleSandman()
     }
 
     // Update dream state.
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         // Remember the initial battery level when the dream started.
         if (startDreaming && isDreaming) {
             mBatteryLevelWhenDreamStarted = mBatteryLevel;
@@ -3633,7 +3635,7 @@ void PowerManagerService::SetHalInteractiveModeLocked(
 
 Boolean PowerManagerService::IsInteractiveInternal()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         return mInteractive;
     }
     return FALSE;
@@ -3641,7 +3643,7 @@ Boolean PowerManagerService::IsInteractiveInternal()
 
 Boolean PowerManagerService::IsLowPowerModeInternal()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         return mLowPowerModeEnabled;
     }
     return FALSE;
@@ -3650,7 +3652,7 @@ Boolean PowerManagerService::IsLowPowerModeInternal()
 Boolean PowerManagerService::SetLowPowerModeInternal(
     /* [in] */ Boolean mode)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (DEBUG) {
             Slogger::D(TAG, "setLowPowerModeInternal %d mIsPowered=%d", mode, mIsPowered);
         }
@@ -3719,7 +3721,7 @@ ECode PowerManagerService::ShutdownOrRebootInternal(
 
     // PowerManager.reboot() is documented not to return so just wait for the inevitable.
     if (wait) {
-        synchronized(runnable) {
+        {    AutoLock syncLock(runnable);
             while (TRUE) {
                 // try {
                 runnable->Wait();
@@ -3759,7 +3761,7 @@ void PowerManagerService::SetStayOnSettingInternal(
 void PowerManagerService::SetMaximumScreenOffTimeoutFromDeviceAdminInternal(
     /* [in] */ Int32 timeMs)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mMaximumScreenOffTimeoutFromDeviceAdmin = timeMs;
         mDirty |= DIRTY_SETTINGS;
         UpdatePowerStateLocked();
@@ -3777,7 +3779,7 @@ void PowerManagerService::SetAttentionLightInternal(
     /* [in] */ Int32 color)
 {
     AutoPtr<Light> light;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (!mSystemReady) {
             return;
         }
@@ -3792,7 +3794,7 @@ void PowerManagerService::SetAttentionLightInternal(
 void PowerManagerService::SetScreenBrightnessOverrideFromWindowManagerInternal(
     /* [in] */ Int32 brightness)
 {
-    synchronized(mLock){
+    {    AutoLock syncLock(mLock);
         if (mScreenBrightnessOverrideFromWindowManager != brightness) {
             mScreenBrightnessOverrideFromWindowManager = brightness;
             mDirty |= DIRTY_SETTINGS;
@@ -3804,7 +3806,7 @@ void PowerManagerService::SetScreenBrightnessOverrideFromWindowManagerInternal(
 void PowerManagerService::SetUserActivityTimeoutOverrideFromWindowManagerInternal(
     /* [in] */ Int64 timeoutMillis)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mUserActivityTimeoutOverrideFromWindowManager != timeoutMillis) {
             mUserActivityTimeoutOverrideFromWindowManager = timeoutMillis;
             mDirty |= DIRTY_SETTINGS;
@@ -3816,7 +3818,7 @@ void PowerManagerService::SetUserActivityTimeoutOverrideFromWindowManagerInterna
 void PowerManagerService::SetTemporaryScreenBrightnessSettingOverrideInternal(
     /* [in] */ Int32 brightness)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mTemporaryScreenBrightnessSettingOverride != brightness) {
             mTemporaryScreenBrightnessSettingOverride = brightness;
             mDirty |= DIRTY_SETTINGS;
@@ -3828,7 +3830,7 @@ void PowerManagerService::SetTemporaryScreenBrightnessSettingOverrideInternal(
 void PowerManagerService::SetTemporaryScreenAutoBrightnessAdjustmentSettingOverrideInternal(
     /* [in] */ Float adj)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         // Note: This condition handles NaN because NaN is not equal to any other
         // value, including itself.
         if (mTemporaryScreenAutoBrightnessAdjustmentSettingOverride != adj) {
@@ -3843,7 +3845,7 @@ void PowerManagerService::SetDozeOverrideFromDreamManagerInternal(
     /* [in] */ Int32 screenState,
     /* [in] */ Int32 screenBrightness)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mDozeScreenStateOverrideFromDreamManager != screenState
                 || mDozeScreenBrightnessOverrideFromDreamManager != screenBrightness) {
             mDozeScreenStateOverrideFromDreamManager = screenState;
@@ -3906,7 +3908,7 @@ ECode PowerManagerService::LowLevelReboot(
 ECode PowerManagerService::Monitor()
 {
     // Grab and release lock for watchdog monitor to detect deadlocks.
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         return NOERROR;
     }
     return NOERROR;
@@ -3918,7 +3920,7 @@ void PowerManagerService::DumpInternal(
     pw->Println(String("POWER MANAGER (dumpsys power)\n"));
 
     AutoPtr<WirelessChargerDetector> wcd;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         pw->Println(String("Power Manager State:"));
         pw->Println(String("  mDirty=0x") + StringUtils::ToHexString(mDirty));
         pw->Println(String("  mWakefulness=") + WakefulnessToString(mWakefulness));
@@ -4254,7 +4256,7 @@ void PowerManagerService::CleanupProximity()
 void PowerManagerService::SetButtonBrightnessOverrideFromWindowManagerInternal(
     /* [in] */ Int32 brightness)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (mButtonBrightnessOverrideFromWindowManager != brightness) {
             mButtonBrightnessOverrideFromWindowManager = brightness;
             mDirty |= DIRTY_SETTINGS;

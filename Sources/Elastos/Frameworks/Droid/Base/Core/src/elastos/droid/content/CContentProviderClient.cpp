@@ -7,6 +7,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::IICancellationSignal;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::Looper;
@@ -97,7 +99,7 @@ ECode CContentProviderClient::constructor(
 ECode CContentProviderClient::SetDetectNotResponding(
     /* [in] */ Int64 timeoutMillis)
 {
-    synchronized(mContentProviderClientLock) {
+    {    AutoLock syncLock(mContentProviderClientLock);
         mAnrTimeout = timeoutMillis;
 
         if (timeoutMillis > 0) {

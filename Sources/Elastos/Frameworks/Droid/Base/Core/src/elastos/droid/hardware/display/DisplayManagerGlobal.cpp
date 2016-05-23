@@ -14,6 +14,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::ILooper;
@@ -170,7 +172,7 @@ DisplayManagerGlobal::~DisplayManagerGlobal()
 
 AutoPtr<IDisplayManagerGlobal> DisplayManagerGlobal::GetInstance()
 {
-    synchronized(sInstanceLock) {
+    {    AutoLock syncLock(sInstanceLock);
         if (sInstance == NULL) {
             AutoPtr<IInterface> service = ServiceManager::GetService(IContext::DISPLAY_SERVICE);
             if (service != NULL) {
@@ -194,7 +196,7 @@ ECode DisplayManagerGlobal::GetDisplayInfo(
     *displayInfo = NULL;
 
     //try {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (USE_CACHE) {
             HashMap<Int32, AutoPtr<IDisplayInfo> >::Iterator find
                 = mDisplayInfoCache.Find(displayId);
@@ -243,7 +245,7 @@ ECode DisplayManagerGlobal::GetDisplayIds(
 
     AutoPtr< ArrayOf<Int32> > ids;
     //try {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (USE_CACHE) {
             if (mDisplayIdCache != NULL) {
                 *displayIds = mDisplayIdCache;
@@ -340,7 +342,7 @@ ECode DisplayManagerGlobal::RegisterDisplayListener(
         handler->GetLooper((ILooper**)&looper);
     }
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         List<AutoPtr<DisplayListenerDelegate> >::Iterator iter = FindDisplayListenerLocked(listener);
         if (iter == mDisplayListeners.End()) {
             AutoPtr<DisplayListenerDelegate> delegate = new DisplayListenerDelegate(listener);
@@ -361,7 +363,7 @@ ECode DisplayManagerGlobal::UnregisterDisplayListener(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         List<AutoPtr<DisplayListenerDelegate> >::Iterator iter = FindDisplayListenerLocked(listener);
         if (iter != mDisplayListeners.End()) {
             AutoPtr<DisplayListenerDelegate> d = *iter;
@@ -404,7 +406,7 @@ void DisplayManagerGlobal::HandleDisplayEvent(
     if (DEBUG) {
         Logger::D(TAG, "onDisplayEvent: displayId=%d, event=%d", displayId, event);
     }
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (USE_CACHE) {
             mDisplayInfoCache.Erase(displayId);
 
@@ -422,7 +424,7 @@ void DisplayManagerGlobal::HandleDisplayEvent(
 
 ECode DisplayManagerGlobal::StartWifiDisplayScan()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mWifiDisplayScanNestCount++ == 0) {
             RegisterCallbackIfNeededLocked();
             if (FAILED(mDm->StartWifiDisplayScan())) {
@@ -436,7 +438,7 @@ ECode DisplayManagerGlobal::StartWifiDisplayScan()
 
 ECode DisplayManagerGlobal::StopWifiDisplayScan()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (--mWifiDisplayScanNestCount == 0) {
             if (FAILED(mDm->StopWifiDisplayScan())) {
                 Logger::E(TAG, "Failed to scan for Wifi displays.");

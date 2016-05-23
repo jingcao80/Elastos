@@ -1,6 +1,8 @@
 #include "elastos/droid/server/IoThread.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::CHandler;
@@ -31,7 +33,7 @@ void IoThread::EnsureThreadLocked()
 
 AutoPtr<IoThread> IoThread::Get()
 {
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         EnsureThreadLocked();
     }
     return sInstance;
@@ -39,7 +41,7 @@ AutoPtr<IoThread> IoThread::Get()
 
 AutoPtr<IHandler> IoThread::GetHandler()
 {
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         EnsureThreadLocked();
     }
     return sHandler;

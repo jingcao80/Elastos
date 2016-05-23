@@ -2,6 +2,9 @@
 #include "BufferedInputStream.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Elastos {
 namespace IO {
 
@@ -44,7 +47,7 @@ ECode BufferedInputStream::Available(
     VALIDATE_NOT_NULL(number)
     *number = 0;
 
-    synchronized(this){
+    {    AutoLock syncLock(this);
         AutoPtr<IInputStream> localIn = mIn; // 'in' could be invalidated by close()
         if (NULL == mBuf || NULL == localIn) {
             return StreamClosed();
@@ -133,7 +136,7 @@ ECode BufferedInputStream::Fillbuf(
 ECode BufferedInputStream::Mark(
     /* [in] */ Int32 readLimit)
 {
-    synchronized(this){
+    {    AutoLock syncLock(this);
         mMarklimit = readLimit;
         mMarkpos = mPos;
     }
@@ -154,7 +157,7 @@ ECode BufferedInputStream::Read(
     VALIDATE_NOT_NULL(value)
     *value = -1;
 
-    synchronized(this){
+    {    AutoLock syncLock(this);
 
         // Use local refs since buf and in may be invalidated by an
         // unsynchronized close()
@@ -201,7 +204,7 @@ ECode BufferedInputStream::Read(
     VALIDATE_NOT_NULL(number);
     *number = 0;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (NULL == buffer) {
             // throw new NullPointerException("buffer == null");
             return E_NULL_POINTER_EXCEPTION;
@@ -303,7 +306,7 @@ ECode BufferedInputStream::Read(
 
 ECode BufferedInputStream::Reset()
 {
-    synchronized(this){
+    {    AutoLock syncLock(this);
         // BEGIN android-changed
         /*
          * These exceptions get thrown in some "normalish" circumstances,
@@ -331,7 +334,7 @@ ECode BufferedInputStream::Skip(
     VALIDATE_NOT_NULL(number)
     *number = 0;
 
-    synchronized(this){
+    {    AutoLock syncLock(this);
         // Use local refs since buf and in may be invalidated by an
         // unsynchronized close()
         AutoPtr<ArrayOf<Byte> > localBuf = mBuf;

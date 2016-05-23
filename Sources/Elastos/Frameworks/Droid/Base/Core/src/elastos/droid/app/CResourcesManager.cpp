@@ -21,6 +21,8 @@
 #include "elastos/core/CoreUtils.h"
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CContextImpl;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Pm::IActivityInfo;
@@ -81,7 +83,7 @@ ECode CResourcesManager::constructor()
 
 AutoPtr<IResourcesManager> CResourcesManager::GetInstance()
 {
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         if (sResourcesManager == NULL) {
             CResourcesManager::New((IResourcesManager**)&sResourcesManager);
         }
@@ -239,7 +241,7 @@ ECode CResourcesManager::GetTopLevelResources(
             overrideConfiguration, scale, isThemeable, themeConfig, token);
 
     AutoPtr<IResources> r;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // Resources is app scale dependent.
         AutoPtr<IInterface> obj, resObj;
         mActiveResources->Get(TO_IINTERFACE(key), (IInterface**)&obj);
@@ -390,7 +392,7 @@ ECode CResourcesManager::GetTopLevelResources(
         Logger::I(TAG, "=======================================================");
     }
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj, resObj;
         mActiveResources->Get(TO_IINTERFACE(key), (IInterface**)&obj);
         if (obj != NULL) {

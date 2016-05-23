@@ -17,6 +17,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Graphics::CBitmap;
 using Elastos::Droid::Graphics::CCanvas;
@@ -509,7 +511,7 @@ ECode CMediaSessionLegacyHelper::GetHelper(
     if (DEBUG) {
         // Logger::D(TAG, "Attempting to get helper with context " + context);
     }
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         if (sInstance == NULL) {
             CMediaSessionLegacyHelper::New(context, (IMediaSessionLegacyHelper**)&sInstance);
         }

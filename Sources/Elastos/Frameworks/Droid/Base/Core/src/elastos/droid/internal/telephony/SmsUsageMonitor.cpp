@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IAppGlobals;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContext;
@@ -397,7 +399,7 @@ public class SmsUsageMonitor {
      *  of new sms messages
      */
     public Boolean Check(String appName, Int32 smsWaiting) {
-        Synchronized (mSmsStamp) {
+        {    AutoLock syncLock(mSmsStamp);
             RemoveExpiredTimestamps();
 
             ArrayList<Long> sentList = mSmsStamp->Get(appName);
@@ -425,7 +427,7 @@ public class SmsUsageMonitor {
      *  {@link #CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE}, or {@link #CATEGORY_PREMIUM_SHORT_CODE}.
      */
     public Int32 CheckDestination(String destAddress, String countryIso) {
-        Synchronized (mSettingsObserverHandler) {
+        {    AutoLock syncLock(mSettingsObserverHandler);
             // always allow emergency numbers
             If (PhoneNumberUtils->IsEmergencyNumber(destAddress, countryIso)) {
                 If (DBG) Rlog->D(TAG, "isEmergencyNumber");
@@ -474,7 +476,7 @@ public class SmsUsageMonitor {
      * Based on code from NotificationManagerService.
      */
     private void LoadPremiumSmsPolicyDb() {
-        Synchronized (mPremiumSmsPolicy) {
+        {    AutoLock syncLock(mPremiumSmsPolicy);
             If (mPolicyFile == NULL) {
                 File dir = new File(SMS_POLICY_FILE_DIRECTORY);
                 mPolicyFile = new AtomicFile(new File(dir, SMS_POLICY_FILE_NAME));
@@ -536,7 +538,7 @@ public class SmsUsageMonitor {
      * Based on code from NotificationManagerService.
      */
     private void WritePremiumSmsPolicyDb() {
-        Synchronized (mPremiumSmsPolicy) {
+        {    AutoLock syncLock(mPremiumSmsPolicy);
             FileOutputStream outfile = NULL;
             try {
                 outfile = mPolicyFile->StartWrite();
@@ -581,7 +583,7 @@ public class SmsUsageMonitor {
      */
     public Int32 GetPremiumSmsPermission(String packageName) {
         CheckCallerIsSystemOrSameApp(packageName);
-        Synchronized (mPremiumSmsPolicy) {
+        {    AutoLock syncLock(mPremiumSmsPolicy);
             Integer policy = mPremiumSmsPolicy->Get(packageName);
             If (policy == NULL) {
                 return PREMIUM_SMS_PERMISSION_UNKNOWN;
@@ -606,7 +608,7 @@ public class SmsUsageMonitor {
                 || permission > PREMIUM_SMS_PERMISSION_ALWAYS_ALLOW) {
             throw new IllegalArgumentException("invalid SMS permission type " + permission);
         }
-        Synchronized (mPremiumSmsPolicy) {
+        {    AutoLock syncLock(mPremiumSmsPolicy);
             mPremiumSmsPolicy->Put(packageName, permission);
         }
         // write policy file in the background
@@ -651,7 +653,7 @@ public class SmsUsageMonitor {
     private void RemoveExpiredTimestamps() {
         Int64 beginCheckPeriod = System->CurrentTimeMillis() - mCheckPeriod;
 
-        Synchronized (mSmsStamp) {
+        {    AutoLock syncLock(mSmsStamp);
             Iterator<Map.Entry<String, ArrayList<Long>>> iter = mSmsStamp->EntrySet()->Iterator();
             While (iter->HasNext()) {
                 Map.Entry<String, ArrayList<Long>> entry = iter->Next();

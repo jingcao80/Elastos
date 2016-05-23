@@ -7,6 +7,8 @@
 #include "AutoLock.h"
 #include "Logger.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::CLocale;
 using Elastos::Utility::Logging::Logger;
@@ -60,7 +62,7 @@ AutoPtr<ILocaleData> LocaleData::Get(
     String tmp;
     locale->ToLanguageTag(&tmp);
     const String languageTag = tmp;
-    synchronized(sLocaleDataCacheLock) {
+    {    AutoLock syncLock(sLocaleDataCacheLock);
         HashMap< String, AutoPtr<ILocaleData> >::Iterator it =
                 sLocaleDataCache.Find(languageTag);
         if (it != sLocaleDataCache.End()) {
@@ -69,7 +71,7 @@ AutoPtr<ILocaleData> LocaleData::Get(
     }
 
     AutoPtr<ILocaleData> newLocaleData = InitLocaleData(locale);
-    synchronized(sLocaleDataCacheLock) {
+    {    AutoLock syncLock(sLocaleDataCacheLock);
         HashMap< String, AutoPtr<ILocaleData> >::Iterator it =
                 sLocaleDataCache.Find(languageTag);
         if (it != sLocaleDataCache.End()) {

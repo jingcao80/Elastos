@@ -14,6 +14,8 @@
 #include <Elastos.Droid.Content.h>
 #include <Elastos.CoreLibrary.IO.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntentFilter;
@@ -400,7 +402,7 @@ ECode WiredAccessoryManager::NotifyWiredAccessoryChanged(
 
 ECode WiredAccessoryManager::SystemReady()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mWakeLock->AcquireLock();
 
         AutoPtr<IMessage> msg;

@@ -15,6 +15,8 @@
 #include <elastos/droid/utility/Xml.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::CComponentNameHelper;
@@ -512,7 +514,7 @@ ECode DeviceOwner::ReadOwnerFile()
 
 ECode DeviceOwner::WriteOwnerFile()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         WriteOwnerFileLocked();
     }
     return NOERROR;

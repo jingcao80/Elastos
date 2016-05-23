@@ -13,6 +13,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::CPendingIntentHelper;
@@ -90,7 +92,7 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnUserSwitching(
     // Note that the mLockPatternUtils user has already been updated from setCurrentUser.
     // We need to force a reset of the views, since lockNow (called by
     // ActivityManagerService) will not reconstruct the keyguard if it is already showing.
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         mHost->mSwitchingUser = TRUE;
         mHost->mKeyguardDonePending = FALSE;
         mHost->ResetStateLocked();
@@ -159,7 +161,7 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnUserInfoChanged(
 ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnPhoneStateChanged(
     /* [in] */ Int32 phoneState)
 {
-    synchronized(mHost) {
+    {    AutoLock syncLock(mHost);
         if (ITelephonyManager::CALL_STATE_IDLE == phoneState  // call ending
                 && !mHost->mScreenOn                           // screen off
                 && mHost->mExternallyEnabled) {                // not disabled by any app
@@ -200,7 +202,7 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnSimStateChanged(
         case IccCardConstantsState_ABSENT:
             // only force lock screen in case of missing sim if user hasn't
             // gone through setup wizard
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 Boolean isDeviceProvisioned = FALSE;
                 //TODO
                 // mHost->mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
@@ -220,7 +222,7 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnSimStateChanged(
             break;
         case IccCardConstantsState_PIN_REQUIRED:
         case IccCardConstantsState_PUK_REQUIRED:
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 Boolean isShowing;
                 mHost->IsShowing(&isShowing);
                 if (!isShowing) {
@@ -234,7 +236,7 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnSimStateChanged(
             }
             break;
         case IccCardConstantsState_PERM_DISABLED:
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 Boolean isShowing;
                 mHost->IsShowing(&isShowing);
                 if (!isShowing) {
@@ -249,7 +251,7 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnSimStateChanged(
             }
             break;
         case IccCardConstantsState_READY:
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 Boolean isShowing;
                 mHost->IsShowing(&isShowing);
                 if (!isShowing) {
@@ -365,7 +367,7 @@ ECode CKeyguardViewMediator::MyBroadcastReceiver::OnReceive(
         const Int32 sequence = value;
         if (DEBUG) Logger::D(TAG, "received DELAYED_KEYGUARD_ACTION with seq = %d, mDelayedShowingSequence = %d",
             sequence, mHost->mDelayedShowingSequence);
-        synchronized(mHost) {
+        {    AutoLock syncLock(mHost);
             if (mHost->mDelayedShowingSequence == sequence) {
                 // Don't play lockscreen SFX if the screen went off due to timeout.
                 mHost->mSuppressNextLockSound = TRUE;
@@ -449,7 +451,7 @@ ECode CKeyguardViewMediator::MyHandler::HandleMessage(
             break;
         }
         case KEYGUARD_TIMEOUT:
-            synchronized(mHost) {
+            {    AutoLock syncLock(mHost);
                 AutoPtr<IInterface> obj;
                 msg->GetObj((IInterface**)&obj);
                 AutoPtr<IBundle> b = IBundle::Probe(obj);
@@ -698,7 +700,7 @@ ECode CKeyguardViewMediator::OnSystemReady()
     Logger::D(TAG, "TODO [OnSystemReady]: Not implement SEARCH_SERVICE.");
     // mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
     mSearchManager = ISearchManager::Probe(obj);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (DEBUG) Logger::D(TAG, "onSystemReady");
         mSystemReady = TRUE;
         //TODO
@@ -736,7 +738,7 @@ ECode CKeyguardViewMediator::OnSystemReady()
 ECode CKeyguardViewMediator::OnScreenTurnedOff(
     /* [in] */ Int32 why)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mScreenOn = FALSE;
         if (DEBUG) Logger::D(TAG, "onScreenTurnedOff(%d)", why);
 
@@ -861,7 +863,7 @@ void CKeyguardViewMediator::CancelDoKeyguardLaterLocked()
 ECode CKeyguardViewMediator::OnScreenTurnedOn(
     /* [in] */ IIKeyguardShowCallback* callback)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mScreenOn = TRUE;
         CancelDoKeyguardLaterLocked();
         if (DEBUG) Logger::D(TAG, "onScreenTurnedOn, seq = %d", mDelayedShowingSequence);
@@ -895,7 +897,7 @@ void CKeyguardViewMediator::MaybeSendUserPresentBroadcast()
 
 ECode CKeyguardViewMediator::OnDreamingStarted()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean isSecure;
         mLockPatternUtils->IsSecure(&isSecure);
         if (mScreenOn && isSecure) {
@@ -907,7 +909,7 @@ ECode CKeyguardViewMediator::OnDreamingStarted()
 
 ECode CKeyguardViewMediator::OnDreamingStopped()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mScreenOn) {
             CancelDoKeyguardLaterLocked();
         }
@@ -918,7 +920,7 @@ ECode CKeyguardViewMediator::OnDreamingStopped()
 ECode CKeyguardViewMediator::SetKeyguardEnabled(
     /* [in] */ Boolean enabled)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (DEBUG) Logger::D(TAG, "setKeyguardEnabled(%s)", enabled ? "TRUE" : "FALSE");
 
         mExternallyEnabled = enabled;
@@ -982,7 +984,7 @@ ECode CKeyguardViewMediator::SetKeyguardEnabled(
 ECode CKeyguardViewMediator::VerifyUnlock(
     /* [in] */ IIKeyguardExitCallback* callback)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean isDeviceProvisioned = TRUE;
         // mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
         if (!isDeviceProvisioned) {
@@ -1064,7 +1066,7 @@ ECode CKeyguardViewMediator::SetOccluded(
 void CKeyguardViewMediator::HandleSetOccluded(
     /* [in] */ Boolean isOccluded)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mOccluded != isOccluded) {
             mOccluded = isOccluded;
             mStatusBarKeyguardViewManager->SetOccluded(isOccluded);
@@ -1270,7 +1272,7 @@ ECode CKeyguardViewMediator::KeyguardDone(
 {
     if (DEBUG) Logger::D(TAG, "keyguardDone(%s)", authenticated ? "TRUE" : "FALSE");
     // EventLog.writeEvent(70000, 2);//TODO
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mKeyguardDonePending = FALSE;
     }
     AutoPtr<IMessage> msg;
@@ -1315,7 +1317,7 @@ void CKeyguardViewMediator::HandleKeyguardDone(
 
 void CKeyguardViewMediator::SendUserPresentBroadcast()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mBootCompleted) {
             Int32 user;
             mLockPatternUtils->GetCurrentUser(&user);
@@ -1332,7 +1334,7 @@ void CKeyguardViewMediator::SendUserPresentBroadcast()
 
 void CKeyguardViewMediator::HandleKeyguardDoneDrawing()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (DEBUG) Logger::D(TAG, "handleKeyguardDoneDrawing");
         if (mWaitingUntilKeyguardVisible) {
             if (DEBUG) Logger::D(TAG, "handleKeyguardDoneDrawing: notifying mWaitingUntilKeyguardVisible");
@@ -1413,7 +1415,7 @@ void CKeyguardViewMediator::UpdateActivityLockScreenState()
 void CKeyguardViewMediator::HandleShow(
     /* [in] */ IBundle* options)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (!mSystemReady) {
             if (DEBUG) Logger::D(TAG, "ignoring handleShow because system is not ready.");
             return;
@@ -1441,7 +1443,7 @@ void CKeyguardViewMediator::HandleShow(
 
 void CKeyguardViewMediator::HandleHide()
 {
-    synchronized (this){
+    {    AutoLock syncLock(this);
         if (DEBUG) Logger::D(TAG, "handleHide");
 
         mHiding = TRUE;
@@ -1476,7 +1478,7 @@ void CKeyguardViewMediator::HandleStartKeyguardExitAnimation(
     /* [in] */ Int64 startTime,
     /* [in] */ Int64 fadeoutDuration)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
 
         if (!mHiding) {
             return;
@@ -1544,7 +1546,7 @@ void CKeyguardViewMediator::AdjustStatusBarLocked()
 
 void CKeyguardViewMediator::HandleReset()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (DEBUG) Logger::D(TAG, "handleReset");
         mStatusBarKeyguardViewManager->Reset();
     }
@@ -1552,7 +1554,7 @@ void CKeyguardViewMediator::HandleReset()
 
 void CKeyguardViewMediator::HandleVerifyUnlock()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (DEBUG) Logger::D(TAG, "handleVerifyUnlock");
         mStatusBarKeyguardViewManager->VerifyUnlock();
         mShowing = TRUE;
@@ -1562,7 +1564,7 @@ void CKeyguardViewMediator::HandleVerifyUnlock()
 
 void CKeyguardViewMediator::HandleNotifyScreenOff()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (DEBUG) Logger::D(TAG, "handleNotifyScreenOff");
         mStatusBarKeyguardViewManager->OnScreenTurnedOff();
     }
@@ -1571,7 +1573,7 @@ void CKeyguardViewMediator::HandleNotifyScreenOff()
 void CKeyguardViewMediator::HandleNotifyScreenOn(
     /* [in] */ IIKeyguardShowCallback* callback)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (DEBUG) Logger::D(TAG, "handleNotifyScreenOn");
         mStatusBarKeyguardViewManager->OnScreenTurnedOn(callback);
     }
@@ -1603,7 +1605,7 @@ ECode CKeyguardViewMediator::OnBootCompleted()
 {
     //TODO
     // mUpdateMonitor->DispatchBootCompleted();
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mBootCompleted = TRUE;
         if (mBootSendUserPresent) {
             SendUserPresentBroadcast();

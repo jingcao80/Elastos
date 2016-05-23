@@ -2,6 +2,8 @@
 #include "elastos/droid/server/net/CDnsServerEntry.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Server::Net::CDnsServerEntry;
 using Elastos::Droid::Server::Net::IDnsServerEntry;
 using Elastos::Droid::Server::Net::IDnsServerRepository;
@@ -42,7 +44,7 @@ ECode DnsServerRepository::constructor()
 ECode DnsServerRepository::SetDnsServersOn(
     /* [in] */ ILinkProperties* lp)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         lp->SetDnsServers(ICollection::Probe(mCurrentServers));
     }
     return NOERROR;
@@ -54,7 +56,7 @@ ECode DnsServerRepository::AddServers(
     /* [out] */ Boolean* isAdded)
 {
     VALIDATE_NOT_NULL(isAdded)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // The lifetime is actually an unsigned 32-bit number, but Java doesn't have unsigned.
         // Technically 0xffffffff (the maximum) is special and means "forever", but 2^32 seconds
         // (136 years) is close enough.
@@ -99,7 +101,7 @@ Boolean DnsServerRepository::UpdateExistingEntry(
     /* [in] */ IInetAddress* address,
     /* [in] */ Int64 expiry)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mIndex->Get(address, (IInterface**)&obj);
         AutoPtr<IDnsServerEntry> existing = IDnsServerEntry::Probe(obj);
@@ -113,7 +115,7 @@ Boolean DnsServerRepository::UpdateExistingEntry(
 
 Boolean DnsServerRepository::UpdateCurrentServers()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ISystem> sys;
         CSystem::AcquireSingleton((ISystem**)&sys);
         Int64 now;

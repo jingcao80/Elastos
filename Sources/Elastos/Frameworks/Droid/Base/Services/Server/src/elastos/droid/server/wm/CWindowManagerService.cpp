@@ -37,6 +37,8 @@
 #include <binder/IServiceManager.h>
 #include <elastos/core/StringUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Animation::IValueAnimatorHelper;
@@ -252,7 +254,7 @@ CAR_INTERFACE_IMPL(CWindowManagerService::MyLowPowerModeListener, Object, ILowPo
 ECode CWindowManagerService::MyLowPowerModeListener::OnLowPowerModeChanged(
     /* [in] */ Boolean enabled)
 {
-    synchronized(mHost->mWindowMapLock) {
+    {    AutoLock syncLock(mHost->mWindowMapLock);
         if (mHost->mAnimationsDisabled != enabled) {
             mHost->mAnimationsDisabled = enabled;
             mHost->DispatchNewAnimatorScaleLocked(NULL);
@@ -458,7 +460,7 @@ CWindowManagerService::RotationWatcherDeathRecipint::RotationWatcherDeathRecipin
 
 ECode CWindowManagerService::RotationWatcherDeathRecipint::ProxyDied()
 {
-    synchronized(mOwner->mWindowMapLock) {
+    {    AutoLock syncLock(mOwner->mWindowMapLock);
         List<AutoPtr<RotationWatcher> >::Iterator iter = mOwner->mRotationWatchers.Begin();
         while (iter != mOwner->mRotationWatchers.End()) {
             AutoPtr<IBinder> b = IBinder::Probe((*iter)->mWatcher);
@@ -536,7 +538,7 @@ ECode CWindowManagerService::LocalService::RequestTraversalFromDisplayManager()
 ECode CWindowManagerService::LocalService::SetMagnificationSpec(
     /* [in] */ IMagnificationSpec* spec)
 {
-    synchronized(mHost->mWindowMapLock) {
+    {    AutoLock syncLock(mHost->mWindowMapLock);
         if (mHost->mAccessibilityController != NULL) {
             mHost->mAccessibilityController->SetMagnificationSpecLocked(spec);
         }
@@ -558,7 +560,7 @@ ECode CWindowManagerService::LocalService::GetCompatibleMagnificationSpecForWind
     VALIDATE_NOT_NULL(_spec)
     *_spec = NULL;
 
-    synchronized(mHost->mWindowMapLock) {
+    {    AutoLock syncLock(mHost->mWindowMapLock);
         AutoPtr<WindowState> windowState;
         HashMap<AutoPtr<IBinder>, AutoPtr<WindowState> >::Iterator it = mHost->mWindowMap.Find(windowToken);
         if (it != mHost->mWindowMap.End() && it->mSecond != NULL) {
@@ -600,7 +602,7 @@ ECode CWindowManagerService::LocalService::GetCompatibleMagnificationSpecForWind
 ECode CWindowManagerService::LocalService::SetMagnificationCallbacks(
     /* [in] */ IMagnificationCallbacks* callbacks)
 {
-    synchronized(mHost->mWindowMapLock) {
+    {    AutoLock syncLock(mHost->mWindowMapLock);
         if (mHost->mAccessibilityController == NULL) {
             mHost->mAccessibilityController = new AccessibilityController(mHost);
         }
@@ -615,7 +617,7 @@ ECode CWindowManagerService::LocalService::SetMagnificationCallbacks(
 ECode CWindowManagerService::LocalService::SetWindowsForAccessibilityCallback(
     /* [in] */ IWindowsForAccessibilityCallback* callback)
 {
-    synchronized(mHost->mWindowMapLock) {
+    {    AutoLock syncLock(mHost->mWindowMapLock);
         if (mHost->mAccessibilityController == NULL) {
             mHost->mAccessibilityController = new AccessibilityController(mHost);
         }
@@ -640,7 +642,7 @@ ECode CWindowManagerService::LocalService::GetFocusedWindowToken(
     VALIDATE_NOT_NULL(binder)
     *binder = NULL;
 
-    synchronized(mHost->mWindowMapLock) {
+    {    AutoLock syncLock(mHost->mWindowMapLock);
         AutoPtr<WindowState> windowState = mHost->GetFocusedWindowLocked();
         if (windowState != NULL) {
             *binder = IBinder::Probe(windowState->mClient);
@@ -667,7 +669,7 @@ ECode CWindowManagerService::LocalService::GetWindowFrame(
     /* [in] */ IBinder* token,
     /* [in] */ IRect* outBounds)
 {
-    synchronized(mHost->mWindowMapLock) {
+    {    AutoLock syncLock(mHost->mWindowMapLock);
         AutoPtr<WindowState> windowState;
         HashMap<AutoPtr<IBinder>, AutoPtr<WindowState> >::Iterator it = mHost->mWindowMap.Find(token);
         if (it != mHost->mWindowMap.End() && it->mSecond != NULL) {
@@ -688,7 +690,7 @@ ECode CWindowManagerService::LocalService::WaitForAllWindowsDrawn(
     /* [in] */ Int64 timeout)
 {
     Slogger::W(TAG, "TODO: wait for launcher app");
-    // synchronized(mHost->mWindowMapLock) {
+    // {    AutoLock syncLock(mHost->mWindowMapLock);
     //     mHost->mWaitingForDrawnCallback = callback;
     //     AutoPtr<WindowList> windows = mHost->GetDefaultWindowListLocked();
     //     Int32 size;
@@ -2611,7 +2613,7 @@ Boolean CWindowManagerService::UpdateWallpaperOffsetLocked(
 void CWindowManagerService::WallpaperOffsetsComplete(
     /* [in] */ IBinder* window)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (mWaitingOnWallpaper != NULL &&
                 IBinder::Probe(mWaitingOnWallpaper->mClient.Get()) == window) {
             mWaitingOnWallpaper = NULL;
@@ -2786,7 +2788,7 @@ Int32 CWindowManagerService::AddWindow(
     Int32 type;
     attrs->GetType(&type);
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         assert(mDisplayReady);
         // if (!mDisplayReady) {
         //     throw new IllegalStateException("Display has not been initialialized");
@@ -3139,7 +3141,7 @@ ECode CWindowManagerService::SetScreenCaptureDisabled(
         Slogger::E(TAG, "Only system can call setScreenCaptureDisabled.");
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<IBoolean> b;
         CBoolean::New(disabled, (IBoolean**)&b);
         mScreenCaptureDisabled->Put(userId, b);
@@ -3151,7 +3153,7 @@ void CWindowManagerService::RemoveWindow(
     /* [in] */ CSession* session,
     /* [in] */ IIWindow* client)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<WindowState> win;
         WindowForClientLocked(session, client, FALSE, (WindowState**)&win);
         if (win == NULL) {
@@ -3382,7 +3384,7 @@ void CWindowManagerService::RemoveWindowInnerLocked(
 
 void CWindowManagerService::UpdateAppOpsState()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         Int32 numDisplays;
         mDisplayContents->GetSize(&numDisplays);
         for (Int32 displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
@@ -3439,7 +3441,7 @@ void CWindowManagerService::SetTransparentRegionWindow(
 {
     Int64 origId = Binder::ClearCallingIdentity();
     // try {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
 
         AutoPtr<WindowState> w;
         WindowForClientLocked(session, client, FALSE, (WindowState**)&w);
@@ -3462,7 +3464,7 @@ void CWindowManagerService::SetInsetsWindow(
 {
     Int64 origId = Binder::ClearCallingIdentity();
     // try {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
 
         AutoPtr<WindowState> w;
         WindowForClientLocked(session, client, FALSE, (WindowState**)&w);
@@ -3495,7 +3497,7 @@ void CWindowManagerService::GetWindowDisplayFrame(
     /* [in] */ IIWindow* client,
     /* [in] */ IRect* outDisplayFrame)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<WindowState> win;
         WindowForClientLocked(session, client, FALSE, (WindowState**)&win);
         if (win == NULL) {
@@ -3526,7 +3528,7 @@ void CWindowManagerService::WallpaperCommandComplete(
     /* [in] */ IBinder* window,
     /* [in] */ IBundle* result)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (mWaitingOnWallpaper != NULL &&
                 IBinder::Probe(mWaitingOnWallpaper->mClient.Get()) == window) {
             mWaitingOnWallpaper = NULL;
@@ -3642,7 +3644,7 @@ void CWindowManagerService::OnRectangleOnScreenRequested(
     /* [in] */ IBinder* token,
     /* [in] */ IRect* rectangle)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (mAccessibilityController != NULL) {
             AutoPtr<WindowState> window;
             HashMap<AutoPtr<IBinder>, AutoPtr<WindowState> >::Iterator it = mWindowMap.Find(token);
@@ -3661,7 +3663,7 @@ AutoPtr<IIWindowId> CWindowManagerService::GetWindowId(
     /* [in] */ IBinder* token)
 {
     AutoPtr<IIWindowId> value;
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<WindowState> window;
         HashMap<AutoPtr<IBinder>, AutoPtr<WindowState> >::Iterator it = mWindowMap.Find(token);
         if (it != mWindowMap.End()) {
@@ -3709,7 +3711,7 @@ Int32 CWindowManagerService::RelayoutWindow(
 
     Int64 origId = Binder::ClearCallingIdentity();
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<WindowState> win;
         WindowForClientLocked(session, client, FALSE, (WindowState**)&win);
         if (win == NULL) {
@@ -4078,7 +4080,7 @@ void CWindowManagerService::PerformDeferredDestroyWindow(
     Int64 origId = Binder::ClearCallingIdentity();
 
     // try {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<WindowState> win;
         WindowForClientLocked(session, client, FALSE, (WindowState**)&win);
         if (win == NULL) {
@@ -4100,7 +4102,7 @@ Boolean CWindowManagerService::OutOfMemoryWindow(
 
     // try {
     Boolean result;
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<WindowState> win;
         WindowForClientLocked(session, client, FALSE, (WindowState**)&win);
         if (win == NULL) {
@@ -4121,7 +4123,7 @@ void CWindowManagerService::FinishDrawingWindow(
     /* [in] */ IIWindow* client)
 {
     Int64 origId = Binder::ClearCallingIdentity();
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<WindowState> win;
         WindowForClientLocked(session, client, FALSE, (WindowState**)&win);
         if (win != NULL && win->mWinAnimator->FinishDrawingLocked()) {
@@ -4216,7 +4218,7 @@ void CWindowManagerService::ValidateAppTokens(
     /* [in] */ Int32 stackId,
     /* [in] */ IArrayList* tasks) //List<TaskGroup>
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         Int32 size;
         tasks->GetSize(&size);
         Int32 t = size - 1;
@@ -4354,7 +4356,7 @@ ECode CWindowManagerService::AddWindowToken(
         return E_SECURITY_EXCEPTION;
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<WindowToken> wtoken;
         HashMap<AutoPtr<IBinder>, AutoPtr<WindowToken> >::Iterator tokenIt = mTokenMap.Find(token);
         if (tokenIt != mTokenMap.End()) {
@@ -4387,7 +4389,7 @@ ECode CWindowManagerService::RemoveWindowToken(
     }
 
     Int64 origId = Binder::ClearCallingIdentity();
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<DisplayContent> displayContent;
         AutoPtr<WindowToken> wtoken;
         HashMap<AutoPtr<IBinder>, AutoPtr<WindowToken> >::Iterator tokenIt
@@ -4529,7 +4531,7 @@ ECode CWindowManagerService::AddAppToken(
     //     inputDispatchingTimeoutNanos = DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
     // }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<AppWindowToken> atoken = FindAppWindowToken(IBinder::Probe(token));
         if (atoken != NULL) {
             Slogger::W(TAG, "Attempted to add existing app token: %p", token);
@@ -4583,7 +4585,7 @@ ECode CWindowManagerService::SetAppGroupId(
         return E_SECURITY_EXCEPTION;
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<AppWindowToken> atoken = FindAppWindowToken(token);
         if (atoken == NULL) {
             Slogger::W(TAG, "Attempted to set group id of non-existing app token: %p", token);
@@ -4748,7 +4750,7 @@ ECode CWindowManagerService::UpdateOrientationFromAppTokens(
 
     Int64 ident = Binder::ClearCallingIdentity();
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<IConfiguration> temp = UpdateOrientationFromAppTokensLocked(
                 currentConfig, freezeThisOneIfNeeded);
 
@@ -4845,7 +4847,7 @@ ECode CWindowManagerService::SetNewConfiguration(
         return E_SECURITY_EXCEPTION;
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mCurConfiguration = NULL;
         CConfiguration::New(config, (IConfiguration**)&mCurConfiguration);
         if (mWaitingForConfig) {
@@ -4871,7 +4873,7 @@ ECode CWindowManagerService::SetAppOrientation(
         return E_SECURITY_EXCEPTION;
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<AppWindowToken> atoken = FindAppWindowToken(IBinder::Probe(token));
         if (atoken == NULL) {
             Slogger::W(TAG, "Attempted to set orientation of non-existing app token: %p", token);
@@ -4890,7 +4892,7 @@ ECode CWindowManagerService::GetAppOrientation(
 {
     VALIDATE_NOT_NULL(orientation);
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<AppWindowToken> wtoken = FindAppWindowToken(IBinder::Probe(token));
         if (wtoken == NULL) {
             *orientation = IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED;
@@ -4975,7 +4977,7 @@ ECode CWindowManagerService::SetFocusedApp(
         return E_SECURITY_EXCEPTION;
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<AppWindowToken> newFocus;
         if (token == NULL) {
             if (DEBUG_FOCUS_LIGHT) Slogger::V(TAG, "Clearing focused app, was %p", mFocusedApp.Get());
@@ -5032,7 +5034,7 @@ ECode CWindowManagerService::PrepareAppTransition(
         return E_SECURITY_EXCEPTION;
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (DEBUG_APP_TRANSITIONS) {
             Slogger::V(TAG, "Prepare app transition: transit=%d %p alwaysKeepCurrent=%d Callers="
                     , transit, mAppTransition.Get(), alwaysKeepCurrent/*, Debug.getCallers(3)*/);
@@ -5079,7 +5081,7 @@ ECode CWindowManagerService::OverridePendingAppTransition(
     /* [in] */ Int32 exitAnim,
     /* [in] */ IIRemoteCallback* startedCallback)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mAppTransition->OverridePendingAppTransition(packageName, enterAnim, exitAnim,
                 startedCallback);
     }
@@ -5092,7 +5094,7 @@ ECode CWindowManagerService::OverridePendingAppTransitionScaleUp(
     /* [in] */ Int32 startWidth,
     /* [in] */ Int32 startHeight)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mAppTransition->OverridePendingAppTransitionScaleUp(startX, startY, startWidth, startHeight);
     }
     return NOERROR;
@@ -5105,7 +5107,7 @@ ECode CWindowManagerService::OverridePendingAppTransitionThumb(
     /* [in] */ IIRemoteCallback* startedCallback,
     /* [in] */ Boolean scaleUp)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mAppTransition->OverridePendingAppTransitionThumb(srcThumb, startX, startY,
                 startedCallback, scaleUp);
     }
@@ -5121,7 +5123,7 @@ ECode CWindowManagerService::OverridePendingAppTransitionAspectScaledThumb(
     /* [in] */ IIRemoteCallback* startedCallback,
     /* [in] */ Boolean scaleUp)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mAppTransition->OverridePendingAppTransitionAspectScaledThumb(srcThumb, startX,
                 startY, targetWidth, targetHeight, startedCallback, scaleUp);
     }
@@ -5139,7 +5141,7 @@ ECode CWindowManagerService::ExecuteAppTransition()
         return E_SECURITY_EXCEPTION;
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (DEBUG_APP_TRANSITIONS) {
             Slogger::W(TAG, "Execute app transition: %p", mAppTransition.Get()/*, new RuntimeException("here").fillInStackTrace()*/);
         }
@@ -5407,7 +5409,7 @@ ECode CWindowManagerService::SetAppStartingWindow(
 void CWindowManagerService::RemoveAppStartingWindow(
     /* [in] */ IBinder* token)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<AppWindowToken> wtoken;
         HashMap<AutoPtr<IBinder>, AutoPtr<WindowToken> >::Iterator it = mTokenMap.Find(token);
         if (it != mTokenMap.End()) {
@@ -5432,7 +5434,7 @@ ECode CWindowManagerService::SetAppWillBeHidden(
 
     AutoPtr<AppWindowToken> wtoken;
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         wtoken = FindAppWindowToken(token);
         if (wtoken != NULL) {
             wtoken->mWillBeHidden = true;
@@ -5445,7 +5447,7 @@ void CWindowManagerService::SetAppFullscreen(
     /* [in] */ IBinder* token,
     /* [in] */ Boolean toOpaque)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<AppWindowToken> atoken = FindAppWindowToken(token);
         if (atoken != NULL) {
             atoken->mAppFullscreen = toOpaque;
@@ -5459,7 +5461,7 @@ void CWindowManagerService::SetWindowOpaque(
     /* [in] */ IBinder* token,
     /* [in] */ Boolean isOpaque)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         SetWindowOpaqueLocked(token, isOpaque);
     }
 }
@@ -5627,7 +5629,7 @@ ECode CWindowManagerService::SetAppVisibility(
 
     AutoPtr<AppWindowToken> wtoken;
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         wtoken = FindAppWindowToken(token);
         if (wtoken == NULL) {
             Slogger::W(TAG, "Attempted to set visibility of non-existing app token: %p", token);
@@ -5812,7 +5814,7 @@ ECode CWindowManagerService::StartAppFreezingScreen(
         return E_SECURITY_EXCEPTION;
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (configChanges == 0 && OkToDisplay()) {
             // if (DEBUG_ORIENTATION) Slogger::V(TAG, "Skipping set freeze of " + token);
             return NOERROR;
@@ -5844,7 +5846,7 @@ ECode CWindowManagerService::StopAppFreezingScreen(
         return E_SECURITY_EXCEPTION;
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<AppWindowToken> wtoken = FindAppWindowToken(token);
         if (wtoken == NULL || wtoken->mAppToken == NULL) {
             return NOERROR;
@@ -5887,7 +5889,7 @@ ECode CWindowManagerService::RemoveAppToken(
     Boolean delayed = FALSE;
 
     Int64 origId = Binder::ClearCallingIdentity();
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<WindowToken> basewtoken;
         HashMap<AutoPtr<IBinder>, AutoPtr<WindowToken> >::Iterator tokenIt
                 = mTokenMap.Find(token);
@@ -6299,7 +6301,7 @@ void CWindowManagerService::MoveTaskToTop(
 {
     Int64 origId = Binder::ClearCallingIdentity();
     // try {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<IInterface> value;
         mTaskIdToTask->Get(taskId, (IInterface**)&value);
         AutoPtr<Task> task = (Task*)IObject::Probe(value);
@@ -6331,7 +6333,7 @@ void CWindowManagerService::MoveTaskToBottom(
 {
     Int64 origId = Binder::ClearCallingIdentity();
     // try {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<IInterface> value;
         mTaskIdToTask->Get(taskId, (IInterface**)&value);
         AutoPtr<Task> task = (Task*)IObject::Probe(value);
@@ -6355,7 +6357,7 @@ void CWindowManagerService::AttachStack(
 {
     Int64 origId = Binder::ClearCallingIdentity();
     // try {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<IInterface> value;
         mDisplayContents->Get(displayId, (IInterface**)&value);
         AutoPtr<DisplayContent> displayContent = (DisplayContent*)IObject::Probe(value);
@@ -6398,7 +6400,7 @@ void CWindowManagerService::DetachStackLocked(
 void CWindowManagerService::DetachStack(
     /* [in] */ Int32 stackId)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<IInterface> value;
         mStackIdToStack->Get(stackId, (IInterface**)&value);
         AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(value);
@@ -6441,7 +6443,7 @@ void CWindowManagerService::RemoveTaskLocked(
 void CWindowManagerService::RemoveTask(
     /* [in] */ Int32 taskId)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<IInterface> value;
         mTaskIdToTask->Get(taskId, (IInterface**)&value);
         AutoPtr<Task> task = (Task*)IObject::Probe(value);
@@ -6458,7 +6460,7 @@ void CWindowManagerService::AddTask(
     /* [in] */ Int32 stackId,
     /* [in] */ Boolean toTop)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (DEBUG_STACK) Slogger::I(TAG, "addTask: adding taskId=%d to %d", taskId, (toTop ? "top" : "bottom"));
         AutoPtr<IInterface> value;
         mTaskIdToTask->Get(taskId, (IInterface**)&value);
@@ -6480,7 +6482,7 @@ ECode CWindowManagerService::ResizeStack(
     /* [in] */ Int32 stackId,
     /* [in] */ IRect* bounds)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<IInterface> stackValue;
         mStackIdToStack->Get(stackId, (IInterface**)&stackValue);
         AutoPtr<TaskStack> stack = (TaskStack*)IObject::Probe(stackValue);
@@ -6527,7 +6529,7 @@ ECode CWindowManagerService::StartFreezingScreen(
         // throw new SecurityException("Requires FREEZE_SCREEN permission");
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (!mClientFreezingScreen) {
             mClientFreezingScreen = TRUE;
             Int64 origId = Binder::ClearCallingIdentity();
@@ -6554,7 +6556,7 @@ ECode CWindowManagerService::StopFreezingScreen()
         // throw new SecurityException("Requires FREEZE_SCREEN permission");
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (mClientFreezingScreen) {
             mClientFreezingScreen = FALSE;
             AutoPtr<ICharSequence> cs;
@@ -6683,7 +6685,7 @@ ECode CWindowManagerService::DismissKeyguard()
         return E_SECURITY_EXCEPTION;
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mPolicy->DismissKeyguardLw();
     }
     return NOERROR;
@@ -6702,7 +6704,7 @@ ECode CWindowManagerService::KeyguardGoingAway(
         Slogger::E(TAG, "Requires DISABLE_KEYGUARD permission");
         return E_SECURITY_EXCEPTION;
     }
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mAnimator->mKeyguardGoingAway = TRUE;
         mAnimator->mKeyguardGoingAwayToNotificationShade = keyguardGoingToNotificationShade;
         mAnimator->mKeyguardGoingAwayDisableWindowAnimations = disableWindowAnimations;
@@ -6726,14 +6728,14 @@ ECode CWindowManagerService::NeedsNavigationBar(
 
 void CWindowManagerService::KeyguardWaitingForActivityDrawn()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mKeyguardWaitingForActivityDrawn = TRUE;
     }
 }
 
 void CWindowManagerService::NotifyActivityDrawnForKeyguard()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (mKeyguardWaitingForActivityDrawn) {
             mPolicy->NotifyActivityDrawnForKeyguardLw();
             mKeyguardWaitingForActivityDrawn = FALSE;
@@ -6749,7 +6751,7 @@ void CWindowManagerService::ShowGlobalActions()
 ECode CWindowManagerService::CloseSystemDialogs(
     /* [in] */ const String& reason)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         Int32 numDisplays;
         mDisplayContents->GetSize(&numDisplays);
         for (Int32 displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
@@ -6889,7 +6891,7 @@ ECode CWindowManagerService::GetCurrentAnimatorScale(
     /* [out] */ Float* scale)
 {
     VALIDATE_NOT_NULL(scale)
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         *scale = mAnimationsDisabled ? 0 : mAnimatorDurationScaleSetting;
     }
     return NOERROR;
@@ -6991,7 +6993,7 @@ ECode CWindowManagerService::RebootSafeMode(
 void CWindowManagerService::SetCurrentProfileIds(
     /* [in] */ ArrayOf<Int32>* currentProfileIds)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mCurrentProfileIds = currentProfileIds;
     }
 }
@@ -7000,7 +7002,7 @@ void CWindowManagerService::SetCurrentUser(
     /* [in] */ Int32 newUserId,
     /* [in] */ ArrayOf<Int32>* currentProfileIds)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mCurrentUserId = newUserId;
         mCurrentProfileIds = currentProfileIds;
         mAppTransition->SetCurrentUser(newUserId);
@@ -7032,7 +7034,7 @@ Boolean CWindowManagerService::IsCurrentProfileLocked(
 
 void CWindowManagerService::EnableScreenAfterBoot()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (DEBUG_BOOT) {
             Slogger::I(TAG, "enableScreenAfterBoot: mDisplayEnabled=%d  mForceDisplayEnabled=%d"
                 " mShowingBootMessages=%d mSystemBooted=%d",
@@ -7058,7 +7060,7 @@ void CWindowManagerService::EnableScreenAfterBoot()
 
 ECode CWindowManagerService::EnableScreenIfNeeded()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         EnableScreenIfNeededLocked();
     }
     return NOERROR;
@@ -7085,7 +7087,7 @@ void CWindowManagerService::EnableScreenIfNeededLocked()
 
 void CWindowManagerService::PerformBootTimeout()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (mDisplayEnabled) {
             return;
         }
@@ -7163,7 +7165,7 @@ Boolean CWindowManagerService::CheckWaitingForWindowsLocked()
 void CWindowManagerService::PerformEnableScreen()
 {
     Slogger::I(TAG, " >>> PerformEnableScreen");
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (DEBUG_BOOT) {
             Slogger::I(TAG, "performEnableScreen: mDisplayEnabled=%d mForceDisplayEnabled=%d"
                 " mShowingBootMessages=%d mSystemBooted=%d mOnlyCore=%d mBootAnimationStopped=%d",
@@ -7272,7 +7274,7 @@ void CWindowManagerService::ShowBootMessage(
 {
     Boolean first = FALSE;
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         // if (DEBUG_BOOT) {
         //     RuntimeException here = new RuntimeException("here");
         //     here.fillInStackTrace();
@@ -7320,7 +7322,7 @@ void CWindowManagerService::HideBootMessagesLocked()
 ECode CWindowManagerService::SetInTouchMode(
     /* [in] */ Boolean mode)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mInTouchMode = mode;
     }
     return NOERROR;
@@ -7360,7 +7362,7 @@ void CWindowManagerService::ShowEmulatorDisplayOverlayIfNeeded()
 
 void CWindowManagerService::ShowCircularMask()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
 
         if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, ">>> OPEN TRANSACTION showCircularMask");
         AutoPtr<ISurfaceControlHelper> scHelper;
@@ -7393,7 +7395,7 @@ void CWindowManagerService::ShowCircularMask()
 
 void CWindowManagerService::ShowEmulatorDisplayOverlay()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
 
         if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, ">>> OPEN TRANSACTION showEmulatorDisplayOverlay");
         AutoPtr<ISurfaceControlHelper> scHelper;
@@ -8165,7 +8167,7 @@ ECode CWindowManagerService::RemoveRotationWatcher(
     /* [in] */ IRotationWatcher* watcher)
 {
     AutoPtr<IBinder> watcherBinder = IBinder::Probe(watcher);
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         List< AutoPtr<RotationWatcher> >::Iterator it = mRotationWatchers.Begin();
         while (it != mRotationWatchers.End()) {
             AutoPtr<RotationWatcher> rotationWatcher = *it;
@@ -8338,7 +8340,7 @@ Boolean CWindowManagerService::ViewServerListWindows(
 
     AutoPtr<WindowList> windows;
     CArrayList::New((WindowList**)&windows);
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         //noinspection unchecked
         Int32 numDisplays;
         mDisplayContents->GetSize(&numDisplays);
@@ -8563,7 +8565,7 @@ Boolean CWindowManagerService::ViewServerWindowCommand(
 void CWindowManagerService::AddWindowChangeListener(
     /* [in] */ IWindowChangeListener* listener)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mWindowChangeListeners.PushBack(listener);
     }
 }
@@ -8571,7 +8573,7 @@ void CWindowManagerService::AddWindowChangeListener(
 void CWindowManagerService::RemoveWindowChangeListener(
     /* [in] */ IWindowChangeListener* listener)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mWindowChangeListeners.Remove(listener);
     }
 }
@@ -8580,7 +8582,7 @@ void CWindowManagerService::NotifyWindowsChanged()
 {
     AutoPtr<ArrayOf<IWindowChangeListener*> > windowChangeListeners;
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (mWindowChangeListeners.IsEmpty())
             return;
 
@@ -8602,7 +8604,7 @@ void CWindowManagerService::NotifyFocusChanged()
 {
     AutoPtr<ArrayOf<IWindowChangeListener*> > windowChangeListeners;
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (mWindowChangeListeners.IsEmpty())
             return;
 
@@ -8627,7 +8629,7 @@ AutoPtr<WindowState> CWindowManagerService::FindWindow(
         return GetFocusedWindow();
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<ISystem> sys;
         CSystem::AcquireSingleton((ISystem**)&sys);
         Int32 numDisplays;
@@ -8666,7 +8668,7 @@ ECode CWindowManagerService::SendNewConfiguration()
 AutoPtr<IConfiguration> CWindowManagerService::ComputeNewConfiguration()
 {
     AutoPtr<IConfiguration> config;
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         config = ComputeNewConfigurationLocked();
         if (config == NULL && mWaitingForConfig) {
             // Nothing changed but we are waiting for something... stop that!
@@ -9050,7 +9052,7 @@ void CWindowManagerService::UpdateShowImeWithHardKeyboard()
     Settings::Secure::GetInt32ForUser(
             resolver, ISettingsSecure::SHOW_IME_WITH_HARD_KEYBOARD, 0, mCurrentUserId, &value);
     Boolean showImeWithHardKeyboard = value == 1;
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (mShowImeWithHardKeyboard != showImeWithHardKeyboard) {
             mShowImeWithHardKeyboard = showImeWithHardKeyboard;
             Boolean result;
@@ -9062,7 +9064,7 @@ void CWindowManagerService::UpdateShowImeWithHardKeyboard()
 void CWindowManagerService::SetOnHardKeyboardStatusChangeListener(
     /* [in] */ IOnHardKeyboardStatusChangeListener* listener)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mHardKeyboardStatusChangeListener = listener;
     }
 }
@@ -9071,7 +9073,7 @@ void CWindowManagerService::NotifyHardKeyboardStatusChange()
 {
     Boolean available;
     AutoPtr<IOnHardKeyboardStatusChangeListener> listener;
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         listener = mHardKeyboardStatusChangeListener;
         available = mHardKeyboardAvailable;
     }
@@ -9104,7 +9106,7 @@ AutoPtr<IBinder> CWindowManagerService::PrepareDragSurface(
     AutoPtr<IBinder> token;
 
     // try {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         // try {
         if (mDragState == NULL) {
             // TODO(multi-display): support other displays
@@ -9175,7 +9177,7 @@ ECode CWindowManagerService::PauseKeyDispatching(
         return E_SECURITY_EXCEPTION;
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<WindowToken> wtoken;
         HashMap<AutoPtr<IBinder>, AutoPtr<WindowToken> >::Iterator it
                 = mTokenMap.Find(token);
@@ -9201,7 +9203,7 @@ ECode CWindowManagerService::ResumeKeyDispatching(
         return E_SECURITY_EXCEPTION;
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<WindowToken> wtoken;
         HashMap<AutoPtr<IBinder>, AutoPtr<WindowToken> >::Iterator it
                 = mTokenMap.Find(token);
@@ -9227,7 +9229,7 @@ ECode CWindowManagerService::SetEventDispatching(
         return E_SECURITY_EXCEPTION;
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mEventDispatchingEnabled = enabled;
         if (mDisplayEnabled) {
             mInputMonitor->SetEventDispatchingLw(enabled);
@@ -9299,7 +9301,7 @@ ECode CWindowManagerService::DisplayReady()
         (*displays)[i]->GetDisplayId(&displayId);
         DisplayReady(displayId);
     }
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<DisplayContent> displayContent = GetDefaultDisplayContentLocked();
         ReadForcedDisplaySizeAndDensityLocked(displayContent);
         mDisplayReady = TRUE;
@@ -9310,7 +9312,7 @@ ECode CWindowManagerService::DisplayReady()
     // } catch (RemoteException e) {
     // }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<IPackageManager> packageManager;
         mContext->GetPackageManager((IPackageManager**)&packageManager);
         packageManager->HasSystemFeature(IPackageManager::FEATURE_TOUCHSCREEN, &mIsTouchDevice);
@@ -9328,7 +9330,7 @@ ECode CWindowManagerService::DisplayReady()
 void CWindowManagerService::DisplayReady(
     /* [in] */ Int32 displayId)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<DisplayContent> displayContent = GetDisplayContentLocked(displayId);
         if (displayContent != NULL) {
             mAnimator->AddDisplayLocked(displayId);
@@ -9709,7 +9711,7 @@ ECode CWindowManagerService::HandleReportFocusChange()
     AutoPtr<WindowState> lastFocus;
     AutoPtr<WindowState> newFocus;
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         lastFocus = mLastFocus;
         newFocus = mCurrentFocus;
         if (lastFocus == newFocus) {
@@ -9750,7 +9752,7 @@ ECode CWindowManagerService::HandleReportLosingFocus()
 {
     AutoPtr<WindowList> losers;
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         losers = mLosingFocus;
         mLosingFocus = NULL;
         CArrayList::New((WindowList**)&mLosingFocus);
@@ -9804,7 +9806,7 @@ ECode CWindowManagerService::HandleAddStarting(
     if (view != NULL) {
         Boolean abort = FALSE;
 
-        synchronized(mWindowMapLock) {
+        {    AutoLock syncLock(mWindowMapLock);
 
             if (wtoken->mRemoved || wtoken->mStartingData == NULL) {
                 // If the window was successfully added, then
@@ -9845,7 +9847,7 @@ ECode CWindowManagerService::HandleRemoveStarting(
     AutoPtr<IBinder> token;
     AutoPtr<IView> view;
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
 
         if (DEBUG_STARTING_WINDOW) {
             Slogger::V(TAG, "Remove starting %p: startingWindow=%p, startingView=%p",
@@ -9949,7 +9951,7 @@ ECode CWindowManagerService::HandleReportApplicationTokenWindows(
 ECode CWindowManagerService::HandleWindowFreezeTimeout()
 {
     // TODO(multidisplay): Can non-default displays rotate?
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         Slogger::W(TAG, "Window freeze timeout expired.");
         AutoPtr<WindowList> windows = GetDefaultWindowListLocked();
         Int32 i;
@@ -9974,7 +9976,7 @@ ECode CWindowManagerService::HandleWindowFreezeTimeout()
 
 ECode CWindowManagerService::HandleAppTransitionTimeout()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (mAppTransition->IsTransitionSet()) {
             if (DEBUG_APP_TRANSITIONS) Slogger::V(TAG, "*** APP TRANSITION TIMEOUT");
             mAppTransition->SetTimeout();
@@ -9999,7 +10001,7 @@ ECode CWindowManagerService::HandlePersistAnimationScale()
 
 ECode CWindowManagerService::HandleForceGc()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         // Since we're holding both mWindowMap and mAnimator we don't need to
         // hold mAnimator.mLayoutToAnim.
         if (mAnimator->mAnimating || mAnimationScheduled) {
@@ -10023,7 +10025,7 @@ ECode CWindowManagerService::HandleForceGc()
 
 ECode CWindowManagerService::HandleAppFreezeTimeout()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         Slogger::W(TAG, "App freeze timeout expired.");
         Int32 numStacks;
         mStackIdToStack->GetSize(&numStacks);
@@ -10054,7 +10056,7 @@ ECode CWindowManagerService::HandleAppFreezeTimeout()
 
 ECode CWindowManagerService::HandleClientFreezeTimeout()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         if (mClientFreezingScreen) {
             mClientFreezingScreen = FALSE;
             AutoPtr<ICharSequence> cs;
@@ -10070,7 +10072,7 @@ ECode CWindowManagerService::HandleClientFreezeTimeout()
 ECode CWindowManagerService::HandleReportWindowsChange()
 {
     if (mWindowsChanged) {
-        synchronized(mWindowMapLock) {
+        {    AutoLock syncLock(mWindowMapLock);
             mWindowsChanged = FALSE;
         }
         NotifyWindowsChanged();
@@ -10085,7 +10087,7 @@ ECode CWindowManagerService::HandleDragStartTimeout(
     if (DEBUG_DRAG) {
         Slogger::W(TAG, "Timeout starting drag by win %p", winBinder);
     }
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         // !!! TODO: ANR the app that has failed to start the drag in time
         if (mDragState != NULL) {
             mDragState->Unregister();
@@ -10103,7 +10105,7 @@ ECode CWindowManagerService::HandleDragEndTimeout(
     if (DEBUG_DRAG) {
         Slogger::W(TAG, "Timeout ending drag to win %p", winBinder);
     }
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         // !!! TODO: ANR the drag-receiving app
         if (mDragState != NULL) {
             mDragState->mDragResult = FALSE;
@@ -10117,7 +10119,7 @@ ECode CWindowManagerService::HandleDragEndTimeout(
 ECode CWindowManagerService::HandleWaitingForDrawnTimeout()
 {
     AutoPtr<IRunnable> callback;
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         // Slogger::W(TAG, "Timeout waiting for drawn: undrawn=" + mWaitingForDrawn);
         mWaitingForDrawn->Clear();
         callback = mWaitingForDrawnCallback;
@@ -10155,7 +10157,7 @@ ECode CWindowManagerService::InputMethodClientHasFocus(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         // The focus for the client is the window immediately below
         // where we would place the input method window.
         Int32 idx = FindDesiredInputMethodWindowIndexLocked(FALSE);
@@ -10231,7 +10233,7 @@ ECode CWindowManagerService::GetInitialDisplaySize(
     /* [out] */ IPoint** outSize)
 {
     VALIDATE_NOT_NULL(outSize)
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<DisplayContent> displayContent = GetDisplayContentLocked(displayId);
         if (displayContent != NULL && displayContent->HasAccess(Binder::GetCallingUid())) {
             AutoLock lock(displayContent->mDisplaySizeLock);
@@ -10249,7 +10251,7 @@ ECode CWindowManagerService::GetBaseDisplaySize(
     /* [out] */ IPoint** outSize)
 {
     VALIDATE_NOT_NULL(outSize)
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<DisplayContent> displayContent = GetDisplayContentLocked(displayId);
         if (displayContent != NULL && displayContent->HasAccess(Binder::GetCallingUid())) {
             AutoLock lock(displayContent->mDisplaySizeLock);
@@ -10279,7 +10281,7 @@ ECode CWindowManagerService::SetForcedDisplaySize(
     }
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         // Set some sort of reasonable bounds on the size of the display that we
         // will try to emulate.
         Int32 MIN_WIDTH = 200;
@@ -10390,7 +10392,7 @@ ECode CWindowManagerService::ClearForcedDisplaySize(
     }
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<DisplayContent> displayContent = GetDisplayContentLocked(displayId);
         if (displayContent != NULL) {
             SetForcedDisplaySizeLocked(displayContent, displayContent->mInitialDisplayWidth,
@@ -10415,7 +10417,7 @@ ECode CWindowManagerService::GetInitialDisplayDensity(
     VALIDATE_NOT_NULL(result)
     *result = -1;
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<DisplayContent> displayContent = GetDisplayContentLocked(displayId);
         if (displayContent != NULL && displayContent->HasAccess(Binder::GetCallingUid())) {
             AutoLock lock(displayContent->mDisplaySizeLock);
@@ -10432,7 +10434,7 @@ ECode CWindowManagerService::GetBaseDisplayDensity(
     VALIDATE_NOT_NULL(result)
     *result = -1;
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<DisplayContent> displayContent = GetDisplayContentLocked(displayId);
         if (displayContent != NULL && displayContent->HasAccess(Binder::GetCallingUid())) {
             AutoLock lock(displayContent->mDisplaySizeLock);
@@ -10460,7 +10462,7 @@ ECode CWindowManagerService::SetForcedDisplayDensity(
     }
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<DisplayContent> displayContent = GetDisplayContentLocked(displayId);
         if (displayContent != NULL) {
             SetForcedDisplayDensityLocked(displayContent, density);
@@ -10507,7 +10509,7 @@ ECode CWindowManagerService::ClearForcedDisplayDensity(
     }
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<DisplayContent> displayContent = GetDisplayContentLocked(displayId);
         if (displayContent != NULL) {
             SetForcedDisplayDensityLocked(displayContent, displayContent->mInitialDisplayDensity);
@@ -10586,7 +10588,7 @@ ECode CWindowManagerService::SetOverscan(
     }
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<DisplayContent> displayContent = GetDisplayContentLocked(displayId);
         if (displayContent != NULL) {
             SetOverscanLocked(displayContent, left, top, right, bottom);
@@ -10935,7 +10937,7 @@ void CWindowManagerService::PerformLayoutAndPlaceSurfacesLockedLoop()
         mForceRemoves = NULL;
         Slogger::W(TAG, "Due to memory failure, waiting a bit for next layout");
         Object tmp;
-        synchronized(tmp) {
+        {    AutoLock syncLock(tmp);
             // try {
             tmp.Wait(250);
             // } catch (InterruptedException e) {
@@ -12616,7 +12618,7 @@ void CWindowManagerService::SetHoldScreenLocked(
 
 ECode CWindowManagerService::RequestTraversal()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         RequestTraversalLocked();
     }
     return NOERROR;
@@ -13281,7 +13283,7 @@ ECode CWindowManagerService::StatusBarVisibilityChanged(
         //         + Manifest::permission::STATUS_BAR);
     }
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         mLastStatusBarVisibility = visibility;
         mPolicy->AdjustSystemUiVisibilityLw(visibility, &visibility);
         UpdateStatusBarVisibilityLocked(visibility);
@@ -13328,7 +13330,7 @@ void CWindowManagerService::UpdateStatusBarVisibilityLocked(
 
 ECode CWindowManagerService::ReevaluateStatusBarVisibility()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         Int32 visibility;
         mPolicy->AdjustSystemUiVisibilityLw(mLastStatusBarVisibility, &visibility);
         UpdateStatusBarVisibilityLocked(visibility);
@@ -13352,7 +13354,7 @@ ECode CWindowManagerService::AddFakeWindow(
 {
     VALIDATE_NOT_NULL(fakeWindow)
 
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<FakeWindowImpl> fw = new FakeWindowImpl(this, looper, inputEventReceiverFactory,
                 name, windowType, layoutParamsFlags, layoutParamsPrivateFlags,
                 canReceiveKeys, hasFocus, touchFullscreen);
@@ -13375,7 +13377,7 @@ ECode CWindowManagerService::AddFakeWindow(
 Boolean CWindowManagerService::RemoveFakeWindowLocked(
     /* [in] */ IFakeWindow* window)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         List< AutoPtr<FakeWindowImpl> >::Iterator it = mFakeWindows.Begin();
         for (; it != mFakeWindows.End(); ++it) {
             if ((*it).Get() == window) {
@@ -13390,7 +13392,7 @@ Boolean CWindowManagerService::RemoveFakeWindowLocked(
 
 void CWindowManagerService::SaveLastInputMethodWindowForTransition()
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         // TODO(multidisplay): Pass in the displayID.
         AutoPtr<DisplayContent> displayContent = GetDefaultDisplayContentLocked();
         if (mInputMethodWindow != NULL) {
@@ -13473,7 +13475,7 @@ ECode CWindowManagerService::GetWindowContentFrameStats(
         Slogger::E(TAG, "Requires FRAME_STATS permission");
         return E_SECURITY_EXCEPTION;
     }
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         HashMap<AutoPtr<IBinder>, AutoPtr<WindowState> >::Iterator it = mWindowMap.Find(token);
         AutoPtr<WindowState> windowState;
         if (it != mWindowMap.End()) {
@@ -13541,7 +13543,7 @@ void CWindowManagerService::SaveANRStateLocked(
 
 ECode CWindowManagerService::Monitor()
 {
-    synchronized(mWindowMapLock) { }
+    {    AutoLock syncLock(mWindowMapLock); }
     return NOERROR;
 }
 
@@ -13660,7 +13662,7 @@ ECode CWindowManagerService::OnDisplayAdded(
 void CWindowManagerService::HandleDisplayAdded(
     /* [in] */ Int32 displayId)
 {
-    synchronized(mWindowMapLock) {
+    {    AutoLock syncLock(mWindowMapLock);
         AutoPtr<IDisplay> display;
         mDisplayManager->GetDisplay(displayId, (IDisplay**)&display);
         if (display != NULL) {

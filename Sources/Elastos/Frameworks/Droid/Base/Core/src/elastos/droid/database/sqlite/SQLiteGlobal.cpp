@@ -10,6 +10,8 @@
 #include "elastos/droid/R.h"
 #include <sqlite3.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Os::IStatFs;
 using Elastos::Droid::Os::CStatFs;
@@ -44,7 +46,7 @@ Int32 SQLiteGlobal::ReleaseMemory()
 Int32 SQLiteGlobal::GetDefaultPageSize()
 {
     Int32 result;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (sDefaultPageSize == 0) {
             AutoPtr<IStatFs> fs;
             CStatFs::New(String("/data"), (IStatFs**)&fs);

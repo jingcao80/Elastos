@@ -7,6 +7,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::R;
 using Elastos::Core::AutoLock;
@@ -143,7 +145,7 @@ ECode PreferenceGroup::AddPreference(
         return NOERROR;
     }
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mPreferenceList->Add(insertionIndex, preference);
     }
 
@@ -175,7 +177,7 @@ Boolean PreferenceGroup::RemovePreferenceInt(
     /* [in] */ IPreference* preference)
 {
     Boolean modified;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         preference->OnPrepareForRemoval();
         mPreferenceList->Remove(preference, &modified);
     }
@@ -184,7 +186,7 @@ Boolean PreferenceGroup::RemovePreferenceInt(
 
 ECode PreferenceGroup::RemoveAll()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IList> preferenceList = mPreferenceList;
         Int32 i;
         preferenceList->GetSize(&i);
@@ -309,7 +311,7 @@ ECode PreferenceGroup::NotifyDependencyChange(
 
 ECode PreferenceGroup::SortPreferences()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ICollections> coll;
         CCollections::AcquireSingleton((ICollections**)&coll);
         coll->Sort(mPreferenceList);

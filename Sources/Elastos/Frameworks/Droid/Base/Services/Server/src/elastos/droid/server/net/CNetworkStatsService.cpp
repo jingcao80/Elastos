@@ -26,6 +26,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::CObject;
 using Elastos::Core::CSystem;
 using Elastos::Core::ISystem;
@@ -178,7 +180,7 @@ ECode CNetworkStatsService::RemovedReceiver::OnReceive(
     if (uid == -1) return NOERROR;
 
     AutoPtr<IObject> obj = mOwner->mStatsLock;
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         mOwner->mWakeLock->AcquireLock();
         // try {
         AutoPtr< ArrayOf<Int32> > uids = ArrayOf<Int32>::Alloc(1);
@@ -209,7 +211,7 @@ ECode CNetworkStatsService::UserReceiver::OnReceive(
     if (userId == -1) return NOERROR;
 
     AutoPtr<IObject> obj = mOwner->mStatsLock;
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         mOwner->mWakeLock->AcquireLock();
         // try {
         mOwner->RemoveUserLocked(userId);
@@ -236,7 +238,7 @@ ECode CNetworkStatsService::ShutdownReceiver::OnReceive(
 
     // SHUTDOWN is protected broadcast.
     AutoPtr<IObject> obj = mOwner->mStatsLock;
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         mOwner->ShutdownLocked();
     }
     return NOERROR;
@@ -504,7 +506,7 @@ CNetworkStatsService::InnerSub_INetworkStatsSession::InnerSub_INetworkStatsSessi
 AutoPtr<NetworkStatsCollection> CNetworkStatsService::InnerSub_INetworkStatsSession::GetUidComplete()
 {
     AutoPtr<IObject> obj = mHost->mStatsLock;
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         if (mUidComplete == NULL) {
             mHost->mUidRecorder->GetOrLoadCompleteLocked((NetworkStatsCollection**)&mUidComplete);
         }
@@ -515,7 +517,7 @@ AutoPtr<NetworkStatsCollection> CNetworkStatsService::InnerSub_INetworkStatsSess
 AutoPtr<NetworkStatsCollection> CNetworkStatsService::InnerSub_INetworkStatsSession::GetUidTagComplete()
 {
     AutoPtr<IObject> obj = mHost->mStatsLock;
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         if (mUidTagComplete == NULL) {
             mHost->mUidTagRecorder->GetOrLoadCompleteLocked((NetworkStatsCollection**)&mUidTagComplete);
         }
@@ -780,7 +782,7 @@ void CNetworkStatsService::SystemReady()
 
     UpdatePersistThresholds();
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // upgrade any legacy stats, migrating them to rotated files
         MaybeUpgradeLegacyStatsLocked();
 
@@ -1137,7 +1139,7 @@ ECode CNetworkStatsService::IncrementOperationCount(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 set = INetworkStats::SET_DEFAULT;
         HashMap<Int32, Int32>::Iterator iter = mActiveUidCounterSet.Find(uid);
         if(iter != mActiveUidCounterSet.End()) {
@@ -1156,7 +1158,7 @@ ECode CNetworkStatsService::SetUidForeground(
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::MODIFY_NETWORK_ACCOUNTING, TAG))
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 set = uidForeground ? INetworkStats::SET_FOREGROUND : INetworkStats::SET_DEFAULT;
         Int32 oldSet = INetworkStats::SET_DEFAULT;
         HashMap<Int32, Int32>::Iterator iter = mActiveUidCounterSet.Find(uid);
@@ -1217,7 +1219,7 @@ ECode CNetworkStatsService::AdvisePersistThreshold(
         system->GetCurrentTimeMillis(&currentTime);
     }
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (!mSystemReady) return NOERROR;
 
         UpdatePersistThresholds();
@@ -1249,7 +1251,7 @@ void CNetworkStatsService::UpdatePersistThresholds()
 
 void CNetworkStatsService::UpdateIfaces()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mWakeLock->AcquireLock();
         UpdateIfacesLocked();
         mWakeLock->ReleaseLock();
@@ -1401,7 +1403,7 @@ void CNetworkStatsService::PerformPoll(
         mTime->ForceRefresh(&result);
     }
 
-    synchronized(mStatsLock) {
+    {    AutoLock syncLock(mStatsLock);
         mWakeLock->AcquireLock();
 
         PerformPollLocked(flags);
@@ -1631,7 +1633,7 @@ void CNetworkStatsService::Dump(
     AutoPtr<IIndentingPrintWriter> pw;
     CIndentingPrintWriter::New(IWriter::Probe(writer), String("  "), (IIndentingPrintWriter**)&pw);
 
-    synchronized(mStatsLock) {
+    {    AutoLock syncLock(mStatsLock);
         if (poll) {
             PerformPollLocked(FLAG_PERSIST_ALL | FLAG_PERSIST_FORCE);
             IPrintWriter::Probe(pw)->Println(String("Forced poll"));

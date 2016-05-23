@@ -3,6 +3,8 @@
 #include "elastos/droid/location/CGpsSatellite.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::EIID_IIterable;
 using Elastos::Utility::EIID_IIterator;
 
@@ -112,7 +114,7 @@ ECode GpsStatus::SetStatus(
     /* [in] */ Int32 almanacMask,
     /* [in] */ Int32 usedInFixMask)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 i;
         for (i = 0; i < mSatellites->GetLength(); i++) {
             (*mSatellites)[i]->SetValid(FALSE);

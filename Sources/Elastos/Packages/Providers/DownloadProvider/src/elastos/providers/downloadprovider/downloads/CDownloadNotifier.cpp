@@ -12,6 +12,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::INotificationBuilder;
 using Elastos::Droid::App::CNotificationBuilder;
 using Elastos::Droid::App::IDownloadManager;
@@ -98,7 +100,7 @@ ECode CDownloadNotifier::NotifyDownloadSpeed(
     /* [in] */ Int64 id,
     /* [in] */ Int64 bytesPerSecond)
 {
-    synchronized (mDownloadSpeedLock) {
+    {    AutoLock syncLock(mDownloadSpeedLock);
         if (bytesPerSecond != 0) {
             mDownloadSpeed->Put(id, bytesPerSecond);
             mDownloadTouch->Put(id, SystemClock::GetElapsedRealtime());
@@ -114,7 +116,7 @@ ECode CDownloadNotifier::NotifyDownloadSpeed(
 ECode CDownloadNotifier::UpdateWith(
     /* [in] */ ICollection* downloads)
 {
-    synchronized (mActiveNotifsLock) {
+    {    AutoLock syncLock(mActiveNotifsLock);
         UpdateWithLocked(downloads);
     }
     return NOERROR;
@@ -299,7 +301,7 @@ void CDownloadNotifier::UpdateWithLocked(
             Int64 current = 0;
             Int64 total = 0;
             Int64 speed = 0;
-            synchronized (mDownloadSpeedLock) {
+            {    AutoLock syncLock(mDownloadSpeedLock);
                 AutoPtr<IIterator> itClu;
                 cluster->GetIterator((IIterator**)&itClu);
                 Boolean bHasNxt = FALSE;
@@ -527,7 +529,7 @@ AutoPtr<ArrayOf<Int64> > CDownloadNotifier::GetDownloadIds(
 
 ECode CDownloadNotifier::DumpSpeeds()
 {
-    synchronized (mDownloadSpeedLock) {
+    {    AutoLock syncLock(mDownloadSpeedLock);
         Int32 size = 0;
         mDownloadSpeed->GetSize(&size);
         for (Int32 i = 0; i < size; i++) {

@@ -11,6 +11,8 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::EIID_IHandlerCallback;
 using Elastos::Droid::Os::ServiceManager;
@@ -99,8 +101,7 @@ ECode CPppoeStateTracker::ResetInterface(
             Slogger::I(TAG, "Mask: %s", netmask.string());
             Slogger::I(TAG, "DNS: %s", dns.string());
 
-            synchronized(mSyncLock)
-            {
+            {    AutoLock syncLock(mSyncLock);
                 if(mInterfaceName != NULL) {
                     Slogger::I(TAG, "reset device: %s", mInterfaceName.string());
                     //NetworkUtils::ResetConnections(mInterfaceName, INetworkUtils::RESET_ALL_ADDRESSES);
@@ -249,8 +250,7 @@ ECode CPppoeStateTracker::NotifyPppConnected(
     /* [in] */ const String& ifname)
 {
     Slogger::I(TAG, "report interface is up for %s", ifname.string());
-    synchronized(mSyncLock)
-    {
+    {    AutoLock syncLock(mSyncLock);
         //TODO: Need IHandler::sendEmptyMessage
         //mTrackerTarget->SendEmptyMessage(EVENT_CONNECTED);
     }
@@ -265,8 +265,7 @@ ECode CPppoeStateTracker::NotifyStateChange(
     if (ifname.Equals(mInterfaceName)) {
         Slogger::I(TAG, "update network state tracker");
 
-        synchronized(mSyncLock)
-        {
+        {    AutoLock syncLock(mSyncLock);
             //TODO: Need IHandler::sendEmptyMessage
             // mTrackerTarget->SendEmptyMessage(state->Equals(DetailedState::CONNECTED)
             //     ? EVENT_CONNECTED : EVENT_DISCONNECTED);

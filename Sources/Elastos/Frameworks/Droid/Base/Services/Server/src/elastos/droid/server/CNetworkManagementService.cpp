@@ -28,6 +28,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IService;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResources;
@@ -836,7 +838,7 @@ ECode CNetworkManagementService::NotifyInterfaceClassActivity(
     }
 
     Boolean report = FALSE;
-    synchronized(mIdleTimerLock) {
+    {    AutoLock syncLock(mIdleTimerLock);
         if (Ptr(mActiveIdleTimers)->Func(IHashMap::IsEmpty)) {
             // If there are no idle timers, we are not monitoring activity, so we
             // are always considered active.
@@ -1038,7 +1040,7 @@ ECode CNetworkManagementService::PrepareNativeDaemon()
     }
 
     // push any existing quota or UID rules
-    synchronized(mQuotaLock) {
+    {    AutoLock syncLock(mQuotaLock);
         Int32 size;
         mActiveQuotas->GetSize(&size);
         if (size > 0) {
@@ -2148,7 +2150,7 @@ ECode CNetworkManagementService::AddIdleTimer(
 
     if (DBG) Slogger::D(TAG, "Adding idletimer");
 
-    synchronized(mIdleTimerLock) {
+    {    AutoLock syncLock(mIdleTimerLock);
         AutoPtr<IInterface> value;
         mActiveIdleTimers->Get(StringUtils::ParseCharSequence(iface), (IInterface**)&value);
         AutoPtr<IdleTimerParams> params = (IdleTimerParams*)IObject::Probe(value);
@@ -2190,7 +2192,7 @@ ECode CNetworkManagementService::RemoveIdleTimer(
 
     if (DBG) Slogger::D(TAG, "Removing idletimer");
 
-    synchronized(mIdleTimerLock) {
+    {    AutoLock syncLock(mIdleTimerLock);
         AutoPtr<IInterface> value;
         mActiveIdleTimers->Get(StringUtils::ParseCharSequence(iface), (IInterface**)&value);
         AutoPtr<IdleTimerParams> params = (IdleTimerParams*)IObject::Probe(value);
@@ -2282,7 +2284,7 @@ ECode CNetworkManagementService::SetInterfaceQuota(
     if (!mBandwidthControlEnabled)
         return NOERROR;
 
-    synchronized(mQuotaLock) {
+    {    AutoLock syncLock(mQuotaLock);
         Boolean isContainsKey;
         mActiveQuotas->ContainsKey(StringUtils::ParseCharSequence(iface), &isContainsKey);
         if (isContainsKey) {
@@ -2313,7 +2315,7 @@ ECode CNetworkManagementService::RemoveInterfaceQuota(
     if (!mBandwidthControlEnabled)
         return NOERROR;
 
-    synchronized(mQuotaLock) {
+    {    AutoLock syncLock(mQuotaLock);
         Boolean isContainsKey;
         mActiveQuotas->ContainsKey(StringUtils::ParseCharSequence(iface), &isContainsKey);
         if (isContainsKey) {
@@ -2352,7 +2354,7 @@ ECode CNetworkManagementService::SetInterfaceAlert(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    synchronized(mQuotaLock) {
+    {    AutoLock syncLock(mQuotaLock);
         Boolean isContainsKey;
         mActiveAlerts->ContainsKey(StringUtils::ParseCharSequence(iface), &isContainsKey);
         if (isContainsKey) {
@@ -2382,7 +2384,7 @@ ECode CNetworkManagementService::RemoveInterfaceAlert(
     if (!mBandwidthControlEnabled)
         return NOERROR;
 
-    synchronized(mQuotaLock) {
+    {    AutoLock syncLock(mQuotaLock);
         Boolean isContainsKey;
         mActiveAlerts->ContainsKey(StringUtils::ParseCharSequence(iface), &isContainsKey);
         if (isContainsKey) {
@@ -2432,7 +2434,7 @@ ECode CNetworkManagementService::SetUidNetworkRules(
     if (!mBandwidthControlEnabled)
         return NOERROR;
 
-    synchronized(mQuotaLock) {
+    {    AutoLock syncLock(mQuotaLock);
         Boolean oldRejectOnQuota;
         mUidRejectOnQuota->Get(uid, &oldRejectOnQuota);
         if (oldRejectOnQuota == rejectOnQuotaInterfaces) {
@@ -2925,7 +2927,7 @@ ECode CNetworkManagementService::ReportNetworkActive()
 ECode CNetworkManagementService::IsNetworkActive(
         /* [out] */ Boolean* result)
 {
-    synchronized(mNetworkActivityListeners) {
+    {    AutoLock syncLock(mNetworkActivityListeners);
         *result = mNetworkActive || Ptr(mActiveIdleTimers)->Func(IHashMap::IsEmpty);
     }
     return NOERROR;
@@ -2959,14 +2961,14 @@ void CNetworkManagementService::Dump(
     pw->Print(String("mNetworkActive="));
     pw->Println(mNetworkActive);
 
-    synchronized(mQuotaLock) {
+    {    AutoLock syncLock(mQuotaLock);
         pw->Print(String("Active quota ifaces: "));
         pw->Println(Object::ToString(mActiveQuotas));
         pw->Print(String("Active alert ifaces: "));
         pw->Println(Object::ToString(mActiveAlerts));
     }
 
-    synchronized(mUidRejectOnQuota) {
+    {    AutoLock syncLock(mUidRejectOnQuota);
         pw->Print(String("UID reject on quota ifaces: ["));
         Int32 size;
         mUidRejectOnQuota->GetSize(&size);
@@ -2979,7 +2981,7 @@ void CNetworkManagementService::Dump(
         pw->Println(String("]"));
     }
 
-    synchronized(mIdleTimerLock) {
+    {    AutoLock syncLock(mIdleTimerLock);
         pw->Println(String("Idle timers:"));
         FOR_EACH(iter, Ptr(mActiveIdleTimers)->Func(mActiveIdleTimers->GetEntrySet)) {
             AutoPtr<IMapEntry> ent = IMapEntry::Probe(Ptr(iter)->Func(iter->GetNext));
@@ -3005,7 +3007,7 @@ void CNetworkManagementService::Dump(
 ECode CNetworkManagementService::GetBatteryStats(
     /* [out] */ IIBatteryStats** result)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mBatteryStats != NULL) {
             FUNC_RETURN(mBatteryStats)
         }

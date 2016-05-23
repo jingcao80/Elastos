@@ -7,6 +7,8 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Slogger;
@@ -90,7 +92,7 @@ ECode TaskDrainer::constructor(
 ECode TaskDrainer::TaskStarted(
     /* [in] */ IInterface* task)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (VERBOSE) {
             StringBuilder sb;
             sb += TAG;
@@ -124,7 +126,7 @@ ECode TaskDrainer::TaskStarted(
 ECode TaskDrainer::TaskFinished(
     /* [in] */ IInterface* task)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (VERBOSE) {
             StringBuilder sb;
             sb += TAG;
@@ -154,7 +156,7 @@ ECode TaskDrainer::TaskFinished(
 
 ECode TaskDrainer::BeginDrain()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (!mDraining) {
             if (VERBOSE) {
                 StringBuilder sb;

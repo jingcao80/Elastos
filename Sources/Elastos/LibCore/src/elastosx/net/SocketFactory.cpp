@@ -3,6 +3,8 @@
 #include "CDefaultSocketFactory.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastosx::Net::CDefaultSocketFactory;
 
 namespace Elastosx {
@@ -24,7 +26,7 @@ ECode SocketFactory::GetDefault(
 {
     VALIDATE_NOT_NULL(factory)
 
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         if (sDefaultFactory == NULL) {
             CDefaultSocketFactory::New((ISocketFactory**)&sDefaultFactory);
         }

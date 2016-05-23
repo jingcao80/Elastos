@@ -8,6 +8,8 @@
 #include <elastos/droid/utility/TimeUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Utility::TimeUtils;
 using Elastos::Core::CSystem;
@@ -91,7 +93,7 @@ void DozeLog::TraceDozing(
 {
     if (!ENABLED) return;
     sPulsing = FALSE;
-    synchronized(sDozeLog) {
+    {    AutoLock syncLock(sDozeLog);
         if (dozing && sMessages == NULL) {
             sTimes = ArrayOf<Int64>::Alloc(SIZE);
             sMessages = ArrayOf<String>::Alloc(SIZE);
@@ -176,7 +178,7 @@ void DozeLog::TraceProximityResult(
 void DozeLog::Dump(
     /* [in] */ IPrintWriter* pw)
 {
-    synchronized(sDozeLog) {
+    {    AutoLock syncLock(sDozeLog);
         if (sMessages == NULL) return;
         pw->Println(String("  Doze log:"));
         Int32 start = (sPosition - sCount + SIZE) % SIZE;
@@ -212,7 +214,7 @@ void DozeLog::Dump(
 void DozeLog::Log(
     /* [in] */ const String& msg)
 {
-    synchronized(sDozeLog) {
+    {    AutoLock syncLock(sDozeLog);
         if (sMessages == NULL) return;
         AutoPtr<ISystem> system;
         Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);

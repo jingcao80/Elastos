@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.gsm;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IAlarmManager;
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::App::INotificationManager;
@@ -482,7 +484,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             case EVENT_ALL_DATA_DISCONNECTED:
                 Int64 dds = SubscriptionManager->GetDefaultDataSubId();
                 ProxyController->GetInstance()->UnregisterForAllDataDisconnected(dds, this);
-                Synchronized(this) {
+                {    AutoLock syncLock(this);
                     If (mPendingRadioPowerOffAfterDataOff) {
                         If (DBG) Log("EVENT_ALL_DATA_DISCONNECTED, turn radio off now.");
                         HangupAndPowerOff();
@@ -2086,7 +2088,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      */
     //@Override
     CARAPI PowerOffRadioSafely(DcTrackerBase dcTracker) {
-        Synchronized (this) {
+        {    AutoLock syncLock(this);
             If (!mPendingRadioPowerOffAfterDataOff) {
                 Int64 dds = SubscriptionManager->GetDefaultDataSubId();
                 // To minimize race conditions we call cleanUpAllConnections on

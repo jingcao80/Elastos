@@ -10,6 +10,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Internal::App::CProcessStateHolder;
@@ -316,7 +318,7 @@ void ProcessRecord::Dump(
     // }
     // if (setProcState >= ActivityManager.PROCESS_STATE_SERVICE) {
     //     long wtime;
-    //     synchronized (mBatteryStats) {
+    //     {    AutoLock syncLock(mBatteryStats);
     //         wtime = mBatteryStats.getProcessWakeTime(info.uid,
     //                 pid, SystemClock.elapsedRealtime());
     //     }

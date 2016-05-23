@@ -12,6 +12,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Droid::Graphics::EIID_ISurfaceTexture;
@@ -48,7 +50,7 @@ ECode ChildProcessService::InnerRunnable::Run()
         // Boolean useLinker = Linker.isUsed();
 
         // if (useLinker) {
-        //     synchronized(mMainThread) {
+        //     {    AutoLock syncLock(mMainThread);
         //         while (!mIsBound) {
         //             mMainThread.wait();
         //         }
@@ -68,13 +70,13 @@ ECode ChildProcessService::InnerRunnable::Run()
         //     Log.e(TAG, "Failed to load native library, exiting child process", e);
         //     System.exit(-1);
         // }
-        // synchronized(mMainThread) {
+        // {    AutoLock syncLock(mMainThread);
         //     while (mCommandLineParams == null) {
         //         mMainThread.wait();
         //     }
         // }
         // LibraryLoader.initialize(mCommandLineParams);
-        // synchronized(mMainThread) {
+        // {    AutoLock syncLock(mMainThread);
         //     mLibraryInitialized = true;
         //     mMainThread.notifyAll();
         //     while (mFileIds == null) {
@@ -125,7 +127,7 @@ ChildProcessService::ChildProcessService()
     //     @Override
     //     public int setupConnection(Bundle args, IChildProcessCallback callback) {
     //         mCallback = callback;
-    //         synchronized(mMainThread) {
+    //         {    AutoLock syncLock(mMainThread);
     //             // Allow the command line to be set via bind() intent or setupConnection, but
     //             // the FD can only be transferred here.
     //             if (mCommandLineParams == null) {
@@ -215,8 +217,7 @@ ECode ChildProcessService::OnDestroy()
         return NOERROR;
     }
 
-    //synchronized(mMainThread)
-    {
+    //{    AutoLock syncLock(mMainThread);
         AutoLock lock(mMainThreadLock);
         // try {
             while (!mLibraryInitialized) {
@@ -252,8 +253,7 @@ ECode ChildProcessService::OnBind(
     // TODO
     // StopSelf();
 
-    //synchronized(mMainThread)
-    {
+    //{    AutoLock syncLock(mMainThread);
         AutoLock lock(mMainThreadLock);
         intent->GetStringArrayExtra(
                 ChildProcessConnection::EXTRA_COMMAND_LINE,

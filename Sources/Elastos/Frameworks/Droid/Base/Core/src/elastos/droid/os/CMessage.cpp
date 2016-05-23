@@ -8,6 +8,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Utility::TimeUtils;
 using Elastos::Core::ICloneable;
@@ -242,7 +244,7 @@ ECode CMessage::RecycleUnchecked()
     mCallback = NULL;
     mData = NULL;
 
-    synchronized(sPoolSync) {
+    {    AutoLock syncLock(sPoolSync);
         if (sPoolSize < MAX_POOL_SIZE) {
             mNext = sPool;
             sPool = this;

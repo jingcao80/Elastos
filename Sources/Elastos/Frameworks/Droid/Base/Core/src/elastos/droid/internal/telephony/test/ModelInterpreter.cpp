@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.test;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Telephony::IRlog;
@@ -235,7 +237,7 @@ public class ModelInterpreter
                     break;
                 }
 
-                Synchronized(mPausedResponseMonitor) {
+                {    AutoLock syncLock(mPausedResponseMonitor);
                     While (mPausedResponseCount > 0) {
                         try {
                             mPausedResponseMonitor->Wait();
@@ -244,7 +246,7 @@ public class ModelInterpreter
                     }
                 }
 
-                Synchronized (this) {
+                {    AutoLock syncLock(this);
                     try {
                         mFinalResponse = "OK";
                         ProcessLine(line);
@@ -275,7 +277,7 @@ public class ModelInterpreter
     CARAPI
     TriggerRing(String number)
     {
-        Synchronized (this) {
+        {    AutoLock syncLock(this);
             Boolean success;
 
             success = mSimulatedCallState->TriggerRing(number);
@@ -373,7 +375,7 @@ public class ModelInterpreter
     CARAPI
     SendUnsolicited (String unsol)
     {
-        Synchronized (this) {
+        {    AutoLock syncLock(this);
             Println(unsol);
         }
     }
@@ -406,7 +408,7 @@ public class ModelInterpreter
 
 
 
-        Synchronized (this) {
+        {    AutoLock syncLock(this);
             Println("+CMT: ,1\r" + pdu->ToString());
         }
 
@@ -417,7 +419,7 @@ public class ModelInterpreter
     CARAPI
     PauseResponses()
     {
-        Synchronized(mPausedResponseMonitor) {
+        {    AutoLock syncLock(mPausedResponseMonitor);
             mPausedResponseCount++;
         }
     }
@@ -426,7 +428,7 @@ public class ModelInterpreter
     CARAPI
     ResumeResponses()
     {
-        Synchronized(mPausedResponseMonitor) {
+        {    AutoLock syncLock(mPausedResponseMonitor);
             mPausedResponseCount--;
 
             If (mPausedResponseCount == 0) {
@@ -601,7 +603,7 @@ public class ModelInterpreter
     void
     Println (String s)
     {
-        Synchronized(this) {
+        {    AutoLock syncLock(this);
             try {
                 Byte[] bytes =  s->GetBytes("US-ASCII");
 
@@ -618,7 +620,7 @@ public class ModelInterpreter
     void
     Print (String s)
     {
-        Synchronized(this) {
+        {    AutoLock syncLock(this);
             try {
                 Byte[] bytes =  s->GetBytes("US-ASCII");
 

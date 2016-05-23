@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.dataconnection;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
@@ -169,7 +171,7 @@ public class DctController extends Handler {
 
     private class DataStateReceiver extends BroadcastReceiver {
         CARAPI OnReceive(Context context, Intent intent) {
-            Synchronized(this) {
+            {    AutoLock syncLock(this);
                 If (intent->GetAction()->Equals(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED)) {
                     ServiceState ss = ServiceState->NewFromBundle(intent->GetExtras());
 
@@ -619,21 +621,21 @@ public class DctController extends Handler {
 
     CARAPI RegisterForDefaultDataSwitchInfo(Handler h, Int32 what, Object obj) {
         Registrant r = new Registrant (h, what, obj);
-        Synchronized (mNotifyDefaultDataSwitchInfo) {
+        {    AutoLock syncLock(mNotifyDefaultDataSwitchInfo);
             mNotifyDefaultDataSwitchInfo->Add(r);
         }
     }
 
     CARAPI RegisterForOnDemandDataSwitchInfo(Handler h, Int32 what, Object obj) {
         Registrant r = new Registrant (h, what, obj);
-        Synchronized (mNotifyOnDemandDataSwitchInfo) {
+        {    AutoLock syncLock(mNotifyOnDemandDataSwitchInfo);
             mNotifyOnDemandDataSwitchInfo->Add(r);
         }
     }
 
     CARAPI RegisterForOnDemandPsAttach(Handler h, Int32 what, Object obj) {
         Registrant r = new Registrant (h, what, obj);
-        Synchronized (mNotifyOnDemandPsAttach) {
+        {    AutoLock syncLock(mNotifyOnDemandPsAttach);
             mNotifyOnDemandPsAttach->Add(r);
         }
     }
@@ -814,7 +816,7 @@ public class DctController extends Handler {
 
         CARAPI UnLock() {
             Rlog->D(TAG, "unLock the DdsSwitchSerializer");
-            Synchronized(this) {
+            {    AutoLock syncLock(this);
                 mIsDdsSwitchCompleted = TRUE;
                 Rlog->D(TAG, "unLocked the DdsSwitchSerializer");
                 NotifyAll();
@@ -823,7 +825,7 @@ public class DctController extends Handler {
         }
 
         public Boolean IsLocked() {
-            Synchronized(this) {
+            {    AutoLock syncLock(this);
                 Rlog->D(TAG, "isLocked = " + !mIsDdsSwitchCompleted);
                 return !mIsDdsSwitchCompleted;
             }
@@ -837,7 +839,7 @@ public class DctController extends Handler {
                     Rlog->D(TAG, "EVENT_START_DDS_SWITCH");
 
                     try {
-                        Synchronized(this) {
+                        {    AutoLock syncLock(this);
                             While(!mIsDdsSwitchCompleted) {
                                 Rlog->D(TAG, "DDS switch in progress, wait");
                                 Wait();

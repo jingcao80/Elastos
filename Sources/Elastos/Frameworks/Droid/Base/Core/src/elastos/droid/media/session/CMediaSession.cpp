@@ -9,6 +9,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Pm::CParceledListSlice;
 using Elastos::Droid::Content::Pm::IParceledListSlice;
 using Elastos::Droid::Media::IRating;
@@ -308,7 +310,7 @@ ECode CMediaSession::SetCallback(
     /* [in] */ IMediaSessionCallback * callback,
     /* [in] */ IHandler * _handler)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (callback == NULL) {
             if (mCallback != NULL) {
                 ((CMediaSessionCallback*)(mCallback->mCallback.Get()))->mSession = NULL;
@@ -744,7 +746,7 @@ ECode CMediaSession::PostToCallback(
     /* [in] */ IInterface * obj,
     /* [in] */ IBundle * extras)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mCallback != NULL) {
             mCallback->Post(what, obj, extras);
         }

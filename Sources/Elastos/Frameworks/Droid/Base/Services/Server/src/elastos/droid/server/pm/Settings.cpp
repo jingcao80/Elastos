@@ -17,6 +17,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
@@ -4080,7 +4082,7 @@ void Settings::RemoveUserLPw(
 void Settings::RemoveCrossProfileIntentFiltersLPw(
     /* [in] */ Int32 userId)
 {
-    synchronized (mCrossProfileIntentResolversLock) {
+    {    AutoLock syncLock(mCrossProfileIntentResolversLock);
         // userId is the source user
         if (mCrossProfileIntentResolvers.Find(userId) != mCrossProfileIntentResolvers.End()) {
             mCrossProfileIntentResolvers.Erase(userId);

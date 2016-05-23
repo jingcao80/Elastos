@@ -7,6 +7,8 @@
 #include "Collections.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashMap;
@@ -32,7 +34,7 @@ ECode CookieStoreImpl::Add(
     /* [in] */ IURI* uri,
     /* [in] */ IHttpCookie* cookie)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (cookie == NULL) {
             return E_NULL_POINTER_EXCEPTION;
         }
@@ -79,7 +81,7 @@ ECode CookieStoreImpl::Get(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (uri == NULL) {
             return E_NULL_POINTER_EXCEPTION;
         }
@@ -168,7 +170,7 @@ ECode CookieStoreImpl::GetCookies(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IList> outresult;
         CArrayList::New((IList**)&outresult);
 
@@ -209,7 +211,7 @@ ECode CookieStoreImpl::GetURIs(
 {
     VALIDATE_NOT_NULL(URIs);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IList> outresult;
         AutoPtr<ISet> keyset;
         mMap->GetKeySet((ISet**)&keyset);
@@ -229,7 +231,7 @@ ECode CookieStoreImpl::Remove(
 {
     VALIDATE_NOT_NULL(succeeded);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (cookie == NULL) {
             return E_NULL_POINTER_EXCEPTION;
         }
@@ -256,7 +258,7 @@ ECode CookieStoreImpl::RemoveAll(
 {
     VALIDATE_NOT_NULL(succeeded);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean isEmpty;
         mMap->IsEmpty(&isEmpty);
         *succeeded = !isEmpty;

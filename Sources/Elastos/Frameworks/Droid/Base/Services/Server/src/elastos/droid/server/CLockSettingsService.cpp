@@ -19,6 +19,8 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContentValues;
@@ -648,7 +650,7 @@ ECode CLockSettingsService::RegisterObserver(
 {
     AutoPtr<ISystemProperties> sysprop;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysprop);
-    synchronized(mObserversLock) {
+    {    AutoLock syncLock(mObserversLock);
         List<AutoPtr<LockSettingsObserver> >::Iterator it = mObservers.Begin();
         for (; it != mObservers.End(); ++it) {
             LockSettingsObserver* lso = *it;
@@ -680,7 +682,7 @@ ECode CLockSettingsService::RegisterObserver(
 ECode CLockSettingsService::UnregisterObserver(
     /* [in] */ IILockSettingsObserver* remote)
 {
-    synchronized(mObserversLock) {
+    {    AutoLock syncLock(mObserversLock);
         List<AutoPtr<LockSettingsObserver> >::Iterator it = mObservers.Begin();
         for (; it != mObservers.End(); ++it) {
             LockSettingsObserver* lso = *it;
@@ -697,7 +699,7 @@ ECode CLockSettingsService::NotifyObservers(
     /* [in] */ const String& key,
     /* [in] */ Int32 userId)
 {
-    synchronized(mObserversLock) {
+    {    AutoLock syncLock(mObserversLock);
         ECode ec = NOERROR;
         List<AutoPtr<LockSettingsObserver> >::Iterator it = mObservers.Begin();
         for (; it != mObservers.End(); ++it) {

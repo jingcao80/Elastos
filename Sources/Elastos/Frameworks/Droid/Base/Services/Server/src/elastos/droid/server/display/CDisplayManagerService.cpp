@@ -18,6 +18,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Thread.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::IBinder;
@@ -564,7 +566,7 @@ ECode CDisplayManagerService::LocalService::InitPowerManagement(
     /* [in] */ ISensorManager* sensorManager)
 {
     Object* obj = mHost->mSyncRoot;
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         AutoPtr<IDisplayBlanker> blanker = new DisplayBlanker(mHost, callbacks);
         mHost->mDisplayPowerController = new DisplayPowerController(
             mHost->mContext, callbacks, handler, sensorManager, blanker);
@@ -882,7 +884,7 @@ ECode CDisplayManagerService::OnBootPhase(
 {
     if (phase == PHASE_WAIT_FOR_DEFAULT_DISPLAY) {
         Object* obj = (Object*)mSyncRoot.Get();
-        synchronized(obj) {
+        {    AutoLock syncLock(obj);
             Int64 timeout = SystemClock::GetUptimeMillis() + WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT;
             HashMap<Int32, AutoPtr<LogicalDisplay> >::Iterator it;
             it = mLogicalDisplays.Find(IDisplay::DEFAULT_DISPLAY);
@@ -910,7 +912,7 @@ ECode CDisplayManagerService::OnBootPhase(
 ECode CDisplayManagerService::WindowManagerAndInputReady()
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         AutoPtr<IInterface> service = LocalServices::GetService(EIID_IWindowManagerInternal);
         mWindowManagerInternal = IWindowManagerInternal::Probe(service);
         service = LocalServices::GetService(EIID_IInputManagerInternal);
@@ -1000,11 +1002,11 @@ ECode CDisplayManagerService::RequestGlobalDisplayStateInternal(
         /* [in] */ Int32 state)
 {
     ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    {    AutoLock syncLock(sync);
 
         // Update the display state within the lock.
         Object* syncRoot = (Object*)mSyncRoot.Get();
-        synchronized(syncRoot) {
+        {    AutoLock syncLock(syncRoot);
             if (mGlobalDisplayState != state) {
                 mGlobalDisplayState = state;
                 UpdateGlobalDisplayStateLocked(IList::Probe(mTempDisplayStateWorkQueue));
@@ -1040,7 +1042,7 @@ ECode CDisplayManagerService::GetDisplayInfoInternal(
     *displayInfo = NULL;
 
     Object* syncRoot = (Object*)mSyncRoot.Get();
-    synchronized(syncRoot) {
+    {    AutoLock syncLock(syncRoot);
         HashMap<Int32, AutoPtr<LogicalDisplay> >::Iterator it = mLogicalDisplays.Find(displayId);
         if (it != mLogicalDisplays.End()) {
             AutoPtr<IDisplayInfo> info = it->mSecond->GetDisplayInfoLocked();
@@ -1064,7 +1066,7 @@ ECode CDisplayManagerService::GetDisplayIdsInternal(
     *displayIds = NULL;
 
     Object* syncRoot = (Object*)mSyncRoot.Get();
-    synchronized(syncRoot) {
+    {    AutoLock syncLock(syncRoot);
         Int32 count = mLogicalDisplays.GetSize();
         AutoPtr<ArrayOf<Int32> > ids = ArrayOf<Int32>::Alloc(count);
         Int32 n = 0;
@@ -1095,7 +1097,7 @@ ECode CDisplayManagerService::RegisterCallbackInternal(
     /* [in] */ Int32 callingPid)
 {
     Object* syncRoot = (Object*)mSyncRoot.Get();
-    synchronized(syncRoot) {
+    {    AutoLock syncLock(syncRoot);
         HashMap<Int32, AutoPtr<CallbackRecord> >::Iterator find = mCallbacks.Find(callingPid);
         if (find != mCallbacks.End()) {
             Slogger::E(TAG, "The calling process has already registered an IIDisplayManagerCallback.");
@@ -1119,7 +1121,7 @@ void CDisplayManagerService::OnCallbackDied(
     /* [in] */ CallbackRecord* record)
 {
     Object* syncRoot = (Object*)mSyncRoot.Get();
-    synchronized(syncRoot) {
+    {    AutoLock syncLock(syncRoot);
         HashMap<Int32, AutoPtr<CallbackRecord> >::Iterator find = mCallbacks.Find(record->mPid);
         if (find != mCallbacks.End()) {
             mCallbacks.Erase(find);
@@ -1132,7 +1134,7 @@ ECode CDisplayManagerService::StartWifiDisplayScanInternal(
     /* [in] */ Int32 callingPid)
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
 
         HashMap<Int32, AutoPtr<CallbackRecord> >::Iterator find = mCallbacks.Find(callingPid);
         if (find != mCallbacks.End()) {
@@ -1162,7 +1164,7 @@ ECode CDisplayManagerService::StopWifiDisplayScanInternal(
     /* [in] */ Int32 callingPid)
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         HashMap<Int32, AutoPtr<CallbackRecord> >::Iterator find = mCallbacks.Find(callingPid);
         if (find == mCallbacks.End()) {
             Slogger::E(TAG, "The calling process has not registered an IIDisplayManagerCallback.");
@@ -1197,7 +1199,7 @@ ECode CDisplayManagerService::ConnectWifiDisplayInternal(
     /* [in] */ const String& address)
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         if (mWifiDisplayAdapter != NULL) {
             mWifiDisplayAdapter->RequestConnectLocked(address);
         }
@@ -1208,7 +1210,7 @@ ECode CDisplayManagerService::ConnectWifiDisplayInternal(
 ECode CDisplayManagerService::PauseWifiDisplayInternal()
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         if (mWifiDisplayAdapter != NULL) {
             mWifiDisplayAdapter->RequestPauseLocked();
         }
@@ -1219,7 +1221,7 @@ ECode CDisplayManagerService::PauseWifiDisplayInternal()
 ECode CDisplayManagerService::ResumeWifiDisplayInternal()
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         if (mWifiDisplayAdapter != NULL) {
             mWifiDisplayAdapter->RequestResumeLocked();
         }
@@ -1230,7 +1232,7 @@ ECode CDisplayManagerService::ResumeWifiDisplayInternal()
 ECode CDisplayManagerService::DisconnectWifiDisplayInternal()
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         if (mWifiDisplayAdapter != NULL) {
             mWifiDisplayAdapter->RequestDisconnectLocked();
         }
@@ -1243,7 +1245,7 @@ ECode CDisplayManagerService::RenameWifiDisplayInternal(
     /* [in] */ const String& alias)
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         if (mWifiDisplayAdapter != NULL) {
             mWifiDisplayAdapter->RequestRenameLocked(address, alias);
         }
@@ -1255,7 +1257,7 @@ ECode CDisplayManagerService::ForgetWifiDisplayInternal(
     /* [in] */ const String& address)
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         if (mWifiDisplayAdapter != NULL) {
             mWifiDisplayAdapter->RequestForgetLocked(address);
         }
@@ -1269,7 +1271,7 @@ ECode CDisplayManagerService::GetWifiDisplayStatusInternal(
     VALIDATE_NOT_NULL(status);
 
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         if (mWifiDisplayAdapter != NULL) {
             AutoPtr<IWifiDisplayStatus> s = mWifiDisplayAdapter->GetWifiDisplayStatusLocked();
             *status = s;
@@ -1296,7 +1298,7 @@ Int32 CDisplayManagerService::CreateVirtualDisplayInternal(
     /* [in] */ Int32 flags)
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         if (mVirtualDisplayAdapter == NULL) {
             Slogger::W(TAG,
                 "Rejecting request to create private virtual display "
@@ -1333,7 +1335,7 @@ ECode CDisplayManagerService::ResizeVirtualDisplayInternal(
     /* [in] */ Int32 densityDpi)
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         if (mVirtualDisplayAdapter == NULL) {
             return NOERROR;
         }
@@ -1348,7 +1350,7 @@ ECode CDisplayManagerService::SetVirtualDisplaySurfaceInternal(
     /* [in] */ ISurface* surface)
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         if (mVirtualDisplayAdapter == NULL) {
             return NOERROR;
         }
@@ -1362,7 +1364,7 @@ ECode CDisplayManagerService::ReleaseVirtualDisplayInternal(
     /* [in] */ IBinder* appToken)
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         if (mVirtualDisplayAdapter == NULL) {
             return NOERROR;
         }
@@ -1462,7 +1464,7 @@ void CDisplayManagerService::HandleDisplayDeviceAdded(
    /* [in] */ DisplayDevice* device)
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         HandleDisplayDeviceAddedLocked(device);
     }
 }
@@ -1512,7 +1514,7 @@ void CDisplayManagerService::HandleDisplayDeviceRemoved(
     /* [in] */ DisplayDevice* device)
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         HandleDisplayDeviceRemovedLocked(device);
     }
 }
@@ -1675,7 +1677,7 @@ void CDisplayManagerService::SetDisplayPropertiesInternal(
     /* [in] */ Boolean inTraversal)
 {
     Object* obj = (Object*)mSyncRoot.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         HashMap<Int32, AutoPtr<LogicalDisplay> >::Iterator it;
         it = mLogicalDisplays.Find(displayId);
         if (it == mLogicalDisplays.End()) {
@@ -1860,7 +1862,7 @@ ECode CDisplayManagerService::DumpInternal(
 {
     // pw.println("DISPLAY MANAGER (dumpsys display)");
 
-    // synchronized(mSyncRoot) {
+    // {    AutoLock syncLock(mSyncRoot);
     //     pw.println("  mOnlyCode=" + mOnlyCore);
     //     pw.println("  mSafeMode=" + mSafeMode);
     //     pw.println("  mPendingTraversal=" + mPendingTraversal);

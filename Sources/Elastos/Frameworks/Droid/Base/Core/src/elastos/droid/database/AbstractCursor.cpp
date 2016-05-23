@@ -10,6 +10,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::IO::EIID_ICloseable;
@@ -441,7 +443,7 @@ ECode AbstractCursor::UnregisterDataSetObserver(
 ECode AbstractCursor::OnChange(
     /* [in] */ Boolean selfChange)
 {
-    synchronized(mSelfObserverLock) {
+    {    AutoLock syncLock(mSelfObserverLock);
         mContentObservable->DispatchChange(selfChange);
         if (mNotifyUri != NULL && selfChange) {
             mContentResolver->NotifyChange(mNotifyUri, mSelfObserver);
@@ -462,7 +464,7 @@ ECode AbstractCursor::SetNotificationUri(
     /* [in] */ IUri* notifyUri,
     /* [in] */ Int32 userHandle)
 {
-    synchronized(mSelfObserverLock) {
+    {    AutoLock syncLock(mSelfObserverLock);
         mNotifyUri = notifyUri;
         mContentResolver = cr;
         if (mSelfObserver != NULL) {
@@ -482,7 +484,7 @@ ECode AbstractCursor::GetNotificationUri(
 {
     VALIDATE_NOT_NULL(uri)
 
-    synchronized(mSelfObserverLock) {
+    {    AutoLock syncLock(mSelfObserverLock);
         *uri = mNotifyUri;
         REFCOUNT_ADD(*uri)
     }

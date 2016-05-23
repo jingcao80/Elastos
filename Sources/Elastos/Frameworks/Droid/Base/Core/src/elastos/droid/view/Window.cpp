@@ -15,6 +15,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IService;
 using Elastos::Droid::Content::Res::IResources;
@@ -103,7 +105,7 @@ ECode Window::GetContext(
 ECode Window::GetWindowStyle(
     /* [out] */ ITypedArray** attrs)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mWindowStyle == NULL) {
             AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
                 const_cast<Int32 *>(R::styleable::Window),

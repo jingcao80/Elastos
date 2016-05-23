@@ -181,7 +181,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     public List<JobInfo> GetPendingJobs(Int32 uid) {
         ArrayList<JobInfo> outList = new ArrayList<JobInfo>();
-        synchronized(mJobs) {
+        {    AutoLock syncLock(mJobs);
             ArraySet<JobStatus> jobs = mJobs->GetJobs();
             for (Int32 i=0; i<jobs->Size(); i++) {
                 JobStatus job = jobs->ValueAt(i);
@@ -195,7 +195,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     private void CancelJobsForUser(Int32 userHandle) {
         List<JobStatus> jobsForUser;
-        synchronized(mJobs) {
+        {    AutoLock syncLock(mJobs);
             jobsForUser = mJobs->GetJobsByUser(userHandle);
         }
         for (Int32 i=0; i<jobsForUser->Size(); i++) {
@@ -212,7 +212,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     CARAPI CancelJobsForUid(Int32 uid) {
         List<JobStatus> jobsForUid;
-        synchronized(mJobs) {
+        {    AutoLock syncLock(mJobs);
             jobsForUid = mJobs->GetJobsByUid(uid);
         }
         for (Int32 i=0; i<jobsForUid->Size(); i++) {
@@ -230,7 +230,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     CARAPI CancelJob(Int32 uid, Int32 jobId) {
         JobStatus toCancel;
-        synchronized(mJobs) {
+        {    AutoLock syncLock(mJobs);
             toCancel = mJobs->GetJobByUidAndJobId(uid, jobId);
         }
         if (toCancel != NULL) {
@@ -243,7 +243,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             Slogger::D(TAG, "Cancelling: " + cancelled);
         }
         StopTrackingJob(cancelled);
-        synchronized(mJobs) {
+        {    AutoLock syncLock(mJobs);
             // Remove from pending queue.
             mPendingJobs->Remove(cancelled);
             // Cancel if running.
@@ -291,7 +291,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             GetContext()->RegisterReceiverAsUser(
                     mBroadcastReceiver, UserHandle.ALL, userFilter, NULL, NULL);
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
-            synchronized(mJobs) {
+            {    AutoLock syncLock(mJobs);
                 // Let's go!
                 mReadyToRock = TRUE;
                 mBatteryStats = IBatteryStats.Stub->AsInterface(ServiceManager->GetService(
@@ -324,7 +324,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     private void StartTrackingJob(JobStatus jobStatus) {
         Boolean update;
         Boolean rocking;
-        synchronized(mJobs) {
+        {    AutoLock syncLock(mJobs);
             update = mJobs->Add(jobStatus);
             rocking = mReadyToRock;
         }
@@ -346,7 +346,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     private Boolean StopTrackingJob(JobStatus jobStatus) {
         Boolean removed;
         Boolean rocking;
-        synchronized(mJobs) {
+        {    AutoLock syncLock(mJobs);
             // Remove from store as well as controllers.
             removed = mJobs->Remove(jobStatus);
             rocking = mReadyToRock;
@@ -505,14 +505,14 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         //@Override
         CARAPI HandleMessage(Message message) {
-            synchronized(mJobs) {
+            {    AutoLock syncLock(mJobs);
                 if (!mReadyToRock) {
                     return;
                 }
             }
             switch (message.what) {
                 case MSG_JOB_EXPIRED:
-                    synchronized(mJobs) {
+                    {    AutoLock syncLock(mJobs);
                         JobStatus runNow = (JobStatus) message.obj;
                         // runNow can be NULL, which is a controller's way of indicating that its
                         // state is such that all ready jobs should be run immediately.
@@ -524,7 +524,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                     break;
                 case MSG_CHECK_JOB:
-                    synchronized(mJobs) {
+                    {    AutoLock syncLock(mJobs);
                         // Check the list of jobs and run some of them if we feel inclined.
                         MaybeQueueReadyJobsForExecutionLockedH();
                     }
@@ -660,7 +660,7 @@ public class JobSchedulerService extends com.android.server.SystemService
          * here is where we decide whether to actually execute it.
          */
         private void MaybeRunPendingJobsH() {
-            synchronized(mJobs) {
+            {    AutoLock syncLock(mJobs);
                 Iterator<JobStatus> it = mPendingJobs->Iterator();
                 if (DEBUG) {
                     Slogger::D(TAG, "pending queue: " + mPendingJobs->Size() + " jobs.");
@@ -732,7 +732,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             // If we get this far we're good to go; all we need to do now is check
             // whether the app is allowed to persist its scheduled work.
             final Boolean canPersist;
-            synchronized(mPersistCache) {
+            {    AutoLock syncLock(mPersistCache);
                 Boolean cached = mPersistCache->Get(uid);
                 if (cached != NULL) {
                     canPersist = cached->BooleanValue();
@@ -828,7 +828,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     void DumpInternal(PrintWriter pw) {
         final Int64 now = SystemClock->ElapsedRealtime();
-        synchronized(mJobs) {
+        {    AutoLock syncLock(mJobs);
             pw->Print("Started users: ");
             for (Int32 i=0; i<mStartedUsers->Size(); i++) {
                 pw->Print("u" + mStartedUsers->Get(i) + " ");

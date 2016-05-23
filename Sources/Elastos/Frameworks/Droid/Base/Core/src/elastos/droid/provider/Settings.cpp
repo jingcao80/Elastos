@@ -24,6 +24,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/regex/Pattern.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CContentValues;
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::ContentResolver;
@@ -144,7 +146,7 @@ ECode Settings::NameValueCache::LazyGetProvider(
     VALIDATE_NOT_NULL(provider);
     AutoPtr<IIContentProvider> cp;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         cp = mContentProvider;
         if (cp == NULL) {
             String authority;
@@ -211,7 +213,7 @@ ECode Settings::NameValueCache::GetStringForUser(
         SystemProperties::GetInt64(mVersionSystemProperty, 0, &newValuesVersion);
 
         // Our own user's settings data uses a client-side cache
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             if (mValuesVersion != newValuesVersion) {
                 if (LOCAL_LOGV || FALSE) {
                     String segment;
@@ -1461,7 +1463,7 @@ ECode Settings::Secure::GetStringForUser(
 
     Settings::Secure::MOVED_TO_LOCK_SETTINGS->Contains(CoreUtils::Convert(name), &flag);
     if (flag) {
-        synchronized(sSecureLock) {
+        {    AutoLock syncLock(sSecureLock);
             if (sLockSettings == NULL) {
                 sLockSettings = IILockSettings::Probe(ServiceManager::GetService(String("lock_settings")));
                 sIsSystemProcess = Process::MyUid() == IProcess::SYSTEM_UID;
@@ -1855,7 +1857,7 @@ ECode Settings::Secure::SetLocationProviderEnabledForUser(
     // and let the SettingsProvider handle it rather than reading and modifying
     // the list of enabled providers.
     String provider;
-    synchronized(sLocationSettingsLock) {
+    {    AutoLock syncLock(sLocationSettingsLock);
         if (enabled) {
             provider = String("+") + _provider;
         } else {
@@ -1872,7 +1874,7 @@ Boolean Settings::Secure::SetLocationModeForUser(
     /* [in] */ Int32 userId)
 {
     Boolean result = FALSE;
-    synchronized(sLocationSettingsLock) {
+    {    AutoLock syncLock(sLocationSettingsLock);
         Boolean gps = FALSE;
         Boolean network = FALSE;
         switch (mode) {
@@ -1908,7 +1910,7 @@ Int32 Settings::Secure::GetLocationModeForUser(
     /* [in] */ IContentResolver* cr,
     /* [in] */ Int32 userId)
 {
-    synchronized(sLocationSettingsLock) {
+    {    AutoLock syncLock(sLocationSettingsLock);
         Boolean gpsEnabled = FALSE;
         Settings::Secure::IsLocationProviderEnabledForUser(
             cr, ILocationManager::GPS_PROVIDER, userId, &gpsEnabled);

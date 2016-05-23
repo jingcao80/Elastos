@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.sip;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Net::Rtp::IAudioGroup;
@@ -92,7 +94,7 @@ public class SipPhone extends SipPhoneBase {
         // FIXME: Is synchronizing on the class necessary, should we use a mLockObj?
         // Also there are many things not synchronized, of course
         // this may be TRUE of CdmaPhone and GsmPhone too!!!
-        Synchronized (SipPhone.class) {
+        {    AutoLock syncLock(SipPhone.class);
             If (!(incomingCall instanceof SipAudioCall)) {
                 If (DBG) Log("takeIncomingCall: ret=NULL, not a SipAudioCall");
                 return NULL;
@@ -143,7 +145,7 @@ public class SipPhone extends SipPhoneBase {
 
     //@Override
     CARAPI AcceptCall(Int32 videoState) throws CallStateException {
-        Synchronized (SipPhone.class) {
+        {    AutoLock syncLock(SipPhone.class);
             If ((mRingingCall->GetState() == Call.State.INCOMING) ||
                     (mRingingCall->GetState() == Call.State.WAITING)) {
                 If (DBG) Log("acceptCall: accepting");
@@ -162,7 +164,7 @@ public class SipPhone extends SipPhoneBase {
 
     //@Override
     CARAPI RejectCall() throws CallStateException {
-        Synchronized (SipPhone.class) {
+        {    AutoLock syncLock(SipPhone.class);
             If (mRingingCall->GetState()->IsRinging()) {
                 If (DBG) Log("rejectCall: rejecting");
                 mRingingCall->RejectCall();
@@ -178,7 +180,7 @@ public class SipPhone extends SipPhoneBase {
 
     //@Override
     public Connection Dial(String dialString, Int32 videoState) throws CallStateException {
-        Synchronized (SipPhone.class) {
+        {    AutoLock syncLock(SipPhone.class);
             return DialInternal(dialString, videoState);
         }
     }
@@ -212,7 +214,7 @@ public class SipPhone extends SipPhoneBase {
     //@Override
     CARAPI SwitchHoldingAndActive() throws CallStateException {
         If (DBG) Log("dialInternal: switch fg and bg");
-        Synchronized (SipPhone.class) {
+        {    AutoLock syncLock(SipPhone.class);
             mForegroundCall->SwitchWith(mBackgroundCall);
             If (mBackgroundCall->GetState()->IsAlive()) mBackgroundCall->Hold();
             If (mForegroundCall->GetState()->IsAlive()) mForegroundCall->Unhold();
@@ -227,7 +229,7 @@ public class SipPhone extends SipPhoneBase {
 
     //@Override
     CARAPI Conference() throws CallStateException {
-        Synchronized (SipPhone.class) {
+        {    AutoLock syncLock(SipPhone.class);
             If ((mForegroundCall->GetState() != SipCall.State.ACTIVE)
                     || (mForegroundCall->GetState() != SipCall.State.ACTIVE)) {
                 throw new CallStateException("wrong state to merge calls: fg="
@@ -240,7 +242,7 @@ public class SipPhone extends SipPhoneBase {
     }
 
     CARAPI Conference(Call that) throws CallStateException {
-        Synchronized (SipPhone.class) {
+        {    AutoLock syncLock(SipPhone.class);
             If (!(that instanceof SipCall)) {
                 throw new CallStateException("expect " + SipCall.class
                         + ", cannot merge with " + that->GetClass());
@@ -261,7 +263,7 @@ public class SipPhone extends SipPhoneBase {
 
     //@Override
     CARAPI ClearDisconnected() {
-        Synchronized (SipPhone.class) {
+        {    AutoLock syncLock(SipPhone.class);
             mRingingCall->ClearDisconnected();
             mForegroundCall->ClearDisconnected();
             mBackgroundCall->ClearDisconnected();
@@ -276,7 +278,7 @@ public class SipPhone extends SipPhoneBase {
         If (!PhoneNumberUtils->Is12Key(c)) {
             Loge("sendDtmf called with invalid character '" + c + "'");
         } else If (mForegroundCall->GetState()->IsAlive()) {
-            Synchronized (SipPhone.class) {
+            {    AutoLock syncLock(SipPhone.class);
                 mForegroundCall->SendDtmf(c);
             }
         }
@@ -332,7 +334,7 @@ public class SipPhone extends SipPhoneBase {
     CARAPI SetEchoSuppressionEnabled() {
         // Echo suppression may not be available on every device. So, check
         // whether it is supported
-        Synchronized (SipPhone.class) {
+        {    AutoLock syncLock(SipPhone.class);
             AudioManager audioManager = (AudioManager) mContext->GetSystemService(Context.AUDIO_SERVICE);
             String echoSuppression = audioManager->GetParameters("ec_supported");
             If (echoSuppression->Contains("off")) {
@@ -343,7 +345,7 @@ public class SipPhone extends SipPhoneBase {
 
     //@Override
     CARAPI SetMute(Boolean muted) {
-        Synchronized (SipPhone.class) {
+        {    AutoLock syncLock(SipPhone.class);
             mForegroundCall->SetMute(muted);
         }
     }
@@ -438,7 +440,7 @@ public class SipPhone extends SipPhoneBase {
 
         void SwitchWith(SipCall that) {
             If (SC_DBG) Log("switchWith");
-            Synchronized (SipPhone.class) {
+            {    AutoLock syncLock(SipPhone.class);
                 SipCall tmp = new SipCall();
                 tmp->TakeOver(this);
                 this->TakeOver(that);
@@ -463,7 +465,7 @@ public class SipPhone extends SipPhoneBase {
         //@Override
         public List<Connection> GetConnections() {
             If (SC_VDBG) Log("getConnections");
-            Synchronized (SipPhone.class) {
+            {    AutoLock syncLock(SipPhone.class);
                 // FIXME should return Collections->UnmodifiableList();
                 return mConnections;
             }
@@ -494,7 +496,7 @@ public class SipPhone extends SipPhoneBase {
 
         //@Override
         CARAPI Hangup() throws CallStateException {
-            Synchronized (SipPhone.class) {
+            {    AutoLock syncLock(SipPhone.class);
                 If (mState->IsAlive()) {
                     If (SC_DBG) Log("hangup: call " + GetState()
                             + ": " + this + " on phone " + GetPhone());
@@ -734,7 +736,7 @@ public class SipPhone extends SipPhoneBase {
                 If (GetDisconnectCause() != DisconnectCause.LOCAL) {
                     SetDisconnectCause(cause);
                 }
-                Synchronized (SipPhone.class) {
+                {    AutoLock syncLock(SipPhone.class);
                     SetState(Call.State.DISCONNECTED);
                     SipAudioCall sipAudioCall = mSipAudioCall;
                     // FIXME: This goes NULL and is synchronized, but many uses aren't sync'd
@@ -770,7 +772,7 @@ public class SipPhone extends SipPhoneBase {
 
             //@Override
             CARAPI OnChanged(SipAudioCall call) {
-                Synchronized (SipPhone.class) {
+                {    AutoLock syncLock(SipPhone.class);
                     Call.State newState = GetCallStateFrom(call);
                     If (mState == newState) return;
                     If (newState == Call.State.INCOMING) {
@@ -927,7 +929,7 @@ public class SipPhone extends SipPhoneBase {
 
         //@Override
         CARAPI Hangup() throws CallStateException {
-            Synchronized (SipPhone.class) {
+            {    AutoLock syncLock(SipPhone.class);
                 If (SCN_DBG) Log("hangup: conn=" + mPeer->GetUriString()
                         + ": " + mState + ": on phone "
                         + GetPhone()->GetPhoneName());
@@ -951,7 +953,7 @@ public class SipPhone extends SipPhoneBase {
 
         //@Override
         CARAPI Separate() throws CallStateException {
-            Synchronized (SipPhone.class) {
+            {    AutoLock syncLock(SipPhone.class);
                 SipCall call = (GetPhone() == SipPhone.this)
                         ? (SipCall) GetBackgroundCall()
                         : (SipCall) GetForegroundCall();

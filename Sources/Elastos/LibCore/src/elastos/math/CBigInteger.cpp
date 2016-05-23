@@ -10,6 +10,8 @@
 #include "StringUtils.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::Math;
 using Elastos::Core::Character;
 using Elastos::Core::StringUtils;
@@ -258,7 +260,7 @@ AutoPtr<BigInt> CBigInteger::GetBigInt()
         return mBigInt;
     }
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mNativeIsValid) {
             return mBigInt;
         }
@@ -303,7 +305,7 @@ void CBigInteger::PrepareJavaRepresentation()
         return;
     }
 
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (mJavaIsValid) {
             return;
         }

@@ -7,6 +7,8 @@
 //TODO: Need CSecurity
 //#include "CSecurity.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::ISet;
@@ -834,7 +836,7 @@ ECode Cipher::GetSpi(
         return NOERROR;
     }
 
-    synchronized(mInitLock) {
+    {    AutoLock syncLock(mInitLock);
         if (mSpiImpl != NULL && key == NULL) {
             *spi = mSpiImpl;
             REFCOUNT_ADD(*spi);

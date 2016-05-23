@@ -8,6 +8,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Os::ISystemProperties;
@@ -114,7 +116,7 @@ Boolean PerformanceManager::SetPowerProfile(
     if (profile.IsNull() || profile.Equals(GetPowerProfile())) {
         return FALSE;
     }
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         mProfileSetByUser = !profile.Equals(mPerfProfileDefault);
         SetPowerProfileLocked(profile);
     }
@@ -163,7 +165,7 @@ void PerformanceManager::ActivityResumed(
         return;
     }
 
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         // Don't mess with it if the user has manually set a profile
         if (mProfileSetByUser) {
             return;

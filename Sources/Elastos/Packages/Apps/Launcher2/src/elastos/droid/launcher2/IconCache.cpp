@@ -11,6 +11,8 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResourcesHelper;
@@ -216,7 +218,7 @@ Slogger::E("IconCache", "============================IconCache::MakeDefaultIcon"
 void IconCache::Remove(
     /* [in] */ IComponentName* componentName)
 {
-    synchronized(mCache) {
+    {    AutoLock syncLock(mCache);
         mCache->Remove(TO_IINTERFACE(componentName));
     }
     return;
@@ -224,7 +226,7 @@ void IconCache::Remove(
 
 void IconCache::Flush()
 {
-    synchronized(mCache) {
+    {    AutoLock syncLock(mCache);
         mCache->Clear();
     }
     return;
@@ -235,7 +237,7 @@ void IconCache::GetTitleAndIcon(
     /* [in] */ ILauncherActivityInfo* info,
     /* [in] */ IHashMap* labelCache)
 {
-    synchronized(mCache) {
+    {    AutoLock syncLock(mCache);
         ApplicationInfo* _info = (ApplicationInfo*)application;
         AutoPtr<IUserHandle> handle;
         info->GetUser((IUserHandle**)&handle);
@@ -253,7 +255,7 @@ AutoPtr<IBitmap> IconCache::GetIcon(
     /* [in] */ IIntent* intent,
     /* [in] */ IUserHandle* user)
 {
-    synchronized(mCache) {
+    {    AutoLock syncLock(mCache);
         AutoPtr<IInterface> obj;
         IContext::Probe(mContext)->GetSystemService(IContext::LAUNCHER_APPS_SERVICE, (IInterface**)&obj);
         AutoPtr<ILauncherApps> launcherApps = ILauncherApps::Probe(obj);
@@ -277,7 +279,7 @@ AutoPtr<IBitmap> IconCache::GetIcon(
     /* [in] */ ILauncherActivityInfo* info,
     /* [in] */ IHashMap* labelCache)
 {
-    synchronized(mCache) {
+    {    AutoLock syncLock(mCache);
         if (info == NULL || component == NULL) {
             return NULL;
         }

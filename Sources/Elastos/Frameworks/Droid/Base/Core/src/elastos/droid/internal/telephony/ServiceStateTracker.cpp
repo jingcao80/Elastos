@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntentFilter;
@@ -254,7 +256,7 @@ public abstract class ServiceStateTracker extends Handler {
     private SignalStrength mLastSignalStrength = NULL;
     protected Boolean NotifySignalStrength() {
         Boolean notified = FALSE;
-        Synchronized(mCellInfo) {
+        {    AutoLock syncLock(mCellInfo);
             If (!mSignalStrength->Equals(mLastSignalStrength)) {
                 try {
                     mPhoneBase->NotifySignalStrength();
@@ -292,7 +294,7 @@ public abstract class ServiceStateTracker extends Handler {
                 Log("useDataRegStateForDataOnlyDevice: VoiceRegState=" + mNewSS->GetVoiceRegState()
                     + " DataRegState=" + mNewSS->GetDataRegState());
             }
-            // TODO: Consider not lying and instead have callers know the difference. 
+            // TODO: Consider not lying and instead have callers know the difference.
             mNewSS->SetVoiceRegState(mNewSS->GetDataRegState());
         }
     }
@@ -410,7 +412,7 @@ public abstract class ServiceStateTracker extends Handler {
     CARAPI HandleMessage(Message msg) {
         Switch (msg.what) {
             case EVENT_SET_RADIO_POWER_OFF:
-                Synchronized(this) {
+                {    AutoLock syncLock(this);
                     If (mPendingRadioPowerOffAfterDataOff &&
                             (msg.arg1 == mPendingRadioPowerOffAfterDataOffTag)) {
                         If (DBG) Log("EVENT_SET_RADIO_OFF, turn radio off now.");
@@ -431,7 +433,7 @@ public abstract class ServiceStateTracker extends Handler {
             case EVENT_GET_CELL_INFO_LIST: {
                 AsyncResult ar = (AsyncResult) msg.obj;
                 CellInfoResult result = (CellInfoResult) ar.userObj;
-                Synchronized(result.lockObj) {
+                {    AutoLock syncLock(result.lockObj);
                     If (ar.exception != NULL) {
                         Log("EVENT_GET_CELL_INFO_LIST: error ret NULL, e=" + ar.exception);
                         result.list = NULL;
@@ -603,7 +605,7 @@ public abstract class ServiceStateTracker extends Handler {
      * Hang up the existing voice calls to decrease call drop rate.
      */
     CARAPI PowerOffRadioSafely(DcTrackerBase dcTracker) {
-        Synchronized (this) {
+        {    AutoLock syncLock(this);
             If (!mPendingRadioPowerOffAfterDataOff) {
                 // In some network, deactivate PDP connection cause releasing of RRC connection,
                 // which MM/IMSI detaching request needs. Without this detaching, network can
@@ -653,7 +655,7 @@ public abstract class ServiceStateTracker extends Handler {
      * return TRUE if there is pending request to process; FALSE otherwise.
      */
     public Boolean ProcessPendingRadioPowerOffAfterDataOff() {
-        Synchronized(this) {
+        {    AutoLock syncLock(this);
             If (mPendingRadioPowerOffAfterDataOff) {
                 If (DBG) Log("Process pending request to turn radio off.");
                 mPendingRadioPowerOffAfterDataOffTag += 1;
@@ -773,7 +775,7 @@ public abstract class ServiceStateTracker extends Handler {
                 If ((SystemClock->ElapsedRealtime() - mLastCellInfoListTime)
                         > LAST_CELL_INFO_LIST_MAX_AGE_MS) {
                     Message msg = ObtainMessage(EVENT_GET_CELL_INFO_LIST, result);
-                    Synchronized(result.lockObj) {
+                    {    AutoLock syncLock(result.lockObj);
                         result.list = NULL;
                         mCi->GetCellInfoList(msg);
                         try {
@@ -794,7 +796,7 @@ public abstract class ServiceStateTracker extends Handler {
             If (DBG) Log("SST->GetAllCellInfo(): not implemented");
             result.list = NULL;
         }
-        Synchronized(result.lockObj) {
+        {    AutoLock syncLock(result.lockObj);
             If (result.list != NULL) {
                 If (DBG) Log("SST->GetAllCellInfo(): X size=" + result.list->Size()
                         + " list=" + result.list);
@@ -810,7 +812,7 @@ public abstract class ServiceStateTracker extends Handler {
      * @return signal strength
      */
     public SignalStrength GetSignalStrength() {
-        Synchronized(mCellInfo) {
+        {    AutoLock syncLock(mCellInfo);
             return mSignalStrength;
         }
     }

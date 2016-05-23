@@ -6,6 +6,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::CThread;
 using Elastos::Core::StringUtils;
 using Elastos::IO::ICloseable;
@@ -136,7 +138,7 @@ ECode ViewServer::ViewServerWorker::Run()
 
 ECode ViewServer::ViewServerWorker::WindowsChanged()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         mNeedWindowListUpdate = TRUE;
         mLock.NotifyAll();
     }
@@ -145,7 +147,7 @@ ECode ViewServer::ViewServerWorker::WindowsChanged()
 
 ECode ViewServer::ViewServerWorker::FocusChanged()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         mNeedFocusedWindowUpdate = TRUE;
         mLock.NotifyAll();
     }
@@ -175,7 +177,7 @@ Boolean ViewServer::ViewServerWorker::WindowManagerAutolistLoop()
         Boolean needWindowListUpdate = FALSE;
         Boolean needFocusedWindowUpdate = FALSE;
 
-        synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             while (!mNeedWindowListUpdate && !mNeedFocusedWindowUpdate) {
                 mLock.Wait();
             }

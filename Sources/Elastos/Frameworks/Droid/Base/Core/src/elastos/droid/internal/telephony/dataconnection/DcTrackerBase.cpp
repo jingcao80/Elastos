@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.dataconnection;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IAlarmManager;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IBroadcastReceiver;
@@ -1019,7 +1021,7 @@ public abstract class DcTrackerBase extends Handler {
      */
     public Boolean GetAnyDataEnabled() {
         final Boolean result;
-        Synchronized (mDataEnabledLock) {
+        {    AutoLock syncLock(mDataEnabledLock);
             result = (mInternalDataEnabled && mUserDataEnabled && sPolicyDataEnabled
                     && (mEnabledCount != 0));
         }
@@ -1029,7 +1031,7 @@ public abstract class DcTrackerBase extends Handler {
 
     protected Boolean IsEmergency() {
         final Boolean result;
-        Synchronized (mDataEnabledLock) {
+        {    AutoLock syncLock(mDataEnabledLock);
             result = mPhone->IsInEcm() || mPhone->IsInEmergencyCall();
         }
         Log("isEmergency: result=" + result);
@@ -1196,7 +1198,7 @@ public abstract class DcTrackerBase extends Handler {
                     IsApnTypeActive(ApnIdToType(apnId)));
         }
         If (enabled == DctConstants.ENABLED) {
-            Synchronized (this) {
+            {    AutoLock syncLock(this);
                 If (!mDataEnabled[apnId]) {
                     mDataEnabled[apnId] = TRUE;
                     mEnabledCount++;
@@ -1212,7 +1214,7 @@ public abstract class DcTrackerBase extends Handler {
         } else {
             // disable
             Boolean didDisable = FALSE;
-            Synchronized (this) {
+            {    AutoLock syncLock(this);
                 If (mDataEnabled[apnId]) {
                     mDataEnabled[apnId] = FALSE;
                     mEnabledCount--;
@@ -1286,7 +1288,7 @@ public abstract class DcTrackerBase extends Handler {
     }
 
     protected void OnSetInternalDataEnabled(Boolean enabled) {
-        Synchronized (mDataEnabledLock) {
+        {    AutoLock syncLock(mDataEnabledLock);
             mInternalDataEnabled = enabled;
             If (enabled) {
                 Log("onSetInternalDataEnabled: changed to enabled, try to setup data call");
@@ -1307,7 +1309,7 @@ public abstract class DcTrackerBase extends Handler {
     public abstract Boolean IsDisconnected();
 
     protected void OnSetUserDataEnabled(Boolean enabled) {
-        Synchronized (mDataEnabledLock) {
+        {    AutoLock syncLock(mDataEnabledLock);
             If (mUserDataEnabled != enabled) {
                 mUserDataEnabled = enabled;
                 Settings::Global::>PutInt(mPhone->GetContext()->GetContentResolver(),
@@ -1334,7 +1336,7 @@ public abstract class DcTrackerBase extends Handler {
     }
 
     protected void OnSetPolicyDataEnabled(Boolean enabled) {
-        Synchronized (mDataEnabledLock) {
+        {    AutoLock syncLock(mDataEnabledLock);
             If (sPolicyDataEnabled != enabled) {
                 sPolicyDataEnabled = enabled;
                 If (enabled) {

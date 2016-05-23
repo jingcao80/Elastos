@@ -12,6 +12,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Os::CBinder;
 using Elastos::Droid::Os::Looper;
@@ -152,7 +154,7 @@ ECode CInputManager::constructor()
 
 AutoPtr<IInputManager> CInputManager::GetInstance()
 {
-    synchronized(sInstanceLock) {
+    {    AutoLock syncLock(sInstanceLock);
         if (sInstance == NULL) {
             ASSERT_SUCCEEDED(CInputManager::New((IInputManager**)&sInstance));
         }
@@ -167,7 +169,7 @@ ECode CInputManager::GetInputDevice(
 {
     VALIDATE_NOT_NULL(device);
 
-    synchronized(mInputDevicesLock) {
+    {    AutoLock syncLock(mInputDevicesLock);
         FAIL_RETURN(PopulateInputDevicesLocked());
 
         HashMap<Int32, AutoPtr<IInputDevice> >::Iterator find = mInputDevices->Find(id);
@@ -205,7 +207,7 @@ ECode CInputManager::GetInputDeviceByDescriptor(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    synchronized(mInputDevicesLock) {
+    {    AutoLock syncLock(mInputDevicesLock);
         PopulateInputDevicesLocked();
 
         HashMap<Int32, AutoPtr<IInputDevice> >::Iterator iter = mInputDevices->Begin();
@@ -244,7 +246,7 @@ ECode CInputManager::GetInputDeviceIds(
 {
     VALIDATE_NOT_NULL(deviceIds);
 
-    synchronized(mInputDevicesLock) {
+    {    AutoLock syncLock(mInputDevicesLock);
         FAIL_RETURN(PopulateInputDevicesLocked());
 
         Int32 count = mInputDevices->GetSize();
@@ -280,7 +282,7 @@ ECode CInputManager::RegisterInputDeviceListener(
         handler->GetLooper((ILooper**)&looper);
     }
 
-    synchronized(mInputDevicesLock) {
+    {    AutoLock syncLock(mInputDevicesLock);
         List<AutoPtr<InputDeviceListenerDelegate> >::Iterator find =
             FindInputDeviceListenerLocked(listener);
         if (find == mInputDeviceListeners.End()) {
@@ -301,7 +303,7 @@ ECode CInputManager::UnregisterInputDeviceListener(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    synchronized(mInputDevicesLock) {
+    {    AutoLock syncLock(mInputDevicesLock);
         List<AutoPtr<InputDeviceListenerDelegate> >::Iterator find =
             FindInputDeviceListenerLocked(listener);
         if (find != mInputDeviceListeners.End()) {
@@ -631,7 +633,7 @@ void CInputManager::OnInputDevicesChanged(
         Logger::D(TAG, "Received input devices changed.");
     }
 
-    synchronized(mInputDevicesLock) {
+    {    AutoLock syncLock(mInputDevicesLock);
         //TODO: from size - 1 to 0
         //
         HashMap<Int32, AutoPtr<IInputDevice> >::Iterator iter = mInputDevices->Begin();

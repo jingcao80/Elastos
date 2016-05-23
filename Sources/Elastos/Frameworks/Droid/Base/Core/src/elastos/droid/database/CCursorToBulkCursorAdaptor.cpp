@@ -6,6 +6,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Database::Sqlite::ISQLiteClosable;
 using Elastos::Utility::Logging::Slogger;
@@ -101,7 +103,7 @@ ECode CCursorToBulkCursorAdaptor::ThrowIfCursorIsClosed()
 
 ECode CCursorToBulkCursorAdaptor::ProxyDied()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         DisposeLocked();
     }
     return NOERROR;
@@ -112,7 +114,7 @@ ECode CCursorToBulkCursorAdaptor::GetBulkCursorDescriptor(
 {
     VALIDATE_NOT_NULL(result);
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCursorIsClosed())
 
         AutoPtr<CBulkCursorDescriptor> d;
@@ -141,7 +143,7 @@ ECode CCursorToBulkCursorAdaptor::GetWindow(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCursorIsClosed())
 
         Boolean isSuccess;
@@ -187,7 +189,7 @@ ECode CCursorToBulkCursorAdaptor::OnMove(
     /* [in] */ Int32 position)
 {
     ECode ec = NOERROR;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCursorIsClosed())
         Int32 mPosition;
         ICursor::Probe(mCursor)->GetPosition(&mPosition);
@@ -199,7 +201,7 @@ ECode CCursorToBulkCursorAdaptor::OnMove(
 
 ECode CCursorToBulkCursorAdaptor::Deactivate()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mCursor != NULL) {
             UnregisterObserverProxyLocked();
             ICursor::Probe(mCursor)->Deactivate();
@@ -212,7 +214,7 @@ ECode CCursorToBulkCursorAdaptor::Deactivate()
 
 ECode CCursorToBulkCursorAdaptor::Close()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         DisposeLocked();
     }
     return NOERROR;
@@ -225,7 +227,7 @@ ECode CCursorToBulkCursorAdaptor::Requery(
     VALIDATE_NOT_NULL(result)
 
     ECode ec = NOERROR;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCursorIsClosed())
 
         CloseFilledWindowLocked();
@@ -284,7 +286,7 @@ ECode CCursorToBulkCursorAdaptor::GetExtras(
     /* [out] */ IBundle** result)
 {
     ECode ec = NOERROR;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCursorIsClosed())
         ec = ICursor::Probe(mCursor)->GetExtras(result);
     }
@@ -296,7 +298,7 @@ ECode CCursorToBulkCursorAdaptor::Respond(
     /* [out] */ IBundle** result)
 {
     ECode ec = NOERROR;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfCursorIsClosed())
         ec = ICursor::Probe(mCursor)->Respond(extras, result);
     }
@@ -325,7 +327,7 @@ ECode CCursorToBulkCursorAdaptor::constructor(
     mProviderName = providerName;
 
     ECode ec = NOERROR;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         ec = CreateAndRegisterObserverProxyLocked(observer);
     }
     return ec;

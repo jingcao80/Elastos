@@ -6,6 +6,8 @@
 #include "CFile.h"
 #include "CFileOutputStream.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::AutoLock;
 using Elastos::IO::IFile;
 using Elastos::IO::CFile;
@@ -79,14 +81,14 @@ ECode CJarURLConnectionImpl::FindJarFile() /*throws IOException*/
 {
     Boolean usecaches = FALSE;
     if (GetUseCaches(&usecaches), usecaches) {
-        synchronized (sJarCacheLock) {
+        {    AutoLock syncLock(sJarCacheLock);
             mJarFile = sJarCache[mJarFileURL];
         }
 
         if (mJarFile == NULL) {
             AutoPtr<IJarFile> jar;
             FAIL_RETURN(OpenJarFile((IJarFile**)&jar));
-            synchronized (sJarCacheLock) {
+            {    AutoLock syncLock(sJarCacheLock);
                 mJarFile = sJarCache[mJarFileURL];
                 if (mJarFile == NULL) {
                     sJarCache[mJarFileURL] = jar;

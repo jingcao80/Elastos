@@ -72,7 +72,7 @@ final class CachedBluetoothDeviceManager {
             BluetoothDevice device) {
         CachedBluetoothDevice newDevice = new CachedBluetoothDevice(mContext, adapter,
             profileManager, device);
-        synchronized(mCachedDevices) {
+        {    AutoLock syncLock(mCachedDevices);
             mCachedDevices->Add(newDevice);
         }
         return newDevice;

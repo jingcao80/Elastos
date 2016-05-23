@@ -28,6 +28,8 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::Bluetooth::IBluetoothDevice;
 using Elastos::Droid::Internal::Net::CNetworkStatsFactory;
@@ -4164,7 +4166,7 @@ AutoPtr<BatteryStatsImpl> BatteryStatsImpl::Uid::GetBatteryStats()
 
 ECode BatteryStatsImpl::SetOnBatteryRunnable::Run()
 {
-    synchronized (mHost->mCheckinFileLock) {
+    {    AutoLock syncLock(mHost->mCheckinFileLock);
         AutoPtr<IFileOutputStream> stream;
         // try {
         ECode ec = mHost->mCheckinFile->StartWrite((IFileOutputStream**)&stream);

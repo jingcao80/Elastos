@@ -10,6 +10,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::CContentValues;
 using Elastos::Droid::Content::IContentUris;
@@ -74,7 +76,7 @@ ECode CDownloadScanner::HasPendingScans(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    synchronized (mConnection) {
+    {    AutoLock syncLock(mConnection);
         Boolean bEmp = FALSE;
         if ((mPending->IsEmpty(&bEmp), bEmp)) {
             *result = FALSE;
@@ -109,7 +111,7 @@ ECode CDownloadScanner::RequestScan(
 {
     AutoPtr<CDownloadInfo> _info = (CDownloadInfo*)info;
     if (Constants::LOGV) Logger::V(Constants::TAG, "requestScan() for %s", (const char*)(_info->mFileName));
-    synchronized (mConnection) {
+    {    AutoLock syncLock(mConnection);
         AutoPtr<ScanRequest> req = new ScanRequest(_info->mId, _info->mFileName, _info->mMimeType);
         AutoPtr<ICharSequence> pPath;
         CString::New(req->mPath, (ICharSequence**)&pPath);
@@ -134,7 +136,7 @@ ECode CDownloadScanner::Shutdown()
 
 ECode CDownloadScanner::OnMediaScannerConnected()
 {
-    synchronized (mConnection) {
+    {    AutoLock syncLock(mConnection);
         AutoPtr<ICollection> clt;
         mPending->GetValues((ICollection**)&clt);
         AutoPtr<IIterator> it;
@@ -155,7 +157,7 @@ ECode CDownloadScanner::OnScanCompleted(
     /* [in] */ IUri* uri)
 {
     AutoPtr<ScanRequest> req;
-    synchronized (mConnection) {
+    {    AutoLock syncLock(mConnection);
         AutoPtr<ICharSequence> pPath;
         CString::New(path, (ICharSequence**)&pPath);
         AutoPtr<IInterface> rm;

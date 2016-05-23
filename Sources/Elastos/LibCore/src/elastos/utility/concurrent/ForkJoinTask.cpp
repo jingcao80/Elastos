@@ -7,6 +7,8 @@
 #include "CSystem.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::IO::EIID_ISerializable;
 using Elastos::Core::ISystem;
 using Elastos::Core::Thread;
@@ -39,7 +41,7 @@ Int32 ForkJoinTask::SetCompletion(
         assert(0 && "TODO");
         // if (U.compareAndSwapInt(this, STATUS, s, s | completion)) {
         //     if ((s >>> 16) != 0)
-        //         synchronized (this) { notifyAll(); }
+        //         AutoLock syncLock(this) { notifyAll(); }
         //     return completion;
         // }
     }
@@ -89,7 +91,7 @@ Int32 ForkJoinTask::ExternalAwaitDone()
     //         Boolean interrupted = FALSE;
     //         do {
     //             // if (U.compareAndSwapInt(this, STATUS, s, s | SIGNAL)) {
-    //             //     synchronized (this) {
+    //             //     {    AutoLock syncLock(this);
     //             //         if (mStatus >= 0) {
     //             //             try {
     //             //                 Wait();
@@ -125,7 +127,7 @@ Int32 ForkJoinTask::ExternalInterruptibleAwaitDone()
     // }
     // while ((s = status) >= 0) {
     //     if (U.compareAndSwapInt(this, STATUS, s, s | SIGNAL)) {
-    //         synchronized (this) {
+    //         {    AutoLock syncLock(this);
     //             if (status >= 0)
     //                 wait();
     //             else
@@ -658,7 +660,7 @@ ECode ForkJoinTask::Get(
                 else {
                     // if ((ms = TimeUnit.NANOSECONDS.toMillis(ns)) > 0L &&
                     //     U.compareAndSwapInt(this, STATUS, s, s | SIGNAL)) {
-                    //     synchronized (this) {
+                    //     {    AutoLock syncLock(this);
                     //         if (status >= 0) {
                     //             try {
                     //                 wait(ms);

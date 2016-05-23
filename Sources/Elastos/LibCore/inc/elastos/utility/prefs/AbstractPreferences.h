@@ -49,7 +49,7 @@ public:
     //     }
 
     //     private EventObject getEventObject() throws InterruptedException {
-    //         synchronized (events) {
+    //         {    AutoLock syncLock(events);
     //             if (events.isEmpty()) {
     //                 events.wait();
     //             }
@@ -61,7 +61,7 @@ public:
 
     //     private void dispatchPrefChange(PreferenceChangeEvent event,
     //             List<EventListener> preferenceChangeListeners) {
-    //         synchronized (preferenceChangeListeners) {
+    //         {    AutoLock syncLock(preferenceChangeListeners);
     //             for (EventListener preferenceChangeListener : preferenceChangeListeners) {
     //                 ((PreferenceChangeListener) preferenceChangeListener).preferenceChange(event);
     //             }
@@ -70,7 +70,7 @@ public:
 
     //     private void dispatchNodeRemove(NodeChangeEvent event,
     //             List<EventListener> nodeChangeListeners) {
-    //         synchronized (nodeChangeListeners) {
+    //         {    AutoLock syncLock(nodeChangeListeners);
     //             for (EventListener nodeChangeListener : nodeChangeListeners) {
     //                 ((NodeChangeListener) nodeChangeListener).childRemoved(event);
     //             }
@@ -79,7 +79,7 @@ public:
 
     //     private void dispatchNodeAdd(NodeChangeEvent event,
     //             List<EventListener> nodeChangeListeners) {
-    //         synchronized (nodeChangeListeners) {
+    //         {    AutoLock syncLock(nodeChangeListeners);
     //             for (EventListener nodeChangeListener : nodeChangeListeners) {
     //                 NodeChangeListener ncl = (NodeChangeListener) nodeChangeListener;
     //                 ncl.childAdded(event);

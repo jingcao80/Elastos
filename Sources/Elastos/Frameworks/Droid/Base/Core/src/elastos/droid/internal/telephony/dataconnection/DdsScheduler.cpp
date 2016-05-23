@@ -29,6 +29,8 @@
 
 package com.android.internal.telephony.dataconnection;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
@@ -128,13 +130,13 @@ public class DdsScheduler extends StateMachine {
     }
 
     void AddRequest(NetworkRequest req) {
-        Synchronized(mInbox) {
+        {    AutoLock syncLock(mInbox);
             mInbox->Add(new NetworkRequestInfo(req));
         }
     }
 
     void RemoveRequest(NetworkRequest req) {
-        Synchronized(mInbox) {
+        {    AutoLock syncLock(mInbox);
             For(Int32 i = 0; i < mInbox->Size(); i++) {
                 NetworkRequestInfo tempNrInfo = mInbox->Get(i);
                 If(tempNrInfo.mRequest->Equals(req)) {
@@ -145,7 +147,7 @@ public class DdsScheduler extends StateMachine {
     }
 
     void MarkAccepted(NetworkRequest req) {
-        Synchronized(mInbox) {
+        {    AutoLock syncLock(mInbox);
             For(Int32 i = 0; i < mInbox->Size(); i++) {
                 NetworkRequestInfo tempNrInfo = mInbox->Get(i);
                 If(tempNrInfo.mRequest->Equals(req)) {
@@ -156,7 +158,7 @@ public class DdsScheduler extends StateMachine {
     }
 
     Boolean IsAlreadyAccepted(NetworkRequest nr) {
-        Synchronized(mInbox) {
+        {    AutoLock syncLock(mInbox);
             For(Int32 i = 0; i < mInbox->Size(); i++) {
                 NetworkRequestInfo tempNrInfo = mInbox->Get(i);
                 If(tempNrInfo.mRequest->Equals(nr)) {
@@ -168,7 +170,7 @@ public class DdsScheduler extends StateMachine {
     }
 
     NetworkRequest GetFirstWaitingRequest() {
-        Synchronized(mInbox) {
+        {    AutoLock syncLock(mInbox);
             If(mInbox->IsEmpty()) {
                 return NULL;
             } else {
@@ -179,7 +181,7 @@ public class DdsScheduler extends StateMachine {
 
     Boolean AcceptWaitingRequest() {
         Boolean anyAccepted = FALSE;
-        Synchronized(mInbox) {
+        {    AutoLock syncLock(mInbox);
             If(!mInbox->IsEmpty()) {
                 For (Int32 i =0; i < mInbox->Size(); i++) {
                     NetworkRequest nr = mInbox->Get(i).mRequest;
@@ -312,7 +314,7 @@ public class DdsScheduler extends StateMachine {
     }
 
     Boolean IsAnyRequestWaiting() {
-        Synchronized(mInbox) {
+        {    AutoLock syncLock(mInbox);
             return !mInbox->IsEmpty();
         }
     }

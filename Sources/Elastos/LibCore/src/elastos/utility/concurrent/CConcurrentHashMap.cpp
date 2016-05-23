@@ -8,6 +8,8 @@
 #include "AutoLock.h"
 #include "Arrays.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::IO::EIID_ISerializable;
 using Elastos::IO::IOutputStream;
 using Elastos::IO::IObjectOutputStreamPutField;
@@ -648,7 +650,7 @@ void CConcurrentHashMap::Transfer(
     //     else if ((fh = f->mHash) == MOVED)
     //         advance = TRUE; // already processed
     //     else {
-    //         synchronized (f) {
+    //         {    AutoLock syncLock(f);
     //             if (TabAt(tab, i) == f) {
     //                 AutoPtr<Node> ln, hn;
     //                 if (fh >= 0) {
@@ -733,7 +735,7 @@ void CConcurrentHashMap::TreeifyBin(
     //             Transfer(tab, NULL);
     //     }
     //     else if ((b = TabAt(tab, index)) != NULL) {
-    //         synchronized (b) {
+    //         {    AutoLock syncLock(b);
     //             if (TabAt(tab, index) == b) {
     //                 AutoPtr<TreeNode> hd = NULL, tl = NULL;
     //                 for (AutoPtr<Node> e = b; e != NULL; e = e->mNext) {
@@ -2631,7 +2633,7 @@ ECode CConcurrentHashMap::Clear()
             i = 0; // restart
         }
         else {
-            synchronized (f) {
+            {    AutoLock syncLock(f);
                 if (TabAt(tab, i) == f) {
                     TreeBin* tb = (TreeBin*)ITreeBin::Probe(f);
                     AutoPtr<Node> p = (fh >= 0 ? f.Get() :

@@ -12,6 +12,8 @@
 #include "elastos/droid/utility/CArraySet.h"
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Utility::CInt64SparseArray;
 using Elastos::Droid::Utility::IInt64SparseArray;
@@ -54,7 +56,7 @@ ECode CAccessibilityCache::constructor()
 ECode CAccessibilityCache::AddWindow(
     /* [in] */ IAccessibilityWindowInfo* window)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         Int32 windowId;
         window->GetId(&windowId);
         if (DEBUG) {
@@ -76,7 +78,7 @@ ECode CAccessibilityCache::AddWindow(
 ECode CAccessibilityCache::OnAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         Int32 eventType;
         event->GetEventType(&eventType);
         switch (eventType) {
@@ -94,7 +96,7 @@ ECode CAccessibilityCache::OnAccessibilityEvent(
                 break;
             }
             case IAccessibilityEvent::TYPE_WINDOW_CONTENT_CHANGED: {
-                synchronized(mLock) {
+                {    AutoLock syncLock(mLock);
                     Int32 windowId;
                     IAccessibilityRecord::Probe(event)->GetWindowId(&windowId);
                     Int64 sourceId;
@@ -172,7 +174,7 @@ ECode CAccessibilityCache::GetNode(
     VALIDATE_NOT_NULL(info);
     *info = NULL;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mNodeCache->Get(windowId, (IInterface**)&obj);
         AutoPtr<IInt64SparseArray> nodes = IInt64SparseArray::Probe(obj);
@@ -206,7 +208,7 @@ ECode CAccessibilityCache::GetWindows(
     VALIDATE_NOT_NULL(list);
     *list = NULL;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         Int32 windowCount;
         mWindowCache->GetSize(&windowCount);
         if (windowCount > 0) {
@@ -249,7 +251,7 @@ ECode CAccessibilityCache::GetWindow(
     VALIDATE_NOT_NULL(info);
     *info = NULL;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mWindowCache->Get(windowId, (IInterface**)&obj);
         AutoPtr<IAccessibilityWindowInfo> window = IAccessibilityWindowInfo::Probe(obj);
@@ -267,7 +269,7 @@ ECode CAccessibilityCache::GetWindow(
 ECode CAccessibilityCache::Add(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (DEBUG) {
             Logger::I(TAG, "add(%p) ", info);
         }
@@ -329,7 +331,7 @@ ECode CAccessibilityCache::Add(
 
 ECode CAccessibilityCache::Clear()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (DEBUG) {
             Logger::I(TAG, "clear()");
         }
@@ -415,7 +417,7 @@ void CAccessibilityCache::ClearSubTreeRecursiveLocked(
 
 ECode CAccessibilityCache::CheckIntegrity()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         // Get the root.
         Int32 size1, size2;
         Boolean res;

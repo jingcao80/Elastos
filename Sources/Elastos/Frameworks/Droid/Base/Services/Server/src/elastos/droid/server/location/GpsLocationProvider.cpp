@@ -22,6 +22,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::AppOpsManager;
 using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::App::IPendingIntentHelper;
@@ -449,7 +451,7 @@ ECode GpsLocationProvider::MyBroadcastReceiver::OnReceive(
         phone->GetSimOperator(&mccMnc);
         if (!TextUtils::IsEmpty(mccMnc)) {
             Logger::D(TAG, "SIM MCC/MNC is available: %s", mccMnc.string());
-            synchronized(this) {
+            {    AutoLock syncLock(this);
                 mHost->ReloadGpsProperties(context, mHost->mProperties);
                 mHost->mNIHandler->SetSuplEsEnabled(mHost->mSuplEsEnabled);
             }
@@ -1397,7 +1399,7 @@ void GpsLocationProvider::HandleUpdateLocation(
 
 ECode GpsLocationProvider::Enable()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mEnabled) return E_NULL_POINTER_EXCEPTION;
         mEnabled = TRUE;
     }
@@ -1475,7 +1477,7 @@ void GpsLocationProvider::HandleEnable()
         }
     }
     else {
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             mEnabled = FALSE;
         }
         Logger::W(TAG, "Failed to enable location provider");
@@ -1484,7 +1486,7 @@ void GpsLocationProvider::HandleEnable()
 
 ECode GpsLocationProvider::Disable()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (!mEnabled) return E_NULL_POINTER_EXCEPTION;
         mEnabled = FALSE;
     }
@@ -1512,7 +1514,7 @@ ECode GpsLocationProvider::IsEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *result = mEnabled;
     }
     return NOERROR;
@@ -1894,7 +1896,7 @@ void GpsLocationProvider::ReportLocation(
 {
     if (VERBOSE) Logger::V(TAG, "reportLocation lat: %lf long: %lf timestamp: %ld", latitude,longitude,timestamp);
 
-    synchronized(mLocation) {
+    {    AutoLock syncLock(mLocation);
         mLocationFlags = flags;
         if ((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
             mLocation->SetLatitude(latitude);

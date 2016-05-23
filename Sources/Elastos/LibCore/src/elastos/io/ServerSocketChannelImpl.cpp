@@ -6,6 +6,8 @@
 #include "SocketChannelImpl.h"
 #include "IoUtils.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Libcore::IO::IoUtils;
 using Elastos::Net::CInetSocketAddress;
 using Elastos::Net::ISocketImpl;
@@ -56,7 +58,7 @@ ECode ServerSocketChannelImpl::ServerSocketAdapter::ImplAccept(
     clientSocketChannel->GetSocket((ISocket**)&clientSocket);
     Boolean connectOK = FALSE;
     // try {
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         ServerSocket::ImplAccept(clientSocket);
 
         // Sync the client socket's associated channel state with the Socket and OS.
@@ -91,7 +93,7 @@ ECode ServerSocketChannelImpl::ServerSocketAdapter::GetChannel(
 
 ECode ServerSocketChannelImpl::ServerSocketAdapter::Close()
 {
-    synchronized (mChannelImpl) {
+    {    AutoLock syncLock(mChannelImpl);
         ServerSocket::Close();
         Boolean isflag = FALSE;
         if (mChannelImpl->IsOpen(&isflag), isflag) {
@@ -153,7 +155,7 @@ ECode ServerSocketChannelImpl::Accept(
     AutoPtr<SocketChannelImpl> result = new SocketChannelImpl(spro, FALSE);
     // try {
         Begin();
-        synchronized (mAcceptLock) {
+        {    AutoLock syncLock(mAcceptLock);
             // try {
             AutoPtr<ISocket> outsoc;
             FAIL_RETURN(mSocket->ImplAccept(result, (ISocket**)&outsoc));

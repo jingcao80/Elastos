@@ -20,6 +20,8 @@
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::Res::IResources;
@@ -248,7 +250,7 @@ ECode WallpaperService::Engine::MWindow::DispatchWallpaperOffsets(
     /* [in] */ Float yStep,
     /* [in] */ Boolean sync)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (WallpaperService::DEBUG) Logger::V(TAG, "Dispatch wallpaper offsets: %f, %f", x, y);
         mHost->mPendingXOffset = x;
         mHost->mPendingYOffset = y;
@@ -275,7 +277,7 @@ ECode WallpaperService::Engine::MWindow::DispatchWallpaperCommand(
     /* [in] */ IBundle* extras,
     /* [in] */ Boolean sync)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (WallpaperService::DEBUG) Logger::V(TAG, "Dispatch wallpaper command: %d, %d", x, y);
         AutoPtr<WallpaperCommand> cmd = new WallpaperCommand();
         cmd->mAction = action;
@@ -551,7 +553,7 @@ ECode WallpaperService::Engine::DispatchPointer(
 {
     Boolean result = FALSE;
     if (event->IsTouchEvent(&result), result) {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             Int32 action;
             if (event->GetAction(&action) == IMotionEvent::ACTION_MOVE) {
                 mPendingMove = event;
@@ -1102,7 +1104,7 @@ ECode WallpaperService::Engine::DoOffsetsChanged(
 
     Float xOffset = 0, yOffset = 0, xOffsetStep = 0, yOffsetStep = 0;
     Boolean sync = FALSE;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         xOffset = mPendingXOffset;
         yOffset = mPendingYOffset;
         xOffsetStep = mPendingXOffsetStep;
@@ -1447,7 +1449,7 @@ ECode WallpaperService::IWallpaperEngineWrapper::ExecuteMessage(
             Int32 action;
             ev->GetAction(&action);
             if (action == IMotionEvent::ACTION_MOVE) {
-                synchronized(this) {
+                {    AutoLock syncLock(this);
                     if (mEngine->mPendingMove == ev) {
                         mEngine->mPendingMove = NULL;
                     }

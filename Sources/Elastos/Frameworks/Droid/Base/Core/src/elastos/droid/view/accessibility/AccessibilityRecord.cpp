@@ -13,6 +13,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::CArrayList;
@@ -554,7 +556,7 @@ ECode AccessibilityRecord::Obtain(
     /* [out] */ IAccessibilityRecord** newInstance)
 {
     VALIDATE_NOT_NULL(newInstance);
-    synchronized(sPoolLock) {
+    {    AutoLock syncLock(sPoolLock);
         if (sPool != NULL) {
             AutoPtr<AccessibilityRecord> record = sPool;
             sPool = sPool->mNext;
@@ -582,7 +584,7 @@ ECode AccessibilityRecord::Recycle()
         // throw new IllegalStateException("Record already recycled!");
     }
     Clear();
-    synchronized(sPoolLock) {
+    {    AutoLock syncLock(sPoolLock);
         if (sPoolSize <= MAX_POOL_SIZE) {
             mNext = sPool;
             sPool = this;

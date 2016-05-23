@@ -6,6 +6,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Media::EIID_IMediaRouterCallback;
 using Elastos::Droid::Media::EIID_IMediaRouterSimpleCallback;
@@ -134,7 +136,7 @@ MediaProjectionManagerService::CallbackDelegate::CallbackDelegate()
 void MediaProjectionManagerService::CallbackDelegate::Add(
     /* [in] */ IIMediaProjectionCallback* callback)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IBinder> b = IBinder::Probe(callback);
         mClientCallbacks[b] = callback;
     }
@@ -143,7 +145,7 @@ void MediaProjectionManagerService::CallbackDelegate::Add(
 void MediaProjectionManagerService::CallbackDelegate::Add(
     /* [in] */ IIMediaProjectionWatcherCallback* callback)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IBinder> b = IBinder::Probe(callback);
         mWatcherCallbacks[b] = callback;
     }
@@ -152,7 +154,7 @@ void MediaProjectionManagerService::CallbackDelegate::Add(
 void MediaProjectionManagerService::CallbackDelegate::Remove(
     /* [in] */ IIMediaProjectionCallback* callback)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IBinder> b = IBinder::Probe(callback);
         mClientCallbacks.Erase(b);
     }
@@ -161,7 +163,7 @@ void MediaProjectionManagerService::CallbackDelegate::Remove(
 void MediaProjectionManagerService::CallbackDelegate::Remove(
     /* [in] */ IIMediaProjectionWatcherCallback* callback)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IBinder> b = IBinder::Probe(callback);
         mWatcherCallbacks.Erase(b);
     }
@@ -174,7 +176,7 @@ void MediaProjectionManagerService::CallbackDelegate::DispatchStart(
         Slogger::E(TAG, "Tried to dispatch start notification for a null media projection. Ignoring!");
         return;
     }
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         HashMap<AutoPtr<IBinder>, AutoPtr<IIMediaProjectionWatcherCallback> >::Iterator it = mWatcherCallbacks.Begin();
         for (; it != mWatcherCallbacks.End(); ++it) {
             AutoPtr<IIMediaProjectionWatcherCallback> callback = it->mSecond;
@@ -193,7 +195,7 @@ void MediaProjectionManagerService::CallbackDelegate::DispatchStop(
         Slogger::E(TAG, "Tried to dispatch stop notification for a null media projection. Ignoring!");
         return;
     }
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         HashMap<AutoPtr<IBinder>, AutoPtr<IIMediaProjectionCallback> >::Iterator it = mClientCallbacks.Begin();
         for (; it != mClientCallbacks.End(); ++it) {
             AutoPtr<IIMediaProjectionCallback> callback = it->mSecond;
@@ -306,7 +308,7 @@ ECode MediaProjectionManagerService::OnSwitchUser(
 
 ECode MediaProjectionManagerService::Monitor()
 {
-    synchronized (mLock) { /* check for deadlock */ }
+    {    AutoLock syncLock(mLock); /* check for deadlock */ }
     return NOERROR;
 }
 
@@ -338,7 +340,7 @@ void MediaProjectionManagerService::AddCallback(
     /* [in] */ IIMediaProjectionWatcherCallback* callback)
 {
     AutoPtr<IProxyDeathRecipient> deathRecipient = new AddCallbackDeathRecipient(callback, this);
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         mCallbackDelegate->Add(callback);
         LinkDeathRecipientLocked(callback, deathRecipient);
     }
@@ -347,7 +349,7 @@ void MediaProjectionManagerService::AddCallback(
 void MediaProjectionManagerService::RemoveCallback(
     /* [in] */ IIMediaProjectionWatcherCallback* callback)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         UnlinkDeathRecipientLocked(callback);
         mCallbackDelegate->Remove(callback);
     }
@@ -405,7 +407,7 @@ void MediaProjectionManagerService::DispatchStop(
 Boolean MediaProjectionManagerService::IsValidMediaProjection(
     /* [in] */ IBinder* token)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (mProjectionToken != NULL) {
             Boolean equals;
             IObject::Probe(mProjectionToken)->Equals(token, &equals);
@@ -418,7 +420,7 @@ Boolean MediaProjectionManagerService::IsValidMediaProjection(
 AutoPtr<IMediaProjectionInfo> MediaProjectionManagerService::GetActiveProjectionInfo()
 {
     AutoPtr<IMediaProjectionInfo> info;
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (mProjectionGrant == NULL) {
             return NULL;
         }

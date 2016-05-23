@@ -21,6 +21,8 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.IO.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::Binder;
@@ -473,7 +475,7 @@ ECode CDreamManagerService::DumpInternal(
 Boolean CDreamManagerService::IsDreamingInternal()
 {
     Boolean bval = FALSE;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         bval = mCurrentDreamToken != NULL && !mCurrentDreamIsTest
             && !mCurrentDreamIsWaking;
     }
@@ -516,7 +518,7 @@ ECode CDreamManagerService::FinishSelfInternal(
     // If the dream is ending on its own for other reasons and no wake
     // locks are held and the user activity timeout has expired then the
     // device may simply go to sleep.
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mCurrentDreamToken.Get() == token) {
             return StopDreamLocked(immediate);
         }
@@ -528,7 +530,7 @@ ECode CDreamManagerService::TestDreamInternal(
     /* [in] */ IComponentName* dream,
     /* [in] */ Int32 userId)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         return StartDreamLocked(dream, TRUE /*isTest*/, FALSE /*canDoze*/, userId);
     }
     return NOERROR;
@@ -544,7 +546,7 @@ ECode CDreamManagerService::StartDreamInternal(
 
     AutoPtr<IComponentName> dream = ChooseDreamForUser(doze, userId);
     if (dream != NULL) {
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             StartDreamLocked(dream, FALSE /*isTest*/, doze, userId);
         }
     }
@@ -554,7 +556,7 @@ ECode CDreamManagerService::StartDreamInternal(
 ECode CDreamManagerService::StopDreamInternal(
     /* [in] */ Boolean immediate)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         return StopDreamLocked(immediate);
     }
     return NOERROR;
@@ -570,7 +572,7 @@ ECode CDreamManagerService::StartDozingInternal(
             TO_CSTR(token),  screenState, screenBrightness);
     }
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mCurrentDreamToken.Get() == token && mCurrentDreamCanDoze) {
             mCurrentDreamDozeScreenState = screenState;
             mCurrentDreamDozeScreenBrightness = screenBrightness;
@@ -592,7 +594,7 @@ ECode CDreamManagerService::StopDozingInternal(
             TO_CSTR(token));
     }
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mCurrentDreamToken.Get() == token && mCurrentDreamIsDozing) {
             mCurrentDreamIsDozing = FALSE;
             mDozeWakeLock->ReleaseLock();

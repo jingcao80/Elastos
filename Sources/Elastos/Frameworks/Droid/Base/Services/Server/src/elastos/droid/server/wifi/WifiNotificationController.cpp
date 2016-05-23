@@ -7,6 +7,8 @@
 #include "elastos/droid/R.h"
 #include "elastos/droid/provider/Settings.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::INotificationManager;
 using Elastos::Droid::App::CNotification;
 using Elastos::Droid::App::ITaskStackBuilder;
@@ -96,7 +98,7 @@ ECode WifiNotificationController::NotificationEnabledSettingObserver::Register()
     AutoPtr<IUri> uri;
     Settings::Global::GetUriFor(ISettingsGlobal::WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, (IUri**)&uri);
     cr->RegisterContentObserver(uri, TRUE, this);
-    synchronized (mOwner) {
+    {    AutoLock syncLock(mOwner);
         mOwner->mNotificationEnabled = GetValue();
     }
     return NOERROR;
@@ -107,7 +109,7 @@ ECode WifiNotificationController::NotificationEnabledSettingObserver::OnChange(
 {
     ContentObserver::OnChange(selfChange);
 
-    synchronized (mOwner) {
+    {    AutoLock syncLock(mOwner);
         mOwner->mNotificationEnabled = GetValue();
         mOwner->ResetNotification();
     }
@@ -183,7 +185,7 @@ void WifiNotificationController::CheckAndSetNotification(
     /* [in] */ INetworkInfo* networkInfo,
     /* [in] */ IList* scanResults)//IScanResult
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // TODO: unregister broadcast so we do not have to check here
         // If we shouldn't place a notification on available networks, then
         // don't bother doing any of the following
@@ -238,7 +240,7 @@ void WifiNotificationController::CheckAndSetNotification(
 // synchronized
 void WifiNotificationController::ResetNotification()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mNotificationRepeatTime = 0;
         mNumScansSinceNetworkStateChange = 0;
         SetNotificationVisible(FALSE, 0, FALSE, 0);

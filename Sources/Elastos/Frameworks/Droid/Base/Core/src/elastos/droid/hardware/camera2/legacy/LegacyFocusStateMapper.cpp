@@ -10,6 +10,8 @@
 #include <elastos/utility/Objects.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Camera2::Utils::ParamsUtils;
 using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Core::CoreUtils;
@@ -45,7 +47,7 @@ LegacyFocusStateMapper::MyMoveCallback::OnAutoFocusMoving(
     /* [in] */ IHardwareCamera* camera)
 {
     Object& _lock = mHost->mLock;
-    synchronized(_lock) {
+    {    AutoLock syncLock(_lock);
         Int32 latestAfRun = mHost->mAfRun;
 
         if (mHost->VERBOSE) {
@@ -68,7 +70,6 @@ LegacyFocusStateMapper::MyMoveCallback::OnAutoFocusMoving(
 
         if (mAfMode == IParameters::FOCUS_MODE_CONTINUOUS_PICTURE ||
             mAfMode == IParameters::FOCUS_MODE_CONTINUOUS_VIDEO) {
-            break;
             // This callback should never be sent in any other AF mode
         }
         else {
@@ -98,7 +99,7 @@ ECode LegacyFocusStateMapper::MyFocusCallback::OnAutoFocus(
     /* [in] */ IHardwareCamera* camera)
 {
     Object& _lock = mHost->mLock;
-    synchronized(_lock) {
+    {    AutoLock syncLock(_lock);
         Int32 latestAfRun = mHost->mAfRun;
 
         if (mHost->VERBOSE) {
@@ -122,7 +123,6 @@ ECode LegacyFocusStateMapper::MyFocusCallback::OnAutoFocus(
             mAfMode == IParameters::FOCUS_MODE_CONTINUOUS_PICTURE ||
             mAfMode == IParameters::FOCUS_MODE_CONTINUOUS_VIDEO ||
             mAfMode == IParameters::FOCUS_MODE_MACRO) {
-            break;
             // This callback should never be sent in any other AF mode
         }
         else {
@@ -183,7 +183,7 @@ ECode LegacyFocusStateMapper::ProcessRequestTriggers(
 
         // Switching modes always goes back to INACTIVE; ignore callbacks from previous modes
 
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             ++mAfRun;
             mAfState = ICameraMetadata::CONTROL_AF_STATE_INACTIVE;
         }
@@ -196,7 +196,7 @@ ECode LegacyFocusStateMapper::ProcessRequestTriggers(
     {
         Int32 currentAfRun = 0;
 
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             currentAfRun = mAfRun;
         }
 
@@ -232,7 +232,7 @@ ECode LegacyFocusStateMapper::ProcessRequestTriggers(
             }
 
             Int32 currentAfRun;
-            synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 currentAfRun = ++mAfRun;
                 mAfState = afStateAfterStart;
             }
@@ -253,10 +253,10 @@ ECode LegacyFocusStateMapper::ProcessRequestTriggers(
         }
         case ICameraMetadata::CONTROL_AF_TRIGGER_CANCEL:
         {
-            synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 Int32 updatedAfRun;
 
-                synchronized(mLock) {
+                {    AutoLock syncLock(mLock);
                     updatedAfRun = ++mAfRun;
                     mAfState = ICameraMetadata::CONTROL_AF_STATE_INACTIVE;
                 }
@@ -287,7 +287,7 @@ ECode LegacyFocusStateMapper::MapResultTriggers(
     FAIL_RETURN(Preconditions::CheckNotNull(result, String("result must not be null")))
 
     Int32 newAfState = 0;
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         newAfState = mAfState;
     }
 

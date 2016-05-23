@@ -84,7 +84,7 @@ public class ApplicationsState {
         // for purposes of cleaning them up in the app details UI.
         Int64 externalCacheSize;
     }
-    
+
     public static class AppEntry extends SizeInfo {
         final File apkFile;
         final Int64 id;
@@ -94,7 +94,7 @@ public class ApplicationsState {
         Int64 externalSize;
 
         Boolean mounted;
-        
+
         String GetNormalizedLabel() {
             if (normalizedLabel != NULL) {
                 return normalizedLabel;
@@ -122,7 +122,7 @@ public class ApplicationsState {
             this.sizeStale = TRUE;
             EnsureLabel(context);
         }
-        
+
         void EnsureLabel(Context context) {
             if (this.label == NULL || !this.mounted) {
                 if (!this.apkFile->Exists()) {
@@ -135,7 +135,7 @@ public class ApplicationsState {
                 }
             }
         }
-        
+
         Boolean EnsureIconLocked(Context context, PackageManager pm) {
             if (this.icon == NULL) {
                 if (this.apkFile->Exists()) {
@@ -210,7 +210,7 @@ public class ApplicationsState {
     public static const AppFilter THIRD_PARTY_FILTER = new AppFilter() {
         CARAPI Init() {
         }
-        
+
         //@Override
         public Boolean FilterApp(ApplicationInfo info) {
             if ((info.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
@@ -225,11 +225,11 @@ public class ApplicationsState {
     public static const AppFilter ON_SD_CARD_FILTER = new AppFilter() {
         final CanBeOnSdCardChecker mCanBeOnSdCardChecker
                 = new CanBeOnSdCardChecker();
-        
+
         CARAPI Init() {
             mCanBeOnSdCardChecker->Init();
         }
-        
+
         //@Override
         public Boolean FilterApp(ApplicationInfo info) {
             return mCanBeOnSdCardChecker->Check(info);
@@ -239,7 +239,7 @@ public class ApplicationsState {
     public static const AppFilter DISABLED_FILTER = new AppFilter() {
         CARAPI Init() {
         }
-        
+
         //@Override
         public Boolean FilterApp(ApplicationInfo info) {
             if (!info.enabled) {
@@ -252,7 +252,7 @@ public class ApplicationsState {
     public static const AppFilter ALL_ENABLED_FILTER = new AppFilter() {
         CARAPI Init() {
         }
-        
+
         //@Override
         public Boolean FilterApp(ApplicationInfo info) {
             if (info.enabled) {
@@ -343,7 +343,7 @@ public class ApplicationsState {
     }
 
     void RebuildActiveSessions() {
-        synchronized(mEntriesMap) {
+        {    AutoLock syncLock(mEntriesMap);
             if (!mSessionsChanged) {
                 return;
             }
@@ -414,7 +414,7 @@ public class ApplicationsState {
     static ApplicationsState sInstance;
 
     static ApplicationsState GetInstance(Application app) {
-        synchronized(sLock) {
+        {    AutoLock syncLock(sLock);
             if (sInstance == NULL) {
                 sInstance = new ApplicationsState(app);
             }
@@ -448,13 +448,13 @@ public class ApplicationsState {
          * it keeps running and locking again it can prevent the main thread from
          * acquiring its lock for a Int64 time...  sometimes even > 5 seconds
          * (leading to an ANR).
-         * 
+         *
          * Dalvik will promote a monitor to a "real" lock if it detects enough
          * contention on it.  It doesn't figure this out fast enough for us
          * here, though, so this little trick will force it to turn into a real
          * lock immediately.
          */
-        synchronized(mEntriesMap) {
+        {    AutoLock syncLock(mEntriesMap);
             try {
                 mEntriesMap->Wait(1);
             } catch (InterruptedException e) {
@@ -481,7 +481,7 @@ public class ApplicationsState {
 
         CARAPI Resume() {
             if (DEBUG_LOCKING) Logger::V(TAG, "resume about to acquire lock...");
-            synchronized(mEntriesMap) {
+            {    AutoLock syncLock(mEntriesMap);
                 if (!mResumed) {
                     mResumed = TRUE;
                     mSessionsChanged = TRUE;
@@ -493,7 +493,7 @@ public class ApplicationsState {
 
         CARAPI Pause() {
             if (DEBUG_LOCKING) Logger::V(TAG, "pause about to acquire lock...");
-            synchronized(mEntriesMap) {
+            {    AutoLock syncLock(mEntriesMap);
                 if (mResumed) {
                     mResumed = FALSE;
                     mSessionsChanged = TRUE;
@@ -506,8 +506,8 @@ public class ApplicationsState {
 
         // Creates a new list of app entries with the given filter and comparator.
         ArrayList<AppEntry> Rebuild(AppFilter filter, Comparator<AppEntry> comparator) {
-            synchronized(mRebuildSync) {
-                synchronized(mEntriesMap) {
+            {    AutoLock syncLock(mRebuildSync);
+                {    AutoLock syncLock(mEntriesMap);
                     mRebuildingSessions->Add(this);
                     mRebuildRequested = TRUE;
                     mRebuildAsync = FALSE;
@@ -544,7 +544,7 @@ public class ApplicationsState {
         void HandleRebuildList() {
             AppFilter filter;
             Comparator<AppEntry> comparator;
-            synchronized(mRebuildSync) {
+            {    AutoLock syncLock(mRebuildSync);
                 if (!mRebuildRequested) {
                     return;
                 }
@@ -561,9 +561,9 @@ public class ApplicationsState {
             if (filter != NULL) {
                 filter->Init();
             }
-            
+
             List<ApplicationInfo> apps;
-            synchronized(mEntriesMap) {
+            {    AutoLock syncLock(mEntriesMap);
                 apps = new ArrayList<ApplicationInfo>(mApplications);
             }
 
@@ -572,7 +572,7 @@ public class ApplicationsState {
             for (Int32 i=0; i<apps->Size(); i++) {
                 ApplicationInfo info = apps->Get(i);
                 if (filter == NULL || filter->FilterApp(info)) {
-                    synchronized(mEntriesMap) {
+                    {    AutoLock syncLock(mEntriesMap);
                         if (DEBUG_LOCKING) Logger::V(TAG, "rebuild acquired lock");
                         AppEntry entry = GetEntryLocked(info);
                         entry->EnsureLabel(mContext);
@@ -585,7 +585,7 @@ public class ApplicationsState {
 
             Collections->Sort(filteredApps, comparator);
 
-            synchronized(mRebuildSync) {
+            {    AutoLock syncLock(mRebuildSync);
                 if (!mRebuildRequested) {
                     mLastAppList = filteredApps;
                     if (!mRebuildAsync) {
@@ -606,7 +606,7 @@ public class ApplicationsState {
 
         CARAPI Release() {
             Pause();
-            synchronized(mEntriesMap) {
+            {    AutoLock syncLock(mEntriesMap);
                 mSessions->Remove(this);
             }
         }
@@ -614,7 +614,7 @@ public class ApplicationsState {
 
     public Session NewSession(Callbacks callbacks) {
         Session s = new Session(callbacks);
-        synchronized(mEntriesMap) {
+        {    AutoLock syncLock(mEntriesMap);
             mSessions->Add(s);
         }
         return s;
@@ -691,7 +691,7 @@ public class ApplicationsState {
 
     AppEntry GetEntry(String packageName) {
         if (DEBUG_LOCKING) Logger::V(TAG, "getEntry about to acquire lock...");
-        synchronized(mEntriesMap) {
+        {    AutoLock syncLock(mEntriesMap);
             AppEntry entry = mEntriesMap->Get(packageName);
             if (entry == NULL) {
                 for (Int32 i=0; i<mApplications->Size(); i++) {
@@ -706,19 +706,19 @@ public class ApplicationsState {
             return entry;
         }
     }
-    
+
     void EnsureIcon(AppEntry entry) {
         if (entry.icon != NULL) {
             return;
         }
-        synchronized(entry) {
+        {    AutoLock syncLock(entry);
             entry->EnsureIconLocked(mContext, mPm);
         }
     }
-    
+
     void RequestSize(String packageName) {
         if (DEBUG_LOCKING) Logger::V(TAG, "requestSize about to acquire lock...");
-        synchronized(mEntriesMap) {
+        {    AutoLock syncLock(mEntriesMap);
             AppEntry entry = mEntriesMap->Get(packageName);
             if (entry != NULL) {
                 mPm->GetPackageSizeInfo(packageName, mBackgroundHandler.mStatsObserver);
@@ -730,7 +730,7 @@ public class ApplicationsState {
     Int64 SumCacheSizes() {
         Int64 sum = 0;
         if (DEBUG_LOCKING) Logger::V(TAG, "sumCacheSizes about to acquire lock...");
-        synchronized(mEntriesMap) {
+        {    AutoLock syncLock(mEntriesMap);
             if (DEBUG_LOCKING) Logger::V(TAG, "-> sumCacheSizes now has lock");
             for (Int32 i=mAppEntries->Size()-1; i>=0; i--) {
                 sum += mAppEntries->Get(i).cacheSize;
@@ -739,7 +739,7 @@ public class ApplicationsState {
         }
         return sum;
     }
-    
+
     Int32 IndexOfApplicationInfoLocked(String pkgName) {
         for (Int32 i=mApplications->Size()-1; i>=0; i--) {
             if (mApplications->Get(i).packageName->Equals(pkgName)) {
@@ -751,7 +751,7 @@ public class ApplicationsState {
 
     void AddPackage(String pkgName) {
         try {
-            synchronized(mEntriesMap) {
+            {    AutoLock syncLock(mEntriesMap);
                 if (DEBUG_LOCKING) Logger::V(TAG, "addPackage acquired lock");
                 if (DEBUG) Logger::I(TAG, "Adding package " + pkgName);
                 if (!mResumed) {
@@ -788,7 +788,7 @@ public class ApplicationsState {
     }
 
     void RemovePackage(String pkgName) {
-        synchronized(mEntriesMap) {
+        {    AutoLock syncLock(mEntriesMap);
             if (DEBUG_LOCKING) Logger::V(TAG, "removePackage acquired lock");
             Int32 idx = IndexOfApplicationInfoLocked(pkgName);
             if (DEBUG) Logger::I(TAG, "removePackage: " + pkgName + " @ " + idx);
@@ -822,7 +822,7 @@ public class ApplicationsState {
         RemovePackage(pkgName);
         AddPackage(pkgName);
     }
-    
+
     AppEntry GetEntryLocked(ApplicationInfo info) {
         AppEntry entry = mEntriesMap->Get(info.packageName);
         if (DEBUG) Logger::I(TAG, "Looking up entry of pkg " + info.packageName + ": " + entry);
@@ -877,11 +877,11 @@ public class ApplicationsState {
         final IPackageStatsObserver.Stub mStatsObserver = new IPackageStatsObserver->Stub() {
             CARAPI OnGetStatsCompleted(PackageStats stats, Boolean succeeded) {
                 Boolean sizeChanged = FALSE;
-                synchronized(mEntriesMap) {
+                {    AutoLock syncLock(mEntriesMap);
                     if (DEBUG_LOCKING) Logger::V(TAG, "onGetStatsCompleted acquired lock");
                     AppEntry entry = mEntriesMap->Get(stats.packageName);
                     if (entry != NULL) {
-                        synchronized(entry) {
+                        {    AutoLock syncLock(entry);
                             entry.sizeStale = FALSE;
                             entry.sizeLoadStart = 0;
                             Int64 externalCodeSize = stats.externalCodeSize
@@ -938,7 +938,7 @@ public class ApplicationsState {
         CARAPI HandleMessage(Message msg) {
             // Always try rebuilding list first thing, if needed.
             ArrayList<Session> rebuildingSessions = NULL;
-            synchronized(mEntriesMap) {
+            {    AutoLock syncLock(mEntriesMap);
                 if (mRebuildingSessions->Size() > 0) {
                     rebuildingSessions = new ArrayList<Session>(mRebuildingSessions);
                     mRebuildingSessions->Clear();
@@ -955,7 +955,7 @@ public class ApplicationsState {
                 } break;
                 case MSG_LOAD_ENTRIES: {
                     Int32 numDone = 0;
-                    synchronized(mEntriesMap) {
+                    {    AutoLock syncLock(mEntriesMap);
                         if (DEBUG_LOCKING) Logger::V(TAG, "MSG_LOAD_ENTRIES acquired lock");
                         for (Int32 i=0; i<mApplications->Size() && numDone<6; i++) {
                             if (!mRunning) {
@@ -981,12 +981,12 @@ public class ApplicationsState {
                 } break;
                 case MSG_LOAD_ICONS: {
                     Int32 numDone = 0;
-                    synchronized(mEntriesMap) {
+                    {    AutoLock syncLock(mEntriesMap);
                         if (DEBUG_LOCKING) Logger::V(TAG, "MSG_LOAD_ICONS acquired lock");
                         for (Int32 i=0; i<mAppEntries->Size() && numDone<2; i++) {
                             AppEntry entry = mAppEntries->Get(i);
                             if (entry.icon == NULL || !entry.mounted) {
-                                synchronized(entry) {
+                                {    AutoLock syncLock(entry);
                                     if (entry->EnsureIconLocked(mContext, mPm)) {
                                         if (!mRunning) {
                                             mRunning = TRUE;
@@ -1013,7 +1013,7 @@ public class ApplicationsState {
                     }
                 } break;
                 case MSG_LOAD_SIZES: {
-                    synchronized(mEntriesMap) {
+                    {    AutoLock syncLock(mEntriesMap);
                         if (DEBUG_LOCKING) Logger::V(TAG, "MSG_LOAD_SIZES acquired lock");
                         if (mCurComputingSizePkg != NULL) {
                             if (DEBUG_LOCKING) Logger::V(TAG, "MSG_LOAD_SIZES releasing: currently computing");

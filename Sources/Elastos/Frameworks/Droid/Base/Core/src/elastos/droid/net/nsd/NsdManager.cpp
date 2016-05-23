@@ -14,6 +14,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Utility::CAsyncChannel;
 using Elastos::Droid::Internal::Utility::IAsyncChannel;
@@ -81,7 +83,7 @@ ECode NsdManager::PutListener(
     }
 
     Int32 key = 0;
-    synchronized(mMapLock) {
+    {    AutoLock syncLock(mMapLock);
         Int32 valueIndex;
         mListenerMap->IndexOfValue(listener, &valueIndex);
         if (valueIndex != -1) {
@@ -111,7 +113,7 @@ ECode NsdManager::GetListener(
         return NOERROR;
     }
 
-    synchronized(mMapLock) {
+    {    AutoLock syncLock(mMapLock);
         mListenerMap->Get(key, result);
     }
 
@@ -125,7 +127,7 @@ ECode NsdManager::GetNsdService(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(mMapLock) {
+    {    AutoLock syncLock(mMapLock);
         AutoPtr<IInterface> obj;
         mServiceMap->Get(key, (IInterface**)&obj);
         *result = INsdServiceInfo::Probe(obj);
@@ -140,7 +142,7 @@ ECode NsdManager::RemoveListener(
 {
     if (key == INVALID_LISTENER_KEY) return NOERROR;
 
-    synchronized(mMapLock) {
+    {    AutoLock syncLock(mMapLock);
         mListenerMap->Remove(key);
         mServiceMap->Remove(key);
     }
@@ -154,7 +156,7 @@ ECode NsdManager::GetListenerKey(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(mMapLock) {
+    {    AutoLock syncLock(mMapLock);
         Int32 valueIndex;
         mListenerMap->IndexOfValue(listener, &valueIndex);
         if (valueIndex != -1) {

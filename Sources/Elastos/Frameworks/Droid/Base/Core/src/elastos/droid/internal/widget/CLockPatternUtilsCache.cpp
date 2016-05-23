@@ -3,6 +3,8 @@
 #include "elastos/droid/utility/CArrayMap.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Utility::CArrayMap;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CBoolean;
@@ -326,7 +328,7 @@ void CLockPatternUtilsCache::PutCache(
     /* [in] */ Int32 userId,
     /* [in] */ IInterface* value)
 {
-    synchronized (mCache) {
+    {    AutoLock syncLock(mCache);
         // Create a new key, because this will be stored in the map.
         AutoPtr<CacheKey> cacheKey = new CacheKey();
         AutoPtr<ILockPatternUtilsCacheCacheKey> k = cacheKey->Set(key, userId);
@@ -338,7 +340,7 @@ void CLockPatternUtilsCache::InvalidateCache(
     /* [in] */ const String& key,
     /* [in] */ Int32 userId)
 {
-    synchronized (mCache) {
+    {    AutoLock syncLock(mCache);
         // Safe to reuse mCacheKey, because it is not stored in the map.
         AutoPtr<ILockPatternUtilsCacheCacheKey> k = mCacheKey->Set(key, userId);
         mCache->Remove(k);

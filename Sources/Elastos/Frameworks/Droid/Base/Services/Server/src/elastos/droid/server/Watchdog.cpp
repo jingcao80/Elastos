@@ -20,6 +20,8 @@
 #include <string.h>
 #include <errno.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentFilter;
@@ -369,7 +371,7 @@ ECode Watchdog::ProcessStarted(
     /* [in] */ Int32 pid)
 {
     Slogger::D(TAG, "ProcessStarted: %s, pid: %d", name.string(), pid);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // assert(0 && "TODO check namespace");
         if (name.Equals("com.android.phone")) {
             mPhonePid = pid;
@@ -381,7 +383,7 @@ ECode Watchdog::ProcessStarted(
 ECode Watchdog::SetActivityController(
     /* [in] */ IIActivityController* controller)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mController = controller;
     }
     return NOERROR;
@@ -390,7 +392,7 @@ ECode Watchdog::SetActivityController(
 ECode Watchdog::SetAllowRestart(
     /* [in] */ Boolean allowRestart)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mAllowRestart = allowRestart;
     }
     return NOERROR;
@@ -399,7 +401,7 @@ ECode Watchdog::SetAllowRestart(
 ECode Watchdog::AddMonitor(
     /* [in] */ IWatchdogMonitor* monitor)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean bval;
         if (IsAlive(&bval), bval) {
             Slogger::E(TAG, "Monitors can't be added once the Watchdog is running");
@@ -420,7 +422,7 @@ ECode Watchdog::AddThread(
     /* [in] */ IHandler* thread,
     /* [in] */ Int64 timeoutMillis)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean bval;
         if (IsAlive(&bval), bval) {
             Slogger::E(TAG, "Monitors can't be added once the Watchdog is running");
@@ -649,7 +651,7 @@ ECode Watchdog::Run()
         // } catch (InterruptedException ignored) {}
 
         AutoPtr<IIActivityController> controller;
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             controller = mController;
         }
         if (controller != NULL) {

@@ -19,6 +19,8 @@
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IPendingIntentHelper;
 using Elastos::Droid::App::IProfileGroup;
 using Elastos::Droid::App::ProfileGroupMode;
@@ -96,7 +98,7 @@ ECode CAudioManager::FocusEventHandlerDelegate::MyHandler::HandleMessage(
 
     AutoPtr<IAudioManagerOnAudioFocusChangeListener> listener;
     Object& lock = mHost->mOwner->mFocusListenerLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         listener = mHost->mOwner->FindFocusListener(info);
     }
     if (listener != NULL) {
@@ -1285,7 +1287,7 @@ ECode CAudioManager::RegisterAudioFocusListener(
     /* [in] */ IAudioManagerOnAudioFocusChangeListener* l)
 {
     String key = GetIdForAudioFocusListener(l);
-    synchronized(mFocusListenerLock) {
+    {    AutoLock syncLock(mFocusListenerLock);
         HashMap<String, AutoPtr<IAudioManagerOnAudioFocusChangeListener> >::Iterator it =
             mAudioFocusIdListenerMap.Find(key);
         if (it != mAudioFocusIdListenerMap.End()) {
@@ -1300,7 +1302,7 @@ ECode CAudioManager::UnregisterAudioFocusListener(
     /* [in] */ IAudioManagerOnAudioFocusChangeListener* l)
 {
     String key = GetIdForAudioFocusListener(l);
-    synchronized(mFocusListenerLock) {
+    {    AutoLock syncLock(mFocusListenerLock);
         HashMap<String, AutoPtr<IAudioManagerOnAudioFocusChangeListener> >::Iterator it =
         mAudioFocusIdListenerMap.Find(key);
         if (it != mAudioFocusIdListenerMap.End())
@@ -2123,7 +2125,7 @@ ECode CAudioManager::ResetAudioPortGeneration(
     VALIDATE_NOT_NULL(result)
 
     Int32 generation;
-    synchronized(mAudioPortGeneration) {
+    {    AutoLock syncLock(mAudioPortGeneration);
         mAudioPortGeneration->GetValue(&generation);
         mAudioPortGeneration = NULL;
         CInteger32::New(AUDIOPORT_GENERATION_INIT, (IInteger32**)&mAudioPortGeneration);
@@ -2139,7 +2141,7 @@ ECode CAudioManager::UpdateAudioPortCache(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(mAudioPortGeneration) {
+    {    AutoLock syncLock(mAudioPortGeneration);
         Int32 val;
         mAudioPortGeneration->GetValue(&val);
         if (val == AUDIOPORT_GENERATION_INIT) {

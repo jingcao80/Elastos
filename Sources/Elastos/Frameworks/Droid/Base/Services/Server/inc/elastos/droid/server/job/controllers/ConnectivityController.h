@@ -56,7 +56,7 @@ public class ConnectivityController extends StateController implements
     private Boolean mNetworkConnected;
 
     public static ConnectivityController Get(JobSchedulerService jms) {
-        synchronized(sCreationLock) {
+        {    AutoLock syncLock(sCreationLock);
             if (mSingleton == NULL) {
                 mSingleton = new ConnectivityController(jms, jms->GetContext());
             }
@@ -84,7 +84,7 @@ public class ConnectivityController extends StateController implements
     //@Override
     CARAPI MaybeStartTrackingJob(JobStatus jobStatus) {
         if (jobStatus->HasConnectivityConstraint() || jobStatus->HasUnmeteredConstraint()) {
-            synchronized(mTrackedJobs) {
+            {    AutoLock syncLock(mTrackedJobs);
                 jobStatus.connectivityConstraintSatisfied->Set(mNetworkConnected);
                 jobStatus.unmeteredConstraintSatisfied->Set(mNetworkUnmetered);
                 mTrackedJobs->Add(jobStatus);
@@ -95,7 +95,7 @@ public class ConnectivityController extends StateController implements
     //@Override
     CARAPI MaybeStopTrackingJob(JobStatus jobStatus) {
         if (jobStatus->HasConnectivityConstraint() || jobStatus->HasUnmeteredConstraint()) {
-            synchronized(mTrackedJobs) {
+            {    AutoLock syncLock(mTrackedJobs);
                 mTrackedJobs->Remove(jobStatus);
             }
         }
@@ -105,7 +105,7 @@ public class ConnectivityController extends StateController implements
      * @param userId Id of the user for whom we are updating the connectivity state.
      */
     private void UpdateTrackedJobs(Int32 userId) {
-        synchronized(mTrackedJobs) {
+        {    AutoLock syncLock(mTrackedJobs);
             Boolean changed = FALSE;
             for (JobStatus js : mTrackedJobs) {
                 if (js->GetUserId() != userId) {
@@ -128,7 +128,7 @@ public class ConnectivityController extends StateController implements
      * We know the network has just come up. We want to run any jobs that are ready.
      */
     public synchronized void OnNetworkActive() {
-        synchronized(mTrackedJobs) {
+        {    AutoLock syncLock(mTrackedJobs);
             for (JobStatus js : mTrackedJobs) {
                 if (js->IsReady()) {
                     if (DEBUG) {

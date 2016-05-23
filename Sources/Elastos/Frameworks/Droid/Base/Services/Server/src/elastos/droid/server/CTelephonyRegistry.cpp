@@ -19,6 +19,8 @@
 #include <Elastos.Droid.Internal.h>
 #include <Elastos.CoreLibrary.Utility.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::CBundle;
@@ -364,7 +366,7 @@ ECode CTelephonyRegistry::Listen(
         /* Checks permission and throws Security exception */
         FAIL_RETURN(CheckListenerPermission(events))
 
-        synchronized(mRecordsLock) {
+        {    AutoLock syncLock(mRecordsLock);
             // register
             AutoPtr<Record> r;
             AutoPtr<ISubscriptionManager> smHelper;
@@ -520,7 +522,7 @@ ECode CTelephonyRegistry::Listen(
 ECode CTelephonyRegistry::Remove(
     /* [in] */ IBinder* binder)
 {
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
             if ((*it)->mBinder.Get() == binder) {
@@ -546,7 +548,7 @@ ECode CTelephonyRegistry::NotifyCallState(
     }
 
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
             Record* r = *it;
@@ -576,7 +578,7 @@ ECode CTelephonyRegistry::NotifyCallStateForSubscriber(
             subId, state, incomingNumber.string());
     }
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         AutoPtr<ISubscriptionManager> smHelper;
         //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
         Int32 phoneId;
@@ -612,7 +614,7 @@ ECode CTelephonyRegistry::NotifyServiceStateForPhoneId(
     }
 
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         if (VDBG) {
             Slogger::D(TAG, "notifyServiceStateForSubscriber: subId=%lld phoneId=%d, state=%s",
                 subId, phoneId, TO_CSTR(state));
@@ -673,7 +675,7 @@ ECode CTelephonyRegistry::NotifySignalStrengthForSubscriber(
         ToStringLogSSC(String("notifySignalStrengthForSubscriber"));
     }
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         AutoPtr<ISubscriptionManager> smHelper;
         //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
         Int32 phoneId;
@@ -747,7 +749,7 @@ ECode CTelephonyRegistry::NotifyCellInfoForSubscriber(
     }
 
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         AutoPtr<ISubscriptionManager> smHelper;
         //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
         Int32 phoneId;
@@ -785,7 +787,7 @@ ECode CTelephonyRegistry::NotifyDataConnectionRealTimeInfo(
     }
 
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         mDcRtInfo = dcRtInfo;
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
@@ -821,7 +823,7 @@ ECode CTelephonyRegistry::NotifyMessageWaitingChangedForPhoneId(
             phoneId, subId, mwi);
     }
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         if (ValidatePhoneId(phoneId)) {
             (*mMessageWaiting)[phoneId] = mwi;
             List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
@@ -860,7 +862,7 @@ ECode CTelephonyRegistry::NotifyCallForwardingChangedForSubscriber(
             subId, cfi);
     }
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         AutoPtr<ISubscriptionManager> smHelper;
         //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
         Int32 phoneId;
@@ -899,7 +901,7 @@ ECode CTelephonyRegistry::NotifyDataActivityForSubscriber(
         return NOERROR;
     }
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         AutoPtr<ISubscriptionManager> smHelper;
         //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
         Int32 phoneId;
@@ -958,7 +960,7 @@ ECode CTelephonyRegistry::NotifyDataConnectionForSubscriber(
             networkType, mRecords.GetSize());
     }
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         AutoPtr<ISubscriptionManager> smHelper;
         //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
         Int32 phoneId;
@@ -1067,7 +1069,7 @@ ECode CTelephonyRegistry::NotifyDataConnectionFailedForSubscriber(
     }
     ECode ec = NOERROR;
     String emptyStr("");
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         mPreciseDataConnectionState = NULL;
         // CPreciseDataConnectionState::New(
         //     ITelephonyManager::DATA_UNKNOWN,ITelephonyManager::NETWORK_TYPE_UNKNOWN,
@@ -1108,7 +1110,7 @@ ECode CTelephonyRegistry::NotifyCellLocationForSubscriber(
     }
 
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         AutoPtr<ISubscriptionManager> smHelper;
         //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
         Int32 phoneId;
@@ -1147,7 +1149,7 @@ ECode CTelephonyRegistry::NotifyOtaspChanged(
         return NOERROR;
     }
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         mOtaspMode = otaspMode;
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
@@ -1174,7 +1176,7 @@ ECode CTelephonyRegistry::NotifyPreciseCallState(
     }
 
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         mRingingCallState = ringingCallState;
         mForegroundCallState = foregroundCallState;
         mBackgroundCallState = backgroundCallState;
@@ -1208,7 +1210,7 @@ ECode CTelephonyRegistry::NotifyDisconnectCause(
         return NOERROR;
     }
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         mPreciseCallState = NULL;
         // CPreciseCallState::New(mRingingCallState, mForegroundCallState,
         //     mBackgroundCallState, disconnectCause, preciseDisconnectCause,
@@ -1239,7 +1241,7 @@ ECode CTelephonyRegistry::NotifyPreciseDataConnectionFailed(
         return NOERROR;
     }
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         mPreciseDataConnectionState = NULL;
         // CPreciseDataConnectionState::New(
         //     ITelephonyManager::DATA_UNKNOWN, ITelephonyManager::NETWORK_TYPE_UNKNOWN,
@@ -1268,7 +1270,7 @@ ECode CTelephonyRegistry::NotifyVoLteServiceStateChanged(
         return NOERROR;
     }
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         mVoLteServiceState = lteState;
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
@@ -1296,7 +1298,7 @@ ECode CTelephonyRegistry::NotifyOemHookRawEventForSubscriber(
     }
 
     ECode ec = NOERROR;
-    synchronized(mRecordsLock) {
+    {    AutoLock syncLock(mRecordsLock);
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
             Record* r = *it;
@@ -1330,7 +1332,7 @@ ECode CTelephonyRegistry::Dump(
     //             + Binder::GetCallingPid() + ", uid=" + Binder::GetCallingUid());
     //     return NOERROR;
     // }
-    // synchronized(mRecordsLock) {
+    // {    AutoLock syncLock(mRecordsLock);
     //     Int32 recordCount = mRecords.size();
     //     pw->Println("last known state:");
     //     for (Int32 i = 0; i < ITelephonyManager::getDefault().getPhoneCount(); i++) {

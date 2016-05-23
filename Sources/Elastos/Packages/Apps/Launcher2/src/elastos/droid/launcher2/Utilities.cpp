@@ -7,6 +7,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
 using Elastos::Droid::Graphics::PorterDuffMode_CLEAR;
@@ -125,7 +127,7 @@ AutoPtr<IBitmap> Utilities::CreateIconBitmap(
     /* [in] */ IDrawable* icon,
     /* [in] */ IContext* context)
 {
-    synchronized(sCanvasLock) { // we share the statics :-(
+    {    AutoLock syncLock(sCanvasLock); // we share the statics :-(
         if (sIconWidth == -1) {
             InitStatics(context);
         }
@@ -223,7 +225,7 @@ ECode Utilities::DrawSelectedAllAppsBitmap(
     /* [in] */ Boolean pressed,
     /* [in] */ IBitmap* src)
 {
-    synchronized(sCanvasLock) { // we share the statics :-(
+    {    AutoLock syncLock(sCanvasLock); // we share the statics :-(
         if (sIconWidth == -1) {
             // We can't have gotten to here without src being initialized, which
             // comes from this file already.  So just assert.
@@ -257,7 +259,7 @@ AutoPtr<IBitmap> Utilities::ResampleIconBitmap(
     /* [in] */ IBitmap* bitmap,
     /* [in] */ IContext* context)
 {
-    synchronized(sCanvasLock) { // we share the statics :-(
+    {    AutoLock syncLock(sCanvasLock); // we share the statics :-(
         if (sIconWidth == -1) {
             InitStatics(context);
         }
@@ -284,7 +286,7 @@ AutoPtr<IBitmap> Utilities::DrawDisabledBitmap(
     /* [in] */ IBitmap* bitmap,
     /* [in] */ IContext* context)
 {
-    synchronized (sCanvasLock) { // we share the statics :-(
+    {    AutoLock syncLock(sCanvasLock); // we share the statics :-(
         if (sIconWidth == -1) {
             InitStatics(context);
         }

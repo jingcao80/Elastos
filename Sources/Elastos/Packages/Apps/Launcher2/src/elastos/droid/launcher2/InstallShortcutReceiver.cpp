@@ -14,6 +14,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::IIntentHelper;
 using Elastos::Droid::Content::CIntentHelper;
@@ -72,7 +74,7 @@ InstallShortcutReceiver::MyThread::MyThread(
 
 ECode InstallShortcutReceiver::MyThread::Run()
 {
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         // If the new app is going to fall into the same page as before,
         // then just continue adding to the current page
         Int32 newAppsScreen;
@@ -129,7 +131,7 @@ ECode InstallShortcutReceiver::AddToInstallQueue(
     /* [in] */ ISharedPreferences* sharedPrefs,
     /* [in] */ PendingInstallShortcutInfo* info)
 {
-    synchronized(sLock){
+    {    AutoLock syncLock(sLock);
     //try
     {
         AutoPtr<IJSONStringer> json;
@@ -191,7 +193,7 @@ EXIT:
 AutoPtr<IArrayList> InstallShortcutReceiver::GetAndClearInstallQueue(
     /* [in] */ ISharedPreferences* sharedPrefs)
 {
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         AutoPtr<ISet> strings;
         sharedPrefs->GetStringSet(APPS_PENDING_INSTALL, NULL, (ISet**)&strings);
         if (strings == NULL) {
@@ -417,7 +419,7 @@ void InstallShortcutReceiver::ProcessInstallShortcut(
     AutoPtr<ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(1);
     (*result)[0] = INSTALL_SHORTCUT_SUCCESSFUL;
     Boolean found = FALSE;
-    synchronized(app) {
+    {    AutoLock syncLock(app);
         // Flush the LauncherModel worker thread, so that if we just did another
         // processInstallShortcut, we give it time for its shortcut to get added to the
         // database (getItemsInLocalCoordinates reads the database)

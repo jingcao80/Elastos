@@ -11,6 +11,8 @@
 #include "CLibcore.h"
 #include "IoBridge.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::IBoolean;
 using Elastos::Core::CBoolean;
 using Elastos::Core::IInteger32;
@@ -97,7 +99,7 @@ ECode CPlainDatagramSocketImpl::OnBind(
 
 ECode CPlainDatagramSocketImpl::Close()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mGuard->Close();
         return IoBridge::CloseAndSignalBlockedThreads(mFd);
     }

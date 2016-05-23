@@ -8,6 +8,8 @@
 #include "elastos/core/AutoLock.h"
 #include "elastos/utility/logging/Logger.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Net::IURI;
 using Org::Apache::Http::Client::EIID_IHttpClient;
@@ -37,7 +39,7 @@ ECode AbstractHttpClient::GetParams(
     /* [out] */ IHttpParams** params)
 {
     VALIDATE_NOT_NULL(params)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mDefaultParams == NULL) {
             CreateHttpParams((IHttpParams**)&mDefaultParams);
         }
@@ -50,7 +52,7 @@ ECode AbstractHttpClient::GetParams(
 void AbstractHttpClient::SetParams(
     /* [in] */ IHttpParams* params)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mDefaultParams = params;
     }
 }
@@ -59,7 +61,7 @@ ECode AbstractHttpClient::GetConnectionManager(
     /* [out] */ IClientConnectionManager** manager)
 {
     VALIDATE_NOT_NULL(manager)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mConnManager == NULL) {
             CreateClientConnectionManager((IClientConnectionManager**)&mConnManager);
         }
@@ -73,7 +75,7 @@ ECode AbstractHttpClient::GetRequestExecutor(
     /* [out] */ IHttpRequestExecutor** executor)
 {
     VALIDATE_NOT_NULL(executor)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mRequestExec == NULL) {
             CreateRequestExecutor((IHttpRequestExecutor**)&mRequestExec);
         }
@@ -87,7 +89,7 @@ ECode AbstractHttpClient::GetAuthSchemes(
     /* [out] */ IAuthSchemeRegistry** registry)
 {
     VALIDATE_NOT_NULL(registry)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mSupportedAuthSchemes == NULL) {
             CreateAuthSchemeRegistry((IAuthSchemeRegistry**)&mSupportedAuthSchemes);
         }
@@ -100,7 +102,7 @@ ECode AbstractHttpClient::GetAuthSchemes(
 void AbstractHttpClient::SetAuthSchemes(
     /* [in] */ IAuthSchemeRegistry* authSchemeRegistry)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mSupportedAuthSchemes = authSchemeRegistry;
     }
 }
@@ -109,7 +111,7 @@ ECode AbstractHttpClient::GetCookieSpecs(
     /* [out] */ ICookieSpecRegistry** registry)
 {
     VALIDATE_NOT_NULL(registry)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mSupportedCookieSpecs == NULL) {
             CreateCookieSpecRegistry((ICookieSpecRegistry**)&mSupportedCookieSpecs);
         }
@@ -122,7 +124,7 @@ ECode AbstractHttpClient::GetCookieSpecs(
 void AbstractHttpClient::SetCookieSpecs(
     /* [in] */ ICookieSpecRegistry* cookieSpecRegistry)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mSupportedCookieSpecs = cookieSpecRegistry;
     }
 }
@@ -131,7 +133,7 @@ ECode AbstractHttpClient::GetConnectionReuseStrategy(
     /* [out] */ IConnectionReuseStrategy** strategy)
 {
     VALIDATE_NOT_NULL(strategy)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mReuseStrategy == NULL) {
             CreateConnectionReuseStrategy((IConnectionReuseStrategy**)&mReuseStrategy);
         }
@@ -144,7 +146,7 @@ ECode AbstractHttpClient::GetConnectionReuseStrategy(
 void AbstractHttpClient::SetReuseStrategy(
     /* [in] */ IConnectionReuseStrategy* reuseStrategy)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mReuseStrategy = reuseStrategy;
     }
 }
@@ -153,7 +155,7 @@ ECode AbstractHttpClient::GetConnectionKeepAliveStrategy(
     /* [out] */ IConnectionKeepAliveStrategy** strategy)
 {
     VALIDATE_NOT_NULL(strategy)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mKeepAliveStrategy == NULL) {
             CreateConnectionKeepAliveStrategy((IConnectionKeepAliveStrategy**)&mKeepAliveStrategy);
         }
@@ -166,7 +168,7 @@ ECode AbstractHttpClient::GetConnectionKeepAliveStrategy(
 void AbstractHttpClient::SetKeepAliveStrategy(
     /* [in] */ IConnectionKeepAliveStrategy* keepAliveStrategy)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mKeepAliveStrategy = keepAliveStrategy;
     }
 }
@@ -175,7 +177,7 @@ ECode AbstractHttpClient::GetHttpRequestRetryHandler(
     /* [out] */ IHttpRequestRetryHandler** handler)
 {
     VALIDATE_NOT_NULL(handler)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mRetryHandler == NULL) {
             CreateHttpRequestRetryHandler((IHttpRequestRetryHandler**)&mRetryHandler);
         }
@@ -188,7 +190,7 @@ ECode AbstractHttpClient::GetHttpRequestRetryHandler(
 void AbstractHttpClient::SetHttpRequestRetryHandler(
     /* [in] */ IHttpRequestRetryHandler* retryHandler)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mRetryHandler = retryHandler;
     }
 }
@@ -197,7 +199,7 @@ ECode AbstractHttpClient::GetRedirectHandler(
     /* [out] */ IRedirectHandler** handler)
 {
     VALIDATE_NOT_NULL(handler)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mRedirectHandler == NULL) {
             CreateRedirectHandler((IRedirectHandler**)&mRedirectHandler);
         }
@@ -210,7 +212,7 @@ ECode AbstractHttpClient::GetRedirectHandler(
 ECode AbstractHttpClient::SetRedirectHandler(
     /* [in] */ IRedirectHandler* redirectHandler)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mRedirectHandler = redirectHandler;
     }
     return NOERROR;
@@ -220,7 +222,7 @@ ECode AbstractHttpClient::GetTargetAuthenticationHandler(
     /* [out] */ IAuthenticationHandler** handler)
 {
     VALIDATE_NOT_NULL(handler)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mTargetAuthHandler == NULL) {
             CreateTargetAuthenticationHandler((IAuthenticationHandler**)&mTargetAuthHandler);
         }
@@ -233,7 +235,7 @@ ECode AbstractHttpClient::GetTargetAuthenticationHandler(
 void AbstractHttpClient::SetTargetAuthenticationHandler(
     /* [in] */ IAuthenticationHandler* targetAuthHandler)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mTargetAuthHandler = targetAuthHandler;
     }
 }
@@ -242,7 +244,7 @@ ECode AbstractHttpClient::GetProxyAuthenticationHandler(
     /* [out] */ IAuthenticationHandler** handler)
 {
     VALIDATE_NOT_NULL(handler)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mProxyAuthHandler == NULL) {
             CreateProxyAuthenticationHandler((IAuthenticationHandler**)&mProxyAuthHandler);
         }
@@ -255,7 +257,7 @@ ECode AbstractHttpClient::GetProxyAuthenticationHandler(
 void AbstractHttpClient::SetProxyAuthenticationHandler(
     /* [in] */ IAuthenticationHandler* proxyAuthHandler)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mProxyAuthHandler = proxyAuthHandler;
     }
 }
@@ -264,7 +266,7 @@ ECode AbstractHttpClient::GetCookieStore(
     /* [out] */ ICookieStore** store)
 {
     VALIDATE_NOT_NULL(store)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mCookieStore == NULL) {
             CreateCookieStore((ICookieStore**)&mCookieStore);
         }
@@ -277,7 +279,7 @@ ECode AbstractHttpClient::GetCookieStore(
 void AbstractHttpClient::SetCookieStore(
     /* [in] */ ICookieStore* cookieStore)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mCookieStore = cookieStore;
     }
 }
@@ -286,7 +288,7 @@ ECode AbstractHttpClient::GetCredentialsProvider(
     /* [out] */ ICredentialsProvider** provider)
 {
     VALIDATE_NOT_NULL(provider)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mCredsProvider == NULL) {
             CreateCredentialsProvider((ICredentialsProvider**)&mCredsProvider);
         }
@@ -299,7 +301,7 @@ ECode AbstractHttpClient::GetCredentialsProvider(
 void AbstractHttpClient::SetCredentialsProvider(
     /* [in] */ ICredentialsProvider* credsProvider)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mCredsProvider = credsProvider;
     }
 }
@@ -308,7 +310,7 @@ ECode AbstractHttpClient::GetRoutePlanner(
     /* [out] */ IHttpRoutePlanner** planner)
 {
     VALIDATE_NOT_NULL(planner)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mRoutePlanner == NULL) {
             CreateHttpRoutePlanner((IHttpRoutePlanner**)&mRoutePlanner);
         }
@@ -321,7 +323,7 @@ ECode AbstractHttpClient::GetRoutePlanner(
 void AbstractHttpClient::SetRoutePlanner(
     /* [in] */ IHttpRoutePlanner* routePlanner)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mRoutePlanner = routePlanner;
     }
 }
@@ -330,7 +332,7 @@ ECode AbstractHttpClient::GetUserTokenHandler(
     /* [out] */ IUserTokenHandler** handler)
 {
     VALIDATE_NOT_NULL(handler)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mUserTokenHandler == NULL) {
             CreateUserTokenHandler((IUserTokenHandler**)&mUserTokenHandler);
         }
@@ -343,7 +345,7 @@ ECode AbstractHttpClient::GetUserTokenHandler(
 void AbstractHttpClient::SetUserTokenHandler(
     /* [in] */ IUserTokenHandler* userTokenHandler)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mUserTokenHandler = userTokenHandler;
     }
 }
@@ -352,7 +354,7 @@ ECode AbstractHttpClient::GetHttpProcessor(
     /* [out] */ IBasicHttpProcessor** processor)
 {
     VALIDATE_NOT_NULL(processor)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mHttpProcessor == NULL) {
             CreateHttpProcessor((IBasicHttpProcessor**)&mHttpProcessor);
         }
@@ -365,7 +367,7 @@ ECode AbstractHttpClient::GetHttpProcessor(
 ECode AbstractHttpClient::AddResponseInterceptor(
     /* [in] */ IHttpResponseInterceptor* itcp)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IBasicHttpProcessor> processor;
         GetHttpProcessor((IBasicHttpProcessor**)&processor);
         processor->AddInterceptor(itcp);
@@ -377,7 +379,7 @@ ECode AbstractHttpClient::AddResponseInterceptor(
     /* [in] */ IHttpResponseInterceptor* itcp,
     /* [in] */ Int32 index)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IBasicHttpProcessor> processor;
         GetHttpProcessor((IBasicHttpProcessor**)&processor);
         processor->AddInterceptor(itcp, index);
@@ -390,7 +392,7 @@ ECode AbstractHttpClient::GetResponseInterceptor(
     /* [out] */ IHttpResponseInterceptor** interceptor)
 {
     VALIDATE_NOT_NULL(interceptor)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IBasicHttpProcessor> processor;
         GetHttpProcessor((IBasicHttpProcessor**)&processor);
         IHttpResponseInterceptorList::Probe(processor)->GetResponseInterceptor(index, interceptor);
@@ -402,7 +404,7 @@ ECode AbstractHttpClient::GetResponseInterceptorCount(
     /* [out] */ Int32* count)
 {
     VALIDATE_NOT_NULL(count)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IBasicHttpProcessor> processor;
         GetHttpProcessor((IBasicHttpProcessor**)&processor);
         IHttpResponseInterceptorList::Probe(processor)->GetResponseInterceptorCount(count);
@@ -412,7 +414,7 @@ ECode AbstractHttpClient::GetResponseInterceptorCount(
 
 ECode AbstractHttpClient::ClearResponseInterceptors()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IBasicHttpProcessor> processor;
         GetHttpProcessor((IBasicHttpProcessor**)&processor);
         IHttpResponseInterceptorList::Probe(processor)->ClearResponseInterceptors();
@@ -431,7 +433,7 @@ ECode AbstractHttpClient::RemoveResponseInterceptorByClass(
 ECode AbstractHttpClient::AddRequestInterceptor(
     /* [in] */ IHttpRequestInterceptor* itcp)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IBasicHttpProcessor> processor;
         GetHttpProcessor((IBasicHttpProcessor**)&processor);
         IHttpRequestInterceptorList::Probe(processor)->AddRequestInterceptor(itcp);
@@ -443,7 +445,7 @@ ECode AbstractHttpClient::AddRequestInterceptor(
     /* [in] */ IHttpRequestInterceptor* itcp,
     /* [in] */ Int32 index)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IBasicHttpProcessor> processor;
         GetHttpProcessor((IBasicHttpProcessor**)&processor);
         IHttpRequestInterceptorList::Probe(processor)->AddRequestInterceptor(itcp, index);
@@ -456,7 +458,7 @@ ECode AbstractHttpClient::GetRequestInterceptor(
     /* [out] */ IHttpRequestInterceptor** interceptor)
 {
     VALIDATE_NOT_NULL(interceptor)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IBasicHttpProcessor> processor;
         GetHttpProcessor((IBasicHttpProcessor**)&processor);
         IHttpRequestInterceptorList::Probe(processor)->GetRequestInterceptor(index, interceptor);
@@ -468,7 +470,7 @@ ECode AbstractHttpClient::GetRequestInterceptorCount(
     /* [out] */ Int32* count)
 {
     VALIDATE_NOT_NULL(count)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IBasicHttpProcessor> processor;
         GetHttpProcessor((IBasicHttpProcessor**)&processor);
         IHttpRequestInterceptorList::Probe(processor)->GetRequestInterceptorCount(count);
@@ -478,7 +480,7 @@ ECode AbstractHttpClient::GetRequestInterceptorCount(
 
 ECode AbstractHttpClient::ClearRequestInterceptors()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IBasicHttpProcessor> processor;
         GetHttpProcessor((IBasicHttpProcessor**)&processor);
         IHttpRequestInterceptorList::Probe(processor)->ClearRequestInterceptors();
@@ -569,7 +571,7 @@ ECode AbstractHttpClient::Execute(
 
     // Initialize the request execution context making copies of
     // all shared objects that are potentially threading unsafe.
-    synchronized (this) {
+    {    AutoLock syncLock(this);
 
         AutoPtr<IHttpContext> defaultContext;
         CreateHttpContext((IHttpContext**)&defaultContext);

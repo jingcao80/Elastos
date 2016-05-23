@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Os::IAsyncResult;
@@ -68,7 +70,7 @@ public abstract class IccPhoneBookInterfaceManager {
             Switch (msg.what) {
                 case EVENT_GET_SIZE_DONE:
                     ar = (AsyncResult) msg.obj;
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         If (ar.exception == NULL) {
                             mRecordSize = (Int32[])ar.result;
                             // recordSize[0]  is the record length
@@ -83,14 +85,14 @@ public abstract class IccPhoneBookInterfaceManager {
                     break;
                 case EVENT_UPDATE_DONE:
                     ar = (AsyncResult) msg.obj;
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         mSuccess = (ar.exception == NULL);
                         NotifyPending(ar);
                     }
                     break;
                 case EVENT_LOAD_DONE:
                     ar = (AsyncResult)msg.obj;
-                    Synchronized (mLock) {
+                    {    AutoLock syncLock(mLock);
                         If (ar.exception == NULL) {
                             mRecords = (List<AdnRecord>) ar.result;
                         } else {
@@ -241,7 +243,7 @@ public abstract class IccPhoneBookInterfaceManager {
 
         efid = UpdateEfForIccType(efid);
 
-        Synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             CheckThread();
             mSuccess = FALSE;
             AtomicBoolean status = new AtomicBoolean(FALSE);
@@ -283,7 +285,7 @@ public abstract class IccPhoneBookInterfaceManager {
         If (DBG)
             Logd("updateAdnRecordsInEfBySearch: efid=" + efid + ", values = " + values + ", pin2="
                     + pin2);
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             CheckThread();
             mSuccess = FALSE;
             AtomicBoolean status = new AtomicBoolean(FALSE);
@@ -331,7 +333,7 @@ public abstract class IccPhoneBookInterfaceManager {
         If (DBG) Logd("updateAdnRecordsInEfByIndex: efid=" + efid +
                 " Index=" + index + " ==> " +
                 "("+ newTag + "," + newPhoneNumber + ")"+ " pin2=" + pin2);
-        Synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             CheckThread();
             mSuccess = FALSE;
             AtomicBoolean status = new AtomicBoolean(FALSE);
@@ -379,7 +381,7 @@ public abstract class IccPhoneBookInterfaceManager {
         efid = UpdateEfForIccType(efid);
         If (DBG) Logd("getAdnRecordsInEF: efid=" + efid);
 
-        Synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             CheckThread();
             AtomicBoolean status = new AtomicBoolean(FALSE);
             Message response = mBaseHandler->ObtainMessage(EVENT_LOAD_DONE, status);

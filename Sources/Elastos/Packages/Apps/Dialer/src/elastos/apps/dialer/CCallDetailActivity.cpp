@@ -3,6 +3,8 @@
 #include "elastos/droid/widget/Toast.h"
 #include <Elastos.Droid.Content.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IFragmentManager;
 using Elastos::Droid::App::IFragmentTransaction;
 using Elastos::Droid::Content::IIntent;
@@ -142,7 +144,7 @@ CCallDetailActivity::ProximitySensorListener::ProximitySensorListener(
 
 ECode CCallDetailActivity::ProximitySensorListener::OnNear()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ClearPendingRequests();
         PostDelayed(mBlankRunnable, PROXIMITY_BLANK_DELAY_MILLIS);
         return NOERROR;
@@ -151,7 +153,7 @@ ECode CCallDetailActivity::ProximitySensorListener::OnNear()
 
 ECode CCallDetailActivity::ProximitySensorListener::OnFar()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ClearPendingRequests();
         PostDelayed(mUnblankRunnable, PROXIMITY_UNBLANK_DELAY_MILLIS);
         return NOERROR;

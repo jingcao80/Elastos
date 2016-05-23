@@ -8,6 +8,8 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.CoreLibrary.Utility.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::Job::IJobInfo;
 using Elastos::Droid::App::Job::IJobInfoBuilder;
 using Elastos::Droid::App::Job::CJobInfoBuilder;
@@ -54,7 +56,7 @@ CMountServiceIdler::FinishCallbackRunnable::FinishCallbackRunnable(
 ECode CMountServiceIdler::FinishCallbackRunnable::Run()
 {
     Slogger::I(CMountServiceIdler::TAG, "Got mount service completion callback");
-    synchronized(mHost->mFinishCallback.Get()) {
+    {    AutoLock syncLock(mHost->mFinishCallback.Get());
         if (mHost->mStarted) {
             mHost->JobFinished(mHost->mJobParams, FALSE);
             mHost->mStarted = FALSE;
@@ -103,7 +105,7 @@ ECode CMountServiceIdler::OnStartJob(
     // CMountService* ms = CMountService::sSelf;
     // if (ms != NULL) {
     //     Object* obj = mFinishCallback.Get();
-    //     synchronized(obj) {
+    //     {    AutoLock syncLock(obj);
     //         mStarted = TRUE;
     //     }
     //     ms->RunIdleMaintenance(mFinishCallback);
@@ -123,7 +125,7 @@ ECode CMountServiceIdler::OnStopJob(
     // that we don't need to call JobFinished(), and let everything happen in
     // the callback from the mount service.
     Object* obj = mFinishCallback.Get();
-    synchronized(obj) {
+    {    AutoLock syncLock(obj);
         mStarted = FALSE;
     }
     return FALSE;

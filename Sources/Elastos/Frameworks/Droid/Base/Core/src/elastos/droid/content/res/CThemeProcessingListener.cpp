@@ -6,6 +6,8 @@
 #include <elastos/utility/etl/List.h>
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Logging::Logger;
 
@@ -20,7 +22,7 @@ namespace Res {
 
 ECode CThemeProcessingListener::OnFinishedProcessingRunnable::Run()
 {
-    synchronized (mHost->mProcessingListenersLock) {
+    {    AutoLock syncLock(mHost->mProcessingListenersLock);
         List<AutoPtr<IThemeProcessingListener> > listenersToRemove;
         HashSet<AutoPtr<IThemeProcessingListener> >::Iterator it = mHost->mProcessingListeners.Begin();
         for (; it != mHost->mProcessingListeners.End(); ++it) {

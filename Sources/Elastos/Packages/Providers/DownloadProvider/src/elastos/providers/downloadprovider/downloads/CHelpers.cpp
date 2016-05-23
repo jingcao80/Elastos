@@ -16,6 +16,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Os::Environment;
@@ -358,7 +360,7 @@ ECode CHelpers::GenerateSaveFile(
         }
     }
 
-    synchronized (sUniqueLock) {
+    {    AutoLock syncLock(sUniqueLock);
         name = GenerateAvailableFilenameLocked(parentTest, prefix, suffix);
 
         // Claim this filename inside lock to prevent other threads from

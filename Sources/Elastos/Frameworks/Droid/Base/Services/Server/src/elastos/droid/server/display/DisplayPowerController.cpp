@@ -15,6 +15,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Server::Lights::Light;
 using Elastos::Droid::Server::Lights::LightsManager;
 using Elastos::Droid::Server::LocalServices;
@@ -434,7 +436,7 @@ Boolean DisplayPowerController::RequestPowerState(
             TO_CSTR(request), waitForNegativeProximity);
     }
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         Boolean changed = FALSE;
 
         if (waitForNegativeProximity
@@ -473,7 +475,7 @@ ECode DisplayPowerController::UpdateBrightness()
 void DisplayPowerController::Dump(
     /* [in] */ IPrintWriter* pw)
 {
-    // synchronized(mLock) {
+    // {    AutoLock syncLock(mLock);
     //     pw.println();
     //     pw.println("Display Power Controller Locked State:");
     //     pw.println("  mDisplayReadyLocked=" + mDisplayReadyLocked);
@@ -505,7 +507,7 @@ void DisplayPowerController::Dump(
 
 ECode DisplayPowerController::SendUpdatePowerState()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         return SendUpdatePowerStateLocked();
     }
     return NOERROR;
@@ -575,7 +577,7 @@ void DisplayPowerController::UpdatePowerState()
     Boolean mustInitialize = FALSE;
     Boolean autoBrightnessAdjustmentChanged = FALSE;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mPendingUpdatePowerStateLocked = FALSE;
         if (mPendingRequestLocked == NULL) {
             return; // wait until first actual power request
@@ -809,7 +811,7 @@ void DisplayPowerController::UpdatePowerState()
     // Notify the power manager when ready.
     if (ready && mustNotify) {
         // Send state change.
-        synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             if (!mPendingRequestChangedLocked) {
                 mDisplayReadyLocked = TRUE;
 

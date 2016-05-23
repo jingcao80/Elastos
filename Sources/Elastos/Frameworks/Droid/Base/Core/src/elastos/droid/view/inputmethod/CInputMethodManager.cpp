@@ -22,6 +22,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Os::Looper;
@@ -92,7 +94,7 @@ ECode CInputMethodManager::MyHandler::HandleMessage(
             // } catch (RuntimeException e) {
             //     ((PrintWriter)args.arg2).println("Exception: " + e);
             // }
-            // synchronized(args.arg4) {
+            // {    AutoLock syncLock(args.arg4);
             //     ((CountDownLatch)args.arg4).countDown();
             // }
             // args.recycle();

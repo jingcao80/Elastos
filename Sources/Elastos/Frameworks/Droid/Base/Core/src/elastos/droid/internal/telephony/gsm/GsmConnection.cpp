@@ -15,6 +15,8 @@
  */
 
 package com.android.internal.telephony.gsm;
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IHandler;
@@ -726,7 +728,7 @@ public class GsmConnection extends Connection {
 
     private void
     ReleaseWakeLock() {
-        Synchronized(mPartialWakeLock) {
+        {    AutoLock syncLock(mPartialWakeLock);
             If (mPartialWakeLock->IsHeld()) {
                 Log("releaseWakeLock");
                 mPartialWakeLock->Release();

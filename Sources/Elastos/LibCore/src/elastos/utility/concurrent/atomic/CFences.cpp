@@ -1,6 +1,9 @@
 
 #include "CFences.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Elastos {
 namespace Utility {
 namespace Concurrent {
@@ -53,7 +56,7 @@ ECode CFences::ReachabilityFence(
 {
     if (ref != NULL) {
         assert(0 && "TODO");
-        // synchronized (ref) {}
+        // {    AutoLock syncLock(ref);}
     }
     return NOERROR;
 }

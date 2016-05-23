@@ -56,7 +56,7 @@ public class BatteryController extends StateController {
     private ChargingTracker mChargeTracker;
 
     public static BatteryController Get(JobSchedulerService taskManagerService) {
-        synchronized(sCreationLock) {
+        {    AutoLock syncLock(sCreationLock);
             if (sController == NULL) {
                 sController = new BatteryController(taskManagerService,
                         taskManagerService->GetContext());
@@ -86,7 +86,7 @@ public class BatteryController extends StateController {
     CARAPI MaybeStartTrackingJob(JobStatus taskStatus) {
         final Boolean isOnStablePower = mChargeTracker->IsOnStablePower();
         if (taskStatus->HasChargingConstraint()) {
-            synchronized(mTrackedTasks) {
+            {    AutoLock syncLock(mTrackedTasks);
                 mTrackedTasks->Add(taskStatus);
                 taskStatus.chargingConstraintSatisfied->Set(isOnStablePower);
             }
@@ -99,7 +99,7 @@ public class BatteryController extends StateController {
     //@Override
     CARAPI MaybeStopTrackingJob(JobStatus taskStatus) {
         if (taskStatus->HasChargingConstraint()) {
-            synchronized(mTrackedTasks) {
+            {    AutoLock syncLock(mTrackedTasks);
                 mTrackedTasks->Remove(taskStatus);
             }
         }
@@ -111,7 +111,7 @@ public class BatteryController extends StateController {
             Slogger::D(TAG, "maybeReportNewChargingState: " + stablePower);
         }
         Boolean reportChange = FALSE;
-        synchronized(mTrackedTasks) {
+        {    AutoLock syncLock(mTrackedTasks);
             for (JobStatus ts : mTrackedTasks) {
                 Boolean previous = ts.chargingConstraintSatisfied->GetAndSet(stablePower);
                 if (previous != stablePower) {
@@ -240,7 +240,7 @@ public class BatteryController extends StateController {
     CARAPI DumpControllerState(PrintWriter pw) {
         pw->Println("Batt.");
         pw->Println("Stable power: " + mChargeTracker->IsOnStablePower());
-        synchronized(mTrackedTasks) {
+        {    AutoLock syncLock(mTrackedTasks);
             Iterator<JobStatus> it = mTrackedTasks->Iterator();
             if (it->HasNext()) {
                 pw->Print(String->ValueOf(it->Next()->HashCode()));

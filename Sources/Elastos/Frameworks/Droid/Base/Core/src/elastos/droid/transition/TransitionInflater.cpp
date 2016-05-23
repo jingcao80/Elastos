@@ -21,6 +21,8 @@
 #include "elastos/droid/utility/Xml.h"
 #include "elastos/droid/R.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Content::Res::IXmlResourceParser;
 using Elastos::Droid::Content::Res::IResources;
@@ -232,7 +234,7 @@ AutoPtr<ITransition> TransitionInflater::CreateTransitionFromXml(
 //     }
 
 //     try {
-//         synchronized(sConstructors) {
+//         {    AutoLock syncLock(sConstructors);
 //             Constructor constructor = sConstructors.get(className);
 //             if (constructor == null) {
 //                 Class c = mContext.getClassLoader().loadClass(className)

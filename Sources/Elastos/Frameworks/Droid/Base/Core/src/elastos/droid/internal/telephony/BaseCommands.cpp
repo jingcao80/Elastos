@@ -20,6 +20,8 @@
 package com.android.internal.telephony;
 
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IRegistrantList;
@@ -123,7 +125,7 @@ public abstract class BaseCommands implements CommandsInterface {
     CARAPI RegisterForRadioStateChanged(Handler h, Int32 what, Object obj) {
         Registrant r = new Registrant (h, what, obj);
 
-        Synchronized (mStateMonitor) {
+        {    AutoLock syncLock(mStateMonitor);
             mRadioStateChangedRegistrants->Add(r);
             r->NotifyRegistrant();
         }
@@ -131,7 +133,7 @@ public abstract class BaseCommands implements CommandsInterface {
 
     //@Override
     CARAPI UnregisterForRadioStateChanged(Handler h) {
-        Synchronized (mStateMonitor) {
+        {    AutoLock syncLock(mStateMonitor);
             mRadioStateChangedRegistrants->Remove(h);
         }
     }
@@ -149,7 +151,7 @@ public abstract class BaseCommands implements CommandsInterface {
     CARAPI RegisterForOn(Handler h, Int32 what, Object obj) {
         Registrant r = new Registrant (h, what, obj);
 
-        Synchronized (mStateMonitor) {
+        {    AutoLock syncLock(mStateMonitor);
             mOnRegistrants->Add(r);
 
             If (mState->IsOn()) {
@@ -159,7 +161,7 @@ public abstract class BaseCommands implements CommandsInterface {
     }
     //@Override
     CARAPI UnregisterForOn(Handler h) {
-        Synchronized (mStateMonitor) {
+        {    AutoLock syncLock(mStateMonitor);
             mOnRegistrants->Remove(h);
         }
     }
@@ -169,7 +171,7 @@ public abstract class BaseCommands implements CommandsInterface {
     CARAPI RegisterForAvailable(Handler h, Int32 what, Object obj) {
         Registrant r = new Registrant (h, what, obj);
 
-        Synchronized (mStateMonitor) {
+        {    AutoLock syncLock(mStateMonitor);
             mAvailRegistrants->Add(r);
 
             If (mState->IsAvailable()) {
@@ -180,7 +182,7 @@ public abstract class BaseCommands implements CommandsInterface {
 
     //@Override
     CARAPI UnregisterForAvailable(Handler h) {
-        Synchronized(mStateMonitor) {
+        {    AutoLock syncLock(mStateMonitor);
             mAvailRegistrants->Remove(h);
         }
     }
@@ -189,7 +191,7 @@ public abstract class BaseCommands implements CommandsInterface {
     CARAPI RegisterForNotAvailable(Handler h, Int32 what, Object obj) {
         Registrant r = new Registrant (h, what, obj);
 
-        Synchronized (mStateMonitor) {
+        {    AutoLock syncLock(mStateMonitor);
             mNotAvailRegistrants->Add(r);
 
             If (!mState->IsAvailable()) {
@@ -200,7 +202,7 @@ public abstract class BaseCommands implements CommandsInterface {
 
     //@Override
     CARAPI UnregisterForNotAvailable(Handler h) {
-        Synchronized (mStateMonitor) {
+        {    AutoLock syncLock(mStateMonitor);
             mNotAvailRegistrants->Remove(h);
         }
     }
@@ -209,7 +211,7 @@ public abstract class BaseCommands implements CommandsInterface {
     CARAPI RegisterForOffOrNotAvailable(Handler h, Int32 what, Object obj) {
         Registrant r = new Registrant (h, what, obj);
 
-        Synchronized (mStateMonitor) {
+        {    AutoLock syncLock(mStateMonitor);
             mOffOrNotAvailRegistrants->Add(r);
 
             If (mState == RadioState.RADIO_OFF || !mState->IsAvailable()) {
@@ -219,7 +221,7 @@ public abstract class BaseCommands implements CommandsInterface {
     }
     //@Override
     CARAPI UnregisterForOffOrNotAvailable(Handler h) {
-        Synchronized(mStateMonitor) {
+        {    AutoLock syncLock(mStateMonitor);
             mOffOrNotAvailRegistrants->Remove(h);
         }
     }
@@ -809,7 +811,7 @@ public abstract class BaseCommands implements CommandsInterface {
     protected void SetRadioState(RadioState newState) {
         RadioState oldState;
 
-        Synchronized (mStateMonitor) {
+        {    AutoLock syncLock(mStateMonitor);
             oldState = mState;
             mState = newState;
 

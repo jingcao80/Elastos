@@ -6,6 +6,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::View::EIID_ISurfaceHolderCallback;
@@ -161,7 +163,7 @@ ECode CTvView::MySessionCallback::OnSessionCreated(
     mHost->mSession = session;
     if (session != NULL) {
         Object& lock = mHost->sMainTvViewLock;
-        synchronized(lock) {
+        {    AutoLock syncLock(lock);
             Boolean b;
             mHost->HasWindowFocus(&b);
 
@@ -443,7 +445,7 @@ ECode CTvView::SetCallback(
 
 ECode CTvView::SetMain()
 {
-    synchronized(sMainTvViewLock) {
+    {    AutoLock syncLock(sMainTvViewLock);
         GetWeakReference((IWeakReference**)&sMainTvView);
         Boolean b;
         HasWindowFocus(&b);
@@ -523,7 +525,7 @@ ECode CTvView::Tune(
         // throw new IllegalArgumentException("inputId cannot be NULL or an empty string");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    synchronized(sMainTvViewLock) {
+    {    AutoLock syncLock(sMainTvViewLock);
         if (sMainTvView == NULL) {
             GetWeakReference((IWeakReference**)&sMainTvView);
         }
@@ -555,7 +557,7 @@ ECode CTvView::Tune(
 ECode CTvView::Reset()
 {
     if (DEBUG) Logger::D(TAG, "reset()");
-    synchronized(sMainTvViewLock) {
+    {    AutoLock syncLock(sMainTvViewLock);
         if (sMainTvView != NULL) {
             AutoPtr<ITvView> cs;
             sMainTvView->Resolve(EIID_ITvView, (IInterface**)&cs);
@@ -782,7 +784,7 @@ ECode CTvView::DispatchWindowFocusChanged(
     ViewGroup::DispatchWindowFocusChanged(hasFocus);
     // Other app may have shown its own main TvView.
     // Set main again to regain main session.
-    synchronized(sMainTvViewLock) {
+    {    AutoLock syncLock(sMainTvViewLock);
         if (sMainTvView.Get() != NULL) {
             AutoPtr<ITvView> cs;
             sMainTvView->Resolve(EIID_ITvView, (IInterface**)&cs);

@@ -196,9 +196,6 @@ protected:
         /* [in] */ Int32 r,
         /* [in] */ Int32 b);
 
-private:
-    static CARAPI_(AutoPtr<ITimeInterpolator>) InitAlphaInterpolator();
-
 protected:
     /*const*/ AutoPtr<VisibilityAnimListener> mVisAnimListener;
     /*const*/ AutoPtr<IContext> mPopupContext;

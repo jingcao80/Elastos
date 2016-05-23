@@ -22,6 +22,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IWallpaperInfo;
 using Elastos::Droid::App::CWallpaperManagerHelper;
@@ -775,7 +777,7 @@ assert(0);
 
 //     // Remove all queued items that match the same package
 //     if (newApps != NULL) {
-//         synchronized(newApps) {
+//         {    AutoLock syncLock(newApps);
 //             AutoPtr<IIterator> iter;
 //             newApps->GetIterator((IIterator**)&iter);
 //             Boolean res;

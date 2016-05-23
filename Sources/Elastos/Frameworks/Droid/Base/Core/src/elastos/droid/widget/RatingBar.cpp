@@ -6,6 +6,8 @@
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::Drawable::Shapes::CRectShape;
 using Elastos::Droid::Graphics::Drawable::Shapes::IRectShape;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
@@ -243,7 +245,7 @@ void RatingBar::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AbsSeekBar::OnMeasure(widthMeasureSpec, heightMeasureSpec);
 
         if(mSampleTile != NULL) {
@@ -296,7 +298,7 @@ void RatingBar::DispatchRatingChange(
 ECode RatingBar::SetMax(
     /* [in] */ Int32 max)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (max <= 0) {
             return NOERROR;
         }

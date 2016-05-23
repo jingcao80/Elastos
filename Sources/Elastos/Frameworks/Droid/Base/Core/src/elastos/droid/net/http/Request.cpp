@@ -25,6 +25,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Internal::Utility::IProtocol;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::Process;
@@ -131,7 +133,7 @@ ECode Request::constructor(
 ECode Request::SetLoadingPaused(
     /* [in] */ Boolean pause)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mLoadingPaused = pause;
 
         // Wake up the paused thread if we're unpausing the load.
@@ -351,7 +353,7 @@ ECode Request::ReadResponse(
         Int32 len = 0;
         Int32 lowWater = buf->GetLength() / 2;
         while (len != -1) {
-                synchronized(mClientResource) {
+                {    AutoLock syncLock(mClientResource);
                     while (mLoadingPaused) {
                         // Put this (network loading) thread to sleep if WebCore
                         // has asked us to. This can happen with plugins for
@@ -414,7 +416,7 @@ ECode Request::ReadResponse(
 
 ECode Request::Cancel()
 {
-    synchronized(mClientResource) {
+    {    AutoLock syncLock(mClientResource);
         if (HttpLog::LOGV) {
             HttpLog::V("Request.cancel(): %s", Ptr(this)->Func(GetUri).string());
         }
@@ -511,7 +513,7 @@ ECode Request::Reset()
 
 ECode Request::WaitUntilComplete()
 {
-    synchronized(mClientResource) {
+    {    AutoLock syncLock(mClientResource);
         if (HttpLog::LOGV) HttpLog::V(String("Request.waitUntilComplete()"));
         ISynchronize::Probe(mClientResource)->Wait();
         if (HttpLog::LOGV) HttpLog::V(String("Request.waitUntilComplete() done waiting"));
@@ -521,7 +523,7 @@ ECode Request::WaitUntilComplete()
 
 ECode Request::Complete()
 {
-    synchronized(mClientResource) {
+    {    AutoLock syncLock(mClientResource);
         return ISynchronize::Probe(mClientResource)->NotifyAll();
     }
     return NOERROR;

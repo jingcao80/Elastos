@@ -6,6 +6,8 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::IUUIDHelper;
 using Elastos::Utility::CUUIDHelper;
 using Elastos::Utility::Logging::Logger;
@@ -43,7 +45,7 @@ ECode CLoudnessEnhancer::BaseParameterListener::OnParameterChange(
     AutoPtr<ILoudnessEnhancerOnParameterChangeListener> l;
     {
         Object& lock = mHost->mParamListenerLock;
-        synchronized(lock);
+        AutoLock syncLock(lock);
         if (mHost->mParamListener != NULL) {
             l = mHost->mParamListener;
         }
@@ -124,7 +126,7 @@ ECode CLoudnessEnhancer::GetTargetGain(
 ECode CLoudnessEnhancer::SetParameterListener(
     /* [in] */ ILoudnessEnhancerOnParameterChangeListener * listener)
 {
-    synchronized(mParamListenerLock) {
+    {    AutoLock syncLock(mParamListenerLock);
         if (mParamListener == NULL) {
             mBaseParamListener = new BaseParameterListener(this);
             AudioEffect::SetParameterListener(mBaseParamListener);

@@ -31,6 +31,8 @@
 #include <utils/String16.h>
 #include <utils/SortedVector.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Camera2::Impl::CCameraMetadataNative;
 using Elastos::Droid::Hardware::Camera2::Params::CFace;
 using Elastos::Droid::Hardware::Camera2::Params::CLensShadingMap;
@@ -1985,7 +1987,7 @@ ECode CameraMetadataNative::NativeAllocateCopy(
 ECode CameraMetadataNative::NativeWriteToParcel(
     /* [in] */ IParcel* parcel)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ALOGV("%s", __FUNCTION__);
         android::CameraMetadata* metadata;
         FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
@@ -2015,7 +2017,7 @@ ECode CameraMetadataNative::NativeWriteToParcel(
 ECode CameraMetadataNative::NativeReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ALOGV("%s", __FUNCTION__);
         android::CameraMetadata* metadata;
         FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))
@@ -2045,7 +2047,7 @@ ECode CameraMetadataNative::NativeReadFromParcel(
 ECode CameraMetadataNative::NativeSwap(
     /* [in] */ ICameraMetadataNative* other)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ALOGV("%s", __FUNCTION__);
 
         android::CameraMetadata* metadata;
@@ -2067,7 +2069,7 @@ ECode CameraMetadataNative::NativeSwap(
 
 void CameraMetadataNative::NativeClose()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ALOGV("%s", __FUNCTION__);
 
         android::CameraMetadata* metadata = CameraMetadata_getPointerNoThrow(this);
@@ -2089,7 +2091,7 @@ ECode CameraMetadataNative::NativeIsEmpty(
     *result = FALSE;
 
     Boolean empty = FALSE;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ALOGV("%s", __FUNCTION__);
 
         android::CameraMetadata* metadata;
@@ -2119,7 +2121,7 @@ ECode CameraMetadataNative::NativeGetEntryCount(
     *count = 0;
 
     Int32 res = 0;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ALOGV("%s", __FUNCTION__);
 
         android::CameraMetadata* metadata;
@@ -2203,7 +2205,7 @@ ECode CameraMetadataNative::NativeReadValues(
     *values = NULL;
 
     AutoPtr<ArrayOf<Byte> > byteArray;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ALOGV("%s (tag = %d)", __FUNCTION__, tag);
 
         android::CameraMetadata* metadata;
@@ -2254,7 +2256,7 @@ ECode CameraMetadataNative::NativeWriteValues(
     /* [in] */ Int32 tag,
     /* [in] */ ArrayOf<Byte>* src)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ALOGV("%s (tag = %d)", __FUNCTION__, tag);
 
         android::CameraMetadata* metadata;
@@ -2344,7 +2346,7 @@ static void* CameraMetadata_writeMetadataThread(
 
 ECode CameraMetadataNative::NativeDump()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         ALOGV("%s", __FUNCTION__);
         android::CameraMetadata* metadata;
         FAIL_RETURN(CameraMetadata_getPointerThrow(this, (android::CameraMetadata**)&metadata))

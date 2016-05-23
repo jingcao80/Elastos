@@ -25,6 +25,8 @@
 #include <Elastos.Droid.Os.h>
 #include <unistd.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::CComponentName;
@@ -2772,7 +2774,7 @@ AutoPtr<IArrayList> CMountService::GetShareableVolumes()
     // Sharable volumes have android:allowMassStorage="true" in storage_list.xml
     AutoPtr<IArrayList> volumesToMount;
     CArrayList::New((IArrayList**)&volumesToMount);
-    synchronized (mVolumesLock) {
+    {    AutoLock syncLock(mVolumesLock);
         List< AutoPtr<IStorageVolume> >::Iterator it = mVolumes.Begin();
         for (; it != mVolumes.End(); ++it) {
             AutoPtr<IStorageVolume> volume = *it;

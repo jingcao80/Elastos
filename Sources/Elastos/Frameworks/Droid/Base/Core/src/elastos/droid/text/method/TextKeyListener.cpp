@@ -14,6 +14,8 @@
 #include "elastos/droid/provider/Settings.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::EIID_IContentResolver;
 using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Database::IIContentObserver;
@@ -459,7 +461,7 @@ ECode TextKeyListener::GetPrefs(
     /* [out] */ Int32* ret)
 {
     VALIDATE_NOT_NULL(ret)
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (!mPrefsInited || mResolver == NULL) {
             InitPrefs(context);
         }

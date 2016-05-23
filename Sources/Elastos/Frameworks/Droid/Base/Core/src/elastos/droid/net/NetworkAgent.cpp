@@ -13,6 +13,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Utility::CAsyncChannel;
 using Elastos::Droid::Internal::Utility::IAsyncChannel;
@@ -123,7 +125,7 @@ ECode NetworkAgent::HandleMessage(
                 ac->Connected(NULL, this, replyTo);
                 ac->ReplyToMessage(msg, IAsyncChannel::CMD_CHANNEL_FULLY_CONNECTED,
                         IAsyncChannel::STATUS_SUCCESSFUL);
-                synchronized(mPreConnectedQueue) {
+                {    AutoLock syncLock(mPreConnectedQueue);
                     mAsyncChannel = ac;
                     Int32 size;
                     mPreConnectedQueue->GetSize(&size);
@@ -146,7 +148,7 @@ ECode NetworkAgent::HandleMessage(
             if (DBG) Log("NetworkAgent channel lost");
             // let the client know CS is done with us.
             Unwanted();
-            synchronized(mPreConnectedQueue) {
+            {    AutoLock syncLock(mPreConnectedQueue);
                 mAsyncChannel = NULL;
             }
             break;
@@ -171,7 +173,7 @@ ECode NetworkAgent::QueueOrSendMessage(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    synchronized(mPreConnectedQueue) {
+    {    AutoLock syncLock(mPreConnectedQueue);
         if (mAsyncChannel != NULL) {
             mAsyncChannel->SendMessage(what, obj);
         } else {

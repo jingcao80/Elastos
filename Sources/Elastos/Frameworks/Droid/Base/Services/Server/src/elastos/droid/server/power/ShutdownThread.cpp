@@ -15,6 +15,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IKeyguardManager;
 using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::App::CAlertDialogBuilder;
@@ -494,7 +496,7 @@ void ShutdownThread::ShutdownInner(
 {
     // ensure that only one thread is trying to power down.
     // any additional calls are just returned
-    synchronized(sIsStartedGuard) {
+    {    AutoLock syncLock(sIsStartedGuard);
         if (sIsStarted) {
             Logger::D(TAG, "Request to shutdown already running, returning.");
             return;
@@ -659,7 +661,7 @@ void ShutdownThread::LockDevice()
 void ShutdownThread::BeginShutdownSequence(
     /* [in] */ IContext* context)
 {
-    synchronized(sIsStartedGuard) {
+    {    AutoLock syncLock(sIsStartedGuard);
         if (sIsStarted) {
             Logger::D(TAG, "Shutdown sequence already running, returning.");
             return;
@@ -760,7 +762,7 @@ void ShutdownThread::BeginShutdownSequence(
 
 void ShutdownThread::ActionDone()
 {
-    synchronized (mActionDoneSync) {
+    {    AutoLock syncLock(mActionDoneSync);
         mActionDone = TRUE;
         mActionDoneSync.NotifyAll();
     }
@@ -806,7 +808,7 @@ ECode ShutdownThread::Run()
             mHandler, 0, String(NULL), NULL);
 
     Int64 endTime = SystemClock::GetElapsedRealtime() + MAX_BROADCAST_TIME;
-    synchronized(mActionDoneSync) {
+    {    AutoLock syncLock(mActionDoneSync);
         while (!mActionDone) {
             Int64 delay = endTime - SystemClock::GetElapsedRealtime();
             if (delay <= 0) {
@@ -867,7 +869,7 @@ ECode ShutdownThread::Run()
     Logger::I(TAG, "wait for shutdown music");
 
     Int64 endTimeForMusic = SystemClock::GetElapsedRealtime() + MAX_BROADCAST_TIME;
-    synchronized (mActionDoneSync) {
+    {    AutoLock syncLock(mActionDoneSync);
         while (mIsShutdownMusicPlaying) {
             Int64 delay = endTimeForMusic - SystemClock::GetElapsedRealtime();
             if (delay <= 0) {
@@ -896,7 +898,7 @@ ECode ShutdownThread::Run()
     // Set initial variables and time out time.
     mActionDone = FALSE;
     Int64 endShutTime = SystemClock::GetElapsedRealtime() + MAX_SHUTDOWN_WAIT_TIME;
-    synchronized(mActionDoneSync) {
+    {    AutoLock syncLock(mActionDoneSync);
         // try {
         obj = NULL;
         serviceManager->CheckService(String("mount"), (IInterface**)&obj);

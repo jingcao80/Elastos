@@ -8,6 +8,8 @@
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CString;
@@ -201,7 +203,7 @@ ArrayAdapter::~ArrayAdapter()
 ECode ArrayAdapter::Add(
     /* [in] */ IInterface* object)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mOriginalValues != NULL) {
             mOriginalValues->Add(object);
         } else {
@@ -217,7 +219,7 @@ ECode ArrayAdapter::Add(
 ECode ArrayAdapter::AddAll(
     /* [in] */ ICollection* collection)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mOriginalValues != NULL) {
             mOriginalValues->AddAll(collection);
         } else {
@@ -232,7 +234,7 @@ ECode ArrayAdapter::AddAll(
 ECode ArrayAdapter::AddAll(
     /* [in] */ ArrayOf<IInterface* >* items)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<ICollections> cs;
         CCollections::AcquireSingleton((ICollections**)&cs);
         if (mOriginalValues != NULL) {
@@ -251,7 +253,7 @@ ECode ArrayAdapter::Insert(
     /* [in] */ IInterface* object,
     /* [in] */ Int32 index)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mOriginalValues != NULL) {
             mOriginalValues->Add(index, object);
         } else {
@@ -266,7 +268,7 @@ ECode ArrayAdapter::Insert(
 ECode ArrayAdapter::Remove(
     /* [in] */ IInterface* object)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mOriginalValues != NULL) {
             mOriginalValues->Remove(object);
         } else {
@@ -280,7 +282,7 @@ ECode ArrayAdapter::Remove(
 
 ECode ArrayAdapter::Clear()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mOriginalValues != NULL) {
             mOriginalValues->Clear();
         } else {
@@ -295,7 +297,7 @@ ECode ArrayAdapter::Clear()
 ECode ArrayAdapter::Sort(
     /* [in] */ IComparator* comparator)
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<ICollections> cs;
         CCollections::AcquireSingleton((ICollections**)&cs);
         if (mOriginalValues != NULL) {

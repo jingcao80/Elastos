@@ -16,6 +16,8 @@
 #include <utils/NativeHandle.h>
 #include <hardware/tv_input.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::CObject;
 using Elastos::Droid::Media::Tv::CTvInputHardwareInfoBuilder;
@@ -627,7 +629,7 @@ ECode TvInputHal::constructor(
 
 ECode TvInputHal::Init()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         mPtr = NativeOpen(this);
     }
     return NOERROR;
@@ -641,7 +643,7 @@ ECode TvInputHal::AddStream(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mPtr == 0) {
             *result = ERROR_NO_INIT;
             return NOERROR;
@@ -670,7 +672,7 @@ ECode TvInputHal::RemoveStream(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mPtr == 0) {
             *result = ERROR_NO_INIT;
             return NOERROR;
@@ -694,7 +696,7 @@ ECode TvInputHal::RemoveStream(
 
 ECode TvInputHal::Close()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (mPtr != 0l) {
             NativeClose(mPtr);
         }
@@ -770,7 +772,7 @@ ECode TvInputHal::HandleMessage(
         case EVENT_DEVICE_AVAILABLE: {
             AutoPtr<IArrayOf> configs;
             AutoPtr<ITvInputHardwareInfo> info = ITvInputHardwareInfo::Probe(obj);
-            synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 RetrieveStreamConfigsLocked(Ptr(info)->Func(info->GetDeviceId));
                 if (DEBUG) {
                     Slogger::D(TAG, "EVENT_DEVICE_AVAILABLE: info = %s", TO_CSTR(info));
@@ -801,7 +803,7 @@ ECode TvInputHal::HandleMessage(
         case EVENT_STREAM_CONFIGURATION_CHANGED: {
             AutoPtr<IArrayOf> configs;
             Int32 deviceId = arg1;
-            synchronized(mLock) {
+            {    AutoLock syncLock(mLock);
                 if (DEBUG) {
                     Slogger::D(TAG, "EVENT_STREAM_CONFIGURATION_CHANGED: deviceId = %d", deviceId);
                 }

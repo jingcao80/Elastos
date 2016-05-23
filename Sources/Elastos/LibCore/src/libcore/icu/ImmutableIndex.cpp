@@ -5,6 +5,9 @@
 #include "AutoLock.h"
 #include "ElStringByteSink.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Libcore {
 namespace ICU {
 
@@ -22,8 +25,7 @@ ImmutableIndex::ImmutableIndex(Int64 peer)
 
 ImmutableIndex::~ImmutableIndex()
 {
-    synchronized(this)
-    {
+    {    AutoLock syncLock(this);
         AlphabeticIndex::Destroy(mPeer);
         mPeer = 0;
     }

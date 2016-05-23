@@ -10,6 +10,8 @@
 #include "CLibcore.h"
 #include "IoUtils.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Libcore::IO::IoBridge;
 using Libcore::IO::CLibcore;
 using Libcore::IO::IoUtils;
@@ -100,7 +102,7 @@ ECode SocketChannelImpl::SocketAdapter::Bind(
 
 ECode SocketChannelImpl::SocketAdapter::Close()
 {
-    synchronized (mChannel) {
+    {    AutoLock syncLock(mChannel);
         Socket::Close();
         Boolean isflag = FALSE;
         if (mChannel->IsOpen(&isflag), isflag) {
@@ -424,7 +426,7 @@ ECode SocketChannelImpl::FinishConnect(
     VALIDATE_NOT_NULL(ret)
     *ret = FALSE;
 
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         if (!IsOpen()) {
             // throw new ClosedChannelException();
             return E_CLOSED_CHANNEL_EXCEPTION;
@@ -460,7 +462,7 @@ ECode SocketChannelImpl::FinishConnect(
         End(finished);
     // }
 
-    synchronized (this) {
+    {    AutoLock syncLock(this);
         mStatus = (finished ? SOCKET_STATUS_CONNECTED : mStatus);
         if (finished && mSocket != NULL) {
             AutoPtr<IInetAddress> addr;
@@ -700,7 +702,7 @@ ECode SocketChannelImpl::ReadImpl(
     VALIDATE_NOT_NULL(ret)
     *ret = 0;
 
-    synchronized (mReadLock) {
+    {    AutoLock syncLock(mReadLock);
         Int32 readCount = 0;
         // try {
             Boolean isflag = FALSE;
@@ -730,7 +732,7 @@ ECode SocketChannelImpl::WriteImpl(
     VALIDATE_NOT_NULL(ret)
     *ret = 0;
 
-    synchronized (mWriteLock) {
+    {    AutoLock syncLock(mWriteLock);
         Boolean isflag = FALSE;
         if (IBuffer::Probe(src)->HasRemaining(&isflag), !isflag) {
             *ret = 0;

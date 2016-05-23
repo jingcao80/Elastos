@@ -10,6 +10,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Core::StringBuilder;
@@ -367,7 +369,7 @@ ECode Location::DistanceTo(
 {
     VALIDATE_NOT_NULL(distance);
     // See if we already have the result
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<Location> destLocation = (Location*)dest;
         if (mLatitude != mLat1 || mLongitude != mLon1 ||
             destLocation->mLatitude != mLat2 || destLocation->mLongitude != mLon2) {
@@ -391,7 +393,7 @@ ECode Location::BearingTo(
 {
     VALIDATE_NOT_NULL(initialBearing);
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // See if we already have the result
         AutoPtr<Location> destLocation = (Location*)dest;
         if (mLatitude != mLat1 || mLongitude != mLon1 ||

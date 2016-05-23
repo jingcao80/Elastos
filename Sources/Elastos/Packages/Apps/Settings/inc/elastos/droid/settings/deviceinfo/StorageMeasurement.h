@@ -71,7 +71,7 @@ public class StorageMeasurement {
      * {@link StorageVolume}, or internal storage if {@code NULL}.
      */
     public static StorageMeasurement GetInstance(Context context, StorageVolume volume) {
-        synchronized(sInstances) {
+        {    AutoLock syncLock(sInstances);
             StorageMeasurement value = sInstances->Get(volume);
             if (value == NULL) {
                 value = new StorageMeasurement(context->GetApplicationContext(), volume);
@@ -220,7 +220,7 @@ public class StorageMeasurement {
 
         //@Override
         CARAPI OnGetStatsCompleted(PackageStats stats, Boolean succeeded) {
-            synchronized(mDetails) {
+            {    AutoLock syncLock(mDetails);
                 if (succeeded) {
                     AddStatsLocked(stats);
                 }
@@ -318,7 +318,7 @@ public class StorageMeasurement {
                         return;
                     }
 
-                    synchronized(mLock) {
+                    {    AutoLock syncLock(mLock);
                         if (mBound) {
                             RemoveMessages(MSG_DISCONNECT);
                             SendMessage(ObtainMessage(MSG_CONNECTED, mDefaultContainer));
@@ -337,7 +337,7 @@ public class StorageMeasurement {
                     break;
                 }
                 case MSG_DISCONNECT: {
-                    synchronized(mLock) {
+                    {    AutoLock syncLock(mLock);
                         if (mBound) {
                             final Context context = (mContext != NULL) ? mContext->Get() : NULL;
                             if (context == NULL) {

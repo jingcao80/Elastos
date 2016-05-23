@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.gsm;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
 
 using Elastos::Droid::Os::IMessage;
@@ -56,7 +58,7 @@ public class SimPhoneBookInterfaceManager extends IccPhoneBookInterfaceManager {
     //@Override
     public Int32[] GetAdnRecordsSize(Int32 efid) {
         If (DBG) Logd("getAdnRecordsSize: efid=" + efid);
-        Synchronized(mLock) {
+        {    AutoLock syncLock(mLock);
             CheckThread();
             mRecordSize = new Int32[3];
 

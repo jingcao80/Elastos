@@ -5,6 +5,8 @@
 #include "HashTable.h"
 #include "AutoLock.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::IFloat;
 using Elastos::Core::CFloat;
 using Elastos::Core::StringBuilder;
@@ -397,7 +399,7 @@ ECode HashTable::_KeySet::Remove(
 {
     VALIDATE_NOT_NULL(value)
 
-    synchronized(mHost);
+    AutoLock syncLock(mHost);
     Int32 oldSize = mHost->mSize;
     AutoPtr<IInterface> res;
     mHost->Remove(o, (IInterface**)&res);
@@ -407,7 +409,7 @@ ECode HashTable::_KeySet::Remove(
 
 ECode HashTable::_KeySet::Clear()
 {
-    synchronized(mHost);
+    AutoLock syncLock(mHost);
     return mHost->Clear();
 }
 
@@ -435,7 +437,7 @@ ECode HashTable::_KeySet::RemoveAll(
     /* [in] */ ICollection* collection,
     /* [out] */ Boolean* value)
 {
-    synchronized(mHost);
+    AutoLock syncLock(mHost);
     return AbstractSet::RemoveAll(collection, value);
 }
 
@@ -443,7 +445,7 @@ ECode HashTable::_KeySet::RetainAll(
     /* [in] */ ICollection* collection,
     /* [out] */ Boolean* value)
 {
-    synchronized(mHost);
+    AutoLock syncLock(mHost);
     return AbstractSet::RetainAll(collection, value);
 }
 
@@ -451,7 +453,7 @@ ECode HashTable::_KeySet::ContainsAll(
     /* [in] */ ICollection* collection,
     /* [out] */ Boolean* value)
 {
-    synchronized(mHost);
+    AutoLock syncLock(mHost);
     return AbstractSet::ContainsAll(collection, value);
 }
 
@@ -459,28 +461,28 @@ ECode HashTable::_KeySet::Equals(
     /* [in] */ IInterface* object,
     /* [out] */ Boolean* value)
 {
-    synchronized(mHost);
+    AutoLock syncLock(mHost);
     return AbstractSet::Equals(object, value);
 }
 
 ECode HashTable::_KeySet::GetHashCode(
     /* [out] */ Int32* value)
 {
-    synchronized(mHost);
+    AutoLock syncLock(mHost);
     return AbstractSet::GetHashCode(value);
 }
 
 ECode HashTable::_KeySet::ToString(
     /* [out] */ String* str)
 {
-    synchronized(mHost);
+    AutoLock syncLock(mHost);
     return AbstractSet::ToString(str);
 }
 
 ECode HashTable::_KeySet::ToArray(
     /* [out, callee] */ ArrayOf<IInterface*>** array)
 {
-    synchronized(mHost);
+    AutoLock syncLock(mHost);
     return AbstractSet::ToArray(array);
 }
 
@@ -488,7 +490,7 @@ ECode HashTable::_KeySet::ToArray(
     /* [in] */ ArrayOf<IInterface*>* contents,
     /* [out, callee] */ ArrayOf<IInterface*>** outArray)
 {
-    synchronized(mHost);
+    AutoLock syncLock(mHost);
     return AbstractSet::ToArray(contents, outArray);
 }
 
@@ -594,21 +596,21 @@ ECode HashTable::_Values::ContainsAll(
     /* [in] */ ICollection* collection,
     /* [out] */ Boolean* value)
 {
-    synchronized(mHost);
+    AutoLock syncLock(mHost);
     return AbstractCollection::ContainsAll(collection, value);
 }
 
 ECode HashTable::_Values::ToString(
     /* [out] */ String* str)
 {
-    synchronized(mHost);
+    AutoLock syncLock(mHost);
     return AbstractCollection::ToString(str);
 }
 
 ECode HashTable::_Values::ToArray(
     /* [out, callee] */ ArrayOf<IInterface*>** array)
 {
-    synchronized(mHost);
+    AutoLock syncLock(mHost);
     return AbstractCollection::ToArray(array);
 }
 
@@ -616,7 +618,7 @@ ECode HashTable::_Values::ToArray(
     /* [in] */ ArrayOf<IInterface*>* contents,
     /* [out, callee] */ ArrayOf<IInterface*>** outArray)
 {
-    synchronized(mHost);
+    AutoLock syncLock(mHost);
     return AbstractCollection::ToArray(contents, outArray);
 }
 
@@ -898,7 +900,7 @@ ECode HashTable::Clone(
     /* [out] */ IInterface** object)
 {
     assert(0);
-    /*synchronized(this);
+    /*AutoLock syncLock(this);
 
     AutoPtr<CHashTable> result;
     // try {
@@ -926,7 +928,7 @@ ECode HashTable::IsEmpty(
 {
     VALIDATE_NOT_NULL(value)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
        *value = mSize == 0;
     }
     return NOERROR;
@@ -937,7 +939,7 @@ ECode HashTable::GetSize(
 {
     VALIDATE_NOT_NULL(value)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *value = mSize;
     }
     return NOERROR;
@@ -949,7 +951,7 @@ ECode HashTable::Get(
 {
     VALIDATE_NOT_NULL(outface)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // Doug Lea's supplemental secondaryHash function (inlined)
         Int32 hash = Object::GetHashCode(key);
         hash ^= ((UInt32)hash >> 20) ^ ((UInt32)hash >> 12);
@@ -977,7 +979,7 @@ ECode HashTable::ContainsKey(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // Doug Lea's supplemental secondaryHash function (inlined)
         Int32 hash = Object::GetHashCode(key);
         hash ^= ((UInt32)hash >> 20) ^ ((UInt32)hash >> 12);
@@ -1005,7 +1007,7 @@ ECode HashTable::ContainsValue(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (value == NULL) {
             // throw new NullPointerException("value == null");
             return E_NULL_POINTER_EXCEPTION;
@@ -1038,7 +1040,7 @@ ECode HashTable::Put(
     /* [in] */ IInterface* value,
     /* [out] */ IInterface** outface)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (key == NULL || value == NULL) {
             if (outface) {
                 *outface = NULL;
@@ -1120,7 +1122,7 @@ ECode HashTable::ConstructorPut(
 ECode HashTable::PutAll(
     /* [in] */ IMap* map)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 sizelen = 0;
         map->GetSize(&sizelen);
         EnsureCapacity(sizelen);
@@ -1243,7 +1245,7 @@ ECode HashTable::Remove(
 {
     VALIDATE_NOT_NULL(outface)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 keyhash = Object::GetHashCode(key);
         Int32 hash = SecondaryHash(keyhash);
         AutoPtr<ArrayOf<HashtableEntry*> > tab = mTable;
@@ -1278,7 +1280,7 @@ ECode HashTable::Remove(
 
 ECode HashTable::Clear()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mSize != 0) {
             // Arrays.fill(table, null);
             for (Int32 i = 0; i < mTable->GetLength(); ++i) {
@@ -1296,7 +1298,7 @@ ECode HashTable::GetKeySet(
 {
     VALIDATE_NOT_NULL(keySet)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ISet> ks = mKeySet;
         *keySet = ks != NULL ? ks : (mKeySet = (ISet*) new _KeySet(this));
         REFCOUNT_ADD(*keySet);
@@ -1309,7 +1311,7 @@ ECode HashTable::GetValues(
 {
     VALIDATE_NOT_NULL(value)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ICollection> vs = mValues;
         *value = vs != NULL ? vs : (mValues = (ICollection*) new _Values(this));
         REFCOUNT_ADD(*value);
@@ -1322,7 +1324,7 @@ ECode HashTable::GetEntrySet(
 {
     VALIDATE_NOT_NULL(entries)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ISet> es = mEntrySet;
         *entries = (es != NULL) ? es : (mEntrySet = (ISet*) new _EntrySet(this));
         REFCOUNT_ADD(*entries);
@@ -1335,7 +1337,7 @@ ECode HashTable::GetKeys(
 {
     VALIDATE_NOT_NULL(enm)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IEnumeration> res = (IEnumeration*) new KeyEnumeration(this);
         *enm = res;
         REFCOUNT_ADD(*enm);
@@ -1348,7 +1350,7 @@ ECode HashTable::GetElements(
 {
     VALIDATE_NOT_NULL(enm)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IEnumeration> res = (IEnumeration*) new ValueEnumeration(this);
         *enm = res;
         REFCOUNT_ADD(*enm);
@@ -1360,7 +1362,7 @@ Boolean HashTable::ContainsMapping(
     /* [in] */ IInterface* key,
     /* [in] */ IInterface* value)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 keycode = Object::GetHashCode(key);
         Int32 hash = SecondaryHash(keycode);
         AutoPtr<ArrayOf<HashtableEntry*> > tab = mTable;
@@ -1380,7 +1382,7 @@ Boolean HashTable::RemoveMapping(
     /* [in] */ IInterface* key,
     /* [in] */ IInterface* value)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 keycode = Object::GetHashCode(key);
         Int32 hash = SecondaryHash(keycode);
         AutoPtr<ArrayOf<HashtableEntry*> > tab = mTable;
@@ -1412,7 +1414,7 @@ ECode HashTable::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IMap> res = (IMap*) object->Probe(EIID_IMap);
         AutoPtr<ISet> outarr;
         AutoPtr<ISet> outarr2;
@@ -1428,7 +1430,7 @@ ECode HashTable::GetHashCode(
 {
     VALIDATE_NOT_NULL(hashCode)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 result = 0;
         AutoPtr<ArrayOf<IInterface*> > outarr;
         AutoPtr<ISet> outset;
@@ -1461,7 +1463,7 @@ ECode HashTable::ToString(
     StringBuilder result;
     result.AppendChar('{');
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ISet> outarr;
         GetEntrySet((ISet**)&outarr);
         AutoPtr<IIterator> i;
@@ -1524,7 +1526,7 @@ ECode HashTable::WriteObject(
     /* [in] */ IObjectOutputStream* stream)
 {
     // Emulate loadFactor field for other implementations to read
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IObjectOutputStreamPutField> fields;
         stream->PutFields((IObjectOutputStreamPutField**)&fields);
         fields->Put(String("threshold"),  (Int32) (DEFAULT_LOAD_FACTOR * mTable->GetLength()));

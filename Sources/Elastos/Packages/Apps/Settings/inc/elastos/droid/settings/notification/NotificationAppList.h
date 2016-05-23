@@ -415,7 +415,7 @@ public class NotificationAppList extends PinnedHeaderListFragment
     private final Runnable mCollectAppsRunnable = new Runnable() {
         //@Override
         CARAPI Run() {
-            synchronized(mRows) {
+            {    AutoLock syncLock(mRows);
                 final Int64 start = SystemClock->UptimeMillis();
                 if (DEBUG) Logger::D(TAG, "Collecting apps...");
                 mRows->Clear();
@@ -479,7 +479,7 @@ public class NotificationAppList extends PinnedHeaderListFragment
     private void RefreshDisplayedItems() {
         if (DEBUG) Logger::D(TAG, "Refreshing apps...");
         mAdapter->Clear();
-        synchronized(mSortedRows) {
+        {    AutoLock syncLock(mSortedRows);
             String section = NULL;
             final Int32 N = mSortedRows->Size();
             Boolean first = TRUE;

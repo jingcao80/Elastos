@@ -12,6 +12,8 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::App::IActivityManagerRecentTaskInfo;
@@ -81,7 +83,7 @@ ECode RecentTasksLoader::BgLoadThread::Run()
     AutoPtr<ITaskDescription> first;
     mHost->LoadFirstTask((ITaskDescription**)&first);
 
-    synchronized(mHost->mFirstTaskLock) {
+    {    AutoLock syncLock(mHost->mFirstTaskLock);
         if (mHost->mCancelPreloadingFirstTask) {
             mHost->ClearFirstTask();
         }
@@ -611,7 +613,7 @@ ECode RecentTasksLoader::LoadThumbnailAndIcon(
     if (DEBUG) {
         Logger::V(TAG, "Loaded bitmap for task %s: %s", TO_CSTR(td), TO_CSTR(thumbnail));
     }
-    synchronized(td) {
+    {    AutoLock syncLock(td);
         if (thumbnail != NULL) {
             // td->SetThumbnail(thumbnail);
             AutoPtr<IResources> res;
@@ -771,7 +773,7 @@ void RecentTasksLoader::CancelLoadingThumbnailsAndIcons()
 
 void RecentTasksLoader::ClearFirstTask()
 {
-    synchronized(mFirstTaskLock) {
+    {    AutoLock syncLock(mFirstTaskLock);
         mFirstTask = NULL;
         mFirstTaskLoaded = FALSE;
     }
@@ -780,7 +782,7 @@ void RecentTasksLoader::ClearFirstTask()
 ECode RecentTasksLoader::PreloadFirstTask()
 {
     AutoPtr<BgLoadThread> bgLoad = new BgLoadThread(this);
-    synchronized(mFirstTaskLock) {
+    {    AutoLock syncLock(mFirstTaskLock);
         if (!mPreloadingFirstTask) {
             ClearFirstTask();
             mPreloadingFirstTask = TRUE;
@@ -792,7 +794,7 @@ ECode RecentTasksLoader::PreloadFirstTask()
 
 ECode RecentTasksLoader::CancelPreloadingFirstTask()
 {
-    synchronized(mFirstTaskLock) {
+    {    AutoLock syncLock(mFirstTaskLock);
         if (mPreloadingFirstTask) {
             mCancelPreloadingFirstTask = TRUE;
         }
@@ -808,7 +810,7 @@ ECode RecentTasksLoader::GetFirstTask(
 {
     VALIDATE_NOT_NULL(des);
     while (TRUE) {
-        synchronized(mFirstTaskLock) {
+        {    AutoLock syncLock(mFirstTaskLock);
             if (mFirstTaskLoaded) {
                 *des = mFirstTask;
                 REFCOUNT_ADD(*des);

@@ -30,6 +30,8 @@
 
 package com.android.internal.telephony;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
@@ -766,7 +768,7 @@ public class ModemStackController extends Handler {
         If (mIsStackReady) {
             r->NotifyRegistrant();
         }
-        Synchronized (mStackReadyRegistrants) {
+        {    AutoLock syncLock(mStackReadyRegistrants);
             mStackReadyRegistrants->Add(r);
         }
     }
@@ -787,7 +789,7 @@ public class ModemStackController extends Handler {
         If (mModemRatCapabilitiesAvailable) {
             r->NotifyRegistrant();
         }
-        Synchronized (mModemRatCapsAvailableRegistrants) {
+        {    AutoLock syncLock(mModemRatCapsAvailableRegistrants);
             mModemRatCapsAvailableRegistrants->Add(r);
         }
     }
@@ -795,7 +797,7 @@ public class ModemStackController extends Handler {
     CARAPI RegisterForModemDataCapsUpdate(Handler h, Int32 what, Object obj) {
         Registrant r = new Registrant (h, what, obj);
 
-        Synchronized (mModemDataCapsAvailableRegistrants) {
+        {    AutoLock syncLock(mModemDataCapsAvailableRegistrants);
             mModemDataCapsAvailableRegistrants->Add(r);
         }
     }

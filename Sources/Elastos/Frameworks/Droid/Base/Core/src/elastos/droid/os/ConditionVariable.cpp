@@ -1,6 +1,8 @@
 #include "elastos/droid/os/ConditionVariable.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 
@@ -21,7 +23,7 @@ ConditionVariable::ConditionVariable(
 
 ECode ConditionVariable::Open()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean old = mCondition;
         mCondition = TRUE;
         if (!old) {
@@ -33,7 +35,7 @@ ECode ConditionVariable::Open()
 
 ECode ConditionVariable::Close()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mCondition = FALSE;
     }
     return NOERROR;
@@ -41,7 +43,7 @@ ECode ConditionVariable::Close()
 
 ECode ConditionVariable::Block()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         while (!mCondition) {
             // try {
                 this->Wait();
@@ -64,7 +66,7 @@ ECode ConditionVariable::Block(
     // call the other block() method in that case.  It simplifies
     // this code for the common case.
     if (timeout != 0) {
-        synchronized(this) {
+        {    AutoLock syncLock(this);
             AutoPtr<ISystem> system;
             CSystem::AcquireSingleton((ISystem**)&system);
             Int64 now;

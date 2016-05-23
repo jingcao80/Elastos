@@ -8,6 +8,8 @@
 #include "elastos/utility/Arrays.h"
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::AutoLock;
 using Elastosx::Crypto::ICipherHelper;
 using Elastosx::Crypto::CCipherHelper;
@@ -197,8 +199,7 @@ AutoPtr<CipherFactory::CipherData> CipherFactory::GetCipherData(
         // }
 
         // Only the first thread is allowed to save the data.
-        //synchronized(mDataLock)
-        {
+        //{    AutoLock syncLock(mDataLock);
             AutoLock lock(mDataLock);
             if (mData == NULL) {
                 mData = data;
@@ -229,8 +230,7 @@ void CipherFactory::TriggerKeyGeneration()
 {
     if (mData != NULL) return;
 
-    //synchronized(mDataLock)
-    {
+    //{    AutoLock syncLock(mDataLock);
         AutoLock lock(mDataLock);
         if (mDataGenerator == NULL) {
             mDataGenerator = new FutureTask(CreateGeneratorCallable());

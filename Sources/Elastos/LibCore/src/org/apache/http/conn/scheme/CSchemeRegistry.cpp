@@ -8,6 +8,8 @@
 #include "elastos/utility/CArrayList.h"
 #include "elastos/utility/logging/Logger.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::Core::StringBuilder;
@@ -33,7 +35,7 @@ ECode CSchemeRegistry::GetScheme(
 {
     VALIDATE_NOT_NULL(scheme)
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *scheme = NULL;
 
         AutoPtr<IScheme> found;
@@ -53,7 +55,7 @@ ECode CSchemeRegistry::GetScheme(
     /* [out] */ IScheme** scheme)
 {
     VALIDATE_NOT_NULL(scheme)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *scheme = NULL;
         if (host == NULL) {
             Logger::E("CSchemeRegistry", "Host must not be null.");
@@ -71,7 +73,7 @@ ECode CSchemeRegistry::Get(
     /* [out] */ IScheme** scheme)
 {
     VALIDATE_NOT_NULL(scheme)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *scheme = NULL;
         if (name.IsNull()) {
             Logger::E("CSchemeRegistry", "Name must not be null.");
@@ -95,7 +97,7 @@ ECode CSchemeRegistry::Register(
     /* [out] */ IScheme** scheme)
 {
     VALIDATE_NOT_NULL(scheme)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *scheme = NULL;
         if (sch == NULL) {
             Logger::E("CSchemeRegistry", "Scheme must not be null.");
@@ -119,7 +121,7 @@ ECode CSchemeRegistry::Unregister(
     /* [out] */ IScheme** scheme)
 {
     VALIDATE_NOT_NULL(scheme)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *scheme = NULL;
         if (name.IsNull()) {
             Logger::E("CSchemeRegistry", "Name must not be null.");
@@ -142,7 +144,7 @@ ECode CSchemeRegistry::GetSchemeNames(
     /* [out] */ IList** names)
 {
     VALIDATE_NOT_NULL(names)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ISet> keyset;
         mRegisteredSchemes->GetKeySet((ISet**)&keyset);
         AutoPtr<ICollection> col = ICollection::Probe(keyset);
@@ -157,7 +159,7 @@ ECode CSchemeRegistry::GetSchemeNames(
 ECode CSchemeRegistry::SetItems(
     /* [in] */ IMap* map)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (map == NULL) {
             return NOERROR;
         }

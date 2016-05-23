@@ -6,6 +6,8 @@
 #include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Net::EIID_IINetworkScoreCache;
 using Elastos::Droid::Net::IRssiCurve;
 using Elastos::Droid::Net::IWifiKey;
@@ -52,7 +54,7 @@ ECode WifiNetworkScoreCache::UpdateScores(
     networks->GetSize(&size);
     Logger::E(TAG, "updateScores list size=%d", size);
 
-    synchronized(mNetworkCache) {
+    {    AutoLock syncLock(mNetworkCache);
         for (Int32 i = 0; i < size; ++i) {
             AutoPtr<IInterface> obj;
             networks->Get(i, (IInterface**)&obj);
@@ -67,7 +69,7 @@ ECode WifiNetworkScoreCache::UpdateScores(
 
 ECode WifiNetworkScoreCache::ClearScores()
 {
-    synchronized (mNetworkCache) {
+    {    AutoLock syncLock(mNetworkCache);
          mNetworkCache->Clear();
     }
     return NOERROR;
@@ -82,7 +84,7 @@ ECode WifiNetworkScoreCache::IsScoredNetwork(
     if (key.IsNull()) return FALSE;
 
     //find it
-    synchronized(mNetworkCache) {
+    {    AutoLock syncLock(mNetworkCache);
         AutoPtr<IInterface> obj;
         mNetworkCache->Get(CoreUtils::Convert(key), (IInterface**)&obj);
         IScoredNetwork* network = IScoredNetwork::Probe(obj);
@@ -109,7 +111,7 @@ ECode WifiNetworkScoreCache::GetNetworkScore(
     }
 
     //find it
-    synchronized(mNetworkCache) {
+    {    AutoLock syncLock(mNetworkCache);
         AutoPtr<IInterface> obj;
         mNetworkCache->Get(CoreUtils::Convert(key), (IInterface**)&obj);
         IScoredNetwork* network = IScoredNetwork::Probe(obj);
@@ -148,7 +150,7 @@ ECode WifiNetworkScoreCache::GetNetworkScore(
     }
 
     //find it
-    synchronized(mNetworkCache) {
+    {    AutoLock syncLock(mNetworkCache);
         AutoPtr<IInterface> obj;
         mNetworkCache->Get(CoreUtils::Convert(key), (IInterface**)&obj);
         IScoredNetwork* network = IScoredNetwork::Probe(obj);

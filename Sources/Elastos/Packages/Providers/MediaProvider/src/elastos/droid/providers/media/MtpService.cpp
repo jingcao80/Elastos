@@ -14,6 +14,8 @@
 #include <elastos/core/Thread.h>
 #include <elastos/core/Object.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::EIID_IService;
 using Elastos::Droid::App::IActivityManagerHelper;
@@ -89,7 +91,7 @@ ECode MtpService::MyStorageEventListener::OnStorageStateChanged(
     /* [in] */ const String& oldState,
     /* [in] */ const String& newState)
 {
-    synchronized(mOwner->mBinder) {
+    {    AutoLock syncLock(mOwner->mBinder);
         Slogger::D(TAG, "onStorageStateChanged %s %s -> %s", path.string(), oldState.string(), newState.string());
         if (IEnvironment::MEDIA_MOUNTED.Equals(newState)) {
             mOwner->VolumeMountedLocked(path);
@@ -125,7 +127,7 @@ CAR_INTERFACE_IMPL(MtpService::MyRunnable, Runnable, IRunnable)
 
 ECode MtpService::MyRunnable::Run()
 {
-    synchronized(mOwner->mBinder) {
+    {    AutoLock syncLock(mOwner->mBinder);
         // Unhide the storage units when the user has unlocked the lockscreen
         if (mOwner->mMtpDisabled) {
             mOwner->AddStorageDevicesLocked();
@@ -183,7 +185,7 @@ CAR_INTERFACE_IMPL_2(MtpService::MyIMtpService, Object, IIMtpService, IBinder)
 ECode MtpService::MyIMtpService::SendObjectAdded(
     /* [in] */ Int32 objectHandle)
 {
-    synchronized(mOwner->mBinder) {
+    {    AutoLock syncLock(mOwner->mBinder);
         if (mServer != NULL) {
             return mOwner->mServer->SendObjectAdded(objectHandle);
         }
@@ -193,7 +195,7 @@ ECode MtpService::MyIMtpService::SendObjectAdded(
 ECode MtpService::MyIMtpService::SendObjectRemoved(
     /* [in] */ Int32 objectHandle)
 {
-    synchronized(mOwner->mBinder) {
+    {    AutoLock syncLock(mOwner->mBinder);
         if (mServer != NULL) {
             return mServer->SendObjectRemoved(objectHandle);
         }
@@ -233,7 +235,7 @@ ECode MtpService::OnCreate()
     AutoPtr<IStorageManagerHelper> smr;
     CStorageManagerHelper::AcquireSingleton((IStorageManagerHelper**)&smr);
     smr->From((IContext*)this, (IStorageManager**)&mStorageManager);
-    synchronized(mBinder) {
+    {    AutoLock syncLock(mBinder);
         UpdateDisabledStateLocked();
         mStorageManager->RegisterListener(mStorageEventListener.Get());
         AutoPtr<ArrayOf<IStorageVolume*> > volumes;
@@ -259,7 +261,7 @@ ECode MtpService::OnStartCommand(
     /* [in] */ Int32 startId,
     /* [out] */ Int32* result)
 {
-    synchronized(mBinder) {
+    {    AutoLock syncLock(mBinder);
         UpdateDisabledStateLocked();
         Boolean flag = FALSE;
         intent->GetBooleanExtra(IUsbManager::USB_FUNCTION_PTP, FALSE, &flag);

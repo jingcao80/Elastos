@@ -25,6 +25,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::DroidRuntime;
 using Elastos::Droid::Os::Process;
@@ -85,7 +87,7 @@ ApplicationPackageManager::ApplicationPackageManager(
 
 AutoPtr<IUserManager> ApplicationPackageManager::GetUserManager()
 {
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mUserManager == NULL) {
             mUserManager = CUserManager::Get(mContext);
         }
@@ -2295,7 +2297,7 @@ ECode ApplicationPackageManager::GetPackageInstaller(
     VALIDATE_NOT_NULL(installer)
     *installer = NULL;
 
-    synchronized(mLock) {
+    {    AutoLock syncLock(mLock);
         if (mInstaller == NULL) {
             // try {
             AutoPtr<IIPackageInstaller> pi;

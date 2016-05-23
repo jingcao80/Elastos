@@ -16,6 +16,8 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Animation::EIID_ITypeEvaluator;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IObjectAnimator;
@@ -1014,7 +1016,7 @@ AutoPtr<ScreenMagnifier::MotionEventInfo> ScreenMagnifier::MotionEventInfo::Obta
     /* [in] */ Int32 policyFlags)
 {
     AutoPtr<MotionEventInfo> info;
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         if (sPoolSize > 0) {
             sPoolSize--;
             info = sPool;
@@ -1047,7 +1049,7 @@ void ScreenMagnifier::MotionEventInfo::Initialize(
 
 ECode ScreenMagnifier::MotionEventInfo::Recycle()
 {
-    synchronized(sLock) {
+    {    AutoLock syncLock(sLock);
         if (mInPool) {
             Slogger::E(ScreenMagnifier::TAG, "Already recycled.");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;

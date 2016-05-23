@@ -11,6 +11,8 @@
 #include <Elastos.Droid.Net.h>
 #include <Elastos.Droid.SecurityBridge.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::Content::CContentProviderHelper;
@@ -169,7 +171,7 @@ AutoPtr<ClipboardService::PerUserClipboard> ClipboardService::GetClipboard(
     /* [in] */ Int32 userId)
 {
     AutoPtr<PerUserClipboard> puc;
-    synchronized(mClipboards) {
+    {    AutoLock syncLock(mClipboards);
         AutoPtr<IInterface> obj;
         mClipboards->Get(userId, (IInterface**)&obj);
         puc = (PerUserClipboard*)IObject::Probe(obj);
@@ -185,7 +187,7 @@ AutoPtr<ClipboardService::PerUserClipboard> ClipboardService::GetClipboard(
 void ClipboardService::RemoveClipboard(
     /* [in] */ Int32 userId)
 {
-    synchronized(mClipboards) {
+    {    AutoLock syncLock(mClipboards);
         mClipboards->Remove(userId);
     }
 }
@@ -194,7 +196,7 @@ ECode ClipboardService::SetPrimaryClip(
     /* [in] */ IClipData* clip,
     /* [in] */ const String& callingPackage)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 itemCount;
         if (clip != NULL && (clip->GetItemCount(&itemCount), itemCount <= 0)) {
             Slogger::E(TAG, "No items");
@@ -337,7 +339,7 @@ ECode ClipboardService::GetPrimaryClip(
     VALIDATE_NOT_NULL(clip);
     *clip = NULL;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 value;
         mAppOps->NoteOp(IAppOpsManager::OP_READ_CLIPBOARD, Binder::GetCallingUid(),
                 pkg, &value);
@@ -369,7 +371,7 @@ ECode ClipboardService::GetPrimaryClipDescription(
     VALIDATE_NOT_NULL(description)
     *description = NULL;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 value;
         mAppOps->CheckOp(IAppOpsManager::OP_READ_CLIPBOARD, Binder::GetCallingUid(),
                 callingPackage, &value);
@@ -397,7 +399,7 @@ ECode ClipboardService::HasPrimaryClip(
     VALIDATE_NOT_NULL(hasPrimaryClip);
     *hasPrimaryClip = FALSE;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 value;
         mAppOps->CheckOp(IAppOpsManager::OP_READ_CLIPBOARD, Binder::GetCallingUid(),
                 callingPackage, &value);
@@ -425,7 +427,7 @@ ECode ClipboardService::AddPrimaryClipChangedListener(
     /* [in] */ IOnPrimaryClipChangedListener* listener,
     /* [in] */ const String& callingPackage)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<ListenerInfo> info = new ListenerInfo(Binder::GetCallingUid(), callingPackage);
         Boolean result;
         return GetClipboard()->mPrimaryClipListeners->Register(listener, TO_IINTERFACE(info), &result);
@@ -436,7 +438,7 @@ ECode ClipboardService::AddPrimaryClipChangedListener(
 ECode ClipboardService::RemovePrimaryClipChangedListener(
     /* [in] */ IOnPrimaryClipChangedListener* listener)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean result;
         return GetClipboard()->mPrimaryClipListeners->Unregister(listener, &result);
     }
@@ -450,7 +452,7 @@ ECode ClipboardService::HasClipboardText(
     VALIDATE_NOT_NULL(hasClipboardText);
     *hasClipboardText = FALSE;
 
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 value;
         mAppOps->CheckOp(IAppOpsManager::OP_READ_CLIPBOARD, Binder::GetCallingUid(),
                 callingPackage, &value);

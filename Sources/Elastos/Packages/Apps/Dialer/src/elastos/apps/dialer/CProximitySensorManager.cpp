@@ -1,6 +1,9 @@
 
 #include "CProximitySensorManager.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Elastos{
 namespace Apps{
 namespace Dialer {
@@ -42,7 +45,7 @@ ECode CProximitySensorManager::ProximitySensorEventListener::OnSensorChanged(
     Float value = (*values)[0];
     // Convert the sensor into a NEAR/FAR state.
     IProximitySensorManager::State state = GetStateFromValue(value);
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // No change in state, do nothing.
         if (state == mLastState) {
             return NOERROR;
@@ -88,7 +91,7 @@ IProximitySensorManager::State CProximitySensorManager::ProximitySensorEventList
 
 void CProximitySensorManager::ProximitySensorEventListener::UnregisterWhenFar()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mLastState == State.FAR) {
             // We are already in the far state, just unregister now.
             UnregisterWithoutNotification();
@@ -101,7 +104,7 @@ void CProximitySensorManager::ProximitySensorEventListener::UnregisterWhenFar()
 
 void CProximitySensorManager::ProximitySensorEventListener::Register()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // It is okay to register multiple times.
         Boolean supported;
         mSensorManager->RegisterListener(ISensorListener::Probe(this),
@@ -114,7 +117,7 @@ void CProximitySensorManager::ProximitySensorEventListener::Register()
 void CProximitySensorManager::ProximitySensorEventListener::Unregister()
 {
     IProximitySensorManager::State lastState;
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         UnregisterWithoutNotification();
         lastState = mLastState;
         // Always go back to the FAR state. That way, when we register again we will get a

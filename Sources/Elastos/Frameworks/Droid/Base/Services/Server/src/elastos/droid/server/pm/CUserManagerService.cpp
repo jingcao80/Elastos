@@ -20,6 +20,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Core::IBoolean;
 using Elastos::Core::CBoolean;
@@ -104,9 +106,9 @@ CUserManagerService::FinishRemoveUserReceiver::FinishRemoveUserThread::FinishRem
 ECode CUserManagerService::FinishRemoveUserReceiver::FinishRemoveUserThread::Run()
 {
     AutoPtr<IObject> lock = mHost->mInstallLock;
-    synchronized (lock) {
+    {    AutoLock syncLock(lock);
         AutoPtr<IObject> pkgLock = mHost->mPackagesLock;
-        synchronized (pkgLock) {
+        {    AutoLock syncLock(pkgLock);
             mHost->RemoveUserStateLocked(mUserHandle);
         }
     }
@@ -139,7 +141,7 @@ ECode CUserManagerService::FinishRemoveUserReceiver::OnReceive(
 ECode CUserManagerService::RemoveUserStateRunnable::Run()
 {
     AutoPtr<IObject> lock = mHost->mPackagesLock;
-    synchronized (lock) {
+    {    AutoLock syncLock(lock);
         mHost->mRemovingUserIds.Erase(mUserHandle);
     }
     return NOERROR;
@@ -293,8 +295,8 @@ ECode CUserManagerService::Init(
     mInstallLock = installLock;
     mPackagesLock = packagesLock;
     CHandler::New((IHandler**)&mHandler);
-    synchronized (mInstallLock) {
-        synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mInstallLock);
+        {    AutoLock syncLock(mPackagesLock);
             Boolean result;
             CFile::New(dataDir, USER_INFO_DIR, (IFile**)&mUsersDir);
             mUsersDir->Mkdirs(&result);
@@ -366,7 +368,7 @@ void CUserManagerService::SystemReady()
 
 AutoPtr<CUserManagerService> CUserManagerService::GetInstance()
 {
-    synchronized (sLock){
+    {    AutoLock syncLock(sLock);
         return sInstance;
     }
     return NULL;
@@ -379,7 +381,7 @@ ECode CUserManagerService::GetUsers(
     VALIDATE_NOT_NULL(_users)
     *_users = NULL;
     FAIL_RETURN(CheckManageUsersPermission(String("query users")))
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IList> users;
         CArrayList::New(mUsers.GetSize(), (IList**)&users);
         HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it;
@@ -416,7 +418,7 @@ ECode CUserManagerService::GetProfiles(
     }
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IList> list = GetProfilesLocked(userId, enabledOnly);
         *result = list;
         REFCOUNT_ADD(*result)
@@ -466,7 +468,7 @@ ECode CUserManagerService::GetProfileParent(
     *info = NULL;
 
     FAIL_RETURN(CheckManageUsersPermission(String("get the profile parent")))
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> profile = GetUserInfoLocked(userHandle);
         Int32 parentUserId;
         profile->GetProfileGroupId(&parentUserId);
@@ -502,7 +504,7 @@ ECode CUserManagerService::SetUserEnabled(
     /* [in] */ Int32 userHandle)
 {
     FAIL_RETURN(CheckManageUsersPermission(String("enable user")))
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> info = GetUserInfoLocked(userHandle);
         Boolean isEnabled;
         if (info != NULL && (info->IsEnabled(&isEnabled), !isEnabled)) {
@@ -524,7 +526,7 @@ ECode CUserManagerService::GetUserInfo(
     *userInfo = NULL;
 
     FAIL_RETURN(CheckManageUsersPermission(String("query user")))
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> user = GetUserInfoLocked(userId);
         *userInfo = user;
         REFCOUNT_ADD(*userInfo)
@@ -536,7 +538,7 @@ ECode CUserManagerService::IsRestricted(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         GetUserInfoLocked(UserHandle::GetCallingUserId())->IsRestricted(result);
     }
     return NOERROR;
@@ -562,7 +564,7 @@ AutoPtr<IUserInfo> CUserManagerService::GetUserInfoLocked(
 Boolean CUserManagerService::Exists(
     /* [in] */ Int32 userId)
 {
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         for (Int32 i = 0; i < mUserIds->GetLength(); ++i) {
             if ((*mUserIds)[i] == userId) return TRUE;
         }
@@ -576,7 +578,7 @@ ECode CUserManagerService::SetUserName(
 {
     FAIL_RETURN(CheckManageUsersPermission(String("rename users")))
     Boolean changed = FALSE;
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> info;
         HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it = mUsers.Find(userId);
         if (it != mUsers.End()) {
@@ -607,7 +609,7 @@ ECode CUserManagerService::SetUserIcon(
     FAIL_RETURN(CheckManageUsersPermission(String("update users")))
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> info;
         HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it = mUsers.Find(userId);
         if (it != mUsers.End()) {
@@ -645,7 +647,7 @@ ECode CUserManagerService::GetUserIcon(
 {
     VALIDATE_NOT_NULL(userIcon)
     *userIcon = NULL;
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> info;
         HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it = mUsers.Find(userId);
         if (it != mUsers.End()) {
@@ -684,7 +686,7 @@ ECode CUserManagerService::MakeInitialized(
     /* [in] */ Int32 userId)
 {
     FAIL_RETURN(CheckManageUsersPermission(String("makeInitialized")))
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> info;
         HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it = mUsers.Find(userId);
         if (it != mUsers.End()) {
@@ -719,7 +721,7 @@ ECode CUserManagerService::GetDefaultGuestRestrictions(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
     FAIL_RETURN(CheckManageUsersPermission(String("getDefaultGuestRestrictions")))
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         CBundle::New(mGuestRestrictions, result);
     }
     return NOERROR;
@@ -729,7 +731,7 @@ ECode CUserManagerService::SetDefaultGuestRestrictions(
     /* [in] */ IBundle* restrictions)
 {
     FAIL_RETURN(CheckManageUsersPermission(String("setDefaultGuestRestrictions")))
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         mGuestRestrictions->Clear();
         mGuestRestrictions->PutAll(restrictions);
         WriteUserListLocked();
@@ -744,7 +746,7 @@ ECode CUserManagerService::HasUserRestriction(
 {
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IBundle> restrictions;
         HashMap<Int32, AutoPtr<IBundle> >::Iterator it = mUserRestrictions.Find(userId);
         if (it != mUserRestrictions.End()) {
@@ -764,7 +766,7 @@ ECode CUserManagerService::GetUserRestrictions(
     VALIDATE_NOT_NULL(bundle)
     // checkManageUsersPermission("getUserRestrictions");
 
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IBundle> restrictions;
         HashMap<Int32, AutoPtr<IBundle> >::Iterator it = mUserRestrictions.Find(userHandle);
         if (it != mUserRestrictions.End()) {
@@ -787,7 +789,7 @@ ECode CUserManagerService::SetUserRestrictions(
     FAIL_RETURN(CheckManageUsersPermission(String("setUserRestrictions")))
     if (restrictions == NULL) return NOERROR;
 
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IBundle> bundle;
         HashMap<Int32, AutoPtr<IBundle> >::Iterator it = mUserRestrictions.Find(userId);
         if (it != mUserRestrictions.End()) {
@@ -901,7 +903,7 @@ void CUserManagerService::WriteBitmapLocked(
 
 AutoPtr< ArrayOf<Int32> > CUserManagerService::GetUserIds()
 {
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         return mUserIds;
     }
     return NULL;
@@ -1517,7 +1519,7 @@ Boolean CUserManagerService::IsPackageInstalled(
 void CUserManagerService::CleanAppRestrictions(
     /* [in] */ Int32 userId)
 {
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IFile> dir = Environment::GetUserSystemDirectory(userId);
         AutoPtr<ArrayOf<String> > files;
         dir->List((ArrayOf<String>**)&files);
@@ -1540,7 +1542,7 @@ void CUserManagerService::CleanAppRestrictionsForPackage(
     /* [in] */ const String& pkg,
     /* [in] */ Int32 userId)
 {
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IFile> dir = Environment::GetUserSystemDirectory(userId);
         AutoPtr<IFile> resFile;
         CFile::New(dir, PackageToRestrictionsFileName(pkg), (IFile**)&resFile);
@@ -1601,8 +1603,8 @@ AutoPtr<IUserInfo> CUserManagerService::CreateUserInternal(
     Int64 ident = Binder::ClearCallingIdentity();
     AutoPtr<IUserInfo> userInfo;
     // try {
-    synchronized (mInstallLock) {
-        synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mInstallLock);
+        {    AutoLock syncLock(mPackagesLock);
             AutoPtr<IUserInfo> parent;
             if (parentId != IUserHandle::USER_NULL) {
                 parent = GetUserInfoLocked(parentId);
@@ -1728,7 +1730,7 @@ ECode CUserManagerService::MarkGuestForDeletion(
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
     AutoPtr<IUserInfo> user;
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it = mUsers.Find(userHandle);
         if (it != mUsers.End()) {
             user = it->mSecond;
@@ -1780,7 +1782,7 @@ ECode CUserManagerService::RemoveUser(
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
     AutoPtr<IUserInfo> user;
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it = mUsers.Find(userHandle);
         if (it != mUsers.End()) {
             user = it->mSecond;
@@ -1945,7 +1947,7 @@ ECode CUserManagerService::GetApplicationRestrictionsForUser(
             || !UserHandle::IsSameApp(Binder::GetCallingUid(), GetUidForPackage(packageName))) {
         FAIL_RETURN(CheckManageUsersPermission(String("Only system can get restrictions for other users/apps")))
     }
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         // Read the restrictions from XML
         AutoPtr<IBundle> temp = ReadApplicationRestrictionsLocked(packageName, userId);
         *bundle = temp;
@@ -1963,7 +1965,7 @@ ECode CUserManagerService::SetApplicationRestrictions(
             || !UserHandle::IsSameApp(Binder::GetCallingUid(), GetUidForPackage(packageName))) {
         FAIL_RETURN(CheckManageUsersPermission(String("Only system can set restrictions for other users/apps")))
     }
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         Boolean isEmpty;
         if (restrictions == NULL || (restrictions->IsEmpty(&isEmpty), isEmpty)) {
             CleanAppRestrictionsForPackage(packageName, userId);
@@ -1996,7 +1998,7 @@ ECode CUserManagerService::SetRestrictionsChallenge(
 
     FAIL_RETURN(CheckManageUsersPermission(String("Only system can modify restrictions pin")))
     Int32 userId = UserHandle::GetCallingUserId();
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<RestrictionsPinState> pinState;
         HashMap<Int32, AutoPtr<RestrictionsPinState> >::Iterator it = mRestrictionsPinStates.Find(userId);
         if (it != mRestrictionsPinStates.End()) {
@@ -2046,7 +2048,7 @@ ECode CUserManagerService::CheckRestrictionsChallenge(
 
     FAIL_RETURN(CheckManageUsersPermission(String("Only system can verify the restrictions pin")))
     Int32 userId = UserHandle::GetCallingUserId();
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<RestrictionsPinState> pinState;
         HashMap<Int32, AutoPtr<RestrictionsPinState> >::Iterator it = mRestrictionsPinStates.Find(userId);
         if (it != mRestrictionsPinStates.End()) {
@@ -2116,7 +2118,7 @@ ECode CUserManagerService::HasRestrictionsChallenge(
 {
     VALIDATE_NOT_NULL(result)
     Int32 userId = UserHandle::GetCallingUserId();
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         *result = HasRestrictionsPinLocked(userId);
     }
     return NOERROR;
@@ -2148,7 +2150,7 @@ void CUserManagerService::RemoveRestrictionsForUser(
     /* [in] */ Int32 userHandle,
     /* [in] */ Boolean unhideApps)
 {
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         // Remove all user restrictions
         AutoPtr<IBundle> b;
         CBundle::New((IBundle**)&b);
@@ -2423,7 +2425,7 @@ ECode CUserManagerService::GetUserSerialNumber(
     /* [out] */ Int32* serialNo)
 {
     VALIDATE_NOT_NULL(serialNo)
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         if (!Exists(userHandle)) {
             *serialNo = -1;
             return NOERROR;
@@ -2438,7 +2440,7 @@ ECode CUserManagerService::GetUserHandle(
     /* [out] */ Int32* userHandle)
 {
     VALIDATE_NOT_NULL(userHandle)
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         for (Int32 i = 0; i < mUserIds->GetLength(); ++i) {
             Int32 userId = (*mUserIds)[i];
             AutoPtr<IUserInfo> user = GetUserInfoLocked(userId);
@@ -2478,7 +2480,7 @@ void CUserManagerService::UpdateUserIdsLocked()
 void CUserManagerService::UserForeground(
     /* [in] */ Int32 userId)
 {
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> user;
         HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it = mUsers.Find(userId);
         if (it != mUsers.End()) {
@@ -2504,7 +2506,7 @@ void CUserManagerService::UserForeground(
 Int32 CUserManagerService::GetNextAvailableIdLocked()
 {
     Int32 i = MIN_USER_ID;
-    synchronized (mPackagesLock) {
+    {    AutoLock syncLock(mPackagesLock);
         while (i < Elastos::Core::Math::INT32_MAX_VALUE) {
             if (mUsers.Find(i) == mUsers.End() && !mRemovingUserIds[i]) {
                 break;
@@ -2549,7 +2551,7 @@ ECode CUserManagerService::ToString(
 
 //     long now = System.currentTimeMillis();
 //     StringBuilder sb = new StringBuilder();
-//     synchronized (mPackagesLock) {
+//     {    AutoLock syncLock(mPackagesLock);
 //         pw.println("Users:");
 //         for (int i = 0; i < mUsers.size(); i++) {
 //             UserInfo user = mUsers.valueAt(i);

@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using static android::Telephony::SmsManager::IRESULT_ERROR_GENERIC_FAILURE;
 
 using Elastos::Utility::IArrayList;
@@ -236,7 +238,7 @@ public class ImsSMSDispatcher extends SMSDispatcher {
                                            List<SmsTracker> sendPendingList,
                                            SMSDispatcher smsDispatcher,
                                            Boolean success) {
-        Synchronized (sendPendingList) {
+        {    AutoLock syncLock(sendPendingList);
             For (Int32 i = 0, count = sendPendingList->Size(); i < count; i++) {
                 SmsTracker tracker = sendPendingList->Get(i);
                 If (tracker.mMessageRef == messageRef) {

@@ -19,6 +19,8 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::AppWidget::IAppWidgetManager;
 using Elastos::Droid::Content::CIntentFilterComparison;
@@ -1357,7 +1359,7 @@ ECode RemoteViewsAdapter::GetView(
 
         //     RemoteViewsFrameLayout loadingView = null;
         //     final RemoteViewsMetaData metaData = mCache.getMetaData();
-        //     synchronized(metaData) {
+        //     {    AutoLock syncLock(metaData);
         //         loadingView = metaData.createLoadingView(position, convertView, parent,
         //                 mCache, mLayoutInflater, mRemoteViewsOnClickHandler);
         //     }

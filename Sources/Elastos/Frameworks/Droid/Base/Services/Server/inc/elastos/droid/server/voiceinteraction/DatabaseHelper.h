@@ -89,7 +89,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * TODO: We only support one keyphrase currently.
      */
     public Boolean UpdateKeyphraseSoundModel(KeyphraseSoundModel soundModel) {
-        Synchronized(this) {
+        {    AutoLock syncLock(this);
             SQLiteDatabase db = GetWritableDatabase();
             ContentValues values = new ContentValues();
             values->Put(SoundModelContract.KEY_MODEL_UUID, soundModel.uuid->ToString());
@@ -121,7 +121,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Boolean DeleteKeyphraseSoundModel(Int32 keyphraseId, Int32 userHandle, String bcp47Locale) {
         // Sanitize the locale to guard against SQL injection.
         bcp47Locale = Locale->ForLanguageTag(bcp47Locale).ToLanguageTag();
-        Synchronized(this) {
+        {    AutoLock syncLock(this);
             KeyphraseSoundModel soundModel = GetKeyphraseSoundModel(keyphraseId, userHandle,
                     bcp47Locale);
             if (soundModel == NULL) {
@@ -150,7 +150,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String bcp47Locale) {
         // Sanitize the locale to guard against SQL injection.
         bcp47Locale = Locale->ForLanguageTag(bcp47Locale).ToLanguageTag();
-        Synchronized(this) {
+        {    AutoLock syncLock(this);
             // Find the corresponding sound model ID for the keyphrase.
             String selectQuery = "SELECT  * FROM " + SoundModelContract.TABLE
                     + " WHERE " + SoundModelContract.KEY_KEYPHRASE_ID + "= '" + keyphraseId

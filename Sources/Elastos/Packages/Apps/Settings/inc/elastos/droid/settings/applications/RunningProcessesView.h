@@ -52,25 +52,25 @@ using Elastos::Utility::IIterator;
 public class RunningProcessesView extends FrameLayout
         implements AdapterView.OnItemClickListener, RecyclerListener,
         RunningState.OnRefreshUiListener {
-    
+
     final Int32 mMyUserId;
 
     Int64 SECONDARY_SERVER_MEM;
-    
+
     final HashMap<View, ActiveItem> mActiveItems = new HashMap<View, ActiveItem>();
 
     ActivityManager mAm;
-    
+
     RunningState mState;
-    
+
     Fragment mOwner;
-    
+
     Runnable mDataAvail;
 
     StringBuilder mBuilder = new StringBuilder(128);
-    
+
     RunningState.BaseItem mCurSelected;
-    
+
     ListView mListView;
     View mHeader;
     ServiceListAdapter mAdapter;
@@ -102,19 +102,19 @@ public class RunningProcessesView extends FrameLayout
 
         void UpdateTime(Context context, StringBuilder builder) {
             TextView uptimeView = NULL;
-            
+
             if (mItem instanceof RunningState.ServiceItem) {
                 // If we are displaying a service, then the service
                 // uptime goes at the top.
                 uptimeView = mHolder.size;
-                
+
             } else {
                 String size = mItem.mSizeStr != NULL ? mItem.mSizeStr : "";
                 if (!size->Equals(mItem.mCurSizeStr)) {
                     mItem.mCurSizeStr = size;
                     mHolder.size->SetText(size);
                 }
-                
+
                 if (mItem.mBackground) {
                     // This is a background process; no uptime.
                     if (!mSetBackground) {
@@ -150,7 +150,7 @@ public class RunningProcessesView extends FrameLayout
             }
         }
     }
-    
+
     public static class ViewHolder {
         public View rootView;
         public ImageView icon;
@@ -158,7 +158,7 @@ public class RunningProcessesView extends FrameLayout
         public TextView description;
         public TextView size;
         public TextView uptime;
-        
+
         public ViewHolder(View v) {
             rootView = v;
             icon = (ImageView)v->FindViewById(R.id.icon);
@@ -168,10 +168,10 @@ public class RunningProcessesView extends FrameLayout
             uptime = (TextView)v->FindViewById(R.id.uptime);
             v->SetTag(this);
         }
-        
+
         public ActiveItem Bind(RunningState state, RunningState.BaseItem item,
                 StringBuilder builder) {
-            synchronized(state.mLock) {
+            {    AutoLock syncLock(state.mLock);
                 PackageManager pm = rootView->GetContext()->GetPackageManager();
                 if (item.mPackageInfo == NULL && item instanceof RunningState.MergedItem) {
                     // Items for background processes don't normally load
@@ -202,13 +202,13 @@ public class RunningProcessesView extends FrameLayout
             }
         }
     }
-    
+
     static class TimeTicker extends TextView {
         public TimeTicker(Context context, AttributeSet attrs) {
             Super(context, attrs);
         }
     }
-    
+
     class ServiceListAdapter extends BaseAdapter {
         final RunningState mState;
         final LayoutInflater mInflater;
@@ -216,7 +216,7 @@ public class RunningProcessesView extends FrameLayout
         ArrayList<RunningState.MergedItem> mOrigItems;
         final ArrayList<RunningState.MergedItem> mItems
                 = new ArrayList<RunningState.MergedItem>();
-        
+
         ServiceListAdapter(RunningState state) {
             mState = state;
             mInflater = (LayoutInflater)GetContext()->GetSystemService(
@@ -254,11 +254,11 @@ public class RunningProcessesView extends FrameLayout
                 }
             }
         }
-        
+
         public Boolean HasStableIds() {
             return TRUE;
         }
-        
+
         public Int32 GetCount() {
             return mItems->Size();
         }
@@ -294,15 +294,15 @@ public class RunningProcessesView extends FrameLayout
             BindView(v, position);
             return v;
         }
-        
+
         public View NewView(ViewGroup parent) {
             View v = mInflater->Inflate(R.layout.running_processes_item, parent, FALSE);
             new ViewHolder(v);
             return v;
         }
-        
+
         CARAPI BindView(View view, Int32 position) {
-            synchronized(mState.mLock) {
+            {    AutoLock syncLock(mState.mLock);
                 if (position >= mItems->Size()) {
                     // List must have changed since we last reported its
                     // size...  ignore here, we will be doing a data changed
@@ -323,7 +323,7 @@ public class RunningProcessesView extends FrameLayout
             adapter->RefreshItems();
             adapter->NotifyDataSetChanged();
         }
-        
+
         if (mDataAvail != NULL) {
             mDataAvail->Run();
             mDataAvail = NULL;
@@ -341,7 +341,7 @@ public class RunningProcessesView extends FrameLayout
         }
         */
 
-        synchronized(mState.mLock) {
+        {    AutoLock syncLock(mState.mLock);
             if (mCurShowCached != mAdapter.mShowBackground) {
                 mCurShowCached = mAdapter.mShowBackground;
                 if (mCurShowCached) {
@@ -396,7 +396,7 @@ public class RunningProcessesView extends FrameLayout
             }
         }
     }
-    
+
     CARAPI OnItemClick(AdapterView<?> parent, View v, Int32 position, Int64 id) {
         ListView l = (ListView)parent;
         RunningState.MergedItem mi = (RunningState.MergedItem)l->GetAdapter()->GetItem(position);
@@ -421,7 +421,7 @@ public class RunningProcessesView extends FrameLayout
                     R::string::runningservicedetails_settings_title, NULL, NULL, 0);
         }
     }
-    
+
     CARAPI OnMovedToScrapHeap(View view) {
         mActiveItems->Remove(view);
     }
@@ -430,7 +430,7 @@ public class RunningProcessesView extends FrameLayout
         Super(context, attrs);
         mMyUserId = UserHandle->MyUserId();
     }
-    
+
     CARAPI DoCreate(Bundle savedInstanceState) {
         mAm = (ActivityManager)GetContext()->GetSystemService(Context.ACTIVITY_SERVICE);
         mState = RunningState->GetInstance(GetContext());
@@ -464,7 +464,7 @@ public class RunningProcessesView extends FrameLayout
         mAm->GetMemoryInfo(memInfo);
         SECONDARY_SERVER_MEM = memInfo.secondaryServerThreshold;
     }
-    
+
     CARAPI DoPause() {
         mState->Pause();
         mDataAvail = NULL;

@@ -15,6 +15,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::HardwareCamera;
 using Elastos::Droid::Hardware::Camera2::Legacy::CLegacyCameraDevice;
 using Elastos::Droid::Hardware::Camera2::Legacy::CCameraDeviceUserShim;
@@ -476,7 +478,7 @@ ECode CameraDeviceUserShim::SubmitRequest(
         return NOERROR;
     }
 
-    synchronized(mConfigureLock) {
+    {    AutoLock syncLock(mConfigureLock);
         if (mConfiguring) {
             Slogger::E(TAG, "Cannot submit request, configuration change in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
@@ -507,7 +509,7 @@ ECode CameraDeviceUserShim::SubmitRequestList(
         return NOERROR;
     }
 
-    synchronized(mConfigureLock) {
+    {    AutoLock syncLock(mConfigureLock);
         if (mConfiguring) {
             Slogger::E(TAG, "Cannot submit request, configuration change in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
@@ -537,7 +539,7 @@ ECode CameraDeviceUserShim::CancelRequest(
         return NOERROR;
     }
 
-    synchronized(mConfigureLock) {
+    {    AutoLock syncLock(mConfigureLock);
         if (mConfiguring) {
             Slogger::E(TAG, "Cannot cancel request, configuration change in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
@@ -569,7 +571,7 @@ ECode CameraDeviceUserShim::BeginConfigure(
         return NOERROR;
     }
 
-    synchronized(mConfigureLock) {
+    {    AutoLock syncLock(mConfigureLock);
         if (mConfiguring) {
             Slogger::E(TAG, "Cannot begin configure, configuration change already in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
@@ -600,7 +602,7 @@ ECode CameraDeviceUserShim::EndConfigure(
     }
 
     AutoPtr<IArrayList> surfaces;
-    synchronized(mConfigureLock) {
+    {    AutoLock syncLock(mConfigureLock);
         if (!mConfiguring) {
             Slogger::E(TAG, "Cannot end configure, no configuration change in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
@@ -640,7 +642,7 @@ ECode CameraDeviceUserShim::DeleteStream(
         return NOERROR;
     }
 
-    synchronized(mConfigureLock) {
+    {    AutoLock syncLock(mConfigureLock);
         if (!mConfiguring) {
             Slogger::E(TAG, "Cannot delete stream, beginConfigure hasn't been called yet.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
@@ -681,7 +683,7 @@ ECode CameraDeviceUserShim::CreateStream(
         return NOERROR;
     }
 
-    synchronized(mConfigureLock) {
+    {    AutoLock syncLock(mConfigureLock);
         if (!mConfiguring) {
             Slogger::E(TAG, "Cannot create stream, beginConfigure hasn't been called yet.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
@@ -766,7 +768,7 @@ ECode CameraDeviceUserShim::WaitUntilIdle(
         return NOERROR;
     }
 
-    synchronized(mConfigureLock) {
+    {    AutoLock syncLock(mConfigureLock);
         if (mConfiguring) {
             Slogger::E(TAG, "Cannot wait until idle, configuration change in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;
@@ -797,7 +799,7 @@ ECode CameraDeviceUserShim::Flush(
         return NOERROR;
     }
 
-    synchronized(mConfigureLock) {
+    {    AutoLock syncLock(mConfigureLock);
         if (mConfiguring) {
             Slogger::E(TAG, "Cannot flush, configuration change in progress.");
             *result = ICameraBinderDecorator::ICameraBinderDecorator_INVALID_OPERATION;

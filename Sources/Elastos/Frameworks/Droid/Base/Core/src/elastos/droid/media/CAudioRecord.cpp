@@ -22,6 +22,8 @@
 #include <media/AudioRecord.h>
 #include <system/audio.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CActivityThread;
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
@@ -95,7 +97,7 @@ ECode CAudioRecord::NativeEventHandler::HandleMessage(
     AutoPtr<IAudioRecordOnRecordPositionUpdateListener> listener;
 
     Object& lock = mOwner->mPositionListenerLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         listener = mOwner->mPositionListener;
     }
 
@@ -301,7 +303,7 @@ ECode CAudioRecord::StartRecording() // throws IllegalStateException
     }
 
     // start recording
-    synchronized(mRecordingStateLock) {
+    {    AutoLock syncLock(mRecordingStateLock);
         Int32 result;
         NativeStart(IMediaSyncEvent::SYNC_EVENT_NONE, 0, &result);
         if (result == SUCCESS) {
@@ -333,7 +335,7 @@ ECode CAudioRecord::StartRecording( // throws IllegalStateException
     syncEvent->GetType(&tempValue1);
     syncEvent->GetAudioSessionId(&tempValue2);
 
-    synchronized(mRecordingStateLock) {
+    {    AutoLock syncLock(mRecordingStateLock);
         Int32 result;
         NativeStart(tempValue1, tempValue2, &result);
         if (result == SUCCESS) {
@@ -352,7 +354,7 @@ ECode CAudioRecord::Stop() // throws IllegalStateException
     }
 
     // stop recording
-    synchronized(mRecordingStateLock) {
+    {    AutoLock syncLock(mRecordingStateLock);
         HandleFullVolumeRec(FALSE);
 
         NativeStop();
@@ -446,7 +448,7 @@ ECode CAudioRecord::SetRecordPositionUpdateListener(
     /* [in] */ IAudioRecordOnRecordPositionUpdateListener* listener,
     /* [in] */ IHandler* handler)
 {
-    synchronized(mPositionListenerLock) {
+    {    AutoLock syncLock(mPositionListenerLock);
         mPositionListener = listener;
 
         if (listener != NULL) {
@@ -632,7 +634,7 @@ ECode CAudioRecord::GetRecordingState(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    synchronized (mRecordingStateLock) {
+    {    AutoLock syncLock(mRecordingStateLock);
         *result = mRecordingState;
     }
     return NOERROR;

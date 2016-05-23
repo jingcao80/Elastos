@@ -12,6 +12,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::ISharedPreferencesEditor;
 using Elastos::Droid::Content::IIntent;
@@ -50,7 +52,7 @@ UninstallShortcutReceiver::MyThread::MyThread(
 
 ECode UninstallShortcutReceiver::MyThread::Run()
 {
-    synchronized(mSavedNewApps) {
+    {    AutoLock syncLock(mSavedNewApps);
         AutoPtr<ISharedPreferencesEditor> editor;
         mSharedPrefs->Edit((ISharedPreferencesEditor**)&editor);
         editor->PutStringSet(IInstallShortcutReceiver::NEW_APPS_LIST_KEY,
@@ -147,7 +149,7 @@ void UninstallShortcutReceiver::ProcessUninstallShortcut(
     AutoPtr<IContext> ctx;
     context->GetApplicationContext((IContext**)&ctx);
     AutoPtr<ILauncherApplication> app = ILauncherApplication::Probe(ctx);
-    synchronized(app) {
+    {    AutoLock syncLock(app);
         RemoveShortcut(context, data, sharedPrefs);
     }
 }
@@ -244,7 +246,7 @@ void UninstallShortcutReceiver::RemoveShortcut(
         AutoPtr<ISet> newApps;
         CHashSet::New((ISet**)&newApps);
         sharedPrefs->GetStringSet(IInstallShortcutReceiver::NEW_APPS_LIST_KEY, newApps, (ISet**)&newApps);
-        synchronized(newApps) {
+        {    AutoLock syncLock(newApps);
             do {
                 String str;
                 intent->ToUri(0, &str);

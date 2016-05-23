@@ -20,6 +20,8 @@
 #include <media/AudioTrack.h>
 #include <system/audio.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CActivityThread;
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::Content::IContext;
@@ -530,7 +532,7 @@ ECode CAudioTrack::GetPlayState(
     /* [out] */ Int32* state)
 {
     VALIDATE_NOT_NULL(state);
-    synchronized (mPlayStateLock) {
+    {    AutoLock syncLock(mPlayStateLock);
         *state = mPlayState;
     }
     return NOERROR;
@@ -855,7 +857,7 @@ ECode CAudioTrack::Play()
         Int32 result;
         SetVolume(0, &result);
     }
-    synchronized(mPlayStateLock) {
+    {    AutoLock syncLock(mPlayStateLock);
         NativeStart();
         mPlayState = PLAYSTATE_PLAYING;
     }
@@ -885,7 +887,7 @@ ECode CAudioTrack::Stop()
     }
 
     // stop playing
-    synchronized(mPlayStateLock) {
+    {    AutoLock syncLock(mPlayStateLock);
         NativeStop();
         mPlayState = PLAYSTATE_STOPPED;
     }
@@ -901,7 +903,7 @@ ECode CAudioTrack::Pause()
     //logd("pause()");
 
     // pause playback
-    synchronized(mPlayStateLock) {
+    {    AutoLock syncLock(mPlayStateLock);
         NativePause();
         mPlayState = PLAYSTATE_PAUSED;
     }

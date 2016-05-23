@@ -1,6 +1,9 @@
 
 #include "DialpadFragment.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
+
 namespace Elastos{
 namespace Apps{
 namespace Dialer {
@@ -826,7 +829,7 @@ ECode DialpadFragment::OnResume()
 
     // if the mToneGenerator creation fails, just continue without it.  It is
     // a local audio signal, and is not as important as the dtmf tone itself.
-    synchronized(mToneGeneratorLock) {
+    {    AutoLock syncLock(mToneGeneratorLock);
         if (mToneGenerator == NULL) {
             // try {
             ECode ec = CToneGenerator::New(DIAL_TONE_STREAM_TYPE,
@@ -924,7 +927,7 @@ ECode DialpadFragment::OnPause()
     StopTone();
     mPressedDialpadKeys->Clear();
 
-    synchronized(mToneGeneratorLock) {
+    {    AutoLock syncLock(mToneGeneratorLock);
         if (mToneGenerator != NULL) {
             mToneGenerator->ReleaseResources();
             mToneGenerator = NULL;
@@ -1419,7 +1422,7 @@ void DialpadFragment::PlayTone(
         return;
     }
 
-    synchronized(mToneGeneratorLock) {
+    {    AutoLock syncLock(mToneGeneratorLock);
         if (mToneGenerator == NULL) {
             Logger::W(TAG, "playTone: mToneGenerator == null, tone: %d", tone);
             return;
@@ -1436,7 +1439,7 @@ void DialpadFragment::StopTone()
     if (!mDTMFToneEnabled) {
         return;
     }
-    synchronized(mToneGeneratorLock) {
+    {    AutoLock syncLock(mToneGeneratorLock);
         if (mToneGenerator == NULL) {
             Logger::W(TAG, "stopTone: mToneGenerator == null");
             return;

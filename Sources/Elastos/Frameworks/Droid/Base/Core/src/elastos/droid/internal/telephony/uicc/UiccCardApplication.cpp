@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.uicc;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IHandler;
@@ -114,7 +116,7 @@ public class UiccCardApplication {
     }
 
     void Update (IccCardApplicationStatus as, Context c, CommandsInterface ci) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mDestroyed) {
                 Loge("Application updated after destroyed! Fix me!");
                 return;
@@ -163,7 +165,7 @@ public class UiccCardApplication {
     }
 
     void Dispose() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (DBG) Log(mAppType + " being Disposed");
             mDestroyed = TRUE;
             If (mIccRecords != NULL) { mIccRecords->Dispose();}
@@ -220,7 +222,7 @@ public class UiccCardApplication {
      * @param ar is asyncResult of Query_Facility_Locked
      */
     private void OnQueryFdnEnabled(AsyncResult ar) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (ar.exception != NULL) {
                 If (DBG) Log("Error in querying facility lock:" + ar.exception);
                 return;
@@ -245,7 +247,7 @@ public class UiccCardApplication {
     }
 
     private void OnChangeFdnDone(AsyncResult ar) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Int32 attemptsRemaining = -1;
 
             If (ar.exception == NULL) {
@@ -275,7 +277,7 @@ public class UiccCardApplication {
 
     /** REMOVE when mIccLockEnabled is not needed*/
     private void OnQueryFacilityLock(AsyncResult ar) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If(ar.exception != NULL) {
                 If (DBG) Log("Error in querying facility lock:" + ar.exception);
                 return;
@@ -325,7 +327,7 @@ public class UiccCardApplication {
 
     /** REMOVE when mIccLockEnabled is not needed */
     private void OnChangeFacilityLock(AsyncResult ar) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Int32 attemptsRemaining = -1;
 
             If (ar.exception == NULL) {
@@ -437,7 +439,7 @@ public class UiccCardApplication {
     }
 
     CARAPI RegisterForReady(Handler h, Int32 what, Object obj) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             For (Int32 i = mReadyRegistrants->Size() - 1; i >= 0 ; i--) {
                 Registrant  r = (Registrant) mReadyRegistrants->Get(i);
                 Handler rH = r->GetHandler();
@@ -453,7 +455,7 @@ public class UiccCardApplication {
     }
 
     CARAPI UnregisterForReady(Handler h) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mReadyRegistrants->Remove(h);
         }
     }
@@ -462,7 +464,7 @@ public class UiccCardApplication {
      * Notifies handler of any transition into State->IsPinLocked()
      */
     CARAPI RegisterForLocked(Handler h, Int32 what, Object obj) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Registrant r = new Registrant (h, what, obj);
             mPinLockedRegistrants->Add(r);
             NotifyPinLockedRegistrantsIfNeeded(r);
@@ -470,7 +472,7 @@ public class UiccCardApplication {
     }
 
     CARAPI UnregisterForLocked(Handler h) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mPinLockedRegistrants->Remove(h);
         }
     }
@@ -479,7 +481,7 @@ public class UiccCardApplication {
      * Notifies handler of any transition into State.PERSO_LOCKED
      */
     CARAPI RegisterForPersoLocked(Handler h, Int32 what, Object obj) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Registrant r = new Registrant (h, what, obj);
             mPersoLockedRegistrants->Add(r);
             NotifyPersoLockedRegistrantsIfNeeded(r);
@@ -487,7 +489,7 @@ public class UiccCardApplication {
     }
 
     CARAPI UnregisterForPersoLocked(Handler h) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mPersoLockedRegistrants->Remove(h);
         }
     }
@@ -571,19 +573,19 @@ public class UiccCardApplication {
     }
 
     public AppState GetState() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mAppState;
         }
     }
 
     public AppType GetType() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mAppType;
         }
     }
 
     public Int32 GetAuthContext() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mAuthContext;
         }
     }
@@ -616,13 +618,13 @@ public class UiccCardApplication {
     }
 
     public PersoSubState GetPersoSubState() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mPersoSubState;
         }
     }
 
     public String GetAid() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mAid;
         }
     }
@@ -632,7 +634,7 @@ public class UiccCardApplication {
     }
 
     public PinState GetPin1State() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (mPin1Replaced) {
                 return mUiccCard->GetUniversalPinState();
             }
@@ -641,13 +643,13 @@ public class UiccCardApplication {
     }
 
     public IccFileHandler GetIccFileHandler() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mIccFh;
         }
     }
 
     public IccRecords GetIccRecords() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mIccRecords;
         }
     }
@@ -683,7 +685,7 @@ public class UiccCardApplication {
      *          .GetCommandError() == CommandException.Error.PASSWORD_INCORRECT
      */
     CARAPI SupplyPin (String pin, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mCi->SupplyIccPinForApp(pin, mAid, mHandler->ObtainMessage(EVENT_PIN1_PUK1_DONE,
                     onComplete));
         }
@@ -712,28 +714,28 @@ public class UiccCardApplication {
      *
      */
     CARAPI SupplyPuk (String puk, String newPin, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
         mCi->SupplyIccPukForApp(puk, newPin, mAid,
                 mHandler->ObtainMessage(EVENT_PIN1_PUK1_DONE, onComplete));
         }
     }
 
     CARAPI SupplyPin2 (String pin2, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mCi->SupplyIccPin2ForApp(pin2, mAid,
                     mHandler->ObtainMessage(EVENT_PIN2_PUK2_DONE, onComplete));
         }
     }
 
     CARAPI SupplyPuk2 (String puk2, String newPin2, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             mCi->SupplyIccPuk2ForApp(puk2, newPin2, mAid,
                     mHandler->ObtainMessage(EVENT_PIN2_PUK2_DONE, onComplete));
         }
     }
 
     CARAPI SupplyDepersonalization (String pin, String type, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (DBG) Log("Network Despersonalization: pin = **** , type = " + type);
             mCi->SupplyDepersonalization(pin, type, onComplete);
         }
@@ -766,7 +768,7 @@ public class UiccCardApplication {
      *         FALSE for ICC fdn disabled
      */
     public Boolean GetIccFdnEnabled() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mIccFdnEnabled;
         }
     }
@@ -793,7 +795,7 @@ public class UiccCardApplication {
      */
     CARAPI SetIccLockEnabled (Boolean enabled,
             String password, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Int32 serviceClassX;
             serviceClassX = CommandsInterface.SERVICE_CLASS_VOICE +
                     CommandsInterface.SERVICE_CLASS_DATA +
@@ -820,7 +822,7 @@ public class UiccCardApplication {
      */
     CARAPI SetIccFdnEnabled (Boolean enabled,
             String password, Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             Int32 serviceClassX;
             serviceClassX = CommandsInterface.SERVICE_CLASS_VOICE +
                     CommandsInterface.SERVICE_CLASS_DATA +
@@ -849,7 +851,7 @@ public class UiccCardApplication {
      */
     CARAPI ChangeIccLockPassword(String oldPassword, String newPassword,
             Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (DBG) Log("changeIccLockPassword");
             mCi->ChangeIccPinForApp(oldPassword, newPassword, mAid,
                     mHandler->ObtainMessage(EVENT_CHANGE_PIN1_DONE, onComplete));
@@ -869,7 +871,7 @@ public class UiccCardApplication {
      */
     CARAPI ChangeIccFdnPassword(String oldPassword, String newPassword,
             Message onComplete) {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             If (DBG) Log("changeIccFdnPassword");
             mCi->ChangeIccPin2ForApp(oldPassword, newPassword, mAid,
                     mHandler->ObtainMessage(EVENT_CHANGE_PIN2_DONE, onComplete));
@@ -880,7 +882,7 @@ public class UiccCardApplication {
      * @return TRUE if ICC card is PIN2 blocked
      */
     public Boolean GetIccPin2Blocked() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mPin2State == PinState.PINSTATE_ENABLED_BLOCKED;
         }
     }
@@ -889,7 +891,7 @@ public class UiccCardApplication {
      * @return TRUE if ICC card is PUK2 blocked
      */
     public Boolean GetIccPuk2Blocked() {
-        Synchronized (mLock) {
+        {    AutoLock syncLock(mLock);
             return mPin2State == PinState.PINSTATE_ENABLED_PERM_BLOCKED;
         }
     }

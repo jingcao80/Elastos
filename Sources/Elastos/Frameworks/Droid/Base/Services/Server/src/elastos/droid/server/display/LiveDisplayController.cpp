@@ -17,6 +17,8 @@
 #include <binder/Parcel.h>
 #include <binder/IServiceManager.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Animation::IValueAnimatorHelper;
 using Elastos::Droid::Animation::CValueAnimatorHelper;
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
@@ -598,7 +600,7 @@ void LiveDisplayController::UpdateLiveDisplay()
 void LiveDisplayController::UpdateLiveDisplay(
     /* [in] */ Float lux)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mCurrentLux = lux;
         mHandler->RemoveMessages(MSG_UPDATE_LIVE_DISPLAY);
         Boolean result;
@@ -609,7 +611,7 @@ void LiveDisplayController::UpdateLiveDisplay(
 void LiveDisplayController::UpdateColorTemperature(
     /* [in] */ ITwilightState* twilight)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Int32 temperature = mDayTemperature;
         if (mMode == MODE_OFF || mLowPerformance) {
             temperature = OFF_TEMPERATURE;
@@ -641,7 +643,7 @@ void LiveDisplayController::UpdateColorTemperature(
 void LiveDisplayController::SetDisplayTemperature(
     /* [in] */ Int32 temperature)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         mColorTemperature = temperature;
 
         AutoPtr<ArrayOf<Float> > rgb = TemperatureToRGB(temperature);
@@ -761,7 +763,7 @@ void LiveDisplayController::SetDisplayTemperature(
 void LiveDisplayController::UpdateOutdoorMode(
     /* [in] */ ITwilightState* twilight)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean isNight;
         Boolean enabled = !mLowPerformance &&
                 ((mMode == MODE_OUTDOOR) ||
@@ -782,7 +784,7 @@ void LiveDisplayController::UpdateOutdoorMode(
 void LiveDisplayController::UpdateColorEnhancement(
     /* [in] */ ITwilightState* twilight)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean isNight;
         Boolean enabled = !mLowPerformance && (mUseColorEnhancement &&
                 !(mMode == MODE_NIGHT ||
@@ -800,7 +802,7 @@ void LiveDisplayController::UpdateColorEnhancement(
 
 void LiveDisplayController::UpdateLowPowerMode()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean enabled = mUseLowPower && mCurrentLux < mDefaultOutdoorLux;
 
         if (enabled == mLowPower) {

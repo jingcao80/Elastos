@@ -22,6 +22,8 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Camera2::CCaptureResult;
 using Elastos::Droid::Hardware::Camera2::CTotalCaptureResult;
 using Elastos::Droid::Hardware::Camera2::ITotalCaptureResult;
@@ -437,7 +439,7 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnDeviceError(
     }
 
     Object& lock = mHost->mInterfaceLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         if (mHost->mRemoteDevice == NULL) {
             return NOERROR; // Camera already closed
         }
@@ -478,7 +480,7 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnDeviceIdle()
     }
 
     Object& lock = mHost->mInterfaceLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         if (!mHost->mIdle) {
@@ -505,7 +507,7 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnCaptureStarted(
     AutoPtr<ICameraDeviceImplCaptureCallbackHolder> holder;
 
     Object& lock = mHost->mInterfaceLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         // Get the callback for this frame ID, if there is one
@@ -545,7 +547,7 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnResultReceived(
     }
 
     Object& lock = mHost->mInterfaceLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         // TODO: Handle CameraCharacteristics access from CaptureResult correctly.
@@ -704,7 +706,7 @@ ECode CameraDeviceImpl::CallOnOpeneRunnable::Run()
 {
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
     Object& lock = mHost->mInterfaceLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         sessionCallback = mHost->mSessionStateCallback;
@@ -725,7 +727,7 @@ ECode CameraDeviceImpl::CallOnUnconfiguredRunnable::Run()
 {
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
     Object& lock = mHost->mInterfaceLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         sessionCallback = mHost->mSessionStateCallback;
@@ -746,7 +748,7 @@ ECode CameraDeviceImpl::CallOnActiveRunnable::Run()
 {
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
     Object& lock = mHost->mInterfaceLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         sessionCallback = mHost->mSessionStateCallback;
@@ -767,7 +769,7 @@ ECode CameraDeviceImpl::CallOnBusyRunnable::Run()
 {
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
     Object& lock = mHost->mInterfaceLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         sessionCallback = mHost->mSessionStateCallback;
@@ -794,7 +796,7 @@ ECode CameraDeviceImpl::CallOnCloseRunnable::Run()
     }
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
     Object& lock = mHost->mInterfaceLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         sessionCallback = mHost->mSessionStateCallback;
     }
     if (sessionCallback != NULL) {
@@ -815,7 +817,7 @@ ECode CameraDeviceImpl::CallOnIdlRunnable::Run()
 {
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
     Object& lock = mHost->mInterfaceLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         sessionCallback = mHost->mSessionStateCallback;
@@ -836,7 +838,7 @@ ECode CameraDeviceImpl::CallOnDisconnectedRunnable::Run()
 {
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
     Object& lock = mHost->mInterfaceLock;
-    synchronized(lock) {
+    {    AutoLock syncLock(lock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         sessionCallback = mHost->mSessionStateCallback;
@@ -1143,7 +1145,7 @@ ECode CameraDeviceImpl::GetCallbacks(
 ECode CameraDeviceImpl::SetRemoteDevice(
     /* [in] */ IICameraDeviceUser* remoteDevice)
 {
-    synchronized(mInterfaceLock) {
+    {    AutoLock syncLock(mInterfaceLock);
         // TODO: Move from decorator to direct binder-mediated exceptions
         // If setRemoteFailure already called, do nothing
         if (mInError) return NOERROR;
@@ -1188,7 +1190,7 @@ ECode CameraDeviceImpl::SetRemoteFailure(
     // }
     const Int32 code = failureCode;
     const Boolean isError = failureIsError;
-    synchronized(mInterfaceLock) {
+    {    AutoLock syncLock(mInterfaceLock);
         mInError = TRUE;
         AutoPtr<RemoteFailureRunnable> run = new RemoteFailureRunnable(this, isError, code);
         Boolean result;
@@ -1228,7 +1230,7 @@ ECode CameraDeviceImpl::ConfigureOutputsChecked(
     }
     Boolean success = FALSE;
 
-    synchronized(mInterfaceLock) {
+    {    AutoLock syncLock(mInterfaceLock);
         FAIL_RETURN(CheckIfCameraClosedOrInError())
 
         AutoPtr<IHashSet> addSet;
@@ -1382,7 +1384,7 @@ ECode CameraDeviceImpl::CreateCaptureSession(
     /* [in] */ ICameraCaptureSessionStateCallback* _callback,
     /* [in] */ IHandler* handler)
 {
-    synchronized(mInterfaceLock) {
+    {    AutoLock syncLock(mInterfaceLock);
         if (DEBUG) {
             Slogger::D(TAG, "createCaptureSession");
         }
@@ -1434,7 +1436,7 @@ ECode CameraDeviceImpl::CreateCaptureSession(
 ECode CameraDeviceImpl::SetSessionListener(
     /* [in] */ ICameraDeviceImplStateCallbackKK* sessionCallback)
 {
-    synchronized(mInterfaceLock) {
+    {    AutoLock syncLock(mInterfaceLock);
         mSessionStateCallback = sessionCallback;
     }
     return NOERROR;
@@ -1447,7 +1449,7 @@ ECode CameraDeviceImpl::CreateCaptureRequest(
     VALIDATE_NOT_NULL(builder);
     *builder = NULL;
 
-    synchronized(mInterfaceLock) {
+    {    AutoLock syncLock(mInterfaceLock);
         FAIL_RETURN(CheckIfCameraClosedOrInError())
 
         AutoPtr<ICameraMetadataNative> templatedRequest;
@@ -1633,7 +1635,7 @@ ECode CameraDeviceImpl::SubmitCaptureRequest(
         }
     }
 
-    synchronized(mInterfaceLock) {
+    {    AutoLock syncLock(mInterfaceLock);
         FAIL_RETURN(CheckIfCameraClosedOrInError())
         Int32 requestId;
 
@@ -1749,7 +1751,7 @@ ECode CameraDeviceImpl::SetRepeatingBurst(
 
 ECode CameraDeviceImpl::StopRepeating()
 {
-    synchronized(mInterfaceLock) {
+    {    AutoLock syncLock(mInterfaceLock);
         FAIL_RETURN(CheckIfCameraClosedOrInError())
         if (mRepeatingRequestId != REQUEST_ID_NONE) {
 
@@ -1791,7 +1793,7 @@ ECode CameraDeviceImpl::StopRepeating()
 
 ECode CameraDeviceImpl::WaitUntilIdle()
 {
-    synchronized(mInterfaceLock) {
+    {    AutoLock syncLock(mInterfaceLock);
         FAIL_RETURN(CheckIfCameraClosedOrInError())
 
         if (mRepeatingRequestId != REQUEST_ID_NONE) {
@@ -1818,7 +1820,7 @@ ECode CameraDeviceImpl::WaitUntilIdle()
 
 ECode CameraDeviceImpl::Flush()
 {
-    synchronized(mInterfaceLock) {
+    {    AutoLock syncLock(mInterfaceLock);
         FAIL_RETURN(CheckIfCameraClosedOrInError())
 
         Boolean tmp;
@@ -1856,7 +1858,7 @@ ECode CameraDeviceImpl::Flush()
 
 ECode CameraDeviceImpl::Close()
 {
-    synchronized(mInterfaceLock) {
+    {    AutoLock syncLock(mInterfaceLock);
         //try {
         ECode ec = NOERROR;
         if (mRemoteDevice != NULL) {
@@ -1915,7 +1917,7 @@ ECode CameraDeviceImpl::CheckAndFireSequenceComplete()
 
             Int32 requestId = value;
             AutoPtr<ICameraDeviceImplCaptureCallbackHolder> holder;
-            synchronized(mInterfaceLock) {
+            {    AutoLock syncLock(mInterfaceLock);
                 if (mRemoteDevice == NULL) {
                     Slogger::W(TAG, "Camera closed while checking sequences");
                     return NOERROR;

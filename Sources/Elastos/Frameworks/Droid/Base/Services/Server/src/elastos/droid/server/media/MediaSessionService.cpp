@@ -8,6 +8,8 @@
 #include "elastos/core/StringUtils.h"
 #include <elastos/utility/logging/Slogger.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::Content::IComponentNameHelper;
@@ -201,7 +203,7 @@ AutoPtr<IIAudioService> MediaSessionService::GetAudioService()
 void MediaSessionService::UpdateSession(
     /* [in] */ MediaSessionRecord* record)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (Find(mAllSessions.Begin(), mAllSessions.End(), AutoPtr<MediaSessionRecord>(record)) == mAllSessions.End()) {
             Slogger::D(TAG, "Unknown session updated. Ignoring.");
             return;
@@ -217,7 +219,7 @@ void MediaSessionService::OnSessionPlaystateChange(
     /* [in] */ Int32 newState)
 {
     Boolean updateSessions = FALSE;
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (Find(mAllSessions.Begin(), mAllSessions.End(), AutoPtr<MediaSessionRecord>(record)) == mAllSessions.End()) {
             Slogger::D(TAG, "Unknown session changed playback state. Ignoring.");
             return;
@@ -232,7 +234,7 @@ void MediaSessionService::OnSessionPlaystateChange(
 void MediaSessionService::OnSessionPlaybackTypeChanged(
     /* [in] */ MediaSessionRecord* record)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         if (Find(mAllSessions.Begin(), mAllSessions.End(), AutoPtr<MediaSessionRecord>(record)) == mAllSessions.End()) {
             Slogger::D(TAG, "Unknown session changed playback type. Ignoring.");
             return;
@@ -258,7 +260,7 @@ ECode MediaSessionService::OnSwitchUser(
 ECode MediaSessionService::OnStopUser(
     /* [in] */ Int32 userHandle)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         HashMap<Int32, AutoPtr<UserRecord> >::Iterator it = mUserRecords.Find(userHandle);
         AutoPtr<UserRecord> user;
         if (it != mUserRecords.End()) {
@@ -273,7 +275,7 @@ ECode MediaSessionService::OnStopUser(
 
 ECode MediaSessionService::Monitor()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         // Check for deadlock
     }
     return NOERROR;
@@ -297,7 +299,7 @@ ECode MediaSessionService::EnforcePhoneStatePermission(
 void MediaSessionService::SessionDied(
     /* [in] */ MediaSessionRecord* session)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         DestroySessionLocked(session);
     }
 }
@@ -305,14 +307,14 @@ void MediaSessionService::SessionDied(
 void MediaSessionService::DestroySession(
     /* [in] */ MediaSessionRecord* session)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         DestroySessionLocked(session);
     }
 }
 
 void MediaSessionService::UpdateUser()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<IActivityManagerHelper> helper;
         CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
         Int32 userId;
@@ -338,7 +340,7 @@ void MediaSessionService::UpdateUser()
 
 void MediaSessionService::UpdateActiveSessionListeners()
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         List<AutoPtr<SessionsListenerRecord> >::ReverseIterator rit = mSessionsListeners.RBegin();
         while (rit != mSessionsListeners.REnd()) {
             AutoPtr<SessionsListenerRecord> listener = *rit;
@@ -532,7 +534,7 @@ ECode MediaSessionService::CreateSessionInternal(
 {
     VALIDATE_NOT_NULL(record)
     ECode ec;
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         ec = CreateSessionLocked(callerPid, callerUid, userId, callerPackageName, cb, tag, record);
     }
     return ec;
@@ -620,7 +622,7 @@ Boolean MediaSessionService::IsSessionDiscoverable(
 void MediaSessionService::PushSessionsChanged(
     /* [in] */ Int32 userId)
 {
-    synchronized (mLock) {
+    {    AutoLock syncLock(mLock);
         AutoPtr<List<AutoPtr<MediaSessionRecord> > > records = mPriorityStack->GetActiveSessions(userId);
         if (records->IsEmpty() == FALSE) {
             RememberMediaButtonReceiverLocked((*records->Begin()));

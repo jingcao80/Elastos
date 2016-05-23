@@ -27,6 +27,8 @@
 
 // using Elastos::Droid::Server::Connectivity::Vpn;
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::App::CNotificationBuilder;
@@ -337,7 +339,7 @@ ECode LockdownVpnTracker::InitLocked()
     }
     // }
 
-    synchronized(mStateLock) {
+    {    AutoLock syncLock(mStateLock);
         HandleStateChangedLocked();
     }
     return NOERROR;
@@ -390,7 +392,7 @@ ECode LockdownVpnTracker::ShutdownLocked()
 ECode LockdownVpnTracker::Reset()
 {
     Slogger::D(TAG, "reset()");
-    synchronized(mStateLock) {
+    {    AutoLock syncLock(mStateLock);
         // cycle tracker, reset error count, and trigger retry
         ShutdownLocked();
         InitLocked();
@@ -447,7 +449,7 @@ ECode LockdownVpnTracker::SetFirewallEgressSourceRule(
 
 ECode LockdownVpnTracker::OnNetworkInfoChanged()
 {
-    synchronized(mStateLock){
+    {    AutoLock syncLock(mStateLock);
         return HandleStateChangedLocked();
     }
     return NOERROR;

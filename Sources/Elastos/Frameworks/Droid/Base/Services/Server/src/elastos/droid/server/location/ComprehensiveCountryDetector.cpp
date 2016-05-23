@@ -13,6 +13,8 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Location::CCountry;
 using Elastos::Droid::Location::CGeocoderHelper;
@@ -139,7 +141,7 @@ ECode ComprehensiveCountryDetector::AddToLogs(
     // If the country (ISO and source) are the same as before, then there is no
     // need to add this country as another entry in the logs. Synchronize access to this
     // variable since multiple threads could be calling this method.
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         Boolean equals;
         IObject::Probe(mLastCountryAddedToLogs)->Equals(country, &equals);
         if (mLastCountryAddedToLogs != NULL && equals) {
@@ -357,7 +359,7 @@ ECode ComprehensiveCountryDetector::RunAfterDetection(
 ECode ComprehensiveCountryDetector::StartLocationBasedDetector(
     /* [in] */ ICountryListener* listener)
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mLocationBasedCountryDetector != NULL) {
             return E_NULL_POINTER_EXCEPTION;
         }
@@ -389,7 +391,7 @@ ECode ComprehensiveCountryDetector::CreateLocationBasedCountryDetector(
     /* [out] */ CountryDetectorBase** db)
 {
     VALIDATE_NOT_NULL(db)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         *db = new LocationBasedCountryDetector(mContext);
         REFCOUNT_ADD(*db)
     }
@@ -429,7 +431,7 @@ void ComprehensiveCountryDetector::NotifyIfCountryChanged(
 
 ECode ComprehensiveCountryDetector::ScheduleLocationRefresh()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mLocationRefreshTimer != NULL) return E_NULL_POINTER_EXCEPTION;
         if (DEBUG) {
             Slogger::D(TAG, "start periodic location refresh timer. Interval: %ld", LOCATION_REFRESH_INTERVAL);
@@ -443,7 +445,7 @@ ECode ComprehensiveCountryDetector::ScheduleLocationRefresh()
 
 void ComprehensiveCountryDetector::CancelLocationRefresh()
 {
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mLocationRefreshTimer != NULL) {
             mLocationRefreshTimer->Cancel();
             mLocationRefreshTimer = NULL;
@@ -455,7 +457,7 @@ void ComprehensiveCountryDetector::CancelLocationRefresh()
 void ComprehensiveCountryDetector::AddPhoneStateListener()
 {
     #if 0 //TODO
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (mPhoneStateListener == NULL) {
             AutoPtr<MyPhoneStateListener> psl = new MyPhoneStateListener(this);
             mPhoneStateListener = (IPhoneStateListener*)psl.Get();
@@ -468,7 +470,7 @@ void ComprehensiveCountryDetector::AddPhoneStateListener()
 ECode ComprehensiveCountryDetector::RemovePhoneStateListener()
 {
     //TODO
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         // if (mPhoneStateListener == NULL) {
             // mTelephonyManager->Listen(mPhoneStateListener.Get(), IPhoneStateListener::LISTEN_NONE);
         //     mPhoneStateListener = NULL;
@@ -481,7 +483,7 @@ ECode ComprehensiveCountryDetector::IsGeoCoderImplemented(
     /* [out] */ Boolean* isGeoCoderImplemented)
 {
     VALIDATE_NOT_NULL(isGeoCoderImplemented)
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         AutoPtr<IGeocoderHelper> gh;
         CGeocoderHelper::AcquireSingleton((IGeocoderHelper**)&gh);
         gh->IsPresent(isGeoCoderImplemented);

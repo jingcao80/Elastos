@@ -3,6 +3,8 @@
 #include "elastos/droid/media/audiofx/CEnvironmentalReverbSettings.h"
 #include <elastos/core/AutoLock.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Utility::IUUIDHelper;
 using Elastos::Utility::CUUIDHelper;
 
@@ -32,7 +34,7 @@ ECode CEnvironmentalReverb::BaseParameterListener::OnParameterChange(
     AutoPtr<IEnvironmentalReverbOnParameterChangeListener> l;
     {
         Object& lock = mHost->mParamListenerLock;
-        synchronized(lock);
+        AutoLock syncLock(lock);
         if (mHost->mParamListener != NULL) {
             l = mHost->mParamListener;
         }
@@ -304,7 +306,7 @@ ECode CEnvironmentalReverb::GetDensity(
 ECode CEnvironmentalReverb::SetParameterListener(
     /* [in] */ IEnvironmentalReverbOnParameterChangeListener* listener)
 {
-    synchronized(mParamListenerLock);
+    AutoLock syncLock(mParamListenerLock);
     if (mParamListener != NULL) {
         mParamListener = listener;
         mBaseParamListener = new BaseParameterListener(this);

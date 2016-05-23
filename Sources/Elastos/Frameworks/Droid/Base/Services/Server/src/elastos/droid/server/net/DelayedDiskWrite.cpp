@@ -6,6 +6,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <Elastos.CoreLibrary.IO.h>
 
+#include <elastos/core/AutoLock.h>
+using Elastos::Core::AutoLock;
 using Elastos::Core::IRunnable;
 using Elastos::Core::IThread;
 using Elastos::Droid::Os::CHandler;
@@ -58,7 +60,7 @@ ECode DelayedDiskWrite::Write(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     /* Do a delayed write to disk on a separate handler thread */
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (++mWriteSequence == 1) {
             CHandlerThread::New(String("DelayedDiskWriteThread"), (IHandlerThread**)&mDiskWriteHandlerThread);
             IThread::Probe(mDiskWriteHandlerThread)->Start();
@@ -100,7 +102,7 @@ ECode DelayedDiskWrite::DoWrite(
     }
     // }
     // Quit if no more writes sent
-    synchronized(this) {
+    {    AutoLock syncLock(this);
         if (--mWriteSequence == 0) {
             Ptr(mDiskWriteHandler)->Func(IHandler::GetLooper)->Quit();
             mDiskWriteHandler = NULL;
