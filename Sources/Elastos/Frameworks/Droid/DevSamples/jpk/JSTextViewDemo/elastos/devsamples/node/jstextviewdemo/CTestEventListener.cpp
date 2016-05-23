@@ -11,7 +11,7 @@ using Elastos::Utility::Logging::Logger;
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
-namespace TextViewDemo {
+namespace JSTextViewDemo {
 
 static const String DBG_TAG("CTestEventListener");
 
@@ -160,7 +160,7 @@ ECode CTestEventListener::SetNodeBridge(
     return NOERROR;
 }
 
-}   //namespace TextViewDemo
+}   //namespace JSTextViewDemo
 }   //namespace Node
 }   //namespace DevSamples
 }   //namespace Elastos

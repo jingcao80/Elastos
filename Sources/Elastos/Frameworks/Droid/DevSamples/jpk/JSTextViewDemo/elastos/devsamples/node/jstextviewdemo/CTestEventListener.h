@@ -11,7 +11,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 
 //#include "_CTestEventListener.h"
-#include "_Elastos_DevSamples_Node_TextViewDemo_CTestEventListener.h"
+#include "_Elastos_DevSamples_Node_JSTextViewDemo_CTestEventListener.h"
 
 //#include <ext/frameworkdef.h>
 #include <elastos/droid/ext/frameworkdef.h>
@@ -119,7 +119,7 @@ struct NodeBridge
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
-namespace TextViewDemo {
+namespace JSTextViewDemo {
 
 EXTERN IHandler* myHandler;
 
@@ -314,7 +314,7 @@ public:
     static bool mNodeInit;
 };
 
-}   //namespace TextViewDemo
+}   //namespace JSTextViewDemo
 }   //namespace Node
 }   //namespace DevSamples
 }   //namespace Elastos

@@ -1,4 +1,4 @@
-TARGET_NAME = Elastos.DevSamples.Node.TextViewDemo
+TARGET_NAME = Elastos.DevSamples.Node.JSTextViewDemo
 TARGET_TYPE = eco
 
 CAR_FLAGS += -n -u
@@ -6,10 +6,10 @@ LUBE_FLAGS += -n -u
 
 include $(MAKEDIR)/../../../../../../../sources.inc
 INCLUDES += $(MAKEDIR)
-INCLUDES += $(MAKEDIR)/../../../../../Common/inc
 INCLUDES += $(MAKEDIR)/../../../../
+INCLUDES += $(MAKEDIR)/../../../../../Common/inc
 
-SOURCES = Elastos.DevSamples.Node.TextViewDemo.car
+SOURCES = Elastos.DevSamples.Node.JSTextViewDemo.car
 SOURCES += R.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
@@ -25,5 +25,5 @@ LIBRARIES += -lm -licuuc -llog
 
 APPPACK = 1
 DIRRESOURCES += $(MAKEDIR)/res;
-APP_PACKAGE_NAME = Elastos.DevSamples.Node.TextViewDemo
-RES_NAMESPACE = Elastos.DevSamples.Node.TextViewDemo
+APP_PACKAGE_NAME = Elastos.DevSamples.Node.JSTextViewDemo
+RES_NAMESPACE = Elastos.DevSamples.Node.JSTextViewDemo

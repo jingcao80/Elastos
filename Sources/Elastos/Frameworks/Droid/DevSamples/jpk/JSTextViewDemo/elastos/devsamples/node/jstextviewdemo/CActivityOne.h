@@ -1,11 +1,11 @@
 
-#ifndef __Elastos_DevSamples_Node_TextViewDemo_CActivityOne_H__
-#define __Elastos_DevSamples_Node_TextViewDemo_CActivityOne_H__
+#ifndef __Elastos_DevSamples_Node_JSTextViewDemo_CActivityOne_H__
+#define __Elastos_DevSamples_Node_JSTextViewDemo_CActivityOne_H__
 
 #include <Elastos.Droid.Graphics.h>
 #include <Elastos.Droid.Widget.h>
 #include <elastos/droid/app/Activity.h>
-#include "_Elastos_DevSamples_Node_TextViewDemo_CActivityOne.h"
+#include "_Elastos_DevSamples_Node_JSTextViewDemo_CActivityOne.h"
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::IDialog;
@@ -31,7 +31,7 @@ using Elastos::Droid::Widget::IToggleButton;
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
-namespace TextViewDemo {
+namespace JSTextViewDemo {
 
 CarClass(CActivityOne)
     , public Activity
@@ -185,9 +185,9 @@ private:
     AutoPtr<IToggleButton> mToggleButton2;
 };
 
-} // namespace TextViewDemo
+} // namespace JSTextViewDemo
 } // namespace Node
 } // namespace DevSamples
 } // namespace Elastos
 
-#endif // __Elastos_DevSamples_TextViewDemo_Node_CActivityOne_H__
+#endif // __Elastos_DevSamples_Node_JSTextViewDemo_CActivityOne_H__

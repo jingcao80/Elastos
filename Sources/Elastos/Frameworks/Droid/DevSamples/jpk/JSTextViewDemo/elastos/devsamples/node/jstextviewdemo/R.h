@@ -5,13 +5,13 @@
  * should not be modified by hand.
  */
 
-#ifndef __Elastos_DevSamples_Node_TextViewDemo_R_H__
-#define __Elastos_DevSamples_Node_TextViewDemo_R_H__
+#ifndef __Elastos_DevSamples_Node_JSTextViewDemo_R_H__
+#define __Elastos_DevSamples_Node_JSTextViewDemo_R_H__
 #include <elatypes.h>
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
-namespace TextViewDemo {
+namespace JSTextViewDemo {
 class ECO_PUBLIC R {
     public: class attr {
     };
@@ -73,4 +73,4 @@ class ECO_PUBLIC R {
 };
 };
 
-#endif // __Elastos_DevSamples_Node_TextViewDemo_R_H__
+#endif // __Elastos_DevSamples_Node_JSTextViewDemo_R_H__
