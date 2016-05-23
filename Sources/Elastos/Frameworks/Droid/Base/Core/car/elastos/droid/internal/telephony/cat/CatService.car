@@ -7,14 +7,13 @@ module {
     namespace Telephony {
     namespace Cat {
 
+    /**
+     * @Involve
+     * interface IHandler
+     * interface IAppInterface
+     */
     interface ICatService {
         Dispose();
-
-        HandleMessage(Message msg);
-
-        OnCmdResponse(CatResponseMessage resMsg);
-
-        UpdateIccAvailability();
 
     }
 

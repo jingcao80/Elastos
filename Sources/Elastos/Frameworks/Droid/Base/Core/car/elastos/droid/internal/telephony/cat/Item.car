@@ -7,21 +7,11 @@ module {
     namespace Telephony {
     namespace Cat {
 
+    /**
+     * @Involve
+     * interface IParcelable
+     */
     interface IItem {
-        DescribeContents(
-            [out] Int32* result);
-
-        WriteToParcel(
-            [in] Parcel dest, 
-            [in] Int32 flags);
-
-        CreateFromParcel(
-            [in] Parcel in,
-            [out] Item* result);
-
-        NewArray(
-            [in] Int32 size);
-
     }
 
     }//Cat

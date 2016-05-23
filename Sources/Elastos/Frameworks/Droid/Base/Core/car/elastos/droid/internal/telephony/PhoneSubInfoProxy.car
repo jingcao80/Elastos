@@ -6,66 +6,27 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IIPhoneSubInfo
+     */
     interface IPhoneSubInfoProxy {
         SetmPhoneSubInfo(
-            [in] PhoneSubInfo phoneSubInfo);
-
-        GetDeviceId(
-            [out] String* result);
+            [in] IPhoneSubInfo* phoneSubInfo);
 
         GetImei(
             [out] String* result);
 
-        GetDeviceSvn(
-            [out] String* result);
-
-        GetSubscriberId(
-            [out] String* result);
-
         GetGroupIdLevel1(
             [out] String* result);
-
-        GetIccSerialNumber(
-            [out] String* result);
-
-        GetLine1Number(
-            [out] String* result);
-
-        GetLine1AlphaTag(
-            [out] String* result);
-
-        GetMsisdn(
-            [out] String* result);
-
-        GetVoiceMailNumber(
-            [out] String* result);
-
-        GetCompleteVoiceMailNumber(
-            [out] String* result);
-
-        GetVoiceMailAlphaTag(
-            [out] String* result);
-
-        GetIsimImpi(
-            [out] String* result);
-
-        GetIsimDomain(
-            [out] String* result);
-
-        GetIsimImpu();
-
-        GetIsimIst(
-            [out] String* result);
-
-        GetIsimPcscf();
 
         GetIsimChallengeResponse(
             [in] String nonce,
             [out] String* result);
 
         GetIccSimChallengeResponse(
-            [in] Int64 subId, 
-            [in] Int32 appType, 
+            [in] Int64 subId,
+            [in] Int32 appType,
             [in] String data,
             [out] String* result);
 

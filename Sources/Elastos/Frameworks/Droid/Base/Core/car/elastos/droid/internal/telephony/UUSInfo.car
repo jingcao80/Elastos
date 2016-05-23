@@ -6,7 +6,46 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    [deprecated]
     interface IUUSInfo {
+        /*
+         * User-to-User signaling Info activation types derived from 3GPP 23.087
+         * v8.0
+         */
+
+        const Int32 UUS_TYPE1_IMPLICIT = 0;
+
+        const Int32 UUS_TYPE1_REQUIRED = 1;
+
+        const Int32 UUS_TYPE1_NOT_REQUIRED = 2;
+
+        const Int32 UUS_TYPE2_REQUIRED = 3;
+
+        const Int32 UUS_TYPE2_NOT_REQUIRED = 4;
+
+        const Int32 UUS_TYPE3_REQUIRED = 5;
+
+        const Int32 UUS_TYPE3_NOT_REQUIRED = 6;
+
+        /*
+         * User-to-User Signaling Information data coding schemes. Possible values
+         * for Octet 3 (Protocol Discriminator field) in the UUIE. The values have
+         * been specified in section 10.5.4.25 of 3GPP TS 24.008
+         */
+
+        const Int32 UUS_DCS_USP = 0; /* User specified protocol */
+
+        const Int32 UUS_DCS_OSIHLP = 1; /* OSI higher layer protocol */
+
+        const Int32 UUS_DCS_X244 = 2; /* X.244 */
+
+        const Int32 UUS_DCS_RMCF = 3; /*
+                                                   * Reserved for system management
+                                                   * convergence function
+                                                   */
+
+        const Int32 UUS_DCS_IA5c = 4; /* IA5 characters */
+
         GetDcs(
             [out] Int32* result);
 
@@ -19,7 +58,11 @@ module {
         SetType(
             [in] Int32 uusType);
 
-        GetUserData();
+        GetUserData(
+            [out, callee] ArrayOf<Byte>* result);
+
+        SetUserData(
+            [in] ArrayOf<Byte>* uusData);
 
     }
 

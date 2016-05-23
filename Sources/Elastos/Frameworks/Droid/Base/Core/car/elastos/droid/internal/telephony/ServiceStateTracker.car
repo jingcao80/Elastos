@@ -1,84 +1,167 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Telephony.ISignalStrength;
+    // interface Elastos.Droid.Internal.Telephony.DataConnection.IDcTrackerBase;
+
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IPrintWriter;
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IHandler
+     */
+    [deprecated]
     interface IServiceStateTracker {
-        RequestShutdown();
+        /** Waiting period before recheck gprs and voice registration. */
+        const Int32 DEFAULT_GPRS_CHECK_PERIOD_MILLIS = 60 * 1000;
 
         Dispose();
 
         GetDesiredPowerState(
             [out] Boolean* result);
 
+        /**
+         * Registration point for combined roaming on
+         * combined roaming is true when roaming is true and ONS differs SPN
+         *
+         * @param h handler to notify
+         * @param what what code of message when delivered
+         * @param obj placed in Message.obj
+         */
+        RegisterForRoamingOn(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
+
+        UnregisterForRoamingOn(
+            [in] IHandler* h);
+
+        /**
+         * Registration point for combined roaming off
+         * combined roaming is true when roaming is true and ONS differs SPN
+         *
+         * @param h handler to notify
+         * @param what what code of message when delivered
+         * @param obj placed in Message.obj
+         */
+        RegisterForRoamingOff(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
+
+        UnregisterForRoamingOff(
+            [in] IHandler* h);
+
+        /**
+         * Re-register network by toggling preferred network type.
+         * This is a work-around to deregister and register network since there is
+         * no ril api to set COPS=2 (deregister) only.
+         *
+         * @param onComplete is dispatched when this is complete.  it will be
+         * an AsyncResult, and onComplete.obj.exception will be non-null
+         * on failure.
+         */
+        ReRegisterNetwork(
+            [in] IMessage* onComplete);
+
+        SetRadioPower(
+            [in] Boolean power);
+
+        EnableSingleLocationUpdate();
+
+        EnableLocationUpdates();
+
+        DisableLocationUpdates();
+
+        GetCurrentDataConnectionState(
+            [out] Int32* result);
+
+        IsConcurrentVoiceAndDataAllowed(
+            [out] Boolean* result);
+
+        SetImsRegistrationState(
+            [in] Boolean registered);
+
+        PollState();
 
         RegisterForDataConnectionAttached(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForDataConnectionAttached(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForDataConnectionDetached(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForDataConnectionDetached(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForDataRegStateOrRatChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForDataRegStateOrRatChanged(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForNetworkAttached(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForNetworkAttached(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForPsRestrictedEnabled(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForPsRestrictedEnabled(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForPsRestrictedDisabled(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForPsRestrictedDisabled(
-            [in] Handler h);
+            [in] IHandler* h);
 
-        PowerOffRadioSafely(
-            [in] DcTrackerBase dcTracker);
+        // PowerOffRadioSafely(
+        //     [in] IDcTrackerBase* dcTracker);
 
         ProcessPendingRadioPowerOffAfterDataOff(
             [out] Boolean* result);
 
         GetSystemProperty(
-            [in] String property, 
+            [in] String property,
             [in] String defValue,
             [out] String* result);
 
-        GetAllCellInfo();
+        GetAllCellInfo(
+            [out] IList** result);
 
         GetSignalStrength(
-            [out] SignalStrength* result);
+            [out] ISignalStrength** result);
 
+        Dump(
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* pw,
+            [in] ArrayOf<String>* args);
     }
 
     }//Telephony

@@ -7,6 +7,10 @@ module {
     namespace Telephony {
     namespace Cat {
 
+    /**
+     * @Involve
+     * interface ICatException
+     */
     interface IResultException {
         Result(
             [out] ResultCode* result);

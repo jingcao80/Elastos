@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    enum Elastos.Droid.Internal.Telephony.MessageClass;
 
     namespace Elastos {
     namespace Droid {
@@ -19,6 +21,12 @@ module {
         GetMessageBody(
             [out] String* result);
 
+        /**
+         * Returns the class of this message.
+         */
+        GetMessageClass(
+            [out] MessageClass* result);
+
         GetDisplayMessageBody(
             [out] String* result);
 
@@ -37,12 +45,83 @@ module {
         GetEmailFrom(
             [out] String* result);
 
-        GetUserData();
+        /**
+         * Get protocol identifier.
+         */
+        GetProtocolIdentifier(
+            [out] Int32* result);
+
+        /**
+         * See TS 23.040 9.2.3.9 returns true if this is a "replace short message"
+         * SMS
+         */
+        IsReplace(
+            [out] Boolean* result);
+
+        /**
+         * Returns true for CPHS MWI toggle message.
+         *
+         * @return true if this is a CPHS MWI toggle message See CPHS 4.2 section
+         *         B.4.2
+         */
+        IsCphsMwiMessage(
+            [out] Boolean* result);
+
+        /**
+         * returns true if this message is a CPHS voicemail / message waiting
+         * indicator (MWI) clear message
+         */
+        IsMWIClearMessage(
+            [out] Boolean* result);
+
+        /**
+         * returns true if this message is a CPHS voicemail / message waiting
+         * indicator (MWI) set message
+         */
+        IsMWISetMessage(
+            [out] Boolean* result);
+
+        /**
+         * returns true if this message is a "Message Waiting Indication Group:
+         * Discard Message" notification and should not be stored.
+         */
+        IsMwiDontStore(
+            [out] Boolean* result);
+
+        GetUserData(
+            [out, callee] ArrayOf<Byte>* result);
 
         GetUserDataHeader(
-            [out] SmsHeader* result);
+            [out] ISmsHeader** result);
 
-        GetPdu();
+        GetPdu(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * For an SMS-STATUS-REPORT message, this returns the status field from
+         * the status report.  This field indicates the status of a previously
+         * submitted SMS, if requested.  See TS 23.040, 9.2.3.15 TP-Status for a
+         * description of values.
+         *
+         * @return 0 indicates the previously sent message was received.
+         *         See TS 23.040, 9.9.2.3.15 for a description of other possible
+         *         values.
+         */
+        GetStatus(
+            [out] Int32* result);
+
+        /**
+         * Return true iff the message is a SMS-STATUS-REPORT message.
+         */
+        IsStatusReportMessage(
+            [out] Boolean* result);
+
+        /**
+         * Returns true iff the <code>TP-Reply-Path</code> bit is set in
+         * this message.
+         */
+        IsReplyPathPresent(
+            [out] Boolean* result);
 
         GetStatusOnIcc(
             [out] Int32* result);

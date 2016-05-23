@@ -1,88 +1,47 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Net.INetworkRequest;
+
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    interface ISubscriptionControllerOnDemandDdsLockNotifier {
+        NotifyOnDemandDdsLockGranted(
+            [in] INetworkRequest* n);
+    }
+
+    /**
+     * @Involve
+     * interface IISub
+     */
+    [deprecated]
     interface ISubscriptionController {
-        SetColor(
-            [in] Int32 color, 
-            [in] Int64 subId,
-            [out] Int32* result);
+        GetSubIdFromNetworkRequest(
+            [in] INetworkRequest* n,
+            [out] Int64* result);
 
-        SetDisplayName(
-            [in] String displayName, 
-            [in] Int64 subId,
-            [out] Int32* result);
+        StartOnDemandDataSubscriptionRequest(
+            [in] INetworkRequest* n);
 
-        SetDisplayNameUsingSrc(
-            [in] String displayName, 
-            [in] Int64 subId, 
-            [in] Int64 nameSource,
-            [out] Int32* result);
+        StopOnDemandDataSubscriptionRequest(
+            [in] INetworkRequest* n);
 
-        SetDisplayNumber(
-            [in] String number, 
-            [in] Int64 subId,
-            [out] Int32* result);
-
-        SetDisplayNumberFormat(
-            [in] Int32 format, 
-            [in] Int64 subId,
-            [out] Int32* result);
-
-        SetDataRoaming(
-            [in] Int32 roaming, 
-            [in] Int64 subId,
-            [out] Int32* result);
-
+        /**
+         * Set MCC/MNC by subscription ID
+         * @param mccMnc MCC/MNC associated with the subscription
+         * @param subId the unique SubInfoRecord index in database
+         * @return the number of records updated
+         */
         SetMccMnc(
-            [in] String mccMnc, 
+            [in] String mccMnc,
             [in] Int64 subId,
             [out] Int32* result);
-
-        GetSlotId(
-            [in] Int64 subId,
-            [out] Int32* result);
-
-        GetSubId(
-            [in] Int32 slotId);
-
-        GetPhoneId(
-            [in] Int64 subId,
-            [out] Int32* result);
-
-        ClearSubInfo(
-            [out] Int32* result);
-
-        GetDefaultSubId(
-            [out] Int64* result);
-
-        SetDefaultSmsSubId(
-            [in] Int64 subId);
-
-        GetDefaultSmsSubId(
-            [out] Int64* result);
-
-        SetDefaultVoiceSubId(
-            [in] Int64 subId);
-
-        GetDefaultVoiceSubId(
-            [out] Int64* result);
-
-        IsSMSPromptEnabled(
-            [out] Boolean* result);
-
-        SetSMSPromptEnabled(
-            [in] Boolean enabled);
-
-        GetDefaultDataSubId(
-            [out] Int64* result);
-
-        SetDefaultDataSubId(
-            [in] Int64 subId);
 
         GetCurrentDds(
             [out] Int64* result);
@@ -90,22 +49,75 @@ module {
         SetDataSubId(
             [in] Int64 subId);
 
+        /* Sets the default subscription. If only one sub is active that
+         * sub is set as default subId. If two or more  sub's are active
+         * the first sub is set as default subscription
+         */
+        // FIXME
         SetDefaultSubId(
             [in] Int64 subId);
 
-        ClearDefaultsForInactiveSubIds();
-
+        /* This should return long and not long [] since each phone has
+         * exactly 1 sub id for now, it could return the 0th element
+         * returned from getSubId()
+         */
+        // FIXME will design a mechanism to manage the relationship between PhoneId/SlotId/SubId
+        // since phoneId = SlotId is not always true
         GetSubIdUsingPhoneId(
             [in] Int32 phoneId,
             [out] Int64* result);
 
         GetSubIdUsingSlotId(
-            [in] Int32 slotId);
+            [in] Int32 slotId,
+            [out, callee] ArrayOf<Int64>* result);
 
         GetSubInfoUsingSlotIdWithCheck(
-            [in] Int32 slotId, 
-            [in] Boolean needCheck);
+            [in] Int32 slotId,
+            [in] Boolean needCheck,
+            [out] IList** result);
 
+        UpdatePhonesAvailability(
+            [in] ArrayOf<IPhoneProxy*>* phones);
+
+        SetNwMode(
+            [in] Int64 subId,
+            [in] Int32 nwMode);
+
+        GetNwMode(
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        /* setDds flag is used to trigger DDS switch request during
+          device powerUp and when flex map performed */
+        UpdateUserPrefs(
+            [in] Boolean setDds);
+
+        RegisterForOnDemandDdsLockNotification(
+            [in] Int64 clientSubId,
+            [in] ISubscriptionControllerOnDemandDdsLockNotifier* cb);
+
+        /* {@hide} */
+        NotifyOnDemandDataSubIdChanged(
+            [in] INetworkRequest* n);
+
+        RemoveStaleSubPreferences(
+            [in] String prefKey);
+
+    }
+
+    [deprecated]
+    interface ISubscriptionControllerHelper {
+        Init(
+            [in] IPhone* phone,
+            [out] ISubscriptionController** result);
+
+        Init(
+            [in] IContext* c,
+            [in] ArrayOf<ICommandsInterface*>* ci,
+            [out] ISubscriptionController** result);
+
+        GetInstance(
+            [out] ISubscriptionController** result);
     }
 
     }//Telephony

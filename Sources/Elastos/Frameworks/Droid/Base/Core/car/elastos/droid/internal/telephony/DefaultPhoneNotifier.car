@@ -63,7 +63,7 @@ module
          * for the public API.
          */
         // ConvertDataState(
-        //     [in] IPhoneConstantsDataState* state,
+        //     [in] PhoneConstantsDataState* state,
         //     [out] Int32* result);
 
         /**
@@ -72,7 +72,7 @@ module
          */
         // ConvertDataState(
         //     [in] Int32 state,
-        //     [out] IPhoneConstantsDataState** result);
+        //     [out] PhoneConstantsDataState** result);
 
         /**
          * Convert the {@link Phone.DataActivityState} enum into the TelephonyManager.DATA_* constants

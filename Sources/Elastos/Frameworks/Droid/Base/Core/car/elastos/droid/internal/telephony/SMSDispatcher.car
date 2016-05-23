@@ -6,11 +6,52 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IHandler
+     */
     interface ISMSDispatcher {
         Dispose();
 
-        HandleMessage(Message msg);
+        /**
+         * Returns the premium SMS permission for the specified package. If the package has never
+         * been seen before, the default {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_ASK_USER}
+         * will be returned.
+         * @param packageName the name of the package to query permission
+         * @return one of {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_UNKNOWN},
+         *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_ASK_USER},
+         *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_NEVER_ALLOW}, or
+         *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_ALWAYS_ALLOW}
+         */
+        GetPremiumSmsPermission(
+            [in] String packageName,
+            [out] Int32* result);
 
+        /**
+         * Sets the premium SMS permission for the specified package and save the value asynchronously
+         * to persistent storage.
+         * @param packageName the name of the package to set permission
+         * @param permission one of {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_ASK_USER},
+         *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_NEVER_ALLOW}, or
+         *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_ALWAYS_ALLOW}
+         */
+        SetPremiumSmsPermission(
+            [in] String packageName,
+            [in] Int32 permission);
+
+        /**
+         * Retry the message along to the radio.
+         *
+         * @param tracker holds the SMS message to send
+         */
+        // SendRetrySms(
+        //     [in] ISmsTracker* tracker);
+
+        IsIms(
+            [out] Boolean* result);
+
+        GetImsSmsFormat(
+            [out] String* result);
     }
 
     }//Telephony

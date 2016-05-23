@@ -7,24 +7,27 @@ module {
     namespace Telephony {
     namespace Cat {
 
+    enum IDurationTimeUnit {
+        TimeUnit_MINUTE = 0x00,
+        TimeUnit_SECOND = 0x01,
+        TimeUnit_TENTH_SECOND = 0x02
+
+        // private int mValue;
+
+        // TimeUnit(int value) {
+        //     mValue = value;
+        // }
+
+        // public int value() {
+        //     return mValue;
+        // }
+    }
+
+    /**
+     * @Involve
+     * interface IParcelable
+     */
     interface IDuration {
-        Value(
-            [out] Int32* result);
-
-        WriteToParcel(
-            [in] Parcel dest, 
-            [in] Int32 flags);
-
-        DescribeContents(
-            [out] Int32* result);
-
-        CreateFromParcel(
-            [in] Parcel in,
-            [out] Duration* result);
-
-        NewArray(
-            [in] Int32 size);
-
     }
 
     }//Cat

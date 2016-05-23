@@ -1,0 +1,90 @@
+
+module
+{
+    interface Elastos.Droid.Telephony.IDataConnectionRealTimeInfo;
+    interface Elastos.Droid.Telephony.IVoLteServiceState;
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    [deprecated]
+    interface IPhoneNotifier {
+
+        NotifyPhoneState(
+            [in] IPhone* sender);
+
+        NotifyServiceState(
+            [in] IPhone* sender);
+
+        NotifyCellLocation(
+            [in] IPhone* sender);
+
+        NotifySignalStrength(
+            [in] IPhone* sender);
+
+        NotifyMessageWaitingChanged(
+            [in] IPhone* sender);
+
+        NotifyCallForwardingChanged(
+            [in] IPhone* sender);
+
+        /** TODO - reason should never be null */
+        NotifyDataConnection(
+            [in] IPhone* sender,
+            [in] String reason,
+            [in] String apnType,
+            [in] PhoneConstantsDataState* state);
+
+        NotifyDataConnectionFailed(
+            [in] IPhone* sender,
+            [in] String reason,
+            [in] String apnType);
+
+        NotifyDataActivity(
+            [in] IPhone* sender);
+
+        NotifyOtaspChanged(
+            [in] IPhone* sender,
+            [in] Int32 otaspMode);
+
+        NotifyCellInfo(
+            [in] IPhone* sender,
+            [in] IList* cellInfo);
+
+        NotifyPreciseCallState(
+            [in] IPhone* sender);
+
+        NotifyDisconnectCause(
+            [in] Int32 cause,
+            [in] Int32 preciseCause);
+
+        NotifyPreciseDataConnectionFailed(
+            [in] IPhone* sender,
+            [in] String reason,
+            [in] String apnType,
+            [in] String apn,
+            [in] String failCause);
+
+        NotifyDataConnectionRealTimeInfo(
+            [in] IPhone* sender,
+            [in] IDataConnectionRealTimeInfo* dcRtInfo);
+
+        NotifyVoLteServiceStateChanged(
+            [in] IPhone* sender,
+            [in] IVoLteServiceState* lteState);
+
+        NotifyOemHookRawEventForSubscriber(
+            [in] Int64 subId,
+            [in] ArrayOf<Byte>* rawData);
+    }
+
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

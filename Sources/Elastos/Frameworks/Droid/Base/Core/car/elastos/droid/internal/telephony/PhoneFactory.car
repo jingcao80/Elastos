@@ -1,5 +1,11 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Internal.Telephony.IPhoneNotifier;
+    interface Elastos.Droid.Internal.Telephony.ISubInfoRecordUpdater;
+    // interface Elastos.Droid.Internal.Telephony.Sip.ISipPhone;
+    // interface Elastos.Droid.Internal.Telephony.ImsPhone.IImsPhone;
 
     namespace Elastos {
     namespace Droid {
@@ -8,50 +14,51 @@ module {
 
     interface IPhoneFactory {
         MakeDefaultPhones(
-            [in] Context context);
+            [in] IContext* context);
 
         MakeDefaultPhone(
-            [in] Context context);
+            [in] IContext* context);
 
         GetCdmaPhone(
             [in] Int32 phoneId,
-            [out] Phone* result);
+            [out] IPhone** result);
 
         GetGsmPhone(
             [in] Int32 phoneId,
-            [out] Phone* result);
+            [out] IPhone** result);
 
         GetDefaultPhone(
-            [out] Phone* result);
+            [out] IPhone** result);
 
         GetPhone(
             [in] Int32 phoneId,
-            [out] Phone* result);
+            [out] IPhone** result);
 
-        GetPhones();
+        GetPhones(
+            [out, callee] ArrayOf<IPhone*>* result);
 
         GetCdmaPhone(
-            [out] Phone* result);
+            [out] IPhone** result);
 
         GetGsmPhone(
-            [out] Phone* result);
+            [out] IPhone** result);
 
         GetContext(
-            [out] Context* result);
+            [out] IContext** result);
 
-        MakeSipPhone(
-            [in] String sipUri,
-            [out] SipPhone* result);
+        // MakeSipPhone(
+        //     [in] String sipUri,
+        //     [out] ISipPhone** result);
 
         SetDefaultSubscription(
             [in] Int32 subId);
 
         CalculatePreferredNetworkType(
-            [in] Context context,
+            [in] IContext* context,
             [out] Int32* result);
 
         CalculatePreferredNetworkType(
-            [in] Context context, 
+            [in] IContext* context,
             [in] Int32 phoneId,
             [out] Int32* result);
 
@@ -88,13 +95,13 @@ module {
         SetSMSSubscription(
             [in] Int32 subId);
 
-        MakeImsPhone(
-            [in] PhoneNotifier phoneNotifier, 
-            [in] Phone defaultPhone,
-            [out] ImsPhone* result);
+        // MakeImsPhone(
+        //     [in] IPhoneNotifier* phoneNotifier,
+        //     [in] IPhone* defaultPhone,
+        //     [out] IImsPhone** result);
 
         GetSubInfoRecordUpdater(
-            [out] SubInfoRecordUpdater* result);
+            [out] ISubInfoRecordUpdater** result);
 
     }
 

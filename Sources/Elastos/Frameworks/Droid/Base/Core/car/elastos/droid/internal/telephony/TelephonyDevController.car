@@ -1,52 +1,65 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IMessage;
+
+    using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IHandler
+     */
     interface ITelephonyDevController {
-        Create(
-            [out] TelephonyDevController* result);
-
-        GetInstance(
-            [out] TelephonyDevController* result);
-
-        RegisterRIL(
-            [in] CommandsInterface cmdsIf);
-
-        UnregisterRIL(
-            [in] CommandsInterface cmdsIf);
-
-        HandleMessage(
-            [in] Message msg);
-
-        GetModemCount(
-            [out] Int32* result);
-
         GetModem(
             [in] Int32 index,
-            [out] HardwareConfig* result);
+            [out] IHardwareConfig** result);
 
         GetSimCount(
             [out] Int32* result);
 
         GetSim(
             [in] Int32 index,
-            [out] HardwareConfig* result);
+            [out] IHardwareConfig** result);
 
         GetModemForSim(
             [in] Int32 simIndex,
-            [out] HardwareConfig* result);
+            [out] IHardwareConfig** result);
 
         GetAllSimsForModem(
-            [in] Int32 modemIndex);
+            [in] Int32 modemIndex,
+            [out] IArrayList** result);
 
-        GetAllModems();
+        GetAllModems(
+            [out] IArrayList** result);
 
-        GetAllSims();
+        GetAllSims(
+            [out] IArrayList** result);
 
+    }
+
+    interface ITelephonyDevControllerHelper {
+        Create(
+            [out] ITelephonyDevController** result);
+
+        GetInstance(
+            [out] ITelephonyDevController** result);
+
+        RegisterRIL(
+            [in] ICommandsInterface* cmdsIf);
+
+        UnregisterRIL(
+            [in] ICommandsInterface* cmdsIf);
+
+        HandleMessage(
+            [in] IMessage* msg);
+
+        GetModemCount(
+            [out] Int32* result);
     }
 
     }//Telephony

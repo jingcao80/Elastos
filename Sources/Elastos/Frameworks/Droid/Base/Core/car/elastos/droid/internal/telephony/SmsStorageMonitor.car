@@ -6,11 +6,12 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IHandler
+     */
     interface ISmsStorageMonitor {
         Dispose();
-
-        HandleMessage(
-            [in] Message msg);
 
         IsStorageAvailable(
             [out] Boolean* result);

@@ -1,102 +1,90 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IMessage;
+
+    using interface Elastos.IO.IPrintWriter;
+    using interface Elastos.IO.IFileDescriptor;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
-        Obtain(
-            [in] Int32 request, 
-            [in] Message result,
-            [out] RILRequest* result);
-
-        Release();
-
-    interface IRIL {
-        OnDisplayAdded(
-            [in] Int32 displayId);
-
-
-        interface IRILUnsolOemHookBuffer {
+    interface IRILUnsolOemHookBuffer {
         GetRilInstance(
             [out] Int32* result);
 
-            GetUnsolOemHookBuffer();
+        GetUnsolOemHookBuffer(
+            [out, callee] ArrayOf<Byte>* result);
 
-        }
+    }
 
-        NeedsOldRilFeature(
-            [in] String feature,
-            [out] Boolean* result);
+    /**
+     * @Involve
+     * interface ICommandsInterface
+     * interface IBaseCommands
+     */
+    [deprecated]
+    interface IRIL {
 
-        SetPhoneType(
-            [in] Int32 phoneType);
+        GetImsRegistrationState(
+            [in] IMessage* result);
 
-        SetCdmaRoamingPreference(
-            [in] Int32 cdmaRoamingType, 
-            [in] Message response);
+        SetUiccSubscription(
+            [in] Int32 slotId,
+            [in] Int32 appIndex,
+            [in] Int32 subId,
+            [in] Int32 subStatus,
+            [in] IMessage* result);
 
-        SetCdmaSubscriptionSource(
-            [in] Int32 cdmaSubscription , 
-            [in] Message response);
+        // FIXME This API should take an AID and slot ID
+        SetDataAllowed(
+            [in] Boolean allowed,
+            [in] IMessage* result);
 
-        GetCdmaSubscriptionSource(
-            [in] Message response);
+        GetDataCallProfile(
+            [in] Int32 appType,
+            [in] IMessage* result);
 
-        QueryTTYMode(
-            [in] Message response);
+        SendSMS(
+            [in] String smscPDU,
+            [in] String pdu,
+            [in] IMessage* result);
 
-        SetTTYMode(
-            [in] Int32 ttyMode, 
-            [in] Message response);
+        SendCdmaSms(
+            [in] ArrayOf<Byte>* pdu,
+            [in] IMessage* result);
 
-        GetCdmaBroadcastConfig(
-            [in] Message response);
+        SendImsGsmSms(
+            [in] String smscPDU,
+            [in] String pdu,
+            [in] Int32 retry,
+            [in] Int32 messageRef,
+            [in] IMessage* result);
 
-        SetCdmaBroadcastActivation(
-            [in] Boolean activate, 
-            [in] Message response);
+        SendImsCdmaSms(
+            [in] ArrayOf<Byte>* pdu,
+            [in] Int32 retry,
+            [in] Int32 messageRef,
+            [in] IMessage* result);
 
-        ExitEmergencyCallbackMode(
-            [in] Message response);
+        SetInitialAttachApn(
+            [in] String apn,
+            [in] String protocol,
+            [in] Int32 authType,
+            [in] String username,
+            [in] String password,
+            [in] IMessage* result);
 
-        RequestIsimAuthentication(
-            [in] String nonce, 
-            [in] Message response);
+        // SetDataProfile(
+        //     [in] ArrayOf<IDataProfile*>* dps,
+        //     [in] IMessage* result);
 
-        GetCellInfoList(
-            [in] Message result);
-
-        SetCellInfoListRate(
-            [in] Int32 rateInMillis, 
-            [in] Message response);
-
-        TestingEmergencyCall();
-
-        IccOpenLogicalChannel(
-            [in] String AID, 
-            [in] Message response);
-
-        IccCloseLogicalChannel(
-            [in] Int32 channel, 
-            [in] Message response);
-
-        GetAtr(
-            [in] Message response);
-
-        NvReadItem(
-            [in] Int32 itemID, 
-            [in] Message response);
-
-        NvWriteItem(
-            [in] Int32 itemID, 
-            [in] String itemValue, 
-            [in] Message response);
-
-        NvResetConfig(
-            [in] Int32 resetType, 
-            [in] Message response);
+        Dump(
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* pw,
+            [in] ArrayOf<String>* args);
 
     }
 

@@ -1,14 +1,18 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Os.IHandler;
+    // interface Elastos.Droid.Internal.Telephony.Uicc.IUiccController;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    [deprecated]
     interface IProxyController {
-        GetInstance(
-            [out] ProxyController* result);
 
         UpdateDataConnectionTracker(
             [in] Int32 sub);
@@ -16,23 +20,40 @@ module {
         EnableDataConnectivity(
             [in] Int32 sub);
 
+        DisableDataConnectivity(
+            [in] Int32 sub,
+            [in] IMessage* dataCleanedUpMsg);
+
         UpdateCurrentCarrierInProvider(
             [in] Int32 sub);
 
         RegisterForAllDataDisconnected(
-            [in] Int64 subId, 
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] Int64 subId,
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForAllDataDisconnected(
-            [in] Int64 subId, 
-            [in] Handler h);
+            [in] Int64 subId,
+            [in] IHandler* h);
 
         IsDataDisconnected(
             [in] Int64 subId,
             [out] Boolean* result);
 
+    }
+
+    [deprecated]
+    interface IProxyControllerHelper {
+        // GetInstance(
+        //     [in] IContext* context,
+        //     [in] ArrayOf<IPhone*>* phoneProxy,
+        //     [in] IUiccController* uiccController,
+        //     [in] ArrayOf<ICommandsInterface*>* ci,
+        //     [out] IProxyController** result);
+
+        GetInstance(
+            [out] IProxyController** result);
     }
 
     }//Telephony

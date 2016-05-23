@@ -7,19 +7,17 @@ module {
     namespace Telephony {
 
     interface ISubscription {
-        Equals(
-            [in] Subscription sub,
-            [out] Boolean* result);
+        const Int32 SUBSCRIPTION_INDEX_INVALID = -1;
 
         IsSame(
-            [in] Subscription sub,
+            [in] ISubscription* sub,
             [out] Boolean* result);
 
         Clear();
 
         CopyFrom(
-            [in] Subscription from,
-            [out] Subscription* result);
+            [in] ISubscription* from,
+            [out] ISubscription** result);
 
         GetAppIndex(
             [out] Int32* result);

@@ -8,13 +8,21 @@ module {
     namespace Cat {
 
     interface ICatLog {
-        D(Object caller, String msg);
+        D(
+            [in] IInterface* caller,
+            [in] String msg);
 
-        D(String caller, String msg);
+        D(
+            [in] String caller,
+            [in] String msg);
 
-        E(Object caller, String msg);
+        E(
+            [in] IInterface* caller,
+            [in] String msg);
 
-        E(String caller, String msg);
+        E(
+            [in] String caller,
+            [in] String msg);
 
     }
 

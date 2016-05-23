@@ -1,639 +1,46 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Internal.Telephony.IPhoneSubInfoProxy;
+    // interface Elastos.Droid.Internal.Telephony.Uicc.IIccFileHandler;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * @Involve
+     * interface IHandler
+     * interface IPhone
+     */
     interface IPhoneProxy {
-        HandleMessage(
-            [in] Message msg);
 
         GetIccSmsInterfaceManager(
-            [out] IccSmsInterfaceManager* result);
+            [out] IIccSmsInterfaceManager** result);
 
         GetPhoneSubInfoProxy(
-            [out] PhoneSubInfoProxy* result);
+            [out] IPhoneSubInfoProxy** result);
 
         GetIccPhoneBookInterfaceManagerProxy(
-            [out] IccPhoneBookInterfaceManagerProxy* result);
+            [out] IIccPhoneBookInterfaceManagerProxy** result);
 
-        GetIccFileHandler(
-            [out] IccFileHandler* result);
+        // GetIccFileHandler(
+        //     [out] IIccFileHandler** result);
 
         IsImsVtCallPresent(
             [out] Boolean* result);
 
-        UpdatePhoneObject(
-            [in] Int32 voiceRadioTech);
-
-        GetServiceState(
-            [out] ServiceState* result);
-
-        GetCellLocation(
-            [out] CellLocation* result);
-
-        GetAllCellInfo();
-
-        SetCellInfoListRate(
-            [in] Int32 rateInMillis);
-
-        GetDataConnectionState(
-            [out] DataState* result);
-
-        GetDataConnectionState(
-            [in] String apnType,
-            [out] DataState* result);
-
-        GetDataActivityState(
-            [out] DataActivityState* result);
-
-        GetContext(
-            [out] Context* result);
-
-        DisableDnsCheck(
-            [in] Boolean b);
-
-        IsDnsCheckDisabled(
-            [out] Boolean* result);
-
-        GetState(
-            [out] State* result);
-
-        GetPhoneName(
-            [out] String* result);
-
-        GetPhoneType(
-            [out] Int32* result);
-
-        GetActiveApnTypes();
-
-        GetActiveApnHost(
-            [in] String apnType,
-            [out] String* result);
-
-        GetLinkProperties(
-            [in] String apnType,
-            [out] LinkProperties* result);
-
-        GetNetworkCapabilities(
-            [in] String apnType,
-            [out] NetworkCapabilities* result);
-
-        GetSignalStrength(
-            [out] SignalStrength* result);
-
-        RegisterForUnknownConnection(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForUnknownConnection(
-            [in] Handler h);
-
-        RegisterForHandoverStateChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForHandoverStateChanged(
-            [in] Handler h);
-
-        RegisterForPreciseCallStateChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForPreciseCallStateChanged(
-            [in] Handler h);
-
-        RegisterForNewRingingConnection(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForNewRingingConnection(
-            [in] Handler h);
-
-        UnregisterForVideoCapabilityChanged(
-            [in] Handler h);
-
-        RegisterForIncomingRing(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForIncomingRing(
-            [in] Handler h);
-
-        RegisterForDisconnect(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForDisconnect(
-            [in] Handler h);
-
-        RegisterForMmiInitiate(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForMmiInitiate(
-            [in] Handler h);
-
-        RegisterForMmiComplete(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForMmiComplete(
-            [in] Handler h);
-
-        GetPendingMmiCodes();
-
-        SendUssdResponse(
-            [in] String ussdMessge);
-
-        RegisterForServiceStateChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForServiceStateChanged(
-            [in] Handler h);
-
-        RegisterForSuppServiceNotification(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForSuppServiceNotification(
-            [in] Handler h);
-
-        RegisterForSuppServiceFailed(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForSuppServiceFailed(
-            [in] Handler h);
-
-        RegisterForInCallVoicePrivacyOn(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForInCallVoicePrivacyOn(
-            [in] Handler h);
-
-        RegisterForInCallVoicePrivacyOff(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForInCallVoicePrivacyOff(
-            [in] Handler h);
-
-        RegisterForCdmaOtaStatusChange(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForCdmaOtaStatusChange(
-            [in] Handler h);
-
-        RegisterForSubscriptionInfoReady(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForSubscriptionInfoReady(
-            [in] Handler h);
-
-        RegisterForEcmTimerReset(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForEcmTimerReset(
-            [in] Handler h);
-
-        RegisterForRingbackTone(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForRingbackTone(
-            [in] Handler h);
-
-        RegisterForOnHoldTone(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForOnHoldTone(
-            [in] Handler h);
-
-        RegisterForResendIncallMute(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForResendIncallMute(
-            [in] Handler h);
-
-        RegisterForSimRecordsLoaded(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
         UnregisterForSimRecordsLoaded(
-            [in] Handler h);
-
-        GetIccRecordsLoaded(
-            [out] Boolean* result);
-
-        GetIccCard(
-            [out] IccCard* result);
-
-        CanConference(
-            [out] Boolean* result);
-
-        EnableEnhancedVoicePrivacy(
-            [in] Boolean enable, 
-            [in] Message onComplete);
-
-        GetEnhancedVoicePrivacy(
-            [in] Message onComplete);
-
-        CanTransfer(
-            [out] Boolean* result);
-
-        ClearDisconnected();
-
-        GetForegroundCall(
-            [out] Call* result);
-
-        GetBackgroundCall(
-            [out] Call* result);
-
-        GetRingingCall(
-            [out] Call* result);
-
-        HandlePinMmi(
-            [in] String dialString,
-            [out] Boolean* result);
-
-        SendDtmf(
-            [in] Char32 c);
-
-        StartDtmf(
-            [in] Char32 c);
-
-        StopDtmf();
-
-        SetRadioPower(
-            [in] Boolean power);
-
-        GetMessageWaitingIndicator(
-            [out] Boolean* result);
-
-        GetCallForwardingIndicator(
-            [out] Boolean* result);
-
-        GetLine1Number(
-            [out] String* result);
-
-        GetCdmaMin(
-            [out] String* result);
-
-        IsMinInfoReady(
-            [out] Boolean* result);
-
-        GetCdmaPrlVersion(
-            [out] String* result);
-
-        GetLine1AlphaTag(
-            [out] String* result);
-
-        SetLine1Number(
-            [in] String alphaTag, 
-            [in] String number, 
-            [in] Message onComplete);
-
-        GetVoiceMailNumber(
-            [out] String* result);
-
-        GetVoiceMessageCount(
-            [out] Int32* result);
-
-        GetVoiceMailAlphaTag(
-            [out] String* result);
-
-        GetOutgoingCallerIdDisplay(
-            [in] Message onComplete);
-
-        GetCallWaiting(
-            [in] Message onComplete);
-
-        SetCallWaiting(
-            [in] Boolean enable, 
-            [in] Message onComplete);
-
-        GetAvailableNetworks(
-            [in] Message response);
-
-        SetNetworkSelectionModeAutomatic(
-            [in] Message response);
-
-        SelectNetworkManually(
-            [in] OperatorInfo network, 
-            [in] Message response);
-
-        SetPreferredNetworkType(
-            [in] Int32 networkType, 
-            [in] Message response);
-
-        GetPreferredNetworkType(
-            [in] Message response);
-
-        GetNeighboringCids(
-            [in] Message response);
-
-        SetOnPostDialCharacter(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        SetMute(
-            [in] Boolean muted);
-
-        GetMute(
-            [out] Boolean* result);
-
-        SetEchoSuppressionEnabled();
-
-        GetDataCallList(
-            [in] Message response);
-
-        UpdateServiceLocation();
-
-        EnableLocationUpdates();
-
-        DisableLocationUpdates();
-
-        SetUnitTestMode(
-            [in] Boolean f);
-
-        GetUnitTestMode(
-            [out] Boolean* result);
-
-        SetBandMode(
-            [in] Int32 bandMode, 
-            [in] Message response);
-
-        QueryAvailableBandMode(
-            [in] Message response);
-
-        GetDataRoamingEnabled(
-            [out] Boolean* result);
-
-        SetDataRoamingEnabled(
-            [in] Boolean enable);
-
-        GetDataEnabled(
-            [out] Boolean* result);
-
-        SetDataEnabled(
-            [in] Boolean enable);
-
-        QueryCdmaRoamingPreference(
-            [in] Message response);
-
-        SetCdmaRoamingPreference(
-            [in] Int32 cdmaRoamingType, 
-            [in] Message response);
-
-        SetCdmaSubscription(
-            [in] Int32 cdmaSubscriptionType, 
-            [in] Message response);
-
-        GetSimulatedRadioControl(
-            [out] SimulatedRadioControl* result);
-
-        IsDataConnectivityPossible(
-            [out] Boolean* result);
-
-        IsOnDemandDataPossible(
-            [in] String apnType,
-            [out] Boolean* result);
-
-        IsDataConnectivityPossible(
-            [in] String apnType,
-            [out] Boolean* result);
-
-        GetDeviceId(
-            [out] String* result);
-
-        GetDeviceSvn(
-            [out] String* result);
-
-        GetSubscriberId(
-            [out] String* result);
-
-        GetGroupIdLevel1(
-            [out] String* result);
-
-        GetIccSerialNumber(
-            [out] String* result);
-
-        GetEsn(
-            [out] String* result);
-
-        GetMeid(
-            [out] String* result);
-
-        GetMsisdn(
-            [out] String* result);
-
-        GetImei(
-            [out] String* result);
-
-        GetPhoneSubInfo(
-            [out] PhoneSubInfo* result);
-
-        GetIccPhoneBookInterfaceManager(
-            [out] IccPhoneBookInterfaceManager* result);
-
-        SetUiTTYMode(
-            [in] Int32 uiTtyMode, 
-            [in] Message onComplete);
-
-        SetTTYMode(
-            [in] Int32 ttyMode, 
-            [in] Message onComplete);
-
-        QueryTTYMode(
-            [in] Message onComplete);
-
-        ActivateCellBroadcastSms(
-            [in] Int32 activate, 
-            [in] Message response);
-
-        GetCellBroadcastSmsConfig(
-            [in] Message response);
-
-        NotifyDataActivity();
-
-        GetSmscAddress(
-            [in] Message result);
-
-        SetSmscAddress(
-            [in] String address, 
-            [in] Message result);
-
-        GetCdmaEriIconIndex(
-            [out] Int32* result);
-
-        GetCdmaEriText(
-            [out] String* result);
-
-        GetCdmaEriIconMode(
-            [out] Int32* result);
+            [in] IHandler* h);
 
         GetActivePhone(
-            [out] Phone* result);
-
-        SendBurstDtmf(
-            [in] String dtmfString, 
-            [in] Int32 on, 
-            [in] Int32 off, 
-            [in] Message onComplete);
-
-        ExitEmergencyCallbackMode();
-
-        NeedsOtaServiceProvisioning(
-            [out] Boolean* result);
-
-        IsOtaSpNumber(
-            [in] String dialStr,
-            [out] Boolean* result);
-
-        RegisterForCallWaiting(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForCallWaiting(
-            [in] Handler h);
-
-        RegisterForSignalInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForSignalInfo(
-            [in] Handler h);
-
-        RegisterForDisplayInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForDisplayInfo(
-            [in] Handler h);
-
-        RegisterForNumberInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForNumberInfo(
-            [in] Handler h);
-
-        RegisterForRedirectedNumberInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForRedirectedNumberInfo(
-            [in] Handler h);
-
-        RegisterForLineControlInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForLineControlInfo(
-            [in] Handler h);
-
-        RegisterFoT53ClirlInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForT53ClirInfo(
-            [in] Handler h);
-
-        RegisterForT53AudioControlInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForT53AudioControlInfo(
-            [in] Handler h);
-
-        SetOnEcbModeExitResponse(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnsetOnEcbModeExitResponse(
-            [in] Handler h);
+            [out] IPhone** result);
 
         IsManualNetSelAllowed(
             [out] Boolean* result);
-
-        IsCspPlmnEnabled(
-            [out] Boolean* result);
-
-        GetIsimRecords(
-            [out] IsimRecords* result);
-
-        GetLteOnCdmaMode(
-            [out] Int32* result);
-
-        GetLteOnGsmMode(
-            [out] Int32* result);
-
-        SetVoiceMessageWaiting(
-            [in] Int32 line, 
-            [in] Int32 countWaiting);
-
-        GetUsimServiceTable(
-            [out] UsimServiceTable* result);
-
-        GetUiccCard(
-            [out] UiccCard* result);
-
-        NvReadItem(
-            [in] Int32 itemID, 
-            [in] Message response);
-
-        NvWriteItem(
-            [in] Int32 itemID, 
-            [in] String itemValue, 
-            [in] Message response);
-
-        NvResetConfig(
-            [in] Int32 resetType, 
-            [in] Message response);
-
-        Dispose();
-
-        RemoveReferences();
 
         UpdateCurrentCarrierInProvider(
             [out] Boolean* result);
@@ -641,23 +48,23 @@ module {
         UpdateDataConnectionTracker();
 
         SetInternalDataEnabled(
-            [in] Boolean enable);
+            [in] Boolean enbl);
 
         SetInternalDataEnabledFlag(
-            [in] Boolean enable,
+            [in] Boolean enbl,
             [out] Boolean* result);
 
         SetInternalDataEnabled(
-            [in] Boolean enable, 
-            [in] Message onCompleteMsg);
+            [in] Boolean enbl,
+            [in] IMessage* onCompleteMsg);
 
         RegisterForAllDataDisconnected(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForAllDataDisconnected(
-            [in] Handler h);
+            [in] IHandler* h);
 
         GetSubId(
             [out] Int64* result);
@@ -665,40 +72,10 @@ module {
         GetPhoneId(
             [out] Int32* result);
 
-        GetPcscfAddress(
-            [in] String apnType);
-
-        SetImsRegistrationState(
-            [in] Boolean registered);
-
-        GetImsPhone(
-            [out] Phone* result);
-
-        RelinquishOwnershipOfImsPhone(
-            [out] ImsPhone* result);
-
-        SetOperatorBrandOverride(
-            [in] String brand,
-            [out] Boolean* result);
-
-        IsRadioAvailable(
-            [out] Boolean* result);
-
-        ShutdownRadio();
-
         GetCallBarringOption(
-            [in] String facility, 
-            [in] String password, 
-            [in] Message onComplete);
-
-        RequestChangeCbPsw(
-            [in] String facility, 
-            [in] String oldPwd, 
-            [in] String newPwd, 
-            [in] Message result);
-
-        SetLocalCallHold(
-            [in] Int32 lchStatus);
+            [in] String facility,
+            [in] String password,
+            [in] IMessage* onComplete);
 
     }
 

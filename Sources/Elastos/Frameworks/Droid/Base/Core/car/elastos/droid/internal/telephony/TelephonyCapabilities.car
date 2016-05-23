@@ -8,35 +8,35 @@ module {
 
     interface ITelephonyCapabilities {
         SupportsEcm(
-            [in] Phone phone,
+            [in] IPhone* phone,
             [out] Boolean* result);
 
         SupportsOtasp(
-            [in] Phone phone,
+            [in] IPhone* phone,
             [out] Boolean* result);
 
         SupportsVoiceMessageCount(
-            [in] Phone phone,
+            [in] IPhone* phone,
             [out] Boolean* result);
 
         SupportsNetworkSelection(
-            [in] Phone phone,
+            [in] IPhone* phone,
             [out] Boolean* result);
 
         GetDeviceIdLabel(
-            [in] Phone phone,
+            [in] IPhone* phone,
             [out] Int32* result);
 
         SupportsConferenceCallManagement(
-            [in] Phone phone,
+            [in] IPhone* phone,
             [out] Boolean* result);
 
         SupportsHoldAndUnhold(
-            [in] Phone phone,
+            [in] IPhone* phone,
             [out] Boolean* result);
 
         SupportsAnswerAndHold(
-            [in] Phone phone,
+            [in] IPhone* phone,
             [out] Boolean* result);
 
         SupportsAdn(

@@ -11,19 +11,19 @@ module {
             [out] Int32* result);
 
         CopyFrom(
-            [in] SubscriptionData from,
-            [out] SubscriptionData* result);
+            [in] ISubscriptionData* from,
+            [out] ISubscriptionData** result);
 
         GetIccId(
             [out] String* result);
 
         HasSubscription(
-            [in] Subscription sub,
+            [in] ISubscription* sub,
             [out] Boolean* result);
 
         GetSubscription(
-            [in] Subscription sub,
-            [out] Subscription* result);
+            [in] ISubscription* sub,
+            [out] ISubscription** result);
 
     }
 
