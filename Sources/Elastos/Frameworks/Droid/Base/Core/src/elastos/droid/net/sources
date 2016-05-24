@@ -103,5 +103,5 @@ SOURCES += WifiLinkQualityInfo.cpp
 ELASTOS_LIBS += dhcp/dhcp.lib
 ELASTOS_LIBS += http/http.lib
 ELASTOS_LIBS += nsd/nsd.lib
-// ELASTOS_LIBS += etherethernet.lib
-// ELASTOS_LIBS += pppoe/pppoe.lib
+#ELASTOS_LIBS += etherethernet.lib
+#ELASTOS_LIBS += pppoe/pppoe.lib
