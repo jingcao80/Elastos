@@ -8,9 +8,7 @@ DEFS_Debug := \
 	'-D_FILE_OFFSET_BITS=64' \
 	'-DBUILDING_NODE_EXTENSION' \
 	'-DDEBUG' \
-	'-D_DEBUG' \
-	'-DANDROID' \
-	'-DHAVE_SYS_UIO_H'
+	'-D_DEBUG'
 
 # Flags passed to all source files.
 CFLAGS_Debug := \
@@ -20,8 +18,7 @@ CFLAGS_Debug := \
 	-Wextra \
 	-Wno-unused-parameter \
 	-g \
-	-O0 \
-	-Wno-unused-local-typedefs
+	-O0
 
 # Flags passed to only C files.
 CFLAGS_C_Debug :=
@@ -29,16 +26,12 @@ CFLAGS_C_Debug :=
 # Flags passed to only C++ files.
 CFLAGS_CC_Debug := \
 	-fno-rtti \
-	-fno-exceptions \
-	-std=c++98 \
-	-Wno-c++0x-compat
+	-fno-exceptions
 
 INCS_Debug := \
-    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include \
-    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/stlport \
-    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node/ \
-    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node/deps/uv/ \
-    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node/deps/v8/ \
+	-I/home/whm/.node-gyp/0.12.7/src \
+	-I/home/whm/.node-gyp/0.12.7/deps/uv/include \
+	-I/home/whm/.node-gyp/0.12.7/deps/v8/include \
 	-I$(srcdir)/JavaScriptCore \
 	-I$(srcdir)/JavaScriptCore/icu \
 	-I$(srcdir)/JavaScriptCore/wtf \
@@ -74,9 +67,7 @@ DEFS_Release := \
 	'-DNODE_GYP_MODULE_NAME=elastos' \
 	'-D_LARGEFILE_SOURCE' \
 	'-D_FILE_OFFSET_BITS=64' \
-	'-DBUILDING_NODE_EXTENSION' \
-	'-DANDROID' \
-	'-DHAVE_SYS_UIO_H'
+	'-DBUILDING_NODE_EXTENSION'
 
 # Flags passed to all source files.
 CFLAGS_Release := \
@@ -89,8 +80,7 @@ CFLAGS_Release := \
 	-ffunction-sections \
 	-fdata-sections \
 	-fno-tree-vrp \
-	-fno-omit-frame-pointer \
-	-Wno-unused-local-typedefs
+	-fno-omit-frame-pointer
 
 # Flags passed to only C files.
 CFLAGS_C_Release :=
@@ -98,17 +88,12 @@ CFLAGS_C_Release :=
 # Flags passed to only C++ files.
 CFLAGS_CC_Release := \
 	-fno-rtti \
-	-fno-exceptions \
-	-std=c++98 \
-	-Wno-c++0x-compat
+	-fno-exceptions
 
 INCS_Release := \
-    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include \
-    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/bionic \
-    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/stlport \
-    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node/ \
-    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node/deps/uv/ \
-    -I $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/include/node/deps/v8/ \
+	-I/home/whm/.node-gyp/0.12.7/src \
+	-I/home/whm/.node-gyp/0.12.7/deps/uv/include \
+	-I/home/whm/.node-gyp/0.12.7/deps/v8/include \
 	-I$(srcdir)/JavaScriptCore \
 	-I$(srcdir)/JavaScriptCore/icu \
 	-I$(srcdir)/JavaScriptCore/wtf \
@@ -150,16 +135,36 @@ OBJS := \
 	$(obj).target/$(TARGET)/bindings_node/v8/V8Proxy.o \
 	$(obj).target/$(TARGET)/bindings_node/v8/npruntime.o \
 	$(obj).target/$(TARGET)/bindings_node/v8/npapi.o \
-	$(obj).target/$(TARGET)/bridge/car/Elastos.CoreLibrary.o \
+	$(obj).target/$(TARGET)/bridge/car/inc/Elastos.CoreLibrary.o \
 	$(obj).target/$(TARGET)/bridge/car/CarUtility.o \
 	$(obj).target/$(TARGET)/bridge/car/CobjectWrapper.o \
 	$(obj).target/$(TARGET)/bridge/car/CarCallbackProxy.o \
-	$(obj).target/$(TARGET)/bridge/car/v8/CarClassCobjectV8.o \
-	$(obj).target/$(TARGET)/bridge/car/v8/CarFieldCobjectV8.o \
-	$(obj).target/$(TARGET)/bridge/car/v8/CarInstanceCobjectV8.o \
-	$(obj).target/$(TARGET)/bridge/car/v8/CarMethodCobject.o \
+	$(obj).target/$(TARGET)/bridge/car/v8/CarClassV8.o \
+	$(obj).target/$(TARGET)/bridge/car/v8/CarFieldV8.o \
+	$(obj).target/$(TARGET)/bridge/car/v8/CarInstanceV8.o \
+	$(obj).target/$(TARGET)/bridge/car/v8/CarMethodV8.o \
 	$(obj).target/$(TARGET)/bridge/car/v8/CarNPObjectV8.o \
-	$(obj).target/$(TARGET)/bridge/car/v8/CarUtilityPrivate.o
+	$(obj).target/$(TARGET)/bridge/car/v8/CarUtilityPrivate.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/Assertions.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/CurrentTime.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/dtoa.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/DecimalNumber.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/FastMalloc.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/HashTable.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/StackBounds.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/TCSystemAlloc.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/Threading.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/ThreadingNone.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/WTFThreadData.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/text/AtomicString.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/text/CString.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/text/StringBuilder.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/text/StringImpl.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/text/StringStatics.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/text/WTFString.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/unicode/icu/CollatorICU.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/unicode/CollatorDefault.o \
+	$(obj).target/$(TARGET)/JavaScriptCore/wtf/unicode/UTF8.o
 
 # Add to the list of files we specially track dependencies for.
 all_deps += $(OBJS)
@@ -188,20 +193,18 @@ $(obj).$(TOOLSET)/$(TARGET)/%.o: $(obj)/%.cpp FORCE_DO_CMD
 LDFLAGS_Debug := \
 	-pthread \
 	-rdynamic \
-	--sysroot=$(XDK_BUILD_PATH)/Prebuilt/Linux \
-	-L$(XDK_BUILD_PATH)/Prebuilt/Linux/usr/lib
+	-L/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Build/Prebuilt/Linux/usr/lib
 
 LDFLAGS_Release := \
 	-pthread \
 	-rdynamic \
-	--sysroot=$(XDK_BUILD_PATH)/Prebuilt/Linux \
-	-L$(XDK_BUILD_PATH)/Prebuilt/Linux/usr/lib
+	-L/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Build/Prebuilt/Linux/usr/lib
 
 LIBS := \
-	$(XDK_USER_LIB)/Elastos.Runtime.lib \
-	$(XDK_TARGETS)/Elastos.Runtime.eco \
-	$(XDK_TARGETS)/Elastos.CoreLibrary.eco \
-	$(XDK_USER_LIB)/crt0.lib \
+	/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Targets/obj/rdk/arm.gnu.android.dbg/lib/Elastos.Runtime.lib \
+	/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Targets/rdk/arm.gnu.android.dbg/bin/Elastos.Runtime.eco \
+	/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Targets/rdk/arm.gnu.android.dbg/bin/Elastos.CoreLibrary.eco \
+	/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Targets/obj/rdk/arm.gnu.android.dbg/lib/crt0.lib \
 	-licuuc \
 	-licui18n \
 	-llog \

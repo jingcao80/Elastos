@@ -12,6 +12,7 @@ CAR_OBJECT_IMPL(CTestCarDataType)
 
 ECode CTestCarDataType::Test_NULL()
 {
+    ALOGD("CTestCarDataType::Test_NULL begin");
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
@@ -21,7 +22,14 @@ ECode CTestCarDataType::Test_Int16(
     /* [out] */ Int16 * pOutValue)
 {
     // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    //return E_NOT_IMPLEMENTED;
+
+    ALOGD("CTestCarDataType::Test_Int16 begin");
+
+    assert(pOutValue != NULL);
+    ALOGD("==== File: %s, Function: %s, inValue: %d ====", __FILE__, __FUNCTION__, inValue);
+    *pOutValue = inValue;
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_Int16_Ref(

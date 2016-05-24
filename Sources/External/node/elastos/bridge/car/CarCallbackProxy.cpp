@@ -10,7 +10,7 @@
 #include "node_JavaSharedClient.h"
 
 #include "CarNPObjectV8.h"
-#include "CarInstanceCobjectV8.h"
+#include "CarInstanceV8.h"
 
 #include "CarCallbackProxy.h"
 #include <sys/mman.h>
@@ -176,6 +176,7 @@ ECode CarCallbackInterfaceProxy::ReadParam(
     methodInfo->GetAllParamInfos(paramInfos);
 
     *ppCarArgs = new CarValue[paramCount];
+    CarValue* carArgs = *ppCarArgs;
 
     for (Int32 i = 0; i < paramCount; i++) {
         IParamInfo* paramInfo = (*paramInfos)[i];
@@ -327,10 +328,11 @@ ECode CarCallbackInterfaceProxy::ReadParam(
 
                     if (bNotCarCallbackObject) {
                         npArgs[i].type = NPVariantType_Object;
-                        npArgs[i].value.objectValue = CarInstanceToNPObject(new CarInstanceCobject(new CobjectWrapper(obj, paramTypeInfo), true));
+                        npArgs[i].value.objectValue = CarInstanceToNPObject(new CarInstanceV8(new CobjectWrapper(obj, paramTypeInfo), true));
                     }
                     else {
-                        abort();
+                        Int32 iii = 1/0;
+                        assert(0);
                     }
 
                     puArgs++;
@@ -560,8 +562,8 @@ ECode CarCallbackInterfaceProxy::ReadParam(
                                     }
 
                                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
-                                    for (Int32 j = 0; j < length; j++) {
-                                        pV8Array->Set(j, v8::Int32::New(isolate,(*pArray)[j]));
+                                    for (Int32 i = 0; i < length; i++) {
+                                        pV8Array->Set(i, v8::Int32::New(isolate,(*pArray)[i]));
                                     }
 
                                     WebCore::V8NPObject* pV8NPObject = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
@@ -599,9 +601,9 @@ ECode CarCallbackInterfaceProxy::ReadParam(
 
                                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
 
-                                    for (Int32 j = 0; j < length; j++) {
-                                        const char* utf8String = strdup(((*pArray)[j]).string());
-                                        pV8Array->Set(j, v8::String::NewFromUtf8(isolate,utf8String));
+                                    for (Int32 i = 0; i < length; i++) {
+                                        const char* utf8String = strdup(((*pArray)[i]).string());
+                                        pV8Array->Set(i, v8::String::NewFromUtf8(isolate,utf8String));
                                     }
 
                                     WebCore::V8NPObject* pV8NPObject = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
@@ -1240,11 +1242,11 @@ void CarCallbackInterfaceProxy::Callback::Call()
                                 carArray = ArrayOf<Int32>::Alloc(length);
 
                                 // Now iterate over each element and add to the array.
-                                for (Int32 j = 0; j < length; j++) {
+                                for (Int32 i = 0; i < length; i++) {
                                     NPVariant npvValue;
-                                    _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(j), &npvValue);
+                                    _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(i), &npvValue);
                                     Int32 iVal = (Int32)NPVARIANT_TO_DOUBLE(npvValue);
-                                    reinterpret_cast< ArrayOf<Int32>* >(carArray)->Set(j, iVal);
+                                    reinterpret_cast< ArrayOf<Int32>* >(carArray)->Set(i, iVal);
                                 }
 
                                 *(ArrayOf<Int32>**)(mOutParamPtrs[i]) = (ArrayOf<Int32>*)carArray;
@@ -1266,11 +1268,11 @@ void CarCallbackInterfaceProxy::Callback::Call()
 
                                 carArray = ArrayOf<Elastos::String>::Alloc(length);
 
-                                for (Int32 j = 0; j < length; j++) {
+                                for (Int32 i = 0; i < length; i++) {
                                     NPVariant npvValue;
-                                    _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(j), &npvValue);
+                                    _NPN_GetProperty(0, object, _NPN_GetIntIdentifier(i), &npvValue);
                                     NPString src = NPVARIANT_TO_STRING(npvValue);
-                                    reinterpret_cast< ArrayOf<Elastos::String>* >(carArray)->Set(j, Elastos::String(src.UTF8Characters));
+                                    reinterpret_cast< ArrayOf<Elastos::String>* >(carArray)->Set(i, Elastos::String(src.UTF8Characters));
                                 }
 
                                 *(ArrayOf<Elastos::String>**)(mOutParamPtrs[i]) = (ArrayOf<Elastos::String>*)carArray;

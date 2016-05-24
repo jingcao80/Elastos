@@ -66,15 +66,15 @@
                 "bindings_node/v8/npruntime.cpp",
                 "bindings_node/v8/npapi.cpp",
 
-                "bridge/car/Elastos.CoreLibrary.cpp",
+                "bridge/car/inc/Elastos.CoreLibrary.cpp",
 
                 "bridge/car/CarUtility.cpp",
                 "bridge/car/CobjectWrapper.cpp",
                 "bridge/car/CarCallbackProxy.cpp",
-                "bridge/car/v8/CarClassCobjectV8.cpp",
-                "bridge/car/v8/CarFieldCobjectV8.cpp",
-                "bridge/car/v8/CarInstanceCobjectV8.cpp",
-                "bridge/car/v8/CarMethodCobject.cpp",
+                "bridge/car/v8/CarClassV8.cpp",
+                "bridge/car/v8/CarFieldV8.cpp",
+                "bridge/car/v8/CarInstanceV8.cpp",
+                "bridge/car/v8/CarMethodV8.cpp",
                 "bridge/car/v8/CarNPObjectV8.cpp",
                 "bridge/car/v8/CarUtilityPrivate.cpp",
 

@@ -26,8 +26,8 @@ class CarInstance;
 struct CarValue
 {
     CarValue()
-        : mIOAttribute(ParamIOAttribute_In)
-        , mType(0)
+        : mType(0)
+        , mIOAttribute(ParamIOAttribute_In)
         , mInt16Value(0)
         , mInt32Value(0)
         , mInt64Value(0)

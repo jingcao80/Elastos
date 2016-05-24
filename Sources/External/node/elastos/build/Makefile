@@ -307,10 +307,10 @@ ifeq ($(strip $(foreach prefix,$(NO_LOAD),\
   include elastos.target.mk
 endif
 
-#quiet_cmd_regen_makefile = ACTION Regenerating $@
-#cmd_regen_makefile = cd $(srcdir); /usr/local/lib/node_modules/npm/node_modules/node-gyp/gyp/gyp_main.py -fmake --ignore-environment "--toplevel-dir=." -I/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Sources/External/node-arm-so/elastos/build/config.gypi -I/usr/local/lib/node_modules/npm/node_modules/node-gyp/addon.gypi -I/home/whm/.node-gyp/0.12.7/common.gypi "--depth=." "-Goutput_dir=." "--generator-output=build" "-Dlibrary=shared_library" "-Dvisibility=default" "-Dnode_root_dir=/home/whm/.node-gyp/0.12.7" "-Dmodule_root_dir=/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Sources/External/node-arm-so/elastos" binding.gyp
-#Makefile: $(srcdir)/../../../../../../../../.node-gyp/0.12.7/common.gypi $(srcdir)/build/config.gypi $(srcdir)/binding.gyp $(srcdir)/../../../../../../../../../../usr/local/lib/node_modules/npm/node_modules/node-gyp/addon.gypi
-#	$(call do_cmd,regen_makefile)
+quiet_cmd_regen_makefile = ACTION Regenerating $@
+cmd_regen_makefile = cd $(srcdir); /usr/local/lib/node_modules/npm/node_modules/node-gyp/gyp/gyp_main.py -fmake --ignore-environment "--toplevel-dir=." -I/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Sources/External/node-arm/elastos/build/config.gypi -I/usr/local/lib/node_modules/npm/node_modules/node-gyp/addon.gypi -I/home/whm/.node-gyp/0.12.7/common.gypi "--depth=." "-Goutput_dir=." "--generator-output=build" "-Dlibrary=shared_library" "-Dvisibility=default" "-Dnode_root_dir=/home/whm/.node-gyp/0.12.7" "-Dmodule_root_dir=/home/whm/kt_work/Elastos/ElastosRDK5/Elastos5/Sources/External/node-arm/elastos" binding.gyp
+Makefile: $(srcdir)/../../../../../../../../.node-gyp/0.12.7/common.gypi $(srcdir)/build/config.gypi $(srcdir)/binding.gyp $(srcdir)/../../../../../../../../../../usr/local/lib/node_modules/npm/node_modules/node-gyp/addon.gypi
+	$(call do_cmd,regen_makefile)
 
 # "all" is a concatenation of the "all" targets from all the included
 # sub-makefiles. This is just here to clarify.
