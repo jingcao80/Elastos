@@ -115,13 +115,14 @@ ECode CEGL14::EglInitialize(
 {
     VALIDATE_NOT_NULL(result)
 
+    ECode returnEcode = NOERROR;
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
 
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglInitialize: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     EGLint *major_base = (EGLint *) 0;
@@ -169,7 +170,7 @@ ECode CEGL14::EglInitialize(
         (EGLint *)minor
     );
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglTerminate(
@@ -180,17 +181,19 @@ ECode CEGL14::EglTerminate(
 
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
+    ECode returnEcode = NOERROR;
+
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglTerminate: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     _returnValue = eglTerminate(
         (EGLDisplay)dpy_native
     );
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglQueryString(
@@ -200,15 +203,16 @@ ECode CEGL14::EglQueryString(
 {
     VALIDATE_NOT_NULL(str)
     *str = NULL;
+    ECode returnEcode = NOERROR;
 
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglQueryString: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     const char* chars = (const char*) eglQueryString( dpy_native, (EGLint)name);
     *str = String(chars);
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglGetConfigs(
@@ -224,11 +228,12 @@ ECode CEGL14::EglGetConfigs(
 
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
+    ECode returnEcode = NOERROR;
 
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglGetConfigs: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     Int32 _configsRemaining;
@@ -269,7 +274,7 @@ ECode CEGL14::EglGetConfigs(
         (EGLint *)num_config
     );
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglChooseConfig(
@@ -287,11 +292,12 @@ ECode CEGL14::EglChooseConfig(
 
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
+    ECode returnEcode = NOERROR;
 
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglChooseConfig: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     Boolean attrib_list_sentinel = FALSE;
@@ -374,7 +380,7 @@ ECode CEGL14::EglChooseConfig(
         delete[] configs;
     }
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglGetConfigAttrib(
@@ -389,16 +395,17 @@ ECode CEGL14::EglGetConfigAttrib(
 
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
+    ECode returnEcode = NOERROR;
 
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglGetConfigAttrib: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLConfig config_native = (EGLConfig) FromEGLHandle(IEGLObjectHandle::Probe(config));
     if (!config_native) {
         LOGD("EglGetConfigAttrib: config_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     EGLint *value_base = (EGLint *) 0;
@@ -429,7 +436,7 @@ ECode CEGL14::EglGetConfigAttrib(
     );
 
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglCreateWindowSurface(
@@ -477,17 +484,18 @@ ECode CEGL14::_EglCreateWindowSurface(
 {
     VALIDATE_NOT_NULL(surface)
     *surface = NULL;
+    ECode returnEcode = NOERROR;
 
     EGLSurface _returnValue = (EGLSurface) 0;
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("_EglCreateWindowSurface: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLConfig config_native = (EGLConfig) FromEGLHandle(IEGLObjectHandle::Probe(config));
     if (!config_native) {
         LOGD("_EglCreateWindowSurface: config_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Int32 attrib_list_sentinel = 0;
     EGLint *attrib_list_base = (EGLint *) 0;
@@ -539,7 +547,7 @@ not_valid_surface:
     AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLSurface, _returnValue);
     *surface = IEGLSurface::Probe(obj);
     REFCOUNT_ADD(*surface)
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglCreatePbufferSurface(
@@ -553,16 +561,17 @@ ECode CEGL14::EglCreatePbufferSurface(
     *surface = NULL;
 
     EGLSurface _returnValue = (EGLSurface) 0;
+    ECode returnEcode = NOERROR;
 
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglCreatePbufferSurface: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLConfig config_native = (EGLConfig) FromEGLHandle(IEGLObjectHandle::Probe(config));
     if (!config_native) {
         LOGD("EglCreatePbufferSurface: config_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Boolean attrib_list_sentinel = FALSE;
     EGLint *attrib_list_base = (EGLint *) 0;
@@ -601,7 +610,7 @@ ECode CEGL14::EglCreatePbufferSurface(
     AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLSurface, _returnValue);
     *surface = IEGLSurface::Probe(obj);
     REFCOUNT_ADD(*surface)
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglCreatePixmapSurface(
@@ -631,15 +640,17 @@ ECode CEGL14::EglDestroySurface(
 
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
+    ECode returnEcode = NOERROR;
+
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglDestroySurface: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLSurface surface_native = (EGLSurface) FromEGLHandle(IEGLObjectHandle::Probe(surface));
     if (!surface_native) {
         LOGD("EglDestroySurface: surface_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     _returnValue = eglDestroySurface(
@@ -647,7 +658,7 @@ ECode CEGL14::EglDestroySurface(
         (EGLSurface)surface_native
     );
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglQuerySurface(
@@ -662,15 +673,17 @@ ECode CEGL14::EglQuerySurface(
 
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
+    ECode returnEcode = NOERROR;
+
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglQuerySurface: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLSurface surface_native = (EGLSurface) FromEGLHandle(IEGLObjectHandle::Probe(surface));
     if (!surface_native) {
         LOGD("EglQuerySurface: surface_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLint *value_base = (EGLint *) 0;
     Int32 _remaining;
@@ -699,7 +712,7 @@ ECode CEGL14::EglQuerySurface(
         (EGLint *)value
     );
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglBindAPI(
@@ -794,17 +807,18 @@ ECode CEGL14::EglCreatePbufferFromClientBufferInner(
 {
     VALIDATE_NOT_NULL(surface)
     *surface = NULL;
+    ECode returnEcode = NOERROR;
 
     EGLSurface _returnValue = (EGLSurface) 0;
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglCreatePbufferFromClientBufferInner: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLConfig config_native = (EGLConfig) FromEGLHandle(IEGLObjectHandle::Probe(config));
     if (!config_native) {
         LOGD("EglCreatePbufferFromClientBufferInner: config_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Boolean attrib_list_sentinel = FALSE;
     EGLint *attrib_list_base = (EGLint *) 0;
@@ -845,7 +859,7 @@ ECode CEGL14::EglCreatePbufferFromClientBufferInner(
     AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLSurface, _returnValue);
     *surface = IEGLSurface::Probe(obj);
     REFCOUNT_ADD(*surface)
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglSurfaceAttrib(
@@ -859,15 +873,17 @@ ECode CEGL14::EglSurfaceAttrib(
 
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
+    ECode returnEcode = NOERROR;
+
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglSurfaceAttrib: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLSurface surface_native = (EGLSurface) FromEGLHandle(IEGLObjectHandle::Probe(surface));
     if (!surface_native) {
         LOGD("EglSurfaceAttrib: surface_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     _returnValue = eglSurfaceAttrib(
@@ -877,7 +893,7 @@ ECode CEGL14::EglSurfaceAttrib(
         (EGLint)value
     );
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglBindTexImage(
@@ -890,16 +906,17 @@ ECode CEGL14::EglBindTexImage(
 
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
+    ECode returnEcode = NOERROR;
 
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglBindTexImage: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLSurface surface_native = (EGLSurface) FromEGLHandle(IEGLObjectHandle::Probe(surface));
     if (!surface_native) {
         LOGD("EglBindTexImage: surface_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     _returnValue = eglBindTexImage(
@@ -908,7 +925,7 @@ ECode CEGL14::EglBindTexImage(
         (EGLint)buffer
     );
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglReleaseTexImage(
@@ -921,15 +938,17 @@ ECode CEGL14::EglReleaseTexImage(
 
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
+    ECode returnEcode = NOERROR;
+
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglReleaseTexImage: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLSurface surface_native = (EGLSurface) FromEGLHandle(IEGLObjectHandle::Probe(surface));
     if (!surface_native) {
         LOGD("EglReleaseTexImage: surface_native== null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     _returnValue = eglReleaseTexImage(
@@ -938,7 +957,7 @@ ECode CEGL14::EglReleaseTexImage(
         (EGLint)buffer
     );
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglSwapInterval(
@@ -950,10 +969,12 @@ ECode CEGL14::EglSwapInterval(
 
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
+    ECode returnEcode = NOERROR;
+
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglSwapInterval: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     _returnValue = eglSwapInterval(
@@ -961,7 +982,7 @@ ECode CEGL14::EglSwapInterval(
         (EGLint)interval
     );
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglCreateContext(
@@ -974,22 +995,23 @@ ECode CEGL14::EglCreateContext(
 {
     VALIDATE_NOT_NULL(context)
     *context = NULL;
+    ECode returnEcode = NOERROR;
 
     EGLContext _returnValue = (EGLContext) 0;
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglCreateContext: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLConfig config_native = (EGLConfig) FromEGLHandle(IEGLObjectHandle::Probe(config));
     if (!config_native) {
         LOGD("EglCreateContext: config_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLContext share_context_native = (EGLContext) FromEGLHandle(IEGLObjectHandle::Probe(share_context));
     if (!share_context_native) {
         LOGD("EglCreateContext: share_context_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     bool attrib_list_sentinel = FALSE;
     EGLint *attrib_list_base = (EGLint *) 0;
@@ -1029,7 +1051,7 @@ ECode CEGL14::EglCreateContext(
     AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLContext, _returnValue);
     *context = IEGLContext::Probe(obj);
     REFCOUNT_ADD(*context)
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglDestroyContext(
@@ -1038,18 +1060,19 @@ ECode CEGL14::EglDestroyContext(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    ECode returnEcode = NOERROR;
 
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglDestroyContext: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLContext ctx_native = (EGLContext) FromEGLHandle(IEGLObjectHandle::Probe(ctx));
     if (!ctx_native) {
         LOGD("EglDestroyContext: ctx_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     _returnValue = eglDestroyContext(
@@ -1057,7 +1080,7 @@ ECode CEGL14::EglDestroyContext(
         (EGLContext)ctx_native
     );
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglMakeCurrent(
@@ -1068,28 +1091,29 @@ ECode CEGL14::EglMakeCurrent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    ECode returnEcode = NOERROR;
 
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglMakeCurrent: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLSurface draw_native = (EGLSurface) FromEGLHandle(IEGLObjectHandle::Probe(draw));
     if (!draw_native) {
         LOGD("EglMakeCurrent: draw_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLSurface read_native = (EGLSurface) FromEGLHandle(IEGLObjectHandle::Probe(read));
     if (!read_native) {
         LOGD("EglMakeCurrent: read_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLContext ctx_native = (EGLContext) FromEGLHandle(IEGLObjectHandle::Probe(ctx));
     if (!ctx_native) {
         LOGD("EglMakeCurrent: ctx_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     _returnValue = eglMakeCurrent(
@@ -1099,7 +1123,7 @@ ECode CEGL14::EglMakeCurrent(
         (EGLContext)ctx_native
     );
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglGetCurrentContext(
@@ -1156,18 +1180,19 @@ ECode CEGL14::EglQueryContext(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    ECode returnEcode = NOERROR;
 
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglQueryContext: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLContext ctx_native = (EGLContext) FromEGLHandle(IEGLObjectHandle::Probe(ctx));
     if (!ctx_native) {
         LOGD("EglQueryContext: ctx_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLint *value_base = (EGLint *) 0;
     Int32 _remaining;
@@ -1196,7 +1221,7 @@ ECode CEGL14::EglQueryContext(
         (EGLint *)value
     );
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglWaitGL(
@@ -1230,18 +1255,19 @@ ECode CEGL14::EglSwapBuffers(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    ECode returnEcode = NOERROR;
 
     EGLBoolean _returnValue = (EGLBoolean) 0;
     *result = _returnValue;
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("EglSwapBuffers: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLSurface surface_native = (EGLSurface) FromEGLHandle(IEGLObjectHandle::Probe(surface));
     if (!surface_native) {
         LOGD("EglSwapBuffers: surface_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     _returnValue = eglSwapBuffers(
@@ -1249,7 +1275,7 @@ ECode CEGL14::EglSwapBuffers(
         (EGLSurface)surface_native
     );
     *result = _returnValue;
-    return NOERROR;
+    return returnEcode;
 }
 
 ECode CEGL14::EglCopyBuffers(
@@ -1299,7 +1325,7 @@ Int64 CEGL14::FromEGLHandle(
     if (obj == NULL) {
         LOGD("FromEGLHandle: Object is set to null.")
         //return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        return NULL;
+        return 0;//NULL;
     }
     Int64 handle;
     obj->GetNativeHandle(&handle);
@@ -1328,17 +1354,18 @@ ECode CEGL14::_EglCreateWindowSurfaceTexture(
 {
     VALIDATE_NOT_NULL(surface)
     *surface = NULL;
+    ECode returnEcode = NOERROR;
 
     EGLSurface _returnValue = (EGLSurface) 0;
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
     if (!dpy_native) {
         LOGD("_EglCreateWindowSurfaceTexture: dpy_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     EGLConfig config_native = (EGLConfig) FromEGLHandle(IEGLObjectHandle::Probe(config));
     if (!config_native) {
         LOGD("_EglCreateWindowSurfaceTexture: config_native == null")
-        //return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Int32 attrib_list_sentinel = 0;
     EGLint *attrib_list_base = (EGLint *) 0;
@@ -1397,7 +1424,7 @@ not_valid_surface:
     AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLSurface, _returnValue);
     *surface = IEGLSurface::Probe(obj);
     REFCOUNT_ADD(*surface)
-    return NOERROR;
+    return returnEcode;
 }
 
 

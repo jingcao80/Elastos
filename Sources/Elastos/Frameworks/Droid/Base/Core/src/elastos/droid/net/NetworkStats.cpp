@@ -40,6 +40,16 @@ const String NetworkStats::IFACE_ALL(NULL);
 
 ECode NetworkStats::constructor()
 {
+    mCapacity = 0;
+    mIface = EmptyArray::STRING;
+    mUid = EmptyArray::INT32;
+    mSet = EmptyArray::INT32;
+    mTag = EmptyArray::INT32;
+    mRxBytes = EmptyArray::INT64;
+    mRxPackets = EmptyArray::INT64;
+    mTxBytes = EmptyArray::INT64;
+    mTxPackets = EmptyArray::INT64;
+    mOperations = EmptyArray::INT64;
     return NOERROR;
 }
 
