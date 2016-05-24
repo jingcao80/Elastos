@@ -142,4 +142,4 @@ ELASTOS_LIBS += inputmethod/inputmethod.lib
 ELASTOS_LIBS += accessibility/accessibility.lib
 ELASTOS_LIBS += animation/animation.lib
 ELASTOS_LIBS += textservice/textservice.lib
-// ELASTOS_LIBS += menu/menu.lib
+#ELASTOS_LIBS += menu/menu.lib

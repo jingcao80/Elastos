@@ -7,9 +7,9 @@ include $(MAKEDIR)/../../../../../../../../../../sources.inc
 INCLUDES += ../../
 INCLUDES += ../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../../../../inc/
-//INCLUDES += $(PREBUILD_INC)/skia/utils
-//INCLUDES += $(PREBUILD_INC)/skia/core
-//INCLUDES += $(PREBUILD_INC)/androidfw
+#INCLUDES += $(PREBUILD_INC)/skia/utils
+#INCLUDES += $(PREBUILD_INC)/skia/core
+#INCLUDES += $(PREBUILD_INC)/androidfw
 
 C_DEFINES += -DDROID_CORE
 

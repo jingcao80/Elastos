@@ -56,15 +56,15 @@ SOURCES += NativeTextHelper.cpp
 SOURCES += CNativeTextHelper.cpp
 SOURCES += CParcelableList.cpp
 
-// SOURCES += droid_nio_utils.cpp
-// SOURCES += SparseInt32Array.cpp
-// SOURCES += CParcelableObjectContainer.cpp
-// SOURCES += JournaledFile.cpp
-// SOURCES += CFastXmlSerializer.cpp
-// SOURCES += StateMachine.cpp
-// SOURCES += CharSequences.cpp
-// SOURCES += CPropertyHelper.cpp
-// SOURCES += ReflectiveProperty.cpp
-// SOURCES += FileRotator.cpp
+#SOURCES += droid_nio_utils.cpp
+#SOURCES += SparseInt32Array.cpp
+#SOURCES += CParcelableObjectContainer.cpp
+#SOURCES += JournaledFile.cpp
+#SOURCES += CFastXmlSerializer.cpp
+#SOURCES += StateMachine.cpp
+#SOURCES += CharSequences.cpp
+#SOURCES += CPropertyHelper.cpp
+#SOURCES += ReflectiveProperty.cpp
+#SOURCES += FileRotator.cpp
 
-// SOURCES += CIndentingPrintWriter.cpp
+#SOURCES += CIndentingPrintWriter.cpp

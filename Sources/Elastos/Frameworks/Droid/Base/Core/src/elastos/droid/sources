@@ -72,13 +72,13 @@ ELASTOS_LIBS += webkit/webkit.lib
 ELASTOS_LIBS += widget/widget.lib
 ELASTOS_LIBS += wifi/wifi.lib
 
-// ELASTOS_LIBS += wifidisplay/wifidisplay.lib
-// ELASTOS_LIBS += statusbar/statusbar.lib
-// ELASTOS_LIBS += bluetooth/bluetooth.lib
-// ELASTOS_LIBS += speech/speech.lib
-// ELASTOS_LIBS += privacy/privacy.lib
-// ELASTOS_LIBS += accounts/accounts.lib
-// ELASTOS_LIBS += swextend/gpio/gpio.lib
+#ELASTOS_LIBS += wifidisplay/wifidisplay.lib
+#ELASTOS_LIBS += statusbar/statusbar.lib
+#ELASTOS_LIBS += bluetooth/bluetooth.lib
+#ELASTOS_LIBS += speech/speech.lib
+#ELASTOS_LIBS += privacy/privacy.lib
+#ELASTOS_LIBS += accounts/accounts.lib
+#ELASTOS_LIBS += swextend/gpio/gpio.lib
 
 LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
@@ -94,4 +94,4 @@ LIBRARIES += $(PREBUILD_LIB)/libstagefright_amrnbenc.a
 
 LIBRARIES += -licuuc -licui18n -lbinder -lutils -lcutils -lsqlite -lskia -lui -linput -landroidfw -lselinux -lz -lusbhost -lnativebridge -lprocessgroup -lmtp -lexif -ljhead -lmedia -lcamera_client -lminikin -lhwui -lgui -lsoundtrigger -lhardware_legacy -lelwebviewchromium -lhardware -lpdfium -ljpeg -lstlport -ldl -lcamera_metadata -lEGL -lGLESv1_CM -lETC1 -lGLESv2 -lnetd_client  -lnetutils -limg_utils -lstagefright -lstagefright_foundation -lstagefright_amrnb_common
 
-//LIBRARIES += -licuuc -licui18n -lbinder -lutils -lcutils -lsqlite -lskia -lgui -lui -lhwui -landroidfw -lharfbuzz -ljpeg -lz -lmedia -lhardware_legacy -lstagefright -lstagefright_foundation -lstagefright_amrnb_common -lsqlite -lcamera_client -lusbhost -lselinux -lgpioservice -lelwebcore -lelchromium_net -lcrypto -lstlport -lEGL -lGLESv1_CM -lETC1 -lGLESv2 -ldrm1 -lmtp -lexif -lminikin -lc++ -lharfbuzz_ng
+#LIBRARIES += -licuuc -licui18n -lbinder -lutils -lcutils -lsqlite -lskia -lgui -lui -lhwui -landroidfw -lharfbuzz -ljpeg -lz -lmedia -lhardware_legacy -lstagefright -lstagefright_foundation -lstagefright_amrnb_common -lsqlite -lcamera_client -lusbhost -lselinux -lgpioservice -lelwebcore -lelchromium_net -lcrypto -lstlport -lEGL -lGLESv1_CM -lETC1 -lGLESv2 -ldrm1 -lmtp -lexif -lminikin -lc++ -lharfbuzz_ng

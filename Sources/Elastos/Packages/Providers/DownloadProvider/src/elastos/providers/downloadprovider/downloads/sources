@@ -28,8 +28,8 @@ SOURCES += CHelpers.cpp
 SOURCES += COpenHelper.cpp
 SOURCES += RealSystemFacade.cpp
 SOURCES += CSizeLimitActivity.cpp
-// SOURCES += StopRequestException.cpp
 SOURCES += CStorageUtils.cpp
+#SOURCES += StopRequestException.cpp
 
 
 LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
