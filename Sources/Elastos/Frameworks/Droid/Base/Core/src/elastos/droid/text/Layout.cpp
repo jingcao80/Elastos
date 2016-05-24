@@ -2049,7 +2049,7 @@ ECode Layout::GetSelectionPath(
 
         Int32 lb, le;
         GetLineEnd(startline, &le);
-        GetLineEnd(startline, &lb);
+        GetLineBottom(startline, &lb);
         AddSelection(startline, start, le, top, lb, dest);
 
         Int32 dir;
