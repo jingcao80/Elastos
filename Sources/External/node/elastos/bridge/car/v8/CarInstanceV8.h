@@ -1,40 +1,43 @@
 
-#ifndef __CARINSTANCE_H__
-#define __CARINSTANCE_H__
+#ifndef __CARINSTANCEV8_H__
+#define __CARINSTANCEV8_H__
+
+#include <elastos.h>
 
 #if ENABLE(CAR_BRIDGE)
 
-#include "CarValueV8.h"
-#include "CobjectWrapper.h"
-#include <wtf/RefCounted.h>
+#include "CarInstance.h"
+
+#include "CarClassV8.h"
 
 namespace JSC {
 namespace Bindings {
 
-class CarKlass;
-class CarField;
-class CarMethod;
-
-class CarInstance : public RefCounted<CarInstance>
+class CarInstanceV8 : public CarInstance
 {
 public:
-    virtual ~CarInstance() {}
+    CarInstanceV8(CobjectWrapper* objectWrapper, bool requireAnnotation);
 
-    virtual CarKlass* getClass() const = 0;
-    // args must be an array of length greater than or equal to the number of
-    // arguments expected by the method.
-    virtual void invokeMethod(const CarMethod*, CarValue* args, bool& didRaiseUncaughtException) = 0;
-    virtual CarValue getField(const CarField*) = 0;
+    virtual CarKlass* getClass() const;
+    virtual void invokeMethod(const CarMethod*, CarValue* args, bool& didRaiseUncaughtException);
+    virtual CarValue getField(const CarField*);
+    virtual void begin();
+    virtual void end();
 
-    // These functions are called before and after the main entry points into
-    // the native implementations.  They can be used to establish and cleanup
-    // any needed state.
-    virtual void begin() = 0;
-    virtual void end() = 0;
+    IInterface* carInstance() const;
 
-    virtual IInterface* carInstance() const = 0;
+    CobjectWrapper* getInstance() const { return mInstance->get(); }
 
-    virtual CobjectWrapper* getInstance() const = 0;
+protected:
+    RefPtr<CobjectWrapper> mInstance;
+    mutable OwnPtr<CarKlass> mClass;
+    bool mRequireAnnotation;
+
+    typedef WTF::HashMap<WTF::String, CarValue> DynamicFieldMap;
+    DynamicFieldMap mDynamicFields;
+
+    //pthread_mutex_t mMutex;
+    //pthread_mutex_t* pMutex;
 };
 
 } // namespace Bindings
@@ -42,4 +45,4 @@ public:
 
 #endif // ENABLE(CAR_BRIDGE)
 
-#endif //__CARINSTANCE_H__
+#endif //__CARINSTANCEV8_H__

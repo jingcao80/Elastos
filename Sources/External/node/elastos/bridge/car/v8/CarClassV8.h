@@ -4,29 +4,33 @@
 
 #if ENABLE(CAR_BRIDGE)
 
-#include <wtf/HashMap.h>
-#include <wtf/Vector.h>
-#include <wtf/text/StringHash.h>
-#include <wtf/text/WTFString.h>
+#include <elastos.h>
+#include "CobjectWrapper.h"
+#include "CarKlass.h"
+#include "CarField.h"
 
 namespace JSC {
 namespace Bindings {
 
-class CarField;
-class CarMethod;
-
-typedef WTF::Vector<CarMethod*> MethodList;
-typedef WTF::HashMap<WTF::String, CarField*> FieldMap;
-
-class CarKlass
+class CarClassV8 : public CarKlass
 {
 public:
-    virtual ~CarKlass() {}
+    CarClassV8(CobjectWrapper*, bool);
 
-    virtual MethodList methodsNamed(const char* name) const = 0;
-    virtual CarField* fieldNamed(const char* name) const = 0;
+    virtual ~CarClassV8();
 
-    virtual bool isView() const = 0;
+    // CarClass implementation
+    virtual MethodList methodsNamed(const char* name) const;
+    virtual CarField* fieldNamed(const char* name) const;
+
+    virtual bool isView() const;
+private:
+    typedef WTF::HashMap<WTF::String, MethodList*> MethodListMap;
+    MethodListMap mMethods;
+    FieldMap mFields;
+    bool mRequireAnnotation;
+
+    bool mIsView;
 };
 
 } // namespace Bindings

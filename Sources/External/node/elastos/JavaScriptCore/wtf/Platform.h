@@ -773,8 +773,7 @@
 // Changes needed to support native plugins (npapi.h). If the change is generic,
 // it may be under a different #define (see: PLUGIN_PLATFORM_SETVALUE,
 // PLUGIN_SCHEDULE_TIMER)
-//#define ANDROID_PLUGINS
-#define ELASTOS_PLUGINS
+#define ANDROID_PLUGINS
 // This enables a portable implementation of NPN_[Un]ScheduleTimer
 // Will submit this as a patch to apple
 #define PLUGIN_SCHEDULE_TIMER // FIXME: Rename to ANDROID_PLUGIN_SCHEDULE_TIMER
@@ -822,6 +821,7 @@
 #define ucol_close ucol_close_53
 #define ucol_strcoll ucol_strcoll_53
 
+#define ELASTOS_PLUGINS
 #endif /* PLATFORM(ELASTOS) */
 
 #if PLATFORM(WIN) && !OS(WINCE)

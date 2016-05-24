@@ -10,6 +10,7 @@
 #include "V8NPObject.h"
 #include <node.h>
 #include <uv.h>
+//#include "elastos/HashSet.h"
 #include "etl/HashSet.h"
 #include "elastos.h"
 #include "CarValueV8.h"
@@ -132,6 +133,7 @@ public:
 
     //Run in elastos ui thread
     static void EnqueueFunctionPtr(void (*proc)(void*), void* payload) {
+        pthread_t mThread = pthread_self();
         elCallbackQuene.cbFunction = proc;
         elCallbackQuene.cbParameters = payload;
         TestCallbackBuf* callback = new TestCallbackBuf(

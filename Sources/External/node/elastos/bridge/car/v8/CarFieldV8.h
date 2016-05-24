@@ -26,34 +26,40 @@
 #ifndef CarFieldV8_h
 #define CarFieldV8_h
 
+#include <elastos.h>
+
 #if ENABLE(CAR_BRIDGE)
 
-#include "CarUtilityPrivate.h"
-#include <wtf/HashMap.h>
-#include <wtf/Vector.h>
-#include <wtf/text/StringHash.h>
-#include <wtf/text/WTFString.h>
+#include "CarField.h"
+#include "CarString.h"
+#include "CobjectWrapper.h"
 
 namespace JSC {
 namespace Bindings {
 
-typedef WTF::HashMap<WTF::String, CarMethod*> FieldMethodListMap;
-
-class CarField {
+class CarFieldV8 : public CarField {
 public:
-    virtual ~CarField() {}
+    CarFieldV8(CarString inName, int inAttr);
 
-    virtual WTF::String name() const = 0;
-    virtual const char* typeClassName() const = 0;
-    virtual CarDataType type() const = 0;
+    ~CarFieldV8();
 
-    virtual int attr() const = 0;
-    virtual void setAttr(int) = 0;
-    virtual FieldMethodListMap& fieldMethodList() = 0;
+    // CarField implementation
+    virtual WTF::String name() const { return mName.impl(); }
+    virtual const char* typeClassName() const { return mTypeClassName.utf8(); }
+    virtual CarDataType type() const { return mType; }
 
-public:
-    static const int READABLE = 0x1;
-    static const int WRITEABLE = 0x10;
+    virtual int attr() const { return mAttr; }
+    virtual void setAttr(int attr) { mAttr = attr; }
+    virtual FieldMethodListMap& fieldMethodList() { return mFieldMethodList; }
+
+private:
+    CarString mName;
+    CarString mTypeClassName;
+    CarDataType mType;
+    RefPtr<CobjectWrapper> mField;
+
+    int mAttr;
+    FieldMethodListMap mFieldMethodList;
 };
 
 } // namespace Bindings

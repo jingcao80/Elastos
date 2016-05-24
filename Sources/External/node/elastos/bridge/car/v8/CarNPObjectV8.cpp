@@ -6,15 +6,16 @@
 
 #include "npruntime_impl.h"
 
+//#include "elastos/HashSet.h"
 #include "etl/HashSet.h"
 #include "elastos.h"
 
 #include "CarUtilityPrivate.h"
 #include "CarNPObjectV8.h"
 #include "CarClassV8.h"
-#include "CarInstanceV8.h"
-#include "CarMethodCobject.h"
-#include "CarFieldCobjectV8.h"
+#include "CarInstance.h"
+#include "CarMethodV8.h"
+#include "CarFieldV8.h"
 
 #include <utils/Log.h>
 
@@ -102,6 +103,223 @@ bool CarNPObjectHasMethod(NPObject* npobj, NPIdentifier identifier) //TODO
     return retValue;
 }
 
+//whether is run on ui thread,to be fixed with annotation,
+//and this function to be deleted or replaced with a method/class name list just for debug.
+bool _BeRunOnUiThread(
+    CarInstance* instance,
+    NPUTF8* name,
+    uint32_t argCount,
+    bool bClass,
+    IInterface* object,
+    IClassInfo* classInfo,
+    IMethodInfo* methodInfo
+) {
+    bool bRunOnUiThread = false;
+
+    ECode ec = NOERROR;
+    WTF::String methodName(name);
+
+    bRunOnUiThread = (instance->getClass()->isView() && methodName.startsWith(WTF::String("Set")));
+    if (!strcmp(name,"SetOnClickListener")) {
+        bRunOnUiThread = false;
+    }
+    if (!strcmp(name,"StartAnimation")) {
+        bRunOnUiThread = false;
+    }
+    if (!strcmp(name,"ShowAtLocation")) {
+        bRunOnUiThread = true;
+    }
+    if (!strcmp(name,"Dismiss")) {
+        bRunOnUiThread = true;
+    }
+
+    //Activity::ShowDialog
+    if (!strcmp(name,"ShowDialog")) {
+        bRunOnUiThread = true;
+    }
+
+    //CAlertDialogBuilder::Create
+    if (!strcmp(name,"Create")) {
+        bRunOnUiThread = true;
+    }
+
+    //CAlertDialogBuilder::SetPositiveButtonEx
+    if (!strcmp(name,"SetPositiveButtonEx")) {
+        bRunOnUiThread = true;
+    }
+    //IDialog::Show
+    if (!strcmp(name,"Show")) {
+        bRunOnUiThread = true;
+    }
+    //IDialog::DispatchOnCreate
+    if (!strcmp(name,"DispatchOnCreate")) {
+        bRunOnUiThread = true;
+    }
+    if (!strcmp(name,"ShowAsDropDown")) {
+        bRunOnUiThread = true;
+    }
+    if (!strcmp(name,"SetImageDrawable")) {
+        bRunOnUiThread = true;
+    }
+    if (!strcmp(name,"SetImageResource")) {
+        bRunOnUiThread = true;
+    }
+
+    if (!strcmp(name,"GetAnnotation")) {
+        bRunOnUiThread = true;
+    }
+
+    // if (!strcmp(name,"New_CSimpleAdapter")) {
+    //     bRunOnUiThread = true;
+    // }
+    // if (!strcmp(name,"GetService")) {
+    //     ALOGD("CarNPObjectInvoke ======== GetService==========1=================");
+    //     bRunOnUiThread = true;
+    // }
+
+    if (!strcmp(name,"CreateObject")) {
+        if (bClass) {
+            bRunOnUiThread = false;
+
+            Elastos::String tmp_ClassName;
+            WTF::String className;
+
+            if (argCount == 0) {
+                AutoPtr<IMethodInfo> tmp_methodInfo_1;
+                //ec = classInfo->GetMethodInfo("GetName", (IMethodInfo**)&tmp_methodInfo_1);
+                ec = classInfo->GetMethodInfo(Elastos::String("GetName"), Elastos::String("(I32)E"), (IMethodInfo**)&tmp_methodInfo_1);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject GetMethodInfo failed===============");
+                }
+                AutoPtr<IArgumentList> tmp_argumentList_1;
+                ec = tmp_methodInfo_1->CreateArgumentList((IArgumentList**)&tmp_argumentList_1);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject CeateArgumentList failee==========");
+                }
+                Elastos::String mStringValue_1;
+                ec = tmp_argumentList_1->SetOutputArgumentOfStringPtr(0,&mStringValue_1);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject SetOutputArgumentOfStringPtr failed==========");
+                }
+                ec = tmp_methodInfo_1->Invoke(object, tmp_argumentList_1);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject invoke  failed=========");
+                }
+
+                ALOGD("CarNPObjectInvoke ======== CreateObject begin==========%s",mStringValue_1.string());
+                className = WTF::String(mStringValue_1);
+            }
+            else {
+                //to be finished
+                //var tmp_object = object.GetClassInfo();
+                AutoPtr<IMethodInfo> tmp_methodInfo;
+                //ec = classInfo->GetMethodInfo("GetClassInfo", (IMethodInfo**)&tmp_methodInfo);
+                ec = classInfo->GetMethodInfo(Elastos::String("GetClassInfo"), Elastos::String("(I32)E"), (IMethodInfo**)&tmp_methodInfo);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject GetMethodInfo failed==========");
+                }
+                AutoPtr<IArgumentList> tmp_argumentList;
+                ec = tmp_methodInfo->CreateArgumentList((IArgumentList**)&tmp_argumentList);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject CeateArgumentList failed==========");
+                }
+                AutoPtr<IInterface> tmp_object;
+                ec = tmp_argumentList->SetOutputArgumentOfObjectPtrPtr(0,(IInterface**)&tmp_object);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject SetOutputArgumentOfObjectPtrPtr failed==========");
+                }
+                ec = tmp_methodInfo->Invoke(object, tmp_argumentList);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject invoke failed==========");
+                }
+
+                //var mStringValue_1 = tmp_object.GetName();
+                AutoPtr<IClassInfo> tmp_classInfo_1;
+                ec = CObject::ReflectClassInfo(tmp_object, (IClassInfo**)&tmp_classInfo_1);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject GetMethodInfo failed==========");
+                }
+                AutoPtr<IMethodInfo> tmp_methodInfo_1;
+                //ec = tmp_classInfo_1->GetMethodInfo("GetName", (IMethodInfo**)&tmp_methodInfo_1);
+                ec = tmp_classInfo_1->GetMethodInfo(Elastos::String("GetName"), Elastos::String("(I32)E"), (IMethodInfo**)&tmp_methodInfo_1);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject GetMethodInfo failed==========");
+                }
+                AutoPtr<IArgumentList> tmp_argumentList_1;
+                ec = tmp_methodInfo_1->CreateArgumentList((IArgumentList**)&tmp_argumentList_1);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject CeateArgumentList failed==========");
+                }
+                Elastos::String mStringValue_1;
+                ec = tmp_argumentList_1->SetOutputArgumentOfStringPtr(0,&mStringValue_1);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject SetOutputArgumentOfStringPtr failed==========");
+                }
+                ec = tmp_methodInfo_1->Invoke(tmp_object, tmp_argumentList_1);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject invoke failed==========");
+                }
+
+                ALOGD("CarNPObjectInvoke ======== CreateObject begin==========%s",mStringValue_1.string());
+                className = WTF::String(mStringValue_1);
+            }
+
+            bRunOnUiThread = className.startsWith(WTF::String("CPopupWindow"));
+            //bRunOnUiThread = bRunOnUiThread || className.startsWith(WTF::String("CArrayAdapter"));
+            //bRunOnUiThread = bRunOnUiThread || className.startsWith(WTF::String("CSimpleAdapter"));
+            //bRunOnUiThread = bRunOnUiThread || className.startsWith(WTF::String("CServiceManager"));
+
+            if (bRunOnUiThread) {
+                Elastos::String annotation;
+                ec = methodInfo->GetAnnotation(&annotation);
+                if (FAILED(ec)) {
+                    printf("Get %s method annotation failed!\n", name);
+                }
+
+                AutoPtr<IClassInfo> tmp_classInfo_2;
+                ec = CObject::ReflectClassInfo(object, (IClassInfo**)&tmp_classInfo_2);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject GetMethodInfo failed==========");
+                }
+                AutoPtr<IMethodInfo> tmp_methodInfo_2;
+                //ec = tmp_classInfo_2->GetMethodInfo("GetAnnotation", (IMethodInfo**)&tmp_methodInfo_2);
+                ec = tmp_classInfo_2->GetMethodInfo(Elastos::String("GetAnnotation"), Elastos::String("(I32)E"), (IMethodInfo**)&tmp_methodInfo_2);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject GetMethodInfo failed==========");
+                }
+                AutoPtr<IArgumentList> tmp_argumentList_2;
+                ec = tmp_methodInfo_2->CreateArgumentList((IArgumentList**)&tmp_argumentList_2);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject CeateArgumentList failed==========");
+                }
+                Elastos::String mConstructorAnnotation;
+                ec = tmp_argumentList_2->SetOutputArgumentOfStringPtr(0,&mConstructorAnnotation);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject SetOutputArgumentOfStringPtr failed==========");
+                }
+                ec = tmp_methodInfo_2->Invoke(object, tmp_argumentList_2);
+                if (FAILED(ec)) {
+                    ALOGD("CarNPObjectInvoke ======== CreateObject invoke failed==========");
+                }
+
+                if (FAILED(ec)) {
+                    printf("Get %s method constructorInfo annotation failed!\n", name);
+                }
+
+                if (mConstructorAnnotation == "MainThread") {
+                    bRunOnUiThread = true;
+                }
+            }
+
+        }
+    }
+
+    bRunOnUiThread = bRunOnUiThread || (methodName.startsWith(WTF::String("SetContentView")));
+
+    return bRunOnUiThread;
+}   //_BeRunOnUiThread
+
+
 bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant* args, uint32_t argCount, NPVariant* result)
 {
     ECode ec = NOERROR;
@@ -118,6 +336,8 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         LOG_ERROR("CarNPObjectInvoke: unable to get method name from NPIdentifier");
         return false;
     }
+
+    ALOGD("CarNPObjectInvoke.1 method name: %s====",name);
 
     instance->begin();
 
@@ -158,6 +378,8 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         return false;
     }
 
+    ALOGD("CarNPObjectInvoke.2 method name: %s====",name);
+
     AutoPtr<IInterface> object = instance->carInstance();
 
     AutoPtr<IInterfaceInfo> interfaceInfo;
@@ -167,41 +389,65 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
 
     ec = CObject::ReflectClassInfo(object, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
+        ALOGD("CarNPObjectInvoke name: %s====CObject::ReflectClassInfo Failed",name);
         bClass = false;
         interfaceInfo = IInterfaceInfo::Probe(instance->getInstance()->getDataTypeInfo());
     }
 
     AutoPtr<IMethodInfo> methodInfo;
     if (bClass) {
+        ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo By ClassInfo",carMethod->name().utf8().data() );
         //ec = classInfo->GetMethodInfo(carMethod->name().utf8().data(), (IMethodInfo**)&methodInfo);
         ec = classInfo->GetMethodInfo(Elastos::String(carMethod->name().utf8().data()), Elastos::String("(I32)E"), (IMethodInfo**)&methodInfo);
     }
     else {
+        ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo By InterfaceInfo",name);
         //ec = interfaceInfo->GetMethodInfo(carMethod->name().utf8().data(), (IMethodInfo**)&methodInfo);
         ec = classInfo->GetMethodInfo(Elastos::String(carMethod->name().utf8().data()), Elastos::String("(I32)E"), (IMethodInfo**)&methodInfo);
     }
     if (FAILED(ec)) {
+        ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo Failed!",name);
         LOG_ERROR("CarNPObjectInvoke: get methodinfo failed, to invoke default!");
         instance->end();
         free(name);
         return false;
     }
 
+    ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo Success!",name);
+
     //-----------------bRunOnUiThread begin-------------------
     bool bRunOnUiThread;
 
-    Elastos::String mMethodAnnotation;
-    ec = methodInfo->GetAnnotation(&mMethodAnnotation);
-    if (FAILED(ec)) {
-        printf("Get %s method annotation failed!\n", name);
-        free(name);
-        return ec;
+    //whether is run on ui thread,to be fixed with annotation
+    bRunOnUiThread = _BeRunOnUiThread(
+        instance,
+        name,
+        argCount,
+        bClass,
+        object.Get(),
+        classInfo.Get(),
+        methodInfo.Get()
+    );
+
+    if (!bRunOnUiThread) {
+        Elastos::String mMethodAnnotation;
+        ec = methodInfo->GetAnnotation(&mMethodAnnotation);
+        if (FAILED(ec)) {
+            printf("Get %s method annotation failed!\n", name);
+            free(name);
+            return ec;
+        }
+
+        if (mMethodAnnotation == "MainThread") {
+            bRunOnUiThread = true;
+        }
     }
 
-    if (mMethodAnnotation == "MainThread") {
-        bRunOnUiThread = true;
+    if(bRunOnUiThread) {
+        ALOGD("CarNPObjectInvoke.beRunOnUiThread method name: %s====",name);
     }
 
+    //bRunOnUiThread = true;
     carMethod->setRunOnUiThread(bRunOnUiThread);
     //-----------------bRunOnUiThread end-------------------
 

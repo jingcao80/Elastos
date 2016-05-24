@@ -14,7 +14,7 @@ namespace Bindings {
 class CobjectWrapper : IInterface
 {
 friend class CarInstance;
-friend class CarInstanceCobject;
+friend class CarInstanceV8;
 
 public:
     PInterface Probe(
@@ -73,7 +73,7 @@ public:
     CobjectWrapper(IInterface*, IDataTypeInfo*);
 
 protected:
-    virtual ~CobjectWrapper();
+    ~CobjectWrapper();
 
     AutoPtr<IInterface> mInstance;
     AutoPtr<IDataTypeInfo> mDataTypeInfo;

@@ -33,11 +33,12 @@
 #include <wtf/text/CString.h>
 #include <wtf/text/StringBuilder.h>
 
+//#include "elastos/HashSet.h"
 #include "etl/HashSet.h"
 #include "elastos.h"
 
-#include "CarInstanceCobjectV8.h"
-#include "CarClassCobjectV8.h"
+#include "CarInstanceV8.h"
+#include "CarClassV8.h"
 #include "CarMethod.h"
 
 #include "CarNPObjectV8.h"
@@ -69,6 +70,9 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
     CarDataType carDataType = result->mType;
     NPVariantType type = value.type;
 
+    const char* tmpType = ClassNameFromCarDataType((CarDataType)(result->mType));
+    const char* tmpSubType = ClassNameFromCarDataType((CarDataType)(result->mElementType));
+
     switch (carDataType) {
         case CarDataType_Int16:
             if (type == NPVariantType_Int32) {
@@ -89,7 +93,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
             // }
             // break;
 
-            Int32 _value = 0;
+            Int32 _value;
             if (type == NPVariantType_Int32) {
                 _value = (Elastos::Int32)(NPVARIANT_TO_INT32(value));
             }
@@ -98,7 +102,8 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
             }
 
             if (result->mTagSetLocalPtr) {
-                CarQuintet* carArray = NULL;
+                CarValue* aCarValue = new CarValue();
+                CarQuintet* carArray;
 
                 NPObject* object = NPVARIANT_IS_OBJECT(value) ? NPVARIANT_TO_OBJECT(value) : 0;
                 NPVariant npvLength;
@@ -790,6 +795,9 @@ void convertCarValuesToNPVariant(const CarMethod* method, CarValue* values, Arra
 
 void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
 {
+    const char* tmpType = ClassNameFromCarDataType((CarDataType)(value.mType));
+    const char* tmpSubType = ClassNameFromCarDataType((CarDataType)(value.mElementType));
+
     VOID_TO_NPVARIANT(*result);
 
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
@@ -813,7 +821,17 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
             break;
         case CarDataType_Char32:
         {
+
+        // AutoPtr<ArrayOf<Char32> > buf = ArrayOf<Char32>::Alloc(size);
+        // for (Int32 i = 0; i < size; ++i) {
+        //     buf->Set(i, (Char32)(*(p + i)));
+        // }
+        // String str(*buf);
+
+
+            //ArrayOf_<Char32, 1> charArray;
             AutoPtr<ArrayOf<Char32> > charArray = ArrayOf<Char32>::Alloc(1);
+            //charArray[0] = value.mCharValue;
             charArray->Set(0, (Char32)value.mCharValue);
             const char* utf8String = strdup(Elastos::String(*charArray).string());
             STRINGZ_TO_NPVARIANT(utf8String, *result);
@@ -987,7 +1005,9 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
 
                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
                     for (Int32 i = 0; i < length; i++){
+                        //ArrayOf_<Char32, 1> charArray;
                         AutoPtr<ArrayOf<Char32> > charArray = ArrayOf<Char32>::Alloc(1);
+                        //charArray[0] = (*pArray)[i];
                         charArray->Set(0, (Char32)(*pArray)[i]);
                         const char* utf8String = strdup(Elastos::String(*charArray).string());
                         pV8Array->Set(i, v8::String::NewFromUtf8(isolate,utf8String));
@@ -1137,7 +1157,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
                         NPVariant* tempNPVariant = &(*pNPVariantArray)[i];
 
                         (*pNPVariantArray)[i].type = NPVariantType_Object;
-                        (*pNPVariantArray)[i].value.objectValue = CarInstanceToNPObject(new CarInstanceCobject(new CobjectWrapper(tempClassinfo, NULL), true));
+                        (*pNPVariantArray)[i].value.objectValue = CarInstanceToNPObject(new CarInstanceV8(new CobjectWrapper(tempClassinfo, NULL), true));
 
                         v8::Handle<v8::Value> tempV8Object = WebCore::convertNPVariantToV8Object(tempNPVariant, NULL);
 
@@ -1160,6 +1180,8 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
         }
         case CarDataType_LocalPtr:  //deprecated
         {
+            ArrayOf<Int32>* tempArray2 = reinterpret_cast< ArrayOf<Int32>* >(value.mCarQuintet);
+
             NPObject tempNPObject;
             //TODO:convert ArrayOf into NPObject
             result->type = NPVariantType_Object;
@@ -1170,7 +1192,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
         {
             result->type = NPVariantType_Object;
             value.mObjectWrapper->setInstance(value.mObjectValue);
-            result->value.objectValue = CarInstanceToNPObject(new CarInstanceCobject(value.mObjectWrapper, true));
+            result->value.objectValue = CarInstanceToNPObject(new CarInstanceV8(value.mObjectWrapper, true));
             break;
         }
         default :

@@ -21,6 +21,14 @@
 #define __USE_MALLOC
 #endif
 
+//#include <elastos.h>
+//#include <elautoptr.h>
+//#include <elastos/HashMap.h>
+
+//#include "Elastos.Droid.Core.h"
+//#include "Elastos.Droid.JavaProxy.h"
+//#include "Elastos.Droid.Server.h"
+
 /*
 #undef WK_EXPORT
 #if defined(WK_NO_EXPORT)
@@ -37,7 +45,6 @@
 #define WK_EXPORT
 #endif // defined(WK_NO_EXPORT)
 */
-
 #undef WK_EXPORT
 #ifndef WK_EXPORT
 #define WK_EXPORT __attribute__((visibility("default")))
@@ -45,5 +52,7 @@
 #warning XXXXXXXX_#WK_EXPORT
 //#error check WKEXPORT definition first
 #endif
+
+//using Elastos::Utility::HashMap;
 
 #endif //__ELANDROID_H__

@@ -1,4 +1,4 @@
-global.elastos = require("../elastos.node");
+global.elastos = require("../../bin/elastos.node");
 
 elog("type of elastos: " + typeof elastos);
 elog("type of elastos.require: " + typeof elastos.require);
