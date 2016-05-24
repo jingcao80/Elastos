@@ -4,9 +4,11 @@ TARGET_TYPE = eco
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
-include $(MAKEDIR)/../../../../../sources.inc
+include $(MAKEDIR)/../../sources.inc
 INCLUDES += $(MAKEDIR)
-INCLUDES += $(MAKEDIR)/../../../
+INCLUDES += $(MAKEDIR)/src
+
+VPATH += $(MAKEDIR)/src/elastos/devsamples/tabhostdemo
 
 SOURCES = Elastos.DevSamples.TabHostDemo.car
 SOURCES += R.cpp
