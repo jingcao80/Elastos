@@ -35,63 +35,58 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-// class SoftReferenceThreadLocal
-//     : public Object
-// {
-// public:
-//     SoftReferenceThreadLocal();
+// TODO: we don't have SoftReference, use StrongReference instead
+class SoftReferenceThreadLocal : public Object
+{
+public:
+    SoftReferenceThreadLocal();
 
-//     CARAPI_(void) Set(
-//         /* [in] */ IInterface* t);
+    CARAPI_(void) Set(
+        /* [in] */ IInterface* t);
 
-//     CARAPI_(AutoPtr<IInterface>) Get();
+    CARAPI_(AutoPtr<IInterface>) Get();
 
-// protected:
-//     virtual CARAPI_(AutoPtr<IInterface>) InitialValue() = 0;
+protected:
+    virtual CARAPI_(AutoPtr<IInterface>) InitialValue() = 0;
 
-// private:
-//     AutoPtr<IThreadLocal> mThreadLocal;
-// };
+private:
+    pthread_key_t mThreadLocal;
+};
 
-// class CanvasCache
-//     : public SoftReferenceThreadLocal
-// {
-// protected:
-//     //@Override
-//     CARAPI_(AutoPtr<IInterface>) InitialValue();
-// };
+class CanvasCache : public SoftReferenceThreadLocal
+{
+protected:
+    //@Override
+    CARAPI_(AutoPtr<IInterface>) InitialValue();
+};
 
-// class PaintCache
-//     : public SoftReferenceThreadLocal
-// {
-// protected:
-//     //@Override
-//     CARAPI_(AutoPtr<IInterface>) InitialValue();
-// };
+class PaintCache : public SoftReferenceThreadLocal
+{
+protected:
+    //@Override
+    CARAPI_(AutoPtr<IInterface>) InitialValue();
+};
 
-// class BitmapCache
-//     : public SoftReferenceThreadLocal
-// {
-// protected:
-//     //@Override
-//     CARAPI_(AutoPtr<IInterface>) InitialValue();
-// };
+class BitmapCache : public SoftReferenceThreadLocal
+{
+protected:
+    //@Override
+    CARAPI_(AutoPtr<IInterface>) InitialValue();
+};
 
-// class RectCache
-//     : public SoftReferenceThreadLocal
-// {
-// protected:
-//     //@Override
-//     CARAPI_(AutoPtr<IInterface>) InitialValue();
-// };
+class RectCache : public SoftReferenceThreadLocal
+{
+protected:
+    //@Override
+    CARAPI_(AutoPtr<IInterface>) InitialValue();
+};
 
-// class BitmapFactoryOptionsCache
-//     : public SoftReferenceThreadLocal
-// {
-// protected::
-//     //@Override
-//     CARAPI_(AutoPtr<IInterface>) InitialValue();
-// };
+class BitmapFactoryOptionsCache : public SoftReferenceThreadLocal
+{
+protected:
+    //@Override
+    CARAPI_(AutoPtr<IInterface>) InitialValue();
+};
 
 class WidgetPreviewLoader
     : public Object
@@ -268,21 +263,6 @@ private:
         /* [in] */ Int32 h,
         /* [in] */ Float scale);
 
-    CARAPI_(void) MakeKey();
-
-public:
-    pthread_key_t mCachedShortcutPreviewBitmap;
-    pthread_key_t mCachedShortcutPreviewPaint;
-    pthread_key_t mCachedShortcutPreviewCanvas;
-
-    pthread_key_t mCachedAppWidgetPreviewCanvas;
-    pthread_key_t mCachedAppWidgetPreviewSrcRect;
-    pthread_key_t mCachedAppWidgetPreviewDestRect;
-    pthread_key_t mCachedAppWidgetPreviewPaint;
-
-    pthread_key_t mCachedBitmapFactoryOptions;
-    //pthread_once_t mKeyOnce;
-
 private:
     static const String TAG;
     static const String ANDROID_INCREMENTAL_VERSION_NAME_KEY;
@@ -296,17 +276,17 @@ private:
     AutoPtr<IPagedViewCellLayout> mWidgetSpacingLayout;
 
     // Used for drawing shortcut previews
-    // AutoPtr<BitmapCache> mCachedShortcutPreviewBitmap = new BitmapCache();
-    // AutoPtr<PaintCache> mCachedShortcutPreviewPaint = new PaintCache();
-    // AutoPtr<CanvasCache> mCachedShortcutPreviewCanvas = new CanvasCache();
+    AutoPtr<BitmapCache> mCachedShortcutPreviewBitmap;
+    AutoPtr<PaintCache> mCachedShortcutPreviewPaint;
+    AutoPtr<CanvasCache> mCachedShortcutPreviewCanvas;
 
     // Used for drawing widget previews
-    // AutoPtr<CanvasCache> mCachedAppWidgetPreviewCanvas = new CanvasCache();
-    // AutoPtr<RectCache> mCachedAppWidgetPreviewSrcRect = new RectCache();
-    // AutoPtr<RectCache> mCachedAppWidgetPreviewDestRect = new RectCache();
-    // AutoPtr<PaintCache> mCachedAppWidgetPreviewPaint = new PaintCache();
+    AutoPtr<CanvasCache> mCachedAppWidgetPreviewCanvas;
+    AutoPtr<RectCache> mCachedAppWidgetPreviewSrcRect;
+    AutoPtr<RectCache> mCachedAppWidgetPreviewDestRect;
+    AutoPtr<PaintCache> mCachedAppWidgetPreviewPaint;
     String mCachedSelectQuery;
-    //AutoPtr<BitmapFactoryOptionsCache> mCachedBitmapFactoryOptions = new BitmapFactoryOptionsCache();
+    AutoPtr<BitmapFactoryOptionsCache> mCachedBitmapFactoryOptions;
 
     Int32 mAppIconSize;
     Int32 mProfileBadgeSize;

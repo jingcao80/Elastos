@@ -376,6 +376,11 @@ public:
         /* [in] */ Int32 index,
         /* [out] */ IView** view);
 
+    //@Override
+    CARAPI IndexToPage(
+        /* [in] */ Int32 index,
+        /* [out] */ Int32* page);
+
     /**
      * Used by the parent to get the content width to set the tab bar to
      * @return

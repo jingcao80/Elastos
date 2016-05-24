@@ -69,6 +69,72 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
+static void SoftReferenceThreadLocalDestructor(void* param)
+{
+    IInterface* obj = (IInterface*)param;
+    if (obj != NULL) {
+        obj->Release();
+    }
+}
+
+SoftReferenceThreadLocal::SoftReferenceThreadLocal()
+{
+    pthread_key_create(&mThreadLocal, SoftReferenceThreadLocalDestructor);
+}
+
+void SoftReferenceThreadLocal::Set(
+    /* [in] */ IInterface* t)
+{
+    IInterface* oldValue = (IInterface*)pthread_getspecific(mThreadLocal);
+    if (oldValue != NULL) {
+        oldValue->Release();
+    }
+    pthread_setspecific(mThreadLocal, t);
+    REFCOUNT_ADD(t);
+}
+
+AutoPtr<IInterface> SoftReferenceThreadLocal::Get()
+{
+    AutoPtr<IInterface> obj = (IInterface*)pthread_getspecific(mThreadLocal);
+    if (obj == NULL) {
+        obj = InitialValue();
+        pthread_setspecific(mThreadLocal, obj);
+        REFCOUNT_ADD(obj);
+    }
+    return obj;
+}
+
+AutoPtr<IInterface> CanvasCache::InitialValue()
+{
+    AutoPtr<ICanvas> canvas;
+    CCanvas::New((ICanvas**)&canvas);
+    return canvas;
+}
+
+AutoPtr<IInterface> PaintCache::InitialValue()
+{
+    return NULL;
+}
+
+AutoPtr<IInterface> BitmapCache::InitialValue()
+{
+    return NULL;
+}
+
+AutoPtr<IInterface> RectCache::InitialValue()
+{
+    AutoPtr<IRect> rect;
+    CRect::New((IRect**)&rect);
+    return rect;
+}
+
+AutoPtr<IInterface> BitmapFactoryOptionsCache::InitialValue()
+{
+    AutoPtr<IBitmapFactoryOptions> opts;
+    CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&opts);
+    return NOERROR;
+}
+
 const Int32 WidgetPreviewLoader::CacheDb::DB_VERSION = 2;
 const String WidgetPreviewLoader::CacheDb::DB_NAME("widgetpreviews.db");
 const String WidgetPreviewLoader::CacheDb::TABLE_NAME("shortcut_and_widget_previews");
@@ -230,78 +296,6 @@ const String WidgetPreviewLoader::SHORTCUT_PREFIX("Shortcut:");
 
 CAR_INTERFACE_IMPL(WidgetPreviewLoader, Object, IWidgetPreviewLoader);
 
-void BitmapDestructor(void* st)
-{
-    IBitmap* obj = static_cast<IBitmap*>(st);
-    if (obj) {
-        obj->Release();
-    }
-}
-
-void PaintDestructor(void* st)
-{
-    IPaint* obj = static_cast<IPaint*>(st);
-    if (obj) {
-        obj->Release();
-    }
-}
-
-void CanvasDestructor(void* st)
-{
-    ICanvas* obj = static_cast<ICanvas*>(st);
-    if (obj) {
-        obj->Release();
-    }
-}
-
-void RectDestructor(void* st)
-{
-    IRect* obj = static_cast<IRect*>(st);
-    if (obj) {
-        obj->Release();
-    }
-}
-
-void BitmapFactoryOptionsDestructor(void* st)
-{
-    IBitmapFactoryOptions* obj = static_cast<IBitmapFactoryOptions*>(st);
-    if (obj) {
-        obj->Release();
-    }
-}
-
-void WidgetPreviewLoader::MakeKey()
-{
-    Int32 UNUSED(result) = pthread_key_create(&mCachedShortcutPreviewBitmap, BitmapDestructor);
-    assert(result == 0);
-
-    result = pthread_key_create(&mCachedShortcutPreviewPaint, PaintDestructor);
-    assert(result == 0);
-
-    result = pthread_key_create(&mCachedShortcutPreviewCanvas, CanvasDestructor);
-    assert(result == 0);
-
-    result = pthread_key_create(&mCachedAppWidgetPreviewCanvas,
-            CanvasDestructor);
-    assert(result == 0);
-
-    result = pthread_key_create(&mCachedAppWidgetPreviewSrcRect,
-            RectDestructor);
-    assert(result == 0);
-
-    result = pthread_key_create(&mCachedAppWidgetPreviewDestRect,
-            RectDestructor);
-    assert(result == 0);
-
-    result = pthread_key_create(&mCachedAppWidgetPreviewPaint,
-            PaintDestructor);
-    assert(result == 0);
-
-    result = pthread_key_create(&mCachedBitmapFactoryOptions,
-            BitmapFactoryOptionsDestructor);
-    assert(result == 0);
-}
-
 WidgetPreviewLoader::WidgetPreviewLoader()
     : mPreviewBitmapWidth(0)
     , mPreviewBitmapHeight(0)
@@ -312,8 +306,14 @@ WidgetPreviewLoader::WidgetPreviewLoader()
     , mProfileBadgeMargin(0)
     , sWidgetPreviewIconPaddingPercentage(0.25f)
 {
-    //pthread_once(&mKeyOnce, MakeKey);
-    MakeKey();
+    mCachedShortcutPreviewBitmap = new BitmapCache();
+    mCachedShortcutPreviewPaint = new PaintCache();
+    mCachedShortcutPreviewCanvas = new CanvasCache();
+    mCachedAppWidgetPreviewCanvas = new CanvasCache();
+    mCachedAppWidgetPreviewSrcRect = new RectCache();
+    mCachedAppWidgetPreviewDestRect = new RectCache();
+    mCachedAppWidgetPreviewPaint = new PaintCache();
+    mCachedBitmapFactoryOptions = new BitmapFactoryOptionsCache();
 }
 
 ECode WidgetPreviewLoader::constructor(
@@ -443,12 +443,7 @@ ECode WidgetPreviewLoader::GetPreview(
         }
 
         if (unusedBitmap != NULL) {
-            AutoPtr<ICanvas> c = (ICanvas*)pthread_getspecific(mCachedAppWidgetPreviewCanvas);
-            if (c == NULL) {
-                CCanvas::New((ICanvas**)&c);
-                pthread_setspecific(mCachedAppWidgetPreviewCanvas, c.Get());
-                c->AddRef();
-            }
+            AutoPtr<ICanvas> c = ICanvas::Probe(mCachedAppWidgetPreviewCanvas->Get());
             c->SetBitmap(unusedBitmap);
             c->DrawColor(0, PorterDuffMode_CLEAR);
             c->SetBitmap(NULL);
@@ -722,12 +717,7 @@ ECode WidgetPreviewLoader::ReadFromDb(
         result->GetBlob(0, (ArrayOf<Byte>**)&blob);
         ICloseable::Probe(result)->Close();
         AutoPtr<IBitmapFactoryOptions> opts =
-                (IBitmapFactoryOptions*)pthread_getspecific(mCachedBitmapFactoryOptions);
-        if (opts == NULL) {
-            CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&opts);
-            pthread_setspecific(mCachedBitmapFactoryOptions, opts.Get());
-            opts->AddRef();
-        }
+            IBitmapFactoryOptions::Probe(mCachedBitmapFactoryOptions->Get());
         opts->SetInBitmap(b);
         opts->SetInSampleSize(1);
         AutoPtr<IBitmapFactory> helper;
@@ -870,12 +860,7 @@ ECode WidgetPreviewLoader::GenerateWidgetPreview(
         helper->CreateBitmap(previewWidth, previewHeight,
                 BitmapConfig_ARGB_8888, (IBitmap**)&defaultPreview);
 
-        AutoPtr<ICanvas> c = (ICanvas*)pthread_getspecific(mCachedAppWidgetPreviewCanvas);
-        if (c == NULL) {
-            CCanvas::New((ICanvas**)&c);
-            pthread_setspecific(mCachedAppWidgetPreviewCanvas, c.Get());
-            c->AddRef();
-        }
+        AutoPtr<ICanvas> c = ICanvas::Probe(mCachedAppWidgetPreviewCanvas->Get());
         c->SetBitmap(defaultPreview);
         IDrawable::Probe(previewDrawable)->SetBounds(0, 0, previewWidth, previewHeight);
         previewDrawable->SetTileModeXY(ShaderTileMode_REPEAT,
@@ -946,24 +931,9 @@ ECode WidgetPreviewLoader::GenerateWidgetPreview(
                 previewHeight);
     }
     else {
-        AutoPtr<ICanvas> c = (ICanvas*)pthread_getspecific(mCachedAppWidgetPreviewCanvas);
-        if (c == NULL) {
-            CCanvas::New((ICanvas**)&c);
-            pthread_setspecific(mCachedAppWidgetPreviewCanvas, c.Get());
-            c->AddRef();
-        }
-        AutoPtr<IRect> src = (IRect*)pthread_getspecific(mCachedAppWidgetPreviewSrcRect);
-        if (src == NULL) {
-            CRect::New((IRect**)&src);
-            pthread_setspecific(mCachedAppWidgetPreviewSrcRect, src.Get());
-            src->AddRef();
-        }
-        AutoPtr<IRect> dest = (IRect*)pthread_getspecific(mCachedAppWidgetPreviewDestRect);
-        if (dest == NULL) {
-            CRect::New((IRect**)&dest);
-            pthread_setspecific(mCachedAppWidgetPreviewDestRect, dest.Get());
-            dest->AddRef();
-        }
+        AutoPtr<ICanvas> c = ICanvas::Probe(mCachedAppWidgetPreviewCanvas->Get());
+        AutoPtr<IRect> src = IRect::Probe(mCachedAppWidgetPreviewSrcRect->Get());
+        AutoPtr<IRect> dest = IRect::Probe(mCachedAppWidgetPreviewDestRect->Get());
 
         c->SetBitmap(preview);
         Int32 width;
@@ -973,12 +943,11 @@ ECode WidgetPreviewLoader::GenerateWidgetPreview(
         src->Set(0, 0, width, height);
         dest->Set(x, 0, x + previewWidth, previewHeight);
 
-        AutoPtr<IPaint> p = (IPaint*)pthread_getspecific(mCachedAppWidgetPreviewPaint);
+        AutoPtr<IPaint> p = IPaint::Probe(mCachedAppWidgetPreviewPaint->Get());
         if (p == NULL) {
             CPaint::New((IPaint**)&p);
             p->SetFilterBitmap(TRUE);
-            pthread_setspecific(mCachedAppWidgetPreviewPaint, p.Get());
-            p->AddRef();
+            mCachedAppWidgetPreviewPaint->Set(p);
         }
         c->DrawBitmap(defaultPreview, src, dest, p);
         c->SetBitmap(NULL);
@@ -1057,25 +1026,18 @@ ECode WidgetPreviewLoader::GenerateShortcutPreview(
     VALIDATE_NOT_NULL(bitmap);
     *bitmap = NULL;
 
-    AutoPtr<IBitmap> tempBitmap = (IBitmap*)pthread_getspecific(mCachedShortcutPreviewBitmap);
-    AutoPtr<ICanvas> c = (ICanvas*)pthread_getspecific(mCachedShortcutPreviewCanvas);
-    if (c == NULL) {
-        CCanvas::New((ICanvas**)&c);
-        pthread_setspecific(mCachedShortcutPreviewCanvas, c.Get());
-        c->AddRef();
-    }
+    AutoPtr<IBitmap> tempBitmap = IBitmap::Probe(mCachedShortcutPreviewBitmap->Get());
+    AutoPtr<ICanvas> c = ICanvas::Probe(mCachedShortcutPreviewCanvas->Get());
 
-    Int32 width = 0;
-    Int32 height = 0;
-    if (tempBitmap == NULL || ((tempBitmap->GetWidth(&width), width) != maxWidth) ||
-            ((tempBitmap->GetHeight(&height), height) != maxHeight)) {
+    Int32 width, height;
+    if (tempBitmap == NULL || (tempBitmap->GetWidth(&width), width) != maxWidth
+        || (tempBitmap->GetHeight(&height), height) != maxHeight) {
         AutoPtr<IBitmapHelper> helper;
         CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
         tempBitmap = NULL;
         helper->CreateBitmap(maxWidth, maxHeight,
                 BitmapConfig_ARGB_8888, (IBitmap**)&tempBitmap);
-        pthread_setspecific(mCachedShortcutPreviewBitmap, tempBitmap.Get());
-        tempBitmap->AddRef();
+        mCachedShortcutPreviewBitmap->Set(tempBitmap);
     }
     else {
         c->SetBitmap(tempBitmap);
@@ -1123,7 +1085,7 @@ ECode WidgetPreviewLoader::GenerateShortcutPreview(
 
     c->SetBitmap(preview);
     // Draw a desaturated/scaled version of the icon in the background as a watermark
-    AutoPtr<IPaint> p = (IPaint*)pthread_getspecific(mCachedShortcutPreviewPaint);
+    AutoPtr<IPaint> p = IPaint::Probe(mCachedShortcutPreviewPaint->Get());
     if (p == NULL) {
         CPaint::New((IPaint**)&p);
         AutoPtr<IColorMatrix> colorMatrix;
@@ -1133,8 +1095,7 @@ ECode WidgetPreviewLoader::GenerateShortcutPreview(
         CColorMatrixColorFilter::New(colorMatrix, (IColorMatrixColorFilter**)&filter);
         p->SetColorFilter(IColorFilter::Probe(filter));
         p->SetAlpha((Int32)(255 * 0.06f));
-        pthread_setspecific(mCachedShortcutPreviewPaint, p.Get());
-        p->AddRef();
+        mCachedShortcutPreviewPaint->Set(p);
     }
     c->DrawBitmap(tempBitmap, 0.0f, 0.0f, p);
     c->SetBitmap(NULL);

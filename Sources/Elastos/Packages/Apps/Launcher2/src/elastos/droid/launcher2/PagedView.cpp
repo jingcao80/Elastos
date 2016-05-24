@@ -377,19 +377,14 @@ ECode PagedView::GetPageAt(
     /* [in] */ Int32 index,
     /* [out] */ IView** page)
 {
-    VALIDATE_NOT_NULL(page);
-
-    AutoPtr<IView> tmp = GetPageAt(index);
-    *page = tmp;
-    REFCOUNT_ADD(*page);
-    return NOERROR;
+    return GetChildAt(index, page);
 }
 
 AutoPtr<IView> PagedView::GetPageAt(
     /* [in] */ Int32 index)
 {
     AutoPtr<IView> view;
-    GetChildAt(index, (IView**)&view);
+    GetPageAt(index, (IView**)&view);
     return view;
 }
 

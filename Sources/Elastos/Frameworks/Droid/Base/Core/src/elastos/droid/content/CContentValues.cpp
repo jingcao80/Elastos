@@ -276,9 +276,7 @@ ECode CContentValues::Put(
     if (key.IsNull()) return E_INVALID_ARGUMENT;
 
     if (value != NULL) {
-        Int32 length = value->GetLength();
-        AutoPtr<IArrayOf> array;
-        CArrayOf::New(EIID_IByte, length,(IArrayOf**)&array);
+        AutoPtr<IArrayOf> array = CoreUtils::ConvertByteArray(value);
         AutoPtr<ICharSequence> ko = CoreUtils::Convert(key);
         return mValues->Put(TO_IINTERFACE(ko), TO_IINTERFACE(array));
     }

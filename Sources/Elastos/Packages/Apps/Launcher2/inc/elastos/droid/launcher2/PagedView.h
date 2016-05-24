@@ -391,7 +391,7 @@ protected:
 
     virtual CARAPI_(Boolean) IsDataReady();
 
-    CARAPI IndexToPage(
+    virtual CARAPI IndexToPage(
         /* [in] */ Int32 index,
         /* [out] */ Int32* page);
 

@@ -1574,7 +1574,7 @@ void CAppsCustomizePagedView::UpdateCurrentTab(
             }
             else if (currentPage < mNumAppsPages) {
                 tabHost->GetTabTagForContentType(AppsCustomizePagedViewContentType_Applications, &type);
-                if (tag.Equals(type)) {
+                if (!tag.Equals(type)) {
                     tabHost->SetCurrentTabFromContent(AppsCustomizePagedViewContentType_Applications);
                 }
             }
@@ -1778,7 +1778,7 @@ void CAppsCustomizePagedView::PrepareLoadWidgetPreviewsTask(
 
     AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
     array->Set(0, TO_IINTERFACE(pageData));
-    ((AsyncTask*)t)->ExecuteOnExecutor(AsyncTask::THREAD_POOL_EXECUTOR, array);
+    t->ExecuteOnExecutor(AsyncTask::THREAD_POOL_EXECUTOR, array);
     mRunningTasks->Add(TO_IINTERFACE(t));
 }
 
@@ -2013,13 +2013,6 @@ ECode CAppsCustomizePagedView::SyncPages()
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
 
-    for (Int32 i = 0; i < mNumAppsPages; ++i) {
-        AutoPtr<IPagedViewCellLayout> layout = new PagedViewCellLayout();
-        ((PagedViewCellLayout*)layout.Get())->constructor(context);
-        SetupPage(layout);
-        AddView(IView::Probe(layout));
-    }
-
     for (Int32 j = 0; j < mNumWidgetPages; ++j) {
         AutoPtr<PagedViewGridLayout> layout = new PagedViewGridLayout(
                 context, mWidgetCountX, mWidgetCountY);
@@ -2030,6 +2023,13 @@ ECode CAppsCustomizePagedView::SyncPages()
             IViewGroupLayoutParams::MATCH_PARENT,
             (IViewGroupLayoutParams**)&params);
         AddView(layout, params);
+    }
+
+    for (Int32 i = 0; i < mNumAppsPages; ++i) {
+        AutoPtr<IPagedViewCellLayout> layout = new PagedViewCellLayout();
+        ((PagedViewCellLayout*)layout.Get())->constructor(context);
+        SetupPage(layout);
+        AddView(IView::Probe(layout));
     }
 
     return NOERROR;
@@ -2057,6 +2057,18 @@ ECode CAppsCustomizePagedView::GetPageAt(
     Int32 _index;
     IndexToPage(index, &_index);
     return GetChildAt(_index, view);
+}
+
+ECode CAppsCustomizePagedView::IndexToPage(
+    /* [in] */ Int32 index,
+    /* [out] */ Int32* page)
+{
+    VALIDATE_NOT_NULL(page);
+
+    Int32 childCount;
+    GetChildCount(&childCount);
+    *page = childCount - index - 1;
+    return NOERROR;
 }
 
 ECode CAppsCustomizePagedView::ScreenScrolled(
