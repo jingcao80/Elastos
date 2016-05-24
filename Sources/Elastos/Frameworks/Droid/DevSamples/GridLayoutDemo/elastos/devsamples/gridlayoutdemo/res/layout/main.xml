@@ -20,22 +20,25 @@
         android:layout_columnSpan="2"
         android:layout_gravity="fill"
         />
-    <Button
-        android:text="+"
-        />
-   <Button
-        android:text="1"
-        />
 
-
-    <Button
-        android:text="2"
-        />
     <Button
         android:text="清空"
         android:layout_columnSpan="2"
         android:layout_gravity="fill"
         />
+
+    <Button
+        android:text="+"
+        />
+
+    <Button
+        android:text="1"
+        />
+
+    <Button
+        android:text="2"
+        />
+
     <Button
         android:text="3"
         />
@@ -86,7 +89,7 @@
     android:rowCount="6"
     android:columnCount="4"
     android:orientation="horizontal"
-    android:layout_gravity="center" 
+    android:layout_gravity="center"
     android:layout_margin="20dp">
     <TextView
         android:layout_columnSpan="4"
@@ -126,7 +129,7 @@
         android:layout_column="0"
         android:layout_columnSpan="2"
         android:layout_rowSpan="2"
-        android:layout_gravity="fill"  
+        android:layout_gravity="fill"
     />
 
     <Button
@@ -135,7 +138,7 @@
         android:layout_column="2"
         android:layout_columnSpan="2"
         android:layout_rowSpan="2"
-        android:layout_gravity="fill"  
+        android:layout_gravity="fill"
     />
 
     <Button
