@@ -148,7 +148,7 @@ ECode AppsCustomizeAsyncTask::DoInBackground(
     // Load each of the widget previews in the background
     AsyncTaskPageData* date =
             (AsyncTaskPageData*)IAppsCustomizePagedViewAsyncTaskPageData::Probe((*params)[0]);
-    date->mDoInBackgroundCallback->Run(IAppsCustomizePagedViewAppsCustomizeAsyncTask::Probe(this),
+    date->mDoInBackgroundCallback->Run(this,
             IAppsCustomizePagedViewAsyncTaskPageData::Probe((*params)[0]));
     *obj = (*params)[0];
     REFCOUNT_ADD(*obj);
@@ -161,7 +161,7 @@ ECode AppsCustomizeAsyncTask::OnPostExecute(
     // All the widget previews are loaded, so we can just callback to inflate the page
     AsyncTaskPageData* date =
             (AsyncTaskPageData*)IAppsCustomizePagedViewAsyncTaskPageData::Probe(result);
-    return date->mPostExecuteCallback->Run(IAppsCustomizePagedViewAppsCustomizeAsyncTask::Probe(this),
+    return date->mPostExecuteCallback->Run(this,
             IAppsCustomizePagedViewAsyncTaskPageData::Probe(result));
 }
 
@@ -639,6 +639,7 @@ void CAppsCustomizePagedView::UpdatePageCounts()
     mWidgets->GetSize(&size);
     mNumWidgetPages = (Int32)Elastos::Core::Math::Ceil(size /
             (Float)(mWidgetCountX * mWidgetCountY));
+
     mApps->GetSize(&size);
     mNumAppsPages = (Int32)Elastos::Core::Math::Ceil((Float)size / (mCellCountX * mCellCountY));
 }
@@ -1886,10 +1887,10 @@ ECode CAppsCustomizePagedView::SyncWidgetPageItems(
             widget->ApplyFromResolveInfo(mPackageManager, info, mWidgetPreviewLoader);
             IView::Probe(widget)->SetTag(TO_IINTERFACE(createItemInfo));
         }
-        IView::Probe(widget)->SetOnClickListener(this);
-        IView::Probe(widget)->SetOnLongClickListener(this);
-        IView::Probe(widget)->SetOnTouchListener(this);
-        IView::Probe(widget)->SetOnKeyListener(this);
+        _view->SetOnClickListener(this);
+        _view->SetOnLongClickListener(this);
+        _view->SetOnTouchListener(this);
+        _view->SetOnKeyListener(this);
 
         // Layout each widget
         Int32 ix = i % mWidgetCountX;
@@ -1928,18 +1929,19 @@ void CAppsCustomizePagedView::LoadWidgetPreviewsInBackground(
         task->SyncThreadPriority();
     }
 
+    AutoPtr<AppsCustomizeAsyncTask> acst = (AppsCustomizeAsyncTask*)task;
     // Load each of the widget/shortcut previews
     AutoPtr<IArrayList> items = ((AsyncTaskPageData*)data)->mItems;
     AutoPtr<IArrayList> images = ((AsyncTaskPageData*)data)->mGeneratedImages;
     Int32 count;
     items->GetSize(&count);
     for (Int32 i = 0; i < count; ++i) {
-        if (task != NULL) {
+        if (acst != NULL) {
             // Ensure we haven't been cancelled yet
-            if (((AsyncTask*)task)->IsCancelled()) break;
+            if (acst->IsCancelled()) break;
             // Before work on each item, ensure that this task is running at the correct
             // priority
-            task->SyncThreadPriority();
+            acst->SyncThreadPriority();
         }
 
         AutoPtr<IInterface> obj;
@@ -2010,6 +2012,14 @@ ECode CAppsCustomizePagedView::SyncPages()
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
+
+    for (Int32 i = 0; i < mNumAppsPages; ++i) {
+        AutoPtr<IPagedViewCellLayout> layout = new PagedViewCellLayout();
+        ((PagedViewCellLayout*)layout.Get())->constructor(context);
+        SetupPage(layout);
+        AddView(IView::Probe(layout));
+    }
+
     for (Int32 j = 0; j < mNumWidgetPages; ++j) {
         AutoPtr<PagedViewGridLayout> layout = new PagedViewGridLayout(
                 context, mWidgetCountX, mWidgetCountY);
@@ -2022,12 +2032,6 @@ ECode CAppsCustomizePagedView::SyncPages()
         AddView(layout, params);
     }
 
-    for (Int32 i = 0; i < mNumAppsPages; ++i) {
-        AutoPtr<IPagedViewCellLayout> layout = new PagedViewCellLayout();
-        ((PagedViewCellLayout*)layout.Get())->constructor(context);
-        SetupPage(layout);
-        AddView(IView::Probe(layout));
-    }
     return NOERROR;
 }
 

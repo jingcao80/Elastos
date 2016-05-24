@@ -1,5 +1,5 @@
-#ifndef  __ELASTOS_DROID_LAUNCHER2_CPACKAGECHANGEDRECEIVER_H__
-#define  __ELASTOS_DROID_LAUNCHER2_CPACKAGECHANGEDRECEIVER_H__
+#ifndef  __ELASTOS_DROID_LAUNCHER2_CAPPSCUSTOMIZEPAGEDVIEW_H__
+#define  __ELASTOS_DROID_LAUNCHER2_CAPPSCUSTOMIZEPAGEDVIEW_H__
 
 #include "_Elastos_Droid_Launcher2_CAppsCustomizePagedView.h"
 #include "elastos/droid/ext/frameworkext.h"
@@ -157,8 +157,8 @@ private:
 
     private:
         CAppsCustomizePagedView* mHost;
-        PendingAddWidgetInfo* mInfo;
-        IBundle* mOptions;
+        AutoPtr<PendingAddWidgetInfo> mInfo;
+        AutoPtr<IBundle> mOptions;
     };
 
     class MyRunnable3
@@ -174,8 +174,8 @@ private:
 
     private:
         CAppsCustomizePagedView* mHost;
-        PendingAddWidgetInfo* mInfo;
-        IAppWidgetProviderInfo* mPInfo;
+        AutoPtr<PendingAddWidgetInfo> mInfo;
+        AutoPtr<IAppWidgetProviderInfo> mPInfo;
     };
 
     class MyRunnable4
@@ -250,10 +250,10 @@ private:
         CAppsCustomizePagedView* mHost;
         Int32 mCellWidth;
         Int32 mCellHeight;
-        IPagedViewGridLayout* mLayout;
+        AutoPtr<IPagedViewGridLayout> mLayout;
         Boolean mImmediate;
         Int32 mPage;
-        IArrayList* mItems;
+        AutoPtr<IArrayList> mItems;
     };
 
 public:
@@ -678,4 +678,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_LAUNCHER2_CPACKAGECHANGEDRECEIVER_H__
+#endif // __ELASTOS_DROID_LAUNCHER2_CAPPSCUSTOMIZEPAGEDVIEW_H__

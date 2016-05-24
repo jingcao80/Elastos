@@ -3685,6 +3685,7 @@ ECode View::FitSystemWindowsInt(
         if (!localInsets) {
             CRect::New((IRect**)&localInsets);
             pthread_setspecific(sKey, localInsets.Get());
+            localInsets->AddRef();
         }
 
         Boolean result = ComputeFitSystemWindows(insets, localInsets);
@@ -10948,6 +10949,7 @@ ECode View::ResolvePadding()
             if (padding == NULL) {
                 CRect::New((IRect**)&padding);
                 pthread_setspecific(sKey, padding.Get());
+                padding->AddRef();
             }
             Boolean res;
             mBackground->GetPadding(padding, &res);

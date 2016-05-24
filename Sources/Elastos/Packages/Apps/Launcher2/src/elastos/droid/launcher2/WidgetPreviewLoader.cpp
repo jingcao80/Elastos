@@ -69,72 +69,6 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-// SoftReferenceThreadLocal::SoftReferenceThreadLocal()
-// {
-//     mThreadLocal = new ThreadLocal<SoftReference<T>>();
-// }
-
-// void SoftReferenceThreadLocal::Set(
-//     /* [in] */ IInterface* t)
-// {
-//     mThreadLocal.set(new SoftReference<T>(t));
-// }
-
-// AutoPtr<IInterface> SoftReferenceThreadLocal::Get()
-// {
-//     SoftReference<T> reference = mThreadLocal.get();
-//     T obj;
-//     if (reference == null) {
-//         obj = initialValue();
-//         mThreadLocal.set(new SoftReference<T>(obj));
-//         return obj;
-//     } else {
-//         obj = reference.get();
-//         if (obj == null) {
-//             obj = initialValue();
-//             mThreadLocal.set(new SoftReference<T>(obj));
-//         }
-//         return obj;
-//     }
-// }
-
-// AutoPtr<IInterface> CanvasCache::InitialValue()
-// {
-
-// }
-
-// AutoPtr<IInterface> PaintCache::InitialValue()
-// {
-
-// }
-
-// AutoPtr<IInterface> BitmapCache::InitialValue()
-// {
-
-// }
-
-// AutoPtr<IInterface> RectCache::InitialValue()
-// {
-
-// }
-
-// AutoPtr<IInterface> BitmapFactoryOptionsCache::InitialValue()
-// {
-
-// }
-
-pthread_key_t WidgetPreviewLoader::mCachedShortcutPreviewBitmap;
-pthread_key_t WidgetPreviewLoader::mCachedShortcutPreviewPaint;
-pthread_key_t WidgetPreviewLoader::mCachedShortcutPreviewCanvas;
-
-pthread_key_t WidgetPreviewLoader::mCachedAppWidgetPreviewCanvas;
-pthread_key_t WidgetPreviewLoader::mCachedAppWidgetPreviewSrcRect;
-pthread_key_t WidgetPreviewLoader::mCachedAppWidgetPreviewDestRect;
-pthread_key_t WidgetPreviewLoader::mCachedAppWidgetPreviewPaint;
-
-pthread_key_t WidgetPreviewLoader::mCachedBitmapFactoryOptions;
-pthread_once_t WidgetPreviewLoader::sKeyOnce;
-
 const Int32 WidgetPreviewLoader::CacheDb::DB_VERSION = 2;
 const String WidgetPreviewLoader::CacheDb::DB_NAME("widgetpreviews.db");
 const String WidgetPreviewLoader::CacheDb::TABLE_NAME("shortcut_and_widget_previews");
@@ -296,8 +230,7 @@ const String WidgetPreviewLoader::SHORTCUT_PREFIX("Shortcut:");
 
 CAR_INTERFACE_IMPL(WidgetPreviewLoader, Object, IWidgetPreviewLoader);
 
-
-static void BitmapDestructor(void* st)
+void BitmapDestructor(void* st)
 {
     IBitmap* obj = static_cast<IBitmap*>(st);
     if (obj) {
@@ -305,7 +238,7 @@ static void BitmapDestructor(void* st)
     }
 }
 
-static void PaintDestructor(void* st)
+void PaintDestructor(void* st)
 {
     IPaint* obj = static_cast<IPaint*>(st);
     if (obj) {
@@ -313,7 +246,7 @@ static void PaintDestructor(void* st)
     }
 }
 
-static void CanvasDestructor(void* st)
+void CanvasDestructor(void* st)
 {
     ICanvas* obj = static_cast<ICanvas*>(st);
     if (obj) {
@@ -321,7 +254,7 @@ static void CanvasDestructor(void* st)
     }
 }
 
-static void RectDestructor(void* st)
+void RectDestructor(void* st)
 {
     IRect* obj = static_cast<IRect*>(st);
     if (obj) {
@@ -329,7 +262,7 @@ static void RectDestructor(void* st)
     }
 }
 
-static void BitmapFactoryOptionsDestructor(void* st)
+void BitmapFactoryOptionsDestructor(void* st)
 {
     IBitmapFactoryOptions* obj = static_cast<IBitmapFactoryOptions*>(st);
     if (obj) {
@@ -337,51 +270,36 @@ static void BitmapFactoryOptionsDestructor(void* st)
     }
 }
 
-static void MakeKey()
+void WidgetPreviewLoader::MakeKey()
 {
-    Int32 UNUSED(result) = pthread_key_create(&WidgetPreviewLoader::mCachedShortcutPreviewBitmap, BitmapDestructor);
+    Int32 UNUSED(result) = pthread_key_create(&mCachedShortcutPreviewBitmap, BitmapDestructor);
     assert(result == 0);
 
-    result = pthread_key_create(&WidgetPreviewLoader::mCachedShortcutPreviewPaint, PaintDestructor);
+    result = pthread_key_create(&mCachedShortcutPreviewPaint, PaintDestructor);
     assert(result == 0);
 
-    result = pthread_key_create(&WidgetPreviewLoader::mCachedShortcutPreviewCanvas, CanvasDestructor);
+    result = pthread_key_create(&mCachedShortcutPreviewCanvas, CanvasDestructor);
     assert(result == 0);
-    AutoPtr<ICanvas> canvas1;
-    CCanvas::New((ICanvas**)&canvas1);
-    pthread_setspecific(WidgetPreviewLoader::mCachedShortcutPreviewCanvas, canvas1.Get());
 
-    result = pthread_key_create(&WidgetPreviewLoader::mCachedAppWidgetPreviewCanvas,
+    result = pthread_key_create(&mCachedAppWidgetPreviewCanvas,
             CanvasDestructor);
     assert(result == 0);
-    AutoPtr<ICanvas> canvas2;
-    CCanvas::New((ICanvas**)&canvas2);
-    pthread_setspecific(WidgetPreviewLoader::mCachedAppWidgetPreviewCanvas, canvas2.Get());
 
-    result = pthread_key_create(&WidgetPreviewLoader::mCachedAppWidgetPreviewSrcRect,
+    result = pthread_key_create(&mCachedAppWidgetPreviewSrcRect,
             RectDestructor);
     assert(result == 0);
-    AutoPtr<IRect> rect1;
-    CRect::New((IRect**)&rect1);
-    pthread_setspecific(WidgetPreviewLoader::mCachedAppWidgetPreviewSrcRect, rect1.Get());
 
-    result = pthread_key_create(&WidgetPreviewLoader::mCachedAppWidgetPreviewDestRect,
+    result = pthread_key_create(&mCachedAppWidgetPreviewDestRect,
             RectDestructor);
     assert(result == 0);
-    AutoPtr<IRect> rect2;
-    CRect::New((IRect**)&rect2);
-    pthread_setspecific(WidgetPreviewLoader::mCachedAppWidgetPreviewDestRect, rect2.Get());
 
-    result = pthread_key_create(&WidgetPreviewLoader::mCachedAppWidgetPreviewPaint,
+    result = pthread_key_create(&mCachedAppWidgetPreviewPaint,
             PaintDestructor);
     assert(result == 0);
 
-    result = pthread_key_create(&WidgetPreviewLoader::mCachedBitmapFactoryOptions,
+    result = pthread_key_create(&mCachedBitmapFactoryOptions,
             BitmapFactoryOptionsDestructor);
     assert(result == 0);
-    AutoPtr<IBitmapFactoryOptions> op;
-    CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&op);
-    pthread_setspecific(WidgetPreviewLoader::mCachedBitmapFactoryOptions, op.Get());
 }
 
 WidgetPreviewLoader::WidgetPreviewLoader()
@@ -394,7 +312,8 @@ WidgetPreviewLoader::WidgetPreviewLoader()
     , mProfileBadgeMargin(0)
     , sWidgetPreviewIconPaddingPercentage(0.25f)
 {
-    pthread_once(&sKeyOnce, MakeKey);
+    //pthread_once(&mKeyOnce, MakeKey);
+    MakeKey();
 }
 
 ECode WidgetPreviewLoader::constructor(
@@ -406,12 +325,9 @@ ECode WidgetPreviewLoader::constructor(
 
     AutoPtr<IResources> resources;
     mContext->GetResources((IResources**)&resources);
-    resources->GetDimensionPixelSize(
-            Elastos::Droid::Launcher2::R::dimen::app_icon_size, &mAppIconSize);
-    resources->GetDimensionPixelSize(
-            Elastos::Droid::Launcher2::R::dimen::profile_badge_size, &mProfileBadgeSize);
-    resources->GetDimensionPixelSize(
-            Elastos::Droid::Launcher2::R::dimen::profile_badge_margin, &mProfileBadgeMargin);
+    resources->GetDimensionPixelSize(R::dimen::app_icon_size, &mAppIconSize);
+    resources->GetDimensionPixelSize(R::dimen::profile_badge_size, &mProfileBadgeSize);
+    resources->GetDimensionPixelSize(R::dimen::profile_badge_margin, &mProfileBadgeMargin);
 
     AutoPtr<IContext> context;
     IContext::Probe(launcher)->GetApplicationContext((IContext**)&context);
@@ -528,6 +444,11 @@ ECode WidgetPreviewLoader::GetPreview(
 
         if (unusedBitmap != NULL) {
             AutoPtr<ICanvas> c = (ICanvas*)pthread_getspecific(mCachedAppWidgetPreviewCanvas);
+            if (c == NULL) {
+                CCanvas::New((ICanvas**)&c);
+                pthread_setspecific(mCachedAppWidgetPreviewCanvas, c.Get());
+                c->AddRef();
+            }
             c->SetBitmap(unusedBitmap);
             c->DrawColor(0, PorterDuffMode_CLEAR);
             c->SetBitmap(NULL);
@@ -712,6 +633,7 @@ ECode WidgetPreviewLoader::WriteToDb(
 
     //try {
     Int64 num;
+Slogger::E("WidgetPreviewLoader","==============WriteToDb name=%s",name.string());
     ECode ec = db->Insert(CacheDb::TABLE_NAME, String(NULL), values, &num);
     //} catch (SQLiteDiskIOException e) {
     if (ec == (ECode)E_SQLITE_DISK_IO_EXCEPTION) {
@@ -801,6 +723,11 @@ ECode WidgetPreviewLoader::ReadFromDb(
         ICloseable::Probe(result)->Close();
         AutoPtr<IBitmapFactoryOptions> opts =
                 (IBitmapFactoryOptions*)pthread_getspecific(mCachedBitmapFactoryOptions);
+        if (opts == NULL) {
+            CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&opts);
+            pthread_setspecific(mCachedBitmapFactoryOptions, opts.Get());
+            opts->AddRef();
+        }
         opts->SetInBitmap(b);
         opts->SetInSampleSize(1);
         AutoPtr<IBitmapFactory> helper;
@@ -944,6 +871,11 @@ ECode WidgetPreviewLoader::GenerateWidgetPreview(
                 BitmapConfig_ARGB_8888, (IBitmap**)&defaultPreview);
 
         AutoPtr<ICanvas> c = (ICanvas*)pthread_getspecific(mCachedAppWidgetPreviewCanvas);
+        if (c == NULL) {
+            CCanvas::New((ICanvas**)&c);
+            pthread_setspecific(mCachedAppWidgetPreviewCanvas, c.Get());
+            c->AddRef();
+        }
         c->SetBitmap(defaultPreview);
         IDrawable::Probe(previewDrawable)->SetBounds(0, 0, previewWidth, previewHeight);
         previewDrawable->SetTileModeXY(ShaderTileMode_REPEAT,
@@ -1015,8 +947,23 @@ ECode WidgetPreviewLoader::GenerateWidgetPreview(
     }
     else {
         AutoPtr<ICanvas> c = (ICanvas*)pthread_getspecific(mCachedAppWidgetPreviewCanvas);
+        if (c == NULL) {
+            CCanvas::New((ICanvas**)&c);
+            pthread_setspecific(mCachedAppWidgetPreviewCanvas, c.Get());
+            c->AddRef();
+        }
         AutoPtr<IRect> src = (IRect*)pthread_getspecific(mCachedAppWidgetPreviewSrcRect);
+        if (src == NULL) {
+            CRect::New((IRect**)&src);
+            pthread_setspecific(mCachedAppWidgetPreviewSrcRect, src.Get());
+            src->AddRef();
+        }
         AutoPtr<IRect> dest = (IRect*)pthread_getspecific(mCachedAppWidgetPreviewDestRect);
+        if (dest == NULL) {
+            CRect::New((IRect**)&dest);
+            pthread_setspecific(mCachedAppWidgetPreviewDestRect, dest.Get());
+            dest->AddRef();
+        }
 
         c->SetBitmap(preview);
         Int32 width;
@@ -1031,6 +978,7 @@ ECode WidgetPreviewLoader::GenerateWidgetPreview(
             CPaint::New((IPaint**)&p);
             p->SetFilterBitmap(TRUE);
             pthread_setspecific(mCachedAppWidgetPreviewPaint, p.Get());
+            p->AddRef();
         }
         c->DrawBitmap(defaultPreview, src, dest, p);
         c->SetBitmap(NULL);
@@ -1111,17 +1059,23 @@ ECode WidgetPreviewLoader::GenerateShortcutPreview(
 
     AutoPtr<IBitmap> tempBitmap = (IBitmap*)pthread_getspecific(mCachedShortcutPreviewBitmap);
     AutoPtr<ICanvas> c = (ICanvas*)pthread_getspecific(mCachedShortcutPreviewCanvas);
+    if (c == NULL) {
+        CCanvas::New((ICanvas**)&c);
+        pthread_setspecific(mCachedShortcutPreviewCanvas, c.Get());
+        c->AddRef();
+    }
 
-    Int32 width;
-    tempBitmap->GetWidth(&width);
-    Int32 height;
-    tempBitmap->GetHeight(&height);
-    if (tempBitmap == NULL || width != maxWidth || height != maxHeight) {
+    Int32 width = 0;
+    Int32 height = 0;
+    if (tempBitmap == NULL || ((tempBitmap->GetWidth(&width), width) != maxWidth) ||
+            ((tempBitmap->GetHeight(&height), height) != maxHeight)) {
         AutoPtr<IBitmapHelper> helper;
         CBitmapHelper::AcquireSingleton((IBitmapHelper**)&helper);
+        tempBitmap = NULL;
         helper->CreateBitmap(maxWidth, maxHeight,
                 BitmapConfig_ARGB_8888, (IBitmap**)&tempBitmap);
         pthread_setspecific(mCachedShortcutPreviewBitmap, tempBitmap.Get());
+        tempBitmap->AddRef();
     }
     else {
         c->SetBitmap(tempBitmap);
@@ -1137,14 +1091,11 @@ ECode WidgetPreviewLoader::GenerateShortcutPreview(
     AutoPtr<IResources> resources;
     mContext->GetResources((IResources**)&resources);
     Int32 paddingTop;
-    resources->GetDimensionPixelOffset(Elastos::Droid::Launcher2
-            ::R::dimen::shortcut_preview_padding_top, &paddingTop);
+    resources->GetDimensionPixelOffset(R::dimen::shortcut_preview_padding_top, &paddingTop);
     Int32 paddingLeft;
-    resources->GetDimensionPixelOffset(Elastos::Droid::Launcher2
-            ::R::dimen::shortcut_preview_padding_left, &paddingLeft);
+    resources->GetDimensionPixelOffset(R::dimen::shortcut_preview_padding_left, &paddingLeft);
     Int32 paddingRight;
-    resources->GetDimensionPixelOffset(Elastos::Droid::Launcher2
-            ::R::dimen::shortcut_preview_padding_right, &paddingRight);
+    resources->GetDimensionPixelOffset(R::dimen::shortcut_preview_padding_right, &paddingRight);
 
     Int32 scaledIconWidth = (maxWidth - paddingLeft - paddingRight);
 
@@ -1183,10 +1134,11 @@ ECode WidgetPreviewLoader::GenerateShortcutPreview(
         p->SetColorFilter(IColorFilter::Probe(filter));
         p->SetAlpha((Int32)(255 * 0.06f));
         pthread_setspecific(mCachedShortcutPreviewPaint, p.Get());
+        p->AddRef();
     }
     c->DrawBitmap(tempBitmap, 0.0f, 0.0f, p);
     c->SetBitmap(NULL);
-Slogger::E("WidgetPreviewLoader", "==========GenerateShortcutPreview (icon hight&width) mAppIconSize=%",mAppIconSize);
+Slogger::E("WidgetPreviewLoader", "==========GenerateShortcutPreview (icon hight&width) mAppIconSize=%d",mAppIconSize);
     RenderDrawableToBitmap(icon, preview, 0, 0, mAppIconSize, mAppIconSize);
 
     *bitmap = preview;

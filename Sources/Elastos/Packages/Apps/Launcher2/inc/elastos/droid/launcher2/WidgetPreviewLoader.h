@@ -268,18 +268,20 @@ private:
         /* [in] */ Int32 h,
         /* [in] */ Float scale);
 
+    CARAPI_(void) MakeKey();
+
 public:
-    static pthread_key_t mCachedShortcutPreviewBitmap;
-    static pthread_key_t mCachedShortcutPreviewPaint;
-    static pthread_key_t mCachedShortcutPreviewCanvas;
+    pthread_key_t mCachedShortcutPreviewBitmap;
+    pthread_key_t mCachedShortcutPreviewPaint;
+    pthread_key_t mCachedShortcutPreviewCanvas;
 
-    static pthread_key_t mCachedAppWidgetPreviewCanvas;
-    static pthread_key_t mCachedAppWidgetPreviewSrcRect;
-    static pthread_key_t mCachedAppWidgetPreviewDestRect;
-    static pthread_key_t mCachedAppWidgetPreviewPaint;
+    pthread_key_t mCachedAppWidgetPreviewCanvas;
+    pthread_key_t mCachedAppWidgetPreviewSrcRect;
+    pthread_key_t mCachedAppWidgetPreviewDestRect;
+    pthread_key_t mCachedAppWidgetPreviewPaint;
 
-    static pthread_key_t mCachedBitmapFactoryOptions;
-    static pthread_once_t sKeyOnce;
+    pthread_key_t mCachedBitmapFactoryOptions;
+    //pthread_once_t mKeyOnce;
 
 private:
     static const String TAG;
