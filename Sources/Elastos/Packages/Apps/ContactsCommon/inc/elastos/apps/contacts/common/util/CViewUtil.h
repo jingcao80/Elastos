@@ -11,7 +11,7 @@ namespace Common {
 namespace Util {
 
 CarClass(CViewUtil)
-    , public singleton
+    , public Singleton
     , public IViewUtil
 {
 public:

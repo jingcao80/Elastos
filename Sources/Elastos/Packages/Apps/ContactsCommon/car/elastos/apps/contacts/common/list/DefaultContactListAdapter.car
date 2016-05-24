@@ -1,0 +1,26 @@
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * @Involve
+     * interface Elastos.Apps.Contacts.Common.List.IPinnedHeaderListAdapter
+     * interface Elastos.Apps.Contacts.Common.List.IIndexerListAdapter
+     * interface Elastos.Apps.Contacts.Common.List.IContactEntryListAdapter
+     * interface Elastos.Apps.Contacts.Common.List.IContactListAdapter
+     */
+    interface IDefaultContactListAdapter {
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

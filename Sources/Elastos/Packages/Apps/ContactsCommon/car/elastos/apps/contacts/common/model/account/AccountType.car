@@ -1,0 +1,238 @@
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace Model {
+    namespace Account {
+
+    interface IAccountType {
+        /**
+         * Whether this account type was able to be fully initialized.  This may be false if
+         * (for example) the package name associated with the account type could not be found.
+         */
+        IsInitialized(
+            [out] Boolean* result);
+
+        /**
+         * @return Whether this type is an "embedded" type.  i.e. any of {@link FallbackAccountType},
+         * {@link GoogleAccountType} or {@link ExternalAccountType}.
+         *
+         * If an embedded type cannot be initialized (i.e. if {@link #isInitialized()} returns
+         * {@code false}) it's considered critical, and the application will crash.  On the other
+         * hand if it's not an embedded type, we just skip loading the type.
+         */
+        IsEmbedded(
+            [out] Boolean* result);
+
+        IsExtension(
+            [out] Boolean* result);
+
+        /**
+         * @return True if contacts can be created and edited using this app. If false,
+         * there could still be an external editor as provided by
+         * {@link #getEditContactActivityClassName()} or {@link #getCreateContactActivityClassName()}
+         */
+        AreContactsWritable(
+            [out] Boolean* result);
+
+        /**
+         * Returns an optional custom edit activity.
+         *
+         * Only makes sense for non-embedded account types.
+         * The activity class should reside in the sync adapter package as determined by
+         * {@link #syncAdapterPackageName}.
+         */
+        GetEditContactActivityClassName(
+            [out] String* className);
+
+        /**
+         * Returns an optional custom new contact activity.
+         *
+         * Only makes sense for non-embedded account types.
+         * The activity class should reside in the sync adapter package as determined by
+         * {@link #syncAdapterPackageName}.
+         */
+        GetCreateContactActivityClassName(
+            [out] String* className);
+
+        /**
+         * Returns an optional custom invite contact activity.
+         *
+         * Only makes sense for non-embedded account types.
+         * The activity class should reside in the sync adapter package as determined by
+         * {@link #syncAdapterPackageName}.
+         */
+        GetInviteContactActivityClassName(
+            [out] String* className);
+
+        /**
+         * Returns an optional service that can be launched whenever a contact is being looked at.
+         * This allows the sync adapter to provide more up-to-date information.
+         *
+         * The service class should reside in the sync adapter package as determined by
+         * {@link #getViewContactNotifyServicePackageName()}.
+         */
+        GetViewContactNotifyServiceClassName(
+            [out] String* className);
+
+        /**
+         * TODO This is way too hacky should be removed.
+         *
+         * This is introduced for {@link GoogleAccountType} where {@link #syncAdapterPackageName}
+         * is the authenticator package name but the notification service is in the sync adapter
+         * package.  See {@link #resourcePackageName} -- we should clean up those.
+         */
+        GetViewContactNotifyServicePackageName(
+            [out] String* packageName);
+
+        /** Returns an optional Activity string that can be used to view the group. */
+        GetViewGroupActivity(
+            [out] String* activity);
+
+        GetDisplayLabel(
+            [in] IContext* context,
+            [out] ICharSequence** label);
+
+        /**
+         * Returns {@link AccountTypeWithDataSet} for this type.
+         */
+        GetAccountTypeAndDataSet(
+            [out] IAccountTypeWithDataSet** dataSet);
+
+        /**
+         * Returns a list of additional package names that should be inspected as additional
+         * external account types.  This allows for a primary account type to indicate other packages
+         * that may not be sync adapters but which still provide contact data, perhaps under a
+         * separate data set within the account.
+         */
+        GetExtensionPackageNames(
+            [out] IList** names);
+
+        /**
+         * Returns an optional custom label for the "invite contact" action, which will be shown on
+         * the contact card.  (If not defined, returns null.)
+         */
+        GetInviteContactActionLabel(
+            [in] IContext* context,
+            [out] ICharSequence** label);
+
+        /**
+         * Returns a label for the "view group" action. If not defined, this falls back to our
+         * own "View Updates" string
+         */
+        GetViewGroupLabel(
+            [in] IContext* context,
+            [out] ICharSequence** label);
+
+        GetDisplayIcon(
+            [in] IContext* context,
+            [out] IDrawable* icon);
+
+        /**
+         * Whether or not groups created under this account type have editable membership lists.
+         */
+        IsGroupMembershipEditable(
+            [out] Boolean result);
+
+        /**
+         * Return list of {@link DataKind} supported, sorted by
+         * {@link DataKind#weight}.
+         */
+        GetSortedDataKinds(
+            [out] IArrayList** kinds);
+
+        /**
+         * Find the {@link DataKind} for a specific MIME-type, if it's handled by
+         * this data source.
+         */
+        GetKindForMimetype(
+            [in] String mimeType,
+            [out] IDataKind** kind);
+
+        /**
+         * Add given {@link DataKind} to list of those provided by this source.
+         */
+        AddKind(
+            [in] IDataKind* kind,
+            [out] IDataKind** result);
+    }
+
+    interface IAccountTypeEditType {
+        SetSecondary(
+            [in] Boolean secondary,
+            [out] IAccountTypeEditType* editType);
+
+        SetSpecificMax(
+            [in] Int32 specificMax,
+            [out] IAccountTypeEditType* editType);
+
+        SetCustomColumn(
+            [in] String customColumn,
+            [out] IAccountTypeEditType* editType);
+    }
+
+    /**
+     * @Involve
+     * interface IAccountTypeEditType
+     */
+    interface IAccountTypeEventEditType {
+        IsYearOptional(
+            [out] Boolean* result);
+
+        SetYearOptional(
+            [in] Boolean yearOptional,
+            [out] IAccountTypeEventEditType* editType);
+    }
+
+    interface IAccountTypeEditField {
+        SetOptional(
+            [in] Boolean optional,
+            [out] IAccountTypeEventEditField* editField);
+
+        SetShortForm(
+            [in] Boolean shortForm,
+            [out] IAccountTypeEventEditField* editField);
+
+        SetLongForm(
+            [in] Boolean longForm,
+            [out] IAccountTypeEventEditField* editField);
+
+        SetMinLines(
+            [in] Int32 minLines,
+            [out] IAccountTypeEventEditField* editField);
+
+        IsMultiLine(
+            [out] Boolean* result);
+    }
+
+    /**
+     * Generic method of inflating a given {@link ContentValues} into a user-readable
+     * {@link CharSequence}. For example, an inflater could combine the multiple
+     * columns of {@link StructuredPostal} together using a string resource
+     * before presenting to the user.
+     */
+    interface IAccountTypeStringInflater {
+        InflateUsing(
+            [in] IContext* context,
+            [in] IContentValues* values,
+            [out] ICharSequence** result);
+    }
+
+    /**
+     * @Involve
+     * interface IComparator
+     */
+    interface IAccountTypeDisplayLabelComparator {
+    }
+
+    } // Account
+    } // Model
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

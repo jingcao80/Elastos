@@ -1,0 +1,26 @@
+
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace List {
+
+    /*
+     * Interface to provide callback to activity when a child fragment is scrolled
+     */
+    interface IOnListFragmentScrolledListener {
+        OnListFragmentScrollStateChange(
+            [in] Int32 scrollState);
+
+        OnListFragmentScroll(
+            [in] Int32 firstVisibleItem,
+            [in] Int32 visibleItemCount,
+            [in] Int32 totalItemCount);
+    }
+
+    } //List
+    } //Dailer
+    } //Apps
+    } //Elastos
+}

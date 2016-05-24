@@ -1,0 +1,150 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IComponentCallbacks
+     * interface Elastos.Droid.Content.IComponentCallbacks2
+     * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
+     * interface Elastos.Droid.App.IFragment
+     * interface Elastos.Apps.DailerBind.Analytics.IAnalyticsFragment
+     */
+    interface IContactEntryListFragment {
+        // TODO: Make this protected. This should not be used from the PeopleActivity but
+        // instead use the new startActivityWithResultFromFragment API
+        const Int32 ACTIVITY_REQUEST_CODE_PICKER = 1;
+
+        /**
+         * Sets a context for the fragment in the unit test environment.
+         */
+        SetContext(
+            [in] IContext* context);
+
+        GetContext(
+            [out] IContext** context);
+
+        SetEnabled(
+            [in] Boolean enabled);
+
+        /**
+         * Overrides a loader manager for use in unit tests.
+         */
+        SetLoaderManager(
+            [in] ILoaderManager* loaderManager);
+
+        GetAdapter(
+            [out] IInterface** adapter);
+
+        GetListView(
+            [out] IListView** listView);
+
+        RestoreSavedState(
+            [in] IBundle* savedState);
+
+        CreateCursorLoader(
+            [in] IContext* context,
+            [out] ICursorLoader** loader);
+
+        OnLoaderReset(
+            [in] ILoader* loader);
+
+        IsLoading(
+            [out] Boolean* result);
+
+        IsLoadingDirectoryList(
+            [out] Boolean* result);
+
+        SetSectionHeaderDisplayEnabled(
+            [in] Boolean flag);
+
+        IsSectionHeaderDisplayEnabled(
+            [out] Boolean* result);
+
+        SetVisibleScrollbarEnabled(
+            [in] Boolean flag);
+
+        SetPhotoLoaderEnabled(
+            [in] Boolean flag);
+
+        IsPhotoLoaderEnabled(
+            [out] Boolean* result);
+
+        /**
+         * Returns true if the list is supposed to visually highlight the selected item.
+         */
+        IsSelectionVisible(
+            [out] Boolean* result);
+
+        SetSelectionVisible(
+            [in] Boolean flag);
+
+        SetQuickContactEnabled(
+            [in] Boolean flag);
+
+        SetAdjustSelectionBoundsEnabled(
+            [in] Boolean flag);
+
+        SetIncludeProfile(
+            [in] Boolean flag);
+
+        IsSearchMode(
+            [out] Boolean* result);
+
+        GetQueryString(
+            [out] String* str);
+
+        SetQueryString(
+            [in] String queryString,
+            [in] Boolean delaySelection);
+
+        SetShowEmptyListForNullQuery(
+            [in] Boolean show);
+
+        GetDirectoryLoaderId(
+            [out] Int32 id);
+
+        GetDirectorySearchMode(
+            [out] Int32 mode);
+
+        SetDirectorySearchMode(
+            [in] Int32 mode);
+
+        IsLegacyCompatibilityMode(
+            [out] Boolean* result);
+
+        SetLegacyCompatibilityMode(
+            [in] Boolean flag);
+
+        GetSortOrder(
+            [out] Int32 sortOrder);
+
+        SetSortOrder(
+            [in] Int32 sortOrder);
+
+        SetDirectoryResultLimit(
+            [in] Int32 limit);
+
+        SetDarkTheme(
+            [in] Boolean value);
+
+        /**
+         * Processes a result returned by the contact picker.
+         */
+        OnPickerResult(
+            [in] IIntent* data);
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

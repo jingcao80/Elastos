@@ -1,0 +1,43 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+
+    interface ICollapser {
+        /**
+         * Collapses a list of Collapsible items into a list of collapsed items. Items are collapsed
+         * if {@link Collapsible#shouldCollapseWith(Object)} returns true, and are collapsed
+         * through the {@Link Collapsible#collapseWith(Object)} function implemented by the data item.
+         *
+         * @param list List of Objects of type <T extends Collapsible<T>> to be collapsed.
+         */
+        CollapseList(
+            [in] IList* list,
+            [in] IContext* context);
+
+    }
+
+    /*
+     * Interface implemented by data types that can be collapsed into groups of similar data. This
+     * can be used for example to collapse similar contact data items into a single item.
+     */
+    interface ICollapsible {
+        CollapseWith(
+            [in] IInterface* t);
+
+        ShouldCollapseWith(
+            [in] IInterface* t,
+            [in] IContext* context,
+            [out] Boolean* result);
+    }
+
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

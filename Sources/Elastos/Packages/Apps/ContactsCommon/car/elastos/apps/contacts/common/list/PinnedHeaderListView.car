@@ -30,7 +30,7 @@ module
      * interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback
      * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      *
-     * interface Elastos.App.Contacts.Common.List.IAutoScrollListView
+     * interface Elastos.Apps.Contacts.Common.List.IAutoScrollListView
      */
     interface IPinnedHeaderListView {
         SetScrollToSectionOnHeaderTouch(

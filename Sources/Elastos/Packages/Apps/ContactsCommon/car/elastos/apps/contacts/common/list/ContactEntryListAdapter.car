@@ -10,8 +10,8 @@ module
 
     /**
      * @Involve
-     * interface Elastos.App.Contacts.Common.List.IPinnedHeaderListAdapter
-     * interface Elastos.App.Contacts.Common.List.IIndexerListAdapter
+     * interface Elastos.Apps.Contacts.Common.List.IPinnedHeaderListAdapter
+     * interface Elastos.Apps.Contacts.Common.List.IIndexerListAdapter
      */
     interface IContactEntryListAdapter {
         /**

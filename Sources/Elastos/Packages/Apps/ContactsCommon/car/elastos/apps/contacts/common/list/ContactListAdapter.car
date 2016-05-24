@@ -1,0 +1,80 @@
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * @Involve
+     * interface Elastos.Apps.Contacts.Common.List.IPinnedHeaderListAdapter
+     * interface Elastos.Apps.Contacts.Common.List.IIndexerListAdapter
+     * interface Elastos.Apps.Contacts.Common.List.IContactEntryListAdapter
+     */
+    interface IContactListAdapter {
+        SetPhotoPosition(
+            [in] IContactListItemView::PhotoPosition photoPosition);
+
+        GetPhotoPosition(
+            [out] IContactListItemView::PhotoPosition* photoPosition);
+
+        GetUnknownNameText(
+            [out] ICharSequence** text);
+
+        GetSelectedContactDirectoryId(
+            [out] Int64* id);
+
+        GetSelectedContactLookupKey(
+            [out] String* str);
+
+        GetSelectedContactId(
+            [out] Int64* id);
+
+        SetSelectedContact(
+            [in] Int64 selectedDirectoryId,
+            [in] String lookupKey,
+            [in] Int64 contactId);
+
+        /**
+         * Builds the {@link Contacts#CONTENT_LOOKUP_URI} for the given
+         * {@link ListView} position.
+         */
+        GetContactUri(
+            [in] Int32 position,
+            [out] IUri** uri);
+
+        GetContactUri(
+            [in] Int32 position,
+            [in] ICursor* cursor,
+            [out] IUri** uri);
+
+        /**
+         * Returns true if the specified contact is selected in the list. For a
+         * contact to be shown as selected, we need both the directory and and the
+         * lookup key to be the same. We are paying no attention to the contactId,
+         * because it is volatile, especially in the case of directories.
+         */
+        IsSelectedContact(
+            [in] Int32 partitionIndex,
+            [in] ICursor* cursor,
+            [out] Boolean result);
+
+        GetSelectedContactPosition(
+            [out] Int32 position);
+
+        HasValidSelection(
+            [out] Boolean* result);
+
+        GetFirstContactUri(
+            [out] IUri** uri);
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

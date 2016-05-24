@@ -11,7 +11,7 @@ module
      * interface Elastos.Droid.Content.IComponentCallbacks
      * interface Elastos.Droid.Content.IComponentCallbacks2
      * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
-     * interface Elastos.Droid.App.IFragment
+     * interface Elastos.Droid.Apps.IFragment
      */
     interface IAnalyticsFragment {
     }
