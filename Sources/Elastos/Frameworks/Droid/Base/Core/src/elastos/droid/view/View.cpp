@@ -3149,9 +3149,9 @@ ECode View::ComputeClickPointInScreenForAccessibility(
 }
 
 void View::OffsetRects(
-        /* [in] */ IArrayList* rects,
-        /* [in] */ Float offsetX,
-        /* [in] */ Float offsetY)
+    /* [in] */ IArrayList* rects,
+    /* [in] */ Float offsetX,
+    /* [in] */ Float offsetY)
 {
     Int32 rectCount;
     rects->GetSize(&rectCount);
@@ -4261,7 +4261,7 @@ ECode View::SetHasTransientState(
  * Returns true if this view is currently attached to a window.
  */
 ECode View::IsAttachedToWindow(
-        /* [out] */ Boolean* res)
+    /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
 
@@ -5348,8 +5348,8 @@ ECode View::GetParentForAccessibility(
 }
 
 ECode View::AddChildrenForAccessibility(
-    /* [in] */ IArrayList* children) {
-
+    /* [in] */ IArrayList* children)
+{
     return NOERROR;
 }
 
@@ -12200,7 +12200,7 @@ ECode View::CreateSnapshot(
     /* [in] */ Boolean skipChildren,
     /* [out] */ IBitmap** bm)
 {
-    assert(bm != NULL);
+    VALIDATE_NOT_NULL(bm)
 
     Int32 width = mRight - mLeft;
     Int32 height = mBottom - mTop;
@@ -12216,6 +12216,7 @@ ECode View::CreateSnapshot(
     CBitmap::CreateBitmap(displayMetrics, width > 0 ? width : 1, height > 0 ? height : 1, quality, (IBitmap**)&bitmap);
     if (bitmap == NULL) {
         //throw new OutOfMemoryError();
+        *bm = NULL;
         return E_OUT_OF_MEMORY_ERROR;
     }
 
@@ -17345,6 +17346,7 @@ ECode View::GetVerticalScrollFactor(
     /* [out] */ Float* scroll)
 {
     VALIDATE_NOT_NULL(scroll)
+
     if (mVerticalScrollFactor == 0) {
         AutoPtr<ITypedValue> outValue;
         CTypedValue::New((ITypedValue**)&outValue);
@@ -17356,6 +17358,7 @@ ECode View::GetVerticalScrollFactor(
         theme->ResolveAttribute(R::attr::listPreferredItemHeight, outValue, TRUE, &res);
         if (!res) {
             Logger::E(TAG, "Expected theme to define listPreferredItemHeight.");
+            *scroll = 0.0;
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -17443,7 +17446,8 @@ ECode View::ResolveTextDirection(
                     // We cannot do the resolution if there is no parent, so use the default one
                     mPrivateFlags2 |= PFLAG2_TEXT_DIRECTION_RESOLVED_DEFAULT;
                     // Resolution will need to happen again later
-                    return FALSE;
+                    *res = FALSE;
+                    return NOERROR;
                 }
                 // Parent has not yet resolved, so we still return the default
                 Boolean isTextDirectionResolved;
@@ -17512,7 +17516,8 @@ ECode View::ResolveTextDirection(
 
     // Set to resolved
     mPrivateFlags2 |= PFLAG2_TEXT_DIRECTION_RESOLVED;
-    return TRUE;
+    *res = TRUE;
+    return NOERROR;
 }
 
 ECode View::CanResolveTextDirection(
@@ -17707,7 +17712,8 @@ ECode View::ResolveTextAlignment(
 
     // Set the resolved
     mPrivateFlags2 |= PFLAG2_TEXT_ALIGNMENT_RESOLVED;
-    return TRUE;
+    *res = TRUE;
+    return NOERROR;
 }
 
 ECode View::CanResolveTextAlignment(

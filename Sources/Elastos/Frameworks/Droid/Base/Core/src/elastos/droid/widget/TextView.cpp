@@ -6075,7 +6075,7 @@ AutoPtr<IPath> TextView::GetUpdatedHighlightPath()
     GetSelectionEnd(&selEnd);
     Boolean isFocused, isPressed;
     if (mMovement != NULL && ((IsFocused(&isFocused), isFocused)
-        || (IsPressed(&isPressed), isPressed)) && selStart >= 0) {
+            || (IsPressed(&isPressed), isPressed)) && selStart >= 0) {
         if (selStart == selEnd) {
             if (mEditor != NULL && TO_EDITOR(mEditor)->IsCursorVisible() &&
                 (SystemClock::GetUptimeMillis() - TO_EDITOR(mEditor)->mShowCursor) %
@@ -10234,20 +10234,21 @@ ECode TextView::PerformLongClick(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
+
     Boolean handled = FALSE;
-    View::PerformLongClick(res);
-    if (*res) {
+
+    Boolean result;
+    View::PerformLongClick(&result);
+    if (result) {
         handled = TRUE;
     }
 
     if (mEditor != NULL) {
-        Boolean res;
-        mEditor->PerformLongClick(handled, &res);
-        handled |= res;
+        mEditor->PerformLongClick(handled, &result);
+        handled |= result;
     }
 
     if (handled) {
-        Boolean result;
         PerformHapticFeedback(IHapticFeedbackConstants::LONG_PRESS, &result);
         if (mEditor != NULL) TO_EDITOR(mEditor)->mDiscardNextActionUp = TRUE;
     }

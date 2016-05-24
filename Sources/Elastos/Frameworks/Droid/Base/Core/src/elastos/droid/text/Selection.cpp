@@ -28,8 +28,9 @@ Int32 Selection::GetSelectionStart(
         ISpanned::Probe(text)->GetSpanStart(SELECTION_START, &start);
         return start;
     }
-    else
+    else {
         return -1;
+    }
 }
 
 /**
@@ -44,8 +45,9 @@ Int32 Selection::GetSelectionEnd(
         ISpanned::Probe(text)->GetSpanStart(SELECTION_END, &end);
         return end;
     }
-    else
+    else {
         return -1;
+    }
 }
 
 /*
@@ -181,7 +183,6 @@ Boolean Selection::MoveDown(
     Int32 start = GetSelectionStart(csq);
     Int32 end = GetSelectionEnd(csq);
     Int32 len;
-    csq->GetLength(&len);
 
     if (start != end) {
         Int32 min = Elastos::Core::Math::Min(start, end);
@@ -189,7 +190,7 @@ Boolean Selection::MoveDown(
 
         SetSelection(text, max);
 
-        if (min == 0 && max == len) {
+        if (min == 0 && max == (csq->GetLength(&len), len)) {
             return FALSE;
         }
 
@@ -218,7 +219,7 @@ Boolean Selection::MoveDown(
             SetSelection(text, move);
             return TRUE;
         }
-        else if (end != len) {
+        else if (end != (csq->GetLength(&len), len)) {
             SetSelection(text, len);
             return TRUE;
         }
@@ -452,13 +453,14 @@ Boolean Selection::MoveToPreceding(
     Int32 end = GetSelectionEnd(csq);
     Int32 offset;
     iter->Preceding(end, &offset);
-//    if (offset != ISelectionPositionIterator::DONE) {
+    if (offset != ISelectionPositionIterator::DONE) {
         if (extendSelection) {
             ExtendSelection(text, offset);
-        } else {
+        }
+        else {
             SetSelection(text, offset);
         }
-//    }
+    }
     return TRUE;
 }
 
@@ -474,13 +476,14 @@ Boolean Selection::MoveToFollowing(
     Int32 end = GetSelectionEnd(csq);
     Int32 offset;
     iter->Following(end, &offset);
-//    if (offset != ISelectionPositionIterator::DONE) {
+    if (offset != ISelectionPositionIterator::DONE) {
         if (extendSelection) {
             ExtendSelection(text, offset);
-        } else {
+        }
+        else {
             SetSelection(text, offset);
         }
-//    }
+    }
     return TRUE;
 }
 
@@ -504,10 +507,12 @@ Int32 Selection::FindEdge(
         Int32 end, lineCount;
         layout->GetLineEnd(line, &end);
         layout->GetLineCount(&lineCount);
-        if (line == lineCount - 1)
+        if (line == lineCount - 1) {
             return end;
-        else
+        }
+        else {
             return end - 1;
+        }
     }
 }
 
@@ -530,17 +535,21 @@ Int32 Selection::ChooseHorizontal(
 
         if (direction < 0) {
             // to left
-            if (h1 < h2)
+            if (h1 < h2) {
                 return off1;
-            else
+            }
+            else {
                 return off2;
+            }
         }
         else {
             // to right
-            if (h1 > h2)
+            if (h1 > h2) {
                 return off1;
-            else
+            }
+            else {
                 return off2;
+            }
         }
     }
     else {
@@ -556,7 +565,8 @@ Int32 Selection::ChooseHorizontal(
 
         if (textdir == direction) {
             return Elastos::Core::Math::Max(off1, off2);
-        } else {
+        }
+        else {
             return Elastos::Core::Math::Min(off1, off2);
         }
     }

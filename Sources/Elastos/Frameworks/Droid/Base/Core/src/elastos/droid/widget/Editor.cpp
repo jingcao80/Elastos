@@ -3114,7 +3114,7 @@ Editor::Editor(
     , mCreatedWithASelection(FALSE)
     , mTextView(textView)
 {
-    mCursorDrawable = ArrayOf<IDrawable *>::Alloc(2);
+    mCursorDrawable = ArrayOf<IDrawable*>::Alloc(2);
     mCursorAnchorInfoNotifier = new CursorAnchorInfoNotifier(this);
 }
 
@@ -4484,10 +4484,9 @@ void Editor::OnDraw(
     }
 
     Boolean isAccelerated = FALSE;
-    canvas->IsHardwareAccelerated(&isAccelerated);
     Boolean canHaveDisplayList;
     if ((mTextView->CanHaveDisplayList(&canHaveDisplayList), canHaveDisplayList)
-        && isAccelerated) {
+            && (canvas->IsHardwareAccelerated(&isAccelerated), isAccelerated)) {
         DrawHardwareAccelerated(canvas, layout, highlight, highlightPaint,
                 cursorOffsetVertical);
     }
@@ -4971,8 +4970,9 @@ void Editor::UpdateCursorPosition(
         mCursorDrawable->Set(cursorIndex, cursor);
     }
 
-    if (mTempRect == NULL)
+    if (mTempRect == NULL) {
         CRect::New((IRect**)&mTempRect);
+    }
 
     Boolean isPadding;
     (*mCursorDrawable)[cursorIndex]->GetPadding(mTempRect, &isPadding);
