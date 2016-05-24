@@ -3486,8 +3486,7 @@ ECode TextView::GetTypefaceStyle(
     VALIDATE_NOT_NULL(style)
     AutoPtr<ITypeface> typeface;
     IPaint::Probe(mTextPaint)->GetTypeface((ITypeface**)&typeface);
-    typeface->GetStyle(style);
-    return NOERROR;
+    return typeface->GetStyle(style);
 }
 
 ECode TextView::SetTextSize(
@@ -3591,16 +3590,14 @@ ECode TextView::GetTypeface(
 ECode TextView::SetElegantTextHeight(
     /* [in] */ Boolean elegant)
 {
-    IPaint::Probe(mTextPaint)->SetElegantTextHeight(elegant);
-    return NOERROR;
+    return IPaint::Probe(mTextPaint)->SetElegantTextHeight(elegant);
 }
 
 ECode TextView::GetLetterSpacing(
     /* [out] */ Float* spacing)
 {
     VALIDATE_NOT_NULL(spacing)
-    IPaint::Probe(mTextPaint)->GetLetterSpacing(spacing);
-    return NOERROR;
+    return IPaint::Probe(mTextPaint)->GetLetterSpacing(spacing);
 }
 
 ECode TextView::SetLetterSpacing(
@@ -5265,7 +5262,7 @@ ECode TextView::GetPrivateImeOptions(
         *options = editor->mInputContentType->mPrivateImeOptions;
     }
     else {
-        *options = String("");
+        *options = "";
     }
     return NOERROR;
 }
@@ -6941,7 +6938,8 @@ ECode TextView::OnKeyUp(
                                 */
                                 Boolean res;
                                 View::OnKeyUp(keyCode, event, &res);
-                                return TRUE;
+                                *resValue = TRUE;
+                                return NOERROR;
                             }
                             else if ((flags & IKeyEvent::FLAG_EDITOR_ACTION) != 0) {
                                 // No target for next focus, but make sure the IME
@@ -8218,7 +8216,7 @@ Boolean TextView::BringTextIntoView()
     return FALSE;
 }
 
-CARAPI TextView::BringPointIntoView(
+ECode TextView::BringPointIntoView(
     /* [in] */ Int32 offset,
     /* [out] */ Boolean* result)
 {
@@ -9644,6 +9642,8 @@ ECode TextView::GetTextColors(
     /* [out] */ IColorStateList** list)
 {
     VALIDATE_NOT_NULL(list)
+    *list = NULL;
+
     if (!attrs) {
         return E_NULL_POINTER_EXCEPTION;
     }
@@ -9707,32 +9707,28 @@ ECode TextView::OnKeyShortcut(
     switch (keyCode) {
     case IKeyEvent::KEYCODE_A:
         if (CanSelectText()) {
-            OnTextContextMenuItem(R::id::selectAll, res);
-            return NOERROR;
+            return OnTextContextMenuItem(R::id::selectAll, res);
         }
 
         break;
 
     case IKeyEvent::KEYCODE_X:
         if (CanCut()) {
-            OnTextContextMenuItem(R::id::cut, res);
-            return NOERROR;
+            return OnTextContextMenuItem(R::id::cut, res);
         }
 
         break;
 
     case IKeyEvent::KEYCODE_C:
         if (CanCopy()) {
-            OnTextContextMenuItem(R::id::copy, res);
-            return NOERROR;
+            return OnTextContextMenuItem(R::id::copy, res);
         }
 
         break;
 
     case IKeyEvent::KEYCODE_V:
         if (CanPaste()) {
-            OnTextContextMenuItem(R::id::paste, res);
-            return NOERROR;
+            return OnTextContextMenuItem(R::id::paste, res);
         }
 
         break;
@@ -10256,7 +10252,8 @@ ECode TextView::PerformLongClick(
         if (mEditor != NULL) TO_EDITOR(mEditor)->mDiscardNextActionUp = TRUE;
     }
 
-    return handled;
+    *res = handled;
+    return NOERROR;
 }
 
 void TextView::OnScrollChanged(
@@ -10275,12 +10272,18 @@ ECode TextView::IsSuggestionsEnabled(
     /* [out] */ Boolean* enabled)
 {
     VALIDATE_NOT_NULL(enabled)
-    if (mEditor == NULL) return FALSE;
+    *enabled = FALSE;
+
+    if (mEditor == NULL) {
+        return NOERROR;
+    }
     AutoPtr<Editor> editor = TO_EDITOR(mEditor);
     if ((editor->mInputType & IInputType::TYPE_MASK_CLASS) != IInputType::TYPE_CLASS_TEXT) {
-        return FALSE;
+        return NOERROR;
     }
-    if ((editor->mInputType & IInputType::TYPE_TEXT_FLAG_NO_SUGGESTIONS) > 0) return FALSE;
+    if ((editor->mInputType & IInputType::TYPE_TEXT_FLAG_NO_SUGGESTIONS) > 0) {
+        return NOERROR;
+    }
 
     Int32 variation = editor->mInputType & IInputType::TYPE_MASK_VARIATION;
     *enabled = (variation == IInputType::TYPE_TEXT_VARIATION_NORMAL ||
@@ -10446,7 +10449,10 @@ ECode TextView::GetOffsetForPosition(
     VALIDATE_NOT_NULL(offset)
     AutoPtr<ILayout> layout;
     GetLayout((ILayout**)&layout);
-    if (layout == NULL) return -1;
+    if (layout == NULL) {
+        *offset = -1;
+        return NOERROR;
+    }
     Int32 line = GetLineAtCoordinate(y);
     *offset = GetOffsetAtCoordinate(line, x);
     return NOERROR;
@@ -10788,7 +10794,6 @@ ECode TextView::SetAccessibilitySelection(
     }
     return NOERROR;
 }
-
 
 } // namespace Widget
 } // namespace Droid

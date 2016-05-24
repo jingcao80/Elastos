@@ -2556,8 +2556,8 @@ void SelectionModifierCursorController::OnTouchEvent(
     switch (mask) {
         case IMotionEvent::ACTION_DOWN:
             // Remember finger down position, to be able to start selection from there
-            mEditor->mTextView->GetOffsetForPosition(x, y, &mMinTouchOffset);
             mEditor->mTextView->GetOffsetForPosition(x, y, &mMaxTouchOffset);
+            mMinTouchOffset = mMaxTouchOffset;
 
             // Double tap detection
             if (mGestureStayedInTapRegion) {

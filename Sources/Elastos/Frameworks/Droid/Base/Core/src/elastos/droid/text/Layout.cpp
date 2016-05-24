@@ -22,6 +22,8 @@ using Elastos::Droid::Emoji::CEmojiFactoryHelper;
 using Elastos::Droid::Graphics::CRect;
 //using Elastos::Droid::Graphics::PathDirection;
 using Elastos::Droid::Graphics::PathDirection_CW;
+using Elastos::Droid::Internal::Utility::ArrayUtils;
+using Elastos::Droid::Internal::Utility::GrowingArrayUtils;
 using Elastos::Droid::Text::MeasuredText;
 using Elastos::Droid::Text::AndroidBidi;
 using Elastos::Droid::Text::Style::EIID_IParagraphStyle;
@@ -39,8 +41,6 @@ using Elastos::Droid::Text::Method::MetaKeyKeyListener;
 using Elastos::Droid::Text::Method::IMetaKeyKeyListener;
 using Elastos::Droid::Text::MeasuredText;
 using Elastos::Droid::Text::AndroidBidi;
-using Elastos::Droid::Internal::Utility::ArrayUtils;
-using Elastos::Droid::Internal::Utility::GrowingArrayUtils;
 
 using Elastos::Core::CString;
 using Elastos::Core::EIID_ICharSequence;
@@ -683,7 +683,8 @@ ECode Layout::DrawText(
         if (hasTabOrEmoji && !tabStopsIsInitialized) {
             if (tabStops == NULL) {
                 tabStops = new TabStops(TAB_INCREMENT, (ArrayOf<IInterface*>*)(spans.Get()));
-            } else {
+            }
+            else {
                 tabStops->Reset(TAB_INCREMENT, (ArrayOf<IInterface*>*)(spans.Get()));
             }
             tabStopsIsInitialized = TRUE;
@@ -694,7 +695,8 @@ ECode Layout::DrawText(
         if (align == ALIGN_LEFT) {
             align = (dir == ILayout::DIR_LEFT_TO_RIGHT) ?
                 ALIGN_NORMAL : ALIGN_OPPOSITE;
-        } else if (align == ALIGN_RIGHT) {
+        }
+        else if (align == ALIGN_RIGHT) {
             align = (dir == ILayout::DIR_LEFT_TO_RIGHT) ?
                 ALIGN_OPPOSITE : ALIGN_NORMAL;
         }
@@ -703,18 +705,22 @@ ECode Layout::DrawText(
         if (align == ALIGN_NORMAL) {
             if (dir == ILayout::DIR_LEFT_TO_RIGHT) {
                 x = left;
-            } else {
+            }
+            else {
                 x = right;
             }
-        } else {
+        }
+        else {
             Int32 max = (Int32)GetLineExtent(i, tabStops, FALSE);
             if (align == ALIGN_OPPOSITE) {
                 if (dir == ILayout::DIR_LEFT_TO_RIGHT) {
                     x = right - max;
-                } else {
+                }
+                else {
                     x = left - max;
                 }
-            } else { // Alignment.ALIGN_CENTER
+            }
+            else { // Alignment.ALIGN_CENTER
                 max = max & ~1;
                 x = (right + left - max) >> 1;
             }
@@ -846,20 +852,25 @@ ECode Layout::GetLineRangeForDraw(
         canvas->GetClipBounds(sTempRect, &flag);
         if (!flag) {
             // Negative range end used as a special flag
-            return TextUtils::PackRangeInInt64(0, -1);
+            *result = TextUtils::PackRangeInInt64(0, -1);
+            return NOERROR;
         }
 
         sTempRect->GetTop(&dtop);
         sTempRect->GetBottom(&dbottom);
     }
 
-    Int32 top = Elastos::Core::Math::Max(dtop, 0);
+    using Elastos::Core::Math;
+    Int32 top = Math::Max(dtop, 0);
     Int32 count, tt;
     GetLineCount(&count);
     GetLineTop(count, &tt);
-    Int32 bottom = Elastos::Core::Math::Min(tt, dbottom);
+    Int32 bottom = Math::Min(tt, dbottom);
 
-    if (top >= bottom) return TextUtils::PackRangeInInt64(0, -1);
+    if (top >= bottom) {
+        *result = TextUtils::PackRangeInInt64(0, -1);
+        return NOERROR;
+    }
     Int32 tv, bv;
     GetLineForVertical(top, &tv);
     GetLineForVertical(bottom, &bv);
@@ -881,7 +892,8 @@ Int32 Layout::GetLineStartPos(
 
     if (align == ALIGN_LEFT) {
         align = (dir == ILayout::DIR_LEFT_TO_RIGHT) ? ALIGN_NORMAL : ALIGN_OPPOSITE;
-    } else if (align == ALIGN_RIGHT) {
+    }
+    else if (align == ALIGN_RIGHT) {
         align = (dir == ILayout::DIR_LEFT_TO_RIGHT) ? ALIGN_OPPOSITE : ALIGN_NORMAL;
     }
 
@@ -889,10 +901,12 @@ Int32 Layout::GetLineStartPos(
     if (align == ALIGN_NORMAL) {
         if (dir == ILayout::DIR_LEFT_TO_RIGHT) {
             x = left;
-        } else {
+        }
+        else {
             x = right;
         }
-    } else {
+    }
+    else {
         AutoPtr<TabStops> tabStops;
         Boolean bval;
         GetLineContainsTab(line, &bval);
@@ -915,11 +929,13 @@ Int32 Layout::GetLineStartPos(
         if (align == ALIGN_OPPOSITE) {
             if (dir == ILayout::DIR_LEFT_TO_RIGHT) {
                 x = right - max;
-            } else {
+            }
+            else {
                 // max is negative here
                 x = left - max;
             }
-        } else { // Alignment.ALIGN_CENTER
+        }
+        else { // Alignment.ALIGN_CENTER
             max = max & ~1;
             x = (left + right - max) >> 1;
         }
@@ -1295,7 +1311,8 @@ ECode Layout::GetLineLeft(
     else if (align == ALIGN_RIGHT) {
         Float fmax;
         GetLineMax(line, &fmax);
-        return mWidth - fmax;
+        *result = mWidth - fmax;
+        return NOERROR;
     }
     else if (align == ALIGN_OPPOSITE) {
         if (dir == ILayout::DIR_RIGHT_TO_LEFT) {
@@ -1304,7 +1321,8 @@ ECode Layout::GetLineLeft(
         else {
             Float fmax;
             GetLineMax(line, &fmax);
-            return mWidth - fmax;
+            *result = mWidth - fmax;
+            return NOERROR;
         }
     }
     else { /* align == Alignment.ALIGN_CENTER */
@@ -1402,7 +1420,6 @@ Float Layout::GetLineExtent(
     /* [in] */ Int32 line,
     /* [in] */ Boolean full)
 {
-
     Int32 start, end, visibleEnd;
     GetLineStart(line, &start);
     GetLineEnd(line, &end);
@@ -1448,10 +1465,12 @@ Float Layout::GetLineExtent(
 {
     Int32 start,  end;
     GetLineStart(line, &start);
-    if (full)
+    if (full) {
         GetLineEnd(line, &end);
-    else
+    }
+    else {
         GetLineVisibleEnd(line, &end);
+    }
     Boolean hasTabsOrEmoji;
     GetLineContainsTab(line, &hasTabsOrEmoji);
     AutoPtr<ILayoutDirections> directions;
@@ -1481,14 +1500,15 @@ ECode Layout::GetLineForVertical(
     while (high - low > 1) {
         guess = (high + low) / 2;
         GetLineTop(guess, &top);
-        if (top > vertical)
+        if (top > vertical) {
             high = guess;
-        else
+        }
+        else {
             low = guess;
+        }
     }
 
-    if (low < 0)
-        return NOERROR;
+    if (low < 0) return NOERROR;
 
     *result = low;
     return NOERROR;
@@ -1543,13 +1563,16 @@ ECode Layout::GetOffsetForHorizontal(
 
     Int32 count;
     GetLineCount(&count);
-    if (line == count - 1)
+    if (line == count - 1) {
         max++;
+    }
+
+    using Elastos::Core::Math;
 
     Int32 best = min;
     Float ph;
     GetPrimaryHorizontal(best, &ph);
-    Float bestdist = Elastos::Core::Math::Abs(ph - horiz);
+    Float bestdist = Math::Abs(ph - horiz);
 
     AutoPtr< ArrayOf<Int32> > directions;
     dirs->GetDirections((ArrayOf<Int32>**)&directions);
@@ -1566,25 +1589,28 @@ ECode Layout::GetOffsetForHorizontal(
             guess = (high + low) / 2;
             Int32 adguess = GetOffsetAtStartOf(guess);
             GetPrimaryHorizontal(adguess, &ph);
-            if (ph * swap >= horiz * swap)
+            if (ph * swap >= horiz * swap) {
                 high = guess;
-            else
+            }
+            else {
                 low = guess;
+            }
         }
 
-        if (low < here + 1)
+        if (low < here + 1) {
             low = here + 1;
+        }
 
         if (low < there) {
             low = GetOffsetAtStartOf(low);
 
             GetPrimaryHorizontal(low, &ph);
-            Float dist = Elastos::Core::Math::Abs(ph - horiz);
+            Float dist = Math::Abs(ph - horiz);
 
             Int32 aft = TextUtils::GetOffsetAfter(mText, low);
             if (aft < there) {
                 GetPrimaryHorizontal(aft, &ph);
-                Float other = Elastos::Core::Math::Abs(ph - horiz);
+                Float other = Math::Abs(ph - horiz);
 
                 if (other < dist) {
                     dist = other;
@@ -1599,7 +1625,7 @@ ECode Layout::GetOffsetForHorizontal(
         }
 
         GetPrimaryHorizontal(here, &ph);
-        Float dist = Elastos::Core::Math::Abs(ph - horiz);
+        Float dist = Math::Abs(ph - horiz);
 
         if (dist < bestdist) {
             bestdist = dist;
@@ -1608,14 +1634,15 @@ ECode Layout::GetOffsetForHorizontal(
     }
 
     GetPrimaryHorizontal(max, &ph);
-    Float dist = Elastos::Core::Math::Abs(ph - horiz);
+    Float dist = Math::Abs(ph - horiz);
 
     if (dist <= bestdist) {
         bestdist = dist;
         best = max;
     }
 
-    return best;
+    *result = best;
+    return NOERROR;
 }
 
 ECode Layout::GetLineEnd(
@@ -1696,7 +1723,8 @@ ECode Layout::GetLineAscent(
     GetLineTop(line, &top);
     GetLineTop(line + 1, &topNext);
     GetLineDescent(line, &descent);
-    return top - (topNext - descent);
+    *result = top - (topNext - descent);
+    return NOERROR;
 }
 
 ECode Layout::GetOffsetToLeftOf(
@@ -1737,16 +1765,19 @@ Int32 Layout::GetOffsetToLeftRightOf(
             if (line < count - 1) {
                 lineChanged = TRUE;
                 ++line;
-            } else {
+            }
+            else {
                 return caret; // at very end, don't move
             }
         }
-    } else {
+    }
+    else {
         if (caret == lineStart) {
             if (line > 0) {
                 lineChanged = TRUE;
                 --line;
-            } else {
+            }
+            else {
                 return caret; // at very start, don't move
             }
         }
@@ -1783,8 +1814,7 @@ Int32 Layout::GetOffsetAtStartOf(
 {
     // XXX this probably should skip local reorderings and
     // zero-width characters, look at callers
-    if (offset == 0)
-        return 0;
+    if (offset == 0) return 0;
 
     AutoPtr<ICharSequence> text = mText;
     Char32 c;
@@ -1794,8 +1824,9 @@ Int32 Layout::GetOffsetAtStartOf(
         Char32 c1;
         text->GetCharAt(offset - 1, &c1);
 
-        if (c1 >= 0xD800/*'\uD800'*/ && c1 <= 0xDBFF/*'\uDBFF'*/)
+        if (c1 >= 0xD800/*'\uD800'*/ && c1 <= 0xDBFF/*'\uDBFF'*/) {
            offset -= 1;
+        }
     }
 
     if (mSpannedText) {
@@ -1810,8 +1841,9 @@ Int32 Layout::GetOffsetAtStartOf(
             spanned->GetSpanStart((*spans)[i], &start);
             spanned->GetSpanEnd((*spans)[i], &end);
 
-            if (start < offset && end > offset)
+            if (start < offset && end > offset) {
                 offset = start;
+            }
         }
     }
 
@@ -1956,11 +1988,13 @@ void Layout::AddSelection(
     GetLineDirections(line, (ILayoutDirections**)&dirs);
 
     Char32 ch;
-    if (lineEnd > lineStart && (mText->GetCharAt(lineEnd - 1, &ch), ch) == '\n')
+    if (lineEnd > lineStart && (mText->GetCharAt(lineEnd - 1, &ch), ch) == '\n') {
         lineEnd--;
+    }
 
     AutoPtr< ArrayOf<Int32> > directions = NULL;
     dirs->GetDirections((ArrayOf<Int32>**)&directions);
+    using Elastos::Core::Math;
     for (Int32 i = 0; i < directions->GetLength(); i += 2) {
         Int32 here = lineStart + (*directions)[i];
         Int32 there = here + ((*directions)[i+1] & ILayout::RUN_LENGTH_MASK);
@@ -1969,15 +2003,15 @@ void Layout::AddSelection(
             there = lineEnd;
 
         if (start <= there && end >= here) {
-            Int32 st = Elastos::Core::Math::Max(start, here);
-            Int32 en = Elastos::Core::Math::Min(end, there);
+            Int32 st = Math::Max(start, here);
+            Int32 en = Math::Min(end, there);
 
             if (st != en) {
                 Float h1 = GetHorizontal(st, FALSE, line, FALSE /* not clamped */);
                 Float h2 = GetHorizontal(en, TRUE, line, FALSE /* not clamped */);
 
-                Float left = Elastos::Core::Math::Min(h1, h2);
-                Float right = Elastos::Core::Math::Max(h1, h2);
+                Float left = Math::Min(h1, h2);
+                Float right = Math::Max(h1, h2);
 
                 dest->AddRect(left, top, right, bottom, PathDirection_CW);
             }
@@ -2009,7 +2043,8 @@ ECode Layout::GetSelectionPath(
 
     if (startline == endline) {
         AddSelection(startline, start, end, top, bottom, dest);
-    } else {
+    }
+    else {
         Float width = mWidth;
 
         Int32 lb, le;
@@ -2187,7 +2222,8 @@ Float Layout::MeasurePara(
         if (mt->mEasy) {
             directions = DIRS_ALL_LEFT_TO_RIGHT;
             dir = ILayout::DIR_LEFT_TO_RIGHT;
-        } else {
+        }
+        else {
             directions = AndroidBidi::Directions(mt->mDir, mt->mLevels,
                 0, mt->mChars, 0, mt->mLen);
             dir = mt->mDir;
@@ -2248,7 +2284,8 @@ Float Layout::NextTab(
     /* [in] */ Float h,
     /* [in] */ ArrayOf<IInterface*>* _tabs)
 {
-    Float nh = Elastos::Core::Math::FLOAT_MAX_VALUE;
+    using Elastos::Core::Math;
+    Float nh = Math::FLOAT_MAX_VALUE;
     Boolean alltabs = FALSE;
 
     AutoPtr< ArrayOf<IInterface*> > tabs = _tabs;
@@ -2270,12 +2307,14 @@ Float Layout::NextTab(
             ITabStopSpan* tss = (ITabStopSpan*)((*tabs)[i]->Probe(EIID_ITabStopSpan));
             tss->GetTabStop(&where);
 
-            if (where < nh && where > h)
+            if (where < nh && where > h) {
                 nh = where;
+            }
         }
 
-        if (nh != Elastos::Core::Math::FLOAT_MAX_VALUE)
+        if (nh != Math::FLOAT_MAX_VALUE) {
             return nh;
+        }
     }
 
     return ((Int32) ((h + TAB_INCREMENT) / TAB_INCREMENT)) * TAB_INCREMENT;
