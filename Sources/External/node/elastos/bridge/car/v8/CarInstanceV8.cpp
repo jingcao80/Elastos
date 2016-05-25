@@ -72,26 +72,29 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool& 
     AutoPtr<IClassInfo> classInfo;
     AutoPtr<IInterfaceInfo> interfaceInfo;
 
-    bool bClass = true;
-    ec = CObject::ReflectClassInfo(*(PInterface*)&object, (IClassInfo**)&classInfo);
-    if (FAILED(ec)) {
-        bClass = false;
-        interfaceInfo = IInterfaceInfo::Probe(mInstance->getDataTypeInfo());
-    }
-
     AutoPtr<IMethodInfo> aMethod;
-    if (bClass) {
-        //ec = classInfo->GetMethodInfo(method->name().utf8().data(), (IMethodInfo**)&aMethod);
-        ec = classInfo->GetMethodInfo(Elastos::String(method->name().utf8().data()), Elastos::String("(I32)E"), (IMethodInfo**)&aMethod);
-     }
-    else {
-        //ec = interfaceInfo->GetMethodInfo(method->name().utf8().data(), (IMethodInfo**)&aMethod);
-        ec = interfaceInfo->GetMethodInfo(Elastos::String(method->name().utf8().data()), Elastos::String("(I32)E"), (IMethodInfo**)&aMethod);
-    }
-    if (FAILED(ec)) {
-        LOG_ERROR("CarInstanceV8::invokeMethod unable to get methodInfo of \"%s\"", method->name().utf8().data());
-        return;
-    }
+    aMethod = method->methodInfo();
+
+    // bool bClass = true;
+    // ec = CObject::ReflectClassInfo(*(PInterface*)&object, (IClassInfo**)&classInfo);
+    // if (FAILED(ec)) {
+    //     bClass = false;
+    //     interfaceInfo = IInterfaceInfo::Probe(mInstance->getDataTypeInfo());
+    // }
+
+    // AutoPtr<IMethodInfo> aMethod;
+    // if (bClass) {
+    //     //ec = classInfo->GetMethodInfo(method->name().utf8().data(), (IMethodInfo**)&aMethod);
+    //     ec = classInfo->GetMethodInfo(Elastos::String(method->name().utf8().data()), Elastos::String("(I32)E"), (IMethodInfo**)&aMethod);
+    //  }
+    // else {
+    //     //ec = interfaceInfo->GetMethodInfo(method->name().utf8().data(), (IMethodInfo**)&aMethod);
+    //     ec = interfaceInfo->GetMethodInfo(Elastos::String(method->name().utf8().data()), Elastos::String("(I32)E"), (IMethodInfo**)&aMethod);
+    // }
+    // if (FAILED(ec)) {
+    //     LOG_ERROR("CarInstanceV8::invokeMethod unable to get methodInfo of \"%s\"", method->name().utf8().data());
+    //     return;
+    // }
 
     AutoPtr<IArgumentList> argumentList = NULL;
     if (numParams > 0) {
@@ -280,8 +283,8 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool& 
                 return;
             }
 
-            aParameter->Release();
-            aParameter = NULL;
+            //aParameter->Release();
+            //aParameter = NULL;
         }
         ArrayOf<IParamInfo*>::Free(paramInfos);
     }

@@ -795,6 +795,8 @@ void convertCarValuesToNPVariant(const CarMethod* method, CarValue* values, Arra
 
 void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
 {
+    ALOGD("========convertCarValueToNPVariant========1");
+
     const char* tmpType = ClassNameFromCarDataType((CarDataType)(value.mType));
     const char* tmpSubType = ClassNameFromCarDataType((CarDataType)(value.mElementType));
 

@@ -21,11 +21,6 @@ ECode CTestCarDataType::Test_Int16(
     /* [in] */ Int16 inValue,
     /* [out] */ Int16 * pOutValue)
 {
-    // TODO: Add your code here
-    //return E_NOT_IMPLEMENTED;
-
-    ALOGD("CTestCarDataType::Test_Int16 begin");
-
     assert(pOutValue != NULL);
     ALOGD("==== File: %s, Function: %s, inValue: %d ====", __FILE__, __FUNCTION__, inValue);
     *pOutValue = inValue;
@@ -44,8 +39,10 @@ ECode CTestCarDataType::Test_Int32(
     /* [in] */ Int32 inValue,
     /* [out] */ Int32 * pOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    assert(pOutValue != NULL);
+    ALOGD("==== File: %s, Function: %s, inValue: %d ====", __FILE__, __FUNCTION__, inValue);
+    *pOutValue = inValue;
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_Int32_Ref(
@@ -60,8 +57,10 @@ ECode CTestCarDataType::Test_Int64(
     /* [in] */ Int64 inValue,
     /* [out] */ Int64 * pOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    assert(pOutValue != NULL);
+    ALOGD("==== File: %s, Function: %s, inValue: %lld ====", __FILE__, __FUNCTION__, inValue);
+    *pOutValue = inValue;
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_Int64_Ref(
@@ -76,8 +75,10 @@ ECode CTestCarDataType::Test_Byte(
     /* [in] */ Byte inValue,
     /* [out] */ Byte * pOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    assert(pOutValue != NULL);
+    ALOGD("==== File: %s, Function: %s, inValue: %d ====", __FILE__, __FUNCTION__, inValue);
+    *pOutValue = inValue;
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_Byte_Ref(
@@ -92,8 +93,10 @@ ECode CTestCarDataType::Test_Float(
     /* [in] */ Float inValue,
     /* [out] */ Float * pOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    assert(pOutValue != NULL);
+    ALOGD("==== File: %s, Function: %s, inValue: %f ====", __FILE__, __FUNCTION__, inValue);
+    *pOutValue = inValue;
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_Float_Ref(
@@ -108,8 +111,10 @@ ECode CTestCarDataType::Test_Double(
     /* [in] */ Double inValue,
     /* [out] */ Double * pOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    assert(pOutValue != NULL);
+    ALOGD("==== File: %s, Function: %s, inValue: %f ====", __FILE__, __FUNCTION__, inValue);
+    *pOutValue = inValue;
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_Double_Ref(
@@ -120,17 +125,19 @@ ECode CTestCarDataType::Test_Double_Ref(
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CTestCarDataType::Test_Char16(
-    /* [in] */ Char16 inValue,
-    /* [out] */ Char16 * pOutValue)
+ECode CTestCarDataType::Test_Char(
+    /* [in] */ Char32 inValue,
+    /* [out] */ Char32 * pOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    assert(pOutValue != NULL);
+    ALOGD("==== File: %s, Function: %s, inValue: %c ====", __FILE__, __FUNCTION__, inValue);
+    *pOutValue = inValue;
+    return NOERROR;
 }
 
-ECode CTestCarDataType::Test_Char16_Ref(
-    /* [in] */ Char16 * pInValue,
-    /* [out] */ Char16 * pOutValue)
+ECode CTestCarDataType::Test_Char_Ref(
+    /* [in] */ Char32 * pInValue,
+    /* [out] */ Char32 * pOutValue)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
@@ -140,8 +147,10 @@ ECode CTestCarDataType::Test_String(
     /* [in] */ const String& inStr,
     /* [out] */ String * pOutStr)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    assert(pOutStr != NULL);
+    ALOGD("==== File: %s, Function: %s, inStr: %s ====", __FILE__, __FUNCTION__, inStr.string());
+    *pOutStr = inStr;
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_String_Ref(
@@ -156,8 +165,10 @@ ECode CTestCarDataType::Test_Boolean(
     /* [in] */ Boolean inValue,
     /* [out] */ Boolean * pOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    assert(pOutValue != NULL);
+    *pOutValue = inValue;
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_Boolean_Ref(
@@ -188,8 +199,10 @@ ECode CTestCarDataType::Test_EGuid(
     /* [in] */ const EGuid & inId,
     /* [out] */ EGuid * pOutId)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    assert(pOutId != NULL);
+    *pOutId = inId;
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_EGuid_Ref(
@@ -204,8 +217,10 @@ ECode CTestCarDataType::Test_ECode(
     /* [in] */ ECode inValue,
     /* [out] */ ECode * pOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    assert(pOutValue != NULL);
+    *pOutValue = inValue;
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_ECode_Ref(
@@ -220,8 +235,10 @@ ECode CTestCarDataType::Test_Enum(
     /* [in] */ CarDataType inValue,
     /* [out] */ CarDataType * pOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    assert(pOutValue != NULL);
+    *pOutValue = inValue;
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_Enum_Ref(
@@ -233,136 +250,207 @@ ECode CTestCarDataType::Test_Enum_Ref(
 }
 
 ECode CTestCarDataType::Test_ArrayOf_Int16(
-    /* [in] */ const ArrayOf<Int16> & inArrayOf,
-    /* [out, callee] */ ArrayOf<Int16> ** ppOutArrayOf)
+    /* [in] */ const ArrayOf<Int16> & inValue,
+    /* [out, callee] */ ArrayOf<Int16> ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    AutoPtr< ArrayOf<Int16> > carArray = ArrayOf<Int16>::Alloc(inValue.GetLength());
+    carArray->Copy(&inValue);
+    *ppOutValue = carArray;
+    REFCOUNT_ADD(*ppOutValue);
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_ArrayOf_Ref(
-    /* [in] */ ArrayOf<Int16> * pInArrayOf,
-    /* [out, callee] */ ArrayOf<Int16> ** ppOutArrayOf)
+    /* [in] */ ArrayOf<Int16> * pInValue,
+    /* [out, callee] */ ArrayOf<Int16> ** ppOutValue)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CTestCarDataType::Test_ArrayOf_Int32(
-    /* [in] */ const ArrayOf<Int32> & inArrayOf,
-    /* [out, callee] */ ArrayOf<Int32> ** ppOutArrayOf)
+    /* [in] */ const ArrayOf<Int32> & inValue,
+    /* [out, callee] */ ArrayOf<Int32> ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    AutoPtr< ArrayOf<Int32> > carArray = ArrayOf<Int32>::Alloc(inValue.GetLength());
+    carArray->Copy(&inValue);
+    *ppOutValue = carArray;
+    REFCOUNT_ADD(*ppOutValue);
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_ArrayOf_Int64(
-    /* [in] */ const ArrayOf<Int64> & inArrayOf,
-    /* [out, callee] */ ArrayOf<Int64> ** ppOutArrayOf)
+    /* [in] */ const ArrayOf<Int64> & inValue,
+    /* [out, callee] */ ArrayOf<Int64> ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    AutoPtr< ArrayOf<Int64> > carArray = ArrayOf<Int64>::Alloc(inValue.GetLength());
+    carArray->Copy(&inValue);
+    *ppOutValue = carArray;
+    REFCOUNT_ADD(*ppOutValue);
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_ArrayOf_Byte(
-    /* [in] */ const ArrayOf<Byte> & inArrayOf,
-    /* [out, callee] */ ArrayOf<Byte> ** ppOutArrayOf)
+    /* [in] */ const ArrayOf<Byte> & inValue,
+    /* [out, callee] */ ArrayOf<Byte> ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    AutoPtr< ArrayOf<Byte> > carArray = ArrayOf<Byte>::Alloc(inValue.GetLength());
+    carArray->Copy(&inValue);
+    *ppOutValue = carArray;
+    REFCOUNT_ADD(*ppOutValue);
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_ArrayOf_Float(
-    /* [in] */ const ArrayOf<Float> & inArrayOf,
-    /* [out, callee] */ ArrayOf<Float> ** ppOutArrayOf)
+    /* [in] */ const ArrayOf<Float> & inValue,
+    /* [out, callee] */ ArrayOf<Float> ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    AutoPtr< ArrayOf<Float> > carArray = ArrayOf<Float>::Alloc(inValue.GetLength());
+    carArray->Copy(&inValue);
+    *ppOutValue = carArray;
+    REFCOUNT_ADD(*ppOutValue);
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_ArrayOf_Double(
-    /* [in] */ const ArrayOf<Double> & inArrayOf,
-    /* [out, callee] */ ArrayOf<Double> ** ppOutArrayOf)
+    /* [in] */ const ArrayOf<Double> & inValue,
+    /* [out, callee] */ ArrayOf<Double> ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    AutoPtr< ArrayOf<Double> > carArray = ArrayOf<Double>::Alloc(inValue.GetLength());
+    carArray->Copy(&inValue);
+    *ppOutValue = carArray;
+    REFCOUNT_ADD(*ppOutValue);
+    return NOERROR;
 }
 
-ECode CTestCarDataType::Test_ArrayOf_Char16(
-    /* [in] */ const ArrayOf<Char16> & inArrayOf,
-    /* [out, callee] */ ArrayOf<Char16> ** ppOutArrayOf)
+ECode CTestCarDataType::Test_ArrayOf_Char(
+    /* [in] */ const ArrayOf<Char32> & inValue,
+    /* [out, callee] */ ArrayOf<Char32> ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s, inValue[0]: %d, inValue[1]: %d, inValue[2]: %d ====", __FILE__, __FUNCTION__,
+            inValue[0], inValue[1], inValue[2]);
+    AutoPtr< ArrayOf<Char32> > carArray = ArrayOf<Char32>::Alloc(inValue.GetLength());
+    carArray->Copy(&inValue);
+    *ppOutValue = carArray;
+    REFCOUNT_ADD(*ppOutValue);
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_ArrayOf_String(
-    /* [in] */ const ArrayOf<String> & inArrayOf,
-    /* [out, callee] */ ArrayOf<String> ** ppOutArrayOf)
+    /* [in] */ const ArrayOf<String> & inValue,
+    /* [out, callee] */ ArrayOf<String> ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    AutoPtr< ArrayOf<String> > carArray = ArrayOf<String>::Alloc(inValue.GetLength());
+    carArray->Copy(&inValue);
+    *ppOutValue = carArray;
+    REFCOUNT_ADD(*ppOutValue);
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_ArrayOf_Boolean(
-    /* [in] */ const ArrayOf<Boolean> & inArrayOf,
-    /* [out, callee] */ ArrayOf<Boolean> ** ppOutArrayOf)
+    /* [in] */ const ArrayOf<Boolean> & inValue,
+    /* [out, callee] */ ArrayOf<Boolean> ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    AutoPtr< ArrayOf<Boolean> > carArray = ArrayOf<Boolean>::Alloc(inValue.GetLength());
+    carArray->Copy(&inValue);
+    *ppOutValue = carArray;
+    REFCOUNT_ADD(*ppOutValue);
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_ArrayOf_EMuid(
-    /* [in] */ const ArrayOf<EMuid> & inArrayOf,
-    /* [out, callee] */ ArrayOf<EMuid> ** ppOutArrayOf)
+    /* [in] */ const ArrayOf<EMuid> & inValue,
+    /* [out, callee] */ ArrayOf<EMuid> ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    AutoPtr< ArrayOf<EMuid> > carArray = ArrayOf<EMuid>::Alloc(inValue.GetLength());
+    carArray->Copy(&inValue);
+    *ppOutValue = carArray;
+    REFCOUNT_ADD(*ppOutValue);
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_ArrayOf_EGuid(
-    /* [in] */ const ArrayOf<EGuid> & inArrayOf,
-    /* [out, callee] */ ArrayOf<EGuid> ** ppOutArrayOf)
+    /* [in] */ const ArrayOf<EGuid> & inValue,
+    /* [out, callee] */ ArrayOf<EGuid> ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    AutoPtr< ArrayOf<EGuid> > carArray = ArrayOf<EGuid>::Alloc(inValue.GetLength());
+    carArray->Copy(&inValue);
+    *ppOutValue = carArray;
+    REFCOUNT_ADD(*ppOutValue);
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_ArrayOf_ECode(
-    /* [in] */ const ArrayOf<ECode> & inArrayOf,
-    /* [out, callee] */ ArrayOf<ECode> ** ppOutArrayOf)
+    /* [in] */ const ArrayOf<ECode> & inValue,
+    /* [out, callee] */ ArrayOf<ECode> ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s, inValue[0]: 0x%08x, inValue[1]: 0x%08x, inValue[2]: 0x%08x ====", __FILE__, __FUNCTION__,
+            inValue[0], inValue[1], inValue[2]);
+    AutoPtr< ArrayOf<ECode> > carArray = ArrayOf<ECode>::Alloc(inValue.GetLength());
+    carArray->Copy(&inValue);
+    *ppOutValue = carArray;
+    REFCOUNT_ADD(*ppOutValue);
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_ArrayOf_Enum(
-    /* [in] */ const ArrayOf<CarDataType> & inArrayOf,
-    /* [out, callee] */ ArrayOf<CarDataType> ** ppOutArrayOf)
+    /* [in] */ const ArrayOf<CarDataType> & inValue,
+    /* [out, callee] */ ArrayOf<CarDataType> ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s, inValue[0]: %d, inValue[1]: %d, inValue[2]: %d ====", __FILE__, __FUNCTION__,
+            inValue[0], inValue[1], inValue[2]);
+    AutoPtr< ArrayOf<TestObjectState> > carArray = ArrayOf<TestObjectState>::Alloc(inValue.GetLength());
+    carArray->Copy(&inValue);
+    *ppOutValue = carArray;
+    REFCOUNT_ADD(*ppOutValue);
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_ArrayOf_IInterface(
-    /* [in] */ const ArrayOf<IInterface*> & inArrayOf,
-    /* [out, callee] */ ArrayOf<IInterface*> ** ppOutArrayOf)
+    /* [in] */ const ArrayOf<IInterface*> & inValue,
+    /* [out, callee] */ ArrayOf<IInterface*> ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    /*
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+
+    Int32 length = inValue.GetLength();
+    //ArrayOf<Int32>* carArray = ArrayOf<Int32>::Alloc(length);
+    AutoPtr< ArrayOf<IInterface> > carArray = ArrayOf<IInterface>::Alloc(length);
+
+    for (Int32 i = 0; i < length; i++) {
+        carArray->Set(i,inValue[i]);
+    }
+
+    *outValue = carArray;
+    if (*outValue != NULL) (*outValue)->AddRef();
+    */
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_Interface(
-    /* [in] */ IInterface * pInObject,
-    /* [out] */ IInterface ** ppOutObject)
+    /* [in] */ IInterface * pInValue,
+    /* [out] */ IInterface ** ppOutValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    assert(ppOutValue != NULL);
+    *ppOutValue = pInValue;
+    REFCOUNT_ADD(*ppOutValue);
+    return NOERROR;
 }
 
 ECode CTestCarDataType::Test_Interface_Ref(
-    /* [in] */ IInterface ** inObject,
-    /* [out] */ IInterface ** ppOutObject)
+    /* [in] */ IInterface ** inValue,
+    /* [out] */ IInterface ** ppOutValue)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;

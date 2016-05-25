@@ -127,7 +127,7 @@ try {
 
             var oRetValue = oCarObject[sFunName](oProp.v);
             var oRetValue = oCarObject.Test_Int16(16);
-            elog(sFunName+'====typeof: '+typeof oRetValue);
+            elog(sFunName+'====typeof: '+typeof oRetValue + "====retvalue:"+oRetValue);
 
             a.push(sFunName + "========" + oProp.sv.call(oCarObject[sFunName](oProp.v)));
 

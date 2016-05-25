@@ -26,6 +26,8 @@ public:
 
     virtual bool isRunOnUiThread() const = 0;
     virtual void setRunOnUiThread(bool) = 0;
+
+    virtual AutoPtr<IMethodInfo> methodInfo() const = 0;
 };
 
 } // namespace Bindings

@@ -102,6 +102,11 @@ module
 
     //-------------------------user interface---------------------
 
+    enum TestObjectState {
+        TestObjectState_State1,
+        TestObjectState_State2,
+    }
+
     [deprecated]
     interface ITestEventListener {
         OnEvent1(
@@ -181,12 +186,12 @@ module
             [in] Double* inValue,    //deprecated
             [out] Double* outValue);
 
-        Test_Char16(
-            [in] Char16 inValue,
-            [out] Char16* outValue);
-        Test_Char16_Ref(
-            [in] Char16* inValue,    //deprecated
-            [out] Char16* outValue);
+        Test_Char(
+            [in] Char32 inValue,
+            [out] Char32* outValue);
+        Test_Char_Ref(
+            [in] Char32* inValue,    //deprecated
+            [out] Char32* outValue);
 
         Test_String(
             [in] String inStr,
@@ -232,60 +237,60 @@ module
 
         //Enum
         Test_Enum(
-            [in] enum CarDataType inValue,
-            [out] enum CarDataType* outValue);
+            [in] TestObjectState inValue,
+            [out] TestObjectState* outValue);
         Test_Enum_Ref(
-            [in] enum CarDataType* inValue,    //deprecated
-            [out] enum CarDataType* outValue);
+            [in] enum TestObjectState* inValue,    //deprecated
+            [out] enum TestObjectState* outValue);
 
         //ArrayOf
         Test_ArrayOf_Int16(
-            [in] ArrayOf<Int16> inArrayOf,
-            [out, callee] ArrayOf<Int16>* outArrayOf);
+            [in] ArrayOf<Int16> inValue,
+            [out, callee] ArrayOf<Int16>* outValue);
         Test_ArrayOf_Ref(
-            [in] ArrayOf<Int16>* inArrayOf,    //deprecated
-            [out, callee] ArrayOf<Int16>* outArrayOf);
+            [in] ArrayOf<Int16>* inValue,    //deprecated
+            [out, callee] ArrayOf<Int16>* outValue);
 
         Test_ArrayOf_Int32(
-            [in] ArrayOf<Int32> inArrayOf,
-            [out, callee] ArrayOf<Int32>* outArrayOf);
+            [in] ArrayOf<Int32> inValue,
+            [out, callee] ArrayOf<Int32>* outValue);
         Test_ArrayOf_Int64(
-            [in] ArrayOf<Int64> inArrayOf,
-            [out, callee] ArrayOf<Int64>* outArrayOf);
+            [in] ArrayOf<Int64> inValue,
+            [out, callee] ArrayOf<Int64>* outValue);
         Test_ArrayOf_Byte(
-            [in] ArrayOf<Byte> inArrayOf,
-            [out, callee] ArrayOf<Byte>* outArrayOf);
+            [in] ArrayOf<Byte> inValue,
+            [out, callee] ArrayOf<Byte>* outValue);
         Test_ArrayOf_Float(
-            [in] ArrayOf<Float> inArrayOf,
-            [out, callee] ArrayOf<Float>* outArrayOf);
+            [in] ArrayOf<Float> inValue,
+            [out, callee] ArrayOf<Float>* outValue);
         Test_ArrayOf_Double(
-            [in] ArrayOf<Double> inArrayOf,
-            [out, callee] ArrayOf<Double>* outArrayOf);
-        Test_ArrayOf_Char16(
-            [in] ArrayOf<Char16> inArrayOf,
-            [out, callee] ArrayOf<Char16>* outArrayOf);
+            [in] ArrayOf<Double> inValue,
+            [out, callee] ArrayOf<Double>* outValue);
+        Test_ArrayOf_Char(
+            [in] ArrayOf<Char32> inValue,
+            [out, callee] ArrayOf<Char32>* outValue);
         Test_ArrayOf_String(
-            [in] ArrayOf<String> inArrayOf,
-            [out, callee] ArrayOf<String>* outArrayOf);
+            [in] ArrayOf<String> inValue,
+            [out, callee] ArrayOf<String>* outValue);
         Test_ArrayOf_Boolean(
-            [in] ArrayOf<Boolean> inArrayOf,
-            [out, callee] ArrayOf<Boolean>* outArrayOf);
+            [in] ArrayOf<Boolean> inValue,
+            [out, callee] ArrayOf<Boolean>* outValue);
         Test_ArrayOf_EMuid(
-            [in] ArrayOf<EMuid> inArrayOf,
-            [out, callee] ArrayOf<EMuid>* outArrayOf);
+            [in] ArrayOf<EMuid> inValue,
+            [out, callee] ArrayOf<EMuid>* outValue);
         Test_ArrayOf_EGuid(
-            [in] ArrayOf<EGuid> inArrayOf,
-            [out, callee] ArrayOf<EGuid>* outArrayOf);
+            [in] ArrayOf<EGuid> inValue,
+            [out, callee] ArrayOf<EGuid>* outValue);
         Test_ArrayOf_ECode(
-            [in] ArrayOf<ECode> inArrayOf,
-            [out, callee] ArrayOf<ECode>* outArrayOf);
+            [in] ArrayOf<ECode> inValue,
+            [out, callee] ArrayOf<ECode>* outValue);
 
         //Test_ArrayOf_LocalPtr(...)
         //Test_ArrayOf_LocalType(...)
 
         Test_ArrayOf_Enum(
-            [in] ArrayOf<enum CarDataType> inArrayOf,
-            [out, callee] ArrayOf<enum CarDataType>* outArrayOf);
+            [in] ArrayOf<TestObjectState> inValue,
+            [out, callee] ArrayOf<TestObjectState>* outValue);
 
         //CARQuintet type cann't be nested(system notification bug:CARQuintet->CARQuient)
         //Test_ArrayOf_StringBuf(...)
@@ -293,8 +298,8 @@ module
         //Test_ArrayOf_CppVector(...)
 
         Test_ArrayOf_IInterface(
-            [in] ArrayOf<IInterface*> inArrayOf,
-            [out, callee] ArrayOf<IInterface*>* outArrayOf);
+            [in] ArrayOf<IInterface*> inValue,
+            [out, callee] ArrayOf<IInterface*>* outValue);
 
         //CppVector
             //ICppVectorInfo/ICppVectorSetter/ICppVectorGetter
@@ -303,11 +308,11 @@ module
             //IStructInfo/IStructSetter/IStructGetter
 
         Test_Interface(
-            [in] IInterface* inObject,
-            [out] IInterface** outObject);
+            [in] IInterface* inValue,
+            [out] IInterface** outValue);
         Test_Interface_Ref(
-            [in] IInterface** inObject,         //deprecated
-            [out] IInterface** outObject);
+            [in] IInterface** inValue,         //deprecated
+            [out] IInterface** outValue);
     }
 
     [deprecated]

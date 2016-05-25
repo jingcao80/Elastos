@@ -71,13 +71,13 @@ public:
         /* [in] */ Double * pInValue,
         /* [out] */ Double * pOutValue);
 
-    CARAPI Test_Char16(
-        /* [in] */ Char16 inValue,
-        /* [out] */ Char16 * pOutValue);
+    CARAPI Test_Char(
+        /* [in] */ Char32 inValue,
+        /* [out] */ Char32 * pOutValue);
 
-    CARAPI Test_Char16_Ref(
-        /* [in] */ Char16 * pInValue,
-        /* [out] */ Char16 * pOutValue);
+    CARAPI Test_Char_Ref(
+        /* [in] */ Char32 * pInValue,
+        /* [out] */ Char32 * pOutValue);
 
     CARAPI Test_String(
         /* [in] */ const String& inStr,
@@ -120,80 +120,80 @@ public:
         /* [out] */ ECode * pOutValue);
 
     CARAPI Test_Enum(
-        /* [in] */ CarDataType inValue,
-        /* [out] */ CarDataType * pOutValue);
+        /* [in] */ TestObjectState inValue,
+        /* [out] */ TestObjectState * pOutValue);
 
     CARAPI Test_Enum_Ref(
-        /* [in] */ CarDataType * pInValue,
-        /* [out] */ CarDataType * pOutValue);
+        /* [in] */ TestObjectState * pInValue,
+        /* [out] */ TestObjectState * pOutValue);
 
     CARAPI Test_ArrayOf_Int16(
-        /* [in] */ const ArrayOf<Int16> & inArrayOf,
-        /* [out, callee] */ ArrayOf<Int16> ** ppOutArrayOf);
+        /* [in] */ const ArrayOf<Int16> & inValue,
+        /* [out, callee] */ ArrayOf<Int16> ** ppOutValue);
 
     CARAPI Test_ArrayOf_Ref(
-        /* [in] */ ArrayOf<Int16> * pInArrayOf,
-        /* [out, callee] */ ArrayOf<Int16> ** ppOutArrayOf);
+        /* [in] */ ArrayOf<Int16> * pInValue,
+        /* [out, callee] */ ArrayOf<Int16> ** ppOutValue);
 
     CARAPI Test_ArrayOf_Int32(
-        /* [in] */ const ArrayOf<Int32> & inArrayOf,
-        /* [out, callee] */ ArrayOf<Int32> ** ppOutArrayOf);
+        /* [in] */ const ArrayOf<Int32> & inValue,
+        /* [out, callee] */ ArrayOf<Int32> ** ppOutValue);
 
     CARAPI Test_ArrayOf_Int64(
-        /* [in] */ const ArrayOf<Int64> & inArrayOf,
-        /* [out, callee] */ ArrayOf<Int64> ** ppOutArrayOf);
+        /* [in] */ const ArrayOf<Int64> & inValue,
+        /* [out, callee] */ ArrayOf<Int64> ** ppOutValue);
 
     CARAPI Test_ArrayOf_Byte(
-        /* [in] */ const ArrayOf<Byte> & inArrayOf,
-        /* [out, callee] */ ArrayOf<Byte> ** ppOutArrayOf);
+        /* [in] */ const ArrayOf<Byte> & inValue,
+        /* [out, callee] */ ArrayOf<Byte> ** ppOutValue);
 
     CARAPI Test_ArrayOf_Float(
-        /* [in] */ const ArrayOf<Float> & inArrayOf,
-        /* [out, callee] */ ArrayOf<Float> ** ppOutArrayOf);
+        /* [in] */ const ArrayOf<Float> & inValue,
+        /* [out, callee] */ ArrayOf<Float> ** ppOutValue);
 
     CARAPI Test_ArrayOf_Double(
-        /* [in] */ const ArrayOf<Double> & inArrayOf,
-        /* [out, callee] */ ArrayOf<Double> ** ppOutArrayOf);
+        /* [in] */ const ArrayOf<Double> & inValue,
+        /* [out, callee] */ ArrayOf<Double> ** ppOutValue);
 
-    CARAPI Test_ArrayOf_Char16(
-        /* [in] */ const ArrayOf<Char16> & inArrayOf,
-        /* [out, callee] */ ArrayOf<Char16> ** ppOutArrayOf);
+    CARAPI Test_ArrayOf_Char(
+        /* [in] */ const ArrayOf<Char32> & inValue,
+        /* [out, callee] */ ArrayOf<Char32> ** ppOutValue);
 
     CARAPI Test_ArrayOf_String(
-        /* [in] */ const ArrayOf<String> & inArrayOf,
-        /* [out, callee] */ ArrayOf<String> ** ppOutArrayOf);
+        /* [in] */ const ArrayOf<String> & inValue,
+        /* [out, callee] */ ArrayOf<String> ** ppOutValue);
 
     CARAPI Test_ArrayOf_Boolean(
-        /* [in] */ const ArrayOf<Boolean> & inArrayOf,
-        /* [out, callee] */ ArrayOf<Boolean> ** ppOutArrayOf);
+        /* [in] */ const ArrayOf<Boolean> & inValue,
+        /* [out, callee] */ ArrayOf<Boolean> ** ppOutValue);
 
     CARAPI Test_ArrayOf_EMuid(
-        /* [in] */ const ArrayOf<EMuid> & inArrayOf,
-        /* [out, callee] */ ArrayOf<EMuid> ** ppOutArrayOf);
+        /* [in] */ const ArrayOf<EMuid> & inValue,
+        /* [out, callee] */ ArrayOf<EMuid> ** ppOutValue);
 
     CARAPI Test_ArrayOf_EGuid(
-        /* [in] */ const ArrayOf<EGuid> & inArrayOf,
-        /* [out, callee] */ ArrayOf<EGuid> ** ppOutArrayOf);
+        /* [in] */ const ArrayOf<EGuid> & inValue,
+        /* [out, callee] */ ArrayOf<EGuid> ** ppOutValue);
 
     CARAPI Test_ArrayOf_ECode(
-        /* [in] */ const ArrayOf<ECode> & inArrayOf,
-        /* [out, callee] */ ArrayOf<ECode> ** ppOutArrayOf);
+        /* [in] */ const ArrayOf<ECode> & inValue,
+        /* [out, callee] */ ArrayOf<ECode> ** ppOutValue);
 
     CARAPI Test_ArrayOf_Enum(
-        /* [in] */ const ArrayOf<CarDataType> & inArrayOf,
-        /* [out, callee] */ ArrayOf<CarDataType> ** ppOutArrayOf);
+        /* [in] */ const ArrayOf<TestObjectState> & inValue,
+        /* [out, callee] */ ArrayOf<TestObjectState> ** ppOutValue);
 
     CARAPI Test_ArrayOf_IInterface(
-        /* [in] */ const ArrayOf<IInterface*> & inArrayOf,
-        /* [out, callee] */ ArrayOf<IInterface*> ** ppOutArrayOf);
+        /* [in] */ const ArrayOf<IInterface*> & inValue,
+        /* [out, callee] */ ArrayOf<IInterface*> ** ppOutValue);
 
     CARAPI Test_Interface(
-        /* [in] */ IInterface * pInObject,
-        /* [out] */ IInterface ** ppOutObject);
+        /* [in] */ IInterface * pInValue,
+        /* [out] */ IInterface ** ppOutValue);
 
     CARAPI Test_Interface_Ref(
-        /* [in] */ IInterface ** inObject,
-        /* [out] */ IInterface ** ppOutObject);
+        /* [in] */ IInterface ** inValue,
+        /* [out] */ IInterface ** ppOutValue);
 
 private:
     // TODO: Add your private member variables here.

@@ -395,23 +395,30 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
     }
 
     AutoPtr<IMethodInfo> methodInfo;
-    if (bClass) {
-        ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo By ClassInfo",carMethod->name().utf8().data() );
-        //ec = classInfo->GetMethodInfo(carMethod->name().utf8().data(), (IMethodInfo**)&methodInfo);
-        ec = classInfo->GetMethodInfo(Elastos::String(carMethod->name().utf8().data()), Elastos::String("(I32)E"), (IMethodInfo**)&methodInfo);
-    }
-    else {
-        ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo By InterfaceInfo",name);
-        //ec = interfaceInfo->GetMethodInfo(carMethod->name().utf8().data(), (IMethodInfo**)&methodInfo);
-        ec = classInfo->GetMethodInfo(Elastos::String(carMethod->name().utf8().data()), Elastos::String("(I32)E"), (IMethodInfo**)&methodInfo);
-    }
-    if (FAILED(ec)) {
-        ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo Failed!",name);
-        LOG_ERROR("CarNPObjectInvoke: get methodinfo failed, to invoke default!");
-        instance->end();
-        free(name);
-        return false;
-    }
+
+    methodInfo = carMethod->methodInfo();
+
+    Elastos::String temp_name;
+    methodInfo->GetName(&temp_name);
+    ALOGD("CarNPObjectInvoke name: %s====name1: %s",name,temp_name.string());
+
+    // if (bClass) {
+    //     ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo By ClassInfo",carMethod->name().utf8().data() );
+    //     //ec = classInfo->GetMethodInfo(carMethod->name().utf8().data(), (IMethodInfo**)&methodInfo);
+    //     ec = classInfo->GetMethodInfo(Elastos::String(carMethod->name().utf8().data()), Elastos::String("(I32)E"), (IMethodInfo**)&methodInfo);
+    // }
+    // else {
+    //     ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo By InterfaceInfo",name);
+    //     //ec = interfaceInfo->GetMethodInfo(carMethod->name().utf8().data(), (IMethodInfo**)&methodInfo);
+    //     ec = classInfo->GetMethodInfo(Elastos::String(carMethod->name().utf8().data()), Elastos::String("(I32)E"), (IMethodInfo**)&methodInfo);
+    // }
+    // if (FAILED(ec)) {
+    //     ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo Failed!",name);
+    //     LOG_ERROR("CarNPObjectInvoke: get methodinfo failed, to invoke default!");
+    //     instance->end();
+    //     free(name);
+    //     return false;
+    // }
 
     ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo Success!",name);
 
@@ -507,8 +514,8 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
                     LOG_ERROR("CarNPObjectInvoke param IOAtrribute: args num error");
                     instance->end();
                     for (unsigned int j = 0; j < numParams; j++) {
-                        (*paramInfos)[j]->Release();
-                        (*paramInfos)[j] = NULL;
+                        //(*paramInfos)[j]->Release();
+                        //(*paramInfos)[j] = NULL;
                     }
                     ArrayOf<IParamInfo*>::Free(paramInfos);
                     return false;
@@ -532,8 +539,8 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
                 break;
         }
 
-        (*paramInfos)[i]->Release();
-        (*paramInfos)[i] = NULL;
+        //(*paramInfos)[i]->Release();
+        //(*paramInfos)[i] = NULL;
     }
     ArrayOf<IParamInfo*>::Free(paramInfos);
 
@@ -546,6 +553,8 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         delete[] jArgs;
         return false;
     }
+
+    ALOGD("CarNPObjectInvoke method name: %s====invoke Success!",name);
 
     convertCarValuesToNPVariant(carMethod, jArgs, outParamsPosBuf, result);
 
@@ -732,8 +741,8 @@ bool CarNPObjectEnumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count
         AutoPtr<IMethodInfo> methodInfo = (*methodInfos)[i];
         methodInfo->GetName(&nameBuf);
         outList[i] = _NPN_GetStringIdentifier((const char*)nameBuf);
-        methodInfo->Release();
-        methodInfo = NULL;
+        //methodInfo->Release();
+        //methodInfo = NULL;
     }
 
     ArrayOf<IMethodInfo*>::Free(methodInfos);

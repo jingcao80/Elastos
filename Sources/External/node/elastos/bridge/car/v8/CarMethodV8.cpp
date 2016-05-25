@@ -22,6 +22,8 @@ using namespace JSC::Bindings;
 CarMethodV8::CarMethodV8(IMethodInfo* aMethod)
 : mIsRunOnUiThread(false)
 {
+    mMethodInfo = aMethod;
+
     //Get method name
     Elastos::String nameBuf;
     aMethod->GetName(&nameBuf);
@@ -37,8 +39,8 @@ CarMethodV8::CarMethodV8(IMethodInfo* aMethod)
                 AutoPtr<IParamInfo> aParameter = (*paramInfos)[i];
                 aParameter->GetName(&nameBuf);
                 mParameters.append((const char*)nameBuf);
-                (*paramInfos)[i]->Release();
-                (*paramInfos)[i] = NULL;
+                //(*paramInfos)[i]->Release();
+                //(*paramInfos)[i] = NULL;
         }
         ArrayOf<IParamInfo*>::Free(paramInfos);
     }

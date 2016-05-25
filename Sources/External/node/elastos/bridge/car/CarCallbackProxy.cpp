@@ -127,8 +127,8 @@ CarCallbackInterfaceProxy::~CarCallbackInterfaceProxy()
     if (mMethodInfos != NULL) {
         //for (Int32 i = 0; i < mMethodInfos->GetUsed(); i++) {
         for (Int32 i = 0; i < mMethodInfos->GetLength(); i++) {
-            (*mMethodInfos)[i]->Release();
-            (*mMethodInfos)[i] = NULL;
+            //(*mMethodInfos)[i]->Release();
+            //(*mMethodInfos)[i] = NULL;
         }
         ArrayOf<IMethodInfo*>::Free(mMethodInfos);
     }

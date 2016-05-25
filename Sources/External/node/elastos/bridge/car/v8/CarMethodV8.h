@@ -33,6 +33,8 @@ public:
 
     virtual bool isRunOnUiThread() const { return mIsRunOnUiThread; }
     virtual void setRunOnUiThread(bool isRunOnUiThread) { mIsRunOnUiThread = isRunOnUiThread; }
+
+    virtual AutoPtr<IMethodInfo> methodInfo() const { return mMethodInfo; }
 private:
     WTF::Vector<WTF::String> mParameters;
     CarString mName;
@@ -42,6 +44,8 @@ private:
     bool mIsStatic;
 
     bool mIsRunOnUiThread;
+
+    AutoPtr<IMethodInfo> mMethodInfo;
 };
 
 } // namespace Bindings
