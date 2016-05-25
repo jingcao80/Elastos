@@ -27,9 +27,6 @@ module {
         GetInterpolation(
             [in] Float input,
             [out] Float* output);
-
-        HasNativeInterpolator(
-            [out] Boolean* res);
     }
 
     }   //namespace Animation

@@ -54,17 +54,17 @@ ValueAnimator::AnimationHandler::~AnimationHandler()
     List<AutoPtr<IValueAnimator> >::Iterator it;
     for (it = mAnimations.Begin(); it != mAnimations.End(); ++it) {
         ValueAnimator* anim = (ValueAnimator*)(*it).Get();
-        anim->mParent = NULL;
+        anim->ReleaseParent();
     }
 
     for (it = mPendingAnimations.Begin(); it != mPendingAnimations.End(); ++it) {
         ValueAnimator* anim = (ValueAnimator*)(*it).Get();
-        anim->mParent = NULL;
+        anim->ReleaseParent();
     }
 
     for (it = mDelayedAnims.Begin(); it != mDelayedAnims.End(); ++it) {
         ValueAnimator* anim = (ValueAnimator*)(*it).Get();
-        anim->mParent = NULL;
+        anim->ReleaseParent();
     }
 }
 
@@ -387,7 +387,8 @@ ECode ValueAnimator::SetDuration(
     return NOERROR;
 }
 
-void ValueAnimator::UpdateScaledDuration() {
+void ValueAnimator::UpdateScaledDuration()
+{
     mDuration = (Int64)(mUnscaledDuration * sDurationScale);
 }
 
@@ -677,7 +678,6 @@ ECode ValueAnimator::End()
     pendingContains = pIt != handler->mPendingAnimations.End();
     aContains = aIt != handler->mAnimations.End();
 
-
     if (!pendingContains && !aContains) {
         // Special case if the animation has not yet started; get it ready for ending
         mStartedDelay = FALSE;
@@ -787,11 +787,8 @@ void ValueAnimator::EndAnimation(
 
     // clear refcount of AnimationSet
     //
-    if (mParent != NULL) {
-        AnimatorSet* parentObj = (AnimatorSet*)mParent.Get();
-        parentObj->SetLastChildAnimator(this);
-        mParent = NULL;
-    }
+    ReleaseParent();
+
     // if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
     //     Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, getNameForTrace(),
     //             System.identityHashCode(this));

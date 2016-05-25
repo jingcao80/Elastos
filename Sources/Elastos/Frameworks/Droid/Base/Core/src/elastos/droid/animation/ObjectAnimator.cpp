@@ -238,15 +238,15 @@ ECode ObjectAnimator::Start()
             }
         }
     }
-    // if (DBG) {
-    //     Log.d(LOGTAG, "Anim target, duration: " + getTarget() + ", " + getDuration());
-    //     for (int i = 0; i < mValues.length; ++i) {
-    //         PropertyValuesHolder pvh = mValues[i];
-    //         Log.d(LOGTAG, "   Values[" + i + "]: " +
-    //             pvh.getPropertyName() + ", " + pvh.mKeyframes.getValue(0) + ", " +
-    //             pvh.mKeyframes.getValue(1));
-    //     }
-    // }
+    if (FALSE) {
+        Int64 duration;
+        GetDuration(&duration);
+        Logger::D(LOGTAG, " >>> %s :\n Anim target: %s, duration: %lld", TO_CSTR(this), TO_CSTR(mTarget), duration);
+        for (Int32 i = 0; i < mValues->GetLength(); ++i) {
+            Logger::D(LOGTAG, "         Values[%d]: %s", i, TO_CSTR((*mValues)[i]));
+        }
+    }
+
     return ValueAnimator::Start();
 }
 
@@ -831,9 +831,8 @@ ECode ObjectAnimator::ToString(
     if (mValues != NULL) {
         sb += ", values{";
         for (Int32 i = 0; i < mValues->GetLength(); ++i) {
-            String v = Object::ToString((*mValues)[i]);
-            sb += "\n    ";
-            sb += v;
+            if (i != 0) sb += ",";
+            sb += Object::ToString((*mValues)[i]);
         }
     }
     sb += "}";

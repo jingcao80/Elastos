@@ -116,6 +116,7 @@ SOURCES += CSurfaceViewWindow.cpp
 SOURCES += ScaleGestureDetector.cpp
 SOURCES += MenuInflater.cpp
 SOURCES += ViewPropertyAnimator.cpp
+SOURCES += ViewPropertyAnimatorRT.cpp
 SOURCES += CWindowInfo.cpp
 SOURCES += CWindowInsets.cpp
 SOURCES += CWindowInfoHelper.cpp

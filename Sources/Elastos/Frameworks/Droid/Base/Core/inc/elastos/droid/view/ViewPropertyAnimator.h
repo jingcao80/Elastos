@@ -5,6 +5,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/view/View.h"
+#include "elastos/droid/view/ViewPropertyAnimatorRT.h"
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
 
@@ -29,21 +30,6 @@ class ViewPropertyAnimator
     : public Object
     , public IViewPropertyAnimator
 {
-public:
-    class NameValuesHolder
-        : public Object
-    {
-    public:
-        NameValuesHolder(
-            /* [in] */ Int32 nameConstant,
-            /* [in] */ Float fromeValue,
-            /* [in] */ Float deltaValue);
-
-        Int32 mNameConstant;
-        Float mFromValue;
-        Float mDeltaValue;
-    };
-
 private:
     friend class RenderNodeAnimator;
 private:
@@ -311,6 +297,8 @@ public:
     const static Int32 ALPHA          = 0x0800;
 
 private:
+    friend class ViewPropertyAnimatorRT;
+
     Int64 mDuration;
     Boolean mDurationSet;
     Int64 mStartDelay;
@@ -320,7 +308,7 @@ private:
     AutoPtr<IAnimatorListener> mListener;
     AutoPtr<IAnimatorUpdateListener> mUpdateListener;
     AutoPtr<IValueAnimator> mTempValueAnimator;
-    AutoPtr<IInterface> mRTBackend;  /*IViewPropertyAnimatorRT*/
+    AutoPtr<ViewPropertyAnimatorRT> mRTBackend;
     AutoPtr<AnimatorEventListener> mAnimatorEventListener;
     AutoPtr<List<AutoPtr<NameValuesHolder> > > mPendingAnimations;
     AutoPtr<IRunnable> mPendingSetupAction;

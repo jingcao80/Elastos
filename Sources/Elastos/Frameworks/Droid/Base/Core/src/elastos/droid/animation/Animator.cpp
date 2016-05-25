@@ -2,23 +2,33 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/animation/Animator.h"
 #include <elastos/utility/etl/Algorithm.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::EIID_ICloneable;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Animation {
 
 CAR_INTERFACE_IMPL_2(Animator, Object, IAnimator, ICloneable)
+
 Animator::Animator()
     : mPaused(FALSE)
+    , mParent(NULL)
+    , mParentRefCount(0)
 {
 }
 
 Animator::~Animator()
 {
     mListeners.Clear();
+    if (mParentRefCount > 0) {
+        Logger::E("Animator", " parent:%s not released. mParentRefCount:%d.",
+            TO_CSTR(mParent), mParentRefCount);
+        assert(mParentRefCount == 0);
+    }
 }
 
 ECode Animator::Start()
@@ -238,6 +248,39 @@ ECode Animator::SetAllowRunningAsynchronously(
     /* [in] */ Boolean mayRunAsync)
 {
     // It is up to subclasses to support this, if they can.
+    return NOERROR;
+}
+
+ECode Animator::SetParent(
+    /* [in] */ IAnimatorSet* parent)
+{
+    if (mParent == NULL) {
+        mParent = parent;
+    }
+    else {
+        if (mParent != parent) {
+            Logger::E("Animator", " parent:%p already exists.", mParent);
+            assert(0);
+        }
+    }
+
+    mParent->AddRef();
+    ++mParentRefCount;
+    //Logger::I("Animator", " %p SetParent %p mParentRefCount: %d", this, mParent, mParentRefCount);
+    return NOERROR;
+}
+
+ECode Animator::ReleaseParent()
+{
+    if (mParent != NULL) {
+        --mParentRefCount;
+        //Logger::I("Animator", " %p ReleaseParent %p mParentRefCount: %d", this, mParent, mParentRefCount);
+
+        mParent->Release();
+        if (mParentRefCount <= 0) {
+            mParent = NULL;
+        }
+    }
     return NOERROR;
 }
 

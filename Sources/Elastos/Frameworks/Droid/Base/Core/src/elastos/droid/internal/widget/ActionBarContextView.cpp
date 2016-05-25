@@ -65,6 +65,45 @@ ECode ActionBarContextView::InnerCloseButtonListener::OnClick(
 }
 
 //=====================================================================
+//                         ActionBarContextView::AnimatorListener
+//=====================================================================
+CAR_INTERFACE_IMPL(ActionBarContextView::AnimatorListener, Object, IAnimatorListener)
+
+ActionBarContextView::AnimatorListener::AnimatorListener(
+    /* [in] */ ActionBarContextView* host)
+    : mHost(host)
+{
+}
+
+ECode ActionBarContextView::AnimatorListener::OnAnimationStart(
+    /* [in] */ IAnimator* animation)
+{
+    return NOERROR;
+}
+
+ECode ActionBarContextView::AnimatorListener::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    if (mHost->mAnimationMode == ActionBarContextView::ANIMATE_OUT) {
+        mHost->KillMode();
+    }
+    mHost->mAnimationMode = ANIMATE_IDLE;
+    return NOERROR;
+}
+
+ECode ActionBarContextView::AnimatorListener::OnAnimationCancel(
+    /* [in] */ IAnimator* animation)
+{
+    return NOERROR;
+}
+
+ECode ActionBarContextView::AnimatorListener::OnAnimationRepeat(
+    /* [in] */ IAnimator* animation)
+{
+    return NOERROR;
+}
+
+//=====================================================================
 //                         ActionBarContextView
 //=====================================================================
 const String ActionBarContextView::TAG("ActionBarContextView");
@@ -72,7 +111,7 @@ const Int32 ActionBarContextView::ANIMATE_IDLE;
 const Int32 ActionBarContextView::ANIMATE_IN;
 const Int32 ActionBarContextView::ANIMATE_OUT;
 
-CAR_INTERFACE_IMPL_2(ActionBarContextView, AbsActionBarView, IAnimatorListener, IActionBarContextView)
+CAR_INTERFACE_IMPL(ActionBarContextView, AbsActionBarView, IActionBarContextView)
 
 ActionBarContextView::ActionBarContextView()
     : mTitleStyleRes(0)
@@ -83,12 +122,13 @@ ActionBarContextView::ActionBarContextView()
 {
 }
 
+ActionBarContextView::~ActionBarContextView()
+{
+}
+
 ECode ActionBarContextView::constructor(
     /* [in] */ IContext* context)
 {
-    // ==================before translated======================
-    // this(context, null);
-
     return constructor(context, NULL);
 }
 
@@ -96,9 +136,6 @@ ECode ActionBarContextView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    // ==================before translated======================
-    // this(context, attrs, com.android.internal.R.attr.actionModeStyle);
-
     return constructor(context, attrs, R::attr::actionModeStyle);
 }
 
@@ -107,9 +144,6 @@ ECode ActionBarContextView::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyleAttr)
 {
-    // ==================before translated======================
-    // this(context, attrs, defStyleAttr, 0);
-
     return constructor(context, attrs, defStyleAttr, 0);
 }
 
@@ -121,29 +155,6 @@ ECode ActionBarContextView::constructor(
 {
     VALIDATE_NOT_NULL(context);
     VALIDATE_NOT_NULL(attrs);
-    // ==================before translated======================
-    // super(context, attrs, defStyleAttr, defStyleRes);
-    //
-    // final TypedArray a = context.obtainStyledAttributes(
-    //         attrs, R.styleable.ActionMode, defStyleAttr, defStyleRes);
-    // setBackground(a.getDrawable(
-    //         com.android.internal.R.styleable.ActionMode_background));
-    // mTitleStyleRes = a.getResourceId(
-    //         com.android.internal.R.styleable.ActionMode_titleTextStyle, 0);
-    // mSubtitleStyleRes = a.getResourceId(
-    //         com.android.internal.R.styleable.ActionMode_subtitleTextStyle, 0);
-    //
-    // mContentHeight = a.getLayoutDimension(
-    //         com.android.internal.R.styleable.ActionMode_height, 0);
-    //
-    // mSplitBackground = a.getDrawable(
-    //         com.android.internal.R.styleable.ActionMode_backgroundSplit);
-    //
-    // mCloseItemLayout = a.getResourceId(
-    //         com.android.internal.R.styleable.ActionMode_closeItemLayout,
-    //         R.layout.action_mode_close_item);
-    //
-    // a.recycle();
 
     AbsActionBarView::constructor(context, attrs, defStyleAttr, defStyleRes);
     AutoPtr<ITypedArray> a;
@@ -165,13 +176,6 @@ ECode ActionBarContextView::constructor(
 
 ECode ActionBarContextView::OnDetachedFromWindow()
 {
-    // ==================before translated======================
-    // super.onDetachedFromWindow();
-    // if (mActionMenuPresenter != null) {
-    //     mActionMenuPresenter.hideOverflowMenu();
-    //     mActionMenuPresenter.hideSubMenus();
-    // }
-
     AbsActionBarView::OnDetachedFromWindow();
     if (mActionMenuPresenter != NULL) {
         Boolean res = FALSE;
@@ -184,53 +188,25 @@ ECode ActionBarContextView::OnDetachedFromWindow()
 ECode ActionBarContextView::SetSplitToolbar(
     /* [in] */ Boolean split)
 {
-    // ==================before translated======================
-    // if (mSplitActionBar != split) {
-    //     if (mActionMenuPresenter != null) {
-    //         // Mode is already active; move everything over and adjust the menu itself.
-    //         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
-    //                 LayoutParams.MATCH_PARENT);
-    //         if (!split) {
-    //             mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
-    //             mMenuView.setBackground(null);
-    //             final ViewGroup oldParent = (ViewGroup) mMenuView.getParent();
-    //             if (oldParent != null) oldParent.removeView(mMenuView);
-    //             addView(mMenuView, layoutParams);
-    //         } else {
-    //             // Allow full screen width in split mode.
-    //             mActionMenuPresenter.setWidthLimit(
-    //                     getContext().getResources().getDisplayMetrics().widthPixels, true);
-    //             // No limit to the item count; use whatever will fit.
-    //             mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
-    //             // Span the whole width
-    //             layoutParams.width = LayoutParams.MATCH_PARENT;
-    //             layoutParams.height = mContentHeight;
-    //             mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
-    //             mMenuView.setBackground(mSplitBackground);
-    //             final ViewGroup oldParent = (ViewGroup) mMenuView.getParent();
-    //             if (oldParent != null) oldParent.removeView(mMenuView);
-    //             mSplitView.addView(mMenuView, layoutParams);
-    //         }
-    //     }
-    //     super.setSplitToolbar(split);
-    // }
-
     if (mSplitActionBar != split) {
         if (mActionMenuPresenter != NULL) {
             // Mode is already active; move everything over and adjust the menu itself.
             AutoPtr<IViewGroupLayoutParams> layoutParams;
-            CViewGroupLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::MATCH_PARENT, (IViewGroupLayoutParams**)&layoutParams);
+            CViewGroupLayoutParams::New(
+                IViewGroupLayoutParams::WRAP_CONTENT,
+                IViewGroupLayoutParams::MATCH_PARENT, (IViewGroupLayoutParams**)&layoutParams);
             if (!split) {
                 AutoPtr<IMenuView> view;
-                IMenuPresenter::Probe(mActionMenuPresenter)->GetMenuView(IViewGroup::Probe(this), (IMenuView**)&view);
+                IMenuPresenter::Probe(mActionMenuPresenter)->GetMenuView(this, (IMenuView**)&view);
                 mMenuView = IActionMenuView::Probe(view);
-                IView::Probe(mMenuView)->SetBackground(NULL);
+                IView* v = IView::Probe(mMenuView);
+                v->SetBackground(NULL);
                 AutoPtr<IViewParent> oldParent;;
-                IView::Probe(mMenuView)->GetParent((IViewParent**)&oldParent);
+                v->GetParent((IViewParent**)&oldParent);
                 IViewManager* vm = IViewManager::Probe(oldParent);
                 if (vm != NULL)
-                    vm->RemoveView(IView::Probe(mMenuView));
-                AddView(IView::Probe(mMenuView), layoutParams);
+                    vm->RemoveView(v);
+                AddView(v, layoutParams);
             }
             else {
                 AutoPtr<IContext> context;
@@ -251,15 +227,16 @@ ECode ActionBarContextView::SetSplitToolbar(
                 layoutParams->SetWidth(IViewGroupLayoutParams::MATCH_PARENT);
                 layoutParams->SetHeight(mContentHeight);
                 AutoPtr<IMenuView> view;
-                IMenuPresenter::Probe(mActionMenuPresenter)->GetMenuView(IViewGroup::Probe(this), (IMenuView**)&view);
+                IMenuPresenter::Probe(mActionMenuPresenter)->GetMenuView(this, (IMenuView**)&view);
                 mMenuView = IActionMenuView::Probe(view);
-                IView::Probe(mMenuView)->SetBackground(mSplitBackground);
+                IView* v = IView::Probe(mMenuView);
+                v->SetBackground(mSplitBackground);
                 AutoPtr<IViewParent> oldParent;
-                IView::Probe(mMenuView)->GetParent((IViewParent**)&oldParent);
+                v->GetParent((IViewParent**)&oldParent);
                 IViewManager* vm = IViewManager::Probe(oldParent);
                 if (vm != NULL)
-                    vm->RemoveView(IView::Probe(mMenuView));
-                mSplitView->AddView(IView::Probe(mMenuView), layoutParams);
+                    vm->RemoveView(v);
+                mSplitView->AddView(v, layoutParams);
             }
         }
         AbsActionBarView::SetSplitToolbar(split);
@@ -270,9 +247,6 @@ ECode ActionBarContextView::SetSplitToolbar(
 ECode ActionBarContextView::SetContentHeight(
     /* [in] */ Int32 height)
 {
-    // ==================before translated======================
-    // mContentHeight = height;
-
     mContentHeight = height;
     return NOERROR;
 }
@@ -281,19 +255,6 @@ ECode ActionBarContextView::SetCustomView(
     /* [in] */ IView* view)
 {
     VALIDATE_NOT_NULL(view);
-    // ==================before translated======================
-    // if (mCustomView != null) {
-    //     removeView(mCustomView);
-    // }
-    // mCustomView = view;
-    // if (mTitleLayout != null) {
-    //     removeView(mTitleLayout);
-    //     mTitleLayout = null;
-    // }
-    // if (view != null) {
-    //     addView(view);
-    // }
-    // requestLayout();
 
     if (mCustomView != NULL) {
         RemoveView(mCustomView);
@@ -314,9 +275,6 @@ ECode ActionBarContextView::SetTitle(
     /* [in] */ ICharSequence* title)
 {
     VALIDATE_NOT_NULL(title);
-    // ==================before translated======================
-    // mTitle = title;
-    // initTitle();
 
     mTitle = title;
     InitTitle();
@@ -327,9 +285,6 @@ ECode ActionBarContextView::SetSubtitle(
     /* [in] */ ICharSequence* subtitle)
 {
     VALIDATE_NOT_NULL(subtitle);
-    // ==================before translated======================
-    // mSubtitle = subtitle;
-    // initTitle();
 
     mSubtitle = subtitle;
     InitTitle();
@@ -340,8 +295,6 @@ ECode ActionBarContextView::GetTitle(
     /* [out] */ ICharSequence** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mTitle;
 
     *result = mTitle;
     REFCOUNT_ADD(*result);
@@ -352,8 +305,6 @@ ECode ActionBarContextView::GetSubtitle(
     /* [out] */ ICharSequence** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mSubtitle;
 
     *result = mSubtitle;
     REFCOUNT_ADD(*result);
@@ -364,58 +315,12 @@ ECode ActionBarContextView::InitForMode(
     /* [in] */ IActionMode* mode)
 {
     VALIDATE_NOT_NULL(mode);
-    // ==================before translated======================
-    // if (mClose == null) {
-    //     LayoutInflater inflater = LayoutInflater.from(mContext);
-    //     mClose = inflater.inflate(mCloseItemLayout, this, false);
-    //     addView(mClose);
-    // } else if (mClose.getParent() == null) {
-    //     addView(mClose);
-    // }
-    //
-    // View closeButton = mClose.findViewById(R.id.action_mode_close_button);
-    // closeButton.setOnClickListener(new OnClickListener() {
-    //     public void onClick(View v) {
-    //         mode.finish();
-    //     }
-    // });
-    //
-    // final MenuBuilder menu = (MenuBuilder) mode.getMenu();
-    // if (mActionMenuPresenter != null) {
-    //     mActionMenuPresenter.dismissPopupMenus();
-    // }
-    // mActionMenuPresenter = new ActionMenuPresenter(mContext);
-    // mActionMenuPresenter.setReserveOverflow(true);
-    //
-    // final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
-    //         LayoutParams.MATCH_PARENT);
-    // if (!mSplitActionBar) {
-    //     menu.addMenuPresenter(mActionMenuPresenter, mPopupContext);
-    //     mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
-    //     mMenuView.setBackgroundDrawable(null);
-    //     addView(mMenuView, layoutParams);
-    // } else {
-    //     // Allow full screen width in split mode.
-    //     mActionMenuPresenter.setWidthLimit(
-    //             getContext().getResources().getDisplayMetrics().widthPixels, true);
-    //     // No limit to the item count; use whatever will fit.
-    //     mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
-    //     // Span the whole width
-    //     layoutParams.width = LayoutParams.MATCH_PARENT;
-    //     layoutParams.height = mContentHeight;
-    //     menu.addMenuPresenter(mActionMenuPresenter, mPopupContext);
-    //     mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
-    //     mMenuView.setBackgroundDrawable(mSplitBackground);
-    //     mSplitView.addView(mMenuView, layoutParams);
-    // }
-    //
-    // mAnimateInOnLayout = true;
 
     AutoPtr<IViewParent> vp;
     if (mClose == NULL) {
         AutoPtr<ILayoutInflater> inflater;
         LayoutInflater::From(mContext, (ILayoutInflater**)&inflater);
-        inflater->Inflate(mCloseItemLayout, IViewGroup::Probe(this), FALSE, (IView**)&mClose);
+        inflater->Inflate(mCloseItemLayout, this, FALSE, (IView**)&mClose);
         AddView(mClose);
     }
     else if ((mClose->GetParent((IViewParent**)&vp), vp) == NULL) {
@@ -442,7 +347,7 @@ ECode ActionBarContextView::InitForMode(
     if (!mSplitActionBar) {
         menu->AddMenuPresenter(IMenuPresenter::Probe(mActionMenuPresenter), mPopupContext);
         AutoPtr<IMenuView> view;
-        IMenuPresenter::Probe(mActionMenuPresenter)->GetMenuView(IViewGroup::Probe(this), (IMenuView**)&view);
+        IMenuPresenter::Probe(mActionMenuPresenter)->GetMenuView(this, (IMenuView**)&view);
         mMenuView = IActionMenuView::Probe(view);
         IView::Probe(mMenuView)->SetBackgroundDrawable(NULL);
         AddView(IView::Probe(mMenuView), layoutParams);
@@ -467,7 +372,7 @@ ECode ActionBarContextView::InitForMode(
         layoutParams->SetHeight(mContentHeight);
         menu->AddMenuPresenter(IMenuPresenter::Probe(mActionMenuPresenter), mPopupContext);
         AutoPtr<IMenuView> view;
-        IMenuPresenter::Probe(mActionMenuPresenter)->GetMenuView(IViewGroup::Probe(this), (IMenuView**)&view);
+        IMenuPresenter::Probe(mActionMenuPresenter)->GetMenuView(this, (IMenuView**)&view);
         mMenuView = IActionMenuView::Probe(view);
         IView::Probe(mMenuView)->SetBackgroundDrawable(mSplitBackground);
         mSplitView->AddView(IView::Probe(mMenuView), layoutParams);
@@ -479,21 +384,6 @@ ECode ActionBarContextView::InitForMode(
 
 ECode ActionBarContextView::CloseMode()
 {
-    // ==================before translated======================
-    // if (mAnimationMode == ANIMATE_OUT) {
-    //     // Called again during close; just finish what we were doing.
-    //     return;
-    // }
-    // if (mClose == null) {
-    //     killMode();
-    //     return;
-    // }
-    //
-    // finishAnimation();
-    // mAnimationMode = ANIMATE_OUT;
-    // mCurrentAnimation = makeOutAnimation();
-    // mCurrentAnimation.start();
-
     if (mAnimationMode == ANIMATE_OUT) {
         // Called again during close; just finish what we were doing.
         return NOERROR;
@@ -504,6 +394,7 @@ ECode ActionBarContextView::CloseMode()
     }
 
     FinishAnimation();
+
     mAnimationMode = ANIMATE_OUT;
     mCurrentAnimation = MakeOutAnimation();
     mCurrentAnimation->Start();
@@ -512,20 +403,11 @@ ECode ActionBarContextView::CloseMode()
 
 ECode ActionBarContextView::KillMode()
 {
-    // ==================before translated======================
-    // finishAnimation();
-    // removeAllViews();
-    // if (mSplitView != null) {
-    //     mSplitView.removeView(mMenuView);
-    // }
-    // mCustomView = null;
-    // mMenuView = null;
-    // mAnimateInOnLayout = false;
-
     FinishAnimation();
     RemoveAllViews();
-    if (IViewManager::Probe(mSplitView) != NULL) {
-        IViewManager::Probe(mSplitView)->RemoveView(IView::Probe(mMenuView));
+    IViewManager* vm = IViewManager::Probe(mSplitView);
+    if (vm != NULL) {
+        vm->RemoveView(IView::Probe(mMenuView));
     }
     mCustomView = NULL;
     mMenuView = NULL;
@@ -537,11 +419,6 @@ ECode ActionBarContextView::ShowOverflowMenu(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mActionMenuPresenter != null) {
-    //     return mActionMenuPresenter.showOverflowMenu();
-    // }
-    // return false;
 
     if (mActionMenuPresenter != NULL) {
         return mActionMenuPresenter->ShowOverflowMenu(result);
@@ -554,11 +431,6 @@ ECode ActionBarContextView::HideOverflowMenu(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mActionMenuPresenter != null) {
-    //     return mActionMenuPresenter.hideOverflowMenu();
-    // }
-    // return false;
 
     if (mActionMenuPresenter != NULL) {
         return mActionMenuPresenter->HideOverflowMenu(result);
@@ -571,11 +443,6 @@ ECode ActionBarContextView::IsOverflowMenuShowing(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mActionMenuPresenter != null) {
-    //     return mActionMenuPresenter.isOverflowMenuShowing();
-    // }
-    // return false;
 
     if (mActionMenuPresenter != NULL) {
         return mActionMenuPresenter->IsOverflowMenuShowing(result);
@@ -590,61 +457,16 @@ ECode ActionBarContextView::GenerateLayoutParams(
 {
     VALIDATE_NOT_NULL(attrs);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return new MarginLayoutParams(getContext(), attrs);
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<IViewGroupMarginLayoutParams> lp;
-    CViewGroupMarginLayoutParams::New(context, attrs, (IViewGroupMarginLayoutParams**)&lp);
-    *result = IViewGroupLayoutParams::Probe(lp);
-    REFCOUNT_ADD(*result);
-    return NOERROR;
-}
-
-ECode ActionBarContextView::OnAnimationStart(
-    /* [in] */ IAnimator* animation)
-{
-    VALIDATE_NOT_NULL(animation);
-    return NOERROR;
-}
-
-ECode ActionBarContextView::OnAnimationEnd(
-    /* [in] */ IAnimator* animation)
-{
-    VALIDATE_NOT_NULL(animation);
-    // ==================before translated======================
-    // if (mAnimationMode == ANIMATE_OUT) {
-    //     killMode();
-    // }
-    // mAnimationMode = ANIMATE_IDLE;
-
-    if (mAnimationMode == ANIMATE_OUT) {
-        KillMode();
-    }
-    mAnimationMode = ANIMATE_IDLE;
-    return NOERROR;
-}
-
-ECode ActionBarContextView::OnAnimationCancel(
-    /* [in] */ IAnimator* animation)
-{
-    return NOERROR;
-}
-
-ECode ActionBarContextView::OnAnimationRepeat(
-    /* [in] */ IAnimator* animation)
-{
-    return NOERROR;
+    return CViewGroupMarginLayoutParams::New(context, attrs, result);
 }
 
 ECode ActionBarContextView::ShouldDelayChildPressedState(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-
     *result = FALSE;
     return NOERROR;
 }
@@ -653,18 +475,6 @@ ECode ActionBarContextView::OnInitializeAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
     VALIDATE_NOT_NULL(event);
-    // ==================before translated======================
-    // if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-    //     // Action mode started
-    //     event.setSource(this);
-    //     event.setClassName(getClass().getName());
-    //     event.setPackageName(getContext().getPackageName());
-    //     event.setContentDescription(mTitle);
-    // } else {
-    //     super.onInitializeAccessibilityEvent(event);
-    // }
-
-    assert(event != NULL);
     Int32 type = 0;
     event->GetEventType(&type);
     if (type == IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED) {
@@ -692,12 +502,6 @@ ECode ActionBarContextView::OnInitializeAccessibilityEvent(
 ECode ActionBarContextView::SetTitleOptional(
     /* [in] */ Boolean titleOptional)
 {
-    // ==================before translated======================
-    // if (titleOptional != mTitleOptional) {
-    //     requestLayout();
-    // }
-    // mTitleOptional = titleOptional;
-
     if (titleOptional != mTitleOptional) {
         RequestLayout();
     }
@@ -709,9 +513,6 @@ ECode ActionBarContextView::IsTitleOptional(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mTitleOptional;
-
     *result = mTitleOptional;
     return NOERROR;
 }
@@ -720,97 +521,17 @@ ECode ActionBarContextView::GenerateDefaultLayoutParams(
     /* [out] */ IViewGroupLayoutParams** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // Used by custom views if they don't supply layout params. Everything else
-    // // added to an ActionBarContextView should have them already.
-    // return new MarginLayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 
-    CViewGroupLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::WRAP_CONTENT, result);
-    return NOERROR;
+    // Used by custom views if they don't supply layout params. Everything else
+    // added to an ActionBarContextView should have them already.
+    return CViewGroupLayoutParams::New(
+        IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::WRAP_CONTENT, result);
 }
 
 void ActionBarContextView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    // ==================before translated======================
-    // final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-    // if (widthMode != MeasureSpec.EXACTLY) {
-    //     throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
-    //             "with android:layout_width=\"match_parent\" (or fill_parent)");
-    // }
-    //
-    // final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-    // if (heightMode == MeasureSpec.UNSPECIFIED) {
-    //     throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
-    //             "with android:layout_height=\"wrap_content\"");
-    // }
-    //
-    // final int contentWidth = MeasureSpec.getSize(widthMeasureSpec);
-    //
-    // int maxHeight = mContentHeight > 0 ?
-    //         mContentHeight : MeasureSpec.getSize(heightMeasureSpec);
-    //
-    // final int verticalPadding = getPaddingTop() + getPaddingBottom();
-    // int availableWidth = contentWidth - getPaddingLeft() - getPaddingRight();
-    // final int height = maxHeight - verticalPadding;
-    // final int childSpecHeight = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
-    //
-    // if (mClose != null) {
-    //     availableWidth = measureChildView(mClose, availableWidth, childSpecHeight, 0);
-    //     MarginLayoutParams lp = (MarginLayoutParams) mClose.getLayoutParams();
-    //     availableWidth -= lp.leftMargin + lp.rightMargin;
-    // }
-    //
-    // if (mMenuView != null && mMenuView.getParent() == this) {
-    //     availableWidth = measureChildView(mMenuView, availableWidth,
-    //             childSpecHeight, 0);
-    // }
-    //
-    // if (mTitleLayout != null && mCustomView == null) {
-    //     if (mTitleOptional) {
-    //         final int titleWidthSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-    //         mTitleLayout.measure(titleWidthSpec, childSpecHeight);
-    //         final int titleWidth = mTitleLayout.getMeasuredWidth();
-    //         final boolean titleFits = titleWidth <= availableWidth;
-    //         if (titleFits) {
-    //             availableWidth -= titleWidth;
-    //         }
-    //         mTitleLayout.setVisibility(titleFits ? VISIBLE : GONE);
-    //     } else {
-    //         availableWidth = measureChildView(mTitleLayout, availableWidth, childSpecHeight, 0);
-    //     }
-    // }
-    //
-    // if (mCustomView != null) {
-    //     ViewGroup.LayoutParams lp = mCustomView.getLayoutParams();
-    //     final int customWidthMode = lp.width != LayoutParams.WRAP_CONTENT ?
-    //             MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
-    //     final int customWidth = lp.width >= 0 ?
-    //             Math.min(lp.width, availableWidth) : availableWidth;
-    //     final int customHeightMode = lp.height != LayoutParams.WRAP_CONTENT ?
-    //             MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
-    //     final int customHeight = lp.height >= 0 ?
-    //             Math.min(lp.height, height) : height;
-    //     mCustomView.measure(MeasureSpec.makeMeasureSpec(customWidth, customWidthMode),
-    //             MeasureSpec.makeMeasureSpec(customHeight, customHeightMode));
-    // }
-    //
-    // if (mContentHeight <= 0) {
-    //     int measuredHeight = 0;
-    //     final int count = getChildCount();
-    //     for (int i = 0; i < count; i++) {
-    //         View v = getChildAt(i);
-    //         int paddedViewHeight = v.getMeasuredHeight() + verticalPadding;
-    //         if (paddedViewHeight > measuredHeight) {
-    //             measuredHeight = paddedViewHeight;
-    //         }
-    //     }
-    //     setMeasuredDimension(contentWidth, measuredHeight);
-    // } else {
-    //     setMeasuredDimension(contentWidth, maxHeight);
-    // }
-
     Int32 widthMode = View::MeasureSpec::GetMode(widthMeasureSpec);
     if (widthMode != View::MeasureSpec::EXACTLY) {
         /*throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
@@ -920,42 +641,6 @@ ECode ActionBarContextView::OnLayout(
     /* [in] */ Int32 r,
     /* [in] */ Int32 b)
 {
-    // ==================before translated======================
-    // final boolean isLayoutRtl = isLayoutRtl();
-    // int x = isLayoutRtl ? r - l - getPaddingRight() : getPaddingLeft();
-    // final int y = getPaddingTop();
-    // final int contentHeight = b - t - getPaddingTop() - getPaddingBottom();
-    //
-    // if (mClose != null && mClose.getVisibility() != GONE) {
-    //     MarginLayoutParams lp = (MarginLayoutParams) mClose.getLayoutParams();
-    //     final int startMargin = (isLayoutRtl ? lp.rightMargin : lp.leftMargin);
-    //     final int endMargin = (isLayoutRtl ? lp.leftMargin : lp.rightMargin);
-    //     x = next(x, startMargin, isLayoutRtl);
-    //     x += positionChild(mClose, x, y, contentHeight, isLayoutRtl);
-    //     x = next(x, endMargin, isLayoutRtl);
-    //
-    //     if (mAnimateInOnLayout) {
-    //         mAnimationMode = ANIMATE_IN;
-    //         mCurrentAnimation = makeInAnimation();
-    //         mCurrentAnimation.start();
-    //         mAnimateInOnLayout = false;
-    //     }
-    // }
-    //
-    // if (mTitleLayout != null && mCustomView == null && mTitleLayout.getVisibility() != GONE) {
-    //     x += positionChild(mTitleLayout, x, y, contentHeight, isLayoutRtl);
-    // }
-    //
-    // if (mCustomView != null) {
-    //     x += positionChild(mCustomView, x, y, contentHeight, isLayoutRtl);
-    // }
-    //
-    // x = isLayoutRtl ? getPaddingLeft() : r - l - getPaddingRight();
-    //
-    // if (mMenuView != null) {
-    //     x += positionChild(mMenuView, x, y, contentHeight, !isLayoutRtl);
-    // }
-
     Boolean isLayoutRtl = FALSE;
     IsLayoutRtl(&isLayoutRtl);
     Int32 paddingLeft = 0, paddingRight = 0, paddingTop = 0, paddingBottom = 0;
@@ -968,8 +653,7 @@ ECode ActionBarContextView::OnLayout(
     Int32 contentHeight = b - t - paddingTop - paddingBottom;
 
     Int32 visible = 0;
-    mClose->GetVisibility(&visible);
-    if (mClose != NULL && visible != IView::GONE) {
+    if (mClose != NULL && (mClose->GetVisibility(&visible), visible != IView::GONE)) {
         AutoPtr<IViewGroupLayoutParams> vglp;
         mClose->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
         IViewGroupMarginLayoutParams* lp = IViewGroupMarginLayoutParams::Probe(vglp);
@@ -1010,32 +694,6 @@ ECode ActionBarContextView::OnLayout(
 
 void ActionBarContextView::InitTitle()
 {
-    // ==================before translated======================
-    // if (mTitleLayout == null) {
-    //     LayoutInflater inflater = LayoutInflater.from(getContext());
-    //     inflater.inflate(R.layout.action_bar_title_item, this);
-    //     mTitleLayout = (LinearLayout) getChildAt(getChildCount() - 1);
-    //     mTitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_title);
-    //     mSubtitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_subtitle);
-    //     if (mTitleStyleRes != 0) {
-    //         mTitleView.setTextAppearance(mContext, mTitleStyleRes);
-    //     }
-    //     if (mSubtitleStyleRes != 0) {
-    //         mSubtitleView.setTextAppearance(mContext, mSubtitleStyleRes);
-    //     }
-    // }
-    //
-    // mTitleView.setText(mTitle);
-    // mSubtitleView.setText(mSubtitle);
-    //
-    // final boolean hasTitle = !TextUtils.isEmpty(mTitle);
-    // final boolean hasSubtitle = !TextUtils.isEmpty(mSubtitle);
-    // mSubtitleView.setVisibility(hasSubtitle ? VISIBLE : GONE);
-    // mTitleLayout.setVisibility(hasTitle || hasSubtitle ? VISIBLE : GONE);
-    // if (mTitleLayout.getParent() == null) {
-    //     addView(mTitleLayout);
-    // }
-
     if (mTitleLayout == NULL) {
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
@@ -1043,7 +701,7 @@ void ActionBarContextView::InitTitle()
         LayoutInflater::From(context, (ILayoutInflater**)&inflater);
         assert(inflater != NULL);
         AutoPtr<IView> view;
-        inflater->Inflate(R::layout::action_bar_title_item, IViewGroup::Probe(this), (IView**)&view);
+        inflater->Inflate(R::layout::action_bar_title_item, this, (IView**)&view);
 
         Int32 count = 0;
         GetChildCount(&count);
@@ -1081,13 +739,6 @@ void ActionBarContextView::InitTitle()
 
 void ActionBarContextView::FinishAnimation()
 {
-    // ==================before translated======================
-    // final Animator a = mCurrentAnimation;
-    // if (a != null) {
-    //     mCurrentAnimation = null;
-    //     a.end();
-    // }
-
     AutoPtr<IAnimator> a = mCurrentAnimation;
     if (a != NULL) {
         mCurrentAnimation = NULL;
@@ -1097,32 +748,6 @@ void ActionBarContextView::FinishAnimation()
 
 AutoPtr<IAnimator> ActionBarContextView::MakeInAnimation()
 {
-    // ==================before translated======================
-    // mClose.setTranslationX(-mClose.getWidth() -
-    //         ((MarginLayoutParams) mClose.getLayoutParams()).leftMargin);
-    // ObjectAnimator buttonAnimator = ObjectAnimator.ofFloat(mClose, "translationX", 0);
-    // buttonAnimator.setDuration(200);
-    // buttonAnimator.addListener(this);
-    // buttonAnimator.setInterpolator(new DecelerateInterpolator());
-    //
-    // AnimatorSet set = new AnimatorSet();
-    // AnimatorSet.Builder b = set.play(buttonAnimator);
-    //
-    // if (mMenuView != null) {
-    //     final int count = mMenuView.getChildCount();
-    //     if (count > 0) {
-    //         for (int i = count - 1, j = 0; i >= 0; i--, j++) {
-    //             View child = mMenuView.getChildAt(i);
-    //             child.setScaleY(0);
-    //             ObjectAnimator a = ObjectAnimator.ofFloat(child, "scaleY", 0, 1);
-    //             a.setDuration(300);
-    //             b.with(a);
-    //         }
-    //     }
-    // }
-    //
-    // return set;
-
     assert(mClose != NULL);
     Int32 width = 0;
     mClose->GetWidth(&width);
@@ -1138,17 +763,18 @@ AutoPtr<IAnimator> ActionBarContextView::MakeInAnimation()
     (*tmpValues)[0] = 0.0f;
     AutoPtr<IObjectAnimator> buttonAnimator = CObjectAnimator::OfFloat(mClose, String("translationX"), tmpValues);
     IValueAnimator::Probe(buttonAnimator)->SetDuration(200);
-    IAnimator::Probe(buttonAnimator)->AddListener(IAnimatorListener::Probe(this));
+    IAnimator* animator = IAnimator::Probe(buttonAnimator);
+    AutoPtr<IAnimatorListener> al = new AnimatorListener(this);
+    animator->AddListener(al);
 
     AutoPtr<IDecelerateInterpolator> decele;
     CDecelerateInterpolator::New((IDecelerateInterpolator**)&decele);
-    IAnimator::Probe(buttonAnimator)->SetInterpolator(ITimeInterpolator::Probe(decele));
+    animator->SetInterpolator(ITimeInterpolator::Probe(decele));
 
     AutoPtr<IAnimatorSet> animatorSet;
     CAnimatorSet::New((IAnimatorSet**)&animatorSet);
     AutoPtr<IAnimatorSetBuilder> b;
-    animatorSet->Play(IAnimator::Probe(buttonAnimator), (IAnimatorSetBuilder**)&b);
-
+    animatorSet->Play(animator, (IAnimatorSetBuilder**)&b);
     if (mMenuView != NULL) {
         Int32 count = 0;
         IViewGroup::Probe(mMenuView)->GetChildCount(&count);
@@ -1168,38 +794,11 @@ AutoPtr<IAnimator> ActionBarContextView::MakeInAnimation()
         }
     }
 
-    AutoPtr<IAnimator> result = IAnimator::Probe(animatorSet);
-    return result;
+    return IAnimator::Probe(animatorSet);
 }
-
 
 AutoPtr<IAnimator> ActionBarContextView::MakeOutAnimation()
 {
-    // ==================before translated======================
-    // ObjectAnimator buttonAnimator = ObjectAnimator.ofFloat(mClose, "translationX",
-    //         -mClose.getWidth() - ((MarginLayoutParams) mClose.getLayoutParams()).leftMargin);
-    // buttonAnimator.setDuration(200);
-    // buttonAnimator.addListener(this);
-    // buttonAnimator.setInterpolator(new DecelerateInterpolator());
-    //
-    // AnimatorSet set = new AnimatorSet();
-    // AnimatorSet.Builder b = set.play(buttonAnimator);
-    //
-    // if (mMenuView != null) {
-    //     final int count = mMenuView.getChildCount();
-    //     if (count > 0) {
-    //         for (int i = 0; i < 0; i++) {
-    //             View child = mMenuView.getChildAt(i);
-    //             child.setScaleY(0);
-    //             ObjectAnimator a = ObjectAnimator.ofFloat(child, "scaleY", 0);
-    //             a.setDuration(300);
-    //             b.with(a);
-    //         }
-    //     }
-    // }
-    //
-    // return set;
-
     Int32 width = 0;
     mClose->GetWidth(&width);
     AutoPtr<IViewGroupLayoutParams> vglp;
@@ -1211,23 +810,26 @@ AutoPtr<IAnimator> ActionBarContextView::MakeOutAnimation()
     (*tmpValues)[0] = -width - leftMargin;
     AutoPtr<IObjectAnimator> buttonAnimator = CObjectAnimator::OfFloat(mClose, String("translationX"), tmpValues);
     IValueAnimator::Probe(buttonAnimator)->SetDuration(200);
-    IAnimator::Probe(buttonAnimator)->AddListener(IAnimatorListener::Probe(this));
+    IAnimator* animator = IAnimator::Probe(buttonAnimator);
+    AutoPtr<IAnimatorListener> al = new AnimatorListener(this);
+    animator->AddListener(al);
     AutoPtr<IDecelerateInterpolator> decele;
     CDecelerateInterpolator::New((IDecelerateInterpolator**)&decele);
-    IAnimator::Probe(buttonAnimator)->SetInterpolator(ITimeInterpolator::Probe(decele));
+    animator->SetInterpolator(ITimeInterpolator::Probe(decele));
 
     AutoPtr<IAnimatorSet> animatorSet;
     CAnimatorSet::New((IAnimatorSet**)&animatorSet);
     AutoPtr<IAnimatorSetBuilder> b;
-    animatorSet->Play(IAnimator::Probe(buttonAnimator), (IAnimatorSetBuilder**)&b);
+    animatorSet->Play(animator, (IAnimatorSetBuilder**)&b);
 
     if (mMenuView != NULL) {
+        IViewGroup* vg = IViewGroup::Probe(mMenuView);
         Int32 count;
-        IViewGroup::Probe(mMenuView)->GetChildCount(&count);
+        vg->GetChildCount(&count);
         if (count > 0) {
             for (Int32 i = 0; i < count; ++i) {
                 AutoPtr<IView> child;
-                IViewGroup::Probe(mMenuView)->GetChildAt(i, (IView**)&child);
+                vg->GetChildAt(i, (IView**)&child);
                 child->SetScaleY(0);
 
                 AutoPtr<ArrayOf<Float> > tmpValues = ArrayOf<Float>::Alloc(1);
@@ -1239,8 +841,7 @@ AutoPtr<IAnimator> ActionBarContextView::MakeOutAnimation()
         }
     }
 
-    AutoPtr<IAnimator> result = IAnimator::Probe(animatorSet);
-    return result;
+    return IAnimator::Probe(animatorSet);
 }
 
 } // namespace Widget

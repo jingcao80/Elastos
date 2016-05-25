@@ -30,6 +30,8 @@ class FallbackLUTInterpolator
     , public ITimeInterpolator
 {
 public:
+    CAR_INTERFACE_DECL()
+
     /**
      * Used to cache the Float[] LUT for use across multiple native
      * interpolator creation

@@ -192,9 +192,10 @@ public:
 
     static CARAPI_(Boolean) InitHashMap();
 
-protected:
     static CARAPI_(Boolean) IsNativeInterpolator(
         /* [in] */ ITimeInterpolator* interpolator);
+
+protected:
 
     CARAPI_(void) OnFinished();
 

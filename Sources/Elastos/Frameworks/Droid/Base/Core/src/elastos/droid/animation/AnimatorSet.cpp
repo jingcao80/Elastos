@@ -5,6 +5,7 @@
 #include "elastos/droid/animation/CAnimatorSet.h"
 #include "elastos/droid/animation/CAnimatorSetBuilder.h"
 #include <elastos/utility/logging/Logger.h>
+#include <utils/CallStack.h>
 
 using Elastos::Core::ICloneable;
 using Elastos::Utility::IIterator;
@@ -99,10 +100,10 @@ void AnimatorSet::DependencyListener::StartIfReady(
 //==============================================================================
 CAR_INTERFACE_IMPL_2(AnimatorSet::AnimatorSetListener, Object, IAnimatorSetListener, IAnimatorListener);
 
-AnimatorSet::AnimatorSetListener::AnimatorSetListener(
+ECode AnimatorSet::AnimatorSetListener::constructor(
     /* [in] */ AnimatorSet* animatorSet)
 {
-    animatorSet->GetWeakReference((IWeakReference**)&mWeakAnimatorSet);
+    return animatorSet->GetWeakReference((IWeakReference**)&mWeakAnimatorSet);
 }
 
 ECode AnimatorSet::AnimatorSetListener::OnAnimationCancel(
@@ -111,7 +112,11 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationCancel(
     AutoPtr<IAnimatorSet> obj;
     mWeakAnimatorSet->Resolve(EIID_IAnimatorSet, (IInterface**)&obj);
     if (obj == NULL) {
-        Logger::E(TAG, "Error: AnimatorSet has been released!");
+        Logger::E(TAG, "Error: AnimatorSet has been released! backtrace is:");
+        android::CallStack stack;
+        stack.update();
+        String backtrace(stack.toString("").string());
+        Logger::E(TAG, "%s", backtrace.string());
         assert(0 && "Error: AnimatorSet has been released!");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -140,8 +145,14 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationEnd(
     AutoPtr<IAnimatorSet> obj;
     mWeakAnimatorSet->Resolve(EIID_IAnimatorSet, (IInterface**)&obj);
     if (obj == NULL) {
-        Logger::D(TAG, "Warning: AnimatorSet has been released!");
-        return NOERROR;
+        Logger::E(TAG, "Error: %s, %s, AnimatorSet has been released! backtrace is:",
+            TO_CSTR(this), TO_CSTR(animation));
+        android::CallStack stack;
+        stack.update();
+        String backtrace(stack.toString("").string());
+        Logger::E(TAG, "%s", backtrace.string());
+        assert(0 && "Error: AnimatorSet has been released!");
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     AnimatorSet* animatorSet = (AnimatorSet*)obj.Get();
@@ -547,7 +558,8 @@ ECode AnimatorSet::End()
     if (IsStarted(&started), started) {
         if (mSortedNodes.GetSize() != mNodes.GetSize()) {
             if (mSetListener == NULL) {
-                mSetListener = new AnimatorSetListener(this);
+                mSetListener = new AnimatorSetListener();
+                mSetListener->constructor(this);
             }
 
             // hasn't been started yet - sort the nodes now, then end them
@@ -563,6 +575,8 @@ ECode AnimatorSet::End()
         if (mSortedNodes.IsEmpty() == FALSE) {
             List<AutoPtr<Node> >::Iterator it = mSortedNodes.Begin();
             for (; it != mSortedNodes.End(); it++) {
+                // hold refcount of AnimationSet
+                ((Animator*)(*it)->mAnimation.Get())->SetParent(this);
                 (*it)->mAnimation->End();
             }
         }
@@ -751,7 +765,8 @@ ECode AnimatorSet::Start()
     AutoPtr< List<AutoPtr<Node> > > nodesToStart = new List<AutoPtr<Node> >;
     if (!mSortedNodes.IsEmpty()) {
         if (mSetListener == NULL) {
-            mSetListener = new AnimatorSetListener(this);
+            mSetListener = new AnimatorSetListener();
+            mSetListener->constructor(this);
         }
 
         for (it = mSortedNodes.Begin(); it != mSortedNodes.End(); ++it) {
@@ -771,7 +786,7 @@ ECode AnimatorSet::Start()
             }
 
             // hold refcount of AnimationSet
-            ((Animator*)node->mAnimation.Get())->mParent = this;
+            ((Animator*)node->mAnimation.Get())->SetParent(this);
             node->mAnimation->AddListener(mSetListener);
         }
     }
@@ -1007,31 +1022,6 @@ ECode AnimatorSet::Reverse()
         }
     }
     return NOERROR;
-}
-
-void AnimatorSet::SetLastChildAnimator(
-    /* [in] */ IAnimator* animator)
-{
-    mLastChildAnimator = animator;
-}
-
-void AnimatorSet::OnLastStrongRef(
-    /* [in] */ const void* id)
-{
-    if (mLastChildAnimator != NULL) {
-        mLastChildAnimator->RemoveListener(mSetListener);
-    }
-    // This was the last child animation to end, notify listeners that this
-    // AnimatorSet has ended
-    if (!mListeners.IsEmpty()) {
-        List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
-        List<AutoPtr<IAnimatorListener> >::Iterator it;
-        for (it = tmpListeners.Begin(); it != tmpListeners.End(); ++it) {
-            (*it)->OnAnimationEnd((IAnimator*)this);
-        }
-    }
-    mStarted = FALSE;
-    mPaused = FALSE;
 }
 
 }   //namespace Animation

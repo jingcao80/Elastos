@@ -32,10 +32,41 @@ namespace Widget {
   */
 class ActionBarContextView
     : public AbsActionBarView
-    , public IAnimatorListener
     , public IActionBarContextView
 {
 private:
+    class AnimatorListener
+        : public Object
+        , public IAnimatorListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("ActionBarContextView::AnimatorListener")
+
+        AnimatorListener(
+            /* [in] */ ActionBarContextView* host);
+
+        // @Override
+        CARAPI OnAnimationStart(
+            /* [in] */ IAnimator* animation);
+
+        // @Override
+        CARAPI OnAnimationEnd(
+            /* [in] */ IAnimator* animation);
+
+        // @Override
+        CARAPI OnAnimationCancel(
+            /* [in] */ IAnimator* animation);
+
+        // @Override
+        CARAPI OnAnimationRepeat(
+            /* [in] */ IAnimator* animation);
+
+    private:
+        ActionBarContextView* mHost;
+    };
+
     class InnerCloseButtonListener
         : public Object
         , public IViewOnClickListener
@@ -57,6 +88,8 @@ public:
     CAR_INTERFACE_DECL()
 
     ActionBarContextView();
+
+    ~ActionBarContextView();
 
     CARAPI constructor(
         /* [in] */ IContext* context);
@@ -124,22 +157,6 @@ public:
     CARAPI GenerateLayoutParams(
         /* [in] */ IAttributeSet* attrs,
         /* [out] */ IViewGroupLayoutParams** result);
-
-    // @Override
-    CARAPI OnAnimationStart(
-        /* [in] */ IAnimator* animation);
-
-    // @Override
-    CARAPI OnAnimationEnd(
-        /* [in] */ IAnimator* animation);
-
-    // @Override
-    CARAPI OnAnimationCancel(
-        /* [in] */ IAnimator* animation);
-
-    // @Override
-    CARAPI OnAnimationRepeat(
-        /* [in] */ IAnimator* animation);
 
     // @Override
     CARAPI ShouldDelayChildPressedState(

@@ -277,12 +277,14 @@ public:
     virtual CARAPI SetAllowRunningAsynchronously(
         /* [in] */ Boolean mayRunAsync);
 
+    CARAPI SetParent(
+        /* [in] */ IAnimatorSet* parent);
+
+    CARAPI ReleaseParent();
+
 protected:
     CARAPI CloneImpl(
         /* [in] */ IAnimator* anim);
-
-public:
-    AutoPtr<IAnimatorSet> mParent;
 
 protected:
     /**
@@ -303,6 +305,10 @@ protected:
     Boolean mPaused;
 
     friend class AnimatorSet;
+
+private:
+    IAnimatorSet* mParent;
+    Int32 mParentRefCount;
 };
 
 }   //namespace Animation

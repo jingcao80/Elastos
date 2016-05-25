@@ -642,7 +642,6 @@ module
             [in] Int32 defStyleRes);
 
         interface IActionBarContextView;
-        interface IAnimatorListener;
         interface IAbsActionBarView;
         interface IViewGroup;
         interface IView;

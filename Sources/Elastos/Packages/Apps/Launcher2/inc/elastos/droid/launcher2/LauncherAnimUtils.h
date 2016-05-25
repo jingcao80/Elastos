@@ -122,13 +122,11 @@ public:
         /* [in] */ ArrayOf<IPropertyValuesHolder*>* values);
 
 private:
-    static CARAPI_(Boolean) InitStaticBlock();
+    static CARAPI_(AutoPtr<IAnimatorListener>) GetEndAnimListener();
 
 public:
     static AutoPtr<IHashSet> sAnimators;
     static AutoPtr<IAnimatorListener> sEndAnimListener;
-
-    static Boolean mInitStaticBlock;
 };
 
 } // namespace Launcher2

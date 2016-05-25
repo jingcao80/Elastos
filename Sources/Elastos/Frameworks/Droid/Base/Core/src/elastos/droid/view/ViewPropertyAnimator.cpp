@@ -37,19 +37,6 @@ const Int32 ViewPropertyAnimator::ALPHA;
 const Int32 ViewPropertyAnimator::TRANSFORM_MASK;
 
 //=====================================================================
-//               ViewPropertyAnimator::NameValuesHolder
-//=====================================================================
-ViewPropertyAnimator::NameValuesHolder::NameValuesHolder(
-    /* [in] */ Int32 nameConstant,
-    /* [in] */ Float fromeValue,
-    /* [in] */ Float deltaValue)
-    : mNameConstant(nameConstant)
-    , mFromValue(fromeValue)
-    , mDeltaValue(deltaValue)
-{
-}
-
-//=====================================================================
 //         ViewPropertyAnimator::AnimatorEventListener
 //=====================================================================
 CAR_INTERFACE_IMPL_2(ViewPropertyAnimator::AnimatorEventListener, Object, IAnimatorUpdateListener, IAnimatorListener)
@@ -434,17 +421,6 @@ ECode ViewPropertyAnimator::GetInterpolator(
     /* [out] */ ITimeInterpolator** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mInterpolatorSet) {
-    //     return mInterpolator;
-    // } else {
-    //     // Just return the default from ValueAnimator, since that's what we'd get if
-    //     // the value has not been set otherwise
-    //     if (mTempValueAnimator == null) {
-    //         mTempValueAnimator = new ValueAnimator();
-    //     }
-    //     return mTempValueAnimator.getInterpolator();
-    // }
 
     if (mInterpolatorSet) {
         *result = mInterpolator;
@@ -527,8 +503,7 @@ ECode ViewPropertyAnimator::Cancel()
     Boolean resTmp = FALSE;
     mView->RemoveCallbacks(mAnimationStarter, &resTmp);
     if (mRTBackend != NULL) {
-        assert(0);
-        //-- has no this car: mRTBackend->CancelAll();
+        mRTBackend->CancelAll();
     }
     return NOERROR;
 }
@@ -750,8 +725,8 @@ ECode ViewPropertyAnimator::HasActions(
 
 ECode ViewPropertyAnimator::StartAnimation()
 {
-    Logger::D("ViewPropertyAnimator", "TODO: Not have the class ViewPropertyAnimatorRT.");
-    if (mRTBackend != NULL && FALSE/*mRTBackend->StartAnimation(this)*/) {
+    Boolean bval;
+    if (mRTBackend != NULL && (mRTBackend->StartAnimation(this, &bval), bval)) {
         return NOERROR;
     }
 

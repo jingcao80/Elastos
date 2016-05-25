@@ -7,12 +7,16 @@
 
 using Elastos::Droid::Utility::TimeUtils;
 using Elastos::Droid::View::Choreographer;
+using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 
 namespace Elastos {
 namespace Droid {
 namespace Internal {
 namespace View {
 namespace Animation {
+
+CAR_INTERFACE_IMPL_3(FallbackLUTInterpolator, Object, IFallbackLUTInterpolator, \
+    INativeInterpolatorFactory, ITimeInterpolator)
 
 ECode FallbackLUTInterpolator::constructor(
     /* [in] */ ITimeInterpolator* interpolator,

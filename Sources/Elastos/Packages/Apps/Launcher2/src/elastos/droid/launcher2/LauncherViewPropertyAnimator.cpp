@@ -276,7 +276,7 @@ ECode LauncherViewPropertyAnimator::Start()
 
     mViewPropertyAnimator->SetListener(this);
     mViewPropertyAnimator->Start();
-    LauncherAnimUtils::CancelOnDestroyActivity(IAnimator::Probe(this));
+    LauncherAnimUtils::CancelOnDestroyActivity(this);
     return NOERROR;
 }
 

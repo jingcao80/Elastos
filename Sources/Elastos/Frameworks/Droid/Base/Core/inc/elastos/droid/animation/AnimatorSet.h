@@ -96,7 +96,7 @@ private:
 
         TO_STRING_IMPL("AnimatorSet::AnimatorSetListener")
 
-        AnimatorSetListener(
+        CARAPI constructor(
             /* [in] */ AnimatorSet* animatorSet);
 
         CARAPI OnAnimationCancel(
@@ -248,9 +248,9 @@ public:
 
     AnimatorSet();
 
-    CARAPI constructor();
-
     ~AnimatorSet();
+
+    CARAPI constructor();
 
     /**
      * Sets up this AnimatorSet to play all of the supplied animations at the same time.
@@ -430,12 +430,6 @@ public:
      */
     // @Override
     virtual CARAPI Reverse();
-
-    CARAPI_(void) SetLastChildAnimator(
-        /* [in] */ IAnimator* animator);
-
-    CARAPI_(void) OnLastStrongRef(
-        /* [in] */ const void* id);
 
 protected:
     CARAPI CloneImpl(

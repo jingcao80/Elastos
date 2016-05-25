@@ -91,24 +91,30 @@ ECode LauncherAnimUtils::MyOnDrawListener::OnDraw()
     return mView->Post(run, &res);
 }
 
-AutoPtr<IHashSet> LauncherAnimUtils::sAnimators;
-AutoPtr<IAnimatorListener> LauncherAnimUtils::sEndAnimListener;
 
-Boolean LauncherAnimUtils::InitStaticBlock()
+static AutoPtr<IHashSet> InitStaticBlock()
 {
-    CHashSet::New((IHashSet**)&sAnimators);
-    sEndAnimListener = new MyAnimatorListener();
-Slogger::D("LauncherAnimUtils", "=======LauncherAnimUtils::InitStaticBlock sEndAnimListener=%p",sEndAnimListener.Get());
-    return TRUE;
+    AutoPtr<IHashSet> animators;
+    CHashSet::New((IHashSet**)&animators);
+    return animators;
 }
 
-Boolean LauncherAnimUtils::mInitStaticBlock = InitStaticBlock();
+AutoPtr<IHashSet> LauncherAnimUtils::sAnimators = InitStaticBlock();
+AutoPtr<IAnimatorListener> LauncherAnimUtils::sEndAnimListener;
+
+AutoPtr<IAnimatorListener> LauncherAnimUtils::GetEndAnimListener()
+{
+    if (sEndAnimListener == NULL) {
+        sEndAnimListener = new MyAnimatorListener();
+    }
+    return sEndAnimListener;
+}
 
 void LauncherAnimUtils::CancelOnDestroyActivity(
     /* [in] */ IAnimator* a)
 {
     sAnimators->Add(TO_IINTERFACE(a));
-    a->AddListener(sEndAnimListener);
+    a->AddListener(GetEndAnimListener());
 }
 
 void LauncherAnimUtils::StartAnimationAfterNextDraw(
