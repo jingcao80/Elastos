@@ -47,9 +47,9 @@ try {
     function smuid() {return sax.call(this);}
     function sguid() {
         return JSON.stringify({
-            clsid:smuid.call(this.clsid),
-            pUunm:this.pUunm,
-            carcode:sx.call(this.carcode)
+            mClsid:smuid.call(this.mClsid),
+            mUunm:this.mUunm,
+            mCarcode:sx.call(this.mCarcode)
         });
     }
     function sav() {return JSON.stringify(this);}
@@ -90,25 +90,25 @@ try {
         },
         "EGuid":{
             v:{
-                clsid:[0x12345678,0x1234,0x5678,[0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89]],
-                pUunm:"test-eguid-clsid",
-                carcode:0x1234
+                mClsid:[0x12345678,0x1234,0x5678,[0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89]],
+                mUunm:"test-eguid-clsid",
+                mCarcode:0x1234
             },
             va:[
                 {
-                    clsid:[0x12345678,0x1234,0x5678,[0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89]],
-                    pUunm:"test-eguid-clsid",
-                    carcode:0x1234
+                    mClsid:[0x12345678,0x1234,0x5678,[0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89]],
+                    mUunm:"test-eguid-clsid",
+                    mCarcode:0x1234
                 },
                 {
-                    clsid:[0x23456789,0x2345,0x6789,[0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9A]],
-                    pUunm:"test-eguid-clsid",
-                    carcode:0x2345
+                    mClsid:[0x23456789,0x2345,0x6789,[0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9A]],
+                    mUunm:"test-eguid-clsid",
+                    mCarcode:0x2345
                 },
                 {
-                    clsid:[0x3456789A,0x3456,0x789A,[0x34,0x45,0x56,0x67,0x78,0x89,0x9A,0xAB]],
-                    pUunm:"test-eguid-clsid",
-                    carcode:0x3456
+                    mClsid:[0x3456789A,0x3456,0x789A,[0x34,0x45,0x56,0x67,0x78,0x89,0x9A,0xAB]],
+                    mUunm:"test-eguid-clsid",
+                    mCarcode:0x3456
                 }
             ],
             sv:sguid,
@@ -119,20 +119,29 @@ try {
 
     for (var i = 0; i < looptimes; i++) {
         for (var prop in aTestData) {
-            if(prop == "Interface") continue;    //comment when completed
+            //comment when completed
+            if(prop == "Int16") continue;
+            if(prop == "Int32") continue;
+            if(prop == "Int64") continue;
+            if(prop == "Byte") continue;
+            if(prop == "Float") continue;
+            if(prop == "Double") continue;
+            if(prop == "Char") continue;
+            if(prop == "String") continue;
+            if(prop == "Boolean") continue;
+            if(prop == "ECode") continue;
+            if(prop == "Enum") continue;
+            //if(prop == "EMuid") continue;
+            if(prop == "EGuid") continue;
+            if(prop == "Interface") continue;
 
             var oProp = aTestData[prop];
 
             var sFunName = "Test_" + prop;
-
-            var oRetValue = oCarObject[sFunName](oProp.v);
-            var oRetValue = oCarObject.Test_Int16(16);
-            elog(sFunName+'====typeof: '+typeof oRetValue + "====retvalue:"+oRetValue);
-
             a.push(sFunName + "========" + oProp.sv.call(oCarObject[sFunName](oProp.v)));
 
-            if(prop == "EMuid") continue;    //comment when completed
-            if(prop == "EGuid") continue;    //comment when completed
+            if(prop == "EMuid") continue;   //TODO
+            if(prop == "EGuid") continue;   //TODO
 
             var sFunName = "Test_ArrayOf_" + prop;
             a.push(sFunName + "========" + oProp.sa.call(oCarObject[sFunName](oProp.va)));
@@ -154,4 +163,4 @@ else {
 
 }    //fnTestCarDataType
 
-ElastosTest.fnTestCarDataType(5);
+ElastosTest.fnTestCarDataType(1);
