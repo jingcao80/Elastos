@@ -1,5 +1,8 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Os.IHandler;
 
     namespace Elastos {
     namespace Droid {
@@ -7,18 +10,39 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    /**
+     * @Involve
+     * interface ICDMAPhone
+     */
     interface ICDMALTEPhone {
-        Dispose();
+        GetSystemProperty(
+            [in] String property,
+            [in] String defValue,
+            [out] String* result);
 
-        RemoveReferences();
+        UpdateDataConnectionTracker();
 
-        HandleMessage(
-            [in] Message msg);
+        SetInternalDataEnabled(
+            [in] Boolean enbl,
+            [in] IMessage* onCompleteMsg);
 
-        GetDataConnectionState(
-            [in] String apnType,
-            [out] DataState* result);
+        SetInternalDataEnabledFlag(
+            [in] Boolean enbl,
+            [out] Boolean* result);
 
+        /**
+         * @return operator numeric.
+         */
+        GetOperatorNumeric(
+            [out] String* result);
+
+        RegisterForAllDataDisconnected(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
+
+        UnregisterForAllDataDisconnected(
+            [in] IHandler* h);
     }
 
     }//Cdma

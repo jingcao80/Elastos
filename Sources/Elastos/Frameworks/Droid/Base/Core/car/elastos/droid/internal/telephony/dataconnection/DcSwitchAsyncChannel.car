@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IMessage;
 
     namespace Elastos {
     namespace Droid {
@@ -7,12 +9,16 @@ module {
     namespace Telephony {
     namespace DataConnection {
 
+    /**
+     * @Involve
+     * interface IAsyncChannel
+     */
     interface IDcSwitchAsyncChannel {
         ReqConnect(
             [in] String type);
 
         RspConnect(
-            [in] Message response,
+            [in] IMessage* response,
             [out] Int32* result);
 
         ConnectSync(
@@ -23,7 +29,7 @@ module {
             [in] String type);
 
         RspDisconnect(
-            [in] Message response,
+            [in] IMessage* response,
             [out] Int32* result);
 
         DisconnectSync(
@@ -33,7 +39,7 @@ module {
         ReqIsIdle();
 
         RspIsIdle(
-            [in] Message response,
+            [in] IMessage* response,
             [out] Boolean* result);
 
         IsIdleSync(
@@ -42,7 +48,7 @@ module {
         ReqIsIdleOrDeacting();
 
         RspIsIdleOrDeacting(
-            [in] Message response,
+            [in] IMessage* response,
             [out] Boolean* result);
 
         IsIdleOrDeactingSync(

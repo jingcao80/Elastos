@@ -1,5 +1,8 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Internal.Telephony.IConnection;
+    interface Elastos.Droid.Os.IHandler;
 
     namespace Elastos {
     namespace Droid {
@@ -7,7 +10,32 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    /**
+     * @Involve
+     * interface IPhoneBase
+     */
     interface ICDMAPhone {
+        const String PROPERTY_CDMA_HOME_OPERATOR_NUMERIC =
+            "ro.cdma.home.operator.numeric";
+
+        NotifyNewRingingConnection(
+            [in] IConnection* c);
+
+        NotifyEcbmTimerReset(
+            [in] Boolean flag);
+
+        RegisterForEriFileLoaded(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
+
+        UnregisterForEriFileLoaded(
+            [in] IHandler* h);
+
+        PrepareEri();
+
+        IsEriFileLoaded(
+            [out] Boolean* result);
     }
 
     }//Cdma

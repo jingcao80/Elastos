@@ -1,5 +1,10 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Net.ILinkProperties;
+    interface Elastos.Droid.Net.IProxyInfo;
+    interface Elastos.Droid.Net.INetworkCapabilities;
+    interface Elastos.Droid.Os.IMessage;
 
     namespace Elastos {
     namespace Droid {
@@ -7,15 +12,60 @@ module {
     namespace Telephony {
     namespace DataConnection {
 
+    /**
+     * enum used to notify action taken or necessary to be
+     * taken after the link property is changed.
+     */
+    enum LinkPropertyChangeAction {
+        LinkPropertyChangeAction_NONE,
+        LinkPropertyChangeAction_CHANGED,
+        LinkPropertyChangeAction_RESET
+
+        // public static LinkPropertyChangeAction fromInt(int value) {
+        //     if (value == NONE.ordinal()) {
+        //         return NONE;
+        //     } else if (value == CHANGED.ordinal()) {
+        //         return CHANGED;
+        //     } else if (value == RESET.ordinal()) {
+        //         return RESET;
+        //     } else {
+        //         throw new RuntimeException("LinkPropertyChangeAction.fromInt: bad value=" + value);
+        //     }
+        // }
+    }
+
+    /**
+     * @Involve
+     * interface IAsyncChannel
+     */
     interface IDcAsyncChannel {
-        FromInt(
-            [in] Int32 value,
-            [out] LinkPropertyChangeAction* result);
+        const Int32 BASE = 0x00041000; // IProtocol::BASE_DATA_CONNECTION_AC;
+
+        const Int32 REQ_IS_INACTIVE = 0x00041000; // BASE + 0;
+        const Int32 RSP_IS_INACTIVE = 0x00041001; // BASE + 1;
+
+        const Int32 REQ_GET_CID = 0x00041002; // BASE + 2;
+        const Int32 RSP_GET_CID = 0x00041003; // BASE + 3;
+
+        const Int32 REQ_GET_APNSETTING = 0x00041004; // BASE + 4;
+        const Int32 RSP_GET_APNSETTING = 0x00041005; // BASE + 5;
+
+        const Int32 REQ_GET_LINK_PROPERTIES = 0x00041006; // BASE + 6;
+        const Int32 RSP_GET_LINK_PROPERTIES = 0x00041007; // BASE + 7;
+
+        const Int32 REQ_SET_LINK_PROPERTIES_HTTP_PROXY = 0x00041008; // BASE + 8;
+        const Int32 RSP_SET_LINK_PROPERTIES_HTTP_PROXY = 0x00041009; // BASE + 9;
+
+        const Int32 REQ_GET_NETWORK_CAPABILITIES = 0x0004100A; // BASE + 10;
+        const Int32 RSP_GET_NETWORK_CAPABILITIES = 0x0004100B; // BASE + 11;
+
+        const Int32 REQ_RESET = 0x0004100C; // BASE + 12;
+        const Int32 RSP_RESET = 0x0004100D; // BASE + 13;
 
         ReqIsInactive();
 
         RspIsInactive(
-            [in] Message response,
+            [in] IMessage* response,
             [out] Boolean* result);
 
         IsInactiveSync(
@@ -24,7 +74,7 @@ module {
         ReqCid();
 
         RspCid(
-            [in] Message response,
+            [in] IMessage* response,
             [out] Int32* result);
 
         GetCidSync(
@@ -33,51 +83,72 @@ module {
         ReqApnSetting();
 
         RspApnSetting(
-            [in] Message response,
-            [out] ApnSetting* result);
+            [in] IMessage* response,
+            [out] IApnSetting** result);
 
         GetApnSettingSync(
-            [out] ApnSetting* result);
+            [out] IApnSetting** result);
 
         ReqLinkProperties();
 
         RspLinkProperties(
-            [in] Message response,
-            [out] LinkProperties* result);
+            [in] IMessage* response,
+            [out] ILinkProperties** result);
 
         GetLinkPropertiesSync(
-            [out] LinkProperties* result);
+            [out] ILinkProperties** result);
 
         ReqSetLinkPropertiesHttpProxy(
-            [in] ProxyInfo proxy);
+            [in] IProxyInfo* proxy);
 
         SetLinkPropertiesHttpProxySync(
-            [in] ProxyInfo proxy);
+            [in] IProxyInfo* proxy);
 
         ReqNetworkCapabilities();
 
         RspNetworkCapabilities(
-            [in] Message response,
-            [out] NetworkCapabilities* result);
+            [in] IMessage* response,
+            [out] INetworkCapabilities** result);
 
         GetNetworkCapabilitiesSync(
-            [out] NetworkCapabilities* result);
+            [out] INetworkCapabilities** result);
 
         ReqReset();
 
+        /**
+         * Bring up a connection to the apn and return an AsyncResult in onCompletedMsg.
+         * Used for cellular networks that use Acesss Point Names (APN) such
+         * as GSM networks.
+         *
+         * @param apnContext is the Access Point Name to bring up a connection to
+         * @param initialMaxRetry the number of retires for initial bringup.
+         * @param profileId for the conneciton
+         * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
+         *        With AsyncResult.userObj set to the original msg.obj,
+         *        AsyncResult.result = FailCause and AsyncResult.exception = Exception().
+         */
+        BringUp(
+            [in] IApnContext* apnContext,
+            [in] Int32 initialMaxRetry,
+            [in] Int32 profileId,
+            [in] Int32 rilRadioTechnology,
+            [in] Boolean retryWhenSSChange,
+            [in] IMessage* onCompletedMsg);
+
         TearDown(
-            [in] ApnContext apnContext, 
-            [in] String reason, 
-            [in] Message onCompletedMsg);
+            [in] IApnContext* apnContext,
+            [in] String reason,
+            [in] IMessage* onCompletedMsg);
 
         TearDownAll(
-            [in] String reason, 
-            [in] Message onCompletedMsg);
+            [in] String reason,
+            [in] IMessage* onCompletedMsg);
 
         GetDataConnectionIdSync(
             [out] Int32* result);
 
-        GetPcscfAddr();
+        GetPcscfAddr(
+            [out, callee] ArrayOf<String>* result);
 
     }
 

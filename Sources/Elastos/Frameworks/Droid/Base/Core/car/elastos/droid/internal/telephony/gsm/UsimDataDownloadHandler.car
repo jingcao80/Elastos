@@ -7,18 +7,14 @@ module {
     namespace Telephony {
     namespace Gsm {
 
+    /**
+     * @Involve
+     * interface IHandler
+     */
     interface IUsimDataDownloadHandler {
-        HandleUsimDataDownload(
-            [in] UsimServiceTable ust, 
-            [in] SmsMessage smsMessage,
-            [out] Int32* result);
-
         StartDataDownload(
-            [in] SmsMessage smsMessage,
+            [in] ISmsMessage* smsMessage,
             [out] Int32* result);
-
-        HandleMessage(
-            [in] Message msg);
 
     }
 

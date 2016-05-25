@@ -7,27 +7,13 @@ module {
     namespace Telephony {
     namespace Gsm {
 
+    /**
+     * @Involve
+     * interface ICallTracker
+     */
     interface IGsmCallTracker {
-        GsmCallTracker (GSMPhone phone);
 
         Dispose();
-
-        RegisterForVoiceCallStarted(Handler h, Int32 what, Object obj);
-
-        UnregisterForVoiceCallStarted(Handler h);
-
-        RegisterForVoiceCallEnded(Handler h, Int32 what, Object obj);
-
-        UnregisterForVoiceCallEnded(Handler h);
-
-
-
-        HangupWaitingOrBackground();
-
-        HangupForegroundResumeBackground();
-
-        HangupAllConnections(GsmCall call);
-
     }
 
     }//Gsm

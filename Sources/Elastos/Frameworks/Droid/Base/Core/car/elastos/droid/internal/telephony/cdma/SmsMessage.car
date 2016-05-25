@@ -1,5 +1,11 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Internal.Telephony.ISmsHeader;
+    interface Elastos.Droid.Internal.Telephony.IGsmAlphabetTextEncodingDetails;
+
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
     namespace Droid {
@@ -7,13 +13,203 @@ module {
     namespace Telephony {
     namespace Cdma {
 
-    interface ISmsMessage {
-        interface ISmsMessageSubmitPdu {
-        }
+    /**
+     * @Involve
+     * interface ISubmitPduBase
+     */
+    interface ISmsMessageSubmitPdu {
+    }
 
+    /**
+     * @Involve
+     * interface ISmsMessageBase
+     */
+    interface ISmsMessage {
 
         GetSmsCbProgramData();
 
+        /**
+         * Returns the list of service category program data, if present.
+         * @return a list of CdmaSmsCbProgramData objects, or null if not present
+         * @hide
+         */
+        GetSmsCbProgramData(
+            [out] IArrayList** result);
+    }
+
+    [deprecated]
+    interface ISmsMessageHelper {
+        /**
+         * Create an SmsMessage from a raw PDU.
+         * Note: In CDMA the PDU is just a byte representation of the received Sms.
+         */
+        CreateFromPdu(
+            [in] ArrayOf<Byte>* pdu,
+            [out] ISmsMessage** result);
+
+        /**
+         *  Create a "raw" CDMA SmsMessage from a Parcel that was forged in ril.cpp.
+         *  Note: Only primitive fields are set.
+         */
+        NewFromParcel(
+            [in] IParcel* p,
+            [out] ISmsMessage** result);
+
+        /**
+         * Create an SmsMessage from an SMS EF record.
+         *
+         * @param index Index of SMS record. This should be index in ArrayList
+         *              returned by RuimSmsInterfaceManager.getAllMessagesFromIcc + 1.
+         * @param data Record data.
+         * @return An SmsMessage representing the record.
+         *
+         * @hide
+         */
+        CreateFromEfRecord(
+            [in] Int32 index,
+            [in] ArrayOf<Byte>* data,
+            [out] ISmsMessage** result);
+
+        /**
+         * Note: This function is a GSM specific functionality which is not supported in CDMA mode.
+         */
+        GetTPLayerLengthForPDU(
+            [in] String pdu,
+            [out] Int32* result);
+
+        /**
+         * Get an SMS-SUBMIT PDU for a destination address and a message
+         *
+         * @param scAddr                Service Centre address.  Null means use default.
+         * @param destAddr              Address of the recipient.
+         * @param message               String representation of the message payload.
+         * @param statusReportRequested Indicates whether a report is requested for this message.
+         * @param smsHeader             Array containing the data for the User Data Header, preceded
+         *                              by the Element Identifiers.
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         * @hide
+         */
+        GetSubmitPdu(
+            [in] String scAddr,
+            [in] String destAddr,
+            [in] String message,
+            [in] Boolean statusReportRequested,
+            [in] ISmsHeader* smsHeader,
+            [out] ISmsMessageSubmitPdu** result);
+
+        /**
+         * Get an SMS-SUBMIT PDU for a destination address and a message
+         *
+         * @param scAddr                Service Centre address.  Null means use default.
+         * @param destAddr              Address of the recipient.
+         * @param message               String representation of the message payload.
+         * @param statusReportRequested Indicates whether a report is requested for this message.
+         * @param smsHeader             Array containing the data for the User Data Header, preceded
+         *                              by the Element Identifiers.
+         * @param priority              Priority level of the message
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         * @hide
+         */
+        GetSubmitPdu(
+            [in] String scAddr,
+            [in] String destAddr,
+            [in] String message,
+            [in] Boolean statusReportRequested,
+            [in] ISmsHeader* smsHeader,
+            [in] Int32 priority,
+            [out] ISmsMessageSubmitPdu** result);
+
+        /**
+         * Get an SMS-SUBMIT PDU for a data message to a destination address and port.
+         *
+         * @param scAddr Service Centre address. null == use default
+         * @param destAddr the address of the destination for the message
+         * @param destPort the port to deliver the message to at the
+         *        destination
+         * @param data the data for the message
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         */
+        GetSubmitPdu(
+            [in] String scAddr,
+            [in] String destAddr,
+            [in] Int32 destPort,
+            [in] ArrayOf<Byte>* data,
+            [in] Boolean statusReportRequested,
+            [out] ISmsMessageSubmitPdu** result);
+
+        /**
+         * Get an SMS-SUBMIT PDU for a data message to a destination address and port.
+         *
+         * @param scAddr Service Centre address. null == use default
+         * @param destAddr the address of the destination for the message
+         * @param destPort the port to deliver the message to at the
+         *        destination
+         * @param origPort  the originator port set by the sender
+         * @param data the data for the message
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         */
+        GetSubmitPdu(
+            [in] String scAddr,
+            [in] String destAddr,
+            [in] Int32 destPort,
+            [in] Int32 origPort,
+            [in] ArrayOf<Byte>* data,
+            [in] Boolean statusReportRequested,
+            [out] ISmsMessageSubmitPdu** result);
+
+        /**
+         * Get an SMS-SUBMIT PDU for a data message to a destination address &amp; port
+         *
+         * @param destAddr the address of the destination for the message
+         * @param userData the data for the message
+         * @param statusReportRequested Indicates whether a report is requested for this message.
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         */
+        GetSubmitPdu(
+            [in] String destAddr,
+            [in] IUserData* userData,
+            [in] Boolean statusReportRequested,
+            [out] ISmsMessageSubmitPdu** result);
+
+        /**
+         * Get an SMS-SUBMIT PDU for a data message to a destination address &amp; port
+         *
+         * @param destAddr the address of the destination for the message
+         * @param userData the data for the message
+         * @param statusReportRequested Indicates whether a report is requested for this message.
+         * @param priority Priority level of the message
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         */
+        GetSubmitPdu(
+            [in] String destAddr,
+            [in] IUserData* userData,
+            [in] Boolean statusReportRequested,
+            [in] Int32 priority,
+            [out] ISmsMessageSubmitPdu** result);
+
+        /**
+         * Calculate the number of septets needed to encode the message.
+         *
+         * @param messageBody the message to encode
+         * @param use7bitOnly ignore (but still count) illegal characters if true
+         * @return TextEncodingDetails
+         */
+        CalculateLength(
+            [in] ICharSequence* messageBody,
+            [in] Boolean use7bitOnly,
+            [out] IGsmAlphabetTextEncodingDetails** result);
     }
 
     }//Cdma

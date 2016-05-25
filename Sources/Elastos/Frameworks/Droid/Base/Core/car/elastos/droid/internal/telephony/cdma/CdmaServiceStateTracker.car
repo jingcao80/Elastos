@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IHandler;
 
     namespace Elastos {
     namespace Droid {
@@ -7,19 +9,42 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    /**
+     * @Involve
+     * interface IServiceStateTracker
+     */
     interface ICdmaServiceStateTracker {
-        OnChange(Boolean selfChange);
+        /**
+         * Registration point for subscription info ready
+         * @param h handler to notify
+         * @param what what code of message when delivered
+         * @param obj placed in Message.obj
+         */
+        RegisterForSubscriptionInfoReady(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
-        OnChange(Boolean selfChange);
+        UnregisterForSubscriptionInfoReady(
+            [in] IHandler* h);
 
-        Dispose();
+        GetMdnNumber(
+            [out] String* result);
 
-        RegisterForSubscriptionInfoReady(Handler h, Int32 what, Object obj);
+        GetCdmaMin(
+            [out] String* result);
 
-        UnregisterForSubscriptionInfoReady(Handler h);
+        /** Returns null if NV is not yet ready */
+        GetPrlVersion(
+            [out] String* result);
 
-        HandleMessage (Message msg);
-
+        /**
+         * Check if subscription data has been assigned to mMin
+         *
+         * return true if MIN info is ready; false otherwise.
+         */
+        IsMinInfoReady(
+            [out] Boolean* result);
     }
 
     }//Cdma

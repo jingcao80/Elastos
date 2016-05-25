@@ -10,6 +10,12 @@ module {
     interface ICdmaCallWaitingNotification {
     }
 
+    interface ICdmaCallWaitingNotificationHelper {
+        PresentationFromCLIP(
+            [in] Int32 cli,
+            [out] Int32* result);
+    }
+
     }//Cdma
     }//Telephony
     }//Internal

@@ -7,11 +7,59 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    /**
+     * @Involve
+     * interface ISmsAddress
+     */
     interface ICdmaSmsAddress {
+        /**
+         * Digit Mode Indicator is a 1-bit value that indicates whether
+         * the address digits are 4-bit DTMF codes or 8-bit codes.  (See
+         * 3GPP2 C.S0015-B, v2, 3.4.3.3)
+         */
+        const Int32 DIGIT_MODE_4BIT_DTMF              = 0x00;
+        const Int32 DIGIT_MODE_8BIT_CHAR              = 0x01;
+
+        /**
+         * Number Mode Indicator is 1-bit value that indicates whether the
+         * address type is a data network address or not.  (See 3GPP2
+         * C.S0015-B, v2, 3.4.3.3)
+         */
+        const Int32 NUMBER_MODE_NOT_DATA_NETWORK      = 0x00;
+        const Int32 NUMBER_MODE_DATA_NETWORK          = 0x01;
+
+        /**
+         * Number Types for data networks.
+         * (See 3GPP2 C.S005-D, table2.7.1.3.2.4-2 for complete table)
+         * (See 3GPP2 C.S0015-B, v2, 3.4.3.3 for data network subset)
+         * NOTE: value is stored in the parent class ton field.
+         */
+        const Int32 TON_UNKNOWN                   = 0x00;
+        const Int32 TON_INTERNATIONAL_OR_IP       = 0x01;
+        const Int32 TON_NATIONAL_OR_EMAIL         = 0x02;
+        const Int32 TON_NETWORK                   = 0x03;
+        const Int32 TON_SUBSCRIBER                = 0x04;
+        const Int32 TON_ALPHANUMERIC              = 0x05;
+        const Int32 TON_ABBREVIATED               = 0x06;
+        const Int32 TON_RESERVED                  = 0x07;
+
+        /**
+         * Maximum lengths for fields as defined in ril_cdma_sms.h.
+         */
+        const Int32 SMS_ADDRESS_MAX          =  36;
+        const Int32 SMS_SUBADDRESS_MAX       =  36;
+
+        /**
+         * Numbering Plan identification is a 0 or 4-bit value that
+         * indicates which numbering plan identification is set.  (See
+         * 3GPP2, C.S0015-B, v2, 3.4.3.3 and C.S005-D, table2.7.1.3.2.4-3)
+         */
+        const Int32 NUMBERING_PLAN_UNKNOWN           = 0x0;
+        const Int32 NUMBERING_PLAN_ISDN_TELEPHONY    = 0x1;
+
         Parse(
             [in] String address,
-            [out] CdmaSmsAddress* result);
-
+            [out] ICdmaSmsAddress** result);
     }
 
     }//Cdma

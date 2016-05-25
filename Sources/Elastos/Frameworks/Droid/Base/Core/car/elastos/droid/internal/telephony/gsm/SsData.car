@@ -7,27 +7,46 @@ module {
     namespace Telephony {
     namespace Gsm {
 
+    enum ServiceType {
+        SS_CFU,
+        SS_CF_BUSY,
+        SS_CF_NO_REPLY,
+        SS_CF_NOT_REACHABLE,
+        SS_CF_ALL,
+        SS_CF_ALL_CONDITIONAL,
+        SS_CLIP,
+        SS_CLIR,
+        SS_COLP,
+        SS_COLR,
+        SS_WAIT,
+        SS_BAOC,
+        SS_BAOIC,
+        SS_BAOIC_EXC_HOME,
+        SS_BAIC,
+        SS_BAIC_ROAMING,
+        SS_ALL_BARRING,
+        SS_OUTGOING_BARRING,
+        SS_INCOMING_BARRING
+    }
+
+    enum RequestType {
+        SS_ACTIVATION,
+        SS_DEACTIVATION,
+        SS_INTERROGATION,
+        SS_REGISTRATION,
+        SS_ERASURE
+    }
+
+    enum TeleserviceType {
+        SS_ALL_TELE_AND_BEARER_SERVICES,
+        SS_ALL_TELESEVICES,
+        SS_TELEPHONY,
+        SS_ALL_DATA_TELESERVICES,
+        SS_SMS_SERVICES,
+        SS_ALL_TELESERVICES_EXCEPT_SMS
+    }
+
     interface ISsData {
-        IsTypeCF(
-            [out] Boolean* result);
-
-        IsTypeUnConditional(
-            [out] Boolean* result);
-
-        IsTypeCW(
-            [out] Boolean* result);
-
-        IsTypeClip(
-            [out] Boolean* result);
-
-        IsTypeClir(
-            [out] Boolean* result);
-
-        IsTypeBarring(
-            [out] Boolean* result);
-
-        IsTypeInterrogation(
-            [out] Boolean* result);
 
         ServiceTypeFromRILInt(
             [in] Int32 type,

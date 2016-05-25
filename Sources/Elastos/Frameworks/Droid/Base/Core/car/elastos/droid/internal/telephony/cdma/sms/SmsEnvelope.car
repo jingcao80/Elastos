@@ -8,6 +8,45 @@ module {
     namespace Cdma {
 
     interface ISmsEnvelope {
+        /**
+         * Message Types
+         * (See 3GPP2 C.S0015-B 3.4.1)
+         */
+        const Int32 MESSAGE_TYPE_POINT_TO_POINT   = 0x00;
+        const Int32 MESSAGE_TYPE_BROADCAST        = 0x01;
+        const Int32 MESSAGE_TYPE_ACKNOWLEDGE      = 0x02;
+
+        /**
+         * Supported Teleservices
+         * (See 3GPP2 N.S0005 and TIA-41)
+         */
+        const Int32 TELESERVICE_NOT_SET           = 0x0000;
+        const Int32 TELESERVICE_WMT               = 0x1002;
+        const Int32 TELESERVICE_VMN               = 0x1003;
+        const Int32 TELESERVICE_WAP               = 0x1004;
+        const Int32 TELESERVICE_WEMT              = 0x1005;
+        const Int32 TELESERVICE_SCPT              = 0x1006;
+        const Int32 TELESERVICE_CT_WAP            = 0xFDEA;
+
+        /**
+         * The following are defined as extensions to the standard teleservices
+         */
+        // Voice mail notification through Message Waiting Indication in CDMA mode or Analog mode.
+        // Defined in 3GPP2 C.S-0005, 3.7.5.6, an Info Record containing an 8-bit number with the
+        // number of messages waiting, it's used by some CDMA carriers for a voice mail count.
+        const Int32 TELESERVICE_MWI               = 0x40000;
+
+        // Service Categories for Cell Broadcast, see 3GPP2 C.R1001 table 9.3.1-1
+        // static final int SERVICE_CATEGORY_EMERGENCY      = 0x0001;
+        //...
+
+        // CMAS alert service category assignments, see 3GPP2 C.R1001 table 9.3.3-1
+        const Int32 SERVICE_CATEGORY_CMAS_PRESIDENTIAL_LEVEL_ALERT  = 0x1000;
+        const Int32 SERVICE_CATEGORY_CMAS_EXTREME_THREAT            = 0x1001;
+        const Int32 SERVICE_CATEGORY_CMAS_SEVERE_THREAT             = 0x1002;
+        const Int32 SERVICE_CATEGORY_CMAS_CHILD_ABDUCTION_EMERGENCY = 0x1003;
+        const Int32 SERVICE_CATEGORY_CMAS_TEST_MESSAGE              = 0x1004;
+        const Int32 SERVICE_CATEGORY_CMAS_LAST_RESERVED_VALUE       = 0x10ff;
     }
 
     }//Cdma

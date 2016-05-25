@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
     namespace Droid {
@@ -7,24 +9,30 @@ module {
     namespace Telephony {
     namespace Gsm {
 
+    /**
+     * @Involve
+     * interface IHandler
+     * interface IIccConstants
+     */
     interface IUsimPhoneBookManager {
         Reset();
 
-        LoadEfFilesFromUsim();
+        LoadEfFilesFromUsim(
+            [out] IArrayList** result);
 
         InvalidateCache();
 
         UpdateEmailFile(
-            [in] Int32 adnRecNum, 
-            [in] String oldEmail, 
-            [in] String newEmail, 
+            [in] Int32 adnRecNum,
+            [in] String oldEmail,
+            [in] String newEmail,
             [in] Int32 efidIndex,
             [out] Boolean* result);
 
         UpdateAnrFile(
-            [in] Int32 adnRecNum, 
-            [in] String oldAnr, 
-            [in] String newAnr, 
+            [in] Int32 adnRecNum,
+            [in] String oldAnr,
+            [in] String newAnr,
             [in] Int32 efidIndex,
             [out] Boolean* result);
 
@@ -32,21 +40,34 @@ module {
             [in] Int32 adnIndex,
             [out] Int32* result);
 
-        ParseType1EmailFile(
-            [in] Int32 numRecs, 
-            [in] Int32 pbrIndex);
+        GetAnrCount(
+            [out] Int32* result);
 
-        ParseType1AnrFile(
-            [in] Int32 numRecs, 
-            [in] Int32 pbrIndex);
+        GetEmailCount(
+            [out] Int32* result);
 
-        HandleMessage(
-            [in] Message msg);
+        GetSpareAnrCount(
+            [out] Int32* result);
 
-        ParseTag(
-            [in] SimTlv tlv, 
-            [in] Int32 recNum);
+        GetSpareEmailCount(
+            [out] Int32* result);
 
+        GetUsimAdnCount(
+            [out] Int32* result);
+
+        GetEmptyEmailNum_Pbrindex(
+            [in] Int32 pbrindex,
+            [out] Int32* result);
+
+        GetEmptyAnrNum_Pbrindex(
+            [in] Int32 pbrindex,
+            [out] Int32* result);
+
+        GetEmailFilesCountEachAdn(
+            [out] Int32* result);
+
+        GetAnrFilesCountEachAdn(
+            [out] Int32* result);
     }
 
     }//Gsm

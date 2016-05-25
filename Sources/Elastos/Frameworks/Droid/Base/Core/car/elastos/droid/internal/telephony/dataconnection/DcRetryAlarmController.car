@@ -8,6 +8,11 @@ module {
     namespace DataConnection {
 
     interface IDcRetryAlarmController {
+
+        StartRetryAlarm(
+            [in] Int32 what,
+            [in] Int32 tag,
+            [in] Int32 delay);
     }
 
     }//DataConnection

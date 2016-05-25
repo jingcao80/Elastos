@@ -8,8 +8,56 @@ module {
     namespace Cdma {
 
     interface IUserData {
-        StringToAscii(String str);
+        /**
+         * User data encoding types.
+         * (See 3GPP2 C.R1001-F, v1.0, table 9.1-1)
+         */
+        const Int32 ENCODING_OCTET                      = 0x00;
+        const Int32 ENCODING_IS91_EXTENDED_PROTOCOL     = 0x01;
+        const Int32 ENCODING_7BIT_ASCII                 = 0x02;
+        const Int32 ENCODING_IA5                        = 0x03;
+        const Int32 ENCODING_UNICODE_16                 = 0x04;
+        const Int32 ENCODING_SHIFT_JIS                  = 0x05;
+        const Int32 ENCODING_KOREAN                     = 0x06;
+        const Int32 ENCODING_LATIN_HEBREW               = 0x07;
+        const Int32 ENCODING_LATIN                      = 0x08;
+        const Int32 ENCODING_GSM_7BIT_ALPHABET          = 0x09;
+        const Int32 ENCODING_GSM_DCS                    = 0x0A;
 
+        /**
+         * User data message type encoding types.
+         * (See 3GPP2 C.S0015-B, 4.5.2 and 3GPP 23.038, Section 4)
+         */
+        const Int32 ENCODING_GSM_DCS_7BIT               = 0x00;
+        const Int32 ENCODING_GSM_DCS_8BIT               = 0x01;
+        const Int32 ENCODING_GSM_DCS_16BIT              = 0x02;
+
+        /**
+         * IS-91 message types.
+         * (See TIA/EIS/IS-91-A-ENGL 1999, table 3.7.1.1-3)
+         */
+        const Int32 IS91_MSG_TYPE_VOICEMAIL_STATUS   = 0x82;
+        const Int32 IS91_MSG_TYPE_SHORT_MESSAGE_FULL = 0x83;
+        const Int32 IS91_MSG_TYPE_CLI                = 0x84;
+        const Int32 IS91_MSG_TYPE_SHORT_MESSAGE      = 0x85;
+
+        /**
+         * Only elements between these indices in the ASCII table are printable.
+         */
+        const Int32 PRINTABLE_ASCII_MIN_INDEX = 0x20;
+        const Int32 ASCII_NL_INDEX = 0x0A;
+        const Int32 ASCII_CR_INDEX = 0x0D;
+
+        /**
+         * Mapping for ASCII values less than 32 are flow control signals
+         * and not used here.
+         */
+        const Int32 ASCII_MAP_BASE_INDEX = 0x20;
+        const Int32 ASCII_MAP_MAX_INDEX = 0x7E; // ASCII_MAP_BASE_INDEX + ASCII_MAP.length - 1;
+
+        StringToAscii(
+            [in] String str,
+            [out, callee] ArrayOf<Byte>* result);
     }
 
     }//Cdma

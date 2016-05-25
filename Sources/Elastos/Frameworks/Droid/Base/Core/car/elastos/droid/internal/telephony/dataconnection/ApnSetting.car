@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
@@ -7,26 +9,29 @@ module {
     namespace Telephony {
     namespace DataConnection {
 
+    enum ApnProfileType {
+        PROFILE_TYPE_APN = 0,
+        PROFILE_TYPE_CDMA = 1,
+        PROFILE_TYPE_OMH = 2
+
+        // int id;
+
+        // private ApnProfileType(int i) {
+        //     this.id = i;
+        // }
+
+        // public int getid() {
+        //     return id;
+        // }
+    }
+
     interface IApnSetting {
-        Getid(
-            [out] Int32* result);
-
-        FromString(
-            [in] String data,
-            [out] ApnSetting* result);
-
-        ArrayFromString(
-            [in] String data);
 
         HasMvnoParams(
             [out] Boolean* result);
 
         CanHandleType(
             [in] String type,
-            [out] Boolean* result);
-
-        Equals(
-            [in] Object o,
             [out] Boolean* result);
 
         GetApnProfileType(
@@ -41,6 +46,16 @@ module {
         ToHash(
             [out] String* result);
 
+    }
+
+    interface IApnSettingHelper {
+        FromString(
+            [in] String data,
+            [out] IApnSetting** result);
+
+        ArrayFromString(
+            [in] String data,
+            [out] IList** result);
     }
 
     }//DataConnection

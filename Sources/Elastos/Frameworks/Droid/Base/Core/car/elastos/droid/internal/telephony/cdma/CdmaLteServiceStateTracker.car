@@ -7,22 +7,11 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    /**
+     * @Involve
+     * interface ICdmaServiceStateTracker
+     */
     interface ICdmaLteServiceStateTracker {
-        Dispose();
-
-        HandleMessage(
-            [in] Message msg);
-
-        PollState();
-
-        IsConcurrentVoiceAndDataAllowed(
-            [out] Boolean* result);
-
-        GetAllCellInfo();
-
-        PowerOffRadioSafely(
-            [in] DcTrackerBase dcTracker);
-
     }
 
     }//Cdma

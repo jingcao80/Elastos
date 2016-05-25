@@ -1,5 +1,10 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Internal.Telephony.ISmsStorageMonitor;
+    interface Elastos.Droid.Internal.Telephony.IPhoneBase;
+    interface Elastos.Droid.Internal.Telephony.Cdma.ICdmaSMSDispatcher;
 
     namespace Elastos {
     namespace Droid {
@@ -7,7 +12,23 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    /**
+     * @Involve
+     * interface IInboundSmsHandler
+     */
     interface ICdmaInboundSmsHandler {
+    }
+
+    interface ICdmaInboundSmsHandlerHelper {
+        /**
+         * Wait for state machine to enter startup state. We can't send any messages until then.
+         */
+        MakeInboundSmsHandler(
+            [in] IContext* context,
+            [in] ISmsStorageMonitor* storageMonitor,
+            [in] IPhoneBase* phone,
+            [in] ICdmaSMSDispatcher* smsDispatcher,
+            [out] ICdmaInboundSmsHandler** result);
     }
 
     }//Cdma

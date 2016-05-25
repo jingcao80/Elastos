@@ -7,52 +7,16 @@ module {
     namespace Telephony {
     namespace Gsm {
 
+    /**
+     * @Involve
+     * interface IConnection
+     */
     interface IGsmConnection {
-        GsmConnection(
-            [in] Context context, 
-            [in] DriverCall dc, 
-            [in] GsmCallTracker ct, 
-            [in] Int32 index);
-
-        GsmConnection(
-            [in] Context context, 
-            [in] String dialString, 
-            [in] GsmCallTracker ct, 
-            [in] GsmCall parent);
 
         Dispose();
 
-        GetCall(
-            [out] GsmCall* result);
-
-        GetDisconnectTime(
-            [out] Int64* result);
-
-        GetHoldDurationMillis(
-            [out] Int64* result);
-
-        GetDisconnectCause(
+        GetPreciseDisconnectCause(
             [out] Int32* result);
-
-        GetState(
-            [out] State* result);
-
-        GetPostDialState(
-            [out] PostDialState* result);
-
-        ProceedAfterWaitChar();
-
-        ProceedAfterWildChar(
-            [in] String str);
-
-        CancelPostDial();
-
-        DisconnectCauseFromCode(
-            [in] Int32 causeCode,
-            [out] Int32* result);
-
-        Update(
-            [in] DriverCall dc);
 
     }
 

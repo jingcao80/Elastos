@@ -1,5 +1,8 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Internal.Telephony.IPhoneBase;
 
     namespace Elastos {
     namespace Droid {
@@ -7,7 +10,23 @@ module {
     namespace Telephony {
     namespace Gsm {
 
+    /**
+     * @Involve
+     * interface ICellBroadcastHandler
+     */
     interface IGsmCellBroadcastHandler {
+    }
+
+    interface IGsmCellBroadcastHandlerHelper {
+        /**
+         * Create a new CellBroadcastHandler.
+         * @param context the context to use for dispatching Intents
+         * @return the new handler
+         */
+        MakeGsmCellBroadcastHandler(
+            [in] IContext* context,
+            [in] IPhoneBase* phone,
+            [out] IGsmCellBroadcastHandler** result);
     }
 
     }//Gsm

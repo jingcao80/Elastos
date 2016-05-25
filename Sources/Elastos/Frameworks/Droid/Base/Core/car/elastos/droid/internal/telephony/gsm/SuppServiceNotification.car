@@ -8,6 +8,30 @@ module {
     namespace Gsm {
 
     interface ISuppServiceNotification {
+        const Int32 NOTIFICATION_TYPE_MO = 0;
+        const Int32 NOTIFICATION_TYPE_MT = 1;
+
+        const Int32 MO_CODE_UNCONDITIONAL_CF_ACTIVE     = 0;
+        const Int32 MO_CODE_SOME_CF_ACTIVE              = 1;
+        const Int32 MO_CODE_CALL_FORWARDED              = 2;
+        const Int32 MO_CODE_CALL_IS_WAITING             = 3;
+        const Int32 MO_CODE_CUG_CALL                    = 4;
+        const Int32 MO_CODE_OUTGOING_CALLS_BARRED       = 5;
+        const Int32 MO_CODE_INCOMING_CALLS_BARRED       = 6;
+        const Int32 MO_CODE_CLIR_SUPPRESSION_REJECTED   = 7;
+        const Int32 MO_CODE_CALL_DEFLECTED              = 8;
+
+        const Int32 MT_CODE_FORWARDED_CALL              = 0;
+        const Int32 MT_CODE_CUG_CALL                    = 1;
+        const Int32 MT_CODE_CALL_ON_HOLD                = 2;
+        const Int32 MT_CODE_CALL_RETRIEVED              = 3;
+        const Int32 MT_CODE_MULTI_PARTY_CALL            = 4;
+        const Int32 MT_CODE_ON_HOLD_CALL_RELEASED       = 5;
+        const Int32 MT_CODE_FORWARD_CHECK_RECEIVED      = 6;
+        const Int32 MT_CODE_CALL_CONNECTING_ECT         = 7;
+        const Int32 MT_CODE_CALL_CONNECTED_ECT          = 8;
+        const Int32 MT_CODE_DEFLECTED_CALL              = 9;
+        const Int32 MT_CODE_ADDITIONAL_CALL_FORWARDED   = 10;
     }
 
     }//Gsm

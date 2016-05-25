@@ -8,10 +8,14 @@ module {
     namespace DataConnection {
 
     interface IDataProfile {
-        Equals(
-            [in] Object o,
-            [out] Boolean* result);
+    }
 
+    [deprecated]
+    interface IDataProfileHelper {
+        ToParcel(
+            [in] IParcel* pc,
+            [in] ArrayOf<IDataProfile*>* dps,
+            [out] IParcel** result);
     }
 
     }//DataConnection

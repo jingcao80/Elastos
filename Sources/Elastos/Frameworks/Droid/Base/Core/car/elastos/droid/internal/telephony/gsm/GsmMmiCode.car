@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Internal.Telephony.IPhone;
 
     namespace Elastos {
     namespace Droid {
@@ -7,43 +9,25 @@ module {
     namespace Telephony {
     namespace Gsm {
 
+    /**
+     * @Involve
+     * interface IHandler
+     * interface IMmiCode
+     */
     interface IGsmMmiCode {
-        GsmMmiCode(
-            [in] GSMPhone phone, 
-            [in] UiccCardApplication app);
 
-        IsCancelable(
-            [out] Boolean* result);
+        GetPhone(
+            [out] IPhone** result);
 
-        IsPinPukCommand(
-            [out] Boolean* result);
-
-        IsActivate(
-            [out] Boolean* result);
-
-        IsDeactivate(
-            [out] Boolean* result);
-
-        IsInterrogate(
-            [out] Boolean* result);
-
-        IsRegister(
-            [out] Boolean* result);
-
-        IsErasure(
-            [out] Boolean* result);
-
+        /**
+         * Returns true if this is a USSD code that's been submitted to the
+         * network...eg, after processCode() is called
+         */
         IsPendingUSSD(
-            [out] Boolean* result);
-
-        IsUssdRequest(
             [out] Boolean* result);
 
         IsSsInfo(
             [out] Boolean* result);
-
-        SendUssd(
-            [in] String ussdMessage);
 
     }
 

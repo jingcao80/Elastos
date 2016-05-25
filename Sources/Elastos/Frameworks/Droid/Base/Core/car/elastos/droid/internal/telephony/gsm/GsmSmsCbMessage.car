@@ -10,6 +10,20 @@ module {
     interface IGsmSmsCbMessage {
     }
 
+    interface IGsmSmsCbMessageHelper {
+        /**
+         * Create a new SmsCbMessage object from one or more received PDUs. This is used by some
+         * CellBroadcastReceiver test cases, because SmsCbHeader is now package local.
+         *
+         * @param location the location (geographical scope) for the message
+         * @param pdus PDU bytes
+         */
+        // CreateSmsCbMessage(
+        //     [in] ISmsCbLocation* location,
+        //     [in] byte[][] pdus,
+        //     [out] ISmsCbMessage** result);
+    }
+
     }//Gsm
     }//Telephony
     }//Internal

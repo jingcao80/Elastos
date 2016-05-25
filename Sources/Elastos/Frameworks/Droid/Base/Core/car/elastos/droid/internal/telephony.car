@@ -123,6 +123,73 @@ module
     merge("telephony/cat/Tone.car");
     merge("telephony/cat/ToneSettings.car");
 
+    merge("telephony/cdma/sms/BearerData.car");
+    merge("telephony/cdma/sms/CdmaSmsAddress.car");
+    merge("telephony/cdma/sms/SmsEnvelope.car");
+    merge("telephony/cdma/sms/UserData.car");
+
+    merge("telephony/cdma/CDMALTEPhone.car");
+    merge("telephony/cdma/CDMAPhone.car");
+    merge("telephony/cdma/CallFailCause.car");
+    merge("telephony/cdma/CdmaCall.car");
+    merge("telephony/cdma/CdmaCallTracker.car");
+    merge("telephony/cdma/CdmaCallWaitingNotification.car");
+    merge("telephony/cdma/CdmaConnection.car");
+    merge("telephony/cdma/CdmaInboundSmsHandler.car");
+    merge("telephony/cdma/CdmaInformationRecords.car");
+    merge("telephony/cdma/CdmaLteServiceStateTracker.car");
+    merge("telephony/cdma/CdmaMmiCode.car");
+    merge("telephony/cdma/CdmaSMSDispatcher.car");
+    merge("telephony/cdma/CdmaServiceCategoryProgramHandler.car");
+    merge("telephony/cdma/CdmaServiceStateTracker.car");
+    merge("telephony/cdma/CdmaSmsBroadcastConfigInfo.car");
+    merge("telephony/cdma/CdmaSubscriptionSourceManager.car");
+    merge("telephony/cdma/EriInfo.car");
+    merge("telephony/cdma/EriManager.car");
+    merge("telephony/cdma/RuimPhoneBookInterfaceManager.car");
+    merge("telephony/cdma/SignalToneUtil.car");
+    merge("telephony/cdma/SmsMessage.car");
+
+    merge("telephony/dataconnection/ApnContext.car");
+    merge("telephony/dataconnection/ApnProfileOmh.car");
+    merge("telephony/dataconnection/ApnSetting.car");
+    merge("telephony/dataconnection/CdmaApnProfileTracker.car");
+    merge("telephony/dataconnection/DataCallResponse.car");
+    merge("telephony/dataconnection/DataConnection.car");
+    merge("telephony/dataconnection/DataProfile.car");
+    merge("telephony/dataconnection/DcAsyncChannel.car");
+    merge("telephony/dataconnection/DcFailCause.car");
+    merge("telephony/dataconnection/DcRetryAlarmController.car");
+    merge("telephony/dataconnection/DcSwitchAsyncChannel.car");
+    merge("telephony/dataconnection/DcSwitchState.car");
+    merge("telephony/dataconnection/DcTesterDeactivateAll.car");
+    merge("telephony/dataconnection/DcTesterFailBringUpAll.car");
+    merge("telephony/dataconnection/DcTracker.car");
+    merge("telephony/dataconnection/DcTrackerBase.car");
+    merge("telephony/dataconnection/DctController.car");
+    merge("telephony/dataconnection/DdsScheduler.car");
+    merge("telephony/dataconnection/DdsSchedulerAc.car");
+
+    merge("telephony/gsm/CallFailCause.car");
+    merge("telephony/gsm/GSMPhone.car");
+    merge("telephony/gsm/GsmCallTracker.car");
+    merge("telephony/gsm/GsmCellBroadcastHandler.car");
+    merge("telephony/gsm/GsmConnection.car");
+    merge("telephony/gsm/GsmInboundSmsHandler.car");
+    merge("telephony/gsm/GsmMmiCode.car");
+    merge("telephony/gsm/GsmSMSDispatcher.car");
+    merge("telephony/gsm/GsmSmsAddress.car");
+    merge("telephony/gsm/GsmSmsCbMessage.car");
+    merge("telephony/gsm/SimPhoneBookInterfaceManager.car");
+    merge("telephony/gsm/SimTlv.car");
+    merge("telephony/gsm/SmsBroadcastConfigInfo.car");
+    merge("telephony/gsm/SmsCbConstants.car");
+    merge("telephony/gsm/SmsMessage.car");
+    merge("telephony/gsm/SsData.car");
+    merge("telephony/gsm/SuppServiceNotification.car");
+    merge("telephony/gsm/UsimDataDownloadHandler.car");
+    merge("telephony/gsm/UsimPhoneBookManager.car");
+
     namespace Elastos {
     namespace Droid {
     namespace Internal {

@@ -1,5 +1,8 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Os.IHandler;
 
     namespace Elastos {
     namespace Droid {
@@ -7,63 +10,44 @@ module {
     namespace Telephony {
     namespace DataConnection {
 
+    /**
+     * @Involve
+     * interface IDcTrackerBase
+     */
     interface IDcTracker {
-        Dispose();
-
-        GetAnyDataEnabled(
-            [out] Boolean* result);
 
         GetAnyDataEnabled(
             [in] Boolean checkUserDataEnabled,
             [out] Boolean* result);
 
-        IsDisconnected(
-            [out] Boolean* result);
-
-        HandleMessage(
-            [in] Message msg);
-
         Update();
-
-        CleanUpAllConnections(
-            [in] String cause);
 
         UpdateRecords();
 
         CleanUpAllConnections(
-            [in] String cause, 
-            [in] Message disconnectAllCompleteMsg);
+            [in] String cause,
+            [in] IMessage* disconnectAllCompleteMsg);
 
         RegisterForAllDataDisconnected(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForAllDataDisconnected(
-            [in] Handler h);
+            [in] IHandler* h);
 
         SetInternalDataEnabledFlag(
-            [in] Boolean enable,
+            [in] Boolean enbl,
             [out] Boolean* result);
 
         SetInternalDataEnabled(
-            [in] Boolean enable,
-            [out] Boolean* result);
-
-        SetInternalDataEnabled(
-            [in] Boolean enable, 
-            [in] Message onCompleteMsg,
+            [in] Boolean enbl,
+            [in] IMessage* onCompleteMsg,
             [out] Boolean* result);
 
         SetDataAllowed(
-            [in] Boolean enable, 
-            [in] Message response);
-
-        GetPcscfAddress(
-            [in] String apnType);
-
-        SetImsRegistrationState(
-            [in] Boolean registered);
+            [in] Boolean enbl,
+            [in] IMessage* response);
 
     }
 

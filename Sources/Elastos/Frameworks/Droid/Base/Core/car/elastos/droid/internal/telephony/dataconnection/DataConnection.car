@@ -7,30 +7,11 @@ module {
     namespace Telephony {
     namespace DataConnection {
 
+    /**
+     * @Involve
+     * interface IStateMachine
+     */
     interface IDataConnection {
-        CmdToString(
-            [in] Int32 cmd,
-            [out] String* result);
-
-        Dispose();
-
-        GetCopyNetworkCapabilities(
-            [out] NetworkCapabilities* result);
-
-        GetCopyLinkProperties(
-            [out] LinkProperties* result);
-
-        GetIsInactive(
-            [out] Boolean* result);
-
-        GetCid(
-            [out] Int32* result);
-
-        GetApnSetting(
-            [out] ApnSetting* result);
-
-        SetLinkPropertiesHttpProxy(
-            [in] ProxyInfo proxy);
 
         IsIpv4Connected(
             [out] Boolean* result);
@@ -38,21 +19,8 @@ module {
         IsIpv6Connected(
             [out] Boolean* result);
 
-        UpdateLinkProperty(
-            [in] DataCallResponse newState,
-            [out] UpdateLinkPropertyResult* result);
-
         GetDataConnectionId(
             [out] Int32* result);
-
-        Exit();
-
-        ProcessMessage(
-            [in] Message msg,
-            [out] Boolean* result);
-
-        Slog(
-            [in] String s);
 
         ToStringSimple(
             [out] String* result);

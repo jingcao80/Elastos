@@ -1,5 +1,12 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Net.INetworkRequest;
+    interface Elastos.Droid.Internal.Telephony.IDataStateChangedCallback;
+    interface Elastos.Droid.Internal.Telephony.IPhoneProxy;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IMessenger;
+    interface Elastos.Droid.Os.ILooper;
 
     namespace Elastos {
     namespace Droid {
@@ -7,29 +14,27 @@ module {
     namespace Telephony {
     namespace DataConnection {
 
+    /**
+     * @Involve
+     * interface IHandler
+     */
     interface IDctController {
-        IsActiveSubId(
-            [in] Int64 subId,
-            [out] Boolean* result);
 
         GetDataStateChangedCallback(
-            [out] IDataStateChangedCallback* result);
-
-        GetInstance(
-            [out] DctController* result);
+            [out] IDataStateChangedCallback** result);
 
         EnableApnType(
-            [in] Int64 subId, 
+            [in] Int64 subId,
             [in] String type,
             [out] Int32* result);
 
         DisableApnType(
-            [in] Int64 subId, 
+            [in] Int64 subId,
             [in] String type,
             [out] Int32* result);
 
         IsDataConnectivityPossible(
-            [in] String type, 
+            [in] String type,
             [in] Int32 phoneId,
             [out] Boolean* result);
 
@@ -41,45 +46,45 @@ module {
             [in] Int64 reqSubId);
 
         DoPsAttach(
-            [in] NetworkRequest n);
+            [in] INetworkRequest* n);
 
         DoPsDetach();
 
         SetOnDemandDataSubId(
-            [in] NetworkRequest n);
+            [in] INetworkRequest* n);
 
         RegisterForDefaultDataSwitchInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         RegisterForOnDemandDataSwitchInfo(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         RegisterForOnDemandPsAttach(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         RegisterDdsSwitchPropService(
-            [in] Messenger messenger);
+            [in] IMessenger* messenger);
 
-        HandleMessage(
-            [in] Message msg);
-
-        DdsSwitchSerializerHandler(
-            [in] Looper looper);
-
-        UnLock();
-
-        IsLocked(
+        IsDctControllerLocked(
             [out] Boolean* result);
 
-        HandleMessage(
-            [in] Message msg);
+    }
 
+    [deprecated]
+    interface IDctControllerHelper {
+        GetInstance(
+            [out] IDctController** result);
+
+        MakeDctController(
+            [in] ArrayOf<IPhoneProxy*>* phones,
+            [in] ILooper* looper,
+            [out] IDctController** result);
     }
 
     }//DataConnection

@@ -1,5 +1,10 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IMessage;
+
+    using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
     namespace Droid {
@@ -7,25 +12,29 @@ module {
     namespace Telephony {
     namespace DataConnection {
 
+    /**
+     * @Involve
+     * interface IHandler
+     */
     interface ICdmaApnProfileTracker {
-        LoadProfiles();
 
         RegisterForModemProfileReady(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForModemProfileReady(
-            [in] Handler h);
+            [in] IHandler* h);
 
         HandleMessage(
-            [in] Message msg);
+            [in] IMessage* msg);
 
         GetApnProfile(
             [in] String serviceType,
-            [out] ApnSetting* result);
+            [out] IApnSetting** result);
 
-        GetOmhApnProfilesList();
+        GetOmhApnProfilesList(
+            [out] IArrayList** result);
 
         ClearActiveApnProfile();
 

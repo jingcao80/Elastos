@@ -7,11 +7,11 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    /**
+     * @Involve
+     * interface IIccPhoneBookInterfaceManager
+     */
     interface IRuimPhoneBookInterfaceManager {
-        Dispose();
-
-        GetAdnRecordsSize(Int32 efid);
-
     }
 
     }//Cdma

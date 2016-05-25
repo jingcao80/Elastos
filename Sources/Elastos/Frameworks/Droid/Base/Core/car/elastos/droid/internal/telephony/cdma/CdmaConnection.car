@@ -7,78 +7,25 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    /**
+     * @Involve
+     * interface IConnection
+     */
     interface ICdmaConnection {
-        CdmaConnection(
-            [in] Context context, 
-            [in] DriverCall dc, 
-            [in] CdmaCallTracker ct, 
-            [in] Int32 index);
-
         Dispose();
 
-        GetOrigDialString(
-            [out] String* result);
-
-        GetCall(
-            [out] CdmaCall* result);
-
-        GetDisconnectTime(
-            [out] Int64* result);
-
-        GetHoldDurationMillis(
-            [out] Int64* result);
-
-        GetDisconnectCause(
-            [out] Int32* result);
-
-        GetState(
-            [out] State* result);
-
-        GetPostDialState(
-            [out] PostDialState* result);
-
-        ProceedAfterWaitChar();
-
-        ProceedAfterWildChar(
-            [in] String str);
-
-        CancelPostDial();
-
-        DisconnectCauseFromCode(
-            [in] Int32 causeCode,
-            [out] Int32* result);
-
-        Update(
-            [in] DriverCall dc);
-
-        GetRemainingPostDialString(
-            [out] String* result);
-
         UpdateParent(
-            [in] CdmaCall oldParent, 
-            [in] CdmaCall newParent);
-
-        ProcessNextPostDialChar();
-
-        FormatDialString(
-            [in] String phoneNumber,
-            [out] String* result);
-
-        GetNumberPresentation(
-            [out] Int32* result);
-
-        GetUUSInfo(
-            [out] UUSInfo* result);
+            [in] ICdmaCall* oldParent,
+            [in] ICdmaCall* newParent);
 
         GetPreciseDisconnectCause(
             [out] Int32* result);
+    }
 
-        GetOrigConnection(
-            [out] Connection* result);
-
-        IsMultiparty(
-            [out] Boolean* result);
-
+    interface ICdmaConnectionHelper {
+        FormatDialString(
+            [in] String phoneNumber,
+            [out] String* result);
     }
 
     }//Cdma

@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IHandler;
 
     namespace Elastos {
     namespace Droid {
@@ -7,37 +9,20 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    /**
+     * @Involve
+     * interface ICallTracker
+     */
     interface ICdmaCallTracker {
         Dispose();
 
-        RegisterForVoiceCallStarted(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForVoiceCallStarted(
-            [in] Handler h);
-
-        RegisterForVoiceCallEnded(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForVoiceCallEnded(
-            [in] Handler h);
-
         RegisterForCallWaiting(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForCallWaiting(
-            [in] Handler h);
-
-
-        IsInEmergencyCall(
-            [out] Boolean* result);
-
+            [in] IHandler* h);
     }
 
     }//Cdma

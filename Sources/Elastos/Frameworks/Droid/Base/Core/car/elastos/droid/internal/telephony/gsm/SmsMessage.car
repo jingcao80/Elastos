@@ -1,5 +1,9 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Internal.Telephony.IGsmAlphabetTextEncodingDetails;
+
+    using interface Elastos.Core.ICharSequence;
 
     namespace Elastos {
     namespace Droid {
@@ -7,22 +11,258 @@ module {
     namespace Telephony {
     namespace Gsm {
 
+    /**
+     * @Involve
+     * interface ISubmitPduBase
+     */
+    interface ISmsMessageSubmitPdu {
+    }
+
+    /**
+     * @Involve
+     * interface ISmsMessageBase
+     */
     interface ISmsMessage {
-        interface ISmsMessageSubmitPdu {
-        }
-
-
-
-
-        GetMessageClass(
-            [out] MessageClass* result);
-
-        IsUsimDataDownload(
+        /**
+         * 3GPP TS 23.040 9.2.3.9 specifies that Type Zero messages are indicated
+         * by TP_PID field set to value 0x40
+         */
+        IsTypeZero(
             [out] Boolean* result);
 
         GetNumOfVoicemails(
             [out] Int32* result);
 
+    }
+
+    [deprecated]
+    interface ISmsMessageHelper {
+        /**
+         * Create an SmsMessage from a raw PDU.
+         */
+        CreateFromPdu(
+            [in] ArrayOf<Byte>* pdu,
+            [out] ISmsMessage** result);
+
+        /**
+         * TS 27.005 3.4.1 lines[0] and lines[1] are the two lines read from the
+         * +CMT unsolicited response (PDU mode, of course)
+         *  +CMT: [&lt;alpha>],<length><CR><LF><pdu>
+         *
+         * Only public for debugging
+         *
+         * {@hide}
+         */
+        NewFromCMT(
+            [in] ArrayOf<String>* lines,
+            [out] ISmsMessage** result);
+
+        /** @hide */
+        NewFromCDS(
+            [in] String line,
+            [out] ISmsMessage** result);
+
+        /**
+         * Create an SmsMessage from an SMS EF record.
+         *
+         * @param index Index of SMS record. This should be index in ArrayList
+         *              returned by SmsManager.getAllMessagesFromSim + 1.
+         * @param data Record data.
+         * @return An SmsMessage representing the record.
+         *
+         * @hide
+         */
+        CreateFromEfRecord(
+            [in] Int32 index,
+            [in] ArrayOf<Byte>* data,
+            [out] ISmsMessage** result);
+
+        /**
+         * Get the TP-Layer-Length for the given SMS-SUBMIT PDU Basically, the
+         * length in bytes (not hex chars) less the SMSC header
+         */
+        GetTPLayerLengthForPDU(
+            [in] String pdu,
+            [out] Int32* result);
+
+        /**
+         * Get Encoded Relative Validty Period Value from Validity period in mins.
+         *
+         * @param validityPeriod Validity period in mins.
+         *
+         * Refer specification 3GPP TS 23.040 V6.8.1 section 9.2.3.12.1.
+         * ||relValidityPeriod (TP-VP)  ||                 ||  validityPeriod   ||
+         *
+         *      0 to 143                            --->       (TP-VP + 1) x 5 minutes
+         *
+         *      144 to 167                         --->        12 hours + ((TP-VP -143) x 30 minutes)
+         *
+         *      168 to 196                         --->        (TP-VP - 166) x 1 day
+         *
+         *      197 to 255                         --->        (TP-VP - 192) x 1 week
+         *
+         * @return relValidityPeriod Encoded Relative Validity Period Value.
+         * @hide
+         */
+        GetRelativeValidityPeriod(
+            [in] Int32 validityPeriod,
+            [out] Int32* result);
+
+        /**
+         * Get an SMS-SUBMIT PDU for a destination address and a message
+         *
+         * @param scAddress Service Centre address.  Null means use default.
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         * @hide
+         */
+        GetSubmitPdu(
+            [in] String scAddress,
+            [in] String destinationAddress,
+            [in] String message,
+            [in] Boolean statusReportRequested,
+            [in] ArrayOf<Byte>* header,
+            [out] ISmsMessageSubmitPdu** result);
+
+        /**
+         * Get an SMS-SUBMIT PDU for a destination address and a message using the
+         * specified encoding.
+         *
+         * @param scAddress Service Centre address.  Null means use default.
+         * @param encoding Encoding defined by constants in
+         *        com.android.internal.telephony.SmsConstants.ENCODING_*
+         * @param languageTable
+         * @param languageShiftTable
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         * @hide
+         */
+        GetSubmitPdu(
+            [in] String scAddress,
+            [in] String destinationAddress,
+            [in] String message,
+            [in] Boolean statusReportRequested,
+            [in] ArrayOf<Byte>* header,
+            [in] Int32 encoding,
+            [in] Int32 languageTable,
+            [in] Int32 languageShiftTable,
+            [out] ISmsMessageSubmitPdu** result);
+
+        /**
+         * Get an SMS-SUBMIT PDU for a destination address and a message using the
+         * specified encoding.
+         *
+         * @param scAddress Service Centre address.  Null means use default.
+         * @param encoding Encoding defined by constants in
+         *        com.android.internal.telephony.SmsConstants.ENCODING_*
+         * @param languageTable
+         * @param languageShiftTable
+         * @param validityPeriod Validity Period of the message in Minutes.
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         * @hide
+         */
+        GetSubmitPdu(
+            [in] String scAddress,
+            [in] String destinationAddress,
+            [in] String message,
+            [in] Boolean statusReportRequested,
+            [in] ArrayOf<Byte>* header,
+            [in] Int32 encoding,
+            [in] Int32 languageTable,
+            [in] Int32 languageShiftTable,
+            [in] Int32 validityPeriod,
+            [out] ISmsMessageSubmitPdu** result);
+
+        /**
+         * Get an SMS-SUBMIT PDU for a destination address and a message
+         *
+         * @param scAddress Service Centre address.  Null means use default.
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         */
+        GetSubmitPdu(
+            [in] String scAddress,
+            [in] String destinationAddress,
+            [in] String message,
+            [in] Boolean statusReportRequested,
+            [out] ISmsMessageSubmitPdu** result);
+
+        /**
+         * Get an SMS-SUBMIT PDU for a destination address and a message
+         *
+         * @param scAddress Service Centre address.  Null means use default.
+         * @param destinationAddress the address of the destination for the message
+         * @param statusReportRequested staus report of the message Requested
+         * @param validityPeriod Validity Period of the message in Minutes.
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         */
+        GetSubmitPdu(
+            [in] String scAddress,
+            [in] String destinationAddress,
+            [in] String message,
+            [in] Boolean statusReportRequested,
+            [in] Int32 validityPeriod,
+            [out] ISmsMessageSubmitPdu** result);
+
+        /**
+         * Get an SMS-SUBMIT PDU for a data message to a destination address &amp; port
+         *
+         * @param scAddress Service Centre address. null == use default
+         * @param destinationAddress the address of the destination for the message
+         * @param destinationPort the port to deliver the message to at the
+         *        destination
+         * @param data the data for the message
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         */
+        GetSubmitPdu(
+            [in] String scAddress,
+            [in] String destinationAddress,
+            [in] Int32 destinationPort,
+            [in] ArrayOf<Byte>* data,
+            [in] Boolean statusReportRequested,
+            [out] ISmsMessageSubmitPdu** result);
+
+        /**
+         * Get an SMS-SUBMIT PDU for a data message to a destination address and port
+         *
+         * @param scAddress Service Centre address. null == use default
+         * @param destinationAddress the address of the destination for the message
+         * @param destinationPort the port to deliver the message to at the destination
+         * @param originatorPort the originator port set by the sender
+         * @param data the data for the message
+         * @return a <code>SubmitPdu</code> containing the encoded SC
+         *         address, if applicable, and the encoded message.
+         *         Returns null on encode error.
+         */
+        GetSubmitPdu(
+            [in] String scAddress,
+            [in] String destinationAddress,
+            [in] Int32 destinationPort,
+            [in] Int32 originatorPort,
+            [in] ArrayOf<Byte>* data,
+            [in] Boolean statusReportRequested,
+            [out] ISmsMessageSubmitPdu** result);
+
+        /**
+         * Calculate the number of septets needed to encode the message.
+         *
+         * @param msgBody the message to encode
+         * @param use7bitOnly ignore (but still count) illegal characters if true
+         * @return TextEncodingDetails
+         */
+        CalculateLength(
+            [in] ICharSequence* msgBody,
+            [in] Boolean use7bitOnly,
+            [out] IGsmAlphabetTextEncodingDetails** result);
     }
 
     }//Gsm

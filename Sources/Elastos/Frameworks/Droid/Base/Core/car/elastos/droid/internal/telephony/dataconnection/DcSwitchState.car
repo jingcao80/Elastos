@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IHandler;
 
     namespace Elastos {
     namespace Droid {
@@ -7,12 +9,29 @@ module {
     namespace Telephony {
     namespace DataConnection {
 
+    /**
+     * @Involve
+     * interface IStateMachine
+     */
     interface IDcSwitchState {
+
+        NotifyDataConnection(
+            [in] Int32 phoneId,
+            [in] String state,
+            [in] String reason,
+            [in] String apnName,
+            [in] String apnType,
+            [in] Boolean unavailable);
+
         CleanupAllConnection();
 
-        RegisterForIdle(Handler h, Int32 what, Object obj);
+        RegisterForIdle(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
-        UnregisterForIdle(Handler h);
+        UnregisterForIdle(
+            [in] IHandler* h);
 
         TransitToIdleState();
 

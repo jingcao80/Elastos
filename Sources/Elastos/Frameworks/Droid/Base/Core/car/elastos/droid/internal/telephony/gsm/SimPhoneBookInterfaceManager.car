@@ -7,11 +7,11 @@ module {
     namespace Telephony {
     namespace Gsm {
 
+    /**
+     * @Involve
+     * interface IIccPhoneBookInterfaceManager
+     */
     interface ISimPhoneBookInterfaceManager {
-        Dispose();
-
-        GetAdnRecordsSize(Int32 efid);
-
     }
 
     }//Gsm

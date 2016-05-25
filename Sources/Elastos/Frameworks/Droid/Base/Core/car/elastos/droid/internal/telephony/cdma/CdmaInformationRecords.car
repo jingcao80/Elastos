@@ -7,38 +7,48 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    interface ICdmaInformationRecordsCdmaSignalInfoRec {
+    }
+
+    interface ICdmaInformationRecordsCdmaDisplayInfoRec {
+    }
+
+    interface ICdmaInformationRecordsCdmaNumberInfoRec {
+    }
+
+    interface ICdmaInformationRecordsCdmaRedirectingNumberInfoRec {
+    }
+
+    interface ICdmaInformationRecordsCdmaLineControlInfoRec {
+    }
+
+    interface ICdmaInformationRecordsCdmaT53ClirInfoRec {
+    }
+
+    interface ICdmaInformationRecordsCdmaT53AudioControlInfoRec {
+    }
+
     interface ICdmaInformationRecords {
+        /**
+         * Record type identifier
+         */
+        const Int32 RIL_CDMA_DISPLAY_INFO_REC = 0;
+        const Int32 RIL_CDMA_CALLED_PARTY_NUMBER_INFO_REC = 1;
+        const Int32 RIL_CDMA_CALLING_PARTY_NUMBER_INFO_REC = 2;
+        const Int32 RIL_CDMA_CONNECTED_NUMBER_INFO_REC = 3;
+        const Int32 RIL_CDMA_SIGNAL_INFO_REC = 4;
+        const Int32 RIL_CDMA_REDIRECTING_NUMBER_INFO_REC = 5;
+        const Int32 RIL_CDMA_LINE_CONTROL_INFO_REC = 6;
+        const Int32 RIL_CDMA_EXTENDED_DISPLAY_INFO_REC = 7;
+        const Int32 RIL_CDMA_T53_CLIR_INFO_REC = 8;
+        const Int32 RIL_CDMA_T53_RELEASE_INFO_REC = 9;
+        const Int32 RIL_CDMA_T53_AUDIO_CONTROL_INFO_REC = 10;
+    }
+
+    interface ICdmaInformationRecordsHelper {
         IdToString(
             [in] Int32 id,
             [out] String* result);
-
-        interface ICdmaInformationRecordsCdmaSignalInfoRec {
-        }
-
-        CdmaSignalInfoRec(
-            [in] Int32 isPresent, 
-            [in] Int32 signalType, 
-            [in] Int32 alertPitch, 
-            [in] Int32 signal);
-
-        interface ICdmaInformationRecordsCdmaDisplayInfoRec {
-        }
-
-        interface ICdmaInformationRecordsCdmaNumberInfoRec {
-        }
-
-        interface ICdmaInformationRecordsCdmaRedirectingNumberInfoRec {
-        }
-
-        interface ICdmaInformationRecordsCdmaLineControlInfoRec {
-        }
-
-        interface ICdmaInformationRecordsCdmaT53ClirInfoRec {
-        }
-
-        interface ICdmaInformationRecordsCdmaT53AudioControlInfoRec {
-        }
-
     }
 
     }//Cdma

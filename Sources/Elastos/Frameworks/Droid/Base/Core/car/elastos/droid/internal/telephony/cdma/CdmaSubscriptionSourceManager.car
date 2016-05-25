@@ -1,5 +1,9 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Internal.Telephony.ICommandsInterface;
 
     namespace Elastos {
     namespace Droid {
@@ -7,20 +11,40 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    /**
+     * @Involve
+     * interface IHandler
+     */
     interface ICdmaSubscriptionSourceManager {
-        Dispose(
-            [in] Handler h);
+        const Int32 SUBSCRIPTION_SOURCE_UNKNOWN = -1;
+        const Int32 SUBSCRIPTION_FROM_RUIM      = 0; /* CDMA subscription from RUIM */
+        const Int32 SUBSCRIPTION_FROM_NV        = 1; /* CDMA subscription from NV */
+        const Int32 PREFERRED_CDMA_SUBSCRIPTION = SUBSCRIPTION_FROM_NV;
 
-        HandleMessage(
-            [in] Message msg);
+        Dispose(
+            [in] IHandler* h);
 
         GetCdmaSubscriptionSource(
             [out] Int32* result);
+    }
+
+    interface ICdmaSubscriptionSourceManagerHelper {
+        /**
+         * This function creates a single instance of this class
+         *
+         * @return object of type CdmaSubscriptionSourceManager
+         */
+        GetInstance(
+            [in] IContext* context,
+            [in] ICommandsInterface* ci,
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj,
+            [out] ICdmaSubscriptionSourceManager** result);
 
         GetDefault(
-            [in] Context context,
+            [in] IContext* context,
             [out] Int32* result);
-
     }
 
     }//Cdma

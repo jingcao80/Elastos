@@ -7,21 +7,13 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    /**
+     * @Involve
+     * interface ICall
+     */
     interface ICdmaCall {
-        CdmaCall(
-            [in] CdmaCallTracker owner);
 
         Dispose();
-
-        IsMultiparty(
-            [out] Boolean* result);
-
-        Update(
-            [in] CdmaConnection conn, 
-            [in] DriverCall dc);
-
-        ClearDisconnected();
-
     }
 
     }//Cdma

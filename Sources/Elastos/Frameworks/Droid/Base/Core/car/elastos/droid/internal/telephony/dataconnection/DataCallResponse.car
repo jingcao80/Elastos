@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Net.ILinkProperties;
 
     namespace Elastos {
     namespace Droid {
@@ -7,9 +9,35 @@ module {
     namespace Telephony {
     namespace DataConnection {
 
+    /**
+     * Class returned by onSetupConnectionCompleted.
+     */
+    enum SetupResult {
+        SUCCESS,
+        ERR_BadCommand,
+        ERR_UnacceptableParameter,
+        ERR_GetLastErrorFromRil,
+        ERR_Stale,
+        ERR_RilError
+
+        // public DcFailCause mFailCause;
+
+        // SetupResult() {
+        //     mFailCause = DcFailCause.fromInt(0);
+        // }
+
+        // @Override
+        // public String toString() {
+        //     return name() + "  SetupResult.mFailCause=" + mFailCause;
+        // }
+    }
+
     interface IDataCallResponse {
 
-
+        SetLinkProperties(
+            [in] ILinkProperties* linkProperties,
+            [in] Boolean okToUseSystemPropertyDns,
+            [out] SetupResult* result);
 
     }
 

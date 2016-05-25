@@ -7,23 +7,12 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    /**
+     * @Involve
+     * interface IHandler
+     * interface IMmiCode
+     */
     interface ICdmaMmiCode {
-        CdmaMmiCode(
-            [in] CDMAPhone phone, 
-            [in] UiccCardApplication app);
-
-        IsCancelable(
-            [out] Boolean* result);
-
-        IsPinPukCommand(
-            [out] Boolean* result);
-
-        IsRegister(
-            [out] Boolean* result);
-
-        IsUssdRequest(
-            [out] Boolean* result);
-
     }
 
     }//Cdma

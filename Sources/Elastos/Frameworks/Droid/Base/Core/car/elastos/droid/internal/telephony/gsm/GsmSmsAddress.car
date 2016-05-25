@@ -7,15 +7,11 @@ module {
     namespace Telephony {
     namespace Gsm {
 
+    /**
+     * @Involve
+     * interface ISmsAddress
+     */
     interface IGsmSmsAddress {
-        GetAddressString(
-            [out] String* result);
-
-        IsAlphanumeric(
-            [out] Boolean* result);
-
-        IsNetworkSpecific(
-            [out] Boolean* result);
 
         IsCphsVoiceMessageIndicatorAddress(
             [out] Boolean* result);

@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Net.INetworkRequest;
 
     namespace Elastos {
     namespace Droid {
@@ -7,57 +9,24 @@ module {
     namespace Telephony {
     namespace DataConnection {
 
+    /**
+     * @Involve
+     * interface IStateMachine
+     */
     interface IDdsScheduler {
-        GetInstance(
-            [out] DdsScheduler* result);
-
-        Init();
-
-        AddRequest(
-            [in] NetworkRequest req);
-
-        RemoveRequest(
-            [in] NetworkRequest req);
-
-        MarkAccepted(
-            [in] NetworkRequest req);
-
-        IsAlreadyAccepted(
-            [in] NetworkRequest nr,
-            [out] Boolean* result);
-
-        GetFirstWaitingRequest(
-            [out] NetworkRequest* result);
-
-        AcceptWaitingRequest(
-            [out] Boolean* result);
-
-        NotifyRequestAccepted(
-            [in] NetworkRequest nr);
-
-        IsDdsSwitchRequired(
-            [in] NetworkRequest n,
-            [out] Boolean* result);
 
         GetCurrentDds(
             [out] Int64* result);
 
         UpdateCurrentDds(
-            [in] NetworkRequest n);
+            [in] INetworkRequest* n);
+    }
 
-        GetSubIdFromNetworkRequest(
-            [in] NetworkRequest n,
-            [out] Int64* result);
+    interface IDdsSchedulerHelper {
+        GetInstance(
+            [out] IDdsScheduler** result);
 
-        TriggerSwitch(
-            [in] NetworkRequest n);
-
-        IsMultiDataSupported(
-            [out] Boolean* result);
-
-        IsAnyRequestWaiting(
-            [out] Boolean* result);
-
+        Init();
     }
 
     }//DataConnection

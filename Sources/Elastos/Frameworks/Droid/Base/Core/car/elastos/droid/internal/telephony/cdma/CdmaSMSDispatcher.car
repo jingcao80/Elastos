@@ -7,11 +7,11 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    /**
+     * @Involve
+     * interface ISMSDispatcher
+     */
     interface ICdmaSMSDispatcher {
-        SendStatusReportMessage(SmsMessage sms);
-
-        HandleCdmaStatusReport(SmsMessage sms);
-
     }
 
     }//Cdma

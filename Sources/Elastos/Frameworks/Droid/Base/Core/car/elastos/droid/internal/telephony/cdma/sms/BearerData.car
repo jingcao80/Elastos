@@ -1,26 +1,197 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Internal.Telephony.IGsmAlphabetTextEncodingDetails;
+
+    using interface Elastos.Core.ICharSequence;
 
     namespace Elastos {
     namespace Droid {
     namespace Internal {
     namespace Telephony {
     namespace Cdma {
+    namespace Sms {
+
+    /**
+     * @Involve
+     * interface ITime
+     */
+    interface IBearerDataTimeStamp {
+        // FromByteArray(
+        //     [in] ArrayOf<Byte>* data,
+        //     [out] ITimeStamp** result);
+    }
 
     interface IBearerData {
-        interface IBearerDataTimeStamp {
-        }
+        /**
+         * Supported message types for CDMA SMS messages
+         * (See 3GPP2 C.S0015-B, v2.0, table 4.5.1-1)
+         */
+        const Int32 MESSAGE_TYPE_DELIVER        = 0x01;
+        const Int32 MESSAGE_TYPE_SUBMIT         = 0x02;
+        const Int32 MESSAGE_TYPE_CANCELLATION   = 0x03;
+        const Int32 MESSAGE_TYPE_DELIVERY_ACK   = 0x04;
+        const Int32 MESSAGE_TYPE_USER_ACK       = 0x05;
+        const Int32 MESSAGE_TYPE_READ_ACK       = 0x06;
+        const Int32 MESSAGE_TYPE_DELIVER_REPORT = 0x07;
+        const Int32 MESSAGE_TYPE_SUBMIT_REPORT  = 0x08;
+
+        /**
+         * Supported priority modes for CDMA SMS messages
+         * (See 3GPP2 C.S0015-B, v2.0, table 4.5.9-1)
+         */
+        const Int32 PRIORITY_NORMAL        = 0x0;
+        const Int32 PRIORITY_INTERACTIVE   = 0x1;
+        const Int32 PRIORITY_URGENT        = 0x2;
+        const Int32 PRIORITY_EMERGENCY     = 0x3;
+
+        /**
+         * Supported privacy modes for CDMA SMS messages
+         * (See 3GPP2 C.S0015-B, v2.0, table 4.5.10-1)
+         */
+        const Int32 PRIVACY_NOT_RESTRICTED = 0x0;
+        const Int32 PRIVACY_RESTRICTED     = 0x1;
+        const Int32 PRIVACY_CONFIDENTIAL   = 0x2;
+        const Int32 PRIVACY_SECRET         = 0x3;
+
+        /**
+         * Supported alert priority modes for CDMA SMS messages
+         * (See 3GPP2 C.S0015-B, v2.0, table 4.5.13-1)
+         */
+        const Int32 ALERT_DEFAULT          = 0x0;
+        const Int32 ALERT_LOW_PRIO         = 0x1;
+        const Int32 ALERT_MEDIUM_PRIO      = 0x2;
+        const Int32 ALERT_HIGH_PRIO        = 0x3;
+
+        /**
+         * Supported display modes for CDMA SMS messages.  Display mode is
+         * a 2-bit value used to indicate to the mobile station when to
+         * display the received message.  (See 3GPP2 C.S0015-B, v2,
+         * 4.5.16)
+         */
+        const Int32 DISPLAY_MODE_IMMEDIATE      = 0x0;
+        const Int32 DISPLAY_MODE_DEFAULT        = 0x1;
+        const Int32 DISPLAY_MODE_USER           = 0x2;
+
+        /**
+         * Language Indicator values.  NOTE: the spec (3GPP2 C.S0015-B,
+         * v2, 4.5.14) is ambiguous as to the meaning of this field, as it
+         * refers to C.R1001-D but that reference has been crossed out.
+         * It would seem reasonable to assume the values from C.R1001-F
+         * (table 9.2-1) are to be used instead.
+         */
+        const Int32 LANGUAGE_UNKNOWN  = 0x00;
+        const Int32 LANGUAGE_ENGLISH  = 0x01;
+        const Int32 LANGUAGE_FRENCH   = 0x02;
+        const Int32 LANGUAGE_SPANISH  = 0x03;
+        const Int32 LANGUAGE_JAPANESE = 0x04;
+        const Int32 LANGUAGE_KOREAN   = 0x05;
+        const Int32 LANGUAGE_CHINESE  = 0x06;
+        const Int32 LANGUAGE_HEBREW   = 0x07;
+
+        /**
+         * SMS Message Status Codes.  The first component of the Message
+         * status indicates if an error has occurred and whether the error
+         * is considered permanent or temporary.  The second component of
+         * the Message status indicates the cause of the error (if any).
+         * (See 3GPP2 C.S0015-B, v2.0, 4.5.21)
+         */
+        /* no-error codes */
+        const Int32 ERROR_NONE                   = 0x00;
+        const Int32 STATUS_ACCEPTED              = 0x00;
+        const Int32 STATUS_DEPOSITED_TO_INTERNET = 0x01;
+        const Int32 STATUS_DELIVERED             = 0x02;
+        const Int32 STATUS_CANCELLED             = 0x03;
+        /* temporary-error and permanent-error codes */
+        const Int32 ERROR_TEMPORARY              = 0x02;
+        const Int32 STATUS_NETWORK_CONGESTION    = 0x04;
+        const Int32 STATUS_NETWORK_ERROR         = 0x05;
+        const Int32 STATUS_UNKNOWN_ERROR         = 0x1F;
+        /* permanent-error codes */
+        const Int32 ERROR_PERMANENT              = 0x03;
+        const Int32 STATUS_CANCEL_FAILED         = 0x06;
+        const Int32 STATUS_BLOCKED_DESTINATION   = 0x07;
+        const Int32 STATUS_TEXT_TOO_LONG         = 0x08;
+        const Int32 STATUS_DUPLICATE_MESSAGE     = 0x09;
+        const Int32 STATUS_INVALID_DESTINATION   = 0x0A;
+        const Int32 STATUS_MESSAGE_EXPIRED       = 0x0D;
+        /* undefined-status codes */
+        const Int32 ERROR_UNDEFINED              = 0xFF;
+        const Int32 STATUS_UNDEFINED             = 0xFF;
+
+        /**
+         * Relative time is specified as one byte, the value of which
+         * falls into a series of ranges, as specified below.  The idea is
+         * that shorter time intervals allow greater precision -- the
+         * value means minutes from zero until the MINS_LIMIT (inclusive),
+         * upon which it means hours until the HOURS_LIMIT, and so
+         * forth. (See 3GPP2 C.S0015-B, v2, 4.5.6-1)
+         */
+        const Int32 RELATIVE_TIME_MINS_LIMIT      = 143;
+        const Int32 RELATIVE_TIME_HOURS_LIMIT     = 167;
+        const Int32 RELATIVE_TIME_DAYS_LIMIT      = 196;
+        const Int32 RELATIVE_TIME_WEEKS_LIMIT     = 244;
+        const Int32 RELATIVE_TIME_INDEFINITE      = 245;
+        const Int32 RELATIVE_TIME_NOW             = 246;
+        const Int32 RELATIVE_TIME_MOBILE_INACTIVE = 247;
+        const Int32 RELATIVE_TIME_RESERVED        = 248;
 
         GetLanguage(
             [out] String* result);
-
-
-        Encode(
-            [in] BearerData bData);
-
-
     }
 
+    [deprecated]
+    interface IBearerDataHelper {
+        /**
+         * Calculate the message text encoding length, fragmentation, and other details.
+         *
+         * @param msg message text
+         * @param force7BitEncoding ignore (but still count) illegal characters if true
+         * @return septet count, or -1 on failure
+         */
+        CalcTextEncodingDetails(
+            [in] ICharSequence* msg,
+            [in] Boolean force7BitEncoding,
+            [out] IGsmAlphabetTextEncodingDetails** result);
+
+        /**
+         * Create serialized representation for BearerData object.
+         * (See 3GPP2 C.R1001-F, v1.0, section 4.5 for layout details)
+         *
+         * @param bData an instance of BearerData.
+         *
+         * @return byte array of raw encoded SMS bearer data.
+         */
+        Encode(
+            [in] IBearerData* bData,
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Create BearerData object from serialized representation.
+         * (See 3GPP2 C.R1001-F, v1.0, section 4.5 for layout details)
+         *
+         * @param smsData byte array of raw encoded SMS bearer data.
+         * @return an instance of BearerData.
+         */
+        Decode(
+            [in] ArrayOf<Byte>* smsData,
+            [out] IBearerData** result);
+
+        /**
+         * Create BearerData object from serialized representation.
+         * (See 3GPP2 C.R1001-F, v1.0, section 4.5 for layout details)
+         *
+         * @param smsData byte array of raw encoded SMS bearer data.
+         * @param serviceCategory the envelope service category (for CMAS alert handling)
+         * @return an instance of BearerData.
+         */
+        Decode(
+            [in] ArrayOf<Byte>* smsData,
+            [in] Int32 serviceCategory,
+            [out] IBearerData** result);
+    }
+
+    }//Sms
     }//Cdma
     }//Telephony
     }//Internal

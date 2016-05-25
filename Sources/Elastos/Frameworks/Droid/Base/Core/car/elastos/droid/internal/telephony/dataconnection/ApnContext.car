@@ -1,5 +1,12 @@
 
-module {
+module
+{
+    interface Elastos.Droid.App.IPendingIntent;
+    enum Elastos.Droid.Internal.Telephony.DctConstantsState;
+    interface Elastos.Droid.Internal.Telephony.DataConnection.IDcAsyncChannel;
+    interface Elastos.Droid.Internal.Telephony.DataConnection.IApnSetting;
+
+    using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
     namespace Droid {
@@ -12,22 +19,25 @@ module {
             [out] String* result);
 
         GetDcAc(
-            [out] DcAsyncChannel* result);
+            [out] IDcAsyncChannel** result);
 
         SetDataConnectionAc(
-            [in] DcAsyncChannel dcac);
+            [in] IDcAsyncChannel* dcac);
 
         GetReconnectIntent(
-            [out] PendingIntent* result);
+            [out] IPendingIntent** result);
 
         SetReconnectIntent(
-            [in] PendingIntent intent);
+            [in] IPendingIntent* intent);
 
         GetApnSetting(
-            [out] ApnSetting* result);
+            [out] IApnSetting** result);
 
         SetApnSetting(
-            [in] ApnSetting apnSetting);
+            [in] IApnSetting* apnSetting);
+
+        SetWaitingApns(
+            [in] IArrayList* waitingApns);
 
         GetWaitingApnsPermFailCount(
             [out] Int32* result);
@@ -35,15 +45,19 @@ module {
         DecWaitingApnsPermFailCount();
 
         GetNextWaitingApn(
-            [out] ApnSetting* result);
+            [out] IApnSetting** result);
 
         RemoveWaitingApn(
-            [in] ApnSetting apn);
+            [in] IApnSetting* apn);
 
-        GetWaitingApns();
+        GetWaitingApns(
+            [out] IArrayList** result);
+
+        SetState(
+            [in] DctConstantsState s);
 
         GetState(
-            [out] State* result);
+            [out] DctConstantsState* result);
 
         IsDisconnected(
             [out] Boolean* result);

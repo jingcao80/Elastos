@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Net.INetworkRequest;
 
     namespace Elastos {
     namespace Droid {
@@ -7,10 +9,25 @@ module {
     namespace Telephony {
     namespace DataConnection {
 
+    /**
+     * @Involve
+     * interface IAsyncChannel
+     */
     interface IDdsSchedulerAc {
-        AllocateDds(NetworkRequest req);
+        const Int32 BASE = 0x00084000; // IProtocol::BASE_DDS_SCHEDULER;
+        const Int32 REQ_DDS_ALLOCATION = 0x00084000; // BASE + 0;
+        const Int32 REQ_DDS_FREE = 0x00084001; // BASE + 1;
+        const Int32 EVENT_ON_DEMAND_DDS_SWITCH_DONE = 0x00084002; // BASE + 2;
+        const Int32 EVENT_ON_DEMAND_PS_ATTACH_DONE = 0x00084003; // BASE + 3;
+        const Int32 EVENT_MODEM_DATA_CAPABILITY_UPDATE = 0x00084004; // BASE + 4;
+        const Int32 EVENT_ADD_REQUEST = 0x00084005; // BASE + 5;
+        const Int32 EVENT_REMOVE_REQUEST = 0x00084006; // BASE + 6;
 
-        FreeDds(NetworkRequest req);
+        AllocateDds(
+            [in] INetworkRequest* req);
+
+        FreeDds(
+            [in] INetworkRequest* req);
 
     }
 

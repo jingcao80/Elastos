@@ -1,5 +1,14 @@
 
-module {
+module
+{
+    // interface Elastos.Droid.Os.IAsyncResult;
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Net.ILinkProperties;
+    interface Elastos.Droid.Net.INetworkCapabilities;
+    enum Elastos.Droid.Internal.Telephony.DctConstantsActivity;
+    enum Elastos.Droid.Internal.Telephony.DctConstantsState;
+    // interface Elastos.Droid.Internal.Telephony.Uicc.IIccRecords;
+    // interface Elastos.Droid.Internal.Telephony.DataConnection.IDcFailCause;
 
     namespace Elastos {
     namespace Droid {
@@ -7,26 +16,32 @@ module {
     namespace Telephony {
     namespace DataConnection {
 
+    interface IDcTrackerBaseTxRxSum {
+        Reset();
+
+        UpdateTxRxSum();
+
+    }
+
+    /**
+     * @Involve
+     * interface IHandler
+     */
+    [deprecated]
     interface IDcTrackerBase {
         Run();
-
-        interface IDcTrackerBaseTxRxSum {
-            Reset();
-
-            UpdateTxRxSum();
-
-        }
 
         Dispose();
 
         GetActivity(
-            [out] Activity* result);
+            [out] DctConstantsActivity* result);
 
         IsApnTypeActive(
             [in] String type,
             [out] Boolean* result);
 
-        GetActiveApnTypes();
+        GetActiveApnTypes(
+            [out, callee] ArrayOf<String>* result);
 
         GetActiveApnString(
             [in] String apnType,
@@ -39,39 +54,144 @@ module {
             [out] Boolean* result);
 
         SetDataEnabled(
-            [in] Boolean enable);
+            [in] Boolean enbl);
 
         GetDataEnabled(
             [out] Boolean* result);
 
-        HandleMessage(
-            [in] Message msg);
+        // abstract methods
+        RestartRadio();
+
+        Log(
+            [in] String s);
+
+        Loge(
+            [in] String s);
+
+        IsDataAllowed(
+            [out] Boolean* result);
+
+        IsApnTypeAvailable(
+            [in] String type,
+            [out] Boolean* result);
+
+        GetState(
+            [in] String apnType,
+            [out] DctConstantsState* result);
+
+        IsProvisioningApn(
+            [in] String apnType,
+            [out] Boolean* result);
+
+        SetState(
+            [in] DctConstantsState* s);
+
+        GotoIdleAndNotifyDataConnection(
+            [in] String reason);
+
+        OnTrySetupData(
+            [in] String reason,
+            [out] Boolean* result);
+
+        OnRoamingOff();
+
+        OnRoamingOn();
+
+        OnRadioAvailable();
+
+        OnRadioOffOrNotAvailable();
+
+        // OnDataSetupComplete(
+        //     [in] IAsyncResult* ar);
+
+        // OnDataSetupCompleteError(
+        //     [in] IAsyncResult* ar);
+
+        // OnDisconnectDone(
+        //     [in] Int32 connId,
+        //     [in] IAsyncResult* ar);
+
+        // OnDisconnectDcRetrying(
+        //     [in] Int32 connId,
+        //     [in] IAsyncResult* ar);
+
+        OnVoiceCallStarted();
+
+        OnVoiceCallEnded();
+
+        OnCleanUpConnection(
+            [in] Boolean tearDown,
+            [in] Int32 apnId,
+            [in] String reason);
+
+        OnCleanUpAllConnections(
+            [in] String cause);
+
+        IsDataPossible(
+            [in] String apnType,
+            [out] Boolean* result);
+
+        IsOnDemandDataPossible(
+            [in] String apnType,
+            [out] Boolean* result);
+
+        OnUpdateIcc(
+            [out] Boolean* result);
+
+        CompleteConnection(
+            [in] IApnContext* apnContext);
+
+        SetDataAllowed(
+            [in] Boolean enbl,
+            [in] IMessage* response);
+
+        GetPcscfAddress(
+            [in] String apnType,
+            [out, callee] ArrayOf<String>* result);
+
+        SetImsRegistrationState(
+            [in] Boolean registered);
+
+        // MvnoMatches(
+        //     [in] IIccRecords* r,
+        //     [in] String mvno_type,
+        //     [in] String mvno_match_data,
+        //     [out] Boolean* result);
+
+        // IsPermanentFail(
+        //     [in] IDcFailCause* dcFailCause,
+        //     [out] Boolean* result);
 
         GetAnyDataEnabled(
             [out] Boolean* result);
 
         GetLinkProperties(
             [in] String apnType,
-            [out] LinkProperties* result);
+            [out] ILinkProperties** result);
 
         GetNetworkCapabilities(
             [in] String apnType,
-            [out] NetworkCapabilities* result);
+            [out] INetworkCapabilities** result);
 
         IsApnTypeEnabled(
             [in] String apnType,
             [out] Boolean* result);
 
         SetInternalDataEnabled(
-            [in] Boolean enable,
+            [in] Boolean enbl,
             [out] Boolean* result);
 
         CleanUpAllConnections(
             [in] String cause);
 
-        StartNetStatPoll();
+        IsDisconnected(
+            [out] Boolean* result);
 
-        StopNetStatPoll();
+        SendStartNetStatPoll(
+            [in] DctConstantsActivity activity);
+
+        SendStopNetStatPoll(
+            [in] DctConstantsActivity activity);
 
         UpdateDataActivity();
 

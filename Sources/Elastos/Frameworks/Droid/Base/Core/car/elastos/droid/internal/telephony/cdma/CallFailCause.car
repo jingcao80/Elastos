@@ -1,0 +1,63 @@
+
+module {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Cdma {
+
+    /**
+     * CDMA Call fail causes covering all the possible failures that are
+     * needed to be distinguished by the UI. CDMA call failure reasons
+     * are derived from the possible call failure scenarios described
+     * in "CDMA IS2000 - Release A (C.S0005-A v6.0)" standard.
+     *
+     * {@hide}
+     *
+     */
+    interface ICallFailCause {
+        const Int32 NORMAL_CLEARING                = 16;
+        // Busy Tone
+        const Int32 USER_BUSY                      = 17;
+
+        const Int32 NORMAL_UNSPECIFIED             = 31;
+
+        // Congestion Tone
+        const Int32 NO_CIRCUIT_AVAIL               = 34;
+
+        // others
+        const Int32 ACM_LIMIT_EXCEEDED             = 68;
+        const Int32 CALL_BARRED                    = 240;
+        const Int32 FDN_BLOCKED                    = 241;
+
+        // Stk Call Control
+        const Int32 DIAL_MODIFIED_TO_USSD          = 244;
+        const Int32 DIAL_MODIFIED_TO_SS            = 245;
+        const Int32 DIAL_MODIFIED_TO_DIAL          = 246;
+
+        const Int32 CDMA_LOCKED_UNTIL_POWER_CYCLE  = 1000;
+        const Int32 CDMA_DROP                      = 1001;
+        const Int32 CDMA_INTERCEPT                 = 1002;
+        const Int32 CDMA_REORDER                   = 1003;
+        const Int32 CDMA_SO_REJECT                 = 1004;
+        const Int32 CDMA_RETRY_ORDER               = 1005;
+        const Int32 CDMA_ACCESS_FAILURE            = 1006;
+        const Int32 CDMA_PREEMPTED                 = 1007;
+
+        // For non-emergency number dialed while in emergency callback mode.
+        const Int32 CDMA_NOT_EMERGENCY             = 1008;
+
+        // Access Blocked by CDMA Network.
+        const Int32 CDMA_ACCESS_BLOCKED            = 1009;
+
+        const Int32 ERROR_UNSPECIFIED = 0xffff;
+    }
+
+    }//Cdma
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

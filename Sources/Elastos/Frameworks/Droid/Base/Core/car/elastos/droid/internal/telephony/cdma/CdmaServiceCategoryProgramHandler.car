@@ -7,6 +7,10 @@ module {
     namespace Telephony {
     namespace Cdma {
 
+    /**
+     * @Involve
+     * interface IWakeLockStateMachine
+     */
     interface ICdmaServiceCategoryProgramHandler {
     }
 

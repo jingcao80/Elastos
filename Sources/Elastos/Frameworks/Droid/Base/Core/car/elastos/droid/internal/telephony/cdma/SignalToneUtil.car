@@ -8,7 +8,67 @@ module {
     namespace Cdma {
 
     interface ISignalToneUtil {
-        Int32 GetAudioToneFromSignalInfo(Int32 signalType, Int32 alertPitch, Int32 signal);
+        /** A marker that isn't a valid TONE */
+        const Int32 CDMA_INVALID_TONE = -1;
+
+        // public final int int IS95_CONST_IR_SIGNAL_TYPE_TYPE;
+        const Int32 IS95_CONST_IR_SIGNAL_TONE = 0;
+        const Int32 IS95_CONST_IR_SIGNAL_ISDN = 1;
+        const Int32 IS95_CONST_IR_SIGNAL_IS54B = 2;
+        const Int32 IS95_CONST_IR_SIGNAL_USR_DEFD_ALERT = 4;
+
+        // public final int int IS95_CONST_IR_ALERT_PITCH_TYPE;
+        const Int32 IS95_CONST_IR_ALERT_MED = 0;
+        const Int32 IS95_CONST_IR_ALERT_HIGH = 1;
+        const Int32 IS95_CONST_IR_ALERT_LOW = 2;
+
+        // Based on 3GPP2 C.S0005-E, section 3.7.5.5 Signal,
+        // set TAPIAMSSCDMA_SIGNAL_PITCH_UNKNOWN to 0 to avoid
+        // the alert pitch to be involved in hash calculation for
+        // signal type other than IS54B.
+        const Int32 TAPIAMSSCDMA_SIGNAL_PITCH_UNKNOWN = 0;
+
+        // public final int int IS95_CONST_IR_SIGNAL_TYPE;
+        const Int32 IS95_CONST_IR_SIG_ISDN_NORMAL = 0;
+        const Int32 IS95_CONST_IR_SIG_ISDN_INTGRP = 1;
+        const Int32 IS95_CONST_IR_SIG_ISDN_SP_PRI = 2;
+        const Int32 IS95_CONST_IR_SIG_ISDN_PAT_3 = 3;
+        const Int32 IS95_CONST_IR_SIG_ISDN_PING = 4;
+        const Int32 IS95_CONST_IR_SIG_ISDN_PAT_5 = 5;
+        const Int32 IS95_CONST_IR_SIG_ISDN_PAT_6 = 6;
+        const Int32 IS95_CONST_IR_SIG_ISDN_PAT_7 = 7;
+        const Int32 IS95_CONST_IR_SIG_ISDN_OFF = 15;
+        const Int32 IS95_CONST_IR_SIG_TONE_DIAL = 0;
+        const Int32 IS95_CONST_IR_SIG_TONE_RING = 1;
+        const Int32 IS95_CONST_IR_SIG_TONE_INT = 2;
+        const Int32 IS95_CONST_IR_SIG_TONE_ABB_INT = 3;
+        const Int32 IS95_CONST_IR_SIG_TONE_REORDER = 4;
+        const Int32 IS95_CONST_IR_SIG_TONE_ABB_RE = 5;
+        const Int32 IS95_CONST_IR_SIG_TONE_BUSY = 6;
+        const Int32 IS95_CONST_IR_SIG_TONE_CONFIRM = 7;
+        const Int32 IS95_CONST_IR_SIG_TONE_ANSWER = 8;
+        const Int32 IS95_CONST_IR_SIG_TONE_CALL_W = 9;
+        const Int32 IS95_CONST_IR_SIG_TONE_PIP = 10;
+        const Int32 IS95_CONST_IR_SIG_TONE_NO_TONE = 63;
+        const Int32 IS95_CONST_IR_SIG_IS54B_NO_TONE = 0;
+        const Int32 IS95_CONST_IR_SIG_IS54B_L = 1;
+        const Int32 IS95_CONST_IR_SIG_IS54B_SS = 2;
+        const Int32 IS95_CONST_IR_SIG_IS54B_SSL = 3;
+        const Int32 IS95_CONST_IR_SIG_IS54B_SS_2 = 4;
+        const Int32 IS95_CONST_IR_SIG_IS54B_SLS = 5;
+        const Int32 IS95_CONST_IR_SIG_IS54B_S_X4 = 6;
+        const Int32 IS95_CONST_IR_SIG_IS54B_PBX_L = 7;
+        const Int32 IS95_CONST_IR_SIG_IS54B_PBX_SS = 8;
+        const Int32 IS95_CONST_IR_SIG_IS54B_PBX_SSL = 9;
+        const Int32 IS95_CONST_IR_SIG_IS54B_PBX_SLS = 10;
+        const Int32 IS95_CONST_IR_SIG_IS54B_PBX_S_X4 = 11;
+        const Int32 IS95_CONST_IR_SIG_TONE_ABBR_ALRT = 0;
+
+        GetAudioToneFromSignalInfo(
+            [in] Int32 signalType,
+            [in] Int32 alertPitch,
+            [in] Int32 signal,
+            [out] Int32* result);
 
     }
 
