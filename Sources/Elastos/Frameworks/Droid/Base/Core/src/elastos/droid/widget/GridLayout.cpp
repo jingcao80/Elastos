@@ -166,9 +166,9 @@ AutoPtr<GridLayout::PackedMap<AutoPtr<IGridLayoutSpec>, AutoPtr<IBounds> > > Gri
 
 void GridLayout::Axis::ComputeGroupBounds()
 {
-    AutoPtr< ArrayOf<IBounds*> > values = mGroupBounds->mValues;
+    AutoPtr< ArrayOf< AutoPtr<IBounds> > > values = mGroupBounds->mValues;
     for (Int32 i = 0; i < values->GetLength(); i++) {
-        Bounds* bounds = (Bounds*)(*values)[i];
+        Bounds* bounds = (Bounds*)(*values)[i].Get();
         bounds->Reset();
     }
     Int32 N;

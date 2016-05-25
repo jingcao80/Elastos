@@ -538,7 +538,7 @@ public:
     // A mutable Integer - used to avoid heap allocation during the layout operation
 
     class MutableInt
-        : public Object
+        : public ElRefBase
     {
     public:
         MutableInt();
@@ -567,7 +567,7 @@ public:
 
         CARAPI_(void) Put(K key, V value)
         {
-            PushBack(Pair<K, V>(key, value));
+            List<Pair<K, V> >::PushBack(Pair<K, V>(key, value));
         }
 
         AutoPtr< PackedMap<K, V> > Pack()
