@@ -383,10 +383,10 @@
 > Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider
 
 # ==== build DevSamples ====
- Elastos/Frameworks/Droid/DevSamples/ImageDemo/elastos/devsamples/imagedemo Elastos.DevSamples.ImageDemo.car
-> Elastos/Frameworks/Droid/DevSamples/ImageDemo/elastos/devsamples/imagedemo
- Elastos/Frameworks/Droid/DevSamples/TabHostDemo/elastos/devsamples/tabhostdemo Elastos.DevSamples.TabHostDemo.car
-> Elastos/Frameworks/Droid/DevSamples/TabHostDemo/elastos/devsamples/tabhostdemo
+ Elastos/Frameworks/Droid/DevSamples/ImageDemo Elastos.DevSamples.ImageDemo.car
+> Elastos/Frameworks/Droid/DevSamples/ImageDemo
+ Elastos/Frameworks/Droid/DevSamples/TabHostDemo Elastos.DevSamples.TabHostDemo.car
+> Elastos/Frameworks/Droid/DevSamples/TabHostDemo
 
 # ==== build Commands ====
 #> Elastos/Frameworks/Droid/Commands/Monkey Elastos.Droid.Core.eco
