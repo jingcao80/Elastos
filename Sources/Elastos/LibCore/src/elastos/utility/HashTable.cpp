@@ -580,7 +580,7 @@ ECode HashTable::_Values::Equals(
     /* [out] */ Boolean* value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = TO_IINTERFACE(this) == object;
+    *value = TO_IINTERFACE(this) == TO_IINTERFACE(object);
     return NOERROR;
 }
 
@@ -841,7 +841,7 @@ ECode HashTable::constructor(
     /* [in] */ Int32 capacity,
     /* [in] */ Float loadFactor)
 {
-    constructor(capacity);
+    FAIL_RETURN(constructor(capacity));
 
     AutoPtr<CFloat> fptr;
     FAIL_RETURN(CFloat::NewByFriend(loadFactor, (CFloat**)&fptr));
@@ -863,6 +863,9 @@ ECode HashTable::constructor(
 ECode HashTable::constructor(
     /* [in] */ IMap* map)
 {
+    if (map == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
     Int32 sizelen = 0;
     map->GetSize(&sizelen);
     constructor(CapacityForInitSize(sizelen));
@@ -961,7 +964,7 @@ ECode HashTable::Get(
         for (HashtableEntry * e= (*tab)[hash & (tab->GetLength() - 1)];
                 e != NULL; e = e->mNext) {
             AutoPtr<IInterface> eKey = e->mKey;
-            if (eKey.Get() == key || (e->mHash == hash && Object::Equals(key, eKey))) {
+            if (CObject::Compare(eKey, key) || (e->mHash == hash && Object::Equals(key, eKey))) {
                 *outface = e->mValue;
                 REFCOUNT_ADD(*outface)
                 return NOERROR;
@@ -979,6 +982,10 @@ ECode HashTable::ContainsKey(
 {
     VALIDATE_NOT_NULL(result)
 
+    if (key == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
     {    AutoLock syncLock(this);
         // Doug Lea's supplemental secondaryHash function (inlined)
         Int32 hash = Object::GetHashCode(key);
@@ -989,7 +996,7 @@ ECode HashTable::ContainsKey(
         for (HashtableEntry * e = (*tab)[hash & (tab->GetLength() - 1)];
                 e != NULL; e = e->mNext) {
             AutoPtr<IInterface> eKey = e->mKey;
-            if (eKey.Get() == key || (e->mHash == hash && Object::Equals(key, eKey))) {
+            if (CObject::Compare(eKey, key) || (e->mHash == hash && Object::Equals(key, eKey))) {
                 *result = TRUE;
                 return NOERROR;
             }
@@ -1122,6 +1129,10 @@ ECode HashTable::ConstructorPut(
 ECode HashTable::PutAll(
     /* [in] */ IMap* map)
 {
+    if (map == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
     {    AutoLock syncLock(this);
         Int32 sizelen = 0;
         map->GetSize(&sizelen);
@@ -1244,6 +1255,9 @@ ECode HashTable::Remove(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface)
+    if (NULL == key) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
 
     {    AutoLock syncLock(this);
         Int32 keyhash = Object::GetHashCode(key);
@@ -1390,7 +1404,7 @@ Boolean HashTable::RemoveMapping(
         AutoPtr<HashtableEntry> prev;
         for (AutoPtr<HashtableEntry> e = (*tab)[index]; e != NULL; prev = e, e = e->mNext) {
             if (e->mHash == hash && Object::Equals((e->mKey).Get(), key)) {
-                if (!(e->mValue.Get() == value)) {
+                if (!CObject::Compare(e->mValue, value)) {
                     return FALSE;  // Map has wrong value for key
                 }
                 if (prev == NULL) {
@@ -1442,7 +1456,7 @@ ECode HashTable::GetHashCode(
             e->GetKey((IInterface**)&key);
             AutoPtr<IInterface> value;
             e->GetValue((IInterface**)&value);
-            if (key.Get() == TO_IINTERFACE(this) || value.Get() == TO_IINTERFACE(this)) {
+            if (TO_IINTERFACE(key) == TO_IINTERFACE(this) || TO_IINTERFACE(value) == TO_IINTERFACE(this)) {
                 continue;
             }
             Int32 keyhash = Object::GetHashCode(key);
@@ -1478,7 +1492,7 @@ ECode HashTable::ToString(
             AutoPtr<IInterface> key;
             entry->GetKey((IInterface**)&key);
             String keystr;
-            result.Append(key.Get() == TO_IINTERFACE(this)
+            result.Append(TO_IINTERFACE(key) == TO_IINTERFACE(this)
                 ? String("(this Map)") : Object::ToString(key));
 
             result.AppendChar('=');
@@ -1486,7 +1500,7 @@ ECode HashTable::ToString(
             AutoPtr<IInterface> value;
             entry->GetValue((IInterface**)&value);
             String valuestr;
-            result.Append(value.Get() == TO_IINTERFACE(this)
+            result.Append(TO_IINTERFACE(value) == TO_IINTERFACE(this)
                 ? String("(this Map)") : Object::ToString(value));
 
             if (i->HasNext(&hasMore), hasMore) {
