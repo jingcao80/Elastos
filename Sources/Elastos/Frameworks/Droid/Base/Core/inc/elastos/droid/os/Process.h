@@ -555,12 +555,14 @@ public:
     /**
      * The state of the connection to the primary zygote.
      */
-    static AutoPtr<ZygoteState> mPrimaryZygoteState;
+    static AutoPtr<ZygoteState> mPrimaryElastosZygoteState;
+    static AutoPtr<ZygoteState> mPrimaryJavaZygoteState;
 
     /**
      * The state of the connection to the secondary zygote.
      */
-    static AutoPtr<ZygoteState> mSecondaryZygoteState;
+    static AutoPtr<ZygoteState> mSecondaryElastosZygoteState;
+    static AutoPtr<ZygoteState> mSecondaryJavaZygoteState;
 
     static const String TAG;// = "Process";
 

@@ -70,8 +70,10 @@ const String Process::SECONDARY_ZYGOTE_SOCKET_JAVA("zygote_secondary");
 
 const Int32 Process::ROOT_UID = 0;
 
-AutoPtr<Process::ZygoteState> Process::mPrimaryZygoteState;
-AutoPtr<Process::ZygoteState> Process::mSecondaryZygoteState;
+AutoPtr<Process::ZygoteState> Process::mPrimaryElastosZygoteState;
+AutoPtr<Process::ZygoteState> Process::mPrimaryJavaZygoteState;
+AutoPtr<Process::ZygoteState> Process::mSecondaryElastosZygoteState;
+AutoPtr<Process::ZygoteState> Process::mSecondaryJavaZygoteState;
 
 const Int32 Process::ZYGOTE_RETRY_MILLIS = 500;
 
@@ -1564,33 +1566,33 @@ ECode Process::OpenElastosZygoteSocketIfNeeded(
     VALIDATE_NOT_NULL(state)
     *state = NULL;
 
-    if (mPrimaryZygoteState == NULL || mPrimaryZygoteState->IsClosed()) {
-        mPrimaryZygoteState = NULL;
-        ECode ec = ZygoteState::Connect(ZYGOTE_SOCKET_ELASTOS, (ZygoteState**)&mPrimaryZygoteState);
+    if (mPrimaryElastosZygoteState == NULL || mPrimaryElastosZygoteState->IsClosed()) {
+        mPrimaryElastosZygoteState = NULL;
+        ECode ec = ZygoteState::Connect(ZYGOTE_SOCKET_ELASTOS, (ZygoteState**)&mPrimaryElastosZygoteState);
         if (FAILED(ec)) {
             Logger::E(TAG, "Error connecting to primary zygote");
             return E_ZYGOTE_START_FAILED_EXCEPTION;
         }
     }
 
-    if (mPrimaryZygoteState->Matches(abi)) {
-        *state = mPrimaryZygoteState;
+    if (mPrimaryElastosZygoteState->Matches(abi)) {
+        *state = mPrimaryElastosZygoteState;
         REFCOUNT_ADD(*state)
         return NOERROR;
     }
 
     // The primary zygote didn't match. Try the secondary.
-    if (mSecondaryZygoteState == NULL || mSecondaryZygoteState->IsClosed()) {
-        mSecondaryZygoteState = NULL;
-        ECode ec = ZygoteState::Connect(SECONDARY_ZYGOTE_SOCKET_ELASTOS, (ZygoteState**)&mSecondaryZygoteState);
+    if (mSecondaryElastosZygoteState == NULL || mSecondaryElastosZygoteState->IsClosed()) {
+        mSecondaryElastosZygoteState = NULL;
+        ECode ec = ZygoteState::Connect(SECONDARY_ZYGOTE_SOCKET_ELASTOS, (ZygoteState**)&mSecondaryElastosZygoteState);
         if (FAILED(ec)) {
             Logger::E(TAG, "Error connecting to secondary zygote");
             return E_ZYGOTE_START_FAILED_EXCEPTION;
         }
     }
 
-    if (mSecondaryZygoteState->Matches(abi)) {
-        *state = mSecondaryZygoteState;
+    if (mSecondaryElastosZygoteState->Matches(abi)) {
+        *state = mSecondaryElastosZygoteState;
         REFCOUNT_ADD(*state)
         return NOERROR;
     }
@@ -1607,10 +1609,10 @@ ECode Process::OpenJavaZygoteSocketIfNeeded(
     VALIDATE_NOT_NULL(state)
     *state = NULL;
 
-    if (mPrimaryZygoteState == NULL || mPrimaryZygoteState->IsClosed()) {
+    if (mPrimaryJavaZygoteState == NULL || mPrimaryJavaZygoteState->IsClosed()) {
         // try {
-        mPrimaryZygoteState = NULL;
-        ECode ec = ZygoteState::Connect(ZYGOTE_SOCKET_JAVA, (ZygoteState**)&mPrimaryZygoteState);
+        mPrimaryJavaZygoteState = NULL;
+        ECode ec = ZygoteState::Connect(ZYGOTE_SOCKET_JAVA, (ZygoteState**)&mPrimaryJavaZygoteState);
         // } catch (IOException ioe) {
         if (ec == (ECode)E_IO_EXCEPTION) {
             // throw new ZygoteStartFailedEx("Error connecting to primary zygote", ioe);
@@ -1619,17 +1621,17 @@ ECode Process::OpenJavaZygoteSocketIfNeeded(
         }
     }
 
-    if (mPrimaryZygoteState->Matches(abi)) {
-        *state = mPrimaryZygoteState;
+    if (mPrimaryJavaZygoteState->Matches(abi)) {
+        *state = mPrimaryJavaZygoteState;
         REFCOUNT_ADD(*state)
         return NOERROR;
     }
 
     // The primary zygote didn't match. Try the secondary.
-    if (mSecondaryZygoteState == NULL || mSecondaryZygoteState->IsClosed()) {
+    if (mSecondaryJavaZygoteState == NULL || mSecondaryJavaZygoteState->IsClosed()) {
         // try {
-        mSecondaryZygoteState = NULL;
-        ECode ec = ZygoteState::Connect(SECONDARY_ZYGOTE_SOCKET_JAVA, (ZygoteState**)&mSecondaryZygoteState);
+        mSecondaryJavaZygoteState = NULL;
+        ECode ec = ZygoteState::Connect(SECONDARY_ZYGOTE_SOCKET_JAVA, (ZygoteState**)&mSecondaryJavaZygoteState);
         if (ec == (ECode)E_IO_EXCEPTION) {
         // } catch (IOException ioe) {
         //     throw new ZygoteStartFailedEx("Error connecting to secondary zygote", ioe);
@@ -1638,8 +1640,8 @@ ECode Process::OpenJavaZygoteSocketIfNeeded(
         }
     }
 
-    if (mSecondaryZygoteState->Matches(abi)) {
-        *state = mSecondaryZygoteState;
+    if (mSecondaryJavaZygoteState->Matches(abi)) {
+        *state = mSecondaryJavaZygoteState;
         REFCOUNT_ADD(*state)
         return NOERROR;
     }

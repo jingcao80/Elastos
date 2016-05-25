@@ -246,12 +246,12 @@ ECode CApplicationThreadNative::ScheduleLaunchActivity(
          "ILandroid/content/pm/ActivityInfo;"\
          "Landroid/content/res/Configuration;"\
          "Landroid/content/res/CompatibilityInfo;"\
-         "Landroid/internal/app/IVoiceInteractor;"\
+         "Lcom/android/internal/app/IVoiceInteractor;"\
          "ILandroid/os/Bundle;"\
          "Landroid/os/PersistableBundle;"\
          "Ljava/util/List;"\
          "Ljava/util/List;"\
-         "Landroid/app/ProfilerInfo;)V");
+         "ZZLandroid/app/ProfilerInfo;)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: scheduleLaunchActivity", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jIntent, jToken, (jint)ident, jInfo, jCurConfig,
@@ -391,19 +391,19 @@ ECode CApplicationThreadNative::BindApplication(
     }
 
     if (services != NULL) {
-        Int32 count = 0;
-        services->GetSize(&count);
-        jclass c = env->FindClass("java/util/HashMap");
-        Util::CheckErrorAndLog(env, "BindApplication", "FindClass: HashMap %d", __LINE__);
+        // Int32 count = 0;
+        // services->GetSize(&count);
+        // jclass c = env->FindClass("java/util/HashMap");
+        // Util::CheckErrorAndLog(env, "BindApplication", "FindClass: HashMap %d", __LINE__);
 
-        jmethodID m = env->GetMethodID(c,"<init>","()V");
-        Util::CheckErrorAndLog(env, "BindApplication", "GetMethodID: HashMap %d", __LINE__);
+        // jmethodID m = env->GetMethodID(c,"<init>","()V");
+        // Util::CheckErrorAndLog(env, "BindApplication", "GetMethodID: HashMap %d", __LINE__);
 
-        jServices = env->NewObject(c, m);
-        Util::CheckErrorAndLog(env, "BindApplication", "NewObject: HashMap %d", __LINE__);
+        // jServices = env->NewObject(c, m);
+        // Util::CheckErrorAndLog(env, "BindApplication", "NewObject: HashMap %d", __LINE__);
 
-        m = env->GetMethodID(c, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
-        Util::CheckErrorAndLog(env, "BindApplication", "GetMethodID: put %d", __LINE__);
+        // m = env->GetMethodID(c, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+        // Util::CheckErrorAndLog(env, "BindApplication", "GetMethodID: put %d", __LINE__);
 
         // if (count > 0) {
         //     AutoPtr<ArrayOf<String> > keys;
@@ -425,7 +425,7 @@ ECode CApplicationThreadNative::BindApplication(
         //     }
         // }
 
-        env->DeleteLocalRef(c);
+        // env->DeleteLocalRef(c);
     }
 
     if (coreSettings != NULL) {
@@ -443,7 +443,7 @@ ECode CApplicationThreadNative::BindApplication(
          "Landroid/app/ProfilerInfo;"\
          "Landroid/os/Bundle;"\
          "Landroid/app/IInstrumentationWatcher;"\
-         "Landroid/app/IIUiAutomationConnection;"\
+         "Landroid/app/IUiAutomationConnection;"\
          "IZZZLandroid/content/res/Configuration;"\
          "Landroid/content/res/CompatibilityInfo;"\
          "Ljava/util/Map;"\
