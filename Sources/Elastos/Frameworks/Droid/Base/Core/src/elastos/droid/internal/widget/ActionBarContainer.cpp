@@ -1,7 +1,6 @@
 
 #include "elastos/droid/internal/widget/ActionBarContainer.h"
 #include "elastos/droid/R.h"
-#include "elastos/droid/widget/CFrameLayoutLayoutParams.h"
 #include "elastos/core/Math.h"
 
 using Elastos::Droid::App::IActionBar;
@@ -10,7 +9,6 @@ using Elastos::Droid::Internal::Widget::EIID_IActionBarContainer;
 using Elastos::Droid::Internal::Widget::IResolverDrawerLayout;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::IViewGroupMarginLayoutParams;
-using Elastos::Droid::Widget::CFrameLayoutLayoutParams;
 
 namespace Elastos {
 namespace Droid {
@@ -241,6 +239,7 @@ ECode ActionBarContainer::SetSplitBackground(
 ECode ActionBarContainer::SetVisibility(
     /* [in] */ Int32 visibility)
 {
+    FAIL_RETURN(FrameLayout::SetVisibility(visibility));
     Boolean isVisible = visibility == IView::VISIBLE;
     Boolean res = FALSE;
     if (mBackground != NULL) {
@@ -257,6 +256,7 @@ ECode ActionBarContainer::SetVisibility(
 
 ECode ActionBarContainer::JumpDrawablesToCurrentState()
 {
+    FAIL_RETURN(FrameLayout::JumpDrawablesToCurrentState());
     if (mBackground != NULL) {
         mBackground->JumpToCurrentState();
     }
@@ -298,7 +298,7 @@ ECode ActionBarContainer::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     Boolean res;
     *result = mIsTransitioning || (FrameLayout::OnInterceptTouchEvent(ev, &res), res);
     return NOERROR;
@@ -308,7 +308,7 @@ ECode ActionBarContainer::OnTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     FrameLayout::OnTouchEvent(ev, result);
 
     // An action bar always eats hover events.
@@ -320,6 +320,7 @@ ECode ActionBarContainer::OnHoverEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     FrameLayout::OnHoverEvent(ev, result);
 
     // An action bar always eats hover events.
@@ -335,9 +336,10 @@ ECode ActionBarContainer::SetTabContainer(
     }
     mTabContainer = IView::Probe(tabView);
     if (tabView != NULL) {
-        AddView(IView::Probe(tabView));
+        IView* view = IView::Probe(tabView);
+        AddView(view);
         AutoPtr<IViewGroupLayoutParams> lp;
-        IView::Probe(tabView)->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+        view->GetLayoutParams((IViewGroupLayoutParams**)&lp);
         lp->SetWidth(IViewGroupLayoutParams::MATCH_PARENT);
         lp->SetHeight(IViewGroupLayoutParams::WRAP_CONTENT);
         tabView->SetAllowCollapse(FALSE);
@@ -348,9 +350,9 @@ ECode ActionBarContainer::SetTabContainer(
 ECode ActionBarContainer::GetTabContainer(
     /* [out] */ IView** result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     *result = mTabContainer;
-    REFCOUNT_ADD(*result);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -359,7 +361,7 @@ ECode ActionBarContainer::StartActionModeForChild(
     /* [in] */ IActionModeCallback* callback,
     /* [out] */ IActionMode** result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     // No starting an action mode for an action bar child! (Where would it go?)
     *result = NULL;
     return NOERROR;
@@ -369,9 +371,10 @@ void ActionBarContainer::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
+    using Elastos::Core::Math;
     if (mActionBarView == NULL
         && View::MeasureSpec::GetMode(heightMeasureSpec) == View::MeasureSpec::AT_MOST && mHeight >= 0) {
-        heightMeasureSpec = View::MeasureSpec::MakeMeasureSpec(Elastos::Core::Math::Min(mHeight,
+        heightMeasureSpec = View::MeasureSpec::MakeMeasureSpec(Math::Min(mHeight,
                 View::MeasureSpec::GetSize(heightMeasureSpec)), View::MeasureSpec::AT_MOST);
     }
     FrameLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -389,16 +392,16 @@ void ActionBarContainer::OnMeasure(
             if (child == mTabContainer) {
                 continue;
             }
-            nonTabMaxHeight = Elastos::Core::Math::Max(nonTabMaxHeight, IsCollapsed(child) ? 0 :
+            nonTabMaxHeight = Math::Max(nonTabMaxHeight, IsCollapsed(child) ? 0 :
                     GetMeasuredHeightWithMargins(child));
         }
         Int32 mode = View::MeasureSpec::GetMode(heightMeasureSpec);
         Int32 maxHeight = mode == View::MeasureSpec::AT_MOST ?
-                View::MeasureSpec::GetSize(heightMeasureSpec) : Elastos::Core::Math::INT32_MAX_VALUE;
+                View::MeasureSpec::GetSize(heightMeasureSpec) : Math::INT32_MAX_VALUE;
         Int32 measureWidth = 0;
         GetMeasuredWidth(&measureWidth);
         SetMeasuredDimension(measureWidth,
-                Elastos::Core::Math::Min(nonTabMaxHeight + GetMeasuredHeightWithMargins(mTabContainer),
+                Math::Min(nonTabMaxHeight + GetMeasuredHeightWithMargins(mTabContainer),
                         maxHeight));
     }
 }
@@ -441,10 +444,10 @@ ECode ActionBarContainer::OnLayout(
         }
     }
     else {
+        Int32 left = 0, top = 0, right = 0, bottom = 0;
         if (mBackground != NULL) {
             mActionBarView->GetVisibility(&visibility);
             if (visibility == IView::VISIBLE) {
-                Int32 left = 0, top = 0, right = 0, bottom = 0;
                 mActionBarView->GetLeft(&left);
                 mActionBarView->GetTop(&top);
                 mActionBarView->GetRight(&right);
@@ -453,7 +456,6 @@ ECode ActionBarContainer::OnLayout(
             }
             else if (mActionContextView != NULL &&
                     (mActionContextView->GetVisibility(&visibility), visibility == IView::VISIBLE)) {
-                Int32 left = 0, top = 0, right = 0, bottom = 0;
                 mActionContextView->GetLeft(&left);
                 mActionContextView->GetTop(&top);
                 mActionContextView->GetRight(&right);
@@ -467,7 +469,6 @@ ECode ActionBarContainer::OnLayout(
         }
         mIsStacked = hasTabs;
         if (hasTabs && mStackedBackground != NULL) {
-            Int32 left = 0, top = 0, right = 0, bottom = 0;
             tabContainer->GetLeft(&left);
             tabContainer->GetTop(&top);
             tabContainer->GetRight(&right);
@@ -486,8 +487,8 @@ ECode ActionBarContainer::OnLayout(
 Boolean ActionBarContainer::VerifyDrawable(
     /* [in] */ IDrawable* who)
 {
-    return (who == mBackground && !mIsSplit) || (who == mStackedBackground && mIsStacked) ||
-        (who == mSplitBackground && mIsSplit) || FrameLayout::VerifyDrawable(who);
+    return (who == mBackground.Get() && !mIsSplit) || (who == mStackedBackground.Get() && mIsStacked) ||
+        (who == mSplitBackground.Get() && mIsSplit) || FrameLayout::VerifyDrawable(who);
 }
 
 ECode ActionBarContainer::DrawableStateChanged()
@@ -524,11 +525,12 @@ Int32 ActionBarContainer::GetMeasuredHeightWithMargins(
 {
     AutoPtr<IViewGroupLayoutParams> lp;
     view->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+    IViewGroupMarginLayoutParams* vgmlp = IViewGroupMarginLayoutParams::Probe(lp);
 
     Int32 measureHeight = 0, topMargin = 0, bottomMargin = 0;
     view->GetMeasuredHeight(&measureHeight);
-    IViewGroupMarginLayoutParams::Probe(lp)->GetTopMargin(&topMargin);
-    IViewGroupMarginLayoutParams::Probe(lp)->GetBottomMargin(&bottomMargin);
+    vgmlp->GetTopMargin(&topMargin);
+    vgmlp->GetBottomMargin(&bottomMargin);
     return measureHeight + topMargin + bottomMargin;
 }
 

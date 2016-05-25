@@ -52,7 +52,7 @@ ActionMenuItemView::ActionMenuItemForwardingListener::ActionMenuItemForwardingLi
     /* [in] */ ActionMenuItemView* owner)
     : mOwner(owner)
 {
-     ListPopupWindow::ForwardingListener::constructor(owner);
+    ListPopupWindow::ForwardingListener::constructor(owner);
 }
 
 ECode ActionMenuItemView::ActionMenuItemForwardingListener::GetPopup(
@@ -435,6 +435,7 @@ ECode ActionMenuItemView::NeedsDividerBefore(
 ECode ActionMenuItemView::NeedsDividerAfter(
     /* [out] */ Boolean* need)
 {
+    VALIDATE_NOT_NULL(need)
     return HasText(need);
 }
 

@@ -4,7 +4,6 @@
 
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
 #include "elastos/droid/ext/frameworkext.h"
-//#include "elastos/droid/internal/widget/DecorContentParent.h"
 #include "elastos/droid/utility/Int32Property.h"
 #include "elastos/droid/view/ViewGroup.h"
 #include "Elastos.Droid.Widget.h"
@@ -18,7 +17,6 @@ using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Internal::View::Menu::IMenuPresenterCallback;
-//using Elastos::Droid::Internal::Widget::DecorContentParent;
 using Elastos::Droid::Internal::Widget::IActionBarContainer;
 using Elastos::Droid::Internal::Widget::IActionBarOverlayLayout;
 using Elastos::Droid::Internal::Widget::IActionBarVisibilityCallback;
@@ -381,7 +379,7 @@ protected:
         /* [in] */ Int32 bottom);
 
 private:
-    static CARAPI_(AutoPtr< ArrayOf<Int32> >) MiddleInitAttrs();
+    static CARAPI_(AutoPtr<IProperty>) InitActinoBarHideOffset();
 
     CARAPI_(void) Init(
         /* [in] */ IContext* context);
@@ -411,8 +409,6 @@ private:
     CARAPI_(Boolean) ShouldHideActionBarOnFling(
         /* [in] */ Float velocityX,
         /* [in] */ Float velocityY);
-
-    static CARAPI_(AutoPtr<IProperty>) InitActinoBarHideOffset();
 
 public:
     static const AutoPtr<IProperty> ACTION_BAR_HIDE_OFFSET;
@@ -458,4 +454,3 @@ private:
 } // namespace Elastos
 
 #endif // __ELASTOS_DROID_INTERNAL_WIDGET_ACTIONBAROVERLAYLAYOUT_H__
-

@@ -184,11 +184,6 @@ public:
         /* [in] */ Boolean enabled);
 
 protected:
-    CARAPI Init(
-        /* [in] */ IContext* ctx,
-        /* [in] */ IAttributeSet* attrs = NULL,
-        /* [in] */ Int32 defStyle = 0);
-
     //@Override
     CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,

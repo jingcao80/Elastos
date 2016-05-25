@@ -9975,6 +9975,8 @@ ECode TextView::PerformAccessibilityAction(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
+
+    Boolean result = FALSE;
     switch (action) {
         case IAccessibilityNodeInfo::ACTION_CLICK:
         {
@@ -10004,8 +10006,7 @@ ECode TextView::PerformAccessibilityAction(
                 // Show the IME, except when selecting in read-only text.
                 AutoPtr<IInputMethodManager> imm = CInputMethodManager::PeekInstance();
                 ViewClicked(imm);
-                Boolean res;
-                if ((IsTextSelectable(&res), !res) && TO_EDITOR(mEditor)->mShowSoftInputOnFocus && imm) {
+                if ((IsTextSelectable(&result), !result) && TO_EDITOR(mEditor)->mShowSoftInputOnFocus && imm) {
                     Boolean show;
                     imm->ShowSoftInput(this, 0, &show);
                     handled |= show;
@@ -10017,9 +10018,9 @@ ECode TextView::PerformAccessibilityAction(
         }
         case IAccessibilityNodeInfo::ACTION_COPY:
         {
-            Boolean isFocused, onTextContextMenuItem;
+            Boolean isFocused;
             if ((IsFocused(&isFocused), isFocused) && CanCopy()) {
-                if (OnTextContextMenuItem(R::id::copy, &onTextContextMenuItem), onTextContextMenuItem) {
+                if (OnTextContextMenuItem(R::id::copy, &result), result) {
                     *res = TRUE;
                     return NOERROR;
                 }
@@ -10030,9 +10031,9 @@ ECode TextView::PerformAccessibilityAction(
 
         case IAccessibilityNodeInfo::ACTION_PASTE:
         {
-            Boolean isFocused, onTextContextMenuItem;
+            Boolean isFocused;
             if ((IsFocused(&isFocused), isFocused) && CanPaste()) {
-                if (OnTextContextMenuItem(R::id::paste, &onTextContextMenuItem), onTextContextMenuItem) {
+                if (OnTextContextMenuItem(R::id::paste, &result), result) {
                     *res = TRUE;
                     return NOERROR;
                 }
@@ -10043,9 +10044,9 @@ ECode TextView::PerformAccessibilityAction(
 
         case IAccessibilityNodeInfo::ACTION_CUT:
         {
-            Boolean isFocused, onTextContextMenuItem;
+            Boolean isFocused;
             if ((IsFocused(&isFocused), isFocused) && CanCut()) {
-                if (OnTextContextMenuItem(R::id::cut, &onTextContextMenuItem), onTextContextMenuItem) {
+                if (OnTextContextMenuItem(R::id::cut, &result), result) {
                     *res = TRUE;
                     return NOERROR;
                 }
@@ -10357,20 +10358,23 @@ Boolean TextView::CanCopy()
 
 Boolean TextView::CanPaste()
 {
-    AutoPtr<IContext> c;
-    GetContext((IContext**)&c);
-    AutoPtr<IInterface> obj;
-    c->GetSystemService(IContext::CLIPBOARD_SERVICE, (IInterface**)&obj);
-    AutoPtr<IClipboardManager> cm = IClipboardManager::Probe(obj);
-    if (!cm) return FALSE;
-
-    Boolean hasClip;
-    cm->HasPrimaryClip(&hasClip);
     Int32 start, end;
-    return IEditable::Probe(mText)
+    if (IEditable::Probe(mText) != NULL
             && mEditor != NULL && TO_EDITOR(mEditor)->mKeyListener != NULL
-            && (GetSelectionStart(&start), start) >= 0 && (GetSelectionEnd(&end), end) >= 0
-            && hasClip;
+            && (GetSelectionStart(&start), start) >= 0
+            && (GetSelectionEnd(&end), end) >= 0) {
+        AutoPtr<IContext> c;
+        GetContext((IContext**)&c);
+        AutoPtr<IInterface> obj;
+        c->GetSystemService(IContext::CLIPBOARD_SERVICE, (IInterface**)&obj);
+        AutoPtr<IClipboardManager> cm = IClipboardManager::Probe(obj);
+        if (!cm) {
+            return FALSE;
+        }
+        Boolean hasClip;
+        cm->HasPrimaryClip(&hasClip);
+        return hasClip;
+    }
 }
 
 Boolean TextView::SelectAllText()

@@ -1,6 +1,5 @@
 
 #include "elastos/droid/internal/widget/ActionBarContextView.h"
-#include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include "elastos/droid/view/CViewGroupMarginLayoutParams.h"
@@ -12,7 +11,6 @@
 #include "elastos/core/Math.h"
 #include "elastos/droid/R.h"
 
-using Elastos::Droid::Internal::Widget::EIID_IActionBarContextView;
 using Elastos::Droid::Animation::EIID_IAnimatorListener;
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Animation::CObjectAnimator;
@@ -21,7 +19,12 @@ using Elastos::Droid::Animation::CAnimatorSet;
 using Elastos::Droid::Animation::IAnimatorSetBuilder;
 using Elastos::Droid::Animation::IAnimatorSet;
 using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Internal::View::Menu::IMenuView;
+using Elastos::Droid::Internal::View::Menu::IMenuPresenter;
+using Elastos::Droid::Internal::View::Menu::IMenuBuilder;
+using Elastos::Droid::Internal::Widget::EIID_IActionBarContextView;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::View::Animation::IDecelerateInterpolator;
 using Elastos::Droid::View::Animation::CDecelerateInterpolator;
 using Elastos::Droid::View::IViewGroupLayoutParams;
@@ -30,21 +33,21 @@ using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::View::IMenu;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
-using Elastos::Droid::View::CViewGroupLayoutParams;
 using Elastos::Droid::View::IViewGroupMarginLayoutParams;
 using Elastos::Droid::View::CViewGroupMarginLayoutParams;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::Widget::CActionMenuPresenter;
-using Elastos::Droid::Internal::View::Menu::IMenuView;
-using Elastos::Droid::Internal::View::Menu::IMenuPresenter;
-using Elastos::Droid::Internal::View::Menu::IMenuBuilder;
-using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Core::CString;
 
 namespace Elastos {
 namespace Droid {
 namespace Internal {
 namespace Widget {
+
+const String ActionBarContextView::TAG("ActionBarContextView");
+const Int32 ActionBarContextView::ANIMATE_IDLE = 0;
+const Int32 ActionBarContextView::ANIMATE_IN = 1;
+const Int32 ActionBarContextView::ANIMATE_OUT = 2;
 
 //=====================================================================
 //             ActionBarContextView::InnerCloseButtonListener
@@ -106,10 +109,6 @@ ECode ActionBarContextView::AnimatorListener::OnAnimationRepeat(
 //=====================================================================
 //                         ActionBarContextView
 //=====================================================================
-const String ActionBarContextView::TAG("ActionBarContextView");
-const Int32 ActionBarContextView::ANIMATE_IDLE;
-const Int32 ActionBarContextView::ANIMATE_IN;
-const Int32 ActionBarContextView::ANIMATE_OUT;
 
 CAR_INTERFACE_IMPL(ActionBarContextView, AbsActionBarView, IActionBarContextView)
 
@@ -117,6 +116,7 @@ ActionBarContextView::ActionBarContextView()
     : mTitleStyleRes(0)
     , mSubtitleStyleRes(0)
     , mTitleOptional(FALSE)
+    , mCloseItemLayout(0)
     , mAnimateInOnLayout(FALSE)
     , mAnimationMode(0)
 {
@@ -204,8 +204,9 @@ ECode ActionBarContextView::SetSplitToolbar(
                 AutoPtr<IViewParent> oldParent;;
                 v->GetParent((IViewParent**)&oldParent);
                 IViewManager* vm = IViewManager::Probe(oldParent);
-                if (vm != NULL)
+                if (vm != NULL) {
                     vm->RemoveView(v);
+                }
                 AddView(v, layoutParams);
             }
             else {
@@ -234,8 +235,9 @@ ECode ActionBarContextView::SetSplitToolbar(
                 AutoPtr<IViewParent> oldParent;
                 v->GetParent((IViewParent**)&oldParent);
                 IViewManager* vm = IViewManager::Probe(oldParent);
-                if (vm != NULL)
+                if (vm != NULL) {
                     vm->RemoveView(v);
+                }
                 mSplitView->AddView(v, layoutParams);
             }
         }
@@ -254,7 +256,7 @@ ECode ActionBarContextView::SetContentHeight(
 ECode ActionBarContextView::SetCustomView(
     /* [in] */ IView* view)
 {
-    VALIDATE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view)
 
     if (mCustomView != NULL) {
         RemoveView(mCustomView);
@@ -274,7 +276,7 @@ ECode ActionBarContextView::SetCustomView(
 ECode ActionBarContextView::SetTitle(
     /* [in] */ ICharSequence* title)
 {
-    VALIDATE_NOT_NULL(title);
+    VALIDATE_NOT_NULL(title)
 
     mTitle = title;
     InitTitle();
@@ -284,7 +286,7 @@ ECode ActionBarContextView::SetTitle(
 ECode ActionBarContextView::SetSubtitle(
     /* [in] */ ICharSequence* subtitle)
 {
-    VALIDATE_NOT_NULL(subtitle);
+    VALIDATE_NOT_NULL(subtitle)
 
     mSubtitle = subtitle;
     InitTitle();
@@ -294,7 +296,7 @@ ECode ActionBarContextView::SetSubtitle(
 ECode ActionBarContextView::GetTitle(
     /* [out] */ ICharSequence** result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
 
     *result = mTitle;
     REFCOUNT_ADD(*result);
@@ -304,7 +306,7 @@ ECode ActionBarContextView::GetTitle(
 ECode ActionBarContextView::GetSubtitle(
     /* [out] */ ICharSequence** result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
 
     *result = mSubtitle;
     REFCOUNT_ADD(*result);
@@ -314,8 +316,7 @@ ECode ActionBarContextView::GetSubtitle(
 ECode ActionBarContextView::InitForMode(
     /* [in] */ IActionMode* mode)
 {
-    VALIDATE_NOT_NULL(mode);
-
+    VALIDATE_NOT_NULL(mode)
     AutoPtr<IViewParent> vp;
     if (mClose == NULL) {
         AutoPtr<ILayoutInflater> inflater;
@@ -343,14 +344,19 @@ ECode ActionBarContextView::InitForMode(
     mActionMenuPresenter->SetReserveOverflow(TRUE);
 
     AutoPtr<IViewGroupLayoutParams> layoutParams;
-    CViewGroupLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::MATCH_PARENT, (IViewGroupLayoutParams**)&layoutParams);
+    CViewGroupLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT,
+            IViewGroupLayoutParams::MATCH_PARENT,
+            (IViewGroupLayoutParams**)&layoutParams);
+
+    IMenuPresenter* actionMenuPresenter = IMenuPresenter::Probe(mActionMenuPresenter);
     if (!mSplitActionBar) {
-        menu->AddMenuPresenter(IMenuPresenter::Probe(mActionMenuPresenter), mPopupContext);
+        menu->AddMenuPresenter(actionMenuPresenter, mPopupContext);
         AutoPtr<IMenuView> view;
-        IMenuPresenter::Probe(mActionMenuPresenter)->GetMenuView(this, (IMenuView**)&view);
+        actionMenuPresenter->GetMenuView(this, (IMenuView**)&view);
         mMenuView = IActionMenuView::Probe(view);
-        IView::Probe(mMenuView)->SetBackgroundDrawable(NULL);
-        AddView(IView::Probe(mMenuView), layoutParams);
+        IView* menuView = IView::Probe(mMenuView);
+        menuView->SetBackgroundDrawable(NULL);
+        AddView(menuView, layoutParams);
     }
     else {
         AutoPtr<IContext> context;
@@ -370,12 +376,13 @@ ECode ActionBarContextView::InitForMode(
         // Span the whole width
         layoutParams->SetWidth(IViewGroupLayoutParams::MATCH_PARENT);
         layoutParams->SetHeight(mContentHeight);
-        menu->AddMenuPresenter(IMenuPresenter::Probe(mActionMenuPresenter), mPopupContext);
+        menu->AddMenuPresenter(actionMenuPresenter, mPopupContext);
         AutoPtr<IMenuView> view;
-        IMenuPresenter::Probe(mActionMenuPresenter)->GetMenuView(this, (IMenuView**)&view);
+        actionMenuPresenter->GetMenuView(this, (IMenuView**)&view);
         mMenuView = IActionMenuView::Probe(view);
-        IView::Probe(mMenuView)->SetBackgroundDrawable(mSplitBackground);
-        mSplitView->AddView(IView::Probe(mMenuView), layoutParams);
+        IView* menuView = IView::Probe(mMenuView);
+        menuView->SetBackgroundDrawable(mSplitBackground);
+        mSplitView->AddView(menuView, layoutParams);
     }
 
     mAnimateInOnLayout = TRUE;
@@ -478,20 +485,21 @@ ECode ActionBarContextView::OnInitializeAccessibilityEvent(
     Int32 type = 0;
     event->GetEventType(&type);
     if (type == IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED) {
+        IAccessibilityRecord* _event = IAccessibilityRecord::Probe(event);
         // Action mode started
-        IAccessibilityRecord::Probe(event)->SetSource(IView::Probe(this));
+        _event->SetSource(IView::Probe(this));
         AutoPtr<ICharSequence> name;
         CString::New(String("CActionBarContextView"), (ICharSequence**)&name);
-        IAccessibilityRecord::Probe(event)->SetClassName(name);
+        _event->SetClassName(name);
 
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
         String pkgName;
         context->GetPackageName(&pkgName);
-        name->Release();
+        name = NULL;
         CString::New(pkgName, (ICharSequence**)&name);
         event->SetPackageName(name);
-        IAccessibilityRecord::Probe(event)->SetContentDescription(mTitle);
+        _event->SetContentDescription(mTitle);
     }
     else {
         AbsActionBarView::OnInitializeAccessibilityEvent(event);
@@ -521,11 +529,11 @@ ECode ActionBarContextView::GenerateDefaultLayoutParams(
     /* [out] */ IViewGroupLayoutParams** result)
 {
     VALIDATE_NOT_NULL(result);
-
     // Used by custom views if they don't supply layout params. Everything else
     // added to an ActionBarContextView should have them already.
-    return CViewGroupLayoutParams::New(
-        IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::WRAP_CONTENT, result);
+
+    return CViewGroupMarginLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT,
+            IViewGroupLayoutParams::WRAP_CONTENT, result);
 }
 
 void ActionBarContextView::OnMeasure(
@@ -573,29 +581,35 @@ void ActionBarContextView::OnMeasure(
         availableWidth -= leftMargin + rightMargin;
     }
 
-    AutoPtr<IViewParent> vp;
-    IView::Probe(mMenuView)->GetParent((IViewParent**)&vp);
-    if (mMenuView != NULL && (TO_IINTERFACE(vp)== TO_IINTERFACE(this))) {
-        availableWidth = MeasureChildView(IView::Probe(mMenuView), availableWidth, childSpecHeight, 0);
+    if (mMenuView != NULL) {
+        IView* menuView = IView::Probe(mMenuView);
+        AutoPtr<IViewParent> vp;
+        menuView->GetParent((IViewParent**)&vp);
+        if (vp.Get() == (IViewParent*)this) {
+            availableWidth = MeasureChildView(menuView, availableWidth, childSpecHeight, 0);
+        }
     }
 
     if (mTitleLayout != NULL && mCustomView == NULL) {
+        IView* titleLayout = IView::Probe(mTitleLayout);
         if (mTitleOptional) {
             Int32 titleWidthSpec = View::MeasureSpec::MakeMeasureSpec(0, View::MeasureSpec::UNSPECIFIED);
-            IView::Probe(mTitleLayout)->Measure(titleWidthSpec, childSpecHeight);
+            titleLayout->Measure(titleWidthSpec, childSpecHeight);
             Int32 titleWidth;
-            IView::Probe(mTitleLayout)->GetMeasuredWidth(&titleWidth);
+            titleLayout->GetMeasuredWidth(&titleWidth);
 
             Boolean titleFits = titleWidth <= availableWidth;
             if (titleFits) {
                 availableWidth -= titleWidth;
             }
-            IView::Probe(mTitleLayout)->SetVisibility(titleFits ? IView::VISIBLE : IView::GONE);
+            titleLayout->SetVisibility(titleFits ? IView::VISIBLE : IView::GONE);
         }
         else {
-            availableWidth = MeasureChildView(IView::Probe(mTitleLayout), availableWidth, childSpecHeight, 0);
+            availableWidth = MeasureChildView(titleLayout, availableWidth, childSpecHeight, 0);
         }
     }
+
+    using Elastos::Core::Math;
 
     if (mCustomView != NULL) {
         AutoPtr<IViewGroupLayoutParams> lp;
@@ -603,11 +617,11 @@ void ActionBarContextView::OnMeasure(
         Int32 w;
         lp->GetWidth(&w);
         Int32 customWidthMode = w != IViewGroupLayoutParams::WRAP_CONTENT ? MeasureSpec::EXACTLY : MeasureSpec::AT_MOST;
-        Int32 customWidth = w >= 0 ? Elastos::Core::Math::Min(w, availableWidth) : availableWidth;
+        Int32 customWidth = w >= 0 ? Math::Min(w, availableWidth) : availableWidth;
         Int32 h;
         lp->GetHeight(&h);
         Int32 customHeightMode = h != IViewGroupLayoutParams::WRAP_CONTENT ? View::MeasureSpec::EXACTLY : View::MeasureSpec::AT_MOST;
-        Int32 customHeight = h >= 0 ? Elastos::Core::Math::Min(h, height) : height;
+        Int32 customHeight = h >= 0 ? Math::Min(h, height) : height;
         mCustomView->Measure(View::MeasureSpec::MakeMeasureSpec(customWidth, customWidthMode),
             View::MeasureSpec::MakeMeasureSpec(customHeight, customHeightMode));
     }
@@ -676,16 +690,22 @@ ECode ActionBarContextView::OnLayout(
         }
     }
 
-    IView::Probe(mTitleLayout)->GetVisibility(&visible);
-    if (mTitleLayout != NULL && mCustomView == NULL && visible != IView::GONE) {
-        x += PositionChild(IView::Probe(mTitleLayout), x, y, contentHeight, isLayoutRtl);
+    if (mTitleLayout != NULL && mCustomView == NULL) {
+        IView* titleLayout = IView::Probe(mTitleLayout);
+        titleLayout->GetVisibility(&visible);
+        if (visible != IView::GONE) {
+            x += PositionChild(titleLayout, x, y, contentHeight, isLayoutRtl);
+        }
     }
 
     if (mCustomView != NULL) {
         x += PositionChild(IView::Probe(mCustomView), x, y, contentHeight, isLayoutRtl);
     }
 
+    GetPaddingLeft(&paddingLeft);
+    GetPaddingRight(&paddingRight);
     x = isLayoutRtl ? paddingLeft : r - l - paddingRight;
+
     if (mMenuView != NULL) {
         x += PositionChild(IView::Probe(mMenuView), x, y, contentHeight, !isLayoutRtl);
     }
@@ -708,11 +728,12 @@ void ActionBarContextView::InitTitle()
         AutoPtr<IView> viewTmp;
         GetChildAt(count - 1, (IView**)&viewTmp);
         mTitleLayout = ILinearLayout::Probe(viewTmp);
+        IView* titleLayout = IView::Probe(mTitleLayout);
         viewTmp = NULL;
-        IView::Probe(mTitleLayout)->FindViewById(R::id::action_bar_title, (IView**)&viewTmp);
+        titleLayout->FindViewById(R::id::action_bar_title, (IView**)&viewTmp);
         mTitleView = ITextView::Probe(viewTmp);
         viewTmp = NULL;
-        IView::Probe(mTitleLayout)->FindViewById(R::id::action_bar_subtitle, (IView**)&viewTmp);
+        titleLayout->FindViewById(R::id::action_bar_subtitle, (IView**)&viewTmp);
         mSubtitleView = ITextView::Probe(viewTmp);
         if (mTitleStyleRes != 0) {
             mTitleView->SetTextAppearance(mContext, mTitleStyleRes);
@@ -728,12 +749,13 @@ void ActionBarContextView::InitTitle()
     Boolean hasTitle = !TextUtils::IsEmpty(mTitle);
     Boolean hasSubtitle = !TextUtils::IsEmpty(mSubtitle);
     IView::Probe(mSubtitleView)->SetVisibility(hasSubtitle ? IView::VISIBLE : IView::GONE);
-    IView::Probe(mTitleLayout)->SetVisibility(hasTitle || hasSubtitle ? IView::VISIBLE : IView::GONE);
+    IView* tl = IView::Probe(mTitleLayout);
+    tl->SetVisibility(hasTitle || hasSubtitle ? IView::VISIBLE : IView::GONE);
 
     AutoPtr<IViewParent> vp;
-    IView::Probe(mTitleLayout)->GetParent((IViewParent**)&vp);
+    tl->GetParent((IViewParent**)&vp);
     if (vp == NULL) {
-        AddView(IView::Probe(mTitleLayout));
+        AddView(tl);
     }
 }
 
@@ -776,12 +798,13 @@ AutoPtr<IAnimator> ActionBarContextView::MakeInAnimation()
     AutoPtr<IAnimatorSetBuilder> b;
     animatorSet->Play(animator, (IAnimatorSetBuilder**)&b);
     if (mMenuView != NULL) {
+        IViewGroup* vg = IViewGroup::Probe(mMenuView);
         Int32 count = 0;
-        IViewGroup::Probe(mMenuView)->GetChildCount(&count);
+        vg->GetChildCount(&count);
         if (count > 0) {
             for (Int32 i = count - 1, j = 0; i >= 0; --i, ++j) {
                 AutoPtr<IView> child;
-                IViewGroup::Probe(mMenuView)->GetChildAt(i, (IView**)&child);
+                vg->GetChildAt(i, (IView**)&child);
                 child->SetScaleY(0);
 
                 AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(2);
@@ -848,5 +871,3 @@ AutoPtr<IAnimator> ActionBarContextView::MakeOutAnimation()
 } // namespace Internal
 } // namespace Droid
 } // namespace Elastos
-
-

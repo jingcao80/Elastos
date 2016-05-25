@@ -4,12 +4,14 @@
 #include "elastos/droid/internal/widget/ActionBarOverlayLayout.h"
 #include "elastos/droid/internal/widget/CActionBarOverlayLayoutLayoutParams.h"
 #include "elastos/droid/os/Build.h"
-#include "elastos/droid/R.h"
 #include "elastos/droid/view/CWindowInsets.h"
 #include "elastos/droid/widget/COverScroller.h"
+#include "elastos/droid/R.h"
 #include "elastos/core/CoreUtils.h"
 #include "elastos/core/Math.h"
 #include <elastos/utility/logging/Logger.h>
+
+#include <utils/CallStack.h>
 
 using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
@@ -28,6 +30,25 @@ namespace Elastos {
 namespace Droid {
 namespace Internal {
 namespace Widget {
+
+AutoPtr<IProperty> ActionBarOverlayLayout::InitActinoBarHideOffset()
+{
+    AutoPtr<IProperty> result = new InnerIntProperty();
+    return result;
+}
+
+const AutoPtr<IProperty> ActionBarOverlayLayout::ACTION_BAR_HIDE_OFFSET = ActionBarOverlayLayout::InitActinoBarHideOffset();
+
+AutoPtr< ArrayOf<Int32> > InitAttrs()
+{
+    AutoPtr< ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(2);
+    (*result)[0] = R::attr::actionBarSize;
+    (*result)[1] = R::attr::windowContentOverlay;
+    return result;
+}
+
+AutoPtr< ArrayOf<Int32> > ActionBarOverlayLayout::ATTRS = InitAttrs();
+const String ActionBarOverlayLayout::TAG("ActionBarOverlayLayout");
 
 //=====================================================================
 //                 ActionBarOverlayLayout::ActionBarOverlayLayoutLayoutParams
@@ -132,14 +153,17 @@ ECode ActionBarOverlayLayout::InnerRunnable::Run()
     propertyAnimatorTop->SetListener(mOwner->mTopAnimatorListener);
     mOwner->mCurrentActionBarTopAnimator = propertyAnimatorTop;
     Int32 visibility = 0;
-    if (mOwner->mActionBarBottom != NULL &&
-        (IView::Probe(mOwner->mActionBarBottom)->GetVisibility(&visibility), visibility != IView::GONE)) {
-        AutoPtr<IViewPropertyAnimator> propertyAnimatorBottom;
-        IView::Probe(mOwner->mActionBarBottom)->Animate((IViewPropertyAnimator**)&propertyAnimatorBottom);
-        propertyAnimatorBottom->TranslationY(0);
-        propertyAnimatorBottom->SetListener(mOwner->mBottomAnimatorListener);
-        mOwner->mCurrentActionBarBottomAnimator = propertyAnimatorBottom;
+    if (mOwner->mActionBarBottom != NULL) {
+        IView* barBottom = IView::Probe(mOwner->mActionBarBottom);
+        if (barBottom->GetVisibility(&visibility), visibility != IView::GONE) {
+            AutoPtr<IViewPropertyAnimator> propertyAnimatorBottom;
+            barBottom->Animate((IViewPropertyAnimator**)&propertyAnimatorBottom);
+            propertyAnimatorBottom->TranslationY(0);
+            propertyAnimatorBottom->SetListener(mOwner->mBottomAnimatorListener);
+            mOwner->mCurrentActionBarBottomAnimator = propertyAnimatorBottom;
+        }
     }
+
     return NOERROR;
 }
 
@@ -156,24 +180,27 @@ ActionBarOverlayLayout::InnerRunnable1::InnerRunnable1(
 ECode ActionBarOverlayLayout::InnerRunnable1::Run()
 {
     mOwner->HaltActionBarHideOffsetAnimations();
+    IView* barTop = IView::Probe(mOwner->mActionBarTop);
     AutoPtr<IViewPropertyAnimator> propertyAnimatorTop;
-    IView::Probe(mOwner->mActionBarTop)->Animate((IViewPropertyAnimator**)&propertyAnimatorTop);
+    barTop->Animate((IViewPropertyAnimator**)&propertyAnimatorTop);
     Int32 height = 0;
-    IView::Probe(mOwner->mActionBarTop)->GetHeight(&height);
+    barTop->GetHeight(&height);
     propertyAnimatorTop->TranslationY(-height);
     propertyAnimatorTop->SetListener(mOwner->mTopAnimatorListener);
     mOwner->mCurrentActionBarTopAnimator = propertyAnimatorTop;
     Int32 visibility = 0;
-    if (mOwner->mActionBarBottom != NULL &&
-        (IView::Probe(mOwner->mActionBarBottom)->GetVisibility(&visibility), visibility != IView::GONE)) {
-        AutoPtr<IViewPropertyAnimator> propertyAnimatorBottom;
-        IView::Probe(mOwner->mActionBarBottom)->Animate((IViewPropertyAnimator**)&propertyAnimatorBottom);
-        Int32 height = 0;
-        IView::Probe(mOwner->mActionBarBottom)->GetHeight(&height);
-        propertyAnimatorBottom->TranslationY(height);
-        propertyAnimatorBottom->SetListener(mOwner->mBottomAnimatorListener);
-        mOwner->mCurrentActionBarBottomAnimator = propertyAnimatorBottom;
+    if (mOwner->mActionBarBottom != NULL) {
+        IView* barBottom = IView::Probe(mOwner->mActionBarBottom);
+        if (barBottom->GetVisibility(&visibility), visibility != IView::GONE) {
+            AutoPtr<IViewPropertyAnimator> propertyAnimatorBottom;
+            barBottom->Animate((IViewPropertyAnimator**)&propertyAnimatorBottom);
+            barBottom->GetHeight(&height);
+            propertyAnimatorBottom->TranslationY(height);
+            propertyAnimatorBottom->SetListener(mOwner->mBottomAnimatorListener);
+            mOwner->mCurrentActionBarBottomAnimator = propertyAnimatorBottom;
+        }
     }
+
     return NOERROR;
 }
 
@@ -181,7 +208,7 @@ ECode ActionBarOverlayLayout::InnerRunnable1::Run()
 //               ActionBarOverlayLayout::InnerIntProperty
 //=====================================================================
 ActionBarOverlayLayout::InnerIntProperty::InnerIntProperty()
-    : Int32Property(String(""))
+    : Int32Property(String("actionBarHideOffset"))
 {
 }
 
@@ -210,14 +237,12 @@ ECode ActionBarOverlayLayout::InnerIntProperty::Get(
 //=====================================================================
 //                        ActionBarOverlayLayout
 //=====================================================================
-const AutoPtr<IProperty> ActionBarOverlayLayout::ACTION_BAR_HIDE_OFFSET = ActionBarOverlayLayout::InitActinoBarHideOffset();
-AutoPtr< ArrayOf<Int32> > ActionBarOverlayLayout::ATTRS = ActionBarOverlayLayout::MiddleInitAttrs();
-const String ActionBarOverlayLayout::TAG("ActionBarOverlayLayout");
 
 CAR_INTERFACE_IMPL_2(ActionBarOverlayLayout, ViewGroup, IDecorContentParent, IActionBarOverlayLayout)
+
 ActionBarOverlayLayout::ActionBarOverlayLayout()
     : mActionBarHeight(0)
-    , mWindowVisibility(0)
+    , mWindowVisibility(IView::VISIBLE)
     , mIgnoreWindowContentOverlay(FALSE)
     , mOverlayMode(FALSE)
     , mHasNonEmbeddedTabs(FALSE)
@@ -225,7 +250,7 @@ ActionBarOverlayLayout::ActionBarOverlayLayout()
     , mAnimatingForFling(FALSE)
     , mHideOnContentScrollReference(0)
     , mLastSystemUiVisibility(0)
-    , ACTION_BAR_ANIMATE_DELAY(0)
+    , ACTION_BAR_ANIMATE_DELAY(600)
 {
     CRect::New((IRect**)&mBaseContentInsets);
     CRect::New((IRect**)&mLastBaseContentInsets);
@@ -233,6 +258,12 @@ ActionBarOverlayLayout::ActionBarOverlayLayout()
     CRect::New((IRect**)&mBaseInnerInsets);
     CRect::New((IRect**)&mInnerInsets);
     CRect::New((IRect**)&mLastInnerInsets);
+
+    mTopAnimatorListener = new InnerAnimatorListenerAdapter(this);
+    mBottomAnimatorListener = new InnerAnimatorListenerAdapter1(this);
+
+    mRemoveActionBarHideOffset = new InnerRunnable(this);
+    mAddActionBarHideOffset = new InnerRunnable1(this);
 }
 
 ECode ActionBarOverlayLayout::constructor(
@@ -413,12 +444,13 @@ ECode ActionBarOverlayLayout::Draw(
 {
     ViewGroup::Draw(c);
     if (mWindowContentOverlay != NULL && !mIgnoreWindowContentOverlay) {
+        IView* barTop = IView::Probe(mActionBarTop);
         Int32 visibility = 0;
-        IView::Probe(mActionBarTop)->GetVisibility(&visibility);
+        barTop->GetVisibility(&visibility);
         Int32 bottom = 0;
         Float transY = 0;
-        IView::Probe(mActionBarTop)->GetBottom(&bottom);
-        IView::Probe(mActionBarTop)->GetTranslationY(&transY);
+        barTop->GetBottom(&bottom);
+        barTop->GetTranslationY(&transY);
         Int32 top = visibility == VISIBLE ? (Int32)(bottom + transY + 0.5f) : 0;
 
         Int32 width = 0, intrinsHeight = 0;
@@ -568,34 +600,38 @@ ECode ActionBarOverlayLayout::GetActionBarHideOffset(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = 0;
+
     if (mActionBarTop != NULL) {
         Float transY = 0;
         IView::Probe(mActionBarTop)->GetTranslationY(&transY);
         *result = -(Int32)transY;
     }
-    else {
-        *result = 0;
-    }
+
     return NOERROR;
 }
 
 ECode ActionBarOverlayLayout::SetActionBarHideOffset(
     /* [in] */ Int32 offset)
 {
+    using Elastos::Core::Math;
     HaltActionBarHideOffsetAnimations();
+    IView* barTop = IView::Probe(mActionBarTop);
     Int32 topHeight = 0;
-    IView::Probe(mActionBarTop)->GetHeight(&topHeight);
-    offset = Elastos::Core::Math::Max(0, Elastos::Core::Math::Min(offset, topHeight));
-    IView::Probe(mActionBarTop)->SetTranslationY(-offset);
+    barTop->GetHeight(&topHeight);
+    offset = Math::Max(0, Math::Min(offset, topHeight));
+    barTop->SetTranslationY(-offset);
     Int32 visibility = 0;
-    if (mActionBarBottom != NULL &&
-        (IView::Probe(mActionBarBottom)->GetVisibility(&visibility), visibility != IView::GONE)) {
-        // Match the hide offset proportionally for a split bar
-        Float fOffset = (Float)offset / topHeight;
-        Int32 height = 0;
-        IView::Probe(mActionBarBottom)->GetHeight(&height);
-        Int32 bOffset = (Int32)(height * fOffset);
-        IView::Probe(mActionBarBottom)->SetTranslationY(bOffset);
+    if (mActionBarBottom != NULL) {
+        IView* barBottom = IView::Probe(mActionBarBottom);
+        if (barBottom->GetVisibility(&visibility), visibility != IView::GONE) {
+            // Match the hide offset proportionally for a split bar
+            Float fOffset = (Float)offset / topHeight;
+            Int32 height = 0;
+            barBottom->GetHeight(&height);
+            Int32 bOffset = (Int32)(height * fOffset);
+            barBottom->SetTranslationY(bOffset);
+        }
     }
     return NOERROR;
 }
@@ -659,14 +695,15 @@ ECode ActionBarOverlayLayout::SetUiOptions(
         PullChildren();
         Boolean canSplit = FALSE;
         if (mActionBarBottom != NULL && (mDecorToolbar->CanSplit(&canSplit), canSplit)) {
-            mDecorToolbar->SetSplitView(IViewGroup::Probe(mActionBarBottom));
+            IViewGroup* abb = IViewGroup::Probe(mActionBarBottom);
+            mDecorToolbar->SetSplitView(abb);
             mDecorToolbar->SetSplitToolbar(splitActionBar);
             mDecorToolbar->SetSplitWhenNarrow(splitWhenNarrow);
 
             AutoPtr<IView> viewTmp;
             FindViewById(R::id::action_context_bar, (IView**)&viewTmp);
             CActionBarContextView* cab = (CActionBarContextView*)viewTmp.Get();
-            cab->SetSplitView(IViewGroup::Probe(mActionBarBottom));
+            cab->SetSplitView(abb);
             cab->SetSplitToolbar(splitActionBar);
             cab->SetSplitWhenNarrow(splitWhenNarrow);
         }
@@ -855,8 +892,10 @@ void ActionBarOverlayLayout::OnMeasure(
     Int32 maxHeight = 0;
     Int32 maxWidth = 0;
     Int32 childState = 0;
+
     Int32 topInset = 0;
     Int32 bottomInset = 0;
+
     IView* barTop = IView::Probe(mActionBarTop);
     IView* barBottom = IView::Probe(mActionBarBottom);
 
@@ -864,14 +903,16 @@ void ActionBarOverlayLayout::OnMeasure(
     AutoPtr<IViewGroupLayoutParams> lp;
     barTop->GetLayoutParams((IViewGroupLayoutParams**)&lp);
 
+    using Elastos::Core::Math;
+
     Int32 measureWidth = 0, measureHeight = 0, measureState = 0;
     Int32 leftMargin = 0, rightMargin = 0, topMargin = 0, bottomMargin = 0;
     barTop->GetMeasuredWidth(&measureWidth);
     barTop->GetMeasuredHeight(&measureHeight);
     barTop->GetMeasuredState(&measureState);
     IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&leftMargin, &topMargin, &rightMargin, &bottomMargin);
-    maxWidth = Elastos::Core::Math::Max(maxWidth, measureWidth + leftMargin + rightMargin);
-    maxHeight = Elastos::Core::Math::Max(maxHeight, measureHeight + topMargin + bottomMargin);
+    maxWidth = Math::Max(maxWidth, measureWidth + leftMargin + rightMargin);
+    maxHeight = Math::Max(maxHeight, measureHeight + topMargin + bottomMargin);
     childState = CombineMeasuredStates(childState, measureState);
 
     // xlarge screen layout doesn't have bottom action bar.
@@ -885,14 +926,15 @@ void ActionBarOverlayLayout::OnMeasure(
         barBottom->GetMeasuredState(&measureState);
         IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&leftMargin, &topMargin, &rightMargin, &bottomMargin);
 
-        maxWidth = Elastos::Core::Math::Max(maxWidth, measureWidth + leftMargin + rightMargin);
-        maxHeight = Elastos::Core::Math::Max(maxHeight, measureHeight + topMargin + bottomMargin);
+        maxWidth = Math::Max(maxWidth, measureWidth + leftMargin + rightMargin);
+        maxHeight = Math::Max(maxHeight, measureHeight + topMargin + bottomMargin);
         childState = CombineMeasuredStates(childState, measureState);
     }
 
     Int32 vis = 0;
     GetWindowSystemUiVisibility(&vis);
     Boolean stable = (vis & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0;
+
     Int32 visibility = 0;
     barTop->GetVisibility(&visibility);
 
@@ -978,8 +1020,8 @@ void ActionBarOverlayLayout::OnMeasure(
     mContent->GetMeasuredState(&measureState);
     IViewGroupMarginLayoutParams::Probe(lp)->GetMargins(&leftMargin, &topMargin, &rightMargin, &bottomMargin);
 
-    maxWidth = Elastos::Core::Math::Max(maxWidth, measureWidth + leftMargin + rightMargin);
-    maxHeight = Elastos::Core::Math::Max(maxHeight, measureHeight + topMargin + bottomMargin);
+    maxWidth = Math::Max(maxWidth, measureWidth + leftMargin + rightMargin);
+    maxHeight = Math::Max(maxHeight, measureHeight + topMargin + bottomMargin);
     childState = CombineMeasuredStates(childState, measureState);
 
     // Account for padding too
@@ -992,8 +1034,8 @@ void ActionBarOverlayLayout::OnMeasure(
     maxHeight += paddingTop + paddingBottom;
 
     // Check against our minimum height and width
-    maxHeight = Elastos::Core::Math::Max(maxHeight, GetSuggestedMinimumHeight());
-    maxWidth = Elastos::Core::Math::Max(maxWidth, GetSuggestedMinimumWidth());
+    maxHeight = Math::Max(maxHeight, GetSuggestedMinimumHeight());
+    maxWidth = Math::Max(maxWidth, GetSuggestedMinimumWidth());
 
     SetMeasuredDimension(ResolveSizeAndState(maxWidth, widthMeasureSpec, childState),
             ResolveSizeAndState(maxHeight, heightMeasureSpec, childState << MEASURED_HEIGHT_STATE_SHIFT));
@@ -1031,33 +1073,31 @@ ECode ActionBarOverlayLayout::OnLayout(
             child->GetMeasuredWidth(&width);
             child->GetMeasuredHeight(&height);
 
+            IViewGroupMarginLayoutParams* vgmlp = IViewGroupMarginLayoutParams::Probe(lp);
+
             Int32 leftMargin = 0;
-            IViewGroupMarginLayoutParams::Probe(lp)->GetLeftMargin(&leftMargin);
+            vgmlp->GetLeftMargin(&leftMargin);
             Int32 childLeft = parentLeft + leftMargin;
-            Int32 bottomMargin = 0;
-            IViewGroupMarginLayoutParams::Probe(lp)->GetBottomMargin(&bottomMargin);
             Int32 childTop;
             if (child.Get() == IView::Probe(mActionBarBottom)) {
+                Int32 bottomMargin = 0;
+                vgmlp->GetBottomMargin(&bottomMargin);
                 childTop = parentBottom - height - bottomMargin;
+Logger::D("ActionBarOverlayLayout::OnLayout", "========== 1 Line:%d  childTop :%d==============", __LINE__, childTop);
             }
             else {
                 Int32 topMargin = 0;
-                IViewGroupMarginLayoutParams::Probe(lp)->GetTopMargin(&topMargin);
+                vgmlp->GetTopMargin(&topMargin);
                 childTop = parentTop + topMargin;
+Logger::D("ActionBarOverlayLayout::OnLayout", "========== 2 Line:%d i:%d  childTop :%d, parentTop:%d, topMargin:%d==============",
+    __LINE__, i, childTop, parentTop, topMargin);
             }
 
+Logger::D("ActionBarOverlayLayout::OnLayout", "========== 3 Line:%d  childTop :%d==============", __LINE__, childTop);
             child->Layout(childLeft, childTop, childLeft + width, childTop + height);
         }
     }
     return NOERROR;
-}
-
-AutoPtr< ArrayOf<Int32> > ActionBarOverlayLayout::MiddleInitAttrs()
-{
-    AutoPtr< ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(2);
-    (*result)[0] = R::attr::actionBarSize;
-    (*result)[1] = R::attr::windowContentOverlay;
-    return result;
 }
 
 void ActionBarOverlayLayout::Init(
@@ -1094,30 +1134,39 @@ Boolean ActionBarOverlayLayout::ApplyInsets(
     Boolean changed = FALSE;
     AutoPtr<IViewGroupLayoutParams> lp;
     view->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+
+    IViewGroupMarginLayoutParams* vgmlp = IViewGroupMarginLayoutParams::Probe(lp);
+
     Int32 lpValue = 0, rValue = 0;
-    IViewGroupMarginLayoutParams::Probe(lp)->GetLeftMargin(&lpValue);
+    vgmlp->GetLeftMargin(&lpValue);
     insets->GetLeft(&rValue);
     if (left && lpValue != rValue) {
         changed = TRUE;
-        IViewGroupMarginLayoutParams::Probe(lp)->SetLeftMargin(rValue);
+        vgmlp->SetLeftMargin(rValue);
     }
-    IViewGroupMarginLayoutParams::Probe(lp)->GetTopMargin(&lpValue);
+    vgmlp->GetTopMargin(&lpValue);
     insets->GetTop(&rValue);
     if (top && lpValue != rValue) {
         changed = TRUE;
-        IViewGroupMarginLayoutParams::Probe(lp)->SetTopMargin(rValue);
+        vgmlp->SetTopMargin(rValue);
+
+Logger::D("ActionBarOverlayLayout::ApplyInsets", "======= line:%d, rValue:%d ========", __LINE__, rValue);
+android::CallStack stack;
+stack.update();
+String backtrace(stack.toString("").string());
+Logger::I(TAG, "%s", backtrace.string());
     }
-    IViewGroupMarginLayoutParams::Probe(lp)->GetRightMargin(&lpValue);
+    vgmlp->GetRightMargin(&lpValue);
     insets->GetRight(&rValue);
     if (right && lpValue != rValue) {
         changed = TRUE;
-        IViewGroupMarginLayoutParams::Probe(lp)->SetRightMargin(rValue);
+        vgmlp->SetRightMargin(rValue);
     }
-    IViewGroupMarginLayoutParams::Probe(lp)->GetBottomMargin(&lpValue);
+    vgmlp->GetBottomMargin(&lpValue);
     insets->GetBottom(&rValue);
     if (bottom && lpValue != rValue) {
         changed = TRUE;
-        IViewGroupMarginLayoutParams::Probe(lp)->SetBottomMargin(rValue);
+        vgmlp->SetBottomMargin(rValue);
     }
     return changed;
 }
@@ -1127,6 +1176,8 @@ ECode ActionBarOverlayLayout::GetDecorToolbar(
     /* [out] */ IDecorToolbar** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     if (IDecorToolbar::Probe(view) != NULL) {
         *result = IDecorToolbar::Probe(view);
         REFCOUNT_ADD(*result);
@@ -1185,7 +1236,9 @@ Boolean ActionBarOverlayLayout::ShouldHideActionBarOnFling(
     /* [in] */ Float velocityX,
     /* [in] */ Float velocityY)
 {
-    mFlingEstimator->Fling(0, 0, 0, (Int32)velocityY, 0, 0, Elastos::Core::Math::INT32_MIN_VALUE, Elastos::Core::Math::INT32_MAX_VALUE);
+    using Elastos::Core::Math;
+    mFlingEstimator->Fling(0, 0, 0, (Int32)velocityY, 0, 0,
+            Math::INT32_MIN_VALUE, Math::INT32_MAX_VALUE);
     Int32 finalY = 0;
     mFlingEstimator->GetFinalY(&finalY);
     Int32 height = 0;
@@ -1193,15 +1246,7 @@ Boolean ActionBarOverlayLayout::ShouldHideActionBarOnFling(
     return finalY > height;
 }
 
-AutoPtr<IProperty> ActionBarOverlayLayout::InitActinoBarHideOffset()
-{
-    AutoPtr<IProperty> result = new InnerIntProperty();
-    return result;
-}
-
 } // namespace Widget
 } // namespace Internal
 } // namespace Droid
 } // namespace Elastos
-
-

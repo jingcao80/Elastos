@@ -6,20 +6,20 @@
 #include "elastos/droid/internal/widget/AbsActionBarView.h"
 #include "Elastos.Droid.Os.h"
 
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IAnimatorListener;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::Widget::IActionBarContextView;
+using Elastos::Droid::Internal::Widget::AbsActionBarView;
 using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::IActionMode;
 using Elastos::Droid::View::IViewOnClickListener;
-using Elastos::Droid::Animation::IAnimator;
-using Elastos::Droid::Animation::IAnimatorListener;
 using Elastos::Droid::Widget::ILinearLayout;
 using Elastos::Droid::Widget::ITextView;
-using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
-using Elastos::Droid::Internal::Widget::IActionBarContextView;
-using Elastos::Droid::Internal::Widget::AbsActionBarView;
 using Elastos::Core::ICharSequence;
 
 namespace Elastos {
@@ -216,9 +216,9 @@ private:
     AutoPtr<IAnimator> mCurrentAnimation;
     Boolean mAnimateInOnLayout;
     Int32 mAnimationMode;
-    static const Int32 ANIMATE_IDLE = 0;
-    static const Int32 ANIMATE_IN = 1;
-    static const Int32 ANIMATE_OUT = 2;
+    static const Int32 ANIMATE_IDLE;
+    static const Int32 ANIMATE_IN;
+    static const Int32 ANIMATE_OUT;
 };
 
 } // namespace Widget
