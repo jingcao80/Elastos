@@ -35,7 +35,7 @@ extern int _DumpBin(const void *pv, int size);
 
 #define MARSHAL_MAGIC           0x7a79636f
 
-#define MSH_MAX_METHODS         (192 + 4)
+#define MSH_MAX_METHODS         (224 + 4)
 
 #define MSH_ALIGN_4(n)          RoundUp2((n), 4)
 

@@ -41,7 +41,7 @@ Address s_proxyEntryAddress = (Address)NULL;
 #define PROXY_ENTRY_SIZE    0x10
 #define PROXY_ENTRY_MASK    0x0f
 #define PROXY_ENTRY_SHIFT   4
-#define PROXY_ENTRY_NUM     0xc0
+#define PROXY_ENTRY_NUM     0xe0
 
 #ifdef _x86
 

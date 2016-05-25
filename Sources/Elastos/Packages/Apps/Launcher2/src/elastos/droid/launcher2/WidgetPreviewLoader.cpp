@@ -132,7 +132,7 @@ AutoPtr<IInterface> BitmapFactoryOptionsCache::InitialValue()
 {
     AutoPtr<IBitmapFactoryOptions> opts;
     CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&opts);
-    return NOERROR;
+    return opts;
 }
 
 const Int32 WidgetPreviewLoader::CacheDb::DB_VERSION = 2;

@@ -2410,25 +2410,30 @@ String CTelephonyManager::GetProcCmdLine()
     String cmdline;
     AutoPtr<IFileInputStream> is;
 
-    // try {
-    CFileInputStream::New(String("/proc/cmdline"), (IFileInputStream**)&is);
-    AutoPtr<ArrayOf<Byte> > buffer = ArrayOf<Byte>::Alloc(2048);
+    ECode ec;
+    do {
+        ec = CFileInputStream::New(String("/proc/cmdline"), (IFileInputStream**)&is);
+        if (FAILED(ec))
+            break;
+        AutoPtr<ArrayOf<Byte> > buffer = ArrayOf<Byte>::Alloc(2048);
 
-    Int32 count;
-    IInputStream::Probe(is)->Read(buffer, &count);
-    if (count > 0) {
-        cmdline = String(*buffer, 0, count);
+        Int32 count;
+        ec = IInputStream::Probe(is)->Read(buffer, &count);
+        if (FAILED(ec))
+            break;
+        if (count > 0) {
+            cmdline = String(*buffer, 0, count);
+        }
+    } while (0);
+
+    if (FAILED(ec)) {
+        Logger::D(TAG, "No /proc/cmdline exception=");
     }
-    // } catch (IOException e) {
-    //     Rlog.d(TAG, "No /proc/cmdline exception=" + e);
-    // } finally {
+
     if (is != NULL) {
-        // try {
         ICloseable::Probe(is)->Close();
-        // } catch (IOException e) {
-        // }
     }
-    // }
+
     Logger::D(TAG, "/proc/cmdline=%s", cmdline.string());
     return cmdline;
 }
