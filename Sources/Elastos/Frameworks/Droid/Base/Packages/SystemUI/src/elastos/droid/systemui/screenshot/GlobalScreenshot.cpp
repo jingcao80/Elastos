@@ -139,6 +139,8 @@ ECode GlobalScreenshot::MyInterpolator1::GetInterpolation(
 ECode GlobalScreenshot::MyInterpolator1::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
     return NOERROR;
 }
 
@@ -172,6 +174,8 @@ ECode GlobalScreenshot::MyInterpolator2::GetInterpolation(
 ECode GlobalScreenshot::MyInterpolator2::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
     return NOERROR;
 }
 
@@ -324,6 +328,8 @@ ECode GlobalScreenshot::MyInterpolator3::GetInterpolation(
 ECode GlobalScreenshot::MyInterpolator3::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
     return NOERROR;
 }
 

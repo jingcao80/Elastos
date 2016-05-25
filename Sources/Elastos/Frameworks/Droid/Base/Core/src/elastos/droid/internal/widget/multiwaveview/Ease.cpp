@@ -32,7 +32,9 @@ ECode Ease::Linear::TimeInterpolator::GetInterpolation(
 ECode Ease::Linear::TimeInterpolator::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -59,7 +61,9 @@ ECode Ease::Cubic::TimeInterpolatorIn::GetInterpolation(
 ECode Ease::Cubic::TimeInterpolatorIn::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -80,7 +84,9 @@ ECode Ease::Cubic::TimeInterpolatorOut::GetInterpolation(
 ECode Ease::Cubic::TimeInterpolatorOut::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -107,7 +113,9 @@ ECode Ease::Cubic::TimeInterpolatorInOut::GetInterpolation(
 ECode Ease::Cubic::TimeInterpolatorInOut::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -140,7 +148,9 @@ ECode Ease::Quad::TimeInterpolatorIn::GetInterpolation(
 ECode Ease::Quad::TimeInterpolatorIn::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -161,7 +171,9 @@ ECode Ease::Quad::TimeInterpolatorOut::GetInterpolation(
 ECode Ease::Quad::TimeInterpolatorOut::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -189,7 +201,9 @@ ECode Ease::Quad::TimeInterpolatorInOut::GetInterpolation(
 ECode Ease::Quad::TimeInterpolatorInOut::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -222,7 +236,9 @@ ECode Ease::Quart::TimeInterpolatorIn::GetInterpolation(
 ECode Ease::Quart::TimeInterpolatorIn::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -243,7 +259,9 @@ ECode Ease::Quart::TimeInterpolatorOut::GetInterpolation(
 ECode Ease::Quart::TimeInterpolatorOut::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -270,7 +288,9 @@ ECode Ease::Quart::TimeInterpolatorInOut::GetInterpolation(
 ECode Ease::Quart::TimeInterpolatorInOut::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -303,7 +323,9 @@ ECode Ease::Quint::TimeInterpolatorIn::GetInterpolation(
 ECode Ease::Quint::TimeInterpolatorIn::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -324,7 +346,9 @@ ECode Ease::Quint::TimeInterpolatorOut::GetInterpolation(
 ECode Ease::Quint::TimeInterpolatorOut::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -351,7 +375,9 @@ ECode Ease::Quint::TimeInterpolatorInOut::GetInterpolation(
 ECode Ease::Quint::TimeInterpolatorInOut::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -383,7 +409,9 @@ ECode Ease::Sine::TimeInterpolatorIn::GetInterpolation(
 ECode Ease::Sine::TimeInterpolatorIn::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -403,7 +431,9 @@ ECode Ease::Sine::TimeInterpolatorOut::GetInterpolation(
 ECode Ease::Sine::TimeInterpolatorOut::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -423,7 +453,9 @@ ECode Ease::Sine::TimeInterpolatorInOut::GetInterpolation(
 ECode Ease::Sine::TimeInterpolatorInOut::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 //=====================================================================

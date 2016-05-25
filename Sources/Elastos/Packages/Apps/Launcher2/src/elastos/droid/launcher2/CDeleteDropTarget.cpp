@@ -175,7 +175,6 @@ ECode CDeleteDropTarget::MyTimeInterpolator::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-
     *res = FALSE;
     return NOERROR;
 }
@@ -270,7 +269,6 @@ ECode CDeleteDropTarget::MyTimeInterpolator2::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-
     *res = FALSE;
     return NOERROR;
 }

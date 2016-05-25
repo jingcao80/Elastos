@@ -44,7 +44,7 @@ ECode LogDecelerateInterpolator::HasNativeInterpolator(
 {
     VALIDATE_NOT_NULL(res);
     *res = FALSE;
-    return E_NOT_IMPLEMENTED;
+    return NOERROR;
 }
 
 

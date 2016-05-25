@@ -51,26 +51,27 @@ ViewPropertyAnimator::AnimatorEventListener::AnimatorEventListener(
 ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationStart(
     /* [in] */ IAnimator* animation)
 {
+    IInterface* animObj = TO_IINTERFACE(animation);
     if (mHost->mAnimatorSetupMap != NULL) {
         Boolean containKey = FALSE;
-        mHost->mAnimatorSetupMap->ContainsKey(TO_IINTERFACE(animation), &containKey);
+        mHost->mAnimatorSetupMap->ContainsKey(animObj, &containKey);
         if (containKey) {
             AutoPtr<IInterface> valueTmp;
-            mHost->mAnimatorSetupMap->Get(TO_IINTERFACE(animation), (IInterface**)&valueTmp);
+            mHost->mAnimatorSetupMap->Get(animObj, (IInterface**)&valueTmp);
             IRunnable* value = IRunnable::Probe(valueTmp);
             value->Run();
-            mHost->mAnimatorSetupMap->Remove(TO_IINTERFACE(animation));
+            mHost->mAnimatorSetupMap->Remove(animObj);
         }
     }
     if (mHost->mAnimatorOnStartMap != NULL) {
         Boolean containKey = FALSE;
-        mHost->mAnimatorOnStartMap->ContainsKey(TO_IINTERFACE(animation), &containKey);
+        mHost->mAnimatorOnStartMap->ContainsKey(animObj, &containKey);
         if (containKey) {
             AutoPtr<IInterface> valueTmp;
-            mHost->mAnimatorOnStartMap->Get(TO_IINTERFACE(animation), (IInterface**)&valueTmp);
+            mHost->mAnimatorOnStartMap->Get(animObj, (IInterface**)&valueTmp);
             IRunnable* value = IRunnable::Probe(valueTmp);
             value->Run();
-            mHost->mAnimatorOnStartMap->Remove(TO_IINTERFACE(animation));
+            mHost->mAnimatorOnStartMap->Remove(animObj);
         }
     }
     if (mHost->mListener != NULL) {
@@ -82,33 +83,34 @@ ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationStart(
 ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
+    IInterface* animObj = TO_IINTERFACE(animation);
     mHost->mView->SetHasTransientState(FALSE);
     if (mHost->mListener != NULL) {
         mHost->mListener->OnAnimationEnd(animation);
     }
     if (mHost->mAnimatorOnEndMap != NULL) {
         Boolean containKey = FALSE;
-        mHost->mAnimatorOnEndMap->ContainsKey(TO_IINTERFACE(animation), &containKey);
+        mHost->mAnimatorOnEndMap->ContainsKey(animObj, &containKey);
         if (containKey) {
             AutoPtr<IInterface> valueTmp;
-            mHost->mAnimatorOnEndMap->Get(TO_IINTERFACE(animation), (IInterface**)&valueTmp);
+            mHost->mAnimatorOnEndMap->Get(animObj, (IInterface**)&valueTmp);
             IRunnable* value = IRunnable::Probe(valueTmp);
             value->Run();
-            mHost->mAnimatorOnEndMap->Remove(TO_IINTERFACE(animation));
+            mHost->mAnimatorOnEndMap->Remove(animObj);
         }
     }
     if (mHost->mAnimatorCleanupMap != NULL) {
         Boolean containKey = FALSE;
-        mHost->mAnimatorCleanupMap->ContainsKey(TO_IINTERFACE(animation), &containKey);
+        mHost->mAnimatorCleanupMap->ContainsKey(animObj, &containKey);
         if (containKey) {
             AutoPtr<IInterface> valueTmp;
-            mHost->mAnimatorCleanupMap->Get(TO_IINTERFACE(animation), (IInterface**)&valueTmp);
+            mHost->mAnimatorCleanupMap->Get(animObj, (IInterface**)&valueTmp);
             IRunnable* value = IRunnable::Probe(valueTmp);
             value->Run();
-            mHost->mAnimatorCleanupMap->Remove(TO_IINTERFACE(animation));
+            mHost->mAnimatorCleanupMap->Remove(animObj);
         }
     }
-    mHost->mAnimatorMap->Remove(TO_IINTERFACE(animation));
+    mHost->mAnimatorMap->Remove(animObj);
     return NOERROR;
 }
 
@@ -147,8 +149,7 @@ ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationUpdate(
     if (containKey) {
         AutoPtr<IInterface> valueTmp;
         mHost->mAnimatorMap->Get(TO_IINTERFACE(animation), (IInterface**)&valueTmp);
-        IObject* objTmp = IObject::Probe(valueTmp);
-        propertyBundle = (PropertyBundle*)objTmp;
+        propertyBundle = (PropertyBundle*)IObject::Probe(valueTmp);
     }
     if (propertyBundle == NULL) {
         // Shouldn't happen, but just to play it safe
@@ -353,17 +354,6 @@ ECode ViewPropertyAnimator::GetDuration(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mDurationSet) {
-    //     return mDuration;
-    // } else {
-    //     // Just return the default from ValueAnimator, since that's what we'd get if
-    //     // the value has not been set otherwise
-    //     if (mTempValueAnimator == null) {
-    //         mTempValueAnimator = new ValueAnimator();
-    //     }
-    //     return mTempValueAnimator.getDuration();
-    // }
 
     if (mDurationSet) {
         *result = mDuration;
@@ -489,8 +479,7 @@ ECode ViewPropertyAnimator::Cancel()
         keySet->ToArray((ArrayOf<IInterface*>**)&keyArray);
         Int32 keySize = keyArray->GetLength();
         for (Int32 idx=0; idx<keySize; ++idx) {
-            IInterface* interfaceTmp = (*keyArray)[idx];
-            IAnimator* animatorTmp = IAnimator::Probe(interfaceTmp);
+            IAnimator* animatorTmp = IAnimator::Probe((*keyArray)[idx]);
             animatorTmp->Cancel();
         }
     }
@@ -502,9 +491,9 @@ ECode ViewPropertyAnimator::Cancel()
 
     Boolean resTmp = FALSE;
     mView->RemoveCallbacks(mAnimationStarter, &resTmp);
-    if (mRTBackend != NULL) {
-        mRTBackend->CancelAll();
-    }
+    // if (mRTBackend != NULL) {
+    //     mRTBackend->CancelAll();
+    // }
     return NOERROR;
 }
 
@@ -725,10 +714,10 @@ ECode ViewPropertyAnimator::HasActions(
 
 ECode ViewPropertyAnimator::StartAnimation()
 {
-    Boolean bval;
-    if (mRTBackend != NULL && (mRTBackend->StartAnimation(this, &bval), bval)) {
-        return NOERROR;
-    }
+    // Boolean bval;
+    // if (mRTBackend != NULL && (mRTBackend->StartAnimation(this, &bval), bval)) {
+    //     return NOERROR;
+    // }
 
     mView->SetHasTransientState(TRUE);
     AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(1);
@@ -746,21 +735,22 @@ ECode ViewPropertyAnimator::StartAnimation()
     AutoPtr<PropertyBundle> pb = new PropertyBundle(propertyMask, nameValueList);
     IAnimator* animatorTmp = IAnimator::Probe(animator);
     assert(NULL != animatorTmp);
-    mAnimatorMap->Put(TO_IINTERFACE(animator), TO_IINTERFACE(pb));
+    IInterface* animObj = TO_IINTERFACE(animator);
+    mAnimatorMap->Put(animObj, TO_IINTERFACE(pb));
     if (mPendingSetupAction != NULL) {
-        mAnimatorSetupMap->Put(TO_IINTERFACE(animator), TO_IINTERFACE(mPendingSetupAction));
+        mAnimatorSetupMap->Put(animObj, TO_IINTERFACE(mPendingSetupAction));
         mPendingSetupAction = NULL;
     }
     if (mPendingCleanupAction != NULL) {
-        mAnimatorCleanupMap->Put(TO_IINTERFACE(animator), TO_IINTERFACE(mPendingCleanupAction));
+        mAnimatorCleanupMap->Put(animObj, TO_IINTERFACE(mPendingCleanupAction));
         mPendingCleanupAction = NULL;
     }
     if (mPendingOnStartAction != NULL) {
-        mAnimatorOnStartMap->Put(TO_IINTERFACE(animator), TO_IINTERFACE(mPendingOnStartAction));
+        mAnimatorOnStartMap->Put(animObj, TO_IINTERFACE(mPendingOnStartAction));
         mPendingOnStartAction = NULL;
     }
     if (mPendingOnEndAction != NULL) {
-        mAnimatorOnEndMap->Put(TO_IINTERFACE(animator), TO_IINTERFACE(mPendingOnEndAction));
+        mAnimatorOnEndMap->Put(animObj, TO_IINTERFACE(mPendingOnEndAction));
         mPendingOnEndAction = NULL;
     }
 
@@ -817,8 +807,7 @@ ECode ViewPropertyAnimator::AnimatePropertyBy(
             IInterface* interfaceTmp = (*keyArray)[idx];
             AutoPtr<IInterface> valueTmp;
             mAnimatorMap->Get(interfaceTmp, (IInterface**)&valueTmp);
-            IObject* objTmp = IObject::Probe(valueTmp);
-            PropertyBundle* bundle = (PropertyBundle*)objTmp;
+            PropertyBundle* bundle = (PropertyBundle*)IObject::Probe(valueTmp);
             if (bundle->Cancel(constantName)) {
                 // property was canceled - cancel the animation if it's now empty
                 // Note that it's safe to break out here because every new animation

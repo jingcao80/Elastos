@@ -56,6 +56,9 @@ public:
         /* [in] */ Float input,
         /* [out] */ Float* result);
 
+    CARAPI HasNativeInterpolator(
+        /* [out] */ Boolean* res);
+
 private:
     static CARAPI_(AutoPtr<ArrayOf<Float> >) CreateLUT(
         /* [in] */ ITimeInterpolator* interpolator,

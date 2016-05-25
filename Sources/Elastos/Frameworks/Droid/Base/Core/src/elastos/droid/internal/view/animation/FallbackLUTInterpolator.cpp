@@ -69,6 +69,14 @@ ECode FallbackLUTInterpolator::GetInterpolation(
     return mSourceInterpolator->GetInterpolation(input, result);
 }
 
+ECode FallbackLUTInterpolator::HasNativeInterpolator(
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res);
+    *res = TRUE;
+    return NOERROR;
+}
+
 } //namespace Animation
 } //namespace View
 } //namespace Internal

@@ -80,7 +80,7 @@ ECode AppTransition::FadeOutInterpolator::GetInterpolation(
     return NOERROR;
 }
 
-ECode AppTransition::FadeOutInterpolator:: HasNativeInterpolator(
+ECode AppTransition::FadeOutInterpolator::HasNativeInterpolator(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
