@@ -9,7 +9,8 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/Arrays.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::IInsets;
@@ -25,6 +26,8 @@ using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -76,13 +79,15 @@ Int32 GridLayout::Axis::CalculateMaxIndex()
         }
         else {
             AutoPtr<IGridLayoutSpec> rowSpec;
-            glp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
+            params->GetRowSpec((IGridLayoutSpec**)&rowSpec);
             spec = (Spec*)rowSpec.Get();
         }
         AutoPtr<Interval> span = spec->mSpan;
+        Int32 size;
+        span->Size(&size);
         result = Elastos::Core::Math::Max(result, span->mMin);
         result = Elastos::Core::Math::Max(result, span->mMax);
-        result = Elastos::Core::Math::Max(result, span->Size());
+        result = Elastos::Core::Math::Max(result, size);
     }
     return result == -1 ? GridLayout::UNDEFINED : result;
 }
@@ -149,10 +154,11 @@ AutoPtr<GridLayout::PackedMap<AutoPtr<IGridLayoutSpec>, AutoPtr<IBounds> > > Gri
         }
         else {
             AutoPtr<IGridLayoutSpec> rowSpec;
-            glp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
+            params->GetRowSpec((IGridLayoutSpec**)&rowSpec);
             spec = (Spec*)rowSpec.Get();
         }
-        AutoPtr<Bounds> bounds = mHost->GetAlignment(spec->mAlignment, mHorizontal)->GetBounds();
+        AutoPtr<IBounds> bounds;
+        mHost->GetAlignment(spec->mAlignment, mHorizontal)->GetBounds((IBounds**)&bounds);
         assoc->Put((IGridLayoutSpec*)spec, bounds);
     }
     return assoc->Pack();
@@ -162,7 +168,7 @@ void GridLayout::Axis::ComputeGroupBounds()
 {
     AutoPtr< ArrayOf<IBounds*> > values = mGroupBounds->mValues;
     for (Int32 i = 0; i < values->GetLength(); i++) {
-        Bounds* bounds = (Bounds*)(*values)[i].Get();
+        Bounds* bounds = (Bounds*)(*values)[i];
         bounds->Reset();
     }
     Int32 N;
@@ -180,12 +186,12 @@ void GridLayout::Axis::ComputeGroupBounds()
         }
         else {
             AutoPtr<IGridLayoutSpec> rowSpec;
-            glp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
+            params->GetRowSpec((IGridLayoutSpec**)&rowSpec);
             spec = (Spec*)rowSpec.Get();
         }
         Int32 size;
         if (spec->mWeight == 0) {
-            size = mHost->GetMeasurementIncludingMargin(c, mHorizontal);
+            mHost->GetMeasurementIncludingMargin(c, mHorizontal, &size);
         }
         else {
             size = (*GetOriginalMeasurements())[i] + (*GetDeltas())[i];
@@ -218,20 +224,20 @@ GridLayout::Axis::CreateLinks(
     AutoPtr< ArrayOf<AutoPtr<IGridLayoutSpec> > > keys = GetGroupBounds()->mKeys;
     for (Int32 i = 0, N = keys->GetLength(); i < N; i++) {
         Spec* sp = (Spec*)(*keys)[i].Get();
-        AutoPtr<Interval> span = min ? sp->mSpan : sp->mSpan->Inverse();
+        AutoPtr<Interval> span;
+        if (min) {
+            span = sp->mSpan;
+        }
+        else {
+            AutoPtr<IInterval> tmp;
+            sp->mSpan->Inverse((IInterval**)&tmp);
+            span = (Interval*)tmp.Get();
+        }
         AutoPtr<MutableInt> mut = new MutableInt();
         result->Put((IInterval*)span, mut);
     }
     return result->Pack();
 }
-
-
-
-
-
-
-
-
 
 void GridLayout::Axis::ComputeLinks(
     /* [in] */ PackedMap<AutoPtr<IInterval>, AutoPtr<MutableInt> >* links,
@@ -244,16 +250,17 @@ void GridLayout::Axis::ComputeLinks(
 
     AutoPtr< ArrayOf<AutoPtr<IBounds> > > bounds = GetGroupBounds()->mValues;
     for (Int32 i = 0; i < bounds->GetLength(); i++) {
-        Bounds* boundsImpl = (Bounds*)((*bounds)[i].Get());
+        Bounds* boundsImpl = (Bounds*)(*bounds)[i].Get();
         Int32 size = boundsImpl->Size(min);
         AutoPtr<MutableInt> valueHolder = links->GetValue(i);
         valueHolder->mValue = Elastos::Core::Math::Max(valueHolder->mValue, min ? size : -size);
     }
 }
 
-AutoPtr< GridLayout::PackedMap<AutoPtr<IInterval>, AutoPtr<GridLayout::MutableInt> > > GridLayout::Axis::GetForwardLinks()
+AutoPtr< GridLayout::PackedMap<AutoPtr<IInterval>, AutoPtr<GridLayout::MutableInt> > >
+GridLayout::Axis::GetForwardLinks()
 {
-    if (!mForwardLinks) {
+    if (mForwardLinks == NULL) {
         mForwardLinks = CreateLinks(TRUE);
     }
     if (!mForwardLinksValid) {
@@ -263,9 +270,10 @@ AutoPtr< GridLayout::PackedMap<AutoPtr<IInterval>, AutoPtr<GridLayout::MutableIn
     return mForwardLinks;
 }
 
-AutoPtr< GridLayout::PackedMap<AutoPtr<IInterval>, AutoPtr<GridLayout::MutableInt> > > GridLayout::Axis::GetBackwardLinks()
+AutoPtr< GridLayout::PackedMap<AutoPtr<IInterval>, AutoPtr<GridLayout::MutableInt> > >
+GridLayout::Axis::GetBackwardLinks()
 {
-    if (!mBackwardLinks) {
+    if (mBackwardLinks = NULL) {
         mBackwardLinks = CreateLinks(FALSE);
     }
     if (!mBackwardLinksValid) {
@@ -281,17 +289,24 @@ void GridLayout::Axis::Include(
     /* [in] */ MutableInt* size,
     /* [in] */ Boolean ignoreIfAlreadyPresent)
 {
-    if (key->Size() == 0) {
+    /*
+    Remove self referential links.
+    These appear:
+        . as parental constraints when GridLayout has no children
+        . when components have been marked as GONE
+    */
+    Int32 count;
+    if (key->Size(&count), count == 0) {
         return;
     }
+    // this bit below should really be computed outside here -
+            // its just to stop default (row/col > 0) constraints obliterating valid entries
     if (ignoreIfAlreadyPresent) {
-        List< AutoPtr<Arc> >::Iterator it = arcs.Begin();
-        for (; it != arcs.End(); it++)
-        {
+        List< AutoPtr<Arc> >::Iterator it;
+        for (it = arcs.Begin(); it != arcs.End(); ++it) {
             AutoPtr<Interval> span = (*it)->mSpan;
             Boolean equal;
-            AutoPtr<IObject> objKey = key;
-            if (span->Equals(objKey, &equal), equal) {
+            if (span->Equals((IInterval*)key, &equal), equal) {
                 return;
             }
         }
@@ -308,32 +323,28 @@ void GridLayout::Axis::Include(
     Include(arcs, key, size, TRUE);
 }
 
-AutoPtr< ArrayOf<AutoPtr<ArrayOf<GridLayout::Arc*> > > > GridLayout::Axis::GroupArcsByFirstVertex(
+AutoPtr< ArrayOf<AutoPtr<ArrayOf<GridLayout::Arc*> > > >
+GridLayout::Axis::GroupArcsByFirstVertex(
     /* [in] */ AutoPtr< ArrayOf<Arc*> > arcs)
 {
-    Int32 N = GetCount() + 1;
-
-    AutoPtr< ArrayOf<AutoPtr<ArrayOf<GridLayout::Arc*> > > > result = ArrayOf<AutoPtr<ArrayOf<GridLayout::Arc*> > >::Alloc(N);
-
-    Int32 sizes[N];
-    for (UInt32 i = 0; i < sizeof(sizes) / sizeof(sizes[0]); i++) {
-        sizes[i] = 0;
-    }
+    Int32 N = GetCount() + 1; // the number of vertices
+    AutoPtr< ArrayOf<AutoPtr<ArrayOf<GridLayout::Arc*> > > > result =
+            ArrayOf<AutoPtr<ArrayOf<GridLayout::Arc*> > >::Alloc(N);
+    AutoPtr< ArrayOf<Int32> > sizes = ArrayOf<Int32>::Alloc(N);
     for (Int32 i = 0; i < arcs->GetLength(); i++) {
-        AutoPtr<Arc> firstArc = (*arcs)[i];
-        sizes[firstArc->mSpan->mMin]++;
+        AutoPtr<Arc> arc = (*arcs)[i];
+        (*sizes)[arc->mSpan->mMin]++;
     }
-    for (UInt32 i = 0; i < sizeof(sizes) / sizeof(sizes[0]); i++) {
-        AutoPtr<ArrayOf<Arc*> > Arcn = ArrayOf<Arc*>::Alloc(sizes[i]);
-        result->Set(i, Arcn);
+    for (Int32 i = 0; i < sizes->GetLength(); i++) {
+        AutoPtr<ArrayOf<Arc*> > arcArray = ArrayOf<Arc*>::Alloc((*sizes)[i]);
+        result->Set(i, arcArray);
     }
-    for (UInt32 i = 0; i < sizeof(sizes) / sizeof(sizes[0]); i++) {
-        sizes[i] = 0;
-    }
+    // reuse the sizes array to hold the current last elements as we insert each arc
+    Arrays::Fill(sizes, 0);
     for (Int32 i = 0; i < arcs->GetLength(); i++) {
-        AutoPtr<Arc> secondArc = (*arcs)[i];
-        Int32 index = secondArc->mSpan->mMin;
-        (*result)[index]->Set(sizes[index]++, secondArc);
+        AutoPtr<Arc> arc = (*arcs)[i];
+        Int32 index = arc->mSpan->mMin;
+        (*result)[index]->Set((*sizes)[index]++, arc);
     }
     return result;
 }
@@ -341,49 +352,8 @@ AutoPtr< ArrayOf<AutoPtr<ArrayOf<GridLayout::Arc*> > > > GridLayout::Axis::Group
 AutoPtr< ArrayOf<GridLayout::Arc*> > GridLayout::Axis::TopologicalSort(
     /* [in] */ ArrayOf<Arc*>* arcs)
 {
-    Int32 len = arcs->GetLength();
-    AutoPtr< ArrayOf<Arc*> > result = ArrayOf<Arc*>::Alloc(len);
-    Int32 cursor = len - 1;
-    AutoPtr< ArrayOf<AutoPtr<ArrayOf<GridLayout::Arc*> > > > arcsByVertex = GroupArcsByFirstVertex(arcs);
-    AutoPtr< ArrayOf<Int32> > visited = ArrayOf<Int32>::Alloc(GetCount() + 1);
-    AutoPtr<TopoSort> sort = new TopoSort(result, cursor, arcsByVertex, visited);
+    AutoPtr<TopoSort> sort = new TopoSort(arcs, this);
     return sort->Sort();
-    /*return new Object() {
-        Arc[] result = new Arc[arcs.length];
-        int cursor = result.length - 1;
-        Arc[][] arcsByVertex = groupArcsByFirstVertex(arcs);
-        int[] visited = new int[getCount() + 1];
-
-        void walk(int loc) {
-            switch (visited[loc]) {
-                case NEW: {
-                    visited[loc] = PENDING;
-                    for (Arc arc : arcsByVertex[loc]) {
-                        walk(arc.span.max);
-                        result[cursor--] = arc;
-                    }
-                    visited[loc] = COMPLETE;
-                    break;
-                }
-                case PENDING: {
-                    // le singe est dans l'arbre
-                    assert false;
-                    break;
-                }
-                case COMPLETE: {
-                    break;
-                }
-            }
-        }
-
-        Arc[] sort() {
-            for (int loc = 0, N = arcsByVertex.length; loc < N; loc++) {
-                walk(loc);
-            }
-            assert cursor == -1;
-            return result;
-        }
-    }.sort();*/
 }
 
 AutoPtr< ArrayOf<GridLayout::Arc*> > GridLayout::Axis::TopologicalSort(
@@ -391,7 +361,7 @@ AutoPtr< ArrayOf<GridLayout::Arc*> > GridLayout::Axis::TopologicalSort(
 {
     AutoPtr< ArrayOf<Arc*> > result = ArrayOf<Arc*>::Alloc(arcs.GetSize());
     List< AutoPtr<Arc> >::Iterator it = arcs.Begin();
-    for(Int32 i = 0; it != arcs.End(); it++, i++) {
+    for(Int32 i = 0; it != arcs.End(); ++it, ++i) {
         result->Set(i, *it);
     }
     return TopologicalSort(result);
@@ -402,8 +372,7 @@ void GridLayout::Axis::AddComponentSizes(
     /* [in] */ PackedMap<AutoPtr<IInterval>, AutoPtr<MutableInt> >* links)
 {
     for (Int32 i = 0; i < links->mKeys->GetLength(); i++) {
-        AutoPtr<IInterval> tmp = (*links->mKeys)[i];
-        AutoPtr<Interval> key = (Interval*)tmp.Get();
+        AutoPtr<Interval> key = (Interval*)(*links->mKeys)[i].Get();
         Include(result, key, (*links->mValues)[i], FALSE);
     }
 }
@@ -412,10 +381,14 @@ AutoPtr< ArrayOf<GridLayout::Arc*> > GridLayout::Axis::CreateArcs()
 {
     List< AutoPtr<Arc> > mins, maxs;
 
+    // Add the minimum values from the components.
     AddComponentSizes(mins, GetForwardLinks());
+    // Add the maximum values from the components.
     AddComponentSizes(maxs, GetBackwardLinks());
 
+    // Add ordering constraints to prevent row/col sizes from going negative
     if (mOrderPreserved) {
+        // Add a constraint for every row/col
         for (Int32 i = 0; i < GetCount(); i++) {
             AutoPtr<Interval> val = new Interval(i, i + 1);
             AutoPtr<MutableInt> mut = new MutableInt(0);
@@ -431,8 +404,7 @@ AutoPtr< ArrayOf<GridLayout::Arc*> > GridLayout::Axis::CreateArcs()
 
     AutoPtr< ArrayOf<Arc*> > sMins = TopologicalSort(mins);
     AutoPtr< ArrayOf<Arc*> > sMaxs = TopologicalSort(maxs);
-    /*AutoPtr< ArrayOf<Arc*> > test = mHost->Append(sMins.Get(), sMaxs.Get());
-    return test;*/
+
     return mHost->Append(sMins.Get(), sMaxs.Get());
 }
 
@@ -440,6 +412,18 @@ void GridLayout::Axis::ComputeArcs()
 {
     GetForwardLinks();
     GetBackwardLinks();
+}
+
+AutoPtr< ArrayOf<GridLayout::Arc*> > GridLayout::Axis::GetArcs()
+{
+    if (mArcs = NULL) {
+        mArcs = CreateArcs();
+    }
+    if (!mArcsValid) {
+        ComputeArcs();
+        mArcsValid = TRUE;
+    }
+    return mArcs;
 }
 
 Boolean GridLayout::Axis::Relax(
@@ -464,9 +448,7 @@ Boolean GridLayout::Axis::Relax(
 void GridLayout::Axis::Init(
     /* [in] */ ArrayOf<Int32>* locations)
 {
-    for (Int32 i = 0; i < locations->GetLength(); i++) {
-        (*locations)[i] = 0;
-    }
+    Arrays::Fill(locations, 0);
 }
 
 String GridLayout::Axis::ArcsToString(
@@ -475,11 +457,12 @@ String GridLayout::Axis::ArcsToString(
     String var = mHorizontal ? String("x") : String("y");
     StringBuilder result;
     Boolean first = TRUE;
-    List< AutoPtr<Arc> >::Iterator it = arcs.Begin();
-    for (; it != arcs.End(); it++) {
+    List< AutoPtr<Arc> >::Iterator it;
+    for (it = arcs.Begin(); it != arcs.End(); ++it) {
         if (first) {
             first = FALSE;
-        } else {
+        }
+        else {
             result += String(", ");
         }
         Int32 src = (*it)->mSpan->mMin;
@@ -493,7 +476,8 @@ String GridLayout::Axis::ArcsToString(
             result += src;
             result += String(">=");
             result += value;
-        } else {
+        }
+        else {
             result += var;
             result += src;
             result += String("-");
@@ -503,9 +487,7 @@ String GridLayout::Axis::ArcsToString(
             result += -value;
         }
     }
-    String str;
-    result.ToString(&str);
-    return str;
+    return result.ToString();
 }
 
 void GridLayout::Axis::LogError(
@@ -524,6 +506,7 @@ void GridLayout::Axis::LogError(
             removed.PushBack(arc);
         }
     }
+    // TODO:
     /*Log.d(TAG, axisName + " constraints: " + arcsToString(culprits) + " are inconsistent; "
             + "permanently removing: " + arcsToString(removed) + ". ");*/
 }
@@ -532,20 +515,21 @@ void GridLayout::Axis::Solve(
     /* [in] */ ArrayOf<Arc*>* arcs,
     /* [in] */ ArrayOf<Int32>* locations)
 {
-
     String axisName = mHorizontal ? String("horizontal") : String("vertical");
-    Int32 N = GetCount() + 1;
-    AutoPtr< ArrayOf<Boolean> > originalCulprits = NULL;
+    Int32 N = GetCount() + 1; // The number of vertices is the number of columns/rows + 1.
+    AutoPtr< ArrayOf<Boolean> > originalCulprits;
+
     for (Int32 p = 0; p < arcs->GetLength(); p++) {
         Init(locations);
 
+        // We take one extra pass over traditional Bellman-Ford (and omit their final step)
         for (Int32 i = 0; i < N; i++) {
             Boolean changed = FALSE;
             for (Int32 j = 0, length = arcs->GetLength(); j < length; j++) {
                 changed |= Relax(locations, (*arcs)[j]);
             }
             if (!changed) {
-                if (originalCulprits) {
+                if (originalCulprits != NULL) {
                     LogError(axisName, arcs, originalCulprits);
                 }
                 return;
@@ -566,6 +550,7 @@ void GridLayout::Axis::Solve(
         for (Int32 i = 0; i < arcs->GetLength(); i++) {
             if ((*culprits)[i]) {
                 AutoPtr<Arc> arc = (*arcs)[i];
+                // Only remove max values, min values alone cannot be inconsistent
                 if (arc->mSpan->mMin < arc->mSpan->mMax) {
                     continue;
                 }
@@ -580,24 +565,54 @@ void GridLayout::Axis::ComputeMargins(
     /* [in] */ Boolean leading)
 {
     AutoPtr< ArrayOf<Int32> > margins = leading ? mLeadingMargins : mTrailingMargins;
-    Int32 childCount;
-    mHost->GetChildCount(&childCount);
-    for (Int32 i = 0; i < childCount; i++) {
+    Int32 N;
+    mHost->GetChildCount(&N);
+    for (Int32 i = 0; i < N; i++) {
         AutoPtr<IView> c;
         mHost->GetChildAt(i, (IView**)&c);
         Int32 visibility = 0;
         c->GetVisibility(&visibility);
         if (visibility == IView::GONE) continue;
-        AutoPtr<IGridLayoutLayoutParams> glp = mHost->GetLayoutParams(c);
-        AutoPtr<IGridLayoutSpec> columnSpec, rowSpec;
-        glp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
-        glp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
-
-        AutoPtr<Spec> spec = mHorizontal ? (Spec*)columnSpec.Get() : (Spec*)rowSpec.Get();
+        AutoPtr<IGridLayoutLayoutParams> lp = mHost->GetLayoutParams(c);
+        AutoPtr<Spec> spec;
+        if (mHorizontal) {
+            AutoPtr<IGridLayoutSpec> columnSpec;
+            lp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
+            spec = (Spec*)columnSpec.Get();
+        }
+        else {
+            AutoPtr<IGridLayoutSpec> rowSpec;
+            lp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
+            spec = (Spec*)rowSpec.Get();
+        }
         AutoPtr<Interval> span = spec->mSpan;
         Int32 index = leading ? span->mMin : span->mMax;
         (*margins)[index] = Elastos::Core::Math::Max((*margins)[index], mHost->GetMargin1(c, mHorizontal, leading));
     }
+}
+
+AutoPtr< ArrayOf<Int32> > GridLayout::Axis::GetLeadingMargins()
+{
+    if (mLeadingMargins = NULL) {
+        mLeadingMargins = ArrayOf<Int32>::Alloc(GetCount() + 1);
+    }
+    if (!mLeadingMarginsValid) {
+        ComputeMargins(TRUE);
+        mLeadingMarginsValid = TRUE;
+    }
+    return mLeadingMargins;
+}
+
+AutoPtr< ArrayOf<Int32> > GridLayout::Axis::GetTrailingMargins()
+{
+    if (mTrailingMargins = NULL) {
+        mTrailingMargins = ArrayOf<Int32>::Alloc(GetCount() + 1);
+    }
+    if (!mTrailingMarginsValid) {
+        ComputeMargins(FALSE);
+        mTrailingMarginsValid = TRUE;
+    }
+    return mTrailingMargins;
 }
 
 void GridLayout::Axis::Solve(
@@ -608,17 +623,23 @@ void GridLayout::Axis::Solve(
 
 Boolean GridLayout::Axis::ComputeHasWeights()
 {
-    Int32 childCount;
-    mHost->GetChildCount(&childCount);
-    for (int i = 0; i < childCount; i++) {
+    Int32 N;
+    mHost->GetChildCount(&N);
+    for (int i = 0; i < N; i++) {
         AutoPtr<IView> v;
         mHost->GetChildAt(i, (IView**)&v);
         AutoPtr<IGridLayoutLayoutParams> lp = mHost->GetLayoutParams(v);
-        AutoPtr<IGridLayoutSpec> columnSpec, rowSpec;
-        lp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
-        lp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
-
-        Spec* spec = mHorizontal ? (Spec*)columnSpec.Get() : (Spec*)rowSpec.Get();
+        AutoPtr<Spec> spec;
+        if (mHorizontal) {
+            AutoPtr<IGridLayoutSpec> columnSpec;
+            lp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
+            spec = (Spec*)columnSpec.Get();
+        }
+        else {
+            AutoPtr<IGridLayoutSpec> rowSpec;
+            lp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
+            spec = (Spec*)rowSpec.Get();
+        }
         if (spec->mWeight != 0) {
             return TRUE;
         }
@@ -635,6 +656,16 @@ Boolean GridLayout::Axis::HasWeights()
     return mHasWeights;
 }
 
+AutoPtr<ArrayOf<Int32> > GridLayout::Axis::GetOriginalMeasurements()
+{
+    if (mOriginalMeasurements == NULL) {
+        Int32 N;
+        mHost->GetChildCount(&N);
+        mOriginalMeasurements = ArrayOf<Int32>::Alloc(N);
+    }
+    return mOriginalMeasurements;
+}
+
 void GridLayout::Axis::RecordOriginalMeasurement(
     /* [in] */ Int32 i)
 {
@@ -642,26 +673,44 @@ void GridLayout::Axis::RecordOriginalMeasurement(
         AutoPtr<ArrayOf<Int32> > arr = GetOriginalMeasurements();
         AutoPtr<IView> v;
         mHost->GetChildAt(i, (IView**)&v);
-        (*arr)[i] = mHost->GetMeasurementIncludingMargin(v, mHorizontal);
+        Int32 result;
+        mHost->GetMeasurementIncludingMargin(v, mHorizontal, &result);
+        (*arr)[i] = result;
     }
+}
+
+AutoPtr<ArrayOf<Int32> > GridLayout::Axis::GetDeltas()
+{
+    if (mDeltas == NULL) {
+        Int32 N;
+        mHost->GetChildCount(&N);
+        mDeltas = ArrayOf<Int32>::Alloc(N);
+    }
+    return mDeltas;
 }
 
 void GridLayout::Axis::ShareOutDelta()
 {
     Int32 totalDelta = 0;
     Float totalWeight = 0;
-    Int32 childCount;
-    mHost->GetChildCount(&childCount);
-    for (int i = 0; i < childCount; i++) {
+    Int32 N;
+    mHost->GetChildCount(&N);
+    for (Int32 i = 0; i < N; i++) {
         AutoPtr<IView> c;
         mHost->GetChildAt(i, (IView**)&c);
-        AutoPtr<IGridLayoutSpec> columnSpec, rowSpec;
         AutoPtr<IGridLayoutLayoutParams> lp = mHost->GetLayoutParams(c);
-        lp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
-        lp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
-        Spec* spec = mHorizontal ? (Spec*)columnSpec.Get() : (Spec*)rowSpec.Get();
+        AutoPtr<Spec> spec;
+        if (mHorizontal) {
+            AutoPtr<IGridLayoutSpec> columnSpec;
+            lp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
+            spec = (Spec*)columnSpec.Get();
+        }
+        else {
+            AutoPtr<IGridLayoutSpec> rowSpec;
+            lp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
+            spec = (Spec*)rowSpec.Get();
+        }
         Float weight = spec->mWeight;
-
         if (weight != 0) {
             AutoPtr<ArrayOf<Int32> > measurements = GetOriginalMeasurements();
             Int32 delta = mHost->GetMeasurement(c, mHorizontal) - (*measurements)[i];
@@ -669,18 +718,23 @@ void GridLayout::Axis::ShareOutDelta()
             totalWeight += weight;
         }
     }
-
-    mHost->GetChildCount(&childCount);
-    for (int i = 0; i < childCount; i++) {
+    mHost->GetChildCount(&N);
+    for (Int32 i = 0; i < N; i++) {
         AutoPtr<IView> c;
         mHost->GetChildAt(i, (IView**)&c);
-        AutoPtr<IGridLayoutSpec> columnSpec, rowSpec;
         AutoPtr<IGridLayoutLayoutParams> lp = mHost->GetLayoutParams(c);
-        lp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
-        lp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
-        Spec* spec = mHorizontal ? (Spec*)columnSpec.Get() : (Spec*)rowSpec.Get();
+        AutoPtr<Spec> spec;
+        if (mHorizontal) {
+            AutoPtr<IGridLayoutSpec> columnSpec;
+            lp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
+            spec = (Spec*)columnSpec.Get();
+        }
+        else {
+            AutoPtr<IGridLayoutSpec> rowSpec;
+            lp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
+            spec = (Spec*)rowSpec.Get();
+        }
         Float weight = spec->mWeight;
-
         if (weight != 0) {
             Int32 delta = Elastos::Core::Math::Round((weight * totalDelta / totalWeight));
             (*mDeltas)[i] = delta;
@@ -695,9 +749,7 @@ void GridLayout::Axis::SolveAndDistributeSpace(
     /* [in] */ ArrayOf<Int32>* a)
 {
     AutoPtr<ArrayOf<Int32> > deltas = GetDeltas();
-    for(Int32 i = 0; i < deltas->GetLength(); i++) {
-        (*deltas)[i] = 0;
-    }
+    Arrays::Fill(deltas, 0);
     Solve(a);
     ShareOutDelta();
     mArcsValid = FALSE;
@@ -712,10 +764,17 @@ void GridLayout::Axis::ComputeLocations(
 {
     if (!HasWeights()) {
         Solve(a);
-    } else {
+    }
+    else {
         SolveAndDistributeSpace(a);
     }
     if (!mOrderPreserved) {
+        // Solve returns the smallest solution to the constraint system for which all
+        // values are positive. One value is therefore zero - though if the row/col
+        // order is not preserved this may not be the first vertex. For consistency,
+        // translate all the values so that they measure the distance from a[0]; the
+        // leading edge of the parent. After this transformation some values may be
+        // negative.
         Int32 a0 = (*a)[0];
         for (Int32 i = 0, N = a->GetLength(); i < N; i++) {
             (*a)[i] = (*a)[i] - a0;
@@ -723,9 +782,25 @@ void GridLayout::Axis::ComputeLocations(
     }
 }
 
+AutoPtr< ArrayOf<Int32> > GridLayout::Axis::GetLocations()
+{
+    if (mLocations == NULL) {
+        Int32 N = GetCount() + 1;
+        mLocations = ArrayOf<Int32>::Alloc(N);
+    }
+    if (!mLocationsValid) {
+        ComputeLocations(mLocations);
+        mLocationsValid = TRUE;
+    }
+    return mLocations;
+}
+
 Int32 GridLayout::Axis::Size(
     /* [in] */ ArrayOf<Int32>* locations)
 {
+    // The parental edges are attached to vertices 0 and N - even when order is not
+    // being preserved and other vertices fall outside this range. Measure the distance
+    // between vertices 0 and N, assuming that locations[0] = 0.
     return (*locations)[GetCount()];
 }
 
@@ -744,59 +819,6 @@ Int32 GridLayout::Axis::GetMeasure(
 {
     SetParentConstraints(min, max);
     return Size(GetLocations());
-}
-
-
-
-
-
-AutoPtr< ArrayOf<GridLayout::Arc*> > GridLayout::Axis::GetArcs()
-{
-    if (!mArcs) {
-        mArcs = CreateArcs();
-    }
-    if (!mArcsValid) {
-        ComputeArcs();
-        mArcsValid = TRUE;
-    }
-    return mArcs;
-}
-
-AutoPtr< ArrayOf<Int32> > GridLayout::Axis::GetLeadingMargins()
-{
-    if (!mLeadingMargins) {
-        mLeadingMargins = ArrayOf<Int32>::Alloc(GetCount() + 1);
-    }
-    if (!mLeadingMarginsValid) {
-        ComputeMargins(TRUE);
-        mLeadingMarginsValid = TRUE;
-    }
-    return mLeadingMargins;
-}
-
-AutoPtr< ArrayOf<Int32> > GridLayout::Axis::GetTrailingMargins()
-{
-    if (!mTrailingMargins) {
-        mTrailingMargins = ArrayOf<Int32>::Alloc(GetCount() + 1);
-    }
-    if (!mTrailingMarginsValid) {
-        ComputeMargins(FALSE);
-        mTrailingMarginsValid = TRUE;
-    }
-    return mTrailingMargins;
-}
-
-AutoPtr< ArrayOf<Int32> > GridLayout::Axis::GetLocations()
-{
-    if (!mLocations) {
-        Int32 N = GetCount() + 1;
-        mLocations = ArrayOf<Int32>::Alloc(N);
-    }
-    if (!mLocationsValid) {
-        ComputeLocations(mLocations);
-        mLocationsValid = TRUE;
-    }
-    return mLocations;
 }
 
 Int32 GridLayout::Axis::GetMeasure(
@@ -831,16 +853,21 @@ void GridLayout::Axis::Layout(
 void GridLayout::Axis::InvalidateStructure()
 {
     mMaxIndex = UNDEFINED;
+
     mGroupBounds = NULL;
     mForwardLinks = NULL;
     mBackwardLinks = NULL;
+
     mLeadingMargins = NULL;
     mTrailingMargins = NULL;
     mArcs = NULL;
+
     mLocations = NULL;
+
     mOriginalMeasurements = NULL;
     mDeltas = NULL;
     mHasWeightsValid = FALSE;
+
     InvalidateValues();
 }
 
@@ -849,60 +876,113 @@ void GridLayout::Axis::InvalidateValues()
     mGroupBoundsValid = FALSE;
     mForwardLinksValid = FALSE;
     mBackwardLinksValid = FALSE;
+
     mLeadingMarginsValid = FALSE;
     mTrailingMarginsValid = FALSE;
     mArcsValid = FALSE;
+
     mLocationsValid = FALSE;
 }
 
-AutoPtr<ArrayOf<Int32> > GridLayout::Axis::GetDeltas()
-{
-    if (mDeltas == NULL) {
-        Int32 childCount;
-        mHost->GetChildCount(&childCount);
-        mDeltas = ArrayOf<Int32>::Alloc(childCount);
-    }
-    return mDeltas;
-}
 
-AutoPtr<ArrayOf<Int32> > GridLayout::Axis::GetOriginalMeasurements()
-{
-    if (mOriginalMeasurements == NULL) {
-        Int32 childCount;
-        mHost->GetChildCount(&childCount);
-        mOriginalMeasurements = ArrayOf<Int32>::Alloc(childCount);
-    }
-    return mOriginalMeasurements;
-}
+//=================================================================
+// GridLayout::GridLayoutLayoutParams
+//=================================================================
+Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_WIDTH;
+Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_HEIGHT;
+Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_MARGIN;
+Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_ROW;
+Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_COLUMN;
+AutoPtr<GridLayout::Interval> GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN;
+Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN_SIZE;
 
+Int32 GridLayout::GridLayoutLayoutParams::MARGIN;
+Int32 GridLayout::GridLayoutLayoutParams::LEFT_MARGIN;
+Int32 GridLayout::GridLayoutLayoutParams::TOP_MARGIN;
+Int32 GridLayout::GridLayoutLayoutParams::RIGHT_MARGIN;
+Int32 GridLayout::GridLayoutLayoutParams::BOTTOM_MARGIN;
 
+Int32 GridLayout::GridLayoutLayoutParams::COLUMN;
+Int32 GridLayout::GridLayoutLayoutParams::COLUMN_SPAN;
+Int32 GridLayout::GridLayoutLayoutParams::COLUMN_WEIGHT;
 
+Int32 GridLayout::GridLayoutLayoutParams::ROW;
+Int32 GridLayout::GridLayoutLayoutParams::ROW_SPAN;
+Int32 GridLayout::GridLayoutLayoutParams::ROW_WEIGHT;
 
-static const Int32 DEFAULT_WIDTH = IViewGroupLayoutParams::WRAP_CONTENT;
-        static const Int32 DEFAULT_HEIGHT = IViewGroupLayoutParams::WRAP_CONTENT;
-const Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_MARGIN = Elastos::Core::Math::INT32_MIN_VALUE;
-const Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_ROW = Elastos::Core::Math::INT32_MIN_VALUE;
-const Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_COLUMN = Elastos::Core::Math::INT32_MIN_VALUE;
-const AutoPtr<GridLayout::Interval> GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN = new GridLayout::Interval(GridLayout::UNDEFINED, GridLayout::UNDEFINED + 1);
-const Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN_SIZE = DEFAULT_SPAN->Size();
-
-static const Int32 MARGIN = R::styleable::ViewGroup_MarginLayout_layout_margin;
-static const Int32 LEFT_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginLeft;
-static const Int32 TOP_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginTop;
-static const Int32 RIGHT_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginRight;
-static const Int32 BOTTOM_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginBottom;
-
-static const Int32 COLUMN = R::styleable::GridLayout_Layout_layout_column;
-static const Int32 COLUMN_SPAN = R::styleable::GridLayout_Layout_layout_columnSpan;
-static const Int32 COLUMN_WEIGHT = R::styleable::GridLayout_Layout_layout_columnWeight;
-
-static const Int32 ROW = R::styleable::GridLayout_Layout_layout_row;
-static const Int32 ROW_SPAN = R::styleable::GridLayout_Layout_layout_rowSpan;
-static const Int32 ROW_WEIGHT = R::styleable::GridLayout_Layout_layout_rowWeight;
-
-static const Int32 GRAVITY = R::styleable::GridLayout_Layout_layout_gravity;
+Int32 GridLayout::GridLayoutLayoutParams::GRAVITY;
 
 CAR_INTERFACE_IMPL(GridLayout::GridLayoutLayoutParams, ViewGroup::MarginLayoutParams, IGridLayoutLayoutParams)
+
+GridLayout::GridLayoutLayoutParams::GridLayoutLayoutParams()
+    : mRowSpec(Spec::UNDEFINED)
+    , mColumnSpec(Spec::UNDEFINED)
+{}
+
+ECode GridLayout::GridLayoutLayoutParams::constructor(
+    /* [in] */ Int32 width,
+    /* [in] */ Int32 height,
+    /* [in] */ Int32 left,
+    /* [in] */ Int32 top,
+    /* [in] */ Int32 right,
+    /* [in] */ Int32 bottom,
+    /* [in] */ IGridLayoutSpec* rowSpec,
+    /* [in] */ IGridLayoutSpec* columnSpec)
+{
+    FAIL_RETURN(MarginLayoutParams::constructor(width, height))
+    SetMargins(left, top, right, bottom);
+    mRowSpec = rowSpec;
+    mColumnSpec = columnSpec;
+    return NOERROR;
+}
+
+ECode GridLayout::GridLayoutLayoutParams::constructor(
+    /* [in] */ IGridLayoutSpec* rowSpec,
+    /* [in] */ IGridLayoutSpec* columnSpec)
+{
+    return constructor(DEFAULT_WIDTH, DEFAULT_HEIGHT,
+            DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN,
+            rowSpec, columnSpec);
+}
+
+ECode GridLayout::GridLayoutLayoutParams::constructor()
+{
+    return constructor(Spec::UNDEFINED, Spec::UNDEFINED);
+}
+
+ECode GridLayout::GridLayoutLayoutParams::constructor(
+    /* [in] */ IViewGroupLayoutParams* params)
+{
+    return MarginLayoutParams::constructor(params);
+}
+
+ECode GridLayout::GridLayoutLayoutParams::constructor(
+    /* [in] */ IViewGroupMarginLayoutParams* params)
+{
+    return MarginLayoutParams::constructor(params);
+}
+
+ECode GridLayout::GridLayoutLayoutParams::constructor(
+    /* [in] */ IGridLayoutLayoutParams* that)
+{
+    FAIL_RETURN(MarginLayoutParams::constructor(
+            IViewGroupMarginLayoutParams::Probe(that)))
+
+    AutoPtr<GridLayoutLayoutParams> cgl = (GridLayoutLayoutParams*)that;
+    mRowSpec = cgl->mRowSpec;
+    mColumnSpec = cgl->mColumnSpec;
+    return NOERROR;
+}
+
+ECode GridLayout::GridLayoutLayoutParams::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs)
+{
+    FAIL_RETURN(MarginLayoutParams::constructor(context, attrs))
+    ReInitSuper(context, attrs);
+    Init(context, attrs);
+    return NOERROR;
+}
 
 void GridLayout::GridLayoutLayoutParams::ReInitSuper(
     /* [in] */ IContext* context,
@@ -946,33 +1026,90 @@ void GridLayout::GridLayoutLayoutParams::Init(
     a->GetInt32(COLUMN_SPAN, DEFAULT_SPAN_SIZE, &colSpan);
     Float colWeight;
     a->GetFloat(COLUMN_WEIGHT, GridLayout::Spec::DEFAULT_WEIGHT, &colWeight);
-    mColumnSpec = GridLayout::GetSpec(column, colSpan, GridLayout::GetAlignment(gravity, TRUE), colWeight);
+    mColumnSpec = GetSpec(column, colSpan, GetAlignment(gravity, TRUE), colWeight);
 
     Int32 row = 0;
     a->GetInt32(ROW, DEFAULT_ROW, &row);
     Int32 rowSpan = 0;
     a->GetInt32(ROW_SPAN, DEFAULT_SPAN_SIZE, &rowSpan);
     Float rowWeight;
-    a->GetFloat(ROW_WEIGHT, GridLayout::Spec::DEFAULT_WEIGHT, &rowWeight);
-    mRowSpec = GridLayout::GetSpec(row, rowSpan, GridLayout::GetAlignment(gravity, FALSE), rowWeight);
+    a->GetFloat(ROW_WEIGHT, Spec::DEFAULT_WEIGHT, &rowWeight);
+    mRowSpec = GetSpec(row, rowSpan, GetAlignment(gravity, FALSE), rowWeight);
 //    } finally {
     a->Recycle();
 //    }
 }
 
-
-GridLayout::GridLayoutLayoutParams::GridLayoutLayoutParams()
-    : mRowSpec(GridLayout::Spec::UNDEFINED)
-    , mColumnSpec(GridLayout::Spec::UNDEFINED)
-{}
-
 ECode GridLayout::GridLayoutLayoutParams::SetGravity(
     /* [in] */ Int32 gravity)
 {
-    AutoPtr<GridLayout::Spec> row = (GridLayout::Spec*)mRowSpec.Get();
-    AutoPtr<GridLayout::Spec> col = (GridLayout::Spec*)mColumnSpec.Get();
-    mRowSpec = IGridLayoutSpec::Probe(row->CopyWriteAlignment(GridLayout::GetAlignment(gravity, FALSE)));
-    mColumnSpec = IGridLayoutSpec::Probe(col->CopyWriteAlignment(GridLayout::GetAlignment(gravity, TRUE)));
+    AutoPtr<IGridLayoutSpec> spec;
+    mRowSpec->CopyWriteAlignment(GetAlignment(gravity, FALSE), (IGridLayoutSpec**)&spec);
+    mRowSpec = spec;
+    spec = NULL;
+    mColumnSpec->CopyWriteAlignment(GetAlignment(gravity, TRUE), (IGridLayoutSpec**)&spec);
+    mColumnSpec = spec;
+    return NOERROR;
+}
+
+ECode GridLayout::GridLayoutLayoutParams::SetBaseAttributes(
+    /* [in] */ ITypedArray* attributes,
+    /* [in] */ Int32 widthAttr,
+    /* [in] */ Int32 heightAttr)
+{
+    attributes->GetLayoutDimension(widthAttr, DEFAULT_WIDTH, &mWidth);
+    attributes->GetLayoutDimension(heightAttr, DEFAULT_HEIGHT, &mHeight);
+    return NOERROR;
+}
+
+void GridLayout::GridLayoutLayoutParams::SetRowSpecSpan(
+    /* [in] */ GridLayout::Interval* span)
+{
+    AutoPtr<IGridLayoutSpec> spec;
+    mRowSpec->CopyWriteSpan(span, (IGridLayoutSpec**)&spec);
+    mRowSpec = spec;
+}
+
+void GridLayout::GridLayoutLayoutParams::SetColumnSpecSpan(
+    /* [in] */ GridLayout::Interval* span)
+{
+    AutoPtr<IGridLayoutSpec> spec;
+    mColumnSpec->CopyWriteSpan(span, (IGridLayoutSpec**)&spec);
+    mColumnSpec = spec;
+}
+
+ECode GridLayout::GridLayoutLayoutParams::Equals(
+    /* [in] */ IInterface* obj,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+
+    IGridLayoutLayoutParams* glp = IGridLayoutLayoutParams::Probe(obj);
+    if (glp == NULL) return NOERROR;
+
+    GridLayoutLayoutParams* that = (GridLayoutLayoutParams*)glp;
+
+    if (this == that) {
+        *result = TRUE;
+        return NOERROR;
+    }
+
+    if (!Object::Equals(mColumnSpec, that->mColumnSpec)) return NOERROR;
+    if (!Object::Equals(mRowSpec, that->mRowSpec)) return NOERROR;
+
+    *result = TRUE;
+    return NOERROR;
+}
+
+ECode GridLayout::GridLayoutLayoutParams::GetHashCode(
+    /* [out] */ Int32* hash)
+{
+    VALIDATE_NOT_NULL(hash)
+
+    Int32 result = Object::GetHashCode(mRowSpec);
+    result = 31 * result + Object::GetHashCode(mColumnSpec);
+    *hash = result;
     return NOERROR;
 }
 
@@ -994,7 +1131,6 @@ ECode GridLayout::GridLayoutLayoutParams::GetRowSpec(
     /* [out] */ IGridLayoutSpec** r)
 {
     VALIDATE_NOT_NULL(r)
-
     *r = mRowSpec;
     REFCOUNT_ADD(*r)
     return NOERROR;
@@ -1004,1268 +1140,10 @@ ECode GridLayout::GridLayoutLayoutParams::GetColumnSpec(
     /* [out] */ IGridLayoutSpec** c)
 {
     VALIDATE_NOT_NULL(c)
-
     *c = mColumnSpec;
     REFCOUNT_ADD(*c)
     return NOERROR;
 }
-
-void GridLayout::GridLayoutLayoutParams::SetRowSpecSpan(
-    /* [in] */ GridLayout::Interval* span)
-{
-    AutoPtr<GridLayout::Spec> row = (GridLayout::Spec*)mRowSpec.Get();
-    mRowSpec = row->CopyWriteSpan(span);
-}
-
-void GridLayout::GridLayoutLayoutParams::SetColumnSpecSpan(
-    /* [in] */ GridLayout::Interval* span)
-{
-    AutoPtr<GridLayout::Spec> col = (GridLayout::Spec*)mColumnSpec.Get();
-    mColumnSpec = col->CopyWriteSpan(span);
-}
-
-ECode GridLayout::GridLayoutLayoutParams::Equals(
-    /* [in] */ IInterface* obj,
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result);
-    *result = FALSE;
-    VALIDATE_NOT_NULL(obj);
-
-    IGridLayoutLayoutParams * glp = IGridLayoutLayoutParams::Probe(obj);
-    if (glp == NULL) return NOERROR;
-
-    GridLayoutLayoutParams* that = (GridLayoutLayoutParams*) glp;
-
-    Boolean equals = FALSE;
-    IObject::Probe(mColumnSpec)->Equals(that->mColumnSpec, &equals);
-    if (!equals) return NOERROR;
-    IObject::Probe(mRowSpec)->Equals(that->mRowSpec, &equals);
-    if (!equals) return NOERROR;
-
-    *result = TRUE;
-    return NOERROR;
-}
-
-ECode GridLayout::GridLayoutLayoutParams::GetHashCode(
-    /* [out] */ Int32* hash)
-{
-    VALIDATE_NOT_NULL(hash)
-
-    Int32 result = 0;
-    IObject::Probe(mRowSpec)->GetHashCode(&result);
-    Int32 col = 0;
-    IObject::Probe(mColumnSpec)->GetHashCode(&col);
-    result = 31 * result + col;
-    *hash = result;
-    return NOERROR;
-}
-
-ECode GridLayout::GridLayoutLayoutParams::SetBaseAttributes(
-    /* [in] */ ITypedArray* attributes,
-    /* [in] */ Int32 widthAttr,
-    /* [in] */ Int32 heightAttr)
-{
-    FAIL_RETURN(attributes->GetLayoutDimension(widthAttr, DEFAULT_WIDTH, &mWidth));
-    return attributes->GetLayoutDimension(heightAttr, DEFAULT_HEIGHT, &mHeight);
-}
-
-ECode GridLayout::GridLayoutLayoutParams::constructor(
-    /* [in] */ Int32 width,
-    /* [in] */ Int32 height,
-    /* [in] */ Int32 left,
-    /* [in] */ Int32 top,
-    /* [in] */ Int32 right,
-    /* [in] */ Int32 bottom,
-    /* [in] */ IGridLayoutSpec* rowSpec,
-    /* [in] */ IGridLayoutSpec* columnSpec)
-{
-    FAIL_RETURN(MarginLayoutParams::constructor(width, height))
-    SetMargins(left, top, right, bottom);
-    mRowSpec = rowSpec;
-    mColumnSpec = columnSpec;
-    return NOERROR;
-}
-
-ECode GridLayout::GridLayoutLayoutParams::constructor()
-{
-    return constructor(GridLayout::Spec::UNDEFINED, GridLayout::Spec::UNDEFINED);
-}
-
-ECode GridLayout::GridLayoutLayoutParams::constructor(
-    /* [in] */ IGridLayoutSpec* rowSpec,
-    /* [in] */ IGridLayoutSpec* columnSpec)
-{
-    return constructor(DEFAULT_WIDTH, DEFAULT_HEIGHT,
-        DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN,
-        rowSpec, columnSpec);
-}
-
-ECode GridLayout::GridLayoutLayoutParams::constructor(
-    /* [in] */ IViewGroupLayoutParams* params)
-{
-    return MarginLayoutParams::constructor(params);
-}
-
-ECode GridLayout::GridLayoutLayoutParams::constructor(
-    /* [in] */ IViewGroupMarginLayoutParams* params)
-{
-    return MarginLayoutParams::constructor(params);
-}
-
-ECode GridLayout::GridLayoutLayoutParams::constructor(
-    /* [in] */ IGridLayoutLayoutParams* that)
-{
-    FAIL_RETURN(MarginLayoutParams::constructor(IViewGroupMarginLayoutParams::Probe(that)))
-    AutoPtr<GridLayoutLayoutParams> cgl = (GridLayoutLayoutParams*)that;
-    mRowSpec = cgl->mRowSpec;
-    mColumnSpec = cgl->mColumnSpec;
-    return NOERROR;
-}
-
-ECode GridLayout::GridLayoutLayoutParams::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-{
-    FAIL_RETURN(MarginLayoutParams::constructor(context, attrs))
-    ReInitSuper(context, attrs);
-    Init(context, attrs);
-    return NOERROR;
-}
-
-
-//=====================================================================
-// GridLayout
-//=====================================================================
-const Int32 GridLayout::HORIZONTAL = ILinearLayout::HORIZONTAL;
-const Int32 GridLayout::VERTICAL = ILinearLayout::VERTICAL;
-const Int32 GridLayout::UNDEFINED = Elastos::Core::Math::INT32_MIN_VALUE;
-const Int32 GridLayout::ALIGN_BOUNDS = 0;
-const Int32 GridLayout::ALIGN_MARGINS = 1;
-const Int32 GridLayout::MAX_SIZE = 100000;
-const Int32 GridLayout::DEFAULT_CONTAINER_MARGIN = 0;
-const Int32 GridLayout::UNINITIALIZED_HASH = 0;
-const AutoPtr<GridLayout::Alignment> GridLayout::UNDEFINED_ALIGNMENT = new GridLayout::UndefinedAlignment();
-const AutoPtr<GridLayout::Alignment> GridLayout::LEADING = new GridLayout::LeadingAlignment();
-const AutoPtr<GridLayout::Alignment> GridLayout::TRAILING = new GridLayout::TrailingAlignment();
-const AutoPtr<GridLayout::Alignment> GridLayout::TOP = GridLayout::LEADING;
-const AutoPtr<GridLayout::Alignment> GridLayout::BOTTOM = GridLayout::TRAILING;
-const AutoPtr<GridLayout::Alignment> GridLayout::START = GridLayout::LEADING;
-const AutoPtr<GridLayout::Alignment> GridLayout::END = GridLayout::TRAILING;
-const AutoPtr<GridLayout::Alignment> GridLayout::LEFT = GridLayout::CreateSwitchingAlignment(GridLayout::START, GridLayout::END);
-const AutoPtr<GridLayout::Alignment> GridLayout::RIGHT = GridLayout::CreateSwitchingAlignment(GridLayout::END, GridLayout::START);
-const AutoPtr<GridLayout::Alignment> GridLayout::CENTER = new GridLayout::CenterAlignment();
-const AutoPtr<GridLayout::Alignment> GridLayout::BASELINE = new GridLayout::BaseLineAlignment();
-const AutoPtr<GridLayout::Alignment> GridLayout::FILL = new GridLayout::FillAlignment();
-const String GridLayout::TAG("GridLayout");
-const Int32 GridLayout::DEFAULT_ORIENTATION = HORIZONTAL;
-const Int32 GridLayout::DEFAULT_COUNT = UNDEFINED;
-const Boolean GridLayout::DEFAULT_USE_DEFAULT_MARGINS = FALSE;
-const Boolean GridLayout::DEFAULT_ORDER_PRESERVED = TRUE;
-const Int32 GridLayout::DEFAULT_ALIGNMENT_MODE = ALIGN_MARGINS;
-const Int32 GridLayout::ORIENTATION = R::styleable::GridLayout_orientation;
-const Int32 GridLayout::ROW_COUNT = R::styleable::GridLayout_rowCount;
-const Int32 GridLayout::COLUMN_COUNT = R::styleable::GridLayout_columnCount;
-const Int32 GridLayout::USE_DEFAULT_MARGINS = R::styleable::GridLayout_useDefaultMargins;
-const Int32 GridLayout::ALIGNMENT_MODE = R::styleable::GridLayout_alignmentMode;
-const Int32 GridLayout::ROW_ORDER_PRESERVED = R::styleable::GridLayout_rowOrderPreserved;
-const Int32 GridLayout::COLUMN_ORDER_PRESERVED = R::styleable::GridLayout_columnOrderPreserved;
-const Int32 GridLayout::INFLEXIBLE = 0;
-const Int32 GridLayout::CAN_STRETCH = 2;
-
-CAR_INTERFACE_IMPL(GridLayout, ViewGroup, IGridLayout)
-
-GridLayout::GridLayout()
-    : mOrientation(DEFAULT_ORIENTATION)
-    , mUseDefaultMargins(DEFAULT_USE_DEFAULT_MARGINS)
-    , mAlignmentMode(DEFAULT_ALIGNMENT_MODE)
-    , mDefaultGap(0)
-    , mLastLayoutParamsHashCode(UNINITIALIZED_HASH)
-{
-    mHorizontalAxis = new Axis(TRUE, this);
-    mVerticalAxis = new Axis(FALSE, this);
-}
-
-ECode GridLayout::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs,
-    /* [in] */ Int32 defStyleAttr,
-    /* [in] */ Int32 defStyleRes)
-{
-    ViewGroup::constructor(context, attrs, defStyleAttr, defStyleRes);
-
-    AutoPtr<IResources> res;
-    context->GetResources((IResources**)&res);
-    res->GetDimensionPixelOffset(R::dimen::default_gap, &mDefaultGap);
-
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::GridLayout),
-            ArraySize(R::styleable::GridLayout));
-    AutoPtr<ITypedArray> a;
-    FAIL_RETURN(context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
-
-//    try {
-    Int32 rowCount = 0;
-    a->GetInt32(ROW_COUNT, DEFAULT_COUNT, &rowCount);
-    SetRowCount(rowCount);
-    Int32 columnCount = 0;
-    a->GetInt32(COLUMN_COUNT, DEFAULT_COUNT, &columnCount);
-    SetColumnCount(columnCount);
-    Int32 orientation = 0;
-    a->GetInt32(ORIENTATION, DEFAULT_ORIENTATION, &orientation);
-    SetOrientation(orientation);
-    Boolean margins = FALSE;
-    a->GetBoolean(USE_DEFAULT_MARGINS, DEFAULT_USE_DEFAULT_MARGINS, &margins);
-    SetUseDefaultMargins(margins);
-    Int32 alignmentMode = 0;
-    a->GetInt32(ALIGNMENT_MODE, DEFAULT_ALIGNMENT_MODE, &alignmentMode);
-    SetAlignmentMode(alignmentMode);
-    Boolean rowOrderPreserved = FALSE;
-    a->GetBoolean(ROW_ORDER_PRESERVED, DEFAULT_ORDER_PRESERVED, &rowOrderPreserved);
-    SetRowOrderPreserved(rowOrderPreserved);
-    Boolean columnOrderPreserved = FALSE;
-    a->GetBoolean(COLUMN_ORDER_PRESERVED, DEFAULT_ORDER_PRESERVED, &columnOrderPreserved);
-    SetColumnOrderPreserved(columnOrderPreserved);
-//        } finally {
-    a->Recycle();
-//        }
-    return NOERROR;
-}
-
-Int32 GridLayout::GetOrientation()
-{
-   return mOrientation;
-}
-
-ECode GridLayout::GetOrientation(
-    /* [out] */ Int32* orientation)
-{
-   *orientation = mOrientation;
-   return NOERROR;
-}
-
-
-ECode GridLayout::GetRowCount(
-    /* [out] */ Int32* result)
-{
-    *result = GetRowCount();
-    return NOERROR;
-}
-
-ECode GridLayout::GetColumnCount(
-    /* [out] */ Int32* result)
-{
-    *result = GetColumnCount();
-    return NOERROR;
-}
-
-ECode GridLayout::GetUseDefaultMargins(
-    /* [out] */ Boolean* result)
-{
-    *result = GetUseDefaultMargins();
-    return NOERROR;
-}
-
-ECode GridLayout::GetAlignmentMode(
-    /* [out] */ Int32* result)
-{
-    *result = GetAlignmentMode();
-    return NOERROR;
-}
-ECode GridLayout::IsRowOrderPreserved(
-    /* [out] */ Boolean* result)
-{
-    *result = IsRowOrderPreserved();
-    return NOERROR;
-}
-
-ECode GridLayout::IsColumnOrderPreserved(
-    /* [out] */ Boolean* result)
-{
-    *result = IsColumnOrderPreserved();
-    return NOERROR;
-}
-
-ECode GridLayout::SetOrientation(
-    /* [in] */ Int32 orientation)
-{
-    if (mOrientation != orientation) {
-        mOrientation = orientation;
-        InvalidateStructure();
-        RequestLayout();
-    }
-    return NOERROR;
-}
-
-Int32 GridLayout::GetRowCount()
-{
-    return mVerticalAxis->GetCount();
-}
-
-ECode GridLayout::SetRowCount(
-    /* [in] */ Int32 rowCount)
-{
-    mVerticalAxis->SetCount(rowCount);
-    InvalidateStructure();
-    RequestLayout();
-    return NOERROR;
-}
-
-Int32 GridLayout::GetColumnCount()
-{
-    return mHorizontalAxis->GetCount();
-}
-
-ECode GridLayout::SetColumnCount(
-    /* [in] */ Int32 columnCount)
-{
-    mHorizontalAxis->SetCount(columnCount);
-    InvalidateStructure();
-    RequestLayout();
-    return NOERROR;
-}
-
-Boolean GridLayout::GetUseDefaultMargins()
-{
-    return mUseDefaultMargins;
-}
-
-ECode GridLayout::SetUseDefaultMargins(
-    /* [in] */ Boolean useDefaultMargins)
-{
-    mUseDefaultMargins = useDefaultMargins;
-    RequestLayout();
-    return NOERROR;
-}
-
-Int32 GridLayout::GetAlignmentMode()
-{
-    return mAlignmentMode;
-}
-
-ECode GridLayout::SetAlignmentMode(
-    /* [in] */ Int32 alignmentMode)
-{
-    mAlignmentMode = alignmentMode;
-    RequestLayout();
-    return NOERROR;
-}
-
-Boolean GridLayout::IsRowOrderPreserved()
-{
-    return mVerticalAxis->IsOrderPreserved();;
-}
-
-ECode GridLayout::SetRowOrderPreserved(
-    /* [in] */ Boolean rowOrderPreserved)
-{
-    mVerticalAxis->SetOrderPreserved(rowOrderPreserved);
-    InvalidateStructure();
-    RequestLayout();
-    return NOERROR;
-}
-
-Boolean GridLayout::IsColumnOrderPreserved()
-{
-    return mHorizontalAxis->IsOrderPreserved();
-}
-
-ECode GridLayout::SetColumnOrderPreserved(
-    /* [in] */ Boolean columnOrderPreserved)
-{
-    mHorizontalAxis->SetOrderPreserved(columnOrderPreserved);
-    InvalidateStructure();
-    RequestLayout();
-    return NOERROR;
-}
-
-Int32 GridLayout::Max2(
-    /* [in] */ ArrayOf<Int32>* a,
-    /* [in] */ Int32 valueIfEmpty)
-{
-    Int32 result = valueIfEmpty;
-    for (Int32 i = 0, N = a->GetLength(); i < N; i++) {
-        result = Elastos::Core::Math::Max(result, (*a)[i]);
-    }
-    return result;
-}
-
-AutoPtr<GridLayout::Alignment> GridLayout::GetAlignment(
-    /* [in] */ Int32 gravity,
-    /* [in] */ Boolean horizontal)
-{
-    Int32 mask = horizontal ? IGravity::HORIZONTAL_GRAVITY_MASK : IGravity::VERTICAL_GRAVITY_MASK;
-    Int32 shift = horizontal ? IGravity::AXIS_X_SHIFT : IGravity::AXIS_Y_SHIFT;
-    Int32 flags = (gravity & mask) >> shift;
-    switch (flags) {
-        case (IGravity::AXIS_SPECIFIED | IGravity::AXIS_PULL_BEFORE):
-ALOGD("==== File: %s, Line: %d, horizontal: %d ====", __FILE__, __LINE__, horizontal);
-            return horizontal ? LEFT : TOP;
-        case (IGravity::AXIS_SPECIFIED | IGravity::AXIS_PULL_AFTER):
-ALOGD("==== File: %s, Line: %d, horizontal: %d ====", __FILE__, __LINE__, horizontal);
-            return horizontal ? RIGHT : BOTTOM;
-        case (IGravity::AXIS_SPECIFIED | IGravity::AXIS_PULL_BEFORE | IGravity::AXIS_PULL_AFTER):
-ALOGD("==== File: %s, Line: %d, horizontal: %d ====", __FILE__, __LINE__, horizontal);
-            return FILL;
-        case IGravity::AXIS_SPECIFIED:
-ALOGD("==== File: %s, Line: %d, horizontal: %d ====", __FILE__, __LINE__, horizontal);
-            return CENTER;
-        case (IGravity::AXIS_SPECIFIED | IGravity::AXIS_PULL_BEFORE | IGravity::RELATIVE_LAYOUT_DIRECTION):
-ALOGD("==== File: %s, Line: %d, horizontal: %d ====", __FILE__, __LINE__, horizontal);
-            return START;
-        case (IGravity::AXIS_SPECIFIED | IGravity::AXIS_PULL_AFTER | IGravity::RELATIVE_LAYOUT_DIRECTION):
-ALOGD("==== File: %s, Line: %d, horizontal: %d ====", __FILE__, __LINE__, horizontal);
-            return END;
-        default:
-ALOGD("==== File: %s, Line: %d, horizontal: %d ====", __FILE__, __LINE__, horizontal);
-            return UNDEFINED_ALIGNMENT;
-    }
-}
-
-Int32 GridLayout::GetMargin1(
-    /* [in] */ IView* view,
-    /* [in] */ Boolean horizontal,
-    /* [in] */ Boolean leading)
-{
-    AutoPtr<IGridLayoutLayoutParams> lp = GetLayoutParams(view);
-    Int32 lMargin, rMargin, tMargin, bMargin;
-    AutoPtr<IViewGroupMarginLayoutParams> mlp = IViewGroupMarginLayoutParams::Probe(lp);
-    mlp->GetLeftMargin(&lMargin);
-    mlp->GetRightMargin(&rMargin);
-    mlp->GetTopMargin(&tMargin);
-    mlp->GetBottomMargin(&bMargin);
-    Int32 margin =  horizontal ?
-            (leading ? lMargin : rMargin) :
-            (leading ? tMargin : bMargin);
-    return margin == UNDEFINED ? GetDefaultMargin(view, IViewGroupLayoutParams::Probe(lp), horizontal, leading) : margin;
-}
-
-AutoPtr<IGridLayoutLayoutParams> GridLayout::GetLayoutParams(
-    /* [in] */ IView* c)
-{
-    AutoPtr<IViewGroupLayoutParams> lp;
-    c->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-    return IGridLayoutLayoutParams::Probe(lp);
-}
-
-ECode GridLayout::GenerateLayoutParams(
-    /* [in] */ IAttributeSet* attrs,
-    /* [out] */ IViewGroupLayoutParams** params)
-{
-    VALIDATE_NOT_NULL(params);
-    AutoPtr<IContext> context;
-    GetContext((IContext**)&context);
-    AutoPtr<IViewGroupLayoutParams> lp;
-    FAIL_RETURN(CGridLayoutLayoutParams::New(context, attrs, (IViewGroupLayoutParams**)&lp));
-    *params = lp;
-    REFCOUNT_ADD(*params);
-    return NOERROR;
-}
-
-Int32 GridLayout::GetMeasurementIncludingMargin(
-    /* [in] */ IView* c,
-    /* [in] */ Boolean horizontal)
-{
-    Int32 visibility = 0;
-    c->GetVisibility(&visibility);
-    if (visibility == IView::GONE) {
-        return 0;
-    }
-    return GetMeasurement(c, horizontal) + GetTotalMargin(c, horizontal);
-}
-
-ECode GridLayout::GetMeasurementIncludingMargin(
-    /* [in] */ IView* c,
-    /* [in] */ Boolean horizontal,
-    /* [out] */ Int32* result)
-{
-    *result = GetMeasurementIncludingMargin(c, horizontal);
-    return NOERROR;
-}
-
-ECode GridLayout::RequestLayout()
-{
-    ViewGroup::RequestLayout();
-    InvalidateValues();
-    return NOERROR;
-}
-
-AutoPtr<GridLayout::Alignment> GridLayout::GetAlignment(
-    /* [in] */ Alignment* alignment,
-    /* [in] */ Boolean horizontal)
-{
-    if (alignment != UNDEFINED_ALIGNMENT) {
-        return alignment;
-    }
-    else {
-        if (horizontal) {
-            return START;
-        }
-        else {
-            return BASELINE;
-        }
-    }
-}
-
-ECode GridLayout::OnInitializeAccessibilityEvent(
-    /* [in] */ IAccessibilityEvent* event)
-{
-    ViewGroup::OnInitializeAccessibilityEvent(event);
-    AutoPtr<ICharSequence> seq = CoreUtils::Convert(String("GridLayout"));
-    IAccessibilityRecord::Probe(event)->SetClassName(seq);
-    return NOERROR;
-}
-
-ECode GridLayout::OnInitializeAccessibilityNodeInfo(
-    /* [in] */ IAccessibilityNodeInfo* info)
-{
-    ViewGroup::OnInitializeAccessibilityNodeInfo(info);
-    AutoPtr<ICharSequence> seq = CoreUtils::Convert(String("GridLayout"));
-    info->SetClassName(seq);
-    return NOERROR;
-}
-
-void GridLayout::OnSetLayoutParams(
-    /* [in] */ IView* child,
-    /* [in] */ IViewGroupLayoutParams* layoutParams)
-{
-    ViewGroup::OnSetLayoutParams(child, layoutParams);
-
-    if (!CheckLayoutParams(layoutParams)) {
-        String wt = String("supplied LayoutParams are of the wrong type");
-        HandleInvalidParams(wt);
-    }
-    InvalidateStructure();
-}
-
-Boolean GridLayout::CheckLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p)
-{
-    IGridLayoutLayoutParams* gllp = IGridLayoutLayoutParams::Probe(p);
-    if (!gllp) {
-        return FALSE;
-    }
-
-    CheckLayoutParams(gllp, TRUE);
-    CheckLayoutParams(gllp, FALSE);
-    return TRUE;
-}
-
-AutoPtr<IViewGroupLayoutParams> GridLayout::GenerateDefaultLayoutParams()
-{
-    AutoPtr<IViewGroupLayoutParams> lp;
-    CGridLayoutLayoutParams::New((IViewGroupLayoutParams**)&lp);
-    return lp;
-}
-
-AutoPtr<IViewGroupLayoutParams> GridLayout::GenerateLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p)
-{
-    AutoPtr<IViewGroupLayoutParams> lp;
-    CGridLayoutLayoutParams::New(p, (IViewGroupLayoutParams**)&lp);
-    return lp;
-}
-
-void GridLayout::OnDebugDrawMargins(
-    /* [in] */ ICanvas* canvas,
-    /* [in] */ IPaint* paint)
-{
-    AutoPtr<IGridLayoutLayoutParams> lp;
-    CGridLayoutLayoutParams::New((IGridLayoutLayoutParams**)&lp);
-    Int32 count;
-    GetChildCount(&count);
-    for (Int32 i = 0; i < count; i++) {
-        AutoPtr<IView> c;
-        GetChildAt(i, (IView**)&c);
-        IViewGroupMarginLayoutParams::Probe(lp)->SetMargins(
-                GetMargin1(c, TRUE, TRUE),
-                GetMargin1(c, FALSE, TRUE),
-                GetMargin1(c, TRUE, FALSE),
-                GetMargin1(c, FALSE, FALSE));
-        IViewGroupLayoutParams::Probe(lp)->OnDebugDraw(c, canvas, paint);
-    }
-}
-
-void GridLayout::OnDebugDraw(
-    /* [in] */ ICanvas* canvas)
-{
-    AutoPtr<IPaint> paint;
-    CPaint::New((IPaint**)&paint);
-    paint->SetStyle(Elastos::Droid::Graphics::PaintStyle_STROKE);
-    Int32 color = Color::Argb(50, 255, 255, 255);
-    paint->SetColor(color);
-
-    AutoPtr<IInsets> insets;
-    GetOpticalInsets((IInsets**)&insets);
-
-    Int32 w, h;
-    GetWidth(&w);
-    GetHeight(&h);
-    Int32 it, il, ir, ib;
-    insets->GetTop(&it);
-    insets->GetLeft(&il);
-    insets->GetRight(&ir);
-    insets->GetBottom(&ib);
-
-    Int32 top    =     mPaddingTop    + it;
-    Int32 left   =     mPaddingLeft   + il;
-    Int32 right  = w - mPaddingRight  - ir;
-    Int32 bottom = h - mPaddingBottom - ib;
-
-    AutoPtr< ArrayOf<Int32> > xs = mHorizontalAxis->mLocations;
-    if (xs) {
-        for (Int32 i = 0, length = xs->GetLength(); i < length; i++) {
-            Int32 x = left + (*xs)[i];
-            DrawLine(canvas, x, top, x, bottom, paint);
-        }
-    }
-
-    AutoPtr< ArrayOf<Int32> > ys = mVerticalAxis->mLocations;
-    if (ys) {
-        for (Int32 i = 0, length = ys->GetLength(); i < length; i++) {
-            Int32 y = top + (*ys)[i];
-            DrawLine(canvas, left, y, right, y, paint);
-        }
-    }
-
-    ViewGroup::OnDebugDraw(canvas);
-}
-
-void GridLayout::OnViewAdded(
-    /* [in] */ IView* child)
-{
-    ViewGroup::OnViewAdded(child);
-    InvalidateStructure();
-}
-
-void GridLayout::OnViewRemoved(
-    /* [in] */ IView* child)
-{
-    ViewGroup::OnViewRemoved(child);
-    InvalidateStructure();
-}
-
-void GridLayout::OnChildVisibilityChanged(
-    /* [in] */ IView* child,
-    /* [in] */ Int32 oldVisibility,
-    /* [in] */ Int32 newVisibility)
-{
-    ViewGroup::OnChildVisibilityChanged(child, oldVisibility, newVisibility);
-    if (oldVisibility == IView::GONE || newVisibility == IView::GONE) {
-        InvalidateStructure();
-    }
-}
-
-void GridLayout::OnMeasure(
-    /* [in] */ Int32 widthSpec,
-    /* [in] */ Int32 heightSpec)
-{
-    ConsistencyCheck();
-
-    InvalidateValues();
-
-    Int32 hPadding = mPaddingLeft + mPaddingRight;
-    Int32 vPadding = mPaddingTop  + mPaddingBottom;
-
-    Int32 widthSpecSansPadding =  Adjust(widthSpec, -hPadding);
-    Int32 heightSpecSansPadding = Adjust(heightSpec, -vPadding);
-
-    MeasureChildrenWithMargins(widthSpecSansPadding, heightSpecSansPadding, TRUE);
-
-    Int32 widthSansPadding = 0, heightSansPadding = 0;
-
-    if (mOrientation == ILinearLayout::HORIZONTAL) {
-        widthSansPadding = mHorizontalAxis->GetMeasure(widthSpecSansPadding);
-        MeasureChildrenWithMargins(widthSpecSansPadding, heightSpecSansPadding, FALSE);
-        heightSansPadding = mVerticalAxis->GetMeasure(heightSpecSansPadding);
-    } else {
-        heightSansPadding = mVerticalAxis->GetMeasure(heightSpecSansPadding);
-        MeasureChildrenWithMargins(widthSpecSansPadding, heightSpecSansPadding, FALSE);
-        widthSansPadding = mHorizontalAxis->GetMeasure(widthSpecSansPadding);
-    }
-
-    Int32 measuredWidth = Elastos::Core::Math::Max(hPadding + widthSansPadding, GetSuggestedMinimumWidth());
-    Int32 measuredHeight = Elastos::Core::Math::Max(vPadding + heightSansPadding, GetSuggestedMinimumHeight());
-
-    SetMeasuredDimension(
-            ResolveSizeAndState(measuredWidth, widthSpec, 0),
-            ResolveSizeAndState(measuredHeight, heightSpec, 0));
-}
-
-ECode GridLayout::OnLayout(
-    /* [in] */ Boolean changed,
-    /* [in] */ Int32 left,
-    /* [in] */ Int32 top,
-    /* [in] */ Int32 right,
-    /* [in] */ Int32 bottom)
-{
-    ConsistencyCheck();
-
-    Int32 targetWidth = mRight - mLeft;
-    Int32 targetHeight = mBottom - mTop;
-
-    mHorizontalAxis->Layout(targetWidth - mPaddingLeft - mPaddingRight);
-    mVerticalAxis->Layout(targetHeight - mPaddingTop - mPaddingBottom);
-
-    AutoPtr< ArrayOf<Int32> > hLocations = mHorizontalAxis->GetLocations();
-    AutoPtr< ArrayOf<Int32> > vLocations = mVerticalAxis->GetLocations();
-
-    Int32 childCount;
-    GetChildCount(&childCount);
-    for (Int32 i = 0; i < childCount; i++)
-    {
-        AutoPtr<IView> c;
-        GetChildAt(i, (IView**)&c);
-        Int32 visibility = 0;
-        c->GetVisibility(&visibility);
-        if (visibility == IView::GONE) continue;
-        AutoPtr<IGridLayoutLayoutParams> lp = GetLayoutParams(c);
-        AutoPtr<IGridLayoutSpec> columnSpec, rowSpec;
-        lp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
-        lp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
-
-        AutoPtr<Spec> columnSpecImpl = (Spec*)columnSpec.Get();
-        AutoPtr<Spec> rowSpecImpl = (Spec*)rowSpec.Get();
-
-        AutoPtr<Interval> colSpan = columnSpecImpl->mSpan;
-        AutoPtr<Interval> rowSpan = rowSpecImpl->mSpan;
-
-        Int32 x1 = (*hLocations)[colSpan->mMin];
-        Int32 y1 = (*vLocations)[rowSpan->mMin];
-
-        Int32 x2 = (*hLocations)[colSpan->mMax];
-        Int32 y2 = (*vLocations)[rowSpan->mMax];
-
-        Int32 cellWidth = x2 - x1;
-        Int32 cellHeight = y2 - y1;
-
-        Int32 pWidth = GetMeasurement(c, TRUE);
-        Int32 pHeight = GetMeasurement(c, FALSE);
-
-        AutoPtr<Alignment> hAlign = GetAlignment(columnSpecImpl->mAlignment, TRUE);
-        AutoPtr<Alignment> vAlign = GetAlignment(rowSpecImpl->mAlignment, FALSE);
-
-        AutoPtr<Bounds> boundsX = (Bounds*)(mHorizontalAxis->GetGroupBounds()->GetValue(i).Get());
-        AutoPtr<Bounds> boundsY = (Bounds*)(mVerticalAxis->GetGroupBounds()->GetValue(i).Get());
-
-        Int32 gravityOffsetX = 0;
-        hAlign->GetGravityOffset(c, cellWidth - boundsX->Size(TRUE), &gravityOffsetX);
-        Int32 gravityOffsetY = 0;
-        vAlign->GetGravityOffset(c, cellHeight - boundsY->Size(TRUE), &gravityOffsetY);
-
-        Int32 leftMargin = GetMargin(c, TRUE, TRUE);
-        Int32 topMargin = GetMargin(c, FALSE, TRUE);
-        Int32 rightMargin = GetMargin(c, TRUE, FALSE);
-        Int32 bottomMargin = GetMargin(c, FALSE, FALSE);
-
-        Int32 sumMarginsX = leftMargin + rightMargin;
-        Int32 sumMarginsY = topMargin + bottomMargin;
-
-        Int32 alignmentOffsetX = boundsX->GetOffset(this, c, hAlign, pWidth + sumMarginsX, TRUE);
-        Int32 alignmentOffsetY = boundsY->GetOffset(this, c, vAlign, pHeight + sumMarginsY, FALSE);
-
-        Int32 width = 0;
-        hAlign->GetSizeInCell(c, pWidth, cellWidth - sumMarginsX, &width);
-
-        Int32 height = 0;
-        vAlign->GetSizeInCell(c, pHeight, cellHeight - sumMarginsY, &height);
-
-        Int32 dx = x1 + gravityOffsetX + alignmentOffsetX;
-
-        Boolean isLayoutRtl;
-        IsLayoutRtl(&isLayoutRtl);
-        Int32 cx = !isLayoutRtl ? mPaddingLeft + leftMargin + dx :
-                targetWidth - width - mPaddingRight - rightMargin - dx;
-
-        Int32 cy = mPaddingTop + y1 + gravityOffsetY + alignmentOffsetY + topMargin;
-
-        Int32 mw = 0, mh = 0;
-        c->GetMeasuredWidth(&mw);
-        c->GetMeasuredHeight(&mh);
-        if (width != mw || height != mh) {
-            c->Measure(View::MeasureSpec::MakeMeasureSpec(width, View::MeasureSpec::EXACTLY),
-                View::MeasureSpec::MakeMeasureSpec(height, View::MeasureSpec::EXACTLY));
-        }
-ALOGD("==== File: %s, Line: %d, c: %s, cx: %d, cy: %d, width: %d, height: %d, pWidth: %d, cellWidth: %d, sumMarginsX: %d ====", __FILE__, __LINE__, TO_CSTR(c),
-    cx, cy, width, height, pWidth, cellWidth, sumMarginsX);
-        c->Layout(cx, cy, cx + width, cy + height);
-    }
-    return NOERROR;
-}
-
-Int32 GridLayout::Adjust(
-    /* [in] */ Int32 measureSpec,
-    /* [in] */ Int32 delta)
-{
-    return View::MeasureSpec::MakeMeasureSpec(
-            MeasureSpec::GetSize(measureSpec + delta),  MeasureSpec::GetMode(measureSpec));
-}
-
-Int32 GridLayout::GetDefaultMargin(
-    /* [in] */ IView* c,
-    /* [in] */ Boolean horizontal,
-    /* [in] */ Boolean leading)
-{
-    if (ISpace::Probe(c) != NULL) {
-        return 0;
-    }
-    return mDefaultGap / 2;
-}
-
-Int32 GridLayout::GetDefaultMargin(
-    /* [in] */ IView* c,
-    /* [in] */ Boolean isAtEdge,
-    /* [in] */ Boolean horizontal,
-    /* [in] */ Boolean leading)
-{
-    return isAtEdge ? DEFAULT_CONTAINER_MARGIN : GetDefaultMargin(c, horizontal, leading);
-}
-
-Int32 GridLayout::GetDefaultMargin(
-    /* [in] */ IView* c,
-    /* [in] */ IViewGroupLayoutParams* p,
-    /* [in] */ Boolean horizontal,
-    /* [in] */ Boolean leading)
-{
-    if (!mUseDefaultMargins) {
-        return 0;
-    }
-    AutoPtr<IGridLayoutLayoutParams> glp = IGridLayoutLayoutParams::Probe(p);
-    AutoPtr<IGridLayoutSpec> columnSpec, rowSpec;
-    glp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
-    glp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
-
-    AutoPtr<Spec> spec = horizontal ? (Spec*)columnSpec.Get() : (Spec*)rowSpec.Get();
-    AutoPtr<Axis> axis = horizontal ? mHorizontalAxis : mVerticalAxis;
-    AutoPtr<Interval> span = spec->mSpan;
-
-    Boolean isLayoutRtl;
-    IsLayoutRtl(&isLayoutRtl);
-    Boolean leading1 = (horizontal && isLayoutRtl) ? !leading : leading;
-    Boolean isAtEdge = leading1 ? (span->mMin == 0) : (span->mMax == axis->GetCount());
-
-    return GetDefaultMargin(c, isAtEdge, horizontal, leading);
-}
-
-Int32 GridLayout::GetMargin(
-    /* [in] */ IView* view,
-    /* [in] */ Boolean horizontal,
-    /* [in] */ Boolean leading)
-{
-    if (mAlignmentMode == ALIGN_MARGINS) {
-        return GetMargin1(view, horizontal, leading);
-    } else {
-        AutoPtr<Axis> axis = horizontal ? mHorizontalAxis : mVerticalAxis;
-        AutoPtr< ArrayOf<Int32> > margins = leading ? axis->GetLeadingMargins() : axis->GetTrailingMargins();
-
-        AutoPtr<IGridLayoutLayoutParams> lp = GetLayoutParams(view);
-        AutoPtr<IGridLayoutSpec> columnSpec, rowSpec;
-        lp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
-        lp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
-        AutoPtr<Spec> spec = horizontal ? (Spec*)columnSpec.Get() : (Spec*)rowSpec.Get();
-        Int32 index = leading ? spec->mSpan->mMin : spec->mSpan->mMax;
-        return (*margins)[index];
-    }
-}
-
-Int32 GridLayout::GetTotalMargin(
-    /* [in] */ IView* child,
-    /* [in] */ Boolean horizontal)
-{
-    return GetMargin(child, horizontal, TRUE) + GetMargin(child, horizontal, FALSE);
-}
-
-Boolean GridLayout::Fits(
-    /* [in] */ ArrayOf<Int32>* a,
-    /* [in] */ Int32 value,
-    /* [in] */ Int32 start,
-    /* [in] */ Int32 end)
-{
-    if (end > a->GetLength()) {
-        return FALSE;
-    }
-    for (Int32 i = start; i < end; i++) {
-        if ((*a)[i] > value) {
-            return FALSE;
-        }
-    }
-    return TRUE;
-}
-
-void GridLayout::ProcrusteanFill(
-    /* [in] */ ArrayOf<Int32>* a,
-    /* [in] */ Int32 start,
-    /* [in] */ Int32 end,
-    /* [in] */ Int32 value)
-{
-    Int32 length = a->GetLength();
-    if(start < 0 || end > length) {
-        /*throw new ArrayIndexOutOfBoundsException("start < 0 || end > len."
-                    + " start=" + start + ", end=" + end + ", len=" + len);*/
-    }
-    if (start > end) {
-        //throw new IllegalArgumentException("start > end: " + start + " > " + end);
-    }
-
-    Int32 newStart = Elastos::Core::Math::Min(start, length);
-    Int32 newEnd = Elastos::Core::Math::Min(end, length);
-
-    for(Int32 i = newStart; i < newEnd; i++) {
-        (*a)[i] = value;
-    }
-}
-
-void GridLayout::SetCellGroup(
-    /* [in] */ IViewGroupLayoutParams* lp,
-    /* [in] */ Int32 row,
-    /* [in] */ Int32 rowSpan,
-    /* [in] */ Int32 col,
-    /* [in] */ Int32 colSpan)
-{
-ALOGD("==== File: %s, Line: %d, row: %d, rowSpan: %d, col: %d, colSpan: %d ====", __FILE__, __LINE__,
-    row, rowSpan, col, colSpan);
-    AutoPtr<Interval> rowItv = new Interval(row, row + rowSpan);
-    AutoPtr<Interval> colItv = new Interval(col, col + colSpan);
-    AutoPtr<CGridLayoutLayoutParams> glp = (CGridLayoutLayoutParams*)lp;
-    glp->SetRowSpecSpan(rowItv);
-    glp->SetColumnSpecSpan(colItv);
-}
-
-Int32 GridLayout::Clip(
-    /* [in] */ Interval* minorRange,
-    /* [in] */ Boolean minorWasDefined,
-    /* [in] */ Int32 count)
-{
-    Int32 size = minorRange->Size();
-    if (count == 0) {
-        return size;
-    }
-    Int32 min = minorWasDefined ? Elastos::Core::Math::Min(minorRange->mMin, count) : 0;
-    return Elastos::Core::Math::Min(size, count - min);
-}
-
-void GridLayout::ValidateLayoutParams()
-{
-    Boolean horizontal = (mOrientation == HORIZONTAL);
-    AutoPtr<Axis> axis = horizontal ? mHorizontalAxis : mVerticalAxis;
-    Int32 count = (axis->mDefinedCount != UNDEFINED) ? axis->mDefinedCount : 0;
-
-    Int32 major = 0;
-    Int32 minor = 0;
-    AutoPtr< ArrayOf<Int32> > maxSizes = ArrayOf<Int32>::Alloc(count);
-    Int32 childCount;
-    GetChildCount(&childCount);
-
-    for (Int32 i = 0; i < childCount; i++) {
-        AutoPtr<IView> v;
-        GetChildAt(i, (IView**)&v);
-        AutoPtr<IViewGroupLayoutParams> lp;
-        v->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-        AutoPtr<IGridLayoutLayoutParams> glp = IGridLayoutLayoutParams::Probe(lp);
-
-        AutoPtr<IGridLayoutSpec> columnSpec, rowSpec;
-        glp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
-        glp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
-        AutoPtr<Spec> majorSpec = horizontal ? (Spec*)rowSpec.Get() : (Spec*)columnSpec.Get();
-
-        AutoPtr<Interval> majorRange = majorSpec->mSpan;
-        Boolean majorWasDefined = majorSpec->mStartDefined;
-        Int32 majorSpan = majorRange->Size();
-        if (majorWasDefined) {
-            major = majorRange->mMin;
-        }
-
-        AutoPtr<Spec> minorSpec = horizontal ? (Spec*)columnSpec.Get() : (Spec*)rowSpec.Get();
-        AutoPtr<Interval> minorRange = minorSpec->mSpan;
-        Boolean minorWasDefined = minorSpec->mStartDefined;
-        Int32 minorSpan = Clip(minorRange, minorWasDefined, count);
-        if (minorWasDefined) {
-            minor = minorRange->mMin;
-        }
-
-        if (count != 0) {
-            if (!majorWasDefined || !minorWasDefined) {
-                while (!Fits(maxSizes, major, minor, minor + minorSpan)) {
-                    if (minorWasDefined) {
-                        major++;
-                    } else {
-                        if (minor + minorSpan <= count) {
-                            minor++;
-                        } else {
-                            minor = 0;
-                            major++;
-                        }
-                    }
-                }
-            }
-            ProcrusteanFill(maxSizes, minor, minor + minorSpan, major + majorSpan);
-        }
-
-        if (horizontal) {
-            SetCellGroup(lp, major, majorSpan, minor, minorSpan);
-        } else {
-            SetCellGroup(lp, minor, minorSpan, major, majorSpan);
-        }
-
-        minor = minor + minorSpan;
-    }
-}
-
-void GridLayout::InvalidateStructure()
-{
-    mLastLayoutParamsHashCode = UNINITIALIZED_HASH;
-    mHorizontalAxis->InvalidateStructure();
-    mVerticalAxis->InvalidateStructure();
-    InvalidateValues();
-}
-
-void GridLayout::InvalidateValues()
-{
-    if (mHorizontalAxis && mVerticalAxis) {
-        mHorizontalAxis->InvalidateValues();
-        mVerticalAxis->InvalidateValues();
-    }
-}
-
-ECode GridLayout::HandleInvalidParams(
-    /* [in] */ const String& msg)
-{
-    //////////////////////////////// is right
-    return E_ILLEGAL_ARGUMENT_EXCEPTION;
-}
-
-void GridLayout::CheckLayoutParams(
-    /* [in] */ IGridLayoutLayoutParams* lp,
-    /* [in] */ Boolean horizontal)
-{
-    String groupName = horizontal ? String("column") : String("row");
-    AutoPtr<IGridLayoutSpec> columnSpec, rowSpec;
-    lp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
-    lp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
-    AutoPtr<Spec> spec = horizontal ? (Spec*)columnSpec.Get() : (Spec*)rowSpec.Get();
-    AutoPtr<Interval> span = spec->mSpan;
-    if (span->mMin != UNDEFINED && span->mMin < 0) {
-        String wt = groupName + String(" indices must be positive");
-        HandleInvalidParams(wt);
-    }
-    AutoPtr<Axis> axis = horizontal ? mHorizontalAxis : mVerticalAxis;
-    Int32 count = axis->mDefinedCount;
-    if (count != UNDEFINED) {
-        if (span->mMax > count) {
-            String wt = groupName + String(" indices (start + span) mustn't exceed the ") + groupName + String(" count");
-            HandleInvalidParams(wt);
-        }
-        if (span->Size() > count) {
-            String wt = groupName + String(" span mustn't exceed the ") + groupName + String(" count");
-            HandleInvalidParams(wt);
-        }
-    }
-}
-
-void GridLayout::DrawLine(
-    /* [in] */ ICanvas* graphics,
-    /* [in] */ Int32 x1,
-    /* [in] */ Int32 y1,
-    /* [in] */ Int32 x2,
-    /* [in] */ Int32 y2,
-    /* [in] */ IPaint* paint)
-{
-    Boolean isLayoutRtl;
-    IsLayoutRtl(&isLayoutRtl);
-    if (isLayoutRtl) {
-        Int32 width;
-        GetWidth(&width);
-        graphics->DrawLine(width - x1, y1, width - x2, y2, paint);
-    } else {
-        graphics->DrawLine(x1, y1, x2, y2, paint);
-    }
-}
-
-Int32 GridLayout::ComputeLayoutParamsHashCode()
-{
-    Int32 result = 1;
-    Int32 childCount;
-    GetChildCount(&childCount);
-    for (Int32 i = 0; i < childCount; i++) {
-        AutoPtr<IView> c;
-        GetChildAt(i, (IView**)&c);
-        Int32 visibility = 0;
-        c->GetVisibility(&visibility);
-        if (visibility == IView::GONE) continue;
-        AutoPtr<IViewGroupLayoutParams> lp;
-        c->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-        IGridLayoutLayoutParams * glp = IGridLayoutLayoutParams::Probe(lp.Get());
-        Int32 hash;
-        IObject::Probe(glp)->GetHashCode(&hash);
-        result = 31 * result + hash;
-    }
-    return result;
-}
-
-void GridLayout::ConsistencyCheck()
-{
-    if (mLastLayoutParamsHashCode == UNINITIALIZED_HASH) {
-        ValidateLayoutParams();
-        mLastLayoutParamsHashCode = ComputeLayoutParamsHashCode();
-    }
-    else if (mLastLayoutParamsHashCode != ComputeLayoutParamsHashCode()) {
-        SLOGGERW(TAG, String("The fields of some layout parameters were modified in between layout") +
-            " operations. Check the javadoc for GridLayout.LayoutParams#rowSpec.");
-        InvalidateStructure();
-        ConsistencyCheck();
-    }
-}
-
-void GridLayout::MeasureChildWithMargins2(
-    /* [in] */ IView* child,
-    /* [in] */ Int32 parentWidthSpec,
-    /* [in] */ Int32 parentHeightSpec,
-    /* [in] */ Int32 childWidth,
-    /* [in] */ Int32 childHeight)
-{
-    Int32 childWidthSpec = GetChildMeasureSpec(parentWidthSpec,
-            GetTotalMargin(child, TRUE), childWidth);
-    Int32 childHeightSpec = GetChildMeasureSpec(parentHeightSpec,
-            GetTotalMargin(child, FALSE), childHeight);
-
-    child->Measure(childWidthSpec, childHeightSpec);
-}
-
-void GridLayout::MeasureChildrenWithMargins(
-    /* [in] */ Int32 widthSpec,
-    /* [in] */ Int32 heightSpec,
-    /* [in] */ Boolean firstPass)
-{
-    Int32 childCount;
-    GetChildCount(&childCount);
-    for (Int32 i = 0; i < childCount; i++) {
-        AutoPtr<IView> c;
-        GetChildAt(i, (IView**)&c);
-        Int32 visibility = 0;
-        c->GetVisibility(&visibility);
-        if (visibility == IView::GONE) continue;
-        AutoPtr<IGridLayoutLayoutParams> glp = GetLayoutParams(c);
-        AutoPtr<IViewGroupLayoutParams> lp = IViewGroupLayoutParams::Probe(glp);
-        Int32 width, height;
-        lp->GetWidth(&width);
-        lp->GetHeight(&height);
-        if (firstPass) {
-            MeasureChildWithMargins2(c, widthSpec, heightSpec, width, height);
-            mHorizontalAxis->RecordOriginalMeasurement(i);
-            mVerticalAxis->RecordOriginalMeasurement(i);
-        }
-        else {
-            Boolean horizontal = (mOrientation == HORIZONTAL);
-            AutoPtr<IGridLayoutSpec> columnSpec, rowSpec;
-            glp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
-            glp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
-            AutoPtr<Spec> spec = horizontal ? (Spec*)columnSpec.Get() : (Spec*)rowSpec.Get();
-            if (spec->mAlignment == FILL) {
-                AutoPtr<Interval> span = spec->mSpan;
-                AutoPtr<Axis> axis = horizontal ? mHorizontalAxis : mVerticalAxis;
-                AutoPtr< ArrayOf<Int32> > locations = axis->GetLocations();
-                Int32 cellSize = (*locations)[span->mMax] - (*locations)[span->mMin];
-                Int32 viewSize = cellSize - GetTotalMargin(c, horizontal);
-                if (horizontal) {
-                    MeasureChildWithMargins2(c, widthSpec, heightSpec, viewSize, height);
-                }
-                else {
-                    MeasureChildWithMargins2(c, widthSpec, heightSpec, width, viewSize);
-                }
-            }
-        }
-    }
-}
-
-Int32 GridLayout::GetMeasurement(
-    /* [in] */ IView* c,
-    /* [in] */ Boolean horizontal)
-{
-    Int32 result = 0;
-    if (horizontal) {
-        c->GetMeasuredWidth(&result);
-    }
-    else {
-        c->GetMeasuredHeight(&result);
-    }
-    return result;
-}
-
-AutoPtr<GridLayout::Alignment> GridLayout::CreateSwitchingAlignment(
-    /* [in] */ Alignment* ltr,
-    /* [in] */ Alignment* rtl)
-{
-    AutoPtr<Alignment> al = new SwitchingAlignment(ltr, rtl);
-    return al;
-}
-
-Boolean GridLayout::CanStretch(
-    /* [in] */ Int32 flexibility)
-{
-    return (flexibility & CAN_STRETCH) != 0;
-}
-
-AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
-    /* [in] */ Int32 start,
-    /* [in] */ Int32 size,
-    /* [in] */ Alignment* alignment)
-{
-    return GetSpec(start, size, alignment, Spec::DEFAULT_WEIGHT);
-}
-
-AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
-    /* [in] */ Int32 start,
-    /* [in] */ Alignment* alignment)
-{
-    return GetSpec(start, 1, alignment);
-}
-
-AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
-    /* [in] */ Int32 start,
-    /* [in] */ Int32 size)
-{
-    return GetSpec(start, size, UNDEFINED_ALIGNMENT);
-}
-
-AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
-    /* [in] */ Int32 start)
-{
-    return GetSpec(start, 1);
-}
-
-AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
-    /* [in] */ Int32 start,
-    /* [in] */ Int32 size,
-    /* [in] */ Alignment* alignment,
-    /* [in] */ Float weight)
-{
-    AutoPtr<IGridLayoutSpec> result = new Spec(start != UNDEFINED, start, size, alignment, weight);
-    return result;
-}
-
-AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
-    /* [in] */ Int32 start,
-    /* [in] */ Alignment* alignment,
-    /* [in] */ Float weight)
-{
-    return GetSpec(start, 1, alignment, weight);
-}
-
-AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
-    /* [in] */ Int32 start,
-    /* [in] */ Int32 size,
-    /* [in] */ Float weight)
-{
-    return GetSpec(start, size, UNDEFINED_ALIGNMENT, weight);
-}
-
-AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
-    /* [in] */ Int32 start,
-    /* [in] */ Float weight)
-{
-    return GetSpec(start, 1, weight);
-}
-
 
 
 //==================================================================
@@ -2274,27 +1152,33 @@ AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
 GridLayout::Arc::Arc(
     /* [in] */ Interval* span,
     /* [in] */ MutableInt* value)
-    : mValid(TRUE)
-{
-    mSpan = span;
-    mValue = value;
-}
+    : mSpan(span)
+    , mValue(value)
+    , mValid(TRUE)
+{}
 
-String GridLayout::Arc::ToString()
+ECode GridLayout::Arc::ToString(
+    /* [out] */ String* info)
 {
+    VALIDATE_NOT_NULL(info);
+
     String str;
     mSpan->ToString(&str);
     str += String(" ");
-    String mut = mValue->ToString();
+    String mut;
+    mValue->ToString(&mut);
     if (!mValid) {
         str += String("+>");
-    } else {
+    }
+    else {
         str += String("->");
     }
     str += String(" ");
     str += mut;
-    return str;
+    *info = str;
+    return NOERROR;
 }
+
 
 //==================================================================
 //                      GridLayout::MutableInt
@@ -2315,10 +1199,15 @@ void GridLayout::MutableInt::Reset()
     mValue = Elastos::Core::Math::INT32_MIN_VALUE;
 }
 
-String GridLayout::MutableInt::ToString()
+ECode GridLayout::MutableInt::ToString(
+    /* [out] */ String* info)
 {
-    return StringUtils::ToString(mValue);
+    VALIDATE_NOT_NULL(info);
+
+    *info = StringUtils::ToString(mValue);
+    return NOERROR;
 }
+
 
 //==================================================================
 //                      GridLayout::Bounds
@@ -2328,51 +1217,6 @@ CAR_INTERFACE_IMPL(GridLayout::Bounds, Object, IBounds)
 GridLayout::Bounds::Bounds()
 {
     Reset();
-}
-
-ECode GridLayout::Bounds::GetBefore(
-    /* [out] */ Int32* before)
-{
-    VALIDATE_NOT_NULL(before)
-    *before = mBefore;
-    return NOERROR;
-}
-
-ECode GridLayout::Bounds::GetAfter(
-    /* [out] */ Int32* after)
-{
-    VALIDATE_NOT_NULL(after)
-    *after = mAfter;
-    return NOERROR;
-}
-
-ECode GridLayout::Bounds::GetFlexibility(
-    /* [out] */ Int32* flexibility)
-{
-    VALIDATE_NOT_NULL(flexibility)
-    *flexibility = mFlexibility;
-    return NOERROR;
-}
-
-ECode GridLayout::Bounds::SetBefore(
-    /* [in] */ Int32 before)
-{
-    mBefore = before;
-    return NOERROR;
-}
-
-ECode GridLayout::Bounds::SetAfter(
-    /* [in] */ Int32 after)
-{
-    mAfter = after;
-    return NOERROR;
-}
-
-ECode GridLayout::Bounds::SetFlexibility(
-    /* [in] */ Int32 flexibility)
-{
-    mFlexibility = flexibility;
-    return NOERROR;
 }
 
 void GridLayout::Bounds::Reset()
@@ -2422,10 +1266,12 @@ void GridLayout::Bounds::Include(
     /* [in] */ Axis* axis,
     /* [in] */ Int32 size)
 {
-    mFlexibility &= spec->GetFlexibility();
+    Int32 flexibility;
+    spec->GetFlexibility(&flexibility);
+    mFlexibility &= flexibility;
     Boolean horizontal = axis->mHorizontal;
-    GridLayout* layout = (GridLayout*)(gl);
-    AutoPtr<Alignment> alignment = layout->GetAlignment(spec->mAlignment, horizontal);
+    AutoPtr<Alignment> alignment = ((GridLayout*)(gl))->GetAlignment(spec->mAlignment, horizontal);
+    // todo test this works correctly when the returned value is UNDEFINED
     Int32 mode = 0;
     IViewGroup::Probe(gl)->GetLayoutMode(&mode);
     Int32 before = 0;
@@ -2433,12 +1279,62 @@ void GridLayout::Bounds::Include(
     Include(before, size - before);
 }
 
-String GridLayout::Bounds::ToString()
+ECode GridLayout::Bounds::ToString(
+    /* [out] */ String* info)
 {
+    VALIDATE_NOT_NULL(info);
     String before = StringUtils::ToString(mBefore);
     String after = StringUtils::ToString(mAfter);
-    return String("Bounds{") + String("before=") + before + String(", after=") + after + String("}");
+    *info = String("Bounds{") + String("before=") +
+            before + String(", after=") + after + String("}");
+    return NOERROR;
 }
+
+ECode GridLayout::Bounds::GetBefore(
+    /* [out] */ Int32* before)
+{
+    VALIDATE_NOT_NULL(before)
+    *before = mBefore;
+    return NOERROR;
+}
+
+ECode GridLayout::Bounds::GetAfter(
+    /* [out] */ Int32* after)
+{
+    VALIDATE_NOT_NULL(after)
+    *after = mAfter;
+    return NOERROR;
+}
+
+ECode GridLayout::Bounds::GetFlexibility(
+    /* [out] */ Int32* flexibility)
+{
+    VALIDATE_NOT_NULL(flexibility)
+    *flexibility = mFlexibility;
+    return NOERROR;
+}
+
+ECode GridLayout::Bounds::SetBefore(
+    /* [in] */ Int32 before)
+{
+    mBefore = before;
+    return NOERROR;
+}
+
+ECode GridLayout::Bounds::SetAfter(
+    /* [in] */ Int32 after)
+{
+    mAfter = after;
+    return NOERROR;
+}
+
+ECode GridLayout::Bounds::SetFlexibility(
+    /* [in] */ Int32 flexibility)
+{
+    mFlexibility = flexibility;
+    return NOERROR;
+}
+
 
 //==================================================================
 //                      GridLayout::Interval
@@ -2452,31 +1348,64 @@ GridLayout::Interval::Interval(
     , mMax(max)
 {}
 
-Int32 GridLayout::Interval::Size()
-{
-    return mMax - mMin;
-}
-
 ECode GridLayout::Interval::Size(
     /* [out] */ Int32* size)
 {
+    VALIDATE_NOT_NULL(size);
     *size = mMax - mMin;
     return NOERROR;
-}
-
-AutoPtr<GridLayout::Interval> GridLayout::Interval::Inverse()
-{
-    AutoPtr<Interval> val = new Interval(mMax, mMin);
-    return val;
 }
 
 ECode GridLayout::Interval::Inverse(
     /* [out] */ IInterval** interval)
 {
-    AutoPtr<Interval> tmp = Inverse();
-    *interval = tmp.Get();
+    VALIDATE_NOT_NULL(interval);
+    *interval = new Interval(mMax, mMin);
     REFCOUNT_ADD(*interval)
+    return NOERROR;
+}
 
+ECode GridLayout::Interval::Equals(
+    /* [in] */ IInterface* that,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+
+    IInterval* itv = IInterval::Probe(that);
+    if (itv == NULL) return NOERROR;
+
+    Interval* interval = (Interval*)itv;
+
+    if (mMax != interval->mMax){
+        return NOERROR;
+    }
+    //noinspection RedundantIfStatement
+    if (mMin != interval->mMin) {
+        return NOERROR;
+    }
+
+    *result = TRUE;
+    return NOERROR;
+}
+
+ECode GridLayout::Interval::GetHashCode(
+    /* [out] */ Int32* hashCode)
+{
+    VALIDATE_NOT_NULL(hashCode)
+    Int32 result = mMin;
+    result = 31 * result + mMax;
+    *hashCode = result;
+    return NOERROR;
+}
+
+ECode GridLayout::Interval::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    String min = StringUtils::ToString(mMin);
+    String max = StringUtils::ToString(mMax);
+    *str = String("[") + min + String(", ") + max + String("]");
     return NOERROR;
 }
 
@@ -2497,63 +1426,14 @@ ECode GridLayout::Interval::GetMax(
     return NOERROR;
 }
 
-ECode GridLayout::Interval::Equals(
-    /* [in] */ IInterface* that,
-    /* [out] */ Boolean* result)
-{
-    IObject* obj = IObject::Probe(that);
-    Interval* other = (Interval*)obj;
-    if (this == other) {
-        *result = TRUE;
-        return NOERROR;
-    }
-    if (other == NULL) {
-        *result = FALSE;
-        return NOERROR;
-    }
-
-    if (mMax != other->mMax) {
-        *result = FALSE;
-        return NOERROR;
-    }
-    if (mMin != other->mMin) {
-        *result = FALSE;
-        return NOERROR;
-    }
-
-    *result = TRUE;
-    return NOERROR;
-}
-
-ECode GridLayout::Interval::GetHashCode(
-    /* [out] */ Int32* hashCode)
-{
-    Int32 result = mMin;
-    result = 31 * result + mMax;
-    *hashCode = result;
-    return NOERROR;
-}
-
-ECode GridLayout::Interval::ToString(
-    /* [out] */ String* str)
-{
-    String min = StringUtils::ToString(mMin);
-    String max = StringUtils::ToString(mMax);
-    *str = String("[") + min + String(", ") + max + String("]");
-    return NOERROR;
-}
 
 //==================================================================
 //                      GridLayout::Spec
 //==================================================================
+AutoPtr<IGridLayoutSpec> GridLayout::Spec::UNDEFINED;
+Float GridLayout::Spec::DEFAULT_WEIGHT;
+
 CAR_INTERFACE_IMPL(GridLayout::Spec, Object, IGridLayoutSpec)
-
-static AutoPtr<IGridLayoutSpec> InitStatic() {
-    AutoPtr<IGridLayoutSpec> sp = GridLayout::GetSpec(GridLayout::UNDEFINED);
-    return sp;
-}
-
-const AutoPtr<IGridLayoutSpec> GridLayout::Spec::UNDEFINED = InitStatic();
 
 GridLayout::Spec::Spec(
     /* [in] */ Boolean startDefined,
@@ -2576,16 +1456,7 @@ GridLayout::Spec::Spec(
     , mAlignment(alignment)
     , mWeight(weight)
 {
-    AutoPtr<Interval> val = new Interval(start, start + size);
-    mSpan = (Interval*)val;
-}
-
-
-AutoPtr<GridLayout::Spec> GridLayout::Spec::CopyWriteSpan(
-    /* [in] */ Interval* span)
-{
-    AutoPtr<Spec> sp = new Spec(mStartDefined, span, mAlignment, mWeight);
-    return sp;
+    mSpan = new Interval(start, start + size);
 }
 
 ECode GridLayout::Spec::CopyWriteSpan(
@@ -2593,24 +1464,17 @@ ECode GridLayout::Spec::CopyWriteSpan(
     /* [out] */ IGridLayoutSpec** spec)
 {
     VALIDATE_NOT_NULL(spec)
-
-    Interval* impl = (Interval*)span;
-    AutoPtr<Spec> specTmp = CopyWriteSpan(impl);
-    *spec = specTmp.Get();
+    *spec = new Spec(mStartDefined, (Interval*)span, mAlignment, mWeight);
     REFCOUNT_ADD(*spec)
     return NOERROR;
 }
-
 
 ECode GridLayout::Spec::CopyWriteAlignment(
     /* [in] */ IGridLayoutAlignment* alignment,
     /* [out] */ IGridLayoutSpec** spec)
 {
     VALIDATE_NOT_NULL(spec)
-
-    Alignment* impl = (Alignment*)alignment;
-    AutoPtr<Spec> specTmp = CopyWriteAlignment(impl);
-    *spec = specTmp.Get();
+    *spec = new Spec(mStartDefined, mSpan, (Alignment*)alignment, mWeight);
     REFCOUNT_ADD(*spec)
     return NOERROR;
 }
@@ -2619,21 +1483,8 @@ ECode GridLayout::Spec::GetFlexibility(
     /* [out] */ Int32* rst)
 {
     VALIDATE_NOT_NULL(rst)
-
-    *rst = GetFlexibility();
+    *rst = (mAlignment == UNDEFINED_ALIGNMENT && mWeight == 0) ? INFLEXIBLE : CAN_STRETCH;
     return NOERROR;
-}
-
-AutoPtr<GridLayout::Spec> GridLayout::Spec::CopyWriteAlignment(
-    /* [in] */ Alignment* alignment)
-{
-    AutoPtr<Spec> sp = new Spec(mStartDefined, mSpan, alignment, mWeight);
-    return sp;
-}
-
-Int32 GridLayout::Spec::GetFlexibility()
-{
-    return (mAlignment == GridLayout::UNDEFINED_ALIGNMENT && mWeight == 0) ? GridLayout::INFLEXIBLE : GridLayout::CAN_STRETCH;
 }
 
 ECode GridLayout::Spec::Equals(
@@ -2643,19 +1494,27 @@ ECode GridLayout::Spec::Equals(
     VALIDATE_NOT_NULL(res);
     *res = FALSE;
 
-    AutoPtr<IGridLayoutSpec> sp = IGridLayoutSpec::Probe(that);
+    IGridLayoutSpec* sp = IGridLayoutSpec::Probe(that);
     if (sp == NULL) {
         return NOERROR;
     }
-    Spec* spec = (Spec*)sp.Get();
-    if (mAlignment != spec->mAlignment) {
+
+
+    Spec* spec = (Spec*)sp;
+
+    if (this == spec) {
+        *res = TRUE;
         return NOERROR;
     }
-    Boolean equal;
-    AutoPtr<IObject> obj = spec->mSpan;
-    if (mSpan->Equals(obj, &equal), equal) {
+
+    if (!Object::Equals(mAlignment, spec->mAlignment)) {
         return NOERROR;
     }
+    //noinspection RedundantIfStatement
+    if (!Object::Equals(mSpan, spec->mSpan)) {
+        return NOERROR;
+    }
+
     *res = TRUE;
     return NOERROR;
 }
@@ -2664,12 +1523,12 @@ ECode GridLayout::Spec::GetHashCode(
     /* [out] */ Int32* code)
 {
     VALIDATE_NOT_NULL(code);
-    Int32 result;
-    mSpan->GetHashCode(&result);
-    result = 31 * result /*+ mAlignment->GetHashCode()*/;
+    Int32 result = Object::GetHashCode(mSpan);
+    result = 31 * result + Object::GetHashCode(mAlignment);
     *code = result;
     return NOERROR;
 }
+
 
 //==================================================================
 //                      GridLayout::Alignment
@@ -2678,24 +1537,6 @@ CAR_INTERFACE_IMPL(GridLayout::Alignment, Object, IGridLayoutAlignment)
 
 GridLayout::Alignment::Alignment()
 {}
-
-AutoPtr<GridLayout::Bounds> GridLayout::Alignment::GetBounds()
-{
-    AutoPtr<Bounds> b = new Bounds();
-    return b;
-}
-
-ECode GridLayout::Alignment::GetBounds(
-    /* [out] */ IBounds** bounds)
-{
-    VALIDATE_NOT_NULL(bounds)
-
-    AutoPtr<IBounds> tmp = GetBounds();
-    *bounds = tmp;
-    REFCOUNT_ADD(*bounds)
-
-    return NOERROR;
-}
 
 ECode GridLayout::Alignment::GetSizeInCell(
     /* [in] */ IView* view,
@@ -2707,6 +1548,16 @@ ECode GridLayout::Alignment::GetSizeInCell(
     *size = viewSize;
     return NOERROR;
 }
+
+ECode GridLayout::Alignment::GetBounds(
+    /* [out] */ IBounds** bounds)
+{
+    VALIDATE_NOT_NULL(bounds)
+    *bounds = new Bounds();
+    REFCOUNT_ADD(*bounds)
+    return NOERROR;
+}
+
 
 //==================================================================
 //                      GridLayout::UndefinedAlignment
@@ -2732,6 +1583,7 @@ ECode GridLayout::UndefinedAlignment::GetAlignmentValue(
     return NOERROR;
 }
 
+
 //==================================================================
 //                      GridLayout::LeadingAlignment
 //==================================================================
@@ -2756,6 +1608,7 @@ ECode GridLayout::LeadingAlignment::GetAlignmentValue(
     return NOERROR;
 }
 
+
 //==================================================================
 //                      GridLayout::TrailingAlignment
 //==================================================================
@@ -2779,6 +1632,7 @@ ECode GridLayout::TrailingAlignment::GetAlignmentValue(
     *value = viewSize;
     return NOERROR;
 }
+
 
 //==================================================================
 //                      GridLayout::SwitchingAlignment
@@ -2815,6 +1669,7 @@ ECode GridLayout::SwitchingAlignment::GetAlignmentValue(
     return NOERROR;
 }
 
+
 //==================================================================
 //                      GridLayout::CenterAlignment
 //==================================================================
@@ -2839,6 +1694,7 @@ ECode GridLayout::CenterAlignment::GetAlignmentValue(
     return NOERROR;
 }
 
+
 //==================================================================
 //                      GridLayout::BaseLineAlignment
 //==================================================================
@@ -2848,7 +1704,7 @@ ECode GridLayout::BaseLineAlignment::GetGravityOffset(
     /* [out] */ Int32* offset)
 {
     VALIDATE_NOT_NULL(offset);
-    *offset = 0;
+    *offset = 0; // baseline gravity is top
     return NOERROR;
 }
 
@@ -2872,15 +1728,22 @@ ECode GridLayout::BaseLineAlignment::GetAlignmentValue(
     return NOERROR;
 }
 
-AutoPtr<GridLayout::Bounds> GridLayout::BaseLineAlignment::GetBounds()
+ECode GridLayout::BaseLineAlignment::GetBounds(
+    /* [out] */ IBounds** bounds)
 {
-    AutoPtr<AlignmentBounds> b = new AlignmentBounds();
-    return b;
+    VALIDATE_NOT_NULL(bounds);
+    *bounds = new AlignmentBounds();
+    REFCOUNT_ADD(*bounds);
+    return NOERROR;
 }
+
 
 //==================================================================
 //                      GridLayout::AlignmentBounds
 //==================================================================
+GridLayout::AlignmentBounds::AlignmentBounds()
+    : mSize(0)
+{}
 
 void GridLayout::AlignmentBounds::Reset()
 {
@@ -2911,6 +1774,7 @@ Int32 GridLayout::AlignmentBounds::GetOffset(
 {
     return Elastos::Core::Math::Max(0, Bounds::GetOffset(gl, c, a, size, horizontal));
 }
+
 
 //==================================================================
 //                      GridLayout::FillAlignment
@@ -2947,38 +1811,39 @@ ECode GridLayout::FillAlignment::GetSizeInCell(
     return NOERROR;
 }
 
+
 //==================================================================
 //                      GridLayout::TopoSort
 //==================================================================
 GridLayout::TopoSort::TopoSort(
-    /* [in] */ ArrayOf<Arc*>* result,
-    /* [in] */ Int32 cursor,
-    /* [in] */ ArrayOf< AutoPtr< ArrayOf< Arc*> > >* arcsByVertex,
-    /* [in] */ ArrayOf<Int32>* visited)
-    : mResult(result)
-    , mCursor(cursor)
-    , mArcsByVertex(arcsByVertex)
-    , mvisited(visited)
-{}
+    /* [in] */ ArrayOf<Arc*>* arcs,
+    /* [in] */ Axis* axis)
+{
+    mResult = ArrayOf<Arc*>::Alloc(arcs->GetLength());
+    mCursor = mResult->GetLength() - 1;
+    mArcsByVertex = axis->GroupArcsByFirstVertex(arcs);
+    mVisited = ArrayOf<Int32>::Alloc(axis->GetCount() + 1);
+}
 
 void GridLayout::TopoSort::Walk(
     /* [in] */ Int32 loc)
 {
-    switch((*mvisited)[loc]) {
+    switch((*mVisited)[loc]) {
         case Axis::NEW:
         {
-            (*mvisited)[loc] = Axis::PENDING;
+            (*mVisited)[loc] = Axis::PENDING;
             AutoPtr<ArrayOf<GridLayout::Arc*> > a = (*mArcsByVertex)[loc];
             for (Int32 i = 0; i < a->GetLength(); i++) {
                 AutoPtr<Arc> arc = (*a)[i];
                 Walk(arc->mSpan->mMax);
                 mResult->Set(mCursor--, arc);
             }
-            (*mvisited)[loc] = Axis::COMPLETE;
+            (*mVisited)[loc] = Axis::COMPLETE;
             break;
         }
         case Axis::PENDING:
-        //assert false;
+            // le singe est dans l'arbre
+            //assert false;
             break;
 
         case Axis::COMPLETE:
@@ -2993,6 +1858,1249 @@ AutoPtr< ArrayOf<GridLayout::Arc*> > GridLayout::TopoSort::Sort()
     }
     assert(mCursor == -1);
     return mResult;
+}
+
+
+//=====================================================================
+// GridLayout
+//=====================================================================
+Int32 GridLayout::HORIZONTAL;
+Int32 GridLayout::VERTICAL;
+Int32 GridLayout::UNDEFINED;
+Int32 GridLayout::ALIGN_BOUNDS = 0;
+Int32 GridLayout::ALIGN_MARGINS = 1;
+Int32 GridLayout::MAX_SIZE = 100000;
+Int32 GridLayout::DEFAULT_CONTAINER_MARGIN = 0;
+Int32 GridLayout::UNINITIALIZED_HASH = 0;
+AutoPtr<GridLayout::Alignment> GridLayout::UNDEFINED_ALIGNMENT;
+AutoPtr<GridLayout::Alignment> GridLayout::LEADING;
+AutoPtr<GridLayout::Alignment> GridLayout::TRAILING;
+AutoPtr<GridLayout::Alignment> GridLayout::TOP;
+AutoPtr<GridLayout::Alignment> GridLayout::BOTTOM;
+AutoPtr<GridLayout::Alignment> GridLayout::START;
+AutoPtr<GridLayout::Alignment> GridLayout::END;
+AutoPtr<GridLayout::Alignment> GridLayout::LEFT;
+AutoPtr<GridLayout::Alignment> GridLayout::RIGHT;
+AutoPtr<GridLayout::Alignment> GridLayout::CENTER;
+AutoPtr<GridLayout::Alignment> GridLayout::BASELINE;
+AutoPtr<GridLayout::Alignment> GridLayout::FILL;
+String GridLayout::TAG("GridLayout");
+Int32 GridLayout::DEFAULT_ORIENTATION;
+Int32 GridLayout::DEFAULT_COUNT;
+Boolean GridLayout::DEFAULT_USE_DEFAULT_MARGINS = FALSE;
+Boolean GridLayout::DEFAULT_ORDER_PRESERVED = TRUE;
+Int32 GridLayout::DEFAULT_ALIGNMENT_MODE;
+Int32 GridLayout::ORIENTATION;
+Int32 GridLayout::ROW_COUNT;
+Int32 GridLayout::COLUMN_COUNT;
+Int32 GridLayout::USE_DEFAULT_MARGINS;
+Int32 GridLayout::ALIGNMENT_MODE;
+Int32 GridLayout::ROW_ORDER_PRESERVED;
+Int32 GridLayout::COLUMN_ORDER_PRESERVED;
+Int32 GridLayout::INFLEXIBLE = 0;
+Int32 GridLayout::CAN_STRETCH = 2;
+INIT_PROI_4 const GridLayout::StaticInitializer GridLayout::sInitializer;
+
+CAR_INTERFACE_IMPL(GridLayout, ViewGroup, IGridLayout)
+
+GridLayout::GridLayout()
+    : mOrientation(DEFAULT_ORIENTATION)
+    , mUseDefaultMargins(DEFAULT_USE_DEFAULT_MARGINS)
+    , mAlignmentMode(DEFAULT_ALIGNMENT_MODE)
+    , mDefaultGap(0)
+    , mLastLayoutParamsHashCode(UNINITIALIZED_HASH)
+{
+    mHorizontalAxis = new Axis(TRUE, this);
+    mVerticalAxis = new Axis(FALSE, this);
+}
+
+ECode GridLayout::constructor(
+    /* [in] */ IContext* context)
+{
+    return constructor(context, NULL);
+}
+
+ECode GridLayout::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs)
+{
+    return constructor(context, attrs, 0);
+}
+
+ECode GridLayout::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs,
+    /* [in] */ Int32 defStyle)
+{
+    return constructor(context, attrs, defStyle, 0);
+}
+
+ECode GridLayout::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs,
+    /* [in] */ Int32 defStyleAttr,
+    /* [in] */ Int32 defStyleRes)
+{
+    FAIL_RETURN(ViewGroup::constructor(context, attrs, defStyleAttr, defStyleRes));
+
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
+    res->GetDimensionPixelOffset(R::dimen::default_gap, &mDefaultGap);
+
+    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
+            const_cast<Int32 *>(R::styleable::GridLayout),
+            ArraySize(R::styleable::GridLayout));
+    AutoPtr<ITypedArray> a;
+    FAIL_RETURN(context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
+
+//    try {
+    Int32 rowCount = 0;
+    a->GetInt32(ROW_COUNT, DEFAULT_COUNT, &rowCount);
+    SetRowCount(rowCount);
+    Int32 columnCount = 0;
+    a->GetInt32(COLUMN_COUNT, DEFAULT_COUNT, &columnCount);
+    SetColumnCount(columnCount);
+    Int32 orientation = 0;
+    a->GetInt32(ORIENTATION, DEFAULT_ORIENTATION, &orientation);
+    SetOrientation(orientation);
+    Boolean margins = FALSE;
+    a->GetBoolean(USE_DEFAULT_MARGINS, DEFAULT_USE_DEFAULT_MARGINS, &margins);
+    SetUseDefaultMargins(margins);
+    Int32 alignmentMode = 0;
+    a->GetInt32(ALIGNMENT_MODE, DEFAULT_ALIGNMENT_MODE, &alignmentMode);
+    SetAlignmentMode(alignmentMode);
+    Boolean rowOrderPreserved = FALSE;
+    a->GetBoolean(ROW_ORDER_PRESERVED, DEFAULT_ORDER_PRESERVED, &rowOrderPreserved);
+    SetRowOrderPreserved(rowOrderPreserved);
+    Boolean columnOrderPreserved = FALSE;
+    a->GetBoolean(COLUMN_ORDER_PRESERVED, DEFAULT_ORDER_PRESERVED, &columnOrderPreserved);
+    SetColumnOrderPreserved(columnOrderPreserved);
+//        } finally {
+    a->Recycle();
+//        }
+    return NOERROR;
+}
+
+ECode GridLayout::GetOrientation(
+    /* [out] */ Int32* orientation)
+{
+    VALIDATE_NOT_NULL(orientation)
+    *orientation = mOrientation;
+    return NOERROR;
+}
+
+ECode GridLayout::SetOrientation(
+    /* [in] */ Int32 orientation)
+{
+    if (mOrientation != orientation) {
+        mOrientation = orientation;
+        InvalidateStructure();
+        RequestLayout();
+    }
+    return NOERROR;
+}
+
+ECode GridLayout::GetRowCount(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mVerticalAxis->GetCount();
+    return NOERROR;
+}
+
+ECode GridLayout::SetRowCount(
+    /* [in] */ Int32 rowCount)
+{
+    mVerticalAxis->SetCount(rowCount);
+    InvalidateStructure();
+    RequestLayout();
+    return NOERROR;
+}
+
+ECode GridLayout::GetColumnCount(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mHorizontalAxis->GetCount();
+    return NOERROR;
+}
+
+ECode GridLayout::SetColumnCount(
+    /* [in] */ Int32 columnCount)
+{
+    mHorizontalAxis->SetCount(columnCount);
+    InvalidateStructure();
+    RequestLayout();
+    return NOERROR;
+}
+
+ECode GridLayout::GetUseDefaultMargins(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mUseDefaultMargins;
+    return NOERROR;
+}
+
+ECode GridLayout::SetUseDefaultMargins(
+    /* [in] */ Boolean useDefaultMargins)
+{
+    mUseDefaultMargins = useDefaultMargins;
+    RequestLayout();
+    return NOERROR;
+}
+
+ECode GridLayout::GetAlignmentMode(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mAlignmentMode;
+    return NOERROR;
+}
+
+ECode GridLayout::SetAlignmentMode(
+    /* [in] */ Int32 alignmentMode)
+{
+    mAlignmentMode = alignmentMode;
+    RequestLayout();
+    return NOERROR;
+}
+
+ECode GridLayout::IsRowOrderPreserved(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mVerticalAxis->IsOrderPreserved();
+    return NOERROR;
+}
+
+ECode GridLayout::SetRowOrderPreserved(
+    /* [in] */ Boolean rowOrderPreserved)
+{
+    mVerticalAxis->SetOrderPreserved(rowOrderPreserved);
+    InvalidateStructure();
+    RequestLayout();
+    return NOERROR;
+}
+
+ECode GridLayout::IsColumnOrderPreserved(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mHorizontalAxis->IsOrderPreserved();
+    return NOERROR;
+}
+
+ECode GridLayout::SetColumnOrderPreserved(
+    /* [in] */ Boolean columnOrderPreserved)
+{
+    mHorizontalAxis->SetOrderPreserved(columnOrderPreserved);
+    InvalidateStructure();
+    RequestLayout();
+    return NOERROR;
+}
+
+Int32 GridLayout::Max2(
+    /* [in] */ ArrayOf<Int32>* a,
+    /* [in] */ Int32 valueIfEmpty)
+{
+    Int32 result = valueIfEmpty;
+    for (Int32 i = 0, N = a->GetLength(); i < N; i++) {
+        result = Elastos::Core::Math::Max(result, (*a)[i]);
+    }
+    return result;
+}
+
+AutoPtr<GridLayout::Alignment> GridLayout::GetAlignment(
+    /* [in] */ Int32 gravity,
+    /* [in] */ Boolean horizontal)
+{
+    Int32 mask = horizontal ? IGravity::HORIZONTAL_GRAVITY_MASK : IGravity::VERTICAL_GRAVITY_MASK;
+    Int32 shift = horizontal ? IGravity::AXIS_X_SHIFT : IGravity::AXIS_Y_SHIFT;
+    Int32 flags = (gravity & mask) >> shift;
+    switch (flags) {
+        case (IGravity::AXIS_SPECIFIED | IGravity::AXIS_PULL_BEFORE):
+            return horizontal ? LEFT : TOP;
+        case (IGravity::AXIS_SPECIFIED | IGravity::AXIS_PULL_AFTER):
+            return horizontal ? RIGHT : BOTTOM;
+        case (IGravity::AXIS_SPECIFIED | IGravity::AXIS_PULL_BEFORE | IGravity::AXIS_PULL_AFTER):
+            return FILL;
+        case IGravity::AXIS_SPECIFIED:
+            return CENTER;
+        case (IGravity::AXIS_SPECIFIED | IGravity::AXIS_PULL_BEFORE | IGravity::RELATIVE_LAYOUT_DIRECTION):
+            return START;
+        case (IGravity::AXIS_SPECIFIED | IGravity::AXIS_PULL_AFTER | IGravity::RELATIVE_LAYOUT_DIRECTION):
+            return END;
+        default:
+            return UNDEFINED_ALIGNMENT;
+    }
+}
+
+Int32 GridLayout::GetDefaultMargin(
+    /* [in] */ IView* c,
+    /* [in] */ Boolean horizontal,
+    /* [in] */ Boolean leading)
+{
+    if (ISpace::Probe(c) != NULL) {
+        return 0;
+    }
+    return mDefaultGap / 2;
+}
+
+Int32 GridLayout::GetDefaultMargin(
+    /* [in] */ IView* c,
+    /* [in] */ Boolean isAtEdge,
+    /* [in] */ Boolean horizontal,
+    /* [in] */ Boolean leading)
+{
+    return /* isAtEdge ? DEFAULT_CONTAINER_MARGIN : */GetDefaultMargin(c, horizontal, leading);
+}
+
+Int32 GridLayout::GetDefaultMargin(
+    /* [in] */ IView* c,
+    /* [in] */ IGridLayoutLayoutParams* glp,
+    /* [in] */ Boolean horizontal,
+    /* [in] */ Boolean leading)
+{
+    if (!mUseDefaultMargins) {
+        return 0;
+    }
+    AutoPtr<Spec> spec;
+    AutoPtr<Axis> axis;
+    if (horizontal) {
+        AutoPtr<IGridLayoutSpec> columnSpec;
+        glp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
+        spec = (Spec*)columnSpec.Get();
+        axis = mHorizontalAxis;
+    }
+    else {
+        AutoPtr<IGridLayoutSpec> rowSpec;
+        glp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
+        spec = (Spec*)rowSpec.Get();
+        axis = mVerticalAxis;
+    }
+
+    AutoPtr<Interval> span = spec->mSpan;
+    Boolean isLayoutRtl;
+    IsLayoutRtl(&isLayoutRtl);
+    Boolean leading1 = (horizontal && isLayoutRtl) ? !leading : leading;
+    Boolean isAtEdge = leading1 ? (span->mMin == 0) : (span->mMax == axis->GetCount());
+
+    return GetDefaultMargin(c, isAtEdge, horizontal, leading);
+}
+
+Int32 GridLayout::GetMargin1(
+    /* [in] */ IView* view,
+    /* [in] */ Boolean horizontal,
+    /* [in] */ Boolean leading)
+{
+    AutoPtr<IGridLayoutLayoutParams> lp = GetLayoutParams(view);
+    Int32 margin;
+    if (horizontal) {
+        if (leading) {
+            IViewGroupMarginLayoutParams::Probe(lp)->GetLeftMargin(&margin);
+        }
+        else {
+            IViewGroupMarginLayoutParams::Probe(lp)->GetRightMargin(&margin);
+        }
+    }
+    else {
+        if (leading) {
+            IViewGroupMarginLayoutParams::Probe(lp)->GetTopMargin(&margin);
+        }
+        else {
+            IViewGroupMarginLayoutParams::Probe(lp)->GetBottomMargin(&margin);
+        }
+    }
+    return margin == UNDEFINED ?
+            GetDefaultMargin(view, lp, horizontal, leading) : margin;
+}
+
+Int32 GridLayout::GetMargin(
+    /* [in] */ IView* view,
+    /* [in] */ Boolean horizontal,
+    /* [in] */ Boolean leading)
+{
+    if (mAlignmentMode == ALIGN_MARGINS) {
+        return GetMargin1(view, horizontal, leading);
+    }
+    else {
+        AutoPtr<Axis> axis = horizontal ? mHorizontalAxis : mVerticalAxis;
+        AutoPtr< ArrayOf<Int32> > margins = leading ? axis->GetLeadingMargins() : axis->GetTrailingMargins();
+        AutoPtr<IGridLayoutLayoutParams> lp = GetLayoutParams(view);
+        AutoPtr<Spec> spec;
+        if (horizontal) {
+            AutoPtr<IGridLayoutSpec> columnSpec;
+            lp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
+            spec = (Spec*)columnSpec.Get();
+        }
+        else {
+            AutoPtr<IGridLayoutSpec> rowSpec;
+            lp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
+            spec = (Spec*)rowSpec.Get();
+        }
+        Int32 index = leading ? spec->mSpan->mMin : spec->mSpan->mMax;
+        return (*margins)[index];
+    }
+}
+
+Int32 GridLayout::GetTotalMargin(
+    /* [in] */ IView* child,
+    /* [in] */ Boolean horizontal)
+{
+    return GetMargin(child, horizontal, TRUE) + GetMargin(child, horizontal, FALSE);
+}
+
+Boolean GridLayout::Fits(
+    /* [in] */ ArrayOf<Int32>* a,
+    /* [in] */ Int32 value,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 end)
+{
+    if (end > a->GetLength()) {
+        return FALSE;
+    }
+    for (Int32 i = start; i < end; i++) {
+        if ((*a)[i] > value) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+void GridLayout::ProcrusteanFill(
+    /* [in] */ ArrayOf<Int32>* a,
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 end,
+    /* [in] */ Int32 value)
+{
+    Int32 length = a->GetLength();
+    Arrays::Fill(a, Elastos::Core::Math::Min(start, length),
+            Elastos::Core::Math::Min(end, length), value);
+}
+
+void GridLayout::SetCellGroup(
+    /* [in] */ IGridLayoutLayoutParams* lp,
+    /* [in] */ Int32 row,
+    /* [in] */ Int32 rowSpan,
+    /* [in] */ Int32 col,
+    /* [in] */ Int32 colSpan)
+{
+    AutoPtr<Interval> rowItv = new Interval(row, row + rowSpan);
+    AutoPtr<Interval> colItv = new Interval(col, col + colSpan);
+    AutoPtr<CGridLayoutLayoutParams> glp = (CGridLayoutLayoutParams*)lp;
+    glp->SetRowSpecSpan(rowItv);
+    glp->SetColumnSpecSpan(colItv);
+}
+
+Int32 GridLayout::Clip(
+    /* [in] */ Interval* minorRange,
+    /* [in] */ Boolean minorWasDefined,
+    /* [in] */ Int32 count)
+{
+    Int32 size;
+    minorRange->Size(&size);
+    if (count == 0) {
+        return size;
+    }
+    Int32 min = minorWasDefined ? Elastos::Core::Math::Min(minorRange->mMin, count) : 0;
+    return Elastos::Core::Math::Min(size, count - min);
+}
+
+void GridLayout::ValidateLayoutParams()
+{
+    Boolean horizontal = (mOrientation == HORIZONTAL);
+    AutoPtr<Axis> axis = horizontal ? mHorizontalAxis : mVerticalAxis;
+    Int32 count = (axis->mDefinedCount != UNDEFINED) ? axis->mDefinedCount : 0;
+
+    Int32 major = 0;
+    Int32 minor = 0;
+    AutoPtr< ArrayOf<Int32> > maxSizes = ArrayOf<Int32>::Alloc(count);
+
+    Int32 N;
+    GetChildCount(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IView> v;
+        GetChildAt(i, (IView**)&v);
+        AutoPtr<IViewGroupLayoutParams> lp;
+        v->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+        AutoPtr<IGridLayoutLayoutParams> glp = IGridLayoutLayoutParams::Probe(lp);
+
+        AutoPtr<Spec> majorSpec;
+        if (horizontal) {
+            AutoPtr<IGridLayoutSpec> rowSpec;
+            glp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
+            majorSpec = (Spec*)rowSpec.Get();
+        }
+        else {
+            AutoPtr<IGridLayoutSpec> columnSpec;
+            glp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
+            majorSpec = (Spec*)columnSpec.Get();
+        }
+        AutoPtr<Interval> majorRange = majorSpec->mSpan;
+        Boolean majorWasDefined = majorSpec->mStartDefined;
+        Int32 majorSpan;
+        majorRange->Size(&majorSpan);
+        if (majorWasDefined) {
+            major = majorRange->mMin;
+        }
+
+        AutoPtr<Spec> minorSpec;
+        if (horizontal) {
+            AutoPtr<IGridLayoutSpec> columnSpec;
+            glp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
+            minorSpec = (Spec*)columnSpec.Get();
+        }
+        else {
+            AutoPtr<IGridLayoutSpec> rowSpec;
+            glp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
+            minorSpec = (Spec*)rowSpec.Get();
+        }
+        AutoPtr<Interval> minorRange = minorSpec->mSpan;
+        Boolean minorWasDefined = minorSpec->mStartDefined;
+        Int32 minorSpan = Clip(minorRange, minorWasDefined, count);
+        if (minorWasDefined) {
+            minor = minorRange->mMin;
+        }
+
+        if (count != 0) {
+            if (!majorWasDefined || !minorWasDefined) {
+                while (!Fits(maxSizes, major, minor, minor + minorSpan)) {
+                    if (minorWasDefined) {
+                        major++;
+                    }
+                    else {
+                        if (minor + minorSpan <= count) {
+                            minor++;
+                        }
+                        else {
+                            minor = 0;
+                            major++;
+                        }
+                    }
+                }
+            }
+            ProcrusteanFill(maxSizes, minor, minor + minorSpan, major + majorSpan);
+        }
+
+        if (horizontal) {
+            SetCellGroup(glp, major, majorSpan, minor, minorSpan);
+        }
+        else {
+            SetCellGroup(glp, minor, minorSpan, major, majorSpan);
+        }
+
+        minor = minor + minorSpan;
+    }
+}
+
+void GridLayout::InvalidateStructure()
+{
+    mLastLayoutParamsHashCode = UNINITIALIZED_HASH;
+    mHorizontalAxis->InvalidateStructure();
+    mVerticalAxis->InvalidateStructure();
+    // This can end up being done twice. Better twice than not at all.
+    InvalidateValues();
+}
+
+void GridLayout::InvalidateValues()
+{
+    // Need null check because requestLayout() is called in View's initializer,
+    // before we are set up.
+    if (mHorizontalAxis != NULL && mVerticalAxis != NULL) {
+        mHorizontalAxis->InvalidateValues();
+        mVerticalAxis->InvalidateValues();
+    }
+}
+
+void GridLayout::OnSetLayoutParams(
+    /* [in] */ IView* child,
+    /* [in] */ IViewGroupLayoutParams* layoutParams)
+{
+    ViewGroup::OnSetLayoutParams(child, layoutParams);
+
+    if (!CheckLayoutParams(layoutParams)) {
+        String wt("supplied LayoutParams are of the wrong type");
+        HandleInvalidParams(wt);
+    }
+
+    InvalidateStructure();
+}
+
+AutoPtr<IGridLayoutLayoutParams> GridLayout::GetLayoutParams(
+    /* [in] */ IView* c)
+{
+    AutoPtr<IViewGroupLayoutParams> lp;
+    c->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+    return IGridLayoutLayoutParams::Probe(lp);
+}
+
+ECode GridLayout::HandleInvalidParams(
+    /* [in] */ const String& msg)
+{
+    Logger::E(TAG, "%s. ", msg.string());
+    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+}
+
+ECode GridLayout::CheckLayoutParams(
+    /* [in] */ IGridLayoutLayoutParams* lp,
+    /* [in] */ Boolean horizontal)
+{
+    String groupName = horizontal ? String("column") : String("row");
+    AutoPtr<Spec> spec;
+    if (horizontal) {
+        AutoPtr<IGridLayoutSpec> columnSpec;
+        lp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
+        spec = (Spec*)columnSpec.Get();
+    }
+    else {
+        AutoPtr<IGridLayoutSpec> rowSpec;
+        lp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
+        spec = (Spec*)rowSpec.Get();
+    }
+    AutoPtr<Interval> span = spec->mSpan;
+    if (span->mMin != UNDEFINED && span->mMin < 0) {
+        String wt = groupName + String(" indices must be positive");
+        FAIL_RETURN(HandleInvalidParams(wt))
+    }
+    AutoPtr<Axis> axis = horizontal ? mHorizontalAxis : mVerticalAxis;
+    Int32 count = axis->mDefinedCount;
+    if (count != UNDEFINED) {
+        if (span->mMax > count) {
+            String wt = groupName + String(" indices (start + span) mustn't exceed the ") + groupName + String(" count");
+            return HandleInvalidParams(wt);
+        }
+        Int32 size;
+        if (span->Size(&size), size > count) {
+            String wt = groupName + String(" span mustn't exceed the ") + groupName + String(" count");
+            return HandleInvalidParams(wt);
+        }
+    }
+    return NOERROR;
+}
+
+Boolean GridLayout::CheckLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
+{
+    IGridLayoutLayoutParams* gllp = IGridLayoutLayoutParams::Probe(p);
+    if (!gllp) {
+        return FALSE;
+    }
+
+    if (FAILED(CheckLayoutParams(gllp, TRUE))) return FALSE;
+    if (FAILED(CheckLayoutParams(gllp, FALSE))) return FALSE;
+
+    return TRUE;
+}
+
+ECode GridLayout::GenerateDefaultLayoutParams(
+    /* [out] */ IViewGroupLayoutParams** params)
+{
+    VALIDATE_NOT_NULL(params);
+    return CGridLayoutLayoutParams::New(params);
+}
+
+ECode GridLayout::GenerateLayoutParams(
+    /* [in] */ IAttributeSet* attrs,
+    /* [out] */ IViewGroupLayoutParams** params)
+{
+    VALIDATE_NOT_NULL(params);
+    AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
+    return CGridLayoutLayoutParams::New(context, attrs, params);
+}
+
+AutoPtr<IViewGroupLayoutParams> GridLayout::GenerateLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
+{
+    AutoPtr<IViewGroupLayoutParams> lp;
+    CGridLayoutLayoutParams::New(p, (IViewGroupLayoutParams**)&lp);
+    return lp;
+}
+
+void GridLayout::DrawLine(
+    /* [in] */ ICanvas* graphics,
+    /* [in] */ Int32 x1,
+    /* [in] */ Int32 y1,
+    /* [in] */ Int32 x2,
+    /* [in] */ Int32 y2,
+    /* [in] */ IPaint* paint)
+{
+    Boolean isLayoutRtl;
+    IsLayoutRtl(&isLayoutRtl);
+    if (isLayoutRtl) {
+        Int32 width;
+        GetWidth(&width);
+        graphics->DrawLine(width - x1, y1, width - x2, y2, paint);
+    }
+    else {
+        graphics->DrawLine(x1, y1, x2, y2, paint);
+    }
+}
+
+void GridLayout::OnDebugDrawMargins(
+    /* [in] */ ICanvas* canvas,
+    /* [in] */ IPaint* paint)
+{
+    AutoPtr<IGridLayoutLayoutParams> lp;
+    CGridLayoutLayoutParams::New((IGridLayoutLayoutParams**)&lp);
+    Int32 N;
+    GetChildCount(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IView> c;
+        GetChildAt(i, (IView**)&c);
+        IViewGroupMarginLayoutParams::Probe(lp)->SetMargins(
+                GetMargin1(c, TRUE, TRUE),
+                GetMargin1(c, FALSE, TRUE),
+                GetMargin1(c, TRUE, FALSE),
+                GetMargin1(c, FALSE, FALSE));
+        IViewGroupLayoutParams::Probe(lp)->OnDebugDraw(c, canvas, paint);
+    }
+}
+
+void GridLayout::OnDebugDraw(
+    /* [in] */ ICanvas* canvas)
+{
+    AutoPtr<IPaint> paint;
+    CPaint::New((IPaint**)&paint);
+    paint->SetStyle(Elastos::Droid::Graphics::PaintStyle_STROKE);
+    paint->SetColor(Color::Argb(50, 255, 255, 255));
+
+    AutoPtr<IInsets> insets;
+    GetOpticalInsets((IInsets**)&insets);
+
+    Int32 paddingTop, paddingLeft, paddingRight, paddingBottom;
+    GetPaddingLeft(&paddingLeft);
+    GetPaddingTop(&paddingTop);
+    GetPaddingRight(&paddingRight);
+    GetPaddingBottom(&paddingBottom);
+    Int32 w, h;
+    GetWidth(&w);
+    GetHeight(&h);
+    Int32 it, il, ir, ib;
+    insets->GetTop(&it);
+    insets->GetLeft(&il);
+    insets->GetRight(&ir);
+    insets->GetBottom(&ib);
+
+    Int32 top    =     paddingTop    + it;
+    Int32 left   =     paddingLeft   + il;
+    Int32 right  = w - paddingRight  - ir;
+    Int32 bottom = h - paddingBottom - ib;
+
+    AutoPtr< ArrayOf<Int32> > xs = mHorizontalAxis->mLocations;
+    if (xs != NULL) {
+        for (Int32 i = 0, length = xs->GetLength(); i < length; i++) {
+            Int32 x = left + (*xs)[i];
+            DrawLine(canvas, x, top, x, bottom, paint);
+        }
+    }
+
+    AutoPtr< ArrayOf<Int32> > ys = mVerticalAxis->mLocations;
+    if (ys != NULL) {
+        for (Int32 i = 0, length = ys->GetLength(); i < length; i++) {
+            Int32 y = top + (*ys)[i];
+            DrawLine(canvas, left, y, right, y, paint);
+        }
+    }
+
+    ViewGroup::OnDebugDraw(canvas);
+}
+
+void GridLayout::OnViewAdded(
+    /* [in] */ IView* child)
+{
+    ViewGroup::OnViewAdded(child);
+    InvalidateStructure();
+}
+
+void GridLayout::OnViewRemoved(
+    /* [in] */ IView* child)
+{
+    ViewGroup::OnViewRemoved(child);
+    InvalidateStructure();
+}
+
+void GridLayout::OnChildVisibilityChanged(
+    /* [in] */ IView* child,
+    /* [in] */ Int32 oldVisibility,
+    /* [in] */ Int32 newVisibility)
+{
+    ViewGroup::OnChildVisibilityChanged(child, oldVisibility, newVisibility);
+    if (oldVisibility == IView::GONE || newVisibility == IView::GONE) {
+        InvalidateStructure();
+    }
+}
+
+Int32 GridLayout::ComputeLayoutParamsHashCode()
+{
+    Int32 result = 1;
+    Int32 N;
+    GetChildCount(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IView> c;
+        GetChildAt(i, (IView**)&c);
+        Int32 visibility = 0;
+        c->GetVisibility(&visibility);
+        if (visibility == IView::GONE) continue;
+        AutoPtr<IViewGroupLayoutParams> lp;
+        c->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+        result = 31 * result + Object::GetHashCode(lp);
+    }
+    return result;
+}
+
+void GridLayout::ConsistencyCheck()
+{
+    if (mLastLayoutParamsHashCode == UNINITIALIZED_HASH) {
+        ValidateLayoutParams();
+        mLastLayoutParamsHashCode = ComputeLayoutParamsHashCode();
+    }
+    else if (mLastLayoutParamsHashCode != ComputeLayoutParamsHashCode()) {
+        Logger::D(TAG, "The fields of some layout parameters were modified in between layout"
+                " operations. Check the javadoc for GridLayout.LayoutParams#rowSpec.");
+        InvalidateStructure();
+        ConsistencyCheck();
+    }
+}
+
+void GridLayout::MeasureChildWithMargins2(
+    /* [in] */ IView* child,
+    /* [in] */ Int32 parentWidthSpec,
+    /* [in] */ Int32 parentHeightSpec,
+    /* [in] */ Int32 childWidth,
+    /* [in] */ Int32 childHeight)
+{
+    Int32 childWidthSpec = GetChildMeasureSpec(parentWidthSpec,
+            GetTotalMargin(child, TRUE), childWidth);
+    Int32 childHeightSpec = GetChildMeasureSpec(parentHeightSpec,
+            GetTotalMargin(child, FALSE), childHeight);
+    child->Measure(childWidthSpec, childHeightSpec);
+}
+
+void GridLayout::MeasureChildrenWithMargins(
+    /* [in] */ Int32 widthSpec,
+    /* [in] */ Int32 heightSpec,
+    /* [in] */ Boolean firstPass)
+{
+    Int32 N;
+    GetChildCount(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IView> c;
+        GetChildAt(i, (IView**)&c);
+        Int32 visibility = 0;
+        c->GetVisibility(&visibility);
+        if (visibility == IView::GONE) continue;
+        AutoPtr<IGridLayoutLayoutParams> glp = GetLayoutParams(c);
+        if (firstPass) {
+            AutoPtr<IViewGroupLayoutParams> lp = IViewGroupLayoutParams::Probe(glp);
+            Int32 width, height;
+            lp->GetWidth(&width);
+            lp->GetHeight(&height);
+            MeasureChildWithMargins2(c, widthSpec, heightSpec, width, height);
+            mHorizontalAxis->RecordOriginalMeasurement(i);
+            mVerticalAxis->RecordOriginalMeasurement(i);
+        }
+        else {
+            Boolean horizontal = (mOrientation == HORIZONTAL);
+            AutoPtr<Spec> spec;
+            if (horizontal) {
+                AutoPtr<IGridLayoutSpec> columnSpec;
+                glp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
+                spec = (Spec*)columnSpec.Get();
+            }
+            else {
+                AutoPtr<IGridLayoutSpec> rowSpec;
+                glp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
+                spec = (Spec*)rowSpec.Get();
+            }
+            if (spec->mAlignment == FILL) {
+                AutoPtr<Interval> span = spec->mSpan;
+                AutoPtr<Axis> axis = horizontal ? mHorizontalAxis : mVerticalAxis;
+                AutoPtr< ArrayOf<Int32> > locations = axis->GetLocations();
+                Int32 cellSize = (*locations)[span->mMax] - (*locations)[span->mMin];
+                Int32 viewSize = cellSize - GetTotalMargin(c, horizontal);
+                if (horizontal) {
+                    Int32 height;
+                    IViewGroupLayoutParams::Probe(glp)->GetHeight(&height);
+                    MeasureChildWithMargins2(c, widthSpec, heightSpec, viewSize, height);
+                }
+                else {
+                    Int32 width;
+                    IViewGroupLayoutParams::Probe(glp)->GetWidth(&width);
+                    MeasureChildWithMargins2(c, widthSpec, heightSpec, width, viewSize);
+                }
+            }
+        }
+    }
+}
+
+Int32 GridLayout::Adjust(
+    /* [in] */ Int32 measureSpec,
+    /* [in] */ Int32 delta)
+{
+    return View::MeasureSpec::MakeMeasureSpec(
+            MeasureSpec::GetSize(measureSpec + delta),  MeasureSpec::GetMode(measureSpec));
+}
+
+void GridLayout::OnMeasure(
+    /* [in] */ Int32 widthSpec,
+    /* [in] */ Int32 heightSpec)
+{
+    ConsistencyCheck();
+
+    InvalidateValues();
+
+    Int32 paddingLeft, paddingRight, paddingTop, paddingBottom;
+    GetPaddingLeft(&paddingLeft);
+    GetPaddingTop(&paddingTop);
+    GetPaddingRight(&paddingRight);
+    GetPaddingBottom(&paddingBottom);
+
+    Int32 hPadding = paddingLeft + paddingRight;
+    Int32 vPadding = paddingTop  + paddingBottom;
+
+    Int32 widthSpecSansPadding =  Adjust(widthSpec, -hPadding);
+    Int32 heightSpecSansPadding = Adjust(heightSpec, -vPadding);
+
+    MeasureChildrenWithMargins(widthSpecSansPadding, heightSpecSansPadding, TRUE);
+
+    Int32 widthSansPadding = 0, heightSansPadding = 0;
+
+    if (mOrientation == HORIZONTAL) {
+        widthSansPadding = mHorizontalAxis->GetMeasure(widthSpecSansPadding);
+        MeasureChildrenWithMargins(widthSpecSansPadding, heightSpecSansPadding, FALSE);
+        heightSansPadding = mVerticalAxis->GetMeasure(heightSpecSansPadding);
+    }
+    else {
+        heightSansPadding = mVerticalAxis->GetMeasure(heightSpecSansPadding);
+        MeasureChildrenWithMargins(widthSpecSansPadding, heightSpecSansPadding, FALSE);
+        widthSansPadding = mHorizontalAxis->GetMeasure(widthSpecSansPadding);
+    }
+
+    Int32 measuredWidth = Elastos::Core::Math::Max(hPadding + widthSansPadding, GetSuggestedMinimumWidth());
+    Int32 measuredHeight = Elastos::Core::Math::Max(vPadding + heightSansPadding, GetSuggestedMinimumHeight());
+
+    SetMeasuredDimension(
+            ResolveSizeAndState(measuredWidth, widthSpec, 0),
+            ResolveSizeAndState(measuredHeight, heightSpec, 0));
+}
+
+Int32 GridLayout::GetMeasurement(
+    /* [in] */ IView* c,
+    /* [in] */ Boolean horizontal)
+{
+    Int32 result = 0;
+    if (horizontal) {
+        c->GetMeasuredWidth(&result);
+    }
+    else {
+        c->GetMeasuredHeight(&result);
+    }
+    return result;
+}
+
+ECode GridLayout::GetMeasurementIncludingMargin(
+    /* [in] */ IView* c,
+    /* [in] */ Boolean horizontal,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Int32 visibility = 0;
+    c->GetVisibility(&visibility);
+    if (visibility == IView::GONE) {
+        *result = 0;
+        return NOERROR;
+    }
+    *result = GetMeasurement(c, horizontal) + GetTotalMargin(c, horizontal);
+    return NOERROR;
+}
+
+ECode GridLayout::RequestLayout()
+{
+    ViewGroup::RequestLayout();
+    InvalidateValues();
+    return NOERROR;
+}
+
+AutoPtr<GridLayout::Alignment> GridLayout::GetAlignment(
+    /* [in] */ Alignment* alignment,
+    /* [in] */ Boolean horizontal)
+{
+    if (alignment != UNDEFINED_ALIGNMENT) {
+        return alignment;
+    }
+    else {
+        if (horizontal) {
+            return START;
+        }
+        else {
+            return BASELINE;
+        }
+    }
+}
+
+ECode GridLayout::OnLayout(
+    /* [in] */ Boolean changed,
+    /* [in] */ Int32 left,
+    /* [in] */ Int32 top,
+    /* [in] */ Int32 right,
+    /* [in] */ Int32 bottom)
+{
+    ConsistencyCheck();
+
+    Int32 targetWidth = mRight - mLeft;
+    Int32 targetHeight = mBottom - mTop;
+
+    Int32 paddingLeft, paddingRight, paddingTop, paddingBottom;
+    GetPaddingLeft(&paddingLeft);
+    GetPaddingTop(&paddingTop);
+    GetPaddingRight(&paddingRight);
+    GetPaddingBottom(&paddingBottom);
+
+    mHorizontalAxis->Layout(targetWidth - paddingLeft - paddingRight);
+    mVerticalAxis->Layout(targetHeight - paddingTop - paddingBottom);
+
+    AutoPtr< ArrayOf<Int32> > hLocations = mHorizontalAxis->GetLocations();
+    AutoPtr< ArrayOf<Int32> > vLocations = mVerticalAxis->GetLocations();
+
+    Int32 N;
+    GetChildCount(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IView> c;
+        GetChildAt(i, (IView**)&c);
+        Int32 visibility = 0;
+        c->GetVisibility(&visibility);
+        if (visibility == IView::GONE) continue;
+        AutoPtr<IGridLayoutLayoutParams> lp = GetLayoutParams(c);
+        AutoPtr<IGridLayoutSpec> columnSpec, rowSpec;
+        lp->GetColumnSpec((IGridLayoutSpec**)&columnSpec);
+        lp->GetRowSpec((IGridLayoutSpec**)&rowSpec);
+        Spec* columnSpecImpl = (Spec*)columnSpec.Get();
+        Spec* rowSpecImpl = (Spec*)rowSpec.Get();
+
+        AutoPtr<Interval> colSpan = columnSpecImpl->mSpan;
+        AutoPtr<Interval> rowSpan = rowSpecImpl->mSpan;
+
+        Int32 x1 = (*hLocations)[colSpan->mMin];
+        Int32 y1 = (*vLocations)[rowSpan->mMin];
+
+        Int32 x2 = (*hLocations)[colSpan->mMax];
+        Int32 y2 = (*vLocations)[rowSpan->mMax];
+
+        Int32 cellWidth = x2 - x1;
+        Int32 cellHeight = y2 - y1;
+
+        Int32 pWidth = GetMeasurement(c, TRUE);
+        Int32 pHeight = GetMeasurement(c, FALSE);
+
+        AutoPtr<Alignment> hAlign = GetAlignment(columnSpecImpl->mAlignment, TRUE);
+        AutoPtr<Alignment> vAlign = GetAlignment(rowSpecImpl->mAlignment, FALSE);
+
+        AutoPtr<Bounds> boundsX = (Bounds*)mHorizontalAxis->GetGroupBounds()->GetValue(i).Get();
+        AutoPtr<Bounds> boundsY = (Bounds*)mVerticalAxis->GetGroupBounds()->GetValue(i).Get();
+
+        Int32 gravityOffsetX = 0;
+        hAlign->GetGravityOffset(c, cellWidth - boundsX->Size(TRUE), &gravityOffsetX);
+        Int32 gravityOffsetY = 0;
+        vAlign->GetGravityOffset(c, cellHeight - boundsY->Size(TRUE), &gravityOffsetY);
+
+        Int32 leftMargin = GetMargin(c, TRUE, TRUE);
+        Int32 topMargin = GetMargin(c, FALSE, TRUE);
+        Int32 rightMargin = GetMargin(c, TRUE, FALSE);
+        Int32 bottomMargin = GetMargin(c, FALSE, FALSE);
+
+        Int32 sumMarginsX = leftMargin + rightMargin;
+        Int32 sumMarginsY = topMargin + bottomMargin;
+
+        Int32 alignmentOffsetX = boundsX->GetOffset(this, c, hAlign, pWidth + sumMarginsX, TRUE);
+        Int32 alignmentOffsetY = boundsY->GetOffset(this, c, vAlign, pHeight + sumMarginsY, FALSE);
+
+        Int32 width = 0;
+        hAlign->GetSizeInCell(c, pWidth, cellWidth - sumMarginsX, &width);
+        Int32 height = 0;
+        vAlign->GetSizeInCell(c, pHeight, cellHeight - sumMarginsY, &height);
+
+        Int32 dx = x1 + gravityOffsetX + alignmentOffsetX;
+
+        Boolean isLayoutRtl;
+        IsLayoutRtl(&isLayoutRtl);
+        Int32 cx = !isLayoutRtl ? paddingLeft + leftMargin + dx :
+                targetWidth - width - paddingRight - rightMargin - dx;
+        Int32 cy = paddingTop + y1 + gravityOffsetY + alignmentOffsetY + topMargin;
+
+        Int32 mw = 0, mh = 0;
+        c->GetMeasuredWidth(&mw);
+        c->GetMeasuredHeight(&mh);
+        if (width != mw || height != mh) {
+            c->Measure(View::MeasureSpec::MakeMeasureSpec(width, View::MeasureSpec::EXACTLY),
+                View::MeasureSpec::MakeMeasureSpec(height, View::MeasureSpec::EXACTLY));
+        }
+        c->Layout(cx, cy, cx + width, cy + height);
+    }
+    return NOERROR;
+}
+
+ECode GridLayout::OnInitializeAccessibilityEvent(
+    /* [in] */ IAccessibilityEvent* event)
+{
+    ViewGroup::OnInitializeAccessibilityEvent(event);
+    AutoPtr<ICharSequence> seq = CoreUtils::Convert(String("CGridLayout"));
+    IAccessibilityRecord::Probe(event)->SetClassName(seq);
+    return NOERROR;
+}
+
+ECode GridLayout::OnInitializeAccessibilityNodeInfo(
+    /* [in] */ IAccessibilityNodeInfo* info)
+{
+    ViewGroup::OnInitializeAccessibilityNodeInfo(info);
+    AutoPtr<ICharSequence> seq = CoreUtils::Convert(String("CGridLayout"));
+    info->SetClassName(seq);
+    return NOERROR;
+}
+
+AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 size,
+    /* [in] */ Alignment* alignment,
+    /* [in] */ Float weight)
+{
+    return new Spec(start != UNDEFINED, start, size, alignment, weight);
+}
+
+AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
+    /* [in] */ Int32 start,
+    /* [in] */ Alignment* alignment,
+    /* [in] */ Float weight)
+{
+    return GetSpec(start, 1, alignment, weight);
+}
+
+AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 size,
+    /* [in] */ Float weight)
+{
+    return GetSpec(start, size, UNDEFINED_ALIGNMENT, weight);
+}
+
+AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
+    /* [in] */ Int32 start,
+    /* [in] */ Float weight)
+{
+    return GetSpec(start, 1, weight);
+}
+
+AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 size,
+    /* [in] */ Alignment* alignment)
+{
+    return GetSpec(start, size, alignment, Spec::DEFAULT_WEIGHT);
+}
+
+AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
+    /* [in] */ Int32 start,
+    /* [in] */ Alignment* alignment)
+{
+    return GetSpec(start, 1, alignment);
+}
+
+AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
+    /* [in] */ Int32 start,
+    /* [in] */ Int32 size)
+{
+    return GetSpec(start, size, UNDEFINED_ALIGNMENT);
+}
+
+AutoPtr<IGridLayoutSpec> GridLayout::GetSpec(
+    /* [in] */ Int32 start)
+{
+    return GetSpec(start, 1);
+}
+
+AutoPtr<GridLayout::Alignment> GridLayout::CreateSwitchingAlignment(
+    /* [in] */ Alignment* ltr,
+    /* [in] */ Alignment* rtl)
+{
+    return new SwitchingAlignment(ltr, rtl);
+}
+
+Boolean GridLayout::CanStretch(
+    /* [in] */ Int32 flexibility)
+{
+    return (flexibility & CAN_STRETCH) != 0;
+}
+
+
+//=====================================================================
+// GridLayout::StaticInitializer
+//=====================================================================
+GridLayout::StaticInitializer::StaticInitializer()
+{
+    //=====================================================================
+    // GridLayout
+    //=====================================================================
+    GridLayout::HORIZONTAL = ILinearLayout::HORIZONTAL;
+    GridLayout::VERTICAL = ILinearLayout::VERTICAL;
+    GridLayout::UNDEFINED = Elastos::Core::Math::INT32_MIN_VALUE;
+    GridLayout::UNDEFINED_ALIGNMENT = new GridLayout::UndefinedAlignment();
+    GridLayout::LEADING = new GridLayout::LeadingAlignment();
+    GridLayout::TRAILING = new GridLayout::TrailingAlignment();
+    GridLayout::TOP = GridLayout::LEADING;
+    GridLayout::BOTTOM = GridLayout::TRAILING;
+    GridLayout::START = GridLayout::LEADING;
+    GridLayout::END = GridLayout::TRAILING;
+    GridLayout::LEFT = GridLayout::CreateSwitchingAlignment(GridLayout::START, GridLayout::END);
+    GridLayout::RIGHT = GridLayout::CreateSwitchingAlignment(GridLayout::END, GridLayout::START);
+    GridLayout::CENTER = new GridLayout::CenterAlignment();
+    GridLayout::BASELINE = new GridLayout::BaseLineAlignment();
+    GridLayout::FILL = new GridLayout::FillAlignment();
+    GridLayout::DEFAULT_ORIENTATION = HORIZONTAL;
+    GridLayout::DEFAULT_COUNT = UNDEFINED;
+    GridLayout::DEFAULT_ALIGNMENT_MODE = ALIGN_MARGINS;
+    GridLayout::ORIENTATION = R::styleable::GridLayout_orientation;
+    GridLayout::ROW_COUNT = R::styleable::GridLayout_rowCount;
+    GridLayout::COLUMN_COUNT = R::styleable::GridLayout_columnCount;
+    GridLayout::USE_DEFAULT_MARGINS = R::styleable::GridLayout_useDefaultMargins;
+    GridLayout::ALIGNMENT_MODE = R::styleable::GridLayout_alignmentMode;
+    GridLayout::ROW_ORDER_PRESERVED = R::styleable::GridLayout_rowOrderPreserved;
+    GridLayout::COLUMN_ORDER_PRESERVED = R::styleable::GridLayout_columnOrderPreserved;
+
+    //=================================================================
+    // GridLayout::GridLayoutLayoutParams
+    //=================================================================
+    GridLayout::GridLayoutLayoutParams::DEFAULT_WIDTH = IViewGroupLayoutParams::WRAP_CONTENT;
+    GridLayout::GridLayoutLayoutParams::DEFAULT_HEIGHT = IViewGroupLayoutParams::WRAP_CONTENT;
+    GridLayout::GridLayoutLayoutParams::DEFAULT_MARGIN = Elastos::Core::Math::INT32_MIN_VALUE;
+    GridLayout::GridLayoutLayoutParams::DEFAULT_ROW = Elastos::Core::Math::INT32_MIN_VALUE;
+    GridLayout::GridLayoutLayoutParams::DEFAULT_COLUMN = Elastos::Core::Math::INT32_MIN_VALUE;
+    GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN = new GridLayout::Interval(GridLayout::UNDEFINED, GridLayout::UNDEFINED + 1);
+    Int32 size;
+    GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN->Size(&size);
+    GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN_SIZE = size;
+
+    GridLayout::GridLayoutLayoutParams::MARGIN = R::styleable::ViewGroup_MarginLayout_layout_margin;
+    GridLayout::GridLayoutLayoutParams::LEFT_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginLeft;
+    GridLayout::GridLayoutLayoutParams::TOP_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginTop;
+    GridLayout::GridLayoutLayoutParams::RIGHT_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginRight;
+    GridLayout::GridLayoutLayoutParams::BOTTOM_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginBottom;
+
+    GridLayout::GridLayoutLayoutParams::COLUMN = R::styleable::GridLayout_Layout_layout_column;
+    GridLayout::GridLayoutLayoutParams::COLUMN_SPAN = R::styleable::GridLayout_Layout_layout_columnSpan;
+    GridLayout::GridLayoutLayoutParams::COLUMN_WEIGHT = R::styleable::GridLayout_Layout_layout_columnWeight;
+
+    GridLayout::GridLayoutLayoutParams::ROW = R::styleable::GridLayout_Layout_layout_row;
+    GridLayout::GridLayoutLayoutParams::ROW_SPAN = R::styleable::GridLayout_Layout_layout_rowSpan;
+    GridLayout::GridLayoutLayoutParams::ROW_WEIGHT = R::styleable::GridLayout_Layout_layout_rowWeight;
+
+    GridLayout::GridLayoutLayoutParams::GRAVITY = R::styleable::GridLayout_Layout_layout_gravity;
+
+    //==================================================================
+    //                      GridLayout::Spec
+    //==================================================================
+    GridLayout::Spec::UNDEFINED = GridLayout::GetSpec(GridLayout::UNDEFINED);
+    GridLayout::Spec::DEFAULT_WEIGHT = 0;
 }
 
 } // namespace Widget
