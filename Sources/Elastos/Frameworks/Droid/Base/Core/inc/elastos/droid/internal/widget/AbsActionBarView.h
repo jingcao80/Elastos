@@ -41,7 +41,7 @@ protected:
 
         virtual CARAPI WithFinalVisibility(
             /* [in] */ Int32 visibility,
-            /* [out] */ VisibilityAnimListener** result);
+            /* [out] */ IAnimatorListener** result);
 
         // @Override
         CARAPI OnAnimationStart(
@@ -209,7 +209,7 @@ protected:
 
 private:
     static const AutoPtr<ITimeInterpolator> sAlphaInterpolator;
-    static const Int32 FADE_DURATION = 200;
+    static const Int32 FADE_DURATION;
 };
 
 } // namespace Widget

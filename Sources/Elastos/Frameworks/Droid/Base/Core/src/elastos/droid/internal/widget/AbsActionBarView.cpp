@@ -2,11 +2,11 @@
 #include "elastos/droid/animation/CAnimatorSet.h"
 #include "elastos/droid/animation/ObjectAnimator.h"
 #include "elastos/droid/internal/widget/AbsActionBarView.h"
-#include "elastos/droid/R.h"
 #include "elastos/droid/utility/CTypedValue.h"
 #include "elastos/droid/view/animation/CDecelerateInterpolator.h"
 #include "elastos/droid/view/CContextThemeWrapper.h"
 #include "elastos/droid/view/View.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -52,7 +52,7 @@ AbsActionBarView::VisibilityAnimListener::VisibilityAnimListener(
 
 ECode AbsActionBarView::VisibilityAnimListener::WithFinalVisibility(
     /* [in] */ Int32 visibility,
-    /* [out] */ VisibilityAnimListener** result)
+    /* [out] */ IAnimatorListener** result)
 {
     VALIDATE_NOT_NULL(result)
     mFinalVisibility = visibility;
@@ -73,8 +73,9 @@ ECode AbsActionBarView::VisibilityAnimListener::OnAnimationStart(
 ECode AbsActionBarView::VisibilityAnimListener::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    if (mCanceled)
+    if (mCanceled) {
         return NOERROR;
+    }
 
     mOwner->mVisibilityAnim = NULL;
     mOwner->SetVisibility(mFinalVisibility);
@@ -128,7 +129,7 @@ static AutoPtr<ITimeInterpolator> InitAlphaInterpolator()
 }
 
 const AutoPtr<ITimeInterpolator> AbsActionBarView::sAlphaInterpolator = InitAlphaInterpolator();
-const Int32 AbsActionBarView::FADE_DURATION;
+const Int32 AbsActionBarView::FADE_DURATION = 200;
 
 CAR_INTERFACE_IMPL(AbsActionBarView, ViewGroup, IAbsActionBarView)
 
@@ -137,6 +138,7 @@ AbsActionBarView::AbsActionBarView()
     , mSplitWhenNarrow(FALSE)
     , mContentHeight(0)
 {
+    mVisAnimListener = new VisibilityAnimListener(this);
 }
 
 ECode AbsActionBarView::constructor(
@@ -167,8 +169,6 @@ ECode AbsActionBarView::constructor(
     /* [in] */ Int32 defStyleRes)
 {
     ViewGroup::constructor(context, attrs, defStyleAttr, defStyleRes);
-
-    mVisAnimListener = new VisibilityAnimListener(this);
 
     AutoPtr<ITypedValue> tv;
     CTypedValue::New((ITypedValue**)&tv);
@@ -246,9 +246,9 @@ ECode AbsActionBarView::AnimateToVisibility(
     }
 
     if (visibility == IView::VISIBLE) {
-        Int32 visibility = 0;
-        GetVisibility(&visibility);
-        if (visibility != IView::VISIBLE) {
+        Int32 visibilityTmp = 0;
+        GetVisibility(&visibilityTmp);
+        if (visibilityTmp != IView::VISIBLE) {
             SetAlpha(0);
             if (mSplitView != NULL && mMenuView != NULL) {
                 IView::Probe(mMenuView)->SetAlpha(0);
@@ -262,24 +262,24 @@ ECode AbsActionBarView::AnimateToVisibility(
         IValueAnimator::Probe(anim)->SetDuration(FADE_DURATION);
         aninmator->SetInterpolator(sAlphaInterpolator);
 
-        AutoPtr<VisibilityAnimListener> animListener;
-        mVisAnimListener->WithFinalVisibility(visibility, (VisibilityAnimListener**)&animListener);
-        IAnimatorListener* al = IAnimatorListener::Probe(animListener);
+        AutoPtr<IAnimatorListener> animListener;
+        mVisAnimListener->WithFinalVisibility(visibility, (IAnimatorListener**)&animListener);
 
         if (mSplitView != NULL && mMenuView != NULL) {
             AutoPtr<IAnimatorSet> set;
             CAnimatorSet::New((IAnimatorSet**)&set);
+            IAnimator* _set = IAnimator::Probe(set);
             AutoPtr<IObjectAnimator> splitAnim = ObjectAnimator::OfFloat(mMenuView, String("alpha"), values);
             IValueAnimator::Probe(splitAnim)->SetDuration(FADE_DURATION);
-            IAnimator::Probe(set)->AddListener(al);
+            _set->AddListener(animListener);
 
             AutoPtr<IAnimatorSetBuilder> ab;
             set->Play(aninmator, (IAnimatorSetBuilder**)&ab);
             ab->With(IAnimator::Probe(splitAnim));
-            IAnimator::Probe(set)->Start();
+            _set->Start();
         }
         else {
-            aninmator->AddListener(al);
+            aninmator->AddListener(animListener);
             aninmator->Start();
         }
     }
@@ -291,24 +291,24 @@ ECode AbsActionBarView::AnimateToVisibility(
         IAnimator* aninmator = IAnimator::Probe(anim);
         aninmator->SetInterpolator(sAlphaInterpolator);
 
-        AutoPtr<VisibilityAnimListener> animListener;
-        mVisAnimListener->WithFinalVisibility(visibility, (VisibilityAnimListener**)&animListener);
-        IAnimatorListener* al = IAnimatorListener::Probe(animListener);
+        AutoPtr<IAnimatorListener> animListener;
+        mVisAnimListener->WithFinalVisibility(visibility, (IAnimatorListener**)&animListener);
 
         if (mSplitView != NULL && mMenuView != NULL) {
             AutoPtr<IAnimatorSet> set;
             CAnimatorSet::New((IAnimatorSet**)&set);
+            IAnimator* _set = IAnimator::Probe(set);
             AutoPtr<IObjectAnimator> splitAnim = ObjectAnimator::OfFloat(mMenuView, String("alpha"), values);
             IValueAnimator::Probe(splitAnim)->SetDuration(FADE_DURATION);
-            IAnimator::Probe(set)->AddListener(al);
+            _set->AddListener(animListener);
 
             AutoPtr<IAnimatorSetBuilder> ab;
             set->Play(aninmator, (IAnimatorSetBuilder**)&ab);
             ab->With(IAnimator::Probe(splitAnim));
-            IAnimator::Probe(set)->Start();
+            _set->Start();
         }
         else {
-            aninmator->AddListener(al);
+            aninmator->AddListener(animListener);
             aninmator->Start();
         }
     }
@@ -476,11 +476,11 @@ Int32 AbsActionBarView::PositionChild(
     /* [in] */ Int32 contentHeight,
     /* [in] */ Boolean reverse)
 {
-
     Int32 childWidth = 0, childHeight, childTop;
     child->GetMeasuredWidth(&childWidth);
     child->GetMeasuredHeight(&childHeight);
     childTop = y + (contentHeight - childHeight) / 2;
+
     if (reverse) {
         child->Layout(x - childWidth, childTop, x, childTop + childHeight);
     }
@@ -500,10 +500,7 @@ ECode AbsActionBarView::OnLayout(
     return NOERROR;
 }
 
-
 } // namespace Widget
 } // namespace Internal
 } // namespace Droid
 } // namespace Elastos
-
-

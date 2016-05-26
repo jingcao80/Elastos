@@ -379,8 +379,6 @@ protected:
         /* [in] */ Int32 bottom);
 
 private:
-    static CARAPI_(AutoPtr<IProperty>) InitActinoBarHideOffset();
-
     CARAPI_(void) Init(
         /* [in] */ IContext* context);
 

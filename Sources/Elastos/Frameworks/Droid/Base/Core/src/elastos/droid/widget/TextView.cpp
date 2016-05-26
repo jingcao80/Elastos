@@ -10375,6 +10375,7 @@ Boolean TextView::CanPaste()
         cm->HasPrimaryClip(&hasClip);
         return hasClip;
     }
+    return FALSE;
 }
 
 Boolean TextView::SelectAllText()

@@ -31,15 +31,9 @@ namespace Droid {
 namespace Internal {
 namespace Widget {
 
-AutoPtr<IProperty> ActionBarOverlayLayout::InitActinoBarHideOffset()
-{
-    AutoPtr<IProperty> result = new InnerIntProperty();
-    return result;
-}
+const AutoPtr<IProperty> ActionBarOverlayLayout::ACTION_BAR_HIDE_OFFSET = new InnerIntProperty();
 
-const AutoPtr<IProperty> ActionBarOverlayLayout::ACTION_BAR_HIDE_OFFSET = ActionBarOverlayLayout::InitActinoBarHideOffset();
-
-AutoPtr< ArrayOf<Int32> > InitAttrs()
+static AutoPtr< ArrayOf<Int32> > InitAttrs()
 {
     AutoPtr< ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(2);
     (*result)[0] = R::attr::actionBarSize;
