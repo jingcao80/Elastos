@@ -1570,7 +1570,7 @@ ECode Process::OpenElastosZygoteSocketIfNeeded(
         mPrimaryElastosZygoteState = NULL;
         ECode ec = ZygoteState::Connect(ZYGOTE_SOCKET_ELASTOS, (ZygoteState**)&mPrimaryElastosZygoteState);
         if (FAILED(ec)) {
-            Logger::E(TAG, "Error connecting to primary zygote");
+            Logger::E(TAG, "Error connecting to primary elzygote");
             return E_ZYGOTE_START_FAILED_EXCEPTION;
         }
     }
@@ -1586,7 +1586,7 @@ ECode Process::OpenElastosZygoteSocketIfNeeded(
         mSecondaryElastosZygoteState = NULL;
         ECode ec = ZygoteState::Connect(SECONDARY_ZYGOTE_SOCKET_ELASTOS, (ZygoteState**)&mSecondaryElastosZygoteState);
         if (FAILED(ec)) {
-            Logger::E(TAG, "Error connecting to secondary zygote");
+            Logger::E(TAG, "Error connecting to secondary elzygote");
             return E_ZYGOTE_START_FAILED_EXCEPTION;
         }
     }
@@ -1598,7 +1598,7 @@ ECode Process::OpenElastosZygoteSocketIfNeeded(
     }
 
     // throw new ZygoteStartFailedEx("Unsupported zygote ABI: " + abi);
-    Logger::E(TAG, "OpenElastosZygoteSocketIfNeeded::Unsupported zygote ABI: %s", abi.string());
+    Logger::E(TAG, "OpenElastosZygoteSocketIfNeeded::Unsupported elzygote ABI: %s", abi.string());
     return E_ZYGOTE_START_FAILED_EXCEPTION;
 }
 
