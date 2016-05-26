@@ -28,44 +28,38 @@ ECode CMediaPlayerHelper::Create(
 
 ECode CMediaPlayerHelper::Create(
     /* [in] */ IContext* ctx,
+    /* [in] */ IUri* uri,
+    /* [in] */ ISurfaceHolder* holder,
+    /* [in] */ IAudioAttributes* audioAttributes,
+    /* [in] */ Int32 audioSessionId,
+    /* [out] */ IMediaPlayer** result)
+{
+    return CMediaPlayer::Create(ctx, uri, holder, audioAttributes, audioSessionId, result);
+}
+
+ECode CMediaPlayerHelper::Create(
+    /* [in] */ IContext* ctx,
     /* [in] */ Int32 resid,
     /* [out] */ IMediaPlayer** player)
 {
     return CMediaPlayer::Create(ctx, resid, player);
 }
 
-ECode CMediaPlayerHelper::SetRawDataMode(
-    /* [in] */ Int32 rawDataMode)
+ECode CMediaPlayerHelper::Create(
+    /* [in] */ IContext* ctx,
+    /* [in] */ Int32 resid,
+    /* [in] */ IAudioAttributes* audioAttributes,
+    /* [in] */ Int32 audioSessionId,
+    /* [out] */ IMediaPlayer** result)
 {
-    return CMediaPlayer::SetRawDataMode(rawDataMode);
+    return CMediaPlayer::Create(ctx, resid, audioAttributes, audioSessionId, result);
 }
 
-ECode CMediaPlayerHelper::GetRawDataMode(
-    /* [out] */ Int32* rawDataMode)
+ECode CMediaPlayerHelper::NativePullBatteryData(
+    /* [in] */ IParcel* reply,
+    /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(rawDataMode);
-    *rawDataMode = CMediaPlayer::GetRawDataMode();
-    return NOERROR;
-}
-
-/* Rotate the video. */
-ECode CMediaPlayerHelper::IsRotatable(
-    /* [out] */ Boolean* rotatable)
-{
-    return CMediaPlayer::IsRotatable(rotatable);
-}
-
-ECode CMediaPlayerHelper::SetRotation(
-    /* [in] */ Int32 value)
-{
-    return CMediaPlayer::SetRotation(value);
-}
-
-/*  Notify hdmi status. */
-ECode CMediaPlayerHelper::SetHdmiState(
-    /* [in] */ Boolean bHdmiPlugged)
-{
-    return CMediaPlayer::SetHdmiState(bHdmiPlugged);
+    return CMediaPlayer::NativePullBatteryData(reply, result);
 }
 
 } // namespace Media

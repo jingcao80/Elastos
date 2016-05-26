@@ -4,14 +4,20 @@
 
 #include "_Elastos_Droid_Media_CAudioRecordHelper.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Singleton.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Media {
 
 CarClass(CAudioRecordHelper)
+    , public Singleton
+    , public IAudioRecordHelper
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_SINGLETON_DECL()
     /**
      * Returns the minimum buffer size required for the successful creation of an AudioRecord
      * object.

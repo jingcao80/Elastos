@@ -6,6 +6,10 @@ namespace Elastos {
 namespace Droid {
 namespace Media {
 
+CAR_INTERFACE_IMPL(CAudioRecordHelper, Singleton, IAudioRecordHelper)
+
+CAR_SINGLETON_IMPL(CAudioRecordHelper)
+
 ECode CAudioRecordHelper::GetMinBufferSize(
     /* [in] */ Int32 sampleRateInHz,
     /* [in] */ Int32 channelConfig,

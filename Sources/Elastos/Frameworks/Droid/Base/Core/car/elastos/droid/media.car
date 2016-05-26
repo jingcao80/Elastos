@@ -420,6 +420,10 @@ module
         interface IAudioManager;
     }
 
+    singleton class CAudioManagerHelper {
+        interface IAudioManagerHelper;
+    }
+
     [deprecated]
     class CAudioPatch {
         constructor(
@@ -445,6 +449,10 @@ module
             [in] Int32 sessionId);
 
         interface IAudioRecord;
+    }
+
+    singleton class CAudioRecordHelper {
+        interface IAudioRecordHelper;
     }
 
     class CAudioRoutesInfo {
@@ -740,6 +748,10 @@ module
         interface IMediaCodec;
     }
 
+    singleton class CMediaCodecHelper {
+        interface IMediaCodecHelper;
+    }
+
     [deprecated]
     class CMediaCrypto {
         constructor();
@@ -921,6 +933,10 @@ module
 
         interface IMediaPlayer;
         interface ISubtitleControllerListener;
+    }
+
+    singleton class CMediaPlayerHelper {
+        interface IMediaPlayerHelper;
     }
 
     class CMediaRouterSimpleCallback {

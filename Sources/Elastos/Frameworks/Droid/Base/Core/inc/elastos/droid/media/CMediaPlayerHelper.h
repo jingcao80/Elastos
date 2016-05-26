@@ -19,6 +19,9 @@ CarClass(CMediaPlayerHelper)
     , public IMediaPlayerHelper
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_SINGLETON_DECL()
 
     /**
      * Convenience method to create a MediaPlayer for a given Uri.
@@ -55,6 +58,25 @@ public:
         /* [out] */ IMediaPlayer** player);
 
     /**
+     * Same factory method as {@link #create(Context, Uri, SurfaceHolder)} but that lets you specify
+     * the audio attributes and session ID to be used by the new MediaPlayer instance.
+     * @param context the Context to use
+     * @param uri the Uri from which to get the datasource
+     * @param holder the SurfaceHolder to use for displaying the video, may be null.
+     * @param audioAttributes the {@link AudioAttributes} to be used by the media player.
+     * @param audioSessionId the audio session ID to be used by the media player,
+     *     see {@link AudioManager#generateAudioSessionId()} to obtain a new session.
+     * @return a MediaPlayer object, or null if creation failed
+     */
+    CARAPI Create(
+        /* [in] */ IContext* ctx,
+        /* [in] */ IUri* uri,
+        /* [in] */ ISurfaceHolder* holder,
+        /* [in] */ IAudioAttributes* audioAttributes,
+        /* [in] */ Int32 audioSessionId,
+        /* [out] */ IMediaPlayer** result);
+
+    /**
      * Convenience method to create a MediaPlayer for a given resource id.
      * On success, {@link #prepare()} will already have been called and must not be called again.
      * <p>When done with the MediaPlayer, you should call  {@link #release()},
@@ -72,27 +94,32 @@ public:
         /* [out] */ IMediaPlayer** player);
 
     /**
-     * set the status of the raw data mode.
-     * <p>
-     *
-     * @param enable  whether to enable the raw data mode.
+     * Same factory method as {@link #create(Context, int)} but that lets you specify the audio
+     * attributes and session ID to be used by the new MediaPlayer instance.
+     * @param context the Context to use
+     * @param resid the raw resource id (<var>R.raw.&lt;something></var>) for
+     *              the resource to use as the datasource
+     * @param audioAttributes the {@link AudioAttributes} to be used by the media player.
+     * @param audioSessionId the audio session ID to be used by the media player,
+     *     see {@link AudioManager#generateAudioSessionId()} to obtain a new session.
+     * @return a MediaPlayer object, or null if creation failed
      */
-    CARAPI SetRawDataMode(
-        /* [in] */ Int32 rawDataMode);
+    CARAPI Create(
+        /* [in] */ IContext* ctx,
+        /* [in] */ Int32 resid,
+        /* [in] */ IAudioAttributes* audioAttributes,
+        /* [in] */ Int32 audioSessionId,
+        /* [out] */ IMediaPlayer** result);
 
-    CARAPI GetRawDataMode(
-        /* [out] */ Int32* rawDataMode);
-
-    /* Rotate the video. */
-    CARAPI IsRotatable(
-        /* [out] */ Boolean* rotatable);
-
-    CARAPI SetRotation(
-        /* [in] */ Int32 value);
-
-    /*  Notify hdmi status. */
-    CARAPI SetHdmiState(
-        /* [in] */ Boolean bHdmiPlugged);
+    /**
+     * @param reply Parcel with audio/video duration info for battery
+                    tracking usage
+     * @return The status code.
+     * {@hide}
+     */
+    CARAPI NativePullBatteryData(
+        /* [in] */ IParcel* reply,
+        /* [out] */ Int32* result);
 };
 
 } // namespace Media
