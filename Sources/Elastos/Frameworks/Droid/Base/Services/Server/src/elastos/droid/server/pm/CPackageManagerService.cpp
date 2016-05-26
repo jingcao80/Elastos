@@ -10618,7 +10618,8 @@ Slogger::I(TAG, " >>>>>>>>> ScanPackageDirtyLI %s", TO_CSTR(pkg));
     }
 
     if (pkg->mPackageName.Equals("android")) {
-        {    AutoLock syncLock(mPackagesLock);
+        {
+            AutoLock syncLock(mPackagesLock);
             if (mElastosApplication != NULL) {
                 Slogger::W(TAG, "*************************************************");
                 Slogger::W(TAG, "Core android package being redefined.  Skipping %s.", TO_CSTR(scanFile));
