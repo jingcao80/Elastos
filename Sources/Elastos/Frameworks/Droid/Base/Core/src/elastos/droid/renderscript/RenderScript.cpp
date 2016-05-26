@@ -1,23 +1,123 @@
 
 #include "elastos/droid/RenderScript/RenderScript.h"
+#include "elastos/droid/content/res/CAssetManager.h"
+#include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/os/CSystemProperties.h"
-#include "elastos/droid/view/Surface.h"
+#include "elastos/droid/view/CSurface.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <androidfw/Asset.h>
 #include <gui/Surface.h>
 #include <ui/ANativeObjectBase.h>
 #include <rs/rs.h>
+#include <rs/rsEnv.h>
+#include <skia/core/SkBitmap.h>
 
+using Elastos::Droid::Graphics::CBitmap;
 using Elastos::Droid::RenderScript::EIID_IRenderScript;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::View::Surface;
+using Elastos::Droid::View::CSurface;
+using Elastos::Core::IByte;
+using Elastos::Core::IFloat;
+using Elastos::Core::IDouble;
+using Elastos::Core::IInteger32;
+using Elastos::Core::IInteger16;
+using Elastos::Core::IInteger64;
 using Elastos::Utility::Concurrent::Locks::ILock;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace RenderScript {
+
+#define PER_ARRAY_TYPE(flag, fnc, readonly, ...) {                                      \
+    int len = 0;                                                                        \
+    void *ptr = NULL;                                                                   \
+    size_t typeBytes = 0;                                                               \
+    AutoPtr<IArrayOf> array = IArrayOf::Probe(d);                                       \
+    switch(dataType) {                                                                  \
+    case RS_TYPE_FLOAT_32:                                                              \
+        array->GetLength((Int32*)&len);                                                 \
+        AutoPtr<ArrayOf<Float> > arrayF = ArrayOf<Float>::Alloc(len);                   \
+        for (Int32 i = 0; i < len; i++) {                                               \
+            AutoPtr<IInterface> v;                                                      \
+            array->Get(i, (IInterface**)&v);                                            \
+            IFloat::Probe(v)->GetValue(&(*arrayF)[i]);                                  \
+        }                                                                               \
+        ptr = arrayF->GetPayload();                                                     \
+        typeBytes = 4;                                                                  \
+        fnc(__VA_ARGS__);                                                               \
+        return;                                                                         \
+    case RS_TYPE_FLOAT_64:                                                              \
+        array->GetLength((Int32*)&len);                                                 \
+        AutoPtr<ArrayOf<Double> > arrayD = ArrayOf<Double>::Alloc(len);                 \
+        for (Int32 i = 0; i < len; i++) {                                               \
+            AutoPtr<IInterface> v;                                                      \
+            array->Get(i, (IInterface**)&v);                                            \
+            IDouble::Probe(v)->GetValue(&(*arrayD)[i]);                                 \
+        }                                                                               \
+        ptr = arrayD->GetPayload();                                                     \
+        typeBytes = 8;                                                                  \
+        fnc(__VA_ARGS__);                                                               \
+        return;                                                                         \
+    case RS_TYPE_SIGNED_8:                                                              \
+    case RS_TYPE_UNSIGNED_8:                                                            \
+        array->GetLength((Int32*)&len);                                                 \
+        AutoPtr<ArrayOf<Byte> > arrayB = ArrayOf<Byte>::Alloc(len);                     \
+        for (Int32 i = 0; i < len; i++) {                                               \
+            AutoPtr<IInterface> v;                                                      \
+            array->Get(i, (IInterface**)&v);                                            \
+            IByte::Probe(v)->GetValue(&(*arrayB)[i]);                                   \
+        }                                                                               \
+        ptr = arrayB->GetPayload();                                                     \
+        typeBytes = 1;                                                                  \
+        fnc(__VA_ARGS__);                                                               \
+        return;                                                                         \
+    case RS_TYPE_SIGNED_16:                                                             \
+    case RS_TYPE_UNSIGNED_16:                                                           \
+        array->GetLength((Int32*)&len);                                                 \
+        AutoPtr<ArrayOf<Int16> > arrayI16 = ArrayOf<Int16>::Alloc(len);                 \
+        for (Int32 i = 0; i < len; i++) {                                               \
+            AutoPtr<IInterface> v;                                                      \
+            array->Get(i, (IInterface**)&v);                                            \
+            IInteger16::Probe(v)->GetValue(&(*arrayI16)[i]);                            \
+        }                                                                               \
+        ptr = arrayI16->GetPayload();                                                   \
+        typeBytes = 2;                                                                  \
+        fnc(__VA_ARGS__);                                                               \
+        return;                                                                         \
+    case RS_TYPE_SIGNED_32:                                                             \
+    case RS_TYPE_UNSIGNED_32:                                                           \
+        array->GetLength((Int32*)&len);                                                 \
+        AutoPtr<ArrayOf<Int32> > arrayI32 = ArrayOf<Int32>::Alloc(len);                 \
+        for (Int32 i = 0; i < len; i++) {                                               \
+            AutoPtr<IInterface> v;                                                      \
+            array->Get(i, (IInterface**)&v);                                            \
+            IInteger32::Probe(v)->GetValue(&(*arrayI32)[i]);                            \
+        }                                                                               \
+        ptr = arrayI32->GetPayload();                                                   \
+        typeBytes = 4;                                                                  \
+        fnc(__VA_ARGS__);                                                               \
+        return;                                                                         \
+    case RS_TYPE_SIGNED_64:                                                             \
+    case RS_TYPE_UNSIGNED_64:                                                           \
+        array->GetLength((Int32*)&len);                                                 \
+        AutoPtr<ArrayOf<Int64> > arrayI64 = ArrayOf<Int64>::Alloc(len);                 \
+        for (Int32 i = 0; i < len; i++) {                                               \
+            AutoPtr<IInterface> v;                                                      \
+            array->Get(i, (IInterface**)&v);                                            \
+            IInteger64::Probe(v)->GetValue(&(*arrayI64)[i]);                            \
+        }                                                                               \
+        ptr = arrayI64->GetPayload();                                                   \
+        typeBytes = 8;                                                                  \
+        fnc(__VA_ARGS__);                                                               \
+        return;                                                                         \
+    default:                                                                            \
+        break;                                                                          \
+    }                                                                                   \
+}
 
 class AutoStringArrayToUTF8 {
 public:
@@ -139,7 +239,7 @@ Int32 RenderScript::NContextGetUserMessage(
     size_t receiveLen;
     uint32_t subID;
     int id = rsContextGetMessage((RsContext)con,
-            ptr, len * 4,
+            (void*)data->GetPayload(), len * 4,
             &receiveLen, sizeof(receiveLen),
             &subID, sizeof(subID));
     if (!id && receiveLen) {
@@ -368,6 +468,7 @@ ECode RenderScript::NContextSetSurfaceTexture(
     /* [in] */ Int32 h,
     /* [in] */ ISurfaceTexture* sur)
 {
+    AutoLock lock(this);
     FAIL_RETURN(validate())
     RsnContextSetSurfaceTexture(mContext, w, h, sur);
     return NOERROR;
@@ -384,6 +485,7 @@ void RenderScript::RsnContextSetPriority(
 ECode RenderScript::NContextSetPriority(
     /* [in] */ Int32 p)
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnContextSetPriority(mContext, p);
     return NOERROR;
@@ -400,6 +502,7 @@ void RenderScript::RsnContextDump(
 ECode RenderScript::NContextDump(
     /* [in] */ Int32 bits)
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnContextDump(mContext, bits);
     return NOERROR;
@@ -414,6 +517,7 @@ void RenderScript::RsnContextFinish(
 
 ECode RenderScript::NContextFinish()
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnContextFinish(mContext);
     return NOERROR;
@@ -425,13 +529,14 @@ void RenderScript::RsnContextSendMessage(
     /* [in] */ ArrayOf<Int32>* data)
 {
     Slogger::D(LOG_TAG, "nContextSendMessage, con(%p), id(%i), len(%i)", (RsContext)con, id, len);
-    rsContextSendMessage((RsContext)con, id, (const uint8_t *)data.GetPayload(), len * sizeof(int));
+    rsContextSendMessage((RsContext)con, id, (const uint8_t *)data->GetPayload(), len * sizeof(int));
 }
 
 ECode RenderScript::NContextSendMessage(
     /* [in] */ Int32 id,
     /* [in] */ ArrayOf<Int32>* data)
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnContextSendMessage(mContext, id, data);
     return NOERROR;
@@ -448,6 +553,7 @@ void RenderScript::RsnContextBindRootScript(
 ECode RenderScript::NContextBindRootScript(
     /* [in] */ Int64 script)
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnContextBindRootScript(mContext, script);
     return NOERROR;
@@ -465,6 +571,7 @@ ECode RenderScript::NContextBindSampler(
     /* [in] */ Int32 sampler,
     /* [in] */ Int32 slot)
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnContextBindSampler(mContext, sampler, slot);
     return NOERROR;
@@ -481,6 +588,7 @@ void RenderScript::RsnContextBindProgramStore(
 ECode RenderScript::NContextBindProgramStore(
     /* [in] */ Int64 pfs)
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnContextBindProgramStore(mContext, pfs);
     return NOERROR;
@@ -497,6 +605,7 @@ void RenderScript::RsnContextBindProgramFragment(
 ECode RenderScript::NContextBindProgramFragment(
     /* [in] */ Int64 pf)
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnContextBindProgramFragment(mContext, pf);
     return NOERROR;
@@ -513,6 +622,7 @@ void RenderScript::RsnContextBindProgramVertex(
 ECode RenderScript::NContextBindProgramVertex(
     /* [in] */ Int64 pv)
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnContextBindProgramVertex(mContext, pv);
     return NOERROR;
@@ -529,6 +639,7 @@ void RenderScript::RsnContextBindProgramRaster(
 ECode RenderScript::NContextBindProgramRaster(
     /* [in] */ Int64 pr)
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnContextBindProgramRaster(mContext, pr);
     return NOERROR;
@@ -543,6 +654,7 @@ void RenderScript::RsnContextPause(
 
 ECode RenderScript::NContextPause()
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnContextPause(mContext);
     return NOERROR;
@@ -557,6 +669,7 @@ void RenderScript::RsnContextResume(
 
 ECode RenderScript::NContextResume()
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnContextResume(mContext);
     return NOERROR;
@@ -568,13 +681,14 @@ void RenderScript::RsnAssignName(
     /* [in] */ ArrayOf<Byte>* name)
 {
     Slogger::D(LOG_TAG, "nAssignName, con(%p), obj(%p)", (RsContext)con, (void *)obj);
-    rsAssignName((RsContext)con, (void *)obj, (const char *)name.GetPayload(), name->GetLength());
+    rsAssignName((RsContext)con, (void *)obj, (const char *)name->GetPayload(), name->GetLength());
 }
 
 ECode RenderScript::NAssignName(
     /* [in] */ Int64 obj,
     /* [in] */ ArrayOf<Byte>* name)
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnAssignName(mContext, obj, name);
 }
@@ -596,6 +710,7 @@ ECode RenderScript::NGetName(
     /* [in] */ Int64 obj,
     /* [out] */ String* name)
 {
+    AutoLock lock(this);
     VALIDATE_NOT_NULL(name)
     *name = rsnGetName(mContext, obj);
     return NOERROR;
@@ -638,8 +753,9 @@ ECode RenderScript::NElementCreate(
     /* [in] */ Int32 vecSize,
     /* [out] */ Int64* result)
 {
+    AutoLock lock(this);
     VALIDATE_NOT_NULL(result)
-    *result = rsnElementCreate(mContext, type, kind, norm, vecSize);
+    *result = RsnElementCreate(mContext, type, kind, norm, vecSize);
     return NOERROR;
 }
 
@@ -685,8 +801,9 @@ ECode RenderScript::NElementCreate2(
     /* [in] */ ArrayOf<Int32>* arraySizes,
     /* [out] */ Int64* result)
 {
+    AutoLock lock(this);
     VALIDATE_NOT_NULL(result)
-    *result = rsnElementCreate2(mContext, elements, names, arraySizes);
+    *result = RsnElementCreate2(mContext, elements, names, arraySizes);
     return NOERROR;
 }
 
@@ -714,6 +831,7 @@ ECode RenderScript::NElementGetNativeData(
     /* [in] */ Int64 id,
     /* [in] */ ArrayOf<Int32>* elementData)
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnElementGetNativeData(mContext, id, elementData);
     return NOERROR;
@@ -754,6 +872,7 @@ ECode RenderScript::NElementGetSubElements(
     /* [in] */ ArrayOf<String>* names,
     /* [in] */ ArrayOf<Int32>* arraySizes)
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnElementGetSubElements(mContext, id, IDs, names, arraySizes);
     return NOERROR;
@@ -785,8 +904,9 @@ ECode RenderScript::NTypeCreate(
     /* [in] */ Int32 yuv,
     /* [out] */ Int64* result)
 {
+    AutoLock lock(this);
     VALIDATE_NOT_NULL(result)
-    *result = rsnTypeCreate(mContext, eid, x, y, z, mips, faces, yuv);
+    *result = RsnTypeCreate(mContext, eid, x, y, z, mips, faces, yuv);
     return NOERROR;
 }
 
@@ -815,6 +935,7 @@ ECode RenderScript::NTypeGetNativeData(
     /* [in] */ Int64 id,
     /* [in] */ ArrayOf<Int64>* typeData)
 {
+    AutoLock lock(this);
     FAIL_RETURN(Validate())
     RsnTypeGetNativeData(mContext, id, typeData);
     return NOERROR;
@@ -840,8 +961,11 @@ ECode RenderScript::NAllocationCreateTyped(
     /* [in] */ Int64 pointer,
     /* [out] */ Int64* result)
 {
+    AutoLock lock(this);
     VALIDATE_NOT_NULL(result)
-    *result = rsnAllocationCreateTyped(mContext, type, mip, usage, pointer);
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnAllocationCreateTyped(mContext, type, mip, usage, pointer);
     return NOERROR;
 }
 
@@ -852,16 +976,14 @@ Int64 RenderScript::RsnAllocationCreateFromBitmap(
     /* [in] */ IBitmap* bmp,
     /* [in] */ Int32 usage)
 {
-    // begin from this
-    SkBitmap const * nativeBitmap =
-            (SkBitmap const *)_env->GetLongField(jbitmap, gNativeBitmapID);
+    SkBitmap const * nativeBitmap = reinterpret_cast<SkBitmap const *>(((CBitmap*)bmp.Get())->mNativeBitmap);
     const SkBitmap& bitmap(*nativeBitmap);
 
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
-    jlong id = (jlong)(uintptr_t)rsAllocationCreateFromBitmap((RsContext)con,
-                                                  (RsType)type, (RsAllocationMipmapControl)mip,
-                                                  ptr, bitmap.getSize(), usage);
+    Int64 id = (Int64)(uintptr_t)rsAllocationCreateFromBitmap((RsContext)con,
+            (RsType)type, (RsAllocationMipmapControl)mip,
+            ptr, bitmap.getSize(), usage);
     bitmap.unlockPixels();
     return id;
 }
@@ -871,121 +993,315 @@ ECode RenderScript::NAllocationCreateFromBitmap(
     /* [in] */ Int32 mip,
     /* [in] */ IBitmap* bmp,
     /* [in] */ Int32 usage,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnAllocationCreateFromBitmap(mContext, type, mip, bmp, usage);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnAllocationCreateBitmapBackedAllocation(
     /* [in] */ Int64 con,
     /* [in] */ Int64 type,
     /* [in] */ Int32 mip,
     /* [in] */ IBitmap* bmp,
-    /* [in] */ Int32 usage);
+    /* [in] */ Int32 usage)
+{
+    SkBitmap const * nativeBitmap = reinterpret_cast<SkBitmap const *>(((CBitmap*)bmp.Get())->mNativeBitmap);
+    const SkBitmap& bitmap(*nativeBitmap);
+
+    bitmap.lockPixels();
+    const void* ptr = bitmap.getPixels();
+    Int64 id = (Int64)(uintptr_t)rsAllocationCreateTyped((RsContext)con,
+            (RsType)type, (RsAllocationMipmapControl)mip,
+            (uint32_t)usage, (uintptr_t)ptr);
+    bitmap.unlockPixels();
+    return id;
+}
 
 ECode RenderScript::NAllocationCreateBitmapBackedAllocation(
     /* [in] */ Int64 type,
     /* [in] */ Int32 mip,
     /* [in] */ IBitmap* bmp,
     /* [in] */ Int32 usage,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnAllocationCreateBitmapBackedAllocation(mContext, type, mip, bmp, usage);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnAllocationCubeCreateFromBitmap(
     /* [in] */ Int64 con,
     /* [in] */ Int64 type,
     /* [in] */ Int32 mip,
     /* [in] */ IBitmap* bmp,
-    /* [in] */ Int32 usage);
+    /* [in] */ Int32 usage)
+{
+    SkBitmap const * nativeBitmap = reinterpret_cast<SkBitmap const *>(((CBitmap*)bmp.Get())->mNativeBitmap);
+    const SkBitmap& bitmap(*nativeBitmap);
+
+    bitmap.lockPixels();
+    const void* ptr = bitmap.getPixels();
+    Int64 id = (Int64)(uintptr_t)rsAllocationCubeCreateFromBitmap((RsContext)con,
+            (RsType)type, (RsAllocationMipmapControl)mip,
+            ptr, bitmap.getSize(), usage);
+    bitmap.unlockPixels();
+    return id;
+}
 
 ECode RenderScript::NAllocationCubeCreateFromBitmap(
     /* [in] */ Int64 type,
     /* [in] */ Int32 mip,
     /* [in] */ IBitmap* bmp,
     /* [in] */ Int32 usage,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnAllocationCubeCreateFromBitmap(mContext, type, mip, bmp, usage);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnAllocationCreateBitmapRef(
     /* [in] */ Int64 con,
     /* [in] */ Int64 type,
-    /* [in] */ IBitmap* bmp);
+    /* [in] */ IBitmap* bmp)
+{
+    assert(0);
+    return -1;
+}
 
 ECode RenderScript::NAllocationCreateBitmapRef(
     /* [in] */ Int64 type,
     /* [in] */ IBitmap* bmp,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnAllocationCreateBitmapRef(mContext, type, bmp);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnAllocationCreateFromAssetStream(
     /* [in] */ Int64 con,
     /* [in] */ Int32 mips,
     /* [in] */ Int32 assetStream,
-    /* [in] */ Int32 usage);
+    /* [in] */ Int32 usage)
+{
+    assert(0);
+    return -1;
+}
 
 ECode RenderScript::NAllocationCreateFromAssetStream(
     /* [in] */ Int32 mips,
     /* [in] */ Int32 assetStream,
     /* [in] */ Int32 usage,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnAllocationCreateFromAssetStream(mContext, mips, assetStream, usage);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationCopyToBitmap(
     /* [in] */ Int64 con,
     /* [in] */ Int64 alloc,
-    /* [in] */ IBitmap* bmp);
+    /* [in] */ IBitmap* bmp)
+{
+    SkBitmap const * nativeBitmap = reinterpret_cast<SkBitmap const *>(((CBitmap*)bmp.Get())->mNativeBitmap);
+    const SkBitmap& bitmap(*nativeBitmap);
+
+    bitmap.lockPixels();
+    void* ptr = bitmap.getPixels();
+    rsAllocationCopyToBitmap((RsContext)con, (RsAllocation)alloc, ptr, bitmap.getSize());
+    bitmap.unlockPixels();
+    bitmap.notifyPixelsChanged();
+}
 
 ECode RenderScript::NAllocationCopyToBitmap(
     /* [in] */ Int64 alloc,
-    /* [in] */ IBitmap* bmp);
+    /* [in] */ IBitmap* bmp)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationCopyToBitmap(mContext, alloc, bmp);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationSyncAll(
     /* [in] */ Int64 con,
     /* [in] */ Int64 alloc,
-    /* [in] */ Int32 src);
+    /* [in] */ Int32 src)
+{
+    Slogger::D(LOG_TAG, "nAllocationSyncAll, con(%p), a(%p), bits(0x%08x)",
+            (RsContext)con, (RsAllocation)a, bits);
+    rsAllocationSyncAll((RsContext)con, (RsAllocation)a, (RsAllocationUsageType)bits);
+}
 
 ECode RenderScript::NAllocationSyncAll(
     /* [in] */ Int64 alloc,
-    /* [in] */ Int32 src);
+    /* [in] */ Int32 src)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationSyncAll(mContext, alloc, src);
+    return NOERROR;
+}
 
-native Surface rsnAllocationGetSurface(
+AutoPtr<ISurface> RsnAllocationGetSurface(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 alloc);
+    /* [in] */ Int64 alloc)
+{
+    Slogger::D(LOG_TAG, "nAllocationGetSurface, con(%p), a(%p)", (RsContext)con, (RsAllocation)a);
 
-synchronized Surface nAllocationGetSurface(
-    /* [in] */ Int64 alloc);
+    android::IGraphicBufferProducer *v = (android::IGraphicBufferProducer *)rsAllocationGetSurface(
+            (RsContext)con, (RsAllocation)a);
+    android::sp<android::IGraphicBufferProducer> bp = v;
+    v->decStrong(NULL);
+
+    android::sp<android::Surface> surface(new android::Surface(bufferProducer, TRUE));
+    if (surface == NULL) {
+        return NULL;
+    }
+
+    AutoPtr<ISurface> surfaceObj;
+    CSurface::New((Int64)surface.get(), (ISurface**)&surfaceObj);
+    return surfaceObj;
+}
+
+ECode NAllocationGetSurface(
+    /* [in] */ Int64 alloc,
+    /* [out] */ ISurface** surface)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(surface)
+    *surface = NULL;
+    FAIL_RETURN(Validate())
+    *surface = RsnAllocationGetSurface(mContext, alloc);
+    REFCOUNT_ADD(*surface)
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationSetSurface(
     /* [in] */ Int64 con,
     /* [in] */ Int64 alloc,
-    /* [in] */ ISurface* sur);
+    /* [in] */ ISurface* sur)
+{
+    Slogger::("nAllocationSetSurface, con(%p), alloc(%p), surface(%p)",
+            (RsContext)con, (RsAllocation)alloc, (Surface *)sur);
+
+    android::sp<android::Surface> s;
+    if (sur != 0) {
+        Surface* surfaceObj = (Surface*)sur;
+        AutoLock lock(surfaceObj);
+        s = reinterpret_cast<android::Surface*>(surfaceObj->mNativeObject);
+    }
+
+    rsAllocationSetSurface((RsContext)con, (RsAllocation)alloc, static_cast<ANativeWindow *>(s.get()));
+}
 
 ECode RenderScript::NAllocationSetSurface(
     /* [in] */ Int64 alloc,
-    /* [in] */ ISurface* sur);
+    /* [in] */ ISurface* sur)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationSetSurface(mContext, alloc, sur);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationIoSend(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 alloc);
+    /* [in] */ Int64 alloc)
+{
+    Slogger::D(LOG_TAG, "nAllocationIoSend, con(%p), alloc(%p)", (RsContext)con, alloc);
+    rsAllocationIoSend((RsContext)con, (RsAllocation)alloc);
+}
 
 ECode RenderScript::NAllocationIoSend(
-    /* [in] */ Int64 alloc);
+    /* [in] */ Int64 alloc)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationIoSend(mContext, alloc);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationIoReceive(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 alloc);
+    /* [in] */ Int64 alloc)
+{
+    Slogger::D(LOG_TAG, "nAllocationIoReceive, con(%p), alloc(%p)", (RsContext)con, alloc);
+    rsAllocationIoReceive((RsContext)con, (RsAllocation)alloc);
+}
 
 ECode RenderScript::NAllocationIoReceive(
-    /* [in] */ Int64 alloc);
+    /* [in] */ Int64 alloc)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationIoReceive(mContext, alloc);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationGenerateMipmaps(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 alloc);
+    /* [in] */ Int64 alloc)
+{
+    Slogger::D(LOG_TAG, "nAllocationGenerateMipmaps, con(%p), a(%p)", (RsContext)con, (RsAllocation)alloc);
+    rsAllocationGenerateMipmaps((RsContext)con, (RsAllocation)alloc);
+}
 
 ECode RenderScript::NAllocationGenerateMipmaps(
-    /* [in] */ Int64 alloc);
+    /* [in] */ Int64 alloc)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationGenerateMipmaps(mContext, alloc);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationCopyFromBitmap(
     /* [in] */ Int64 con,
     /* [in] */ Int64 alloc,
-    /* [in] */ IBitmap* bmp);
+    /* [in] */ IBitmap* bmp)
+{
+    SkBitmap const * nativeBitmap = reinterpret_cast<SkBitmap const *>(((CBitmap*)bmp.Get())->mNativeBitmap);
+    const SkBitmap& bitmap(*nativeBitmap);
+    int w = bitmap.width();
+    int h = bitmap.height();
+
+    bitmap.lockPixels();
+    const void* ptr = bitmap.getPixels();
+    rsAllocation2DData((RsContext)con, (RsAllocation)alloc, 0, 0,
+            0, RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_X,
+            w, h, ptr, bitmap.getSize(), 0);
+    bitmap.unlockPixels();
+}
 
 ECode RenderScript::NAllocationCopyFromBitmap(
     /* [in] */ Int64 alloc,
-    /* [in] */ IBitmap* bmp);
+    /* [in] */ IBitmap* bmp)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationCopyFromBitmap(mContext, alloc, bmp);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationData1D(
     /* [in] */ Int64 con,
@@ -995,7 +1311,13 @@ void RenderScript::RsnAllocationData1D(
     /* [in] */ Int32 count,
     /* [in] */ IInterface* d,
     /* [in] */ Int32 sizeBytes,
-    /* [in] */ Int32 dt);
+    /* [in] */ Int32 dataType)
+{
+    RsAllocation *alloc = (RsAllocation *)_alloc;
+    Slogger::D(LOG_TAG, "nAllocation1DData, con(%p), adapter(%p), offset(%i), count(%i), sizeBytes(%i), dataType(%i)",
+            (RsContext)con, (RsAllocation)alloc, offset, count, sizeBytes, dataType);
+    PER_ARRAY_TYPE(NULL, rsAllocation1DData, TRUE, (RsContext)con, alloc, offset, lod, count, ptr, sizeBytes);
+}
 
 ECode RenderScript::NAllocationData1D(
     /* [in] */ Int64 id,
@@ -1004,7 +1326,13 @@ ECode RenderScript::NAllocationData1D(
     /* [in] */ Int32 count,
     /* [in] */ IInterface* d,
     /* [in] */ Int32 sizeBytes,
-    /* [in] */ ElementDataType dt);
+    /* [in] */ ElementDataType dt)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationData1D(mContext, id, off, mip, count, d, sizeBytes, dt.mID);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationElementData1D(
     /* [in] */ Int64 con,
@@ -1013,7 +1341,13 @@ void RenderScript::RsnAllocationElementData1D(
     /* [in] */ Int32 mip,
     /* [in] */ Int32 compIdx,
     /* [in] */ ArrayOf<Byte>* d,
-    /* [in] */ Int32 sizeBytes);
+    /* [in] */ Int32 sizeBytes)
+{
+    Int32 len = d->GetLength();
+    Slogger::D(LOG_TAG, "nAllocationElementData1D, con(%p), alloc(%p), offset(%i), comp(%i), len(%i), sizeBytes(%i)",
+            (RsContext)con, (RsAllocation)alloc, offset, compIdx, len, sizeBytes);
+    rsAllocation1DElementData((RsContext)con, (RsAllocation)alloc, offset, lod, d->GetPayload(), sizeBytes, compIdx);
+}
 
 ECode RenderScript::NAllocationElementData1D(
     /* [in] */ Int64 id,
@@ -1021,7 +1355,13 @@ ECode RenderScript::NAllocationElementData1D(
     /* [in] */ Int32 mip,
     /* [in] */ Int32 compIdx,
     /* [in] */ ArrayOf<Byte>* d,
-    /* [in] */ Int32 sizeBytes);
+    /* [in] */ Int32 sizeBytes)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationElementData1D(mContext, id, xoff, mip, compIdx, d, sizeBytes);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationData2D(
     /* [in] */ Int64 con,
@@ -1036,7 +1376,23 @@ void RenderScript::RsnAllocationData2D(
     /* [in] */ Int32 srcXoff,
     /* [in] */ Int32 srcYoff,
     /* [in] */ Int32 srcMip,
-    /* [in] */ Int32 srcFace);
+    /* [in] */ Int32 srcFace)
+{
+    Slogger::D(LOG_TAG, "nAllocation2DData_s, con(%p), dstAlloc(%p), dstXoff(%i), dstYoff(%i),"
+            " dstMip(%i), dstFace(%i), width(%i), height(%i),"
+            " srcAlloc(%p), srcXoff(%i), srcYoff(%i), srcMip(%i), srcFace(%i)",
+            (RsContext)con, (RsAllocation)dstAlloc, dstXoff, dstYoff, dstMip, dstFace,
+            width, height, (RsAllocation)srcAlloc, srcXoff, srcYoff, srcMip, srcFace);
+
+    rsAllocationCopy2DRange((RsContext)con,
+            (RsAllocation)dstAlloc,
+            dstXoff, dstYoff,
+            dstMip, dstFace,
+            width, height,
+            (RsAllocation)srcAlloc,
+            srcXoff, srcYoff,
+            srcMip, srcFace);
+}
 
 ECode RenderScript::NAllocationData2D(
     /* [in] */ Int64 dstAlloc,
@@ -1050,7 +1406,18 @@ ECode RenderScript::NAllocationData2D(
     /* [in] */ Int32 srcXoff,
     /* [in] */ Int32 srcYoff,
     /* [in] */ Int32 srcMip,
-    /* [in] */ Int32 srcFace);
+    /* [in] */ Int32 srcFace)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationData2D(mContext,
+            dstAlloc, dstXoff, dstYoff,
+            dstMip, dstFace,
+            width, height,
+            srcAlloc, srcXoff, srcYoff,
+            srcMip, srcFace);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationData2D(
     /* [in] */ Int64 con,
@@ -1061,9 +1428,16 @@ void RenderScript::RsnAllocationData2D(
     /* [in] */ Int32 face,
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
-    /* [in] */ IInterface* d,
+    /* [in] */ IInterface* data,
     /* [in] */ Int32 sizeBytes,
-    /* [in] */ Int32 dt);
+    /* [in] */ Int32 dataType)
+{
+    RsAllocation *alloc = (RsAllocation *)_alloc;
+    RsAllocationCubemapFace face = (RsAllocationCubemapFace)_face;
+    Slogger::D(LOG_TAG, "nAllocation2DData, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i) type(%i)",
+            (RsContext)con, alloc, xoff, yoff, w, h, sizeBytes, dataType);
+    PER_ARRAY_TYPE(NULL, rsAllocation2DData, TRUE, (RsContext)con, alloc, xoff, yoff, lod, face, w, h, ptr, sizeBytes, 0);
+}
 
 ECode RenderScript::NAllocationData2D(
     /* [in] */ Int64 id,
@@ -1075,7 +1449,13 @@ ECode RenderScript::NAllocationData2D(
     /* [in] */ Int32 h,
     /* [in] */ IInterface* d,
     /* [in] */ Int32 sizeBytes,
-    /* [in] */ ElementDataType dt);
+    /* [in] */ ElementDataType dt)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes, dt);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationData2D(
     /* [in] */ Int64 con,
@@ -1084,7 +1464,10 @@ void RenderScript::RsnAllocationData2D(
     /* [in] */ Int32 yoff,
     /* [in] */ Int32 mip,
     /* [in] */ Int32 face,
-    /* [in] */ IBitmap* b);
+    /* [in] */ IBitmap* b)
+{
+    assert(0);
+}
 
 ECode RenderScript::NAllocationData2D(
     /* [in] */ Int64 id,
@@ -1092,7 +1475,13 @@ ECode RenderScript::NAllocationData2D(
     /* [in] */ Int32 yoff,
     /* [in] */ Int32 mip,
     /* [in] */ Int32 face,
-    /* [in] */ IBitmap* b);
+    /* [in] */ IBitmap* b)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationData2D(mContext, id, xoff, yoff, mip, face, b);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationData3D(
     /* [in] */ Int64 con,
@@ -1108,7 +1497,21 @@ void RenderScript::RsnAllocationData3D(
     /* [in] */ Int32 srcXoff,
     /* [in] */ Int32 srcYoff,
     /* [in] */ Int32 srcZoff,
-    /* [in] */ Int32 srcMip);
+    /* [in] */ Int32 srcMip)
+{
+    Slogger::D(LOG_TAG, "nAllocationData3D_alloc, con(%p), dstAlloc(%p), dstXoff(%i), dstYoff(%i),"
+            " dstMip(%i), width(%i), height(%i),"
+            " srcAlloc(%p), srcXoff(%i), srcYoff(%i), srcMip(%i)",
+            (RsContext)con, (RsAllocation)dstAlloc, dstXoff, dstYoff, dstMip,
+            width, height, (RsAllocation)srcAlloc, srcXoff, srcYoff, srcMip);
+
+    rsAllocationCopy3DRange((RsContext)con,
+            (RsAllocation)dstAlloc,
+            dstXoff, dstYoff, dstZoff, dstMip,
+            width, height, depth,
+            (RsAllocation)srcAlloc,
+            srcXoff, srcYoff, srcZoff, srcMip);
+}
 
 ECode RenderScript::NAllocationData3D(
     /* [in] */ Int64 dstAlloc,
@@ -1123,7 +1526,16 @@ ECode RenderScript::NAllocationData3D(
     /* [in] */ Int32 srcXoff,
     /* [in] */ Int32 srcYoff,
     /* [in] */ Int32 srcZoff,
-    /* [in] */ Int32 srcMip);
+    /* [in] */ Int32 srcMip)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationData3D(mContext,
+            dstAlloc, dstXoff, dstYoff, dstZoff,
+            dstMip, width, height, depth,
+            srcAlloc, srcXoff, srcYoff, srcZoff, srcMip);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationData3D(
     /* [in] */ Int64 con,
@@ -1135,9 +1547,15 @@ void RenderScript::RsnAllocationData3D(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 depth,
-    /* [in] */ IInterface* d,
+    /* [in] */ IInterface* data,
     /* [in] */ Int32 sizeBytes,
-    /* [in] */ Int32 dt);
+    /* [in] */ Int32 dataType)
+{
+    RsAllocation *alloc = (RsAllocation *)_alloc;
+    Slogger::D(LOG_TAG, "nAllocation3DData, con(%p), alloc(%p), xoff(%i), yoff(%i), zoff(%i), lod(%i), w(%i), h(%i), d(%i), sizeBytes(%i)",
+            (RsContext)con, (RsAllocation)alloc, xoff, yoff, zoff, lod, w, h, d, sizeBytes);
+    PER_ARRAY_TYPE(NULL, rsAllocation3DData, TRUE, (RsContext)con, alloc, xoff, yoff, zoff, lod, w, h, d, ptr, sizeBytes, 0);
+}
 
 ECode RenderScript::NAllocationData3D(
     /* [in] */ Int64 id,
@@ -1148,20 +1566,37 @@ ECode RenderScript::NAllocationData3D(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 depth,
-    /* [in] */ IInterface* d,
+    /* [in] */ IInterface* data,
     /* [in] */ Int32 sizeBytes,
-    /* [in] */ ElementDataType dt);
+    /* [in] */ ElementDataType dt)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes, dt);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationRead(
     /* [in] */ Int64 con,
     /* [in] */ Int64 id,
-    /* [in] */ IInterface* d,
-    /* [in] */ Int32 dt);
+    /* [in] */ IInterface* data,
+    /* [in] */ Int32 dataType)
+{
+    RsAllocation *alloc = (RsAllocation *)_alloc;
+    Slogger::D(LOG_TAG, "nAllocationRead, con(%p), alloc(%p)", (RsContext)con, (RsAllocation)alloc);
+    PER_ARRAY_TYPE(0, rsAllocationRead, FALSE, (RsContext)con, alloc, ptr, len * typeBytes);
+}
 
 ECode RenderScript::NAllocationRead(
     /* [in] */ Int64 id,
     /* [in] */ IInterface* d,
-    /* [in] */ ElementDataType dt);
+    /* [in] */ ElementDataType dt)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationRead(mContext, id, d, dt);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationRead1D(
     /* [in] */ Int64 con,
@@ -1169,9 +1604,15 @@ void RenderScript::RsnAllocationRead1D(
     /* [in] */ Int32 off,
     /* [in] */ Int32 mip,
     /* [in] */ Int32 count,
-    /* [in] */ IInterface* d,
+    /* [in] */ IInterface* data,
     /* [in] */ Int32 sizeBytes,
-    /* [in] */ Int32 dt);
+    /* [in] */ Int32 dataType)
+{
+    RsAllocation *alloc = (RsAllocation *)_alloc;
+    Slogger::D(LOG_TAG, "nAllocation1DRead, con(%p), adapter(%p), offset(%i), count(%i), sizeBytes(%i), dataType(%i)",
+            (RsContext)con, alloc, offset, count, sizeBytes, dataType);
+    PER_ARRAY_TYPE(0, rsAllocation1DRead, FALSE, (RsContext)con, alloc, offset, lod, count, ptr, sizeBytes);
+}
 
 ECode RenderScript::NAllocationRead1D(
     /* [in] */ Int64 id,
@@ -1180,7 +1621,13 @@ ECode RenderScript::NAllocationRead1D(
     /* [in] */ Int32 count,
     /* [in] */ IInterface* d,
     /* [in] */ Int32 sizeBytes,
-    /* [in] */ ElementDataType dt);
+    /* [in] */ ElementDataType dt)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationRead1D(mContext, id, off, mip, count, d, sizeBytes, dt);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationRead2D(
     /* [in] */ Int64 con,
@@ -1191,9 +1638,16 @@ void RenderScript::RsnAllocationRead2D(
     /* [in] */ Int32 face,
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
-    /* [in] */ IInterface* d,
+    /* [in] */ IInterface* data,
     /* [in] */ Int32 sizeBytes,
-    /* [in] */ Int32 dt);
+    /* [in] */ Int32 dataType)
+{
+    RsAllocation *alloc = (RsAllocation *)_alloc;
+    RsAllocationCubemapFace face = (RsAllocationCubemapFace)_face;
+    Slogger::D(LOG_TAG, "nAllocation2DRead, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i) type(%i)",
+            (RsContext)con, alloc, xoff, yoff, w, h, sizeBytes, dataType);
+    PER_ARRAY_TYPE(0, rsAllocation2DRead, FALSE, (RsContext)con, alloc, xoff, yoff, lod, face, w, h, ptr, sizeBytes, 0);
+}
 
 ECode RenderScript::NAllocationRead2D(
     /* [in] */ Int64 id,
@@ -1205,169 +1659,392 @@ ECode RenderScript::NAllocationRead2D(
     /* [in] */ Int32 h,
     /* [in] */ IInterface* d,
     /* [in] */ Int32 sizeBytes,
-    /* [in] */ ElementDataType dt);
+    /* [in] */ ElementDataType dt)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationRead2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes, dt);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnAllocationGetType(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id);
+    /* [in] */ Int64 id)
+{
+    Slogger::D(LOG_TAG, "nAllocationGetType, con(%p), a(%p)", (RsContext)con, (RsAllocation)a);
+    return (Int64)(uintptr_t) rsaAllocationGetType((RsContext)con, (RsAllocation)a);
+}
 
 ECode RenderScript::NAllocationGetType(
     /* [in] */ Int64 id,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnAllocationGetType(mContext, id);
+    return NOERROR;
+}
 
 void RenderScript::RsnAllocationResize1D(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
-    /* [in] */ Int32 dimX);
+    /* [in] */ Int64 alloc,
+    /* [in] */ Int32 dimX)
+{
+    Slogger::D(LOG_TAG, "nAllocationResize1D, con(%p), alloc(%p), sizeX(%i)", (RsContext)con, (RsAllocation)alloc, dimX);
+    rsAllocationResize1D((RsContext)con, (RsAllocation)alloc, dimX);
+}
 
 ECode RenderScript::NAllocationResize1D(
     /* [in] */ Int64 id,
-    /* [in] */ Int32 dimX);
+    /* [in] */ Int32 dimX)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnAllocationResize1D(mContext, id, dimX);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnFileA3DCreateFromAssetStream(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 assetStream);
+    /* [in] */ Int64 native_asset)
+{
+    android::Asset* asset = reinterpret_cast<android::Asset*>(native_asset);
+    ALOGV("______nFileA3D %p", asset);
+
+    Int64 id = (Int64)(uintptr_t)rsaFileA3DCreateFromMemory((RsContext)con, asset->getBuffer(false), asset->getLength());
+    return id;
+}
 
 ECode RenderScript::NFileA3DCreateFromAssetStream(
     /* [in] */ Int64 assetStream,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnFileA3DCreateFromAssetStream(mContext, assetStream);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnFileA3DCreateFromFile(
     /* [in] */ Int64 con,
-    /* [in] */ const String& path);
+    /* [in] */ const String& fileName)
+{
+    Int64 id = (Int64)(uintptr_t)rsaFileA3DCreateFromFile((RsContext)con, fileName.stirng());
+    return id;
+}
 
 ECode RenderScript::NFileA3DCreateFromFile(
     /* [in] */ const String& path,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnFileA3DCreateFromFile(mContext, path);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnFileA3DCreateFromAsset(
     /* [in] */ Int64 con,
     /* [in] */ IAssetManager* mgr,
-    /* [in] */ const String& path);
+    /* [in] */ const String& path)
+{
+    android::AssetManager* mgr = (android::AssetManager*)((CAssetManager*)mgr)->Ni();
+    if (mgr == NULL) {
+        return 0;
+    }
+
+    android::Asset* asset = mgr->open(path.string(), android::Asset::ACCESS_BUFFER);
+    if (asset == NULL) {
+        return 0;
+    }
+
+    Int64 id = (Int64)(uintptr_t)rsaFileA3DCreateFromAsset((RsContext)con, asset);
+    return id;
+}
 
 ECode RenderScript::NFileA3DCreateFromAsset(
     /* [in] */ IAssetManager* mgr,
     /* [in] */ const String& path,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnFileA3DCreateFromAsset(mContext, mgr, path);
+    return NOERROR;
+}
 
-CARAPI_(Int32) RsnFileA3DGetNumIndexEntries(
+Int32 RenderScript::RsnFileA3DGetNumIndexEntries(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 fileA3D);
+    /* [in] */ Int64 fileA3D)
+{
+    int32_t numEntries = 0;
+    rsaFileA3DGetNumIndexEntries((RsContext)con, &numEntries, (RsFile)fileA3D);
+    return (Int32)numEntries;
+}
 
 ECode RenderScript::NFileA3DGetNumIndexEntries(
     /* [in] */ Int64 fileA3D,
-    /* [out] */ Int32* result);
+    /* [out] */ Int32* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnFileA3DGetNumIndexEntries(mContext, fileA3D);
+    return NOERROR;
+}
 
 void RenderScript::RsnFileA3DGetIndexEntries(
     /* [in] */ Int64 con,
     /* [in] */ Int64 fileA3D,
     /* [in] */ Int32 numEntries,
     /* [in] */ ArrayOf<Int32>* IDs,
-    /* [in] */ ArrayOf<String>* names);
+    /* [in] */ ArrayOf<String>* names)
+{
+    ALOGV("______nFileA3D %p", (RsFile) fileA3D);
+    RsFileIndexEntry *fileEntries = (RsFileIndexEntry*)malloc((uint32_t)numEntries * sizeof(RsFileIndexEntry));
+
+    rsaFileA3DGetIndexEntries((RsContext)con, fileEntries, (uint32_t)numEntries, (RsFile)fileA3D);
+
+    for(Int32 i = 0; i < numEntries; i ++) {
+        (*names)[i] = String(fileEntries[i].objectName);
+        (*IDs)[i] = (const Int32*)&fileEntries[i].classID;
+    }
+
+    free(fileEntries);
+}
 
 ECode RenderScript::NFileA3DGetIndexEntries(
     /* [in] */ Int64 fileA3D,
     /* [in] */ Int32 numEntries,
     /* [in] */ ArrayOf<Int32>* IDs,
-    /* [in] */ ArrayOf<String>* names);
+    /* [in] */ ArrayOf<String>* names)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnFileA3DGetIndexEntries(mContext, fileA3D, numEntries, IDs, names);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnFileA3DGetEntryByIndex(
     /* [in] */ Int64 con,
     /* [in] */ Int64 fileA3D,
-    /* [in] */ Int32 index);
+    /* [in] */ Int32 index)
+{
+    ALOGV("______nFileA3D %p", (RsFile) fileA3D);
+    Int64 id = (Int64)(uintptr_t)rsaFileA3DGetEntryByIndex((RsContext)con, (uint32_t)index, (RsFile)fileA3D);
+    return id;
+}
 
 ECode RenderScript::NFileA3DGetEntryByIndex(
     /* [in] */ Int64 fileA3D,
     /* [in] */ Int32 index,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnFileA3DGetEntryByIndex(mContext, fileA3D, index);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnFontCreateFromFile(
     /* [in] */ Int64 con,
     /* [in] */ const String& fileName,
     /* [in] */ Float size,
-    /* [in] */ Int32 dpi);
+    /* [in] */ Int32 dpi)
+{
+    Int64 id = (Int64)(uintptr_t)rsFontCreateFromFile((RsContext)con,
+            fileName.string(), fileName.GetLength(),
+            fontSize, dpi);
+    return id;
+}
 
 ECode RenderScript::NFontCreateFromFile(
     /* [in] */ const String& fileName,
     /* [in] */ Float size,
     /* [in] */ Int32 dpi,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnFontCreateFromFile(mContext, fileName, size, dpi);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnFontCreateFromAssetStream(
     /* [in] */ Int64 con,
     /* [in] */ const String& name,
     /* [in] */ Float size,
     /* [in] */ Int32 dpi,
-    /* [in] */ Int64 assetStream);
+    /* [in] */ Int64 native_asset)
+{
+    android::Asset* asset = reinterpret_cast<android::Asset*>(native_asset);
+    Int64 id = (Int64)(uintptr_t)rsFontCreateFromMemory((RsContext)con,
+            name.string(), name.GetLength(),
+            fontSize, dpi,
+            asset->getBuffer(false), asset->getLength());
+    return id;
+}
 
 ECode RenderScript::NFontCreateFromAssetStream(
     /* [in] */ const String& name,
     /* [in] */ Float size,
     /* [in] */ Int32 dpi,
     /* [in] */ Int64 assetStream,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnFontCreateFromAssetStream(mContext, name, size, dpi, assetStream);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnFontCreateFromAsset(
     /* [in] */ Int64 con,
     /* [in] */ IAssetManager* mgr,
     /* [in] */ const String& path,
     /* [in] */ Float size,
-    /* [in] */ Int32 dpi);
+    /* [in] */ Int32 dpi)
+{
+    android::AssetManager* mgr = (android::AssetManager*)((CAssetManager*)mgr)->Ni();
+    if (mgr == NULL) {
+        return 0;
+    }
+
+    android::Asset* asset = mgr->open(path.string(), android::Asset::ACCESS_BUFFER);
+    if (asset == NULL) {
+        return 0;
+    }
+
+    Int64 id = (Int64)(uintptr_t)rsFontCreateFromMemory((RsContext)con,
+            str.string(), str.GetLength(),
+            fontSize, dpi,
+            asset->getBuffer(false), asset->getLength());
+    delete asset;
+    return id;
+}
 
 ECode RenderScript::NFontCreateFromAsset(
     /* [in] */ IAssetManager* mgr,
     /* [in] */ const String& path,
     /* [in] */ Float size,
     /* [in] */ Int32 dpi,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnFontCreateFromAsset(mContext, mgr, path, size, dpi);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptBindAllocation(
     /* [in] */ Int64 con,
     /* [in] */ Int64 script,
     /* [in] */ Int64 alloc,
-    /* [in] */ Int32 slot);
+    /* [in] */ Int32 slot)
+{
+    Slogger::D(LOG_TAG, "nScriptBindAllocation, con(%p), script(%p), alloc(%p), slot(%i)",
+            (RsContext)con, (RsScript)script, (RsAllocation)alloc, slot);
+    rsScriptBindAllocation((RsContext)con, (RsScript)script, (RsAllocation)alloc, slot);
+}
 
 ECode RenderScript::NScriptBindAllocation(
     /* [in] */ Int64 script,
     /* [in] */ Int64 alloc,
-    /* [in] */ Int32 slot);
+    /* [in] */ Int32 slot)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptBindAllocation(mContext, script, alloc, slot);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptSetTimeZone(
     /* [in] */ Int64 con,
     /* [in] */ Int64 script,
-    /* [in] */ ArrayOf<Byte>* timeZone);
+    /* [in] */ ArrayOf<Byte>* timeZone)
+{
+    Slogger::D(LOG_TAG, "nScriptCSetTimeZone, con(%p), s(%p)", (RsContext)con, (void *)script);
+
+    Int32 length = timeZone->GetLength();
+    rsScriptSetTimeZone((RsContext)con, (RsScript)script, (const char *)timeZone->GetPayload(), length);
+}
 
 ECode RenderScript::NScriptSetTimeZone(
     /* [in] */ Int64 script,
-    /* [in] */ ArrayOf<Byte>* timeZone);
+    /* [in] */ ArrayOf<Byte>* timeZone)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptSetTimeZone(mContext, script, timeZone);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptInvoke(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
-    /* [in] */ Int32 slot);
+    /* [in] */ Int64 obj,
+    /* [in] */ Int32 slot)
+{
+    Slogger::D(LOG_TAG, "nScriptInvoke, con(%p), script(%p)", (RsContext)con, (void *)obj);
+    rsScriptInvoke((RsContext)con, (RsScript)obj, slot);
+}
 
 ECode RenderScript::NScriptInvoke(
     /* [in] */ Int64 id,
-    /* [in] */ Int32 slot);
+    /* [in] */ Int32 slot)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptInvoke(mContext, id, slot);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptForEach(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
     /* [in] */ Int64 ain,
     /* [in] */ Int64 aout,
-    /* [in] */ ArrayOf<Byte>* params);
+    /* [in] */ ArrayOf<Byte>* params)
+{
+    Slogger::D(LOG_TAG, "nScriptForEach, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
+    Int32 len = params->GetLength();
+    rsScriptForEach((RsContext)con, (RsScript)script, slot, (RsAllocation)ain, (RsAllocation)aout,
+            params->GetPayload(), len, NULL, 0);
+}
 
 void RenderScript::RsnScriptForEach(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
     /* [in] */ Int64 ain,
-    /* [in] */ Int64 aout);
+    /* [in] */ Int64 aout)
+{
+    Slogger::D(LOG_TAG, "nScriptForEach, con(%p), s(%p), slot(%i)",
+            (RsContext)con, (void *)script, slot);
+    rsScriptForEach((RsContext)con, (RsScript)script, slot, (RsAllocation)ain,
+            (RsAllocation)aout, NULL, 0, NULL, 0);
+}
 
 void RenderScript::RsnScriptForEachClipped(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
     /* [in] */ Int64 ain,
     /* [in] */ Int64 aout,
@@ -1377,11 +2054,28 @@ void RenderScript::RsnScriptForEachClipped(
     /* [in] */ Int32 ystart,
     /* [in] */ Int32 yend,
     /* [in] */ Int32 zstart,
-    /* [in] */ Int32 zend);
+    /* [in] */ Int32 zend)
+{
+    Slogger::D(LOG_TAG, "nScriptForEachClipped, con(%p), s(%p), slot(%i)",
+            (RsContext)con, (void *)script, slot);
+    Int32 len = params->GetLength();
+    RsScriptCall sc;
+    sc.xStart = xstart;
+    sc.xEnd = xend;
+    sc.yStart = ystart;
+    sc.yEnd = yend;
+    sc.zStart = zstart;
+    sc.zEnd = zend;
+    sc.strategy = RS_FOR_EACH_STRATEGY_DONT_CARE;
+    sc.arrayStart = 0;
+    sc.arrayEnd = 0;
+    rsScriptForEach((RsContext)con, (RsScript)script, slot, (RsAllocation)ain,
+            (RsAllocation)aout, params->GetPayload(), len, &sc, sizeof(sc));
+}
 
 void RenderScript::RsnScriptForEachClipped(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
     /* [in] */ Int64 ain,
     /* [in] */ Int64 aout,
@@ -1390,14 +2084,40 @@ void RenderScript::RsnScriptForEachClipped(
     /* [in] */ Int32 ystart,
     /* [in] */ Int32 yend,
     /* [in] */ Int32 zstart,
-    /* [in] */ Int32 zend);
+    /* [in] */ Int32 zend)
+{
+    Slogger::D(LOG_TAG, "nScriptForEachClipped, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
+    RsScriptCall sc;
+    sc.xStart = xstart;
+    sc.xEnd = xend;
+    sc.yStart = ystart;
+    sc.yEnd = yend;
+    sc.zStart = zstart;
+    sc.zEnd = zend;
+    sc.strategy = RS_FOR_EACH_STRATEGY_DONT_CARE;
+    sc.arrayStart = 0;
+    sc.arrayEnd = 0;
+    rsScriptForEach((RsContext)con, (RsScript)script, slot, (RsAllocation)ain,
+            (RsAllocation)aout, NULL, 0, &sc, sizeof(sc));
+}
 
 ECode RenderScript::NScriptForEach(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
     /* [in] */ Int64 ain,
     /* [in] */ Int64 aout,
-    /* [in] */ ArrayOf<Byte>* params);
+    /* [in] */ ArrayOf<Byte>* params)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    if (params == NULL) {
+        RsnScriptForEach(mContext, id, slot, ain, aout);
+    }
+    else {
+        RsnScriptForEach(mContext, id, slot, ain, aout, params);
+    }
+    return NOERROR;
+}
 
 ECode RenderScript::NScriptForEachClipped(
     /* [in] */ Int64 id,
@@ -1410,17 +2130,22 @@ ECode RenderScript::NScriptForEachClipped(
     /* [in] */ Int32 ystart,
     /* [in] */ Int32 yend,
     /* [in] */ Int32 zstart,
-    /* [in] */ Int32 zend);
+    /* [in] */ Int32 zend)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    if (params == NULL) {
+        RsnScriptForEachClipped(mContext, id, slot, ain, aout, xstart, xend, ystart, yend, zstart, zend);
+    }
+    else {
+        RsnScriptForEachClipped(mContext, id, slot, ain, aout, params, xstart, xend, ystart, yend, zstart, zend);
+    }
+    return NOERROR;
+}
 
-/**
- * Multi-input code.
- *
- */
-
-// @hide
 void RenderScript::RsnScriptForEachMultiClipped(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
     /* [in] */ ArrayOf<Int64>* ains,
     /* [in] */ Int64 aout,
@@ -1430,12 +2155,52 @@ void RenderScript::RsnScriptForEachMultiClipped(
     /* [in] */ Int32 ystart,
     /* [in] */ Int32 yend,
     /* [in] */ Int32 zstart,
-    /* [in] */ Int32 zend);
+    /* [in] */ Int32 zend)
+{
+    Slogger::D("nScriptForEachMultiClippedV, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
 
-// @hide
+    Int32 in_len = ains->GetLength();
+    Int64* in_ptr = ains->GetPayload();
+
+    RsAllocation *in_allocs = NULL;
+
+    if (sizeof(RsAllocation) == sizeof(jlong)) {
+      in_allocs = (RsAllocation*)in_ptr;
+
+    }
+    else {
+      // Convert from 64-bit jlong types to the native pointer type.
+
+      in_allocs = new RsAllocation[in_len];
+
+      for (int index = in_len; --index >= 0;) {
+        in_allocs[index] = (RsAllocation)in_ptr[index];
+      }
+    }
+
+    Int32 param_len = params->GetLength();
+
+    RsScriptCall sc;
+    sc.xStart = xstart;
+    sc.xEnd = xend;
+    sc.yStart = ystart;
+    sc.yEnd = yend;
+    sc.zStart = zstart;
+    sc.zEnd = zend;
+    sc.strategy = RS_FOR_EACH_STRATEGY_DONT_CARE;
+    sc.arrayStart = 0;
+    sc.arrayEnd = 0;
+    rsScriptForEachMulti((RsContext)con, (RsScript)script, slot,
+            in_allocs, in_len, (RsAllocation)aout, params->GetPayload(), param_len, &sc, sizeof(sc));
+
+    if (sizeof(RsAllocation) != sizeof(jlong)) {
+      delete[] in_allocs;
+    }
+}
+
 void RenderScript::RsnScriptForEachMultiClipped(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
     /* [in] */ ArrayOf<Int64>* ains,
     /* [in] */ Int64 aout,
@@ -1444,9 +2209,48 @@ void RenderScript::RsnScriptForEachMultiClipped(
     /* [in] */ Int32 ystart,
     /* [in] */ Int32 yend,
     /* [in] */ Int32 zstart,
-    /* [in] */ Int32 zend);
+    /* [in] */ Int32 zend)
+{
+    Slogger::D(LOG_TAG, "nScriptForEachMultiClipped, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
 
-// @hide
+    Int32 in_len = ains->GetLength();
+    Int64* in_ptr = ains->GetPayload();
+
+    RsAllocation *in_allocs = NULL;
+
+    if (sizeof(RsAllocation) == sizeof(jlong)) {
+      in_allocs = (RsAllocation*)ains->GetPayload();
+
+    }
+    else {
+      // Convert from 64-bit jlong types to the native pointer type.
+
+      in_allocs = new RsAllocation[in_len];
+
+      for (int index = in_len; --index >= 0;) {
+        in_allocs[index] = (RsAllocation)in_ptr[index];
+      }
+    }
+
+    RsScriptCall sc;
+    sc.xStart = xstart;
+    sc.xEnd = xend;
+    sc.yStart = ystart;
+    sc.yEnd = yend;
+    sc.zStart = zstart;
+    sc.zEnd = zend;
+    sc.strategy = RS_FOR_EACH_STRATEGY_DONT_CARE;
+    sc.arrayStart = 0;
+    sc.arrayEnd = 0;
+
+    rsScriptForEachMulti((RsContext)con, (RsScript)script, slot, in_allocs, in_len,
+            (RsAllocation)aout, NULL, 0, &sc, sizeof(sc));
+
+    if (sizeof(RsAllocation) != sizeof(jlong)) {
+      delete[] in_allocs;
+    }
+}
+
 ECode RenderScript::NScriptForEachMultiClipped(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
@@ -1458,196 +2262,437 @@ ECode RenderScript::NScriptForEachMultiClipped(
     /* [in] */ Int32 ystart,
     /* [in] */ Int32 yend,
     /* [in] */ Int32 zstart,
-    /* [in] */ Int32 zend);
+    /* [in] */ Int32 zend)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    if (params == NULL) {
+        RsnScriptForEachMultiClipped(mContext, id, slot, ains, aout, xstart, xend, ystart, yend, zstart, zend);
+    }
+    else {
+        RsnScriptForEachMultiClipped(mContext, id, slot, ains, aout, params, xstart, xend, ystart, yend, zstart, zend);
+    }
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptInvokeV(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
-    /* [in] */ ArrayOf<Byte>* params);
+    /* [in] */ ArrayOf<Byte>* data)
+{
+    Slogger::D(LOG_TAG, "nScriptInvokeV, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
+    Int32 len = data->GetLength();
+    Byte *ptr = data->GetPayload();
+    rsScriptInvokeV((RsContext)con, (RsScript)script, slot, ptr, len);
+}
 
 ECode RenderScript::NScriptInvokeV(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
-    /* [in] */ ArrayOf<Byte>* params);
+    /* [in] */ ArrayOf<Byte>* params)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptInvokeV(mContext, id, slot, params);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptSetVarI(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
-    /* [in] */ Int32 val);
+    /* [in] */ Int32 val)
+{
+    Slogger::D(LOG_TAG, "nScriptSetVarI, con(%p), s(%p), slot(%i), val(%i)", (RsContext)con, (void *)script, slot, val);
+    rsScriptSetVarI((RsContext)con, (RsScript)script, slot, val);
+}
 
 ECode RenderScript::NScriptSetVarI(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
-    /* [in] */ Int32 val);
+    /* [in] */ Int32 val)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptSetVarI(mContext, id, slot, val);
+    return NOERROR;
+}
 
-CARAPI_(Int32) RsnScriptGetVarI(
+Int32 RenderScript::RsnScriptGetVarI(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
-    /* [in] */ Int32 slot);
+    /* [in] */ Int64 script,
+    /* [in] */ Int32 slot)
+{
+    Slogger::D(LOG_TAG, "nScriptGetVarI, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
+    int value = 0;
+    rsScriptGetVarV((RsContext)con, (RsScript)script, slot, &value, sizeof(value));
+    return value;
+}
 
 ECode RenderScript::NScriptGetVarI(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
-    /* [out] */ Int32* result);
+    /* [out] */ Int32* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnScriptGetVarI(mContext, id, slot);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptSetVarJ(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
-    /* [in] */ Int64 val);
+    /* [in] */ Int64 val)
+{
+    Slogger::D(LOG_TAG, "nScriptSetVarJ, con(%p), s(%p), slot(%i), val(%lli)",
+            (RsContext)con, (void *)script, slot, val);
+    rsScriptSetVarJ((RsContext)con, (RsScript)script, slot, val);
+}
 
 ECode RenderScript::NScriptSetVarJ(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
-    /* [in] */ Int64 val);
+    /* [in] */ Int64 val)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptSetVarJ(mContext, id, slot, val);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnScriptGetVarJ(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
-    /* [in] */ Int32 slot);
+    /* [in] */ Int64 script,
+    /* [in] */ Int32 slot)
+{
+    Slogger::D(LOG_TAG, "nScriptGetVarJ, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
+    Int64 value = 0;
+    rsScriptGetVarV((RsContext)con, (RsScript)script, slot, &value, sizeof(value));
+    return value;
+}
 
 ECode RenderScript::NScriptGetVarJ(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnScriptGetVarJ(mContext, id, slot);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptSetVarF(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
-    /* [in] */ Float val);
+    /* [in] */ Float val)
+{
+    Slogger::D(LOG_TAG, "nScriptSetVarF, con(%p), s(%p), slot(%i), val(%f)",
+            (RsContext)con, (void *)script, slot, val);
+    rsScriptSetVarF((RsContext)con, (RsScript)script, slot, val);
+}
 
 ECode RenderScript::NScriptSetVarF(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
-    /* [in] */ Float val);
+    /* [in] */ Float val)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptSetVarF(mContext, id, slot, val);
+    return NOERROR;
+}
 
-CARAPI_(Float) RsnScriptGetVarF(
+Float RenderScript::RsnScriptGetVarF(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
-    /* [in] */ Int32 slot);
+    /* [in] */ Int64 script,
+    /* [in] */ Int32 slot)
+{
+    Slogger::D(LOG_TAG, "nScriptGetVarF, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
+    Float value = 0;
+    rsScriptGetVarV((RsContext)con, (RsScript)script, slot, &value, sizeof(value));
+    return value;
+}
 
 ECode RenderScript::NScriptGetVarF(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
-    /* [out] */ Float* result);
+    /* [out] */ Float* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnScriptGetVarF(mContext, id, slot);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptSetVarD(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
-    /* [in] */ Double val);
+    /* [in] */ Double val)
+{
+    Slogger::D(LOG_TAG, "nScriptSetVarD, con(%p), s(%p), slot(%i), val(%lf)", (RsContext)con, (void *)script, slot, val);
+    rsScriptSetVarD((RsContext)con, (RsScript)script, slot, val);
+}
 
 ECode RenderScript::NScriptSetVarD(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
-    /* [in] */ Double val);
+    /* [in] */ Double val)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptSetVarD(mContext, id, slot, val);
+    return NOERROR;
+}
 
-CARAPI_(Double) RsnScriptGetVarD(
+Double RenderScript::RsnScriptGetVarD(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
-    /* [in] */ Int32 slot);
+    /* [in] */ Int64 script,
+    /* [in] */ Int32 slot)
+{
+    Slogger::D(LOG_TAG, "nScriptGetVarD, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
+    Double value = 0;
+    rsScriptGetVarV((RsContext)con, (RsScript)script, slot, &value, sizeof(value));
+    return value;
+}
 
 ECode RenderScript::NScriptGetVarD(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
-    /* [out] */ Double* result);
+    /* [out] */ Double* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnScriptGetVarD(mContext, id, slot);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptSetVarV(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
-    /* [in] */ ArrayOf<Byte>* val);
+    /* [in] */ ArrayOf<Byte>* val)
+{
+    Slogger::D(LOG_TAG, "nScriptSetVarV, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
+    Int32 len = val->GetLength();
+    rsScriptSetVarV((RsContext)con, (RsScript)script, slot, val->GetPayload(), len);
+}
 
 ECode RenderScript::NScriptSetVarV(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
-    /* [in] */ ArrayOf<Byte>* val);
+    /* [in] */ ArrayOf<Byte>* val)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptSetVarV(mContext, id, slot, val);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptGetVarV(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
-    /* [in] */ ArrayOf<Byte>* val);
+    /* [in] */ ArrayOf<Byte>* val)
+{
+    Slogger::D(LOG_TAG, "nScriptSetVarV, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
+    Int32 len = val->GetLength();
+    rsScriptGetVarV((RsContext)con, (RsScript)script, slot, val->GetPayload(), len);
+}
 
 ECode RenderScript::NScriptGetVarV(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
-    /* [in] */ ArrayOf<Byte>* val);
+    /* [in] */ ArrayOf<Byte>* val)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptGetVarV(mContext, id, slot, val);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptSetVarVE(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
-    /* [in] */ ArrayOf<Byte>* val,
+    /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int64 e,
-    /* [in] */ ArrayOf<Int32>* dims);
+    /* [in] */ ArrayOf<Int32>* dims)
+{
+    Slogger::D(LOG_TAG, "nScriptSetVarVE, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
+    Int32 len = data->GetLength();
+    Int32 dimsLen = dims->GetLength() * sizeof(int);
+    rsScriptSetVarVE((RsContext)con, (RsScript)script, slot, data->GetPayload(), len, (RsElement)elem,
+            (const uint32_t*)dims->GetPayload(), dimsLen);
+}
 
 ECode RenderScript::NScriptSetVarVE(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
     /* [in] */ ArrayOf<Byte>* val,
     /* [in] */ Int64 e,
-    /* [in] */ ArrayOf<Int32>* dims);
+    /* [in] */ ArrayOf<Int32>* dims)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptSetVarVE(mContext, id, slot, val, e, dims);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptSetVarObj(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 script,
     /* [in] */ Int32 slot,
-    /* [in] */ Int64 val);
+    /* [in] */ Int64 val)
+{
+    Slogger::D(LOG_TAG, "nScriptSetVarObj, con(%p), s(%p), slot(%i), val(%i)", (RsContext)con, (void *)script, slot, val);
+    rsScriptSetVarObj((RsContext)con, (RsScript)script, slot, (RsObjectBase)val);
+}
 
 ECode RenderScript::NScriptSetVarObj(
     /* [in] */ Int64 id,
     /* [in] */ Int32 slot,
-    /* [in] */ Int64 val);
+    /* [in] */ Int64 val)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptSetVarObj(mContext, id, slot, val);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnScriptCCreate(
     /* [in] */ Int64 con,
     /* [in] */ const String& resName,
     /* [in] */ const String& cacheDir,
-    /* [in] */ ArrayOf<Byte>* script,
-    /* [in] */ Int32 length);
+    /* [in] */ ArrayOf<Byte>* scriptRef,
+    /* [in] */ Int32 length)
+{
+    Slogger::D(LOG_TAG, "nScriptCCreate, con(%p)", (RsContext)con);
+
+    Int64 ret = 0;
+    Byte* script_ptr = NULL;
+    Int32 _exception = 0;
+    Int32 remaining;
+    if (!scriptRef) {
+        _exception = 1;
+        //jniThrowException(_env, "java/lang/IllegalArgumentException", "script == null");
+        return (Int64)(uintptr_t)ret;
+    }
+    if (length < 0) {
+        _exception = 1;
+        //jniThrowException(_env, "java/lang/IllegalArgumentException", "length < 0");
+        return (Int64)(uintptr_t)ret;
+    }
+    remaining = scriptRef->GetLength();
+    if (remaining < length) {
+        _exception = 1;
+        //jniThrowException(_env, "java/lang/IllegalArgumentException",
+        //        "length > script.length - offset");
+        return (Int64)(uintptr_t)ret;
+    }
+    script_ptr = scriptRef->GetPayload();
+
+    //rsScriptCSetText((RsContext)con, (const char *)script_ptr, length);
+
+    ret = (Int64)(uintptr_t)rsScriptCCreate((RsContext)con,
+            resName.string(), resName.GetLength(),
+            cacheDir.string(), cacheDir.GetLength(),
+            (const char *)script_ptr, length);
+}
 
 ECode RenderScript::NScriptCCreate(
     /* [in] */ const String& resName,
     /* [in] */ const String& cacheDir,
     /* [in] */ ArrayOf<Byte>* script,
     /* [in] */ Int32 length,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptCCreate(mContext, resName, cacheDir, script, length);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnScriptIntrinsicCreate(
     /* [in] */ Int64 con,
     /* [in] */ Int32 id,
-    /* [in] */ Int64 eid);
+    /* [in] */ Int64 eid)
+{
+    Slogger::D(LOG_TAG, "nScriptIntrinsicCreate, con(%p) id(%i) element(%p)", (RsContext)con, id, (void *)eid);
+    return (Int64)(uintptr_t)rsScriptIntrinsicCreate((RsContext)con, id, (RsElement)eid);
+}
 
 ECode RenderScript::NScriptIntrinsicCreate(
     /* [in] */ Int32 id,
     /* [in] */ Int64 eid,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnScriptIntrinsicCreate(mContext, id, eid);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnScriptKernelIDCreate(
     /* [in] */ Int64 con,
     /* [in] */ Int64 sid,
     /* [in] */ Int32 slot,
-    /* [in] */ Int32 sig);
+    /* [in] */ Int32 sig)
+{
+    Slogger::D(LOG_TAG, "nScriptKernelIDCreate, con(%p) script(%p), slot(%i), sig(%i)", (RsContext)con, (void *)sid, slot, sig);
+    return (Int64)(uintptr_t)rsScriptKernelIDCreate((RsContext)con, (RsScript)sid, slot, sig);
+}
 
 ECode RenderScript::NScriptKernelIDCreate(
     /* [in] */ Int64 sid,
     /* [in] */ Int32 slot,
     /* [in] */ Int32 sig,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnScriptKernelIDCreate(mContext, sid, slot, sig);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnScriptFieldIDCreate(
     /* [in] */ Int64 con,
     /* [in] */ Int64 sid,
-    /* [in] */ Int32 slot);
+    /* [in] */ Int32 slot)
+{
+    Slogger::D(LOG_TAG, "nScriptFieldIDCreate, con(%p) script(%p), slot(%i)", (RsContext)con, (void *)sid, slot);
+    return (Int64)(uintptr_t)rsScriptFieldIDCreate((RsContext)con, (RsScript)sid, slot);
+}
 
 ECode RenderScript::NScriptFieldIDCreate(
     /* [in] */ Int64 sid,
     /* [in] */ Int32 slot,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnScriptFieldIDCreate(mContext, sid, slot);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnScriptGroupCreate(
     /* [in] */ Int64 con,
@@ -1655,7 +2700,59 @@ Int64 RenderScript::RsnScriptGroupCreate(
     /* [in] */ ArrayOf<Int64>* src,
     /* [in] */ ArrayOf<Int64>* dstk,
     /* [in] */ ArrayOf<Int64>* dstf,
-    /* [in] */ ArrayOf<Int64>* types);
+    /* [in] */ ArrayOf<Int64>* types)
+{
+    Slogger::D(LOG_TAG, "nScriptGroupCreate, con(%p)", (RsContext)con);
+
+    Int32 kernelsLen = kernels->GetLength();
+    Int64 *jKernelsPtr = kernels->GetPayload();
+    RsScriptKernelID* kernelsPtr = (RsScriptKernelID*) malloc(sizeof(RsScriptKernelID) * kernelsLen);
+    for(int i = 0; i < kernelsLen; ++i) {
+        kernelsPtr[i] = (RsScriptKernelID)jKernelsPtr[i];
+    }
+
+    Int32 srcLen = src->GetLength();
+    Int64 *jSrcPtr = src->GetPayload();
+    RsScriptKernelID* srcPtr = (RsScriptKernelID*) malloc(sizeof(RsScriptKernelID) * srcLen);
+    for(int i = 0; i < srcLen; ++i) {
+        srcPtr[i] = (RsScriptKernelID)jSrcPtr[i];
+    }
+
+    Int32 dstkLen = dstk->GetLength();
+    Int64 *jDstkPtr = dstk->GetPayload();
+    RsScriptKernelID* dstkPtr = (RsScriptKernelID*) malloc(sizeof(RsScriptKernelID) * dstkLen);
+    for(int i = 0; i < dstkLen; ++i) {
+        dstkPtr[i] = (RsScriptKernelID)jDstkPtr[i];
+    }
+
+    Int32 dstfLen = dstf->GetLength();
+    Int64 *jDstfPtr = dstf->GetPayload();
+    RsScriptKernelID* dstfPtr = (RsScriptKernelID*) malloc(sizeof(RsScriptKernelID) * dstfLen);
+    for(int i = 0; i < dstfLen; ++i) {
+        dstfPtr[i] = (RsScriptKernelID)jDstfPtr[i];
+    }
+
+    Int32 typesLen = types->GetLength();
+    Int64 *jTypesPtr = types->GetPayload();
+    RsType* typesPtr = (RsType*) malloc(sizeof(RsType) * typesLen);
+    for(int i = 0; i < typesLen; ++i) {
+        typesPtr[i] = (RsType)jTypesPtr[i];
+    }
+
+    Int64 id = (Int64)(uintptr_t)rsScriptGroupCreate((RsContext)con,
+           (RsScriptKernelID *)kernelsPtr, kernelsLen * sizeof(RsScriptKernelID),
+           (RsScriptKernelID *)srcPtr, srcLen * sizeof(RsScriptKernelID),
+           (RsScriptKernelID *)dstkPtr, dstkLen * sizeof(RsScriptKernelID),
+           (RsScriptFieldID *)dstfPtr, dstfLen * sizeof(RsScriptKernelID),
+           (RsType *)typesPtr, typesLen * sizeof(RsType));
+
+    free(kernelsPtr);
+    free(srcPtr);
+    free(dstkPtr);
+    free(dstfPtr);
+    free(typesPtr);
+    return id;
+}
 
 ECode RenderScript::NScriptGroupCreate(
     /* [in] */ ArrayOf<Int64>* kernels,
@@ -1663,36 +2760,76 @@ ECode RenderScript::NScriptGroupCreate(
     /* [in] */ ArrayOf<Int64>* dstk,
     /* [in] */ ArrayOf<Int64>* dstf,
     /* [in] */ ArrayOf<Int64>* types,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnScriptGroupCreate(mContext, kernels, src, dstk, dstf, types);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptGroupSetInput(
     /* [in] */ Int64 con,
     /* [in] */ Int64 group,
     /* [in] */ Int64 kernel,
-    /* [in] */ Int64 alloc);
+    /* [in] */ Int64 alloc)
+{
+    Slogger::D(LOG_TAG, "nScriptGroupSetInput, con(%p) group(%p), kernelId(%p), alloc(%p)",
+            (RsContext)con, (void *)gid, (void *)kid, (void *)alloc);
+    rsScriptGroupSetInput((RsContext)con, (RsScriptGroup)gid, (RsScriptKernelID)kid, (RsAllocation)alloc);
+}
 
 ECode RenderScript::NScriptGroupSetInput(
     /* [in] */ Int64 group,
     /* [in] */ Int64 kernel,
-    /* [in] */ Int64 alloc);
+    /* [in] */ Int64 alloc)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptGroupSetInput(mContext, group, kernel, alloc);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptGroupSetOutput(
     /* [in] */ Int64 con,
     /* [in] */ Int64 group,
     /* [in] */ Int64 kernel,
-    /* [in] */ Int64 alloc);
+    /* [in] */ Int64 alloc)
+{
+    Slogger::D(LOG_TAG, "nScriptGroupSetOutput, con(%p) group(%p), kernelId(%p), alloc(%p)",
+            (RsContext)con, (void *)group, (void *)kernel, (void *)alloc);
+    rsScriptGroupSetOutput((RsContext)con, (RsScriptGroup)group, (RsScriptKernelID)kernel, (RsAllocation)alloc);
+}
 
 ECode RenderScript::NScriptGroupSetOutput(
     /* [in] */ Int64 group,
     /* [in] */ Int64 kernel,
-    /* [in] */ Int64 alloc);
+    /* [in] */ Int64 alloc)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptGroupSetOutput(mContext, group, kernel, alloc);
+    return NOERROR;
+}
 
 void RenderScript::RsnScriptGroupExecute(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 group);
+    /* [in] */ Int64 group)
+{
+    Slogger::D(LOG_TAG, "nScriptGroupSetOutput, con(%p) group(%p)", (RsContext)con, (void *)gid);
+    rsScriptGroupExecute((RsContext)con, (RsScriptGroup)gid);
+}
 
 ECode RenderScript::NScriptGroupExecute(
-    /* [in] */ Int64 group);
+    /* [in] */ Int64 group)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnScriptGroupExecute(mContext, group);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnSamplerCreate(
     /* [in] */ Int64 con,
@@ -1701,7 +2838,17 @@ Int64 RenderScript::RsnSamplerCreate(
     /* [in] */ Int32 wrapS,
     /* [in] */ Int32 wrapT,
     /* [in] */ Int32 wrapR,
-    /* [in] */ Float aniso);
+    /* [in] */ Float aniso)
+{
+    Slogger::D(LOG_TAG, "nSamplerCreate, con(%p)", (RsContext)con);
+    return (Int64)(uintptr_t)rsSamplerCreate((RsContext)con,
+            (RsSamplerValue)magFilter,
+            (RsSamplerValue)minFilter,
+            (RsSamplerValue)wrapS,
+            (RsSamplerValue)wrapT,
+            (RsSamplerValue)wrapR,
+            aniso);
+}
 
 ECode RenderScript::NSamplerCreate(
     /* [in] */ Int32 magFilter,
@@ -1710,7 +2857,15 @@ ECode RenderScript::NSamplerCreate(
     /* [in] */ Int32 wrapT,
     /* [in] */ Int32 wrapR,
     /* [in] */ Float aniso,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnSamplerCreate(mContext, magFilter, minFilter, wrapS, wrapT, wrapR, aniso);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnProgramStoreCreate(
     /* [in] */ Int64 con,
@@ -1722,8 +2877,13 @@ Int64 RenderScript::RsnProgramStoreCreate(
     /* [in] */ Boolean dither,
     /* [in] */ Int32 srcMode,
     /* [in] */ Int32 dstMode,
-    /* [in] */ Int32 depthFunc,
-    /* [out] */ Int64* result);
+    /* [in] */ Int32 depthFunc)
+{
+    Slogger::D(LOG_TAG, "nProgramStoreCreate, con(%p)", (RsContext)con);
+    return (Int64)(uintptr_t)rsProgramStoreCreate((RsContext)con, r, g, b, a,
+            depthMask, ditherEnable, (RsBlendSrcFunc)srcFunc,
+            (RsBlendDstFunc)destFunc, (RsDepthFunc)depthFunc);
+}
 
 ECode RenderScript::NProgramStoreCreate(
     /* [in] */ Boolean r,
@@ -1735,124 +2895,348 @@ ECode RenderScript::NProgramStoreCreate(
     /* [in] */ Int32 srcMode,
     /* [in] */ Int32 dstMode,
     /* [in] */ Int32 depthFunc,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnProgramStoreCreate(mContext, r, g, b, a, depthMask, dither, srcMode,
+            dstMode, depthFunc);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnProgramRasterCreate(
     /* [in] */ Int64 con,
     /* [in] */ Boolean pointSprite,
-    /* [in] */ Int32 cullMode);
+    /* [in] */ Int32 cullMode)
+{
+    Slogger::D(LOG_TAG, "nProgramRasterCreate, con(%p), pointSprite(%i), cull(%i)", (RsContext)con, pointSprite, cullMode);
+    return (Int64)(uintptr_t)rsProgramRasterCreate((RsContext)con, pointSprite, (RsCullMode)cullMode);
+}
 
 ECode RenderScript::NProgramRasterCreate(
     /* [in] */ Boolean pointSprite,
     /* [in] */ Int32 cullMode,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnProgramRasterCreate(mContext, pointSprite, cullMode);
+    return NOERROR;
+}
 
 void RenderScript::RsnProgramBindConstants(
     /* [in] */ Int64 con,
     /* [in] */ Int64 pv,
     /* [in] */ Int32 slot,
-    /* [in] */ Int64 mID);
+    /* [in] */ Int64 a)
+{
+    Slogger::D(LOG_TAG, "nProgramBindConstants, con(%p), vpf(%p), sloat(%i), a(%p)",
+            (RsContext)con, (RsProgramVertex)pv, slot, (RsAllocation)a);
+    rsProgramBindConstants((RsContext)con, (RsProgram)vpv, slot, (RsAllocation)a);
+}
 
 ECode RenderScript::NProgramBindConstants(
     /* [in] */ Int64 pv,
     /* [in] */ Int32 slot,
-    /* [in] */ Int64 mID);
+    /* [in] */ Int64 mID)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnProgramBindConstants(mContext, pv, slot, mID);
+    return NOERROR;
+}
 
 void RenderScript::RsnProgramBindTexture(
     /* [in] */ Int64 con,
     /* [in] */ Int64 vpf,
     /* [in] */ Int32 slot,
-    /* [in] */ Int64 a);
+    /* [in] */ Int64 a)
+{
+    Slogger::D(LOG_TAG, "nProgramBindTexture, con(%p), vpf(%p), slot(%i), a(%p)",
+            (RsContext)con, (RsProgramFragment)vpf, slot, (RsAllocation)a);
+    rsProgramBindTexture((RsContext)con, (RsProgramFragment)vpf, slot, (RsAllocation)a);
+}
 
 ECode RenderScript::NProgramBindTexture(
     /* [in] */ Int64 vpf,
     /* [in] */ Int32 slot,
-    /* [in] */ Int64 a);
+    /* [in] */ Int64 a)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnProgramBindTexture(mContext, vpf, slot, a);
+    return NOERROR;
+}
 
 void RenderScript::RsnProgramBindSampler(
     /* [in] */ Int64 con,
     /* [in] */ Int64 vpf,
     /* [in] */ Int32 slot,
-    /* [in] */ Int64 s);
+    /* [in] */ Int64 s)
+{
+    Slogger::D(LOG_TAG, "nProgramBindSampler, con(%p), vpf(%p), slot(%i), a(%p)",
+            (RsContext)con, (RsProgramFragment)vpf, slot, (RsSampler)s);
+    rsProgramBindSampler((RsContext)con, (RsProgramFragment)vpf, slot, (RsSampler)s);
+}
 
 ECode RenderScript::NProgramBindSampler(
     /* [in] */ Int64 vpf,
     /* [in] */ Int32 slot,
-    /* [in] */ Int64 s);
+    /* [in] */ Int64 s)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnProgramBindSampler(mContext, vpf, slot, s);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnProgramFragmentCreate(
-    /* [in] */ Int64 con, String shader,
+    /* [in] */ Int64 con,
+    /* [in] */ const String& shader,
     /* [in] */ ArrayOf<String>* texNames,
-    /* [in] */ ArrayOf<Int64>* params);
+    /* [in] */ ArrayOf<Int64>* params)
+{
+    Int64 *jParamPtr = params->GetPayload();
+    Int32 paramLen = params->GetLength();
+
+    Int32 texCount = texNames->GetLength();
+    AutoStringArrayToUTF8 names(texNames, texCount);
+    const char ** nameArray = names.c_str();
+    size_t* sizeArray = names.c_str_len();
+
+    Slogger::D(LOG_TAG, "nProgramFragmentCreate, con(%p), paramLen(%i)", (RsContext)con, paramLen);
+
+    uintptr_t * paramPtr = (uintptr_t*) malloc(sizeof(uintptr_t) * paramLen);
+    for(int i = 0; i < paramLen; ++i) {
+        paramPtr[i] = (uintptr_t)jParamPtr[i];
+    }
+    Int64 ret = (Int64)(uintptr_t)rsProgramFragmentCreate((RsContext)con, shader.string(), shader.GetLength(),
+            nameArray, texCount, sizeArray,
+            paramPtr, paramLen);
+
+    free(paramPtr);
+    return ret;
+}
 
 ECode RenderScript::NProgramFragmentCreate(
     /* [in] */ const String& shader,
     /* [in] */ ArrayOf<String>* texNames,
     /* [in] */ ArrayOf<Int64>* params,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnProgramFragmentCreate(mContext, shader, texNames, params);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnProgramVertexCreate(
     /* [in] */ Int64 con, String shader,
     /* [in] */ ArrayOf<String>* texNames,
-    /* [in] */ ArrayOf<Int64>* params);
+    /* [in] */ ArrayOf<Int64>* params)
+{
+    Int64 *jParamPtr = params->GetPayload();
+    Int32 paramLen = params->GetLength();
+
+    Slogger::D(LOG_TAG, "nProgramVertexCreate, con(%p), paramLen(%i)", (RsContext)con, paramLen);
+
+    Int32 texCount = texNames->GetLength();
+    AutoStringArrayToUTF8 names(texNames, texCount);
+    const char ** nameArray = names.c_str();
+    size_t* sizeArray = names.c_str_len();
+
+    uintptr_t * paramPtr = (uintptr_t*) malloc(sizeof(uintptr_t) * paramLen);
+    for(int i = 0; i < paramLen; ++i) {
+        paramPtr[i] = (uintptr_t)jParamPtr[i];
+    }
+
+    Int64 ret = (Int64)(uintptr_t)rsProgramVertexCreate((RsContext)con, shaderUTF.c_str(), shaderUTF.length(),
+            nameArray, texCount, sizeArray,
+            paramPtr, paramLen);
+
+    free(paramPtr);
+    return ret;
+}
 
 ECode RenderScript::NProgramVertexCreate(
     /* [in] */ const String& shader,
     /* [in] */ ArrayOf<String>* texNames,
     /* [in] */ ArrayOf<Int64>* params,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnProgramVertexCreate(mContext, shader, texNames, params);
+    return NOERROR;
+}
 
 Int64 RenderScript::RsnMeshCreate(
     /* [in] */ Int64 con,
     /* [in] */ ArrayOf<Int64>* vtx,
     /* [in] */ ArrayOf<Int64>* idx,
-    /* [in] */ ArrayOf<Int32>* prim);
+    /* [in] */ ArrayOf<Int32>* prim)
+{
+    Slogger::D(LOG_TAG, "nMeshCreate, con(%p)", (RsContext)con);
+
+    Int32 vtxLen = vtx->GetLength();
+    Int64 *jVtxPtr = vtx->GetPayload();
+    RsAllocation* vtxPtr = (RsAllocation*) malloc(sizeof(RsAllocation) * vtxLen);
+    for(int i = 0; i < vtxLen; ++i) {
+        vtxPtr[i] = (RsAllocation)(uintptr_t)jVtxPtr[i];
+    }
+
+    Int32 idxLen = idx->GetLength();
+    Int64 *jIdxPtr = idx->GetPayload();
+    RsAllocation* idxPtr = (RsAllocation*) malloc(sizeof(RsAllocation) * idxLen);
+    for(int i = 0; i < idxLen; ++i) {
+        idxPtr[i] = (RsAllocation)(uintptr_t)jIdxPtr[i];
+    }
+
+    Int32 primLen = prim->GetLength();
+    Int32 *primPtr = prim->GetPayload(_prim, NULL);
+
+    Int64 id = (Int64)(uintptr_t)rsMeshCreate((RsContext)con,
+            (RsAllocation *)vtxPtr, vtxLen,
+            (RsAllocation *)idxPtr, idxLen,
+            (uint32_t *)primPtr, primLen);
+
+    free(vtxPtr);
+    free(idxPtr);
+    return id;
+}
 
 ECode RenderScript::NMeshCreate(
     /* [in] */ ArrayOf<Int64>* vtx,
     /* [in] */ ArrayOf<Int64>* idx,
     /* [in] */ ArrayOf<Int32>* prim,
-    /* [out] */ Int64* result);
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnMeshCreate(mContext, vtx, idx, prim);
+    return NOERROR;
+}
 
-CARAPI_(Int32) RsnMeshGetVertexBufferCount(
+Int32 RenderScript::RsnMeshGetVertexBufferCount(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id);
+    /* [in] */ Int64 id)
+{
+    Slogger::D(LOG_TAG, "nMeshGetVertexBufferCount, con(%p), Mesh(%p)", (RsContext)con, (RsMesh)mesh);
+    Int32 vtxCount = 0;
+    rsaMeshGetVertexBufferCount((RsContext)con, (RsMesh)mesh, &vtxCount);
+    return vtxCount;
+}
 
 ECode RenderScript::NMeshGetVertexBufferCount(
     /* [in] */ Int64 id,
-    /* [out] */ Int32* count);
+    /* [out] */ Int32* count)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnMeshGetVertexBufferCount(mContext, id);
+    return NOERROR;
+}
 
-CARAPI_(Int32) RsnMeshGetIndexCount(
+Int32 RenderScript::RsnMeshGetIndexCount(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id);
+    /* [in] */ Int64 id)
+{
+    Slogger::D(LOG_TAG, "nMeshGetIndexCount, con(%p), Mesh(%p)", (RsContext)con, (RsMesh)mesh);
+    Int32 idxCount = 0;
+    rsaMeshGetIndexCount((RsContext)con, (RsMesh)mesh, &idxCount);
+    return idxCount;
+}
 
 ECode RenderScript::NMeshGetIndexCount(
     /* [in] */ Int64 id,
-    /* [out] */ Int32* count);
+    /* [out] */ Int32* count)
+{
+    AutoLock lock(this);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    FAIL_RETURN(Validate())
+    *result = RsnMeshGetIndexCount(mContext, id);
+    return NOERROR;
+}
 
 void RenderScript::RsnMeshGetVertices(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 mesh,
     /* [in] */ ArrayOf<Int64>* vtxIds,
-    /* [in] */ Int32 vtxIdCount);
+    /* [in] */ Int32 vtxIdCount)
+{
+    Slogger::D(LOG_TAG, "nMeshGetVertices, con(%p), Mesh(%p)", (RsContext)con, (RsMesh)mesh);
+
+    RsAllocation *allocs = (RsAllocation*)malloc((uint32_t)numVtxIDs * sizeof(RsAllocation));
+    rsaMeshGetVertices((RsContext)con, (RsMesh)mesh, allocs, (uint32_t)numVtxIDs);
+
+    for(Int32 i = 0; i < numVtxIDs; i ++) {
+        const Int64 alloc = (Int64)(uintptr_t)allocs[i];
+        (*vtxIds)[i] = alloc;
+    }
+
+    free(allocs);
+}
 
 ECode RenderScript::NMeshGetVertices(
     /* [in] */ Int64 id,
     /* [in] */ ArrayOf<Int64>* vtxIds,
-    /* [in] */ Int32 vtxIdCount);
+    /* [in] */ Int32 vtxIdCount)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnMeshGetVertices(mContext, id, vtxIds, vtxIdCount);
+    return NOERROR;
+}
 
 void RenderScript::RsnMeshGetIndices(
     /* [in] */ Int64 con,
-    /* [in] */ Int64 id,
+    /* [in] */ Int64 mesh,
     /* [in] */ ArrayOf<Int64>* idxIds,
     /* [in] */ ArrayOf<Int32>* primitives,
-    /* [in] */ Int32 vtxIdCount);
+    /* [in] */ Int32 vtxIdCount)
+{
+    Slogger::D(LOG_TAG, "nMeshGetVertices, con(%p), Mesh(%p)", (RsContext)con, (RsMesh)mesh);
+
+    RsAllocation *allocs = (RsAllocation*)malloc((uint32_t)numIndices * sizeof(RsAllocation));
+    uint32_t *prims= (uint32_t*)malloc((uint32_t)numIndices * sizeof(uint32_t));
+
+    rsaMeshGetIndices((RsContext)con, (RsMesh)mesh, allocs, prims, (uint32_t)numIndices);
+
+    for(Int32 i = 0; i < numIndices; i ++) {
+        const Int64 alloc = (Int64)(uintptr_t)allocs[i];
+        const Int32 prim = (Int32)prims[i];
+        (*idxIds)[i] = alloc;
+        (*primitives)[i] = prim;
+    }
+
+    free(allocs);
+    free(prims);
+}
 
 ECode RenderScript::NMeshGetIndices(
     /* [in] */ Int64 id,
     /* [in] */ ArrayOf<Int64>* idxIds,
     /* [in] */ ArrayOf<Int32>* primitives,
-    /* [in] */ Int32 vtxIdCount);
+    /* [in] */ Int32 vtxIdCount)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnMeshGetIndices(mContext, id, idxIds, primitives, vtxIdCount);
+    return NOERROR;
+}
 
 } // namespace RenderScript
 } // namespace Droid

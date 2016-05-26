@@ -272,10 +272,6 @@ ECode CMediaRecorder::GetSurface(
     *result = surfaceObj;
     REFCOUNT_ADD(*result)
     return NOERROR;
-
-
-
-    return NOERROR;
 }
 
 ECode CMediaRecorder::SetPreviewDisplay(

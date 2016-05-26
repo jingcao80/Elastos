@@ -445,12 +445,13 @@ protected:
         /* [in] */ Int64 alloc,
         /* [in] */ Int32 src);
 
-    native Surface rsnAllocationGetSurface(
+    CARAPI_(AutoPtr<ISurface>) RsnAllocationGetSurface(
         /* [in] */ Int64 con,
         /* [in] */ Int64 alloc);
 
-    synchronized Surface nAllocationGetSurface(
-        /* [in] */ Int64 alloc);
+    CARAPI NAllocationGetSurface(
+        /* [in] */ Int64 alloc,
+        /* [out] */ ISurface** surface);
 
     CARAPI_(void) RsnAllocationSetSurface(
         /* [in] */ Int64 con,
@@ -1226,8 +1227,7 @@ protected:
         /* [in] */ Boolean dither,
         /* [in] */ Int32 srcMode,
         /* [in] */ Int32 dstMode,
-        /* [in] */ Int32 depthFunc,
-        /* [out] */ Int64* result);
+        /* [in] */ Int32 depthFunc);
 
     CARAPI NProgramStoreCreate(
         /* [in] */ Boolean r,
@@ -1285,7 +1285,8 @@ protected:
         /* [in] */ Int64 s);
 
     CARAPI_(Int64) RsnProgramFragmentCreate(
-        /* [in] */ Int64 con, String shader,
+        /* [in] */ Int64 con,
+        /* [in] */ const String& shader,
         /* [in] */ ArrayOf<String>* texNames,
         /* [in] */ ArrayOf<Int64>* params);
 
