@@ -26,69 +26,66 @@ AutoPtr<INodeBridgeListener> CTestEventListener::mNodeBridgeListener = NULL;
 
 bool CTestEventListener::mNodeInit = false;
 
-// CallbackRunnable* CallbackRunnable::mInstances[5];  //CallbackRunnable to be renameed: EpkCallbackRunnable
+CallbackRunnable* CallbackRunnable::mInstances[5];  //CallbackRunnable to be renameed: EpkCallbackRunnable
 
-// CallbackRunnable::CallbackRunnable(
-//     /* [in] */ IInterface* object,
-//     /* [in] */ IMethodInfo* method,
-//     /* [in] */ IArgumentList* argumentList,
-//     /* [in] */ pthread_mutex_t* mutex)
-//     : mObject(object)
-//     , mMethod(method)
-//     , mArgumentList(argumentList)
-// {
-//     CallbackRunnable::mInstances[0] = this;
-// }
+CallbackRunnable::CallbackRunnable(
+    /* [in] */ IInterface* object,
+    /* [in] */ IMethodInfo* method,
+    /* [in] */ IArgumentList* argumentList,
+    /* [in] */ pthread_mutex_t* mutex)
+    : mObject(object)
+    , mMethod(method)
+    , mArgumentList(argumentList)
+{
+    CallbackRunnable::mInstances[0] = this;
+}
 
-// //CAR_INTERFACE_IMPL(CallbackRunnable, IRunnable);
-// CAR_INTERFACE_IMPL(CallbackRunnable, ElRefBase, IRunnable);
+CAR_INTERFACE_IMPL(CallbackRunnable, Object, IRunnable);
 
-// ECode CallbackRunnable::Run()
-// {
-//     g_pNodeBridge->vt->Invoke(g_pNodeBridge);
+ECode CallbackRunnable::Run()
+{
+    g_pNodeBridge->vt->Invoke(g_pNodeBridge);
 
-//     mMyLock = 0;
+    mMyLock = 0;
 
-//     return NOERROR;
-// }
+    return NOERROR;
+}
 
-// CallbackRunnable::~CallbackRunnable()
-// {
-//     //TODO
-// }
+CallbackRunnable::~CallbackRunnable()
+{
+    //TODO
+}
 
-// ECode CTestEventListener::_Thread::Run()
-// {
-//     int argc = 3;
-//     char** argv = new char*[4];
+ECode CTestEventListener::_Thread::Run()
+{
+    int argc = 3;
+    char** argv = new char*[4];
 
-//     argv[0] = new char[1024];
-//     memset(argv[0],0,1024);
+    argv[0] = new char[1024];
+    memset(argv[0],0,1024);
 
-//     char processName[] = "/system/bin/ElApp_process";
-//     Int32 length_0 = sizeof(processName);
-//     snprintf(argv[0], length_0 + 1, "%s", processName);
+    char processName[] = "/system/bin/ElApp_process";
+    Int32 length_0 = sizeof(processName);
+    snprintf(argv[0], length_0 + 1, "%s", processName);
 
-//     char jsFileName[] = "/data/temp/node/elastos_node.js";
-//     Int32 length_1 = sizeof(jsFileName);
-//     argv[1] = argv[0] + length_0;
-//     snprintf(argv[1], length_1 + 1, "%s", jsFileName);
+    char jsFileName[] = "/data/temp/node/elastos_node.js";
+    Int32 length_1 = sizeof(jsFileName);
+    argv[1] = argv[0] + length_0;
+    snprintf(argv[1], length_1 + 1, "%s", jsFileName);
 
-//     const char* packageName = mPackageName.string();
-//     Int32 length_2 = strlen(packageName) + 1;
-//     argv[2] = argv[1] + length_1;
-//     snprintf(argv[2], length_2 + 1, "%s", packageName);
+    const char* packageName = mPackageName.string();
+    Int32 length_2 = strlen(packageName) + 1;
+    argv[2] = argv[1] + length_1;
+    snprintf(argv[2], length_2 + 1, "%s", packageName);
 
-//     argv[3] = NULL;
+    argv[3] = NULL;
 
-//     node::Start(argc,argv);
+    node::Start(argc,argv);
 
-//     //delete argv
+    //delete argv
 
-//     return NOERROR;
-// }
-
-//CAR_OBJECT_IMPL(CTestEventListener)
+    return NOERROR;
+}
 
 CAR_INTERFACE_IMPL(CTestEventListener, Object, ITestEventListener)
 
@@ -111,8 +108,8 @@ ECode CTestEventListener::OnNodeEvent(
 ECode CTestEventListener::GetEnqueueUIMessagePtr(
     /* [out] */ Int32 * pOutPtr)
 {
-    // *pOutPtr = (Int32)CallbackRunnable::EnqueueUIMessage;
-    // return NOERROR;
+    *pOutPtr = (Int32)CallbackRunnable::EnqueueUIMessage;
+    return NOERROR;
 }
 
 ECode CTestEventListener::Sleep(

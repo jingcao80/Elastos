@@ -1,24 +1,17 @@
-
 #ifndef __CTESTEVENTLISTENER_H__
 #define __CTESTEVENTLISTENER_H__
-
 
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Os.h"
-//#include "_Elastos_Droid_Media_CAsyncPlayer.h"
 #include "elastos/droid/ext/frameworkext.h"
 
-//#include "_CTestEventListener.h"
 #include "_Elastos_DevSamples_Node_JSTextViewDemo_CTestEventListener.h"
 
-//#include <ext/frameworkdef.h>
 #include <elastos/droid/ext/frameworkdef.h>
 #include <elastos/core/Object.h>
 #include <elastos/core/Thread.h>
-
-//#include <elastos/ThreadBase.h>
 
 #include <cutils/log.h>
 
@@ -28,13 +21,11 @@ using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Core::Thread;
 using Elastos::Utility::ILinkedList;
 
-
-//using Elastos::Core::Threading::ThreadBase;
 using Elastos::Core::IRunnable;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
-//using Elastos::Droid::Os::CMessage;
+using Elastos::Droid::Os::CMessage;
 
 //----------------NodeBridge Definition Start---------------
 
@@ -126,80 +117,87 @@ EXTERN IHandler* myHandler;
 EXTERN NodeBridge* g_pNodeBridge;
 EXTERN NodeBridge** g_ppNodeBridge;
 
-// class CallbackRunnable
-//     : public ElRefBase
-//     , public IRunnable
-// {
-// public:
+class CallbackRunnable
+    : public Object
+    , public IRunnable
+{
+public:
 
-//     CallbackRunnable(
-//         /* [in] */ IInterface* object,
-//         /* [in] */ IMethodInfo* method,
-//         /* [in] */ IArgumentList* argumentList,
-//         /* [in] */ pthread_mutex_t* mutex);
+    CallbackRunnable(
+        /* [in] */ IInterface* object,
+        /* [in] */ IMethodInfo* method,
+        /* [in] */ IArgumentList* argumentList,
+        /* [in] */ pthread_mutex_t* mutex);
 
-//     ~CallbackRunnable();
+    ~CallbackRunnable();
 
-//     CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL()
 
-//     CARAPI Run();
+    CARAPI constructor(
+        /* [in] */ IInterface* object,
+        /* [in] */ IMethodInfo* method,
+        /* [in] */ IArgumentList* argumentList,
+        /* [in] */ pthread_mutex_t* mutex);
 
-//     static void NodeMessage_FireCallback(void* payload) {
-//         // AutoPtr<IMessage> msg = (IMessage*)payload;
-//         // AutoPtr<IRunnable> runnable;
-//         // msg->GetCallback((IRunnable**)&runnable);
+    CARAPI Run();
 
-//         // IInterface* _interface = runnable->Probe(EIID_IInterface);
-//         // CallbackRunnable* callback = (CallbackRunnable*)_interface;
+    static void NodeMessage_FireCallback(void* payload) {
+        AutoPtr<IMessage> msg = (IMessage*)payload;
+        AutoPtr<IRunnable> runnable;
+        msg->GetCallback((IRunnable**)&runnable);
 
-//         // ECode ec = callback->mMethod->Invoke(callback->mObject, callback->mArgumentList);
-//         // if (FAILED(ec)) {
-//         //     ALOGD("NodeMessage_FireCallback================Invoke failed================");
-//         // }
-//     }
+        IInterface* _interface = runnable->Probe(EIID_IInterface);
+        //CallbackRunnable* callback = (CallbackRunnable*)_interface;
+        CallbackRunnable* callback = *(CallbackRunnable**)&_interface;
 
-//     static void NodeMessage_Send(void* payload) {
-//         // AutoPtr<IHandler> target = myHandler;
-//         // AutoPtr<IMessage> msg = (IMessage*)payload;
+        ECode ec = callback->mMethod->Invoke(callback->mObject, callback->mArgumentList);
+        if (FAILED(ec)) {
+            ALOGD("NodeMessage_FireCallback================Invoke failed================");
+        }
+    }
 
-//         // Boolean result;
-//         // target->SendMessage(msg, &result);
-//     }
+    static void NodeMessage_Send(void* payload) {
+        AutoPtr<IHandler> target = myHandler;
+        AutoPtr<IMessage> msg = (IMessage*)payload;
 
-//     static void EnqueueUIMessage(void* obj, void* method, void* params)
-//     {
-//         // pthread_t mThread = pthread_self();
+        Boolean result;
+        target->SendMessage(msg, &result);
+    }
 
-//         // AutoPtr<IMessage> msg;
-//         // CMessage::New((IMessage**)&msg);
+    static void EnqueueUIMessage(void* obj, void* method, void* params)
+    {
+        pthread_t mThread = pthread_self();
 
-//         // AutoPtr<IHandler> target = myHandler;
-//         // msg->SetTarget(target);
+        AutoPtr<IMessage> msg;
+        CMessage::New((IMessage**)&msg);
 
-//         // Int32 MSG_RUNONUITHREAD = 0x0;
-//         // msg->SetWhat(MSG_RUNONUITHREAD);
+        AutoPtr<IHandler> target = myHandler;
+        msg->SetTarget(target);
 
-//         // pthread_mutex_t* mutex;
+        Int32 MSG_RUNONUITHREAD = 0x0;
+        msg->SetWhat(MSG_RUNONUITHREAD);
 
-//         // CallbackRunnable* callback = new CallbackRunnable(
-//         //     (IInterface*)obj, (IMethodInfo*)method, (IArgumentList*)params, (pthread_mutex_t*)mutex);
-//         // IRunnable* runnable = IRunnable::Probe(callback);
-//         // msg->SetCallback(runnable);
+        pthread_mutex_t* mutex;
 
-//         // g_pNodeBridge->vt->Enqueue(g_pNodeBridge, obj, NodeMessage_Send, NodeMessage_FireCallback, (void*)msg);
+        CallbackRunnable* callback = new CallbackRunnable(
+            (IInterface*)obj, (IMethodInfo*)method, (IArgumentList*)params, (pthread_mutex_t*)mutex);
+        IRunnable* runnable = IRunnable::Probe(callback);
+        msg->SetCallback(runnable);
 
-//         // return;
-//     };
+        g_pNodeBridge->vt->Enqueue(g_pNodeBridge, obj, NodeMessage_Send, NodeMessage_FireCallback, (void*)msg);
 
-// private:
-//     AutoPtr<IInterface> mObject;
-//     AutoPtr<IMethodInfo> mMethod;
-//     AutoPtr<IArgumentList> mArgumentList;
+        return;
+    };
 
-//     static CallbackRunnable* mInstances[];
+private:
+    AutoPtr<IInterface> mObject;
+    AutoPtr<IMethodInfo> mMethod;
+    AutoPtr<IArgumentList> mArgumentList;
 
-//     Int32 mMyLock;
-// };
+    static CallbackRunnable* mInstances[];
+
+    Int32 mMyLock;
+};
 
 CarClass(CTestEventListener)
     , public Object
@@ -207,66 +205,63 @@ CarClass(CTestEventListener)
 {
 
 public:
-    // class _Thread : public ThreadBase
-    // {
-    // public:
-    //     _Thread(
-    //         /* [in] */ const String& packageName)
-    //         : mPackageName(packageName)
-    //     {
-    //         ThreadBase::Init();
-    //     }
+    class _Thread : public Thread
+    {
+    public:
+        _Thread(
+            /* [in] */ const String& packageName)
+            : mPackageName(packageName)
+        {
+            Thread::constructor(String("CTestEventListener::_Thread"));
+        }
 
-    //     CARAPI Run();
+        CARAPI Run();
 
-    // private:
-    //     String mPackageName;
-    // };
+    private:
+        String mPackageName;
+    };
 
     static void InitBridge(const String& packageName) {
-        // AutoPtr<_Thread> t = new _Thread(packageName);
+        AutoPtr<_Thread> t = new _Thread(packageName);
 
-        // pthread_mutex_t* pMutex = &mMutex;
+        pthread_mutex_t* pMutex = &mMutex;
 
-        // pthread_mutex_init(pMutex, NULL);
-        // pthread_mutex_lock(pMutex);
+        pthread_mutex_init(pMutex, NULL);
+        pthread_mutex_lock(pMutex);
 
-        // t->Start();
+        t->Start();
 
-        // //todo: use wait()
-        // pthread_mutex_lock(pMutex);
-        // pthread_mutex_unlock(pMutex);
+        //todo: use wait()
+        pthread_mutex_lock(pMutex);
+        pthread_mutex_unlock(pMutex);
 
-        // return;
+        return;
     };
 
     static void RegisterActivity(const String& packageName, const String& activityName, IInterface* activityInstance, IActivityListener** activityListener, IHandler* activityHandler) {
-        // ALOGD("CTestEventListener::RegisterActivity================begin================");
+        ALOGD("CTestEventListener::RegisterActivity================begin================");
 
-        // if (!CTestEventListener::mNodeInit) {
-        //     CTestEventListener::InitBridge(packageName);
-        //     CTestEventListener::mNodeInit = true;
-        // }
+        if (!CTestEventListener::mNodeInit) {
+            CTestEventListener::InitBridge(packageName);
+            CTestEventListener::mNodeInit = true;
+        }
 
-        // Boolean result = false;
-        // if(CTestEventListener::mNodeBridgeListener) {
-        //     ALOGD("CTestEventListener::RegisterActivity================mNodeBridgeListener OnRegistActivity.begin================");
+        Boolean result = false;
+        if(CTestEventListener::mNodeBridgeListener) {
+            ALOGD("CTestEventListener::RegisterActivity================mNodeBridgeListener OnRegistActivity.begin================");
 
-        //     CTestEventListener::mNodeBridgeListener->OnRegistActivity(
-        //         packageName, activityName, activityInstance, (Int32)activityListener, activityHandler, &result);
-        //     //CTestEventListener::mNodeBridgeListener->OnRegistActivity(
-        //     //    packageName, activityName, activityInstance, activityListener, activityHandler, &result);
+            CTestEventListener::mNodeBridgeListener->OnRegistActivity(
+                packageName, activityName, activityInstance, (Int32)activityListener, activityHandler, &result);
 
+            ALOGD("CTestEventListener::RegisterActivity================mNodeBridgeListener OnRegistActivity.end================");
+        }
+        else {
+            ALOGD("CTestEventListener::RegisterActivity================mNodeBridgeListener is null================");
+        }
 
-        //     ALOGD("CTestEventListener::RegisterActivity================mNodeBridgeListener OnRegistActivity.end================");
-        // }
-        // else {
-        //     ALOGD("CTestEventListener::RegisterActivity================mNodeBridgeListener is null================");
-        // }
+        ALOGD("CTestEventListener::RegisterActivity================end================");
 
-        // ALOGD("CTestEventListener::RegisterActivity================end================");
-
-        // //g_pNodeBridge->vt->RegisterActivity(packageName.string(), activityName.string());
+        //g_pNodeBridge->vt->RegisterActivity(packageName.string(), activityName.string());
     }
 
 public:
