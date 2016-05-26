@@ -14,6 +14,7 @@ const Int32 CSweepGradient::TYPE_COLOR_START_AND_COLOR_END = 2;
 
 CAR_OBJECT_IMPL(CSweepGradient);
 CAR_INTERFACE_IMPL(CSweepGradient, Shader, ISweepGradient);
+
 CSweepGradient::CSweepGradient()
     : mType(0)
     , mCx(0)
@@ -25,14 +26,14 @@ CSweepGradient::CSweepGradient()
 ECode CSweepGradient::constructor(
     /* [in] */ Float cx,
     /* [in] */ Float cy,
-    /* [in] */ const ArrayOf<Int32>& colors,
+    /* [in] */ ArrayOf<Int32>* colors,
     /* [in] */ ArrayOf<Float>* positions)
 {
-    if (colors.GetLength() < 2) {
+    if (colors == NULL || colors->GetLength() < 2) {
 //        throw new IllegalArgumentException("needs >= 2 number of colors");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    if (positions != NULL && colors.GetLength() != positions->GetLength()) {
+    if (positions != NULL && colors->GetLength() != positions->GetLength()) {
 //        throw new IllegalArgumentException(
 //                    "color and position arrays must be of equal length");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -40,7 +41,7 @@ ECode CSweepGradient::constructor(
     mType = TYPE_COLORS_AND_POSITIONS;
     mCx = cx;
     mCy = cy;
-    mColors = const_cast<ArrayOf<Int32>* >(&colors);
+    mColors = colors;
     mPositions = positions;
     Init(NativeCreate1(cx, cy, colors, positions));
     return NOERROR;
@@ -67,10 +68,15 @@ ECode CSweepGradient::Copy(
     VALIDATE_NOT_NULL(shader);
     AutoPtr<IShader> copy;
     switch (mType) {
-        case TYPE_COLORS_AND_POSITIONS:
-            CSweepGradient::New(mCx, mCy, *mColors->Clone(),
-                    mPositions != NULL ? mPositions->Clone() : NULL, (IShader**)&copy);
+        case TYPE_COLORS_AND_POSITIONS: {
+            AutoPtr< ArrayOf<Int32> > colors = mColors->Clone();
+            AutoPtr<ArrayOf<Float> > positions;
+            if (mPositions) {
+                positions = mPositions->Clone();
+            }
+            CSweepGradient::New(mCx, mCy, colors, positions, (IShader**)&copy);
             break;
+        }
         case TYPE_COLOR_START_AND_COLOR_END:
             CSweepGradient::New(mCx, mCy, mColor0, mColor1, (IShader**)&copy);
             break;
@@ -89,11 +95,11 @@ ECode CSweepGradient::Copy(
 Int64 CSweepGradient::NativeCreate1(
     /* [in] */ Float x,
     /* [in] */ Float y,
-    /* [in] */ const ArrayOf<Int32>& colors,
+    /* [in] */ ArrayOf<Int32>* colors,
     /* [in] */ ArrayOf<Float>* positions)
 {
-    size_t count = (size_t)colors.GetLength();
-    const Int32* colValues = colors.GetPayload();
+    size_t count = (size_t)colors->GetLength();
+    const Int32* colValues = colors->GetPayload();
 
     // AutoJavaFloatArray autoPos(env, jpositions, count);
 #ifdef SK_SCALAR_IS_FLOAT

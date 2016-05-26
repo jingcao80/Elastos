@@ -37,7 +37,7 @@ public:
     CARAPI constructor(
         /* [in] */ Float cx,
         /* [in] */ Float cy,
-        /* [in] */ const ArrayOf<Int32>& colors,
+        /* [in] */ ArrayOf<Int32>* colors,
         /* [in] */ ArrayOf<Float>* positions);
 
     /**
@@ -66,7 +66,7 @@ private:
     static CARAPI_(Int64) NativeCreate1(
         /* [in] */ Float x,
         /* [in] */ Float y,
-        /* [in] */ const ArrayOf<Int32>& colors,
+        /* [in] */ ArrayOf<Int32>* colors,
         /* [in] */ ArrayOf<Float>* positions);
 
     static CARAPI_(Int64) NativeCreate2(

@@ -20,13 +20,16 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-KeyguardClockPositionAlgorithm::Result::Result()
-    : mClockY(0)
-    , mClockScale(0)
-    , mClockAlpha(0)
-    , mStackScrollerPadding(0)
-    , mStackScrollerPaddingAdjustment(0)
-{}
+static AutoPtr<IPathInterpolator> InitSlowDownInterpolator()
+{
+    AutoPtr<IPath> path;
+    CPath::New((IPath**)&path);
+    path->MoveTo(0, 0);
+    path->CubicTo(0.3f, 0.875f, 0.6f, 1.0f, 1.0f, 1.0f);
+    AutoPtr<IPathInterpolator> pi;
+    CPathInterpolator::New(path, (IPathInterpolator**)&pi);
+    return pi;
+}
 
 const Float KeyguardClockPositionAlgorithm::SLOW_DOWN_FACTOR = 0.4f;
 const Float KeyguardClockPositionAlgorithm::CLOCK_RUBBERBAND_FACTOR_MIN = 0.08f;
@@ -36,7 +39,16 @@ const Float KeyguardClockPositionAlgorithm::CLOCK_SCALE_FADE_END = 0.75f;
 const Float KeyguardClockPositionAlgorithm::CLOCK_SCALE_FADE_END_NO_NOTIFS = 0.5f;
 const Float KeyguardClockPositionAlgorithm::CLOCK_ADJ_TOP_PADDING_MULTIPLIER_MIN = 1.4f;
 const Float KeyguardClockPositionAlgorithm::CLOCK_ADJ_TOP_PADDING_MULTIPLIER_MAX = 3.2f;
-AutoPtr<IPathInterpolator> KeyguardClockPositionAlgorithm::sSlowDownInterpolator;
+AutoPtr<IPathInterpolator> KeyguardClockPositionAlgorithm::sSlowDownInterpolator = InitSlowDownInterpolator();
+
+KeyguardClockPositionAlgorithm::Result::Result()
+    : mClockY(0)
+    , mClockScale(0)
+    , mClockAlpha(0)
+    , mStackScrollerPadding(0)
+    , mStackScrollerPaddingAdjustment(0)
+{}
+
 
 KeyguardClockPositionAlgorithm::KeyguardClockPositionAlgorithm()
     : mClockNotificationsMarginMin(0)
@@ -187,17 +199,6 @@ Float KeyguardClockPositionAlgorithm::GetNotificationAmountT()
 {
     return mNotificationCount
             / (mMaxKeyguardNotifications + mMoreCardNotificationAmount);
-}
-
-AutoPtr<IPathInterpolator> KeyguardClockPositionAlgorithm::InitStatic()
-{
-    AutoPtr<IPath> path;
-    CPath::New((IPath**)&path);
-    path->MoveTo(0, 0);
-    path->CubicTo(0.3f, 0.875f, 0.6f, 1.f, 1.f, 1.f);
-    AutoPtr<IPathInterpolator> pi;
-    CPathInterpolator::New(path, (IPathInterpolator**)&pi);
-    return pi;
 }
 
 } // namespace Phone

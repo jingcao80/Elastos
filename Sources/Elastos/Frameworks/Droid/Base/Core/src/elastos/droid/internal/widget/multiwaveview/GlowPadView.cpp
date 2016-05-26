@@ -164,6 +164,18 @@ ECode GlowPadView::AnimationBundle::Get(
     return NOERROR;
 }
 
+ECode GlowPadView::AnimationBundle::ToString(
+    /* [ou] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("GlowPadView::AnimationBundle@");
+    String info;
+    ArrayList::ToString(&info);
+    sb += info;
+    *str = sb.ToString();
+    return NOERROR;
+}
+
 //=====================================================================
 //               GlowPadView::AnimatorListenerAdapter_1::
 //=====================================================================

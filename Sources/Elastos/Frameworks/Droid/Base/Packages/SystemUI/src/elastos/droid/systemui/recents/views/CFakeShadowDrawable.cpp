@@ -270,7 +270,7 @@ void CFakeShadowDrawable::BuildShadowCorners()
     (*positions)[1] = startRatio;
     (*positions)[2] = 1.0f;
     AutoPtr<IRadialGradient> radialGradient;
-    CRadialGradient::New(0, 0, mCornerRadius + mShadowSize, *colors, positions,
+    CRadialGradient::New(0, 0, mCornerRadius + mShadowSize, colors, positions,
         ShaderTileMode_CLAMP, (IRadialGradient**)&radialGradient);
     mCornerShadowPaint->SetShader(IShader::Probe(radialGradient));
 

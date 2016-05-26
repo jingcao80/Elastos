@@ -793,7 +793,7 @@ module
             [in] Float x,
             [in] Float y,
             [in] Float radius,
-            [in] ArrayOf<Int32> colors,
+            [in] ArrayOf<Int32>* colors,
             [in] ArrayOf<Float>* positions,
             [in] ShaderTileMode tile);
 
@@ -1042,7 +1042,7 @@ module
         constructor(
             [in] Float cx,
             [in] Float cy,
-            [in] ArrayOf<Int32> colors,
+            [in] ArrayOf<Int32>* colors,
             [in] ArrayOf<Float>* positions);
 
         /**

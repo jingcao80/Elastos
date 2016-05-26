@@ -87,6 +87,13 @@ module
     namespace Keyguard {
 
         interface IViewMediatorCallback {
+            UserActivity();
+
+            KeyguardDone(
+                [in] Boolean authenticated);
+
+            KeyguardDoneDrawing();
+
             SetNeedsInput(
                 [in] Boolean needsInput);
 

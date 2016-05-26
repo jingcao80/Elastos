@@ -13,7 +13,9 @@ const Int32 CLinearGradient::TYPE_COLORS_AND_POSITIONS = 1;
 const Int32 CLinearGradient::TYPE_COLOR_START_AND_COLOR_END = 2;
 
 CAR_OBJECT_IMPL(CLinearGradient);
+
 CAR_INTERFACE_IMPL(CLinearGradient, Shader, ILinearGradient);
+
 CLinearGradient::CLinearGradient()
     : mType(0)
     , mX0(0)
@@ -30,8 +32,8 @@ ECode CLinearGradient::constructor(
     /* [in] */ Float y0,
     /* [in] */ Float x1,
     /* [in] */ Float y1,
-    /* [in] */ const ArrayOf<Int32>* colors,
-    /* [in] */ const ArrayOf<Float>* positions,
+    /* [in] */ ArrayOf<Int32>* colors,
+    /* [in] */ ArrayOf<Float>* positions,
     /* [in] */ ShaderTileMode tile)
 {
     if (colors->GetLength() < 2) {
@@ -47,8 +49,8 @@ ECode CLinearGradient::constructor(
     mY0 = y0;
     mX1 = x1;
     mY1 = y1;
-    mColors = const_cast<ArrayOf<Int32>*>(colors);
-    mPositions = const_cast<ArrayOf<Float>*>(positions);
+    mColors = colors;
+    mPositions = positions;
     mTileMode = tile;
     Init(NativeCreate1(x0, y0, x1, y1, colors, positions, tile));
     return NOERROR;
@@ -80,8 +82,8 @@ Int64 CLinearGradient::NativeCreate1(
     /* [in] */ Float y0,
     /* [in] */ Float x1,
     /* [in] */ Float y1,
-    /* [in] */ const ArrayOf<Int32>* colors,
-    /* [in] */ const ArrayOf<Float>* positions,
+    /* [in] */ ArrayOf<Int32>* colors,
+    /* [in] */ ArrayOf<Float>* positions,
     /* [in] */ ShaderTileMode tileMode)
 {
     SkPoint pts[2];

@@ -55,6 +55,9 @@ private:
             /* [in] */ Int32 location,
             /* [out] */ IInterface** object);
 
+        CARAPI ToString(
+            /* [ou] */ String* str);
+
     private:
         Boolean mSuspended;
     };

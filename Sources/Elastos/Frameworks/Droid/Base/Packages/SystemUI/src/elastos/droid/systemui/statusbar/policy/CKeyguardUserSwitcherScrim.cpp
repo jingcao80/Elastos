@@ -141,7 +141,7 @@ void CKeyguardUserSwitcherScrim::UpdatePaint()
     (*fvs)[0] = Elastos::Core::Math::Max(0.f, mLayoutWidth * INNER_EXTENT / radius);
     (*fvs)[1] = 1.f;
     AutoPtr<IShader> shader;
-    CRadialGradient::New(isLtr ? mLayoutWidth : 0, 0, radius, *ivs, fvs,
+    CRadialGradient::New(isLtr ? mLayoutWidth : 0, 0, radius, ivs, fvs,
                 ShaderTileMode_CLAMP, (IShader**)&shader);
     mRadialGradientPaint->SetShader(shader);
 }

@@ -20,7 +20,8 @@ namespace Phone {
 /**
  * Utility class to calculate the clock position and top padding of notifications on Keyguard.
  */
-class KeyguardClockPositionAlgorithm: public Object
+class KeyguardClockPositionAlgorithm:
+    public Object
 {
 public:
     class Result: public Object
@@ -102,8 +103,6 @@ private:
      * @return a value from 0 to 1 depending on how many notification there are
      */
     CARAPI_(Float) GetNotificationAmountT();
-
-    static CARAPI_(AutoPtr<IPathInterpolator>) InitStatic();
 
 private:
     static const Float SLOW_DOWN_FACTOR;

@@ -13,6 +13,7 @@ const Int32 CRadialGradient::TYPE_COLOR_CENTER_AND_COLOR_EDGE = 2;
 
 CAR_OBJECT_IMPL(CRadialGradient);
 CAR_INTERFACE_IMPL(CRadialGradient, Shader, IRadialGradient);
+
 CRadialGradient::CRadialGradient()
     : mType(0)
     , mX(0)
@@ -27,7 +28,7 @@ ECode CRadialGradient::constructor(
     /* [in] */ Float x,
     /* [in] */ Float y,
     /* [in] */ Float radius,
-    /* [in] */ const ArrayOf<Int32>& colors,
+    /* [in] */ ArrayOf<Int32>* colors,
     /* [in] */ ArrayOf<Float>* positions,
     /* [in] */ ShaderTileMode tile)
 {
@@ -35,11 +36,11 @@ ECode CRadialGradient::constructor(
 //        throw new IllegalArgumentException("radius must be > 0");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    if (colors.GetLength() < 2) {
+    if (colors == NULL || colors->GetLength() < 2) {
 //        throw new IllegalArgumentException("needs >= 2 number of colors");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    if (positions != NULL && colors.GetLength() != positions->GetLength()) {
+    if (positions != NULL && colors->GetLength() != positions->GetLength()) {
 //        throw new IllegalArgumentException("color and position arrays must be of equal length");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -47,7 +48,7 @@ ECode CRadialGradient::constructor(
     mX = x;
     mY = y;
     mRadius = radius;
-    mColors = const_cast<ArrayOf<Int32>* >(&colors);
+    mColors = colors;
     mPositions = positions;
     mTileMode = tile;
     Init(NativeCreate1(x, y, radius, colors, positions, tile));
@@ -83,10 +84,17 @@ ECode CRadialGradient::Copy(
     VALIDATE_NOT_NULL(shader);
     AutoPtr<IShader> copy;
     switch (mType) {
-        case TYPE_COLORS_AND_POSITIONS:
-            CRadialGradient::New(mX, mY, mRadius, *mColors->Clone(),
-                    mPositions != NULL ? mPositions->Clone() : NULL, mTileMode, (IShader**)&copy);
+        case TYPE_COLORS_AND_POSITIONS: {
+            AutoPtr<ArrayOf<Int32> > colors = mColors->Clone();
+            AutoPtr<ArrayOf<Float> > positions;
+            if (mPositions) {
+                positions = mPositions->Clone();
+            }
+            CRadialGradient::New(mX, mY, mRadius, colors,
+                positions, mTileMode, (IShader**)&copy);
             break;
+        }
+
         case TYPE_COLOR_CENTER_AND_COLOR_EDGE:
             CRadialGradient::New(mX, mY, mRadius, mCenterColor, mEdgeColor, mTileMode, (IShader**)&copy);
             break;
@@ -106,15 +114,15 @@ Int64 CRadialGradient::NativeCreate1(
     /* [in] */ Float x,
     /* [in] */ Float y,
     /* [in] */ Float radius,
-    /* [in] */ const ArrayOf<Int32>& colors,
+    /* [in] */ ArrayOf<Int32>* colors,
     /* [in] */ ArrayOf<Float>* positions,
     /* [in] */ ShaderTileMode tile)
 {
     SkPoint center;
     center.set(x, y);
 
-    size_t count = (size_t)colors.GetLength();
-    const Int32* colorValues = colors.GetPayload();
+    size_t count = (size_t)colors->GetLength();
+    const Int32* colorValues = colors->GetPayload();
 
     // AutoJavaFloatArray autoPos(env, posArray, count);
     assert(positions->GetLength() >= count);

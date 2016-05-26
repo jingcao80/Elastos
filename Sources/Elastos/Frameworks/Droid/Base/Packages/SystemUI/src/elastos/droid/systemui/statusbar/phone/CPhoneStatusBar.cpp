@@ -5145,8 +5145,9 @@ ECode CPhoneStatusBar::UpdateStackScrollerState(
 ECode CPhoneStatusBar::UserActivity()
 {
     if (mState == IStatusBarState::KEYGUARD) {
-        assert(0 && "TODO");
-        // mKeyguardViewMediatorCallback->UserActivity();
+        if (mKeyguardViewMediatorCallback != NULL) {
+            mKeyguardViewMediatorCallback->UserActivity();
+        }
     }
     return NOERROR;
 }

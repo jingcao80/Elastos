@@ -928,7 +928,7 @@ Boolean GradientDrawable::EnsureValidRect()
         mRect->Set(bounds->mLeft + inset, bounds->mTop + inset,
                    bounds->mRight - inset, bounds->mBottom - inset);
 
-        ArrayOf<Int32>* colors = st->mColors;
+        AutoPtr<ArrayOf<Int32> > colors = st->mColors;
         if (colors != NULL) {
             CRectF* r = (CRectF*)mRect.Get();
             Float x0, x1, y0, y1;
@@ -1007,7 +1007,7 @@ Boolean GradientDrawable::EnsureValidRect()
 
                 AutoPtr<IRadialGradient> shader;
                 CRadialGradient::New(
-                        x0, y0, radius, *colors, NULL, ShaderTileMode_CLAMP, (IRadialGradient**)&shader);
+                        x0, y0, radius, colors, NULL, ShaderTileMode_CLAMP, (IRadialGradient**)&shader);
                 mFillPaint->SetShader(IShader::Probe(shader));
             }
             else if (st->mGradient == IGradientDrawable::SWEEP_GRADIENT) {
@@ -1042,7 +1042,7 @@ Boolean GradientDrawable::EnsureValidRect()
 
                 }
                 AutoPtr<IShader> shader;
-                CSweepGradient::New(x0, y0, *tempColors, tempPositions, (IShader**)&shader);
+                CSweepGradient::New(x0, y0, tempColors, tempPositions, (IShader**)&shader);
                 mFillPaint->SetShader(shader);
             }
 

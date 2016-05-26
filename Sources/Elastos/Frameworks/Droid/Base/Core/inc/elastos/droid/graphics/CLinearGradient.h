@@ -36,8 +36,8 @@ public:
         /* [in] */ Float y0,
         /* [in] */ Float x1,
         /* [in] */ Float y1,
-        /* [in] */ const ArrayOf<Int32>* colors,
-        /* [in] */ const ArrayOf<Float>* positions,
+        /* [in] */ ArrayOf<Int32>* colors,
+        /* [in] */ ArrayOf<Float>* positions,
         /* [in] */ ShaderTileMode tile);
 
     /** Create a shader that draws a linear gradient along a line.
@@ -64,8 +64,8 @@ private:
         /* [in] */ Float y0,
         /* [in] */ Float x1,
         /* [in] */ Float y1,
-        /* [in] */ const ArrayOf<Int32>* colors,
-        /* [in] */ const ArrayOf<Float>* positions,
+        /* [in] */ ArrayOf<Int32>* colors,
+        /* [in] */ ArrayOf<Float>* positions,
         /* [in] */ ShaderTileMode tileMode);
 
     CARAPI_(Int64) NativeCreate2(

@@ -326,7 +326,6 @@ AnimatorSet::AnimatorSet()
     , mDuration(-1)
     , mReversible(TRUE)
 {
-    Logger::I(TAG, " >>>> Create AnimatorSet : 0x%0x =====================", this);
 }
 
 ECode AnimatorSet::constructor()
@@ -336,7 +335,6 @@ ECode AnimatorSet::constructor()
 
 AnimatorSet::~AnimatorSet()
 {
-    Logger::I(TAG, " >>>> Destory AnimatorSet: 0x%0x =====================", this);
 }
 
 ECode AnimatorSet::PlayTogether(
