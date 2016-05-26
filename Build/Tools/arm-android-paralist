@@ -443,8 +443,9 @@
 > Elastos/Packages/Apps/Launcher2/src/elastos/droid/launcher2
 
 # ==== Elastos/Packages/InputMethods ====
-> Elastos/Packages/InputMethods/PinyinIME/src/elastos/droid/inputmethod/pinyin Elastos.Droid.InputMethod.Pinyin.car
-> Elastos/Packages/InputMethods/PinyinIME/src/elastos/droid/inputmethod/pinyin
+> Elastos/Packages/InputMethods/PinyinIME Elastos.Droid.InputMethod.Pinyin.car
+> Elastos/Packages/InputMethods/PinyinIME/src/elastos/droid/inputmethod/pinyin/share
+> Elastos/Packages/InputMethods/PinyinIME
 
 # ==== build Packages/Providers/MediaProvider ====
 > Elastos/Packages/Providers/MediaProvider/src/elastos/droid/providers/media Elastos.Droid.Providers.Media.car

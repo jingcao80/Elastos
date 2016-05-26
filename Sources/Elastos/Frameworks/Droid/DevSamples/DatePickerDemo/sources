@@ -1,0 +1,29 @@
+TARGET_NAME = Elastos.DevSamples.DatePickerDemo
+TARGET_TYPE = eco
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+include $(MAKEDIR)/../../sources.inc
+INCLUDES += $(MAKEDIR)
+INCLUDES += $(MAKEDIR)/src
+
+VPATH += $(MAKEDIR)/src/elastos/devsamples/datepickerdemo
+
+SOURCES = Elastos.DevSamples.DatePickerDemo.car
+SOURCES += R.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += Elastos.Droid.Core.cpp
+SOURCES += CActivityOne.cpp
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += -lm -licuuc -llog
+
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;
+APP_PACKAGE_NAME = Elastos.DevSamples.DatePickerDemo
+RES_NAMESPACE = Elastos.DevSamples.DatePickerDemo

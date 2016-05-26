@@ -1,0 +1,338 @@
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/GridLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:rowCount="6"
+    android:columnCount="4"
+    android:orientation="horizontal">
+
+    <TextView
+        android:layout_columnSpan="4"
+        android:text="0"
+        android:textSize="50sp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        />
+
+    <Button
+        android:text="0"
+        android:layout_columnSpan="2"
+        android:layout_gravity="fill"
+        />
+    <Button
+        android:text="+"
+        />
+   <Button
+        android:text="1"
+        />
+
+
+    <Button
+        android:text="2"
+        />
+    <Button
+        android:text="清空"
+        android:layout_columnSpan="2"
+        android:layout_gravity="fill"
+        />
+    <Button
+        android:text="3"
+        />
+<!--     <Button
+        android:text="-"
+        />
+    <Button
+        android:text="4"
+        />
+    <Button
+        android:text="5"
+        />
+    <Button
+        android:text="6"
+        />
+    <Button
+        android:text="*"
+        />
+    <Button
+        android:text="7"
+        />
+    <Button
+        android:text="8"
+        />
+    <Button
+        android:text="9"
+        />
+    <Button
+        android:text="/"
+        />
+    <Button
+        android:text="."
+        />
+    <Button
+        android:text="0"
+        />
+    <Button
+        android:text="="
+        /> -->
+</GridLayout>
+
+
+<!-- <?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:rowCount="6"
+    android:columnCount="4"
+    android:orientation="horizontal"
+    android:layout_gravity="center" 
+    android:layout_margin="20dp">
+    <TextView
+        android:layout_columnSpan="4"
+        android:text="00000000000000000"
+        android:textSize="50sp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+    />
+
+    <Button
+        android:text="2"
+        android:layout_row="5"
+        android:layout_column="1"
+    />
+
+    <Button
+        android:text="3"
+        android:layout_row="5"
+        android:layout_column="2"
+    />
+
+    <Button
+        android:text="1"
+        android:layout_row="5"
+        android:layout_column="0"
+    />
+
+    <Button
+        android:text="4"
+        android:layout_row="5"
+        android:layout_column="3"
+    />
+
+    <Button
+        android:text="清空清空清空清空"
+        android:layout_row="1"
+        android:layout_column="0"
+        android:layout_columnSpan="2"
+        android:layout_rowSpan="2"
+        android:layout_gravity="fill"  
+    />
+
+    <Button
+        android:text="回退回退回退回退"
+        android:layout_row="3"
+        android:layout_column="2"
+        android:layout_columnSpan="2"
+        android:layout_rowSpan="2"
+        android:layout_gravity="fill"  
+    />
+
+    <Button
+        android:text="+"
+        android:layout_row="1"
+        android:layout_column="3"
+    />
+    <Button
+        android:text="-"
+        android:layout_row="2"
+        android:layout_column="2"
+    />
+
+    <Button
+        android:text="*"
+        android:layout_row="3"
+        android:layout_column="1"
+    />
+    <Button
+        android:text="/"
+        android:layout_row="4"
+        android:layout_column="0"
+    />
+</GridLayout> -->
+
+
+
+
+<!-- <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="20dp"
+    android:columnCount="4"
+    android:orientation="horizontal"
+    android:rowCount="8" >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_columnSpan="4"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="right"
+        android:text="thinking牌计算器" />
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_columnSpan="4"
+        android:layout_margin="10dp"
+        android:background="#eee"
+        android:textSize="40dp" />
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_columnSpan="4"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:text="清除" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_marginLeft="10dp"
+        android:layout_row="3"
+        android:text="9" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="1"
+        android:layout_row="3"
+        android:text="8" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="2"
+        android:layout_row="3"
+        android:text="7" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="3"
+        android:layout_gravity="fill_horizontal"
+        android:layout_marginRight="10dp"
+        android:layout_row="3"
+        android:text="+" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_marginLeft="10dp"
+        android:layout_row="4"
+        android:text="6" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="1"
+        android:layout_row="4"
+        android:text="5" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="2"
+        android:layout_row="4"
+        android:text="4" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="3"
+        android:layout_gravity="fill_horizontal"
+        android:layout_marginRight="10dp"
+        android:layout_row="4"
+        android:text="-" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_marginLeft="10dp"
+        android:layout_row="5"
+        android:text="3" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="1"
+        android:layout_row="5"
+        android:text="2" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="2"
+        android:layout_row="5"
+        android:text="1" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="3"
+        android:layout_gravity="fill_horizontal"
+        android:layout_marginRight="10dp"
+        android:layout_row="5"
+        android:text="*" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_columnSpan="3"
+        android:layout_gravity="fill_horizontal"
+        android:layout_marginLeft="10dp"
+        android:text="0" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="3"
+        android:layout_gravity="fill_horizontal"
+        android:layout_marginRight="10dp"
+        android:layout_row="6"
+        android:text="/" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_columnSpan="4"
+        android:layout_gravity="fill_horizontal"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:text="=" />
+
+
+</GridLayout>
+ -->
