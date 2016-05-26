@@ -11,7 +11,9 @@ namespace StatusBar {
 namespace Phone {
 
 const Float BounceInterpolator::SCALE_FACTOR = 7.5625f;
+
 CAR_INTERFACE_IMPL_3(BounceInterpolator, Object, IBounceInterpolator, IInterpolator, ITimeInterpolator);
+
 ECode BounceInterpolator::GetInterpolation(
     /* [in] */ Float t,
     /* [out] */ Float* value)
@@ -33,6 +35,14 @@ ECode BounceInterpolator::GetInterpolation(
         return NOERROR;
     }
     *value = 1;
+    return NOERROR;
+}
+
+ECode BounceInterpolator::HasNativeInterpolator(
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res);
+    *res = FALSE;
     return NOERROR;
 }
 

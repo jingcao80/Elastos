@@ -24,7 +24,8 @@ namespace Animation {
 
 CAR_OBJECT_IMPL(CDecelerateInterpolator);
 
-CAR_INTERFACE_IMPL_4(CDecelerateInterpolator, Object, IDecelerateInterpolator, INativeInterpolatorFactory, IInterpolator, ITimeInterpolator);
+CAR_INTERFACE_IMPL_4(CDecelerateInterpolator, Object, IDecelerateInterpolator, \
+    INativeInterpolatorFactory, IInterpolator, ITimeInterpolator);
 
 CDecelerateInterpolator::CDecelerateInterpolator()
     : mFactor(1.0f)

@@ -34,6 +34,9 @@ public:
         /* [in] */ Float t,
         /* [out] */ Float* value);
 
+    CARAPI HasNativeInterpolator(
+        /* [out] */ Boolean* res);
+
 private:
     static const Float SCALE_FACTOR;
 };

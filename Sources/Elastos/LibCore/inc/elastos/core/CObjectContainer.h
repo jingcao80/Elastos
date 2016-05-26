@@ -13,6 +13,8 @@ namespace Core{
 CarClass(CObjectContainer), public SimpleContainer
 {
 public:
+    CAR_OBJECT_DECL()
+
     CObjectContainer();
 
     virtual ~CObjectContainer();

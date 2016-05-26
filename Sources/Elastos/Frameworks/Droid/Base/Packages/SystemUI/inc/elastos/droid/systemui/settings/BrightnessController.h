@@ -9,7 +9,6 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/droid/database/ContentObserver.h>
 #include "elastos/droid/systemui/settings/CurrentUserTracker.h"
-#include "elastos/droid/systemui/settings/CToggleSlider.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::ContentObserver;
@@ -26,9 +25,35 @@ namespace Settings {
 
 class BrightnessController
     : public Object
-    , public IToggleSliderListener
 {
 private:
+    class ToggleSliderListener
+        : public Object
+        , public IToggleSliderListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("BrightnessController::ToggleSliderListener")
+
+        ToggleSliderListener(
+            /* [in] */ BrightnessController* host);
+
+        // @Override
+        CARAPI OnInit(
+            /* [in] */ IToggleSlider* control);
+
+        // @Override
+        CARAPI OnChanged(
+            /* [in] */ IToggleSlider* view,
+            /* [in] */ Boolean tracking,
+            /* [in] */ Boolean automatic,
+            /* [in] */ Int32 value);
+
+    private:
+        BrightnessController* mHost;
+    };
+
     /** ContentObserver to watch brightness **/
     class BrightnessObserver
         : public ContentObserver
@@ -107,12 +132,10 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     BrightnessController(
         /* [in] */ IContext* context,
         /* [in] */ IImageView* icon,
-        /* [in] */ CToggleSlider* control);
+        /* [in] */ IToggleSlider* control);
 
     CARAPI_(void) AddStateChangedCallback(
         /* [in] */ IBrightnessStateChangeCallback* cb);
@@ -120,21 +143,10 @@ public:
     CARAPI_(Boolean) RemoveStateChangedCallback(
         /* [in] */ IBrightnessStateChangeCallback* cb);
 
-    // @Override
-    CARAPI OnInit(
-        /* [in] */ IToggleSlider* control);
-
     CARAPI_(void) RegisterCallbacks();
 
     /** Unregister all call backs, both to and from the controller */
     CARAPI_(void) UnregisterCallbacks();
-
-    // @Override
-    CARAPI OnChanged(
-        /* [in] */ IToggleSlider* view,
-        /* [in] */ Boolean tracking,
-        /* [in] */ Boolean automatic,
-        /* [in] */ Int32 value);
 
 private:
     CARAPI_(void) SetMode(
@@ -156,6 +168,8 @@ private:
     CARAPI_(void) UpdateSlider();
 
 private:
+    friend class ToggleSliderListener;
+
     const static String TAG;
     const static Boolean SHOW_AUTOMATIC_ICON;
 
@@ -170,7 +184,7 @@ private:
 
     AutoPtr<IContext> mContext;
     AutoPtr<IImageView> mIcon;
-    AutoPtr<CToggleSlider> mControl;
+    AutoPtr<IToggleSlider> mControl;
     Boolean mAutomaticAvailable;
     AutoPtr<IIPowerManager> mPower;
     AutoPtr<CurrentUserTracker> mUserTracker;
@@ -182,6 +196,7 @@ private:
     Boolean mAutomatic;
     Boolean mListening;
     Boolean mExternalChange;
+    AutoPtr<IToggleSliderListener> mToggleSliderListener;
 };
 
 } // namespace Settings

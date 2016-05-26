@@ -333,8 +333,12 @@ const Float CNotificationStackScrollLayout::RUBBER_BAND_FACTOR_NORMAL = 0.35f;
 const Float CNotificationStackScrollLayout::RUBBER_BAND_FACTOR_AFTER_EXPAND = 0.15f;
 const Float CNotificationStackScrollLayout::RUBBER_BAND_FACTOR_ON_PANEL_EXPAND = 0.21f;
 const Int32 CNotificationStackScrollLayout::INVALID_POINTER = -1;
+
 CAR_INTERFACE_IMPL_5(CNotificationStackScrollLayout, ViewGroup, INotificationStackScrollLayout \
-    , ISwipeHelperCallback, IExpandHelperCallback, IScrollAdapter, IExpandableViewOnHeightChangedListener);
+    , ISwipeHelperCallback, IExpandHelperCallback, IScrollAdapter, IExpandableViewOnHeightChangedListener)
+
+CAR_OBJECT_IMPL(CNotificationStackScrollLayout)
+
 CNotificationStackScrollLayout::CNotificationStackScrollLayout()
     : mSwipingInProgress(FALSE)
     , mCurrentStackHeight(Elastos::Core::Math::INT32_MAX_VALUE)

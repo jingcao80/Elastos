@@ -2,7 +2,7 @@
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/widget/ScrollView.h"
-// #include "elastos/droid/os/CStrictMode.h";
+#include "elastos/droid/os/CStrictMode.h"
 #include "elastos/droid/widget/COverScroller.h"
 #include "elastos/droid/widget/CFrameLayoutLayoutParams.h"
 #include "elastos/droid/widget/CEdgeEffect.h"
@@ -41,7 +41,7 @@ using Elastos::Droid::View::IInputEvent;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::Animation::AnimationUtils;
-// using Elastos::Droid::Os::CStrictMode;
+using Elastos::Droid::Os::CStrictMode;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -595,8 +595,7 @@ ECode ScrollView::OnInterceptTouchEvent(
                 mNestedYOffset = 0;
                 if (mScrollStrictSpan == NULL) {
                     AutoPtr<IStrictMode> mode;
-                    assert(0 && "TODO");
-                    // CStrictMode::AcquireSingleton((IStrictMode**)&mode);
+                    CStrictMode::AcquireSingleton((IStrictMode**)&mode);
                     mode->EnterCriticalSpan(String("ScrollView-scroll"), (IStrictModeSpan**)&mScrollStrictSpan);
                 }
                 AutoPtr<IViewParent> parent;
@@ -638,8 +637,7 @@ ECode ScrollView::OnInterceptTouchEvent(
 
             if (mIsBeingDragged && mScrollStrictSpan == NULL) {
                 AutoPtr<IStrictMode> mode;
-                assert(0 && "TODO");
-                // CStrictMode::AcquireSingleton((IStrictMode**)&mode);
+                CStrictMode::AcquireSingleton((IStrictMode**)&mode);
                 mode->EnterCriticalSpan(String("ScrollView-scroll"), (IStrictModeSpan**)&mScrollStrictSpan);
             }
 
@@ -1907,8 +1905,7 @@ ECode ScrollView::Fling(
 
         if (mFlingStrictSpan == NULL) {
             AutoPtr<IStrictMode> mode;
-            assert(0 && "TODO");
-            // CStrictMode::AcquireSingleton((IStrictMode**)&mode);
+            CStrictMode::AcquireSingleton((IStrictMode**)&mode);
             mode->EnterCriticalSpan(String("ScrollView-fling"), (IStrictModeSpan**)&mFlingStrictSpan);
         }
 

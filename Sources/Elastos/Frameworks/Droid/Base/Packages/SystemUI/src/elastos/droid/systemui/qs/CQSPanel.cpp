@@ -208,8 +208,11 @@ ECode CQSPanel::OnClickListener3::OnClick(
 }
 
 const Float CQSPanel::TILE_ASPECT = 1.2f;
+
 CAR_OBJECT_IMPL(CQSPanel)
+
 CAR_INTERFACE_IMPL(CQSPanel, ViewGroup, IQSPanel)
+
 CQSPanel::CQSPanel()
     : mColumns(0)
     , mCellWidth(0)
@@ -223,10 +226,6 @@ CQSPanel::CQSPanel()
     , mListening(FALSE)
     , mGridContentVisible(TRUE)
 {
-    CArrayList::New((IArrayList**)&mRecords);
-    mHandler = new H(this);
-    mTeardownDetailWhenDone = new TeardownDetailWhenDone(this);
-    mHideGridContentWhenDone = new HideGridContentWhenDone(this);
 }
 
 ECode CQSPanel::constructor(
@@ -241,6 +240,11 @@ ECode CQSPanel::constructor(
 {
     ViewGroup::constructor(context, attrs);
     mContext = context;
+
+    CArrayList::New((IArrayList**)&mRecords);
+    mHandler = new H(this);
+    mTeardownDetailWhenDone = new TeardownDetailWhenDone(this);
+    mHideGridContentWhenDone = new HideGridContentWhenDone(this);
 
     AutoPtr<ILayoutInflater> inflater;
     LayoutInflater::From(context, (ILayoutInflater**)&inflater);
@@ -273,7 +277,7 @@ ECode CQSPanel::constructor(
     AutoPtr<IView> v;
     FindViewById(R::id::brightness_slider, (IView**)&v);
     mBrightnessController = new BrightnessController(ctx, IImageView::Probe(view),
-            (CToggleSlider*)IToggleSlider::Probe(v));
+        IToggleSlider::Probe(v));
 
     AutoPtr<DetailDoneButtonOnClickListener> cl = new DetailDoneButtonOnClickListener(this);
     IView::Probe(mDetailDoneButton)->SetOnClickListener(cl);
@@ -443,7 +447,7 @@ void CQSPanel::ShowDetail(
     /* [in] */ Record* r)
 {
     AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(H::SHOW_DETAIL, show ? 1 : 0, 0, r->Probe(EIID_IQSPanelRecord), (IMessage**)&msg);
+    mHandler->ObtainMessage(H::SHOW_DETAIL, show ? 1 : 0, 0, IQSPanelRecord::Probe(r), (IMessage**)&msg);
     msg->SendToTarget();
 }
 
@@ -536,7 +540,7 @@ void CQSPanel::HandleShowDetail(
     /* [in] */ Record* r,
     /* [in] */ Boolean show)
 {
-    if (r->Probe(EIID_IQSPanelTileRecord) != NULL) {
+    if (IQSPanelTileRecord::Probe(r) != NULL) {
         HandleShowDetailTile((TileRecord*)r, show);
     }
     else {
@@ -803,7 +807,7 @@ void CQSPanel::SetDetailRecord(
 {
     if (r == mDetailRecord) return;
     mDetailRecord = r;
-    const Boolean scanState = mDetailRecord->Probe(EIID_IQSPanelTileRecord) != NULL
+    const Boolean scanState = IQSPanelTileRecord::Probe(mDetailRecord) != NULL
             && ((TileRecord*) mDetailRecord.Get())->mScanState;
     FireScanStateChanged(scanState);
 }

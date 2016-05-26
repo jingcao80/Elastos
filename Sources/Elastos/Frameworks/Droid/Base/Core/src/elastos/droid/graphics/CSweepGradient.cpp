@@ -103,7 +103,7 @@ Int64 CSweepGradient::NativeCreate1(
 
     // AutoJavaFloatArray autoPos(env, jpositions, count);
 #ifdef SK_SCALAR_IS_FLOAT
-    SkScalar* pos = positions->GetPayload();
+    SkScalar* pos = positions ? positions->GetPayload() : NULL;
 #else
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
