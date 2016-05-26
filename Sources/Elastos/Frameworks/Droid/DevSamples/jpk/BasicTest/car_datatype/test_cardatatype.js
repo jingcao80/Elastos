@@ -19,26 +19,13 @@ ElastosTest.fnTestCarDataType = function(looptimes) {
 
 elog("fnTestCarDataType begin : " + looptimes);
 
-
 var a = [];
 var s = "";
 var p = 0;
 
 try {
-    //var sEcoName = "/data/elastos/JSTestCarDataType.eco";
-    //var sClassName = "CTestCarDataType";
     var sEcoName = "../../bin/Elastos.DevSamples.Node.CarRuntime.eco";
-
-// namespace Elastos {
-// namespace DevSamples {
-// namespace Node {
-// namespace CarRuntime {
-
-// CarClass(CTestCarDataType)
-
-
     var sClassName = "Elastos.DevSamples.Node.CarRuntime.CTestCarDataType";
-
     var oCarObject = elastos.require(sEcoName, sClassName);
 
     function sv() {return this;}
@@ -147,6 +134,16 @@ try {
             a.push(sFunName + "========" + oProp.sa.call(oCarObject[sFunName](oProp.va)));
         }
     }
+
+    oCarObject.Test_AddEventListener({
+        OnEvent1 : function(ai_eventId){
+            elog("========OnEvent1 : " + ai_eventId);
+        },
+        OnEvent2 : function(as_eventStr){
+            elog("========OnEvent2 : " + as_eventStr);
+        }
+    });
+
 } catch(e) {
     a.push("test error at p = " + p + "\r\n" + e);
 }

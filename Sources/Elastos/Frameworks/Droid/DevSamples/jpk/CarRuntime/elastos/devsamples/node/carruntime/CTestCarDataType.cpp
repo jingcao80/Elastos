@@ -6,9 +6,23 @@ namespace DevSamples {
 namespace Node {
 namespace CarRuntime {
 
-CAR_INTERFACE_IMPL(CTestCarDataType, Object, ITestCarDataType)
+CAR_INTERFACE_IMPL_2(CTestCarDataType, Object, ITestCarDataType, ITestCarRuntime)
 
 CAR_OBJECT_IMPL(CTestCarDataType)
+
+CTestCarDataType::_Thread::_Thread(
+    /* [in] */ ITestEventListener* listener)
+    : mListener(listener)
+{
+    Thread::constructor(String("CTestCarDataType::_Thread"));
+}
+
+ECode CTestCarDataType::_Thread::Run()
+{
+    ALOGD("==== File: %s, Line: %d, tid: %d ====", __FILE__, __LINE__, gettid());
+    mListener->OnEvent2(String("Hello Elastos Callback!"));
+    return NOERROR;
+}
 
 ECode CTestCarDataType::Test_NULL()
 {
@@ -454,6 +468,52 @@ ECode CTestCarDataType::Test_Interface_Ref(
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
+}
+
+ECode CTestCarDataType::Test_CreateInstance(
+    /* [in] */ const String& moduleName,
+    /* [in] */ const String& className,
+    /* [out] */ IInterface** object)
+{
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    assert(object != NULL);
+
+    AutoPtr<IModuleInfo> moduleInfo;
+    ECode ec = _CReflector_AcquireModuleInfo(
+            moduleName, (IModuleInfo**)&moduleInfo);
+    if (FAILED(ec)) {
+        ALOGD("Acquire \"%s\" module info failed!\n", moduleName.string());
+        return ec;
+    }
+
+    AutoPtr<IClassInfo> classInfo;
+    ec = moduleInfo->GetClassInfo(
+            className, (IClassInfo**)&classInfo);
+    if (FAILED(ec)) {
+        ALOGD("Acquire \"%s\" class info failed!\n", className.string());
+        return ec;
+    }
+
+    AutoPtr<IInterface> testObject;
+    ec = classInfo->CreateObject((IInterface**)&testObject);
+    if (FAILED(ec)) {
+        ALOGD("Create object failed!\n");
+        return ec;
+    }
+
+    *object = testObject;
+    REFCOUNT_ADD(*object);
+    return NOERROR;
+}
+
+ECode CTestCarDataType::Test_AddEventListener(
+    /* [in] */ ITestEventListener* listener)
+{
+    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
+    listener->OnEvent1(9);
+    AutoPtr<_Thread> t = new _Thread(listener);
+    t->Start();
+    return NOERROR;
 }
 
 }

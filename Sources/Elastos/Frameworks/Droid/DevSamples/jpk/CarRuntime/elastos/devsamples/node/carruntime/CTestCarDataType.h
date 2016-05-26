@@ -6,6 +6,9 @@
 
 #include <elastos/droid/ext/frameworkdef.h>
 #include <elastos/core/Object.h>
+#include <elastos/core/Thread.h>
+
+using Elastos::Core::Thread;
 
 namespace Elastos {
 namespace DevSamples {
@@ -15,7 +18,22 @@ namespace CarRuntime {
 CarClass(CTestCarDataType)
     , public Object
     , public ITestCarDataType
+    , public ITestCarRuntime
 {
+public:
+    class _Thread
+        : public Thread
+    {
+    public:
+        _Thread(
+            /* [in] */ ITestEventListener* listener);
+
+        CARAPI Run();
+
+    private:
+        AutoPtr<ITestEventListener> mListener;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -194,6 +212,14 @@ public:
     CARAPI Test_Interface_Ref(
         /* [in] */ IInterface ** inValue,
         /* [out] */ IInterface ** ppOutValue);
+
+    CARAPI Test_CreateInstance(
+        /* [in] */ const String& moduleName,
+        /* [in] */ const String& className,
+        /* [out] */ IInterface** object);
+
+    CARAPI Test_AddEventListener(
+        /* [in] */ ITestEventListener* listener);
 
 private:
     // TODO: Add your private member variables here.

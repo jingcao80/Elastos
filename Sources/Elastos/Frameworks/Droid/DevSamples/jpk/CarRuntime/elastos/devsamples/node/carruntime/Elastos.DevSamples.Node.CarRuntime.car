@@ -315,6 +315,16 @@ module
             [out] IInterface** outValue);
     }
 
+    interface ITestCarRuntime {
+        Test_CreateInstance(
+            [in] String moduleName,
+            [in] String className,
+            [out] IInterface** object);
+
+        Test_AddEventListener(
+            [in] ITestEventListener* listener);
+    }
+
     [deprecated]
     interface IMethodTest {
         TestMethod_00();
@@ -1639,6 +1649,7 @@ module
 
     class CTestCarDataType {
         interface ITestCarDataType;
+        interface ITestCarRuntime;
     }
 
     class CTestProperty {
