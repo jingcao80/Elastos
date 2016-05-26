@@ -362,7 +362,7 @@ ECode CTreeSet::GetSubSet(
 {
     VALIDATE_NOT_NULL(outsort)
     AutoPtr<INavigableSet> ns;
-    GetSubSet(start, TRUE, end, FALSE, (INavigableSet**)&ns);
+    FAIL_RETURN(GetSubSet(start, TRUE, end, FALSE, (INavigableSet**)&ns));
     *outsort = ISortedSet::Probe(ns);
     REFCOUNT_ADD(*outsort);
     return NOERROR;

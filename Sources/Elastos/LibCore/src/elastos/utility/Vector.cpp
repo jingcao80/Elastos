@@ -241,6 +241,10 @@ ECode Vector::ContainsAll(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    if (NULL == collection) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
     {    AutoLock syncLock(this);
         AbstractList::ContainsAll(collection, result);
     }
@@ -250,7 +254,10 @@ ECode Vector::ContainsAll(
 ECode Vector::CopyInto(
     /* [in] */ ArrayOf<IInterface*>* elements)
 {
-    VALIDATE_NOT_NULL(elements);
+    if (NULL == elements) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
     {    AutoLock syncLock(this);
         elements->Copy(mElementData, mElementCount);
     }
@@ -718,7 +725,7 @@ ECode Vector::Set(
         /* [in] */ Int32 location,
         /* [in] */ IInterface* object)
 {
-    return AbstractList::Set(location, object);
+    return Set(location, object, NULL);
 }
 
 ECode Vector::Set(
@@ -726,13 +733,14 @@ ECode Vector::Set(
     /* [in] */ IInterface* object,
     /* [out] */ IInterface** prevObject)
 {
-    VALIDATE_NOT_NULL(prevObject)
     {    AutoLock syncLock(this);
         if (location >= 0 && location < mElementCount) {
             AutoPtr<IInterface> result = (*mElementData)[location];
             mElementData->Set(location, object);
-            *prevObject = result;
-            REFCOUNT_ADD(*prevObject);
+            if (prevObject) {
+                *prevObject = result;
+                REFCOUNT_ADD(*prevObject);
+            }
             return NOERROR;
         }
     }
