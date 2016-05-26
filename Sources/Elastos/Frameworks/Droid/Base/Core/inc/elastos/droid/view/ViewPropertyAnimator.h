@@ -39,9 +39,9 @@ public:
             /* [in] */ Int32 nameConstant,
             /* [in] */ Float fromeValue,
             /* [in] */ Float deltaValue)
-            : mNameConstant(0)
-            , mFromValue(0)
-            , mDeltaValue(0)
+            : mNameConstant(nameConstant)
+            , mFromValue(fromeValue)
+            , mDeltaValue(deltaValue)
         {}
 
         Int32 mNameConstant;
