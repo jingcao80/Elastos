@@ -52,7 +52,7 @@ ECode CActivityOne::OnCreate(
 
     myHandler = mHandler;
 
-    mPackageName = String("JSTextViewDemo");
+    mPackageName = String("Elastos.DevSamples.Node.JSTextViewDemo");
     mActivityName = String("CActivityOne");
 
     AutoPtr<IInterface> helper;

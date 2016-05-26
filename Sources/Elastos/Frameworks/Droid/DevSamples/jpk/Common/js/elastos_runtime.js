@@ -1,6 +1,21 @@
 module.exports = function (api) {
 
-var _Runtime_Native = api.require("/data/elastos/" + "JSCarRoot.eco", "CCarRoot");
+elog('==========elasto_runtime.js begin.0===========');
+elog('==========elasto_runtime.js begin.1===========' + typeof api.require);
+
+//var _Runtime_Native = api.require("/data/elastos/" + "JSCarRoot.eco", "CCarRoot");
+//var _Runtime_Native = api.require("/data/temp/node/bin/Elastos.DevSamples.Node.CarRuntime.eco", "CCarRuntime");
+
+//var _Runtime_Native = api.require("/data/temp/node/bin/Elastos.DevSamples.Node.CarRuntime.eco", "CTestCarDataType");
+
+//var sEcoName = "../../bin/Elastos.DevSamples.Node.CarRuntime.eco";
+var sEcoName = "/data/temp/node/bin/Elastos.DevSamples.Node.CarRuntime.eco";
+//var sClassName = "Elastos.DevSamples.Node.CarRuntime.CTestCarDataType";
+var sClassName = "Elastos.DevSamples.Node.CarRuntime.CCarRuntime";
+
+var _Runtime_Native = api.require(sEcoName, sClassName);
+
+elog('==========elasto_runtime.js begin.2===========');
 
 var _getModuleInfo = function (asEcoName) {
     return _Runtime_Native.Test_Require_ModuleInfo(asEcoName);
@@ -157,7 +172,7 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
 
         var bFoundConstructor = (i < im);
         if (!bFoundConstructor) {
-            whmlog('====classinfo__createObject====can not find constructor ==============');
+            elog('====classinfo__createObject====can not find constructor ==============');
             return null;
         }
 
@@ -217,25 +232,25 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                     break;
                 case CarDataType.LocalPtr:
                     //to be finished
-                    whmlog('==============classinfo__createObject ===========LocalPtr====begin====');
+                    elog('==============classinfo__createObject ===========LocalPtr====begin====');
                     //oArgumentList.SetInputArgumentOfLocalPtr(i,arguments[i+2]);
                     var tmp = [1,2,3];
                     oArgumentList.SetInputArgumentOfLocalPtr(tmp,i,arguments[i+2]);
-                    whmlog('==============classinfo__createObject ===========LocalPtr====end====');
+                    elog('==============classinfo__createObject ===========LocalPtr====end====');
                     break;
                 default:
                     var sCarDataType = getDataTypeCarString(iDataType);
-                    whmlog('==============argument type: to be finished===========rc:'+ i +'======datatype:'+iDataType);
+                    elog('==============argument type: to be finished===========rc:'+ i +'======datatype:'+iDataType);
                     break;
             }
         }
 
-        whmlog('==============oConstructorInfo.GetAnnotation===========type: ' + typeof(oConstructorInfo.GetAnnotation));
+        elog('==============oConstructorInfo.GetAnnotation===========type: ' + typeof(oConstructorInfo.GetAnnotation));
         var aa=[];
         for (var p in oConstructorInfo)aa.push(p);
-        whmlog('==============oConstructorInfo.GetAnnotation===========methods list: ' + aa.join("--"));
+        elog('==============oConstructorInfo.GetAnnotation===========methods list: ' + aa.join("--"));
         var sAnnotation = oConstructorInfo.GetAnnotation();
-        whmlog('==============oConstructorInfo.GetAnnotation===========value: ' + sAnnotation);
+        elog('==============oConstructorInfo.GetAnnotation===========value: ' + sAnnotation);
 
         newObject = oConstructorInfo.CreateObject(oArgumentList);
     }

@@ -68,7 +68,8 @@ ECode CTestEventListener::_Thread::Run()
     Int32 length_0 = sizeof(processName);
     snprintf(argv[0], length_0 + 1, "%s", processName);
 
-    char jsFileName[] = "/data/temp/node/elastos_node.js";
+    //char jsFileName[] = "/data/temp/node/elastos_node.js";
+    char jsFileName[] = "/data/temp/node/Common/js/elastos_node.js";
     Int32 length_1 = sizeof(jsFileName);
     argv[1] = argv[0] + length_0;
     snprintf(argv[1], length_1 + 1, "%s", jsFileName);

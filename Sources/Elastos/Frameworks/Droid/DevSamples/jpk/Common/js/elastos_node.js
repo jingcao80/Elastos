@@ -1,4 +1,4 @@
-whmlog('=====================elasto_node.js begin===================================');
+elog('==========elasto_node.js begin===========');
 
 var sPackageName = process.argv[2];
 //var sActivityName = process.argv[3];
@@ -6,14 +6,24 @@ var sPackageName = process.argv[2];
 var root = global||window;
 
 root.Elastos = ( function () {
+    elog('==========elasto_node.js begin.1========');
+    //var _api = require('./elastos.node');
+    var _api = require('../../bin/elastos.node');
 
-    var _api = require('./elastos.node');
-
+    elog('==========elasto_node.js begin.2========');
     var _Runtime = require('./elastos_runtime.js')(_api);
+
+    elog('==========elasto_node.js begin.3========');
     var _Module_Core = _Runtime.getModuleInfo("/system/lib/Elastos.CoreLibrary.eco");
+
+    elog('==========elasto_node.js begin.4========');
     var _Module_Droid = _Runtime.getModuleInfo("/system/lib/Elastos.Droid.Core.eco");
 
-    var _Bridge_Native = _api.require("/data/elastos/" + sPackageName + ".eco", "CTestEventListener");
+    elog('==========elasto_node.js begin.5========'+sPackageName);
+    //var _Bridge_Native = _api.require("/data/elastos/" + sPackageName + ".eco", "CTestEventListener");
+    var _Bridge_Native = _api.require("/data/elastos/" + sPackageName + ".eco", sPackageName + ".CTestEventListener");
+
+    elog('==========elasto_node.js begin.6========');
     var _Bridge = {
         init : function (aoNodeBridgeListener) {
             var pEnqueueUIMessage = _Bridge_Native.GetEnqueueUIMessagePtr();
@@ -122,13 +132,13 @@ Application.NodeBridgeListener = {
         oActivity.ActivityListener = oActivityListener;
         _this.Activities.push(oActivity);
 
-        whmlog('=======================OnRegistActivity.SetActivityListener.begin=================================');
+        elog('=======================OnRegistActivity.SetActivityListener.begin=================================');
 
         //Elastos.Test.SetActivityListener(oActivityListener);
         Elastos.Test.SetActivityListener(aoActivityListener, oActivityListener);
         //out_aoActivityListener.data = oActivityListener;
 
-        whmlog('=======================OnRegistActivity.SetActivityListener.end=================================');
+        elog('=======================OnRegistActivity.SetActivityListener.end=================================');
 
         out_abResult.data = true;
     },
@@ -136,4 +146,4 @@ Application.NodeBridgeListener = {
 
 Application.Ready();
 
-whmlog('=====================elasto_node.js end===================================');
+elog('=====================elasto_node.js end===================================');
