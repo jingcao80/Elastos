@@ -2,6 +2,7 @@
 #include "elastos/droid/systemui/statusbar/policy/UserSwitcherController.h"
 #include "elastos/droid/systemui/BitmapHelper.h"
 #include "elastos/droid/systemui/CGuestResumeSessionReceiver.h"
+#include "elastos/droid/systemui/qs/tiles/CUserDetailView.h"
 #include "../../R.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Internal.h"
@@ -36,6 +37,7 @@ using Elastos::Droid::SystemUI::BitmapHelper;
 using Elastos::Droid::SystemUI::CGuestResumeSessionReceiver;
 using Elastos::Droid::SystemUI::Qs::EIID_IQSTileDetailAdapter;
 using Elastos::Droid::SystemUI::Qs::Tiles::IUserDetailView;
+using Elastos::Droid::SystemUI::Qs::Tiles::CUserDetailView;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Core::CString;
@@ -454,8 +456,7 @@ ECode UserSwitcherController::UserDetailAdapter::CreateDetailView(
     VALIDATE_NOT_NULL(view);
     AutoPtr<IUserDetailView> v;
     if (IUserDetailView::Probe(convertView) == NULL) {
-        assert(0 && "TODO");
-        // v = CUserDetailView::Inflate(context, parent, FALSE);
+        v = CUserDetailView::Inflate(context, parent, FALSE);
         v->CreateAndSetAdapter(mHost);
     }
     else {

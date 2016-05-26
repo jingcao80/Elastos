@@ -25,10 +25,6 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-// {9cf99c13-56c5-4194-ab03-a862cee2ab06}
-extern "C" const InterfaceID EIID_NODE =
-    { 0x9cf99c13, 0x56c5, 0x4194, { 0xab, 0x03, 0xa8, 0x62, 0xce, 0xe2, 0xab, 0x06 } };
-
 static String TAG("RelativeLayout");
 
 //==============================================================================

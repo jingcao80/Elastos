@@ -23,7 +23,7 @@ namespace Animation {
 
 CAR_OBJECT_IMPL(COvershootInterpolator);
 
-CAR_INTERFACE_IMPL_4(COvershootInterpolator, Object, IOvershootInterpolator,
+CAR_INTERFACE_IMPL_4(COvershootInterpolator, Object, IOvershootInterpolator, \
         INativeInterpolatorFactory, IInterpolator, ITimeInterpolator);
 
 COvershootInterpolator::COvershootInterpolator()

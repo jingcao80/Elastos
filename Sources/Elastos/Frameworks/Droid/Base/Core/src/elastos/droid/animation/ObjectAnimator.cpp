@@ -258,9 +258,11 @@ ECode ObjectAnimator::InitAnimation()
         AutoPtr<IInterface> target;
         GetTarget((IInterface**)&target);
         if (target != NULL) {
+            PropertyValuesHolder* pvh;
             const Int32 numValues = mValues->GetLength();
             for (Int32 i = 0; i < numValues; ++i) {
-                ((PropertyValuesHolder*)((*mValues)[i]))->SetupSetterAndGetter(target);
+                pvh = (PropertyValuesHolder*)(*mValues)[i];
+                pvh->SetupSetterAndGetter(target);
             }
         }
 
@@ -311,10 +313,11 @@ ECode ObjectAnimator::SetupStartValues()
     AutoPtr<IInterface> target;
     GetTarget((IInterface**)&target);
     if (target != NULL) {
+        PropertyValuesHolder* pvh;
         Int32 numValues = mValues->GetLength();
         for (Int32 i = 0; i < numValues; ++i) {
-            AutoPtr<IPropertyValuesHolder> holder = (*mValues)[i];
-            ((PropertyValuesHolder*)holder.Get())->SetupStartValue(target);
+            pvh = (PropertyValuesHolder*)(*mValues)[i];
+            pvh->SetupStartValue(target);
         }
     }
 
@@ -328,10 +331,11 @@ ECode ObjectAnimator::SetupEndValues()
     AutoPtr<IInterface> target;
     GetTarget((IInterface**)&target);
     if (target != NULL) {
+        PropertyValuesHolder* pvh;
         Int32 numValues = mValues->GetLength();
         for (Int32 i = 0; i < numValues; ++i) {
-            AutoPtr<IPropertyValuesHolder> holder = (*mValues)[i];
-            ((PropertyValuesHolder*)holder.Get())->SetupEndValue(target);
+            pvh = (PropertyValuesHolder*)(*mValues)[i];
+            pvh->SetupEndValue(target);
         }
     }
 
@@ -350,11 +354,11 @@ ECode ObjectAnimator::AnimateValue(
     }
 
     ValueAnimator::AnimateValue(fraction);
+    PropertyValuesHolder* pvh;
     Int32 numValues = mValues->GetLength();
     for (Int32 i = 0; i < numValues; ++i) {
-        AutoPtr<IPropertyValuesHolder> holder = (*mValues)[i];
-        PropertyValuesHolder* ptr = (PropertyValuesHolder*)holder.Get();
-        ptr->SetAnimatedValue(target);
+        pvh = (PropertyValuesHolder*)(*mValues)[i];
+        pvh->SetAnimatedValue(target);
     }
     return NOERROR;
 }
@@ -443,10 +447,14 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
     }
 
     AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
-    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(xPropertyName,
-            IKeyframes::Probe(((PathKeyframes*)keyframes.Get())->CreateXInt32Keyframes()));
-    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(yPropertyName,
-            IKeyframes::Probe(((PathKeyframes*)keyframes.Get())->CreateYInt32Keyframes()));
+    PathKeyframes* pkf = (PathKeyframes*)keyframes.Get();
+    AutoPtr<IInt32Keyframes> xfkf = pkf->CreateXInt32Keyframes();
+    AutoPtr<IInt32Keyframes> yfkf = pkf->CreateYInt32Keyframes();
+
+    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(
+        xPropertyName, IKeyframes::Probe(xfkf));
+    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(
+        yPropertyName, IKeyframes::Probe(yfkf));
 
     AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(2);
     a->Set(0, x);
@@ -465,10 +473,14 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
     }
 
     AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
-    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(xProperty,
-            IKeyframes::Probe(((PathKeyframes*)keyframes.Get())->CreateXInt32Keyframes()));
-    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(yProperty,
-            IKeyframes::Probe(((PathKeyframes*)keyframes.Get())->CreateYInt32Keyframes()));
+    PathKeyframes* pkf = (PathKeyframes*)keyframes.Get();
+    AutoPtr<IInt32Keyframes> xfkf = pkf->CreateXInt32Keyframes();
+    AutoPtr<IInt32Keyframes> yfkf = pkf->CreateYInt32Keyframes();
+
+    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(
+        xProperty, IKeyframes::Probe(xfkf));
+    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(
+        yProperty, IKeyframes::Probe(yfkf));
     AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(2);
     a->Set(0, x);
     a->Set(1, y);
@@ -564,10 +576,14 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
     }
 
     AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
-    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(xPropertyName,
-            IKeyframes::Probe(((PathKeyframes*)keyframes.Get())->CreateXFloatKeyframes()));
-    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(yPropertyName,
-            IKeyframes::Probe(((PathKeyframes*)keyframes.Get())->CreateYFloatKeyframes()));
+    PathKeyframes* pkf = (PathKeyframes*)keyframes.Get();
+    AutoPtr<IFloatKeyframes> xfkf = pkf->CreateXFloatKeyframes();
+    AutoPtr<IFloatKeyframes> yfkf = pkf->CreateYFloatKeyframes();
+
+    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(
+        xPropertyName, IKeyframes::Probe(xfkf));
+    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(
+        yPropertyName, IKeyframes::Probe(yfkf));
     AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(2);
     a->Set(0, x);
     a->Set(1, y);
@@ -585,10 +601,14 @@ AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
     }
 
     AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
-    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(xProperty,
-            IKeyframes::Probe(((PathKeyframes*)keyframes.Get())->CreateXFloatKeyframes()));
-    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(yProperty,
-            IKeyframes::Probe(((PathKeyframes*)keyframes.Get())->CreateYFloatKeyframes()));
+    PathKeyframes* pkf = (PathKeyframes*)keyframes.Get();
+    AutoPtr<IFloatKeyframes> xfkf = pkf->CreateXFloatKeyframes();
+    AutoPtr<IFloatKeyframes> yfkf = pkf->CreateYFloatKeyframes();
+
+    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(
+        xProperty, IKeyframes::Probe(xfkf));
+    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(
+        yProperty, IKeyframes::Probe(yfkf));
     AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(2);
     a->Set(0, x);
     a->Set(1, y);

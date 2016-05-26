@@ -8,7 +8,7 @@
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
 #include "elastos/droid/view/animation/CAccelerateDecelerateInterpolator.h"
 #include "elastos/droid/view/animation/CDecelerateInterpolator.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::View::Animation::CAccelerateDecelerateInterpolator;
 using Elastos::Droid::View::Animation::IAccelerateDecelerateInterpolator;
@@ -19,6 +19,7 @@ using Elastos::Droid::View::IViewTreeObserver;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::EIID_IViewGroup;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -361,6 +362,10 @@ CLayoutTransition::CLayoutTransition()
             FLAG_APPEARING | FLAG_DISAPPEARING)
     , mAnimateParentHierarchy(TRUE)
 {
+}
+
+ECode CLayoutTransition::constructor()
+{
     if (sDefaultChangeIn == NULL) {
         // "left" is just a placeholder; we'll put real properties/values in when needed
         AutoPtr<ArrayOf<Int32> > parmInt32 = ArrayOf<Int32>::Alloc(2);
@@ -379,32 +384,40 @@ CLayoutTransition::CLayoutTransition()
         AutoPtr<IObjectAnimatorHelper> helper;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
         helper->OfPropertyValuesHolder(NULL, params, (IObjectAnimator**)&sDefaultChangeIn);
-        IAnimator::Probe(sDefaultChangeIn)->SetDuration(DEFAULT_DURATION);
-        IAnimator::Probe(sDefaultChangeIn)->SetStartDelay(mChangingAppearingDelay);
-        IAnimator::Probe(sDefaultChangeIn)->SetInterpolator(mChangingAppearingInterpolator);
+        IAnimator* animator = IAnimator::Probe(sDefaultChangeIn);
+        animator->SetDuration(DEFAULT_DURATION);
+        animator->SetStartDelay(mChangingAppearingDelay);
+        animator->SetInterpolator(mChangingAppearingInterpolator);
+
         AutoPtr<IInterface> obj;
         ICloneable::Probe(sDefaultChangeIn)->Clone((IInterface**)&obj);
         sDefaultChangeOut = IObjectAnimator::Probe(obj);
-        IAnimator::Probe(sDefaultChangeOut)->SetStartDelay(mChangingDisappearingDelay);
-        IAnimator::Probe(sDefaultChangeOut)->SetInterpolator(mChangingDisappearingInterpolator);
+        animator = IAnimator::Probe(sDefaultChangeOut);
+        animator->SetStartDelay(mChangingDisappearingDelay);
+        animator->SetInterpolator(mChangingDisappearingInterpolator);
+
         obj = NULL;
         ICloneable::Probe(sDefaultChangeIn)->Clone((IInterface**)&obj);
         sDefaultChange = IObjectAnimator::Probe(obj);
-        IAnimator::Probe(sDefaultChange)->SetStartDelay(mChangingDelay);
-        IAnimator::Probe(sDefaultChange)->SetInterpolator(mChangingInterpolator);
+        animator = IAnimator::Probe(sDefaultChange);
+        animator->SetStartDelay(mChangingDelay);
+        animator->SetInterpolator(mChangingInterpolator);
 
         AutoPtr<ArrayOf<Float> > paramFloat1 = ArrayOf<Float>::Alloc(2);
         (*paramFloat1)[0] = 0.0f; (*paramFloat1)[1] = 1.0f;
         sDefaultFadeIn = CObjectAnimator::OfFloat(NULL, String("alpha"), paramFloat1);
-        IAnimator::Probe(sDefaultFadeIn)->SetDuration(DEFAULT_DURATION);
-        IAnimator::Probe(sDefaultFadeIn)->SetStartDelay(mAppearingDelay);
-        IAnimator::Probe(sDefaultFadeIn)->SetInterpolator(mAppearingInterpolator);
+        animator = IAnimator::Probe(sDefaultFadeIn);
+        animator->SetDuration(DEFAULT_DURATION);
+        animator->SetStartDelay(mAppearingDelay);
+        animator->SetInterpolator(mAppearingInterpolator);
+
         AutoPtr<ArrayOf<Float> > paramFloat2 = ArrayOf<Float>::Alloc(2);
         (*paramFloat2)[0] = 1.0f; (*paramFloat2)[1] = 0.0f;
         sDefaultFadeOut = CObjectAnimator::OfFloat(NULL, String("alpha"), paramFloat2);
-        IAnimator::Probe(sDefaultFadeOut)->SetDuration(DEFAULT_DURATION);
-        IAnimator::Probe(sDefaultFadeOut)->SetStartDelay(mDisappearingDelay);
-        IAnimator::Probe(sDefaultFadeOut)->SetInterpolator(mDisappearingInterpolator);
+        animator = IAnimator::Probe(sDefaultFadeOut);
+        animator->SetDuration(DEFAULT_DURATION);
+        animator->SetStartDelay(mDisappearingDelay);
+        animator->SetInterpolator(mDisappearingInterpolator);
     }
 //
     mChangingAppearingAnim = IAnimator::Probe(sDefaultChangeIn);
@@ -412,9 +425,6 @@ CLayoutTransition::CLayoutTransition()
     mChangingAnim = IAnimator::Probe(sDefaultChange);
     mAppearingAnim = IAnimator::Probe(sDefaultFadeIn);
     mDisappearingAnim = IAnimator::Probe(sDefaultFadeOut);
-}
-ECode CLayoutTransition::constructor()
-{
     return NOERROR;
 }
 
@@ -1151,6 +1161,7 @@ void CLayoutTransition::RunAppearingTransition(
         anim->SetInterpolator(mAppearingInterpolator);
     }
     if (IObjectAnimator::Probe(anim) != NULL) {
+        Logger::I("CLayoutTransition", "=================================anim:%s, target:%s", TO_CSTR(anim), TO_CSTR(child));
         IValueAnimator::Probe(anim)->SetCurrentPlayTime(0);
     }
 

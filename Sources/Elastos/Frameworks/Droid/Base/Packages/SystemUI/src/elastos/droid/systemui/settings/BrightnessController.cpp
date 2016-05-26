@@ -16,8 +16,8 @@ using Elastos::Droid::Provider::CSettingsSystem;
 using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::SystemUI::Settings::IBrightnessStateChangeCallback;
 using Elastos::Droid::R;
-using Elastos::Utility::IIterable;
 using Elastos::Utility::IIterator;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -33,6 +33,7 @@ BrightnessController::BrightnessObserver::BrightnessObserver(
     /* [in] */ BrightnessController* host)
     : mHost(host)
 {
+    // TODO zhaohui needs CAR class for BrightnessController
     ContentObserver::constructor(handler);
     AutoPtr<ISettingsSystem> ss;
     CSettingsSystem::AcquireSingleton((ISettingsSystem**)&ss);
@@ -54,26 +55,24 @@ ECode BrightnessController::BrightnessObserver::OnChange(
     if (selfChange) return E_NULL_POINTER_EXCEPTION;
 
     mHost->mExternalChange = TRUE;
-    Boolean isEqual1, isEqual2, isEqual3;
-    IObject::Probe(BRIGHTNESS_MODE_URI)->Equals(uri, &isEqual1);
-    IObject::Probe(BRIGHTNESS_URI)->Equals(uri, &isEqual2);
-    IObject::Probe(BRIGHTNESS_ADJ_URI)->Equals(uri, &isEqual3);
-    if (isEqual1) {
+
+    if (Object::Equals(BRIGHTNESS_MODE_URI, uri)) {
         mHost->UpdateMode();
         mHost->UpdateSlider();
     }
-    else if (isEqual2 && !(mHost->mAutomatic)) {
+    else if (Object::Equals(BRIGHTNESS_URI, uri) && !(mHost->mAutomatic)) {
         mHost->UpdateSlider();
     }
-    else if (isEqual3 && mHost->mAutomatic) {
+    else if (Object::Equals(BRIGHTNESS_ADJ_URI, uri) && mHost->mAutomatic) {
         mHost->UpdateSlider();
     }
     else {
         mHost->UpdateMode();
         mHost->UpdateSlider();
     }
+
     AutoPtr<IIterator> it;
-    IIterable::Probe(mHost->mChangeCallbacks)->GetIterator((IIterator**)&it);
+    mHost->mChangeCallbacks->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
@@ -172,6 +171,61 @@ ECode BrightnessController::Runnable2::Run()
         IUserHandle::USER_CURRENT, &result);
 }
 
+//=========================================================
+// BrightnessController::ToggleSliderListener
+//=========================================================
+CAR_INTERFACE_IMPL(BrightnessController::ToggleSliderListener, Object, IToggleSliderListener)
+
+BrightnessController::ToggleSliderListener::ToggleSliderListener(
+    /* [in] */ BrightnessController* host)
+    : mHost(host)
+{}
+
+ECode BrightnessController::ToggleSliderListener::OnInit(
+    /* [in] */ IToggleSlider* control)
+{
+    // Do nothing
+    return NOERROR;
+}
+
+ECode BrightnessController::ToggleSliderListener::OnChanged(
+    /* [in] */ IToggleSlider* view,
+    /* [in] */ Boolean tracking,
+    /* [in] */ Boolean automatic,
+    /* [in] */ Int32 value)
+{
+    mHost->UpdateIcon(mHost->mAutomatic);
+    if (mHost->mExternalChange) return E_NULL_POINTER_EXCEPTION;
+
+    if (!mHost->mAutomatic) {
+        const Int32 val = value + mHost->mMinimumBacklight;
+        mHost->SetBrightness(val);
+        if (!tracking) {
+            AutoPtr<Runnable1> runnable = new BrightnessController::Runnable1(val, mHost);
+            AsyncTask::Execute(runnable);
+        }
+    }
+    else {
+        const Float adj = value / (BRIGHTNESS_ADJ_RESOLUTION / 2.0f) - 1;
+        mHost->SetBrightnessAdj(adj);
+        if (!tracking) {
+            AutoPtr<Runnable2> runnable = new BrightnessController::Runnable2(adj, mHost);
+            AsyncTask::Execute(runnable);
+        }
+    }
+
+    AutoPtr<IIterator> it;
+    mHost->mChangeCallbacks->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IBrightnessStateChangeCallback> cb = IBrightnessStateChangeCallback::Probe(obj);
+        cb->OnBrightnessLevelChanged();
+    }
+    return NOERROR;
+}
+
 //==================================
 // BrightnessController
 //==================================
@@ -179,12 +233,10 @@ const String BrightnessController::TAG("StatusBar.BrightnessController");
 const Boolean BrightnessController::SHOW_AUTOMATIC_ICON = FALSE;
 const Float BrightnessController::BRIGHTNESS_ADJ_RESOLUTION = 100.0f;
 
-CAR_INTERFACE_IMPL(BrightnessController, Object, IToggleSliderListener)
-
 BrightnessController::BrightnessController(
     /* [in] */ IContext* context,
     /* [in] */ IImageView* icon,
-    /* [in] */ CToggleSlider* control)
+    /* [in] */ IToggleSlider* control)
     : mContext(context)
     , mIcon(icon)
     , mControl(control)
@@ -193,9 +245,11 @@ BrightnessController::BrightnessController(
     , mListening(FALSE)
     , mExternalChange(FALSE)
 {
+    CArrayList::New((IArrayList**)&mChangeCallbacks);
     CHandler::New((IHandler**)&mHandler);
     mUserTracker = new MyCurrentUserTracker(mContext, this);
     mBrightnessObserver = new BrightnessObserver(mHandler, this);
+    mToggleSliderListener = new ToggleSliderListener(this);
 
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
@@ -225,13 +279,6 @@ Boolean BrightnessController::RemoveStateChangedCallback(
     return isRemoved;
 }
 
-ECode BrightnessController::OnInit(
-    /* [in] */ IToggleSlider* control)
-{
-    // Do nothing
-    return NOERROR;
-}
-
 void BrightnessController::RegisterCallbacks()
 {
     if (mListening) {
@@ -246,7 +293,7 @@ void BrightnessController::RegisterCallbacks()
     UpdateMode();
     UpdateSlider();
 
-    mControl->SetOnChangedListener(this);
+    mControl->SetOnChangedListener(mToggleSliderListener);
     mListening = TRUE;
 }
 
@@ -260,44 +307,6 @@ void BrightnessController::UnregisterCallbacks()
     mUserTracker->StopTracking();
     mControl->SetOnChangedListener(NULL);
     mListening = FALSE;
-}
-
-ECode BrightnessController::OnChanged(
-    /* [in] */ IToggleSlider* view,
-    /* [in] */ Boolean tracking,
-    /* [in] */ Boolean automatic,
-    /* [in] */ Int32 value)
-{
-    UpdateIcon(mAutomatic);
-    if (mExternalChange) return E_NULL_POINTER_EXCEPTION;
-
-    if (!mAutomatic) {
-        const Int32 val = value + mMinimumBacklight;
-        SetBrightness(val);
-        if (!tracking) {
-            AutoPtr<Runnable1> runnable = new Runnable1(val, this);
-            AsyncTask::Execute(runnable);
-        }
-    }
-    else {
-        const Float adj = value / (BRIGHTNESS_ADJ_RESOLUTION / 2.0f) - 1;
-        SetBrightnessAdj(adj);
-        if (!tracking) {
-            AutoPtr<Runnable2> runnable = new Runnable2(adj, this);
-            AsyncTask::Execute(runnable);
-        }
-    }
-
-    AutoPtr<IIterator> it;
-    IIterable::Probe(mChangeCallbacks)->GetIterator((IIterator**)&it);
-    Boolean hasNext;
-    while (it->HasNext(&hasNext), hasNext) {
-        AutoPtr<IInterface> obj;
-        it->GetNext((IInterface**)&obj);
-        AutoPtr<IBrightnessStateChangeCallback> cb = IBrightnessStateChangeCallback::Probe(obj);
-        cb->OnBrightnessLevelChanged();
-    }
-    return NOERROR;
 }
 
 void BrightnessController::SetMode(

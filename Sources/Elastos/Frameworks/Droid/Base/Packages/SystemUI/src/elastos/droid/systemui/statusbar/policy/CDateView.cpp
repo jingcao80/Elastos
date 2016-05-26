@@ -48,11 +48,13 @@ ECode CDateView::DateViewBroadcastReceiver::OnReceive(
 }
 
 const String CDateView::TAG("DateView");
+
 CAR_INTERFACE_IMPL(CDateView, TextView, IDateView)
+
+CAR_OBJECT_IMPL(CDateView)
+
 CDateView::CDateView()
 {
-    mIntentReceiver = new DateViewBroadcastReceiver(this);
-    CDate::New((IDate**)&mCurrentTime);
 }
 
 ECode CDateView::constructor(
@@ -60,6 +62,9 @@ ECode CDateView::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     TextView::constructor(context, attrs);
+
+    mIntentReceiver = new DateViewBroadcastReceiver(this);
+    CDate::New((IDate**)&mCurrentTime);
 
     AutoPtr<IResourcesTheme> rt;
     context->GetTheme((IResourcesTheme**)&rt);

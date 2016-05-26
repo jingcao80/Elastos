@@ -9,17 +9,18 @@
 #include "elastos/droid/systemui/settings/BrightnessController.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.View.h"
+#include <elastos/droid/view/ViewGroup.h>
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
 #include <elastos/droid/os/Handler.h>
-#include <elastos/core/Object.h>
 
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::SystemUI::Settings::BrightnessController;
+using Elastos::Droid::SystemUI::StatusBar::Policy::IBrightnessMirrorController;
 using Elastos::Droid::SystemUI::StatusBar::Phone::IPhoneQSTileHost;
 using Elastos::Droid::View::IViewOnClickListener;
-using Elastos::Core::Object;
+using Elastos::Droid::View::ViewGroup;
 using Elastos::Utility::ICollection;
 
 namespace Elastos {

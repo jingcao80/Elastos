@@ -36,8 +36,6 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-extern "C" const InterfaceID EIID_NODE;
-
 /**
  * Compares two views in left-to-right and top-to-bottom fashion.
  */

@@ -288,16 +288,16 @@ GradientDrawable::GradientDrawable()
 
 ECode GradientDrawable::constructor()
 {
-    AutoPtr<GradientState> state = new GradientState(GradientDrawableOrientation_TOP_BOTTOM, NULL);
-    return constructor((IDrawableConstantState*)state, NULL);
+    AutoPtr<IDrawableConstantState> state = new GradientState(GradientDrawableOrientation_TOP_BOTTOM, NULL);
+    return constructor(state, NULL);
 }
 
 ECode GradientDrawable::constructor(
     /* [in] */ GradientDrawableOrientation orientation,
     /* [in] */ ArrayOf<Int32>* colors)
 {
-    AutoPtr<GradientState> state = new GradientState(orientation, colors);
-    return constructor((IDrawableConstantState*)state, NULL);
+    AutoPtr<IDrawableConstantState> state = new GradientState(orientation, colors);
+    return constructor(state, NULL);
 }
 
 ECode GradientDrawable::constructor(

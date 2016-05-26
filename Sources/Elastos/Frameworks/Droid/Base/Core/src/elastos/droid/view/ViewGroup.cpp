@@ -4394,12 +4394,10 @@ ECode ViewGroup::GetOverlay(
 {
     VALIDATE_NOT_NULL(overlay)
     if (mOverlay == NULL) {
-        AutoPtr<IViewGroupOverlay> temp;
-        CViewGroupOverlay::New(mContext, this, (IViewGroupOverlay**)&temp);
-        mOverlay = IViewOverlay::Probe(temp);
-        *overlay = mOverlay;
-        REFCOUNT_ADD(*overlay);
+        CViewGroupOverlay::New(mContext, this, (IViewOverlay**)&mOverlay);
     }
+    *overlay = mOverlay;
+    REFCOUNT_ADD(*overlay);
     return NOERROR;
 }
 

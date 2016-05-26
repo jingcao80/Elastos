@@ -92,9 +92,8 @@ Int64 CLinearGradient::NativeCreate1(
 
     size_t count = colors->GetLength();
 
-    // AutoJavaFloatArray autoPos(env, posArray, count);
 #ifdef SK_SCALAR_IS_FLOAT
-    SkScalar* pos = positions->GetPayload();
+    SkScalar* pos = positions ? positions->GetPayload() : NULL;
 #else
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
