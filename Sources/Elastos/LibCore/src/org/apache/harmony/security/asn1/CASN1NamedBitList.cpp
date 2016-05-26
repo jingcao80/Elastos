@@ -10,6 +10,8 @@ namespace Asn1 {
 static AutoPtr<ArrayOf<Byte> > CASN1NamedBitList::sSET_MASK;
 static AutoPtr<IBitString> sEmptyString = InitStatic();
 
+CAR_OBJECT_IMPL(CASN1NamedBitList)
+
 AutoPtr<IBitString> CASN1NamedBitList::InitStatic()
 {
     sSET_MASK = ArrayOf<Byte>::Alloc(8);

@@ -6,6 +6,9 @@ namespace Apache {
 namespace Harmony {
 namespace Security {
 
+CAR_OBJECT_IMPL(CSystemScope)
+
+CAR_INTERFACE_IMPL(CSystemScope, Object, IIdentityScope)
 
 ECode CSystemScope::AddCertificate(
     /* [in] */ Elastos::Security::ICertificate * pCertificate)

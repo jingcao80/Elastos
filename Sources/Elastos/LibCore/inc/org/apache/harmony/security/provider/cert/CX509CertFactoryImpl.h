@@ -22,6 +22,8 @@ namespace Cert {
 CarClass(CX509CertFactoryImpl), public CertificateFactorySpi
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI_(AutoPtr<ICache>) InitStatic();
 
     CARAPI EngineGenerateCertificate(

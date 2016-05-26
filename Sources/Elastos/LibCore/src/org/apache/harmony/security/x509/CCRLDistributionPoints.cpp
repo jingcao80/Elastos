@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CCRLDistributionPoints)
+
+CAR_INTERFACE_IMPL(CCRLDistributionPoints, Object, ICRLDistributionPoints)
 
 ECode CCRLDistributionPoints::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte> ** ppEncode)

@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CDNParser)
+    , public Object
+    , public IDNParser
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI Parse(
         /* [out] */ Elastos::Utility::IList ** ppList);
 

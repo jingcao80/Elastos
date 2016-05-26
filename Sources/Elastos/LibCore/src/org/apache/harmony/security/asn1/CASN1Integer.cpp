@@ -20,6 +20,7 @@ namespace Asn1 {
 
 AutoPtr<IASN1Integer> CASN1Integer::ASN1 = InitStatic();
 
+CAR_OBJECT_IMPL(CASN1Integer)
 AutoPtr<IASN1Integer> CASN1Integer::InitStatic()
 {
     return new CASN1Integer();

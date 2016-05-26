@@ -5,6 +5,10 @@
 namespace Elastos {
 namespace IO {
 
+CAR_SINGLETON_IMPL(CFileDescriptorHelper)
+
+CAR_INTERFACE_IMPL(CFileDescriptorHelper, Singleton, IFileDescriptorHelper)
+
 ECode CFileDescriptorHelper::GetInFile(
     /* [out] */ IFileDescriptor** inFile)
 {

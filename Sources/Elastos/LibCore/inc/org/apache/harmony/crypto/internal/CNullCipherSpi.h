@@ -17,8 +17,11 @@ namespace Crypto {
 namespace Internal {
 
 CarClass(CNullCipherSpi)
+    , public CipherSpi
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI EngineSetMode(
         /* [in] */ const String& mode);
 

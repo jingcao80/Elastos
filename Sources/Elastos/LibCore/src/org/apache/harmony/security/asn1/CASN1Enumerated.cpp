@@ -12,6 +12,10 @@ namespace Asn1 {
 
 AutoPtr<IASN1Enumerated> CASN1Enumerated::sASN1 = Init();
 
+CAR_OBJECT_IMPL(CASN1Enumerated)
+
+CAR_INTERFACE_IMPL(CASN1Enumerated, ASN1Primitive, IASN1Enumerated)
+
 AutoPtr<IASN1Enumerated> CASN1Enumerated::Init()
 {
     return new CASN1Enumerated();

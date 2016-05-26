@@ -16,6 +16,8 @@ namespace Asn1 {
 CarClass(CASN1Implicit), public ASN1Type
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetId(
         /* [out] */ Int32* id);
 

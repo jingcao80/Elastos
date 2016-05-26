@@ -8,6 +8,7 @@ namespace Harmony {
 namespace Crypto {
 namespace Internal {
 
+CAR_OBJECT_IMPL(CNullCipherSpi)
 
 ECode CNullCipherSpi::EngineSetMode(
     /* [in] */ const String& mode)

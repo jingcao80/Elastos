@@ -263,6 +263,10 @@ AutoPtr<IASN1Sequence> CSignedData::InitStatic()
     return new ASN1SequenceDerived(arg);
 }
 
+CAR_OBJECT_IMPL(CSignedData)
+
+CAR_INTERFACE_IMPL(CSignedData, Object, ISignedData)
+
 CSignedData::CSignedData()
 {}
 

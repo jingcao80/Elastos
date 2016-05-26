@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CX509PublicKey)
+
+CAR_INTERFACE_IMPL(CX509PublicKey, Object, IX509PublicKey)
 
 ECode CX509PublicKey::GetAlgorithm(
     /* [out] */ String * pAlgorithm)

@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_PROVIDER_CERT_CX509CERTPATHIMPLHELPER_H__
 
 #include "_Org_Apache_Harmony_Security_Provider_Cert_CX509CertPathImplHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Org {
 namespace Apache {
@@ -12,8 +13,14 @@ namespace Provider {
 namespace Cert {
 
 CarClass(CX509CertPathImplHelper)
+    , public Singleton
+    , public IX509CertPathImplHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetInstance(
         /* [in] */ Elastos::IO::IInputStream * pIs,
         /* [out] */ Org::Apache::Harmony::Security::Provider::Cert::IX509CertPathImpl ** ppInstance);

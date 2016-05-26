@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X501 {
 
+CAR_SINGLETON_IMPL(CNameHelper)
+
+CAR_INTERFACE_IMPL(CNameHelper, Singleton, INameHelper)
 
 ECode CNameHelper::GetASN1_RDN(
     /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1SetOf ** ppAsn1_rdn)

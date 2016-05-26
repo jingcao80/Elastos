@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CISSUINGDISTRIBUTIONPOINTHELPER_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CIssuingDistributionPointHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Org {
 namespace Apache {
@@ -11,8 +12,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CIssuingDistributionPointHelper)
+    , public Singleton
+    , public IIssuingDistributionPointHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI Decode(
         /* [in] */ ArrayOf<Byte> * pEncoding,
         /* [out] */ Org::Apache::Harmony::Security::X509::IIssuingDistributionPoint ** ppObject);

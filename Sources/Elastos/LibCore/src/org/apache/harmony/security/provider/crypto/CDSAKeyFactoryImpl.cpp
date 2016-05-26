@@ -8,6 +8,7 @@ namespace Security {
 namespace Provider {
 namespace Crypto {
 
+CAR_OBJECT_IMPL(CDSAKeyFactoryImpl)
 
 ECode CDSAKeyFactoryImpl::EngineGeneratePublic(
     /* [in] */ Elastos::Security::Spec::IKeySpec * pKeySpec,

@@ -3,13 +3,20 @@
 #define __ELASTOS_TEXT_CDATEFORMATFIELDHELPER_H__
 
 #include "_Elastos_Text_CDateFormatFieldHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Elastos {
 namespace Text {
 
 CarClass(CDateFormatFieldHelper)
+    , public Singleton
+    , public IDateFormatFieldHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetDateFormatFieldByName(
         /* [in] */ const String& name,
         /* [out] */ IDateFormatField** field);

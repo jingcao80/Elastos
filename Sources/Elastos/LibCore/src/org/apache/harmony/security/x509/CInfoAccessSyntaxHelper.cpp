@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_SINGLETON_IMPL(CInfoAccessSyntaxHelper)
+
+CAR_INTERFACE_IMPL(CInfoAccessSyntaxHelper, Singleton, IInfoAccessSyntaxHelper)
 
 ECode CInfoAccessSyntaxHelper::Decode(
     /* [in] */ ArrayOf<Byte> * pEncoding,

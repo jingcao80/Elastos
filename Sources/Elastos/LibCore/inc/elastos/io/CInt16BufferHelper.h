@@ -3,13 +3,20 @@
 #define __ELASTOS_IO_CINT16BUFFERHELPER_H__
 
 #include "_Elastos_IO_CInt16BufferHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Elastos {
 namespace IO {
 
 CarClass(CInt16BufferHelper)
+    , public Singleton
+    , public IInt16BufferHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     /**
      * Creates a short buffer based on a newly allocated short array.
      *

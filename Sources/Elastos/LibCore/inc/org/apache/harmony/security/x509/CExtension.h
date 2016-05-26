@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CExtension)
+    , public Object
+    , public IExtension
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetExtnID(
         /* [out] */ String * pExtnID);
 

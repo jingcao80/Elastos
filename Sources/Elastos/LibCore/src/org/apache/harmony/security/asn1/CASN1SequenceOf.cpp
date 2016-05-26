@@ -7,6 +7,7 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
+CAR_OBJECT_IMPL(CASN1SequenceOf)
 
 ECode CASN1SequenceOf::GetId(
     /* [out] */ Int32 *id)

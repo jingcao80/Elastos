@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_PKCS10_CCERTIFICATIONREQUESTINFOHELPER_H__
 
 #include "_Org_Apache_Harmony_Security_Pkcs10_CCertificationRequestInfoHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Org {
 namespace Apache {
@@ -11,8 +12,14 @@ namespace Security {
 namespace Pkcs10 {
 
 CarClass(CCertificationRequestInfoHelper)
+    , public Singleton
+    , public ICertificationRequestInfoHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetASN1(
         /* [out] */ IASN1Sequence** asn1);
 

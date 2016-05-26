@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(COtherName)
+    , public Object
+    , public IOtherName
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetValue(
         /* [out, callee] */ ArrayOf<Byte> ** ppValue);
 

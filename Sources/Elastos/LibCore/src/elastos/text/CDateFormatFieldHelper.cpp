@@ -5,6 +5,10 @@
 namespace Elastos {
 namespace Text {
 
+CAR_SINGLETON_IMPL(CDateFormatFieldHelper)
+
+CAR_INTERFACE_IMPL(CDateFormatFieldHelper, Singleton, IDateFormatFieldHelper)
+
 ECode CDateFormatFieldHelper::GetDateFormatFieldByName(
     /* [in] */ const String& name,
     /* [out] */ IDateFormatField** field)

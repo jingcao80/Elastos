@@ -46,6 +46,8 @@ CFileDescriptor::CFileDescriptor()
     : mDescriptor(-1)
 {}
 
+CAR_OBJECT_IMPL(CFileDescriptor)
+
 CAR_INTERFACE_IMPL(CFileDescriptor, Object, IFileDescriptor)
 
 ECode CFileDescriptor::constructor()

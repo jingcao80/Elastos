@@ -8,6 +8,9 @@ namespace Security {
 namespace X509 {
 namespace Tsp {
 
+CAR_OBJECT_IMPL(CTSTInfo)
+
+CAR_INTERFACE_IMPL(CTSTInfo, Object, ITSTInfo)
 
 ECode CTSTInfo::ToString(
     /* [out] */ String * pStr)

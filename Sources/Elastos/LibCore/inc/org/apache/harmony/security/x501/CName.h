@@ -11,8 +11,14 @@ namespace Security {
 namespace X501 {
 
 CarClass(CName)
+    , public Object
+    , public IName
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetX500Principal(
         /* [out] */ Elastosx::Security::Auth::X500::IX500Principal ** ppX500Principal);
 

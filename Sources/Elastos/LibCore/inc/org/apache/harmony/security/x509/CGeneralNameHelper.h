@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CGENERALNAMEHELPER_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CGeneralNameHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Org {
 namespace Apache {
@@ -11,8 +12,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CGeneralNameHelper)
+    , public Singleton
+    , public IGeneralNameHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI CheckDNS(
         /* [in] */ const String& dns);
 

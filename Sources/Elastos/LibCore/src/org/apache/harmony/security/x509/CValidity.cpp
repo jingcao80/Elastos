@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CValidity)
+
+CAR_INTERFACE_IMPL(CValidity, Object, IValidity)
 
 ECode CValidity::GetNotBefore(
     /* [out] */ Elastos::Utility::IDate ** ppDate)

@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X501 {
 
+CAR_SINGLETON_IMPL(CAttributeTypeAndValueHelper)
+
+CAR_INTERFACE_IMPL(CAttributeTypeAndValueHelper, Singleton, IAttributeTypeAndValueHelper)
 
 ECode CAttributeTypeAndValueHelper::GetAttributeValue(
     /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Type ** ppAttributeValue)

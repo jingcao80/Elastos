@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X501 {
 
+CAR_OBJECT_IMPL(CAttributeTypeAndValue)
+
+CAR_INTERFACE_IMPL(CAttributeTypeAndValue, Object, IAttributeTypeAndValue)
 
 ECode CAttributeTypeAndValue::AppendName(
     /* [in] */ const String& attrFormat,

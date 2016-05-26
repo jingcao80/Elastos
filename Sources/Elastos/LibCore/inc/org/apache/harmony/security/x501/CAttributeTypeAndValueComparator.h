@@ -11,8 +11,14 @@ namespace Security {
 namespace X501 {
 
 CarClass(CAttributeTypeAndValueComparator)
+    , public Object
+    , public IAttributeTypeAndValueComparator
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI Compare(
         /* [in] */ IInterface * pLhs,
         /* [in] */ IInterface * pRhs,

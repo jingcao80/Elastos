@@ -16,6 +16,7 @@ namespace Asn1 {
 CarClass(CASN1GeneralizedTime), public ASN1Time
 {
 public:
+    CAR_OBJECT_DECL()
     static AutoPtr<IASN1Type> Init();
 
     static CARAPI GetInstance(

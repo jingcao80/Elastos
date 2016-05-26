@@ -9,6 +9,10 @@ namespace Security {
 namespace Provider {
 namespace Cert {
 
+CAR_OBJECT_IMPL(CCache)
+
+CAR_INTERFACE_IMPL(CCache, Object, ICache)
+
 CCache::CCache()
     : mCache_size(0)
     , mPrefix_size(0)

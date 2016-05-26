@@ -5,6 +5,8 @@
 namespace Elastos {
 namespace Utility {
 
+CAR_OBJECT_IMPL(CLinkedHashSet)
+
 CAR_INTERFACE_IMPL(CLinkedHashSet, HashSet, ILinkedHashSet)
 
 ECode CLinkedHashSet::constructor()

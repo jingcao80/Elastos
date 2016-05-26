@@ -24,6 +24,8 @@ namespace Utility {
 //==========================================================
 const AutoPtr<IComparator> CTreeMap::NATURAL_ORDER = (IComparator*) new OrderComparator();
 
+CAR_OBJECT_IMPL(CTreeMap)
+
 CAR_INTERFACE_IMPL_5(CTreeMap, AbstractMap, ITreeMap, ISortedMap, INavigableMap, ICloneable, ISerializable)
 
 CTreeMap::CTreeMap()

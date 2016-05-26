@@ -259,6 +259,10 @@ AutoPtr<IASN1Sequence> CCertificationRequestInfo::InitStatic()
     return ret;
 }
 
+CAR_OBJECT_IMPL(CCertificationRequestInfo)
+
+CAR_INTERFACE_IMPL(CCertificationRequestInfo, Object, ICertificationRequestInfo)
+
 CCertificationRequestInfo::CCertificationRequestInfo(
     /*[in] */ Int32 version,
     /*[in] */ IName* subject,

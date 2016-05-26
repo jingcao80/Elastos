@@ -8,6 +8,7 @@ namespace Security {
 namespace Provider {
 namespace Cert {
 
+CAR_OBJECT_IMPL(CX509CRLImpl)
 
 ECode CX509CRLImpl::Equals(
     /* [in] */ IInterface * pOther,

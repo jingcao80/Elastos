@@ -8,6 +8,9 @@ namespace Security {
 namespace X509 {
 namespace Tsp {
 
+CAR_SINGLETON_IMPL(CPKIStatusInfoHelper)
+
+CAR_INTERFACE_IMPL(CPKIStatusInfoHelper, Singleton, IPKIStatusInfoHelper)
 
 ECode CPKIStatusInfoHelper::GetASN1(
     /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence ** ppAsn1)

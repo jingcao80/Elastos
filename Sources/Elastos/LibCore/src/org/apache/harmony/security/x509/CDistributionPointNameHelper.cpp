@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_SINGLETON_IMPL(CDistributionPointNameHelper)
+
+CAR_INTERFACE_IMPL(CDistributionPointNameHelper, Singleton, IDistributionPointNameHelper)
 
 ECode CDistributionPointNameHelper::GetASN1(
     /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Choice ** ppAsn1)

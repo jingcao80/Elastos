@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CSubjectPublicKeyInfo)
+
+CAR_INTERFACE_IMPL(CSubjectPublicKeyInfo, Object, ISubjectPublicKeyInfo)
 
 ECode CSubjectPublicKeyInfo::GetAlgorithmIdentifier(
     /* [out] */ Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier ** ppAlgorithmIdentifier)

@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CCertificate)
+
+CAR_INTERFACE_IMPL(CCertificate, Object, ICertificate)
 
 ECode CCertificate::GetTbsCertificate(
     /* [out] */ Org::Apache::Harmony::Security::X509::ITBSCertificate ** ppTbsCertificate)

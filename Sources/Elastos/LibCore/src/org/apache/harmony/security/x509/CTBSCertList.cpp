@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CTBSCertList)
+
+CAR_INTERFACE_IMPL(CTBSCertList, Object, ITBSCertList)
 
 ECode CTBSCertList::GetVersion(
     /* [out] */ Int32 * pVer)

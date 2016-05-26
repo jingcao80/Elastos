@@ -413,7 +413,7 @@ module
         interface IASN1Any;
     }
 
-    class CASN1AnyHelper {
+    singleton class CASN1AnyHelper {
         interface IASN1AnyHelper;
     }
 
@@ -456,6 +456,7 @@ module
         constructor();
 
         interface IASN1Enumerated;
+        interface IASN1Primitive;
     }
 
     singleton class CASN1EnumeratedHelper {
@@ -473,6 +474,8 @@ module
             [in] IASN1Type* type);
 
         interface IASN1Explicit;
+        interface IASN1Type;
+        interface IASN1Constants;
     }
 
     class CASN1GeneralizedTime {
@@ -554,7 +557,7 @@ module
         interface IASN1SetOf;
     }
 
-    class CASN1StringTypeHelper {
+    singleton class CASN1StringTypeHelper {
         interface IASN1StringTypeHelper;
     }
 

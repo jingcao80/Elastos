@@ -15,6 +15,8 @@ namespace Cert {
 CarClass(CDRLCertFactory), public Provider
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetProperty(
         /* [in] */ const String& name,
         /* [out] */ String * pStr);

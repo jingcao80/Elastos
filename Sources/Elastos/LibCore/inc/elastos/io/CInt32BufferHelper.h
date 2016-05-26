@@ -3,13 +3,20 @@
 #define __ELASTOS_IO_CINT32BUFFERHELPER_H__
 
 #include "_Elastos_IO_CInt32BufferHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Elastos {
 namespace IO {
 
 CarClass(CInt32BufferHelper)
+    , public Singleton
+    , public IInt32BufferHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     /**
      * Creates an int buffer based on a newly allocated int array.
      *

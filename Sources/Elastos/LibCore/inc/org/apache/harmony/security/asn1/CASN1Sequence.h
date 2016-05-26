@@ -17,6 +17,8 @@ namespace Asn1 {
 CarClass(CASN1Sequence), public ASN1Sequence
 {
 public:
+    CAR_OBJECT_DECL()
+
     ASN1TYPE_METHODS_DECL()
 
     CARAPI SetType(

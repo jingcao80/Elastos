@@ -14,6 +14,8 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
+CAR_OBJECT_IMPL(CASN1Oid)
+
 ASN1TYPE_METHODS_IMPL(CASN1Oid, ASN1Oid)
 
 ECode CASN1Oid::constructor()

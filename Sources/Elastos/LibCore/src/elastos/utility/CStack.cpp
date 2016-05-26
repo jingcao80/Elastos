@@ -8,6 +8,8 @@ using Elastos::Core::AutoLock;
 namespace Elastos {
 namespace Utility {
 
+CAR_OBJECT_IMPL(CStack)
+
 CAR_INTERFACE_IMPL(CStack, Vector, IStack)
 
 ECode CStack::constructor()

@@ -8,6 +8,7 @@ namespace Security {
 namespace Provider {
 namespace Crypto {
 
+CAR_OBJECT_IMPL(CSHA1withDSA_SignatureImpl)
 
 ECode CSHA1withDSA_SignatureImpl::GetProvider(
     /* [out] */ Elastos::Security::IProvider ** ppProvider)

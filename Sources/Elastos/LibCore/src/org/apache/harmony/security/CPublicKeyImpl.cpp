@@ -6,6 +6,9 @@ namespace Apache {
 namespace Harmony {
 namespace Security {
 
+CAR_OBJECT_IMPL(CPublicKeyImpl)
+
+CAR_INTERFACE_IMPL(CPublicKeyImpl, Object, IPublicKeyImpl)
 
 ECode CPublicKeyImpl::GetAlgorithm(
     /* [out] */ String * pAlgorithm)

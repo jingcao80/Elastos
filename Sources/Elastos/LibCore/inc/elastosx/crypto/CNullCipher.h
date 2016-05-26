@@ -13,6 +13,8 @@ CarClass(CNullCipher)
     , public INullCipher
 {
 public:
+    CAR_OBJECT_DECL()
+
     CAR_INTERFACE_DECL()
 
     CNullCipher();

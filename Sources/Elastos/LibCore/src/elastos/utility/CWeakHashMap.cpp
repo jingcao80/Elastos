@@ -618,6 +618,8 @@ ECode CWeakHashMap::_Values::GetHashCode(
 //==========================================================
 //       CWeakHashMap
 //==========================================================
+CAR_OBJECT_IMPL(CWeakHashMap)
+
 CAR_INTERFACE_IMPL(CWeakHashMap, AbstractMap, IWeakHashMap)
 
 const Int32 CWeakHashMap::DEFAULT_SIZE;

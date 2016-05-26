@@ -169,6 +169,8 @@ AutoPtr<ICache> CX509CertFactoryImpl::InitStatic()
     return ret;
 }
 
+CAR_OBJECT_IMPL(CX509CertFactoryImpl)
+
 ECode CX509CertFactoryImpl::EngineGenerateCertificate(
     /* [in] */ IInputStream* inStream,
     /* [out] */ ICertificate** cert)

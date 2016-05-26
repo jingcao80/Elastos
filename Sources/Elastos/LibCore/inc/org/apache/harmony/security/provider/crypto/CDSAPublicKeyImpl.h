@@ -14,6 +14,8 @@ namespace Crypto {
 CarClass(CDSAPublicKeyImpl)
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetAlgorithm(
         /* [out] */ String * pAlgorithm);
 

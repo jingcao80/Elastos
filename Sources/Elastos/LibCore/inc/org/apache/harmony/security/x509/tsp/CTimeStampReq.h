@@ -12,8 +12,14 @@ namespace X509 {
 namespace Tsp {
 
 CarClass(CTimeStampReq)
+    , public Object
+    , public ITimeStampReq
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI ToString(
         /* [out] */ String * pStr);
 

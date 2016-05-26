@@ -8,6 +8,7 @@ namespace Security {
 namespace Provider {
 namespace Crypto {
 
+CAR_OBJECT_IMPL(CSHA1_MessageDigestImpl)
 
 ECode CSHA1_MessageDigestImpl::Clone(
     /* [out] */ IInterface ** ppObject)

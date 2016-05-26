@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CPolicyConstraints)
+
+CAR_INTERFACE_IMPL(CPolicyConstraints, Object, IPolicyConstraints)
 
 ECode CPolicyConstraints::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte> ** ppEncode)

@@ -8,6 +8,9 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
+CAR_SINGLETON_IMPL(CASN1IntegerHelper)
+
+CAR_INTERFACE_IMPL(CASN1IntegerHelper, Singleton, IASN1IntegerHelper)
 
 ECode CASN1IntegerHelper::GetInstance(
     /* [out] */ IASN1Integer** instance)

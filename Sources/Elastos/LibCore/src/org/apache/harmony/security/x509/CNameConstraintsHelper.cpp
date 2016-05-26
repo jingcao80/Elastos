@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_SINGLETON_IMPL(CNameConstraintsHelper)
+
+CAR_INTERFACE_IMPL(CNameConstraintsHelper, Singleton, INameConstraintsHelper)
 
 ECode CNameConstraintsHelper::Decode(
     /* [in] */ ArrayOf<Byte> * pEncoding,

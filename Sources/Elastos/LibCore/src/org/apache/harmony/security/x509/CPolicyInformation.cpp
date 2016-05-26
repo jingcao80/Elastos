@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CPolicyInformation)
+
+CAR_INTERFACE_IMPL(CPolicyInformation, Object, IPolicyInformation)
 
 ECode CPolicyInformation::GetPolicyIdentifier(
     /* [out] */ String * pPolicyIdentifier)

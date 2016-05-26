@@ -9,6 +9,10 @@ namespace Harmony {
 namespace Security {
 namespace Pkcs7 {
 
+CAR_SINGLETON_IMPL(CSignerInfoHelper)
+
+CAR_INTERFACE_IMPL(CSignerInfoHelper, Singleton, ISignerInfoHelper)
+
 ECode CSignerInfoHelper::GetIssuerAndSerialNumber(
     /* [out] */ IASN1Sequence** issuerAndSerialNumber)
 {

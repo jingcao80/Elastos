@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CExtensionValue)
+
+CAR_INTERFACE_IMPL(CExtensionValue, Object, IExtensionValue)
 
 ECode CExtensionValue::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte> ** ppEncode)

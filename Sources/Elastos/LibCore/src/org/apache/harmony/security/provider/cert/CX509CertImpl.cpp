@@ -8,6 +8,7 @@ namespace Security {
 namespace Provider {
 namespace Cert {
 
+CAR_OBJECT_IMPL(CX509CertImpl)
 
 ECode CX509CertImpl::GetType(
     /* [out] */ String* type)

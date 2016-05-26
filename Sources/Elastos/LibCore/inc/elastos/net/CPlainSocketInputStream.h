@@ -14,6 +14,8 @@ CarClass(CPlainSocketInputStream)
     , public InputStream
 {
 public:
+    CAR_OBJECT_DECL()
+
     CPlainSocketInputStream();
 
     CARAPI constructor(

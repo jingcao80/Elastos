@@ -14,6 +14,8 @@ namespace Crypto {
 CarClass(CDSAKeyFactoryImpl)
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI EngineGeneratePublic(
         /* [in] */ Elastos::Security::Spec::IKeySpec * pKeySpec,
         /* [out] */ Elastos::Security::IPublicKey ** ppPubKey);

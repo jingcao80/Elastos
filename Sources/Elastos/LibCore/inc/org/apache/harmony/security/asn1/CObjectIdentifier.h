@@ -13,6 +13,8 @@ namespace Asn1 {
 CarClass(CObjectIdentifier)
 {
 public:
+    CAR_OBJECT_DECL()
+
     static CARAPI Validate(
         /* [in] */ ArrayOf<Int32>* oid);
 

@@ -14,6 +14,8 @@ namespace Asn1 {
 CarClass(CASN1OctetString), public ASN1StringType
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI constructor();
 
     static CARAPI GetInstance(

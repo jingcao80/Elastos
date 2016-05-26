@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CAlgorithmIdentifier)
+
+CAR_INTERFACE_IMPL(CAlgorithmIdentifier, Object, IAlgorithmIdentifier)
 
 ECode CAlgorithmIdentifier::GetAlgorithm(
     /* [out] */ String * pAlgorithm)

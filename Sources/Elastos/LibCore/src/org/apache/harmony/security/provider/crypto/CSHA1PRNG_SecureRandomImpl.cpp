@@ -8,6 +8,7 @@ namespace Security {
 namespace Provider {
 namespace Crypto {
 
+CAR_OBJECT_IMPL(CSHA1PRNG_SecureRandomImpl)
 
 ECode CSHA1PRNG_SecureRandomImpl::EngineSetSeed(
     /* [in] */ ArrayOf<Byte> * pSeed)

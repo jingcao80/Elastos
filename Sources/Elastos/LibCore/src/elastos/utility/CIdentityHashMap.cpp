@@ -27,6 +27,8 @@ const Int32 CIdentityHashMap::sLoadFactor;
 
 const AutoPtr<IInterface> CIdentityHashMap::NULL_OBJECT = (IObject*)new NullObject;  //$NON-LOCK-1$
 
+CAR_OBJECT_IMPL(CIdentityHashMap)
+
 CAR_INTERFACE_IMPL_3(CIdentityHashMap, AbstractMap, IIdentityHashMap, ISerializable, ICloneable)
 
 CIdentityHashMap::CIdentityHashMap()

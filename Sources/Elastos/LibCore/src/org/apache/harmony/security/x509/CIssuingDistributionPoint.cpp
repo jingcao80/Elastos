@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CIssuingDistributionPoint)
+
+CAR_INTERFACE_IMPL(CIssuingDistributionPoint, Object, IIssuingDistributionPoint)
 
 ECode CIssuingDistributionPoint::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte> ** ppEncode)

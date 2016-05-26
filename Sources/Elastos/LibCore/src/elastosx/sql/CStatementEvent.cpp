@@ -5,6 +5,8 @@
 namespace Elastosx {
 namespace Sql {
 
+CAR_OBJECT_IMPL(CStatementEvent)
+
 CAR_INTERFACE_IMPL(CStatementEvent, EventObject, IStatementEvent)
 
 CStatementEvent::CStatementEvent()

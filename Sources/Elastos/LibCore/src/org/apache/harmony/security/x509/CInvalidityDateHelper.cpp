@@ -8,6 +8,10 @@ namespace Security {
 namespace X509 {
 
 
+CAR_SINGLETON_IMPL(CInvalidityDateHelper)
+
+CAR_INTERFACE_IMPL(CInvalidityDateHelper, Singleton, IInvalidityDateHelper)
+
 ECode CInvalidityDateHelper::GetASN1(
     /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Type ** ppAsn1)
 {

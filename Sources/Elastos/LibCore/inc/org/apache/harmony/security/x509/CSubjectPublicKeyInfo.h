@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CSubjectPublicKeyInfo)
+    , public Object
+    , public ISubjectPublicKeyInfo
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetAlgorithmIdentifier(
         /* [out] */ Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier ** ppAlgorithmIdentifier);
 

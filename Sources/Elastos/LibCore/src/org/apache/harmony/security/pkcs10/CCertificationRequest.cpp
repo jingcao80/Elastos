@@ -230,6 +230,10 @@ AutoPtr<IASN1Sequence> CCertificationRequest::InitStatic()
     return ret;
 }
 
+CAR_OBJECT_IMPL(CCertificationRequest)
+
+CAR_INTERFACE_IMPL(CCertificationRequest, Singleton, ICertificationRequest)
+
 CCertificationRequest::CCertificationRequest()
 {}
 

@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CPrivateKeyUsagePeriod)
+    , public Object
+    , public IPrivateKeyUsagePeriod
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetNotBefore(
         /* [out] */ Elastos::Utility::IDate ** ppNotBefore);
 

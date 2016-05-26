@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CAlgorithmIdentifier)
+    , public Object
+    , public IAlgorithmIdentifier
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetAlgorithm(
         /* [out] */ String * pAlgorithm);
 

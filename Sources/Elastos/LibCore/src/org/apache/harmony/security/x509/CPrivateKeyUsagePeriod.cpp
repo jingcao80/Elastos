@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CPrivateKeyUsagePeriod)
+
+CAR_INTERFACE_IMPL(CPrivateKeyUsagePeriod, Object, IPrivateKeyUsagePeriod)
 
 ECode CPrivateKeyUsagePeriod::GetNotBefore(
     /* [out] */ Elastos::Utility::IDate ** ppNotBefore)

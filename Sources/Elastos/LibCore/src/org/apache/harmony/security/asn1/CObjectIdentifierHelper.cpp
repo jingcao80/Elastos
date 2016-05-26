@@ -7,7 +7,9 @@ namespace Apache {
 namespace Harmony {
 namespace Security {
 namespace Asn1 {
+CAR_SINGLETON_IMPL(CObjectIdentifierHelper)
 
+CAR_INTERFACE_IMPL(CObjectIdentifierHelper, Singleton, IObjectIdentifierHelper)
 
 ECode CObjectIdentifierHelper::Validate(
     /* [in] */ ArrayOf<Int32>* oid)

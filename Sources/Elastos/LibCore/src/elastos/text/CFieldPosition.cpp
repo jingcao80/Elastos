@@ -7,6 +7,8 @@ using Elastos::Core::StringBuilder;
 namespace Elastos {
 namespace Text {
 
+CAR_OBJECT_IMPL(CFieldPosition)
+
 CAR_INTERFACE_IMPL(CFieldPosition, Object, IFieldPosition)
 
 CFieldPosition::CFieldPosition()

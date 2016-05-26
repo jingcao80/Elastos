@@ -13,6 +13,10 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
+CAR_OBJECT_IMPL(CASN1Explicit)
+
+CAR_INTERFACE_IMPL(CASN1Explicit, ASN1Constructed, IASN1Explicit)
+
 ECode CASN1Explicit::GetType(
     /* [out] */ IASN1Type** type)
 {

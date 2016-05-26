@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_SINGLETON_IMPL(CCRLNumberHelper)
+
+CAR_INTERFACE_IMPL(CCRLNumberHelper, Singleton, ICRLNumberHelper)
 
 ECode CCRLNumberHelper::GetASN1(
     /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Type ** ppAsn1)

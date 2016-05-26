@@ -14,6 +14,8 @@ namespace Crypto {
 CarClass(CSHA1PRNG_SecureRandomImpl)
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI EngineSetSeed(
         /* [in] */ ArrayOf<Byte> * pSeed);
 

@@ -272,6 +272,8 @@ ECode CLinkedList::ReverseLinkIterator::Remove()
 //============================================================
 // CLinkedList
 //============================================================
+CAR_OBJECT_IMPL(CLinkedList)
+
 CAR_INTERFACE_IMPL_5(CLinkedList, AbstractSequentialList, ILinkedList, IDeque, IQueue, ICloneable, ISerializable)
 
 CLinkedList::CLinkedList()

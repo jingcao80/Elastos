@@ -12,6 +12,9 @@ namespace Harmony {
 namespace Kernel {
 namespace Vm {
 
+CAR_SINGLETON_IMPL(CStringUtils)
+
+CAR_INTERFACE_IMPL(CStringUtils, Singleton, IStringUtils)
 
 ECode CStringUtils::CombineStrings(
     /* [in] */ ArrayOf<PInterface>* list,

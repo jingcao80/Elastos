@@ -6,6 +6,8 @@ using Elastos::Security::ISecureRandom;
 namespace Elastosx {
 namespace Crypto {
 
+CAR_OBJECT_IMPL(CNullCipher)
+
 CAR_INTERFACE_IMPL(CNullCipher, Cipher, INullCipher)
 
 CNullCipher::CNullCipher()

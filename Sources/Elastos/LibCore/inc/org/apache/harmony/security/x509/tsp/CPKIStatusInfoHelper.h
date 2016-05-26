@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_TSP_CPKISTATUSINFOHELPER_H__
 
 #include "_Org_Apache_Harmony_Security_X509_Tsp_CPKIStatusInfoHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Org {
 namespace Apache {
@@ -12,8 +13,14 @@ namespace X509 {
 namespace Tsp {
 
 CarClass(CPKIStatusInfoHelper)
+    , public Singleton
+    , public IPKIStatusInfoHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetASN1(
         /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence ** ppAsn1);
 

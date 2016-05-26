@@ -3,13 +3,20 @@
 #define __ELASTOS_IO_CFLOATBUFFERHELPER_H__
 
 #include "_Elastos_IO_CFloatBufferHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Elastos {
 namespace IO {
 
 CarClass(CFloatBufferHelper)
+    , public Singleton
+    , public IFloatBufferHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     /**
      * Creates a float buffer based on a newly allocated float array.
      *

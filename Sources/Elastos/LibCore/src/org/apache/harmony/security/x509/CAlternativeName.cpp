@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CAlternativeName)
+
+CAR_INTERFACE_IMPL(CAlternativeName, Object, IAlternativeName)
 
 ECode CAlternativeName::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte> ** ppEncode)

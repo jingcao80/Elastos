@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CExtension)
+
+CAR_INTERFACE_IMPL(CExtension, Object, IExtension)
 
 ECode CExtension::GetExtnID(
     /* [out] */ String * pExtnID)

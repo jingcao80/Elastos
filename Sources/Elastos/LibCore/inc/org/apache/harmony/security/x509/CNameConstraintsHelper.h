@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CNAMECONSTRAINTSHELPER_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CNameConstraintsHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Org {
 namespace Apache {
@@ -11,8 +12,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CNameConstraintsHelper)
+    , public Singleton
+    , public INameConstraintsHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI Decode(
         /* [in] */ ArrayOf<Byte> * pEncoding,
         /* [out] */ Org::Apache::Harmony::Security::X509::INameConstraints ** ppObject);

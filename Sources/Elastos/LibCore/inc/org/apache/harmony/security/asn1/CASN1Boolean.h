@@ -16,6 +16,8 @@ namespace Asn1 {
 CarClass(CASN1Boolean), public ASN1Primitive
 {
 public:
+    CAR_OBJECT_DECL()
+
     static AutoPtr<IASN1Type> InitStatic();
 
     static CARAPI GetInstance(

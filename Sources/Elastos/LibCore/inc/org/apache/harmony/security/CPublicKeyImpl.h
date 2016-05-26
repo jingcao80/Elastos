@@ -10,8 +10,14 @@ namespace Harmony {
 namespace Security {
 
 CarClass(CPublicKeyImpl)
+    , public Object
+    , public IPublicKeyImpl
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetAlgorithm(
         /* [out] */ String * pAlgorithm);
 

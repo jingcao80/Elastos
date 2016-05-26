@@ -14,6 +14,8 @@ namespace Crypto {
 CarClass(CSHA1withDSA_SignatureImpl)
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetProvider(
         /* [out] */ Elastos::Security::IProvider ** ppProvider);
 

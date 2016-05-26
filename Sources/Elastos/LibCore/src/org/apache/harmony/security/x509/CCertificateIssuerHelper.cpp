@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_SINGLETON_IMPL(CCertificateIssuerHelper)
+
+CAR_INTERFACE_IMPL(CCertificateIssuerHelper, Singleton, ICertificateIssuerHelper)
 
 ECode CCertificateIssuerHelper::GetASN1(
     /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Type ** ppAsn1)

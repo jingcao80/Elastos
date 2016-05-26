@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_SINGLETON_IMPL(COtherNameHelper)
+
+CAR_INTERFACE_IMPL(COtherNameHelper, Singleton, IOtherNameHelper)
 
 ECode COtherNameHelper::GetASN1(
     /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence ** ppAsn1)

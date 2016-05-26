@@ -11,8 +11,14 @@ namespace Security {
 namespace Asn1 {
 
 CarClass(CBitString)
+    , public Object
+    , public IBitString
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI_(AutoPtr<ArrayOf<Byte> >) InitStatic();
 
     CARAPI SetBytes(

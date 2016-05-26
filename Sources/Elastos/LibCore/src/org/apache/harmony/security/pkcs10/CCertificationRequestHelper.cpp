@@ -9,6 +9,9 @@ namespace Harmony {
 namespace Security {
 namespace Pkcs10 {
 
+CAR_SINGLETON_IMPL(CCertificationRequestHelper)
+
+CAR_INTERFACE_IMPL(CCertificationRequestHelper, Singleton, ICertificationRequestHelper)
 
 ECode CCertificationRequestHelper::GetASN1(
     /* [out] */ IASN1Sequence** asn1)

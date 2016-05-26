@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CReasonCode)
+
+CAR_INTERFACE_IMPL(CReasonCode, Object, IReasonCode)
 
 ECode CReasonCode::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte> ** ppEncode)

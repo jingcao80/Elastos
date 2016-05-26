@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_SINGLETON_IMPL(CCRLDistributionPointsHelper)
+
+CAR_INTERFACE_IMPL(CCRLDistributionPointsHelper, Singleton, ICRLDistributionPointsHelper)
 
 ECode CCRLDistributionPointsHelper::Decode(
     /* [in] */ ArrayOf<Byte> * pEncoding,

@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CPOLICYQUALIFIERINFOHELPER_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CPolicyQualifierInfoHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Org {
 namespace Apache {
@@ -11,8 +12,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CPolicyQualifierInfoHelper)
+    , public Singleton
+    , public IPolicyQualifierInfoHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetASN1(
         /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence ** ppAsn1);
 

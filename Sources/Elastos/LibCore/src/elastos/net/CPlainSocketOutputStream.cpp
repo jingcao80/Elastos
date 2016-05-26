@@ -5,6 +5,8 @@
 namespace Elastos {
 namespace Net {
 
+CAR_OBJECT_IMPL(CPlainSocketOutputStream)
+
 CPlainSocketOutputStream::CPlainSocketOutputStream()
 {
 }

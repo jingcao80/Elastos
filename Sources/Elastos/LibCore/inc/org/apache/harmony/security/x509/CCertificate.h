@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CCertificate)
+    , public Object
+    , public ICertificate
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetTbsCertificate(
         /* [out] */ Org::Apache::Harmony::Security::X509::ITBSCertificate ** ppTbsCertificate);
 

@@ -5,6 +5,8 @@
 namespace Elastos {
 namespace Text {
 
+CAR_OBJECT_IMPL(CCollationElementIterator)
+
 CAR_INTERFACE_IMPL(CCollationElementIterator, Object, ICollationElementIterator)
 
 ECode CCollationElementIterator::constructor(

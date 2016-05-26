@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CExtensions)
+    , public Object
+    , public IExtensions
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetSize(
         /* [out] */ Int32 * pSize);
 

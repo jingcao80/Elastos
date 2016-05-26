@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CGeneralNames)
+
+CAR_INTERFACE_IMPL(CGeneralNames, Object, IGeneralNames)
 
 ECode CGeneralNames::GetNames(
     /* [out] */ Elastos::Utility::IList ** ppNames)

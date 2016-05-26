@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X501_CATTRIBUTETYPEANDVALUEHELPER_H__
 
 #include "_Org_Apache_Harmony_Security_X501_CAttributeTypeAndValueHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Org {
 namespace Apache {
@@ -11,8 +12,14 @@ namespace Security {
 namespace X501 {
 
 CarClass(CAttributeTypeAndValueHelper)
+    , public Singleton
+    , public IAttributeTypeAndValueHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetAttributeValue(
         /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Type ** ppAttributeValue);
 

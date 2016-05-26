@@ -9,6 +9,8 @@ namespace Security {
 namespace Asn1 {
 
 
+CAR_OBJECT_IMPL(CObjectIdentifier)
+
 ECode CObjectIdentifier::Equals(
     /* [in] */ PInterface obj,
     /* [out] */ Boolean* isEqual)

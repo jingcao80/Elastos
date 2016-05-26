@@ -12,8 +12,14 @@ namespace X509 {
 namespace Tsp {
 
 CarClass(CMessageImprint)
+    , public Object
+    , public IMessageImprint
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetASN1(
         /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence ** ppAsn1);
 

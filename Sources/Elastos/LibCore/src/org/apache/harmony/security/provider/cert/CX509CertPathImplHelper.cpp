@@ -8,6 +8,9 @@ namespace Security {
 namespace Provider {
 namespace Cert {
 
+CAR_SINGLETON_IMPL(CX509CertPathImplHelper)
+
+CAR_INTERFACE_IMPL(CX509CertPathImplHelper, Singleton, IX509CertPathImplHelper)
 
 ECode CX509CertPathImplHelper::GetInstance(
     /* [in] */ Elastos::IO::IInputStream * pIs,

@@ -105,6 +105,11 @@ AutoPtr<IASN1Sequence> CPrivateKeyInfo::InitStatic()
     return new ASN1SequenceDerived(arg);
 }
 
+
+CAR_OBJECT_IMPL(CPrivateKeyInfo)
+
+CAR_INTERFACE_IMPL(CPrivateKeyInfo, Object, IPrivateKeyInfo)
+
 CPrivateKeyInfo::CPrivateKeyInfo()
 {}
 

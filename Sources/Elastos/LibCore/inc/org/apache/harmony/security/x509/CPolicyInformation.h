@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CPolicyInformation)
+    , public Object
+    , public IPolicyInformation
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetPolicyIdentifier(
         /* [out] */ String * pPolicyIdentifier);
 

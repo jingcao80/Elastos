@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CInvalidityDate)
+
+CAR_INTERFACE_IMPL(CInvalidityDate, Object, IInvalidityDate)
 
 ECode CInvalidityDate::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte> ** ppEncode)

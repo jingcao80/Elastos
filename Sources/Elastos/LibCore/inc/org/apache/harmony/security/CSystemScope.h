@@ -10,8 +10,14 @@ namespace Harmony {
 namespace Security {
 
 CarClass(CSystemScope)
+    , public Object
+    , public IIdentityScope
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI AddCertificate(
         /* [in] */ Elastos::Security::ICertificate * pCertificate);
 

@@ -17,6 +17,8 @@ namespace Asn1 {
 CarClass(CASN1Oid), public ASN1Oid
 {
 public:
+    CAR_OBJECT_DECL()
+
     ASN1TYPE_METHODS_DECL()
 
     CARAPI constructor();

@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CGeneralName)
+
+CAR_INTERFACE_IMPL(CGeneralName, Object, IGeneralName)
 
 ECode CGeneralName::GetTag(
     /* [out] */ Int32 * pTag)

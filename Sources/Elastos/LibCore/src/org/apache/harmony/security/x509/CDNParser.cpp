@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CDNParser)
+
+CAR_INTERFACE_IMPL(CDNParser, Object, IDNParser)
 
 ECode CDNParser::Parse(
     /* [out] */ Elastos::Utility::IList ** ppList)

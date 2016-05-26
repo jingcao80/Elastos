@@ -8,6 +8,9 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
+CAR_SINGLETON_IMPL(CASN1StringTypeHelper)
+
+CAR_INTERFACE_IMPL(CASN1StringTypeHelper, Singleton, IASN1StringTypeHelper)
 
 ECode CASN1StringTypeHelper::GetBMPSTRING(
     /* [out] */ IASN1Type** BMPSTRING)

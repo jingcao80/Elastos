@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CGeneralName)
+    , public Object
+    , public IGeneralName
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetTag(
         /* [out] */ Int32 * pTag);
 

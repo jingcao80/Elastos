@@ -11,8 +11,14 @@ namespace Security {
 namespace X501 {
 
 CarClass(CAttributeValue)
+    , public Object
+    , public IAttributeValue
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetWasEncoded(
         /* [out] */ Boolean * pWasEncoded);
 

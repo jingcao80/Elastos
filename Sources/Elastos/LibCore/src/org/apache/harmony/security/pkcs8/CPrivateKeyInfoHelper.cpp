@@ -8,6 +8,9 @@ namespace Harmony {
 namespace Security {
 namespace Pkcs8 {
 
+CAR_SINGLETON_IMPL(CPrivateKeyInfoHelper)
+
+CAR_INTERFACE_IMPL(CPrivateKeyInfoHelper, Singleton, IPrivateKeyInfoHelper)
 
 ECode CPrivateKeyInfoHelper::GetASN1(
     /* [out] */ IASN1Sequence** asn1)

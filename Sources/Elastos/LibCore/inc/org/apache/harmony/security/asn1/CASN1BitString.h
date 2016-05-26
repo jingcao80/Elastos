@@ -16,6 +16,8 @@ namespace Asn1 {
 CarClass(CASN1BitString), public ASN1BitString
 {
 public:
+    CAR_OBJECT_DECL()
+
     static CARAPI GetInstance(
     /* [out] */ IASN1Type** instance);
 

@@ -8,6 +8,7 @@ namespace Security {
 namespace Provider {
 namespace Cert {
 
+CAR_OBJECT_IMPL(CDRLCertFactory)
 
 ECode CDRLCertFactory::GetProperty(
     /* [in] */ const String& name,

@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_SINGLETON_IMPL(CAccessDescriptionHelper)
+
+CAR_INTERFACE_IMPL(CAccessDescriptionHelper, Singleton, IAccessDescriptionHelper)
 
 ECode CAccessDescriptionHelper::GetASN1(
     /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence ** ppAsn1)

@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CAuthorityKeyIdentifier)
+
+CAR_INTERFACE_IMPL(CAuthorityKeyIdentifier, Object, IAuthorityKeyIdentifier)
 
 ECode CAuthorityKeyIdentifier::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte> ** ppEncode)

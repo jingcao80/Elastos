@@ -8,6 +8,9 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
+CAR_SINGLETON_IMPL(CBerInputStreamHelper)
+
+CAR_INTERFACE_IMPL(CBerInputStreamHelper, Singleton, IBerInputStreamHelper)
 
 ECode CBerInputStreamHelper::GetLength(
     /* [in] */ ArrayOf<Byte>* encoding,

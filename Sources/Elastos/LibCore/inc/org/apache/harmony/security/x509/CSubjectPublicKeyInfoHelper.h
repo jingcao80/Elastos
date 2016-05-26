@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CSUBJECTPUBLICKEYINFOHELPER_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CSubjectPublicKeyInfoHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Org {
 namespace Apache {
@@ -11,8 +12,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CSubjectPublicKeyInfoHelper)
+    , public Singleton
+    , public ISubjectPublicKeyInfoHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetASN1(
         /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence ** ppAsn1);
 

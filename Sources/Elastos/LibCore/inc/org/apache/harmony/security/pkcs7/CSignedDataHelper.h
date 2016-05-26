@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_PKCS7_CSIGNEDDATAHELPER_H__
 
 #include "_Org_Apache_Harmony_Security_Pkcs7_CSignedDataHelper.h"
+#include <elastos/core/Singleton.h>
 
 using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
 
@@ -13,8 +14,14 @@ namespace Security {
 namespace Pkcs7 {
 
 CarClass(CSignedDataHelper)
+    , public Singleton
+    , public ISignedDataHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetASN1(
         /* [out] */ IASN1Sequence** asn1);
 };

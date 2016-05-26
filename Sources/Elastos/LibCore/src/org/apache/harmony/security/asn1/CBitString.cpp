@@ -12,6 +12,10 @@ static AutoPtr<ArrayOf<Byte> > SET_MASK;
 
 static AutoPtr<ArrayOf<Byte> > RESET_MASK = InitStatic();
 
+CAR_OBJECT_IMPL(CBitString)
+
+CAR_INTERFACE_IMPL(CBitString, Object, IBitString)
+
 AutoPtr<ArrayOf<Byte> > CBitString::InitStatic()
 {
     SET_MASK = ArrayOf<Byte>::Alloc(8);

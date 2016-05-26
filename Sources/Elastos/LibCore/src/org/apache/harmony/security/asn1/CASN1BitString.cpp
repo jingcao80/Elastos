@@ -7,6 +7,8 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
+CAR_OBJECT_IMPL(CASN1BitString)
+
 ECode CASN1BitString::GetInstance(
     /* [out] */ IASN1Type** instance)
 {

@@ -11,8 +11,14 @@ namespace Security {
 namespace X501 {
 
 CarClass(CAttributeTypeAndValue)
+    , public Object
+    , public IAttributeTypeAndValue
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI AppendName(
         /* [in] */ const String& attrFormat,
         /* [in] */ Elastos::Core::IStringBuilder * pSb);

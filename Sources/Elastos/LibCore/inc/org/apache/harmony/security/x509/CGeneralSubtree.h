@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CGeneralSubtree)
+    , public Object
+    , public IGeneralSubtree
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetBase(
         /* [out] */ Org::Apache::Harmony::Security::X509::IGeneralName ** ppBase);
 

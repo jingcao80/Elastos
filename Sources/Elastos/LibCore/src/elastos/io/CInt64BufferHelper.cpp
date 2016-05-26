@@ -4,6 +4,9 @@
 
 namespace Elastos {
 namespace IO {
+CAR_SINGLETON_IMPL(CInt64BufferHelper)
+
+CAR_INTERFACE_IMPL(CInt64BufferHelper, Singleton, IInt64BufferHelper)
 
 ECode CInt64BufferHelper::Allocate(
     /* [in] */ Int32 capacity,

@@ -13,6 +13,8 @@ CarClass(CFieldPosition)
     , public IFieldPosition
 {
 public:
+    CAR_OBJECT_DECL()
+
     CAR_INTERFACE_DECL()
 
     CFieldPosition();

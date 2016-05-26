@@ -82,6 +82,8 @@ private:
         AutoPtr<ArrayOf<Byte> > SIGNED_DATA_OID;
     };
 public:
+    CAR_OBJECT_DECL()
+
     static AutoPtr<ArrayOf<String> > InitStatic();
 
     static CARAPI GetInstance(

@@ -182,6 +182,10 @@ AutoPtr<IASN1Sequence> CSignerInfo::InitStatic()
     return ret;
 }
 
+CAR_OBJECT_IMPL(CSignerInfo)
+
+CAR_INTERFACE_IMPL(CSignerInfo, Object, ISignerInfo)
+
 CSignerInfo::CSignerInfo()
 {}
 

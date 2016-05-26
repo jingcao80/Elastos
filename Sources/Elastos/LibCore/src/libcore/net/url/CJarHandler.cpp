@@ -12,6 +12,7 @@ namespace Libcore {
 namespace Net {
 namespace Url {
 
+CAR_OBJECT_IMPL(CJarHandler)
 CAR_INTERFACE_IMPL(CJarHandler, URLStreamHandler, IJarHandler)
 
 ECode CJarHandler::constructor()

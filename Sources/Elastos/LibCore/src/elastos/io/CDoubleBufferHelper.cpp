@@ -5,6 +5,10 @@
 namespace Elastos {
 namespace IO {
 
+CAR_SINGLETON_IMPL(CDoubleBufferHelper)
+
+CAR_INTERFACE_IMPL(CDoubleBufferHelper, Singleton, IDoubleBufferHelper)
+
 ECode CDoubleBufferHelper::Allocate(
     /* [in] */ Int32 capacity,
     /* [out] */ IDoubleBuffer** doubleBuf)

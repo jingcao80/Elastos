@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CDistributionPoint)
+
+CAR_INTERFACE_IMPL(CDistributionPoint, Object, IDistributionPoint)
 
 ECode CDistributionPoint::DumpValue(
     /* [in] */ Elastos::Core::IStringBuilder * pSb,

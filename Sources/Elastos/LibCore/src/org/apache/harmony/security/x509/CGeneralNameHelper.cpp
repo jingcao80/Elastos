@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_SINGLETON_IMPL(CGeneralNameHelper)
+
+CAR_INTERFACE_IMPL(CGeneralNameHelper, Singleton, IGeneralNameHelper)
 
 ECode CGeneralNameHelper::CheckDNS(
     /* [in] */ const String& dns)

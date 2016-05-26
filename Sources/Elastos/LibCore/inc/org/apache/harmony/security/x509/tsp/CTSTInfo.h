@@ -12,8 +12,14 @@ namespace X509 {
 namespace Tsp {
 
 CarClass(CTSTInfo)
+    , public Object
+    , public ITSTInfo
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI ToString(
         /* [out] */ String * pStr);
 

@@ -10,6 +10,8 @@ namespace Asn1 {
 
 static AutoPtr<IASN1Type> CASN1Boolean::sASN1 = InitStatic();
 
+CAR_OBJECT_IMPL(CASN1Boolean)
+
 AutoPtr<IASN1Type> CASN1Boolean::InitStatic()
 {
     return new CASN1Boolean();

@@ -9,6 +9,8 @@ using Libcore::IO::CStreams;
 namespace Elastosx {
 namespace Crypto {
 
+CAR_OBJECT_IMPL(CCipherInputStream)
+
 CAR_INTERFACE_IMPL(CCipherInputStream, FilterInputStream, ICipherInputStream)
 
 CCipherInputStream::CCipherInputStream()

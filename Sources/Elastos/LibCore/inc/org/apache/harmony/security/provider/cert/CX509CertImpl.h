@@ -24,6 +24,8 @@ namespace Cert {
 CarClass(CX509CertImpl), public X509Certificate
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetType(
         /* [out] */ String* type);
 

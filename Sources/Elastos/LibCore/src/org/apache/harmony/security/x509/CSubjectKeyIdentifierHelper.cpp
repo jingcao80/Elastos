@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_SINGLETON_IMPL(CSubjectKeyIdentifierHelper)
+
+CAR_INTERFACE_IMPL(CSubjectKeyIdentifierHelper, Singleton, ISubjectKeyIdentifierHelper)
 
 ECode CSubjectKeyIdentifierHelper::Decode(
     /* [in] */ ArrayOf<Byte> * pEncoding,

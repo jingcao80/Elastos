@@ -26,6 +26,8 @@ namespace Cert {
 CarClass(CX509CRLImpl), public X509CRL
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI Equals(
         /* [in] */ IInterface* other,
         /* [out] */ Boolean* result);

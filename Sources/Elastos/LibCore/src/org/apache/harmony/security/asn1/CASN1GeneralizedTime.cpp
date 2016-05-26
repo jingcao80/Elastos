@@ -15,6 +15,8 @@ AutoPtr<IASN1Type> CASN1GeneralizedTime::sASN1 = Init();
 
 String CASN1GeneralizedTime::GEN_PATTERN("yyyyMMddHHmmss.SSS");
 
+CAR_OBJECT_IMPL(CASN1GeneralizedTime)
+
 AutoPtr<IASN1Type> CASN1GeneralizedTime::Init()
 {
     return new CASN1GeneralizedTime();

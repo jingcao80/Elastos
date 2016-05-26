@@ -12,8 +12,14 @@ namespace Provider {
 namespace Cert {
 
 CarClass(CCache)
+    , public Object
+    , public ICache
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CCache();
 
     CARAPI GetHash(

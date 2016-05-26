@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X501 {
 
+CAR_OBJECT_IMPL(CAttributeTypeAndValueComparator)
+
+CAR_INTERFACE_IMPL(CAttributeTypeAndValueComparator, Object, IAttributeTypeAndValueComparator)
 
 ECode CAttributeTypeAndValueComparator::Compare(
     /* [in] */ IInterface * pLhs,

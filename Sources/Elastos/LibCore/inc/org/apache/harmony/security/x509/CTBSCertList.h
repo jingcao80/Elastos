@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CTBSCertList)
+    , public Object
+    , public ITBSCertList
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetVersion(
         /* [out] */ Int32 * pVer);
 

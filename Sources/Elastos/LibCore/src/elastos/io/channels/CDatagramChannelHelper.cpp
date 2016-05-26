@@ -4,6 +4,9 @@
 namespace Elastos {
 namespace IO {
 namespace Channels {
+CAR_SINGLETON_IMPL(CDatagramChannelHelper)
+
+CAR_INTERFACE_IMPL(CDatagramChannelHelper, Singleton, IDatagramChannelHelper)
 
 ECode CDatagramChannelHelper::Open(
     /* [out] */ IDatagramChannel** channel)

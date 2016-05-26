@@ -8,6 +8,9 @@ namespace Security {
 namespace Provider {
 namespace Crypto {
 
+CAR_SINGLETON_IMPL(CRandomBitsSupplierHelper)
+
+CAR_INTERFACE_IMPL(CRandomBitsSupplierHelper, Singleton, IRandomBitsSupplierHelper)
 
 ECode CRandomBitsSupplierHelper::IsServiceAvailable(
     /* [out] */ Boolean * pAvailable)

@@ -4,6 +4,7 @@
 namespace Org {
 namespace W3c {
 namespace Dom {
+CAR_OBJECT_IMPL(CText)
 
 CAR_INTERFACE_IMPL(CText, Object, IText)
 

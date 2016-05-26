@@ -7,6 +7,8 @@ using Elastos::Core::StringBuilder;
 namespace Elastos {
 namespace Text {
 
+CAR_OBJECT_IMPL(CParsePosition)
+
 CAR_INTERFACE_IMPL(CParsePosition, Object, IParsePosition)
 
 CParsePosition::CParsePosition()

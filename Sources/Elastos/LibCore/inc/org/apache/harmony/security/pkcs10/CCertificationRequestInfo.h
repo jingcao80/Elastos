@@ -13,6 +13,8 @@ namespace Security {
 namespace Pkcs10 {
 
 CarClass(CCertificationRequestInfo)
+    , public Object
+    , public ICertificationRequestInfo
 {
 public:
     class ASN1SequenceDerived
@@ -48,6 +50,10 @@ public:
         ASN1SequenceDerived(
             /* [in] */ ArrayOf<IASN1Type *>* type);
     };
+
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
 
     static AutoPtr<IASN1Sequence> InitStatic();
 

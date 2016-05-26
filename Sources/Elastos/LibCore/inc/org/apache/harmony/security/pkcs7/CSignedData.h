@@ -13,6 +13,8 @@ namespace Security {
 namespace Pkcs7 {
 
 CarClass(CSignedData)
+    , public Object
+    , public ISignedData
 {
 private:
     friend class ASN1SequenceDerived;
@@ -49,6 +51,10 @@ private:
             /* [in] */ ArrayOf<IASN1Type *>* type);
     };
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     static CARAPI_(AutoPtr<IASN1Sequence>) InitStatic();
 
     CSignedData();

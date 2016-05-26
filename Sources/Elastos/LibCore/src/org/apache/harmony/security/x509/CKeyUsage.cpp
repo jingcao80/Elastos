@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CKeyUsage)
+
+CAR_INTERFACE_IMPL(CKeyUsage, Object, IKeyUsage)
 
 ECode CKeyUsage::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte> ** ppEncode)

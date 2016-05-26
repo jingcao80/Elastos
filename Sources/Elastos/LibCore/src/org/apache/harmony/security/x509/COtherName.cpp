@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(COtherName)
+
+CAR_INTERFACE_IMPL(COtherName, Object, IOtherName)
 
 ECode COtherName::GetValue(
     /* [out, callee] */ ArrayOf<Byte> ** ppValue)

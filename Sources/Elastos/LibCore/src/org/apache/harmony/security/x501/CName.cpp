@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X501 {
 
+CAR_OBJECT_IMPL(CName)
+
+CAR_INTERFACE_IMPL(CName, Object, IName)
 
 ECode CName::GetX500Principal(
     /* [out] */ Elastosx::Security::Auth::X500::IX500Principal ** ppX500Principal)

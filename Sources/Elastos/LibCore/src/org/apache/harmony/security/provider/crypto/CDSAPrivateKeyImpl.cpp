@@ -8,6 +8,7 @@ namespace Security {
 namespace Provider {
 namespace Crypto {
 
+CAR_OBJECT_IMPL(CDSAPrivateKeyImpl)
 
 ECode CDSAPrivateKeyImpl::GetAlgorithm(
     /* [out] */ String * pAlgorithm)

@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CCertificateIssuer)
+
+CAR_INTERFACE_IMPL(CCertificateIssuer, Object, ICertificateIssuer)
 
 ECode CCertificateIssuer::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte> ** ppEncode)

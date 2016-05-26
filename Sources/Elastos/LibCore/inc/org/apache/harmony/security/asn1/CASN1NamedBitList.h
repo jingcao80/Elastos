@@ -16,6 +16,8 @@ namespace Asn1 {
 CarClass(CASN1NamedBitList), public ASN1BitString
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetId(
         /* [out] */ Int32* id);
 

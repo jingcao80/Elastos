@@ -7,6 +7,8 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
+CAR_OBJECT_IMPL(CASN1Sequence)
+
 ASN1TYPE_METHODS_IMPL(CASN1Sequence, ASN1Sequence)
 
 ECode CASN1Sequence::SetType(

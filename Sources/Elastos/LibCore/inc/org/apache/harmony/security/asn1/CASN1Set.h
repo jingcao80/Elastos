@@ -15,7 +15,7 @@ namespace Asn1 {
 CarClass(CASN1Set), public ASN1TypeCollection
 {
 public:
-    ASN1TYPE_METHODS_DECL()
+    CAR_OBJECT_DECL()
 
     CARAPI SetType(
         /* [in] */ ArrayOf<IASN1Type*>* type);

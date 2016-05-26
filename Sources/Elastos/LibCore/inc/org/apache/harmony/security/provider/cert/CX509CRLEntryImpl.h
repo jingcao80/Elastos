@@ -21,6 +21,8 @@ namespace Cert {
 CarClass(CX509CRLEntryImpl), public X509CRLEntry
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetCriticalExtensionOIDs(
         /* [out] */ ISet** oids);
 

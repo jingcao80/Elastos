@@ -17,6 +17,8 @@ namespace Asn1 {
 
 AutoPtr<IASN1UTCTime> CASN1UTCTime::ASN1 = InitStatic();
 
+CAR_OBJECT_IMPL(CASN1UTCTime)
+
 AutoPtr<IASN1UTCTime> CASN1UTCTime::InitStatic()
 {
     return new CASN1UTCTime();

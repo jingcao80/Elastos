@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X501 {
 
+CAR_OBJECT_IMPL(CDirectoryString)
+
+CAR_INTERFACE_IMPL(CDirectoryString, Object, IDirectoryString)
 
 ECode CDirectoryString::GetASN1(
     /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Choice ** ppAsn1)

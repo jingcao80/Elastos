@@ -4,6 +4,8 @@
 namespace Elastosx {
 namespace Sql {
 
+CAR_OBJECT_IMPL(CConnectionEvent)
+
 CAR_INTERFACE_IMPL(CConnectionEvent, EventObject, IConnectionEvent)
 
 CConnectionEvent::CConnectionEvent()

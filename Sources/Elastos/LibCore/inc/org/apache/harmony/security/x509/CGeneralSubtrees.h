@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CGeneralSubtrees)
+    , public Object
+    , public IGeneralSubtrees
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetSubtrees(
         /* [out] */ Elastos::Utility::IList ** ppSubtrees);
 

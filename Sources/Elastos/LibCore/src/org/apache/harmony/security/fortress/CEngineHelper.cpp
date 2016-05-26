@@ -8,6 +8,9 @@ namespace Harmony {
 namespace Security {
 namespace Fortress {
 
+CAR_SINGLETON_IMPL(CEngineHelper)
+
+CAR_INTERFACE_IMPL(CEngineHelper, Singleton, IEngineHelper)
 
 ECode CEngineHelper::SetDoor(
     /* [in] */ ISecurityAccess* door)

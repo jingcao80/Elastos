@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CGeneralSubtrees)
+
+CAR_INTERFACE_IMPL(CGeneralSubtrees, Object, IGeneralSubtrees)
 
 ECode CGeneralSubtrees::GetSubtrees(
     /* [out] */ Elastos::Utility::IList ** ppSubtrees)

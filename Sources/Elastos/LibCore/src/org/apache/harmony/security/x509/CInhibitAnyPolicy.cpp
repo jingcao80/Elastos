@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CInhibitAnyPolicy)
+
+CAR_INTERFACE_IMPL(CInhibitAnyPolicy, Object, IInhibitAnyPolicy)
 
 ECode CInhibitAnyPolicy::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte> ** ppEncode)

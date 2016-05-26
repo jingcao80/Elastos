@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CInfoAccessSyntax)
+
+CAR_INTERFACE_IMPL(CInfoAccessSyntax, Object, IInfoAccessSyntax)
 
 ECode CInfoAccessSyntax::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte> ** ppEncode)

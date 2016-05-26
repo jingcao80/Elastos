@@ -14,6 +14,8 @@ namespace Crypto {
 CarClass(CSHA1_MessageDigestImpl)
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI Clone(
         /* [out] */ IInterface ** ppObject);
 

@@ -22,7 +22,10 @@ namespace Libcore {
 namespace Net {
 namespace Url {
 
+CAR_OBJECT_IMPL(CJarURLConnectionImpl)
+
 CAR_INTERFACE_IMPL(CJarURLConnectionImpl, JarURLConnection, IJarURLConnectionImpl)
+
 Object CJarURLConnectionImpl::sJarCacheLock;
 HashMap<AutoPtr<IURL>, AutoPtr<IJarFile> > CJarURLConnectionImpl::sJarCache;
 

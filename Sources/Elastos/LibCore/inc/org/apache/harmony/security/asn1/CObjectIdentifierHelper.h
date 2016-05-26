@@ -3,6 +3,7 @@
 #define __ORG_APACHE_HARMONY_SECURITY_ASN1_COBJECTIDENTIFIERHELPER_H__
 
 #include "_Org_Apache_Harmony_Security_Asn1_CObjectIdentifierHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Org {
 namespace Apache {
@@ -11,8 +12,14 @@ namespace Security {
 namespace Asn1 {
 
 CarClass(CObjectIdentifierHelper)
+    , public Singleton
+    , public IObjectIdentifierHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI Validate(
         /* [in] */ ArrayOf<Int32>* oid);
 

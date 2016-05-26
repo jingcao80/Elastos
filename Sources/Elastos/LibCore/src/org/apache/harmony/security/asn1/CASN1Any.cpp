@@ -10,6 +10,8 @@ namespace Asn1 {
 
 AutoPtr<IASN1Any> CASN1Any::sASN1 = Init();
 
+CAR_OBJECT_IMPL(CASN1Any)
+
 AutoPtr<IASN1Any> CASN1Any::Init()
 {
     return new CASN1Any();

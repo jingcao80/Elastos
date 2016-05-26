@@ -16,6 +16,8 @@ namespace Security {
 namespace Pkcs7 {
 
 CarClass(CSignerInfo)
+    , public Object
+    , public ISignerInfo
 {
 private:
     friend class ASN1SequenceDerived1;
@@ -49,6 +51,10 @@ private:
     };
 
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     static CARAPI_(AutoPtr<IASN1Sequence>) InitStatic();
 
     CSignerInfo();

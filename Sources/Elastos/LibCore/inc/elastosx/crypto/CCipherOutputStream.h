@@ -16,6 +16,8 @@ CarClass(CCipherOutputStream)
     , public ICipherOutputStream
 {
 public:
+    CAR_OBJECT_DECL()
+
     CAR_INTERFACE_DECL()
 
     CCipherOutputStream();

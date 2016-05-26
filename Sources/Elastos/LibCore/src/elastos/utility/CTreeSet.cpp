@@ -15,6 +15,8 @@ using Elastos::IO::IOutputStream;
 namespace Elastos {
 namespace Utility {
 
+CAR_OBJECT_IMPL(CTreeSet)
+
 CAR_INTERFACE_IMPL_5(CTreeSet, AbstractSet, ITreeSet, INavigableSet, ISortedSet, ICloneable, ISerializable)
 
 ECode CTreeSet::constructor()

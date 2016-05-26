@@ -280,6 +280,8 @@ AutoPtr<ArrayOf<String> > CX509CertPathImpl::InitStatic()
     return ret;
 }
 
+CAR_OBJECT_IMPL(CX509CertPathImpl)
+
 ECode CX509CertPathImpl::GetInstance(
     /* [in] */ IInputStream* is,
     /* [out] */ IX509CertPathImpl** instance)

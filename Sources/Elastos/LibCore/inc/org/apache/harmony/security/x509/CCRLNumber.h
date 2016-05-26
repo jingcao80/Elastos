@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CCRLNumber)
+    , public Object
+    , public ICRLNumber
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetEncoded(
         /* [out, callee] */ ArrayOf<Byte> ** ppEncode);
 

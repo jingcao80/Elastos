@@ -9,6 +9,9 @@ namespace Harmony {
 namespace Security {
 namespace Pkcs7 {
 
+CAR_SINGLETON_IMPL(CSignedDataHelper)
+
+CAR_INTERFACE_IMPL(CSignedDataHelper, Singleton, ISignedDataHelper)
 
 ECode CSignedDataHelper::GetASN1(
     /* [out] */ IASN1Sequence** asn1)

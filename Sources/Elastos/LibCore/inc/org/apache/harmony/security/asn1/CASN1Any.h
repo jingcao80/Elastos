@@ -16,6 +16,8 @@ namespace Asn1 {
 CarClass(CASN1Any), public ASN1Type
 {
 public:
+    CAR_OBJECT_DECL()
+
     static CARAPI GetInstance(
         /* [out] */ IASN1Any** instance);
 

@@ -5,6 +5,10 @@
 namespace Elastos {
 namespace IO {
 
+CAR_SINGLETON_IMPL(CDataInputStreamHelper)
+
+CAR_INTERFACE_IMPL(CDataInputStreamHelper, Singleton, IDataInputStreamHelper)
+
 CDataInputStreamHelper::ReadUTF(
     /* [in] */ IDataInput* dataInput,
     /* [out] */ String* str)

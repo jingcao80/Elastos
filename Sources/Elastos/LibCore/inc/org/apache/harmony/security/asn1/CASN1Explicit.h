@@ -13,9 +13,15 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-CarClass(CASN1Explicit), public ASN1Constructed
+CarClass(CASN1Explicit)
+    , public ASN1Constructed
+    , public ICASN1Explicit
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetType(
         /* [out] */ IASN1Type** type);
 

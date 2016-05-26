@@ -2,13 +2,20 @@
 #define __ELASTOS_IO_CDOUBLEBUFFERHELPER_H__
 
 #include "_Elastos_IO_CDoubleBufferHelper.h"
+#include <elastos/core/Singleton.h>
 
 namespace Elastos {
 namespace IO {
 
 CarClass(CDoubleBufferHelper)
+    , public Singleton
+    , public IDoubleBufferHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     /**
      * Creates a double buffer based on a newly allocated double array.
      *

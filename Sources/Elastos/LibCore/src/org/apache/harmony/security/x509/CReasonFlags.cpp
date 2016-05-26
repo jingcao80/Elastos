@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CReasonFlags)
+
+CAR_INTERFACE_IMPL(CReasonFlags, Object, IReasonFlags)
 
 ECode CReasonFlags::DumpValue(
     /* [in] */ Elastos::Core::IStringBuilder * pSb,

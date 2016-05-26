@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CDistributionPoint)
+    , public Object
+    , public IDistributionPoint
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI DumpValue(
         /* [in] */ Elastos::Core::IStringBuilder * pSb,
         /* [in] */ const String& prefix);

@@ -4,6 +4,9 @@
 
 namespace Elastos {
 namespace IO {
+CAR_SINGLETON_IMPL(CFloatBufferHelper)
+
+CAR_INTERFACE_IMPL(CFloatBufferHelper, Singleton, IFloatBufferHelper)
 
 ECode CFloatBufferHelper::Allocate(
     /* [in] */ Int32 capacity,

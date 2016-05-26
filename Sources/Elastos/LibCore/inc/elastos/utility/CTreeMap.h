@@ -1202,6 +1202,8 @@ private:
 public:
     CTreeMap();
 
+    CAR_OBJECT_DECL()
+
     CAR_INTERFACE_DECL()
 
     /**

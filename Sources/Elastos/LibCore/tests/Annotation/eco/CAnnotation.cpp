@@ -1,6 +1,8 @@
 
 #include "CAnnotation.h"
 
+CAR_OBJECT_IMPL(CAnnotation)
+
 CAR_INTERFACE_IMPL(CAnnotation, Object, IAnnotation)
 
 ECode CAnnotation::constructor()

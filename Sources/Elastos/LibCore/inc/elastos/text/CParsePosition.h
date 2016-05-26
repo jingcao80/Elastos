@@ -13,6 +13,8 @@ CarClass(CParsePosition)
     , public IParsePosition
 {
 public:
+    CAR_OBJECT_DECL()
+
     CAR_INTERFACE_DECL()
 
     CParsePosition();

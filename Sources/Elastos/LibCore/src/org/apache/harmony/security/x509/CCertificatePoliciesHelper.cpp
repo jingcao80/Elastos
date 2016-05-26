@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_SINGLETON_IMPL(CCertificatePoliciesHelper)
+
+CAR_INTERFACE_IMPL(CCertificatePoliciesHelper, Singleton, ICertificatePoliciesHelper)
 
 ECode CCertificatePoliciesHelper::Decode(
     /* [in] */ ArrayOf<Byte> * pEncoding,

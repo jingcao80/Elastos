@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CExtensions)
+
+CAR_INTERFACE_IMPL(CExtensions, Object, IExtensions)
 
 ECode CExtensions::GetSize(
     /* [out] */ Int32 * pSize)

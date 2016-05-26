@@ -8,6 +8,9 @@ namespace Security {
 namespace X509 {
 namespace Tsp {
 
+CAR_OBJECT_IMPL(CTimeStampResp)
+
+CAR_INTERFACE_IMPL(CTimeStampResp, Object, ITimeStampResp)
 
 ECode CTimeStampResp::ToString(
     /* [out] */ String * pStr)

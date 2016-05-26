@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CGeneralSubtree)
+
+CAR_INTERFACE_IMPL(CGeneralSubtree, Object, IGeneralSubtree)
 
 ECode CGeneralSubtree::GetBase(
     /* [out] */ Org::Apache::Harmony::Security::X509::IGeneralName ** ppBase)

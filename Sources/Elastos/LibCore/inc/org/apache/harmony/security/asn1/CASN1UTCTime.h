@@ -15,6 +15,8 @@ namespace Asn1 {
 CarClass(CASN1UTCTime), public ASN1Time
 {
 public:
+    CAR_OBJECT_DECL()
+
     ASN1TYPE_METHODS_DECL()
 
     static AutoPtr<IASN1UTCTime> InitStatic();

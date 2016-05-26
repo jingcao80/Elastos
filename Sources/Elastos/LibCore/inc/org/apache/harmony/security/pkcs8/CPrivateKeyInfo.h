@@ -14,6 +14,8 @@ namespace Security {
 namespace Pkcs8 {
 
 CarClass(CPrivateKeyInfo)
+    , public Object
+    , public IPrivateKeyInfo
 {
 private:
     friend class ASN1SequenceDerived;
@@ -33,6 +35,10 @@ private:
 
 public:
     static AutoPtr<IASN1Sequence> InitStatic();
+
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
 
     CPrivateKeyInfo();
 

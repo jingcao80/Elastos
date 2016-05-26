@@ -8,6 +8,9 @@ namespace Security {
 namespace X509 {
 namespace Tsp {
 
+CAR_SINGLETON_IMPL(CTimeStampReqHelper)
+
+CAR_INTERFACE_IMPL(CTimeStampReqHelper, Singleton, ITimeStampReqHelper)
 
 ECode CTimeStampReqHelper::GetASN1(
     /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence ** ppAsn1)

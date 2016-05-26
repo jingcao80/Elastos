@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CGeneralNames)
+    , public Object
+    , public IGeneralNames
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetNames(
         /* [out] */ Elastos::Utility::IList ** ppNames);
 

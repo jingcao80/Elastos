@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X501 {
 
+CAR_OBJECT_IMPL(CAttributeValue)
+
+CAR_INTERFACE_IMPL(CAttributeValue, Object, IAttributeValue)
 
 ECode CAttributeValue::GetWasEncoded(
     /* [out] */ Boolean * pWasEncoded)

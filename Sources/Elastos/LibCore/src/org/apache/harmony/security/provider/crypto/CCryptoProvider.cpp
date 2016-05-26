@@ -8,6 +8,7 @@ namespace Security {
 namespace Provider {
 namespace Crypto {
 
+CAR_OBJECT_IMPL(CCryptoProvider)
 
 ECode CCryptoProvider::GetProperty(
     /* [in] */ const String& name,

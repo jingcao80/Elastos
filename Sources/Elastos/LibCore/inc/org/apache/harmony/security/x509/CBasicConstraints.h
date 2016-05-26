@@ -11,8 +11,14 @@ namespace Security {
 namespace X509 {
 
 CarClass(CBasicConstraints)
+    , public Object
+    , public IBasicConstraints
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetEncoded(
         /* [out, callee] */ ArrayOf<Byte> ** ppEncode);
 

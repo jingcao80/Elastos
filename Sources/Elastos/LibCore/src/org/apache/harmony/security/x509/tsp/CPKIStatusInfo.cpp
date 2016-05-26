@@ -8,6 +8,9 @@ namespace Security {
 namespace X509 {
 namespace Tsp {
 
+CAR_OBJECT_IMPL(CPKIStatusInfo)
+
+CAR_INTERFACE_IMPL(CPKIStatusInfo, Object, IPKIStatusInfo)
 
 ECode CPKIStatusInfo::ToString(
     /* [out] */ String * pStr)

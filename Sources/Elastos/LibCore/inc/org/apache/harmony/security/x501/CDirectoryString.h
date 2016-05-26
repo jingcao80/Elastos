@@ -11,8 +11,14 @@ namespace Security {
 namespace X501 {
 
 CarClass(CDirectoryString)
+    , public Object
+    , public IDirectoryString
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetASN1(
         /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Choice ** ppAsn1);
 

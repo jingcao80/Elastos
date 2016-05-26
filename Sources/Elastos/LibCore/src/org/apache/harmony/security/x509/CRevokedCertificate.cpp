@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace X509 {
 
+CAR_OBJECT_IMPL(CRevokedCertificate)
+
+CAR_INTERFACE_IMPL(CRevokedCertificate, Object, IRevokedCertificate)
 
 ECode CRevokedCertificate::GetCrlEntryExtensions(
     /* [out] */ Org::Apache::Harmony::Security::X509::IExtensions ** ppExtensions)

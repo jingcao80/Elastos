@@ -20,6 +20,7 @@ namespace Asn1 {
 //TODO:
 const AutoPtr<IASN1OctetString> CASN1OctetString::ASN1;// = InitASN1();
 
+CAR_OBJECT_IMPL(CASN1OctetString)
 AutoPtr<IASN1OctetString> CASN1OctetString::InitASN1()
 {
     AutoPtr<IASN1OctetString> asn1Obj;
