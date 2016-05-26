@@ -4237,7 +4237,7 @@ ECode CActivityManagerService::StartProcessLocked(
     // the PID of the new process, or else throw a RuntimeException.
     Boolean isActivityProcess = (entryPoint == NULL);
     if (isActivityProcess) {
-        entryPoint = "Elastos.Droid.App.CActivityThreadHelper";//"android.app.ActivityThread";
+        entryPoint = "android.app.ActivityThread";
     }
     CheckTime(startTime, String("startProcess: asking zygote to start proc"));
 
