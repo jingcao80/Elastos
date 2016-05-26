@@ -7,6 +7,7 @@
 
 using Elastos::Core::IRunnable;
 using Elastos::Core::IThread;
+using Elastos::Core::Object;
 using Elastos::Core::Thread;
 
 namespace Elastos {

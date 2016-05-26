@@ -6,6 +6,7 @@
 #include "Singleton.h"
 #include <elastos/utility/etl/List.h>
 
+using Elastos::Core::Singleton;
 using Elastos::Utility::Etl::List;
 
 namespace Elastos {

@@ -480,7 +480,7 @@ ECode NumberFormat::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<INumberFormat> obj = INumberFormat::Probe(object);
+    INumberFormat* obj = INumberFormat::Probe(object);
     if (obj == (INumberFormat*)this) {
         *result = TRUE;
         return NOERROR;

@@ -5,6 +5,7 @@
 #include "elastos/core/Object.h"
 
 using Elastos::Core::ICloneable;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Utility {

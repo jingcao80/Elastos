@@ -6,6 +6,7 @@
 #include "Object.h"
 
 using Elastos::Core::IRunnable;
+using Elastos::Core::Object;
 using Elastos::Utility::Concurrent::Locks::IReentrantLock;
 using Elastos::Utility::Concurrent::Locks::ICondition;
 

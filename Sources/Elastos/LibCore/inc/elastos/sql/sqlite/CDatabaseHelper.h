@@ -5,6 +5,8 @@
 #include "_Elastos_Sql_SQLite_CDatabaseHelper.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
+
 namespace Elastos {
 namespace Sql {
 namespace SQLite {

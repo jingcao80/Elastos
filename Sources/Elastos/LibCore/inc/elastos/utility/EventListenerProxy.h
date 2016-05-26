@@ -4,6 +4,8 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
+
 namespace Elastos {
 namespace Utility {
 

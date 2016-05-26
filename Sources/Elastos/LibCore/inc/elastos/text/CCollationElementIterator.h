@@ -6,8 +6,9 @@
 #include "_Elastos_Text_CCollationElementIterator.h"
 #include "Object.h"
 
-using Libcore::ICU::ICollationElementIteratorICU;
+using Elastos::Core::Object;
 using Elastos::Text::ICharacterIterator;
+using Libcore::ICU::ICollationElementIteratorICU;
 
 namespace Elastos {
 namespace Text {

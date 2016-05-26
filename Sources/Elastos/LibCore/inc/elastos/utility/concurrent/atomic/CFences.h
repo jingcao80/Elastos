@@ -5,6 +5,8 @@
 #include "_Elastos_Utility_Concurrent_Atomic_CFences.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
+
 namespace Elastos {
 namespace Utility {
 namespace Concurrent {

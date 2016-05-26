@@ -5,8 +5,9 @@
 #include "_Elastos_Text_CNormalizerHelper.h"
 #include "Singleton.h"
 
-using Elastos::Utility::ILocale;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::Singleton;
+using Elastos::Utility::ILocale;
 
 namespace Elastos {
 namespace Text {

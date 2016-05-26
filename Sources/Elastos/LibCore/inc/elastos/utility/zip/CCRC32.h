@@ -5,6 +5,7 @@
 #include "_Elastos_Utility_Zip_CCRC32.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Utility {

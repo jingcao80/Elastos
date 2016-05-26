@@ -7,6 +7,7 @@
 
 using Elastos::Core::IThrowable;
 using Elastos::Core::IRunnable;
+using Elastos::Core::Object;
 using Elastos::IO::IObjectOutputStream;
 using Elastos::IO::IObjectInputStream;
 using Elastos::IO::ISerializable;
@@ -17,10 +18,10 @@ namespace Utility {
 namespace Concurrent {
 
 class ForkJoinTask
-    : public IForkJoinTask
+    : public Object
+    , public IForkJoinTask
     , public ISerializable
     , public IFuture
-    , public Object
 {
 public:
     /**

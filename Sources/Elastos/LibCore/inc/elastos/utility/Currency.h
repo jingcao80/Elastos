@@ -4,16 +4,17 @@
 
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Object.h"
+#define HASH_FOR_UTILITY
+#include <elastos/corehash.h>
 #include <elastos/utility/etl/HashMap.h>
 
+using Elastos::Core::Object;
+using Elastos::IO::ISerializable;
 using Elastos::Utility::ILocale;
 using Elastos::Utility::Etl::HashMap;
-using Elastos::IO::ISerializable;
 
-DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Utility::ILocale)
-
-namespace Elastos{
-namespace Utility{
+namespace Elastos {
+namespace Utility {
 
 /**
  * A currency corresponding to an <a href="http://en.wikipedia.org/wiki/ISO_4217">ISO 4217</a>

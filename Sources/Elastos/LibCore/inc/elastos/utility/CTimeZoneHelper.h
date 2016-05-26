@@ -5,6 +5,8 @@
 #include "_Elastos_Utility_CTimeZoneHelper.h"
 #include "elastos/core/Singleton.h"
 
+using Elastos::Core::Singleton;
+
 namespace Elastos {
 namespace Utility {
 

@@ -7,6 +7,7 @@
 
 using Elastos::Core::IComparator;
 using Elastos::Core::ICloneable;
+using Elastos::Core::Object;
 using Elastos::Utility::ILocale;
 using Libcore::ICU::IRuleBasedCollatorICU;
 

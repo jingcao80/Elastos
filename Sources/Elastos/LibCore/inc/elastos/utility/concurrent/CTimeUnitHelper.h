@@ -5,6 +5,8 @@
 #include "_Elastos_Utility_Concurrent_CTimeUnitHelper.h"
 #include "elastos/core/Singleton.h"
 
+using Elastos::Core::Singleton;
+
 namespace Elastos {
 namespace Utility {
 namespace Concurrent {

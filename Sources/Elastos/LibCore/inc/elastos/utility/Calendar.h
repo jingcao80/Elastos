@@ -6,8 +6,9 @@
 
 using Elastos::Core::IComparable;
 using Elastos::Core::ICloneable;
-using Elastos::Utility::ILocale;
+using Elastos::Core::Object;
 using Elastos::IO::ISerializable;
+using Elastos::Utility::ILocale;
 
 namespace Elastos{
 namespace Utility{

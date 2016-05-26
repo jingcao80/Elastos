@@ -6,6 +6,7 @@
 
 using Elastos::Core::ICloneable;
 using Elastos::Core::IArrayOf;
+using Elastos::Core::Object;
 using Elastos::IO::ISerializable;
 using Elastos::Utility::ILocale;
 using Elastos::Utility::ITimeZone;

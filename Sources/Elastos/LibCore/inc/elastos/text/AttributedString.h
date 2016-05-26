@@ -3,13 +3,14 @@
 
 #include "Elastos.CoreLibrary.Text.h"
 #include "Object.h"
+#define HASH_FOR_TEXT
+#include <elastos/corehash.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/etl/HashSet.h>
 
-DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Text::IAttributedCharacterIteratorAttribute)
-
 using Elastos::Core::ICloneable;
+using Elastos::Core::Object;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Etl::HashSet;
 using Elastos::Utility::Etl::HashMap;

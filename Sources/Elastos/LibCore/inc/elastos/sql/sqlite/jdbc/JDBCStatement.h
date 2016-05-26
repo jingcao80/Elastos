@@ -6,9 +6,10 @@
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/List.h>
 
-using Elastos::Utility::Etl::List;
+using Elastos::Core::Object;
 using Elastos::Sql::IResultSet;
 using Elastos::Sql::ISQLWarning;
+using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Sql {

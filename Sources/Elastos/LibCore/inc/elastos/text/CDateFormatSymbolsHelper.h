@@ -5,6 +5,7 @@
 #include "_Elastos_Text_CDateFormatSymbolsHelper.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
 using Elastos::Utility::ILocale;
 
 namespace Elastos {

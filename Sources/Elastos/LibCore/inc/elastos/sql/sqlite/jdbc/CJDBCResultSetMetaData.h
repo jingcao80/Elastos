@@ -5,6 +5,7 @@
 #include <elastos/core/Object.h>
 #include "_Elastos_Sql_SQLite_JDBC_CJDBCResultSetMetaData.h"
 
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Sql {

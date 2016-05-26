@@ -4,6 +4,7 @@
 #include "Elastos.CoreLibrary.Text.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 using Elastos::Text::IAttributedCharacterIterator;;
 
 namespace Elastos {

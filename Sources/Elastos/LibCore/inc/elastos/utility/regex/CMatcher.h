@@ -10,6 +10,7 @@
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IStringBuffer;
 using Elastos::Core::StringBuffer;
+using Elastos::Core::Object;
 using U_ICU_NAMESPACE::RegexMatcher;
 
 namespace Elastos {

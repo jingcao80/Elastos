@@ -5,6 +5,7 @@
 #include "_Elastos_Utility_Jar_CPack200.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
 using Elastos::Utility::Jar::IPacker;
 using Elastos::Utility::Jar::IUnpacker;
 

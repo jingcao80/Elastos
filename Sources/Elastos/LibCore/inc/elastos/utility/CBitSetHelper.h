@@ -5,6 +5,7 @@
 #include "_Elastos_Utility_CBitSetHelper.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
 using Elastos::IO::IInt64Buffer;
 using Elastos::IO::IByteBuffer;
 

@@ -5,6 +5,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::IClassLoader;
+using Elastos::Core::Object;
 using Elastos::Utility::ILocale;
 
 namespace Elastos {

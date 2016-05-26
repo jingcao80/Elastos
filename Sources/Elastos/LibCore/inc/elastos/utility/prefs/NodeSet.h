@@ -4,6 +4,7 @@
 #include "Elastos.CoreLibrary.External.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 using Org::W3c::Dom::INodeList;
 using Org::W3c::Dom::INode;
 

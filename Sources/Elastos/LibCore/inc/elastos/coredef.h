@@ -119,7 +119,7 @@ template<> struct Hash<TypeName *>                                              
 {                                                                                       \
     size_t operator()(TypeName * s) const                                               \
     {                                                                                   \
-        return (size_t)Object::GetHashCode(s);                                          \
+        return (size_t)Elastos::Core::Object::GetHashCode(s);                           \
     }                                                                                   \
 };                                                                                      \
                                                                                         \
@@ -127,7 +127,7 @@ template<> struct Hash<AutoPtr<TypeName> >                                      
 {                                                                                       \
     size_t operator()(const AutoPtr<TypeName> & s) const                                \
     {                                                                                   \
-        return (size_t)Object::GetHashCode(s.Get());                                    \
+        return (size_t)Elastos::Core::Object::GetHashCode(s.Get());                     \
     }                                                                                   \
 };                                                                                      \
                                                                                         \
@@ -135,7 +135,7 @@ template<> struct EqualTo<TypeName *>                                           
 {                                                                                       \
     Boolean operator()(TypeName * x, TypeName * y) const                                \
     {                                                                                   \
-        return Object::Equals(x, y);                                                    \
+        return Elastos::Core::Object::Equals(x, y);                                     \
     }                                                                                   \
 };                                                                                      \
                                                                                         \
@@ -143,7 +143,7 @@ template<> struct EqualTo<AutoPtr<TypeName> >                                   
 {                                                                                       \
     Boolean operator()(const AutoPtr<TypeName> & x, const AutoPtr<TypeName> & y) const  \
     {                                                                                   \
-        return Object::Equals(x, y);                                                    \
+        return Elastos::Core::Object::Equals(x, y);                                     \
     }                                                                                   \
 };                                                                                      \
                                                                                         \

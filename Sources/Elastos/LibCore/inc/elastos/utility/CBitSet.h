@@ -6,6 +6,7 @@
 #include "Object.h"
 
 using Elastos::Core::ICloneable;
+using Elastos::Core::Object;
 using Elastos::IO::IInt64Buffer;
 using Elastos::IO::IByteBuffer;
 using Elastos::IO::ISerializable;

@@ -5,6 +5,7 @@
 #include "_Elastos_Utility_CLocaleBuilder.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Utility {

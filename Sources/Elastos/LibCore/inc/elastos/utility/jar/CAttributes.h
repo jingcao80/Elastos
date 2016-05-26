@@ -5,11 +5,12 @@
 #include "_Elastos_Utility_Jar_CAttributes.h"
 #include "Object.h"
 
+using Elastos::Core::ICharSequence;
+using Elastos::Core::ICloneable;
+using Elastos::Core::Object;
 using Elastos::Utility::IMapEntry;
 using Elastos::Utility::IMap;
 using Elastos::Utility::ICollection;
-using Elastos::Core::ICharSequence;
-using Elastos::Core::ICloneable;
 
 namespace Elastos {
 namespace Utility {

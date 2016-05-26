@@ -5,6 +5,8 @@
 #include "_Elastos_Text_CParsePosition.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
+
 namespace Elastos {
 namespace Text {
 

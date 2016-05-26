@@ -5,8 +5,8 @@
 #include "_Elastos_Sql_SQLite_JDBC_CJDBCConnection.h"
 #include "Object.h"
 
-using Elastos::Utility::IMap;
-using Elastos::Utility::IProperties;
+using Elastos::Core::Object;
+using Elastos::IO::ICloseable;
 using Elastos::Sql::ISQLWarning;
 using Elastos::Sql::IStatement;
 using Elastos::Sql::IDatabaseMetaData;
@@ -18,7 +18,8 @@ using Elastos::Sql::IBlob;
 using Elastos::Sql::INClob;
 using Elastos::Sql::ISQLXML;
 using Elastos::Sql::IPreparedStatement;
-using Elastos::IO::ICloseable;
+using Elastos::Utility::IMap;
+using Elastos::Utility::IProperties;
 
 namespace Elastos {
 namespace Sql {

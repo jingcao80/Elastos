@@ -6,6 +6,7 @@
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/Vector.h>
 
+using Elastos::Core::Object;
 using Elastos::Utility::Etl::Vector;
 
 namespace Elastos {

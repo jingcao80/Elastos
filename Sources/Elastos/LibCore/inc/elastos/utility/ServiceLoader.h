@@ -2,9 +2,9 @@
 #define __ELASTOS_UTILITY_PROPERTYPERMISSION_H__
 
 #include "Elastos.CoreLibrary.Utility.h"
-#include "Singleton.h"
+#include "Object.h"
 
-using Elastos::Core::Singleton;
+using Elastos::Core::Object;
 using Elastos::Core::IClassLoader;
 
 namespace Elastos {

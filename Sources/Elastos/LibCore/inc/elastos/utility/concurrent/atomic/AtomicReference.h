@@ -5,6 +5,7 @@
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 using Elastos::IO::ISerializable;
 
 namespace Elastos {

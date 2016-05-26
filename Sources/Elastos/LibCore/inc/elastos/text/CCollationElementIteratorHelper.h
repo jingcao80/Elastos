@@ -5,6 +5,7 @@
 #include "_Elastos_Text_CCollationElementIteratorHelper.h"
 #include "Singleton.h"
 
+using Elastos::Core::Singleton;
 
 namespace Elastos {
 namespace Text {

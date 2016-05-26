@@ -6,6 +6,7 @@
 #include "Object.h"
 
 using Elastos::Core::IThread;
+using Elastos::Core::Object;
 using Elastos::Utility::Concurrent::Atomic::IAtomicReference;
 
 namespace Elastos {

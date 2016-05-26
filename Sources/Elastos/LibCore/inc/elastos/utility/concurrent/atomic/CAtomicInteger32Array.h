@@ -5,6 +5,7 @@
 #include "_Elastos_Utility_Concurrent_Atomic_CAtomicInteger32Array.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 using Elastos::IO::ISerializable;
 
 namespace Elastos {

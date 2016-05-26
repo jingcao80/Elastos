@@ -7,6 +7,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::ICharSequence;
+using Elastos::Core::Object;
 using U_ICU_NAMESPACE::RegexPattern;
 
 namespace Elastos {

@@ -5,6 +5,8 @@
 #include "_Elastos_Utility_Jar_CName.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
+
 namespace Elastos {
 namespace Utility {
 namespace Jar {

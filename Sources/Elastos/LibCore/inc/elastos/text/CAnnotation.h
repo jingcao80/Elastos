@@ -5,6 +5,7 @@
 #include "_Elastos_Text_CAnnotation.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Text {

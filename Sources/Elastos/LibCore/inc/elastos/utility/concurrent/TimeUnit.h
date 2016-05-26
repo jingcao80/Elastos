@@ -8,6 +8,7 @@
 
 using Elastos::Core::ISynchronize;
 using Elastos::Core::IThread;
+using Elastos::Core::Object;
 
 #define ITIMEUNIT_METHODS_DECL()                                        \
     CARAPI Convert(                                                     \
@@ -68,44 +69,6 @@ public:
         /* [in] */ Int64 d,
         /* [in] */ Int64 m,
         /* [in] */ Int64 over);
-
-    virtual CARAPI Convert(
-        /* [in] */ Int64 sourceDuration,
-        /* [in] */ ITimeUnit* sourceUnit,
-        /* [out] */ Int64* result) = 0;
-
-    virtual CARAPI ToNanos(
-        /* [in] */ Int64 duration,
-        /* [out] */ Int64* result) = 0;
-
-    virtual CARAPI ToMicros(
-        /* [in] */ Int64 duration,
-        /* [out] */ Int64* result) = 0;
-
-    virtual CARAPI ToMillis(
-        /* [in] */ Int64 duration,
-        /* [out] */ Int64* result) = 0;
-
-    virtual CARAPI ToSeconds(
-        /* [in] */ Int64 duration,
-        /* [out] */ Int64* result) = 0;
-
-    virtual CARAPI ToMinutes(
-        /* [in] */ Int64 duration,
-        /* [out] */ Int64* result) = 0;
-
-    virtual CARAPI ToHours(
-        /* [in] */ Int64 duration,
-        /* [out] */ Int64* result) = 0;
-
-    virtual CARAPI ToDays(
-        /* [in] */ Int64 duration,
-        /* [out] */ Int64* result) = 0;
-
-    virtual CARAPI ExcessNanos(
-        /* [in] */ Int64 d,
-        /* [in] */ Int64 m,
-        /* [out] */ Int32* result) = 0;
 
     virtual CARAPI TimedWait(
         /* [in] */ ISynchronize* obj,

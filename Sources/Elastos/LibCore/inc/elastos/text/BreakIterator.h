@@ -5,6 +5,7 @@
 #include "Elastos.CoreLibrary.Text.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
 using Elastos::Core::ICloneable;
 using Elastos::Utility::ILocale;
 using Elastos::Text::ICharacterIterator;

@@ -7,6 +7,7 @@
 #include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Core::ICloneable;
+using Elastos::Core::Object;
 using Elastos::IO::IOutputStream;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IByteBuffer;

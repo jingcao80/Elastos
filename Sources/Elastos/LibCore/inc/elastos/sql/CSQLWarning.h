@@ -5,6 +5,8 @@
 #include "_Elastos_Sql_CSQLWarning.h"
 #include "Object.h"
 
+using Elastos::Core::Object;
+
 namespace Elastos {
 namespace Sql {
 
