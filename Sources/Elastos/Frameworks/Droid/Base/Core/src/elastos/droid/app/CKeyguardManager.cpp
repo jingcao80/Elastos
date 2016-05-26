@@ -58,6 +58,8 @@ ECode CKeyguardManager::KeyguardLock::ReenableKeyguard()
 //====================================================================
 CAR_INTERFACE_IMPL(CKeyguardManager, Object, IKeyguardManager)
 
+CAR_OBJECT_IMPL(CKeyguardManager)
+
 ECode CKeyguardManager::constructor()
 {
     mWM = CWindowManagerGlobal::GetWindowManagerService();

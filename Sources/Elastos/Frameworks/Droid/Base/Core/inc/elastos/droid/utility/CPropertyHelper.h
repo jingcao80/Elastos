@@ -9,6 +9,8 @@ namespace Utility {
 CarClass(CPropertyHelper)
 {
 public:
+    CAR_OBJECT_DECL()
+
     CPropertyHelper();
 
     CARAPI constructor();

@@ -6,6 +6,7 @@ namespace Droid {
 namespace Commands {
 namespace Monkey {
 
+CAR_OBJECT_IMPL(CMonkeyGetAppFrameRateEvent)
 
 ECode CMonkeyGetAppFrameRateEvent::GetEventType(
     /* [out] */ Int32 *eventType)

@@ -24,6 +24,8 @@ namespace Monkey {
 CarClass(CMonkeySourceNetworkViews)
 {
 private:
+    CAR_OBJECT_DECL()
+
     /* Interface for view queries */
     class ViewIntrospectionCommand : public ElRefBase {
     public:

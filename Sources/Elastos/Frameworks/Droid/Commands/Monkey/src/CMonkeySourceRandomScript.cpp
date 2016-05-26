@@ -6,6 +6,7 @@ namespace Droid {
 namespace Commands {
 namespace Monkey {
 
+CAR_OBJECT_IMPL(CMonkeySourceRandomScript)
 
 ECode CMonkeySourceRandomScript::GetNextEvent(
     /* [out] */IMonkeyEvent **event)

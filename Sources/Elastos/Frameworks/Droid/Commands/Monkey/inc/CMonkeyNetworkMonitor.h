@@ -13,6 +13,8 @@ namespace Monkey {
 CarClass(CMonkeyNetworkMonitor) , public MonkeyNetworkMonitor
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI PerformReceive(
         /* [in] */ IIntent *intent,
         /* [in] */ Int32 resultCode,

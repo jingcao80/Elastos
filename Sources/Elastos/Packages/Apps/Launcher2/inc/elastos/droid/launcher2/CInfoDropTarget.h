@@ -23,7 +23,9 @@ CarClass(CInfoDropTarget)
     , public IInfoDropTarget
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
 
     //@Override
     CARAPI AcceptDrop(

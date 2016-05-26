@@ -14,6 +14,10 @@ namespace Server {
 CarClass(CPrivacySettingsManagerService)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CPrivacySettingsManagerService();
 
     CARAPI constructor(

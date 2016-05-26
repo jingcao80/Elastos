@@ -26,6 +26,10 @@ const String CGpio::mMulSelName = String("/mul_sel");
 
 android::sp<android::IGpioService> CGpio::mGpioService;
 
+CAR_INTERFACE_IMPL(CGpio, Object, IGpio)
+
+CAR_OBJECT_IMPL(CGpio)
+
 CGpio::CGpio()
 {
     if (mGpioService == NULL) {

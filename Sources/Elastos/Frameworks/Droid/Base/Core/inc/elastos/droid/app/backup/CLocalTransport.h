@@ -20,6 +20,11 @@ namespace Backup {
 CarClass(CLocalTransport)
 {
 public:
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CLocalTransport();
 
     ~CLocalTransport();

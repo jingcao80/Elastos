@@ -48,6 +48,8 @@ ECode CClipboardManager::PrimaryClipChangedServiceListener::DispatchPrimaryClipC
 
 CAR_INTERFACE_IMPL(CClipboardManager, Object/*Elastos::Droid::Text::ClipboardManager*/, IClipboardManager)
 
+CAR_OBJECT_IMPL(CClipboardManager)
+
 CClipboardManager::CClipboardManager()
     : mContext(NULL)
 {

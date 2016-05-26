@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_APPS_PACKAGEINSTALLER_CUNINSTALLAPPPROGRESS_H__
 #define __ELASTOS_APPS_PACKAGEINSTALLER_CUNINSTALLAPPPROGRESS_H__
 
-//#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/app/Activity.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
 #include <Elastos.Droid.App.h>
@@ -13,7 +13,7 @@
 #include "_Elastos_Apps_PackageInstaller_CUninstallAppProgress.h"
 #include "elastos/core/Object.h"
 
-//using Elastos::Droid::App::Activity;
+using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::IPackageDeleteObserver;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
@@ -43,7 +43,7 @@ namespace PackageInstaller {
   * the application object of the application to uninstall.
   */
 CarClass(CUninstallAppProgress)
-    , public Object // Activity
+    , public Activity
     , public IViewOnClickListener
     , public IUninstallAppProgress
 {
@@ -101,6 +101,8 @@ private:
 
 public:
     CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
 
     CUninstallAppProgress();
 

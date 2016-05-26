@@ -10,6 +10,11 @@ namespace Utility {
 CarClass(CEventLogTagsDescription)
 {
 public:
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CEventLogTagsDescription();
 
     ~CEventLogTagsDescription();

@@ -18,6 +18,10 @@ namespace Telephony {
 CarClass(CCellInfo)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
 

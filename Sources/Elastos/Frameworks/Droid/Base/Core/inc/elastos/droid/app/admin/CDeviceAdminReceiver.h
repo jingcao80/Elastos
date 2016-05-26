@@ -16,6 +16,11 @@ using Elastos::Droid::Content::IComponentName;
 CarClass(CDeviceAdminReceiver)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
+
     /**
      * Retrieve the DevicePolicyManager interface for this administrator to work
      * with the system.

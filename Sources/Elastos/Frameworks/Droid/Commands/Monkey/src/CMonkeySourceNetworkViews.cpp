@@ -63,6 +63,8 @@ AutoPtr<HashMap<String, AutoPtr<CMonkeySourceNetworkViews::ViewIntrospectionComm
     return pm;
 }
 
+CAR_OBJECT_IMPL(CMonkeySourceNetworkViews)
+
 ECode CMonkeySourceNetworkViews::Setup()
 {
     CUiTestAutomationBridge::New((IUiTestAutomationBridge**)&sUiTestAutomationBridge);

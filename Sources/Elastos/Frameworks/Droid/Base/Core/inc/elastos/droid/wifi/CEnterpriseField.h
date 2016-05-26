@@ -11,6 +11,10 @@ namespace Wifi {
 CarClass(CEnterpriseField)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ const String& varName);
 

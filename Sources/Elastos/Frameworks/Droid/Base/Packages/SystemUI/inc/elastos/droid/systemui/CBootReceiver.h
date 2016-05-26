@@ -21,6 +21,8 @@ CarClass(CBootReceiver)
     , public BroadcastReceiver
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI OnReceive(
         /* [in] */ IContext* context,
         /* [in] */ IIntent* intent);

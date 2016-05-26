@@ -14,6 +14,10 @@ namespace Privacy {
 CarClass(CPrivacySettingsManager)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI GetSettings(
         /* [in] */ const String& packageName,
         /* [out] */ Elastos::Droid::Privacy::IPrivacySettings** privactySettings);

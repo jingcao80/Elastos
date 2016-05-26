@@ -10,6 +10,10 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
+CAR_INTERFACE_IMPL(CDropBoxManagerEntry, Object, IDropBoxManagerEntry)
+
+CAR_OBJECT_IMPL(CDropBoxManagerEntry)
+
 ECode CDropBoxManagerEntry::constructor()
 {
     return NOERROR;

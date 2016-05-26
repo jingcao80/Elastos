@@ -13,6 +13,10 @@ namespace Admin {
 CarClass(CDevicePolicyManagerHelper)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_SINGLETON_DECL()
+
     /** @hide */
     CARAPI Create(
         /* [in] */ IContext* context,

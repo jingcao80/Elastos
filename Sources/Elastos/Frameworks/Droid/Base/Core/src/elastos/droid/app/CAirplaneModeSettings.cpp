@@ -92,7 +92,7 @@ ECode CAirplaneModeSettings::ProcessOverride(
             sg->PutInt32(resolver, ISettingsGlobal::AIRPLANE_MODE_ON, mValue, &result);
             AutoPtr<IIntent> intent;
             CIntent::New(IIntent::ACTION_AIRPLANE_MODE_CHANGED, (IIntent**)&intent);
-            intent->PutExtra(String("state"), mValue == 1);
+            intent->PutBooleanExtra(String("state"), mValue == 1);
             context->SendBroadcast(intent);
         }
     }

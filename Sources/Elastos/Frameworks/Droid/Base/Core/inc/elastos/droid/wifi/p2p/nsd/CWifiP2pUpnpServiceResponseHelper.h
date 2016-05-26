@@ -15,6 +15,10 @@ namespace Nsd {
 CarClass(CWifiP2pUpnpServiceResponseHelper)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_SINGLETON_DECL()
+
     CARAPI NewInstance(
         /* [in] */ Int32 status,
         /* [in] */ Int32 transId,

@@ -14,6 +14,10 @@ namespace Telephony {
 CarClass(CGsmAlphabetHelper)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_SINGLETON_DECL()
+
     CARAPI CharToGsm(
         /* [in] */ Char32 c,
         /* [out] */ Int32* val);

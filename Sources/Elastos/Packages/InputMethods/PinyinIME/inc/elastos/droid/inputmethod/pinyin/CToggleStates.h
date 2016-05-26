@@ -12,6 +12,10 @@ namespace Pinyin {
 CarClass(CToggleStates)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CToggleStates();
 
     CARAPI SetRowIdToEnable(

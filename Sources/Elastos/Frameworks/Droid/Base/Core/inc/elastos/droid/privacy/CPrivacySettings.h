@@ -12,6 +12,10 @@ namespace Privacy {
 CarClass(CPrivacySettings)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CPrivacySettings()
         : _id(0)
         , packageName(String(NULL))

@@ -15,6 +15,11 @@ namespace Backup {
 CarClass(CWallpaperBackupHelper), public FileBackupHelperBase
 {
 public:
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CWallpaperBackupHelper();
 
     ~CWallpaperBackupHelper();

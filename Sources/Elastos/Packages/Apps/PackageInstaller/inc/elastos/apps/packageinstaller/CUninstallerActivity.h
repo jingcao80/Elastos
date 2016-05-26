@@ -2,8 +2,8 @@
 #ifndef __ELASTOS_APPS_PACKAGEINSTALLER_CUNINSTALLERACTIVITY_H__
 #define __ELASTOS_APPS_PACKAGEINSTALLER_CUNINSTALLERACTIVITY_H__
 
-//#include "elastos/droid/app/Activity.h"
-//#include "elastos/droid/app/DialogFragment.h"
+#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/app/DialogFragment.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Content.h>
@@ -11,7 +11,7 @@
 #include "_Elastos_Apps_PackageInstaller_CUninstallerActivity.h"
 #include "elastos/core/Object.h"
 
-//using Elastos::Droid::App::Activity;
+using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::IDialog;
 using Elastos::Droid::App::IDialogFragment;
 using Elastos::Droid::Content::IDialogInterface;
@@ -33,12 +33,12 @@ namespace PackageInstaller {
   * com.android.packageinstaller.PackageName set to the application package name
   */
 CarClass(CUninstallerActivity)
-    , public Object // Activity
+    , public Activity
     , public IUninstallerActivity
 {
 public:
     class UninstallAlertDialogFragment
-        : public Object // DialogFragment
+        : public DialogFragment
         , public IDialogInterfaceOnClickListener
     {
     public:
@@ -86,6 +86,8 @@ public:
 
 public:
     CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
 
     CUninstallerActivity();
 

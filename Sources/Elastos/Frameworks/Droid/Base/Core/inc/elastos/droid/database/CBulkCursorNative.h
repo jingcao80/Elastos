@@ -15,8 +15,7 @@ namespace Database {
 CarClass(CBulkCursorNative), public BulkCursorNative
 {
 public:
-    CARAPI_(PInterface) Probe(
-        /* [in]  */ REIID riid);
+    CAR_OBJECT_DECL()
 
     CARAPI OnTransact(
         /* [in] */ Int32 code,

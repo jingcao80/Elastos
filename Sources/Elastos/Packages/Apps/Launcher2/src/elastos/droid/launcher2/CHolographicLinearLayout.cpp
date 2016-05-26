@@ -11,6 +11,8 @@ namespace Launcher2 {
 
 CAR_INTERFACE_IMPL(CHolographicLinearLayout, LinearLayout, IHolographicLinearLayout);
 
+CAR_OBJECT_IMPL(CHolographicLinearLayout)
+
 CHolographicLinearLayout::CHolographicLinearLayout()
     : mImageViewId(0)
 {

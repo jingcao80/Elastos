@@ -13,6 +13,10 @@ CarClass(CWMSWallpaperConnection)
 {
     friend class CWallpaperManagerService;
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ IWallpaperInfo* info,
         /* [in] */ Handle32 wallpaper,

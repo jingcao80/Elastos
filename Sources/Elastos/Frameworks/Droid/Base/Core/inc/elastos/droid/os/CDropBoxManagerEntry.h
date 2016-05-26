@@ -31,6 +31,10 @@ namespace Os {
 CarClass(CDropBoxManagerEntry)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor();
 
     /** Create a new empty Entry with no contents. */

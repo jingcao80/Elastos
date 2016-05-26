@@ -76,6 +76,10 @@ public:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IIPowerManager* powerManagerService);

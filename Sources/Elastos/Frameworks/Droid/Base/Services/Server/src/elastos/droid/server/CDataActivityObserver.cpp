@@ -9,6 +9,8 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 
+CAR_OBJECT_IMPL(CDataActivityObserver)
+
 ECode CDataActivityObserver::InterfaceClassDataActivityChanged(
     /* [in] */ const String& label,
     /* [in] */ Boolean active,

@@ -50,6 +50,9 @@ ECode CRingtonePlayer::Client::ProxyDied()
 //-------------------------------------------
 const String CRingtonePlayer::TAG("CRingtonePlayer");
 const Boolean CRingtonePlayer::LOGD = FALSE;
+
+CAR_OBJECT_IMPL(CRingtonePlayer)
+
 CRingtonePlayer::CRingtonePlayer()
 {
     mAsyncPlayer = new NotificationPlayer(TAG);

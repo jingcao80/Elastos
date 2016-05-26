@@ -244,6 +244,8 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
+    CAR_OBJECT_DECL()
+
     // @Override
     CARAPI_(AutoPtr<IDialog>) OnCreateDialog(
         /* [in] */ Int32 id,

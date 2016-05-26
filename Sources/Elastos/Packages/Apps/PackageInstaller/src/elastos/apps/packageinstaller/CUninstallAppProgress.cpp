@@ -379,7 +379,9 @@ ECode CUninstallAppProgress::InnerOnClickListener::OnClick(
 //=====================================================================
 const Int32 CUninstallAppProgress::UNINSTALL_COMPLETE;
 
-CAR_INTERFACE_IMPL_2(CUninstallAppProgress, Object/*Activity*/, IViewOnClickListener, IUninstallAppProgress)
+CAR_INTERFACE_IMPL_2(CUninstallAppProgress, Activity, IViewOnClickListener, IUninstallAppProgress)
+
+CAR_OBJECT_IMPL(CUninstallAppProgress)
 
 CUninstallAppProgress::CUninstallAppProgress()
 {

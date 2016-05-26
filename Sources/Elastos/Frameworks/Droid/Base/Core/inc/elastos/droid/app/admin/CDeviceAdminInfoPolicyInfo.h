@@ -14,6 +14,10 @@ namespace Admin {
 CarClass(CDeviceAdminInfoPolicyInfo)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ Int32 identIn,
         /* [in] */ const String& tagIn,

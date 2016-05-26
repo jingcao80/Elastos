@@ -9,6 +9,8 @@ namespace App {
 
 CAR_INTERFACE_IMPL(COnKeyguardExitResult, Object, IOnKeyguardExitResult)
 
+CAR_OBJECT_IMPL(COnKeyguardExitResult)
+
 ECode COnKeyguardExitResult::constructor(
     /* [in] */ IKeyguardManagerOnKeyguardExitResult* cb)
 {

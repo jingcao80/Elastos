@@ -58,6 +58,8 @@ public:
     };
 
 public:
+    CAR_OBJECT_DECL()
+
     CRingtonePlayer();
 
     //@Override

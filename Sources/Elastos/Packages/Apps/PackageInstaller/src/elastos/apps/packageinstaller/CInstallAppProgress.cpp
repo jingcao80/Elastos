@@ -312,7 +312,9 @@ ECode CInstallAppProgress::InnerLogOnClickListener::OnClick(
 const Int32 CInstallAppProgress::DLG_OUT_OF_SPACE;
 const Int32 CInstallAppProgress::INSTALL_COMPLETE;
 
-CAR_INTERFACE_IMPL_3(CInstallAppProgress, Object/*Activity*/, IViewOnClickListener, IDialogInterfaceOnCancelListener, IInstallAppProgress)
+CAR_INTERFACE_IMPL_3(CInstallAppProgress, Activity, IViewOnClickListener, IDialogInterfaceOnCancelListener, IInstallAppProgress)
+
+CAR_OBJECT_IMPL(CInstallAppProgress)
 
 CInstallAppProgress::CInstallAppProgress()
     : TAG("CInstallAppProgress")

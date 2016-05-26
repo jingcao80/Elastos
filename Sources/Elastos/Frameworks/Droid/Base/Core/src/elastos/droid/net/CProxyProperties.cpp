@@ -19,6 +19,10 @@ namespace Elastos {
 namespace Droid {
 namespace Net {
 
+CAR_INTERFACE_IMPL(CProxyProperties, Object, IProxyProperties)
+
+CAR_OBJECT_IMPL(CProxyProperties)
+
 ECode CProxyProperties::constructor()
 {
     return NOERROR;

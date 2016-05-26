@@ -69,6 +69,8 @@ const String CHotseat::TAG("Hotseat");
 
 CAR_INTERFACE_IMPL(CHotseat, FrameLayout, IHotseat);
 
+CAR_OBJECT_IMPL(CHotseat)
+
 CHotseat::CHotseat()
     : mCellCountX(0)
     , mCellCountY(0)

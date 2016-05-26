@@ -26,6 +26,8 @@ CarClass(CHolographicLinearLayout)
     , public IHolographicLinearLayout
 {
 public:
+    CAR_OBJECT_DECL()
+
     CAR_INTERFACE_DECL();
 
     CHolographicLinearLayout();

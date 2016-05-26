@@ -11,6 +11,10 @@ namespace View {
 CarClass(CInputDeviceHelper)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     /**
      * Gets information about the input device with the specified id.
      * @param id The device id.

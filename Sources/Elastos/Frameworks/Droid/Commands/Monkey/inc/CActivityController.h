@@ -15,6 +15,8 @@ namespace Monkey {
 CarClass(CActivityController)
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI ActivityStarting(
         /* [in] */ IIntent * intent,
         /* [in] */ const String& pkg,

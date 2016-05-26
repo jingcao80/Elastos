@@ -22,11 +22,10 @@ CarClass(CFailedToCreateTests)
 public:
     CAR_INTERFACE_DECL()
 
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ ECode ec);
-
-    CARAPI GetClassID(
-        /* [out] */ ClassID *pCLSID);
 
     CARAPI TestSuiteConstructionFailed();
 

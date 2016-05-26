@@ -15,6 +15,8 @@ namespace Monkey {
 CarClass(CMonkeyEventQueue), public MonkeyEventQueue
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI IsEmpty(
         /* [out] */ Boolean *isEmpty);
 

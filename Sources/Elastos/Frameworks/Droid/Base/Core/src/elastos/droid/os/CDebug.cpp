@@ -92,6 +92,10 @@ static int CompareHeapRecords(const void* vrec1, const void* vrec2)
     return 0;
 }
 
+CAR_INTERFACE_IMPL(CDebug, Object, IDebug)
+
+CAR_OBJECT_IMPL(CDebug)
+
 ECode CDebug::DumpHeap(
     /* [in] */ IFileDescriptor* fd)
 {

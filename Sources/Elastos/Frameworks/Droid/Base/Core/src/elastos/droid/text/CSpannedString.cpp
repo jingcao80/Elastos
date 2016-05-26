@@ -9,6 +9,8 @@ namespace Text {
 
 CAR_INTERFACE_IMPL_4(CSpannedString, SpannableStringInternal, ISpannedString, ICharSequence, IGetChars, ISpanned)
 
+CAR_OBJECT_IMPL(CSpannedString)
+
 CSpannedString::CSpannedString()
 {
 }

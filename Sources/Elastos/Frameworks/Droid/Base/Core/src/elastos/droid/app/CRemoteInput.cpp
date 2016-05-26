@@ -120,6 +120,8 @@ const Int32 CRemoteInput::DEFAULT_FLAGS = 0x1;
 
 CAR_INTERFACE_IMPL_2(CRemoteInput, Object, IRemoteInput, IParcelable)
 
+CAR_OBJECT_IMPL(CRemoteInput)
+
 CRemoteInput::CRemoteInput()
     : mFlags(0)
 {}

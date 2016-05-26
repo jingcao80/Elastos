@@ -6,6 +6,8 @@ namespace Droid {
 namespace Commands {
 namespace Monkey {
 
+CAR_OBJECT_IMPL(CMonkey)
+
 ECode CMonkey::Main(
     /* [in] */ const ArrayOf<String>& args)
 {
@@ -13,15 +15,6 @@ ECode CMonkey::Main(
     return NOERROR;
 }
 
-UInt32 CMonkey::AddRef()
-{
-    return _CMonkey::AddRef();
-}
-
-UInt32 CMonkey::Release()
-{
-    return _CMonkey::Release();
-}
 
 } // namespace Monkey
 } // namespace Commands

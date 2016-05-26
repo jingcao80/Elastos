@@ -14,6 +14,10 @@ namespace Os {
 CarClass(CDebug)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI DumpHeap(
         /* [in] */ IFileDescriptor* fd);
 

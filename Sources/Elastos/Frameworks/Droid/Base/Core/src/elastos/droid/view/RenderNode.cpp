@@ -862,7 +862,10 @@ ECode RenderNode::AddAnimator(
         SLOGGERE("RenderNode", "Cannot start this animator on a detached view!")
         return E_ILLEGAL_STATE_EXCEPTION;
     }
-    nAddAnimator(mNativeRenderNode, 0L/*animator.getNativeAnimator()*/);// zhangjingcheng
+
+    Int64 ptr;
+    animator->GetNativeAnimator(&ptr);
+    nAddAnimator(mNativeRenderNode, ptr);
     ((View*)mOwningView.Get())->mAttachInfo->mViewRootImpl->RegisterAnimatingRenderNode(this);
     return NOERROR;
 }

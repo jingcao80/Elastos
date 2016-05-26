@@ -13,6 +13,10 @@ namespace View {
 
 const String CDisplayManagerAw::Tab("DislayManagerAw");
 
+CAR_INTERFACE_IMPL(CDisplayManagerAw, Object, IDisplayManagerAw)
+
+CAR_OBJECT_IMPL(CDisplayManagerAw)
+
 CDisplayManagerAw::CDisplayManagerAw()
 {
     CBinder::New((IBinder**)&mToken);

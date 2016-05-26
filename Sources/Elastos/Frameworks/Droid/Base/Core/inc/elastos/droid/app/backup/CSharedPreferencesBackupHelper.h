@@ -14,6 +14,9 @@ namespace Backup {
 CarClass(CSharedPreferencesBackupHelper), public FileBackupHelperBase
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
 
     /** @hide */
     CARAPI constructor(

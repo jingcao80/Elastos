@@ -25,6 +25,10 @@ namespace Os {
 CarClass(CDropBoxManager)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     /** {@hide} */
     CARAPI constructor(
         /* [in] */ IDropBoxManagerService* service);

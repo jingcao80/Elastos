@@ -11,6 +11,11 @@ namespace Os {
 
 CarClass(CBinderDeathRecipient)
 {
+public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI ProxyDied();
 };
 

@@ -4232,7 +4232,7 @@ ECode CConnectivityService::SetAirplaneMode(
     settingsGlobal->PutInt32(cr, ISettingsGlobal::AIRPLANE_MODE_ON, enable ? 1 : 0, &bval);
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_AIRPLANE_MODE_CHANGED, (IIntent**)&intent);
-    intent->PutExtra(String("state"), enable);
+    intent->PutBooleanExtra(String("state"), enable);
     mContext->SendBroadcast(intent);
 
     Binder::RestoreCallingIdentity(ident);

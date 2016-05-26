@@ -15,6 +15,10 @@ class CWallpaperManagerService;
 CarClass(CWMSUserSwitchObserver)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
             /* [in] */ Handle32 owner);
 

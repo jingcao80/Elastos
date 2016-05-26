@@ -81,6 +81,7 @@ void QSDetailClipper::AnimateCircularClip(
 {
     if (mAnimator != NULL) {
         mAnimator->Cancel();
+        mAnimator = NULL;
     }
 
     Int32 tmp = 0;

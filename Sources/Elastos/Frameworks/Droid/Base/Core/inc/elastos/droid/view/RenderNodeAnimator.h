@@ -4,6 +4,7 @@
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/animation/Animator.h"
+#include "elastos/droid/view/Choreographer.h"
 #include "elastos/droid/graphics/CanvasProperty.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/List.h>
@@ -13,6 +14,7 @@
 using Elastos::Droid::Graphics::CanvasProperty;
 using Elastos::Droid::Graphics::ICanvasProperty;
 using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::View::Choreographer;
 using Elastos::Droid::Animation::Animator;
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Animation::IAnimatorListener;
@@ -67,8 +69,6 @@ private:
     Int64 mNativePtr;
 };
 
-
-
 class RenderNodeAnimator
     : public Animator
     , public IRenderNodeAnimator
@@ -99,7 +99,7 @@ private:
         CARAPI ScheduleCallback();
 
         List<AutoPtr<IRenderNodeAnimator> > mDelayedAnims;
-        AutoPtr<IChoreographer> mChoreographer;
+        AutoPtr<Choreographer> mChoreographer;
         Boolean mCallbackScheduled;
     };
 

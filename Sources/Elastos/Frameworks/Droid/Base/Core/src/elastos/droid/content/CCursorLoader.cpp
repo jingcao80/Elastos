@@ -19,6 +19,8 @@ namespace Content {
 
 CAR_INTERFACE_IMPL_3(CCursorLoader, AsyncTaskLoader, ICursorLoader, IAsyncTaskLoader, ILoader)
 
+CAR_OBJECT_IMPL(CCursorLoader)
+
 CCursorLoader::CCursorLoader()
 {}
 

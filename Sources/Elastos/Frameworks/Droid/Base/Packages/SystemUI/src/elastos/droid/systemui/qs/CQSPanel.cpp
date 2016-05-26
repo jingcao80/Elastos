@@ -22,6 +22,7 @@ namespace Qs {
 
 const Int32 CQSPanel::H::SHOW_DETAIL = 1;
 const Int32 CQSPanel::H::SET_TILE_VISIBILITY = 2;
+
 CQSPanel::H::H(
     /* [in] */ CQSPanel* host)
     : mHost(host)
@@ -37,9 +38,10 @@ ECode CQSPanel::H::HandleMessage(
     if (what == SHOW_DETAIL) {
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
+        Record* r = (Record*)IQSPanelRecord::Probe(obj);
         Int32 arg1 = 0;
         msg->GetArg1(&arg1);
-        mHost->HandleShowDetail((Record*)IQSPanelRecord::Probe(obj), arg1 != 0);
+        mHost->HandleShowDetail(r, arg1 != 0);
     }
     else if (what == SET_TILE_VISIBILITY) {
         AutoPtr<IInterface> obj;
@@ -52,10 +54,12 @@ ECode CQSPanel::H::HandleMessage(
 }
 
 CAR_INTERFACE_IMPL(CQSPanel::Record, Object, IQSPanelRecord)
+
 CQSPanel::Record::Record()
 {}
 
-CAR_INTERFACE_IMPL(CQSPanel::TileRecord, Object, IQSPanelTileRecord)
+CAR_INTERFACE_IMPL(CQSPanel::TileRecord, CQSPanel::Record, IQSPanelTileRecord)
+
 CQSPanel::TileRecord::TileRecord()
     : mRow(0)
     , mCol(0)
@@ -97,6 +101,7 @@ ECode CQSPanel::HideGridContentWhenDone::OnAnimationEnd(
 }
 
 CAR_INTERFACE_IMPL(CQSPanel::DetailDoneButtonOnClickListener, Object, IViewOnClickListener)
+
 CQSPanel::DetailDoneButtonOnClickListener::DetailDoneButtonOnClickListener(
     /* [in] */ CQSPanel* host)
     : mHost(host)
@@ -110,12 +115,14 @@ ECode CQSPanel::DetailDoneButtonOnClickListener::OnClick(
 }
 
 CAR_INTERFACE_IMPL(CQSPanel::QSTileCallback, Object, IQSTileCallback)
+
 CQSPanel::QSTileCallback::QSTileCallback(
     /* [in] */ CQSPanel* host,
     /* [in] */ TileRecord* r)
     : mHost(host)
     , mR(r)
-{}
+{
+}
 
 ECode CQSPanel::QSTileCallback::OnStateChanged(
     /* [in] */ IQSTileState* state)
@@ -167,6 +174,7 @@ ECode CQSPanel::QSTileCallback::OnAnnouncementRequested(
 }
 
 CAR_INTERFACE_IMPL(CQSPanel::OnClickListener1, Object, IViewOnClickListener)
+
 CQSPanel::OnClickListener1::OnClickListener1(
     /* [in] */ TileRecord* r)
     : mR(r)
@@ -180,6 +188,7 @@ ECode CQSPanel::OnClickListener1::OnClick(
 }
 
 CAR_INTERFACE_IMPL(CQSPanel::OnClickListener2, Object, IViewOnClickListener)
+
 CQSPanel::OnClickListener2::OnClickListener2(
     /* [in] */ TileRecord* r)
     : mR(r)
@@ -193,6 +202,7 @@ ECode CQSPanel::OnClickListener2::OnClick(
 }
 
 CAR_INTERFACE_IMPL(CQSPanel::OnClickListener3, Object, IViewOnClickListener)
+
 CQSPanel::OnClickListener3::OnClickListener3(
     /* [in] */ CQSPanel* host,
     /* [in] */ IIntent* settingsIntent)
@@ -446,8 +456,12 @@ void CQSPanel::ShowDetail(
     /* [in] */ Boolean show,
     /* [in] */ Record* r)
 {
+    if (show) {
+        assert(IQSPanelRecord::Probe(r) != NULL);
+    }
+
     AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(H::SHOW_DETAIL, show ? 1 : 0, 0, IQSPanelRecord::Probe(r), (IMessage**)&msg);
+    mHandler->ObtainMessage(H::SHOW_DETAIL, show ? 1 : 0, 0, (IQSPanelRecord*)r, (IMessage**)&msg);
     msg->SendToTarget();
 }
 
@@ -560,9 +574,11 @@ void CQSPanel::HandleShowDetailTile(
         r->mTile->GetDetailAdapter((IQSTileDetailAdapter**)&r->mDetailAdapter);
         if (r->mDetailAdapter == NULL) return;
     }
+
+    IView* tv = IView::Probe(r->mTileView);
     Int32 v1 = 0, v2 = 0;
-    Int32 x = (IView::Probe(r->mTileView)->GetLeft(&v1), v1) + (IView::Probe(r->mTileView)->GetWidth(&v2), v2) / 2;
-    Int32 y = (IView::Probe(r->mTileView)->GetTop(&v1), v1) + (IView::Probe(r->mTileView)->GetHeight(&v2), v2) / 2;
+    Int32 x = (tv->GetLeft(&v1), v1) + (tv->GetWidth(&v2), v2) / 2;
+    Int32 y = (tv->GetTop(&v1), v1) + (tv->GetHeight(&v2), v2) / 2;
     HandleShowDetailImpl(r, show, x, y);
 }
 
@@ -576,7 +592,9 @@ void CQSPanel::HandleShowDetailImpl(
     AutoPtr<IQSTileDetailAdapter> detailAdapter;
     AutoPtr<IAnimatorListener> listener;
     if (show) {
+        assert(r != NULL);
         detailAdapter = r->mDetailAdapter;
+        r->mDetailView = NULL;
         detailAdapter->CreateDetailView(mContext, r->mDetailView, mDetailContent, (IView**)&r->mDetailView);
         if (r->mDetailView == NULL) {
             // throw new IllegalStateException("Must return detail view");
@@ -807,8 +825,11 @@ void CQSPanel::SetDetailRecord(
 {
     if (r == mDetailRecord) return;
     mDetailRecord = r;
-    const Boolean scanState = IQSPanelTileRecord::Probe(mDetailRecord) != NULL
-            && ((TileRecord*) mDetailRecord.Get())->mScanState;
+    Boolean scanState = FALSE;
+    IQSPanelTileRecord* tr = IQSPanelTileRecord::Probe(mDetailRecord);
+    if (tr != NULL) {
+        scanState = ((TileRecord*)tr)->mScanState;
+    }
     FireScanStateChanged(scanState);
 }
 

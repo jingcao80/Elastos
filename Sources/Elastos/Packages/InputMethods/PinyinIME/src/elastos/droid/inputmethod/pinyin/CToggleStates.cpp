@@ -7,6 +7,10 @@ namespace Droid {
 namespace InputMethod {
 namespace Pinyin {
 
+CAR_INTERFACE_IMPL(CToggleStates, Object, IToggleStates)
+
+CAR_OBJECT_IMPL(CToggleStates)
+
 CToggleStates::CToggleStates()
     : mQwerty(FALSE)
     , mQwertyUpperCase(FALSE)

@@ -24,6 +24,8 @@ namespace Monkey {
 static const Int32 DEBUG_ALLOW_ANY_STARTS = 0;
 static const Int32 DEBUG_ALLOW_ANY_RESTARTS = 0;
 
+CAR_OBJECT_IMPL(CActivityController)
+
 ECode CActivityController::ActivityStarting(
     /* [in] */ IIntent *intent,
     /* [in] */ const String& pkg,

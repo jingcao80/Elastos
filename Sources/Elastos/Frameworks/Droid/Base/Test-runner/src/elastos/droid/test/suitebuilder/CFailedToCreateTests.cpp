@@ -11,18 +11,12 @@ namespace SuiteBuilder {
 
 CAR_INTERFACE_IMPL(CFailedToCreateTests, TestCase, IFailedToCreateTests)
 
+CAR_OBJECT_IMPL(CFailedToCreateTests)
+
 ECode CFailedToCreateTests::constructor(
     /* [in] */ ECode ec)
 {
     mException = ec;
-    return NOERROR;
-}
-
-ECode CFailedToCreateTests::GetClassID(
-    /* [out] */ ClassID *pCLSID)
-{
-    VALIDATE_NOT_NULL(pCLSID);
-    *pCLSID = ECLSID_CFailedToCreateTests;
     return NOERROR;
 }
 

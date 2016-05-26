@@ -6,6 +6,8 @@ namespace Droid {
 namespace Commands {
 namespace Monkey {
 
+CAR_OBJECT_IMPL(CMonkeySourceNetwork)
+
 ECode CMonkeySourceNetwork::GetNextEvent(
     /* [out] */ IMonkeyEvent **event)
 {

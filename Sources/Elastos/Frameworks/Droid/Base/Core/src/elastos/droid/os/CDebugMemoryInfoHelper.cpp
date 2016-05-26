@@ -7,11 +7,9 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
+CAR_INTERFACE_IMPL(CDebugMemoryInfoHelper, Object, IDebugMemoryInfoHelper)
 
-ECode CDebugMemoryInfoHelper::constructor()
-{
-    return NOERROR;
-}
+CAR_SINGLETON_IMPL(CDebugMemoryInfoHelper)
 
 ECode CDebugMemoryInfoHelper::GetOtherLabel(
     /* [in] */ Int32 which,

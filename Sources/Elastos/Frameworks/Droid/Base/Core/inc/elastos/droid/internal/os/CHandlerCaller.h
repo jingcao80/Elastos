@@ -36,6 +36,8 @@ private:
     };
 
 public:
+    CAR_OBJECT_DECL()
+
     CAR_INTERFACE_DECL()
 
     // if callback has this's reference,isStrong must be FLASE

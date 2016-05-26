@@ -8,6 +8,8 @@ namespace Launcher2 {
 
 CAR_INTERFACE_IMPL(CFolderEditText, EditText, IFolderEditText);
 
+CAR_OBJECT_IMPL(CFolderEditText)
+
 ECode CFolderEditText::SetFolder(
     /* [in] */ IFolder* folder)
 {

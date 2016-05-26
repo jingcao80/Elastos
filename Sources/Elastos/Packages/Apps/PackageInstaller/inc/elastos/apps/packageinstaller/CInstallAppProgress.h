@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_APPS_PACKAGEINSTALLER_CINSTALLAPPPROGRESS_H__
 #define __ELASTOS_APPS_PACKAGEINSTALLER_CINSTALLAPPPROGRESS_H__
 
-//#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/app/Activity.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Content.h>
@@ -14,7 +14,7 @@
 #include "elastos/apps/packageinstaller/InstallFlowAnalytics.h"
 #include "elastos/core/Object.h"
 
-//using Elastos::Droid::App::Activity;
+using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::IDialog;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
@@ -47,7 +47,7 @@ namespace PackageInstaller {
   * the existing package is replaced with the new one.
   */
 CarClass(CInstallAppProgress)
-    , public Object // Activity
+    , public Activity
     , public IViewOnClickListener
     , public IDialogInterfaceOnCancelListener
     , public IInstallAppProgress
@@ -127,6 +127,8 @@ private:
 
 public:
     CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
 
     CInstallAppProgress();
 

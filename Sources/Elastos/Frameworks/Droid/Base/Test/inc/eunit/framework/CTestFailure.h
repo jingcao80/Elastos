@@ -17,6 +17,8 @@ CarClass(CTestFailure)
 public:
     CAR_INTERFACE_DECL()
 
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ ITest* failedTest,
         /* [in] */ ECode ec,

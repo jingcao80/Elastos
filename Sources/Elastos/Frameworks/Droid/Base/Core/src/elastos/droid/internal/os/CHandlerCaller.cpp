@@ -47,6 +47,8 @@ ECode CHandlerCaller::MyHandler::HandleMessage(
 //==========================================================================
 CAR_INTERFACE_IMPL(CHandlerCaller, Object, IHandlerCaller)
 
+CAR_OBJECT_IMPL(CHandlerCaller)
+
 ECode CHandlerCaller::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ILooper* looper,

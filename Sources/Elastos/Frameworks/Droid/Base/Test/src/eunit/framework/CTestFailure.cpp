@@ -7,6 +7,8 @@ namespace Framework {
 
 CAR_INTERFACE_IMPL(CTestFailure, Object, ITestFailure)
 
+CAR_OBJECT_IMPL(CTestFailure)
+
 ECode CTestFailure::constructor(
     /* [in] */ ITest* failedTest,
     /* [in] */ ECode ec,

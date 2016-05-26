@@ -26,6 +26,8 @@ namespace Launcher2 {
 
 CAR_INTERFACE_IMPL(CInfoDropTarget, ButtonDropTarget, IInfoDropTarget);
 
+CAR_OBJECT_IMPL(CInfoDropTarget)
+
 ECode CInfoDropTarget::OnFinishInflate()
 {
     ButtonDropTarget::OnFinishInflate();

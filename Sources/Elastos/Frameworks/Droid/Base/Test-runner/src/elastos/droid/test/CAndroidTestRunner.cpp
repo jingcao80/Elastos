@@ -24,6 +24,8 @@ CAndroidTestRunner::CAndroidTestRunner()
 
 CAR_INTERFACE_IMPL_2(CAndroidTestRunner, Object, IBaseTestRunner, IAndroidTestRunner)
 
+CAR_OBJECT_IMPL(CAndroidTestRunner)
+
 ECode CAndroidTestRunner::SetTestClassName(
     /* [in] */ const String& testPackageName,
     /* [in] */ const String& testClassName,

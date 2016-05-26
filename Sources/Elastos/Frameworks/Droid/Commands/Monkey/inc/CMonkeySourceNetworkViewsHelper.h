@@ -13,6 +13,11 @@ namespace Monkey {
 CarClass(CMonkeySourceNetworkViewsHelper), public MonkeySourceNetworkViewsHelper
 {
 public:
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI Setup();
 };
 

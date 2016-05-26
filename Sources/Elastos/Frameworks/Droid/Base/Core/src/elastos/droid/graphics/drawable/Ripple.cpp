@@ -9,12 +9,14 @@
 #include "elastos/droid/graphics/drawable/RippleDrawable.h"
 #include "elastos/droid/graphics/CPaint.h"
 #include "elastos/droid/utility/MathUtils.h"
+#include "elastos/droid/view/CRenderNodeAnimator.h"
 #include "elastos/droid/view/animation/CLinearInterpolator.h"
 
 using Elastos::Droid::Animation::ObjectAnimator;
 using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::Utility::MathUtils;
 using Elastos::Droid::View::IRenderNodeAnimator;
+using Elastos::Droid::View::CRenderNodeAnimator;
 using Elastos::Droid::View::Animation::CLinearInterpolator;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
@@ -105,6 +107,7 @@ ECode Ripple::constructor(
 {
     IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(owner);
     wrs->GetWeakReference((IWeakReference**)&mWeakHost);
+    assert(mWeakHost != NULL);
     mBounds = bounds;
 
     mStartingX = startingX;
@@ -441,28 +444,31 @@ void Ripple::ExitHardware(
     mPropX = CanvasProperty::CreateFloat(startX);
     mPropY = CanvasProperty::CreateFloat(startY);
 
-    assert(0 && "TODO");
-    AutoPtr<IRenderNodeAnimator> radiusAnim/* = new RenderNodeAnimator(mPropRadius, mOuterRadius)*/;
-    IAnimator::Probe(radiusAnim)->SetDuration(radiusDuration);
-    IAnimator::Probe(radiusAnim)->SetInterpolator(DECEL_INTERPOLATOR);
+    AutoPtr<IAnimator> radiusAnim;
+    CRenderNodeAnimator::New(mPropRadius, mOuterRadius, (IAnimator**)&radiusAnim);
+    radiusAnim->SetDuration(radiusDuration);
+    radiusAnim->SetInterpolator(DECEL_INTERPOLATOR);
 
-    AutoPtr<IRenderNodeAnimator> xAnim/* = new RenderNodeAnimator(mPropX, mOuterX)*/;
-    IAnimator::Probe(xAnim)->SetDuration(radiusDuration);
-    IAnimator::Probe(xAnim)->SetInterpolator(DECEL_INTERPOLATOR);
+    AutoPtr<IAnimator> xAnim;
+    CRenderNodeAnimator::New(mPropX, mOuterX, (IAnimator**)&xAnim);
+    xAnim->SetDuration(radiusDuration);
+    xAnim->SetInterpolator(DECEL_INTERPOLATOR);
 
-    AutoPtr<IRenderNodeAnimator> yAnim/* = new RenderNodeAnimator(mPropY, mOuterY)*/;
-    IAnimator::Probe(yAnim)->SetDuration(radiusDuration);
-    IAnimator::Probe(yAnim)->SetInterpolator(DECEL_INTERPOLATOR);
+    AutoPtr<IAnimator> yAnim;
+    CRenderNodeAnimator::New(mPropY, mOuterY, (IAnimator**)&yAnim);
+    yAnim->SetDuration(radiusDuration);
+    yAnim->SetInterpolator(DECEL_INTERPOLATOR);
 
-    AutoPtr<IRenderNodeAnimator> opacityAnim/* = new RenderNodeAnimator(mPropPaint, RenderNodeAnimator.PAINT_ALPHA, 0)*/;
-    IAnimator::Probe(opacityAnim)->SetDuration(opacityDuration);
-    IAnimator::Probe(opacityAnim)->SetInterpolator(LINEAR_INTERPOLATOR);
-    IAnimator::Probe(opacityAnim)->AddListener(mAnimationListener);
+    AutoPtr<IAnimator> opacityAnim;
+    CRenderNodeAnimator::New(mPropPaint, IRenderNodeAnimator::PAINT_ALPHA, 0, (IAnimator**)&opacityAnim);
+    opacityAnim->SetDuration(opacityDuration);
+    opacityAnim->SetInterpolator(LINEAR_INTERPOLATOR);
+    opacityAnim->AddListener(mAnimationListener);
 
-    mPendingAnimations->Add(radiusAnim);
-    mPendingAnimations->Add(opacityAnim);
-    mPendingAnimations->Add(xAnim);
-    mPendingAnimations->Add(yAnim);
+    mPendingAnimations->Add(IRenderNodeAnimator::Probe(radiusAnim));
+    mPendingAnimations->Add(IRenderNodeAnimator::Probe(opacityAnim));
+    mPendingAnimations->Add(IRenderNodeAnimator::Probe(xAnim));
+    mPendingAnimations->Add(IRenderNodeAnimator::Probe(yAnim));
 
     mHardwareAnimating = TRUE;
 
@@ -612,10 +618,10 @@ void Ripple::RemoveSelf()
 {
     // The owner will invalidate itself.
     if (!mCanceled) {
-        AutoPtr<IRippleDrawable> rd;
-        mWeakHost->Resolve(EIID_IRippleDrawable, (IInterface**)&rd);
-        if (rd) {
-            RippleDrawable* owner = (RippleDrawable*)rd.Get();
+        AutoPtr<IInterface> obj;
+        mWeakHost->Resolve(EIID_IRippleDrawable, (IInterface**)&obj);
+        if (obj) {
+            RippleDrawable* owner = (RippleDrawable*)IRippleDrawable::Probe(obj);
             owner->RemoveRipple(this);
         }
     }
@@ -623,10 +629,10 @@ void Ripple::RemoveSelf()
 
 void Ripple::InvalidateSelf()
 {
-    AutoPtr<IRippleDrawable> rd;
-    mWeakHost->Resolve(EIID_IRippleDrawable, (IInterface**)&rd);
-    if (rd) {
-        RippleDrawable* owner = (RippleDrawable*)rd.Get();
+    AutoPtr<IInterface> obj;
+    mWeakHost->Resolve(EIID_IRippleDrawable, (IInterface**)&obj);
+    if (obj) {
+        RippleDrawable* owner = (RippleDrawable*)IRippleDrawable::Probe(obj);
         owner->InvalidateSelf();
     }
 }

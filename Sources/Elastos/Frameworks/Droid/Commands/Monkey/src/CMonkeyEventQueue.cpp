@@ -8,6 +8,8 @@ namespace Droid {
 namespace Commands {
 namespace Monkey {
 
+CAR_OBJECT_IMPL(CMonkeyEventQueue)
+
 ECode CMonkeyEventQueue::IsEmpty(
     /* [out] */ Boolean *isEmpty)
 {

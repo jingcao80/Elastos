@@ -17,6 +17,8 @@ class CConnectivityService;
 CarClass(CDataActivityObserver), public BaseNetworkObserver
 {
 public:
+    CAR_OBJECT_DECL()
+
     /**
      * Interface data activity status is changed.
      *

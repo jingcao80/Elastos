@@ -6,6 +6,10 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
+CAR_INTERFACE_IMPL(CDebugMemoryInfo, Object, IDebugMemoryInfo)
+
+CAR_OBJECT_IMPL(CDebugMemoryInfo)
+
 CDebugMemoryInfo::CDebugMemoryInfo()
 {
     mOtherStats = ArrayOf<Int32>::Alloc(IDebugMemoryInfo::NUM_OTHER_STATS * 3);

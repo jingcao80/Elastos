@@ -127,11 +127,12 @@ private:
 
 public:
 
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CUsageStatsService()
-        : mLastResumedPkg(String(NULL))
-        , mLastResumedComp(String(NULL))
-        , mIsResumed(FALSE)
-        , mFileLeaf(String(NULL))
+        : mIsResumed(FALSE)
     {}
 
     ~CUsageStatsService();

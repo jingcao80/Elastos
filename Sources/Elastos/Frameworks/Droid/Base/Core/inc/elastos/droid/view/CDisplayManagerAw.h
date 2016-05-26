@@ -9,6 +9,10 @@ namespace View {
 CarClass(CDisplayManagerAw)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CDisplayManagerAw();
 
     CARAPI constructor();

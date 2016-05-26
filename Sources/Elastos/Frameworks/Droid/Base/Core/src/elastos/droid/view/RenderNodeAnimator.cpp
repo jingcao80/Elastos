@@ -20,6 +20,7 @@ using Elastos::Droid::Animation::EIID_IAnimator;
 using Elastos::Droid::Internal::View::Animation::FallbackLUTInterpolator;
 using Elastos::Droid::Internal::View::Animation::INativeInterpolatorFactory;
 using Elastos::Core::EIID_IRunnable;
+using Elastos::Utility::Logging::Slogger;
 using android::uirenderer::RenderPropertyAnimator;
 using android::uirenderer::BaseRenderNodeAnimator;
 using android::uirenderer::CanvasPropertyPrimitive;
@@ -77,7 +78,7 @@ CAR_INTERFACE_IMPL(RenderNodeAnimator::DelayedAnimationHelper, Object, IRunnable
 
 RenderNodeAnimator::DelayedAnimationHelper::DelayedAnimationHelper()
 {
-    // mChoreographer = Choreographer::GetInstance();
+    mChoreographer = Choreographer::GetInstance();
 }
 
 ECode RenderNodeAnimator::DelayedAnimationHelper::AddDelayedAnimation(
@@ -155,7 +156,7 @@ public:
     {
         // LOG_ALWAYS_FATAL_IF(!mFinishListener, "Finished listener twice?");
         if (!mFinishListener) {
-            SLOGGERE("RenderNodeAnimator", "Finished listener twice?")
+            Slogger::E("RenderNodeAnimator", "Finished listener twice?");
             assert(0);
         }
         RenderNodeAnimator::CallOnFinished(mFinishListener);
@@ -238,13 +239,13 @@ ECode RenderNodeAnimator::constructor(
 ECode RenderNodeAnimator::Start()
 {
     if (mTarget == NULL) {
-        SLOGGERE("RenderNodeAnimator", "Missing target!")
+        Slogger::E("RenderNodeAnimator", "Missing target!");
         // throw new IllegalStateException("Missing target!");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     if (mState != STATE_PREPARE) {
-        SLOGGERE("RenderNodeAnimator", "Already started!")
+        Slogger::E("RenderNodeAnimator", "Already started!");
         // throw new IllegalStateException("Already started!");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -313,11 +314,10 @@ ECode RenderNodeAnimator::SetTarget(
     /* [in] */ ICanvas* canvas)
 {
     if (IGLES20RecordingCanvas::Probe(canvas) == NULL) {
-        SLOGGERE("RenderNodeAnimator", "Not a GLES20RecordingCanvas")
+        Slogger::E("RenderNodeAnimator", "Not a GLES20RecordingCanvas");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    // if (!(canvas instanceof GLES20RecordingCanvas)) {
-    //     throw new IllegalArgumentException("Not a GLES20RecordingCanvas");
-    // }
+
     GLES20RecordingCanvas* recordingCanvas = (GLES20RecordingCanvas*) canvas;
     SetTarget(recordingCanvas->mNode);
     return NOERROR;
@@ -336,8 +336,7 @@ ECode RenderNodeAnimator::SetStartDelay(
 {
     FAIL_RETURN(CheckMutable())
     if (startDelay < 0) {
-        SLOGGERE("RenderNodeAnimator", "startDelay must be positive; %lld", startDelay)
-        // throw new IllegalArgumentException("startDelay must be positive; " + startDelay);
+        Slogger::E("RenderNodeAnimator", "startDelay must be positive; %lld", startDelay);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     mUnscaledStartDelay = startDelay;
@@ -359,9 +358,8 @@ ECode RenderNodeAnimator::SetDuration(
 {
     FAIL_RETURN(CheckMutable())
     if (duration < 0) {
-        SLOGGERE("RenderNodeAnimator", "duration must be positive; %lld", duration)
-        // throw new IllegalArgumentException("duration must be positive; " + duration);
-        return E_ILLEGAL_STATE_EXCEPTION;
+        Slogger::E("RenderNodeAnimator", "duration must be positive; %lld", duration);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     mUnscaledDuration = duration;
     nSetDuration(mNativePtr->get(), (Int64) (duration * ValueAnimator::GetDurationScale()));
@@ -417,15 +415,14 @@ ECode RenderNodeAnimator::Clone(
     /* [out] */ IInterface** object)
 {
     VALIDATE_NOT_NULL(object)
-
-    // throw new IllegalStateException("Cannot clone this animator");
-    SLOGGERE("RenderNodeAnimator", "Cannot clone this animator")
+    Slogger::E("RenderNodeAnimator", "Cannot clone this animator");
     return E_ILLEGAL_STATE_EXCEPTION;
 }
 
 ECode RenderNodeAnimator::GetNativeAnimator(
     /* [out] */ Int64* ptr)
 {
+    VALIDATE_NOT_NULL(ptr)
     *ptr = mNativePtr->get();
     return NOERROR;
 }
@@ -441,9 +438,9 @@ ECode RenderNodeAnimator::SetAllowRunningAsynchronously(
 Int32 RenderNodeAnimator::MapViewPropertyToRenderProperty(
     /* [in] */ Int32 viewProperty)
 {
-    if(sViewPropertyAnimatorMap.Find(viewProperty) != sViewPropertyAnimatorMap.End())
-    {
-        return sViewPropertyAnimatorMap[viewProperty];
+    HashMap<Int32, Int32>::Iterator it = sViewPropertyAnimatorMap.Find(viewProperty);
+    if (it != sViewPropertyAnimatorMap.End()) {
+        return it->mSecond;
     }
     return -1;
 }
@@ -491,7 +488,7 @@ ECode RenderNodeAnimator::CheckMutable()
 {
     if (mState != STATE_PREPARE) {
         // throw new IllegalStateException("Animator has already started, cannot change it now!");
-        SLOGGERE("RenderNodeAnimator", "Animator has already started, cannot change it now!")
+        Slogger::E("RenderNodeAnimator", "Animator has already started, cannot change it now!");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;
@@ -559,7 +556,7 @@ ECode RenderNodeAnimator::SetTarget(
 {
     if (mTarget != NULL) {
         // throw new IllegalStateException("Target already set!");
-        SLOGGERE("RenderNodeAnimator", "Target already set!")
+        Slogger::E("RenderNodeAnimator", "Target already set!");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     mTarget = node;
@@ -604,7 +601,7 @@ static inline RenderPropertyAnimator::RenderProperty toRenderProperty(
     // LOG_ALWAYS_FATAL_IF(property < 0 || property > RenderPropertyAnimator::ALPHA,
     //         "Invalid property %d", property);
     if (property < 0 || property > RenderPropertyAnimator::ALPHA) {
-        SLOGGERE("RenderNodeAnimator", "Invalid property %d", property)
+        Slogger::E("RenderNodeAnimator", "Invalid property %d", property);
         assert(0);
     }
     return static_cast<RenderPropertyAnimator::RenderProperty>(property);
@@ -617,7 +614,7 @@ static inline CanvasPropertyPaintAnimator::PaintField toPaintField(
     //         || field > CanvasPropertyPaintAnimator::ALPHA,
     //         "Invalid paint field %d", field);
     if (field < 0 || field > RenderPropertyAnimator::ALPHA) {
-        SLOGGERE("RenderNodeAnimator", "Invalid paint field %d", field)
+        Slogger::E("RenderNodeAnimator", "Invalid paint field %d", field);
         assert(0);
     }
     return static_cast<CanvasPropertyPaintAnimator::PaintField>(field);
@@ -677,7 +674,7 @@ void RenderNodeAnimator::nSetDuration(
 {
     // LOG_ALWAYS_FATAL_IF(duration < 0, "Duration cannot be negative");
     if (duration < 0) {
-        SLOGGERE("RenderNodeAnimator", "Duration cannot be negative")
+        Slogger::E("RenderNodeAnimator", "Duration cannot be negative");
         assert(0);
     }
     BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
@@ -697,7 +694,7 @@ void RenderNodeAnimator::nSetStartDelay(
 {
     // LOG_ALWAYS_FATAL_IF(startDelay < 0, "Start delay cannot be negative");
     if (startDelay < 0) {
-        SLOGGERE("RenderNodeAnimator", "Start delay cannot be negative")
+        Slogger::E("RenderNodeAnimator", "Start delay cannot be negative");
         assert(0);
     }
     BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);

@@ -133,5 +133,4 @@ SOURCES += widgets.cpp
 #SOURCES += StackView.cpp
 #SOURCES += CStackView.cpp
 #SOURCES += StackViewLayoutParams.cpp
-#SOURCES += CStackViewLayoutParams.cpp
 #SOURCES += SuggestionsAdapter.cpp

@@ -82,6 +82,9 @@ private:
             const String mValue;
     };
 
+public:
+    CAR_OBJECT_DECL()
+
 private:
     static AutoPtr<HashMap<String, AutoPtr<VarGetter> > > VAR_MAP;
 };

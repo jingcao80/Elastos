@@ -41,6 +41,8 @@ private:
 public:
     CTestResult();
 
+    CAR_OBJECT_DECL()
+
     CAR_INTERFACE_DECL()
 
     CARAPI constructor();

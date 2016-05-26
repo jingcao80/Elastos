@@ -975,7 +975,9 @@ ECode PropertyValuesHolder::CloneSuperData(
     holder->mProperty = mProperty;
     holder->mSetter = mSetter;
     holder->mValueType = mValueType;
-    ICloneable::Probe(mKeyframes)->Clone((IInterface**)(&(holder->mKeyframes)));
+    AutoPtr<IInterface> obj;
+    ICloneable::Probe(mKeyframes)->Clone((IInterface**)&obj);
+    holder->mKeyframes = IKeyframes::Probe(obj);
     holder->mTmpValueArray = mTmpValueArray;
     holder->mGetter = mGetter;
     holder->mEvaluator = mEvaluator;

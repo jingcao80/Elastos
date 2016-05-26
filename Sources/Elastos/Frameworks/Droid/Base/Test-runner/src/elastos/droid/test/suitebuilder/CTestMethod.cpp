@@ -10,6 +10,8 @@ namespace SuiteBuilder {
 
 CAR_INTERFACE_IMPL(CTestMethod, Object, ITestMethod)
 
+CAR_OBJECT_IMPL(CTestMethod)
+
 ECode CTestMethod::constructor(
     /* [in] */ IMethodInfo* method,
     /* [in] */ IClassInfo* enclosingClass)

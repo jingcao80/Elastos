@@ -428,8 +428,7 @@ ECode TwilightService::UpdateLocationReceiver::OnReceive(
     intent->GetAction(&action);
     Boolean result;
     intent->GetBooleanExtra(String("state"), FALSE, &result);
-    if (IIntent::ACTION_AIRPLANE_MODE_CHANGED.Equals(action)
-            && !result) {
+    if (IIntent::ACTION_AIRPLANE_MODE_CHANGED.Equals(action) && !result) {
         // Airplane mode is now off!
         mHost->mLocationHandler->RequestLocationUpdate();
         return NOERROR;
@@ -545,6 +544,7 @@ ECode TwilightService::OnStart()
     context->GetSystemService(IContext::LOCATION_SERVICE, (IInterface**)&service);
     mLocationManager = ILocationManager::Probe(service);
     mLocationHandler = new LocationHandler(this);
+    mLocationHandler->constructor();
 
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(IIntent::ACTION_AIRPLANE_MODE_CHANGED,(IIntentFilter**)&filter);

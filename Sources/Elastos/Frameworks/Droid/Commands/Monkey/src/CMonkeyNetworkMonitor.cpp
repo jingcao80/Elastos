@@ -6,6 +6,8 @@ namespace Droid {
 namespace Commands {
 namespace Monkey {
 
+CAR_OBJECT_IMPL(CMonkeyNetworkMonitor)
+
 ECode CMonkeyNetworkMonitor::PerformReceive(
     /* [in] */ IIntent *intent,
     /* [in] */ Int32 resultCode,

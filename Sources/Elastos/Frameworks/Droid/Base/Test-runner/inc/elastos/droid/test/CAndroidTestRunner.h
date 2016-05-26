@@ -38,6 +38,8 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    CAR_OBJECT_DECL()
+
     CARAPI SetPreference(
         /* [in] */ const String& key,
         /* [in] */ const String& value);

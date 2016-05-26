@@ -13,6 +13,8 @@ const String CActivityManagerAppTask::TAG("CActivityManagerAppTask");
 
 CAR_INTERFACE_IMPL(CActivityManagerAppTask, Object, IActivityManagerAppTask)
 
+CAR_OBJECT_IMPL(CActivityManagerAppTask)
+
 ECode CActivityManagerAppTask::constructor(
     /* [in] */ IIAppTask* task)
 {

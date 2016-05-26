@@ -4,6 +4,10 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
+CAR_INTERFACE_IMPL(CEventLog, Object, IEventLog)
+
+CAR_OBJECT_IMPL(CEventLog)
+
 CEventLog::CEventLog()
     : mWallpaperXStep(-1)
     , mWallpaperYStep(-1)

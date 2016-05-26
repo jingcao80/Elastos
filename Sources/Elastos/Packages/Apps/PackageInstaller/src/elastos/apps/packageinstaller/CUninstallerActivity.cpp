@@ -43,7 +43,7 @@ namespace PackageInstaller {
 //=====================================================================
 //          CUninstallerActivity::UninstallAlertDialogFragment
 //=====================================================================
-CAR_INTERFACE_IMPL(CUninstallerActivity::UninstallAlertDialogFragment, Object/*DialogFragment*/, IDialogInterfaceOnClickListener)
+CAR_INTERFACE_IMPL(CUninstallerActivity::UninstallAlertDialogFragment, DialogFragment, IDialogInterfaceOnClickListener)
 
 ECode CUninstallerActivity::UninstallAlertDialogFragment::OnCreateDialog(
     /* [in] */ IBundle* savedInstanceState,
@@ -297,7 +297,9 @@ ECode CUninstallerActivity::AppNotFoundDialogFragment::OnDismiss(
 //=====================================================================
 const String CUninstallerActivity::TAG("CUninstallerActivity");
 
-CAR_INTERFACE_IMPL(CUninstallerActivity, Object/*Activity*/, IUninstallerActivity)
+CAR_INTERFACE_IMPL(CUninstallerActivity, Activity, IUninstallerActivity)
+
+CAR_OBJECT_IMPL(CUninstallerActivity)
 
 CUninstallerActivity::CUninstallerActivity()
 {

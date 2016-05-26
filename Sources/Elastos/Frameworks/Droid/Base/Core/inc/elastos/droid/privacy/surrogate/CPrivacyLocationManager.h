@@ -54,6 +54,8 @@ private:
     };
 
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ IILocationManager* service,
         /* [in] */ IContext* context);

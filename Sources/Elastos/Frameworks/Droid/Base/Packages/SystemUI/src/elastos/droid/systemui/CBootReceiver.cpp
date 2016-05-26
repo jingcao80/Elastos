@@ -18,6 +18,9 @@ namespace SystemUI {
 // CBootReceiver::
 //===============================================================
 String CBootReceiver::TAG = String("SystemUIBootReceiver");
+
+CAR_OBJECT_IMPL(CBootReceiver)
+
 ECode CBootReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)

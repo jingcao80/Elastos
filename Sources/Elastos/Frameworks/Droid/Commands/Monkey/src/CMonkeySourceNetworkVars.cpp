@@ -278,6 +278,8 @@ String CMonkeySourceNetworkVars::StaticVarGetter::Get()
     return mValue;
 }
 
+CAR_OBJECT_IMPL(CMonkeySourceNetworkVars)
+
 } // namespace Monkey
 } // namespace Commands
 } // namespace Droid

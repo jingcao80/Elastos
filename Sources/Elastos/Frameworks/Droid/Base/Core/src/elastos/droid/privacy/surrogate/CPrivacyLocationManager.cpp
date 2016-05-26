@@ -24,6 +24,8 @@ namespace Surrogate {
 const String CPrivacyLocationManager::TAG("PrivacyLocationManager");
 const Int32 CPrivacyLocationManager::CUSTOM_LOCATION_UPDATE_COUNT = 5;
 
+CAR_OBJECT_IMPL(CPrivacyLocationManager)
+
 ECode CPrivacyLocationManager::constructor(
     /* [in] */ IILocationManager* service,
     /* [in] */ IContext* context)

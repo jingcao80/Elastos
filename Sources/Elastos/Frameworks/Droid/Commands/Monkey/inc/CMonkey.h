@@ -13,11 +13,10 @@ namespace Monkey {
 CarClass(CMonkey), public Monkey
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI Main(
         /* [in] */ const ArrayOf<String>& args);
-
-    CARAPI_(UInt32) AddRef();
-    CARAPI_(UInt32) Release();
 };
 
 } // namespace Monkey

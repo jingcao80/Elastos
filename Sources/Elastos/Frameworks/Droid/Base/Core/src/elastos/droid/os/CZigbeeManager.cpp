@@ -41,6 +41,10 @@ AutoPtr<ArrayOf<String> > InitActions()
 
 const AutoPtr<ArrayOf<String> > CZigbeeManager::sActions = InitActions();
 
+CAR_INTERFACE_IMPL(CZigbeeManager)
+
+CAR_OBJECT_IMPL(CZigbeeManager)
+
 ECode CZigbeeManager::IsValidType(
     /* [in] */ Int32 checkType,
     /* [out] */ Boolean* res)

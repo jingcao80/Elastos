@@ -10,6 +10,11 @@ namespace Os {
 CarClass(CZigbeeManager)
 {
 public:
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     /*
      *  Check if type is defined
      *  Return value: true - type is defined, false - invalid type

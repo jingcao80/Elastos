@@ -32,6 +32,8 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    CAR_OBJECT_DECL()
+
     /**
      * The given name is automatically prefixed with the package containing the tests to be run.
      * If more than one package is specified, the first is used.

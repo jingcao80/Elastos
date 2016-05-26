@@ -164,7 +164,7 @@ private:
 
     private:
         CQSPanel* mHost;
-        TileRecord* mR;
+        AutoPtr<TileRecord> mR;
     };
 
     class OnClickListener1
@@ -182,7 +182,7 @@ private:
             /* [in] */ IView* v);
 
     private:
-        TileRecord* mR;
+        AutoPtr<TileRecord> mR;
     };
 
     class OnClickListener2
@@ -200,7 +200,7 @@ private:
             /* [in] */ IView* v);
 
     private:
-        TileRecord* mR;
+        AutoPtr<TileRecord> mR;
     };
 
     class OnClickListener3

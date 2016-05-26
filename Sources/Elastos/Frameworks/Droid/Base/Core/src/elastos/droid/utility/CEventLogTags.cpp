@@ -4,6 +4,10 @@ namespace Elastos {
 namespace Droid {
 namespace Utility {
 
+CAR_INTERFACE_IMPL(CEventLogTags, Object, IEventLogTags)
+
+CAR_OBJECT_IMPL(CEventLogTags)
+
 // CEventLogTags::CEventLogTags()
 // {
 // }

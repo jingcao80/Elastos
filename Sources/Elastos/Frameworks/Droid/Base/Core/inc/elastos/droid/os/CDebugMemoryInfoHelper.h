@@ -11,7 +11,9 @@ namespace Os {
 CarClass(CDebugMemoryInfoHelper)
 {
 public:
-    CARAPI constructor();
+    CAR_INTERFACE_DECL()
+
+    CAR_SINGLETON_DECL()
 
     CARAPI GetOtherLabel(
         /* [in] */ Int32 which,

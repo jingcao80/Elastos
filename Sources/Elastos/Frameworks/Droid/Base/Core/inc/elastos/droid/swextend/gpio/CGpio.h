@@ -18,6 +18,10 @@ namespace Swextend {
 CarClass(CGpio)
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CGpio();
 
     CARAPI WriteGpio(

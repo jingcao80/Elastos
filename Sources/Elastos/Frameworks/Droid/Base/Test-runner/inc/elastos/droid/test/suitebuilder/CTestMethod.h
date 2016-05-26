@@ -24,6 +24,8 @@ CarClass(CTestMethod)
 public:
     CAR_INTERFACE_DECL()
 
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ IMethodInfo* method,
         /* [in] */ IClassInfo* enclosingClass);

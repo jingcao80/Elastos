@@ -23,6 +23,8 @@ ECode CTestResult::_Protectable::Protect()
 
 CAR_INTERFACE_IMPL(CTestResult, Object, ITestResult)
 
+CAR_OBJECT_IMPL(CTestResult)
+
 CTestResult::CTestResult()
     : mRunTests(0)
     , mStop(FALSE)

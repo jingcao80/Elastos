@@ -6,6 +6,10 @@ namespace Os {
 
 const String CDropBoxManager::TAG("DropBoxManager");
 
+CAR_INTERFACE_IMPL(CDropBoxManager, Object, IDropBoxManager)
+
+CAR_OBJECT_IMPL(CDropBoxManager)
+
 ECode CDropBoxManager::constructor(
     /* [in] */ IDropBoxManagerService* service)
 {

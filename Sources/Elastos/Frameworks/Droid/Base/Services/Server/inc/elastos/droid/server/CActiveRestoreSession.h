@@ -15,8 +15,12 @@ namespace Server {
 CarClass(CActiveRestoreSession)
 {
 public:
-    CActiveRestoreSession(){}
-    ~CActiveRestoreSession(){}
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
+    CActiveRestoreSession() {}
+    ~CActiveRestoreSession() {}
 
     CARAPI constructor(
         /* [in] */ const String &packageName,

@@ -52,6 +52,10 @@ private:
         /* [in] */ Int32 userHandle);
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI SystemReady();
 
     CARAPI FindAvailRecognizer(

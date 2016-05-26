@@ -103,6 +103,8 @@
 #include "elastos/droid/widget/CSpinner.h"
 #include "elastos/droid/widget/CSpinnerSavedState.h"
 #include "elastos/droid/widget/CSwitch.h"
+//#include "elastos/droid/widget/CStackView.h"
+//#include "elastos/droid/widget/CStackViewLayoutParams.h"
 #include "elastos/droid/widget/CTableLayout.h"
 #include "elastos/droid/widget/CTableLayoutLayoutParams.h"
 #include "elastos/droid/widget/CTableRow.h"
@@ -244,6 +246,8 @@ CAR_OBJECT_IMPL(CSpellChecker)
 CAR_OBJECT_IMPL(CSpinner)
 CAR_OBJECT_IMPL(CSpinnerSavedState)
 CAR_OBJECT_IMPL(CSwitch)
+// CAR_OBJECT_IMPL(CStackView)
+// CAR_OBJECT_IMPL(CStackViewLayoutParams)
 CAR_OBJECT_IMPL(CTabHost)
 CAR_OBJECT_IMPL(CTableLayout)
 CAR_OBJECT_IMPL(CTableLayoutLayoutParams)

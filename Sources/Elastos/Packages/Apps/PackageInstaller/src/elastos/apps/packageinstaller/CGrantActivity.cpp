@@ -34,6 +34,8 @@ namespace PackageInstaller {
 //=====================================================================
 CAR_INTERFACE_IMPL_2(CGrantActivity, Object/*Activity*/, IViewOnClickListener, IGrantActivity)
 
+CAR_OBJECT_IMPL(CGrantActivity)
+
 CGrantActivity::CGrantActivity()
 {
 }

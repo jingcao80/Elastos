@@ -20,6 +20,8 @@ CarClass(CCursorLoader)
 public:
     CAR_INTERFACE_DECL()
 
+    CAR_OBJECT_DECL()
+
     CCursorLoader();
 
     virtual ~CCursorLoader();

@@ -19,6 +19,8 @@ namespace SuiteBuilder {
 
 CAR_INTERFACE_IMPL(CTestSuiteBuilder, Object, ITestSuiteBuilder)
 
+CAR_OBJECT_IMPL(CTestSuiteBuilder)
+
 CTestSuiteBuilder::CTestSuiteBuilder()
 {
     mTestGrouping = new TestGrouping(TestGrouping::SORT_BY_FULLY_QUALIFIED_NAME);
