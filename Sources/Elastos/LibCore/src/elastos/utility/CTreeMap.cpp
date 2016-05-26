@@ -285,10 +285,13 @@ ECode CTreeMap::Find(
 
     AutoPtr<Node> nearest = mRoot, temp;
     while (TRUE) {
-        Int32 comvalue = 0;
-        Int32 comparison = (comparableKey != NULL)
-                ? (comparableKey->CompareTo(nearest->mKey, &comvalue), comvalue)
-                : (mComparator->Compare(key, nearest->mKey, &comvalue), comvalue);
+        Int32 comparison = 0;
+        if (comparableKey != NULL) {
+            FAIL_RETURN(comparableKey->CompareTo(nearest->mKey, &comparison));
+        }
+        else {
+            FAIL_RETURN(mComparator->Compare(key, nearest->mKey, &comparison));
+        }
 
         /*
          * We found the requested key.

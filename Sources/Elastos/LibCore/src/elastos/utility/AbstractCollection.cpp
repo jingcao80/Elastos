@@ -124,13 +124,13 @@ ECode AbstractCollection::ContainsAll(
     Boolean hasnext = FALSE;
     Boolean flag = FALSE;
     while ((it->HasNext(&hasnext), hasnext)) {
-            AutoPtr<IInterface> nextobject;
-            it->GetNext((IInterface**)&nextobject);
-            Contains(nextobject, &flag);
-            if (!flag) {
-                *result = FALSE;
-                return NOERROR;
-            }
+        AutoPtr<IInterface> nextobject;
+        it->GetNext((IInterface**)&nextobject);
+        Contains(nextobject, &flag);
+        if (!flag) {
+            *result = FALSE;
+            return NOERROR;
+        }
     }
     *result = TRUE;
     return NOERROR;
