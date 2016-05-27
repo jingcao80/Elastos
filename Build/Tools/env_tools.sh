@@ -308,7 +308,7 @@ function eldrop ()
             done 3<$XDK_TOOLS/eldrop_apps.list
             unset ANDROID_AVD_TAG MAKE_DIR SET_FOR_ANDROID ANDROID_AVD
         fi
-    else
+    elif [ -z "$1" ]; then
         get_android_serialno
         if [ -n "$ANDROID_AVD" ]; then
             ANDROID_AVD_TAG=1
@@ -348,6 +348,8 @@ function eldrop ()
             done 3<$XDK_TOOLS/eldrop.list
             unset ANDROID_AVD_TAG MAKE_DIR SET_FOR_ANDROID ANDROID_AVD
         fi
+    else
+        echo "Error: The parameter is wrong, please check!"
     fi
 }
 
