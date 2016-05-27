@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CSSLEngineDataStream)
+
+CAR_INTERFACE_IMPL(CSSLEngineDataStream, Object, ISSLEngineDataStream)
 
 ECode CSSLEngineDataStream::HasData(
     /* [out] */ Boolean * pHasData)

@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_XNET_PROVIDER_JSSE_COPENSSLMESSAGEDIGESTJDK_SHA1_H__
 
 #include "_Org_Apache_Harmony_Xnet_Provider_Jsse_COpenSSLMessageDigestJDK_SHA1.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -12,8 +15,11 @@ namespace Provider {
 namespace Jsse {
 
 CarClass(COpenSSLMessageDigestJDK_SHA1)
+    , public Object
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI Clone(
         /* [out] */ IInterface ** ppObject);
 

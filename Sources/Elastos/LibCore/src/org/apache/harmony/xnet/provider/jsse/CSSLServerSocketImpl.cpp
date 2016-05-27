@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CSSLServerSocketImpl)
 
 ECode CSSLServerSocketImpl::GetImpl(
     /* [out] */ Elastos::Net::ISocketImpl ** ppImpl)

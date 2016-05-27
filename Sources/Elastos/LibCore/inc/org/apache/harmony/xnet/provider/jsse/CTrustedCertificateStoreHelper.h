@@ -4,6 +4,10 @@
 
 #include "_Org_Apache_Harmony_Xnet_Provider_Jsse_CTrustedCertificateStoreHelper.h"
 
+#include <elastos/core/Singleton.h>
+
+using Elastos::Core::Singleton;
+
 namespace Org {
 namespace Apache {
 namespace Harmony {
@@ -12,8 +16,14 @@ namespace Provider {
 namespace Jsse {
 
 CarClass(CTrustedCertificateStoreHelper)
+    , public Singleton
+    , public ITrustedCertificateStoreHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI IsSystem(
         /* [in] */ const String& alias,
         /* [out] */ Boolean * pIsSystem);

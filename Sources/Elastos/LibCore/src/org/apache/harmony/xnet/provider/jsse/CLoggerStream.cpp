@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CLoggerStream)
+
+CAR_INTERFACE_IMPL(CLoggerStream, Object, ILoggerStream)
 
 ECode CLoggerStream::Close()
 {

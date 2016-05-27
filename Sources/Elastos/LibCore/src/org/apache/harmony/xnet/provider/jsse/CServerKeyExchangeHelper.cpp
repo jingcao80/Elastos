@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_SINGLETON_IMPL(CServerKeyExchangeHelper)
+
+CAR_INTERFACE_IMPL(CServerKeyExchangeHelper, Singleton, IServerKeyExchangeHelper)
 
 ECode CServerKeyExchangeHelper::ToUnsignedByteArray(
     /* [in] */ Elastos::Math::IBigInteger * pBi,

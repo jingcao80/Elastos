@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace Utils {
 
+CAR_SINGLETON_IMPL(CObjectIdentifierInUtilsHelper)
+
+CAR_INTERFACE_IMPL(CObjectIdentifierInUtilsHelper, Singleton, IObjectIdentifierInUtilsHelper)
 
 ECode CObjectIdentifierInUtilsHelper::ValidateOid(
     /* [in] */ ArrayOf<Int32> * pOid)

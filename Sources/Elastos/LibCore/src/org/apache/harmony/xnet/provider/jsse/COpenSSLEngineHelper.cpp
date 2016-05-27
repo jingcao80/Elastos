@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_SINGLETON_IMPL(COpenSSLEngineHelper)
+
+CAR_INTERFACE_IMPL(COpenSSLEngineHelper, Singleton, IOpenSSLEngineHelper)
 
 ECode COpenSSLEngineHelper::GetInstance(
     /* [in] */ const String& engine,

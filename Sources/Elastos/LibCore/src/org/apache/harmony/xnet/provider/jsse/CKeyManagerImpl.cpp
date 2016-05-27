@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CKeyManagerImpl)
 
 ECode CKeyManagerImpl::ChooseClientAlias(
     /* [in] */ ArrayOf<String> * pKeyType,

@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CEXTENSIONS_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CExtensions.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {

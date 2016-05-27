@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CSSLEngineImpl)
 
 ECode CSSLEngineImpl::GetPeerHost(
     /* [out] */ String * pHost)

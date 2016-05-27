@@ -5,6 +5,7 @@
 #include "_Org_Apache_Harmony_Security_Pkcs7_CSignedDataHelper.h"
 #include <elastos/core/Singleton.h>
 
+using Elastos::Core::Singleton;
 using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
 
 namespace Org {

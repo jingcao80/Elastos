@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_XNET_PROVIDER_JSSE_CPINFAILURELOGGERHELPER_H__
 
 #include "_Org_Apache_Harmony_Xnet_Provider_Jsse_CPinFailureLoggerHelper.h"
+#include <elastos/core/Singleton.h>
+
+using Elastos::Core::Singleton;
 
 namespace Org {
 namespace Apache {
@@ -12,8 +15,14 @@ namespace Provider {
 namespace Jsse {
 
 CarClass(CPinFailureLoggerHelper)
+    , public Singleton
+    , public IPinFailureLoggerHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI Log(
         /* [in] */ const String& cn,
         /* [in] */ Boolean chainContainsUserCert,

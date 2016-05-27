@@ -12,8 +12,11 @@ namespace Provider {
 namespace Jsse {
 
 CarClass(CSSLSocketOutputStream)
+    , public Object
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI Close();
 
     CARAPI Write(

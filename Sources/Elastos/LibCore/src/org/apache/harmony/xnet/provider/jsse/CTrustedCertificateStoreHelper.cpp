@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_SINGLETON_IMPL(CTrustedCertificateStoreHelper)
+
+CAR_INTERFACE_IMPL(CTrustedCertificateStoreHelper, Singleton, ITrustedCertificateStoreHelper)
 
 ECode CTrustedCertificateStoreHelper::IsSystem(
     /* [in] */ const String& alias,

@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(COpenSSLCipherRSA_Raw)
 
 ECode COpenSSLCipherRSA_Raw::EngineSetMode(
     /* [in] */ const String& mode)

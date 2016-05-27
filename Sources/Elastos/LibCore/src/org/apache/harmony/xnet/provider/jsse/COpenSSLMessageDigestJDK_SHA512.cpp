@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(COpenSSLMessageDigestJDK_SHA512)
 
 ECode COpenSSLMessageDigestJDK_SHA512::Clone(
     /* [out] */ IInterface ** ppObject)

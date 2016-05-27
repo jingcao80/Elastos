@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CCipherSuite)
+
+CAR_INTERFACE_IMPL(CCipherSuite, Object, ICipherSuite)
 
 ECode CCipherSuite::IsAnonymous(
     /* [out] */ Boolean * pAnnoymous)

@@ -7,6 +7,7 @@ namespace Harmony {
 namespace Xml {
 namespace Dom {
 
+CAR_OBJECT_IMPL(CNotationImpl)
 
 ECode CNotationImpl::GetNodeName(
     /* [out] */ String * pStr)

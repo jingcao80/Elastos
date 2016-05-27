@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CClientHello)
+
+CAR_INTERFACE_IMPL(CClientHello, Object, IClientHello)
 
 ECode CClientHello::GetLength(
     /* [out] */ Int32 * pLength)

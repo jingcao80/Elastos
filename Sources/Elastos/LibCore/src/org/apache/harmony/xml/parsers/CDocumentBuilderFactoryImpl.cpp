@@ -7,6 +7,7 @@ namespace Harmony {
 namespace Xml {
 namespace Parsers {
 
+CAR_OBJECT_IMPL(CDocumentBuilderFactoryImpl)
 
 ECode CDocumentBuilderFactoryImpl::NewDocumentBuilder(
     /* [out] */ Elastosx::Xml::Parsers::IDocumentBuilder ** ppBuilder)

@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CTrustedCertificateKeyStoreSpi)
 
 ECode CTrustedCertificateKeyStoreSpi::EngineGetKey(
     /* [in] */ const String& alias,

@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_XNET_PROVIDER_JSSE_COPENSSLSIGNATURE_SHA256RSA_H__
 
 #include "_Org_Apache_Harmony_Xnet_Provider_Jsse_COpenSSLSignature_SHA256RSA.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -12,8 +15,11 @@ namespace Provider {
 namespace Jsse {
 
 CarClass(COpenSSLSignature_SHA256RSA)
+    , public Object
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetProvider(
         /* [out] */ Elastos::Security::IProvider ** ppProvider);
 

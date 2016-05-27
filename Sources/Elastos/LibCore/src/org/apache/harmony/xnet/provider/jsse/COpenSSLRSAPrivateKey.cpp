@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(COpenSSLRSAPrivateKey)
+
+CAR_INTERFACE_IMPL(COpenSSLRSAPrivateKey, Object, IOpenSSLRSAPrivateKey)
 
 ECode COpenSSLRSAPrivateKey::GetPrivateExponent(
     /* [out] */ Elastos::Math::IBigInteger ** ppPrivateExponent)

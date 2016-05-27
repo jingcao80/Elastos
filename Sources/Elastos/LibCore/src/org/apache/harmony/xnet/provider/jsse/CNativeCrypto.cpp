@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CNativeCrypto)
+
+CAR_INTERFACE_IMPL(CNativeCrypto, Object, INativeCrypto)
 
 ECode CNativeCrypto::ENGINE_load_dynamic()
 {

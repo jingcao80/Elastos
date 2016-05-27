@@ -3,7 +3,9 @@
 #define __ORG_APACHE_HARMONY_SECURITY_PKCS7_CSIGNEDDATA_H__
 
 #include "_Org_Apache_Harmony_Security_Pkcs7_CSignedData.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Core::Object;
 using Elastos::Utility::IList;
 
 namespace Org {

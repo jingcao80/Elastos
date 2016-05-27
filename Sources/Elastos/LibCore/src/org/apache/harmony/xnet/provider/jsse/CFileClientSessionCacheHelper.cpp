@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_SINGLETON_IMPL(CFileClientSessionCacheHelper)
+
+CAR_INTERFACE_IMPL(CFileClientSessionCacheHelper, Singleton, IFileClientSessionCacheHelper)
 
 ECode CFileClientSessionCacheHelper::UsingDirectory(
     /* [in] */ Elastos::IO::IFile * pDirectory,

@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CHelloRequest)
 
 ECode CHelloRequest::GetLength(
     /* [out] */ Int32 * pLength)

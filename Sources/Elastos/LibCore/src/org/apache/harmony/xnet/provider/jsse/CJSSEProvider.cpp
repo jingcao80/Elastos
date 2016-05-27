@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CJSSEProvider)
 
 ECode CJSSEProvider::GetProperty(
     /* [in] */ const String& name,

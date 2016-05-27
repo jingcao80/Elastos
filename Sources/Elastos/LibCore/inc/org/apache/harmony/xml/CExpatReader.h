@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_XML_CEXPATREADER_H__
 
 #include "_Org_Apache_Harmony_Xml_CExpatReader.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -10,8 +13,14 @@ namespace Harmony {
 namespace Xml {
 
 CarClass(CExpatReader)
+    , public Object
+    , public IExpatReader
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetFeature(
         /* [in] */ const String& name,
         /* [out] */ Boolean * pFeature);

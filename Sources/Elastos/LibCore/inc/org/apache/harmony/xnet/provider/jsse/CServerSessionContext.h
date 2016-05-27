@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_XNET_PROVIDER_JSSE_CSERVERSESSIONCONTEXT_H__
 
 #include "_Org_Apache_Harmony_Xnet_Provider_Jsse_CServerSessionContext.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -12,8 +15,14 @@ namespace Provider {
 namespace Jsse {
 
 CarClass(CServerSessionContext)
+    , public Object
+    , public IServerSessionContext
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetIds(
         /* [out] */ Elastos::Utility::IEnumeration ** ppIds);
 

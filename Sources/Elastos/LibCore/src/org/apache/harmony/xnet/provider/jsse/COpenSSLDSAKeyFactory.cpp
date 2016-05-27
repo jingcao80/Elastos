@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(COpenSSLDSAKeyFactory)
 
 ECode COpenSSLDSAKeyFactory::EngineGeneratePublic(
     /* [in] */ Elastos::Security::Spec::IKeySpec * pKeySpec,

@@ -9,6 +9,7 @@
 
 using Elastos::Core::Singleton;
 using Elastos::Core::Mutex;
+using Elastos::Core::Singleton;
 using Elastos::Security::IProvider;
 using Elastos::Security::IProviderService;
 using Elastos::Utility::IList;

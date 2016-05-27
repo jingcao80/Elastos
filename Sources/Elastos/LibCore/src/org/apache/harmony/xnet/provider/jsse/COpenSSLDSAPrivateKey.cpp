@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(COpenSSLDSAPrivateKey)
 
 ECode COpenSSLDSAPrivateKey::GetX(
     /* [out] */ Elastos::Math::IBigInteger ** ppX)

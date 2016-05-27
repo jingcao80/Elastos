@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_XNET_PROVIDER_JSSE_CSSLENGINEIMPL_H__
 
 #include "_Org_Apache_Harmony_Xnet_Provider_Jsse_CSSLEngineImpl.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -12,8 +15,11 @@ namespace Provider {
 namespace Jsse {
 
 CarClass(CSSLEngineImpl)
+    , public Object
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetPeerHost(
         /* [out] */ String * pHost);
 

@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace Utils {
 
+CAR_SINGLETON_IMPL(CArrayHelper)
+
+CAR_INTERFACE_IMPL(CArrayHelper, Singleton, IArrayHelper)
 
 ECode CArrayHelper::GetBytesAsString(
     /* [in] */ ArrayOf<Byte> * pData,

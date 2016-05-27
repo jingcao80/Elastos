@@ -3,7 +3,9 @@
 #define __ORG_APACHE_HARMONY_SECURITY_PKCS10_CCERTIFICATIONREQUESTINFO_H__
 
 #include "_Org_Apache_Harmony_Security_Pkcs10_CCertificationRequestInfo.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Core::Object;
 using Org::Apache::Harmony::Security::X501::IName;
 
 namespace Org {

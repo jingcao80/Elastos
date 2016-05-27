@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(COpenSSLSocketFactoryImpl)
 
 ECode COpenSSLSocketFactoryImpl::CreateSocket(
     /* [out] */ Elastos::Net::ISocket ** ppSock)

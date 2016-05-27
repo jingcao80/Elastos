@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CHandshakeIODataStream)
+
+CAR_INTERFACE_IMPL(CHandshakeIODataStream, Object, IHandshakeIODataStream)
 
 ECode CHandshakeIODataStream::Close()
 {

@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(COpenSSLDSAParams)
 
 ECode COpenSSLDSAParams::GetG(
     /* [out] */ Elastos::Math::IBigInteger ** ppBase)

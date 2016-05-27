@@ -7,6 +7,7 @@ namespace Harmony {
 namespace Xml {
 namespace Dom {
 
+CAR_OBJECT_IMPL(CDOMConfigurationImpl)
 
 ECode CDOMConfigurationImpl::SetParameter(
     /* [in] */ const String& name,

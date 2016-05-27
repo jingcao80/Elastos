@@ -7,6 +7,7 @@ namespace Harmony {
 namespace Xml {
 namespace Parsers {
 
+CAR_OBJECT_IMPL(CSAXParserImpl)
 
 ECode CSAXParserImpl::Reset()
 {

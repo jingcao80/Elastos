@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CTrustedCertificateStore)
+
+CAR_INTERFACE_IMPL(CTrustedCertificateStore, Object, ITrustedCertificateStore)
 
 ECode CTrustedCertificateStore::GetCertificate(
     /* [in] */ const String& alias,

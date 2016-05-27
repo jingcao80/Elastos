@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(COpenSSLSignature_MD5RSA)
 
 ECode COpenSSLSignature_MD5RSA::GetProvider(
     /* [out] */ Elastos::Security::IProvider ** ppProvider)

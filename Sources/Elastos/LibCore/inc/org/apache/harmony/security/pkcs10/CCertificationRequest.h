@@ -4,6 +4,9 @@
 
 #include "_Org_Apache_Harmony_Security_Pkcs10_CCertificationRequest.h"
 #include <ASN1Sequence.h>
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {

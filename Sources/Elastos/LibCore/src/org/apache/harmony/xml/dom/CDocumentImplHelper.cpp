@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Xml {
 namespace Dom {
 
+CAR_SINGLETON_IMPL(CDocumentImplHelper)
+
+CAR_INTERFACE_IMPL(CDocumentImplHelper, Singleton, IDocumentImplHelper)
 
 ECode CDocumentImplHelper::IsXMLIdentifier(
     /* [in] */ const String& s,

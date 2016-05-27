@@ -10,6 +10,8 @@ namespace Crypto {
 
 CAR_OBJECT_IMPL(CCryptoProvider)
 
+CAR_INTERFACE_IMPL(CCryptoProvider, Object, ICryptoProvider)
+
 ECode CCryptoProvider::GetProperty(
     /* [in] */ const String& name,
     /* [out] */ String * pStr)

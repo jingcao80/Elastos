@@ -5,6 +5,8 @@
 #include "_Org_Apache_Harmony_Security_X509_CGeneralNamesHelper.h"
 #include <elastos/core/Singleton.h>
 
+using Elastos::Core::Singleton;
+
 namespace Org {
 namespace Apache {
 namespace Harmony {

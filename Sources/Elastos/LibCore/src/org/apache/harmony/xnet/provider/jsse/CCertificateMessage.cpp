@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CCertificateMessage)
+
+CAR_INTERFACE_IMPL(CCertificateMessage, Object, ICertificateMessage)
 
 ECode CCertificateMessage::GetLength(
     /* [out] */ Int32 * pLength)

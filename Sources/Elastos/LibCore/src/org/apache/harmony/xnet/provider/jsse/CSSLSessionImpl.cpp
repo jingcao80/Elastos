@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CSSLSessionImpl)
 
 ECode CSSLSessionImpl::GetApplicationBufferSize(
     /* [out] */ Int32 * pSize)

@@ -7,6 +7,7 @@ namespace Harmony {
 namespace Xml {
 namespace Dom {
 
+CAR_OBJECT_IMPL(CNodeListImpl)
 
 ECode CNodeListImpl::Item(
     /* [in] */ Int32 index,

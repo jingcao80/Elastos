@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CPinListEntry)
+
+CAR_INTERFACE_IMPL(CPinListEntry, Object, IPinListEntry)
 
 ECode CPinListEntry::GetCommonName(
     /* [out] */ String * pCommonName)

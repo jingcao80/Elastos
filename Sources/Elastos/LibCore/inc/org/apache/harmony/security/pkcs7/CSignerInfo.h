@@ -4,7 +4,9 @@
 
 #include "_Org_Apache_Harmony_Security_Pkcs7_CSignerInfo.h"
 #include <ASN1SequenceMacro.h>
+#include <elastos/core/Object.h>
 
+using Elastos::Core::Object;
 using Elastosx::Security::Auth::X500::IX500Principal;
 using Elastos::Math::IBigInteger;
 using Elastos::Utility::IList;

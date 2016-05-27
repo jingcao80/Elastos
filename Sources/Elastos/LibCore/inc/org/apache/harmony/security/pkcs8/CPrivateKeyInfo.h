@@ -3,9 +3,11 @@
 #define __ORG_APACHE_HARMONY_SECURITY_PKCS8_CPRIVATEKEYINFO_H__
 
 #include "_Org_Apache_Harmony_Security_Pkcs8_CPrivateKeyInfo.h"
+#include <elastos/core/Object.h>
 
-using Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier;
+using Elastos::Core::Object;
 using Elastos::Utility::IList;
+using Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier;
 
 namespace Org {
 namespace Apache {

@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CSSLEngineAppData)
 
 ECode CSSLEngineAppData::Append(
     /* [in] */ ArrayOf<Byte> * pSrc)

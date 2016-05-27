@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CFinished)
+
+CAR_INTERFACE_IMPL(CFinished, Object, IFinished)
 
 ECode CFinished::GetLength(
     /* [out] */ Int32 * pLength)

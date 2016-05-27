@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(COpenSSLContextImpl)
 
 ECode COpenSSLContextImpl::EngineInit(
     /* [in] */ ArrayOf<Elastosx::Net::Ssl::IKeyManager *> * pKm,

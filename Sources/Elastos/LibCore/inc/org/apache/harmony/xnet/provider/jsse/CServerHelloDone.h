@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_XNET_PROVIDER_JSSE_CSERVERHELLODONE_H__
 
 #include "_Org_Apache_Harmony_Xnet_Provider_Jsse_CServerHelloDone.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -12,8 +15,11 @@ namespace Provider {
 namespace Jsse {
 
 CarClass(CServerHelloDone)
+    , public Object
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetLength(
         /* [out] */ Int32 * pLength);
 

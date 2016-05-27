@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CTrustManagerImpl)
 
 ECode CTrustManagerImpl::CheckClientTrusted(
     /* [in] */ ArrayOf<Elastos::Security::Cert::IX509Certificate *> * pChain,

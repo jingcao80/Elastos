@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_SECURITY_PROVIDER_CRYPTO_CCRYPTOPROVIDER_H__
 
 #include "_Org_Apache_Harmony_Security_Provider_Crypto_CCryptoProvider.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -12,8 +15,14 @@ namespace Provider {
 namespace Crypto {
 
 CarClass(CCryptoProvider)
+    , public Object
+    , public ICryptoProvider
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetProperty(
         /* [in] */ const String& name,
         /* [out] */ String * pStr);

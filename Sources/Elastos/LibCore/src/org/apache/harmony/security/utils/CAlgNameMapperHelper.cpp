@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace Utils {
 
+CAR_SINGLETON_IMPL(CAlgNameMapperHelper)
+
+CAR_INTERFACE_IMPL(CAlgNameMapperHelper, Singleton, IAlgNameMapperHelper)
 
 ECode CAlgNameMapperHelper::Map2OID(
     /* [in] */ const String& algName,

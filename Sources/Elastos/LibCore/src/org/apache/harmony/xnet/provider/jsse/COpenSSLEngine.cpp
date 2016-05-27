@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(COpenSSLEngine)
+
+CAR_INTERFACE_IMPL(COpenSSLEngine, Object, IOpenSSLEngine)
 
 ECode COpenSSLEngine::GetPrivateKeyById(
     /* [in] */ const String& id,

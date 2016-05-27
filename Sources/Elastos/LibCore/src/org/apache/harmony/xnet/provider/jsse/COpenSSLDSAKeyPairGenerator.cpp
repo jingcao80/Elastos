@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(COpenSSLDSAKeyPairGenerator)
 
 ECode COpenSSLDSAKeyPairGenerator::GenerateKeyPair(
     /* [out] */ Elastos::Security::IKeyPair ** ppKeyPair)

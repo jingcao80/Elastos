@@ -7,6 +7,7 @@ namespace Harmony {
 namespace Xml {
 namespace Dom {
 
+CAR_OBJECT_IMPL(CDocumentTypeImpl)
 
 ECode CDocumentTypeImpl::GetNodeName(
     /* [out] */ String * pStr)

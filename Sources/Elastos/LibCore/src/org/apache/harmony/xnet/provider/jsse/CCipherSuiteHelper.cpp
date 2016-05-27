@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_SINGLETON_IMPL(CCipherSuiteHelper)
+
+CAR_INTERFACE_IMPL(CCipherSuiteHelper, Singleton, ICipherSuiteHelper)
 
 ECode CCipherSuiteHelper::GetByName(
     /* [in] */ const String& name,

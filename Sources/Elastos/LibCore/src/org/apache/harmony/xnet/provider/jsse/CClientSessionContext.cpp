@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CClientSessionContext)
+
+CAR_INTERFACE_IMPL(CClientSessionContext, Object, IClientSessionContext)
 
 ECode CClientSessionContext::GetIds(
     /* [out] */ Elastos::Utility::IEnumeration ** ppIds)

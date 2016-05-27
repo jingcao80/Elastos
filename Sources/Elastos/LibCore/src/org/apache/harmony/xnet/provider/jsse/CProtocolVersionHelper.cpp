@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_SINGLETON_IMPL(CProtocolVersionHelper)
+
+CAR_INTERFACE_IMPL(CProtocolVersionHelper, Singleton, IProtocolVersionHelper)
 
 ECode CProtocolVersionHelper::GetSupportedProtocols(
     /* [out, callee] */ ArrayOf<String> ** ppSupportedProtocols)

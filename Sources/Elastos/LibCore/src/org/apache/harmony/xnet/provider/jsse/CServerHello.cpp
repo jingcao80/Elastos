@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CServerHello)
+
+CAR_INTERFACE_IMPL(CServerHello, Object, IServerHello)
 
 ECode CServerHello::GetLength(
     /* [out] */ Int32 * pLength)

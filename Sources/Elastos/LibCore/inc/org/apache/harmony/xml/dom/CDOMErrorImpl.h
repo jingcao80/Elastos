@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_XML_DOM_CDOMERRORIMPL_H__
 
 #include "_Org_Apache_Harmony_Xml_Dom_CDOMErrorImpl.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -11,8 +14,11 @@ namespace Xml {
 namespace Dom {
 
 CarClass(CDOMErrorImpl)
+    , public Object
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetSeverity(
         /* [out] */ Int16 * pValue);
 

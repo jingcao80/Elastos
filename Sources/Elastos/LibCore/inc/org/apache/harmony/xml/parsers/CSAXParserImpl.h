@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_XML_PARSERS_CSAXPARSERIMPL_H__
 
 #include "_Org_Apache_Harmony_Xml_Parsers_CSAXParserImpl.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -11,8 +14,11 @@ namespace Xml {
 namespace Parsers {
 
 CarClass(CSAXParserImpl)
+    , public Object
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI Reset();
 
     CARAPI Parse(

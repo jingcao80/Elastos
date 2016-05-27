@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_XNET_PROVIDER_JSSE_CSERVERHANDSHAKEIMPL_H__
 
 #include "_Org_Apache_Harmony_Xnet_Provider_Jsse_CServerHandshakeImpl.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -12,8 +15,11 @@ namespace Provider {
 namespace Jsse {
 
 CarClass(CServerHandshakeImpl)
+    , public Object
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetEngineOwner(
         /* [out] */ Elastosx::Net::Ssl::ISSLEngine ** ppEngineOwner);
 

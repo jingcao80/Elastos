@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_XNET_PROVIDER_JSSE_CSERVERKEYEXCHANGE_H__
 
 #include "_Org_Apache_Harmony_Xnet_Provider_Jsse_CServerKeyExchange.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -12,8 +15,14 @@ namespace Provider {
 namespace Jsse {
 
 CarClass(CServerKeyExchange)
+    , public Object
+    , public IServerKeyExchange
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetLength(
         /* [out] */ Int32 * pLength);
 

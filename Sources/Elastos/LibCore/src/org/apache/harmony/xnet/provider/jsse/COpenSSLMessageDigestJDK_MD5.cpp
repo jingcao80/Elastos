@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(COpenSSLMessageDigestJDK_MD5)
 
 ECode COpenSSLMessageDigestJDK_MD5::Clone(
     /* [out] */ IInterface ** ppObject)

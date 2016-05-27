@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CCertPinManager)
+
+CAR_INTERFACE_IMPL(CCertPinManager, Object, ICertPinManager)
 
 ECode CCertPinManager::ChainIsNotPinned(
     /* [in] */ const String& hostname,

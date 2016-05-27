@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_SINGLETON_IMPL(CPinFailureLoggerHelper)
+
+CAR_INTERFACE_IMPL(CPinFailureLoggerHelper, Singleton, IPinFailureLoggerHelper)
 
 ECode CPinFailureLoggerHelper::Log(
     /* [in] */ const String& cn,

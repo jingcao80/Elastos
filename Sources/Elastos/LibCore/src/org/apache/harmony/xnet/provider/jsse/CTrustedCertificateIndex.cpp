@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CTrustedCertificateIndex)
+
+CAR_INTERFACE_IMPL(CTrustedCertificateIndex, Object, ITrustedCertificateIndex)
 
 ECode CTrustedCertificateIndex::CheckServerTrustedEx(
     /* [in] */ ArrayOf<Elastos::Security::Cert::IX509Certificate *> * pChain,

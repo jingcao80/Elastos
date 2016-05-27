@@ -8,6 +8,9 @@ namespace Security {
 namespace X509 {
 namespace Tsp {
 
+CAR_SINGLETON_IMPL(CTSTInfoHelper)
+
+CAR_INTERFACE_IMPL(CTSTInfoHelper, Singleton, ITSTInfoHelper)
 
 ECode CTSTInfoHelper::GetACCURACY(
     /* [out] */ Org::Apache::Harmony::Security::Asn1::IASN1Sequence ** ppAccuracy)

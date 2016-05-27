@@ -7,6 +7,9 @@ namespace Harmony {
 namespace Security {
 namespace Utils {
 
+CAR_OBJECT_IMPL(CObjectIdentifierInUtils)
+
+CAR_INTERFACE_IMPL(CObjectIdentifierInUtils, Object, IObjectIdentifierInUtils)
 
 ECode CObjectIdentifierInUtils::GetOid(
     /* [out, callee] */ ArrayOf<Int32> ** ppOid)

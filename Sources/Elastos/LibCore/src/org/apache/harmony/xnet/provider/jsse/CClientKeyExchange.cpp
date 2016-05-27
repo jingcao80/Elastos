@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CClientKeyExchange)
+
+CAR_INTERFACE_IMPL(CClientKeyExchange, Object, IClientKeyExchange)
 
 ECode CClientKeyExchange::GetLength(
     /* [out] */ Int32 * pLength)

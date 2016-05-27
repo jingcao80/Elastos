@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CKeyManagerFactoryImpl)
 
 ECode CKeyManagerFactoryImpl::EngineInit(
     /* [in] */ Elastos::Security::IKeyStore * pKs,

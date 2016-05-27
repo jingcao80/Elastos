@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_XNET_PROVIDER_JSSE_CCERTPINMANAGER_H__
 
 #include "_Org_Apache_Harmony_Xnet_Provider_Jsse_CCertPinManager.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -12,8 +15,14 @@ namespace Provider {
 namespace Jsse {
 
 CarClass(CCertPinManager)
+    , public Object
+    , public ICertPinManager
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI ChainIsNotPinned(
         /* [in] */ const String& hostname,
         /* [in] */ Elastos::Utility::IList * pChain,

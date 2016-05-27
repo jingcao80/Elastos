@@ -6,6 +6,9 @@ namespace Apache {
 namespace Harmony {
 namespace Xml {
 
+CAR_OBJECT_IMPL(CExpatReader)
+
+CAR_INTERFACE_IMPL(CExpatReader, Object, IExpatReader)
 
 ECode CExpatReader::GetFeature(
     /* [in] */ const String& name,

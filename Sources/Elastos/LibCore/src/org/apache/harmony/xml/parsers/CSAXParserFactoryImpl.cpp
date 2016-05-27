@@ -7,6 +7,7 @@ namespace Harmony {
 namespace Xml {
 namespace Parsers {
 
+CAR_OBJECT_IMPL(CSAXParserFactoryImpl)
 
 ECode CSAXParserFactoryImpl::NewSAXParser(
     /* [out] */ Elastosx::Xml::Parsers::ISAXParser ** ppParser)

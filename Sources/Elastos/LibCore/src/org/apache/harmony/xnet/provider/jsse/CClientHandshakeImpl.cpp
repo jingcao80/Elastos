@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CClientHandshakeImpl)
 
 ECode CClientHandshakeImpl::GetEngineOwner(
     /* [out] */ Elastosx::Net::Ssl::ISSLEngine ** ppEngineOwner)

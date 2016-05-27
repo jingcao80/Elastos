@@ -8,6 +8,9 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(COpenSSLProvider)
+
+CAR_INTERFACE_IMPL(COpenSSLProvider, Object, IOpenSSLProvider)
 
 ECode COpenSSLProvider::GetProperty(
     /* [in] */ const String& name,

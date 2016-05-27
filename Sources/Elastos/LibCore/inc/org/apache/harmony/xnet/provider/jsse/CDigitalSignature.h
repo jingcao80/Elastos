@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_XNET_PROVIDER_JSSE_CDIGITALSIGNATURE_H__
 
 #include "_Org_Apache_Harmony_Xnet_Provider_Jsse_CDigitalSignature.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -12,8 +15,14 @@ namespace Provider {
 namespace Jsse {
 
 CarClass(CDigitalSignature)
+    , public Object
+    , public IDigitalSignature
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI Init(
         /* [in] */ Elastos::Security::IPrivateKey * pKey);
 

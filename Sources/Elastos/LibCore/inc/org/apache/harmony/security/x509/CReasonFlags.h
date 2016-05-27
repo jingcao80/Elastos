@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X509_CREASONFLAGS_H__
 
 #include "_Org_Apache_Harmony_Security_X509_CReasonFlags.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {

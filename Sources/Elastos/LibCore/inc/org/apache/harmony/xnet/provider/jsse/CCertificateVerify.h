@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_XNET_PROVIDER_JSSE_CCERTIFICATEVERIFY_H__
 
 #include "_Org_Apache_Harmony_Xnet_Provider_Jsse_CCertificateVerify.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -12,8 +15,11 @@ namespace Provider {
 namespace Jsse {
 
 CarClass(CCertificateVerify)
+    , public Object
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetLength(
         /* [out] */ Int32 * pLength);
 

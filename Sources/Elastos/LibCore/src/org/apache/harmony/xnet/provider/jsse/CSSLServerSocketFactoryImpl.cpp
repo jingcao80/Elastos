@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CSSLServerSocketFactoryImpl)
 
 ECode CSSLServerSocketFactoryImpl::CreateServerSocket(
     /* [out] */ Elastos::Net::IServerSocket ** ppSock)

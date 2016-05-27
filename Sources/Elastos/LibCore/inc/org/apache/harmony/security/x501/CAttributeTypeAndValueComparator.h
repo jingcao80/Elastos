@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_SECURITY_X501_CATTRIBUTETYPEANDVALUECOMPARATOR_H__
 
 #include "_Org_Apache_Harmony_Security_X501_CAttributeTypeAndValueComparator.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {

@@ -3,6 +3,9 @@
 #define __ORG_APACHE_HARMONY_SECURITY_UTILS_COBJECTIDENTIFIERINUTILS_H__
 
 #include "_Org_Apache_Harmony_Security_Utils_CObjectIdentifierInUtils.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Apache {
@@ -11,8 +14,14 @@ namespace Security {
 namespace Utils {
 
 CarClass(CObjectIdentifierInUtils)
+    , public Object
+    , public IObjectIdentifierInUtils
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI GetOid(
         /* [out, callee] */ ArrayOf<Int32> ** ppOid);
 

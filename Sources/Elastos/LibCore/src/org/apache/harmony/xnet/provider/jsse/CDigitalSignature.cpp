@@ -8,6 +8,7 @@ namespace Xnet {
 namespace Provider {
 namespace Jsse {
 
+CAR_OBJECT_IMPL(CDigitalSignature)
 
 ECode CDigitalSignature::Init(
     /* [in] */ Elastos::Security::IPrivateKey * pKey)

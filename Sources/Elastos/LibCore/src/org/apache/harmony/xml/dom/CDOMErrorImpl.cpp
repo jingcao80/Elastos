@@ -7,6 +7,7 @@ namespace Harmony {
 namespace Xml {
 namespace Dom {
 
+CAR_OBJECT_IMPL(CDOMErrorImpl)
 
 ECode CDOMErrorImpl::GetSeverity(
     /* [out] */ Int16 * pValue)
