@@ -219,8 +219,9 @@ ECode QSTileView::SetDual(
         RecreateLabel();
     }
     AutoPtr<IDrawable> tileBackground = GetTileBackground();
-    if (IRippleDrawable::Probe(tileBackground)) {
-        SetRipple(IRippleDrawable::Probe(tileBackground));
+    IRippleDrawable* rippleDrawable = IRippleDrawable::Probe(tileBackground);
+    if (rippleDrawable) {
+        SetRipple(rippleDrawable);
     }
     if (dual) {
         mTopBackgroundView->SetOnClickListener(mClickPrimary);

@@ -239,13 +239,7 @@ public:
         CARAPI OnInterruptionFilterChanged(
             /* [in] */ Int32 interruptionFilter);
 
-        ///pay for someone's error,he write a ToString in Binder.car
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            return NOERROR;
-        }
-        ///pay for someone's error
+        TO_STRING_IMPL("INotificationListenerWrapper")
 
     private:
         NotificationListenerService* mHost;
@@ -637,7 +631,7 @@ private:
 
 private:
     const String TAG;//= NotificationListenerService.class.getSimpleName() + "[" + getClass().getSimpleName() + "]";
-    AutoPtr<INotificationListenerWrapper> mWrapper;
+    AutoPtr<IINotificationListener> mWrapper;
     AutoPtr<RankingMap> mRankingMap;
 
     AutoPtr<IINotificationManager> mNoMan;

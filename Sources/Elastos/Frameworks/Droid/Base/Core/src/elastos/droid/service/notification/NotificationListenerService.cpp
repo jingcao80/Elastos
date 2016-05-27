@@ -152,7 +152,7 @@ ECode NotificationListenerService::CancelNotification(
     GetNotificationInterface((IINotificationManager**)&nm);
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
     (*array)[0] = key;
-    ECode ec = nm->CancelNotificationsFromListener(IINotificationListener::Probe(mWrapper), array);
+    ECode ec = nm->CancelNotificationsFromListener(mWrapper, array);
     if (FAILED(ec)) {
         Logger::V(TAG, "Unable to contact notification manager");
         return E_REMOTE_EXCEPTION;
@@ -171,7 +171,7 @@ ECode NotificationListenerService::CancelNotifications(
     if (!IsBound()) return E_NULL_POINTER_EXCEPTION;
     AutoPtr<IINotificationManager> nm;
     GetNotificationInterface((IINotificationManager**)&nm);
-    ECode ec = nm->CancelNotificationsFromListener(IINotificationListener::Probe(mWrapper), keys);
+    ECode ec = nm->CancelNotificationsFromListener(mWrapper, keys);
     if (FAILED(ec)) {
         Logger::V(TAG, "Unable to contact notification manager");
         return E_REMOTE_EXCEPTION;
@@ -352,11 +352,9 @@ ECode NotificationListenerService::OnBind(
 {
     VALIDATE_NOT_NULL(b)
     if (mWrapper == NULL) {
-        AutoPtr<IINotificationListener> listener;
-        CINotificationListenerWrapper::New(this, (IINotificationListener**)&listener);
-        mWrapper = (INotificationListenerWrapper*) listener.Get();
+        CINotificationListenerWrapper::New(this, (IINotificationListener**)&mWrapper);
     }
-    *b = mWrapper;
+    *b = IBinder::Probe(mWrapper);
     REFCOUNT_ADD(*b)
     return NOERROR;
 }
@@ -377,9 +375,7 @@ ECode NotificationListenerService::RegisterAsSystemService(
 {
     mSystemContext = context;
     if (mWrapper == NULL) {
-        AutoPtr<IINotificationListener> listener;
-        CINotificationListenerWrapper::New(this, (IINotificationListener**)&listener);
-        mWrapper = (INotificationListenerWrapper*) listener.Get();
+        CINotificationListenerWrapper::New(this, (IINotificationListener**)&mWrapper);
     }
     AutoPtr<IINotificationManager> noMan;
     GetNotificationInterface((IINotificationManager**)&noMan);
