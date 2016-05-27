@@ -71,6 +71,8 @@ public:
 
     Ripple();
 
+    ~Ripple();
+
     /**
      * Creates a new ripple.
      */

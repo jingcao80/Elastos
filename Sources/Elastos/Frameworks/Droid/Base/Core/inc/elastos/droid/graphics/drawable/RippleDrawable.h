@@ -192,7 +192,7 @@ public:
      *
      * @param ripple the ripple to remove
      */
-    CARAPI_(void) RemoveRipple(
+    CARAPI RemoveRipple(
         /* [in] */ IRipple* ripple);
 
     // @Override
@@ -205,11 +205,6 @@ public:
 
     // @Override
     CARAPI Mutate();
-
-    // @Override
-    CARAPI_(AutoPtr<LayerState>) CreateConstantState(
-        /* [in] */ LayerState* state,
-        /* [in] */ IResources* res);
 
     /**
      * Sets the maximum ripple radius in pixels. The default value of
@@ -237,12 +232,19 @@ public:
 
 protected:
     // @Override
+    CARAPI_(AutoPtr<LayerState>) CreateConstantState(
+        /* [in] */ LayerState* state,
+        /* [in] */ IResources* res);
+
+    // @Override
     CARAPI_(Boolean) OnStateChange(
         /* [in] */ ArrayOf<Int32>* stateSet);
 
     // @Override
     CARAPI_(void) OnBoundsChange(
         /* [in] */ IRect* bounds);
+
+    CARAPI_(void) OnLastStrongRef(const void* id);
 
 private:
     CARAPI_(Boolean) CancelExitingRipples();
@@ -331,6 +333,7 @@ private:
 
     CARAPI_(void) InitializeFromState();
 
+    CARAPI Cancel();
 public:
     /**
      * Constant for automatically determining the maximum ripple radius.

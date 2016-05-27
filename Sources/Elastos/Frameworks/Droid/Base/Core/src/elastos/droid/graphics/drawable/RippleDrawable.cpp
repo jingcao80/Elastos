@@ -57,7 +57,6 @@ ECode RippleDrawable::RippleState::CanApplyTheme(
 ECode RippleDrawable::RippleState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
     return CRippleDrawable::New(this, NULL, NULL, drawable);
 }
 
@@ -65,7 +64,6 @@ ECode RippleDrawable::RippleState::NewDrawable(
     /* [in] */ IResources* res,
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
     return CRippleDrawable::New(this, res, NULL, drawable);
 }
 
@@ -743,7 +741,7 @@ ECode RippleDrawable::Draw(
     return canvas->RestoreToCount(saveCount);
 }
 
-void RippleDrawable::RemoveRipple(
+ECode RippleDrawable::RemoveRipple(
     /* [in] */ IRipple* ripple)
 {
     // Ripple ripple ripple ripple. Ripple ripple.
@@ -751,13 +749,13 @@ void RippleDrawable::RemoveRipple(
     Int32 count = mExitingRipplesCount;
     Int32 index = GetRippleIndex(ripple);
     if (index >= 0) {
-        // System.arraycopy(ripples, index + 1, ripples, index, count - (index + 1));
         ripples->Copy(index, ripples, index + 1, count - (index + 1));
         (*ripples)[count - 1] = NULL;
         mExitingRipplesCount--;
 
         InvalidateSelf();
     }
+    return NOERROR;
 }
 
 Int32 RippleDrawable::GetRippleIndex(
@@ -1047,6 +1045,32 @@ void RippleDrawable::InitializeFromState()
 {
     // Initialize from constant state.
     FindDrawableByLayerId(R::id::mask, (IDrawable**)&mMask);
+}
+
+ECode RippleDrawable::Cancel()
+{
+    if (mBackground != NULL) {
+        mBackground->Cancel();
+    }
+
+    if (mRipple != NULL) {
+        mRipple->Cancel();
+    }
+
+    if (mExitingRipples != NULL) {
+        for (Int32 i = 0; i < mExitingRipples->GetLength(); ++i) {
+            AutoPtr<IRipple> ripple = (*mExitingRipples)[i];
+            if (ripple) {
+                ripple->Cancel();
+            }
+        }
+    }
+    return NOERROR;
+}
+
+void RippleDrawable::OnLastStrongRef(const void* id)
+{
+    Cancel();
 }
 
 } // namespace Drawable

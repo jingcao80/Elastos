@@ -11,6 +11,7 @@
 #include "elastos/droid/utility/MathUtils.h"
 #include "elastos/droid/view/CRenderNodeAnimator.h"
 #include "elastos/droid/view/animation/CLinearInterpolator.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::ObjectAnimator;
 using Elastos::Droid::Animation::EIID_ITimeInterpolator;
@@ -20,6 +21,7 @@ using Elastos::Droid::View::CRenderNodeAnimator;
 using Elastos::Droid::View::Animation::CLinearInterpolator;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -55,6 +57,7 @@ Ripple::RippleAnimatorListenerAdapter::RippleAnimatorListenerAdapter(
 ECode Ripple::RippleAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
+    Logger::I("Ripple", " >> Ripple OnAnimationEnd %p", mHost);
     mHost->RemoveSelf();
     return NOERROR;
 }
@@ -98,6 +101,11 @@ Ripple::Ripple()
     , mHasMaxRadius(FALSE)
     , mCanceled(FALSE)
 {}
+
+Ripple::~Ripple()
+{
+    Logger::I("Ripple", " >> Destory Ripple %p", this);
+}
 
 ECode Ripple::constructor(
     /* [in] */ IRippleDrawable* owner,
@@ -618,6 +626,7 @@ void Ripple::RemoveSelf()
 {
     // The owner will invalidate itself.
     if (!mCanceled) {
+        assert(mWeakHost != NULL);
         AutoPtr<IInterface> obj;
         mWeakHost->Resolve(EIID_IRippleDrawable, (IInterface**)&obj);
         if (obj) {
@@ -629,6 +638,7 @@ void Ripple::RemoveSelf()
 
 void Ripple::InvalidateSelf()
 {
+    assert(mWeakHost != NULL);
     AutoPtr<IInterface> obj;
     mWeakHost->Resolve(EIID_IRippleDrawable, (IInterface**)&obj);
     if (obj) {

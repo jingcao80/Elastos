@@ -9,12 +9,14 @@
 #include "elastos/droid/graphics/CPaint.h"
 #include "elastos/droid/graphics/Color.h"
 #include "elastos/droid/utility/MathUtils.h"
+#include "elastos/droid/view/CRenderNodeAnimator.h"
 #include "elastos/droid/view/animation/CLinearInterpolator.h"
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Animation::ObjectAnimator;
 using Elastos::Droid::Utility::MathUtils;
 using Elastos::Droid::View::IRenderNodeAnimator;
+using Elastos::Droid::View::CRenderNodeAnimator;
 using Elastos::Droid::View::Animation::CLinearInterpolator;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
@@ -58,9 +60,10 @@ ECode CRippleBackground::OuterOpacityAnimatorListenerAdapter::OnAnimationEnd(
     (*fa)[0] = 0;
     AutoPtr<IObjectAnimator> outerFadeOutAnim = ObjectAnimator::OfFloat((IObject*)mHost, String("outerOpacity"), fa);
     outerFadeOutAnim->SetAutoCancel(TRUE);
-    IAnimator::Probe(outerFadeOutAnim)->SetDuration(mDuration);
-    IAnimator::Probe(outerFadeOutAnim)->SetInterpolator(LINEAR_INTERPOLATOR);
-    IAnimator::Probe(outerFadeOutAnim)->AddListener(mHost->mAnimationListener);
+    IAnimator* animator = IAnimator::Probe(outerFadeOutAnim);
+    animator->SetDuration(mDuration);
+    animator->SetInterpolator(LINEAR_INTERPOLATOR);
+    animator->AddListener(mHost->mAnimationListener);
 
     mHost->mAnimOuterOpacity = outerFadeOutAnim;
 
@@ -290,15 +293,16 @@ ECode CRippleBackground::Enter()
     (*fa)[1] = 1;
     AutoPtr<IObjectAnimator> outer = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("outerOpacity"), fa);
     outer->SetAutoCancel(TRUE);
-    IAnimator::Probe(outer)->SetDuration(outerDuration);
-    IAnimator::Probe(outer)->SetInterpolator(LINEAR_INTERPOLATOR);
+    IAnimator* animator = IAnimator::Probe(outer);
+    animator->SetDuration(outerDuration);
+    animator->SetInterpolator(LINEAR_INTERPOLATOR);
 
     mAnimOuterOpacity = outer;
 
     // Enter animations always run on the UI thread, since it's unlikely
     // that anything interesting is happening until the user lifts their
     // finger.
-    IAnimator::Probe(outer)->Start();
+    animator->Start();
     return NOERROR;
 }
 
@@ -352,9 +356,8 @@ void CRippleBackground::ExitHardware(
     AutoPtr<IAnimator> outerOpacityAnim;
     if (inflectionDuration > 0) {
         // Outer opacity continues to increase for a bit.
-        assert(0 && "TODO");
-        // outerOpacityAnim = new RenderNodeAnimator(mPropOuterPaint,
-        //         RenderNodeAnimator.PAINT_ALPHA, inflectionOpacity);
+        CRenderNodeAnimator::New(mPropOuterPaint, IRenderNodeAnimator::PAINT_ALPHA,
+            inflectionOpacity, (IAnimator**)&outerOpacityAnim);
         outerOpacityAnim->SetDuration(inflectionDuration);
         outerOpacityAnim->SetInterpolator(LINEAR_INTERPOLATOR);
 
@@ -362,8 +365,8 @@ void CRippleBackground::ExitHardware(
         Int32 outerDuration = opacityDuration - inflectionDuration;
         if (outerDuration > 0) {
             AutoPtr<IAnimator> outerFadeOutAnim;
-            assert(0 && "TODO");
-            // CRenderNodeAnimator::New(mPropOuterPaint, RenderNodeAnimator.PAINT_ALPHA, 0, (IAnimator**)&outerFadeOutAnim);
+            CRenderNodeAnimator::New(mPropOuterPaint, IRenderNodeAnimator::PAINT_ALPHA,
+                0, (IAnimator**)&outerFadeOutAnim);
             outerFadeOutAnim->SetDuration(outerDuration);
             outerFadeOutAnim->SetInterpolator(LINEAR_INTERPOLATOR);
             outerFadeOutAnim->SetStartDelay(inflectionDuration);
@@ -375,8 +378,8 @@ void CRippleBackground::ExitHardware(
             outerOpacityAnim->AddListener(mAnimationListener);
         }
     } else {
-        assert(0 && "TODO");
-        // CRenderNodeAnimator::New(mPropOuterPaint, RenderNodeAnimator.PAINT_ALPHA, 0, (IAnimator**)&outerOpacityAnim);
+        CRenderNodeAnimator::New(mPropOuterPaint, IRenderNodeAnimator::PAINT_ALPHA,
+            0, (IAnimator**)&outerOpacityAnim);
         outerOpacityAnim->SetInterpolator(LINEAR_INTERPOLATOR);
         outerOpacityAnim->SetDuration(opacityDuration);
         outerOpacityAnim->AddListener(mAnimationListener);
@@ -421,35 +424,39 @@ void CRippleBackground::ExitSoftware(
     /* [in] */ Int32 inflectionOpacity)
 {
     AutoPtr<IObjectAnimator> outerOpacityAnim;
+    IAnimator* animator = NULL;
     if (inflectionDuration > 0) {
         // Outer opacity continues to increase for a bit.
         AutoPtr<ArrayOf<Float> > fa = ArrayOf<Float>::Alloc(1);
         (*fa)[0] = inflectionOpacity / 255.0f;
         outerOpacityAnim = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("outerOpacity"), fa);
         outerOpacityAnim->SetAutoCancel(TRUE);
-        IAnimator::Probe(outerOpacityAnim)->SetDuration(inflectionDuration);
-        IAnimator::Probe(outerOpacityAnim)->SetInterpolator(LINEAR_INTERPOLATOR);
+        animator = IAnimator::Probe(outerOpacityAnim);
+        animator->SetDuration(inflectionDuration);
+        animator->SetInterpolator(LINEAR_INTERPOLATOR);
 
         // Chain the outer opacity exit animation.
         Int32 outerDuration = opacityDuration - inflectionDuration;
         if (outerDuration > 0) {
-            AutoPtr<OuterOpacityAnimatorListenerAdapter> adapter = new OuterOpacityAnimatorListenerAdapter(this, outerDuration);
-            IAnimator::Probe(outerOpacityAnim)->AddListener(adapter);
+            AutoPtr<OuterOpacityAnimatorListenerAdapter> adapter =
+                new OuterOpacityAnimatorListenerAdapter(this, outerDuration);
+            animator->AddListener(adapter);
         } else {
-            IAnimator::Probe(outerOpacityAnim)->AddListener(mAnimationListener);
+            animator->AddListener(mAnimationListener);
         }
     } else {
         AutoPtr<ArrayOf<Float> > fa = ArrayOf<Float>::Alloc(1);
         (*fa)[0] = 0;
         outerOpacityAnim = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("outerOpacity"), fa);
         outerOpacityAnim->SetAutoCancel(TRUE);
-        IAnimator::Probe(outerOpacityAnim)->SetDuration(opacityDuration);
-        IAnimator::Probe(outerOpacityAnim)->AddListener(mAnimationListener);
+        animator = IAnimator::Probe(outerOpacityAnim);
+        animator->SetDuration(opacityDuration);
+        animator->AddListener(mAnimationListener);
     }
 
     mAnimOuterOpacity = outerOpacityAnim;
 
-    IAnimator::Probe(outerOpacityAnim)->Start();
+    animator->Start();
 }
 
 ECode CRippleBackground::Cancel()
