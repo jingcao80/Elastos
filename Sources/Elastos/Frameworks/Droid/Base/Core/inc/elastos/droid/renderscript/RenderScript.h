@@ -3,9 +3,14 @@
 #define __ELASTOS_DROID_RENDERSCRIPT_RENDERSCEIPT_H__
 
 #include "Elastos.Droid.RenderScript.h"
+#include "elastos/droid/RenderScript/ProgramStore.h"
+#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Thread.h>
 
 using Elastos::Droid::Content::Res::IAssetManager;
 using Elastos::Droid::Graphics::ISurfaceTexture;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Thread;
 using Elastos::Utility::Concurrent::Locks::IReentrantReadWriteLock;
 using Elastos::IO::IFile;
 
@@ -14,11 +19,88 @@ namespace Droid {
 namespace RenderScript {
 
 class Allocation;
+class Element;
 
 class RenderScript
     : public Object
     , public IRenderScript
 {
+public:
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+
+    /**
+     * The base class from which an application should derive in order
+     * to receive RS messages from scripts. When a script calls {@code
+     * rsSendToClient}, the data fields will be filled, and the run
+     * method will be called on a separate thread.  This will occur
+     * some time after {@code rsSendToClient} completes in the script,
+     * as {@code rsSendToClient} is asynchronous. Message handlers are
+     * not guaranteed to have completed when {@link
+     * android.renderscript.RenderScript#finish} returns.
+     *
+     */
+    class RSMessageHandler : public Runnable
+    {
+    public:
+        RSMessageHandler()
+            : mID(0)
+            , mLength(0)
+        {}
+
+        CARAPI Run();
+
+    protected:
+        AutoPtr<ArrayOf<Int32> > mData;
+        Int32 mID;
+        Int32 mLength;
+    };
+
+    /**
+     * The runtime error handler base class.  An application should derive from this class
+     * if it wishes to install an error handler.  When errors occur at runtime,
+     * the fields in this class will be filled, and the run method will be called.
+     *
+     */
+    class RSErrorHandler : public Runnable
+    {
+    public:
+        RSErrorHandler()
+            : mErrorNum(0)
+        {}
+
+        CARAPI Run();
+
+    protected:
+        String mErrorMessage;
+        Int32 mErrorNum;
+    };
+
+protected:
+    class MessageThread : public Thread
+    {
+    public:
+        MessageThread(
+            /* [in] */ RenderScript* rs);
+
+        CARAPI Run();
+
+    public:
+        AutoPtr<RenderScript> mRS;
+        Boolean mRun;
+        AutoPtr<ArrayOf<Int32> > mAuxData;
+
+        const Int32 RS_MESSAGE_TO_CLIENT_NONE = 0;
+        const Int32 RS_MESSAGE_TO_CLIENT_EXCEPTION = 1;
+        const Int32 RS_MESSAGE_TO_CLIENT_RESIZE = 2;
+        const Int32 RS_MESSAGE_TO_CLIENT_ERROR = 3;
+        const Int32 RS_MESSAGE_TO_CLIENT_USER = 4;
+        const Int32 RS_MESSAGE_TO_CLIENT_NEW_BUFFER = 5;
+
+        const Int32 RS_ERROR_FATAL_DEBUG = 0x0800;
+        const Int32 RS_ERROR_FATAL_UNKNOWN = 0x1000;
+    };
+
 private:
     class StaticInitializer
     {
@@ -53,6 +135,120 @@ public:
      */
     static CARAPI_(void) SetupDiskCache(
         /* [in] */ IFile* cacheDir);
+
+    CARAPI_(void) SetMessageHandler(
+        /* [in] */ RSMessageHandler* msg);
+
+    CARAPI_(AutoPtr<RSMessageHandler>) GetMessageHandler();
+
+    /**
+     * Place a message into the message queue to be sent back to the message
+     * handler once all previous commands have been executed.
+     *
+     * @param id
+     * @param data
+     */
+    CARAPI_(void) SendMessage(
+        /* [in] */ Int32 id,
+        /* [in] */ ArrayOf<Int32>* data);
+
+    CARAPI_(void) SetErrorHandler(
+        /* [in] */ RSErrorHandler msg);
+
+    CARAPI_(AutoPtr<RSErrorHandler>) GetErrorHandler();
+
+    CARAPI SetPriority(
+        /* [in] */ RenderScriptPriority p);
+
+    /**
+     * Gets the application context associated with the RenderScript context.
+     *
+     * @return The application context.
+     */
+    CARAPI GetApplicationContext(
+        /* [out] */ IContext** ctx);
+
+    /**
+     * @hide
+     */
+    static CARAPI Create(
+        /* [in] */ IContext* ctx,
+        /* [in] */ Int32 sdkVersion,
+        /* [out] */ IRenderScript** rs);
+
+    /**
+     * Create a RenderScript context.
+     *
+     * @hide
+     * @param ctx The context.
+     * @return RenderScript
+     */
+    static CARAPI Create(
+        /* [in] */ IContext* ctx,
+        /* [in] */ Int32 sdkVersion,
+        /* [in] */ RenderScriptContextType ct,
+        /* [in] */ Int32 flags,
+        /* [out] */ IRenderScript** rs);
+
+    /**
+     * Create a RenderScript context.
+     *
+     * @param ctx The context.
+     * @return RenderScript
+     */
+    static CARAPI Create(
+        /* [in] */ IContext* ctx,
+        /* [out] */ IRenderScript** rs);
+
+    /**
+     * Create a RenderScript context.
+     *
+     *
+     * @param ctx The context.
+     * @param ct The type of context to be created.
+     * @return RenderScript
+     */
+    static CARAPI Create(
+        /* [in] */ IContext* ctx,
+        /* [in] */ RenderScriptContextType ct,
+        /* [out] */ IRenderScript** rs);
+
+     /**
+     * Create a RenderScript context.
+     *
+     *
+     * @param ctx The context.
+     * @param ct The type of context to be created.
+     * @param flags The OR of the CREATE_FLAG_* options desired
+     * @return RenderScript
+     */
+    static CARAPI Create(
+        /* [in] */ IContext* ctx,
+        /* [in] */ RenderScriptContextType ct,
+        /* [in] */ Int32 flags,
+        /* [out] */ IRenderScript** rs);
+
+    /**
+     * Print the currently available debugging information about the state of
+     * the RS context to the log.
+     *
+     */
+    CARAPI ContextDump();
+
+    /**
+     * Wait for any pending asynchronous opeations (such as copies to a RS
+     * allocation or RS script executions) to complete.
+     *
+     */
+    CARAPI Finish();
+
+    /**
+     * Destroys this RenderScript context.  Once this function is called,
+     * using this context or any objects belonging to this context is
+     * illegal.
+     *
+     */
+    CARAPI Destroy();
 
 protected:
     static CARAPI_(void) _NInit();
@@ -1359,6 +1555,32 @@ protected:
         /* [in] */ ArrayOf<Int32>* primitives,
         /* [in] */ Int32 vtxIdCount);
 
+    CARAPI_(Int64) RsnPathCreate(
+        /* [in] */ Int64 con,
+        /* [in] */ Int32 prim,
+        /* [in] */ Boolean isStatic,
+        /* [in] */ Int64 vtx,
+        /* [in] */ Int64 loop,
+        /* [in] */ Float q);
+
+    CARAPI NPathCreate(
+        /* [in] */ Int32 prim,
+        /* [in] */ Boolean isStatic,
+        /* [in] */ Int64 vtx,
+        /* [in] */ Int64 loop,
+        /* [in] */ Float q,
+        /* [out] */ Int64* result);
+
+    CARAPI ValidateObject(
+        /* [in] */ BaseObj* o);
+
+    CARAPI Validate();
+
+    CARAPI_(Boolean) IsAlive();
+
+    CARAPI_(Int64) SafeID(
+        /* [in] */ BaseObj* o);
+
 private:
     CARAPI_(android::sp<ANativeWindow>) SurfaceGetNativeWindow(
         /* [in] */ ISurface* surfaceObj);
@@ -1389,12 +1611,132 @@ protected:
     ContextType mContextType;
     AutoPtr<IReentrantReadWriteLock> mRWLock;
 
+    Int64 mDev;
+    Int64 mContext;
+    // @SuppressWarnings({"FieldCanBeLocal"})
+    AutoPtr<MessageThread> mMessageThread;
+
+    AutoPtr<IElement> mElement_U8;
+    AutoPtr<IElement> mElement_I8;
+    AutoPtr<IElement> mElement_U16;
+    AutoPtr<IElement> mElement_I16;
+    AutoPtr<IElement> mElement_U32;
+    AutoPtr<IElement> mElement_I32;
+    AutoPtr<IElement> mElement_U64;
+    AutoPtr<IElement> mElement_I64;
+    AutoPtr<IElement> mElement_F32;
+    AutoPtr<IElement> mElement_F64;
+    AutoPtr<IElement> mElement_BOOLEAN;
+
+    AutoPtr<IElement> mElement_ELEMENT;
+    AutoPtr<IElement> mElement_TYPE;
+    AutoPtr<IElement> mElement_ALLOCATION;
+    AutoPtr<IElement> mElement_SAMPLER;
+    AutoPtr<IElement> mElement_SCRIPT;
+    AutoPtr<IElement> mElement_MESH;
+    AutoPtr<IElement> mElement_PROGRAM_FRAGMENT;
+    AutoPtr<IElement> mElement_PROGRAM_VERTEX;
+    AutoPtr<IElement> mElement_PROGRAM_RASTER;
+    AutoPtr<IElement> mElement_PROGRAM_STORE;
+    AutoPtr<IElement> mElement_FONT;
+
+    AutoPtr<IElement> mElement_A_8;
+    AutoPtr<IElement> mElement_RGB_565;
+    AutoPtr<IElement> mElement_RGB_888;
+    AutoPtr<IElement> mElement_RGBA_5551;
+    AutoPtr<IElement> mElement_RGBA_4444;
+    AutoPtr<IElement> mElement_RGBA_8888;
+
+    AutoPtr<IElement> mElement_FLOAT_2;
+    AutoPtr<IElement> mElement_FLOAT_3;
+    AutoPtr<IElement> mElement_FLOAT_4;
+
+    AutoPtr<IElement> mElement_DOUBLE_2;
+    AutoPtr<IElement> mElement_DOUBLE_3;
+    AutoPtr<IElement> mElement_DOUBLE_4;
+
+    AutoPtr<IElement> mElement_UCHAR_2;
+    AutoPtr<IElement> mElement_UCHAR_3;
+    AutoPtr<IElement> mElement_UCHAR_4;
+
+    AutoPtr<IElement> mElement_CHAR_2;
+    AutoPtr<IElement> mElement_CHAR_3;
+    AutoPtr<IElement> mElement_CHAR_4;
+
+    AutoPtr<IElement> mElement_USHORT_2;
+    AutoPtr<IElement> mElement_USHORT_3;
+    AutoPtr<IElement> mElement_USHORT_4;
+
+    AutoPtr<IElement> mElement_SHORT_2;
+    AutoPtr<IElement> mElement_SHORT_3;
+    AutoPtr<IElement> mElement_SHORT_4;
+
+    AutoPtr<IElement> mElement_UINT_2;
+    AutoPtr<IElement> mElement_UINT_3;
+    AutoPtr<IElement> mElement_UINT_4;
+
+    AutoPtr<IElement> mElement_INT_2;
+    AutoPtr<IElement> mElement_INT_3;
+    AutoPtr<IElement> mElement_INT_4;
+
+    AutoPtr<IElement> mElement_ULONG_2;
+    AutoPtr<IElement> mElement_ULONG_3;
+    AutoPtr<IElement> mElement_ULONG_4;
+
+    AutoPtr<IElement> mElement_LONG_2;
+    AutoPtr<IElement> mElement_LONG_3;
+    AutoPtr<IElement> mElement_LONG_4;
+
+    AutoPtr<IElement> mElement_YUV;
+
+    AutoPtr<IElement> mElement_MATRIX_4X4;
+    AutoPtr<IElement> mElement_MATRIX_3X3;
+    AutoPtr<IElement> mElement_MATRIX_2X2;
+
+    AutoPtr<ISampler> mSampler_CLAMP_NEAREST;
+    AutoPtr<ISampler> mSampler_CLAMP_LINEAR;
+    AutoPtr<ISampler> mSampler_CLAMP_LINEAR_MIP_LINEAR;
+    AutoPtr<ISampler> mSampler_WRAP_NEAREST;
+    AutoPtr<ISampler> mSampler_WRAP_LINEAR;
+    AutoPtr<ISampler> mSampler_WRAP_LINEAR_MIP_LINEAR;
+    AutoPtr<ISampler> mSampler_MIRRORED_REPEAT_NEAREST;
+    AutoPtr<ISampler> mSampler_MIRRORED_REPEAT_LINEAR;
+    AutoPtr<ISampler> mSampler_MIRRORED_REPEAT_LINEAR_MIP_LINEAR;
+
+    AutoPtr<ProgramStore> mProgramStore_BLEND_NONE_DEPTH_TEST;
+    AutoPtr<ProgramStore> mProgramStore_BLEND_NONE_DEPTH_NO_DEPTH;
+    AutoPtr<ProgramStore> mProgramStore_BLEND_ALPHA_DEPTH_TEST;
+    AutoPtr<ProgramStore> mProgramStore_BLEND_ALPHA_DEPTH_NO_DEPTH;
+
+    AutoPtr<ProgramRaster> mProgramRaster_CULL_BACK;
+    AutoPtr<ProgramRaster> mProgramRaster_CULL_FRONT;
+    AutoPtr<ProgramRaster> mProgramRaster_CULL_NONE;
+
+    /**
+     * If an application is expecting messages, it should set this
+     * field to an instance of {@link RSMessageHandler}.  This
+     * instance will receive all the user messages sent from {@code
+     * sendToClient} by scripts from this context.
+     *
+     */
+    AutoPtr<RSMessageHandler> mMessageCallback;
+
+    /**
+     * Application Error handler.  All runtime errors will be dispatched to the
+     * instance of RSAsyncError set here.  If this field is null a
+     * {@link RSRuntimeException} will instead be thrown with details about the error.
+     * This will cause program termaination.
+     *
+     */
+    AutoPtr<RSErrorHandler> mErrorCallback;
+
 private:
     AutoPtr<IContext> mApplicationContext;
 
     static StaticInitializer sInitializer;
 
     friend class Allocation;
+    friend class Element;
     friend class StaticInitializer;
 };
 

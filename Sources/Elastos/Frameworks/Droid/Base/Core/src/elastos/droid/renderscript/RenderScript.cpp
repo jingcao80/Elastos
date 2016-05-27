@@ -1,5 +1,6 @@
 
 #include "elastos/droid/RenderScript/RenderScript.h"
+#include "elastos/droid/RenderScript/Allocation.h"
 #include "elastos/droid/content/res/CAssetManager.h"
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/os/CSystemProperties.h"
@@ -19,12 +20,14 @@ using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::View::Surface;
 using Elastos::Droid::View::CSurface;
+using Elastos::Core::AutoLock;
 using Elastos::Core::IByte;
 using Elastos::Core::IFloat;
 using Elastos::Core::IDouble;
 using Elastos::Core::IInteger32;
 using Elastos::Core::IInteger16;
 using Elastos::Core::IInteger64;
+using Elastos::Utility::Concurrent::Locks::CReentrantReadWriteLock;
 using Elastos::Utility::Concurrent::Locks::ILock;
 using Elastos::Utility::Logging::Slogger;
 
@@ -152,6 +155,26 @@ private:
 
 
 //==========================================================
+// RenderScript::RSMessageHandler
+//==========================================================
+
+ECode RenderScript::RSMessageHandler::Run()
+{
+    return NOERROR;
+}
+
+
+//==========================================================
+// RenderScript::RSErrorHandler
+//==========================================================
+
+ECode RenderScript::RSErrorHandler::Run()
+{
+    return NOERROR;
+}
+
+
+//==========================================================
 // RenderScript::StaticInitializer
 //==========================================================
 
@@ -186,6 +209,106 @@ RenderScript::StaticInitializer::StaticInitializer()
 
 
 //==========================================================
+// RenderScript::MessageThread
+//==========================================================
+
+RenderScript::MessageThread::MessageThread(
+    /* [in] */ RenderScript* rs)
+    : mRS(rs)
+    , mRun(TRUE)
+{
+    constructor(String("RSMessageThread"));
+    mAuxData = ArrayOf<Int32>::Alloc(2);
+}
+
+ECode RenderScript::MessageThread::Run()
+{
+    // This function is a temporary solution.  The final solution will
+    // used typed allocations where the message id is the type indicator.
+    AutoPtr<ArrayOf<Int32> > rbuf = ArrayOf<Int32>::Alloc(16);
+    mRS->NContextInitToClient(mRS->mContext);
+    while(mRun) {
+        (*rbuf)[0] = 0;
+        Int32 msg = mRS->NContextPeekMessage(mRS->mContext, mAuxData);
+        Int32 size = (*mAuxData)[1];
+        Int32 subID = (*mAuxData)[0];
+
+        if (msg == RS_MESSAGE_TO_CLIENT_USER) {
+            if ((size >> 2) >= rbuf->GetLength()) {
+                rbuf = ArrayOf<Int32>::Alloc((size + 3) >> 2);
+            }
+            if (mRS->NContextGetUserMessage(mRS->mContext, rbuf) != RS_MESSAGE_TO_CLIENT_USER) {
+                Slogger::E(LOG_TAG, "Error processing message from RenderScript.");
+                return E_RS_DRIVER_EXCEPTION;
+            }
+
+            if(mRS->mMessageCallback != NULL) {
+                mRS->mMessageCallback->mData = rbuf;
+                mRS->mMessageCallback->mID = subID;
+                mRS->mMessageCallback->mLength = size;
+                mRS->mMessageCallback->Run();
+            }
+            else {
+                Slogger::E(LOG_TAG, "Received a message from the script with no message handler installed.");
+                return E_RS_INVALID_STATE_EXCEPTION;
+            }
+            continue;
+        }
+
+        if (msg == RS_MESSAGE_TO_CLIENT_ERROR) {
+            String e = mRS->nContextGetErrorMessage(mRS->mContext);
+
+            // Throw RSRuntimeException under the following conditions:
+            //
+            // 1) It is an unknown fatal error.
+            // 2) It is a debug fatal error, and we are not in a
+            //    debug context.
+            // 3) It is a debug fatal error, and we do not have an
+            //    error callback.
+            if (subID >= RS_ERROR_FATAL_UNKNOWN || (subID >= RS_ERROR_FATAL_DEBUG &&
+                    (mRS->mContextType != RenderScriptContextType_DEBUG || mRS->mErrorCallback == NULL))) {
+                Slogger::E(LOG_TAG, "Fatal error %d, details: %s", subID, e.string());
+                return E_RS_RUNTIME_EXCEPTION;
+            }
+
+            if(mRS->mErrorCallback != NULL) {
+                mRS->mErrorCallback->mErrorMessage = e;
+                mRS->mErrorCallback->mErrorNum = subID;
+                mRS->mErrorCallback->Run();
+            }
+            else {
+                Slogger::E(LOG_TAG, "non fatal RS error, %s", e.string());
+                // Do not throw here. In these cases, we do not have
+                // a fatal error.
+            }
+            continue;
+        }
+
+        if (msg == RS_MESSAGE_TO_CLIENT_NEW_BUFFER) {
+            if (mRS->NContextGetUserMessage(mRS->mContext, rbuf) != RS_MESSAGE_TO_CLIENT_NEW_BUFFER) {
+                Slogger::E(LOG_TAG, "Error processing message from RenderScript.");
+                return E_RS_RUNTIME_EXCEPTION;
+            }
+            Int64 bufferID = ((Int64)(*rbuf)[1] << 32L) + ((Int64)(*rbuf)[0] & 0xffffffffL);
+            Allocation::SendBufferNotification(bufferID);
+            continue;
+        }
+
+        // 2: teardown.
+        // But we want to avoid starving other threads during
+        // teardown by yielding until the next line in the destructor
+        // can execute to set mRun = false
+        // try {
+        Sleep(1, 0);
+        // } catch(InterruptedException e) {
+        // }
+    }
+    //Log.d(LOG_TAG, "MessageThread exiting.");
+    return NOERROR;
+}
+
+
+//==========================================================
 // RenderScript
 //==========================================================
 
@@ -200,6 +323,8 @@ const Int64 RenderScript::sMinorID;
 RenderScript::StaticInitializer RenderScript::sInitializer;
 
 RenderScript::RenderScript()
+    : mDev(0)
+    , mContext(0)
 {}
 
 RenderScript::~RenderScript()
@@ -207,7 +332,14 @@ RenderScript::~RenderScript()
 
 ECode RenderScript::constructor(
     /* [in] */ IContext* ctx)
-{}
+{
+    mContextType = RenderScriptContextType_NORMAL;
+    if (ctx != NULL) {
+        ctx->GetApplicationContext((IContext**)&mApplicationContext);
+    }
+    CReentrantReadWriteLock::New((IReentrantReadWriteLock**)&mRWLock);
+    return NOERROR;
+}
 
 CAR_INTERFACE_IMPL(RenderScript, Object, IRenderScript)
 
@@ -3236,6 +3368,224 @@ ECode RenderScript::NMeshGetIndices(
     FAIL_RETURN(Validate())
     RsnMeshGetIndices(mContext, id, idxIds, primitives, vtxIdCount);
     return NOERROR;
+}
+
+Int64 RenderScript::RsnPathCreate(
+    /* [in] */ Int64 con,
+    /* [in] */ Int32 prim,
+    /* [in] */ Boolean isStatic,
+    /* [in] */ Int64 vtx,
+    /* [in] */ Int64 loop,
+    /* [in] */ Float q)
+{
+    Slogger::D(LOG_TAG, "nPathCreate, con(%p)", (RsContext)con);
+    Int64 id = (Int64)(uintptr_t)rsPathCreate((RsContext)con, (RsPathPrimitive)prim, isStatic,
+            (RsAllocation)vtx,
+            (RsAllocation)loop, q);
+    return id;
+}
+
+ECode RenderScript::NPathCreate(
+    /* [in] */ Int32 prim,
+    /* [in] */ Boolean isStatic,
+    /* [in] */ Int64 vtx,
+    /* [in] */ Int64 loop,
+    /* [in] */ Float q,
+    /* [out] */ Int64* result)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate())
+    RsnPathCreate(mContext, prim, isStatic, vtx, loop, q);
+    return NOERROR;
+}
+
+void RenderScript::SetMessageHandler(
+    /* [in] */ RSMessageHandler* msg)
+{
+    mMessageCallback = msg;
+}
+
+AutoPtr<RSMessageHandler> RenderScript::GetMessageHandler()
+{
+    return mMessageCallback;
+}
+
+void RenderScript::SendMessage(
+    /* [in] */ Int32 id,
+    /* [in] */ ArrayOf<Int32>* data)
+{
+    NContextSendMessage(id, data);
+}
+
+void RenderScript::SetErrorHandler(
+    /* [in] */ RSErrorHandler msg)
+{
+    mErrorCallback = msg;
+}
+
+AutoPtr<RSErrorHandler> RenderScript::GetErrorHandler()
+{
+    return mErrorCallback;
+}
+
+ECode RenderScript::ValidateObject(
+    /* [in] */ BaseObj* o)
+{
+    if (o != NULL) {
+        if (o->mRS.Get() != this) {
+            Slogger::E(LOG_TAG, "Attempting to use an object across contexts.");
+            return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
+    }
+    return NOERROR;
+}
+
+ECode RenderScript::Validate()
+{
+    if (mContext == 0) {
+        Slogger::E(LOG_TAG, "Calling RS with no Context active.");
+        return E_RS_INVALID_STATE_EXCEPTION;
+    }
+    return NOERROR;
+}
+
+ECode RenderScript::SetPriority(
+    /* [in] */ RenderScriptPriority p)
+{
+    FAIL_RETURN(Validate())
+    return NContextSetPriority(p);
+}
+
+ECode RenderScript::GetApplicationContext(
+    /* [out] */ IContext** ctx)
+{
+    VALIDATE_NOT_NULL(ctx)
+    *ctx = mApplicationContext;
+    REFCOUNT_ADD(*ctx)
+    return NOERROR;
+}
+
+ECode RenderScript::Create(
+    /* [in] */ IContext* ctx,
+    /* [in] */ Int32 sdkVersion,
+    /* [out] */ IRenderScript** rs)
+{
+    VALIDATE_NOT_NULL(rs)
+    return Create(ctx, sdkVersion, RenderScriptContextType_NORMAL, CREATE_FLAG_NONE, rs);
+}
+
+ECode RenderScript::Create(
+    /* [in] */ IContext* ctx,
+    /* [in] */ Int32 sdkVersion,
+    /* [in] */ RenderScriptContextType ct,
+    /* [in] */ Int32 flags,
+    /* [out] */ IRenderScript** _rs)
+{
+    VALIDATE_NOT_NULL(_rs)
+    *_rs = NULL;
+    if (!sInitialized) {
+        Slogger::E(LOG_TAG, "RenderScript.create() called when disabled; someone is likely to crash");
+        return NOERROR;
+    }
+
+    if ((flags & ~(CREATE_FLAG_LOW_LATENCY | CREATE_FLAG_LOW_POWER)) != 0) {
+        Slogger::E(LOG_TAG, "Invalid flags passed.");
+        return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    AutoLock<RenderScript> rs = new RenderScript(ctx);
+
+    rs->mDev = rs->NDeviceCreate();
+    rs->mContext = rs->NContextCreate(rs->mDev, flags, sdkVersion, ct);
+    rs->mContextType = ct;
+    if (rs->mContext == 0) {
+        Slogger::E(LOG_TAG, "Failed to create RS context.");
+        return E_RS_DRIVER_EXCEPTION;
+    }
+    rs->mMessageThread = new MessageThread(rs);
+    rs->mMessageThread->Start();
+    *_rs = (IRenderScript*)rs;
+    REFCOUNT_ADD(*_rs)
+    return NOERROR;
+}
+
+ECode RenderScript::Create(
+    /* [in] */ IContext* ctx,
+    /* [out] */ IRenderScript** rs)
+{
+    VALIDATE_NOT_NULL(rs)
+    return Create(ctx, RenderScriptContextType_NORMAL, rs);
+}
+
+ECode RenderScript::Create(
+    /* [in] */ IContext* ctx,
+    /* [in] */ RenderScriptContextType ct,
+    /* [out] */ IRenderScript** rs)
+{
+    VALIDATE_NOT_NULL(rs)
+    AutoPtr<IApplicationInfo> info;
+    ctx->GetApplicationInfo((IApplicationInfo**)&info);
+    Int32 v;
+    info->GetTargetSdkVersion(&v);
+    return Create(ctx, v, ct, CREATE_FLAG_NONE, rs);
+}
+
+ECode RenderScript::Create(
+    /* [in] */ IContext* ctx,
+    /* [in] */ RenderScriptContextType ct,
+    /* [in] */ Int32 flags,
+    /* [out] */ IRenderScript** rs)
+{
+    VALIDATE_NOT_NULL(rs)
+    AutoPtr<IApplicationInfo> info;
+    ctx->GetApplicationInfo((IApplicationInfo**)&info);
+    Int32 v;
+    info->GetTargetSdkVersion(&v);
+    return Create(ctx, v, ct, flags, rs);
+}
+
+ECode RenderScript::ContextDump()
+{
+    FAIL_RETURN(Validate())
+    return NContextDump(0);
+}
+
+ECode RenderScript::Finish()
+{
+    return NContextFinish();
+}
+
+ECode RenderScript::Destroy()
+{
+    Validate();
+    NContextFinish();
+
+    NContextDeinitToClient(mContext);
+    mMessageThread->mRun = FALSE;
+    // try {
+    mMessageThread->Join();
+    // } catch(InterruptedException e) {
+    // }
+    NContextDestroy();
+    NDeviceDestroy(mDev);
+    mDev = 0;
+    return NOERROR;
+}
+
+Boolean RenderScript::IsAlive()
+{
+    return mContext != 0;
+}
+
+Int64 RenderScript::SafeID(
+    /* [in] */ BaseObj* o)
+{
+    if(o != NULL) {
+        Int64 id;
+        o->GetID(this, &id);
+        return id;
+    }
+    return 0;
 }
 
 } // namespace RenderScript

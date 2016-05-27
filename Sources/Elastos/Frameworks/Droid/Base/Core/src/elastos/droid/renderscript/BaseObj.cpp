@@ -1,8 +1,8 @@
 
 #include "elastos/droid/RenderScript/BaseObj.h"
 #include <elastos/utility/logging/Slogger.h>
-
 #include <elastos/core/AutoLock.h>
+
 using Elastos::Core::AutoLock;
 using Elastos::Droid::RenderScript::EIID_IBaseObj;
 using Elastos::Utility::Concurrent::Locks::ILock;
