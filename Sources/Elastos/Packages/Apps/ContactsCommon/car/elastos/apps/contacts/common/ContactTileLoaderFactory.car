@@ -1,0 +1,63 @@
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+
+    interface IContactTileLoaderFactory {
+        const Int32 CONTACT_ID = 0;
+        const Int32 DISPLAY_NAME = 1;
+        const Int32 STARRED = 2;
+        const Int32 PHOTO_URI = 3;
+        const Int32 LOOKUP_KEY = 4;
+        const Int32 CONTACT_PRESENCE = 5;
+        const Int32 CONTACT_STATUS = 6;
+
+        // Only used for StrequentPhoneOnlyLoader
+        const Int32 PHONE_NUMBER = 5;
+        const Int32 PHONE_NUMBER_TYPE = 6;
+        const Int32 PHONE_NUMBER_LABEL = 7;
+        const Int32 IS_DEFAULT_NUMBER = 8;
+        const Int32 PINNED = 9;
+        // The _ID field returned for strequent items actually contains data._id instead of
+        // contacts._id because the query is performed on the data table. In order to obtain the
+        // contact id for strequent items, we thus have to use Phone.contact_id instead.
+        const Int32 CONTACT_ID_FOR_DATA = 10;
+    }
+
+    interface IContactTileLoaderFactoryHelper {
+        /**
+         * Projection used for the {@link Contacts#CONTENT_STREQUENT_URI}
+         * query when {@link ContactsContract#STREQUENT_PHONE_ONLY} flag
+         * is set to true. The main difference is the lack of presence
+         * and status data and the addition of phone number and label.
+         */
+        // @VisibleForTesting
+        GetCOLUMNS_PHONE_ONLY(
+            [out, callee] ArrayOf<String>* columnsPhone);
+
+        CreateStrequentLoader(
+            [in] IContext* context,
+            [out] ICursorLoader* loader);
+
+        CreateStrequentPhoneOnlyLoader(
+            [in] IContext* context,
+            [out] ICursorLoader* loader);
+
+        CreateStarredLoader(
+            [in] IContext* context,
+            [out] ICursorLoader* loader);
+
+        CreateFrequentLoader(
+            [in] IContext* context,
+            [out] ICursorLoader* loader);
+    }
+
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

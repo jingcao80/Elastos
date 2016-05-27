@@ -1,0 +1,65 @@
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IComponentCallbacks
+     * interface Elastos.Droid.Content.IComponentCallbacks2
+     * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
+     * interface Elastos.Droid.App.IFragment
+     * interface Elastos.Apps.DailerBind.Analytics.IAnalyticsFragment
+     * interface Elastos.Apps.Contacts.Common.List.IContactEntryListFragment
+     */
+    interface IPhoneNumberPickerFragment {
+        SetDirectorySearchEnabled(
+            [in] Boolean flag);
+
+        SetOnPhoneNumberPickerActionListener(
+            [in] IOnPhoneNumberPickerActionListener* listener);
+
+        GetOnPhoneNumberPickerListener(
+            [out] IOnPhoneNumberPickerActionListener** listener);
+
+        /**
+         * @param shortcutAction either {@link Intent#ACTION_CALL} or
+         *            {@link Intent#ACTION_SENDTO} or null.
+         */
+        SetShortcutAction(
+            [in] String shortcutAction);
+
+        SetUseCallableUri(
+            [in] Boolean useCallableUri);
+
+        UsesCallableUri(
+            [out] Boolean* useCallableUri);
+
+        PickPhoneNumber(
+            [in] IUri* uri);
+
+        OnShortcutIntentCreated(
+            [in] IUri* uri,
+            [in] IIntent* shortcutIntent);
+
+        GetFilter(
+            [out] IContactListFilter** filter);
+
+        SetFilter(
+            [in] IContactListFilter* filter);
+
+        SetPhotoPosition(
+            [in] IContactListItemViewPhotoPosition* photoPosition);
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

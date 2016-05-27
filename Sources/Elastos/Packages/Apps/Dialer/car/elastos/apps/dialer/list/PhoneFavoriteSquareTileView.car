@@ -1,0 +1,31 @@
+
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace List {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Apps.Dailer.List.IPhoneFavoriteTileView
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Apps.Common.List.IContactTileView
+     */
+    interface IPhoneFavoriteSquareTileView {
+        GetContactEntry(
+            [out] IContactEntry** entry);
+    }
+
+    } //List
+    } //Dailer
+    } //Apps
+    } //Elastos
+}
