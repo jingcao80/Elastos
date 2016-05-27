@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="EditTextDemo"
+      package="Elastos.DevSamples.EditTextDemo"
       android:versionCode="1"
       android:versionName="1.0">
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="21" />
+
     <application android:icon="@drawable/icon" android:label="@string/app_name">
-        <activity android:name="CActivityOne"
-                  android:label="@string/app_name"
-                  android:theme="@android:style/Theme.NoTitleBar">
+        <activity android:name=".CActivityOne"
+                  android:label="@string/app_name">
+                  <!--android:theme="@android:style/Theme.Holo"-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -14,4 +19,5 @@
             </intent-filter>
         </activity>
     </application>
+
 </manifest>

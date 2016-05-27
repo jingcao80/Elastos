@@ -268,9 +268,9 @@ ECode AbsActionBarView::AnimateToVisibility(
         if (mSplitView != NULL && mMenuView != NULL) {
             AutoPtr<IAnimatorSet> set;
             CAnimatorSet::New((IAnimatorSet**)&set);
-            IAnimator* _set = IAnimator::Probe(set);
             AutoPtr<IObjectAnimator> splitAnim = ObjectAnimator::OfFloat(mMenuView, String("alpha"), values);
             IValueAnimator::Probe(splitAnim)->SetDuration(FADE_DURATION);
+            IAnimator* _set = IAnimator::Probe(set);
             _set->AddListener(animListener);
 
             AutoPtr<IAnimatorSetBuilder> ab;
@@ -297,9 +297,9 @@ ECode AbsActionBarView::AnimateToVisibility(
         if (mSplitView != NULL && mMenuView != NULL) {
             AutoPtr<IAnimatorSet> set;
             CAnimatorSet::New((IAnimatorSet**)&set);
-            IAnimator* _set = IAnimator::Probe(set);
             AutoPtr<IObjectAnimator> splitAnim = ObjectAnimator::OfFloat(mMenuView, String("alpha"), values);
             IValueAnimator::Probe(splitAnim)->SetDuration(FADE_DURATION);
+            IAnimator* _set = IAnimator::Probe(set);
             _set->AddListener(animListener);
 
             AutoPtr<IAnimatorSetBuilder> ab;

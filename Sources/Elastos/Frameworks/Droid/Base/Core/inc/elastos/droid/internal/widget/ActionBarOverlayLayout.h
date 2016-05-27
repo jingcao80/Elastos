@@ -2,11 +2,10 @@
 #ifndef __ELASTOS_DROID_INTERNAL_WIDGET_ACTIONBAROVERLAYLAYOUT_H__
 #define __ELASTOS_DROID_INTERNAL_WIDGET_ACTIONBAROVERLAYLAYOUT_H__
 
+#include "Elastos.Droid.Widget.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
-#include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/utility/Int32Property.h"
 #include "elastos/droid/view/ViewGroup.h"
-#include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IAnimator;
@@ -24,6 +23,7 @@ using Elastos::Droid::Internal::Widget::IDecorContentParent;
 using Elastos::Droid::Internal::Widget::IDecorToolbar;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Utility::Int32Property;
+using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::View::IMenu;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroupLayoutParams;
@@ -35,7 +35,6 @@ using Elastos::Droid::View::ViewGroup;
 using Elastos::Droid::Widget::IOverScroller;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IRunnable;
-using Elastos::Droid::Utility::ISparseArray;
 
 namespace Elastos {
 namespace Droid {

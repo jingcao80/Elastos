@@ -11,8 +11,6 @@
 #include "elastos/core/Math.h"
 #include <elastos/utility/logging/Logger.h>
 
-#include <utils/CallStack.h>
-
 using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Res::IResourcesTheme;
@@ -31,8 +29,6 @@ namespace Droid {
 namespace Internal {
 namespace Widget {
 
-const AutoPtr<IProperty> ActionBarOverlayLayout::ACTION_BAR_HIDE_OFFSET = new InnerIntProperty();
-
 static AutoPtr< ArrayOf<Int32> > InitAttrs()
 {
     AutoPtr< ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(2);
@@ -40,6 +36,7 @@ static AutoPtr< ArrayOf<Int32> > InitAttrs()
     (*result)[1] = R::attr::windowContentOverlay;
     return result;
 }
+const AutoPtr<IProperty> ActionBarOverlayLayout::ACTION_BAR_HIDE_OFFSET = new InnerIntProperty();
 
 AutoPtr< ArrayOf<Int32> > ActionBarOverlayLayout::ATTRS = InitAttrs();
 const String ActionBarOverlayLayout::TAG("ActionBarOverlayLayout");
@@ -1077,17 +1074,13 @@ ECode ActionBarOverlayLayout::OnLayout(
                 Int32 bottomMargin = 0;
                 vgmlp->GetBottomMargin(&bottomMargin);
                 childTop = parentBottom - height - bottomMargin;
-Logger::D("ActionBarOverlayLayout::OnLayout", "========== 1 Line:%d  childTop :%d==============", __LINE__, childTop);
             }
             else {
                 Int32 topMargin = 0;
                 vgmlp->GetTopMargin(&topMargin);
                 childTop = parentTop + topMargin;
-Logger::D("ActionBarOverlayLayout::OnLayout", "========== 2 Line:%d i:%d  childTop :%d, parentTop:%d, topMargin:%d==============",
-    __LINE__, i, childTop, parentTop, topMargin);
             }
 
-Logger::D("ActionBarOverlayLayout::OnLayout", "========== 3 Line:%d  childTop :%d==============", __LINE__, childTop);
             child->Layout(childLeft, childTop, childLeft + width, childTop + height);
         }
     }
@@ -1143,12 +1136,6 @@ Boolean ActionBarOverlayLayout::ApplyInsets(
     if (top && lpValue != rValue) {
         changed = TRUE;
         vgmlp->SetTopMargin(rValue);
-
-Logger::D("ActionBarOverlayLayout::ApplyInsets", "======= line:%d, rValue:%d ========", __LINE__, rValue);
-android::CallStack stack;
-stack.update();
-String backtrace(stack.toString("").string());
-Logger::I(TAG, "%s", backtrace.string());
     }
     vgmlp->GetRightMargin(&lpValue);
     insets->GetRight(&rValue);

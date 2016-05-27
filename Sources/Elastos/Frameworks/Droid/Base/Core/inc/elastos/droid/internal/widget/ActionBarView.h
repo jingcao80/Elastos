@@ -168,7 +168,7 @@ public:
         Int32 mUpIndicatorRes;
         AutoPtr<IDrawable> mDefaultUpIndicator;
         AutoPtr<IDrawable> mUpIndicator;
-        static const Int64 DEFAULT_TRANSITION_DURATION = 150;
+        static const Int64 DEFAULT_TRANSITION_DURATION;
     };
 
 private:
@@ -557,19 +557,14 @@ public:
     /**
       * Display options applied by default
       */
-    static const Int32 DISPLAY_DEFAULT = 0;
+    static const Int32 DISPLAY_DEFAULT;
     AutoPtr<IView> mExpandedActionView;
     AutoPtr<IWindowCallback> mWindowCallback;
 
 private:
     static const String TAG;
-    static const Int32 DISPLAY_RELAYOUT_MASK = IActionBar::DISPLAY_SHOW_HOME |
-        IActionBar::DISPLAY_USE_LOGO |
-        IActionBar::DISPLAY_HOME_AS_UP |
-        IActionBar::DISPLAY_SHOW_CUSTOM |
-        IActionBar::DISPLAY_SHOW_TITLE |
-        IActionBar::DISPLAY_TITLE_MULTIPLE_LINES;
-    static const Int32 DEFAULT_CUSTOM_GRAVITY = IGravity::START | IGravity::CENTER_VERTICAL;
+    static const Int32 DISPLAY_RELAYOUT_MASK;
+    static const Int32 DEFAULT_CUSTOM_GRAVITY;
     Int32 mNavigationMode;
     Int32 mDisplayOptions;
     AutoPtr<ICharSequence> mTitle;

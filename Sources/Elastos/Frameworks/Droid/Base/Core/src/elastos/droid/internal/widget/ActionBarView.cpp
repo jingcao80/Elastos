@@ -4,7 +4,6 @@
 #include "elastos/droid/internal/widget/CActionBarViewSavedState.h"
 #include "elastos/droid/internal/widget/ActionBarView.h"
 #include "elastos/droid/internal/view/menu/CActionMenuItem.h"
-#include "elastos/droid/R.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include "elastos/droid/view/Gravity.h"
@@ -14,6 +13,7 @@
 #include "elastos/droid/widget/CLinearLayoutLayoutParams.h"
 #include "elastos/droid/widget/CProgressBar.h"
 #include "elastos/droid/widget/CSpinner.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -156,7 +156,7 @@ ECode ActionBarView::InnerOnClickListener1::OnClick(
 //=====================================================================
 //                       ActionBarView::HomeView
 //=====================================================================
-const Int64 ActionBarView::HomeView::DEFAULT_TRANSITION_DURATION;
+const Int64 ActionBarView::HomeView::DEFAULT_TRANSITION_DURATION = 150;
 
 ActionBarView::HomeView::HomeView()
     : mUpWidth(0)
@@ -188,22 +188,19 @@ ECode ActionBarView::HomeView::constructor(
 ECode ActionBarView::HomeView::SetShowUp(
     /* [in] */ Boolean isUp)
 {
-    IView::Probe(mUpView)->SetVisibility(isUp ? VISIBLE : IView::GONE);
-    return NOERROR;
+    return IView::Probe(mUpView)->SetVisibility(isUp ? IView::VISIBLE : IView::GONE);
 }
 
 ECode ActionBarView::HomeView::SetShowIcon(
     /* [in] */ Boolean showIcon)
 {
-    IView::Probe(mIconView)->SetVisibility(showIcon ? VISIBLE : IView::GONE);
-    return NOERROR;
+    return IView::Probe(mIconView)->SetVisibility(showIcon ? IView::VISIBLE: IView::GONE);
 }
 
 ECode ActionBarView::HomeView::SetIcon(
     /* [in] */ IDrawable* icon)
 {
-    mIconView->SetImageDrawable(icon);
-    return NOERROR;
+    return mIconView->SetImageDrawable(icon);
 }
 
 ECode ActionBarView::HomeView::SetUpIndicator(
@@ -252,7 +249,7 @@ ECode ActionBarView::HomeView::OnPopulateAccessibilityEvent(
     if (!TextUtils::IsEmpty(cdesc)) {
         AutoPtr<IList> text;
         IAccessibilityRecord::Probe(event)->GetText((IList**)&text);
-        text->Add(TO_IINTERFACE(cdesc));
+        text->Add(cdesc);
     }
     return NOERROR;
 }
@@ -303,6 +300,7 @@ ECode ActionBarView::HomeView::OnFinishInflate()
     AutoPtr<IView> viewTmp1;
     FindViewById(R::id::home, (IView**)&viewTmp1);
     mIconView = IImageView::Probe(viewTmp1);
+    mDefaultUpIndicator = NULL;
     mUpView->GetDrawable((IDrawable**)&mDefaultUpIndicator);
     return NOERROR;
 }
@@ -311,48 +309,47 @@ void ActionBarView::HomeView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    MeasureChildWithMargins(IView::Probe(mUpView), widthMeasureSpec, 0, heightMeasureSpec, 0);
+    IView* upView = IView::Probe(mUpView);
+    MeasureChildWithMargins(upView, widthMeasureSpec, 0, heightMeasureSpec, 0);
     AutoPtr<IViewGroupLayoutParams> upLp;
-    IView::Probe(mUpView)->GetLayoutParams((IViewGroupLayoutParams**)&upLp);
+    upView->GetLayoutParams((IViewGroupLayoutParams**)&upLp);
 
-    Int32 leftMargin = 0, rightMargin = 0;
-    IViewGroupMarginLayoutParams::Probe(upLp)->GetLeftMargin(&leftMargin);
-    IViewGroupMarginLayoutParams::Probe(upLp)->GetRightMargin(&rightMargin);
+    Int32 leftMargin = 0, rightMargin = 0, topMargin = 0, bottomMargin = 0;
+    IViewGroupMarginLayoutParams::Probe(upLp)->GetMargins(&leftMargin,
+            &topMargin, &rightMargin, &bottomMargin);
 
     Int32 upMargins = leftMargin + rightMargin;
-    IView::Probe(mUpView)->GetMeasuredWidth(&mUpWidth);
+    upView->GetMeasuredWidth(&mUpWidth);
     mStartOffset = mUpWidth + upMargins;
 
     Int32 upviewVisibility = 0;
-    IView::Probe(mUpView)->GetVisibility(&upviewVisibility);
-
-    Int32 topMargin = 0, bottomMargin = 0;
-    IViewGroupMarginLayoutParams::Probe(upLp)->GetTopMargin(&topMargin);
-
+    upView->GetVisibility(&upviewVisibility);
     Int32 measureHeight = 0;
-    IView::Probe(mUpView)->GetMeasuredHeight(&measureHeight);
+    upView->GetMeasuredHeight(&measureHeight);
 
     Int32 width = upviewVisibility == IView::GONE ? 0 : mStartOffset;
     Int32 height = topMargin + measureHeight + bottomMargin;
 
+    using Elastos::Core::Math;
+
+    IView* iconView = IView::Probe(mIconView);
     Int32 iconviewVisibility = 0;
-    IView::Probe(mIconView)->GetVisibility(&iconviewVisibility);
+    iconView->GetVisibility(&iconviewVisibility);
     if (iconviewVisibility != IView::GONE) {
-        MeasureChildWithMargins(IView::Probe(mIconView), widthMeasureSpec, width, heightMeasureSpec, 0);
+        MeasureChildWithMargins(iconView, widthMeasureSpec, width, heightMeasureSpec, 0);
 
         AutoPtr<IViewGroupLayoutParams> iconLp;
-        IView::Probe(mIconView)->GetLayoutParams((IViewGroupLayoutParams**)&iconLp);
+        iconView->GetLayoutParams((IViewGroupLayoutParams**)&iconLp);
+
+        IViewGroupMarginLayoutParams::Probe(iconLp)->GetMargins(&leftMargin,
+                &topMargin, &rightMargin, &bottomMargin);
 
         Int32 measureWidth = 0, measureHeight = 0;
-        IView::Probe(mIconView)->GetMeasuredWidth(&measureWidth);
-        IView::Probe(mIconView)->GetMeasuredHeight(&measureHeight);
-        IViewGroupMarginLayoutParams::Probe(iconLp)->GetLeftMargin(&leftMargin);
-        IViewGroupMarginLayoutParams::Probe(iconLp)->GetRightMargin(&rightMargin);
-        IViewGroupMarginLayoutParams::Probe(iconLp)->GetTopMargin(&topMargin);
-        IViewGroupMarginLayoutParams::Probe(iconLp)->GetBottomMargin(&bottomMargin);
+        iconView->GetMeasuredWidth(&measureWidth);
+        iconView->GetMeasuredHeight(&measureHeight);
         width += leftMargin + measureWidth + rightMargin;
 
-        height = Elastos::Core::Math::Max(height, topMargin + measureHeight + bottomMargin);
+        height = Math::Max(height, topMargin + measureHeight + bottomMargin);
     }
     else if (upMargins < 0) {
         // Remove the measurement effects of negative margins used for offsets
@@ -366,7 +363,7 @@ void ActionBarView::HomeView::OnMeasure(
 
     switch (widthMode) {
         case View::MeasureSpec::AT_MOST:
-            width = Elastos::Core::Math::Min(width, widthSize);
+            width = Math::Min(width, widthSize);
             break;
         case View::MeasureSpec::EXACTLY:
             width = widthSize;
@@ -377,7 +374,7 @@ void ActionBarView::HomeView::OnMeasure(
     }
     switch (heightMode) {
         case View::MeasureSpec::AT_MOST:
-            height = Elastos::Core::Math::Min(height, heightSize);
+            height = Math::Min(height, heightSize);
             break;
         case View::MeasureSpec::EXACTLY:
             height = heightSize;
@@ -404,19 +401,21 @@ ECode ActionBarView::HomeView::OnLayout(
     GetWidth(&width);
     Int32 upOffset = 0;
 
+    IView* upView = IView::Probe(mUpView);
     Int32 visibility = 0;
-    IView::Probe(mUpView)->GetVisibility(&visibility);
+    upView->GetVisibility(&visibility);
     if (visibility != IView::GONE) {
         AutoPtr<IViewGroupLayoutParams> upLp;
-        IView::Probe(mUpView)->GetLayoutParams((IViewGroupLayoutParams**)&upLp);
+        upView->GetLayoutParams((IViewGroupLayoutParams**)&upLp);
 
         Int32 upHeight = 0, upWidth = 0;
-        IView::Probe(mUpView)->GetMeasuredWidth(&upWidth);
-        IView::Probe(mUpView)->GetMeasuredHeight(&upHeight);
+        upView->GetMeasuredWidth(&upWidth);
+        upView->GetMeasuredHeight(&upHeight);
 
         Int32 leftMargin = 0, rightMargin = 0;
-        IViewGroupMarginLayoutParams::Probe(upLp)->GetLeftMargin(&leftMargin);
-        IViewGroupMarginLayoutParams::Probe(upLp)->GetRightMargin(&rightMargin);
+        IViewGroupMarginLayoutParams* vgmlp = IViewGroupMarginLayoutParams::Probe(upLp);
+        vgmlp->GetLeftMargin(&leftMargin);
+        vgmlp->GetRightMargin(&rightMargin);
 
         upOffset = leftMargin + upWidth + rightMargin;
         Int32 upTop = vCenter - upHeight / 2;
@@ -433,26 +432,28 @@ ECode ActionBarView::HomeView::OnLayout(
             upLeft = 0;
             l += upOffset;
         }
-        IView::Probe(mUpView)->Layout(upLeft, upTop, upRight, upBottom);
+        upView->Layout(upLeft, upTop, upRight, upBottom);
     }
 
     AutoPtr<IViewGroupLayoutParams> iconLp;
-    IView::Probe(mIconView)->GetLayoutParams((IViewGroupLayoutParams**)&iconLp);
+    upView->GetLayoutParams((IViewGroupLayoutParams**)&iconLp);
 
     Int32 iconWidth = 0, iconHeight = 0;
-    IView::Probe(mIconView)->GetMeasuredWidth(&iconWidth);
-    IView::Probe(mIconView)->GetMeasuredHeight(&iconHeight);
-
+    upView->GetMeasuredWidth(&iconWidth);
+    upView->GetMeasuredHeight(&iconHeight);
     Int32 hCenter = (r - l) / 2;
+
+    using Elastos::Core::Math;
+    IViewGroupMarginLayoutParams* vgmlpIcon = IViewGroupMarginLayoutParams::Probe(iconLp);
     Int32 topMargin = 0;
-    IViewGroupMarginLayoutParams::Probe(iconLp)->GetTopMargin(&topMargin);
-    Int32 iconTop = Elastos::Core::Math::Max(topMargin, vCenter - iconHeight / 2);
+    vgmlpIcon->GetTopMargin(&topMargin);
+    Int32 iconTop = Math::Max(topMargin, vCenter - iconHeight / 2);
     Int32 iconBottom = iconTop + iconHeight;
     Int32 iconLeft;
     Int32 iconRight;
     Int32 marginStart = 0;
-    IViewGroupMarginLayoutParams::Probe(iconLp)->GetMarginStart(&marginStart);
-    Int32 delta = Elastos::Core::Math::Max(marginStart, hCenter - iconWidth / 2);
+    vgmlpIcon->GetMarginStart(&marginStart);
+    Int32 delta = Math::Max(marginStart, hCenter - iconWidth / 2);
     if (isLayoutRtl) {
         iconRight = width - upOffset - delta;
         iconLeft = iconRight - iconWidth;
@@ -461,7 +462,7 @@ ECode ActionBarView::HomeView::OnLayout(
         iconLeft = upOffset + delta;
         iconRight = iconLeft + iconWidth;
     }
-    IView::Probe(mIconView)->Layout(iconLeft, iconTop, iconRight, iconBottom);
+    upView->Layout(iconLeft, iconTop, iconRight, iconBottom);
     return NOERROR;
 }
 
@@ -510,6 +511,7 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::GetMenuView(
     /* [in] */ IViewGroup* root,
     /* [out] */ IMenuView** result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = NULL;
     return NOERROR;
 }
@@ -521,12 +523,13 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::UpdateMenuView(
         Boolean found = FALSE;
 
         if (mMenu) {
+            IMenu* menu = IMenu::Probe(mMenu);
             Int32 count = 0;
-            IMenu::Probe(mMenu)->GetSize(&count);
+            menu->GetSize(&count);
             for (Int32 i = 0; i < count; ++i) {
                 AutoPtr<IMenuItem> item;
-                IMenu::Probe(mMenu)->GetItem(i, (IMenuItem**)&item);
-                if (TO_IINTERFACE(item) == TO_IINTERFACE(mCurrentExpandedItem)) {
+                menu->GetItem(i, (IMenuItem**)&item);
+                if (item.Get() == IMenuItem::Probe(mCurrentExpandedItem)) {
                     found = TRUE;
                     break;
                 }
@@ -577,6 +580,8 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::ExpandItemActionView(
 {
     VALIDATE_NOT_NULL(result)
 
+    ActionBarTransition::BeginDelayedTransition(mOwner);
+
     IMenuItem::Probe(item)->GetActionView((IView**)&(mOwner->mExpandedActionView));
     AutoPtr<IDrawableConstantState> state;
     mOwner->mIcon->GetConstantState((IDrawableConstantState**)&state);
@@ -589,23 +594,28 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::ExpandItemActionView(
     mCurrentExpandedItem = item;
     AutoPtr<IViewParent> eavParent;
     mOwner->mExpandedActionView->GetParent((IViewParent**)&eavParent);
-    if (TO_IINTERFACE(eavParent) != TO_IINTERFACE(mOwner)) {
+    if (eavParent != mOwner) {
         mOwner->AddView(mOwner->mExpandedActionView);
     }
     AutoPtr<IViewParent> ehlParent;
     mOwner->mExpandedHomeLayout->GetParent((IViewParent**)&ehlParent);
-    if (TO_IINTERFACE(ehlParent) != TO_IINTERFACE(mOwner)) {
-        mOwner->AddView(mOwner->mExpandedHomeLayout);
+    if (ehlParent.Get() != IViewParent::Probe(mOwner->mUpGoerFive)) {
+        mOwner->mUpGoerFive->AddView(mOwner->mExpandedHomeLayout);
     }
     mOwner->mHomeLayout->SetVisibility(IView::GONE);
-    if (mOwner->mTitleLayout)
+    if (mOwner->mTitleLayout) {
         IView::Probe(mOwner->mTitleLayout)->SetVisibility(IView::GONE);
-    if (mOwner->mTabScrollView)
+    }
+    if (mOwner->mTabScrollView) {
         IView::Probe(mOwner->mTabScrollView)->SetVisibility(IView::GONE);
-    if (mOwner->mSpinner)
+    }
+    if (mOwner->mSpinner) {
         IView::Probe(mOwner->mSpinner)->SetVisibility(IView::GONE);
-    if (mOwner->mCustomNavView)
+    }
+    if (mOwner->mCustomNavView) {
         IView::Probe(mOwner->mCustomNavView)->SetVisibility(IView::GONE);
+    }
+    mOwner->SetHomeButtonEnabled(FALSE, FALSE);
     mOwner->RequestLayout();
     item->SetActionViewExpanded(TRUE);
 
@@ -623,7 +633,7 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::CollapseItemActionView(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    ActionBarTransition::BeginDelayedTransition(IViewGroup::Probe(this));
+    ActionBarTransition::BeginDelayedTransition(mOwner);
     ICollapsibleActionView* collapsibleActionView = ICollapsibleActionView::Probe(mOwner->mExpandedActionView);
     if (collapsibleActionView) {
         collapsibleActionView->OnActionViewCollapsed();
@@ -633,22 +643,25 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::CollapseItemActionView(
     mOwner->mUpGoerFive->RemoveView(mOwner->mExpandedHomeLayout);
     mOwner->mExpandedActionView = NULL;
     if ((mOwner->mDisplayOptions & IActionBar::DISPLAY_SHOW_HOME) != 0) {
-        IView::Probe(mOwner->mHomeLayout)->SetVisibility(VISIBLE);
+        IView::Probe(mOwner->mHomeLayout)->SetVisibility(IView::VISIBLE);
     }
     if ((mOwner->mDisplayOptions & IActionBar::DISPLAY_SHOW_TITLE) != 0) {
         if (mOwner->mTitleLayout == NULL) {
             mOwner->InitTitle();
         }
         else {
-            IView::Probe(mOwner->mTitleLayout)->SetVisibility(VISIBLE);
+            IView::Probe(mOwner->mTitleLayout)->SetVisibility(IView::VISIBLE);
         }
     }
-    if (mOwner->mTabScrollView != NULL)
-        IView::Probe(mOwner->mTabScrollView)->SetVisibility(VISIBLE);
-    if (mOwner->mSpinner != NULL)
-        IView::Probe(mOwner->mSpinner)->SetVisibility(VISIBLE);
-    if (mOwner->mCustomNavView != NULL)
-        IView::Probe(mOwner->mCustomNavView)->SetVisibility(VISIBLE);
+    if (mOwner->mTabScrollView != NULL) {
+        IView::Probe(mOwner->mTabScrollView)->SetVisibility(IView::VISIBLE);
+    }
+    if (mOwner->mSpinner != NULL) {
+        IView::Probe(mOwner->mSpinner)->SetVisibility(IView::VISIBLE);
+    }
+    if (mOwner->mCustomNavView != NULL) {
+        IView::Probe(mOwner->mCustomNavView)->SetVisibility(IView::VISIBLE);
+    }
 
     mOwner->mExpandedHomeLayout->SetIcon(NULL);
     mCurrentExpandedItem = NULL;
@@ -685,17 +698,23 @@ ECode ActionBarView::ExpandedActionViewMenuPresenter::OnRestoreInstanceState(
 //=====================================================================
 //                            ActionBarView
 //=====================================================================
-const Int32 ActionBarView::DISPLAY_DEFAULT;
+const Int32 ActionBarView::DISPLAY_DEFAULT = 0;
 const String ActionBarView::TAG("ActionBarView");
-const Int32 ActionBarView::DISPLAY_RELAYOUT_MASK;
-const Int32 ActionBarView::DEFAULT_CUSTOM_GRAVITY;
+const Int32 ActionBarView::DISPLAY_RELAYOUT_MASK = IActionBar::DISPLAY_SHOW_HOME |
+        IActionBar::DISPLAY_USE_LOGO |
+        IActionBar::DISPLAY_HOME_AS_UP |
+        IActionBar::DISPLAY_SHOW_CUSTOM |
+        IActionBar::DISPLAY_SHOW_TITLE |
+        IActionBar::DISPLAY_TITLE_MULTIPLE_LINES;
+const Int32 ActionBarView::DEFAULT_CUSTOM_GRAVITY = IGravity::START | IGravity::CENTER_VERTICAL;
 
 CAR_INTERFACE_IMPL_2(ActionBarView, AbsActionBarView, IDecorToolbar, IActionBarView)
 
 ActionBarView::ActionBarView()
     : mNavigationMode(0)
-    , mDisplayOptions(0)
+    , mDisplayOptions(-1)
     , mHomeDescriptionRes(0)
+    , mProgressBarPadding(0)
     , mItemPadding(0)
     , mTitleStyleRes(0)
     , mSubtitleStyleRes(0)
@@ -706,8 +725,10 @@ ActionBarView::ActionBarView()
     , mIsCollapsible(FALSE)
     , mWasHomeEnabled(FALSE)
     , mMenuPrepared(FALSE)
-    , mDefaultUpDescription(0)
+    , mDefaultUpDescription(R::string::action_bar_up_description)
 {
+    mExpandedActionViewUpListener = new InnerOnClickListener(this);
+    mUpClickListener = new InnerOnClickListener1(this);
 }
 
 ECode ActionBarView::constructor(
@@ -738,7 +759,7 @@ ECode ActionBarView::constructor(
     a->GetResourceId(R::styleable::ActionBar_homeLayout, R::layout::action_bar_home, &homeResId);
 
     AutoPtr<IView> upView;
-    inflater->Inflate(R::layout::action_bar_up_container, IViewGroup::Probe(this), FALSE, (IView**)&upView);
+    inflater->Inflate(R::layout::action_bar_up_container, this, FALSE, (IView**)&upView);
     mUpGoerFive = IViewGroup::Probe(upView);
     AutoPtr<IView> homev;
     inflater->Inflate(homeResId, mUpGoerFive, FALSE, (IView**)&homev);
@@ -755,7 +776,7 @@ ECode ActionBarView::constructor(
     resources->GetText(mDefaultUpDescription, (ICharSequence**)&csq);
     mExpandedHomeLayout->SetContentDescription(csq);
     AutoPtr<IDrawable> upBackground;
-    IView::Probe(mUpGoerFive)->GetBackground((IDrawable**)&upBackground);
+    upView->GetBackground((IDrawable**)&upBackground);
     if (upBackground) {
         AutoPtr<IDrawableConstantState> upstate;
         upBackground->GetConstantState((IDrawableConstantState**)&upstate);
@@ -781,7 +802,7 @@ ECode ActionBarView::constructor(
     Int32 customNavId = 0;
     a->GetResourceId(R::styleable::ActionBar_customNavigationLayout, 0, &customNavId);
     if (customNavId != 0) {
-        inflater->Inflate(customNavId, IViewGroup::Probe(this), FALSE, (IView**)&mCustomNavView);
+        inflater->Inflate(customNavId, this, FALSE, (IView**)&mCustomNavView);
         mNavigationMode = IActionBar::NAVIGATION_MODE_STANDARD;
         SetDisplayOptions(mDisplayOptions | IActionBar::DISPLAY_SHOW_CUSTOM);
     }
@@ -790,9 +811,9 @@ ECode ActionBarView::constructor(
     a->Recycle();
 
     CActionMenuItem::New(context, 0, R::id::home, 0, 0, mTitle, (IActionMenuItem**)&mLogoNavItem);
-    mHomeLayout->SetOnClickListener(mUpClickListener);
-    mHomeLayout->SetClickable(TRUE);
-    mHomeLayout->SetFocusable(TRUE);
+    upView->SetOnClickListener(mUpClickListener);
+    upView->SetClickable(TRUE);
+    upView->SetFocusable(TRUE);
 
     Int32 accessibility = 0;
     GetImportantForAccessibility(&accessibility);
@@ -833,19 +854,21 @@ ECode ActionBarView::ShouldDelayChildPressedState(
 ECode ActionBarView::InitProgress()
 {
     CProgressBar::New(mContext, NULL, 0, mProgressStyle, (IProgressBar**)&mProgressView);
-    IView::Probe(mProgressView)->SetId(R::id::progress_horizontal);
+    IView* pv = IView::Probe(mProgressView);
+    pv->SetId(R::id::progress_horizontal);
     mProgressView->SetMax(10000);
-    IView::Probe(mProgressView)->SetVisibility(IView::GONE);
-    AddView(IView::Probe(mProgressView));
+    pv->SetVisibility(IView::GONE);
+    AddView(pv);
     return NOERROR;
 }
 
 ECode ActionBarView::InitIndeterminateProgress()
 {
     CProgressBar::New(mContext, NULL, 0, mIndeterminateProgressStyle, (IProgressBar**)&mIndeterminateProgressView);
-    IView::Probe(mIndeterminateProgressView)->SetId(R::id::progress_circular);
-    IView::Probe(mIndeterminateProgressView)->SetVisibility(IView::GONE);
-    AddView(IView::Probe(mIndeterminateProgressView));
+    IView* ipv = IView::Probe(mIndeterminateProgressView);
+    ipv->SetId(R::id::progress_circular);
+    ipv->SetVisibility(IView::GONE);
+    AddView(ipv);
     return NOERROR;
 }
 
@@ -855,28 +878,29 @@ ECode ActionBarView::SetSplitToolbar(
    if (mSplitActionBar != splitActionBar) {
         if (mMenuView != NULL) {
             AutoPtr<IViewParent> viewParent;
-            IView::Probe(mMenuView)->GetParent((IViewParent**)&viewParent);
+            IView* menuView = IView::Probe(mMenuView);
+            menuView->GetParent((IViewParent**)&viewParent);
             IViewGroup* oldParent = IViewGroup::Probe(viewParent);
             if (oldParent != NULL) {
-                //car has no this func: oldParent->RemoveView(IView::Probe(mMenuView));
+                oldParent->RemoveView(menuView);
             }
 
             AutoPtr<IViewGroupLayoutParams> menuViewLayoutParams;
-            IView::Probe(mMenuView)->GetLayoutParams((IViewGroupLayoutParams**)&menuViewLayoutParams);
+            menuView->GetLayoutParams((IViewGroupLayoutParams**)&menuViewLayoutParams);
             if (splitActionBar) {
                 if (mSplitView != NULL) {
-                    mSplitView->AddView(IView::Probe(mMenuView));
+                    mSplitView->AddView(menuView);
                 }
                 menuViewLayoutParams->SetWidth(IViewGroupLayoutParams::MATCH_PARENT);
             }
             else {
-                AddView(IView::Probe(mMenuView));
+                AddView(menuView);
                 menuViewLayoutParams->SetWidth(IViewGroupLayoutParams::WRAP_CONTENT);
             }
-            IView::Probe(mMenuView)->RequestLayout();
+            menuView->RequestLayout();
         }
         if (mSplitView != NULL) {
-            IView::Probe(mSplitView)->SetVisibility(splitActionBar ? VISIBLE : IView::GONE);
+            IView::Probe(mSplitView)->SetVisibility(splitActionBar ? IView::VISIBLE : IView::GONE);
         }
 
         if (mActionMenuPresenter != NULL) {
@@ -891,7 +915,7 @@ ECode ActionBarView::SetSplitToolbar(
                 mActionMenuPresenter->SetExpandedActionViewsExclusive(FALSE);
 
                 AutoPtr<IContext> context;
-                IView::Probe(this)->GetContext((IContext**)&context);
+                GetContext((IContext**)&context);
                 AutoPtr<IResources> resources;
                 context->GetResources((IResources**)&resources);
                 AutoPtr<IDisplayMetrics> displayMetrics;
@@ -940,9 +964,10 @@ ECode ActionBarView::SetEmbeddedTabView(
     mTabScrollView = tabs;
     mIncludeTabs = tabs != NULL;
     if (mIncludeTabs && mNavigationMode == IActionBar::NAVIGATION_MODE_TABS) {
-        AddView(IView::Probe(mTabScrollView));
+        IView* tabScrollView = IView::Probe(mTabScrollView);
+        AddView(tabScrollView);
         AutoPtr<IViewGroupLayoutParams> lp;
-        IView::Probe(mTabScrollView)->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+        tabScrollView->GetLayoutParams((IViewGroupLayoutParams**)&lp);
 
         lp->SetWidth(IViewGroupLayoutParams::WRAP_CONTENT);
         lp->SetHeight(IViewGroupLayoutParams::MATCH_PARENT);
@@ -961,8 +986,9 @@ ECode ActionBarView::SetMenu(
     /* [in] */ IMenu* menu,
     /* [in] */ IMenuPresenterCallback* cb)
 {
-    if (menu == IMenu::Probe(mOptionsMenu))
+    if (menu == IMenu::Probe(mOptionsMenu)) {
         return NOERROR;
+    }
 
     if (mOptionsMenu) {
         mOptionsMenu->RemoveMenuPresenter(IMenuPresenter::Probe(mActionMenuPresenter));
@@ -972,18 +998,19 @@ ECode ActionBarView::SetMenu(
     IMenuBuilder* builder = IMenuBuilder::Probe(menu);
     mOptionsMenu = builder;
     if (mMenuView) {
+        IView* _menuView = IView::Probe(mMenuView);
         AutoPtr<IViewParent> p;
-        IView::Probe(mMenuView)->GetParent((IViewParent**)&p);
+        _menuView->GetParent((IViewParent**)&p);
         IViewGroup* oldParent = IViewGroup::Probe(p);
         if (oldParent) {
-            IViewManager* mg = IViewManager::Probe(oldParent);
-            mg->RemoveView(IView::Probe(mMenuView));
+            IViewManager::Probe(oldParent)->RemoveView(_menuView);
         }
     }
     if (mActionMenuPresenter == NULL) {
         CActionMenuPresenter::New(mContext, (IActionMenuPresenter**)&mActionMenuPresenter);
-        IBaseMenuPresenter::Probe(mActionMenuPresenter)->SetCallback(cb);
-        IBaseMenuPresenter::Probe(mActionMenuPresenter)->SetId(R::id::action_menu_presenter);
+        IBaseMenuPresenter* actionMenuPresenter = IBaseMenuPresenter::Probe(mActionMenuPresenter);
+        actionMenuPresenter->SetCallback(cb);
+        actionMenuPresenter->SetId(R::id::action_menu_presenter);
         mExpandedMenuPresenter = new ExpandedActionViewMenuPresenter(this);
     }
 
@@ -1000,22 +1027,22 @@ ECode ActionBarView::SetMenu(
         mActionMenuPresenter->SetExpandedActionViewsExclusive(b);
         ConfigPresenters(builder);
         AutoPtr<IMenuView> v;
-        IMenuPresenter::Probe(mActionMenuPresenter)->GetMenuView(IViewGroup::Probe(this), (IMenuView**)&v);
+        IMenuPresenter::Probe(mActionMenuPresenter)->GetMenuView(this, (IMenuView**)&v);
         menuView = IActionMenuView::Probe(v);
+        IView* _menuView = IView::Probe(menuView);
         AutoPtr<IViewParent> p;
-        IView::Probe(menuView)->GetParent((IViewParent**)&p);
+        _menuView->GetParent((IViewParent**)&p);
         IViewGroup* oldParent = IViewGroup::Probe(p);
-        if (oldParent && TO_IINTERFACE(oldParent) != TO_IINTERFACE(this)) {
-            IViewManager* mg = IViewManager::Probe(oldParent);
-            mg->RemoveView(IView::Probe(menuView));
+        if (oldParent && oldParent != this) {
+            IViewManager::Probe(oldParent)->RemoveView(_menuView);
         }
-        AddView(IView::Probe(menuView), layoutParams);
+        AddView(_menuView, layoutParams);
     }
     else {
         mActionMenuPresenter->SetExpandedActionViewsExclusive(FALSE);
         // Allow full screen width in split mode.
         AutoPtr<IContext> context;
-        IView::Probe(this)->GetContext((IContext**)&context);
+        GetContext((IContext**)&context);
         AutoPtr<IResources> resources;
         context->GetResources((IResources**)&resources);
         AutoPtr<IDisplayMetrics> metrics;
@@ -1028,25 +1055,25 @@ ECode ActionBarView::SetMenu(
         layoutParams->SetHeight(IViewGroupLayoutParams::WRAP_CONTENT);
         ConfigPresenters(builder);
         AutoPtr<IMenuView> v;
-        IMenuPresenter::Probe(mActionMenuPresenter)->GetMenuView(IViewGroup::Probe(this), (IMenuView**)&v);
+        IMenuPresenter::Probe(mActionMenuPresenter)->GetMenuView(this, (IMenuView**)&v);
         menuView = IActionMenuView::Probe(v);
+        IView* _menuView = IView::Probe(menuView);
         if (mSplitView) {
             AutoPtr<IViewParent> p;
-            IView::Probe(menuView)->GetParent((IViewParent**)&p);
+            _menuView->GetParent((IViewParent**)&p);
             IViewGroup* oldParent = IViewGroup::Probe(p);
-            if (oldParent && oldParent != mSplitView) {
-                IViewManager* mg = IViewManager::Probe(oldParent);
-                mg->RemoveView(IView::Probe(menuView));
+            if (oldParent && oldParent != mSplitView.Get()) {
+                IViewManager::Probe(oldParent)->RemoveView(_menuView);
             }
 
             Int32 animatedVisibility = 0;
             GetAnimatedVisibility(&animatedVisibility);
-            IView::Probe(menuView)->SetVisibility(animatedVisibility);
-            mSplitView->AddView(IView::Probe(menuView), layoutParams);
+            _menuView->SetVisibility(animatedVisibility);
+            mSplitView->AddView(_menuView, layoutParams);
         }
         else {
             // We'll add this later if we missed it this time.
-            IView::Probe(menuView)->SetLayoutParams(layoutParams);
+            _menuView->SetLayoutParams(layoutParams);
         }
     }
     mMenuView = menuView;
@@ -1175,8 +1202,7 @@ ECode ActionBarView::SetDisplayOptions(
                 InitTitle();
             }
             else {
-                AutoPtr<IViewManager> vm = IViewManager::Probe(mUpGoerFive);
-                vm->RemoveView(IView::Probe(mTitleLayout));
+                IViewManager::Probe(mUpGoerFive)->RemoveView(IView::Probe(mTitleLayout));
             }
         }
 
@@ -1184,7 +1210,7 @@ ECode ActionBarView::SetDisplayOptions(
         Boolean homeAsUp = (mDisplayOptions & IActionBar::DISPLAY_HOME_AS_UP) != 0;
         Boolean titleUp = !showHome && homeAsUp;
         mHomeLayout->SetShowIcon(showHome);
-        Int32 homeVis = (showHome || titleUp) && mExpandedActionView == NULL ? VISIBLE : IView::GONE;
+        Int32 homeVis = (showHome || titleUp) && mExpandedActionView == NULL ? IView::VISIBLE : IView::GONE;
         IView::Probe(mHomeLayout)->SetVisibility(homeVis);
 
         if ((flagsChanged & IActionBar::DISPLAY_SHOW_CUSTOM) != 0 && mCustomNavView) {
@@ -1198,13 +1224,12 @@ ECode ActionBarView::SetDisplayOptions(
 
         if (mTitleLayout && (flagsChanged & IActionBar::DISPLAY_TITLE_MULTIPLE_LINES) != 0) {
             if ((options & IActionBar::DISPLAY_TITLE_MULTIPLE_LINES) != 0) {
-                assert(0 && "TEXTVIEW NEED ADD INTERFACE");
-                //TitleView->SetSingleLine(FALSE);
+                mTitleView->SetSingleLine(FALSE);
                 mTitleView->SetMaxLines(2);
             }
             else {
                 mTitleView->SetMaxLines(1);
-                //mTitleView->SetSingleLine(TRUE);
+                mTitleView->SetSingleLine(TRUE);
             }
         }
 
@@ -1245,9 +1270,10 @@ ECode ActionBarView::SetIcon(
     /* [in] */ Int32 resId)
 {
     AutoPtr<IDrawable> drawable;
-    mContext->GetDrawable(resId, (IDrawable**)&drawable);
-    SetIcon(resId != 0 ? drawable : NULL);
-    return NOERROR;
+    if (resId != 0) {
+        mContext->GetDrawable(resId, (IDrawable**)&drawable);
+    }
+    return SetIcon(drawable);
 }
 
 ECode ActionBarView::HasIcon(
@@ -1272,9 +1298,10 @@ ECode ActionBarView::SetLogo(
     /* [in] */ Int32 resId)
 {
     AutoPtr<IDrawable> drawable;
-    mContext->GetDrawable(resId, (IDrawable**)&drawable);
-    SetLogo(resId != 0 ? drawable : NULL);
-    return NOERROR;
+    if (resId != 0) {
+        mContext->GetDrawable(resId, (IDrawable**)&drawable);
+    }
+    return SetLogo(drawable);
 }
 
 ECode ActionBarView::HasLogo(
@@ -1323,7 +1350,7 @@ ECode ActionBarView::SetNavigationMode(
                     AutoPtr<IAdapter> temp;
                     av->GetAdapter((IAdapter**)&temp);
                     ISpinnerAdapter* spinnerAdapter = ISpinnerAdapter::Probe(temp);
-                    if (spinnerAdapter != mSpinnerAdapter) {
+                    if (spinnerAdapter != mSpinnerAdapter.Get()) {
                         av->SetAdapter(IAdapter::Probe(mSpinnerAdapter));
                     }
                     av->SetOnItemSelectedListener(mNavItemSelectedListener);
@@ -1349,8 +1376,9 @@ ECode ActionBarView::SetDropdownParams(
     mSpinnerAdapter = adapter;
     mNavItemSelectedListener = l;
     if (mSpinner != NULL) {
-        IAdapterView::Probe(mSpinner)->SetAdapter(IAdapter::Probe(adapter));
-        IAdapterView::Probe(mSpinner)->SetOnItemSelectedListener(l);
+        IAdapterView* av = IAdapterView::Probe(mSpinner);
+        av->SetAdapter(IAdapter::Probe(adapter));
+        av->SetOnItemSelectedListener(l);
     }
     return NOERROR;
 }
@@ -1359,9 +1387,10 @@ ECode ActionBarView::GetDropdownItemCount(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    Int32 count = 0;
-    IAdapterView::Probe(mSpinnerAdapter)->GetCount(&count);
-    *result = mSpinnerAdapter != NULL ? count : 0;
+    *result = 0;
+    if (mSpinnerAdapter != NULL) {
+        IAdapterView::Probe(mSpinnerAdapter)->GetCount(result);
+    }
     return NOERROR;
 }
 
@@ -1409,7 +1438,7 @@ ECode ActionBarView::GetViewGroup(
     /* [out] */ IViewGroup** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = IViewGroup::Probe(this);
+    *result = this;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -1440,12 +1469,13 @@ ECode ActionBarView::IsTitleTruncated(
     AutoPtr<ILayout> titleLayout;
     mTitleView->GetLayout((ILayout**)&titleLayout);
     if (!titleLayout) {
-        return FALSE;
+        *result = FALSE;
+        return NOERROR;
     }
 
     Int32 lineCount = 0;
     titleLayout->GetLineCount(&lineCount);
-    for (int i = 0; i < lineCount; i++) {
+    for (Int32 i = 0; i < lineCount; i++) {
         Int32 count = 0;
         titleLayout->GetEllipsisCount(i, &count);
         if (count > 0) {
@@ -1472,10 +1502,10 @@ ECode ActionBarView::GenerateLayoutParams(
     /* [out] */ IViewGroupLayoutParams** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = lp;
     if (lp == NULL) {
         return GenerateDefaultLayoutParams(result);
     }
+    *result = lp;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -1484,7 +1514,7 @@ ECode ActionBarView::OnSaveInstanceState(
     /* [out] */ IParcelable** result)
 {
     VALIDATE_NOT_NULL(result)
-    AutoPtr<IParcelable> superState = View::OnSaveInstanceState();
+    AutoPtr<IParcelable> superState = AbsActionBarView::OnSaveInstanceState();
     AutoPtr<IActionBarViewSavedState> state;
     CActionBarViewSavedState::New(superState, (IActionBarViewSavedState**)&state);
     CActionBarViewSavedState* ss = (CActionBarViewSavedState*)state.Get();
@@ -1493,7 +1523,7 @@ ECode ActionBarView::OnSaveInstanceState(
         IMenuItem::Probe(mExpandedMenuPresenter->mCurrentExpandedItem)->GetItemId(&itemId);
         ss->mExpandedMenuItemId = itemId;
     }
-    IAbsActionBarView::Probe(this)->IsOverflowMenuShowing(&ss->mIsOverflowOpen);
+    IsOverflowMenuShowing(&ss->mIsOverflowOpen);
     *result = IParcelable::Probe(state);
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -1560,12 +1590,12 @@ ECode ActionBarView::SetNavigationContentDescription(
     /* [in] */ Int32 resId)
 {
     mHomeDescriptionRes = resId;
-    AutoPtr<IResources> resources;
-    GetResources((IResources**)&resources);
-
-    AutoPtr<ICharSequence> text;
-    resources->GetText(resId, (ICharSequence**)&text);
-    mHomeDescription = resId != 0 ? text : NULL;
+    mHomeDescription = NULL;
+    if (resId != 0) {
+        AutoPtr<IResources> resources;
+        GetResources((IResources**)&resources);
+        resources->GetText(resId, (ICharSequence**)&mHomeDescription);
+    }
 
     Boolean isEnabled = FALSE;
     IView::Probe(mUpGoerFive)->IsEnabled(&isEnabled);
@@ -1594,11 +1624,11 @@ void ActionBarView::OnConfigurationChanged(
     mSubtitleView = NULL;
 
     if (mTitleLayout) {
+        IView* titleLayout = IView::Probe(mTitleLayout);
         AutoPtr<IViewParent> p;
-        IView::Probe(mTitleLayout)->GetParent((IViewParent**)&p);
-        if(TO_IINTERFACE(p) == TO_IINTERFACE(mUpGoerFive)) {
-            AutoPtr<IViewManager> vm = IViewManager::Probe(mUpGoerFive);
-            vm->RemoveView(IView::Probe(mTitleLayout));
+        titleLayout->GetParent((IViewParent**)&p);
+        if(p.Get() == IViewParent::Probe(mUpGoerFive)) {
+            IViewManager::Probe(mUpGoerFive)->RemoveView(titleLayout);
         }
     }
 
@@ -1636,15 +1666,16 @@ ECode ActionBarView::OnFinishInflate()
     AddView(IView::Probe(mUpGoerFive));
 
     if (mCustomNavView && (mDisplayOptions & IActionBar::DISPLAY_SHOW_CUSTOM) != 0) {
+        IView* customNavView = IView::Probe(mCustomNavView);
         AutoPtr<IViewParent> parent;
-        IView::Probe(mCustomNavView)->GetParent((IViewParent**)&parent);
+        customNavView->GetParent((IViewParent**)&parent);
 
-        if (TO_IINTERFACE(parent) != TO_IINTERFACE(this)) {
-            if (IViewGroup::Probe(parent)) {
-                AutoPtr<IViewManager> vg = IViewManager::Probe(parent);
-                vg->RemoveView(IView::Probe(mCustomNavView));
+        if (parent != this) {
+            IViewGroup* _parent = IViewGroup::Probe(parent);
+            if (_parent) {
+                _parent->RemoveView(customNavView);
             }
-            AddView(IView::Probe(mCustomNavView));
+            AddView(customNavView);
         }
     }
     return NOERROR;
@@ -1666,7 +1697,7 @@ void ActionBarView::OnMeasure(
             child->GetVisibility(&visible);
             Int32 count = 0;
             IViewGroup::Probe(mMenuView)->GetChildCount(&count);
-            if (visible != IView::GONE && !(TO_IINTERFACE(child) == TO_IINTERFACE(mMenuView) && count == 0) && TO_IINTERFACE(child) != TO_IINTERFACE(mUpGoerFive)) {
+            if (visible != IView::GONE && !(child.Get() == IView::Probe(mMenuView) && count == 0) && child.Get() != IView::Probe(mUpGoerFive)) {
                 ++visibleChildren;
             }
         }
@@ -1675,7 +1706,7 @@ void ActionBarView::OnMeasure(
         mUpGoerFive->GetChildCount(&upChildCount);
         for (Int32 i = 0; i < upChildCount; ++i) {
             AutoPtr<IView> child;
-            GetChildAt(i, (IView**)&child);
+            mUpGoerFive->GetChildAt(i, (IView**)&child);
             Int32 visible = 0;
             child->GetVisibility(&visible);
             if (visible != IView::GONE) {
@@ -1721,9 +1752,12 @@ void ActionBarView::OnMeasure(
     Int32 leftOfCenter = availableWidth / 2;
     Int32 rightOfCenter = leftOfCenter;
 
-    Int32 visibility = 0;
-    IView::Probe(mTitleLayout)->GetVisibility(&visibility);
-    Boolean showTitle = mTitleLayout != NULL && visibility != IView::GONE && (mDisplayOptions & IActionBar::DISPLAY_SHOW_TITLE) != 0;
+    Boolean showTitle = FALSE;
+    if (mTitleLayout != NULL) {
+        Int32 visibility = 0;
+        IView::Probe(mTitleLayout)->GetVisibility(&visibility);
+        showTitle = visibility != IView::GONE && (mDisplayOptions & IActionBar::DISPLAY_SHOW_TITLE) != 0;
+    }
 
     AutoPtr<HomeView> homeLayout = mExpandedActionView != NULL ? mExpandedHomeLayout : mHomeLayout;
 
@@ -1739,39 +1773,47 @@ void ActionBarView::OnMeasure(
         homeWidthSpec = View::MeasureSpec::MakeMeasureSpec(homeLpWidth, View::MeasureSpec::EXACTLY);
     }
 
+    using Elastos::Core::Math;
+
     homeLayout->Measure(homeWidthSpec, exactHeightSpec);
     Int32 homeWidth = 0;
     Int32 homeVisibility = 0;
     homeLayout->GetVisibility(&homeVisibility);
-    AutoPtr<IViewParent> viewParent;
-    homeLayout->GetParent((IViewParent**)&viewParent);
-    if ((homeVisibility != IView::GONE && TO_IINTERFACE(viewParent) == TO_IINTERFACE(mUpGoerFive)) || showTitle) {
-        homeLayout->GetMeasuredWidth(&homeWidth);
-        Int32 homeof = 0;
-        homeLayout->GetStartOffset(&homeof);
-        Int32 homeOffsetWidth = homeWidth + homeof;
-        availableWidth = Elastos::Core::Math::Max(0, availableWidth - homeOffsetWidth);
-        leftOfCenter = Elastos::Core::Math::Max(0, availableWidth - homeOffsetWidth);
-    }
-
-    if (mMenuView) {
-        AutoPtr<IViewParent> mp;
-        IView::Probe(mMenuView)->GetParent((IViewParent**)&mp);
-        if (mp.Get() == IViewParent::Probe(this)) {
-            availableWidth = MeasureChildView(IView::Probe(mMenuView), availableWidth, exactHeightSpec, 0);
-            Int32 menuw = 0;
-            IView::Probe(mMenuView)->GetMeasuredWidth(&menuw);
-            rightOfCenter = Elastos::Core::Math::Max(0, rightOfCenter - menuw);
+    if (homeVisibility != IView::GONE) {
+        AutoPtr<IViewParent> viewParent;
+        homeLayout->GetParent((IViewParent**)&viewParent);
+        if (viewParent.Get() == IViewParent::Probe(mUpGoerFive) || showTitle) {
+            homeLayout->GetMeasuredWidth(&homeWidth);
+            Int32 homeof = 0;
+            homeLayout->GetStartOffset(&homeof);
+            Int32 homeOffsetWidth = homeWidth + homeof;
+            availableWidth = Math::Max(0, availableWidth - homeOffsetWidth);
+            leftOfCenter = Math::Max(0, availableWidth - homeOffsetWidth);
         }
     }
 
-    Int32 iv = 0;
-    if (mIndeterminateProgressView &&
-            (IView::Probe(mIndeterminateProgressView)->GetVisibility(&iv), iv != IView::GONE)) {
-        availableWidth = MeasureChildView(IView::Probe(mIndeterminateProgressView), availableWidth, childSpecHeight, 0);
-        Int32 ipw = 0;
-        IView::Probe(mIndeterminateProgressView)->GetMeasuredWidth(&ipw);
-        rightOfCenter = Elastos::Core::Math::Max(0, rightOfCenter - ipw);
+    if (mMenuView) {
+        IView* menuView = IView::Probe(mMenuView);
+        AutoPtr<IViewParent> mp;
+        menuView->GetParent((IViewParent**)&mp);
+        if (mp == this) {
+            availableWidth = MeasureChildView(menuView, availableWidth, exactHeightSpec, 0);
+            Int32 menuw = 0;
+            menuView->GetMeasuredWidth(&menuw);
+            rightOfCenter = Math::Max(0, rightOfCenter - menuw);
+        }
+    }
+
+    if (mIndeterminateProgressView) {
+        IView* indeterminateProgressView = IView::Probe(mIndeterminateProgressView);
+        Int32 iv = 0;
+        indeterminateProgressView->GetVisibility(&iv);
+        if (iv != IView::GONE) {
+            availableWidth = MeasureChildView(indeterminateProgressView, availableWidth, childSpecHeight, 0);
+            Int32 ipw = 0;
+            indeterminateProgressView->GetMeasuredWidth(&ipw);
+            rightOfCenter = Math::Max(0, rightOfCenter - ipw);
+        }
     }
 
     if (!mExpandedActionView) {
@@ -1779,27 +1821,29 @@ void ActionBarView::OnMeasure(
             case IActionBar::NAVIGATION_MODE_LIST:
                 if (mListNavLayout) {
                     Int32 itemPaddingSize = showTitle ? mItemPadding * 2 : mItemPadding;
-                    availableWidth = Elastos::Core::Math::Max(0, availableWidth - itemPaddingSize);
-                    leftOfCenter = Elastos::Core::Math::Max(0, leftOfCenter - itemPaddingSize);
-                    IView::Probe(mListNavLayout)->Measure(View::MeasureSpec::MakeMeasureSpec(availableWidth, View::MeasureSpec::AT_MOST),
+                    availableWidth = Math::Max(0, availableWidth - itemPaddingSize);
+                    leftOfCenter = Math::Max(0, leftOfCenter - itemPaddingSize);
+                    IView* listNavLayout = IView::Probe(mListNavLayout);
+                    listNavLayout->Measure(View::MeasureSpec::MakeMeasureSpec(availableWidth, View::MeasureSpec::AT_MOST),
                         View::MeasureSpec::MakeMeasureSpec(height, View::MeasureSpec::EXACTLY));
                     Int32 listNavWidth = 0;
-                    IView::Probe(mListNavLayout)->GetMeasuredWidth(&listNavWidth);
-                    availableWidth = Elastos::Core::Math::Max(0, availableWidth - listNavWidth);
-                    leftOfCenter = Elastos::Core::Math::Max(0, leftOfCenter - listNavWidth);
+                    listNavLayout->GetMeasuredWidth(&listNavWidth);
+                    availableWidth = Math::Max(0, availableWidth - listNavWidth);
+                    leftOfCenter = Math::Max(0, leftOfCenter - listNavWidth);
                 }
                 break;
             case IActionBar::NAVIGATION_MODE_TABS:
                 if (mTabScrollView) {
                     Int32 itemPaddingSize = showTitle ? mItemPadding * 2 : mItemPadding;
-                    availableWidth = Elastos::Core::Math::Max(0, availableWidth - itemPaddingSize);
-                    leftOfCenter = Elastos::Core::Math::Max(0, leftOfCenter - itemPaddingSize);
-                    IView::Probe(mTabScrollView)->Measure(View::MeasureSpec::MakeMeasureSpec(availableWidth, View::MeasureSpec::AT_MOST),
+                    availableWidth = Math::Max(0, availableWidth - itemPaddingSize);
+                    leftOfCenter = Math::Max(0, leftOfCenter - itemPaddingSize);
+                    IView* tabScrollView = IView::Probe(mTabScrollView);
+                    tabScrollView->Measure(View::MeasureSpec::MakeMeasureSpec(availableWidth, View::MeasureSpec::AT_MOST),
                         View::MeasureSpec::MakeMeasureSpec(height, View::MeasureSpec::EXACTLY));
                     Int32 tabWidth = 0;
-                    IView::Probe(mTabScrollView)->GetMeasuredWidth(&tabWidth);
-                    availableWidth = Elastos::Core::Math::Max(0, availableWidth - tabWidth);
-                    leftOfCenter = Elastos::Core::Math::Max(0, leftOfCenter - tabWidth);
+                    tabScrollView->GetMeasuredWidth(&tabWidth);
+                    availableWidth = Math::Max(0, availableWidth - tabWidth);
+                    leftOfCenter = Math::Max(0, leftOfCenter - tabWidth);
                 }
                 break;
         }
@@ -1822,18 +1866,12 @@ void ActionBarView::OnMeasure(
         if (IActionBarLayoutParams::Probe(lp)) {
             ablp = IActionBarLayoutParams::Probe(lp);
         }
-        else {
-            ablp = NULL;
-        }
 
         Int32 horizontalMargin = 0;
         Int32 verticalMargin = 0;
         if (ablp) {
             Int32 ablm = 0, abrm = 0, abtm = 0, abbm = 0;
-            IViewGroupMarginLayoutParams::Probe(ablp)->GetLeftMargin(&ablm);
-            IViewGroupMarginLayoutParams::Probe(ablp)->GetRightMargin(&abrm);
-            IViewGroupMarginLayoutParams::Probe(ablp)->GetTopMargin(&abtm);
-            IViewGroupMarginLayoutParams::Probe(ablp)->GetBottomMargin(&abbm);
+            IViewGroupMarginLayoutParams::Probe(ablp)->GetMargins(&ablm, &abtm, &abrm, &abbm);
 
             horizontalMargin = ablm + abrm;
             verticalMargin = abtm + abbm;
@@ -1848,16 +1886,20 @@ void ActionBarView::OnMeasure(
             customNavHeightMode = (lp->GetHeight(&height), height) != IViewGroupLayoutParams::WRAP_CONTENT ?
                 View::MeasureSpec::EXACTLY : View::MeasureSpec::AT_MOST;
         }
-        Int32 lh = 0, lw = 0, abg = 0;
+        Int32 lh = 0, lw = 0;
         lp->GetHeight(&lh);
         lp->GetWidth(&lw);
-        ablp->GetGravity(&abg);
-        Int32 customNavHeight = Elastos::Core::Math::Max(0, (lh >= 0 ? Elastos::Core::Math::Min(lh, height) : height) - verticalMargin);
+        Int32 customNavHeight = Math::Max(0, (lh >= 0 ? Math::Min(lh, height) : height) - verticalMargin);
         Int32 customNavWidthMode = lw != IViewGroupLayoutParams::WRAP_CONTENT ? View::MeasureSpec::EXACTLY : View::MeasureSpec::AT_MOST;
-        Int32 customNavWidth = Elastos::Core::Math::Max(0, (lw >= 0 ? Elastos::Core::Math::Min(lw, availableWidth) : availableWidth) - horizontalMargin);
-        Int32 hgrav = (ablp ? abg : DEFAULT_CUSTOM_GRAVITY) & IGravity::HORIZONTAL_GRAVITY_MASK;
+        Int32 customNavWidth = Math::Max(0, (lw >= 0 ? Math::Min(lw, availableWidth) : availableWidth) - horizontalMargin);
+        Int32 gra = DEFAULT_CUSTOM_GRAVITY;
+        if (ablp) {
+            ablp->GetGravity(&gra);
+        }
+        Int32 hgrav = gra & IGravity::HORIZONTAL_GRAVITY_MASK;
+
         if (hgrav == IGravity::CENTER_HORIZONTAL && lw == IViewGroupLayoutParams::MATCH_PARENT) {
-            customNavWidth = Elastos::Core::Math::Min(leftOfCenter, rightOfCenter) * 2;
+            customNavWidth = Math::Min(leftOfCenter, rightOfCenter) * 2;
         }
 
         customView->Measure(View::MeasureSpec::MakeMeasureSpec(customNavWidth, customNavWidthMode),
@@ -1871,7 +1913,7 @@ void ActionBarView::OnMeasure(
     if (mTitleLayout) {
         Int32 tw = 0;
         IView::Probe(mTitleLayout)->GetMeasuredWidth(&tw);
-        leftOfCenter = Elastos::Core::Math::Max(0, leftOfCenter - tw);
+        leftOfCenter = Math::Max(0, leftOfCenter - tw);
     }
 
     if (mContentHeight <= 0) {
@@ -1898,13 +1940,17 @@ void ActionBarView::OnMeasure(
         IAbsActionBarView::Probe(mContextView)->SetContentHeight(measureHeight);
     }
 
-    Int32 pv = 0;
-    if (mProgressView && (IView::Probe(mProgressView)->GetVisibility(&pv), pv != IView::GONE)) {
-        Int32 measureHeight = 0;
-        GetMeasuredHeight(&measureHeight);
-        IView::Probe(mProgressView)->Measure(View::MeasureSpec::MakeMeasureSpec(
-                contentWidth - mProgressBarPadding * 2, View::MeasureSpec::EXACTLY),
-                View::MeasureSpec::MakeMeasureSpec(measureHeight, View::MeasureSpec::AT_MOST));
+    if (mProgressView) {
+        IView* progressView = IView::Probe(mProgressView);
+        Int32 pv = 0;
+        progressView->GetVisibility(&pv);
+        if (pv != IView::GONE) {
+            Int32 measureHeight = 0;
+            GetMeasuredHeight(&measureHeight);
+            progressView->Measure(View::MeasureSpec::MakeMeasureSpec(
+                    contentWidth - mProgressBarPadding * 2, View::MeasureSpec::EXACTLY),
+                    View::MeasureSpec::MakeMeasureSpec(measureHeight, View::MeasureSpec::AT_MOST));
+        }
     }
 }
 
@@ -1937,16 +1983,20 @@ ECode ActionBarView::OnLayout(
     Int32 y = paddingTop;
 
     AutoPtr<HomeView> homeLayout = mExpandedActionView ? mExpandedHomeLayout : mHomeLayout;
-    Int32 titleVisibility = 0;
-    IView::Probe(mTitleLayout)->GetVisibility(&titleVisibility);
-    Boolean showTitle = mTitleLayout != NULL && titleVisibility != IView::GONE &&
-        (mDisplayOptions & IActionBar::DISPLAY_SHOW_TITLE) != 0;
+    Boolean showTitle = FALSE;
+    if (mTitleLayout != NULL) {
+        Int32 titleVisibility = 0;
+        IView::Probe(mTitleLayout)->GetVisibility(&titleVisibility);
+        showTitle =  titleVisibility != IView::GONE &&
+            (mDisplayOptions & IActionBar::DISPLAY_SHOW_TITLE) != 0;
+    }
     Int32 startOffset = 0;
+    IView* _homeLayout = IView::Probe(homeLayout);
     AutoPtr<IViewParent> homeViewParent;
-    IView::Probe(homeLayout)->GetParent((IViewParent**)&homeViewParent);
-    if (TO_IINTERFACE(homeViewParent)== TO_IINTERFACE(mUpGoerFive)) {
+    _homeLayout->GetParent((IViewParent**)&homeViewParent);
+    if (homeViewParent.Get() == IViewParent::Probe(mUpGoerFive)) {
         Int32 homeVisibility = 0;
-        IView::Probe(homeLayout)->GetVisibility(&homeVisibility);
+        _homeLayout->GetVisibility(&homeVisibility);
         if (homeVisibility != IView::GONE) {
             homeLayout->GetStartOffset(&startOffset);
         }
@@ -1982,23 +2032,27 @@ ECode ActionBarView::OnLayout(
     }
 
     if (mMenuView) {
+        IView* menuView = IView::Probe(mMenuView);
         AutoPtr<IViewParent> p;
-        IView::Probe(mMenuView)->GetParent((IViewParent**)&p);
-        if (TO_IINTERFACE(p) == TO_IINTERFACE(this)) {
-            PositionChild(IView::Probe(mMenuView), menuStart, y, contentHeight, !isLayoutRtl);
+        menuView->GetParent((IViewParent**)&p);
+        if (p == this) {
+            PositionChild(menuView, menuStart, y, contentHeight, !isLayoutRtl);
             Int32 w = 0;
-            IView::Probe(mMenuView)->GetMeasuredWidth(&w);
+            menuView->GetMeasuredWidth(&w);
             menuStart += direction * w;
         }
     }
 
-    Int32 visibility = 0;
-    if (mIndeterminateProgressView &&
-            (IView::Probe(mIndeterminateProgressView)->GetVisibility(&visibility), visibility != IView::GONE)) {
-        PositionChild(IView::Probe(mIndeterminateProgressView), menuStart, y, contentHeight, !isLayoutRtl);
-        Int32 w = 0;
-        IView::Probe(mIndeterminateProgressView)->GetMeasuredWidth(&w);
-        menuStart += direction * w;
+    if (mIndeterminateProgressView) {
+        IView* indeterminateProgressView = IView::Probe(mIndeterminateProgressView);
+        Int32 visibility = 0;
+        indeterminateProgressView->GetVisibility(&visibility);
+        if (visibility != IView::GONE) {
+            PositionChild(indeterminateProgressView, menuStart, y, contentHeight, !isLayoutRtl);
+            Int32 w = 0;
+            indeterminateProgressView->GetMeasuredWidth(&w);
+            menuStart += direction * w;
+        }
     }
 
     AutoPtr<IView> customView;
@@ -2020,22 +2074,21 @@ ECode ActionBarView::OnLayout(
             ablp = IActionBarLayoutParams::Probe(lp);
             ablp->GetGravity(&gravity);
         }
-        else {
-            ablp = NULL;
-        }
 
         Int32 navWidth = 0;
         customView->GetMeasuredWidth(&navWidth);
+
         Int32 topMargin = 0;
         Int32 bottomMargin = 0;
         if (ablp) {
+            IViewGroupMarginLayoutParams* vgmlp = IViewGroupMarginLayoutParams::Probe(ablp);
             Int32 start = 0, end = 0;
-            IViewGroupMarginLayoutParams::Probe(ablp)->GetMarginStart(&start);
+            vgmlp->GetMarginStart(&start);
             x = Next(x, start, isLayoutRtl);
-            IViewGroupMarginLayoutParams::Probe(ablp)->GetMarginEnd(&end);
+            vgmlp->GetMarginEnd(&end);
             menuStart += direction * end;
-            IViewGroupMarginLayoutParams::Probe(ablp)->GetTopMargin(&topMargin);
-            IViewGroupMarginLayoutParams::Probe(ablp)->GetBottomMargin(&bottomMargin);
+            vgmlp->GetTopMargin(&topMargin);
+            vgmlp->GetBottomMargin(&bottomMargin);
         }
 
         Int32 hgravity = gravity & IGravity::RELATIVE_HORIZONTAL_GRAVITY_MASK;
@@ -2088,13 +2141,17 @@ ECode ActionBarView::OnLayout(
         switch (vgravity) {
             case IGravity::CENTER_VERTICAL:
                 {
+                    Int32 paddedTop;
+                    GetPaddingTop(&paddedTop);
+                    GetPaddingBottom(&paddingBottom);
                     Int32 paddedBottom = mBottom - mTop - paddingBottom;
                     Int32 h = 0;
                     customView->GetMeasuredHeight(&h);
-                    ypos = ((paddedBottom - paddingTop) - h) / 2;
+                    ypos = ((paddedBottom - paddedTop) - h) / 2;
                 }
                 break;
             case IGravity::TOP:
+                GetPaddingTop(&paddingTop);
                 ypos = paddingTop + topMargin;
                 break;
             case IGravity::BOTTOM:
@@ -2103,6 +2160,7 @@ ECode ActionBarView::OnLayout(
                     customView->GetMeasuredHeight(&h);
                     Int32 height = 0;
                     GetHeight(&height);
+                    GetPaddingBottom(&paddingBottom);
                     ypos = height - paddingBottom - h - bottomMargin;
                 }
                 break;
@@ -2116,13 +2174,14 @@ ECode ActionBarView::OnLayout(
     }
 
     if (mProgressView) {
-        IView::Probe(mProgressView)->BringToFront();
+        IView* pv = IView::Probe(mProgressView);
+        pv->BringToFront();
         Int32 ph = 0;
-        IView::Probe(mProgressView)->GetMeasuredHeight(&ph);
+        pv->GetMeasuredHeight(&ph);
         Int32 halfProgressHeight = ph / 2;
         Int32 pw = 0;
-        IView::Probe(mProgressView)->GetMeasuredWidth(&pw);
-        IView::Probe(mProgressView)->Layout(mProgressBarPadding, -halfProgressHeight, mProgressBarPadding + pw, halfProgressHeight);
+        pv->GetMeasuredWidth(&pw);
+        pv->Layout(mProgressBarPadding, -halfProgressHeight, mProgressBarPadding + pw, halfProgressHeight);
     }
     return NOERROR;
 }
@@ -2135,9 +2194,10 @@ void ActionBarView::ConfigPresenters(
         builder->AddMenuPresenter(IMenuPresenter::Probe(mExpandedMenuPresenter), mPopupContext);
     }
     else {
-        IMenuPresenter::Probe(mActionMenuPresenter)->InitForMenu(mPopupContext, NULL);
+        IMenuPresenter* actionMenuPresenter = IMenuPresenter::Probe(mActionMenuPresenter);
+        actionMenuPresenter->InitForMenu(mPopupContext, NULL);
         mExpandedMenuPresenter->InitForMenu(mPopupContext, NULL);
-        IMenuPresenter::Probe(mActionMenuPresenter)->UpdateMenuView(TRUE);
+        actionMenuPresenter->UpdateMenuView(TRUE);
         mExpandedMenuPresenter->UpdateMenuView(TRUE);
     }
 }
@@ -2173,21 +2233,24 @@ void ActionBarView::SetHomeButtonEnabled(
         return ;
     }
 
-    IView::Probe(mUpGoerFive)->SetEnabled(enable);
-    IView::Probe(mUpGoerFive)->SetFocusable(enable);
+    IView* upGoerFive = IView::Probe(mUpGoerFive);
+
+    upGoerFive->SetEnabled(enable);
+    upGoerFive->SetFocusable(enable);
     UpdateHomeAccessibility(enable);
 }
 
 void ActionBarView::UpdateHomeAccessibility(
     /* [in] */ Boolean homeEnabled)
 {
+    IView* upGoerFive = IView::Probe(mUpGoerFive);
     if (!homeEnabled) {
-        IView::Probe(mUpGoerFive)->SetContentDescription(NULL);
-        IView::Probe(mUpGoerFive)->SetImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+        upGoerFive->SetContentDescription(NULL);
+        upGoerFive->SetImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
     else {
-        IView::Probe(mUpGoerFive)->SetImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-        IView::Probe(mUpGoerFive)->SetContentDescription(BuildHomeContentDescription());
+        upGoerFive->SetImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+        upGoerFive->SetContentDescription(BuildHomeContentDescription());
     }
 }
 
@@ -2241,18 +2304,19 @@ void ActionBarView::InitTitle()
 {
     if (!mTitleLayout) {
         AutoPtr<IContext> context;
-        IView::Probe(this)->GetContext((IContext**)&context);
+        GetContext((IContext**)&context);
 
         AutoPtr<ILayoutInflater> inflater;
         LayoutInflater::From(context, (ILayoutInflater**)&inflater);
         AutoPtr<IView> v;
-        inflater->Inflate(R::layout::action_bar_title_item, IViewGroup::Probe(this), FALSE, (IView**)&v);
+        inflater->Inflate(R::layout::action_bar_title_item, this, FALSE, (IView**)&v);
         mTitleLayout = ILinearLayout::Probe(v);
         AutoPtr<IView> title;
-        IView::Probe(mTitleLayout)->FindViewById(R::id::action_bar_title, (IView**)&title);
+        IView* titleLayout = IView::Probe(mTitleLayout);
+        titleLayout->FindViewById(R::id::action_bar_title, (IView**)&title);
         mTitleView = ITextView::Probe(title);
         AutoPtr<IView> subview;
-        IView::Probe(mTitleLayout)->FindViewById(R::id::action_bar_subtitle, (IView**)&subview);
+        titleLayout->FindViewById(R::id::action_bar_subtitle, (IView**)&subview);
         mSubtitleView = ITextView::Probe(subview);
 
         if (mTitleStyleRes != 0) {
@@ -2272,12 +2336,13 @@ void ActionBarView::InitTitle()
     }
 
     ActionBarTransition::BeginDelayedTransition(this);
-    IViewGroup::Probe(mUpGoerFive)->AddView(IView::Probe(mTitleLayout));
+    IView* _titleLayout = IView::Probe(mTitleLayout);
+    IViewGroup::Probe(mUpGoerFive)->AddView(_titleLayout);
     if (mExpandedActionView || (TextUtils::IsEmpty(mTitle) && TextUtils::IsEmpty(mSubtitle))) {
-        IView::Probe(mTitleLayout)->SetVisibility(IView::GONE);
+        _titleLayout->SetVisibility(IView::GONE);
     }
     else {
-        IView::Probe(mTitleLayout)->SetVisibility(VISIBLE);
+        _titleLayout->SetVisibility(IView::VISIBLE);
     }
 }
 
@@ -2356,5 +2421,3 @@ ECode ActionBarView::RestoreHierarchyState(
 } // namespace Internal
 } // namespace Droid
 } // namespace Elastos
-
-
