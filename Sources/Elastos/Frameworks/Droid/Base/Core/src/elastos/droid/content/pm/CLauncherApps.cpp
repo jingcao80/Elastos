@@ -343,8 +343,9 @@ CAR_OBJECT_IMPL(CLauncherApps)
 CLauncherApps::CLauncherApps()
 {
     CArrayList::New((IList**)&mCallbacks);
-    CLauncherAppsOnAppsChangedListener::New(IWeakReference::Probe(TO_IINTERFACE(this)),
-            (IOnAppsChangedListener**)&mAppsChangedListener);
+    AutoPtr<IWeakReference> weakRef;
+    GetWeakReference((IWeakReference**)&weakRef);
+    CLauncherAppsOnAppsChangedListener::New(weakRef, (IOnAppsChangedListener**)&mAppsChangedListener);
 }
 
 CLauncherApps::~CLauncherApps()

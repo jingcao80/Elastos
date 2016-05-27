@@ -1,6 +1,7 @@
 
-#include "elastos/droid/defaultcontainerservice/DefaultContainerService.h"
-#include "elastos/droid/defaultcontainerservice/MeasurementUtils.h"
+#include "elastos/droid/defcontainer/DefaultContainerService.h"
+#include "elastos/droid/defcontainer/CMediaContainerService.h"
+#include "elastos/droid/defcontainer/MeasurementUtils.h"
 #include "elastos/droid/os/Process.h"
 #include <elastos/droid/os/Environment.h>
 #include "elastos/droid/os/FileUtils.h"
@@ -57,7 +58,7 @@ using Libcore::IO::CStreams;
 
 namespace Elastos {
 namespace Droid {
-namespace DefaultContainerService {
+namespace DefContainer {
 
 //////////////////////////////////////////////////////////////////
 //      DefaultContainerService::MediaContainerService
@@ -69,9 +70,9 @@ DefaultContainerService::MediaContainerService::MediaContainerService()
 {}
 
 ECode DefaultContainerService::MediaContainerService::constructor(
-    /* [in] */ DefaultContainerService* host)
+    /* [in] */ IService* host)
 {
-    mHost = host;
+    mHost = (DefaultContainerService*)host;
     return NOERROR;
 }
 
@@ -169,7 +170,7 @@ ECode DefaultContainerService::MediaContainerService::GetMinimalPackageInfo(
     /* [out] */ IPackageInfoLite** result)
 {
     VALIDATE_NOT_NULL(result)
-    AutoPtr<IContext> context = IContext::Probe(this);
+    AutoPtr<IContext> context = IContext::Probe(mHost);
     Boolean isForwardLocked = (flags & IPackageManager::INSTALL_FORWARD_LOCK) != 0;
 
     AutoPtr<IPackageInfoLite> ret;
@@ -365,14 +366,14 @@ ECode DefaultContainerService::MediaContainerService::ToString(
 //////////////////////////////////////////////////////////////////
 
 DefaultContainerService::DefaultContainerService()
-    //: IntentService()
 {
+    CMediaContainerService::New(this, (IBinder**)&mBinder);
 }
 
 ECode DefaultContainerService::constructor()
 {
-    //IntentService::constructor(String("DefaultContainerService"));
-    //SetIntentRedelivery(TRUE);
+    IntentService::constructor(String("DefaultContainerService"));
+    SetIntentRedelivery(TRUE);
     return NOERROR;
 }
 
@@ -636,6 +637,6 @@ ECode DefaultContainerService::CopyFile(
     return NOERROR;
 }
 
-} //namespace DefaultContainerService
+} //namespace DefContainer
 } //namespace Droid
 } //namespace Elastos

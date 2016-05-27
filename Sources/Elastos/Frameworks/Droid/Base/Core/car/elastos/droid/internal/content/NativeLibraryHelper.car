@@ -2,6 +2,7 @@
 module
 {
     using interface Elastos.IO.IFile;
+    interface Elastos.Droid.Content.Pm.IPackageLite;
 
     namespace Elastos {
     namespace Droid {
@@ -33,8 +34,8 @@ module
             [in] Handle64 pkg, //PackageParser.Package*
             [out] INativeLibraryHelperHandle** handle);
 
-        CreatePackageLite(
-            [in] Handle64 pkgLite, //PackageParser.PackageLite*
+        Create(
+            [in] IPackageLite* pkgLite,
             [out] INativeLibraryHelperHandle** handle);
     }
 

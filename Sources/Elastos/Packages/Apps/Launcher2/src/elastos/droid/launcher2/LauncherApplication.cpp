@@ -85,10 +85,10 @@ ECode LauncherApplication::OnCreate()
     CLauncherModel::New(ILauncherApplication::Probe(this), mIconCache, (ILauncherModel**)&mModel);
     AutoPtr<IInterface> obj;
     GetSystemService(IContext::LAUNCHER_APPS_SERVICE, (IInterface**)&obj);
-    AutoPtr<ILauncherApps> launcherApps = ILauncherApps::Probe(obj);
+    mLauncherApps = ILauncherApps::Probe(obj);
     AutoPtr<ILauncherAppsCallback> _callback;
     mModel->GetLauncherAppsCallback((ILauncherAppsCallback**)&_callback);
-    launcherApps->RegisterCallback(_callback);
+    mLauncherApps->RegisterCallback(_callback);
 
     // Register intent receivers
     AutoPtr<IIntentFilter> filter1;

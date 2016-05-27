@@ -424,6 +424,9 @@ public:
     CARAPI Append(
         /* [in] */ IInterface* obj);
 
+    CARAPI Append(
+        /* [in] */ IObject* obj);
+
     /**
      * Adds the specified string to the end of this buffer.
      * <p>
@@ -855,6 +858,7 @@ public:
     StringBuilder& operator+=(StringBuffer&);
     StringBuilder& operator+=(StringBuilder&);
     StringBuilder& operator+=(IInterface*);
+    StringBuilder& operator+=(IObject*);
 
 private:
     ECO_LOCAL StringBuilder(const StringBuilder&);

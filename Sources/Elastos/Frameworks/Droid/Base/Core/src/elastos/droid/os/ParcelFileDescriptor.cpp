@@ -1025,11 +1025,11 @@ ECode ParcelFileDescriptor::WriteToParcel(
 
         Int32 fd = -1;
         mFd->GetDescriptor(&fd);
-        out->WriteFileDescriptor(fd);
+        out->WriteDupFileDescriptor(fd);
         if (mCommFd != NULL) {
             mCommFd->GetDescriptor(&fd);
             out->WriteInt32(1);
-            out->WriteFileDescriptor(fd);
+            out->WriteDupFileDescriptor(fd);
         }
         else {
             out->WriteInt32(0);

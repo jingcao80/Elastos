@@ -77,6 +77,7 @@ using Elastos::IO::IFileInputStream;
 // using Elastos::Security::CSecureRandom;
 using Elastos::Utility::Objects;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::CRandom;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Etl::Set;
 using Libcore::IO::IIoUtils;
@@ -495,8 +496,9 @@ ECode CPackageInstallerService::constructor(
     /* [in] */ IFile* stagingDir)
 {
     mInternalCallback = new InternalCallback(this);
-    // TODO: SecureRandom has not been realized
+    Slogger::D(TAG, "TODO: CSecureRandom has not been realized!");
     // CSecureRandom::New((IRandom**)&mRandom);
+    CRandom::New((IRandom**)&mRandom);
 
     mContext = context;
     mPm = (CPackageManagerService*)pm;

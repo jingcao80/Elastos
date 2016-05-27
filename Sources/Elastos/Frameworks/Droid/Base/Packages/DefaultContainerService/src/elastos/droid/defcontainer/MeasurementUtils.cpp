@@ -5,11 +5,11 @@
 #include <fcntl.h>
 #include <dirent.h>
 
-#include "elastos/droid/defaultcontainerservice/MeasurementUtils.h"
+#include "elastos/droid/defcontainer/MeasurementUtils.h"
 
 namespace Elastos {
 namespace Droid {
-namespace DefaultContainerService {
+namespace DefContainer {
 
 Int64 stat_size(struct stat *s)
 {
@@ -84,6 +84,6 @@ Int64 MeasurementUtils::MeasureDirectory(
     return ret;
 }
 
-} //namespace DefaultContainerService
+} //namespace DefContainer
 } //namespace Droid
 } //namespace Elastos

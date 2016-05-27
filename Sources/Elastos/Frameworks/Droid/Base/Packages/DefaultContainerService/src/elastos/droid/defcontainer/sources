@@ -1,4 +1,4 @@
-TARGET_NAME= DefaultContainerService
+TARGET_NAME= Elastos.Droid.DefContainer
 TARGET_TYPE= eco
 
 EXPORT_ALL_SYMBOLS = 1
@@ -12,7 +12,7 @@ LUBE_FLAGS += -n -u
 
 IMPORTS += Elastos.Droid.Core.eco
 
-SOURCES = DefaultContainerService.car
+SOURCES = Elastos.Droid.DefContainer.car
 SOURCES += DefaultContainerService.cpp
 SOURCES += MeasurementUtils.cpp
 SOURCES += CDefaultContainerService.cpp
@@ -27,4 +27,6 @@ LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 LIBRARIES += -lm -licuuc -llog -lutils -landroidfw
 
 APPPACK = 1
+APP_PACKAGE_NAME = Elastos.Droid.DefContainer
+RES_NAMESPACE = Elastos.Droid.DefContainer
 DIRRESOURCES += $(MAKEDIR)/res;

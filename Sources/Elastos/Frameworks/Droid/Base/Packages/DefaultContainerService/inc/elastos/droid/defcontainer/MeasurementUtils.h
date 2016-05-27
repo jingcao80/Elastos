@@ -7,7 +7,7 @@ using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
-namespace DefaultContainerService {
+namespace DefContainer {
 
 class MeasurementUtils
     : public Object
@@ -17,7 +17,7 @@ public:
          /* [in] */ const String& path);
 };
 
-} //namespace DefaultContainerService
+} //namespace DefContainer
 } //namespace Droid
 } //namespace Elastos
 

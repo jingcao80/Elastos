@@ -24,11 +24,11 @@ ECode CNativeLibraryHelperHandleHelper::CreatePackage(
     return CNativeLibraryHelperHandle::CreatePackage(pkg, handle);
 }
 
-ECode CNativeLibraryHelperHandleHelper::CreatePackageLite(
-    /* [in] */ Handle64 lite,
+ECode CNativeLibraryHelperHandleHelper::Create(
+    /* [in] */ IPackageLite* lite,
     /* [out] */ INativeLibraryHelperHandle** handle)
 {
-    return CNativeLibraryHelperHandle::CreatePackageLite(lite, handle);
+    return CNativeLibraryHelperHandle::Create(lite, handle);
 }
 
 } // namespace Content

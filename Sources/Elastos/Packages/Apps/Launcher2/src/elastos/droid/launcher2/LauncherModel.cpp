@@ -1345,7 +1345,7 @@ Boolean LauncherModel::LoaderTask::CheckItemPlacement(
 
         // We use the last index to refer to the hotseat and the screen as the rank, so
         // test and update the occupied state accordingly
-        if ((*occupied)[ILauncher::SCREEN_COUNT][item->mScreen][0] != NULL) {
+        if ((*(*(*occupied)[ILauncher::SCREEN_COUNT])[item->mScreen])[0] != NULL) {
             StringBuilder sb;
             sb += "Error loading shortcut into hotseat ";
             sb += TO_STR(item);
@@ -1362,7 +1362,7 @@ Boolean LauncherModel::LoaderTask::CheckItemPlacement(
             return FALSE;
         }
         else {
-            (*((*occupied)[ILauncher::SCREEN_COUNT]))[item->mScreen]->Set(0, item);
+            (*(*occupied)[ILauncher::SCREEN_COUNT])[item->mScreen]->Set(0, item);
             return TRUE;
         }
     }
@@ -1374,7 +1374,7 @@ Boolean LauncherModel::LoaderTask::CheckItemPlacement(
     // Check if any workspace icons overlap with each other
     for (Int32 x = item->mCellX; x < (item->mCellX+item->mSpanX); x++) {
         for (Int32 y = item->mCellY; y < (item->mCellY+item->mSpanY); y++) {
-            if ((*occupied)[containerIndex][x][y] != NULL) {
+            if ((*(*(*occupied)[containerIndex])[x])[y] != NULL) {
                 StringBuilder sb;
                 sb += "Error loading shortcut ";
                 sb += TO_STR(item);
@@ -1396,7 +1396,7 @@ Boolean LauncherModel::LoaderTask::CheckItemPlacement(
     }
     for (Int32 x = item->mCellX; x < (item->mCellX+item->mSpanX); x++) {
         for (Int32 y = item->mCellY; y < (item->mCellY+item->mSpanY); y++) {
-            (*((*occupied)[containerIndex]))[x]->Set(y, item);
+            (*(*occupied)[containerIndex])[x]->Set(y, item);
         }
     }
 
@@ -1454,7 +1454,7 @@ void LauncherModel::LoaderTask::LoadWorkspace()
                 ArrayOf<ArrayOf<ItemInfo*>* >::Alloc(mCellCountX + 1);
             occupied->Set(i, array2);
 
-            for (Int32 j = 0; i < mCellCountX + 1; i++) {
+            for (Int32 j = 0; j < mCellCountX + 1; j++) {
                 AutoPtr<ArrayOf<ItemInfo*> > array3 =
                         ArrayOf<ItemInfo*>::Alloc(mCellCountY + 1);
                 array2->Set(j, array3);
@@ -1820,7 +1820,7 @@ FINALLY:
                         line += " | ";
                     }
                     for (Int32 x = 0; x < mCellCountX; x++) {
-                        line += (((*occupied)[s][x][y] != NULL) ? "#" : ".");
+                        line += (*(*(*occupied)[s])[x])[y] != NULL ? "#" : ".";
                     }
                 }
                 line += " ]";

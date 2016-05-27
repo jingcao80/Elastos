@@ -2404,6 +2404,7 @@ CPackageManagerService::InstallParams::InstallParams(
     /* [in] */ const String& packageAbiOverride,
     /* [in] */ CPackageManagerService* owner)
     : HandlerParams(user, owner)
+    , mOrigin(origin)
     , mObserver(observer)
     , mInstallFlags(installFlags)
     , mInstallerPackageName(installerPackageName)
@@ -4113,13 +4114,13 @@ const Int64 CPackageManagerService::DEFAULT_MANDATORY_FSTRIM_INTERVAL =  3 * IDa
 const Boolean CPackageManagerService::DEFAULT_VERIFY_ENABLE;
 const Int64 CPackageManagerService::DEFAULT_VERIFICATION_TIMEOUT;
 const Int32 CPackageManagerService::DEFAULT_VERIFICATION_RESPONSE;
-const String CPackageManagerService::DEFAULT_CONTAINER_PACKAGE("com.android.defcontainer");
+const String CPackageManagerService::DEFAULT_CONTAINER_PACKAGE("Elastos.Droid.DefContainer");
 
 static AutoPtr<IComponentName> Init_DEFAULT_CONTAINER_COMPONENT()
 {
     AutoPtr<IComponentName> component;
     CComponentName::New(CPackageManagerService::DEFAULT_CONTAINER_PACKAGE,
-            String("com.android.defcontainer.DefaultContainerService"), (IComponentName**)&component);
+            String("Elastos.Droid.DefContainer.CDefaultContainerService"), (IComponentName**)&component);
     return component;
 }
 const AutoPtr<IComponentName> CPackageManagerService::DEFAULT_CONTAINER_COMPONENT =  Init_DEFAULT_CONTAINER_COMPONENT();
@@ -10694,11 +10695,12 @@ Slogger::I(TAG, " >>>>>>>>> ScanPackageDirtyLI %s", TO_CSTR(pkg));
             if (sharedSetting != NULL) {
                 s1 = sharedSetting->mSignatures->mSignatures;
             }
-            if ((CompareSignatures(pkg->mSignatures, s1) == IPackageManager::SIGNATURE_MATCH)) {
-                Slogger::E(TAG, "%d Cannot install platform packages to user storage!",
-                        IPackageManager::INSTALL_FAILED_INVALID_INSTALL_LOCATION);
-                return E_PACKAGE_MANAGER_EXCEPTION;
-            }
+            Slogger::D("TAG", "TODO: CompareSignatures should be called here");
+            // if ((CompareSignatures(pkg->mSignatures, s1) == IPackageManager::SIGNATURE_MATCH)) {
+            //     Slogger::E(TAG, "%d Cannot install platform packages to user storage!",
+            //             IPackageManager::INSTALL_FAILED_INVALID_INSTALL_LOCATION);
+            //     return E_PACKAGE_MANAGER_EXCEPTION;
+            // }
         }
     }
 
@@ -14992,6 +14994,7 @@ void CPackageManagerService::InstallNewPackageLI(
             millis, user, readBuffer, (PackageParser::Package**)&newPackage);
     if (FAILED(ec)) {
         res->SetError(String("Package couldn't be installed in ") + pkg->mCodePath, sLastScanError, ec);
+        return;
     }
 
     UpdateSettingsLI(newPackage, installerPackageName, NULL, NULL, res);

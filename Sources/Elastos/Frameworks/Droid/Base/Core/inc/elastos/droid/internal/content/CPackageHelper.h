@@ -6,6 +6,7 @@
 #include <elastos/core/Singleton.h>
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Pm::IPackageLite;
 using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Core::Singleton;
 using Elastos::IO::IFile;
@@ -113,13 +114,13 @@ public:
         /* [out] */ Int32* result);
 
     CARAPI CalculateInstalledSize(
-        /* [in] */ Handle64 pkg,
+        /* [in] */ IPackageLite* pkg,
         /* [in] */ Boolean isForwardLocked,
         /* [in] */ const String& abiOverride,
         /* [out] */ Int64* size);
 
     CARAPI CalculateInstalledSize(
-        /* [in] */ Handle64 pkg,
+        /* [in] */ IPackageLite* pkg,
         /* [in] */ INativeLibraryHelperHandle* handle,
         /* [in] */ Boolean isForwardLocked,
         /* [in] */ const String& abiOverride,

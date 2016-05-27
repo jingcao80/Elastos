@@ -547,35 +547,40 @@ ECode WallpaperManagerService::MyPackageMonitor::DoPackagesChangedLocked(
         }
     }
 
-    String wcpn;
-    _wallpaper->mWallpaperComponent->GetPackageName(&wcpn);
-    Boolean isPackageModified = FALSE;
-    IsPackageModified(wcpn, &isPackageModified);
-    if (_wallpaper->mWallpaperComponent != NULL && isPackageModified) {
-        AutoPtr<IPackageManager> pm;
-        mHost->mContext->GetPackageManager((IPackageManager**)&pm);
-        AutoPtr<IServiceInfo> info;
-        ECode ec = pm->GetServiceInfo(_wallpaper->mWallpaperComponent, 0, (IServiceInfo**)&info);
-        if (FAILED(ec)) {
-            String str;
-            IObject::Probe(_wallpaper->mWallpaperComponent)->ToString(&str);
-            Slogger::W(WallpaperManagerService::TAG, "Wallpaper component gone, removing: %s", str.string());
-            mHost->ClearWallpaperLocked(FALSE, _wallpaper->mUserId, NULL);
-            return E_NAME_NOT_FOUND_EXCEPTION;
+    if (_wallpaper->mWallpaperComponent != NULL) {
+        String wcpn;
+        _wallpaper->mWallpaperComponent->GetPackageName(&wcpn);
+        Boolean isPackageModified = FALSE;
+        IsPackageModified(wcpn, &isPackageModified);
+        if (isPackageModified) {
+            AutoPtr<IPackageManager> pm;
+            mHost->mContext->GetPackageManager((IPackageManager**)&pm);
+            AutoPtr<IServiceInfo> info;
+            ECode ec = pm->GetServiceInfo(_wallpaper->mWallpaperComponent, 0, (IServiceInfo**)&info);
+            if (FAILED(ec)) {
+                String str;
+                IObject::Probe(_wallpaper->mWallpaperComponent)->ToString(&str);
+                Slogger::W(WallpaperManagerService::TAG, "Wallpaper component gone, removing: %s", str.string());
+                mHost->ClearWallpaperLocked(FALSE, _wallpaper->mUserId, NULL);
+                return E_NAME_NOT_FOUND_EXCEPTION;
+            }
         }
     }
 
-    String nwcpn;
-    _wallpaper->mNextWallpaperComponent->GetPackageName(&nwcpn);
-    IsPackageModified(nwcpn, &isPackageModified);
-    if (_wallpaper->mNextWallpaperComponent != NULL && isPackageModified) {
-        AutoPtr<IPackageManager> pm;
-        mHost->mContext->GetPackageManager((IPackageManager**)&pm);
-        AutoPtr<IServiceInfo> info;
-        ECode ec = pm->GetServiceInfo(_wallpaper->mNextWallpaperComponent, 0, (IServiceInfo**)&info);
-        if (FAILED(ec)) {
-            _wallpaper->mNextWallpaperComponent = NULL;
-            return E_NAME_NOT_FOUND_EXCEPTION;
+    if (_wallpaper->mNextWallpaperComponent != NULL) {
+        String nwcpn;
+        _wallpaper->mNextWallpaperComponent->GetPackageName(&nwcpn);
+        Boolean isPackageModified = FALSE;
+        IsPackageModified(nwcpn, &isPackageModified);
+        if (isPackageModified) {
+            AutoPtr<IPackageManager> pm;
+            mHost->mContext->GetPackageManager((IPackageManager**)&pm);
+            AutoPtr<IServiceInfo> info;
+            ECode ec = pm->GetServiceInfo(_wallpaper->mNextWallpaperComponent, 0, (IServiceInfo**)&info);
+            if (FAILED(ec)) {
+                _wallpaper->mNextWallpaperComponent = NULL;
+                return E_NAME_NOT_FOUND_EXCEPTION;
+            }
         }
     }
     *result = changed;

@@ -5,6 +5,7 @@
 #include "_Elastos_Droid_Internal_Content_CNativeLibraryHelperHandleHelper.h"
 #include <elastos/core/Singleton.h>
 
+using Elastos::Droid::Content::Pm::IPackageLite;
 using Elastos::Core::Singleton;
 using Elastos::IO::IFile;
 
@@ -30,8 +31,8 @@ public:
         /* [in] */ Handle64 pkg,
         /* [out] */ INativeLibraryHelperHandle** handle);
 
-    CARAPI CreatePackageLite(
-        /* [in] */ Handle64 lite,
+    CARAPI Create(
+        /* [in] */ IPackageLite* lite,
         /* [out] */ INativeLibraryHelperHandle** handle);
 };
 

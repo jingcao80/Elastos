@@ -2701,6 +2701,8 @@ ECode CActivityThread::HandleReceiver(
     GetPackageInfoNoCheck(appInfo, data->mCompatInfo, (ILoadedPkg**)&pi);
     LoadedPkg* packageInfo = (LoadedPkg*)pi.Get();
 
+    AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
+
     AutoPtr<IBroadcastReceiver> receiver;
     AutoPtr<IClassLoader> cl;
 
@@ -2721,6 +2723,7 @@ ECode CActivityThread::HandleReceiver(
     if (FAILED(ec)) {
         Slogger::E(TAG, "HandleReceiver: packageName [%s], Load class [%s] in %s failed.",
             packageName.string(), className.string(), TO_CSTR(cl));
+        data->SendFinished(mgr);
         return ec;
     }
 
@@ -2728,6 +2731,7 @@ ECode CActivityThread::HandleReceiver(
     ec = classInfo->CreateObject((IInterface**)&object);
     if (FAILED(ec)) {
         Slogger::E(TAG, "HandleReceiver: Create activity object [%s] failed.", className.string());
+        data->SendFinished(mgr);
         return ec;
     }
 
@@ -2777,7 +2781,6 @@ ECode CActivityThread::HandleReceiver(
             Slogger::I(TAG, "Finishing failed broadcast to %s", comp.string());
         }
 
-        AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
         data->SendFinished(mgr);
         ec = E_RUNTIME_EXCEPTION;
         Slogger::E(TAG, "Unable to start receiver %s", comp.string());

@@ -245,6 +245,12 @@ ECode StringBuilder::Append(
 }
 
 ECode StringBuilder::Append(
+    /* [in] */ IObject* obj)
+{
+    return AbstractStringBuilder::Append(obj);
+}
+
+ECode StringBuilder::Append(
     /* [in] */ const String& str)
 {
     return AbstractStringBuilder::Append(str);
@@ -493,6 +499,12 @@ StringBuilder& StringBuilder::operator+=(const String& right)
 }
 
 StringBuilder& StringBuilder::operator+=(IInterface* right)
+{
+    AbstractStringBuilder::Append(right);
+    return *this;
+}
+
+StringBuilder& StringBuilder::operator+=(IObject* right)
 {
     AbstractStringBuilder::Append(right);
     return *this;

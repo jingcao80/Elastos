@@ -36,7 +36,29 @@ ECode CPackageInstallObserver2Native::constructor(
 ECode CPackageInstallObserver2Native::OnUserActionRequired(
         /* [in] */ IIntent* intent)
 {
-    assert(0);
+    // LOGGERD(TAG, "+ CPackageInstallObserver2Native::OnUserActionRequired()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jobject jintent = NULL;
+    if (intent != NULL) {
+        jintent = Util::ToJavaIntent(env, intent);
+    }
+
+    jclass c = env->FindClass("android/content/pm/IPackageInstallObserver2");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IPackageInstallObserver2 %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "onUserActionRequired", "(Landroid/content/Intent;)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: onUserActionRequired %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, jintent);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: onUserActionRequired %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jintent);
+
+    // LOGGERD(TAG, "- CPackageInstallObserver2Native::OnUserActionRequired()");
     return NOERROR;
 }
 
@@ -46,7 +68,33 @@ ECode CPackageInstallObserver2Native::OnPackageInstalled(
     /* [in] */ const String& msg,
     /* [in] */ IBundle* extras)
 {
-    assert(0);
+    // LOGGERD(TAG, "+ CPackageInstallObserver2Native::OnPackageInstalled()");
+
+    JNIEnv* env;
+    mJVM->AttachCurrentThread(&env, NULL);
+
+    jstring jpackageName = Util::ToJavaString(env, packageName);
+    jstring jmsg = Util::ToJavaString(env, msg);
+    jobject jextras = NULL;
+    if (extras != NULL) {
+        jextras = Util::ToJavaBundle(env, extras);
+    }
+
+    jclass c = env->FindClass("android/content/pm/IPackageInstallObserver2");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IPackageInstallObserver2 %d", __LINE__);
+
+    jmethodID m = env->GetMethodID(c, "onPackageInstalled", "(Ljava/lang/String;ILjava/lang/String;Landroid/os/Bundle;)V");
+    Util::CheckErrorAndLog(env, TAG, "GetMethodID: onPackageInstalled %d", __LINE__);
+
+    env->CallVoidMethod(mJInstance, m, jpackageName, (jint)returnCode, jmsg, jextras);
+    Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: onPackageInstalled %d", __LINE__);
+
+    env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jpackageName);
+    env->DeleteLocalRef(jmsg);
+    env->DeleteLocalRef(jextras);
+
+    // LOGGERD(TAG, "- CPackageInstallObserver2Native::OnPackageInstalled()");
     return NOERROR;
 }
 

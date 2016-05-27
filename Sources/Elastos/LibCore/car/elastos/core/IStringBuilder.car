@@ -316,6 +316,9 @@ module
         Append(
             [in] IInterface* obj);
 
+        Append(
+            [in] IObject* obj);
+
         /**
          * Adds the specified string to the end of this buffer.
          * <p>

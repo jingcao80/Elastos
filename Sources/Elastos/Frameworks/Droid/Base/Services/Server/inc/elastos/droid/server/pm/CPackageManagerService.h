@@ -729,7 +729,6 @@ public:/* package */
         AutoPtr<IFile> mCodeFile;
         AutoPtr<IFile> mResourceFile;
         AutoPtr<IFile> mLegacyNativeLibraryPath;
-        CPackageManagerService* mHost;
     };
 
     /**

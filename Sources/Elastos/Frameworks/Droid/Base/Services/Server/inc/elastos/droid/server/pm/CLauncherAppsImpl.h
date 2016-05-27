@@ -81,6 +81,8 @@ private:
         CARAPI OnPackagesUnavailable(
             /* [in] */ ArrayOf<String>* packages);
 
+        TO_STRING_IMPL("CLauncherAppsImpl::MyPackageMonitor")
+
     private:
         /** Checks if user is a profile of or same as listeningUser.
           * and the user is enabled.

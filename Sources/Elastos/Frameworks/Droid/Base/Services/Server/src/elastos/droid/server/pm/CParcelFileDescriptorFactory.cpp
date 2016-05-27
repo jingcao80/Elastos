@@ -61,7 +61,7 @@ ECode CParcelFileDescriptorFactory::Open(
         Slogger::E("CPackageMangerService", "Failed to open: ox%08x", ec);
         return E_REMOTE_EXCEPTION;
     }
-    return CParcelFileDescriptor::New(IParcelFileDescriptor::Probe(fd), pfd);
+    return CParcelFileDescriptor::New(fd, pfd);
     // } catch (ErrnoException e) {
     //     throw new RemoteException( + e.getMessage());
     // }

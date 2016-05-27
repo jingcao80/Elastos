@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.defcontainer" coreApp="true">
+        package="Elastos.Droid.DefContainer" coreApp="true">
     <uses-permission android:name="android.permission.ASEC_ACCESS"/>
     <uses-permission android:name="android.permission.ASEC_CREATE"/>
     <uses-permission android:name="android.permission.ASEC_DESTROY"/>
@@ -13,7 +13,7 @@
     <application android:label="@string/service_name"
                  android:allowBackup="false">
 
-        <service android:name=".DefaultContainerService"
+        <service android:name=".CDefaultContainerService"
                  android:enabled="true"
                  android:exported="true"
                  android:permission="android.permission.COPY_PROTECTED_DATA"/>

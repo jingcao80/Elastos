@@ -1014,9 +1014,6 @@ Int32 IntentFilter::MatchData(
                     return IIntentFilter::NO_MATCH_DATA;
                 }
             }
-            else {
-                return IIntentFilter::NO_MATCH_DATA;
-            }
         }
 
         // If neither an ssp nor an authority matched, we're done.

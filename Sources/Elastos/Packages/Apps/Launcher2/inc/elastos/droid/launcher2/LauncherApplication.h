@@ -114,6 +114,8 @@ private:
      * Receives notifications whenever the user favorites have changed.
      */
     AutoPtr<IContentObserver> mFavoritesObserver;
+
+    AutoPtr<ILauncherApps> mLauncherApps;
 };
 
 } // namespace Launcher2

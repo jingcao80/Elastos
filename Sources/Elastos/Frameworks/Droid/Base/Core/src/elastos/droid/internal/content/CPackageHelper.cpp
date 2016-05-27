@@ -705,14 +705,14 @@ ECode CPackageHelper::ResolveInstallLocation(
 }
 
 ECode CPackageHelper::CalculateInstalledSize(
-    /* [in] */ Handle64 pkg,
+    /* [in] */ IPackageLite* pkg,
     /* [in] */ Boolean isForwardLocked,
     /* [in] */ const String& abiOverride,
     /* [out] */ Int64* size)
 {
     VALIDATE_NOT_NULL(size)
     AutoPtr<INativeLibraryHelperHandle> handle;
-    CNativeLibraryHelperHandle::CreatePackage(pkg, (INativeLibraryHelperHandle**)&handle);
+    CNativeLibraryHelperHandle::Create(pkg, (INativeLibraryHelperHandle**)&handle);
     ECode ec = CalculateInstalledSize(pkg, handle, isForwardLocked, abiOverride, size);
     AutoPtr<IIoUtils> ioUtils;
     ASSERT_SUCCEEDED(CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils));
@@ -721,7 +721,7 @@ ECode CPackageHelper::CalculateInstalledSize(
 }
 
 ECode CPackageHelper::CalculateInstalledSize(
-    /* [in] */ Handle64 pkg,
+    /* [in] */ IPackageLite* pkg,
     /* [in] */ INativeLibraryHelperHandle* handle,
     /* [in] */ Boolean isForwardLocked,
     /* [in] */ const String& abiOverride,

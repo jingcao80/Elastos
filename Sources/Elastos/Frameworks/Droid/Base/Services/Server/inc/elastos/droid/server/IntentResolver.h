@@ -11,6 +11,7 @@
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/Object.h>
+#include <elastos/utility/Arrays.h>
 //#include "elastos/droid/net/Uri.h"
 
 using Elastos::Utility::Etl::HashSet;
@@ -23,6 +24,7 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::IIntentFilterAuthorityEntry;
 using Elastos::Droid::Os::IPatternMatcher;
+using Elastos::Utility::Arrays;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -605,9 +607,9 @@ AutoPtr< List< AutoPtr<R> > > IntentResolver<F, R>::QueryIntent(
 //    Boolean debug = localLOGV ||
 //                ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
 
-    // if (debug) Slog.v(
-    //     TAG, "Resolving type=" + resolvedType + " scheme=" + scheme
-    //     + " defaultOnly=" + defaultOnly + " userId=" + userId + " of " + intent);
+    if (debug)
+        Slogger::V(TAG, "Resolving type=%s scheme=%s defaultOnly=%d userId=%d of %s",
+            resolvedType.string(), scheme.string(), defaultOnly, userId, TO_CSTR(intent));
 
     AutoPtr< ArrayOf<F*> > firstTypeCut;
     AutoPtr< ArrayOf<F*> > secondTypeCut;
@@ -629,12 +631,12 @@ AutoPtr< List< AutoPtr<R> > > IntentResolver<F, R>::QueryIntent(
                     if (it != mTypeToFilter.End()) {
                         firstTypeCut = it->mSecond;
                     }
-                    // if (debug) Slog.v(TAG, "First type cut: " + Arrays.toString(firstTypeCut));
+                    if (debug) Slogger::V(TAG, "First type cut: %s", Arrays::ToString(firstTypeCut).string());
                     it = mWildTypeToFilter.Find(baseType);
                     if (it != mWildTypeToFilter.End()) {
                         secondTypeCut = it->mSecond;
                     }
-                    // if (debug) Slog.v(TAG, "Second type cut: " + Arrays.toString(secondTypeCut));
+                    if (debug) Slogger::V(TAG, "Second type cut: %s", Arrays::ToString(secondTypeCut).string());
                 }
                 else {
                     // We can match anything with our base type.
@@ -642,12 +644,12 @@ AutoPtr< List< AutoPtr<R> > > IntentResolver<F, R>::QueryIntent(
                     if (it != mBaseTypeToFilter.End()) {
                         firstTypeCut = it->mSecond;
                     }
-                    // if (debug) Slog.v(TAG, "First type cut: " + Arrays.toString(firstTypeCut));
+                    if (debug) Slogger::V(TAG, "First type cut: %s", Arrays::ToString(firstTypeCut).string());
                     it = mWildTypeToFilter.Find(baseType);
                     if (it != mWildTypeToFilter.End()) {
                         secondTypeCut = it->mSecond;
                     }
-                    // if (debug) Slog.v(TAG, "Second type cut: " + Arrays.toString(secondTypeCut));
+                    if (debug) Slogger::V(TAG, "Second type cut: %s", Arrays::ToString(secondTypeCut).string());
                 }
 
                 // Any */* types always apply, but we only need to do this
@@ -656,7 +658,7 @@ AutoPtr< List< AutoPtr<R> > > IntentResolver<F, R>::QueryIntent(
                 if (it != mWildTypeToFilter.End()) {
                     thirdTypeCut = it->mSecond;
                 }
-                // if (debug) Slog.v(TAG, "Third type cut: " + Arrays.toString(thirdTypeCut));
+                if (debug) Slogger::V(TAG, "Third type cut: %s", Arrays::ToString(thirdTypeCut).string());
             }
             else {
                 String action;
@@ -669,7 +671,7 @@ AutoPtr< List< AutoPtr<R> > > IntentResolver<F, R>::QueryIntent(
                     if (it != mTypedActionToFilter.End()) {
                         firstTypeCut = it->mSecond;
                     }
-                    // if (debug) Slog.v(TAG, "Typed Action list: " + Arrays.toString(firstTypeCut));
+                    if (debug) Slogger::V(TAG, "Typed Action list: %s", Arrays::ToString(firstTypeCut).string());
                 }
             }
         }
@@ -683,7 +685,7 @@ AutoPtr< List< AutoPtr<R> > > IntentResolver<F, R>::QueryIntent(
         if (it != mSchemeToFilter.End()) {
             schemeCut = it->mSecond;
         }
-        // if (debug) Slog.v(TAG, "Scheme list: " + Arrays.toString(schemeCut));
+        if (debug) Slogger::V(TAG, "Scheme list: %s", Arrays::ToString(schemeCut).string());
     }
 
     // If the intent does not specify any data -- either a MIME type or
@@ -696,7 +698,7 @@ AutoPtr< List< AutoPtr<R> > > IntentResolver<F, R>::QueryIntent(
         if (it != mActionToFilter.End()) {
             firstTypeCut = it->mSecond;
         }
-        // if (debug) Slog.v(TAG, "Action list: " + Arrays.toString(firstTypeCut));
+        if (debug) Slogger::V(TAG, "Action list: %s", Arrays::ToString(firstTypeCut).string());
     }
 
     AutoPtr< ArrayOf<String> > categories = GetFastIntentCategories(intent);
@@ -718,12 +720,13 @@ AutoPtr< List< AutoPtr<R> > > IntentResolver<F, R>::QueryIntent(
     }
     SortResults(finalList);
 
-    // if (debug) {
-    //     Slog.v(TAG, "Final result list:");
-    //     for (int i=0; i<finalList.size(); i++) {
-    //         Slog.v(TAG, "  " + finalList.get(i));
-    //     }
-    // }
+    if (debug) {
+        Slogger::V(TAG, "Final result list:");
+        typename List< AutoPtr<R> >::Iterator iter = finalList->Begin();
+        for (; iter != finalList->End(); ++iter) {
+            Slogger::V(TAG, "  %s", TO_CSTR(*iter));
+        }
+    }
     return finalList;
 }
 
@@ -986,28 +989,28 @@ void IntentResolver<F, R>::BuildResolveList(
     AutoPtr<F> filter;
     for (i = 0; i < N && (filter = (*src)[i]) != NULL; i++) {
         Int32 match;
-        // if (debug) Slog.v(TAG, "Matching against filter " + filter);
+        if (debug) Slogger::V(TAG, "Matching against filter %s", TO_CSTR(filter));
 
         if (excludingStopped && IsFilterStopped(filter, userId)) {
-            // if (debug) {
-            //     Slog.v(TAG, "  Filter's target is stopped; skipping");
-            // }
+            if (debug) {
+                Slogger::V(TAG, "  Filter's target is stopped; skipping");
+            }
             continue;
         }
 
         // Is delivery being limited to filters owned by a particular package?
         if (!packageName.IsNull() && !IsPackageForFilter(packageName, filter)) {
-            // if (debug) {
-            //     Slog.v(TAG, "  Filter is not from package " + packageName + "; skipping");
-            // }
+            if (debug) {
+                Slogger::V(TAG, "  Filter is not from package %s; skipping", packageName.string());
+            }
             continue;
         }
 
         // Do we already have this one?
         if (!AllowFilterResult(filter, dest)) {
-            // if (debug) {
-            //     Slog.v(TAG, "  Filter's target already added");
-            // }
+            if (debug) {
+                Slogger::V(TAG, "  Filter's target already added");
+            }
             continue;
         }
 
@@ -1015,9 +1018,8 @@ void IntentResolver<F, R>::BuildResolveList(
                 categories, String("IntentResolver"));
 
         if (match >= 0) {
-            // if (debug) Slog.v(TAG, "  Filter matched!  match=0x" +
-            //         Integer.toHexString(match) + " hasDefault="
-            //         + filter.hasCategory(Intent.CATEGORY_DEFAULT));
+            if (debug) Slogger::V(TAG, "  Filter matched!  match=0x%0x hasDefault=%d",
+                match, filter->HasCategory(IIntent::CATEGORY_DEFAULT));
             if (!defaultOnly || filter->HasCategory(IIntent::CATEGORY_DEFAULT)) {
                 AutoPtr<R> oneResult = NewResult(filter, match, userId);
                 if (oneResult != NULL) {
@@ -1034,17 +1036,17 @@ void IntentResolver<F, R>::BuildResolveList(
             }
         }
         else {
-//                if (debug) {
-//                    String reason;
-//                    switch (match) {
-//                        case IntentFilter.NO_MATCH_ACTION: reason = "action"; break;
-//                        case IntentFilter.NO_MATCH_CATEGORY: reason = "category"; break;
-//                        case IntentFilter.NO_MATCH_DATA: reason = "data"; break;
-//                        case IntentFilter.NO_MATCH_TYPE: reason = "type"; break;
-//                        default: reason = "unknown reason"; break;
-//                    }
-//                    Log.v(TAG, "  Filter did not match: " + reason);
-//                }
+            if (debug) {
+                String reason;
+                switch (match) {
+                    case IIntentFilter::NO_MATCH_ACTION: reason = "action"; break;
+                    case IIntentFilter::NO_MATCH_CATEGORY: reason = "category"; break;
+                    case IIntentFilter::NO_MATCH_DATA: reason = "data"; break;
+                    case IIntentFilter::NO_MATCH_TYPE: reason = "type"; break;
+                    default: reason = "unknown reason"; break;
+                }
+                Slogger::V(TAG, "  Filter did not match: %s", reason.string());
+            }
         }
     }
 

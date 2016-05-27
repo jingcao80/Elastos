@@ -21,7 +21,7 @@ using Elastos::IO::IFile;
 
 namespace Elastos {
 namespace Droid {
-namespace DefaultContainerService {
+namespace DefContainer {
 
 class DefaultContainerService
     : public IntentService
@@ -38,7 +38,7 @@ public:
         MediaContainerService();
 
         CARAPI constructor(
-            /* [in] */ DefaultContainerService* host);
+            /* [in] */ IService* host);
 
         CARAPI CopyPackageToContainer(
             /* [in] */ const String& packagePath,
@@ -139,7 +139,7 @@ private:
     AutoPtr<IIMediaContainerService> mBinder;
 };
 
-} //namespace DefaultContainerService
+} //namespace DefContainer
 } //namespace Droid
 } //namespace Elastos
 

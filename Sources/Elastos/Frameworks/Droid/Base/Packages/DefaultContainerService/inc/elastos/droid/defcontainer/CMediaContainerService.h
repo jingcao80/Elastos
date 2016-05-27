@@ -1,13 +1,13 @@
 #ifndef __ELASTOS_DROID_DEFAULTCONTAINERSERVICE_CMEDIACONTAINERSERVICE_H__
 #define __ELASTOS_DROID_DEFAULTCONTAINERSERVICE_CMEDIACONTAINERSERVICE_H__
 
-#include "_Elastos_Droid_DefaultContainerService_CMediaContainerService.h"
+#include "_Elastos_Droid_DefContainer_CMediaContainerService.h"
 #include "DefaultContainerService.h"
 #include "elastos/coredef.h"
 
 namespace Elastos {
 namespace Droid {
-namespace DefaultContainerService {
+namespace DefContainer {
 
 CarClass(CMediaContainerService), public DefaultContainerService::MediaContainerService
 {
@@ -16,7 +16,7 @@ public:
 };
 
 
-} //namespace DefaultContainerService
+} //namespace DefContainer
 } //namespace Droid
 } //namespace Elastos
 

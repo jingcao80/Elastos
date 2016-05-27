@@ -935,7 +935,7 @@ ECode CPackageInstallerSession::CalculateInstalledSize(
     String abiOverride;
     mParams->GetAbiOverride(&abiOverride);
     Int64 result;
-    ECode ec = pkgHelper->CalculateInstalledSize((Handle64)pkg.Get(), isForwardLocked, abiOverride, &result);
+    ECode ec = pkgHelper->CalculateInstalledSize(pkg, isForwardLocked, abiOverride, &result);
     if (ec == (ECode)E_IO_EXCEPTION) {
         sErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
         Slogger::E(TAG, "Failed to calculate install size");

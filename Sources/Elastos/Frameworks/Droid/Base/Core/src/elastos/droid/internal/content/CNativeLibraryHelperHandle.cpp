@@ -30,7 +30,7 @@ ECode CNativeLibraryHelperHandle::Create(
         Slogger::E("CNativeLibraryHelperHandle", "Failed to parse package: %p", packageFile);
         return E_IO_EXCEPTION;
     }
-    return CreatePackageLite((Handle64)lite.Get(), handle);
+    return Create(lite, handle);
     // } catch (PackageParserException e) {
     //     throw new IOException("Failed to parse package: " + packageFile, e);
     // }
@@ -46,8 +46,8 @@ ECode CNativeLibraryHelperHandle::CreatePackage(
     return Create(pkg->GetAllCodePaths(), (flags & IApplicationInfo::FLAG_MULTIARCH) != 0, handle);
 }
 
-ECode CNativeLibraryHelperHandle::CreatePackageLite(
-    /* [in] */ Handle64 _lite,
+ECode CNativeLibraryHelperHandle::Create(
+    /* [in] */ IPackageLite* _lite,
     /* [out] */ INativeLibraryHelperHandle** handle)
 {
     AutoPtr<PackageParser::PackageLite> lite = (PackageParser::PackageLite*)_lite;
