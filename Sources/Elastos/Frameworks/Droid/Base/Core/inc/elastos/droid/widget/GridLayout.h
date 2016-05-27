@@ -183,16 +183,16 @@ public:
 
         CARAPI_(void) ComputeGroupBounds();
 
-        AutoPtr< PackedMap<AutoPtr<IInterval>, AutoPtr<MutableInt> > > CreateLinks(
+        AutoPtr< PackedMap<AutoPtr<IInterval>, AutoPtr<IMutableInt> > > CreateLinks(
             /* [in] */ Boolean min);
 
         CARAPI_(void) ComputeLinks(
-            /* [in] */ PackedMap<AutoPtr<IInterval>, AutoPtr<MutableInt> >* links,
+            /* [in] */ PackedMap<AutoPtr<IInterval>, AutoPtr<IMutableInt> >* links,
             /* [in] */ Boolean min);
 
-        AutoPtr< PackedMap<AutoPtr<IInterval>, AutoPtr<MutableInt> > > GetForwardLinks();
+        AutoPtr< PackedMap<AutoPtr<IInterval>, AutoPtr<IMutableInt> > > GetForwardLinks();
 
-        AutoPtr< PackedMap<AutoPtr<IInterval>, AutoPtr<MutableInt> > > GetBackwardLinks();
+        AutoPtr< PackedMap<AutoPtr<IInterval>, AutoPtr<IMutableInt> > > GetBackwardLinks();
 
         CARAPI_(void) Include(
             /* [in] */ List< AutoPtr<Arc> >& arcs,
@@ -216,7 +216,7 @@ public:
 
         CARAPI_(void) AddComponentSizes(
             /* [in] */ List< AutoPtr<Arc> >& result,
-            /* [in] */ PackedMap<AutoPtr<IInterval>, AutoPtr<MutableInt> >* links);
+            /* [in] */ PackedMap<AutoPtr<IInterval>, AutoPtr<IMutableInt> >* links);
 
         CARAPI_(AutoPtr< ArrayOf<Arc*> >) CreateArcs();
 
@@ -281,10 +281,10 @@ public:
         AutoPtr<PackedMap<AutoPtr<IGridLayoutSpec>, AutoPtr<IBounds> > > mGroupBounds;
         Boolean mGroupBoundsValid;
 
-        AutoPtr< PackedMap<AutoPtr<IInterval>, AutoPtr<MutableInt> > > mForwardLinks;
+        AutoPtr< PackedMap<AutoPtr<IInterval>, AutoPtr<IMutableInt> > > mForwardLinks;
         Boolean mForwardLinksValid;
 
-        AutoPtr< PackedMap<AutoPtr<IInterval>, AutoPtr<MutableInt> > > mBackwardLinks;
+        AutoPtr< PackedMap<AutoPtr<IInterval>, AutoPtr<IMutableInt> > > mBackwardLinks;
         Boolean mBackwardLinksValid;
 
         AutoPtr< ArrayOf<Int32> > mLeadingMargins;
@@ -400,8 +400,6 @@ public:
         : public ViewGroup::MarginLayoutParams
         , public IGridLayoutLayoutParams
     {
-        friend class StaticInitializer;
-
     public:
         CAR_INTERFACE_DECL()
 
@@ -480,6 +478,9 @@ public:
             /* [in] */ IContext* context,
             /* [in] */ IAttributeSet* attrs);
 
+        static CARAPI_(Int32) Init_DEFAULT_SPAN_SIZE(
+            /* [in] */ Interval* span);
+
     public:
         AutoPtr<IGridLayoutSpec> mRowSpec;
         AutoPtr<IGridLayoutSpec> mColumnSpec;
@@ -487,31 +488,31 @@ public:
     private:
         // Default values
 
-        static Int32 DEFAULT_WIDTH;
-        static Int32 DEFAULT_HEIGHT;
-        static Int32 DEFAULT_MARGIN;
-        static Int32 DEFAULT_ROW ;
-        static Int32 DEFAULT_COLUMN;
-        static AutoPtr<GridLayout::Interval> DEFAULT_SPAN;
-        static Int32 DEFAULT_SPAN_SIZE;
+        static const Int32 DEFAULT_WIDTH;
+        static const Int32 DEFAULT_HEIGHT;
+        static const Int32 DEFAULT_MARGIN;
+        static const Int32 DEFAULT_ROW ;
+        static const Int32 DEFAULT_COLUMN;
+        static const AutoPtr<GridLayout::Interval> DEFAULT_SPAN;
+        static const Int32 DEFAULT_SPAN_SIZE;
 
         // TypedArray indices
 
-        static Int32 MARGIN;
-        static Int32 LEFT_MARGIN;
-        static Int32 TOP_MARGIN;
-        static Int32 RIGHT_MARGIN;
-        static Int32 BOTTOM_MARGIN;
+        static const Int32 MARGIN;
+        static const Int32 LEFT_MARGIN;
+        static const Int32 TOP_MARGIN;
+        static const Int32 RIGHT_MARGIN;
+        static const Int32 BOTTOM_MARGIN;
 
-        static Int32 COLUMN;
-        static Int32 COLUMN_SPAN;
-        static Int32 COLUMN_WEIGHT;
+        static const Int32 COLUMN;
+        static const Int32 COLUMN_SPAN;
+        static const Int32 COLUMN_WEIGHT;
 
-        static Int32 ROW;
-        static Int32 ROW_SPAN;
-        static Int32 ROW_WEIGHT;
+        static const Int32 ROW;
+        static const Int32 ROW_SPAN;
+        static const Int32 ROW_WEIGHT;
 
-        static Int32 GRAVITY;
+        static const Int32 GRAVITY;
     };
 
     /*
@@ -538,7 +539,8 @@ public:
     // A mutable Integer - used to avoid heap allocation during the layout operation
 
     class MutableInt
-        : public ElRefBase
+        : public Object
+        , public IMutableInt
     {
     public:
         MutableInt();
@@ -546,7 +548,9 @@ public:
         MutableInt(
             /* [in] */ Int32 value);
 
-        CARAPI_(void) Reset();
+        CAR_INTERFACE_DECL();
+
+        CARAPI Reset();
 
         CARAPI ToString(
             /* [out] */ String* info);
@@ -743,7 +747,7 @@ public:
      * For row groups, this specifies the vertical alignment.
      * For column groups, this specifies the horizontal alignment.
      * <p>
-     * Use the following static methods to create specs:
+     * Use the following static const methods to create specs:
      * <ul>
      *   <li>{@link #spec(int)}</li>
      *   <li>{@link #spec(int, int)}</li>
@@ -808,8 +812,8 @@ public:
             /* [in] */ Float weight);
 
     public:
-        static AutoPtr<IGridLayoutSpec> UNDEFINED;
-        static Float DEFAULT_WEIGHT;
+        static const AutoPtr<IGridLayoutSpec> UNDEFINED;
+        static const Float DEFAULT_WEIGHT;
 
         Boolean mStartDefined;
         AutoPtr<Interval> mSpan;
@@ -1074,12 +1078,6 @@ public:
         Int32 mCursor;
         AutoPtr< ArrayOf<AutoPtr<ArrayOf<GridLayout::Arc*> > > > mArcsByVertex;
         AutoPtr< ArrayOf<Int32> > mVisited;
-    };
-
-    class StaticInitializer
-    {
-    public:
-        StaticInitializer();
     };
 
 public:
@@ -1604,12 +1602,12 @@ public:
     /**
      * The horizontal orientation.
      */
-    static Int32 HORIZONTAL;
+    static const Int32 HORIZONTAL;
 
     /**
      * The vertical orientation.
      */
-    static Int32 VERTICAL;
+    static const Int32 VERTICAL;
 
     /**
      * The constant used to indicate that a value is undefined.
@@ -1620,7 +1618,7 @@ public:
      * The value used for the constant (currently {@link Integer#MIN_VALUE}) is
      * intended to avoid confusion between valid values whose sign may not be known.
      */
-    static Int32 UNDEFINED;
+    static const Int32 UNDEFINED;
 
     /**
      * This constant is an {@link #setAlignmentMode(int) alignmentMode}.
@@ -1639,7 +1637,7 @@ public:
      *
      * @see #setAlignmentMode(int)
      */
-    static Int32 ALIGN_BOUNDS;
+    static const Int32 ALIGN_BOUNDS;
 
     /**
      * This constant is an {@link #setAlignmentMode(int) alignmentMode}.
@@ -1653,70 +1651,70 @@ public:
      *
      * @see #setAlignmentMode(int)
      */
-    static Int32 ALIGN_MARGINS;
+    static const Int32 ALIGN_MARGINS;
 
     // Misc constants
 
-    static Int32 MAX_SIZE;
-    static Int32 DEFAULT_CONTAINER_MARGIN;
-    static Int32 UNINITIALIZED_HASH;
+    static const Int32 MAX_SIZE;
+    static const Int32 DEFAULT_CONTAINER_MARGIN;
+    static const Int32 UNINITIALIZED_HASH;
 
-    static AutoPtr<Alignment> UNDEFINED_ALIGNMENT;
+    static const AutoPtr<Alignment> UNDEFINED_ALIGNMENT;
 
     /**
      * Indicates that a view should be aligned with the <em>start</em>
      * edges of the other views in its cell group.
      */
-    static AutoPtr<Alignment> LEADING;
+    static const AutoPtr<Alignment> LEADING;
 
     /**
      * Indicates that a view should be aligned with the <em>end</em>
      * edges of the other views in its cell group.
      */
-    static AutoPtr<Alignment> TRAILING;
+    static const AutoPtr<Alignment> TRAILING;
 
     /**
      * Indicates that a view should be aligned with the <em>top</em>
      * edges of the other views in its cell group.
      */
-    static AutoPtr<Alignment> TOP;
+    static const AutoPtr<Alignment> TOP;
 
     /**
      * Indicates that a view should be aligned with the <em>bottom</em>
      * edges of the other views in its cell group.
      */
-    static AutoPtr<Alignment> BOTTOM;
+    static const AutoPtr<Alignment> BOTTOM;
 
     /**
      * Indicates that a view should be aligned with the <em>start</em>
      * edges of the other views in its cell group.
      */
-    static AutoPtr<Alignment> START;
+    static const AutoPtr<Alignment> START;
 
     /**
      * Indicates that a view should be aligned with the <em>end</em>
      * edges of the other views in its cell group.
      */
-    static AutoPtr<Alignment> END;
+    static const AutoPtr<Alignment> END;
 
     /**
      * Indicates that a view should be aligned with the <em>left</em>
      * edges of the other views in its cell group.
      */
-    static AutoPtr<Alignment> LEFT;
+    static const AutoPtr<Alignment> LEFT;
 
     /**
      * Indicates that a view should be aligned with the <em>right</em>
      * edges of the other views in its cell group.
      */
-    static AutoPtr<Alignment> RIGHT;
+    static const AutoPtr<Alignment> RIGHT;
 
     /**
      * Indicates that a view should be <em>centered</em> with the other views in its cell group.
      * This constant may be used in both {@link LayoutParams#rowSpec rowSpecs} and {@link
      * LayoutParams#columnSpec columnSpecs}.
      */
-    static AutoPtr<Alignment> CENTER;
+    static const AutoPtr<Alignment> CENTER;
 
     /**
      * Indicates that a view should be aligned with the <em>baselines</em>
@@ -1725,35 +1723,35 @@ public:
      *
      * @see View#getBaseline()
      */
-    static AutoPtr<Alignment> BASELINE;
+    static const AutoPtr<Alignment> BASELINE;
 
     /**
      * Indicates that a view should expanded to fit the boundaries of its cell group.
      * This constant may be used in both {@link LayoutParams#rowSpec rowSpecs} and
      * {@link LayoutParams#columnSpec columnSpecs}.
      */
-    static AutoPtr<Alignment> FILL;
+    static const AutoPtr<Alignment> FILL;
 
 private:
-    static String TAG;
+    static const String TAG;
 
     // Defaults
 
-    static Int32 DEFAULT_ORIENTATION;
-    static Int32 DEFAULT_COUNT;
-    static Boolean DEFAULT_USE_DEFAULT_MARGINS;
-    static Boolean DEFAULT_ORDER_PRESERVED;
-    static Int32 DEFAULT_ALIGNMENT_MODE;
+    static const Int32 DEFAULT_ORIENTATION;
+    static const Int32 DEFAULT_COUNT;
+    static const Boolean DEFAULT_USE_DEFAULT_MARGINS;
+    static const Boolean DEFAULT_ORDER_PRESERVED;
+    static const Int32 DEFAULT_ALIGNMENT_MODE;
 
     // TypedArray indices
 
-    static Int32 ORIENTATION;
-    static Int32 ROW_COUNT;
-    static Int32 COLUMN_COUNT;
-    static Int32 USE_DEFAULT_MARGINS;
-    static Int32 ALIGNMENT_MODE;
-    static Int32 ROW_ORDER_PRESERVED;
-    static Int32 COLUMN_ORDER_PRESERVED;
+    static const Int32 ORIENTATION;
+    static const Int32 ROW_COUNT;
+    static const Int32 COLUMN_COUNT;
+    static const Int32 USE_DEFAULT_MARGINS;
+    static const Int32 ALIGNMENT_MODE;
+    static const Int32 ROW_ORDER_PRESERVED;
+    static const Int32 COLUMN_ORDER_PRESERVED;
 
     AutoPtr<Axis> mHorizontalAxis;
     AutoPtr<Axis> mVerticalAxis;
@@ -1763,10 +1761,8 @@ private:
     Int32 mDefaultGap;
     Int32 mLastLayoutParamsHashCode;
 
-    static Int32 INFLEXIBLE;
-    static Int32 CAN_STRETCH;
-
-    static const StaticInitializer sInitializer;
+    static const Int32 INFLEXIBLE;
+    static const Int32 CAN_STRETCH;
 };
 
 } // namespace Widget
