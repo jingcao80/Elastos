@@ -190,6 +190,55 @@ module
     merge("telephony/gsm/UsimDataDownloadHandler.car");
     merge("telephony/gsm/UsimPhoneBookManager.car");
 
+    merge("telephony/imsphone/ImsPhone.car");
+    merge("telephony/imsphone/ImsPhoneCall.car");
+    merge("telephony/imsphone/ImsPhoneCallTracker.car");
+    merge("telephony/imsphone/ImsPhoneConnection.car");
+    merge("telephony/imsphone/ImsPhoneFactory.car");
+    merge("telephony/imsphone/ImsPhoneMmiCode.car");
+
+    merge("telephony/sip/SipPhone.car");
+    merge("telephony/sip/SipPhoneBase.car");
+    merge("telephony/sip/SipPhoneFactory.car");
+
+    merge("telephony/uicc/AdnRecord.car");
+    merge("telephony/uicc/AdnRecordCache.car");
+    merge("telephony/uicc/AdnRecordLoader.car");
+    merge("telephony/uicc/CsimFileHandler.car");
+    merge("telephony/uicc/IccCardApplicationStatus.car");
+    merge("telephony/uicc/IccCardProxy.car");
+    merge("telephony/uicc/IccCardStatus.car");
+    merge("telephony/uicc/IccConstants.car");
+    merge("telephony/uicc/IccException.car");
+    merge("telephony/uicc/IccFileHandler.car");
+    merge("telephony/uicc/IccFileNotFound.car");
+    merge("telephony/uicc/IccFileTypeMismatch.car");
+    merge("telephony/uicc/IccIoResult.car");
+    merge("telephony/uicc/IccRecords.car");
+    merge("telephony/uicc/IccRefreshResponse.car");
+    merge("telephony/uicc/IccServiceTable.car");
+    merge("telephony/uicc/IccUtils.car");
+    merge("telephony/uicc/IccVmFixedException.car");
+    merge("telephony/uicc/IccVmNotSupportedException.car");
+    merge("telephony/uicc/IsimFileHandler.car");
+    merge("telephony/uicc/IsimRecords.car");
+    merge("telephony/uicc/IsimUiccRecords.car");
+    merge("telephony/uicc/RuimFileHandler.car");
+    merge("telephony/uicc/RuimRecords.car");
+    merge("telephony/uicc/SIMFileHandler.car");
+    merge("telephony/uicc/SIMRecords.car");
+    merge("telephony/uicc/SpnOverride.car");
+    merge("telephony/uicc/UICCConfig.car");
+    merge("telephony/uicc/UiccCard.car");
+    merge("telephony/uicc/UiccCardApplication.car");
+    merge("telephony/uicc/UiccCarrierPrivilegeRules.car");
+    merge("telephony/uicc/UiccController.car");
+    merge("telephony/uicc/UiccTlvData.car");
+    merge("telephony/uicc/UsimFileHandler.car");
+    merge("telephony/uicc/UsimServiceTable.car");
+
+    merge("telephony/utility/BlacklistUtils.car");
+
     namespace Elastos {
     namespace Droid {
     namespace Internal {

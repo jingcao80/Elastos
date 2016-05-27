@@ -7,18 +7,39 @@ module {
     namespace Telephony {
     namespace Uicc {
 
+    enum CardState {
+        CARDSTATE_ABSENT,
+        CARDSTATE_PRESENT,
+        CARDSTATE_ERROR
+
+        // public boolean isCardPresent() {
+        //     return this == CARDSTATE_PRESENT;
+        // }
+    }
+
+    enum PinState {
+        PINSTATE_UNKNOWN,
+        PINSTATE_ENABLED_NOT_VERIFIED,
+        PINSTATE_ENABLED_VERIFIED,
+        PINSTATE_DISABLED,
+        PINSTATE_ENABLED_BLOCKED,
+        PINSTATE_ENABLED_PERM_BLOCKED
+
+        // boolean isPermBlocked() {
+        //     return this == PINSTATE_ENABLED_PERM_BLOCKED;
+        // }
+
+        // boolean isPinRequired() {
+        //     return this == PINSTATE_ENABLED_NOT_VERIFIED;
+        // }
+
+        // boolean isPukRequired() {
+        //     return this == PINSTATE_ENABLED_BLOCKED;
+        // }
+    }
+
     interface IIccCardStatus {
-        IsCardPresent(
-            [out] Boolean* result);
-
-        IsPermBlocked(
-            [out] Boolean* result);
-
-        IsPinRequired(
-            [out] Boolean* result);
-
-        IsPukRequired(
-            [out] Boolean* result);
+        const Int32 CARD_MAX_APPS = 8;
 
         SetCardState(
             [in] Int32 state);

@@ -36,6 +36,14 @@ module
         // }
     }
 
+    enum ICallSrvccState {
+        ICallSrvccState_NONE,
+        ICallSrvccState_STARTED,
+        ICallSrvccState_COMPLETED,
+        ICallSrvccState_FAILED,
+        ICallSrvccState_CANCELED
+    }
+
     interface ICall {
 
         GetConnections(

@@ -11,6 +11,17 @@ module {
         IsIncomplete(
             [out] Boolean* result);
 
+    }
+
+    [deprecated]
+    interface IUiccTlvDataHelper {
+        IsUiccTlvData(
+            [in] ArrayOf<Byte>* data,
+            [out] Boolean* result);
+
+        Parse(
+            [in] ArrayOf<Byte>* data,
+            [out] IUiccTlvData** result);
 
     }
 

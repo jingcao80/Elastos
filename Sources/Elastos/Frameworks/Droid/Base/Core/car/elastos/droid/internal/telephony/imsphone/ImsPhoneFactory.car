@@ -1,5 +1,9 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Internal.Telephony.IPhoneNotifier;
+    interface Elastos.Droid.Internal.Telephony.IPhone;
 
     namespace Elastos {
     namespace Droid {
@@ -8,6 +12,18 @@ module {
     namespace ImsPhone {
 
     interface IImsPhoneFactory {
+        /**
+         * Makes a {@link ImsPhone} object.
+         * @param context {@code Context} needed to create a Phone object
+         * @param phoneNotifier {@code PhoneNotifier} needed to create a Phone
+         *      object
+         * @return the {@code ImsPhone} object
+         */
+        MakePhone(
+            [in] IContext* context,
+            [in] IPhoneNotifier* phoneNotifier,
+            [in] IPhone* defaultPhone,
+            [out] IImsPhone** result);
 
     }
 

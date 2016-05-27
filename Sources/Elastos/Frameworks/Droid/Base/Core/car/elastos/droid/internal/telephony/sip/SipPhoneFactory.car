@@ -1,5 +1,8 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Internal.Telephony.IPhoneNotifier;
 
     namespace Elastos {
     namespace Droid {
@@ -8,6 +11,19 @@ module {
     namespace Sip {
 
     interface ISipPhoneFactory {
+        /**
+         * Makes a {@link SipPhone} object.
+         * @param sipUri the local SIP URI the phone runs on
+         * @param context {@code Context} needed to create a Phone object
+         * @param phoneNotifier {@code PhoneNotifier} needed to create a Phone
+         *      object
+         * @return the {@code SipPhone} object or null if the SIP URI is not valid
+         */
+        MakePhone(
+            [in] String sipUri,
+            [in] IContext* context,
+            [in] IPhoneNotifier* phoneNotifier,
+            [out] ISipPhone** result);
     }
 
     }//Sip

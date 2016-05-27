@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    enum Elastos.Droid.Internal.Telephony.Uicc.PinState;
 
     namespace Elastos {
     namespace Droid {
@@ -7,25 +9,78 @@ module {
     namespace Telephony {
     namespace Uicc {
 
+    enum AppType{
+        APPTYPE_UNKNOWN,
+        APPTYPE_SIM,
+        APPTYPE_USIM,
+        APPTYPE_RUIM,
+        APPTYPE_CSIM,
+        APPTYPE_ISIM
+    }
+
+    enum AppState{
+        APPSTATE_UNKNOWN,
+        APPSTATE_DETECTED,
+        APPSTATE_PIN,
+        APPSTATE_PUK,
+        APPSTATE_SUBSCRIPTION_PERSO,
+        APPSTATE_READY
+
+        // boolean isPinRequired() {
+        //     return this == APPSTATE_PIN;
+        // }
+
+        // boolean isPukRequired() {
+        //     return this == APPSTATE_PUK;
+        // }
+
+        // boolean isSubscriptionPersoEnabled() {
+        //     return this == APPSTATE_SUBSCRIPTION_PERSO;
+        // }
+
+        // boolean isAppReady() {
+        //     return this == APPSTATE_READY;
+        // }
+
+        // boolean isAppNotReady() {
+        //     return this == APPSTATE_UNKNOWN  ||
+        //            this == APPSTATE_DETECTED;
+        // }
+    }
+
+    enum PersoSubState{
+        PERSOSUBSTATE_UNKNOWN,
+        PERSOSUBSTATE_IN_PROGRESS,
+        PERSOSUBSTATE_READY,
+        PERSOSUBSTATE_SIM_NETWORK,
+        PERSOSUBSTATE_SIM_NETWORK_SUBSET,
+        PERSOSUBSTATE_SIM_CORPORATE,
+        PERSOSUBSTATE_SIM_SERVICE_PROVIDER,
+        PERSOSUBSTATE_SIM_SIM,
+        PERSOSUBSTATE_SIM_NETWORK_PUK,
+        PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK,
+        PERSOSUBSTATE_SIM_CORPORATE_PUK,
+        PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK,
+        PERSOSUBSTATE_SIM_SIM_PUK,
+        PERSOSUBSTATE_RUIM_NETWORK1,
+        PERSOSUBSTATE_RUIM_NETWORK2,
+        PERSOSUBSTATE_RUIM_HRPD,
+        PERSOSUBSTATE_RUIM_CORPORATE,
+        PERSOSUBSTATE_RUIM_SERVICE_PROVIDER,
+        PERSOSUBSTATE_RUIM_RUIM,
+        PERSOSUBSTATE_RUIM_NETWORK1_PUK,
+        PERSOSUBSTATE_RUIM_NETWORK2_PUK,
+        PERSOSUBSTATE_RUIM_HRPD_PUK,
+        PERSOSUBSTATE_RUIM_CORPORATE_PUK,
+        PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK,
+        PERSOSUBSTATE_RUIM_RUIM_PUK
+
+        // boolean isPersoSubStateUnknown() {
+        //     return this == PERSOSUBSTATE_UNKNOWN;
+        // }
+    }
+
     interface IIccCardApplicationStatus {
-        IsPinRequired(
-            [out] Boolean* result);
-
-        IsPukRequired(
-            [out] Boolean* result);
-
-        IsSubscriptionPersoEnabled(
-            [out] Boolean* result);
-
-        IsAppReady(
-            [out] Boolean* result);
-
-        IsAppNotReady(
-            [out] Boolean* result);
-
-        IsPersoSubStateUnknown(
-            [out] Boolean* result);
-
         AppTypeFromRILInt(
             [in] Int32 type,
             [out] AppType* result);

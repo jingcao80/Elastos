@@ -1,0 +1,40 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Sip {
+
+    /**
+     * @Involve
+     * interface IPhoneBase
+     */
+    interface ISipPhoneBase {
+
+        CanDial(
+            [out] Boolean* result);
+
+        GetCurrentDataConnectionList(
+            [out] IList** result);
+
+        EnableDataConnectivity(
+            [out] Boolean* result);
+
+        DisableDataConnectivity(
+            [out] Boolean* result);
+
+        SaveClirSetting(
+            [in] Int32 commandInterfaceCLIRMode);
+    }
+
+    }//Sip
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

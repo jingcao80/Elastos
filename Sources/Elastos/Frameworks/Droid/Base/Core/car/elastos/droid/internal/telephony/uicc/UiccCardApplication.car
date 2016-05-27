@@ -1,5 +1,10 @@
 
-module {
+module
+{
+    enum Elastos.Droid.Internal.Telephony.Uicc.PersoSubState;
+    enum Elastos.Droid.Internal.Telephony.Uicc.PinState;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IMessage;
 
     namespace Elastos {
     namespace Droid {
@@ -8,14 +13,244 @@ module {
     namespace Uicc {
 
     interface IUiccCardApplication {
-        Update(
-            [in] IccCardApplicationStatus as, 
-            [in] Context c, 
-            [in] CommandsInterface ci);
+        /**
+         * These values are for authContext (parameter P2) per 3GPP TS 31.102 (Section 7.1.2)
+         */
+        const Int32 AUTH_CONTEXT_EAP_SIM = 128;
+        const Int32 AUTH_CONTEXT_EAP_AKA = 129;
+        const Int32 AUTH_CONTEXT_UNDEFINED = -1;
 
-        Dispose();
+        RegisterForReady(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
-        QueryFdn();
+        UnregisterForReady(
+            [in] IHandler* h);
+
+        /**
+         * Notifies handler of any transition into State.isPinLocked()
+         */
+        RegisterForLocked(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
+
+        UnregisterForLocked(
+            [in] IHandler* h);
+
+        /**
+         * Notifies handler of any transition into State.PERSO_LOCKED
+         */
+        RegisterForPersoLocked(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
+
+        UnregisterForPersoLocked(
+            [in] IHandler* h);
+
+        GetState(
+            [out] AppState* result);
+
+        GetType(
+            [out] AppType* result);
+
+        GetAuthContext(
+            [out] Int32* result);
+
+        GetPersoSubState(
+            [out] PersoSubState* result);
+
+        GetAid(
+            [out] String* result);
+
+        GetAppLabel(
+            [out] String* result);
+
+        GetPin1State(
+            [out] PinState* result);
+
+        GetIccFileHandler(
+            [out] IIccFileHandler** result);
+
+        GetIccRecords(
+            [out] IIccRecords** result);
+
+        IsPersoLocked(
+            [out] Boolean* result);
+
+        /**
+         * Supply the ICC PIN to the ICC
+         *
+         * When the operation is complete, onComplete will be sent to its
+         * Handler.
+         *
+         * onComplete.obj will be an AsyncResult
+         * onComplete.arg1 = remaining attempts before puk locked or -1 if unknown
+         *
+         * ((AsyncResult)onComplete.obj).exception == null on success
+         * ((AsyncResult)onComplete.obj).exception != null on fail
+         *
+         * If the supplied PIN is incorrect:
+         * ((AsyncResult)onComplete.obj).exception != null
+         * && ((AsyncResult)onComplete.obj).exception
+         *       instanceof com.android.internal.telephony.gsm.CommandException)
+         * && ((CommandException)(((AsyncResult)onComplete.obj).exception))
+         *          .getCommandError() == CommandException.Error.PASSWORD_INCORRECT
+         */
+        SupplyPin(
+            [in] String pin,
+            [in] IMessage* onComplete);
+
+        /**
+         * Supply the ICC PUK to the ICC
+         *
+         * When the operation is complete, onComplete will be sent to its
+         * Handler.
+         *
+         * onComplete.obj will be an AsyncResult
+         * onComplete.arg1 = remaining attempts before Icc will be permanently unusable
+         * or -1 if unknown
+         *
+         * ((AsyncResult)onComplete.obj).exception == null on success
+         * ((AsyncResult)onComplete.obj).exception != null on fail
+         *
+         * If the supplied PIN is incorrect:
+         * ((AsyncResult)onComplete.obj).exception != null
+         * && ((AsyncResult)onComplete.obj).exception
+         *       instanceof com.android.internal.telephony.gsm.CommandException)
+         * && ((CommandException)(((AsyncResult)onComplete.obj).exception))
+         *          .getCommandError() == CommandException.Error.PASSWORD_INCORRECT
+         *
+         *
+         */
+        SupplyPuk(
+            [in] String puk,
+            [in] String newPin,
+            [in] IMessage* onComplete);
+
+        SupplyPin2(
+            [in] String pin2,
+            [in] IMessage* onComplete);
+
+        SupplyPuk2(
+            [in] String puk2,
+            [in] String newPin2,
+            [in] IMessage* onComplete);
+
+        SupplyDepersonalization(
+            [in] String pin,
+            [in] String type,
+            [in] IMessage* onComplete);
+
+        /**
+         * Check whether ICC pin lock is enabled
+         * This is a sync call which returns the cached pin enabled state
+         *
+         * @return true for ICC locked enabled
+         *         false for ICC locked disabled
+         */
+        GetIccLockEnabled(
+            [out] Boolean* result);
+
+        /**
+         * Check whether ICC fdn (fixed dialing number) is enabled
+         * This is a sync call which returns the cached pin enabled state
+         *
+         * @return true for ICC fdn enabled
+         *         false for ICC fdn disabled
+         */
+        GetIccFdnEnabled(
+            [out] Boolean* result);
+
+        /**
+         * Check whether fdn (fixed dialing number) service is available.
+         * @return true if ICC fdn service available
+         *         false if ICC fdn service not available
+         */
+        GetIccFdnAvailable(
+            [out] Boolean* result);
+
+        /**
+         * Set the ICC pin lock enabled or disabled
+         * When the operation is complete, onComplete will be sent to its handler
+         *
+         * @param enabled "true" for locked "false" for unlocked.
+         * @param password needed to change the ICC pin state, aka. Pin1
+         * @param onComplete
+         *        onComplete.obj will be an AsyncResult
+         *        ((AsyncResult)onComplete.obj).exception == null on success
+         *        ((AsyncResult)onComplete.obj).exception != null on fail
+         */
+        SetIccLockEnabled(
+            [in] Boolean enabled,
+            [in] String password,
+            [in] IMessage* onComplete);
+
+        /**
+         * Set the ICC fdn enabled or disabled
+         * When the operation is complete, onComplete will be sent to its handler
+         *
+         * @param enabled "true" for locked "false" for unlocked.
+         * @param password needed to change the ICC fdn enable, aka Pin2
+         * @param onComplete
+         *        onComplete.obj will be an AsyncResult
+         *        ((AsyncResult)onComplete.obj).exception == null on success
+         *        ((AsyncResult)onComplete.obj).exception != null on fail
+         */
+        SetIccFdnEnabled(
+            [in] Boolean enabled,
+            [in] String password,
+            [in] IMessage* onComplete);
+
+        /**
+         * Change the ICC password used in ICC pin lock
+         * When the operation is complete, onComplete will be sent to its handler
+         *
+         * @param oldPassword is the old password
+         * @param newPassword is the new password
+         * @param onComplete
+         *        onComplete.obj will be an AsyncResult
+         *        onComplete.arg1 = attempts remaining or -1 if unknown
+         *        ((AsyncResult)onComplete.obj).exception == null on success
+         *        ((AsyncResult)onComplete.obj).exception != null on fail
+         */
+        ChangeIccLockPassword(
+            [in] String oldPassword,
+            [in] String newPassword,
+            [in] IMessage* onComplete);
+
+        /**
+         * Change the ICC password used in ICC fdn enable
+         * When the operation is complete, onComplete will be sent to its handler
+         *
+         * @param oldPassword is the old password
+         * @param newPassword is the new password
+         * @param onComplete
+         *        onComplete.obj will be an AsyncResult
+         *        ((AsyncResult)onComplete.obj).exception == null on success
+         *        ((AsyncResult)onComplete.obj).exception != null on fail
+         */
+        ChangeIccFdnPassword(
+            [in] String oldPassword,
+            [in] String newPassword,
+            [in] IMessage* onComplete);
+
+        /**
+         * @return true if ICC card is PIN2 blocked
+         */
+        GetIccPin2Blocked(
+            [out] Boolean* result);
+
+        /**
+         * @return true if ICC card is PUK2 blocked
+         */
+        GetIccPuk2Blocked(
+            [out] Boolean* result);
+
+        GetUICCConfig(
+            [out] IUICCConfig** result);
 
     }
 

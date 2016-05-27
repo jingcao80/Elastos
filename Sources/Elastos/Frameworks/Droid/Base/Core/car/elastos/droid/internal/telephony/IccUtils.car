@@ -99,7 +99,12 @@ module
         AdnStringFieldToString(
             [in] ArrayOf<Byte>* data,
             [in] Int32 offset,
-            [in] Int32 length);
+            [in] Int32 length,
+            [out] String* result);
+
+        HexCharToInt(
+            [in] Char32 c,
+            [out] Int32* result);
 
         /**
          * Converts a hex String to a byte array.

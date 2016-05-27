@@ -1,5 +1,11 @@
 
-module {
+module
+{
+    // interface Elastos.Droid.Os.IAsyncResult;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIsimRecords;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUsimServiceTable;
 
     namespace Elastos {
     namespace Droid {
@@ -7,48 +13,93 @@ module {
     namespace Telephony {
     namespace Uicc {
 
+    /**
+     * Generic ICC record loaded callback. Subclasses can call EF load methods on
+     * {@link IccFileHandler} passing a Message for onLoaded with the what field set to
+     * {@link #EVENT_GET_ICC_RECORD_DONE} and the obj field set to an instance
+     * of this interface. The {@link #handleMessage} method in this class will print a
+     * log message using {@link #getEfName()} and decrement {@link #mRecordsToLoad}.
+     *
+     * If the record load was successful, {@link #onRecordLoaded} will be called with the result.
+     * Otherwise, an error log message will be output by {@link #handleMessage} and
+     * {@link #onRecordLoaded} will not be called.
+     */
+    interface IIccRecordLoaded {
+        GetEfName(
+            [out] String* result);
+
+        // OnRecordLoaded(
+        //     [in] IAsyncResult* ar);
+    }
+
+    /**
+     * interface IHandler
+     * interface IIccConstants
+     */
+    [deprecated]
     interface IIccRecords {
+        // Bitmasks for SPN display rules.
+        const Int32 SPN_RULE_SHOW_SPN  = 0x01;
+        const Int32 SPN_RULE_SHOW_PLMN = 0x02;
+
+        const Int32 EVENT_MWI = 0; // Message Waiting indication
+        const Int32 EVENT_CFI = 1; // Call Forwarding indication
+        const Int32 EVENT_SPN = 2; // Service Provider Name
+
+        const Int32 EVENT_GET_ICC_RECORD_DONE = 100;
+        const Int32 EVENT_REFRESH = 31; // ICC refresh occurred
+
+        const Int32 EVENT_REFRESH_OEM = 29;
+
         Dispose();
 
-        RecordsRequired();
+        OnReady();
 
         GetAdnCache(
-            [out] AdnRecordCache* result);
+            [out] IAdnRecordCache** result);
 
         GetIccId(
             [out] String* result);
 
         RegisterForRecordsLoaded(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForRecordsLoaded(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForImsiReady(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForImsiReady(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForRecordsEvents(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForRecordsEvents(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForNewSms(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForNewSms(
-            [in] Handler h);
+            [in] IHandler* h);
+
+        RegisterForNetworkSelectionModeAutomatic(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
+
+        UnregisterForNetworkSelectionModeAutomatic(
+            [in] IHandler* h);
 
         GetIMSI(
             [out] String* result);
@@ -62,6 +113,11 @@ module {
         GetGid1(
             [out] String* result);
 
+        SetMsisdnNumber(
+            [in] String alphaTag,
+            [in] String number,
+            [in] IMessage* onComplete);
+
         GetMsisdnAlphaTag(
             [out] String* result);
 
@@ -71,14 +127,78 @@ module {
         GetServiceProviderName(
             [out] String* result);
 
+        /**
+         * Set voice mail number to SIM record
+         *
+         * The voice mail number can be stored either in EF_MBDN (TS 51.011) or
+         * EF_MAILBOX_CPHS (CPHS 4.2)
+         *
+         * If EF_MBDN is available, store the voice mail number to EF_MBDN
+         *
+         * If EF_MAILBOX_CPHS is enabled, store the voice mail number to EF_CHPS
+         *
+         * So the voice mail number will be stored in both EFs if both are available
+         *
+         * Return error only if both EF_MBDN and EF_MAILBOX_CPHS fail.
+         *
+         * When the operation is complete, onComplete will be sent to its handler
+         *
+         * @param alphaTag alpha-tagging of the dailing nubmer (upto 10 characters)
+         * @param voiceNumber dailing nubmer (upto 20 digits)
+         *        if the number is start with '+', then set to international TOA
+         * @param onComplete
+         *        onComplete.obj will be an AsyncResult
+         *        ((AsyncResult)onComplete.obj).exception == null on success
+         *        ((AsyncResult)onComplete.obj).exception != null on fail
+         */
+        SetVoiceMailNumber(
+            [in] String alphaTag,
+            [in] String voiceNumber,
+            [in] IMessage* onComplete);
+
         GetVoiceMailAlphaTag(
             [out] String* result);
+
+        /**
+         * Sets the SIM voice message waiting indicator records
+         * @param line GSM Subscriber Profile Number, one-based. Only '1' is supported
+         * @param countWaiting The number of messages waiting, if known. Use
+         *                     -1 to indicate that an unknown number of
+         *                      messages are waiting
+         */
+        SetVoiceMessageWaiting(
+            [in] Int32 line,
+            [in] Int32 countWaiting);
+
+        /**
+         * Called by GsmPhone to update VoiceMail count
+         */
+        GetVoiceMessageCount(
+            [out] Int32* result);
+
+        /**
+         * Called by STK Service when REFRESH is received.
+         * @param fileChanged indicates whether any files changed
+         * @param fileList if non-null, a list of EF files that changed
+         */
+        OnRefresh(
+            [in] Boolean fileChanged,
+            [in] ArrayOf<Int32>* fileList);
 
         GetRecordsLoaded(
             [out] Boolean* result);
 
-        HandleMessage(
-            [in] Message msg);
+        /**
+         * Returns the SpnDisplayRule based on settings on the SIM and the
+         * specified plmn (currently-registered PLMN).  See TS 22.101 Annex A
+         * and TS 51.011 10.3.11 for details.
+         *
+         * If the SPN is not found on the SIM, the rule is always PLMN_ONLY.
+         * Generally used for GSM/UMTS and the like SIMs.
+         */
+        GetDisplayRule(
+            [in] String plmn,
+            [out] Int32* result);
 
         IsCspPlmnEnabled(
             [out] Boolean* result);
@@ -93,20 +213,21 @@ module {
             [out] Boolean* result);
 
         SetVoiceCallForwardingFlag(
-            [in] Int32 line, 
-            [in] Boolean enable, 
+            [in] Int32 line,
+            [in] Boolean enbl,
             [in] String number);
 
-        IsProvisioned ();
+        IsProvisioned(
+            [out] Boolean* result);
 
         GetIsimRecords(
-            [out] IsimRecords* result);
+            [out] IIsimRecords** result);
 
         GetUsimServiceTable(
-            [out] UsimServiceTable* result);
+            [out] IUsimServiceTable** result);
 
         GetIccSimChallengeResponse(
-            [in] Int32 authContext, 
+            [in] Int32 authContext,
             [in] String data,
             [out] String* result);
 

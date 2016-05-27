@@ -1,5 +1,7 @@
 
-module {
+module
+{
+//     interface Elastos.Droid.Content.IAsyncResult;
 
     namespace Elastos {
     namespace Droid {
@@ -7,55 +9,15 @@ module {
     namespace Telephony {
     namespace Uicc {
 
+    /**
+     * interface IIccRecords
+     */
     interface ISIMRecords {
-        Dispose();
-
-        GetIMSI(
-            [out] String* result);
-
-        GetMsisdnNumber(
-            [out] String* result);
-
-        GetGid1(
-            [out] String* result);
-
-        GetUsimServiceTable(
-            [out] UsimServiceTable* result);
-
-        GetMsisdnAlphaTag(
-            [out] String* result);
-
-        GetVoiceMailNumber(
-            [out] String* result);
-
-        IsCallForwardStatusStored(
-            [out] Boolean* result);
-
-        GetVoiceCallForwardingFlag(
-            [out] Boolean* result);
-
-        SetVoiceCallForwardingFlag(
-            [in] Int32 line, 
-            [in] Boolean enable, 
-            [in] String dialNumber);
-
-        GetOperatorNumeric(
-            [out] String* result);
-
-        HandleMessage(
-            [in] Message msg);
-
-        HandleSmsOnIcc(
-            [in] AsyncResult ar);
-
-        OnReady();
-
-        GetDisplayRule(
-            [in] String plmn,
+        GetVoiceMessageCount(
             [out] Int32* result);
 
-        IsCspPlmnEnabled(
-            [out] Boolean* result);
+        // HandleSmsOnIcc(
+        //     [in] IAsyncResult* ar);
 
     }
 

@@ -7,80 +7,18 @@ module {
     namespace Telephony {
     namespace Uicc {
 
+    /**
+     * @Involve
+     * interface IHandler
+     * interface IIccCard
+     */
     interface IIccCardProxy {
         Dispose();
 
         SetVoiceRadioTech(
             [in] Int32 radioTech);
 
-        HandleMessage(
-            [in] Message msg);
-
-        ResetProperties();
-
         GetIccRecordsLoaded(
-            [out] Boolean* result);
-
-        GetState(
-            [out] State* result);
-
-        GetIccRecords(
-            [out] IccRecords* result);
-
-        GetIccFileHandler(
-            [out] IccFileHandler* result);
-
-        RegisterForAbsent(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForAbsent(
-            [in] Handler h);
-
-        RegisterForPersoLocked(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForPersoLocked(
-            [in] Handler h);
-
-        RegisterForLocked(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForLocked(
-            [in] Handler h);
-
-        SupplyPin(
-            [in] String pin, 
-            [in] Message onComplete);
-
-        SupplyPuk(
-            [in] String puk, 
-            [in] String newPin, 
-            [in] Message onComplete);
-
-        SupplyPin2(
-            [in] String pin2, 
-            [in] Message onComplete);
-
-        SupplyPuk2(
-            [in] String puk2, 
-            [in] String newPin2, 
-            [in] Message onComplete);
-
-        SupplyDepersonalization(
-            [in] String pin, 
-            [in] String type, 
-            [in] Message onComplete);
-
-        GetIccLockEnabled(
-            [out] Boolean* result);
-
-        GetIccFdnEnabled(
             [out] Boolean* result);
 
         GetIccFdnAvailable(
@@ -90,32 +28,6 @@ module {
             [out] Boolean* result);
 
         GetIccPuk2Blocked(
-            [out] Boolean* result);
-
-        SetIccLockEnabled(
-            [in] Boolean enabled, 
-            [in] String password, 
-            [in] Message onComplete);
-
-        SetIccFdnEnabled(
-            [in] Boolean enabled, 
-            [in] String password, 
-            [in] Message onComplete);
-
-        ChangeIccLockPassword(
-            [in] String oldPassword, 
-            [in] String newPassword, 
-            [in] Message onComplete);
-
-        ChangeIccFdnPassword(
-            [in] String oldPassword, 
-            [in] String newPassword, 
-            [in] Message onComplete);
-
-        GetServiceProviderName(
-            [out] String* result);
-
-        HasIccCard(
             [out] Boolean* result);
 
     }

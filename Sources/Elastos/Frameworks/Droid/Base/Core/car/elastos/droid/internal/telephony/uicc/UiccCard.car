@@ -1,5 +1,20 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.Pm.IPackageManager;
+    interface Elastos.Droid.Internal.Telephony.ICommandsInterface;
+    interface Elastos.Droid.Internal.Telephony.Cat.ICatService;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUiccCardApplication;
+    enum Elastos.Droid.Internal.Telephony.Uicc.AppType;
+    enum Elastos.Droid.Internal.Telephony.Uicc.CardState;
+    enum Elastos.Droid.Internal.Telephony.Uicc.PinState;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IMessage;
+
+    using interface Elastos.Security.ISignature;
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
@@ -11,32 +26,177 @@ module {
         Dispose();
 
         Update(
-            [in] Context c, 
-            [in] CommandsInterface ci, 
-            [in] IccCardStatus ics);
+            [in] IContext* c,
+            [in] ICommandsInterface* ci,
+            [in] IIccCardStatus* ics);
 
         GetCatService(
-            [out] CatService* result);
+            [out] ICatService** result);
 
         RegisterForAbsent(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForAbsent(
-            [in] Handler h);
+            [in] IHandler* h);
 
         RegisterForCarrierPrivilegeRulesLoaded(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnregisterForCarrierPrivilegeRulesLoaded(
-            [in] Handler h);
+            [in] IHandler* h);
 
-        OnClick(
-            [in] DialogInterface dialog, 
-            [in] Int32 which);
+        IsApplicationOnIcc(
+            [in] AppType type,
+            [out] Boolean* result);
+
+        GetCardState(
+            [out] CardState* result);
+
+        GetUniversalPinState(
+            [out] PinState* result);
+
+        GetSlotId(
+            [out] Int32* result);
+
+        GetApplication(
+            [in] Int32 family,
+            [out] IUiccCardApplication** result);
+
+        GetApplicationIndex(
+            [in] Int32 index,
+            [out] IUiccCardApplication** result);
+
+        /**
+         * Returns the SIM application of the specified type.
+         *
+         * @param type ICC application type (@see com.android.internal.telephony.PhoneConstants#APPTYPE_xxx)
+         * @return application corresponding to type or a null if no match found
+         */
+        GetApplicationByType(
+            [in] Int32 type,
+            [out] IUiccCardApplication** result);
+
+        /**
+         * Exposes {@link CommandsInterface.iccOpenLogicalChannel}
+         */
+        IccOpenLogicalChannel(
+            [in] String AID,
+            [in] IMessage* response);
+
+        /**
+         * Exposes {@link CommandsInterface.iccCloseLogicalChannel}
+         */
+        IccCloseLogicalChannel(
+            [in] Int32 channel,
+            [in] IMessage* response);
+
+        /**
+         * Exposes {@link CommandsInterface.iccTransmitApduLogicalChannel}
+         */
+        IccTransmitApduLogicalChannel(
+            [in] Int32 channel,
+            [in] Int32 cla,
+            [in] Int32 command,
+            [in] Int32 p1,
+            [in] Int32 p2,
+            [in] Int32 p3,
+            [in] String data,
+            [in] IMessage* response);
+
+        /**
+         * Exposes {@link CommandsInterface.iccTransmitApduBasicChannel}
+         */
+        IccTransmitApduBasicChannel(
+            [in] Int32 cla,
+            [in] Int32 command,
+            [in] Int32 p1,
+            [in] Int32 p2,
+            [in] Int32 p3,
+            [in] String data,
+            [in] IMessage* response);
+
+        /**
+         * Exposes {@link CommandsInterface.iccIO}
+         */
+        IccExchangeSimIO(
+            [in] Int32 fileID,
+            [in] Int32 command,
+            [in] Int32 p1,
+            [in] Int32 p2,
+            [in] Int32 p3,
+            [in] String pathID,
+            [in] IMessage* response);
+
+        /**
+         * Exposes {@link CommandsInterface.getAtr}
+         */
+        GetAtr(
+            [in] IMessage* response);
+
+        /**
+         * Exposes {@link CommandsInterface.sendEnvelopeWithStatus}
+         */
+        SendEnvelopeWithStatus(
+            [in] String contents,
+            [in] IMessage* response);
+
+        /* Returns number of applications on this card */
+        GetNumApplications(
+            [out] Int32* result);
+
+        /**
+         * Returns true iff carrier priveleges rules are null (dont need to be loaded) or loaded.
+         */
+        AreCarrierPriviligeRulesLoaded(
+            [out] Boolean* result);
+
+        /**
+         * Exposes {@link UiccCarrierPrivilegeRules.getCarrierPrivilegeStatus}.
+         */
+        GetCarrierPrivilegeStatus(
+            [in] ISignature* signature,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /**
+         * Exposes {@link UiccCarrierPrivilegeRules.getCarrierPrivilegeStatus}.
+         */
+        GetCarrierPrivilegeStatus(
+            [in] IPackageManager* packageManager,
+            [in] String packageName,
+            [out] Int32* result);
+
+        /**
+         * Exposes {@link UiccCarrierPrivilegeRules.getCarrierPrivilegeStatusForCurrentTransaction}.
+         */
+        GetCarrierPrivilegeStatusForCurrentTransaction(
+            [in] IPackageManager* packageManager,
+            [out] Int32* result);
+
+        /**
+         * Exposes {@link UiccCarrierPrivilegeRules.getCarrierPackageNamesForIntent}.
+         */
+        GetCarrierPackageNamesForIntent(
+            [in] IPackageManager* packageManager,
+            [in] IIntent* intent,
+            [out] IList** result);
+
+        SetOperatorBrandOverride(
+            [in] String brand,
+            [out] Boolean* result);
+
+        GetOperatorBrandOverride(
+            [out] String* result);
+
+        GetIccId(
+            [out] String* result);
+
+        GetUICCConfig(
+            [out] IUICCConfig** result);
 
     }
 

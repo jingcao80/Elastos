@@ -7,105 +7,15 @@ module {
     namespace Telephony {
     namespace ImsPhone {
 
+    /**
+     * @Involve
+     * interface ICallTracker
+     */
     interface IImsPhoneCallTracker {
-        OnReceive(
-            [in] Context context, 
-            [in] Intent intent);
-
-        Thread(
-            [out] new* result);
-
         Dispose();
 
-        RegisterForVoiceCallStarted(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForVoiceCallStarted(
-            [in] Handler h);
-
-        RegisterForVoiceCallEnded(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForVoiceCallEnded(
-            [in] Handler h);
-
-
-        SendUSSD(
-            [in] String ussdString, 
-            [in] Message response);
-
-        CancelUSSD();
-
-        OnCallProgressing(
-            [in] ImsCall imsCall);
-
-        OnCallStarted(
-            [in] ImsCall imsCall);
-
-        OnCallUpdated(
-            [in] ImsCall imsCall);
-
-        OnCallStartFailed(
-            [in] ImsCall imsCall, 
-            [in] ImsReasonInfo reasonInfo);
-
-        OnCallTerminated(
-            [in] ImsCall imsCall, 
-            [in] ImsReasonInfo reasonInfo);
-
-        OnCallHeld(
-            [in] ImsCall imsCall);
-
-        OnCallHoldFailed(
-            [in] ImsCall imsCall, 
-            [in] ImsReasonInfo reasonInfo);
-
-        OnCallResumed(
-            [in] ImsCall imsCall);
-
-        OnCallResumeFailed(
-            [in] ImsCall imsCall, 
-            [in] ImsReasonInfo reasonInfo);
-
-        OnCallResumeReceived(
-            [in] ImsCall imsCall);
-
-        OnCallHoldReceived(
-            [in] ImsCall imsCall);
-
-        OnCallMerged(
-            [in] ImsCall call);
-
-        OnCallMergeFailed(
-            [in] ImsCall call, 
-            [in] ImsReasonInfo reasonInfo);
-
-        OnCallStarted(
-            [in] ImsCall imsCall);
-
-        OnCallStartFailed(
-            [in] ImsCall imsCall, 
-            [in] ImsReasonInfo reasonInfo);
-
-        OnCallTerminated(
-            [in] ImsCall imsCall, 
-            [in] ImsReasonInfo reasonInfo);
-
-        OnImsConnected();
-
-        OnImsDisconnected();
-
-        OnImsResumed();
-
-        OnImsSuspended();
-
-        OnVoiceMessageCountChanged(
-            [in] Int32 count);
-
+        AddParticipant(
+            [in] String dialString);
 
         IsInEmergencyCall(
             [out] Boolean* result);

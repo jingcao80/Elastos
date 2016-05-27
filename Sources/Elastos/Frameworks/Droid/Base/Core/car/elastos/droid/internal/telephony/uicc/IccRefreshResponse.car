@@ -8,6 +8,9 @@ module {
     namespace Uicc {
 
     interface IIccRefreshResponse {
+        const Int32 REFRESH_RESULT_FILE_UPDATE = 0; /* Single file was updated */
+        const Int32 REFRESH_RESULT_INIT = 1;        /* The Icc has been initialized */
+        const Int32 REFRESH_RESULT_RESET = 2;       /* The Icc was reset */
     }
 
     }//Uicc

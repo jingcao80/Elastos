@@ -1,5 +1,9 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IMessage;
+
+    using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
     namespace Droid {
@@ -7,53 +11,130 @@ module {
     namespace Telephony {
     namespace Uicc {
 
+    /**
+     * interface IHandler
+     * interface IIccConstants
+     */
+    [deprecated]
     interface IIccFileHandler {
         Dispose();
 
         LoadEFLinearFixed(
-            [in] Int32 fileid, 
-            [in] String path, 
-            [in] Int32 recordNum, 
-            [in] Message onLoaded);
+            [in] Int32 fileid,
+            [in] String path,
+            [in] Int32 recordNum,
+            [in] IMessage* onLoaded);
 
         LoadEFLinearFixed(
-            [in] Int32 fileid, 
-            [in] Int32 recordNum, 
-            [in] Message onLoaded);
+            [in] Int32 fileid,
+            [in] Int32 recordNum,
+            [in] IMessage* onLoaded);
 
         LoadEFImgLinearFixed(
-            [in] Int32 recordNum, 
-            [in] Message onLoaded);
+            [in] Int32 recordNum,
+            [in] IMessage* onLoaded);
 
         GetEFLinearRecordSize(
-            [in] Int32 fileid, 
-            [in] String path, 
-            [in] Message onLoaded);
+            [in] Int32 fileid,
+            [in] String path,
+            [in] IMessage* onLoaded);
 
         GetEFLinearRecordSize(
-            [in] Int32 fileid, 
-            [in] Message onLoaded);
+            [in] Int32 fileid,
+            [in] IMessage* onLoaded);
 
         LoadEFLinearFixedAll(
-            [in] Int32 fileid, 
-            [in] Message onLoaded);
+            [in] Int32 fileid,
+            [in] IMessage* onLoaded);
 
         LoadEFLinearFixedAll(
-            [in] Int32 fileid, 
-            [in] String path, 
-            [in] Message onLoaded);
+            [in] Int32 fileid,
+            [in] String path,
+            [in] IMessage* onLoaded);
+
+        /**
+         * Load several records from a SIM Linear Fixed EF
+         *
+         * @param fileid EF id
+         * @param onLoaded
+         *
+         * ((AsyncResult)(onLoaded.obj)).result is an ArrayList<byte[]>
+         *
+         */
+        LoadEFLinearFixedPart(
+            [in] Int32 fileid,
+            [in] IArrayList* recordNums,
+            [in] IMessage* onLoaded);
 
         LoadEFTransparent(
-            [in] Int32 fileid, 
-            [in] Message onLoaded);
+            [in] Int32 fileid,
+            [in] IMessage* onLoaded);
 
         LoadEFTransparent(
-            [in] Int32 fileid, 
-            [in] Int32 size, 
-            [in] Message onLoaded);
+            [in] Int32 fileid,
+            [in] Int32 size,
+            [in] IMessage* onLoaded);
 
-        HandleMessage(
-            [in] Message msg);
+        /**
+         * Load a SIM Transparent EF-IMG. Used right after loadEFImgLinearFixed to
+         * retrive STK's icon data.
+         *
+         * @param fileid EF id
+         * @param onLoaded
+         *
+         * ((AsyncResult)(onLoaded.obj)).result is the byte[]
+         *
+         */
+        LoadEFImgTransparent(
+            [in] Int32 fileid,
+            [in] Int32 highOffset,
+            [in] Int32 lowOffset,
+            [in] Int32 length,
+            [in] IMessage* onLoaded);
+
+        /**
+         * Update a record in a linear fixed EF
+         * @param fileid EF id
+         * @param path Path of the EF on the card
+         * @param recordNum 1-based (not 0-based) record number
+         * @param data must be exactly as long as the record in the EF
+         * @param pin2 for CHV2 operations, otherwist must be null
+         * @param onComplete onComplete.obj will be an AsyncResult
+         *                   onComplete.obj.userObj will be a IccIoResult on success
+         */
+        UpdateEFLinearFixed(
+            [in] Int32 fileid,
+            [in] String path,
+            [in] Int32 recordNum,
+            [in] ArrayOf<Byte>* data,
+            [in] String pin2,
+            [in] IMessage* onComplete);
+
+        /**
+         * Update a record in a linear fixed EF
+         * @param fileid EF id
+         * @param recordNum 1-based (not 0-based) record number
+         * @param data must be exactly as long as the record in the EF
+         * @param pin2 for CHV2 operations, otherwist must be null
+         * @param onComplete onComplete.obj will be an AsyncResult
+         *                   onComplete.obj.userObj will be a IccIoResult on success
+         */
+        UpdateEFLinearFixed(
+            [in] Int32 fileid,
+            [in] Int32 recordNum,
+            [in] ArrayOf<Byte>* data,
+            [in] String pin2,
+            [in] IMessage* onComplete);
+
+        /**
+         * Update a transparent EF
+         * @param fileid EF id
+         * @param data must be exactly as long as the EF
+         */
+        UpdateEFTransparent(
+            [in] Int32 fileid,
+            [in] ArrayOf<Byte>* data,
+            [in] IMessage* onComplete);
     }
 
     }//Uicc

@@ -1,5 +1,13 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Internal.Telephony.IPhoneBase;
+    enum Elastos.Droid.Internal.Telephony.ICallSrvccState;
+    interface Elastos.Droid.Internal.Telephony.Gsm.ISuppServiceNotification;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccRecords;
+
+    using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
     namespace Droid {
@@ -7,65 +15,39 @@ module {
     namespace Telephony {
     namespace ImsPhone {
 
+    /**
+     * @Involve
+     * interface IImsPhoneBase
+     */
     interface IImsPhone {
-        GetCallTracker(
-            [out] CallTracker* result);
 
-        CanConference(
-            [out] Boolean* result);
+        const String CS_FALLBACK = "cs_fallback";
+
+        UpdateParentPhone(
+            [in] IPhoneBase* parentPhone);
 
         CanDial(
             [out] Boolean* result);
 
-        Conference();
-
-        ClearDisconnected();
-
-        CanTransfer(
-            [out] Boolean* result);
-
-        ExplicitCallTransfer();
-
         NotifySuppSvcNotification(
-            [in] SuppServiceNotification suppSvc);
+            [in] ISuppServiceNotification* suppSvc);
 
-        HandleInCallMmiCommands(
-            [in] String dialString,
-            [out] Boolean* result);
+        GetHandoverConnection(
+            [out] IArrayList** result);
 
-        IsInCall(
-            [out] Boolean* result);
+        NotifySrvccState(
+            [in] ICallSrvccState state);
 
-        NotifyNewRingingConnection(
-            [in] Connection c);
+        RegisterForSilentRedial(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
-        NotifyForVideoCapabilityChanged(
-            [in] Boolean isVideoCapable);
+        UnregisterForSilentRedial(
+            [in] IHandler* h);
 
-        SetOnPostDialCharacter(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        SetMute(
-            [in] Boolean muted);
-
-        SetUiTTYMode(
-            [in] Int32 uiTtyMode, 
-            [in] Message onComplete);
-
-        GetMute(
-            [out] Boolean* result);
-
-        GetState(
-            [out] State* result);
-
-        HandleMessage(
-            [in] Message msg);
-
-        OnECBMEntered();
-
-        OnECBMExited();
+        GetIccRecords(
+            [out] IIccRecords** result);
 
         IsInEmergencyCall(
             [out] Boolean* result);
@@ -73,20 +55,13 @@ module {
         IsInEcm(
             [out] Boolean* result);
 
-        SendEmergencyCallbackModeChange();
-
-        ExitEmergencyCallbackMode();
-
-        HandleTimerInEmergencyCallbackMode(
-            [in] Int32 action);
-
         SetOnEcbModeExitResponse(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
 
         UnsetOnEcbModeExitResponse(
-            [in] Handler h);
+            [in] IHandler* h);
 
         IsVolteEnabled(
             [out] Boolean* result);

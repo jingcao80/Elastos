@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Os.IMessage;
 
     namespace Elastos {
     namespace Droid {
@@ -7,7 +9,49 @@ module {
     namespace Telephony {
     namespace Uicc {
 
+    /**
+     * @Involve
+     * interface IHandler
+     */
     interface IAdnRecordLoader {
+        /**
+         * Resulting AdnRecord is placed in response.obj.result
+         * or response.obj.exception is set
+         */
+        LoadFromEF(
+            [in] Int32 ef,
+            [in] Int32 extensionEF,
+            [in] Int32 recordNumber,
+            [in] IMessage* response);
+
+        /**
+         * Resulting ArrayList&lt;adnRecord> is placed in response.obj.result
+         * or response.obj.exception is set
+         */
+        LoadAllFromEF(
+            [in] Int32 ef,
+            [in] Int32 extensionEF,
+            [in] IMessage* response);
+
+        /**
+         * Write adn to a EF SIM record
+         * It will get the record size of EF record and compose hex adn array
+         * then write the hex array to EF record
+         *
+         * @param adn is set with alphaTag and phone number
+         * @param ef EF fileid
+         * @param extensionEF extension EF fileid
+         * @param recordNumber 1-based record index
+         * @param pin2 for CHV2 operations, must be null if pin2 is not needed
+         * @param response will be sent to its handler when completed
+         */
+        UpdateEF(
+            [in] IAdnRecord* adn,
+            [in] Int32 ef,
+            [in] Int32 extensionEF,
+            [in] Int32 recordNumber,
+            [in] String pin2,
+            [in] IMessage* response);
     }
 
     }//Uicc

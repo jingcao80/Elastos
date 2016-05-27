@@ -7,56 +7,38 @@ module {
     namespace Telephony {
     namespace ImsPhone {
 
+    /**
+     * @Involve
+     * interface IHandler
+     * interface IMmiCode
+     */
     interface IImsPhoneMmiCode {
-        IsScMatchesSuppServType(
-            [in] String dialString,
-            [out] Boolean* result);
+        //***** Supplementary Service Query Bundle Keys
+        // Used by IMS Service layer to put supp. serv. query
+        // responses into the ssInfo Bundle.
+        const String UT_BUNDLE_KEY_CLIR = "queryClir";
+        const String UT_BUNDLE_KEY_SSINFO = "imsSsInfo";
 
-        IsServiceCodeUncondCallFwdTimer(
-            [in] String sc,
-            [out] Boolean* result);
-
-        GetPhone(
-            [out] Phone* result);
-
-        IsCancelable(
-            [out] Boolean* result);
-
-        GetDialingNumber(
-            [out] String* result);
-
-        IsPinPukCommand(
-            [out] Boolean* result);
-
-        IsActivate(
-            [out] Boolean* result);
-
-        IsDeactivate(
-            [out] Boolean* result);
-
-        IsInterrogate(
-            [out] Boolean* result);
-
-        IsRegister(
-            [out] Boolean* result);
-
-        IsErasure(
-            [out] Boolean* result);
-
+        /**
+         * Returns true if this is a USSD code that's been submitted to the
+         * network...eg, after processCode() is called
+         */
         IsPendingUSSD(
             [out] Boolean* result);
 
-        IsUssdRequest(
-            [out] Boolean* result);
-
         CalForwardAction(
-            [in] String dialingNumber);
-
-        CallBarrAction(
             [in] String dialingNumber,
             [out] Int32* result);
 
-
+        /*
+         * The below actions are IMS/Volte CallBarring actions.We have not defined
+         * these actions in ImscommandInterface.However we have reused existing
+         * actions of CallForwarding as, both CF and CB actions are used for same
+         * purpose.
+         */
+        CallBarrAction(
+            [in] String dialingNumber,
+            [out] Int32* result);
 
     }
 

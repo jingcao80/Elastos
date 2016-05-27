@@ -1,5 +1,11 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Content.Pm.IPackageManager;
+
+    using interface Elastos.Security.ISignature;
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
@@ -7,26 +13,40 @@ module {
     namespace Telephony {
     namespace Uicc {
 
+    /**
+     * interface IHandler
+     */
     interface IUiccCarrierPrivilegeRules {
         AreCarrierPriviligeRulesLoaded(
             [out] Boolean* result);
 
         GetCarrierPrivilegeStatus(
-            [in] Signature signature, 
+            [in] ISignature* signature,
             [in] String packageName,
             [out] Int32* result);
 
         GetCarrierPrivilegeStatus(
-            [in] PackageManager packageManager, 
+            [in] IPackageManager* packageManager,
             [in] String packageName,
             [out] Int32* result);
 
         GetCarrierPrivilegeStatusForCurrentTransaction(
-            [in] PackageManager packageManager,
+            [in] IPackageManager* packageManager,
             [out] Int32* result);
 
-        HandleMessage(
-            [in] Message msg);
+        /**
+         * Returns the package name of the carrier app that should handle the input intent.
+         *
+         * @param packageManager PackageManager for getting receivers.
+         * @param intent Intent that will be sent.
+         * @return list of carrier app package names that can handle the intent.
+         *         Returns null if there is an error and an empty list if there
+         *         are no matching packages.
+         */
+        GetCarrierPackageNamesForIntent(
+            [in] IPackageManager* packageManager,
+            [in] IIntent* intent,
+            [out] IList** result);
 
     }
 

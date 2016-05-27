@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
     namespace Droid {
@@ -7,17 +9,12 @@ module {
     namespace Telephony {
     namespace Uicc {
 
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    [deprecated]
     interface IAdnRecord {
-        CreateFromParcel(
-            [in] Parcel source,
-            [out] AdnRecord* result);
-
-        NewArray(
-            [in] Int32 size);
-
-        AdnRecord(
-            [in] String alphaTag, 
-            [in] String number);
 
         GetAlphaTag(
             [out] String* result);
@@ -25,9 +22,17 @@ module {
         GetNumber(
             [out] String* result);
 
-        GetEmails();
+        GetEmails(
+            [out, callee] ArrayOf<String>* result);
 
-        GetAdditionalNumbers();
+        SetEmails(
+            [in] ArrayOf<String>* emails);
+
+        GetAdditionalNumbers(
+            [out, callee] ArrayOf<String>* result);
+
+        SetAdditionalNumbers(
+            [in] ArrayOf<String>* additionalNumbers);
 
         IsEmpty(
             [out] Boolean* result);
@@ -36,23 +41,32 @@ module {
             [out] Boolean* result);
 
         IsEqual(
-            [in] AdnRecord adn,
+            [in] IAdnRecord* adn,
             [out] Boolean* result);
 
+        UpdateAnrEmailArrayHelper(
+            [in] ArrayOf<String>* dest,
+            [in] ArrayOf<String>* src,
+            [in] Int32 fileCount,
+            [out, callee] ArrayOf<String>* result);
+
         UpdateAnrEmailArray(
-            [in] AdnRecord adn, 
-            [in] Int32 emailFileNum, 
+            [in] IAdnRecord* adn,
+            [in] Int32 emailFileNum,
             [in] Int32 anrFileNum);
 
-        DescribeContents(
-            [out] Int32* result);
-
-        WriteToParcel(
-            [in] Parcel dest, 
-            [in] Int32 flags);
-
         BuildAdnString(
-            [in] Int32 recordSize);
+            [in] Int32 recordSize,
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * See TS 51.011 10.5.10
+         */
+        AppendExtRecord(
+            [in] ArrayOf<Byte>* extRecord);
+
+        GetAnrNumbers(
+            [out, callee] ArrayOf<String>* result);
 
     }
 

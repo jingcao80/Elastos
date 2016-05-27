@@ -7,20 +7,15 @@ module {
     namespace Telephony {
     namespace ImsPhone {
 
+    /**
+     * @Involve
+     * interface ICall
+     */
     interface IImsPhoneCall {
         Dispose();
 
-        GetExtras(
-            [out] Bundle* result);
-
-
-        Update(
-            [in] ImsPhoneConnection conn, 
-            [in] ImsCall imsCall, 
-            [in] State state);
-
-        SwitchWith(
-            [in] ImsPhoneCall that);
+        // GetImsCall(
+        //     [out] IImsCall** result);
 
     }
 

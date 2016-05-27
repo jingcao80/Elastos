@@ -1,5 +1,11 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Internal.Telephony.ICommandsInterface;
+
+    using interface Elastos.IO.IByteBuffer;
 
     namespace Elastos {
     namespace Droid {
@@ -7,66 +13,71 @@ module {
     namespace Telephony {
     namespace Uicc {
 
+    /**
+     * interface IHandler
+     */
     interface IUiccController {
-        Make(
-            [in] Context c, 
-            [in] CommandsInterface ci,
-            [out] UiccController* result);
-
-        GetInstance(
-            [out] UiccController* result);
+        const Int32 APP_FAM_UNKNOWN =  -1;
+        const Int32 APP_FAM_3GPP =  1;
+        const Int32 APP_FAM_3GPP2 = 2;
+        const Int32 APP_FAM_IMS   = 3;
 
         GetUiccCard(
-            [out] UiccCard* result);
+            [out] IUiccCard** result);
 
         GetUiccCard(
             [in] Int32 slotId,
-            [out] UiccCard* result);
+            [out] IUiccCard** result);
 
-        GetUiccCards();
+        GetUiccCards(
+            [out, callee] ArrayOf<IUiccCard*>* result);
 
         GetUiccCardApplication(
             [in] Int32 family,
-            [out] UiccCardApplication* result);
+            [out] IUiccCardApplication** result);
 
         GetIccRecords(
+            [in] Int32 slotId,
             [in] Int32 family,
-            [out] IccRecords* result);
-
-        GetIccRecords(
-            [in] Int32 slotId, 
-            [in] Int32 family,
-            [out] IccRecords* result);
+            [out] IIccRecords** result);
 
         GetIccFileHandler(
+            [in] Int32 slotId,
             [in] Int32 family,
-            [out] IccFileHandler* result);
+            [out] IIccFileHandler** result);
 
-        GetIccFileHandler(
-            [in] Int32 slotId, 
+        RegisterForIccChanged(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
+
+        UnregisterForIccChanged(
+            [in] IHandler* h);
+
+        GetUiccCardApplication(
+            [in] Int32 slotId,
             [in] Int32 family,
-            [out] IccFileHandler* result);
+            [out] IUiccCardApplication** result);
+
+    }
+
+    [deprecated]
+    interface IUiccControllerHelper {
+        Make(
+            [in] IContext* c,
+            [in] ArrayOf<ICommandsInterface*>* ci,
+            [out] IUiccController** result);
+
+        GetInstance(
+            [out] IUiccController** result);
 
         GetFamilyFromRadioTechnology(
             [in] Int32 radioTechnology,
             [out] Int32* result);
 
-        RegisterForIccChanged(
-            [in] Handler h, 
-            [in] Int32 what, 
-            [in] Object obj);
-
-        UnregisterForIccChanged(
-            [in] Handler h);
-
-        HandleMessage(
-            [in] Message msg);
-
-        GetUiccCardApplication(
-            [in] Int32 slotId, 
-            [in] Int32 family,
-            [out] UiccCardApplication* result);
-
+        ParseOemSimRefresh(
+            [in] IByteBuffer* payload,
+            [out] IIccRefreshResponse** result);
     }
 
     }//Uicc

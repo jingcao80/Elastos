@@ -7,11 +7,10 @@ module {
     namespace Telephony {
     namespace Uicc {
 
+    /**
+     * interface IIccRecords
+     */
     interface IRuimRecords {
-        Dispose();
-
-        GetIMSI(
-            [out] String* result);
 
         GetMdnNumber(
             [out] String* result);
@@ -22,24 +21,23 @@ module {
         GetPrlVersion(
             [out] String* result);
 
-        SetVoiceMailNumber(
-            [in] String alphaTag, 
-            [in] String voiceNumber, 
-            [in] Message onComplete);
-
         GetOperatorNumeric(
             [out] String* result);
 
-        HandleMessage(
-            [in] Message msg);
+        GetMdn(
+            [out] String* result);
 
-        OnReady();
+        GetMin(
+            [out] String* result);
 
-        RecordsRequired();
+        GetSid(
+            [out] String* result);
 
-        GetDisplayRule(
-            [in] String plmnNumeric,
-            [out] Int32* result);
+        GetNid(
+            [out] String* result);
+
+        GetCsimSpnDisplayCondition(
+            [out] Boolean* result);
 
     }
 
