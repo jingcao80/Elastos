@@ -12,3 +12,5 @@ INCLUDES += $(PREBUILD_INC)/
 SOURCES += BaseObj.cpp
 SOURCES += Allocation.cpp
 SOURCES += RenderScript.cpp
+SOURCES += CRenderScriptHelper.cpp
+SOURCES += Element.cpp

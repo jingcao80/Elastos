@@ -1,0 +1,577 @@
+
+module
+{
+
+    interface Elastos.Droid.RenderScript.IRenderScript;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace RenderScript {
+
+    /**
+     * DataType represents the basic type information for a basic element.  The
+     * naming convention follows.  For numeric types it is FLOAT,
+     * SIGNED, or UNSIGNED followed by the _BITS where BITS is the
+     * size of the data.  BOOLEAN is a true / false (1,0)
+     * represented in an 8 bit container.  The UNSIGNED variants
+     * with multiple bit definitions are for packed graphical data
+     * formats and represent vectors with per vector member sizes
+     * which are treated as a single unit for packing and alignment
+     * purposes.
+     *
+     * MATRIX the three matrix types contain FLOAT_32 elements and are treated
+     * as 32 bits for alignment purposes.
+     *
+     * RS_* objects.  32 bit opaque handles.
+     */
+    enum ElementDataType {
+        ElementDataType_NONE,
+        // ElementDataType_FLOAT_16,
+        ElementDataType_FLOAT_32 = 2,
+        ElementDataType_FLOAT_64,
+        ElementDataType_SIGNED_8,
+        ElementDataType_SIGNED_16,
+        ElementDataType_SIGNED_32,
+        ElementDataType_SIGNED_64,
+        ElementDataType_UNSIGNED_8,
+        ElementDataType_UNSIGNED_16,
+        ElementDataType_UNSIGNED_32,
+        ElementDataType_UNSIGNED_64,
+
+        ElementDataType_BOOLEAN,
+
+        ElementDataType_UNSIGNED_5_6_5,
+        ElementDataType_UNSIGNED_5_5_5_1,
+        ElementDataType_UNSIGNED_4_4_4_4,
+
+        ElementDataType_MATRIX_4X4,
+        ElementDataType_MATRIX_3X3,
+        ElementDataType_MATRIX_2X2,
+
+        ElementDataType_RS_ELEMENT = 1000,
+        ElementDataType_RS_TYPE,
+        ElementDataType_RS_ALLOCATION,
+        ElementDataType_RS_SAMPLER,
+        ElementDataType_RS_SCRIPT,
+        ElementDataType_RS_MESH,
+        ElementDataType_RS_PROGRAM_FRAGMENT,
+        ElementDataType_RS_PROGRAM_VERTEX,
+        ElementDataType_RS_PROGRAM_RASTER,
+        ElementDataType_RS_PROGRAM_STORE,
+        ElementDataType_RS_FONT;
+    }
+
+    /**
+     * The special interpretation of the data if required.  This is primarly
+     * useful for graphical data.  USER indicates no special interpretation is
+     * expected.  PIXEL is used in conjunction with the standard data types for
+     * representing texture formats.
+     */
+    enum ElementDataKind {
+        ElementDataKind_USER,
+
+        ElementDataKind_PIXEL_L = 7,
+        ElementDataKind_PIXEL_A,
+        ElementDataKind_PIXEL_LA,
+        ElementDataKind_PIXEL_RGB,
+        ElementDataKind_PIXEL_RGBA,
+        ElementDataKind_PIXEL_DEPTH,
+        ElementDataKind_PIXEL_YUV;
+    }
+
+    /**
+     * <p>An Element represents one item within an {@link
+     * android.renderscript.Allocation}.  An Element is roughly equivalent to a C
+     * type in a RenderScript kernel. Elements may be basic or complex. Some basic
+     * elements are</p> <ul> <li>A single float value (equivalent to a float in a
+     * kernel)</li> <li>A four-element float vector (equivalent to a float4 in a
+     * kernel)</li> <li>An unsigned 32-bit integer (equivalent to an unsigned int in
+     * a kernel)</li> <li>A single signed 8-bit integer (equivalent to a char in a
+     * kernel)</li> </ul> <p>A complex element is roughly equivalent to a C struct
+     * and contains a number of basic or complex Elements. From Java code, a complex
+     * element contains a list of sub-elements and names that represents a
+     * particular data structure. Structs used in RS scripts are available to Java
+     * code by using the {@code ScriptField_structname} class that is reflected from
+     * a particular script.</p>
+     *
+     * <p>Basic Elements are comprised of a {@link
+     * android.renderscript.Element.DataType} and a {@link
+     * android.renderscript.Element.DataKind}. The DataType encodes C type
+     * information of an Element, while the DataKind encodes how that Element should
+     * be interpreted by a {@link android.renderscript.Sampler}. Note that {@link
+     * android.renderscript.Allocation} objects with DataKind {@link
+     * android.renderscript.Element.DataKind#USER} cannot be used as input for a
+     * {@link android.renderscript.Sampler}. In general, {@link
+     * android.renderscript.Allocation} objects that are intended for use with a
+     * {@link android.renderscript.Sampler} should use bitmap-derived Elements such
+     * as {@link android.renderscript.Element#RGBA_8888} or {@link
+     * android.renderscript#Element.A_8}.</p>
+     *
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For more information about creating an application that uses RenderScript, read the
+     * <a href="{@docRoot}guide/topics/renderscript/index.html">RenderScript</a> developer guide.</p>
+     * </div>
+     **/
+    interface IElement {
+
+        /**
+        * @return element size in bytes
+        */
+        GetBytesSize(
+            [out] Int32* value);
+
+        /**
+        * Returns the number of vector components. 2 for float2, 4 for
+        * float4, etc.
+        * @return element vector size
+        */
+        GetVectorSize(
+            [out] Int32* value);
+
+        /**
+         * Return if a element is too complex for use as a data source for a Mesh or
+         * a Program.
+         *
+         * @return boolean
+         */
+        IsComplex(
+            [out] Boolean* isComplex);
+
+        /**
+        * Elements could be simple, such as an int or a float, or a
+        * structure with multiple sub elements, such as a collection of
+        * floats, float2, float4. This function returns zero for simple
+        * elements or the number of sub-elements otherwise.
+        * @return number of sub-elements in this element
+        */
+        GetSubElementCount(
+            [out] Int32* value);
+
+        /**
+        * For complex elements, this function will return the
+        * sub-element at index
+        * @param index index of the sub-element to return
+        * @return sub-element in this element at given index
+        */
+        GetSubElement(
+            [in] Int32 index,
+            [out] IElement** e);
+
+        /**
+        * For complex elements, this function will return the
+        * sub-element name at index
+        * @param index index of the sub-element
+        * @return sub-element in this element at given index
+        */
+        GetSubElementName(
+            [in] Int32 index,
+            [out] String* name);
+
+        /**
+        * For complex elements, some sub-elements could be statically
+        * sized arrays. This function will return the array size for
+        * sub-element at index
+        * @param index index of the sub-element
+        * @return array size of sub-element in this element at given index
+        */
+        GetSubElementArraySize(
+            [in] Int32 index,
+            [out] Int32* value);
+
+        /**
+        * This function specifies the location of a sub-element within
+        * the element
+        * @param index index of the sub-element
+        * @return offset in bytes of sub-element in this element at given index
+        */
+        GetSubElementOffsetBytes(
+            [in] Int32 index,
+            [out] Int32* value);
+
+        /**
+        * @return element data type
+        */
+        GetDataType(
+            [out] ElementDataType* dt);
+
+        /**
+        * @return element data kind
+        */
+        GetDataKind(
+            [out] ElementDataKind* dk);
+
+        /**
+         * Check if the current Element is compatible with another Element.
+         * Primitive Elements are compatible if they share the same underlying
+         * size and type (i.e. U8 is compatible with A_8). User-defined Elements
+         * must be equal in order to be compatible. This requires strict name
+         * equivalence for all sub-Elements (in addition to structural equivalence).
+         *
+         * @param e The Element to check compatibility with.
+         *
+         * @return boolean true if the Elements are compatible, otherwise false.
+         */
+        IsCompatible(
+            [in] IElement* e,
+            [out] Boolean* isCompatible);
+
+    }
+
+    interface IElementHelper {
+
+        /**
+         * Utility function for returning an Element containing a single Boolean.
+         *
+         * @param rs Context to which the element will belong.
+         *
+         * @return Element
+         */
+        BOOLEAN(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        /**
+         * Utility function for returning an Element containing a single UNSIGNED_8.
+         *
+         * @param rs Context to which the element will belong.
+         *
+         * @return Element
+         */
+        U8(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        /**
+         * Utility function for returning an Element containing a single SIGNED_8.
+         *
+         * @param rs Context to which the element will belong.
+         *
+         * @return Element
+         */
+        I8(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U16(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I16(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U32(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I32(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U64(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I64(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        F32(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        F64(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        ELEMENT(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        TYPE(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        ALLOCATION(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        SAMPLER(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        SCRIPT(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        MESH(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        PROGRAM_FRAGMENT(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        PROGRAM_VERTEX(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        PROGRAM_RASTER(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        PROGRAM_STORE(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        FONT(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        A_8(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        RGB_565(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        RGB_888(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        RGBA_5551(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        RGBA_4444(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        RGBA_8888(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        F32_2(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        F32_3(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        F32_4(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        F64_2(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        F64_3(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        F64_4(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U8_2(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U8_3(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U8_4(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I8_2(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I8_3(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I8_4(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U16_2(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U16_3(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U16_4(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I16_2(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I16_3(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I16_4(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U32_2(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U32_3(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U32_4(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I32_2(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I32_3(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I32_4(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U64_2(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U64_3(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        U64_4(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I64_2(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I64_3(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        I64_4(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        YUV(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        MATRIX_4X4(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        /** @deprecated use MATRIX_4X4
+        */
+        MATRIX4X4(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        MATRIX_3X3(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        MATRIX_2X2(
+            [in] IRenderScript* rs,
+            [out] IElement** e);
+
+        /**
+         * Create a custom vector element of the specified DataType and vector size.
+         * DataKind will be set to USER. Only primitive types (FLOAT_32, FLOAT_64,
+         * SIGNED_8, SIGNED_16, SIGNED_32, SIGNED_64, UNSIGNED_8, UNSIGNED_16,
+         * UNSIGNED_32, UNSIGNED_64, BOOLEAN) are supported.
+         *
+         * @param rs The context associated with the new Element.
+         * @param dt The DataType for the new Element.
+         * @param size Vector size for the new Element.  Range 2-4 inclusive
+         *             supported.
+         *
+         * @return Element
+         */
+        CreateVector(
+            [in] IRenderScript* rs,
+            [in] Handle64 dt,
+            [in] Int32 size,
+            [out] IElement** e);
+
+        /**
+         * Create a new pixel Element type.  A matching DataType and DataKind must
+         * be provided.  The DataType and DataKind must contain the same number of
+         * components.  Vector size will be set to 1.
+         *
+         * @param rs The context associated with the new Element.
+         * @param dt The DataType for the new element.
+         * @param dk The DataKind to specify the mapping of each component in the
+         *           DataType.
+         *
+         * @return Element
+         */
+        CreatePixel(
+            [in] IRenderScript* rs,
+            [in] Handle64 dt,
+            [in] ElementDataKind dk,
+            [out] IElement** e);
+
+    }
+
+    interface IElementBuilder {
+
+        /**
+         * Add an array of elements to this element.
+         *
+         * @param element
+         * @param name
+         * @param arraySize
+         */
+        Add(
+            [in] IElement* element,
+            [in] String name,
+            [in] Int32 arraySize,
+            [out] IElementBuilder** builder);
+
+        /**
+         * Add a single element to this Element.
+         *
+         * @param element
+         * @param name
+         */
+        Add(
+            [in] IElement* element,
+            [in] String name,
+            [out] IElementBuilder** builder);
+
+        /**
+         * Create the element from this builder.
+         *
+         *
+         * @return Element
+         */
+        Create(
+            [out] IElement** e);
+
+    }
+
+    } // namespace RenderScript
+    } // namepsace Droid
+    } // namespace Elastos
+}

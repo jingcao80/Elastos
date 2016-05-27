@@ -1,7 +1,21 @@
 
 module
 {
+
+    merge("renderscript/BaseObj.car");
     merge("renderscript/Allocation.car");
     merge("renderscript/RenderScript.car");
-    merge("renderscript/BaseObj.car");
+    merge("renderscript/Element.car");
+
+    namespace Elastos {
+    namespace Droid {
+    namespace RenderScript {
+
+    singleton class CRenderScriptHelper {
+        interface IRenderScriptHelper;
+    }
+
+    } // RenderScript
+    } // Droid
+    } // Elastos
 }
