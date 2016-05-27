@@ -4,14 +4,21 @@
 
 #include "_Elastos_Droid_Media_CAudioManagerHelper.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Singleton.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Media {
 
 CarClass(CAudioManagerHelper)
+    , public Singleton
+    , public IAudioManagerHelper
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_SINGLETON_DECL()
+
     /**
      * Checks valid ringer mode values.
      *
@@ -25,28 +32,20 @@ public:
         /* [out] */ Boolean* result);
 
     /**
-    * @hide
-    */
-    CARAPI SetHdmiAvailable(
-        /* [in] */ Boolean val);
-
-    CARAPI GetHdmiAvailable(
+     * Return true if the device code corresponds to an output device.
+     * @hide
+     */
+    CARAPI IsOutputDevice(
+        /* [in] */ Int32 device,
         /* [out] */ Boolean* result);
 
     /**
-    * @hide
-    */
-    CARAPI GetHdmiExpected(
+     * Return true if the device code corresponds to an input device.
+     * @hide
+     */
+    CARAPI IsInputDevice(
+        /* [in] */ Int32 device,
         /* [out] */ Boolean* result);
-
-    /**
-    * @hide
-    */
-    CARAPI SetHdmiExpected(
-        /* [in] */ Boolean val);
-
-    CARAPI GetDefaultStreamVolume(
-        /* [out, callee] */ ArrayOf<Int32>** defaultStreamVolume);
 };
 
 } // namespace Media

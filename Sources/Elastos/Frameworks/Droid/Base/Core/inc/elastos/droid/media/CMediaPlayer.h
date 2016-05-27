@@ -1547,7 +1547,7 @@ public:
      * @return The status code.
      * {@hide}
      */
-    CARAPI NativePullBatteryData(
+    static CARAPI NativePullBatteryData(
         /* [in] */ IParcel* reply,
         /* [out] */ Int32* result);
 

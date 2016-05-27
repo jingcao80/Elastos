@@ -1114,6 +1114,8 @@ CMediaRouter::~CMediaRouter()
 
 CAR_INTERFACE_IMPL(CMediaRouter, Object, IMediaRouter)
 
+CAR_OBJECT_IMPL(CMediaRouter)
+
 ECode CMediaRouter::constructor(
     /* [in] */ IContext* context)
 {

@@ -7,6 +7,10 @@ namespace Elastos {
 namespace Droid {
 namespace Media {
 
+CAR_INTERFACE_IMPL(CMediaCodecHelper, Singleton, IMediaCodecHelper)
+
+CAR_SINGLETON_IMPL(CMediaCodecHelper)
+
 ECode CMediaCodecHelper::CreateDecoderByType(
     /* [in] */ const String& type,
     /* [out] */ IMediaCodec** result)

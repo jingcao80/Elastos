@@ -6,6 +6,10 @@ namespace Elastos {
 namespace Droid {
 namespace Media {
 
+CAR_INTERFACE_IMPL(CAudioManagerHelper, Singleton, IAudioManagerHelper)
+
+CAR_SINGLETON_IMPL(CAudioManagerHelper)
+
 ECode CAudioManagerHelper::IsValidRingerMode(
     /* [in] */ Int32 ringerMode,
     /* [out] */ Boolean* result)
@@ -13,39 +17,22 @@ ECode CAudioManagerHelper::IsValidRingerMode(
     return CAudioManager::IsValidRingerMode(ringerMode, result);
 }
 
-ECode CAudioManagerHelper::SetHdmiAvailable(
-    /* [in] */ Boolean val)
-{
-    return CAudioManager::SetHdmiAvailable(val) ;
-}
-
-ECode CAudioManagerHelper::GetHdmiAvailable(
+ECode CAudioManagerHelper::IsOutputDevice(
+    /* [in] */ Int32 device,
     /* [out] */ Boolean* result)
 {
-    return CAudioManager::GetHdmiAvailable(result) ;
+    return CAudioManager::IsOutputDevice(device, result);
 }
 
-ECode CAudioManagerHelper::GetHdmiExpected(
+/**
+ * Return true if the device code corresponds to an input device.
+ * @hide
+ */
+ECode CAudioManagerHelper::IsInputDevice(
+    /* [in] */ Int32 device,
     /* [out] */ Boolean* result)
 {
-    return CAudioManager::GetHdmiExpected(result);
-}
-
-ECode CAudioManagerHelper::SetHdmiExpected(
-    /* [in] */ Boolean val)
-{
-    return CAudioManager::SetHdmiExpected(val);
-}
-
-ECode CAudioManagerHelper::GetDefaultStreamVolume(
-    /* [out, callee] */ ArrayOf<Int32>** defaultStreamVolume)
-{
-    VALIDATE_NOT_NULL(defaultStreamVolume)
-    AutoPtr< ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(const_cast<Int32*>(CAudioManager::DEFAULT_STREAM_VOLUME), 10);
-
-    *defaultStreamVolume = array;
-    REFCOUNT_ADD(*defaultStreamVolume);
-    return NOERROR;
+    return CAudioManager::IsInputDevice(device, result);
 }
 
 } // namespace Media

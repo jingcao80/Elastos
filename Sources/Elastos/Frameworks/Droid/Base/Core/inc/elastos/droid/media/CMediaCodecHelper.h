@@ -4,6 +4,7 @@
 
 #include "_Elastos_Droid_Media_CMediaCodecHelper.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Singleton.h>
 
 using Elastos::Droid::Media::IMediaCodec;
 
@@ -12,8 +13,14 @@ namespace Droid {
 namespace Media {
 
 CarClass(CMediaCodecHelper)
+    , public Singleton
+    , public IMediaCodecHelper
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_SINGLETON_DECL()
+
     CARAPI CreateDecoderByType(
         /* [in] */ const String& type,
         /* [out] */ IMediaCodec** result);
