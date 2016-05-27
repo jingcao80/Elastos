@@ -33,6 +33,46 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
+//=====================================================================
+// GridLayout
+//=====================================================================
+const Int32 GridLayout::HORIZONTAL = ILinearLayout::HORIZONTAL;
+const Int32 GridLayout::VERTICAL = ILinearLayout::VERTICAL;
+const Int32 GridLayout::UNDEFINED = Elastos::Core::Math::INT32_MIN_VALUE;
+const Int32 GridLayout::ALIGN_BOUNDS = 0;
+const Int32 GridLayout::ALIGN_MARGINS = 1;
+const Int32 GridLayout::MAX_SIZE = 100000;
+const Int32 GridLayout::DEFAULT_CONTAINER_MARGIN = 0;
+const Int32 GridLayout::UNINITIALIZED_HASH = 0;
+const AutoPtr<GridLayout::Alignment> GridLayout::UNDEFINED_ALIGNMENT = new GridLayout::UndefinedAlignment();
+const AutoPtr<GridLayout::Alignment> GridLayout::LEADING = new GridLayout::LeadingAlignment();
+const AutoPtr<GridLayout::Alignment> GridLayout::TRAILING = new GridLayout::TrailingAlignment();
+const AutoPtr<GridLayout::Alignment> GridLayout::TOP = GridLayout::LEADING;
+const AutoPtr<GridLayout::Alignment> GridLayout::BOTTOM = GridLayout::TRAILING;
+const AutoPtr<GridLayout::Alignment> GridLayout::START = GridLayout::LEADING;
+const AutoPtr<GridLayout::Alignment> GridLayout::END = GridLayout::TRAILING;
+const AutoPtr<GridLayout::Alignment> GridLayout::LEFT = GridLayout::CreateSwitchingAlignment(GridLayout::START, GridLayout::END);
+const AutoPtr<GridLayout::Alignment> GridLayout::RIGHT = GridLayout::CreateSwitchingAlignment(GridLayout::END, GridLayout::START);
+const AutoPtr<GridLayout::Alignment> GridLayout::CENTER = new GridLayout::CenterAlignment();
+const AutoPtr<GridLayout::Alignment> GridLayout::BASELINE = new GridLayout::BaseLineAlignment();
+const AutoPtr<GridLayout::Alignment> GridLayout::FILL = new GridLayout::FillAlignment();
+const String GridLayout::TAG("GridLayout");
+const Int32 GridLayout::DEFAULT_ORIENTATION = HORIZONTAL;
+const Int32 GridLayout::DEFAULT_COUNT = UNDEFINED;
+const Boolean GridLayout::DEFAULT_USE_DEFAULT_MARGINS = FALSE;
+const Boolean GridLayout::DEFAULT_ORDER_PRESERVED = TRUE;
+const Int32 GridLayout::DEFAULT_ALIGNMENT_MODE = ALIGN_MARGINS;
+const Int32 GridLayout::ORIENTATION = R::styleable::GridLayout_orientation;
+const Int32 GridLayout::ROW_COUNT = R::styleable::GridLayout_rowCount;
+const Int32 GridLayout::COLUMN_COUNT = R::styleable::GridLayout_columnCount;
+const Int32 GridLayout::USE_DEFAULT_MARGINS = R::styleable::GridLayout_useDefaultMargins;
+const Int32 GridLayout::ALIGNMENT_MODE = R::styleable::GridLayout_alignmentMode;
+const Int32 GridLayout::ROW_ORDER_PRESERVED = R::styleable::GridLayout_rowOrderPreserved;
+const Int32 GridLayout::COLUMN_ORDER_PRESERVED = R::styleable::GridLayout_columnOrderPreserved;
+const Int32 GridLayout::INFLEXIBLE = 0;
+const Int32 GridLayout::CAN_STRETCH = 2;
+
+
 //==================================================================
 //                      GridLayout::Axis
 //==================================================================
@@ -215,12 +255,12 @@ GridLayout::Axis::GetGroupBounds()
     return mGroupBounds;
 }
 
-AutoPtr< GridLayout::PackedMap<AutoPtr<IInterval>, AutoPtr<GridLayout::MutableInt> > >
+AutoPtr< GridLayout::PackedMap<AutoPtr<IInterval>, AutoPtr<IMutableInt> > >
 GridLayout::Axis::CreateLinks(
     /* [in] */ Boolean min)
 {
-    AutoPtr< Assoc< AutoPtr<IInterval>, AutoPtr<MutableInt> > > result =
-            Assoc< AutoPtr<IInterval>, AutoPtr<MutableInt> >::Of(NULL, NULL);
+    AutoPtr< Assoc< AutoPtr<IInterval>, AutoPtr<IMutableInt> > > result =
+            Assoc< AutoPtr<IInterval>, AutoPtr<IMutableInt> >::Of(NULL, NULL);
     AutoPtr< ArrayOf<AutoPtr<IGridLayoutSpec> > > keys = GetGroupBounds()->mKeys;
     for (Int32 i = 0, N = keys->GetLength(); i < N; i++) {
         Spec* sp = (Spec*)(*keys)[i].Get();
@@ -234,16 +274,16 @@ GridLayout::Axis::CreateLinks(
             span = (Interval*)tmp.Get();
         }
         AutoPtr<MutableInt> mut = new MutableInt();
-        result->Put((IInterval*)span, mut);
+        result->Put((IInterval*)span, (IMutableInt*)mut);
     }
     return result->Pack();
 }
 
 void GridLayout::Axis::ComputeLinks(
-    /* [in] */ PackedMap<AutoPtr<IInterval>, AutoPtr<MutableInt> >* links,
+    /* [in] */ PackedMap<AutoPtr<IInterval>, AutoPtr<IMutableInt> >* links,
     /* [in] */ Boolean min)
 {
-    AutoPtr< ArrayOf<AutoPtr<MutableInt> > > spans = links->mValues;
+    AutoPtr< ArrayOf<AutoPtr<IMutableInt> > > spans = links->mValues;
     for (Int32 i = 0; i < spans->GetLength(); i++) {
         (*spans)[i]->Reset();
     }
@@ -252,16 +292,18 @@ void GridLayout::Axis::ComputeLinks(
     for (Int32 i = 0; i < bounds->GetLength(); i++) {
         Bounds* boundsImpl = (Bounds*)(*bounds)[i].Get();
         Int32 size = boundsImpl->Size(min);
-        AutoPtr<MutableInt> valueHolder = links->GetValue(i);
-        valueHolder->mValue = Elastos::Core::Math::Max(valueHolder->mValue, min ? size : -size);
+        AutoPtr<IMutableInt> valueHolder = links->GetValue(i);
+        MutableInt* valueHolderObj = (MutableInt*)valueHolder.Get();
+        valueHolderObj->mValue = Elastos::Core::Math::Max(valueHolderObj->mValue, min ? size : -size);
     }
 }
 
-AutoPtr< GridLayout::PackedMap<AutoPtr<IInterval>, AutoPtr<GridLayout::MutableInt> > >
+AutoPtr< GridLayout::PackedMap<AutoPtr<IInterval>, AutoPtr<IMutableInt> > >
 GridLayout::Axis::GetForwardLinks()
 {
     if (mForwardLinks == NULL) {
         mForwardLinks = CreateLinks(TRUE);
+        AutoPtr< ArrayOf<AutoPtr<IMutableInt> > > spans = mForwardLinks->mValues;
     }
     if (!mForwardLinksValid) {
         ComputeLinks(mForwardLinks, TRUE);
@@ -270,11 +312,12 @@ GridLayout::Axis::GetForwardLinks()
     return mForwardLinks;
 }
 
-AutoPtr< GridLayout::PackedMap<AutoPtr<IInterval>, AutoPtr<GridLayout::MutableInt> > >
+AutoPtr< GridLayout::PackedMap<AutoPtr<IInterval>, AutoPtr<IMutableInt> > >
 GridLayout::Axis::GetBackwardLinks()
 {
-    if (mBackwardLinks = NULL) {
+    if (mBackwardLinks == NULL) {
         mBackwardLinks = CreateLinks(FALSE);
+        AutoPtr< ArrayOf<AutoPtr<IMutableInt> > > spans = mBackwardLinks->mValues;
     }
     if (!mBackwardLinksValid) {
         ComputeLinks(mBackwardLinks, FALSE);
@@ -369,11 +412,12 @@ AutoPtr< ArrayOf<GridLayout::Arc*> > GridLayout::Axis::TopologicalSort(
 
 void GridLayout::Axis::AddComponentSizes(
     /* [in] */ List< AutoPtr<Arc> >& result,
-    /* [in] */ PackedMap<AutoPtr<IInterval>, AutoPtr<MutableInt> >* links)
+    /* [in] */ PackedMap<AutoPtr<IInterval>, AutoPtr<IMutableInt> >* links)
 {
     for (Int32 i = 0; i < links->mKeys->GetLength(); i++) {
         AutoPtr<Interval> key = (Interval*)(*links->mKeys)[i].Get();
-        Include(result, key, (*links->mValues)[i], FALSE);
+        AutoPtr<MutableInt> value = (MutableInt*)(*links->mValues)[i].Get();
+        Include(result, key, value, FALSE);
     }
 }
 
@@ -416,7 +460,7 @@ void GridLayout::Axis::ComputeArcs()
 
 AutoPtr< ArrayOf<GridLayout::Arc*> > GridLayout::Axis::GetArcs()
 {
-    if (mArcs = NULL) {
+    if (mArcs == NULL) {
         mArcs = CreateArcs();
     }
     if (!mArcsValid) {
@@ -593,7 +637,7 @@ void GridLayout::Axis::ComputeMargins(
 
 AutoPtr< ArrayOf<Int32> > GridLayout::Axis::GetLeadingMargins()
 {
-    if (mLeadingMargins = NULL) {
+    if (mLeadingMargins == NULL) {
         mLeadingMargins = ArrayOf<Int32>::Alloc(GetCount() + 1);
     }
     if (!mLeadingMarginsValid) {
@@ -605,7 +649,7 @@ AutoPtr< ArrayOf<Int32> > GridLayout::Axis::GetLeadingMargins()
 
 AutoPtr< ArrayOf<Int32> > GridLayout::Axis::GetTrailingMargins()
 {
-    if (mTrailingMargins = NULL) {
+    if (mTrailingMargins == NULL) {
         mTrailingMargins = ArrayOf<Int32>::Alloc(GetCount() + 1);
     }
     if (!mTrailingMarginsValid) {
@@ -888,29 +932,30 @@ void GridLayout::Axis::InvalidateValues()
 //=================================================================
 // GridLayout::GridLayoutLayoutParams
 //=================================================================
-Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_WIDTH;
-Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_HEIGHT;
-Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_MARGIN;
-Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_ROW;
-Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_COLUMN;
-AutoPtr<GridLayout::Interval> GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN;
-Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN_SIZE;
+const Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_WIDTH = IViewGroupLayoutParams::WRAP_CONTENT;
+const Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_HEIGHT = IViewGroupLayoutParams::WRAP_CONTENT;
+const Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_MARGIN = Elastos::Core::Math::INT32_MIN_VALUE;
+const Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_ROW = Elastos::Core::Math::INT32_MIN_VALUE;
+const Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_COLUMN = Elastos::Core::Math::INT32_MIN_VALUE;
+const AutoPtr<GridLayout::Interval> GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN = new GridLayout::Interval(GridLayout::UNDEFINED, GridLayout::UNDEFINED + 1);
+const Int32 GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN_SIZE =
+        GridLayout::GridLayoutLayoutParams::Init_DEFAULT_SPAN_SIZE(DEFAULT_SPAN);
 
-Int32 GridLayout::GridLayoutLayoutParams::MARGIN;
-Int32 GridLayout::GridLayoutLayoutParams::LEFT_MARGIN;
-Int32 GridLayout::GridLayoutLayoutParams::TOP_MARGIN;
-Int32 GridLayout::GridLayoutLayoutParams::RIGHT_MARGIN;
-Int32 GridLayout::GridLayoutLayoutParams::BOTTOM_MARGIN;
+const Int32 GridLayout::GridLayoutLayoutParams::MARGIN = R::styleable::ViewGroup_MarginLayout_layout_margin;
+const Int32 GridLayout::GridLayoutLayoutParams::LEFT_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginLeft;
+const Int32 GridLayout::GridLayoutLayoutParams::TOP_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginTop;
+const Int32 GridLayout::GridLayoutLayoutParams::RIGHT_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginRight;
+const Int32 GridLayout::GridLayoutLayoutParams::BOTTOM_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginBottom;
 
-Int32 GridLayout::GridLayoutLayoutParams::COLUMN;
-Int32 GridLayout::GridLayoutLayoutParams::COLUMN_SPAN;
-Int32 GridLayout::GridLayoutLayoutParams::COLUMN_WEIGHT;
+const Int32 GridLayout::GridLayoutLayoutParams::COLUMN = R::styleable::GridLayout_Layout_layout_column;
+const Int32 GridLayout::GridLayoutLayoutParams::COLUMN_SPAN = R::styleable::GridLayout_Layout_layout_columnSpan;
+const Int32 GridLayout::GridLayoutLayoutParams::COLUMN_WEIGHT = R::styleable::GridLayout_Layout_layout_columnWeight;
 
-Int32 GridLayout::GridLayoutLayoutParams::ROW;
-Int32 GridLayout::GridLayoutLayoutParams::ROW_SPAN;
-Int32 GridLayout::GridLayoutLayoutParams::ROW_WEIGHT;
+const Int32 GridLayout::GridLayoutLayoutParams::ROW = R::styleable::GridLayout_Layout_layout_row;
+const Int32 GridLayout::GridLayoutLayoutParams::ROW_SPAN = R::styleable::GridLayout_Layout_layout_rowSpan;
+const Int32 GridLayout::GridLayoutLayoutParams::ROW_WEIGHT = R::styleable::GridLayout_Layout_layout_rowWeight;
 
-Int32 GridLayout::GridLayoutLayoutParams::GRAVITY;
+const Int32 GridLayout::GridLayoutLayoutParams::GRAVITY = R::styleable::GridLayout_Layout_layout_gravity;
 
 CAR_INTERFACE_IMPL(GridLayout::GridLayoutLayoutParams, ViewGroup::MarginLayoutParams, IGridLayoutLayoutParams)
 
@@ -1145,6 +1190,14 @@ ECode GridLayout::GridLayoutLayoutParams::GetColumnSpec(
     return NOERROR;
 }
 
+Int32 GridLayout::GridLayoutLayoutParams::Init_DEFAULT_SPAN_SIZE(
+    /* [in] */ Interval* span)
+{
+    Int32 size;
+    span->Size(&size);
+    return size;
+}
+
 
 //==================================================================
 //                      GridLayout::Arc
@@ -1183,6 +1236,8 @@ ECode GridLayout::Arc::ToString(
 //==================================================================
 //                      GridLayout::MutableInt
 //==================================================================
+CAR_INTERFACE_IMPL(GridLayout::MutableInt, Object, IMutableInt)
+
 GridLayout::MutableInt::MutableInt()
 {
     Reset();
@@ -1194,9 +1249,10 @@ GridLayout::MutableInt::MutableInt(
     mValue = value;
 }
 
-void GridLayout::MutableInt::Reset()
+ECode GridLayout::MutableInt::Reset()
 {
     mValue = Elastos::Core::Math::INT32_MIN_VALUE;
+    return NOERROR;
 }
 
 ECode GridLayout::MutableInt::ToString(
@@ -1430,8 +1486,8 @@ ECode GridLayout::Interval::GetMax(
 //==================================================================
 //                      GridLayout::Spec
 //==================================================================
-AutoPtr<IGridLayoutSpec> GridLayout::Spec::UNDEFINED;
-Float GridLayout::Spec::DEFAULT_WEIGHT;
+const AutoPtr<IGridLayoutSpec> GridLayout::Spec::UNDEFINED = GridLayout::GetSpec(GridLayout::UNDEFINED);
+const Float GridLayout::Spec::DEFAULT_WEIGHT = 0;
 
 CAR_INTERFACE_IMPL(GridLayout::Spec, Object, IGridLayoutSpec)
 
@@ -1864,42 +1920,6 @@ AutoPtr< ArrayOf<GridLayout::Arc*> > GridLayout::TopoSort::Sort()
 //=====================================================================
 // GridLayout
 //=====================================================================
-Int32 GridLayout::HORIZONTAL;
-Int32 GridLayout::VERTICAL;
-Int32 GridLayout::UNDEFINED;
-Int32 GridLayout::ALIGN_BOUNDS = 0;
-Int32 GridLayout::ALIGN_MARGINS = 1;
-Int32 GridLayout::MAX_SIZE = 100000;
-Int32 GridLayout::DEFAULT_CONTAINER_MARGIN = 0;
-Int32 GridLayout::UNINITIALIZED_HASH = 0;
-AutoPtr<GridLayout::Alignment> GridLayout::UNDEFINED_ALIGNMENT;
-AutoPtr<GridLayout::Alignment> GridLayout::LEADING;
-AutoPtr<GridLayout::Alignment> GridLayout::TRAILING;
-AutoPtr<GridLayout::Alignment> GridLayout::TOP;
-AutoPtr<GridLayout::Alignment> GridLayout::BOTTOM;
-AutoPtr<GridLayout::Alignment> GridLayout::START;
-AutoPtr<GridLayout::Alignment> GridLayout::END;
-AutoPtr<GridLayout::Alignment> GridLayout::LEFT;
-AutoPtr<GridLayout::Alignment> GridLayout::RIGHT;
-AutoPtr<GridLayout::Alignment> GridLayout::CENTER;
-AutoPtr<GridLayout::Alignment> GridLayout::BASELINE;
-AutoPtr<GridLayout::Alignment> GridLayout::FILL;
-String GridLayout::TAG("GridLayout");
-Int32 GridLayout::DEFAULT_ORIENTATION;
-Int32 GridLayout::DEFAULT_COUNT;
-Boolean GridLayout::DEFAULT_USE_DEFAULT_MARGINS = FALSE;
-Boolean GridLayout::DEFAULT_ORDER_PRESERVED = TRUE;
-Int32 GridLayout::DEFAULT_ALIGNMENT_MODE;
-Int32 GridLayout::ORIENTATION;
-Int32 GridLayout::ROW_COUNT;
-Int32 GridLayout::COLUMN_COUNT;
-Int32 GridLayout::USE_DEFAULT_MARGINS;
-Int32 GridLayout::ALIGNMENT_MODE;
-Int32 GridLayout::ROW_ORDER_PRESERVED;
-Int32 GridLayout::COLUMN_ORDER_PRESERVED;
-Int32 GridLayout::INFLEXIBLE = 0;
-Int32 GridLayout::CAN_STRETCH = 2;
-INIT_PROI_4 const GridLayout::StaticInitializer GridLayout::sInitializer;
 
 CAR_INTERFACE_IMPL(GridLayout, ViewGroup, IGridLayout)
 
@@ -3030,77 +3050,6 @@ Boolean GridLayout::CanStretch(
     /* [in] */ Int32 flexibility)
 {
     return (flexibility & CAN_STRETCH) != 0;
-}
-
-
-//=====================================================================
-// GridLayout::StaticInitializer
-//=====================================================================
-GridLayout::StaticInitializer::StaticInitializer()
-{
-    //=====================================================================
-    // GridLayout
-    //=====================================================================
-    GridLayout::HORIZONTAL = ILinearLayout::HORIZONTAL;
-    GridLayout::VERTICAL = ILinearLayout::VERTICAL;
-    GridLayout::UNDEFINED = Elastos::Core::Math::INT32_MIN_VALUE;
-    GridLayout::UNDEFINED_ALIGNMENT = new GridLayout::UndefinedAlignment();
-    GridLayout::LEADING = new GridLayout::LeadingAlignment();
-    GridLayout::TRAILING = new GridLayout::TrailingAlignment();
-    GridLayout::TOP = GridLayout::LEADING;
-    GridLayout::BOTTOM = GridLayout::TRAILING;
-    GridLayout::START = GridLayout::LEADING;
-    GridLayout::END = GridLayout::TRAILING;
-    GridLayout::LEFT = GridLayout::CreateSwitchingAlignment(GridLayout::START, GridLayout::END);
-    GridLayout::RIGHT = GridLayout::CreateSwitchingAlignment(GridLayout::END, GridLayout::START);
-    GridLayout::CENTER = new GridLayout::CenterAlignment();
-    GridLayout::BASELINE = new GridLayout::BaseLineAlignment();
-    GridLayout::FILL = new GridLayout::FillAlignment();
-    GridLayout::DEFAULT_ORIENTATION = HORIZONTAL;
-    GridLayout::DEFAULT_COUNT = UNDEFINED;
-    GridLayout::DEFAULT_ALIGNMENT_MODE = ALIGN_MARGINS;
-    GridLayout::ORIENTATION = R::styleable::GridLayout_orientation;
-    GridLayout::ROW_COUNT = R::styleable::GridLayout_rowCount;
-    GridLayout::COLUMN_COUNT = R::styleable::GridLayout_columnCount;
-    GridLayout::USE_DEFAULT_MARGINS = R::styleable::GridLayout_useDefaultMargins;
-    GridLayout::ALIGNMENT_MODE = R::styleable::GridLayout_alignmentMode;
-    GridLayout::ROW_ORDER_PRESERVED = R::styleable::GridLayout_rowOrderPreserved;
-    GridLayout::COLUMN_ORDER_PRESERVED = R::styleable::GridLayout_columnOrderPreserved;
-
-    //=================================================================
-    // GridLayout::GridLayoutLayoutParams
-    //=================================================================
-    GridLayout::GridLayoutLayoutParams::DEFAULT_WIDTH = IViewGroupLayoutParams::WRAP_CONTENT;
-    GridLayout::GridLayoutLayoutParams::DEFAULT_HEIGHT = IViewGroupLayoutParams::WRAP_CONTENT;
-    GridLayout::GridLayoutLayoutParams::DEFAULT_MARGIN = Elastos::Core::Math::INT32_MIN_VALUE;
-    GridLayout::GridLayoutLayoutParams::DEFAULT_ROW = Elastos::Core::Math::INT32_MIN_VALUE;
-    GridLayout::GridLayoutLayoutParams::DEFAULT_COLUMN = Elastos::Core::Math::INT32_MIN_VALUE;
-    GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN = new GridLayout::Interval(GridLayout::UNDEFINED, GridLayout::UNDEFINED + 1);
-    Int32 size;
-    GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN->Size(&size);
-    GridLayout::GridLayoutLayoutParams::DEFAULT_SPAN_SIZE = size;
-
-    GridLayout::GridLayoutLayoutParams::MARGIN = R::styleable::ViewGroup_MarginLayout_layout_margin;
-    GridLayout::GridLayoutLayoutParams::LEFT_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginLeft;
-    GridLayout::GridLayoutLayoutParams::TOP_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginTop;
-    GridLayout::GridLayoutLayoutParams::RIGHT_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginRight;
-    GridLayout::GridLayoutLayoutParams::BOTTOM_MARGIN = R::styleable::ViewGroup_MarginLayout_layout_marginBottom;
-
-    GridLayout::GridLayoutLayoutParams::COLUMN = R::styleable::GridLayout_Layout_layout_column;
-    GridLayout::GridLayoutLayoutParams::COLUMN_SPAN = R::styleable::GridLayout_Layout_layout_columnSpan;
-    GridLayout::GridLayoutLayoutParams::COLUMN_WEIGHT = R::styleable::GridLayout_Layout_layout_columnWeight;
-
-    GridLayout::GridLayoutLayoutParams::ROW = R::styleable::GridLayout_Layout_layout_row;
-    GridLayout::GridLayoutLayoutParams::ROW_SPAN = R::styleable::GridLayout_Layout_layout_rowSpan;
-    GridLayout::GridLayoutLayoutParams::ROW_WEIGHT = R::styleable::GridLayout_Layout_layout_rowWeight;
-
-    GridLayout::GridLayoutLayoutParams::GRAVITY = R::styleable::GridLayout_Layout_layout_gravity;
-
-    //==================================================================
-    //                      GridLayout::Spec
-    //==================================================================
-    GridLayout::Spec::UNDEFINED = GridLayout::GetSpec(GridLayout::UNDEFINED);
-    GridLayout::Spec::DEFAULT_WEIGHT = 0;
 }
 
 } // namespace Widget

@@ -175,6 +175,10 @@ module
             [out] Int32* rst);
     }
 
+    interface IMutableInt {
+        Reset();
+    }
+
     /*
     For each group (with a given alignment) we need to store the amount of space required
     before the alignment point and the amount of space required after it. One side of this
