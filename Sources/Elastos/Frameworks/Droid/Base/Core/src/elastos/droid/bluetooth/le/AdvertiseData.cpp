@@ -369,6 +369,12 @@ ECode AdvertiseData::ReadFromParcel(
     this->mIncludeDeviceName = builder->mIncludeDeviceName;
     return NOERROR;
 }
+
+ECode AdvertiseData::constructor()
+{
+    return NOERROR;
+}
+
 ECode AdvertiseData::constructor(
     /* [in] */ IParcel* source)
 {

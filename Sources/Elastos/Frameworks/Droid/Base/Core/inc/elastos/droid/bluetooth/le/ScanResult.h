@@ -25,6 +25,8 @@ public:
 
     ScanResult();
 
+    CARAPI constructor();
+
     /**
       * Constructor of scan result.
       *

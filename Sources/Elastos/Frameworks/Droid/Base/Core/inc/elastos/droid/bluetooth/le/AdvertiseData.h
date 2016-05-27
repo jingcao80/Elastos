@@ -180,6 +180,8 @@ public:
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ IParcel* source);
 

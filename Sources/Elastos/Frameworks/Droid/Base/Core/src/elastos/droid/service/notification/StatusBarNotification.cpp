@@ -29,6 +29,11 @@ StatusBarNotification::StatusBarNotification()
 {
 }
 
+ECode StatusBarNotification::constructor()
+{
+    return NOERROR;
+}
+
 ECode StatusBarNotification::constructor(
     /* [in] */ const String& pkg,
     /* [in] */ const String& opPkg,
@@ -153,7 +158,8 @@ ECode StatusBarNotification::ReadFromParcel(
     in->ReadInt32(&mInitialPid);
     in->ReadInt32(&mScore);
 
-    // this.notification = new Notification(in);
+    CNotification::New((INotification**)&mNotification);
+    IParcelable::Probe(mNotification)->ReadFromParcel(in);
     UserHandle::ReadFromParcel(in, (IUserHandle**)&mUser);
     in->ReadInt64(&mPostTime);
     Key(&mKey);
@@ -177,8 +183,8 @@ ECode StatusBarNotification::WriteToParcel(
     out->WriteInt32(mUid);
     out->WriteInt32(mInitialPid);
     out->WriteInt32(mScore);
-    // this.notification.writeToParcel(out, flags);
-    // user.writeToParcel(out, flags);
+    IParcelable::Probe(mNotification)->WriteToParcel(out);
+    IParcelable::Probe(mUser)->WriteToParcel(out);
 
     out->WriteInt64(mPostTime);
     return NOERROR;

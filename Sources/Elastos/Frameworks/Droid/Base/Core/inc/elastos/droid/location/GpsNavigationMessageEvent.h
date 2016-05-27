@@ -28,6 +28,8 @@ public:
 
     GpsNavigationMessageEvent();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ IGpsNavigationMessage* message);
 

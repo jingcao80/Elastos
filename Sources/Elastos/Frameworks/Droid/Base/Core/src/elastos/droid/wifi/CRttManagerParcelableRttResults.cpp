@@ -9,6 +9,11 @@ CAR_INTERFACE_IMPL_2(CRttManagerParcelableRttResults, Object, IParcelable, IRttM
 
 CAR_OBJECT_IMPL(CRttManagerParcelableRttResults)
 
+ECode CRttManagerParcelableRttResults::constructor()
+{
+    return NOERROR;
+}
+
 ECode CRttManagerParcelableRttResults::constructor(
     /* [in] */ ArrayOf<IRttManagerRttResult*>* results)
 {

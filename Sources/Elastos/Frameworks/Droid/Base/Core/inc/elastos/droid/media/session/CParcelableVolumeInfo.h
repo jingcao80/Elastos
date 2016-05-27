@@ -30,6 +30,8 @@ public:
 
     virtual ~CParcelableVolumeInfo();
 
+    CARAPI constructor();
+
     /**
      * @hide
      */

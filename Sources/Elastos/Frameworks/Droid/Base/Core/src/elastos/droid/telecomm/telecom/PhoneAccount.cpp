@@ -158,6 +158,11 @@ ECode PhoneAccount::Builder::Build(
 //===============================================================
 CAR_INTERFACE_IMPL_2(PhoneAccount, Object, IPhoneAccount, IParcelable)
 
+ECode PhoneAccount::constructor()
+{
+    return NOERROR;
+}
+
 ECode PhoneAccount::constructor(
     /* [in] */ IPhoneAccountHandle* account,
     /* [in] */ IUri* address,

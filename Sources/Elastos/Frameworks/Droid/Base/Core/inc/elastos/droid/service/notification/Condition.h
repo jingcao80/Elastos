@@ -25,6 +25,8 @@ public:
 
     Condition();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ IUri* id,
         /* [in] */ const String& summary,

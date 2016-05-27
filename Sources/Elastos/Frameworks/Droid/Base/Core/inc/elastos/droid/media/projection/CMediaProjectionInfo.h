@@ -27,6 +27,8 @@ public:
 
     virtual ~CMediaProjectionInfo();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ const String& packageName,
         /* [in] */ IUserHandle * handle);

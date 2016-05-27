@@ -22,6 +22,11 @@ ScanResult::ScanResult()
 {
 }
 
+ECode ScanResult::constructor()
+{
+    return NOERROR;
+}
+
 ECode ScanResult::constructor(
     /* [in] */ IBluetoothDevice* device,
     /* [in] */ IScanRecord* scanRecord,

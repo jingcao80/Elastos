@@ -62,6 +62,7 @@ class CSettingsObserver;
 class CLockscreenSettingsObserver;
 class CBaseBroadcastReceiver;
 class DelegateViewHelper;
+class CNotificationListenerService;
 
 class BaseStatusBar
     : public SystemUI
@@ -175,102 +176,6 @@ private:
             /* [in] */ IView* view,
             /* [in] */ IPendingIntent* pendingIntent,
             /* [in] */ IIntent* fillInIntent);
-
-    private:
-        BaseStatusBar* mHost;
-    };
-
-    class _NotificationListenerService: public NotificationListenerService
-    {
-    private:
-        class Runnable1 : public Runnable
-        {
-        public:
-            Runnable1(
-                /* [in] */ _NotificationListenerService* service,
-                /* [in] */ ArrayOf<IStatusBarNotification*>* notifications,
-                /* [in] */ INotificationListenerServiceRankingMap* currentRanking);
-
-            // @Override
-            CARAPI Run();
-
-        private:
-            _NotificationListenerService* mService;
-            AutoPtr<ArrayOf<IStatusBarNotification*> > mNotifications;
-            AutoPtr<INotificationListenerServiceRankingMap> mCurrentRanking;
-        };
-
-        class Runnable2 : public Runnable
-        {
-        public:
-            Runnable2(
-                /* [in] */ _NotificationListenerService* service,
-                /* [in] */ IStatusBarNotification* sbn,
-                /* [in] */ INotificationListenerServiceRankingMap* rankingMap);
-
-            // @Override
-            CARAPI Run();
-
-        private:
-            _NotificationListenerService* mService;
-            AutoPtr<IStatusBarNotification> mSbn;
-            AutoPtr<INotificationListenerServiceRankingMap> mRankingMap;
-        };
-
-        class Runnable3 : public Runnable
-        {
-        public:
-            Runnable3(
-                /* [in] */ _NotificationListenerService* service,
-                /* [in] */ IStatusBarNotification* sbn,
-                /* [in] */ INotificationListenerServiceRankingMap* rankingMap);
-
-            // @Override
-            CARAPI Run();
-
-        private:
-            _NotificationListenerService* mService;
-            AutoPtr<IStatusBarNotification> mSbn;
-            AutoPtr<INotificationListenerServiceRankingMap> mRankingMap;
-        };
-
-        class Runnable4 : public Runnable
-        {
-        public:
-            Runnable4(
-                /* [in] */ _NotificationListenerService* service,
-                /* [in] */ INotificationListenerServiceRankingMap* rankingMap);
-
-            // @Override
-            CARAPI Run();
-
-        private:
-            _NotificationListenerService* mService;
-            AutoPtr<INotificationListenerServiceRankingMap> mRankingMap;
-        };
-
-    public:
-        TO_STRING_IMPL("BaseStatusBar::_NotificationListenerService")
-
-        _NotificationListenerService(
-            /* [in] */ BaseStatusBar* host);
-
-        // @Override
-        CARAPI OnListenerConnected();
-
-        // @Override
-        CARAPI OnNotificationPosted(
-            /* [in] */ IStatusBarNotification* sbn,
-            /* [in] */ INotificationListenerServiceRankingMap* rankingMap);
-
-        // @Override
-        CARAPI OnNotificationRemoved(
-            /* [in] */ IStatusBarNotification* sbn,
-            /* [in] */ INotificationListenerServiceRankingMap* rankingMap);
-
-        // @Override
-        CARAPI OnNotificationRankingUpdate(
-            /* [in] */ INotificationListenerServiceRankingMap* rankingMap);
 
     private:
         BaseStatusBar* mHost;
@@ -873,6 +778,7 @@ private:
     friend class CLockscreenSettingsObserver;
     friend class CBaseBroadcastReceiver;
     friend class DelegateViewHelper;
+    friend class CNotificationListenerService;
 };
 
 } // namespace StatusBar

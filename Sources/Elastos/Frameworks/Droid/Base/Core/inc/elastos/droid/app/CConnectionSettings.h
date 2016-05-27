@@ -26,6 +26,8 @@ public:
 
     CConnectionSettings();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ Int32 connectionId);
 

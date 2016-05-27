@@ -15,6 +15,11 @@ namespace Telecom {
 //===============================================================
 CAR_INTERFACE_IMPL_2(PhoneAccountHandle, Object, IPhoneAccountHandle, IParcelable)
 
+ECode PhoneAccountHandle::constructor()
+{
+    return NOERROR;
+}
+
 ECode PhoneAccountHandle::constructor(
     /* [in] */ IComponentName* componentName,
     /* [in] */const String& id)

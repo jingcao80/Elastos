@@ -9,6 +9,11 @@ CAR_INTERFACE_IMPL_2(CWifiScannerParcelableScanResults, Object, IWifiScannerParc
 
 CAR_OBJECT_IMPL(CWifiScannerParcelableScanResults)
 
+ECode CWifiScannerParcelableScanResults::constructor()
+{
+    return NOERROR;
+}
+
 ECode CWifiScannerParcelableScanResults::constructor(
     /* [in] */ ArrayOf<IScanResult*>* results)
 {

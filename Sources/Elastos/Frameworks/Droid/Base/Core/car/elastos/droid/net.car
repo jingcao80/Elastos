@@ -483,6 +483,8 @@ module
     }
 
     class CNetworkKey {
+        constructor();
+
         constructor(
             [in] IWifiKey* wifiKey);
 

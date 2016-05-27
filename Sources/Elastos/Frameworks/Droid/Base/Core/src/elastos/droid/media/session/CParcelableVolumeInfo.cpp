@@ -21,6 +21,11 @@ CParcelableVolumeInfo::~CParcelableVolumeInfo()
 {
 }
 
+ECode CParcelableVolumeInfo::constructor()
+{
+    return NOERROR;
+}
+
 ECode CParcelableVolumeInfo::constructor(
     /* [in] */ Int32 volumeType,
     /* [in] */ IAudioAttributes * audioAttrs,

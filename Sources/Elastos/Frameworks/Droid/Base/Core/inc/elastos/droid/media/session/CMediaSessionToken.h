@@ -29,6 +29,8 @@ public:
 
     virtual ~CMediaSessionToken();
 
+    CARAPI constructor();
+
     /**
      * @hide
      */

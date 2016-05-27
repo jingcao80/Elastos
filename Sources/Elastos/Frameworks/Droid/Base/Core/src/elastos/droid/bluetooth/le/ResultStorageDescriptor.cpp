@@ -18,6 +18,11 @@ ResultStorageDescriptor::ResultStorageDescriptor()
     mLength = 0;
 }
 
+ECode ResultStorageDescriptor::constructor()
+{
+    return NOERROR;
+}
+
 ECode ResultStorageDescriptor::constructor(
     /* [in] */ Int32 type,
     /* [in] */ Int32 offset,

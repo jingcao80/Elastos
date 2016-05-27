@@ -29,6 +29,8 @@ public:
 
     CNotificationGroup();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ const String& name);
 

@@ -3612,7 +3612,7 @@ ECode RemoteViews::OnLoadClass(
 {
     VALIDATE_NOT_NULL(res);
 //    return clazz.isAnnotationPresent(RemoteView.class);
-    *res = FALSE;
+    *res = TRUE;
     return NOERROR;
 }
 

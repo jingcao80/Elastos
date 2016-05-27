@@ -12,6 +12,11 @@ namespace Telecom {
 //===============================================================
 CAR_INTERFACE_IMPL_2(StatusHints, Object, IStatusHints, IParcelable)
 
+ECode StatusHints::constructor()
+{
+    return NOERROR;
+}
+
 ECode StatusHints::constructor(
     /* [in] */ IComponentName* packageName,
     /* [in] */ ICharSequence* label,

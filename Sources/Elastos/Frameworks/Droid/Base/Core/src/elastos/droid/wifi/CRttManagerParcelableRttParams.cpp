@@ -10,6 +10,11 @@ CAR_INTERFACE_IMPL_2(CRttManagerParcelableRttParams, Object, IParcelable, IRttMa
 
 CAR_OBJECT_IMPL(CRttManagerParcelableRttParams)
 
+ECode CRttManagerParcelableRttParams::constructor()
+{
+    return NOERROR;
+}
+
 ECode CRttManagerParcelableRttParams::constructor(
     /* [in] */ ArrayOf<IRttManagerRttParams*>* params)
 {

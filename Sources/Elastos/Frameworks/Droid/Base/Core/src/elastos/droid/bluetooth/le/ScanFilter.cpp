@@ -189,6 +189,11 @@ ScanFilter::ScanFilter()
 {
 }
 
+ECode ScanFilter::constructor()
+{
+    return NOERROR;
+}
+
 ECode ScanFilter::constructor(
     /* [in] */ IParcel* source)
 {

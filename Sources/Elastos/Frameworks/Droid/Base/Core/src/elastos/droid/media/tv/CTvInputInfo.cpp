@@ -81,6 +81,11 @@ CTvInputInfo::~CTvInputInfo()
 {
 }
 
+ECode CTvInputInfo::constructor()
+{
+    return NOERROR;
+}
+
 ECode CTvInputInfo::constructor(
     /* [in] */ IResolveInfo* service,
     /* [in] */ const String& id,

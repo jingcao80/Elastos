@@ -22,6 +22,11 @@ CMediaProjectionInfo::~CMediaProjectionInfo()
 {
 }
 
+ECode CMediaProjectionInfo::constructor()
+{
+    return NOERROR;
+}
+
 ECode CMediaProjectionInfo::constructor(
     /* [in] */ const String& packageName,
     /* [in] */ IUserHandle * handle)

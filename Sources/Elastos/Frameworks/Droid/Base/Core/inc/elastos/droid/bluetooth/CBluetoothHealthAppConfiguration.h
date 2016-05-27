@@ -51,6 +51,8 @@ public:
     CARAPI WriteToParcel(
         /* [in] */ IParcel* dest);
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ const String& name,
         /* [in] */ Int32 dataType);

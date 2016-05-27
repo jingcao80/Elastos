@@ -44,6 +44,7 @@ SOURCES += CPackageParserHelper.cpp
 SOURCES += CPackageStats.cpp
 SOURCES += PackageUserState.cpp
 SOURCES += CParceledListSlice.cpp
+SOURCES += CParceledListSliceBinder.cpp
 SOURCES += CPathPermission.cpp
 SOURCES += PermissionGroupInfo.cpp
 SOURCES += PermissionInfo.cpp

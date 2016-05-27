@@ -57,7 +57,7 @@ NotificationListenerService::NotificationListenerService()
 
 ECode NotificationListenerService::constructor()
 {
-    return NOERROR;
+    return Service::constructor();
 }
 
 ECode NotificationListenerService::OnNotificationPosted(
@@ -661,14 +661,16 @@ ECode NotificationListenerService::RankingMap::GetRanking(
 ECode NotificationListenerService::RankingMap::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    //TODO
+    dest->WriteInterfacePtr(mRankingUpdate);
     return NOERROR;
 }
 
 ECode NotificationListenerService::RankingMap::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    //TODO
+    AutoPtr<IInterface> obj;
+    source->ReadInterfacePtr((Handle32*)&obj);
+    mRankingUpdate = INotificationRankingUpdate::Probe(obj);
     return NOERROR;
 }
 

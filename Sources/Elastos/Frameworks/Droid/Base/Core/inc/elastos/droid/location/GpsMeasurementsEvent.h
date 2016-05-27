@@ -34,6 +34,8 @@ public:
 
     GpsMeasurementsEvent();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ IGpsClock* clock,
         /* [in] */ ArrayOf<IGpsMeasurement*>* measurements);

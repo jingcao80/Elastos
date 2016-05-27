@@ -25,6 +25,8 @@ class PhoneAccountHandle
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ IComponentName* componentName,
         /* [in] */const String& id);

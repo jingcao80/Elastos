@@ -26,6 +26,8 @@ public:
 
     CStreamSettings();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ Int32 streamId);
 

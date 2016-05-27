@@ -41,6 +41,11 @@ CProfileGroup::CProfileGroup()
     CRingtoneManager::GetDefaultUri(IRingtoneManager::TYPE_RINGTONE, (IUri**)&mRingerOverride);
 }
 
+ECode CProfileGroup::constructor()
+{
+    return NOERROR;
+}
+
 ECode CProfileGroup::constructor(
     /* [in] */ IUUID* uuid,
     /* [in] */ Boolean defaultGroup)

@@ -20,6 +20,11 @@ CMediaSessionToken::~CMediaSessionToken()
 {
 }
 
+ECode CMediaSessionToken::constructor()
+{
+    return NOERROR;
+}
+
 ECode CMediaSessionToken::constructor(
     /* [in] */ IISessionController * binder)
 {

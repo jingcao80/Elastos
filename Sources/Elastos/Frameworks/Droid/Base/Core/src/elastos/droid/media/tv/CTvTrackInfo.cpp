@@ -24,6 +24,11 @@ CTvTrackInfo::~CTvTrackInfo()
 {
 }
 
+ECode CTvTrackInfo::constructor()
+{
+    return NOERROR;
+}
+
 ECode CTvTrackInfo::constructor(
     /* [in] */ Int32 type,
     /* [in] */ const String& id,

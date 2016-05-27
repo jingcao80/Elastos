@@ -31,6 +31,8 @@ public:
 
     CAR_OBJECT_DECL()
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ Int32 type,
         /* [in] */ const String& id,

@@ -47,6 +47,8 @@ public:
 
         virtual ~ProfileTrigger();
 
+        CARAPI constructor();
+
         CARAPI constructor(
             /* [in] */ Int32 type,
             /* [in] */ const String& id,
@@ -100,6 +102,8 @@ public:
     Profile();
 
     virtual ~Profile();
+
+    CARAPI constructor();
 
     CARAPI constructor(
         /* [in] */ const String& name);

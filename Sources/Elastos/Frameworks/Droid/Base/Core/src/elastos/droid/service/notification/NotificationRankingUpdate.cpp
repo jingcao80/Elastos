@@ -13,6 +13,11 @@ NotificationRankingUpdate::NotificationRankingUpdate()
 {
 }
 
+ECode NotificationRankingUpdate::constructor()
+{
+    return NOERROR;
+}
+
 ECode NotificationRankingUpdate::constructor(
     /* [in] */ ArrayOf<String>* keys,
     /* [in] */ ArrayOf<String>* interceptedKeys,

@@ -24,6 +24,8 @@ public:
 
     NotificationRankingUpdate();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ ArrayOf<String>* keys,
         /* [in] */ ArrayOf<String>* interceptedKeys,

@@ -38,6 +38,8 @@ public:
 
     CAR_OBJECT_DECL()
 
+    CARAPI constructor();
+
     /**
      * Constructor.
      *

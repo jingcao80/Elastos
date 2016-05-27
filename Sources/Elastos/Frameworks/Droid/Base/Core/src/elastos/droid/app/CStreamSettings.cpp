@@ -22,6 +22,11 @@ CStreamSettings::CStreamSettings()
     , mDirty(FALSE)
 {}
 
+ECode CStreamSettings::constructor()
+{
+    return NOERROR;
+}
+
 ECode CStreamSettings::constructor(
     /* [in] */ Int32 streamId)
 {

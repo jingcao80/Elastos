@@ -230,6 +230,7 @@ module
          }
 
          class CBluetoothClass {
+             constructor();
 
              constructor(
                  [in] Int32 classInt);
@@ -239,6 +240,7 @@ module
          }
 
          class CBluetoothDevice {
+             constructor();
 
              /*package*/ constructor(
                  [in] String address);
@@ -253,6 +255,7 @@ module
          }
 
          class CBluetoothHealthAppConfiguration {
+             constructor();
 
              /**
               * Constructor to register the SINK role
@@ -352,6 +355,8 @@ module
          }
 
          class CBluetoothActivityEnergyInfo {
+             constructor();
+
              constructor(
                 [in] Int32 stackState,
                 [in] Int32 txTime,
@@ -364,6 +369,8 @@ module
          }
 
          class CBluetoothAudioConfig {
+             constructor();
+
              constructor(
                 [in] Int32 sampleRate,
                 [in] Int32 channelConfig,
@@ -421,6 +428,8 @@ module
         }
 
          class CBluetoothHeadsetClientCall {
+             constructor();
+
              constructor(
                 [in] Int32 id,
                 [in] Int32 state,
@@ -464,6 +473,8 @@ module
         }
 
          class CBluetoothMasInstance {
+             constructor();
+
              constructor(
                 [in] Int32 id,
                 [in] String name,
@@ -485,6 +496,8 @@ module
 
          namespace LE {
              class CAdvertiseData {
+                 constructor();
+
                  constructor(
                      [in] IParcel* parcel);
 
@@ -500,6 +513,8 @@ module
              }
 
              class CAdvertiseSettings {
+                constructor();
+
                 constructor(
                     [in] IParcel* parcel);
 
@@ -528,6 +543,8 @@ module
              }
 
              class CResultStorageDescriptor {
+                constructor();
+
                 constructor(
                     [in] IParcel* source);
 
@@ -541,6 +558,8 @@ module
              }
 
              class CScanFilter {
+                constructor();
+
                 constructor(
                     [in] IParcel* source);
 
@@ -553,6 +572,8 @@ module
              }
 
              class CScanResult {
+                constructor();
+
                 constructor(
                     [in] IParcel* source);
 
@@ -567,6 +588,8 @@ module
              }
 
              class CScanSettings {
+                constructor();
+
                 constructor(
                     [in] IParcel* source);
 

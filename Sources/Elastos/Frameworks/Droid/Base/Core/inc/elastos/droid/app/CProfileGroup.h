@@ -33,6 +33,8 @@ public:
 
     CProfileGroup();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ IUUID* uuid,
         /* [in] */ Boolean defaultGroup);

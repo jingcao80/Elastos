@@ -120,15 +120,10 @@ ECode CBluetoothHealthAppConfiguration::WriteToParcel(
     return NOERROR;
 }
 
-//ECode CBluetoothHealthAppConfiguration::constructor()
-//{
-//    mName = String("");
-//    mDataType = 0;
-//    mRole = 0;
-//    mChannelType = 0;
-//
-//    return NOERROR;
-//}
+ECode CBluetoothHealthAppConfiguration::constructor()
+{
+    return NOERROR;
+}
 
 ECode CBluetoothHealthAppConfiguration::constructor(
     /* [in] */ const String& name,

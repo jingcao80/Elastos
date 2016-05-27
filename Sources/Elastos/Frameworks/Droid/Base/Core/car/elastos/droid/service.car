@@ -397,6 +397,8 @@ module
         }
 
         class CCondition {
+            constructor();
+
             constructor(
                 [in] IUri* id,
                 [in] String summary,
@@ -426,6 +428,8 @@ module
 
         [deprecated]
         class CNotificationRankingUpdate {
+            constructor();
+
             constructor(
                 [in] ArrayOf<String>* keys,
                 [in] ArrayOf<String>* interceptedKeys,
@@ -440,6 +444,8 @@ module
         }
 
         class CStatusBarNotification {
+            constructor();
+
             /** @hide */
             constructor(
                 [in] String pkg,

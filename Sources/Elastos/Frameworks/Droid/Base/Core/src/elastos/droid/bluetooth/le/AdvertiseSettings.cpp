@@ -158,6 +158,11 @@ ECode AdvertiseSettings::ReadFromParcel(
     return constructor(in);
 }
 
+ECode AdvertiseSettings::constructor()
+{
+    return NOERROR;
+}
+
 ECode AdvertiseSettings::constructor(
     /* [in] */ Int32 advertiseMode,
     /* [in] */ Int32 advertiseTxPowerLevel,

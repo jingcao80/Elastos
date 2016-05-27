@@ -38,6 +38,11 @@ Address::~Address()
 {
 }
 
+ECode Address::constructor()
+{
+    return NOERROR;
+}
+
 ECode Address::constructor(
     /* [in] */ ILocale* locale)
 {

@@ -55,6 +55,11 @@ Profile::ProfileTrigger::ProfileTrigger()
 Profile::ProfileTrigger::~ProfileTrigger()
 {}
 
+ECode Profile::ProfileTrigger::constructor()
+{
+    return NOERROR;
+}
+
 ECode Profile::ProfileTrigger::constructor(
     /* [in] */ Int32 type,
     /* [in] */ const String& id,
@@ -223,6 +228,11 @@ Profile::Profile()
 
 Profile::~Profile()
 {}
+
+ECode Profile::constructor()
+{
+    return NOERROR;
+}
 
 ECode Profile::constructor(
     /* [in] */ const String& name)

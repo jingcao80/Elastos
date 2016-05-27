@@ -18,6 +18,11 @@ CMediaSessionQueueItem::~CMediaSessionQueueItem()
 {
 }
 
+ECode CMediaSessionQueueItem::constructor()
+{
+    return NOERROR;
+}
+
 ECode CMediaSessionQueueItem::constructor(
     /* [in] */ IMediaDescription * description,
     /* [in] */ Int64 id)

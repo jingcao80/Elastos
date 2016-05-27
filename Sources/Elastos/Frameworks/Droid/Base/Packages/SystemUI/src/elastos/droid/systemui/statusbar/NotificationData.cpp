@@ -8,6 +8,7 @@
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::Os::IBundle;
@@ -24,6 +25,7 @@ using Elastos::Utility::ICollections;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::IList;
 using Elastos::Utility::ISet;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -470,7 +472,8 @@ ECode NotificationData::FilterAndSort()
         entry->GetNotification((IStatusBarNotification**)&sbn);
 
         if (ShouldFilterOut(sbn)) {
-            continue;
+            Logger::D("NotificationData", "[TODO] UpdateRankingAndSort has an error????");
+            // continue;
         }
 
         AutoPtr<INotification> n;

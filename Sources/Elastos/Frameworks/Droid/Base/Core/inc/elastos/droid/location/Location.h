@@ -35,6 +35,8 @@ public:
 
     Location();
 
+    CARAPI constructor();
+
     /**
      * Construct a new Location with a named provider.
      *

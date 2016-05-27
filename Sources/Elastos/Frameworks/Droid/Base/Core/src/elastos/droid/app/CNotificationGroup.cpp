@@ -36,6 +36,11 @@ CNotificationGroup::CNotificationGroup()
     CHashSet::New((ISet**)&mPackages);
 }
 
+ECode CNotificationGroup::constructor()
+{
+    return NOERROR;
+}
+
 ECode CNotificationGroup::constructor(
     /* [in] */ const String& name)
 {

@@ -18,6 +18,11 @@ BluetoothActivityEnergyInfo::BluetoothActivityEnergyInfo()
 {
 }
 
+ECode BluetoothActivityEnergyInfo::constructor()
+{
+    return NOERROR;
+}
+
 ECode BluetoothActivityEnergyInfo::constructor(
     /* [in] */ Int32 stackState,
     /* [in] */ Int32 txTime,

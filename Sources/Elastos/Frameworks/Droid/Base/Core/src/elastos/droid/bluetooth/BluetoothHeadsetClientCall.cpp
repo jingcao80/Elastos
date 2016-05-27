@@ -17,6 +17,11 @@ BluetoothHeadsetClientCall::BluetoothHeadsetClientCall()
 {
 }
 
+ECode BluetoothHeadsetClientCall::constructor()
+{
+    return NOERROR;
+}
+
 ECode BluetoothHeadsetClientCall::constructor(
     /* [in] */ Int32 id,
     /* [in] */ Int32 state,

@@ -28,6 +28,8 @@ public:
 
     virtual ~CMediaSessionQueueItem();
 
+    CARAPI constructor();
+
     /**
      * Create a new {@link MediaSession.QueueItem}.
      *

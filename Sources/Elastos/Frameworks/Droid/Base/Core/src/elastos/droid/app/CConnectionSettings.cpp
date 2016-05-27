@@ -55,6 +55,11 @@ CConnectionSettings::CConnectionSettings()
     , mDirty(FALSE)
 {}
 
+ECode CConnectionSettings::constructor()
+{
+    return NOERROR;
+}
+
 ECode CConnectionSettings::constructor(
     /* [in] */ Int32 connectionId)
 {

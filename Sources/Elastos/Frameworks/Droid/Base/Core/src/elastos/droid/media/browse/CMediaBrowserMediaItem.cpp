@@ -21,6 +21,11 @@ CMediaBrowserMediaItem::~CMediaBrowserMediaItem()
 {
 }
 
+ECode CMediaBrowserMediaItem::constructor()
+{
+    return NOERROR;
+}
+
 ECode CMediaBrowserMediaItem::constructor(
     /* [in] */ IMediaDescription * description,
     /* [in] */ Int32 flags)

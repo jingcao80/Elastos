@@ -125,6 +125,8 @@ public:
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ Int32 scanMode,
         /* [in] */ Int32 callbackType,

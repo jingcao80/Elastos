@@ -83,6 +83,7 @@ private:
     Boolean mIsLastSlice;
 
     AutoPtr<IList> mList;
+    friend class CParceledListSliceBinder;
 };
 
 } // namespace Pm

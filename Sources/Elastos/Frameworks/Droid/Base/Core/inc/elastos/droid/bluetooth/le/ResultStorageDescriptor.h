@@ -26,6 +26,8 @@ public:
 
     ResultStorageDescriptor();
 
+    CARAPI constructor();
+
     /**
       * Constructor of {@link ResultStorageDescriptor}
       *

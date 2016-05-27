@@ -274,6 +274,7 @@ module
     using interface Elastos.Droid.Os.IBinder;
     using interface Elastos.Droid.Os.IHandler;
     using interface Elastos.Droid.Service.Dreams.IDreamService;
+    using interface Elastos.Droid.Service.Notification.INotificationListenerService;
     using interface Elastos.Droid.Service.Wallpaper.IWallpaperService;
     using interface Elastos.Droid.View.IView;
     using interface Elastos.Droid.View.IViewOnLayoutChangeListener;
@@ -1894,9 +1895,23 @@ module
 
         class CBaseBroadcastReceiver {
             constructor(
-                [in] IBaseStatusBar* policy);
+                [in] IBaseStatusBar* bar);
 
             interface IBroadcastReceiver;
+        }
+
+        class CNotificationListenerService {
+            constructor();
+
+            constructor(
+                [in] IBaseStatusBar* bar);
+
+            interface INotificationListenerService;
+            interface IService;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+            interface IContextWrapper;
+            interface IContext;
         }
 
         //===========================================================================

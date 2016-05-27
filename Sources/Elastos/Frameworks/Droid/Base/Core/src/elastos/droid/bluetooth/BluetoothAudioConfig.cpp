@@ -18,6 +18,11 @@ BluetoothAudioConfig::BluetoothAudioConfig()
 {
 }
 
+ECode BluetoothAudioConfig::constructor()
+{
+    return NOERROR;
+}
+
 ECode BluetoothAudioConfig::constructor(
     /* [in] */ Int32 sampleRate,
     /* [in] */ Int32 channelConfig,

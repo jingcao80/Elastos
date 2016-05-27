@@ -18,6 +18,11 @@ GpsNavigationMessageEvent::GpsNavigationMessageEvent()
 {
 }
 
+ECode GpsNavigationMessageEvent::constructor()
+{
+    return NOERROR;
+}
+
 ECode GpsNavigationMessageEvent::constructor(
     /* [in] */ IGpsNavigationMessage* message)
 {

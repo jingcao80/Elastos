@@ -158,6 +158,8 @@ public:
 
     ScanFilter();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ IParcel* source);
 

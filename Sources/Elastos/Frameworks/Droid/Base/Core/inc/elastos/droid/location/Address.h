@@ -29,6 +29,8 @@ public:
 
     virtual ~Address();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ ILocale* locale);
 

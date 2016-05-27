@@ -9,6 +9,11 @@ CAR_INTERFACE_IMPL_2(CWifiScannerOperationResult, Object, IWifiScannerOperationR
 
 CAR_OBJECT_IMPL(CWifiScannerOperationResult)
 
+ECode CWifiScannerOperationResult::constructor()
+{
+    return NOERROR;
+}
+
 ECode CWifiScannerOperationResult::constructor(
     /* [in] */ Int32 reason,
     /* [in] */ const String& description)

@@ -61,6 +61,8 @@ module
 
         [deprecated]
         class CAddress {
+            constructor();
+
             constructor(
                 [in] ILocale* locale);
 
@@ -193,6 +195,8 @@ module
         }
 
         class CLocation {
+            constructor();
+
             constructor(
                 [in] String provider);
 
@@ -288,6 +292,8 @@ module
 
         [deprecated]
         class CGpsMeasurementsEvent {
+            constructor();
+
             constructor(
                 [in] IGpsClock* clock,
                 [in] ArrayOf<IGpsMeasurement*>* measurements);
@@ -322,6 +328,8 @@ module
         }
 
         class CGpsNavigationMessageEvent {
+            constructor();
+
             constructor(
                 [in] IGpsNavigationMessage* measurements);
 

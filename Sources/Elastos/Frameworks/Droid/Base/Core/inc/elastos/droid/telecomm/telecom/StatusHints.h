@@ -30,6 +30,8 @@ class StatusHints
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ IComponentName* packageName,
         /* [in] */ ICharSequence* label,

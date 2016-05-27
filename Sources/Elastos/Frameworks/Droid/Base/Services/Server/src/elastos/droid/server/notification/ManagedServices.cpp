@@ -386,6 +386,7 @@ ECode ManagedServices::MyServiceConnection::OnServiceConnected(
         // }
     }
     if (added) {
+Slogger::D(mHost->TAG, "[wanli] OnServiceConnected =============== 1");
         mHost->OnServiceAdded(info);
     }
     return NOERROR;
@@ -613,8 +614,11 @@ ECode ManagedServices::RegisterService(
 {
     FAIL_RETURN(CheckNotNull(service))
     AutoPtr<ManagedServiceInfo> info;
+Slogger::D(TAG, "[wanli] RegisterService =============== 1");
     RegisterServiceImpl(service, component, userid, (ManagedServiceInfo**)&info);
+Slogger::D(TAG, "[wanli] RegisterService =============== 2, info=[%p]", info.Get());
     if (info != NULL) {
+Slogger::D(TAG, "[wanli] RegisterService =============== 3");
         OnServiceAdded(info);
     }
     return NOERROR;

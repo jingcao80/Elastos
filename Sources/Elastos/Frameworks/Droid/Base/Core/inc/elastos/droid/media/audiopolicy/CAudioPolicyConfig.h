@@ -30,6 +30,8 @@ public:
 
     virtual ~CAudioPolicyConfig();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ IArrayList * mixes);
 

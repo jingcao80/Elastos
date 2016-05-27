@@ -195,6 +195,8 @@ public:
     static CARAPI_(AutoPtr< ArrayOf<Byte> >) ConvertPinToBytes(
         /* [in] */ const String& pin);
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ const String& address);
 

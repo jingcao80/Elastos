@@ -29,6 +29,11 @@ CTvContentRatingSystemInfo::~CTvContentRatingSystemInfo()
 {
 }
 
+ECode CTvContentRatingSystemInfo::constructor()
+{
+    return NOERROR;
+}
+
 ECode CTvContentRatingSystemInfo::constructor(
     /* [in] */ IUri * xmlUri,
     /* [in] */ IApplicationInfo * applicationInfo)

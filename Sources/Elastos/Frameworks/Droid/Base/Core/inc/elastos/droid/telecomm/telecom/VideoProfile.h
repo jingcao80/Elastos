@@ -95,6 +95,8 @@ public:
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     /**
      * Creates an instance of the VideoProfile
      *

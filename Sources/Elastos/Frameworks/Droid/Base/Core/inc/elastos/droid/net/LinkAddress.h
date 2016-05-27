@@ -37,7 +37,6 @@ class LinkAddress
 public:
     CAR_INTERFACE_DECL()
 
-public:
     /**
      * Utility function to determines the scope of a unicast address. Per RFC 4291 section 2.5 and
      * RFC 6724 section 3.2.

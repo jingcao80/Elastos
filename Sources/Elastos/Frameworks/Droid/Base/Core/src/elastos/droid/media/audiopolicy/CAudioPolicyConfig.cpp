@@ -20,6 +20,11 @@ CAudioPolicyConfig::~CAudioPolicyConfig()
 {
 }
 
+ECode CAudioPolicyConfig::constructor()
+{
+    return NOERROR;
+}
+
 ECode CAudioPolicyConfig::constructor(
     /* [in] */ IArrayList * mixes)
 {

@@ -26,6 +26,8 @@ public:
 
     BluetoothAudioConfig();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ Int32 sampleRate,
         /* [in] */ Int32 channelConfig,

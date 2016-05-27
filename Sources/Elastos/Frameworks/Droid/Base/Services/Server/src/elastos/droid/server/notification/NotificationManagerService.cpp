@@ -1137,7 +1137,6 @@ ECode NotificationManagerService::NotificationListeners::NotifyPostedLocked(
     // Lazily initialized snapshots of the notification.
     AutoPtr<IStatusBarNotification> sbnClone;
     AutoPtr<IStatusBarNotification> sbnCloneLight;
-
     Int32 size = 0;
     mServices->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {

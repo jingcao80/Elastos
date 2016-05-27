@@ -129,6 +129,8 @@ public:
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ Int32 advertiseMode,
         /* [in] */ Int32 advertiseTxPowerLevel,

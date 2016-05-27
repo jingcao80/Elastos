@@ -17,6 +17,11 @@ BluetoothMasInstance::BluetoothMasInstance()
 {
 }
 
+ECode BluetoothMasInstance::constructor()
+{
+    return NOERROR;
+}
+
 ECode BluetoothMasInstance::constructor(
     /* [in] */ Int32 id,
     /* [in] */ const String& name,

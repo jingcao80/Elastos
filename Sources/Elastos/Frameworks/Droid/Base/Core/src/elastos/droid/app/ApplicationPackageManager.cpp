@@ -366,7 +366,7 @@ ECode ApplicationPackageManager::GetApplicationInfo(
 {
     VALIDATE_NOT_NULL(info)
     AutoPtr<IApplicationInfo> ai;
-    #if 0
+    #if 1
     Int32 id;
     mContext->GetUserId(&id);
     FAIL_RETURN(mPM->GetApplicationInfo(packageName, flags, id, (IApplicationInfo**)&ai));

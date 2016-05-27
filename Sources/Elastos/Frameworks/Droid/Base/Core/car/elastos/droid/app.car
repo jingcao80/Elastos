@@ -980,6 +980,8 @@ module
     }
 
     class CProfileGroup {
+        constructor();
+
         constructor(
             [in] IUUID* uuid,
             [in] Boolean defaultGroup);
@@ -998,6 +1000,8 @@ module
     }
 
     class CProfile {
+        constructor();
+
         constructor(
             [in] String name);
 
@@ -1016,6 +1020,8 @@ module
     }
 
     class CProfileTrigger {
+        constructor();
+
         constructor(
             [in] Int32 type,
             [in] String id,
@@ -1045,7 +1051,6 @@ module
 
     /** @hide */
     class CProfilerInfo {
-
         constructor();
 
         constructor(
@@ -1354,6 +1359,8 @@ module
     }
 
     class CNotificationGroup {
+        constructor();
+
         constructor(
             [in] String name);
 
@@ -1835,6 +1842,8 @@ module
     }
 
     class CStreamSettings {
+        constructor();
+
         constructor(
             [in] Int32 streamId);
 
@@ -1986,6 +1995,8 @@ module
     }
 
     class CConnectionSettings {
+        constructor();
+
         constructor(
             [in] Int32 connectionId);
 

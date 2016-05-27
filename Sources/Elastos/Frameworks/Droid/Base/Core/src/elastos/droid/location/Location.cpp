@@ -56,6 +56,11 @@ Location::Location()
     mResults = ArrayOf<Float>::Alloc(2);
 }
 
+ECode Location::constructor()
+{
+    return NOERROR;
+}
+
 ECode Location::constructor(
     /* [in] */ const String& provider)
 {

@@ -30,6 +30,8 @@ public:
 
     StatusBarNotification();
 
+    CARAPI constructor();
+
     /** @hide */
     CARAPI constructor(
         /* [in] */ const String& pkg,

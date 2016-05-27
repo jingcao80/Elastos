@@ -659,10 +659,10 @@ AutoPtr< ArrayOf<Byte> > CBluetoothDevice::ConvertPinToBytes(
     return pinBytes;
 }
 
-//ECode CBluetoothDevice::constructor()
-//{
-//    return NOERROR;
-//}
+ECode CBluetoothDevice::constructor()
+{
+    return NOERROR;
+}
 
 ECode CBluetoothDevice::constructor(
     /* [in] */ const String& address)

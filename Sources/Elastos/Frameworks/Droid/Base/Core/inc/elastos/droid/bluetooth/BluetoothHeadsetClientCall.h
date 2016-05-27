@@ -24,6 +24,8 @@ public:
 
     BluetoothHeadsetClientCall();
 
+    CARAPI constructor();
+
     /**
       * Creates BluetoothHeadsetClientCall instance.
       */

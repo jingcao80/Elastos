@@ -11,6 +11,11 @@ GpsMeasurementsEvent::GpsMeasurementsEvent()
 {
 }
 
+ECode GpsMeasurementsEvent::constructor()
+{
+    return NOERROR;
+}
+
 ECode GpsMeasurementsEvent::constructor(
     /* [in] */ IGpsClock* clock,
     /* [in] */ ArrayOf<IGpsMeasurement*>* measurements)

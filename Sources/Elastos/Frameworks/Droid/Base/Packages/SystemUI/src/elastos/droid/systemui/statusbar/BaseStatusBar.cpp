@@ -1,10 +1,11 @@
 
 #include "elastos/droid/systemui/statusbar/BaseStatusBar.h"
+#include "elastos/droid/systemui/statusbar/CBaseBroadcastReceiver.h"
 #include "elastos/droid/systemui/statusbar/CCommandQueue.h"
+#include "elastos/droid/systemui/statusbar/CLockscreenSettingsObserver.h"
+#include "elastos/droid/systemui/statusbar/CNotificationListenerService.h"
 #include "elastos/droid/systemui/statusbar/CStatusBarIconView.h"
 #include "elastos/droid/systemui/statusbar/CSettingsObserver.h"
-#include "elastos/droid/systemui/statusbar/CLockscreenSettingsObserver.h"
-#include "elastos/droid/systemui/statusbar/CBaseBroadcastReceiver.h"
 #include "../R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Internal.h"
@@ -336,10 +337,10 @@ ECode CBaseBroadcastReceiver::OnReceive(
 }
 
 //==============================================================================
-//                  BaseStatusBar::_NotificationListenerService::Runnable1
+//                  CNotificationListenerService::Runnable1
 //==============================================================================
-BaseStatusBar::_NotificationListenerService::Runnable1::Runnable1(
-    /* [in] */ _NotificationListenerService* service,
+CNotificationListenerService::Runnable1::Runnable1(
+    /* [in] */ CNotificationListenerService* service,
     /* [in] */ ArrayOf<IStatusBarNotification*>* notifications,
     /* [in] */ INotificationListenerServiceRankingMap* currentRanking)
     : mService(service)
@@ -347,7 +348,7 @@ BaseStatusBar::_NotificationListenerService::Runnable1::Runnable1(
     , mCurrentRanking(currentRanking)
 {}
 
-ECode BaseStatusBar::_NotificationListenerService::Runnable1::Run()
+ECode CNotificationListenerService::Runnable1::Run()
 {
     for (Int32 i = 0; i < mNotifications->GetLength(); i++) {
         AutoPtr<IStatusBarNotification> sbn = (*mNotifications)[i];
@@ -357,10 +358,10 @@ ECode BaseStatusBar::_NotificationListenerService::Runnable1::Run()
 }
 
 //==============================================================================
-//                  BaseStatusBar::_NotificationListenerService::Runnable2
+//                  CNotificationListenerService::Runnable2
 //==============================================================================
-BaseStatusBar::_NotificationListenerService::Runnable2::Runnable2(
-    /* [in] */ _NotificationListenerService* service,
+CNotificationListenerService::Runnable2::Runnable2(
+    /* [in] */ CNotificationListenerService* service,
     /* [in] */ IStatusBarNotification* sbn,
     /* [in] */ INotificationListenerServiceRankingMap* rankingMap)
     : mService(service)
@@ -368,7 +369,7 @@ BaseStatusBar::_NotificationListenerService::Runnable2::Runnable2(
     , mRankingMap(rankingMap)
 {}
 
-ECode BaseStatusBar::_NotificationListenerService::Runnable2::Run()
+ECode CNotificationListenerService::Runnable2::Run()
 {
     AutoPtr<INotification> n;
     mSbn->GetNotification((INotification**)&n);
@@ -387,7 +388,7 @@ ECode BaseStatusBar::_NotificationListenerService::Runnable2::Run()
     mSbn->GetGroupKey(&gkey);
     if ((n->IsGroupChild(&tmp), tmp) &&
             (mService->mHost->mNotificationData->IsGroupWithSummary(gkey, &tmp2), tmp2)) {
-        if (DEBUG) {
+        if (mService->mHost->DEBUG) {
             Logger::D(mService->mHost->TAG, "Ignoring group child due to existing summary: %p", mSbn.Get());
         }
 
@@ -410,10 +411,10 @@ ECode BaseStatusBar::_NotificationListenerService::Runnable2::Run()
 }
 
 //==============================================================================
-//                  BaseStatusBar::_NotificationListenerService::Runnable3
+//                  CNotificationListenerService::Runnable3
 //==============================================================================
-BaseStatusBar::_NotificationListenerService::Runnable3::Runnable3(
-    /* [in] */ _NotificationListenerService* service,
+CNotificationListenerService::Runnable3::Runnable3(
+    /* [in] */ CNotificationListenerService* service,
     /* [in] */ IStatusBarNotification* sbn,
     /* [in] */ INotificationListenerServiceRankingMap* rankingMap)
     : mService(service)
@@ -421,7 +422,7 @@ BaseStatusBar::_NotificationListenerService::Runnable3::Runnable3(
     , mRankingMap(rankingMap)
 {}
 
-ECode BaseStatusBar::_NotificationListenerService::Runnable3::Run()
+ECode CNotificationListenerService::Runnable3::Run()
 {
     String key;
     mSbn->GetKey(&key);
@@ -430,31 +431,39 @@ ECode BaseStatusBar::_NotificationListenerService::Runnable3::Run()
 }
 
 //==============================================================================
-//                  BaseStatusBar::_NotificationListenerService::Runnable4
+//                  CNotificationListenerService::Runnable4
 //==============================================================================
-BaseStatusBar::_NotificationListenerService::Runnable4::Runnable4(
-    /* [in] */ _NotificationListenerService* service,
+CNotificationListenerService::Runnable4::Runnable4(
+    /* [in] */ CNotificationListenerService* service,
     /* [in] */ INotificationListenerServiceRankingMap* rankingMap)
     : mService(service)
     , mRankingMap(rankingMap)
 {}
 
-ECode BaseStatusBar::_NotificationListenerService::Runnable4::Run()
+ECode CNotificationListenerService::Runnable4::Run()
 {
     return mService->mHost->UpdateNotificationRanking(mRankingMap);
 }
 
 //==============================================================================
-//                  BaseStatusBar::_NotificationListenerService
+//                  CNotificationListenerService
 //==============================================================================
-BaseStatusBar::_NotificationListenerService::_NotificationListenerService(
-    /* [in] */ BaseStatusBar* host)
-    : mHost(host)
-{}
-
-ECode BaseStatusBar::_NotificationListenerService::OnListenerConnected()
+CAR_OBJECT_IMPL(CNotificationListenerService)
+ECode CNotificationListenerService::constructor()
 {
-    if (DEBUG) Logger::D(mHost->TAG, "onListenerConnected");
+    return NotificationListenerService::constructor();
+}
+
+ECode CNotificationListenerService::constructor(
+    /* [in] */ IBaseStatusBar* host)
+{
+    mHost = (BaseStatusBar*)host;
+    return NotificationListenerService::constructor();
+}
+
+ECode CNotificationListenerService::OnListenerConnected()
+{
+    if (mHost->DEBUG) Logger::D(mHost->TAG, "onListenerConnected");
     AutoPtr<ArrayOf<IStatusBarNotification*> > notifications;
     GetActiveNotifications((ArrayOf<IStatusBarNotification*>**)&notifications);
     AutoPtr<INotificationListenerServiceRankingMap> currentRanking;
@@ -465,32 +474,32 @@ ECode BaseStatusBar::_NotificationListenerService::OnListenerConnected()
     return NOERROR;
 }
 
-ECode BaseStatusBar::_NotificationListenerService::OnNotificationPosted(
+ECode CNotificationListenerService::OnNotificationPosted(
     /* [in] */ IStatusBarNotification* sbn,
     /* [in] */ INotificationListenerServiceRankingMap* rankingMap)
 {
-    if (DEBUG) Logger::D(mHost->TAG, "onNotificationPosted: %p", sbn);
+    if (mHost->DEBUG) Logger::D(mHost->TAG, "onNotificationPosted: %p", sbn);
     AutoPtr<Runnable2> run = new Runnable2(this, sbn, rankingMap);
     Boolean tmp = FALSE;
     mHost->mHandler->Post(run, &tmp);
     return NOERROR;
 }
 
-ECode BaseStatusBar::_NotificationListenerService::OnNotificationRemoved(
+ECode CNotificationListenerService::OnNotificationRemoved(
     /* [in] */ IStatusBarNotification* sbn,
     /* [in] */ INotificationListenerServiceRankingMap* rankingMap)
 {
-    if (DEBUG) Logger::D(mHost->TAG, "onNotificationRemoved: %p", sbn);
+    if (mHost->DEBUG) Logger::D(mHost->TAG, "onNotificationRemoved: %p", sbn);
     AutoPtr<Runnable3> run = new Runnable3(this, sbn, rankingMap);
     Boolean tmp = FALSE;
     mHost->mHandler->Post(run, &tmp);
     return NOERROR;
 }
 
-ECode BaseStatusBar::_NotificationListenerService::OnNotificationRankingUpdate(
+ECode CNotificationListenerService::OnNotificationRankingUpdate(
     /* [in] */ INotificationListenerServiceRankingMap* rankingMap)
 {
-    if (DEBUG) Logger::D(mHost->TAG, "onRankingUpdate");
+    if (mHost->DEBUG) Logger::D(mHost->TAG, "onRankingUpdate");
     AutoPtr<Runnable4> run = new Runnable4(this, rankingMap);
     Boolean tmp = FALSE;
     mHost->mHandler->Post(run, &tmp);
@@ -918,7 +927,7 @@ BaseStatusBar::BaseStatusBar()
 {
     mOnClickHandler = new _RemoteViewsOnClickHandler(this);
     CBaseBroadcastReceiver::New(this, (IBroadcastReceiver**)&mBroadcastReceiver);
-    mNotificationListener = new _NotificationListenerService(this);
+    CNotificationListenerService::New(this, (INotificationListenerService**)&mNotificationListener);
     mRecentsPreloadOnTouchListener = new RecentsPreloadOnTouchListener(this);
     mHandler = CreateHandler();
 
@@ -2441,7 +2450,8 @@ void BaseStatusBar::UpdateRowStates()
     activeNotifications->GetSize(&N);
 
     Int32 visibleNotifications = 0;
-    Boolean onKeyguard = mState == IStatusBarState::KEYGUARD;
+    Logger::D(TAG, "TODO [UpdateRowStates onKeyguard = TRUE]");
+    Boolean onKeyguard = TRUE/*mState == IStatusBarState::KEYGUARD*/;
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<IInterface> obj;
         activeNotifications->Get(i, (IInterface**)&obj);
@@ -2635,41 +2645,29 @@ ECode BaseStatusBar::UpdateNotification(
     // large view may be NULL
     AutoPtr<IView> oldEntryBCView;
     oldEntry->GetBigContentView((IView**)&oldEntryBCView);
-    bigContentView->GetPackage(&package);
-    oldBigContentView->GetPackage(&oldPackage);
-    bigContentView->GetLayoutId(&nId);
-    oldBigContentView->GetLayoutId(&oldId);
     Boolean bigContentsUnchanged =
             (oldEntryBCView.Get() == NULL && bigContentView == NULL)
             || ((oldEntryBCView.Get() != NULL && bigContentView != NULL)
-                && package != NULL
-                && oldPackage != NULL
+                && (bigContentView->GetPackage(&package), package) != NULL
+                && (oldBigContentView->GetPackage(&oldPackage), oldPackage) != NULL
                 && oldPackage.Equals(package)
-                && oldId == nId);
+                && (oldBigContentView->GetLayoutId(&oldId), oldId) == (bigContentView->GetLayoutId(&nId), nId));
 
-    headsUpContentView->GetPackage(&package);
-    oldHeadsUpContentView->GetPackage(&oldPackage);
-    headsUpContentView->GetLayoutId(&nId);
-    oldHeadsUpContentView->GetLayoutId(&oldId);
     Boolean headsUpContentsUnchanged =
             (oldHeadsUpContentView == NULL && headsUpContentView == NULL)
             || ((oldHeadsUpContentView != NULL && headsUpContentView != NULL)
-                && package != NULL
-                && oldPackage != NULL
+                && (headsUpContentView->GetPackage(&package), package) != NULL
+                && (oldHeadsUpContentView->GetPackage(&oldPackage), oldPackage) != NULL
                 && oldPackage.Equals(package)
-                && oldId == nId);
+                && (oldHeadsUpContentView->GetLayoutId(&oldId), oldId) == (headsUpContentView->GetLayoutId(&nId), nId));
 
-    publicContentView->GetPackage(&package);
-    oldPublicContentView->GetPackage(&oldPackage);
-    publicContentView->GetLayoutId(&nId);
-    oldPublicContentView->GetLayoutId(&oldId);
     Boolean publicUnchanged  =
             (oldPublicContentView == NULL && publicContentView == NULL)
             || ((oldPublicContentView != NULL && publicContentView != NULL)
-                    && package != NULL
-                    && oldPackage != NULL
+                    && (publicContentView->GetPackage(&package), package) != NULL
+                    && (oldPublicContentView->GetPackage(&oldPackage), oldPackage) != NULL
                     && oldPackage.Equals(package)
-                    && oldId == nId);
+                    && (oldPublicContentView->GetLayoutId(&oldId), oldId) == (publicContentView->GetLayoutId(&nId), nId));
 
     AutoPtr<ICharSequence> tickerText;
     n->GetTickerText((ICharSequence**)&tickerText);
@@ -2865,9 +2863,10 @@ void BaseStatusBar::UpdateNotificationViews(
     AutoPtr<INotification> publicVersion;
     n->GetPublicVersion((INotification**)&publicVersion);
 
-    AutoPtr<IRemoteViews> pc;
-    publicVersion->GetContentView((IRemoteViews**)&pc);
-    AutoPtr<IRemoteViews> publicContentView = publicVersion != NULL ? pc.Get() : NULL;
+    AutoPtr<IRemoteViews> publicContentView;
+    if (publicVersion != NULL) {
+        publicVersion->GetContentView((IRemoteViews**)&publicContentView);
+    }
 
     // Reapply the RemoteViews
     AutoPtr<IView> expanded;
@@ -3035,7 +3034,7 @@ ECode BaseStatusBar::Destroy()
 AutoPtr<IPackageManager> BaseStatusBar::GetPackageManagerForUser(
     /* [in] */ Int32 userId)
 {
-    AutoPtr<IContext> contextForUser = mContext;
+    IContext* contextForUser = mContext;
     // UserHandle defines special userId as negative values, e.g. USER_ALL
     if (userId >= 0) {
         // try {

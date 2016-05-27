@@ -24,6 +24,8 @@ public:
 
     virtual ~CMediaBrowserMediaItem();
 
+    CARAPI constructor();
+
     /**
      * Create a new MediaItem for use in browsing media.
      * @param description The description of the media, which must include a

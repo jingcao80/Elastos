@@ -29,6 +29,11 @@ Condition::Condition()
 {
 }
 
+ECode Condition::constructor()
+{
+    return NOERROR;
+}
+
 ECode Condition::constructor(
     /* [in] */ IUri* id,
     /* [in] */ const String& summary,

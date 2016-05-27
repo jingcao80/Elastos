@@ -14,6 +14,11 @@ CAR_INTERFACE_IMPL_2(CWifiActivityEnergyInfo, Object, IParcelable, IWifiActivity
 
 CAR_OBJECT_IMPL(CWifiActivityEnergyInfo)
 
+ECode CWifiActivityEnergyInfo::constructor()
+{
+    return NOERROR;
+}
+
 ECode CWifiActivityEnergyInfo::constructor(
     /* [in] */ Int32 stackState,
     /* [in] */ Int32 txTime,

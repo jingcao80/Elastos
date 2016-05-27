@@ -25,6 +25,8 @@ public:
 
     BluetoothActivityEnergyInfo();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ Int32 stackState,
         /* [in] */ Int32 txTime,

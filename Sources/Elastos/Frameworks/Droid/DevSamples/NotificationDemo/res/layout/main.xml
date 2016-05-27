@@ -7,7 +7,7 @@
     <TextView
         android:id="@+id/myTextView"
         android:layout_width="fill_parent"
-        android:layout_height="40px"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:gravity="center_vertical"
         android:textColor="#000000"
@@ -22,22 +22,22 @@
 
         <Button
             android:id="@+id/statusBarNotificationButton"
-            android:layout_width="200px"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="StatusBar Notification" />
         <Button
             android:id="@+id/startNotificationButton"
-            android:layout_width="200px"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Start Notification" />
         <Button
             android:id="@+id/updateNotificationButton"
-            android:layout_width="200px"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Update Notification" />
         <Button
             android:id="@+id/cancelNotificationButton"
-            android:layout_width="200px"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Cancel Notification" />
 

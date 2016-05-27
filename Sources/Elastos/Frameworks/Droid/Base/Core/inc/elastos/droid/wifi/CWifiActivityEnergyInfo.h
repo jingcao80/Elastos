@@ -19,6 +19,8 @@ public:
 
     CAR_OBJECT_DECL()
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ Int32 stackState,
         /* [in] */ Int32 txTime,

@@ -161,6 +161,11 @@ CARAPI ScanSettings::ReadFromParcel(
     return NOERROR;
 }
 
+ECode ScanSettings::constructor()
+{
+    return NOERROR;
+}
+
 ECode ScanSettings::constructor(
     /* [in] */ Int32 scanMode,
     /* [in] */ Int32 callbackType,

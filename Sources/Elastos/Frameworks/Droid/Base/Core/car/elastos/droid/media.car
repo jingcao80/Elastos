@@ -1669,6 +1669,8 @@ module
     }
 
     class CAudioPolicyConfig {
+        constructor();
+
         constructor(
             [in] IArrayList* mixes);
 
@@ -1687,6 +1689,8 @@ module
     namespace Browse {
 
     class CMediaBrowserMediaItem {
+        constructor();
+
         constructor(
             [in] IMediaDescription* description,
             [in] Int32 flags);
@@ -1738,6 +1742,8 @@ module
     }
 
     class CMediaProjectionInfo {
+        constructor();
+
         constructor(
             [in] String packageName,
             [in] IUserHandle* handle);
@@ -1796,6 +1802,8 @@ module
     }
 
     class CMediaSessionToken {
+        constructor();
+
         constructor(
             [in] IISessionController* binder);
 
@@ -1804,6 +1812,8 @@ module
     }
 
     class CMediaSessionQueueItem {
+        constructor();
+
         constructor(
             [in] IMediaDescription* description,
             [in] Int64 id);
@@ -1845,6 +1855,8 @@ module
     }
 
     class CParcelableVolumeInfo {
+        constructor();
+
         constructor(
             [in] Int32 volumeType,
             [in] IAudioAttributes* audioAttrs,
@@ -1961,6 +1973,8 @@ module
     }
 
     class CTvContentRatingSystemInfo {
+        constructor();
+
         constructor(
             [in] IUri* xmlUri,
             [in] IApplicationInfo* applicationInfo);
@@ -2020,6 +2034,8 @@ module
     }
 
     class CTvTrackInfo {
+        constructor();
+
         constructor(
             [in] Int32 type,
             [in] String id,
@@ -2048,6 +2064,8 @@ module
     }
 
     class CTvInputInfo {
+        constructor();
+
         constructor(
             [in] IResolveInfo * service,
             [in] String id,

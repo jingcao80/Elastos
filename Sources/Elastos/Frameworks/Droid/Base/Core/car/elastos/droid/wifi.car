@@ -99,6 +99,8 @@ module
 
         [deprecated]
         class CRttManagerParcelableRttParams {
+            constructor();
+
             constructor(
                 [in] ArrayOf<IRttManagerRttParams*>* params);
 
@@ -114,6 +116,8 @@ module
 
         [deprecated]
         class CRttManagerParcelableRttResults {
+            constructor();
+
             constructor(
                 [in] ArrayOf<IRttManagerRttResult*>* result);
 
@@ -132,6 +136,8 @@ module
         }
 
         class CWifiActivityEnergyInfo {
+            constructor();
+
             constructor(
                 [in] Int32 stackState,
                 [in] Int32 txTime,
@@ -224,6 +230,8 @@ module
 
         [deprecated]
         class CWifiScannerParcelableScanResults {
+            constructor();
+
             constructor(
                 [in] ArrayOf<IScanResult*>* results);
 
@@ -252,6 +260,8 @@ module
         }
 
         class CWifiScannerOperationResult {
+            constructor();
+
             constructor(
                 [in] Int32 reason,
                 [in] String description);

@@ -1305,6 +1305,15 @@ module
         interface IParcelable;
     }
 
+    class CParceledListSliceBinder {
+        constructor(
+            [in] IInterface* obj,
+            [in] IList* list,
+            [in] Int32 N);
+
+        interface IBinder;
+    }
+
     class CPathPermission {
         constructor();
 
