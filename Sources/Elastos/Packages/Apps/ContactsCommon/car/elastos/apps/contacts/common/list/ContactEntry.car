@@ -1,0 +1,24 @@
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    interface IContactEntry {
+    }
+
+    interface IContactEntryHelper {
+        GetBLANK_ENTRY(
+            [out] IContactEntry** entry);
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

@@ -1,0 +1,51 @@
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * Action callbacks that can be sent by a phone number picker.
+     */
+    interface IOnPhoneNumberPickerActionListener {
+        /**
+         * Returns the selected phone number to the requester.
+         */
+        OnPickPhoneNumberAction(
+            [in] IUri* dataUri);
+
+        /**
+         * Calls the specified phone number audio call.
+         */
+        OnCallNumberDirectly(
+            [in] String phoneNumber);
+
+        /**
+         * Calls the specified phone number, either as an audio or video call.
+         */
+        OnCallNumberDirectly(
+            [in] String phoneNumber,
+            [in] Boolean isVideoCall);
+
+        /**
+         * Returns the selected number as a shortcut intent.
+         */
+        OnShortcutIntentCreated(
+            [in] IIntent* intent);
+
+        /**
+         * Called when home menu in {@link ActionBar} is clicked by the user.
+         */
+        OnHomeInActionBarSelected();
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Apps
+    } // Elastos
+
+}

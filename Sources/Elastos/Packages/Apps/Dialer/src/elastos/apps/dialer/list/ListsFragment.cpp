@@ -519,8 +519,8 @@ ECode ListsFragment::ShowRemoveView(
         mShortcutCardsListView->GetChildAt(0, (IView**)&v);
         animator = NULL;
         v->Animate((IViewPropertyAnimator**)&animator);
-        animator->WithLayer()
-        animator->Alpha(show ? REMOVE_VIEW_SHOWN_ALPHA : REMOVE_VIEW_HIDDEN_ALPHA)
+        animator->WithLayer();
+        animator->Alpha(show ? REMOVE_VIEW_SHOWN_ALPHA : REMOVE_VIEW_HIDDEN_ALPHA);
         animator->Start();
     }
     return NOERROR;
