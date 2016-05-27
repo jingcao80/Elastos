@@ -4235,7 +4235,7 @@ ECode CActivityManagerService::StartProcessLocked(
 
     // Start the process.  It will either succeed and return a result containing
     // the PID of the new process, or else throw a RuntimeException.
-    Boolean isActivityProcess = (entryPoint == NULL);
+    Boolean isActivityProcess = (entryPoint.IsNull());
     if (isActivityProcess) {
         entryPoint = "android.app.ActivityThread";
     }
@@ -4247,7 +4247,7 @@ ECode CActivityManagerService::StartProcessLocked(
     app->mInfo->GetDataDir(&dataDir);
     app->mInfo->GetTargetSdkVersion(&targetSdkVersion);
     app->mInfo->GetSeinfo(&seinfo);
-    processClass = sourcePath.EndWith(".apk") ? entryPoint : String("Elastos.Droid.App.CActivityThreadHelper");
+    processClass = sourcePath.EndWith(".apk") && !sourcePath.Contains("framework-res.apk") ? entryPoint : String("Elastos.Droid.App.CActivityThreadHelper");
     Slogger::I(TAG, " >>> StartProcessLocked %s, ProcessName:%s, processClass: %s, dataDir: %s, seinfo: %s",
         sourcePath.string(), app->mProcessName.string(), processClass.string(),
         dataDir.string(), seinfo.string());

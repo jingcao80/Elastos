@@ -1,6 +1,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/CComponentName.h"
+#include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/content/pm/ResolveInfo.h"
 #include "elastos/droid/content/pm/CActivityInfo.h"
 #include "elastos/droid/content/pm/CProviderInfo.h"
@@ -281,8 +282,11 @@ ECode ResolveInfo::ReadFromParcel(
         source->ReadInterfacePtr((Handle32*)(IInterface**)&info);
         mProviderInfo = IProviderInfo::Probe(info);
     }
-
-    source->ReadInterfacePtr((Handle32*)&mFilter);
+    source->ReadInt32(&ival);
+    if (ival != 0) {
+        CIntentFilter::New((IIntentFilter**)&mFilter);
+        IParcelable::Probe(mFilter)->ReadFromParcel(source);
+    }
     source->ReadInt32(&mPriority);
     source->ReadInt32(&mPreferredOrder);
     source->ReadInt32(&mMatch);
@@ -316,8 +320,13 @@ ECode ResolveInfo::WriteToParcel(
     else {
         dest->WriteInt32(0);
     }
-
-    dest->WriteInterfacePtr(mFilter);
+    if (mFilter != NULL) {
+        dest->WriteInt32(1);
+        IParcelable::Probe(mFilter)->WriteToParcel(dest);
+    }
+    else {
+        dest->WriteInt32(0);
+    }
     dest->WriteInt32(mPriority);
     dest->WriteInt32(mPreferredOrder);
     dest->WriteInt32(mMatch);

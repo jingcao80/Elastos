@@ -538,12 +538,10 @@ AutoPtr<ActivityRecord> ActivityStack::FindTaskLocked(
             return NULL;
         }
         AutoPtr<IComponentName> clstmp;
-        if (taskIntent != NULL && (taskIntent->GetComponent((IComponentName**)&clstmp), clstmp) != NULL) {
+        if (taskIntent != NULL && (taskIntent->GetComponent((IComponentName**)&clstmp), clstmp != NULL)) {
             Int32 result;
             IComparable::Probe(clstmp)->CompareTo(TO_IINTERFACE(cls), &result);
-            Boolean equals;
-            IObject::Probe(documentData)->Equals(TO_IINTERFACE(taskDocumentData), &equals);
-            if (result == 0 && equals) {
+            if (result == 0 && Object::Equals(documentData, taskDocumentData)) {
                 if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Found matching class!");
                 //dump();
                 //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "For Intent " + intent + " bringing to top: " + r.intent);
@@ -552,12 +550,10 @@ AutoPtr<ActivityRecord> ActivityStack::FindTaskLocked(
         }
 
         clstmp = NULL;
-        if (affinityIntent != NULL && (affinityIntent->GetComponent((IComponentName**)&clstmp), clstmp)  != NULL) {
+        if (affinityIntent != NULL && (affinityIntent->GetComponent((IComponentName**)&clstmp), clstmp != NULL)) {
             Int32 result;
             IComparable::Probe(clstmp)->CompareTo(TO_IINTERFACE(cls), &result);
-            Boolean equals;
-            IObject::Probe(documentData)->Equals(TO_IINTERFACE(taskDocumentData), &equals);
-            if (result == 0 && equals) {
+            if (result == 0 && Object::Equals(documentData, taskDocumentData)) {
                 if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Found matching class!!");
                 //dump();
                 //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "For Intent " + intent + " bringing to top: " + r.intent);
