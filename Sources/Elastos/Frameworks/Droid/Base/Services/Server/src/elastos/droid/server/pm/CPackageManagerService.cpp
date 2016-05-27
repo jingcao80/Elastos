@@ -144,6 +144,7 @@ using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Utility::ILogHelper;
 using Elastos::Droid::Utility::CAtomicFile;
+using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::IWindowManager;
 using Elastos::Droid::Server::SystemConfig;
@@ -7715,9 +7716,8 @@ ECode CPackageManagerService::QueryIntentActivities(
     }
 
     if (comp != NULL) {
-        AutoPtr<IArrayList> al;
-        CArrayList::New(1, (IArrayList**)&al);
-        AutoPtr<IList> list = IList::Probe(al);
+        AutoPtr<IList> list;
+        CParcelableList::New(1, (IList**)&list);
         AutoPtr<IActivityInfo> ai;
         GetActivityInfo(comp, flags, userId, (IActivityInfo**)&ai);
         if (ai != NULL) {
@@ -7732,7 +7732,8 @@ ECode CPackageManagerService::QueryIntentActivities(
     }
 
     // reader
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         String pkgName;
         intent->GetPackage(&pkgName);
         if (pkgName.IsNull()) {
@@ -7742,11 +7743,10 @@ ECode CPackageManagerService::QueryIntentActivities(
             AutoPtr<IResolveInfo> resolveInfo  = QuerySkipCurrentProfileIntents(matchingFilters, intent,
                     resolvedType, flags, userId);
             if (resolveInfo != NULL) {
-                AutoPtr<IArrayList> al;
-                CArrayList::New(1, (IArrayList**)&al);
-                AutoPtr<IList> result = IList::Probe(al);
-                result->Add(resolveInfo);
-                *infos = result;
+                AutoPtr<IList> list;
+                CParcelableList::New(1, (IList**)&list);
+                list->Add(resolveInfo);
+                *infos = list;
                 REFCOUNT_ADD(*infos)
                 return NOERROR;
             }
@@ -7759,7 +7759,7 @@ ECode CPackageManagerService::QueryIntentActivities(
             AutoPtr<List<AutoPtr<IResolveInfo> > > result = mActivities->QueryIntent(
                     intent, resolvedType, flags, userId);
             AutoPtr<IList> list;
-            CArrayList::New((IList**)&list);
+            CParcelableList::New((IList**)&list);
             List<AutoPtr<IResolveInfo> >::Iterator riIt = result->Begin();
             for (; riIt != result->End(); ++riIt) {
                 list->Add(*riIt);
@@ -7784,7 +7784,7 @@ ECode CPackageManagerService::QueryIntentActivities(
             AutoPtr<List<AutoPtr<IResolveInfo> > > ris = mActivities->QueryIntentForPackage(
                     intent, resolvedType, flags, &pkg->mActivities, userId);
             AutoPtr<IList> list;
-            CArrayList::New((IList**)&list);
+            CParcelableList::New((IList**)&list);
             List<AutoPtr<IResolveInfo> >::Iterator riIt = ris->Begin();
             for (; riIt != ris->End(); ++riIt) {
                 list->Add(*riIt);
@@ -7795,7 +7795,7 @@ ECode CPackageManagerService::QueryIntentActivities(
         }
 
         AutoPtr<IList> al;
-        CArrayList::New((IList**)&al);
+        CParcelableList::New((IList**)&al);
         *infos = al;
         REFCOUNT_ADD(*infos)
     }
@@ -10645,11 +10645,11 @@ Slogger::I(TAG, " >>>>>>>>> ScanPackageDirtyLI %s", TO_CSTR(pkg));
                 AutoPtr<IComponentInfo> ci = IComponentInfo::Probe(mResolveActivity);
                 AutoPtr<IPackageItemInfo> pii = IPackageItemInfo::Probe(mResolveActivity);
                 ci->SetApplicationInfo(mElastosApplication);
-                pii->SetName(String("com.android.internal.app.ResolverActivity") /*ResolverActivity.class.getName()*/);
+                pii->SetName(String("Elastos.Droid.Internal.App.CResolverActivity") /*ResolverActivity.class.getName()*/);
                 String pkgName;
                 IPackageItemInfo::Probe(mElastosApplication)->GetPackageName(&pkgName);
                 pii->SetPackageName(pkgName);
-                ci->SetProcessName(String("system:ui"));
+                ci->SetProcessName(String("system:Elastos.Droid.SystemUI"));
                 mResolveActivity->SetLaunchMode(IActivityInfo::LAUNCH_MULTIPLE);
                 mResolveActivity->SetDocumentLaunchMode(IActivityInfo::DOCUMENT_LAUNCH_NEVER);
                 mResolveActivity->SetFlags(IActivityInfo::FLAG_EXCLUDE_FROM_RECENTS);

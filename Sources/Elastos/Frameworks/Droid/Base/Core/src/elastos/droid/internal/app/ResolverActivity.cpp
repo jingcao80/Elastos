@@ -342,9 +342,10 @@ void ResolverActivity::ResolveListAdapter::RebuildList()
             Boolean riIsDefault;
             ri->GetIsDefault(&riIsDefault);
 
-            if (DEBUG)
+            if (DEBUG) {
                 Logger::V(TAG, "%s=%d/%d vs %s=%d/%d", r0Name.string(), r0Priority, r0IsDefault,
                     riName.string(), riPriority, riIsDefault);
+            }
 
             if (r0Priority != riPriority || r0IsDefault != riIsDefault) {
                 while (i < N) {
@@ -414,7 +415,7 @@ void ResolverActivity::ResolveListAdapter::RebuildList()
         r0 = IResolveInfo::Probe(item0);
         Int32 start = 0;
         AutoPtr<ICharSequence> r0Label;
-        IPackageItemInfo::Probe(r0)->LoadLabel(mHost->mPm, (ICharSequence**)&r0Label);
+        r0->LoadLabel(mHost->mPm, (ICharSequence**)&r0Label);
         mHost->mShowExtended = FALSE;
         for (Int32 i = 1; i < N; i++) {
             String r0pkgName, ripkgName;
@@ -428,7 +429,7 @@ void ResolverActivity::ResolveListAdapter::RebuildList()
             currentResolveList->Get(i, (IInterface**)&item);
             AutoPtr<IResolveInfo> ri = IResolveInfo::Probe(item);
             AutoPtr<ICharSequence> riLabel;
-            IPackageItemInfo::Probe(ri)->LoadLabel(mHost->mPm, (ICharSequence**)&riLabel);
+            ri->LoadLabel(mHost->mPm, (ICharSequence**)&riLabel);
             if (riLabel == NULL) {
                 AutoPtr<IActivityInfo> aInfo;
                 ri->GetActivityInfo((IActivityInfo**)&aInfo);
@@ -438,14 +439,14 @@ void ResolverActivity::ResolveListAdapter::RebuildList()
             if (ripkgName.Equals(r0pkgName)) {
                 continue;
             }
-            ProcessGroup(currentResolveList, start, (i-1), r0, r0Label);
+            ProcessGroup(currentResolveList, start, (i - 1), r0, r0Label);
             r0 = ri;
             r0Label = riLabel;
             start = i;
             i++;
         }
         // Process last group
-        ProcessGroup(currentResolveList, start, (N-1), r0, r0Label);
+        ProcessGroup(currentResolveList, start, (N - 1), r0, r0Label);
     }
 }
 
@@ -570,8 +571,9 @@ AutoPtr<IResolveInfo> ResolverActivity::ResolveListAdapter::ResolveInfoForPositi
         GetItem(position, (IInterface**)&item);
         info = (DisplayResolveInfo*)IObject::Probe(item);
     }
-    else
+    else {
         info = mList[position];
+    }
     return info->mRi;
 }
 
@@ -585,8 +587,9 @@ AutoPtr<IIntent> ResolverActivity::ResolveListAdapter::IntentForPosition(
         GetItem(position, (IInterface**)&item);
         dri = (DisplayResolveInfo*)IObject::Probe(item);
     }
-    else
+    else {
         dri = mList[position];
+    }
 
     AutoPtr<IActivityInfo> ai;
     dri->mRi->GetActivityInfo((IActivityInfo**)&ai);
@@ -852,14 +855,14 @@ ECode ResolverActivity::ResolverComparator::Compare(
     }
 
     AutoPtr<ICharSequence> sa;
-    IPackageItemInfo::Probe(lhs)->LoadLabel(mHost->mPm, (ICharSequence**)&sa);
+    lhs->LoadLabel(mHost->mPm, (ICharSequence**)&sa);
     if (sa == NULL) {
         String name;
         IPackageItemInfo::Probe(lhsInfo)->GetName(&name);
         sa = CoreUtils::Convert(name);
     }
     AutoPtr<ICharSequence>  sb;
-    IPackageItemInfo::Probe(rhs)->LoadLabel(mHost->mPm, (ICharSequence**)&sa);
+    rhs->LoadLabel(mHost->mPm, (ICharSequence**)&sa);
     if (sb == NULL) {
         String name;
         IPackageItemInfo::Probe(lhsInfo)->GetName(&name);
@@ -960,12 +963,13 @@ ECode ResolverActivity::OnCreate(
 ECode ResolverActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState,
     /* [in] */ IIntent* intent,
-    /* [in] */ ICharSequence* title,
+    /* [in] */ ICharSequence* _title,
     /* [in] */ Int32 defaultTitleRes,
     /* [in] */ ArrayOf<IIntent*>* initialIntents,
     /* [in] */ IList* rList,
     /* [in] */ Boolean alwaysUseOption)
 {
+    AutoPtr<ICharSequence> title = _title;
     SetTheme(R::style::Theme_DeviceDefault_Resolver);
     Activity::OnCreate(savedInstanceState);
 
@@ -1072,7 +1076,7 @@ ECode ResolverActivity::OnCreate(
 
     AutoPtr<IView> view;
     FindViewById(R::id::contentPanel, (IView**)&view);
-    AutoPtr<IResolverDrawerLayout> rdl = IResolverDrawerLayout::Probe(view);;
+    AutoPtr<IResolverDrawerLayout> rdl = IResolverDrawerLayout::Probe(view);
     if (rdl != NULL) {
         AutoPtr<ViewOnClickListener> listener = new ViewOnClickListener(this);
         rdl->SetOnClickOutsideListener(listener);
@@ -1501,8 +1505,7 @@ ECode ResolverActivity::OnIntentSelected(
             }
         }
         String scheme;
-        data->GetScheme(&scheme);
-        if (data != NULL && scheme != NULL) {
+        if (data != NULL && (data->GetScheme(&scheme), !scheme.IsNull())) {
             // We need the data specification if there was no type,
             // OR if the scheme is not one of our magical "file:"
             // or "content:" schemes (see IntentFilter for the reason).
@@ -1586,7 +1589,7 @@ ECode ResolverActivity::OnIntentSelected(
             mAdapter->mOrigResolveList->GetSize(&N);
             AutoPtr<ArrayOf<IComponentName*> > set = ArrayOf<IComponentName*>::Alloc(N);
             Int32 bestMatch = 0;
-            for (Int32 i=0; i<N; i++) {
+            for (Int32 i = 0; i < N; i++) {
                 AutoPtr<IInterface> item;
                 mAdapter->mOrigResolveList->Get(i, (IInterface**)&item);
                 AutoPtr<IResolveInfo> r = IResolveInfo::Probe(item);

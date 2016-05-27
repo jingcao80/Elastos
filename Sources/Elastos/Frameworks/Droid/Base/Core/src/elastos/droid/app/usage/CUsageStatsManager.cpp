@@ -3,6 +3,7 @@
 #include "elastos/droid/app/usage/CUsageEvents.h"
 #include "elastos/droid/utility/CArrayMap.h"
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Pm::IParceledListSlice;
 using Elastos::Droid::Utility::IArrayMap;
@@ -11,12 +12,12 @@ using Elastos::Core::CoreUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace App {
 namespace Usage {
-
 
 static AutoPtr<IUsageEvents> InitUsageEvents()
 {
@@ -55,8 +56,9 @@ ECode CUsageStatsManager::QueryUsageStats(
     AutoPtr<IParceledListSlice> slice;
     String packageName;
     mContext->GetOpPackageName(&packageName);
-    FAIL_RETURN(mService->QueryUsageStats(intervalType, beginTime, endTime, packageName,
-            (IParceledListSlice**)&slice));
+    Logger::D("CUsageStatsManager", "================== TODO: USAGE_STATS_SERVICE is NULL");
+    // FAIL_RETURN(mService->QueryUsageStats(intervalType, beginTime, endTime, packageName,
+    //         (IParceledListSlice**)&slice));
     if (slice != NULL) {
         return slice->GetList(result);
     }
@@ -78,8 +80,9 @@ ECode CUsageStatsManager::QueryConfigurations(
     AutoPtr<IParceledListSlice> slice;
     String packageName;
     mContext->GetOpPackageName(&packageName);
-    FAIL_RETURN(mService->QueryConfigurationStats(intervalType, beginTime, endTime, packageName,
-            (IParceledListSlice**)&slice));
+    Logger::D("CUsageStatsManager", "================== TODO: USAGE_STATS_SERVICE is NULL");
+    // FAIL_RETURN(mService->QueryConfigurationStats(intervalType, beginTime, endTime, packageName,
+    //         (IParceledListSlice**)&slice));
     if (slice != NULL) {
         return slice->GetList(result);
     }
@@ -100,7 +103,8 @@ ECode CUsageStatsManager::QueryEvents(
     AutoPtr<IUsageEvents> iter;
     String packageName;
     mContext->GetOpPackageName(&packageName);
-    mService->QueryEvents(beginTime, endTime, packageName, (IUsageEvents**)&iter);
+    Logger::D("CUsageStatsManager", "================== TODO: USAGE_STATS_SERVICE is NULL");
+    // mService->QueryEvents(beginTime, endTime, packageName, (IUsageEvents**)&iter);
     if (iter != NULL) {
         *result = iter;
         REFCOUNT_ADD(*result)
