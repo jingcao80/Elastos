@@ -1,6 +1,7 @@
 
 #include "CarCallbackProxy.h"
 #include "V8Utility.h"
+#include "V8CarObject.h"
 #include <sys/mman.h>
 #include <utils/Log.h>
 #include <uv.h>
@@ -49,6 +50,10 @@ DECL_SYS_PROXY_ENTRY();
 
 namespace Elastos {
 namespace Node {
+
+// {8CC78507-90A3-4771-9122-F279D7D20DCA}
+static const InterfaceID EIID_CarCallbackObject =
+        { 0x8cc78507, 0x90a3, 0x4771, { 0x91, 0x22, 0xf2, 0x79, 0xd7, 0xd2, 0xd, 0xca } };
 
 static UInt32 g_marshalVtbl[MSH_MAX_METHODS];
 
@@ -250,6 +255,218 @@ ECode CarCallbackInterfaceProxy::ReadParam(
                         puArgs += sizeof(EGuid) / 4;
                         break;
                     }
+                    case CarDataType_Interface:
+                    {
+                        IInterface* carObject = (IInterface*)*puArgs;
+
+                        if (carObject->Probe(EIID_CarCallbackObject) == NULL) {
+                            CarValue value;
+                            value.mType = CarDataType_Interface;
+                            value.mObjectValue = carObject;
+                            v8::Local<v8::Object> v8Object = V8CarObject::New(isolate, value);
+
+                            v8Args[i].Reset(isolate, v8Object);
+                        }
+                        else {
+                            Logger::E("CarCallbackInterfaceProxy", "CarCallbackObject unsupported!");
+                        }
+
+                        puArgs++;
+                        break;
+                    }
+                    case CarDataType_ArrayOf:
+                    {
+                        CarQuintet* carArray = (CarQuintet*)*puArgs;
+
+                        AutoPtr<IDataTypeInfo> elementTypeInfo;
+                        ICarArrayInfo::Probe(paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementTypeInfo);
+                        CarDataType elementDataType;
+                        elementTypeInfo->GetDataType(&elementDataType);
+
+                        switch(elementDataType) {
+                            case CarDataType_Byte:
+                            {
+                                Int32 count = carArray->mSize / sizeof(Byte);
+                                Byte* buffer = (Byte*)carArray->mBuf;
+
+                                v8::Local<v8::Array> v8Array = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, count));
+                                for (Int32 j = 0; j < count; j++) {
+                                    v8Array->Set(j, v8::Number::New(isolate, buffer[j]));
+                                }
+
+                                v8Args[i].Reset(isolate, v8Array);
+                                break;
+                            }
+                            case CarDataType_Int16:
+                            {
+                                Int32 count = carArray->mSize / sizeof(Int16);
+                                Int16* buffer = (Int16*)carArray->mBuf;
+
+                                v8::Local<v8::Array> v8Array = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, count));
+                                for (Int32 j = 0; j < count; j++) {
+                                    v8Array->Set(j, v8::Number::New(isolate, buffer[j]));
+                                }
+
+                                v8Args[i].Reset(isolate, v8Array);
+                                break;
+                            }
+                            case CarDataType_Char32:
+                            case CarDataType_Int32:
+                            case CarDataType_ECode:
+                            case CarDataType_Enum:
+                            {
+                                Int32 count = carArray->mSize / sizeof(Int32);
+                                Int32* buffer = (Int32*)carArray->mBuf;
+
+                                v8::Local<v8::Array> v8Array = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, count));
+                                for (Int32 j = 0; j < count; j++) {
+                                    v8Array->Set(j, v8::Number::New(isolate, buffer[j]));
+                                }
+
+                                v8Args[i].Reset(isolate, v8Array);
+                                break;
+                            }
+                            case CarDataType_Float:
+                            {
+                                Int32 count = carArray->mSize / sizeof(Float);
+                                Float* buffer = (Float*)carArray->mBuf;
+
+                                v8::Local<v8::Array> v8Array = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, count));
+                                for (Int32 j = 0; j < count; j++) {
+                                    v8Array->Set(j, v8::Number::New(isolate, buffer[j]));
+                                }
+
+                                v8Args[i].Reset(isolate, v8Array);
+                                break;
+                            }
+                            case CarDataType_Int64:
+                            case CarDataType_Double:
+                            {
+                                Int32 count = carArray->mSize / sizeof(Double);
+                                Double* buffer = (Double*)carArray->mBuf;
+
+                                v8::Local<v8::Array> v8Array = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, count));
+                                for (Int32 j = 0; j < count; j++) {
+                                    v8Array->Set(j, v8::Number::New(isolate, buffer[j]));
+                                }
+
+                                v8Args[i].Reset(isolate, v8Array);
+                                break;
+                            }
+                            case CarDataType_Boolean:
+                            {
+                                Int32 count = carArray->mSize / sizeof(Boolean);
+                                Boolean* buffer = (Boolean*)carArray->mBuf;
+
+                                v8::Local<v8::Array> v8Array = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, count));
+                                for (Int32 j = 0; j < count; j++) {
+                                    v8Array->Set(j, v8::Boolean::New(isolate, buffer[j]));
+                                }
+
+                                v8Args[i].Reset(isolate, v8Array);
+                                break;
+                            }
+                            case CarDataType_String:
+                            {
+                                Int32 count = carArray->mSize / sizeof(String);
+                                String* buffer = (String*)carArray->mBuf;
+
+                                v8::Local<v8::Array> v8Array = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, count));
+                                for (Int32 j = 0; j < count; j++) {
+                                    v8Array->Set(j, v8::String::NewFromUtf8(isolate, buffer[j].string()));
+                                }
+
+                                v8Args[i].Reset(isolate, v8Array);
+                                break;
+                            }
+                            case CarDataType_EMuid:
+                            {
+                                Int32 count = carArray->mSize / sizeof(EMuid);
+                                EMuid* buffer = (EMuid*)carArray->mBuf;
+
+                                v8::Local<v8::Array> v8Array = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, count));
+                                for (Int32 j = 0; j < count; j++) {
+                                    EMuid& iid = buffer[j];
+
+                                    v8::Local<v8::Array> v8EMuid = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, 4));
+                                    v8EMuid->Set(0, v8::Number::New(isolate, iid.mData1));
+                                    v8EMuid->Set(1, v8::Number::New(isolate, iid.mData2));
+                                    v8EMuid->Set(2, v8::Number::New(isolate, iid.mData3));
+                                    v8::Local<v8::Array> v8EMuidData4 = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, 4));
+                                    for(Int32 k = 0; k < 8; k++) {
+                                        v8EMuidData4->Set(k, v8::Number::New(isolate, iid.mData4[k]));
+                                    }
+                                    v8EMuid->Set(3, v8EMuidData4);
+
+                                    v8Array->Set(j, v8EMuid);
+                                }
+
+                                v8Args[i].Reset(isolate, v8Array);
+                                break;
+                            }
+                            case CarDataType_EGuid:
+                            {
+                                Int32 count = carArray->mSize / sizeof(EMuid);
+                                EMuid* buffer = (EMuid*)carArray->mBuf;
+
+                                v8::Local<v8::Array> v8Array = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, count));
+                                for (Int32 j = 0; j < count; j++) {
+                                    EGuid& cid = *(EGuid*)puArgs;
+                                    EMuid& iid = cid.mClsid;
+
+                                    v8::Local<v8::Array> v8EMuid = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, 4));
+                                    v8EMuid->Set(0, v8::Number::New(isolate, iid.mData1));
+                                    v8EMuid->Set(1, v8::Number::New(isolate, iid.mData2));
+                                    v8EMuid->Set(2, v8::Number::New(isolate, iid.mData3));
+                                    v8::Local<v8::Array> v8EMuidData4 = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, 4));
+                                    for(Int32 k = 0; k < 8; k++) {
+                                        v8EMuidData4->Set(k, v8::Number::New(isolate, iid.mData4[k]));
+                                    }
+                                    v8EMuid->Set(3, v8EMuidData4);
+
+                                    v8::Local<v8::Object> v8EGuid = v8::Local<v8::Object>::New(isolate, v8::Object::New(isolate));
+                                    v8EGuid->Set(v8::String::NewFromUtf8(isolate, "mClsid"), v8EMuid);
+                                    v8EGuid->Set(v8::String::NewFromUtf8(isolate, "mUunm"), v8::String::NewFromUtf8(isolate, cid.mUunm));
+                                    v8EGuid->Set(v8::String::NewFromUtf8(isolate, "mCarcode"), v8::Number::New(isolate, cid.mCarcode));
+
+                                    v8Array->Set(j, v8EGuid);
+                                }
+
+                                v8Args[i].Reset(isolate, v8Array);
+                                break;
+                            }
+                            case CarDataType_Interface:
+                            {
+                                Int32 count = carArray->mSize / sizeof(Int32);
+                                IInterface** buffer = (IInterface**)carArray->mBuf;
+
+                                v8::Local<v8::Array> v8Array = v8::Local<v8::Array>::New(isolate, v8::Array::New(isolate, count));
+                                for (Int32 j = 0; j < count; j++) {
+                                    IInterface* carObject = buffer[j];
+
+                                    if (carObject->Probe(EIID_CarCallbackObject) == NULL) {
+                                        CarValue value;
+                                        value.mType = CarDataType_Interface;
+                                        value.mObjectValue = carObject;
+                                        v8::Local<v8::Object> v8Object = V8CarObject::New(isolate, value);
+
+                                        v8Array->Set(j, v8Object);
+                                    }
+                                    else {
+                                        Logger::E("CarCallbackInterfaceProxy", "CarCallbackObject unsupported!");
+                                    }
+                                }
+
+                                v8Args[i].Reset(isolate, v8Array);
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+
+                        puArgs++;
+                        break;
+                    }
                 }
 
                 break;
@@ -399,9 +616,19 @@ void CarCallbackInterfaceProxy::Callback::Call()
 //============================================================
 //  CarCallbackObject
 //============================================================
+
 CarCallbackObject::~CarCallbackObject()
 {
     mV8Object.Reset();
+}
+
+PInterface CarCallbackObject::Probe(
+    /* [in] */ REIID riid)
+{
+    if (riid == EIID_CarCallbackObject) {
+        return (IObject*)this;
+    }
+    return Object::Probe(riid);
 }
 
 ECode CarCallbackObject::ToString(

@@ -89,6 +89,9 @@ class CarCallbackObject
 public:
     ~CarCallbackObject();
 
+    CARAPI_(PInterface) Probe(
+        /* [in] */ REIID riid);
+
     CARAPI ToString(
         /* [out] */ Elastos::String* info);
 
