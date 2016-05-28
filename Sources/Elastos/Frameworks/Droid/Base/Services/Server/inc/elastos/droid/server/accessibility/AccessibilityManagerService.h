@@ -1348,7 +1348,7 @@ private:
 
     static const String GET_WINDOW_TOKEN;
 
-    static AutoPtr<IComponentName> sFakeAccessibilityServiceComponentName;//new ComponentName("foo.bar", "FakeService");
+    static AutoPtr<IComponentName> sFakeAccessibilityServiceComponentName;
 
     static const String FUNCTION_DUMP;
 

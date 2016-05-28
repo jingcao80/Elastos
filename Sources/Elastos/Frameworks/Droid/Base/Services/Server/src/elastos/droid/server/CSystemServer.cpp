@@ -18,6 +18,7 @@
 #include "elastos/droid/server/CNsdService.h"
 #include "elastos/droid/server/CBatteryService.h"
 
+#include "elastos/droid/server/accessibility/CAccessibilityManagerService.h"
 #include "elastos/droid/server/accounts/CAccountManagerService.h"
 #include "elastos/droid/server/appwidget/CAppWidgetService.h"
 #include "elastos/droid/server/clipboard/CClipboardService.h"
@@ -87,12 +88,14 @@ using Elastos::Droid::Content::IIClipboard;
 using Elastos::Droid::Media::CAudioService;
 using Elastos::Droid::Media::IAudioService;
 using Elastos::Droid::View::IIWindowManager;
+using Elastos::Droid::View::Accessibility::IIAccessibilityManager;
 using Elastos::Droid::Accounts::IIAccountManager;
 using Elastos::Droid::Hardware::Input::IIInputManager;
 using Elastos::Droid::Webkit::IWebViewFactory;
 using Elastos::Droid::Webkit::CWebViewFactory;
 using Elastos::Droid::Utility::CDisplayMetrics;
 
+using Elastos::Droid::Server::Accessibility::CAccessibilityManagerService;
 using Elastos::Droid::Server::Accounts::CAccountManagerService;
 using Elastos::Droid::Server::AppWidget::CAppWidgetService;
 using Elastos::Droid::Server::Clipboard::CClipboardService;
@@ -637,11 +640,11 @@ ECode SystemServer::StartOtherServices()
 
             ServiceManager::AddService(IContext::INPUT_METHOD_SERVICE, (IIInputMethodManager*)imm.Get());
 
-            Slogger::I(TAG, "Accessibility Manager todo");
-            // AutoPtr<IIAccessibilityManager> accessManager;
-            // ec = CAccessibilityManagerService::New(context, (IIAccessibilityManager**)&accessManager);
-            // if (FAILED(ec)) ReportWtf("starting Accessibility Service", ec);
-            // ServiceManager::AddService(IContext::ACCESSIBILITY_SERVICE, accessManager);
+            Slogger::I(TAG, "Accessibility Manager");
+            AutoPtr<IIAccessibilityManager> accessManager;
+            ec = CAccessibilityManagerService::New(context, (IIAccessibilityManager**)&accessManager);
+            if (FAILED(ec)) ReportWtf("starting Accessibility Service", ec);
+            ServiceManager::AddService(IContext::ACCESSIBILITY_SERVICE, accessManager);
         }
     }
 

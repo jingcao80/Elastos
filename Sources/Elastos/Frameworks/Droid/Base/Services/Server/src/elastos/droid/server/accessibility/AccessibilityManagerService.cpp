@@ -14,6 +14,7 @@
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/Manifest.h"
 #include "elastos/droid/R.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
@@ -21,8 +22,6 @@
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::AccessibilityService::EIID_IIAccessibilityServiceConnection;
 using Elastos::Droid::AccessibilityService::CAccessibilityServiceInfo;
 using Elastos::Droid::AccessibilityService::IAccessibilityService;
@@ -97,6 +96,7 @@ using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::IWindowManagerPolicy;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::View::IInputDevice;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IAppendable;
 using Elastos::Core::StringBuilder;
@@ -3443,41 +3443,30 @@ ECode AccessibilityManagerService::constructor(
     /* [in] */ IContext* context)
 {
     mPendingEventPool = new Pools::SimplePool<PendingEvent>(MAX_POOL_SIZE);
-
     CSimpleStringSplitter::New(COMPONENT_NAME_SEPARATOR, (ISimpleStringSplitter**)&mStringColonSplitter);
-
     CArrayList::New((IList**)&mEnabledServicesForFeedbackTempList);
-
-    ASSERT_SUCCEEDED(CRegion::New((IRegion**)&mTempRegion));
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTempRect));
-    ASSERT_SUCCEEDED(CPoint::New((IPoint**)&mTempPoint));
-
+    CRegion::New((IRegion**)&mTempRegion);
+    CRect::New((IRect**)&mTempRect);
+    CPoint::New((IPoint**)&mTempPoint);
     CHashSet::New((ISet**)&mTempComponentNameSet);
     CArrayList::New((IList**)&mTempAccessibilityServiceInfoList);
-
     CRemoteCallbackList::New((IRemoteCallbackList**)&mGlobalClients);
-
     CSparseArray::New((ISparseArray**)&mGlobalInteractionConnections);
     CSparseArray::New((ISparseArray**)&mGlobalWindowTokens);
     CSparseArray::New((ISparseArray**)&mUserStates);
-    /*  */
 
     mContext = context;
     mContext->GetPackageManager((IPackageManager**)&mPackageManager);
     AutoPtr<IInterface> obj = LocalServices::GetService(EIID_IWindowManagerInternal);
     mWindowManagerService = IWindowManagerInternal::Probe(obj);
-
     obj = NULL;
     FAIL_RETURN(context->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj));
     mUserManager = IUserManager::Probe(obj);
-
     mSecurityPolicy = new SecurityPolicy(this);
     AutoPtr<ILooper> looper;
     FAIL_RETURN(mContext->GetMainLooper((ILooper**)&looper));
     mMainHandler = new MainHandler(looper, this);
-
     CLockPatternUtils::New(context, (ILockPatternUtils**)&mLockPatternUtils);
-
     RegisterBroadcastReceivers();
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
