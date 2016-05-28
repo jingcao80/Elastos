@@ -131,6 +131,8 @@ module
     const E_TYPE_EXCEPTION                              =  0xED040000;
     const E_QUERY_POOL_EXCEPTION                        =  0xED050000;
     const E_ENCODE_EXCEPTION                            =  0xED060000;
+    const E_TELEPHONEY_AT_PARSE_EXCEPTION               =  0xED070000;
+    const E_TELEPHONEY_CALL_STATE_EXCEPTION             =  0xED080000;
 
     //==========================================================================
     // Elastos Droid hardware exception codes (Family: 0x6E - EE)

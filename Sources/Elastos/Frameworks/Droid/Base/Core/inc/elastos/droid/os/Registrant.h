@@ -10,9 +10,11 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
+class RegistrantList;
+
 /** @hide */
 class Registrant
-    : Object
+    : public Object
 {
 public:
     Registrant(
@@ -49,6 +51,7 @@ private:
     AutoPtr<IWeakReference>     mRefH;
     Int32                       mWhat;
     AutoPtr<IInterface>         mUserObj;
+    friend class RegistrantList;
 };
 
 } // namespace Os

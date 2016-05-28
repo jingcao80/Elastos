@@ -1,8 +1,8 @@
 
 module
 {
-    interface Elastos.Droid.Telecomm.Telecom.IPhone;
-    // interface Elastos.Droid.Internal.Telephony.IConnection;
+    interface Elastos.Droid.Internal.Telephony.IPhone;
+    interface Elastos.Droid.Internal.Telephony.IConnection;
     interface Elastos.Droid.Os.IBundle;
 
     using interface Elastos.Utility.IList;
@@ -45,7 +45,9 @@ module
     }
 
     interface ICall {
-
+        /** Do not modify the List result!!! This list is not yours to keep
+         *  It will change across event loop iterations            top
+         */
         GetConnections(
             [out] IList** result);
 
@@ -57,9 +59,9 @@ module
 
         Hangup();
 
-        // HasConnection(
-        //     [in] IConnection* c,
-        //     [out] Boolean* result);
+        HasConnection(
+            [in] IConnection* c,
+            [out] Boolean* result);
 
         HasConnections(
             [out] Boolean* result);
@@ -77,8 +79,8 @@ module
          * Returns the Connection associated with this Call that was created
          * first, or null if there are no Connections in this Call
          */
-        // GetEarliestConnection(
-        //     [out] IConnection** result);
+        GetEarliestConnection(
+            [out] IConnection** result);
 
         GetEarliestCreateTime(
             [out] Int64* result);
@@ -96,8 +98,8 @@ module
          * Returns the Connection associated with this Call that was created
          * last, or null if there are no Connections in this Call
          */
-        // GetLatestConnection(
-        //     [out] IConnection** result);
+        GetLatestConnection(
+            [out] IConnection** result);
 
         IsGeneric(
             [out] Boolean* result);

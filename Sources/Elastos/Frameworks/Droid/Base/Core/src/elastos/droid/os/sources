@@ -69,6 +69,7 @@ SOURCES += Process.cpp
 SOURCES += CProcessStartResult.cpp
 #SOURCES += CRecoverySystem.cpp
 SOURCES += Registrant.cpp
+SOURCES += RegistrantList.cpp
 SOURCES += RemoteCallback.cpp
 SOURCES += RemoteCallbackList.cpp
 SOURCES += CRemoteCallbackList.cpp

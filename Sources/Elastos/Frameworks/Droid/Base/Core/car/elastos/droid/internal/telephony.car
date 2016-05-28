@@ -5,6 +5,8 @@ module
     merge("telephony/BaseCommands.car");
     merge("telephony/Call.car");
     merge("telephony/CallForwardInfo.car");
+    merge("telephony/PhoneConstants.car");
+    merge("telephony/UUSInfo.car");
     merge("telephony/CallManager.car");
     merge("telephony/CallStateException.car");
     merge("telephony/CallTracker.car");
@@ -51,16 +53,15 @@ module
     merge("telephony/ModemStackController.car");
     merge("telephony/OperatorInfo.car");
     merge("telephony/Operators.car");
+    merge("telephony/PhoneSubInfo.car");
     merge("telephony/Phone.car");
     merge("telephony/PhoneBase.car");
     merge("telephony/PhoneFactory.car");
     merge("telephony/PhoneNotifier.car");
     merge("telephony/PhoneProxy.car");
-    merge("telephony/PhoneSubInfo.car");
     merge("telephony/PhoneSubInfoController.car");
     merge("telephony/PhoneSubInfoProxy.car");
     merge("telephony/ProxyController.car");
-    merge("telephony/PhoneConstants.car");
     merge("telephony/RILConstants.car");
     merge("telephony/RIL.car");
     merge("telephony/RadioNVItems.car");
@@ -90,7 +91,6 @@ module
     merge("telephony/TelephonyCapabilities.car");
     merge("telephony/TelephonyDevController.car");
     merge("telephony/TelephonyTester.car");
-    merge("telephony/UUSInfo.car");
     merge("telephony/UiccPhoneBookController.car");
     merge("telephony/UiccSmsController.car");
     merge("telephony/WakeLockStateMachine.car");

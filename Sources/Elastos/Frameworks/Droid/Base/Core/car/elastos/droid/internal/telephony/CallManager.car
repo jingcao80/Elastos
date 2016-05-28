@@ -1,11 +1,9 @@
 
 module
 {
-    // interface Elastos.Droid.Internal.Telephony.PhoneConstants;
-    // interface Elastos.Droid.Internal.Telephony.IUUSInfo;
     interface Elastos.Droid.Os.IMessage;
     interface Elastos.Droid.Os.IHandler;
-    interface Elastos.Droid.Telecomm.Telecom.IPhone;
+    interface Elastos.Droid.Internal.Telephony.IPhone;
 
     using interface Elastos.IO.IFileDescriptor;
     using interface Elastos.Utility.IList;
@@ -20,12 +18,12 @@ module
         GetAllPhones(
             [out] IList** result);
 
-        // GetState(
-        //     [out] PhoneConstantsState* result);
+        GetState(
+            [out] PhoneConstantsState* result);
 
-        // GetState(
-        //     [in] Int64 subId,
-        //     [out] PhoneConstantsState* result);
+        GetState(
+            [in] Int64 subId,
+            [out] PhoneConstantsState* result);
 
         GetServiceState(
             [out] Int32* result);
@@ -163,11 +161,11 @@ module
          * dialing, alerting, ringing, or waiting.  Other errors are
          * handled asynchronously.
          */
-        // Dial(
-        //     [in] IPhone* phone,
-        //     [in] String dialString,
-        //     [in] Int32 videoState,
-        //     [out] IConnection** result);
+        Dial(
+            [in] IPhone* phone,
+            [in] String dialString,
+            [in] Int32 videoState,
+            [out] IConnection** result);
 
         /**
          * Initiate a new voice connection. This happens asynchronously, so you
@@ -179,12 +177,12 @@ module
          * dialing, alerting, ringing, or waiting.  Other errors are
          * handled asynchronously.
          */
-        // Dial(
-        //     [in] IPhone* phone,
-        //     [in] String dialString,
-        //     [in] IUUSInfo* uusInfo,
-        //     [in] Int32 videoState,
-        //     [out] IConnection** result);
+        Dial(
+            [in] IPhone* phone,
+            [in] String dialString,
+            [in] IUUSInfo* uusInfo,
+            [in] Int32 videoState,
+            [out] IConnection** result);
 
         ClearDisconnected();
 
@@ -487,12 +485,12 @@ module
             [in] Int64 subId,
             [out] ICall** result);
 
-        // GetActiveFgCallState(
-        //     [out] PhoneConstantsState* result);
+        GetActiveFgCallState(
+            [out] ICallState* result);
 
-        // GetActiveFgCallState(
-        //     [in] Int64 subId,
-        //     [out] PhoneConstantsState* result);
+        GetActiveFgCallState(
+            [in] Int64 subId,
+            [out] ICallState* result);
 
         GetFgCallConnections(
             [out] IList** result);
@@ -508,12 +506,12 @@ module
             [in] Int64 subId,
             [out] IList** result);
 
-        // GetFgCallLatestConnection(
-        //     [out] IConnection** result);
+        GetFgCallLatestConnection(
+            [out] IConnection** result);
 
-        // GetFgCallLatestConnection(
-        //     [in] Int64 subId,
-        //     [out] IConnection** result);
+        GetFgCallLatestConnection(
+            [in] Int64 subId,
+            [out] IConnection** result);
 
         HasDisconnectedFgCall(
             [out] Boolean* result);
@@ -545,5 +543,4 @@ module
     }//Internal
     }//Droid
     }//Elastos
-
 }

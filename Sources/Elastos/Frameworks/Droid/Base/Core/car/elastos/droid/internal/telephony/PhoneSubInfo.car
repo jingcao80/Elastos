@@ -69,7 +69,6 @@ module {
             [in] Int32 appType,
             [in] String data,
             [out] String* result);
-
     }
 
     }//Telephony

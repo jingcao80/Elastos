@@ -10,6 +10,10 @@ module
     interface Elastos.Droid.Telephony.IServiceState;
     interface Elastos.Droid.Telephony.ICellLocation;
     interface Elastos.Droid.Telephony.ISignalStrength;
+    interface Elastos.Droid.Internal.Telephony.ImsPhone.IImsPhone;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIsimRecords;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUiccCard;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUsimServiceTable;
 
     using interface Elastos.Utility.IList;
 
@@ -217,8 +221,8 @@ module
          * exists at this interface -- use
          * {@link android.telephony.PhoneStateListener} instead.
          */
-        // GetDataConnectionState(
-        //     [out] IDataState* result);
+        GetDataConnectionState(
+            [out] PhoneConstantsDataState* result);
 
         /**
          * Get the current DataState. No change notification exists at this
@@ -226,9 +230,9 @@ module
          * {@link android.telephony.PhoneStateListener} instead.
          * @param apnType specify for which apn to get connection state info.
          */
-        // GetDataConnectionState(
-        //     [in] String apnType,
-        //     [out] IDataState* result);
+        GetDataConnectionState(
+            [in] String apnType,
+            [out] PhoneConstantsDataState* result);
 
         /**
          * Get the current DataActivityState. No change notification exists at this
@@ -269,8 +273,8 @@ module
          * changes.<p>
          *
          */
-        // GetState(
-        //     [out] IState* result);
+        GetState(
+            [out] PhoneConstantsState* result);
 
         /**
          * Returns a string identifier for this phone interface for parties
@@ -995,11 +999,11 @@ module
          *                that is dialing, alerting, ringing, or waiting. Other
          *                errors are handled asynchronously.
          */
-        // Dial(
-        //     [in] String dialString,
-        //     [in] IUUSInfo* uusInfo,
-        //     [in] Int32 videoState,
-        //     [out] IConnection** result);
+        Dial(
+            [in] String dialString,
+            [in] IUUSInfo* uusInfo,
+            [in] Int32 videoState,
+            [out] IConnection** result);
 
         /**
          * Initiate to add a participant in an IMS call.
@@ -1624,7 +1628,7 @@ module
          * otherwise, null.
          */
         // GetSimulatedRadioControl(
-        //     [out] ISimulatedRadioControl** result);
+        //    [out] ISimulatedRadioControl** result);
 
         /**
          * Report on whether data connectivity is allowed.
@@ -1728,8 +1732,8 @@ module
         /**
          * Retrieves the PhoneSubInfo of the Phone
          */
-        // GetPhoneSubInfo(
-        //     [out] IPhoneSubInfo** result);
+        GetPhoneSubInfo(
+            [out] IPhoneSubInfo** result);
 
         /**
          * Retrieves the IccPhoneBookInterfaceManager of the Phone
@@ -2102,8 +2106,8 @@ module
          * Return an interface to retrieve the ISIM records for IMS, if available.
          * @return the interface to retrieve the ISIM records, or null if not supported
          */
-        // GetIsimRecords(
-        //     [out] IIsimRecords** result);
+        GetIsimRecords(
+            [out] IIsimRecords** result);
 
         /**
          * Sets the SIM voice message waiting indicator records.
@@ -2120,15 +2124,15 @@ module
          * Gets the USIM service table from the UICC, if present and available.
          * @return an interface to the UsimServiceTable record, or null if not available
          */
-        // GetUsimServiceTable(
-        //     [out] IUsimServiceTable** result);
+        GetUsimServiceTable(
+            [out] IUsimServiceTable** result);
 
         /**
          * Gets the Uicc card corresponding to this phone.
          * @return the UiccCard object corresponding to the phone ID.
          */
-        // GetUiccCard(
-        //     [out] IUiccCard** result);
+        GetUiccCard(
+            [out] IUiccCard** result);
 
         /**
          * Unregister from all events it registered for and dispose objects
@@ -2251,15 +2255,15 @@ module
          * the phone.
          * @return the instance of the ImsPhone phone previously owned
          */
-        // RelinquishOwnershipOfImsPhone(
-        //     [out] IImsPhone** result);
+        RelinquishOwnershipOfImsPhone(
+            [out] IImsPhone** result);
 
         /**
          * Take ownership and wire-up the input ImsPhone
          * @param imsPhone ImsPhone to be used.
          */
-        // AcquireOwnershipOfImsPhone(
-        //     [in] IImsPhone* imsPhone);
+        AcquireOwnershipOfImsPhone(
+            [in] IImsPhone* imsPhone);
 
         /**
          * Return the service state of mImsPhone if it is STATE_IN_SERVICE
