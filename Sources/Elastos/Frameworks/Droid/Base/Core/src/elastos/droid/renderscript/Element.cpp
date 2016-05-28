@@ -72,6 +72,73 @@ Element::DataType::DataType(
     }
 }
 
+AutoPtr<DataType> Element::DataType::GetDataType(
+    /* [in] */ Int32 id)
+{
+    switch(id) {
+        case ElementDataType_NONE:
+            return NONE;
+        case ElementDataType_FLOAT_32:
+            return FLOAT_32;
+        case ElementDataType_FLOAT_64:
+            return FLOAT_64;
+        case ElementDataType_SIGNED_8:
+            return SIGNED_8;
+        case ElementDataType_SIGNED_16:
+            return SIGNED_16;
+        case ElementDataType_SIGNED_32:
+            return SIGNED_32;
+        case ElementDataType_SIGNED_64:
+            return SIGNED_64;
+        case ElementDataType_UNSIGNED_8:
+            return UNSIGNED_8;
+        case ElementDataType_UNSIGNED_16:
+            return UNSIGNED_16;
+        case ElementDataType_UNSIGNED_32:
+            return UNSIGNED_32;
+        case ElementDataType_UNSIGNED_64:
+            return UNSIGNED_64;
+        case ElementDataType_BOOLEAN:
+            return BOOLEAN;
+        case ElementDataType_UNSIGNED_5_6_5:
+            return UNSIGNED_5_6_5;
+        case ElementDataType_UNSIGNED_5_5_5_1:
+            return UNSIGNED_5_5_5_1;
+        case ElementDataType_UNSIGNED_4_4_4_4:
+            return UNSIGNED_4_4_4_4;
+        case ElementDataType_MATRIX_4X4:
+            return MATRIX_4X4;
+        case ElementDataType_MATRIX_3X3:
+            return MATRIX_3X3;
+        case ElementDataType_MATRIX_2X2:
+            return MATRIX_2X2;
+        case ElementDataType_RS_ELEMENT:
+            return RS_ELEMENT;
+        case ElementDataType_RS_TYPE:
+            return RS_TYPE;
+        case ElementDataType_RS_ALLOCATION:
+            return RS_ALLOCATION;
+        case ElementDataType_RS_SAMPLER:
+            return RS_SAMPLER;
+        case ElementDataType_RS_SCRIPT:
+            return RS_SCRIPT;
+        case ElementDataType_RS_MESH:
+            return RS_MESH;
+        case ElementDataType_RS_PROGRAM_FRAGMENT:
+            return RS_PROGRAM_FRAGMENT;
+        case ElementDataType_RS_PROGRAM_VERTEX:
+            return RS_PROGRAM_VERTEX;
+        case ElementDataType_RS_PROGRAM_RASTER:
+            return RS_PROGRAM_RASTER;
+        case ElementDataType_RS_PROGRAM_STORE:
+            return RS_PROGRAM_STORE;
+        case ElementDataType_RS_FONT:
+            return RS_FONT;
+        default:
+            return NULL;
+    }
+}
+
 
 //==========================================================
 // Element
@@ -245,7 +312,7 @@ ECode Element::GetDataKind(
 }
 
 AutoPtr<IElement> Element::BOOLEAN(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_BOOLEAN == NULL) {
         rs->mElement_BOOLEAN = CreateUser(rs, DataType::BOOLEAN);
@@ -254,7 +321,7 @@ AutoPtr<IElement> Element::BOOLEAN(
 }
 
 AutoPtr<IElement> Element::U8(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_U8 == NULL) {
         rs->mElement_U8 = CreateUser(rs, DataType::UNSIGNED_8);
@@ -263,7 +330,7 @@ AutoPtr<IElement> Element::U8(
 }
 
 AutoPtr<IElement> Element::I8(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_I8 == NULL) {
         rs->mElement_I8 = CreateUser(rs, DataType::SIGNED_8);
@@ -272,7 +339,7 @@ AutoPtr<IElement> Element::I8(
 }
 
 AutoPtr<IElement> Element::U16(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_U16 == NULL) {
         rs->mElement_U16 = CreateUser(rs, DataType::UNSIGNED_16);
@@ -281,7 +348,7 @@ AutoPtr<IElement> Element::U16(
 }
 
 AutoPtr<IElement> Element::I16(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_I16 == NULL) {
         rs->mElement_I16 = CreateUser(rs, DataType::SIGNED_16);
@@ -290,7 +357,7 @@ AutoPtr<IElement> Element::I16(
 }
 
 AutoPtr<IElement> Element::U32(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_U32 == NULL) {
         rs->mElement_U32 = CreateUser(rs, DataType::UNSIGNED_32);
@@ -299,7 +366,7 @@ AutoPtr<IElement> Element::U32(
 }
 
 AutoPtr<IElement> Element::I32(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_I32 == NULL) {
         rs->mElement_I32 = CreateUser(rs, DataType::SIGNED_32);
@@ -308,7 +375,7 @@ AutoPtr<IElement> Element::I32(
 }
 
 AutoPtr<IElement> Element::U64(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_U64 == NULL) {
         rs->mElement_U64 = CreateUser(rs, DataType::UNSIGNED_64);
@@ -317,7 +384,7 @@ AutoPtr<IElement> Element::U64(
 }
 
 AutoPtr<IElement> Element::I64(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_I64 == NULL) {
         rs->mElement_I64 = CreateUser(rs, DataType::SIGNED_64);
@@ -326,7 +393,7 @@ AutoPtr<IElement> Element::I64(
 }
 
 AutoPtr<IElement> Element::F32(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_F32 == NULL) {
         rs->mElement_F32 = CreateUser(rs, DataType::FLOAT_32);
@@ -335,7 +402,7 @@ AutoPtr<IElement> Element::F32(
 }
 
 AutoPtr<IElement> Element::F64(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_F64 == NULL) {
         rs->mElement_F64 = CreateUser(rs, DataType::FLOAT_64);
@@ -344,7 +411,7 @@ AutoPtr<IElement> Element::F64(
 }
 
 AutoPtr<IElement> Element::ELEMENT(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_ELEMENT == NULL) {
         rs->mElement_ELEMENT = CreateUser(rs, DataType::RS_ELEMENT);
@@ -353,7 +420,7 @@ AutoPtr<IElement> Element::ELEMENT(
 }
 
 AutoPtr<IElement> Element::TYPE(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_TYPE == NULL) {
         rs->mElement_TYPE = CreateUser(rs, DataType::RS_TYPE);
@@ -362,7 +429,7 @@ AutoPtr<IElement> Element::TYPE(
 }
 
 AutoPtr<IElement> Element::ALLOCATION(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_ALLOCATION == NULL) {
         rs->mElement_ALLOCATION = CreateUser(rs, DataType::RS_ALLOCATION);
@@ -371,7 +438,7 @@ AutoPtr<IElement> Element::ALLOCATION(
 }
 
 AutoPtr<IElement> Element::SAMPLER(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_SAMPLER == NULL) {
         rs->mElement_SAMPLER = CreateUser(rs, DataType::RS_SAMPLER);
@@ -380,7 +447,7 @@ AutoPtr<IElement> Element::SAMPLER(
 }
 
 AutoPtr<IElement> Element::SCRIPT(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_SCRIPT == NULL) {
         rs->mElement_SCRIPT = CreateUser(rs, DataType::RS_SCRIPT);
@@ -389,7 +456,7 @@ AutoPtr<IElement> Element::SCRIPT(
 }
 
 AutoPtr<IElement> Element::MESH(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_MESH == NULL) {
         rs->mElement_MESH = CreateUser(rs, DataType::RS_MESH);
@@ -398,7 +465,7 @@ AutoPtr<IElement> Element::MESH(
 }
 
 AutoPtr<IElement> Element::PROGRAM_FRAGMENT(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_PROGRAM_FRAGMENT == NULL) {
         rs->mElement_PROGRAM_FRAGMENT = CreateUser(rs, DataType::RS_PROGRAM_FRAGMENT);
@@ -407,7 +474,7 @@ AutoPtr<IElement> Element::PROGRAM_FRAGMENT(
 }
 
 AutoPtr<IElement> Element::PROGRAM_VERTEX(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_PROGRAM_VERTEX == NULL) {
         rs->mElement_PROGRAM_VERTEX = CreateUser(rs, DataType::RS_PROGRAM_VERTEX);
@@ -416,7 +483,7 @@ AutoPtr<IElement> Element::PROGRAM_VERTEX(
 }
 
 AutoPtr<IElement> Element::PROGRAM_RASTER(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_PROGRAM_RASTER == NULL) {
         rs->mElement_PROGRAM_RASTER = CreateUser(rs, DataType::RS_PROGRAM_RASTER);
@@ -425,7 +492,7 @@ AutoPtr<IElement> Element::PROGRAM_RASTER(
 }
 
 AutoPtr<IElement> Element::PROGRAM_STORE(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_PROGRAM_STORE == NULL) {
         rs->mElement_PROGRAM_STORE = CreateUser(rs, DataType::RS_PROGRAM_STORE);
@@ -434,7 +501,7 @@ AutoPtr<IElement> Element::PROGRAM_STORE(
 }
 
 AutoPtr<IElement> Element::FONT(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_FONT == NULL) {
         rs->mElement_FONT = CreateUser(rs, DataType::RS_FONT);
@@ -443,7 +510,7 @@ AutoPtr<IElement> Element::FONT(
 }
 
 AutoPtr<IElement> Element::A_8(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_A_8 == NULL) {
         rs->mElement_A_8 = CreatePixel(rs, (Handle64)DataType::UNSIGNED_8, ElementDataKind_PIXEL_A);
@@ -452,7 +519,7 @@ AutoPtr<IElement> Element::A_8(
 }
 
 AutoPtr<IElement> Element::RGB_565(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_RGB_565 == NULL) {
         rs->mElement_RGB_565 = CreatePixel(rs, (Handle64)DataType::UNSIGNED_5_6_5, ElementDataKind_PIXEL_RGB);
@@ -461,7 +528,7 @@ AutoPtr<IElement> Element::RGB_565(
 }
 
 AutoPtr<IElement> Element::RGB_888(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_RGB_888 == NULL) {
         rs->mElement_RGB_888 = CreatePixel(rs, (Handle64)DataType::UNSIGNED_8, ElementDataKind_PIXEL_RGB);
@@ -470,7 +537,7 @@ AutoPtr<IElement> Element::RGB_888(
 }
 
 AutoPtr<IElement> Element::RGBA_5551(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_RGBA_5551 == NULL) {
         rs->mElement_RGBA_5551 = CreatePixel(rs, (Handle64)DataType::UNSIGNED_5_5_5_1, ElementDataKind_PIXEL_RGBA);
@@ -480,7 +547,7 @@ AutoPtr<IElement> Element::RGBA_5551(
 
 
 AutoPtr<IElement> Element::RGBA_4444(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_RGBA_4444 == NULL) {
         rs->mElement_RGBA_4444 = CreatePixel(rs, (Handle64)DataType::UNSIGNED_4_4_4_4, ElementDataKind_PIXEL_RGBA);
@@ -490,7 +557,7 @@ AutoPtr<IElement> Element::RGBA_4444(
 
 
 AutoPtr<IElement> Element::RGBA_8888(
-    /* [in] */ IRenderScript* rs)
+    /* [in] */ RenderScript* rs)
 {
     if(rs->mElement_RGBA_8888 == NULL) {
         rs->mElement_RGBA_8888 = CreatePixel(rs, (Handle64)DataType::UNSIGNED_8, ElementDataKind_PIXEL_RGBA);
@@ -498,134 +565,341 @@ AutoPtr<IElement> Element::RGBA_8888(
     return rs->mElement_RGBA_8888;
 }
 
-
 AutoPtr<IElement> Element::F32_2(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_FLOAT_2 == NULL) {
+        rs->mElement_FLOAT_2 = CreateVector(rs, (Handle64)DataType::FLOAT_32, 2);
+    }
+    return rs->mElement_FLOAT_2;
+}
 
 AutoPtr<IElement> Element::F32_3(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_FLOAT_3 == NULL) {
+        rs->mElement_FLOAT_3 = CreateVector(rs, (Handle64)DataType::FLOAT_32, 3);
+    }
+    return rs->mElement_FLOAT_3;
+}
 
 AutoPtr<IElement> Element::F32_4(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_FLOAT_4 == NULL) {
+        rs->mElement_FLOAT_4 = CreateVector(rs, (Handle64)DataType::FLOAT_32, 4);
+    }
+    return rs->mElement_FLOAT_4;
+}
 
 AutoPtr<IElement> Element::F64_2(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_DOUBLE_2 == NULL) {
+        rs->mElement_DOUBLE_2 = CreateVector(rs, (Handle64)DataType::FLOAT_64, 2);
+    }
+    return rs->mElement_DOUBLE_2;
+}
 
 AutoPtr<IElement> Element::F64_3(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_DOUBLE_3 == NULL) {
+        rs->mElement_DOUBLE_3 = CreateVector(rs, (Handle64)DataType::FLOAT_64, 3);
+    }
+    return rs->mElement_DOUBLE_3;
+}
 
 AutoPtr<IElement> Element::F64_4(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_DOUBLE_4 == NULL) {
+        rs->mElement_DOUBLE_4 = CreateVector(rs, (Handle64)DataType::FLOAT_64, 4);
+    }
+    return rs->mElement_DOUBLE_4;
+}
 
 AutoPtr<IElement> Element::U8_2(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_UCHAR_2 == NULL) {
+        rs->mElement_UCHAR_2 = CreateVector(rs, (Handle64)DataType::UNSIGNED_8, 2);
+    }
+    return rs->mElement_UCHAR_2;
+}
 
 AutoPtr<IElement> Element::U8_3(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_UCHAR_3 == NULL) {
+        rs->mElement_UCHAR_3 = CreateVector(rs, (Handle64)DataType::UNSIGNED_8, 3);
+    }
+    return rs->mElement_UCHAR_3;
+}
 
 AutoPtr<IElement> Element::U8_4(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_UCHAR_4 == NULL) {
+        rs->mElement_UCHAR_4 = CreateVector(rs, (Handle64)DataType::UNSIGNED_8, 4);
+    }
+    return rs->mElement_UCHAR_4;
+}
 
 AutoPtr<IElement> Element::I8_2(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_CHAR_2 == NULL) {
+        rs->mElement_CHAR_2 = CreateVector(rs, (Handle64)DataType::SIGNED_8, 2);
+    }
+    return rs->mElement_CHAR_2;
+}
 
 AutoPtr<IElement> Element::I8_3(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_CHAR_3 == NULL) {
+        rs->mElement_CHAR_3 = CreateVector(rs, (Handle64)DataType::SIGNED_8, 3);
+    }
+    return rs->mElement_CHAR_3;
+}
 
 AutoPtr<IElement> Element::I8_4(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_CHAR_4 == NULL) {
+        rs->mElement_CHAR_4 = CreateVector(rs, (Handle64)DataType::SIGNED_8, 4);
+    }
+    return rs->mElement_CHAR_4;
+}
 
 AutoPtr<IElement> Element::U16_2(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_USHORT_2 == NULL) {
+        rs->mElement_USHORT_2 = CreateVector(rs, (Handle64)DataType::UNSIGNED_16, 2);
+    }
+    return rs->mElement_USHORT_2;
+}
 
 AutoPtr<IElement> Element::U16_3(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_USHORT_3 == NULL) {
+        rs->mElement_USHORT_3 = CreateVector(rs, (Handle64)DataType::UNSIGNED_16, 3);
+    }
+    return rs->mElement_USHORT_3;
+}
 
 AutoPtr<IElement> Element::U16_4(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_USHORT_4 == NULL) {
+        rs->mElement_USHORT_4 = CreateVector(rs, (Handle64)DataType::UNSIGNED_16, 4);
+    }
+    return rs->mElement_USHORT_4;
+}
 
 AutoPtr<IElement> Element::I16_2(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_SHORT_2 == NULL) {
+        rs->mElement_SHORT_2 = CreateVector(rs, (Handle64)DataType::SIGNED_16, 2);
+    }
+    return rs->mElement_SHORT_2;
+}
 
 AutoPtr<IElement> Element::I16_3(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_SHORT_3 == NULL) {
+        rs->mElement_SHORT_3 = CreateVector(rs, (Handle64)DataType::SIGNED_16, 3);
+    }
+    return rs->mElement_SHORT_3;
+}
 
 AutoPtr<IElement> Element::I16_4(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_SHORT_4 == NULL) {
+        rs->mElement_SHORT_4 = CreateVector(rs, (Handle64)DataType::SIGNED_16, 4);
+    }
+    return rs->mElement_SHORT_4;
+}
 
 AutoPtr<IElement> Element::U32_2(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_UINT_2 == NULL) {
+        rs->mElement_UINT_2 = CreateVector(rs, (Handle64)DataType::UNSIGNED_32, 2);
+    }
+    return rs->mElement_UINT_2;
+}
 
 AutoPtr<IElement> Element::U32_3(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_UINT_3 == NULL) {
+        rs->mElement_UINT_3 = CreateVector(rs, (Handle64)DataType::UNSIGNED_32, 3);
+    }
+    return rs->mElement_UINT_3;
+}
 
 AutoPtr<IElement> Element::U32_4(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_UINT_4 == NULL) {
+        rs->mElement_UINT_4 = CreateVector(rs, (Handle64)DataType::UNSIGNED_32, 4);
+    }
+    return rs->mElement_UINT_4;
+}
 
 AutoPtr<IElement> Element::I32_2(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_INT_2 == NULL) {
+        rs->mElement_INT_2 = CreateVector(rs, (Handle64)DataType::SIGNED_32, 2);
+    }
+    return rs->mElement_INT_2;
+}
 
 AutoPtr<IElement> Element::I32_3(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_INT_3 == NULL) {
+        rs->mElement_INT_3 = CreateVector(rs, (Handle64)DataType::SIGNED_32, 3);
+    }
+    return rs->mElement_INT_3;
+}
 
 AutoPtr<IElement> Element::I32_4(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_INT_4 == NULL) {
+        rs->mElement_INT_4 = CreateVector(rs, (Handle64)DataType::SIGNED_32, 4);
+    }
+    return rs->mElement_INT_4;
+}
 
 AutoPtr<IElement> Element::U64_2(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_ULONG_2 == NULL) {
+        rs->mElement_ULONG_2 = CreateVector(rs, (Handle64)DataType::UNSIGNED_64, 2);
+    }
+    return rs->mElement_ULONG_2;
+}
 
 AutoPtr<IElement> Element::U64_3(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_ULONG_3 == NULL) {
+        rs->mElement_ULONG_3 = CreateVector(rs, (Handle64)DataType::UNSIGNED_64, 3);
+    }
+    return rs->mElement_ULONG_3;
+}
 
 AutoPtr<IElement> Element::U64_4(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_ULONG_4 == NULL) {
+        rs->mElement_ULONG_4 = CreateVector(rs, (Handle64)DataType::UNSIGNED_64, 4);
+    }
+    return rs->mElement_ULONG_4;
+}
 
 AutoPtr<IElement> Element::I64_2(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_LONG_2 == NULL) {
+        rs->mElement_LONG_2 = CreateVector(rs, (Handle64)DataType::SIGNED_64, 2);
+    }
+    return rs->mElement_LONG_2;
+}
 
 AutoPtr<IElement> Element::I64_3(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_LONG_2 == NULL) {
+        rs->mElement_LONG_2 = CreateVector(rs, (Handle64)DataType::SIGNED_64, 3);
+    }
+    return rs->mElement_LONG_2;
+}
 
 AutoPtr<IElement> Element::I64_4(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if(rs->mElement_LONG_2 == NULL) {
+        rs->mElement_LONG_2 = CreateVector(rs, (Handle64)DataType::SIGNED_64, 4);
+    }
+    return rs->mElement_LONG_2;
+}
 
 AutoPtr<IElement> Element::YUV(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if (rs->mElement_YUV == NULL) {
+        rs->mElement_YUV = CreatePixel(rs, (Handle64)DataType::UNSIGNED_8, ElementDataKind_PIXEL_YUV);
+    }
+    return rs->mElement_YUV;
+}
 
 AutoPtr<IElement> Element::MATRIX_4X4(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if (rs->mElement_MATRIX_4X4 == NULL) {
+        rs->mElement_MATRIX_4X4 = CreateUser(rs, (Handle64)DataType::MATRIX_4X4);
+    }
+    return rs->mElement_MATRIX_4X4;
+}
 
-/** @deprecated use MATRIX_4X4
-*/
 AutoPtr<IElement> Element::MATRIX4X4(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    return MATRIX_4X4(rs);
+}
 
 AutoPtr<IElement> Element::MATRIX_3X3(
-    /* [in] */ IRenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    if (rs->mElement_MATRIX_3X3 == NULL) {
+        rs->mElement_MATRIX_3X3 = CreateUser(rs, (Handle64)DataType::MATRIX_3X3);
+    }
+    return rs->mElement_MATRIX_3X3;
+}
 
 AutoPtr<IElement> Element::MATRIX_2X2(
-    /* [in] */ IRenderScript* rs);
-
-AutoPtr<IElement> Element::CreateVector(
-    /* [in] */ IRenderScript* rs,
-    /* [in] */ Handle64 dt,
-    /* [in] */ Int32 size);
-
-AutoPtr<IElement> Element::CreatePixel(
-    /* [in] */ IRenderScript* rs,
-    /* [in] */ Handle64 dt,
-    /* [in] */ ElementDataKind dk);
-
-ECode Element::IsCompatible(
-    /* [in] */ IElement* e,
-    /* [out] */ Boolean* isCompatible);
+    /* [in] */ RenderScript* rs)
+{
+    if (rs->mElement_MATRIX_2X2 == NULL) {
+        rs->mElement_MATRIX_2X2 = CreateUser(rs, (Handle64)DataType::MATRIX_2X2);
+    }
+    return rs->mElement_MATRIX_2X2;
+}
 
 ECode Element::constructor(
     /* [in] */ Int64 id,
     /* [in] */ RenderScript* rs,
     /* [in] */ ArrayOf<IElement*>* e,
     /* [in] */ ArrayOf<String>* n,
-    /* [in] */ ArrayOf<Int32>* as);
+    /* [in] */ ArrayOf<Int32>* as)
+{
+    BaseObj::constructor(id, rs);
+    mSize = 0;
+    mVectorSize = 1;
+    mElements = e;
+    mElementNames = n;
+    mArraySizes = as;
+    mType = DataType::NONE;
+    mKind = ElementDataKind_USER;
+    mOffsetInBytes = ArrayOf<Int32>::Alloc(mElements->GetLength());
+    for (Int32 ct = 0; ct < mElements->GetLength(); ct++ ) {
+        (*mOffsetInBytes)[ct] = mSize;
+        mSize += (*mElements)[ct].mSize * (*mArraySizes)[ct];
+    }
+    UpdateVisibleSubElements();
+    return NOERROR;
+}
 
 ECode Element::constructor(
     /* [in] */ Int64 id,
@@ -633,11 +907,230 @@ ECode Element::constructor(
     /* [in] */ DataType* dt,
     /* [in] */ ElementDataKind dk,
     /* [in] */ Boolean norm,
-    /* [in] */ Int32 size);
+    /* [in] */ Int32 size)
+{
+    BaseObj::constructor(id, rs);
+    if ((dt->mID != ElementDataType_UNSIGNED_5_6_5) &&
+        (dt->mID != ElementDataType_UNSIGNED_4_4_4_4) &&
+        (dt->mID != ElementDataType_UNSIGNED_5_5_5_1)) {
+        if (size == 3) {
+            mSize = dt->mSize * 4;
+        }
+        else {
+            mSize = dt->mSize * size;
+        }
+    } else {
+        mSize = dt->mSize;
+    }
+    mType = dt;
+    mKind = dk;
+    mNormalized = norm;
+    mVectorSize = size;
+    return NOERROR;
+}
 
 ECode Element::constructor(
     /* [in] */ Int64 id,
-    /* [in] */ RenderScript* rs);
+    /* [in] */ RenderScript* rs)
+{
+    return BaseObj::constructor(id, rs);
+}
+
+void Element::UpdateFromNative()
+{
+    BaseObj::UpdateFromNative();
+
+    // we will pack mType; mKind; mNormalized; mVectorSize; NumSubElements
+    AutoPtr<ArrayOf<Int32> > dataBuffer = ArrayOf<Int32>::Alloc(5);
+    Int64 id;
+    GetID(mRS, &id);
+    mRS->NElementGetNativeData(id, dataBuffer);
+
+    mNormalized = (*dataBuffer)[2] == 1 ? TRUE : FALSE;
+    mVectorSize = (*dataBuffer)[3];
+    mSize = 0;
+    mType = DataType::GetDataType((*dataBuffer)[0]);
+    mSize = mType->mSize * mVectorSize;
+    mKind = (*dataBuffer)[1];
+    // for (DataType dt: DataType.values()) {
+    //     if(dt.mID == dataBuffer[0]){
+    //         mType = dt;
+    //         mSize = mType.mSize * mVectorSize;
+    //     }
+    // }
+    // for (DataKind dk: ElementDataType_values()) {
+    //     if(dk.mID == dataBuffer[1]){
+    //         mKind = dk;
+    //     }
+    // }
+
+    Int32 numSubElements = (*dataBuffer)[4];
+    if(numSubElements > 0) {
+        mElements = ArrayOf<IElement*>::Alloc(numSubElements);
+        mElementNames = ArrayOf<String>::Alloc(numSubElements);
+        mArraySizes = ArrayOf<Int32>::Alloc(numSubElements);
+        mOffsetInBytes = ArrayOf<Int32>::Alloc(numSubElements);
+
+        AutoPtr<ArrayOf<Int64> > subElementIds = ArrayOf<Int64>::Alloc(numSubElements);
+        Int64 id;
+        GetID(mRS, &id);
+        mRS->NElementGetSubElements(id, subElementIds, mElementNames, mArraySizes);
+        for(Int32 i = 0; i < numSubElements; i ++) {
+            AutoPtr<IElement> e = (IElement*)new Element((*subElementIds)[i], mRS);
+            mElements->Set(i, e);
+            (*mElements)[i]->UpdateFromNative();
+            (*mOffsetInBytes)[i] = mSize;
+            mSize += (*mElements)[i]->mSize * (*mArraySizes)[i];
+        }
+    }
+    UpdateVisibleSubElements();
+}
+
+AutoPtr<IElement> Element::CreateUser(
+    /* [in] */ RenderScript* rs,
+    /* [in] */ DataType* dt)
+{
+    ElementDataKind dk = ElementDataKind_USER;
+    Boolean norm = FALSE;
+    Int32 vecSize = 1;
+    Int64 id;
+    rs->NElementCreate(dt->mID, dk, norm, vecSize, &id);
+    return (IElement*)new Element(id, rs, dt, dk, norm, vecSize);
+}
+
+ECode Element::CreateVector(
+    /* [in] */ RenderScript* rs,
+    /* [in] */ Handle64 _dt,
+    /* [in] */ Int32 size,
+    /* [out] */ IElement** e)
+{
+    VALIDATE_NOT_NULL(e)
+    *e = NULL;
+    AutoPtr<DataType> dt = (DataType*)_dt;
+    if (size < 2 || size > 4) {
+        Slogger::E("Element", "Vector size out of range 2-4.");
+        return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    switch (dt) {
+        // Support only primitive integer/float/boolean types as vectors.
+        case ElementDataType_FLOAT_32:
+        case ElementDataType_FLOAT_64:
+        case ElementDataType_SIGNED_8:
+        case ElementDataType_SIGNED_16:
+        case ElementDataType_SIGNED_32:
+        case ElementDataType_SIGNED_64:
+        case ElementDataType_UNSIGNED_8:
+        case ElementDataType_UNSIGNED_16:
+        case ElementDataType_UNSIGNED_32:
+        case ElementDataType_UNSIGNED_64:
+        case ElementDataType_BOOLEAN: {
+            ElementDataKind dk = ElementDataKind_USER;
+            Boolean norm = FALSE;
+            Int64 id;
+            rs->NElementCreate(dt->mID, dk, norm, size, &id);
+            *e = (IElement*)new Element(id, rs, dt, dk, norm, size);
+            REFCOUNT_ADD(*e)
+            return NOERROR;
+        }
+
+        default: {
+            Slogger::E("Element", "Cannot create vector of non-primitive type.");
+            return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
+    }
+}
+
+ECode Element::CreatePixel(
+    /* [in] */ RenderScript* rs,
+    /* [in] */ Handle64 _dt,
+    /* [in] */ ElementDataKind dk,
+    /* [out] */ IElement** e)
+{
+    VALIDATE_NOT_NULL(e)
+    *e = NULL;
+    AutoPtr<DataType> dt = (DataType*)_dt;
+    if (!(dk == ElementDataType_PIXEL_L ||
+          dk == ElementDataType_PIXEL_A ||
+          dk == ElementDataType_PIXEL_LA ||
+          dk == ElementDataType_PIXEL_RGB ||
+          dk == ElementDataType_PIXEL_RGBA ||
+          dk == ElementDataType_PIXEL_DEPTH ||
+          dk == ElementDataType_PIXEL_YUV)) {
+        Slogger::E("Element", "Unsupported DataKind");
+        return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (!(dt->mID == ElementDataType_UNSIGNED_8 ||
+          dt->mID == ElementDataType_UNSIGNED_16 ||
+          dt->mID == ElementDataType_UNSIGNED_5_6_5 ||
+          dt->mID == ElementDataType_UNSIGNED_4_4_4_4 ||
+          dt->mID == ElementDataType_UNSIGNED_5_5_5_1)) {
+        Slogger::E("Element", "Unsupported DataType");
+        return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (dt->mID == ElementDataType_UNSIGNED_5_6_5 && dk != ElementDataType_PIXEL_RGB) {
+        Slogger::E("Element", "Bad kind and type combo");
+        return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (dt->mID == ElementDataType_UNSIGNED_5_5_5_1 && dk != ElementDataType_PIXEL_RGBA) {
+        Slogger::E("Element", "Bad kind and type combo");
+        return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (dt->mID == ElementDataType_UNSIGNED_4_4_4_4 && dk != ElementDataType_PIXEL_RGBA) {
+        Slogger::E("Element", "Bad kind and type combo");
+        return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (dt->mID == ElementDataType_UNSIGNED_16 && dk != ElementDataType_PIXEL_DEPTH) {
+        Slogger::E("Element", "Bad kind and type combo");
+        return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Int32 size = 1;
+    switch (dk) {
+        case ElementDataKind_PIXEL_LA:
+            size = 2;
+            break;
+        case ElementDataKind_PIXEL_RGB:
+            size = 3;
+            break;
+        case ElementDataKind_PIXEL_RGBA:
+            size = 4;
+            break;
+        case ElementDataKind_PIXEL_DEPTH:
+            size = 2;
+            break;
+    }
+
+    Boolean norm = TRUE;
+    Int64 id;
+    rs->NElementCreate(dt->mID, dk, norm, size, &id);
+    *e = (IElement*)new Element(id, rs, dt, dk, norm, size);
+    REFCOUNT_ADD(*e)
+    return NOERROR;
+}
+
+ECode Element::IsCompatible(
+    /* [in] */ IElement* e,
+    /* [out] */ Boolean* isCompatible)
+{
+    VALIDATE_NOT_NULL(isCompatible)
+    // Try strict BaseObj equality to start with.
+    if (this->Equals(e)) {
+        *isCompatible = TRUE;
+        return NOERROR;
+    }
+
+    AutoPtr<Element> obj = (Element*)e;
+    // Ignore mKind because it is allowed to be different (user vs. pixel).
+    // We also ignore mNormalized because it can be different. The mType
+    // field must not be NONE since we require name equivalence for
+    // all user-created Elements.
+    return ((mSize == obj->mSize) &&
+            (mType->mID != ElementDataType_NONE) &&
+            (mType->mID == obj->mType->mID) &&
+            (mVectorSize == obj->mVectorSize));
+}
+
 
 } // namespace RenderScript
 } // namespace Droid

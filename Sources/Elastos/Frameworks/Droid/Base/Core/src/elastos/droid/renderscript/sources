@@ -14,3 +14,4 @@ SOURCES += Allocation.cpp
 SOURCES += RenderScript.cpp
 SOURCES += CRenderScriptHelper.cpp
 SOURCES += Element.cpp
+SOURCES += CElementBuilder.cpp

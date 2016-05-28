@@ -15,6 +15,13 @@ module
         interface IRenderScriptHelper;
     }
 
+    class CElementBuilder {
+        constructor(
+            [in] IRenderScript* rs);
+
+        interface IElementBuilder;
+    }
+
     } // RenderScript
     } // Droid
     } // Elastos

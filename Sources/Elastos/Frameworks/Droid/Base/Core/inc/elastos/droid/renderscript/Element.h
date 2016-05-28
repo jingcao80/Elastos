@@ -16,6 +16,10 @@ class Element
 public:
     class DataType : public Object
     {
+    public:
+        static CARAPI_(AutoPtr<DataType>) GetDataType(
+            /* [in] */ Int32 id);
+
     private:
         DataType(
             /* [in] */ Int32 id,
@@ -165,7 +169,7 @@ public:
      * @return Element
      */
     CARAPI_(AutoPtr<IElement>) BOOLEAN(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     /**
      * Utility function for returning an Element containing a single UNSIGNED_8.
@@ -175,7 +179,7 @@ public:
      * @return Element
      */
     CARAPI_(AutoPtr<IElement>) U8(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     /**
      * Utility function for returning an Element containing a single SIGNED_8.
@@ -185,189 +189,189 @@ public:
      * @return Element
      */
     CARAPI_(AutoPtr<IElement>) I8(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U16(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I16(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U32(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I32(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U64(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I64(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) F32(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) F64(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) ELEMENT(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) TYPE(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) ALLOCATION(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) SAMPLER(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) SCRIPT(
         /* [in] */ IRenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) MESH(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) PROGRAM_FRAGMENT(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) PROGRAM_VERTEX(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) PROGRAM_RASTER(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) PROGRAM_STORE(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) FONT(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) A_8(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) RGB_565(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) RGB_888(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) RGBA_5551(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) RGBA_4444(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) RGBA_8888(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) F32_2(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) F32_3(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) F32_4(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) F64_2(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) F64_3(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) F64_4(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U8_2(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U8_3(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U8_4(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I8_2(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I8_3(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I8_4(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U16_2(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U16_3(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U16_4(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I16_2(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I16_3(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I16_4(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U32_2(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U32_3(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U32_4(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I32_2(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I32_3(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I32_4(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U64_2(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U64_3(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) U64_4(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I64_2(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I64_3(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) I64_4(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) YUV(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) MATRIX_4X4(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     /** @deprecated use MATRIX_4X4
     */
     CARAPI_(AutoPtr<IElement>) MATRIX4X4(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) MATRIX_3X3(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     CARAPI_(AutoPtr<IElement>) MATRIX_2X2(
-        /* [in] */ IRenderScript* rs);
+        /* [in] */ RenderScript* rs);
 
     /**
      * Create a custom vector element of the specified DataType and vector size.
@@ -382,10 +386,11 @@ public:
      *
      * @return Element
      */
-    CARAPI_(AutoPtr<IElement>) CreateVector(
-        /* [in] */ IRenderScript* rs,
+    CARAPI CreateVector(
+        /* [in] */ RenderScript* rs,
         /* [in] */ Handle64 dt,
-        /* [in] */ Int32 size);
+        /* [in] */ Int32 size,
+        /* [out] */ IElement** e);
 
     /**
      * Create a new pixel Element type.  A matching DataType and DataKind must
@@ -399,10 +404,11 @@ public:
      *
      * @return Element
      */
-    CARAPI_(AutoPtr<IElement>) CreatePixel(
-        /* [in] */ IRenderScript* rs,
+    CARAPI CreatePixel(
+        /* [in] */ RenderScript* rs,
         /* [in] */ Handle64 dt,
-        /* [in] */ ElementDataKind dk);
+        /* [in] */ ElementDataKind dk,
+        /* [out] */ IElement** e);
 
     /**
      * Check if the current Element is compatible with another Element.
@@ -419,6 +425,7 @@ public:
         /* [in] */ IElement* e,
         /* [out] */ Boolean* isCompatible);
 
+protected:
     CARAPI constructor(
         /* [in] */ Int64 id,
         /* [in] */ RenderScript* rs,
@@ -437,6 +444,21 @@ public:
     CARAPI constructor(
         /* [in] */ Int64 id,
         /* [in] */ RenderScript* rs);
+
+    // @Override
+    CARAPI_(void) UpdateFromNative();
+
+    /**
+     * Create a custom Element of the specified DataType.  The DataKind will be
+     * set to USER and the vector size to 1 indicating non-vector.
+     *
+     * @param rs The context associated with the new Element.
+     * @param dt The DataType for the new element.
+     * @return Element
+     */
+    static CARAPI_(AutoPtr<IElement>) CreateUser(
+        /* [in] */ RenderScript* rs,
+        /* [in] */ DataType* dt);
 
 private:
     CARAPI_(void) UpdateVisibleSubElements();
