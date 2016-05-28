@@ -418,12 +418,12 @@ void ResolverActivity::ResolveListAdapter::RebuildList()
         r0->LoadLabel(mHost->mPm, (ICharSequence**)&r0Label);
         mHost->mShowExtended = FALSE;
         for (Int32 i = 1; i < N; i++) {
-            String r0pkgName, ripkgName;
             if (r0Label == NULL) {
                 AutoPtr<IActivityInfo> aInfo;
                 r0->GetActivityInfo((IActivityInfo**)&aInfo);
-                IPackageItemInfo::Probe(aInfo)->GetPackageName(&r0pkgName);
-                r0Label = CoreUtils::Convert(r0pkgName);
+                String pkgName;
+                IPackageItemInfo::Probe(aInfo)->GetPackageName(&pkgName);
+                r0Label = CoreUtils::Convert(pkgName);
             }
             AutoPtr<IInterface> item;
             currentResolveList->Get(i, (IInterface**)&item);
@@ -433,10 +433,11 @@ void ResolverActivity::ResolveListAdapter::RebuildList()
             if (riLabel == NULL) {
                 AutoPtr<IActivityInfo> aInfo;
                 ri->GetActivityInfo((IActivityInfo**)&aInfo);
-                IPackageItemInfo::Probe(aInfo)->GetPackageName(&ripkgName);
-                riLabel = CoreUtils::Convert(ripkgName);
+                String pkgName;
+                IPackageItemInfo::Probe(aInfo)->GetPackageName(&pkgName);
+                riLabel = CoreUtils::Convert(pkgName);
             }
-            if (ripkgName.Equals(r0pkgName)) {
+            if (Object::Equals(r0Label, riLabel)) {
                 continue;
             }
             ProcessGroup(currentResolveList, start, (i - 1), r0, r0Label);
@@ -1429,7 +1430,7 @@ void ResolverActivity::SetAlwaysButtonEnabled(
 }
 
 ECode ResolverActivity::OnButtonClick(
-       /* [in] */ IView* v)
+    /* [in] */ IView* v)
 {
     Int32 id;
     v->GetId(&id);

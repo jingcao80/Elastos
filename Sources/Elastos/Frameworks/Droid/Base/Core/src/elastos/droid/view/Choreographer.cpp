@@ -13,7 +13,7 @@
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/hardware/display/DisplayManagerGlobal.h"
-#include "elastos/droid/os/CMessageHelper.h"
+#include "elastos/droid/os/CMessage.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/utility/TimeUtils.h"
 #include <elastos/core/Math.h>
@@ -27,8 +27,8 @@ using Elastos::Droid::Hardware::Display::DisplayManagerGlobal;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::SystemProperties;
-using Elastos::Droid::Os::IMessageHelper;
-using Elastos::Droid::Os::CMessageHelper;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::CMessage;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Utility::TimeUtils;
 
@@ -178,10 +178,7 @@ ECode Choreographer::FrameDisplayEventReceiver::OnVsync(
     mTimestampNanos = timestampNanos;
     mFrame = frame;
 
-    AutoPtr<IMessageHelper> helper;
-    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
-    AutoPtr<IMessage> msg;
-    helper->Obtain(mOwner->mHandler, this, (IMessage**)&msg);
+    AutoPtr<IMessage> msg = CMessage::Obtain(mOwner->mHandler, this);
     msg->SetAsynchronous(TRUE);
     Boolean result;
     mOwner->mHandler->SendMessageAtTime(msg, timestampNanos / TimeUtils::NANOS_PER_MS, &result);

@@ -807,7 +807,7 @@ AutoPtr<IView> AbsListView::RecycleBin::GetTransientStateView(
 {
     if (mHost->mAdapter != NULL
             && mHost->mAdapterHasStableIds
-            && mTransientStateViewsById) {
+            && mTransientStateViewsById != NULL) {
         Int64 id;
         IAdapter::Probe(mHost->mAdapter)->GetItemId(position, &id);
         AutoPtr<IInterface> obj;

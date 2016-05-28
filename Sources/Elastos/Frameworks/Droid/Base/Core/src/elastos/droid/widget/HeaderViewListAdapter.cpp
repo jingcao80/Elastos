@@ -302,13 +302,12 @@ ECode HeaderViewListAdapter::GetItemViewType(
     VALIDATE_NOT_NULL(type);
     Int32 numHeaders = 0;
     GetHeadersCount(&numHeaders);
-    if(mAdapter != NULL && position >= numHeaders) {
+    if (mAdapter != NULL && position >= numHeaders) {
         Int32 adjPosition = position - numHeaders;
         Int32 adapterCount = 0;
         IAdapter::Probe(mAdapter)->GetCount(&adapterCount);
-        if(adjPosition < adapterCount) {
-            Int32 res = 0;
-            IAdapter::Probe(mAdapter)->GetItemViewType(adjPosition, &res);
+        if (adjPosition < adapterCount) {
+            return IAdapter::Probe(mAdapter)->GetItemViewType(adjPosition, type);
         }
     }
     *type = IAdapterView::ITEM_VIEW_TYPE_HEADER_OR_FOOTER;

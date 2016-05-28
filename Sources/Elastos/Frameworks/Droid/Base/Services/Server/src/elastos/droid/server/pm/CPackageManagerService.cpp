@@ -10649,7 +10649,7 @@ Slogger::I(TAG, " >>>>>>>>> ScanPackageDirtyLI %s", TO_CSTR(pkg));
                 String pkgName;
                 IPackageItemInfo::Probe(mElastosApplication)->GetPackageName(&pkgName);
                 pii->SetPackageName(pkgName);
-                ci->SetProcessName(String("system:Elastos.Droid.SystemUI"));
+                ci->SetProcessName(String("system:ui"));
                 mResolveActivity->SetLaunchMode(IActivityInfo::LAUNCH_MULTIPLE);
                 mResolveActivity->SetDocumentLaunchMode(IActivityInfo::DOCUMENT_LAUNCH_NEVER);
                 mResolveActivity->SetFlags(IActivityInfo::FLAG_EXCLUDE_FROM_RECENTS);

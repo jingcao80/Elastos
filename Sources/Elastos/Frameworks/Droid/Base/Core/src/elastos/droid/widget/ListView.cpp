@@ -1250,7 +1250,7 @@ Int32 ListView::MeasureHeightOfChildren(
     endPosition = (endPosition == NO_POSITION) ? count - 1 : endPosition;
     Boolean recyle = RecycleOnMeasure();
 
-    for(Int32 i = startPosition; i <= endPosition; ++i) {
+    for (Int32 i = startPosition; i <= endPosition; ++i) {
         child = ObtainView(i, mIsScrap);
         MeasureScrapChild(child, i, widthMeasureSpec);
 

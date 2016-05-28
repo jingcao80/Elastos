@@ -1236,7 +1236,7 @@ ECode View::InnerViewOnClickListener::OnClick(
     if (mHandler != NULL) {
         AutoPtr<IArgumentList> args;
         mHandler->CreateArgumentList((IArgumentList**)&args);
-        args->SetInputArgumentOfObjectPtr(0, (IView*)this);
+        args->SetInputArgumentOfObjectPtr(0, view);
         ECode ec = mHandler->Invoke(ctx.Get(), args);
         if (FAILED(ec)) {
             Logger::E(TAG, "Could not execute method [%s] with [%s] for onClick handler on view %s in %s",
