@@ -109,13 +109,12 @@ ECode CSearchDropTargetBar::OnFinishInflate()
     // Get the individual components
     FindViewById(Elastos::Droid::Launcher2::R::id::qsb_search_bar, (IView**)&mQSBSearchBar);
     FindViewById(Elastos::Droid::Launcher2::R::id::drag_target_bar, (IView**)&mDropTargetBar);
-
-    AutoPtr<IView> tmp;
-    mDropTargetBar->FindViewById(Elastos::Droid::Launcher2::R::id::info_target_text, (IView**)&tmp);
-    mInfoDropTarget = IButtonDropTarget::Probe(tmp);
-    AutoPtr<IView> tmp2;
-    mDropTargetBar->FindViewById(Elastos::Droid::Launcher2::R::id::delete_target_text, (IView**)&tmp2);
-    mDeleteDropTarget = IButtonDropTarget::Probe(tmp2);
+    AutoPtr<IView> view;
+    mDropTargetBar->FindViewById(Elastos::Droid::Launcher2::R::id::info_target_text, (IView**)&view);
+    mInfoDropTarget = IButtonDropTarget::Probe(view);
+    view = NULL;
+    mDropTargetBar->FindViewById(Elastos::Droid::Launcher2::R::id::delete_target_text, (IView**)&view);
+    mDeleteDropTarget = IButtonDropTarget::Probe(view);
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     resources->GetDimensionPixelSize(Elastos::Droid::Launcher2::R::dimen::qsb_bar_height, &mBarHeight);
@@ -134,13 +133,12 @@ ECode CSearchDropTargetBar::OnFinishInflate()
         AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
         (*array)[0] = (Float)(-mBarHeight);
         (*array)[1] = 0.0f;
-        helper->OfFloat(TO_IINTERFACE(mDropTargetBar), String("translationY"),
+        helper->OfFloat(mDropTargetBar, String("translationY"),
                 array, (IObjectAnimator**)&mDropTargetBarAnim);
-        AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(2);
-        (*array2)[0] = 0.0f;
-        (*array2)[1] = (Float)(-mBarHeight);
-        helper->OfFloat(TO_IINTERFACE(mQSBSearchBar), String("translationY"),
-                array2, (IObjectAnimator**)&mQSBSearchBarAnim);
+        (*array)[0] = 0.0f;
+        (*array)[1] = (Float)(-mBarHeight);
+        helper->OfFloat(mQSBSearchBar, String("translationY"),
+                array, (IObjectAnimator**)&mQSBSearchBarAnim);
     }
     else {
         mDropTargetBar->SetAlpha(0.0f);
@@ -149,13 +147,12 @@ ECode CSearchDropTargetBar::OnFinishInflate()
         AutoPtr<ArrayOf<Float> > array = ArrayOf<Float>::Alloc(2);
         (*array)[0] = 0.0;
         (*array)[1] = 1.0f;
-        helper->OfFloat(TO_IINTERFACE(mDropTargetBar), String("alpha"),
+        helper->OfFloat(mDropTargetBar, String("alpha"),
                 array, (IObjectAnimator**)&mDropTargetBarAnim);
-        AutoPtr<ArrayOf<Float> > array2 = ArrayOf<Float>::Alloc(2);
-        (*array2)[0] = 1.0;
-        (*array2)[1] = 0.0f;
-        helper->OfFloat(TO_IINTERFACE(mQSBSearchBar), String("alpha"),
-                array2, (IObjectAnimator**)&mQSBSearchBarAnim);
+        (*array)[0] = 1.0;
+        (*array)[1] = 0.0f;
+        helper->OfFloat(mQSBSearchBar, String("alpha"),
+                array, (IObjectAnimator**)&mQSBSearchBarAnim);
     }
     SetupAnimation(mDropTargetBarAnim, mDropTargetBar);
     SetupAnimation(mQSBSearchBarAnim, mQSBSearchBar);

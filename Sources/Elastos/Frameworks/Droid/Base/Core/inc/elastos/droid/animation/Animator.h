@@ -109,8 +109,7 @@ public:
      *
      * @return the number of milliseconds to delay running the animation
      */
-    virtual CARAPI GetStartDelay(
-        /* [out] */ Int64* delay) = 0;
+    using IAnimator::GetStartDelay;
 
     /**
      * The amount of time, in milliseconds, to delay starting the animation after
@@ -118,24 +117,21 @@ public:
 
      * @param startDelay The amount of the delay, in milliseconds
      */
-    virtual CARAPI SetStartDelay(
-        /* [in] */ Int64 startDelay) = 0;
+    using IAnimator::SetStartDelay;
 
     /**
      * Sets the length of the animation.
      *
      * @param duration The length of the animation, in milliseconds.
      */
-    virtual CARAPI SetDuration(
-        /* [in] */ Int64 duration) = 0;
+    using IAnimator::SetDuration;
 
     /**
      * Gets the length of the animation.
      *
      * @return The length of the animation, in milliseconds.
      */
-    virtual CARAPI GetDuration(
-        /* [out] */ Int64* duration) = 0;
+    using IAnimator::GetDuration;
 
     /**
      * The time interpolator used in calculating the elapsed fraction of this animation. The
@@ -145,8 +141,7 @@ public:
      *
      * @param value the interpolator to be used by this animation
      */
-    virtual CARAPI SetInterpolator(
-        /* [in] */ ITimeInterpolator* value) = 0;
+    using IAnimator::SetInterpolator;
 
     virtual CARAPI GetInterpolator(
         /* [out] */ ITimeInterpolator** interpolator);
@@ -157,8 +152,7 @@ public:
      *
      * @return Whether the Animator is running.
      */
-    virtual CARAPI IsRunning(
-        /* [out] */ Boolean* running) = 0;
+    using IAnimator::IsRunning;
 
     /**
      * Returns whether this Animator has been started and not yet ended. This state is a superset
@@ -197,10 +191,7 @@ public:
      * @return ArrayList<AnimatorListener> The set of listeners.
      */
     virtual CARAPI GetListeners(
-            /* [out, callee] */ ArrayOf<IAnimatorListener*>** listeners);
-
-//    CARAPI SetListeners(
-//        /* [in] */ ArrayOf<IAnimatorListener*>* listeners);
+        /* [out] */ IArrayList** listeners);
 
     /**
      * Adds a pause listener to this animator.
@@ -290,13 +281,12 @@ protected:
     /**
      * The set of listeners to be sent events through the life of an animation.
      */
-    List<AutoPtr<IAnimatorListener> > mListeners;
+    AutoPtr<IArrayList> mListeners;
 
     /**
      * The set of listeners to be sent pause/resume events through the life
      * of an animation.
      */
-    // ArrayList<AnimatorPauseListener> mPauseListeners = null;
     AutoPtr<IArrayList> mPauseListeners;
 
     /**

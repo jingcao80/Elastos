@@ -271,10 +271,15 @@ ECode RenderNodeAnimator::Cancel()
         }
         nEnd(mNativePtr->get());
 
-        AutoPtr<ArrayOf<IAnimatorListener*> > listeners = CloneListeners();
-        Int32 numListeners = listeners == NULL ? 0 : listeners->GetLength();
+        AutoPtr<IArrayList> listeners = CloneListeners();
+        Int32 numListeners = 0;
+        if (listeners != NULL) {
+            listeners->GetSize(&numListeners);
+        }
         for (Int32 i = 0; i < numListeners; i++) {
-            (*listeners)[i]->OnAnimationCancel(this);
+            AutoPtr<IInterface> obj;
+            listeners->Get(i, (IInterface**)&obj);
+            IAnimatorListener::Probe(obj)->OnAnimationCancel(this);
         }
 
         if (mViewTarget != NULL) {
@@ -461,10 +466,15 @@ void RenderNodeAnimator::OnFinished()
     }
     mState = STATE_FINISHED;
 
-    AutoPtr<ArrayOf<IAnimatorListener*> > listeners = CloneListeners();
-    Int32 numListeners = listeners == NULL ? 0 : listeners->GetLength();
-    for (int i = 0; i < numListeners; i++) {
-        (*listeners)[i]->OnAnimationEnd(this);
+    AutoPtr<IArrayList> listeners = CloneListeners();
+    Int32 numListeners = 0;
+    if (listeners != NULL) {
+        listeners->GetSize(&numListeners);
+    }
+    for (Int32 i = 0; i < numListeners; i++) {
+        AutoPtr<IInterface> obj;
+        listeners->Get(i, (IInterface**)&obj);
+        IAnimatorListener::Probe(obj)->OnAnimationEnd(this);
     }
 
     // Release the native object, as it has a global reference to us. This
@@ -532,10 +542,15 @@ void RenderNodeAnimator::DoStart()
 
 void RenderNodeAnimator::NotifyStartListeners()
 {
-    AutoPtr<ArrayOf<IAnimatorListener*> > listeners = CloneListeners();
-    Int32 numListeners = listeners == NULL ? 0 : listeners->GetLength();
-    for (int i = 0; i < numListeners; i++) {
-        (*listeners)[i]->OnAnimationStart(this);
+    AutoPtr<IArrayList> listeners = CloneListeners();
+    Int32 numListeners = 0;
+    if (listeners != NULL) {
+        listeners->GetSize(&numListeners);
+    }
+    for (Int32 i = 0; i < numListeners; i++) {
+        AutoPtr<IInterface> obj;
+        listeners->Get(i, (IInterface**)&obj);
+        IAnimatorListener::Probe(obj)->OnAnimationStart(this);
     }
 }
 
@@ -564,17 +579,16 @@ ECode RenderNodeAnimator::SetTarget(
     return NOERROR;
 }
 
-AutoPtr<ArrayOf<IAnimatorListener*> > RenderNodeAnimator::CloneListeners()
+AutoPtr<IArrayList> RenderNodeAnimator::CloneListeners()
 {
-    AutoPtr<ArrayOf<IAnimatorListener*> > listeners;
-    GetListeners((ArrayOf<IAnimatorListener*>**)&listeners);
+    AutoPtr<IArrayList> listeners;
+    GetListeners((IArrayList**)&listeners);
     if (listeners != NULL) {
-        AutoPtr<ArrayOf<IAnimatorListener*> > res
-            = ArrayOf<IAnimatorListener*>::Alloc(listeners->GetLength());
-        res->Copy(listeners);
-        return res;
+        AutoPtr<IInterface> cloneObj;
+        ICloneable::Probe(listeners)->Clone((IInterface**)&cloneObj);
+        listeners = IArrayList::Probe(cloneObj);
     }
-    return NULL;
+    return listeners;
 }
 
 Boolean RenderNodeAnimator::ProcessDelayed(

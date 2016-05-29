@@ -894,14 +894,15 @@ AutoPtr<IDropTarget> DragController::FindDropTarget(
     AutoPtr<IArrayList> dropTargets = mDropTargets;
     Int32 count;
     dropTargets->GetSize(&count);
-    for (Int32 i=count-1; i>=0; i--) {
+    for (Int32 i = count - 1; i >= 0; i--) {
         AutoPtr<IInterface> obj;
         dropTargets->Get(i, (IInterface**)&obj);
         AutoPtr<IDropTarget> target = IDropTarget::Probe(obj);
         Boolean res;
         target->IsDropEnabled(&res);
-        if (!res)
+        if (!res) {
             continue;
+        }
 
         IView::Probe(target)->GetHitRect(r);
 

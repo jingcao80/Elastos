@@ -268,7 +268,7 @@ ECode ArrayList::Clone(
     CArrayList::NewByFriend((CArrayList**)&result);
     result->mArray = mArray->Clone();
     result->mSize = mSize;
-    *outarray = (IArrayList*) result.Get();
+    *outarray = (IArrayList*)result.Get();
     REFCOUNT_ADD(*outarray)
     // } catch (CloneNotSupportedException e) {
     //    throw new AssertionError();

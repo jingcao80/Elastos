@@ -6,6 +6,7 @@
 using Elastos::Core::AutoLock;
 using Elastos::Core::ECLSID_CInteger32;
 using Elastos::Core::EIID_IInteger32;
+using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
 
 namespace Elastos {
@@ -83,7 +84,7 @@ ECode Int32PropertyValuesHolder::Clone(
     /* [out] */ IInterface** holder)
 {
     AutoPtr<Int32PropertyValuesHolder> v = new Int32PropertyValuesHolder(mPropertyName, mInt32Keyframes);
-    CloneSuperData(v);
+    CloneImpl(v);
     v->mJniSetter = mJniSetter;
     v->mInt32Keyframes = mInt32Keyframes;
     v->mInt32AnimatedValue = mInt32AnimatedValue;
@@ -164,7 +165,7 @@ ECode Int32PropertyValuesHolder::SetupSetter(
     // Check new static hashmap<propName, int> for setter method
     {
         AutoLock lock(mPropertyMapLock);
-        AutoPtr<IClassInfo> clInfo = TransformClassInfo(target);
+        AutoPtr<IClassInfo> clInfo = GetClassInfo(target);
         ClassMethodMapIterator exit = sJNISetterPropertyMap.Find(clInfo);
         AutoPtr<MethodMap> propertyMap = NULL;
         if(exit != sJNISetterPropertyMap.End()) {

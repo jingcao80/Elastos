@@ -3630,7 +3630,7 @@ ECode Workspace::OnDrop(
 
     Int32 snapScreen = -1;
     Boolean resizeOnDrop = FALSE;
-    if (TO_IINTERFACE(_d->mDragSource) != TO_IINTERFACE(this)) {
+    if (_d->mDragSource.Get() != IDragSource::Probe(this)) {
         AutoPtr<ArrayOf<Int32> > touchXY = ArrayOf<Int32>::Alloc(2);
         (*touchXY)[0] = (Int32)(*mDragViewVisualCenter)[0];
         (*touchXY)[1] = (Int32)(*mDragViewVisualCenter)[1];
@@ -3802,7 +3802,7 @@ ECode Workspace::OnDrop(
         AutoPtr<IRunnable> finalResizeRunnable = resizeRunnable;
         // Prepare it to be animated into its new position
         // This must be called after the view has been re-parented
-        AutoPtr<IRunnable> onCompleteRunnable = new MyRunnable3(this, finalResizeRunnable);
+        AutoPtr<IRunnable> onCompleteRunnable = new MyRunnable4(this, finalResizeRunnable);
         mAnimatingViewIntoPlace = TRUE;
         Boolean res;
         _d->mDragView->HasDrawn(&res);

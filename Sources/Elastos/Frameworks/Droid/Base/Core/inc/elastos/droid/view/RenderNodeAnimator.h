@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_VIEW_RENDERNODEANIMATOR_H__
 
 #include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/animation/Animator.h"
 #include "elastos/droid/view/Choreographer.h"
@@ -20,6 +21,7 @@ using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Animation::IAnimatorListener;
 using Elastos::Core::Object;
 using Elastos::Core::IRunnable;
+using Elastos::Utility::IArrayList;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Etl::HashMap;
 
@@ -216,7 +218,7 @@ private:
     CARAPI SetTarget(
         /* [in] */ IRenderNode* node);
 
-    CARAPI_(AutoPtr<ArrayOf<IAnimatorListener*> >) CloneListeners();
+    CARAPI_(AutoPtr<IArrayList>) CloneListeners();
 
     CARAPI_(Boolean) ProcessDelayed(
         /* [in] */ Int64 frameTimeMs);

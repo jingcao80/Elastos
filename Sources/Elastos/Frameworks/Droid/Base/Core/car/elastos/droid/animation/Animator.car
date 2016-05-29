@@ -2,6 +2,7 @@
 module
 {
     interface Elastos.Droid.Animation.ITimeInterpolator;
+    using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
     namespace Droid {
@@ -204,10 +205,7 @@ module
          * @return ArrayList<AnimatorListener> The set of listeners.
          */
         GetListeners(
-            [out, callee] ArrayOf<IAnimatorListener*>* listeners);
-
-        //SetListeners(
-        //    [in] ArrayOf<IAnimatorListener*>* listeners);
+            [out] IArrayList** listeners);
 
         /**
          * Adds a pause listener to this animator.

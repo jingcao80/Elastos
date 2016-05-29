@@ -127,11 +127,13 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationCancel(
         // Listeners are already notified of the AnimatorSet canceling in cancel().
         // The logic below only kicks in when animations end normally
         if (animatorSet->mPlayingSet.IsEmpty()) {
-            if (!animatorSet->mListeners.IsEmpty()) {
-                List<AutoPtr<IAnimatorListener> > tmpListeners(animatorSet->mListeners);
-                List<AutoPtr<IAnimatorListener> >::Iterator it;
-                for (it = tmpListeners.Begin(); it != tmpListeners.End(); ++it) {
-                    (*it)->OnAnimationCancel((IAnimator*)animatorSet);
+            if (animatorSet->mListeners != NULL) {
+                Int32 numListeners;
+                animatorSet->mListeners->GetSize(&numListeners);
+                for (Int32 i = 0; i < numListeners; ++i) {
+                    AutoPtr<IInterface> obj;
+                    animatorSet->mListeners->Get(i, (IInterface**)&obj);
+                    IAnimatorListener::Probe(obj)->OnAnimationCancel((IAnimator*)animatorSet);
                 }
             }
         }
@@ -177,11 +179,16 @@ ECode AnimatorSet::AnimatorSetListener::OnAnimationEnd(
         if (allDone) {
             // If this was the last child animation to end, then notify listeners that this
             // AnimatorSet has ended
-            if (!animatorSet->mListeners.IsEmpty()) {
-                List<AutoPtr<IAnimatorListener> > tmpListeners(animatorSet->mListeners);
-                List<AutoPtr<IAnimatorListener> >::Iterator it;
-                for (it = tmpListeners.Begin(); it != tmpListeners.End(); ++it) {
-                    (*it)->OnAnimationEnd((IAnimator*)animatorSet);
+            if (animatorSet->mListeners != NULL) {
+                AutoPtr<IInterface> cloneObj;
+                ICloneable::Probe(animatorSet->mListeners)->Clone((IInterface**)&cloneObj);
+                IArrayList* tmpListeners = IArrayList::Probe(cloneObj);
+                Int32 numListeners;
+                tmpListeners->GetSize(&numListeners);
+                for (Int32 i = 0; i < numListeners; ++i) {
+                    AutoPtr<IInterface> obj;
+                    tmpListeners->Get(i, (IInterface**)&obj);
+                    IAnimatorListener::Probe(obj)->OnAnimationEnd((IAnimator*)animatorSet);
                 }
             }
             animatorSet->mStarted = FALSE;
@@ -517,11 +524,17 @@ ECode AnimatorSet::Cancel()
     mTerminated = TRUE;
     Boolean started = FALSE;
     if (IsStarted(&started), started) {
-        List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
-        if (tmpListeners.IsEmpty() == FALSE) {
-            List<AutoPtr<IAnimatorListener> >::Iterator it = tmpListeners.Begin();
-            for (; it != tmpListeners.End(); it++) {
-                (*it)->OnAnimationCancel(this);
+        AutoPtr<IArrayList> tmpListeners;
+        if (mListeners != NULL) {
+            AutoPtr<IInterface> cloneObj;
+            ICloneable::Probe(mListeners)->Clone((IInterface**)&cloneObj);
+            tmpListeners = IArrayList::Probe(cloneObj);
+            Int32 numListeners;
+            tmpListeners->GetSize(&numListeners);
+            for (Int32 i = 0; i < numListeners; ++i) {
+                AutoPtr<IInterface> obj;
+                tmpListeners->Get(i, (IInterface**)&obj);
+                IAnimatorListener::Probe(obj)->OnAnimationCancel(this);
             }
         }
         Boolean running;
@@ -536,10 +549,13 @@ ECode AnimatorSet::Cancel()
                 (*it)->mAnimation->Cancel();
             }
         }
-        if (tmpListeners.IsEmpty() == FALSE) {
-            List<AutoPtr<IAnimatorListener> >::Iterator it = tmpListeners.Begin();
-            for (; it != tmpListeners.End(); it++) {
-                (*it)->OnAnimationEnd(this);
+        if (tmpListeners != NULL) {
+            Int32 numListeners;
+            tmpListeners->GetSize(&numListeners);
+            for (Int32 i = 0; i < numListeners; ++i) {
+                AutoPtr<IInterface> obj;
+                tmpListeners->Get(i, (IInterface**)&obj);
+                IAnimatorListener::Probe(obj)->OnAnimationEnd(this);
             }
         }
         mStarted = FALSE;
@@ -578,11 +594,16 @@ ECode AnimatorSet::End()
                 (*it)->mAnimation->End();
             }
         }
-        if (mListeners.IsEmpty() == FALSE) {
-            List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
-            List<AutoPtr<IAnimatorListener> >::Iterator it = tmpListeners.Begin();
-            for (; it != tmpListeners.End(); it++) {
-                (*it)->OnAnimationEnd(this);
+        if (mListeners != NULL) {
+            AutoPtr<IInterface> cloneObj;
+            ICloneable::Probe(mListeners)->Clone((IInterface**)&cloneObj);
+            IArrayList* tmpListeners = IArrayList::Probe(cloneObj);
+            Int32 numListeners;
+            tmpListeners->GetSize(&numListeners);
+            for (Int32 i = 0; i < numListeners; ++i) {
+                AutoPtr<IInterface> obj;
+                tmpListeners->Get(i, (IInterface**)&obj);
+                IAnimatorListener::Probe(obj)->OnAnimationEnd(this);
             }
         }
         mStarted = FALSE;
@@ -742,13 +763,19 @@ ECode AnimatorSet::Start()
     for (; it!= mSortedNodes.End(); ++it) {
         AutoPtr<Node> node = *it;
         // First, clear out the old listeners
-        AutoPtr<ArrayOf<IAnimatorListener*> > oldListeners;
-        node->mAnimation->GetListeners((ArrayOf<IAnimatorListener*>**)&oldListeners);
-        if (oldListeners != NULL && oldListeners->GetLength() > 0) {
-            AutoPtr<ArrayOf<IAnimatorListener*> > clonedListeners = oldListeners->Clone();
-
-            for (Int32 i = 0; i < clonedListeners->GetLength(); i++) {
-                AutoPtr<IAnimatorListener> listener = (*clonedListeners)[i];
+        AutoPtr<IArrayList> oldListeners;
+        node->mAnimation->GetListeners((IArrayList**)&oldListeners);
+        Int32 size;
+        if (oldListeners != NULL && (oldListeners->GetSize(&size), size > 0)) {
+            AutoPtr<IInterface> cloneObj;
+            ICloneable::Probe(oldListeners)->Clone((IInterface**)&cloneObj);
+            IArrayList* clonedListeners = IArrayList::Probe(cloneObj);
+            Int32 numListeners;
+            clonedListeners->GetSize(&numListeners);
+            for (Int32 i = 0; i < numListeners; ++i) {
+                AutoPtr<IInterface> obj;
+                clonedListeners->Get(i, (IInterface**)&obj);
+                IAnimatorListener* listener = IAnimatorListener::Probe(obj);
                 if (IDependencyListener::Probe(listener) || IAnimatorSetListener::Probe(listener)) {
                     node->mAnimation->RemoveListener(listener);
                 }
@@ -808,22 +835,32 @@ ECode AnimatorSet::Start()
         da->Start();
     }
 
-    if (!mListeners.IsEmpty()) {
-        List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
-        List<AutoPtr<IAnimatorListener> >::Iterator tmpIt = tmpListeners.Begin();
-        for (; tmpIt != tmpListeners.End(); ++tmpIt) {
-            (*tmpIt)->OnAnimationStart(this);
+    if (mListeners != NULL) {
+        AutoPtr<IInterface> cloneObj;
+        ICloneable::Probe(mListeners)->Clone((IInterface**)&cloneObj);
+        IArrayList* tmpListeners = IArrayList::Probe(cloneObj);
+        Int32 numListeners;
+        tmpListeners->GetSize(&numListeners);
+        for (Int32 i = 0; i < numListeners; ++i) {
+            AutoPtr<IInterface> obj;
+            tmpListeners->Get(i, (IInterface**)&obj);
+            IAnimatorListener::Probe(obj)->OnAnimationStart(this);
         }
     }
     if (mNodes.IsEmpty() && mStartDelay == 0) {
         // Handle unusual case where empty AnimatorSet is started - should send out
         // end event immediately since the event will not be sent out at all otherwise
         mStarted = FALSE;
-        if (mListeners.IsEmpty() == FALSE) {
-            List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
-            List<AutoPtr<IAnimatorListener> >::Iterator tmpIt = tmpListeners.Begin();
-            for (; tmpIt != tmpListeners.End(); ++tmpIt) {
-                (*tmpIt)->OnAnimationEnd(this);
+        if (mListeners != NULL) {
+            AutoPtr<IInterface> cloneObj;
+            ICloneable::Probe(mListeners)->Clone((IInterface**)&cloneObj);
+            IArrayList* tmpListeners = IArrayList::Probe(cloneObj);
+            Int32 numListeners;
+            tmpListeners->GetSize(&numListeners);
+            for (Int32 i = 0; i < numListeners; ++i) {
+                AutoPtr<IInterface> obj;
+                tmpListeners->Get(i, (IInterface**)&obj);
+                IAnimatorListener::Probe(obj)->OnAnimationEnd(this);
             }
         }
     }
@@ -880,24 +917,32 @@ ECode AnimatorSet::CloneImpl(
         nodeClone->mTmpDependencies.Clear();
         nodeClone->mNodeDependents.Clear();
         nodeClone->mNodeDependencies.Clear();
-
         // clear out any listeners that were set up by the AnimatorSet; these will
         // be set up when the clone's nodes are sorted
-        Animator* animator = (Animator*)(nodeClone->mAnimation.Get());
-        List<AutoPtr<IAnimatorListener> > cloneListeners(animator->mListeners);
-        if (cloneListeners.IsEmpty() == FALSE) {
-            List<AutoPtr<IAnimatorListener> > listenersToRemove;
-            List<AutoPtr<IAnimatorListener> >::Iterator cloneIt = cloneListeners.Begin();
-            for (; cloneIt != cloneListeners.End(); cloneIt++) {
-                AutoPtr<IAnimatorListener> listener = *cloneIt;
-                if (IAnimatorSetListener::Probe(listener)) {
-                    listenersToRemove.PushBack(listener);
+        AutoPtr<IArrayList> cloneListeners;
+        nodeClone->mAnimation->GetListeners((IArrayList**)&cloneListeners);
+        if (cloneListeners != NULL) {
+            AutoPtr<IArrayList> listenersToRemove;
+            Int32 size;
+            cloneListeners->GetSize(&size);
+            for (Int32 i = 0; i < size; ++i) {
+                AutoPtr<IInterface> obj;
+                cloneListeners->Get(i, (IInterface**)&obj);
+                IAnimatorListener* listener = IAnimatorListener::Probe(obj);
+                if (IAnimatorSetListener::Probe(listener) != NULL) {
+                    if (listenersToRemove == NULL) {
+                        CArrayList::New((IArrayList**)&listenersToRemove);
+                    }
+                    listenersToRemove->Add(listener);
                 }
             }
-            if (listenersToRemove.IsEmpty() == FALSE) {
-                List<AutoPtr<IAnimatorListener> >::Iterator removeIt = listenersToRemove.Begin();
-                for (; removeIt != listenersToRemove.End(); removeIt++) {
-                    cloneListeners.Remove(*removeIt);
+            if (listenersToRemove != NULL) {
+                Int32 numListeners;
+                listenersToRemove->GetSize(&numListeners);
+                for (Int32 i = 0; i < numListeners; ++i) {
+                    AutoPtr<IInterface> listener;
+                    listenersToRemove->Get(i, (IInterface**)&listener);
+                    cloneListeners->Remove(listener);
                 }
             }
         }

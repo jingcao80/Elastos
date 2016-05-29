@@ -1379,7 +1379,8 @@ ECode RemoteViews::ReflectionAction::Apply(
     }
 
     String param = GetParameterType();
-    AutoPtr<IClassInfo> klass = PropertyValuesHolder::TransformClassInfo(view);
+    AutoPtr<IClassInfo> klass;
+    CObject::ReflectClassInfo(view, (IClassInfo**)&klass);
     if (klass == NULL) {
         SLOGGERE("RemoteViews", "can not find view's class infomations")
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -2990,7 +2991,8 @@ ECode RemoteViews::GetMethod(
     VALIDATE_NOT_NULL(info)
 
     AutoPtr<IMethodInfo> method;
-    AutoPtr<IClassInfo> klass = PropertyValuesHolder::TransformClassInfo(view);
+    AutoPtr<IClassInfo> klass;
+    CObject::ReflectClassInfo(view, (IClassInfo**)&klass);
     if (klass == NULL) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

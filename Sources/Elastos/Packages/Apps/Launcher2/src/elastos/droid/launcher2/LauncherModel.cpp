@@ -1427,7 +1427,8 @@ void LauncherModel::LoaderTask::LoadWorkspace()
     // mHost->mApp->GetLauncherProvider((ILauncherProvider**)&provider);
     // provider->LoadDefaultFavoritesIfNecessary(0, FALSE);
 
-    {    AutoLock syncLock(sBgLock);
+    {
+        AutoLock syncLock(sBgLock);
         sBgWorkspaceItems->Clear();
         sBgAppWidgets->Clear();
         sBgFolders->Clear();

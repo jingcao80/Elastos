@@ -8,13 +8,12 @@
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Droid::Utility::IProperty;
 using Elastos::Droid::Graphics::IPointF;
-using Elastos::Core::INumber;
-using Elastos::Core::IInteger32;
+using Elastos::Droid::Utility::IProperty;
+using Elastos::Core::IArrayOf;
 using Elastos::Utility::Etl::HashMap;
 
-DEFINE_OBJECT_HASH_FUNC_FOR(IClassInfo);
+DEFINE_OBJECT_HASH_FUNC_USING_ADDR_FOR(IClassInfo);
 
 namespace Elastos {
 namespace Droid {
@@ -33,17 +32,15 @@ private:
         : public TypeConverter/*<PointF, float[]>*/
     {
     public:
-        CAR_INTERFACE_DECL()
-
         PointFToFloatArray();
 
         // @Override
-        virtual CARAPI Convert(
+        CARAPI Convert(
             /* [in] */ IInterface* value,
             /* [out] */ IInterface** values);
 
     private:
-        AutoPtr<ArrayOf<Float> > mCoordinates;
+        AutoPtr<IArrayOf> mCoordinates;
     };
 
     /**
@@ -53,17 +50,15 @@ private:
         : public TypeConverter/*<PointF, int[]>*/
     {
     public:
-        CAR_INTERFACE_DECL()
-
         PointFToInt32Array();
 
         // @Override
-        virtual CARAPI Convert(
+        CARAPI Convert(
             /* [in] */ IInterface* value,
             /* [out] */ IInterface** values);
 
     private:
-        AutoPtr<ArrayOf<Int32> > mCoordinates;
+        AutoPtr<IArrayOf> mCoordinates;
     };
 
 public:
@@ -110,7 +105,7 @@ public:
      */
     static CARAPI OfMultiInt32(
         /* [in] */ const String& propertyName,
-        /* [in] */ ArrayOf<ArrayOf<Int32>* >* values,
+        /* [in] */ ArrayOf<ArrayOf<Int32>*>* values,
         /* [out] */ IPropertyValuesHolder** holder);
 
     /**
@@ -173,6 +168,28 @@ public:
         /* [in] */ ITypeConverter* converter,
         /* [in] */ ITypeEvaluator* evaluator,
         /* [in] */ ArrayOf<IKeyframe*>* values);
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property name and
+     * set of Float values.
+     * @param propertyName The name of the property being animated.
+     * @param values The values that the named property will animate between.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     */
+    static CARAPI_(AutoPtr<IPropertyValuesHolder>) OfFloat(
+        /* [in] */ const String& propertyName,
+        /* [in] */ ArrayOf<Float>* values);
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property and
+     * set of Float values.
+     * @param property The property being animated. Should not be NULL.
+     * @param values The values that the property will animate between.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     */
+    static CARAPI_(AutoPtr<IPropertyValuesHolder>) OfFloat(
+        /* [in] */ IProperty* property,
+        /* [in] */ ArrayOf<Float>* values);
 
     /**
      * Constructs and returns a PropertyValuesHolder with a given property name and
@@ -255,6 +272,23 @@ public:
 
     /**
      * Constructs and returns a PropertyValuesHolder with a given property name and
+     * set of Object values. This variant also takes a TypeEvaluator because the system
+     * cannot automatically interpolate between objects of unknown type.
+     *
+     * @param propertyName The name of the property being animated.
+     * @param evaluator A TypeEvaluator that will be called on each animation frame to
+     * provide the necessary interpolation between the Object values to derive the animated
+     * value.
+     * @param values The values that the named property will animate between.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     */
+    static CARAPI_(AutoPtr<IPropertyValuesHolder>) OfObject(
+        /* [in] */ const String& propertyName,
+        /* [in] */ ITypeEvaluator* evaluator,
+        /* [in] */ ArrayOf<IInterface*>* values);
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property name and
      * a Path along which the values should be animated. This variant supports a
      * <code>TypeConverter</code> to convert from <code>PointF</code> to the target
      * type.
@@ -273,6 +307,23 @@ public:
         /* [in] */ const String& propertyName,
         /* [in] */ ITypeConverter* converter,
         /* [in] */ IPath* path);
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property and
+     * set of Object values. This variant also takes a TypeEvaluator because the system
+     * cannot automatically interpolate between objects of unknown type.
+     *
+     * @param property The property being animated. Should not be NULL.
+     * @param evaluator A TypeEvaluator that will be called on each animation frame to
+     * provide the necessary interpolation between the Object values to derive the animated
+     * value.
+     * @param values The values that the property will animate between.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     */
+    static CARAPI_(AutoPtr<IPropertyValuesHolder>) OfObject(
+        /* [in] */ IProperty* property,
+        /* [in] */ ITypeEvaluator* evaluator,
+        /* [in] */ ArrayOf<IInterface*>* values);
 
     /**
      * Constructs and returns a PropertyValuesHolder with a given property and
@@ -320,70 +371,6 @@ public:
         /* [in] */ ITypeConverter* converter,
         /* [in] */ IPath* path);
 
-    static CARAPI_(AutoPtr<IPropertyValuesHolder>) OfKeyframes(
-        /* [in] */ const String& propertyName,
-        /* [in] */ IKeyframes* keyframes);
-
-    static CARAPI_(AutoPtr<IPropertyValuesHolder>) OfKeyframes(
-        /* [in] */ IProperty* property,
-        /* [in] */ IKeyframes* keyframes);
-
-    /**
-     * Constructs and returns a PropertyValuesHolder with a given property name and
-     * set of Float values.
-     * @param propertyName The name of the property being animated.
-     * @param values The values that the named property will animate between.
-     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
-     */
-    static CARAPI_(AutoPtr<IPropertyValuesHolder>) OfFloat(
-        /* [in] */ const String& propertyName,
-        /* [in] */ ArrayOf<Float>* values);
-
-    /**
-     * Constructs and returns a PropertyValuesHolder with a given property and
-     * set of Float values.
-     * @param property The property being animated. Should not be NULL.
-     * @param values The values that the property will animate between.
-     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
-     */
-    static CARAPI_(AutoPtr<IPropertyValuesHolder>) OfFloat(
-        /* [in] */ IProperty* property,
-        /* [in] */ ArrayOf<Float>* values);
-
-    /**
-     * Constructs and returns a PropertyValuesHolder with a given property name and
-     * set of Object values. This variant also takes a TypeEvaluator because the system
-     * cannot automatically interpolate between objects of unknown type.
-     *
-     * @param propertyName The name of the property being animated.
-     * @param evaluator A TypeEvaluator that will be called on each animation frame to
-     * provide the necessary interpolation between the Object values to derive the animated
-     * value.
-     * @param values The values that the named property will animate between.
-     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
-     */
-    static CARAPI_(AutoPtr<IPropertyValuesHolder>) OfObject(
-        /* [in] */ const String& propertyName,
-        /* [in] */ ITypeEvaluator* evaluator,
-        /* [in] */ ArrayOf<IInterface*>* values);
-
-    /**
-     * Constructs and returns a PropertyValuesHolder with a given property and
-     * set of Object values. This variant also takes a TypeEvaluator because the system
-     * cannot automatically interpolate between objects of unknown type.
-     *
-     * @param property The property being animated. Should not be NULL.
-     * @param evaluator A TypeEvaluator that will be called on each animation frame to
-     * provide the necessary interpolation between the Object values to derive the animated
-     * value.
-     * @param values The values that the property will animate between.
-     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
-     */
-    static CARAPI_(AutoPtr<IPropertyValuesHolder>) OfObject(
-        /* [in] */ IProperty* property,
-        /* [in] */ ITypeEvaluator* evaluator,
-        /* [in] */ ArrayOf<IInterface*>* values);
-
     /**
      * Constructs and returns a PropertyValuesHolder object with the specified property name and set
      * of values. These values can be of any type, but the type should be consistent so that
@@ -426,6 +413,15 @@ public:
     static CARAPI_(AutoPtr<IPropertyValuesHolder>) OfKeyframe(
         /* [in] */ IProperty* property,
         /* [in] */ ArrayOf<IKeyframe*>* values);
+
+
+    static CARAPI_(AutoPtr<IPropertyValuesHolder>) OfKeyframes(
+        /* [in] */ const String& propertyName,
+        /* [in] */ IKeyframes* keyframes);
+
+    static CARAPI_(AutoPtr<IPropertyValuesHolder>) OfKeyframes(
+        /* [in] */ IProperty* property,
+        /* [in] */ IKeyframes* keyframes);
 
     /**
      * Set the animated values for this object to this set of ints.
@@ -534,8 +530,9 @@ public:
     virtual CARAPI SetupEndValue(
         /* [in] */ IInterface* target);
 
-    CARAPI CloneSuperData(
-        /* [in] */ PropertyValuesHolder* holder);
+    CARAPI Clone(
+        /* [out] */ IInterface** holder);
+
     /**
      * Internal function to set the value on the target object, using the setter set up
      * earlier on this PropertyValuesHolder object. This function is called by ObjectAnimator
@@ -622,9 +619,6 @@ public:
     virtual CARAPI GetAnimatedValue(
         /* [out] */ IInterface** value);
 
-    CARAPI Clone(
-        /* [out] */ IInterface** holder);
-
     CARAPI ToString(
         /* [out] */ String* str);
 
@@ -645,9 +639,6 @@ public:
         /* [in] */ const String& prefix,
         /* [in] */ const String& propertyName);
 
-    static CARAPI_(AutoPtr<IClassInfo>) TransformClassInfo(
-        /* [in] */ IInterface* o);
-
 protected:
     /**
      * Internal utility constructor, used by the factory methods to set the property name.
@@ -662,6 +653,9 @@ protected:
      */
     PropertyValuesHolder(
         /* [in] */ IProperty* property);
+
+    CARAPI CloneImpl(
+        /* [in] */ PropertyValuesHolder* holder);
 
     //The function will help you transform from a object to classInfo
 
@@ -731,6 +725,9 @@ protected:
         /* [in] */ IMethodInfo* methodID,
         /* [in] */ ArrayOf<Float>* args);
 
+    static CARAPI_(AutoPtr<IClassInfo>) GetClassInfo(
+        /* [in] */ IInterface* o);
+
 private:
     /**
      * Determine the setter or getter function using the JavaBeans convention of setFoo or
@@ -747,12 +744,10 @@ private:
      * value types used on the setter.
      * @return Method the method associated with mPropertyName.
      */
-
-    //TODO
-    AutoPtr<IMethodInfo> GetPropertyFunction(
+    CARAPI_(AutoPtr<IMethodInfo>) GetPropertyFunction(
         /* [in] */ IClassInfo* targetClass,
         /* [in] */ const String& prefix,
-        /* [in] */ InterfaceID* type);
+        /* [in] */ const InterfaceID& type);
 
     /**
      * Returns the setter or getter requested. This utility function checks whether the
@@ -764,20 +759,21 @@ private:
      * @param valueType The type of parameter passed into the method (NULL for getter).
      * @return Method the method associated with mPropertyName.
      */
-
-    AutoPtr<IMethodInfo> SetupSetterOrGetter(
+    CARAPI_(AutoPtr<IMethodInfo>) SetupSetterOrGetter(
         /* [in] */ IClassInfo* targetClass,
-        /* [in] */ PropertyValuesHolder::ClassMethodMap * propertyMapMap,
+        /* [in] */ PropertyValuesHolder::ClassMethodMap* propertyMapMap,
         /* [in] */ const String& prefix,
-        /* [in] */ InterfaceID* type);
+        /* [in] */ const InterfaceID& type);
 
     /**
      * Utility function to get the getter from targetClass
      */
-
-    //TODO
     CARAPI SetupGetter(
         /* [in] */ IInterface* target);
+
+    CARAPI ConvertBack(
+        /* [in] */ IInterface* value,
+        /* [out] */ IInterface** outValue);
 
     /**
      * Utility function to set the value stored in a particular Keyframe. The value used is
@@ -786,17 +782,10 @@ private:
      * @param target The target object from which the current value should be extracted.
      * @param kf The keyframe which holds the property name and value.
      */
-
-    //TODO
     CARAPI SetupValue(
         /* [in] */ IInterface* target,
         /* [in] */ IKeyframe* kf);
 
-    virtual CARAPI ConvertBack(
-        /* [in] */ IInterface* value,
-        /* [out] */ IInterface** outValue);
-
-private:
     static CARAPI_(AutoPtr<ITypeEvaluator>) InitInt32Evaluator();
 
     static CARAPI_(AutoPtr<ITypeEvaluator>) InitFloatEvaluator();
@@ -839,7 +828,6 @@ protected:
     Object mPropertyMapLock;
 
     // Used to pass single value to varargs parameter in setter invocation
-    //final Object[] mTmpValueArray = new Object[1];
     AutoPtr<ArrayOf<IInterface*> > mTmpValueArray;
 
 private:

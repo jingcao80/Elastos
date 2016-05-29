@@ -94,7 +94,7 @@ ECode MultiFloatValuesHolder::SetupSetter(
     // try {
     AutoLock lock(mPropertyMapLock);
     // mPropertyMapLock.writeLock().lock();
-    AutoPtr<IClassInfo> info = TransformClassInfo(targetClass);
+    AutoPtr<IClassInfo> info = GetClassInfo(targetClass);
     AutoPtr<MethodMap> propertyMap = sJNISetterPropertyMap[info];
 
     typename ClassMethodMap::Iterator it = sJNISetterPropertyMap.Find(info);

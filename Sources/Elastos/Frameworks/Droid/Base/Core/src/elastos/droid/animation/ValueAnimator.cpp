@@ -8,24 +8,27 @@
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/view/animation/AnimationUtils.h"
 #include "elastos/droid/view/animation/CAccelerateDecelerateInterpolator.h"
-#include "elastos/droid/view/CChoreographerHelper.h"
+#include "elastos/droid/view/Choreographer.h"
 #include "elastos/droid/view/animation/CLinearInterpolator.h"
 #include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/etl/Algorithm.h>
-#include <unistd.h>
 
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::SystemProperties;
-using Elastos::Droid::View::IChoreographerHelper;
-using Elastos::Droid::View::CChoreographerHelper;
+using Elastos::Droid::View::Choreographer;
 using Elastos::Droid::View::Animation::AnimationUtils;
 using Elastos::Droid::View::Animation::CAccelerateDecelerateInterpolator;
 using Elastos::Droid::View::Animation::ILinearInterpolator;
 using Elastos::Droid::View::Animation::CLinearInterpolator;
 using Elastos::Core::EIID_IRunnable;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -42,9 +45,7 @@ CAR_INTERFACE_IMPL(ValueAnimator::AnimationHandler, Object, IRunnable);
 ValueAnimator::AnimationHandler::AnimationHandler()
     : mAnimationScheduled(FALSE)
 {
-    AutoPtr<IChoreographerHelper> helper;
-    ASSERT_SUCCEEDED(CChoreographerHelper::AcquireSingleton((IChoreographerHelper**)&helper));
-    helper->GetInstance((IChoreographer**)&mChoreographer);
+    mChoreographer = (IChoreographer*)Choreographer::GetInstance();
 }
 
 ValueAnimator::AnimationHandler::~AnimationHandler()
@@ -88,7 +89,6 @@ void ValueAnimator::AnimationHandler::DoAnimationFrame(
         for (it = pendingCopy.Begin(); it != pendingCopy.End(); ++it) {
             AutoPtr<IValueAnimator> anim = *it;
             ValueAnimator* va = (ValueAnimator*)anim.Get();
-            assert(va != NULL);
             // If the animation has a startDelay, place it on the delayed list
             if (va->mStartDelay == 0) {
                 va->StartAnimation(this);
@@ -108,14 +108,12 @@ void ValueAnimator::AnimationHandler::DoAnimationFrame(
             mReadyAnims.PushBack(anim);
         }
     }
-
     if (!mReadyAnims.IsEmpty()) {
         for (it = mReadyAnims.Begin(); it != mReadyAnims.End(); ++it) {
             AutoPtr<IValueAnimator> anim = *it;
             ValueAnimator* va = (ValueAnimator*)anim.Get();
             va->StartAnimation(this);
             va->mRunning = TRUE;
-
             mDelayedAnims.Remove(anim);
         }
         mReadyAnims.Clear();
@@ -123,36 +121,29 @@ void ValueAnimator::AnimationHandler::DoAnimationFrame(
 
     // Now process all active animations. The return value from animationFrame()
     // tells the handler whether it should now be ended
-
     Int32 numAnims = mAnimations.GetSize();
     for (it = mAnimations.Begin(); it != mAnimations.End(); it++) {
         mTmpAnimations.PushBack(*it);
     }
-
     if (!mTmpAnimations.IsEmpty()) {
-        List<AutoPtr<IValueAnimator> >::Iterator findResult;
         it = mTmpAnimations.Begin();
         for (Int32 i = 0; i < numAnims && it != mTmpAnimations.End(); ++i, ++it) {
             AutoPtr<IValueAnimator> anim = *it;
             ValueAnimator* va = (ValueAnimator*)anim.Get();
-
-            findResult = Find(mAnimations.Begin(), mAnimations.End(), anim);
-            if (findResult != mAnimations.End()) {
-                if (va->DoAnimationFrame(frameTime)) {
-                    mEndingAnims.PushBack(anim);
-                }
+            List<AutoPtr<IValueAnimator> >::Iterator findResult =
+                    Find(mAnimations.Begin(), mAnimations.End(), anim);
+            if (findResult != mAnimations.End() && va->DoAnimationFrame(frameTime)) {
+                mEndingAnims.PushBack(anim);
             }
         }
         mTmpAnimations.Clear();
     }
-
     if (!mEndingAnims.IsEmpty()) {
         for (it = mEndingAnims.Begin(); it != mEndingAnims.End(); ++it) {
             AutoPtr<IValueAnimator> anim = *it;
             ValueAnimator* va = (ValueAnimator*)anim.Get();
             va->EndAnimation(this);
         }
-
         mEndingAnims.Clear();
     }
 
@@ -175,13 +166,13 @@ ECode ValueAnimator::AnimationHandler::Run()
 void ValueAnimator::AnimationHandler::ScheduleAnimation() {
     if (!mAnimationScheduled) {
         mChoreographer->PostCallback(IChoreographer::CALLBACK_ANIMATION, this, NULL);
-
         mAnimationScheduled = TRUE;
     }
 }
 
+
 //==============================================================================
-//              ValueAnimator::AnimationHandler
+//              ValueAnimator
 //==============================================================================
 
 AutoPtr<ITimeInterpolator> CreateInterPolator()
@@ -206,11 +197,12 @@ static Boolean InitTLS()
     return TRUE;
 }
 
+Float ValueAnimator::sDurationScale = 1.0f;
+
 const Int32 ValueAnimator::STOPPED  = 0;
 const Int32 ValueAnimator::RUNNING  = 1;
 const Int32 ValueAnimator::SEEKED   = 2;
 
-Float ValueAnimator::sDurationScale = 1.0f;
 pthread_key_t ValueAnimator::sAnimationHandler;
 Boolean ValueAnimator::sHaveKey = InitTLS();
 const AutoPtr<ITimeInterpolator> ValueAnimator::sDefaultInterpolator = CreateInterPolator();
@@ -220,10 +212,10 @@ CAR_INTERFACE_IMPL(ValueAnimator, Animator, IValueAnimator);
 ValueAnimator::ValueAnimator()
     : mStartTime(0)
     , mSeekTime(-1)
-    , mPauseTime(0)
-    , mResumed(FALSE)
     , mPlayingState(STOPPED)
     , mInitialized(FALSE)
+    , mPauseTime(0)
+    , mResumed(FALSE)
     , mPlayingBackwards(FALSE)
     , mCurrentIteration(0)
     , mCurrentFraction(0.0f)
@@ -238,9 +230,8 @@ ValueAnimator::ValueAnimator()
     , mUnscaledStartDelay(0)
     , mRepeatCount(0)
     , mRepeatMode(IValueAnimator::ANIMATION_RESTART)
-{
-    mInterpolator = sDefaultInterpolator;
-}
+    , mInterpolator(sDefaultInterpolator)
+{}
 
 ECode ValueAnimator::constructor()
 {
@@ -249,7 +240,6 @@ ECode ValueAnimator::constructor()
 
 ValueAnimator::~ValueAnimator()
 {
-    mValues = NULL;
     mValuesMap.Clear();
 }
 
@@ -262,6 +252,54 @@ void ValueAnimator::SetDurationScale(
 Float ValueAnimator::GetDurationScale()
 {
     return sDurationScale;
+}
+
+AutoPtr<IValueAnimator> ValueAnimator::OfInt32(
+    /* [in] */ ArrayOf<Int32>* values)
+{
+    AutoPtr<IValueAnimator> anim;
+    CValueAnimator::New((IValueAnimator**)&anim);
+    anim->SetInt32Values(values);
+    return anim;
+}
+
+AutoPtr<IValueAnimator> ValueAnimator::OfArgb(
+    /* [in] */ ArrayOf<Int32>* values)
+{
+    AutoPtr<IValueAnimator> anim;
+    CValueAnimator::New((IValueAnimator**)&anim);
+    anim->SetInt32Values(values);
+    anim->SetEvaluator(ITypeEvaluator::Probe(CArgbEvaluator::GetInstance()));
+    return anim;
+}
+
+AutoPtr<IValueAnimator> ValueAnimator::OfFloat(
+    /* [in] */ ArrayOf<Float>* values)
+{
+    AutoPtr<IValueAnimator> anim;
+    CValueAnimator::New((IValueAnimator**)&anim);
+    anim->SetFloatValues(values);
+    return anim;
+}
+
+AutoPtr<IValueAnimator> ValueAnimator::OfPropertyValuesHolder(
+    /* [in] */ ArrayOf<IPropertyValuesHolder*>* values)
+{
+    AutoPtr<IValueAnimator> anim;
+    CValueAnimator::New((IValueAnimator**)&anim);
+    anim->SetValues(values);
+    return anim;
+}
+
+AutoPtr<IValueAnimator> ValueAnimator::OfObject(
+    /* [in] */ ITypeEvaluator* evaluator,
+    /* [in] */ ArrayOf<IInterface*>* values)
+{
+    AutoPtr<IValueAnimator> anim;
+    CValueAnimator::New((IValueAnimator**)&anim);
+    anim->SetObjectValues(values);
+    anim->SetEvaluator(evaluator);
+    return anim;
 }
 
 ECode ValueAnimator::SetInt32Values(
@@ -283,7 +321,6 @@ ECode ValueAnimator::SetInt32Values(
     }
     // New property/values/target should cause re-initialization prior to starting
     mInitialized = FALSE;
-
     return NOERROR;
 }
 
@@ -305,7 +342,6 @@ ECode ValueAnimator::SetFloatValues(
     }
     // New property/values/target should cause re-initialization prior to starting
     mInitialized = FALSE;
-
     return NOERROR;
 }
 
@@ -327,7 +363,6 @@ ECode ValueAnimator::SetObjectValues(
     }
     // New property/values/target should cause re-initialization prior to starting
     mInitialized = FALSE;
-
     return NOERROR;
 }
 
@@ -336,17 +371,15 @@ ECode ValueAnimator::SetValues(
 {
     Int32 numValues = values->GetLength();
     mValues = values;
-
     mValuesMap.Clear();
-    String propertyName;
     for (Int32 i = 0; i < numValues; ++i) {
         AutoPtr<IPropertyValuesHolder> valuesHolder = (*values)[i];
+        String propertyName;
         valuesHolder->GetPropertyName(&propertyName);
         mValuesMap[propertyName] = valuesHolder;
     }
     // New property/values/target should cause re-initialization prior to starting
     mInitialized = FALSE;
-
     return NOERROR;
 }
 
@@ -368,7 +401,6 @@ ECode ValueAnimator::InitAnimation()
             PropertyValuesHolder* holder = (PropertyValuesHolder*)pvh.Get();
             holder->Init();
         }
-
         mInitialized = TRUE;
     }
     return NOERROR;
@@ -379,9 +411,8 @@ ECode ValueAnimator::SetDuration(
 {
     if (duration < 0) {
         Logger::E(TAG, "IllegalArgumentException: Animators cannot have negative duration: %d", duration);
-        return NOERROR;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-
     mUnscaledDuration = duration;
     UpdateScaledDuration();
     return NOERROR;
@@ -412,7 +443,6 @@ ECode ValueAnimator::SetCurrentPlayTime(
     }
     mStartTime = currentTime - playTime;
     DoAnimationFrame(currentTime);
-
     return NOERROR;
 }
 
@@ -424,7 +454,6 @@ ECode ValueAnimator::GetCurrentPlayTime(
         *playTime = 0;
         return NOERROR;
     }
-
     Int64 tmp = 0;
     AnimationUtils::CurrentAnimationTimeMillis(&tmp);
     *playTime = tmp - mStartTime;
@@ -447,36 +476,30 @@ ECode ValueAnimator::SetStartDelay(
     return NOERROR;
 }
 
+Int64 ValueAnimator::GetFrameDelay()
+{
+    return Choreographer::GetFrameDelay();
+}
+
+ECode ValueAnimator::SetFrameDelay(
+    /* [in]*/ Int64 delay)
+{
+    Choreographer::SetFrameDelay(delay);
+    return NOERROR;
+}
+
 ECode ValueAnimator::GetAnimatedValue(
     /* [out] */ IInterface** value)
 {
     VALIDATE_NOT_NULL(value);
     *value = NULL;
-    AutoPtr<IInterface> obj;
     if (mValues != NULL && mValues->GetLength() > 0) {
         AutoPtr<IPropertyValuesHolder> holder = (*mValues)[0];
         PropertyValuesHolder* pvh = (PropertyValuesHolder*)holder.Get();
         return pvh->GetAnimatedValue(value);
     }
-
     // Shouldn't get here; should always have values unless ValueAnimator was set up wrong
     return NOERROR;
-}
-
-Int64 ValueAnimator::GetFrameDelay()
-{
-    AutoPtr<IChoreographerHelper> helper;
-    ASSERT_SUCCEEDED(CChoreographerHelper::AcquireSingleton((IChoreographerHelper**)&helper));
-    Int64 delay;
-    helper->GetFrameDelay(&delay);
-    return delay;
-}
-ECode ValueAnimator::SetFrameDelay(
-    /* [in]*/ Int64 delay)
-{
-    AutoPtr<IChoreographerHelper> helper;
-    ASSERT_SUCCEEDED(CChoreographerHelper::AcquireSingleton((IChoreographerHelper**)&helper));
-    return helper->SetFrameDelay(delay);
 }
 
 ECode ValueAnimator::GetAnimatedValue(
@@ -486,12 +509,11 @@ ECode ValueAnimator::GetAnimatedValue(
     VALIDATE_NOT_NULL(value);
     *value = NULL;
     StrMapIterator it = mValuesMap.Find(propertyName);
-    if (it != mValuesMap.End() && it->mSecond != NULL) {
+    if (it != mValuesMap.End()) {
        AutoPtr<IPropertyValuesHolder> valuesHolder = it->mSecond;
        PropertyValuesHolder* pvh = (PropertyValuesHolder*)valuesHolder.Get();
        return pvh->GetAnimatedValue(value);
     }
-
     // At least avoid crashing if called with bogus propertyName
     return NOERROR;
 }
@@ -529,23 +551,34 @@ ECode ValueAnimator::GetRepeatMode(
 ECode ValueAnimator::AddUpdateListener(
     /* [in] */ IAnimatorUpdateListener* listener)
 {
-    mUpdateListeners.PushBack(listener);
+    if (mUpdateListeners == NULL) {
+        CArrayList::New((IArrayList**)&mUpdateListeners);
+    }
+    mUpdateListeners->Add(listener);
     return NOERROR;
 }
 
 ECode ValueAnimator::RemoveAllUpdateListeners()
 {
-    mUpdateListeners.Clear();
+    if (mUpdateListeners == NULL) {
+        return NOERROR;
+    }
+    mUpdateListeners->Clear();
+    mUpdateListeners = NULL;
     return NOERROR;
 }
 
 ECode ValueAnimator::RemoveUpdateListener(
     /* [in] */ IAnimatorUpdateListener* listener)
 {
-    AutoPtr<IAnimatorUpdateListener> obj = listener;
-    AULIterator it = Find(mUpdateListeners.Begin(), mUpdateListeners.End(), obj);
-    if (it != mUpdateListeners.End()) {
-        mUpdateListeners.Erase(it);
+    if (mUpdateListeners == NULL) {
+        return NOERROR;
+    }
+    mUpdateListeners->Remove(listener);
+    Int32 size;
+    mUpdateListeners->GetSize(&size);
+    if (size == 0) {
+        mUpdateListeners = NULL;
     }
     return NOERROR;
 }
@@ -553,11 +586,12 @@ ECode ValueAnimator::RemoveUpdateListener(
 ECode ValueAnimator::SetInterpolator(
     /* [in] */ ITimeInterpolator* value)
 {
-    mInterpolator = value;
-    if (mInterpolator == NULL) {
+    if (value != NULL) {
+        mInterpolator = value;
+    }
+    else {
         CLinearInterpolator::New((ITimeInterpolator**)&mInterpolator);
     }
-
     return NOERROR;
 }
 
@@ -573,38 +607,36 @@ ECode ValueAnimator::GetInterpolator(
 ECode ValueAnimator::SetEvaluator(
     /* [in] */ ITypeEvaluator* value)
 {
-    if (value != NULL && mValues != NULL) {
-        if(mValues->GetLength() > 0) {
-            (*mValues)[0]->SetEvaluator(value);
-        }
+    if (value != NULL && mValues != NULL && mValues->GetLength() > 0) {
+        (*mValues)[0]->SetEvaluator(value);
     }
-
     return NOERROR;
 }
 
 void ValueAnimator::NotifyStartListeners()
 {
-    if (!mStartListenersCalled && mListeners.IsEmpty() == FALSE) {
-        List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
-        List<AutoPtr<IAnimatorListener> >::Iterator it = tmpListeners.Begin();
-        for (; it != tmpListeners.End(); it++) {
-            (*it)->OnAnimationStart(this);
+    if (mListeners != NULL && !mStartListenersCalled) {
+        AutoPtr<IInterface> cloneObj;
+        ICloneable::Probe(mListeners)->Clone((IInterface**)&cloneObj);
+        IArrayList* tmpListeners = IArrayList::Probe(cloneObj);
+        Int32 numListeners;
+        tmpListeners->GetSize(&numListeners);
+        for (Int32 i = 0; i < numListeners; ++i) {
+            AutoPtr<IInterface> obj;
+            tmpListeners->Get(i, (IInterface**)&obj);
+            IAnimatorListener::Probe(obj)->OnAnimationStart(this);
         }
     }
-
     mStartListenersCalled = TRUE;
 }
 
-void ValueAnimator::Start(
+ECode ValueAnimator::Start(
     /* [in] */ Boolean playBackwards)
 {
-    AutoPtr<ILooper> looper = Looper::GetMyLooper();
-
-    if (looper == NULL) {
+    if (Looper::GetMyLooper() == NULL) {
         Logger::E(TAG, "Animators may only be run on Looper threads");
-        return;
+        return E_ANDROID_RUNTIME_EXCEPTION;
     }
-
     mPlayingBackwards = playBackwards;
     mCurrentIteration = 0;
     mPlayingState = STOPPED;
@@ -613,7 +645,6 @@ void ValueAnimator::Start(
     mPaused = FALSE;
     UpdateScaledDuration(); // in case the scale factor has changed since creation time
     AutoPtr<AnimationHandler> animationHandler = GetOrCreateAnimationHandler();
-
     // TODO animation change refcount
     //
     AutoPtr<IValueAnimator> anim = this;
@@ -625,14 +656,13 @@ void ValueAnimator::Start(
         mRunning = TRUE;
         NotifyStartListeners();
     }
-
     animationHandler->Start();
+    return NOERROR;
 }
 
 ECode ValueAnimator::Start()
 {
-    Start(FALSE);
-    return NOERROR;
+    return Start(FALSE);
 }
 
 ECode ValueAnimator::Cancel()
@@ -640,45 +670,40 @@ ECode ValueAnimator::Cancel()
     // Only cancel if the animation is actually running or has been started and is about
     // to run
     AutoPtr<AnimationHandler> handler = GetOrCreateAnimationHandler();
-    Boolean pendingContains = FALSE, delayContains = FALSE;
     AutoPtr<IValueAnimator> thisAnim = this;
-    List<AutoPtr<IValueAnimator> >::Iterator pIt = Find(handler->mPendingAnimations.Begin(), handler->mPendingAnimations.End(), thisAnim);
-    List<AutoPtr<IValueAnimator> >::Iterator dIt = Find(handler->mDelayedAnims.Begin(), handler->mDelayedAnims.End(), thisAnim);
-    pendingContains = pIt != handler->mPendingAnimations.End();
-    delayContains = dIt != handler->mDelayedAnims.End();
-
-    if (mPlayingState != STOPPED || pendingContains || delayContains) {
+    if (mPlayingState != STOPPED
+        || Find(handler->mPendingAnimations.Begin(), handler->mPendingAnimations.End(), thisAnim)
+                != handler->mPendingAnimations.End()
+        || Find(handler->mDelayedAnims.Begin(), handler->mDelayedAnims.End(), thisAnim)
+                != handler->mDelayedAnims.End()) {
         // Only notify listeners if the animator has actually started
-        if ((mStarted || mRunning) && mListeners.IsEmpty() == FALSE) {
+        if ((mStarted || mRunning) && mListeners != NULL) {
             if (!mRunning) {
                 // If it's not yet running, then start listeners weren't called. Call them now.
                 NotifyStartListeners();
             }
-
-            List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
-            List<AutoPtr<IAnimatorListener> >::Iterator it = tmpListeners.Begin();
-            for (; it != tmpListeners.End(); it++) {
-                (*it)->OnAnimationCancel(this);
+            AutoPtr<IInterface> cloneObj;
+            ICloneable::Probe(mListeners)->Clone((IInterface**)&cloneObj);
+            IArrayList* tmpListeners = IArrayList::Probe(cloneObj);
+            Int32 numListeners;
+            tmpListeners->GetSize(&numListeners);
+            for (Int32 i = 0; i < numListeners; ++i) {
+                AutoPtr<IInterface> obj;
+                tmpListeners->Get(i, (IInterface**)&obj);
+                IAnimatorListener::Probe(obj)->OnAnimationCancel(this);
             }
         }
-
         EndAnimation(handler);
     }
-
     return NOERROR;
 }
 
 ECode ValueAnimator::End()
 {
     AutoPtr<AnimationHandler> handler = GetOrCreateAnimationHandler();
-    Boolean pendingContains = FALSE, aContains = FALSE;
     AutoPtr<IValueAnimator> thisAnim = this;
-    List<AutoPtr<IValueAnimator> >::Iterator pIt = Find(handler->mPendingAnimations.Begin(), handler->mPendingAnimations.End(), thisAnim);
-    List<AutoPtr<IValueAnimator> >::Iterator aIt = Find(handler->mAnimations.Begin(), handler->mAnimations.End(), thisAnim);
-    pendingContains = pIt != handler->mPendingAnimations.End();
-    aContains = aIt != handler->mAnimations.End();
-
-    if (!pendingContains && !aContains) {
+    if (Find(handler->mAnimations.Begin(), handler->mAnimations.End(), thisAnim) == handler->mAnimations.End()
+        && Find(handler->mPendingAnimations.Begin(), handler->mPendingAnimations.End(), thisAnim) == handler->mPendingAnimations.End()) {
         // Special case if the animation has not yet started; get it ready for ending
         mStartedDelay = FALSE;
         StartAnimation(handler);
@@ -687,10 +712,8 @@ ECode ValueAnimator::End()
     else if (!mInitialized) {
         InitAnimation();
     }
-
     AnimateValue(mPlayingBackwards ? 0.0f : 1.0f);
     EndAnimation(handler);
-
     return NOERROR;
 }
 
@@ -738,15 +761,14 @@ ECode ValueAnimator::Reverse()
         Int64 currentPlayTime = currentTime - mStartTime;
         Int64 timeLeft = mDuration - currentPlayTime;
         mStartTime = currentTime - timeLeft;
+        return NOERROR;
     }
     else if (mStarted) {
-        End();
+        return End();
     }
     else {
-        Start(TRUE);
+        return Start(TRUE);
     }
-
-    return NOERROR;
 }
 
 ECode ValueAnimator::CanReverse(
@@ -760,24 +782,26 @@ ECode ValueAnimator::CanReverse(
 void ValueAnimator::EndAnimation(
     /* [in] */ AnimationHandler* handler)
 {
-    assert(handler != NULL);
     AutoPtr<IValueAnimator> anim = this; // holder ref here
     handler->mAnimations.Remove(anim);
     handler->mPendingAnimations.Remove(anim);
     handler->mDelayedAnims.Remove(anim);
-
     mPlayingState = STOPPED;
     mPaused = FALSE;
-    if ((mStarted || mRunning) && !mListeners.IsEmpty()) {
+    if ((mStarted || mRunning) && mListeners != NULL) {
         if (!mRunning) {
             // If it's not yet running, then start listeners weren't called. Call them now.
             NotifyStartListeners();
         }
-
-        List<AutoPtr<IAnimatorListener> > tmpListeners(mListeners);
-        List<AutoPtr<IAnimatorListener> >::Iterator it;
-        for (it = tmpListeners.Begin(); it != tmpListeners.End(); ++it) {
-            (*it)->OnAnimationEnd(this);
+        AutoPtr<IInterface> cloneObj;
+        ICloneable::Probe(mListeners)->Clone((IInterface**)&cloneObj);
+        IArrayList* tmpListeners = IArrayList::Probe(cloneObj);
+        Int32 numListeners;
+        tmpListeners->GetSize(&numListeners);
+        for (Int32 i = 0; i < numListeners; ++i) {
+            AutoPtr<IInterface> obj;
+            tmpListeners->Get(i, (IInterface**)&obj);
+            IAnimatorListener::Probe(obj)->OnAnimationEnd(this);
         }
     }
     mRunning = FALSE;
@@ -798,16 +822,14 @@ void ValueAnimator::EndAnimation(
 void ValueAnimator::StartAnimation(
     /* [in] */ AnimationHandler* handler)
 {
-    assert(handler != NULL);
     // if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
     //     Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW, getNameForTrace(),
     //             System.identityHashCode(this));
     // }
-
     InitAnimation();
     AutoPtr<IValueAnimator> anim = this;
     handler->mAnimations.PushBack(anim);
-    if (mStartDelay > 0 && mListeners.IsEmpty() == FALSE) {
+    if (mStartDelay > 0 && mListeners != NULL) {
         // Listeners were already notified in start() if startDelay is 0; this is
         // just for delayed animations
         NotifyStartListeners();
@@ -861,20 +883,21 @@ Boolean ValueAnimator::AnimationFrame(
             if (fraction >= 1.0f) {
                 if (mCurrentIteration < mRepeatCount || mRepeatCount == INFINITE) {
                     // Time to repeat
-                    if (mListeners.IsEmpty() == FALSE) {
-                        List<AutoPtr<IAnimatorListener> >::Iterator it = mListeners.Begin();
-                        for (; it != mListeners.End(); ++it) {
-                            (*it)->OnAnimationRepeat(this);
+                    if (mListeners != NULL) {
+                        Int32 numListeners;
+                        mListeners->GetSize(&numListeners);
+                        for (Int32 i = 0; i < numListeners; ++i) {
+                            AutoPtr<IInterface> obj;
+                            mListeners->Get(i, (IInterface**)&obj);
+                            IAnimatorListener::Probe(obj)->OnAnimationRepeat(this);
                         }
                     }
-
                     if (mRepeatMode == IValueAnimator::ANIMATION_REVERSE) {
                         mPlayingBackwards = !mPlayingBackwards;
                     }
-
                     mCurrentIteration += (Int32)fraction;
-                    Int32 iValue = (Int32)fraction;
-                    fraction = fraction - iValue;// fraction %1.0f
+                    Int32 value = fraction;
+                    fraction = fraction - value; //fraction % 1.0f;
                     mStartTime += mDuration;
                 }
                 else {
@@ -882,11 +905,9 @@ Boolean ValueAnimator::AnimationFrame(
                     fraction = Elastos::Core::Math::Min(fraction, 1.0f);
                 }
             }
-
             if (mPlayingBackwards) {
                 fraction = 1.0f - fraction;
             }
-
             AnimateValue(fraction);
             break;
     }
@@ -908,7 +929,6 @@ Boolean ValueAnimator::DoAnimationFrame(
             mSeekTime = -1;
         }
     }
-
     if (mPaused) {
         if (mPauseTime < 0) {
             mPauseTime = frameTime;
@@ -922,7 +942,6 @@ Boolean ValueAnimator::DoAnimationFrame(
             mStartTime += (frameTime - mPauseTime);
         }
     }
-
     // The frame time might be before the start time during the first frame of
     // an animation.  The "current time" must always be on or after the start
     // time to avoid animating frames at negative time intervals.  In practice, this
@@ -940,22 +959,23 @@ ECode ValueAnimator::GetAnimatedFraction(
 }
 
 ECode ValueAnimator::AnimateValue(
-    /* [in] */ Float _fraction)
+    /* [in] */ Float fraction)
 {
-    Float fraction;
-    mInterpolator->GetInterpolation(_fraction, &fraction);
+    mInterpolator->GetInterpolation(fraction, &fraction);
     mCurrentFraction = fraction;
     Int32 numValues = mValues->GetLength();
     for (Int32 i = 0; i < numValues; ++i) {
         AutoPtr<IPropertyValuesHolder> pvh = (*mValues)[i];
-       PropertyValuesHolder* holder = (PropertyValuesHolder*)pvh.Get();
-       holder->CalculateValue(fraction);
+        PropertyValuesHolder* holder = (PropertyValuesHolder*)pvh.Get();
+        holder->CalculateValue(fraction);
     }
-
-    if (mUpdateListeners.IsEmpty() == FALSE) {
-        List<AutoPtr<IAnimatorUpdateListener> >::Iterator it = mUpdateListeners.Begin();
-        for (; it != mUpdateListeners.End(); ++it) {
-            (*it)->OnAnimationUpdate(this);
+    if (mUpdateListeners != NULL) {
+        Int32 numListeners;
+        mUpdateListeners->GetSize(&numListeners);
+        for (Int32 i = 0; i < numListeners; ++i) {
+            AutoPtr<IInterface> obj;
+            mUpdateListeners->Get(i, (IInterface**)&obj);
+            IAnimatorUpdateListener::Probe(obj)->OnAnimationUpdate(this);
         }
     }
     return NOERROR;
@@ -981,18 +1001,23 @@ ECode ValueAnimator::CloneImpl(
 
     ValueAnimator* anim = (ValueAnimator*)object;
 
-    if (mUpdateListeners.IsEmpty() == FALSE) {
-       anim->mUpdateListeners.Clear();
-       Copy(mUpdateListeners.Begin(), mUpdateListeners.End(), anim->mUpdateListeners.Begin());
+    if (mUpdateListeners != NULL) {
+        AutoPtr<IArrayList> oldListeners = mUpdateListeners;
+        CArrayList::New((IArrayList**)&anim->mUpdateListeners);
+        Int32 numListeners;
+        oldListeners->GetSize(&numListeners);
+        for (Int32 i = 0; i < numListeners; ++i) {
+            AutoPtr<IInterface> obj;
+            oldListeners->Get(i, (IInterface**)&obj);
+            anim->mUpdateListeners->Add(obj);
+        }
     }
-
     anim->mSeekTime = -1;
     anim->mPlayingBackwards = FALSE;
     anim->mCurrentIteration = 0;
     anim->mInitialized = FALSE;
     anim->mPlayingState = STOPPED;
     anim->mStartedDelay = FALSE;
-
     if (mValues != NULL) {
         Int32 numValues = mValues->GetLength();
         anim->mValues = ArrayOf<IPropertyValuesHolder*>::Alloc(numValues);
@@ -1034,56 +1059,28 @@ AutoPtr<ValueAnimator::AnimationHandler> ValueAnimator::GetOrCreateAnimationHand
         pthread_setspecific(sAnimationHandler, handler.Get());
         handler->AddRef();
     }
-
     return handler;
 }
 
-AutoPtr<IValueAnimator> ValueAnimator::OfInt32(
-    /* [in] */ ArrayOf<Int32>* values)
+ECode ValueAnimator::ToString(
+    /* [out] */ String* info)
 {
-    AutoPtr<IValueAnimator> anim;
-    CValueAnimator::New((IValueAnimator**)&anim);
-    anim->SetInt32Values(values);
-    return anim;
-}
-
-AutoPtr<IValueAnimator> ValueAnimator::OfArgb(
-    /* [in] */ ArrayOf<Int32>* values)
-{
-    AutoPtr<IValueAnimator> anim;
-    CValueAnimator::New((IValueAnimator**)&anim);
-    anim->SetInt32Values(values);
-    anim->SetEvaluator(ITypeEvaluator::Probe(CArgbEvaluator::GetInstance()));
-    return anim;
-}
-
-AutoPtr<IValueAnimator> ValueAnimator::OfFloat(
-    /* [in] */ ArrayOf<Float>* values)
-{
-    AutoPtr<IValueAnimator> anim;
-    CValueAnimator::New((IValueAnimator**)&anim);
-    anim->SetFloatValues(values);
-    return anim;
-}
-
-AutoPtr<IValueAnimator> ValueAnimator::OfPropertyValuesHolder(
-    /* [in] */ ArrayOf<IPropertyValuesHolder*>* values)
-{
-    AutoPtr<IValueAnimator> anim;
-    CValueAnimator::New((IValueAnimator**)&anim);
-    anim->SetValues(values);
-    return anim;
-}
-
-AutoPtr<IValueAnimator> ValueAnimator::OfObject(
-    /* [in] */ ITypeEvaluator* evaluator,
-    /* [in] */ ArrayOf<IInterface*>* values)
-{
-    AutoPtr<IValueAnimator> anim;
-    CValueAnimator::New((IValueAnimator**)&anim);
-    anim->SetObjectValues(values);
-    anim->SetEvaluator(evaluator);
-    return anim;
+    VALIDATE_NOT_NULL(info);
+    StringBuilder sb;
+    sb += "ValueAnimator@";
+    Int32 hashCode;
+    GetHashCode(&hashCode);
+    sb += StringUtils::ToHexString(hashCode);
+    if (mValues != NULL) {
+        for (Int32 i = 0; i < mValues->GetLength(); ++i) {
+            sb += "\n    ";
+            String info;
+            IObject::Probe((*mValues)[i])->ToString(&info);
+            sb += info;
+        }
+    }
+    *info = sb.ToString();
+    return NOERROR;
 }
 
 ECode ValueAnimator::SetAllowRunningAsynchronously(

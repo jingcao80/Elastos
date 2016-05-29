@@ -82,80 +82,7 @@ public:
         /* [out] */ String* name);
 
     // @Override
-    virtual CARAPI_(String) GetNameForTrace();
-
-    //@Override
-    virtual CARAPI SetInt32Values(
-        /* [in] */ ArrayOf<Int32>* values);
-
-    //@Override
-    virtual CARAPI SetFloatValues(
-        /* [in] */ ArrayOf<Float>* values);
-
-    //@Override
-    virtual CARAPI SetObjectValues(
-        /* [in] */ ArrayOf<IInterface*>* values);
-
-    //@Override
-    virtual CARAPI Start();
-
-    /**
-     * This function is called immediately before processing the first animation
-     * frame of an animation. If there is a nonzero <code>startDelay</code>, the
-     * function is called after that delay ends.
-     * It takes care of the final initialization steps for the
-     * animation. This includes setting mEvaluator, if the user has not yet
-     * set it up, and the setter/getter methods, if the user did not supply
-     * them.
-     *
-     *  <p>Overriders of this method should call the superclass method to cause
-     *  internal mechanisms to be set up correctly.</p>
-     */
-    //@Override
-    virtual CARAPI InitAnimation();
-
-    /**
-     * Sets the length of the animation. The default duration is 300 milliseconds.
-     *
-     * @param duration The length of the animation, in milliseconds.
-     * @return ObjectAnimator The object called with setDuration(). This return
-     * value makes it easier to compose statements together that construct and then set the
-     * duration, as in
-     * <code>ObjectAnimator.ofInt(target, propertyName, 0, 10).setDuration(500).start()</code>.
-     */
-    //@Override
-    virtual CARAPI SetDuration(
-        /* [in] */ Int64 duration);
-
-    /**
-     * The target object whose property will be animated by this animation
-     *
-     * @return The object being animated
-     */
-    virtual CARAPI GetTarget(
-        /* [out] */ IInterface** object);
-
-    /**
-     * Sets the target object whose property will be animated by this animation
-     *
-     * @param target The object being animated
-     */
-    //@Override
-    virtual CARAPI SetTarget(
-        /*[in] */ IInterface* target);
-
-    //@Override
-    virtual CARAPI SetupStartValues();
-
-    //@Override
-    virtual CARAPI SetupEndValues();
-
-    //@Override
-    virtual CARAPI AnimateValue(
-        /* [in] */ Float fraction);
-
-    virtual CARAPI Clone(
-        /* [out] */ IInterface** object);
+    CARAPI_(String) GetNameForTrace();
 
     /**
      * Constructs and returns an ObjectAnimator that animates between Int32 values. A single
@@ -171,26 +98,9 @@ public:
      * @param values A set of values that the animation will animate between over time.
      * @return An ObjectAnimator object that is set up to animate between the given values.
      */
-    static AutoPtr<IObjectAnimator> OfInt32(
+    static CARAPI_(AutoPtr<IObjectAnimator>) OfInt32(
         /* [in] */ IInterface* target,
         /* [in] */ const String& propertyName,
-        /* [in] */ ArrayOf<Int32>* values);
-
-    /**
-     * Constructs and returns an ObjectAnimator that animates between int values. A single
-     * value implies that that value is the one being animated to. Two values imply a starting
-     * and ending values. More than two values imply a starting value, values to animate through
-     * along the way, and an ending value (these values will be distributed evenly across
-     * the duration of the animation).
-     *
-     * @param target The object whose property is to be animated.
-     * @param property The property being animated.
-     * @param values A set of values that the animation will animate between over time.
-     * @return An ObjectAnimator object that is set up to animate between the given values.
-     */
-    static AutoPtr<IObjectAnimator> OfInt32(
-        /* [in] */ IInterface* target,
-        /* [in] */ IProperty* property,
         /* [in] */ ArrayOf<Int32>* values);
 
     /**
@@ -210,11 +120,28 @@ public:
      * @param path The <code>Path</code> to animate values along.
      * @return An ObjectAnimator object that is set up to animate along <code>path</code>.
      */
-    static AutoPtr<IObjectAnimator> OfInt32(
+    static CARAPI_(AutoPtr<IObjectAnimator>) OfInt32(
         /* [in] */ IObject* target,
         /* [in] */ const String& xPropertyName,
         /* [in] */ const String& yPropertyName,
         /* [in] */ IPath* path);
+
+    /**
+     * Constructs and returns an ObjectAnimator that animates between int values. A single
+     * value implies that that value is the one being animated to. Two values imply a starting
+     * and ending values. More than two values imply a starting value, values to animate through
+     * along the way, and an ending value (these values will be distributed evenly across
+     * the duration of the animation).
+     *
+     * @param target The object whose property is to be animated.
+     * @param property The property being animated.
+     * @param values A set of values that the animation will animate between over time.
+     * @return An ObjectAnimator object that is set up to animate between the given values.
+     */
+    static CARAPI_(AutoPtr<IObjectAnimator>) OfInt32(
+        /* [in] */ IInterface* target,
+        /* [in] */ IProperty* property,
+        /* [in] */ ArrayOf<Int32>* values);
 
     /**
      * Constructs and returns an ObjectAnimator that animates coordinates along a <code>Path</code>
@@ -229,7 +156,7 @@ public:
      * @param path The <code>Path</code> to animate values along.
      * @return An ObjectAnimator object that is set up to animate along <code>path</code>.
      */
-    static AutoPtr<IObjectAnimator> OfInt32(
+    static CARAPI_(AutoPtr<IObjectAnimator>) OfInt32(
         /* [in] */ IInterface* target,
         /* [in] */ IProperty* xProperty,
         /* [in] */ IProperty* yProperty,
@@ -339,6 +266,25 @@ public:
         /* [in] */ ArrayOf<Int32>* values);
 
     /**
+     * Constructs and returns an ObjectAnimator that animates between Float values. A single
+     * value implies that that value is the one being animated to. Two values imply a starting
+     * and ending values. More than two values imply a starting value, values to animate through
+     * along the way, and an ending value (these values will be distributed evenly across
+     * the duration of the animation).
+     *
+     * @param target The object whose property is to be animated. This object should
+     * have a public method on it called <code>setName()</code>, where <code>name</code> is
+     * the value of the <code>propertyName</code> parameter.
+     * @param propertyName The name of the property being animated.
+     * @param values A set of values that the animation will animate between over time.
+     * @return An ObjectAnimator object that is set up to animate between the given values.
+     */
+    static CARAPI_(AutoPtr<IObjectAnimator>) OfFloat(
+        /* [in] */ IInterface* target,
+        /* [in] */ const String& propertyName,
+        /* [in] */ ArrayOf<Float>* values);
+
+    /**
      * Constructs and returns an ObjectAnimator that animates coordinates along a <code>Path</code>
      * using two properties. A <code>Path</code></> animation moves in two dimensions, animating
      * coordinates <code>(x, y)</code> together to follow the line. In this variation, the
@@ -360,6 +306,23 @@ public:
         /* [in] */ const String& xPropertyName,
         /* [in] */ const String& yPropertyName,
         /* [in] */ IPath* path);
+
+    /**
+     * Constructs and returns an ObjectAnimator that animates between float values. A single
+     * value implies that that value is the one being animated to. Two values imply a starting
+     * and ending values. More than two values imply a starting value, values to animate through
+     * along the way, and an ending value (these values will be distributed evenly across
+     * the duration of the animation).
+     *
+     * @param target The object whose property is to be animated.
+     * @param property The property being animated.
+     * @param values A set of values that the animation will animate between over time.
+     * @return An ObjectAnimator object that is set up to animate between the given values.
+     */
+    static CARAPI_(AutoPtr<IObjectAnimator>) OfFloat(
+        /* [in] */ IInterface* target,
+        /* [in] */ IProperty* propertyName,
+        /* [in] */ ArrayOf<Float>* values);
 
     /**
      * Constructs and returns an ObjectAnimator that animates coordinates along a <code>Path</code>
@@ -448,42 +411,6 @@ public:
         /* [in] */ ArrayOf<IInterface*>* values);
 
     /**
-     * Constructs and returns an ObjectAnimator that animates between Float values. A single
-     * value implies that that value is the one being animated to. Two values imply a starting
-     * and ending values. More than two values imply a starting value, values to animate through
-     * along the way, and an ending value (these values will be distributed evenly across
-     * the duration of the animation).
-     *
-     * @param target The object whose property is to be animated. This object should
-     * have a public method on it called <code>setName()</code>, where <code>name</code> is
-     * the value of the <code>propertyName</code> parameter.
-     * @param propertyName The name of the property being animated.
-     * @param values A set of values that the animation will animate between over time.
-     * @return An ObjectAnimator object that is set up to animate between the given values.
-     */
-    static AutoPtr<IObjectAnimator> OfFloat(
-        /* [in] */ IInterface* target,
-        /* [in] */ const String& propertyName,
-        /* [in] */ ArrayOf<Float>* values);
-
-    /**
-     * Constructs and returns an ObjectAnimator that animates between float values. A single
-     * value implies that that value is the one being animated to. Two values imply a starting
-     * and ending values. More than two values imply a starting value, values to animate through
-     * along the way, and an ending value (these values will be distributed evenly across
-     * the duration of the animation).
-     *
-     * @param target The object whose property is to be animated.
-     * @param property The property being animated.
-     * @param values A set of values that the animation will animate between over time.
-     * @return An ObjectAnimator object that is set up to animate between the given values.
-     */
-    static AutoPtr<IObjectAnimator> OfFloat(
-        /* [in] */ IInterface* target,
-        /* [in] */ IProperty* propertyName,
-        /* [in] */ ArrayOf<Float>* values);
-
-    /**
      * Constructs and returns an ObjectAnimator that animates between Object values. A single
      * value implies that that value is the one being animated to. Two values imply a starting
      * and ending values. More than two values imply a starting value, values to animate through
@@ -503,27 +430,6 @@ public:
     static AutoPtr<IObjectAnimator> OfObject(
         /* [in] */ IInterface* target,
         /* [in] */ const String& propertyName,
-        /* [in] */ ITypeEvaluator* evaluator,
-        /* [in] */ ArrayOf<IInterface*>* values);
-
-    /**
-     * Constructs and returns an ObjectAnimator that animates between Object values. A single
-     * value implies that that value is the one being animated to. Two values imply a starting
-     * and ending values. More than two values imply a starting value, values to animate through
-     * along the way, and an ending value (these values will be distributed evenly across
-     * the duration of the animation).
-     *
-     * @param target The object whose property is to be animated.
-     * @param property The property being animated.
-     * @param evaluator A TypeEvaluator that will be called on each animation frame to
-     * provide the necessary interpolation between the Object values to derive the animated
-     * value.
-     * @param values A set of values that the animation will animate between over time.
-     * @return An ObjectAnimator object that is set up to animate between the given values.
-     */
-    static AutoPtr<IObjectAnimator> OfObject(
-        /* [in] */ IInterface* target,
-        /* [in] */ IProperty* property,
         /* [in] */ ITypeEvaluator* evaluator,
         /* [in] */ ArrayOf<IInterface*>* values);
 
@@ -549,8 +455,29 @@ public:
     static CARAPI_(AutoPtr<IObjectAnimator>) OfObject(
         /* [in] */ IInterface* target,
         /* [in] */ const String& propertyName,
-        /* [in] */ /*@Nullable*/ ITypeConverter* converter,
+        /* [in] */ ITypeConverter* converter,
         /* [in] */ IPath* path);
+
+    /**
+     * Constructs and returns an ObjectAnimator that animates between Object values. A single
+     * value implies that that value is the one being animated to. Two values imply a starting
+     * and ending values. More than two values imply a starting value, values to animate through
+     * along the way, and an ending value (these values will be distributed evenly across
+     * the duration of the animation).
+     *
+     * @param target The object whose property is to be animated.
+     * @param property The property being animated.
+     * @param evaluator A TypeEvaluator that will be called on each animation frame to
+     * provide the necessary interpolation between the Object values to derive the animated
+     * value.
+     * @param values A set of values that the animation will animate between over time.
+     * @return An ObjectAnimator object that is set up to animate between the given values.
+     */
+    static AutoPtr<IObjectAnimator> OfObject(
+        /* [in] */ IInterface* target,
+        /* [in] */ IProperty* property,
+        /* [in] */ ITypeEvaluator* evaluator,
+        /* [in] */ ArrayOf<IInterface*>* values);
 
     /**
      * Constructs and returns an ObjectAnimator that animates between Object values. A single
@@ -601,8 +528,8 @@ public:
     // @NonNull
     static CARAPI_(AutoPtr<IObjectAnimator>) OfObject(
         /* [in] */ IInterface* target,
-        /* [in] */ /*@NonNull*/ IProperty* property,
-        /* [in] */ /*@Nullable*/ ITypeConverter* converter,
+        /* [in] */ IProperty* property,
+        /* [in] */ ITypeConverter* converter,
         /* [in] */ IPath* path);
 
     /**
@@ -622,9 +549,21 @@ public:
      * over time.
      * @return An ObjectAnimator object that is set up to animate between the given values.
      */
-    static AutoPtr<IObjectAnimator> OfPropertyValuesHolder(
+    static CARAPI_(AutoPtr<IObjectAnimator>) OfPropertyValuesHolder(
         /* [in] */ IInterface* target,
         /* [in] */ ArrayOf<IPropertyValuesHolder*>* values);
+
+    //@Override
+    CARAPI SetInt32Values(
+        /* [in] */ ArrayOf<Int32>* values);
+
+    //@Override
+    CARAPI SetFloatValues(
+        /* [in] */ ArrayOf<Float>* values);
+
+    //@Override
+    CARAPI SetObjectValues(
+        /* [in] */ ArrayOf<IInterface*>* values);
 
     /**
      * autoCancel controls whether an ObjectAnimator will be canceled automatically
@@ -640,15 +579,73 @@ public:
     virtual CARAPI SetAutoCancel(
         /* [in] */ Boolean cancel);
 
-    CARAPI_(Boolean) HasSameTargetAndProperties(
-        /* [in] */ /*@Nullable*/ IAnimator* anim);
+    //@Override
+    CARAPI Start();
+
+    /**
+     * This function is called immediately before processing the first animation
+     * frame of an animation. If there is a nonzero <code>startDelay</code>, the
+     * function is called after that delay ends.
+     * It takes care of the final initialization steps for the
+     * animation. This includes setting mEvaluator, if the user has not yet
+     * set it up, and the setter/getter methods, if the user did not supply
+     * them.
+     *
+     *  <p>Overriders of this method should call the superclass method to cause
+     *  internal mechanisms to be set up correctly.</p>
+     */
+    //@Override
+    CARAPI InitAnimation();
+
+    /**
+     * Sets the length of the animation. The default duration is 300 milliseconds.
+     *
+     * @param duration The length of the animation, in milliseconds.
+     * @return ObjectAnimator The object called with setDuration(). This return
+     * value makes it easier to compose statements together that construct and then set the
+     * duration, as in
+     * <code>ObjectAnimator.ofInt(target, propertyName, 0, 10).setDuration(500).start()</code>.
+     */
+    //@Override
+    CARAPI SetDuration(
+        /* [in] */ Int64 duration);
+
+    /**
+     * The target object whose property will be animated by this animation
+     *
+     * @return The object being animated
+     */
+    CARAPI GetTarget(
+        /* [out] */ IInterface** object);
+
+    /**
+     * Sets the target object whose property will be animated by this animation
+     *
+     * @param target The object being animated
+     */
+    //@Override
+    CARAPI SetTarget(
+        /*[in] */ IInterface* target);
+
+    //@Override
+    CARAPI SetupStartValues();
+
+    //@Override
+    CARAPI SetupEndValues();
+
+    //@Override
+    CARAPI AnimateValue(
+        /* [in] */ Float fraction);
+
+    //@Override
+    CARAPI Clone(
+        /* [out] */ IInterface** object);
 
     // @Override
-    // @NonNull
     CARAPI ToString(
         /* [out] */ String* str);
 
-protected:
+private:
     /**
      * Private utility constructor that initializes the target object and name of the
      * property being animated.
@@ -672,11 +669,16 @@ protected:
         /* [in] */ IInterface* target,
         /* [in] */ IProperty* property);
 
+    CARAPI_(Boolean) HasSameTargetAndProperties(
+        /* [in] */ IAnimator* anim);
+
     CARAPI CloneImpl(
         /* [in] */ IObjectAnimator* anim);
 
 private:
     static const String LOGTAG;
+
+    static const Boolean DBG;
 
     /**
      * A weak reference to the target object on which the property exists, set
@@ -690,7 +692,6 @@ private:
 
     Boolean mAutoCancel;
 };
-
 
 }   //namespace Animation
 }   //namespace Droid

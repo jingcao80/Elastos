@@ -13380,7 +13380,8 @@ AutoPtr<IRenderNode> View::GetDrawableRenderNode(
 {
     AutoPtr<IRenderNode> renderNode = inRenderNode;
     if (renderNode == NULL) {
-        AutoPtr<IClassInfo> cInfo = PropertyValuesHolder::TransformClassInfo(drawable);
+        AutoPtr<IClassInfo> cInfo;
+        CObject::ReflectClassInfo(drawable, (IClassInfo**)&cInfo);
         String name;
         cInfo->GetName(&name);
         renderNode = RenderNode::Create(name, this);

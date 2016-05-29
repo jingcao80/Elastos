@@ -23,7 +23,6 @@ Animator::Animator()
 
 Animator::~Animator()
 {
-    mListeners.Clear();
     if (mParentRefCount > 0) {
         Logger::E("Animator", " parent:%s not released. mParentRefCount:%d.",
             TO_CSTR(mParent), mParentRefCount);
@@ -108,46 +107,40 @@ ECode Animator::IsStarted(
     /* [out] */ Boolean* started)
 {
     VALIDATE_NOT_NULL(started);
-
     return IsRunning(started);
 }
 
 ECode Animator::AddListener(
     /* [in] */ IAnimatorListener* listener)
 {
-    mListeners.PushBack(listener);
+    if (mListeners == NULL) {
+        CArrayList::New((IArrayList**)&mListeners);
+    }
+    mListeners->Add(listener);
     return NOERROR;
 }
 
 ECode Animator::RemoveListener(
     /* [in] */ IAnimatorListener* listener)
 {
-    if (mListeners.IsEmpty()) {
+    if (mListeners == NULL) {
         return NOERROR;
     }
-
-    mListeners.Remove(listener);
+    mListeners->Remove(listener);
+    Int32 size;
+    mListeners->GetSize(&size);
+    if (size == 0) {
+        mListeners = NULL;
+    }
     return NOERROR;
 }
 
 ECode Animator::GetListeners(
-    /* [out] */ ArrayOf<IAnimatorListener*>** listeners)
+    /* [out] */ IArrayList** listeners)
 {
     VALIDATE_NOT_NULL(listeners);
-    *listeners = NULL;
-
-    Int32 size = mListeners.GetSize();
-    if (size > 0) {
-        AutoPtr<ArrayOf<IAnimatorListener*> > tmp = ArrayOf<IAnimatorListener*>::Alloc(size);
-        List<AutoPtr<IAnimatorListener> >::Iterator it = mListeners.Begin();
-        for (Int32 i = 0; it != mListeners.End(); it++, i++) {
-            tmp->Set(i, *it);
-        }
-        *listeners = tmp;
-        REFCOUNT_ADD(*listeners);
-        return NOERROR;
-    }
-
+    *listeners = mListeners;
+    REFCOUNT_ADD(*listeners);
     return NOERROR;
 }
 
@@ -177,13 +170,14 @@ ECode Animator::RemovePauseListener(
 
 ECode Animator::RemoveAllListeners()
 {
-    mListeners.Clear();
-
+    if (mListeners != NULL) {
+        mListeners->Clear();
+        mListeners = NULL;
+    }
     if (mPauseListeners != NULL) {
         mPauseListeners->Clear();
         mPauseListeners = NULL;
     }
-
     return NOERROR;
 }
 
@@ -193,11 +187,17 @@ ECode Animator::CloneImpl(
     VALIDATE_NOT_NULL(_anim)
 
     Animator* anim = (Animator*)_anim;
-    if (mListeners.IsEmpty() == FALSE) {
-        anim->mListeners.Clear();
-        Copy(mListeners.Begin(), mListeners.End(), anim->mListeners.Begin());
+    if (mListeners != NULL) {
+        AutoPtr<IArrayList> oldListeners = mListeners;
+        CArrayList::New((IArrayList**)&anim->mListeners);
+        Int32 numListeners;
+        oldListeners->GetSize(&numListeners);
+        for (Int32 i = 0; i < numListeners; ++i) {
+            AutoPtr<IInterface> listener;
+            oldListeners->Get(i, (IInterface**)&listener);
+            anim->mListeners->Add(listener);
+        }
     }
-
     if (mPauseListeners != NULL) {
         AutoPtr<IArrayList> oldListeners = mPauseListeners;
         anim->mPauseListeners = NULL;
@@ -210,7 +210,6 @@ ECode Animator::CloneImpl(
             anim->mPauseListeners->Add(listener);
         }
     }
-
     return NOERROR;
 }
 

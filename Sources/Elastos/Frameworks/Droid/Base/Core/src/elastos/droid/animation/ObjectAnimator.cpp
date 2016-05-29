@@ -17,6 +17,7 @@ namespace Droid {
 namespace Animation {
 
 const String ObjectAnimator::LOGTAG("ObjectAnimator");
+const Boolean ObjectAnimator::DBG = FALSE;
 
 CAR_INTERFACE_IMPL(ObjectAnimator, ValueAnimator, IObjectAnimator);
 
@@ -38,16 +39,13 @@ ECode ObjectAnimator::SetPropertyName(
         AutoPtr<IPropertyValuesHolder> valuesHolder = (*mValues)[0];
         String oldName;
         valuesHolder->GetPropertyName(&oldName);
-
         valuesHolder->SetPropertyName(propertyName);
         mValuesMap.Erase(oldName);
         mValuesMap[propertyName] = valuesHolder;
     }
-
     mPropertyName = propertyName;
     // New property/values/target should cause re-initialization prior to starting
     mInitialized = FALSE;
-
     return NOERROR;
 }
 
@@ -64,15 +62,12 @@ ECode ObjectAnimator::SetProperty(
         mValuesMap.Erase(oldName);
         mValuesMap[mPropertyName] = valuesHolder;
     }
-
     if (mProperty != NULL) {
         property->GetName(&mPropertyName);
     }
-
     mProperty = property;
     // New property/values/target should cause re-initialization prior to starting
     mInitialized = FALSE;
-
     return NOERROR;
 }
 
@@ -95,7 +90,6 @@ ECode ObjectAnimator::GetPropertyName(
             else {
                 propertyName += ",";
             }
-
             String tmp;
             (*mValues)[i]->GetPropertyName(&tmp);
             propertyName += tmp;
@@ -109,9 +103,7 @@ String ObjectAnimator::GetNameForTrace()
 {
     String name;
     GetPropertyName(&name);
-    StringBuilder sb("animator:");
-    sb += name;
-    return sb.ToString();
+    return String("animator:") + name;
 }
 
 ECode ObjectAnimator::constructor(
@@ -119,7 +111,8 @@ ECode ObjectAnimator::constructor(
     /* [in] */ const String& propertyName)
 {
     SetTarget(target);
-    return SetPropertyName(propertyName);
+    SetPropertyName(propertyName);
+    return NOERROR;
 }
 
 ECode ObjectAnimator::constructor(
@@ -127,7 +120,400 @@ ECode ObjectAnimator::constructor(
     /* [in] */ IProperty* property)
 {
     SetTarget(target);
-    return SetProperty(property);
+    SetProperty(property);
+    return NOERROR;
+}
+
+static ECode CheckIsCarObject(
+    /* [in] */ IInterface* target)
+{
+#if defined(_DEBUG)
+    ECode ec = NOERROR;
+    if (target != NULL) {
+        ClassID objId;
+        if (IObject::Probe(target) == NULL ||
+                FAILED(IObject::Probe(target)->GetClassID(&objId))) {
+            Logger::E("ObjectAnimator", "Target object [%s] is not a CAR object!", TO_CSTR(target));
+            assert(0 && "Target object is not a CAR object!");
+        }
+    }
+    return ec;
+#endif
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
+    /* [in] */ IInterface* target,
+    /* [in] */ const String& propertyName,
+    /* [in] */ ArrayOf<Int32>* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IObjectAnimator> anim;
+    CObjectAnimator::New((IObjectAnimator**)&anim);
+    CObjectAnimator* oa = (CObjectAnimator*)anim.Get();
+    oa->constructor(target, propertyName);
+    IValueAnimator::Probe(anim)->SetInt32Values(values);
+    return anim;
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
+    /* [in] */ IObject* target,
+    /* [in] */ const String& xPropertyName,
+    /* [in] */ const String& yPropertyName,
+    /* [in] */ IPath* path)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
+    PathKeyframes* pkf = (PathKeyframes*)keyframes.Get();
+    AutoPtr<IInt32Keyframes> xfkf = pkf->CreateXInt32Keyframes();
+    AutoPtr<IInt32Keyframes> yfkf = pkf->CreateYInt32Keyframes();
+    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(
+            xPropertyName, IKeyframes::Probe(xfkf));
+    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(
+            yPropertyName, IKeyframes::Probe(yfkf));
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(2);
+    a->Set(0, x);
+    a->Set(1, y);
+    return OfPropertyValuesHolder(target, a);
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
+    /* [in] */ IInterface* target,
+    /* [in] */ IProperty* property,
+    /* [in] */ ArrayOf<Int32>* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IObjectAnimator> anim;
+    CObjectAnimator::New((IObjectAnimator**)&anim);
+    CObjectAnimator* oa = (CObjectAnimator*)anim.Get();
+    oa->constructor(target, property);
+    IValueAnimator::Probe(anim)->SetInt32Values(values);
+    return anim;
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
+    /* [in] */ IInterface* target,
+    /* [in] */ IProperty* xProperty,
+    /* [in] */ IProperty* yProperty,
+    /* [in] */ IPath* path)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
+    PathKeyframes* pkf = (PathKeyframes*)keyframes.Get();
+    AutoPtr<IInt32Keyframes> xfkf = pkf->CreateXInt32Keyframes();
+    AutoPtr<IInt32Keyframes> yfkf = pkf->CreateYInt32Keyframes();
+    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(
+            xProperty, IKeyframes::Probe(xfkf));
+    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(
+            yProperty, IKeyframes::Probe(yfkf));
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(2);
+    a->Set(0, x);
+    a->Set(1, y);
+    return OfPropertyValuesHolder(target, a);
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiInt32(
+    /* [in] */ IInterface* target,
+    /* [in] */ const String& propertyName,
+    /* [in] */ ArrayOf<ArrayOf<Int32>* >* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IPropertyValuesHolder> pvh;
+    PropertyValuesHolder::OfMultiInt32(propertyName, values, (IPropertyValuesHolder**)&pvh);
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
+    a->Set(0, pvh);
+    return OfPropertyValuesHolder(target, a);
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiInt32(
+    /* [in] */ IInterface* target,
+    /* [in] */ const String& propertyName,
+    /* [in] */ IPath* path)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfMultiInt32(propertyName, path);
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
+    a->Set(0, pvh);
+    return OfPropertyValuesHolder(target, a);
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiInt32(
+    /* [in] */ IInterface* target,
+    /* [in] */ const String& propertyName,
+    /* [in] */ ITypeConverter* converter,
+    /* [in] */ ITypeEvaluator* evaluator,
+    /* [in] */ ArrayOf<IInterface*>* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfMultiInt32(propertyName, converter,
+            evaluator, values);
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
+    a->Set(0, pvh);
+    return OfPropertyValuesHolder(target, a);
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfArgb(
+    /* [in] */ IInterface* target,
+    /* [in] */ const String& propertyName,
+    /* [in] */ ArrayOf<Int32>* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IObjectAnimator> animator = OfInt32(target, propertyName, values);
+    IValueAnimator::Probe(animator)->SetEvaluator(ITypeEvaluator::Probe(CArgbEvaluator::GetInstance()));
+    return animator;
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfArgb(
+    /* [in] */ IInterface* target,
+    /* [in] */ IProperty* property,
+    /* [in] */ ArrayOf<Int32>* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IObjectAnimator> animator = OfInt32(target, property, values);
+    IValueAnimator::Probe(animator)->SetEvaluator(ITypeEvaluator::Probe(CArgbEvaluator::GetInstance()));
+    return animator;
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
+    /* [in] */ IInterface* target,
+    /* [in] */ const String& propertyName,
+    /* [in] */ ArrayOf<Float>* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IObjectAnimator> anim;
+    CObjectAnimator::New((IObjectAnimator**)&anim);
+    CObjectAnimator* oa = (CObjectAnimator*)anim.Get();
+    oa->constructor(target, propertyName);
+    IValueAnimator::Probe(anim)->SetFloatValues(values);
+    return anim;
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
+    /* [in] */ IInterface* target,
+    /* [in] */ const String& xPropertyName,
+    /* [in] */ const String& yPropertyName,
+    /* [in] */ IPath* path)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
+    PathKeyframes* pkf = (PathKeyframes*)keyframes.Get();
+    AutoPtr<IFloatKeyframes> xfkf = pkf->CreateXFloatKeyframes();
+    AutoPtr<IFloatKeyframes> yfkf = pkf->CreateYFloatKeyframes();
+    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(
+            xPropertyName, IKeyframes::Probe(xfkf));
+    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(
+            yPropertyName, IKeyframes::Probe(yfkf));
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(2);
+    a->Set(0, x);
+    a->Set(1, y);
+    return OfPropertyValuesHolder(target, a);
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
+    /* [in] */ IInterface* target,
+    /* [in] */ IProperty* property,
+    /* [in] */ ArrayOf<Float>* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IObjectAnimator> anim;
+    CObjectAnimator::New((IObjectAnimator**)&anim);
+    CObjectAnimator* oa = (CObjectAnimator*)anim.Get();
+    oa->constructor(target, property);
+    IValueAnimator::Probe(anim)->SetFloatValues(values);
+    return anim;
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
+    /* [in] */ IInterface* target,
+    /* [in] */ IProperty* xProperty,
+    /* [in] */ IProperty* yProperty,
+    /* [in] */ IPath* path)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
+    PathKeyframes* pkf = (PathKeyframes*)keyframes.Get();
+    AutoPtr<IFloatKeyframes> xfkf = pkf->CreateXFloatKeyframes();
+    AutoPtr<IFloatKeyframes> yfkf = pkf->CreateYFloatKeyframes();
+    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(
+            xProperty, IKeyframes::Probe(xfkf));
+    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(
+            yProperty, IKeyframes::Probe(yfkf));
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(2);
+    a->Set(0, x);
+    a->Set(1, y);
+    return OfPropertyValuesHolder(target, a);
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiFloat(
+    /* [in] */ IInterface* target,
+    /* [in] */ const String& propertyName,
+    /* [in] */ ArrayOf<ArrayOf<Float>*>* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IPropertyValuesHolder> pvh;
+    PropertyValuesHolder::OfMultiFloat(propertyName, values, (IPropertyValuesHolder**)&pvh);
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
+    a->Set(0, pvh);
+    return OfPropertyValuesHolder(target, a);
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiFloat(
+    /* [in] */ IInterface* target,
+    /* [in] */ const String& propertyName,
+    /* [in] */ IPath* path)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfMultiFloat(propertyName, path);
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
+    a->Set(0, pvh);
+    return OfPropertyValuesHolder(target, a);
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiFloat(
+    /* [in] */ IInterface* target,
+    /* [in] */ const String& propertyName,
+    /* [in] */ ITypeConverter* converter,
+    /* [in] */ ITypeEvaluator* evaluator,
+    /* [in] */ ArrayOf<IInterface*>* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfMultiFloat(propertyName, converter,
+            evaluator, values);
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
+    a->Set(0, pvh);
+    return OfPropertyValuesHolder(target, a);
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
+    /* [in] */ IInterface* target,
+    /* [in] */ const String& propertyName,
+    /* [in] */ ITypeEvaluator* evaluator,
+    /* [in] */ ArrayOf<IInterface*>* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IObjectAnimator> anim;
+    CObjectAnimator::New((IObjectAnimator**)&anim);
+    CObjectAnimator* oa = (CObjectAnimator*)anim.Get();
+    oa->constructor(target, propertyName);
+    IValueAnimator* va = IValueAnimator::Probe(anim);
+    va->SetObjectValues(values);
+    va->SetEvaluator(evaluator);
+    return anim;
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
+    /* [in] */ IInterface* target,
+    /* [in] */ const String& propertyName,
+    /* [in] */ ITypeConverter* converter,
+    /* [in] */ IPath* path)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfObject(propertyName, converter, path);
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
+    a->Set(0, pvh);
+    return OfPropertyValuesHolder(target, a);
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
+    /* [in] */ IInterface* target,
+    /* [in] */ IProperty* property,
+    /* [in] */ ITypeEvaluator* evaluator,
+    /* [in] */ ArrayOf<IInterface*>* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IObjectAnimator> anim;
+    CObjectAnimator::New((IObjectAnimator**)&anim);
+    CObjectAnimator* oa = (CObjectAnimator*)anim.Get();
+    oa->constructor(target, property);
+    IValueAnimator* va = IValueAnimator::Probe(anim);
+    va->SetObjectValues(values);
+    va->SetEvaluator(evaluator);
+    return anim;
+}
+
+
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
+    /* [in] */ IInterface* target,
+    /* [in] */ IProperty* property,
+    /* [in] */ ITypeConverter* converter,
+    /* [in] */ ITypeEvaluator* evaluator,
+    /* [in] */ ArrayOf<IInterface*>* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfObject(property, converter, evaluator,
+            values);
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
+    a->Set(0, pvh);
+    return OfPropertyValuesHolder(target, a);
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
+    /* [in] */ IInterface* target,
+    /* [in] */ /*@NonNull*/ IProperty* property,
+    /* [in] */ /*@Nullable*/ ITypeConverter* converter,
+    /* [in] */ IPath* path)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfObject(property, converter, path);
+    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
+    a->Set(0, pvh);
+    return OfPropertyValuesHolder(target, a);
+}
+
+AutoPtr<IObjectAnimator> ObjectAnimator::OfPropertyValuesHolder(
+    /* [in] */ IInterface* target,
+    /* [in] */ ArrayOf<IPropertyValuesHolder*>* values)
+{
+    if (FAILED(CheckIsCarObject(target))) {
+        return NULL;
+    }
+    AutoPtr<IObjectAnimator> anim;
+    CObjectAnimator::New((IObjectAnimator**)&anim);
+    IAnimator::Probe(anim)->SetTarget(target);
+    IValueAnimator::Probe(anim)->SetValues(values);
+    return anim;
 }
 
 ECode ObjectAnimator::SetInt32Values(
@@ -138,18 +524,19 @@ ECode ObjectAnimator::SetInt32Values(
         // whatever the current propertyName is
         AutoPtr<ArrayOf<IPropertyValuesHolder*> > params = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
         if (mProperty != NULL) {
-            params->Set(0, PropertyValuesHolder::OfInt32(mProperty, values));
+            AutoPtr<IPropertyValuesHolder> holder = PropertyValuesHolder::OfInt32(mProperty, values);
+            params->Set(0, holder);
             SetValues(params);
         }
         else {
-            params->Set(0, PropertyValuesHolder::OfInt32(mPropertyName, values));
+            AutoPtr<IPropertyValuesHolder> holder = PropertyValuesHolder::OfInt32(mPropertyName, values);
+            params->Set(0, holder);
             SetValues(params);
         }
     }
     else {
         ValueAnimator::SetInt32Values(values);
     }
-
     return NOERROR;
 }
 
@@ -174,7 +561,6 @@ ECode ObjectAnimator::SetFloatValues(
     else {
         ValueAnimator::SetFloatValues(values);
     }
-
     return NOERROR;
 }
 
@@ -199,8 +585,42 @@ ECode ObjectAnimator::SetObjectValues(
     else {
         ValueAnimator::SetObjectValues(values);
     }
-
     return NOERROR;
+}
+
+ECode ObjectAnimator::SetAutoCancel(
+    /* [in] */ Boolean cancel)
+{
+    mAutoCancel = cancel;
+    return NOERROR;
+}
+
+Boolean ObjectAnimator::HasSameTargetAndProperties(
+    /* [in] */ IAnimator* anim)
+{
+    if (IObjectAnimator::Probe(anim)) {
+        AutoPtr<ArrayOf<IPropertyValuesHolder*> > theirValues;
+        IValueAnimator::Probe(anim)->GetValues((ArrayOf<IPropertyValuesHolder*>**)&theirValues);
+        AutoPtr<IInterface> obj1;
+        IObjectAnimator::Probe(anim)->GetTarget((IInterface**)&obj1);
+        AutoPtr<IInterface> obj2;
+        GetTarget((IInterface**)&obj2);
+        if (IInterface::Probe(obj1) == IInterface::Probe(obj2)
+                && mValues->GetLength() == theirValues->GetLength()) {
+            for (Int32 i = 0; i < mValues->GetLength(); ++i) {
+                AutoPtr<IPropertyValuesHolder> pvhMine = (*mValues)[i];
+                AutoPtr<IPropertyValuesHolder> pvhTheirs = (*theirValues)[i];
+                String pn1, pn2;
+                pvhMine->GetPropertyName(&pn1);
+                pvhTheirs->GetPropertyName(&pn2);
+                if (pn1.IsNull() || !pn1.Equals(pn2)) {
+                    return FALSE;
+                }
+            }
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 ECode ObjectAnimator::Start()
@@ -208,29 +628,25 @@ ECode ObjectAnimator::Start()
     // See if any of the current active/pending animators need to be canceled
     AutoPtr<AnimationHandler> handler = (AnimationHandler*)pthread_getspecific(sAnimationHandler);
     if (handler != NULL) {
-        List<AutoPtr<IValueAnimator> >::ReverseIterator it1 = handler->mAnimations.RBegin();
-        for (; it1 != handler->mAnimations.REnd(); ++it1) {
-            AutoPtr<IObjectAnimator> anim = IObjectAnimator::Probe(*it1);
+        List<AutoPtr<IValueAnimator> >::ReverseIterator it;
+        for (it = handler->mAnimations.RBegin(); it != handler->mAnimations.REnd(); ++it) {
+            AutoPtr<IObjectAnimator> anim = IObjectAnimator::Probe(*it);
             if (anim) {
                 if (((ObjectAnimator*)anim.Get())->mAutoCancel && HasSameTargetAndProperties(IAnimator::Probe(anim))) {
                     IAnimator::Probe(anim)->Cancel();
                 }
             }
         }
-
-        List<AutoPtr<IValueAnimator> >::ReverseIterator it2 = handler->mPendingAnimations.RBegin();
-        for (; it2 != handler->mPendingAnimations.REnd(); ++it2) {
-            AutoPtr<IObjectAnimator> anim = IObjectAnimator::Probe(*it2);
+        for (it = handler->mPendingAnimations.RBegin(); it != handler->mPendingAnimations.REnd(); ++it) {
+            AutoPtr<IObjectAnimator> anim = IObjectAnimator::Probe(*it);
             if (anim) {
                 if (((ObjectAnimator*)anim.Get())->mAutoCancel && HasSameTargetAndProperties(IAnimator::Probe(anim))) {
                     IAnimator::Probe(anim)->Cancel();
                 }
             }
         }
-
-        List<AutoPtr<IValueAnimator> >::ReverseIterator it3 = handler->mDelayedAnims.RBegin();
-        for (; it3 != handler->mDelayedAnims.REnd(); ++it3) {
-            AutoPtr<IObjectAnimator> anim = IObjectAnimator::Probe(*it3);
+        for (it = handler->mDelayedAnims.RBegin(); it != handler->mDelayedAnims.REnd(); ++it) {
+            AutoPtr<IObjectAnimator> anim = IObjectAnimator::Probe(*it);
             if (anim) {
                 if (((ObjectAnimator*)anim.Get())->mAutoCancel && HasSameTargetAndProperties(IAnimator::Probe(anim))) {
                     IAnimator::Probe(anim)->Cancel();
@@ -238,7 +654,7 @@ ECode ObjectAnimator::Start()
             }
         }
     }
-    if (FALSE) {
+    if (DBG) {
         Int64 duration;
         GetDuration(&duration);
         Logger::D(LOGTAG, " >>> %s :\n Anim target: %s, duration: %lld", TO_CSTR(this), TO_CSTR(mTarget), duration);
@@ -246,7 +662,6 @@ ECode ObjectAnimator::Start()
             Logger::D(LOGTAG, "         Values[%d]: %s", i, TO_CSTR((*mValues)[i]));
         }
     }
-
     return ValueAnimator::Start();
 }
 
@@ -258,14 +673,12 @@ ECode ObjectAnimator::InitAnimation()
         AutoPtr<IInterface> target;
         GetTarget((IInterface**)&target);
         if (target != NULL) {
-            PropertyValuesHolder* pvh;
             const Int32 numValues = mValues->GetLength();
             for (Int32 i = 0; i < numValues; ++i) {
-                pvh = (PropertyValuesHolder*)(*mValues)[i];
+                PropertyValuesHolder* pvh = (PropertyValuesHolder*)(*mValues)[i];
                 pvh->SetupSetterAndGetter(target);
             }
         }
-
         ValueAnimator::InitAnimation();
     }
     return NOERROR;
@@ -286,7 +699,6 @@ ECode ObjectAnimator::GetTarget(
     if (mTarget == NULL) {
         return NOERROR;
     }
-
     return mTarget->Resolve(EIID_IInterface, object);
 }
 
@@ -295,7 +707,7 @@ ECode ObjectAnimator::SetTarget(
 {
     AutoPtr<IInterface> oldTarget;
     GetTarget((IInterface**)&oldTarget);
-    if (oldTarget.Get() != IInterface::Probe(target)) {
+    if (IInterface::Probe(oldTarget) != IInterface::Probe(target)) {
         mTarget = NULL;
         if (target != NULL) {
             IWeakReferenceSource::Probe(target)->GetWeakReference((IWeakReference**)&mTarget);
@@ -303,24 +715,22 @@ ECode ObjectAnimator::SetTarget(
         // New target should cause re-initialization prior to starting
         mInitialized = FALSE;
     }
-
     return NOERROR;
 }
 
 ECode ObjectAnimator::SetupStartValues()
 {
     InitAnimation();
+
     AutoPtr<IInterface> target;
     GetTarget((IInterface**)&target);
     if (target != NULL) {
-        PropertyValuesHolder* pvh;
         Int32 numValues = mValues->GetLength();
         for (Int32 i = 0; i < numValues; ++i) {
-            pvh = (PropertyValuesHolder*)(*mValues)[i];
+            PropertyValuesHolder* pvh = (PropertyValuesHolder*)(*mValues)[i];
             pvh->SetupStartValue(target);
         }
     }
-
     return NOERROR;
 }
 
@@ -331,14 +741,12 @@ ECode ObjectAnimator::SetupEndValues()
     AutoPtr<IInterface> target;
     GetTarget((IInterface**)&target);
     if (target != NULL) {
-        PropertyValuesHolder* pvh;
         Int32 numValues = mValues->GetLength();
         for (Int32 i = 0; i < numValues; ++i) {
-            pvh = (PropertyValuesHolder*)(*mValues)[i];
+            PropertyValuesHolder* pvh = (PropertyValuesHolder*)(*mValues)[i];
             pvh->SetupEndValue(target);
         }
     }
-
     return NOERROR;
 }
 
@@ -354,10 +762,9 @@ ECode ObjectAnimator::AnimateValue(
     }
 
     ValueAnimator::AnimateValue(fraction);
-    PropertyValuesHolder* pvh;
     Int32 numValues = mValues->GetLength();
     for (Int32 i = 0; i < numValues; ++i) {
-        pvh = (PropertyValuesHolder*)(*mValues)[i];
+        PropertyValuesHolder* pvh = (PropertyValuesHolder*)(*mValues)[i];
         pvh->SetAnimatedValue(target);
     }
     return NOERROR;
@@ -383,455 +790,7 @@ ECode ObjectAnimator::CloneImpl(
     anim->mTarget = mTarget;
     anim->mPropertyName = mPropertyName;
     anim->mProperty = mProperty;
-
     return NOERROR;
-}
-
-static ECode CheckIsCarObject(
-    /* [in] */ IInterface* target)
-{
-#if defined(_DEBUG)
-    ECode ec = NOERROR;
-    if (target != NULL) {
-        ClassID objId;
-        ec = IObject::Probe(target)->GetClassID(&objId);
-        if (FAILED(ec)) {
-            Logger::E("ObjectAnimator", "Target object [%s] is not a CAR object!", TO_CSTR(target));
-            assert(0 && "Target object is not a CAR object!");
-        }
-    }
-    return ec;
-#endif
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
-    /* [in] */ IInterface* target,
-    /* [in] */ const String& propertyName,
-    /* [in] */ ArrayOf<Int32>* values)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IObjectAnimator> anim = new ObjectAnimator();
-    ObjectAnimator* oa = (ObjectAnimator*)anim.Get();
-    oa->constructor(target, propertyName);
-    IValueAnimator::Probe(anim)->SetInt32Values(values);
-    return anim;
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
-    /* [in] */ IInterface* target,
-    /* [in] */ IProperty* property,
-    /* [in] */ ArrayOf<Int32>* values)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IObjectAnimator> anim = new ObjectAnimator();
-    ObjectAnimator* oa = (ObjectAnimator*)anim.Get();
-    oa->constructor(target, property);
-    IValueAnimator::Probe(anim)->SetInt32Values(values);
-    return anim;
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
-    /* [in] */ IObject* target,
-    /* [in] */ const String& xPropertyName,
-    /* [in] */ const String& yPropertyName,
-    /* [in] */ IPath* path)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
-    PathKeyframes* pkf = (PathKeyframes*)keyframes.Get();
-    AutoPtr<IInt32Keyframes> xfkf = pkf->CreateXInt32Keyframes();
-    AutoPtr<IInt32Keyframes> yfkf = pkf->CreateYInt32Keyframes();
-
-    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(
-        xPropertyName, IKeyframes::Probe(xfkf));
-    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(
-        yPropertyName, IKeyframes::Probe(yfkf));
-
-    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(2);
-    a->Set(0, x);
-    a->Set(1, y);
-    return OfPropertyValuesHolder(target, a);
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(
-    /* [in] */ IInterface* target,
-    /* [in] */ IProperty* xProperty,
-    /* [in] */ IProperty* yProperty,
-    /* [in] */ IPath* path)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
-    PathKeyframes* pkf = (PathKeyframes*)keyframes.Get();
-    AutoPtr<IInt32Keyframes> xfkf = pkf->CreateXInt32Keyframes();
-    AutoPtr<IInt32Keyframes> yfkf = pkf->CreateYInt32Keyframes();
-
-    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(
-        xProperty, IKeyframes::Probe(xfkf));
-    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(
-        yProperty, IKeyframes::Probe(yfkf));
-    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(2);
-    a->Set(0, x);
-    a->Set(1, y);
-    return OfPropertyValuesHolder(target, a);
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiInt32(
-    /* [in] */ IInterface* target,
-    /* [in] */ const String& propertyName,
-    /* [in] */ ArrayOf<ArrayOf<Int32>* >* values)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IPropertyValuesHolder> pvh;
-    PropertyValuesHolder::OfMultiInt32(propertyName, values, (IPropertyValuesHolder**)&pvh);
-
-    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
-    a->Set(0, pvh);
-    return OfPropertyValuesHolder(target, a);
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiInt32(
-    /* [in] */ IInterface* target,
-    /* [in] */ const String& propertyName,
-    /* [in] */ IPath* path)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfMultiInt32(propertyName, path);
-    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
-    a->Set(0, pvh);
-    return OfPropertyValuesHolder(target, a);
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiInt32(
-    /* [in] */ IInterface* target,
-    /* [in] */ const String& propertyName,
-    /* [in] */ ITypeConverter* converter,
-    /* [in] */ ITypeEvaluator* evaluator,
-    /* [in] */ ArrayOf<IInterface*>* values)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfMultiInt32(propertyName, converter,
-            evaluator, values);
-    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
-    a->Set(0, pvh);
-    return OfPropertyValuesHolder(target, a);
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfArgb(
-    /* [in] */ IInterface* target,
-    /* [in] */ const String& propertyName,
-    /* [in] */ ArrayOf<Int32>* values)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IObjectAnimator> animator = OfInt32(target, propertyName, values);
-    IValueAnimator::Probe(animator)->SetEvaluator(ITypeEvaluator::Probe(CArgbEvaluator::GetInstance()));
-    return animator;
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfArgb(
-    /* [in] */ IInterface* target,
-    /* [in] */ IProperty* property,
-    /* [in] */ ArrayOf<Int32>* values)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IObjectAnimator> animator = OfInt32(target, property, values);
-    IValueAnimator::Probe(animator)->SetEvaluator(ITypeEvaluator::Probe(CArgbEvaluator::GetInstance()));
-    return animator;
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
-    /* [in] */ IInterface* target,
-    /* [in] */ const String& xPropertyName,
-    /* [in] */ const String& yPropertyName,
-    /* [in] */ IPath* path)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
-    PathKeyframes* pkf = (PathKeyframes*)keyframes.Get();
-    AutoPtr<IFloatKeyframes> xfkf = pkf->CreateXFloatKeyframes();
-    AutoPtr<IFloatKeyframes> yfkf = pkf->CreateYFloatKeyframes();
-
-    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(
-        xPropertyName, IKeyframes::Probe(xfkf));
-    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(
-        yPropertyName, IKeyframes::Probe(yfkf));
-    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(2);
-    a->Set(0, x);
-    a->Set(1, y);
-    return OfPropertyValuesHolder(target, a);
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
-    /* [in] */ IInterface* target,
-    /* [in] */ IProperty* xProperty,
-    /* [in] */ IProperty* yProperty,
-    /* [in] */ IPath* path)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IPathKeyframes> keyframes = KeyframeSet::OfPath(path);
-    PathKeyframes* pkf = (PathKeyframes*)keyframes.Get();
-    AutoPtr<IFloatKeyframes> xfkf = pkf->CreateXFloatKeyframes();
-    AutoPtr<IFloatKeyframes> yfkf = pkf->CreateYFloatKeyframes();
-
-    AutoPtr<IPropertyValuesHolder> x = PropertyValuesHolder::OfKeyframes(
-        xProperty, IKeyframes::Probe(xfkf));
-    AutoPtr<IPropertyValuesHolder> y = PropertyValuesHolder::OfKeyframes(
-        yProperty, IKeyframes::Probe(yfkf));
-    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(2);
-    a->Set(0, x);
-    a->Set(1, y);
-    return OfPropertyValuesHolder(target, a);
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiFloat(
-    /* [in] */ IInterface* target,
-    /* [in] */ const String& propertyName,
-    /* [in] */ ArrayOf<ArrayOf<Float>*>* values)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IPropertyValuesHolder> pvh;
-    PropertyValuesHolder::OfMultiFloat(propertyName, values, (IPropertyValuesHolder**)&pvh);
-    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
-    a->Set(0, pvh);
-    return OfPropertyValuesHolder(target, a);
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiFloat(
-    /* [in] */ IInterface* target,
-    /* [in] */ const String& propertyName,
-    /* [in] */ IPath* path)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfMultiFloat(propertyName, path);
-    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
-    a->Set(0, pvh);
-    return OfPropertyValuesHolder(target, a);
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfMultiFloat(
-    /* [in] */ IInterface* target,
-    /* [in] */ const String& propertyName,
-    /* [in] */ ITypeConverter* converter,
-    /* [in] */ ITypeEvaluator* evaluator,
-    /* [in] */ ArrayOf<IInterface*>* values)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfMultiFloat(propertyName, converter,
-            evaluator, values);
-    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
-    a->Set(0, pvh);
-    return OfPropertyValuesHolder(target, a);
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
-    /* [in] */ IInterface* target,
-    /* [in] */ const String& propertyName,
-    /* [in] */ ArrayOf<Float>* values)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IObjectAnimator> anim = new ObjectAnimator();
-    ObjectAnimator* oa = (ObjectAnimator*)anim.Get();
-    oa->constructor(target, propertyName);
-    IValueAnimator::Probe(anim)->SetFloatValues(values);
-    return anim;
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfFloat(
-    /* [in] */ IInterface* target,
-    /* [in] */ IProperty* property,
-    /* [in] */ ArrayOf<Float>* values)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IObjectAnimator> anim = new ObjectAnimator();
-    ObjectAnimator* oa = (ObjectAnimator*)anim.Get();
-    oa->constructor(target, property);
-    IValueAnimator::Probe(anim)->SetFloatValues(values);
-    return anim;
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
-    /* [in] */ IInterface* target,
-    /* [in] */ const String& propertyName,
-    /* [in] */ ITypeEvaluator* evaluator,
-    /* [in] */ ArrayOf<IInterface*>* values)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IObjectAnimator> anim = new ObjectAnimator();
-    ObjectAnimator* oa = (ObjectAnimator*)anim.Get();
-    oa->constructor(target, propertyName);
-    IValueAnimator* va = IValueAnimator::Probe(anim);
-    va->SetObjectValues(values);
-    va->SetEvaluator(evaluator);
-    return anim;
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
-    /* [in] */ IInterface* target,
-    /* [in] */ IProperty* property,
-    /* [in] */ ITypeEvaluator* evaluator,
-    /* [in] */ ArrayOf<IInterface*>* values)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IObjectAnimator> anim = new ObjectAnimator();
-    ObjectAnimator* oa = (ObjectAnimator*)anim.Get();
-    oa->constructor(target, property);
-    IValueAnimator* va = IValueAnimator::Probe(anim);
-    va->SetObjectValues(values);
-    va->SetEvaluator(evaluator);
-    return anim;
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
-    /* [in] */ IInterface* target,
-    /* [in] */ const String& propertyName,
-    /* [in] */ /*@Nullable*/ ITypeConverter* converter,
-    /* [in] */ IPath* path)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfObject(propertyName, converter, path);
-    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
-    a->Set(0, pvh);
-    return OfPropertyValuesHolder(target, a);
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
-    /* [in] */ IInterface* target,
-    /* [in] */ IProperty* property,
-    /* [in] */ ITypeConverter* converter,
-    /* [in] */ ITypeEvaluator* evaluator,
-    /* [in] */ ArrayOf<IInterface*>* values)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfObject(property, converter, evaluator,
-            values);
-    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
-    a->Set(0, pvh);
-    return OfPropertyValuesHolder(target, a);
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfObject(
-    /* [in] */ IInterface* target,
-    /* [in] */ /*@NonNull*/ IProperty* property,
-    /* [in] */ /*@Nullable*/ ITypeConverter* converter,
-    /* [in] */ IPath* path)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IPropertyValuesHolder> pvh = PropertyValuesHolder::OfObject(property, converter, path);
-    AutoPtr<ArrayOf<IPropertyValuesHolder*> > a = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
-    a->Set(0, pvh);
-    return OfPropertyValuesHolder(target, a);
-}
-
-AutoPtr<IObjectAnimator> ObjectAnimator::OfPropertyValuesHolder(
-    /* [in] */ IInterface* target,
-    /* [in] */ ArrayOf<IPropertyValuesHolder*>* values)
-{
-    if (FAILED(CheckIsCarObject(target))) {
-        return NULL;
-    }
-
-    AutoPtr<IObjectAnimator> anim;
-    CObjectAnimator::New((IObjectAnimator**)&anim);
-    IAnimator::Probe(anim)->SetTarget(target);
-    IValueAnimator::Probe(anim)->SetValues(values);
-    return anim;
-}
-
-ECode ObjectAnimator::SetAutoCancel(
-    /* [in] */ Boolean cancel)
-{
-    mAutoCancel = cancel;
-    return NOERROR;
-}
-
-Boolean ObjectAnimator::HasSameTargetAndProperties(
-    /* [in] */ /*@Nullable*/ IAnimator* anim)
-{
-    if (IObjectAnimator::Probe(anim)) {
-        AutoPtr<ArrayOf<IPropertyValuesHolder*> > theirValues;
-        IValueAnimator::Probe(anim)->GetValues((ArrayOf<IPropertyValuesHolder*>**)&theirValues);
-        AutoPtr<IInterface> obj1;
-        AutoPtr<IInterface> obj2;
-        if ((IObjectAnimator::Probe(anim)->GetTarget((IInterface**)&obj1), obj1.Get())
-                    == (GetTarget((IInterface**)&obj2), obj2.Get())
-                && mValues->GetLength() == theirValues->GetLength()) {
-            for (Int32 i = 0; i < mValues->GetLength(); ++i) {
-                AutoPtr<IPropertyValuesHolder> pvhMine = (*mValues)[i];
-                AutoPtr<IPropertyValuesHolder> pvhTheirs = (*theirValues)[i];
-
-                String pn1, pn2;
-                pvhMine->GetPropertyName(&pn1);
-                pvhTheirs->GetPropertyName(&pn2);
-                if (pn1.IsNull() || !pn1.Equals(pn2)) {
-                    return FALSE;
-                }
-            }
-            return TRUE;
-        }
-    }
-    return FALSE;
 }
 
 ECode ObjectAnimator::ToString(

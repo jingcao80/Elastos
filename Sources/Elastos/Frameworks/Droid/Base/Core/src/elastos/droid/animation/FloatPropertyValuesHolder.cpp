@@ -86,7 +86,7 @@ ECode FloatPropertyValuesHolder::Clone(
     /* [out] */ IInterface** holder)
 {
     AutoPtr<FloatPropertyValuesHolder> v = new FloatPropertyValuesHolder(mPropertyName, mFloatKeyframes);
-    CloneSuperData(v);
+    CloneImpl(v);
     v->mJniSetter = mJniSetter;
     v->mFloatKeyframes = mFloatKeyframes;
     v->mFloatAnimatedValue = mFloatAnimatedValue;
@@ -167,7 +167,7 @@ ECode FloatPropertyValuesHolder::SetupSetter(
     // Check new static hashmap<propName, int> for setter method
     {
         AutoLock lock(mPropertyMapLock);
-        AutoPtr<IClassInfo> clInfo = TransformClassInfo(target);
+        AutoPtr<IClassInfo> clInfo = GetClassInfo(target);
         ClassID id;
         id.mUunm = (char*)malloc(80);
         clInfo->GetId(&id);

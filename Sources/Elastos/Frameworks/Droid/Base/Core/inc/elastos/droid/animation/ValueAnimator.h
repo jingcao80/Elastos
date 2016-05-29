@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_DROID_ANIMATION_VALUEANIMATOR_H__
 #define __ELASTOS_DROID_ANIMATION_VALUEANIMATOR_H__
 
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/animation/Animator.h"
 #include <elastos/utility/etl/HashMap.h>
 
@@ -30,10 +31,6 @@ public:
 
         TO_STRING_IMPL("ValueAnimator::AnimationHandler")
 
-        AnimationHandler();
-
-        ~AnimationHandler();
-
         /**
          * Start animating on the next frame.
          */
@@ -42,6 +39,10 @@ public:
         CARAPI Run();
 
     private:
+        AnimationHandler();
+
+        ~AnimationHandler();
+
         CARAPI_(void) DoAnimationFrame(
             /* [in] */ Int64 frameTime);
 
@@ -52,21 +53,21 @@ public:
         friend class ObjectAnimator;
 
         // The per-thread list of all active animations
-        List<AutoPtr<IValueAnimator> > mAnimations/* = new ArrayList<ValueAnimator>()*/;
+        List<AutoPtr<IValueAnimator> > mAnimations;
 
         // Used in doAnimationFrame() to avoid concurrent modifications of mAnimations
-        List<AutoPtr<IValueAnimator> > mTmpAnimations/* = new ArrayList<ValueAnimator>()*/;
+        List<AutoPtr<IValueAnimator> > mTmpAnimations;
 
         // The per-thread set of animations to be started on the next animation frame
-        List<AutoPtr<IValueAnimator> > mPendingAnimations/* = new ArrayList<ValueAnimator>()*/;
+        List<AutoPtr<IValueAnimator> > mPendingAnimations;
 
         /**
          * Internal per-thread collections used to avoid set collisions as animations start and end
          * while being processed.
          */
-        List<AutoPtr<IValueAnimator> > mDelayedAnims/* = new ArrayList<ValueAnimator>()*/;
-        List<AutoPtr<IValueAnimator> > mEndingAnims/* = new ArrayList<ValueAnimator>()*/;
-        List<AutoPtr<IValueAnimator> > mReadyAnims/* = new ArrayList<ValueAnimator>()*/;
+        List<AutoPtr<IValueAnimator> > mDelayedAnims;
+        List<AutoPtr<IValueAnimator> > mEndingAnims;
+        List<AutoPtr<IValueAnimator> > mReadyAnims;
 
         AutoPtr<IChoreographer> mChoreographer;
         Boolean mAnimationScheduled;
@@ -82,9 +83,90 @@ public:
      */
     ValueAnimator();
 
+    virtual ~ValueAnimator();
+
     CARAPI constructor();
 
-    virtual ~ValueAnimator();
+    static CARAPI_(void) SetDurationScale(
+        /* [in] */ Float durationScale);
+
+    static CARAPI_(Float) GetDurationScale();
+
+    /**
+     * Constructs and returns a ValueAnimator that animates between int values. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
+     *
+     * @param values A set of values that the animation will animate between over time.
+     * @return A ValueAnimator object that is set up to animate between the given values.
+     */
+    static CARAPI_(AutoPtr<IValueAnimator>) OfInt32(
+        /* [in] */ ArrayOf<Int32>* values);
+
+    /**
+     * Constructs and returns a ValueAnimator that animates between color values. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
+     *
+     * @param values A set of values that the animation will animate between over time.
+     * @return A ValueAnimator object that is set up to animate between the given values.
+     */
+    static CARAPI_(AutoPtr<IValueAnimator>) OfArgb(
+        /* [in] */ ArrayOf<Int32>* values);
+
+    /**
+     * Constructs and returns a ValueAnimator that animates between float values. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
+     *
+     * @param values A set of values that the animation will animate between over time.
+     * @return A ValueAnimator object that is set up to animate between the given values.
+     */
+    static CARAPI_(AutoPtr<IValueAnimator>) OfFloat(
+        /* [in] */ ArrayOf<Float>* values);
+
+    /**
+     * Constructs and returns a ValueAnimator that animates between the values
+     * specified in the PropertyValuesHolder objects.
+     *
+     * @param values A set of PropertyValuesHolder objects whose values will be animated
+     * between over time.
+     * @return A ValueAnimator object that is set up to animate between the given values.
+     */
+    static CARAPI_(AutoPtr<IValueAnimator>) OfPropertyValuesHolder(
+        /* [in] */ ArrayOf<IPropertyValuesHolder*>* values);
+
+    /**
+     * Constructs and returns a ValueAnimator that animates between Object values. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
+     *
+     * <p>Since ValueAnimator does not know how to animate between arbitrary Objects, this
+     * factory method also takes a TypeEvaluator object that the ValueAnimator will use
+     * to perform that interpolation.
+     *
+     * @param evaluator A TypeEvaluator that will be called on each animation frame to
+     * provide the ncessry interpolation between the Object values to derive the animated
+     * value.
+     * @param values A set of values that the animation will animate between over time.
+     * @return A ValueAnimator object that is set up to animate between the given values.
+     */
+    static CARAPI_(AutoPtr<IValueAnimator>) OfObject(
+        /* [in] */ ITypeEvaluator* evaluator,
+        /* [in] */ ArrayOf<IInterface*>* values);
+
 
     /**
      * Sets Int32 values that will be animated between. A single
@@ -223,6 +305,35 @@ public:
      */
     virtual CARAPI SetStartDelay(
         /* [in] */ Int64 startDelay);
+
+    /**
+     * The amount of time, in milliseconds, between each frame of the animation. This is a
+     * requested time that the animation will attempt to honor, but the actual delay between
+     * frames may be different, depending on system load and capabilities. This is a static
+     * function because the same delay will be applied to all animations, since they are all
+     * run off of a single timing loop.
+     *
+     * The frame delay may be ignored when the animation system uses an external timing
+     * source, such as the display refresh rate (vsync), to govern animations.
+     *
+     * @return the requested time between frames, in milliseconds
+     */
+    static CARAPI_(Int64) GetFrameDelay();
+
+    /**
+     * The amount of time, in milliseconds, between each frame of the animation. This is a
+     * requested time that the animation will attempt to honor, but the actual delay between
+     * frames may be different, depending on system load and capabilities. This is a static
+     * function because the same delay will be applied to all animations, since they are all
+     * run off of a single timing loop.
+     *
+     * The frame delay may be ignored when the animation system uses an external timing
+     * source, such as the display refresh rate (vsync), to govern animations.
+     *
+     * @param frameDelay the requested time between frames, in milliseconds
+     */
+    static CARAPI SetFrameDelay(
+        /* [in]*/ Int64 delay);
 
     /**
      * The most recent value calculated by this <code>ValueAnimator</code> when there is just one
@@ -407,42 +518,6 @@ public:
     virtual CARAPI Clone(
         /* [out] */ IInterface** object);
 
-    static CARAPI_(void) SetDurationScale(
-        /* [in] */ Float durationScale);
-
-    static CARAPI_(Float) GetDurationScale();
-
-    /**
-     * The amount of time, in milliseconds, between each frame of the animation. This is a
-     * requested time that the animation will attempt to honor, but the actual delay between
-     * frames may be different, depending on system load and capabilities. This is a static
-     * function because the same delay will be applied to all animations, since they are all
-     * run off of a single timing loop.
-     *
-     * The frame delay may be ignored when the animation system uses an external timing
-     * source, such as the display refresh rate (vsync), to govern animations.
-     *
-     * @return the requested time between frames, in milliseconds
-     */
-
-    static CARAPI_(Int64) GetFrameDelay();
-
-    /**
-     * The amount of time, in milliseconds, between each frame of the animation. This is a
-     * requested time that the animation will attempt to honor, but the actual delay between
-     * frames may be different, depending on system load and capabilities. This is a static
-     * function because the same delay will be applied to all animations, since they are all
-     * run off of a single timing loop.
-     *
-     * The frame delay may be ignored when the animation system uses an external timing
-     * source, such as the display refresh rate (vsync), to govern animations.
-     *
-     * @param frameDelay the requested time between frames, in milliseconds
-     */
-
-    static CARAPI SetFrameDelay(
-        /* [in]*/ Int64 delay);
-
     /**
      * Return the number of animations currently running.
      *
@@ -461,32 +536,9 @@ public:
      */
     static CARAPI_(void) ClearAllAnimations();
 
-    static CARAPI_(AutoPtr<IValueAnimator>) OfInt32(
-        /* [in] */ ArrayOf<Int32>* values);
-
-    /**
-     * Constructs and returns a ValueAnimator that animates between color values. A single
-     * value implies that that value is the one being animated to. However, this is not typically
-     * useful in a ValueAnimator object because there is no way for the object to determine the
-     * starting value for the animation (unlike ObjectAnimator, which can derive that value
-     * from the target object and property being animated). Therefore, there should typically
-     * be two or more values.
-     *
-     * @param values A set of values that the animation will animate between over time.
-     * @return A ValueAnimator object that is set up to animate between the given values.
-     */
-    static CARAPI_(AutoPtr<IValueAnimator>) OfArgb(
-        /* [in] */ ArrayOf<Int32>* values);
-
-    static CARAPI_(AutoPtr<IValueAnimator>) OfFloat(
-        /* [in] */ ArrayOf<Float>* values);
-
-    static CARAPI_(AutoPtr<IValueAnimator>) OfPropertyValuesHolder(
-        /* [in] */ ArrayOf<IPropertyValuesHolder*>* values);
-
-    static CARAPI_(AutoPtr<IValueAnimator>) OfObject(
-        /* [in] */ ITypeEvaluator* evaluator,
-        /* [in] */ ArrayOf<IInterface*>* values);
+    //@Override
+    CARAPI ToString(
+        /* [out] */ String* info);
 
     /**
      * <p>Whether or not the ValueAnimator is allowed to run asynchronously off of
@@ -540,6 +592,18 @@ protected:
     virtual CARAPI InitAnimation();
 
     /**
+     * Called internally to end an animation by removing it from the animations list. Must be
+     * called on the UI thread.
+     */
+    CARAPI_(void) EndAnimation(
+        /* [in] */ AnimationHandler* handler);
+
+    /**
+     * Returns the name of this animator for debugging purposes.
+     */
+    CARAPI_(String) GetNameForTrace();
+
+    /**
      * This internal function processes a single animation frame for a given animation. The
      * currentTime parameter is the timing pulse sent by the handler, used to calculate the
      * elapsed duration, and therefore
@@ -582,6 +646,8 @@ protected:
         /* [in] */ IValueAnimator* anim);
 
 private:
+    CARAPI_(void) UpdateScaledDuration();
+
     CARAPI_(void) NotifyStartListeners();
 
     /**
@@ -597,15 +663,8 @@ private:
      *
      * @param playBackwards Whether the ValueAnimator should start playing in reverse.
      */
-    CARAPI_(void) Start(
+    CARAPI Start(
         /* [in] */ Boolean playBackwards);
-
-   /**
-     * Called internally to end an animation by removing it from the animations list. Must be
-     * called on the UI thread.
-     */
-    CARAPI_(void) EndAnimation(
-        /* [in] */ AnimationHandler* handler);
 
     /**
      * Called internally to start an animation by adding it to the active animations list. Must be
@@ -613,11 +672,6 @@ private:
      */
     CARAPI_(void) StartAnimation(
         /* [in] */ AnimationHandler* handler);
-
-    /**
-     * Returns the name of this animator for debugging purposes.
-     */
-    CARAPI_(String) GetNameForTrace();
 
     /**
      * Internal function called to process an animation frame on an animation that is currently
@@ -634,7 +688,11 @@ private:
 
     CARAPI_(AutoPtr<AnimationHandler>) GetOrCreateAnimationHandler();
 
-    CARAPI_(void) UpdateScaledDuration();
+public:
+    // The static sAnimationHandler processes the internal timing loop on which all animations
+    // are based
+    static pthread_key_t sAnimationHandler;
+    static Boolean sHaveKey;
 
 protected:
     /**
@@ -664,19 +722,6 @@ protected:
     Int64 mSeekTime;
 
     /**
-     * Set on the next frame after pause() is called, used to calculate a new startTime
-     * or delayStartTime which allows the animator to continue from the point at which
-     * it was paused. If negative, has not yet been set.
-     */
-    Int64 mPauseTime;
-
-    /**
-     * Set when an animator is resumed. This triggers logic in the next frame which
-     * actually resumes the animator.
-     */
-    Boolean mResumed;
-
-    /**
      * Flag that represents the current state of the animation. Used to figure out when to start
      * an animation (if state == STOPPED). Also used to end an animation that
      * has been cancel()'d or end()'d since the last animation frame. Possible values are
@@ -700,18 +745,26 @@ protected:
      * by property name during calls to getAnimatedValue(String).
      */
     HashMap<String, AutoPtr<IPropertyValuesHolder> > mValuesMap;
-
-public:
-    // The static sAnimationHandler processes the internal timing loop on which all animations
-    // are based
-    static pthread_key_t sAnimationHandler;
-    static Boolean sHaveKey;
+    typedef HashMap<String, AutoPtr<IPropertyValuesHolder> >::Iterator StrMapIterator;
 
 private:
     /**
      * Internal constants
      */
     static Float sDurationScale;
+
+    /**
+     * Set on the next frame after pause() is called, used to calculate a new startTime
+     * or delayStartTime which allows the animator to continue from the point at which
+     * it was paused. If negative, has not yet been set.
+     */
+    Int64 mPauseTime;
+
+    /**
+     * Set when an animator is resumed. This triggers logic in the next frame which
+     * actually resumes the animator.
+     */
+    Boolean mResumed;
 
     // The time interpolator to be used if none is set on the animation
     static const AutoPtr<ITimeInterpolator> sDefaultInterpolator;
@@ -774,8 +827,8 @@ private:
     //
 
     // How Int64 the animation should last in ms
-    Int64 mDuration;// = (Int64)(300 * sDurationScale);
-    Int64 mUnscaledDuration;// = 300;
+    Int64 mDuration;
+    Int64 mUnscaledDuration;
 
     // The amount of time in ms to delay starting the animation after start() is called
     Int64 mStartDelay;
@@ -802,10 +855,7 @@ private:
     /**
      * The set of listeners to be sent events through the life of an animation.
      */
-    List<AutoPtr<IAnimatorUpdateListener> > mUpdateListeners;
-
-    typedef List<AutoPtr<IAnimatorUpdateListener> >::Iterator AULIterator;
-    typedef HashMap<String, AutoPtr<IPropertyValuesHolder> >::Iterator StrMapIterator;
+    AutoPtr<IArrayList> mUpdateListeners;
 };
 
 } // namespace Animation

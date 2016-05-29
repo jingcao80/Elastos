@@ -32,10 +32,6 @@ CarClass(CObjectAnimator) , public ObjectAnimator
 {
 public:
     CAR_OBJECT_DECL()
-
-    CARAPI constructor();
-
-    using ObjectAnimator::constructor;
 };
 
 } // namespace Animation
