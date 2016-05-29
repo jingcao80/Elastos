@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_DROID_ANIMATION_FLOATPROPERTYVALUESHOLDER_H__
 #define __ELASTOS_DROID_ANIMATION_FLOATPROPERTYVALUESHOLDER_H__
 
+#include "Elastos.Droid.Utility.h"
 #include "PropertyValuesHolder.h"
 
 using Elastos::Droid::Utility::IFloatProperty;
@@ -39,7 +40,7 @@ public:
     CARAPI CalculateValue(
         /* [in] */ Float fraction);
 
-    virtual CARAPI GetAnimatedValue(
+    CARAPI GetAnimatedValue(
         /* [out] */ IInterface** value);
 
     CARAPI Clone(
@@ -49,13 +50,13 @@ public:
         /* [in] */ IInterface* target);
 
     CARAPI SetupSetter(
-            /* [in] */ IInterface* targetClass);
+            /* [in] */ IClassInfo* targetClass);
 
 protected:
-
-    AutoPtr<IMethodInfo> mJniSetter;
+    AutoPtr<IMethodInfo> mNativeSetter;
     AutoPtr<IFloatKeyframes> mFloatKeyframes;
     Float mFloatAnimatedValue;
+
 private:
     typedef HashMap<String, AutoPtr<IMethodInfo> > MethodMap;
     typedef typename MethodMap::Iterator MethodMapIterator;
@@ -63,9 +64,8 @@ private:
     typedef HashMap<AutoPtr<IClassInfo>, AutoPtr<MethodMap> > ClassMethodMap;
     typedef typename ClassMethodMap::Iterator ClassMethodMapIterator;
 
-    static ClassMethodMap sJNISetterPropertyMap;
+    static ClassMethodMap sNativeSetterPropertyMap;
     AutoPtr<IFloatProperty> mFloatProperty;
-
 };
 
 } // namespace Animation

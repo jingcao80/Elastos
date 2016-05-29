@@ -2,38 +2,40 @@
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/animation/Int32PropertyValuesHolder.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 
 using Elastos::Core::AutoLock;
-using Elastos::Core::ECLSID_CInteger32;
 using Elastos::Core::EIID_IInteger32;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
 namespace Animation {
 
-Int32PropertyValuesHolder::ClassMethodMap Int32PropertyValuesHolder::sJNISetterPropertyMap;
+Int32PropertyValuesHolder::ClassMethodMap Int32PropertyValuesHolder::sNativeSetterPropertyMap;
 
 CAR_INTERFACE_IMPL(Int32PropertyValuesHolder, PropertyValuesHolder, IInt32PropertyValuesHolder);
+
 Int32PropertyValuesHolder::Int32PropertyValuesHolder(
     /* [in] */ const String& propertyName,
     /* [in] */ IInt32Keyframes* keyframes)
     : PropertyValuesHolder(propertyName)
-    , mInt32Keyframes(keyframes)
 {
     mValueType = EIID_IInteger32;
     mKeyframes = IKeyframes::Probe(keyframes);
+    mInt32Keyframes = keyframes;
 }
 
 Int32PropertyValuesHolder::Int32PropertyValuesHolder(
     /* [in] */ IProperty* property,
     /* [in] */ IInt32Keyframes* keyframes)
     : PropertyValuesHolder(property)
-    , mInt32Keyframes(keyframes)
 {
     mValueType = EIID_IInteger32;
     mKeyframes = IKeyframes::Probe(keyframes);
+    mInt32Keyframes = keyframes;
 }
 
 Int32PropertyValuesHolder::Int32PropertyValuesHolder(
@@ -50,9 +52,9 @@ Int32PropertyValuesHolder::Int32PropertyValuesHolder(
     : PropertyValuesHolder(property)
 {
     SetInt32Values(values);
-   if(property->Probe(EIID_IInt32Property)) {
+    if (IInt32Property::Probe(property) != NULL) {
        mInt32Property = IInt32Property::Probe(mProperty);
-   }
+    }
 }
 
 ECode Int32PropertyValuesHolder::SetInt32Values(
@@ -85,12 +87,11 @@ ECode Int32PropertyValuesHolder::Clone(
 {
     AutoPtr<Int32PropertyValuesHolder> v = new Int32PropertyValuesHolder(mPropertyName, mInt32Keyframes);
     CloneImpl(v);
-    v->mJniSetter = mJniSetter;
+    v->mNativeSetter = mNativeSetter;
     v->mInt32Keyframes = mInt32Keyframes;
     v->mInt32AnimatedValue = mInt32AnimatedValue;
-    *holder = (IInt32PropertyValuesHolder*)v.Get();
+    *holder = (IInt32PropertyValuesHolder*)v;
     REFCOUNT_ADD(*holder);
-
     return NOERROR;
 }
 
@@ -100,64 +101,19 @@ ECode Int32PropertyValuesHolder::SetAnimatedValue(
     if (mInt32Property != NULL) {
         return mInt32Property->SetValue(target, mInt32AnimatedValue);
     }
-
-    AutoPtr<IInterface> animatedValue;
-    GetAnimatedValue((IInterface**)&animatedValue);
     if (mProperty != NULL) {
-        mProperty->Set(target, animatedValue);
+        mProperty->Set(target, CoreUtils::Convert(mInt32AnimatedValue));
         return NOERROR;
     }
-
-    if (mJniSetter != NULL) {
-        AutoPtr<IArgumentList> args;
-        mJniSetter->CreateArgumentList((IArgumentList**)&args);
-        AutoPtr<IFunctionInfo> funcInfo;
-        args->GetFunctionInfo((IFunctionInfo**)&funcInfo);
-        AutoPtr<IParamInfo> paramInfo;
-        funcInfo->GetParamInfoByIndex(0, (IParamInfo**)&paramInfo);
-        AutoPtr<IDataTypeInfo> dataTypeInfo;
-        paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
-        CarDataType carType;
-        dataTypeInfo->GetDataType(&carType);
-        if(carType == CarDataType_Int32)
-        {
-            args->SetInputArgumentOfInt32(0, mInt32AnimatedValue);
-        } else if(carType == CarDataType_Interface){
-            args->SetInputArgumentOfObjectPtr(0, animatedValue);
-        } else {
-            assert(0);
-        }
-        mJniSetter->Invoke(target, args);
-        return NOERROR;
-    }
-    if (mSetter != NULL) {
-        AutoPtr<IArgumentList> args;
-        mSetter->CreateArgumentList((IArgumentList**)&args);
-        AutoPtr<IFunctionInfo> funcInfo;
-        args->GetFunctionInfo((IFunctionInfo**)&funcInfo);
-        AutoPtr<IParamInfo> paramInfo;
-        funcInfo->GetParamInfoByIndex(0, (IParamInfo**)&paramInfo);
-        AutoPtr<IDataTypeInfo> dataTypeInfo;
-        paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
-        CarDataType carType;
-        dataTypeInfo->GetDataType(&carType);
-        if(carType == CarDataType_Int32)
-        {
-            args->SetInputArgumentOfInt32(0, mInt32AnimatedValue);
-        } else if(carType == CarDataType_Interface){
-            args->SetInputArgumentOfObjectPtr(0, animatedValue);
-        } else {
-            assert(0);
-        }
-        mSetter->Invoke(target, args);
-
+    if (mNativeSetter != NULL) {
+        nCallInt32Method(target, mNativeSetter, mInt32AnimatedValue);
         return NOERROR;
     }
     return NOERROR;
 }
 
 ECode Int32PropertyValuesHolder::SetupSetter(
-        /* [in] */ IInterface* target)
+        /* [in] */ IClassInfo* target)
 {
     if (mProperty != NULL) {
         return NOERROR;
@@ -165,38 +121,33 @@ ECode Int32PropertyValuesHolder::SetupSetter(
     // Check new static hashmap<propName, int> for setter method
     {
         AutoLock lock(mPropertyMapLock);
-        AutoPtr<IClassInfo> clInfo = GetClassInfo(target);
-        ClassMethodMapIterator exit = sJNISetterPropertyMap.Find(clInfo);
-        AutoPtr<MethodMap> propertyMap = NULL;
-        if(exit != sJNISetterPropertyMap.End()) {
-            propertyMap = exit->mSecond;
-            if(propertyMap != NULL) {
-                MethodMapIterator it = propertyMap->Find(mPropertyName);
-                if(it != propertyMap->End()) {
-                    AutoPtr<IMethodInfo> mtInfo = it->mSecond;
-                    if(mtInfo != NULL) {
-                        mJniSetter = mtInfo;
-                    }
-                }
+
+        AutoPtr<MethodMap> propertyMap;
+        ClassMethodMapIterator it = sNativeSetterPropertyMap.Find(target);
+        if (it != sNativeSetterPropertyMap.End()) {
+            propertyMap = it->mSecond;
+        }
+        if (propertyMap != NULL) {
+            MethodMapIterator mit = propertyMap->Find(mPropertyName);
+            AutoPtr<IMethodInfo> mtInfo;
+            if (mit != propertyMap->End()) {
+                mtInfo = mit->mSecond;
+            }
+            if (mtInfo != NULL) {
+                mNativeSetter = mit->mSecond;
             }
         }
-
-        if(mJniSetter == NULL) {
+        if (mNativeSetter == NULL) {
             String methodName = GetMethodName(String("Set"), mPropertyName);
-            clInfo->GetMethodInfo(methodName, String("(I32)E"), (IMethodInfo**)&mJniSetter);
-            if(mJniSetter != NULL) {
+            mNativeSetter = nGetInt32Method(target, methodName);
+            if (mNativeSetter != NULL) {
                 if (propertyMap == NULL) {
                     propertyMap = new MethodMap();
-                    sJNISetterPropertyMap[clInfo] = propertyMap;
+                    sNativeSetterPropertyMap[target] = propertyMap;
                 }
-                (*propertyMap)[mPropertyName] = mJniSetter;
+                (*propertyMap)[mPropertyName] = mNativeSetter;
             }
         }
-
-    }
-    if (mJniSetter == NULL) {
-        // Couldn't find method through fast JNI approach - just use reflection
-        return PropertyValuesHolder::SetupSetter(target);
     }
     return NOERROR;
 }

@@ -11,8 +11,10 @@ namespace Elastos {
 namespace Droid {
 namespace Animation {
 
-MultiInt32ValuesHolder::ClassMethodMap MultiInt32ValuesHolder::sJNISetterPropertyMap;
+MultiInt32ValuesHolder::ClassMethodMap MultiInt32ValuesHolder::sNativeSetterPropertyMap;
+
 CAR_INTERFACE_IMPL(MultiInt32ValuesHolder, PropertyValuesHolder, IMultiInt32ValuesHolder);
+
 MultiInt32ValuesHolder::MultiInt32ValuesHolder(
     /* [in] */ const String& propertyName,
     /* [in] */ ITypeConverter* converter,
@@ -44,85 +46,81 @@ ECode MultiInt32ValuesHolder::SetAnimatedValue(
     GetAnimatedValue((IInterface**)&v);
     AutoPtr<IArrayList> list = IArrayList::Probe(v);
     Int32 numParameters = 0;
-    assert(list != NULL);
     list->GetSize(&numParameters);
-
     AutoPtr<ArrayOf<Int32> > values = ArrayOf<Int32>::Alloc(numParameters);
-    Int32 iv = 0;
     for (Int32 i = 0; i < numParameters; i++) {
         AutoPtr<IInterface> value;
         list->Get(i, (IInterface**)&value);
+        Int32 iv = 0;
         IInteger32::Probe(value)->GetValue(&iv);
         (*values)[i] = iv;
     }
-
-    if (mJniSetter != NULL) {
+    if (mNativeSetter != NULL) {
         switch (numParameters) {
             case 1:
-                nCallInt32Method(target, mJniSetter, (*values)[0]);
+                nCallInt32Method(target, mNativeSetter, (*values)[0]);
                 break;
             case 2:
-                nCallTwoInt32Method(target, mJniSetter, (*values)[0], (*values)[1]);
+                nCallTwoInt32Method(target, mNativeSetter, (*values)[0], (*values)[1]);
                 break;
             case 4:
-                nCallFourInt32Method(target, mJniSetter, (*values)[0], (*values)[1],
+                nCallFourInt32Method(target, mNativeSetter, (*values)[0], (*values)[1],
                         (*values)[2], (*values)[3]);
                 break;
             default: {
-                nCallMultipleInt32Method(target, mJniSetter, values);
+                nCallMultipleInt32Method(target, mNativeSetter, values);
                 break;
             }
         }
     }
-
     return NOERROR;
 }
 
 ECode MultiInt32ValuesHolder::SetupSetterAndGetter(
     /* [in] */ IInterface* target)
 {
-    return SetupSetter(target/*.getClass()*/);
+    return SetupSetter(GetClassInfo(target));
 }
 
 ECode MultiInt32ValuesHolder::SetupSetter(
-    /* [in] */ IInterface* targetClass)
+    /* [in] */ IClassInfo* targetClass)
 {
-    if (mJniSetter != NULL) {
+    if (mNativeSetter != NULL) {
         return NOERROR;
     }
     // try {
         // mPropertyMapLock.writeLock().lock();
     AutoLock lock(mPropertyMapLock);
-    AutoPtr<IClassInfo> info = GetClassInfo(targetClass);
-    AutoPtr<MethodMap> propertyMap = sJNISetterPropertyMap[info];
 
-    typename ClassMethodMap::Iterator it = sJNISetterPropertyMap.Find(info);
-    if ((it != sJNISetterPropertyMap.End()) && (it->mSecond != NULL)) {
+    AutoPtr<MethodMap> propertyMap;
+    typename ClassMethodMap::Iterator it = sNativeSetterPropertyMap.Find(targetClass);
+    if (it != sNativeSetterPropertyMap.End()) {
         propertyMap = it->mSecond;
-        typename MethodMap::Iterator it2 = propertyMap->Find(mPropertyName);
-        if ((it2 != propertyMap->End()) && (it2->mSecond != NULL)) {
-            mJniSetter = it2->mSecond;
+    }
+    if (propertyMap != NULL) {
+        MethodMapIterator mit = propertyMap->Find(mPropertyName);
+        AutoPtr<IMethodInfo> mtInfo;
+        if (mit != propertyMap->End()) {
+            mtInfo = mit->mSecond;
+        }
+        if (mtInfo != NULL) {
+            mNativeSetter = mit->mSecond;
         }
     }
-    if (mJniSetter == NULL) {
+    if (mNativeSetter == NULL) {
         String methodName = GetMethodName(String("Set"), mPropertyName);
         CalculateValue(0.f);
         AutoPtr<IInterface> values;
         GetAnimatedValue((IInterface**)&values);
         Int32 numParams = 0;
         IArrayList::Probe(values)->GetSize(&numParams);
-        try {
-            mJniSetter = nGetMultipleInt32Method(info, methodName, numParams);
-        } catch (NoSuchMethodError e) {
-            // try without the 'set' prefix
-            mJniSetter = nGetMultipleInt32Method(info, mPropertyName, numParams);
-        }
-        if (mJniSetter != NULL) {
+        mNativeSetter = nGetMultipleInt32Method(targetClass, methodName, numParams);
+        if (mNativeSetter != NULL) {
             if (propertyMap == NULL) {
                 propertyMap = new MethodMap();
-                sJNISetterPropertyMap[info] = propertyMap;
+                sNativeSetterPropertyMap[targetClass] = propertyMap;
             }
-            (*propertyMap)[mPropertyName] = mJniSetter;
+            (*propertyMap)[mPropertyName] = mNativeSetter;
         }
     }
     // } finally {

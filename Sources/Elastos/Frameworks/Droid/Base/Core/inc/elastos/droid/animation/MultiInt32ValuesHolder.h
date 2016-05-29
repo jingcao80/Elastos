@@ -51,10 +51,10 @@ public:
 
     // @Override
     CARAPI SetupSetter(
-        /* [in] */ IInterface* targetClass);
+        /* [in] */ IClassInfo* targetClass);
 
 private:
-    AutoPtr<IMethodInfo> mJniSetter;
+    AutoPtr<IMethodInfo> mNativeSetter;
 
     typedef HashMap<String, AutoPtr<IMethodInfo> > MethodMap;
     typedef typename MethodMap::Iterator MethodMapIterator;
@@ -62,7 +62,7 @@ private:
     typedef HashMap<AutoPtr<IClassInfo>, AutoPtr<MethodMap> > ClassMethodMap;
     typedef typename ClassMethodMap::Iterator ClassMethodMapIterator;
 
-    static ClassMethodMap sJNISetterPropertyMap;
+    static ClassMethodMap sNativeSetterPropertyMap;
 };
 
 } // namespace Animation

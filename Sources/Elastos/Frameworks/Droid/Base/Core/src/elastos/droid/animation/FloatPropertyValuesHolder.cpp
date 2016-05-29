@@ -1,40 +1,40 @@
 
-#include "Elastos.Droid.Utility.h"
 #include "elastos/droid/animation/FloatPropertyValuesHolder.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 
-using Elastos::Droid::Utility::EIID_IFloatProperty;
 using Elastos::Core::AutoLock;
-using Elastos::Core::ECLSID_CFloat;
 using Elastos::Core::IFloat;
-using Elastos::Core::EIID_IFloat;
 using Elastos::Core::CFloat;
+using Elastos::Core::EIID_IFloat;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
 namespace Animation {
 
-FloatPropertyValuesHolder::ClassMethodMap FloatPropertyValuesHolder::sJNISetterPropertyMap;
+FloatPropertyValuesHolder::ClassMethodMap FloatPropertyValuesHolder::sNativeSetterPropertyMap;
 
 CAR_INTERFACE_IMPL(FloatPropertyValuesHolder, PropertyValuesHolder, IFloatPropertyValuesHolder);
+
 FloatPropertyValuesHolder::FloatPropertyValuesHolder(
     /* [in] */ const String& propertyName,
     /* [in] */ IFloatKeyframes* keyframes)
     : PropertyValuesHolder(propertyName)
-    , mFloatKeyframes(keyframes)
 {
     mValueType = EIID_IFloat;
     mKeyframes = IKeyframes::Probe(keyframes);
+    mFloatKeyframes = keyframes;
 }
 
 FloatPropertyValuesHolder::FloatPropertyValuesHolder(
     /* [in] */ IProperty* property,
     /* [in] */ IFloatKeyframes* keyframes)
     : PropertyValuesHolder(property)
-    , mFloatKeyframes(keyframes)
 {
     mValueType = EIID_IFloat;
     mKeyframes = IKeyframes::Probe(keyframes);
+    mFloatKeyframes = keyframes;
 }
 
 FloatPropertyValuesHolder::FloatPropertyValuesHolder(
@@ -51,7 +51,7 @@ FloatPropertyValuesHolder::FloatPropertyValuesHolder(
     : PropertyValuesHolder(property)
 {
     SetFloatValues(values);
-    if(property->Probe(EIID_IFloatProperty)) {
+    if (IFloatProperty::Probe(property) != NULL) {
         mFloatProperty = IFloatProperty::Probe(mProperty);
     }
 }
@@ -87,12 +87,11 @@ ECode FloatPropertyValuesHolder::Clone(
 {
     AutoPtr<FloatPropertyValuesHolder> v = new FloatPropertyValuesHolder(mPropertyName, mFloatKeyframes);
     CloneImpl(v);
-    v->mJniSetter = mJniSetter;
+    v->mNativeSetter = mNativeSetter;
     v->mFloatKeyframes = mFloatKeyframes;
     v->mFloatAnimatedValue = mFloatAnimatedValue;
-    *holder = (IFloatPropertyValuesHolder*)v.Get();
+    *holder = (IFloatPropertyValuesHolder*)v;
     REFCOUNT_ADD(*holder);
-
     return NOERROR;
 }
 
@@ -102,64 +101,19 @@ ECode FloatPropertyValuesHolder::SetAnimatedValue(
     if (mFloatProperty != NULL) {
         return mFloatProperty->SetValue(target, mFloatAnimatedValue);
     }
-
-    AutoPtr<IInterface> animatedValue;
-    GetAnimatedValue((IInterface**)&animatedValue);
     if (mProperty != NULL) {
-        mProperty->Set(target, animatedValue);
+        mProperty->Set(target, CoreUtils::Convert(mFloatAnimatedValue));
         return NOERROR;
     }
-    if (mJniSetter != NULL) {
-        AutoPtr<IArgumentList> args;
-        mJniSetter->CreateArgumentList((IArgumentList**)&args);
-        AutoPtr<IFunctionInfo> funcInfo;
-        args->GetFunctionInfo((IFunctionInfo**)&funcInfo);
-        AutoPtr<IParamInfo> paramInfo;
-        funcInfo->GetParamInfoByIndex(0, (IParamInfo**)&paramInfo);
-        AutoPtr<IDataTypeInfo> dataTypeInfo;
-        paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
-        CarDataType carType;
-        dataTypeInfo->GetDataType(&carType);
-        if(carType == CarDataType_Float)
-        {
-            args->SetInputArgumentOfFloat(0, mFloatAnimatedValue);
-        } else if(carType == CarDataType_Interface){
-            args->SetInputArgumentOfObjectPtr(0, animatedValue);
-        } else {
-            assert(0);
-        }
-        mJniSetter->Invoke(target, args);
-        return NOERROR;
-    }
-    if (mSetter != NULL) {
-        AutoPtr<IArgumentList> args;
-        mSetter->CreateArgumentList((IArgumentList**)&args);
-        AutoPtr<IFunctionInfo> funcInfo;
-        args->GetFunctionInfo((IFunctionInfo**)&funcInfo);
-        AutoPtr<IParamInfo> paramInfo;
-        funcInfo->GetParamInfoByIndex(0, (IParamInfo**)&paramInfo);
-        AutoPtr<IDataTypeInfo> dataTypeInfo;
-        paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
-        CarDataType carType;
-        dataTypeInfo->GetDataType(&carType);
-        if (carType == CarDataType_Float) {
-            args->SetInputArgumentOfFloat(0, mFloatAnimatedValue);
-        }
-        else if(carType == CarDataType_Interface){
-            args->SetInputArgumentOfObjectPtr(0, animatedValue);
-        }
-        else {
-            assert(0);
-        }
-        mSetter->Invoke(target, args);
-
+    if (mNativeSetter != NULL) {
+        nCallFloatMethod(target, mNativeSetter, mFloatAnimatedValue);
         return NOERROR;
     }
     return NOERROR;
 }
 
 ECode FloatPropertyValuesHolder::SetupSetter(
-        /* [in] */ IInterface* target)
+        /* [in] */ IClassInfo* target)
 {
     if (mProperty != NULL) {
         return NOERROR;
@@ -167,43 +121,33 @@ ECode FloatPropertyValuesHolder::SetupSetter(
     // Check new static hashmap<propName, int> for setter method
     {
         AutoLock lock(mPropertyMapLock);
-        AutoPtr<IClassInfo> clInfo = GetClassInfo(target);
-        ClassID id;
-        id.mUunm = (char*)malloc(80);
-        clInfo->GetId(&id);
-        free(id.mUunm);
-        ClassMethodMapIterator exit = sJNISetterPropertyMap.Find(clInfo);
+
         AutoPtr<MethodMap> propertyMap;
-        if (exit != sJNISetterPropertyMap.End()) {
-            propertyMap = exit->mSecond;
-            if (propertyMap != NULL) {
-                MethodMapIterator it = propertyMap->Find(mPropertyName);
-                if (it != propertyMap->End()) {
-                    AutoPtr<IMethodInfo> mtInfo = it->mSecond;
-                    if (mtInfo != NULL) {
-                        mJniSetter = mtInfo;
-                    }
-                }
+        ClassMethodMapIterator it = sNativeSetterPropertyMap.Find(target);
+        if (it != sNativeSetterPropertyMap.End()) {
+            propertyMap = it->mSecond;
+        }
+        if (propertyMap != NULL) {
+            MethodMapIterator mit = propertyMap->Find(mPropertyName);
+            AutoPtr<IMethodInfo> mtInfo;
+            if (mit != propertyMap->End()) {
+                mtInfo = mit->mSecond;
+            }
+            if (mtInfo != NULL) {
+                mNativeSetter = mit->mSecond;
             }
         }
-
-        if (mJniSetter == NULL) {
+        if (mNativeSetter == NULL) {
             String methodName = GetMethodName(String("Set"), mPropertyName);
-            // clInfo->GetMethodInfo(methodName, (IMethodInfo**)&mJniSetter);
-            mJniSetter = nGetFloatMethod(target, methodName);
-            if (mJniSetter != NULL) {
+            mNativeSetter = nGetFloatMethod(target, methodName);
+            if (mNativeSetter != NULL) {
                 if (propertyMap == NULL) {
                     propertyMap = new MethodMap();
-                    sJNISetterPropertyMap[clInfo] = propertyMap;
+                    sNativeSetterPropertyMap[target] = propertyMap;
                 }
-                (*propertyMap)[mPropertyName] = mJniSetter;
+                (*propertyMap)[mPropertyName] = mNativeSetter;
             }
         }
-    }
-
-    if (mJniSetter == NULL) {
-        // Couldn't find method through fast JNI approach - just use reflection
-        return PropertyValuesHolder::SetupSetter(target);
     }
     return NOERROR;
 }

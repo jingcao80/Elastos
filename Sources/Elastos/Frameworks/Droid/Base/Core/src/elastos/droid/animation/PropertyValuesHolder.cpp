@@ -15,6 +15,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Graphics::EIID_IPointF;
@@ -36,6 +37,7 @@ using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
 using Elastos::Core::EIID_IInteger32;
 using Elastos::Core::ECLSID_CInteger32;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
@@ -137,8 +139,8 @@ Int32 PropertyValuesHolder::DOUBLE_VARIANTS[6] = {
     CLASS_FLOAT/*float.class*/, CLASS_INT/*int.class*/,
     CLASS_IFLOAT/*Float.class*/, CLASS_IINTEGER32/*Integer.class*/};
 
-AutoPtr< PropertyValuesHolder::ClassMethodMap > PropertyValuesHolder::sSetterPropertyMap = new ClassMethodMap();
-AutoPtr< PropertyValuesHolder::ClassMethodMap > PropertyValuesHolder::sGetterPropertyMap = new ClassMethodMap();
+PropertyValuesHolder::ClassMethodMap PropertyValuesHolder::sSetterPropertyMap;
+PropertyValuesHolder::ClassMethodMap PropertyValuesHolder::sGetterPropertyMap;
 
 static String GetSignature(
     /* [in] */ Int32 type,
@@ -600,7 +602,7 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetPropertyFunction(
 
 AutoPtr<IMethodInfo> PropertyValuesHolder::SetupSetterOrGetter(
     /* [in] */ IClassInfo* targetClass,
-    /* [in] */ PropertyValuesHolder::ClassMethodMap* propertyMapMap,
+    /* [in] */ PropertyValuesHolder::ClassMethodMap& propertyMapMap,
     /* [in] */ const String& prefix,
     /* [in] */ const InterfaceID& valueType)
 {
@@ -610,8 +612,8 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::SetupSetterOrGetter(
 
         AutoPtr<IClassInfo> key = targetClass;
         AutoPtr< MethodMap > propertyMap;
-        typename ClassMethodMap::Iterator it = propertyMapMap->Find(key);
-        if (it != propertyMapMap->End()) {
+        typename ClassMethodMap::Iterator it = propertyMapMap.Find(key);
+        if (it != propertyMapMap.End()) {
             propertyMap = it->mSecond;
         }
         if (propertyMap != NULL) {
@@ -624,7 +626,7 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::SetupSetterOrGetter(
             setterOrGetter = GetPropertyFunction(targetClass, prefix, valueType);
             if (propertyMap == NULL) {
                 propertyMap = new MethodMap();
-                (*propertyMapMap)[key] = propertyMap;
+                propertyMapMap[key] = propertyMap;
             }
             (*propertyMap)[mPropertyName] = setterOrGetter;
         }
@@ -633,26 +635,24 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::SetupSetterOrGetter(
 }
 
 ECode PropertyValuesHolder::SetupSetter(
-    /* [in] */ IInterface* targetClass)
+    /* [in] */ IClassInfo* targetClass)
 {
     InterfaceID propertyType = mValueType;
     if (mConverter != NULL) {
         mConverter->GetTargetType(&propertyType);
     }
-    AutoPtr<IClassInfo> info = GetClassInfo(targetClass);
-    mSetter = SetupSetterOrGetter(info, sSetterPropertyMap, String("Set"), propertyType);
+    mSetter = SetupSetterOrGetter(targetClass, sSetterPropertyMap, String("Set"), propertyType);
     return NOERROR;
 }
 
 ECode PropertyValuesHolder::SetupGetter(
-     /* [in] */ IInterface* target)
+     /* [in] */ IClassInfo* targetClass)
 {
     InterfaceID propertyType = mValueType;
     if (mConverter != NULL) {
         mConverter->GetTargetType(&propertyType);
     }
-    AutoPtr<IClassInfo> info = GetClassInfo(target);
-    mGetter = SetupSetterOrGetter(info, sGetterPropertyMap, String("Get"), propertyType);
+    mGetter = SetupSetterOrGetter(targetClass, sGetterPropertyMap, String("Get"), propertyType);
     return NOERROR;
 }
 
@@ -692,7 +692,7 @@ ECode PropertyValuesHolder::SetupSetterAndGetter(
     }
 NEXT:
     if (mSetter == NULL) {
-        SetupSetter(target);
+        SetupSetter(GetClassInfo(target));
     }
     AutoPtr<ArrayOf<IKeyframe*> > frames;
     mKeyframes->GetKeyframes((ArrayOf<IKeyframe*>**)&frames);
@@ -703,7 +703,7 @@ NEXT:
         kf->HasValue(&has);
         if (!has || ((Keyframe*)kf)->ValueWasSetOnStart()) {
             if (mGetter == NULL) {
-                SetupGetter(target);
+                SetupGetter(GetClassInfo(target));
                 if (mGetter == NULL) {
                     // Already logged the error - just return to avoid NPE
                     return NOERROR;
@@ -871,7 +871,7 @@ ECode PropertyValuesHolder::SetupValue(
         kf->SetValue(cValue);
     }
     if (mGetter == NULL) {
-        SetupGetter(target);
+        SetupGetter(GetClassInfo(target));
         if (mGetter == NULL) {
             // Already logged the error - just return to avoid NPE
             return NOERROR;
@@ -1229,45 +1229,54 @@ String PropertyValuesHolder::GetMethodName(
 }
 
 AutoPtr<IMethodInfo> PropertyValuesHolder::nGetInt32Method(
-    /* [in] */ IInterface* targetClass,
+    /* [in] */ IClassInfo* targetClass,
     /* [in] */ const String& methodName)
 {
-    AutoPtr<IClassInfo> clInfo = GetClassInfo(targetClass);
     AutoPtr<IMethodInfo> mi;
-    clInfo->GetMethodInfo(methodName, String("(I32)E"), (IMethodInfo**)&mi);
+    targetClass->GetMethodInfo(methodName, String("(I32)E"), (IMethodInfo**)&mi);
     return mi;
 }
 
 AutoPtr<IMethodInfo> PropertyValuesHolder::nGetFloatMethod(
-    /* [in] */ IInterface* targetClass,
+    /* [in] */ IClassInfo* targetClass,
     /* [in] */ const String& methodName)
 {
-    AutoPtr<IClassInfo> clInfo = GetClassInfo(targetClass);
     AutoPtr<IMethodInfo> mi;
-    clInfo->GetMethodInfo(methodName, String("(F)E"), (IMethodInfo**)&mi);
+    targetClass->GetMethodInfo(methodName, String("(F)E"), (IMethodInfo**)&mi);
+    return mi;
+}
+
+static AutoPtr<IMethodInfo> GetMultiparameterMethod(
+    /* [in] */ IClassInfo* targetClass,
+    /* [in] */ const String& methodName,
+    /* [in] */ Int32 parameterCount,
+    /* [in] */ const String& parameterType)
+{
+    StringBuilder sb;
+    sb += "(";
+    for (Int32 i = 0; i < parameterCount; i++) {
+        sb += parameterType;
+    }
+    sb += ")E";
+    AutoPtr<IMethodInfo> mi;
+    targetClass->GetMethodInfo(methodName, sb.ToString(), (IMethodInfo**)&mi);
     return mi;
 }
 
 AutoPtr<IMethodInfo> PropertyValuesHolder::nGetMultipleInt32Method(
-    /* [in] */ IInterface* targetClass,
+    /* [in] */ IClassInfo* targetClass,
     /* [in] */ const String& methodName,
     /* [in] */ Int32 numParams)
 {
-    AutoPtr<IClassInfo> clInfo = GetClassInfo(targetClass);
-    AutoPtr<IMethodInfo> mi;
-    clInfo->GetMethodInfo(methodName, String("(I32I32I32I32)E"), (IMethodInfo**)&mi);
-    return mi;
+    return GetMultiparameterMethod(targetClass, methodName, numParams, String("I32"));
 }
 
 AutoPtr<IMethodInfo> PropertyValuesHolder::nGetMultipleFloatMethod(
-    /* [in] */ IInterface* targetClass,
+    /* [in] */ IClassInfo* targetClass,
     /* [in] */ const String& methodName,
     /* [in] */ Int32 numParams)
 {
-    AutoPtr<IClassInfo> clInfo = GetClassInfo(targetClass);
-    AutoPtr<IMethodInfo> mi;
-    clInfo->GetMethodInfo(methodName, String("(FFFF)E"), (IMethodInfo**)&mi);
-    return mi;
+    return GetMultiparameterMethod(targetClass, methodName, numParams, String("F"));
 }
 
 void PropertyValuesHolder::nCallInt32Method(

@@ -493,7 +493,7 @@ public:
      * @param targetClass The Class on which the requested method should exist.
      */
     virtual CARAPI SetupSetter(
-        /* [in] */ IInterface* targetClass);
+        /* [in] */ IClassInfo* targetClass);
 
     /**
      * Internal function (called from ObjectAnimator) to set up the setter and getter
@@ -660,20 +660,20 @@ protected:
     //The function will help you transform from a object to classInfo
 
     static CARAPI_(AutoPtr<IMethodInfo>) nGetInt32Method(
-        /* [in] */ IInterface* targetClass,
+        /* [in] */ IClassInfo* targetClass,
         /* [in] */ const String& methodName);
 
     static CARAPI_(AutoPtr<IMethodInfo>) nGetFloatMethod(
-        /* [in] */ IInterface* targetClass,
+        /* [in] */ IClassInfo* targetClass,
         /* [in] */ const String& methodName);
 
     static CARAPI_(AutoPtr<IMethodInfo>) nGetMultipleInt32Method(
-        /* [in] */ IInterface* targetClass,
+        /* [in] */ IClassInfo* targetClass,
         /* [in] */ const String& methodName,
         /* [in] */ Int32 numParams);
 
     static CARAPI_(AutoPtr<IMethodInfo>) nGetMultipleFloatMethod(
-        /* [in] */ IInterface* targetClass,
+        /* [in] */ IClassInfo* targetClass,
         /* [in] */ const String& methodName,
         /* [in] */ Int32 numParams);
 
@@ -761,7 +761,7 @@ private:
      */
     CARAPI_(AutoPtr<IMethodInfo>) SetupSetterOrGetter(
         /* [in] */ IClassInfo* targetClass,
-        /* [in] */ PropertyValuesHolder::ClassMethodMap* propertyMapMap,
+        /* [in] */ PropertyValuesHolder::ClassMethodMap& propertyMapMap,
         /* [in] */ const String& prefix,
         /* [in] */ const InterfaceID& type);
 
@@ -769,7 +769,7 @@ private:
      * Utility function to get the getter from targetClass
      */
     CARAPI SetupGetter(
-        /* [in] */ IInterface* target);
+        /* [in] */ IClassInfo* target);
 
     CARAPI ConvertBack(
         /* [in] */ IInterface* value,
@@ -860,8 +860,8 @@ private:
     // is used to speed up property/setter/getter lookups for a given class/property
     // combination. No need to use reflection on the combination more than once.
     //TODO
-    static AutoPtr< ClassMethodMap > sSetterPropertyMap;
-    static AutoPtr< ClassMethodMap > sGetterPropertyMap;
+    static ClassMethodMap sSetterPropertyMap;
+    static ClassMethodMap sGetterPropertyMap;
 
     /**
      * The type evaluator used to calculate the animated values. This evaluator is determined

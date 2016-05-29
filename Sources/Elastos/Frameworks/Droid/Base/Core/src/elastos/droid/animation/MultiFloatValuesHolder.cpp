@@ -11,8 +11,10 @@ namespace Elastos {
 namespace Droid {
 namespace Animation {
 
-MultiFloatValuesHolder::ClassMethodMap MultiFloatValuesHolder::sJNISetterPropertyMap;
+MultiFloatValuesHolder::ClassMethodMap MultiFloatValuesHolder::sNativeSetterPropertyMap;
+
 CAR_INTERFACE_IMPL(MultiFloatValuesHolder, PropertyValuesHolder, IMultiFloatValuesHolder);
+
 MultiFloatValuesHolder::MultiFloatValuesHolder(
     /* [in] */ const String& propertyName,
     /* [in] */ ITypeConverter* converter,
@@ -44,34 +46,32 @@ ECode MultiFloatValuesHolder::SetAnimatedValue(
     GetAnimatedValue((IInterface**)&v);
     AutoPtr<IArrayList> list = IArrayList::Probe(v);
     Int32 numParameters = 0;
-    assert(list != NULL);
     list->GetSize(&numParameters);
-
     AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(numParameters);
-    Float fv = 0.f;
     for (Int32 i = 0; i < numParameters; i++) {
         AutoPtr<IInterface> value;
         list->Get(i, (IInterface**)&value);
+        Float fv = 0.f;
         IFloat::Probe(value)->GetValue(&fv);
         (*values)[i] = fv;
     }
-    if (mJniSetter != 0) {
+    if (mNativeSetter != NULL) {
         switch (numParameters) {
             case 1: {
-                nCallFloatMethod(target, mJniSetter, (*values)[0]);
+                nCallFloatMethod(target, mNativeSetter, (*values)[0]);
                 break;
             }
             case 2: {
-                nCallTwoFloatMethod(target, mJniSetter, (*values)[0], (*values)[1]);
+                nCallTwoFloatMethod(target, mNativeSetter, (*values)[0], (*values)[1]);
                 break;
             }
             case 4: {
-                nCallFourFloatMethod(target, mJniSetter, (*values)[0], (*values)[1],
+                nCallFourFloatMethod(target, mNativeSetter, (*values)[0], (*values)[1],
                         (*values)[2], (*values)[3]);
                 break;
             }
             default: {
-                nCallMultipleFloatMethod(target, mJniSetter, values);
+                nCallMultipleFloatMethod(target, mNativeSetter, values);
                 break;
             }
         }
@@ -82,50 +82,48 @@ ECode MultiFloatValuesHolder::SetAnimatedValue(
 ECode MultiFloatValuesHolder::SetupSetterAndGetter(
     /* [in] */ IInterface* target)
 {
-    return SetupSetter(target);
+    return SetupSetter(GetClassInfo(target));
 }
 
 ECode MultiFloatValuesHolder::SetupSetter(
-    /* [in] */ IInterface* targetClass)
+    /* [in] */ IClassInfo* targetClass)
 {
-    if (mJniSetter != NULL) {
+    if (mNativeSetter != NULL) {
         return NOERROR;
     }
     // try {
-    AutoLock lock(mPropertyMapLock);
     // mPropertyMapLock.writeLock().lock();
-    AutoPtr<IClassInfo> info = GetClassInfo(targetClass);
-    AutoPtr<MethodMap> propertyMap = sJNISetterPropertyMap[info];
+    AutoLock lock(mPropertyMapLock);
 
-    typename ClassMethodMap::Iterator it = sJNISetterPropertyMap.Find(info);
-    if ((it != sJNISetterPropertyMap.End()) && (it->mSecond != NULL)) {
+    AutoPtr<MethodMap> propertyMap;
+    typename ClassMethodMap::Iterator it = sNativeSetterPropertyMap.Find(targetClass);
+    if (it != sNativeSetterPropertyMap.End()) {
         propertyMap = it->mSecond;
-        typename MethodMap::Iterator it2 = propertyMap->Find(mPropertyName);
-        if ((it2 != propertyMap->End()) && (it2->mSecond != NULL)) {
-            mJniSetter = it2->mSecond;
+    }
+    if (propertyMap != NULL) {
+        MethodMapIterator mit = propertyMap->Find(mPropertyName);
+        AutoPtr<IMethodInfo> mtInfo;
+        if (mit != propertyMap->End()) {
+            mtInfo = mit->mSecond;
+        }
+        if (mtInfo != NULL) {
+            mNativeSetter = mit->mSecond;
         }
     }
-
-    if (mJniSetter == NULL) {
+    if (mNativeSetter == NULL) {
         String methodName = GetMethodName(String("Set"), mPropertyName);
         CalculateValue(0.f);
         AutoPtr<IInterface> values;
         GetAnimatedValue((IInterface**)&values);
         Int32 numParams = 0;
         IArrayList::Probe(values)->GetSize(&numParams);
-
-        try {
-            mJniSetter = nGetMultipleFloatMethod(info, methodName, numParams);
-        } catch (NoSuchMethodError e) {
-            // try without the 'set' prefix
-            mJniSetter = nGetMultipleFloatMethod(info, mPropertyName, numParams);
-        }
-        if (mJniSetter != NULL) {
+        mNativeSetter = nGetMultipleFloatMethod(targetClass, methodName, numParams);
+        if (mNativeSetter != NULL) {
             if (propertyMap == NULL) {
                 propertyMap = new MethodMap();
-                sJNISetterPropertyMap[info] = propertyMap;
+                sNativeSetterPropertyMap[targetClass] = propertyMap;
             }
-            (*propertyMap)[mPropertyName] = mJniSetter;
+            (*propertyMap)[mPropertyName] = mNativeSetter;
         }
     }
     // } finally {

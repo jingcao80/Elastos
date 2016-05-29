@@ -5,7 +5,6 @@
 #include "PropertyValuesHolder.h"
 
 using Elastos::Droid::Utility::IInt32Property;
-using Elastos::Droid::Utility::EIID_IInt32Property;
 
 namespace Elastos {
 namespace Droid {
@@ -40,7 +39,7 @@ public:
     CARAPI CalculateValue(
         /* [in] */ Float fraction);
 
-    virtual CARAPI GetAnimatedValue(
+    CARAPI GetAnimatedValue(
         /* [out] */ IInterface** value);
 
     CARAPI Clone(
@@ -50,10 +49,10 @@ public:
         /* [in] */ IInterface* target);
 
     CARAPI SetupSetter(
-        /* [in] */ IInterface* targetClass);
+        /* [in] */ IClassInfo* targetClass);
 
 protected:
-    AutoPtr<IMethodInfo> mJniSetter;
+    AutoPtr<IMethodInfo> mNativeSetter;
     AutoPtr<IInt32Keyframes> mInt32Keyframes;
     Int32 mInt32AnimatedValue;
 
@@ -64,9 +63,8 @@ private:
     typedef HashMap<AutoPtr<IClassInfo>, AutoPtr<MethodMap> > ClassMethodMap;
     typedef typename ClassMethodMap::Iterator ClassMethodMapIterator;
 
-    static ClassMethodMap sJNISetterPropertyMap;
+    static ClassMethodMap sNativeSetterPropertyMap;
     AutoPtr<IInt32Property> mInt32Property;
-
 };
 
 } // namespace Animation
