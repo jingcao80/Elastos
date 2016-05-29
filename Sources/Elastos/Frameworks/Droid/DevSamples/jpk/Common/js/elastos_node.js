@@ -1,29 +1,15 @@
-elog('==========elasto_node.js begin===========');
-
 var sPackageName = process.argv[2];
 //var sActivityName = process.argv[3];
 
 var root = global||window;
 
 root.Elastos = ( function () {
-    elog('==========elasto_node.js begin.1========');
-    //var _api = require('./elastos.node');
     var _api = require('../../bin/elastos.node');
-
-    elog('==========elasto_node.js begin.2========');
     var _Runtime = require('./elastos_runtime.js')(_api);
-
-    elog('==========elasto_node.js begin.3========');
     var _Module_Core = _Runtime.getModuleInfo("/system/lib/Elastos.CoreLibrary.eco");
-
-    elog('==========elasto_node.js begin.4========');
     var _Module_Droid = _Runtime.getModuleInfo("/system/lib/Elastos.Droid.Core.eco");
-
-    elog('==========elasto_node.js begin.5========'+sPackageName);
-    //var _Bridge_Native = _api.require("/data/elastos/" + sPackageName + ".eco", "CTestEventListener");
     var _Bridge_Native = _api.require("/data/elastos/" + sPackageName + ".eco", sPackageName + ".CTestEventListener");
 
-    elog('==========elasto_node.js begin.6========');
     var _Bridge = {
         init : function (aoNodeBridgeListener) {
             var pEnqueueUIMessage = _Bridge_Native.GetEnqueueUIMessagePtr();
@@ -57,7 +43,8 @@ root.Elastos = ( function () {
             },
 
             CString : function (asText) {
-                return Elastos.Core.New("CStringWrapper",asText);
+                //return Elastos.Core.New("CStringWrapper",asText);
+                return Elastos.Core.New("Elastos.Core.CString",asText);
             },
         },
 
@@ -74,7 +61,8 @@ root.Elastos = ( function () {
 
         Application : {
             PackageName : sPackageName,
-            RootPath : "/data/temp/node/" + sPackageName,
+            //RootPath : "/data/temp/node/" + sPackageName,
+            RootPath : "/data/temp/node/" + sPackageName.split(".").pop(),
 
             R : null,
 
@@ -89,12 +77,16 @@ root.Elastos = ( function () {
             //Uses-libraries : [],  ECO/NPM
 
             Run : function () {
+                elog("========Run.begin========");
+
                 var assert = require('assert');
                 var called = false;
 
                 process.on('exit', function () {
                     assert(called);
                 });
+
+                elog("========Run.begin.1========typeof _api.receive:" + typeof _api.receive);
 
                 _api.receive(5, function (err, val) {
                     assert.equal(null, err);
@@ -103,11 +95,15 @@ root.Elastos = ( function () {
                         called = true;
                     });
                 });
+                elog("========Run.end========nonononono!");
             },
 
             Ready : function () {
+                elog("========Ready.begin========");
                 _Bridge.init(this.NodeBridgeListener);
+                elog("========Ready.1========");
                 this.Run();
+                elog("========Ready.end========");
             },
         },
     }
@@ -117,7 +113,6 @@ root.Application = Elastos.Application;
 
 Application.NodeBridgeListener = {
     OnRegistActivity : function(asPackageName, asActivityName, aoActivityInstance, aoActivityListener, aoActivityHandler, out_abResult) {
-    //OnRegistActivity : function(asPackageName, asActivityName, aoActivityInstance, out_aoActivityListener, aoActivityHandler, out_abResult) {
         var _this = Elastos.Application;
 
         _this.R = require(_this.RootPath + "/R.js");
@@ -128,22 +123,15 @@ Application.NodeBridgeListener = {
             ActivityInstance : aoActivityInstance,
             ActivityHandler : aoActivityHandler,
         };
+
         oActivityListener = require(sFileName)(Elastos, oActivity);
         oActivity.ActivityListener = oActivityListener;
         _this.Activities.push(oActivity);
 
-        elog('=======================OnRegistActivity.SetActivityListener.begin=================================');
-
-        //Elastos.Test.SetActivityListener(oActivityListener);
         Elastos.Test.SetActivityListener(aoActivityListener, oActivityListener);
-        //out_aoActivityListener.data = oActivityListener;
-
-        elog('=======================OnRegistActivity.SetActivityListener.end=================================');
 
         out_abResult.data = true;
     },
 };
 
 Application.Ready();
-
-elog('=====================elasto_node.js end===================================');

@@ -1,3 +1,5 @@
+elog("========CActivityOne.js========begin========");
+
 module.exports = function(aoElastos, aoActivity){
     //common definition
     var CString = aoElastos.Core.CString;
@@ -13,7 +15,7 @@ module.exports = function(aoElastos, aoActivity){
         s = "    Info: " + s;
         var oInfo = oActivity.FindViewById(R.id.myTextView);
         oInfo.SetText(CString(s));
-        whmlog(s);
+        elog(s);
     }
 
     function _startEPK(asName) {
@@ -31,9 +33,13 @@ module.exports = function(aoElastos, aoActivity){
     return {
         //OnCreate:function(aoContext){
         OnCreate:function(aoContext, aoSavedInstanceState){
+            elog("========CActivityOne.js====OnCreate====begin========");
+
             //----------------SetContentView begin----------------
             oActivity.SetContentView(R.layout.main);
             //----------------SetContentView end----------------
+
+            elog("========CActivityOne.js====OnCreate====begin.1========");
 
             //----------------myTextView begin----------------
             var oMyTextView = oActivity.FindViewById(R.id.myTextView);
@@ -46,6 +52,8 @@ module.exports = function(aoElastos, aoActivity){
             })();
             oMyTextView.SetOnClickListener(jso_button_MyTextView_cb);
             //----------------myTextView begin----------------
+
+            elog("========CActivityOne.js====OnCreate====begin.2========");
 
             //----------------myEditText begin----------------
             var oMyEditText = oActivity.FindViewById(R.id.myEditText);
@@ -81,38 +89,65 @@ module.exports = function(aoElastos, aoActivity){
             oMyTextView.SetOnKeyListener(jso_button_MyEditText_OnKeyListener);
             //----------------myEditText begin----------------
 
+            elog("========CActivityOne.js====OnCreate====begin.3========");
+
             //----------------chkAndroid/chkIos begin----------------
             var oChkAndroid = oActivity.FindViewById(R.id.chkAndroid);
             var oChkIos = oActivity.FindViewById(R.id.chkIos);
+            var oChkUbuntu = oActivity.FindViewById(R.id.chkUbuntu);
+
             var jso_button_group_cb = {
                 OnClick:function(aoView){
-                    var id = aoView.GetId();
-                    var check = ( id == R.id.chkAndroid );
-                    _showInfo( (check?"Android":"Ios") + " button clicked" );
-                    oChkAndroid.SetChecked(check);
-                    oChkIos.SetChecked(!check);
+                    //var id = aoView.GetId();
+                    //var check = ( id == R.id.chkAndroid );
+                    //_showInfo( (check?"Android":"Ios") + " button clicked" );
+                    //oChkAndroid.SetChecked(check);
+                    //oChkIos.SetChecked(!check);
+
+                    oChkAndroid.SetChecked(false);
+                    oChkIos.SetChecked(false);
+                    oChkUbuntu.SetChecked(false);
+                    aoView.SetChecked(true);
                 }
             };
             oChkAndroid.SetOnClickListener(jso_button_group_cb);
             oChkIos.SetOnClickListener(jso_button_group_cb);
+            oChkUbuntu.SetOnClickListener(jso_button_group_cb);
             //----------------chkAndroid/chkIos end----------------
 
+            elog("========CActivityOne.js====OnCreate====begin.4========");
+
             //----------------AnamtionButton begin----------------
+if (false) {
             oActivity.FindViewById(R.id.AnamtionButton).SetOnClickListener( (function(){
+                elog("========CActivityOne.js====OnCreate====begin.4.1========");
+
                 var iSelf = 1;  //RELATIVE_TO_SELF;
                 var oAnimation = {
-                    Alpha :     Droid_New("CAlphaAnimation", 0.3, 1.0),
-                    Rotate :    Droid_New("CRotateAnimation", 0.0, 350.0, iSelf, 0.5, iSelf, 0.5),
-                    Scale :     Droid_New("CScaleAnimation", 0.2, 1.4, 0.2, 1.4, iSelf, 0.5, iSelf, 0.5),
-                    Translate : Droid_New("CTranslateAnimation", 300.0, -20.0, -10.0, 30.0)
+                    Alpha :     Droid_New("Elastos.Droid.View.Animation.CAlphaAnimation", 0.3, 1.0),
+                    Rotate :    Droid_New("Elastos.Droid.View.Animation.CRotateAnimation", 0.0, 350.0, iSelf, 0.5, iSelf, 0.5),
+                    Scale :     Droid_New("Elastos.Droid.View.Animation.CScaleAnimation", 0.2, 1.4, 0.2, 1.4, iSelf, 0.5, iSelf, 0.5),
+                    Translate : Droid_New("Elastos.Droid.View.Animation.CTranslateAnimation", 300.0, -20.0, -10.0, 30.0)
                 };
+
+                elog("========CActivityOne.js====OnCreate====begin.4.2========");
+
                 var keys = [];  //Object.keys()
                 for (var prop in oAnimation) {
+                    elog("========CActivityOne.js====OnCreate====begin.4.2.1========"+prop);
                     keys.push(prop);
+                    elog("========CActivityOne.js====OnCreate====begin.4.2.2.1========"+typeof oAnimation[prop]);
+                    elog("========CActivityOne.js====OnCreate====begin.4.2.2.2========"+typeof oAnimation[prop].SetDuration);
                     oAnimation[prop].SetDuration(3000);
+                    elog("========CActivityOne.js====OnCreate====begin.4.2.3========"+prop);
                 }
+
+                elog("========CActivityOne.js====OnCreate====begin.4.3========");
+
                 var oButton = oActivity.FindViewById(R.id.DialogButton);
                 var count = 0;
+
+                elog("========CActivityOne.js====OnCreate====begin.4.4========");
 
                 return {
                     OnClick:function(aoView){
@@ -124,7 +159,10 @@ module.exports = function(aoElastos, aoActivity){
                     }
                 }
             })() );
+}
             //----------------AnamtionButton end----------------
+
+            elog("========CActivityOne.js====OnCreate====begin.5========");
 
             //----------------PopupWindowButton begin----------------
             function OnCreatePopupWindow(){
@@ -176,6 +214,8 @@ module.exports = function(aoElastos, aoActivity){
             oPopupWindowButton.SetOnClickListener(jso_button_PopupWindowButton_cb);
             //----------------PopupWindowButton end----------------
 
+            elog("========CActivityOne.js====OnCreate====begin.6========");
+
             //----------------DialogButton begin----------------
             var oDialogButton = oActivity.FindViewById(R.id.DialogButton);
             var jso_button_DialogButton_cb = (function(){
@@ -189,9 +229,11 @@ module.exports = function(aoElastos, aoActivity){
             oDialogButton.SetOnClickListener(jso_button_DialogButton_cb);
             //----------------DialogButton end----------------
 
+            elog("========CActivityOne.js====OnCreate====begin.7========");
+
             //----------------ConnectivityManagerButton begin----------------
             function OnTestConnectivityManager(){
-                whmlog('====jso_activity_cb====OnTestConnectivityManager.begin====');
+                elog('====jso_activity_cb====OnTestConnectivityManager.begin====');
                 //TODO
             }
             var oConnectivityManagerButton = oActivity.FindViewById(R.id.ConnectivityManagerButton);
@@ -206,9 +248,11 @@ module.exports = function(aoElastos, aoActivity){
             oConnectivityManagerButton.SetOnClickListener(jso_button_ConnectivityManagerButton_cb);
             //----------------ConnectivityManagerButton end----------------
 
+            elog("========CActivityOne.js====OnCreate====begin.8========");
+
             //----------------PowerManagerButton begin----------------
             function OnTestPowerManager(){
-                whmlog('====jso_activity_cb====OnTestPowerManager.begin====');
+                elog('====jso_activity_cb====OnTestPowerManager.begin====');
                 //TODO
             }
             var oPowerManagerButton = oActivity.FindViewById(R.id.PowerManagerButton);
@@ -223,8 +267,10 @@ module.exports = function(aoElastos, aoActivity){
             oPowerManagerButton.SetOnClickListener(jso_button_PowerManagerButton_cb);
             //----------------PowerManagerButton end----------------
 
-            //----------------myListView begin----------------
+            elog("========CActivityOne.js====OnCreate====begin.9========");
 
+            //----------------myListView begin----------------
+if (false) {
             var oListView = oActivity.FindViewById(R.id.myListView);
             var oDataList = Droid_New("CParcelableObjectContainer");
 
@@ -313,8 +359,10 @@ module.exports = function(aoElastos, aoActivity){
                 }
             })();
             oListView.SetOnItemClickListener(jso_ListView_cb);
-
+}
             //----------------myListView end----------------
+
+            elog("========CActivityOne.js====OnCreate====begin.10========");
 
             //----------------NavigationBar begin----------------
 
@@ -323,25 +371,27 @@ module.exports = function(aoElastos, aoActivity){
 
             //----------------NavigationBar end----------------
 
+            elog("========CActivityOne.js====OnCreate====end========");
+
             return;
         },  //OnCreate
         OnStart:function(aoContext){
-            whmlog('====jso_activity_cb====OnStart.begin====');
+            elog('====jso_activity_cb====OnStart.begin====');
         },
         OnResume:function(aoContext){
-            whmlog('====jso_activity_cb====OnResume.begin====');
+            elog('====jso_activity_cb====OnResume.begin====');
         },
         OnPause:function(aoContext){
-            whmlog('====jso_activity_cb====OnPause.begin====');
+            elog('====jso_activity_cb====OnPause.begin====');
         },
         OnStop:function(aoContext){
-            whmlog('====jso_activity_cb====OnStop.begin====');
+            elog('====jso_activity_cb====OnStop.begin====');
         },
         OnDestroy:function(aoContext){
-            whmlog('====jso_activity_cb====OnDestroy.begin====');
+            elog('====jso_activity_cb====OnDestroy.begin====');
         },
         OnActivityResult:function(aoContext, aiRequestCode, aiResultCode, aoIntentData){
-            whmlog('====jso_activity_cb====OnActivityResult.begin====');
+            elog('====jso_activity_cb====OnActivityResult.begin====');
         },
         OnCreateDialog:function(aoContext, aiId, out_aoDialog){
             var builder = Droid_New("CAlertDialogBuilder", oActivity);
@@ -390,3 +440,5 @@ module.exports = function(aoElastos, aoActivity){
         },
     }
 };
+
+elog("========CActivityOne.js========end========");

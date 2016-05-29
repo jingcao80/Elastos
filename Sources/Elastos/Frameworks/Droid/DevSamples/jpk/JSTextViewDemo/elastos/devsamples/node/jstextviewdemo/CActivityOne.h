@@ -2,6 +2,8 @@
 #ifndef __CACTIVITYONE_H__
 #define __CACTIVITYONE_H__
 
+#define JSAppName JSTextViewDemo
+
 #include "_Elastos_DevSamples_Node_JSTextViewDemo_CActivityOne.h"
 #include <elastos/droid/app/Activity.h>
 #include <elastos/droid/os/Handler.h>
@@ -18,7 +20,8 @@ using Elastos::Droid::Os::IMessage;
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
-namespace JSTextViewDemo {
+//namespace JSTextViewDemo {
+namespace JSAppName {
 
 CarClass(CActivityOne)
     , public Activity

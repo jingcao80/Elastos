@@ -28,12 +28,7 @@ ECode CTestConstructorInfo::GetName(
 ECode CTestConstructorInfo::GetAnnotation(
     /* [out] */ String * pName)
 {
-    ALOGD("CTestConstructorInfo::GetAnnotation==========begin==========");
-
     mConstructorInfo->GetAnnotation(pName);
-
-    ALOGD("CTestConstructorInfo::GetAnnotation==========end==========%s", pName->string());
-
     return NOERROR;
 }
 

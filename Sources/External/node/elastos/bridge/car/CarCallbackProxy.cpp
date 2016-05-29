@@ -1045,32 +1045,68 @@ CarCallbackInterfaceProxy::Callback::~Callback()
     delete[] mOutParamPtrs;
 }
 
+const char* ToCString(const v8::String::Utf8Value& value) {
+    return *value ? *value : "<string conversion failed>";
+}
+
+void ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch) {
+  v8::HandleScope handle_scope(isolate);
+  v8::String::Utf8Value exception(try_catch->Exception());
+  const char* exception_string = ToCString(exception);
+  v8::Handle<v8::Message> message = try_catch->Message();
+  if (message.IsEmpty()) {
+    // V8 didn't provide any extra information about this error; just
+    // print the exception.
+    ALOGD("js error====%s\n", exception_string);
+  } else {
+    v8::String::Utf8Value filename(message->GetScriptOrigin().ResourceName());
+    const char* filename_string = ToCString(filename);
+    int linenum = message->GetLineNumber();
+    ALOGD("js error====%s:%i: %s\n", filename_string, linenum, exception_string);
+    // Print line of source code.
+    v8::String::Utf8Value sourceline(message->GetSourceLine());
+    const char* sourceline_string = ToCString(sourceline);
+    ALOGD("%s\n", sourceline_string);
+    // Print wavy underline (GetUnderline is deprecated).
+    int start = message->GetStartColumn();
+    for (int i = 0; i < start; i++) {
+      ALOGD(" ");
+    }
+    int end = message->GetEndColumn();
+    for (int i = start; i < end; i++) {
+      ALOGD("^");
+    }
+    ALOGD("\n");
+    v8::String::Utf8Value stack_trace(try_catch->StackTrace());
+    if (stack_trace.length() > 0) {
+      const char* stack_trace_string = ToCString(stack_trace);
+      ALOGD("%s\n", stack_trace_string);
+    }
+  }
+}
+
 void CarCallbackInterfaceProxy::Callback::Call()
 {
     Int32 paramCount;
     mMethodInfo->GetParamCount(&paramCount);
 
     if (paramCount != mParamCount) {
-        LOG_ERROR("CarCallbackInterfaceProxy::Callback::Call paramCount is wrong");
+        ALOG("CarCallbackInterfaceProxy::Callback::Call paramCount is wrong");
         return;
     }
 
     v8::Isolate* isolate = mObject->mIsolate;
-    isolate->Enter();
-
-    v8::Handle<v8::Context> context = v8::Isolate::GetCurrent()->GetCurrentContext();
-
-    v8::Isolate::Scope isolateScope(isolate);
-    v8::Context::Scope contextScope(context);
-
+    v8::Handle<v8::Context> context = isolate->GetCurrentContext();
     v8::HandleScope scope(isolate);
 
     NPObject* obj = mObject->mObject;
     if (obj->_class == WebCore::npScriptObjectClass) {
         Elastos::String methodName;
         mMethodInfo->GetName(&methodName);
+
         NPVariant npvValue;
         _NPN_GetProperty(0, obj, _NPN_GetStringIdentifier((const char*)methodName), &npvValue);
+
         if (npvValue.type == NPVariantType_Object) {
             WebCore::V8NPObject* v8NPFuncObject = (WebCore::V8NPObject*)(NPVARIANT_TO_OBJECT(npvValue));
 
@@ -1085,15 +1121,23 @@ void CarCallbackInterfaceProxy::Callback::Call()
                 jsFunc = v8::Local<v8::Function>::Cast(jsObject);
             }
 
+            v8::TryCatch try_catch;
+
             v8::Handle<v8::Value>* argv = ConvertParams();
             jsFunc->Call(context->Global(), mParamCount, argv);
+
+            if (try_catch.HasCaught()) {
+                ALOGD("====CarCallbackInterfaceProxy::Callback::Call======7.0======callbakc error");
+                ReportException(isolate, &try_catch);
+                //assert(0); just crash again
+                jsFunc->Call(context->Global(), mParamCount, argv);
+            }
 
             //get out params
             for (Int32 i = 0; i < mParamCount; i++) {
                 if (!mOutParamPtrs[i]) continue;
 
                 v8::Handle<v8::Value> outV8Handle = argv[i];
-
                 v8::Local<v8::Object> outV8Object(v8::Handle<v8::Object>::Cast(outV8Handle));
 
                 WebCore::V8NPObject* v8NPObject = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
@@ -1344,18 +1388,14 @@ void CarCallbackInterfaceProxy::Callback::Call()
                         break;
                     }
                 }   //switch (mOutParamTypes[i])
-
-                ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===2===");
             }
 
             delete[] argv;
         }
     }
     else {
-        LOG_ERROR("CarCallbackInterfaceProxy::Callback::Call object is not js object");
+        ALOGD("CarCallbackInterfaceProxy::Callback::Call object is not js object");
     }
-
-    isolate->Exit();
 }
 
 v8::Handle<v8::Value>* CarCallbackInterfaceProxy::Callback::ConvertParams()

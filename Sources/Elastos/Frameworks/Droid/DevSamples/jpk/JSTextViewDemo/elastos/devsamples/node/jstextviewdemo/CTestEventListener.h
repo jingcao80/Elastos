@@ -1,6 +1,8 @@
 #ifndef __CTESTEVENTLISTENER_H__
 #define __CTESTEVENTLISTENER_H__
 
+#define JSAppName JSTextViewDemo
+
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Net.h"
@@ -110,16 +112,24 @@ struct NodeBridge
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
-namespace JSTextViewDemo {
+//namespace JSTextViewDemo {
+namespace JSAppName {
 
 EXTERN IHandler* myHandler;
 
 EXTERN NodeBridge* g_pNodeBridge;
 EXTERN NodeBridge** g_ppNodeBridge;
 
+    // interface ICallbackRunnable {
+    //     GetInstance(
+    //         [out] IInterface** instance);
+    // }
+
+
 class CallbackRunnable
     : public Object
     , public IRunnable
+    , public ICallbackRunnable
 {
 public:
 
@@ -127,33 +137,62 @@ public:
         /* [in] */ IInterface* object,
         /* [in] */ IMethodInfo* method,
         /* [in] */ IArgumentList* argumentList,
-        /* [in] */ pthread_mutex_t* mutex);
+        /* [in] */ pthread_mutex_t* mutex,
+        /* [in] */ Int32 tag);
 
     ~CallbackRunnable();
 
     CAR_INTERFACE_DECL()
 
-    CARAPI constructor(
-        /* [in] */ IInterface* object,
-        /* [in] */ IMethodInfo* method,
-        /* [in] */ IArgumentList* argumentList,
-        /* [in] */ pthread_mutex_t* mutex);
+    //CAR_OBJECT_DECL()
+
+    // CARAPI constructor(
+    //     /* [in] */ IInterface* object,
+    //     /* [in] */ IMethodInfo* method,
+    //     /* [in] */ IArgumentList* argumentList,
+    //     /* [in] */ pthread_mutex_t* mutex);
 
     CARAPI Run();
 
+    CARAPI GetInstance(IInterface** ppInstance);
+
     static void NodeMessage_FireCallback(void* payload) {
+        ALOGD("NodeMessage_FireCallback================begin================");
+
+        ECode ec = NOERROR;
+
         AutoPtr<IMessage> msg = (IMessage*)payload;
         AutoPtr<IRunnable> runnable;
         msg->GetCallback((IRunnable**)&runnable);
 
+        ALOGD("NodeMessage_FireCallback================1================");
+
         IInterface* _interface = runnable->Probe(EIID_IInterface);
+        //IInterface* _object = runnable->Probe(EIID_IObject);
         //CallbackRunnable* callback = (CallbackRunnable*)_interface;
         CallbackRunnable* callback = *(CallbackRunnable**)&_interface;
+        //CallbackRunnable* callback = *(CallbackRunnable**)&runnable;
 
-        ECode ec = callback->mMethod->Invoke(callback->mObject, callback->mArgumentList);
+
+        ICallbackRunnable* _callbackRunnable = (ICallbackRunnable*)runnable->Probe(EIID_ICallbackRunnable);
+
+        CallbackRunnable* callback_1;
+        _callbackRunnable->GetInstance((IInterface**)&callback_1);
+
+        ALOGD("NodeMessage_FireCallback================2================");
+        ALOGD("NodeMessage_FireCallback================2.0================mTag:%d",callback_1->mTag);
+        ALOGD("NodeMessage_FireCallback================2.1================mTag:%d",callback->mTag);
+
+        //ec = callback->mMethod->Invoke(callback->mObject, callback->mArgumentList);
+        ec = callback_1->mMethod->Invoke(callback_1->mObject, callback_1->mArgumentList);
+
+        ALOGD("NodeMessage_FireCallback================3================");
+
         if (FAILED(ec)) {
             ALOGD("NodeMessage_FireCallback================Invoke failed================");
         }
+
+        ALOGD("NodeMessage_FireCallback================end================");
     }
 
     static void NodeMessage_Send(void* payload) {
@@ -180,9 +219,11 @@ public:
         pthread_mutex_t* mutex;
 
         CallbackRunnable* callback = new CallbackRunnable(
-            (IInterface*)obj, (IMethodInfo*)method, (IArgumentList*)params, (pthread_mutex_t*)mutex);
+            (IInterface*)obj, (IMethodInfo*)method, (IArgumentList*)params, (pthread_mutex_t*)mutex, 258);
         IRunnable* runnable = IRunnable::Probe(callback);
         msg->SetCallback(runnable);
+
+        ALOGD("EnqueueUIMessage======================mTag:%d",callback->mTag);
 
         g_pNodeBridge->vt->Enqueue(g_pNodeBridge, obj, NodeMessage_Send, NodeMessage_FireCallback, (void*)msg);
 
@@ -197,6 +238,8 @@ private:
     static CallbackRunnable* mInstances[];
 
     Int32 mMyLock;
+
+    Int32 mTag;
 };
 
 CarClass(CTestEventListener)

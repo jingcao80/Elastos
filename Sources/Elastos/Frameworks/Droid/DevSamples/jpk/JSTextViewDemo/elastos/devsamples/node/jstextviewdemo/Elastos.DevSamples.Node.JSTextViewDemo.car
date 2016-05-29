@@ -15,7 +15,6 @@ module
     interface Elastos.Droid.View.IContextMenuInfo;
 
     using interface Elastos.Droid.App.IActivity;
-    //using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
@@ -119,6 +118,12 @@ module
     }
 
     [local]
+    interface ICallbackRunnable {
+        GetInstance(
+            [out] IInterface** instance);
+    }
+
+    [local]
     interface IActivityOne {
         OnClickPopupWindow(
             [in] IView* v);
@@ -128,16 +133,6 @@ module
         constructor();
 
         interface IActivity;
-        interface IContext;
-        interface IContextThemeWrapper;
-        interface ILayoutInflaterFactory;
-        interface ILayoutInflaterFactory2;
-        interface IWindowCallback;
-        interface IKeyEventCallback;
-        interface IViewOnCreateContextMenuListener;
-        interface IComponentCallbacks;
-        interface IComponentCallbacks2;
-        interface IOnWindowDismissedCallback;
     }
 
     class CTestEventListener {

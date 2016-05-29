@@ -1,21 +1,8 @@
 module.exports = function (api) {
 
-elog('==========elasto_runtime.js begin.0===========');
-elog('==========elasto_runtime.js begin.1===========' + typeof api.require);
-
-//var _Runtime_Native = api.require("/data/elastos/" + "JSCarRoot.eco", "CCarRoot");
-//var _Runtime_Native = api.require("/data/temp/node/bin/Elastos.DevSamples.Node.CarRuntime.eco", "CCarRuntime");
-
-//var _Runtime_Native = api.require("/data/temp/node/bin/Elastos.DevSamples.Node.CarRuntime.eco", "CTestCarDataType");
-
-//var sEcoName = "../../bin/Elastos.DevSamples.Node.CarRuntime.eco";
 var sEcoName = "/data/temp/node/bin/Elastos.DevSamples.Node.CarRuntime.eco";
-//var sClassName = "Elastos.DevSamples.Node.CarRuntime.CTestCarDataType";
 var sClassName = "Elastos.DevSamples.Node.CarRuntime.CCarRuntime";
-
 var _Runtime_Native = api.require(sEcoName, sClassName);
-
-elog('==========elasto_runtime.js begin.2===========');
 
 var _getModuleInfo = function (asEcoName) {
     return _Runtime_Native.Test_Require_ModuleInfo(asEcoName);
@@ -245,15 +232,13 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
             }
         }
 
-        elog('==============oConstructorInfo.GetAnnotation===========type: ' + typeof(oConstructorInfo.GetAnnotation));
         var aa=[];
         for (var p in oConstructorInfo)aa.push(p);
-        elog('==============oConstructorInfo.GetAnnotation===========methods list: ' + aa.join("--"));
         var sAnnotation = oConstructorInfo.GetAnnotation();
-        elog('==============oConstructorInfo.GetAnnotation===========value: ' + sAnnotation);
 
         newObject = oConstructorInfo.CreateObject(oArgumentList);
     }
+
     return newObject;
 }   //classinfo__createObject
 

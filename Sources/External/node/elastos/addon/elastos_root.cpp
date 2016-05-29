@@ -412,11 +412,15 @@ void Observe(uv_work_t* r) {
 
 void Back(uv_work_t* r) {
     NodeMessageQueue* mq = (NodeMessageQueue*)pNodeBridge->mQueues[pNodeBridge->mNODE];
+
     NodeMessage* msg = mq->mMessages[1];
+
     NodeMessage_Invoke(msg);
 
     //call the back function, no use
     Isolate* isolate = Isolate::GetCurrent();
+    v8::Handle<v8::Context> context = isolate->GetCurrentContext();
+
     HandleScope scope(isolate);
     async_req* req = reinterpret_cast<async_req*>(r->data);
 
@@ -428,7 +432,7 @@ void Back(uv_work_t* r) {
     TryCatch try_catch;
 
     Local<Function> callback = Local<Function>::New(isolate, req->callback);
-    callback->Call(isolate->GetCurrentContext()->Global(), 2, argv);
+    callback->Call(context->Global(), 2, argv);
 
     Receive_(req->input,callback);
 

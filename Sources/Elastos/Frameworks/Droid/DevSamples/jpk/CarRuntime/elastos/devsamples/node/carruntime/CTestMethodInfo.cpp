@@ -21,15 +21,14 @@ ECode CTestMethodInfo::GetAnnotation(
     /* [out] */ String * pName)
 {
     mMethodInfo->GetAnnotation(pName);
-
     return NOERROR;
 }
 
 ECode CTestMethodInfo::GetParamCount(
     /* [out] */ Int32 * pCount)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    mMethodInfo->GetParamCount(pCount);
+    return NOERROR;
 }
 
 ECode CTestMethodInfo::GetAllParamInfos(

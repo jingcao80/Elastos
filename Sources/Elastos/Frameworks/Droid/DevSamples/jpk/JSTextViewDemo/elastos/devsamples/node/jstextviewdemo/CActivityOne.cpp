@@ -14,7 +14,8 @@ using Elastos::Utility::Logging::Logger;
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
-namespace JSTextViewDemo {
+//namespace JSTextViewDemo {
+namespace JSAppName {
 
 EXTERN const _ELASTOS ClassID ECLSID_CActivityOne;
 
@@ -24,6 +25,8 @@ EXTERN NodeBridge** g_ppNodeBridge;
 EXTERN IHandler* myHandler;
 
 const String CActivityOne::TAG("CActivityOne");
+
+static const String DBG_TAG("CActivityOne");
 
 ECode CActivityOne::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -74,27 +77,42 @@ ECode CActivityOne::OnCreate(
 
 ECode CActivityOne::OnStart()
 {
-    return mListener->OnStart(this);
+    Logger::I(DBG_TAG, " >> OnStart()");
+    ECode ec = Activity::OnStart();
+    mListener->OnStart(this);
+    return ec;
 }
 
 ECode CActivityOne::OnResume()
 {
-    return mListener->OnResume(this);
+    Logger::I(DBG_TAG, " >> OnResume()");
+    ECode ec = Activity::OnResume();
+    mListener->OnResume(this);
+    return ec;
 }
 
 ECode CActivityOne::OnPause()
 {
-    return mListener->OnPause(this);
+    Logger::I(DBG_TAG, " >> OnPause()");
+    ECode ec = Activity::OnPause();
+    mListener->OnPause(this);
+    return ec;
 }
 
 ECode CActivityOne::OnStop()
 {
-    return mListener->OnStop(this);
+    Logger::I(DBG_TAG, " >> OnStop()");
+    ECode ec = Activity::OnStop();
+    mListener->OnStop(this);
+    return ec;
 }
 
 ECode CActivityOne::OnDestroy()
 {
-    return mListener->OnDestroy(this);
+    Logger::I(DBG_TAG, " >> OnDestroy()");
+    ECode ec = Activity::OnDestroy();
+    mListener->OnDestroy(this);
+    return ec;
 }
 
 ECode CActivityOne::OnActivityResult(

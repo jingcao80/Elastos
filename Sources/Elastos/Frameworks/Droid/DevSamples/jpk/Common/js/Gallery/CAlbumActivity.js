@@ -79,7 +79,7 @@ module.exports = function(aoElastos, aoActivity){
 
                         var ec = oActivity.StartActivity(intent)
                         if (ec) {
-                            whmlog("OnClick()---StartActivity CBrowserActivity failed!");
+                            elog("OnClick()---StartActivity CBrowserActivity failed!");
                         }
                     }
                 }
@@ -90,9 +90,9 @@ module.exports = function(aoElastos, aoActivity){
     };  //_SetFolerLayoutListener
 
     var _GetSimpleAdapter = function (aoInObject) {
-        whmlog('==================_GetSimpleAdapter.begin=============');
+        elog('==================_GetSimpleAdapter.begin=============');
 
-        whmlog('==================_GetSimpleAdapter.begin.0.0============='+typeof(aoInObject));
+        elog('==================_GetSimpleAdapter.begin.0.0============='+typeof(aoInObject));
 
 // AutoPtr<ISimpleAdapter> CAlbumActivity::GetSimpleAdapter()
 // {
@@ -102,7 +102,7 @@ module.exports = function(aoElastos, aoActivity){
 
         //simpleAdapter = aoInObject;
 
-        whmlog('==================_GetSimpleAdapter.begin.0.1============='+typeof(simpleAdapter));
+        elog('==================_GetSimpleAdapter.begin.0.1============='+typeof(simpleAdapter));
 
 //     if (!mAlbumEntryList.IsEmpty()) {
         if (mAlbumEntryList.length > 0) {
@@ -114,7 +114,7 @@ module.exports = function(aoElastos, aoActivity){
 //         CParcelableObjectContainer::New((IObjectContainer**)&dataList);
             var dataList = Droid_New('CParcelableObjectContainer');
 
-            whmlog('==================_GetSimpleAdapter.begin=====1========');
+            elog('==================_GetSimpleAdapter.begin=====1========');
 
 //         AutoPtr<IObjectStringMap> map;
 //         AutoPtr<IBoolean> boolValue;
@@ -171,7 +171,7 @@ module.exports = function(aoElastos, aoActivity){
 
             return dataList;
 
-            whmlog('==================_GetSimpleAdapter.begin=====2========');
+            elog('==================_GetSimpleAdapter.begin=====2========');
 
 //         AutoPtr<ArrayOf<String> > from = ArrayOf<String>::Alloc(5);
 //         (*from)[0] = key1;
@@ -215,15 +215,15 @@ module.exports = function(aoElastos, aoActivity){
 
 //}   //if(0==1)
 
-            whmlog('==================ssssssssssssssssssssssssssssssssss========');
+            elog('==================ssssssssssssssssssssssssssssssssss========');
 
             simpleAdapter = Droid_New('CSimpleAdapter', oActivity, dataList, R.layout.album_item, from, to);
 
-            whmlog('==================tttttttttttttttttttttttttttttttttt========');
+            elog('==================tttttttttttttttttttttttttttttttttt========');
 
 //aa.bb();    //debug break
 
-            whmlog('==================_GetSimpleAdapter.begin=====3.0========'+typeof(simpleAdapter));
+            elog('==================_GetSimpleAdapter.begin=====3.0========'+typeof(simpleAdapter));
 
             //simpleAdapter = aoInObject;
 
@@ -233,23 +233,23 @@ module.exports = function(aoElastos, aoActivity){
             //var myViewBinder = Droid_new('MyViewBinder', oActivity);
             //simpleAdapter.SetViewBinder(myViewBinder);
 
-            whmlog('==================_GetSimpleAdapter.begin=====3.1========'+typeof(simpleAdapter));
+            elog('==================_GetSimpleAdapter.begin=====3.1========'+typeof(simpleAdapter));
 
 if (0==2) {
             simpleAdapter.SetViewBinder({
 
                 SetViewValue : function (aoView, aoData, asTextRepresentation, out_abResult) {
-                    whmlog('==================SetViewValue.begin=============');
+                    elog('==================SetViewValue.begin=============');
 
                     out_abResult.data = false;
 
                     var viewType = "";
                     if (typeof(aoView.SetOnTouchListener) == 'function') viewType += " LinearLayout";
                     if (typeof(aoView.SetImageResource) == 'function') viewType += " ImageView";
-                    whmlog('==================SetViewValue.viewtype=============' + viewType);
+                    elog('==================SetViewValue.viewtype=============' + viewType);
 
                     if(typeof(aoView.SetImageResource) == 'function') {
-                        whmlog('==================SetViewValue.ImageView.begin=============');
+                        elog('==================SetViewValue.ImageView.begin=============');
 
                         //var myLoadImage = new MyLoadImageCallback(oActivity);
 
@@ -257,7 +257,7 @@ if (0==2) {
 
                         var myLoadImage = {
                             ImageLoaded : function(aoImageDrawable, aoImageView){
-                                whmlog('==================ImageLoaded.begin=============');
+                                elog('==================ImageLoaded.begin=============');
 
 
                                 //MyImageLoaded(aoImageDrawable, aoImageView);
@@ -273,16 +273,16 @@ if (0==2) {
     // Boolean result;
     // return mHost->mMyHandler->SendMessage(msg, &result);
 
-                                whmlog('==================ImageLoaded.end=============');
+                                elog('==================ImageLoaded.end=============');
 
                             },
                         };
 
 
-                        whmlog('==================SetViewValue.ImageView.begin======1=======');
+                        elog('==================SetViewValue.ImageView.begin======1=======');
 
                         var drawable = AsyncImageLoader.LoadDrawable(asTextRepresentation, false, aoImageView, myLoadImage);
-                        whmlog('==================SetViewValue.ImageView.begin======2=======');
+                        elog('==================SetViewValue.ImageView.begin======2=======');
                         if (drawable) {
                             aoImageView.SetImageDrawable(drawable);
                         }
@@ -294,22 +294,22 @@ if (0==2) {
                         out_abResult.data = true;
                     }
                     else if (typeof(aoView.SetOnTouchListener) == 'function') {  //ILinearLayout
-                        whmlog('==================SetViewValue.LinearLayout.begin=============');
+                        elog('==================SetViewValue.LinearLayout.begin=============');
 
                         _SetFolerLayoutListener(aoView);
                         // aoView.SetOnTouchListener({
                         //     //(IViewOnTouchListener*)(mHost->mMyListener->Probe(EIID_IViewOnTouchListener))
                         //     //CAlbumActivity::MyListener::OnTouch
                         //     OnTouch : function(aoView, aoEvent, out_abResult) {
-                        //         whmlog('==================LinearLayout.OnTouch.begin=============');
+                        //         elog('==================LinearLayout.OnTouch.begin=============');
                         //     }
                         // });
 
                         out_abResult.data = false;
-                        whmlog('==================SetViewValue.LinearLayout.end=============');
+                        elog('==================SetViewValue.LinearLayout.end=============');
                     }
 
-                    whmlog('==================SetViewValue.end=============');
+                    elog('==================SetViewValue.end=============');
                 },
             });
 
@@ -317,7 +317,7 @@ if (0==2) {
 
         }
 
-        whmlog('==================_GetSimpleAdapter.end=============');
+        elog('==================_GetSimpleAdapter.end=============');
 
         //return simpleAdapter;
 // }
@@ -342,7 +342,7 @@ if (0==2) {
         //     // mSimpleAdapter->NotifyDataSetChanged();
         // }
         // else {
-        //     whmlog("LoadAlbumView()----mSimpleAdapter is empty");
+        //     elog("LoadAlbumView()----mSimpleAdapter is empty");
         //     mEmptyView.SetVisibility(IView_VISIBLE);
         //     mGridView.SetVisibility(IView_GONE);
         // }
@@ -355,7 +355,7 @@ if (0==2) {
         mDeleteButton.SetOnClickListener( (function(){
             return {
                 OnClick : function (aoView) {
-                    whmlog("=========================mDeleteButton.OnClick.begin=============================");
+                    elog("=========================mDeleteButton.OnClick.begin=============================");
                 },
             };
         })() );
@@ -363,7 +363,7 @@ if (0==2) {
         mDetailLayout.SetOnClickListener( (function(){
             return {
                 OnClick : function (aoView) {
-                    whmlog("=========================mDetailLayout.OnClick.begin=============================");
+                    elog("=========================mDetailLayout.OnClick.begin=============================");
                 },
             };
         })() );
@@ -371,7 +371,7 @@ if (0==2) {
         mCheckAll.SetOnClickListener( (function(){
             return {
                 OnClick : function (aoView) {
-                    whmlog("=========================mCheckAll.OnClick.begin=============================");
+                    elog("=========================mCheckAll.OnClick.begin=============================");
                 },
             };
         })() );
@@ -415,7 +415,7 @@ if (0==2) {
                 mAlbumPopupWindow.SetBackgroundDrawable(bitmapDrawable);
                 mAlbumPopupWindow.SetOnDismissListener({
                     OnDismiss : function (aoView) {
-                        whmlog('================mAlbumPopupWindow.OnDismiss=================');
+                        elog('================mAlbumPopupWindow.OnDismiss=================');
                     },
                 });
                 mAlbumPopupWindow.ShowAsDropDown(aoView);
@@ -442,7 +442,7 @@ if (0==2) {
 
         mAboutButton.SetOnClickListener({
             OnClick : function (aoView) {
-                whmlog('================mAboutButton.OnClick.begin=======1==========');
+                elog('================mAboutButton.OnClick.begin=======1==========');
 
                 var intent = Droid_New('CIntent');
                 intent.SetClassNameEx("Gallery", "Gallery.CAboutActivity");
@@ -453,22 +453,22 @@ if (0==2) {
 
     var LoadImageInfoRunnable_Run = function () {
 
-        whmlog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====');
+        elog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====');
 
         var pathMap = DataSourceHelper.GetImageFileMap();
 
         var pathList = DataSourceHelper.GetImagePathList();
 
-        whmlog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====1====');
+        elog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====1====');
 
         mAlbumEntryList = [];
 
         var fileList, entry, path;
         for (var i=0, im=pathList.length; i<im; i++) {
-            whmlog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====2====');
+            elog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====2====');
             path = pathList[i];
             fileList = pathMap[path];
-            whmlog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====3===='+JSON.stringify(fileList));
+            elog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====3===='+JSON.stringify(fileList));
 
             entry = {};
             entry.sourcePath = [
@@ -476,19 +476,19 @@ if (0==2) {
                 //fileList.GetFront()
                 fileList[0]
             ].join(DataSourceHelper.PATH_SPLITE);
-            whmlog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====4====');
+            elog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====4====');
 
             //var lastIndex = path.LastIndexOf(DataSourceHelper.PATH_SPLITE);
             //entry.desc = path.slice(lastIndex + 1);
             entry.desc = path.split(DataSourceHelper.PATH_SPLITE).pop();
             entry.num = fileList.length;
             mAlbumEntryList.push(entry);
-            whmlog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====5====');
+            elog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====5====');
         }
 
         var result = oHandler.SendEmptyMessage(MSG_LOAD_ALBUM_VIEW);
 
-        whmlog('====jso_activity_cb====LoadImageInfoRunnable_Run.end====');
+        elog('====jso_activity_cb====LoadImageInfoRunnable_Run.end====');
 
         //_LoadAlbumView();
     };
@@ -496,7 +496,7 @@ if (0==2) {
 //----------------------------------------------------------
 
     function _LoadImageInfos () {
-        whmlog('========DataSourceHelper::LoadImageInfos.begin====');
+        elog('========DataSourceHelper::LoadImageInfos.begin====');
 
         //to be run in new thread
         LoadImageInfoRunnable_Run();
@@ -532,7 +532,7 @@ if (0==2) {
 
     return {
         OnCreate:function(aoContext){
-            whmlog('====jso_activity_cb====OnCreate.begin====0');
+            elog('====jso_activity_cb====OnCreate.begin====0');
 
             oActivity.SetContentView(R.layout.activity_album);
 
@@ -552,35 +552,35 @@ if (0==2) {
 
         },  //OnCreate
         OnStart:function(aoContext){
-            whmlog('====jso_activity_cb====OnStart.begin====');
+            elog('====jso_activity_cb====OnStart.begin====');
         },
         OnResume:function(aoContext){
-            whmlog('====jso_activity_cb====OnResume.begin====');
+            elog('====jso_activity_cb====OnResume.begin====');
         },
         OnPause:function(aoContext){
-            whmlog('====jso_activity_cb====OnPause.begin====');
+            elog('====jso_activity_cb====OnPause.begin====');
         },
         OnStop:function(aoContext){
-            whmlog('====jso_activity_cb====OnStop.begin====');
+            elog('====jso_activity_cb====OnStop.begin====');
         },
         OnDestroy:function(aoContext){
-            whmlog('====jso_activity_cb====OnDestroy.begin====');
+            elog('====jso_activity_cb====OnDestroy.begin====');
         },
         OnActivityResult:function(aoContext, aiRequestCode, aiResultCode, aoIntentData){
-            whmlog('====jso_activity_cb====OnActivityResult.begin====');
+            elog('====jso_activity_cb====OnActivityResult.begin====');
         },
         OnCreateDialog:function(aoContext, aiId, out_aoDialog){
-            whmlog('====jso_activity_cb====OnCreateDialog.begin====');
+            elog('====jso_activity_cb====OnCreateDialog.begin====');
         },   //OnCreateDialog
         OnCreateContextMenu:function(aoContext, aoMenu, aoV, aoMenuInfo){
-            whmlog('====jso_activity_cb====OnCreateContextMenu.begin====');
+            elog('====jso_activity_cb====OnCreateContextMenu.begin====');
         },
         CreateNavigationBar:function(aoContext){
-            whmlog('====jso_activity_cb====CreateNavigationBar.begin====');
+            elog('====jso_activity_cb====CreateNavigationBar.begin====');
         },
         //OnExchangeData : function(inObject_0, inObject_1, inObject_2, inObject_3, inObject_4, outObject_0, outObject_1, outObject_2, outObject_3, outObject_4) {
         OnExchangeData : function(aiTimes ,aoInObject, aoOutObject) {
-            whmlog('====jso_activity_cb====OnExchangeData.begin====times:'+aiTimes);
+            elog('====jso_activity_cb====OnExchangeData.begin====times:'+aiTimes);
 
 if (aiTimes == 0) {
 
@@ -598,7 +598,7 @@ if (aiTimes == 0) {
             // mSimpleAdapter->NotifyDataSetChanged();
         }
         else {
-            whmlog("LoadAlbumView()----mSimpleAdapter is empty");
+            elog("LoadAlbumView()----mSimpleAdapter is empty");
             mEmptyView.SetVisibility(IView_VISIBLE);
             mGridView.SetVisibility(IView_GONE);
         }
@@ -617,37 +617,37 @@ if (aiTimes == 2) {
 
 if (aiTimes == 3) {
                 _CSimpleAdapterParams.viewBinder = aoInObject;
-                whmlog('====jso_activity_cb====OnExchangeData.viewBinder======3======');
+                elog('====jso_activity_cb====OnExchangeData.viewBinder======3======');
 
                 aoOutObject.data = oActivity;
 }   //if (aiTimes == 3)
 if (aiTimes == 4) {
-                whmlog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.0======');
+                elog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.0======');
 
-                // whmlog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======1======');
+                // elog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======1======');
                 var o = _CSimpleAdapterParams;
-                // whmlog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======2======');
+                // elog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======2======');
 
-                whmlog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.1======');
+                elog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.1======');
                 //var oCSimpleAdapter_00 = aoElastos.Test.New_CSimpleAdapter(o.ctx, o.data, o.resource, o.from, o.to);
                 //var oCSimpleAdapter = aoInObject;
-                // whmlog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======3======');
+                // elog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======3======');
                 var oCSimpleAdapter = Droid_New("CSimpleAdapter", o.ctx, o.data, o.resource, o.from, o.to);
                 //var oCSimpleAdapter = aoElastos.Test.New_CSimpleAdapter(o.ctx, o.data, o.resource, o.from, o.to);
-                whmlog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.2======');
+                elog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.2======');
 
                 //var a=[];
                 //for (var p in oCSimpleAdapter_00)a.push(p);
-                //whmlog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.2.0======'+a.join('=='));
+                //elog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.2.0======'+a.join('=='));
                 var a=[];
                 for (var p in oCSimpleAdapter)a.push(p);
-                whmlog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.2.1======'+a.join('=='));
+                elog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.2.1======'+a.join('=='));
 
                 oCSimpleAdapter.SetViewBinder(o.viewBinder);
-                whmlog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.3======');
+                elog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.3======');
 
                 aoOutObject.data = oCSimpleAdapter;
-                whmlog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.4======');
+                elog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.4======');
 
                 //aa = bb.cc();   //break
 
@@ -675,7 +675,7 @@ if (aiTimes == 12) {
 
 if (aiTimes == 14) {
 
-            whmlog('====jso_activity_cb====OnExchangeData.12===========1============'+typeof(drawable));
+            elog('====jso_activity_cb====OnExchangeData.12===========1============'+typeof(drawable));
 
                 //AutoPtr<IBitmapDrawable> drawable = AsyncImageLoader::LoadDrawable(textRepresentation, FALSE, imageView, myLoadImage);
                 var oAsyncImageLoader = Droid_New("AsyncImageLoader");
@@ -684,24 +684,24 @@ if (aiTimes == 14) {
                 var drawable = aoInObject;
                 //if ( typeof(drawable)=="object" ) {
                 if (drawable) {
-                    whmlog('====jso_activity_cb====OnExchangeData.12===========2============');
+                    elog('====jso_activity_cb====OnExchangeData.12===========2============');
                     _imageView.SetImageDrawable(drawable);
-                    whmlog('====jso_activity_cb====OnExchangeData.12===========3============');
+                    elog('====jso_activity_cb====OnExchangeData.12===========3============');
                 }
                 else {
-                    whmlog('====jso_activity_cb====OnExchangeData.12===========4============');
+                    elog('====jso_activity_cb====OnExchangeData.12===========4============');
                     _imageView.SetImageResource(R.color.divide_line_bg);
-                    whmlog('====jso_activity_cb====OnExchangeData.12===========5============');
+                    elog('====jso_activity_cb====OnExchangeData.12===========5============');
                 }
 }   //if (aiTimes == 12)
 
 
 
-            whmlog('====jso_activity_cb====OnExchangeData.end====');
+            elog('====jso_activity_cb====OnExchangeData.end====');
         },  //OnExchangeData
 
         OnExchangeData_String : function(aiTimes ,aoInObject, aoOutObject) {
-            whmlog('====jso_activity_cb====OnExchangeData.begin====times:'+aiTimes);
+            elog('====jso_activity_cb====OnExchangeData.begin====times:'+aiTimes);
 
 if (aiTimes == 13) {
                 _textRepresentation = aoInObject;
@@ -710,10 +710,10 @@ if (aiTimes == 13) {
         },  //OnExchangeData_String
 
         OnExchangeData_LocalPtr_ArrayOf_Int32 : function(aiTimes ,aoInArray, aoOutArray) {
-            whmlog('====jso_activity_cb====OnExchangeData_LocalPtr_ArrayOf_Int32.begin====');
+            elog('====jso_activity_cb====OnExchangeData_LocalPtr_ArrayOf_Int32.begin====');
 
 if (aiTimes == 0) {
-            whmlog('====jso_activity_cb====OnExchangeData_LocalPtr_ArrayOf_Int32.begin====aoInArray type:'+typeof(aoInArray));
+            elog('====jso_activity_cb====OnExchangeData_LocalPtr_ArrayOf_Int32.begin====aoInArray type:'+typeof(aoInArray));
 
             var to = [
                 R.id.album_set_cover,
@@ -730,7 +730,7 @@ if (aiTimes == 0) {
         },  //OnExchangeData_LocalPtr_ArrayOf_Int32
 
         OnExchangeData_LocalPtr_ArrayOf_String : function(aiTimes ,aoInArray, aoOutArray) {
-            whmlog('====jso_activity_cb====OnExchangeData_LocalPtr_ArrayOf_String.begin====');
+            elog('====jso_activity_cb====OnExchangeData_LocalPtr_ArrayOf_String.begin====');
 if (aiTimes == 0) {
             var from = [
                 "cover",
@@ -749,22 +749,22 @@ if (aiTimes == 0) {
         },  //OnExchangeData_LocalPtr_ArrayOf_String
 
         OnHandleMessage:function(aoContext, aoMessage){
-            whmlog('====jso_activity_cb====OnHandleMessage.begin====');
+            elog('====jso_activity_cb====OnHandleMessage.begin====');
 
-            whmlog('====jso_activity_cb====OnHandleMessage.begin===='+typeof(aoMessage));
+            elog('====jso_activity_cb====OnHandleMessage.begin===='+typeof(aoMessage));
 
             var aa = [];
             for (prop in aoMessage) aa.push(prop);
-            whmlog('====jso_activity_cb====OnHandleMessage.aoMessage.methods:===='+aa.join('--'));
+            elog('====jso_activity_cb====OnHandleMessage.aoMessage.methods:===='+aa.join('--'));
 
             var what = aoMessage.GetWhat();
 
             if (what == MSG_LOAD_ALBUM_VIEW) {
-                whmlog('====jso_activity_cb====OnHandleMessage====MSG_LOAD_ALBUM_VIEW====');
+                elog('====jso_activity_cb====OnHandleMessage====MSG_LOAD_ALBUM_VIEW====');
                 _LoadAlbumView();
             }
             else if (what == MSG_IMAGE_LOADED) {
-                whmlog('====jso_activity_cb====OnHandleMessage====MSG_IMAGE_LOADED====');
+                elog('====jso_activity_cb====OnHandleMessage====MSG_IMAGE_LOADED====');
 
                 var obj = aoMessage.GetObj();
                 //var args = obj.Get();
@@ -783,7 +783,7 @@ if (aiTimes == 0) {
 
             }
             else {
-                whmlog('====jso_activity_cb====OnHandleMessage====MSG_OTHER====');
+                elog('====jso_activity_cb====OnHandleMessage====MSG_OTHER====');
             }
         },
     }

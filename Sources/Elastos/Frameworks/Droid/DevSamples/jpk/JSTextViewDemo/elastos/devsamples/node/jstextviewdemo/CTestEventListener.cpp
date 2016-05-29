@@ -1,4 +1,3 @@
-
 #include "CTestEventListener.h"
 
 #include <elastos/utility/logging/Logger.h>
@@ -11,7 +10,8 @@ using Elastos::Utility::Logging::Logger;
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
-namespace JSTextViewDemo {
+//namespace JSTextViewDemo {
+namespace JSAppName {
 
 static const String DBG_TAG("CTestEventListener");
 
@@ -32,21 +32,35 @@ CallbackRunnable::CallbackRunnable(
     /* [in] */ IInterface* object,
     /* [in] */ IMethodInfo* method,
     /* [in] */ IArgumentList* argumentList,
-    /* [in] */ pthread_mutex_t* mutex)
+    /* [in] */ pthread_mutex_t* mutex,
+    /* [in] */ Int32 tag)
     : mObject(object)
     , mMethod(method)
     , mArgumentList(argumentList)
+    , mTag(tag)
 {
+    ALOGD("CallbackRunnable::CallbackRunnable================oooooooooooo================");
     CallbackRunnable::mInstances[0] = this;
 }
 
-CAR_INTERFACE_IMPL(CallbackRunnable, Object, IRunnable);
+//CAR_INTERFACE_IMPL(CallbackRunnable, Object, IRunnable);
+CAR_INTERFACE_IMPL_2(CallbackRunnable, Object, IRunnable, ICallbackRunnable);
+
+//CAR_OBJECT_IMPL(CallbackRunnable)
 
 ECode CallbackRunnable::Run()
 {
     g_pNodeBridge->vt->Invoke(g_pNodeBridge);
 
     mMyLock = 0;
+
+    return NOERROR;
+}
+
+ECode CallbackRunnable::GetInstance(IInterface** ppInstance)
+{
+    Int32 ttt = (Int32)this;
+    *ppInstance = (IInterface*)ttt;
 
     return NOERROR;
 }

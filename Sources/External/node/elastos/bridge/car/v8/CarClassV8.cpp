@@ -62,7 +62,7 @@ CarClassV8::CarClassV8(CobjectWrapper* objectWrapper, bool requireAnnotation)
         methodInfo->GetName(&nameBuf);
         WTF::String methodName((const char*)nameBuf);
 
-        ALOGD("CarClassV8::CarClassV8 method %i name: %s",i,nameBuf.string());
+        //ALOGD("CarClassV8::CarClassV8 method %i name: %s",i,nameBuf.string());
 
         //method
         MethodList* methodList = mMethods.get(methodName);
@@ -77,7 +77,7 @@ CarClassV8::CarClassV8(CobjectWrapper* objectWrapper, bool requireAnnotation)
         Int32 paramCount;
         methodInfo->GetParamCount(&paramCount);
         if (paramCount != 1) {
-            ALOGD("CarClassV8::CarClassV8 Before Release 0 : Not Property");
+            //ALOGD("CarClassV8::CarClassV8 Before Release 0 : Not Property");
             //methodInfo->Release();
             //methodInfo = NULL;
             continue;
@@ -96,7 +96,7 @@ CarClassV8::CarClassV8(CobjectWrapper* objectWrapper, bool requireAnnotation)
             rwAttrib = CarField::WRITEABLE;
         }
         else {
-            ALOGD("CarClassV8::CarClassV8 Before Release 1 : Not Get or Set");
+            //ALOGD("CarClassV8::CarClassV8 Before Release 1 : Not Get or Set");
             //methodInfo->Release();
             //methodInfo = NULL;
             continue;
@@ -119,7 +119,7 @@ CarClassV8::CarClassV8(CobjectWrapper* objectWrapper, bool requireAnnotation)
             carField->fieldMethodList().set(methodName, carMethod);
         }
 
-        ALOGD("CarClassV8::CarClassV8 Before Release 2 : Atfer used");
+        //ALOGD("CarClassV8::CarClassV8 Before Release 2 : Atfer used");
         //methodInfo->Release();
         //methodInfo = NULL;
     }

@@ -166,7 +166,7 @@ var ImageLoaderThread = (function(){
 //public static
 function LoadDrawable (imageUrl, isHigh, imageView, imageCallback) {
 
-    whmlog('================AsyncImageLoader.LoadDrawable.begin==========================');
+    elog('================AsyncImageLoader.LoadDrawable.begin==========================');
 
 return null;
         //Mutex::Autolock lock(sLock);
