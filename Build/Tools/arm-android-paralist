@@ -154,6 +154,7 @@
   Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/content/pm
   Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/content/res
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/content
+- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/codeaurora/ims/csvt
 #  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/media/drm/mobile1
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/media/audiofx
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/media/audiopolicy
@@ -193,7 +194,8 @@
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/policy
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/preference
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/statusbar
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/telephony
+- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/telephony/utility
+> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/telephony
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/transition
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/utility/cm
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/utility/gesture

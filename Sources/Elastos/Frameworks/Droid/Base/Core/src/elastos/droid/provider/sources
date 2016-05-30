@@ -146,3 +146,4 @@ SOURCES += CThemesContractMixnMatchColumns.cpp
 SOURCES += CThemesContractPreviewColumns.cpp
 SOURCES += CThemesContractThemesColumns.cpp
 SOURCES += ThemesContract.cpp
+SOURCES += Telephony.cpp

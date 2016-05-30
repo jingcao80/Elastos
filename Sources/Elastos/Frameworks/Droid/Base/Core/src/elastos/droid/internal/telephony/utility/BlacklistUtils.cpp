@@ -1,184 +1,244 @@
-/*
- * Copyright (C) 2013 The CyanogenMod Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.android.internal.telephony.util;
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.Droid.Os.h"
+#include "elastos/droid/internal/telephony/utility/BlacklistUtils.h"
+#include "elastos/droid/internal/telephony/CCallerInfo.h"
+#include "elastos/droid/provider/Telephony.h"
+#include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/net/CUriHelper.h"
+#include "elastos/droid/content/CContentValues.h"
+#include "elastos/droid/text/TextUtils.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::CContentValues;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::IUriBuilder;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Provider::ISettings;
-using Elastos::Droid::Provider::Telephony::IBlacklist;
-using Elastos::Droid::Text::ITextUtils;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ITelephonyBlacklist;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::ILog;
 
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
 
 using Elastos::Droid::Internal::Telephony::ICallerInfo;
+using Elastos::Droid::Internal::Telephony::CCallerInfo;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::Logging::Logger;
 
-/**
- * Blacklist Utility Class
- * @hide
- */
-public class BlacklistUtils {
-    private static const String TAG = "BlacklistUtils";
-    private static const Boolean DEBUG = FALSE;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Utility {
 
-    // Blacklist matching type
-    public static const Int32 MATCH_NONE = 0;
-    public static const Int32 MATCH_PRIVATE = 1;
-    public static const Int32 MATCH_UNKNOWN = 2;
-    public static const Int32 MATCH_LIST = 3;
-    public static const Int32 MATCH_REGEX = 4;
+const String BlacklistUtils::TAG("BlacklistUtils");
+const Boolean BlacklistUtils::DEBUG = FALSE;
 
-    public static const Int32 BLOCK_CALLS =
-            Settings.System.BLACKLIST_BLOCK << Settings.System.BLACKLIST_PHONE_SHIFT;
-    public static const Int32 BLOCK_MESSAGES =
-            Settings.System.BLACKLIST_BLOCK << Settings.System.BLACKLIST_MESSAGE_SHIFT;
+Boolean BlacklistUtils::AddOrUpdate(
+    /* [in] */ IContext* context,
+    /* [in] */ const String& number,
+    /* [in] */ Int32 flags,
+    /* [in] */ Int32 valid)
+{
+    AutoPtr<IContentValues> cv;
+    CContentValues::New((IContentValues**)&cv);
 
-    public static Boolean AddOrUpdate(Context context, String number, Int32 flags, Int32 valid) {
-        ContentValues cv = new ContentValues();
-
-        If ((valid & BLOCK_CALLS) != 0) {
-            cv->Put(Blacklist.PHONE_MODE, (flags & BLOCK_CALLS) != 0 ? 1 : 0);
-        }
-        If ((valid & BLOCK_MESSAGES) != 0) {
-            cv->Put(Blacklist.MESSAGE_MODE, (flags & BLOCK_MESSAGES) != 0 ? 1 : 0);
-        }
-
-        Uri uri = Uri->WithAppendedPath(Blacklist.CONTENT_FILTER_BYNUMBER_URI, number);
-        Int32 count = context->GetContentResolver()->Update(uri, cv, NULL, NULL);
-
-        return count > 0;
+    if ((valid & BLOCK_CALLS) != 0) {
+        cv->Put(ITelephonyBlacklist::PHONE_MODE, (flags & BLOCK_CALLS) != 0 ? 1 : 0);
+    }
+    if ((valid & BLOCK_MESSAGES) != 0) {
+        cv->Put(ITelephonyBlacklist::MESSAGE_MODE, (flags & BLOCK_MESSAGES) != 0 ? 1 : 0);
     }
 
-    /**
-     * Check if the number is in the blacklist
-     * @param number: Number to check
-     * @return one of: MATCH_NONE, MATCH_PRIVATE, MATCH_UNKNOWN, MATCH_LIST or MATCH_REGEX
-     */
-    public static Int32 IsListed(Context context, String number, Int32 mode) {
-        If (!IsBlacklistEnabled(context)) {
-            return MATCH_NONE;
+    AutoPtr<IUriHelper> helper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+    AutoPtr<IUri> uri;
+    helper->WithAppendedPath(Elastos::Droid::Provider::Telephony::Blacklist::CONTENT_FILTER_BYNUMBER_URI, number, (IUri**)&uri);
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
+    Int32 count = 0;
+    cr->Update(uri, cv, String(NULL), NULL, &count);
+
+    return count > 0;
+}
+
+Int32 BlacklistUtils::IsListed(
+    /* [in] */ IContext* context,
+    /* [in] */ const String& number,
+    /* [in] */ Int32 mode)
+{
+    if (!IsBlacklistEnabled(context)) {
+        return MATCH_NONE;
+    }
+
+    if (DEBUG) {
+        Logger::D(TAG, "Checking number %s against the Blacklist for mode %d", number.string(), mode);
+    }
+
+    String type;
+
+    if (mode == BLOCK_CALLS) {
+        if (DEBUG) Logger::D(TAG, "Checking if an incoming call should be blocked");
+        type = ITelephonyBlacklist::PHONE_MODE;
+    } else if (mode == BLOCK_MESSAGES) {
+        if (DEBUG) Logger::D(TAG, "Checking if an incoming message should be blocked");
+        type = ITelephonyBlacklist::MESSAGE_MODE;
+    } else {
+        Logger::E(TAG, "Invalid mode %d", mode);
+        return MATCH_NONE;
+    }
+
+    // Private and unknown number matching
+    if (TextUtils::IsEmpty(number)) {
+        if (IsBlacklistPrivateNumberEnabled(context, mode)) {
+            if (DEBUG) Logger::D(TAG, "Blacklist matched due to private number");
+            return MATCH_PRIVATE;
         }
+        return MATCH_NONE;
+    }
 
-        If (DEBUG) {
-            Logger::D(TAG, "Checking number " + number + " against the Blacklist for mode " + mode);
+    if (IsBlacklistUnknownNumberEnabled(context, mode)) {
+        AutoPtr<ICallerInfo> ci;
+        CCallerInfo::GetCallerInfo(context, number, (ICallerInfo**)&ci);
+        Boolean contactExists;
+        ci->GetContactExists(&contactExists);
+        if (!contactExists) {
+            if (DEBUG) Logger::D(TAG, "Blacklist matched due to unknown number");
+            return MATCH_UNKNOWN;
         }
+    }
 
-        final String type;
+    AutoPtr<IUriBuilder> builder;
+    Elastos::Droid::Provider::Telephony::Blacklist::CONTENT_FILTER_BYNUMBER_URI->BuildUpon((IUriBuilder**)&builder);
+    builder->AppendPath(number);
+    if (IsBlacklistRegexEnabled(context)) {
+        builder->AppendQueryParameter(ITelephonyBlacklist::REGEX_KEY, String("1"));
+    }
 
-        If (mode == BLOCK_CALLS) {
-            If (DEBUG) Logger::D(TAG, "Checking if an incoming call should be blocked");
-            type = Blacklist.PHONE_MODE;
-        } else If (mode == BLOCK_MESSAGES) {
-            If (DEBUG) Logger::D(TAG, "Checking if an incoming message should be blocked");
-            type = Blacklist.MESSAGE_MODE;
-        } else {
-            Logger::E(TAG, "Invalid mode " + mode);
-            return MATCH_NONE;
+    Int32 result = MATCH_NONE;
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ICursor> c;
+    AutoPtr<IUri> uri;
+    builder->Build((IUri**)&uri);
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(2);
+    array->Set(0, ITelephonyBlacklist::IS_REGEX);
+    array->Set(1, type);
+    cr->Query(uri, array, String(NULL), NULL, String(NULL), (ICursor**)&c);
+
+    if (c != NULL) {
+        if (DEBUG) {
+            Int32 count;
+            c->GetCount(&count);
+            Logger::D(TAG, "Blacklist query successful, %d matches", count);
         }
+        Int32 regexColumnIndex;
+        c->GetColumnIndexOrThrow(ITelephonyBlacklist::IS_REGEX, &regexColumnIndex);
+        Int32 modeColumnIndex;
+        c->GetColumnIndexOrThrow(type, &modeColumnIndex);
+        Boolean whitelisted = FALSE;
 
-        // Private and unknown number matching
-        If (TextUtils->IsEmpty(number)) {
-            If (IsBlacklistPrivateNumberEnabled(context, mode)) {
-                If (DEBUG) Logger::D(TAG, "Blacklist matched due to private number");
-                return MATCH_PRIVATE;
-            }
-            return MATCH_NONE;
-        }
+        Boolean moved;
+        c->MoveToPosition(-1, &moved);
+        Boolean next = FALSE;
+        while (c->MoveToNext(&next), next) {
+            Int32 index, value;
+            Boolean isRegex = (c->GetInt32(regexColumnIndex, &index), index) != 0;
+            Boolean blocked = (c->GetInt32(modeColumnIndex, &value), value) != 0;
 
-        If (IsBlacklistUnknownNumberEnabled(context, mode)) {
-            CallerInfo ci = CallerInfo->GetCallerInfo(context, number);
-            If (!ci.contactExists) {
-                If (DEBUG) Logger::D(TAG, "Blacklist matched due to unknown number");
-                return MATCH_UNKNOWN;
-            }
-        }
-
-        Uri.Builder builder = Blacklist.CONTENT_FILTER_BYNUMBER_URI->BuildUpon();
-        builder->AppendPath(number);
-        If (IsBlacklistRegexEnabled(context)) {
-            builder->AppendQueryParameter(Blacklist.REGEX_KEY, "1");
-        }
-
-        Int32 result = MATCH_NONE;
-        Cursor c = context->GetContentResolver()->Query(builder->Build(),
-                new String[] { Blacklist.IS_REGEX, type }, NULL, NULL, NULL);
-
-        If (c != NULL) {
-            If (DEBUG) Logger::D(TAG, "Blacklist query successful, " + c->GetCount() + " matches");
-            Int32 regexColumnIndex = c->GetColumnIndexOrThrow(Blacklist.IS_REGEX);
-            Int32 modeColumnIndex = c->GetColumnIndexOrThrow(type);
-            Boolean whitelisted = FALSE;
-
-            c->MoveToPosition(-1);
-            While (c->MoveToNext()) {
-                Boolean isRegex = c->GetInt(regexColumnIndex) != 0;
-                Boolean blocked = c->GetInt(modeColumnIndex) != 0;
-
-                If (!isRegex) {
-                    whitelisted = !blocked;
-                    result = MATCH_LIST;
-                    If (blocked) {
-                        break;
-                    }
-                } else If (blocked) {
-                    result = MATCH_REGEX;
+            if (!isRegex) {
+                whitelisted = !blocked;
+                result = MATCH_LIST;
+                if (blocked) {
+                    break;
                 }
             }
-            If (whitelisted) {
-                result = MATCH_NONE;
+            else if (blocked) {
+                result = MATCH_REGEX;
             }
-            c->Close();
         }
-
-        If (DEBUG) Logger::D(TAG, "Blacklist check result for number " + number + " is " + result);
-        return result;
+        if (whitelisted) {
+            result = MATCH_NONE;
+        }
+        ICloseable::Probe(c)->Close();
     }
 
-    public static Boolean IsBlacklistEnabled(Context context) {
-        return Settings.System->GetIntForUser(context->GetContentResolver(),
-                Settings.System.PHONE_BLACKLIST_ENABLED, 1,
-                UserHandle.USER_CURRENT_OR_SELF) != 0;
-    }
-
-    public static Boolean IsBlacklistNotifyEnabled(Context context) {
-        return Settings.System->GetIntForUser(context->GetContentResolver(),
-                Settings.System.PHONE_BLACKLIST_NOTIFY_ENABLED, 1,
-                UserHandle.USER_CURRENT_OR_SELF) != 0;
-    }
-
-    public static Boolean IsBlacklistPrivateNumberEnabled(Context context, Int32 mode) {
-        Return (Settings.System->GetIntForUser(context->GetContentResolver(),
-                Settings.System.PHONE_BLACKLIST_PRIVATE_NUMBER_MODE, 0,
-                UserHandle.USER_CURRENT_OR_SELF) & mode) != 0;
-    }
-
-    public static Boolean IsBlacklistUnknownNumberEnabled(Context context, Int32 mode) {
-        Return (Settings.System->GetIntForUser(context->GetContentResolver(),
-                Settings.System.PHONE_BLACKLIST_UNKNOWN_NUMBER_MODE, 0,
-                UserHandle.USER_CURRENT_OR_SELF) & mode) != 0;
-    }
-
-    public static Boolean IsBlacklistRegexEnabled(Context context) {
-        return Settings.System->GetIntForUser(context->GetContentResolver(),
-                Settings.System.PHONE_BLACKLIST_REGEX_ENABLED, 0,
-                UserHandle.USER_CURRENT_OR_SELF) != 0;
-    }
+    if (DEBUG) Logger::D(TAG, "Blacklist check result for number %s is %d", number.string(), result);
+    return result;
 }
+
+Boolean BlacklistUtils::IsBlacklistEnabled(
+    /* [in] */ IContext* context)
+{
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
+    Int32 res;
+    return Settings::System::GetInt32ForUser(cr,
+            ISettingsSystem::PHONE_BLACKLIST_ENABLED, 1,
+            IUserHandle::USER_CURRENT_OR_SELF, &res);
+    return res != 0;
+}
+
+Boolean BlacklistUtils::IsBlacklistNotifyEnabled(
+    /* [in] */ IContext* context)
+{
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
+    Int32 res;
+    Settings::System::GetInt32ForUser(cr,
+            ISettingsSystem::PHONE_BLACKLIST_NOTIFY_ENABLED, 1,
+            IUserHandle::USER_CURRENT_OR_SELF, &res);
+    return res != 0;
+}
+
+Boolean BlacklistUtils::IsBlacklistPrivateNumberEnabled(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 mode)
+{
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
+    Int32 res;
+    Settings::System::GetInt32ForUser(cr,
+                ISettingsSystem::PHONE_BLACKLIST_PRIVATE_NUMBER_MODE, 0,
+                IUserHandle::USER_CURRENT_OR_SELF, &res);
+    return (res & mode) != 0;
+}
+
+Boolean BlacklistUtils::IsBlacklistUnknownNumberEnabled(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 mode)
+{
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
+    Int32 res;
+    Settings::System::GetInt32ForUser(cr,
+            ISettingsSystem::PHONE_BLACKLIST_UNKNOWN_NUMBER_MODE, 0,
+            IUserHandle::USER_CURRENT_OR_SELF,  &res);
+    return (res & mode) != 0;
+}
+
+Boolean BlacklistUtils::IsBlacklistRegexEnabled(
+    /* [in] */ IContext* context)
+{
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
+    Int32 res;
+    Settings::System::GetInt32ForUser(cr,
+            ISettingsSystem::PHONE_BLACKLIST_REGEX_ENABLED, 0,
+            IUserHandle::USER_CURRENT_OR_SELF, &res);
+    return res != 0;
+}
+
+} // namespace Utility
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos
+
