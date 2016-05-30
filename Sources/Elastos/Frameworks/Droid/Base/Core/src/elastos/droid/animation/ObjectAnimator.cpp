@@ -710,6 +710,7 @@ ECode ObjectAnimator::SetTarget(
     if (IInterface::Probe(oldTarget) != IInterface::Probe(target)) {
         mTarget = NULL;
         if (target != NULL) {
+            CheckIsCarObject(target);
             IWeakReferenceSource::Probe(target)->GetWeakReference((IWeakReference**)&mTarget);
         }
         // New target should cause re-initialization prior to starting

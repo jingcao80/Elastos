@@ -18,6 +18,8 @@ class ColorFilter
 public:
     CAR_INTERFACE_DECL()
 
+    ColorFilter();
+
     virtual ~ColorFilter();
 
 protected:

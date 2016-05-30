@@ -105,9 +105,9 @@ ECode AnimatedVectorDrawable::AnimatedVectorDrawableState::GetChangingConfigurat
 }
 
 
-const String AnimatedVectorDrawable::LOGTAG = String("AnimatedVectorDrawable")/*.class.getSimpleName()*/;
-const String AnimatedVectorDrawable::ANIMATED_VECTOR = String("animated-vector");
-const String AnimatedVectorDrawable::TARGET = String("target");
+const String AnimatedVectorDrawable::LOGTAG("AnimatedVectorDrawable")/*.class.getSimpleName()*/;
+const String AnimatedVectorDrawable::ANIMATED_VECTOR("animated-vector");
+const String AnimatedVectorDrawable::TARGET("target");
 const Boolean AnimatedVectorDrawable::DBG_ANIMATION_VECTOR_DRAWABLE = FALSE;
 
 CAR_INTERFACE_IMPL_2(AnimatedVectorDrawable, Drawable, IAnimatedVectorDrawable, IAnimatable);
@@ -380,7 +380,6 @@ void AnimatedVectorDrawable::SetupAnimatorsForTarget(
     /* [in] */ IAnimator* animator)
 {
     AutoPtr<IInterface> target = ((VectorDrawable*)mAnimatedVectorState->mVectorDrawable.Get())->GetTargetByName(name);
-    //leliang the target must be CAR class
     animator->SetTarget(target);
     if (mAnimatedVectorState->mAnimators == NULL) {
         CArrayList::New((IArrayList**)&mAnimatedVectorState->mAnimators);
@@ -392,9 +391,7 @@ void AnimatedVectorDrawable::SetupAnimatorsForTarget(
     CString::New(name, (ICharSequence**)&cs);
     IMap::Probe(mAnimatedVectorState->mTargetNameMap)->Put(animator, cs);
     if (DBG_ANIMATION_VECTOR_DRAWABLE) {
-        String value;
-        IObject::Probe(animator)->ToString(&value);
-        Logger::V(LOGTAG, String("add animator  for target ") + name + String(" ") + value);
+        Logger::V(LOGTAG, "add animator  for target %s %s", name.string(), TO_CSTR(target));
     }
 }
 

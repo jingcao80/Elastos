@@ -4075,20 +4075,20 @@ ECode CPackageManagerService::RemoveUnusedPackagesRunnable::Run()
 //==============================================================================
 
 const String CPackageManagerService::TAG("CPackageManagerService");
-const Boolean CPackageManagerService::DEBUG_SETTINGS = TRUE;
-const Boolean CPackageManagerService::DEBUG_PREFERRED = TRUE;
-const Boolean CPackageManagerService::DEBUG_UPGRADE = TRUE;
-const Boolean CPackageManagerService::DEBUG_INSTALL = TRUE;
-const Boolean CPackageManagerService::DEBUG_REMOVE = TRUE;
-const Boolean CPackageManagerService::DEBUG_BROADCASTS = TRUE;
-const Boolean CPackageManagerService::DEBUG_SHOW_INFO = TRUE;
-const Boolean CPackageManagerService::DEBUG_PACKAGE_INFO = TRUE;
-const Boolean CPackageManagerService::DEBUG_INTENT_MATCHING = TRUE;
-const Boolean CPackageManagerService::DEBUG_PACKAGE_SCANNING = TRUE;
-const Boolean CPackageManagerService::DEBUG_VERIFY = TRUE;
-const Boolean CPackageManagerService::DEBUG_DEXOPT = TRUE;
-const Boolean CPackageManagerService::DEBUG_ABI_SELECTION = TRUE;
-const Boolean CPackageManagerService::DEBUG_SD_INSTALL = TRUE;
+const Boolean CPackageManagerService::DEBUG_SETTINGS = FALSE;
+const Boolean CPackageManagerService::DEBUG_PREFERRED = FALSE;
+const Boolean CPackageManagerService::DEBUG_UPGRADE = FALSE;
+const Boolean CPackageManagerService::DEBUG_INSTALL = FALSE;
+const Boolean CPackageManagerService::DEBUG_REMOVE = FALSE;
+const Boolean CPackageManagerService::DEBUG_BROADCASTS = FALSE;
+const Boolean CPackageManagerService::DEBUG_SHOW_INFO = FALSE;
+const Boolean CPackageManagerService::DEBUG_PACKAGE_INFO = FALSE;
+const Boolean CPackageManagerService::DEBUG_INTENT_MATCHING = FALSE;
+const Boolean CPackageManagerService::DEBUG_PACKAGE_SCANNING = FALSE;
+const Boolean CPackageManagerService::DEBUG_VERIFY = FALSE;
+const Boolean CPackageManagerService::DEBUG_DEXOPT = FALSE;
+const Boolean CPackageManagerService::DEBUG_ABI_SELECTION = FALSE;
+const Boolean CPackageManagerService::DEBUG_SD_INSTALL = FALSE;
 
 const Int32 CPackageManagerService::RADIO_UID;
 const Int32 CPackageManagerService::LOG_UID;

@@ -1388,6 +1388,10 @@ AutoPtr<IClassInfo> PropertyValuesHolder::GetClassInfo(
 {
     AutoPtr<IClassInfo> klass;
     CObject::ReflectClassInfo(o, (IClassInfo**)&klass);
+    if (klass == NULL) {
+        Logger::E(TAG, "%s is not a CAR Object.", TO_CSTR(o));
+        assert(0 && "It's not a CAR Object.");
+    }
     return klass;
 }
 

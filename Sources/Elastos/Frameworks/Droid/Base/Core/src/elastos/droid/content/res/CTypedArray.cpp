@@ -80,6 +80,7 @@ ECode CTypedArray::GetLength(
     VALIDATE_NOT_NULL(len);
     *len = 0;
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -93,6 +94,7 @@ ECode CTypedArray::GetIndexCount(
     VALIDATE_NOT_NULL(count);
     *count = 0;
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
     *count = (*mIndices)[0];
@@ -106,6 +108,7 @@ ECode CTypedArray::GetIndex(
     VALIDATE_NOT_NULL(index);
     *index = 0;
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
     *index = (*mIndices)[1 + at];
@@ -133,6 +136,7 @@ ECode CTypedArray::GetText(
     *csq = NULL;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -166,6 +170,7 @@ ECode CTypedArray::GetString(
     *str = String(NULL);
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -204,6 +209,7 @@ ECode CTypedArray::GetNonResourceString(
     *str = String(NULL);
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -235,6 +241,7 @@ ECode CTypedArray::GetNonConfigurationString(
     *str = String(NULL);
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -268,6 +275,7 @@ ECode CTypedArray::GetBoolean(
     *value = FALSE;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -305,6 +313,7 @@ ECode CTypedArray::GetInt32(
     *value = defValue;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -342,6 +351,7 @@ ECode CTypedArray::GetFloat(
     *value = defValue;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -386,6 +396,7 @@ ECode CTypedArray::GetColor(
     *value = defValue;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -429,6 +440,7 @@ ECode CTypedArray::GetColorStateList(
     *list = NULL;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -456,6 +468,7 @@ ECode CTypedArray::GetInteger(
     *value = 0;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -488,6 +501,7 @@ ECode CTypedArray::GetDimension(
     *value = 0;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -521,6 +535,7 @@ ECode CTypedArray::GetDimensionPixelOffset(
     *value = 0;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -554,6 +569,7 @@ ECode CTypedArray::GetDimensionPixelSize(
     *value = 0;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -625,6 +641,7 @@ ECode CTypedArray::GetLayoutDimension(
     *dimension = defValue;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -657,6 +674,7 @@ ECode CTypedArray::GetFraction(
     *value = defValue;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
     index *= CAssetManager::STYLE_NUM_ENTRIES;
@@ -689,6 +707,7 @@ ECode CTypedArray::GetResourceId(
     *value = defValue;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -714,6 +733,7 @@ ECode CTypedArray::GetThemeAttributeId(
     *value = defValue;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -733,6 +753,7 @@ ECode CTypedArray::GetDrawable(
     *drawable = NULL;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -758,6 +779,7 @@ ECode CTypedArray::GetTextArray(
     *array = NULL;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -781,6 +803,7 @@ ECode CTypedArray::GetValue(
     VALIDATE_NOT_NULL(outValue);
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -795,6 +818,7 @@ ECode CTypedArray::GetType(
     VALIDATE_NOT_NULL(type)
     *type = 0;
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -811,6 +835,7 @@ ECode CTypedArray::HasValue(
     *hasValue = FALSE;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -829,6 +854,7 @@ ECode CTypedArray::PeekValue(
     *value = NULL;
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -849,6 +875,7 @@ ECode CTypedArray::GetPositionDescription(
     *des = String("");
 
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -862,6 +889,7 @@ ECode CTypedArray::GetPositionDescription(
 ECode CTypedArray::Recycle()
 {
     if (mRecycled) {
+        Logger::W("CTypedArray", "Already recycled!");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -878,6 +906,7 @@ ECode CTypedArray::ExtractThemeAttrs(
     /* [out, callee] */ ArrayOf<Int32>** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
 
     if (mRecycled) {
         // throw new RuntimeException("Cannot make calls to a recycled instance!");

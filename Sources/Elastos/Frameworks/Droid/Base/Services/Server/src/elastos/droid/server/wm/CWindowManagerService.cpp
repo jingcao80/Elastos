@@ -7164,7 +7164,6 @@ Boolean CWindowManagerService::CheckWaitingForWindowsLocked()
 
 void CWindowManagerService::PerformEnableScreen()
 {
-    Slogger::I(TAG, " >>> PerformEnableScreen");
     {    AutoLock syncLock(mWindowMapLock);
         if (DEBUG_BOOT) {
             Slogger::I(TAG, "performEnableScreen: mDisplayEnabled=%d mForceDisplayEnabled=%d"
@@ -7205,7 +7204,6 @@ void CWindowManagerService::PerformEnableScreen()
 
         if (!mForceDisplayEnabled && !CheckBootAnimationCompleteLocked()) {
             if (DEBUG_BOOT) Slogger::I(TAG, "performEnableScreen: Waiting for anim complete");
-            Slogger::I(TAG, " <<< PerformEnableScreen 4");
             return;
         }
 
@@ -7233,7 +7231,6 @@ void CWindowManagerService::PerformEnableScreen()
 
     // Make sure the last requested orientation has been applied.
     UpdateRotationUnchecked(FALSE, FALSE);
-    Slogger::I(TAG, " <<< PerformEnableScreen");
 }
 
 Boolean CWindowManagerService::CheckBootAnimationCompleteLocked()

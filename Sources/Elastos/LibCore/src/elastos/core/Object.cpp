@@ -257,15 +257,11 @@ String Object::GetNamespace(
 String Object::GetModulePath(
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<IClassInfo> classInfo;
-    _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
+    AutoPtr<IModuleInfo> moduleInfo;
+    _CObject_ReflectModuleInfo(obj, (IModuleInfo**)&moduleInfo);
     String path;
-    if (classInfo != NULL) {
-        AutoPtr<IModuleInfo> moduleInfo;
-        classInfo->GetModuleInfo((IModuleInfo**)&moduleInfo);
-        if (moduleInfo != NULL) {
-            moduleInfo->GetPath(&path);
-        }
+    if (moduleInfo != NULL) {
+        moduleInfo->GetPath(&path);
     }
     else {
         ALOGD("error: failed to GetModulePath with %s. It is not a Car class.", TO_CSTR(obj));

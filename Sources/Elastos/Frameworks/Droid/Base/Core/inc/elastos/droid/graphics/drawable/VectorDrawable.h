@@ -108,11 +108,15 @@ protected:
 public:
     class VGroup;
     class VPath;
+
     class VPathRenderer
         : public Object
     {
     public:
         VPathRenderer();
+
+        VPathRenderer(
+            /* [in] */ VPathRenderer* copy);
 
         CARAPI_(void) SetRootAlpha(
             /* [in] */ Int32 alpha);
@@ -126,9 +130,6 @@ public:
 
         // @SuppressWarnings("unused")
         CARAPI_(Float) GetAlpha();
-
-        VPathRenderer(
-            /* [in] */ VPathRenderer* copy);
 
         CARAPI_(Boolean) CanApplyTheme();
 

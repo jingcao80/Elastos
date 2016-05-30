@@ -97,8 +97,6 @@ ECode VectorDrawable::VectorDrawableState::DrawCachedBitmapWithRootAlpha(
 {
     // The bitmap's size is the same as the bounds.
     AutoPtr<IPaint> p = GetPaint(filter);
-    Logger::I(LOGTAG, " >> DrawBitmap: %s, alpha:%d, paint:%s, filter:%s",
-        TO_CSTR(mCachedBitmap), mVPathRenderer->GetRootAlpha(), TO_CSTR(p), TO_CSTR(filter));
     return canvas->DrawBitmap(mCachedBitmap, 0.f, 0.f, p);
 }
 
@@ -142,6 +140,7 @@ void VectorDrawable::VectorDrawableState::CreateCachedBitmapIfNeeded(
     bounds->GetWidth(&width);
     bounds->GetHeight(&height);
     if (mCachedBitmap == NULL || !CanReuseBitmap(width, height)) {
+        mCachedBitmap = NULL;
         CBitmap::CreateBitmap(width, height, BitmapConfig_ARGB_8888, (IBitmap**)&mCachedBitmap);
         mCacheDirty = TRUE;
     }
@@ -266,28 +265,6 @@ VectorDrawable::VPathRenderer::VPathRenderer()
     CPath::New((IPath**)&mRenderPath);
 }
 
-void VectorDrawable::VPathRenderer::SetRootAlpha(
-    /* [in] */ Int32 alpha)
-{
-    mRootAlpha = alpha;
-}
-
-Int32 VectorDrawable::VPathRenderer::GetRootAlpha()
-{
-    return mRootAlpha;
-}
-
-void VectorDrawable::VPathRenderer::SetAlpha(
-    /* [in] */ Float alpha)
-{
-    SetRootAlpha((Int32) (alpha * 255));
-}
-
-Float VectorDrawable::VPathRenderer::GetAlpha()
-{
-    return GetRootAlpha() / 255.0f;
-}
-
 VectorDrawable::VPathRenderer::VPathRenderer(
     /* [in] */ VPathRenderer* copy)
     : mChangingConfigurations(0)
@@ -315,8 +292,30 @@ VectorDrawable::VPathRenderer::VPathRenderer(
     if (copy->mRootName != NULL) {
         AutoPtr<ICharSequence> cs;
         CString::New(copy->mRootName, (ICharSequence**)&cs);
-        mVGTargetsMap->Put(cs, TO_IINTERFACE(this));
+        mVGTargetsMap->Put(cs, (IObject*)this);
     }
+}
+
+void VectorDrawable::VPathRenderer::SetRootAlpha(
+    /* [in] */ Int32 alpha)
+{
+    mRootAlpha = alpha;
+}
+
+Int32 VectorDrawable::VPathRenderer::GetRootAlpha()
+{
+    return mRootAlpha;
+}
+
+void VectorDrawable::VPathRenderer::SetAlpha(
+    /* [in] */ Float alpha)
+{
+    SetRootAlpha((Int32) (alpha * 255));
+}
+
+Float VectorDrawable::VPathRenderer::GetAlpha()
+{
+    return GetRootAlpha() / 255.0f;
 }
 
 Boolean VectorDrawable::VPathRenderer::CanApplyTheme()
@@ -339,11 +338,11 @@ Boolean VectorDrawable::VPathRenderer::RecursiveCanApplyTheme(
         children->Get(i, (IInterface**)&child);
         if (IVGroup::Probe(child)) {
             AutoPtr<VGroup> childGroup = (VGroup*)IVGroup::Probe(child);
-            if (childGroup->CanApplyTheme()
-                    || RecursiveCanApplyTheme(childGroup)) {
+            if (childGroup->CanApplyTheme() || RecursiveCanApplyTheme(childGroup)) {
                 return TRUE;
             }
-        } else if (IVPath::Probe(child)) {
+        }
+        else if (IVPath::Probe(child)) {
             AutoPtr<VPath> childPath = (VPath*)IVPath::Probe(child);
             if (childPath->CanApplyTheme()) {
                 return TRUE;
@@ -378,7 +377,8 @@ void VectorDrawable::VPathRenderer::RecursiveApplyTheme(
                 childGroup->ApplyTheme(t);
             }
             RecursiveApplyTheme(childGroup, t);
-        } else if (IVPath::Probe(child)) {
+        }
+        else if (IVPath::Probe(child)) {
             AutoPtr<VPath> childPath = (VPath*)IVPath::Probe(child);
             if (childPath->CanApplyTheme()) {
                 childPath->ApplyTheme(t);
@@ -412,9 +412,9 @@ void VectorDrawable::VPathRenderer::DrawGroupTree(
         currentGroup->mChildren->Get(i, (IInterface**)&child);
         if (IVGroup::Probe(child)) {
             AutoPtr<VGroup> childGroup = (VGroup*)IVGroup::Probe(child);
-            DrawGroupTree(childGroup, currentGroup->mStackedMatrix,
-                    canvas, w, h, filter);
-        } else if (IVPath::Probe(child)) {
+            DrawGroupTree(childGroup, currentGroup->mStackedMatrix, canvas, w, h, filter);
+        }
+        else if (IVPath::Probe(child)) {
             AutoPtr<VPath> childPath = (VPath*)IVPath::Probe(child);
             DrawPath(currentGroup, childPath, canvas, w, h, filter);
         }
@@ -427,7 +427,6 @@ void VectorDrawable::VPathRenderer::Draw(
     /* [in] */ Int32 h,
     /* [in] */ IColorFilter* filter)
 {
-    Logger::I(LOGTAG, "VPathRenderer::Draw(%d, %d)", w, h);
     // Travese the tree in pre-order to draw.
     DrawGroupTree(mRootGroup, IDENTITY_MATRIX, canvas, w, h, filter);
 }
@@ -440,7 +439,6 @@ void VectorDrawable::VPathRenderer::DrawPath(
     /* [in] */ Int32 h,
     /* [in] */ IColorFilter* filter)
 {
-    Logger::I(LOGTAG, "VPathRenderer::DrawPath(%d, %d)", w, h);
     Float scaleX = w / mViewportWidth;
     Float scaleY = h / mViewportHeight;
     Float minScale = Elastos::Core::Math::Min(scaleX, scaleY);
@@ -458,14 +456,14 @@ void VectorDrawable::VPathRenderer::DrawPath(
         mRenderPath->AddPath(path, mFinalPathMatrix);
         Boolean isNonEmpty = FALSE;
         canvas->ClipPath(mRenderPath, RegionOp_REPLACE, &isNonEmpty);
-    } else {
+    }
+    else {
         AutoPtr<VFullPath> fullPath = (VFullPath*) vPath;
         if (fullPath->mTrimPathStart != 0.0f || fullPath->mTrimPathEnd != 1.0f) {
             // Float start = (fullPath->mTrimPathStart + fullPath->mTrimPathOffset) % 1.0f;
             // Float end = (fullPath->mTrimPathEnd + fullPath->mTrimPathOffset) % 1.0f;
             Float start = fmod((fullPath->mTrimPathStart + fullPath->mTrimPathOffset), 1.0f);
             Float end = fmod((fullPath->mTrimPathEnd + fullPath->mTrimPathOffset), 1.0f);
-
             if (mPathMeasure == NULL) {
                 CPathMeasure::New((IPathMeasure**)&mPathMeasure);
             }
@@ -480,7 +478,8 @@ void VectorDrawable::VPathRenderer::DrawPath(
             if (start > end) {
                 mPathMeasure->GetSegment(start, len, path, TRUE, &bv);
                 mPathMeasure->GetSegment(0.f, end, path, TRUE, &bv);
-            } else {
+            }
+            else {
                 mPathMeasure->GetSegment(start, end, path, TRUE, &bv);
             }
             path->RLineTo(0, 0); // fix bug in measure
@@ -552,7 +551,7 @@ ECode VectorDrawable::VGroup::constructor(
     if (mGroupName != NULL) {
         AutoPtr<ICharSequence> cs;
         CString::New(mGroupName, (ICharSequence**)&cs);
-        targetsMap->Put(cs, TO_IINTERFACE(this));
+        targetsMap->Put(cs, (IVGroup*)this);
     }
 
     mLocalMatrix->Set(copy->mLocalMatrix);
@@ -864,7 +863,8 @@ void VectorDrawable::VPath::SetPathData(
     if (!PathParser::CanMorph(mNodes, nodes)) {
         // This should not happen in the middle of animation.
         mNodes = PathParser::DeepCopyNodes(nodes);
-    } else {
+    }
+    else {
         PathParser::UpdateNodes(mNodes, nodes);
     }
 }
@@ -1047,7 +1047,6 @@ void VectorDrawable::VFullPath::UpdateStateFromTypedArray(
 
     String pathData;
     a->GetString(R::styleable::VectorDrawablePath_pathData, &pathData);
-    Logger::I(LOGTAG, "UpdateStateFromTypedArray: pathData: [%s]", pathData.string());
     if (pathData != NULL) {
         mNodes = PathParser::CreateNodesFromPathData(pathData);
     }
@@ -1057,8 +1056,6 @@ void VectorDrawable::VFullPath::UpdateStateFromTypedArray(
     Int32 value = 0;
     a->GetInt32(R::styleable::VectorDrawablePath_strokeLineCap, -1, &value);
     mStrokeLineCap = GetStrokeLineCap(value, mStrokeLineCap);
-    Logger::I(LOGTAG, "UpdateStateFromTypedArray: mFillColor: [%08x], mFillAlpha:%d",
-        mFillColor, mFillAlpha);
 
     a->GetInt32(R::styleable::VectorDrawablePath_strokeLineJoin, -1, &value);
     mStrokeLineJoin = GetStrokeLineJoin(value, mStrokeLineJoin);
@@ -1196,7 +1193,6 @@ VectorDrawable::VectorDrawable()
 
 ECode VectorDrawable::constructor()
 {
-    Logger::I(LOGTAG, " create VectorDrawable 1:%s", TO_CSTR(this));
     mVectorState = new VectorDrawableState();
     return NOERROR;
 }
@@ -1206,7 +1202,6 @@ ECode VectorDrawable::constructor(
     /* [in] */ IResources* res,
     /* [in] */ IResourcesTheme* theme)
 {
-    Logger::I(LOGTAG, " create VectorDrawable 2:%s", TO_CSTR(this));
     VectorDrawableState* vds = (VectorDrawableState*)state;
     Boolean can = FALSE;
     if (theme != NULL && (vds->CanApplyTheme(&can), can)) {
@@ -1218,7 +1213,8 @@ ECode VectorDrawable::constructor(
         mVectorState = vds;
     }
 
-    mTintFilter = UpdateTintFilter(mTintFilter, vds->mTint, vds->mTintMode);
+    AutoPtr<IPorterDuffColorFilter> temp = mTintFilter;
+    mTintFilter = UpdateTintFilter(temp, vds->mTint, vds->mTintMode);
     return NOERROR;
 }
 
@@ -1255,7 +1251,6 @@ ECode VectorDrawable::GetConstantState(
 ECode VectorDrawable::Draw(
     /* [in] */ ICanvas* canvas)
 {
-    Logger::I(LOGTAG, " >>>>>> Draw %s", TO_CSTR(this));
     AutoPtr<IRect> bounds;
     GetBounds((IRect**)&bounds);
     Int32 w = 0, h = 0;
@@ -1281,7 +1276,6 @@ ECode VectorDrawable::Draw(
 
     // Color filters always override tint filters.
     AutoPtr<IColorFilter> colorFilter = mColorFilter == NULL ? IColorFilter::Probe(mTintFilter) : mColorFilter.Get();
-    Logger::I(LOGTAG, "colorFilter:%s, mTintFilter:%s", TO_CSTR(mColorFilter), TO_CSTR(mTintFilter));
     if (!mAllowCaching) {
         // AnimatedVectorDrawable
         if (!mVectorState->HasTranslucentRoot()) {
@@ -1299,13 +1293,8 @@ ECode VectorDrawable::Draw(
             mVectorState->UpdateCachedBitmap(bounds);
             mVectorState->UpdateCacheStates();
         }
-        Logger::I(LOGTAG, " DrawCachedBitmapWithRootAlpha: %s", TO_CSTR(colorFilter));
         mVectorState->DrawCachedBitmapWithRootAlpha(canvas, colorFilter);
     }
-
-    Logger::I(LOGTAG, "left: %d, top: %d, needMirroring:%d, mAllowCaching:%d, bounds:%s",
-        left, top, needMirroring, mAllowCaching, TO_CSTR(bounds));
-    Logger::I(LOGTAG, " <<<<<< Draw %s", TO_CSTR(this));
     return canvas->RestoreToCount(saveCount);
 }
 
@@ -1330,7 +1319,6 @@ ECode VectorDrawable::SetAlpha(
 ECode VectorDrawable::SetColorFilter(
     /* [in] */ IColorFilter* colorFilter)
 {
-    Logger::I(LOGTAG, " >> SetColorFilter: %s", TO_CSTR(colorFilter));
     mColorFilter = colorFilter;
     return InvalidateSelf();
 }
@@ -1341,10 +1329,10 @@ ECode VectorDrawable::SetTintList(
     AutoPtr<VectorDrawableState> state = mVectorState;
     if (state->mTint.Get() != tint) {
         state->mTint = tint;
-        mTintFilter = UpdateTintFilter(mTintFilter, tint, state->mTintMode);
+        AutoPtr<IPorterDuffColorFilter> temp = mTintFilter;
+        mTintFilter = UpdateTintFilter(temp, tint, state->mTintMode);
         InvalidateSelf();
     }
-    Logger::I(LOGTAG, " >> SetTintList: tint:%s, mTintFilter:%s", TO_CSTR(tint), TO_CSTR(mTintFilter));
     return NOERROR;
 }
 
@@ -1354,7 +1342,8 @@ ECode VectorDrawable::SetTintMode(
     AutoPtr<VectorDrawableState> state = mVectorState;
     if (state->mTintMode != tintMode) {
         state->mTintMode = tintMode;
-        mTintFilter = UpdateTintFilter(mTintFilter, state->mTint, tintMode);
+        AutoPtr<IPorterDuffColorFilter> temp = mTintFilter;
+        mTintFilter = UpdateTintFilter(temp, state->mTint, tintMode);
         InvalidateSelf();
     }
     return NOERROR;
@@ -1375,7 +1364,8 @@ Boolean VectorDrawable::OnStateChange(
 {
     AutoPtr<VectorDrawableState> state = mVectorState;
     if (state->mTint.Get() != NULL && state->mTintMode != -1) {
-        mTintFilter = UpdateTintFilter(mTintFilter, state->mTint, state->mTintMode);
+        AutoPtr<IPorterDuffColorFilter> temp = mTintFilter;
+        mTintFilter = UpdateTintFilter(temp, state->mTint, state->mTintMode);
         InvalidateSelf();
         return TRUE;
     }
@@ -1416,7 +1406,6 @@ ECode VectorDrawable::CanApplyTheme(
 ECode VectorDrawable::ApplyTheme(
     /* [out] */ IResourcesTheme* t)
 {
-    Logger::I(LOGTAG, "ApplyTheme:");
     Drawable::ApplyTheme(t);
 
     AutoPtr<VectorDrawableState> state = mVectorState;
@@ -1440,8 +1429,8 @@ ECode VectorDrawable::ApplyTheme(
         a->Recycle();
         // }
 
-        mTintFilter = UpdateTintFilter(mTintFilter, state->mTint, state->mTintMode);
-        Logger::I(LOGTAG, "ApplyTheme: mTintFilter:%s", TO_CSTR(mTintFilter));
+        AutoPtr<IPorterDuffColorFilter> temp = mTintFilter;
+        mTintFilter = UpdateTintFilter(temp, state->mTint, state->mTintMode);
     }
 
     AutoPtr<VPathRenderer> path = state->mVPathRenderer;
@@ -1486,8 +1475,8 @@ AutoPtr<IVectorDrawable> VectorDrawable::Create(
     IXmlPullParser* parser = IXmlPullParser::Probe(obj);
     AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(parser);
     Int32 type = 0;
-    while ((parser->Next(&type), type) != IXmlPullParser::START_TAG &&
-            type != IXmlPullParser::END_DOCUMENT) {
+    while ((parser->Next(&type), type) != IXmlPullParser::START_TAG
+        && type != IXmlPullParser::END_DOCUMENT) {
         // Empty loop
     }
     if (type != IXmlPullParser::START_TAG) {
@@ -1509,8 +1498,9 @@ Int32 VectorDrawable::ApplyAlpha(
     /* [in] */ Int32 color,
     /* [in] */ Float alpha)
 {
+    Int32 alphaBytes = Color::Alpha(color);
     color &= 0x00FFFFFF;
-    color |= ((Int32) (Color::Alpha(color) * alpha)) << 24;
+    color |= ((Int32)(alphaBytes * alpha) << 24);
     return color;
 }
 
@@ -1532,18 +1522,18 @@ ECode VectorDrawable::Inflate(
     if (FAILED(ec)) {
         return ec;
     }
+
     ec = UpdateStateFromTypedArray(a);
+    a->Recycle();
     if (FAILED(ec)) {
-        a->Recycle();
         return ec;
     }
-    a->Recycle();
 
     state->mCacheDirty = TRUE;
     FAIL_RETURN(InflateInternal(res, parser, attrs, theme));
 
-    mTintFilter = UpdateTintFilter(mTintFilter, state->mTint, state->mTintMode);
-    Logger::I(LOGTAG, "Inflate: mTintFilter:%s", TO_CSTR(mTintFilter));
+    AutoPtr<IPorterDuffColorFilter> temp = mTintFilter;
+    mTintFilter = UpdateTintFilter(temp, state->mTint, state->mTintMode);
     return NOERROR;
 }
 
@@ -1559,9 +1549,10 @@ ECode VectorDrawable::UpdateStateFromTypedArray(
     state->mChangingConfigurations |= config;
 
     // Extract the theme attributes, if any.
+    state->mThemeAttrs = NULL;
     ((CTypedArray*)a)->ExtractThemeAttrs((ArrayOf<Int32>**)&state->mThemeAttrs);
 
-    Int32 tintMode = 0;
+    Int32 tintMode = -1;
     a->GetInt32(R::styleable::VectorDrawable_tintMode, -1, &tintMode);
     if (tintMode != -1) {
         FAIL_RETURN(Drawable::ParseTintMode(tintMode, PorterDuffMode_SRC_IN, &state->mTintMode));
@@ -1618,9 +1609,7 @@ ECode VectorDrawable::UpdateStateFromTypedArray(
         CString::New(name, (ICharSequence**)&cs);
         pathRenderer->mVGTargetsMap->Put(cs, (IObject*)pathRenderer);
     }
-    Logger::I(LOGTAG, "vw:wh (%d, %d), w:h (%d, %d), alphaInFloat: %.2f",
-        pathRenderer->mViewportWidth, pathRenderer->mViewportHeight,
-        pathRenderer->mBaseWidth, pathRenderer->mBaseHeight, alphaInFloat);
+
     return NOERROR;
 }
 
@@ -1649,7 +1638,7 @@ ECode VectorDrawable::InflateInternal(
             AutoPtr<IInterface> currentGroupObj;
             groupStack->Peek((IInterface**)&currentGroupObj);
             AutoPtr<VGroup> currentGroup = (VGroup*)IVGroup::Probe(currentGroupObj);
-            Logger::I(LOGTAG, " >> InflateInternal tag: %s", tagName.string());
+
             if (SHAPE_PATH.Equals(tagName)) {
                 AutoPtr<IVFullPath> ivfp;
                 CVFullPath::New((IVFullPath**)&ivfp);
@@ -1730,11 +1719,11 @@ void VectorDrawable::PrintGroupTree(
         sb += "    ";
     }
     // Print the current node
-    Logger::V(LOGTAG, "%scurrent group is :%s, rotation is %d",
-        sb.ToString().string(), currentGroup->GetGroupName().string(), currentGroup->mRotate);
+    // Logger::V(LOGTAG, "%s current group is :%s, rotation is %d",
+    //     sb.ToString().string(), currentGroup->GetGroupName().string(), currentGroup->mRotate);
 
     AutoPtr<IMatrix> matrix = currentGroup->GetLocalMatrix();
-    Logger::V(LOGTAG, "%smatrix is :%s", sb.ToString().string(), TO_CSTR(matrix));
+    // Logger::V(LOGTAG, "%s matrix is :%s", sb.ToString().string(), TO_CSTR(matrix));
     // Then print all the children groups
     Int32 size = 0;
     currentGroup->mChildren->GetSize(&size);

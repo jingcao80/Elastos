@@ -280,14 +280,16 @@ ECode Paint::GetFlags(
     /* [out] */ Int32* flags)
 {
     VALIDATE_NOT_NULL(flags)
-    *flags = ((SkPaint*)mNativePaint)->getFlags();
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    *flags = paint->getFlags();
     return NOERROR;
 }
 
 ECode Paint::SetFlags(
     /* [in] */ Int32 flags)
 {
-    ((SkPaint*)mNativePaint)->setFlags(flags);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    paint->setFlags(flags);
     return NOERROR;
 }
 
@@ -295,14 +297,16 @@ ECode Paint::GetHinting(
     /* [out] */ Int32* mode)
 {
     VALIDATE_NOT_NULL(mode)
-    *mode = ((SkPaint*)mNativePaint)->getHinting() == SkPaint::kNo_Hinting ? 0 : 1;
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    *mode = paint->getHinting() == SkPaint::kNo_Hinting ? 0 : 1;
     return NOERROR;
 }
 
 ECode Paint::SetHinting(
     /* [in] */ Int32 mode)
 {
-    ((SkPaint*)mNativePaint)->setFlags(mode == 0 ? SkPaint::kNo_Hinting : SkPaint::kSlight_Hinting);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    paint->setFlags(mode == 0 ? SkPaint::kNo_Hinting : SkPaint::kSlight_Hinting);
     return NOERROR;
 }
 
@@ -319,7 +323,8 @@ ECode Paint::IsAntiAlias(
 ECode Paint::SetAntiAlias(
     /* [in] */ Boolean aa)
 {
-    ((SkPaint*)mNativePaint)->setAntiAlias(aa);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    paint->setAntiAlias(aa);
     return NOERROR;
 }
 
@@ -336,7 +341,8 @@ ECode Paint::IsDither(
 ECode Paint::SetDither(
     /* [in] */ Boolean dither)
 {
-    ((SkPaint*)mNativePaint)->setDither(dither);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    paint->setDither(dither);
     return NOERROR;
 }
 
@@ -353,7 +359,8 @@ ECode Paint::IsLinearText(
 ECode Paint::SetLinearText(
     /* [in] */ Boolean linearText)
 {
-    ((SkPaint*)mNativePaint)->setLinearText(linearText);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    paint->setLinearText(linearText);
     return NOERROR;
 }
 
@@ -370,7 +377,8 @@ ECode Paint::IsSubpixelText(
 ECode Paint::SetSubpixelText(
     /* [in] */ Boolean subpixelText)
 {
-    ((SkPaint*)mNativePaint)->setSubpixelText(subpixelText);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    paint->setSubpixelText(subpixelText);
     return NOERROR;
 }
 
@@ -387,7 +395,8 @@ ECode Paint::IsUnderlineText(
 ECode Paint::SetUnderlineText(
     /* [in] */ Boolean underlineText)
 {
-    ((SkPaint*)mNativePaint)->setUnderlineText(underlineText);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    paint->setUnderlineText(underlineText);
     return NOERROR;
 }
 
@@ -404,7 +413,8 @@ ECode Paint::IsStrikeThruText(
 ECode Paint::SetStrikeThruText(
     /* [in] */ Boolean strikeThruText)
 {
-    ((SkPaint*)mNativePaint)->setStrikeThruText(strikeThruText);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    paint->setStrikeThruText(strikeThruText);
     return NOERROR;
 }
 
@@ -421,7 +431,8 @@ ECode Paint::IsFakeBoldText(
 ECode Paint::SetFakeBoldText(
     /* [in] */ Boolean fakeBoldText)
 {
-    ((SkPaint*)mNativePaint)->setFakeBoldText(fakeBoldText);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    paint->setFakeBoldText(fakeBoldText);
     return NOERROR;
 }
 
@@ -438,7 +449,8 @@ ECode Paint::IsFilterBitmap(
 ECode Paint::SetFilterBitmap(
     /* [in] */ Boolean filterBitmap)
 {
-    ((SkPaint*)mNativePaint)->setFilterBitmap(filterBitmap);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    paint->setFilterBitmap(filterBitmap);
     return NOERROR;
 }
 
@@ -461,14 +473,16 @@ ECode Paint::GetColor(
     /* [out] */ Int32* color)
 {
     VALIDATE_NOT_NULL(color)
-    *color = ((SkPaint*)mNativePaint)->getColor();
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    *color = paint->getColor();
     return NOERROR;
 }
 
 ECode Paint::SetColor(
     /* [in] */ Int32 color)
 {
-    ((SkPaint*)mNativePaint)->setColor(color);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    paint->setColor(color);
     return NOERROR;
 }
 
@@ -476,14 +490,16 @@ ECode Paint::GetAlpha(
     /* [out] */ Int32* alpha)
 {
     VALIDATE_NOT_NULL(alpha)
-    *alpha = ((SkPaint*)mNativePaint)->getAlpha();
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    *alpha = paint->getAlpha();
     return NOERROR;
 }
 
 ECode Paint::SetAlpha(
     /* [in] */ Int32 a)
 {
-    ((SkPaint*)mNativePaint)->setAlpha(a);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    paint->setAlpha(a);
     return NOERROR;
 }
 
@@ -500,7 +516,8 @@ ECode Paint::GetStrokeWidth(
     /* [out] */ Float* width)
 {
     VALIDATE_NOT_NULL(width);
-    *width = SkScalarToFloat(((SkPaint*)mNativePaint)->getStrokeWidth());
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    *width = SkScalarToFloat(paint->getStrokeWidth());
     return NOERROR;
 }
 
@@ -514,7 +531,8 @@ ECode Paint::SetStrokeWidth(
 ECode Paint::GetStrokeMiter(
     /* [out] */ Float* miter)
 {
-    *miter = SkScalarToFloat(((SkPaint*)mNativePaint)->getStrokeMiter());
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    *miter = SkScalarToFloat(paint->getStrokeMiter());
     return NOERROR;
 }
 
@@ -807,7 +825,8 @@ ECode Paint::GetTextSize(
     /* [out] */ Float* size)
 {
     VALIDATE_NOT_NULL(size);
-    *size = SkScalarToFloat(((SkPaint*)mNativePaint)->getTextSize());
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    *size = SkScalarToFloat(paint->getTextSize());
     return NOERROR;
 }
 
@@ -822,7 +841,8 @@ ECode Paint::GetTextScaleX(
     /* [out] */ Float* scaleX)
 {
     VALIDATE_NOT_NULL(scaleX);
-    *scaleX = SkScalarToFloat(((SkPaint*)mNativePaint)->getTextScaleX());
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    *scaleX = SkScalarToFloat(paint->getTextScaleX());
     return NOERROR;
 }
 
@@ -837,7 +857,8 @@ ECode Paint::GetTextSkewX(
     /* [out] */ Float* skewX)
 {
     VALIDATE_NOT_NULL(skewX)
-    *skewX = SkScalarToFloat(((SkPaint*)mNativePaint)->getTextSkewX());
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    *skewX = SkScalarToFloat(paint->getTextSkewX());
     return NOERROR;
 }
 
@@ -892,7 +913,8 @@ ECode Paint::Ascent(
 {
     VALIDATE_NOT_NULL(distance)
     SkPaint::FontMetrics metrics;
-    ((SkPaint*)mNativePaint)->getFontMetrics(&metrics);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    paint->getFontMetrics(&metrics);
     *distance = SkScalarToFloat(metrics.fAscent);
     return NOERROR;
 }
@@ -902,7 +924,8 @@ ECode Paint::Descent(
 {
     VALIDATE_NOT_NULL(distance)
     SkPaint::FontMetrics metrics;
-    ((SkPaint*)mNativePaint)->getFontMetrics(&metrics);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    paint->getFontMetrics(&metrics);
     *distance = SkScalarToFloat(metrics.fDescent);
     return NOERROR;
 }
@@ -1696,8 +1719,9 @@ Int64 Paint::NativeInitWithPaint(
 void Paint::NativeReset(
     /* [in] */ Int64 nObj)
 {
-    ((SkPaint*)nObj)->reset();
-    DefaultSettingsForElastos((SkPaint*)nObj);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    paint->reset();
+    DefaultSettingsForElastos(paint);
 }
 
 void Paint::NativeSet(
@@ -1710,40 +1734,46 @@ void Paint::NativeSet(
 Int32 Paint::NativeGetStyle(
     /* [in] */ Int64 nObj)
 {
-    return ((SkPaint*)nObj)->getStyle();
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    return paint->getStyle();
 }
 
 void Paint::NativeSetStyle(
     /* [in] */ Int64 nObj,
     /* [in] */ PaintStyle style)
 {
-    ((SkPaint*)nObj)->setStyle((SkPaint::Style)style);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    paint->setStyle((SkPaint::Style)style);
 }
 
 Int32 Paint::NativeGetStrokeCap(
     /* [in] */ Int64 nObj)
 {
-    return ((SkPaint*)nObj)->getStrokeCap();
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    return paint->getStrokeCap();
 }
 
 void Paint::NativeSetStrokeCap(
     /* [in] */ Int64 nObj,
     /* [in] */ PaintCap cap)
 {
-    ((SkPaint*)nObj)->setStrokeCap((SkPaint::Cap)cap);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    paint->setStrokeCap((SkPaint::Cap)cap);
 }
 
 Int32 Paint::NativeGetStrokeJoin(
     /* [in] */ Int64 nObj)
 {
-    return ((SkPaint*)nObj)->getStrokeJoin();
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    return paint->getStrokeJoin();
 }
 
 void Paint::NativeSetStrokeJoin(
     /* [in] */ Int64 nObj,
     /* [in] */ PaintJoin join)
 {
-    ((SkPaint*)nObj)->setStrokeJoin((SkPaint::Join)join);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    paint->setStrokeJoin((SkPaint::Join)join);
 }
 
 Boolean Paint::NativeGetFillPath(
@@ -1751,42 +1781,53 @@ Boolean Paint::NativeGetFillPath(
     /* [in] */ Int64 src,
     /* [in] */ Int64 dst)
 {
-    return ((SkPaint*)nObj)->getFillPath(*(SkPath*)src, (SkPath*)dst);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    return paint->getFillPath(*(SkPath*)src, (SkPath*)dst);
 }
 
 Int64 Paint::NativeSetShader(
     /* [in] */ Int64 nObj,
-    /* [in] */ Int64 shader)
+    /* [in] */ Int64 shaderObj)
 {
-    return (Int64)((SkPaint*)nObj)->setShader((SkShader*)shader);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    SkShader* shader = reinterpret_cast<SkShader *>(shaderObj);
+    return reinterpret_cast<Int64>(paint->setShader(shader));
 }
 
 Int64 Paint::NativeSetColorFilter(
     /* [in] */ Int64 nObj,
-    /* [in] */ Int64 filter)
+    /* [in] */ Int64 filterObj)
 {
-    return (Int32)((SkPaint*)nObj)->setColorFilter((SkColorFilter*)filter);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    SkColorFilter* filter = reinterpret_cast<SkColorFilter *>(filterObj);
+    return reinterpret_cast<Int64>(paint->setColorFilter(filter));
 }
 
 Int64 Paint::NativeSetXfermode(
     /* [in] */ Int64 nObj,
-    /* [in] */ Int64 xfermode)
+    /* [in] */ Int64 xfermodeObj)
 {
-    return (Int64)((SkPaint*)nObj)->setXfermode((SkXfermode*)xfermode);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    SkXfermode* xfermode = reinterpret_cast<SkXfermode *>(xfermodeObj);
+    return reinterpret_cast<Int64>(paint->setXfermode(xfermode));
 }
 
 Int64 Paint::NativeSetPathEffect(
     /* [in] */ Int64 nObj,
-    /* [in] */ Int64 effect)
+    /* [in] */ Int64 effectObj)
 {
-    return (Int64)((SkPaint*)nObj)->setPathEffect((SkPathEffect*)effect);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    SkPathEffect* effect = reinterpret_cast<SkPathEffect *>(effectObj);
+    return reinterpret_cast<Int64>(paint->setPathEffect(effect));
 }
 
 Int64 Paint::NativeSetMaskFilter(
     /* [in] */ Int64 nObj,
-    /* [in] */ Int64 maskfilter)
+    /* [in] */ Int64 maskfilterObj)
 {
-    return (Int32)((SkPaint*)nObj)->setMaskFilter((SkMaskFilter*)maskfilter);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    SkMaskFilter* maskfilter = reinterpret_cast<SkMaskFilter *>(maskfilterObj);
+    return reinterpret_cast<Int64>(paint->setMaskFilter(maskfilter));
 }
 
 Int64 Paint::NativeSetTypeface(
@@ -1809,14 +1850,16 @@ Int64 Paint::NativeSetRasterizer(
 Int32 Paint::NativeGetTextAlign(
     /* [in] */ Int64 nObj)
 {
-    return ((SkPaint*)nObj)->getTextAlign();
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    return paint->getTextAlign();
 }
 
 void Paint::NativeSetTextAlign(
     /* [in] */ Int64 nObj,
     /* [in] */ PaintAlign align)
 {
-    ((SkPaint*)nObj)->setTextAlign((SkPaint::Align)align);
+    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    paint->setTextAlign((SkPaint::Align)align);
 }
 
 // generate bcp47 identifier for the supplied locale

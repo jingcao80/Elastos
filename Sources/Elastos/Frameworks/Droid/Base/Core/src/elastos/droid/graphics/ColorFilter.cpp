@@ -9,6 +9,11 @@ namespace Droid {
 namespace Graphics {
 
 CAR_INTERFACE_IMPL(ColorFilter, Object, IColorFilter);
+
+ColorFilter::ColorFilter()
+    : mNativeInstance(0)
+{}
+
 ColorFilter::~ColorFilter()
 {
     DestroyFilter(mNativeInstance);

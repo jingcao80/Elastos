@@ -980,15 +980,15 @@ AutoPtr<IPorterDuffColorFilter> Drawable::UpdateTintFilter(
     GetState((ArrayOf<Int32>**)&state);
     Int32 color = 0;
     tint->GetColorForState(state, IColor::TRANSPARENT, &color);
-    if (tintFilter == NULL) {
-        AutoPtr<IPorterDuffColorFilter> filter;
+    AutoPtr<IPorterDuffColorFilter> filter = tintFilter;
+    if (filter == NULL) {
         CPorterDuffColorFilter::New(color, tintMode, (IPorterDuffColorFilter**)&filter);
-        return filter;
     }
-
-    tintFilter->SetColor(color);
-    tintFilter->SetMode(tintMode);
-    return tintFilter;
+    else {
+        filter->SetColor(color);
+        filter->SetMode(tintMode);
+    }
+    return filter;
 }
 
 ECode Drawable::ObtainAttributes(

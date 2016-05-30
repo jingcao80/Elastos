@@ -168,7 +168,6 @@ void PathDataNode::AddCommand(
                 ctrlPointY = currentY + (*val)[k + 3];
                 currentX += (*val)[k + 4];
                 currentY += (*val)[k + 5];
-
                 break;
             case 'C': // curveto - Draws a cubic Bézier curve
                 path->CubicTo((*val)[k + 0], (*val)[k + 1], (*val)[k + 2], (*val)[k + 3],
@@ -487,7 +486,7 @@ AutoPtr<ArrayOf<PathDataNode*> > PathParser::CreateNodesFromPathData(
     list->ToArray((ArrayOf<IInterface*>**)&array);
     AutoPtr<ArrayOf<PathDataNode*> > result = ArrayOf<PathDataNode*>::Alloc(array->GetLength());
     for (Int32 i = 0; i < array->GetLength(); ++i) {
-        PathDataNode* node = (PathDataNode*)(IObject*)IObject::Probe((*array)[i]);
+        PathDataNode* node = (PathDataNode*)IObject::Probe((*array)[i]);
         result->Set(i, node);
     }
     return result;

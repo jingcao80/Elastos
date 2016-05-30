@@ -122,7 +122,7 @@ namespace Phone {
 
 const String CPhoneStatusBar::TAG("CPhoneStatusBar");
 const Boolean CPhoneStatusBar::DEBUG = BaseStatusBar::DEBUG;
-const Boolean CPhoneStatusBar::SPEW = TRUE;
+const Boolean CPhoneStatusBar::SPEW = FALSE;
 const Boolean CPhoneStatusBar::DUMPTRUCK = TRUE; // extra dumpsys info
 const Boolean CPhoneStatusBar::DEBUG_GESTURES = FALSE;
 const Boolean CPhoneStatusBar::DEBUG_MEDIA = FALSE;
