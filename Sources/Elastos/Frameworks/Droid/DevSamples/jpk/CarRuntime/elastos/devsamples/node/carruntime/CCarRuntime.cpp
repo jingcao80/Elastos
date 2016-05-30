@@ -31,9 +31,9 @@ ECode CCarRuntime::Test_Require_ModuleInfo(
     assert(ppOutObject != NULL);
 
     ECode ec;
+
     AutoPtr<IModuleInfo> moduleInfo;
-    ec = _CReflector_AcquireModuleInfo(
-            moduleName, (IModuleInfo**)&moduleInfo);
+    ec = _CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo);
     if (FAILED(ec)) {
         ALOGD("Acquire \"%s\" module info failed!\n", moduleName.string());
         return ec;
@@ -45,11 +45,13 @@ ECode CCarRuntime::Test_Require_ModuleInfo(
         ALOGD("Create \"%s\" instance failed!\n", "CTestModuleInfo");
         return ec;
     }
-    *ppOutObject = testModuleInfo;
-    if (*ppOutObject != NULL) {
+
+    //if (*ppOutObject != NULL) {
         moduleInfo->AddRef();
-        (*ppOutObject)->AddRef();
-    }
+        testModuleInfo->AddRef();
+    //}
+
+    *ppOutObject = testModuleInfo;
 
     return NOERROR;
 }
