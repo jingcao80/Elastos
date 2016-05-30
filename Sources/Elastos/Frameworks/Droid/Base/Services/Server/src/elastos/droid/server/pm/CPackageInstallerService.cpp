@@ -528,7 +528,7 @@ ECode CPackageInstallerService::constructor(
     {    AutoLock syncLock(mSessionsLock);
         ReadSessionsLocked();
         AutoPtr<ArrayOf<IFile*> > files;
-        mStagingDir->ListFiles((ArrayOf<IFile*>**)&files);
+        mStagingDir->ListFiles(sStageFilter, (ArrayOf<IFile*>**)&files);
         Set<AutoPtr<IFile> > unclaimedStages;
         for (Int32 i = 0; i < files->GetLength(); ++i) {
             unclaimedStages.Insert((*files)[i]);

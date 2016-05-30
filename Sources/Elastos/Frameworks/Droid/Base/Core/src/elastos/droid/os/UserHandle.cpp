@@ -147,7 +147,7 @@ ECode UserHandle::Equals(
     if (other != NULL) {
         Int32 oid;
         other->GetIdentifier(&oid);
-        return oid == mHandle;
+        *equals = oid == mHandle;
     }
     return NOERROR;
 }
