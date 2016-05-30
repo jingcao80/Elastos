@@ -1,9 +1,0 @@
-#==========================================================================
-# Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
-#==========================================================================
-
-DIRS = inc
-DIRS += syscar
-DIRS += elasys
-DIRS += eltypes
-DIRS += clsmodule

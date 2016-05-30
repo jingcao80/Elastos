@@ -1,9 +1,0 @@
-#!/bin/sh
-targets="$1"; shift
-for arg in "$@"; do
-	for target in $targets; do
-		if [ "$arg" != "$target" ]; then
-			echo $arg
-		fi
-	done
-done
