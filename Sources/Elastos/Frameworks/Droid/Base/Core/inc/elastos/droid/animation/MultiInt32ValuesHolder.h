@@ -53,6 +53,10 @@ public:
     CARAPI SetupSetter(
         /* [in] */ IClassInfo* targetClass);
 
+    // @Override
+    CARAPI SetupGetter(
+        /* [in] */ IClassInfo* target);
+
 private:
     AutoPtr<IMethodInfo> mNativeSetter;
 

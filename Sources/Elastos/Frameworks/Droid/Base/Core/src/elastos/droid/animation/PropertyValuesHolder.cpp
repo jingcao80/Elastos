@@ -115,84 +115,41 @@ AutoPtr<ITypeEvaluator> PropertyValuesHolder::InitFloatEvaluator()
     return eva;
 }
 
-enum ClassType {
-    CLASS_INT = 0,
-    CLASS_FLOAT = 1,
-    CLASS_DOUBLE = 2,
-    CLASS_IINTEGER32 = 3,
-    CLASS_IFLOAT = 4,
-    CLASS_IDOUBLE = 5
-};
+static AutoPtr< ArrayOf<InterfaceID> > Init_FLOAT_VARIANTS()
+{
+    AutoPtr< ArrayOf<InterfaceID> > variants = ArrayOf<InterfaceID>::Alloc(3);
+    (*variants)[0] = EIID_IFloat; //Float.class
+    (*variants)[1] = EIID_IDouble; //Double.class
+    (*variants)[2] = EIID_IInteger32; //Integer.class
+    return variants;
+}
+
+static AutoPtr< ArrayOf<InterfaceID> > Init_INTEGER_VARIANTS()
+{
+    AutoPtr< ArrayOf<InterfaceID> > variants = ArrayOf<InterfaceID>::Alloc(3);
+    (*variants)[0] = EIID_IInteger32; //Integer.class
+    (*variants)[1] = EIID_IFloat; //Float.class
+    (*variants)[2] = EIID_IDouble; //Double.class
+    return variants;
+}
+
+static AutoPtr< ArrayOf<InterfaceID> > Init_DOUBLE_VARIANTS()
+{
+    AutoPtr< ArrayOf<InterfaceID> > variants = ArrayOf<InterfaceID>::Alloc(3);
+    (*variants)[0] = EIID_IDouble; //Double.class
+    (*variants)[1] = EIID_IFloat; //Float.class
+    (*variants)[2] = EIID_IInteger32; //Integer.class
+    return variants;
+}
 
 AutoPtr<ITypeEvaluator> PropertyValuesHolder::sInt32Evaluator = InitInt32Evaluator();
 AutoPtr<ITypeEvaluator> PropertyValuesHolder::sFloatEvaluator = InitFloatEvaluator();
-Int32 PropertyValuesHolder::FLOAT_VARIANTS[6] = {
-    CLASS_FLOAT/*float.class*/, CLASS_IFLOAT/*Float.class*/,
-    CLASS_DOUBLE/*double.class*/, CLASS_INT/*int.class*/,
-    CLASS_IDOUBLE/*Double.class*/, CLASS_IINTEGER32/*Integer.class*/};
-Int32 PropertyValuesHolder::INTEGER_VARIANTS[6] = {
-    CLASS_INT/*int.class*/, CLASS_IINTEGER32/*Integer.class*/,
-    CLASS_FLOAT/*float.class*/, CLASS_DOUBLE/*double.class*/,
-    CLASS_IFLOAT/*Float.class*/, CLASS_IDOUBLE/*Double.class*/};
-Int32 PropertyValuesHolder::DOUBLE_VARIANTS[6] = {
-    CLASS_DOUBLE/*double.class*/, CLASS_IDOUBLE/*Double.class*/,
-    CLASS_FLOAT/*float.class*/, CLASS_INT/*int.class*/,
-    CLASS_IFLOAT/*Float.class*/, CLASS_IINTEGER32/*Integer.class*/};
+AutoPtr< ArrayOf<InterfaceID> > PropertyValuesHolder::FLOAT_VARIANTS = Init_FLOAT_VARIANTS();
+AutoPtr< ArrayOf<InterfaceID> > PropertyValuesHolder::INTEGER_VARIANTS = Init_INTEGER_VARIANTS();
+AutoPtr< ArrayOf<InterfaceID> > PropertyValuesHolder::DOUBLE_VARIANTS = Init_DOUBLE_VARIANTS();
 
 PropertyValuesHolder::ClassMethodMap PropertyValuesHolder::sSetterPropertyMap;
 PropertyValuesHolder::ClassMethodMap PropertyValuesHolder::sGetterPropertyMap;
-
-static String GetSignature(
-    /* [in] */ Int32 type,
-    /* [in] */ const String& prefix)
-{
-    if (prefix.Equals("Get")) {
-        switch(type) {
-            case CLASS_INT: {
-                return String("(I32*)E");
-            }
-            case CLASS_FLOAT: {
-                return String("(F*)E");
-            }
-            case CLASS_DOUBLE: {
-                return String("(D*)E");
-            }
-            case CLASS_IINTEGER32: {
-                return String("(LElastos/Core/IInteger32;**)E");
-            }
-            case CLASS_IFLOAT: {
-                return String("(LElastos/Core/IFloat;**)E");
-            }
-            case CLASS_IDOUBLE: {
-                return String("(LElastos/Core/IDouble;**)E");
-            }
-        }
-    }
-    else {
-        switch(type) {
-            case CLASS_INT: {
-                return String("(I32)E");
-            }
-            case CLASS_FLOAT: {
-                return String("(F)E");
-            }
-            case CLASS_DOUBLE: {
-                return String("(D)E");
-            }
-            case CLASS_IINTEGER32: {
-                return String("(LElastos/Core/IInteger32;*)E");
-            }
-            case CLASS_IFLOAT: {
-                return String("(LElastos/Core/IFloat;*)E");
-            }
-            case CLASS_IDOUBLE: {
-                return String("(LElastos/Core/IDouble;*)E");
-            }
-        }
-    }
-    assert(0 && "Invalid class type.");
-    return String(NULL);
-}
 
 CAR_INTERFACE_IMPL_2(PropertyValuesHolder, Object, IPropertyValuesHolder, ICloneable);
 
@@ -551,37 +508,23 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetPropertyFunction(
     // TODO: faster implementation...
     AutoPtr<IMethodInfo> returnVal;
     String methodName = GetMethodName(prefix, mPropertyName);
-    String signature;
-    Int32* typeVariants = NULL;
-    Int32 length = 1;
-    if (valueType == EIID_IFloat) {
+    AutoPtr< ArrayOf<InterfaceID> > typeVariants;
+    if (valueType == ECLSID_CFloat) {
         typeVariants = FLOAT_VARIANTS;
-        length = ArraySize(FLOAT_VARIANTS);
     }
-    else if (valueType == EIID_IInteger32) {
+    else if (valueType == ECLSID_CInteger32) {
         typeVariants = INTEGER_VARIANTS;
-        length = ArraySize(INTEGER_VARIANTS);
     }
-    else if (valueType == EIID_IDouble) {
+    else if (valueType == ECLSID_CDouble) {
         typeVariants = DOUBLE_VARIANTS;
-        length = ArraySize(DOUBLE_VARIANTS);
     }
     else {
-        if (valueType == EIID_IPointF) {
-            length = 1;
-            signature = "(LElastos/Droid/Graphics/IPointF;)E";
-        }
-        else {
-            length = 0;
-            assert(0 && "TODO");
-        }
+        typeVariants = ArrayOf<InterfaceID>::Alloc(1);
+        (*typeVariants)[0] = valueType;
     }
-    for (Int32 i = 0; i < length; i++) {
-        if (signature.IsNull()) {
-            signature = GetSignature(typeVariants[i], prefix);
-        }
-        ECode ec = targetClass->GetMethodInfo(methodName, signature, (IMethodInfo**)&returnVal);
-        if (FAILED(ec)) continue;
+    for (Int32 i = 0; i < typeVariants->GetLength(); i++) {
+        AutoPtr<IMethodInfo> method = GetMethodInfo(targetClass, methodName, prefix, typeVariants);
+        if (method == NULL) continue;
         if (mConverter == NULL && prefix.Equals("Set")) {
             // change the value type to suit
             mValueType = valueType;
@@ -593,8 +536,8 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetPropertyFunction(
     if (returnVal == NULL) {
         String className;
         targetClass->GetName(&className);
-        Logger::E(TAG, "Error: Method [%s] with [%s] is not found on target class %s",
-            methodName.string(), signature.string(), className.string());
+        Logger::E(TAG, "Error: Method [%s] is not found on target class %s",
+            methodName.string(), className.string());
     }
 
     return returnVal;
@@ -1393,6 +1336,55 @@ AutoPtr<IClassInfo> PropertyValuesHolder::GetClassInfo(
         assert(0 && "It's not a CAR Object.");
     }
     return klass;
+}
+
+// if (valueType == ECLSID_CPointF) {
+//     length = 1;
+//     signature = "(LElastos/Droid/Graphics/IPointF;)E";
+// }
+// else {
+//     length = 0;
+//     assert(0 && "TODO");
+// }
+
+AutoPtr<IMethodInfo> PropertyValuesHolder::GetMethodInfo(
+    /* [in] */ IClassInfo* targetClass,
+    /* [in] */ const String& method,
+    /* [in] */ const String& prefix,
+    /* [in] */ ArrayOf<InterfaceID>* args)
+{
+    if (method.IsNullOrEmpty()) return NULL;
+
+    Int32 mtdCount;
+    targetClass->GetMethodCount(&mtdCount);
+    AutoPtr< ArrayOf<IMethodInfo*> > methodInfos = ArrayOf<IMethodInfo*>::Alloc(mtdCount);
+    targetClass->GetAllMethodInfos(methodInfos);
+    for (Int32 i = 0; i < mtdCount; i++) {
+        IMethodInfo* methodInfo = (*methodInfos)[i];
+        String methodName;
+        methodInfo->GetName(&methodName);
+        if (!method.Equals(methodName)) continue;
+        Int32 paramCount;
+        methodInfo->GetParamCount(&paramCount);
+        if (paramCount != args->GetLength()) continue;
+        AutoPtr< ArrayOf<IParamInfo*> > paramInfos = ArrayOf<IParamInfo*>::Alloc(paramCount);
+        methodInfo->GetAllParamInfos(paramInfos);
+        for (Int32 j = 0; j < paramCount; ++j) {
+            IParamInfo* paramInfo = (*paramInfos)[j];
+            ParamIOAttribute ioAttr;
+            paramInfo->GetIOAttribute(&ioAttr);
+            if (prefix.Equals(String("Set")) && (ioAttr != ParamIOAttribute_In)) break;
+            else if (ioAttr == ParamIOAttribute_In) break;
+            AutoPtr<IDataTypeInfo> dataTypeInfo;
+            paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
+            if (IInterfaceInfo::Probe(dataTypeInfo) == NULL) break;
+            InterfaceID id;
+            IInterfaceInfo::Probe(dataTypeInfo)->GetId(&id);
+            if ((*args)[j] != id) break;
+        }
+        return methodInfo;
+    }
+    return NULL;
 }
 
 }   //namespace Animation

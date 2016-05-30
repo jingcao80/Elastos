@@ -27,10 +27,6 @@ public:
 
     TypeConverter();
 
-    TypeConverter(
-        /* [in] */ const InterfaceID& fromClass,
-        /* [in] */ const InterfaceID& toClass);
-
     /**
      * Returns the target converted type. Used by the animation system to determine
      * the proper setter function to call.
@@ -60,8 +56,8 @@ protected:
         /* [in] */ const InterfaceID& toClass);
 
 private:
-    /*private Class<T> */InterfaceID mFromClass;
-    /*private Class<V> */InterfaceID mToClass;
+    InterfaceID mFromClass;
+    InterfaceID mToClass;
 };
 
 } // namespace Animation

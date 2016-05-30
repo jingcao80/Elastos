@@ -29,7 +29,7 @@ private:
      * Convert from PointF to float[] for multi-float setters along a Path.
      */
     class PointFToFloatArray
-        : public TypeConverter/*<PointF, float[]>*/
+        : public TypeConverter
     {
     public:
         PointFToFloatArray();
@@ -47,7 +47,7 @@ private:
      * Convert from PointF to int[] for multi-int setters along a Path.
      */
     class PointFToInt32Array
-        : public TypeConverter/*<PointF, int[]>*/
+        : public TypeConverter
     {
     public:
         PointFToInt32Array();
@@ -496,6 +496,12 @@ public:
         /* [in] */ IClassInfo* targetClass);
 
     /**
+     * Utility function to get the getter from targetClass
+     */
+    virtual CARAPI SetupGetter(
+        /* [in] */ IClassInfo* target);
+
+    /**
      * Internal function (called from ObjectAnimator) to set up the setter and getter
      * prior to running the animation. If the setter has not been manually set for this
      * object, it will be derived automatically given the property name, target object, and
@@ -765,12 +771,6 @@ private:
         /* [in] */ const String& prefix,
         /* [in] */ const InterfaceID& type);
 
-    /**
-     * Utility function to get the getter from targetClass
-     */
-    CARAPI SetupGetter(
-        /* [in] */ IClassInfo* target);
-
     CARAPI ConvertBack(
         /* [in] */ IInterface* value,
         /* [out] */ IInterface** outValue);
@@ -785,6 +785,12 @@ private:
     CARAPI SetupValue(
         /* [in] */ IInterface* target,
         /* [in] */ IKeyframe* kf);
+
+    CARAPI_(AutoPtr<IMethodInfo>) GetMethodInfo(
+        /* [in] */ IClassInfo* targetClass,
+        /* [in] */ const String& method,
+        /* [in] */ const String& prefix,
+        /* [in] */ ArrayOf<InterfaceID>* args);
 
     static CARAPI_(AutoPtr<ITypeEvaluator>) InitInt32Evaluator();
 
@@ -812,6 +818,15 @@ protected:
     AutoPtr<IMethodInfo> mSetter;
 
     /**
+     * The getter function, if needed. ObjectAnimator hands off this functionality to
+     * PropertyValuesHolder, since it holds all of the per-property information. This
+     * property is automatically
+     * derived when the animation starts in setupSetterAndGetter() if using ObjectAnimator.
+     * The getter is only derived and used if one of the values is NULL.
+     */
+    AutoPtr<IMethodInfo> mGetter;
+
+    /**
      * The type of values supplied. This information is used both in deriving the setter/getter
      * functions and in deriving the type of TypeEvaluator.
      */
@@ -831,15 +846,6 @@ protected:
     AutoPtr<ArrayOf<IInterface*> > mTmpValueArray;
 
 private:
-    /**
-     * The getter function, if needed. ObjectAnimator hands off this functionality to
-     * PropertyValuesHolder, since it holds all of the per-property information. This
-     * property is automatically
-     * derived when the animation starts in setupSetterAndGetter() if using ObjectAnimator.
-     * The getter is only derived and used if one of the values is NULL.
-     */
-    AutoPtr<IMethodInfo> mGetter;
-
     // type evaluators for the primitive types handled by this implementation
     static AutoPtr<ITypeEvaluator> sInt32Evaluator;
     static AutoPtr<ITypeEvaluator> sFloatEvaluator;
@@ -851,9 +857,9 @@ private:
     // of primitive types (Float vs. Float). But most likely, the setter/getter functions
     // will take primitive types instead.
     // So we supply an ordered array of other types to try before giving up.
-    static Int32 FLOAT_VARIANTS[6];
-    static Int32 INTEGER_VARIANTS[6];
-    static Int32 DOUBLE_VARIANTS[6];
+    static AutoPtr< ArrayOf<InterfaceID> > FLOAT_VARIANTS;
+    static AutoPtr< ArrayOf<InterfaceID> > INTEGER_VARIANTS;
+    static AutoPtr< ArrayOf<InterfaceID> > DOUBLE_VARIANTS;
 
     //TODO
     // These maps hold all property entries for a particular class. This map

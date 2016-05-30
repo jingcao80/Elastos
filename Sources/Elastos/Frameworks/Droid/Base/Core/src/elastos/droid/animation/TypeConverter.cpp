@@ -6,16 +6,9 @@ namespace Droid {
 namespace Animation {
 
 CAR_INTERFACE_IMPL(TypeConverter, Object, ITypeConverter);
+
 TypeConverter::TypeConverter()
 {}
-
-TypeConverter::TypeConverter(
-    /* [in] */ const InterfaceID& fromClass,
-    /* [in] */ const InterfaceID& toClass)
-    : mFromClass(fromClass)
-    , mToClass(toClass)
-{
-}
 
 ECode TypeConverter::constructor(
     /* [in] */ const InterfaceID& fromClass,

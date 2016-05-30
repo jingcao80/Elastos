@@ -49,82 +49,6 @@ public:
     Keyframe();
 
     /**
-     * Indicates whether this keyframe has a valid value. This method is called internally when
-     * an {@link ObjectAnimator} first starts; keyframes without values are assigned values at
-     * that time by deriving the value for the property from the target object.
-     *
-     * @return Boolean Whether this object has a value assigned.
-     */
-    virtual CARAPI HasValue(
-        /* [out] */ Boolean* value);
-
-    /**
-     * Gets the value for this Keyframe.
-     *
-     * @return The value for this Keyframe.
-     */
-    virtual CARAPI GetValue(
-        /* [out] */ IInterface** value) = 0;
-
-    /**
-     * Sets the value for this Keyframe.
-     *
-     * @param value value for this Keyframe.
-     */
-    virtual CARAPI SetValue(
-        /* [in] */ IInterface* value) = 0;
-
-    /**
-     * Gets the time for this keyframe, as a fraction of the overall animation duration.
-     *
-     * @return The time associated with this keyframe, as a fraction of the overall animation
-     * duration. This should be a value between 0 and 1.
-     */
-    virtual CARAPI GetFraction(
-        /* [out] */ Float* fraction);
-
-    /**
-     * Sets the time for this keyframe, as a fraction of the overall animation duration.
-     *
-     * @param fraction time associated with this keyframe, as a fraction of the overall animation
-     * duration. This should be a value between 0 and 1.
-     */
-    virtual CARAPI SetFraction(
-        /* [in] */ Float fraction);
-
-    /**
-     * Gets the optional interpolator for this Keyframe. A value of <code>NULL</code> indicates
-     * that there is no interpolation, which is the same as linear interpolation.
-     *
-     * @return The optional interpolator for this Keyframe.
-     */
-    virtual CARAPI GetInterpolator(
-        /* [out] */ ITimeInterpolator** interpolator);
-
-    /**
-     * Sets the optional interpolator for this Keyframe. A value of <code>NULL</code> indicates
-     * that there is no interpolation, which is the same as linear interpolation.
-     *
-     * @return The optional interpolator for this Keyframe.
-     */
-    virtual CARAPI SetInterpolator(
-        /* [in] */ ITimeInterpolator* interpolator);
-
-    /**
-     * Gets the type of keyframe. This information is used by ValueAnimator to determine the type of
-     * {@link TypeEvaluator} to use when calculating values between keyframes. The type is based
-     * on the type of Keyframe created.
-     *
-     * @return The type of the value stored in the Keyframe.
-     */
-    virtual CARAPI GetType(
-        /* [out] */ InterfaceID* id);
-
-    virtual CARAPI Clone(
-        /* [out] */ IInterface** object) = 0;
-public:
-
-    /**
      * Constructs a Keyframe object with the given time and value. The time defines the
      * time, as a proportion of an overall animation's duration, at which the value will hold true
      * for the animation. The value for the animation between keyframes will be calculated as
@@ -229,6 +153,81 @@ public:
         /* [in] */ Float fraction,
         /* [out] */ IKeyframe** obj);
 
+    /**
+     * Indicates whether this keyframe has a valid value. This method is called internally when
+     * an {@link ObjectAnimator} first starts; keyframes without values are assigned values at
+     * that time by deriving the value for the property from the target object.
+     *
+     * @return Boolean Whether this object has a value assigned.
+     */
+    virtual CARAPI HasValue(
+        /* [out] */ Boolean* value);
+
+    /**
+     * Gets the value for this Keyframe.
+     *
+     * @return The value for this Keyframe.
+     */
+    virtual CARAPI GetValue(
+        /* [out] */ IInterface** value) = 0;
+
+    /**
+     * Sets the value for this Keyframe.
+     *
+     * @param value value for this Keyframe.
+     */
+    virtual CARAPI SetValue(
+        /* [in] */ IInterface* value) = 0;
+
+    /**
+     * Gets the time for this keyframe, as a fraction of the overall animation duration.
+     *
+     * @return The time associated with this keyframe, as a fraction of the overall animation
+     * duration. This should be a value between 0 and 1.
+     */
+    virtual CARAPI GetFraction(
+        /* [out] */ Float* fraction);
+
+    /**
+     * Sets the time for this keyframe, as a fraction of the overall animation duration.
+     *
+     * @param fraction time associated with this keyframe, as a fraction of the overall animation
+     * duration. This should be a value between 0 and 1.
+     */
+    virtual CARAPI SetFraction(
+        /* [in] */ Float fraction);
+
+    /**
+     * Gets the optional interpolator for this Keyframe. A value of <code>NULL</code> indicates
+     * that there is no interpolation, which is the same as linear interpolation.
+     *
+     * @return The optional interpolator for this Keyframe.
+     */
+    virtual CARAPI GetInterpolator(
+        /* [out] */ ITimeInterpolator** interpolator);
+
+    /**
+     * Sets the optional interpolator for this Keyframe. A value of <code>NULL</code> indicates
+     * that there is no interpolation, which is the same as linear interpolation.
+     *
+     * @return The optional interpolator for this Keyframe.
+     */
+    virtual CARAPI SetInterpolator(
+        /* [in] */ ITimeInterpolator* interpolator);
+
+    /**
+     * Gets the type of keyframe. This information is used by ValueAnimator to determine the type of
+     * {@link TypeEvaluator} to use when calculating values between keyframes. The type is based
+     * on the type of Keyframe created.
+     *
+     * @return The type of the value stored in the Keyframe.
+     */
+    virtual CARAPI GetType(
+        /* [out] */ InterfaceID* id);
+
+    virtual CARAPI Clone(
+        /* [out] */ IInterface** object) = 0;
+
 protected:
     /**
      * If the Keyframe's value was acquired from the target object, this flag should be set so that,
@@ -243,17 +242,6 @@ protected:
 
 protected:
     /**
-     * The time at which mValue will hold TRUE.
-     */
-    Float mFraction;
-
-    /**
-     * The type of the value in this Keyframe. This type is determined at construction time,
-     * based on the type of the <code>value</code> object passed into the constructor.
-     */
-    InterfaceID mValueType;
-
-    /**
      * Flag to indicate whether this keyframe has a valid value. This flag is used when an
      * animation first starts, to populate placeholder keyframes with real values derived
      * from the target object.
@@ -265,6 +253,17 @@ protected:
      * If so, its value will be recalculated if target changes.
      */
     Boolean mValueWasSetOnStart;
+
+    /**
+     * The time at which mValue will hold TRUE.
+     */
+    Float mFraction;
+
+    /**
+     * The type of the value in this Keyframe. This type is determined at construction time,
+     * based on the type of the <code>value</code> object passed into the constructor.
+     */
+    InterfaceID mValueType;
 
 private:
     /**
@@ -353,7 +352,7 @@ public:
     CAR_INTERFACE_DECL()
 
     FloatKeyframe(
-            /* [in] */ Float fraction);
+        /* [in] */ Float fraction);
 
     FloatKeyframe(
         /* [in] */ Float fraction,

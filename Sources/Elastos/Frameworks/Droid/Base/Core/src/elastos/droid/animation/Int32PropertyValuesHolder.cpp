@@ -113,7 +113,7 @@ ECode Int32PropertyValuesHolder::SetAnimatedValue(
 }
 
 ECode Int32PropertyValuesHolder::SetupSetter(
-        /* [in] */ IClassInfo* target)
+    /* [in] */ IClassInfo* target)
 {
     if (mProperty != NULL) {
         return NOERROR;
@@ -146,6 +146,46 @@ ECode Int32PropertyValuesHolder::SetupSetter(
                     sNativeSetterPropertyMap[target] = propertyMap;
                 }
                 (*propertyMap)[mPropertyName] = mNativeSetter;
+            }
+        }
+    }
+    return NOERROR;
+}
+
+ECode Int32PropertyValuesHolder::SetupGetter(
+    /* [in] */ IClassInfo* target)
+{
+    if (mProperty != NULL) {
+        return NOERROR;
+    }
+    // Check new static hashmap<propName, int> for setter method
+    {
+        AutoLock lock(mPropertyMapLock);
+
+        AutoPtr<MethodMap> propertyMap;
+        ClassMethodMapIterator it = sNativeSetterPropertyMap.Find(target);
+        if (it != sNativeSetterPropertyMap.End()) {
+            propertyMap = it->mSecond;
+        }
+        if (propertyMap != NULL) {
+            MethodMapIterator mit = propertyMap->Find(mPropertyName);
+            AutoPtr<IMethodInfo> mtInfo;
+            if (mit != propertyMap->End()) {
+                mtInfo = mit->mSecond;
+            }
+            if (mtInfo != NULL) {
+                mGetter = mit->mSecond;
+            }
+        }
+        if (mGetter == NULL) {
+            String methodName = GetMethodName(String("Get"), mPropertyName);
+            target->GetMethodInfo(methodName, String("(I32*)E"), (IMethodInfo**)&mGetter);
+            if (mGetter != NULL) {
+                if (propertyMap == NULL) {
+                    propertyMap = new MethodMap();
+                    sNativeSetterPropertyMap[target] = propertyMap;
+                }
+                (*propertyMap)[mPropertyName] = mGetter;
             }
         }
     }

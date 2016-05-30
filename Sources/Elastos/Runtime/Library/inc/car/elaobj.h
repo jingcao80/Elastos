@@ -38,6 +38,7 @@ typedef enum AggregateType
     AggrType_AspectDetached,
 } AggregateType, AggrType;
 
+EXTERN_C const _ELASTOS InterfaceID EMUID_NULL;
 EXTERN_C const _ELASTOS InterfaceID EIID_IInterface;
 EXTERN_C const _ELASTOS InterfaceID EIID_IObject;
 EXTERN_C const _ELASTOS InterfaceID EIID_IAspect;

@@ -52,6 +52,9 @@ public:
     CARAPI SetupSetter(
             /* [in] */ IClassInfo* targetClass);
 
+    CARAPI SetupGetter(
+        /* [in] */ IClassInfo* target);
+
 protected:
     AutoPtr<IMethodInfo> mNativeSetter;
     AutoPtr<IFloatKeyframes> mFloatKeyframes;

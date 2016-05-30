@@ -2,8 +2,8 @@
 #include "elastos/droid/animation/Keyframe.h"
 
 using Elastos::Core::EIID_ICloneable;
-using Elastos::Core::ECLSID_CFloat;
-using Elastos::Core::ECLSID_CInteger32;
+using Elastos::Core::EIID_IFloat;
+using Elastos::Core::EIID_IInteger32;
 
 namespace Elastos {
 namespace Droid {
@@ -13,11 +13,74 @@ namespace Animation {
 //                  Keyframe
 //==============================================================================
 CAR_INTERFACE_IMPL_2(Keyframe, Object, IKeyframe, ICloneable);
+
 Keyframe::Keyframe()
-    : mFraction(0.0f)
-    , mHasValue(FALSE)
+    : mHasValue(FALSE)
     , mValueWasSetOnStart(FALSE)
+    , mFraction(0.0f)
+{}
+
+ECode Keyframe::OfInt32(
+    /* [in] */ Float fraction,
+    /* [in] */ Int32 value,
+    /* [out] */ IKeyframe** obj)
 {
+    AutoPtr<IKeyframe> rTmp = new Int32Keyframe(fraction, value);
+    *obj = rTmp;
+    REFCOUNT_ADD(*obj)
+    return NOERROR;
+}
+
+ECode Keyframe::OfInt32(
+    /* [in] */ Float fraction,
+    /* [out] */ IKeyframe** obj)
+{
+    AutoPtr<IKeyframe> rTmp = new Int32Keyframe(fraction);
+    *obj = rTmp;
+    REFCOUNT_ADD(*obj)
+    return NOERROR;
+}
+
+ECode Keyframe::OfFloat(
+    /* [in] */ Float fraction,
+    /* [in] */ Float value,
+    /* [out] */ IKeyframe** obj)
+{
+    AutoPtr<IKeyframe> rTmp = new FloatKeyframe(fraction, value);
+    *obj = rTmp;
+    REFCOUNT_ADD(*obj)
+    return NOERROR;
+}
+
+ECode Keyframe::OfFloat(
+    /* [in] */ Float fraction,
+    /* [out] */ IKeyframe** obj)
+{
+    AutoPtr<IKeyframe> rTmp = new FloatKeyframe(fraction);
+    *obj = rTmp;
+    REFCOUNT_ADD(*obj)
+    return NOERROR;
+}
+
+ECode Keyframe::OfObject(
+    /* [in] */ Float fraction,
+    /* [in] */ IInterface* value,
+    /* [out] */ IKeyframe** obj)
+{
+    AutoPtr<IKeyframe> rTmp = new ObjectKeyframe(fraction, value);
+    *obj = rTmp;
+    REFCOUNT_ADD(*obj)
+    return NOERROR;
+}
+
+ECode Keyframe::OfObject(
+    /* [in] */ Float fraction,
+    /* [out] */ IKeyframe** obj)
+{
+    AutoPtr<IKeyframe> rTmp = new ObjectKeyframe(fraction, NULL);
+    *obj = rTmp;
+    REFCOUNT_ADD(*obj)
+    return NOERROR;
 }
 
 ECode Keyframe::HasValue(
@@ -26,6 +89,17 @@ ECode Keyframe::HasValue(
     VALIDATE_NOT_NULL(value);
     *value = mHasValue;
     return NOERROR;
+}
+
+Boolean Keyframe::ValueWasSetOnStart()
+{
+    return mValueWasSetOnStart;
+}
+
+void Keyframe::SetValueWasSetOnStart(
+    /* [in] */ Boolean valueWasSetOnStart)
+{
+    mValueWasSetOnStart = valueWasSetOnStart;
 }
 
 ECode Keyframe::GetFraction(
@@ -67,73 +141,12 @@ ECode Keyframe::GetType(
     return NOERROR;
 }
 
-ECode Keyframe::OfInt32(
-    /* [in] */ Float fraction,
-    /* [in] */ Int32 value,
-    /* [out] */ IKeyframe** obj)
-{
-    AutoPtr<IInt32Keyframe> rTmp = new Int32Keyframe(fraction, value);
-    *obj = IKeyframe::Probe(rTmp);
-    REFCOUNT_ADD(*obj)
-    return NOERROR;
-}
-
-ECode Keyframe::OfInt32(
-    /* [in] */ Float fraction,
-    /* [out] */ IKeyframe** obj)
-{
-    AutoPtr<IInt32Keyframe> rTmp = new Int32Keyframe(fraction);
-    *obj = IKeyframe::Probe(rTmp);
-    REFCOUNT_ADD(*obj)
-    return NOERROR;
-}
-
-ECode Keyframe::OfFloat(
-    /* [in] */ Float fraction,
-    /* [in] */ Float value,
-    /* [out] */ IKeyframe** obj)
-{
-    AutoPtr<IFloatKeyframe> rTmp = new FloatKeyframe(fraction, value);
-    *obj = IKeyframe::Probe(rTmp);
-    REFCOUNT_ADD(*obj)
-    return NOERROR;
-}
-
-ECode Keyframe::OfFloat(
-    /* [in] */ Float fraction,
-    /* [out] */ IKeyframe** obj)
-{
-    AutoPtr<IFloatKeyframe> rTmp = new FloatKeyframe(fraction);
-    *obj = IKeyframe::Probe(rTmp);
-    REFCOUNT_ADD(*obj)
-    return NOERROR;
-}
-
-ECode Keyframe::OfObject(
-    /* [in] */ Float fraction,
-    /* [in] */ IInterface* value,
-    /* [out] */ IKeyframe** obj)
-{
-    AutoPtr<IObjectKeyframe> rTmp = new ObjectKeyframe(fraction, value);
-    *obj = IKeyframe::Probe(rTmp);
-    REFCOUNT_ADD(*obj)
-    return NOERROR;
-}
-
-ECode Keyframe::OfObject(
-    /* [in] */ Float fraction,
-    /* [out] */ IKeyframe** obj)
-{
-    AutoPtr<IObjectKeyframe> rTmp = new ObjectKeyframe(fraction, NULL);
-    *obj = IKeyframe::Probe(rTmp);
-    REFCOUNT_ADD(*obj)
-    return NOERROR;
-}
 
 //==============================================================================
 //                  ObjectKeyframe
 //==============================================================================
 CAR_INTERFACE_IMPL(ObjectKeyframe, Keyframe, IObjectKeyframe);
+
 ObjectKeyframe::ObjectKeyframe(
     /* [in] */ Float fraction,
     /* [in] */ IInterface* value)
@@ -142,11 +155,10 @@ ObjectKeyframe::ObjectKeyframe(
     mValue = value;
     mHasValue = (mValue != NULL);
     if (mHasValue) {
-        AutoPtr<IObject> obj = IObject::Probe(value);
-        obj->GetInterfaceID(value, &mValueType);
-    } else {
-        assert(0 && "TODO");
-        // mValueType = ECLSID_CDummyObject;
+        value->GetInterfaceID(value, &mValueType);
+    }
+    else {
+        mValueType = EIID_IObject;
     }
 }
 
@@ -171,13 +183,13 @@ ECode ObjectKeyframe::Clone(
     /* [out] */ IInterface** object)
 {
     VALIDATE_NOT_NULL(object)
-    Boolean has = FALSE;
-    AutoPtr<ObjectKeyframe> kfClone = new ObjectKeyframe(mFraction, (HasValue(&has), has) ? mValue : NULL);
+    Boolean hasValue = FALSE;
+    HasValue(&hasValue);
+    AutoPtr<ObjectKeyframe> kfClone = new ObjectKeyframe(mFraction, hasValue ? mValue : NULL);
     kfClone->mValueWasSetOnStart = mValueWasSetOnStart;
     AutoPtr<ITimeInterpolator> ti;
     GetInterpolator((ITimeInterpolator**)&ti);
     kfClone->SetInterpolator(ti);
-
     *object = (IKeyframe*)kfClone.Get();
     REFCOUNT_ADD(*object);
     return NOERROR;
@@ -188,13 +200,14 @@ ECode ObjectKeyframe::Clone(
 //                  Int32Keyframe
 //==============================================================================
 CAR_INTERFACE_IMPL(Int32Keyframe, Keyframe, IInt32Keyframe);
+
 Int32Keyframe::Int32Keyframe(
     /* [in] */ Float fraction,
     /* [in] */ Int32 value)
 {
     mFraction = fraction;
     CInteger32::New(value, (IInteger32**)&mValue);
-    mValueType = EIID_IFloat;
+    mValueType = EIID_IInteger32;
     mHasValue = TRUE;
 }
 
@@ -228,8 +241,6 @@ ECode Int32Keyframe::SetValue(
     if (value != NULL && IInteger32::Probe(value) != NULL) {
         mValue = IInteger32::Probe(value);
         mHasValue = TRUE;
-    } else{
-        mHasValue = FALSE;
     }
     return NOERROR;
 }
@@ -238,27 +249,29 @@ ECode Int32Keyframe::Clone(
     /* [out] */ IInterface** object)
 {
     AutoPtr<Int32Keyframe> kfClone;
-    if(mHasValue) {
+    if (mHasValue) {
         Int32 value;
         mValue->GetValue(&value);
         kfClone = new Int32Keyframe(mFraction, value);
-    } else {
+    }
+    else {
         kfClone = new Int32Keyframe(mFraction);
     }
-
     AutoPtr<ITimeInterpolator> ti;
     Keyframe::GetInterpolator((ITimeInterpolator**)&ti);
     kfClone->SetInterpolator(ti);
     kfClone->mValueWasSetOnStart = mValueWasSetOnStart;
-    *object = (IKeyframe*)kfClone->Probe(EIID_IKeyframe);
+    *object = (IKeyframe*)kfClone.Get();
     REFCOUNT_ADD(*object)
     return NOERROR;
 }
+
 
 //==============================================================================
 //                  FloatKeyframe
 //==============================================================================
 CAR_INTERFACE_IMPL(FloatKeyframe, Keyframe, IFloatKeyframe);
+
 FloatKeyframe::FloatKeyframe(
     /* [in] */ Float fraction,
     /* [in] */ Float value)
@@ -299,8 +312,6 @@ ECode FloatKeyframe::SetValue(
     if (value != NULL && IFloat::Probe(value) != NULL) {
         mValue = IFloat::Probe(value);
         mHasValue = TRUE;
-    } else {
-        mHasValue = FALSE;
     }
     return NOERROR;
 }
@@ -313,28 +324,17 @@ ECode FloatKeyframe::Clone(
         Float value;
         mValue->GetValue(&value);
         kfClone = new FloatKeyframe(mFraction, value);
-    } else {
+    }
+    else {
         kfClone = new FloatKeyframe(mFraction);
     }
-
     AutoPtr<ITimeInterpolator> ti;
     Keyframe::GetInterpolator((ITimeInterpolator**)&ti);
     kfClone->SetInterpolator(ti);
     kfClone->mValueWasSetOnStart = mValueWasSetOnStart;
-    *object = (IKeyframe*)kfClone->Probe(EIID_IKeyframe);
+    *object = (IKeyframe*)kfClone.Get();
     REFCOUNT_ADD(*object)
     return NOERROR;
-}
-
-Boolean Keyframe::ValueWasSetOnStart()
-{
-    return mValueWasSetOnStart;
-}
-
-void Keyframe::SetValueWasSetOnStart(
-    /* [in] */ Boolean valueWasSetOnStart)
-{
-    mValueWasSetOnStart = valueWasSetOnStart;
 }
 
 }   //namespace Animation

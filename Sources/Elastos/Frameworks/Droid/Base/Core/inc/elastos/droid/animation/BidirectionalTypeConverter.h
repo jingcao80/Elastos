@@ -24,10 +24,6 @@ public:
 
     BidirectionalTypeConverter();
 
-    BidirectionalTypeConverter(
-        /* [in] */ const InterfaceID& fromClass,
-        /* [in] */ const InterfaceID& toClass);
-
     /**
      * Does a conversion from the target type back to the source type. The subclass
      * must implement this when a TypeConverter is used in animations and current
@@ -58,20 +54,23 @@ private:
     AutoPtr<IBidirectionalTypeConverter> mInvertedConverter;
 };
 
+
 class InvertedConverter
     : public BidirectionalTypeConverter
 {
 public:
-    InvertedConverter(
-        /* [in] */ BidirectionalTypeConverter/*<To, From>*/* converter);
+    InvertedConverter();
+
+    CARAPI constructor(
+        /* [in] */ BidirectionalTypeConverter* converter);
 
     // @Override
-    virtual CARAPI ConvertBack(
+    CARAPI ConvertBack(
         /* [in] */ IInterface* value,
         /* [out] */ IInterface** result);
 
     // @Override
-    virtual CARAPI Convert(
+    CARAPI Convert(
         /* [in] */ IInterface* value,
         /* [out] */ IInterface** result);
 

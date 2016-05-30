@@ -5,14 +5,18 @@ namespace Elastos {
 namespace Droid {
 namespace Animation {
 
-InvertedConverter::InvertedConverter(
-    /* [in] */ BidirectionalTypeConverter/*<To, From>*/* converter)
+InvertedConverter::InvertedConverter()
+{}
+
+ECode InvertedConverter::constructor(
+    /* [in] */ BidirectionalTypeConverter* converter)
 {
     InterfaceID targetType, sourceType;
     converter->GetTargetType(&targetType);
     converter->GetSourceType(&sourceType);
-    constructor(targetType, sourceType);
+    BidirectionalTypeConverter::constructor(targetType, sourceType);
     mConverter = converter;
+    return NOERROR;
 }
 
 ECode InvertedConverter::ConvertBack(
@@ -31,23 +35,20 @@ ECode InvertedConverter::Convert(
     return mConverter->ConvertBack(value, result);
 }
 
+
 CAR_INTERFACE_IMPL(BidirectionalTypeConverter, TypeConverter, IBidirectionalTypeConverter);
+
 BidirectionalTypeConverter::BidirectionalTypeConverter()
 {}
-
-BidirectionalTypeConverter::BidirectionalTypeConverter(
-    /* [in] */ const InterfaceID& fromClass,
-    /* [in] */ const InterfaceID& toClass)
-{
-    TypeConverter::constructor(fromClass, toClass);
-}
 
 ECode BidirectionalTypeConverter::Invert(
     /* [out] */ IBidirectionalTypeConverter** result)
 {
     VALIDATE_NOT_NULL(result);
     if (mInvertedConverter == NULL) {
-        mInvertedConverter = new InvertedConverter(this);
+        AutoPtr<InvertedConverter> ic = new InvertedConverter();
+        ic->constructor(this);
+        mInvertedConverter = ic;
     }
     *result = mInvertedConverter;
     REFCOUNT_ADD(*result);
