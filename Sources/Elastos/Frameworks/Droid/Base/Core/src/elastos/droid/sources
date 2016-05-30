@@ -29,6 +29,7 @@ ELASTOS_LIBS += app/app.lib
 ELASTOS_LIBS += appwidget/appwidget.lib
 ELASTOS_LIBS += bluetooth/bluetooth.lib
 ELASTOS_LIBS += content/content.lib
+ELASTOS_LIBS += codeaurora/ims/csvt/csvt.lib
 ELASTOS_LIBS += database/database.lib
 ELASTOS_LIBS += emoji/emoji.lib
 ELASTOS_LIBS += gesture/gesture.lib

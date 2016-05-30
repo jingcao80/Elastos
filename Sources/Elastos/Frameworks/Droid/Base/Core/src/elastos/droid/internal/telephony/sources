@@ -22,3 +22,5 @@ SOURCES += BaseCommands.cpp
 SOURCES += Call.cpp
 SOURCES += CallForwardInfo.cpp
 SOURCES += CallManager.cpp
+
+ELASTOS_LIBS += utility/utility.lib

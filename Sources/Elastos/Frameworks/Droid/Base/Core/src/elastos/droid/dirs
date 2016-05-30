@@ -11,6 +11,7 @@ DIRS += app
 DIRS += appwidget
 DIRS += animation
 DIRS += bluetooth
+DIRS += codeaurora
 DIRS += content
 DIRS += database
 DIRS += emoji

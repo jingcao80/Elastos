@@ -1,82 +1,144 @@
-/*
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
- *  * Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above
- *    copyright notice, this list of conditions and the following
- *    disclaimer in the documentation and/or other materials provided
- *    with the distribution.
- *  * Neither the name of The Linux Foundation nor the names of its
- *    contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
+#include "elastos/droid/codeaurora/ims/csvt/CallForwardInfoP.h"
 
- * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
- * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
- * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+namespace Elastos {
+namespace Droid {
+namespace CodeAurora {
+namespace Ims {
+namespace Csvt {
 
-package org.codeaurora.ims.csvt;
+CAR_INTERFACE_IMPL_2(CallForwardInfoP, Object, ICallForwardInfoP, IParcelable);
 
-using Elastos::Droid::Os::IParcel;
-using Elastos::Droid::Os::IParcelable;
-
-public class CallForwardInfoP implements Parcelable {
-
-    public Int32             status;      /*1 = active, 0 = not active */
-    public Int32             reason;      /* from TS 27.007 7.11 "reason" */
-    public Int32             serviceClass; /*Sum of CommandsInterface.SERVICE_CLASS */
-    public Int32             toa;         /* "type" from TS 27.007 7.11 */
-    public String          number;      /* "number" from TS 27.007 7.11 */
-    public Int32             timeSeconds; /* for CF no reply only */
-
-    //@Override
-    public Int32 DescribeContents() {
-        return 0;
-    }
-
-    public CallForwardInfoP() {
-    }
-
-    //@Override
-    CARAPI WriteToParcel(Parcel out, Int32 flags) {
-        out->WriteInt(status);
-        out->WriteInt(reason);
-        out->WriteInt(toa);
-        out->WriteString(number);
-        out->WriteInt(timeSeconds);
-        out->WriteInt(serviceClass);
-    }
-
-    public static const Parcelable.Creator<CallForwardInfoP> CREATOR = new
-            Parcelable.Creator<CallForwardInfoP>() {
-
-                //@Override
-                public CallForwardInfoP CreateFromParcel(Parcel in) {
-                    return new CallForwardInfoP(in);
-                }
-
-                //@Override
-                public CallForwardInfoP[] NewArray(Int32 size) {
-                    return new CallForwardInfoP[size];
-                }
-            };
-
-    public CallForwardInfoP(Parcel in) {
-        status = in->ReadInt();
-        reason = in->ReadInt();
-        toa = in->ReadInt();
-        number = in->ReadString();
-        timeSeconds = in->ReadInt();
-        serviceClass = in->ReadInt();
-    }
+CallForwardInfoP::CallForwardInfoP()
+    : status(0)
+    , reason(0)
+    , serviceClass(0)
+    , toa(0)
+    , timeSeconds(0)
+{
 }
+
+ECode CallForwardInfoP::constructor()
+{
+    return NOERROR;
+}
+
+ECode CallForwardInfoP::GetStatus(
+    /* [out] */ Int32* _status)
+{
+    VALIDATE_NOT_NULL(_status);
+    *_status = status;
+    return NOERROR;
+}
+
+ECode CallForwardInfoP::SetStatus(
+    /* [in] */ Int32 _status)
+{
+    status = _status;
+    return NOERROR;
+}
+
+ECode CallForwardInfoP::GetReason(
+    /* [out] */ Int32* _reason)
+{
+    VALIDATE_NOT_NULL(_reason);
+    *_reason = reason;
+    return NOERROR;
+}
+
+ECode CallForwardInfoP::SetReason(
+    /* [in] */ Int32 _reason)
+{
+    reason = _reason;
+    return NOERROR;
+}
+
+ECode CallForwardInfoP::GetServiceClass(
+    /* [out] */ Int32* _serviceClass)
+{
+    VALIDATE_NOT_NULL(_serviceClass);
+    *_serviceClass = serviceClass;
+    return NOERROR;
+}
+
+ECode CallForwardInfoP::SetServiceClass(
+    /* [in] */ Int32 _serviceClass)
+{
+    serviceClass = _serviceClass;
+    return NOERROR;
+}
+
+ECode CallForwardInfoP::GetToa(
+    /* [out] */ Int32* _toa)
+{
+   VALIDATE_NOT_NULL(_toa);
+   *_toa = toa;
+   return NOERROR;
+}
+
+ECode CallForwardInfoP::SetToa(
+    /* [in] */ Int32 _toa)
+{
+    toa = _toa;
+    return NOERROR;
+}
+
+ECode CallForwardInfoP::GetNumber(
+    /* [out] */ String* _number)
+{
+    VALIDATE_NOT_NULL(_number);
+    *_number = number;
+    return NOERROR;
+}
+
+ECode CallForwardInfoP::SetNumber(
+    /* [in] */ const String& _number)
+{
+    number = _number;
+    return NOERROR;
+}
+
+ECode CallForwardInfoP::GetTimeSeconds(
+    /* [out] */ Int32* _timeSeconds)
+{
+    VALIDATE_NOT_NULL(_timeSeconds);
+    *_timeSeconds = timeSeconds;
+    return NOERROR;
+}
+
+ECode CallForwardInfoP::SetTimeSeconds(
+    /* [in] */ Int32 _timeSeconds)
+{
+    timeSeconds = _timeSeconds;
+    return NOERROR;
+}
+
+ECode CallForwardInfoP::ReadFromParcel(
+  /* [in] */ IParcel* parcel)
+{
+    parcel->ReadInt32(&status);
+    parcel->ReadInt32(&reason);
+    parcel->ReadInt32(&toa);
+    parcel->ReadString(&number);
+    parcel->ReadInt32(&timeSeconds);
+    parcel->ReadInt32(&serviceClass);
+    return NOERROR;
+}
+
+ECode CallForwardInfoP::WriteToParcel(
+  /* [in] */ IParcel* dest)
+{
+    dest->WriteInt32(status);
+    dest->WriteInt32(reason);
+    dest->WriteInt32(toa);
+    dest->WriteString(number);
+    dest->WriteInt32(timeSeconds);
+    dest->WriteInt32(serviceClass);
+    return NOERROR;
+}
+
+} // namespace Csvt
+} // namespace Ims
+} // namespace Codeaurora
+} // namespace Droid
+} // namespace Elastos
+

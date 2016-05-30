@@ -1671,7 +1671,7 @@ module
      */
     /**
      * @Involve
-     * interface IThreadsColumns
+     * interface ITelephonyThreadsColumns
      */
     [local]
     interface ITelephonyThreads {
@@ -1716,7 +1716,7 @@ module
      */
     /**
      * @Involve
-     * interface IBaseMmsColumns
+     * interface ITelephonyBaseMmsColumns
      */
     interface ITelephonyMmsInbox {
 
@@ -1731,7 +1731,7 @@ module
      */
     /**
      * @Involve
-     * interface IBaseMmsColumns
+     * interface ITelephonyBaseMmsColumns
      */
     interface ITelephonyMmsSent {
 
@@ -1746,7 +1746,7 @@ module
      */
     /**
      * @Involve
-     * interface IBaseMmsColumns
+     * interface ITelephonyBaseMmsColumns
      */
     interface ITelephonyMmsDraft {
 
@@ -1761,7 +1761,7 @@ module
      */
     /**
      * @Involve
-     * interface IBaseMmsColumns
+     * interface ITelephonyBaseMmsColumns
      */
     interface ITelephonyMmsOutbox {
 
@@ -2026,7 +2026,7 @@ module
      */
     /**
      * @Involve
-     * interface IBaseMmsColumns
+     * interface ITelephonyBaseMmsColumns
      */
     [deprecated]
     interface ITelephonyMms {
