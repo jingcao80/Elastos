@@ -57,7 +57,6 @@ Ripple::RippleAnimatorListenerAdapter::RippleAnimatorListenerAdapter(
 ECode Ripple::RippleAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    Logger::I("Ripple", " >> Ripple OnAnimationEnd %p", mHost);
     mHost->RemoveSelf();
     return NOERROR;
 }
@@ -104,7 +103,6 @@ Ripple::Ripple()
 
 Ripple::~Ripple()
 {
-    Logger::I("Ripple", " >> Destory Ripple %p", this);
 }
 
 ECode Ripple::constructor(

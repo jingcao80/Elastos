@@ -1683,7 +1683,6 @@ ECode ProgressBar::OnAttachedToWindow()
 
 ECode ProgressBar::OnDetachedFromWindow()
 {
-//
     if (mIndeterminate) {
         StopAnimation();
     }

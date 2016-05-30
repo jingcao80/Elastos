@@ -28,11 +28,13 @@ protected:
         : public ConstantState
     {
     public:
+        VectorDrawableState();
+
         // Deep copy for mutate() or implicitly mutate.
         VectorDrawableState(
             /* [in] */ VectorDrawableState* copy);
 
-        CARAPI_(void) DrawCachedBitmapWithRootAlpha(
+        CARAPI DrawCachedBitmapWithRootAlpha(
             /* [in] */ ICanvas* canvas,
             /* [in] */ IColorFilter* filter);
 
@@ -61,8 +63,6 @@ protected:
         // @Override
         CARAPI CanApplyTheme(
             /* [out] */ Boolean* can);
-
-        VectorDrawableState();
 
         // @Override
         CARAPI NewDrawable(
@@ -289,8 +289,6 @@ public:
         CARAPI SetTranslateY(
             /* [in] */ Float translateY);
 
-        TO_STRING_IMPL("VectorDrawable::VGroup");
-
     private:
         CARAPI_(void) UpdateStateFromTypedArray(
             /* [in] */ ITypedArray* a);
@@ -332,10 +330,9 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
-        VPath();
+        TO_STRING_IMPL("VectorDrawable::VPath");
 
-        VPath(
-            /* [in] */ VPath* copy);
+        VPath();
 
         CARAPI constructor(
             /* [in] */ VPath* copy);
@@ -376,6 +373,8 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("VectorDrawable::VClipPath");
+
         CARAPI constructor();
 
         CARAPI constructor(
@@ -388,8 +387,6 @@ public:
 
         // @Override
         CARAPI_(Boolean) IsClipPath();
-
-        TO_STRING_IMPL("VectorDrawable::VClipPath");
 
     private:
         CARAPI_(void) UpdateStateFromTypedArray(
@@ -405,6 +402,8 @@ public:
     {
     public:
         CAR_INTERFACE_DECL()
+
+        VFullPath();
 
         CARAPI constructor();
 

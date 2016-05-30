@@ -124,7 +124,7 @@ namespace SystemUI {
 namespace StatusBar {
 
 const String BaseStatusBar::TAG("StatusBar");
-const Boolean BaseStatusBar::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+const Boolean BaseStatusBar::DEBUG = FALSE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
 const Boolean BaseStatusBar::MULTIUSER_DEBUG = FALSE;
 const Int32 BaseStatusBar::MSG_SHOW_RECENT_APPS;
 const Int32 BaseStatusBar::MSG_HIDE_RECENT_APPS;

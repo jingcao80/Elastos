@@ -68,6 +68,7 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include "elastos/droid/R.h"
 
 using Elastos::Droid::Animation::AnimatorInflater;
@@ -154,6 +155,7 @@ using Elastos::Core::CFloat;
 using Elastos::Core::CString;
 using Elastos::Core::IFloat;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CLocaleHelper;
@@ -15700,8 +15702,8 @@ void View::Debug(
     Int32 id;
     GetId(&id);
     if (id != -1) {
-        output.Append(" (id=");
-        output.Append(id);
+        output.Append(" (id=0x");
+        output.Append(StringUtils::ToHexString(id));
         output.Append(")");
     }
     AutoPtr<IInterface> tag;
@@ -15737,7 +15739,6 @@ void View::Debug(
     output.Append("} ");
     Logger::D(TAG, "%s", output.ToString().string());
 
-
     if (mPaddingLeft != 0 || mPaddingTop != 0 || mPaddingRight != 0
             || mPaddingBottom != 0) {
         output.Reset();
@@ -15768,7 +15769,6 @@ void View::Debug(
         output.Append("BAD! no layout params");
     }
     else {
-        output.Reset();
         String str;
         mLayoutParams->Debug(output.ToString(), &str);
         output.Append(str);

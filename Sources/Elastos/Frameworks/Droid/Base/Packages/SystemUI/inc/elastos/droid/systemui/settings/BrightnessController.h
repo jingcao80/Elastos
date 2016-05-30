@@ -132,7 +132,9 @@ private:
     };
 
 public:
-    BrightnessController(
+    BrightnessController();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IImageView* icon,
         /* [in] */ IToggleSlider* control);

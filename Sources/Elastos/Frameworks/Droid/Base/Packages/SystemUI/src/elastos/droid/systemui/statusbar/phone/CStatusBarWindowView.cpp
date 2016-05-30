@@ -34,15 +34,16 @@ namespace Phone {
 const String CStatusBarWindowView::TAG("StatusBarWindowView");
 const Boolean CStatusBarWindowView::DEBUG = BaseStatusBar::DEBUG;
 
-CAR_OBJECT_IMPL(CStatusBarWindowView)
 CAR_INTERFACE_IMPL(CStatusBarWindowView, FrameLayout, IStatusBarWindowView)
+
+CAR_OBJECT_IMPL(CStatusBarWindowView)
 
 ECode CStatusBarWindowView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    CPaint::New((IPaint**)&mTransparentSrcPaint);
     FrameLayout::constructor(context, attrs);
+    CPaint::New((IPaint**)&mTransparentSrcPaint);
     SetMotionEventSplittingEnabled(FALSE);
     mTransparentSrcPaint->SetColor(0);
     AutoPtr<IXfermode> mode;
@@ -61,10 +62,8 @@ ECode CStatusBarWindowView::FitSystemWindows(
         Int32 l = 0, t = 0, r = 0, b = 0;
         Int32 il = 0, it = 0, ir = 0, ib = 0;
         insets->Get(&il, &it, &ir, &ib);
-        Boolean changed = il != (GetPaddingLeft(&l), l)
-                || it != (GetPaddingTop(&t), t)
-                || ir != (GetPaddingRight(&r), r)
-                || ib != (GetPaddingBottom(&b), b);
+        GetPadding(&l, &t, &r, &b);
+        Boolean changed = il != l || it != t || ir != r || ib != b;
         if (changed) {
             SetPadding(il, it, ir, 0);
         }
@@ -74,10 +73,8 @@ ECode CStatusBarWindowView::FitSystemWindows(
     }
     else {
         Int32 l = 0, t = 0, r = 0, b = 0;
-        Boolean changed = (GetPaddingLeft(&l), l) != 0
-                || (GetPaddingRight(&r), r) != 0
-                || (GetPaddingTop(&t), t) != 0
-                || (GetPaddingBottom(&b), b) != 0;
+        GetPadding(&l, &t, &r, &b);
+        Boolean changed = l != 0 || r != 0 || t != 0 || b != 0;
         if (changed) {
             SetPadding(0, 0, 0, 0);
         }
@@ -297,17 +294,17 @@ void CStatusBarWindowView::OnDraw(
                     mTransparentSrcPaint);
         }
     }
-    if (DEBUG) {
-        AutoPtr<IPaint> pt;
-        CPaint::New((IPaint**)&pt);
-        pt->SetColor(0x80FFFF00);
-        pt->SetStrokeWidth(12.0f);
-        pt->SetStyle(PaintStyle_STROKE);
-        Int32 w = 0, h = 0;
-        canvas->GetWidth(&w);
-        canvas->GetHeight(&h);
-        canvas->DrawRect(0, 0, w, h, pt);
-    }
+    // if (DEBUG) {
+    //     AutoPtr<IPaint> pt;
+    //     CPaint::New((IPaint**)&pt);
+    //     pt->SetColor(0x80FFFF00);
+    //     pt->SetStrokeWidth(12.0f);
+    //     pt->SetStyle(PaintStyle_STROKE);
+    //     Int32 w = 0, h = 0;
+    //     canvas->GetWidth(&w);
+    //     canvas->GetHeight(&h);
+    //     canvas->DrawRect(0, 0, w, h, pt);
+    // }
 }
 
 ECode CStatusBarWindowView::CancelExpandHelper()

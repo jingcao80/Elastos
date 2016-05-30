@@ -693,8 +693,8 @@ ECode LayoutInflater::CreateView(
     }
     String reflectionClassName = GetReflectionClassName(prefix, name);
 
-    Slogger::I(TAG, " >> CreateView: name:%s, prefix:%s, reflectionClassName:%s",
-        name.string(), prefix.string(), reflectionClassName.string());
+    // Slogger::I(TAG, " >> CreateView: name:%s, prefix:%s, fullname:%s",
+    //     name.string(), prefix.string(), reflectionClassName.string());
     AutoPtr<IConstructorInfo> constructor;
     AutoPtr<IClassInfo> clazz;
 
@@ -782,7 +782,7 @@ ECode LayoutInflater::CreateView(
 #if defined(_DEBUG) || defined(_ELASTOS_DEBUG)
     Int32 viewId;
     (*view)->GetId(&viewId);
-    Slogger::D(TAG, " << CreateView: %s, id: 0x%08x, type: %s", TO_CSTR(*view), viewId, reflectionClassName.string());
+    Slogger::D(TAG, " > CreateView: %s, id: 0x%08x, type: %s", TO_CSTR(*view), viewId, reflectionClassName.string());
 #endif
 
     return NOERROR;

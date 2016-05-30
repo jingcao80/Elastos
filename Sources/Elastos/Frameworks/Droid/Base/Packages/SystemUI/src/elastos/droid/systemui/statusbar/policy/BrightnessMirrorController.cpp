@@ -4,12 +4,14 @@
 #include "../../R.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Widget.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::SystemUI::R;
 using Elastos::Droid::SystemUI::StatusBar::Phone::CPhoneStatusBar;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::Widget::IFrameLayoutLayoutParams;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -17,6 +19,11 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
+const String TAG("BrightnessMirrorController");
+
+//===============================================================================
+// BrightnessMirrorController::Runnable1
+//===============================================================================
 BrightnessMirrorController::Runnable1::Runnable1(
     /* [in] */ BrightnessMirrorController* host)
     : mHost(host)
@@ -28,7 +35,11 @@ ECode BrightnessMirrorController::Runnable1::Run()
     return NOERROR;
 }
 
+//===============================================================================
+// BrightnessMirrorController
+//===============================================================================
 CAR_INTERFACE_IMPL(BrightnessMirrorController, Object, IBrightnessMirrorController)
+
 BrightnessMirrorController::BrightnessMirrorController(
     /* [in] */ IStatusBarWindowView* statusBarWindow)
     : TRANSITION_DURATION_OUT(150)
@@ -45,6 +56,7 @@ BrightnessMirrorController::BrightnessMirrorController(
 
 ECode BrightnessMirrorController::ShowMirror()
 {
+    Logger::I(TAG, " >> ShowMirror");
     mBrightnessMirror->SetVisibility(IView::VISIBLE);
     mScrimBehind->AnimateViewAlpha(0.0f, TRANSITION_DURATION_OUT, CPhoneStatusBar::ALPHA_OUT);
     AutoPtr<IViewPropertyAnimator> a;
@@ -56,6 +68,7 @@ ECode BrightnessMirrorController::ShowMirror()
 
 ECode BrightnessMirrorController::HideMirror()
 {
+    Logger::I(TAG, " >> HideMirror");
     mScrimBehind->AnimateViewAlpha(1.0f, TRANSITION_DURATION_IN, CPhoneStatusBar::ALPHA_IN);
     AutoPtr<IViewPropertyAnimator> a;
     mPanelHolder->Animate((IViewPropertyAnimator**)&a);
@@ -69,6 +82,7 @@ ECode BrightnessMirrorController::HideMirror()
 AutoPtr<IViewPropertyAnimator> BrightnessMirrorController::OutAnimation(
     /* [in] */ IViewPropertyAnimator* a)
 {
+    Logger::I(TAG, " >> OutAnimation");
     a->Alpha(0.0f);
     a->SetDuration(TRANSITION_DURATION_OUT);
     a->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT));
@@ -78,6 +92,7 @@ AutoPtr<IViewPropertyAnimator> BrightnessMirrorController::OutAnimation(
 AutoPtr<IViewPropertyAnimator> BrightnessMirrorController::InAnimation(
     /* [in] */ IViewPropertyAnimator* a)
 {
+    Logger::I(TAG, " >> InAnimation");
     a->Alpha(1.0f);
     a->SetDuration(TRANSITION_DURATION_IN);
     a->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_IN));
@@ -95,6 +110,7 @@ ECode BrightnessMirrorController::SetLocation(
     Float y = 0;
     mBrightnessMirror->GetTranslationY(&y);
     mBrightnessMirror->SetTranslationY(y + originalY - mirrorY);
+    Logger::I(TAG, " >> SetLocation: %.2f", y + originalY - mirrorY);
     return NOERROR;
 }
 
@@ -109,6 +125,7 @@ ECode BrightnessMirrorController::GetMirror(
 
 ECode BrightnessMirrorController::UpdateResources()
 {
+    Logger::I(TAG, " >> UpdateResources");
     AutoPtr<IViewGroupLayoutParams> lp;
     mBrightnessMirror->GetLayoutParams((IViewGroupLayoutParams**)&lp);
 

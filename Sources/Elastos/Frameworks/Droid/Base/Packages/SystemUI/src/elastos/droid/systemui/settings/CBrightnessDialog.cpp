@@ -15,6 +15,7 @@ namespace SystemUI {
 namespace Settings {
 
 CAR_OBJECT_IMPL(CBrightnessDialog)
+
 ECode CBrightnessDialog::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
@@ -34,8 +35,9 @@ ECode CBrightnessDialog::OnCreate(
     FindViewById(R::id::brightness_icon, (IView**)&iconV);
     AutoPtr<IImageView> icon = IImageView::Probe(iconV);
     AutoPtr<IView> sliderV;
-    FindViewById(R::id::brightness_icon, (IView**)&sliderV);
-    mBrightnessController = new BrightnessController(this, icon, IToggleSlider::Probe(sliderV));
+    FindViewById(R::id::brightness_slider, (IView**)&sliderV);
+    mBrightnessController = new BrightnessController();
+    mBrightnessController->constructor(this, icon, IToggleSlider::Probe(sliderV));
     return NOERROR;
 }
 

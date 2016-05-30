@@ -2389,7 +2389,7 @@ Boolean ViewRootImpl::MeasureHierarchy(
     if (DBG) {
         Logger::D(TAG, "======================================");
         Logger::D(TAG, "performTraversals -- after measure");
-        // host->Debug();
+        host->Debug();
     }
 
     return windowSizeMayChange;
@@ -3172,7 +3172,7 @@ void ViewRootImpl::PerformTraversals()
         if (DBG) {
             Logger::D(TAG, "======================================");
             Logger::D(TAG, "performTraversals -- after setFrame");
-            // host->Debug();
+            host->Debug();
         }
     }
     if (triggerGlobalLayoutListener) {

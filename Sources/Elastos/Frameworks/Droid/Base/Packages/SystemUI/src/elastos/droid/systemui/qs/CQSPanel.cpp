@@ -6,6 +6,7 @@
 #include <elastos/droid/R.h>
 #include <elastos/droid/view/LayoutInflater.h>
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::SystemUI::Settings::IToggleSlider;
 using Elastos::Droid::SystemUI::Settings::CToggleSlider;
@@ -14,12 +15,18 @@ using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Qs {
 
+static const String TAG("CQSPanel");
+
+//==================================================================
+// CQSPanel::H
+//==================================================================
 const Int32 CQSPanel::H::SHOW_DETAIL = 1;
 const Int32 CQSPanel::H::SET_TILE_VISIBILITY = 2;
 
@@ -53,11 +60,17 @@ ECode CQSPanel::H::HandleMessage(
     return NOERROR;
 }
 
+//==================================================================
+// CQSPanel::Record
+//==================================================================
 CAR_INTERFACE_IMPL(CQSPanel::Record, Object, IQSPanelRecord)
 
 CQSPanel::Record::Record()
 {}
 
+//==================================================================
+// CQSPanel::TileRecord
+//==================================================================
 CAR_INTERFACE_IMPL(CQSPanel::TileRecord, CQSPanel::Record, IQSPanelTileRecord)
 
 CQSPanel::TileRecord::TileRecord()
@@ -66,6 +79,9 @@ CQSPanel::TileRecord::TileRecord()
     , mScanState(FALSE)
 {}
 
+//==================================================================
+// CQSPanel::TeardownDetailWhenDone
+//==================================================================
 CQSPanel::TeardownDetailWhenDone::TeardownDetailWhenDone(
     /* [in] */ CQSPanel* host)
     : mHost(host)
@@ -79,6 +95,9 @@ ECode CQSPanel::TeardownDetailWhenDone::OnAnimationEnd(
     return NOERROR;
 }
 
+//==================================================================
+// CQSPanel::HideGridContentWhenDone
+//==================================================================
 CQSPanel::HideGridContentWhenDone::HideGridContentWhenDone(
     /* [in] */ CQSPanel* host)
     : mHost(host)
@@ -100,6 +119,9 @@ ECode CQSPanel::HideGridContentWhenDone::OnAnimationEnd(
     return NOERROR;
 }
 
+//==================================================================
+// CQSPanel::DetailDoneButtonOnClickListener
+//==================================================================
 CAR_INTERFACE_IMPL(CQSPanel::DetailDoneButtonOnClickListener, Object, IViewOnClickListener)
 
 CQSPanel::DetailDoneButtonOnClickListener::DetailDoneButtonOnClickListener(
@@ -114,6 +136,9 @@ ECode CQSPanel::DetailDoneButtonOnClickListener::OnClick(
     return NOERROR;
 }
 
+//==================================================================
+// CQSPanel::QSTileCallback
+//==================================================================
 CAR_INTERFACE_IMPL(CQSPanel::QSTileCallback, Object, IQSTileCallback)
 
 CQSPanel::QSTileCallback::QSTileCallback(
@@ -173,6 +198,9 @@ ECode CQSPanel::QSTileCallback::OnAnnouncementRequested(
     return NOERROR;
 }
 
+//==================================================================
+// CQSPanel::OnClickListener1
+//==================================================================
 CAR_INTERFACE_IMPL(CQSPanel::OnClickListener1, Object, IViewOnClickListener)
 
 CQSPanel::OnClickListener1::OnClickListener1(
@@ -187,6 +215,9 @@ ECode CQSPanel::OnClickListener1::OnClick(
     return NOERROR;
 }
 
+//==================================================================
+// CQSPanel::OnClickListener2
+//==================================================================
 CAR_INTERFACE_IMPL(CQSPanel::OnClickListener2, Object, IViewOnClickListener)
 
 CQSPanel::OnClickListener2::OnClickListener2(
@@ -201,6 +232,9 @@ ECode CQSPanel::OnClickListener2::OnClick(
     return NOERROR;
 }
 
+//==================================================================
+// CQSPanel::OnClickListener3
+//==================================================================
 CAR_INTERFACE_IMPL(CQSPanel::OnClickListener3, Object, IViewOnClickListener)
 
 CQSPanel::OnClickListener3::OnClickListener3(
@@ -217,6 +251,9 @@ ECode CQSPanel::OnClickListener3::OnClick(
     return NOERROR;
 }
 
+//==================================================================
+// CQSPanel
+//==================================================================
 const Float CQSPanel::TILE_ASPECT = 1.2f;
 
 CAR_OBJECT_IMPL(CQSPanel)
@@ -263,20 +300,25 @@ ECode CQSPanel::constructor(
     AutoPtr<IView> view;
     mDetail->FindViewById(Elastos::Droid::R::id::content, (IView**)&view);
     mDetailContent = IViewGroup::Probe(view);
+
     view = NULL;
     mDetail->FindViewById(Elastos::Droid::R::id::button2, (IView**)&view);
     mDetailSettingsButton = ITextView::Probe(view);
+
     view = NULL;
     mDetail->FindViewById(Elastos::Droid::R::id::button1, (IView**)&view);
     mDetailDoneButton = ITextView::Probe(view);
+
     UpdateDetailText();
     mDetail->SetVisibility(GONE);
     mDetail->SetClickable(TRUE);
     inflater->Inflate(R::layout::quick_settings_brightness_dialog, this, FALSE, (IView**)&mBrightnessView);
     mFooter = new QSFooter(this, context);
+
     AddView(mDetail);
     AddView(mBrightnessView);
     AddView(mFooter->GetView());
+
     mClipper = new QSDetailClipper(mDetail);
     UpdateResources();
 
@@ -284,10 +326,12 @@ ECode CQSPanel::constructor(
     GetContext((IContext**)&ctx);
     view = NULL;
     FindViewById(R::id::brightness_icon, (IView**)&view);
-    AutoPtr<IView> v;
-    FindViewById(R::id::brightness_slider, (IView**)&v);
-    mBrightnessController = new BrightnessController(ctx, IImageView::Probe(view),
-        IToggleSlider::Probe(v));
+    AutoPtr<IImageView> iconView = IImageView::Probe(view);
+    view = NULL;
+    FindViewById(R::id::brightness_slider, (IView**)&view);
+    AutoPtr<IToggleSlider> toggleSlider = IToggleSlider::Probe(view);
+    mBrightnessController = new BrightnessController();
+    mBrightnessController->constructor(ctx, iconView, toggleSlider);
 
     AutoPtr<DetailDoneButtonOnClickListener> cl = new DetailDoneButtonOnClickListener(this);
     IView::Probe(mDetailDoneButton)->SetOnClickListener(cl);
@@ -594,10 +638,11 @@ void CQSPanel::HandleShowDetailImpl(
     if (show) {
         assert(r != NULL);
         detailAdapter = r->mDetailAdapter;
-        r->mDetailView = NULL;
-        detailAdapter->CreateDetailView(mContext, r->mDetailView, mDetailContent, (IView**)&r->mDetailView);
+        AutoPtr<IView> view;
+        detailAdapter->CreateDetailView(mContext, r->mDetailView, mDetailContent, (IView**)&view);
+        r->mDetailView = view;
         if (r->mDetailView == NULL) {
-            // throw new IllegalStateException("Must return detail view");
+            Logger::E(TAG, "HandleShowDetailImpl: Must return detail view");
             assert(0 && "Must return detail view");
         }
 

@@ -151,10 +151,10 @@ ECode CTypedArray::GetText(
 
     AutoPtr<CTypedValue> v = mValue;
     if (GetValueAt(index, v)) {
-        Logger::W(CResources::TAG, "Converting to string: %p", v.Get());
+        Logger::W("CTypedArray", "Converting to string: %p", v.Get());
         return v->CoerceToString(csq);
     }
-    Logger::W(CResources::TAG, "getString of bad type: %d", type);
+    Logger::W("CTypedArray", "getString of bad type: %d", type);
     return NOERROR;
 }
 
@@ -183,7 +183,7 @@ ECode CTypedArray::GetString(
 
     AutoPtr<CTypedValue> v = mValue;
     if (GetValueAt(index, v)) {
-        Logger::W(CResources::TAG, "Converting to string: %p", v.Get());
+        Logger::W("CTypedArray", "Converting to string: %p", v.Get());
         AutoPtr<ICharSequence> csq;
         if (FAILED(v->CoerceToString((ICharSequence**)&csq))) {
             *str = String(NULL);
@@ -191,7 +191,7 @@ ECode CTypedArray::GetString(
         }
         return csq->ToString(str);
     }
-    Logger::W(CResources::TAG, "getString of bad type: %d", type);
+    Logger::W("CTypedArray", "getString of bad type: %d", type);
     *str = String(NULL);
     return NOERROR;
 }
@@ -255,7 +255,7 @@ ECode CTypedArray::GetNonConfigurationString(
         }
         return csq->ToString(str);
     }
-    Logger::W(CResources::TAG, "getString of bad type: 0x%08x", type);
+    Logger::W("CTypedArray", "getString of bad type: 0x%08x", type);
     return NOERROR;
 }
 
@@ -285,13 +285,13 @@ ECode CTypedArray::GetBoolean(
 
     AutoPtr<CTypedValue> v = mValue;
     if (GetValueAt(index, v)) {
-        Logger::W(CResources::TAG, "Converting to boolean: %p", v.Get());
+        Logger::W("CTypedArray", "Converting to boolean: %p", v.Get());
         AutoPtr<ICharSequence> csq;
         v->CoerceToString((ICharSequence**)&csq);
         *value = XmlUtils::ConvertValueToBoolean(csq, defValue);
         return NOERROR;
     }
-    Logger::W(CResources::TAG, "getBoolean of bad type: 0x%08x", type);
+    Logger::W("CTypedArray", "getBoolean of bad type: 0x%08x", type);
     *value = defValue;
     return NOERROR;
 }
@@ -322,13 +322,13 @@ ECode CTypedArray::GetInt32(
 
     AutoPtr<CTypedValue> v = mValue;
     if (GetValueAt(index, v)) {
-        Logger::W(CResources::TAG, "Converting to Int32: %p", v.Get());
+        Logger::W("CTypedArray", "Converting to Int32: %p", v.Get());
         AutoPtr<ICharSequence> csq;
         v->CoerceToString((ICharSequence**)&csq);
         *value = XmlUtils::ConvertValueToInt32(csq, defValue);
         return NOERROR;
     }
-    Logger::W(CResources::TAG, "getInt of bad type: 0x%08x", type);
+    Logger::W("CTypedArray", "getInt of bad type: 0x%08x", type);
     *value = defValue;
     return NOERROR;
 }
@@ -363,7 +363,7 @@ ECode CTypedArray::GetFloat(
 
     AutoPtr<CTypedValue> v = mValue;
     if (GetValueAt(index, v)) {
-        Logger::W(CResources::TAG, "Converting to float: %p", v.Get());
+        Logger::W("CTypedArray", "Converting to float: %p", v.Get());
         AutoPtr<ICharSequence> csq;
         if (SUCCEEDED(v->CoerceToString((ICharSequence**)&csq))) {
             String str;
@@ -372,7 +372,7 @@ ECode CTypedArray::GetFloat(
             return NOERROR;
         }
     }
-    Logger::W(CResources::TAG, "getFloat of bad type: 0x%08x", type);
+    Logger::W("CTypedArray", "getFloat of bad type: 0x%08x", type);
     *value = defValue;
     return NOERROR;
 }
@@ -417,7 +417,7 @@ ECode CTypedArray::GetColor(
         return E_RUNTIME_EXCEPTION;
     }
 
-    Logger::E(CResources::TAG, "Can't convert to color: type=0x%08x", type);
+    Logger::E("CTypedArray", "Can't convert to color: type=0x%08x", type);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -475,7 +475,7 @@ ECode CTypedArray::GetInteger(
         return NOERROR;
     }
 
-    Logger::E(CResources::TAG, "Can't convert to integer: type=0x%08x", type);
+    Logger::E("CTypedArray", "Can't convert to integer: type=0x%08x", type);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -508,7 +508,7 @@ ECode CTypedArray::GetDimension(
         return E_RUNTIME_EXCEPTION;
     }
 
-    Logger::E(CResources::TAG, "Can't convert to dimension: type=0x%08x", type);
+    Logger::E("CTypedArray", "Can't convert to dimension: type=0x%08x", type);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -541,7 +541,7 @@ ECode CTypedArray::GetDimensionPixelOffset(
         return E_RUNTIME_EXCEPTION;
     }
 
-    Logger::E(CResources::TAG, "Can't convert to dimension: type=0x%08x", type);
+    Logger::E("CTypedArray", "Can't convert to dimension: type=0x%08x", type);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -574,7 +574,7 @@ ECode CTypedArray::GetDimensionPixelSize(
         return E_RUNTIME_EXCEPTION;
     }
 
-    Logger::E(CResources::TAG, "Can't convert to dimension: type=0x%08x", type);
+    Logger::E("CTypedArray", "Can't convert to dimension: type=0x%08x", type);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -587,12 +587,14 @@ ECode CTypedArray::GetLayoutDimension(
     *dimension = 0;
 
     if (mRecycled) {
+        Logger::E("CTypedArray", "Cannot make calls to a recycled instance!");
         return E_RUNTIME_EXCEPTION;
     }
 
     index *= CAssetManager::STYLE_NUM_ENTRIES;
     AutoPtr< ArrayOf<Int32> > data = mData;
     Int32 type = (*data)[index + CAssetManager::STYLE_TYPE];
+    // Logger::I("CTypedArray", "GetLayoutDimension: index:%d, name:%s type:%08x", index, name.string(), type);
     if (type >= ITypedValue::TYPE_FIRST_INT && type <= ITypedValue::TYPE_LAST_INT) {
         *dimension = (*data)[index + CAssetManager::STYLE_DATA];
         return NOERROR;
@@ -603,13 +605,14 @@ ECode CTypedArray::GetLayoutDimension(
         return NOERROR;
     }
     else if (type == ITypedValue::TYPE_ATTRIBUTE) {
-        // throw new RuntimeException("Failed to resolve attribute at index " + index);
+        Logger::E("CTypedArray", "Failed to resolve attribute at index %d", index);
         return E_RUNTIME_EXCEPTION;
     }
 
     String des;
     GetPositionDescription(&des);
-    Logger::E(CResources::TAG, ")%s: You must supply a %s attribute.", (const char*)des, (const char*)name);
+    Logger::E("CTypedArray", "%s: You must supply a %s attribute. index:%d, type:%d/%08x",
+        des.string(), name.string(), index, type, type);
     return E_RUNTIME_EXCEPTION;
 }
 
@@ -673,7 +676,7 @@ ECode CTypedArray::GetFraction(
         return E_RUNTIME_EXCEPTION;
     }
 
-    Logger::E(CResources::TAG, "Can't convert to fraction: type=0x%08x", type);
+    Logger::E("CTypedArray", "Can't convert to fraction: type=0x%08x", type);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -843,7 +846,7 @@ ECode CTypedArray::GetPositionDescription(
     /* [out] */ String* des)
 {
     VALIDATE_NOT_NULL(des);
-    *des = String(NULL);
+    *des = String("");
 
     if (mRecycled) {
         return E_RUNTIME_EXCEPTION;

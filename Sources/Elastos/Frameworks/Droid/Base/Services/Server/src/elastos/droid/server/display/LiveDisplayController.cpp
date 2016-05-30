@@ -219,7 +219,7 @@ const Int32 LiveDisplayController::MODE_NIGHT;
 const Int32 LiveDisplayController::MODE_AUTO;
 const Int32 LiveDisplayController::MODE_OUTDOOR;
 const Int32 LiveDisplayController::MODE_DAY;
-const String LiveDisplayController::TAG("LiveDisplay");
+const String LiveDisplayController::TAG("LiveDisplayController");
 const Int64 LiveDisplayController::TWILIGHT_ADJUSTMENT_TIME = IDateUtils::HOUR_IN_MILLIS * 1;
 const Int32 LiveDisplayController::OFF_TEMPERATURE;
 const Int32 LiveDisplayController::MSG_UPDATE_LIVE_DISPLAY;

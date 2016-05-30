@@ -233,18 +233,22 @@ const String BrightnessController::TAG("StatusBar.BrightnessController");
 const Boolean BrightnessController::SHOW_AUTOMATIC_ICON = FALSE;
 const Float BrightnessController::BRIGHTNESS_ADJ_RESOLUTION = 100.0f;
 
-BrightnessController::BrightnessController(
-    /* [in] */ IContext* context,
-    /* [in] */ IImageView* icon,
-    /* [in] */ IToggleSlider* control)
-    : mContext(context)
-    , mIcon(icon)
-    , mControl(control)
-    , mAutomaticAvailable(FALSE)
+BrightnessController::BrightnessController()
+    : mAutomaticAvailable(FALSE)
     , mAutomatic(FALSE)
     , mListening(FALSE)
     , mExternalChange(FALSE)
+{}
+
+ECode BrightnessController::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IImageView* icon,
+    /* [in] */ IToggleSlider* control)
 {
+    mContext = context;
+    mIcon = icon;
+    mControl = control;
+
     CArrayList::New((IArrayList**)&mChangeCallbacks);
     CHandler::New((IHandler**)&mHandler);
     mUserTracker = new MyCurrentUserTracker(mContext, this);
@@ -259,10 +263,12 @@ BrightnessController::BrightnessController(
 
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
-    resources->GetBoolean(Elastos::Droid::R::bool_::config_automatic_brightness_available, &mAutomaticAvailable);
+    resources->GetBoolean(Elastos::Droid::R::bool_::config_automatic_brightness_available,
+        &mAutomaticAvailable);
 
     AutoPtr<IInterface> smObj = ServiceManager::GetService(String("power"));
     mPower = IIPowerManager::Probe(smObj);
+    return NOERROR;
 }
 
 void BrightnessController::AddStateChangedCallback(

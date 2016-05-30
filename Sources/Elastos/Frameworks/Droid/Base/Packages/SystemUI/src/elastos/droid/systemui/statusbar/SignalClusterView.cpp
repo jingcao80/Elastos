@@ -27,6 +27,7 @@ ECode SignalClusterView::ChangedRunnable::Run()
 }
 
 CAR_INTERFACE_IMPL(SignalClusterView::TmpCallback, Object, ISecurityControllerCallback)
+
 SignalClusterView::TmpCallback::TmpCallback(
     /* [in] */ SignalClusterView* host)
     : mHost(host)
@@ -38,9 +39,11 @@ ECode SignalClusterView::TmpCallback::OnStateChanged()
 }
 
 const String SignalClusterView::TAG("SignalClusterView");
-Boolean SignalClusterView::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+Boolean SignalClusterView::DEBUG = FALSE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
+
 CAR_INTERFACE_IMPL_3(SignalClusterView, LinearLayout, ISignalClusterView \
         , INetworkControllerImplSignalCluster, ISecurityControllerCallback);
+
 SignalClusterView::SignalClusterView()
     : mVpnVisible(FALSE)
     , mWifiVisible(FALSE)

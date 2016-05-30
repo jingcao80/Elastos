@@ -3,170 +3,12 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-
-    <!-- <ViewSwitcher
-        android:id="@+id/ViewSwitcher"
+    <!--
+    <TextView
+        android:id="@+id/tv_processbar"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
-
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-            <TextView
-                android:id="@+id/TextView_One"
-                android:layout_width="match_parent"
-                android:layout_height="125px"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center_vertical"
-                android:textColor="#000000"
-                android:text="====人之初 性本善 性相近 习相远 苟不教 性乃迁 教之道 贵以专 昔孟母 择邻处 子不学 断机杼===="
-                android:background="#FFFFFF" >
-            </TextView>
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-            <TextView
-                android:id="@+id/myTextView_Two"
-                android:layout_width="match_parent"
-                android:layout_height="125px"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center_vertical"
-                android:textColor="#000000"
-                android:text="====                           ===="
-                android:background="#FFFFFF" >
-            </TextView>
-        </RelativeLayout>
-    </ViewSwitcher>
- -->
-    <!-- <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-        <ImageButton
-            android:id="@+id/prev"
-            android:layout_width="80px"
-            android:layout_height="wrap_content" />
-
-        <ImageButton
-            android:id="@+id/next"
-            android:layout_width="80px"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
-
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-            <ImageSwitcher android:id="@+id/ImageSwitcher"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-            </ImageSwitcher>
-
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <ImageButton
-                    android:id="@+id/last"
-                    android:layout_width="80dp"
-                    android:layout_height="40dp"/>
-                <ImageButton
-                    android:id="@+id/next"
-                    android:layout_width="80dp"
-                    android:layout_height="40dp"/>
-            </LinearLayout>
-        </LinearLayout> -->
-
-
-        <!-- <CalendarView
-        android:id="@+id/calendarView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" /> -->
-
-        <!-- <DatePicker android:id="@+id/DatePicker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:focusable="true"
-                android:focusableInTouchMode="true">
-        </DatePicker> -->
-
-        <!-- <HorizontalScrollView android:id="@+id/ScrollView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" >
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="垂直滚动视图"
-                android:textSize="30dp" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/test0" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/test1" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/test2" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/test3" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/test4" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/test5" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/test6" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/test7" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/test8" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/test9" />
-
-            </LinearLayout>
-
-        </HorizontalScrollView> -->
+        android:layout_height="wrap_content"
+        android:text="ProgressBar" />
 
     <ProgressBar
         android:id="@+id/ProgressBar"
@@ -178,5 +20,43 @@
         android:secondaryProgress="100">
     </ProgressBar>
 
+    <TextView
+        android:id="@+id/tv_seekbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SeekBar" />
+
+    <SeekBar
+        android:id="@+id/seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:contentDescription="SeekBar"
+        />
+-->
+    <TextView
+        android:id="@+id/tv_custom_seekbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Custom SeekBar" />
+
+    <SeekBar
+        android:id="@+id/custom_seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:thumb="@drawable/ic_brightness_thumb"
+        android:splitTrack="false"
+        android:contentDescription="Custom SeekBar"
+        />
 
 </LinearLayout>

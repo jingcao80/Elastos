@@ -264,7 +264,7 @@ QSTile::QSTile()
 ECode QSTile::constructor(
     /* [in] */ IQSTileHost* host)
 {
-    TAG = String("QSTile. + getClass().getSimpleName()");
+    TAG = "QSTile";
     CHandler::New(Looper::GetMainLooper(), (IHandler**)&mUiHandler);
     mState = NewTileState();
     mTmpState = NewTileState();

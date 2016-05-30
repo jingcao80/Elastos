@@ -10,6 +10,7 @@ namespace SystemUI {
 namespace Settings {
 
 CAR_OBJECT_IMPL(CToggleSeekBar)
+
 ECode CToggleSeekBar::constructor(
     /* [in] */ IContext* context)
 {

@@ -19,7 +19,8 @@ namespace SystemUI {
 namespace Settings {
 
 /** A dialog that provides controls for adjusting the screen brightness. */
-CarClass(CBrightnessDialog), public Activity
+CarClass(CBrightnessDialog)
+    , public Activity
 {
 public:
     CAR_OBJECT_DECL()

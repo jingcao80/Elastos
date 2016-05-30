@@ -22,10 +22,13 @@ namespace Droid {
 namespace SystemUI {
 namespace Settings {
 
+static const String TAG("CToggleSlider");
+
 //==================================
 //   CToggleSlider::MyCheckListener
 //==================================
 CAR_INTERFACE_IMPL(CToggleSlider::MyCheckListener, Object, ICompoundButtonOnCheckedChangeListener)
+
 CToggleSlider::MyCheckListener::MyCheckListener(
     /* [in] */ CToggleSlider* host)
     : mHost(host)
@@ -53,6 +56,7 @@ ECode CToggleSlider::MyCheckListener::OnCheckedChanged(
 //   CToggleSlider::MySeekListener
 //==================================
 CAR_INTERFACE_IMPL(CToggleSlider::MySeekListener, Object, ISeekBarOnSeekBarChangeListener)
+
 CToggleSlider::MySeekListener::MySeekListener(
     /* [in] */ CToggleSlider* host)
     : mHost(host)
@@ -66,8 +70,7 @@ ECode CToggleSlider::MySeekListener::OnProgressChanged(
     if (mHost->mListener != NULL) {
         Boolean isChecked;
         ICheckable::Probe(mHost->mToggle)->IsChecked(&isChecked);
-        mHost->mListener->OnChanged(
-                mHost, mHost->mTracking, isChecked, progress);
+        mHost->mListener->OnChanged(mHost, mHost->mTracking, isChecked, progress);
     }
 
     if (mHost->mMirror != NULL) {
@@ -92,11 +95,11 @@ ECode CToggleSlider::MySeekListener::OnStopTrackingTouch(
 //   CToggleSlider
 //==================================
 CAR_OBJECT_IMPL(CToggleSlider)
+
 CAR_INTERFACE_IMPL(CToggleSlider, RelativeLayout, IToggleSlider)
+
 CToggleSlider::CToggleSlider()
 {
-    mCheckListener = new MyCheckListener(this);
-    mSeekListener = new MySeekListener(this);
 }
 
 ECode CToggleSlider::constructor(
@@ -118,6 +121,9 @@ ECode CToggleSlider::constructor(
     /* [in] */ Int32 defStyle)
 {
     RelativeLayout::constructor(context, attrs, defStyle);
+
+    mCheckListener = new MyCheckListener(this);
+    mSeekListener = new MySeekListener(this);
 
     AutoPtr<IView> view;
     View::Inflate(context, R::layout::status_bar_toggle_slider, this, (IView**)&view);
@@ -147,6 +153,7 @@ ECode CToggleSlider::constructor(
     mLabel = ITextView::Probe(v);
     String str;
     a->GetString(R::styleable::ToggleSlider_text, &str);
+    Logger::I(TAG, " >> CToggleSlider SetText: [%s]", str.string());
     AutoPtr<ICharSequence> cs;
     CString::New(str, (ICharSequence**)&cs);
     mLabel->SetText(cs);
@@ -248,6 +255,7 @@ ECode CToggleSlider::OnStartTrackingTouch(
         IView::Probe(mMirror->mSlider)->SetPressed(TRUE);
     }
 
+    Logger::I(TAG, " >> OnStartTrackingTouch: %s", TO_CSTR(mMirrorController));
     if (mMirrorController != NULL) {
         mMirrorController->ShowMirror();
         AutoPtr<IViewParent> parent;

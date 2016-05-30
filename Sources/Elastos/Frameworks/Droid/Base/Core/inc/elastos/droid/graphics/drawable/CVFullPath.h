@@ -18,51 +18,26 @@ public:
     CARAPI GetStrokeColor(
         /* [out] */ Int32* strokeColor);
 
-    //CARAPI SetStrokeColor(
-    //    /* [in] */ Int32 strokeColor);
-
     CARAPI GetStrokeWidth(
         /* [out] */ Float* strokeWidth);
-
-    //CARAPI SetStrokeWidth(
-    //    /* [in] */ Float strokeWidth);
 
     CARAPI GetStrokeAlpha(
          /* [out] */ Float* strokeAlpha);
 
-    //CARAPI SetStrokeAlpha(
-    //    /* [in] */ Float strokeAlpha);
-
     CARAPI GetFillColor(
         /* [out] */ Int32* fillColor);
-
-    //CARAPI SetFillColor(
-    //    /* [in] */ Int32 fillColor);
 
     CARAPI GetFillAlpha(
         /* [out] */ Float* fillAlpha);
 
-    //CARAPI SetFillAlpha(
-    //    /* [in] */ Float fillAlpha);
-
     CARAPI GetTrimPathStart(
         /* [out] */ Float* trimPathStart);
-
-    //CARAPI SetTrimPathStart(
-    //    /* [in] */ Float trimPathStart);
 
     CARAPI GetTrimPathEnd(
         /* [out] */ Float* trimPathEnd);
 
-    //CARAPI SetTrimPathEnd(
-    //    /* [in] */ Float trimPathEnd);
-
     CARAPI GetTrimPathOffset(
         /* [out] */ Float* trimPathOffset);
-
-    //CARAPI SetTrimPathOffset(
-    //    /* [in] */ Float trimPathOffset);
-
 };
 
 } // namespace Drawable

@@ -141,6 +141,7 @@ ECode CServiceManager::GetService(
 
     ec = (ECode)reply.readInt32();
     if (FAILED(ec)) {
+        if (!name.Equals("accessibility"))
         Slogger::E("CServiceManager", "Failed to get service %s, ec=%08x", name.string(), ec);
         return ec;
     }

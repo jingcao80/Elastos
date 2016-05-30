@@ -373,7 +373,7 @@ CResources::StaticInitializer::StaticInitializer()
 
 
 const String CResources::TAG("CResources");
-const Boolean CResources::DEBUG_LOAD = FALSE;
+const Boolean CResources::DEBUG_LOAD = TRUE;
 const Boolean CResources::DEBUG_CONFIG = FALSE;
 const Boolean CResources::TRACE_FOR_PRELOAD = FALSE;
 const Boolean CResources::TRACE_FOR_MISS_PRELOAD = FALSE;
@@ -1967,11 +1967,7 @@ ECode CResources::ParseBundleExtra(
         sa->Recycle();
         String s;
         attrs->GetPositionDescription(&s);
-        Logger::E(TAG, "<%s> requires an android:name attribute at %s",
-                (const char*)tagName, (const char*)s);
-        // throw new XmlPullParserException("<" + tagName
-        //         + "> requires an android:name attribute at "
-        //         + attrs.getPositionDescription());
+        Logger::E(TAG, "<%s> requires an android:name attribute at %s", tagName.string(), s.string());
         return E_XML_PULL_PARSER_EXCEPTION;
     }
 
@@ -2003,17 +1999,15 @@ ECode CResources::ParseBundleExtra(
         }
         else {
             sa->Recycle();
-//          throw new XmlPullParserException("<" + tagName
-//                  + "> only supports string, integer, float, color, and Boolean at "
-//                  + attrs.getPositionDescription());
+            String s;
+            attrs->GetPositionDescription(&s);
+            Logger::E(TAG, "<%s> only supports string, integer, float, color, and Boolean at %s",
+                tagName.string(), s.string());
             return E_XML_PULL_PARSER_EXCEPTION;
         }
     }
     else {
         sa->Recycle();
-//        throw new XmlPullParserException("<" + tagName
-//                + "> requires an android:value or android:resource attribute at "
-//                + attrs.getPositionDescription());
         String s;
         attrs->GetPositionDescription(&s);
         Logger::E(TAG, "<%s> requires an android:name attribute at %s",
@@ -2330,9 +2324,9 @@ ECode CResources::LoadDrawableForCookie(
         }
     }
 
-    if (DEBUG_LOAD) {
-        Logger::V(TAG, "Loading drawable for cookie %d : %s", value->mAssetCookie, file.string());
-    }
+    // if (DEBUG_LOAD) {
+    //     Logger::V(TAG, "Loading drawable for cookie %d : %s", value->mAssetCookie, file.string());
+    // }
 
     AutoPtr<IDrawable> dr;
     ECode ec = NOERROR;
@@ -2651,6 +2645,12 @@ ECode CResources::LoadXmlResourceParser(
     *parser = NULL;
 
     if (id != 0) {
+        if (DEBUG_LOAD) {
+            if (file.Contains("/layout/")) {
+                Logger::I(TAG, " == load xml resource %s", file.string());
+            }
+        }
+
         // try {
         // These may be compiled...
         AutoLock lock(mCachedXmlBlockIdsLock);

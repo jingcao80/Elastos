@@ -15,13 +15,6 @@ ECode CVFullPath::GetStrokeColor(
     return NOERROR;
 }
 
-//ECode CVFullPath::SetStrokeColor(
-//    /* [in] */ Int32 strokeColor)
-//{
-//    VectorDrawable::VFullPath::SetStrokeColor(strokeColor);
-//    return NOERROR;
-//}
-
 ECode CVFullPath::GetStrokeWidth(
     /* [out] */ Float* strokeWidth)
 {
@@ -29,13 +22,6 @@ ECode CVFullPath::GetStrokeWidth(
     *strokeWidth = VectorDrawable::VFullPath::GetStrokeWidth();
     return NOERROR;
 }
-
-//ECode CVFullPath::SetStrokeWidth(
-//    /* [in] */ Float strokeWidth)
-//{
-//    VectorDrawable::VFullPath::SetStrokeWidth(strokeWidth);
-//    return NOERROR;
-//}
 
 ECode CVFullPath::GetStrokeAlpha(
      /* [out] */ Float* strokeAlpha)
@@ -45,13 +31,6 @@ ECode CVFullPath::GetStrokeAlpha(
     return NOERROR;
 }
 
-//ECode CVFullPath::SetStrokeAlpha(
-//    /* [in] */ Float strokeAlpha)
-//{
-//    VectorDrawable::VFullPath::SetStrokeAlpha(strokeAlpha);
-//    return NOERROR;
-//}
-
 ECode CVFullPath::GetFillColor(
     /* [out] */ Int32* fillColor)
 {
@@ -59,13 +38,6 @@ ECode CVFullPath::GetFillColor(
     *fillColor = VectorDrawable::VFullPath::GetFillColor();
     return NOERROR;
 }
-
-//ECode CVFullPath::SetFillColor(
-//    /* [in] */ Int32 fillColor)
-//{
-//    VectorDrawable::VFullPath::SetFillColor(fillColor);
-//    return NOERROR;
-//}
 
 ECode CVFullPath::GetFillAlpha(
     /* [out] */ Float* fillAlpha)
@@ -75,13 +47,6 @@ ECode CVFullPath::GetFillAlpha(
     return NOERROR;
 }
 
-//ECode CVFullPath::SetFillAlpha(
-//    /* [in] */ Float fillAlpha)
-//{
-//    VectorDrawable::VFullPath::SetFillAlpha(fillAlpha);
-//    return NOERROR;
-//}
-
 ECode CVFullPath::GetTrimPathStart(
     /* [out] */ Float* trimPathStart)
 {
@@ -89,13 +54,6 @@ ECode CVFullPath::GetTrimPathStart(
     *trimPathStart = VectorDrawable::VFullPath::GetTrimPathStart();
     return NOERROR;
 }
-
-//ECode CVFullPath::SetTrimPathStart(
-//    /* [in] */ Float trimPathStart)
-//{
-//    VectorDrawable::VFullPath::SetTrimPathStart(trimPathStart);
-//    return NOERROR;
-//}
 
 ECode CVFullPath::GetTrimPathEnd(
     /* [out] */ Float* trimPathEnd)
@@ -105,13 +63,6 @@ ECode CVFullPath::GetTrimPathEnd(
     return NOERROR;
 }
 
-//ECode CVFullPath::SetTrimPathEnd(
-//    /* [in] */ Float trimPathEnd)
-//{
-//    VectorDrawable::VFullPath::SetTrimPathEnd(trimPathEnd);
-//    return NOERROR;
-//}
-
 ECode CVFullPath::GetTrimPathOffset(
     /* [out] */ Float* trimPathOffset)
 {
@@ -119,13 +70,6 @@ ECode CVFullPath::GetTrimPathOffset(
     *trimPathOffset = VectorDrawable::VFullPath::GetTrimPathOffset();
     return NOERROR;
 }
-
-//ECode CVFullPath::SetTrimPathOffset(
-//    /* [in] */ Float trimPathOffset)
-//{
-//    VectorDrawable::VFullPath::SetTrimPathOffset(trimPathOffset);
-//    return NOERROR;
-//}
 
 } // namespace Drawable
 } // namespace Graphics
