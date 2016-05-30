@@ -558,18 +558,7 @@ AutoPtr<StringBuilder> Telephony::Sms::Intents::NormalizeDigits(
 //end =============Telephony::Sms::Intents===============
 //end =============Telephony::Sms===============
 
-//begin =============Telephony::Threads===============
-CAR_INTERFACE_IMPL_2(Telephony::Threads, Object, ITelephonyThreads, ITelephonyThreadsColumns);
-
-static AutoPtr<ArrayOf<String> > InitID_PROJECTION()
-{
-    AutoPtr<ArrayOf<String> > res = ArrayOf<String>::Alloc(1);
-    res->Set(0, IBaseColumns::ID);
-    return res;
-}
-AutoPtr<ArrayOf<String> > Telephony::Threads::ID_PROJECTION = InitID_PROJECTION();
-AutoPtr<IUri> Telephony::Threads::THREAD_ID_CONTENT_URI = InitURI(String("content://mms-sms/threadID"));
-
+//begin =============Telephony::Mms===============
 static AutoPtr<IUri> Init_Uri_WithAppendedPath(
     /* [in] */ IUri* path,
     /* [in] */ const String& str)
@@ -581,73 +570,6 @@ static AutoPtr<IUri> Init_Uri_WithAppendedPath(
     return uri;
 }
 
-AutoPtr<IUri> Telephony::Threads::CONTENT_URI = Init_Uri_WithAppendedPath(MmsSms::CONTENT_URI, String("conversations"));
-AutoPtr<IUri> Telephony::Threads::OBSOLETE_THREADS_URI = Init_Uri_WithAppendedPath(CONTENT_URI, String("obsolete"));
-
-ECode Telephony::Threads::GetOrCreateThreadId(
-    /* [in] */ IContext* context,
-    /* [in] */ const String& recipient,
-    /* [out] */ Int64* threadId)
-{
-    AutoPtr<ISet> recipients;
-    CHashSet::New((ISet**)&recipients);
-
-    recipients->Add(CoreUtils::Convert(recipient));
-    return GetOrCreateThreadId(context, recipients, threadId);
-}
-
-ECode Telephony::Threads::GetOrCreateThreadId(
-    /* [in] */ IContext* context,
-    /* [in] */ ISet* recipients,//String
-    /* [out] */ Int64* threaId)
-{
-    AutoPtr<IUriBuilder> uriBuilder;
-    THREAD_ID_CONTENT_URI->BuildUpon((IUriBuilder**)&uriBuilder);
-
-    AutoPtr<ArrayOf<IInterface*> > array;
-    recipients->ToArray((ArrayOf<IInterface*>**)&array);
-    for (Int32 i = 0; i < array->GetLength(); ++i) {
-        String recipient;
-        ICharSequence::Probe((*array)[i])->ToString(&recipient);
-        if (FALSE/*TODO Mms::IsEmailAddress(recipient)*/) {
-            String newRecipient;
-            //TODO Mms::ExtractAddrSpec(recipient, &newRecipient);
-            recipient = newRecipient;
-        }
-
-        uriBuilder->AppendQueryParameter(String("recipient"), recipient);
-    }
-
-    AutoPtr<IUri> uri;
-    uriBuilder->Build((IUri**)&uri);
-    //if (DEBUG) Logger::V(TAG, "getOrCreateThreadId uri: " + uri);
-
-    AutoPtr<IContentResolver> cr;
-    context->GetContentResolver((IContentResolver**)&cr);
-    AutoPtr<ICursor> cursor;
-    //TODO ISqliteWrapper::Query(context, cr, uri, ID_PROJECTION, String(NULL), NULL, String(NULL), (ICursor**)&cursor);
-    if (cursor != NULL) {
-        //try {
-            Boolean first;
-            if (cursor->MoveToFirst(&first), first) {
-                return cursor->GetInt64(0, threaId);
-            } else {
-                Logger::E(TAG, "getOrCreateThreadId returned no rows!");
-            }
-        //} finally {
-            ICloseable::Probe(cursor)->Close();
-        //}
-    }
-
-    String str;
-    IObject::Probe(uri)->ToString(&str);
-    Logger::E(TAG, "getOrCreateThreadId failed with uri %s", str.string());
-    //throw new IllegalArgumentException("Unable to find or allocate a thread ID.");
-    return E_ILLEGAL_ARGUMENT_EXCEPTION;
-}
-//end =============Telephony::Threads===============
-
-//begin =============Telephony::Mms===============
 CAR_INTERFACE_IMPL_2(Telephony::Mms, Object, ITelephonyMms, ITelephonyBaseMmsColumns);
 
 AutoPtr<IUri> Telephony::Mms::CONTENT_URI = InitURI(String("content://mms"));
@@ -804,6 +726,84 @@ CAR_INTERFACE_IMPL(Telephony::MmsSms::WordsTable, Object, ITelephonyMmsSmsWordsT
 
 //end =============Telephony::MmsSms::WordsTable===============
 //end =============Telephony::MmsSms===============
+
+//begin =============Telephony::Threads===============
+CAR_INTERFACE_IMPL_2(Telephony::Threads, Object, ITelephonyThreads, ITelephonyThreadsColumns);
+
+static AutoPtr<ArrayOf<String> > InitID_PROJECTION()
+{
+    AutoPtr<ArrayOf<String> > res = ArrayOf<String>::Alloc(1);
+    res->Set(0, IBaseColumns::ID);
+    return res;
+}
+AutoPtr<ArrayOf<String> > Telephony::Threads::ID_PROJECTION = InitID_PROJECTION();
+AutoPtr<IUri> Telephony::Threads::THREAD_ID_CONTENT_URI = InitURI(String("content://mms-sms/threadID"));
+
+AutoPtr<IUri> Telephony::Threads::CONTENT_URI = Init_Uri_WithAppendedPath(MmsSms::CONTENT_URI, String("conversations"));
+AutoPtr<IUri> Telephony::Threads::OBSOLETE_THREADS_URI = Init_Uri_WithAppendedPath(CONTENT_URI, String("obsolete"));
+
+ECode Telephony::Threads::GetOrCreateThreadId(
+    /* [in] */ IContext* context,
+    /* [in] */ const String& recipient,
+    /* [out] */ Int64* threadId)
+{
+    AutoPtr<ISet> recipients;
+    CHashSet::New((ISet**)&recipients);
+
+    recipients->Add(CoreUtils::Convert(recipient));
+    return GetOrCreateThreadId(context, recipients, threadId);
+}
+
+ECode Telephony::Threads::GetOrCreateThreadId(
+    /* [in] */ IContext* context,
+    /* [in] */ ISet* recipients,//String
+    /* [out] */ Int64* threaId)
+{
+    AutoPtr<IUriBuilder> uriBuilder;
+    THREAD_ID_CONTENT_URI->BuildUpon((IUriBuilder**)&uriBuilder);
+
+    AutoPtr<ArrayOf<IInterface*> > array;
+    recipients->ToArray((ArrayOf<IInterface*>**)&array);
+    for (Int32 i = 0; i < array->GetLength(); ++i) {
+        String recipient;
+        ICharSequence::Probe((*array)[i])->ToString(&recipient);
+        if (FALSE/*TODO Mms::IsEmailAddress(recipient)*/) {
+            String newRecipient;
+            //TODO Mms::ExtractAddrSpec(recipient, &newRecipient);
+            recipient = newRecipient;
+        }
+
+        uriBuilder->AppendQueryParameter(String("recipient"), recipient);
+    }
+
+    AutoPtr<IUri> uri;
+    uriBuilder->Build((IUri**)&uri);
+    //if (DEBUG) Logger::V(TAG, "getOrCreateThreadId uri: " + uri);
+
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ICursor> cursor;
+    //TODO ISqliteWrapper::Query(context, cr, uri, ID_PROJECTION, String(NULL), NULL, String(NULL), (ICursor**)&cursor);
+    if (cursor != NULL) {
+        //try {
+            Boolean first;
+            if (cursor->MoveToFirst(&first), first) {
+                return cursor->GetInt64(0, threaId);
+            } else {
+                Logger::E(TAG, "getOrCreateThreadId returned no rows!");
+            }
+        //} finally {
+            ICloseable::Probe(cursor)->Close();
+        //}
+    }
+
+    String str;
+    IObject::Probe(uri)->ToString(&str);
+    Logger::E(TAG, "getOrCreateThreadId failed with uri %s", str.string());
+    //throw new IllegalArgumentException("Unable to find or allocate a thread ID.");
+    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+}
+//end =============Telephony::Threads===============
 
 //begin =============Telephony::Carriers===============
 CAR_INTERFACE_IMPL_2(Telephony::Carriers, Object, ITelephonyCarriers, IBaseColumns);
