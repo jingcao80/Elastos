@@ -4,7 +4,7 @@
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/CMessengerImpl.h"
-#include "elastos/droid/os/CMessageHelper.h"
+#include "elastos/droid/os/CMessage.h"
 #include "elastos/droid/os/CLooperHelper.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringUtils.h>
@@ -303,9 +303,10 @@ ECode Handler::ObtainMessage(
     /* [out] */ IMessage** msg)
 {
     VALIDATE_NOT_NULL(msg);
-    AutoPtr<IMessageHelper> helper;
-    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
-    return helper->Obtain(this, what, arg1, arg2, obj, msg);
+    AutoPtr<IMessage> message = CMessage::Obtain(this, what, arg1, arg2, obj);
+    *msg = message;
+    REFCOUNT_ADD(*msg);
+    return NOERROR;
 }
 
 AutoPtr<IMessage> Handler::GetPostMessage(
@@ -319,9 +320,7 @@ AutoPtr<IMessage> Handler::GetPostMessage(
     /* [in] */ IInterface* token)
 {
     AutoPtr<IMessageHelper> helper;
-    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
-    AutoPtr<IMessage> msg;
-    helper->Obtain(this, (IMessage**)&msg);
+    AutoPtr<IMessage> msg = CMessage::Obtain(this);
     msg->SetWhat((Int32)r);  // as Id
     msg->SetObj(token);
     msg->SetCallback(r);
@@ -413,10 +412,7 @@ ECode Handler::SendEmptyMessageDelayed(
     /* [in] */ Int64 delayMillis,
     /* [out] */ Boolean* result)
 {
-    AutoPtr<IMessageHelper> helper;
-    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
-    AutoPtr<IMessage> msg;
-    helper->Obtain(this, (IMessage**)&msg);
+    AutoPtr<IMessage> msg = CMessage::Obtain(this);
     msg->SetWhat(what);
     return Handler::SendMessageDelayed(msg, delayMillis, result);
 }
@@ -426,10 +422,7 @@ ECode Handler::SendEmptyMessageAtTime(
     /* [in] */ Int64 uptimeMillis,
     /* [out] */ Boolean* result)
 {
-    AutoPtr<IMessageHelper> helper;
-    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
-    AutoPtr<IMessage> msg;
-    helper->Obtain(this, (IMessage**)&msg);
+    AutoPtr<IMessage> msg = CMessage::Obtain(this);
     msg->SetWhat(what);
     return Handler::SendMessageAtTime(msg, uptimeMillis, result);
 }

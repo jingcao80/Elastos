@@ -44,7 +44,8 @@ namespace Graphics {
 
 ////////////////////////////////////////////////////////////////////////////////
 static const String TAG("BitmapFactory");
-const Int32 BitmapFactory::DECODE_BUFFER_SIZE = 300 * 1024;
+const Int32 BitmapFactory::DECODE_BUFFER_SIZE = 16 * 1024;
+
 ECode BitmapFactory::DecodeFile(
     /* [in] */ const String& pathName,
     /* [in] */ IBitmapFactoryOptions* opts,
@@ -53,27 +54,19 @@ ECode BitmapFactory::DecodeFile(
     VALIDATE_NOT_NULL(bitmap);
     *bitmap = NULL;
 
-    //ACTIONS_CODE_START
-    AutoPtr<IBitmapFactoryOptions> options = opts;
-    if (options == NULL) {
-        CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&options);
-        ((CBitmapFactoryOptions*)options.Get())->mNewOptsFlag = TRUE;
-    }
-    //ACTIONS_CODE_END
-
-    AutoPtr<IFileInputStream> fstream;
-    ECode ec = CFileInputStream::New(pathName, (IFileInputStream**)&fstream);
+    AutoPtr<IInputStream> stream;
+    ECode ec = CFileInputStream::New(pathName, (IInputStream**)&stream);
     if (FAILED(ec)) {
         Logger::E(TAG, "BitmapFactory, Unable to decode stream");
         return ec;
     }
 
-    ec = DecodeStream(IInputStream::Probe(fstream), NULL, options, bitmap);
+    ec = DecodeStream(stream, NULL, opts, bitmap);
     if (FAILED(ec)) {
         Logger::E(TAG, "BitmapFactory, Unable to decode stream");
     }
 
-    ICloseable::Probe(fstream)->Close();
+    ICloseable::Probe(stream)->Close();
     return ec;
 }
 
@@ -161,7 +154,7 @@ ECode BitmapFactory::DecodeByteArray(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 length,
-    /* [in] */ IBitmapFactoryOptions* _opts,
+    /* [in] */ IBitmapFactoryOptions* opts,
     /* [out] */ IBitmap** bitmap)
 {
     VALIDATE_NOT_NULL(bitmap);
@@ -170,17 +163,10 @@ ECode BitmapFactory::DecodeByteArray(
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
-    //ACTIONS_CODE_START
-    AutoPtr<IBitmapFactoryOptions> opts = _opts;
-     if (opts == NULL) {
-        CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&opts);
-        ((CBitmapFactoryOptions*)opts.Get())->mNewOptsFlag = TRUE;
-    }
-    //ACTIONS_CODE_END
-
     // Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "decodeBitmap");
     // try {
     AutoPtr<IBitmap> bm = NativeDecodeByteArray(data, offset, length, opts);
+
     AutoPtr<IBitmap> inbm;
     if (bm == NULL && opts != NULL && (opts->GetInBitmap((IBitmap**)&inbm), inbm != NULL)) {
         // throw new IllegalArgumentException("Problem decoding into existing bitmap");
@@ -238,9 +224,9 @@ void BitmapFactory::SetDensityFromOptions(
 }
 
 ECode BitmapFactory::DecodeStream(
-    /* [in] */ IInputStream* _is,
+    /* [in] */ IInputStream* is,
     /* [in] */ IRect* outPadding,
-    /* [in] */ IBitmapFactoryOptions* _opts,
+    /* [in] */ IBitmapFactoryOptions* opts,
     /* [out] */ IBitmap** bitmap)
 {
     VALIDATE_NOT_NULL(bitmap);
@@ -248,29 +234,11 @@ ECode BitmapFactory::DecodeStream(
 
     // we don't throw in this case, thus allowing the caller to only check
     // the cache, and not force the image to be decoded.
-    if (_is == NULL) {
+    if (is == NULL) {
         return NOERROR;
     }
 
-    //ACTIONS_CODE_START
-    AutoPtr<IInputStream> is = _is;
-    Boolean supported = FALSE;
-    is->IsMarkSupported(&supported);
-    if (!supported) {
-        is = NULL;
-        CBufferedInputStream::New(_is, DECODE_BUFFER_SIZE, (IInputStream**)&is);
-    }
-
-    is->Mark(DECODE_BUFFER_SIZE);
-    //ACTIONS_CODE_END
     AutoPtr<IBitmap> bm;
-    //ACTIONS_CODE_START
-    AutoPtr<IBitmapFactoryOptions> opts = _opts;
-    if (opts == NULL) {
-        CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&opts);
-        ((CBitmapFactoryOptions*)opts.Get())->mNewOptsFlag = TRUE;
-    }
-    //ACTIONS_CODE_END
 
     // Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "decodeBitmap");
     // try {
@@ -278,12 +246,13 @@ ECode BitmapFactory::DecodeStream(
         Int64 asset = 0;
         ((CAssetManager::AssetInputStream*)IAssetInputStream::Probe(is))->GetNativeAsset(&asset);
         bm = NativeDecodeAsset(asset, outPadding, opts);
-    } else {
+    }
+    else {
         bm = DecodeStreamInternal(is, outPadding, opts);
     }
 
     AutoPtr<IBitmap> inBitmap;
-    if (bm == NULL && opts != NULL && (opts->GetInBitmap((IBitmap**)&inBitmap), inBitmap.Get()) != NULL) {
+    if (bm == NULL && opts != NULL && (opts->GetInBitmap((IBitmap**)&inBitmap), inBitmap != NULL)) {
         // throw new IllegalArgumentException("Problem decoding into existing bitmap");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -325,25 +294,19 @@ ECode BitmapFactory::DecodeStream(
 ECode BitmapFactory::DecodeFileDescriptor(
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ IRect* outPadding,
-    /* [in] */ IBitmapFactoryOptions* _opts,
+    /* [in] */ IBitmapFactoryOptions* opts,
     /* [out] */ IBitmap** bitmap)
 {
     VALIDATE_NOT_NULL(bitmap);
     *bitmap = NULL;
 
     AutoPtr<IBitmap> bm;
-    //ACTIONS_CODE_START
-    AutoPtr<IBitmapFactoryOptions> opts = _opts;
-    if (opts == NULL) {
-        CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&opts);
-        ((CBitmapFactoryOptions*)opts.Get())->mNewOptsFlag = TRUE;
-    }
-    //ACTIONS_CODE_END
     // Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "decodeFileDescriptor");
     // try {
     if (NativeIsSeekable(fd)) {
         bm = NativeDecodeFileDescriptor(fd, outPadding, opts);
-    } else {
+    }
+    else {
         AutoPtr<IFileInputStream> fis;
         CFileInputStream::New(fd, (IFileInputStream**)&fis);
         // try {
@@ -699,7 +662,7 @@ static AutoPtr<IBitmap> DoDecode(
             return NULL;
         }
 
-        Byte* array = ninePatchChunk->GetPayload() /*(jbyte*) env->GetPrimitiveArrayCritical(ninePatchChunk, NULL)*/;
+        Byte* array = ninePatchChunk->GetPayload();
         if (array == NULL) {
             // return nullObjectReturn("primitive array == null");
             Logger::W("BitmapFactory", String("primitive array == null"));
@@ -707,7 +670,6 @@ static AutoPtr<IBitmap> DoDecode(
         }
 
         memcpy(array, peeker.mPatch, peeker.mPatchSize);
-        // env->ReleasePrimitiveArrayCritical(ninePatchChunk, array, 0);
     }
 
     AutoPtr<NinePatch::InsetStruct> ninePatchInsets;
@@ -716,7 +678,6 @@ static AutoPtr<IBitmap> DoDecode(
                 peeker.mOpticalInsets[0], peeker.mOpticalInsets[1], peeker.mOpticalInsets[2], peeker.mOpticalInsets[3],
                 peeker.mOutlineInsets[0], peeker.mOutlineInsets[1], peeker.mOutlineInsets[2], peeker.mOutlineInsets[3],
                 peeker.mOutlineRadius, peeker.mOutlineAlpha, scale);
-
         if (ninePatchInsets == NULL) {
             // return nullObjectReturn("nine patch insets == null");
             Logger::W("BitmapFactory", String("nine patch insets == null"));
@@ -813,9 +774,7 @@ static AutoPtr<IBitmap> DoDecode(
 // SkImageDecoder_libwebp.
 // FIXME: Get this number from SkImageDecoder
 
-//actions_code(lishiyuan)
-//#define BYTES_TO_BUFFER 64
-#define BYTES_TO_BUFFER (300*1024)
+#define BYTES_TO_BUFFER 64
 
 AutoPtr<IBitmap> BitmapFactory::NativeDecodeStream(
     /* [in] */ IInputStream* is,

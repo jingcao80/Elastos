@@ -267,10 +267,6 @@ public:
      */
     Boolean mInDither;
 
-    //ACTIONS_CODE_START(lishiyuan, comment: sync)
-    Boolean mNewOptsFlag;
-    //ACTIONS_CODE_END
-
     /**
      * The pixel density to use for the bitmap.  This will always result
      * in the returned bitmap having a density set for it (see

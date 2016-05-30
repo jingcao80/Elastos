@@ -163,10 +163,7 @@ private:
         /* [in] */ IBitmapFactoryOptions* opts);
 
 private:
-    //ACTIONS_CODE_START(lishiyuan, comment: sync)
-    //private static final int DECODE_BUFFER_SIZE = 16 * 1024;
     static const Int32 DECODE_BUFFER_SIZE;
-    //ACTIONS_CODE_END
 };
 
 } // namespace Graphics

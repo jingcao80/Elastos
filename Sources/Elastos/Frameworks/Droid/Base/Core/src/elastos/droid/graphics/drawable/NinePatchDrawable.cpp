@@ -661,7 +661,7 @@ ECode NinePatchDrawable::UpdateStateFromTypedArray(
         AutoPtr<IInputStream> is;
         r->OpenRawResource(srcResId, value, (IInputStream**)&is);
 
-        BitmapFactory::DecodeResourceStream(r, value, is, padding, options.Get(), (IBitmap**)&bitmap);
+        BitmapFactory::DecodeResourceStream(r, value, is, padding, options, (IBitmap**)&bitmap);
 
         is->Close();
         // } catch (IOException e) {
@@ -673,7 +673,8 @@ ECode NinePatchDrawable::UpdateStateFromTypedArray(
             // throw new XmlPullParserException(a.getPositionDescription() +
             //         ": <nine-patch> requires a valid src attribute");
             return E_XML_PULL_PARSER_EXCEPTION;
-        } else if ((bitmap->GetNinePatchChunk((ArrayOf<Byte>**)&chunk), chunk.Get()) == NULL) {
+        }
+        else if (bitmap->GetNinePatchChunk((ArrayOf<Byte>**)&chunk), chunk == NULL) {
             // throw new XmlPullParserException(a.getPositionDescription() +
             //         ": <nine-patch> requires a valid 9-patch source image");
             return E_XML_PULL_PARSER_EXCEPTION;
