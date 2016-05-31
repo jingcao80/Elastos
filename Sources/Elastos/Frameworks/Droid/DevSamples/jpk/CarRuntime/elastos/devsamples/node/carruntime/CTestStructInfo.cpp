@@ -13,8 +13,7 @@ CAR_OBJECT_IMPL(CTestStructInfo)
 ECode CTestStructInfo::GetName(
     /* [out] */ String * pName)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mStructInfo->GetName(pName);
 }
 
 ECode CTestStructInfo::GetSize(
@@ -84,8 +83,8 @@ ECode CTestStructInfo::constructor()
 ECode CTestStructInfo::constructor(
     /* [in] */ IStructInfo * pStructInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    mStructInfo = pStructInfo;
+    return NOERROR;
 }
 
 }

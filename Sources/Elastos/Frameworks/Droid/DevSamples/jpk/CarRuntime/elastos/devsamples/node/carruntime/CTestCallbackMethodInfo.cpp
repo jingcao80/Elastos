@@ -13,8 +13,7 @@ CAR_OBJECT_IMPL(CTestCallbackMethodInfo)
 ECode CTestCallbackMethodInfo::GetName(
     /* [out] */ String * pName)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mCallbackMethodInfo->GetName(pName);
 }
 
 ECode CTestCallbackMethodInfo::GetParamCount(
@@ -82,8 +81,8 @@ ECode CTestCallbackMethodInfo::constructor()
 ECode CTestCallbackMethodInfo::constructor(
     /* [in] */ ICallbackMethodInfo * pCallbackMethodInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    mCallbackMethodInfo = pCallbackMethodInfo;
+    return NOERROR;
 }
 
 }

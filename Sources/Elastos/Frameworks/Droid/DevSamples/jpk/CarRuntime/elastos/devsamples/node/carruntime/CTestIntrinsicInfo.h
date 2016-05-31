@@ -38,7 +38,7 @@ public:
         /* [in] */ IIntrinsicInfo * pIntrinsicInfo);
 
 private:
-    // TODO: Add your private member variables here.
+    IIntrinsicInfo* mIntrinsicInfo;
 };
 
 }

@@ -42,7 +42,7 @@ public:
         /* [in] */ ITypeAliasInfo * pTypeAliasInfo);
 
 private:
-    // TODO: Add your private member variables here.
+    ITypeAliasInfo* mTypeAliasInfo;
 };
 
 }

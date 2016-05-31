@@ -13,8 +13,7 @@ CAR_OBJECT_IMPL(CTestLocalTypeInfo)
 ECode CTestLocalTypeInfo::GetName(
     /* [out] */ String * pName)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mLocalTypeInfo->GetName(pName);
 }
 
 ECode CTestLocalTypeInfo::GetSize(
@@ -46,8 +45,8 @@ ECode CTestLocalTypeInfo::constructor()
 ECode CTestLocalTypeInfo::constructor(
     /* [in] */ ILocalTypeInfo * pLocalTypeInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    mLocalTypeInfo = pLocalTypeInfo;
+    return NOERROR;
 }
 
 }

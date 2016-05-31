@@ -52,7 +52,7 @@ public:
         /* [in] */ IEnumInfo * pEnumInfo);
 
 private:
-    // TODO: Add your private member variables here.
+    IEnumInfo* mEnumInfo;
 };
 
 }

@@ -13,8 +13,7 @@ CAR_OBJECT_IMPL(CTestLocalPtrInfo)
 ECode CTestLocalPtrInfo::GetName(
     /* [out] */ String * pName)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mLocalPtrInfo->GetName(pName);
 }
 
 ECode CTestLocalPtrInfo::GetSize(
@@ -54,8 +53,8 @@ ECode CTestLocalPtrInfo::constructor()
 ECode CTestLocalPtrInfo::constructor(
     /* [in] */ ILocalPtrInfo * pLocalPtrInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    mLocalPtrInfo = pLocalPtrInfo;
+    return NOERROR;
 }
 
 }

@@ -13,8 +13,7 @@ CAR_OBJECT_IMPL(CTestCarArrayInfo)
 ECode CTestCarArrayInfo::GetName(
     /* [out] */ String * pName)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mCarArrayInfo->GetName(pName);
 }
 
 ECode CTestCarArrayInfo::GetSize(
@@ -63,8 +62,8 @@ ECode CTestCarArrayInfo::constructor()
 ECode CTestCarArrayInfo::constructor(
     /* [in] */ ICarArrayInfo * pCarArrayInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    mCarArrayInfo = pCarArrayInfo;
+    return NOERROR;
 }
 
 }

@@ -56,7 +56,7 @@ public:
         /* [in] */ IStructInfo * pStructInfo);
 
 private:
-    // TODO: Add your private member variables here.
+    IStructInfo* mStructInfo;
 };
 
 }

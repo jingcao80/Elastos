@@ -13,8 +13,7 @@ CAR_OBJECT_IMPL(CTestConstantInfo)
 ECode CTestConstantInfo::GetName(
     /* [out] */ String * pName)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mConstantInfo->GetName(pName);
 }
 
 ECode CTestConstantInfo::GetValue(
@@ -40,8 +39,8 @@ ECode CTestConstantInfo::constructor()
 ECode CTestConstantInfo::constructor(
     /* [in] */ IConstantInfo * pConstantInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    mConstantInfo = pConstantInfo;
+    return NOERROR;
 }
 
 }

@@ -13,8 +13,7 @@ CAR_OBJECT_IMPL(CTestTypeAliasInfo)
 ECode CTestTypeAliasInfo::GetName(
     /* [out] */ String * pName)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mTypeAliasInfo->GetName(pName);
 }
 
 ECode CTestTypeAliasInfo::GetTypeInfo(
@@ -54,8 +53,8 @@ ECode CTestTypeAliasInfo::constructor()
 ECode CTestTypeAliasInfo::constructor(
     /* [in] */ ITypeAliasInfo * pTypeAliasInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    mTypeAliasInfo = pTypeAliasInfo;
+    return NOERROR;
 }
 
 }

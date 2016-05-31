@@ -13,8 +13,7 @@ CAR_OBJECT_IMPL(CTestFieldInfo)
 ECode CTestFieldInfo::GetName(
     /* [out] */ String * pName)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mFieldInfo->GetName(pName);
 }
 
 ECode CTestFieldInfo::GetTypeInfo(
@@ -33,8 +32,8 @@ ECode CTestFieldInfo::constructor()
 ECode CTestFieldInfo::constructor(
     /* [in] */ IFieldInfo * pFieldInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    mFieldInfo = pFieldInfo;
+    return NOERROR;
 }
 
 }

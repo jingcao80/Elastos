@@ -13,8 +13,16 @@ CAR_OBJECT_IMPL(CTestInterfaceInfo)
 ECode CTestInterfaceInfo::GetName(
     /* [out] */ String * pName)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = mInterfaceInfo->GetName(pName);
+
+    if (FAILED(ec)) {
+        //E_INVALID_ARGUMENT
+        //0x0800a000    E_NO_INTERFACE
+        ALOGD("CTestInterfaceInfo::\"%s\" failed! ECode:%x\n", "GetName", ec);
+        return ec;
+    }
+
+    return ec;
 }
 
 ECode CTestInterfaceInfo::GetSize(
@@ -34,8 +42,7 @@ ECode CTestInterfaceInfo::GetDataType(
 ECode CTestInterfaceInfo::GetNamespace(
     /* [out] */ String * pNs)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mInterfaceInfo->GetNamespace(pNs);
 }
 
 ECode CTestInterfaceInfo::GetId(
@@ -105,8 +112,11 @@ ECode CTestInterfaceInfo::constructor()
 ECode CTestInterfaceInfo::constructor(
     /* [in] */ IInterfaceInfo * pInterfaceInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    mInterfaceInfo = pInterfaceInfo;
+
+    //interfaceInfo->AddRef();
+
+    return NOERROR;
 }
 
 }

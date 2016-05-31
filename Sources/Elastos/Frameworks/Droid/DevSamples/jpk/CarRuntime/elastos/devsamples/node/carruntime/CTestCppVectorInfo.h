@@ -42,7 +42,7 @@ public:
         /* [in] */ ICppVectorInfo * pCppVectorInfo);
 
 private:
-    // TODO: Add your private member variables here.
+    AutoPtr<ICppVectorInfo> mCppVectorInfo;
 };
 
 }

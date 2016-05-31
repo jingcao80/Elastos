@@ -47,7 +47,7 @@ public:
         /* [in] */ ICarArrayInfo * pCarArrayInfo);
 
 private:
-    // TODO: Add your private member variables here.
+    AutoPtr<ICarArrayInfo> mCarArrayInfo;
 };
 
 }

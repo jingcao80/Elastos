@@ -149,6 +149,8 @@ ECode CTestArgumentList::SetInputArgumentOfLocalPtr(
 
     //return mArgumentList->SetInputArgumentOfLocalPtr(index, pValue);
     //return mArgumentList->SetInputArgumentOfLocalPtr(index, (LocalPtr)value);
+
+    return NOERROR;
 }
 
 ECode CTestArgumentList::SetInputArgumentOfLocalType(
@@ -274,8 +276,7 @@ ECode CTestArgumentList::SetOutputArgumentOfLocalPtrPtr(
     /* [in] */ Int32 index,
     /* [out] */ Int32 * pValue)
 {
-    //return mArgumentList->SetOutputArgumentOfLocalPtrPtr(index,pValue);
-    return E_NOT_IMPLEMENTED;
+    return mArgumentList->SetOutputArgumentOfLocalPtrPtr(index,(void**)pValue);
 }
 
 ECode CTestArgumentList::SetOutputArgumentOfLocalTypePtr(
@@ -296,16 +297,16 @@ ECode CTestArgumentList::SetOutputArgumentOfCarArrayPtr(
     /* [in] */ Int32 index,
     /* [out] */ Int32 * pValue)
 {
-    //return mArgumentList->SetOutputArgumentOfCarArrayPtr(index,(PCarQuintet)pValue);
-    return E_NOT_IMPLEMENTED;
+    return mArgumentList->SetOutputArgumentOfCarArrayPtr(index,(PCarQuintet)pValue);
+    //return E_NOT_IMPLEMENTED;
 }
 
 ECode CTestArgumentList::SetOutputArgumentOfCarArrayPtrPtr(
     /* [in] */ Int32 index,
     /* [out] */ Int32 * pValue)
 {
-    //return mArgumentList->SetOutputArgumentOfCarArrayPtrPtr(index,(PCarQuintet*)pValue);
-    return E_NOT_IMPLEMENTED;
+    return mArgumentList->SetOutputArgumentOfCarArrayPtrPtr(index,(PCarQuintet*)pValue);
+    //return E_NOT_IMPLEMENTED;
 }
 
 ECode CTestArgumentList::SetOutputArgumentOfStructPtr(
@@ -319,8 +320,8 @@ ECode CTestArgumentList::SetOutputArgumentOfStructPtrPtr(
     /* [in] */ Int32 index,
     /* [out] */ Int32 * pValue)
 {
-    //return mArgumentList->SetOutputArgumentOfStructPtrPtr(index,(PVoid*)pValue);
-    return E_NOT_IMPLEMENTED;
+    return mArgumentList->SetOutputArgumentOfStructPtrPtr(index,(PVoid*)pValue);
+    //return E_NOT_IMPLEMENTED;
 }
 
 ECode CTestArgumentList::SetOutputArgumentOfObjectPtrPtr(

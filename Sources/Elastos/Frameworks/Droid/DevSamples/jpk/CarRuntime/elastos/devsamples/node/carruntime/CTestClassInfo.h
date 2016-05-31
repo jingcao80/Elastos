@@ -160,7 +160,6 @@ public:
         /* [in] */ IClassInfo * pClassInfo);
 
 private:
-    // TODO: Add your private member variables here.
     AutoPtr<IClassInfo> mClassInfo;
 };
 

@@ -13,8 +13,7 @@ CAR_OBJECT_IMPL(CTestMethodInfo)
 ECode CTestMethodInfo::GetName(
     /* [out] */ String * pName)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mMethodInfo->GetName(pName);
 }
 
 ECode CTestMethodInfo::GetAnnotation(

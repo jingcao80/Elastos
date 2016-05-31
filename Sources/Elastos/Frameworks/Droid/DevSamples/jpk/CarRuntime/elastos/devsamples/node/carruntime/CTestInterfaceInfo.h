@@ -65,7 +65,7 @@ public:
         /* [in] */ IInterfaceInfo * pInterfaceInfo);
 
 private:
-    // TODO: Add your private member variables here.
+    IInterfaceInfo* mInterfaceInfo;
 };
 
 }

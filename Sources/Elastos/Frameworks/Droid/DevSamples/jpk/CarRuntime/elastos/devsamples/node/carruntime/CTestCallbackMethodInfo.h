@@ -58,7 +58,7 @@ public:
         /* [in] */ ICallbackMethodInfo * pCallbackMethodInfo);
 
 private:
-    // TODO: Add your private member variables here.
+    AutoPtr<ICallbackMethodInfo> mCallbackMethodInfo;
 };
 
 }

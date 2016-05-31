@@ -24,15 +24,13 @@ ECode CTestClassInfo::GetName(
 ECode CTestClassInfo::GetNamespace(
     /* [out] */ String * pNs)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mClassInfo->GetNamespace(pNs);
 }
 
 ECode CTestClassInfo::GetId(
     /* [out] */ ClassID * pClsid)
 {
-    mClassInfo->GetId(pClsid);
-    return NOERROR;
+    return mClassInfo->GetId(pClsid);
 }
 
 ECode CTestClassInfo::GetModuleInfo(
@@ -66,43 +64,37 @@ ECode CTestClassInfo::GetModuleInfo(
 ECode CTestClassInfo::IsSingleton(
     /* [out] */ Boolean * pIsSingleton)
 {
-    mClassInfo->IsSingleton(pIsSingleton);
-    return NOERROR;
+    return mClassInfo->IsSingleton(pIsSingleton);
 }
 
 ECode CTestClassInfo::GetThreadingModel(
     /* [out] */ ThreadingModel * pThreadingModel)
 {
-    mClassInfo->GetThreadingModel(pThreadingModel);
-    return NOERROR;
+    return mClassInfo->GetThreadingModel(pThreadingModel);
 }
 
 ECode CTestClassInfo::IsPrivate(
     /* [out] */ Boolean * pIsPrivate)
 {
-    mClassInfo->IsPrivate(pIsPrivate);
-    return NOERROR;
+    return mClassInfo->IsPrivate(pIsPrivate);
 }
 
 ECode CTestClassInfo::IsReturnValue(
     /* [out] */ Boolean * pReturnValue)
 {
-    mClassInfo->IsReturnValue(pReturnValue);
-    return NOERROR;
+    return mClassInfo->IsReturnValue(pReturnValue);
 }
 
 ECode CTestClassInfo::IsBaseClass(
     /* [out] */ Boolean * pIsBaseClass)
 {
-    mClassInfo->IsBaseClass(pIsBaseClass);
-    return NOERROR;
+    return mClassInfo->IsBaseClass(pIsBaseClass);
 }
 
 ECode CTestClassInfo::HasBaseClass(
     /* [out] */ Boolean * pHasBaseClass)
 {
-    mClassInfo->HasBaseClass(pHasBaseClass);
-    return NOERROR;
+    return mClassInfo->HasBaseClass(pHasBaseClass);
 }
 
 ECode CTestClassInfo::GetBaseClassInfo(
@@ -115,15 +107,13 @@ ECode CTestClassInfo::GetBaseClassInfo(
 ECode CTestClassInfo::IsGeneric(
     /* [out] */ Boolean * pIsGeneric)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mClassInfo->IsGeneric(pIsGeneric);
 }
 
 ECode CTestClassInfo::HasGeneric(
     /* [out] */ Boolean * pHasGeneric)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mClassInfo->HasGeneric(pHasGeneric);
 }
 
 ECode CTestClassInfo::GetGenericInfo(
@@ -136,15 +126,13 @@ ECode CTestClassInfo::GetGenericInfo(
 ECode CTestClassInfo::IsRegime(
     /* [out] */ Boolean * pIsRegime)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mClassInfo->IsRegime(pIsRegime);
 }
 
 ECode CTestClassInfo::GetAspectCount(
     /* [out] */ Int32 * pCount)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mClassInfo->GetAspectCount(pCount);
 }
 
 ECode CTestClassInfo::GetAllAspectInfos(
@@ -165,15 +153,13 @@ ECode CTestClassInfo::GetAspectInfo(
 ECode CTestClassInfo::IsAspect(
     /* [out] */ Boolean * pIsAspect)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mClassInfo->IsAspect(pIsAspect);
 }
 
 ECode CTestClassInfo::GetAggregateeCount(
     /* [out] */ Int32 * pCount)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mClassInfo->GetAggregateeCount(pCount);
 }
 
 ECode CTestClassInfo::GetAllAggregateeInfos(
@@ -194,14 +180,13 @@ ECode CTestClassInfo::GetAggregateeInfo(
 ECode CTestClassInfo::GetConstructorCount(
     /* [out] */ Int32 * pCount)
 {
-    mClassInfo->GetConstructorCount(pCount);
-    return NOERROR;
+    return mClassInfo->GetConstructorCount(pCount);
 }
 
 ECode CTestClassInfo::GetAllConstructorInfos(
     /* [out] */ ArrayOf<ITestConstructorInfo *> ** ppConstructorInfos)
 {
-    ECode ec;
+    ECode ec = NOERROR;
 
     Int32 constructorCount;
     ec = this->GetConstructorCount(&constructorCount);
@@ -228,8 +213,6 @@ ECode CTestClassInfo::GetAllConstructorInfos(
         testConstructorInfo->AddRef();
     }   //for
 
-    ec = NOERROR;
-
     return ec;
 }
 
@@ -252,8 +235,7 @@ ECode CTestClassInfo::GetConstructorInfoByParamCount(
 ECode CTestClassInfo::GetInterfaceCount(
     /* [out] */ Int32 * pCount)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mClassInfo->GetInterfaceCount(pCount);
 }
 
 ECode CTestClassInfo::GetAllInterfaceInfos(
@@ -274,8 +256,7 @@ ECode CTestClassInfo::GetInterfaceInfo(
 ECode CTestClassInfo::GetCallbackInterfaceCount(
     /* [out] */ Int32 * pCount)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mClassInfo->GetCallbackInterfaceCount(pCount);
 }
 
 ECode CTestClassInfo::GetAllCallbackInterfaceInfos(
@@ -296,8 +277,7 @@ ECode CTestClassInfo::GetCallbackInterfaceInfo(
 ECode CTestClassInfo::GetMethodCount(
     /* [out] */ Int32 * pCount)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mClassInfo->GetMethodCount(pCount);
 }
 
 ECode CTestClassInfo::GetAllMethodInfos(
@@ -319,8 +299,7 @@ ECode CTestClassInfo::GetMethodInfo(
 ECode CTestClassInfo::GetCallbackMethodCount(
     /* [out] */ Int32 * pCount)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mClassInfo->GetCallbackMethodCount(pCount);
 }
 
 ECode CTestClassInfo::GetAllCallbackMethodInfos(
@@ -379,9 +358,6 @@ ECode CTestClassInfo::constructor(
     /* [in] */ IClassInfo * pClassInfo)
 {
     mClassInfo = pClassInfo;
-
-    //moduleInfo->AddRef();
-
     return NOERROR;
 }
 

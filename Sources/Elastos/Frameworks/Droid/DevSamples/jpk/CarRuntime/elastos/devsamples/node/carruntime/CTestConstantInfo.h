@@ -36,7 +36,7 @@ public:
         /* [in] */ IConstantInfo * pConstantInfo);
 
 private:
-    // TODO: Add your private member variables here.
+    AutoPtr<IConstantInfo> mConstantInfo;
 };
 
 }

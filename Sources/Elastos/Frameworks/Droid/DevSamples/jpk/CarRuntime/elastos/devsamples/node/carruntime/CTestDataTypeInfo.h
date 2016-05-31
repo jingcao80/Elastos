@@ -36,7 +36,6 @@ public:
         /* [in] */ IDataTypeInfo * pDataTypeInfo);
 
 private:
-    // TODO: Add your private member variables here.
     IDataTypeInfo* mDataTypeInfo;
 };
 

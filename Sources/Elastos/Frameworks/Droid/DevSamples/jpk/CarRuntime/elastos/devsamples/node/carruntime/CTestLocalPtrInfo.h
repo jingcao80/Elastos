@@ -42,7 +42,7 @@ public:
         /* [in] */ ILocalPtrInfo * pLocalPtrInfo);
 
 private:
-    // TODO: Add your private member variables here.
+    ILocalPtrInfo* mLocalPtrInfo;
 };
 
 }

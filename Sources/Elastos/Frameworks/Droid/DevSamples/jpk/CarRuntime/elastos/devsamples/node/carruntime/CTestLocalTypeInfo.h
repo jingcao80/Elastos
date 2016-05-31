@@ -38,7 +38,7 @@ public:
         /* [in] */ ILocalTypeInfo * pLocalTypeInfo);
 
 private:
-    // TODO: Add your private member variables here.
+    ILocalTypeInfo* mLocalTypeInfo;
 };
 
 }

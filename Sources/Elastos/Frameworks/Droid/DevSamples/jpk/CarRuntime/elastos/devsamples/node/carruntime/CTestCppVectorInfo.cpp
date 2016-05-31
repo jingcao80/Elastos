@@ -13,8 +13,7 @@ CAR_OBJECT_IMPL(CTestCppVectorInfo)
 ECode CTestCppVectorInfo::GetName(
     /* [out] */ String * pName)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mCppVectorInfo->GetName(pName);
 }
 
 ECode CTestCppVectorInfo::GetSize(
@@ -54,8 +53,8 @@ ECode CTestCppVectorInfo::constructor()
 ECode CTestCppVectorInfo::constructor(
     /* [in] */ ICppVectorInfo * pCppVectorInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    mCppVectorInfo = pCppVectorInfo;
+    return NOERROR;
 }
 
 }

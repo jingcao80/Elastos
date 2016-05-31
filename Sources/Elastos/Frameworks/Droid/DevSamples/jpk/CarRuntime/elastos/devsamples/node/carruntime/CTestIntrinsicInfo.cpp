@@ -13,8 +13,7 @@ CAR_OBJECT_IMPL(CTestIntrinsicInfo)
 ECode CTestIntrinsicInfo::GetName(
     /* [out] */ String * pName)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mIntrinsicInfo->GetName(pName);
 }
 
 ECode CTestIntrinsicInfo::GetSize(
@@ -46,8 +45,8 @@ ECode CTestIntrinsicInfo::constructor()
 ECode CTestIntrinsicInfo::constructor(
     /* [in] */ IIntrinsicInfo * pIntrinsicInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    mIntrinsicInfo = pIntrinsicInfo;
+    return NOERROR;
 }
 
 }

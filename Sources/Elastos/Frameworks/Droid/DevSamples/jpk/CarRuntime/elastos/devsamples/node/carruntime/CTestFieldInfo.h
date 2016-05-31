@@ -33,7 +33,7 @@ public:
         /* [in] */ IFieldInfo * pFieldInfo);
 
 private:
-    // TODO: Add your private member variables here.
+    IFieldInfo* mFieldInfo;
 };
 
 }

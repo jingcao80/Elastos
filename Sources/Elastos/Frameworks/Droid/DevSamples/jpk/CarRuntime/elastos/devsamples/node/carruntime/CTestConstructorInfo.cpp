@@ -163,7 +163,7 @@ ECode CTestConstructorInfo::CreateObjectInRegime(
 ECode CTestConstructorInfo::GetClassInfo(
     /* [out] */ ITestClassInfo ** ppClassInfo)
 {
-    ECode ec;
+    ECode ec = NOERROR;
 
     ALOGD("CTestConstructorInfo::GetClassInfo=================1==========================");
 
@@ -196,8 +196,6 @@ ECode CTestConstructorInfo::GetClassInfo(
     ALOGD("CTestConstructorInfo::GetClassInfo=================5==========================");
     testClassInfo->AddRef();
     ALOGD("CTestConstructorInfo::GetClassInfo=================6==========================");
-
-    ec = NOERROR;
 
     return ec;
 }

@@ -13,8 +13,7 @@ CAR_OBJECT_IMPL(CTestEnumItemInfo)
 ECode CTestEnumItemInfo::GetName(
     /* [out] */ String * pName)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mEnumItemInfo->GetName(pName);
 }
 
 ECode CTestEnumItemInfo::GetEnumInfo(
@@ -40,8 +39,8 @@ ECode CTestEnumItemInfo::constructor()
 ECode CTestEnumItemInfo::constructor(
     /* [in] */ IEnumItemInfo * pEnumItemInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    mEnumItemInfo = pEnumItemInfo;
+    return NOERROR;
 }
 
 }
