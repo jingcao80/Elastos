@@ -1,0 +1,37 @@
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace DailerBind {
+    namespace Analytics {
+
+    /**
+     * @Involve
+     * interface IListActivity
+     * interface IPreferenceManagerOnPreferenceTreeClickListener
+     * interface IPreferenceFragmentOnPreferenceStartFragmentCallback
+     * interface IActivity
+     * interface IContextThemeWrapper
+     * interface ILayoutInflaterFactory
+     * interface ILayoutInflaterFactory2
+     * interface IWindowCallback
+     * interface IKeyEventCallback
+     * interface IViewOnCreateContextMenuListener //undefined
+     * interface IComponentCallbacks2
+     * interface IComponentCallbacks
+     * interface IOnWindowDismissedCallback  //IOnWindowDismissedCallback
+     * interface IContextWrapper
+     * interface IContext
+     * interface IPreferenceActivity
+     *
+     */
+    interface IAnalyticsPreferenceActivity {
+    }
+
+    } // Analytics
+    } // DailerBind
+    } // Apps
+    } // Elastos
+
+}

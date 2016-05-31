@@ -1,0 +1,22 @@
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace Settings {
+
+    /**
+     * @Involve
+     * interface IPreference
+     * interface IComparable
+     * interface IPreferenceManagerOnActivityResultListener
+     * interface IRingtonePreference
+     */
+    interface IDefaultRingtonePreference {
+    }
+
+    } //Settings
+    } //Dailer
+    } //Apps
+    } //Elastos
+}

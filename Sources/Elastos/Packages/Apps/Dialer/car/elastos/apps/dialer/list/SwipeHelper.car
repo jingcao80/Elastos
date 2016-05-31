@@ -1,0 +1,107 @@
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace List {
+
+    interface ISwipeHelper {
+        const Int32 IS_SWIPEABLE_TAG = R.id.is_swipeable_tag;
+
+        const Int32 X = 0;
+        const Int32 Y = 1;
+
+        const Float ALPHA_FADE_START = 0f; // fraction of thumbnail width
+                                           // where fade starts
+
+        SetDensityScale(
+            [in] Float densityScale);
+
+        SetPagingTouchSlop(
+            [in] Float pagingTouchSlop);
+
+        SetChildSwipedFarEnoughFactor(
+            [in] Float factor);
+
+        SetChildSwipedFastEnoughFactor(
+            [in] Float factor);
+
+        SetMinAlpha(
+            [in] Float minAlpha);
+
+        OnInterceptTouchEvent(
+            [in] IMotionEvent* ev,
+            [out] Boolean* result);
+
+        SnapChild(
+            [in] IView* view,
+            [in] Float velocity);
+
+        OnTouchEvent(
+            [in] IMotionEvent* ev,
+            [out] Boolean* result);
+    }
+
+    interface ISwipeHelperHelper {
+        // invalidate the view's own bounds all the way up the view hierarchy
+        InvalidateGlobalRegion(
+            [in] IView* view);
+
+        // invalidate a rectangle relative to the view's coordinate system all the way up the view
+        // hierarchy
+        InvalidateGlobalRegion(
+            [in] IView* view,
+            [in] IRectF* childBounds);
+
+        SetSwipeable(
+            [in] IView* view,
+            [in] Boolean swipeable);
+
+        IsSwipeable(
+            [in] IView* view,
+            [out] Boolean* result);
+
+        GetIS_SWIPEABLE(
+            [out] IInterface** obj);
+    }
+
+    interface ISwipeHelperCallback {
+        GetChildAtPosition(
+            [in] IMotionEvent* ev,
+            [out] IView** child);
+
+        GetChildContentView(
+            [in] IView* v,
+            [out] IView** child);
+
+        OnScroll();
+
+        CanChildBeDismissed(
+            [in] IView* v,
+            [out] Boolean* result);
+
+        OnBeginDrag(
+            [in] IView* v);
+
+        OnChildDismissed(
+            [in] IView* v);
+
+        OnDragCancelled(
+            [in] IView* v);
+    }
+
+    interface ISwipeHelperOnItemGestureListener {
+        OnSwipe(
+            [in] IView* view);
+
+        OnTouch();
+
+        IsSwipeEnabled(
+            [out] Boolean* result);
+    }
+
+    } //List
+    } //Dailer
+    } //Apps
+    } //Elastos
+}
