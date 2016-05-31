@@ -4,7 +4,7 @@ module
     interface Elastos.Droid.Os.IHandler;
     interface Elastos.Droid.Os.IMessage;
     interface Elastos.Droid.Telephony.ISignalStrength;
-    // interface Elastos.Droid.Internal.Telephony.DataConnection.IDcTrackerBase;
+    interface Elastos.Droid.Internal.Telephony.DataConnection.IDcTrackerBase;
 
     using interface Elastos.IO.IFileDescriptor;
     using interface Elastos.IO.IPrintWriter;
@@ -21,6 +21,12 @@ module
      */
     [deprecated]
     interface IServiceStateTracker {
+        /* The otaspMode passed to PhoneStateListener#onOtaspChanged */
+        const Int32 OTASP_UNINITIALIZED     = 0;
+        const Int32 OTASP_UNKNOWN           = 1;
+        const Int32 OTASP_NEEDED            = 2;
+        const Int32 OTASP_NOT_NEEDED        = 3;
+
         /** Waiting period before recheck gprs and voice registration. */
         const Int32 DEFAULT_GPRS_CHECK_PERIOD_MILLIS = 60 * 1000;
 
@@ -141,8 +147,8 @@ module
         UnregisterForPsRestrictedDisabled(
             [in] IHandler* h);
 
-        // PowerOffRadioSafely(
-        //     [in] IDcTrackerBase* dcTracker);
+        PowerOffRadioSafely(
+             [in] IDcTrackerBase* dcTracker);
 
         ProcessPendingRadioPowerOffAfterDataOff(
             [out] Boolean* result);
