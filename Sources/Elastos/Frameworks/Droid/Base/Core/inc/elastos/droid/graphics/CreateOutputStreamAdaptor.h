@@ -13,8 +13,7 @@ namespace Graphics {
 
 SkStream* CreateInputStreamAdaptor(
     /* [in] */ IInputStream* stream,
-    /* [in] */ ArrayOf<Byte>* storage,
-    /* [in] */ Int32 markSize = 0);
+    /* [in] */ ArrayOf<Byte>* storage);
 
 SkStreamRewindable* CopyJavaInputStream(
     /* [in] */ IInputStream* stream,

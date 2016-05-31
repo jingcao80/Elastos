@@ -107,7 +107,7 @@ private:
         /* [in] */ size_t size)
     {
         Int64 skipped = 0;
-        ECode ec = mInputStream->Skip(size, &skipped);
+        ECode ec = mInputStream->Skip((Int64)size, &skipped);
         if (FAILED(ec)) {
             SkDebugf("------- skip threw an exception\n");
             return 0;
@@ -123,19 +123,15 @@ private:
 private:
     AutoPtr<IInputStream> mInputStream;      // the caller owns this object
     AutoPtr< ArrayOf<Byte> > mByteArray;     // the caller owns this object
-    size_t        mCapacity;
+    Int32         mCapacity;
     size_t        mBytesRead;
     bool          mIsAtEnd;
 };
 
 SkStream* CreateInputStreamAdaptor(
     /* [in] */ IInputStream* stream,
-    /* [in] */ ArrayOf<Byte>* storage,
-    /* [in] */ Int32 markSize)
+    /* [in] */ ArrayOf<Byte>* storage)
 {
-    if (markSize) {
-        stream->Mark(markSize);
-    }
     return new InputStreamAdaptor(stream, storage);
 }
 
