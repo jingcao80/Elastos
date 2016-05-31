@@ -163,7 +163,7 @@ void PackedObjectVector<E>::GrowBuffer()
     Int32 after = mRows - (mRowGapStart + mRowGapLength);
 
     newvalues->Copy(0, mValues, 0, mColumns * mRowGapStart);
-    newvalues->Copy((newsize - after) * mColumns, mValues, (newsize - after) * mColumns, after * mColumns);
+    newvalues->Copy((newsize - after) * mColumns, mValues, (mRows - after) * mColumns, after * mColumns);
 
     mRowGapLength += newsize - mRows;
     mRows = newsize;

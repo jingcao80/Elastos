@@ -113,6 +113,8 @@ class TextDisplayList
 public:
     friend class Editor;
 
+    TO_STRING_IMPL("TextDisplayList");
+
     TextDisplayList(
         /* [in] */ const String& name);
 
@@ -239,6 +241,8 @@ class CustomPopupWindow
     : public PopupWindow
 {
 public:
+    TO_STRING_IMPL("CustomPopupWindow");
+
     CustomPopupWindow(
         /* [in] */ IContext* context,
         /* [in] */ Int32 defStyleAttr,
@@ -261,6 +265,8 @@ class PinnedPopupWindow
 {
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("PinnedPopupWindow");
 
     PinnedPopupWindow(
         /* [in] */ Editor* editor);
@@ -317,6 +323,8 @@ class EasyEditPopupWindow
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("EasyEditPopupWindow");
+
     EasyEditPopupWindow(
         /* [in] */ Editor* editor);
 
@@ -359,6 +367,8 @@ class SuggestionAdapter
     : public BaseAdapter
 {
 public:
+    TO_STRING_IMPL("SuggestionAdapter");
+
     SuggestionAdapter(
         /* [in] */ Editor* editor,
         /* [in] */ SuggestionsPopupWindow* popupWindow);
@@ -397,6 +407,8 @@ class SuggestionSpanComparator
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("SuggestionSpanComparator");
+
     SuggestionSpanComparator(
         /* [in] */ SuggestionsPopupWindow* host);
 
@@ -417,6 +429,8 @@ class SuggestionsPopupWindow
 {
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("SuggestionsPopupWindow");
 
     typedef HashMap<AutoPtr<ISuggestionSpan>, AutoPtr<IInteger32> > SuggestionSpanHashMap;
     typedef typename SuggestionSpanHashMap::Iterator SuggestionSpanIterator;
@@ -496,6 +510,8 @@ class SelectionActionModeCallback
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("SelectionActionModeCallback");
+
     SelectionActionModeCallback(
         /* [in] */ Editor* editor);
 
@@ -530,6 +546,8 @@ class ActionPopupWindow
 {
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("ActionPopupWindow");
 
     ActionPopupWindow(
         /* [in] */ Editor* editor);
@@ -569,6 +587,8 @@ class HandleView
 {
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("HandleView");
 
     HandleView();
 
@@ -721,6 +741,8 @@ class InsertionHandleView
     : public HandleView
 {
 public:
+    TO_STRING_IMPL("InsertionHandleView");
+
     InsertionHandleView();
 
     CARAPI constructor(
@@ -781,6 +803,8 @@ class SelectionStartHandleView
     : public HandleView
 {
 public:
+    TO_STRING_IMPL("SelectionStartHandleView");
+
     SelectionStartHandleView();
 
     CARAPI constructor(
@@ -815,6 +839,8 @@ class SelectionEndHandleView
     : public HandleView
 {
 public:
+    TO_STRING_IMPL("SelectionEndHandleView");
+
     SelectionEndHandleView();
 
     CARAPI constructor(
@@ -856,6 +882,8 @@ class CursorController
 {
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("CursorController");
 
     CursorController(
         /* [in] */ Editor* editor);
@@ -899,6 +927,8 @@ class InsertionPointCursorController
     : public CursorController
 {
 public:
+    TO_STRING_IMPL("InsertionPointCursorController");
+
     InsertionPointCursorController(
         /* [in] */ Editor* editor);
 
@@ -928,6 +958,8 @@ class SelectionModifierCursorController
     : public CursorController
 {
 public:
+    TO_STRING_IMPL("SelectionModifierCursorController");
+
     SelectionModifierCursorController(
         /* [in] */ Editor* editor);
 
@@ -991,6 +1023,8 @@ class PositionListener
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("PositionListener");
+
     PositionListener(
         /* [in] */ Editor* editor);
 
@@ -1035,6 +1069,8 @@ class CorrectionHighlighter
     : public Object
 {
 public:
+    TO_STRING_IMPL("CorrectionHighlighter");
+
     CorrectionHighlighter(
         /* [in] */ Editor* editor);
 
@@ -1072,6 +1108,8 @@ class ErrorPopup
     : public PopupWindow
 {
 public:
+    TO_STRING_IMPL("ErrorPopup");
+
     ErrorPopup(
         /* [in]*/ TextView* textView,
         /* [in]*/ Int32 width,
@@ -1108,6 +1146,8 @@ class Blink
     : public HandlerRunnable
 {
 public:
+    TO_STRING_IMPL("Blink");
+
     Blink(
         /* [in]*/ Editor* editor);
 
@@ -1134,6 +1174,8 @@ class DragLocalState
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("DragLocalState");
+
     DragLocalState(
         /* [in] */ TextView* sourceTextView,
         /* [in] */ Int32 start,
@@ -1154,6 +1196,8 @@ class UndoInputFilter
 {
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("UndoInputFilter");
 
     UndoInputFilter(
         /* [in] */ Editor* editor);
@@ -1180,6 +1224,8 @@ class TextModifyOperation
 {
 public:
     CAR_INTERFACE_DECL();
+
+    TO_STRING_IMPL("TextModifyOperation");
 
     TextModifyOperation();
 
@@ -1230,6 +1276,8 @@ private:
             : public Runnable
         {
         public:
+            TO_STRING_IMPL("Editor::SpanController::SpanControllerRunnable");
+
             SpanControllerRunnable(
                 /* [in] */ SpanController* host);
 
@@ -1246,6 +1294,8 @@ private:
         public:
             CAR_INTERFACE_DECL()
 
+            TO_STRING_IMPL("Editor::SpanController::SpanControllerListener");
+
             SpanControllerListener(
                 /* [in] */ SpanController* host);
 
@@ -1257,6 +1307,8 @@ private:
 
     public:
         CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("Editor::SpanController");
 
         SpanController(
             /* [in] */ Editor* host);
@@ -1314,6 +1366,8 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("Editor::CursorAnchorInfoNotifier");
+
         CursorAnchorInfoNotifier(
             /* [in] */ Editor* editor);
 
@@ -1332,6 +1386,8 @@ private:
 
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("Editor");
 
     Editor(
         /* [in] */ TextView* textView);

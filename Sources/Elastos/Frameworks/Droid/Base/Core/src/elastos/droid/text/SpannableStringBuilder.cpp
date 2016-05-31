@@ -62,6 +62,7 @@ SpannableStringBuilder::SpannableStringBuilder()
     , mSpanCount(0)
     , mSpanCountBeforeAdd(0)
 {
+    mFilters = NO_FILTERS;
 }
 
 SpannableStringBuilder::~SpannableStringBuilder()
@@ -89,12 +90,12 @@ ECode SpannableStringBuilder::constructor(
     VALIDATE_NOT_NULL(text);
     Int32 textLen = 0;
     text->GetLength(&textLen);
-    if (start < 0 || end < 0 || start > end ||
-        end - start > textLen) {
+
+    Int32 srclen = end - start;
+    if (start < 0 || end < 0 || start > end || srclen < 0 ||
+        srclen > textLen) {
         return E_STRING_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
-    mFilters = NO_FILTERS;
-    Int32 srclen = end - start;
 
     mText = ArrayUtils::NewUnpaddedChar32Array(GrowingArrayUtils::GrowSize(srclen));
     mGapStart = srclen;
@@ -108,13 +109,13 @@ ECode SpannableStringBuilder::constructor(
     mSpanEnds = EmptyArray::INT32;
     mSpanFlags = EmptyArray::INT32;
 
-    if (ISpanned::Probe(text)) {
-        AutoPtr<ISpanned> sp = ISpanned::Probe(text);
-        AutoPtr< ArrayOf<IInterface*> > spans = NULL;
+    AutoPtr<ISpanned> sp = ISpanned::Probe(text);
+    if (sp != NULL) {
+        AutoPtr< ArrayOf<IInterface*> > spans;
         sp->GetSpans(start, end, EIID_IInterface, (ArrayOf<IInterface*>**)&spans);
 
         for (Int32 i = 0; i < spans->GetLength(); i++) {
-            if (INoCopySpan::Probe((*spans)[i])) {
+            if (INoCopySpan::Probe((*spans)[i]) != NULL) {
                 continue;
             }
 
@@ -127,15 +128,19 @@ ECode SpannableStringBuilder::constructor(
             Int32 fl;
             sp->GetSpanFlags((*spans)[i], &fl);
 
-            if (st < 0)
+            if (st < 0) {
                 st = 0;
-            if (st > end - start)
+            }
+            if (st > end - start) {
                 st = end - start;
+            }
 
-            if (en < 0)
+            if (en < 0) {
                 en = 0;
-            if (en > end - start)
+            }
+            if (en > end - start) {
                 en = end - start;
+            }
 
             SetSpan(FALSE, (*spans)[i], st, en, fl);
         }
@@ -147,13 +152,14 @@ ECode SpannableStringBuilder::constructor(
 AutoPtr<ISpannableStringBuilder> SpannableStringBuilder::ValueOf(
     /* [in] */ ICharSequence* source)
 {
-    AutoPtr<ISpannableStringBuilder> ssb;
-    if (ISpannableStringBuilder::Probe(source)) {
-        ssb = ISpannableStringBuilder::Probe(source);
-    } else {
-        CSpannableStringBuilder::New(source, (ISpannableStringBuilder**)&ssb);
+    AutoPtr<ISpannableStringBuilder> ssb = ISpannableStringBuilder::Probe(source);
+    if (ssb != NULL) {
+        return ssb;
     }
-    return ssb;
+    else {
+        CSpannableStringBuilder::New(source, (ISpannableStringBuilder**)&ssb);
+        return ssb;
+    }
 }
 
 ECode SpannableStringBuilder::GetCharAt(
@@ -177,7 +183,8 @@ ECode SpannableStringBuilder::GetCharAt(
 
     if (where >= mGapStart) {
         *c = (*mText)[where + mGapLength];
-    } else {
+    }
+    else {
         *c = (*mText)[where];
     }
     return NOERROR;
@@ -411,13 +418,13 @@ Boolean SpannableStringBuilder::IsSpanEquals(
         return FALSE;
     }
 
-    AutoPtr<IComparable> cpr = (IComparable*)(lhs->Probe(Elastos::Core::EIID_IComparable));
+    AutoPtr<IComparable> cpr = IComparable::Probe(lhs);
     if (cpr) {
         Int32 result;
         cpr->CompareTo(rhs, &result);
         return (result == 0);
     }
-    else if (lhs->Probe(EIID_IInterface) == rhs->Probe(EIID_IInterface)) {
+    else if (TO_IINTERFACE(lhs) == TO_IINTERFACE(rhs)) {
         return TRUE;
     }
     return FALSE;
@@ -715,7 +722,7 @@ ECode SpannableStringBuilder::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    *str = String("");
+    *str = "";
     Int32 len;
     GetLength(&len);
     if (len == 0) return NOERROR;
@@ -751,9 +758,11 @@ ECode SpannableStringBuilder::DrawText(
 
     if (end <= mGapStart) {
         c->DrawText(mText, start, end - start, x, y, p);
-    } else if (start >= mGapStart) {
+    }
+    else if (start >= mGapStart) {
         c->DrawText(mText, start + mGapLength, end - start, x, y, p);
-    } else {
+    }
+    else {
         AutoPtr< ArrayOf<Char32> > buf = TextUtils::Obtain(end - start);
 
         GetChars(start, end, buf, 0);
@@ -783,10 +792,12 @@ ECode SpannableStringBuilder::DrawTextRun(
     Int32 len = end - start;
     if (contextEnd <= mGapStart) {
         c->DrawTextRun(mText, start, len, contextStart, contextLen, x, y, isRtl, p);
-    } else if (contextStart >= mGapStart) {
+    }
+    else if (contextStart >= mGapStart) {
         c->DrawTextRun(mText, start + mGapLength, len, contextStart + mGapLength,
                 contextLen, x, y, isRtl, p);
-    } else {
+    }
+    else {
         AutoPtr< ArrayOf<Char32> > buf = TextUtils::Obtain(contextLen);
         GetChars(contextStart, contextEnd, buf, 0);
         c->DrawTextRun(buf, start - contextStart, len, 0, contextLen, x, y, isRtl, p);
@@ -809,9 +820,11 @@ ECode SpannableStringBuilder::MeasureText(
 
     if (end <= mGapStart) {
         p->MeasureText(mText, start, end - start, width);
-    } else if (start >= mGapStart) {
+    }
+    else if (start >= mGapStart) {
         p->MeasureText(mText, start + mGapLength, end - start, width);
-    } else {
+    }
+    else {
         AutoPtr< ArrayOf<Char32> > buf = TextUtils::Obtain(end - start);
         GetChars(start, end, buf, 0);
 
@@ -836,9 +849,11 @@ ECode SpannableStringBuilder::GetTextWidths(
 
     if (end <= mGapStart) {
         p->GetTextWidths(mText, start, end - start, widths, count);
-    } else if (start >= mGapStart) {
+    }
+    else if (start >= mGapStart) {
         p->GetTextWidths(mText, start + mGapLength, end - start, widths, count);
-    } else {
+    }
+    else {
         AutoPtr< ArrayOf<Char32> > buf = TextUtils::Obtain(end - start);
         GetChars(start, end, buf, 0);
 
@@ -864,28 +879,27 @@ ECode SpannableStringBuilder::GetTextRunAdvances(
     *result = 0;
     VALIDATE_NOT_NULL(p)
 
-    Float ret;
-
     Int32 contextLen = contextEnd - contextStart;
     Int32 len = end - start;
 
     if (end <= mGapStart) {
         p->GetTextRunAdvances(mText, start, len, contextStart, contextLen,
-                isRtl, advances, advancesPos, &ret);
-    } else if (start >= mGapStart) {
+                isRtl, advances, advancesPos, result);
+    }
+    else if (start >= mGapStart) {
         p->GetTextRunAdvances(mText, start + mGapLength, len,
                 contextStart + mGapLength, contextLen, isRtl, advances,
-                advancesPos, &ret);
-    } else {
+                advancesPos, result);
+    }
+    else {
         AutoPtr< ArrayOf<Char32> > buf = TextUtils::Obtain(contextLen);
         GetChars(contextStart, contextEnd, buf, 0);
 
         p->GetTextRunAdvances(buf, start - contextStart, len,
-               0, contextLen, isRtl, advances, advancesPos, &ret);
+               0, contextLen, isRtl, advances, advancesPos, result);
         TextUtils::Recycle(buf);
     }
 
-    *result = ret;
     return NOERROR;
 }
 
@@ -908,11 +922,13 @@ ECode SpannableStringBuilder::GetTextRunCursor(
     if (contextEnd <= mGapStart) {
         p->GetTextRunCursor(mText, contextStart, contextLen,
                 dir, offset, cursorOpt, &ret);
-    } else if (contextStart >= mGapStart) {
+    }
+    else if (contextStart >= mGapStart) {
         p->GetTextRunCursor(mText, contextStart + mGapLength, contextLen,
                 dir, offset + mGapLength, cursorOpt, &ret);
         ret -= mGapLength;
-    } else {
+    }
+    else {
         AutoPtr< ArrayOf<Char32> > buf = TextUtils::Obtain(contextLen);
         GetChars(contextStart, contextEnd, buf, 0);
         p->GetTextRunCursor(buf, 0, contextLen, dir, offset - contextStart, cursorOpt, &ret);
@@ -990,7 +1006,8 @@ void SpannableStringBuilder::MoveGapTo(
         Int32 overlap = mGapStart - where;
         AutoPtr<ArrayOf<Char32> > newArray = mText->Clone();
         mText->Copy(mGapStart + mGapLength - overlap, newArray, where, overlap);
-    } else /* where > mGapStart */ {
+    }
+    else /* where > mGapStart */ {
         Int32 overlap = where - mGapStart;
         AutoPtr<ArrayOf<Char32> > newArray = mText->Clone();
         mText->Copy(mGapStart, newArray, where + mGapLength - overlap, overlap);
@@ -1007,7 +1024,8 @@ void SpannableStringBuilder::MoveGapTo(
 
         if (start > where) {
             start += mGapLength;
-        } else if (start == where) {
+        }
+        else if (start == where) {
             Int32 flag = ((*mSpanFlags)[i] & START_MASK) >> START_SHIFT;
 
             if (flag == POINT || (atEnd && flag == PARAGRAPH))
@@ -1020,7 +1038,8 @@ void SpannableStringBuilder::MoveGapTo(
 
         if (end > where) {
             end += mGapLength;
-        } else if (end == where) {
+        }
+        else if (end == where) {
             Int32 flag = ((*mSpanFlags)[i] & END_MASK);
 
             if (flag == POINT || (atEnd && flag == PARAGRAPH)) {
@@ -1152,8 +1171,8 @@ ECode SpannableStringBuilder::Change(
 
     mSpanCountBeforeAdd = mSpanCount;
 
-    if (cs->Probe(EIID_ISpanned)) {
-        AutoPtr<ISpanned> sp = (ISpanned*) cs;
+    AutoPtr<ISpanned> sp = ISpanned::Probe(cs);
+    if (sp != NULL) {
         AutoPtr< ArrayOf<IInterface*> > spans;
         sp->GetSpans(csStart, csEnd, EIID_IInterface, (ArrayOf<IInterface*>**)&spans);
         Int32 st, en, temp;
@@ -1195,18 +1214,21 @@ Int32 SpannableStringBuilder::UpdatedIntervalBound(
             if (textIsRemoved || offset > start) {
                 return mGapStart + mGapLength;
             }
-        } else {
+        }
+        else {
             if (flag == PARAGRAPH) {
                 if (atEnd) {
                     return mGapStart + mGapLength;
                 }
-            } else { // MARK
+            }
+            else { // MARK
                 // MARKs should be moved to the start, with the exception of a mark located at
                 // the end of the range (which will be < mGapStart + mGapLength since mGapLength
                 // is > 0, which should stay 'unchanged' at the end of the replaced text.
                 if (textIsRemoved || offset < mGapStart - nbNewChars) {
                     return start;
-                } else {
+                }
+                else {
                     // Move to the end of replaced text (needed if nbNewChars != 0)
                     return mGapStart;
                 }
@@ -1243,19 +1265,21 @@ Boolean SpannableStringBuilder::HasNonExclusiveExclusiveSpanAt(
     /* [in] */ ICharSequence* text,
     /* [in] */ Int32 offset)
 {
-    if (text != NULL && text->Probe(EIID_ISpanned)) {
-        AutoPtr<ISpanned> spanned = (ISpanned*) text;
-        AutoPtr< ArrayOf<IInterface*> > spans;
-        spanned->GetSpans(offset, offset, EIID_IInterface, (ArrayOf<IInterface*>**)&spans);
-        Int32 length = spans->GetLength();
-        for (Int32 i = 0; i < length; i++) {
-            AutoPtr<IInterface> span = (*spans)[i];
-            Int32 flags;
-            spanned->GetSpanFlags(span, &flags);
-            if (flags != ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE) return TRUE;
+    if (text != NULL) {
+        AutoPtr<ISpanned> spanned = ISpanned::Probe(text);
+        if (spanned != NULL) {
+            AutoPtr< ArrayOf<IInterface*> > spans;
+            spanned->GetSpans(offset, offset, EIID_IInterface, (ArrayOf<IInterface*>**)&spans);
+            Int32 length = spans->GetLength();
+            for (Int32 i = 0; i < length; i++) {
+                AutoPtr<IInterface> span = (*spans)[i];
+                Int32 flags;
+                spanned->GetSpanFlags(span, &flags);
+                if (flags != ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE) return TRUE;
+            }
+
         }
     }
-
     return FALSE;
 }
 
@@ -1280,7 +1304,8 @@ void SpannableStringBuilder::SendToSpanWatchers(
                 previousSpanStart -= nbNewChars;
                 spanChanged = TRUE;
             }
-        } else if (spanStart >= replaceStart) {
+        }
+        else if (spanStart >= replaceStart) {
             // No change if span start was already at replace interval boundaries before replace
             if ((spanStart != replaceStart ||
                     ((spanFlags & SPAN_START_AT_START) != SPAN_START_AT_START)) &&
@@ -1299,7 +1324,8 @@ void SpannableStringBuilder::SendToSpanWatchers(
                 previousSpanEnd -= nbNewChars;
                 spanChanged = TRUE;
             }
-        } else if (spanEnd >= replaceStart) {
+        }
+        else if (spanEnd >= replaceStart) {
             // No change if span start was already at replace interval boundaries before replace
             if ((spanEnd != replaceStart ||
                     ((spanFlags & SPAN_END_AT_START) != SPAN_END_AT_START)) &&
@@ -1332,7 +1358,6 @@ void SpannableStringBuilder::SendBeforeTextChanged(
     /* [in] */ Int32 before,
     /* [in] */ Int32 after)
 {
-    AutoPtr<ISpannable> sp = this;
     assert(watchers != NULL);
 
     Int32 n = watchers->GetLength();
@@ -1396,7 +1421,7 @@ void SpannableStringBuilder::SendSpanRemoved(
     ISpannable* spannable = this;
     Int32 n = recip->GetLength();
     for (Int32 i = 0; i < n; i++) {
-        AutoPtr<ISpanWatcher> sw = (ISpanWatcher*)((*recip)[i]->Probe(EIID_ISpanWatcher));
+        AutoPtr<ISpanWatcher> sw = ISpanWatcher::Probe((*recip)[i]);
         sw->OnSpanRemoved(spannable, what, start, end);
     }
 }
@@ -1537,7 +1562,8 @@ ECode SpannableStringBuilder::SetSpan(
     GetLength(&len);
     if (start > mGapStart) {
         start += mGapLength;
-    } else if (start == mGapStart) {
+    }
+    else if (start == mGapStart) {
         if (flagsStart == POINT || (flagsStart == PARAGRAPH && start == len)) {
             start += mGapLength;
         }
@@ -1545,7 +1571,8 @@ ECode SpannableStringBuilder::SetSpan(
 
     if (end > mGapStart) {
         end += mGapLength;
-    } else if (end == mGapStart) {
+    }
+    else if (end == mGapStart) {
         if (flagsEnd == POINT || (flagsEnd == PARAGRAPH && end == len)) {
             end += mGapLength;
         }
