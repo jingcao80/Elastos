@@ -2158,7 +2158,6 @@ ECode WallpaperManagerService::LoadSettingsLocked(
                         wallpaper->mNextWallpaperComponent->GetPackageName(&packageName);
 
                     if (packageName.Equals("android")) {
-                        Slogger::D("xihaoc", "packageName is android");
                         wallpaper->mNextWallpaperComponent = mImageWallpaper;
                     }
 

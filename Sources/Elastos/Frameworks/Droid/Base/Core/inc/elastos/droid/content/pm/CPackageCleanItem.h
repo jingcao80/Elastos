@@ -14,6 +14,7 @@ namespace Pm {
 CarClass(CPackageCleanItem)
     , public Object
     , public IPackageCleanItem
+    , public IParcelable
 {
 public:
     CAR_INTERFACE_DECL()
@@ -33,6 +34,10 @@ public:
 
     CARAPI Equals(
         /* [in] */ IPackageCleanItem* obj,
+        /* [out] */ Boolean* result);
+
+    CARAPI Equals(
+        /* [in] */ IInterface* obj,
         /* [out] */ Boolean* result);
 
     CARAPI GetHashCode(

@@ -105,7 +105,9 @@ public:
             : mContext(context)
             , mTarget(target)
             , mPackageName(packageName)
-        {}
+        {
+            PackageDeleteObserver::constructor();
+        }
 
         CARAPI OnUserActionRequired(
             /* [in] */ IIntent* intent);

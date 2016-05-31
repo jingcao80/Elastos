@@ -268,7 +268,7 @@ ECode Handler::RunWithScissors(
 ECode Handler::ObtainMessage(
     /* [out] */ IMessage** msg)
 {
-    return ObtainMessage(0);
+    return ObtainMessage(0, msg);
 }
 
 ECode Handler::ObtainMessage(

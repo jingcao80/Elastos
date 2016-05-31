@@ -135,6 +135,7 @@ ECode CPackageInstallerService::PackageDeleteObserverAdapter::OnUserActionRequir
     mTarget->SendIntent(mContext, 0, fillIn, NULL, NULL);
     // } catch (SendIntentException ignored) {
     // }
+    Release();
     return NOERROR;
 }
 
@@ -159,6 +160,7 @@ ECode CPackageInstallerService::PackageDeleteObserverAdapter::OnPackageDeleted(
     mTarget->SendIntent(mContext, 0, fillIn, NULL, NULL);
     // } catch (SendIntentException ignored) {
     // }
+    Release();
     return NOERROR;
 }
 
@@ -179,6 +181,7 @@ ECode CPackageInstallerService::PackageInstallObserverAdapter::OnUserActionRequi
     mTarget->SendIntent(mContext, 0, fillIn, NULL, NULL);
     // } catch (SendIntentException ignored) {
     // }
+    Release();
     return NOERROR;
 }
 
@@ -211,6 +214,7 @@ ECode CPackageInstallerService::PackageInstallObserverAdapter::OnPackageInstalle
     mTarget->SendIntent(mContext, 0, fillIn, NULL, NULL);
     // } catch (SendIntentException ignored) {
     // }
+    Release();
     return NOERROR;
 }
 
@@ -1430,6 +1434,7 @@ ECode CPackageInstallerService::Uninstall(
 
     AutoPtr<PackageDeleteObserverAdapter> adapter = new PackageDeleteObserverAdapter(mContext,
             statusReceiver, packageName);
+    adapter->AddRef();
     Int32 perm;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::DELETE_PACKAGES, &perm))

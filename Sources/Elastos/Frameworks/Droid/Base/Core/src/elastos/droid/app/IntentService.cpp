@@ -99,8 +99,10 @@ ECode IntentService::OnStartCommand(
     /* [in] */ Int32 startId,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     OnStart(intent, startId);
-    return mRedelivery ? IService::START_REDELIVER_INTENT : IService::START_NOT_STICKY;
+    *result = mRedelivery ? IService::START_REDELIVER_INTENT : IService::START_NOT_STICKY;
+    return NOERROR;
 }
 
 ECode IntentService::OnDestroy()

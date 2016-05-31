@@ -227,7 +227,6 @@ AsyncTask::~AsyncTask()
 {
     if (!mIsExecuted) {
         delete mWorker;
-        delete mFuture;
     }
 }
 

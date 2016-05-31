@@ -654,8 +654,7 @@ private:
 
     // do not use AutoPtr<WorkerRunnable>
     WorkerRunnable* mWorker;
-    // do not use AutoPtr<MyFutureTask>
-    MyFutureTask* mFuture;
+    AutoPtr<MyFutureTask> mFuture;
     Boolean mIsExecuted;
 
     volatile Status mStatus;

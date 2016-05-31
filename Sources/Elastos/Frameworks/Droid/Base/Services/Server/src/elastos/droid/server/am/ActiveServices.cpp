@@ -16,6 +16,7 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
+#include <utils/CallStack.h>
 
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
@@ -250,6 +251,7 @@ AutoPtr<ActiveServices::ServiceMap> ActiveServices::GetServiceMap(
         smap = new ServiceMap(looper, callingUser, this);
         mServiceMap[callingUser] = smap;
     }
+
     return smap;
 }
 
@@ -2201,8 +2203,7 @@ ECode ActiveServices::ServiceDoneExecutingLocked(
                     break;
                 }
                 default:
-//                     throw new IllegalArgumentException(
-//                             "Unknown service start result: " + res);
+                    Slogger::E(TAG, "Unknown service start result: %d", res);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
             if (res == IService::START_STICKY_COMPATIBILITY) {
@@ -2384,12 +2385,12 @@ Boolean ActiveServices::CollectForceStopServicesLocked(
     /* [in] */ Int32 userId,
     /* [in] */ Boolean evenPersistent,
     /* [in] */ Boolean doit,
-    /* [in] */ IComponentNameCServiceRecordHashMap* services,
+    /* [in] */ IComponentNameCServiceRecordHashMap& services,
     /* [in] */ List<AutoPtr<CServiceRecord> >* result)
 {
     Boolean didSomething = FALSE;
     IComponentNameCServiceRecordHashMap::Iterator it;
-    for (it = services->Begin(); it != services->End(); ++it) {
+    for (it = services.Begin(); it != services.End(); ++it) {
         AutoPtr<CServiceRecord> service = it->mSecond;
         if ((name == NULL || service->mPackageName.Equals(name))
             && (service->mApp == NULL || evenPersistent || !service->mApp->mPersistent)) {
@@ -2424,7 +2425,7 @@ Boolean ActiveServices::ForceStopLocked(
         HashMap<Int32, AutoPtr<ServiceMap> >::Iterator it;
         for (it = mServiceMap.Begin(); it != mServiceMap.End(); ++it) {
             didSomething |= CollectForceStopServicesLocked(name, userId, evenPersistent,
-                    doit, &it->mSecond->mServicesByName, &services);
+                    doit, it->mSecond->mServicesByName, &services);
             if (!doit && didSomething) {
                 return TRUE;
             }
@@ -2435,9 +2436,8 @@ Boolean ActiveServices::ForceStopLocked(
         if (it != mServiceMap.End()) {
             AutoPtr<ServiceMap> smap = it->mSecond;
             if (smap != NULL) {
-                AutoPtr<IComponentNameCServiceRecordHashMap> items = &smap->mServicesByName;
                 didSomething = CollectForceStopServicesLocked(name, userId, evenPersistent,
-                        doit, items, &services);
+                        doit, smap->mServicesByName, &services);
             }
         }
     }
@@ -3252,9 +3252,9 @@ Boolean ActiveServices::DumpService(
                 if (smap == NULL) {
                     continue;
                 }
-                AutoPtr<IComponentNameCServiceRecordHashMap> alls = &smap->mServicesByName;
+                IComponentNameCServiceRecordHashMap& alls = smap->mServicesByName;
                 IComponentNameCServiceRecordHashMap::Iterator it;
-                for (it = alls->Begin(); it != alls->End(); ++it) {
+                for (it = alls.Begin(); it != alls.End(); ++it) {
                     AutoPtr<CServiceRecord> r1 = it->mSecond;
                     services.PushBack(r1);
                 }
@@ -3289,9 +3289,9 @@ Boolean ActiveServices::DumpService(
                 if (smap == NULL) {
                     continue;
                 }
-                AutoPtr<IComponentNameCServiceRecordHashMap> alls = &smap->mServicesByName;
+                IComponentNameCServiceRecordHashMap& alls = smap->mServicesByName;
                 IComponentNameCServiceRecordHashMap::Iterator it;
-                for (it = alls->Begin(); it != alls->End(); ++it) {
+                for (it = alls.Begin(); it != alls.End(); ++it) {
                     AutoPtr<CServiceRecord> r1 = it->mSecond;
                     if (componentName != NULL) {
                         Boolean equal = FALSE;

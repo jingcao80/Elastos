@@ -544,6 +544,7 @@ ECode CPackageInstallerSession::Commit(
     AutoPtr<CPackageInstallerService::PackageInstallObserverAdapter> adapter
             = new CPackageInstallerService::PackageInstallObserverAdapter(mContext,
                     statusReceiver, mSessionId);
+    adapter->AddRef();
     AutoPtr<IIPackageInstallObserver2> b;
     adapter->GetBinder((IIPackageInstallObserver2**)&b);
     AutoPtr<IMessage> msg;

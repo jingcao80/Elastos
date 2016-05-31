@@ -373,7 +373,7 @@ private:
         /* [in] */ Int32 userId,
         /* [in] */ Boolean evenPersistent,
         /* [in] */ Boolean doit,
-        /* [in] */ IComponentNameCServiceRecordHashMap* services,
+        /* [in] */ IComponentNameCServiceRecordHashMap& services,
         /* [in] */ List<AutoPtr<CServiceRecord> >* result);
 
     /**

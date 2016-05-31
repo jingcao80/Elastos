@@ -19,7 +19,6 @@ using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::FileUtils;
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::CServiceManager;
-using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Os::IUserEnvironment;
 using Elastos::Droid::Os::CUserEnvironment;
 using Elastos::Droid::Os::EIID_IBinder;
@@ -425,9 +424,11 @@ ECode DefaultContainerService::OnHandleIntent(
         AutoPtr<IInterface> obj;
         manager->GetService(String("package"), (IInterface**)&obj);
         AutoPtr<IIPackageManager> pm = IIPackageManager::Probe(obj);
-        AutoPtr<IPackageCleanItem> item;
+        AutoPtr<IPackageCleanItem> item, nextItem;
         //try {
-        while ((pm->NextPackageToClean(item, (IPackageCleanItem**)&item), item) != NULL) {
+        while ((pm->NextPackageToClean(item, (IPackageCleanItem**)&nextItem), nextItem) != NULL) {
+            item = nextItem;
+            nextItem = NULL;
             AutoPtr<IUserEnvironment> userEnv;
             Int32 userId;
             item->GetUserId(&userId);
@@ -435,15 +436,15 @@ ECode DefaultContainerService::OnHandleIntent(
             String packageName;
             item->GetPackageName(&packageName);
             AutoPtr< ArrayOf<IFile*> > obj;
-            IEnvironment::Probe(userEnv)->BuildExternalStorageAppDataDirs(packageName, (ArrayOf<IFile*>**)&obj);
+            userEnv->BuildExternalStorageAppDataDirs(packageName, (ArrayOf<IFile*>**)&obj);
             EraseFiles(obj);
             obj = NULL;
-            IEnvironment::Probe(userEnv)->BuildExternalStorageAppMediaDirs(packageName, (ArrayOf<IFile*>**)&obj);
+            userEnv->BuildExternalStorageAppMediaDirs(packageName, (ArrayOf<IFile*>**)&obj);
             EraseFiles(obj);
             Boolean andCode;
             if (item->GetAndCode(&andCode), andCode) {
                 obj = NULL;
-                IEnvironment::Probe(userEnv)->BuildExternalStorageAppObbDirs(
+                userEnv->BuildExternalStorageAppObbDirs(
                     packageName, (ArrayOf<IFile*>**)&obj);
                 EraseFiles(obj);
             }
@@ -551,15 +552,15 @@ ECode DefaultContainerService::CopyPackageInner(
     VALIDATE_NOT_NULL(result)
     String str;
     pkg->GetBaseCodePath(&str);
-    CopyFile(str, target, String("base.apk"));
+    Boolean isEpk = str.EndWith(".epk");
+    CopyFile(str, target, isEpk ? String("base.epk") : String("base.apk"));
     AutoPtr<ArrayOf<String> > splitNames, splitCodePaths;
     pkg->GetSplitNames((ArrayOf<String>**)&splitNames);
     if (!ArrayUtils::IsEmpty(splitNames.Get())) {
-        for (int i = 0; i < splitNames->GetLength(); i++) {
-            splitCodePaths = NULL;
-            pkg->GetSplitCodePaths((ArrayOf<String>**)&splitCodePaths);
+        pkg->GetSplitCodePaths((ArrayOf<String>**)&splitCodePaths);
+        for (Int32 i = 0; i < splitNames->GetLength(); i++) {
             CopyFile((*splitCodePaths)[i], target,
-                String("split_") + (*splitNames)[i] + String(".apk"));
+                String("split_") + (*splitNames)[i] + (isEpk ? ".epk" : ".apk"));
         }
     }
 

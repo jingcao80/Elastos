@@ -766,59 +766,58 @@ Workspace::MyRunnabl9::MyRunnabl9(
 
 ECode Workspace::MyRunnabl9::Run()
 {
-assert(0);
-//     String spKey;
-//     LauncherApplication::GetSharedPreferencesKey(&spKey);
-//     AutoPtr<ISharedPreferences> sp;
-//     mContext->GetSharedPreferences(spKey,
-//             IContext::MODE_PRIVATE, (ISharedPreferences**)&sp);
-//     AutoPtr<ISet> newApps;
-//     sp->GetStringSet(IInstallShortcutReceiver::NEW_APPS_LIST_KEY, NULL, (ISet**)&newApps);
 
-//     // Remove all queued items that match the same package
-//     if (newApps != NULL) {
-//         {    AutoLock syncLock(newApps);
-//             AutoPtr<IIterator> iter;
-//             newApps->GetIterator((IIterator**)&iter);
-//             Boolean res;
-//             while (iter->HasNext(&res), res) {
-//                 //try {
-//                 AutoPtr<IInterface> obj;
-//                 FAIL_GOTO(iter->GetNext((IInterface**)&obj), ERROR)
-//                 AutoPtr<ICharSequence> cchar = ICharSequence::Probe(obj);
-//                 String str;
-//                 cchar->ToString(&str);
-//                 AutoPtr<IIntent> intent;
-//                 AutoPtr<IIntentHelper> helper;
-//                 CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
-//                 FAIL_GOTO(helper->ParseUri(str, 0, (IIntent**)&intent), ERROR)
+    String spKey;
+    LauncherApplication::GetSharedPreferencesKey(&spKey);
+    AutoPtr<ISharedPreferences> sp;
+    mContext->GetSharedPreferences(spKey,
+            IContext::MODE_PRIVATE, (ISharedPreferences**)&sp);
+    AutoPtr<ISet> newApps;
+    sp->GetStringSet(IInstallShortcutReceiver::NEW_APPS_LIST_KEY, NULL, (ISet**)&newApps);
 
-//                 AutoPtr<IComponentName> name;
-//                 FAIL_GOTO(intent->GetComponent((IComponentName**)&name), ERROR)
-//                 Boolean res;
-//                 FAIL_GOTO(mComponentNames->Contains(TO_IINTERFACE(name), &res), ERROR)
-//                 if (res) {
-//                     FAIL_GOTO(iter->Remove(), ERROR)
-//                 }
+    // Remove all queued items that match the same package
+    if (newApps != NULL) {
+        AutoLock syncLock(newApps);
+        AutoPtr<IIterator> iter;
+        newApps->GetIterator((IIterator**)&iter);
+        Boolean res;
+        while (iter->HasNext(&res), res) {
+            //try {
+            AutoPtr<IInterface> obj;
+            iter->GetNext((IInterface**)&obj);
+            AutoPtr<ICharSequence> cchar = ICharSequence::Probe(obj);
+            String str;
+            cchar->ToString(&str);
+            AutoPtr<IIntent> intent;
+            AutoPtr<IIntentHelper> helper;
+            CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
+            if (FAILED(helper->ParseUri(str, 0, (IIntent**)&intent)))
+                continue;
 
-//                 // It is possible that we've queued an item to be loaded, yet it has
-//                 // not been added to the workspace, so remove those items as well.
-//                 AutoPtr<IArrayList> shortcuts;
-//                 FAIL_GOTO(LauncherModel::GetWorkspaceShortcutItemInfosWithIntent(
-//                         intent, (IArrayList**)&shortcuts), ERROR)
-//                 Int32 size;
-//                 FAIL_GOTO(shortcuts->GetSize(&size), ERROR)
-//                 for (Int32 i = 0; i < size; i++) {
-//                     AutoPtr<IInterface> obj;
-//                     FAIL_GOTO(shortcuts->Get(i, (IInterface**)&obj), ERROR)
-//                     AutoPtr<ItemInfo> info = (ItemInfo*)IItemInfo::Probe(obj);
-//                     FAIL_GOTO(LauncherModel::DeleteItemFromDatabase(mContext, info), ERROR)
-//                 }
-// ERROR:
-//                 //} catch (URISyntaxException e) {}
-//             }
-//         }
-//     }
+            AutoPtr<IComponentName> name;
+            intent->GetComponent((IComponentName**)&name);
+            Boolean res;
+            mComponentNames->Contains(TO_IINTERFACE(name), &res);
+            if (res) {
+                iter->Remove();
+            }
+
+            // It is possible that we've queued an item to be loaded, yet it has
+            // not been added to the workspace, so remove those items as well.
+            AutoPtr<IArrayList> shortcuts;
+            LauncherModel::GetWorkspaceShortcutItemInfosWithIntent(
+                    intent, (IArrayList**)&shortcuts);
+            Int32 size;
+            shortcuts->GetSize(&size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> obj;
+                shortcuts->Get(i, (IInterface**)&obj);
+                AutoPtr<ItemInfo> info = (ItemInfo*)IItemInfo::Probe(obj);
+                LauncherModel::DeleteItemFromDatabase(mContext, info);
+            }
+            //} catch (URISyntaxException e) {}
+        }
+    }
     return NOERROR;
 }
 

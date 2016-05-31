@@ -3357,7 +3357,7 @@ AutoPtr<AlarmManagerService::BroadcastStats> AlarmManagerService::GetStatsLocked
     AutoPtr<IArrayMap> uidStats = IArrayMap::Probe(obj); //ArrayMap<String, BroadcastStats>
     if (uidStats == NULL) {
         CArrayMap::New((IArrayMap**)&uidStats);
-        mBroadcastStats->Put(uid, TO_IINTERFACE(obj));
+        mBroadcastStats->Put(uid, TO_IINTERFACE(uidStats));
     }
 
     AutoPtr<IInterface> key = (IInterface*)CoreUtils::Convert(pkg).Get();

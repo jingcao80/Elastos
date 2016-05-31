@@ -7,7 +7,7 @@ namespace Droid {
 namespace Content {
 namespace Pm {
 
-CAR_INTERFACE_IMPL(CPackageCleanItem, Object, IPackageCleanItem)
+CAR_INTERFACE_IMPL_2(CPackageCleanItem, Object, IPackageCleanItem, IParcelable)
 
 CAR_OBJECT_IMPL(CPackageCleanItem)
 
@@ -63,6 +63,13 @@ ECode CPackageCleanItem::Equals(
     // }
 
     return NOERROR;
+}
+
+ECode CPackageCleanItem::Equals(
+    /* [in] */ IInterface* obj,
+    /* [out] */ Boolean* result)
+{
+    return Equals(IPackageCleanItem::Probe(obj), result);
 }
 
 ECode CPackageCleanItem::GetHashCode(

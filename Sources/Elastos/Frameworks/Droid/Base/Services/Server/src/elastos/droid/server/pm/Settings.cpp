@@ -44,6 +44,7 @@ using Elastos::IO::CFileReader;
 using Elastos::IO::IWriter;
 using Elastos::Text::ISimpleDateFormat;
 using Elastos::Text::CSimpleDateFormat;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::IDate;
 using Elastos::Utility::CDate;
 using Elastos::Utility::Logging::Slogger;
@@ -193,6 +194,8 @@ void Settings::Init(
     CFile::New(mSystemDir, String("packages-stopped.xml"), (IFile**)&mStoppedPackagesFilename);
     CFile::New(mSystemDir, String("packages-stopped-backup.xml"), (IFile**)&mBackupStoppedPackagesFilename);
     mReadMessages = new StringBuilder();
+
+    CArrayList::New((IArrayList**)&mPackagesToBeCleaned);
 }
 
 AutoPtr<PackageSetting> Settings::GetPackageLPw(
@@ -2041,10 +2044,13 @@ void Settings::WriteLPr()
             if (FAILED(ec)) break;
         }
 
-        if (!mPackagesToBeCleaned.IsEmpty()) {
-            List< AutoPtr<IPackageCleanItem> >::Iterator it7 = mPackagesToBeCleaned.Begin();
-            for (; it7 != mPackagesToBeCleaned.End(); it7++) {
-                AutoPtr<IPackageCleanItem> item = it7->Get();
+        Int32 size;
+        mPackagesToBeCleaned->GetSize(&size);
+        if (size > 0) {
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> obj;
+                mPackagesToBeCleaned->Get(i, (IInterface**)&obj);
+                AutoPtr<IPackageCleanItem> item = IPackageCleanItem::Probe(obj);
                 String userStr = StringUtils::ToString(item->GetUserId(&val), val);
                 ec = serializer->WriteStartTag(nullStr, String("cleaning-package"));
                 if (FAILED(ec)) break;
@@ -2527,9 +2533,10 @@ AutoPtr<List< AutoPtr<PackageSetting> > > Settings::GetListOfIncompleteInstallPa
 void Settings::AddPackageToCleanLPw(
     /* [in] */ IPackageCleanItem* pkg)
 {
-    if (Find(mPackagesToBeCleaned.Begin(), mPackagesToBeCleaned.End(),
-            AutoPtr<IPackageCleanItem>(pkg)) == mPackagesToBeCleaned.End()) {
-        mPackagesToBeCleaned.PushBack(pkg);
+    Boolean contains = FALSE;
+    mPackagesToBeCleaned->Contains(pkg, &contains);
+    if (!contains) {
+        mPackagesToBeCleaned->Add(pkg);
     }
 }
 

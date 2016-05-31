@@ -130,9 +130,8 @@ ECode PagedViewWidget::OnDetachedFromWindow()
             AutoPtr<IFastBitmapDrawable> preview = IFastBitmapDrawable::Probe(drawable);
 
             AutoPtr<IBitmap> map;
-            preview->GetBitmap((IBitmap**)&map);
-            if (sRecyclePreviewsWhenDetachedFromWindow &&
-                    mInfo != NULL && preview != NULL && map != NULL) {
+            if (sRecyclePreviewsWhenDetachedFromWindow && mInfo != NULL && preview != NULL
+                && (preview->GetBitmap((IBitmap**)&map), map) != NULL) {
                 mWidgetPreviewLoader->RecycleBitmap(mInfo, map);
             }
             image->SetImageDrawable(NULL);

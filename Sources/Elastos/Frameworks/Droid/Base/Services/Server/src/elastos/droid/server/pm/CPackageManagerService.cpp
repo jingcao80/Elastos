@@ -3093,7 +3093,7 @@ Boolean CPackageManagerService::FileInstallArgs::DoRename(
         AutoPtr<IFile> beforeCodeFile = mCodeFile;
         AutoPtr<IFile> afterCodeFile = mHost->GetNextCodePath(pkg->mPackageName);
 
-        Slogger::D(TAG, "Renaming %p to %p", beforeCodeFile.Get(), afterCodeFile.Get());
+        Slogger::D(TAG, "Renaming %s to %s", TO_CSTR(beforeCodeFile), TO_CSTR(afterCodeFile));
         // try {
         String absolutePath, absolutePath1;
         beforeCodeFile->GetAbsolutePath(&absolutePath);
@@ -11603,14 +11603,17 @@ Slogger::I(TAG, " >>>>>>>>> ScanPackageDirtyLI %s", TO_CSTR(pkg));
         IPackageItemInfo::Probe(pkg->mApplicationInfo)->GetPackageName(&pkgAppPkgName);
         mPackages[pkgAppPkgName] = pkg;
         // Make sure we don't accidentally delete its data.
-        List<AutoPtr<IPackageCleanItem> >::Iterator pciit = mSettings->mPackagesToBeCleaned.Begin();
-        while (pciit != mSettings->mPackagesToBeCleaned.End()) {
+        AutoPtr<IIterator> iter;
+        mSettings->mPackagesToBeCleaned->GetIterator((IIterator**)&iter);
+        Boolean hasNext = FALSE;
+        while (iter->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> item;
+            iter->GetNext((IInterface**)&item);
             String pciPkgName;
-            (*pciit)->GetPackageName(&pciPkgName);
+            IPackageCleanItem::Probe(item)->GetPackageName(&pciPkgName);
             if (pkgName.Equals(pciPkgName)) {
-                pciit = mSettings->mPackagesToBeCleaned.Erase(pciit);
+                iter->Remove();
             }
-            else ++pciit;
         }
 
         // Take care of first install / last update times.
@@ -12085,7 +12088,6 @@ Slogger::I(TAG, " >>>>>>>>> ScanPackageDirtyLI %s", TO_CSTR(pkg));
         // Generate Idmaps and res tables if pkg is a theme
         AutoPtr<IIterator> targetIt;
         pkg->mOverlayTargets->GetIterator((IIterator**)&targetIt);
-        Boolean hasNext;
         while (targetIt->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> next;
             targetIt->GetNext((IInterface**)&next);
@@ -13917,12 +13919,16 @@ ECode CPackageManagerService::NextPackageToClean(
             // packages files and can not delete any more.  Bail.
             return NOERROR;
         }
-        List<AutoPtr<IPackageCleanItem> > pkgs = mSettings->mPackagesToBeCleaned;
+        AutoPtr<IArrayList> pkgs = mSettings->mPackagesToBeCleaned;
         if (lastPackage != NULL) {
-            pkgs.Remove(lastPackage);
+            pkgs->Remove(lastPackage);
         }
-        if (pkgs.IsEmpty() == FALSE) {
-            *nextPackage = *pkgs.Begin();
+        Int32 size;
+        pkgs->GetSize(&size);
+        if (size > 0) {
+            AutoPtr<IInterface> item;
+            pkgs->Get(0, (IInterface**)&item);
+            *nextPackage = IPackageCleanItem::Probe(item);
             REFCOUNT_ADD(*nextPackage)
         }
     }
@@ -13958,7 +13964,8 @@ void CPackageManagerService::StartCleaningPackages()
         if (!IsExternalMediaAvailable()) {
             return;
         }
-        if (mSettings->mPackagesToBeCleaned.IsEmpty()) {
+        Boolean isEmpty = FALSE;
+        if (mSettings->mPackagesToBeCleaned->IsEmpty(&isEmpty), isEmpty) {
             return;
         }
     }
@@ -16623,10 +16630,10 @@ void CPackageManagerService::RemoveKeystoreDataIfNeeded(
     }
 
     AutoPtr<IKeyStoreHelper> helper;
-    assert(0 && "TODO");
+    Slogger::E(TAG, "TODO:CPackageManagerService::RemoveKeystoreDataIfNeeded need CKeyStoreHelper");
     // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
     AutoPtr<IKeyStore> keyStore;
-    helper->GetInstance((IKeyStore**)&keyStore);
+    // helper->GetInstance((IKeyStore**)&keyStore);
     if (keyStore != NULL) {
         if (userId == IUserHandle::USER_ALL) {
             AutoPtr<ArrayOf<Int32> > userIds = sUserManager->GetUserIds();

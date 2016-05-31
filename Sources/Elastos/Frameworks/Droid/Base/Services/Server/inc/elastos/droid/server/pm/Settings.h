@@ -20,6 +20,7 @@
 using Elastos::Core::IBoolean;
 using Elastos::Core::StringBuilder;
 using Elastos::IO::IFile;
+using Elastos::Utility::IArrayList;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntentFilterAuthorityEntry;
 using Elastos::Droid::Content::Pm::PackageParser;
@@ -514,7 +515,7 @@ public:
 
     // Packages that have been uninstalled and still need their external
     // storage data deleted.
-    List< AutoPtr<IPackageCleanItem> > mPackagesToBeCleaned;
+    AutoPtr<IArrayList> mPackagesToBeCleaned; // item is IPackageCleanItem
 
     // Packages that have been renamed since they were first installed.
     // Keys are the new names of the packages, values are the original
