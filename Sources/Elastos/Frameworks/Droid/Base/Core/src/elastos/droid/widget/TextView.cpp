@@ -10168,8 +10168,6 @@ ECode TextView::OnTextContextMenuItem(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    AutoPtr<IContext> c;
-    GetContext((IContext**)&c);
     Int32 min = 0;
     Int32 max = 0;
     mText->GetLength(&max);

@@ -37,7 +37,7 @@ void DynamicLayout::ChangeWatcher::Reflow(
     mLayout->Resolve(EIID_IDynamicLayout, (IInterface**)&dl);
 
     if (dl != NULL) {
-        DynamicLayout* layout = (DynamicLayout*)(CDynamicLayout*)dl.Get();
+        DynamicLayout* layout = (DynamicLayout*)dl.Get();
         layout->Reflow(s, where, before, after);
     }
     else if (s != NULL && ISpannable::Probe(s) != NULL) {
