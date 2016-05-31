@@ -33,6 +33,8 @@ ECode AlphabetIndexer::constructor(
     /* [in] */ Int32 sortedColumnIndex,
     /* [in] */ ICharSequence* alphabet)
 {
+    DataSetObserver::constructor();
+
     mDataCursor = cursor;
     mColumnIndex = sortedColumnIndex;
     mAlphabet = alphabet;

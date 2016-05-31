@@ -1,8 +1,8 @@
 
 module
 {
-    interface Elastos.Droid.Content.IContext;
-    interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.View.IViewGroup;
 
     interface Elastos.Droid.SystemUI.StatusBar.Policy.IUserSwitcherController;
 

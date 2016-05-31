@@ -3,8 +3,8 @@ module
 {
     using interface Elastos.Core.IRunnable;
 
-    interface Elastos.Droid.View.IView;
-    interface Elastos.Droid.Graphics.IRect;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.Graphics.IRect;
 
     interface Elastos.Droid.SystemUI.Recents.Model.ITask;
     interface Elastos.Droid.SystemUI.Recents.Model.ITaskStack;

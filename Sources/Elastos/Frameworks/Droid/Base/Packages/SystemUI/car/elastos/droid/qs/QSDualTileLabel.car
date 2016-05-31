@@ -3,8 +3,8 @@ module
 {
     using interface Elastos.Core.ICharSequence;
 
-    interface Elastos.Droid.Graphics.Drawable.IDrawable;
-    interface Elastos.Droid.Graphics.ITypeface;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.Graphics.ITypeface;
 
     namespace Elastos {
     namespace Droid {

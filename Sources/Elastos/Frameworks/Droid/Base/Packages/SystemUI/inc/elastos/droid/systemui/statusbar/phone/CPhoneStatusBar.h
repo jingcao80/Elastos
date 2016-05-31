@@ -3,7 +3,6 @@
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_CPHONESTATUSBAR_H__
 
 #include "_Elastos_Droid_SystemUI_StatusBar_Phone_CPhoneStatusBar.h"
-#include "_Elastos.Droid.Core.h"
 #include "elastos/droid/systemui/statusbar/BaseStatusBar.h"
 #include "elastos/droid/systemui/statusbar/GestureRecorder.h"
 #include "elastos/droid/systemui/statusbar/KeyguardIndicationController.h"
@@ -676,12 +675,12 @@ private:
         IQSTileHost* mQsh;
     };
 
-    class Runnable1: public Runnable
+    class ClearAllNotificationRunnable: public Runnable
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::Runnable1")
+        TO_STRING_IMPL("CPhoneStatusBar::ClearAllNotificationRunnable")
 
-        Runnable1(
+        ClearAllNotificationRunnable(
             /* [in] */ CPhoneStatusBar* host);
 
         // @Override
@@ -691,12 +690,12 @@ private:
         CPhoneStatusBar* mHost;
     };
 
-    class Runnable2: public Runnable
+    class CollapsePanelRunnable: public Runnable
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::Runnable2")
+        TO_STRING_IMPL("CPhoneStatusBar::CollapsePanelRunnable")
 
-        Runnable2(
+        CollapsePanelRunnable(
             /* [in] */ CPhoneStatusBar* host);
 
         // @Override
@@ -706,12 +705,12 @@ private:
         CPhoneStatusBar* mHost;
     };
 
-    class Runnable3: public Runnable
+    class DismissStackScrollerRunnable: public Runnable
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::Runnable3")
+        TO_STRING_IMPL("CPhoneStatusBar::DismissStackScrollerRunnable")
 
-        Runnable3(
+        DismissStackScrollerRunnable(
             /* [in] */ CPhoneStatusBar* host);
 
         // @Override
@@ -741,12 +740,12 @@ private:
         CPhoneStatusBar* mHost;
     };
 
-    class Runnable4: public Runnable
+    class UpdateNotificationShadeRunnable: public Runnable
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::Runnable4")
+        TO_STRING_IMPL("CPhoneStatusBar::UpdateNotificationShadeRunnable")
 
-        Runnable4(
+        UpdateNotificationShadeRunnable(
             /* [in] */ CPhoneStatusBar* host);
 
         // @Override
@@ -756,12 +755,12 @@ private:
         CPhoneStatusBar* mHost;
     };
 
-    class AnimatorListenerAdapter1: public AnimatorListenerAdapter
+    class CarrierLabelVisibleAnimatorListenerAdapter: public AnimatorListenerAdapter
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::AnimatorListenerAdapter1")
+        TO_STRING_IMPL("CPhoneStatusBar::CarrierLabelVisibleAnimatorListenerAdapter")
 
-        AnimatorListenerAdapter1(
+        CarrierLabelVisibleAnimatorListenerAdapter(
             /* [in] */ CPhoneStatusBar* host);
 
         // @Override
@@ -772,12 +771,12 @@ private:
         CPhoneStatusBar* mHost;
     };
 
-    class AnimatorListenerAdapter2: public AnimatorListenerAdapter
+    class ViewGoneAnimatorListenerAdapter: public AnimatorListenerAdapter
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::AnimatorListenerAdapter2")
+        TO_STRING_IMPL("CPhoneStatusBar::ViewGoneAnimatorListenerAdapter")
 
-        AnimatorListenerAdapter2(
+        ViewGoneAnimatorListenerAdapter(
             /* [in] */ IView* view);
 
         // @Override
@@ -788,12 +787,12 @@ private:
         AutoPtr<IView> mView;
     };
 
-    class Runnable5: public Runnable
+    class BackdropGoneRunnable: public Runnable
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::Runnable5")
+        TO_STRING_IMPL("CPhoneStatusBar::BackdropGoneRunnable")
 
-        Runnable5(
+        BackdropGoneRunnable(
             /* [in] */ CPhoneStatusBar* host);
 
         // @Override
@@ -803,12 +802,12 @@ private:
         CPhoneStatusBar* mHost;
     };
 
-    class Runnable6: public Runnable
+    class ViewInvisibleRunnable: public Runnable
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::Runnable6")
+        TO_STRING_IMPL("CPhoneStatusBar::ViewInvisibleRunnable")
 
-        Runnable6(
+        ViewInvisibleRunnable(
             /* [in] */ IView* view);
 
         // @Override
@@ -818,12 +817,12 @@ private:
         AutoPtr<IView> mView;
     };
 
-    class AnimatorListenerAdapter3: public AnimatorListenerAdapter
+    class ChangeVisibilityAndResetAnimatorListenerAdapter: public AnimatorListenerAdapter
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::AnimatorListenerAdapter3")
+        TO_STRING_IMPL("CPhoneStatusBar::ChangeVisibilityAndResetAnimatorListenerAdapter")
 
-        AnimatorListenerAdapter3(
+        ChangeVisibilityAndResetAnimatorListenerAdapter(
             /* [in] */ IView* view,
             /* [in] */ IViewPropertyAnimator* a,
             /* [in] */ Int32 vis);
@@ -838,12 +837,12 @@ private:
         Int32 mVis;
     };
 
-    class AnimatorListenerAdapter4: public AnimatorListenerAdapter
+    class ChangeVisibilityAnimatorListenerAdapter: public AnimatorListenerAdapter
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::AnimatorListenerAdapter4")
+        TO_STRING_IMPL("CPhoneStatusBar::ChangeVisibilityAnimatorListenerAdapter")
 
-        AnimatorListenerAdapter4(
+        ChangeVisibilityAnimatorListenerAdapter(
             /* [in] */ IView* view,
             /* [in] */ Int32 vis);
 
@@ -856,12 +855,12 @@ private:
         Int32 mVis;
     };
 
-    class Runnable7: public Runnable
+    class DebugLoacationRunnable: public Runnable
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::Runnable7")
+        TO_STRING_IMPL("CPhoneStatusBar::DebugLoacationRunnable")
 
-        Runnable7(
+        DebugLoacationRunnable(
             /* [in] */ CPhoneStatusBar* host);
 
         // @Override
@@ -871,12 +870,12 @@ private:
         CPhoneStatusBar* mHost;
     };
 
-    class Runnable8: public Runnable
+    class DismissKeyguardViewManagerRunnable: public Runnable
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::Runnable8")
+        TO_STRING_IMPL("CPhoneStatusBar::DismissKeyguardViewManagerRunnable")
 
-        Runnable8(
+        DismissKeyguardViewManagerRunnable(
             /* [in] */ CPhoneStatusBar* host);
 
         // @Override
@@ -886,12 +885,12 @@ private:
         CPhoneStatusBar* mHost;
     };
 
-    class Runnable9: public Runnable
+    class StartSettingsActivityRunnable: public Runnable
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::Runnable9")
+        TO_STRING_IMPL("CPhoneStatusBar::StartSettingsActivityRunnable")
 
-        Runnable9(
+        StartSettingsActivityRunnable(
             /* [in] */ CPhoneStatusBar* host,
             /* [in] */ IIntent* intent);
 
@@ -903,12 +902,12 @@ private:
         AutoPtr<IIntent> mIntent;
     };
 
-    class Runnable10: public Runnable
+    class EndLaunchTransitionRunnable: public Runnable
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::Runnable10")
+        TO_STRING_IMPL("CPhoneStatusBar::EndLaunchTransitionRunnable")
 
-        Runnable10(
+        EndLaunchTransitionRunnable(
             /* [in] */ CPhoneStatusBar* host);
 
         // @Override
@@ -918,12 +917,12 @@ private:
         CPhoneStatusBar* mHost;
     };
 
-    class Runnable11: public Runnable
+    class FadeKeyguardRunnable: public Runnable
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::Runnable11")
+        TO_STRING_IMPL("CPhoneStatusBar::FadeKeyguardRunnable")
 
-        Runnable11(
+        FadeKeyguardRunnable(
             /* [in] */ CPhoneStatusBar* host,
             /* [in] */ IRunnable* beforeFading);
 
@@ -935,12 +934,66 @@ private:
         AutoPtr<IRunnable> mBeforeFading;
     };
 
+    class KeyguardHostViewOnDismissAction
+        : public Object
+        , public IKeyguardHostViewOnDismissAction
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("CPhoneStatusBar::KeyguardHostViewOnDismissAction")
+
+        KeyguardHostViewOnDismissAction(
+            /* [in] */ CPhoneStatusBar* host,
+            /* [in] */ IIntent* intent,
+            /* [in] */ Boolean afterKeyguardGone,
+            /* [in] */ Boolean keyguardShowing,
+            /* [in] */ Boolean dismissShade);
+
+        /**
+         * @return true if the dismiss should be deferred
+         */
+        CARAPI OnDismiss(
+            /* [out] */ Boolean* result);
+
+    private:
+        CPhoneStatusBar* mHost;
+        AutoPtr<IIntent> mIntent;
+        Boolean mAfterKeyguardGone;
+        Boolean mKeyguardShowing;
+        Boolean mDismissShade;
+    };
+
+    class StartActivityRunnable
+        : public Runnable
+    {
+    public:
+        TO_STRING_IMPL("CPhoneStatusBar::StartActivityRunnable")
+
+        StartActivityRunnable(
+            /* [in] */ CPhoneStatusBar* host,
+            /* [in] */ IIntent* intent,
+            /* [in] */ Boolean afterKeyguardGone,
+            /* [in] */ Boolean keyguardShowing);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        CPhoneStatusBar* mHost;
+        AutoPtr<IIntent> mIntent;
+        Boolean mAfterKeyguardGone;
+        Boolean mKeyguardShowing;
+    };
+
 public:
     CAR_OBJECT_DECL()
 
     CAR_INTERFACE_DECL()
 
     CPhoneStatusBar();
+
+    CARAPI constructor();
 
     // @Override
     CARAPI Start();
@@ -1440,7 +1493,7 @@ protected:
 
     // @Override
     CARAPI_(void) DismissKeyguardThenExecute(
-        /* [in] */ IOnDismissAction* action,
+        /* [in] */ IKeyguardHostViewOnDismissAction* action,
         /* [in] */ Boolean afterKeyguardGone);
 
     // SystemUIService notifies SystemBars of configuration changes, which then calls down here
@@ -1669,8 +1722,6 @@ private:
     CARAPI_(void) HandleLongPressBackRecents(
         /* [in] */ IView* v);
 
-    static CARAPI_(Boolean) InitStatic();
-
 public:
     static const String TAG;
     static const Boolean DEBUG;
@@ -1691,7 +1742,6 @@ public:
 
     static const Int32 FADE_KEYGUARD_START_DELAY;
     static const Int32 FADE_KEYGUARD_DURATION;
-    static Boolean sInit;
     static AutoPtr<IInterpolator> ALPHA_IN;
     static AutoPtr<IInterpolator> ALPHA_OUT;
 

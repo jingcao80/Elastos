@@ -141,8 +141,12 @@ module
         interface IKeyguardDisplayManager {
         }
 
-        namespace KeyguardHostView {
-            interface IOnDismissAction {}
+        interface IKeyguardHostViewOnDismissAction {
+            /**
+             * @return true if the dismiss should be deferred
+             */
+            OnDismiss(
+                [out] Boolean* result);
         }
 
     }}} // Elastos.Droid.Keyguard

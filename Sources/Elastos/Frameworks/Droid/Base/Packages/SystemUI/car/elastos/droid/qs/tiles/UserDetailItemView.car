@@ -1,11 +1,11 @@
 
 module
 {
-    interface Elastos.Droid.Content.IContext;
-    interface Elastos.Droid.View.IView;
-    interface Elastos.Droid.View.IViewGroup;
-    interface Elastos.Droid.Graphics.IBitmap;
-    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.Graphics.IBitmap;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
 
     namespace Elastos {
     namespace Droid {

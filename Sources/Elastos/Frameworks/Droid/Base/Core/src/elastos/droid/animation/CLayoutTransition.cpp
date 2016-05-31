@@ -1161,7 +1161,6 @@ void CLayoutTransition::RunAppearingTransition(
         anim->SetInterpolator(mAppearingInterpolator);
     }
     if (IObjectAnimator::Probe(anim) != NULL) {
-        Logger::I("CLayoutTransition", "=================================anim:%s, target:%s", TO_CSTR(anim), TO_CSTR(child));
         IValueAnimator::Probe(anim)->SetCurrentPlayTime(0);
     }
 

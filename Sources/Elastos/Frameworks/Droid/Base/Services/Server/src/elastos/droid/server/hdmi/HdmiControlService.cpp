@@ -447,12 +447,12 @@ ECode HdmiControlService::BinderService::AddDeviceEventListener(
 }
 
 ECode HdmiControlService::BinderService::GetPortInfo(
-    /* [out] */ IList** result)
+    /* [out] */ IList** list)
 {
-    VALIDATE_NOT_NULL(result)
+    VALIDATE_NOT_NULL(list)
 
     mHost->EnforceAccessPermission();
-    return mHost->GetPortInfo(result);
+    return mHost->GetPortInfo(list);
 }
 
 ECode HdmiControlService::BinderService::CanChangeSystemAudioMode(
@@ -522,10 +522,10 @@ ECode HdmiControlService::BinderService::SetInputChangeListener(
 }
 
 ECode HdmiControlService::BinderService::GetInputDevices(
-    /* [out] */ IList** result)
+    /* [out] */ IList** list)
 {
-    VALIDATE_NOT_NULL(result)
-    *result = NULL;
+    VALIDATE_NOT_NULL(list)
+    *list = NULL;
 
     mHost->EnforceAccessPermission();
     // No need to hold the lock for obtaining TV device as the local device instance
@@ -545,8 +545,8 @@ ECode HdmiControlService::BinderService::GetInputDevices(
         AutoPtr<IList> mhlDevicesLocked, temp;
         mHost->GetMhlDevicesLocked((IList**)&mhlDevicesLocked);
         temp = HdmiUtils::MergeToUnmodifiableList(cecDevices, mhlDevicesLocked);
-        *result = temp;
-        REFCOUNT_ADD(*result)
+        *list = temp;
+        REFCOUNT_ADD(*list)
     }
     return NOERROR;
 }
@@ -1403,9 +1403,10 @@ ECode HdmiControlService::constructor(
 
 ECode HdmiControlService::GetInt32List(
     /* [in] */ const String& string,
-    /* [out] */ IList** result)
+    /* [out] */ IList** retList)
 {
-    VALIDATE_NOT_NULL(result)
+    VALIDATE_NOT_NULL(retList)
+    *retList = NULL;
 
     AutoPtr<IArrayList> list;
     CArrayList::New((IArrayList**)&list);
@@ -1442,7 +1443,7 @@ ECode HdmiControlService::GetInt32List(
     }
     AutoPtr<ICollections> helper;
     CCollections::AcquireSingleton((ICollections**)&helper);
-    return helper->UnmodifiableList(IList::Probe(list), result);
+    return helper->UnmodifiableList(IList::Probe(list), retList);
 }
 
 ECode HdmiControlService::OnStart()
@@ -1774,12 +1775,12 @@ ECode HdmiControlService::InitPortInfo()
 }
 
 ECode HdmiControlService::GetPortInfo(
-    /* [out] */ IList** result)
+    /* [out] */ IList** list)
 {
-    VALIDATE_NOT_NULL(result)
+    VALIDATE_NOT_NULL(list)
 
-    *result = mPortInfo;
-    REFCOUNT_ADD(*result)
+    *list = mPortInfo;
+    REFCOUNT_ADD(*list)
     return NOERROR;
 }
 
@@ -2092,13 +2093,13 @@ ECode HdmiControlService::CheckPollStrategy(
 }
 
 ECode HdmiControlService::GetAllLocalDevices(
-    /* [out] */ IList** result)
+    /* [out] */ IList** list)
 {
-    VALIDATE_NOT_NULL(result)
-    *result = NULL;
+    VALIDATE_NOT_NULL(list)
+    *list = NULL;
 
     AssertRunOnServiceThread();
-    return mCecController->GetLocalDeviceList(result);
+    return mCecController->GetLocalDeviceList(list);
 }
 
 ECode HdmiControlService::GetServiceLock(
@@ -2295,12 +2296,12 @@ ECode HdmiControlService::UpdateSafeMhlInput()
 }
 
 ECode HdmiControlService::GetMhlDevicesLocked(
-    /* [out] */ IList** result)
+    /* [out] */ IList** list)
 {
-    VALIDATE_NOT_NULL(result)
+    VALIDATE_NOT_NULL(list)
 
-    *result = mMhlDevices;
-    REFCOUNT_ADD(*result)
+    *list = mMhlDevices;
+    REFCOUNT_ADD(*list)
     return NOERROR;
 }
 

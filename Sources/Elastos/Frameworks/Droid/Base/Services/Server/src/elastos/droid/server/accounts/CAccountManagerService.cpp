@@ -5847,7 +5847,7 @@ ECode CAccountManagerService::ReadUserDataForAccountFromDatabaseLocked(
     /* [out] */ IHashMap** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = FALSE;
+    *result = NULL;
 
     AutoPtr<IHashMap> userDataForAccount;
     CHashMap::New((IHashMap**)&userDataForAccount);

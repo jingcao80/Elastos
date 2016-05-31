@@ -3,8 +3,8 @@ module
 {
     using interface Elastos.Core.IRunnable;
 
-    interface Elastos.Droid.Animation.IAnimatorUpdateListener;
-    interface Elastos.Droid.Animation.IAnimatorListener;
+    using interface Elastos.Droid.Animation.IAnimatorUpdateListener;
+    using interface Elastos.Droid.Animation.IAnimatorListener;
 
     interface Elastos.Droid.SystemUI.Recents.Model.ITask;
 

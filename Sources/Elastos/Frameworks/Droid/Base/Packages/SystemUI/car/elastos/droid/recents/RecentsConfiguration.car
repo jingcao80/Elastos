@@ -1,8 +1,8 @@
 
 module
 {
-    interface Elastos.Droid.Content.IContext;
-    interface Elastos.Droid.Graphics.IRect;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Graphics.IRect;
     interface Elastos.Droid.SystemUI.Recents.Misc.ISystemServicesProxy;
 
     namespace Elastos {

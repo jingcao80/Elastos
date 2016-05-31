@@ -5548,7 +5548,7 @@ ECode MediaProvider::Canonicalize(
        if (c == NULL || count != 1 || !flag) {
            *result = NULL;
            return NOERROR;
-       }//
+       }
 
        // Construct a canonical Uri by tacking on some query parameters
        AutoPtr<IUriBuilder> builder;

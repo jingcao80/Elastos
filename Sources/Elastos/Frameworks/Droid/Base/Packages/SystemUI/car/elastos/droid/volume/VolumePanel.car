@@ -1,9 +1,9 @@
 
 module
 {
-    interface Elastos.Droid.Content.Res.IConfiguration;
+    using interface Elastos.Droid.Content.Res.IConfiguration;
+    using interface Elastos.Droid.Media.Session.IMediaController;
     interface Elastos.Droid.SystemUI.StatusBar.Policy.IZenModeController;
-    interface Elastos.Droid.Media.Session.IMediaController;
 
     namespace Elastos {
     namespace Droid {

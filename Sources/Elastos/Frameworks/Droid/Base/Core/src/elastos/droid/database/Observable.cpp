@@ -22,12 +22,12 @@ ECode Observable::RegisterObserver(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    {    AutoLock syncLock(mObserversLock);
-        List< AutoPtr<IInterface> >::Iterator it =
-                Find(mObservers.Begin(), mObservers.End(), AutoPtr<IInterface>(observer));
+    {
+        AutoLock syncLock(mObserversLock);
+        AutoPtr<IInterface> obj = observer;
+        List< AutoPtr<IInterface> >::Iterator it = Find(mObservers.Begin(), mObservers.End(), obj);
         if (it != mObservers.End()) {
-            //throw new IllegalStateException("Observer " + observer + " is already registered.");
-            Slogger::E(String("Observable"), "Observer %p is already registered.", observer);
+            Slogger::E(String("Observable"), "Observer %s is already registered.", TO_CSTR(observer));
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         mObservers.PushBack(observer);
@@ -44,12 +44,12 @@ ECode Observable::UnregisterObserver(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    {    AutoLock syncLock(mObserversLock);
-        List< AutoPtr<IInterface> >::Iterator it =
-                Find(mObservers.Begin(), mObservers.End(), AutoPtr<IInterface>(observer));
+    {
+        AutoLock syncLock(mObserversLock);
+        AutoPtr<IInterface> obj = observer;
+        List< AutoPtr<IInterface> >::Iterator it = Find(mObservers.Begin(), mObservers.End(), obj);
         if (it == mObservers.End()) {
-            //throw new IllegalStateException("Observer " + observer + " was not registered.");
-            Slogger::E(String("Observable"), "Observer %p was not registered.", observer);
+            Slogger::E(String("Observable"), "Observer %s was not registered.", TO_CSTR(observer));
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         mObservers.Erase(it);
@@ -60,7 +60,8 @@ ECode Observable::UnregisterObserver(
 
 ECode Observable::UnregisterAll()
 {
-    {    AutoLock syncLock(mObserversLock);
+    {
+        AutoLock syncLock(mObserversLock);
         mObservers.Clear();
     }
     return NOERROR;

@@ -4,7 +4,7 @@ module
     using interface Elastos.Utility.IHashSet;
     using interface Elastos.Utility.IList;
 
-    interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContext;
 
     namespace Elastos {
     namespace Droid {

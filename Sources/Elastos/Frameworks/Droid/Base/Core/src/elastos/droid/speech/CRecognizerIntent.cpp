@@ -67,6 +67,7 @@ ECode CRecognizerIntent::GetVoiceDetailsIntent(
     detailsIntent->SetComponent(cn.Get());
 
     *ppRet = detailsIntent;
+    REFCOUNT_ADD(*ppRet)
     return NOERROR;
 }
 

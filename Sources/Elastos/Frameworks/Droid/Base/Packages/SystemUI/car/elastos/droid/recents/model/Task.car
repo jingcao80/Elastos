@@ -1,8 +1,8 @@
 
 module
 {
-    interface Elastos.Droid.Graphics.IBitmap;
-    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.Graphics.IBitmap;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
 
     namespace Elastos {
     namespace Droid {

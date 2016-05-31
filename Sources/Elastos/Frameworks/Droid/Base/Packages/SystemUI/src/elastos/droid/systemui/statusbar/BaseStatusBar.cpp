@@ -20,8 +20,8 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
-
 #include <elastos/core/AutoLock.h>
+
 using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::CActivityManager;
@@ -123,8 +123,8 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-const String BaseStatusBar::TAG("StatusBar");
-const Boolean BaseStatusBar::DEBUG = FALSE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
+const String BaseStatusBar::TAG("BaseStatusBar");
+const Boolean BaseStatusBar::DEBUG = TRUE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
 const Boolean BaseStatusBar::MULTIUSER_DEBUG = FALSE;
 const Int32 BaseStatusBar::MSG_SHOW_RECENT_APPS;
 const Int32 BaseStatusBar::MSG_HIDE_RECENT_APPS;
@@ -449,6 +449,7 @@ ECode CNotificationListenerService::Runnable4::Run()
 //                  CNotificationListenerService
 //==============================================================================
 CAR_OBJECT_IMPL(CNotificationListenerService)
+
 ECode CNotificationListenerService::constructor()
 {
     return NotificationListenerService::constructor();
@@ -510,6 +511,7 @@ ECode CNotificationListenerService::OnNotificationRankingUpdate(
 //                  BaseStatusBar::RecentsPreloadOnTouchListener
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::RecentsPreloadOnTouchListener, Object, IViewOnTouchListener)
+
 BaseStatusBar::RecentsPreloadOnTouchListener::RecentsPreloadOnTouchListener(
     /* [in] */ BaseStatusBar* host)
     : mHost(host)
@@ -601,6 +603,7 @@ ECode BaseStatusBar::H::HandleMessage(
 //                  BaseStatusBar::TouchOutsideListener
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::TouchOutsideListener, Object, IViewOnTouchListener)
+
 BaseStatusBar::TouchOutsideListener::TouchOutsideListener(
     /* [in] */ Int32 msg,
     /* [in] */ IStatusBarPanel* panel,
@@ -638,6 +641,7 @@ ECode BaseStatusBar::TouchOutsideListener::OnTouch(
 //                  BaseStatusBar::NotificationClicker
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::NotificationClicker, Object, IViewOnClickListener)
+
 BaseStatusBar::NotificationClicker::NotificationClicker(
     /* [in] */ IPendingIntent* intent,
     /* [in] */ const String& notificationKey,
@@ -719,6 +723,7 @@ ECode BaseStatusBar::NotificationClicker::OnClick(
 //                  BaseStatusBar::RecentsComponentCallbacks
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::RecentsComponentCallbacks, Object, IRecentsComponentCallbacks)
+
 BaseStatusBar::RecentsComponentCallbacks::RecentsComponentCallbacks(
     /* [in] */ BaseStatusBar* host)
     : mHost(host)
@@ -734,6 +739,7 @@ ECode BaseStatusBar::RecentsComponentCallbacks::OnVisibilityChanged(
 //                  BaseStatusBar::ViewOnClickListener1
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::ViewOnClickListener1, Object, IViewOnClickListener)
+
 BaseStatusBar::ViewOnClickListener1::ViewOnClickListener1(
     /* [in] */ BaseStatusBar* host,
     /* [in] */ const String& pkg,
@@ -768,6 +774,7 @@ ECode BaseStatusBar::ViewOnClickListener1::OnClick(
 //                  BaseStatusBar::ViewOnClickListener2
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::ViewOnClickListener2, Object, IViewOnClickListener)
+
 BaseStatusBar::ViewOnClickListener2::ViewOnClickListener2(
     /* [in] */ BaseStatusBar* host,
     /* [in] */ const String& pkg,
@@ -788,6 +795,7 @@ ECode BaseStatusBar::ViewOnClickListener2::OnClick(
 //                  BaseStatusBar::ViewOnClickListener3
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::ViewOnClickListener3, Object, IViewOnClickListener)
+
 BaseStatusBar::ViewOnClickListener3::ViewOnClickListener3(
     /* [in] */ BaseStatusBar* host,
     /* [in] */ IIntent* appSettingsLaunchIntent,
@@ -814,6 +822,7 @@ ECode BaseStatusBar::ViewOnClickListener3::OnClick(
 //                  BaseStatusBar::BaseLongPressListener
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::BaseLongPressListener, Object, ISwipeHelperLongPressListener)
+
 BaseStatusBar::BaseLongPressListener::BaseLongPressListener(
     /* [in] */ BaseStatusBar* host)
     : mHost(host)
@@ -925,19 +934,24 @@ BaseStatusBar::BaseStatusBar()
     , mFontScale(0)
     , mDeviceProvisioned(FALSE)
 {
+}
+
+ECode BaseStatusBar::constructor()
+{
     mOnClickHandler = new _RemoteViewsOnClickHandler(this);
     CBaseBroadcastReceiver::New(this, (IBroadcastReceiver**)&mBroadcastReceiver);
     CNotificationListenerService::New(this, (INotificationListenerService**)&mNotificationListener);
     mRecentsPreloadOnTouchListener = new RecentsPreloadOnTouchListener(this);
     mHandler = CreateHandler();
 
-    CSettingsObserver::New((IHandler*)mHandler->Probe(EIID_IHandler),
-        (IBaseStatusBar*)this->Probe(EIID_IBaseStatusBar), (IContentObserver**)&mSettingsObserver);
-    CLockscreenSettingsObserver::New((IHandler*)mHandler->Probe(EIID_IHandler),
-        (IBaseStatusBar*)this->Probe(EIID_IBaseStatusBar), (IContentObserver**)&mLockscreenSettingsObserver);
+    CSettingsObserver::New((IHandler*)mHandler.Get(), this,
+        (IContentObserver**)&mSettingsObserver);
+    CLockscreenSettingsObserver::New((IHandler*)mHandler.Get(), this,
+        (IContentObserver**)&mLockscreenSettingsObserver);
 
     CSparseArray::New((ISparseArray**)&mCurrentProfiles);
     CSparseBooleanArray::New((ISparseBooleanArray**)&mUsersAllowingPrivateNotifications);
+    return NOERROR;
 }
 
 ECode BaseStatusBar::IsDeviceProvisioned(
@@ -1027,7 +1041,7 @@ ECode BaseStatusBar::Start()
     obj = ServiceManager::GetService(IContext::STATUS_BAR_SERVICE);
     mBarService = IIStatusBarService::Probe(obj);
 
-    obj = GetComponent(String("EIID_IRecentsComponent")/*.class*/);
+    obj = GetComponent(String("EIID_IRecentsComponent"));
     mRecents = IRecentsComponent::Probe(obj);
 
     AutoPtr<RecentsComponentCallbacks> c = new RecentsComponentCallbacks(this);
@@ -1071,11 +1085,9 @@ ECode BaseStatusBar::Start()
         AutoPtr<IStatusBarIconList> outIconList;
         AutoPtr<ArrayOf<Int32> > outSwitches;
         AutoPtr<IList> outBinders;
-        mBarService->RegisterStatusBar(IIStatusBar::Probe(mCommandQueue)
-                , iconList, switches, binders,
-                (IStatusBarIconList**)&outIconList,
-                (ArrayOf<Int32>**)&outSwitches,
-                (IList**)&outBinders);
+        mBarService->RegisterStatusBar(IIStatusBar::Probe(mCommandQueue),
+            iconList, switches, binders, (IStatusBarIconList**)&outIconList,
+            (ArrayOf<Int32>**)&outSwitches, (IList**)&outBinders);
         iconList = outIconList;
         switches = outSwitches;
         binders = outBinders;
@@ -1122,14 +1134,8 @@ ECode BaseStatusBar::Start()
     }
 
     if (DEBUG) {
-        Logger::D(TAG,
-                "init: icons=%d disabled=0x%08x lights=0x%08x menu=0x%08x imeButton=0x%08x",
-               N,
-               (*switches)[0],
-               (*switches)[1],
-               (*switches)[2],
-               (*switches)[3]
-               );
+        Logger::D(TAG, "init: icons=%d disabled=0x%08x lights=0x%08x menu=0x%08x imeButton=0x%08x",
+            N, (*switches)[0], (*switches)[1], (*switches)[2], (*switches)[3]);
     }
 
     AutoPtr<IActivityManagerHelper> amHelper;
@@ -1264,9 +1270,10 @@ ECode BaseStatusBar::IsNotificationForCurrentProfiles(
     n->GetUserId(&notificationUserId);
     if (DEBUG && MULTIUSER_DEBUG) {
         Logger::V(TAG, "%s: current userid: %d, notification userid: %d",
-                n, thisUserId, notificationUserId);
+            n, thisUserId, notificationUserId);
     }
-    {    AutoLock syncLock(mCurrentProfiles);
+    {
+        AutoLock syncLock(mCurrentProfiles);
         AutoPtr<IInterface> obj;
         mCurrentProfiles->Get(notificationUserId, (IInterface**)&obj);
         *result = notificationUserId == IUserHandle::USER_ALL
@@ -1286,11 +1293,11 @@ ECode BaseStatusBar::GetCurrentMediaNotificationKey(
 }
 
 void BaseStatusBar::DismissKeyguardThenExecute(
-    /* [in] */ IOnDismissAction* action,
+    /* [in] */ IKeyguardHostViewOnDismissAction* action,
     /* [in] */ Boolean afterKeyguardGone)
 {
-    assert(0 && "TODO");
-    // action->OnDismiss();
+    Boolean bval;
+    action->OnDismiss(&bval);
 }
 
 ECode BaseStatusBar::OnConfigurationChanged(
@@ -1309,8 +1316,8 @@ ECode BaseStatusBar::OnConfigurationChanged(
     Boolean tmp = FALSE;
     if ((locale->Equals(mLocale, &tmp), !tmp) || ld != mLayoutDirection || fontScale != mFontScale) {
         if (DEBUG) {
-            Logger::V(TAG,  "config changed locale/LD: %p (%d) -> %s (%d)", mLocale.Get(), mLayoutDirection,
-                    locale.Get(), ld);
+            Logger::V(TAG,  "config changed locale/LD: %s (%d) -> %s (%d)",
+                TO_CSTR(mLocale), mLayoutDirection, TO_CSTR(locale), ld);
         }
         mLocale = locale;
         mLayoutDirection = ld;
@@ -1733,9 +1740,9 @@ void BaseStatusBar::UpdateSearchPanel()
     inflater->Inflate(R::layout::status_bar_search_panel, IViewGroup::Probe(tmpRoot), FALSE, (IView**)&view);
     mSearchPanelView = ISearchPanelView::Probe(view);
     assert(IView::Probe(mSearchPanelView) != NULL);
-    IView::Probe(mSearchPanelView)->SetOnTouchListener(
+    view->SetOnTouchListener(
         new TouchOutsideListener(MSG_CLOSE_SEARCH_PANEL, IStatusBarPanel::Probe(mSearchPanelView), this));
-    IView::Probe(mSearchPanelView)->SetVisibility(IView::GONE);
+    view->SetVisibility(IView::GONE);
 
     Boolean tmp = FALSE;
     Boolean vertical = mNavigationBarView != NULL && (mNavigationBarView->IsVertical(&tmp), tmp);
@@ -1745,8 +1752,7 @@ void BaseStatusBar::UpdateSearchPanel()
     IView::Probe(mSearchPanelView)->GetLayoutParams((IViewGroupLayoutParams**)&vp);
     AutoPtr<IWindowManagerLayoutParams> lp = GetSearchLayoutParams(vp);
 
-    IViewManager::Probe(mWindowManager)->AddView(IView::Probe(mSearchPanelView),
-        IViewGroupLayoutParams::Probe(lp));
+    IViewManager::Probe(mWindowManager)->AddView(view, IViewGroupLayoutParams::Probe(lp));
     mSearchPanelView->SetBar(this);
     if (visible) {
         mSearchPanelView->Show(TRUE, FALSE);
@@ -1771,6 +1777,7 @@ void BaseStatusBar::SendCloseSystemWindows(
 void BaseStatusBar::ShowRecents(
     /* [in] */ Boolean triggeredFromAltTab)
 {
+    Logger::I(TAG, " >>> ShowRecents");
     if (mRecents != NULL) {
         SendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
         AutoPtr<IView> view = GetStatusBarView();
@@ -1782,6 +1789,7 @@ void BaseStatusBar::HideRecents(
     /* [in] */ Boolean triggeredFromAltTab,
     /* [in] */ Boolean triggeredFromHomeKey)
 {
+    Logger::I(TAG, " >>> HideRecents");
     if (mRecents != NULL) {
         mRecents->HideRecents(triggeredFromAltTab, triggeredFromHomeKey);
     }
@@ -1789,6 +1797,7 @@ void BaseStatusBar::HideRecents(
 
 void BaseStatusBar::ToggleRecents()
 {
+    Logger::I(TAG, " >>> ToggleRecents");
     if (mRecents != NULL) {
         SendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
         AutoPtr<IView> view = GetStatusBarView();
@@ -1798,6 +1807,7 @@ void BaseStatusBar::ToggleRecents()
 
 void BaseStatusBar::PreloadRecents()
 {
+    Logger::I(TAG, " >>> PreloadRecents");
     if (mRecents != NULL) {
         mRecents->PreloadRecents();
     }
@@ -1805,6 +1815,7 @@ void BaseStatusBar::PreloadRecents()
 
 void BaseStatusBar::CancelPreloadingRecents()
 {
+    Logger::I(TAG, " >>> CancelPreloadingRecents");
     if (mRecents != NULL) {
         mRecents->CancelPreloadingRecents();
     }
@@ -3034,7 +3045,7 @@ ECode BaseStatusBar::Destroy()
 AutoPtr<IPackageManager> BaseStatusBar::GetPackageManagerForUser(
     /* [in] */ Int32 userId)
 {
-    IContext* contextForUser = mContext;
+    AutoPtr<IContext> contextForUser = mContext;
     // UserHandle defines special userId as negative values, e.g. USER_ALL
     if (userId >= 0) {
         // try {
@@ -3044,8 +3055,9 @@ AutoPtr<IPackageManager> BaseStatusBar::GetPackageManagerForUser(
         mContext->GetPackageName(&pkgname);
         AutoPtr<IUserHandle> uh;
         CUserHandle::New(userId, (IUserHandle**)&uh);
+        contextForUser = NULL;
         mContext->CreatePackageContextAsUser(pkgname, IContext::CONTEXT_RESTRICTED,
-                    uh, (IContext**)&contextForUser);
+            uh, (IContext**)&contextForUser);
         // } catch (NameNotFoundException e) {
         //     // Shouldn't fail to find the package name for system ui.
         // }

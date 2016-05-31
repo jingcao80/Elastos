@@ -3,6 +3,7 @@
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_BASESTATUSBAR_H__
 
 #include <elastos/droid/ext/frameworkext.h>
+#include "_Elastos.Droid.Core.h"
 #include "elastos/droid/systemui/SystemUI.h"
 #include "elastos/droid/systemui/statusbar/NotificationData.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
@@ -21,7 +22,7 @@ using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Database::ContentObserver;
-using Elastos::Droid::Keyguard::KeyguardHostView::IOnDismissAction;
+using Elastos::Droid::Keyguard::IKeyguardHostViewOnDismissAction;
 using Elastos::Droid::Internal::StatusBar::IIStatusBarService;
 using Elastos::Droid::Internal::StatusBar::IStatusBarIcon;
 using Elastos::Droid::Internal::Utility::INotificationColorUtil;
@@ -307,6 +308,8 @@ public:
 
     BaseStatusBar();
 
+    CARAPI constructor();
+
     // @Override  // NotificationData.Environment
     CARAPI IsDeviceProvisioned(
         /* [out] */ Boolean* result);
@@ -496,7 +499,7 @@ protected:
      * @param afterKeyguardGone Whether the action should be executed after the Keyguard is gone.
      */
     virtual CARAPI_(void) DismissKeyguardThenExecute(
-        /* [in] */ IOnDismissAction* action,
+        /* [in] */ IKeyguardHostViewOnDismissAction* action,
         /* [in] */ Boolean afterKeyguardGone);
 
     // @Override

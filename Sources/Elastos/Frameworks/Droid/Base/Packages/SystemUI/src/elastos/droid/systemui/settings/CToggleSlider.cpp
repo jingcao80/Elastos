@@ -153,7 +153,6 @@ ECode CToggleSlider::constructor(
     mLabel = ITextView::Probe(v);
     String str;
     a->GetString(R::styleable::ToggleSlider_text, &str);
-    Logger::I(TAG, " >> CToggleSlider SetText: [%s]", str.string());
     AutoPtr<ICharSequence> cs;
     CString::New(str, (ICharSequence**)&cs);
     mLabel->SetText(cs);
@@ -255,7 +254,6 @@ ECode CToggleSlider::OnStartTrackingTouch(
         IView::Probe(mMirror->mSlider)->SetPressed(TRUE);
     }
 
-    Logger::I(TAG, " >> OnStartTrackingTouch: %s", TO_CSTR(mMirrorController));
     if (mMirrorController != NULL) {
         mMirrorController->ShowMirror();
         AutoPtr<IViewParent> parent;

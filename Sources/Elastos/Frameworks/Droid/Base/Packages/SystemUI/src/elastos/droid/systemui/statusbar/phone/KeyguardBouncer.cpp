@@ -84,7 +84,7 @@ void KeyguardBouncer::CancelShowRunnable()
 }
 
 void KeyguardBouncer::ShowWithDismissAction(
-    /* [in] */ IOnDismissAction* r)
+    /* [in] */ IKeyguardHostViewOnDismissAction* r)
 {
     EnsureView();
     assert(0 && "TODO: need the app Keyguard.");

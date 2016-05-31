@@ -270,6 +270,7 @@ ECode PrivacyContentResolver::EnforcePrivacyPermission(
                 if(forbidden_position == -1) {
                     Logger::I(TAG,"now we return real cursor, because forbidden_pos is -1");
                     *outCusor = output.Get();
+                    REFCOUNT_ADD(*outCusor)
                     return NOERROR;
                 } //give realcursor, because there is no android_id to block
 

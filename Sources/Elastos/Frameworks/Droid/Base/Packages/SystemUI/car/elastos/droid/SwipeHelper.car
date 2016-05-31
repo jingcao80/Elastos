@@ -2,8 +2,8 @@ module
 {
     using interface Elastos.Core.IRunnable;
 
-    interface Elastos.Droid.View.IView;
-    interface Elastos.Droid.View.IMotionEvent;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IMotionEvent;
 
     namespace Elastos {
     namespace Droid {

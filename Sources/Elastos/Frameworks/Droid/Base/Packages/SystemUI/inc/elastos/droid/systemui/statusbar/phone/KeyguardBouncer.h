@@ -12,7 +12,7 @@
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Keyguard::IViewMediatorCallback;
-using Elastos::Droid::Keyguard::KeyguardHostView::IOnDismissAction;
+using Elastos::Droid::Keyguard::IKeyguardHostViewOnDismissAction;
 using Elastos::Droid::Internal::Widget::ILockPatternUtils;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::View::IChoreographer;
@@ -57,7 +57,7 @@ public:
     CARAPI_(void) Show();
 
     CARAPI_(void) ShowWithDismissAction(
-        /* [in] */ IOnDismissAction* r);
+        /* [in] */ IKeyguardHostViewOnDismissAction* r);
 
     CARAPI_(void) Hide(
         /* [in] */ Boolean destroyView);

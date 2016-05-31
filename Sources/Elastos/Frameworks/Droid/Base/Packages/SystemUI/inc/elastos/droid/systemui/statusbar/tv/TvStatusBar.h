@@ -21,6 +21,8 @@ class TvStatusBar
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     // @Override
     CARAPI AddIcon(
         /* [in] */ const String& slot,

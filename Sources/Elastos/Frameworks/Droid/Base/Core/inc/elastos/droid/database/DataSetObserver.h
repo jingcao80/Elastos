@@ -20,6 +20,8 @@ class ECO_PUBLIC DataSetObserver
 public:
     CAR_INTERFACE_DECL()
 
+    virtual CARAPI constructor();
+
     /**
      * This method is called when the entire data set has changed,
      * most likely through a call to {@link Cursor#requery()} on a {@link Cursor}.

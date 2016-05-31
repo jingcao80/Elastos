@@ -256,6 +256,7 @@ ignored_list = [
     '/media/TtmlRenderer.cpp#IXmlPullParser#mParser',
     '/widget/TabHost.cpp#IView#mTabContent',
     '/widget/Spinner.cpp#IAlertDialog#mPopup',
+    '/widget/Editor.cpp#IPopupWindow#mPopupWindow',
     '/appwidget/AppWidgetServiceImpl.cpp#IList#mWidgets',
     '/res/CResources.cpp#IFormatter#f',
     '/accessibility/AccessibilityInjector.cpp#ITextToSpeech#mTextToSpeech',
@@ -274,6 +275,8 @@ ignored_list = [
     '/Quintet/test.cpp#IBigInteger#i1',
     '/utility/Collections.cpp#IListIterator#mIterator',
     '/utility/CTreeMap.cpp#IWeakReference#mKeySet',
+    '/contentproviderdemo/CContentProviderOne.cpp#IUriMatcher#sUriMatcher',
+
 ]
 
 ############################################################################################################

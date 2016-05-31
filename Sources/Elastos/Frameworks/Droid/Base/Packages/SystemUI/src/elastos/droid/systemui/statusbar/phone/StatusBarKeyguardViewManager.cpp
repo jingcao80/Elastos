@@ -187,7 +187,7 @@ void StatusBarKeyguardViewManager::ShowBouncer()
 }
 
 ECode StatusBarKeyguardViewManager::DismissWithAction(
-    /* [in] */ IOnDismissAction* r,
+    /* [in] */ IKeyguardHostViewOnDismissAction* r,
     /* [in] */ Boolean afterKeyguardGone)
 {
     if (mShowing) {

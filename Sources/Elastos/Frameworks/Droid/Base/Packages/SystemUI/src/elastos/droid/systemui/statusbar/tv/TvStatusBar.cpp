@@ -8,6 +8,12 @@ namespace StatusBar {
 namespace TV {
 
 CAR_INTERFACE_IMPL(TvStatusBar, BaseStatusBar, ITvStatusBar)
+
+ECode TvStatusBar::constructor()
+{
+    return BaseStatusBar::constructor();
+}
+
 ECode TvStatusBar::AddIcon(
     /* [in] */ const String& slot,
     /* [in] */ Int32 index,

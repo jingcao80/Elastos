@@ -1,11 +1,10 @@
 module
 {
-    using interface Elastos.Droid.Content.Res.IConfiguration;
     using interface Elastos.IO.IFileDescriptor;
     using interface Elastos.IO.IPrintWriter;
     using interface Elastos.Utility.IMap;
-    interface Elastos.Droid.Content.IContext;
-    interface Elastos.Droid.Content.Res.IConfiguration;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.Res.IConfiguration;
 
     namespace Elastos {
     namespace Droid {

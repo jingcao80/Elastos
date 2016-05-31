@@ -145,7 +145,7 @@ public:
         /* [in] */ IBundle* options);
 
     CARAPI DismissWithAction(
-        /* [in] */ IOnDismissAction* r,
+        /* [in] */ IKeyguardHostViewOnDismissAction* r,
         /* [in] */ Boolean afterKeyguardGone);
 
     /**
@@ -276,7 +276,7 @@ private:
     Boolean mLastOccluded;
     Boolean mLastBouncerShowing;
     Boolean mLastBouncerDismissible;
-    AutoPtr<IOnDismissAction> mAfterKeyguardGoneAction;
+    AutoPtr<IKeyguardHostViewOnDismissAction> mAfterKeyguardGoneAction;
     AutoPtr<IRunnable> mMakeNavigationBarVisibleRunnable;
 };
 

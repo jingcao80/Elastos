@@ -38,11 +38,11 @@ def find_function_range(lines, index):
         if isCodeLine(line):
             if line.startswith('}') and line.endswith('{'):     # case: } else {
                 pass
-            # elif line.find('{') != -1 and line.find('}') != -1 and line.find('{') < line.find('}'): # case if (bval) { do something }
-            #     pass
+            elif line.find('{') != -1 and line.find('}') != -1 and line.find('{') < line.find('}'): # case if (bval) { do something }
+                pass
             elif line.endswith('{'):
                 matchCount = matchCount + 1
-            elif line.endswith("}"):
+            elif line.endswith("}") or line.startswith('}'):
                 matchCount = matchCount - 1
                 if matchCount == 0:
                     endLineNum = index
@@ -334,7 +334,7 @@ return_value_ignored_list = [
 scan_path = '/home/kesalin/Elastos5/Sources/'                                           # default sacn dir
 log_filepath = '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_add_ref_checker.log'     # default log file path
 
-#scan_path = '/home/kesalin/test/python/test.cpp'
+#scan_path = '/home/kesalin/Elastos5/Sources//Elastos/Packages/Providers/MediaProvider/src/elastos/droid/providers/media/MediaProvider.cpp'
 
 print "python  :", sys.argv[0]
 argc = len(sys.argv)

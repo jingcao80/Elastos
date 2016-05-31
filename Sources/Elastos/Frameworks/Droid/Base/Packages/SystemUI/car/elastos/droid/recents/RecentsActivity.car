@@ -1,7 +1,7 @@
 
 module
 {
-    interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Droid.Content.IIntent;
 
     namespace Elastos {
     namespace Droid {

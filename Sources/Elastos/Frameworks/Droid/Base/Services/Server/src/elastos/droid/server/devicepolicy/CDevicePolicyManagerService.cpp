@@ -7262,10 +7262,10 @@ ECode CDevicePolicyManagerService::GetPermittedInputMethodsForCurrentUser(
 ECode CDevicePolicyManagerService::CreateUser(
     /* [in] */ IComponentName* who,
     /* [in] */ const String& name,
-    /* [out] */ IUserHandle** result)
+    /* [out] */ IUserHandle** user)
 {
-    VALIDATE_NOT_NULL(result)
-    *result = NULL;
+    VALIDATE_NOT_NULL(user)
+    *user = NULL;
 
     {    AutoLock syncLock(this);
         if (who == NULL) {
@@ -7285,11 +7285,10 @@ ECode CDevicePolicyManagerService::CreateUser(
                 AutoPtr<IUserHandle> userHandle;
                 ec = userInfo->GetUserHandle((IUserHandle**)&userHandle);
                 if (FAILED(ec)) break;
-                *result = userHandle;
-                REFCOUNT_ADD(*result)
+                *user = userHandle;
+                REFCOUNT_ADD(*user)
                 break;
             }
-            *result = NULL;
         } while(FALSE);
         // } finally {
         Binder::RestoreCallingIdentity(id);
@@ -7305,10 +7304,10 @@ ECode CDevicePolicyManagerService::CreateAndInitializeUser(
     /* [in] */ const String& ownerName,
     /* [in] */ IComponentName* profileOwnerComponent,
     /* [in] */ IBundle* adminExtras,
-    /* [out] */ IUserHandle** result)
+    /* [out] */ IUserHandle** uh)
 {
-    VALIDATE_NOT_NULL(result)
-    *result = NULL;
+    VALIDATE_NOT_NULL(uh)
+    *uh = NULL;
 
     AutoPtr<IUserHandle> user;
     CreateUser(who, name, (IUserHandle**)&user);
@@ -7349,8 +7348,8 @@ ECode CDevicePolicyManagerService::CreateAndInitializeUser(
         if (FAILED(ec)) break;
         Boolean bNoUse;
         ec = SetProfileOwner(profileOwnerComponent, ownerName, identifier, &bNoUse);
-        *result = user;
-        REFCOUNT_ADD(*result)
+        *uh = user;
+        REFCOUNT_ADD(*uh)
     } while(FALSE);
     // } finally {
     Binder::RestoreCallingIdentity(id);

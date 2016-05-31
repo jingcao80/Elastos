@@ -9161,7 +9161,8 @@ ECode BatteryStatsImpl::GetProcessStatsLocked(
     VALIDATE_NOT_NULL(proc)
     MapUid(uid, &uid);
     AutoPtr<Uid> u = GetUidStatsLocked(uid);
-    *proc = (IBatteryStatsImplUidProc*)u->GetProcessStatsLocked(name);
+    AutoPtr<IBatteryStatsImplUidProc> bsiup = (IBatteryStatsImplUidProc*)u->GetProcessStatsLocked(name);
+    *proc = bsiup;
     REFCOUNT_ADD(*proc)
     return NOERROR;
 }
@@ -9174,7 +9175,8 @@ ECode BatteryStatsImpl::GetPackageStatsLocked(
     VALIDATE_NOT_NULL(pkgStats)
     MapUid(uid, &uid);
     AutoPtr<Uid> u = GetUidStatsLocked(uid);
-    *pkgStats = (IBatteryStatsImplUidPkg*)u->GetPackageStatsLocked(pkg);
+    AutoPtr<IBatteryStatsImplUidPkg> bsiup = (IBatteryStatsImplUidPkg*)u->GetPackageStatsLocked(pkg);
+    *pkgStats = bsiup;
     REFCOUNT_ADD(*pkgStats)
     return NOERROR;
 }
@@ -9188,7 +9190,8 @@ ECode BatteryStatsImpl::GetServiceStatsLocked(
     VALIDATE_NOT_NULL(serv)
     MapUid(uid, &uid);
     AutoPtr<Uid> u = GetUidStatsLocked(uid);
-    *serv = (IBatteryStatsImplUidPkgServ*)u->GetServiceStatsLocked(pkg, name);
+    AutoPtr<IBatteryStatsImplUidPkgServ> bsiups = (IBatteryStatsImplUidPkgServ*)u->GetServiceStatsLocked(pkg, name);
+    *serv = bsiups;
     REFCOUNT_ADD(*serv)
     return NOERROR;
 }

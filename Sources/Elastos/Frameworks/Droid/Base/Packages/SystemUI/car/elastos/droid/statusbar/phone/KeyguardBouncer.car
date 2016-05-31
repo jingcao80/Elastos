@@ -3,7 +3,8 @@ module
 {
     using interface Elastos.Core.IRunnable;
 
-    interface Elastos.Droid.View.IKeyEvent;
+    using interface Elastos.Droid.View.IKeyEvent;
+    using interface Elastos.Droid.Keyguard.IKeyguardHostViewOnDismissAction;
 
     namespace Elastos {
     namespace Droid {
@@ -18,8 +19,8 @@ module
 
         Show();
 
-//        ShowWithDismissAction(
-//            [in] IOnDismissAction* r);
+        ShowWithDismissAction(
+            [in] IKeyguardHostViewOnDismissAction* r);
 
         Hide(
             [in] Boolean destroyView);

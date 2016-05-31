@@ -367,7 +367,7 @@ ECode DefaultContainerService::MediaContainerService::ToString(
 
 DefaultContainerService::DefaultContainerService()
 {
-    CMediaContainerService::New(this, (IBinder**)&mBinder);
+    CMediaContainerService::New(this, (IIMediaContainerService**)&mBinder);
 }
 
 ECode DefaultContainerService::constructor()

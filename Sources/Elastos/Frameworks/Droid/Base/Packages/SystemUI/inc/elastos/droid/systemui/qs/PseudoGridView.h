@@ -38,6 +38,14 @@ public:
     class ViewGroupAdapterBridge: public DataSetObserver
     {
     public:
+        ViewGroupAdapterBridge();
+
+        ~ViewGroupAdapterBridge();
+
+        CARAPI constructor(
+            /* [in] */ IViewGroup* viewGroup,
+            /* [in] */ IBaseAdapter* adapter);
+
         static CARAPI_(void) Link(
             /* [in] */ IViewGroup* viewGroup,
             /* [in] */ IBaseAdapter* adapter);
@@ -49,9 +57,6 @@ public:
         CARAPI OnInvalidated();
 
     private:
-        ViewGroupAdapterBridge(
-            /* [in] */ IViewGroup* viewGroup,
-            /* [in] */ IBaseAdapter* adapter);
 
         CARAPI_(void) Refresh();
 

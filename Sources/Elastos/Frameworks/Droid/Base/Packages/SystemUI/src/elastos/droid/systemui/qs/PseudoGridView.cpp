@@ -1,33 +1,55 @@
 
 #include "elastos/droid/systemui/qs/PseudoGridView.h"
+#include "elastos/droid/systemui/qs/CViewGroupAdapterBridge.h"
 #include "../R.h"
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::View::EIID_IViewGroup;
 using Elastos::Droid::Widget::IAdapter;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Qs {
 
-void PseudoGridView::ViewGroupAdapterBridge::Link(
-    /* [in] */ IViewGroup* viewGroup,
-    /* [in] */ IBaseAdapter* adapter)
+static const String TAG("PseudoGridView");
+
+//===============================================================================
+// PseudoGridView::ViewGroupAdapterBridge
+//===============================================================================
+CAR_OBJECT_IMPL(CViewGroupAdapterBridge)
+
+PseudoGridView::ViewGroupAdapterBridge::ViewGroupAdapterBridge()
+    : mReleased(FALSE)
 {
-    AutoPtr<ViewGroupAdapterBridge> va = new ViewGroupAdapterBridge(viewGroup, adapter);
 }
 
-PseudoGridView::ViewGroupAdapterBridge::ViewGroupAdapterBridge(
+PseudoGridView::ViewGroupAdapterBridge::~ViewGroupAdapterBridge()
+{
+    Logger::I(TAG, " >>> destory ViewGroupAdapterBridge %p", this);
+}
+
+ECode PseudoGridView::ViewGroupAdapterBridge::constructor(
     /* [in] */ IViewGroup* viewGroup,
     /* [in] */ IBaseAdapter* adapter)
-    : mReleased(FALSE)
 {
     IWeakReferenceSource::Probe(viewGroup)->GetWeakReference((IWeakReference**)&mViewGroup);
     mAdapter = adapter;
     mReleased = FALSE;
     IAdapter::Probe(mAdapter)->RegisterDataSetObserver(this);
     Refresh();
+    return NOERROR;
+}
+
+void PseudoGridView::ViewGroupAdapterBridge::Link(
+    /* [in] */ IViewGroup* viewGroup,
+    /* [in] */ IBaseAdapter* adapter)
+{
+    AutoPtr<IDataSetObserver> dso;
+    CViewGroupAdapterBridge::New(viewGroup, adapter, (IDataSetObserver**)&dso);
+    Logger::I(TAG, " >>> Link CViewGroupAdapterBridge: %s", TO_CSTR(dso));
 }
 
 void PseudoGridView::ViewGroupAdapterBridge::Refresh()
@@ -43,10 +65,12 @@ void PseudoGridView::ViewGroupAdapterBridge::Refresh()
         ReleaseAdapter();
         return;
     }
+
+    IAdapter* adapter = IAdapter::Probe(mAdapter);
     Int32 childCount = 0;
     viewGroup->GetChildCount(&childCount);
     Int32 adapterCount = 0;
-    IAdapter::Probe(mAdapter)->GetCount(&adapterCount);
+    adapter->GetCount(&adapterCount);
     const Int32 N = Elastos::Core::Math::Max(childCount, adapterCount);
     for (Int32 i = 0; i < N; i++) {
         if (i < adapterCount) {
@@ -55,7 +79,7 @@ void PseudoGridView::ViewGroupAdapterBridge::Refresh()
                 viewGroup->GetChildAt(i, (IView**)&oldView);
             }
             AutoPtr<IView> newView;
-            IAdapter::Probe(mAdapter)->GetView(i, oldView, viewGroup, (IView**)&newView);
+            adapter->GetView(i, oldView, viewGroup, (IView**)&newView);
             if (oldView == NULL) {
                 // We ran out of existing views. Add it at the end.
                 viewGroup->AddView(newView);
@@ -95,7 +119,11 @@ void PseudoGridView::ViewGroupAdapterBridge::ReleaseAdapter()
     }
 }
 
+//===============================================================================
+// PseudoGridView
+//===============================================================================
 CAR_INTERFACE_IMPL(PseudoGridView, ViewGroup, IPseudoGridView)
+
 PseudoGridView::PseudoGridView()
     : mNumColumns(3)
     , mVerticalSpacing(0)
