@@ -1,285 +1,297 @@
-/*
- * Copyright (C) 2006 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony;
+#include "elastos/droid/internal/telephony/CallTracker.h"
+#include "elastos/droid/internal/telephony/Call.h"
+#include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Content.h"
+#include "elastos/droid/R.h"
+#include <elastos/core/StringUtils.h>
 
-using Elastos::Droid::Os::IAsyncResult;
-using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::ISystemProperties;
-using Elastos::Droid::Text::ITextUtils;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::Telephony::PhoneNumberUtils;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::IIterator;
 
-using Elastos::IO::IFileDescriptor;
-using Elastos::IO::IPrintWriter;
-using Elastos::Utility::IArrayList;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
 
+const Int32 CallTracker::POLL_DELAY_MSEC = 250;
+const Int32 CallTracker::EVENT_POLL_CALLS_RESULT             = 1;
+const Int32 CallTracker::EVENT_CALL_STATE_CHANGE             = 2;
+const Int32 CallTracker::EVENT_REPOLL_AFTER_DELAY            = 3;
+const Int32 CallTracker::EVENT_OPERATION_COMPLETE            = 4;
+const Int32 CallTracker::EVENT_GET_LAST_CALL_FAIL_CAUSE      = 5;
 
-/**
- * {@hide}
- */
-public abstract class CallTracker extends Handler {
+const Int32 CallTracker::EVENT_SWITCH_RESULT                 = 8;
+const Int32 CallTracker::EVENT_RADIO_AVAILABLE               = 9;
+const Int32 CallTracker::EVENT_RADIO_NOT_AVAILABLE           = 10;
+const Int32 CallTracker::EVENT_CONFERENCE_RESULT             = 11;
+const Int32 CallTracker::EVENT_SEPARATE_RESULT               = 12;
+const Int32 CallTracker::EVENT_ECT_RESULT                    = 13;
+const Int32 CallTracker::EVENT_EXIT_ECM_RESPONSE_CDMA        = 14;
+const Int32 CallTracker::EVENT_CALL_WAITING_INFO_CDMA        = 15;
+const Int32 CallTracker::EVENT_THREE_WAY_DIAL_L2_RESULT_CDMA = 16;
+const Int32 CallTracker::EVENT_THREE_WAY_DIAL_BLANK_FLASH    = 20;
+const Boolean CallTracker::DBG_POLL = FALSE;
+CallTracker::CallTracker()
+    : mPendingOperations(0)
+    , mNeedsPoll(FALSE)
+    , mNumberConverted(FALSE)
+    , VALID_COMPARE_LENGTH(3)
+{
+    CArrayList::New((IArrayList**)&mHandoverConnections);
+}
 
-    private static const Boolean DBG_POLL = FALSE;
+CallTracker::~CallTracker()
+{}
 
-    //***** Constants
+void CallTracker::PollCallsWhenSafe()
+{
+    mNeedsPoll = TRUE;
 
-    static const Int32 POLL_DELAY_MSEC = 250;
-
-    protected Int32 mPendingOperations;
-    protected Boolean mNeedsPoll;
-    protected Message mLastRelevantPoll;
-    protected ArrayList<Connection> mHandoverConnections = new ArrayList<Connection>();
-
-    public CommandsInterface mCi;
-
-    protected Boolean mNumberConverted = FALSE;
-    private final Int32 VALID_COMPARE_LENGTH   = 3;
-
-    //***** Events
-
-    protected static const Int32 EVENT_POLL_CALLS_RESULT             = 1;
-    protected static const Int32 EVENT_CALL_STATE_CHANGE             = 2;
-    protected static const Int32 EVENT_REPOLL_AFTER_DELAY            = 3;
-    protected static const Int32 EVENT_OPERATION_COMPLETE            = 4;
-    protected static const Int32 EVENT_GET_LAST_CALL_FAIL_CAUSE      = 5;
-
-    protected static const Int32 EVENT_SWITCH_RESULT                 = 8;
-    protected static const Int32 EVENT_RADIO_AVAILABLE               = 9;
-    protected static const Int32 EVENT_RADIO_NOT_AVAILABLE           = 10;
-    protected static const Int32 EVENT_CONFERENCE_RESULT             = 11;
-    protected static const Int32 EVENT_SEPARATE_RESULT               = 12;
-    protected static const Int32 EVENT_ECT_RESULT                    = 13;
-    protected static const Int32 EVENT_EXIT_ECM_RESPONSE_CDMA        = 14;
-    protected static const Int32 EVENT_CALL_WAITING_INFO_CDMA        = 15;
-    protected static const Int32 EVENT_THREE_WAY_DIAL_L2_RESULT_CDMA = 16;
-    protected static const Int32 EVENT_THREE_WAY_DIAL_BLANK_FLASH    = 20;
-
-    protected void PollCallsWhenSafe() {
-        mNeedsPoll = TRUE;
-
-        If (CheckNoOperationsPending()) {
-            mLastRelevantPoll = ObtainMessage(EVENT_POLL_CALLS_RESULT);
-            mCi->GetCurrentCalls(mLastRelevantPoll);
-        }
-    }
-
-    protected void
-    PollCallsAfterDelay() {
-        Message msg = ObtainMessage();
-
-        msg.what = EVENT_REPOLL_AFTER_DELAY;
-        SendMessageDelayed(msg, POLL_DELAY_MSEC);
-    }
-
-    protected Boolean
-    IsCommandExceptionRadioNotAvailable(Throwable e) {
-        return e != NULL && e instanceof CommandException
-                && ((CommandException)e).GetCommandError()
-                        == CommandException.Error.RADIO_NOT_AVAILABLE;
-    }
-
-    protected abstract void HandlePollCalls(AsyncResult ar);
-
-    protected Connection GetHoConnection(DriverCall dc) {
-        For (Connection hoConn : mHandoverConnections) {
-            Log("getHoConnection - compare number: hoConn= " + hoConn->ToString());
-            If (hoConn->GetAddress() != NULL && hoConn->GetAddress()->Contains(dc.number)) {
-                Log("getHoConnection: Handover connection match found = " + hoConn->ToString());
-                return hoConn;
-            }
-        }
-        For (Connection hoConn : mHandoverConnections) {
-            Log("getHoConnection: compare state hoConn= " + hoConn->ToString());
-            If (hoConn->GetStateBeforeHandover() == Call->StateFromDCState(dc.state)) {
-                Log("getHoConnection: Handover connection match found = " + hoConn->ToString());
-                return hoConn;
-            }
-        }
-        return NULL;
-    }
-
-    protected void NotifySrvccState(Call.SrvccState state, ArrayList<Connection> c) {
-        If (state == Call.SrvccState.STARTED && c != NULL) {
-            // SRVCC started. Prepare handover connections list
-            mHandoverConnections->AddAll(c);
-        } else If (state != Call.SrvccState.COMPLETED) {
-            // SRVCC FAILED/CANCELED. Clear the handover connections list
-            // Individual connections will be removed from the list in HandlePollCalls()
-            mHandoverConnections->Clear();
-        }
-        Log("notifySrvccState: mHandoverConnections= " + mHandoverConnections->ToString());
-    }
-
-    protected void HandleRadioAvailable() {
-        PollCallsWhenSafe();
-    }
-
-    /**
-     * Obtain a complete message that indicates that this operation
-     * does not require polling of GetCurrentCalls(). However, if other
-     * operations that do need GetCurrentCalls() are pending or are
-     * scheduled while this operation is pending, the invocation
-     * of GetCurrentCalls() will be postponed until this
-     * operation is also complete.
-     */
-    protected Message
-    ObtainNoPollCompleteMessage(Int32 what) {
-        mPendingOperations++;
-        mLastRelevantPoll = NULL;
-        return ObtainMessage(what);
-    }
-
-    /**
-     * @return TRUE if we're idle or there's a call to GetCurrentCalls() pending
-     * but nothing else
-     */
-    private Boolean
-    CheckNoOperationsPending() {
-        If (DBG_POLL) Log("checkNoOperationsPending: pendingOperations=" +
-                mPendingOperations);
-        return mPendingOperations == 0;
-    }
-
-    /**
-     * Routine called from dial to check if the number is a test Emergency number
-     * and if so remap the number. This allows a short emergency number to be remapped
-     * to a regular number for testing how the frameworks handles emergency numbers
-     * without actually calling an emergency number.
-     *
-     * This is not a full test and is not a substitute for testing real emergency
-     * numbers but can be useful.
-     *
-     * To use this feature set a system property ril.test.emergencynumber to a pair of
-     * numbers separated by a colon. If the first number matches the number parameter
-     * this routine returns the second number. Example:
-     *
-     * ril.test.emergencynumber=112:1-123-123-45678
-     *
-     * To test Dial 112 take call then hang up on MO device to enter ECM
-     * see RIL#processSolicited RIL_REQUEST_HANGUP_FOREGROUND_RESUME_BACKGROUND
-     *
-     * @param dialString to test if it should be remapped
-     * @return the same number or the remapped number.
-     */
-    protected String CheckForTestEmergencyNumber(String dialString) {
-        String testEn = SystemProperties->Get("ril.test.emergencynumber");
-        If (DBG_POLL) {
-            Log("checkForTestEmergencyNumber: dialString=" + dialString +
-                " testEn=" + testEn);
-        }
-        If (!TextUtils->IsEmpty(testEn)) {
-            String values[] = testEn->Split(":");
-            Log("checkForTestEmergencyNumber: values.length=" + values.length);
-            If (values.length == 2) {
-                If (values[0].Equals(
-                        android.telephony.PhoneNumberUtils->StripSeparators(dialString))) {
-                    mCi->TestingEmergencyCall();
-                    Log("checkForTestEmergencyNumber: remap " +
-                            dialString + " to " + values[1]);
-                    dialString = values[1];
-                }
-            }
-        }
-        return dialString;
-    }
-
-    protected String ConvertNumberIfNecessary(PhoneBase phoneBase, String dialNumber) {
-        If (dialNumber == NULL) {
-            return dialNumber;
-        }
-        String[] convertMaps = phoneBase->GetContext()->GetResources().GetStringArray(
-                R.array.dial_string_replace);
-        Log("convertNumberIfNecessary Roaming"
-            + " convertMaps.length " + convertMaps.length
-            + " dialNumber->Length() " + dialNumber->Length());
-
-        If (convertMaps.length < 1 || dialNumber->Length() < VALID_COMPARE_LENGTH) {
-            return dialNumber;
-        }
-
-        String[] entry;
-        String[] tmpArray;
-        String outNumber = "";
-        For(String convertMap : convertMaps) {
-            Log("convertNumberIfNecessary: " + convertMap);
-            entry = convertMap->Split(":");
-            If (entry.length > 1) {
-                tmpArray = entry[1].Split(",");
-                If (!TextUtils->IsEmpty(entry[0]) && dialNumber->Equals(entry[0])) {
-                    If (tmpArray.length >= 2 && !TextUtils->IsEmpty(tmpArray[1])) {
-                        If (CompareGid1(phoneBase, tmpArray[1])) {
-                            mNumberConverted = TRUE;
-                        }
-                    } else If (outNumber->IsEmpty()) {
-                        mNumberConverted = TRUE;
-                    }
-                    If (mNumberConverted) {
-                        If(!TextUtils->IsEmpty(tmpArray[0]) && tmpArray[0].EndsWith("MDN")) {
-                            String prefix = tmpArray[0].Substring(0, tmpArray[0].Length() -3);
-                            outNumber = prefix + phoneBase->GetLine1Number();
-                        } else {
-                            outNumber = tmpArray[0];
-                        }
-                    }
-                }
-            }
-        }
-
-        If (mNumberConverted) {
-            Log("convertNumberIfNecessary: convert service number");
-            return outNumber;
-        }
-
-        return dialNumber;
-
-    }
-
-    private Boolean CompareGid1(PhoneBase phoneBase, String serviceGid1) {
-        String gid1 = phoneBase->GetGroupIdLevel1();
-        Int32 gid_length = serviceGid1->Length();
-        Boolean ret = TRUE;
-
-        If (serviceGid1 == NULL || serviceGid1->Equals("")) {
-            Log("compareGid1 serviceGid is empty, return " + ret);
-            return ret;
-        }
-        // Check if gid1 match service GID1
-        If (!((gid1 != NULL) && (gid1->Length() >= gid_length) &&
-                gid1->Substring(0, gid_length).EqualsIgnoreCase(serviceGid1))) {
-            Log(" gid1 " + gid1 + " serviceGid1 " + serviceGid1);
-            ret = FALSE;
-        }
-        Log("compareGid1 is " + (ret?"Same":"Different"));
-        return ret;
-    }
-
-    //***** Overridden from Handler
-    //@Override
-    public abstract void HandleMessage (Message msg);
-    public abstract void RegisterForVoiceCallStarted(Handler h, Int32 what, Object obj);
-    public abstract void UnregisterForVoiceCallStarted(Handler h);
-    public abstract void RegisterForVoiceCallEnded(Handler h, Int32 what, Object obj);
-    public abstract void UnregisterForVoiceCallEnded(Handler h);
-
-    protected abstract void Log(String msg);
-
-    CARAPI Dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw->Println("CallTracker:");
-        pw->Println(" mPendingOperations=" + mPendingOperations);
-        pw->Println(" mNeedsPoll=" + mNeedsPoll);
-        pw->Println(" mLastRelevantPoll=" + mLastRelevantPoll);
+    if (CheckNoOperationsPending()) {
+        ObtainMessage(EVENT_POLL_CALLS_RESULT, (IMessage**)&mLastRelevantPoll);
+        mCi->GetCurrentCalls(mLastRelevantPoll);
     }
 }
+
+void CallTracker::PollCallsAfterDelay()
+{
+    AutoPtr<IMessage> msg;
+    ObtainMessage((IMessage**)&msg);
+
+    msg->SetWhat(EVENT_REPOLL_AFTER_DELAY);
+    Boolean tmp = FALSE;
+    SendMessageDelayed(msg, POLL_DELAY_MSEC, &tmp);
+}
+
+Boolean CallTracker::IsCommandExceptionRadioNotAvailable(
+    /* [in] */ IThrowable* e)
+{
+    assert(0 && "TODO");
+    // return e != NULL && e instanceof CommandException
+    //         && ((CommandException)e).getCommandError()
+    //                 == CommandException.Error.RADIO_NOT_AVAILABLE;
+    return FALSE;
+}
+
+AutoPtr<IConnection> CallTracker::GetHoConnection(
+    /* [in] */ DriverCall* dc)
+{
+    AutoPtr<IIterator> ator;
+    mHandoverConnections->GetIterator((IIterator**)&ator);
+    Boolean hasNext = FALSE;
+    String v, str;
+    while (ator->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        ator->GetNext((IInterface**)&obj);
+        AutoPtr<IConnection> hoConn = IConnection::Probe(obj);
+
+        IObject::Probe(hoConn)->ToString(&str);
+        Log(String("getHoConnection - compare number: hoConn= ") + str);
+        if ((hoConn->GetAddress(&v), v) != NULL && v.Contains(dc->mNumber)) {
+            Log(String("getHoConnection: Handover connection match found = ") + str);
+            return hoConn;
+        }
+    }
+
+    ator = NULL;
+    mHandoverConnections->GetIterator((IIterator**)&ator);
+    while (ator->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        ator->GetNext((IInterface**)&obj);
+        AutoPtr<IConnection> hoConn = IConnection::Probe(obj);
+
+        IObject::Probe(hoConn)->ToString(&str);
+        Log(String("getHoConnection: compare state hoConn= ") + str);
+        ICallState cs;
+        if ((hoConn->GetStateBeforeHandover(&cs), cs) == Call::StateFromDCState(dc->mState)) {
+            Log(String("getHoConnection: Handover connection match found = ") + str);
+            return hoConn;
+        }
+    }
+
+    return NULL;
+}
+
+void CallTracker::NotifySrvccState(
+    /* [in] */ ICallSrvccState state,
+    /* [in] */ IArrayList* c)
+{
+    if (state == ICallSrvccState_STARTED && c != NULL) {
+        // SRVCC started. Prepare handover connections list
+        mHandoverConnections->AddAll(ICollection::Probe(c));
+    }
+    else if (state != ICallSrvccState_COMPLETED) {
+        // SRVCC FAILED/CANCELED. Clear the handover connections list
+        // Individual connections will be removed from the list in handlePollCalls()
+        mHandoverConnections->Clear();
+    }
+    String s;
+    IObject::Probe(mHandoverConnections)->ToString(&s);
+    Log(String("notifySrvccState: mHandoverConnections= ") + s);
+}
+
+void CallTracker::HandleRadioAvailable()
+{
+    PollCallsWhenSafe();
+}
+
+AutoPtr<IMessage> CallTracker::ObtainNoPollCompleteMessage(
+    /* [in] */ Int32 what)
+{
+    mPendingOperations++;
+    mLastRelevantPoll = NULL;
+    AutoPtr<IMessage> msg;
+    ObtainMessage(what, (IMessage**)&msg);
+    return msg;
+}
+
+Boolean CallTracker::CheckNoOperationsPending()
+{
+    if (DBG_POLL) Log(String("checkNoOperationsPending: pendingOperations=")
+            + StringUtils::ToString(mPendingOperations));
+    return mPendingOperations == 0;
+}
+
+String CallTracker::CheckForTestEmergencyNumber(
+    /* [in] */ const String& _dialString)
+{
+    String testEn, dialString = _dialString;
+    SystemProperties::Get(String("ril.test.emergencynumber"), &testEn);
+    if (DBG_POLL) {
+        Log(String("checkForTestEmergencyNumber: dialString=") + dialString +
+            String(" testEn=") + testEn);
+    }
+    if (!TextUtils::IsEmpty(testEn)) {
+        AutoPtr<ArrayOf<String> > values;
+        StringUtils::Split(testEn, String(":"), (ArrayOf<String>**)&values);
+        Log(String("checkForTestEmergencyNumber: values.length=") + StringUtils::ToString(values->GetLength()));
+        if (values->GetLength() == 2) {
+            String ss;
+            PhoneNumberUtils::StripSeparators(dialString, &ss);
+            if ((*values)[0].Equals(ss)) {
+                mCi->TestingEmergencyCall();
+                Log(String("checkForTestEmergencyNumber: remap ") +
+                        dialString + String(" to ") + (*values)[1]);
+                dialString = (*values)[1];
+            }
+        }
+    }
+    return dialString;
+}
+
+String CallTracker::ConvertNumberIfNecessary(
+    /* [in] */ IPhoneBase* phoneBase,
+    /* [in] */ const String& dialNumber)
+{
+    if (dialNumber == NULL) {
+        return dialNumber;
+    }
+    AutoPtr<IContext> ctx;
+    IPhone::Probe(phoneBase)->GetContext((IContext**)&ctx);
+    AutoPtr<IResources> res;
+    ctx->GetResources((IResources**)&res);
+    AutoPtr<ArrayOf<String> > convertMaps;
+    res->GetStringArray(Elastos::Droid::R::array::dial_string_replace,
+            (ArrayOf<String>**)&convertMaps);
+    Log(String("convertNumberIfNecessary Roaming")
+        + String(" convertMaps.length ")
+        + StringUtils::ToString(convertMaps->GetLength())
+        + String(" dialNumber.length() ")
+        + StringUtils::ToString(dialNumber.GetLength()));
+
+    if (convertMaps->GetLength() < 1 || dialNumber.GetLength() < VALID_COMPARE_LENGTH) {
+        return dialNumber;
+    }
+
+    AutoPtr<ArrayOf<String> > entry;
+    AutoPtr<ArrayOf<String> > tmpArray;
+    String outNumber("");
+    for(Int32 i = 0; i < convertMaps->GetLength(); i++) {
+        String convertMap = (*convertMaps)[i];
+        Log(String("convertNumberIfNecessary: ") + convertMap);
+        entry = NULL;
+        StringUtils::Split(convertMap, String(":"), (ArrayOf<String>**)&entry);
+        if (entry->GetLength() > 1) {
+            tmpArray = NULL;
+            StringUtils::Split((*entry)[1], String(","), (ArrayOf<String>**)&tmpArray);
+            if (!TextUtils::IsEmpty((*entry)[0]) && dialNumber.Equals((*entry)[0])) {
+                if (tmpArray->GetLength() >= 2 && !TextUtils::IsEmpty((*tmpArray)[1])) {
+                    if (CompareGid1(phoneBase, (*tmpArray)[1])) {
+                        mNumberConverted = TRUE;
+                    }
+                }
+                else if (outNumber.IsEmpty()) {
+                    mNumberConverted = TRUE;
+                }
+                if (mNumberConverted) {
+                    if(!TextUtils::IsEmpty((*tmpArray)[0]) && (*tmpArray)[0].EndWith("MDN")) {
+                        String prefix = (*tmpArray)[0].Substring(0, (*tmpArray)[0].GetLength() -3);
+                        String v;
+                        IPhone::Probe(phoneBase)->GetLine1Number(&v);
+                        outNumber = prefix + v;
+                    }
+                    else {
+                        outNumber = (*tmpArray)[0];
+                    }
+                }
+            }
+        }
+    }
+
+    if (mNumberConverted) {
+        Log(String("convertNumberIfNecessary: convert service number"));
+        return outNumber;
+    }
+
+    return dialNumber;
+}
+
+Boolean CallTracker::CompareGid1(
+    /* [in] */ IPhoneBase* phoneBase,
+    /* [in] */ const String& serviceGid1)
+{
+    String gid1;
+    IPhone::Probe(phoneBase)->GetGroupIdLevel1(&gid1);
+    Int32 gid_length = serviceGid1.GetLength();
+    Boolean ret = TRUE;
+
+    if (serviceGid1 == NULL || serviceGid1.Equals("")) {
+        Log(String("compareGid1 serviceGid is empty, return ") + StringUtils::ToString(ret));
+        return ret;
+    }
+    // Check if gid1 match service GID1
+    if (!((gid1 != NULL) && (gid1.GetLength() >= gid_length) &&
+            gid1.Substring(0, gid_length).EqualsIgnoreCase(serviceGid1))) {
+        Log(String(" gid1 ") + gid1 + String(" serviceGid1 ") + serviceGid1);
+        ret = FALSE;
+    }
+    Log(String("compareGid1 is ") + String((ret ? "Same" : "Different")));
+    return ret;
+}
+
+ECode CallTracker::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    pw->Println(String("CallTracker:"));
+    pw->Println(String(" mPendingOperations=") + StringUtils::ToString(mPendingOperations));
+    pw->Println(String(" mNeedsPoll=") + StringUtils::ToString(mNeedsPoll));
+    pw->Println(String(" mLastRelevantPoll=") + TO_CSTR(mLastRelevantPoll));
+    return NOERROR;
+}
+
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

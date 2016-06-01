@@ -1,254 +1,299 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony;
+#include "elastos/droid/internal/telephony/WakeLockStateMachine.h"
+#include "elastos/droid/os/Build.h"
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Content::IBroadcastReceiver;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::IBuild;
-using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::IPowerManager;
-using Elastos::Droid::Telephony::IRlog;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
-using Elastos::Droid::Internal::Utility::IState;
-using Elastos::Droid::Internal::Utility::IStateMachine;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+
+const Int32 WakeLockStateMachine::EVENT_NEW_SMS_MESSAGE = 1;
+const Boolean WakeLockStateMachine::DBG = TRUE;    // TODO: change to FALSE
+/** Result receiver called for current cell broadcast. */
+const Int32 WakeLockStateMachine::EVENT_BROADCAST_COMPLETE = 2;
+/** Release wakelock after a short timeout when returning to idle state. */
+const Int32 WakeLockStateMachine::EVENT_RELEASE_WAKE_LOCK = 3;
+const Int32 WakeLockStateMachine::EVENT_UPDATE_PHONE_OBJECT = 4;
+/** Wakelock release delay when returning to idle state. */
+const Int32 WakeLockStateMachine::WAKE_LOCK_TIMEOUT = 3000;
+
+WakeLockStateMachine::DefaultState::DefaultState(
+    /* [in] */ WakeLockStateMachine* host)
+    : mHost(host)
+{}
+
+ECode WakeLockStateMachine::DefaultState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    switch (what) {
+        case EVENT_UPDATE_PHONE_OBJECT: {
+            AutoPtr<IInterface> obj;
+            mHost->mPhone = IPhoneBase::Probe(obj);
+            mHost->Log(String("updatePhoneObject: phone=") + TO_CSTR(mHost->mPhone)/*.getClass().getSimpleName()*/);
+            break;
+        }
+        default: {
+            String errorText = String("processMessage: unhandled message type ") + StringUtils::ToString(what);
+            if (Build::IS_DEBUGGABLE) {
+                // throw new RuntimeException(errorText);
+                *result = FALSE;
+                return E_RUNTIME_EXCEPTION;
+            }
+            else {
+                mHost->Loge(errorText);
+            }
+            break;
+        }
+    }
+    *result = HANDLED;
+    return NOERROR;
+}
+
+String WakeLockStateMachine::DefaultState::GetName()
+{
+    return String("Elastos.Droid.Internal.Telephony.WakeLockStateMachine.DefaultState");
+}
+
+WakeLockStateMachine::IdleState::IdleState(
+    /* [in] */ WakeLockStateMachine* host)
+    : mHost(host)
+{}
+
+ECode WakeLockStateMachine::IdleState::Enter()
+{
+    mHost->SendMessageDelayed(EVENT_RELEASE_WAKE_LOCK, WAKE_LOCK_TIMEOUT);
+    return NOERROR;
+}
+
+ECode WakeLockStateMachine::IdleState::Exit()
+{
+    mHost->mWakeLock->AcquireLock();
+    if (DBG) mHost->Log(String("acquired wakelock, leaving Idle state"));
+    return NOERROR;
+}
+
+ECode WakeLockStateMachine::IdleState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    switch (what) {
+        case EVENT_NEW_SMS_MESSAGE: {
+            // transition to waiting state if we sent a broadcast
+            if (mHost->HandleSmsMessage(msg)) {
+                mHost->TransitionTo(mHost->mWaitingState);
+            }
+            *result = HANDLED;
+            return NOERROR;
+        }
+
+        case EVENT_RELEASE_WAKE_LOCK: {
+            mHost->mWakeLock->ReleaseLock();
+            if (DBG) {
+                Boolean tmp = FALSE;
+                if (mHost->mWakeLock->IsHeld(&tmp), tmp) {
+                    // this is okay as long as we call release() for every acquire()
+                    mHost->Log(String("mWakeLock is still held after release"));
+                }
+                else {
+                    mHost->Log(String("mWakeLock released"));
+                }
+            }
+            *result = HANDLED;
+            return NOERROR;
+        }
+
+        default: {
+            *result = NOT_HANDLED;
+            return NOERROR;
+        }
+    }
+    *result = FALSE;
+    return NOERROR;
+}
+
+String WakeLockStateMachine::IdleState::GetName()
+{
+    return String("Elastos.Droid.Internal.Telephony.WakeLockStateMachine.IdleState");
+}
+
+WakeLockStateMachine::WaitingState::WaitingState(
+    /* [in] */ WakeLockStateMachine* host)
+    : mHost(host)
+{}
+
+ECode WakeLockStateMachine::WaitingState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    switch (what) {
+        case EVENT_NEW_SMS_MESSAGE: {
+            mHost->Log(String("deferring message until return to idle"));
+            mHost->DeferMessage(msg);
+            *result = HANDLED;
+            return NOERROR;
+        }
+
+        case EVENT_BROADCAST_COMPLETE: {
+            mHost->Log(String("broadcast complete, returning to idle"));
+            mHost->TransitionTo(mHost->mIdleState);
+            *result = HANDLED;
+            return NOERROR;
+        }
+
+        case EVENT_RELEASE_WAKE_LOCK: {
+            mHost->mWakeLock->ReleaseLock();    // decrement wakelock from previous entry to Idle
+            Boolean tmp = FALSE;
+            if (mHost->mWakeLock->IsHeld(&tmp), !tmp) {
+                // wakelock should still be held until 3 seconds after we enter Idle
+                mHost->Loge(String("mWakeLock released while still in WaitingState!"));
+            }
+            *result = HANDLED;
+            return NOERROR;
+        }
+
+        default: {
+            *result = NOT_HANDLED;
+            return NOERROR;
+        }
+    }
+    *result = FALSE;
+    return NOERROR;
+}
+
+String WakeLockStateMachine::WaitingState::GetName()
+{
+    return String("Elastos.Droid.Internal.Telephony.WakeLockStateMachine.WaitingState");
+}
+
+WakeLockStateMachine::Receiver::Receiver(
+    /* [in] */ WakeLockStateMachine* host)
+    : mHost(host)
+{
+    BroadcastReceiver::constructor();
+}
+
+ECode WakeLockStateMachine::Receiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    mHost->SendMessage(EVENT_BROADCAST_COMPLETE);
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(WakeLockStateMachine, StateMachine, IWakeLockStateMachine)
+WakeLockStateMachine::WakeLockStateMachine(
+    /* [in] */ const String& debugTag,
+    /* [in] */ IContext* context,
+    /* [in] */ IPhoneBase* phone)
+    : StateMachine(debugTag)
+{
+    mDefaultState = new DefaultState(this);
+    mIdleState = new IdleState(this);
+    mWaitingState = new WaitingState(this);
+    mReceiver = new Receiver(this);
+    mContext = context;
+    mPhone = phone;
+
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+    AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj);
+    pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, debugTag, (IPowerManagerWakeLock**)&mWakeLock);
+    mWakeLock->AcquireLock();    // wake lock released after we enter idle state
+
+    AddState(mDefaultState);
+    AddState(mIdleState, mDefaultState);
+    AddState(mWaitingState, mDefaultState);
+    SetInitialState(mIdleState);
+}
+
+ECode WakeLockStateMachine::UpdatePhoneObject(
+    /* [in] */ IPhoneBase* phone)
+{
+    SendMessage(EVENT_UPDATE_PHONE_OBJECT, phone);
+    return NOERROR;
+}
 
 /**
- * Generic state machine for handling messages and waiting for ordered broadcasts to complete.
- * Subclasses implement {@link #handleSmsMessage}, which returns TRUE to transition into waiting
- * state, or FALSE to remain in idle state. The wakelock is acquired on exit from idle state,
- * and is released a few seconds after returning to idle state, or immediately upon calling
- * {@link #quit}.
+ * Tell the state machine to quit after processing all messages.
  */
-public abstract class WakeLockStateMachine extends StateMachine {
-    protected static const Boolean DBG = TRUE;    // TODO: change to FALSE
+ECode WakeLockStateMachine::Dispose()
+{
+    Quit();
+    return NOERROR;
+}
 
-    private final PowerManager.WakeLock mWakeLock;
-
-    /** New message to process. */
-    public static const Int32 EVENT_NEW_SMS_MESSAGE = 1;
-
-    /** Result receiver called for current cell broadcast. */
-    protected static const Int32 EVENT_BROADCAST_COMPLETE = 2;
-
-    /** Release wakelock after a short timeout when returning to idle state. */
-    static const Int32 EVENT_RELEASE_WAKE_LOCK = 3;
-
-    static const Int32 EVENT_UPDATE_PHONE_OBJECT = 4;
-
-    protected PhoneBase mPhone;
-
-    protected Context mContext;
-
-    /** Wakelock release delay when returning to idle state. */
-    private static const Int32 WAKE_LOCK_TIMEOUT = 3000;
-
-    private final DefaultState mDefaultState = new DefaultState();
-    private final IdleState mIdleState = new IdleState();
-    private final WaitingState mWaitingState = new WaitingState();
-
-    protected WakeLockStateMachine(String debugTag, Context context, PhoneBase phone) {
-        Super(debugTag);
-
-        mContext = context;
-        mPhone = phone;
-
-        PowerManager pm = (PowerManager) context->GetSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm->NewWakeLock(PowerManager.PARTIAL_WAKE_LOCK, debugTag);
-        mWakeLock->Acquire();    // wake lock released after we enter idle state
-
-        AddState(mDefaultState);
-        AddState(mIdleState, mDefaultState);
-        AddState(mWaitingState, mDefaultState);
-        SetInitialState(mIdleState);
-    }
-
-    CARAPI UpdatePhoneObject(PhoneBase phone) {
-        SendMessage(EVENT_UPDATE_PHONE_OBJECT, phone);
-    }
-
-    /**
-     * Tell the state machine to quit after processing all messages.
-     */
-    public final void Dispose() {
-        Quit();
-    }
-
-    //@Override
-    protected void OnQuitting() {
-        // fully release the wakelock
-        While (mWakeLock->IsHeld()) {
-            mWakeLock->Release();
-        }
-    }
-
-    /**
-     * Send a message with the specified object for {@link #handleSmsMessage}.
-     * @param obj the object to pass in the msg.obj field
-     */
-    public final void DispatchSmsMessage(Object obj) {
-        SendMessage(EVENT_NEW_SMS_MESSAGE, obj);
-    }
-
-    /**
-     * This parent state throws an Exception (for debug builds) or prints an error for unhandled
-     * message types.
-     */
-    class DefaultState extends State {
-        //@Override
-        public Boolean ProcessMessage(Message msg) {
-            Switch (msg.what) {
-                case EVENT_UPDATE_PHONE_OBJECT: {
-                    mPhone = (PhoneBase) msg.obj;
-                    Log("updatePhoneObject: phone=" + mPhone->GetClass()->GetSimpleName());
-                    break;
-                }
-                default: {
-                    String errorText = "processMessage: unhandled message type " + msg.what;
-                    If (Build.IS_DEBUGGABLE) {
-                        throw new RuntimeException(errorText);
-                    } else {
-                        Loge(errorText);
-                    }
-                    break;
-                }
-            }
-            return HANDLED;
-        }
-    }
-
-    /**
-     * Idle state delivers Cell Broadcasts to receivers. It acquires the wakelock, which is
-     * released when the broadcast completes.
-     */
-    class IdleState extends State {
-        //@Override
-        CARAPI Enter() {
-            SendMessageDelayed(EVENT_RELEASE_WAKE_LOCK, WAKE_LOCK_TIMEOUT);
-        }
-
-        //@Override
-        CARAPI Exit() {
-            mWakeLock->Acquire();
-            If (DBG) Log("acquired wakelock, leaving Idle state");
-        }
-
-        //@Override
-        public Boolean ProcessMessage(Message msg) {
-            Switch (msg.what) {
-                case EVENT_NEW_SMS_MESSAGE:
-                    // transition to waiting state if we sent a broadcast
-                    If (HandleSmsMessage(msg)) {
-                        TransitionTo(mWaitingState);
-                    }
-                    return HANDLED;
-
-                case EVENT_RELEASE_WAKE_LOCK:
-                    mWakeLock->Release();
-                    If (DBG) {
-                        If (mWakeLock->IsHeld()) {
-                            // this is okay as Int64 as we call Release() for every Acquire()
-                            Log("mWakeLock is still held after release");
-                        } else {
-                            Log("mWakeLock released");
-                        }
-                    }
-                    return HANDLED;
-
-                default:
-                    return NOT_HANDLED;
-            }
-        }
-    }
-
-    /**
-     * Waiting state waits for the result receiver to be called for the current cell broadcast.
-     * In this state, any new cell broadcasts are deferred until we return to Idle state.
-     */
-    class WaitingState extends State {
-        //@Override
-        public Boolean ProcessMessage(Message msg) {
-            Switch (msg.what) {
-                case EVENT_NEW_SMS_MESSAGE:
-                    Log("deferring message until return to idle");
-                    DeferMessage(msg);
-                    return HANDLED;
-
-                case EVENT_BROADCAST_COMPLETE:
-                    Log("broadcast complete, returning to idle");
-                    TransitionTo(mIdleState);
-                    return HANDLED;
-
-                case EVENT_RELEASE_WAKE_LOCK:
-                    mWakeLock->Release();    // decrement wakelock from previous entry to Idle
-                    If (!mWakeLock->IsHeld()) {
-                        // wakelock should still be held until 3 seconds after we enter Idle
-                        Loge("mWakeLock released while still in WaitingState!");
-                    }
-                    return HANDLED;
-
-                default:
-                    return NOT_HANDLED;
-            }
-        }
-    }
-
-    /**
-     * Implemented by subclass to handle messages in {@link IdleState}.
-     * @param message the message to process
-     * @return TRUE to transition to {@link WaitingState}; FALSE to stay in {@link IdleState}
-     */
-    protected abstract Boolean HandleSmsMessage(Message message);
-
-    /**
-     * BroadcastReceiver to send message to return to idle state.
-     */
-    protected final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        //@Override
-        CARAPI OnReceive(Context context, Intent intent) {
-            SendMessage(EVENT_BROADCAST_COMPLETE);
-        }
-    };
-
-    /**
-     * Log with debug level.
-     * @param s the string to log
-     */
-    //@Override
-    protected void Log(String s) {
-        Rlog->D(GetName(), s);
-    }
-
-    /**
-     * Log with error level.
-     * @param s the string to log
-     */
-    //@Override
-    protected void Loge(String s) {
-        Rlog->E(GetName(), s);
-    }
-
-    /**
-     * Log with error level.
-     * @param s the string to log
-     * @param e is a Throwable which logs additional information.
-     */
-    //@Override
-    protected void Loge(String s, Throwable e) {
-        Rlog->E(GetName(), s, e);
+void WakeLockStateMachine::OnQuitting()
+{
+    // fully release the wakelock
+    Boolean tmp = FALSE;
+    while (mWakeLock->IsHeld(&tmp), tmp) {
+        mWakeLock->ReleaseLock();
     }
 }
+
+/**
+ * Send a message with the specified object for {@link #handleSmsMessage}.
+ * @param obj the object to pass in the msg.obj field
+ */
+ECode WakeLockStateMachine::DispatchSmsMessage(
+    /* [in] */ IInterface* obj)
+{
+    SendMessage(EVENT_NEW_SMS_MESSAGE, obj);
+    return NOERROR;
+}
+
+void WakeLockStateMachine::Log(
+    /* [in] */ const String& s)
+{
+    String n;
+    GetName(&n);
+    Logger::D(n, s);
+}
+
+/**
+ * Log with error level.
+ * @param s the string to log
+ */
+void WakeLockStateMachine::Loge(
+    /* [in] */ const String& s)
+{
+    String n;
+    GetName(&n);
+    Logger::E(n, s);
+}
+
+/**
+ * Log with error level.
+ * @param s the string to log
+ * @param e is a Throwable which logs additional information.
+ */
+void WakeLockStateMachine::Loge(
+    /* [in] */ const String& s,
+    /* [in] */ IThrowable* e)
+{
+    String n;
+    GetName(&n);
+    Logger::E(n, "%s, %s", s.string(), TO_CSTR(e));
+}
+
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

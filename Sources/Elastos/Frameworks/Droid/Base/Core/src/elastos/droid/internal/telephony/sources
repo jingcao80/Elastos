@@ -22,5 +22,8 @@ SOURCES += BaseCommands.cpp
 SOURCES += Call.cpp
 SOURCES += CallForwardInfo.cpp
 SOURCES += CallManager.cpp
+SOURCES += DriverCall.cpp
+SOURCES += CallTracker.cpp
+SOURCES += WakeLockStateMachine.cpp
 
 ELASTOS_LIBS += utility/utility.lib
