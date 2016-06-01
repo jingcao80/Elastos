@@ -694,11 +694,13 @@ ECode InputEventConsistencyVerifier::AppendEvent(
         message->Append("(unhandled) ");
     }
     if (IKeyEvent::Probe(event)) {
-        message->Append(((CKeyEvent*)event)->ToString());
+        String keyInfo;
+        IObject::Probe(event)->ToString(&keyInfo);
+        message->Append(keyInfo);
     }
     else {
         String motion;
-        ((CMotionEvent*)IMotionEvent::Probe(event))->ToString(&motion);
+        IObject::Probe(event)->ToString(&motion);
         message->Append(motion);
     }
     return NOERROR;

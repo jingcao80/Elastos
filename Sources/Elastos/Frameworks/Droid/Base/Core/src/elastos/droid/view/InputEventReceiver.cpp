@@ -612,7 +612,7 @@ ECode InputEventReceiver::NativeInit(
         return E_RUNTIME_EXCEPTION;
     }
 
-    receiver->incStrong(TAG/*gInputEventReceiverClassInfo.clazz*/); // retain a reference for the object
+    receiver->incStrong(NULL); // retain a reference for the object
     *receiverPtr = reinterpret_cast<Int64>(receiver.get());
     return NOERROR;
 }

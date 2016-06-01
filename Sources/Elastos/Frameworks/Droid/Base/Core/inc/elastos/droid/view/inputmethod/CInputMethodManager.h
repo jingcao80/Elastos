@@ -907,4 +907,6 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
+DEFINE_CONVERSION_FOR(Elastos::Droid::View::InputMethod::CInputMethodManager::PendingEvent, IInterface)
+
 #endif   //__ELASTOS_DROID_VIEW_INPUTMETHOD_CINPUTMETHODMANAGER_H__

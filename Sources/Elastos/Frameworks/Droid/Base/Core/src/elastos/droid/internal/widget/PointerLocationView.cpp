@@ -12,7 +12,6 @@
 #include "elastos/droid/os/CSystemProperties.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Math.h>
-#include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Graphics::CRectF;
@@ -332,11 +331,8 @@ void PointerLocationView::OnMeasure(
         mTextMetrics->GetLeading(&leading);
         mTextMetrics->GetTop(&top);
         mTextMetrics->GetBottom(&bottom);
-        SLOGGERI(String("PointerLocationView::foo"), String("Metrics: ascent=") + StringUtils::ToString(ascent)
-                + " descent=" + StringUtils::ToString(descent)
-                + " leading=" + StringUtils::ToString(leading)
-                + " top=" + StringUtils::ToString(top)
-                + " bottom=" + StringUtils::ToString(bottom));
+        Logger::I(String("PointerLocationView::foo"), "Metrics: ascent=%d descent=%d leading=%d top=%d bottom=%d",
+                ascent, descent, leading, top, bottom);
     }
 }
 
@@ -698,7 +694,7 @@ void PointerLocationView::LogCoords(
     using Elastos::Core::Math;
     Float valueTemp, orientation;
     coords->GetOrientation(&orientation);
-    SLOGGERI(TAG, mText->Clear()
+    Logger::I(TAG, mText->Clear()
         ->Append(type)->Append(String(" id "))->Append(id + 1)
         ->Append(String(": "))
         ->Append(prefix)
@@ -948,10 +944,10 @@ ECode PointerLocationView::OnKeyDown(
         Int32 repeatCount = 0;
         event->GetRepeatCount(&repeatCount);
         if (repeatCount == 0) {
-            SLOGGERI(TAG, String("Key Down: ") + ((CKeyEvent*)event)->ToString());
+            Logger::I(TAG, "Key Down: %s", TO_CSTR(event));
         }
         else {
-            SLOGGERI(TAG, String("Key Repeat #") + StringUtils::ToString(repeatCount) + ": " + ((CKeyEvent*)event)->ToString());
+            Logger::I(TAG, "Key Repeat #%d: %s", repeatCount, TO_CSTR(event));
         }
         *res = TRUE;
         return NOERROR;
@@ -967,7 +963,7 @@ ECode PointerLocationView::OnKeyUp(
     VALIDATE_NOT_NULL(res)
 
     if (ShouldLogKey(keyCode)) {
-        SLOGGERI(TAG, String("Key Up: ") +((CKeyEvent*)event)->ToString());
+        Logger::I(TAG, "Key Up: %s", TO_CSTR(event));
         *res = TRUE;
         return NOERROR;
     }
@@ -1061,10 +1057,10 @@ void PointerLocationView::LogInputDeviceState(
     if (device != NULL) {
         String str;
         device->ToString(&str);
-        SLOGGERI(TAG, state + ": " + str);
+        Logger::I(TAG, "%s: %s", state.string(), str.string());
     }
     else {
-        SLOGGERI(TAG, state + ": " +  StringUtils::ToString(deviceId));
+        Logger::I(TAG, "%s: %d", state.string(), deviceId);
     }
 }
 

@@ -1065,7 +1065,8 @@ public:
         /* [in] */ IInterface* target,
         /* [out] */ Boolean* res);
 
-    CARAPI_(String) ToString();
+    CARAPI ToString(
+        /* [out] */ String* info);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);

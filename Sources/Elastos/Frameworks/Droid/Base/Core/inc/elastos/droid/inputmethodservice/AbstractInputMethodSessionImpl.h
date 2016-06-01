@@ -8,6 +8,7 @@
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::InputMethod::ILocalInputMethodSessionEventCallback;
+using Elastos::Droid::View::InputMethod::IInputMethodSession;
 
 namespace Elastos {
 namespace Droid {
@@ -21,6 +22,7 @@ namespace InputMethodService {
 class ECO_PUBLIC AbstractInputMethodSessionImpl
     : public Object
     , public IAbstractInputMethodSessionImpl
+    , public IInputMethodSession
 {
 public:
     CAR_INTERFACE_DECL()

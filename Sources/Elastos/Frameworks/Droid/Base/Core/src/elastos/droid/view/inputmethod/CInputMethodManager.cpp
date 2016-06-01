@@ -6,15 +6,15 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Widget.h"
-#include "elastos/droid/view/inputmethod/CInputMethodManager.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/CMatrix.h"
+#include "elastos/droid/internal/view/CInputBindResult.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/utility/CSparseArray.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/ViewRootImpl.h"
-//#include "elastos/droid/view/CInputBindResult.h"
+#include "elastos/droid/view/inputmethod/CInputMethodManager.h"
 #include "elastos/droid/view/inputmethod/CEditorInfo.h"
 #include "elastos/droid/view/inputmethod/CBaseInputConnection.h"
 #include "elastos/droid/view/inputmethod/CIInputMethodClient.h"
@@ -26,13 +26,13 @@
 using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::CMatrix;
+using Elastos::Droid::Internal::View::CInputBindResult;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::View::View;
 using Elastos::Droid::View::ViewRootImpl;
-//using Elastos::Droid::View::CInputBindResult;
 using Elastos::Droid::View::InputMethod::CControlledInputConnectionWrapper;
 
 using Elastos::Core::CString;
@@ -217,7 +217,7 @@ CInputMethodManager::CInputMethodManager()
     CRect::New((IRect**)&mCursorRect);
     CIInputMethodClient::New(this, (IInputMethodClient**)&mClient);
 
-//    mPendingEventPool = new Pools::SimplePool<PendingEvent>(20);
+    mPendingEventPool = new Pools::SimplePool<PendingEvent>(20);
     CSparseArray::New(20, (ISparseArray**)&mPendingEvents);
 
     mViewTopLeft = ArrayOf<Int32>::Alloc(2);
@@ -1766,33 +1766,31 @@ ECode CInputMethodManager::GetLastInputMethodSubtype(
 }
 
 void CInputMethodManager::HandleBind(
-    /* [in] */ IInputBindResult* res)
+    /* [in] */ IInputBindResult* obj)
 {
-    assert(res != NULL);
+    CInputBindResult* res = (CInputBindResult*)obj;
+    if (DEBUG) {
+        Logger::I(TAG, "handleMessage: MSG_BIND %d, %s", res->mSequence, res->mId.string());
+    }
     {
         AutoLock lock(mHLock);
 
-        Int32 sequence;
-        res->GetSequence(&sequence);
-        assert(0 && "TODO");
-//         AutoPtr<CInputBindResult> cres = (CInputBindResult*)res;
-        if (mBindSequence < 0 || mBindSequence != sequence) {
-            // Logger::W(TAG, "Ignoring onBind: cur seq=%d, given seq=%d",
-            //     mBindSequence, cres->mSequence);
-            // if (cres->mChannel != NULL && cres->mChannel != mCurChannel) {
-            //     cres->mChannel->Dispose();
-            // }
+        if (mBindSequence < 0 || mBindSequence != res->mSequence) {
+            Logger::W(TAG, "Ignoring onBind: cur seq=%d, given seq=%d",
+                mBindSequence, res->mSequence);
+            if (res->mChannel != NULL && res->mChannel != mCurChannel) {
+                res->mChannel->Dispose();
+            }
             return;
         }
 
         mRequestUpdateCursorAnchorInfoMonitorMode =
-                                REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE;
+                REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE;
 
-//         SetInputChannelLocked(cres->mChannel);
-        mCurMethod = NULL;
-        // res->GetIIMSession((IIInputMethodSession**)&mCurMethod);
-        res->GetId(&mCurId);
-        mBindSequence = sequence;
+        SetInputChannelLocked(res->mChannel);
+        mCurMethod = res->mMethod;
+        mCurId = res->mId;
+        mBindSequence = res->mSequence;
     }
     StartInputInner(NULL, 0, 0, 0);
 }

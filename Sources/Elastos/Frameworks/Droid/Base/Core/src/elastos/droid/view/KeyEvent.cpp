@@ -1385,8 +1385,10 @@ ECode KeyEvent::Dispatch(
     return NOERROR;
 }
 
-String KeyEvent::ToString()
+ECode KeyEvent::ToString(
+    /* [out] */ String* info)
 {
+    VALIDATE_NOT_NULL(info)
     StringBuilder msg;
     msg.Append("KeyEvent { action=");
     msg.Append(ActionToString(mAction));
@@ -1414,7 +1416,8 @@ String KeyEvent::ToString()
     msg.Append(", source=0x");
     msg.Append(StringUtils::ToHexString(mSource));
     msg.Append(" }");
-    return msg.ToString();
+    *info = msg.ToString();
+    return NOERROR;
 }
 
 String KeyEvent::ActionToString(

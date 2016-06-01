@@ -8,7 +8,7 @@ namespace Elastos {
 namespace Droid {
 namespace InputMethodService {
 
-CAR_INTERFACE_IMPL(AbstractInputMethodSessionImpl, Object, IAbstractInputMethodSessionImpl);
+CAR_INTERFACE_IMPL_2(AbstractInputMethodSessionImpl, Object, IAbstractInputMethodSessionImpl, IInputMethodSession);
 
 AbstractInputMethodSessionImpl::AbstractInputMethodSessionImpl(
     /* [in] */ AbstractInputMethodService* host)
@@ -22,7 +22,6 @@ ECode AbstractInputMethodSessionImpl::IsEnabled(
 {
     assert(enabled != NULL);
     *enabled = mEnabled;
-
     return NOERROR;
 }
 
@@ -31,7 +30,6 @@ ECode AbstractInputMethodSessionImpl::IsRevoked(
 {
     assert(revoked != NULL);
     *revoked = mRevoked;
-
     return NOERROR;
 }
 
@@ -41,7 +39,6 @@ ECode AbstractInputMethodSessionImpl::SetEnabled(
     if (!mRevoked) {
         mEnabled = enabled;
     }
-
     return NOERROR;
 }
 
@@ -49,7 +46,6 @@ ECode AbstractInputMethodSessionImpl::RevokeSelf()
 {
     mRevoked = TRUE;
     mEnabled = FALSE;
-
     return NOERROR;
 }
 
@@ -65,7 +61,6 @@ ECode AbstractInputMethodSessionImpl::DispatchKeyEvent(
     if (callback != NULL) {
         return callback->FinishedEvent(seq, handled);
     }
-
     return NOERROR;
 }
 
@@ -80,7 +75,6 @@ ECode AbstractInputMethodSessionImpl::DispatchTrackballEvent(
     if (callback != NULL) {
         return callback->FinishedEvent(seq, handled);
     }
-
     return NOERROR;
 }
 
@@ -94,7 +88,6 @@ ECode AbstractInputMethodSessionImpl::DispatchGenericMotionEvent(
     if (callback != NULL) {
         return callback->FinishedEvent(seq, handled);
     }
-
     return NOERROR;
 }
 
