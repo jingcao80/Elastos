@@ -22,24 +22,24 @@ android:key="parent">
         android:title="@string/wifi_api_test" >
                 <intent
                 android:action="android.intent.action.MAIN"
-                android:targetPackage="com.android.settings"
-                android:targetClass="com.android.settings.wifi.WifiAPITest" />
+                android:targetPackage="Elastos.Droid.Settings"
+                android:targetClass="Elastos.Droid.Settings.wifi.WifiAPITest" />
     </Preference>
 
     <Preference
         android:title="@string/wifi_config_info" >
         <intent
                 android:action="android.intent.action.MAIN"
-                android:targetPackage="com.android.settings"
-                android:targetClass="com.android.settings.wifi.WifiConfigInfo" />
+                android:targetPackage="Elastos.Droid.Settings"
+                android:targetClass="Elastos.Droid.Settings.wifi.WifiConfigInfo" />
     </Preference>
 
     <Preference
         android:title="@string/wifi_status_test" >
         <intent
                 android:action="android.intent.action.MAIN"
-                android:targetPackage="com.android.settings"
-                android:targetClass="com.android.settings.wifi.WifiStatusTest" />
+                android:targetPackage="Elastos.Droid.Settings"
+                android:targetClass="Elastos.Droid.Settings.wifi.WifiStatusTest" />
     </Preference>
 
 </PreferenceScreen>

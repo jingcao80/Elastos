@@ -16,7 +16,7 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/development_settings_title">
-    <com.android.settings.BugreportPreference
+    <Elastos.Droid.Settings.BugreportPreference
             android:key="bugreport"
             android:title="@*android:string/bugreport_title"
             android:dialogTitle="@*android:string/bugreport_title" />
@@ -28,8 +28,8 @@
             android:persistent="false" >
         <intent
                 android:action="android.settings.privacy.SET_FULL_BACKUP_PASSWORD"
-                android:targetPackage="com.android.settings"
-                android:targetClass="com.android.settings.SetFullBackupPassword" />
+                android:targetPackage="Elastos.Droid.Settings"
+                android:targetClass="Elastos.Droid.Settings.SetFullBackupPassword" />
     </PreferenceScreen>
 
     <CheckBoxPreference
@@ -57,7 +57,7 @@
     <PreferenceScreen android:key="proc_stats"
             android:title="@string/process_stats_summary_title"
             android:summary="@string/process_stats_summary"
-            android:fragment="com.android.settings.applications.ProcessStatsUi">
+            android:fragment="Elastos.Droid.Settings.applications.ProcessStatsUi">
     </PreferenceScreen>
 
     <PreferenceCategory android:key="debug_debugging_category"

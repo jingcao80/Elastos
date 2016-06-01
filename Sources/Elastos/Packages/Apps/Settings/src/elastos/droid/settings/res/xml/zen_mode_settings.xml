@@ -20,7 +20,7 @@
     android:title="@string/zen_mode_settings_title" >
 
     <!-- When calls and notifications arrive -->
-    <com.android.settings.notification.DropDownPreference
+    <Elastos.Droid.Settings.notification.DropDownPreference
             android:key="zen_mode"
             android:title="@string/zen_mode_option_title"
             android:persistent="false" />
@@ -50,7 +50,7 @@
             android:switchTextOff=""
             android:switchTextOn="" />
 
-        <com.android.settings.notification.DropDownPreference
+        <Elastos.Droid.Settings.notification.DropDownPreference
                 android:key="starred"
                 android:title="@string/zen_mode_from"
                 android:persistent="false" />
@@ -89,7 +89,7 @@
                 android:key="manage_condition_providers"
                 android:title="@string/manage_condition_providers"
                 android:persistent="false"
-                android:fragment="com.android.settings.notification.ConditionProviderSettings" />
+                android:fragment="Elastos.Droid.Settings.notification.ConditionProviderSettings" />
 
     </PreferenceCategory>
 

@@ -5,7 +5,7 @@
 #include "Elastos.Droid.Wifi.h"
 #include "elastos/droid/preference/Preference.h"
 #include "elastos/droid/utility/LruCache.h"
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::NetworkInfoDetailedState;

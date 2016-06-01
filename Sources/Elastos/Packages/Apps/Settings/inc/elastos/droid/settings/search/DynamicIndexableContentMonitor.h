@@ -7,7 +7,7 @@
 #include "elastos/droid/internal/content/PackageMonitor.h"
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/os/Handler.h"
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;

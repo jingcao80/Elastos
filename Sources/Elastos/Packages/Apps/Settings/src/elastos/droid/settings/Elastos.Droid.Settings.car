@@ -23,8 +23,15 @@ module
     merge("../../../../car/elastos/droid/wifi/WifiPickerActivity.car");
     merge("../../../../car/elastos/droid/wifi/WpsDialog.car");
 
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IFragmentManagerOnBackStackChangedListener;
     using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    using interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener;
+    using interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
     using interface Elastos.Droid.Utility.IAttributeSet;
     using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
     using interface Elastos.Droid.View.IAbsSavedState;
@@ -36,6 +43,13 @@ module
     using interface Elastos.Droid.View.IViewManager;
     using interface Elastos.Droid.View.IViewOnClickListener;
     using interface Elastos.Droid.View.IViewParent;
+    using interface Elastos.Droid.View.IOnActionExpandListener;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
     using interface Elastos.Droid.Widget.IAdapter;
     using interface Elastos.Droid.Widget.ISwitch;
     using interface Elastos.Droid.Widget.IButton;
@@ -45,6 +59,8 @@ module
     using interface Elastos.Droid.Widget.ILinearLayout;
     using interface Elastos.Droid.Widget.ISpinnerAdapter;
     using interface Elastos.Droid.Widget.ITextView;
+    using interface Elastos.Droid.Widget.ISearchViewOnQueryTextListener;
+    using interface Elastos.Droid.Widget.ISearchViewOnCloseListener;
     using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
@@ -179,6 +195,32 @@ module
     namespace Elastos {
     namespace Droid {
     namespace Settings {
+
+    class CSettings {
+        constructor();
+
+        interface ISettingsActivity;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IButtonBarHandler;
+        interface IFragmentManagerOnBackStackChangedListener;
+        interface ISearchViewOnQueryTextListener;
+        interface ISearchViewOnCloseListener;
+        interface IOnActionExpandListener;
+    }
 
     [local]
     class CUserSpinnerAdapter {

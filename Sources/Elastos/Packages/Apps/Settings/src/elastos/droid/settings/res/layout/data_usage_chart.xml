@@ -16,9 +16,9 @@
 
 <!-- NOTE: this explicitly uses right/left padding, since the
      graph isn't swapped in RTL languages -->
-<com.android.settings.widget.ChartDataUsageView
+<Elastos.Droid.Settings.widget.ChartDataUsageView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
+    xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
     android:id="@+id/chart"
     android:layout_width="match_parent"
     android:layout_height="@dimen/data_usage_chart_height"
@@ -27,7 +27,7 @@
     android:paddingTop="16dp"
     android:paddingBottom="24dp">
 
-    <com.android.settings.widget.ChartGridView
+    <Elastos.Droid.Settings.widget.ChartGridView
         android:id="@+id/grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -37,7 +37,7 @@
         android:textAppearance="@android:style/TextAppearance.Material.Caption"
         settings:borderDrawable="@drawable/data_grid_border" />
 
-    <com.android.settings.widget.ChartNetworkSeriesView
+    <Elastos.Droid.Settings.widget.ChartNetworkSeriesView
         android:id="@+id/series"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -47,7 +47,7 @@
         settings:fillColorSecondary="#ff80cbc4"
         settings:safeRegion="3dp" />
 
-    <com.android.settings.widget.ChartNetworkSeriesView
+    <Elastos.Droid.Settings.widget.ChartNetworkSeriesView
         android:id="@+id/detail_series"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -57,7 +57,7 @@
         settings:fillColorSecondary="#ff009688"
         settings:safeRegion="3dp" />
 
-    <com.android.settings.widget.ChartSweepView
+    <Elastos.Droid.Settings.widget.ChartSweepView
         android:id="@+id/sweep_warning"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
         settings:labelColor="#ff37474f"
         settings:safeRegion="4dp" />
 
-    <com.android.settings.widget.ChartSweepView
+    <Elastos.Droid.Settings.widget.ChartSweepView
         android:id="@+id/sweep_limit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -83,4 +83,4 @@
         settings:labelColor="#fff4511e"
         settings:safeRegion="4dp" />
 
-</com.android.settings.widget.ChartDataUsageView>
+</Elastos.Droid.Settings.widget.ChartDataUsageView>

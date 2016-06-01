@@ -5,7 +5,7 @@
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/preference/SwitchPreference.h"
 #include "elastos/droid/settings/inputmethod/InputMethodSettingValuesWrapper.h"
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::Content::IContext;

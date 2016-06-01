@@ -3,7 +3,7 @@
 
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/app/Activity.h"
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::View::IView;

@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,16 +15,16 @@
 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
+        xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:title="@string/sim_lock_settings">
-    
+
     <CheckBoxPreference
             android:key="sim_toggle"
             android:title="@string/sim_pin_toggle"
             android:summaryOn="@string/sim_lock_on"
             android:summaryOff="@string/sim_lock_off"/>
 
-    <com.android.settings.EditPinPreference
+    <Elastos.Droid.Settings.EditPinPreference
             android:key="sim_pin"
             android:dependency="sim_toggle"
             android:title="@string/sim_pin_change"

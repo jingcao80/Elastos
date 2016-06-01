@@ -3,7 +3,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/widget/Switch.h"
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Utility::IAttributeSet;

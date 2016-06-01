@@ -490,11 +490,13 @@ ECode SettingsActivity::OnConfigurationChanged(
 
 ECode SettingsActivity::OnStart()
 {
+    Slogger::I(TAG, " >> enter SettingsActivity::OnStart");
     Activity::OnStart();
 
     if (mNeedToRevertToInitialFragment) {
         RevertToInitialFragment();
     }
+    Slogger::I(TAG, " << leave SettingsActivity::OnStart");
     return NOERROR;
 }
 
@@ -576,6 +578,7 @@ Boolean SettingsActivity::IsLikeShortCutIntent(
 ECode SettingsActivity::OnCreate(
     /* [in] */ IBundle* savedState)
 {
+    Slogger::I(TAG, " >> enter SettingsActivity::OnCreate");
     Activity::OnCreate(savedState);
 
     // Should happen before any call to GetIntent()
@@ -608,13 +611,13 @@ ECode SettingsActivity::OnCreate(
     String className;
     cn->GetClassName(&className);
 
-    mIsShowingDashboard = className.Equals("Elastos.Droid..");
+    mIsShowingDashboard = className.Equals("Elastos.Droid.Settings.CSettings.");
 
-    // This is a "Sub " when:
+    // This is a "Sub Settings" when:
     // - this is a real SubSettings
     // - or :settings:show_fragment_as_subsetting is passed to the Intent
     intent->GetBooleanExtra(EXTRA_SHOW_FRAGMENT_AS_SUBSETTING, FALSE, &res);
-    Boolean isSubSettings = className.Equals("Elastos.Droid..SubSettings") || res;
+    Boolean isSubSettings = className.Equals("Elastos.Droid.Settings.SubSettings") || res;
 
     // If this is a sub settings, then apply the SubSettings Theme for the ActionBar content insets
     if (isSubSettings) {
@@ -698,7 +701,7 @@ ECode SettingsActivity::OnCreate(
             mInitialTitleResId = R::string::dashboard_title;
             AutoPtr<IFragment> fragment;
             SwitchToFragment(
-                    String("Elastos.Droid..Dashboard.DashboardSummary"),
+                    String("Elastos.Droid.Settings.Dashboard.DashboardSummary"),
                     NULL, FALSE, FALSE, mInitialTitleResId, mInitialTitle,
                     FALSE, (IFragment**)&fragment);
         }
@@ -769,6 +772,7 @@ ECode SettingsActivity::OnCreate(
     }
 
     mHomeActivitiesCount = GetHomeActivitiesCount();
+    Slogger::I(TAG, " << leave SettingsActivity::OnCreate");
     return NOERROR;
 }
 
@@ -899,6 +903,7 @@ ECode SettingsActivity::OnSaveInstanceState(
 
 ECode SettingsActivity::OnResume()
 {
+    Slogger::I(TAG, " >> enter SettingsActivity::OnResume");
     Activity::OnResume();
 
     Int32 newHomeActivityCount = GetHomeActivitiesCount();
@@ -925,6 +930,7 @@ ECode SettingsActivity::OnResume()
         Boolean res;
         OnQueryTextSubmit(mSearchQuery, &res);
     }
+    Slogger::I(TAG, " << leave SettingsActivity::OnResume");
     return NOERROR;
 }
 
@@ -1002,13 +1008,13 @@ String SettingsActivity::GetStartingFragmentClass(
     intent->GetComponent((IComponentName**)&comp);
     String intentClass;
     comp->GetClassName(&intentClass);
-    if (intentClass.Equals("Elastos.Droid..SettingsActivity")) return String(NULL);
+    if (intentClass.Equals("Elastos.Droid.Settings.SettingsActivity")) return String(NULL);
 
-    if (String("com.android.settings.ManageApplications").Equals(intentClass)
-            || String("com.android.settings.RunningServices").Equals(intentClass)
-            || String("com.android.settings.applications.StorageUse").Equals(intentClass)) {
+    if (String("Elastos.Droid.Settings.ManageApplications").Equals(intentClass)
+            || String("Elastos.Droid.Settings.RunningServices").Equals(intentClass)
+            || String("Elastos.Droid.Settings.Applications.StorageUse").Equals(intentClass)) {
         // Old names of manage apps.
-        intentClass = "com.android.settings.applications.ManageApplications";
+        intentClass = "Elastos.Droid.Settings.Applications.ManageApplications";
     }
 
     return intentClass;
@@ -1680,7 +1686,7 @@ void SettingsActivity::SwitchToSearchResultsFragmentIfNeeded()
     else {
         AutoPtr<IFragment> fragment;
         SwitchToFragment(
-                String("Elastos.Droid..Dashboard.SearchResultsSummary"),
+                String("Elastos.Droid.Settings.Dashboard.SearchResultsSummary"),
                 NULL, FALSE, TRUE, R::string::search_results_title, NULL,
                 TRUE, (IFragment**)&fragment);
         mSearchResultsFragment = ISearchResultsSummary::Probe(fragment);

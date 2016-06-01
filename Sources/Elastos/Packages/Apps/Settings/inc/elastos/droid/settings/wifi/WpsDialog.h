@@ -5,7 +5,7 @@
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/app/AlertDialog.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::App::AlertDialog;
 using Elastos::Droid::Content::BroadcastReceiver;

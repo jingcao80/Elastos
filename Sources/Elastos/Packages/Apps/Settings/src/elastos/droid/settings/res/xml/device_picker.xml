@@ -17,7 +17,7 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <com.android.settings.bluetooth.BluetoothProgressCategory
+    <Elastos.Droid.Settings.bluetooth.BluetoothProgressCategory
         android:key="bt_device_list"
         android:orderingFromXml="false" />
 

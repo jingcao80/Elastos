@@ -25,15 +25,15 @@
             android:key="sim_activities"
             android:title="@string/sim_pref_divider">
 
-        <com.android.settings.notification.DropDownPreference
+        <Elastos.Droid.Settings.notification.DropDownPreference
             android:key="sim_cellular_data"
             android:title="@string/cellular_data_title" />
 
-        <com.android.settings.notification.DropDownPreference
+        <Elastos.Droid.Settings.notification.DropDownPreference
             android:key="sim_calls"
             android:title="@string/calls_title" />
 
-        <com.android.settings.notification.DropDownPreference
+        <Elastos.Droid.Settings.notification.DropDownPreference
             android:key="sim_sms"
             android:title="@string/sms_messages_title" />
 

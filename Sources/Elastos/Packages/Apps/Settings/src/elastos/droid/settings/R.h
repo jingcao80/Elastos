@@ -10365,19 +10365,19 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #BatteryHistoryChart_android_shadowColor com.android.settings:android_shadowColor}</code></td><td> Place a shadow of the specified color behind the text.</td></tr>
-           <tr><td><code>{@link #BatteryHistoryChart_android_shadowDx com.android.settings:android_shadowDx}</code></td><td> Horizontal offset of the shadow.</td></tr>
-           <tr><td><code>{@link #BatteryHistoryChart_android_shadowDy com.android.settings:android_shadowDy}</code></td><td> Vertical offset of the shadow.</td></tr>
-           <tr><td><code>{@link #BatteryHistoryChart_android_shadowRadius com.android.settings:android_shadowRadius}</code></td><td> Radius of the shadow.</td></tr>
-           <tr><td><code>{@link #BatteryHistoryChart_android_textAppearance com.android.settings:android_textAppearance}</code></td><td> Base text color, typeface, size, and style.</td></tr>
-           <tr><td><code>{@link #BatteryHistoryChart_android_textColor com.android.settings:android_textColor}</code></td><td> Text color.</td></tr>
-           <tr><td><code>{@link #BatteryHistoryChart_android_textSize com.android.settings:android_textSize}</code></td><td> Size of the text.</td></tr>
-           <tr><td><code>{@link #BatteryHistoryChart_android_textStyle com.android.settings:android_textStyle}</code></td><td> Style (bold, italic, bolditalic) for the text.</td></tr>
-           <tr><td><code>{@link #BatteryHistoryChart_android_typeface com.android.settings:android_typeface}</code></td><td> Typeface (normal, sans, serif, monospace) for the text.</td></tr>
-           <tr><td><code>{@link #BatteryHistoryChart_barPredictionColor com.android.settings:barPredictionColor}</code></td><td> Color of predicted future use part of chart.</td></tr>
-           <tr><td><code>{@link #BatteryHistoryChart_barPrimaryColor com.android.settings:barPrimaryColor}</code></td><td> Primary color of chart.</td></tr>
-           <tr><td><code>{@link #BatteryHistoryChart_chartMinHeight com.android.settings:chartMinHeight}</code></td><td> Minimum height of the chart itself.</td></tr>
-           <tr><td><code>{@link #BatteryHistoryChart_headerAppearance com.android.settings:headerAppearance}</code></td><td> Text color, typeface, size, and style of header.</td></tr>
+           <tr><td><code>{@link #BatteryHistoryChart_android_shadowColor Elastos.Droid.Settings:android_shadowColor}</code></td><td> Place a shadow of the specified color behind the text.</td></tr>
+           <tr><td><code>{@link #BatteryHistoryChart_android_shadowDx Elastos.Droid.Settings:android_shadowDx}</code></td><td> Horizontal offset of the shadow.</td></tr>
+           <tr><td><code>{@link #BatteryHistoryChart_android_shadowDy Elastos.Droid.Settings:android_shadowDy}</code></td><td> Vertical offset of the shadow.</td></tr>
+           <tr><td><code>{@link #BatteryHistoryChart_android_shadowRadius Elastos.Droid.Settings:android_shadowRadius}</code></td><td> Radius of the shadow.</td></tr>
+           <tr><td><code>{@link #BatteryHistoryChart_android_textAppearance Elastos.Droid.Settings:android_textAppearance}</code></td><td> Base text color, typeface, size, and style.</td></tr>
+           <tr><td><code>{@link #BatteryHistoryChart_android_textColor Elastos.Droid.Settings:android_textColor}</code></td><td> Text color.</td></tr>
+           <tr><td><code>{@link #BatteryHistoryChart_android_textSize Elastos.Droid.Settings:android_textSize}</code></td><td> Size of the text.</td></tr>
+           <tr><td><code>{@link #BatteryHistoryChart_android_textStyle Elastos.Droid.Settings:android_textStyle}</code></td><td> Style (bold, italic, bolditalic) for the text.</td></tr>
+           <tr><td><code>{@link #BatteryHistoryChart_android_typeface Elastos.Droid.Settings:android_typeface}</code></td><td> Typeface (normal, sans, serif, monospace) for the text.</td></tr>
+           <tr><td><code>{@link #BatteryHistoryChart_barPredictionColor Elastos.Droid.Settings:barPredictionColor}</code></td><td> Color of predicted future use part of chart.</td></tr>
+           <tr><td><code>{@link #BatteryHistoryChart_barPrimaryColor Elastos.Droid.Settings:barPrimaryColor}</code></td><td> Primary color of chart.</td></tr>
+           <tr><td><code>{@link #BatteryHistoryChart_chartMinHeight Elastos.Droid.Settings:chartMinHeight}</code></td><td> Minimum height of the chart itself.</td></tr>
+           <tr><td><code>{@link #BatteryHistoryChart_headerAppearance Elastos.Droid.Settings:headerAppearance}</code></td><td> Text color, typeface, size, and style of header.</td></tr>
            </table>
            @see #BatteryHistoryChart_android_shadowColor
            @see #BatteryHistoryChart_android_shadowDx
@@ -10398,7 +10398,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <p>
           @attr description
            Place a shadow of the specified color behind the text. 
-          <p>This corresponds to the global attribute          resource symbol {@link com.android.settings.R.attr#android_shadowColor}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Settings.R.attr#android_shadowColor}.
           @attr name android:android_shadowColor
         */
         public: static const int BatteryHistoryChart_android_shadowColor = 5;
@@ -10406,7 +10406,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <p>
           @attr description
            Horizontal offset of the shadow. 
-          <p>This corresponds to the global attribute          resource symbol {@link com.android.settings.R.attr#android_shadowDx}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Settings.R.attr#android_shadowDx}.
           @attr name android:android_shadowDx
         */
         public: static const int BatteryHistoryChart_android_shadowDx = 6;
@@ -10414,7 +10414,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <p>
           @attr description
            Vertical offset of the shadow. 
-          <p>This corresponds to the global attribute          resource symbol {@link com.android.settings.R.attr#android_shadowDy}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Settings.R.attr#android_shadowDy}.
           @attr name android:android_shadowDy
         */
         public: static const int BatteryHistoryChart_android_shadowDy = 7;
@@ -10422,7 +10422,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <p>
           @attr description
            Radius of the shadow. 
-          <p>This corresponds to the global attribute          resource symbol {@link com.android.settings.R.attr#android_shadowRadius}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Settings.R.attr#android_shadowRadius}.
           @attr name android:android_shadowRadius
         */
         public: static const int BatteryHistoryChart_android_shadowRadius = 8;
@@ -10430,7 +10430,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <p>
           @attr description
            Base text color, typeface, size, and style. 
-          <p>This corresponds to the global attribute          resource symbol {@link com.android.settings.R.attr#android_textAppearance}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Settings.R.attr#android_textAppearance}.
           @attr name android:android_textAppearance
         */
         public: static const int BatteryHistoryChart_android_textAppearance = 0;
@@ -10438,7 +10438,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <p>
           @attr description
            Text color. 
-          <p>This corresponds to the global attribute          resource symbol {@link com.android.settings.R.attr#android_textColor}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Settings.R.attr#android_textColor}.
           @attr name android:android_textColor
         */
         public: static const int BatteryHistoryChart_android_textColor = 4;
@@ -10446,7 +10446,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <p>
           @attr description
            Size of the text. Recommended dimension type for text is "sp" for scaled-pixels (example: 15sp). 
-          <p>This corresponds to the global attribute          resource symbol {@link com.android.settings.R.attr#android_textSize}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Settings.R.attr#android_textSize}.
           @attr name android:android_textSize
         */
         public: static const int BatteryHistoryChart_android_textSize = 1;
@@ -10454,7 +10454,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <p>
           @attr description
            Style (bold, italic, bolditalic) for the text. 
-          <p>This corresponds to the global attribute          resource symbol {@link com.android.settings.R.attr#android_textStyle}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Settings.R.attr#android_textStyle}.
           @attr name android:android_textStyle
         */
         public: static const int BatteryHistoryChart_android_textStyle = 3;
@@ -10462,7 +10462,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <p>
           @attr description
            Typeface (normal, sans, serif, monospace) for the text. 
-          <p>This corresponds to the global attribute          resource symbol {@link com.android.settings.R.attr#android_typeface}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Settings.R.attr#android_typeface}.
           @attr name android:android_typeface
         */
         public: static const int BatteryHistoryChart_android_typeface = 2;
@@ -10527,11 +10527,11 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #ChartGridView_android_textAppearance com.android.settings:android_textAppearance}</code></td><td></td></tr>
-           <tr><td><code>{@link #ChartGridView_android_textColor com.android.settings:android_textColor}</code></td><td></td></tr>
-           <tr><td><code>{@link #ChartGridView_borderDrawable com.android.settings:borderDrawable}</code></td><td></td></tr>
-           <tr><td><code>{@link #ChartGridView_primaryDrawable com.android.settings:primaryDrawable}</code></td><td></td></tr>
-           <tr><td><code>{@link #ChartGridView_secondaryDrawable com.android.settings:secondaryDrawable}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartGridView_android_textAppearance Elastos.Droid.Settings:android_textAppearance}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartGridView_android_textColor Elastos.Droid.Settings:android_textColor}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartGridView_borderDrawable Elastos.Droid.Settings:borderDrawable}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartGridView_primaryDrawable Elastos.Droid.Settings:primaryDrawable}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartGridView_secondaryDrawable Elastos.Droid.Settings:secondaryDrawable}</code></td><td></td></tr>
            </table>
            @see #ChartGridView_android_textAppearance
            @see #ChartGridView_android_textColor
@@ -10541,19 +10541,19 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          */
         public: static const int ChartGridView[5];
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#android_textAppearance}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#android_textAppearance}
           attribute's value can be found in the {@link #ChartGridView} array.
           @attr name android:android_textAppearance
         */
         public: static const int ChartGridView_android_textAppearance = 0;
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#android_textColor}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#android_textColor}
           attribute's value can be found in the {@link #ChartGridView} array.
           @attr name android:android_textColor
         */
         public: static const int ChartGridView_android_textColor = 1;
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#borderDrawable}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#borderDrawable}
           attribute's value can be found in the {@link #ChartGridView} array.
 
 
@@ -10563,7 +10563,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         */
         public: static const int ChartGridView_borderDrawable = 4;
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#primaryDrawable}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#primaryDrawable}
           attribute's value can be found in the {@link #ChartGridView} array.
 
 
@@ -10573,7 +10573,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         */
         public: static const int ChartGridView_primaryDrawable = 2;
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#secondaryDrawable}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#secondaryDrawable}
           attribute's value can be found in the {@link #ChartGridView} array.
 
 
@@ -10588,10 +10588,10 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #ChartNetworkSeriesView_fillColor com.android.settings:fillColor}</code></td><td></td></tr>
-           <tr><td><code>{@link #ChartNetworkSeriesView_fillColorSecondary com.android.settings:fillColorSecondary}</code></td><td></td></tr>
-           <tr><td><code>{@link #ChartNetworkSeriesView_safeRegion com.android.settings:safeRegion}</code></td><td></td></tr>
-           <tr><td><code>{@link #ChartNetworkSeriesView_strokeColor com.android.settings:strokeColor}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartNetworkSeriesView_fillColor Elastos.Droid.Settings:fillColor}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartNetworkSeriesView_fillColorSecondary Elastos.Droid.Settings:fillColorSecondary}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartNetworkSeriesView_safeRegion Elastos.Droid.Settings:safeRegion}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartNetworkSeriesView_strokeColor Elastos.Droid.Settings:strokeColor}</code></td><td></td></tr>
            </table>
            @see #ChartNetworkSeriesView_fillColor
            @see #ChartNetworkSeriesView_fillColorSecondary
@@ -10600,7 +10600,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          */
         public: static const int ChartNetworkSeriesView[4];
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#fillColor}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#fillColor}
           attribute's value can be found in the {@link #ChartNetworkSeriesView} array.
 
 
@@ -10615,7 +10615,7 @@ containing a value of this type.
         */
         public: static const int ChartNetworkSeriesView_fillColor = 2;
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#fillColorSecondary}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#fillColorSecondary}
           attribute's value can be found in the {@link #ChartNetworkSeriesView} array.
 
 
@@ -10630,7 +10630,7 @@ containing a value of this type.
         */
         public: static const int ChartNetworkSeriesView_fillColorSecondary = 3;
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#safeRegion}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#safeRegion}
           attribute's value can be found in the {@link #ChartNetworkSeriesView} array.
 
 
@@ -10646,7 +10646,7 @@ containing a value of this type.
         */
         public: static const int ChartNetworkSeriesView_safeRegion = 0;
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#strokeColor}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#strokeColor}
           attribute's value can be found in the {@link #ChartNetworkSeriesView} array.
 
 
@@ -10666,13 +10666,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #ChartSweepView_followAxis com.android.settings:followAxis}</code></td><td></td></tr>
-           <tr><td><code>{@link #ChartSweepView_labelColor com.android.settings:labelColor}</code></td><td></td></tr>
-           <tr><td><code>{@link #ChartSweepView_labelSize com.android.settings:labelSize}</code></td><td></td></tr>
-           <tr><td><code>{@link #ChartSweepView_labelTemplate com.android.settings:labelTemplate}</code></td><td></td></tr>
-           <tr><td><code>{@link #ChartSweepView_neighborMargin com.android.settings:neighborMargin}</code></td><td></td></tr>
-           <tr><td><code>{@link #ChartSweepView_safeRegion com.android.settings:safeRegion}</code></td><td></td></tr>
-           <tr><td><code>{@link #ChartSweepView_sweepDrawable com.android.settings:sweepDrawable}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartSweepView_followAxis Elastos.Droid.Settings:followAxis}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartSweepView_labelColor Elastos.Droid.Settings:labelColor}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartSweepView_labelSize Elastos.Droid.Settings:labelSize}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartSweepView_labelTemplate Elastos.Droid.Settings:labelTemplate}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartSweepView_neighborMargin Elastos.Droid.Settings:neighborMargin}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartSweepView_safeRegion Elastos.Droid.Settings:safeRegion}</code></td><td></td></tr>
+           <tr><td><code>{@link #ChartSweepView_sweepDrawable Elastos.Droid.Settings:sweepDrawable}</code></td><td></td></tr>
            </table>
            @see #ChartSweepView_followAxis
            @see #ChartSweepView_labelColor
@@ -10684,7 +10684,7 @@ containing a value of this type.
          */
         public: static const int ChartSweepView[7];
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#followAxis}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#followAxis}
           attribute's value can be found in the {@link #ChartSweepView} array.
 
 
@@ -10701,7 +10701,7 @@ containing a value of this type.
         */
         public: static const int ChartSweepView_followAxis = 1;
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#labelColor}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#labelColor}
           attribute's value can be found in the {@link #ChartSweepView} array.
 
 
@@ -10716,7 +10716,7 @@ containing a value of this type.
         */
         public: static const int ChartSweepView_labelColor = 5;
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#labelSize}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#labelSize}
           attribute's value can be found in the {@link #ChartSweepView} array.
 
 
@@ -10732,7 +10732,7 @@ containing a value of this type.
         */
         public: static const int ChartSweepView_labelSize = 3;
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#labelTemplate}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#labelTemplate}
           attribute's value can be found in the {@link #ChartSweepView} array.
 
 
@@ -10742,7 +10742,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         */
         public: static const int ChartSweepView_labelTemplate = 4;
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#neighborMargin}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#neighborMargin}
           attribute's value can be found in the {@link #ChartSweepView} array.
 
 
@@ -10758,7 +10758,7 @@ containing a value of this type.
         */
         public: static const int ChartSweepView_neighborMargin = 2;
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#safeRegion}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#safeRegion}
           attribute's value can be found in the {@link #ChartSweepView} array.
 
 
@@ -10774,7 +10774,7 @@ containing a value of this type.
         */
         public: static const int ChartSweepView_safeRegion = 6;
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#sweepDrawable}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#sweepDrawable}
           attribute's value can be found in the {@link #ChartSweepView} array.
 
 
@@ -10789,8 +10789,8 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #ChartView_optimalWidth com.android.settings:optimalWidth}</code></td><td> optimal width of the chart </td></tr>
-           <tr><td><code>{@link #ChartView_optimalWidthWeight com.android.settings:optimalWidthWeight}</code></td><td> how to weight extra space beyond optimal width </td></tr>
+           <tr><td><code>{@link #ChartView_optimalWidth Elastos.Droid.Settings:optimalWidth}</code></td><td> optimal width of the chart </td></tr>
+           <tr><td><code>{@link #ChartView_optimalWidthWeight Elastos.Droid.Settings:optimalWidthWeight}</code></td><td> how to weight extra space beyond optimal width </td></tr>
            </table>
            @see #ChartView_optimalWidth
            @see #ChartView_optimalWidthWeight
@@ -10836,13 +10836,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #IconPreferenceScreen_icon com.android.settings:icon}</code></td><td></td></tr>
+           <tr><td><code>{@link #IconPreferenceScreen_icon Elastos.Droid.Settings:icon}</code></td><td></td></tr>
            </table>
            @see #IconPreferenceScreen_icon
          */
         public: static const int IconPreferenceScreen[1];
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#icon}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#icon}
           attribute's value can be found in the {@link #IconPreferenceScreen} array.
 
 
@@ -10857,8 +10857,8 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #PercentageBarChart_emptyColor com.android.settings:emptyColor}</code></td><td> Background color </td></tr>
-           <tr><td><code>{@link #PercentageBarChart_minTickWidth com.android.settings:minTickWidth}</code></td><td> Minimum tick width for each slice in the bar chart.</td></tr>
+           <tr><td><code>{@link #PercentageBarChart_emptyColor Elastos.Droid.Settings:emptyColor}</code></td><td> Background color </td></tr>
+           <tr><td><code>{@link #PercentageBarChart_minTickWidth Elastos.Droid.Settings:minTickWidth}</code></td><td> Minimum tick width for each slice in the bar chart.</td></tr>
            </table>
            @see #PercentageBarChart_emptyColor
            @see #PercentageBarChart_minTickWidth
@@ -10905,13 +10905,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #Preference_keywords com.android.settings:keywords}</code></td><td></td></tr>
+           <tr><td><code>{@link #Preference_keywords Elastos.Droid.Settings:keywords}</code></td><td></td></tr>
            </table>
            @see #Preference_keywords
          */
         public: static const int Preference[1];
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#keywords}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#keywords}
           attribute's value can be found in the {@link #Preference} array.
 
 
@@ -10930,13 +10930,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #SetupWizardIllustration_aspectRatio com.android.settings:aspectRatio}</code></td><td></td></tr>
+           <tr><td><code>{@link #SetupWizardIllustration_aspectRatio Elastos.Droid.Settings:aspectRatio}</code></td><td></td></tr>
            </table>
            @see #SetupWizardIllustration_aspectRatio
          */
         public: static const int SetupWizardIllustration[1];
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#aspectRatio}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#aspectRatio}
           attribute's value can be found in the {@link #SetupWizardIllustration} array.
 
 
@@ -10955,13 +10955,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #WifiEncryptionState_state_encrypted com.android.settings:state_encrypted}</code></td><td></td></tr>
+           <tr><td><code>{@link #WifiEncryptionState_state_encrypted Elastos.Droid.Settings:state_encrypted}</code></td><td></td></tr>
            </table>
            @see #WifiEncryptionState_state_encrypted
          */
         public: static const int WifiEncryptionState[1];
         /**
-          <p>This symbol is the offset where the {@link com.android.settings.R.attr#state_encrypted}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Settings.R.attr#state_encrypted}
           attribute's value can be found in the {@link #WifiEncryptionState} array.
 
 

@@ -36,7 +36,7 @@
             android:textAlignment="viewStart"
             />
 
-    <com.android.settings.dashboard.DashboardContainerView
+    <Elastos.Droid.Settings.dashboard.DashboardContainerView
             android:id="@+id/category_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

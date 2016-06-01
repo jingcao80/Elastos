@@ -16,7 +16,7 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/home_settings"
-        xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
+        xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:key="home"
         android:order="0">
 

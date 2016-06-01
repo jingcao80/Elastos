@@ -15,7 +15,7 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
+    xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
@@ -23,7 +23,7 @@
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
-    <com.android.settings.deviceinfo.PercentageBarChart
+    <Elastos.Droid.Settings.deviceinfo.PercentageBarChart
         android:id="@+id/percentage_bar_chart"
         android:layout_width="match_parent"
         android:layout_height="32dip"
@@ -31,6 +31,6 @@
         android:gravity="center_vertical"
         settings:minTickWidth="6dip"
         settings:emptyColor="@color/material_empty_color_light">
-    </com.android.settings.deviceinfo.PercentageBarChart>
+    </Elastos.Droid.Settings.deviceinfo.PercentageBarChart>
 
 </LinearLayout>

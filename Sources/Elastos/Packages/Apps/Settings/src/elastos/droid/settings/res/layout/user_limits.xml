@@ -24,7 +24,7 @@
     android:layout_marginEnd="32dp"
     android:orientation="vertical">
 
-    <fragment android:name="com.android.settings.users.AppRestrictionsFragment"
+    <fragment android:name="Elastos.Droid.Settings.users.AppRestrictionsFragment"
             android:id="@+id/user_limits_fragment"
             android:layout_weight="1"
             android:layout_width="match_parent"

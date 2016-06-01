@@ -4,7 +4,7 @@
 
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;

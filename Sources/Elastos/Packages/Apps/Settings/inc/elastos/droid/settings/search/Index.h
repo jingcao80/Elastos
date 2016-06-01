@@ -4,7 +4,7 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/os/AsyncTask.h"
 #include <elastos/core/Object.h>
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IResolveInfo;

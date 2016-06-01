@@ -17,7 +17,7 @@
 */
 -->
 
-<com.android.settings.deviceinfo.FileItemInfoLayout
+<Elastos.Droid.Settings.deviceinfo.FileItemInfoLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
@@ -51,5 +51,5 @@
               android:paddingStart="16dip"
               android:textStyle="bold"
               android:textAppearance="?android:attr/textAppearanceSmall" />
-</com.android.settings.deviceinfo.FileItemInfoLayout>
+</Elastos.Droid.Settings.deviceinfo.FileItemInfoLayout>
 

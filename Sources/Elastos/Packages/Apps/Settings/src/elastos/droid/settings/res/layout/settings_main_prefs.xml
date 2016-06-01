@@ -28,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_weight="1">
 
-        <com.android.settings.widget.SwitchBar android:id="@+id/switch_bar"
+        <Elastos.Droid.Settings.widget.SwitchBar android:id="@+id/switch_bar"
                   android:layout_height="?android:attr/actionBarSize"
                   android:layout_width="match_parent"
                   android:background="@drawable/switchbar_background"

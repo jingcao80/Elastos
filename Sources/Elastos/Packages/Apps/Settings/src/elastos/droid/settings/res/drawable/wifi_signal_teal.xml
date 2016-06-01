@@ -15,7 +15,7 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:settings="http://schemas.android.com/apk/res/com.android.settings">
+        xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings">
     <item settings:state_encrypted="true" android:drawable="@drawable/wifi_signal_lock_teal" />
     <item settings:state_encrypted="false" android:drawable="@drawable/wifi_signal_open_teal" />
 </selector>

@@ -15,7 +15,7 @@
 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
+                  xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:title="@string/notification_settings"
         android:key="notification_settings"
         settings:keywords="@string/keywords_sounds_and_notifications">
@@ -25,25 +25,25 @@
         android:title="@string/sound_settings" >
 
         <!-- Media volume -->
-        <com.android.settings.notification.VolumeSeekBarPreference
+        <Elastos.Droid.Settings.notification.VolumeSeekBarPreference
                 android:key="media_volume"
                 android:icon="@drawable/ic_audio_vol_24dp"
                 android:title="@string/media_volume_option_title" />
 
         <!-- Alarm volume -->
-        <com.android.settings.notification.VolumeSeekBarPreference
+        <Elastos.Droid.Settings.notification.VolumeSeekBarPreference
                 android:key="alarm_volume"
                 android:icon="@drawable/ic_audio_alarm_24dp"
                 android:title="@string/alarm_volume_option_title" />
 
         <!-- Ring volume -->
-        <com.android.settings.notification.VolumeSeekBarPreference
+        <Elastos.Droid.Settings.notification.VolumeSeekBarPreference
                 android:key="ring_volume"
                 android:icon="@drawable/ring_notif"
                 android:title="@string/ring_volume_option_title" />
 
         <!-- Notification volume -->
-        <com.android.settings.notification.VolumeSeekBarPreference
+        <Elastos.Droid.Settings.notification.VolumeSeekBarPreference
                 android:key="notification_volume"
                 android:icon="@drawable/ring_notif"
                 android:title="@string/notification_volume_option_title" />
@@ -59,10 +59,10 @@
                 android:key="zen_mode"
                 android:title="@string/zen_mode_settings_title"
                 settings:keywords="@string/keywords_sounds_and_notifications_interruptions"
-                android:fragment="com.android.settings.notification.ZenModeSettings" />
+                android:fragment="Elastos.Droid.Settings.notification.ZenModeSettings" />
 
         <!-- Phone ringtone -->
-        <com.android.settings.DefaultRingtonePreference
+        <Elastos.Droid.Settings.DefaultRingtonePreference
                 android:key="ringtone"
                 android:title="@string/ringtone_title"
                 android:dialogTitle="@string/ringtone_title"
@@ -70,7 +70,7 @@
                 android:ringtoneType="ringtone" />
 
         <!-- Default notification ringtone -->
-        <com.android.settings.DefaultRingtonePreference
+        <Elastos.Droid.Settings.DefaultRingtonePreference
                 android:key="notification_ringtone"
                 android:title="@string/notification_ringtone_title"
                 android:dialogTitle="@string/notification_ringtone_title"
@@ -82,7 +82,7 @@
                 android:key="other_sounds"
                 android:title="@string/other_sound_settings"
                 android:persistent="false"
-                android:fragment="com.android.settings.notification.OtherSoundSettings" />
+                android:fragment="Elastos.Droid.Settings.notification.OtherSoundSettings" />
 
     </PreferenceCategory>
 
@@ -99,7 +99,7 @@
                 android:persistent="false" />
 
          <!-- When device is locked -->
-        <com.android.settings.notification.DropDownPreference
+        <Elastos.Droid.Settings.notification.DropDownPreference
                 android:key="lock_screen_notifications"
                 android:title="@string/lock_screen_notifications_title"
                 android:persistent="false" />
@@ -108,14 +108,14 @@
         <PreferenceScreen
                 android:key="app_notifications"
                 android:title="@string/app_notifications_title"
-                android:fragment="com.android.settings.notification.NotificationAppList" />
+                android:fragment="Elastos.Droid.Settings.notification.NotificationAppList" />
 
         <!-- Notification access -->
         <Preference
                 android:key="manage_notification_access"
                 android:title="@string/manage_notification_access_title"
                 android:persistent="false"
-                android:fragment="com.android.settings.notification.NotificationAccessSettings" />
+                android:fragment="Elastos.Droid.Settings.notification.NotificationAccessSettings" />
 
     </PreferenceCategory>
 

@@ -177,7 +177,7 @@ static AutoPtr<IHashMap> InitsBaseRankMap()
     AutoPtr<IHashMap> map;
     CHashMap::New((IHashMap**)&map);
 
-    InitPut(map, String("com.android.settings"), 0);
+    InitPut(map, String("Elastos.Droid.Settings"), 0);
     return map;
 }
 

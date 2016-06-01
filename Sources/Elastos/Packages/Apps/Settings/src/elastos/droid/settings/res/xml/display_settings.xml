@@ -15,7 +15,7 @@
 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
+                  xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:title="@string/display_settings"
         settings:keywords="@string/keywords_display">
 
@@ -37,7 +37,7 @@
                 android:key="wallpaper"
                 android:title="@string/wallpaper_settings_title"
                 settings:keywords="@string/keywords_display_wallpaper"
-                android:fragment="com.android.settings.WallpaperTypeSettings" />
+                android:fragment="Elastos.Droid.Settings.WallpaperTypeSettings" />
 
         <ListPreference
                 android:key="screen_timeout"
@@ -50,7 +50,7 @@
         <PreferenceScreen
                 android:key="screensaver"
                 android:title="@string/screensaver_settings_title"
-                android:fragment="com.android.settings.DreamSettings" />
+                android:fragment="Elastos.Droid.Settings.DreamSettings" />
 
         <SwitchPreference
                 android:key="lift_to_wake"
@@ -63,7 +63,7 @@
                 android:summary="@string/doze_summary"
                 android:persistent="false" />
 
-        <com.android.settings.WarnedListPreference
+        <Elastos.Droid.Settings.WarnedListPreference
                 android:key="font_size"
                 android:title="@string/title_font_size"
                 settings:keywords="@string/keywords_display_font_size"
@@ -72,7 +72,7 @@
                 android:entryValues="@array/entryvalues_font_size"
                 android:dialogTitle="@string/dialog_title_font_size" />
 
-        <com.android.settings.notification.DropDownPreference
+        <Elastos.Droid.Settings.notification.DropDownPreference
                 android:key="auto_rotate"
                 android:title="@string/display_auto_rotate_title" />
 
@@ -80,6 +80,6 @@
                 android:key="wifi_display"
                 android:title="@string/wifi_display_settings_title"
                 settings:keywords="@string/keywords_display_cast_screen"
-                android:fragment="com.android.settings.wfd.WifiDisplaySettings" />
+                android:fragment="Elastos.Droid.Settings.wfd.WifiDisplaySettings" />
 
 </PreferenceScreen>

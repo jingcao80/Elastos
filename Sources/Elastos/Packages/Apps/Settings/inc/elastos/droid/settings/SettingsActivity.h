@@ -12,7 +12,7 @@
 #include "elastos/droid/settings/widget/SwitchBar.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/os/Handler.h"
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::IActionBar;

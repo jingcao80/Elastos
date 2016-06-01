@@ -5,6 +5,8 @@ namespace Elastos {
 namespace Droid {
 namespace Settings {
 
+CAR_OBJECT_IMPL(CSettings)
+
 Boolean CSettings::AppOpsSummaryActivity::IsValidFragment(
     /* [in] */ const String& className)
 {

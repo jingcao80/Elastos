@@ -3,7 +3,7 @@
 
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/app/Fragment.h"
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::App::Fragment;
 using Elastos::Droid::App::IDialog;

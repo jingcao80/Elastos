@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_SETTINGS_WIRELESSSETTINGS_H__
 
 #include "elastos/droid/settings/SettingsPreferenceFragment.h"
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 
 // using Elastos::Droid::App::IActivity;
 // using Elastos::Droid::App::IAlertDialog;

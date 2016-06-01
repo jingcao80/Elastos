@@ -12,7 +12,7 @@
 #include "elastos/droid/settings/VoiceInputOutputSettings.h"
 #include "elastos/droid/settings/Utils.h"
 #include "elastos/droid/text/TextUtils.h"
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 #include "../R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>

@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.settings"
+        package="Elastos.Droid.Settings"
         coreApp="true"
         android:sharedUserId="android.uid.system">
 
@@ -81,8 +81,8 @@
 
         <!-- Settings -->
 
-        <activity android:name="Settings"
-                android:taskAffinity="com.android.settings"
+        <activity android:name="Elastos.Droid.Settings.CSettings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:label="@string/settings_label_launcher"
                 android:launchMode="singleTask">
             <intent-filter>
@@ -94,28 +94,28 @@
         </activity>
 
         <!-- Alias for launcher activity only, as this belongs to each profile. -->
-        <activity-alias android:name="Settings"
-                android:taskAffinity="com.android.settings"
+        <activity-alias android:name="Elastos.Droid.Settings.CSettings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:label="@string/settings_label_launcher"
                 android:launchMode="singleTask"
-                android:targetActivity="Settings">
+                android:targetActivity="Elastos.Droid.Settings.CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
-
-        <receiver android:name="ManagedProfileSetup">
+<!--
+        <receiver android:name="Elastos.Droid.Settings.ManagedProfileSetup">
             <intent-filter>
                 <action android:name="android.intent.action.USER_INITIALIZE"/>
                 <action android:name="android.intent.action.PRE_BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
-
-        <activity android:name=".SubSettings"
-                android:taskAffinity="com.android.settings"
-                android:parentActivityName="Settings">
+-->
+        <activity android:name="Elastos.Droid.Settings.SubSettings"
+                android:taskAffinity="Elastos.Droid.Settings"
+                android:parentActivityName="Elastos.Droid.Settings.CSettings">
         </activity>
 
         <activity android:name="CreateShortcut" android:label="@string/settings_shortcut"
@@ -128,10 +128,10 @@
 
         <!-- Wireless Controls -->
 
-        <activity android:name="CSettings$WirelessSettingsActivity"
-                android:taskAffinity="com.android.settings"
+        <activity android:name="Elastos.Droid.Settings.CSettings$WirelessSettingsActivity"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:label="@string/wireless_networks_settings_title"
-                android:parentActivityName="Settings">
+                android:parentActivityName="Elastos.Droid.Settings.CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.settings.WIRELESS_SETTINGS" />
@@ -141,7 +141,7 @@
                 <category android:name="android.intent.category.VOICE_LAUNCH" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.WirelessSettings" />
+                android:value="Elastos.Droid.Settings.WirelessSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wireless_settings" />
             <!-- Note that this doesn't really show any Wireless settings. -->
@@ -151,7 +151,7 @@
 
         <!-- Top-level settings -->
 
-        <activity android:name="CSettings$WifiSettingsActivity"
+        <activity android:name="Elastos.Droid.Settings.CSettings$WifiSettingsActivity"
                 android:taskAffinity=""
                 android:label="@string/wifi_settings"
                 android:configChanges="orientation|keyboardHidden|screenSize">
@@ -163,27 +163,27 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.wifi.WifiSettings" />
+                android:value="Elastos.Droid.Settings.Wifi.WifiSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wifi_settings" />
         </activity>
 
         <!-- Keep compatibility with old shortcuts. -->
-        <activity-alias android:name=".wifi.WifiSettings"
-                android:taskAffinity="com.android.settings"
+        <activity-alias android:name="Elastos.Droid.Settings.Wifi.WifiSettings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:label="@string/wifi_settings"
                 android:targetActivity="CSettings$WifiSettingsActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize"
                 android:exported="true">
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.wifi.WifiSettings" />
+                android:value="Elastos.Droid.Settings.Wifi.WifiSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wifi_settings" />
         </activity-alias>
 
-        <activity android:name=".wifi.WifiPickerActivity"
-                android:taskAffinity="com.android.settings"
-                android:parentActivityName="Settings">
+        <activity android:name="Elastos.Droid.Settings.Wifi.WifiPickerActivity"
+                android:taskAffinity="Elastos.Droid.Settings"
+                android:parentActivityName="Elastos.Droid.Settings.CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.net.wifi.PICK_WIFI_NETWORK" />
@@ -191,7 +191,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".wifi.WifiSetupActivity"
+        <activity android:name="Elastos.Droid.Settings.Wifi.WifiSetupActivity"
                 android:taskAffinity="com.android.wizard"
                 android:theme="@style/SetupWizardDisableAppStartingTheme"
                 android:label="@string/wifi_setup_wizard_title"
@@ -204,18 +204,18 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".wifi.WifiSettingsForSetupWizardXL"
+        <activity android:name="Elastos.Droid.Settings.Wifi.WifiSettingsForSetupWizardXL"
                 android:theme="@android:style/Theme.Material.Light.NoActionBar"
                 android:screenOrientation="behind"
                 android:clearTaskOnLaunch="true"
                 android:windowSoftInputMode="adjustResize"
                 android:exported="true" />
 
-        <activity android:name="CSettings$AdvancedWifiSettingsActivity"
-                android:taskAffinity="com.android.settings"
+        <activity android:name="Elastos.Droid.Settings.CSettings$AdvancedWifiSettingsActivity"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:label="@string/wifi_advanced_settings_label"
                 android:configChanges="orientation|keyboardHidden|screenSize"
-                android:parentActivityName="CSettings$WifiSettingsActivity">
+                android:parentActivityName="Elastos.Droid.Settings.CSettings$WifiSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.settings.WIFI_IP_SETTINGS" />
@@ -223,31 +223,31 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.wifi.AdvancedWifiSettings" />
+                android:value="Elastos.Droid.Settings.Wifi.AdvancedWifiSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wifi_settings" />
         </activity>
 
-        <activity android:name="CSettings$SavedAccessPointsSettingsActivity"
-                android:taskAffinity="com.android.settings"
+        <activity android:name="Elastos.Droid.Settings.CSettings$SavedAccessPointsSettingsActivity"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:label="@string/wifi_saved_access_points_label"
                 android:configChanges="orientation|keyboardHidden|screenSize"
-                android:parentActivityName="CSettings$WifiSettingsActivity">
+                android:parentActivityName="Elastos.Droid.Settings.CSettings$WifiSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.settings.WIFI_IF_SETTINGS" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.wifi.SavedAccessPointsSettings" />
+                android:value="Elastos.Droid.Settings.Wifi.SavedAccessPointsSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wifi_settings" />
         </activity>
 
-        <activity android:name=".wifi.WifiInfo"
+        <activity android:name="Elastos.Droid.Settings.Wifi.WifiInfo"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge"
-                android:taskAffinity="com.android.settings"
-                android:parentActivityName="CSettings$WifiSettingsActivity">
+                android:taskAffinity="Elastos.Droid.Settings"
+                android:parentActivityName="Elastos.Droid.Settings.CSettings$WifiSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEVELOPMENT_PREFERENCE" />
@@ -255,10 +255,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".wifi.WifiConfigInfo"
+        <activity android:name="Elastos.Droid.Settings.Wifi.WifiConfigInfo"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge"
-                android:taskAffinity="com.android.settings"
-                android:parentActivityName="CSettings$WifiSettingsActivity">
+                android:taskAffinity="Elastos.Droid.Settings"
+                android:parentActivityName="Elastos.Droid.SettingsCSettings$WifiSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEVELOPMENT_PREFERENCE" />
@@ -266,7 +266,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".wifi.WifiAPITest"
+        <activity android:name="Elastos.Droid.Settings.Wifi.WifiAPITest"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -275,7 +275,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".wifi.WifiStatusTest"
+        <activity android:name="Elastos.Droid.Settings.Wifi.WifiStatusTest"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -285,8 +285,8 @@
         </activity>
 
         <!-- Suspect activity alias: targetActivity is Settings itself, does not define a name. Remove? -->
-        <activity-alias android:name=".wifi.WifiApSettings"
-                android:targetActivity="Settings">
+        <activity-alias android:name="Elastos.Droid.Settings.Wifi.WifiApSettings"
+                android:targetActivity="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -297,7 +297,7 @@
         <activity android:name="CSettings$ApnSettingsActivity"
                 android:label="@string/apn_settings"
                 android:launchMode="singleTask"
-                android:taskAffinity="com.android.settings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:configChanges="orientation|keyboardHidden|screenSize"
                 android:parentActivityName="CSettings$WirelessSettingsActivity">
             <intent-filter>
@@ -329,7 +329,7 @@
         </activity>
 
         <!-- Keep compatibility with old shortcuts. -->
-        <activity-alias android:name=".bluetooth.BluetoothSettings"
+        <activity-alias android:name=".Bluetooth.BluetoothSettings"
                 android:label="@string/bluetooth_settings_title"
                 android:targetActivity="CSettings$BluetoothSettingsActivity"
                 android:exported="true"
@@ -340,7 +340,7 @@
                 android:resource="@id/bluetooth_settings" />
         </activity-alias>
 
-        <activity android:name=".bluetooth.DevicePickerActivity"
+        <activity android:name=".Bluetooth.DevicePickerActivity"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge"
                 android:label="@string/device_picker"
                 android:clearTaskOnLaunch="true">
@@ -378,7 +378,7 @@
         </activity-alias>
 
         <activity android:name="CSettings$WifiP2pSettingsActivity"
-                android:taskAffinity="com.android.settings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="CSettings$WifiSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -439,7 +439,7 @@
 
         <activity android:name="CSettings$LocalePickerActivity"
                 android:label="@string/language_picker_title"
-                android:taskAffinity="com.android.settings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="CSettings$InputMethodAndLanguageSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -457,8 +457,8 @@
 
         <activity android:name="CSettings$InputMethodAndLanguageSettingsActivity"
                 android:label="@string/language_keyboard_settings_title"
-                android:taskAffinity="com.android.settings"
-                android:parentActivityName="Settings">
+                android:taskAffinity="Elastos.Droid.Settings"
+                android:parentActivityName="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.settings.INPUT_METHOD_SETTINGS" />
@@ -475,7 +475,7 @@
 
         <activity android:name="CSettings$VoiceInputSettingsActivity"
                 android:label="@string/voice_input_settings_title"
-                android:taskAffinity="com.android.settings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="CSettings$InputMethodAndLanguageSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -515,7 +515,7 @@
 
         <activity android:name="CSettings$SpellCheckersSettingsActivity"
                 android:label="@string/spellcheckers_settings_title"
-                android:taskAffinity="com.android.settings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="CSettings$InputMethodAndLanguageSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -528,7 +528,7 @@
                 android:resource="@id/language_settings" />
         </activity>
 
-        <activity android:name=".inputmethod.InputMethodAndSubtypeEnablerActivity"
+        <activity android:name=".Inputmethod.InputMethodAndSubtypeEnablerActivity"
                 android:label=""
                 android:clearTaskOnLaunch="true">
             <intent-filter>
@@ -542,7 +542,7 @@
         </activity>
 
         <!-- TODO: This should also be forwarded, but we can't use cross-profile intent filters -->
-        <receiver android:name=".inputmethod.InputMethodDialogReceiver"
+        <receiver android:name=".Inputmethod.InputMethodDialogReceiver"
                 android:enabled="true">
             <intent-filter>
                 <action android:name="android.settings.SHOW_INPUT_METHOD_PICKER" />
@@ -553,7 +553,7 @@
 
         <activity android:name="CSettings$UserDictionarySettingsActivity"
                 android:label="@string/user_dict_settings_title"
-                android:taskAffinity="com.android.settings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="CSettings$InputMethodAndLanguageSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -569,7 +569,7 @@
                 android:value="true" />
         </activity>
 
-        <activity android:name=".inputmethod.UserDictionaryAddWordActivity"
+        <activity android:name=".Inputmethod.UserDictionaryAddWordActivity"
                   android:label="@string/user_dict_settings_title"
                   android:theme="@android:style/Theme.Material.Light.Dialog.NoActionBar"
                   android:windowSoftInputMode="stateVisible"
@@ -664,8 +664,8 @@
         <activity android:name="CSettings$DeviceInfoSettingsActivity"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge"
                 android:label="@string/device_info_settings"
-                android:taskAffinity="com.android.settings"
-                android:parentActivityName="Settings">
+                android:taskAffinity="Elastos.Droid.Settings"
+                android:parentActivityName="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.settings.DEVICE_INFO_SETTINGS" />
@@ -722,7 +722,7 @@
         </activity>
 
         <!-- Keep compatibility with old shortcuts. -->
-        <activity-alias android:name=".applications.ManageApplications"
+        <activity-alias android:name=".Applications.ManageApplications"
                 android:label="@string/applications_settings"
                 android:exported="true"
                 android:targetActivity="CSettings$ManageApplicationsActivity">
@@ -753,7 +753,7 @@
 
         <!-- Provide direct entry into manage apps showing storage usage for apps.
              This is for compatibility with old shortcuts. -->
-        <activity-alias android:name=".applications.StorageUse"
+        <activity-alias android:name=".Applications.StorageUse"
                 android:label="@string/storageuse_settings_title"
                 android:exported="true"
                 android:targetActivity="CSettings$ManageApplicationsActivity">
@@ -766,7 +766,7 @@
         <!-- Still need a top-level activity for showing app details.  Aliasing
              trick is so the code that is now a fragment can still be called
              InstalledAppDetails. -->
-        <activity android:name=".applications.InstalledAppDetailsTop"
+        <activity android:name=".Applications.InstalledAppDetailsTop"
                   android:label="@string/application_info_label"
                   android:exported="true"
                   android:taskAffinity=""
@@ -774,10 +774,10 @@
         </activity>
 
         <!-- Keep compatibility with old shortcuts. -->
-        <activity-alias android:name=".applications.InstalledAppDetails"
+        <activity-alias android:name=".Applications.InstalledAppDetails"
                 android:label="@string/application_info_label"
                 android:exported="true"
-                android:targetActivity=".applications.InstalledAppDetailsTop">
+                android:targetActivity=".Applications.InstalledAppDetailsTop">
             <intent-filter>
                 <action android:name="android.settings.APPLICATION_DETAILS_SETTINGS" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -788,8 +788,8 @@
         <!-- Provide direct entry into manage apps showing running services. -->
         <activity android:name="CSettings$RunningServicesActivity"
                 android:label="@string/runningservices_settings_title"
-                android:taskAffinity="com.android.settings"
-                android:parentActivityName="Settings">
+                android:taskAffinity="Elastos.Droid.Settings"
+                android:parentActivityName="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -806,7 +806,7 @@
         <activity android:name="CSettings$StorageUseActivity"
                 android:label="@string/storageuse_settings_title"
                 android:taskAffinity=""
-                android:parentActivityName="Settings">
+                android:parentActivityName="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -875,7 +875,7 @@
                 android:label="@string/security_settings_title"
                 android:configChanges="orientation|keyboardHidden|screenSize"
                 android:taskAffinity=""
-                android:parentActivityName="Settings">
+                android:parentActivityName="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.settings.SECURITY_SETTINGS" />
@@ -933,8 +933,8 @@
         <activity android:name="CSettings$PrivacySettingsActivity"
                 android:label="@string/privacy_settings_title"
                 android:configChanges="orientation|keyboardHidden|screenSize"
-                android:taskAffinity="com.android.settings"
-                android:parentActivityName="Settings">
+                android:taskAffinity="Elastos.Droid.Settings"
+                android:parentActivityName="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.settings.PRIVACY_SETTINGS" />
@@ -969,7 +969,7 @@
 
         <activity android:name="CSettings$DeviceAdminSettingsActivity"
                 android:label="@string/device_admin_settings_title"
-                android:taskAffinity="com.android.settings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="CSettings$SecuritySettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1005,7 +1005,7 @@
 
         <activity android:name="CSettings$UsageAccessSettingsActivity"
                 android:label="@string/usage_access_title"
-                android:taskAffinity="com.android.settings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="CSettings$SecuritySettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1059,7 +1059,7 @@
 
         <activity android:name="CSettings$AccessibilityDaltonizerSettingsActivity"
                 android:label="@string/accessibility_display_daltonizer_preference_title"
-                android:taskAffinity="com.android.settings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="CSettings$AccessibilitySettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1076,7 +1076,7 @@
 
         <activity android:name="CSettings$CaptioningSettingsActivity"
                 android:label="@string/accessibility_captioning_title"
-                android:taskAffinity="com.android.settings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="CSettings$AccessibilitySettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1093,7 +1093,7 @@
 
         <activity android:name="CSettings$TextToSpeechSettingsActivity"
                 android:label="@string/tts_settings"
-                android:taskAffinity="com.android.settings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="CSettings$InputMethodAndLanguageSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1119,9 +1119,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".notification.RedactionInterstitial"/>
+        <activity android:name=".Notification.RedactionInterstitial"/>
 
-        <activity android:name=".notification.RedactionSettingsStandalone"
+        <activity android:name=".Notification.RedactionSettingsStandalone"
                   android:exported="true">
             <intent-filter>
                 <action android:name="android.settings.ACTION_APP_NOTIFICATION_REDACTION" />
@@ -1167,7 +1167,7 @@
         <activity android:name=".EncryptionInterstitial"/>
 
         <!-- Runs in the phone process since it needs access to the Phone object -->
-        <activity android:name=".deviceinfo.Status"
+        <activity android:name=".Deviceinfo.Status"
                 android:label="@string/device_status_activity_title"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge"
                 android:process="com.android.phone">
@@ -1180,8 +1180,8 @@
 
         <activity android:name="CSettings$StorageSettingsActivity"
                 android:label="@string/storage_settings_title"
-                android:taskAffinity="com.android.settings"
-                android:parentActivityName="Settings">
+                android:taskAffinity="Elastos.Droid.Settings"
+                android:parentActivityName="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.settings.INTERNAL_STORAGE_SETTINGS" />
@@ -1197,7 +1197,7 @@
                 android:value="true" />
         </activity>
 
-        <activity android:name=".deviceinfo.MiscFilesHandler"
+        <activity android:name=".Deviceinfo.MiscFilesHandler"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge"/>
 
         <activity android:name="ApnEditor"
@@ -1238,7 +1238,7 @@
                        android:value="true" />
         </activity>
 
-        <activity android:name=".quicklaunch.BookmarkPicker"
+        <activity android:name=".Quicklaunch.BookmarkPicker"
                   android:label="@string/quick_launch_title"
                   android:theme="@style/Theme.SubSettingsDialogWhenLarge">
             <intent-filter>
@@ -1249,8 +1249,8 @@
 
         <activity android:name="CSettings$DevelopmentSettingsActivity"
                 android:label="@string/development_settings_title"
-                android:taskAffinity="com.android.settings"
-                android:parentActivityName="Settings">
+                android:taskAffinity="Elastos.Droid.Settings"
+                android:parentActivityName="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.settings.APPLICATION_DEVELOPMENT_SETTINGS" />
@@ -1267,8 +1267,8 @@
 
         <activity android:name="CSettings$PrintSettingsActivity"
                 android:label="@string/print_settings"
-                android:taskAffinity="com.android.settings"
-                android:parentActivityName="Settings">
+                android:taskAffinity="Elastos.Droid.Settings"
+                android:parentActivityName="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.settings.ACTION_PRINT_SETTINGS" />
@@ -1283,7 +1283,7 @@
 
         <activity android:name="CSettings$PrintJobSettingsActivity"
                 android:label="@string/print_print_job"
-                android:taskAffinity="com.android.settings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="CSettings$PrintSettingsActivity">
             <intent-filter>
                 <action android:name="android.settings.ACTION_PRINT_SETTINGS" />
@@ -1312,7 +1312,7 @@
 
         <activity android:name="CSettings$UsbSettingsActivity"
                 android:label="@string/storage_title_usb"
-                android:taskAffinity="com.android.settings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="CSettings$StorageSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1341,7 +1341,7 @@
 
         <!-- Bluetooth stuff -->
 
-        <activity android:name=".bluetooth.BluetoothPairingDialog"
+        <activity android:name=".Bluetooth.BluetoothPairingDialog"
                   android:label="@string/bluetooth_pairing_request"
                   android:excludeFromRecents="true"
                   android:theme="@*android:style/Theme.Material.Light.Dialog.Alert">
@@ -1352,7 +1352,7 @@
         </activity>
 
         <receiver
-            android:name=".bluetooth.BluetoothDiscoveryReceiver">
+            android:name=".Bluetooth.BluetoothDiscoveryReceiver">
             <intent-filter>
                 <action android:name="android.bluetooth.adapter.action.DISCOVERY_STARTED" />
                 <action android:name="android.bluetooth.adapter.action.DISCOVERY_FINISHED" />
@@ -1361,7 +1361,7 @@
         </receiver>
 
         <receiver
-            android:name=".bluetooth.DockEventReceiver">
+            android:name=".Bluetooth.DockEventReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.DOCK_EVENT" />
                 <action android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
@@ -1371,9 +1371,9 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".bluetooth.DockService" />
+        <service android:name=".Bluetooth.DockService" />
 
-        <activity android:name=".bluetooth.RequestPermissionActivity"
+        <activity android:name=".Bluetooth.RequestPermissionActivity"
                   android:label="@string/bluetooth_permission_request"
                   android:excludeFromRecents="true"
                   android:permission="android.permission.BLUETOOTH"
@@ -1385,7 +1385,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".wifi.WifiScanModeActivity"
+        <activity android:name=".Wifi.WifiScanModeActivity"
                   android:excludeFromRecents="true"
                   android:theme="@style/Transparent">
             <intent-filter>
@@ -1394,14 +1394,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".bluetooth.RequestPermissionHelperActivity"
+        <activity android:name=".Bluetooth.RequestPermissionHelperActivity"
                   android:label="@string/bluetooth_pairing_request"
                   android:excludeFromRecents="true"
                   android:permission="android.permission.BLUETOOTH"
                   android:theme="@*android:style/Theme.Material.Light.Dialog.Alert">
         </activity>
 
-        <receiver android:name=".bluetooth.BluetoothPairingRequest">
+        <receiver android:name=".Bluetooth.BluetoothPairingRequest">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
                 <action android:name="android.bluetooth.device.action.PAIRING_CANCEL" />
@@ -1409,7 +1409,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".bluetooth.BluetoothPermissionRequest"
+        <receiver android:name=".Bluetooth.BluetoothPermissionRequest"
                   android:permission="android.permission.BLUETOOTH_ADMIN">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.CONNECTION_ACCESS_REQUEST" />
@@ -1417,7 +1417,7 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".bluetooth.BluetoothPermissionActivity"
+        <activity android:name=".Bluetooth.BluetoothPermissionActivity"
                   android:label="@string/bluetooth_connection_permission_request"
                   android:excludeFromRecents="true"
                   android:permission="android.permission.BLUETOOTH_ADMIN"
@@ -1442,7 +1442,7 @@
         <!-- NFC settings -->
         <activity android:name="CSettings$AndroidBeamSettingsActivity"
                 android:label="@string/android_beam_settings_title"
-                android:taskAffinity="com.android.settings"
+                android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="CSettings$WirelessSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1479,8 +1479,8 @@
         </receiver>
 
         <activity android:name="BatteryInfo" android:label="@string/battery_info_label"
-                  android:taskAffinity="com.android.settings"
-                  android:parentActivityName="Settings">
+                  android:taskAffinity="Elastos.Droid.Settings"
+                  android:parentActivityName="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEVELOPMENT_PREFERENCE" />
@@ -1490,8 +1490,8 @@
 
         <activity android:name="Display" android:label="@string/display_label"
                 android:configChanges="fontScale"
-                android:taskAffinity="com.android.settings"
-                android:parentActivityName="Settings">
+                android:taskAffinity="Elastos.Droid.Settings"
+                android:parentActivityName="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEVELOPMENT_PREFERENCE" />
@@ -1509,7 +1509,7 @@
         <!-- Suspect activity alias: targetActivity is Settings itself, does not define a name. Remove? -->
         <activity-alias android:name="ProxySelector"
             android:label="@string/proxy_settings_label"
-            android:targetActivity="Settings">
+            android:targetActivity="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -1564,8 +1564,8 @@
         </activity>
 
         <activity android:name="UsageStatsActivity" android:label="@string/usage_stats_label"
-                  android:taskAffinity="com.android.settings"
-                  android:parentActivityName="Settings">
+                  android:taskAffinity="Elastos.Droid.Settings"
+                  android:parentActivityName="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEVELOPMENT_PREFERENCE" />
@@ -1588,7 +1588,7 @@
         </activity>
 
         <!-- Keep compatibility with old shortcuts. -->
-        <activity-alias android:name=".fuelgauge.PowerUsageSummary"
+        <activity-alias android:name=".Fuelgauge.PowerUsageSummary"
                 android:label="@string/power_usage_summary_title"
                 android:exported="true"
                 android:targetActivity="CSettings$PowerUsageSummaryActivity">
@@ -1618,7 +1618,7 @@
         <activity android:name="CSettings$AccountSettingsActivity"
             android:label="@string/account_settings_title"
             android:taskAffinity=""
-            android:parentActivityName="Settings">
+            android:parentActivityName="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.settings.SYNC_SETTINGS" />
@@ -1633,7 +1633,7 @@
         <activity android:name="CSettings$AccountSyncSettingsActivity"
             android:label="@string/account_sync_settings_title"
             android:taskAffinity=""
-            android:parentActivityName="Settings">
+            android:parentActivityName="CSettings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.settings.ACCOUNT_SYNC_SETTINGS" />
@@ -1651,7 +1651,7 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/header_add_an_account"
-            android:taskAffinity="com.android.settings"
+            android:taskAffinity="Elastos.Droid.Settings"
             android:parentActivityName="CSettings$ManageAccountsSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1666,7 +1666,7 @@
             android:label="@string/header_add_an_account"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/Theme.SubSettingsDialogWhenLarge"/>
-
+<!--
         <activity android:name=".CryptKeeper"
                   android:immersive="true"
                   android:launchMode="singleTop"
@@ -1681,7 +1681,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
+-->
         <activity android:name=".CryptKeeper$FadeToBlack"
             android:immersive="true"
             android:launchMode="singleTop"
@@ -1771,7 +1771,7 @@
                 android:value="true" />
         </activity>
 
-        <activity android:name=".nfc.PaymentDefaultDialog"
+        <activity android:name=".Nfc.PaymentDefaultDialog"
                   android:label="@string/nfc_payment_set_default_label"
                   android:excludeFromRecents="true"
                   android:theme="@*android:style/Theme.Material.Light.Dialog.Alert">
@@ -1934,7 +1934,7 @@
                 android:value="true" />
         </activity>
 
-        <receiver android:name=".widget.SettingsAppWidgetProvider"
+        <receiver android:name=".Widget.SettingsAppWidgetProvider"
                 android:label="@string/gadget_title"
                 android:exported="false"
                 android:enabled="@bool/has_powercontrol_widget">
@@ -1951,14 +1951,14 @@
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/appwidget_info" />
         </receiver>
 
-        <receiver android:name=".bluetooth.BluetoothDiscoverableTimeoutReceiver">
+        <receiver android:name=".Bluetooth.BluetoothDiscoverableTimeoutReceiver">
             <intent-filter>
                 <action android:name="android.bluetooth.intent.DISCOVERABLE_TIMEOUT" />
             </intent-filter>
         </receiver>
 
         <!-- Watch for ContactsContract.Profile changes and update the user's photo.  -->
-        <receiver android:name=".users.ProfileUpdateReceiver">
+        <receiver android:name=".Users.ProfileUpdateReceiver">
             <intent-filter>
                 <action android:name="android.provider.Contacts.PROFILE_CHANGED" />
             </intent-filter>
@@ -1989,7 +1989,7 @@
         </activity>
 
         <provider
-            android:name=".search.SettingsSearchIndexablesProvider"
+            android:name=".Search.SettingsSearchIndexablesProvider"
             android:authorities="com.android.settings"
             android:multiprocess="false"
             android:grantUriPermissions="true"

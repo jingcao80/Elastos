@@ -8,7 +8,7 @@
 #include "elastos/droid/settings/wifi/AccessPoint.h"
 #include "elastos/droid/os/Runnable.h"
 #include <elastos/core/Object.h>
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::IProxyInfo;

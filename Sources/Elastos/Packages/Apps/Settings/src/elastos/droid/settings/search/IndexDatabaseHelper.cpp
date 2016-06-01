@@ -6,7 +6,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;

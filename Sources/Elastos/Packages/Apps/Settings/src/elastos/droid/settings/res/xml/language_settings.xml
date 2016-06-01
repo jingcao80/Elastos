@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,14 +15,14 @@
 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:settings="http://schemas.android.com/apk/res/com.android.settings"
+                  xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:key="language_keyboard_settings"
         android:title="@string/language_keyboard_settings_title">
 
     <PreferenceScreen
             android:key="phone_language"
             android:title="@string/phone_language"
-            android:fragment="com.android.settings.LocalePicker"
+            android:fragment="Elastos.Droid.Settings.LocalePicker"
             />
 
     <!-- Spell checker preference title, summary and fragment will be set programmatically. -->
@@ -69,14 +69,14 @@
                 android:key="voice_input_settings"
                 android:title="@string/voice_input_settings_title"
                 settings:keywords="@string/keywords_voice_input"
-                android:fragment="com.android.settings.voice.VoiceInputSettings"
+                android:fragment="Elastos.Droid.Settings.voice.VoiceInputSettings"
                 />
 
         <PreferenceScreen
                 android:key="tts_settings"
                 android:title="@string/tts_settings_title"
                 settings:keywords="@string/keywords_text_to_speech_output"
-                android:fragment="com.android.settings.tts.TextToSpeechSettings"
+                android:fragment="Elastos.Droid.Settings.tts.TextToSpeechSettings"
                 />
 
     </PreferenceCategory>
@@ -85,7 +85,7 @@
             android:key="pointer_settings_category"
             android:title="@string/pointer_settings_category">
 
-        <com.android.settings.PointerSpeedPreference
+        <Elastos.Droid.Settings.PointerSpeedPreference
                 android:key="pointer_speed"
                 android:title="@string/pointer_speed"
                 android:dialogTitle="@string/pointer_speed"

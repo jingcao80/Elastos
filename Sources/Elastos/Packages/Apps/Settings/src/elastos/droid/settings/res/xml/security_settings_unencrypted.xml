@@ -24,8 +24,8 @@
         <PreferenceScreen
             android:key="encryption"
             android:title="@string/crypt_keeper_encrypt_title"
-            android:fragment="com.android.settings.CryptKeeperSettings" />
-    
+            android:fragment="Elastos.Droid.Settings.CryptKeeperSettings" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

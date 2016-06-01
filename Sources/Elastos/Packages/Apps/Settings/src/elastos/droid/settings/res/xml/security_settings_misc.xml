@@ -26,8 +26,8 @@
                 android:persistent="false">
 
             <intent android:action="android.intent.action.MAIN"
-                    android:targetPackage="com.android.settings"
-                    android:targetClass="com.android.settings.IccLockSettings"/>
+                    android:targetPackage="Elastos.Droid.Settings"
+                    android:targetClass="Elastos.Droid.Settings.IccLockSettings"/>
 
         </Preference>
 
@@ -50,7 +50,7 @@
                 android:title="@string/manage_device_admin"
                 android:summary="@string/manage_device_admin_summary"
                 android:persistent="false"
-                android:fragment="com.android.settings.DeviceAdminSettings"/>
+                android:fragment="Elastos.Droid.Settings.DeviceAdminSettings"/>
 
         <SwitchPreference android:key="toggle_install_applications"
                 android:title="@string/install_applications"
@@ -73,7 +73,7 @@
                 android:title="@string/trusted_credentials"
                 android:summary="@string/trusted_credentials_summary"
                 android:persistent="false"
-                android:fragment="com.android.settings.TrustedCredentialsSettings"/>
+                android:fragment="Elastos.Droid.Settings.TrustedCredentialsSettings"/>
 
         <Preference android:key="credentials_install"
                 android:title="@string/credentials_install"
@@ -92,8 +92,8 @@
                 android:persistent="false">
 
             <intent android:action="com.android.credentials.RESET"
-                    android:targetPackage="com.android.settings"
-                    android:targetClass="com.android.settings.CredentialStorage"/>
+                    android:targetPackage="Elastos.Droid.Settings"
+                    android:targetClass="Elastos.Droid.Settings.CredentialStorage"/>
 
         </Preference>
 
@@ -107,17 +107,17 @@
                 android:title="@string/manage_trust_agents"
                 android:summary="@string/manage_trust_agents_summary"
                 android:persistent="false"
-                android:fragment="com.android.settings.TrustAgentSettings"/>
+                android:fragment="Elastos.Droid.Settings.TrustAgentSettings"/>
 
         <PreferenceScreen
                 android:key="screen_pinning_settings"
                 android:title="@string/screen_pinning_title"
                 android:summary="@string/switch_off_text"
-                android:fragment="com.android.settings.ScreenPinningSettings"/>
+                android:fragment="Elastos.Droid.Settings.ScreenPinningSettings"/>
 
         <Preference android:key="usage_access"
                     android:title="@string/usage_access_title"
-                    android:fragment="com.android.settings.UsageAccessSettings"/>
+                    android:fragment="Elastos.Droid.Settings.UsageAccessSettings"/>
 
     </PreferenceCategory>
 

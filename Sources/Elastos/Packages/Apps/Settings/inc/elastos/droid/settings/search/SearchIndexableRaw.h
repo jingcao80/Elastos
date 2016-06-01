@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_SETTINGS_SEARCH_SEARCHINDEXABLERAW_H__
 
 #include "elastos/droid/provider/SearchIndexableData.h"
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Provider::SearchIndexableData;

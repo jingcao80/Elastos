@@ -3,7 +3,7 @@
 
 #include "elastos/droid/app/AlertDialog.h"
 #include "elastos/droid/settings/wifi/WifiConfigController.h"
-#include "_Settings.h"
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::App::AlertDialog;
 using Elastos::Droid::Content::IContext;
