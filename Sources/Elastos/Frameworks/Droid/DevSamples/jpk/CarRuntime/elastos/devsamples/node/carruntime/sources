@@ -10,6 +10,7 @@ include $(MAKEDIR)/../../../../../../../sources.inc
 INCLUDES += $(MAKEDIR)
 INCLUDES += $(MAKEDIR)/inc
 INCLUDES += $(MAKEDIR)/../../../../
+INCLUDES += $(MAKEDIR)/../../../../../../../../../Runtime/Core/reflection
 
 SOURCES = Elastos.DevSamples.Node.CarRuntime.car
 SOURCES += CCarRuntime.cpp

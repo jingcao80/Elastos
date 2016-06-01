@@ -135,7 +135,13 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         var paramCount = length - 2;
         for(var i=0, im=aConstructorInfos.length; i<im; i++){
             oConstructorInfo = aConstructorInfos[i];
+
             var _paramCount = oConstructorInfo.GetParamCount();
+            //var _paramInfos = oConstructorInfo.GetAllParamInfos();
+            //var _paramCount = _paramInfos.length;
+
+            elog('====classinfo__createObject===='+i+' _paramCount:'+_paramCount+'===paramCount:'+paramCount+'===========');
+
             if (_paramCount == paramCount) {
                 var bSameArgs = true;
                 var aParamInfos = oConstructorInfo.GetAllParamInfos();

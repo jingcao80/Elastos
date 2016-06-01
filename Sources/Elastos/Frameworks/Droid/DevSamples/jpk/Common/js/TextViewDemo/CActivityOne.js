@@ -118,7 +118,7 @@ module.exports = function(aoElastos, aoActivity){
             elog("========CActivityOne.js====OnCreate====begin.4========");
 
             //----------------AnamtionButton begin----------------
-if (false) {
+if (true) {
             oActivity.FindViewById(R.id.AnamtionButton).SetOnClickListener( (function(){
                 elog("========CActivityOne.js====OnCreate====begin.4.1========");
 
@@ -151,9 +151,10 @@ if (false) {
 
                 return {
                     OnClick:function(aoView){
+                        elog("========CActivityOne.js====Annimation::OnClick====begin========");
                         count = count % 4;
                         var key = keys[count];
-                        _showInfo("====" + key + " Animation Selected!");
+                        //_showInfo("====" + key + " Animation Selected!");
                         oButton.StartAnimation(oAnimation[key]);
                         count++;
                     }
