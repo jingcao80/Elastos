@@ -483,14 +483,14 @@ CTethering::TetherInterfaceSM::TetherInterfaceSM(
     /* [in] */ ILooper* looper,
     /* [in] */ Boolean usb,
     /* [in] */ CTethering* host)
-    : StateMachine(name, looper)
-    , mLastError(0)
+    : mLastError(0)
     , mIfaceName(name)
     , mUsb(usb)
     , mAvailable(FALSE)
     , mTethered(FALSE)
     , mHost(host)
 {
+    StateMachine::constructor(name, looper);
     SetLastError(IConnectivityManager::TETHER_ERROR_NO_ERROR);
 
     mInitialState = new InitialState(this);
@@ -1434,13 +1434,13 @@ CTethering::TetherMasterSM::TetherMasterSM(
     /* [in] */ const String& name,
     /* [in] */ ILooper* looper,
     /* [in] */ CTethering* host)
-    : StateMachine(name, looper)
-    , mSequenceNumber(0)
+    : mSequenceNumber(0)
     , mCurrentConnectionSequence(0)
     , mMobileApnReserved(0)
     , mPrevIPV6Connected(FALSE)
     , mHost(host)
 {
+    StateMachine::constructor(name, looper);
     //Add states
     mInitialState = new InitialState(this);
     AddState(mInitialState);

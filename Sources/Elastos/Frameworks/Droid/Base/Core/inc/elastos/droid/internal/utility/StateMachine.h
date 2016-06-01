@@ -788,7 +788,7 @@ protected:
      *
      * @param name of the state machine
      */
-    StateMachine(
+    CARAPI constructor(
         /* [in] */ const String& name);
 
     /**
@@ -796,11 +796,11 @@ protected:
      *
      * @param name of the state machine
      */
-    StateMachine(
+    CARAPI constructor(
         /* [in] */ const String& name,
         /* [in] */ ILooper* looper);
 
-    StateMachine(
+    CARAPI constructor(
         /* [in] */ const String& name,
         /* [in] */ IHandler* handler);
 

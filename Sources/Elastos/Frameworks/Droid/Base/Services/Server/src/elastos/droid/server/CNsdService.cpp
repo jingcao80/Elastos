@@ -848,9 +848,9 @@ void CNsdService::NsdStateMachine::RegisterForNsdSetting()
 CNsdService::NsdStateMachine::NsdStateMachine(
     /* [in] */ const String& name,
     /* [in] */ CNsdService* owner)
-    : StateMachine(name)
-    , mHost(owner)
+    : mHost(owner)
 {
+    StateMachine::constructor(name);
     mDefaultState = new DefaultState(this);
     mDisabledState = new DisabledState(this);
     mEnabledState = new EnabledState(this);

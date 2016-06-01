@@ -2393,6 +2393,22 @@ module
             [in] IBundle* initialExtras);
 
         /**
+         * Like {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, android.os.Handler,
+         * int, String, android.os.Bundle)}, but also allows specification
+         * of an associated app op as per {@link android.app.AppOpsManager}.
+         * @hide
+         */
+        SendOrderedBroadcast(
+            [in] IIntent* intent,
+            [in] String receiverPermission,
+            [in] Int32 appOp,
+            [in] IBroadcastReceiver* resultReceiver,
+            [in] IHandler* scheduler,
+            [in] Int32 initialCode,
+            [in] String initialData,
+            [in] IBundle* initialExtras);
+
+        /**
          * Version of {@sa #sendBroadcast(Intent)} that allows you to specify the
          * user the broadcast will be sent to.  This is not available to applications
          * that are not pre-installed on the system image.  Using it requires holding

@@ -135,22 +135,25 @@ public:
     CARAPI DispatchSmsMessage(
         /* [in] */ IInterface* obj);
 
+    /**
+     * Implemented by subclass to handle messages in {@link IdleState}.
+     * @param message the message to process
+     * @return TRUE to transition to {@link WaitingState}; FALSE to stay in {@link IdleState}
+     */
+    virtual CARAPI HandleSmsMessage(
+        /* [in] */ IMessage* message,
+        /* [out] */ Boolean* result) = 0;
+
 protected:
-    WakeLockStateMachine(
+    WakeLockStateMachine();
+
+    CARAPI constructor(
         /* [in] */ const String& debugTag,
         /* [in] */ IContext* context,
         /* [in] */ IPhoneBase* phone);
 
     // @Override
     CARAPI_(void) OnQuitting();
-
-    /**
-     * Implemented by subclass to handle messages in {@link IdleState}.
-     * @param message the message to process
-     * @return TRUE to transition to {@link WaitingState}; FALSE to stay in {@link IdleState}
-     */
-    virtual CARAPI_(Boolean) HandleSmsMessage(
-        /* [in] */ IMessage* message) = 0;
 
     /**
      * Log with debug level.

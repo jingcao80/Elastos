@@ -717,8 +717,7 @@ WifiController::WifiController(
     /* [in] */ IContext* context,
     /* [in] */ WifiServiceImpl* service,
     /* [in] */ ILooper* looper)
-    : StateMachine(TAG, looper)
-    , mScreenOff(FALSE)
+    : mScreenOff(FALSE)
     , mDeviceIdle(FALSE)
     , mPluggedType(0)
     , mStayAwakeConditions(0)
@@ -727,6 +726,7 @@ WifiController::WifiController(
     , mFirstUserSignOnSeen(FALSE)
     , mReEnableDelayMillis(0)
 {
+    StateMachine::constructor(TAG, looper);
     CNetworkInfo::New(IConnectivityManager::TYPE_WIFI, 0, String("WIFI"), String(""), (INetworkInfo**)&mNetworkInfo);
     CWorkSource::New((IWorkSource**)&mTmpWorkSource);
     mDefaultState = new DefaultState(this);

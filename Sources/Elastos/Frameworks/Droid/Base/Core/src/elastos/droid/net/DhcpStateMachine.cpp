@@ -328,7 +328,6 @@ ECode DhcpStateMachine::MyBroadcastReceiver::OnReceive(
 // DhcpStateMachine
 //==============================================================
 DhcpStateMachine::DhcpStateMachine()
-    : StateMachine(TAG)
 {}
 
 ECode DhcpStateMachine::constructor(
@@ -336,6 +335,7 @@ ECode DhcpStateMachine::constructor(
     /* [in] */ IStateMachine* controller,
     /* [in] */ const String& intf)
 {
+    StateMachine::constructor(TAG);
     mController = controller;
     mContext = context;
     mInterfaceName = intf;

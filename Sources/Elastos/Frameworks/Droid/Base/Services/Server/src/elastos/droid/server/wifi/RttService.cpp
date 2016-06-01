@@ -250,9 +250,9 @@ String RttService::RttServiceImpl::RttStateMachine::RequestPendingState::GetName
 RttService::RttServiceImpl::RttStateMachine::RttStateMachine(
     /* [in] */ ILooper* looper,
     /* [in] */ RttServiceImpl* host)
-    : StateMachine(String("RttStateMachine"), looper)
-    , mHost(host)
+    : mHost(host)
 {
+    StateMachine::constructor(String("RttStateMachine"), looper);
     mDefaultState = new DefaultState(this);
     mEnabledState = new EnabledState(this);
     mRequestPendingState = new RequestPendingState(this);
