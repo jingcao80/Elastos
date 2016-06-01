@@ -2467,10 +2467,9 @@ Int32 CPackageManagerService::InstallParams::InstallLocationPolicy(
                     Int32 versionCode;
                     pkgLite->GetVersionCode(&versionCode);
                     if (versionCode < pkg->mVersionCode) {
-                        // Slog.w(TAG, "Can't install update of " + packageName
-                        //         + " update version " + pkgLite.versionCode
-                        //         + " is older than installed version "
-                        //         + pkg.mVersionCode);
+                        Slogger::W(TAG, "Can't install update of %s update version %d"
+                            " is older than installed version %d", packageName.string(),
+                            versionCode, pkg->mVersionCode);
                         return IPackageHelper::RECOMMEND_FAILED_VERSION_DOWNGRADE;
                     }
                 }
@@ -16441,6 +16440,14 @@ Boolean CPackageManagerService::DeletePackageLI(
         KillApplication(packageName, ps->mAppId, String("uninstall pkg"));
         ret = DeleteInstalledPackageLI(ps, deleteCodeAndResources, flags,
                 allUserHandles, perUserInstalled, outInfo, writeSettings);
+
+        // delete eco
+        StringBuilder ecoDir("/data/elastos/");
+        ecoDir += packageName;
+        ecoDir += ".eco";
+        AutoPtr<IFile> path;
+        CFile::New(ecoDir.ToString(), (IFile**)&path);
+        path->Delete();
     }
     //Cleanup theme related data
     if (ps->mPkg != NULL) {

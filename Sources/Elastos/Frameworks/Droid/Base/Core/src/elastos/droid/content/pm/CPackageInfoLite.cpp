@@ -118,17 +118,17 @@ ECode CPackageInfoLite::SetVersionCode(
 }
 
 ECode CPackageInfoLite::GetMultiArch(
-    /* [out] */ Boolean* versionCode)
+    /* [out] */ Boolean* multiArch)
 {
-    VALIDATE_NOT_NULL(versionCode)
-    *versionCode = mVersionCode;
+    VALIDATE_NOT_NULL(multiArch)
+    *multiArch = mMultiArch;
     return NOERROR;
 }
 
 ECode CPackageInfoLite::SetMultiArch(
-    /* [in] */ Boolean versionCode)
+    /* [in] */ Boolean multiArch)
 {
-    mVersionCode = versionCode;
+    mMultiArch = multiArch;
     return NOERROR;
 }
 
