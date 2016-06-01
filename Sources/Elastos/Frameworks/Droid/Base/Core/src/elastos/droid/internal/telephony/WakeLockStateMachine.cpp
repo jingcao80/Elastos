@@ -93,7 +93,8 @@ ECode WakeLockStateMachine::IdleState::ProcessMessage(
     switch (what) {
         case EVENT_NEW_SMS_MESSAGE: {
             // transition to waiting state if we sent a broadcast
-            if (mHost->HandleSmsMessage(msg)) {
+            Boolean tmp = FALSE;
+            if (mHost->HandleSmsMessage(msg, &tmp), tmp) {
                 mHost->TransitionTo(mHost->mWaitingState);
             }
             *result = HANDLED;
@@ -198,12 +199,15 @@ ECode WakeLockStateMachine::Receiver::OnReceive(
 }
 
 CAR_INTERFACE_IMPL(WakeLockStateMachine, StateMachine, IWakeLockStateMachine)
-WakeLockStateMachine::WakeLockStateMachine(
+WakeLockStateMachine::WakeLockStateMachine()
+{}
+
+ECode WakeLockStateMachine::constructor(
     /* [in] */ const String& debugTag,
     /* [in] */ IContext* context,
     /* [in] */ IPhoneBase* phone)
-    : StateMachine(debugTag)
 {
+    StateMachine::constructor(debugTag);
     mDefaultState = new DefaultState(this);
     mIdleState = new IdleState(this);
     mWaitingState = new WaitingState(this);
@@ -221,6 +225,7 @@ WakeLockStateMachine::WakeLockStateMachine(
     AddState(mIdleState, mDefaultState);
     AddState(mWaitingState, mDefaultState);
     SetInitialState(mIdleState);
+    return NOERROR;
 }
 
 ECode WakeLockStateMachine::UpdatePhoneObject(

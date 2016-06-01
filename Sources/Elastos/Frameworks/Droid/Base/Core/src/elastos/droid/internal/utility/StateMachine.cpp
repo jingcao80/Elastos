@@ -795,7 +795,7 @@ void StateMachine::SmHandler::SetDbg(
 
 CAR_INTERFACE_IMPL(StateMachine, Object, IStateMachine)
 
-StateMachine::StateMachine(
+ECode StateMachine::constructor(
     /* [in] */ const String& name)
 {
     CHandlerThread::New(name, (IHandlerThread**)&mSmThread);
@@ -804,22 +804,25 @@ StateMachine::StateMachine(
     mSmThread->GetLooper((ILooper**)&looper);
 
     InitStateMachine(name, looper);
+    return NOERROR;
 }
 
-StateMachine::StateMachine(
+ECode StateMachine::constructor(
     /* [in] */ const String& name,
     /* [in] */ ILooper* looper)
 {
     InitStateMachine(name, looper);
+    return NOERROR;
 }
 
-StateMachine::StateMachine(
+ECode StateMachine::constructor(
     /* [in] */ const String& name,
     /* [in] */ IHandler* handler)
 {
     AutoPtr<ILooper> looper;
     handler->GetLooper((ILooper**)&looper);
     InitStateMachine(name, looper);
+    return NOERROR;
 }
 
 void StateMachine::InitStateMachine(

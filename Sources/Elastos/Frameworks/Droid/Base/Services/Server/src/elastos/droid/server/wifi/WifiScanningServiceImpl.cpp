@@ -353,9 +353,9 @@ CAR_INTERFACE_IMPL_3(WifiScanningServiceImpl::WifiScanningStateMachine,
 WifiScanningServiceImpl::WifiScanningStateMachine::WifiScanningStateMachine(
     /* [in] */ WifiScanningServiceImpl* owner,
     /* [in] */ ILooper* looper)
-    : StateMachine(TAG, looper)
-    , mOwner(owner)
+    : mOwner(owner)
 {
+    StateMachine::constructor(TAG, looper);
     mDefaultState = new DefaultState(this);
     mStartedState = new StartedState(this);
     mPausedState = new PausedState(this);
@@ -731,9 +731,9 @@ CAR_INTERFACE_IMPL(WifiScanningServiceImpl::WifiChangeStateMachine,
 WifiScanningServiceImpl::WifiChangeStateMachine::WifiChangeStateMachine(
     /* [in] */ WifiScanningServiceImpl* owner,
     /* [in] */ ILooper* looper)
-    : StateMachine(String("SignificantChangeStateMachine"), looper)
-    , mOwner(owner)
+    : mOwner(owner)
 {
+    StateMachine::constructor(String("SignificantChangeStateMachine"), looper);
     mDefaultState = new DefaultState(this);
     mStationaryState = new StationaryState(this);
     mMovingState = new MovingState(this);

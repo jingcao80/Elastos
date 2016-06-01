@@ -740,8 +740,7 @@ NetworkMonitor::NetworkMonitor(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler,
     /* [in] */ NetworkAgentInfo* networkAgentInfo)
-    : StateMachine(TAG + networkAgentInfo->Name()) // Add suffix indicating which NetworkMonitor we're talking about.
-    , mSystemReady(FALSE)
+    : mSystemReady(FALSE)
     , mLingerDelayMs(FALSE)
     , mLingerToken(FALSE)
     , mReevaluateDelayMs(FALSE)
@@ -752,6 +751,8 @@ NetworkMonitor::NetworkMonitor(
     , mIsCaptivePortalCheckEnabled(FALSE)
     , mUserDoesNotWant(FALSE)
 {
+    // Add suffix indicating which NetworkMonitor we're talking about.
+    StateMachine::constructor(TAG + networkAgentInfo->Name());
     mDefaultState = new DefaultState(this);
     mOfflineState = new OfflineState(this);
     mValidatedState = new ValidatedState(this);

@@ -429,9 +429,9 @@ WifiP2pServiceImpl::P2pStateMachine::P2pStateMachine(
     /* [in] */ ILooper* looper,
     /* [in] */ Boolean p2pSupported,
     /* [in] */ WifiP2pServiceImpl* host)
-    : StateMachine(name)
-    , mHost(host)
+    : mHost(host)
 {
+    StateMachine::constructor(name);
     mDefaultState = new DefaultState(this);
     mP2pNotSupportedState = new P2pNotSupportedState(this);
     mP2pDisablingState = new P2pDisablingState(this);

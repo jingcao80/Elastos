@@ -4802,8 +4802,7 @@ WifiStateMachine::WifiStateMachine(
     /* [in] */ IContext* context,
     /* [in] */ const String& wlanInterface,
     /* [in] */ WifiTrafficPoller* trafficPoller)
-    : StateMachine(String("WifiStateMachine"))
-    , obtainingIpWatchdogCount(0)
+    : obtainingIpWatchdogCount(0)
     , roamWatchdogCount(0)
     , disconnectingWatchdogCount(0)
     , mRunningBeaconCount(0)
@@ -4893,6 +4892,7 @@ WifiStateMachine::WifiStateMachine(
     , mRxTimeLastReport(0)
     , lastLinkLayerStatsUpdate(0)
 {
+    StateMachine::constructor(String("WifiStateMachine"));
     CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&mP2pConnected);
     CArrayList::New((IArrayList**)&mScanResults);
     CArrayList::New((IList**)&mBatchedScanResults);

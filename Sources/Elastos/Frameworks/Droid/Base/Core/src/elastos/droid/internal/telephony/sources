@@ -25,5 +25,7 @@ SOURCES += CallManager.cpp
 SOURCES += DriverCall.cpp
 SOURCES += CallTracker.cpp
 SOURCES += WakeLockStateMachine.cpp
+SOURCES += CellBroadcastHandler.cpp
+SOURCES += Connection.cpp
 
 ELASTOS_LIBS += utility/utility.lib

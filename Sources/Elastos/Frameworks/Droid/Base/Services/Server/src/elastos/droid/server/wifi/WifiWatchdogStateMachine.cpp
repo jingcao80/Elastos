@@ -931,13 +931,13 @@ ECode WifiWatchdogStateMachine::NetworkBroadcastReceiver::OnReceive(
 WifiWatchdogStateMachine::WifiWatchdogStateMachine(
     /* [in] */ IContext* context,
     /* [in] */ IMessenger* dstMessenger)
-    : StateMachine(String("WifiWatchdogStateMachine"))
-    , mContext(context)
+    : mContext(context)
     , mPoorNetworkDetectionEnabled(FALSE)
     , mRssiFetchToken(0)
     , mCurrentSignalLevel(0)
     , mIsScreenOn(TRUE)
 {
+    StateMachine::constructor(String("WifiWatchdogStateMachine"));
     mDefaultState = new DefaultState(this);
     mWatchdogDisabledState = new WatchdogDisabledState(this);
     mWatchdogEnabledState = new WatchdogEnabledState(this);
