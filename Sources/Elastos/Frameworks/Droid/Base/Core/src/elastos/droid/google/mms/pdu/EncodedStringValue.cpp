@@ -1,281 +1,276 @@
-/*
- * Copyright (C) 2007-2008 Esmertec AG.
- * Copyright (C) 2007-2008 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.google.android.mms.pdu;
+#include "elastos/droid/google/mms/pdu/EncodedStringValue.h"
 
-using Elastos::Droid::Utility::ILog;
+namespace Elastos {
+namespace Droid {
+namespace Google {
+namespace Mms {
+namespace Pdu {
 
-using Elastos::IO::IByteArrayOutputStream;
-using Elastos::Utility::IArrayList;
+//=====================================================================
+//                          EncodedStringValue
+//=====================================================================
+CAR_INTERFACE_IMPL_2(EncodedStringValue, Object, IEncodedStringValue, ICloneable);
 
-/**
- * Encoded-string-value = Text-string | Value-length Char-set Text-string
- */
-public class EncodedStringValue implements Cloneable {
-    private static const String TAG = "EncodedStringValue";
-    private static const Boolean DEBUG = FALSE;
-    private static const Boolean LOCAL_LOGV = FALSE;
+const String EncodedStringValue::TAG("EncodedStringValue");
+const Boolean EncodedStringValue::DEBUG = FALSE;
+const Boolean EncodedStringValue::LOCAL_LOGV = FALSE;
 
-    /**
-     * The Char-set value.
-     */
-    private Int32 mCharacterSet;
-
-    /**
-     * The Text-string value.
-     */
-    private Byte[] mData;
-
-    /**
-     * Constructor.
-     *
-     * @param charset the Char-set value
-     * @param data the Text-string value
-     * @throws NullPointerException if Text-string value is NULL.
-     */
-    public EncodedStringValue(Int32 charset, Byte[] data) {
-        // TODO: CharSet needs to be validated against MIBEnum.
-        If(NULL == data) {
-            throw new NullPointerException("EncodedStringValue: Text-string is NULL.");
-        }
-
-        mCharacterSet = charset;
-        mData = new Byte[data.length];
-        System->Arraycopy(data, 0, mData, 0, data.length);
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param data the Text-string value
-     * @throws NullPointerException if Text-string value is NULL.
-     */
-    public EncodedStringValue(Byte[] data) {
-        This(CharacterSets.DEFAULT_CHARSET, data);
-    }
-
-    public EncodedStringValue(String data) {
-        try {
-            mData = data->GetBytes(CharacterSets.DEFAULT_CHARSET_NAME);
-            mCharacterSet = CharacterSets.DEFAULT_CHARSET;
-        } Catch (UnsupportedEncodingException e) {
-            Logger::E(TAG, "Default encoding must be supported.", e);
-        }
-    }
-
-    /**
-     * Get Char-set value.
-     *
-     * @return the value
-     */
-    public Int32 GetCharacterSet() {
-        return mCharacterSet;
-    }
-
-    /**
-     * Set Char-set value.
-     *
-     * @param charset the Char-set value
-     */
-    CARAPI SetCharacterSet(Int32 charset) {
-        // TODO: CharSet needs to be validated against MIBEnum.
-        mCharacterSet = charset;
-    }
-
-    /**
-     * Get Text-string value.
-     *
-     * @return the value
-     */
-    public Byte[] GetTextString() {
-        Byte[] byteArray = new Byte[mData.length];
-
-        System->Arraycopy(mData, 0, byteArray, 0, mData.length);
-        return byteArray;
-    }
-
-    /**
-     * Set Text-string value.
-     *
-     * @param textString the Text-string value
-     * @throws NullPointerException if Text-string value is NULL.
-     */
-    CARAPI SetTextString(Byte[] textString) {
-        If(NULL == textString) {
-            throw new NullPointerException("EncodedStringValue: Text-string is NULL.");
-        }
-
-        mData = new Byte[textString.length];
-        System->Arraycopy(textString, 0, mData, 0, textString.length);
-    }
-
-    /**
-     * Convert this object to a {@link java.lang.String}. If the encoding of
-     * the EncodedStringValue is NULL or unsupported, it will be
-     * treated as iso-8859-1 encoding.
-     *
-     * @return The decoded String.
-     */
-    public String GetString()  {
-        If (CharacterSets.ANY_CHARSET == mCharacterSet) {
-            return new String(mData); // system default encoding.
-        } else {
-            try {
-                String name = CharacterSets->GetMimeName(mCharacterSet);
-                return new String(mData, name);
-            } Catch (UnsupportedEncodingException e) {
-            	If (LOCAL_LOGV) {
-            		Logger::V(TAG, e->GetMessage(), e);
-            	}
-            	try {
-                    return new String(mData, CharacterSets.MIMENAME_ISO_8859_1);
-                } Catch (UnsupportedEncodingException _) {
-                    return new String(mData); // system default encoding.
-                }
-            }
-        }
-    }
-
-    /**
-     * Append to Text-string.
-     *
-     * @param textString the textString to append
-     * @throws NullPointerException if the text String is NULL
-     *                      or an IOException occured.
-     */
-    CARAPI AppendTextString(Byte[] textString) {
-        If(NULL == textString) {
-            throw new NullPointerException("Text-string is NULL.");
-        }
-
-        If(NULL == mData) {
-            mData = new Byte[textString.length];
-            System->Arraycopy(textString, 0, mData, 0, textString.length);
-        } else {
-            ByteArrayOutputStream newTextString = new ByteArrayOutputStream();
-            try {
-                newTextString->Write(mData);
-                newTextString->Write(textString);
-            } Catch (IOException e) {
-                e->PrintStackTrace();
-                throw new NullPointerException(
-                        "appendTextString: failed when write a new Text-string");
-            }
-
-            mData = newTextString->ToByteArray();
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#Clone()
-     */
-    //@Override
-    public Object Clone() throws CloneNotSupportedException {
-        super->Clone();
-        Int32 len = mData.length;
-        Byte[] dstBytes = new Byte[len];
-        System->Arraycopy(mData, 0, dstBytes, 0, len);
-
-        try {
-            return new EncodedStringValue(mCharacterSet, dstBytes);
-        } Catch (Exception e) {
-            Logger::E(TAG, "failed to clone an EncodedStringValue: " + this);
-            e->PrintStackTrace();
-            throw new CloneNotSupportedException(e->GetMessage());
-        }
-    }
-
-    /**
-     * Split this encoded string around matches of the given pattern.
-     *
-     * @param pattern the delimiting pattern
-     * @return the array of encoded strings computed by splitting this encoded
-     *         string around matches of the given pattern
-     */
-    public EncodedStringValue[] Split(String pattern) {
-        String[] temp = GetString()->Split(pattern);
-        EncodedStringValue[] ret = new EncodedStringValue[temp.length];
-        For (Int32 i = 0; i < ret.length; ++i) {
-            try {
-                ret[i] = new EncodedStringValue(mCharacterSet,
-                        temp[i].GetBytes());
-            } Catch (NullPointerException _) {
-                // Can't arrive here
-                return NULL;
-            }
-        }
-        return ret;
-    }
-
-    /**
-     * Extract an EncodedStringValue[] from a given String.
-     */
-    public static EncodedStringValue[] Extract(String src) {
-        String[] values = src->Split(";");
-
-        ArrayList<EncodedStringValue> list = new ArrayList<EncodedStringValue>();
-        For (Int32 i = 0; i < values.length; i++) {
-            If (values[i].Length() > 0) {
-                list->Add(new EncodedStringValue(values[i]));
-            }
-        }
-
-        Int32 len = list->Size();
-        If (len > 0) {
-            return list->ToArray(new EncodedStringValue[len]);
-        } else {
-            return NULL;
-        }
-    }
-
-    /**
-     * Concatenate an EncodedStringValue[] into a single String.
-     */
-    public static String Concat(EncodedStringValue[] addr) {
-        StringBuilder sb = new StringBuilder();
-        Int32 maxIndex = addr.length - 1;
-        For (Int32 i = 0; i <= maxIndex; i++) {
-            sb->Append(addr[i].GetString());
-            If (i < maxIndex) {
-                sb->Append(";");
-            }
-        }
-
-        return sb->ToString();
-    }
-
-    public static EncodedStringValue Copy(EncodedStringValue value) {
-        If (value == NULL) {
-            return NULL;
-        }
-
-        return new EncodedStringValue(value.mCharacterSet, value.mData);
-    }
-    
-    public static EncodedStringValue[] EncodeStrings(String[] array) {
-        Int32 count = array.length;
-        If (count > 0) {
-            EncodedStringValue[] encodedArray = new EncodedStringValue[count];
-            For (Int32 i = 0; i < count; i++) {
-                encodedArray[i] = new EncodedStringValue(array[i]);
-            }
-            return encodedArray;
-        }
-        return NULL;
-    }
+EncodedStringValue::EncodedStringValue(
+    /* [in] */ Int32 charset,
+    /* [in] */ ArrayOf<Byte>* data)
+{
+    // ==================before translated======================
+    // // TODO: CharSet needs to be validated against MIBEnum.
+    // if(null == data) {
+    //     throw new NullPointerException("EncodedStringValue: Text-string is null.");
+    // }
+    //
+    // mCharacterSet = charset;
+    // mData = new byte[data.length];
+    // System.arraycopy(data, 0, mData, 0, data.length);
 }
+
+EncodedStringValue::EncodedStringValue(
+    /* [in] */ ArrayOf<Byte>* data)
+{
+    // ==================before translated======================
+    // this(CharacterSets.DEFAULT_CHARSET, data);
+}
+
+EncodedStringValue::EncodedStringValue(
+    /* [in] */ const String& data)
+{
+    // ==================before translated======================
+    // try {
+    //     mData = data.getBytes(CharacterSets.DEFAULT_CHARSET_NAME);
+    //     mCharacterSet = CharacterSets.DEFAULT_CHARSET;
+    // } catch (UnsupportedEncodingException e) {
+    //     Log.e(TAG, "Default encoding must be supported.", e);
+    // }
+}
+
+ECode EncodedStringValue::GetCharacterSet(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mCharacterSet;
+    assert(0);
+    return NOERROR;
+}
+
+ECode EncodedStringValue::SetCharacterSet(
+    /* [in] */ Int32 charset)
+{
+    // ==================before translated======================
+    // // TODO: CharSet needs to be validated against MIBEnum.
+    // mCharacterSet = charset;
+    assert(0);
+    return NOERROR;
+}
+
+ECode EncodedStringValue::GetTextString(
+    /* [out] */ ArrayOf<Byte>** result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // byte[] byteArray = new byte[mData.length];
+    //
+    // System.arraycopy(mData, 0, byteArray, 0, mData.length);
+    // return byteArray;
+    assert(0);
+    return NOERROR;
+}
+
+ECode EncodedStringValue::SetTextString(
+    /* [in] */ ArrayOf<Byte>* textString)
+{
+    VALIDATE_NOT_NULL(textString);
+    // ==================before translated======================
+    // if(null == textString) {
+    //     throw new NullPointerException("EncodedStringValue: Text-string is null.");
+    // }
+    //
+    // mData = new byte[textString.length];
+    // System.arraycopy(textString, 0, mData, 0, textString.length);
+    assert(0);
+    return NOERROR;
+}
+
+ECode EncodedStringValue::GetString(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if (CharacterSets.ANY_CHARSET == mCharacterSet) {
+    //     return new String(mData); // system default encoding.
+    // } else {
+    //     try {
+    //         String name = CharacterSets.getMimeName(mCharacterSet);
+    //         return new String(mData, name);
+    //     } catch (UnsupportedEncodingException e) {
+    //     	if (LOCAL_LOGV) {
+    //     		Log.v(TAG, e.getMessage(), e);
+    //     	}
+    //     	try {
+    //             return new String(mData, CharacterSets.MIMENAME_ISO_8859_1);
+    //         } catch (UnsupportedEncodingException _) {
+    //             return new String(mData); // system default encoding.
+    //         }
+    //     }
+    // }
+    assert(0);
+    return NOERROR;
+}
+
+ECode EncodedStringValue::AppendTextString(
+    /* [in] */ ArrayOf<Byte>* textString)
+{
+    VALIDATE_NOT_NULL(textString);
+    // ==================before translated======================
+    // if(null == textString) {
+    //     throw new NullPointerException("Text-string is null.");
+    // }
+    //
+    // if(null == mData) {
+    //     mData = new byte[textString.length];
+    //     System.arraycopy(textString, 0, mData, 0, textString.length);
+    // } else {
+    //     ByteArrayOutputStream newTextString = new ByteArrayOutputStream();
+    //     try {
+    //         newTextString.write(mData);
+    //         newTextString.write(textString);
+    //     } catch (IOException e) {
+    //         e.printStackTrace();
+    //         throw new NullPointerException(
+    //                 "appendTextString: failed when write a new Text-string");
+    //     }
+    //
+    //     mData = newTextString.toByteArray();
+    // }
+    assert(0);
+    return NOERROR;
+}
+
+AutoPtr<Object> EncodedStringValue::Clone()
+{
+    // ==================before translated======================
+    // super.clone();
+    // int len = mData.length;
+    // byte[] dstBytes = new byte[len];
+    // System.arraycopy(mData, 0, dstBytes, 0, len);
+    //
+    // try {
+    //     return new EncodedStringValue(mCharacterSet, dstBytes);
+    // } catch (Exception e) {
+    //     Log.e(TAG, "failed to clone an EncodedStringValue: " + this);
+    //     e.printStackTrace();
+    //     throw new CloneNotSupportedException(e.getMessage());
+    // }
+    assert(0);
+    AutoPtr<Object> empty;
+    return empty;
+}
+
+ECode EncodedStringValue::Split(
+    /* [in] */ const String& pattern,
+    /* [out] */ ArrayOf<EncodedStringValue*>** result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // String[] temp = getString().split(pattern);
+    // EncodedStringValue[] ret = new EncodedStringValue[temp.length];
+    // for (int i = 0; i < ret.length; ++i) {
+    //     try {
+    //         ret[i] = new EncodedStringValue(mCharacterSet,
+    //                 temp[i].getBytes());
+    //     } catch (NullPointerException _) {
+    //         // Can't arrive here
+    //         return null;
+    //     }
+    // }
+    // return ret;
+    assert(0);
+    return NOERROR;
+}
+
+AutoPtr<ArrayOf<EncodedStringValue*> > EncodedStringValue::Extract(
+    /* [in] */ const String& src)
+{
+    // ==================before translated======================
+    // String[] values = src.split(";");
+    //
+    // ArrayList<EncodedStringValue> list = new ArrayList<EncodedStringValue>();
+    // for (int i = 0; i < values.length; i++) {
+    //     if (values[i].length() > 0) {
+    //         list.add(new EncodedStringValue(values[i]));
+    //     }
+    // }
+    //
+    // int len = list.size();
+    // if (len > 0) {
+    //     return list.toArray(new EncodedStringValue[len]);
+    // } else {
+    //     return null;
+    // }
+    assert(0);
+    AutoPtr< ArrayOf< AutoPtr<EncodedStringValue> > > empty;
+    return empty;
+}
+
+String EncodedStringValue::Concat(
+    /* [in] */ ArrayOf<EncodedStringValue*>* addr)
+{
+    // ==================before translated======================
+    // StringBuilder sb = new StringBuilder();
+    // int maxIndex = addr.length - 1;
+    // for (int i = 0; i <= maxIndex; i++) {
+    //     sb.append(addr[i].getString());
+    //     if (i < maxIndex) {
+    //         sb.append(";");
+    //     }
+    // }
+    //
+    // return sb.toString();
+    assert(0);
+    return String("");
+}
+
+AutoPtr<EncodedStringValue> EncodedStringValue::Copy(
+    /* [in] */ EncodedStringValue* value)
+{
+    // ==================before translated======================
+    // if (value == null) {
+    //     return null;
+    // }
+    //
+    // return new EncodedStringValue(value.mCharacterSet, value.mData);
+    assert(0);
+    AutoPtr<EncodedStringValue> empty;
+    return empty;
+}
+
+AutoPtr<ArrayOf<EncodedStringValue*> > EncodedStringValue::EncodeStrings(
+    /* [in] */ ArrayOf<String>* array)
+{
+    // ==================before translated======================
+    // int count = array.length;
+    // if (count > 0) {
+    //     EncodedStringValue[] encodedArray = new EncodedStringValue[count];
+    //     for (int i = 0; i < count; i++) {
+    //         encodedArray[i] = new EncodedStringValue(array[i]);
+    //     }
+    //     return encodedArray;
+    // }
+    // return null;
+    assert(0);
+    AutoPtr< ArrayOf< AutoPtr<EncodedStringValue> > > empty;
+    return empty;
+}
+
+} // namespace Pdu
+} // namespace Mms
+} // namespace Google
+} // namespace Droid
+} // namespace Elastos

@@ -1,261 +1,142 @@
-/*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/telephony/gsm/SmsManager.h"
 
-package android.telephony.gsm;
+namespace Elastos {
+namespace Droid {
+namespace Telephony {
+namespace Gsm {
 
-using Elastos::Droid::App::IPendingIntent;
+//=====================================================================
+//
+//=====================================================================
+AutoPtr<SmsManager> SmsManager::sInstance;
 
-using Elastos::Utility::IArrayList;
-
-
-/**
- * Manages SMS operations such as sending data, text, and pdu SMS messages.
- * Get this object by calling the static method SmsManager->GetDefault().
- * @deprecated Replaced by android.telephony.SmsManager that supports both GSM and CDMA.
- */
-@Deprecated public class SmsManager {
-    private static SmsManager sInstance;
-    private android.telephony.SmsManager mSmsMgrProxy;
-
-    /** Get the default instance of the SmsManager
-     *
-     * @return the default instance of the SmsManager
-     * @deprecated Use android.telephony.SmsManager.
-     */
-    //@Deprecated
-    public static const SmsManager GetDefault() {
-        If (sInstance == NULL) {
-            sInstance = new SmsManager();
-        }
-        return sInstance;
-    }
-
-    //@Deprecated
-    private SmsManager() {
-        mSmsMgrProxy = android.telephony.SmsManager->GetDefault();
-    }
-
-    /**
-     * Send a text based SMS.
-     *
-     * @param destinationAddress the address to send the message to
-     * @param scAddress is the service center address or NULL to use
-     *  the current default SMSC
-     * @param text the body of the message to send
-     * @param sentIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is successfully sent, or failed.
-     *  The result code will be <code>Activity.RESULT_OK<code> for success,
-     *  or one of these errors:
-     *  <code>RESULT_ERROR_GENERIC_FAILURE</code>
-     *  <code>RESULT_ERROR_RADIO_OFF</code>
-     *  <code>RESULT_ERROR_NULL_PDU</code>.
-     *  The per-application based SMS control checks sentIntent. If sentIntent
-     *  is NULL the caller will be checked against all unknown applications,
-     *  which cause smaller number of SMS to be sent in checking period.
-     * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is delivered to the recipient.  The
-     *  raw pdu of the status report is in the extended Data ("pdu").
-     *
-     * @throws IllegalArgumentException if destinationAddress or text are empty
-     * @deprecated Use android.telephony.SmsManager.
-     */
-    //@Deprecated
-    public final void SendTextMessage(
-            String destinationAddress, String scAddress, String text,
-            PendingIntent sentIntent, PendingIntent deliveryIntent) {
-        mSmsMgrProxy->SendTextMessage(destinationAddress, scAddress, text,
-                sentIntent, deliveryIntent);
-    }
-
-    /**
-     * Divide a text message into several messages, none bigger than
-     * the maximum SMS message size.
-     *
-     * @param text the original message.  Must not be NULL.
-     * @return an <code>ArrayList</code> of strings that, in order,
-     *   comprise the original message
-     * @deprecated Use android.telephony.SmsManager.
-     */
-    //@Deprecated
-    public final ArrayList<String> DivideMessage(String text) {
-        return mSmsMgrProxy->DivideMessage(text);
-    }
-
-    /**
-     * Send a multi-part text based SMS.  The callee should have already
-     * divided the message into correctly sized parts by calling
-     * <code>divideMessage</code>.
-     *
-     * @param destinationAddress the address to send the message to
-     * @param scAddress is the service center address or NULL to use
-     *   the current default SMSC
-     * @param parts an <code>ArrayList</code> of strings that, in order,
-     *   comprise the original message
-     * @param sentIntents if not NULL, an <code>ArrayList</code> of
-     *   <code>PendingIntent</code>S (one for each message part) that is
-     *   broadcast when the corresponding message part has been sent.
-     *   The result code will be <code>Activity.RESULT_OK<code> for success,
-     *   or one of these errors:
-     *   <code>RESULT_ERROR_GENERIC_FAILURE</code>
-     *   <code>RESULT_ERROR_RADIO_OFF</code>
-     *   <code>RESULT_ERROR_NULL_PDU</code>.
-     *   The per-application based SMS control checks sentIntent. If sentIntent
-     *   is NULL the caller will be checked against all unknown applicaitons,
-     *   which cause smaller number of SMS to be sent in checking period.
-     * @param deliveryIntents if not NULL, an <code>ArrayList</code> of
-     *   <code>PendingIntent</code>S (one for each message part) that is
-     *   broadcast when the corresponding message part has been delivered
-     *   to the recipient.  The raw pdu of the status report is in the
-     *   extended Data ("pdu").
-     *
-     * @throws IllegalArgumentException if destinationAddress or data are empty
-     * @deprecated Use android.telephony.SmsManager.
-     */
-    //@Deprecated
-    public final void SendMultipartTextMessage(
-            String destinationAddress, String scAddress, ArrayList<String> parts,
-            ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents) {
-        mSmsMgrProxy->SendMultipartTextMessage(destinationAddress, scAddress, parts,
-                sentIntents, deliveryIntents);
-    }
-
-    /**
-     * Send a data based SMS to a specific application port.
-     *
-     * @param destinationAddress the address to send the message to
-     * @param scAddress is the service center address or NULL to use
-     *  the current default SMSC
-     * @param destinationPort the port to deliver the message to
-     * @param data the body of the message to send
-     * @param sentIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is sucessfully sent, or failed.
-     *  The result code will be <code>Activity.RESULT_OK<code> for success,
-     *  or one of these errors:
-     *  <code>RESULT_ERROR_GENERIC_FAILURE</code>
-     *  <code>RESULT_ERROR_RADIO_OFF</code>
-     *  <code>RESULT_ERROR_NULL_PDU</code>.
-     *  The per-application based SMS control checks sentIntent. If sentIntent
-     *  is NULL the caller will be checked against all unknown applicaitons,
-     *  which cause smaller number of SMS to be sent in checking period.
-     * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is delivered to the recipient.  The
-     *  raw pdu of the status report is in the extended Data ("pdu").
-     *
-     * @throws IllegalArgumentException if destinationAddress or data are empty
-     * @deprecated Use android.telephony.SmsManager.
-     */
-    //@Deprecated
-    public final void SendDataMessage(
-            String destinationAddress, String scAddress, short destinationPort,
-            Byte[] data, PendingIntent sentIntent, PendingIntent deliveryIntent) {
-        mSmsMgrProxy->SendDataMessage(destinationAddress, scAddress, destinationPort,
-                data, sentIntent, deliveryIntent);
-    }
-
-    /**
-     * Copy a raw SMS PDU to the SIM.
-     *
-     * @param smsc the SMSC for this message, or NULL for the default SMSC
-     * @param pdu the raw PDU to store
-     * @param status message Status (STATUS_ON_SIM_READ, STATUS_ON_SIM_UNREAD,
-     *               STATUS_ON_SIM_SENT, STATUS_ON_SIM_UNSENT)
-     * @return TRUE for success
-     * @deprecated Use android.telephony.SmsManager.
-     * {@hide}
-     */
-    //@Deprecated
-    public final Boolean CopyMessageToSim(Byte[] smsc, Byte[] pdu, Int32 status) {
-        return mSmsMgrProxy->CopyMessageToIcc(smsc, pdu, status);
-    }
-
-    /**
-     * Delete the specified message from the SIM.
-     *
-     * @param messageIndex is the record index of the message on SIM
-     * @return TRUE for success
-     * @deprecated Use android.telephony.SmsManager.
-     * {@hide}
-     */
-    //@Deprecated
-    public final Boolean DeleteMessageFromSim(Int32 messageIndex) {
-        return mSmsMgrProxy->DeleteMessageFromIcc(messageIndex);
-    }
-
-    /**
-     * Update the specified message on the SIM.
-     *
-     * @param messageIndex record index of message to update
-     * @param newStatus new message Status (STATUS_ON_SIM_READ,
-     *                  STATUS_ON_SIM_UNREAD, STATUS_ON_SIM_SENT,
-     *                  STATUS_ON_SIM_UNSENT, STATUS_ON_SIM_FREE)
-     * @param pdu the raw PDU to store
-     * @return TRUE for success
-     * @deprecated Use android.telephony.SmsManager.
-     * {@hide}
-     */
-    //@Deprecated
-    public final Boolean UpdateMessageOnSim(Int32 messageIndex, Int32 newStatus, Byte[] pdu) {
-        return mSmsMgrProxy->UpdateMessageOnIcc(messageIndex, newStatus, pdu);
-    }
-
-    /**
-     * Retrieves all messages currently stored on SIM.
-     * @return <code>ArrayList</code> of <code>SmsMessage</code> objects
-     * @deprecated Use android.telephony.SmsManager.
-     * {@hide}
-     */
-    //@Deprecated
-    public final ArrayList<android.telephony.SmsMessage> GetAllMessagesFromSim() {
-        return android.telephony.SmsManager->GetDefault()->GetAllMessagesFromIcc();
-    }
-
-    /** Free Space (TS 51.011 10.5.3).
-     *  @deprecated Use android.telephony.SmsManager. */
-    //@Deprecated static public final Int32 STATUS_ON_SIM_FREE      = 0;
-
-    /** Received and Read (TS 51.011 10.5.3).
-     * @deprecated Use android.telephony.SmsManager. */
-    //@Deprecated static public final Int32 STATUS_ON_SIM_READ      = 1;
-
-    /** Received and Unread (TS 51.011 10.5.3).
-     * @deprecated Use android.telephony.SmsManager. */
-    //@Deprecated static public final Int32 STATUS_ON_SIM_UNREAD    = 3;
-
-    /** Stored and Sent (TS 51.011 10.5.3).
-     * @deprecated Use android.telephony.SmsManager. */
-    //@Deprecated static public final Int32 STATUS_ON_SIM_SENT      = 5;
-
-    /** Stored and Unsent (TS 51.011 10.5.3).
-     * @deprecated Use android.telephony.SmsManager. */
-    //@Deprecated static public final Int32 STATUS_ON_SIM_UNSENT    = 7;
-
-    /** Generic failure cause
-     * @deprecated Use android.telephony.SmsManager. */
-    //@Deprecated static public final Int32 RESULT_ERROR_GENERIC_FAILURE    = 1;
-
-    /** Failed because radio was explicitly turned off
-     * @deprecated Use android.telephony.SmsManager. */
-    //@Deprecated static public final Int32 RESULT_ERROR_RADIO_OFF          = 2;
-
-    /** Failed because no pdu provided
-     * @deprecated Use android.telephony.SmsManager. */
-    //@Deprecated static public final Int32 RESULT_ERROR_NULL_PDU           = 3;
-
-    /** Failed because service is currently unavailable
-     * @deprecated Use android.telephony.SmsManager. */
-    //@Deprecated static public final Int32 RESULT_ERROR_NO_SERVICE         = 4;
-
+AutoPtr<SmsManager> SmsManager::GetDefault()
+{
+    // ==================before translated======================
+    // if (sInstance == null) {
+    //     sInstance = new SmsManager();
+    // }
+    // return sInstance;
+    assert(0);
+    AutoPtr<SmsManager> empty;
+    return empty;
 }
+
+SmsManager::SmsManager()
+{
+    // ==================before translated======================
+    // mSmsMgrProxy = android.telephony.SmsManager.getDefault();
+}
+
+ECode SmsManager::SendTextMessage(
+    /* [in] */ const String& destinationAddress,
+    /* [in] */ const String& scAddress,
+    /* [in] */ const String& text,
+    /* [in] */ IPendingIntent* sentIntent,
+    /* [in] */ IPendingIntent* deliveryIntent)
+{
+    // ==================before translated======================
+    // mSmsMgrProxy.sendTextMessage(destinationAddress, scAddress, text,
+    //         sentIntent, deliveryIntent);
+    assert(0);
+    return NOERROR;
+}
+
+ECode SmsManager::DivideMessage(
+    /* [in] */ const String& text,
+    /* [out] */ IArrayList** result)//String
+{
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+    // ==================before translated======================
+    // return mSmsMgrProxy.divideMessage(text);
+    assert(0);
+    return NOERROR;
+}
+
+ECode SmsManager::SendMultipartTextMessage(
+    /* [in] */ const String& destinationAddress,
+    /* [in] */ const String& scAddress,
+    /* [in] */ IArrayList* parts,//String
+    /* [in] */ IArrayList* sentIntents,//IPendingIntent
+    /* [in] */ IArrayList* deliveryIntents)//IPendingIntent
+{
+    // ==================before translated======================
+    // mSmsMgrProxy.sendMultipartTextMessage(destinationAddress, scAddress, parts,
+    //         sentIntents, deliveryIntents);
+    assert(0);
+    return NOERROR;
+}
+
+ECode SmsManager::SendDataMessage(
+    /* [in] */ const String& destinationAddress,
+    /* [in] */ const String& scAddress,
+    /* [in] */ Int16 destinationPort,
+    /* [in] */ ArrayOf<Byte>* data,
+    /* [in] */ IPendingIntent* sentIntent,
+    /* [in] */ IPendingIntent* deliveryIntent)
+{
+    // ==================before translated======================
+    // mSmsMgrProxy.sendDataMessage(destinationAddress, scAddress, destinationPort,
+    //         data, sentIntent, deliveryIntent);
+    assert(0);
+    return NOERROR;
+}
+
+ECode SmsManager::CopyMessageToSim(
+    /* [in] */ ArrayOf<Byte>* smsc,
+    /* [in] */ ArrayOf<Byte>* pdu,
+    /* [in] */ Int32 status,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+    // ==================before translated======================
+    // return mSmsMgrProxy.copyMessageToIcc(smsc, pdu, status);
+    assert(0);
+    return NOERROR;
+}
+
+ECode SmsManager::DeleteMessageFromSim(
+    /* [in] */ Int32 messageIndex,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+    // ==================before translated======================
+    // return mSmsMgrProxy.deleteMessageFromIcc(messageIndex);
+    assert(0);
+    return NOERROR;
+}
+
+ECode SmsManager::UpdateMessageOnSim(
+    /* [in] */ Int32 messageIndex,
+    /* [in] */ Int32 newStatus,
+    /* [in] */ ArrayOf<Byte>* pdu,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+    // ==================before translated======================
+    // return mSmsMgrProxy.updateMessageOnIcc(messageIndex, newStatus, pdu);
+    assert(0);
+    return NOERROR;
+}
+
+ECode SmsManager::GetAllMessagesFromSim(
+    /* [out] */ IArrayList** result)//SmsMessage
+{
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+    // ==================before translated======================
+    // return android.telephony.SmsManager.getDefault().getAllMessagesFromIcc();
+    assert(0);
+    return NOERROR;
+}
+
+} // namespace Gsm
+} // namespace Telephony
+} // namespace Droid
+} // namespace Elastos
+

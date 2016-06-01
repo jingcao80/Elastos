@@ -1,44 +1,60 @@
-/*
- * Copyright (C) 2008 Esmertec AG.
- * Copyright (C) 2008 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.google.android.mms.util;
+#include "elastos/droid/google/mms/utility/PduCacheEntry.h"
 
-using com::Google::Android::Mms::Pdu::IGenericPdu;
+namespace Elastos {
+namespace Droid {
+namespace Google {
+namespace Mms {
+namespace Utility {
 
-public class PduCacheEntry {
-    private final GenericPdu mPdu;
-    private final Int32 mMessageBox;
-    private final Int64 mThreadId;
+//=====================================================================
+//                            PduCacheEntry
+//=====================================================================
+CAR_INTERFACE_IMPL(PduCacheEntry, Object, IPduCacheEntry);
 
-    public PduCacheEntry(GenericPdu pdu, Int32 msgBox, Int64 threadId) {
-        mPdu = pdu;
-        mMessageBox = msgBox;
-        mThreadId = threadId;
-    }
-
-    public GenericPdu GetPdu() {
-        return mPdu;
-    }
-
-    public Int32 GetMessageBox() {
-        return mMessageBox;
-    }
-
-    public Int64 GetThreadId() {
-        return mThreadId;
-    }
+PduCacheEntry::PduCacheEntry(
+    /* [in] */ IGenericPdu* pdu,
+    /* [in] */ Int32 msgBox,
+    /* [in] */ Int64 threadId)
+{
+    // ==================before translated======================
+    // mPdu = pdu;
+    // mMessageBox = msgBox;
+    // mThreadId = threadId;
 }
+
+ECode PduCacheEntry::GetPdu(
+    /* [out] */ IGenericPdu** result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mPdu;
+    assert(0);
+    return NOERROR;
+}
+
+ECode PduCacheEntry::GetMessageBox(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mMessageBox;
+    assert(0);
+    return NOERROR;
+}
+
+ECode PduCacheEntry::GetThreadId(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mThreadId;
+    assert(0);
+    return NOERROR;
+}
+
+} // namespace Utility
+} // namespace Mms
+} // namespace Google
+} // namespace Droid
+} // namespace Elastos

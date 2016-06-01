@@ -1,261 +1,288 @@
-/*
- * Copyright (C) 2008 Esmertec AG.
- * Copyright (C) 2008 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.google.android.mms.util;
+#include "elastos/droid/google/mms/utility/PduCache.h"
 
-using Elastos::Droid::Content::IContentUris;
-using Elastos::Droid::Content::IUriMatcher;
-using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Provider::Telephony::IMms;
-using Elastos::Droid::Utility::ILog;
+namespace Elastos {
+namespace Droid {
+namespace Google {
+namespace Mms {
+namespace Utility {
 
-using Elastos::Utility::IHashMap;
-using Elastos::Utility::IHashSet;
+//=====================================================================
+//                               PduCache
+//=====================================================================
+CAR_INTERFACE_IMPL(PduCache, AbstractCache, IPduCache);
 
-public class PduCache extends AbstractCache<Uri, PduCacheEntry> {
-    private static const String TAG = "PduCache";
-    private static const Boolean DEBUG = FALSE;
-    private static const Boolean LOCAL_LOGV = FALSE;
+const String PduCache::TAG("PduCache");
+const Boolean PduCache::DEBUG = FALSE;
+const Boolean PduCache::LOCAL_LOGV = FALSE;
+const Int32 PduCache::MMS_ALL;
+const Int32 PduCache::MMS_ALL_ID;
+const Int32 PduCache::MMS_INBOX;
+const Int32 PduCache::MMS_INBOX_ID;
+const Int32 PduCache::MMS_SENT;
+const Int32 PduCache::MMS_SENT_ID;
+const Int32 PduCache::MMS_DRAFTS;
+const Int32 PduCache::MMS_DRAFTS_ID;
+const Int32 PduCache::MMS_OUTBOX;
+const Int32 PduCache::MMS_OUTBOX_ID;
+const Int32 PduCache::MMS_CONVERSATION;
+const Int32 PduCache::MMS_CONVERSATION_ID;
+AutoPtr<IUriMatcher> PduCache::URI_MATCHER;
+AutoPtr<IHashMap> PduCache::MATCH_TO_MSGBOX_ID_MAP;
+AutoPtr<IPduCache> PduCache::sInstance;
 
-    private static const Int32 MMS_ALL             = 0;
-    private static const Int32 MMS_ALL_ID          = 1;
-    private static const Int32 MMS_INBOX           = 2;
-    private static const Int32 MMS_INBOX_ID        = 3;
-    private static const Int32 MMS_SENT            = 4;
-    private static const Int32 MMS_SENT_ID         = 5;
-    private static const Int32 MMS_DRAFTS          = 6;
-    private static const Int32 MMS_DRAFTS_ID       = 7;
-    private static const Int32 MMS_OUTBOX          = 8;
-    private static const Int32 MMS_OUTBOX_ID       = 9;
-    private static const Int32 MMS_CONVERSATION    = 10;
-    private static const Int32 MMS_CONVERSATION_ID = 11;
-
-    private static const UriMatcher URI_MATCHER;
-    private static const HashMap<Integer, Integer> MATCH_TO_MSGBOX_ID_MAP;
-
-    private static PduCache sInstance;
-
-    static {
-        URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
-        URI_MATCHER->AddURI("mms", NULL,         MMS_ALL);
-        URI_MATCHER->AddURI("mms", "#",          MMS_ALL_ID);
-        URI_MATCHER->AddURI("mms", "inbox",      MMS_INBOX);
-        URI_MATCHER->AddURI("mms", "inbox/#",    MMS_INBOX_ID);
-        URI_MATCHER->AddURI("mms", "sent",       MMS_SENT);
-        URI_MATCHER->AddURI("mms", "sent/#",     MMS_SENT_ID);
-        URI_MATCHER->AddURI("mms", "drafts",     MMS_DRAFTS);
-        URI_MATCHER->AddURI("mms", "drafts/#",   MMS_DRAFTS_ID);
-        URI_MATCHER->AddURI("mms", "outbox",     MMS_OUTBOX);
-        URI_MATCHER->AddURI("mms", "outbox/#",   MMS_OUTBOX_ID);
-        URI_MATCHER->AddURI("mms-sms", "conversations",   MMS_CONVERSATION);
-        URI_MATCHER->AddURI("mms-sms", "conversations/#", MMS_CONVERSATION_ID);
-
-        MATCH_TO_MSGBOX_ID_MAP = new HashMap<Integer, Integer>();
-        MATCH_TO_MSGBOX_ID_MAP->Put(MMS_INBOX,  Mms.MESSAGE_BOX_INBOX);
-        MATCH_TO_MSGBOX_ID_MAP->Put(MMS_SENT,   Mms.MESSAGE_BOX_SENT);
-        MATCH_TO_MSGBOX_ID_MAP->Put(MMS_DRAFTS, Mms.MESSAGE_BOX_DRAFTS);
-        MATCH_TO_MSGBOX_ID_MAP->Put(MMS_OUTBOX, Mms.MESSAGE_BOX_OUTBOX);
-    }
-
-    private final HashMap<Integer, HashSet<Uri>> mMessageBoxes;
-    private final HashMap<Long, HashSet<Uri>> mThreads;
-    private final HashSet<Uri> mUpdating;
-
-    private PduCache() {
-        mMessageBoxes = new HashMap<Integer, HashSet<Uri>>();
-        mThreads = new HashMap<Long, HashSet<Uri>>();
-        mUpdating = new HashSet<Uri>();
-    }
-
-    synchronized public static const PduCache GetInstance() {
-        If (sInstance == NULL) {
-            If (LOCAL_LOGV) {
-                Logger::V(TAG, "Constructing new PduCache instance.");
-            }
-            sInstance = new PduCache();
-        }
-        return sInstance;
-    }
-
-    //@Override
-    synchronized public Boolean Put(Uri uri, PduCacheEntry entry) {
-        Int32 msgBoxId = entry->GetMessageBox();
-        HashSet<Uri> msgBox = mMessageBoxes->Get(msgBoxId);
-        If (msgBox == NULL) {
-            msgBox = new HashSet<Uri>();
-            mMessageBoxes->Put(msgBoxId, msgBox);
-        }
-
-        Int64 threadId = entry->GetThreadId();
-        HashSet<Uri> thread = mThreads->Get(threadId);
-        If (thread == NULL) {
-            thread = new HashSet<Uri>();
-            mThreads->Put(threadId, thread);
-        }
-
-        Uri finalKey = NormalizeKey(uri);
-        Boolean result = super->Put(finalKey, entry);
-        If (result) {
-            msgBox->Add(finalKey);
-            thread->Add(finalKey);
-        }
-        SetUpdating(uri, FALSE);
-        return result;
-    }
-
-    synchronized CARAPI SetUpdating(Uri uri, Boolean updating) {
-        If (updating) {
-            mUpdating->Add(uri);
-        } else {
-            mUpdating->Remove(uri);
-        }
-    }
-
-    synchronized public Boolean IsUpdating(Uri uri) {
-        return mUpdating->Contains(uri);
-    }
-
-    //@Override
-    synchronized public PduCacheEntry Purge(Uri uri) {
-        Int32 match = URI_MATCHER->Match(uri);
-        Switch (match) {
-            case MMS_ALL_ID:
-                return PurgeSingleEntry(uri);
-            case MMS_INBOX_ID:
-            case MMS_SENT_ID:
-            case MMS_DRAFTS_ID:
-            case MMS_OUTBOX_ID:
-                String msgId = uri->GetLastPathSegment();
-                return PurgeSingleEntry(Uri->WithAppendedPath(Mms.CONTENT_URI, msgId));
-            // Implicit batch of purge, return NULL.
-            case MMS_ALL:
-            case MMS_CONVERSATION:
-                PurgeAll();
-                return NULL;
-            case MMS_INBOX:
-            case MMS_SENT:
-            case MMS_DRAFTS:
-            case MMS_OUTBOX:
-                PurgeByMessageBox(MATCH_TO_MSGBOX_ID_MAP->Get(match));
-                return NULL;
-            case MMS_CONVERSATION_ID:
-                PurgeByThreadId(ContentUris->ParseId(uri));
-                return NULL;
-            default:
-                return NULL;
-        }
-    }
-
-    private PduCacheEntry PurgeSingleEntry(Uri key) {
-        mUpdating->Remove(key);
-        PduCacheEntry entry = super->Purge(key);
-        If (entry != NULL) {
-            RemoveFromThreads(key, entry);
-            RemoveFromMessageBoxes(key, entry);
-            return entry;
-        }
-        return NULL;
-    }
-
-    //@Override
-    synchronized CARAPI PurgeAll() {
-        super->PurgeAll();
-
-        mMessageBoxes->Clear();
-        mThreads->Clear();
-        mUpdating->Clear();
-    }
-
-    /**
-     * @param uri The Uri to be normalized.
-     * @return Uri The normalized key of cached entry.
-     */
-    private Uri NormalizeKey(Uri uri) {
-        Int32 match = URI_MATCHER->Match(uri);
-        Uri normalizedKey = NULL;
-
-        Switch (match) {
-            case MMS_ALL_ID:
-                normalizedKey = uri;
-                break;
-            case MMS_INBOX_ID:
-            case MMS_SENT_ID:
-            case MMS_DRAFTS_ID:
-            case MMS_OUTBOX_ID:
-                String msgId = uri->GetLastPathSegment();
-                normalizedKey = Uri->WithAppendedPath(Mms.CONTENT_URI, msgId);
-                break;
-            default:
-                return NULL;
-        }
-
-        If (LOCAL_LOGV) {
-            Logger::V(TAG, uri + " -> " + normalizedKey);
-        }
-        return normalizedKey;
-    }
-
-    private void PurgeByMessageBox(Integer msgBoxId) {
-        If (LOCAL_LOGV) {
-            Logger::V(TAG, "Purge cache in message box: " + msgBoxId);
-        }
-
-        If (msgBoxId != NULL) {
-            HashSet<Uri> msgBox = mMessageBoxes->Remove(msgBoxId);
-            If (msgBox != NULL) {
-                For (Uri key : msgBox) {
-                    mUpdating->Remove(key);
-                    PduCacheEntry entry = super->Purge(key);
-                    If (entry != NULL) {
-                        RemoveFromThreads(key, entry);
-                    }
-                }
-            }
-        }
-    }
-
-    private void RemoveFromThreads(Uri key, PduCacheEntry entry) {
-        HashSet<Uri> thread = mThreads->Get(entry->GetThreadId());
-        If (thread != NULL) {
-            thread->Remove(key);
-        }
-    }
-
-    private void PurgeByThreadId(Int64 threadId) {
-        If (LOCAL_LOGV) {
-            Logger::V(TAG, "Purge cache in thread: " + threadId);
-        }
-
-        HashSet<Uri> thread = mThreads->Remove(threadId);
-        If (thread != NULL) {
-            For (Uri key : thread) {
-                mUpdating->Remove(key);
-                PduCacheEntry entry = super->Purge(key);
-                If (entry != NULL) {
-                    RemoveFromMessageBoxes(key, entry);
-                }
-            }
-        }
-    }
-
-    private void RemoveFromMessageBoxes(Uri key, PduCacheEntry entry) {
-        HashSet<Uri> msgBox = mThreads->Get(Long->ValueOf(entry->GetMessageBox()));
-        If (msgBox != NULL) {
-            msgBox->Remove(key);
-        }
-    }
+// synchronized
+AutoPtr<IPduCache> PduCache::GetInstance()
+{
+    // ==================before translated======================
+    // if (sInstance == null) {
+    //     if (LOCAL_LOGV) {
+    //         Log.v(TAG, "Constructing new PduCache instance.");
+    //     }
+    //     sInstance = new PduCache();
+    // }
+    // return sInstance;
+    assert(0);
+    AutoPtr<PduCache> empty;
+    return empty;
 }
+
+// synchronized
+Boolean PduCache::Put(
+    /* [in] */ IUri* uri,
+    /* [in] */ IPduCacheEntry* entry)
+{
+    // ==================before translated======================
+    // int msgBoxId = entry.getMessageBox();
+    // HashSet<Uri> msgBox = mMessageBoxes.get(msgBoxId);
+    // if (msgBox == null) {
+    //     msgBox = new HashSet<Uri>();
+    //     mMessageBoxes.put(msgBoxId, msgBox);
+    // }
+    //
+    // long threadId = entry.getThreadId();
+    // HashSet<Uri> thread = mThreads.get(threadId);
+    // if (thread == null) {
+    //     thread = new HashSet<Uri>();
+    //     mThreads.put(threadId, thread);
+    // }
+    //
+    // Uri finalKey = normalizeKey(uri);
+    // boolean result = super.put(finalKey, entry);
+    // if (result) {
+    //     msgBox.add(finalKey);
+    //     thread.add(finalKey);
+    // }
+    // setUpdating(uri, false);
+    // return result;
+    assert(0);
+    return FALSE;
+}
+
+// synchronized
+ECode PduCache::SetUpdating(
+    /* [in] */ IUri* uri,
+    /* [in] */ Boolean updating)
+{
+    VALIDATE_NOT_NULL(uri);
+    // ==================before translated======================
+    // if (updating) {
+    //     mUpdating.add(uri);
+    // } else {
+    //     mUpdating.remove(uri);
+    // }
+    assert(0);
+    return NOERROR;
+}
+
+// synchronized
+ECode PduCache::IsUpdating(
+    /* [in] */ IUri* uri,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mUpdating.contains(uri);
+    assert(0);
+    return NOERROR;
+}
+
+// synchronized
+AutoPtr<IPduCacheEntry> PduCache::Purge(
+    /* [in] */ IUri* uri)
+{
+    // ==================before translated======================
+    // int match = URI_MATCHER.match(uri);
+    // switch (match) {
+    //     case MMS_ALL_ID:
+    //         return purgeSingleEntry(uri);
+    //     case MMS_INBOX_ID:
+    //     case MMS_SENT_ID:
+    //     case MMS_DRAFTS_ID:
+    //     case MMS_OUTBOX_ID:
+    //         String msgId = uri.getLastPathSegment();
+    //         return purgeSingleEntry(Uri.withAppendedPath(Mms.CONTENT_URI, msgId));
+    //     // Implicit batch of purge, return null.
+    //     case MMS_ALL:
+    //     case MMS_CONVERSATION:
+    //         purgeAll();
+    //         return null;
+    //     case MMS_INBOX:
+    //     case MMS_SENT:
+    //     case MMS_DRAFTS:
+    //     case MMS_OUTBOX:
+    //         purgeByMessageBox(MATCH_TO_MSGBOX_ID_MAP.get(match));
+    //         return null;
+    //     case MMS_CONVERSATION_ID:
+    //         purgeByThreadId(ContentUris.parseId(uri));
+    //         return null;
+    //     default:
+    //         return null;
+    // }
+    assert(0);
+    AutoPtr<PduCacheEntry> empty;
+    return empty;
+}
+
+// synchronized
+ECode PduCache::PurgeAll()
+{
+    // ==================before translated======================
+    // super.purgeAll();
+    //
+    // mMessageBoxes.clear();
+    // mThreads.clear();
+    // mUpdating.clear();
+    assert(0);
+    return NOERROR;
+}
+
+PduCache::PduCache()
+{
+    // ==================before translated======================
+    // mMessageBoxes = new HashMap<Integer, HashSet<Uri>>();
+    // mThreads = new HashMap<Long, HashSet<Uri>>();
+    // mUpdating = new HashSet<Uri>();
+}
+
+AutoPtr<IPduCacheEntry> PduCache::PurgeSingleEntry(
+    /* [in] */ IUri* key)
+{
+    // ==================before translated======================
+    // mUpdating.remove(key);
+    // PduCacheEntry entry = super.purge(key);
+    // if (entry != null) {
+    //     removeFromThreads(key, entry);
+    //     removeFromMessageBoxes(key, entry);
+    //     return entry;
+    // }
+    // return null;
+    assert(0);
+    AutoPtr<PduCacheEntry> empty;
+    return empty;
+}
+
+AutoPtr<IUri> PduCache::NormalizeKey(
+    /* [in] */ IUri* uri)
+{
+    // ==================before translated======================
+    // int match = URI_MATCHER.match(uri);
+    // Uri normalizedKey = null;
+    //
+    // switch (match) {
+    //     case MMS_ALL_ID:
+    //         normalizedKey = uri;
+    //         break;
+    //     case MMS_INBOX_ID:
+    //     case MMS_SENT_ID:
+    //     case MMS_DRAFTS_ID:
+    //     case MMS_OUTBOX_ID:
+    //         String msgId = uri.getLastPathSegment();
+    //         normalizedKey = Uri.withAppendedPath(Mms.CONTENT_URI, msgId);
+    //         break;
+    //     default:
+    //         return null;
+    // }
+    //
+    // if (LOCAL_LOGV) {
+    //     Log.v(TAG, uri + " -> " + normalizedKey);
+    // }
+    // return normalizedKey;
+    assert(0);
+    AutoPtr<IUri> empty;
+    return empty;
+}
+
+void PduCache::PurgeByMessageBox(
+    /* [in] */ IInteger32* msgBoxId)
+{
+    // ==================before translated======================
+    // if (LOCAL_LOGV) {
+    //     Log.v(TAG, "Purge cache in message box: " + msgBoxId);
+    // }
+    //
+    // if (msgBoxId != null) {
+    //     HashSet<Uri> msgBox = mMessageBoxes.remove(msgBoxId);
+    //     if (msgBox != null) {
+    //         for (Uri key : msgBox) {
+    //             mUpdating.remove(key);
+    //             PduCacheEntry entry = super.purge(key);
+    //             if (entry != null) {
+    //                 removeFromThreads(key, entry);
+    //             }
+    //         }
+    //     }
+    // }
+    assert(0);
+}
+
+void PduCache::RemoveFromThreads(
+    /* [in] */ IUri* key,
+    /* [in] */ IPduCacheEntry* entry)
+{
+    // ==================before translated======================
+    // HashSet<Uri> thread = mThreads.get(entry.getThreadId());
+    // if (thread != null) {
+    //     thread.remove(key);
+    // }
+    assert(0);
+}
+
+void PduCache::PurgeByThreadId(
+    /* [in] */ Int64 threadId)
+{
+    // ==================before translated======================
+    // if (LOCAL_LOGV) {
+    //     Log.v(TAG, "Purge cache in thread: " + threadId);
+    // }
+    //
+    // HashSet<Uri> thread = mThreads.remove(threadId);
+    // if (thread != null) {
+    //     for (Uri key : thread) {
+    //         mUpdating.remove(key);
+    //         PduCacheEntry entry = super.purge(key);
+    //         if (entry != null) {
+    //             removeFromMessageBoxes(key, entry);
+    //         }
+    //     }
+    // }
+    assert(0);
+}
+
+void PduCache::RemoveFromMessageBoxes(
+    /* [in] */ IUri* key,
+    /* [in] */ IPduCacheEntry* entry)
+{
+    // ==================before translated======================
+    // HashSet<Uri> msgBox = mThreads.get(Long.valueOf(entry.getMessageBox()));
+    // if (msgBox != null) {
+    //     msgBox.remove(key);
+    // }
+    assert(0);
+}
+
+} // namespace Utility
+} // namespace Mms
+} // namespace Google
+} // namespace Droid
+} // namespace Elastos

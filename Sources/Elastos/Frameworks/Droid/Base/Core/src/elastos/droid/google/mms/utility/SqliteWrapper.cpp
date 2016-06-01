@@ -1,119 +1,166 @@
-/*
- * Copyright (C) 2008 Esmertec AG.
- * Copyright (C) 2008 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.google.android.mms.util;
+#include "elastos/droid/google/mms/utility/SqliteWrapper.h"
 
-using Elastos::Droid::App::IActivityManager;
-using Elastos::Droid::Content::IContentResolver;
-using Elastos::Droid::Content::IContentValues;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Database::ICursor;
-using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Utility::ILog;
-using Elastos::Droid::Widget::IToast;
+namespace Elastos {
+namespace Droid {
+namespace Google {
+namespace Mms {
+namespace Utility {
 
-public class SqliteWrapper {
-    private static const String TAG = "SqliteWrapper";
-    private static const String SQLITE_EXCEPTION_DETAIL_MESSAGE
-                = "unable to open database file";
+//=====================================================================
+//                            SqliteWrapper
+//=====================================================================
+const String SqliteWrapper::TAG("SqliteWrapper");
+const String SqliteWrapper::SQLITE_EXCEPTION_DETAIL_MESSAGE("unable to open database file");
 
-    private SqliteWrapper() {
-        // Forbidden being instantiated.
-    }
-
-    // FIXME: It looks like outInfo.lowMemory does not work well as we expected.
-    // after run command: adb shell fillup -p 100, outInfo.lowMemory is still FALSE.
-    private static Boolean IsLowMemory(Context context) {
-        If (NULL == context) {
-            return FALSE;
-        }
-
-        ActivityManager am = (ActivityManager)
-                        context->GetSystemService(Context.ACTIVITY_SERVICE);
-        ActivityManager.MemoryInfo outInfo = new ActivityManager->MemoryInfo();
-        am->GetMemoryInfo(outInfo);
-
-        return outInfo.lowMemory;
-    }
-
-    // FIXME: need to optimize this method.
-    private static Boolean IsLowMemory(SQLiteException e) {
-        return e->GetMessage()->Equals(SQLITE_EXCEPTION_DETAIL_MESSAGE);
-    }
-
-    public static void CheckSQLiteException(Context context, SQLiteException e) {
-        If (IsLowMemory(e)) {
-            Toast->MakeText(context, R::string::low_memory,
-                    Toast.LENGTH_SHORT).Show();
-        } else {
-            throw e;
-        }
-    }
-
-    public static Cursor Query(Context context, ContentResolver resolver, Uri uri,
-            String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        try {
-            return resolver->Query(uri, projection, selection, selectionArgs, sortOrder);
-        } Catch (SQLiteException e) {
-            Logger::E(TAG, "Catch a SQLiteException when query: ", e);
-            CheckSQLiteException(context, e);
-            return NULL;
-        }
-    }
-
-    public static Boolean Requery(Context context, Cursor cursor) {
-        try {
-            return cursor->Requery();
-        } Catch (SQLiteException e) {
-            Logger::E(TAG, "Catch a SQLiteException when requery: ", e);
-            CheckSQLiteException(context, e);
-            return FALSE;
-        }
-    }
-    public static Int32 Update(Context context, ContentResolver resolver, Uri uri,
-            ContentValues values, String where, String[] selectionArgs) {
-        try {
-            return resolver->Update(uri, values, where, selectionArgs);
-        } Catch (SQLiteException e) {
-            Logger::E(TAG, "Catch a SQLiteException when update: ", e);
-            CheckSQLiteException(context, e);
-            return -1;
-        }
-    }
-
-    public static Int32 Delete(Context context, ContentResolver resolver, Uri uri,
-            String where, String[] selectionArgs) {
-        try {
-            return resolver->Delete(uri, where, selectionArgs);
-        } Catch (SQLiteException e) {
-            Logger::E(TAG, "Catch a SQLiteException when delete: ", e);
-            CheckSQLiteException(context, e);
-            return -1;
-        }
-    }
-
-    public static Uri Insert(Context context, ContentResolver resolver,
-            Uri uri, ContentValues values) {
-        try {
-            return resolver->Insert(uri, values);
-        } Catch (SQLiteException e) {
-            Logger::E(TAG, "Catch a SQLiteException when insert: ", e);
-            CheckSQLiteException(context, e);
-            return NULL;
-        }
-    }
+ECode SqliteWrapper::CheckSQLiteException(
+    /* [in] */ IContext* context,
+    /* [in] */ ISQLiteException* e)
+{
+    VALIDATE_NOT_NULL(context);
+    VALIDATE_NOT_NULL(e);
+    // ==================before translated======================
+    // if (isLowMemory(e)) {
+    //     Toast.makeText(context, com.android.internal.R.string.low_memory,
+    //             Toast.LENGTH_SHORT).show();
+    // } else {
+    //     throw e;
+    // }
+    assert(0);
+    return NOERROR;
 }
+
+AutoPtr<ICursor> SqliteWrapper::Query(
+    /* [in] */ IContext* context,
+    /* [in] */ IContentResolver* resolver,
+    /* [in] */ IUri* uri,
+    /* [in] */ ArrayOf<String>* projection,
+    /* [in] */ const String& selection,
+    /* [in] */ ArrayOf<String>* selectionArgs,
+    /* [in] */ const String& sortOrder)
+{
+    // ==================before translated======================
+    // try {
+    //     return resolver.query(uri, projection, selection, selectionArgs, sortOrder);
+    // } catch (SQLiteException e) {
+    //     Log.e(TAG, "Catch a SQLiteException when query: ", e);
+    //     checkSQLiteException(context, e);
+    //     return null;
+    // }
+    assert(0);
+    AutoPtr<ICursor> empty;
+    return empty;
+}
+
+Boolean SqliteWrapper::Requery(
+    /* [in] */ IContext* context,
+    /* [in] */ ICursor* cursor)
+{
+    // ==================before translated======================
+    // try {
+    //     return cursor.requery();
+    // } catch (SQLiteException e) {
+    //     Log.e(TAG, "Catch a SQLiteException when requery: ", e);
+    //     checkSQLiteException(context, e);
+    //     return false;
+    // }
+    assert(0);
+    return FALSE;
+}
+
+Int32 SqliteWrapper::Update(
+    /* [in] */ IContext* context,
+    /* [in] */ IContentResolver* resolver,
+    /* [in] */ IUri* uri,
+    /* [in] */ IContentValues* values,
+    /* [in] */ const String& where,
+    /* [in] */ ArrayOf<String>* selectionArgs)
+{
+    // ==================before translated======================
+    // try {
+    //     return resolver.update(uri, values, where, selectionArgs);
+    // } catch (SQLiteException e) {
+    //     Log.e(TAG, "Catch a SQLiteException when update: ", e);
+    //     checkSQLiteException(context, e);
+    //     return -1;
+    // }
+    assert(0);
+    return 0;
+}
+
+Int32 SqliteWrapper::Delete(
+    /* [in] */ IContext* context,
+    /* [in] */ IContentResolver* resolver,
+    /* [in] */ IUri* uri,
+    /* [in] */ const String& where,
+    /* [in] */ ArrayOf<String>* selectionArgs)
+{
+    // ==================before translated======================
+    // try {
+    //     return resolver.delete(uri, where, selectionArgs);
+    // } catch (SQLiteException e) {
+    //     Log.e(TAG, "Catch a SQLiteException when delete: ", e);
+    //     checkSQLiteException(context, e);
+    //     return -1;
+    // }
+    assert(0);
+    return 0;
+}
+
+AutoPtr<IUri> SqliteWrapper::Insert(
+    /* [in] */ IContext* context,
+    /* [in] */ IContentResolver* resolver,
+    /* [in] */ IUri* uri,
+    /* [in] */ IContentValues* values)
+{
+    // ==================before translated======================
+    // try {
+    //     return resolver.insert(uri, values);
+    // } catch (SQLiteException e) {
+    //     Log.e(TAG, "Catch a SQLiteException when insert: ", e);
+    //     checkSQLiteException(context, e);
+    //     return null;
+    // }
+    assert(0);
+    AutoPtr<IUri> empty;
+    return empty;
+}
+
+SqliteWrapper::SqliteWrapper()
+{
+    // ==================before translated======================
+    // // Forbidden being instantiated.
+}
+
+Boolean SqliteWrapper::IsLowMemory(
+    /* [in] */ IContext* context)
+{
+    // ==================before translated======================
+    // if (null == context) {
+    //     return false;
+    // }
+    //
+    // ActivityManager am = (ActivityManager)
+    //                 context.getSystemService(Context.ACTIVITY_SERVICE);
+    // ActivityManager.MemoryInfo outInfo = new ActivityManager.MemoryInfo();
+    // am.getMemoryInfo(outInfo);
+    //
+    // return outInfo.lowMemory;
+    assert(0);
+    return FALSE;
+}
+
+Boolean SqliteWrapper::IsLowMemory(
+    /* [in] */ ISQLiteException* e)
+{
+    // ==================before translated======================
+    // return e.getMessage().equals(SQLITE_EXCEPTION_DETAIL_MESSAGE);
+    assert(0);
+    return FALSE;
+}
+
+} // namespace Utility
+} // namespace Mms
+} // namespace Google
+} // namespace Droid
+} // namespace Elastos

@@ -13,9 +13,6 @@ module
     [deprecated]
     interface ISmsManager {
 
-        GetDefault(
-            [out] ISmsManager** result);
-
         SendTextMessage(
             [in] String destinationAddress,
             [in] String scAddress,
@@ -97,6 +94,13 @@ module
          * @deprecated Use android.telephony.SmsManager. */
         const Int32 RESULT_ERROR_NO_SERVICE         = 4;
 
+    }
+
+    [deprecated]
+    interface ISmsManagerHelper {
+
+        GetDefault(
+            [out] ISmsManager** result);
     }
 
     } // namespace Gsm

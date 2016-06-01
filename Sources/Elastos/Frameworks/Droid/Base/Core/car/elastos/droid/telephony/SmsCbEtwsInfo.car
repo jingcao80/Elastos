@@ -42,7 +42,8 @@ module
         GetPrimaryNotificationTimestamp(
             [out] Int64* result);
 
-        GetPrimaryNotificationSignature();
+        GetPrimaryNotificationSignature(
+            [out, callee] ArrayOf<Byte>* result);
 
     }
 

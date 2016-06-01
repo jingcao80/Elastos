@@ -8,7 +8,14 @@ INCLUDES += $(MAKEDIR)/../../../../inc/
 
 C_DEFINES += -DDROID_CORE
 
-SOURCES = CCellIdentityCdma.cpp
+SOURCES = CellBroadcastMessage.cpp
+SOURCES += SmsCbCmasInfo.cpp
+SOURCES += SmsCbEtwsInfo.cpp
+SOURCES += SmsCbLocation.cpp
+SOURCES += SmsCbMessage.cpp
+SOURCES += SmsManager.cpp
+SOURCES += SmsMessage.cpp
+SOURCES += CCellIdentityCdma.cpp
 SOURCES += CCellIdentityGsm.cpp
 SOURCES += CCellIdentityLte.cpp
 SOURCES += CCellIdentityWcdma.cpp

@@ -4,21 +4,8 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Provider.h"
 
-//using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Provider::ISettingsSystem;
-//using Elastos::Droid::Database::ICursor;
-//using Elastos::Droid::Net::IUri;
-//using Elastos::Droid::Os::IUserHandle;
-//using Elastos::Droid::Provider::ISettings;
-//using Elastos::Droid::Provider::Telephony::IBlacklist;
-//using Elastos::Droid::Text::ITextUtils;
-//using Elastos::Droid::Utility::ILog;
-
-//using Elastos::Utility::IArrayList;
-//using Elastos::Utility::IList;
-
-//using Elastos::Droid::Internal::Telephony::ICallerInfo;
 
 namespace Elastos {
 namespace Droid {
