@@ -623,7 +623,7 @@ ECode InputEventReceiver::NativeDispose(
     android::sp<NativeInputEventReceiver> receiver =
             reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
     receiver->dispose();
-    receiver->decStrong(TAG/*gInputEventReceiverClassInfo.clazz*/); // drop reference held by the object
+    receiver->decStrong(NULL); // drop reference held by the object
     return NOERROR;
 }
 

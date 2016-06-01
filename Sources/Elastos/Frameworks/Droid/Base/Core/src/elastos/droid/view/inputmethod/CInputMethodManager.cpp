@@ -153,6 +153,7 @@ CInputMethodManager::ImeInputEventSender::ImeInputEventSender(
     /* [in] */ ILooper* looper,
     /* [in] */ CInputMethodManager* h) : mHost(h) // : InputEventSender(inputChannel, looper)
 {
+    // TODO:
 }
 
 ECode CInputMethodManager::ImeInputEventSender::OnInputEventFinished(
@@ -1424,17 +1425,19 @@ Int32 CInputMethodManager::SendInputEventOnMainLooperLocked(
         AutoPtr<IInputEvent> event = p->mEvent;
         Int32 seq = 0;
         event->GetSequenceNumber(&seq);
-        assert(0 && "TODO");
-        // if (mCurSender->SendInputEvent(seq, event)) {
-        //     mPendingEvents.put(seq, p);
-        //     Trace.traceCounter(Trace.TRACE_TAG_INPUT, PENDING_EVENT_COUNTER,
-        //             mPendingEvents.size());
+        Boolean result;
+        if (mCurSender->SendInputEvent(seq, event, &result), result) {
+            mPendingEvents->Put(seq, (IObject*)p);
+            // TODO:
+            // Trace.traceCounter(Trace.TRACE_TAG_INPUT, PENDING_EVENT_COUNTER,
+            //         mPendingEvents.size());
 
-        //     Message msg = mH.obtainMessage(MSG_TIMEOUT_INPUT_EVENT, p);
-        //     msg.setAsynchronous(true);
-        //     mH.sendMessageDelayed(msg, INPUT_METHOD_NOT_RESPONDING_TIMEOUT);
-        //     return DISPATCH_IN_PROGRESS;
-        // }
+            AutoPtr<IMessage> msg;
+            mH->ObtainMessage(MSG_TIMEOUT_INPUT_EVENT, (IObject*)p, (IMessage**)&msg);
+            msg->SetAsynchronous(TRUE);
+            mH->SendMessageDelayed(msg, INPUT_METHOD_NOT_RESPONDING_TIMEOUT, &result);
+            return DISPATCH_IN_PROGRESS;
+        }
 
         Logger::W(TAG, "Unable to send input event to IME: %s dropping: %p",
                 (const char*)mCurId, event.Get());

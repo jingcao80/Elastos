@@ -1600,7 +1600,7 @@ ECode ViewRootImpl::SetView(
         ECode ec = mWindowSession->AddToDisplay(
             mWindow.Get(), mSeq, mWindowAttributes.Get(),
             hostVisibility, displayId, mAttachInfo->mContentInsets.Get(),
-             mInputChannel, (IRect**)&tempRect,
+            mInputChannel, (IRect**)&tempRect,
             (IInputChannel**)&tempInputChannel, &res);
 
         if (tempRect != NULL) {
