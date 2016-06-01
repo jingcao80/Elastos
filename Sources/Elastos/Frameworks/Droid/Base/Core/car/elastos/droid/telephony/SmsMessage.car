@@ -9,6 +9,15 @@ module
     namespace Droid {
     namespace Telephony {
 
+    enum SmsMessageMessageClass {
+        SmsMessage_MessageClass_UNKNOWN,
+        SmsMessage_MessageClass_CLASS_0,
+        SmsMessage_MessageClass_CLASS_1,
+        SmsMessage_MessageClass_CLASS_2,
+        SmsMessage_MessageClass_CLASS_3
+    }
+
+
     interface ISmsMessageSubmitPdu {
     }
 
@@ -119,9 +128,11 @@ module
         IsMwiDontStore(
             [out] Boolean* result);
 
-        GetUserData();
+        GetUserData(
+            [out, callee] ArrayOf<Byte>* result);
 
-        GetPdu();
+        GetPdu(
+            [out, callee] ArrayOf<Byte>* result);
 
         GetStatusOnIcc(
             [out] Int32* result);

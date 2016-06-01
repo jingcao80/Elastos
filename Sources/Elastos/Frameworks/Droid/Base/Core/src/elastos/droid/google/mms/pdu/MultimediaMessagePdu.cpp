@@ -1,149 +1,139 @@
-/*
- * Copyright (C) 2007 Esmertec AG.
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.google.android.mms.pdu;
+#include "elastos/droid/google/mms/pdu/MultimediaMessagePdu.h"
 
+namespace Elastos {
+namespace Droid {
+namespace Google {
+namespace Mms {
+namespace Pdu {
 
-/**
- * Multimedia message PDU.
- */
-public class MultimediaMessagePdu extends GenericPdu{
-    /**
-     * The body.
-     */
-    private PduBody mMessageBody;
+//=====================================================================
+//                         MultimediaMessagePdu
+//=====================================================================
+CAR_INTERFACE_IMPL(MultimediaMessagePdu, GenericPdu, IMultimediaMessagePdu);
 
-    /**
-     * Constructor.
-     */
-    public MultimediaMessagePdu() {
-        Super();
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param header the header of this PDU
-     * @param body the body of this PDU
-     */
-    public MultimediaMessagePdu(PduHeaders header, PduBody body) {
-        Super(header);
-        mMessageBody = body;
-    }
-
-    /**
-     * Constructor with given headers.
-     *
-     * @param headers Headers for this PDU.
-     */
-    MultimediaMessagePdu(PduHeaders headers) {
-        Super(headers);
-    }
-
-    /**
-     * Get body of the PDU.
-     *
-     * @return the body
-     */
-    public PduBody GetBody() {
-        return mMessageBody;
-    }
-
-    /**
-     * Set body of the PDU.
-     *
-     * @param body the body
-     */
-    CARAPI SetBody(PduBody body) {
-        mMessageBody = body;
-    }
-
-    /**
-     * Get subject.
-     *
-     * @return the value
-     */
-    public EncodedStringValue GetSubject() {
-        return mPduHeaders->GetEncodedStringValue(PduHeaders.SUBJECT);
-    }
-
-    /**
-     * Set subject.
-     *
-     * @param value the value
-     * @throws NullPointerException if the value is NULL.
-     */
-    CARAPI SetSubject(EncodedStringValue value) {
-        mPduHeaders->SetEncodedStringValue(value, PduHeaders.SUBJECT);
-    }
-
-    /**
-     * Get To value.
-     *
-     * @return the value
-     */
-    public EncodedStringValue[] GetTo() {
-        return mPduHeaders->GetEncodedStringValues(PduHeaders.TO);
-    }
-
-    /**
-     * Add a "To" value.
-     *
-     * @param value the value
-     * @throws NullPointerException if the value is NULL.
-     */
-    CARAPI AddTo(EncodedStringValue value) {
-        mPduHeaders->AppendEncodedStringValue(value, PduHeaders.TO);
-    }
-
-    /**
-     * Get X-Mms-Priority value.
-     *
-     * @return the value
-     */
-    public Int32 GetPriority() {
-        return mPduHeaders->GetOctet(PduHeaders.PRIORITY);
-    }
-
-    /**
-     * Set X-Mms-Priority value.
-     *
-     * @param value the value
-     * @throws InvalidHeaderValueException if the value is invalid.
-     */
-    CARAPI SetPriority(Int32 value) throws InvalidHeaderValueException {
-        mPduHeaders->SetOctet(value, PduHeaders.PRIORITY);
-    }
-
-    /**
-     * Get Date value.
-     *
-     * @return the value
-     */
-    public Int64 GetDate() {
-        return mPduHeaders->GetLongInteger(PduHeaders.DATE);
-    }
-
-    /**
-     * Set Date value in seconds.
-     *
-     * @param value the value
-     */
-    CARAPI SetDate(Int64 value) {
-        mPduHeaders->SetLongInteger(value, PduHeaders.DATE);
-    }
+MultimediaMessagePdu::MultimediaMessagePdu()
+{
+    // ==================before translated======================
+    // super();
 }
+
+MultimediaMessagePdu::MultimediaMessagePdu(
+    /* [in] */ IPduHeaders* header,
+    /* [in] */ IPduBody* body)
+{
+    // ==================before translated======================
+    // super(header);
+    // mMessageBody = body;
+}
+
+MultimediaMessagePdu::MultimediaMessagePdu(
+    /* [in] */ IPduHeaders* headers)
+{
+    // ==================before translated======================
+    // super(headers);
+}
+
+ECode MultimediaMessagePdu::GetBody(
+    /* [out] */ IPduBody** result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mMessageBody;
+    assert(0);
+    return NOERROR;
+}
+
+ECode MultimediaMessagePdu::SetBody(
+    /* [in] */ IPduBody* body)
+{
+    VALIDATE_NOT_NULL(body);
+    // ==================before translated======================
+    // mMessageBody = body;
+    assert(0);
+    return NOERROR;
+}
+
+ECode MultimediaMessagePdu::GetSubject(
+    /* [out] */ IEncodedStringValue** result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mPduHeaders.getEncodedStringValue(PduHeaders.SUBJECT);
+    assert(0);
+    return NOERROR;
+}
+
+ECode MultimediaMessagePdu::SetSubject(
+    /* [in] */ IEncodedStringValue* value)
+{
+    VALIDATE_NOT_NULL(value);
+    // ==================before translated======================
+    // mPduHeaders.setEncodedStringValue(value, PduHeaders.SUBJECT);
+    assert(0);
+    return NOERROR;
+}
+
+ECode MultimediaMessagePdu::GetTo(
+    /* [out] */ ArrayOf<IEncodedStringValue*>** result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mPduHeaders.getEncodedStringValues(PduHeaders.TO);
+    assert(0);
+    return NOERROR;
+}
+
+ECode MultimediaMessagePdu::AddTo(
+    /* [in] */ IEncodedStringValue* value)
+{
+    VALIDATE_NOT_NULL(value);
+    // ==================before translated======================
+    // mPduHeaders.appendEncodedStringValue(value, PduHeaders.TO);
+    assert(0);
+    return NOERROR;
+}
+
+ECode MultimediaMessagePdu::GetPriority(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mPduHeaders.getOctet(PduHeaders.PRIORITY);
+    assert(0);
+    return NOERROR;
+}
+
+ECode MultimediaMessagePdu::SetPriority(
+    /* [in] */ Int32 value)
+{
+    // ==================before translated======================
+    // mPduHeaders.setOctet(value, PduHeaders.PRIORITY);
+    assert(0);
+    return NOERROR;
+}
+
+ECode MultimediaMessagePdu::GetDate(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mPduHeaders.getLongInteger(PduHeaders.DATE);
+    assert(0);
+    return NOERROR;
+}
+
+ECode MultimediaMessagePdu::SetDate(
+    /* [in] */ Int64 value)
+{
+    // ==================before translated======================
+    // mPduHeaders.setLongInteger(value, PduHeaders.DATE);
+    assert(0);
+    return NOERROR;
+}
+
+} // namespace Pdu
+} // namespace Mms
+} // namespace Google
+} // namespace Droid
+} // namespace Elastos

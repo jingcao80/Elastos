@@ -1,111 +1,95 @@
-/*
- * Copyright (C) 2012 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
 
-package com.google.android.mms.util;
+#include "elastos/droid/google/mms/utility//DownloadDrmHelper.h"
 
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Drm::IDrmManagerClient;
-using Elastos::Droid::Utility::ILog;
+namespace Elastos {
+namespace Droid {
+namespace Google {
+namespace Mms {
+namespace Utility {
 
-public class DownloadDrmHelper {
-    private static const String TAG = "DownloadDrmHelper";
+//=====================================================================
+//                          DownloadDrmHelper
+//=====================================================================
+const String DownloadDrmHelper::MIMETYPE_DRM_MESSAGE("application/vnd.oma.drm.message");
+const String DownloadDrmHelper::EXTENSION_DRM_MESSAGE(".dm");
+const String DownloadDrmHelper::EXTENSION_INTERNAL_FWDL(".fl");
+const String DownloadDrmHelper::TAG("DownloadDrmHelper");
 
-    /** The MIME type of special DRM files */
-    public static const String MIMETYPE_DRM_MESSAGE = "application/vnd.oma.drm.message";
-
-    /** The extensions of special DRM files */
-    public static const String EXTENSION_DRM_MESSAGE = ".dm";
-
-    public static const String EXTENSION_INTERNAL_FWDL = ".fl";
-
-    /**
-     * Checks if the Media Type is a DRM Media Type
-     *
-     * @param drmManagerClient A DrmManagerClient
-     * @param mimetype Media Type to check
-     * @return True if the Media Type is DRM else FALSE
-     */
-    public static Boolean IsDrmMimeType(Context context, String mimetype) {
-        Boolean result = FALSE;
-        If (context != NULL) {
-            try {
-                DrmManagerClient drmClient = new DrmManagerClient(context);
-                If (drmClient != NULL && mimetype != NULL && mimetype->Length() > 0) {
-                    result = drmClient->CanHandle("", mimetype);
-                }
-            } Catch (IllegalArgumentException e) {
-                Logger::W(TAG,
-                        "DrmManagerClient instance could not be created, context is Illegal.");
-            } Catch (IllegalStateException e) {
-                Logger::W(TAG, "DrmManagerClient didn't initialize properly.");
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Checks if the Media Type needs to be DRM converted
-     *
-     * @param mimetype Media type of the content
-     * @return True if convert is needed else FALSE
-     */
-    public static Boolean IsDrmConvertNeeded(String mimetype) {
-        return MIMETYPE_DRM_MESSAGE->Equals(mimetype);
-    }
-
-    /**
-     * Modifies the file extension for a DRM Forward Lock file NOTE: This
-     * function shouldn't be called if the file shouldn't be DRM converted
-     */
-    public static String ModifyDrmFwLockFileExtension(String filename) {
-        If (filename != NULL) {
-            Int32 extensionIndex;
-            extensionIndex = filename->LastIndexOf(".");
-            If (extensionIndex != -1) {
-                filename = filename->Substring(0, extensionIndex);
-            }
-            filename = filename->Concat(EXTENSION_INTERNAL_FWDL);
-        }
-        return filename;
-    }
-
-    /**
-     * Gets the original mime type of DRM protected content.
-     *
-     * @param context The context
-     * @param path Path to the file
-     * @param containingMime The current mime type of of the file i.e. the
-     *            containing mime type
-     * @return The original mime type of the file if DRM protected else the
-     *         currentMime
-     */
-    public static String GetOriginalMimeType(Context context, String path, String containingMime) {
-        String result = containingMime;
-        DrmManagerClient drmClient = new DrmManagerClient(context);
-        try {
-            If (drmClient->CanHandle(path, NULL)) {
-                result = drmClient->GetOriginalMimeType(path);
-            }
-        } Catch (IllegalArgumentException ex) {
-            Logger::W(TAG,
-                    "Can't get original mime type since path is NULL or empty string.");
-        } Catch (IllegalStateException ex) {
-            Logger::W(TAG, "DrmManagerClient didn't initialize properly.");
-        }
-        return result;
-    }
+Boolean DownloadDrmHelper::IsDrmMimeType(
+    /* [in] */ IContext* context,
+    /* [in] */ const String& mimetype)
+{
+    // ==================before translated======================
+    // boolean result = false;
+    // if (context != null) {
+    //     try {
+    //         DrmManagerClient drmClient = new DrmManagerClient(context);
+    //         if (drmClient != null && mimetype != null && mimetype.length() > 0) {
+    //             result = drmClient.canHandle("", mimetype);
+    //         }
+    //     } catch (IllegalArgumentException e) {
+    //         Log.w(TAG,
+    //                 "DrmManagerClient instance could not be created, context is Illegal.");
+    //     } catch (IllegalStateException e) {
+    //         Log.w(TAG, "DrmManagerClient didn't initialize properly.");
+    //     }
+    // }
+    // return result;
+    assert(0);
+    return FALSE;
 }
+
+Boolean DownloadDrmHelper::IsDrmConvertNeeded(
+    /* [in] */ const String& mimetype)
+{
+    // ==================before translated======================
+    // return MIMETYPE_DRM_MESSAGE.equals(mimetype);
+    assert(0);
+    return FALSE;
+}
+
+String DownloadDrmHelper::ModifyDrmFwLockFileExtension(
+    /* [in] */ const String& filename)
+{
+    // ==================before translated======================
+    // if (filename != null) {
+    //     int extensionIndex;
+    //     extensionIndex = filename.lastIndexOf(".");
+    //     if (extensionIndex != -1) {
+    //         filename = filename.substring(0, extensionIndex);
+    //     }
+    //     filename = filename.concat(EXTENSION_INTERNAL_FWDL);
+    // }
+    // return filename;
+    assert(0);
+    return String("");
+}
+
+String DownloadDrmHelper::GetOriginalMimeType(
+    /* [in] */ IContext* context,
+    /* [in] */ const String& path,
+    /* [in] */ const String& containingMime)
+{
+    // ==================before translated======================
+    // String result = containingMime;
+    // DrmManagerClient drmClient = new DrmManagerClient(context);
+    // try {
+    //     if (drmClient.canHandle(path, null)) {
+    //         result = drmClient.getOriginalMimeType(path);
+    //     }
+    // } catch (IllegalArgumentException ex) {
+    //     Log.w(TAG,
+    //             "Can't get original mime type since path is null or empty string.");
+    // } catch (IllegalStateException ex) {
+    //     Log.w(TAG, "DrmManagerClient didn't initialize properly.");
+    // }
+    // return result;
+    assert(0);
+    return String("");
+}
+
+} // namespace Utility
+} // namespace Mms
+} // namespace Google
+} // namespace Droid
+} // namespace Elastos

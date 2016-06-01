@@ -8,6 +8,14 @@ module
     namespace Telephony {
     namespace Gsm {
 
+    enum GSM_MessageClass {
+        GSM_MessageClass_UNKNOWN,
+        GSM_MessageClass_CLASS_0,
+        GSM_MessageClass_CLASS_1,
+        GSM_MessageClass_CLASS_2,
+        GSM_MessageClass_CLASS_3
+    }
+
     interface ISubmitPdu {
     }
 

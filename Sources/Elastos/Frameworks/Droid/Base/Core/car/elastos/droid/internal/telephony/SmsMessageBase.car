@@ -8,6 +8,9 @@ module
     namespace Internal {
     namespace Telephony {
 
+    interface ISmsMessageBaseSubmitPduBase {
+    }
+
     interface ISmsMessageBase {
         GetServiceCenterAddress(
             [out] String* result);
