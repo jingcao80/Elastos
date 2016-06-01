@@ -379,6 +379,9 @@ public:
         CARAPI RetainAll(
             /* [in] */ ICollection* collection);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CConcurrentSkipListMap::KeySet"); }
+
     private:
         AutoPtr<INavigableMap> mM;
     };
@@ -411,6 +414,9 @@ public:
         CARAPI ToArray(
             /* [in] */ ArrayOf<IInterface*>* inArray,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("CConcurrentSkipListMap::Values"); }
 
     private:
         AutoPtr<INavigableMap> mM;
@@ -490,6 +496,10 @@ public:
 
         CARAPI RetainAll(
             /* [in] */ ICollection* collection);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("CConcurrentSkipListMap::EntrySet"); }
+
     private:
         AutoPtr<INavigableMap> mM;
     };
@@ -758,6 +768,8 @@ public:
         CARAPI Remove(
             /* [in] */ IInterface* obj);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CConcurrentSkipListMap::Submap"); }
 
     private:
         /* ----------------  Utilities -------------- */

@@ -572,7 +572,7 @@ ECode CInterfaceProxy::ProxyEntry(
 
 #if defined(_DEBUG) || defined(_MARSHAL_DEBUG)
     // _DumpObjectProxy(thisPtr->mOwner);
-    // ALOGD(" >>> Current Interface:");
+    // ALOGD(" >>> tid:%d, Current Interface:", gettid());
     // _DumpInterfaceProxy(thisPtr);
     // ALOGD(" >>> Method index:%d, argNum:%d\n", methodIndex, argNum);
     // ALOGD(" >>> Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize);

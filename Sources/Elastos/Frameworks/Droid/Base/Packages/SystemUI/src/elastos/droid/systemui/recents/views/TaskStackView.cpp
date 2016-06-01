@@ -5,6 +5,7 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
 #include "../../R.h"
 
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
@@ -19,12 +20,16 @@ using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashMap;
+using Elastos::Utility::Logging::Logger;
+
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Recents {
 namespace Views {
+
+static const String TAG("TaskStackView");
 
 CAR_INTERFACE_IMPL_5(TaskStackView::Wrapper, Object, ITaskStackCallbacks, ITaskViewCallbacks,
     ITaskStackViewScrollerCallbacks, IViewPoolConsumer, IPackageCallbacks)
@@ -393,6 +398,8 @@ Boolean TaskStackView::UpdateStackTransforms(
     tasks->GetSize(&taskCount);
     Int32 frontMostVisibleIndex = -1;
     Int32 backMostVisibleIndex = -1;
+
+    Logger::I(TAG, "UpdateStackTransforms: taskTransformCount: %d", taskTransformCount);
 
     // We can reuse the task transforms where possible to reduce object allocation
     if (taskTransformCount < taskCount) {

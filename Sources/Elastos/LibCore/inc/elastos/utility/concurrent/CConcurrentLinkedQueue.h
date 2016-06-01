@@ -165,6 +165,8 @@ protected:
 
     CARAPI_(AutoPtr<Node>) First();
 
+    CARAPI_(String) GetClassName() { return String("CConcurrentLinkedQueue"); }
+
 private:
     CARAPI_(void) WriteObject(
         /* [in] */ IObjectOutputStream* s);

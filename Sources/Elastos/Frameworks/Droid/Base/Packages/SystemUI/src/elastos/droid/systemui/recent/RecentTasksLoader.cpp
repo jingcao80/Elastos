@@ -12,8 +12,6 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::App::IActivityManagerRecentTaskInfo;
@@ -52,6 +50,8 @@ namespace Droid {
 namespace SystemUI {
 namespace Recent {
 
+static const String TAG("RecentTasksLoader");
+
 //======================================================================
 // RecentTasksLoader::PreloadTasksRunnable
 //======================================================================
@@ -83,7 +83,8 @@ ECode RecentTasksLoader::BgLoadThread::Run()
     AutoPtr<ITaskDescription> first;
     mHost->LoadFirstTask((ITaskDescription**)&first);
 
-    {    AutoLock syncLock(mHost->mFirstTaskLock);
+    {
+        AutoLock syncLock(mHost->mFirstTaskLock);
         if (mHost->mCancelPreloadingFirstTask) {
             mHost->ClearFirstTask();
         }
@@ -110,9 +111,6 @@ RecentTasksLoader::TaskLoaderAsyncTask::TaskLoaderAsyncTask(
 ECode RecentTasksLoader::TaskLoaderAsyncTask::OnProgressUpdate(
     /* [in] */ ArrayOf<IInterface*>* values)
 {
-    Logger::I("RecentTasksLoader::TaskLoaderAsyncTask", " >> OnProgressUpdate:%p, size:%d",
-        values, values ? values->GetLength() : 0);
-
     if (!IsCancelled()) {
         AutoPtr<IArrayList> newTasks = IArrayList::Probe((*values)[0]);
         // do a callback to RecentsPanelView to let it know we have more values
@@ -136,9 +134,6 @@ ECode RecentTasksLoader::TaskLoaderAsyncTask::DoInBackground(
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** result)
 {
-    Logger::I("RecentTasksLoader::TaskLoaderAsyncTask", " >> DoInBackground:%p, size:%d",
-        params, params ? params->GetLength() : 0);
-
     VALIDATE_NOT_NULL(result)
     // We load in two stages: first, we update progress with just the first screenful
     // of items. Then, we update with the rest of the items
@@ -155,40 +150,41 @@ ECode RecentTasksLoader::TaskLoaderAsyncTask::DoInBackground(
 
     AutoPtr<IList> recentTasks;
     am->GetRecentTasks(MAX_TASKS,
-        IActivityManager::RECENT_IGNORE_UNAVAILABLE
-        | IActivityManager::RECENT_INCLUDE_PROFILES, (IList**)&recentTasks);
-
+        IActivityManager::RECENT_IGNORE_UNAVAILABLE | IActivityManager::RECENT_INCLUDE_PROFILES,
+        (IList**)&recentTasks);
     Int32 numTasks;
     recentTasks->GetSize(&numTasks);
+
     AutoPtr<IIntent> it;
     CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&it);
     it->AddCategory(IIntent::CATEGORY_HOME);
     AutoPtr<IActivityInfo> homeInfo;
     it->ResolveActivityInfo(pm, 0, (IActivityInfo**)&homeInfo);
 
-    Boolean firstScreenful = TRUE;
+    if (DEBUG) {
+        Logger::I("RecentTasksLoader::TaskLoaderAsyncTask", "GetRecentTasks: %d, %s",
+            numTasks, TO_CSTR(recentTasks));
+    }
 
+    Boolean firstScreenful = TRUE;
     AutoPtr<IArrayList> tasks;
     CArrayList::New((IArrayList**)&tasks);
 
     // skip the first task - assume it's either the home screen or the current activity.
-    const Int32 first = 0;
-    for (Int32 i = first, index = 0; i < numTasks && (index < MAX_TASKS); ++i) {
+    for (Int32 i = 0, index = 0; i < numTasks && (index < MAX_TASKS); ++i) {
         if (IsCancelled()) {
             break;
         }
         AutoPtr<IInterface> obj;
         recentTasks->Get(i, (IInterface**)&obj);
-        const AutoPtr<IActivityManagerRecentTaskInfo> recentInfo = IActivityManagerRecentTaskInfo::Probe(obj);
+        IActivityManagerRecentTaskInfo* recentInfo = IActivityManagerRecentTaskInfo::Probe(obj);
 
-        AutoPtr<IIntent> baseIntent;
+        AutoPtr<IIntent> baseIntent, intent;
         recentInfo->GetBaseIntent((IIntent**)&baseIntent);
-        AutoPtr<IIntent> intent;
         CIntent::New(baseIntent, (IIntent**)&intent);
 
         AutoPtr<IComponentName> origActivity;
         recentInfo->GetOrigActivity((IComponentName**)&origActivity);
-
         if (origActivity != NULL) {
             intent->SetComponent(origActivity);
         }
@@ -196,7 +192,6 @@ ECode RecentTasksLoader::TaskLoaderAsyncTask::DoInBackground(
         // Don't load the current home activity.
         AutoPtr<IComponentName> component;
         intent->GetComponent((IComponentName**)&component);
-
         if (mHost->IsCurrentHomeActivity(component, homeInfo)) {
             continue;
         }
@@ -215,31 +210,24 @@ ECode RecentTasksLoader::TaskLoaderAsyncTask::DoInBackground(
         recentInfo->GetUserId(&userId);
         AutoPtr<ICharSequence> description;
         recentInfo->GetDescription((ICharSequence**)&description);
-
-
         AutoPtr<ITaskDescription> item;
         mHost->CreateTaskDescription(id, persistentId, baseIntent,origActivity,
             description, userId, (ITaskDescription**)&item);
 
         if (item != NULL) {
             while (TRUE) {
-                /*ECode ec = */mTasksWaitingForThumbnails->Put(IObject::Probe(item));
-                // if (FAILED(ec)) return E_INTERRUPTED_EXCEPTION;
-                break;
+                ECode ec = mTasksWaitingForThumbnails->Put(item.Get());
+                if (SUCCEEDED(ec)) {
+                    break;
+                }
             }
+
             tasks->Add(item);
             Int32 sizee;
-            tasks->GetSize(&sizee);
-            if (firstScreenful && sizee == mHost->mNumTasksInFirstScreenful) {
-
-                AutoPtr<ArrayOf<IInterface* > > aaTasks = ArrayOf<IInterface* >::Alloc(sizee);
-                for (Int32 i = 0; i < sizee; i++) {
-                    AutoPtr<IInterface> obj;
-                    tasks->Get(i, (IInterface**)&obj);
-                    aaTasks->Set(i, obj);
-                }
-
-                PublishProgress(aaTasks);
+            if (firstScreenful && (tasks->GetSize(&sizee), sizee == mHost->mNumTasksInFirstScreenful)) {
+                AutoPtr<ArrayOf<IInterface* > > results = ArrayOf<IInterface* >::Alloc(sizee);
+                results->Set(0, tasks.Get());
+                PublishProgress(results);
 
                 tasks = NULL;
                 CArrayList::New((IArrayList**)&tasks);
@@ -251,36 +239,26 @@ ECode RecentTasksLoader::TaskLoaderAsyncTask::DoInBackground(
     }
 
     if (!IsCancelled()) {
-        Int32 sizee;
-        tasks->GetSize(&sizee);
-        AutoPtr<ArrayOf<IInterface* > > aaTasks = ArrayOf<IInterface* >::Alloc(sizee);
-        for (Int32 i = 0; i < sizee; i++) {
-            AutoPtr<IInterface> obj;
-            tasks->Get(i, (IInterface**)&obj);
-            aaTasks->Set(i, obj);
-        }
-        PublishProgress(aaTasks);
+        AutoPtr<ArrayOf<IInterface* > > results = ArrayOf<IInterface* >::Alloc(1);
+        results->Set(0, tasks.Get());
+        PublishProgress(results);
+
         if (firstScreenful) {
             // always should publish two updates
             tasks = NULL;
             CArrayList::New((IArrayList**)&tasks);
-            Int32 size;
-            tasks->GetSize(&size);
-            AutoPtr<ArrayOf<IInterface* > > aTasks = ArrayOf<IInterface* >::Alloc(size);
-            for (Int32 i = 0; i < size; i++) {
-                AutoPtr<IInterface> obj;
-                tasks->Get(i, (IInterface**)&obj);
-                aTasks->Set(i, obj);
-            }
-            PublishProgress(aTasks);
+            results = ArrayOf<IInterface* >::Alloc(1);
+            results->Set(0, tasks.Get());
+            PublishProgress(results);
         }
     }
 
     while (TRUE) {
-        AutoPtr<TaskDescription> obj = new TaskDescription();
-        /*ECode ec = */mTasksWaitingForThumbnails->Put((ITaskDescription*)obj);
-        // if (FAILED(ec)) return E_INTERRUPTED_EXCEPTION;
-        break;
+        AutoPtr<ITaskDescription> obj = new TaskDescription();
+        ECode ec = mTasksWaitingForThumbnails->Put(obj);
+        if (SUCCEEDED(ec)) {
+            break;
+        }
     }
 
     Process::SetThreadPriority(origPri);
@@ -295,8 +273,6 @@ ECode RecentTasksLoader::TaskLoaderAsyncTask::DoInBackground(
 ECode RecentTasksLoader::ThumbnailLoaderAsyncTask::OnProgressUpdate(
     /* [in] */ ArrayOf<IInterface*>* values)
 {
-    Logger::I("RecentTasksLoader::ThumbnailLoaderAsyncTask", " >> OnProgressUpdate:%p, size:%d",
-        values, values ? values->GetLength() : 0);
     if (!IsCancelled()) {
         AutoPtr<ITaskDescription> td = ITaskDescription::Probe((*values)[0]);
         Boolean isNull;
@@ -319,9 +295,6 @@ ECode RecentTasksLoader::ThumbnailLoaderAsyncTask::DoInBackground(
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** result)
 {
-    Logger::I("RecentTasksLoader::ThumbnailLoaderAsyncTask", " >> DoInBackground:%p, size:%d",
-        params, params ? params->GetLength() : 0);
-
     VALIDATE_NOT_NULL(result)
     Int32 origPri;
     Process::GetThreadPriority(Process::MyTid(), &origPri);
@@ -333,12 +306,9 @@ ECode RecentTasksLoader::ThumbnailLoaderAsyncTask::DoInBackground(
         }
         AutoPtr<ITaskDescription> td;
         while (td == NULL) {
-            // try {
             AutoPtr<IInterface> obj;
             mTasksWaitingForThumbnails->Take((IInterface**)&obj);
             td = ITaskDescription::Probe(obj);
-            // } catch (InterruptedException e) {
-            // }
         }
 
         AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
@@ -365,18 +335,15 @@ ECode RecentTasksLoader::ThumbnailLoaderAsyncTask::DoInBackground(
 //======================================================================
 
 const String RecentTasksLoader::TAG("RecentTasksLoader");
-const Boolean RecentTasksLoader::DEBUG = IPhoneStatusBar::DEBUG || FALSE;
+const Boolean RecentTasksLoader::DEBUG = TRUE;
 const Int32 RecentTasksLoader::DISPLAY_TASKS = 20;
-const Int32 RecentTasksLoader::MAX_TASKS = DISPLAY_TASKS + 1; // allow extra for non-apps
+const Int32 RecentTasksLoader::MAX_TASKS = 21 /*DISPLAY_TASKS + 1*/; // allow extra for non-apps
 AutoPtr<RecentTasksLoader> RecentTasksLoader::sInstance;
 
 CAR_INTERFACE_IMPL_2(RecentTasksLoader, Object, IViewOnTouchListener, IRecentTasksLoader)
 
-RecentTasksLoader::RecentTasksLoader(
-    /* [in] */ IContext* context)
-    : mContext(context)
-    , mRecentsPanel(NULL)
-    , mFirstTaskLoaded(FALSE)
+RecentTasksLoader::RecentTasksLoader()
+    : mFirstTaskLoaded(FALSE)
     , mIconDpi(0)
     , mNumTasksInFirstScreenful(Elastos::Core::Math::INT32_MAX_VALUE)
     , mFirstScreenful(FALSE)
@@ -384,6 +351,12 @@ RecentTasksLoader::RecentTasksLoader(
     , mPreloadingFirstTask(FALSE)
     , mCancelPreloadingFirstTask(FALSE)
 {
+}
+
+ECode RecentTasksLoader::constructor(
+    /* [in] */ IContext* context)
+{
+    mContext = context;
     mPreloadTasksRunnable = new PreloadTasksRunnable(this);
 
     CHandler::New((IHandler**)&mHandler);
@@ -406,31 +379,29 @@ RecentTasksLoader::RecentTasksLoader(
     }
 
     // Render default icon (just a blank image)
-    Int32 defaultIconSize;
+    Int32 defaultIconSize, dpi;
     res->GetDimensionPixelSize(Elastos::Droid::R::dimen::app_icon_size, &defaultIconSize);
-    Int32 dpi;
     dm->GetDensityDpi(&dpi);
     Int32 iconSize = (Int32)(defaultIconSize * mIconDpi / dpi);
-    CColorDrawableWithDimensions::New(0x00000000, iconSize, iconSize
-            , (IDrawable**)&mDefaultIconBackground);
+    CColorDrawableWithDimensions::New(0x00000000, iconSize, iconSize,
+        (IDrawable**)&mDefaultIconBackground);
 
     // Render the default thumbnail background
-    Int32 thumbnailWidth;
+    Int32 thumbnailWidth, thumbnailHeight, color;
     res->GetDimensionPixelSize(Elastos::Droid::R::dimen::thumbnail_width, &thumbnailWidth);
-    Int32 thumbnailHeight;
     res->GetDimensionPixelSize(Elastos::Droid::R::dimen::thumbnail_height, &thumbnailHeight);
-    Int32 color;
     res->GetColor(R::drawable::status_bar_recents_app_thumbnail_background, &color);
-
-    CColorDrawableWithDimensions::New(color, thumbnailWidth, thumbnailHeight
-            , (IDrawable**)&mDefaultThumbnailBackground);
+    CColorDrawableWithDimensions::New(color, thumbnailWidth, thumbnailHeight,
+        (IDrawable**)&mDefaultThumbnailBackground);
+    return NOERROR;
 }
 
 AutoPtr<RecentTasksLoader> RecentTasksLoader::GetInstance(
     /* [in] */ IContext* context)
 {
     if (sInstance == NULL) {
-        sInstance = new RecentTasksLoader(context);
+        sInstance = new RecentTasksLoader();
+        sInstance->constructor(context);
     }
     return sInstance;
 }
@@ -511,9 +482,9 @@ ECode RecentTasksLoader::IsFirstScreenful(
 
 Boolean RecentTasksLoader::IsCurrentHomeActivity(
     /* [in] */ IComponentName* component,
-    /* [in] */ IActivityInfo* _homeInfo)
+    /* [in] */ IActivityInfo* inHomeInfo)
 {
-    AutoPtr<IActivityInfo> homeInfo = _homeInfo;
+    AutoPtr<IActivityInfo> homeInfo = inHomeInfo;
     if (homeInfo == NULL) {
         AutoPtr<IPackageManager> pm;
         mContext->GetPackageManager((IPackageManager**)&pm);
@@ -549,11 +520,10 @@ ECode RecentTasksLoader::CreateTaskDescription(
     }
     AutoPtr<IPackageManager> pm;
     mContext->GetPackageManager((IPackageManager**)&pm);
-    const AutoPtr<IIPackageManager> ipm = AppGlobals::GetPackageManager();
+    AutoPtr<IIPackageManager> ipm = AppGlobals::GetPackageManager();
     Int32 flags;
     intent->GetFlags(&flags);
-    intent->SetFlags((flags & ~IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
-            | IIntent::FLAG_ACTIVITY_NEW_TASK);
+    intent->SetFlags((flags & ~IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) | IIntent::FLAG_ACTIVITY_NEW_TASK);
     AutoPtr<IResolveInfo> resolveInfo;
     ECode ec = ipm->ResolveIntent(intent, String(NULL), 0, userId, (IResolveInfo**)&resolveInfo);
     if (FAILED(ec)) {
@@ -591,45 +561,44 @@ ECode RecentTasksLoader::CreateTaskDescription(
 }
 
 ECode RecentTasksLoader::LoadThumbnailAndIcon(
-    /* [in] */ ITaskDescription* td)
+    /* [in] */ ITaskDescription* tdObj)
 {
     AutoPtr<IInterface> amObj;
     mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&amObj);
-    AutoPtr<IActivityManager> am = IActivityManager::Probe(am);
+    AutoPtr<IActivityManager> am = IActivityManager::Probe(amObj);
     AutoPtr<IPackageManager> pm;
     mContext->GetPackageManager((IPackageManager**)&pm);
-    AutoPtr<TaskDescription> _td = (TaskDescription*)td;
-    Int32 persistentTaskId = _td->mPersistentTaskId;
-    const AutoPtr<IBitmap> thumbnail = SystemServicesProxy::GetThumbnail(am, persistentTaskId);
-    AutoPtr<IResolveInfo> resolveInfo = _td->mResolveInfo;
+    AutoPtr<TaskDescription> td = (TaskDescription*)tdObj;
+    Int32 persistentTaskId = td->mPersistentTaskId;
+    AutoPtr<IBitmap> thumbnail = SystemServicesProxy::GetThumbnail(am, persistentTaskId);
+    AutoPtr<IResolveInfo> resolveInfo = td->mResolveInfo;
     AutoPtr<IDrawable> icon;
     icon = GetFullResIcon(resolveInfo, pm);
-    if (_td->mUserId != UserHandle::GetMyUserId()) {
+    if (td->mUserId != UserHandle::GetMyUserId()) {
         // Need to badge the icon
         AutoPtr<IUserHandle> uh;
-        CUserHandle::New(_td->mUserId, (IUserHandle**)&uh);
+        CUserHandle::New(td->mUserId, (IUserHandle**)&uh);
         pm->GetUserBadgedIcon(icon, uh, (IDrawable**)&icon);
     }
     if (DEBUG) {
         Logger::V(TAG, "Loaded bitmap for task %s: %s", TO_CSTR(td), TO_CSTR(thumbnail));
     }
-    {    AutoLock syncLock(td);
+    {
+        AutoLock syncLock(td);
         if (thumbnail != NULL) {
-            // td->SetThumbnail(thumbnail);
             AutoPtr<IResources> res;
             mContext->GetResources((IResources**)&res);
             AutoPtr<IDrawable> bd;
             CBitmapDrawable::New(res, thumbnail, (IDrawable**)&bd);
-            _td->SetThumbnail(bd);
+            td->SetThumbnail(bd);
         }
         else {
-            _td->SetThumbnail(mDefaultThumbnailBackground);
+            td->SetThumbnail(mDefaultThumbnailBackground);
         }
         if (icon != NULL) {
-            _td->SetIcon(icon);
+            td->SetIcon(icon);
         }
-        _td->SetLoaded(TRUE);
-        _td->Unlock();
+        td->SetLoaded(TRUE);
     }
     return NOERROR;
 }
@@ -809,8 +778,11 @@ ECode RecentTasksLoader::GetFirstTask(
     /* [out] */ ITaskDescription** des)
 {
     VALIDATE_NOT_NULL(des);
+    *des = NULL;
+
     while (TRUE) {
-        {    AutoLock syncLock(mFirstTaskLock);
+        {
+            AutoLock syncLock(mFirstTaskLock);
             if (mFirstTaskLoaded) {
                 *des = mFirstTask;
                 REFCOUNT_ADD(*des);

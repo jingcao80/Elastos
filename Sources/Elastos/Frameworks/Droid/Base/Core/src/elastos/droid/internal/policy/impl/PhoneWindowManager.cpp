@@ -279,12 +279,12 @@ AutoPtr<HashMap<Int32, AutoPtr<IInterface> > > PhoneWindowManager::sApplicationL
         InitApplicationLaunchKeyCategories();
 
 String PhoneWindowManager::TAG("PhoneWindowManager");
-const Boolean PhoneWindowManager::DEBUG = TRUE;
-const Boolean PhoneWindowManager::localLOGV = TRUE;
-const Boolean PhoneWindowManager::DEBUG_LAYOUT = TRUE;
-const Boolean PhoneWindowManager::DEBUG_INPUT = TRUE;
+const Boolean PhoneWindowManager::DEBUG = FALSE;
+const Boolean PhoneWindowManager::localLOGV = FALSE;
+const Boolean PhoneWindowManager::DEBUG_LAYOUT = FALSE;
+const Boolean PhoneWindowManager::DEBUG_INPUT = FALSE;
 const Boolean PhoneWindowManager::DEBUG_STARTING_WINDOW = FALSE;
-const Boolean PhoneWindowManager::DEBUG_WAKEUP = TRUE;
+const Boolean PhoneWindowManager::DEBUG_WAKEUP = FALSE;
 const Boolean PhoneWindowManager::SHOW_STARTING_ANIMATIONS = TRUE;
 const Boolean PhoneWindowManager::SHOW_PROCESSES_ON_ALT_MENU = FALSE;
 

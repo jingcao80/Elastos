@@ -228,6 +228,7 @@ using Elastos::Droid::Server::CAppOpsService;
 using Elastos::Droid::Text::Format::IDateUtils;
 using Elastos::Droid::Text::Format::CTime;
 using Elastos::Droid::Text::Format::ITime;
+using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Droid::Utility::CAtomicFile;
 using Elastos::Droid::Utility::TimeUtils;
 using Elastos::Droid::Utility::Xml;
@@ -5518,8 +5519,9 @@ void CActivityManagerService::CleanupRecentTasksLocked(
                     else {
                         // Otherwise just not available for now.
                         if (task->mIsAvailable) {
-                            if (DEBUG_RECENTS) Slogger::D(TAG, "Making recent unavailable: %s",
-                                TO_CSTR(task));
+                            if (DEBUG_RECENTS) {
+                                Slogger::D(TAG, "Making recent unavailable: %s", TO_CSTR(task));
+                            }
                         }
                         task->mIsAvailable = FALSE;
                     }
@@ -10663,8 +10665,9 @@ ECode CActivityManagerService::GetAppTasks(
     Int32 callingUid = Binder::GetCallingUid();
     Int64 ident = Binder::ClearCallingIdentity();
 
-    {    AutoLock syncLock(this);
-        CArrayList::New(list);
+    {
+        AutoLock syncLock(this);
+        CParcelableList::New(list);
         // try {
             if (localLOGV) Slogger::V(TAG, "getAppTasks");
 
@@ -10708,9 +10711,10 @@ ECode CActivityManagerService::GetTasks(
 {
     VALIDATE_NOT_NULL(list);
     Int32 callingUid = Binder::GetCallingUid();
-    CArrayList::New(list);
+    CParcelableList::New(list);
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (localLOGV) Slogger::V(TAG, "getTasks: max=%d, flags=%d", maxNum, flags);
 
         Boolean allowed = IsGetTasksAllowed(String("getTasks"), Binder::GetCallingPid(),
@@ -10805,19 +10809,18 @@ ECode CActivityManagerService::GetRecentTasks(
     Int32 callingUid = Binder::GetCallingUid();
     Int32 callingPid = Binder::GetCallingPid();
     FAIL_RETURN(HandleIncomingUser(callingPid, callingUid, userId,
-            FALSE, ALLOW_FULL_ONLY, String("GetRecentTasks"), String(NULL), &userId));
+        FALSE, ALLOW_FULL_ONLY, String("GetRecentTasks"), String(NULL), &userId));
 
     Boolean includeProfiles = (flags & IActivityManager::RECENT_INCLUDE_PROFILES) != 0;
     Boolean withExcluded = (flags & IActivityManager::RECENT_WITH_EXCLUDED) != 0;
     AutoLock lock(this);
-    Boolean allowed = IsGetTasksAllowed(String("getRecentTasks"), callingPid,
-            callingUid);
-    Boolean detailed = CheckCallingPermission(
-            Manifest::permission::GET_DETAILED_TASKS)
-            == IPackageManager::PERMISSION_GRANTED;
+    Boolean allowed = IsGetTasksAllowed(String("GetRecentTasks"), callingPid, callingUid);
+    Boolean detailed = CheckCallingPermission(Manifest::permission::GET_DETAILED_TASKS)
+        == IPackageManager::PERMISSION_GRANTED;
 
     Int32 N = mRecentTasks->GetSize();
-    CArrayList::New(maxNum < N ? maxNum : N, tasks);
+    CParcelableList::New(maxNum < N ? maxNum : N, tasks);
+    if (DEBUG_RECENTS) Slogger::D(TAG, " RecentTasks size: N:%d, return count:%d", N, maxNum < N ? maxNum : N);
 
     AutoPtr<HashSet<Int32> > includedUsers;
     if (includeProfiles) {
@@ -10880,6 +10883,7 @@ ECode CActivityManagerService::GetRecentTasks(
                 baseIntent->ReplaceExtras((IBundle*)NULL);
             }
 
+            if (DEBUG_RECENTS) Slogger::D(TAG, " > recentTasks: %s", TO_CSTR(rti));
             (*tasks)->Add(rti);
             maxNum--;
         }
@@ -10943,8 +10947,7 @@ ECode CActivityManagerService::AddAppTask(
         intent->GetComponent((IComponentName**)&comp);
         if (comp == NULL) {
             Binder::RestoreCallingIdentity(callingIdent);
-            Slogger::E(TAG, "Intent %s must specify explicit component",
-                TO_CSTR(intent));
+            Slogger::E(TAG, "Intent %s must specify explicit component", TO_CSTR(intent));
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         Int32 w, h;
@@ -10971,8 +10974,7 @@ ECode CActivityManagerService::AddAppTask(
             // Must be a new task.
             intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
         }
-        Boolean equals;
-        IObject::Probe(comp)->Equals(mLastAddedTaskComponent, &equals);
+        Boolean equals = Object::Equals(comp, mLastAddedTaskComponent);
         if (!equals || callingUid != mLastAddedTaskUid) {
             mLastAddedTaskActivity = NULL;
         }
@@ -10994,8 +10996,7 @@ ECode CActivityManagerService::AddAppTask(
         }
 
         AutoPtr<TaskRecord> task = new TaskRecord();
-        task->constructor(this, mStackSupervisor->GetNextTaskId(), ainfo,
-                intent, description);
+        task->constructor(this, mStackSupervisor->GetNextTaskId(), ainfo, intent, description);
 
         Int32 trimIdx = TrimRecentsForTask(task, FALSE);
         if (trimIdx >= 0) {
@@ -11032,23 +11033,21 @@ ECode CActivityManagerService::AddAppTask(
 ECode CActivityManagerService::GetAppTaskThumbnailSize(
     /* [out] */ IPoint** point)
 {
-    {    AutoLock syncLock(this);
-        return CPoint::New(mThumbnailWidth, mThumbnailHeight, point);
-    }
-    return NOERROR;
+    AutoLock syncLock(this);
+    return CPoint::New(mThumbnailWidth, mThumbnailHeight, point);
 }
 
 ECode CActivityManagerService::SetTaskDescription(
     /* [in] */ IBinder* token,
     /* [in] */ IActivityManagerTaskDescription* td)
 {
-    {    AutoLock syncLock(this);
-        AutoPtr<ActivityRecord> r = ActivityRecord::IsInStackLocked(token);
-        if (r != NULL) {
-            r->SetTaskDescription(td);
-            r->mTask->UpdateTaskDescription();
-        }
+    AutoLock syncLock(this);
+    AutoPtr<ActivityRecord> r = ActivityRecord::IsInStackLocked(token);
+    if (r != NULL) {
+        r->SetTaskDescription(td);
+        r->mTask->UpdateTaskDescription();
     }
+
     return NOERROR;
 }
 
@@ -11447,7 +11446,8 @@ ECode CActivityManagerService::GetAllStackInfos(
             String("getAllStackInfos()")));
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
-        {    AutoLock syncLock(this);
+        {
+            AutoLock syncLock(this);
             AutoPtr<IList> temp = IList::Probe(mStackSupervisor->GetAllStackInfosLocked());
             *list = temp;
             REFCOUNT_ADD(*list);
@@ -15759,7 +15759,7 @@ ECode CActivityManagerService::GetProcessesInErrorState(
 
     FAIL_RETURN(EnforceNotIsolatedCaller(String("getProcessesInErrorState")));
     // assume our apps are happy - lazy create the list
-    CArrayList::New(procs);
+    CParcelableList::New(procs);
 
     AutoPtr<IActivityManagerHelper> helper;
     CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
@@ -15918,7 +15918,7 @@ ECode CActivityManagerService::GetRunningAppProcesses(
                 //Slogger::v(TAG, "Proc " + app->processName + ": imp=" + currApp.importance
                 //        + " lru=" + currApp.lru);
                 if (*appProcs == NULL) {
-                     FAIL_RETURN(CArrayList::New(appProcs));
+                     FAIL_RETURN(CParcelableList::New(appProcs));
                 }
                 (*appProcs)->Add(currApp);
             }
@@ -15936,7 +15936,7 @@ ECode CActivityManagerService::GetRunningExternalApplications(
     FAIL_RETURN(EnforceNotIsolatedCaller(String("getRunningExternalApplications")));
     AutoPtr<IList> runningApps;
     GetRunningAppProcesses((IList**)&runningApps);
-    CArrayList::New(apps);
+    CParcelableList::New(apps);
     Int32 appsCount;
     if (runningApps != NULL && (runningApps->GetSize(&appsCount), appsCount > 0)) {
         HashSet<String> extList;

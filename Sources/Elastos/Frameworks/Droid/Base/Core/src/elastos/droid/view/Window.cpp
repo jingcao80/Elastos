@@ -383,20 +383,22 @@ ECode Window::AddFlags(
     return SetFlags(flags, flags);
 }
 
-void Window::AddPrivateFlags(
+ECode Window::AddPrivateFlags(
     /* [in] */ Int32 flags)
 {
     SetPrivateFlags(flags, flags);
+    return NOERROR;
 }
 
 /** @hide */
-void Window::SetBlurMaskAlphaThreshold(
+ECode Window::SetBlurMaskAlphaThreshold(
     /* [in] */ Float alpha)
 {
     AutoPtr<IWindowManagerLayoutParams> attrs;
     GetAttributes((IWindowManagerLayoutParams**)&attrs);
     attrs->SetBlurMaskAlphaThreshold(alpha);
     DispatchWindowAttributesChanged(attrs);
+    return NOERROR;
 }
 
 ECode Window::ClearFlags(
@@ -406,7 +408,7 @@ ECode Window::ClearFlags(
 }
 
 /** @hide */
-void Window::ClearPrivateFlags(
+ECode Window::ClearPrivateFlags(
     /* [in] */ Int32 flags)
 {
     SetPrivateFlags(0, flags);

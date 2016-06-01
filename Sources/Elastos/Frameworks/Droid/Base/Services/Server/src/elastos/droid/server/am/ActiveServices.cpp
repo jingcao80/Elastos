@@ -43,6 +43,7 @@ using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Utility::TimeUtils;
+using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Core::StringUtils;
 using Elastos::IO::IFlushable;
 using Elastos::Utility::CArrayList;
@@ -2789,7 +2790,7 @@ AutoPtr<IList> ActiveServices::GetRunningServiceInfoLocked(
     /* [in] */ Int32 flags)
 {
     AutoPtr<IList> res;
-    CArrayList::New((IList**)&res);
+    CParcelableList::New((IList**)&res);
 
     Int32 uid = Binder::GetCallingUid();
     Int64 ident = Binder::ClearCallingIdentity();

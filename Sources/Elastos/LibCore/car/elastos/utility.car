@@ -239,6 +239,56 @@ module
         interface IIterator;
     }
 
+    class CSimpleListIterator {
+        constructor(
+            [in] IList* list);
+
+        interface IIterator;
+    }
+
+    class CFullListIterator {
+        constructor(
+            [in] IList* list,
+            [in] Int32 start);
+
+        interface IIterator;
+        interface IListIterator;
+    }
+
+    class CSubAbstractListIterator {
+        constructor(
+            [in] IList* list,
+            [in] IListIterator* it,
+            [in] Int32 offset,
+            [in] Int32 length);
+
+        interface IIterator;
+        interface IListIterator;
+    }
+
+    class CSubAbstractList {
+        constructor(
+            [in] IList* list,
+            [in] Int32 start,
+            [in] Int32 end);
+
+        interface IList;
+        interface ICollection;
+        interface IIterable;
+    }
+
+    class CRandomAccessSubList {
+        constructor(
+            [in] IList* list,
+            [in] Int32 start,
+            [in] Int32 end);
+
+        interface IRandomAccess;
+        interface IList;
+        interface ICollection;
+        interface IIterable;
+    }
+
     [deprecated]
     class CBitSet {
         constructor();

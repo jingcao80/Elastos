@@ -202,6 +202,9 @@ private:
         CARAPI GetHashCode(
             /* [out] */ Int32* hashCode);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("HashMap::KeySet"); }
+
     private:
         HashMap* mHost;
     };
@@ -267,6 +270,10 @@ private:
 
         CARAPI GetHashCode(
             /* [out] */ Int32* hashCode);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("HashMap::Values"); }
+
     public:
         HashMap* mHost;
     };
@@ -331,6 +338,9 @@ private:
             /* [in] */ ArrayOf<IInterface*>* inArray,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("HashMap::EntrySet"); }
+
     private:
         HashMap* mHost;
     };
@@ -381,6 +391,9 @@ public:
 
 protected:
     HashMap();
+
+
+    CARAPI_(String) GetClassName() { return String("HashMap"); }
 
 public:
     CAR_INTERFACE_DECL()

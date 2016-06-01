@@ -514,6 +514,9 @@ public:
         /* [in] */ Int32 maxElements,
         /* [out] */ Int32* number);
 
+protected:
+    CARAPI_(String) GetClassName() { return String("CSynchronousQueue"); }
+
 private:
     /**
      * Saves this queue to a stream (that is, serializes it).

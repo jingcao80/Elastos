@@ -154,6 +154,8 @@ public:
 protected:
     HashSet() {}
 
+    CARAPI_(String) GetClassName() { return String("HashSet"); }
+
 public:
     /**
      * Constructs a new empty instance of {@code HashSet}.

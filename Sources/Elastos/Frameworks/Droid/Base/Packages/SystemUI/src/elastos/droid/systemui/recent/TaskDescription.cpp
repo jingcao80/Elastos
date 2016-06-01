@@ -1,7 +1,11 @@
 #include "elastos/droid/systemui/recent/TaskDescription.h"
 #include "Elastos.Droid.Os.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::Os::IUserHandle;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -108,6 +112,23 @@ ECode TaskDescription::GetThumbnail(
     VALIDATE_NOT_NULL(thumbnail)
     *thumbnail = mThumbnail;
     REFCOUNT_ADD(*thumbnail)
+    return NOERROR;
+}
+
+ECode TaskDescription::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb(128);
+    sb += "TaskDescription{0x";
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", package:";
+    sb += mPackageName;
+    sb += ", label:";
+    sb += TO_CSTR(mLabel);
+    sb += ", icon:";
+    sb += TO_CSTR(mIcon);
+    *str = sb.ToString();
     return NOERROR;
 }
 

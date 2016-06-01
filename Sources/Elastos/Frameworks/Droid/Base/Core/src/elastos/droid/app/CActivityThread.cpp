@@ -1556,12 +1556,10 @@ ECode CActivityThread::GetPackageInfo(
     if (packageInfo == NULL || (packageInfo->mResources != NULL
             && (packageInfo->mResources->GetAssets((IAssetManager**)&asset), asset->IsUpToDate(&isUp), !isUp))) {
         if (localLOGV) {
-            StringBuilder sb(includeCode ? "Loading code package "
-                   : "Loading resource-only package ");
+            StringBuilder sb(includeCode ? "Loading code package " : "Loading resource-only package ");
             sb += pkgName;
             sb += " (in ";
-            sb += (mBoundApplication != NULL
-                    ? mBoundApplication->mProcessName : String(NULL));
+            sb += (mBoundApplication != NULL ? mBoundApplication->mProcessName : String(NULL));
             sb += ")";
             Slogger::V(TAG, sb.ToString());
         }

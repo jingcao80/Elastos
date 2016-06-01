@@ -31,6 +31,10 @@ CSystemUIApplication::CSystemUIApplication()
     : mServicesStarted(FALSE)
     , mBootCompleted(FALSE)
 {
+}
+
+ECode CSystemUIApplication::constructor()
+{
     SERVICES = ArrayOf<IClassInfo*>::Alloc(7);
     AutoPtr<IClassInfo> clsInfo = Utils::GetClassInfo(String("Elastos.Droid.SystemUI.Keyguard.CKeyguardViewMediator"));
     SERVICES->Set(0, clsInfo);
@@ -48,13 +52,8 @@ CSystemUIApplication::CSystemUIApplication()
     SERVICES->Set(6, clsInfo);
 
     mServices = ArrayOf<ISystemUI*>::Alloc(SERVICES->GetLength());
-    // CHashMap::New((IMap**)&mComponents);
     mComponents = new HashMap<String, AutoPtr<IInterface> >();
-}
-
-ECode CSystemUIApplication::constructor()
-{
-    return NOERROR;
+    return Application::constructor();
 }
 
 ECode CSystemUIApplication::OnCreate()

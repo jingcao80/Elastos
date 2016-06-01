@@ -118,6 +118,8 @@ public:
     CARAPI SetAffiliatedTaskColor(
         /* [in] */ Int32 color);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
 private:
     /**
      * If this task is currently running, this is the identifier for it.

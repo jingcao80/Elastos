@@ -5,6 +5,7 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/systemui/recents/Constants.h"
+#include "elastos/droid/systemui/recents/CRecentAnimationEndedReceiver.h"
 #include "elastos/droid/systemui/recents/RecentsAppWidgetHost.h"
 #include "elastos/droid/systemui/recents/misc/Console.h"
 #include "elastos/droid/systemui/recents/model/RecentsTaskLoader.h"
@@ -86,15 +87,22 @@ ECode AlternateRecentsComponent::MR::Run()
 }
 
 //-----------------------------------------------------------------------------------
-// AlternateRecentsComponent::BR
+// AlternateRecentsComponent::RecentAnimationEndedReceiver
 //-----------------------------------------------------------------------------------
 
-AlternateRecentsComponent::BR::BR(
-    /* [in] */ AlternateRecentsComponent* host)
-    : mHost(host)
-{}
+ECode AlternateRecentsComponent::RecentAnimationEndedReceiver::constructor(
+    /* [in] */ IAlternateRecentsComponent* host)
+{
+    BroadcastReceiver::constructor();
+    mHost = (AlternateRecentsComponent*)host;
+    return NOERROR;
+}
 
-ECode AlternateRecentsComponent::BR::OnReceive(
+// There can be a race condition between the start animation callback and
+// the start of the new activity (where we register the receiver that listens
+// to this broadcast, so we add our own receiver and if that gets called, then
+// we know the activity has not yet started and we can retry sending the broadcast.
+ECode AlternateRecentsComponent::RecentAnimationEndedReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
@@ -102,11 +110,13 @@ ECode AlternateRecentsComponent::BR::OnReceive(
     GetResultCode(&resultCode);
     if (resultCode == IActivity::RESULT_OK) {
         mHost->mStartAnimationTriggered = TRUE;
-        return E_NULL_POINTER_EXCEPTION;
+        return NOERROR;
     }
-    AutoPtr<MR> mr = new MR(mHost);
+
+    // Schedule for the broadcast to be sent again after some time
+    AutoPtr<IRunnable> mr = new MR(mHost);
     Boolean b;
-    mHost->mHandler->PostDelayed((IRunnable*)mr.Get(), 75, &b);
+    mHost->mHandler->PostDelayed(mr, 75, &b);
     return NOERROR;
 }
 
@@ -748,17 +758,20 @@ ECode AlternateRecentsComponent::StartRecentsActivity(
             AutoPtr<IAppWidgetProviderInfo> searchWidget;
             String searchWidgetPackage;
             if (mConfig->HasSearchBarAppWidget()) {
-                searchWidget = mSystemServicesProxy->GetAppWidgetInfo(
-                    mConfig->mSearchBarAppWidgetId);
+                searchWidget = mSystemServicesProxy->GetAppWidgetInfo(mConfig->mSearchBarAppWidgetId);
             }
             else {
                 searchWidget = mSystemServicesProxy->ResolveSearchAppWidget();
             }
-            AutoPtr<IComponentName> provider;
-            searchWidget->GetProvider((IComponentName**)&provider);
-            if (searchWidget != NULL && provider != NULL) {
-                provider->GetPackageName(&searchWidgetPackage);
+
+            if (searchWidget != NULL) {
+                AutoPtr<IComponentName> provider;
+                searchWidget->GetProvider((IComponentName**)&provider);
+                if (provider != NULL) {
+                    provider->GetPackageName(&searchWidgetPackage);
+                }
             }
+
             // Determine whether we are coming from a search owned home activity
             Boolean fromSearchHome = FALSE;
             if (!homeActivityPackage.IsNull() && !searchWidgetPackage.IsNull() &&
@@ -860,8 +873,8 @@ ECode AlternateRecentsComponent::OnAnimationStarted()
         // the start of the new activity (where we register the receiver that listens
         // to this broadcast, so we add our own receiver and if that gets called, then
         // we know the activity has not yet started and we can retry sending the broadcast.
-        AutoPtr<BR> br = new BR(this);
-        AutoPtr<BroadcastReceiver> fallbackReceiver = (BroadcastReceiver*)br.Get();
+        AutoPtr<IBroadcastReceiver> fallbackReceiver;
+        CRecentAnimationEndedReceiver::New(this, (IBroadcastReceiver**)&fallbackReceiver);
 
         // Send the broadcast to notify Recents that the animation has started
         AutoPtr<IIntent> intent;
@@ -869,14 +882,15 @@ ECode AlternateRecentsComponent::OnAnimationStarted()
         String pn;
         mContext->GetPackageName(&pn);
         intent->SetPackage(pn);
-        intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
+        intent->AddFlags(
+            IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
             IIntent::FLAG_RECEIVER_FOREGROUND);
         AutoPtr<IUserHandleHelper> uhh;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
         AutoPtr<IUserHandle> current;
         uhh->GetCURRENT((IUserHandle**)&current);
         mContext->SendOrderedBroadcastAsUser(intent, current, String(NULL),
-                fallbackReceiver, NULL, IActivity::RESULT_CANCELED, String(NULL), NULL);
+            fallbackReceiver, NULL, IActivity::RESULT_CANCELED, String(NULL), NULL);
     }
     return NOERROR;
 }

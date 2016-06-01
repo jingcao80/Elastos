@@ -1,5 +1,10 @@
 #include "CArrayList.h"
 #include "CArrayListIterator.h"
+#include "CSimpleListIterator.h"
+#include "CFullListIterator.h"
+#include "CSubAbstractListIterator.h"
+#include "CSubAbstractList.h"
+#include "CRandomAccessSubList.h"
 #include "CUnsafeArrayList.h"
 #include "CHashMap.h"
 #include "CHashSet.h"
@@ -18,6 +23,11 @@ namespace Utility {
 
 CAR_OBJECT_IMPL(CArrayList)
 CAR_OBJECT_IMPL(CArrayListIterator)
+CAR_OBJECT_IMPL(CSimpleListIterator)
+CAR_OBJECT_IMPL(CFullListIterator)
+CAR_OBJECT_IMPL(CSubAbstractListIterator)
+CAR_OBJECT_IMPL(CSubAbstractList)
+CAR_OBJECT_IMPL(CRandomAccessSubList)
 CAR_OBJECT_IMPL(CHashMap)
 CAR_OBJECT_IMPL(CHashSet)
 CAR_OBJECT_IMPL(CHashTable)

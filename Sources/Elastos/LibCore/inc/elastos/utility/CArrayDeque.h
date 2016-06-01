@@ -276,6 +276,9 @@ private:
     CARAPI ReadObject(
         /* [in] */ IObjectInputStream* stream);
 
+protected:
+    CARAPI_(String) GetClassName() { return String("CArrayDeque"); }
+
 private:
     /**
      * The array in which the elements of the deque are stored.

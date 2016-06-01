@@ -4968,7 +4968,6 @@ ECode CWindowManagerService::SetFocusedApp(
     /* [in] */ IBinder* token,
     /* [in] */ Boolean moveFocusNow)
 {
-    Slogger::I(TAG, " >>> SetFocusedApp");
     if (!CheckCallingPermission(
             Manifest::permission::MANAGE_APP_TOKENS,
             String("SetFocusedApp()"))) {
@@ -5018,7 +5017,6 @@ ECode CWindowManagerService::SetFocusedApp(
             Binder::RestoreCallingIdentity(origId);
         }
     }
-    Slogger::I(TAG, " <<< SetFocusedApp");
     return NOERROR;
 }
 
@@ -11063,7 +11061,7 @@ void CWindowManagerService::PerformLayoutLockedInner(
             || (win->mAttrs->GetType(&type), type == IWindowManagerLayoutParams::TYPE_UNIVERSE_BACKGROUND)) {
             if (!win->mLayoutAttached) {
                 if (initial) {
-                    Slogger::I(TAG, "Window %s clearing mContentChanged - initial", TO_CSTR(win));
+                    // Slogger::I(TAG, "Window %s clearing mContentChanged - initial", TO_CSTR(win));
                     win->mContentChanged = FALSE;
                 }
                 if (type == IWindowManagerLayoutParams::TYPE_DREAM) {

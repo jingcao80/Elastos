@@ -5668,16 +5668,16 @@ ECode CPackageManagerService::GetApplicationInfo(
     VALIDATE_NOT_NULL(appInfo)
     *appInfo = NULL;
 
-    Slogger::D(TAG, " >> GetApplicationInfo [%s], userId %d", packageName.string(), userId);
     if (!sUserManager->Exists(userId)) {
-        Slogger::D(TAG, " >> GetApplicationInfo %d, userId %d not exists.", __LINE__, userId);
+        Slogger::E(TAG, "GetApplicationInfo %d, userId %d not exists.", __LINE__, userId);
         return NOERROR;
     }
 
     FAIL_RETURN(EnforceCrossUserPermission(Binder::GetCallingUid(), userId,
             FALSE, FALSE, String("get application info")))
     // writer
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         AutoPtr<PackageParser::Package> p;
         if (!packageName.IsNull()) {
             HashMap<String, AutoPtr<PackageParser::Package> >::Iterator it = mPackages.Find(packageName);
@@ -5685,8 +5685,9 @@ ECode CPackageManagerService::GetApplicationInfo(
                 p = it->mSecond;
             }
         }
-        // if (DEBUG_PACKAGE_INFO)
-        Slogger::V(TAG, "getApplicationInfo [%s]: %s", packageName.string(), TO_CSTR(p));
+        if (DEBUG_PACKAGE_INFO)
+            Slogger::V(TAG, "getApplicationInfo [%s]: %s", packageName.string(), TO_CSTR(p));
+
         if (p != NULL) {
             AutoPtr<PackageSetting> ps;
             HashMap<String, AutoPtr<PackageSetting> >::Iterator pit =
@@ -5695,33 +5696,28 @@ ECode CPackageManagerService::GetApplicationInfo(
                 ps = pit->mSecond;
             }
             if (ps == NULL) {
-                Slogger::D(TAG, " >> GetApplicationInfo %d", __LINE__);
                 return NOERROR;
             }
             // Note: isEnabledLP() does not apply here - always return info
             AutoPtr<IApplicationInfo> info = PackageParser::GenerateApplicationInfo(
                     p, flags, ps->ReadUserState(userId), userId);
-            Slogger::D(TAG, " >> GetApplicationInfo %d : %s", __LINE__, TO_CSTR(info));
             *appInfo = info;
             REFCOUNT_ADD(*appInfo)
             return NOERROR;
         }
 
         if (packageName.Equals("android") || packageName.Equals("system")) {
-            Slogger::D(TAG, " >> GetApplicationInfo %d, %s", __LINE__, TO_CSTR(mElastosApplication));
             *appInfo = mElastosApplication;
             REFCOUNT_ADD(*appInfo)
             return NOERROR;
         }
         if((flags & IPackageManager::GET_UNINSTALLED_PACKAGES) != 0) {
             AutoPtr<IApplicationInfo> info = GenerateApplicationInfoFromSettingsLPw(packageName, flags, userId);
-            Slogger::D(TAG, " >> GetApplicationInfo %d : %s", __LINE__, TO_CSTR(info));
             *appInfo = info;
             REFCOUNT_ADD(*appInfo)
             return NOERROR;
         }
     }
-    Slogger::D(TAG, " >> GetApplicationInfo %d", __LINE__);
     return NOERROR;
 }
 
@@ -7697,12 +7693,15 @@ ECode CPackageManagerService::QueryIntentActivities(
     VALIDATE_NOT_NULL(infos)
     *infos = NULL;
 
+    if (DEBUG_INTENT_MATCHING) {
+        Logger::I(TAG, "QueryIntentActivities: %s", TO_CSTR(_intent));
+    }
+
     AutoPtr<IIntent> intent = _intent;
     if (!sUserManager->Exists(userId)) {
-        AutoPtr<ICollections> colls;
-        CCollections::AcquireSingleton((ICollections**)&colls);
-        return colls->GetEmptyList(infos);
+        return CParcelableList::New(0, infos);
     }
+
     FAIL_RETURN(EnforceCrossUserPermission(Binder::GetCallingUid(), userId, FALSE, FALSE, String("query intent activities")))
     AutoPtr<IComponentName> comp;
     intent->GetComponent((IComponentName**)&comp);
@@ -7919,9 +7918,7 @@ ECode CPackageManagerService::QueryIntentActivityOptions(
     *infos = NULL;
 
     if (!sUserManager->Exists(userId)) {
-        AutoPtr<ICollections> cols;
-        CCollections::AcquireSingleton((ICollections**)&cols);
-        return cols->GetEmptyList(infos);
+        return CParcelableList::New(0, infos);
     }
     FAIL_RETURN(EnforceCrossUserPermission(Binder::GetCallingUid(), userId, FALSE, FALSE,
             String("query intent activity options")))
@@ -7930,10 +7927,10 @@ ECode CPackageManagerService::QueryIntentActivityOptions(
 
     AutoPtr<IList> results;
     QueryIntentActivities(intent, resolvedType, flags | IPackageManager::GET_RESOLVED_FILTER,
-            userId, (IList**)&results);
+        userId, (IList**)&results);
 
     if (DEBUG_INTENT_MATCHING) {
-        Logger::V(TAG, "Query %p: %p", intent, results.Get());
+        Logger::V(TAG, "Query %s: %s", TO_CSTR(intent), TO_CSTR(results));
     }
 
     Int32 specificsPos = 0;
@@ -8130,7 +8127,7 @@ ECode CPackageManagerService::QueryIntentActivityOptions(
         }
     }
 
-    // if (DEBUG_INTENT_MATCHING) Logger::V(TAG, "Result: " + results);
+    if (DEBUG_INTENT_MATCHING) Logger::V(TAG, "Result: %s", TO_CSTR(results));
 
     *infos = results;
     REFCOUNT_ADD(*infos)
@@ -8147,12 +8144,13 @@ ECode CPackageManagerService::QueryIntentReceivers(
     VALIDATE_NOT_NULL(receivers)
     *receivers = NULL;
 
-    Slogger::D(TAG, " >> QueryIntentReceivers %s", TO_CSTR(_intent));
+    if (DEBUG_INTENT_MATCHING) {
+        Logger::V(TAG, "QueryIntentReceivers %s", TO_CSTR(_intent));
+    }
+
     AutoPtr<IIntent> intent = _intent;
     if (!sUserManager->Exists(userId)) {
-        AutoPtr<ICollections> cols;
-        CCollections::AcquireSingleton((ICollections**)&cols);
-        return cols->GetEmptyList(receivers);
+        return CParcelableList::New(0, receivers);
     }
     AutoPtr<IComponentName> comp;
     intent->GetComponent((IComponentName**)&comp);
@@ -8164,9 +8162,8 @@ ECode CPackageManagerService::QueryIntentReceivers(
         }
     }
     if (comp != NULL) {
-        AutoPtr<IArrayList> al;
-        CArrayList::New(1, (IArrayList**)&al);
-        *receivers = IList::Probe(al);
+        CParcelableList::New(1, receivers);
+
         AutoPtr<IActivityInfo> ai;
         GetReceiverInfo(comp, flags, userId, (IActivityInfo**)&ai);
         if (ai != NULL) {
@@ -8175,19 +8172,19 @@ ECode CPackageManagerService::QueryIntentReceivers(
             ri->SetActivityInfo(ai);
             (*receivers)->Add(ri);
         }
-        REFCOUNT_ADD(*receivers)
         return NOERROR;
     }
 
     // reader
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         String pkgName;
         intent->GetPackage(&pkgName);
         if (pkgName.IsNull()) {
             AutoPtr<List<AutoPtr<IResolveInfo> > > infos = mReceivers->QueryIntent(intent,
                     resolvedType, flags, userId);
             AutoPtr<IList> list;
-            CArrayList::New((IList**)&list);
+            CParcelableList::New((IList**)&list);
             List<AutoPtr<IResolveInfo> >::Iterator infoIt = infos->Begin();
             for (; infoIt != infos->End(); ++infoIt) {
                 list->Add(*infoIt);
@@ -8205,7 +8202,7 @@ ECode CPackageManagerService::QueryIntentReceivers(
             AutoPtr<List<AutoPtr<IResolveInfo> > > infos = mReceivers->QueryIntentForPackage(intent,
                     resolvedType, flags, &pkg->mReceivers, userId);
             AutoPtr<IList> list;
-            CArrayList::New((IList**)&list);
+            CParcelableList::New((IList**)&list);
             List<AutoPtr<IResolveInfo> >::Iterator infoIt = infos->Begin();
             for (; infoIt != infos->End(); ++infoIt) {
                 list->Add(*infoIt);
@@ -8257,12 +8254,14 @@ ECode CPackageManagerService::QueryIntentServices(
     VALIDATE_NOT_NULL(services)
     *services = NULL;
 
+    if (DEBUG_INTENT_MATCHING) {
+        Logger::I(TAG, "QueryIntentServices: %s", TO_CSTR(_intent));
+    }
     AutoPtr<IIntent> intent = _intent;
     if (!sUserManager->Exists(userId)) {
-        AutoPtr<ICollections> cols;
-        CCollections::AcquireSingleton((ICollections**)&cols);
-        return cols->GetEmptyList(services);
+        return CParcelableList::New(0, services);
     }
+
     AutoPtr<IComponentName> comp;
     intent->GetComponent((IComponentName**)&comp);
     if (comp == NULL) {
@@ -8273,10 +8272,7 @@ ECode CPackageManagerService::QueryIntentServices(
         }
     }
     if (comp != NULL) {
-        AutoPtr<IArrayList> al;
-        CArrayList::New(1, (IArrayList**)&al);
-        *services = IList::Probe(al);
-        REFCOUNT_ADD(*services)
+        CParcelableList::New(1, services);
 
         AutoPtr<IServiceInfo> si;
         GetServiceInfo(comp, flags, userId, (IServiceInfo**)&si);
@@ -8296,7 +8292,7 @@ ECode CPackageManagerService::QueryIntentServices(
         if (pkgName.IsNull()) {
             AutoPtr<List<AutoPtr<IResolveInfo> > > ss = mServices->QueryIntent(intent, resolvedType, flags, userId);
             AutoPtr<IList> list;
-            CArrayList::New((IList**)&list);
+            CParcelableList::New((IList**)&list);
             List<AutoPtr<IResolveInfo> >::Iterator serviceIt = ss->Begin();
             for (; serviceIt != ss->End(); ++serviceIt) {
                 list->Add(*serviceIt);
@@ -8314,7 +8310,7 @@ ECode CPackageManagerService::QueryIntentServices(
             AutoPtr<List<AutoPtr<IResolveInfo> > > ss = mServices->QueryIntentForPackage(
                     intent, resolvedType, flags, &pkg->mServices, userId);
             AutoPtr<IList> list;
-            CArrayList::New((IList**)&list);
+            CParcelableList::New((IList**)&list);
             List<AutoPtr<IResolveInfo> >::Iterator serviceIt = ss->Begin();
             for (; serviceIt != ss->End(); ++serviceIt) {
                 list->Add(*serviceIt);
@@ -8336,12 +8332,15 @@ ECode CPackageManagerService::QueryIntentContentProviders(
     VALIDATE_NOT_NULL(infos)
     *infos = NULL;
 
+    if (DEBUG_INTENT_MATCHING) {
+        Logger::I(TAG, "QueryIntentContentProviders: %s", TO_CSTR(_intent));
+    }
+
     AutoPtr<IIntent> intent = _intent;
     if (!sUserManager->Exists(userId)) {
-        AutoPtr<ICollections> cols;
-        CCollections::AcquireSingleton((ICollections**)&cols);
-        return cols->GetEmptyList(infos);
+        return CParcelableList::New(0, infos);
     }
+
     AutoPtr<IComponentName> comp;
     intent->GetComponent((IComponentName**)&comp);
     if (comp == NULL) {
@@ -8353,7 +8352,7 @@ ECode CPackageManagerService::QueryIntentContentProviders(
     }
     if (comp != NULL) {
         AutoPtr<IArrayList> al;
-        CArrayList::New(1, (IArrayList**)&al);
+        CParcelableList::New(1, (IArrayList**)&al);
         *infos = IList::Probe(al);
         AutoPtr<IProviderInfo> pi;
         GetProviderInfo(comp, flags, userId, (IProviderInfo**)&pi);
@@ -8368,13 +8367,14 @@ ECode CPackageManagerService::QueryIntentContentProviders(
     }
 
     // reader
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         String pkgName;
         intent->GetPackage(&pkgName);
         if (pkgName.IsNull()) {
             AutoPtr<List<AutoPtr<IResolveInfo> > > ss = mProviders->QueryIntent(intent, resolvedType, flags, userId);
             AutoPtr<IList> list;
-            CArrayList::New((IList**)&list);
+            CParcelableList::New((IList**)&list);
             List<AutoPtr<IResolveInfo> >::Iterator infoIt = ss->Begin();
             for (; infoIt != ss->End(); ++infoIt) {
                 list->Add(*infoIt);
@@ -8383,6 +8383,7 @@ ECode CPackageManagerService::QueryIntentContentProviders(
             REFCOUNT_ADD(*infos)
             return NOERROR;
         }
+
         AutoPtr<PackageParser::Package> pkg;
         HashMap< String, AutoPtr<PackageParser::Package> >::Iterator it = mPackages.Find(pkgName);
         if (it != mPackages.End()) {
@@ -8392,7 +8393,7 @@ ECode CPackageManagerService::QueryIntentContentProviders(
             AutoPtr<List<AutoPtr<IResolveInfo> > > ss = mProviders->QueryIntentForPackage(
                     intent, resolvedType, flags, &pkg->mProviders, userId);
             AutoPtr<IList> list;
-            CArrayList::New((IList**)&list);
+            CParcelableList::New((IList**)&list);
             List<AutoPtr<IResolveInfo> >::Iterator infoIt = ss->Begin();
             for (; infoIt != ss->End(); ++infoIt) {
                 list->Add(*infoIt);

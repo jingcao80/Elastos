@@ -429,6 +429,9 @@ private:
     CARAPI_(void) ReadObject(
         /* [in] */ IObjectInputStream* s);
 
+protected:
+    CARAPI_(String) GetClassName() { return String("CLinkedTransferQueue"); }
+
 public:
      /**
      * The maximum number of estimated removal failures (sweepVotes)

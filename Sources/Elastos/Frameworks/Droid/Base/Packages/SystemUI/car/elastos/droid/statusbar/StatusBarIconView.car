@@ -49,13 +49,6 @@ module
             [out] IDrawable** drawable);
     }
 
-    interface IStatusBarPanel {
-        IsInContentArea(
-            [in] Int32 x,
-            [in] Int32 y,
-            [out] Boolean* result);
-    }
-
     /**
      * Class to encapsulate all possible status bar states regarding Keyguard.
      */

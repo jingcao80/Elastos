@@ -134,6 +134,9 @@ public:
         /* [in] */ ArrayOf<IInterface*>* inarray,
         /* [out, callee] */ ArrayOf<IInterface*>** outarray);
 
+protected:
+    CARAPI_(String) GetClassName() { return String("HugeEnumSet"); }
+
 private:
     static const Int32 BIT_IN_LONG;// = 64;
 

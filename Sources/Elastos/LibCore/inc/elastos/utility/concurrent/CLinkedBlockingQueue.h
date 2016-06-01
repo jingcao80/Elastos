@@ -244,6 +244,10 @@ private:
      */
     CARAPI_(AutoPtr<IInterface>) Dequeue();
 
+
+protected:
+    CARAPI_(String) GetClassName() { return String("CLinkedBlockingQueue"); }
+
 private:
     /** The capacity bound, or Integer.MAX_VALUE if none */
     Int32 mCapacity;

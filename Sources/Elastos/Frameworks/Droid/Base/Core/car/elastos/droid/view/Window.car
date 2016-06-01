@@ -657,6 +657,14 @@ module
         AddFlags(
             [in] Int32 flags);
 
+        /** @hide */
+        AddPrivateFlags(
+            [in] Int32 flags);
+
+        /** @hide */
+        SetBlurMaskAlphaThreshold(
+            [in] Float alpha);
+
         /**
          * Convenience function to clear the flag bits as specified in flags, as
          * per {@link #setFlags}.
@@ -664,6 +672,10 @@ module
          * @see #setFlags
          */
         ClearFlags(
+            [in] Int32 flags);
+
+        /** @hide */
+        ClearPrivateFlags(
             [in] Int32 flags);
 
         /**

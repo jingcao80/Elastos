@@ -200,6 +200,8 @@ protected:
         /* [in] */ Int32 fromIndex,
         /* [in] */ Int32 toIndex);
 
+    CARAPI_(String) GetClassName() { return String("CArrayList"); }
+
 private:
     ECO_LOCAL static CARAPI_(Int32) NewCapacity(
         /* [in] */ Int32 currentCapacity);

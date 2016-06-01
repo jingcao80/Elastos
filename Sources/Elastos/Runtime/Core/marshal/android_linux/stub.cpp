@@ -615,10 +615,8 @@ void CObjectStub::PrintIpcLog(
     CInterfaceStub* curInterface = &(mInterfaces[header->mInterfaceIndex]);
     InterfaceID temp = curInterface->mInfo->mIID;
     __DumpGUID(temp);
-    PFL_EX("Interface Index = %d", header->mInterfaceIndex)
-    PFL_EX("Method Index = %d", header->mMethodIndex)
-    ALOGD("tid: %d, Interface Index = %d", gettid(), header->mInterfaceIndex);
-    ALOGD("Method Index = %d",header->mMethodIndex);
+    ALOGD("> tid: %d, Interface Index = %d, Method Index = %d",
+        gettid(), header->mInterfaceIndex, header->mMethodIndex);
 }
 
 ECode CObjectStub::GetClassID(

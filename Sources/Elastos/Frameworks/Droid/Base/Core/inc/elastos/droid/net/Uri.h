@@ -120,6 +120,9 @@ public:
         CARAPI ToString(
             /* [out] */ String* str);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("Uri::PathSegments"); }
+
     public:
         /* const */ static AutoPtr<PathSegments> sEMPTY;
 

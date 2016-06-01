@@ -9,7 +9,6 @@
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/app/Activity.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "elastos/droid/systemui/recent/RecentsPanelView.h"
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::Content::BroadcastReceiver;
@@ -17,7 +16,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::SystemUI::StatusBar::IIStatusBarPanel;
+using Elastos::Droid::SystemUI::StatusBar::IStatusBarPanel;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnTouchListener;
@@ -64,7 +63,7 @@ public:
         CAR_INTERFACE_DECL()
 
         TouchOutsideListener(
-            /* [in] */ IIStatusBarPanel* panel,
+            /* [in] */ IStatusBarPanel* panel,
             /* [in] */ RecentsActivity* host);
 
         // @Override
@@ -75,7 +74,7 @@ public:
 
     private:
         RecentsActivity* mHost;
-        AutoPtr<IIStatusBarPanel> mPanel;
+        AutoPtr<IStatusBarPanel> mPanel;
     };
 
 public:
@@ -140,7 +139,7 @@ private:
 private:
     static const String WAS_SHOWING;
 
-    AutoPtr<RecentsPanelView> mRecentsPanel;
+    AutoPtr<IRecentsPanelView> mRecentsPanel;
     AutoPtr<IIntentFilter> mIntentFilter;
     Boolean mShowing;
     Boolean mForeground;

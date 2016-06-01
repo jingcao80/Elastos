@@ -233,6 +233,8 @@ const String BrightnessController::TAG("StatusBar.BrightnessController");
 const Boolean BrightnessController::SHOW_AUTOMATIC_ICON = FALSE;
 const Float BrightnessController::BRIGHTNESS_ADJ_RESOLUTION = 100.0f;
 
+CAR_INTERFACE_IMPL(BrightnessController, Object, IBrightnessController)
+
 BrightnessController::BrightnessController()
     : mAutomaticAvailable(FALSE)
     , mAutomatic(FALSE)
@@ -271,24 +273,23 @@ ECode BrightnessController::constructor(
     return NOERROR;
 }
 
-void BrightnessController::AddStateChangedCallback(
+ECode BrightnessController::AddStateChangedCallback(
     /* [in] */ IBrightnessStateChangeCallback* cb)
 {
-    mChangeCallbacks->Add(cb);
+    return mChangeCallbacks->Add(cb);
 }
 
-Boolean BrightnessController::RemoveStateChangedCallback(
-    /* [in] */ IBrightnessStateChangeCallback* cb)
+ECode BrightnessController::RemoveStateChangedCallback(
+    /* [in] */ IBrightnessStateChangeCallback* cb,
+    /* [out] */ Boolean* result)
 {
-    Boolean isRemoved;
-    mChangeCallbacks->Remove(cb, &isRemoved);
-    return isRemoved;
+    return mChangeCallbacks->Remove(cb, result);
 }
 
-void BrightnessController::RegisterCallbacks()
+ECode BrightnessController::RegisterCallbacks()
 {
     if (mListening) {
-        return;
+        return NOERROR;
     }
 
     mBrightnessObserver->StartObserving();
@@ -301,18 +302,20 @@ void BrightnessController::RegisterCallbacks()
 
     mControl->SetOnChangedListener(mToggleSliderListener);
     mListening = TRUE;
+    return NOERROR;
 }
 
-void BrightnessController::UnregisterCallbacks()
+ECode BrightnessController::UnregisterCallbacks()
 {
     if (!mListening) {
-        return;
+        return NOERROR;
     }
 
     mBrightnessObserver->StopObserving();
     mUserTracker->StopTracking();
     mControl->SetOnChangedListener(NULL);
     mListening = FALSE;
+        return NOERROR;
 }
 
 void BrightnessController::SetMode(

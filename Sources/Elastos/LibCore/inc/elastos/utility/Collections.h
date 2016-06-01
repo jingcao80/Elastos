@@ -253,6 +253,9 @@ public:
             /* [in] */ ArrayOf<IInterface*>* inArray,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::SynchronizedList"); }
+
     private:
         CARAPI WriteObject(
             /* [in] */ IObjectOutputStream* stream);
@@ -281,6 +284,9 @@ public:
             /* [in] */ Int32 start,
             /* [in] */ Int32 end,
             /* [out] */ IList** subList);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::SynchronizedRandomAccessList"); }
 
     private:
         CARAPI_(AutoPtr<IInterface>) WriteReplace();
@@ -367,6 +373,10 @@ public:
 
         CARAPI RetainAll(
             /* [in] */ ICollection* collection);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::SynchronizedSet"); }
+
     private:
         CARAPI WriteObject(
             /* [in] */ IObjectOutputStream* stream);
@@ -446,6 +456,9 @@ public:
 
         CARAPI ToString(
             /* [out] */ String* str);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::SynchronizedMap"); }
 
     private:
         CARAPI WriteObject(
@@ -547,6 +560,9 @@ public:
 
         CARAPI GetSize(
             /* [out] */ Int32* size);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::SynchronizedSortedMap"); }
 
     private:
         CARAPI WriteObject(
@@ -657,6 +673,9 @@ public:
 
         CARAPI RetainAll(
             /* [in] */ ICollection*);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::SynchronizedSortedSet"); }
 
     private:
         CARAPI WriteObject(
@@ -823,6 +842,11 @@ private:
 
         CARAPI GetIterator(
             /* [out] */ IIterator** it);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::CopiesList"); }
+
+    public:
         Int32 mN;
         AutoPtr<IInterface> mElement;
     };
@@ -931,6 +955,9 @@ public:
             /* [in] */ Int32 location,
             /* [out] */ IInterface** object);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::EmptyList"); }
+
     private:
         CARAPI_(AutoPtr<IInterface>) ReadResolve();
     };
@@ -995,6 +1022,8 @@ public:
             /* [in] */ ArrayOf<IInterface*>* inArray,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::EmptySet"); }
     private:
         CARAPI_(AutoPtr<IInterface>) ReadResolve();
     };
@@ -1060,6 +1089,9 @@ public:
 
         CARAPI GetSize(
             /* [out] */ Int32* size);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::EmptyMap"); }
 
     private:
         CARAPI_(AutoPtr<IInterface>) ReadResolve();
@@ -1197,6 +1229,8 @@ public:
             /* [in] */ ArrayOf<IInterface*>* inArray,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::SingletonSet"); }
     public:
         AutoPtr<IInterface> mElement;
     };
@@ -1306,6 +1340,8 @@ public:
         CARAPI GetIterator(
             /* [out] */ IIterator** it);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::SingletonList"); }
     public:
         AutoPtr<IInterface> mElement;
     };
@@ -1415,6 +1451,9 @@ public:
                 /* [in] */ ArrayOf<IInterface*>* inArray,
                 /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
+        protected:
+            CARAPI_(String) GetClassName() { return String("Collections::SingletonMap::MySet"); }
+
         private:
             _SingletonMap* mOwner;
         };
@@ -1472,6 +1511,9 @@ public:
 
         CARAPI GetValues(
             /* [out] */ ICollection** value);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::SingletonMap"); }
 
     protected:
         AutoPtr<IInterface> mK;
@@ -1757,6 +1799,9 @@ public:
         CARAPI RetainAll(
             /* [in] */ ICollection*);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::UnmodifiableList"); }
+
     private:
         CARAPI_(AutoPtr<IInterface>) ReadResolve();
 
@@ -1778,6 +1823,9 @@ public:
             /* [in] */ Int32 start,
             /* [in] */ Int32 end,
             /* [out] */ IList** subList);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::UnmodifiableRandomAccessList"); }
 
     private:
         CARAPI_(AutoPtr<IInterface>) WriteReplace();
@@ -1860,6 +1908,9 @@ public:
 
         CARAPI RetainAll(
             /* [in] */ ICollection*);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::UnmodifiableSet"); }
     };
 
     class _UnmodifiableMap
@@ -1944,6 +1995,10 @@ public:
                 /* [in] */ ArrayOf<IInterface*>* inArray,
                 /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
+        protected:
+            CARAPI_(String) GetClassName() {
+                return String("Collections::UnmodifiableMap::UnmodifiableEntrySet");
+            }
         };
 
     public:
@@ -2023,6 +2078,9 @@ public:
             /* [in] */ ICollection*);
 
         AutoPtr<IMap> mM;
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::UnmodifiableMap"); }
     };
 
     class _UnmodifiableSortedMap
@@ -2125,6 +2183,9 @@ public:
             /* [in] */ ICollection*);
 
         AutoPtr<ISortedMap> mSm;
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::UnmodifiableSortedMap"); }
     };
 
     class _UnmodifiableSortedSet
@@ -2228,6 +2289,9 @@ public:
             /* [in] */ ICollection*);
 
         AutoPtr<ISortedSet> mSs;
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::UnmodifiableSortedSet"); }
     };
 
     class _SetFromMap
@@ -2296,6 +2360,8 @@ public:
             /* [in] */ ICollection* collection,
             /* [out] */ Boolean* modified);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::SetFromMap"); }
     private:
         CARAPI ReadObject(
             /* [in] */ IObjectInputStream* stream);
@@ -2386,6 +2452,8 @@ public:
             /* [out] */ Int32* hashCode);
 
         AutoPtr<IDeque> mQ;
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::AsLifoQueue"); }
     };
 
     class _CheckedCollection
@@ -2471,6 +2539,8 @@ public:
         CARAPI GetHashCode(
             /* [out] */ Int32* hashCode);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::CheckedCollection"); }
     public:
         AutoPtr<ICollection> mC;
         InterfaceID mType;
@@ -2651,6 +2721,8 @@ public:
         CARAPI RetainAll(
             /* [in] */ ICollection*);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::CheckedList"); }
     public:
         AutoPtr<IList> mL;
     };
@@ -2668,6 +2740,9 @@ public:
             /* [in] */ InterfaceID type);
 
         CAR_INTERFACE_DECL()
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::CheckedRandomAccessList"); }
     };
 
     /**
@@ -2751,6 +2826,8 @@ public:
 
         CARAPI RetainAll(
             /* [in] */ ICollection*);
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::CheckedSet"); }
     };
 
     /**
@@ -2978,6 +3055,8 @@ public:
         CARAPI ToString(
             /* [out] */ String* result);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::CheckedMap"); }
     public:
         AutoPtr<IMap> mM;
         InterfaceID mKeyType;
@@ -3089,6 +3168,11 @@ public:
             /* [in] */ ICollection*);
 
         AutoPtr<ISortedSet> mSs;
+
+    protected:
+        CARAPI_(String) GetClassName() {
+            return String("Collections::CheckedSortedSet");
+        }
     };
 
     /**
@@ -3182,6 +3266,9 @@ public:
 
         CARAPI GetHashCode(
             /* [out] */ Int32* hashCode);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Collections::CheckedSortedMap"); }
 
     public:
         AutoPtr<ISortedMap> mSm;

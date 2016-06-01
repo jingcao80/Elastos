@@ -1685,7 +1685,8 @@ ECode Collections::_SynchronizedCollection::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IObject> iObj;
         iObj = IObject::Probe(mC);
         if (iObj != NULL) {

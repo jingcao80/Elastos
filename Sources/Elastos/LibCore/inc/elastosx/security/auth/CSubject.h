@@ -368,6 +368,9 @@ private:
         CARAPI VerifyElement(
             /* [in] */ IInterface *o);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CSubject::SecureSet"); }
+
     private:
         /**
          * Compatibility issue: see comments for setType variable

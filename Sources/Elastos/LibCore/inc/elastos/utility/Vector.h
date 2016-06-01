@@ -256,6 +256,9 @@ public:
     CARAPI Clone(
         /* [out] */ IInterface** object);
 
+protected:
+    CARAPI_(String) GetClassName() { return String("Vector"); }
+
 private:
     AutoPtr<ArrayOf<IInterface*> > NewElementArray(
         /* [in] */ Int32 size);

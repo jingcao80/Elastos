@@ -217,6 +217,9 @@ public:
         /* [in] */ ICollection* collection,
         /* [out] */ Boolean* result);
 
+protected:
+    CARAPI_(String) GetClassName() { return String("CArraySet"); }
+
 private:
     CARAPI AllocArrays(
         /* [in] */ Int32 size);

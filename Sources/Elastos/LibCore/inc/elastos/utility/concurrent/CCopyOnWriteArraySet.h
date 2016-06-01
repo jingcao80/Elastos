@@ -319,6 +319,9 @@ public:
     CARAPI GetIterator(
         /* [out] */ IIterator** it);
 
+protected:
+    CARAPI_(String) GetClassName() { return String("CCopyOnWriteArraySet"); }
+
 private:
     /**
      * Test for equality, coping with nulls.

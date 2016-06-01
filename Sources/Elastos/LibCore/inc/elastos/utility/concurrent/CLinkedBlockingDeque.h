@@ -400,6 +400,9 @@ public:
     CARAPI GetHashCode(
         /* [out] */ Int32* hashCode);
 
+protected:
+    CARAPI_(String) GetClassName() { return String("CLinkedBlockingDeque"); }
+
 private:
     // Basic linking and unlinking operations, called only while holding lock
 

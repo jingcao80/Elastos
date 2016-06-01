@@ -252,6 +252,9 @@ public:
             /* [in] */ ArrayOf<IInterface*>* inArray,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CTreeMap::EntrySet"); }
+
     private:
         CTreeMap* mHost;
     };
@@ -401,6 +404,8 @@ public:
         CARAPI RetainAll(
             /* [in] */ ICollection* collection);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CTreeMap::KeySet"); }
     private:
         CTreeMap* mHost;
     };
@@ -530,6 +535,9 @@ public:
                     /* [out] */ IInterface** object);
             };
 
+        protected:
+            CARAPI_(String) GetClassName() { return String("CTreeMap::BoundedEntrySet"); }
+
         public:
             BoundedEntrySet(
                 /* [in] */ BoundedMap* host);
@@ -619,6 +627,9 @@ public:
                 CARAPI GetNext(
                     /* [out] */ IInterface** object);
             };
+
+        protected:
+            CARAPI_(String) GetClassName() { return String("CTreeMap::BoundedKeySet"); }
 
         public:
             BoundedKeySet(
@@ -925,6 +936,9 @@ public:
 
         CARAPI_(AutoPtr<IInterface>) WriteReplace();
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CTreeMap::BoundedMap"); }
+
     private:
         /**
          * Returns true if the key is in bounds.
@@ -1075,6 +1089,8 @@ public:
         CARAPI ReadResolve(
             /* [out] */ IInterface** outface);
 
+        CARAPI_(String) GetClassName() { return String("CTreeMap::NavigableSubMap"); }
+
     public:
         AutoPtr<CTreeMap> mM;
         AutoPtr<IInterface> mLo;
@@ -1099,6 +1115,8 @@ public:
             /* [in] */ IInterface* to,
             /* [in] */ Bound toBound);
 
+    CARAPI_(String) GetClassName() { return String("CTreeMap::DescendingSubMap"); }
+
     public:
         AutoPtr<IComparator> mReverseComparator;
     };
@@ -1113,6 +1131,8 @@ public:
             /* [in] */ Bound fromBound,
             /* [in] */ IInterface* to,
             /* [in] */ Bound toBound);
+
+        CARAPI_(String) GetClassName() { return String("CTreeMap::AscendingSubMap"); }
     };
 
     class SubMap
@@ -1175,6 +1195,7 @@ public:
         CARAPI ReadResolve(
             /* [out] */ IInterface** outface);
 
+        CARAPI_(String) GetClassName() { return String("CTreeMap::SubMap"); }
     public:
         AutoPtr<IInterface> mFromKey;
         AutoPtr<IInterface> mToKey;
@@ -1956,6 +1977,9 @@ public:
      */
     static CARAPI_(Int32) Count(
         /* [in] */ IIterator* iterator);
+
+protected:
+    CARAPI_(String) GetClassName() { return String("CTreeMap"); }
 
 private:
     CARAPI ReplaceInParent(

@@ -1036,7 +1036,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
         }
 
         default:
-            // throw new RuntimeException("bogus span encoding " + kind);
+            Logger::E(TAG, "bogus span encoding %d", kind);
             return E_RUNTIME_EXCEPTION;
         }
     }

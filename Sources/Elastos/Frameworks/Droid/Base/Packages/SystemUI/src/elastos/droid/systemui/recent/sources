@@ -6,7 +6,8 @@ include $(MAKEDIR)/../../../../../../../../sources.inc
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
-SOURCES = CColorDrawableWithDimensions.cpp
+SOURCES = recent.cpp
+SOURCES += CColorDrawableWithDimensions.cpp
 SOURCES += TaskDescription.cpp
 SOURCES += FadedEdgeDrawHelper.cpp
 SOURCES += FirstFrameAnimatorHelper.cpp
@@ -16,5 +17,4 @@ SOURCES += RecentsActivity.cpp
 SOURCES += RecentsHorizontalScrollView.cpp
 SOURCES += RecentsVerticalScrollView.cpp
 SOURCES += CRecents.cpp
-SOURCES += CRecentsActivity.cpp
 SOURCES += CRecentsPreloadReceiver.cpp

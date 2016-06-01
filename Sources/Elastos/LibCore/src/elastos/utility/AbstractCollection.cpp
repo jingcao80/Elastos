@@ -299,15 +299,19 @@ ECode AbstractCollection::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
+    String className = GetClassName();
     Boolean flag = FALSE;
     if (IsEmpty(&flag), flag) {
-        *result = "[]";
+        StringBuilder sb(className);
+        sb.Append("[]");
+        *result = sb.ToString();
         return NOERROR;
     }
 
     Int32 size;
     GetSize(&size);
     StringBuilder buffer(size * 16);
+    buffer.Append(className);
     buffer.AppendChar('[');
     AutoPtr<IIterator> it;
     GetIterator((IIterator**)&it);

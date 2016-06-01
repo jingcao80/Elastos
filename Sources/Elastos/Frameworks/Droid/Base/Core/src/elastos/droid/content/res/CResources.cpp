@@ -648,6 +648,7 @@ ECode CResources::GetString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
+    *str = String(NULL);
 
     String raw;
     FAIL_RETURN(GetString(id, &raw));
@@ -669,20 +670,26 @@ ECode CResources::GetQuantityString(
     /* [in] */ ArrayOf<IInterface*>* formatArgs,
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str);
+    VALIDATE_NOT_NULL(str)
+    *str = String(NULL);
 
     AutoPtr<ICharSequence> res;
     ECode ec = GetQuantityText(id, quantity, (ICharSequence**)&res);
-    if (SUCCEEDED(ec) && res != NULL) {
-        String raw;
-        res->ToString(&raw);
-        assert(0);
-        // return String.format(mConfiguration.locale, raw, formatArgs);
-        return NOERROR;
+    if (res != NULL) {
+        return E_NOT_FOUND_EXCEPTION;
     }
 
-    *str = NULL;
-    return ec;
+    String raw;
+    res->ToString(&raw);
+    if (raw.IsNull()) {
+        return E_NOT_FOUND_EXCEPTION;
+    }
+    Int32 bufferSize = raw.GetLength() + (formatArgs == NULL ? 0 : formatArgs->GetLength() * 10);
+    AutoPtr<IAppendable> a = new StringBuilder(bufferSize);
+    AutoPtr<Elastos::Utility::IFormatter> f;
+    Elastos::Utility::CFormatter::New(a, mConfiguration->mLocale, (IFormatter**)&f);
+    FAIL_RETURN(f->Format(raw, formatArgs));
+    return f->ToString(str);
 }
 
 ECode CResources::GetQuantityString(

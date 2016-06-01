@@ -22,7 +22,7 @@ using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::SystemUI::ISwipeHelper;
 using Elastos::Droid::SystemUI::ISwipeHelperCallback;
 using Elastos::Droid::SystemUI::Recent::IRecentsCallback;
-using Elastos::Droid::SystemUI::Recent::IRecentsPanelViewRecentsScrollView;
+using Elastos::Droid::SystemUI::Recent::IRecentsScrollView;
 using Elastos::Droid::SystemUI::Recent::ITaskDescriptionAdapter;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IMotionEvent;
@@ -48,7 +48,7 @@ class RecentsHorizontalScrollView
     : public FrameLayout
     , public IHorizontalScrollView
     , public ISwipeHelperCallback
-    , public IRecentsPanelViewRecentsScrollView
+    , public IRecentsScrollView
 {
 private:
     class NoOpListener

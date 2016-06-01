@@ -288,6 +288,9 @@ private:
     CARAPI_(void) ReadObject(
         /* [in] */ IObjectInputStream* s);
 
+protected:
+    CARAPI_(String) GetClassName() { return String("CPriorityBlockingQueue"); }
+
 private:
     static Int64 mSerialVersionUID;
 

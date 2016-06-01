@@ -200,6 +200,9 @@ public:
             /* [in] */ ArrayOf<IInterface*>* inArray,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("AbstractMap::AbstractMapKeySet"); }
+
     private:
         AbstractMap* mMap;
     };
@@ -233,8 +236,6 @@ public:
         : public AbstractCollection
     {
     public:
-        TO_STRING_IMPL("AbstractMap::AbstractMapValues")
-
         AbstractMapValues(
             /* [in] */ AbstractMap* hm);
 
@@ -290,6 +291,9 @@ public:
         CARAPI ToArray(
             /* [in] */ ArrayOf<IInterface*>* inArray,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("AbstractMap::AbstractMapValues"); }
 
     private:
         AbstractMap* mMap;

@@ -17,20 +17,6 @@ class FastImmutableArraySet
     : public AbstractSet
     , public IFastImmutableArraySet
 {
-public:
-    CAR_INTERFACE_DECL()
-
-    FastImmutableArraySet();
-
-    CARAPI constructor(
-        /* [in] */ ArrayOf<IInterface*>* contents);
-
-    CARAPI GetIterator(
-        /* [out] */ IIterator** it);
-
-    CARAPI GetSize(
-        /* [out] */ Int32* size);
-
 private:
     class FastIterator
         : public Object
@@ -56,6 +42,23 @@ private:
         AutoPtr<ArrayOf<IInterface*> > mContents;
         Int32 mIndex;
     };
+
+public:
+    CAR_INTERFACE_DECL()
+
+    FastImmutableArraySet();
+
+    CARAPI constructor(
+        /* [in] */ ArrayOf<IInterface*>* contents);
+
+    CARAPI GetIterator(
+        /* [out] */ IIterator** it);
+
+    CARAPI GetSize(
+        /* [out] */ Int32* size);
+
+protected:
+    CARAPI_(String) GetClassName() { return String("FastImmutableArraySet"); }
 
 private:
     AutoPtr<ArrayOf<IInterface*> > mContents;

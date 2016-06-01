@@ -25,6 +25,7 @@ namespace Settings {
 
 class BrightnessController
     : public Object
+    , public IBrightnessController
 {
 private:
     class ToggleSliderListener
@@ -132,6 +133,8 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     BrightnessController();
 
     CARAPI constructor(
@@ -139,16 +142,17 @@ public:
         /* [in] */ IImageView* icon,
         /* [in] */ IToggleSlider* control);
 
-    CARAPI_(void) AddStateChangedCallback(
+    CARAPI AddStateChangedCallback(
         /* [in] */ IBrightnessStateChangeCallback* cb);
 
-    CARAPI_(Boolean) RemoveStateChangedCallback(
-        /* [in] */ IBrightnessStateChangeCallback* cb);
+    CARAPI RemoveStateChangedCallback(
+        /* [in] */ IBrightnessStateChangeCallback* cb,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(void) RegisterCallbacks();
+    CARAPI RegisterCallbacks();
 
     /** Unregister all call backs, both to and from the controller */
-    CARAPI_(void) UnregisterCallbacks();
+    CARAPI UnregisterCallbacks();
 
 private:
     CARAPI_(void) SetMode(

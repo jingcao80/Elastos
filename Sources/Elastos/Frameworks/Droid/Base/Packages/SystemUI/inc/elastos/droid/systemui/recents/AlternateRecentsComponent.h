@@ -48,6 +48,30 @@ class AlternateRecentsComponent
     , public IActivityOptionsOnAnimationStartedListener
     , public IAlternateRecentsComponent
 {
+public:
+    class RecentAnimationEndedReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        CARAPI constructor(
+            /* [in] */ IAlternateRecentsComponent* host);
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = "AlternateRecentsComponent.RecentAnimationEndedReceiver";
+            return NOERROR;
+        }
+
+    private:
+        AlternateRecentsComponent* mHost;
+    };
+
 private:
     class MR
         : public Runnable
@@ -57,28 +81,6 @@ private:
             /* [in] */ AlternateRecentsComponent* host);
 
         CARAPI Run();
-
-    private:
-        AlternateRecentsComponent* mHost;
-    };
-
-    class BR
-        : public BroadcastReceiver
-    {
-    public:
-        BR(
-            /* [in] */ AlternateRecentsComponent* host);
-
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("AlternateRecentsComponent.BR");
-            return NOERROR;
-        }
 
     private:
         AlternateRecentsComponent* mHost;

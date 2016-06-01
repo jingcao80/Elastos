@@ -154,6 +154,9 @@ public:
         CARAPI GetIterator(
             /* [out] */ IIterator** it);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CScheduledThreadPoolExecutor::DelayedWorkQueue"); }
+
     private:
         /**
          * Sets f's heapIndex if it is a ScheduledFutureTask.

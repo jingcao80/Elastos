@@ -219,6 +219,10 @@ public:
         /* [in] */ ArrayOf<IInterface*>* inarray,
         /* [out, callee] */ ArrayOf<IInterface*>** result);
 
+protected:
+
+    CARAPI_(String) GetClassName() { return String("CConcurrentSkipListSet"); }
+
 private:
     // Support for resetting map in clone
     CARAPI_(void) SetMap(

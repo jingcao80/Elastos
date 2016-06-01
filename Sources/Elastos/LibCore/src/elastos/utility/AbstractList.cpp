@@ -1,5 +1,10 @@
 
 #include "AbstractList.h"
+#include "CSimpleListIterator.h"
+#include "CFullListIterator.h"
+#include "CSubAbstractListIterator.h"
+#include "CSubAbstractList.h"
+#include "CRandomAccessSubList.h"
 
 using Elastos::Utility::IList;
 
@@ -9,15 +14,21 @@ namespace Utility {
 //=================================================
 // AbstractList::SimpleListIterator
 //=================================================
-AbstractList::SimpleListIterator::SimpleListIterator(
-    /* [in] */ AbstractList* owner)
+CAR_INTERFACE_IMPL(AbstractList::SimpleListIterator, Object, IIterator)
+
+AbstractList::SimpleListIterator::SimpleListIterator()
     : mPos(-1)
-    , mExpectedModeCount(owner->mModCount)
+    , mExpectedModeCount(0)
     , mLastPosition(-1)
-    , mOwner(owner)
 {}
 
-CAR_INTERFACE_IMPL(AbstractList::SimpleListIterator, Object, IIterator)
+ECode AbstractList::SimpleListIterator::constructor(
+    /* [in] */ IList* owner)
+{
+    mOwner = (AbstractList*)owner;
+    mExpectedModeCount = mOwner->mModCount;
+    return NOERROR;
+}
 
 ECode AbstractList::SimpleListIterator::HasNext(
     /* [out] */ Boolean* result)
@@ -79,16 +90,21 @@ ECode AbstractList::SimpleListIterator::Remove()
 
 CAR_INTERFACE_IMPL(AbstractList::FullListIterator, SimpleListIterator, IListIterator)
 
-AbstractList::FullListIterator::FullListIterator(
-    /* [in] */ Int32 start,
-    /* [in] */ AbstractList* owner)
-    : SimpleListIterator(owner)
+AbstractList::FullListIterator::FullListIterator()
 {
+}
+
+ECode AbstractList::FullListIterator::constructor(
+    /* [in] */ IList* owner,
+    /* [in] */ Int32 start)
+{
+    SimpleListIterator::constructor(owner);
     Int32 size;
     mOwner->GetSize(&size);
     if (start >= 0 && start <= size) {
         mPos = start - 1;
     }
+    return NOERROR;
 }
 
 ECode AbstractList::FullListIterator::Add(
@@ -201,19 +217,26 @@ ECode AbstractList::FullListIterator::Remove()
 // SubAbstractList::SubAbstractListIterator
 ////////////////////////////////////////////
 
-SubAbstractList::SubAbstractListIterator::SubAbstractListIterator(
-    /* [in] */ IListIterator* it,
-    /* [in] */ SubAbstractList* list,
-    /* [in] */ Int32 offset,
-    /* [in] */ Int32 length)
-    : mSubList(list)
-    , mIterator(it)
-    , mStart(offset)
-    , mEnd(mStart + length)
+CAR_INTERFACE_IMPL_2(SubAbstractList::SubAbstractListIterator, Object, IListIterator, IIterator)
+
+SubAbstractList::SubAbstractListIterator::SubAbstractListIterator()
+    : mStart(0)
+    , mEnd(0)
 {
 }
 
-CAR_INTERFACE_IMPL_2(SubAbstractList::SubAbstractListIterator, Object, IListIterator, IIterator)
+ECode SubAbstractList::SubAbstractListIterator::constructor(
+    /* [in] */ IList* list,
+    /* [in] */ IListIterator* it,
+    /* [in] */ Int32 offset,
+    /* [in] */ Int32 length)
+{
+    mSubList = (SubAbstractList*)list;
+    mIterator = it;
+    mStart = offset;
+    mEnd = mStart + length;
+    return NOERROR;
+}
 
 ECode SubAbstractList::SubAbstractListIterator::Add(
     /* [in] */ IInterface* object)
@@ -312,15 +335,22 @@ ECode SubAbstractList::SubAbstractListIterator::Set(
 //              SubAbstractList
 ////////////////////////////////////////////
 
-SubAbstractList::SubAbstractList(
-    /* [in] */ AbstractList* list,
+SubAbstractList::SubAbstractList()
+    : mOffset(0)
+    , mSize(0)
+{
+}
+
+ECode SubAbstractList::constructor(
+    /* [in] */ IList* list,
     /* [in] */ Int32 start,
     /* [in] */ Int32 end)
-    : mFulllist(list)
-    , mOffset(start)
-    , mSize(end - start)
 {
+    mOffset = start;
+    mSize = end - start;
+    mFulllist = (AbstractList*)list;
     mModCount = mFulllist->mModCount;
+    return NOERROR;
 }
 
 ECode SubAbstractList::Add(
@@ -418,13 +448,9 @@ ECode SubAbstractList::GetListIterator(
     VALIDATE_NOT_NULL(listiterator);
     if (mModCount == mFulllist->mModCount) {
         if (location >= 0 && location <= mSize) {
-            AutoPtr<IListIterator> listiteratorex;
-            mFulllist->GetListIterator(location + mOffset, (IListIterator**)&listiteratorex);
-            AutoPtr<SubAbstractListIterator> subabstractlistiterator =
-                      new SubAbstractListIterator(listiteratorex, this, mOffset, mSize);
-            *listiterator = subabstractlistiterator;
-            REFCOUNT_ADD(*listiterator);
-            return NOERROR;
+            AutoPtr<IListIterator> it;
+            mFulllist->GetListIterator(location + mOffset, (IListIterator**)&it);
+            return CSubAbstractListIterator::New(this, it, mOffset, mSize, listiterator);
         }
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
@@ -512,6 +538,8 @@ ECode SubAbstractList::SizeChanged(
 ////////////////////////////////////////////
 //              AbstractList
 ////////////////////////////////////////////
+
+CAR_INTERFACE_IMPL(AbstractList, AbstractCollection, IList)
 
 ECode AbstractList::constructor()
 {
@@ -697,12 +725,7 @@ ECode AbstractList::IndexOf(
 ECode AbstractList::GetIterator(
     /* [out] */ IIterator** it)
 {
-    VALIDATE_NOT_NULL(it);
-    AutoPtr<SimpleListIterator> simplelistiterator =
-        new AbstractList::SimpleListIterator(this);
-    *it = simplelistiterator;
-    REFCOUNT_ADD(*it);
-    return NOERROR;
+    return CSimpleListIterator::New(this, it);
 }
 
 ECode AbstractList::LastIndexOf(
@@ -754,11 +777,7 @@ ECode AbstractList::GetListIterator(
     /* [in] */ Int32 location,
     /* [out] */ IListIterator** listiterator)
 {
-    VALIDATE_NOT_NULL(listiterator);
-    AutoPtr<FullListIterator> full = new FullListIterator(location, this);
-    *listiterator = full;
-    REFCOUNT_ADD(*listiterator);
-    return NOERROR;
+    return CFullListIterator::New(this, location, listiterator);
 }
 
 ECode AbstractList::Remove(
@@ -856,15 +875,10 @@ ECode AbstractList::GetSubList(
     if (start >= 0 && end <= size) {
         if (start <= end) {
             if (IRandomAccess::Probe(this)) {
-                AutoPtr<SubAbstractListRandomAccess> sublistrandom = new SubAbstractListRandomAccess(this, start, end);
-                *list = IList::Probe(sublistrandom);
-                REFCOUNT_ADD(*list);
-                return NOERROR;
+                return CRandomAccessSubList::New(this, start, end, list);
             }
-            AutoPtr<SubAbstractList> sublist = new SubAbstractList(this, start, end);
-            *list = sublist;
-            REFCOUNT_ADD(*list);
-            return NOERROR;
+
+            return CSubAbstractList::New(this, start, end, list);
         }
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -905,20 +919,18 @@ ECode AbstractList::IsEmpty(
 }
 
 ////////////////////////////////////////////
-//      SubAbstractListRandomAccess
+//      RandomAccessSubList
 ////////////////////////////////////////////
 
-SubAbstractListRandomAccess::SubAbstractListRandomAccess(
-    /* [in] */ AbstractList* list,
+CAR_INTERFACE_IMPL(RandomAccessSubList, SubAbstractList, IRandomAccess)
+
+ECode RandomAccessSubList::constructor(
+    /* [in] */ IList* list,
     /* [in] */ Int32 start,
     /* [in] */ Int32 end)
-    : SubAbstractList(list, start, end)
 {
+    return SubAbstractList::constructor(list, start, end);
 }
-
-CAR_INTERFACE_IMPL(SubAbstractListRandomAccess, SubAbstractList, IRandomAccess)
-
-CAR_INTERFACE_IMPL(AbstractList, AbstractCollection, IList)
 
 } // Utility
 } // Elastos

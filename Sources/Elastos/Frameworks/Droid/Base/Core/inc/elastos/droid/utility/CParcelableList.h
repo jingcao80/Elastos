@@ -30,6 +30,8 @@ public:
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
+
+    CARAPI_(String) GetClassName() { return String("CParcelableList"); }
 };
 
 } // namespace Utility

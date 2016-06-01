@@ -51,7 +51,7 @@ namespace Droid {
 namespace Server {
 namespace Am {
 
-const String TaskRecord::TAG("ActivityManager");
+const String TaskRecord::TAG("TaskRecord");
 const String TaskRecord::ATTR_TASKID("task_id");
 const String TaskRecord::TAG_INTENT("intent");
 const String TaskRecord::TAG_AFFINITYINTENT("affinity_intent");
@@ -124,8 +124,7 @@ ECode TaskRecord::constructor(
     /* [in] */ IIVoiceInteractor* voiceInteractor)
 {
     mService = service;
-    mFilename = StringUtils::ToString(taskId) + TASK_THUMBNAIL_SUFFIX +
-            TaskPersister::IMAGE_EXTENSION;
+    mFilename = StringUtils::ToString(taskId) + TASK_THUMBNAIL_SUFFIX + TaskPersister::IMAGE_EXTENSION;
     CFile::New(TaskPersister::sImagesDir, mFilename, (IFile**)&mLastThumbnailFile);
     mTaskId = taskId;
     mAffiliatedTaskId = taskId;
@@ -145,8 +144,7 @@ ECode TaskRecord::constructor(
     /* [in] */ IActivityManagerTaskDescription* taskDescription)
 {
     mService = service;
-    mFilename = StringUtils::ToString(taskId) + TASK_THUMBNAIL_SUFFIX +
-            TaskPersister::IMAGE_EXTENSION;
+    mFilename = StringUtils::ToString(taskId) + TASK_THUMBNAIL_SUFFIX + TaskPersister::IMAGE_EXTENSION;
     CFile::New(TaskPersister::sImagesDir, mFilename, (IFile**)&mLastThumbnailFile);
     mTaskId = taskId;
     mAffiliatedTaskId = taskId;

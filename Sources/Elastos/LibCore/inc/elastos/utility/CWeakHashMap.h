@@ -101,6 +101,9 @@ private:
                 /* [out] */ IInterface** outface);
         };
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CWeakHashMap::EntrySet"); }
+
     public:
         _EntrySet(
             /* [in] */ CWeakHashMap* owner)
@@ -176,6 +179,9 @@ private:
                 /* [in] */ IMapEntry* entry,
                 /* [out] */ IInterface** outface);
         };
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("CWeakHashMap::KeySet"); }
 
     public:
         _KeySet(
@@ -253,6 +259,8 @@ private:
                 /* [out] */ IInterface** outface);
         };
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CWeakHashMap::Value"); }
     public:
         _Values(
             /* [in] */ CWeakHashMap* owner)
@@ -529,6 +537,9 @@ public:
 
     CARAPI GetHashCode(
         /* [out] */ Int32* hashCode);
+
+protected:
+    CARAPI_(String) GetClassName() { return String("CWeakHashMap"); }
 
 private:
     static CARAPI_(AutoPtr< ArrayOf<Entry*> >) NewEntryArray(

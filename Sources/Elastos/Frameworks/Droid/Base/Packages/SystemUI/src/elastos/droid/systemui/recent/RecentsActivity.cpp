@@ -2,6 +2,7 @@
 #include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/systemui/recent/RecentTasksLoader.h"
 #include "../R.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::CWallpaperManagerHelper;
 using Elastos::Droid::App::IActivityManager;
@@ -18,12 +19,14 @@ using Elastos::Droid::View::EIID_IViewOnTouchListener;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Utility::IArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Recent {
 
+static const String TAG("RecentsActivity");
 //-------------------------------------------------------------
 // RecentsActivity::IntentReceiver
 //-------------------------------------------------------------
@@ -37,6 +40,8 @@ ECode RecentsActivity::IntentReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
+    Logger::I(TAG, " IntentReceiver::OnReceive: %s", TO_CSTR(intent));
+
     String action;
     intent->GetAction(&action);
     if (IRecentsActivity::CLOSE_RECENTS_INTENT.Equals(action)) {
@@ -64,7 +69,7 @@ ECode RecentsActivity::IntentReceiver::OnReceive(
 CAR_INTERFACE_IMPL(RecentsActivity::TouchOutsideListener, Object, IViewOnTouchListener)
 
 RecentsActivity::TouchOutsideListener::TouchOutsideListener(
-    /* [in] */ IIStatusBarPanel* panel,
+    /* [in] */ IStatusBarPanel* panel,
     /* [in] */ RecentsActivity* host)
     : mHost(host)
     , mPanel(panel)
@@ -196,6 +201,7 @@ ECode RecentsActivity::OnBackPressed()
 
 ECode RecentsActivity::DismissAndGoHome()
 {
+    Logger::I(TAG, " >>> RecentsActivity::DismissAndGoHome");
     if (mRecentsPanel != NULL) {
         AutoPtr<IIntent> homeIntent;
         CIntent::New(IIntent::ACTION_MAIN, NULL, (IIntent**)&homeIntent);
@@ -212,6 +218,7 @@ ECode RecentsActivity::DismissAndGoHome()
 
 ECode RecentsActivity::DismissAndGoBack()
 {
+    Logger::I(TAG, " >>> RecentsActivity::DismissAndGoBack");
     if (mRecentsPanel != NULL) {
         AutoPtr<IInterface> obj;
         GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&obj);
@@ -244,23 +251,25 @@ ECode RecentsActivity::DismissAndGoBack()
 ECode RecentsActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
+    Logger::I(TAG, " >>> RecentsActivity::OnCreate");
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);
-    //TODO
-    // window->AddPrivateFlags(
-    //     IWindowManagerLayoutParams::PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR);
+    window->AddPrivateFlags(IWindowManagerLayoutParams::PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR);
     SetContentView(R::layout::status_bar_recent_panel);
+
     AutoPtr<IView> view;
     FindViewById(R::id::recents_root, (IView**)&view);
-    mRecentsPanel = (RecentsPanelView*)view.Get();
+    mRecentsPanel = IRecentsPanelView::Probe(view);
+    assert(mRecentsPanel);
 
-    AutoPtr<TouchOutsideListener> tol = new TouchOutsideListener(mRecentsPanel, this);
-    mRecentsPanel->SetOnTouchListener(tol);
-    mRecentsPanel->SetSystemUiVisibility(IView::SYSTEM_UI_FLAG_LAYOUT_STABLE
-            | IView::SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            | IView::SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+    AutoPtr<TouchOutsideListener> tol = new TouchOutsideListener(
+        IStatusBarPanel::Probe(mRecentsPanel), this);
+    view->SetOnTouchListener(tol);
+    view->SetSystemUiVisibility(IView::SYSTEM_UI_FLAG_LAYOUT_STABLE
+        | IView::SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        | IView::SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
 
-    const AutoPtr<RecentTasksLoader> recentTasksLoader = RecentTasksLoader::GetInstance(this);
+    AutoPtr<RecentTasksLoader> recentTasksLoader = RecentTasksLoader::GetInstance(this);
     recentTasksLoader->SetRecentsPanel(mRecentsPanel, mRecentsPanel);
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
@@ -268,8 +277,7 @@ ECode RecentsActivity::OnCreate(
     res->GetInteger(R::integer::config_recent_item_min_alpha, &i);
     mRecentsPanel->SetMinSwipeAlpha(i / 100.0f);
     Boolean b;
-    savedInstanceState->GetBoolean(WAS_SHOWING, &b);
-    if (savedInstanceState == NULL || b) {
+    if (savedInstanceState == NULL || (savedInstanceState->GetBoolean(WAS_SHOWING, &b), b)) {
         AutoPtr<IIntent> intent;
         GetIntent((IIntent**)&intent);
         HandleIntent(intent, (savedInstanceState == NULL));
@@ -310,6 +318,7 @@ void RecentsActivity::HandleIntent(
     /* [in] */ IIntent* intent,
     /* [in] */ Boolean checkWaitingForAnimationParam)
 {
+    Logger::I(TAG, " >>> HandleIntent:: %s", TO_CSTR(intent));
     Activity::OnNewIntent(intent);
 
     String action;
@@ -323,7 +332,7 @@ void RecentsActivity::HandleIntent(
                 DismissAndGoBack();
             }
             else {
-                const AutoPtr<RecentTasksLoader> recentTasksLoader = RecentTasksLoader::GetInstance(this);
+                AutoPtr<RecentTasksLoader> recentTasksLoader = RecentTasksLoader::GetInstance(this);
                 Boolean b;
                 intent->GetBooleanExtra(WAITING_FOR_WINDOW_ANIMATION_PARAM, FALSE, &b);
                 Boolean waitingForWindowAnimation = checkWaitingForAnimationParam && b;

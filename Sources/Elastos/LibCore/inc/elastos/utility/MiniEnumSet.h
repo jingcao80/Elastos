@@ -131,6 +131,9 @@ public:
         /* [in] */ ArrayOf<IInterface*>* inarray,
         /* [out, callee] */ ArrayOf<IInterface*>** outarray);
 
+protected:
+    CARAPI_(String) GetClassName() { return String("MiniEnumSet"); }
+
 private:
     static const Int32 MAX_ELEMENTS;// = 64;
 

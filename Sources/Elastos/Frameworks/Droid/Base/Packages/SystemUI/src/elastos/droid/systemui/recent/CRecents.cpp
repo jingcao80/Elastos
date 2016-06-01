@@ -143,18 +143,21 @@ ECode CRecents::ToggleRecents(
         return E_NULL_POINTER_EXCEPTION;
     }
 
-    if (DEBUG) Logger::D(TAG, "toggle recents panel");
     // try {
     AutoPtr<RecentTasksLoader> rtl = RecentTasksLoader::GetInstance(mContext);
     AutoPtr<ITaskDescription> firstTask;
     rtl->GetFirstTask((ITaskDescription**)&firstTask);
 
+    if (DEBUG) Logger::D(TAG, "toggle recents panel, firstTask:%s", TO_CSTR(firstTask));
+
     AutoPtr<IIntent> intent;
     CIntent::New(IRecentsActivity::TOGGLE_RECENTS_INTENT, (IIntent**)&intent);
-    intent->SetClassName(String("Elastos.Droid.SystemUI"),
+    intent->SetClassName(
+        String("Elastos.Droid.SystemUI"),
         String("Elastos.Droid.SystemUI.Recent.CRecentsActivity"));
-    intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK
-        | IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+    intent->SetFlags(
+        IIntent::FLAG_ACTIVITY_NEW_TASK |
+        IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 
     AutoPtr<IUserHandle> uh;
     CUserHandle::New(IUserHandle::USER_CURRENT, (IUserHandle**)&uh);
@@ -177,7 +180,6 @@ ECode CRecents::ToggleRecents(
             // The correct window animation will be applied via the activity's style
             mContext->StartActivityAsUser(intent, uh);
         }
-
     }
     else {
         AutoPtr<IBitmap> first;
@@ -199,11 +201,10 @@ ECode CRecents::ToggleRecents(
         AutoPtr<IResources> res;
         mContext->GetResources((IResources**)&res);
 
-        Int32 tw;
+        Int32 tw, th;
         res->GetDimensionPixelSize(R::dimen::status_bar_recents_thumbnail_width, &tw);
-        Float thumbWidth = (Float)tw;
-        Int32 th;
         res->GetDimensionPixelSize(R::dimen::status_bar_recents_thumbnail_height, &th);
+        Float thumbWidth = (Float)tw;
         Float thumbHeight = (Float)th;
         if (first == NULL) {
             Logger::E(TAG, "CRecents thumbnail is null");
@@ -230,9 +231,8 @@ ECode CRecents::ToggleRecents(
         // first, determine which orientation you're in.
         AutoPtr<IConfiguration> config;
         res->GetConfiguration((IConfiguration**)&config);
-        Int32 x, y;
+        Int32 x, y, orientation;
 
-        Int32 orientation;
         config->GetOrientation(&orientation);
         if (orientation == IConfiguration::ORIENTATION_PORTRAIT) {
             Int32 ii;
@@ -248,11 +248,8 @@ ECode CRecents::ToggleRecents(
             res->GetDimensionPixelSize(
                 R::dimen::status_bar_recents_thumbnail_bg_padding, &ii);
             Float thumbBgPadding = ii;
-            Float width = appLabelLeftMargin +
-                    +appLabelWidth
-                    + thumbLeftMargin
-                    + thumbWidth
-                    + 2 * thumbBgPadding;
+            Float width = appLabelLeftMargin + appLabelWidth + thumbLeftMargin
+                    + thumbWidth + 2 * thumbBgPadding;
 
             Int32 widthPixels, heightPixels;
             dm->GetWidthPixels(&widthPixels);
@@ -308,8 +305,7 @@ ECode CRecents::ToggleRecents(
             Float statusBarHeight = (Float)ii2;
             Float recentsItemTopPadding = statusBarHeight;
 
-            Float height = thumbTopMargin
-                    + thumbHeight
+            Float height = thumbTopMargin + thumbHeight
                     + 2 * thumbBgPadding + textPadding + labelTextHeight
                     + recentsItemTopPadding + textPadding + descriptionTextHeight;
             res->GetDimensionPixelSize(R::dimen::status_bar_recents_item_padding, &ii2);
@@ -327,14 +323,16 @@ ECode CRecents::ToggleRecents(
                 - thumbBgPadding - recentsItemRightPadding
                 - recentsScrollViewRightPadding);
             y = (Int32) ((heightPixels - statusBarHeight - height) / 2.0f + thumbTopMargin
-                    + recentsItemTopPadding + thumbBgPadding + statusBarHeight);
+                + recentsItemTopPadding + thumbBgPadding + statusBarHeight);
         }
+
+
+        Logger::I(TAG, " >>>>++++++ x,y: (%d, %d)", x, y);
 
         AutoPtr<IActivityOptionsHelper> aoh;
         CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&aoh);
 
         AutoPtr<MyOnAnimationStartedListener> osl = new MyOnAnimationStartedListener(this);
-
         AutoPtr<IActivityOptions> opts;
         aoh->MakeThumbnailScaleDownAnimation(statusBarView, first, x, y, osl,
             (IActivityOptions**)&opts);

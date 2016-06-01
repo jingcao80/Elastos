@@ -17,6 +17,13 @@ module
     namespace SystemUI {
     namespace Recent {
 
+    /**
+     * @Involve
+     * interface Elastos.Droid.Widget.IBaseAdapter
+     * interface Elastos.Droid.Widget.IListAdapter
+     * interface Elastos.Droid.Widget.ISpinnerAdapter
+     * interface Elastos.Droid.Widget.IAdapter
+     */
     [local]
     interface ITaskDescriptionAdapter {
         GetCount(
@@ -42,40 +49,10 @@ module
 
         RecycleView(
             [in] IView* v);
-
-        RegisterDataSetObserver(
-            [in] IDataSetObserver* observer);
-
-        UnregisterDataSetObserver(
-            [in] IDataSetObserver* observer);
-
-        HasStableIds(
-            [out] Boolean* hasStableIds);
-
-        GetItemViewType(
-            [in] Int32 position,
-            [out] Int32* viewType);
-
-        GetViewTypeCount(
-            [out] Int32* count);
-
-        IsEmpty(
-            [out] Boolean* isEmpty);
-
-        AreAllItemsEnabled(
-            [out] Boolean* enabled);
-
-        IsEnabled(
-            [in] Int32 position,
-            [out] Boolean* enabled);
-
-        NotifyDataSetChanged();
-
-        NotifyDataSetInvalidated();
     }
 
     [local]
-    interface IRecentsPanelViewRecentsScrollView {
+    interface IRecentsScrollView {
         NumItemsInOneScreenful(
             [out] Int32* num);
 

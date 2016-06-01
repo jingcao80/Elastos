@@ -82,10 +82,11 @@ using Elastos::Droid::Server::Am::IPendingIntentRecord;
 using Elastos::Droid::Server::Am::LockTaskNotify;
 using Elastos::Droid::Server::LocalServices;
 using Elastos::Droid::Utility::IEventLogTags;
+using Elastos::Droid::Utility::IArraySet;
 using Elastos::Droid::Utility::CArraySet;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Utility::CSparseInt32Array;
-using Elastos::Droid::Utility::IArraySet;
+using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Droid::View::CDisplayInfo;
 
 using Elastos::Core::AutoLock;
@@ -4705,9 +4706,8 @@ AutoPtr<IActivityManagerStackInfo> ActivityStackSupervisor::GetStackInfoLocked(
 
 AutoPtr<IArrayList> ActivityStackSupervisor::GetAllStackInfosLocked()
 {
-    //ArrayList<StackInfo> list = new ArrayList<StackInfo>();
     AutoPtr<IArrayList> list;
-    CArrayList::New((IArrayList**)&list);
+    CParcelableList::New((IArrayList**)&list);
     Int32 size;
     mActivityDisplays->GetSize(&size);
     for (Int32 displayNdx = 0; displayNdx < size; ++displayNdx) {

@@ -19,6 +19,7 @@ using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IViewTreeObserver;
+using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::EIID_IHorizontalScrollView;
 using Elastos::Core::CString;
 using Elastos::Core::EIID_IRunnable;
@@ -154,8 +155,8 @@ ECode RecentsHorizontalScrollView::AdapterDataSetObserver::OnInvalidated()
 const String RecentsHorizontalScrollView::TAG("RecentsPanelView"); // = RecentsPanelView.TAG;
 const Boolean RecentsHorizontalScrollView::DEBUG = FALSE; // = RecentsPanelView.DEBUG;
 
-// CAR_INTERFACE_IMPL_2(RecentsHorizontalScrollView, HorizontalScrollView, ISwipeHelperCallback, IRecentsPanelViewRecentsScrollView)
-CAR_INTERFACE_IMPL_3(RecentsHorizontalScrollView, FrameLayout, IHorizontalScrollView, ISwipeHelperCallback, IRecentsPanelViewRecentsScrollView)
+// CAR_INTERFACE_IMPL_2(RecentsHorizontalScrollView, HorizontalScrollView, ISwipeHelperCallback, IRecentsScrollView)
+CAR_INTERFACE_IMPL_3(RecentsHorizontalScrollView, FrameLayout, IHorizontalScrollView, ISwipeHelperCallback, IRecentsScrollView)
 
 RecentsHorizontalScrollView::RecentsHorizontalScrollView(
     /* [in] */ IContext* ctx,
@@ -591,11 +592,11 @@ void RecentsHorizontalScrollView::OnSizeChanged(
 }
 
 ECode RecentsHorizontalScrollView::SetAdapter(
-    /* [in] */ ITaskDescriptionAdapter* adapter)
+    /* [in] */ ITaskDescriptionAdapter* tdAdapter)
 {
-    mAdapter = adapter;
+    mAdapter = tdAdapter;
     AutoPtr<AdapterDataSetObserver> observer = new AdapterDataSetObserver(this);
-    mAdapter->RegisterDataSetObserver(observer);
+    IAdapter::Probe(tdAdapter)->RegisterDataSetObserver(observer);
 
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);

@@ -145,6 +145,8 @@ public:
         /* [out, callee] */ ArrayOf<IInterface*>** outarray);
 
 protected:
+    CARAPI_(String) GetClassName() { return String("UnsafeArrayList"); }
+
     UnsafeArrayList();
 
     UnsafeArrayList(

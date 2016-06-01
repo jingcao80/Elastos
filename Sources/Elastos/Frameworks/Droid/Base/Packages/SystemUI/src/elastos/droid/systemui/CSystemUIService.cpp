@@ -8,7 +8,9 @@ namespace Droid {
 namespace SystemUI {
 
 CAR_OBJECT_IMPL(CSystemUIService)
+
 CAR_INTERFACE_IMPL(CSystemUIService, Service, ISystemUIService)
+
 ECode CSystemUIService::OnCreate()
 {
     Service::OnCreate();

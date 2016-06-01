@@ -23,9 +23,9 @@ using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::SystemUI::Recent::IRecentsCallback;
-using Elastos::Droid::SystemUI::Recent::IRecentsPanelViewRecentsScrollView;
+using Elastos::Droid::SystemUI::Recent::IRecentsScrollView;
 using Elastos::Droid::SystemUI::Recent::IRecentTasksLoader;
-using Elastos::Droid::SystemUI::StatusBar::IIStatusBarPanel;
+using Elastos::Droid::SystemUI::StatusBar::IStatusBarPanel;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IMenuItem;
@@ -54,7 +54,7 @@ class RecentsPanelView
     : public FrameLayout
     , public IAdapterViewOnItemClickListener
     , public IRecentsCallback
-    , public IIStatusBarPanel
+    , public IStatusBarPanel
     , public IAnimatorListener
     , public IRecentsPanelView
 {
@@ -80,6 +80,8 @@ public:
     {
     public:
         CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("RecentsPanelView::TaskDescriptionAdapter")
 
         TaskDescriptionAdapter(
             /* [in] */ IContext* context,
@@ -122,36 +124,6 @@ public:
         CARAPI RecycleView(
             /* [in] */ IView* v);
 
-        CARAPI RegisterDataSetObserver(
-            /* [in] */ IDataSetObserver* observer);
-
-        CARAPI UnregisterDataSetObserver(
-            /* [in] */ IDataSetObserver* observer);
-
-        CARAPI HasStableIds(
-            /* [out] */ Boolean* hasStableIds);
-
-        CARAPI GetItemViewType(
-            /* [in] */ Int32 position,
-            /* [out] */ Int32* viewType);
-
-        CARAPI GetViewTypeCount(
-            /* [out] */ Int32* count);
-
-        CARAPI IsEmpty(
-            /* [out] */ Boolean* isEmpty);
-
-        CARAPI AreAllItemsEnabled(
-        /* [out] */ Boolean* enabled);
-
-        CARAPI IsEnabled(
-            /* [in] */ Int32 position,
-            /* [out] */ Boolean* enabled);
-
-        CARAPI NotifyDataSetChanged();
-
-        CARAPI NotifyDataSetInvalidated();
-
     private:
         AutoPtr<ILayoutInflater> mInflater;
         RecentsPanelView* mHost;
@@ -163,6 +135,8 @@ private:
         , public IViewOnLongClickListener
     {
     public:
+        TO_STRING_IMPL("RecentsPanelView::OnLongClickDelegate")
+
         OnLongClickDelegate(
             /* [in] */ IView* other);
 
@@ -181,11 +155,13 @@ private:
         , public IPopupMenuOnMenuItemClickListener
     {
     public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("RecentsPanelView::OnMenuItemClickListener")
+
         OnMenuItemClickListener(
             /* [in] */ RecentsPanelView* host,
             /* [in] */ IView* selectedView);
-
-        CAR_INTERFACE_DECL()
 
         OnMenuItemClick(
             /* [in] */ IMenuItem* item,
@@ -201,11 +177,13 @@ private:
         , public IPopupMenuOnDismissListener
     {
     public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("RecentsPanelView::OnDismissListener")
+
         OnDismissListener(
             /* [in] */ RecentsPanelView* host,
             /* [in] */ IView* thumbnailView);
-
-        CAR_INTERFACE_DECL()
 
         OnDismiss(
             /* [in] */ IPopupMenu* item);
@@ -219,6 +197,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("RecentsPanelView::OnScrollListenerRunnable")
+
         OnScrollListenerRunnable(
             /* [in] */ RecentsPanelView* host);
 
@@ -231,11 +211,13 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    RecentsPanelView(
+    RecentsPanelView();
+
+    CARAPI constructor(
         /* [in] */ IContext* ctx,
         /* [in] */ IAttributeSet* attrs);
 
-    RecentsPanelView(
+    CARAPI constructor(
         /* [in] */ IContext* ctx,
         /* [in] */ IAttributeSet* attrs,
         /* [in] */ Int32 defStyle);
@@ -393,7 +375,7 @@ public:
     AutoPtr<IPopupMenu> mPopup;
     AutoPtr<IView> mRecentsScrim;
     AutoPtr<IView> mRecentsNoApps;
-    AutoPtr<IRecentsPanelViewRecentsScrollView> mRecentsContainer;
+    AutoPtr<IRecentsScrollView> mRecentsContainer;
 
     Boolean mShowing;
     Boolean mWaitingToShow;

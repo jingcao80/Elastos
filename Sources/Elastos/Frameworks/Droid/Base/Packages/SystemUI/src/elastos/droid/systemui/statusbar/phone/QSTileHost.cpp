@@ -59,7 +59,7 @@ namespace StatusBar {
 namespace Phone {
 
 const String QSTileHost::TAG("QSTileHost");
-const Boolean QSTileHost::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+const Boolean QSTileHost::DEBUG = FALSE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
 const String QSTileHost::TILES_SETTING("sysui_qs_tiles");
 
 QSTileHost::Observer::Observer(

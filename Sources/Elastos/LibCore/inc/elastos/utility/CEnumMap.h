@@ -175,6 +175,9 @@ private:
             /* [in] */ ArrayOf<IInterface*>* inArray,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CEnumMap::EnumMapKeySet"); }
+
     private:
         CEnumMap* mEnumMap;
     };
@@ -255,6 +258,8 @@ private:
             /* [in] */ ArrayOf<IInterface*>* inArray,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CEnumMap::EnumMapValueCollection"); }
     private:
         CEnumMap* mEnumMap;
     };
@@ -349,6 +354,8 @@ private:
             /* [in] */ ArrayOf<IInterface*>* inArray,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CEnumMap::EnumMapEntrySet"); }
     private:
         CEnumMap* mEnumMap;
     };
@@ -615,6 +622,9 @@ public:
 
     CARAPI Clone(
         /* [out] */ IInterface** object);
+
+protected:
+    CARAPI_(String) GetClassName() { return String("CEnumMap"); }
 
 private:
     // @SuppressWarnings("unchecked")

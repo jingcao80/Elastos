@@ -16,7 +16,7 @@ class ECO_PUBLIC AbstractList
     : public AbstractCollection
     , public IList
 {
-private:
+public:
     class ECO_LOCAL SimpleListIterator
         : public Object
         , public IIterator
@@ -24,11 +24,10 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        TO_STRING_IMPL("AbstractList::SimpleListIterator")
+        SimpleListIterator();
 
-        SimpleListIterator(
-            /* [in] */ AbstractList* owner);
-
+        CARAPI constructor(
+            /* [in] */ IList* owner);
 
         CARAPI HasNext(
             /* [out] */ Boolean* result);
@@ -52,11 +51,11 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        TO_STRING_IMPL("AbstractList::FullListIterator")
+        FullListIterator();
 
-        FullListIterator(
-            /* [in] */ Int32 start,
-            /* [in] */ AbstractList* owner);
+        CARAPI constructor(
+            /* [in] */ IList* owner,
+            /* [in] */ Int32 start);
 
         CARAPI Add(
             /* [in] */ IInterface* object);
@@ -462,20 +461,22 @@ public:
 class SubAbstractList
     : public AbstractList
 {
-private:
-    class SubAbstractListIterator
+public:
+    class ECO_LOCAL SubAbstractListIterator
         : public Object
         , public IListIterator
         , public IIterator
     {
     public:
-        SubAbstractListIterator(
+        CAR_INTERFACE_DECL()
+
+        SubAbstractListIterator();
+
+        CARAPI constructor(
+            /* [in] */ IList* list,
             /* [in] */ IListIterator* it,
-            /* [in] */ SubAbstractList* list,
             /* [in] */ Int32 offset,
             /* [in] */ Int32 length);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI Add(
             /* [in] */ IInterface* object);
@@ -504,18 +505,18 @@ private:
             /* [in] */ IInterface* object);
 
     private:
-        const AutoPtr<SubAbstractList> mSubList;
-
-        const AutoPtr<IListIterator> mIterator;
+        AutoPtr<SubAbstractList> mSubList;
+        AutoPtr<IListIterator> mIterator;
 
         Int32 mStart;
-
         Int32 mEnd;
     };
 
 public:
-    SubAbstractList(
-        /* [in] */ AbstractList* list,
+    SubAbstractList();
+
+    CARAPI constructor(
+        /* [in] */ IList* list,
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
@@ -562,25 +563,30 @@ public:
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
+protected:
+    CARAPI_(String) GetClassName() { return String("SubAbstractList"); }
+
 private:
-    const AutoPtr<AbstractList> mFulllist;
+    AutoPtr<AbstractList> mFulllist;
 
     Int32 mOffset;
-
     Int32 mSize;
 };
 
-class SubAbstractListRandomAccess
+class RandomAccessSubList
     : public SubAbstractList
     , public IRandomAccess
 {
 public:
-    SubAbstractListRandomAccess(
-        /* [in] */ AbstractList* list,
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor(
+        /* [in] */ IList* list,
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
-    CAR_INTERFACE_DECL()
+protected:
+    CARAPI_(String) GetClassName() { return String("RandomAccessSubList"); }
 };
 
 } // namespace Utility

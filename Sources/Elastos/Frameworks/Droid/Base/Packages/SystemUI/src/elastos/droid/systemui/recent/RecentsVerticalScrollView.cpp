@@ -4,6 +4,7 @@
 #include "../R.h"
 #include "elastos/droid/utility/FloatMath.h"
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Database::EIID_IDataSetObserver;
 using Elastos::Droid::SystemUI::CSwipeHelper;
@@ -18,12 +19,14 @@ using Elastos::Droid::View::EIID_IOnGlobalLayoutListener;
 using Elastos::Droid::View::EIID_IViewOnLongClickListener;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnTouchListener;
+using Elastos::Droid::Widget::IAdapter;
 using Elastos::Core::CString;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::IIterable;
 using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -190,22 +193,26 @@ ECode RecentsVerticalScrollView::AdapterDataSetObserver::OnInvalidated()
 // RecentsVerticalScrollView
 //=================================================================================
 
-const String RecentsVerticalScrollView::TAG("RecentsPanelView"); // = RecentsPanelView.TAG;
-const Boolean RecentsVerticalScrollView::DEBUG = FALSE; // = RecentsPanelView.DEBUG;
+const String RecentsVerticalScrollView::TAG("RecentsVerticalScrollView");
+const Boolean RecentsVerticalScrollView::DEBUG = TRUE;
 
-CAR_INTERFACE_IMPL_2(RecentsVerticalScrollView, ScrollView, ISwipeHelperCallback, IRecentsPanelViewRecentsScrollView)
+CAR_INTERFACE_IMPL_2(RecentsVerticalScrollView, ScrollView, ISwipeHelperCallback, IRecentsScrollView)
 
-RecentsVerticalScrollView::RecentsVerticalScrollView(
+RecentsVerticalScrollView::RecentsVerticalScrollView()
+    : mLastScrollPosition(0)
+    , mNumItemsInOneScreenful(0)
+{
+}
+
+ECode RecentsVerticalScrollView::constructor(
     /* [in] */ IContext* ctx,
     /* [in] */ IAttributeSet* attrs)
-    : mLastScrollPosition(0)
-    , mCallback(NULL)
-    , mNumItemsInOneScreenful(0)
 {
     ScrollView::constructor(ctx, attrs, 0);
     CSwipeHelper::New(ISwipeHelper::X, this, ctx, (ISwipeHelper**)&mSwipeHelper);
     mFadedEdgeDrawHelper = FadedEdgeDrawHelper::Create(ctx, attrs, this, TRUE);
     CHashSet::New((IHashSet**)&mRecycledViews);
+    return NOERROR;
 }
 
 ECode RecentsVerticalScrollView::SetMinSwipeAlpha(
@@ -238,6 +245,7 @@ ECode RecentsVerticalScrollView::FindViewForTask(
     /* [in] */ Int32 persistentTaskId,
     /* [out] */ IView** view)
 {
+    Logger::I(TAG, " >> FindViewForTask: %08x, %d", persistentTaskId, persistentTaskId);
     VALIDATE_NOT_NULL(view);
     Int32 count;
     IViewGroup::Probe(mLinearLayout)->GetChildCount(&count);
@@ -262,6 +270,7 @@ ECode RecentsVerticalScrollView::FindViewForTask(
 
 void RecentsVerticalScrollView::Update()
 {
+    Logger::I(TAG, " >> Update()");
     Int32 count;
     IViewGroup::Probe(mLinearLayout)->GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
@@ -342,6 +351,7 @@ void RecentsVerticalScrollView::Update()
     AutoPtr<IViewTreeObserver> vto;
     GetViewTreeObserver((IViewTreeObserver**)&vto);
     vto->AddOnGlobalLayoutListener(updateScroll);
+    Logger::I(TAG, " << Update()");
 }
 
 ECode RecentsVerticalScrollView::RemoveViewInLayout(
@@ -350,29 +360,36 @@ ECode RecentsVerticalScrollView::RemoveViewInLayout(
     return DismissChild(view);
 }
 
-Boolean RecentsVerticalScrollView::OnInterceptTouchEvent(
-    /* [in] */ IMotionEvent* ev)
+ECode RecentsVerticalScrollView::OnInterceptTouchEvent(
+    /* [in] */ IMotionEvent* ev,
+    /* [out] */ Boolean* result)
 {
-    // if (DEBUG) Log.v(TAG, "onInterceptTouchEvent()");
+    VALIDATE_NOT_NULL(result)
+    if (DEBUG) Logger::V(TAG, "OnInterceptTouchEvent()");
     Boolean b1, b2;
-    mSwipeHelper->OnInterceptTouchEvent(ev, &b1);
-    ScrollView::OnInterceptTouchEvent(ev, &b2);
-    return b1 || b2;
+    *result = (mSwipeHelper->OnInterceptTouchEvent(ev, &b1), b1)
+        || (ScrollView::OnInterceptTouchEvent(ev, &b2), b2);
+    return NOERROR;
 }
 
-Boolean RecentsVerticalScrollView::OnTouchEvent(
-    /* [in] */ IMotionEvent* ev)
+ECode RecentsVerticalScrollView::OnTouchEvent(
+    /* [in] */ IMotionEvent* ev,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     Boolean b1, b2;
-    mSwipeHelper->OnTouchEvent(ev, &b1);
-    ScrollView::OnTouchEvent(ev, &b2);
-    return b1 || b2;
+    *result = (mSwipeHelper->OnTouchEvent(ev, &b1), b1)
+        || (ScrollView::OnTouchEvent(ev, &b2), b2);
+    return NOERROR;
 }
 
-Boolean RecentsVerticalScrollView::CanChildBeDismissed(
-    /* [in] */ IView* v)
+ECode RecentsVerticalScrollView::CanChildBeDismissed(
+    /* [in] */ IView* v,
+    /* [out] */ Boolean* result)
 {
-    return TRUE;
+    VALIDATE_NOT_NULL(result)
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode RecentsVerticalScrollView::IsAntiFalsingNeeded(
@@ -449,15 +466,16 @@ ECode RecentsVerticalScrollView::GetChildAtPosition(
 {
     VALIDATE_NOT_NULL(view);
 
-    Float x, y;
-    Float x1, y1;
-    ev->GetX(&x1);
+    Float x, y, x1, y1;
     Int32 x2, y2;
+    ev->GetX(&x1);
     GetScrollX(&x2);
-    x = x1 + x2;
     ev->GetY(&y1);
     GetScrollY(&y2);
+    x = x1 + x2;
     y = y1 + y2;
+
+    Logger::I(TAG, "GetChildAtPosition: (%.2f, %.2f)", x, y);
 
     Int32 count;
     IViewGroup::Probe(mLinearLayout)->GetChildCount(&count);
@@ -638,9 +656,11 @@ void RecentsVerticalScrollView::OnSizeChanged(
 ECode RecentsVerticalScrollView::SetAdapter(
     /* [in] */ ITaskDescriptionAdapter* adapter)
 {
+    Logger::I(TAG, " >> SetAdapter: %s", TO_CSTR(adapter));
+
     mAdapter = adapter;
     AutoPtr<AdapterDataSetObserver> observer = new AdapterDataSetObserver(this);
-    mAdapter->RegisterDataSetObserver(observer);
+    IAdapter::Probe(mAdapter)->RegisterDataSetObserver(observer);
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     AutoPtr<IDisplayMetrics> dm;
@@ -648,10 +668,8 @@ ECode RecentsVerticalScrollView::SetAdapter(
     Int32 widthPixels, heightPixels;
     dm->GetWidthPixels(&widthPixels);
     dm->GetHeightPixels(&heightPixels);
-    Int32 childWidthMeasureSpec =
-            MeasureSpec::MakeMeasureSpec(widthPixels, MeasureSpec::AT_MOST);
-    Int32 childheightMeasureSpec =
-            MeasureSpec::MakeMeasureSpec(heightPixels, MeasureSpec::AT_MOST);
+    Int32 childWidthMeasureSpec = MeasureSpec::MakeMeasureSpec(widthPixels, MeasureSpec::AT_MOST);
+    Int32 childheightMeasureSpec = MeasureSpec::MakeMeasureSpec(heightPixels, MeasureSpec::AT_MOST);
     AutoPtr<IView> child;
     mAdapter->CreateView(IViewGroup::Probe(mLinearLayout), (IView**)&child);
     child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
@@ -668,9 +686,12 @@ ECode RecentsVerticalScrollView::SetAdapter(
     return NOERROR;
 }
 
-Int32 RecentsVerticalScrollView::NumItemsInOneScreenful()
+ECode RecentsVerticalScrollView::NumItemsInOneScreenful(
+    /* [out] */ Int32* result)
 {
-    return mNumItemsInOneScreenful;
+    VALIDATE_NOT_NULL(result)
+    *result = mNumItemsInOneScreenful;
+    return NOERROR;
 }
 
 ECode RecentsVerticalScrollView::SetLayoutTransition(

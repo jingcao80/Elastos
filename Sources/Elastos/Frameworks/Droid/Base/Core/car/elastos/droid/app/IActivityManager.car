@@ -334,7 +334,6 @@ module
             [in] Int32 stackId,
             [in] IRect* bounds);
 
-
         GetAllStackInfos(
             [out] IList** list);
 

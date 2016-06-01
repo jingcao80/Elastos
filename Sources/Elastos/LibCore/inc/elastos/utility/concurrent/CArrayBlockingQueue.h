@@ -740,6 +740,8 @@ public:
         /* [out] */ IIterator** it);
 
 protected:
+    CARAPI_(String) GetClassName() { return String("CArrayBlockingQueue"); }
+
     // Internal helper methods
 
     /**

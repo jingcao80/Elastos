@@ -337,6 +337,10 @@ public:
         /* [in] */ Int32 start,
         /* [in] */ Int32 end,
         /* [in] */ IList** list);
+
+protected:
+    CARAPI_(String) GetClassName() { return String("CLinkedList"); }
+
 private:
     CARAPI AddLastImpl(
         /* [in] */ IInterface* object,

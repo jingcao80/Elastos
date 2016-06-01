@@ -443,6 +443,9 @@ private:
         /* [in] */ Node* cmp,
         /* [in] */ Node* val);
 
+protected:
+    CARAPI_(String) GetClassName() { return String("CConcurrentLinkedDeque"); }
+
 private:
 //    static Int64 serialVersionUID = 876323262645176354L;
 

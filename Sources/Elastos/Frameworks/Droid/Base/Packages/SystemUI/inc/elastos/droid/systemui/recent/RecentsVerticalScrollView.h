@@ -21,7 +21,7 @@ using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::SystemUI::ISwipeHelper;
 using Elastos::Droid::SystemUI::ISwipeHelperCallback;
 using Elastos::Droid::SystemUI::Recent::IRecentsCallback;
-using Elastos::Droid::SystemUI::Recent::IRecentsPanelViewRecentsScrollView;
+using Elastos::Droid::SystemUI::Recent::IRecentsScrollView;
 using Elastos::Droid::SystemUI::Recent::ITaskDescriptionAdapter;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IMotionEvent;
@@ -43,7 +43,7 @@ namespace Recent {
 class RecentsVerticalScrollView
     : public ScrollView
     , public ISwipeHelperCallback
-    , public IRecentsPanelViewRecentsScrollView
+    , public IRecentsScrollView
 {
 private:
     class NoOpListener
@@ -177,7 +177,9 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    RecentsVerticalScrollView(
+    RecentsVerticalScrollView();
+
+    CARAPI constructor(
         /* [in] */ IContext* ctx,
         /* [in] */ IAttributeSet* attrs);
 
@@ -191,14 +193,17 @@ public:
     CARAPI RemoveViewInLayout(
         /* [in] */ IView* view);
 
-    CARAPI_(Boolean) OnInterceptTouchEvent(
-        /* [in] */ IMotionEvent* ev);
+    CARAPI OnInterceptTouchEvent(
+        /* [in] */ IMotionEvent* ev,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) OnTouchEvent(
-        /* [in] */ IMotionEvent* ev);
+    CARAPI OnTouchEvent(
+        /* [in] */ IMotionEvent* ev,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) CanChildBeDismissed(
-        /* [in] */ IView* v);
+    CARAPI CanChildBeDismissed(
+        /* [in] */ IView* v,
+        /* [out] */ Boolean* result);
 
     // @Override
     CARAPI IsAntiFalsingNeeded(
@@ -263,7 +268,8 @@ public:
     CARAPI SetAdapter(
         /* [in] */ ITaskDescriptionAdapter* adapter);
 
-    CARAPI_(Int32) NumItemsInOneScreenful();
+    CARAPI NumItemsInOneScreenful(
+        /* [out] */ Int32* result);
 
     CARAPI SetLayoutTransition(
         /* [in] */ ILayoutTransition* transition);

@@ -809,7 +809,6 @@ Boolean ActivityStack::StartPausingLocked(
     /* [in] */ Boolean resuming,
     /* [in] */ Boolean dontWait)
 {
-    Slogger::I(TAG, " >>> StartPausingLocked");
     if (mPausingActivity != NULL) {
         // Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity
         //         + " state=" + mPausingActivity.state);
@@ -883,7 +882,6 @@ Boolean ActivityStack::StartPausingLocked(
         mStackSupervisor->AcquireLaunchWakelock();
     }
 
-    Slogger::I(TAG, " <<< StartPausingLocked");
     if (mPausingActivity != NULL) {
         // Have the window manager pause its key dispatching until the new
         // activity has started.  If we're pausing the activity just because

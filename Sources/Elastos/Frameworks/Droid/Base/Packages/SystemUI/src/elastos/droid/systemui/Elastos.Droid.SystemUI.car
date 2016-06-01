@@ -243,6 +243,10 @@ module
     using interface Elastos.Droid.App.IDialog;
     using interface Elastos.Droid.App.INotification;
     using interface Elastos.Droid.App.IService;
+    using interface Elastos.Droid.App.IActivity;
+//     using interface Elastos.Droid.App.INotification;
+//     using interface Elastos.Droid.App.IActivityOptionsOnAnimationStartedListener;
+    using interface Elastos.Droid.Animation.IAnimatorListener;
     using interface Elastos.Droid.Content.IBroadcastReceiver;
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContextWrapper;
@@ -263,10 +267,6 @@ module
     using interface Elastos.Droid.Graphics.Drawable.IColorDrawable;
     using interface Elastos.Droid.Graphics.Drawable.IDrawable;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
-//     using interface Elastos.Droid.Animation.IAnimatorListener;
-    using interface Elastos.Droid.App.IActivity;
-//     using interface Elastos.Droid.App.INotification;
-//     using interface Elastos.Droid.App.IActivityOptionsOnAnimationStartedListener;
     using interface Elastos.Droid.Internal.App.IAlertActivity;
     using interface Elastos.Droid.Internal.App.IResolverActivity;
     using interface Elastos.Droid.Internal.Policy.IIKeyguardService;
@@ -1108,6 +1108,51 @@ module
     //                              Recent
     //===========================================================================
     namespace Recent {
+        [local]
+        class CRecentsPanelView {
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyleAttr);
+
+            interface IRecentsPanelView;
+            interface IAdapterViewOnItemClickListener;
+            interface IRecentsCallback;
+            interface IStatusBarPanel;
+            interface IAnimatorListener;
+            interface IFrameLayout;
+            interface IViewGroup;
+            interface IView;
+            interface IViewParent;
+            interface IViewManager;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }
+
+        [local]
+        class CRecentsVerticalScrollView {
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IRecentsScrollView;
+            interface ISwipeHelperCallback;
+            interface IScrollView;
+            interface IFrameLayout;
+            interface IViewGroup;
+            interface IView;
+            interface IViewParent;
+            interface IViewManager;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }
+
         class CRecents {
             constructor();
 
@@ -1174,6 +1219,14 @@ module
             interface IRecentsAppWidgetHostCallbacks;
             interface IDebugOverlayViewCallbacks;
             interface IRecentsActivity;
+        }
+
+        [local]
+        class CRecentAnimationEndedReceiver {
+            constructor(
+                [in] IAlternateRecentsComponent* host);
+
+            interface IBroadcastReceiver;
         }
 
     namespace Views {

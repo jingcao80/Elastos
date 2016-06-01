@@ -1,14 +1,19 @@
 
 #include "elastos/droid/app/CActivityManagerRecentTaskInfo.h"
-// #include "elastos/droid/app/CActivityManagerTaskDescription.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::CComponentName;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -44,19 +49,27 @@ ECode CActivityManagerRecentTaskInfo::WriteToParcel(
 {
     dest->WriteInt32(mId);
     dest->WriteInt32(mPersistentId);
+
+    if (mBaseIntent != NULL) {
+        dest->WriteInt32(1);
+        dest->WriteInterfacePtr(mBaseIntent);
+    }
+    else {
+        dest->WriteInt32(0);
+    }
+
     dest->WriteInterfacePtr(mOrigActivity);
-    dest->WriteInterfacePtr(mBaseIntent);
-    dest->WriteInterfacePtr(mDescription);
-    // TODO
-//    TextUtils.writeToParcel(description, dest,
-//            Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+    TextUtils::WriteToParcel(mDescription,
+        dest/*, Parcelable.PARCELABLE_WRITE_RETURN_VALUE*/);
 
     if (mTaskDescription != NULL) {
         dest->WriteInt32(1);
-        IParcelable::Probe(mTaskDescription)->WriteToParcel(dest);
-    } else {
+        dest->WriteInterfacePtr(mTaskDescription);
+    }
+    else {
         dest->WriteInt32(0);
     }
+
     dest->WriteInt32(mStackId);
     dest->WriteInt32(mUserId);
     dest->WriteInt64(mFirstActiveTime);
@@ -69,28 +82,37 @@ ECode CActivityManagerRecentTaskInfo::WriteToParcel(
 ECode CActivityManagerRecentTaskInfo::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    AutoPtr<IInterface> obj;
     source->ReadInt32(&mId);
     source->ReadInt32(&mPersistentId);
-    source->ReadInterfacePtr((Handle32*)&obj);
-    mOrigActivity = IComponentName::Probe(obj);
-    obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
-    mBaseIntent = IIntent::Probe(obj);
-    obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
-    mDescription = ICharSequence::Probe(obj);
-    // TODO
-//    description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+
+    AutoPtr<IInterface> obj;
     Int32 ival;
     source->ReadInt32(&ival);
     if (ival > 0) {
-        // CActivityManagerTaskDescription((IActivityManagerTaskDescription**)&mTaskDescription);
-        IParcelable::Probe(mTaskDescription)->ReadFromParcel(source);
+        source->ReadInterfacePtr((Handle32*)&obj);
+        mBaseIntent = IIntent::Probe(obj);
+    }
+    else {
+        mBaseIntent = NULL;
+    }
+
+    obj = NULL;
+    source->ReadInterfacePtr((Handle32*)&obj);
+    mOrigActivity = IComponentName::Probe(obj);
+
+    TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
+        source, (ICharSequence**)&mDescription);
+
+    source->ReadInt32(&ival);
+    if (ival > 0) {
+        obj = NULL;
+        source->ReadInterfacePtr((Handle32*)&obj);
+        mTaskDescription = IActivityManagerTaskDescription::Probe(obj);
     }
     else {
         mTaskDescription = NULL;
     }
+
     source->ReadInt32(&mStackId);
     source->ReadInt32(&mUserId);
     source->ReadInt64(&mFirstActiveTime);
@@ -282,6 +304,30 @@ ECode CActivityManagerRecentTaskInfo::SetAffiliatedTaskColor(
     /* [in] */ Int32 color)
 {
     mAffiliatedTaskColor = color;
+    return NOERROR;
+}
+
+ECode CActivityManagerRecentTaskInfo::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+
+    StringBuilder sb("CActivityManagerRecentTaskInfo{0x");
+    sb += StringUtils::ToHexString((Int32)this);
+    if (mOrigActivity != NULL) {
+        sb += ", ";
+        sb += TO_CSTR(mOrigActivity);
+    }
+    else if (mTaskDescription != NULL) {
+        sb += ", ";
+        sb += TO_CSTR(mTaskDescription);
+    }
+    else if (mDescription != NULL) {
+        sb += ", ";
+        sb += TO_CSTR(mDescription);
+    }
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

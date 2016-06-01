@@ -183,6 +183,9 @@ protected:
             /* [in] */ Int32 end,
             /* [out] */ IList** subList);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CopyOnWriteArrayList::CowSubList"); }
+
     private:
         /*
          * An immutable snapshot of a sub list's state. By gathering all three
@@ -827,6 +830,9 @@ public:
         /* [in] */ Int32 from,
         /* [in] */ Int32 to,
         /* [out] */ Int32* value);
+
+protected:
+    CARAPI_(String) GetClassName() { return String("CopyOnWriteArrayList"); }
 
 private:
     /**

@@ -257,6 +257,9 @@ private:
             /* [in] */ ArrayOf<IInterface*>* contents,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("Hashtable::KeySet"); }
+
     public:
         HashTable* mHost;
     };
@@ -324,6 +327,9 @@ private:
             /* [in] */ ArrayOf<IInterface*>* contents,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("Hashtable::Values"); }
+
     public:
         HashTable* mHost;;
     };
@@ -390,6 +396,9 @@ private:
         CARAPI ToArray(
             /* [in] */ ArrayOf<IInterface*>* contents,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
+
+    protected:
+        CARAPI_(String) GetClassName() { return String("Hashtable::EntrySet"); }
 
     public:
         HashTable* mHost;
@@ -662,6 +671,8 @@ public:
 
 protected:
     HashTable();
+
+    CARAPI_(String) GetClassName() { return String("Hashtable"); }
 
 private:
     /**

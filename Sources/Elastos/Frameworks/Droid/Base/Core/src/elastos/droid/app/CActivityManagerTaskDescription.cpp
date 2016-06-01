@@ -49,7 +49,6 @@ ECode CActivityManagerTaskDescription::constructor(
     CColor::AcquireSingleton((IColor**)&color);
     color->Alpha(colorPrimary, &alpha);
     if ((colorPrimary != 0) && (alpha != 255)) {
-        // throw new RuntimeException("A TaskDescription's primary color should be opaque");
         Logger::E("CActivityManagerTaskDescription", "A TaskDescription's primary color should be opaque");
         return E_RUNTIME_EXCEPTION;
     }
@@ -108,7 +107,6 @@ ECode CActivityManagerTaskDescription::SetPrimaryColor(
     Int32 alpha;
     color->Alpha(primaryColor, &alpha);
     if ((primaryColor != 0) && (alpha != 255)) {
-        // throw new RuntimeException("A TaskDescription's primary color should be opaque");
         Logger::E("CActivityManagerTaskDescription", "A TaskDescription's primary color should be opaque");
         return E_RUNTIME_EXCEPTION;
     }
@@ -235,20 +233,26 @@ ECode CActivityManagerTaskDescription::WriteToParcel(
 {
     if (mLabel.IsNull()) {
         dest->WriteInt32(0);
-    } else {
+    }
+    else {
         dest->WriteInt32(1);
         dest->WriteString(mLabel);
     }
+
     if (mIcon == NULL) {
         dest->WriteInt32(0);
-    } else {
-        dest->WriteInt32(1);
-        IParcelable::Probe(mIcon)->WriteToParcel(dest);
     }
+    else {
+        dest->WriteInt32(1);
+        dest->WriteInterfacePtr(mIcon);
+    }
+
     dest->WriteInt32(mColorPrimary);
+
     if (mIconFilename.IsNull()) {
         dest->WriteInt32(0);
-    } else {
+    }
+    else {
         dest->WriteInt32(1);
         dest->WriteString(mIconFilename);
     }
@@ -266,9 +270,12 @@ ECode CActivityManagerTaskDescription::ReadFromParcel(
 
     source->ReadInt32(&ival);
     if (ival > 0) {
-        CBitmap::New((IBitmap**)&mIcon);
-        IParcelable::Probe(mIcon)->ReadFromParcel(source);
+        AutoPtr<IInterface> obj;
+        source->ReadInterfacePtr((Handle32*)&obj);
+        mIcon = IBitmap::Probe(obj);
     }
+
+    source->ReadInt32(&mColorPrimary);
 
     source->ReadInt32(&ival);
     if (ival > 0) {
@@ -287,6 +294,8 @@ ECode CActivityManagerTaskDescription::ToString(
     sb += Object::ToString(mIcon);
     sb += " colorPrimary: ";
     sb += mColorPrimary;
+    sb += " icon filename:";
+    sb += mIconFilename;
     *str = sb.ToString();
     return NOERROR;
 }

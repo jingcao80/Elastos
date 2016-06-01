@@ -497,6 +497,9 @@ public:
     CARAPI RetainAll(
         /* [in] */ ICollection* collection);
 
+protected:
+    CARAPI_(String) GetClassName() { return String("CPriorityQueue"); }
+
 private:
     // @SuppressWarnings("unchecked")
     CARAPI ReadObject(

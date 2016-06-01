@@ -234,11 +234,11 @@ public:
         /* [in] */ Int32 flags);
 
     /** @hide */
-    virtual CARAPI_(void) AddPrivateFlags(
+    CARAPI AddPrivateFlags(
         /* [in] */ Int32 flags);
 
     /** @hide */
-    virtual CARAPI_(void) SetBlurMaskAlphaThreshold(
+    CARAPI SetBlurMaskAlphaThreshold(
         /* [in] */ Float alpha);
 
     /**
@@ -251,7 +251,7 @@ public:
         /* [in] */ Int32 flags);
 
     /** @hide */
-    virtual CARAPI_(void) ClearPrivateFlags(
+    CARAPI ClearPrivateFlags(
         /* [in] */ Int32 flags);
 
     /**

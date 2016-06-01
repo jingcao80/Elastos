@@ -55,7 +55,7 @@ def summarize_log(logPath):
 
         # log
         logFile = open(logPath, 'a')
-        logInfo = 'results: {0:d} errors, {1:d} warnings.\n'.format(errorCount, warningCount)
+        logInfo = '\n\nresults: {0:d} errors, {1:d} warnings.\n'.format(errorCount, warningCount)
         logFile.write(logInfo)
         print logInfo
         logFile.close()

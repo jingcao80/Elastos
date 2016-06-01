@@ -119,9 +119,6 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    RecentTasksLoader(
-        /* [in] */ IContext* context);
-
     static CARAPI_(AutoPtr<RecentTasksLoader>) GetInstance(
         /* [in] */ IContext* context);
 
@@ -195,6 +192,11 @@ public:
         /* [in] */ Boolean zeroeth);
 
 private:
+    RecentTasksLoader();
+
+    CARAPI constructor(
+        /* [in] */ IContext* context);
+
     CARAPI_(Boolean) IsCurrentHomeActivity(
         /* [in] */ IComponentName* component,
         /* [in] */ IActivityInfo* homeInfo);

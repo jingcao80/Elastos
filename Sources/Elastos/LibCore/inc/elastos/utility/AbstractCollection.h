@@ -300,6 +300,9 @@ public:
 
     CARAPI GetHashCode(
         /* [out] */ Int32* hashCode);
+
+protected:
+    virtual CARAPI_(String) GetClassName() = 0;
 };
 
 } // namespace Utility

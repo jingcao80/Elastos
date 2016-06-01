@@ -6,7 +6,7 @@ module
     namespace SystemUI {
     namespace StatusBar {
 
-    interface IIStatusBarPanel {
+    interface IStatusBarPanel {
         IsInContentArea(
             [in] Int32 x,
             [in] Int32 y,

@@ -118,6 +118,8 @@ public:
         CARAPI GetIterator(
             /* [out] */ IIterator** outiter);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CIdentityHashMap::IdentityHashMapEntrySet"); }
 
     private:
         AutoPtr<CIdentityHashMap> mAssociatedMap;
@@ -146,6 +148,9 @@ public:
         CARAPI GetIterator(
             /* [out] */ IIterator** outiter);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CIdentityHashMap::IdentityHashMapKeySet"); }
+
     private:
         CIdentityHashMap* mAssociatedMap;
     };
@@ -173,6 +178,8 @@ public:
         CARAPI GetIterator(
             /* [out] */ IIterator** outiter);
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CIdentityHashMap::IdentityHashMapValues"); }
     private:
         CIdentityHashMap* mAssociatedMap;
     };
@@ -434,6 +441,9 @@ public:
 
     CARAPI Clone(
         /* [out] */ IInterface** object);
+
+protected:
+    CARAPI_(String) GetClassName() { return String("CIdentityHashMap"); }
 
 private:
     CARAPI_(Int32) GetThreshold(

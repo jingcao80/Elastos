@@ -179,6 +179,9 @@ public:
     CARAPI RetainAll(
         /* [in] */ ICollection* collection);
 
+protected:
+    CARAPI_(String) GetClassName() { return String("CTreeSet"); }
+
 private:
     CARAPI_(void) WriteObject(
         /* [in] */ IObjectOutputStream* stream);

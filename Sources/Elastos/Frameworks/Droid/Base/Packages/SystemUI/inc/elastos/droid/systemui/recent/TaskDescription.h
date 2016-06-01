@@ -65,6 +65,8 @@ public:
     CARAPI GetThumbnail(
         /* [out] */ IDrawable** thumbnail);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
 public:
     AutoPtr<IResolveInfo> mResolveInfo;
     const Int32 mTaskId; // application task id for curating apps

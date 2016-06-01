@@ -167,6 +167,7 @@ AutoPtr<IList> SystemServicesProxy::GetRecentTasks(
     /* [in] */ Int32 userId,
     /* [in] */ Boolean isTopTaskHome)
 {
+    Logger::I(TAG, "GetRecentTasks: numLatestTasks:%d, userId:%d, isTopTaskHome:%d", numLatestTasks, userId, isTopTaskHome);
     if (mAm == NULL) return NULL;
 
     // If we are mocking, then create some recent tasks

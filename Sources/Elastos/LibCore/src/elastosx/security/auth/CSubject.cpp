@@ -783,6 +783,9 @@ ECode CSubject::SecureSet::Get(
             return mElements->GetSize(size);
         }
 
+    protected:
+        CARAPI_(String) GetClassName() { return String("CSubject::InnerSet"); }
+
     private:
         AutoPtr<ILinkedList> mElements;
         ClassID mId;

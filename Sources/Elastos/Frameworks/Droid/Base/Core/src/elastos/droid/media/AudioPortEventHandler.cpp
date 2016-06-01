@@ -251,7 +251,7 @@ ECode AudioPortEventHandler::Handler(
 ECode AudioPortEventHandler::NativeSetup(
     /* [in] */ IWeakReference* weak_this)
 {
-    Logger::V(TAG, "eventHandlerSetup");
+    // Logger::V(TAG, "eventHandlerSetup");
 
     android::sp<JNIAudioPortCallback> callback = new JNIAudioPortCallback(weak_this);
     android::AudioSystem::setAudioPortCallback(callback);
@@ -260,7 +260,7 @@ ECode AudioPortEventHandler::NativeSetup(
 
 ECode AudioPortEventHandler::NativeFinalize()
 {
-    Logger::V(TAG, "eventHandlerFinalize");
+    // Logger::V(TAG, "eventHandlerFinalize");
 
     android::sp<JNIAudioPortCallback> callback;
     android::AudioSystem::setAudioPortCallback(callback);

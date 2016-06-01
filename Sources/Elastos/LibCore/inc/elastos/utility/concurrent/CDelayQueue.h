@@ -148,6 +148,9 @@ private:
      */
     CARAPI_(AutoPtr<IInterface>) PeekExpired();
 
+protected:
+    CARAPI_(String) GetClassName() { return String("CDelayQueue"); }
+
 private:
     AutoPtr<IReentrantLock> mLock;
     AutoPtr<IPriorityQueue> mQ;
