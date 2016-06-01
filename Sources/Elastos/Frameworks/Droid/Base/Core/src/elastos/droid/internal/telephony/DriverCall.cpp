@@ -1,161 +1,225 @@
-/*
- * Copyright (C) 2006 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony;
+#include "elastos/droid/internal/telephony/DriverCall.h"
+#include "elastos/droid/internal/telephony/ATResponseParser.h"
+#include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Telephony::IRlog;
-using Elastos::Lang::IComparable;
-using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::PhoneNumberUtils;
+using Elastos::Core::EIID_IComparable;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
-/**
- * {@hide}
- */
-public class DriverCall implements Comparable<DriverCall> {
-    static const String LOG_TAG = "DriverCall";
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
 
-    public enum State {
-        ACTIVE,
-        HOLDING,
-        DIALING,    // MO call only
-        ALERTING,   // MO call only
-        INCOMING,   // MT call only
-        WAITING;    // MT call only
-        // If you add a state, make sure to look for the Switch()
-        // statements that use this enum
-    }
+const String DriverCall::TAG("DriverCall");
+CAR_INTERFACE_IMPL(DriverCall, Object, IComparable)
+/** returns null on error */
+AutoPtr<DriverCall> DriverCall::FromCLCCLine(
+    /* [in] */ const String& line)
+{
+    AutoPtr<DriverCall> ret = new DriverCall();
 
-    public Int32 index;
-    public Boolean isMT;
-    public State state;     // May be NULL if unavail
-    public Boolean isMpty;
-    public String number;
-    public Int32 TOA;
-    public Boolean isVoice;
-    public Boolean isVoicePrivacy;
-    public Int32 als;
-    public Int32 numberPresentation;
-    public String name;
-    public Int32 namePresentation;
-    public UUSInfo uusInfo;
+    //+CLCC: 1,0,2,0,0,\"+18005551212\",145
+    //     mIndex,mIsMT,state,mode,isMpty(,number,TOA)?
+    AutoPtr<ATResponseParser> p = new ATResponseParser(line);
+    ECode ec = NOERROR;
+    do {
+        if (FAILED(ec = p->NextInt32(&ret->mIndex))) {
+            break;
+        }
 
-    /** returns NULL on error */
-    static DriverCall
-    FromCLCCLine(String line) {
-        DriverCall ret = new DriverCall();
+        if (FAILED(ec = p->NextBoolean(&ret->mIsMT))) {
+            break;
+        }
 
-        //+CLCC: 1,0,2,0,0,\"+18005551212\",145
-        //     index,isMT,state,mode,IsMpty(,number,TOA)?
-        ATResponseParser p = new ATResponseParser(line);
+        Int32 v = 0;
+        if (FAILED(ec = p->NextInt32(&v))) {
+            break;
+        }
+        if (FAILED(ec = StateFromCLCC(v, &ret->mState))) {
+            break;
+        }
 
-        try {
-            ret.index = p->NextInt();
-            ret.isMT = p->NextBoolean();
-            ret.state = StateFromCLCC(p->NextInt());
+        if (FAILED(ec = p->NextInt32(&v))) {
+            break;
+        }
+        ret->mIsVoice = (0 == v);
+        if (FAILED(ec = p->NextBoolean(&ret->mIsMpty))) {
+            break;
+        }
 
-            ret.isVoice = (0 == p->NextInt());
-            ret.isMpty = p->NextBoolean();
+        // use ALLOWED as default presentation while parsing CLCC
+        ret->mNumberPresentation = IPhoneConstants::PRESENTATION_ALLOWED;
 
-            // use ALLOWED as default presentation while parsing CLCC
-            ret.numberPresentation = PhoneConstants.PRESENTATION_ALLOWED;
-
-            If (p->HasMore()) {
-                // Some lame implementations return strings
-                // like "NOT AVAILABLE" in the CLCC line
-                ret.number = PhoneNumberUtils->ExtractNetworkPortionAlt(p->NextString());
-
-                If (ret.number->Length() == 0) {
-                    ret.number = NULL;
-                }
-
-                ret.TOA = p->NextInt();
-
-                // Make sure there's a leading + on addresses with a TOA
-                // of 145
-
-                ret.number = PhoneNumberUtils->StringFromStringAndTOA(
-                                ret.number, ret.TOA);
-
+        Boolean has = FALSE;
+        if (p->HasMore(&has), has) {
+            // Some lame implementations return strings
+            // like "NOT AVAILABLE" in the CLCC line
+            String s;
+            if (FAILED(ec = p->NextString(&s))) {
+                break;
             }
-        } Catch (ATParseEx ex) {
-            Rlog->E(LOG_TAG,"Invalid CLCC line: '" + line + "'");
-            return NULL;
+            PhoneNumberUtils::ExtractNetworkPortionAlt(s, &ret->mNumber);
+
+            if (ret->mNumber.GetLength() == 0) {
+                ret->mNumber = String(NULL);
+            }
+
+            if (FAILED(ec = p->NextInt32(&ret->mTOA))) {
+                break;
+            }
+
+            // Make sure there's a leading + on addresses with a TOA
+            // of 145
+            PhoneNumberUtils::StringFromStringAndTOA(
+                            ret->mNumber, ret->mTOA, &ret->mNumber);
         }
+    } while (0);
 
-        return ret;
+    if (FAILED(ec)) {
+        Logger::E(TAG,"Invalid CLCC line: '%s'", line.string());
+        return NULL;
     }
 
-    public
-    DriverCall() {
-    }
-
-    //@Override
-    public String
-    ToString() {
-        return "id=" + index + ","
-                + state + ","
-                + "toa=" + TOA + ","
-                + (isMpty ? "conf" : "norm") + ","
-                + (isMT ? "mt" : "mo") + ","
-                + als + ","
-                + (isVoice ? "voc" : "nonvoc") + ","
-                + (isVoicePrivacy ? "evp" : "noevp") + ","
-                /*+ "number=" + number */ + ",cli=" + numberPresentation + ","
-                /*+ "name="+ name */ + "," + namePresentation;
-    }
-
-    public static State
-    StateFromCLCC(Int32 state) throws ATParseEx {
-        Switch(state) {
-            case 0: return State.ACTIVE;
-            case 1: return State.HOLDING;
-            case 2: return State.DIALING;
-            case 3: return State.ALERTING;
-            case 4: return State.INCOMING;
-            case 5: return State.WAITING;
-            default:
-                throw new ATParseEx("illegal call state " + state);
-        }
-    }
-
-    public static Int32
-    PresentationFromCLIP(Int32 cli) throws ATParseEx
-    {
-        Switch(cli) {
-            case 0: return PhoneConstants.PRESENTATION_ALLOWED;
-            case 1: return PhoneConstants.PRESENTATION_RESTRICTED;
-            case 2: return PhoneConstants.PRESENTATION_UNKNOWN;
-            case 3: return PhoneConstants.PRESENTATION_PAYPHONE;
-            default:
-                throw new ATParseEx("illegal presentation " + cli);
-        }
-    }
-
-    //***** Comparable Implementation
-
-    /** For sorting by index */
-    //@Override
-    public Int32
-    CompareTo(DriverCall dc) {
-
-        If (index < dc.index) {
-            return -1;
-        } else If (index == dc.index) {
-            return 0;
-        } else { /*index > dc.index*/
-            return 1;
-        }
-    }
+    return ret;
 }
+
+DriverCall::DriverCall()
+    : mIndex(0)
+    , mIsMT(FALSE)
+    // , mState(-1)
+    , mIsMpty(FALSE)
+    , mTOA(0)
+    , mIsVoice(FALSE)
+    , mIsVoicePrivacy(FALSE)
+    , mAls(0)
+    , mNumberPresentation(0)
+    , mNamePresentation(0)
+{
+}
+
+ECode DriverCall::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    StringBuilder sb("id=");
+    sb.Append(mIndex);
+    sb.Append(",");
+    sb.Append(mState);
+    sb.Append(",");
+    sb.Append("toa=");
+    sb.Append(mTOA);
+    sb.Append(",");
+    sb.Append((mIsMpty ? "conf" : "norm"));
+    sb.Append(",");
+    sb.Append((mIsMT ? "mt" : "mo"));
+    sb.Append(",");
+    sb.Append(mAls);
+    sb.Append(",");
+    sb.Append((mIsVoice ? "voc" : "nonvoc"));
+    sb.Append(",");
+    sb.Append(mIsVoicePrivacy ? "evp" : "noevp");
+    sb.Append(",");
+    sb.Append("number=");
+    sb.Append(mNumber);
+    sb.Append(",cli=");
+    sb.Append(mNumberPresentation);
+    sb.Append(",");
+    sb.Append("name=");
+    sb.Append(mName);
+    sb.Append(",");
+    sb.Append(mNamePresentation);
+    return sb.ToString(str);
+}
+
+ECode DriverCall::StateFromCLCC(
+    /* [in] */ Int32 state,
+    /* [out] */ State* result) /*throws ATParseEx*/
+{
+    VALIDATE_NOT_NULL(result);
+    switch(state) {
+        case 0: {
+            *result = ACTIVE;
+            return NOERROR;
+        }
+        case 1: {
+            *result = HOLDING;
+            return NOERROR;
+        }
+        case 2: {
+            *result = DIALING;
+            return NOERROR;
+        }
+        case 3: {
+            *result = ALERTING;
+            return NOERROR;
+        }
+        case 4: {
+            *result = INCOMING;
+            return NOERROR;
+        }
+        case 5: {
+            *result = WAITING;
+            return NOERROR;
+        }
+    }
+    return E_TELEPHONEY_AT_PARSE_EXCEPTION;
+}
+
+ECode DriverCall::PresentationFromCLIP(
+    /* [in] */ Int32 cli,
+    /* [out] */ Int32* result) /*throws ATParseEx*/
+{
+    VALIDATE_NOT_NULL(result);
+    switch(cli) {
+        case 0: {
+            *result = IPhoneConstants::PRESENTATION_ALLOWED;
+            return NOERROR;
+        }
+        case 1: {
+            *result = IPhoneConstants::PRESENTATION_RESTRICTED;
+            return NOERROR;
+        }
+        case 2: {
+            *result = IPhoneConstants::PRESENTATION_UNKNOWN;
+            return NOERROR;
+        }
+        case 3: {
+            *result = IPhoneConstants::PRESENTATION_PAYPHONE;
+            return NOERROR;
+        }
+        // default:
+        //     throw new ATParseEx("illegal presentation " + cli);
+    }
+    *result = -1;
+    return E_TELEPHONEY_AT_PARSE_EXCEPTION;
+}
+
+ECode DriverCall::CompareTo(
+    /* [in] */ IInterface* _dc,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    DriverCall* dc = (DriverCall*)IComparable::Probe(_dc);
+    if (mIndex < dc->mIndex) {
+        *result = -1;
+        return NOERROR;
+    }
+    else if (mIndex == dc->mIndex) {
+        *result = 0;
+        return NOERROR;
+    }
+
+    /*mIndex > dc.mIndex*/
+    *result = 1;
+    return NOERROR;
+}
+
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos
