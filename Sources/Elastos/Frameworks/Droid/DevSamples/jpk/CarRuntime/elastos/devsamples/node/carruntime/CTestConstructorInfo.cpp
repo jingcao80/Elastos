@@ -1,5 +1,6 @@
 
 #include "CTestConstructorInfo.h"
+#include "CConstructorInfo.h"
 
 #include "CTestParamInfo.h"
 #include "CTestArgumentList.h"
@@ -15,7 +16,7 @@ namespace DevSamples {
 namespace Node {
 namespace CarRuntime {
 
-CAR_INTERFACE_IMPL(CTestConstructorInfo, Object, ITestConstructorInfo)
+CAR_INTERFACE_IMPL_2(CTestConstructorInfo, Object, ITestFunctionInfo, ITestConstructorInfo)
 
 CAR_OBJECT_IMPL(CTestConstructorInfo)
 
@@ -35,7 +36,11 @@ ECode CTestConstructorInfo::GetAnnotation(
 ECode CTestConstructorInfo::GetParamCount(
     /* [out] */ Int32 * pCount)
 {
-    mConstructorInfo->GetParamCount(pCount);
+    //mConstructorInfo->GetParamCount(pCount);
+
+    CConstructorInfo* oConstructorInfo = (CConstructorInfo*)mConstructorInfo;
+    *pCount = oConstructorInfo->mMethodInfo->mMethodDescriptor->mParamCount;
+
     return NOERROR;
 }
 
@@ -78,8 +83,27 @@ ECode CTestConstructorInfo::GetParamInfoByIndex(
     /* [in] */ Int32 index,
     /* [out] */ ITestParamInfo ** ppParamInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IParamInfo> paramInfo;
+    ec = mConstructorInfo->GetParamInfoByIndex(index,(IParamInfo**)&paramInfo);
+    if (FAILED(ec)) {
+        ALOGD("CConstructorInfo::GetParamInfoByIndex error: GetParamInfoByIndex fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestParamInfo> testParamInfo;
+    ec = CTestParamInfo::New(paramInfo,(ITestParamInfo**)&testParamInfo);
+    if (FAILED(ec)) {
+        ALOGD("CConstructorInfo::GetParamInfoByIndex error: CTestParamInfo::New fail!");
+        return ec;
+    }
+    *ppParamInfo = testParamInfo;
+
+    paramInfo->AddRef();
+    testParamInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestConstructorInfo::GetParamInfoByName(

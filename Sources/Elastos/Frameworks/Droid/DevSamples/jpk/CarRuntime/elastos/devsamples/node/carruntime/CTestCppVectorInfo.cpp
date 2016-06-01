@@ -6,7 +6,7 @@ namespace DevSamples {
 namespace Node {
 namespace CarRuntime {
 
-CAR_INTERFACE_IMPL(CTestCppVectorInfo, Object, ITestCppVectorInfo)
+CAR_INTERFACE_IMPL_2(CTestCppVectorInfo, Object, ITestDataTypeInfo, ITestCppVectorInfo)
 
 CAR_OBJECT_IMPL(CTestCppVectorInfo)
 

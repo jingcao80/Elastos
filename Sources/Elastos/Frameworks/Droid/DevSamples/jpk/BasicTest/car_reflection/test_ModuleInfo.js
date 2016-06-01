@@ -71,18 +71,43 @@ for (var i=0,im=aClassInfos.length;i<im;i++) {
 }
 } //false
 
-if(false){  //TEST OK
+if(true){  //TEST OK
     // CARAPI GetClassInfo(
     //     /* [in] */ const String& fullName,
     //     /* [out] */ ITestClassInfo ** ppClassInfo);
 //TOFIX: short classname should be supported
 //TODO: oModuleInfo.sClassName / oModuleInfo[sClassName]
-var oClassInfo = oModuleInfo.GetClassInfo("Elastos.DevSamples.Node.CarRuntime.CCarRuntime");
+var oClassInfo = oModuleInfo.GetClassInfo("Elastos.DevSamples.Node.CarRuntime.CTestModuleInfo");
 var sClassName = oClassInfo.GetName();
 elog("========test reflection moduleInfo ========GetClassInfo===class name : " + sClassName);
 }   //false
 
-if(true){  //TEST OK
+//--------------------temp begin------------------------
+
+var aConstructorInfos = oClassInfo.GetAllConstructorInfos();
+var im = aConstructorInfos.length;
+elog("========test reflection moduleInfo ========oClassInfo.GetAllConstructorInfos===length : " + im);
+
+for (var i=0;i<im;i++) {
+    var oConstructorInfo = aConstructorInfos[i];
+    var paramCount = oConstructorInfo.GetParamCount();
+    elog("========test reflection moduleInfo ========oConstructorInfo.GetParamCount===paramCount : " + paramCount);
+
+    var aParamInfos = oConstructorInfo.GetAllParamInfos();
+    var paramCount = aParamInfos.length;
+    elog("========test reflection moduleInfo ========oConstructorInfo.GetAllParamInfos===paramCount : " + paramCount);
+
+    var oParamInfo = oConstructorInfo.GetParamInfoByIndex(0);
+    elog("========test reflection moduleInfo ========oConstructorInfo.GetParamInfoByIndex 0===paramCount : " + paramCount);
+    var oParamInfo = oConstructorInfo.GetParamInfoByIndex(1);
+    elog("========test reflection moduleInfo ========oConstructorInfo.GetParamInfoByIndex 1===paramCount : " + paramCount);
+    var oParamInfo = oConstructorInfo.GetParamInfoByIndex(2);
+    elog("========test reflection moduleInfo ========oConstructorInfo.GetParamInfoByIndex 2===paramCount : " + paramCount);
+}
+
+//--------------------temp end------------------------
+
+if(false){  //TEST OK
     // CARAPI GetInterfaceCount(
     //     /* [out] */ Int32 * pCount);
 //TODO: oModuleInfo.interfaceCount
@@ -90,7 +115,7 @@ var iInterfaceCount = oModuleInfo.GetInterfaceCount();
 elog("========test reflection moduleInfo ========GetInterfaceCount : " + iInterfaceCount);
 }   //false
 
-if(true){  //TEST ERROR
+if(false){  //TEST ERROR
     // CARAPI GetAllInterfaceInfos(
     //     /* [out] */ ArrayOf<ITestInterfaceInfo *> ** ppInterfaceInfos);
 //TODO: oModuleInfo.classInfos[i] / oModuleInfo.classInfos[sClassName]
@@ -108,7 +133,7 @@ for (var i=0,im=aInterfaceInfos.length;i<im;i++) {
 }
 } //false
 
-if(true){  //TEST ERROR
+if(false){  //TEST ERROR
     // CARAPI GetInterfaceInfo(
     //     /* [in] */ const String& fullName,
     //     /* [out] */ ITestInterfaceInfo ** ppInterfaceInfo);

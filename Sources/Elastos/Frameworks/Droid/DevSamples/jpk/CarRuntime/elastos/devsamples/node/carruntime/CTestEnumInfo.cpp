@@ -6,7 +6,7 @@ namespace DevSamples {
 namespace Node {
 namespace CarRuntime {
 
-CAR_INTERFACE_IMPL(CTestEnumInfo, Object, ITestEnumInfo)
+CAR_INTERFACE_IMPL_2(CTestEnumInfo, Object, ITestDataTypeInfo, ITestEnumInfo)
 
 CAR_OBJECT_IMPL(CTestEnumInfo)
 
