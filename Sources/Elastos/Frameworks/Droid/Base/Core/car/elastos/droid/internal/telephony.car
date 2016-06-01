@@ -67,10 +67,10 @@ module
     merge("telephony/RadioNVItems.car");
     merge("telephony/RestrictedState.car");
     merge("telephony/RetryManager.car");
+    merge("telephony/ServiceStateTracker.car");
     merge("telephony/SmsConstants.car");
     merge("telephony/SmsRawData.car");
     merge("telephony/SMSDispatcher.car");
-    merge("telephony/ServiceStateTracker.car");
     merge("telephony/Sms7BitEncodingTranslator.car");
     merge("telephony/SmsAddress.car");
     merge("telephony/SmsApplication.car");
@@ -239,6 +239,8 @@ module
 
     merge("telephony/utility/BlacklistUtils.car");
 
+    interface Elastos.Droid.Telephony.ICellInfo;
+
     namespace Elastos {
     namespace Droid {
     namespace Internal {
@@ -291,6 +293,11 @@ module
             interface IGsmAlphabet;
         }
 
+        //singleton class CSms7BitEncodingTranslatorHelper {
+
+        //    interface ISms7BitEncodingTranslatorHelper;
+        //}
+
         [deprecated]
         class CSmsRawData {
 
@@ -302,6 +309,15 @@ module
             interface ISmsRawData;
             interface IParcelable;
         }
+
+        //class CServiceStateTracker {
+        //    constructor(
+        //        [in] IPhoneBase* phoneBase,
+        //        [in] ICommandsInterface* ci,
+        //        [in] ICellInfo* cellInfo);
+        //
+        //    interface IServiceStateTracker;
+        //}
 
     } // Telephony
     } // Internal
