@@ -220,9 +220,9 @@ ECode RecentsActivity::DismissAndGoBack()
 {
     Logger::I(TAG, " >>> RecentsActivity::DismissAndGoBack");
     if (mRecentsPanel != NULL) {
-        AutoPtr<IInterface> obj;
-        GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&obj);
-        const AutoPtr<IActivityManager> am = IActivityManager::Probe(obj);
+        AutoPtr<IInterface> amObj;
+        GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&amObj);
+        AutoPtr<IActivityManager> am = IActivityManager::Probe(amObj);
         AutoPtr<IList> recentTasks;
         am->GetRecentTasks(2,
             IActivityManager::RECENT_WITH_EXCLUDED |
@@ -231,19 +231,23 @@ ECode RecentsActivity::DismissAndGoBack()
             (IList**)&recentTasks);
         Int32 size;
         recentTasks->GetSize(&size);
-        AutoPtr<IInterface> obj2;
-        recentTasks->Get(1, (IInterface**)&obj2);
-        AutoPtr<IActivityManagerRecentTaskInfo> amrt = IActivityManagerRecentTaskInfo::Probe(obj2);
-        Int32 persistentId;
-        amrt->GetPersistentId(&persistentId);
-        Boolean b;
-        mRecentsPanel->SimulateClick(persistentId, &b);
-        if (size > 1 && b) {
-            // recents panel will take care of calling show(false) through simulateClick
-            return E_NULL_POINTER_EXCEPTION;
+        if (size > 1) {
+            AutoPtr<IInterface> obj;
+            recentTasks->Get(1, (IInterface**)&obj);
+            AutoPtr<IActivityManagerRecentTaskInfo> amrt = IActivityManagerRecentTaskInfo::Probe(obj);
+            Int32 persistentId;
+            amrt->GetPersistentId(&persistentId);
+            Boolean b;
+            mRecentsPanel->SimulateClick(persistentId, &b);
+            if (b) {
+                // recents panel will take care of calling show(false) through simulateClick
+                return NOERROR;
+            }
         }
+
         mRecentsPanel->Show(FALSE);
     }
+
     Finish();
     return NOERROR;
 }

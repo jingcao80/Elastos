@@ -96,7 +96,7 @@ void OverlayDisplayAdapter::OverlayDisplayDevice::DestroyLocked()
 
     mSurfaceTexture = NULL;
     if (mSurface != NULL) {
-        mSurface->ReleaseSurface();
+        mSurface->ReleaseResources();
         mSurface = NULL;
     }
     AutoPtr<ISurfaceControlHelper> surfaceControl;

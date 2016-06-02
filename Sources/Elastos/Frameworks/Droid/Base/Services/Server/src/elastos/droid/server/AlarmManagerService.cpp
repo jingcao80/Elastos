@@ -502,7 +502,7 @@ ECode AlarmManagerService::BinderService::UpdateBlockedUids(
                 Boolean bIsHeld = FALSE;
                 mHost->mWakeLock->IsHeld(&bIsHeld);
                 if (bIsHeld) {
-                    mHost->mWakeLock->Release();
+                    mHost->mWakeLock->ReleaseLock();
                     if (AlarmManagerService::localLOGV) {
                         Slogger::V(TAG, "AM WakeLock Released Internally in updateBlockedUids");
                     }
@@ -1492,7 +1492,7 @@ ECode AlarmManagerService::ResultReceiver::OnSendFinished(
             Boolean bIsHeld = FALSE;
             mHost->mWakeLock->IsHeld(&bIsHeld);
             if (bIsHeld) {
-                mHost->mWakeLock->Release();
+                mHost->mWakeLock->ReleaseLock();
                 if (localLOGV) {
                     Slogger::V(TAG, "AM WakeLock Released Internally onSendFinish");
                 }

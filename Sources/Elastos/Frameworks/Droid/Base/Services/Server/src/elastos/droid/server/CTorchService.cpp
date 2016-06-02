@@ -564,11 +564,11 @@ void CTorchService::TeardownTorch()
     mSession = NULL;
     mFlashlightRequest = NULL;
     if (mSurface != NULL) {
-        mSurface->Release();
-        mSurfaceTexture->Release();
+        mSurface->ReleaseResources();
+        mSurface = NULL;
+        mSurfaceTexture->ReleaseResources();
+        mSurfaceTexture = NULL;
     }
-    mSurface = NULL;
-    mSurfaceTexture = NULL;
 }
 
 void CTorchService::HandleError()

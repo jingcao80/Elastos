@@ -133,21 +133,28 @@ ECode TrustManager::ReportUnlockAttempt(
     /* [in] */ Boolean successful,
     /* [in] */ Int32 userId)
 {
-    ECode ec = mService->ReportUnlockAttempt(successful, userId);
-    if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        OnError(ec);
-        return NOERROR;
+    ECode ec = NOERROR;
+    if (mService != NULL) {
+        ec = mService->ReportUnlockAttempt(successful, userId);
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            OnError(ec);
+            return NOERROR;
+        }
     }
+
     return ec;
 }
 
 ECode TrustManager::ReportEnabledTrustAgentsChanged(
     /* [in] */ Int32 userId)
 {
-    ECode ec = mService->ReportEnabledTrustAgentsChanged(userId);
-    if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        OnError(ec);
-        return NOERROR;
+    ECode ec = NOERROR;
+    if (mService != NULL) {
+        ec = mService->ReportEnabledTrustAgentsChanged(userId);
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            OnError(ec);
+            return NOERROR;
+        }
     }
     return ec;
 }
@@ -155,10 +162,13 @@ ECode TrustManager::ReportEnabledTrustAgentsChanged(
 ECode TrustManager::ReportRequireCredentialEntry(
     /* [in] */ Int32 userId)
 {
-    ECode ec = mService->ReportRequireCredentialEntry(userId);
-    if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        OnError(ec);
-        return NOERROR;
+    ECode ec = NOERROR;
+    if (mService != NULL) {
+        ec = mService->ReportRequireCredentialEntry(userId);
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            OnError(ec);
+            return NOERROR;
+        }
     }
     return ec;
 }

@@ -359,11 +359,11 @@ module
     singleton class CChoreographerHelper {
         interface IChoreographerHelper;
     }
+
     /**
     * Describes the characteristics of a particular logical display.
     * @hide
     */
-
     class CDisplay {
         constructor(
             [in] IDisplayManagerGlobal* global,
@@ -383,35 +383,6 @@ module
         interface IDisplayInfo;
         interface IParcelable;
     }
-
-    //     class CDisplayManagerAw {
-    //         constructor();
-
-    //         interface IDisplayManagerAw;
-    //     }
-
-    //     [local]
-    //     class CDispList {
-    //         constructor(
-    //             [in] IContext* ctx);
-
-    //         interface IDispList;
-    //     }
-
-    //     singleton class CDispListHelper {
-    //         constructor();
-
-    //         interface IDispListHelper;
-    //     }
-
-    //     class CDispListDispFormat {
-
-    //         constructor(
-    //             [in] Int32 type,
-    //             [in] Int32 format);
-
-    //         interface IDispListDispFormat;
-    //     }
 
     /**
      * Use with {@link KeyEvent#dispatch(Callback, DispatcherState, Object)}
@@ -448,6 +419,10 @@ module
             [in] Int64 nativeObject);
 
         interface IGraphicBuffer;
+    }
+
+    singleton class CGLES20CanvasHelper {
+        interface IGLES20CanvasHelper;
     }
 
      /**

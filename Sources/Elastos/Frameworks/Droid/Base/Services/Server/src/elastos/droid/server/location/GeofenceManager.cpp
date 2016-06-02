@@ -439,7 +439,7 @@ ECode GeofenceManager::SendIntent(
     if(FAILED(ec))
     {
         RemoveFence(NULL, pendingIntent);
-        mWakeLock->Release();
+        mWakeLock->ReleaseLock();
         return E_PENDING_INTENT_CANCELED_EXCEPTION;
     }
     return NOERROR;
@@ -493,7 +493,7 @@ ECode GeofenceManager::OnSendFinished(
     /* [in] */ const String& resultData,
     /* [in] */ IBundle* resultExtras)
 {
-    return mWakeLock->Release();
+    return mWakeLock->ReleaseLock();
 }
 
 ECode GeofenceManager::Dump(

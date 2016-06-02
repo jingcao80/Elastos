@@ -15,6 +15,7 @@ using Elastos::Droid::Utility::LruCache;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IInteger32;
 using Elastos::Utility::IHashMap;
+using Elastos::Utility::CHashMap;
 
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Core::IInteger32)
 
@@ -110,6 +111,7 @@ KeyStoreLruCache<V>::KeyStoreLruCache(
 {
     AutoPtr<MyLruCache> ml = new MyLruCache(cacheSize, this);
     mCache = ml;
+    CHashMap::New((IHashMap**)&mTaskKeys);
 }
 
 template<typename V>

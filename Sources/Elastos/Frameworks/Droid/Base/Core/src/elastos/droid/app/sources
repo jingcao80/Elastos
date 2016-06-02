@@ -27,6 +27,7 @@ SOURCES += CActivityManagerRunningAppProcessInfoHelper.cpp
 SOURCES += CActivityManagerRunningServiceInfo.cpp
 SOURCES += CActivityManagerRunningTaskInfo.cpp
 SOURCES += CActivityManagerTaskDescription.cpp
+SOURCES += CActivityManagerTaskDescriptionHelper.cpp
 SOURCES += CActivityManagerTaskThumbnail.cpp
 SOURCES += CActivityManagerWaitResult.cpp
 SOURCES += CActivityManagerStackInfo.cpp

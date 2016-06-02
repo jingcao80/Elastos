@@ -75,7 +75,7 @@ void CKeyEventWakeLockReceiver::OnReceiveResult(
 
 void CKeyEventWakeLockReceiver::ReleaseWakeLockLocked()
 {
-    mHost->mMediaEventWakeLock->Release();
+    mHost->mMediaEventWakeLock->ReleaseLock();
     mHandler->RemoveCallbacks(this);
 }
 

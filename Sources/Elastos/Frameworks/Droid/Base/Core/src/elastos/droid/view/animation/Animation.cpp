@@ -333,6 +333,7 @@ ECode Animation::SetInterpolator(
     /* [in] */ IInterpolator* i)
 {
     mInterpolator = i;
+    assert(mInterpolator != NULL);
     return NOERROR;
 }
 
@@ -340,7 +341,6 @@ ECode Animation::SetStartOffset(
     /* [in] */ Int64 startOffset)
 {
     mStartOffset = startOffset;
-
     return NOERROR;
 }
 
@@ -636,6 +636,8 @@ ECode Animation::GetTransformation(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+
     if (mStartTime == -1) {
         mStartTime = currentTime;
     }
@@ -656,8 +658,9 @@ ECode Animation::GetTransformation(
     Boolean expired = normalizedTime >= 1.0f;
     mMore = !expired;
 
+    using Elastos::Core::Math;
     if (!mFillEnabled) {
-        normalizedTime = Elastos::Core::Math::Max(Elastos::Core::Math::Min(normalizedTime, 1.0f), 0.0f);
+        normalizedTime = Math::Max(Math::Min(normalizedTime, 1.0f), 0.0f);
     }
 
     if ((normalizedTime >= 0.0f || mFillBefore)
@@ -673,7 +676,7 @@ ECode Animation::GetTransformation(
         }
 
         if (mFillEnabled) {
-            normalizedTime = Elastos::Core::Math::Max(Elastos::Core::Math::Min(normalizedTime, 1.0f), 0.0f);
+            normalizedTime = Math::Max(Math::Min(normalizedTime, 1.0f), 0.0f);
         }
 
         if (mCycleFlip) {

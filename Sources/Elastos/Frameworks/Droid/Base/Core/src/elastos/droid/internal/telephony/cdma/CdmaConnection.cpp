@@ -784,7 +784,7 @@ public class CdmaConnection extends Connection {
         {    AutoLock syncLock(mPartialWakeLock);
             If (mPartialWakeLock->IsHeld()) {
                 Log("releaseWakeLock");
-                mPartialWakeLock->Release();
+                mPartialWakeLock->ReleaseLock();
             }
         }
     }

@@ -1084,7 +1084,7 @@ void UsbDeviceManager::EnableWakeLock(
     else{
         Slogger::D(TAG, "disable %s wakelock wlref = %d", TAG.string(), mWlref);
         if(mWlref == 1){
-            mWl->Release();
+            mWl->ReleaseLock();
             mWlref--;
         }
    }

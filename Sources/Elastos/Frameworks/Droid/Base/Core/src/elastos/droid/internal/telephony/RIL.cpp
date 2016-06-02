@@ -356,7 +356,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
 
                         If (s == NULL) {
                             rr->OnError(RADIO_NOT_AVAILABLE, NULL);
-                            rr->Release();
+                            rr->ReleaseSources();
                             DecrementWakeLock();
                             return;
                         }
@@ -393,7 +393,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
                         // eg, if RILReceiver cleared the list.
                         If (req != NULL) {
                             rr->OnError(RADIO_NOT_AVAILABLE, NULL);
-                            rr->Release();
+                            rr->ReleaseSources();
                             DecrementWakeLock();
                         }
                     } Catch (RuntimeException exc) {
@@ -403,7 +403,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
                         // eg, if RILReceiver cleared the list.
                         If (req != NULL) {
                             rr->OnError(GENERIC_FAILURE, NULL);
-                            rr->Release();
+                            rr->ReleaseSources();
                             DecrementWakeLock();
                         }
                     }
@@ -2561,7 +2561,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
                 mWakeLockCount--;
             } else {
                 mWakeLockCount = 0;
-                mWakeLock->Release();
+                mWakeLock->ReleaseLock();
                 mSender->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
             }
         }
@@ -2574,7 +2574,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
             If (mWakeLockCount == 0 && mWakeLock->IsHeld() == FALSE) return FALSE;
             Rlog->D(RILJ_LOG_TAG, "NOTE: mWakeLockCount is " + mWakeLockCount + "at time of clearing");
             mWakeLockCount = 0;
-            mWakeLock->Release();
+            mWakeLock->ReleaseLock();
             mSender->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
             return TRUE;
         }
@@ -2586,7 +2586,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
 
         If (mSocket == NULL) {
             rr->OnError(RADIO_NOT_AVAILABLE, NULL);
-            rr->Release();
+            rr->ReleaseSources();
             return;
         }
 
@@ -2608,7 +2608,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
         } else If (type == RESPONSE_SOLICITED) {
             RILRequest rr = ProcessSolicited (p);
             If (rr != NULL) {
-                rr->Release();
+                rr->ReleaseSources();
                 DecrementWakeLock();
             }
         }
@@ -2636,7 +2636,7 @@ public class RIL extends BaseCommands implements CommandsInterface {
                             RequestToString(rr.mRequest));
                 }
                 rr->OnError(error, NULL);
-                rr->Release();
+                rr->ReleaseSources();
                 DecrementWakeLock();
             }
             mRequestList->Clear();

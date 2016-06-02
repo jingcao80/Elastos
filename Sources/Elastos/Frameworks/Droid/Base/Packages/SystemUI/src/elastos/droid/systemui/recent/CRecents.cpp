@@ -140,7 +140,7 @@ ECode CRecents::ToggleRecents(
         if (mAlternateRecents != NULL) {
             mAlternateRecents->OnToggleRecents(statusBarView);
         }
-        return E_NULL_POINTER_EXCEPTION;
+        return NOERROR;
     }
 
     // try {

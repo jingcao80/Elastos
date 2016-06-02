@@ -4245,7 +4245,7 @@ void PowerManagerService::CleanupProximity()
 {
     Boolean isHeld;
     if (mProximityWakeLock->IsHeld(&isHeld), isHeld) {
-        mProximityWakeLock->Release();
+        mProximityWakeLock->ReleaseLock();
     }
     if (mProximityListener != NULL) {
         mSensorManager->UnregisterListener(mProximityListener);

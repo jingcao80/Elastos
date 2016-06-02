@@ -146,6 +146,12 @@ module
             [in] String attrValue);
     }
 
+    interface IActivityManagerTaskDescriptionHelper {
+        LoadTaskDescriptionIcon(
+            [in] String iconFilename,
+            [out] IBitmap** bm);
+    }
+
     /**
      * The AppTask allows you to manage your own application's tasks.
      * See {@link android.app.ActivityManager#getAppTasks()}

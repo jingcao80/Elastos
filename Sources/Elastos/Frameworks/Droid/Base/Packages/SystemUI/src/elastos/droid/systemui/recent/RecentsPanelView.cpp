@@ -15,8 +15,8 @@
 #include "../R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
-#include <elastos/utility/logging/Logger.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::CLayoutTransition;
 using Elastos::Droid::Animation::EIID_IAnimatorListener;
@@ -180,7 +180,6 @@ ECode RecentsPanelView::TaskDescriptionAdapter::CreateView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
-    Logger::I(TAG, "TaskDescriptionAdapter::CreateView parent %s:", TO_CSTR(parent));
     VALIDATE_NOT_NULL(view);
     AutoPtr<IView> convertView;
     mInflater->Inflate(mHost->mRecentItemLayoutId, parent, FALSE, (IView**)&convertView);
@@ -223,8 +222,6 @@ AutoPtr<IView> RecentsPanelView::TaskDescriptionAdapter::GetView(
     /* [in] */ IView* _convertView,
     /* [in] */ IViewGroup* parent)
 {
-    Logger::I(TAG, "TaskDescriptionAdapter::GetView at %d:", position);
-
     AutoPtr<IView> convertView = _convertView;
     if (convertView == NULL) {
         CreateView(parent, (IView**)&convertView);
@@ -594,7 +591,6 @@ ECode RecentsPanelView::SendCloseSystemWindows(
 void RecentsPanelView::ShowImpl(
     /* [in] */ Boolean show)
 {
-    Logger::I(TAG, " >> ShowImpl: show: %d", show);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     SendCloseSystemWindows(context, IBaseStatusBar::SYSTEM_DIALOG_REASON_RECENT_APPS);
@@ -805,7 +801,6 @@ void RecentsPanelView::UpdateIcon(
     /* [in] */ Boolean show,
     /* [in] */ Boolean anim)
 {
-    Logger::I(TAG, " >> UpdateIcon");
     if (icon != NULL) {
         h->mIconView->SetImageDrawable(icon);
         Int32 v;
@@ -829,7 +824,6 @@ void RecentsPanelView::UpdateThumbnail(
     /* [in] */ Boolean show,
     /* [in] */ Boolean anim)
 {
-    Logger::I(TAG, " >> UpdateThumbnail");
     if (thumbnail != NULL) {
         // Should remove the default image in the frame
         // that this now covers, to improve scrolling speed.
@@ -878,8 +872,6 @@ void RecentsPanelView::UpdateThumbnail(
 ECode RecentsPanelView::OnTaskThumbnailLoaded(
     /* [in] */ ITaskDescription* td)
 {
-    Logger::I(TAG, " >> OnTaskThumbnailLoaded: %s", TO_CSTR(td));
-
     AutoLock syncLock(td);
     if (mRecentsContainer != NULL) {
         AutoPtr<IViewGroup> container = IViewGroup::Probe(mRecentsContainer);
@@ -1001,7 +993,6 @@ ECode RecentsPanelView::OnTaskLoadingCancelled()
 
 ECode RecentsPanelView::RefreshViews()
 {
-    Logger::I(TAG, " >> RefreshViews");
     mListAdapter->NotifyDataSetInvalidated();
     UpdateUiElements();
     ShowIfReady();
@@ -1018,7 +1009,6 @@ void RecentsPanelView::RefreshRecentTasksList(
     /* [in] */ IArrayList* recentTasksList,
     /* [in] */ Boolean firstScreenful)
 {
-    Logger::I(TAG, " >> RefreshRecentTasksList");
     if (mRecentTaskDescriptions == NULL && recentTasksList != NULL) {
         OnTasksLoaded(recentTasksList, firstScreenful);
     }
@@ -1055,7 +1045,6 @@ ECode RecentsPanelView::OnTasksLoaded(
 
 void RecentsPanelView::UpdateUiElements()
 {
-    Logger::I(TAG, " >> UpdateUiElements");
     Int32 numRecentApps = 0;
     if (mRecentTaskDescriptions != NULL) {
         mRecentTaskDescriptions->GetSize(&numRecentApps);
@@ -1099,7 +1088,6 @@ ECode RecentsPanelView::SimulateClick(
 ECode RecentsPanelView::HandleOnClick(
     /* [in] */ IView* view)
 {
-    Logger::I(TAG, " >> HandleOnClick");
     AutoPtr<IInterface> tag;
     view->GetTag((IInterface**)&tag);
     AutoPtr<ViewHolder> holder = (ViewHolder*)(IObject::Probe(tag));
@@ -1191,7 +1179,6 @@ ECode RecentsPanelView::OnItemClick(
 ECode RecentsPanelView::HandleSwipe(
     /* [in] */ IView* view)
 {
-    Logger::I(TAG, " >> HandleSwipe");
     AutoPtr<IInterface> tag;
     view->GetTag((IInterface**)&tag);
     AutoPtr<ViewHolder> holder = (ViewHolder*)(IObject::Probe(tag));
@@ -1220,12 +1207,11 @@ ECode RecentsPanelView::HandleSwipe(
     // the task.
     AutoPtr<IInterface> amObj;
     mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&amObj);
-    AutoPtr<IActivityManager> am = IActivityManager::Probe(am);
+    AutoPtr<IActivityManager> am = IActivityManager::Probe(amObj);
     if (am != NULL) {
-        AutoPtr<TaskDescription> _ad = (TaskDescription*)ad.Get();
-        Int32 persistentTaskId = _ad->mPersistentTaskId;
+        AutoPtr<TaskDescription> td = (TaskDescription*)ad.Get();
         Boolean b;
-        am->RemoveTask(persistentTaskId, IActivityManager::REMOVE_TASK_KILL_PROCESS, &b);
+        am->RemoveTask(td->mPersistentTaskId, IActivityManager::REMOVE_TASK_KILL_PROCESS, &b);
 
         // Accessibility feedback
         AutoPtr<ICharSequence> cs;
@@ -1234,8 +1220,7 @@ ECode RecentsPanelView::HandleSwipe(
         args->Set(0, cs.Get());
         String str;
         mContext->GetString(R::string::accessibility_recents_item_dismissed, args, &str);
-        cs = NULL;
-        CString::New(str, (ICharSequence**)&cs);
+        cs = CoreUtils::Convert(str);
         SetContentDescription(cs);
         SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_SELECTED);
         SetContentDescription(NULL);
@@ -1247,7 +1232,6 @@ void RecentsPanelView::StartApplicationDetailsActivity(
     /* [in] */ const String& packageName,
     /* [in] */ Int32 userId)
 {
-    Logger::I(TAG, " >> StartApplicationDetailsActivity");
     AutoPtr<IUriHelper> uriHelper;
     CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
     AutoPtr<IUri> uri;
@@ -1290,7 +1274,6 @@ ECode RecentsPanelView::HandleLongPress(
     /* [in] */ IView* anchorView,
     /* [in] */ IView* thumbnailView)
 {
-    Logger::I(TAG, " >> HandleLongPress");
     thumbnailView->SetSelected(TRUE);
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
@@ -1313,7 +1296,6 @@ ECode RecentsPanelView::HandleLongPress(
 ECode RecentsPanelView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
-    Logger::I(TAG, " >> DispatchDraw");
     FrameLayout::DispatchDraw(canvas);
 
     Int32 paddingLeft;

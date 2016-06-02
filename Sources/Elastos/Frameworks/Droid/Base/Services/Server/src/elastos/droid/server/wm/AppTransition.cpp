@@ -422,16 +422,14 @@ AutoPtr<IAnimation> AppTransition::CreateScaleUpAnimationLocked(
         // Entering app zooms out from the center of the initial rect.
         Float scaleW = mNextAppTransitionStartWidth / (Float) appWidth;
         Float scaleH = mNextAppTransitionStartHeight / (Float) appHeight;
-        AutoPtr<IScaleAnimation> sa;
+        AutoPtr<IAnimation> scale;
         CScaleAnimation::New(scaleW, 1, scaleH, 1,
-                ComputePivot(mNextAppTransitionStartX, scaleW),
-                ComputePivot(mNextAppTransitionStartY, scaleH), (IScaleAnimation**)&sa);
-        AutoPtr<IAnimation> scale = IAnimation::Probe(sa);
+            ComputePivot(mNextAppTransitionStartX, scaleW),
+            ComputePivot(mNextAppTransitionStartY, scaleH), (IAnimation**)&scale);
         scale->SetInterpolator(mDecelerateInterpolator);
 
-        AutoPtr<IAlphaAnimation> aa;
-        CAlphaAnimation::New(0, 1, (IAlphaAnimation**)&aa);
-        AutoPtr<IAnimation> alpha = IAnimation::Probe(aa);
+        AutoPtr<IAnimation> alpha;
+        CAlphaAnimation::New(0.0, 1.0, (IAnimation**)&alpha);
         alpha->SetInterpolator(mThumbnailFadeOutInterpolator);
 
         AutoPtr<IAnimationSet> set;
@@ -448,14 +446,14 @@ AutoPtr<IAnimation> AppTransition::CreateScaleUpAnimationLocked(
         // the animated elements.  To do this, will just have the existing
         // element fade out.
         AutoPtr<IAlphaAnimation> aa;
-        CAlphaAnimation::New(1, 0, (IAlphaAnimation**)&aa);
+        CAlphaAnimation::New(1.0, 0.0, (IAlphaAnimation**)&aa);
         a = IAnimation::Probe(aa);
         a->SetDetachWallpaper(TRUE);
     }
     else {
         // For normal animations, the exiting element just holds in place.
         AutoPtr<IAlphaAnimation> aa;
-        CAlphaAnimation::New(1, 1, (IAlphaAnimation**)&aa);
+        CAlphaAnimation::New(1.0, 1.0, (IAlphaAnimation**)&aa);
         a = IAnimation::Probe(aa);
     }
 
@@ -479,7 +477,7 @@ AutoPtr<IAnimation> AppTransition::CreateScaleUpAnimationLocked(
     return a;
 }
 
-AutoPtr<IAnimation> AppTransition::PrepareThumbnailAnimationWithDuration(
+ECode AppTransition::PrepareThumbnailAnimationWithDuration(
     /* [in] */ IAnimation* a,
     /* [in] */ Int32 appWidth,
     /* [in] */ Int32 appHeight,
@@ -491,11 +489,10 @@ AutoPtr<IAnimation> AppTransition::PrepareThumbnailAnimationWithDuration(
     }
     a->SetFillAfter(TRUE);
     a->SetInterpolator(interpolator);
-    a->Initialize(appWidth, appHeight, appWidth, appHeight);
-    return a;
+    return a->Initialize(appWidth, appHeight, appWidth, appHeight);
 }
 
-AutoPtr<IAnimation> AppTransition::PrepareThumbnailAnimation(
+ECode AppTransition::PrepareThumbnailAnimation(
     /* [in] */ IAnimation* a,
     /* [in] */ Int32 appWidth,
     /* [in] */ Int32 appHeight,
@@ -558,23 +555,22 @@ AutoPtr<IAnimation> AppTransition::CreateThumbnailAspectScaleAnimationLocked(
     Float unscaledStartY = mNextAppTransitionStartY - (unscaledHeight - thumbHeight) / 2;
     if (mNextAppTransitionScaleUp) {
         // Animation up from the thumbnail to the full screen
-        AutoPtr<IScaleAnimation> sa;
+        AutoPtr<IAnimation> scale;
         CScaleAnimation::New(1, scaleW, 1, scaleW,
-                mNextAppTransitionStartX + (thumbWidth / 2),
-                mNextAppTransitionStartY + (thumbHeight / 2), (IScaleAnimation**)&sa);
-        AutoPtr<IAnimation> scale = IAnimation::Probe(sa);
+            mNextAppTransitionStartX + (thumbWidth / 2),
+            mNextAppTransitionStartY + (thumbHeight / 2), (IAnimation**)&scale);
         scale->SetInterpolator(mThumbnailFastOutSlowInInterpolator);
         scale->SetDuration(THUMBNAIL_APP_TRANSITION_DURATION);
-        AutoPtr<IAlphaAnimation> aa;
-        CAlphaAnimation::New(1, 0, (IAlphaAnimation**)&aa);
-        AutoPtr<IAnimation> alpha = IAnimation::Probe(aa);
+
+        AutoPtr<IAnimation> alpha;
+        CAlphaAnimation::New(1.0, 0.0, (IAnimation**)&alpha);
         alpha->SetInterpolator(mThumbnailFadeOutInterpolator);
         alpha->SetDuration(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION);
+
         Int32 top;
         mNextAppTransitionInsets->GetTop(&top);
-        AutoPtr<ITranslateAnimation> ta;
-        CTranslateAnimation::New(0, 0, 0, -unscaledStartY + top, (ITranslateAnimation**)&ta);
-        AutoPtr<IAnimation> translate = IAnimation::Probe(ta);
+        AutoPtr<IAnimation> translate;
+        CTranslateAnimation::New(0, 0, 0, -unscaledStartY + top, (ITranslateAnimation**)&translate);
         translate->SetInterpolator(mThumbnailFastOutSlowInInterpolator);
         translate->SetDuration(THUMBNAIL_APP_TRANSITION_DURATION);
 
@@ -588,23 +584,22 @@ AutoPtr<IAnimation> AppTransition::CreateThumbnailAspectScaleAnimationLocked(
     }
     else {
         // Animation down from the full screen to the thumbnail
-        AutoPtr<IScaleAnimation> sa;
+        AutoPtr<IAnimation> scale;
         CScaleAnimation::New(scaleW, 1, scaleW, 1,
-                mNextAppTransitionStartX + (thumbWidth / 2),
-                mNextAppTransitionStartY + (thumbHeight / 2), (IScaleAnimation**)&sa);
-        AutoPtr<IAnimation> scale = IAnimation::Probe(sa);
+            mNextAppTransitionStartX + (thumbWidth / 2),
+            mNextAppTransitionStartY + (thumbHeight / 2), (IAnimation**)&scale);
         scale->SetInterpolator(mThumbnailFastOutSlowInInterpolator);
         scale->SetDuration(THUMBNAIL_APP_TRANSITION_DURATION);
-        AutoPtr<IAlphaAnimation> aa;
-        CAlphaAnimation::New(0, 1, (IAlphaAnimation**)&aa);
-        AutoPtr<IAnimation> alpha = IAnimation::Probe(aa);
+
+        AutoPtr<IAnimation> alpha;
+        CAlphaAnimation::New(0.0, 1.0, (IAnimation**)&alpha);
         alpha->SetInterpolator(mThumbnailFadeOutInterpolator);
         alpha->SetDuration(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION);
+
         Int32 top;
         mNextAppTransitionInsets->GetTop(&top);
-        AutoPtr<ITranslateAnimation> ta;
-        CTranslateAnimation::New(0, 0, -unscaledStartY + top, 0, (ITranslateAnimation**)&ta);
-        AutoPtr<IAnimation> translate = IAnimation::Probe(ta);
+        AutoPtr<IAnimation> translate;
+        CTranslateAnimation::New(0, 0, -unscaledStartY + top, 0, (IAnimation**)&translate);
         translate->SetInterpolator(mThumbnailFastOutSlowInInterpolator);
         translate->SetDuration(THUMBNAIL_APP_TRANSITION_DURATION);
 
@@ -616,8 +611,9 @@ AutoPtr<IAnimation> AppTransition::CreateThumbnailAspectScaleAnimationLocked(
         set->AddAnimation(translate);
         a = IAnimation::Probe(set);
     }
-    return PrepareThumbnailAnimationWithDuration(a, appWidth, appHeight, 0,
-            mThumbnailFastOutSlowInInterpolator);
+    PrepareThumbnailAnimationWithDuration(a, appWidth, appHeight, 0,
+        mThumbnailFastOutSlowInInterpolator);
+    return a;
 }
 
 AutoPtr<IAnimation> AppTransition::CreateAspectScaledThumbnailEnterExitAnimationLocked(
@@ -681,16 +677,14 @@ AutoPtr<IAnimation> AppTransition::CreateAspectScaledThumbnailEnterExitAnimation
             }
             mNextAppTransitionInsets->Set(contentInsets);
 
-            AutoPtr<IScaleAnimation> sa;
+            AutoPtr<IAnimation> scaleAnim;
             CScaleAnimation::New(scale, 1, scale, 1,
-                    ComputePivot(mNextAppTransitionStartX, scale),
-                    ComputePivot(mNextAppTransitionStartY, scale), (IScaleAnimation**)&sa);
-            AutoPtr<IAnimation> scaleAnim = IAnimation::Probe(sa);
+                ComputePivot(mNextAppTransitionStartX, scale),
+                ComputePivot(mNextAppTransitionStartY, scale), (IAnimation**)&scaleAnim);
             AutoPtr<IAnimation> clipAnim;
             CClipRectAnimation::New(mTmpFromClipRect, mTmpToClipRect, (IAnimation**)&clipAnim);
-            AutoPtr<ITranslateAnimation> ta;
-            CTranslateAnimation::New(0, 0, -scaledTopDecor, 0, (ITranslateAnimation**)&ta);
-            AutoPtr<IAnimation> translateAnim = IAnimation::Probe(ta);
+            AutoPtr<IAnimation> translateAnim;
+            CTranslateAnimation::New(0, 0, -scaledTopDecor, 0, (IAnimation**)&translateAnim);
 
             AutoPtr<IAnimationSet> set;
             CAnimationSet::New(TRUE, (IAnimationSet**)&set);
@@ -705,14 +699,10 @@ AutoPtr<IAnimation> AppTransition::CreateAspectScaledThumbnailEnterExitAnimation
             if (transit == TRANSIT_WALLPAPER_INTRA_OPEN) {
                 // Fade out the source activity if we are animating to a wallpaper
                 // activity.
-                AutoPtr<IAlphaAnimation> aa;
-                CAlphaAnimation::New(1, 0, (IAlphaAnimation**)&aa);
-                a = IAnimation::Probe(aa);
+                CAlphaAnimation::New(1.0, 0.0, (IAnimation**)&a);
             }
             else {
-                AutoPtr<IAlphaAnimation> aa;
-                CAlphaAnimation::New(1, 1, (IAlphaAnimation**)&aa);
-                a = IAnimation::Probe(aa);
+                CAlphaAnimation::New(1.0, 1.0, (IAnimation**)&a);
             }
             break;
         }
@@ -721,14 +711,10 @@ AutoPtr<IAnimation> AppTransition::CreateAspectScaledThumbnailEnterExitAnimation
             if (transit == TRANSIT_WALLPAPER_INTRA_OPEN) {
                 // Fade in the destination activity if we are animating from a wallpaper
                 // activity.
-                AutoPtr<IAlphaAnimation> aa;
-                CAlphaAnimation::New(0, 1, (IAlphaAnimation**)&aa);
-                a = IAnimation::Probe(aa);
+                CAlphaAnimation::New(0.0, 1.0, (IAnimation**)&a);
             }
             else {
-                AutoPtr<IAlphaAnimation> aa;
-                CAlphaAnimation::New(1, 1, (IAlphaAnimation**)&aa);
-                a = IAnimation::Probe(aa);
+                CAlphaAnimation::New(1.0, 1.0, (IAnimation**)&a);
             }
             break;
         }
@@ -772,16 +758,14 @@ AutoPtr<IAnimation> AppTransition::CreateAspectScaledThumbnailEnterExitAnimation
             }
             mNextAppTransitionInsets->Set(contentInsets);
 
-            AutoPtr<IScaleAnimation> sa;
+            AutoPtr<IAnimation> scaleAnim;
             CScaleAnimation::New(1, scale, 1, scale,
-                    ComputePivot(mNextAppTransitionStartX, scale),
-                    ComputePivot(mNextAppTransitionStartY, scale), (IScaleAnimation**)&sa);
-            AutoPtr<IAnimation> scaleAnim = IAnimation::Probe(sa);
+                ComputePivot(mNextAppTransitionStartX, scale),
+                ComputePivot(mNextAppTransitionStartY, scale), (IAnimation**)&scaleAnim);
             AutoPtr<IAnimation> clipAnim;
             CClipRectAnimation::New(mTmpFromClipRect, mTmpToClipRect, (IAnimation**)&clipAnim);
-            AutoPtr<ITranslateAnimation> ta;
-            CTranslateAnimation::New(0, 0, 0, -scaledTopDecor, (ITranslateAnimation**)&ta);
-            AutoPtr<IAnimation> translateAnim = IAnimation::Probe(ta);
+            AutoPtr<IAnimation> translateAnim;
+            CTranslateAnimation::New(0, 0, 0, -scaledTopDecor, (IAnimation**)&translateAnim);
 
             AutoPtr<IAnimationSet> set;
             CAnimationSet::New(TRUE, (IAnimationSet**)&set);
@@ -800,8 +784,9 @@ AutoPtr<IAnimation> AppTransition::CreateAspectScaledThumbnailEnterExitAnimation
         }
     }
 
-    return PrepareThumbnailAnimationWithDuration(a, appWidth, appHeight,
-            THUMBNAIL_APP_TRANSITION_DURATION, mThumbnailFastOutSlowInInterpolator);
+    PrepareThumbnailAnimationWithDuration(a, appWidth, appHeight,
+        THUMBNAIL_APP_TRANSITION_DURATION, mThumbnailFastOutSlowInInterpolator);
+    return a;
 }
 
 AutoPtr<IAnimation> AppTransition::CreateThumbnailScaleAnimationLocked(
@@ -821,16 +806,14 @@ AutoPtr<IAnimation> AppTransition::CreateThumbnailScaleAnimationLocked(
         // Animation for the thumbnail zooming from its initial size to the full screen
         Float scaleW = appWidth / thumbWidth;
         Float scaleH = appHeight / thumbHeight;
-        AutoPtr<IScaleAnimation> sa;
+        AutoPtr<IAnimation> scale;
         CScaleAnimation::New(1, scaleW, 1, scaleH,
-                ComputePivot(mNextAppTransitionStartX, 1 / scaleW),
-                ComputePivot(mNextAppTransitionStartY, 1 / scaleH), (IScaleAnimation**)&sa);
-        AutoPtr<IAnimation> scale = IAnimation::Probe(sa);
+            ComputePivot(mNextAppTransitionStartX, 1 / scaleW),
+            ComputePivot(mNextAppTransitionStartY, 1 / scaleH), (IAnimation**)&scale);
         scale->SetInterpolator(mDecelerateInterpolator);
 
-        AutoPtr<IAlphaAnimation> aa;
-        CAlphaAnimation::New(1, 0, (IAlphaAnimation**)&aa);
-        AutoPtr<IAnimation> alpha = IAnimation::Probe(aa);
+        AutoPtr<IAnimation> alpha;
+        CAlphaAnimation::New(1.0, 0.0, (IAnimation**)&alpha);
         alpha->SetInterpolator(mThumbnailFadeOutInterpolator);
 
         // This AnimationSet uses the Interpolators assigned above.
@@ -844,14 +827,13 @@ AutoPtr<IAnimation> AppTransition::CreateThumbnailScaleAnimationLocked(
         // Animation for the thumbnail zooming down from the full screen to its final size
         Float scaleW = appWidth / thumbWidth;
         Float scaleH = appHeight / thumbHeight;
-        AutoPtr<IScaleAnimation> sa;
         CScaleAnimation::New(scaleW, 1, scaleH, 1,
-                ComputePivot(mNextAppTransitionStartX, 1 / scaleW),
-                ComputePivot(mNextAppTransitionStartY, 1 / scaleH), (IScaleAnimation**)&sa);
-        a = IAnimation::Probe(sa);
+            ComputePivot(mNextAppTransitionStartX, 1 / scaleW),
+            ComputePivot(mNextAppTransitionStartY, 1 / scaleH), (IAnimation**)&a);
     }
 
-    return PrepareThumbnailAnimation(a, appWidth, appHeight, transit);
+    PrepareThumbnailAnimation(a, appWidth, appHeight, transit);
+    return a;
 }
 
 AutoPtr<IAnimation> AppTransition::CreateThumbnailEnterExitAnimationLocked(
@@ -873,11 +855,9 @@ AutoPtr<IAnimation> AppTransition::CreateThumbnailEnterExitAnimationLocked(
             // Entering app scales up with the thumbnail
             Float scaleW = thumbWidth / appWidth;
             Float scaleH = thumbHeight / appHeight;
-            AutoPtr<IScaleAnimation> sa;
             CScaleAnimation::New(scaleW, 1, scaleH, 1,
-                    ComputePivot(mNextAppTransitionStartX, scaleW),
-                    ComputePivot(mNextAppTransitionStartY, scaleH), (IScaleAnimation**)&sa);
-            a = IAnimation::Probe(sa);
+                ComputePivot(mNextAppTransitionStartX, scaleW),
+                ComputePivot(mNextAppTransitionStartY, scaleH), (IAnimation**)&a);
             break;
         }
         case THUMBNAIL_TRANSITION_EXIT_SCALE_UP: {
@@ -886,39 +866,30 @@ AutoPtr<IAnimation> AppTransition::CreateThumbnailEnterExitAnimationLocked(
                 // Fade out while bringing up selected activity. This keeps the
                 // current activity from showing through a launching wallpaper
                 // activity.
-                AutoPtr<IAlphaAnimation> aa;
-                CAlphaAnimation::New(1, 0, (IAlphaAnimation**)&aa);
-                a = IAnimation::Probe(aa);
+                CAlphaAnimation::New(1.0, 0.0, (IAnimation**)&a);
             }
             else {
                 // noop animation
-                AutoPtr<IAlphaAnimation> aa;
-                CAlphaAnimation::New(1, 1, (IAlphaAnimation**)&aa);
-                a = IAnimation::Probe(aa);
+                CAlphaAnimation::New(1.0, 1.0, (IAnimation**)&a);
             }
             break;
         }
         case THUMBNAIL_TRANSITION_ENTER_SCALE_DOWN: {
             // Entering the other app, it should just be visible while we scale the thumbnail
             // down above it
-            AutoPtr<IAlphaAnimation> aa;
-            CAlphaAnimation::New(1, 1, (IAlphaAnimation**)&aa);
-            a = IAnimation::Probe(aa);
+            CAlphaAnimation::New(1.0, 1.0, (IAnimation**)&a);
             break;
         }
         case THUMBNAIL_TRANSITION_EXIT_SCALE_DOWN: {
             // Exiting the current app, the app should scale down with the thumbnail
             Float scaleW = thumbWidth / appWidth;
             Float scaleH = thumbHeight / appHeight;
-            AutoPtr<IScaleAnimation> sa;
+            AutoPtr<IAnimation> scale;
             CScaleAnimation::New(1, scaleW, 1, scaleH,
-                    ComputePivot(mNextAppTransitionStartX, scaleW),
-                    ComputePivot(mNextAppTransitionStartY, scaleH), (IScaleAnimation**)&sa);
-            AutoPtr<IAnimation> scale = IAnimation::Probe(sa);
-
-            AutoPtr<IAlphaAnimation> aa;
-            CAlphaAnimation::New(1, 0, (IAlphaAnimation**)&aa);
-            AutoPtr<IAnimation> alpha = IAnimation::Probe(aa);
+                ComputePivot(mNextAppTransitionStartX, scaleW),
+                ComputePivot(mNextAppTransitionStartY, scaleH), (IAnimation**)&scale);
+            AutoPtr<IAnimation> alpha;
+            CAlphaAnimation::New(1.0, 0.0, (IAnimation**)&alpha);
 
             AutoPtr<IAnimationSet> set;
             CAnimationSet::New(TRUE, (IAnimationSet**)&set);
@@ -935,7 +906,8 @@ AutoPtr<IAnimation> AppTransition::CreateThumbnailEnterExitAnimationLocked(
         }
     }
 
-    return PrepareThumbnailAnimation(a, appWidth, appHeight, transit);
+    PrepareThumbnailAnimation(a, appWidth, appHeight, transit);
+    return a;
 }
 
 AutoPtr<IAnimation> AppTransition::LoadAnimation(
@@ -1072,8 +1044,8 @@ AutoPtr<IAnimation> AppTransition::LoadAnimation(
         }
         a = animAttr != 0 ? LoadAnimationAttr(lp, animAttr) : NULL;
         if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
-            Slogger::V(TAG, "applyAnimation: anim=%p  animAttr=0x%s transit=%d isEntrance=%d"
-                    , a.Get(), StringUtils::ToString(animAttr).string(), transit, enter/*+ " Callers=" + Debug.getCallers(3)*/);
+            Slogger::V(TAG, "applyAnimation: anim=%s  animAttr=0x%08x transit=%d isEntrance=%d",
+                TO_CSTR(a), animAttr, transit, enter/*+ " Callers=" + Debug.getCallers(3)*/);
         }
     }
     return a;

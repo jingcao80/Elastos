@@ -445,8 +445,8 @@ void FlashlightController::Teardown()
     mSession = NULL;
     mFlashlightRequest = NULL;
     if (mSurface != NULL) {
-        mSurface->ReleaseSurface();
-        mSurfaceTexture->ReleaseBuffers();
+        mSurface->ReleaseResources();
+        mSurfaceTexture->ReleaseResources();
     }
     mSurface = NULL;
     mSurfaceTexture = NULL;

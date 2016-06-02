@@ -1,10 +1,12 @@
 
 #include "elastos/droid/systemui/recents/model/TaskGrouping.h"
+#include "elastos/droid/systemui/recents/misc/Utilities.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Graphics::IColor;
+using Elastos::Droid::SystemUI::Recents::Misc::Utilities;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
@@ -178,9 +180,8 @@ Task::Task(
     Boolean isInAffiliationGroup = (taskAffiliation != key->mId);
     Boolean hasAffiliationGroupColor = isInAffiliationGroup && (taskAffiliationColor != 0);
     mColorPrimary = hasAffiliationGroupColor ? taskAffiliationColor : colorPrimary;
-    assert(0);
-    // mUseLightOnPrimaryColor = Utilities::ComputeContrastBetweenColors(mColorPrimary,
-    //         IColor::WHITE) > 3.0f;
+    mUseLightOnPrimaryColor = Utilities::ComputeContrastBetweenColors(
+        mColorPrimary, IColor::WHITE) > 3.0f;
 }
 
 /** Copies the other task. */
@@ -253,37 +254,45 @@ ECode Task::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+
+    ITask* other = ITask::Probe(o);
     // Check that the id matches
-    if (!ITask::Probe(o)) {
-        *result = FALSE;
+    if (!other) {
         return NOERROR;
     }
-    Task* t = (Task*)ITask::Probe(o);
-    return mKey->Equals((IComponentNameKey*)t->mKey.Get(), result);
+    else if (other == this) {
+        *result = TRUE;
+        return NOERROR;
+    }
+
+    Task* t = (Task*)other;
+    *result = Object::Equals(mKey, t->mKey);
+    return NOERROR;
 }
 
 // @Override
 ECode Task::ToString(
     /* [out] */ String* str)
 {
-     VALIDATE_NOT_NULL(str);
+    VALIDATE_NOT_NULL(str);
     String groupAffiliation("no group");
     if (mGroup != NULL) {
         AutoPtr<TaskGrouping> tk = (TaskGrouping*)mGroup.Get();
         groupAffiliation = StringUtils::ToString(tk->mAffiliation);
     }
     StringBuilder sb;
-    sb += "Task (";
+    sb += "Task{0x";
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", groupAffiliation:";
     sb += groupAffiliation;
-    sb += "): ";
     AutoPtr<IComponentName> component;
     mKey->mBaseIntent->GetComponent((IComponentName**)&component);
     String pkgName;
     component->GetPackageName(&pkgName);
+    sb += ", pkgName:";
     sb += pkgName;
-    sb += " [";
-    sb += (Int32)this;
-    sb += "]";
+    sb += "}";
     return sb.ToString(str);
 }
 

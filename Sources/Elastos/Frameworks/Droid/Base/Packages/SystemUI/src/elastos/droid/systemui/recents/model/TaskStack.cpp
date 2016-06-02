@@ -1,10 +1,14 @@
 
 #include "elastos/droid/systemui/recents/model/TaskStack.h"
 #include "elastos/droid/systemui/recents/Constants.h"
+#include "elastos/droid/systemui/recents/misc/Utilities.h"
 #include "elastos/droid/systemui/recents/misc/NamedCounter.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Graphics::IColor;
+using Elastos::Droid::SystemUI::Recents::Misc::NamedCounter;
+using Elastos::Droid::SystemUI::Recents::Misc::Utilities;
 using Elastos::Core::EIID_IComparator;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::CArrayList;
@@ -14,7 +18,7 @@ using Elastos::Utility::ICollections;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::CRandom;
 using Elastos::Utility::IRandom;
-using Elastos::Droid::SystemUI::Recents::Misc::NamedCounter;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -293,6 +297,7 @@ void TaskStack::SetTasks(
     AutoPtr<IArrayList> taskList = mTaskList->GetTasks();
     Int32 taskCount;
     taskList->GetSize(&taskCount);
+    Logger::I("TaskStack", " >> prev: %d, %s", taskCount, TO_CSTR(taskList));
     for (Int32 i = 0; i < taskCount; i++) {
         AutoPtr<IInterface> item;
         taskList->Get(i, (IInterface**)&item);
@@ -310,6 +315,7 @@ void TaskStack::SetTasks(
             mCb->OnStackTaskRemoved(this, t, NULL);
         }
     }
+
     mTaskList->Set(tasks);
     tasks->GetSize(&taskCount);
     for (Int32 i = 0; i < taskCount; i++) {
@@ -412,6 +418,7 @@ Boolean TaskStack::HasFilteredTasks()
 void TaskStack::AddGroup(
     /* [in] */ TaskGrouping* group)
 {
+    assert(group != NULL);
     mGroups->Add((ITaskGrouping*)group);
     mAffinitiesGroups[group->mAffiliation] = group;
 }
@@ -419,7 +426,8 @@ void TaskStack::AddGroup(
 void TaskStack::RemoveGroup(
     /* [in] */ TaskGrouping* group)
 {
-    mGroups->Remove((ITaskGrouping*)group);
+    AutoPtr<ITaskGrouping> tg = (ITaskGrouping*)group;
+    mGroups->Remove(tg);
     mAffinitiesGroups.Erase(group->mAffiliation);
 }
 
@@ -445,6 +453,7 @@ void TaskStack::CreateAffiliatedGroupings(
         AutoPtr<ICollections> collections;
         CCollections::AcquireSingleton((ICollections**)&collections);
         collections->Sort(IList::Probe(tasks), comparator);
+
         // Create groups when sequential packages are the same
         AutoPtr<NamedCounter> counter = new NamedCounter(String("task-group"), String(""));
         Int32 taskCount;
@@ -454,6 +463,7 @@ void TaskStack::CreateAffiliatedGroupings(
         AutoPtr<IRandom> r;
         CRandom::New((IRandom**)&r);
         Int32 groupCountDown = Constants::DebugFlags::App::TaskAffiliationsGroupCount;
+
         for (Int32 i = 0; i < taskCount; i++) {
             AutoPtr<IInterface> item;
             tasks->Get(i, (IInterface**)&item);
@@ -462,6 +472,7 @@ void TaskStack::CreateAffiliatedGroupings(
             t->mKey->mBaseIntent->GetComponent((IComponentName**)&comp);
             String packageName;
             comp->GetPackageName(&packageName);
+            Logger::I("TaskStack", " task: %s, packageName:%s", TO_CSTR(comp), packageName.string());
             packageName = "pkg"; // Is bug??
             AutoPtr<TaskGrouping> group;
             if (packageName.Equals(prevPackage) && groupCountDown > 0) {
@@ -529,13 +540,15 @@ void TaskStack::CreateAffiliatedGroupings(
             group->AddTask(t);
             tasksMap[t->mKey] = t;
         }
+
         // Update the task colors for each of the groups
         Float minAlpha = config->mTaskBarViewAffiliationColorMinAlpha;
         Int32 groupCount;
         mGroups->GetSize(&groupCount);
         for (Int32 i = 0; i < groupCount; i++) {
             AutoPtr<IInterface> item;
-            tasks->Get(i, (IInterface**)&item);
+            mGroups->Get(i, (IInterface**)&item);
+            // Logger::I("TaskStack", " > %d : %s", i, TO_CSTR(item));
             TaskGrouping* group = (TaskGrouping*)ITaskGrouping::Probe(item);
             taskCount = group->GetTaskCount();
             // Ignore the groups that only have one task
@@ -551,9 +564,8 @@ void TaskStack::CreateAffiliatedGroupings(
                 group->mTaskKeys->Get(j, (IInterface**)&item2);
                 AutoPtr<ITaskKey> taskKey = ITaskKey::Probe(item2);
                 AutoPtr<Task> t = tasksMap[taskKey];
-                assert(0);
-                // t->mColorPrimary = Utilities::GetColorWithOverlay(
-                //     affiliationColor, IColor::WHITE, alpha);
+                t->mColorPrimary = Utilities::GetColorWithOverlay(
+                    affiliationColor, IColor::WHITE, alpha);
                 alpha -= alphaStep;
             }
         }
@@ -561,21 +573,22 @@ void TaskStack::CreateAffiliatedGroupings(
 }
 
 // @Override
-CARAPI TaskStack::ToString(
+ECode TaskStack::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    StringBuilder sb("Tasks:\n");
+    StringBuilder sb("TaskStack{\n");
     AutoPtr<IArrayList> taskList = mTaskList->GetTasks();
     Int32 taskCount;
     taskList->GetSize(&taskCount);
     for (Int32 i = 0; i < taskCount; i++) {
         AutoPtr<IInterface> t;
         taskList->Get(i, (IInterface**)&t);
-        sb += "  ";
-        sb += t;
+        sb += "          ";
+        sb += TO_STR(t);
         sb += "\n";
     }
+    sb += "}";
     return sb.ToString(str);
 }
 

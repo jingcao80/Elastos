@@ -561,7 +561,7 @@ void WiredAccessoryManager::HandleMsgNewDeviceState(
     /* [in] */ const String& headsetName)
 {
     SetDevicesState(headsetState, prevHeadsetState, headsetName);
-    mWakeLock->Release();
+    mWakeLock->ReleaseLock();
 }
 
 } // namespace Server

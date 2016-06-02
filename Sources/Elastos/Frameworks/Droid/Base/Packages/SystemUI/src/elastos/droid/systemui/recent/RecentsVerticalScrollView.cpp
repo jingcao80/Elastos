@@ -194,7 +194,7 @@ ECode RecentsVerticalScrollView::AdapterDataSetObserver::OnInvalidated()
 //=================================================================================
 
 const String RecentsVerticalScrollView::TAG("RecentsVerticalScrollView");
-const Boolean RecentsVerticalScrollView::DEBUG = TRUE;
+const Boolean RecentsVerticalScrollView::DEBUG = FALSE;
 
 CAR_INTERFACE_IMPL_2(RecentsVerticalScrollView, ScrollView, ISwipeHelperCallback, IRecentsScrollView)
 

@@ -588,8 +588,8 @@ Boolean ColorFade::CaptureScreenshotTextureAndSetViewport()
         st->UpdateTexImage();
         st->GetTransformMatrix(mTexMatrix);
         // } finally {
-        s->ReleaseSurface();
-        st->ReleaseBuffers();
+        s->ReleaseResources();
+        st->ReleaseResources();
         // }
 
         st->UpdateTexImage();
@@ -776,7 +776,7 @@ void ColorFade::DestroySurface()
         surfaceControl->OpenTransaction();
         // try {
             mSurfaceControl->Destroy();
-            mSurface->ReleaseSurface();
+            mSurface->ReleaseResources();
         // } finally {
             surfaceControl->CloseTransaction();
         // }

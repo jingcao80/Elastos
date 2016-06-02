@@ -492,7 +492,7 @@ void SurfaceTextureGetTransformMatrix(eobject object, float* mtx)
 
 void SurfaceTextureRelease(eobject object)
 {
-    ((ISurfaceTexture*)object)->ReleaseBuffers();
+    ((ISurfaceTexture*)object)->ReleaseResources();
 }
 
 int64_t SurfaceTextureGetTimestamp(eobject object)

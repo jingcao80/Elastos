@@ -15,6 +15,11 @@ module
     interface IGLES20Canvas {
     }
 
+    interface IGLES20CanvasHelper {
+        SetProperty(
+            [in] String name,
+            [in] String value);
+    }
 
     /**
      * An implementation of a GL canvas that records drawing operations.

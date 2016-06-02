@@ -160,7 +160,7 @@ ECode CSurfaceTexture::GetTimestamp(
     return NOERROR;
 }
 
-ECode CSurfaceTexture::ReleaseBuffers()
+ECode CSurfaceTexture::ReleaseResources()
 {
     NativeRelease();
     return NOERROR;

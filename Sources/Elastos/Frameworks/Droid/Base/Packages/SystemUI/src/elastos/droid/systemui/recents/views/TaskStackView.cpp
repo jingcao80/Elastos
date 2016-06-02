@@ -1,5 +1,6 @@
 #include "elastos/droid/systemui/recents/model/TaskGrouping.h"
 #include "elastos/droid/systemui/recents/views/TaskStackView.h"
+#include "elastos/droid/systemui/recents/misc/Utilities.h"
 #include "elastos/droid/systemui/recents/Constants.h"
 #include <elastos/droid/view/LayoutInflater.h>
 #include <elastos/core/CoreUtils.h>
@@ -14,6 +15,7 @@ using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::SystemUI::Recents::Model::EIID_IPackageCallbacks;
 using Elastos::Droid::SystemUI::Recents::Model::EIID_ITaskStackCallbacks;
 using Elastos::Droid::SystemUI::Recents::Model::TaskGrouping;
+using Elastos::Droid::SystemUI::Recents::Misc::Utilities;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Core::CoreUtils;
@@ -610,9 +612,8 @@ void TaskStackView::ClipTaskViews()
                     // Map the top edge of next task view into the local space of the current
                     // task view to find the clip amount in local space
                     (*mTmpCoord)[0] = (*mTmpCoord)[1] = 0;
-                    assert(0);
-                    // Utilities::MapCoordInDescendentToSelf(nextTv, this, mTmpCoord, FALSE);
-                    // Utilities::MapCoordInSelfToDescendent(tv, this, mTmpCoord, mTmpMatrix);
+                    Utilities::MapCoordInDescendentToSelf(nextTv, this, mTmpCoord, FALSE);
+                    Utilities::MapCoordInSelfToDescendent(tv, this, mTmpCoord, mTmpMatrix);
                     Int32 height, top;
                     tv->GetMeasuredHeight(&height);
                     nextTv->GetPaddingTop(&top);

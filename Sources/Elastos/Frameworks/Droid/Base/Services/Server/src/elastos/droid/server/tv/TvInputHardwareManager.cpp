@@ -95,7 +95,7 @@ ECode TvInputHardwareManager::Connection::ResetLocked(
                 return ec;
         }
         // }
-        mHardware->Release();
+        mHardware->ReleaseResources();
     }
     mHardware = hardware;
     mCallback = callback;
@@ -342,7 +342,7 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::FindAudioDevicePort(
     return NOERROR;
 }
 
-ECode TvInputHardwareManager::TvInputHardwareImpl::ReleaseRes()
+ECode TvInputHardwareManager::TvInputHardwareImpl::ReleaseResources()
 {
     {    AutoLock syncLock(mImplLock);
         mHost->mAudioManager->UnregisterAudioPortUpdateListener(mAudioListener);
@@ -1322,7 +1322,7 @@ ECode TvInputHardwareManager::AcquireHardware(
             // } catch (RemoteException e) {
             if (FAILED(ec)) {
                 if ((ECode)E_REMOTE_EXCEPTION == ec) {
-                    hardware->Release();
+                    hardware->ReleaseResources();
                     *result = NULL;
                     return NOERROR;
                 }

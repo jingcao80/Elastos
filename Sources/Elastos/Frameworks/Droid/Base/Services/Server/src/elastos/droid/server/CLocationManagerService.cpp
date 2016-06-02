@@ -774,7 +774,7 @@ void CLocationManagerService::Receiver::DecrementPendingBroadcastsLocked()
         Boolean b = FALSE;
         mWakeLock->IsHeld(&b);
         if (b) {
-            mWakeLock->Release();
+            mWakeLock->ReleaseLock();
         }
     }
 }
@@ -786,7 +786,7 @@ void CLocationManagerService::Receiver::ClearPendingBroadcastsLocked()
         Boolean b = FALSE;
         mWakeLock->IsHeld(&b);
         if (b) {
-            mWakeLock->Release();
+            mWakeLock->ReleaseLock();
         }
     }
 }

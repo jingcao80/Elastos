@@ -278,7 +278,7 @@ public:
      * to do so may delay resource deallocation for a significant amount of
      * time.
      */
-    CARAPI ReleaseBuffers();
+    CARAPI ReleaseResources();
 
     static CARAPI_(void) PostEventFromNative(
             /* [in] */ IWeakReference/*<SurfaceTexture>*/* weakSelf);

@@ -34,7 +34,7 @@ public:
         /* [in] */ Int32 minDuration);
 
     /** Scales a rect about its centroid */
-    static CARAPI_(void) scaleRectAboutCenter(
+    static CARAPI_(void) ScaleRectAboutCenter(
         /* [in] */ IRect* r,
         /* [in] */ Float scale);
 
@@ -59,7 +59,6 @@ public:
 
     /** Returns the base color overlaid with another overlay color with a specified alpha. */
     static CARAPI_(Int32) GetColorWithOverlay(
-        /* [in] */ Int32 value,
         /* [in] */ Int32 baseColor,
         /* [in] */ Int32 overlayColor,
         /* [in] */ Float overlayAlpha);
@@ -72,23 +71,6 @@ public:
     /** Returns whether the specified intent is a document. */
     static CARAPI_(Boolean) IsDocument(
         /* [in] */ IIntent* intent);
-
-private:
-    // Reflection methods for altering shadows
-#if 0 //TODO
-    private static Method sPropertyMethod;
-    static {
-        try {
-            Class<?> c = Class.forName("android.view.GLES20Canvas");
-            sPropertyMethod = c.getDeclaredMethod("setProperty", String.class, String.class);
-            if (!sPropertyMethod.isAccessible()) sPropertyMethod.setAccessible(true);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-    }
-#endif
 };
 
 } // namespace Misc

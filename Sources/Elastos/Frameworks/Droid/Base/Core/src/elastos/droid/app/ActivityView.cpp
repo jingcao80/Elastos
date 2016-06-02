@@ -90,7 +90,7 @@ ECode ActivityView::ActivityViewSurfaceTextureListener::OnSurfaceTextureDestroye
         Logger::D("ActivityView::ActivityViewSurfaceTextureListener",
             "OnSurfaceTextureDestroyed");
 
-    mHost->mSurface->ReleaseSurface();
+    mHost->mSurface->ReleaseResources();
     mHost->mSurface = NULL;
     // try {
     Int32 dpi;
@@ -637,7 +637,7 @@ ECode ActivityView::ReleaseResources()
     mActivityContainer = NULL;
 
     if (mSurface != NULL) {
-        mSurface->ReleaseSurface();
+        mSurface->ReleaseResources();
         mSurface = NULL;
     }
 
@@ -663,7 +663,7 @@ ECode ActivityView::AttachToSurfaceWhenReady()
     ECode ec = mActivityContainer->SetSurface(mSurface, mWidth, mHeight, dpi);
     // } catch (RemoteException e) {
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        mSurface->ReleaseSurface();
+        mSurface->ReleaseResources();
         mSurface = NULL;
         Logger::E(TAG, "ActivityView: Unable to create ActivityContainer. ");
         return E_RUNTIME_EXCEPTION;

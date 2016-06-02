@@ -920,6 +920,10 @@ module
         interface IParcelable;
     }
 
+    singleton class CActivityManagerTaskDescriptionHelper {
+        interface IActivityManagerTaskDescriptionHelper;
+    }
+
     class CUiModeManager {
         constructor();
 

@@ -648,7 +648,7 @@ ECode TvInputManagerService::BinderService::SetSurface(
     // } finally {
     if (surface != NULL) {
         // surface is not used in TvInputManagerService.
-        surface->Release();
+        surface->ReleaseResources();
     }
     Binder::RestoreCallingIdentity(identity);
     // }
@@ -2935,7 +2935,7 @@ ECode TvInputManagerService::RemoveUser(
             AutoPtr<SessionState> state = (SessionState*) IObject::Probe(Ptr(it)->Func(IIterator::GetNext));
             if (state->mSession != NULL) {
                 // try {
-                ECode ec = state->mSession->Release();
+                ECode ec = state->mSession->ReleaseResources();
                 // } catch (RemoteException e) {
                 if (FAILED(ec)) {
                     if ((ECode)E_REMOTE_EXCEPTION == ec) {
@@ -3251,7 +3251,7 @@ ECode TvInputManagerService::ReleaseSessionLocked(
             SetMainLocked(sessionToken, FALSE, callingUid, userId);
         }
         // try {
-        ECode ec = sessionState->mSession->Release();
+        ECode ec = sessionState->mSession->ReleaseResources();
         // } catch (RemoteException e) {
         if (FAILED(ec)) {
             if ((ECode)E_REMOTE_EXCEPTION == ec) {

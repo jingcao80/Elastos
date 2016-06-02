@@ -39,7 +39,7 @@ module
          * Always call release() when you're done with a Surface.
          * This will make the surface invalid.
          */
-        ReleaseSurface();
+        ReleaseResources();
 
         /**
          * Free all server-side state associated with this surface and

@@ -43,7 +43,7 @@ void AwSurface::ReleaseResources(
         Logger::E("AwSurface", "AwSurface::ReleaseResources, mObj is NULL");
         return;
     }
-    mObj->ReleaseSurface();
+    mObj->ReleaseResources();
 }
 
 Boolean AwSurface::IsValid(

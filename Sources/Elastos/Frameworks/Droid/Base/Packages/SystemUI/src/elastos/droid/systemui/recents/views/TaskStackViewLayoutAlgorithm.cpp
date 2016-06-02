@@ -1,12 +1,14 @@
 
 #include "elastos/droid/systemui/recents/views/TaskStackViewLayoutAlgorithm.h"
 #include "elastos/droid/systemui/recents/model/TaskGrouping.h"
+#include "elastos/droid/systemui/recents/misc/Utilities.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::SystemUI::Recents::Model::ITask;
 using Elastos::Droid::SystemUI::Recents::Model::TaskGrouping;
+using Elastos::Droid::SystemUI::Recents::Misc::Utilities;
 
 namespace Elastos {
 namespace Droid {
@@ -209,8 +211,7 @@ AutoPtr<TaskViewTransform> TaskStackViewLayoutAlgorithm::GetStackTransform(
     transformOut->mTranslationZ = Elastos::Core::Math::Max(minZ, minZ + (Int32)(pBounded * (maxZ - minZ)));
     transformOut->mRect->Set(mTaskRect);
     transformOut->mRect->Offset(0, transformOut->mTranslationY);
-    assert(0);
-    // Utilities::ScaleRectAboutCenter(transformOut->mRect, transformOut->mScale);
+    Utilities::ScaleRectAboutCenter(transformOut->mRect, transformOut->mScale);
     transformOut->mVisible = TRUE;
     transformOut->mP = pTaskRelative;
     return transformOut;

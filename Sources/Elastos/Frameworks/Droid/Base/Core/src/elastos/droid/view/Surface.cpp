@@ -442,7 +442,7 @@ Surface::~Surface()
         if (mCloseGuard != NULL) {
             mCloseGuard->WarnIfOpen();
         }
-        ReleaseSurface();
+        ReleaseResources();
     // } finally {
         // super.finalize();
     // }
@@ -505,7 +505,7 @@ ECode Surface::SetDirtyRect(
 }
 
 
-ECode Surface::ReleaseSurface()
+ECode Surface::ReleaseResources()
 {
     AutoLock lock(this);
     if (mNativeObject != 0) {
@@ -517,7 +517,7 @@ ECode Surface::ReleaseSurface()
 
 ECode Surface::Destroy()
 {
-    ReleaseSurface();
+    ReleaseResources();
     return NOERROR;
 }
 
@@ -759,7 +759,7 @@ ECode Surface::WriteToParcel(
     }
 
     // if ((flags & Parcelable.PARCELABLE_WRITE_RETURN_VALUE) != 0) {
-        ReleaseSurface();
+        ReleaseResources();
     // }
     return NOERROR;
 }

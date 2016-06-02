@@ -1205,7 +1205,7 @@ ECode ViewRootImpl::RenderProfileRunnable::Run()
 }
 
 const char* ViewRootImpl::TAG = "ViewRootImpl";
-const Boolean ViewRootImpl::DBG = TRUE;
+const Boolean ViewRootImpl::DBG = FALSE;
 const Boolean ViewRootImpl::LOCAL_LOGV = FALSE;
 const Boolean ViewRootImpl::DEBUG_DRAW = FALSE || LOCAL_LOGV;
 const Boolean ViewRootImpl::DEBUG_LAYOUT = FALSE || LOCAL_LOGV;
@@ -2541,7 +2541,6 @@ void ViewRootImpl::PerformTraversals()
         host->DispatchAttachedToWindow(mAttachInfo, 0);
         ((ViewTreeObserver*)mAttachInfo->mTreeObserver.Get())->DispatchOnWindowAttachedChange(TRUE);
         DispatchApplyInsets(host);
-        Logger::I(TAG, "Screen on initialized: %d", mAttachInfo->mKeepScreenOn);
     }
     else {
         mWinFrame->GetWidth(&desiredWindowWidth);
@@ -4454,7 +4453,7 @@ ECode ViewRootImpl::DispatchDetachedFromWindow()
     mView = NULL;
     mAttachInfo->mRootView = NULL;
 
-    mSurface->ReleaseSurface();
+    mSurface->ReleaseResources();
 
     if (mInputQueueCallback != NULL && mInputQueue != NULL) {
         mInputQueueCallback->OnInputQueueDestroyed(mInputQueue);
@@ -5427,7 +5426,7 @@ ECode ViewRootImpl::DoDie()
             }
         }
 
-        mSurface->ReleaseSurface();
+        mSurface->ReleaseResources();
         mAdded = FALSE;
     }
     AutoPtr<IWindowManagerGlobal> instance = CWindowManagerGlobal::GetInstance();

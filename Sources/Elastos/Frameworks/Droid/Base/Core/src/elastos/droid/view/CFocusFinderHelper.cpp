@@ -16,11 +16,6 @@ CAR_INTERFACE_IMPL(CFocusFinderHelper, Singleton, IFocusFinderHelper)
 
 CAR_SINGLETON_IMPL(CFocusFinderHelper)
 
-ECode CFocusFinderHelper::constructor()
-{
-    return NOERROR;
-}
-
 ECode CFocusFinderHelper::GetInstance(
     /* [out] */ IFocusFinder** finder)
 {

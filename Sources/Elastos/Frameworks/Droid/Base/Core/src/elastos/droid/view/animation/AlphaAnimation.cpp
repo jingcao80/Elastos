@@ -37,9 +37,7 @@ ECode AlphaAnimation::constructor(
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
 
     a->GetFloat(R::styleable::AlphaAnimation_fromAlpha, 1.0f, &mFromAlpha);
-
     a->GetFloat(R::styleable::AlphaAnimation_toAlpha, 1.0f, &mToAlpha);
-
     a->Recycle();
 
     return NOERROR;

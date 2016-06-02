@@ -351,10 +351,10 @@ void AccessibilityController::DisplayMagnifier::MagnifiedViewport::ViewportWindo
     }
 }
 
-void AccessibilityController::DisplayMagnifier::MagnifiedViewport::ViewportWindow::ReleaseSurface()
+void AccessibilityController::DisplayMagnifier::MagnifiedViewport::ViewportWindow::ReleaseResources()
 {
-    mSurfaceControl->Release();
-    mSurface->Release();
+    mSurfaceControl->ReleaseSurfaceControl();
+    mSurface->ReleaseResources();
 }
 
 
@@ -621,7 +621,7 @@ void AccessibilityController::DisplayMagnifier::MagnifiedViewport::DrawWindowIfN
 
 void AccessibilityController::DisplayMagnifier::MagnifiedViewport::DestroyWindow()
 {
-    mWindow->ReleaseSurface();
+    mWindow->ReleaseResources();
 }
 
 void AccessibilityController::DisplayMagnifier::MagnifiedViewport::PopulateWindowsOnScreenLocked(

@@ -551,8 +551,7 @@ ECode AlternateRecentsComponent::GetUnknownTransitionActivityOptions(
     CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&aoh);
     return aoh->MakeCustomAnimation(mContext,
         R::anim::recents_from_unknown_enter,
-        R::anim::recents_from_unknown_exit, mHandler,
-        (IActivityOptionsOnAnimationStartedListener*)this, ao);
+        R::anim::recents_from_unknown_exit, mHandler, this, ao);
 }
 
 ECode AlternateRecentsComponent::GetHomeTransitionActivityOptions(
@@ -566,13 +565,11 @@ ECode AlternateRecentsComponent::GetHomeTransitionActivityOptions(
     if (fromSearchHome) {
         return aoh->MakeCustomAnimation(mContext,
             R::anim::recents_from_search_launcher_enter,
-            R::anim::recents_from_search_launcher_exit, mHandler,
-            (IActivityOptionsOnAnimationStartedListener*)this, ao);
+            R::anim::recents_from_search_launcher_exit, mHandler, this, ao);
     }
     return aoh->MakeCustomAnimation(mContext,
         R::anim::recents_from_launcher_enter,
-        R::anim::recents_from_launcher_exit, mHandler,
-        (IActivityOptionsOnAnimationStartedListener*)this, ao);
+        R::anim::recents_from_launcher_exit, mHandler, this, ao);
 }
 
 ECode AlternateRecentsComponent::GetThumbnailTransitionActivityOptions(
@@ -592,8 +589,7 @@ ECode AlternateRecentsComponent::GetThumbnailTransitionActivityOptions(
             CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&aoh);
             return aoh->MakeCustomAnimation(mContext,
                 R::anim::recents_from_app_enter,
-                R::anim::recents_from_app_exit, mHandler,
-                (IActivityOptionsOnAnimationStartedListener*)this, ao);
+                R::anim::recents_from_app_exit, mHandler, this, ao);
         }
     }
 
@@ -637,8 +633,7 @@ ECode AlternateRecentsComponent::GetThumbnailTransitionActivityOptions(
         toTaskRect->GetWidth(&width);
         toTaskRect->GetHeight(&height);
         return aoh->MakeThumbnailAspectScaleDownAnimation(mStatusBarView,
-            thumbnail, left, top, width, height,
-            (IActivityOptionsOnAnimationStartedListener*)this, ao);
+            thumbnail, left, top, width, height, this, ao);
     }
 
     // If both the screenshot and thumbnail fails, then just fall back to the default transition

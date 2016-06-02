@@ -2,6 +2,7 @@
 #include "elastos/droid/systemui/recents/model/TaskGrouping.h"
 #include "elastos/droid/systemui/recents/views/RecentsView.h"
 #include "elastos/droid/systemui/recents/views/TaskStackView.h"
+#include "elastos/droid/systemui/recents/misc/Utilities.h"
 #include "elastos/droid/systemui/recents/Constants.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"
@@ -37,6 +38,7 @@ using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::SystemUI::Recents::Model::EIID_IPackageCallbacks;
 using Elastos::Droid::SystemUI::Recents::Model::RecentsTaskLoader;
 using Elastos::Droid::SystemUI::Recents::Model::TaskGrouping;
+using Elastos::Droid::SystemUI::Recents::Misc::Utilities;
 
 namespace Elastos {
 namespace Droid {
@@ -728,19 +730,19 @@ ECode RecentsView::OnTaskViewAppInfoClicked(
 
 // @Override
 ECode RecentsView::OnTaskViewDismissed(
-    /* [in] */ ITask* _t)
+    /* [in] */ ITask* taskObj)
 {
-    assert(0);
-    // Task* t = (Task*)_t;
-    // // Remove any stored data from the loader.  We currently don't bother notifying the views
-    // // that the data has been unloaded because at the point we call onTaskViewDismissed(), the views
-    // // either don't need to be updated, or have already been removed.
-    // AutoPtr<RecentsTaskLoader> loader = RecentsTaskLoader::GetInstance();
-    // loader->DeleteTaskData(t, FALSE);
+    Task* t = (Task*)taskObj;
+    // Remove any stored data from the loader.  We currently don't bother notifying the views
+    // that the data has been unloaded because at the point we call onTaskViewDismissed(), the views
+    // either don't need to be updated, or have already been removed.
+    AutoPtr<RecentsTaskLoader> loader = RecentsTaskLoader::GetInstance();
+    loader->DeleteTaskData(t, FALSE);
 
-    // // Remove the old task from activity manager
-    // loader->GetSystemServicesProxy()->RemoveTask(t->mKey->mId,
-    //         Utilities::IsDocument(t->mKey->mBaseIntent));
+    // Remove the old task from activity manager
+    AutoPtr<SystemServicesProxy> ssp;
+    loader->GetSystemServicesProxy((SystemServicesProxy**)&ssp);
+    ssp->RemoveTask(t->mKey->mId, Utilities::IsDocument(t->mKey->mBaseIntent));
     return NOERROR;
 }
 

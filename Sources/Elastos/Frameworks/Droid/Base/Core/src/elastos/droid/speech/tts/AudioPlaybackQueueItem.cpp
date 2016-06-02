@@ -132,6 +132,7 @@ ECode AudioPlaybackQueueItem::constructor(
     mUri = uri;
     mAudioParams = audioParams;
 
+    assert(0 && "TODO");
 //    CConditionVariable::New((IConditionVariable**)&mDone);
 //    mPlayer = NULL;
     mFinished = FALSE;
@@ -210,6 +211,7 @@ Float AudioPlaybackQueueItem::Clip(
 
 void AudioPlaybackQueueItem::Finish()
 {
+    assert(0 && "TODO");
     //try {
 //        mPlayer->Stop();
     //} catch (IllegalStateException ex) {
@@ -221,6 +223,7 @@ void AudioPlaybackQueueItem::Finish()
 ECode AudioPlaybackQueueItem::Stop(
     /* [in] */ Int32 errorCode)
 {
+    assert(0 && "TODO");
 //    mDone->Open();
     return NOERROR;
 }

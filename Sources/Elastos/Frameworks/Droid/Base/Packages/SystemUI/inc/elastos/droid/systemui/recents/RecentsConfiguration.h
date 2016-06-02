@@ -98,10 +98,10 @@ private:
     RecentsConfiguration(
         /* [in] */ IContext* context);
 
-public:
     static AutoPtr<RecentsConfiguration> sInstance;
     static Int32 sPrevConfigurationHashCode;
 
+public:
     /** Animations */
     Float mAnimationPxMovementPerSecond;
 

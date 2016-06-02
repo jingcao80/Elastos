@@ -7,10 +7,10 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CActivityManagerTaskDescription;
 using Elastos::Droid::App::IActivityManagerRecentTaskInfo;
+using Elastos::Droid::App::IActivityManagerTaskDescriptionHelper;
+using Elastos::Droid::App::CActivityManagerTaskDescriptionHelper;
 using Elastos::Droid::Content::IComponentCallbacks2;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
@@ -273,22 +273,19 @@ AutoPtr<IDrawable> RecentsTaskLoader::TaskResourceLoader::GetTaskDescriptionIcon
     /* [in] */ SystemServicesProxy* ssp,
     /* [in] */ IResources* res)
 {
-#if 0 // CActivityManagerTaskDescriptionHelper needed
-    AutoPtr<IActivityManagerTaskDescriptionHelper> amth;
-    CActivityManagerTaskDescriptionHelper::AcquireSingleton(
-        (IActivityManagerTaskDescriptionHelper**)&amth);
-    AutoPtr<IBitmap> bm;
-    amth->LoadTaskDescriptionIcon(iconFilename, (IBitmap**)&bm);
-    AutoPtr<IBitmap> tdIcon = iconBitmap != NULL
-            ? iconBitmap
-            : bm;
+    AutoPtr<IBitmap> tdIcon = iconBitmap;
+    if (tdIcon == NULL) {
+        AutoPtr<IActivityManagerTaskDescriptionHelper> helper;
+        CActivityManagerTaskDescriptionHelper::AcquireSingleton(
+            (IActivityManagerTaskDescriptionHelper**)&helper);
+        helper->LoadTaskDescriptionIcon(iconFilename, (IBitmap**)&tdIcon);
+    }
     if (tdIcon != NULL) {
         AutoPtr<IDrawable> drawable;
         CBitmapDrawable::New(res, tdIcon, (IDrawable**)&drawable);
-        AutoPtr<Task::TaskKey> _taskKey = (Task::TaskKey*)taskKey.Get();
+        AutoPtr<Task::TaskKey> _taskKey = (Task::TaskKey*)taskKey;
         return ssp->GetBadgedIcon(drawable, _taskKey->mUserId);
     }
-#endif
     return NULL;
 }
 
@@ -450,11 +447,14 @@ String RecentsTaskLoader::GetAndUpdateActivityLabel(
     /* [in] */ ActivityInfoHandle* infoHandle)
 {
     // Return the task description label if it exists
-    String label1;
-    td->GetLabel(&label1);
-    if (td != NULL && !label1.IsNull()) {
-        return label1;
+    if (td != NULL) {
+        String label;
+        td->GetLabel(&label);
+        if (!label.IsNull()) {
+            return label;
+        }
     }
+
     // Return the cached activity label if it exists
     String label = mActivityLabelCache->GetAndInvalidateIfModified(taskKey);
     if (!label.IsNull()) {
@@ -483,8 +483,7 @@ Int32 RecentsTaskLoader::GetActivityPrimaryColor(
     /* [in] */ RecentsConfiguration* config)
 {
     Int32 color;
-    td->GetPrimaryColor(&color);
-    if (td != NULL && color != 0) {
+    if (td != NULL && (td->GetPrimaryColor(&color), color) != 0) {
         return color;
     }
     return config->mTaskBarViewDefaultBackgroundColor;
@@ -543,15 +542,13 @@ AutoPtr<ITaskStack> RecentsTaskLoader::GetTaskStack(
         AutoPtr<IActivityManagerRecentTaskInfo> t = IActivityManagerRecentTaskInfo::Probe(_t);
 
         // Compose the task key
-        Int32 persistentId;
-        t->GetPersistentId(&persistentId);
         AutoPtr<IIntent> baseIntent;
+        Int32 persistentId, userId;
+        Int64 firstActiveTime, lastActiveTime;
+        t->GetPersistentId(&persistentId);
         t->GetBaseIntent((IIntent**)&baseIntent);
-        Int32 userId;
         t->GetUserId(&userId);
-        Int64 firstActiveTime;
         t->GetFirstActiveTime(&firstActiveTime);
-        Int64 lastActiveTime;
         t->GetLastActiveTime(&lastActiveTime);
         AutoPtr<Task::TaskKey> taskKey = new Task::TaskKey(persistentId, baseIntent, userId,
             firstActiveTime, lastActiveTime);
@@ -559,10 +556,9 @@ AutoPtr<ITaskStack> RecentsTaskLoader::GetTaskStack(
         // Get an existing activity info handle if possible
         AutoPtr<Task::ComponentNameKey> cnKey = taskKey->GetComponentNameKey();
         AutoPtr<ActivityInfoHandle> infoHandle;
-        Boolean hasCachedActivityInfo = FALSE;
-        Boolean b1;
-        activityInfoCache->ContainsKey((IComponentNameKey*)cnKey, &b1);
-        if (b1) {
+        Boolean hasCachedActivityInfo = FALSE, bval;
+        activityInfoCache->ContainsKey((IComponentNameKey*)cnKey, &bval);
+        if (bval) {
             AutoPtr<IInterface> _infoHandle;
             activityInfoCache->Get((IComponentNameKey*)cnKey, (IInterface**)&_infoHandle);
             infoHandle = (ActivityInfoHandle*)(IObject::Probe(_infoHandle));
@@ -586,8 +582,7 @@ AutoPtr<ITaskStack> RecentsTaskLoader::GetTaskStack(
         // Load the label, icon, and color
         AutoPtr<IActivityManagerTaskDescription> atd;
         t->GetTaskDescription((IActivityManagerTaskDescription**)&atd);
-        String activityLabel  = GetAndUpdateActivityLabel(taskKey, atd,
-            ssp, infoHandle);
+        String activityLabel  = GetAndUpdateActivityLabel(taskKey, atd, ssp, infoHandle);
         AutoPtr<IDrawable> activityIcon = GetAndUpdateActivityIcon(taskKey, atd,
             ssp, res, infoHandle, preloadTask);
         Int32 activityColor = GetActivityPrimaryColor(atd, config);
@@ -597,12 +592,12 @@ AutoPtr<ITaskStack> RecentsTaskLoader::GetTaskStack(
             activityInfoCache->Put((IComponentNameKey*)cnKey, (IObject*)infoHandle);
         }
 
-        AutoPtr<IBitmap> bm;
-        atd->GetInMemoryIcon((IBitmap**)&bm);
-        AutoPtr<IBitmap> icon = atd != NULL ? bm : NULL;
-        String ifn;
-        atd->GetIconFilename(&ifn);
-        String iconFilename = atd != NULL ? ifn : String(NULL);
+        AutoPtr<IBitmap> icon;
+        String iconFilename;
+        if (atd != NULL) {
+            atd->GetInMemoryIcon((IBitmap**)&icon);
+            atd->GetIconFilename(&iconFilename);
+        }
 
         // Add the task to the stack
         Int32 affiliatedTaskId, affiliatedTaskColor;
@@ -637,6 +632,7 @@ AutoPtr<ITaskStack> RecentsTaskLoader::GetTaskStack(
         // Add the task to the stack
         tasksToAdd->Add((ITask*)task);
     }
+
     stack->SetTasks(IList::Probe(tasksToAdd));
     stack->CreateAffiliatedGroupings(config);
     return stack;

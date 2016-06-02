@@ -20,6 +20,7 @@ namespace View {
 namespace Animation {
 
 CAR_INTERFACE_IMPL(TranslateAnimation, Animation, ITranslateAnimation);
+
 TranslateAnimation::TranslateAnimation()
     : mFromXType(IAnimation::ABSOLUTE)
     , mToXType(IAnimation::ABSOLUTE)

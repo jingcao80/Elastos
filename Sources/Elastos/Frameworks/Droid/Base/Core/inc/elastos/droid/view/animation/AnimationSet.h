@@ -167,6 +167,9 @@ public:
     CARAPI HasAlpha(
         /* [out] */ Boolean* has);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 protected:
     // @Override
     CARAPI Clone(

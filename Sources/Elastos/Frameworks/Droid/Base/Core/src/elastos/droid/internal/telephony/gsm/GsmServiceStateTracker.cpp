@@ -1841,7 +1841,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 }
                 mNitzUpdatedTime = TRUE;
             } finally {
-                mWakeLock->Release();
+                mWakeLock->ReleaseLock();
             }
         } Catch (RuntimeException ex) {
             Loge("NITZ: Parsing NITZ time " + nitz + " ex=" + ex);

@@ -16674,7 +16674,7 @@ ECode View::StartDrag(
 
             // Off and running!  Release our local surface instance; the drag
             // shadow surface is now managed by the system process.
-            surface->ReleaseSurface();
+            surface->ReleaseResources();
         }
     } while (0);
 

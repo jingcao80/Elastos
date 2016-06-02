@@ -242,7 +242,7 @@ public abstract class InboundSmsHandler extends StateMachine {
         mWapPush->Dispose();
 
         While (mWakeLock->IsHeld()) {
-            mWakeLock->Release();
+            mWakeLock->ReleaseLock();
         }
     }
 
@@ -344,7 +344,7 @@ public abstract class InboundSmsHandler extends StateMachine {
                     return HANDLED;
 
                 case EVENT_RELEASE_WAKELOCK:
-                    mWakeLock->Release();
+                    mWakeLock->ReleaseLock();
                     If (DBG) {
                         If (mWakeLock->IsHeld()) {
                             // this is okay as Int64 as we call Release() for every Acquire()
@@ -414,7 +414,7 @@ public abstract class InboundSmsHandler extends StateMachine {
                     return HANDLED;
 
                 case EVENT_RELEASE_WAKELOCK:
-                    mWakeLock->Release();    // decrement wakelock from previous entry to Idle
+                    mWakeLock->ReleaseLock();    // decrement wakelock from previous entry to Idle
                     If (!mWakeLock->IsHeld()) {
                         // wakelock should still be held until 3 seconds after we enter Idle
                         Loge("mWakeLock released while delivering/broadcasting!");

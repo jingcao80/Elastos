@@ -144,7 +144,7 @@ static AutoPtr<IAudioAttributes> InitAudioAttributes()
 }
 
 const String CPhoneStatusBar::TAG("CPhoneStatusBar");
-const Boolean CPhoneStatusBar::DEBUG = BaseStatusBar::DEBUG;
+const Boolean CPhoneStatusBar::DEBUG = FALSE;
 const Boolean CPhoneStatusBar::SPEW = FALSE;
 const Boolean CPhoneStatusBar::DUMPTRUCK = TRUE; // extra dumpsys info
 const Boolean CPhoneStatusBar::DEBUG_GESTURES = FALSE;

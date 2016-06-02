@@ -3340,7 +3340,7 @@ Boolean ViewGroup::DispatchTransformedTouchEvent(
             View::DispatchTouchEvent(event, &handled);
         }
         else {
-            Logger::I(TAG, " >> DispatchTouchEvent to child canel :%s", TO_CSTR(_child));
+            // Logger::I(TAG, " >> cancel, DispatchTouchEvent to child: [%s]", TO_CSTR(_child));
             _child->DispatchTouchEvent(event, &handled);
         }
         event->SetAction(oldAction);
@@ -3398,7 +3398,7 @@ Boolean ViewGroup::DispatchTransformedTouchEvent(
             _child->GetInverseMatrix((IMatrix**)&temp);
             transformedEvent->Transform(temp);
         }
-        Logger::I(TAG, " >> DispatchTouchEvent to child:%s", TO_CSTR(_child));
+        // Logger::I(TAG, " >> DispatchTouchEvent to child: [%s]", TO_CSTR(_child));
         _child->DispatchTouchEvent(transformedEvent, &handled);
     }
 

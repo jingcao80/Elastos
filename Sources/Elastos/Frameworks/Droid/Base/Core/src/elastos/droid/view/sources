@@ -38,6 +38,7 @@ SOURCES += CFocusFinderHelper.cpp
 SOURCES += FrameStats.cpp
 SOURCES += GestureDetector.cpp
 SOURCES += GraphicBuffer.cpp
+SOURCES += CGLES20CanvasHelper.cpp
 SOURCES += Choreographer.cpp
 SOURCES += CChoreographerHelper.cpp
 

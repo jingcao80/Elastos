@@ -506,7 +506,7 @@ void SurfaceTextureRenderer::ClearState()
     mConversionSurfaces->Clear();
     mPBufferPixels = NULL;
     if (mSurfaceTexture != NULL) {
-        mSurfaceTexture->ReleaseBuffers();
+        mSurfaceTexture->ReleaseResources();
     }
     mSurfaceTexture = NULL;
     return;

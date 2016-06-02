@@ -22,7 +22,6 @@ ECode UsbDeviceConnection::constructor(
     /* [in] */ IUsbDevice* device)
 {
     mDevice = device;
-    device->Release();
     return NOERROR;
 }
 

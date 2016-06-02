@@ -23,7 +23,8 @@ namespace Droid {
 namespace Server {
 namespace Wm {
 
-class AppWindowAnimator : public Object
+class AppWindowAnimator
+    : public Object
 {
 public:
     // This is an animation that does nothing: it just immediately finishes
@@ -42,6 +43,8 @@ public:
     };
 
 public:
+    TO_STRING_IMPL("AppWindowAnimator")
+
     AppWindowAnimator(
         /* [in] */ AppWindowToken* atoken);
 

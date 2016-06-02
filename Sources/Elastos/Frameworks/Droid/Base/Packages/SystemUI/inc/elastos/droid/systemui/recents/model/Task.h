@@ -98,6 +98,8 @@ public:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     Task();
 
     Task(
@@ -112,8 +114,6 @@ public:
         /* [in] */ Boolean lockToTaskEnabled,
         /* [in] */ IBitmap* icon,
         /* [in] */ const String& iconFilename);
-
-    CAR_INTERFACE_DECL()
 
     /** Copies the other task. */
     CARAPI CopyFrom(

@@ -390,10 +390,14 @@ ECode TypedProperties::Get(
     /* [in] */ IInterface* key,
     /* [out] */ IInterface** value)
 {
-    FAIL_RETURN(HashMap::Get(key, value))
-    if (IString::Probe(*value) == NULL_STRING) {
-        (*value)->Release();
-        *value = NULL;
+    VALIDATE_NOT_NULL(value)
+    *value = NULL;
+
+    AutoPtr<IInterface> obj;
+    FAIL_RETURN(HashMap::Get(key, (IInterface**)&obj))
+    if (IString::Probe(obj) != NULL_STRING) {
+        *value = obj;
+        REFCOUNT_ADD(*value)
     }
     return NOERROR;
 }

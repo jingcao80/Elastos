@@ -117,7 +117,7 @@ private:
                 /** NOTE: This has to be called within a surface transaction. */
                 CARAPI_(void) DrawIfNeeded();
 
-                CARAPI_(void) ReleaseSurface();
+                CARAPI_(void) ReleaseResources();
 
             private:
                 static const String SURFACE_TITLE;

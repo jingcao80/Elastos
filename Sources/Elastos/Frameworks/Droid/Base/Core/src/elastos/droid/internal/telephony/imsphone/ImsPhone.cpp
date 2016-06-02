@@ -1254,7 +1254,7 @@ public class ImsPhone extends ImsPhoneBase {
     //@Override
     CARAPI ExitEmergencyCallbackMode() {
         If (mWakeLock->IsHeld()) {
-            mWakeLock->Release();
+            mWakeLock->ReleaseLock();
         }
         If (DBG) Rlog->D(LOG_TAG, "ExitEmergencyCallbackMode()");
 

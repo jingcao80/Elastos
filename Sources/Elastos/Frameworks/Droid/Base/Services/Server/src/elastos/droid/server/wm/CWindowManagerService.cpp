@@ -3883,7 +3883,7 @@ Int32 CWindowManagerService::RelayoutWindow(
             else {
                 // For some reason there isn't a surface.  Clear the
                 // caller's object so they see the same state.
-                ec = inSurface->ReleaseSurface();
+                ec = inSurface->ReleaseResources();
             }
             if (FAILED(ec)) {
                 mInputMonitor->UpdateInputWindowsLw(TRUE /*force*/);
@@ -3973,7 +3973,7 @@ Int32 CWindowManagerService::RelayoutWindow(
                 }
             }
 
-            inSurface->ReleaseSurface();
+            inSurface->ReleaseResources();
             if (DEBUG_VISIBILITY) Slogger::I(TAG, "Releasing surface in: %s", TO_CSTR(win));
         }
 
@@ -5182,13 +5182,13 @@ ECode CWindowManagerService::SetAppStartingWindow(
     AutoLock lock(mWindowMapLock);
 
     if (DEBUG_STARTING_WINDOW) {
-        Slogger::V(TAG, "setAppStartingWindow: token=%p pkg=%s transferFrom=%p",
-            token, pkg.string(), transferFrom);
+        Slogger::V(TAG, "setAppStartingWindow: token=%s pkg=%s transferFrom=%p",
+            TO_CSTR(token), pkg.string(), transferFrom);
     }
 
     AutoPtr<AppWindowToken> wtoken = FindAppWindowToken(token);
     if (wtoken == NULL) {
-        // Slog.w(TAG, "Attempted to set icon of non-existing app token: " + token);
+        Slogger::W(TAG, "Attempted to set icon of non-existing app token: %s", TO_CSTR(token));
         return NOERROR;
     }
 
@@ -5215,8 +5215,8 @@ ECode CWindowManagerService::SetAppStartingWindow(
                     mSkipAppTransitionAnimation = TRUE;
                 }
                 if (DEBUG_STARTING_WINDOW) {
-                    Slogger::V(TAG, "Moving existing starting %p from %p to %p",
-                        startingWindow.Get(), ttoken.Get(), wtoken.Get());
+                    Slogger::V(TAG, "Moving existing starting %s from %s to %s",
+                        TO_CSTR(startingWindow), TO_CSTR(ttoken), TO_CSTR(wtoken));
                 }
                 Int64 origId = Binder::ClearCallingIdentity();
 
@@ -5236,12 +5236,12 @@ ECode CWindowManagerService::SetAppStartingWindow(
                 startingWindow->mWinAnimator->mAppAnimator = wtoken->mAppAnimator;
 
                 if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE || DEBUG_STARTING_WINDOW) {
-                    Slogger::V(TAG, "Removing starting window: %p", startingWindow.Get());
+                    Slogger::V(TAG, "Removing starting window: %s", TO_CSTR(startingWindow));
                 }
                 startingWindow->GetWindowList()->Remove((IWindowState*)startingWindow.Get());
                 mWindowsChanged = TRUE;
                 if (DEBUG_ADD_REMOVE) {
-                    Slogger::V(TAG, "Removing starting %p from %p", startingWindow.Get(), ttoken.Get());
+                    Slogger::V(TAG, "Removing starting %s from %s", TO_CSTR(startingWindow), TO_CSTR(ttoken));
                 }
                 ttoken->mWindows->Remove((IWindowState*)startingWindow.Get());
                 ttoken->mAllAppWindows->Remove((IWindowState*)startingWindow.Get());
@@ -11212,8 +11212,8 @@ Int32 CWindowManagerService::HandleAppTransitionReadyLocked(
         for (it = mOpeningApps.Begin(); it != mOpeningApps.End() && goodToGo; ++it) {
             AutoPtr<AppWindowToken> wtoken = *it;
             if (DEBUG_APP_TRANSITIONS) {
-                Slogger::V(TAG, "Check opening app=%p: allDrawn=%d startingDisplayed=%d startingMoved=%d"
-                    , wtoken.Get(), wtoken->mAllDrawn, wtoken->mStartingDisplayed, wtoken->mStartingMoved);
+                Slogger::V(TAG, "Check opening app=%s: allDrawn=%d startingDisplayed=%d startingMoved=%d",
+                    TO_CSTR(wtoken), wtoken->mAllDrawn, wtoken->mStartingDisplayed, wtoken->mStartingMoved);
             }
             if (!wtoken->mAllDrawn && !wtoken->mStartingDisplayed
                     && !wtoken->mStartingMoved) {
@@ -11237,9 +11237,9 @@ Int32 CWindowManagerService::HandleAppTransitionReadyLocked(
 
         // if wallpaper is animating in or out set oldWallpaper to null else to wallpaper
         AutoPtr<WindowState> oldWallpaper =
-                mWallpaperTarget != NULL && mWallpaperTarget->mWinAnimator->IsAnimating()
-                        && !mWallpaperTarget->mWinAnimator->IsDummyAnimation()
-                ? NULL : mWallpaperTarget;
+            mWallpaperTarget != NULL && mWallpaperTarget->mWinAnimator->IsAnimating()
+                    && !mWallpaperTarget->mWinAnimator->IsDummyAnimation()
+            ? NULL : mWallpaperTarget;
 
         mInnerFields->mWallpaperMayChange = FALSE;
 
@@ -11251,8 +11251,9 @@ Int32 CWindowManagerService::HandleAppTransitionReadyLocked(
         Boolean voiceInteraction = FALSE;
 
         if (DEBUG_APP_TRANSITIONS) {
-            Slogger::V(TAG, "New wallpaper target=%p, oldWallpaper=%p, lower target=%p, upper target=%p"
-                    , mWallpaperTarget.Get(), oldWallpaper.Get(), mLowerWallpaperTarget.Get(), mUpperWallpaperTarget.Get());
+            Slogger::V(TAG, "New wallpaper target=%s, oldWallpaper=%p, lower target=%p, upper target=%p",
+                TO_CSTR(mWallpaperTarget), TO_CSTR(oldWallpaper),
+                TO_CSTR(mLowerWallpaperTarget), TO_CSTR(mUpperWallpaperTarget));
         }
 
         Boolean openingAppHasWallpaper = FALSE;
@@ -11426,7 +11427,7 @@ Int32 CWindowManagerService::HandleAppTransitionReadyLocked(
         for (it = mClosingApps.Begin(); it != mClosingApps.End(); ++it) {
             AutoPtr<AppWindowToken> wtoken = *it;
             AutoPtr<AppWindowAnimator> appAnimator = wtoken->mAppAnimator;
-            if (DEBUG_APP_TRANSITIONS) Slogger::V(TAG, "Now closing app %p", wtoken.Get());
+            if (DEBUG_APP_TRANSITIONS) Slogger::V(TAG, "Now closing app %s", TO_CSTR(wtoken));
             appAnimator->ClearThumbnail();
             appAnimator->mAnimation = NULL;
             wtoken->mInPendingTransaction = FALSE;
@@ -11492,12 +11493,12 @@ Int32 CWindowManagerService::HandleAppTransitionReadyLocked(
             dirty->GetHeight(&rectH);
             AutoPtr<ISurfaceControl> surfaceControl;
             CSurfaceControl::New(mFxSession, String("thumbnail anim"), rectW, rectH,
-                    IPixelFormat::TRANSLUCENT, ISurfaceControl::HIDDEN, (ISurfaceControl**)&surfaceControl);
+                IPixelFormat::TRANSLUCENT, ISurfaceControl::HIDDEN, (ISurfaceControl**)&surfaceControl);
             Int32 strack;
             display->GetLayerStack(&strack);
             surfaceControl->SetLayerStack(strack);
             if (SHOW_TRANSACTIONS) {
-                Slogger::I(TAG, "  THUMBNAIL %p: CREATE", surfaceControl.Get());
+                Slogger::I(TAG, "  THUMBNAIL %s: CREATE", TO_CSTR(surfaceControl));
             }
 
             // Draw the thumbnail onto the surface
@@ -11508,7 +11509,8 @@ Int32 CWindowManagerService::HandleAppTransitionReadyLocked(
             drawSurface->LockCanvas(dirty, (ICanvas**)&c);
             c->DrawBitmap(nextAppTransitionThumbnail, 0.0, 0.0, NULL);
             drawSurface->UnlockCanvasAndPost(c);
-            drawSurface->Release();
+            drawSurface->ReleaseResources();
+            drawSurface = NULL;
 
             // Get the thumbnail animation
             AutoPtr<IAnimation> anim;

@@ -21,11 +21,11 @@ class TaskGrouping
     , public ITaskGrouping
 {
 public:
+    CAR_INTERFACE_DECL()
+
     /** Creates a group with a specified affiliation. */
     TaskGrouping(
         /* [in] */ Int32 affiliation);
-
-    CAR_INTERFACE_DECL()
 
     /** Adds a new task to this group. */
     CARAPI_(void) AddTask(
@@ -63,6 +63,9 @@ public:
 
     /** Returns the number of tasks in this group. */
     CARAPI_(Int32) GetTaskCount();
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 private:
     /** Updates the mapping of tasks to indices. */

@@ -255,9 +255,9 @@ private:
     CARAPI_(void) SwitchUsbMassStorage(
         /* [in] */ const Boolean on);
 
-    CARAPI_(void) CheckStorageUsers();
+    CARAPI CheckStorageUsers();
 
-    CARAPI_(void) CheckStorageUsersAsync();
+    CARAPI CheckStorageUsersAsync();
 
 private:
     const static String TAG;

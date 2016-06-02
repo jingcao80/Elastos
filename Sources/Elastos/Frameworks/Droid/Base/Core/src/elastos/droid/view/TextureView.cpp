@@ -222,7 +222,7 @@ void TextureView::DestroySurface()
         }
 
         mLayer->Destory();
-        if (shouldRelease) mSurface->Release();
+        if (shouldRelease) mSurface->ReleaseResources();
         mSurface = NULL;
         mLayer = NULL;
 
@@ -614,7 +614,7 @@ ECode TextureView::SetSurfaceTexture(
         return E_NULL_POINTER_EXCEPTION;
     }
     if (mSurface != NULL) {
-        mSurface->ReleaseBuffers();
+        mSurface->ReleaseResources();
     }
     mSurface = surfaceTexture;
     mUpdateSurface = TRUE;

@@ -118,7 +118,7 @@ public:
     /**
      * Prepares the specified animation with a standard duration, interpolator, etc.
      */
-    CARAPI_(AutoPtr<IAnimation>) PrepareThumbnailAnimationWithDuration(
+    CARAPI PrepareThumbnailAnimationWithDuration(
         /* [in] */ IAnimation* a,
         /* [in] */ Int32 appWidth,
         /* [in] */ Int32 appHeight,
@@ -128,7 +128,7 @@ public:
     /**
      * Prepares the specified animation with a standard duration, interpolator, etc.
      */
-    CARAPI_(AutoPtr<IAnimation>) PrepareThumbnailAnimation(
+    CARAPI PrepareThumbnailAnimation(
         /* [in] */ IAnimation* a,
         /* [in] */ Int32 appWidth,
         /* [in] */ Int32 appHeight,

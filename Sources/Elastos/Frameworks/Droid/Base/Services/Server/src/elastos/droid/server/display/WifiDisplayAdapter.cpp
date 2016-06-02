@@ -343,7 +343,7 @@ WifiDisplayAdapter::WifiDisplayDevice::WifiDisplayDevice(
 void WifiDisplayAdapter::WifiDisplayDevice::DestroyLocked()
 {
     if (mSurface != NULL) {
-        mSurface->ReleaseSurface();
+        mSurface->ReleaseResources();
         mSurface = NULL;
     }
 

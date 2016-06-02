@@ -139,6 +139,7 @@ private:
 
     class HdmiSystemAudioModeChangeListener;
     class InnerSub_Runnable;
+
     class TvInputHardwareImpl
         : public Object
         , public IITvInputHardware
@@ -182,7 +183,7 @@ private:
         CARAPI constructor(
             /* [in] */ ITvInputHardwareInfo* info);
 
-        CARAPI ReleaseRes();
+        CARAPI ReleaseResources();
 
         // prevail.
         // @Override

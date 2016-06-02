@@ -62,21 +62,20 @@ ECode CAnticipateInterpolator::constructor(
     /* [in] */ IResourcesTheme* theme,
     /* [in] */ IAttributeSet* attrs)
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::AnticipateInterpolator),
-            ArraySize(R::styleable::AnticipateInterpolator));
+    Int32 size = ArraySize(R::styleable::AnticipateInterpolator);
+    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(size);
+    attrIds->Copy(R::styleable::AnticipateInterpolator, size);
+    AutoPtr<ITypedArray> sa;
 
-    AutoPtr<ITypedArray> a;
     if (theme != NULL) {
-        theme->ObtainStyledAttributes(attrs, attrIds, 0, 0, (ITypedArray**)&a);
+        theme->ObtainStyledAttributes(attrs, attrIds, 0, 0, (ITypedArray**)&sa);
     }
     else {
-        res->ObtainAttributes(attrs, attrIds, (ITypedArray**)&a);
+        res->ObtainAttributes(attrs, attrIds, (ITypedArray**)&sa);
     }
 
-    a->GetFloat(R::styleable::AnticipateInterpolator_tension, 2.0f, &mTension);
-
-    return a->Recycle();
+    sa->GetFloat(R::styleable::AnticipateInterpolator_tension, 2.0f, &mTension);
+    return sa->Recycle();
 }
 
 ECode CAnticipateInterpolator::GetInterpolation(

@@ -626,7 +626,7 @@ void VirtualActivityContainer::SetSurfaceLocked(
     }
 
     if (mSurface != NULL) {
-        mSurface->ReleaseSurface();
+        mSurface->ReleaseResources();
     }
 
     mSurface = surface;

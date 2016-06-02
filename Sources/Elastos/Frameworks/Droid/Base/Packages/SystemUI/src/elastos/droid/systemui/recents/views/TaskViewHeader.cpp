@@ -1,6 +1,7 @@
 
 #include "elastos/droid/systemui/recents/views/TaskViewHeader.h"
 #include "elastos/droid/systemui/recents/model/Task.h"
+#include "elastos/droid/systemui/recents/misc/Utilities.h"
 #include "elastos/droid/systemui/recents/Constants.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
@@ -40,6 +41,7 @@ using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IFloat;
 using Elastos::Droid::SystemUI::Recents::Model::Task;
+using Elastos::Droid::SystemUI::Recents::Misc::Utilities;
 
 namespace Elastos {
 namespace Droid {
@@ -282,9 +284,7 @@ Int32 TaskViewHeader::GetSecondaryColor(
     /* [in] */ Boolean useLightOverlayColor)
 {
     Int32 overlayColor = useLightOverlayColor ? IColor::WHITE : IColor::BLACK;
-    // return Utilities::GetColorWithOverlay(primaryColor, overlayColor, 0.8f);
-    assert(0);
-    return overlayColor;
+    return Utilities::GetColorWithOverlay(primaryColor, overlayColor, 0.8f);
 }
 
 /** Binds the bar view to the task */

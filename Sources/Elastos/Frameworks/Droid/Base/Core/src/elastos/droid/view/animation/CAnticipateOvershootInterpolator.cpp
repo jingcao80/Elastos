@@ -71,10 +71,11 @@ ECode CAnticipateOvershootInterpolator::constructor(
     /* [in] */ IResourcesTheme* theme,
     /* [in] */ IAttributeSet* attrs)
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::AnticipateOvershootInterpolator),
-            ArraySize(R::styleable::AnticipateOvershootInterpolator));
+    Int32 size = ArraySize(R::styleable::AnticipateOvershootInterpolator);
+    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(size);
+    attrIds->Copy(R::styleable::AnticipateOvershootInterpolator, size);
     AutoPtr<ITypedArray> a;
+
     if (theme != NULL) {
         theme->ObtainStyledAttributes(attrs, attrIds, 0, 0, (ITypedArray**)&a);
     } else {

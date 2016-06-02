@@ -281,7 +281,7 @@ public class CDMAPhone extends PhoneBase {
         If(DBG) Rlog->D(LOG_TAG, "CDMAPhone finalized");
         If (mWakeLock->IsHeld()) {
             Rlog->E(LOG_TAG, "UNEXPECTED; mWakeLock is held when finalizing.");
-            mWakeLock->Release();
+            mWakeLock->ReleaseLock();
         }
     }
 
@@ -1160,7 +1160,7 @@ public class CDMAPhone extends PhoneBase {
     //@Override
     CARAPI ExitEmergencyCallbackMode() {
         If (mWakeLock->IsHeld()) {
-            mWakeLock->Release();
+            mWakeLock->ReleaseLock();
         }
         // Send a message which will invoke handleExitEmergencyCallbackMode
         mCi->ExitEmergencyCallbackMode(ObtainMessage(EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE));

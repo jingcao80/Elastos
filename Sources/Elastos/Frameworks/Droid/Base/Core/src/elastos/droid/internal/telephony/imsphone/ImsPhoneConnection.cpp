@@ -574,7 +574,7 @@ public class ImsPhoneConnection extends Connection {
         {    AutoLock syncLock(mPartialWakeLock);
             If (mPartialWakeLock->IsHeld()) {
                 Rlog->D(LOG_TAG, "releaseWakeLock");
-                mPartialWakeLock->Release();
+                mPartialWakeLock->ReleaseLock();
             }
         }
     }

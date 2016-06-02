@@ -157,7 +157,7 @@ module
          * to do so may delay resource deallocation for a significant amount of
          * time.
          */
-        ReleaseBuffers();
+        ReleaseResources();
 
         /**
          * Set the default size of the image buffers.  The image producer may override the buffer size,

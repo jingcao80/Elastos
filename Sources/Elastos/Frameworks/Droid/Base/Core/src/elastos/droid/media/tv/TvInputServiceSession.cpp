@@ -422,7 +422,7 @@ ECode TvInputServiceSession::ReleaseResources()
     RemoveOverlayView(TRUE);
     OnRelease();
     if (mSurface != NULL) {
-        mSurface->ReleaseSurface();
+        mSurface->ReleaseResources();
         mSurface = NULL;
     }
     return NOERROR;
@@ -440,7 +440,7 @@ ECode TvInputServiceSession::SetSurface(
     Boolean b;
     OnSetSurface(surface, &b);
     if (mSurface != NULL) {
-        mSurface->ReleaseSurface();
+        mSurface->ReleaseResources();
     }
     mSurface = surface;
     // // TODO: Handle failure.

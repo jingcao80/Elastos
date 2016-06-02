@@ -6038,9 +6038,6 @@ ECode TextView::OnCreateDrawableState(
         MergeDrawableStates(states, MULTILINE_STATE_SET);
     }
 
-    assert(states != NULL);
-    *drawableState = states;
-    REFCOUNT_ADD(*drawableState);
     Boolean isTextSelectable;
     if (IsTextSelectable(&isTextSelectable), isTextSelectable) {
         // Disable pressed state, which was introduced when TextView was made clickable.
@@ -6049,12 +6046,11 @@ ECode TextView::OnCreateDrawableState(
         // and long press actions, which are both needed by text selection.
         Int32 length = (*drawableState)->GetLength();
         for (Int32 i = 0; i < length; i++) {
-            if ((**drawableState)[i] == R::attr::state_pressed) {
+            if ((*states)[i] == R::attr::state_pressed) {
                 AutoPtr<ArrayOf<Int32> > nonPressedState = ArrayOf<Int32>::Alloc(length - 1);
-                nonPressedState->Copy(*drawableState, 0, i);
-                nonPressedState->Copy(i, *drawableState, i + 1, length - i - 1);
+                nonPressedState->Copy(states, 0, i);
+                nonPressedState->Copy(i, states, i + 1, length - i - 1);
 
-                (*drawableState)->Release();
                 *drawableState = nonPressedState;
                 REFCOUNT_ADD(*drawableState);
                 return NOERROR;
@@ -6062,6 +6058,8 @@ ECode TextView::OnCreateDrawableState(
         }
     }
 
+    *drawableState = states;
+    REFCOUNT_ADD(*drawableState);
     return NOERROR;
 }
 

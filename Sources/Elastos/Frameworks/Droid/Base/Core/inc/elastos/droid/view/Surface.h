@@ -94,7 +94,7 @@ public:
     CARAPI SetDirtyRect(
         /* [in] */ IRect* dirty);
 
-    CARAPI ReleaseSurface();
+    CARAPI ReleaseResources();
 
     CARAPI Destroy();
 

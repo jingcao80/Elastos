@@ -463,14 +463,14 @@ void UsbStorageActivity::SwitchUsbMassStorage(
     mAsyncStorageHandler->Post(r3, &b3);
 }
 
-void UsbStorageActivity::CheckStorageUsers()
+ECode UsbStorageActivity::CheckStorageUsers()
 {
     AutoPtr<R4> r4 = new R4(this);
     Boolean b4;
-    mAsyncStorageHandler->Post(r4, &b4);
+    return mAsyncStorageHandler->Post(r4, &b4);
 }
 
-void UsbStorageActivity::CheckStorageUsersAsync()
+ECode UsbStorageActivity::CheckStorageUsersAsync()
 {
     AutoPtr<IIMountService> ims = GetMountService();
     if (ims == NULL) {
@@ -496,7 +496,7 @@ void UsbStorageActivity::CheckStorageUsersAsync()
         ECode ec = GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&obj);
         if (FAILED(ec)) {
             ScheduleShowDialog(DLG_ERROR_SHARING);
-            // return E_REMOTE_EXCEPTION;
+            return E_REMOTE_EXCEPTION;
         }
         AutoPtr<IActivityManager> am = IActivityManager::Probe(obj);
         AutoPtr<IList> infoList;
@@ -516,6 +516,7 @@ void UsbStorageActivity::CheckStorageUsersAsync()
         if (localLOGV) Logger::I(TAG, "Enabling UMS");
         SwitchUsbMassStorage(TRUE);
     }
+    return NOERROR;
 }
 
 ECode UsbStorageActivity::OnClick(

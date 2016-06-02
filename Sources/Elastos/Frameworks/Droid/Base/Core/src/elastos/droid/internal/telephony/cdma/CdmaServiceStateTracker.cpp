@@ -682,7 +682,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                 If (states.length > 0) {
                     try {
                         regState = Integer->ParseInt(states[0]);
-    
+
                         // states[3] (if present) is the current radio technology
                         If (states.length >= 4 && states[3] != NULL) {
                             dataRadioTechnology = Integer->ParseInt(states[3]);
@@ -1711,7 +1711,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             } finally {
                 Int64 end = SystemClock->ElapsedRealtime();
                 If (DBG) Log("NITZ: end=" + end + " dur=" + (end - start));
-                mWakeLock->Release();
+                mWakeLock->ReleaseLock();
             }
         } Catch (RuntimeException ex) {
             Loge("NITZ: Parsing NITZ time " + nitz + " ex=" + ex);

@@ -20,8 +20,6 @@ public:
 
     CAR_SINGLETON_DECL()
 
-    CARAPI constructor();
-
     CARAPI GetInstance(
         /* [out] */ IFocusFinder** finder);
 };

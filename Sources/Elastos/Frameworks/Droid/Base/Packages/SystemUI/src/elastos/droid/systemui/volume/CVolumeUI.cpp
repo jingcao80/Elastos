@@ -275,7 +275,9 @@ static AutoPtr<IUri> init()
 
 const AutoPtr<IUri> CVolumeUI::SETTING_URI = init();
 const Int32 CVolumeUI::DEFAULT;
+
 CAR_OBJECT_IMPL(CVolumeUI)
+
 CVolumeUI::CVolumeUI()
     : mDismissDelay(0)
 {
@@ -288,7 +290,7 @@ ECode CVolumeUI::Start()
 {
     AutoPtr<IInterface> amObj;
     Logger::W(TAG, "TODO: GetSystemService Need debug AUDIO_SERVICE.");
-    // mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&amObj);
+    mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&amObj);
     mAudioManager = IAudioManager::Probe(amObj);
 
     AutoPtr<IInterface> msmObj;

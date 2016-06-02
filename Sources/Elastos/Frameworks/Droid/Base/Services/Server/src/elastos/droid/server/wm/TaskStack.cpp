@@ -8,6 +8,7 @@
 #include "elastos/droid/server/wm/BlurLayer.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Content::Res::IResources;
@@ -15,6 +16,7 @@ using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Slogger;
 
@@ -522,12 +524,15 @@ void TaskStack::Close()
     mAnimationBackgroundSurface->mDimSurface->Destroy();
 }
 
-
 ECode TaskStack::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    *str = String("{stackId=") + StringUtils::ToString(mStackId) + String("tasks=")/* + mTasks */;
+    StringBuilder sb("TaskStack{stackId=");
+    sb += mStackId;
+    sb += ", tasks size=";
+    sb += mTasks.GetSize();
+    *str = sb.ToString();
     return NOERROR;
 }
 

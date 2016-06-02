@@ -124,7 +124,7 @@ namespace SystemUI {
 namespace StatusBar {
 
 const String BaseStatusBar::TAG("BaseStatusBar");
-const Boolean BaseStatusBar::DEBUG = TRUE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
+const Boolean BaseStatusBar::DEBUG = FALSE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
 const Boolean BaseStatusBar::MULTIUSER_DEBUG = FALSE;
 const Int32 BaseStatusBar::MSG_SHOW_RECENT_APPS;
 const Int32 BaseStatusBar::MSG_HIDE_RECENT_APPS;
@@ -1789,7 +1789,6 @@ void BaseStatusBar::HideRecents(
     /* [in] */ Boolean triggeredFromAltTab,
     /* [in] */ Boolean triggeredFromHomeKey)
 {
-    Logger::I(TAG, " >>> HideRecents");
     if (mRecents != NULL) {
         mRecents->HideRecents(triggeredFromAltTab, triggeredFromHomeKey);
     }
@@ -1797,7 +1796,6 @@ void BaseStatusBar::HideRecents(
 
 void BaseStatusBar::ToggleRecents()
 {
-    Logger::I(TAG, " >>> ToggleRecents");
     if (mRecents != NULL) {
         SendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
         AutoPtr<IView> view = GetStatusBarView();
@@ -1807,7 +1805,6 @@ void BaseStatusBar::ToggleRecents()
 
 void BaseStatusBar::PreloadRecents()
 {
-    Logger::I(TAG, " >>> PreloadRecents");
     if (mRecents != NULL) {
         mRecents->PreloadRecents();
     }
@@ -1815,7 +1812,6 @@ void BaseStatusBar::PreloadRecents()
 
 void BaseStatusBar::CancelPreloadingRecents()
 {
-    Logger::I(TAG, " >>> CancelPreloadingRecents");
     if (mRecents != NULL) {
         mRecents->CancelPreloadingRecents();
     }
@@ -1823,7 +1819,6 @@ void BaseStatusBar::CancelPreloadingRecents()
 
 void BaseStatusBar::ShowRecentsNextAffiliatedTask()
 {
-    Logger::I(TAG, " >>> ShowRecentsNextAffiliatedTask:%s", TO_CSTR(mRecents));
     if (mRecents != NULL) {
         mRecents->ShowNextAffiliatedTask();
     }
@@ -1831,7 +1826,6 @@ void BaseStatusBar::ShowRecentsNextAffiliatedTask()
 
 void BaseStatusBar::ShowRecentsPreviousAffiliatedTask()
 {
-    Logger::I(TAG, " >>> ShowRecentsPreviousAffiliatedTask:%s", TO_CSTR(mRecents));
     if (mRecents != NULL) {
         mRecents->ShowPrevAffiliatedTask();
     }

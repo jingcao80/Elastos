@@ -12,12 +12,18 @@
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::R;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -34,6 +40,7 @@ const Int32 AnimationSet::PROPERTY_MORPH_MATRIX_MASK = 0x40;
 const Int32 AnimationSet::PROPERTY_CHANGE_BOUNDS_MASK = 0x80;
 
 CAR_INTERFACE_IMPL(AnimationSet, Animation, IAnimationSet);
+
 AnimationSet::AnimationSet()
     : mFlags(0)
     , mDirty(FALSE)
@@ -101,6 +108,7 @@ ECode AnimationSet::constructor(
 ECode AnimationSet::constructor(
     /* [in] */ Boolean shareInterpolator)
 {
+    FAIL_RETURN(Animation::constructor());
     SetFlag(PROPERTY_SHARE_INTERPOLATOR_MASK, shareInterpolator);
     Init();
 
@@ -279,7 +287,6 @@ ECode AnimationSet::SetStartTime(
     Int32 count;
     mAnimations->GetSize(&count);
     AutoPtr<IArrayList> animations = mAnimations;
-
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> obj;
         animations->Get(i, (IInterface**)&obj);
@@ -614,6 +621,19 @@ ECode AnimationSet::WillChangeBounds(
 {
     VALIDATE_NOT_NULL(result);
     *result = (mFlags & PROPERTY_CHANGE_BOUNDS_MASK) == PROPERTY_CHANGE_BOUNDS_MASK;
+    return NOERROR;
+}
+
+ECode AnimationSet::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("AnimationSet{0x");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", animations:";
+    sb += TO_STR(mAnimations);
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

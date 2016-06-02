@@ -1,15 +1,18 @@
 
 #include "elastos/droid/systemui/recents/misc/Utilities.h"
+#include "elastos/droid/systemui/recents/RecentsConfiguration.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Graphics::CColor;
 using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::View::IViewParent;
+using Elastos::Droid::View::IGLES20CanvasHelper;
+using Elastos::Droid::View::CGLES20CanvasHelper;
+using Elastos::Droid::SystemUI::Recents::RecentsConfiguration;
 using Elastos::Core::Math;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IArrayList;
-
 
 namespace Elastos {
 namespace Droid {
@@ -27,20 +30,14 @@ Int32 Utilities::CalculateTranslationAnimationDuration(
     /* [in] */ Int32 distancePx,
     /* [in] */ Int32 minDuration)
 {
-#if 0//TODO
-    AutoPtr<IRecentsConfigurationHelper> helper;
-    CRecentsConfigurationHelper::AcquireSingleton((IRecentsConfigurationHelper**)&helper);
-    AutoPtr<IRecentsConfiguration> config;
-    helper->GetInstance((IRecentsConfiguration**)&config);
-    Float animationPxMovementPerSecond;
-    config->GetAnimationPxMovementPerSecond(&animationPxMovementPerSecond);
-    return Elastos::Core::Math::Max(minDuration, (Int32) (1000.0f /* ms/s */ *
-        (Elastos::Core::Math::Abs(distancePx) / animationPxMovementPerSecond)));
-#endif
+    using Elastos::Core::Math;
+    AutoPtr<RecentsConfiguration> config = RecentsConfiguration::GetInstance();
+    return Math::Max(minDuration, (Int32) (1000.0f /* ms/s */ *
+        (Math::Abs(distancePx) / config->mAnimationPxMovementPerSecond)));
     return 0;
 }
 
-void Utilities::scaleRectAboutCenter(
+void Utilities::ScaleRectAboutCenter(
     /* [in] */ IRect* r,
     /* [in] */ Float scale)
 {
@@ -50,14 +47,9 @@ void Utilities::scaleRectAboutCenter(
         r->GetCenterY(&cy);
         r->Offset(-cx, -cy);
         Int32 left, top, right, bottom;
-        r->GetLeft(&left);
-        r->SetLeft((Int32)(left * scale + 0.5f));
-        r->GetTop(&top);
-        r->SetTop((Int32)(top * scale + 0.5f));
-        r->GetRight(&right);
-        r->SetRight((Int32)(right * scale + 0.5f));
-        r->GetBottom(&bottom);
-        r->SetBottom((Int32)(bottom * scale + 0.5f));
+        r->Get(&left, &top, &right, &bottom);
+        r->Set((Int32)(left * scale + 0.5f), (Int32)(top * scale + 0.5f),
+            (Int32)(right * scale + 0.5f), (Int32)(bottom * scale + 0.5f));
         r->Offset(cx, cy);
     }
 }
@@ -148,8 +140,7 @@ Float Utilities::MapCoordInSelfToDescendent(
     Float scale = 1.0f;
     Int32 count;
     ancestorChain->GetSize(&count);
-    assert(0 && "TODO");
-    //tmpInverseMatrix->Set(Matrix::IDENTITY_MATRIX);
+    tmpInverseMatrix->Reset();
     for (Int32 i = count - 1; i >= 0; i--) {
         AutoPtr<IInterface> obj;
         ancestorChain->Get(i, (IInterface**)&obj);
@@ -193,14 +184,13 @@ Float Utilities::ComputeContrastBetweenColors(
 {
     AutoPtr<IColor> color;
     CColor::AcquireSingleton((IColor**)&color);
-    Int32 red;
+    Int32 red, green, blue;
     color->Red(bg, &red);
-    Float bgR = red / 255.0f;
-    Int32 green;
     color->Green(bg, &green);
-    Float bgG = green / 255.0f;
-    Int32 blue;
     color->Blue(bg, &blue);
+
+    Float bgR = red / 255.0f;
+    Float bgG = green / 255.0f;
     Float bgB = blue / 255.0f;
     bgR = (bgR < 0.03928f) ? bgR / 12.92f : (Float) Elastos::Core::Math::Pow((bgR + 0.055f) / 1.055f, 2.4f);
     bgG = (bgG < 0.03928f) ? bgG / 12.92f : (Float) Elastos::Core::Math::Pow((bgG + 0.055f) / 1.055f, 2.4f);
@@ -208,10 +198,10 @@ Float Utilities::ComputeContrastBetweenColors(
     Float bgL = 0.2126f * bgR + 0.7152f * bgG + 0.0722f * bgB;
 
     color->Red(fg, &red);
-    Float fgR = red / 255.0f;
     color->Green(fg, &green);
-    Float fgG = green / 255.0f;
     color->Blue(fg, &blue);
+    Float fgR = red / 255.0f;
+    Float fgG = green / 255.0f;
     Float fgB = blue / 255.0f;
     fgR = (fgR < 0.03928f) ? fgR / 12.92f : (Float) Elastos::Core::Math::Pow((fgR + 0.055f) / 1.055f, 2.4f);
     fgG = (fgG < 0.03928f) ? fgG / 12.92f : (Float) Elastos::Core::Math::Pow((fgG + 0.055f) / 1.055f, 2.4f);
@@ -222,24 +212,18 @@ Float Utilities::ComputeContrastBetweenColors(
 }
 
 Int32 Utilities::GetColorWithOverlay(
-    /* [in] */ Int32 value,
     /* [in] */ Int32 baseColor,
     /* [in] */ Int32 overlayColor,
     /* [in] */ Float overlayAlpha)
 {
     AutoPtr<IColor> color;
     CColor::AcquireSingleton((IColor**)&color);
-    Int32 red1;
+    Int32 red1, red2, green1, green2, blue1, blue2;
     color->Red(baseColor, &red1);
-    Int32 red2;
     color->Red(overlayColor, &red2);
-    Int32 green1;
     color->Green(baseColor, &green1);
-    Int32 green2;
     color->Green(overlayColor, &green2);
-    Int32 blue1;
     color->Blue(baseColor, &blue1);
-    Int32 blue2;
     color->Blue(overlayColor, &blue2);
     Int32 rgb;
     color->Rgb(
@@ -253,8 +237,9 @@ void Utilities::SetShadowProperty(
     /* [in] */ const String& property,
     /* [in] */ const String& value)
 {
-    // sPropertyMethod.invoke(null, property, value);
-    assert(0 && "TODO");
+    AutoPtr<IGLES20CanvasHelper> helper;
+    CGLES20CanvasHelper::AcquireSingleton((IGLES20CanvasHelper**)&helper);
+    helper->SetProperty(property, value);
 }
 
 Boolean Utilities::IsDocument(

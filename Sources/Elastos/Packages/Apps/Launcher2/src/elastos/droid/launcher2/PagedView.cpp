@@ -141,7 +141,7 @@ const Int32 PagedView::sScrollIndicatorFadeOutDuration;
 const Int32 PagedView::sScrollIndicatorFlashDuration;
 
 const String PagedView::TAG("PagedView");
-const Boolean PagedView::DEBUG = TRUE;
+const Boolean PagedView::DEBUG = FALSE;
 const Int32 PagedView::MIN_LENGTH_FOR_FLING;
 const Float PagedView::OVERSCROLL_ACCELERATE_FACTOR;
 const Float PagedView::OVERSCROLL_DAMP_FACTOR;

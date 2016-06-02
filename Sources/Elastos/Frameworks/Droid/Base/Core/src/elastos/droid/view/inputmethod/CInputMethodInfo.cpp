@@ -109,9 +109,9 @@ ECode CInputMethodInfo::constructor(
         return E_XML_PULL_PARSER_EXCEPTION;
     }
 
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::InputMethod),
-        ArraySize(R::styleable::InputMethod));
+    Int32 size = ArraySize(R::styleable::InputMethod);
+    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
+    layout->Copy(R::styleable::InputMethod, size);
 
     AutoPtr<ITypedArray> sa;
     FAIL_RETURN(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));

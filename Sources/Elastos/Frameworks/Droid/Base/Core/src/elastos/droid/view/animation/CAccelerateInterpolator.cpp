@@ -68,22 +68,22 @@ ECode CAccelerateInterpolator::constructor(
     /* [in] */ IResourcesTheme* theme,
     /* [in] */ IAttributeSet* attrs)
 {
-    AutoPtr<ITypedArray> a;
-    AutoPtr< ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::AccelerateInterpolator),
-            ArraySize(R::styleable::AccelerateInterpolator));
+    Int32 size = ArraySize(R::styleable::AccelerateInterpolator);
+    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(size);
+    attrIds->Copy(R::styleable::AccelerateInterpolator, size);
+    AutoPtr<ITypedArray> sa;
 
     if (theme != NULL) {
-        theme->ObtainStyledAttributes(attrs, attrIds, 0, 0, (ITypedArray**)&a);
+        theme->ObtainStyledAttributes(attrs, attrIds, 0, 0, (ITypedArray**)&sa);
     }
     else {
-        res->ObtainAttributes(attrs, attrIds, (ITypedArray**)&a);
+        res->ObtainAttributes(attrs, attrIds, (ITypedArray**)&sa);
     }
 
-    a->GetFloat(R::styleable::AccelerateInterpolator_factor, 1.0f, &mFactor);
+    sa->GetFloat(R::styleable::AccelerateInterpolator_factor, 1.0f, &mFactor);
     mDoubleFactor = 2 * mFactor;
 
-    return a->Recycle();
+    return sa->Recycle();
 }
 
 ECode CAccelerateInterpolator::GetInterpolation(

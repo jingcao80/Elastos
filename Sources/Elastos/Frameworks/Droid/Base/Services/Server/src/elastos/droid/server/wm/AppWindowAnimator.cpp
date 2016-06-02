@@ -42,6 +42,7 @@ ECode AppWindowAnimator::DummyAnimation::Clone(
 //                  AppWindowAnimator
 //==============================================================================
 
+static const Boolean DEBUG_ANIM = TRUE;
 const String AppWindowAnimator::TAG("AppWindowAnimator");
 const AutoPtr<IAnimation> AppWindowAnimator::sDummyAnimation = (IAnimation*)new DummyAnimation();
 
@@ -90,8 +91,8 @@ void AppWindowAnimator::SetAnimation(
     if (appToken == NULL) return;
 
     if (CWindowManagerService::localLOGV) {
-        Slogger::V(TAG, "Setting animation in %p: %p wxh=%dx%d isVisible=%d", appToken.Get()
-                , anim, width, height, appToken->IsVisible());
+        Slogger::V(TAG, "Setting animation in %p: %p wxh=%dx%d isVisible=%d",
+            appToken.Get(), anim, width, height, appToken->IsVisible());
     }
 
     mAnimation = anim;
@@ -293,11 +294,6 @@ Boolean AppWindowAnimator::StepAnimationLocked(
         if ((appToken->mAllDrawn || mAnimating || appToken->mStartingDisplayed)
                 && mAnimation != NULL) {
             if (!mAnimating) {
-                // if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                //         TAG, "Starting animation in " + mAppToken +
-                //         " @ " + currentTime + " scale="
-                //         + mService.getTransitionAnimationScaleLocked()
-                //         + " allDrawn=" + mAppToken.allDrawn + " animating=" + animating);
                 mAnimation->SetStartTime(currentTime);
                 mAnimating = TRUE;
                 if (mThumbnail != NULL) {

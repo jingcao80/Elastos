@@ -1236,7 +1236,7 @@ ECode WallpaperService::Engine::Detach() {
         if (FAILED(ec)) {
             return E_REMOTE_EXCEPTION;
         }
-        mSurfaceHolder->mSurface->ReleaseSurface();
+        mSurfaceHolder->mSurface->ReleaseResources();
         mCreated = FALSE;
 
         // Dispose the input channel after removing the window so the Window Manager

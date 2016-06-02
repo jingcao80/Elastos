@@ -812,7 +812,7 @@ ECode RecentTasksLoader::LoadFirstTask(
 
     AutoPtr<IInterface> amObj;
     mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&amObj);
-    AutoPtr<IActivityManager> am = IActivityManager::Probe(am);
+    AutoPtr<IActivityManager> am = IActivityManager::Probe(amObj);
 
     AutoPtr<IUserHandleHelper> uhh;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);

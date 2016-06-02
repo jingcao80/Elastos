@@ -1,6 +1,10 @@
 
 #include "elastos/droid/systemui/recents/model/TaskGrouping.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::CArrayList;
 
 namespace Elastos {
@@ -137,6 +141,21 @@ void TaskGrouping::UpdateTaskIndices()
         mTaskKeys->Get(i, (IInterface**)&item);
         mTaskKeyIndices[ITaskKey::Probe(item)] = i;
     }
+}
+
+ECode TaskGrouping::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("TaskGrouping{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", affiliation:";
+    sb += mAffiliation;
+    sb += ", taskKeys:";
+    sb += TO_STR(mTaskKeys);
+    sb += "}";
+    *str = sb.ToString();
+    return NOERROR;
 }
 
 } // namespace Model

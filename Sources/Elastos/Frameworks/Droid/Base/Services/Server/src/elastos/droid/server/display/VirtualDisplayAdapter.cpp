@@ -175,7 +175,7 @@ ECode VirtualDisplayAdapter::VirtualDisplayDevice::ProxyDied()
 ECode VirtualDisplayAdapter::VirtualDisplayDevice::DestroyLocked()
 {
     if (mSurface != NULL) {
-        mSurface->ReleaseSurface();
+        mSurface->ReleaseResources();
         mSurface = NULL;
     }
 

@@ -51,7 +51,7 @@ ECode CSessionManagerImpl::KeyEventDone::OnReceive(
     Boolean containsKey, isHeld;
     if ((extras->ContainsKey(EXTRA_WAKELOCK_ACQUIRED, &containsKey), containsKey)
             && (mHost->mMediaEventWakeLock->IsHeld(&isHeld), isHeld)) {
-        mHost->mMediaEventWakeLock->Release();
+        mHost->mMediaEventWakeLock->ReleaseLock();
     }
     return NOERROR;
 }
@@ -581,7 +581,7 @@ void CSessionManagerImpl::StartVoiceInput(
     //     }
     // }
     if (needWakeLock) {
-        mHost->mMediaEventWakeLock->Release();
+        mHost->mMediaEventWakeLock->ReleaseLock();
     }
 }
 

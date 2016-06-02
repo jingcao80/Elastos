@@ -301,7 +301,9 @@ ECode AnimationUtils::LoadInterpolator(
     AutoPtr<IResourcesTheme> theme;
     context->GetTheme((IResourcesTheme**)&theme);
     ECode ec = CreateInterpolatorFromXml(res, theme, IXmlPullParser::Probe(parser), interpolator);
-
+    if (FAILED(ec)) {
+        Logger::I("AnimationUtils", "Can't load animation resource ID #0x %08x", id);
+    }
     if (parser != NULL) {
         parser->Close();
     }
@@ -322,17 +324,9 @@ ECode AnimationUtils::LoadInterpolator(
     // try {
     FAIL_RETURN(res->GetAnimation(id, (IXmlResourceParser**)&parser));
     ECode ec = CreateInterpolatorFromXml(res, theme, IXmlPullParser::Probe(parser), interpolator);
-    // } catch (XmlPullParserException ex) {
-    //     NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
-    //             Integer.toHexString(id));
-    //     rnf.initCause(ex);
-    //     throw rnf;
-    // } catch (IOException ex) {
-    //     NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
-    //             Integer.toHexString(id));
-    //     rnf.initCause(ex);
-    //     throw rnf;
-    // } finally {
+    if (FAILED(ec)) {
+        Logger::I("AnimationUtils", "Can't load animation resource ID #0x %08x", id);
+    }
     if (parser != NULL)
         parser->Close();
     // }
@@ -395,10 +389,11 @@ ECode AnimationUtils::CreateInterpolatorFromXml(
             FAIL_RETURN(CBounceInterpolator::New((IInterpolator**)&temp));
         }
         else if (name.Equals("pathInterpolator")) {
-            FAIL_RETURN(CPathInterpolator::New(res, theme, attrs, (IInterpolator**)&interpolator));
+            FAIL_RETURN(CPathInterpolator::New(res, theme, attrs, (IInterpolator**)&temp));
         }
         else {
             Logger::E("AnimationUtils", "Unknown interpolator name: %s", name.string());
+            assert(0);
             return E_RUNTIME_EXCEPTION;
         }
     }
