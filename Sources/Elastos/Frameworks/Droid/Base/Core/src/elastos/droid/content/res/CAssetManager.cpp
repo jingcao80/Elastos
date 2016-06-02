@@ -1,4 +1,6 @@
 
+#define THROW_ON_BAD_ID 0
+
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/res/CAssetManager.h"

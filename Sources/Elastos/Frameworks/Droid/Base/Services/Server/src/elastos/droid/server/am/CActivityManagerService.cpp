@@ -4261,6 +4261,7 @@ ECode CActivityManagerService::StartProcessLocked(
     if (FAILED(ec)) {
         Slogger::E(TAG, "faield to StartProcessLocked %s, ProcessName:%s",
             sourcePath.string(), app->mProcessName.string());
+        return ec;
     }
     CheckTime(startTime, String("startProcess: returned from zygote!"));
 

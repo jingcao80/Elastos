@@ -146,12 +146,13 @@ ECode Settings::NameValueCache::LazyGetProvider(
     VALIDATE_NOT_NULL(provider);
     AutoPtr<IIContentProvider> cp;
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         cp = mContentProvider;
         if (cp == NULL) {
             String authority;
             mUri->GetAuthority(&authority);
-            cr->AcquireProvider(authority, (IIContentProvider**)&mContentProvider);
+            FAIL_RETURN(cr->AcquireProvider(authority, (IIContentProvider**)&mContentProvider));
             cp = mContentProvider;
         }
     }
