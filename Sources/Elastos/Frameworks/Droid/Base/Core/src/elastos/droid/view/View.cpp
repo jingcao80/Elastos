@@ -1313,6 +1313,7 @@ View::View()
     , mSendingHoverAccessibilityEvents(FALSE)
     , mLeftPaddingDefined(FALSE)
     , mRightPaddingDefined(FALSE)
+    , mHoldContext(FALSE)
 {
     if (InputEventConsistencyVerifier::IsInstrumentationEnabled()) {
         mInputEventConsistencyVerifier =
@@ -1325,8 +1326,8 @@ View::View()
 View::~View()
 {
     // see CContextThemeWrapper::New in LayoutInflater::CreateViewFromTag
-    if (IContextThemeWrapperInLayoutInflater::Probe(mContext) != NULL) {
-        mContext->Release();
+    if (IContextThemeWrapperInLayoutInflater::Probe(mContext) != NULL || mHoldContext) {
+        REFCOUNT_RELEASE(mContext);
     }
     mInputEventConsistencyVerifier = NULL;
     mAccessibilityDelegate = NULL;
@@ -18576,6 +18577,12 @@ Boolean View::InLiveRegion()
     }
 
     return FALSE;
+}
+
+void View::HoldContext()
+{
+    mHoldContext = TRUE;
+    REFCOUNT_ADD(mContext);
 }
 
 /////////////////////////////////////////////////////////

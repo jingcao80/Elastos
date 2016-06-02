@@ -1,8 +1,9 @@
 
-#include "elastos/droid/systemui/statusbar/policy/PreviewInflater.h"
-#include "elastos/droid/systemui/statusbar/phone/KeyguardPreviewContainer.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
+#include "elastos/droid/systemui/statusbar/policy/PreviewInflater.h"
+#include "elastos/droid/systemui/statusbar/phone/KeyguardPreviewContainer.h"
+#include <elastos/droid/view/View.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Pm::IActivityInfo;
@@ -26,7 +27,9 @@ PreviewInflater::WidgetInfo::WidgetInfo()
 
 const String PreviewInflater::TAG("PreviewInflater");
 const String PreviewInflater::META_DATA_KEYGUARD_LAYOUT("com.android.keyguard.layout");
+
 CAR_INTERFACE_IMPL(PreviewInflater, Object, IPreviewInflater)
+
 PreviewInflater::PreviewInflater(
     /* [in] */ IContext* context,
     /* [in] */ ILockPatternUtils* lockPatternUtils)
@@ -50,9 +53,10 @@ ECode PreviewInflater::InflatePreview(
         *view = NULL;
         return NOERROR;
     }
-    AutoPtr<IKeyguardPreviewContainer> container = new KeyguardPreviewContainer(mContext, NULL);
-    IViewGroup::Probe(container)->AddView(v);
-    *view = IView::Probe(container);
+    AutoPtr<KeyguardPreviewContainer> container = new KeyguardPreviewContainer();
+    container->constructor(mContext, NULL);
+    container->AddView(v);
+    *view = (IView*)container;
     REFCOUNT_ADD(*view)
     return NOERROR;
 }
@@ -76,6 +80,8 @@ AutoPtr<IView> PreviewInflater::InflateWidgetView(
         ec = appInflater->CloneInContext(appContext, (ILayoutInflater**)&appInflater);
         if (FAILED(ec)) break;
         ec = appInflater->Inflate(widgetInfo->mLayoutId, NULL, FALSE, (IView**)&widgetView);
+        // widgetView should hold the refcount of appContext
+        ((Elastos::Droid::View::View*)widgetView.Get())->HoldContext();
     } while (/*PackageManager.NameNotFoundException|RuntimeException e*/0);
 
     if (FAILED(ec)) {

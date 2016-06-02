@@ -12,13 +12,19 @@ namespace StatusBar {
 namespace Phone {
 
 CAR_INTERFACE_IMPL(KeyguardPreviewContainer, FrameLayout, IKeyguardPreviewContainer)
-KeyguardPreviewContainer::KeyguardPreviewContainer(
+
+KeyguardPreviewContainer::KeyguardPreviewContainer()
+{
+    CBlackBarDrawable::New(this, (IDrawable**)&mBlackBarDrawable);
+}
+
+ECode KeyguardPreviewContainer::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    CBlackBarDrawable::New(this, (IDrawable**)&mBlackBarDrawable);
-    FrameLayout::constructor(context, attrs);
+    FAIL_RETURN(FrameLayout::constructor(context, attrs));
     SetBackground(mBlackBarDrawable);
+    return NOERROR;
 }
 
 ECode KeyguardPreviewContainer::OnApplyWindowInsets(

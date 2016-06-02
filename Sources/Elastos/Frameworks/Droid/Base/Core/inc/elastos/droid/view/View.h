@@ -4833,6 +4833,8 @@ public:
         /* [out] */ Int32* right,
         /* [out] */ Int32* bottom);
 
+    CARAPI_(void) HoldContext();
+
 protected:
     virtual CARAPI_(void) InitializeFadingEdge(
         /* [in] */ ITypedArray* a);
@@ -5781,7 +5783,7 @@ public:
      */
     Boolean mCachingFailed;
 
-    static Boolean mDebugViewAttributes;// = false;
+    static Boolean mDebugViewAttributes;
 
     AutoPtr<AttachInfo> mAttachInfo;
 
@@ -6222,9 +6224,9 @@ private:
     /**
      * The next available accessibility id.
      */
-    static Boolean sCompatibilityDone;// = false;
-    static Boolean sUseBrokenMakeMeasureSpec;// = false;
-    static Boolean sIgnoreMeasureCache;// = false;
+    static Boolean sCompatibilityDone;
+    static Boolean sUseBrokenMakeMeasureSpec;
+    static Boolean sIgnoreMeasureCache;
 
     static Int32 sNextAccessibilityViewId;
 
@@ -6237,10 +6239,10 @@ private:
     static AutoPtr<ISparseArray> sAttributeMap;
 
     // correspond to the enum values of View_outlineProvider
-    static const Int32 PROVIDER_BACKGROUND;// = 0;
-    static const Int32 PROVIDER_NONE;// = 1;
-    static const Int32 PROVIDER_BOUNDS;// = 2;
-    static const Int32 PROVIDER_PADDED_BOUNDS;// = 3;
+    static const Int32 PROVIDER_BACKGROUND;
+    static const Int32 PROVIDER_NONE;
+    static const Int32 PROVIDER_BOUNDS;
+    static const Int32 PROVIDER_PADDED_BOUNDS;
 
 public:
     /**
@@ -6255,7 +6257,7 @@ private:
     /**
      * Map used to store views' tags.
      */
-    AutoPtr<ISparseArray> mKeyedTags; /* SparseArray<Object> */
+    AutoPtr<ISparseArray> mKeyedTags;
 
     /**
      * Cache if a left padding has been defined
@@ -6274,6 +6276,8 @@ private:
     AutoPtr<IViewParent> mNestedScrollingParent;
 
     AutoPtr< ArrayOf<Int32> > mTempNestedScrollConsumed;
+
+    Boolean mHoldContext;
 };
 
 } // namespace View

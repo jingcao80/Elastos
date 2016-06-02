@@ -21,7 +21,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="Elastos.Droid.Launcher2">
 
-    <original-package android:name="com.android.launcher2" />
+    <original-package android:name="Elastos.Droid.Launcher2" />
 
     <permission
         android:name="com.android.launcher.permission.PRELOAD_WORKSPACE"
@@ -148,7 +148,7 @@
         <!-- The settings provider contains Home's data, like the workspace favorites -->
         <provider
             android:name="Elastos.Droid.Launcher2.CLauncherProvider"
-            android:authorities="com.android.launcher2.settings"
+            android:authorities="elastos.droid.launcher2.settings"
             android:exported="true"
             android:writePermission="com.android.launcher.permission.WRITE_SETTINGS"
             android:readPermission="com.android.launcher.permission.READ_SETTINGS" />

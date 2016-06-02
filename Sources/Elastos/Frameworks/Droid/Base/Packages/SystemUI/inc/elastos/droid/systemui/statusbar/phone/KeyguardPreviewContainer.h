@@ -27,7 +27,9 @@ class KeyguardPreviewContainer
 public:
     CAR_INTERFACE_DECL()
 
-    KeyguardPreviewContainer(
+    KeyguardPreviewContainer();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 

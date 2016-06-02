@@ -12,7 +12,7 @@ module
      * interface IContentProvider
      */
     interface ILauncherProvider {
-        const String AUTHORITY = "com.android.launcher2.settings";
+        const String AUTHORITY = "elastos.droid.launcher2.settings";
 
         const String TABLE_FAVORITES = "favorites";
         const String PARAMETER_NOTIFY = "notify";
