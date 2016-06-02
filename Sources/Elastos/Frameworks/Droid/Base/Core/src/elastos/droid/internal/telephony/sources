@@ -8,7 +8,8 @@ INCLUDES += $(MAKEDIR)/../../../../../inc/
 
 C_DEFINES += -DDROID_CORE
 
-SOURCES = CCallInfo.cpp
+SOURCES = Telephony.cpp
+SOURCES += CCallInfo.cpp
 SOURCES += CCallerInfo.cpp
 SOURCES += CCallerInfoHelper.cpp
 SOURCES += CCallerInfoAsyncQuery.cpp
@@ -24,6 +25,7 @@ SOURCES += CallForwardInfo.cpp
 SOURCES += CallManager.cpp
 SOURCES += DriverCall.cpp
 SOURCES += CallTracker.cpp
+SOURCES += SmsAddress.cpp
 SOURCES += WakeLockStateMachine.cpp
 SOURCES += CellBroadcastHandler.cpp
 SOURCES += Connection.cpp
