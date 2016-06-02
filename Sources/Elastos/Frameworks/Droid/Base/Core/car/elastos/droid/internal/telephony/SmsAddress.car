@@ -17,23 +17,30 @@ module {
         const Int32 TON_ALPHANUMERIC = 5;
         const Int32 TON_ABBREVIATED = 6;
 
+        /**
+         * Returns the address of the SMS message in String form or NULL if unavailable
+         */
         GetAddressString(
             [out] String* result);
 
+        /**
+         * Returns TRUE if this is an alphanumeric address
+         */
         IsAlphanumeric(
             [out] Boolean* result);
 
+        /**
+         * Returns TRUE if this is a network address
+         */
         IsNetworkSpecific(
             [out] Boolean* result);
 
         CouldBeEmailGateway(
             [out] Boolean* result);
-
     }
 
     }//Telephony
     }//Internal
     }//Droid
     }//Elastos
-
 }

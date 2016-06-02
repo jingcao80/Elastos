@@ -11,7 +11,7 @@ module
     namespace Internal {
     namespace Telephony {
 
-    interface ISmsApplicationSmsApplicationData {
+    interface ISmsApplicationData {
         IsComplete(
             [out] Boolean* result);
 
@@ -33,7 +33,7 @@ module
         GetSmsApplicationData(
             [in] String packageName,
             [in] IContext* context,
-            [out] ISmsApplicationSmsApplicationData** result);
+            [out] ISmsApplicationData** result);
 
         GetDefaultSmsApplication(
             [in] IContext* context,

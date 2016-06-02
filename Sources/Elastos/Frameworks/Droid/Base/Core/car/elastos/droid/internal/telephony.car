@@ -293,10 +293,15 @@ module
             interface IGsmAlphabet;
         }
 
-        //singleton class CSms7BitEncodingTranslatorHelper {
-
-        //    interface ISms7BitEncodingTranslatorHelper;
+        //singleton class CSms7BitEncodingTranslator {
+        //
+        //    interface ISms7BitEncodingTranslator;
         //}
+
+        class CSmsAddress {
+
+            interface ISmsAddress;
+        }
 
         [deprecated]
         class CSmsRawData {

@@ -17,6 +17,8 @@ using Elastos::Droid::Os::Handler;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Internal::Telephony::Dataconnection::IDcTrackerBase;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Telephony::ICellInfo;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::ISignalStrength;

@@ -9,6 +9,17 @@ module
     namespace Telephony {
 
     interface ISms7BitEncodingTranslator {
+        /**
+         * Translates each message character that is not supported by GSM 7bit
+         * alphabet into a supported one
+         *
+         * @param message
+         *            message to be translated
+         * @param throwsException
+         *            if true and some error occurs during translation, an exception
+         *            is thrown; otherwise a null String is returned
+         * @return translated message or null if some error occur
+         */
         Translate(
             [in] ICharSequence* message,
             [out] String* result);

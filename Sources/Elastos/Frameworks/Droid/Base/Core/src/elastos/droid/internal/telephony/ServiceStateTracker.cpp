@@ -14,14 +14,12 @@ using Elastos::Core::IntegralToString;
 using Elastos::Core::StringUtils;
 
 using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Internal::Telephony::Dataconnection::IDcTrackerBase;
 using Elastos::Droid::Internal::Telephony::Uicc::IccCardApplicationStatus::IAppState;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccRecords;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
 using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Net::INetworkInfo;
-using Elastos::Droid::Os::IAsyncResult;
 //using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IRegistrant;
