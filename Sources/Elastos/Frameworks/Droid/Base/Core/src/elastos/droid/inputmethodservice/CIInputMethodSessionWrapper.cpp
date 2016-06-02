@@ -31,14 +31,20 @@ namespace InputMethodService {
 CAR_INTERFACE_IMPL(CIInputMethodSessionWrapper::ImeInputEventReceiver, \
     InputEventReceiver, ILocalInputMethodSessionEventCallback)
 
-CIInputMethodSessionWrapper::ImeInputEventReceiver::ImeInputEventReceiver(
+CIInputMethodSessionWrapper::ImeInputEventReceiver::ImeInputEventReceiver()
+{
+    CSparseArray::New((ISparseArray**)&mPendingEvents);
+}
+
+
+ECode CIInputMethodSessionWrapper::ImeInputEventReceiver::constructor(
     /* [in] */ IInputChannel* inputChannel,
     /* [in] */ ILooper* looper,
     /* [in] */ CIInputMethodSessionWrapper* host)
-    : mHost(host)
 {
-    InputEventReceiver::constructor(inputChannel, looper);
-    CSparseArray::New((ISparseArray**)&mPendingEvents);
+    FAIL_RETURN(InputEventReceiver::constructor(inputChannel, looper));
+    mHost = host;
+    return NOERROR;
 }
 
 ECode CIInputMethodSessionWrapper::ImeInputEventReceiver::OnInputEvent(
@@ -110,7 +116,8 @@ ECode CIInputMethodSessionWrapper::constructor(
     if (channel != NULL) {
         AutoPtr<ILooper> looper;
         context->GetMainLooper((ILooper**)&looper);
-        mReceiver = new ImeInputEventReceiver(channel, looper, this);
+        mReceiver = new ImeInputEventReceiver();
+        mReceiver->constructor(channel, looper, this);
     }
 
     return NOERROR;

@@ -80,7 +80,9 @@ private:
         : public InputEventSender
     {
     public:
-        ImeInputEventSender(
+        ImeInputEventSender();
+
+        CARAPI constructor(
             /* [in] */ IInputChannel* inputChannel,
             /* [in] */ ILooper* looper,
             /* [in] */ CInputMethodManager* h);

@@ -22,6 +22,8 @@ class InputEventSender
 public:
     InputEventSender();
 
+    virtual ~InputEventSender();
+
     CARAPI constructor(
         /* [in] */ IInputChannel* inputChannel,
         /* [in] */ ILooper* looper);
@@ -39,24 +41,21 @@ public:
         /* [in] */ IInputEvent* event,
         /* [out] */ Boolean* res);
 
-protected:
-    CARAPI Finalize();
-
-private:
-    CARAPI Dispose(
-        /* [in] */ Boolean finalized);
-
     CARAPI DispatchInputEventFinished(
         /* [in] */ Int32 seq,
         /* [in] */ Boolean handled);
+
+private:
+    CARAPI_(void) Dispose(
+        /* [in] */ Boolean finalized);
 
     static CARAPI NativeInit(
         /* [in] */ IWeakReference* senderWeak,
         /* [in] */ IInputChannel* inputChannelObj,
         /* [in] */ IMessageQueue* messageQueueObj,
-        /* [out] */ Int64 res);
+        /* [out] */ Int64* senderPtr);
 
-    static CARAPI_(void) NativeDispose(
+    static CARAPI NativeDispose(
         /* [in] */ Int64 senderPtr);
 
     static CARAPI_(Boolean) NativeSendKeyEvent(
@@ -69,25 +68,8 @@ private:
         /* [in] */ Int32 seq,
         /* [in] */ IMotionEvent* eventObj);
 
-    AutoPtr<IInputChannel> GetInputChannel(
-        /* [in] */ IInputChannel* inputChannelObj);
-
-    android::sp<android::MessageQueue>& GetMessageQueue(
-        /* [in] */ IMessageQueue* messageQueueObj);
-
-    CARAPI GetKeyEvent(
-        /* [in] */ IKeyEvent* eventObj,
-        /* [out] */ IKeyEvent** result);
-
-    CARAPI_(AutoPtr<IMotionEvent>) GetMotionEvent(
-        /* [in] */ IMotionEvent* eventObj);
-
-
-
 private:
-    static const String TAG;// = "InputEventSender";
-
-    AutoPtr<ICloseGuard> mCloseGuard;// = CloseGuard.get();
+    AutoPtr<ICloseGuard> mCloseGuard;
 
     Int64 mSenderPtr;
 

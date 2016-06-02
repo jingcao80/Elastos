@@ -57,6 +57,9 @@ public:
     ECO_LOCAL CARAPI DispatchBatchedInputEventPending();
 
 private:
+    CARAPI_(void) Dispose(
+        /* [in] */ Boolean finalized);
+
     ECO_LOCAL static CARAPI NativeInit(
         /* [in] */ IWeakReference* receiver,
         /* [in] */ IInputChannel* inputChannel,
@@ -78,7 +81,7 @@ private:
 
 private:
 
-    AutoPtr<ICloseGuard> mCloseGuard;// = CloseGuard.get();
+    AutoPtr<ICloseGuard> mCloseGuard;
 
     // We keep references to the input channel and message queue objects here so that
     // they are not GC'd while the native peer of the receiver is using them.

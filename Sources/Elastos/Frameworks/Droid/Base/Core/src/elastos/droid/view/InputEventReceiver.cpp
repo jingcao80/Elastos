@@ -52,7 +52,7 @@ static AutoPtr<IKeyEvent> CreateKeyEventFromNative(
             event->getSource(),
             (IKeyEvent**)&eventObj);
     if (FAILED(ec)) {
-       Logger::E(TAG, "An exception occurred while obtaining a key event.");
+        Logger::E(TAG, "An exception occurred while obtaining a key event.");
         return NULL;
     }
     return eventObj;
@@ -309,8 +309,8 @@ android::status_t NativeInputEventReceiver::consumeEvents(
 #endif
 
                     if (obj) {
-                        AutoPtr<IInputEventReceiver> tmp = IInputEventReceiver::Probe(obj);
-                        AutoPtr<InputEventReceiver> inputEventReceiver = (InputEventReceiver*)(tmp.Get());
+                        InputEventReceiver* inputEventReceiver =
+                                (InputEventReceiver*)IInputEventReceiver::Probe(obj);
                         if (NOERROR != inputEventReceiver->DispatchBatchedInputEventPending()) {
                             Logger::E(TAG, "Exception dispatching batched input events.");
                             mBatchedInputEventPending = FALSE; // try again later
@@ -409,7 +409,7 @@ InputEventReceiver::InputEventReceiver()
 
 InputEventReceiver::~InputEventReceiver()
 {
-    Dispose();
+    Dispose(TRUE);
 }
 
 /**
@@ -452,7 +452,17 @@ ECode InputEventReceiver::constructor(
  */
 ECode InputEventReceiver::Dispose()
 {
+    Dispose(FALSE);
+    return NOERROR;
+}
+
+void InputEventReceiver::Dispose(
+    /* [in] */ Boolean finalized)
+{
     if (mCloseGuard != NULL) {
+        if (finalized) {
+            mCloseGuard->WarnIfOpen();
+        }
         mCloseGuard->Close();
     }
 
@@ -462,8 +472,6 @@ ECode InputEventReceiver::Dispose()
     }
     mInputChannel = NULL;
     mMessageQueue = NULL;
-
-    return NOERROR;
 }
 
 /**
@@ -582,7 +590,6 @@ ECode InputEventReceiver::NativeInit(
     /* [in] */ IMessageQueue* messageQueueObj,
     /* [out] */ Int64* receiverPtr)
 {
-    VALIDATE_NOT_NULL(receiverPtr);
     InputChannel* nChannel = (InputChannel*)inputChannelPtr;
     Handle64 nInputChannel = nChannel->mNative;
     NativeInputChannel* nativeInputChannel = reinterpret_cast<NativeInputChannel*>(nInputChannel);

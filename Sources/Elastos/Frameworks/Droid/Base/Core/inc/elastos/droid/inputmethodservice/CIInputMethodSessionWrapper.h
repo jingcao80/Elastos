@@ -48,7 +48,9 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        ImeInputEventReceiver(
+        ImeInputEventReceiver();
+
+        CARAPI constructor(
             /* [in] */ IInputChannel* inputChannel,
             /* [in] */ ILooper* looper,
             /* [in] */ CIInputMethodSessionWrapper* host);
@@ -63,7 +65,7 @@ private:
             /* [in] */ Boolean handled);
 
     private:
-        AutoPtr<ISparseArray> mPendingEvents/* = new SparseArray<InputEvent>()*/;
+        AutoPtr<ISparseArray> mPendingEvents;
         CIInputMethodSessionWrapper* mHost;
     };
 

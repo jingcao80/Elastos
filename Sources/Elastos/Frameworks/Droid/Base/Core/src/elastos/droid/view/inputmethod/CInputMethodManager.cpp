@@ -146,14 +146,19 @@ ECode CInputMethodManager::StartInputRunnable::Run()
 }
 
 //========================================================================================
-//              CInputMethodManager::ImeInputEventSender::
+//              CInputMethodManager::ImeInputEventSender
 //========================================================================================
-CInputMethodManager::ImeInputEventSender::ImeInputEventSender(
+CInputMethodManager::ImeInputEventSender::ImeInputEventSender()
+{}
+
+ECode CInputMethodManager::ImeInputEventSender::constructor(
     /* [in] */ IInputChannel* inputChannel,
     /* [in] */ ILooper* looper,
-    /* [in] */ CInputMethodManager* h) : mHost(h) // : InputEventSender(inputChannel, looper)
+    /* [in] */ CInputMethodManager* h)
 {
-    // TODO:
+    FAIL_RETURN(InputEventSender::constructor(inputChannel, looper))
+    mHost = h;
+    return NOERROR;
 }
 
 ECode CInputMethodManager::ImeInputEventSender::OnInputEventFinished(
@@ -1419,7 +1424,8 @@ Int32 CInputMethodManager::SendInputEventOnMainLooperLocked(
         if (mCurSender == NULL) {
             AutoPtr<ILooper> lp;
             mH->GetLooper((ILooper**)&lp);
-            mCurSender = new ImeInputEventSender(mCurChannel, lp, this);
+            mCurSender = new ImeInputEventSender();
+            mCurSender->constructor(mCurChannel, lp, this);
         }
 
         AutoPtr<IInputEvent> event = p->mEvent;
