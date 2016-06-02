@@ -430,7 +430,7 @@
 > Elastos/Packages/Apps/Calculator/src/elastos/droid/calculator2
 
 # ==== build Packages/Apps/Settings ====
-> Elastos/Packages/Apps/Settings/src/elastos/droid/settings Settings.car
+> Elastos/Packages/Apps/Settings/src/elastos/droid/settings Elastos.Droid.Settings.car
   Elastos/Packages/Apps/Settings/src/elastos/droid/settings/dashboard
   Elastos/Packages/Apps/Settings/src/elastos/droid/settings/drawable
   Elastos/Packages/Apps/Settings/src/elastos/droid/settings/inputmethod
