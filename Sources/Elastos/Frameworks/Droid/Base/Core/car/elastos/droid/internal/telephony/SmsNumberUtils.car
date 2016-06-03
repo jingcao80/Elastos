@@ -6,12 +6,12 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    [local]
     interface ISmsNumberUtils {
         FilterDestAddr(
             [in] IPhoneBase* phoneBase,
             [in] String destAddr,
             [out] String* result);
-
     }
 
     }//Telephony

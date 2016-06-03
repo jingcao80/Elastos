@@ -5,7 +5,10 @@ module
     interface Elastos.Droid.Os.IMessage;
     interface Elastos.Droid.Internal.Telephony.IServiceStateTracker;
     enum Elastos.Droid.Internal.Telephony.PhoneConstantsDataState;
+    enum Elastos.Droid.Internal.Telephony.Uicc.AppType;
     interface Elastos.Droid.Internal.Telephony.ISubscription;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccFileHandler;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccRecords;
     interface Elastos.Droid.Telephony.IDataConnectionRealTimeInfo;
     interface Elastos.Droid.Telephony.IVoLteServiceState;
 
@@ -23,7 +26,7 @@ module
      * interface IPhone
      * interface IHandler
      */
-    [deprecated]
+    [local, deprecated]
     interface IPhoneBase {
         /**
          * Indicates whether Out Of Service is considered as data call disconnect.
@@ -100,8 +103,8 @@ module
             [in] IPhoneBase* from);
 
         // Migrate(
-        //     [in] IRegistrantList* to,
-        //     [in] IRegistrantList* from);
+        //    [in] IRegistrantList* to,
+        //    [in] IRegistrantList* from);
 
         RegisterForSimRecordsLoaded(
             [in] IHandler* h,
@@ -122,14 +125,14 @@ module
         /**
          * Retrieves the IccFileHandler of the Phone instance
          */
-        // GetIccFileHandler(
-        //     [out] IIccFileHandler** result);
+        GetIccFileHandler(
+            [out] IIccFileHandler** result);
 
         /**
          * Retrieves the IccRecords of the Phone instance
          */
-        // GetIccRecords(
-        //     [out] IIccRecords** result);
+        GetIccRecords(
+            [out] IIccRecords** result);
 
         /*
          * Retrieves the Handler of the Phone instance
@@ -149,8 +152,8 @@ module
         GetCallTracker(
             [out] ICallTracker** result);
 
-        // GetCurrentUiccAppType(
-        //     [out] IAppType** result);
+        GetCurrentUiccAppType(
+            [out] AppType* result);
 
         NotifyMessageWaitingIndicator();
 

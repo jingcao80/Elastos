@@ -18,6 +18,7 @@ module
     interface IGsmInboundSmsHandler {
     }
 
+    [local]
     interface IGsmInboundSmsHandlerHelper {
         /**
          * Wait for state machine to enter startup state. We can't send any messages until then.
