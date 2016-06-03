@@ -36,14 +36,14 @@ ECode CHotseat::MyOnTouchListener::OnTouch(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
-    // if (mLauncher != NULL) {
-    //     Int32 action;
-    //     event->GetAction(&action);
-    //     if ((action & IMotionEvent::ACTION_MASK) == IMotionEvent::ACTION_DOWN) {
-    //         mLauncher->OnTouchDownAllAppsButton(v);
-    //     }
-    // }
+
+    if (mLauncher != NULL) {
+        Int32 action;
+        event->GetAction(&action);
+        if ((action & IMotionEvent::ACTION_MASK) == IMotionEvent::ACTION_DOWN) {
+            mLauncher->OnTouchDownAllAppsButton(v);
+        }
+    }
     *result = FALSE;
     return NOERROR;
 }
@@ -59,7 +59,6 @@ CHotseat::MyOnClickListener::MyOnClickListener(
 ECode CHotseat::MyOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
     if (mLauncher != NULL) {
         return mLauncher->OnClickAllAppsButton(v);
     }

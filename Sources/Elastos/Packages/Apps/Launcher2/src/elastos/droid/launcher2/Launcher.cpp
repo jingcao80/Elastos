@@ -684,24 +684,18 @@ Launcher::MyAnimatorListenerAdapter3::MyAnimatorListenerAdapter3(
 ECode Launcher::MyAnimatorListenerAdapter3::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
     mHost->UpdateWallpaperVisibility(TRUE);
     mFromView->SetVisibility(IView::GONE);
     mHost->DispatchOnLauncherTransitionEnd(mFromView, mAnimated, TRUE);
     mHost->DispatchOnLauncherTransitionEnd(mToView, mAnimated, TRUE);
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
-    // if (mHost->mWorkspace != NULL) {
-    //     IPagedView::Probe(mHost->mWorkspace)->HideScrollingIndicator(FALSE);
-    // }
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
+    if (mHost->mWorkspace != NULL) {
+        IPagedView::Probe(mHost->mWorkspace)->HideScrollingIndicator(FALSE);
+    }
     if (mOnCompleteRunnable != NULL) {
         mOnCompleteRunnable->Run();
     }
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
     IPagedView::Probe(mHost->mAppsCustomizeContent)->UpdateCurrentPageScroll();
-    IPagedView::Probe(mHost->mAppsCustomizeContent)->ResumeScrolling();
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
-    return NOERROR;
+    return IPagedView::Probe(mHost->mAppsCustomizeContent)->ResumeScrolling();
 }
 
 Launcher::MyRunnable8::MyRunnable8(
@@ -3427,7 +3421,7 @@ ERROR:
 ECode Launcher::OnClickAllAppsButton(
     /* [in] */ IView* v)
 {
-    return ShowAllApps(FALSE);
+    return ShowAllApps(TRUE);
 }
 
 ECode Launcher::OnTouchDownAllAppsButton(
@@ -4225,14 +4219,15 @@ ECode Launcher::UpdateWallpaperVisibility(
     /* [in] */ Boolean visible)
 {
     Int32 wpflags = visible ? IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER : 0;
+
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);
-ALOGD("==== File: %s, Line: %d, window: %p ====", __FILE__, __LINE__, window.Get());
     AutoPtr<IWindowManagerLayoutParams> params;
     window->GetAttributes((IWindowManagerLayoutParams**)&params);
     Int32 flags;
     params->GetFlags(&flags);
     Int32 curflags = flags & IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER;
+
     if (wpflags != curflags) {
         window->SetFlags(wpflags, IWindowManagerLayoutParams::FLAG_SHOW_WALLPAPER);
     }
@@ -4423,12 +4418,12 @@ void Launcher::ShowAppsCustomizeHelper(
                 mSearchDropTargetBar->HideSearchBar(FALSE);
             }
         }
-        // DispatchOnLauncherTransitionPrepare(fromView, animated, FALSE);
-        // DispatchOnLauncherTransitionStart(fromView, animated, FALSE);
-        // DispatchOnLauncherTransitionEnd(fromView, animated, FALSE);
-        // DispatchOnLauncherTransitionPrepare(toView, animated, FALSE);
-        // DispatchOnLauncherTransitionStart(toView, animated, FALSE);
-        // DispatchOnLauncherTransitionEnd(toView, animated, FALSE);
+        DispatchOnLauncherTransitionPrepare(fromView, animated, FALSE);
+        DispatchOnLauncherTransitionStart(fromView, animated, FALSE);
+        DispatchOnLauncherTransitionEnd(fromView, animated, FALSE);
+        DispatchOnLauncherTransitionPrepare(toView, animated, FALSE);
+        DispatchOnLauncherTransitionStart(toView, animated, FALSE);
+        DispatchOnLauncherTransitionEnd(toView, animated, FALSE);
         UpdateWallpaperVisibility(FALSE);
     }
 }
@@ -4493,13 +4488,13 @@ void Launcher::HideAppsCustomizeHelper(
         (*array)[0] = 1.0f;
         (*array)[1] = 0.0f;
         AutoPtr<IObjectAnimator> alphaAnim = LauncherAnimUtils::OfFloat(fromView, String("alpha"), array);
-        IAnimator::Probe(alphaAnim)->SetDuration(2000/*fadeOutDuration*/);
+        IAnimator::Probe(alphaAnim)->SetDuration(fadeOutDuration);
         AutoPtr<IAccelerateDecelerateInterpolator> value;
         CAccelerateDecelerateInterpolator::New((IAccelerateDecelerateInterpolator**)&value);
-        // IAnimator::Probe(alphaAnim)->SetInterpolator(ITimeInterpolator::Probe(value));
+        IAnimator::Probe(alphaAnim)->SetInterpolator(ITimeInterpolator::Probe(value));
 
-        // AutoPtr<IAnimatorUpdateListener> listener = new MyAnimatorUpdateListener2(this, fromView, toView);
-        // IValueAnimator::Probe(alphaAnim)->AddUpdateListener(listener);
+        AutoPtr<IAnimatorUpdateListener> listener = new MyAnimatorUpdateListener2(this, fromView, toView);
+        IValueAnimator::Probe(alphaAnim)->AddUpdateListener(listener);
 
         mStateAnimation = LauncherAnimUtils::CreateAnimatorSet();
 
@@ -4507,21 +4502,20 @@ void Launcher::HideAppsCustomizeHelper(
         DispatchOnLauncherTransitionPrepare(toView, animated, TRUE);
         IPagedView::Probe(mAppsCustomizeContent)->PauseScrolling();
 
-        // AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter3(this, fromView,
-        //         toView, animated, onCompleteRunnable);
-        // IAnimator::Probe(mStateAnimation)->AddListener(listener2);
-ALOGD("==== File: %s, Line: %d, alphaAnim: %p, fadeOutDuration: %d ====", __FILE__, __LINE__, alphaAnim.Get(), fadeOutDuration);
-        AutoPtr<ArrayOf<IAnimator*> > array2 = ArrayOf<IAnimator*>::Alloc(1);
-        // array2->Set(0, IAnimator::Probe(scaleAnim));
-        array2->Set(0, IAnimator::Probe(alphaAnim));
+        AutoPtr<IAnimatorListener> listener2 = new MyAnimatorListenerAdapter3(this, fromView,
+                toView, animated, onCompleteRunnable);
+        IAnimator::Probe(mStateAnimation)->AddListener(listener2);
+
+        AutoPtr<ArrayOf<IAnimator*> > array2 = ArrayOf<IAnimator*>::Alloc(2);
+        array2->Set(0, IAnimator::Probe(scaleAnim));
+        array2->Set(1, IAnimator::Probe(alphaAnim));
         mStateAnimation->PlayTogether(array2);
-        // if (workspaceAnim != NULL) {
-        //     AutoPtr<IAnimatorSetBuilder> builder;
-        //     mStateAnimation->Play(workspaceAnim, (IAnimatorSetBuilder**)&builder);
-        // }
+        if (workspaceAnim != NULL) {
+            AutoPtr<IAnimatorSetBuilder> builder;
+            mStateAnimation->Play(workspaceAnim, (IAnimatorSetBuilder**)&builder);
+        }
         DispatchOnLauncherTransitionStart(fromView, animated, TRUE);
         DispatchOnLauncherTransitionStart(toView, animated, TRUE);
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
         LauncherAnimUtils::StartAnimationAfterNextDraw(IAnimator::Probe(mStateAnimation), toView);
     }
     else {
@@ -4577,32 +4571,32 @@ ECode Launcher::ShowWorkspace(
         Boolean wasInSpringLoadedMode = (mState == Launcher_APPS_CUSTOMIZE_SPRING_LOADED);
         IView::Probe(mWorkspace)->SetVisibility(IView::VISIBLE);
         HideAppsCustomizeHelper(Launcher_WORKSPACE, animated, FALSE, onCompleteRunnable);
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
+
         // Show the search bar (only animate if we were showing the drop target bar in spring
         // loaded mode)
         if (mSearchDropTargetBar != NULL) {
             mSearchDropTargetBar->ShowSearchBar(wasInSpringLoadedMode);
         }
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
+
         // We only need to animate in the dock divider if we're going from spring loaded mode
         ShowDockDivider(animated && wasInSpringLoadedMode);
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
+
         // Set focus to the AppsCustomize button
         if (mAllAppsButton != NULL) {
             Boolean res;
             mAllAppsButton->RequestFocus(&res);
         }
     }
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
-    // IPagedView::Probe(mWorkspace)->FlashScrollingIndicator(animated);
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
+
+    IPagedView::Probe(mWorkspace)->FlashScrollingIndicator(animated);
+
     // Change the state *after* we've called all the transition code
     mState = Launcher_WORKSPACE;
 
     // Resume the auto-advance of widgets
     mUserPresent = TRUE;
     UpdateRunning();
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
+
     // Send an accessibility event to announce the context change
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);
@@ -4622,7 +4616,7 @@ ECode Launcher::ShowAllApps(
 
     // Change the state *after* we've called all the transition code
     mState = Launcher_APPS_CUSTOMIZE;
-    return NOERROR;
+
     // Pause the auto-advance of widgets until we are out of AllApps
     mUserPresent = FALSE;
     UpdateRunning();
@@ -4642,7 +4636,6 @@ ECode Launcher::EnterSpringLoadedDragMode()
     IsAllAppsVisible(&res);
     if (res) {
         HideAppsCustomizeHelper(Launcher_APPS_CUSTOMIZE_SPRING_LOADED, TRUE, TRUE, NULL);
-ALOGD("==== File: %s, Line: %d ====", __FILE__, __LINE__);
         HideDockDivider();
         mState = Launcher_APPS_CUSTOMIZE_SPRING_LOADED;
     }
