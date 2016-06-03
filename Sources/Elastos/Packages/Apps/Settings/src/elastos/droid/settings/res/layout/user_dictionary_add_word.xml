@@ -22,7 +22,7 @@
   <LinearLayout android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-    <com.android.internal.widget.DialogTitle
+    <Elastos.Droid.Internal.Widget.DialogTitle
           style="?android:attr/windowTitleStyle"
           android:singleLine="true"
           android:ellipsize="end"

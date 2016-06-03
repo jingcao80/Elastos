@@ -41,7 +41,7 @@
             android:layout_gravity="bottom|start"
             android:padding="16dp" >
 
-            <com.android.internal.widget.SubtitleView
+            <Elastos.Droid.Internal.Widget.SubtitleView
                 android:id="@+id/preview_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

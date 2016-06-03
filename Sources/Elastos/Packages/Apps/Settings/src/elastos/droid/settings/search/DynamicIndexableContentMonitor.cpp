@@ -8,6 +8,7 @@
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/UserHandle.h"
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::AccessibilityService::IAccessibilityService;
 using Elastos::Droid::AccessibilityService::IAccessibilityServiceInfo;
@@ -28,6 +29,7 @@ using Elastos::Droid::View::InputMethod::IInputMethodInfo;
 using Elastos::Droid::View::InputMethod::IInputMethodManager;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -200,7 +202,8 @@ ECode DynamicIndexableContentMonitor::Register(
     }
 
     if (mHasFeaturePrinting) {
-        assert(0 && "TODO");
+        // TODO:
+        Slogger::I("DynamicIndexableContentMonitor::Register", "PrintServices is TODO");
         // // Cache print service packages to know when they go away.
         // PrintManager printManager = (PrintManager)
         //         mContext->GetSystemService(Context.PRINT_SERVICE);
@@ -368,7 +371,8 @@ void DynamicIndexableContentMonitor::HandlePackageAvailable(
     }
 
     if (mHasFeaturePrinting) {
-        assert(0 && "TODO");
+        // TODO:
+        Slogger::I("DynamicIndexableContentMonitor::HandlePackageAvailable", "PrintServices is TODO");
         // if (!mPrintServices->Contains(packageName)) {
         //     final Intent intent = GetPrintServiceIntent(packageName);
         //     if (!mContext->GetPackageManager()->QueryIntentServices(intent, 0).IsEmpty()) {
@@ -407,7 +411,8 @@ void DynamicIndexableContentMonitor::HandlePackageUnavailable(
     }
 
     if (mHasFeaturePrinting) {
-        assert(0 && "TODO");
+        // TODO:
+        Slogger::I("DynamicIndexableContentMonitor::HandlePackageUnavailable", "PrintServices is TODO");
         // final Int32 printIndex = mPrintServices->IndexOf(packageName);
         // if (printIndex >= 0) {
         //     mPrintServices->Remove(printIndex);

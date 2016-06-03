@@ -1107,7 +1107,7 @@ void WifiSettings::PrepareWifiAssistantCard()
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
         AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-        (*args)[0] = scorerName;
+        args->Set(0, scorerName);
         String str;
         resources->GetString(R::string::wifi_assistant_title_message, args, &str);
         assistantText->SetText(CoreUtils::Convert(str));

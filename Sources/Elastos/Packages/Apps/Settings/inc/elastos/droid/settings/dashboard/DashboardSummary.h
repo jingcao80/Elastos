@@ -72,6 +72,8 @@ public:
 
     ~DashboardSummary();
 
+    CARAPI constructor();
+
     //@Override
     CARAPI OnResume();
 

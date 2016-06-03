@@ -1250,34 +1250,34 @@ String Utils::FormatElapsedTime(
     if (withSeconds) {
         if (days > 0) {
             AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(4);
-            (*formatArgs)[0] = CoreUtils::Convert(days);
-            (*formatArgs)[1] = CoreUtils::Convert(hours);
-            (*formatArgs)[2] = CoreUtils::Convert(minutes);
-            (*formatArgs)[3] = CoreUtils::Convert(seconds);
+            formatArgs->Set(0, CoreUtils::Convert(days));
+            formatArgs->Set(1, CoreUtils::Convert(hours));
+            formatArgs->Set(2, CoreUtils::Convert(minutes));
+            formatArgs->Set(3, CoreUtils::Convert(seconds));
 
             context->GetString(R::string::battery_history_days, formatArgs, &str);
             sb.Append(str);
         }
         else if (hours > 0) {
             AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(3);
-            (*formatArgs)[0] = CoreUtils::Convert(hours);
-            (*formatArgs)[1] = CoreUtils::Convert(minutes);
-            (*formatArgs)[2] = CoreUtils::Convert(seconds);
+            formatArgs->Set(0, CoreUtils::Convert(hours));
+            formatArgs->Set(1, CoreUtils::Convert(minutes));
+            formatArgs->Set(2, CoreUtils::Convert(seconds));
 
             context->GetString(R::string::battery_history_hours, formatArgs, &str);
             sb.Append(str);
         }
         else if (minutes > 0) {
             AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(2);
-            (*formatArgs)[0] = CoreUtils::Convert(minutes);
-            (*formatArgs)[1] = CoreUtils::Convert(seconds);
+            formatArgs->Set(0, CoreUtils::Convert(minutes));
+            formatArgs->Set(1, CoreUtils::Convert(seconds));
 
             context->GetString(R::string::battery_history_minutes, formatArgs, &str);
             sb.Append(str);
         }
         else {
             AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(1);
-            (*formatArgs)[0] = CoreUtils::Convert(seconds);
+            formatArgs->Set(0, CoreUtils::Convert(seconds));
 
             context->GetString(R::string::battery_history_seconds, formatArgs, &str);
             sb.Append(str);
@@ -1286,9 +1286,9 @@ String Utils::FormatElapsedTime(
     else {
         if (days > 0) {
             AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(3);
-            (*formatArgs)[0] = CoreUtils::Convert(days);
-            (*formatArgs)[1] = CoreUtils::Convert(hours);
-            (*formatArgs)[2] = CoreUtils::Convert(minutes);
+            formatArgs->Set(0, CoreUtils::Convert(days));
+            formatArgs->Set(1, CoreUtils::Convert(hours));
+            formatArgs->Set(2, CoreUtils::Convert(minutes));
 
             context->GetString(R::string::battery_history_days_no_seconds,
                     formatArgs, &str);
@@ -1296,8 +1296,8 @@ String Utils::FormatElapsedTime(
         }
         else if (hours > 0) {
             AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(2);
-            (*formatArgs)[0] = CoreUtils::Convert(hours);
-            (*formatArgs)[1] = CoreUtils::Convert(minutes);
+            formatArgs->Set(0, CoreUtils::Convert(hours));
+            formatArgs->Set(1, CoreUtils::Convert(minutes));
 
             context->GetString(R::string::battery_history_hours_no_seconds,
                     formatArgs, &str);
@@ -1305,7 +1305,7 @@ String Utils::FormatElapsedTime(
         }
         else {
             AutoPtr< ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(1);
-            (*formatArgs)[0] = CoreUtils::Convert(minutes);
+            formatArgs->Set(0, CoreUtils::Convert(minutes));
 
             context->GetString(R::string::battery_history_minutes_no_seconds,
                     formatArgs, &str);

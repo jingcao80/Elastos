@@ -158,7 +158,7 @@ WifiConfigController::WifiConfigController(
     res->GetStringArray(R::array::wifi_peap_phase2_entries, (ArrayOf<String>**)&arrayStr);
     AutoPtr< ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(arrayStr->GetLength());
     for (Int32 i = 0; i < arrayStr->GetLength(); i++) {
-        (*array)[i] = CoreUtils::Convert((*arrayStr)[i]);
+        array->Set(i, CoreUtils::Convert((*arrayStr)[i]));
     }
     CArrayAdapter::New(mContext, Elastos::Droid::R::layout::simple_spinner_item,
             array, (IArrayAdapter**)&PHASE2_PEAP_ADAPTER);
@@ -169,7 +169,7 @@ WifiConfigController::WifiConfigController(
     array = NULL;
     array = ArrayOf<IInterface*>::Alloc(arrayStr->GetLength());
     for (Int32 i = 0; i < arrayStr->GetLength(); i++) {
-        (*array)[i] = CoreUtils::Convert((*arrayStr)[i]);
+        array->Set(i, CoreUtils::Convert((*arrayStr)[i]));
     }
 
     CArrayAdapter::New(mContext, Elastos::Droid::R::layout::simple_spinner_item,
@@ -211,7 +211,7 @@ WifiConfigController::WifiConfigController(
             array = NULL;
             array = ArrayOf<IInterface*>::Alloc(arrayStr->GetLength());
             for (Int32 i = 0; i < arrayStr->GetLength(); i++) {
-                (*array)[i] = CoreUtils::Convert((*arrayStr)[i]);
+                array->Set(i, CoreUtils::Convert((*arrayStr)[i]));
             }
 
             AutoPtr<IArrayAdapter> adapter;
@@ -1292,7 +1292,7 @@ void WifiConfigController::LoadCertificates(
 
     AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(certs->GetLength());
     for (Int32 i = 0; i < certs->GetLength(); i++) {
-        (*args)[i] = CoreUtils::Convert((*certs)[i]);
+        args->Set(i, CoreUtils::Convert((*certs)[i]));
     }
     AutoPtr<IArrayAdapter> adapter;
     CArrayAdapter::New(context, Elastos::Droid::R::layout::simple_spinner_item,

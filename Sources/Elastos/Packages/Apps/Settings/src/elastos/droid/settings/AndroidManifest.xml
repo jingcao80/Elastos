@@ -1964,7 +1964,7 @@
             </intent-filter>
         </receiver>
 
-        <provider
+<!--         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.android.settings.files"
             android:grantUriPermissions="true"
@@ -1972,7 +1972,7 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-        </provider>
+        </provider> -->
 
         <activity android:name="CSettings$SimSettingsActivity"
                 android:label="@string/sim_settings_title"
@@ -1988,9 +1988,9 @@
                 android:resource="@id/sim_settings" />
         </activity>
 
-        <provider
-            android:name=".Search.SettingsSearchIndexablesProvider"
-            android:authorities="com.android.settings"
+<!--         <provider
+            android:name="Elastos.Droid.Settings.Search.SettingsSearchIndexablesProvider"
+            android:authorities="Elastos.Droid.Settings"
             android:multiprocess="false"
             android:grantUriPermissions="true"
             android:permission="android.permission.READ_SEARCH_INDEXABLES"
@@ -1998,7 +1998,7 @@
             <intent-filter>
                 <action android:name="android.content.action.SEARCH_INDEXABLES_PROVIDER" />
             </intent-filter>
-        </provider>
+        </provider> -->
 
     </application>
 </manifest>

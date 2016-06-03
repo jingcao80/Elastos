@@ -113,6 +113,7 @@ using Elastos::Droid::Widget::ICheckable;
 using Elastos::Droid::Widget::IListAdapter;
 using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Utility::CAtomicFile;
+using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Server::Wm::EIID_IOnHardKeyboardStatusChangeListener;
 
@@ -1606,7 +1607,7 @@ ECode CInputMethodManagerService::GetInputMethodList(
     }
 
     AutoLock lock(mMethodMap.Get());
-    return CArrayList::New(ICollection::Probe(mMethodList), infos);
+    return CParcelableList::New(IList::Probe(mMethodList), infos);
 }
 
 ECode CInputMethodManagerService::GetEnabledInputMethodList(

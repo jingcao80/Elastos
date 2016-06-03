@@ -207,13 +207,13 @@ void DateTimeSettings::InitUI()
 
         if ((*dateFormats)[i].GetLength() == 0) {
             AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-            (*args)[0] = CoreUtils::Convert(formatted);
+            args->Set(0, CoreUtils::Convert(formatted));
             String str;
             resource->GetString(R::string::normal_date_format, args, &str);
-            (*formattedDates)[i] = CoreUtils::Convert(str);
+            formattedDates->Set(i, CoreUtils::Convert(str));
         }
         else {
-            (*formattedDates)[i] = CoreUtils::Convert(formatted);
+            formattedDates->Set(i, CoreUtils::Convert(formatted));
         }
     }
 

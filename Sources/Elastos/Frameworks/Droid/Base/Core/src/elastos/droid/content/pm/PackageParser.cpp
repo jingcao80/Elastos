@@ -1831,7 +1831,7 @@ ECode PackageParser::ParseSplitApk(
         if (tagName.Equals("application")) {
             if (foundApp) {
                 if (RIGID_PARSER) {
-                    (*outError)[0] = String("<manifest> has more than one <application>");
+                    (*outError)[0] = "<manifest> has more than one <application>";
                     sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return NOERROR;
                 } else {
@@ -1870,7 +1870,7 @@ ECode PackageParser::ParseSplitApk(
     }
 
     if (!foundApp) {
-        (*outError)[0] = String("<manifest> does not contain an <application>");
+        (*outError)[0] = "<manifest> does not contain an <application>";
         sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_EMPTY;
     }
 
@@ -2610,9 +2610,7 @@ ECode PackageParser::ParseBaseApk(
     pkgName = (*packageSplit)[0];
     splitName = (*packageSplit)[1];
     if (!splitName.IsNullOrEmpty()) {
-        StringBuilder sb("Expected base APK, but found split ");
-        sb += splitName;
-        (*outError)[0] = sb.ToString();
+        (*outError)[0] = String("Expected base APK, but found split ") + splitName;
         sParseError = IPackageManager::INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
         return NOERROR;
     }
@@ -2641,8 +2639,6 @@ ECode PackageParser::ParseBaseApk(
     if (!str.IsNullOrEmpty()) {
         String nameError = ValidateName(str, TRUE);
         if (!nameError.IsNull() && !pkgName.Equals("android")) {
-            // (*outError)[0] = "<manifest> specifies bad sharedUserId name \""
-            //         + str + "\": " + nameError;
             StringBuilder sb("<manifest> specifies bad sharedUserId name \"");
             sb += str;
             sb += "\": ";
@@ -2738,7 +2734,7 @@ ECode PackageParser::ParseBaseApk(
             sa->Recycle();
 
             if (pkg->mOverlayTarget == NULL) {
-                (*outError)[0] = String("<overlay> does not specify a target package");
+                (*outError)[0] = "<overlay> does not specify a target package";
                 sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return NOERROR;
             }
@@ -3195,8 +3191,7 @@ ECode PackageParser::ParseBaseApk(
             }
         }
         else if (RIGID_PARSER) {
-            // (*outError)[0] = (const char*)(
-            //     StringBuffer("Bad element under <manifest>: ") + tagName);
+            (*outError)[0] = String("Bad element under <manifest>: ") + tagName;
             sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             return NOERROR;
 
@@ -3440,7 +3435,7 @@ ECode PackageParser::ParseUsesPermission(
             }
             else {
                 if (*bit != required) {
-                    (*outError)[0] = String("conflicting <uses-permission> entries");
+                    (*outError)[0] = "conflicting <uses-permission> entries";
                     sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return NOERROR;
                 }
@@ -4034,9 +4029,7 @@ ECode PackageParser::ParsePermissionTree(
         index = permName.IndexOf('.', index + 1);
     }
     if (index < 0) {
-        // (*outError)[0] = (const char*)(
-        //     StringBuffer("<permission-tree> name has less than three segments: ")
-        //     + permName);
+        (*outError)[0] = String("<permission-tree> name has less than three segments: ") + permName;
         sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
         return NOERROR;
     }
@@ -4618,9 +4611,7 @@ Boolean PackageParser::ParseBaseApplication(
                 continue;
             }
             else {
-                StringBuilder sb("Bad element under <application>: ");
-                sb += tagName;
-                (*outError)[0] = sb.ToString();
+                (*outError)[0] = String("Bad element under <application>: ") + tagName;
                 sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
@@ -4802,9 +4793,7 @@ ECode PackageParser::ParseSplitApplication(
                 continue;
             }
             else {
-                StringBuilder sb("Bad element under <application>: ");
-                sb += tagName;
-                outError->Set(0, sb.ToString());
+                (*outError)[0] = String("Bad element under <application>: ") + tagName;
                 sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
@@ -4831,9 +4820,7 @@ Boolean PackageParser::ParsePackageItemInfo(
     String name;
     sa->GetNonConfigurationString(nameRes, 0, &name);
     if (name.IsNull()) {
-        StringBuilder sb(tag);
-        sb += " does not specify android:name";
-        outError->Set(0, sb.ToString());
+        (*outError)[0] = tag + String(" does not specify android:name");
         return FALSE;
     }
 
@@ -4958,7 +4945,7 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivity(
         else {
             // Logger::E(TAG, String("Activity ") + packageName + " specified invalid parentActivityName " +
             //         parentName);
-            (*outError)[0] = NULL;
+            (*outError)[0] = String(NULL);
         }
     }
 
@@ -5304,10 +5291,10 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivity(
             }
             else {
                 if (receiver) {
-                    // (*outError)[0] = (const char*)(StringBuffer("Bad element under <receiver>: ") + name);
+                    (*outError)[0] = String("Bad element under <receiver>: ") + name;
                 }
                 else {
-                    // (*outError)[0] = (const char*)(StringBuffer("Bad element under <activity>: ") + name);
+                    (*outError)[0] = String("Bad element under <activity>: ") + name;
                 }
                 return NULL;
             }
@@ -5384,9 +5371,10 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivityAlias(
     }
 
     if (target == NULL) {
-        // (*outError)[0] = (const char*)(
-        //     StringBuffer("<activity-alias> target activity ") + targetActivity
-        //     + " not found in manifest");
+        StringBuilder sb("<activity-alias> target activity ");
+        sb += targetActivity;
+        sb += " not found in manifest";
+        (*outError)[0] = sb.ToString();
         sa->Recycle();
         return NULL;
     }
@@ -5456,7 +5444,7 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivityAlias(
             IPackageItemInfo::Probe(a->mInfo)->GetName(&name);
             // Logger::E(TAG, String("Activity alias ") + name +
             //         " specified invalid parentActivityName " + parentName);
-            (*outError)[0] = NULL;
+            (*outError)[0] = String(NULL);
         }
     }
 
@@ -5510,8 +5498,7 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivityAlias(
                 continue;
             }
             else {
-                // (*outError)[0] = (const char*)(
-                // StringBuffer("Bad element under <activity-alias>: ") + name);
+                (*outError)[0] = String("Bad element under <activity-alias>: ") + name;
                 return NULL;
             }
         }
@@ -5928,8 +5915,7 @@ Boolean PackageParser::ParseProviderTags(
                 continue;
             }
             else {
-                // (*outError)[0] = (const char*)(
-                //     StringBuffer("Bad element under <provider>: ") + name);
+                (*outError)[0] = String("Bad element under <provider>: ") + name;
                 return FALSE;
             }
         }
@@ -6083,8 +6069,7 @@ AutoPtr<PackageParser::Service> PackageParser::ParseService(
                 continue;
             }
             else {
-                // (*outError)[0] = (const char*)(
-                //     StringBuffer("Bad element under <service>: ") + name);
+                (*outError)[0] = String("Bad element under <service>: ") + name;
                 return NULL;
             }
         }
@@ -6136,8 +6121,10 @@ Boolean PackageParser::ParseAllMetaData(
                 continue;
             }
             else {
-                // (*outError)[0] = (const char*)(
-                //     StringBuffer("Bad element under ") + tag + ": " + name);
+                StringBuilder sb("Bad element under ");
+                sb += tag;
+                sb += name;
+                (*outError)[0] = sb.ToString();
                 return FALSE;
             }
         }
@@ -6168,7 +6155,7 @@ AutoPtr<IBundle> PackageParser::ParseMetaData(
     sa->GetNonConfigurationString(
         R::styleable::AndroidManifestMetaData_name, 0, &name);
     if (name.IsNull()) {
-        (*outError)[0] = String("<meta-data> requires an android:name attribute");
+        (*outError)[0] = "<meta-data> requires an android:name attribute";
         sa->Recycle();
         return NULL;
     }
@@ -6471,7 +6458,7 @@ Boolean PackageParser::ParseIntent(
             if (!str.IsNull()) {
                 if (!allowGlobs) {
                     Slogger::E(TAG, "sspPattern not allowed here; ssp must be literal");
-                    (*outError)[0] = String("sspPattern not allowed here; ssp must be literal");
+                    (*outError)[0] = "sspPattern not allowed here; ssp must be literal";
                     return FALSE;
                 }
                 outInfo->AddDataSchemeSpecificPart(str, IPatternMatcher::PATTERN_SIMPLE_GLOB);

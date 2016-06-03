@@ -55,53 +55,57 @@ ECode CInputMethodSubtypeArray::constructor(
 ECode CInputMethodSubtypeArray::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    source->ReadInt32(&mCount);
-    if (mCount > 0) {
-        source->ReadInt32(&mDecompressedSize);
-        source->ReadArrayOf((Handle32*)&mCompressedData);
-    }
+    // TODO:
+    // source->ReadInt32(&mCount);
+    // if (mCount > 0) {
+    //     source->ReadInt32(&mDecompressedSize);
+    //     source->ReadArrayOf((Handle32*)&mCompressedData);
+    // }
     return NOERROR;
 }
 
 ECode CInputMethodSubtypeArray::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    if (mCount == 0) {
-        dest->WriteInt32(mCount);
-        return NOERROR;
-    }
+    // TODO:
+    // if (mCount == 0) {
+    //     dest->WriteInt32(mCount);
+    //     return NOERROR;
+    // }
 
-    AutoPtr<ArrayOf<Byte> > compressedData = mCompressedData;
-    Int32 decompressedSize = mDecompressedSize;
-    if (compressedData == NULL && decompressedSize == 0) {
-        {    AutoLock syncLock(mLockObject);
-            compressedData = mCompressedData;
-            decompressedSize = mDecompressedSize;
-            if (compressedData == NULL && decompressedSize == 0) {
-                AutoPtr<ArrayOf<Byte> > decompressedData = Marshall(mInstance);
-                compressedData = Compress(decompressedData);
-                if (compressedData == NULL) {
-                    decompressedSize = -1;
-                    Slogger::I(TAG, "Failed to compress data.");
-                }
-                else {
-                    decompressedSize = decompressedData->GetLength();
-                }
-                mDecompressedSize = decompressedSize;
-                mCompressedData = compressedData;
-            }
-        }
-    }
+    // AutoPtr<ArrayOf<Byte> > compressedData = mCompressedData;
+    // Int32 decompressedSize = mDecompressedSize;
+    // if (compressedData == NULL && decompressedSize == 0) {
+    //     {
+    //         AutoLock syncLock(mLockObject);
 
-    if (compressedData != NULL && decompressedSize > 0) {
-        dest->WriteInt32(mCount);
-        dest->WriteInt32(decompressedSize);
-        dest->WriteArrayOf((Handle32)compressedData.Get());
-    }
-    else {
-        Slogger::I(TAG, "Unexpected state. Behaving as an empty array.");
-        dest->WriteInt32(0);
-    }
+    //         compressedData = mCompressedData;
+    //         decompressedSize = mDecompressedSize;
+    //         if (compressedData == NULL && decompressedSize == 0) {
+    //             AutoPtr<ArrayOf<Byte> > decompressedData = Marshall(mInstance);
+    //             compressedData = Compress(decompressedData);
+    //             if (compressedData == NULL) {
+    //                 decompressedSize = -1;
+    //                 Slogger::I(TAG, "Failed to compress data.");
+    //             }
+    //             else {
+    //                 decompressedSize = decompressedData->GetLength();
+    //             }
+    //             mDecompressedSize = decompressedSize;
+    //             mCompressedData = compressedData;
+    //         }
+    //     }
+    // }
+
+    // if (compressedData != NULL && decompressedSize > 0) {
+    //     dest->WriteInt32(mCount);
+    //     dest->WriteInt32(decompressedSize);
+    //     dest->WriteArrayOf((Handle32)compressedData.Get());
+    // }
+    // else {
+    //     Slogger::I(TAG, "Unexpected state. Behaving as an empty array.");
+    //     dest->WriteInt32(0);
+    // }
     return NOERROR;
 }
 

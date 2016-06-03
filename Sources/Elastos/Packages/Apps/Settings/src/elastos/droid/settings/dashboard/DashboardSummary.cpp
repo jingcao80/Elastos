@@ -82,13 +82,19 @@ ECode DashboardSummary::HomePackageReceiver::OnReceive(
 
 DashboardSummary::DashboardSummary()
 {
-    AutoPtr<MyHandler> mHandler = new MyHandler(this);
+    mHandler = new MyHandler(this);
+    mHandler->constructor();
 
-    AutoPtr<HomePackageReceiver> mHomePackageReceiver = new HomePackageReceiver(this);
+    mHomePackageReceiver = new HomePackageReceiver(this);
 }
 
 DashboardSummary::~DashboardSummary()
 {}
+
+ECode DashboardSummary::constructor()
+{
+    return NOERROR;
+}
 
 ECode DashboardSummary::OnResume()
 {

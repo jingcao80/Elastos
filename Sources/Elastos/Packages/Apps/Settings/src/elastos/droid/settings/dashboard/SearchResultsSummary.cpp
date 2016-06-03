@@ -621,12 +621,19 @@ ECode SearchResultsSummary::AdapterViewOnItemClickListener::OnItemClick(
 //                  SearchResultsSummary
 //===============================================================================
 
+CAR_INTERFACE_IMPL(SearchResultsSummary, Fragment, ISearchResultsSummary)
+
 SearchResultsSummary::SearchResultsSummary()
     : mShowResults(FALSE)
 {}
 
 SearchResultsSummary::~SearchResultsSummary()
 {}
+
+ECode SearchResultsSummary::constructor()
+{
+    return NOERROR;
+}
 
 ECode SearchResultsSummary::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
@@ -896,7 +903,7 @@ void SearchResultsSummary::UpdateSuggestions()
     else {
         mUpdateSuggestionsTask = new UpdateSuggestionsTask(this);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-        (*args)[0] = CoreUtils::Convert(mQuery);
+        args->Set(0, CoreUtils::Convert(mQuery));
         mUpdateSuggestionsTask->Execute(args);
     }
 }
@@ -911,7 +918,7 @@ void SearchResultsSummary::UpdateSearchResults()
     else {
         mUpdateSearchResultsTask = new UpdateSearchResultsTask(this);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-        (*args)[0] = CoreUtils::Convert(mQuery);
+        args->Set(0, CoreUtils::Convert(mQuery));
         mUpdateSearchResultsTask->Execute(args);
     }
 }

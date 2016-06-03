@@ -221,7 +221,7 @@ ECode InputMethodPreference::OnPreferenceClick(
         AutoPtr<ICharSequence> seq;
         mImi->LoadLabel(packageManager, (ICharSequence**)&seq);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-        (*args)[0] = seq;
+        args->Set(0, seq);
         String message;
         context->GetString(R::string::failed_to_open_app_settings_toast,
                 args, &message);
@@ -321,7 +321,7 @@ void InputMethodPreference::ShowSecurityWarnDialog(
     IPackageItemInfo::Probe(applicationInfo)->LoadLabel(packageManager, (ICharSequence**)&label);
 
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    (*args)[0] = label;
+    args->Set(0, label);
 
     String str;
     context->GetString(R::string::ime_security_warning, args, &str);

@@ -4,6 +4,7 @@ TARGET_TYPE = lib
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
+SOURCES += CDashboardContainerView.cpp
 SOURCES += DashboardCategory.cpp
 SOURCES += DashboardSummary.cpp
 SOURCES += DashboardTile.cpp

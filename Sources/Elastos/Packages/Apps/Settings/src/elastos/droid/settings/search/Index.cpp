@@ -23,8 +23,6 @@
 #include "../R.h"
 #include "elastos/droid/R.h"
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::CContentValues;
@@ -52,6 +50,7 @@ using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Text::INormalizer;
 using Elastos::Text::CNormalizerHelper;
 using Elastos::Text::NormalizerForm_NFD;
+using Elastos::Core::AutoLock;
 using Elastos::Core::IInteger64;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::CSystem;
@@ -533,7 +532,9 @@ AutoPtr<ICursor> Index::Search(
 
     String primarySql = BuildSearchSQL(query, MATCH_COLUMNS_PRIMARY, TRUE);
     Logger::D(TAG, "Search primary query: %s", primarySql.string());
-    database->RawQuery(primarySql, NULL, (ICursor**)&(*cursors)[0]);
+    AutoPtr<ICursor> cursor;
+    database->RawQuery(primarySql, NULL, (ICursor**)&cursor);
+    cursors->Set(0, cursor);
 
     // We need to use an EXCEPT operator as negate MATCH queries do not work.
     AutoPtr<StringBuilder> sql = new StringBuilder(
@@ -543,7 +544,9 @@ AutoPtr<ICursor> Index::Search(
 
     const String secondarySql = sql->ToString();
     Logger::D(TAG, "Search secondary query: %s", secondarySql.string());
-    database->RawQuery(secondarySql, NULL, (ICursor**)&(*cursors)[1]);
+    cursor = NULL;
+    database->RawQuery(secondarySql, NULL, (ICursor**)&cursor);
+    cursors->Set(1, cursor);
 
     AutoPtr<ICursor> result;
     CMergeCursor::New(cursors, (ICursor**)&result);
@@ -598,7 +601,7 @@ ECode Index::AddSavedQuery(
     AutoPtr<SaveSearchQueryTask> task = new SaveSearchQueryTask(this);
 
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    (*args)[0] = CoreUtils::Convert(query);
+    args->Set(0, CoreUtils::Convert(query));
     task->Execute(args);
     // try {
     AutoPtr<IInterface> obj;
@@ -781,7 +784,8 @@ ECode Index::GetNonIndexablesKeys(
 void Index::AddIndexableData(
     /* [in] */ ISearchIndexableData* data)
 {
-    {    AutoLock syncLock(mDataToProcess);
+    {
+        AutoLock syncLock(mDataToProcess);
         mDataToProcess->mDataToUpdate->Add(data);
     }
 }
@@ -789,7 +793,8 @@ void Index::AddIndexableData(
 void Index::AddIndexableData(
     /* [in] */ ArrayOf<ISearchIndexableResource*>* array)
 {
-    {    AutoLock syncLock(mDataToProcess);
+    {
+        AutoLock syncLock(mDataToProcess);
         const Int32 count = array->GetLength();
         for (Int32 n = 0; n < count; n++) {
             mDataToProcess->mDataToUpdate->Add((*array)[n]);
@@ -800,7 +805,8 @@ void Index::AddIndexableData(
 void Index::DeleteIndexableData(
     /* [in] */ ISearchIndexableData* data)
 {
-    {    AutoLock syncLock(mDataToProcess);
+    {
+        AutoLock syncLock(mDataToProcess);
         mDataToProcess->mDataToDelete->Add(data);
     }
 }
@@ -809,7 +815,8 @@ void Index::AddNonIndexableKeys(
     /* [in] */ const String& authority,
     /* [in] */ IList* keys) //List<String>
 {
-    {    AutoLock syncLock(mDataToProcess);
+    {
+        AutoLock syncLock(mDataToProcess);
         mDataToProcess->mNonIndexableKeys->Put(CoreUtils::Convert(authority), keys);
     }
 }
@@ -996,12 +1003,13 @@ AutoPtr<IUri> Index::BuildUriForNonIndexableKeys(
 
 void Index::UpdateInternal()
 {
-    {    AutoLock syncLock(mDataToProcess);
+    {
+        AutoLock syncLock(mDataToProcess);
         AutoPtr<UpdateIndexTask> task = new UpdateIndexTask(this);
         AutoPtr<UpdateData> copy = mDataToProcess->Copy();
 
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-        (*args)[0] = (IObject*)copy.Get();
+        args->Set(0, (IObject*)copy.Get());
 
         task->Execute(args);
         mDataToProcess->Clear();

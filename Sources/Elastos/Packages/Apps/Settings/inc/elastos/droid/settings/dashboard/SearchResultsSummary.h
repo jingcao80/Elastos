@@ -7,6 +7,7 @@
 #include "elastos/droid/app/Fragment.h"
 #include "elastos/droid/widget/BaseAdapter.h"
 #include "elastos/droid/os/AsyncTask.h"
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::App::Fragment;
 using Elastos::Droid::Content::IContext;
@@ -30,6 +31,7 @@ namespace Dashboard {
 
 class SearchResultsSummary
     : public Fragment
+    , public ISearchResultsSummary
 {
 private:
     /**
@@ -242,9 +244,13 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
     SearchResultsSummary();
 
     ~SearchResultsSummary();
+
+    CARAPI constructor();
 
     //@Override
     CARAPI OnCreate(

@@ -32,10 +32,13 @@ CDeflater::~CDeflater()
 //    try {
     if (mGuard != NULL) {
         mGuard->WarnIfOpen();
-        mGuard = NULL;
     }
-    End(); // to allow overriding classes to clean up
-//    endImpl(); // in case those classes don't call super.end()
+
+    AutoLock locK(this);
+    {
+        End(); // to allow overriding classes to clean up
+        EndImplLocked(); // in case those classes don't call super.end()
+    }
 //    } finally {
 //        try {
 //            super.finalize();

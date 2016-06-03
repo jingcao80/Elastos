@@ -24,6 +24,7 @@ module
     merge("../../../../car/elastos/droid/wifi/WpsDialog.car");
 
     using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IFragment;
     using interface Elastos.Droid.App.IFragmentManagerOnBackStackChangedListener;
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContextWrapper;
@@ -69,6 +70,31 @@ module
     namespace Dashboard {
 
     [local]
+    class CDashboardContainerView {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IViewOnClickListener;
+    }
+
+    class CDashboardSummary {
+        constructor();
+
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    [local]
     class CDashboardTileView {
         constructor(
             [in] IContext* context);
@@ -86,6 +112,16 @@ module
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
         interface IViewOnClickListener;
+    }
+
+    class CSearchResultsSummary {
+        constructor();
+
+        interface ISearchResultsSummary;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
     }
 
     } // namespace Dashboard

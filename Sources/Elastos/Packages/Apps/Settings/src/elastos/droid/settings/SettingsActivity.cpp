@@ -611,7 +611,7 @@ ECode SettingsActivity::OnCreate(
     String className;
     cn->GetClassName(&className);
 
-    mIsShowingDashboard = className.Equals("Elastos.Droid.Settings.CSettings.");
+    mIsShowingDashboard = className.Equals("Elastos.Droid.Settings.CSettings");
 
     // This is a "Sub Settings" when:
     // - this is a real SubSettings
@@ -701,7 +701,7 @@ ECode SettingsActivity::OnCreate(
             mInitialTitleResId = R::string::dashboard_title;
             AutoPtr<IFragment> fragment;
             SwitchToFragment(
-                    String("Elastos.Droid.Settings.Dashboard.DashboardSummary"),
+                    String("Elastos.Droid.Settings.Dashboard.CDashboardSummary"),
                     NULL, FALSE, FALSE, mInitialTitleResId, mInitialTitle,
                     FALSE, (IFragment**)&fragment);
         }
@@ -924,7 +924,9 @@ ECode SettingsActivity::OnResume()
     AutoPtr<IIntent> intent;
     RegisterReceiver(mBatteryInfoReceiver, filter, (IIntent**)&intent);
 
-    mDynamicIndexableContentMonitor->Register(IContext::Probe(this));
+    // TODO:
+    Slogger::I("SettingsActivity::OnResume", "Register is TODO");
+    // mDynamicIndexableContentMonitor->Register(IContext::Probe(this));
 
     if (mDisplaySearch && !TextUtils::IsEmpty(mSearchQuery)) {
         Boolean res;
@@ -1448,7 +1450,9 @@ ECode SettingsActivity::UpdateTilesList(
                 }
                 else {
                     // Only show if NFC is on and we have the HCE feature
-                    assert(0 && "TODO");
+
+                    // TODO
+                    Slogger::I(TAG, "CNfcAdapterHelper is TODO");
                     // AutoPtr<INfcAdapterHelper> helper;
                     // CNfcAdapterHelper::AcquireSingleton((INfcAdapterHelper**)&helper);
                     // AutoPtr<INfcAdapter> adapter;
@@ -1686,7 +1690,7 @@ void SettingsActivity::SwitchToSearchResultsFragmentIfNeeded()
     else {
         AutoPtr<IFragment> fragment;
         SwitchToFragment(
-                String("Elastos.Droid.Settings.Dashboard.SearchResultsSummary"),
+                String("Elastos.Droid.Settings.Dashboard.CSearchResultsSummary"),
                 NULL, FALSE, TRUE, R::string::search_results_title, NULL,
                 TRUE, (IFragment**)&fragment);
         mSearchResultsFragment = ISearchResultsSummary::Probe(fragment);
