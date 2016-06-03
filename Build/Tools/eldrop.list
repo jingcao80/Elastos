@@ -11,10 +11,9 @@ Elastos.Droid.Server.eco
 ;Elastos.Droid.JavaProxy.eco
 elservicemanager
 ElApp_process
+pm
+Elastos.Droid.Commands.Pm.eco
 ;Elastos.Droid.Commands.Monkey.eco
 ;Elastos.Droid.Commands.Am.eco
 ;Eunit.eco
 ;Elastos.Droid.Test.eco
-; AudioTrack.eco
-; Snowfox dir
-; XBMC dir

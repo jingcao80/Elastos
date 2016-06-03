@@ -1,0 +1,13 @@
+
+TARGET_NAME = pm
+TARGET_TYPE = ecx
+
+C_DEFINES += -DHAVE_ENDIAN_H
+
+IMPORTS = Elastos.Droid.Commands.Pm.eco
+
+SOURCES = main.cpp
+SOURCES += Elastos.Droid.Commands.Pm.cpp
+
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

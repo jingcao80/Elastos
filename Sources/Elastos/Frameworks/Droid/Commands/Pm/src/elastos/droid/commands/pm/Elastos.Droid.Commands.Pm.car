@@ -1,0 +1,45 @@
+
+module
+{
+    importlib("Elastos.CoreLibrary.eco");
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("../../../../../car/elastos/droid/commands/pm/Pm.car");
+
+    using interface Elastos.Droid.Content.IIIntentSender;
+    using interface Elastos.Droid.Content.Pm.IIPackageDataObserver;
+    using interface Elastos.Droid.Os.IBinder;
+    using interface Elastos.Utility.Concurrent.ISynchronousQueue;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Commands {
+    namespace Pm {
+
+    singleton class CPm {
+        interface IPm;
+    }
+
+    class CLocalIntentSender {
+        constructor(
+            [in] ISynchronousQueue* result);
+
+        interface IIIntentSender;
+        interface IBinder;
+    }
+
+    class CClearDataObserver {
+        interface IIPackageDataObserver;
+        interface IBinder;
+    }
+
+    class CClearCacheObserver {
+        interface IIPackageDataObserver;
+        interface IBinder;
+    }
+
+    } // namespace Pm
+    } // namespace Commands
+    } // namespace Droid
+    } // namespace Elastos
+}

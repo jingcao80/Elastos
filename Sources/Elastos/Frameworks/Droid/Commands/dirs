@@ -1,3 +1,4 @@
 DIRS+=Monkey
 DIRS+=Am
+DIRS+=Pm
 

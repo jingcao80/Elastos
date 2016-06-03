@@ -1,0 +1,23 @@
+TARGET_NAME= Elastos.Droid.Commands.Pm
+TARGET_TYPE= eco
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += $(MAKEDIR)/../../../../../inc/elastos/droid/commands/pm
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += ../
+
+SOURCES = Elastos.Droid.Commands.Pm.car
+SOURCES += Pm.cpp
+SOURCES += CLocalIntentSender.cpp
+SOURCES += pm.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += Elastos.Droid.Core.cpp
+
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += -lcutils
+

@@ -5,6 +5,8 @@
 #include "LockSupport.h"
 #include "CReentrantLock.h"
 #include "CSystem.h"
+#include <cutils/atomic.h>
+#include <cutils/atomic-inline.h>
 
 using Elastos::IO::EIID_ISerializable;
 using Elastos::Core::ISystem;
@@ -15,6 +17,30 @@ using Elastos::Utility::Concurrent::Locks::CReentrantLock;
 namespace Elastos {
 namespace Utility {
 namespace Concurrent {
+
+static Boolean CompareAndSwapObject(volatile int32_t* address, Object* expect, Object* update)
+{
+    // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
+    int ret = android_atomic_release_cas((int32_t)expect,
+            (int32_t)update, address);
+    if (ret == 0) {
+        REFCOUNT_ADD(update)
+        REFCOUNT_RELEASE(expect)
+    }
+    return (ret == 0);
+}
+
+static Boolean CompareAndSwapObject(volatile int32_t* address, IInterface* expect, IInterface* update)
+{
+    // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
+    int ret = android_atomic_release_cas((int32_t)expect,
+            (int32_t)update, address);
+    if (ret == 0) {
+        REFCOUNT_ADD(update)
+        REFCOUNT_RELEASE(expect)
+    }
+    return (ret == 0);
+}
 
 //===============================================================================
 // CSynchronousQueue::TransferStack::SNode::
@@ -30,35 +56,33 @@ Boolean CSynchronousQueue::TransferStack::SNode::CasNext(
     /* [in] */ SNode* cmp,
     /* [in] */ SNode* val)
 {
-    // return cmp == mNext &&
-    //     UNSAFE.compareAndSwapObject(this, nextOffset, cmp, val);
-    assert(0 && "TODO");
-    return FALSE;
+    return cmp == mNext &&
+        CompareAndSwapObject((volatile int32_t*)&mNext, cmp, val);
 }
 
 Boolean CSynchronousQueue::TransferStack::SNode::TryMatch(
     /* [in] */ SNode* s)
 {
-    // if (mMatch == NULL &&
-    //     UNSAFE.compareAndSwapObject(this, matchOffset, NULL, s)) {
-    //     Thread w = waiter;
-    //     if (w != NULL) {    // waiters need at most one unpark
-    //         waiter = NULL;
-    //         LockSupport.unpark(w);
-    //     }
-    //     return true;
-    // }
-    return Object::Equals(mMatch->Probe(EIID_IInterface), s->Probe(EIID_IInterface));
+    if (mMatch == NULL &&
+        CompareAndSwapObject((volatile int32_t*)&mMatch, NULL, s)) {
+        AutoPtr<IThread> w = mWaiter;
+        if (w != NULL) {    // waiters need at most one unpark
+            mWaiter = NULL;
+            LockSupport::Unpark(w);
+        }
+        return TRUE;
+    }
+    return mMatch.Get() == s;
 }
 
 void CSynchronousQueue::TransferStack::SNode::TryCancel()
 {
-//    UNSAFE.compareAndSwapObject(this, matchOffset, NULL, this);
+    CompareAndSwapObject((volatile int32_t*)&mMatch, NULL, this);
 }
 
 Boolean CSynchronousQueue::TransferStack::SNode::IsCancelled()
 {
-    return Object::Equals(mMatch->Probe(EIID_IInterface), TO_IINTERFACE(this));
+    return mMatch.Get() == this;
 }
 
 //===============================================================================
@@ -80,8 +104,8 @@ Boolean CSynchronousQueue::TransferStack::CasHead(
     /* [in] */ SNode* h,
     /* [in] */ SNode* nh)
 {
-    return Object::Equals(h->Probe(EIID_IInterface), mHead->Probe(EIID_IInterface));/* &&
-        UNSAFE.compareAndSwapObject(this, headOffset, h, nh);*/
+    return h == mHead &&
+        CompareAndSwapObject((volatile int32_t*)&mHead, h, nh);
 }
 
 AutoPtr<CSynchronousQueue::TransferStack::SNode> CSynchronousQueue::TransferStack::Snode(
@@ -136,12 +160,11 @@ AutoPtr<IInterface> CSynchronousQueue::TransferStack::Transfer(
             }
             else if (CasHead(h, s = Snode(s, e, h, mode))) {
                 AutoPtr<SNode> m = AwaitFulfill(s, timed, nanos);
-                if (Object::Equals(m->Probe(EIID_IInterface), s->Probe(EIID_IInterface))) {               // wait was cancelled
+                if (m == s) {               // wait was cancelled
                     Clean(s);
                     return NULL;
                 }
-                if ((h = mHead) != NULL &&
-                    Object::Equals(h->mNext->Probe(EIID_IInterface), s->Probe(EIID_IInterface)))
+                if ((h = mHead) != NULL && h->mNext == s)
                     CasHead(h, s->mNext);     // help s's fulfiller
                 return ((mode == REQUEST) ? m->mItem : s->mItem);
             }
@@ -247,7 +270,7 @@ Boolean CSynchronousQueue::TransferStack::ShouldSpin(
     /* [in] */ SNode* s)
 {
     AutoPtr<SNode> h = mHead;
-    return (Object::Equals(h->Probe(EIID_IInterface), s->Probe(EIID_IInterface)) || h == NULL || IsFulfilling(h->mMode));
+    return h.Get() == s || h.Get() == NULL || IsFulfilling(h->mMode);
 }
 
 void CSynchronousQueue::TransferStack::Clean(
@@ -302,32 +325,32 @@ Boolean CSynchronousQueue::TransferQueue::QNode::CasNext(
     /* [in] */ QNode* cmp,
     /* [in] */ QNode* val)
 {
-    return Object::Equals(mNext->Probe(EIID_IInterface), cmp->Probe(EIID_IInterface));/* &&
-        UNSAFE.compareAndSwapObject(this, nextOffset, cmp, val);*/
+    return mNext.Get() == cmp &&
+        CompareAndSwapObject((volatile int32_t*)&mNext, cmp, val);
 }
 
 Boolean CSynchronousQueue::TransferQueue::QNode::CasItem(
     /* [in] */ IInterface* cmp,
     /* [in] */ IInterface* val)
 {
-    return Object::Equals(mItem->Probe(EIID_IInterface), cmp->Probe(EIID_IInterface));/* &&
-        UNSAFE.compareAndSwapObject(this, itemOffset, cmp, val);*/
+    return mItem.Get() == cmp &&
+        CompareAndSwapObject((volatile int32_t*)&mItem, cmp, val);
 }
 
 void CSynchronousQueue::TransferQueue::QNode::TryCancel(
     /* [in] */ IInterface* cmp)
 {
-//    UNSAFE.compareAndSwapObject(this, itemOffset, cmp, this);
+    CompareAndSwapObject((volatile int32_t*)&mItem, cmp, (IObject*)this);
 }
 
 Boolean CSynchronousQueue::TransferQueue::QNode::IsCancelled()
 {
-    return Object::Equals(mItem->Probe(EIID_IInterface), TO_IINTERFACE(this));
+    return TO_IINTERFACE(mItem) == TO_IINTERFACE(this);
 }
 
 Boolean CSynchronousQueue::TransferQueue::QNode::IsOffList()
 {
-    return Object::Equals(mNext->Probe(EIID_IInterface), TO_IINTERFACE(this));
+    return mNext.Get() == this;
 }
 
 //===============================================================================
@@ -346,8 +369,8 @@ void CSynchronousQueue::TransferQueue::AdvanceHead(
     /* [in] */ QNode* h,
     /* [in] */ QNode* nh)
 {
-    if (Object::Equals(h->Probe(EIID_IInterface), mHead->Probe(EIID_IInterface)) /* &&
-        UNSAFE.compareAndSwapObject(this, headOffset, h, nh)*/)
+    if (h == mHead &&
+        CompareAndSwapObject((volatile int32_t*)&mHead, h, nh))
         h->mNext = h; // forget old next
 }
 
@@ -355,16 +378,16 @@ void CSynchronousQueue::TransferQueue::AdvanceTail(
     /* [in] */ QNode* t,
     /* [in] */ QNode* nt)
 {
-    // if (Object::Equals(mTail->Probe(EIID_IInterface), t->Probe(EIID_IInterface)))
-    //     UNSAFE.compareAndSwapObject(this, tailOffset, t, nt);
+    if (mTail.Get() == t)
+        CompareAndSwapObject((volatile int32_t*)&mTail, t, nt);
 }
 
 Boolean CSynchronousQueue::TransferQueue::CasCleanMe(
     /* [in] */ QNode* cmp,
     /* [in] */ QNode* val)
 {
-    return Object::Equals(mCleanMe->Probe(EIID_IInterface), cmp->Probe(EIID_IInterface)); /* &&
-        UNSAFE.compareAndSwapObject(this, cleanMeOffset, cmp, val);*/
+    return mCleanMe.Get() == cmp &&
+        CompareAndSwapObject((volatile int32_t*)&mCleanMe, cmp, val);
 }
 
 AutoPtr<IInterface> CSynchronousQueue::TransferQueue::Transfer(
@@ -406,10 +429,10 @@ AutoPtr<IInterface> CSynchronousQueue::TransferQueue::Transfer(
         if (t == NULL || h == NULL)         // saw uninitialized value
             continue;                       // spin
 
-        if (Object::Equals(h->Probe(EIID_IInterface), t->Probe(EIID_IInterface)) ||
+        if (h == t ||
             t->mIsData == isData) { // empty or same-mode
             AutoPtr<QNode> tn = t->mNext;
-            if (!Object::Equals(t->Probe(EIID_IInterface), mTail->Probe(EIID_IInterface)))                  // inconsistent read
+            if (t != mTail)                  // inconsistent read
                 continue;
             if (tn != NULL) {               // lagging tail
                 AdvanceTail(t, tn);
@@ -424,7 +447,7 @@ AutoPtr<IInterface> CSynchronousQueue::TransferQueue::Transfer(
 
             AdvanceTail(t, s);              // swing tail and wait
             AutoPtr<IInterface> x = AwaitFulfill(s, e, timed, nanos);
-            if (Object::Equals(x->Probe(EIID_IInterface), s->Probe(EIID_IInterface))) {                   // wait was cancelled
+            if (TO_IINTERFACE(x) == TO_IINTERFACE(s)) {                   // wait was cancelled
                 Clean(t, s);
                 return NULL;
             }
@@ -432,7 +455,7 @@ AutoPtr<IInterface> CSynchronousQueue::TransferQueue::Transfer(
             if (!s->IsOffList()) {           // not already unlinked
                 AdvanceHead(t, s);          // unlink if head
                 if (x != NULL)              // and forget fields
-                    s->mItem = s->Probe(EIID_IInterface);
+                    s->mItem = TO_IINTERFACE(s);
                 s->mWaiter = NULL;
             }
             return (x != NULL) ? x.Get() : e;
@@ -440,14 +463,12 @@ AutoPtr<IInterface> CSynchronousQueue::TransferQueue::Transfer(
         }
         else {                            // complementary-mode
             AutoPtr<QNode> m = h->mNext;               // node to fulfill
-            if (!Object::Equals(t->Probe(EIID_IInterface), mTail->Probe(EIID_IInterface))
-                || m == NULL ||
-                !Object::Equals(h->Probe(EIID_IInterface), mHead->Probe(EIID_IInterface)))
+            if (t != mTail || m == NULL || h != mHead)
                 continue;                   // inconsistent read
 
             AutoPtr<IInterface> x = m->mItem;
             if (isData == (x != NULL) ||    // m already fulfilled
-                Object::Equals(x, m->Probe(EIID_IInterface)) ||                   // m cancelled
+                TO_IINTERFACE(x) == TO_IINTERFACE(m) ||                   // m cancelled
                 !m->CasItem(x, e)) {         // lost CAS
                 AdvanceHead(h, m);          // dequeue and retry
                 continue;
@@ -473,14 +494,14 @@ AutoPtr<IInterface> CSynchronousQueue::TransferQueue::AwaitFulfill(
     system->GetNanoTime(&lastTime);
     Int64 deadline = timed ? lastTime + nanos : 0L;
     AutoPtr<IThread> w = Thread::GetCurrentThread();
-    Int32 spins = ((Object::Equals(mHead->mNext->Probe(EIID_IInterface), s->Probe(EIID_IInterface))) ?
+    Int32 spins = ((mHead->mNext.Get() == s) ?
                  (timed ? mMaxTimedSpins : mMaxTimedSpins) : 0);
     for (;;) {
         Boolean b = FALSE;
         if ((w->IsInterrupted(&b), b))
             s->TryCancel(e);
         AutoPtr<IInterface> x = s->mItem;
-        if (!Object::Equals(x, e))
+        if (x.Get() != e)
             return x;
         if (timed) {
             system->GetNanoTime(&lastTime);
@@ -514,7 +535,7 @@ void CSynchronousQueue::TransferQueue::Clean(
      * first. At least one of node s or the node previously
      * saved can always be deleted, so this always terminates.
      */
-    while (Object::Equals(pred->mNext->Probe(EIID_IInterface), s->Probe(EIID_IInterface))) { // Return early if already unlinked
+    while (pred->mNext.Get() == s) { // Return early if already unlinked
         AutoPtr<QNode> h = mHead;
         AutoPtr<QNode> hn = h->mNext;   // Absorb cancelled first node as head
         if (hn != NULL && hn->IsCancelled()) {
@@ -522,18 +543,18 @@ void CSynchronousQueue::TransferQueue::Clean(
             continue;
         }
         AutoPtr<QNode> t = mTail;      // Ensure consistent read for tail
-        if (Object::Equals(t->Probe(EIID_IInterface), h->Probe(EIID_IInterface)))
+        if (t == h)
             return;
         AutoPtr<QNode> tn = t->mNext;
-        if (!Object::Equals(t->Probe(EIID_IInterface), mTail->Probe(EIID_IInterface)))
+        if (t != mTail)
             continue;
         if (tn != NULL) {
             AdvanceTail(t, tn);
             continue;
         }
-        if (!Object::Equals(s->Probe(EIID_IInterface), t->Probe(EIID_IInterface))) {        // If not tail, try to unsplice
+        if (s != t) {        // If not tail, try to unsplice
             AutoPtr<QNode> sn = s->mNext;
-            if (Object::Equals(sn->Probe(EIID_IInterface), s->Probe(EIID_IInterface)) ||
+            if (sn.Get() == s ||
                 pred->CasNext(s, sn))
                 return;
         }
@@ -542,14 +563,14 @@ void CSynchronousQueue::TransferQueue::Clean(
             AutoPtr<QNode> d = dp->mNext;
             AutoPtr<QNode> dn;
             if (d == NULL ||               // d is gone or
-                Object::Equals(d->Probe(EIID_IInterface), dp->Probe(EIID_IInterface)) ||                 // d is off list or
+                d == dp ||                 // d is off list or
                 !d->IsCancelled() ||        // d not cancelled or
-                (!Object::Equals(d->Probe(EIID_IInterface), t->Probe(EIID_IInterface)) &&                 // d not tail and
+                (d != t &&                 // d not tail and
                  (dn = d->mNext) != NULL &&  //   has successor
-                 !Object::Equals(dn->Probe(EIID_IInterface), d->Probe(EIID_IInterface)) &&                //   that is on list
+                 dn != d &&                //   that is on list
                  dp->CasNext(d, dn)))       // d unspliced
                 CasCleanMe(dp, NULL);
-            if (Object::Equals(dp->Probe(EIID_IInterface), pred->Probe(EIID_IInterface)))
+            if (dp.Get() == pred)
                 return;      // s is already saved node
         }
         else if (CasCleanMe(NULL, pred))
@@ -860,7 +881,7 @@ ECode CSynchronousQueue::DrainTo(
 
     if (c == NULL)
         return E_NULL_POINTER_EXCEPTION;
-    if (Object::Equals(c->Probe(EIID_IInterface), TO_IINTERFACE(this)))
+    if (c == (ICollection*)this)
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     Int32 n = 0;
     for (AutoPtr<IInterface> e; (Poll((IInterface**)&e), e) != NULL;) {
@@ -880,7 +901,7 @@ ECode CSynchronousQueue::DrainTo(
 
     if (c == NULL)
         return E_NULL_POINTER_EXCEPTION;
-    if (Object::Equals(c->Probe(EIID_IInterface), TO_IINTERFACE(this)))
+    if (c == (ICollection*)this)
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     Int32 n = 0;
     for (AutoPtr<IInterface> e; n < maxElements && (Poll((IInterface**)&e), e) != NULL;) {

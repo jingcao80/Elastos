@@ -329,6 +329,8 @@ function eldrop ()
                                 elcopy $XDK_TARGETS/elservicemanager /system/bin
                             elif [ "$TARGET" == "ElApp_process" ]; then
                                 elcopy $XDK_TARGETS/ElApp_process /system/bin
+                            elif [ "$TARGET" == "pm" ]; then
+                                elcopy $XDK_TARGETS/pm /system/bin
                             else
                                 elcopy $XDK_TARGETS/$TARGET
                             fi

@@ -1,0 +1,2 @@
+DIRS += src/elastos/droid/commands/pm
+DIRS += ecx

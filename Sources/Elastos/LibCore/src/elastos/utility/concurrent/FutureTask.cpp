@@ -121,6 +121,7 @@ static Boolean CompareAndSwapObject(volatile int32_t* address, IInterface* expec
             (int32_t)update, address);
     if (ret == 0) {
         REFCOUNT_ADD(update)
+        REFCOUNT_RELEASE(expect)
     }
     return (ret == 0);
 }
@@ -325,7 +326,6 @@ void FutureTask::FinishCompletion()
     // assert state > COMPLETING;
     for (AutoPtr<IInterface> q; (q = mWaiters) != NULL;) {
         if (CompareAndSwapObject((volatile int32_t*)&mWaiters, q, NULL)) {
-            REFCOUNT_RELEASE(q)
             for (;;) {
                 WaitNode* qNode = (WaitNode*)IObject::Probe(q);
                 AutoPtr<IThread> t = qNode->mThread;
@@ -389,8 +389,6 @@ ECode FutureTask::AwaitDone(
         else if (!queued) {
             queued = CompareAndSwapObject((volatile int32_t*)&mWaiters,
                     (q->mNext = mWaiters), q->Probe(EIID_IInterface));
-            if (queued)
-                REFCOUNT_RELEASE(q->mNext)
         }
         else if (timed) {
             Int64 now;
@@ -421,7 +419,6 @@ RETRY:
             for (AutoPtr<IInterface> pred, q = mWaiters, s; q != NULL; q = s) {
                 WaitNode* qNode = (WaitNode*)IObject::Probe(q);
                 s = qNode->mNext;
-                Boolean result = FALSE;
                 if (qNode->mThread != NULL) {
                     pred = q;
                 }
@@ -431,11 +428,9 @@ RETRY:
                     if (predNode->mThread == NULL) // check for race
                         goto RETRY;
                 }
-                else if (!(result = CompareAndSwapObject((volatile int32_t*)&mWaiters, q, s))) {
+                else if (!(CompareAndSwapObject((volatile int32_t*)&mWaiters, q, s))) {
                     goto RETRY;
                 }
-                if (result)
-                    REFCOUNT_RELEASE(q);
             }
             break;
         }

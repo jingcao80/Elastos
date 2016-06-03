@@ -400,6 +400,10 @@
 #- Elastos/Frameworks/Droid/Commands/Am/src
 #> Elastos/Frameworks/Droid/Commands/Am
 #> Elastos/Frameworks/Droid/Commands
+#  Elastos/Frameworks/Droid/Commands/Pm/src/elastos/droid/commands/pm Elastos.Droid.Commands.Pm.car
+#> Elastos/Frameworks/Droid/Commands/Pm/src/elastos/droid/commands/pm
+#> Elastos/Frameworks/Droid/Commands/Pm/ecx Elastos.Droid.Commands.Pm.eco
+#> Elastos/Frameworks/Droid/Commands/Pm/ecx
 
 # ==== build DCAR ====
 - Elastos/Frameworks/Droid/DCARServer
