@@ -1472,6 +1472,14 @@ module
             [in] ITestArgumentList* argumentList,
             [out] PInterface* object);
 
+        LocalCreateObject(
+            [in] ITestArgumentList* argumentList,
+            [out] PInterface* object);
+
+        RemoteCreateObject(
+            [in] ITestArgumentList* argumentList,
+            [out] PInterface* object);
+
         CreateObjectInRegime(
             [in] PRegime rgm,
             [in] ITestArgumentList* argumentList,

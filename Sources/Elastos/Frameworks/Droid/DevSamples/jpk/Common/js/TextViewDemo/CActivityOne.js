@@ -108,6 +108,11 @@ module.exports = function(aoElastos, aoActivity){
                     oChkIos.SetChecked(false);
                     oChkUbuntu.SetChecked(false);
                     aoView.SetChecked(true);
+
+                    elog("========CActivityOne.js====chkButton====clicked====0====");
+                    _showInfo("========CActivityOne.js====chkButton====clicked====1====");
+                    elog("========CActivityOne.js====chkButton====clicked====2====");
+
                 }
             };
             oChkAndroid.SetOnClickListener(jso_button_group_cb);
@@ -118,7 +123,6 @@ module.exports = function(aoElastos, aoActivity){
             elog("========CActivityOne.js====OnCreate====begin.4========");
 
             //----------------AnamtionButton begin----------------
-if (true) {
             oActivity.FindViewById(R.id.AnamtionButton).SetOnClickListener( (function(){
                 elog("========CActivityOne.js====OnCreate====begin.4.1========");
 
@@ -160,7 +164,6 @@ if (true) {
                     }
                 }
             })() );
-}
             //----------------AnamtionButton end----------------
 
             elog("========CActivityOne.js====OnCreate====begin.5========");
@@ -271,9 +274,10 @@ if (true) {
             elog("========CActivityOne.js====OnCreate====begin.9========");
 
             //----------------myListView begin----------------
-if (false) {
+if (true) {
             var oListView = oActivity.FindViewById(R.id.myListView);
-            var oDataList = Droid_New("CParcelableObjectContainer");
+            //var oDataList = Droid_New("CParcelableObjectContainer");
+            var oDataList = Droid_New("Elastos.Droid.Utility.CParcelableObjectContainer");
 
             for (var i = 0; i < 5; ++i) {
                 var s = 'Item--' + i;
@@ -286,10 +290,14 @@ if (false) {
                 oDataList.Add( CString(s) );
             }
 
-            var oAdapter = Droid_New("CArrayAdapter", oActivity, R.layout.list_item, oDataList);
+            //var oAdapter = Droid_New("CArrayAdapter", oActivity, R.layout.list_item, oDataList);
+            var oAdapter = Droid_New("Elastos.Droid.Widget.CArrayAdapter", oActivity, R.layout.list_item, oDataList);
+
             oListView.SetAdapter(oAdapter);
 
-            var oDrawable = Droid_New("CColorDrawable", 0xFF0000FF);
+            //var oDrawable = Droid_New("CColorDrawable", 0xFF0000FF);
+            var oDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CColorDrawable", 0xFF0000FF);
+
             oListView.SetDivider(oDrawable);
 
             oListView.SetDividerHeight(1);

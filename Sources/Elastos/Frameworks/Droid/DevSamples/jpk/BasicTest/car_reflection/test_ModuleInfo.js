@@ -23,7 +23,7 @@ api.getModuleInfo = function (asEcoName) {
     return oCarRuntime.Test_Require_ModuleInfo(asEcoName);
 };
 
-var oModuleInfo = api.getModuleInfo("../../bin/Elastos.DevSamples.Node.CarRuntime.eco");
+var oModuleInfo = api.getModuleInfo(sEcoName);
 
 elog("========test reflection moduleInfo ========typeof oModuleInfo : " + typeof oModuleInfo);
 
@@ -77,7 +77,13 @@ if(true){  //TEST OK
     //     /* [out] */ ITestClassInfo ** ppClassInfo);
 //TOFIX: short classname should be supported
 //TODO: oModuleInfo.sClassName / oModuleInfo[sClassName]
-var oClassInfo = oModuleInfo.GetClassInfo("Elastos.DevSamples.Node.CarRuntime.CTestModuleInfo");
+//var sClassName = "Elastos.DevSamples.Node.CarRuntime.CTestModuleInfo";
+
+var sEcoName = "Elastos.CoreLibrary.eco";
+var oModuleInfo_1 = api.getModuleInfo(sEcoName);
+
+var sClassName = "Elastos.Core.CString";
+var oClassInfo = oModuleInfo_1.GetClassInfo(sClassName);
 var sClassName = oClassInfo.GetName();
 elog("========test reflection moduleInfo ========GetClassInfo===class name : " + sClassName);
 }   //false
@@ -97,13 +103,35 @@ for (var i=0;i<im;i++) {
     var paramCount = aParamInfos.length;
     elog("========test reflection moduleInfo ========oConstructorInfo.GetAllParamInfos===paramCount : " + paramCount);
 
-    var oParamInfo = oConstructorInfo.GetParamInfoByIndex(0);
-    elog("========test reflection moduleInfo ========oConstructorInfo.GetParamInfoByIndex 0===paramCount : " + paramCount);
-    var oParamInfo = oConstructorInfo.GetParamInfoByIndex(1);
-    elog("========test reflection moduleInfo ========oConstructorInfo.GetParamInfoByIndex 1===paramCount : " + paramCount);
-    var oParamInfo = oConstructorInfo.GetParamInfoByIndex(2);
-    elog("========test reflection moduleInfo ========oConstructorInfo.GetParamInfoByIndex 2===paramCount : " + paramCount);
+    for (var j=0;j<paramCount;j++) {
+        var oParamInfo = aParamInfos[j];
+        var sParaName = oParamInfo.GetName();
+        elog("========test reflection moduleInfo ===="+j+"====oParamInfo.GetName : " + sParaName);
+    }
 }
+
+var oConstructorInfo = aConstructorInfos[0];
+
+var paramCount = oConstructorInfo.GetParamCount();
+var aParamInfos = oConstructorInfo.GetAllParamInfos();
+var oArgumentList = oConstructorInfo.CreateArgumentList();
+
+oArgumentList.SetInputArgumentOfString(0,String("OKOKOK"));
+
+//var newObject = oConstructorInfo.CreateObject(oArgumentList);
+var oCString = oConstructorInfo.LocalCreateObject(oArgumentList);
+
+var aMethodNames = [];
+for (var prop in oCString) {
+    aMethodNames.push(prop);
+}
+elog("========test reflection moduleInfo ====CString Methods: [" + aMethodNames.join("][") + "]");
+
+elog("========test reflection moduleInfo ====new CString Value: " + oCString.ToString());
+
+elog("========test reflection moduleInfo ====Elastos.Core.CStringtesk OK");
+
+
 
 //--------------------temp end------------------------
 

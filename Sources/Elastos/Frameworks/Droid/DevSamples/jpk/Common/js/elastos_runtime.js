@@ -122,6 +122,7 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         oModuleInfo = _getModuleInfo(oModuleInfo);
     }
     if(typeof(oClassInfo)=='string') {
+        elog('====classinfo__createObject====begin====ClassName:'+oClassInfo);
         oClassInfo = oModuleInfo.GetClassInfo(oClassInfo);
     }
 
@@ -132,7 +133,8 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
     else {
         var aConstructorInfos = oClassInfo.GetAllConstructorInfos();
         var oConstructorInfo;
-        var paramCount = length - 2;
+        //var paramCount = length - 2;
+        var paramCount = length - 1;
         for(var i=0, im=aConstructorInfos.length; i<im; i++){
             oConstructorInfo = aConstructorInfos[i];
 
@@ -142,10 +144,12 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
 
             elog('====classinfo__createObject===='+i+' _paramCount:'+_paramCount+'===paramCount:'+paramCount+'===========');
 
+            //if (_paramCount == paramCount) {
             if (_paramCount == paramCount) {
                 var bSameArgs = true;
                 var aParamInfos = oConstructorInfo.GetAllParamInfos();
-                for(var j = 0, jm = paramCount; j<jm; j++) {
+                //for(var j = 0, jm = paramCount; j<jm; j++) {
+                for(var j = 0, jm = paramCount -1; j<jm; j++) {
                     var paramInfo = aParamInfos[j];
                     var oTypeInfo = paramInfo.GetTypeInfo();
 
@@ -172,7 +176,8 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         var aParamInfos = oConstructorInfo.GetAllParamInfos();
         var oArgumentList = oConstructorInfo.CreateArgumentList();
 
-        for(var i = 0, im = paramCount; i<im; i++) {
+        //for(var i = 0, im = paramCount; i<im; i++) {
+        for(var i = 0, im = paramCount - 1; i<im; i++) {
             var paramInfo = aParamInfos[i];
             var oTypeInfo = paramInfo.GetTypeInfo();
 
@@ -221,7 +226,8 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                 //case CarDataType.CarArray:
                 //case CarDataType.StructPtr:
                 case CarDataType.Interface:
-                    oArgumentList.SetInputArgumentOfObjectPtr(i,arguments[i+2]);
+                    //oArgumentList.SetInputArgumentOfObjectPtr(i,arguments[i+2]);
+                    oArgumentList.SetInputArgumentOfObjectPtr(i,arg);
                     break;
                 case CarDataType.LocalPtr:
                     //to be finished
@@ -238,9 +244,12 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
             }
         }
 
-        var aa=[];
-        for (var p in oConstructorInfo)aa.push(p);
-        var sAnnotation = oConstructorInfo.GetAnnotation();
+        //var paramInfo = aParamInfos[i];
+        //oArgumentList.SetOutputArgumentOfObjectPtr(i,arg);
+
+        //var aa=[];
+        //for (var p in oConstructorInfo)aa.push(p);
+        //var sAnnotation = oConstructorInfo.GetAnnotation();
 
         newObject = oConstructorInfo.CreateObject(oArgumentList);
     }

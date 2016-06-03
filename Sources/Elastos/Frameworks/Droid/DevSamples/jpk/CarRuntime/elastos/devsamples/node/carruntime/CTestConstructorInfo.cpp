@@ -175,6 +175,72 @@ ECode CTestConstructorInfo::CreateObject(
     return ec;
 }
 
+ECode CTestConstructorInfo::LocalCreateObject(
+    /* [in] */ ITestArgumentList * pArgumentList,
+    /* [out] */ PInterface * ppObject)
+{
+    // TODO: Add your code here
+    //return E_NOT_IMPLEMENTED;
+
+    ECode ec = NOERROR;
+
+    IArgumentList* argumentList;
+    ec = pArgumentList->GetInternalObject((PInterface*)&argumentList);
+    if (FAILED(ec)) {
+        ALOGD("CTestConstructorInfo::CreateObject: pArgumentList->GetInternalObject fail!");
+        return ec;
+    }
+    else {
+        ALOGD("CTestConstructorInfo::CreateObject: pArgumentList->GetInternalObject success!");
+    }
+
+    ec = mConstructorInfo->CreateObject(argumentList,ppObject);
+    if (FAILED(ec)) {
+        ALOGD("CTestConstructorInfo::CreateObject: mConstructorInfo->CreateObject fail!");
+        return ec;
+    }
+    else {
+        ALOGD("CTestConstructorInfo::CreateObject: mConstructorInfo->CreateObject success!");
+    }
+
+    (*ppObject)->AddRef();
+
+    return ec;
+}
+
+ECode CTestConstructorInfo::RemoteCreateObject(
+    /* [in] */ ITestArgumentList * pArgumentList,
+    /* [out] */ PInterface * ppObject)
+{
+    // TODO: Add your code here
+    //return E_NOT_IMPLEMENTED;
+
+    ECode ec = NOERROR;
+
+    IArgumentList* argumentList;
+    ec = pArgumentList->GetInternalObject((PInterface*)&argumentList);
+    if (FAILED(ec)) {
+        ALOGD("CTestConstructorInfo::CreateObject: pArgumentList->GetInternalObject fail!");
+        return ec;
+    }
+    else {
+        ALOGD("CTestConstructorInfo::CreateObject: pArgumentList->GetInternalObject success!");
+    }
+
+    ec = mConstructorInfo->CreateObject(argumentList,ppObject);
+    if (FAILED(ec)) {
+        ALOGD("CTestConstructorInfo::CreateObject: mConstructorInfo->CreateObject fail!");
+        return ec;
+    }
+    else {
+        ALOGD("CTestConstructorInfo::CreateObject: mConstructorInfo->CreateObject success!");
+    }
+
+    (*ppObject)->AddRef();
+
+    return ec;
+}
+
 ECode CTestConstructorInfo::CreateObjectInRegime(
     /* [in] */ PRegime pRgm,
     /* [in] */ ITestArgumentList * pArgumentList,

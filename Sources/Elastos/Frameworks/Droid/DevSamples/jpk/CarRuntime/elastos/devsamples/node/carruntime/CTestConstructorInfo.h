@@ -48,6 +48,14 @@ public:
         /* [in] */ ITestArgumentList * pArgumentList,
         /* [out] */ PInterface * ppObject);
 
+    CARAPI LocalCreateObject(
+        /* [in] */ ITestArgumentList * pArgumentList,
+        /* [out] */ PInterface * ppObject);
+
+    CARAPI RemoteCreateObject(
+        /* [in] */ ITestArgumentList * pArgumentList,
+        /* [out] */ PInterface * ppObject);
+
     CARAPI CreateObjectInRegime(
         /* [in] */ PRegime pRgm,
         /* [in] */ ITestArgumentList * pArgumentList,
