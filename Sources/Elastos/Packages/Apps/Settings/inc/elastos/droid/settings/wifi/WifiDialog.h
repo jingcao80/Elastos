@@ -74,7 +74,7 @@ public:
         /* [in] */ ICharSequence* text);
 
     // the under method use to fix compile error
-    //@Override
+    // @Override
     CARAPI GetContext(
         /* [out] */ IContext** context);
 

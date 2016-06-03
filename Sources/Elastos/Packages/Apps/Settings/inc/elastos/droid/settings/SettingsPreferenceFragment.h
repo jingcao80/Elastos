@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_SETTINGS_SETTINGSPREFERENCEFRAGMENT_H__
 
 #include "elastos/droid/app/DialogFragment.h"
+#include "elastos/droid/database/DataSetObserver.h"
 #include "elastos/droid/preference/PreferenceFragment.h"
 #include "_Elastos.Droid.Settings.h"
 
@@ -10,6 +11,7 @@ using Elastos::Droid::App::IFragment;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Preference::PreferenceFragment;
@@ -86,6 +88,7 @@ public:
 
 private:
     class InitDataSetObserver
+        : public DataSetObserver
     {
     public:
         InitDataSetObserver(
@@ -149,6 +152,8 @@ public:
     SettingsPreferenceFragment();
 
     ~SettingsPreferenceFragment();
+
+    CARAPI constructor();
 
     //@Override
     CARAPI OnCreate(

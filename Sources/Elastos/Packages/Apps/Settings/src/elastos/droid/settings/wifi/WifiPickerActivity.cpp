@@ -22,7 +22,7 @@ ECode WifiPickerActivity::GetIntent(
     Boolean hasExtra;
     if (modIntent->HasExtra(EXTRA_SHOW_FRAGMENT, &hasExtra), !hasExtra) {
         modIntent->PutExtra(EXTRA_SHOW_FRAGMENT,
-                String("Elastos.Droid.Settings.Wifi.WifiSettings")/*GetWifiSettingsClass()->GetName()*/);
+                String("Elastos.Droid.Settings.Wifi.CWifiSettings")/*GetWifiSettingsClass()->GetName()*/);
         modIntent->PutExtra(EXTRA_SHOW_FRAGMENT_TITLE_RESID, R::string::wifi_select_network);
     }
     *intent = modIntent;
@@ -33,7 +33,7 @@ ECode WifiPickerActivity::GetIntent(
 Boolean WifiPickerActivity::IsValidFragment(
     /* [in] */ const String& fragmentName)
 {
-    if (String("Elastos.Droid.Settings.Wifi.WifiSettings").Equals(fragmentName)
+    if (String("Elastos.Droid.Settings.Wifi.CWifiSettings").Equals(fragmentName)
             || String("Elastos.Droid.Settings.Wifi.P2p.WifiP2pSettings").Equals(fragmentName)
             || String("Elastos.Droid.Settings.Wifi.SavedAccessPointsWifiSettings").Equals(fragmentName)
             || String("Elastos.Droid.Settings.Wifi.AdvancedWifiSettings").Equals(fragmentName)) return TRUE;

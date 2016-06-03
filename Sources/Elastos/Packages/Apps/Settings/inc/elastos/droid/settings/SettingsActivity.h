@@ -157,7 +157,7 @@ public:
 
     CARAPI constructor();
 
-   CARAPI GetSwitchBar(
+    CARAPI GetSwitchBar(
        /* [out] */ SwitchBar** switchBar);
 
     CARAPI GetDashboardCategories(

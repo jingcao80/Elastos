@@ -2,7 +2,6 @@
 #ifndef __ELASTOS_DROID_SETTINGS_CSETTINGS_H__
 #define __ELASTOS_DROID_SETTINGS_CSETTINGS_H__
 
-#include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/settings/SettingsActivity.h"
 #include "_Elastos_Droid_Settings_CSettings.h"
 

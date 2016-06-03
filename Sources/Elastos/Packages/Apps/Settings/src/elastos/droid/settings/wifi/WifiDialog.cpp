@@ -61,7 +61,7 @@ ECode WifiDialog::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     AutoPtr<ILayoutInflater> inflate;
-    IWifiConfigUiBase::GetLayoutInflater((ILayoutInflater**)&inflate);
+    AlertDialog::GetLayoutInflater((ILayoutInflater**)&inflate);
     inflate->Inflate(R::layout::wifi_dialog, NULL, (IView**)&mView);
     SetView(mView);
     SetInverseBackgroundForced(TRUE);
@@ -128,7 +128,7 @@ ECode WifiDialog::SetCancelButton(
     return SetButton(BUTTON_NEGATIVE, text, mListener);
 }
 
-
+// the under method use to fix compile error
 ECode WifiDialog::GetContext(
     /* [out] */ IContext** context)
 {

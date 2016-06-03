@@ -266,11 +266,16 @@ SettingsPreferenceFragment::SettingsPreferenceFragment()
     : mPreferenceHighlighted(FALSE)
     , mIsDataSetObserverRegistered(FALSE)
 {
-    mDataSetObserver = (IDataSetObserver*)new InitDataSetObserver(this);
+    mDataSetObserver = new InitDataSetObserver(this);
 }
 
 SettingsPreferenceFragment::~SettingsPreferenceFragment()
 {}
+
+ECode SettingsPreferenceFragment::constructor()
+{
+    return NOERROR;
+}
 
 ECode SettingsPreferenceFragment::OnCreate(
     /* [in] */ IBundle* icicle)

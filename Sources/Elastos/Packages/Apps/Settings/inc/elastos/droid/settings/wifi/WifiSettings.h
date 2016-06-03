@@ -55,7 +55,6 @@ namespace Wifi {
 class WifiSettings
     : public RestrictedSettingsFragment
     , public IDialogInterfaceOnClickListener
-    , public IIndexableSearchIndexProvider
 {
 public:
     class MyBaseSearchIndexProvider
@@ -213,6 +212,8 @@ public:
     WifiSettings();
 
     ~WifiSettings();
+
+    CARAPI constructor();
 
     //@Override
     CARAPI OnActivityCreated(

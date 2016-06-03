@@ -617,7 +617,7 @@ ECode SettingsActivity::OnCreate(
     // - this is a real SubSettings
     // - or :settings:show_fragment_as_subsetting is passed to the Intent
     intent->GetBooleanExtra(EXTRA_SHOW_FRAGMENT_AS_SUBSETTING, FALSE, &res);
-    Boolean isSubSettings = className.Equals("Elastos.Droid.Settings.SubSettings") || res;
+    Boolean isSubSettings = className.Equals("Elastos.Droid.Settings.CSubSettings") || res;
 
     // If this is a sub settings, then apply the SubSettings Theme for the ActionBar content insets
     if (isSubSettings) {
@@ -941,7 +941,9 @@ ECode SettingsActivity::OnPause()
     Activity::OnPause();
 
     UnregisterReceiver(mBatteryInfoReceiver);
-    mDynamicIndexableContentMonitor->Unregister();
+    // TODO:
+    Slogger::I("SettingsActivity::OnPause", "Unregister is TODO");
+    // mDynamicIndexableContentMonitor->Unregister();
     return NOERROR;
 }
 
@@ -976,7 +978,7 @@ ECode SettingsActivity::GetIntent(
     String startingFragment = GetStartingFragmentClass(superIntent);
     // This is called from super.onCreate, IsMultiPane() is not yet reliable
     // Do not use onIsHidingHeaders either, which relies itself on this method
-    if (startingFragment != NULL) {
+    if (!startingFragment.IsNull()) {
         AutoPtr<IIntent> modIntent;
         CIntent::New(superIntent, (IIntent**)&modIntent);
         modIntent->PutExtra(EXTRA_SHOW_FRAGMENT, startingFragment);
@@ -1004,7 +1006,7 @@ ECode SettingsActivity::GetIntent(
 String SettingsActivity::GetStartingFragmentClass(
     /* [in] */ IIntent* intent)
 {
-    if (mFragmentClass != NULL) return mFragmentClass;
+    if (!mFragmentClass.IsNull()) return mFragmentClass;
 
     AutoPtr<IComponentName> comp;
     intent->GetComponent((IComponentName**)&comp);
@@ -1598,8 +1600,7 @@ ECode SettingsActivity::ShouldUpRecreateTask(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<IIntent> intent;
-    assert(0 && "TODO");
-    // CIntent::New(this, SettingsActivity.class, (IIntent**)&intent);
+    CIntent::New(this, ECLSID_CSettingsActivity, (IIntent**)&intent);
     return Activity::ShouldUpRecreateTask(intent, result);
 }
 

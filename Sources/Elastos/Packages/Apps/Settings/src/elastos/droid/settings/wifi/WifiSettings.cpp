@@ -401,15 +401,23 @@ ECode WifiSettings::ViewOnClickListener::OnClick(
 //                  WifiSettings
 //===============================================================================
 
-CAR_INTERFACE_IMPL_2(WifiSettings, RestrictedSettingsFragment,
-        IDialogInterfaceOnClickListener, IIndexableSearchIndexProvider);
+CAR_INTERFACE_IMPL(WifiSettings, RestrictedSettingsFragment,
+        IDialogInterfaceOnClickListener);
 
 WifiSettings::WifiSettings()
-    : RestrictedSettingsFragment::RestrictedSettingsFragment(IUserManager::DISALLOW_CONFIG_WIFI)
-    , mLastState(NetworkInfoDetailedState_NONE)
+    : mLastState(NetworkInfoDetailedState_NONE)
     , mEnableNextOnConnection(FALSE)
     , mDlgEdit(FALSE)
 {
+    CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&mConnected);
+}
+
+WifiSettings::~WifiSettings()
+{}
+
+ECode WifiSettings::constructor()
+{
+    RestrictedSettingsFragment::constructor(IUserManager::DISALLOW_CONFIG_WIFI);
     CIntentFilter::New((IIntentFilter**)&mFilter);
     mFilter->AddAction(IWifiManager::WIFI_STATE_CHANGED_ACTION);
     mFilter->AddAction(IWifiManager::SCAN_RESULTS_AVAILABLE_ACTION);
@@ -423,12 +431,8 @@ WifiSettings::WifiSettings()
     mReceiver = new MyBroadcastReceiver(this);
 
     mScanner = new Scanner(this);
-
-    CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&mConnected);
+    return NOERROR;
 }
-
-WifiSettings::~WifiSettings()
-{}
 
 ECode WifiSettings::OnActivityCreated(
     /* [in] */ IBundle* savedInstanceState)
@@ -438,11 +442,11 @@ ECode WifiSettings::OnActivityCreated(
     AutoPtr<IInterface> obj = GetSystemService(IContext::WIFI_SERVICE);
     mWifiManager = IWifiManager::Probe(obj);
 
-    mConnectListener = (IWifiManagerActionListener*)new WifiManagerActionListener(this, 0);
+    mConnectListener = new WifiManagerActionListener(this, 0);
 
-    mSaveListener = (IWifiManagerActionListener*)new WifiManagerActionListener(this, 1);
+    mSaveListener = new WifiManagerActionListener(this, 1);
 
-    mForgetListener = (IWifiManagerActionListener*)new WifiManagerActionListener(this, 2);
+    mForgetListener = new WifiManagerActionListener(this, 2);
 
     if (savedInstanceState != NULL) {
         savedInstanceState->GetBoolean(SAVE_DIALOG_EDIT_MODE, &mDlgEdit);
@@ -701,10 +705,10 @@ ECode WifiSettings::OnOptionsItemSelected(
                 if (ISettingsActivity::Probe(activity) != NULL) {
                     ((SettingsActivity*)ISettingsActivity::Probe(activity))->StartPreferencePanel(
                             String("Elastos.Droid.Settings.Wifi.SavedAccessPointsWifiSettings"), NULL,
-                            R::string::wifi_saved_access_points_titlebar, NULL, (IFragment*)this, 0);
+                            R::string::wifi_saved_access_points_titlebar, NULL, this, 0);
                 }
                 else {
-                    StartFragment((IFragment*)this, String("Elastos.Droid.Settings.Wifi.SavedAccessPointsWifiSettings"),
+                    StartFragment(this, String("Elastos.Droid.Settings.Wifi.SavedAccessPointsWifiSettings"),
                             R::string::wifi_saved_access_points_titlebar,
                             -1 /* Do not request a result */, NULL);
                 }
@@ -717,10 +721,10 @@ ECode WifiSettings::OnOptionsItemSelected(
                 if (ISettingsActivity::Probe(activity) != NULL) {
                     ((SettingsActivity*)ISettingsActivity::Probe(activity))->StartPreferencePanel(
                             String("Elastos.Droid.Settings.Wifi.AdvancedWifiSettings"), NULL,
-                            R::string::wifi_advanced_titlebar, NULL, (IFragment*)this, 0);
+                            R::string::wifi_advanced_titlebar, NULL, this, 0);
                 }
                 else {
-                    StartFragment((IFragment*)this, String("Elastos.Droid.Settings.Wifi.AdvancedWifiSettings"),
+                    StartFragment(this, String("Elastos.Droid.Settings.Wifi.AdvancedWifiSettings"),
                             R::string::wifi_advanced_titlebar, -1 /* Do not request a results */,
                             NULL);
                 }
@@ -900,8 +904,7 @@ ECode WifiSettings::OnCreateDialog(
             // If it's NULL, fine, it's for Add Network
             mSelectedAccessPoint = ap;
             mDialog = new WifiDialog();
-            mDialog->constructor(IContext::Probe(activity),
-                    (IDialogInterfaceOnClickListener*)this, ap, mDlgEdit);
+            mDialog->constructor(IContext::Probe(activity), this, ap, mDlgEdit);
             AutoPtr<IAlertDialog> alertDialog = (IAlertDialog*)mDialog.Get();
             *dialog = IDialog::Probe(alertDialog);
             REFCOUNT_ADD(*dialog);

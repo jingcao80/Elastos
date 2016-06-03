@@ -104,7 +104,7 @@ ECode WifiEnabler::InitHandler::HandleMessage(
             Boolean isWiFiOn;
             data->GetBoolean(EVENT_DATA_IS_WIFI_ON, &isWiFiOn);
             Index::GetInstance(mHost->mContext)->UpdateFromClassNameResource(
-                    String("Elastos.Droid.Settings.Wifi.WifiSettings"),
+                    String("Elastos.Droid.Settings.Wifi.CWifiSettings"),
                     TRUE, isWiFiOn);
             break;
     }

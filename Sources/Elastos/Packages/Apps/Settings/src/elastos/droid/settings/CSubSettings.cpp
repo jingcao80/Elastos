@@ -1,5 +1,5 @@
 
-#include "elastos/droid/settings/SubSettings.h"
+#include "elastos/droid/settings/CSubSettings.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Utility::Logging::Logger;
@@ -8,7 +8,9 @@ namespace Elastos {
 namespace Droid {
 namespace Settings {
 
-ECode SubSettings::OnNavigateUp(
+CAR_OBJECT_IMPL(CSubSettings)
+
+ECode CSubSettings::OnNavigateUp(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
@@ -18,10 +20,10 @@ ECode SubSettings::OnNavigateUp(
     return NOERROR;
 }
 
-Boolean SubSettings::IsValidFragment(
+Boolean CSubSettings::IsValidFragment(
     /* [in] */ const String& fragmentName)
 {
-    Logger::D("SubSettings", "Launching fragment %s", fragmentName.string());
+    Logger::D("CSubSettings", "Launching fragment %s", fragmentName.string());
     return TRUE;
 }
 

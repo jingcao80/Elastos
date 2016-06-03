@@ -113,7 +113,7 @@
             </intent-filter>
         </receiver>
 -->
-        <activity android:name="Elastos.Droid.Settings.SubSettings"
+        <activity android:name="Elastos.Droid.Settings.CSubSettings"
                 android:taskAffinity="Elastos.Droid.Settings"
                 android:parentActivityName="Elastos.Droid.Settings.CSettings">
         </activity>
@@ -163,20 +163,20 @@
                 <category android:name="com.android.settings.SHORTCUT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="Elastos.Droid.Settings.Wifi.WifiSettings" />
+                android:value="Elastos.Droid.Settings.Wifi.CWifiSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wifi_settings" />
         </activity>
 
         <!-- Keep compatibility with old shortcuts. -->
-        <activity-alias android:name="Elastos.Droid.Settings.Wifi.WifiSettings"
+        <activity-alias android:name="Elastos.Droid.Settings.Wifi.CWifiSettings"
                 android:taskAffinity="Elastos.Droid.Settings"
                 android:label="@string/wifi_settings"
                 android:targetActivity="CSettings$WifiSettingsActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize"
                 android:exported="true">
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="Elastos.Droid.Settings.Wifi.WifiSettings" />
+                android:value="Elastos.Droid.Settings.Wifi.CWifiSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wifi_settings" />
         </activity-alias>

@@ -56,7 +56,7 @@ static AutoPtr<IHashMap> InitsRankMap()
     CHashMap::New((IHashMap**)&map);
 
     // Wi-Fi
-    InitPut(map, String("Elastos.Droid.Settings.Wifi.WifiSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Wifi.CWifiSettings"),
             Ranking::RANK_WIFI);
     InitPut(map, String("Elastos.Droid.Settings.Wifi.AdvancedWifiSettings"),
             Ranking::RANK_WIFI);

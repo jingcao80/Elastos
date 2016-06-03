@@ -14,11 +14,10 @@
 #include "elastos/droid/text/TextUtils.h"
 #include "_Elastos.Droid.Settings.h"
 #include "../R.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::CComponentName;
@@ -66,6 +65,7 @@ using Elastos::Droid::View::IInputDeviceHelper;
 using Elastos::Droid::View::InputMethod::IInputMethodSubtype;
 using Elastos::Droid::View::TextService::ISpellCheckerInfo;
 using Elastos::Droid::View::TextService::ITextServicesManager;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Core::EIID_IComparator;
@@ -651,8 +651,7 @@ ECode InputMethodAndLanguageSettings::OnCreate(
         InputMethodAndSubtypeUtil::RemoveUnnecessaryNonPersistentPreference(spellChecker);
         AutoPtr<IIntent> intent;
         CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&intent);
-        assert(0 && "TODO");
-        // intent->SetClass(IContent::Probe(activity), SubSettings.class);
+        intent->SetClass(IContext::Probe(activity), ECLSID_CSubSettings);
         intent->PutExtra(SettingsActivity::EXTRA_SHOW_FRAGMENT,
                 String("Elastos.Droid.Settings.Inputmethod.SpellCheckersSettings"));
         intent->PutExtra(SettingsActivity::EXTRA_SHOW_FRAGMENT_TITLE_RESID,

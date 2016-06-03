@@ -27,8 +27,9 @@ SOURCES += Utils.cpp
 SOURCES += UserSpinnerAdapter.cpp
 SOURCES += CUserSpinnerAdapter.cpp
 SOURCES += CSettings.cpp
-SOURCES += SubSettings.cpp
+SOURCES += CSubSettings.cpp
 SOURCES += VoiceInputOutputSettings.cpp
+SOURCES += settings.cpp
 
 ELASTOS_LIBS += dashboard/dashboard.lib
 ELASTOS_LIBS += drawable/drawable.lib

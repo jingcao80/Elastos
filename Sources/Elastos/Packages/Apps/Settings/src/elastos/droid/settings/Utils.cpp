@@ -870,8 +870,7 @@ AutoPtr<IIntent> Utils::OnBuildStartFragmentIntent(
 {
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&intent);
-    assert(0 && "TODO");
-    // intent->SetClass(context, SubSettings.class);
+    intent->SetClass(context, ECLSID_CSubSettings);
     intent->PutExtra(SettingsActivity::EXTRA_SHOW_FRAGMENT, fragmentName);
     intent->PutExtra(SettingsActivity::EXTRA_SHOW_FRAGMENT_ARGUMENTS, args);
     intent->PutExtra(SettingsActivity::EXTRA_SHOW_FRAGMENT_TITLE_RESID, titleResId);

@@ -16,3 +16,4 @@ SOURCES += WifiSettings.cpp
 SOURCES += WpsDialog.cpp
 SOURCES += CWpsDialogHelper.cpp
 SOURCES += WriteWifiConfigToNfcDialog.cpp
+SOURCES += wifi.cpp

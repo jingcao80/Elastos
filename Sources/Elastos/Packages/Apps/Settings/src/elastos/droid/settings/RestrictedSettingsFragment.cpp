@@ -45,17 +45,22 @@ ECode RestrictedSettingsFragment::MyBroadcastReceiver::OnReceive(
 //                  RestrictedSettingsFragment
 //===============================================================================
 
-RestrictedSettingsFragment::RestrictedSettingsFragment(
-    /* [in] */ const String& restrictionKey)
+RestrictedSettingsFragment::RestrictedSettingsFragment()
     : mChallengeSucceeded(FALSE)
     , mChallengeRequested(FALSE)
 {
-    mRestrictionKey = restrictionKey;
     mScreenOffReceiver = new MyBroadcastReceiver(this);
 }
 
 RestrictedSettingsFragment::~RestrictedSettingsFragment()
 {}
+
+ECode RestrictedSettingsFragment::constructor(
+    /* [in] */ const String& restrictionKey)
+{
+    mRestrictionKey = restrictionKey;
+    return NOERROR;
+}
 
 ECode RestrictedSettingsFragment::OnCreate(
     /* [in] */ IBundle* icicle)

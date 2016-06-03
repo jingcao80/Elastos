@@ -50,16 +50,18 @@ private:
     };
 
 public:
+    RestrictedSettingsFragment();
+
+    ~RestrictedSettingsFragment();
+
     /**
      * @param restrictionKey The restriction key to check before pin protecting
      *            this settings page. Pass in {@link RESTRICT_IF_OVERRIDABLE} if it should
      *            be protected whenever a restrictions provider is set. Pass in
      *            NULL if it should never be protected.
      */
-    RestrictedSettingsFragment(
+    CARAPI constructor(
         /* [in] */ const String& restrictionKey);
-
-    ~RestrictedSettingsFragment();
 
     //@Override
     CARAPI OnCreate(

@@ -37,7 +37,7 @@ static AutoPtr<IHashMap> InitsResMap()
     AutoPtr<IHashMap> map;
     CHashMap::New((IHashMap**)&map);
 
-    InitPut(map, String("Elastos.Droid.Settings.Wifi.WifiSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Wifi.CWifiSettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_wireless);
 
