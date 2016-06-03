@@ -1,90 +1,96 @@
-/*
-** Copyright 2007, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License");
-** you may not use this file except in compliance with the License.
-** You may obtain a copy of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** Unless required by applicable law or agreed to in writing, software
-** distributed under the License is distributed on an "AS IS" BASIS,
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-** See the License for the specific language governing permissions and
-** limitations under the License.
-*/
+#include "Elastos.Droid.Internal.h"
 
-package com.android.internal.telephony.cdma;
+#include "elastos/droid/internal/telephony/cdma/RuimPhoneBookInterfaceManager.h"
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
-using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Cdma {
 
-using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Telephony::IRlog;
+//=====================================================================
+//                    RuimPhoneBookInterfaceManager
+//=====================================================================
+CAR_INTERFACE_IMPL(RuimPhoneBookInterfaceManager, /*TODO IccPhoneBookInterfaceManager*/Object, IRuimPhoneBookInterfaceManager);
+const String RuimPhoneBookInterfaceManager::LOGTAG("RuimPhoneBookIM");
 
-using Elastos::Droid::Internal::Telephony::IIccPhoneBookInterfaceManager;
-using Elastos::Droid::Internal::Telephony::Uicc::IIccFileHandler;
-
-/**
- * RuimPhoneBookInterfaceManager to provide an inter-process communication to
- * access ADN-like SIM records.
- */
-
-
-public class RuimPhoneBookInterfaceManager extends IccPhoneBookInterfaceManager {
-    static const String LOG_TAG = "RuimPhoneBookIM";
-
-    public RuimPhoneBookInterfaceManager(CDMAPhone phone) {
-        Super(phone);
-        //NOTE service "simphonebook" added by IccSmsInterfaceManagerProxy
-    }
-
-    //@Override
-    CARAPI Dispose() {
-        super->Dispose();
-    }
-
-    //@Override
-    protected void Finalize() {
-        try {
-            super->Finalize();
-        } Catch (Throwable throwable) {
-            Rlog->E(LOG_TAG, "Error while finalizing:", throwable);
-        }
-        If(DBG) Rlog->D(LOG_TAG, "RuimPhoneBookInterfaceManager finalized");
-    }
-
-    //@Override
-    public Int32[] GetAdnRecordsSize(Int32 efid) {
-        If (DBG) Logd("getAdnRecordsSize: efid=" + efid);
-        {    AutoLock syncLock(mLock);
-            CheckThread();
-            mRecordSize = new Int32[3];
-
-            //Using mBaseHandler, no difference in EVENT_GET_SIZE_DONE handling
-            AtomicBoolean status = new AtomicBoolean(FALSE);
-            Message response = mBaseHandler->ObtainMessage(EVENT_GET_SIZE_DONE, status);
-
-            IccFileHandler fh = mPhone->GetIccFileHandler();
-            //IccFileHandler can be NULL if there is no icc card present.
-            If (fh != NULL) {
-                fh->GetEFLinearRecordSize(efid, response);
-                WaitForResult(status);
-            }
-        }
-
-        return mRecordSize;
-    }
-
-    //@Override
-    protected void Logd(String msg) {
-        Rlog->D(LOG_TAG, "[RuimPbInterfaceManager] " + msg);
-    }
-
-    //@Override
-    protected void Loge(String msg) {
-        Rlog->E(LOG_TAG, "[RuimPbInterfaceManager] " + msg);
-    }
+RuimPhoneBookInterfaceManager::RuimPhoneBookInterfaceManager(
+    /* [in] */ ICDMAPhone* phone)
+{
+    // ==================before translated======================
+    // super(phone);
+    // //NOTE service "simphonebook" added by IccSmsInterfaceManagerProxy
 }
 
+ECode RuimPhoneBookInterfaceManager::Dispose()
+{
+    // ==================before translated======================
+    // super.dispose();
+    assert(0);
+    return NOERROR;
+}
+
+ECode RuimPhoneBookInterfaceManager::GetAdnRecordsSize(
+    /* [in] */ Int32 efid,
+    /* [out] */ ArrayOf<Int32>** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+    // ==================before translated======================
+    // if (DBG) logd("getAdnRecordsSize: efid=" + efid);
+    // synchronized(mLock) {
+    //     checkThread();
+    //     mRecordSize = new int[3];
+    //
+    //     //Using mBaseHandler, no difference in EVENT_GET_SIZE_DONE handling
+    //     AtomicBoolean status = new AtomicBoolean(false);
+    //     Message response = mBaseHandler.obtainMessage(EVENT_GET_SIZE_DONE, status);
+    //
+    //     IccFileHandler fh = mPhone.getIccFileHandler();
+    //     //IccFileHandler can be null if there is no icc card present.
+    //     if (fh != null) {
+    //         fh.getEFLinearRecordSize(efid, response);
+    //         waitForResult(status);
+    //     }
+    // }
+    //
+    // return mRecordSize;
+    assert(0);
+    return NOERROR;
+}
+
+void RuimPhoneBookInterfaceManager::Finalize()
+{
+    // ==================before translated======================
+    // try {
+    //     super.finalize();
+    // } catch (Throwable throwable) {
+    //     Rlog.e(LOGTAG, "Error while finalizing:", throwable);
+    // }
+    // if(DBG) Rlog.d(LOGTAG, "RuimPhoneBookInterfaceManager finalized");
+    assert(0);
+}
+
+ECode RuimPhoneBookInterfaceManager::Logd(
+    /* [in] */ const String& msg)
+{
+    // ==================before translated======================
+    // Rlog.d(LOGTAG, "[RuimPbInterfaceManager] " + msg);
+    assert(0);
+    return NOERROR;
+}
+
+ECode RuimPhoneBookInterfaceManager::Loge(
+    /* [in] */ const String& msg)
+{
+    // ==================before translated======================
+    // Rlog.e(LOGTAG, "[RuimPbInterfaceManager] " + msg);
+    assert(0);
+    return NOERROR;
+}
+
+} // namespace Cdma
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

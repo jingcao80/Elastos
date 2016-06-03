@@ -1,536 +1,644 @@
-/*
- * Copyright (C) 2011 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.android.internal.telephony.cdma;
-
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
-using Elastos::Droid::App::IActivityManagerNative;
-using Elastos::Droid::Content::IContentValues;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::ISharedPreferences;
-using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Os::IAsyncResult;
-using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Preference::IPreferenceManager;
-using Elastos::Droid::Os::IPowerManager;
-using Elastos::Droid::Os::ISystemProperties;
-using Elastos::Droid::Provider::ITelephony;
-using Elastos::Droid::Text::ITextUtils;
-using Elastos::Droid::Telephony::ISubscriptionManager;
-using Elastos::Droid::Telephony::IRlog;
-using Elastos::Droid::Telephony::IServiceState;
-
-using Elastos::Droid::Internal::Telephony::ICommandsInterface;
-
-using Elastos::Droid::Telephony::ITelephonyManager;
-
-using Elastos::Droid::Internal::Telephony::Dataconnection::IDcTracker;
-using Elastos::Droid::Internal::Telephony::IMccTable;
-using Elastos::Droid::Internal::Telephony::IOperatorInfo;
-using Elastos::Droid::Internal::Telephony::IPhoneConstants;
-using Elastos::Droid::Internal::Telephony::IPhoneNotifier;
-using Elastos::Droid::Internal::Telephony::IPhoneProxy;
-using Elastos::Droid::Internal::Telephony::IPhoneFactory;
-using Elastos::Droid::Internal::Telephony::IPhoneSubInfo;
-using Elastos::Droid::Internal::Telephony::ISMSDispatcher;
-using Elastos::Droid::Internal::Telephony::ISmsBroadcastUndelivered;
-using Elastos::Droid::Internal::Telephony::ISubscription;
-using Elastos::Droid::Internal::Telephony::ISubscriptionController;
-using Elastos::Droid::Internal::Telephony::Gsm::IGsmSMSDispatcher;
-using Elastos::Droid::Internal::Telephony::Gsm::ISmsMessage;
-using Elastos::Droid::Internal::Telephony::Uicc::IIccRecords;
-using Elastos::Droid::Internal::Telephony::Uicc::IIsimRecords;
-using Elastos::Droid::Internal::Telephony::Uicc::IIsimUiccRecords;
-using Elastos::Droid::Internal::Telephony::Uicc::IRuimRecords;
-using Elastos::Droid::Internal::Telephony::Uicc::ISIMRecords;
-using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
-using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
-using Elastos::Droid::Internal::Telephony::IServiceStateTracker;
-using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
-using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
-
-using Elastos::IO::IFileDescriptor;
-using Elastos::IO::IPrintWriter;
-
-using static com::Android::Internal::Telephony::TelephonyProperties::IPROPERTY_ICC_OPERATOR_ALPHA;
-using static com::Android::Internal::Telephony::TelephonyProperties::IPROPERTY_ICC_OPERATOR_ISO_COUNTRY;
-using static com::Android::Internal::Telephony::TelephonyProperties::IPROPERTY_ICC_OPERATOR_NUMERIC;
-using static com::Android::Internal::Telephony::PhoneConstants::IEVENT_SUBSCRIPTION_ACTIVATED;
-using static com::Android::Internal::Telephony::PhoneConstants::IEVENT_SUBSCRIPTION_DEACTIVATED;
-
-public class CDMALTEPhone extends CDMAPhone {
-    static const String LOG_LTE_TAG = "CDMALTEPhone";
-    private static const Boolean DBG = TRUE;
-
-    /** CdmaLtePhone in addition to RuimRecords available from
-     * PhoneBase needs access to SIMRecords and IsimUiccRecords
-     */
-    private SIMRecords mSimRecords;
-    private IsimUiccRecords mIsimUiccRecords;
-
-    // Constructors
-    public CDMALTEPhone(Context context, CommandsInterface ci, PhoneNotifier notifier,
-            Int32 phoneId) {
-        This(context, ci, notifier, FALSE, phoneId);
-    }
-
-    public CDMALTEPhone(Context context, CommandsInterface ci, PhoneNotifier notifier,
-            Boolean unitTestMode, Int32 phoneId) {
-        Super(context, ci, notifier, phoneId);
-
-        Rlog->D(LOG_TAG, "CDMALTEPhone: constructor: sub = " + mPhoneId);
-
-        mDcTracker = new DcTracker(this);
-
-    }
-
-    // Constructors
-    public CDMALTEPhone(Context context, CommandsInterface ci, PhoneNotifier notifier) {
-        Super(context, ci, notifier, FALSE);
-    }
-
-    //@Override
-    protected void InitSstIcc() {
-        mSST = new CdmaLteServiceStateTracker(this);
-    }
-
-    //@Override
-    CARAPI Dispose() {
-        {    AutoLock syncLock(PhoneProxy.lockForRadioTechnologyChange);
-            If (mSimRecords != NULL) {
-                mSimRecords->UnregisterForRecordsLoaded(this);
-            }
-            super->Dispose();
-        }
-    }
-
-    //@Override
-    CARAPI RemoveReferences() {
-        super->RemoveReferences();
-    }
-
-    //@Override
-    CARAPI HandleMessage(Message msg) {
-        AsyncResult ar;
-        Message onComplete;
-
-        // messages to be handled whether or not the phone is being destroyed
-        // should only include messages which are being re-directed and do not use
-        // resources of the phone being destroyed
-        Switch (msg.what) {
-            // handle the select network completion callbacks.
-            case EVENT_SET_NETWORK_MANUAL_COMPLETE:
-            case EVENT_SET_NETWORK_AUTOMATIC_COMPLETE:
-                super->HandleMessage(msg);
-                return;
-        }
-
-        If (!mIsTheCurrentActivePhone) {
-            Rlog->E(LOG_TAG, "Received message " + msg +
-                    "[" + msg.what + "] while being destroyed. Ignoring.");
-            return;
-        }
-        Switch(msg.what) {
-            case EVENT_SIM_RECORDS_LOADED:
-                mSimRecordsLoadedRegistrants->NotifyRegistrants();
-                break;
-
-            case EVENT_SUBSCRIPTION_ACTIVATED:
-                Log("EVENT_SUBSCRIPTION_ACTIVATED");
-                OnSubscriptionActivated();
-                break;
-
-            case EVENT_SUBSCRIPTION_DEACTIVATED:
-                Log("EVENT_SUBSCRIPTION_DEACTIVATED");
-                OnSubscriptionDeactivated();
-                break;
-
-            default:
-                super->HandleMessage(msg);
-        }
-    }
-    //@Override
-    public PhoneConstants.DataState GetDataConnectionState(String apnType) {
-        PhoneConstants.DataState ret = PhoneConstants.DataState.DISCONNECTED;
-
-        If (mSST == NULL) {
-            // Radio Technology Change is ongoing, Dispose() and
-            // RemoveReferences() have already been called
-
-            ret = PhoneConstants.DataState.DISCONNECTED;
-        } else If (mSST->GetCurrentDataConnectionState() != ServiceState.STATE_IN_SERVICE &&
-                            mOosIsDisconnect) {
-            ret = PhoneConstants.DataState.DISCONNECTED;
-            Log("getDataConnectionState: Data is Out of Service. ret = " + ret);
-        } else If (mDcTracker->IsApnTypeEnabled(apnType) == FALSE) {
-            ret = PhoneConstants.DataState.DISCONNECTED;
-        } else {
-            Switch (mDcTracker->GetState(apnType)) {
-                case RETRYING:
-                case FAILED:
-                case IDLE:
-                    ret = PhoneConstants.DataState.DISCONNECTED;
-                    break;
-
-                case CONNECTED:
-                case DISCONNECTING:
-                    If (mCT.mState != PhoneConstants.State.IDLE &&
-                            !mSST->IsConcurrentVoiceAndDataAllowed()) {
-                        ret = PhoneConstants.DataState.SUSPENDED;
-                    } else {
-                        ret = PhoneConstants.DataState.CONNECTED;
-                    }
-                    break;
-
-                case CONNECTING:
-                case SCANNING:
-                    ret = PhoneConstants.DataState.CONNECTING;
-                    break;
-            }
-        }
-
-        Log("getDataConnectionState apnType=" + apnType + " ret=" + ret);
-        return ret;
-    }
-
-    /**
-     * Sets the "current" field in the telephony provider according to the
-     * build-time operator numeric property
-     *
-     * @return TRUE for success; FALSE otherwise.
-     */
-    //@Override
-    Boolean UpdateCurrentCarrierInProvider(String operatorNumeric) {
-        Boolean retVal;
-        If (mUiccController->GetUiccCardApplication(mPhoneId, UiccController.APP_FAM_3GPP) == NULL) {
-            If (DBG) Log("updateCurrentCarrierInProvider APP_FAM_3GPP == NULL");
-            retVal = super->UpdateCurrentCarrierInProvider(operatorNumeric);
-        } else {
-            If (DBG) Log("updateCurrentCarrierInProvider not updated");
-            retVal = TRUE;
-        }
-        If (DBG) Log("updateCurrentCarrierInProvider X retVal=" + retVal);
-        return retVal;
-    }
-
-    //@Override
-    public Boolean UpdateCurrentCarrierInProvider() {
-        Int64 currentDds = SubscriptionManager->GetDefaultDataSubId();
-        String operatorNumeric = GetOperatorNumeric();
-
-        Rlog->D(LOG_TAG, "updateCurrentCarrierInProvider: mSubscription = " + GetSubId()
-                + " currentDds = " + currentDds + " operatorNumeric = " + operatorNumeric);
-
-        If (!TextUtils->IsEmpty(operatorNumeric) && (GetSubId() == currentDds)) {
-            try {
-                Uri uri = Uri->WithAppendedPath(Telephony.Carriers.CONTENT_URI, "current");
-                ContentValues map = new ContentValues();
-                map->Put(Telephony.Carriers.NUMERIC, operatorNumeric);
-                mContext->GetContentResolver()->Insert(uri, map);
-                return TRUE;
-            } Catch (SQLException e) {
-                Rlog->E(LOG_TAG, "Can't store current operator", e);
-            }
-        }
-        return FALSE;
-    }
-
-    // return IMSI from CSIM as subscriber ID if available, otherwise reads from USIM
-    //@Override
-    public String GetSubscriberId() {
-        IccRecords r = (mIccRecords != NULL) ? mIccRecords->Get() : NULL;
-        If (r != NULL) {
-            String imsi = r->GetIMSI();
-            If (!TextUtils->IsEmpty(imsi)) {
-                Log("IMSI = " + imsi);
-                return imsi;
-            }
-        }
-
-        Log("IMSI undefined");
-        return "";
-    }
-
-
-    // fix CTS test expecting IMEI to be used as device ID when in LteOnCdma mode
-    //@Override
-    public String GetDeviceId() {
-        If (TelephonyManager->GetLteOnCdmaModeStatic() == PhoneConstants.LTE_ON_CDMA_TRUE) {
-            return mImei;
-        } else {
-            return super->GetDeviceId();
-        }
-    }
-
-    // return GID1 from USIM
-    //@Override
-    public String GetGroupIdLevel1() {
-        Return (mSimRecords != NULL) ? mSimRecords->GetGid1() : "";
-    }
-
-    //@Override
-    public String GetImei() {
-        return mImei;
-    }
-
-    //@Override
-    public String GetDeviceSvn() {
-        return mImeiSv;
-    }
-
-    //@Override
-    public IsimRecords GetIsimRecords() {
-        return mIsimUiccRecords;
-    }
-
-    //@Override
-    public String GetMsisdn() {
-        Return (mSimRecords != NULL) ? mSimRecords->GetMsisdnNumber() : NULL;
-    }
-
-    //@Override
-    CARAPI GetAvailableNetworks(Message response) {
-        mCi->GetAvailableNetworks(response);
-    }
-
-    //@Override
-    protected void OnUpdateIccAvailability() {
-        If (mSimRecords != NULL) {
-            mSimRecords->UnregisterForRecordsLoaded(this);
-        }
-
-        If (mUiccController == NULL ) {
-            return;
-        }
-
-        // Update IsimRecords
-        UiccCardApplication newUiccApplication =
-                mUiccController->GetUiccCardApplication(mPhoneId, UiccController.APP_FAM_IMS);
-        IsimUiccRecords newIsimUiccRecords = NULL;
-
-        If (newUiccApplication != NULL) {
-            newIsimUiccRecords = (IsimUiccRecords) newUiccApplication->GetIccRecords();
-        }
-        mIsimUiccRecords = newIsimUiccRecords;
-
-        // Update UsimRecords
-        newUiccApplication = mUiccController->GetUiccCardApplication(mPhoneId,
-                UiccController.APP_FAM_3GPP);
-        SIMRecords newSimRecords = NULL;
-        If (newUiccApplication != NULL) {
-            newSimRecords = (SIMRecords) newUiccApplication->GetIccRecords();
-        }
-        mSimRecords = newSimRecords;
-        If (mSimRecords != NULL) {
-            mSimRecords->RegisterForRecordsLoaded(this, EVENT_SIM_RECORDS_LOADED, NULL);
-        }
-
-        super->OnUpdateIccAvailability();
-    }
-
-    //@Override
-    protected void Init(Context context, PhoneNotifier notifier) {
-        mCi->SetPhoneType(PhoneConstants.PHONE_TYPE_CDMA);
-        mCT = new CdmaCallTracker(this);
-        mCdmaSSM = CdmaSubscriptionSourceManager->GetInstance(context, mCi, this,
-                EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, NULL);
-        mRuimPhoneBookInterfaceManager = new RuimPhoneBookInterfaceManager(this);
-        mSubInfo = new PhoneSubInfo(this);
-        mEriManager = new EriManager(this, context, EriManager.ERI_FROM_XML);
-
-        mCi->RegisterForAvailable(this, EVENT_RADIO_AVAILABLE, NULL);
-        mCi->RegisterForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, NULL);
-        mCi->RegisterForOn(this, EVENT_RADIO_ON, NULL);
-        mCi->SetOnSuppServiceNotification(this, EVENT_SSN, NULL);
-        mSST->RegisterForNetworkAttached(this, EVENT_REGISTERED_TO_NETWORK, NULL);
-        mCi->SetEmergencyCallbackMode(this, EVENT_EMERGENCY_CALLBACK_MODE_ENTER, NULL);
-        mCi->RegisterForExitEmergencyCallbackMode(this, EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE,
-                NULL);
-
-        PowerManager pm
-            = (PowerManager) context->GetSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm->NewWakeLock(PowerManager.PARTIAL_WAKE_LOCK,LOG_TAG);
-
-        // This is needed to handle phone process crashes
-        String inEcm = SystemProperties->Get(TelephonyProperties.PROPERTY_INECM_MODE, "FALSE");
-        mIsPhoneInEcmState = inEcm->Equals("TRUE");
-        If (mIsPhoneInEcmState) {
-            // Send a message which will invoke handleExitEmergencyCallbackMode
-            mCi->ExitEmergencyCallbackMode(ObtainMessage(EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE));
-        }
-
-        // get the string that specifies the carrier OTA Sp number
-        mCarrierOtaSpNumSchema = SystemProperties->Get(
-                TelephonyProperties.PROPERTY_OTASP_NUM_SCHEMA,"");
-
-        SetProperties();
-    }
-
-    private void OnSubscriptionActivated() {
-//        mSubscriptionData = SubscriptionManager->GetCurrentSubscription(mSubscription);
-
-        Log("SUBSCRIPTION ACTIVATED : slotId : " + mSubscriptionData.slotId
-                + " appid : " + mSubscriptionData.m3gpp2Index
-                + " subId : " + mSubscriptionData.subId
-                + " subStatus : " + mSubscriptionData.subStatus);
-
-        // Make sure properties are set for proper subscription.
-        SetProperties();
-
-        OnUpdateIccAvailability();
-        mSST->SendMessage(mSST->ObtainMessage(ServiceStateTracker.EVENT_ICC_CHANGED));
-        ((CdmaLteServiceStateTracker)mSST).UpdateCdmaSubscription();
-        ((DcTracker)mDcTracker).UpdateRecords();
-    }
-
-    private void OnSubscriptionDeactivated() {
-        Log("SUBSCRIPTION DEACTIVATED");
-        // resetSubSpecifics
-        mSubscriptionData = NULL;
-    }
-
-    // Set the properties per subscription
-    private void SetProperties() {
-        //Change the system property
-        SetSystemProperty(TelephonyProperties.CURRENT_ACTIVE_PHONE,
-                new Integer(PhoneConstants.PHONE_TYPE_CDMA).ToString());
-        // Sets operator alpha property by retrieving from build-time system property
-        String operatorAlpha = SystemProperties->Get("ro.cdma.home.operator.alpha");
-        If (!TextUtils->IsEmpty(operatorAlpha)) {
-            SetSystemProperty(PROPERTY_ICC_OPERATOR_ALPHA, operatorAlpha);
-        }
-
-        // Sets operator numeric property by retrieving from build-time system property
-        String operatorNumeric = SystemProperties->Get(PROPERTY_CDMA_HOME_OPERATOR_NUMERIC);
-        Log("update icc_operator_numeric=" + operatorNumeric);
-        If (!TextUtils->IsEmpty(operatorNumeric)) {
-            SetSystemProperty(PROPERTY_ICC_OPERATOR_NUMERIC, operatorNumeric);
-
-            SubscriptionController->GetInstance()->SetMccMnc(operatorNumeric, GetSubId());
-            // Sets iso country property by retrieving from build-time system property
-            SetIsoCountryProperty(operatorNumeric);
-            // Updates MCC MNC device configuration information
-            Log("update mccmnc=" + operatorNumeric);
-            MccTable->UpdateMccMncConfiguration(mContext, operatorNumeric, FALSE);
-        }
-        // Sets current entry in the telephony carrier table
-        UpdateCurrentCarrierInProvider();
-    }
-
-    //@Override
-    CARAPI SetSystemProperty(String property, String value) {
-        If(GetUnitTestMode()) {
-            return;
-        }
-        TelephonyManager->SetTelephonyProperty(property, GetSubId(), value);
-    }
-
-    public String GetSystemProperty(String property, String defValue) {
-        If(GetUnitTestMode()) {
-            return NULL;
-        }
-        return TelephonyManager->GetTelephonyProperty(property, GetSubId(), defValue);
-    }
-
-    CARAPI UpdateDataConnectionTracker() {
-        ((DcTracker)mDcTracker).Update();
-    }
-
-    CARAPI SetInternalDataEnabled(Boolean enable, Message onCompleteMsg) {
-        ((DcTracker)mDcTracker)
-                .SetInternalDataEnabled(enable, onCompleteMsg);
-    }
-
-    public Boolean SetInternalDataEnabledFlag(Boolean enable) {
-       Return ((DcTracker)mDcTracker)
-                .SetInternalDataEnabledFlag(enable);
-    }
-
-    /**
-     * @return operator numeric.
-     */
-    public String GetOperatorNumeric() {
-        String operatorNumeric = NULL;
-        IccRecords curIccRecords = NULL;
-        If (mCdmaSubscriptionSource == CDMA_SUBSCRIPTION_NV) {
-            operatorNumeric = SystemProperties->Get("ro.cdma.home.operator.numeric");
-        } else If (mCdmaSubscriptionSource == CDMA_SUBSCRIPTION_RUIM_SIM) {
-            curIccRecords = mSimRecords;
-            If (curIccRecords != NULL) {
-                operatorNumeric = curIccRecords->GetOperatorNumeric();
-            } else {
-                curIccRecords = mIccRecords->Get();
-                If (curIccRecords != NULL && (curIccRecords instanceof RuimRecords)) {
-                    RuimRecords csim = (RuimRecords) curIccRecords;
-                    operatorNumeric = csim->GetOperatorNumeric();
-                }
-            }
-        }
-        If (operatorNumeric == NULL) {
-            Rlog->E(LOG_TAG, "getOperatorNumeric: Cannot retrieve operatorNumeric:"
-                    + " mCdmaSubscriptionSource = " + mCdmaSubscriptionSource + " mIccRecords = "
-                    + ((curIccRecords != NULL) ? curIccRecords->GetRecordsLoaded() : NULL));
-        }
-
-        Rlog->D(LOG_TAG, "getOperatorNumeric: mCdmaSubscriptionSource = " + mCdmaSubscriptionSource
-                + " operatorNumeric = " + operatorNumeric);
-
-        return operatorNumeric;
-    }
-    CARAPI RegisterForAllDataDisconnected(Handler h, Int32 what, Object obj) {
-        ((DcTracker)mDcTracker)
-               .RegisterForAllDataDisconnected(h, what, obj);
-    }
-
-    CARAPI UnregisterForAllDataDisconnected(Handler h) {
-        ((DcTracker)mDcTracker)
-                .UnregisterForAllDataDisconnected(h);
-    }
-
-    //@Override
-    CARAPI RegisterForSimRecordsLoaded(Handler h, Int32 what, Object obj) {
-        mSimRecordsLoadedRegistrants->AddUnique(h, what, obj);
-    }
-
-    //@Override
-    CARAPI UnregisterForSimRecordsLoaded(Handler h) {
-        mSimRecordsLoadedRegistrants->Remove(h);
-    }
-
-
-    //@Override
-    protected void Log(String s) {
-            Rlog->D(LOG_LTE_TAG, s);
-    }
-
-    protected void Loge(String s) {
-            Rlog->E(LOG_LTE_TAG, s);
-    }
-
-    protected void Loge(String s, Throwable e) {
-        Rlog->E(LOG_LTE_TAG, s, e);
-    }
-
-    //@Override
-    CARAPI Dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw->Println("CDMALTEPhone extends:");
-        super->Dump(fd, pw, args);
-    }
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+
+#include "elastos/droid/internal/telephony/cdma/CDMALTEPhone.h"
+
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Cdma {
+
+//=====================================================================
+//                             CDMALTEPhone
+//=====================================================================
+CAR_INTERFACE_IMPL(CDMALTEPhone, CDMAPhone, ICDMALTEPhone);
+
+const String CDMALTEPhone::LOG_LTE_TAG("CDMALTEPhone");
+const Boolean CDMALTEPhone::DBG = true;
+
+CDMALTEPhone::CDMALTEPhone(
+    /* [in] */ IContext* context,
+    /* [in] */ ICommandsInterface* ci,
+    /* [in] */ IPhoneNotifier* notifier,
+    /* [in] */ Int32 phoneId)
+{
+    // ==================before translated======================
+    // this(context, ci, notifier, false, phoneId);
 }
+
+CDMALTEPhone::CDMALTEPhone(
+    /* [in] */ IContext* context,
+    /* [in] */ ICommandsInterface* ci,
+    /* [in] */ IPhoneNotifier* notifier,
+    /* [in] */ Boolean unitTestMode,
+    /* [in] */ Int32 phoneId)
+{
+    // ==================before translated======================
+    // super(context, ci, notifier, phoneId);
+    //
+    // Rlog.d(LOG_TAG, "CDMALTEPhone: constructor: sub = " + mPhoneId);
+    //
+    // mDcTracker = new DcTracker(this);
+}
+
+CDMALTEPhone::CDMALTEPhone(
+    /* [in] */ IContext* context,
+    /* [in] */ ICommandsInterface* ci,
+    /* [in] */ IPhoneNotifier* notifier)
+{
+    // ==================before translated======================
+    // super(context, ci, notifier, false);
+}
+
+ECode CDMALTEPhone::Dispose()
+{
+    // ==================before translated======================
+    // synchronized(PhoneProxy.lockForRadioTechnologyChange) {
+    //     if (mSimRecords != null) {
+    //         mSimRecords.unregisterForRecordsLoaded(this);
+    //     }
+    //     super.dispose();
+    // }
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::RemoveReferences()
+{
+    // ==================before translated======================
+    // super.removeReferences();
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    VALIDATE_NOT_NULL(msg);
+    // ==================before translated======================
+    // AsyncResult ar;
+    // Message onComplete;
+    //
+    // // messages to be handled whether or not the phone is being destroyed
+    // // should only include messages which are being re-directed and do not use
+    // // resources of the phone being destroyed
+    // switch (msg.what) {
+    //     // handle the select network completion callbacks.
+    //     case EVENT_SET_NETWORK_MANUAL_COMPLETE:
+    //     case EVENT_SET_NETWORK_AUTOMATIC_COMPLETE:
+    //         super.handleMessage(msg);
+    //         return;
+    // }
+    //
+    // if (!mIsTheCurrentActivePhone) {
+    //     Rlog.e(LOG_TAG, "Received message " + msg +
+    //             "[" + msg.what + "] while being destroyed. Ignoring.");
+    //     return;
+    // }
+    // switch(msg.what) {
+    //     case EVENT_SIM_RECORDS_LOADED:
+    //         mSimRecordsLoadedRegistrants.notifyRegistrants();
+    //         break;
+    //
+    //     case EVENT_SUBSCRIPTION_ACTIVATED:
+    //         log("EVENT_SUBSCRIPTION_ACTIVATED");
+    //         onSubscriptionActivated();
+    //         break;
+    //
+    //     case EVENT_SUBSCRIPTION_DEACTIVATED:
+    //         log("EVENT_SUBSCRIPTION_DEACTIVATED");
+    //         onSubscriptionDeactivated();
+    //         break;
+    //
+    //     default:
+    //         super.handleMessage(msg);
+    // }
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::GetDataConnectionState(
+    /* [in] */ const String& apnType,
+    /* [out] */ PhoneConstantsState* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // PhoneConstants.DataState ret = PhoneConstants.DataState.DISCONNECTED;
+    //
+    // if (mSST == null) {
+    //     // Radio Technology Change is ongoing, dispose() and
+    //     // removeReferences() have already been called
+    //
+    //     ret = PhoneConstants.DataState.DISCONNECTED;
+    // } else if (mSST.getCurrentDataConnectionState() != ServiceState.STATE_IN_SERVICE &&
+    //                     mOosIsDisconnect) {
+    //     ret = PhoneConstants.DataState.DISCONNECTED;
+    //     log("getDataConnectionState: Data is Out of Service. ret = " + ret);
+    // } else if (mDcTracker.isApnTypeEnabled(apnType) == false) {
+    //     ret = PhoneConstants.DataState.DISCONNECTED;
+    // } else {
+    //     switch (mDcTracker.getState(apnType)) {
+    //         case RETRYING:
+    //         case FAILED:
+    //         case IDLE:
+    //             ret = PhoneConstants.DataState.DISCONNECTED;
+    //             break;
+    //
+    //         case CONNECTED:
+    //         case DISCONNECTING:
+    //             if (mCT.mState != PhoneConstants.State.IDLE &&
+    //                     !mSST.isConcurrentVoiceAndDataAllowed()) {
+    //                 ret = PhoneConstants.DataState.SUSPENDED;
+    //             } else {
+    //                 ret = PhoneConstants.DataState.CONNECTED;
+    //             }
+    //             break;
+    //
+    //         case CONNECTING:
+    //         case SCANNING:
+    //             ret = PhoneConstants.DataState.CONNECTING;
+    //             break;
+    //     }
+    // }
+    //
+    // log("getDataConnectionState apnType=" + apnType + " ret=" + ret);
+    // return ret;
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::UpdateCurrentCarrierInProvider(
+    /* [in] */ const String& operatorNumeric,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+    // ==================before translated======================
+    // boolean retVal;
+    // if (mUiccController.getUiccCardApplication(mPhoneId, UiccController.APP_FAM_3GPP) == null) {
+    //     if (DBG) log("updateCurrentCarrierInProvider APP_FAM_3GPP == null");
+    //     retVal = super.updateCurrentCarrierInProvider(operatorNumeric);
+    // } else {
+    //     if (DBG) log("updateCurrentCarrierInProvider not updated");
+    //     retVal = true;
+    // }
+    // if (DBG) log("updateCurrentCarrierInProvider X retVal=" + retVal);
+    // return retVal;
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::UpdateCurrentCarrierInProvider(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+    // ==================before translated======================
+    // long currentDds = SubscriptionManager.getDefaultDataSubId();
+    // String operatorNumeric = getOperatorNumeric();
+    //
+    // Rlog.d(LOG_TAG, "updateCurrentCarrierInProvider: mSubscription = " + getSubId()
+    //         + " currentDds = " + currentDds + " operatorNumeric = " + operatorNumeric);
+    //
+    // if (!TextUtils.isEmpty(operatorNumeric) && (getSubId() == currentDds)) {
+    //     try {
+    //         Uri uri = Uri.withAppendedPath(Telephony.Carriers.CONTENT_URI, "current");
+    //         ContentValues map = new ContentValues();
+    //         map.put(Telephony.Carriers.NUMERIC, operatorNumeric);
+    //         mContext.getContentResolver().insert(uri, map);
+    //         return true;
+    //     } catch (SQLException e) {
+    //         Rlog.e(LOG_TAG, "Can't store current operator", e);
+    //     }
+    // }
+    // return false;
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::GetSubscriberId(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+    // ==================before translated======================
+    // IccRecords r = (mIccRecords != null) ? mIccRecords.get() : null;
+    // if (r != null) {
+    //     String imsi = r.getIMSI();
+    //     if (!TextUtils.isEmpty(imsi)) {
+    //         log("IMSI = " + imsi);
+    //         return imsi;
+    //     }
+    // }
+    //
+    // log("IMSI undefined");
+    // return "";
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::GetDeviceId(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+    // ==================before translated======================
+    // if (TelephonyManager.getLteOnCdmaModeStatic() == PhoneConstants.LTE_ON_CDMA_TRUE) {
+    //     return mImei;
+    // } else {
+    //     return super.getDeviceId();
+    // }
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::GetGroupIdLevel1(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+    // ==================before translated======================
+    // return (mSimRecords != null) ? mSimRecords.getGid1() : "";
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::GetImei(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+    // ==================before translated======================
+    // return mImei;
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::GetDeviceSvn(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+    // ==================before translated======================
+    // return mImeiSv;
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::GetIsimRecords(
+    /* [out] */ IIsimRecords** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+    // ==================before translated======================
+    // return mIsimUiccRecords;
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::GetMsisdn(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+    // ==================before translated======================
+    // return (mSimRecords != null) ? mSimRecords.getMsisdnNumber() : null;
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::GetAvailableNetworks(
+    /* [in] */ IMessage* response)
+{
+    VALIDATE_NOT_NULL(response);
+    // ==================before translated======================
+    // mCi.getAvailableNetworks(response);
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::SetSystemProperty(
+    /* [in] */ const String& property,
+    /* [in] */ const String& value)
+{
+    // ==================before translated======================
+    // if(getUnitTestMode()) {
+    //     return;
+    // }
+    // TelephonyManager.setTelephonyProperty(property, getSubId(), value);
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::GetSystemProperty(
+    /* [in] */ const String& property,
+    /* [in] */ const String& defValue,
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if(getUnitTestMode()) {
+    //     return null;
+    // }
+    // return TelephonyManager.getTelephonyProperty(property, getSubId(), defValue);
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::UpdateDataConnectionTracker()
+{
+    // ==================before translated======================
+    // ((DcTracker)mDcTracker).update();
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::SetInternalDataEnabled(
+    /* [in] */ Boolean enable,
+    /* [in] */ IMessage* onCompleteMsg)
+{
+    VALIDATE_NOT_NULL(onCompleteMsg);
+    // ==================before translated======================
+    // ((DcTracker)mDcTracker)
+    //         .setInternalDataEnabled(enable, onCompleteMsg);
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::SetInternalDataEnabledFlag(
+    /* [in] */ Boolean enable,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return ((DcTracker)mDcTracker)
+    //          .setInternalDataEnabledFlag(enable);
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::GetOperatorNumeric(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // String operatorNumeric = null;
+    // IccRecords curIccRecords = null;
+    // if (mCdmaSubscriptionSource == CDMA_SUBSCRIPTION_NV) {
+    //     operatorNumeric = SystemProperties.get("ro.cdma.home.operator.numeric");
+    // } else if (mCdmaSubscriptionSource == CDMA_SUBSCRIPTION_RUIM_SIM) {
+    //     curIccRecords = mSimRecords;
+    //     if (curIccRecords != null) {
+    //         operatorNumeric = curIccRecords.getOperatorNumeric();
+    //     } else {
+    //         curIccRecords = mIccRecords.get();
+    //         if (curIccRecords != null && (curIccRecords instanceof RuimRecords)) {
+    //             RuimRecords csim = (RuimRecords) curIccRecords;
+    //             operatorNumeric = csim.getOperatorNumeric();
+    //         }
+    //     }
+    // }
+    // if (operatorNumeric == null) {
+    //     Rlog.e(LOG_TAG, "getOperatorNumeric: Cannot retrieve operatorNumeric:"
+    //             + " mCdmaSubscriptionSource = " + mCdmaSubscriptionSource + " mIccRecords = "
+    //             + ((curIccRecords != null) ? curIccRecords.getRecordsLoaded() : null));
+    // }
+    //
+    // Rlog.d(LOG_TAG, "getOperatorNumeric: mCdmaSubscriptionSource = " + mCdmaSubscriptionSource
+    //         + " operatorNumeric = " + operatorNumeric);
+    //
+    // return operatorNumeric;
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::RegisterForAllDataDisconnected(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
+{
+    // ==================before translated======================
+    // ((DcTracker)mDcTracker)
+    //        .registerForAllDataDisconnected(h, what, obj);
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::UnregisterForAllDataDisconnected(
+    /* [in] */ IHandler* h)
+{
+    // ==================before translated======================
+    // ((DcTracker)mDcTracker)
+    //         .unregisterForAllDataDisconnected(h);
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::RegisterForSimRecordsLoaded(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
+{
+    // ==================before translated======================
+    // mSimRecordsLoadedRegistrants.addUnique(h, what, obj);
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::UnregisterForSimRecordsLoaded(
+    /* [in] */ IHandler* h)
+{
+    // ==================before translated======================
+    // mSimRecordsLoadedRegistrants.remove(h);
+    assert(0);
+    return NOERROR;
+}
+
+ECode CDMALTEPhone::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    // ==================before translated======================
+    // pw.println("CDMALTEPhone extends:");
+    // super.dump(fd, pw, args);
+    assert(0);
+    return NOERROR;
+}
+
+void CDMALTEPhone::InitSstIcc()
+{
+    // ==================before translated======================
+    // mSST = new CdmaLteServiceStateTracker(this);
+    assert(0);
+}
+
+void CDMALTEPhone::OnUpdateIccAvailability()
+{
+    // ==================before translated======================
+    // if (mSimRecords != null) {
+    //     mSimRecords.unregisterForRecordsLoaded(this);
+    // }
+    //
+    // if (mUiccController == null ) {
+    //     return;
+    // }
+    //
+    // // Update IsimRecords
+    // UiccCardApplication newUiccApplication =
+    //         mUiccController.getUiccCardApplication(mPhoneId, UiccController.APP_FAM_IMS);
+    // IsimUiccRecords newIsimUiccRecords = null;
+    //
+    // if (newUiccApplication != null) {
+    //     newIsimUiccRecords = (IsimUiccRecords) newUiccApplication.getIccRecords();
+    // }
+    // mIsimUiccRecords = newIsimUiccRecords;
+    //
+    // // Update UsimRecords
+    // newUiccApplication = mUiccController.getUiccCardApplication(mPhoneId,
+    //         UiccController.APP_FAM_3GPP);
+    // SIMRecords newSimRecords = null;
+    // if (newUiccApplication != null) {
+    //     newSimRecords = (SIMRecords) newUiccApplication.getIccRecords();
+    // }
+    // mSimRecords = newSimRecords;
+    // if (mSimRecords != null) {
+    //     mSimRecords.registerForRecordsLoaded(this, EVENT_SIM_RECORDS_LOADED, null);
+    // }
+    //
+    // super.onUpdateIccAvailability();
+    assert(0);
+}
+
+void CDMALTEPhone::Init(
+    /* [in] */ IContext* context,
+    /* [in] */ IPhoneNotifier* notifier)
+{
+    // ==================before translated======================
+    // mCi.setPhoneType(PhoneConstants.PHONE_TYPE_CDMA);
+    // mCT = new CdmaCallTracker(this);
+    // mCdmaSSM = CdmaSubscriptionSourceManager.getInstance(context, mCi, this,
+    //         EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, null);
+    // mRuimPhoneBookInterfaceManager = new RuimPhoneBookInterfaceManager(this);
+    // mSubInfo = new PhoneSubInfo(this);
+    // mEriManager = new EriManager(this, context, EriManager.ERI_FROM_XML);
+    //
+    // mCi.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);
+    // mCi.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
+    // mCi.registerForOn(this, EVENT_RADIO_ON, null);
+    // mCi.setOnSuppServiceNotification(this, EVENT_SSN, null);
+    // mSST.registerForNetworkAttached(this, EVENT_REGISTERED_TO_NETWORK, null);
+    // mCi.setEmergencyCallbackMode(this, EVENT_EMERGENCY_CALLBACK_MODE_ENTER, null);
+    // mCi.registerForExitEmergencyCallbackMode(this, EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE,
+    //         null);
+    //
+    // PowerManager pm
+    //     = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+    // mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,LOG_TAG);
+    //
+    // // This is needed to handle phone process crashes
+    // String inEcm = SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
+    // mIsPhoneInEcmState = inEcm.equals("true");
+    // if (mIsPhoneInEcmState) {
+    //     // Send a message which will invoke handleExitEmergencyCallbackMode
+    //     mCi.exitEmergencyCallbackMode(obtainMessage(EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE));
+    // }
+    //
+    // // get the string that specifies the carrier OTA Sp number
+    // mCarrierOtaSpNumSchema = SystemProperties.get(
+    //         TelephonyProperties.PROPERTY_OTASP_NUM_SCHEMA,"");
+    //
+    // setProperties();
+    assert(0);
+}
+
+void CDMALTEPhone::Log(
+    /* [in] */ const String& s)
+{
+    // ==================before translated======================
+    // Rlog.d(LOG_LTE_TAG, s);
+    assert(0);
+}
+
+void CDMALTEPhone::Loge(
+    /* [in] */ const String& s)
+{
+    // ==================before translated======================
+    // Rlog.e(LOG_LTE_TAG, s);
+    assert(0);
+}
+
+//void CDMALTEPhone::Loge(
+//    /* [in] */ const String& s,
+//    /* [in] */ Throwable* e)
+//{
+//    // ==================before translated======================
+//    // Rlog.e(LOG_LTE_TAG, s, e);
+//    assert(0);
+//}
+
+void CDMALTEPhone::OnSubscriptionActivated()
+{
+    // ==================before translated======================
+    // //        mSubscriptionData = SubscriptionManager.getCurrentSubscription(mSubscription);
+    //
+    //         log("SUBSCRIPTION ACTIVATED : slotId : " + mSubscriptionData.slotId
+    //                 + " appid : " + mSubscriptionData.m3gpp2Index
+    //                 + " subId : " + mSubscriptionData.subId
+    //                 + " subStatus : " + mSubscriptionData.subStatus);
+    //
+    //         // Make sure properties are set for proper subscription.
+    //         setProperties();
+    //
+    //         onUpdateIccAvailability();
+    //         mSST.sendMessage(mSST.obtainMessage(ServiceStateTracker.EVENT_ICC_CHANGED));
+    //         ((CdmaLteServiceStateTracker)mSST).updateCdmaSubscription();
+    //         ((DcTracker)mDcTracker).updateRecords();
+    assert(0);
+}
+
+void CDMALTEPhone::OnSubscriptionDeactivated()
+{
+    // ==================before translated======================
+    // log("SUBSCRIPTION DEACTIVATED");
+    // // resetSubSpecifics
+    // mSubscriptionData = null;
+    assert(0);
+}
+
+void CDMALTEPhone::SetProperties()
+{
+    // ==================before translated======================
+    // //Change the system property
+    // setSystemProperty(TelephonyProperties.CURRENT_ACTIVE_PHONE,
+    //         new Integer(PhoneConstants.PHONE_TYPE_CDMA).toString());
+    // // Sets operator alpha property by retrieving from build-time system property
+    // String operatorAlpha = SystemProperties.get("ro.cdma.home.operator.alpha");
+    // if (!TextUtils.isEmpty(operatorAlpha)) {
+    //     setSystemProperty(PROPERTY_ICC_OPERATOR_ALPHA, operatorAlpha);
+    // }
+    //
+    // // Sets operator numeric property by retrieving from build-time system property
+    // String operatorNumeric = SystemProperties.get(PROPERTY_CDMA_HOME_OPERATOR_NUMERIC);
+    // log("update icc_operator_numeric=" + operatorNumeric);
+    // if (!TextUtils.isEmpty(operatorNumeric)) {
+    //     setSystemProperty(PROPERTY_ICC_OPERATOR_NUMERIC, operatorNumeric);
+    //
+    //     SubscriptionController.getInstance().setMccMnc(operatorNumeric, getSubId());
+    //     // Sets iso country property by retrieving from build-time system property
+    //     setIsoCountryProperty(operatorNumeric);
+    //     // Updates MCC MNC device configuration information
+    //     log("update mccmnc=" + operatorNumeric);
+    //     MccTable.updateMccMncConfiguration(mContext, operatorNumeric, false);
+    // }
+    // // Sets current entry in the telephony carrier table
+    // updateCurrentCarrierInProvider();
+    assert(0);
+}
+
+} // namespace Cdma
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

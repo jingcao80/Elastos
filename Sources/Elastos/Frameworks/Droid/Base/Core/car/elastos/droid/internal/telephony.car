@@ -125,6 +125,7 @@ module
 
     merge("telephony/cdma/sms/BearerData.car");
     merge("telephony/cdma/sms/CdmaSmsAddress.car");
+    merge("telephony/cdma/sms/CdmaSmsSubaddress.car");
     merge("telephony/cdma/sms/SmsEnvelope.car");
     merge("telephony/cdma/sms/UserData.car");
 
