@@ -13,6 +13,7 @@
 #include <Elastos.Droid.Graphics.h>
 #include <Elastos.Droid.Net.h>
 #include <Elastos.Droid.View.h>
+#include <Elastos.CoreLibrary.Libcore.h>
 #include <elastos/core/AutoLock.h>
 #include "elastos/core/CoreUtils.h"
 #include "elastos/core/StringUtils.h"
@@ -92,6 +93,7 @@ using Elastos::Core::IComparable;
 using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
 using Elastos::IO::CFile;
+using Elastos::IO::ICloseable;
 using Elastos::IO::IOutputStream;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashSet;
@@ -102,6 +104,8 @@ using Elastos::Utility::IIterator;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::Logging::Slogger;
 using Org::Xmlpull::V1::IXmlSerializer;
+using Libcore::IO::CIoUtils;
+using Libcore::IO::IIoUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -7689,14 +7693,16 @@ void AppWidgetServiceImpl::LoadGroupStateLocked(
 
         // No file written for this user - nothing to do.
         AutoPtr<IAtomicFile> file = GetSavedStateFile(profileId);
-        //try {
-            AutoPtr<IFileInputStream> stream;
-            file->OpenRead((IFileInputStream**)&stream);
+        AutoPtr<IFileInputStream> stream;
+        if (FAILED(file->OpenRead((IFileInputStream**)&stream))) {
+            Slogger::W(TAG, "Failed to read state: ");
+        }
+        else {
             version = ReadProfileStateFromFileLocked(stream, profileId, loadedWidgets);
-            //IoUtils::CloseQuietly(stream);
-        //} catch (FileNotFoundException e) {
-            //Slog.w(TAG, "Failed to read state: " + e);
-        //}
+            AutoPtr<IIoUtils> ioUtils;
+            CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+            ioUtils->CloseQuietly(ICloseable::Probe(stream));
+        }
     }
 
     if (version >= 0) {

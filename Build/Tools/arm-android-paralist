@@ -384,6 +384,10 @@
   Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider Elastos.Droid.SettingsProvider.car
 > Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider
 
+# ==== build DefContainer ====
+  Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService/src/elastos/droid/defcontainer Elastos.Droid.DefContainer.car
+> Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService/src/elastos/droid/defcontainer
+
 # ==== build DevSamples ====
  Elastos/Frameworks/Droid/DevSamples/ImageDemo Elastos.DevSamples.ImageDemo.car
 > Elastos/Frameworks/Droid/DevSamples/ImageDemo
@@ -400,10 +404,10 @@
 #- Elastos/Frameworks/Droid/Commands/Am/src
 #> Elastos/Frameworks/Droid/Commands/Am
 #> Elastos/Frameworks/Droid/Commands
-#  Elastos/Frameworks/Droid/Commands/Pm/src/elastos/droid/commands/pm Elastos.Droid.Commands.Pm.car
-#> Elastos/Frameworks/Droid/Commands/Pm/src/elastos/droid/commands/pm
-#> Elastos/Frameworks/Droid/Commands/Pm/ecx Elastos.Droid.Commands.Pm.eco
-#> Elastos/Frameworks/Droid/Commands/Pm/ecx
+  Elastos/Frameworks/Droid/Commands/Pm/src/elastos/droid/commands/pm Elastos.Droid.Commands.Pm.car
+> Elastos/Frameworks/Droid/Commands/Pm/src/elastos/droid/commands/pm
+> Elastos/Frameworks/Droid/Commands/Pm/ecx Elastos.Droid.Commands.Pm.eco
+> Elastos/Frameworks/Droid/Commands/Pm/ecx
 
 # ==== build DCAR ====
 - Elastos/Frameworks/Droid/DCARServer

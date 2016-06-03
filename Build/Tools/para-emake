@@ -336,7 +336,7 @@ build_eco() {
     if [[ "$XDK_TARGETS/$1" -ot "$eco_ts_path" ]]; then
         return
     fi
-    lube -C"$1" -f -T header -T headercpp
+    lube -C"$1" -f -T header2 -T headercpp
     sleep 1&&touch "$eco_ts_path"
 }
 
