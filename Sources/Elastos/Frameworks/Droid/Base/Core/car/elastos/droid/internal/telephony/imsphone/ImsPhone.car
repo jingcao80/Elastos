@@ -19,6 +19,7 @@ module
      * @Involve
      * interface IImsPhoneBase
      */
+    [local]
     interface IImsPhone {
 
         const String CS_FALLBACK = "cs_fallback";

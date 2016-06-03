@@ -12,6 +12,7 @@ module
      * @Involve
      * interface IStateMachine
      */
+    [local]
     interface IWakeLockStateMachine {
         /** New message to process. */
         const Int32 EVENT_NEW_SMS_MESSAGE = 1;

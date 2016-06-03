@@ -255,7 +255,7 @@ public:
      * @return true if the provider was successfully loaded, false otherwise
      */
     virtual CARAPI OnCreate(
-        /* [in] */ Boolean* succeeded) = 0;
+        /* [out] */ Boolean* succeeded) = 0;
 
     /**
      * {@inheritDoc}

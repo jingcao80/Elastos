@@ -17,6 +17,7 @@ module
     interface IGsmCellBroadcastHandler {
     }
 
+    [local]
     interface IGsmCellBroadcastHandlerHelper {
         /**
          * Create a new CellBroadcastHandler.

@@ -11,6 +11,7 @@ module
     namespace Telephony {
     namespace ImsPhone {
 
+    [local]
     interface IImsPhoneFactory {
         /**
          * Makes a {@link ImsPhone} object.

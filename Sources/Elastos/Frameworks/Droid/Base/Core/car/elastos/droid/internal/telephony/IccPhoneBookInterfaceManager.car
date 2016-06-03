@@ -2,7 +2,7 @@
 module
 {
     interface Elastos.Droid.Content.IContentValues;
-    // interface Elastos.Droid.Internal.Telephony.Uicc.IUiccCard;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUiccCard;
 
     using interface Elastos.Utility.IList;
 
@@ -12,11 +12,10 @@ module
     namespace Telephony {
 
     interface IIccPhoneBookInterfaceManager {
-
         Dispose();
 
-        // SetIccCard(
-        //     [in] IUiccCard* card);
+        SetIccCard(
+            [in] IUiccCard* card);
 
         /**
          * Replace oldAdn with newAdn in ADN-like record in EF

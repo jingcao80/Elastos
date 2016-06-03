@@ -29,5 +29,12 @@ SOURCES += SmsAddress.cpp
 SOURCES += WakeLockStateMachine.cpp
 SOURCES += CellBroadcastHandler.cpp
 SOURCES += Connection.cpp
+SOURCES += DefaultPhoneNotifier.cpp
+SOURCES += HardwareConfig.cpp
+SOURCES += HbpcdLookup.cpp
+SOURCES += IccPhoneBookInterfaceManager.cpp
+SOURCES += IccPhoneBookInterfaceManagerProxy.cpp
+SOURCES += HbpcdUtils.cpp
+SOURCES += IccProvider.cpp
 
 ELASTOS_LIBS += utility/utility.lib

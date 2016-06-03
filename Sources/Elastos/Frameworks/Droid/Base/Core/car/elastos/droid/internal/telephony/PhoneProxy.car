@@ -4,7 +4,7 @@ module
     interface Elastos.Droid.Os.IHandler;
     interface Elastos.Droid.Os.IMessage;
     interface Elastos.Droid.Internal.Telephony.IPhoneSubInfoProxy;
-    // interface Elastos.Droid.Internal.Telephony.Uicc.IIccFileHandler;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccFileHandler;
 
     namespace Elastos {
     namespace Droid {
@@ -27,8 +27,8 @@ module
         GetIccPhoneBookInterfaceManagerProxy(
             [out] IIccPhoneBookInterfaceManagerProxy** result);
 
-        // GetIccFileHandler(
-        //     [out] IIccFileHandler** result);
+        GetIccFileHandler(
+            [out] IIccFileHandler** result);
 
         IsImsVtCallPresent(
             [out] Boolean* result);
