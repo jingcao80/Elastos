@@ -5,6 +5,7 @@
 #include "_Elastos_Droid_Server_CAppOpsService.h"
 #include <elastos/droid/os/Runnable.h>
 #include <elastos/droid/os/AsyncTask.h>
+#include <elastos/droid/server/PermissionDialogReqQueue.h>
 #include <elastos/droid/utility/SparseArray.h>
 #include <elastos/utility/etl/HashSet.h>
 #include <Elastos.Droid.App.h>
@@ -129,32 +130,11 @@ private:
         Int32 mNesting;
         Int32 mNoteOpCount;
         Int32 mStartOpCount;
-        // AutoPtr<IPermissionDialogReqQueue> mDialogReqQueue;
+        AutoPtr<PermissionDialogReqQueue> mDialogReqQueue;
         AutoPtr<IArrayList> mClientTokens;
 
         Int32 mAllowedCount;
         Int32 mIgnoredCount;
-    };
-
-    class AskRunnable
-        : public Runnable
-    {
-    public:
-        // AskRunnable(
-        //     /* [in] */ Int32 code,
-        //     /* [in] */ Int32 uid,
-        //      [in]  String packageName,
-        //     /* [in] */ Op* op,
-        //     /* [in] */ PermissionDialogReq* request);
-
-        CARAPI Run();
-
-    public:
-        Int32 mCode;
-        Int32 mUid;
-        String mPackageName;
-        AutoPtr<Op> mOp;
-        // AutoPtr<PermissionDialogReq> mRequest;
     };
 
     class Ops
@@ -181,6 +161,8 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("CAppOpsService::Callback")
+
         Callback(
             /* [in] */ IIAppOpsCallback* callback,
             /* [in] */ CAppOpsService* host);
@@ -189,9 +171,6 @@ private:
 
         //@Override
         CARAPI ProxyDied();
-
-        CARAPI ToString(
-            /* [out] */ String* str);
 
     private:
         friend class CAppOpsService;
@@ -238,6 +217,30 @@ private:
 
     private:
         static const AutoPtr<HashSet<String> > NO_EXCEPTIONS;// = new ArraySet<String>();
+    };
+
+public:
+    class AskRunnable
+        : public Runnable
+    {
+    public:
+        AskRunnable(
+            /* [in] */ Int32 code,
+            /* [in] */ Int32 uid,
+            /* [in] */ const String& packageName,
+            /* [in] */ Op* op,
+            /* [in] */ PermissionDialogReqQueue::PermissionDialogReq* request,
+            /* [in] */ CAppOpsService* host);
+
+        CARAPI Run();
+
+    public:
+        Int32 mCode;
+        Int32 mUid;
+        String mPackageName;
+        AutoPtr<Op> mOp;
+        AutoPtr<PermissionDialogReqQueue::PermissionDialogReq> mRequest;
+        CAppOpsService* mHost;
     };
 
 public:
@@ -480,11 +483,11 @@ private:
         /* [in] */ Int32 uid,
         /* [in] */ const String& packageName);
 
-    // AutoPtr<PermissionDialogReq> AskOperationLocked(
-    //     /* [in] */ Int32 code,
-    //     /* [in] */ Int32 uid,
-    //     /* [in] */ String packageName,
-    //     /* [in] */ Op* op);
+    AutoPtr<PermissionDialogReqQueue::PermissionDialogReq> AskOperationLocked(
+        /* [in] */ Int32 code,
+        /* [in] */ Int32 uid,
+        /* [in] */ const String& packageName,
+        /* [in] */ Op* op);
 
     CARAPI_(void) PrintOperationLocked(
         /* [in] */ Op* op,

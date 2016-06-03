@@ -1199,7 +1199,7 @@ Boolean CThemeService::UpdateWallpaper(
         // try {
             ec = wm->Clear(FALSE);
         // } catch (IOException e) {
-            if (ec = (ECode)E_IO_EXCEPTION) {
+            if (ec == (ECode)E_IO_EXCEPTION) {
                 return FALSE;
             }
         // } finally {
@@ -1521,13 +1521,10 @@ void CThemeService::PostFinish(
         AutoPtr<IInterface> obj;
         mClients->GetBroadcastItem(i, (IInterface**)&obj);
         IIThemeChangeListener* listener = IIThemeChangeListener::Probe(obj);
-        // try {
-            ec = listener->OnFinish(isSuccess);
-        // } catch(RemoteException e) {
-            if (FAILED(ec)) {
-                Logger::W(TAG, "Unable to post progress to client listener");
-            }
-        // }
+        ec = listener->OnFinish(isSuccess);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "Unable to post progress to client listener");
+        }
     }
     mClients->FinishBroadcast();
 
@@ -1547,13 +1544,10 @@ void CThemeService::PostFinishedProcessing(
         AutoPtr<IInterface> obj;
         mProcessingListeners->GetBroadcastItem(i, (IInterface**)&obj);
         IIThemeProcessingListener* listener = IIThemeProcessingListener::Probe(obj);
-        // try {
-            // listener.onFinishedProcessing(pkgName);
-        // } catch(RemoteException e) {
-            if (FAILED(ec)) {
-                Logger::W(TAG, "Unable to post progress to listener");
-            }
-        // }
+        ec =listener->OnFinishedProcessing(pkgName);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "Unable to post progress to listener");
+        }
     }
     mProcessingListeners->FinishBroadcast();
 }

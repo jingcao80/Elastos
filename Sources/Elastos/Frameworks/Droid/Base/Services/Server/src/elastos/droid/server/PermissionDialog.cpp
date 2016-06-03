@@ -1,9 +1,12 @@
 #include <elastos/droid/R.h>
 #include "elastos/droid/server/PermissionDialog.h"
+#include "elastos/droid/server/CAppOpsService.h"
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
 
-using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
@@ -13,7 +16,9 @@ using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::Widget::ICheckable;
 using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -54,62 +59,79 @@ ECode PermissionDialog::MyHandler::HandleMessage(
             remember = FALSE;
     }
 
-    mHost->mService->NotifyOperation(mHost->mCode, mHost->mUid, mHost->mPackageName, mode, remember);
-    IDialogInterface::Probe(this)->Dismiss();
+    CAppOpsService* aos = (CAppOpsService*)mHost->mService.Get();
+    aos->NotifyOperation(mHost->mCode, mHost->mUid, mHost->mPackageName, mode, remember);
+    mHost->Dismiss();
     return NOERROR;
 }
 
 //------------------------------------------------------------------
 //               PermissionDialog
 //------------------------------------------------------------------
-PermissionDialog::PermissionDialog(
+
+CAR_INTERFACE_IMPL(PermissionDialog, BasePermissionDialog, IPermissionDialog)
+
+PermissionDialog::PermissionDialog()
+    : mCode(0)
+    , mUid(0)
+{}
+
+ECode PermissionDialog::constructor(
     /* [in] */ IContext* context,
-    /* [in] */ CAppOpsService* service,
+    /* [in] */ IIAppOpsService* service,
     /* [in] */ Int32 code,
     /* [in] */ Int32 uid,
     /* [in] */ const String& packageName)
-    : mContext(context)
-    , mService(service)
-    , mCode(code)
-    , mUid(uid)
-    , mPackageName(packageName)
 {
+    BasePermissionDialog::constructor(context);
+
+    mService = service;
+    mCode = code;
+    mUid = uid;
+    mPackageName = packageName;
+
+    mContext = context;
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
 
     res->GetTextArray(R::array::app_ops_labels, (ArrayOf<ICharSequence*>**)&mOpLabels);
 
-    IDialog::Probe(this)->SetCancelable(FALSE);
+    SetCancelable(FALSE);
 
-    mHandler = new MyHandler(this);
+    AutoPtr<MyHandler> mh = new MyHandler(this);
+    mh->constructor();
+    mHandler = (IHandler*)mh.Get();
 
     String str;
     res->GetString(R::string::allow, &str);
     AutoPtr<IMessage> message;
     mHandler->ObtainMessage(ACTION_ALLOWED, (IMessage**)&message);
-    IAlertDialog::Probe(this)->SetButton(IDialogInterface::BUTTON_POSITIVE,
-              StringUtils::ParseCharSequence(str), message);
+    SetButton(IDialogInterface::BUTTON_POSITIVE, CoreUtils::Convert(str), message);
 
     res->GetString(R::string::deny, &str);
     message = NULL;
     mHandler->ObtainMessage(ACTION_IGNORED, (IMessage**)&message);
-    IAlertDialog::Probe(this)->SetButton(IDialogInterface::BUTTON_NEGATIVE,
-                StringUtils::ParseCharSequence(str), message);
+    SetButton(IDialogInterface::BUTTON_NEGATIVE, CoreUtils::Convert(str), message);
+
     res->GetString(R::string::privacy_guard_dialog_title, &str);
-    IDialog::Probe(this)->SetTitle(StringUtils::ParseCharSequence(str));
+    SetTitle(CoreUtils::Convert(str));
+
     AutoPtr<IWindow> window;
-    IDialog::Probe(this)->GetWindow((IWindow**)&window);
+    GetWindow((IWindow**)&window);
     AutoPtr<IWindowManagerLayoutParams> attrs;
     window->GetAttributes((IWindowManagerLayoutParams**)&attrs);
-    attrs->SetTitle(StringUtils::ParseCharSequence(String("Permission info: ") + GetAppName(mPackageName)));
+    StringBuilder sb("Permission info: ");
+    sb += GetAppName(mPackageName);
+    attrs->SetTitle(CoreUtils::Convert(sb.ToString()));
     Int32 pFlags;
     attrs->GetPrivateFlags(&pFlags);
     pFlags |= IWindowManagerLayoutParams::PRIVATE_FLAG_SYSTEM_ERROR
             | IWindowManagerLayoutParams::PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
     attrs->SetPrivateFlags(pFlags);
     window->SetAttributes(attrs);
+
     AutoPtr<ILayoutInflater> layoutInflater;
-    IDialog::Probe(this)->GetLayoutInflater((ILayoutInflater**)&layoutInflater);
+    GetLayoutInflater((ILayoutInflater**)&layoutInflater);
     layoutInflater->Inflate(R::layout::permission_confirmation_dialog, NULL, (IView**)&mView);
     AutoPtr<IView> obj;
     mView->FindViewById(R::id::permission_text, (IView**)&obj);
@@ -123,19 +145,18 @@ PermissionDialog::PermissionDialog(
     }
 
     AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(2);
-    array->Set(0, TO_IINTERFACE(StringUtils::ParseCharSequence(name)));
-    array->Set(1, TO_IINTERFACE((*mOpLabels)[mCode]));
+    array->Set(0, CoreUtils::Convert(name).Get());
+    array->Set(1, (*mOpLabels)[mCode]);
 
-    mContext->GetString(R::string::privacy_guard_dialog_summary,
-            array, &str);
-    tv->SetText(StringUtils::ParseCharSequence(str));
-    IAlertDialog::Probe(this)->SetView(mView);
+    mContext->GetString(R::string::privacy_guard_dialog_summary, array, &str);
+    tv->SetText(CoreUtils::Convert(str));
+    SetView(mView);
 
     // After the timeout, pretend the user clicked the quit button
     message = NULL;
     mHandler->ObtainMessage(ACTION_IGNORED_TIMEOUT, (IMessage**)&message);
     Boolean flag = FALSE;
-    mHandler->SendMessageDelayed(message, DISMISS_TIMEOUT, &flag);
+    return mHandler->SendMessageDelayed(message, DISMISS_TIMEOUT, &flag);
 }
 
 String PermissionDialog::GetAppName(
@@ -146,8 +167,8 @@ String PermissionDialog::GetAppName(
     // try {
     AutoPtr<IApplicationInfo> appInfo;
     ECode ec = pm->GetApplicationInfo(packageName,
-                  IPackageManager::GET_DISABLED_COMPONENTS
-                  | IPackageManager::GET_UNINSTALLED_PACKAGES, (IApplicationInfo**)&appInfo);
+      IPackageManager::GET_DISABLED_COMPONENTS | IPackageManager::GET_UNINSTALLED_PACKAGES,
+      (IApplicationInfo**)&appInfo);
     if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
         return String(NULL);
     }

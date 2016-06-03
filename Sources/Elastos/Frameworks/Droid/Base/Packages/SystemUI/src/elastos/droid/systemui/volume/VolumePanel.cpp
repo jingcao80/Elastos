@@ -1703,6 +1703,9 @@ ECode VolumePanel::OnStopSounds()
 
 ECode VolumePanel::OnVibrate()
 {
+    if (LOGD) {
+        Logger::D(mTag, "OnVibrate");
+    }
     // Make sure we ended up in vibrate ringer mode
     Int32 rm;
     mAudioManager->GetRingerMode(&rm);

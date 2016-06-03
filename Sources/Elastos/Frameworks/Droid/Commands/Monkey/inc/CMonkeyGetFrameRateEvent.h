@@ -13,6 +13,8 @@ namespace Monkey {
 CarClass(CMonkeyGetFrameRateEvent) , public MonkeyGetFrameRateEvent
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetEventType(
         /* [out] */ Int32 *eventType);
 

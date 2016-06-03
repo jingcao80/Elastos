@@ -8458,7 +8458,8 @@ ECode PhoneWindowManager::PerformHapticFeedbackLw(
     if (win != NULL) {
         win->GetOwningUid(&owningUid);
         win->GetOwningPackage(&owningPackage);
-    } else {
+    }
+    else {
         owningUid = Process::MyUid();
         mContext->GetOpPackageName(&owningPackage);
     }

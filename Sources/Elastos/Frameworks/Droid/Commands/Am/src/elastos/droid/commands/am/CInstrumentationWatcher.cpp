@@ -11,6 +11,8 @@ namespace Am {
 
 CAR_INTERFACE_IMPL_2(CInstrumentationWatcher, Object, IInstrumentationWatcher, IBinder);
 
+CAR_OBJECT_IMPL(CInstrumentationWatcher)
+
 ECode CInstrumentationWatcher::constructor()
 {
     return NOERROR;

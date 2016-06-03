@@ -27,6 +27,7 @@ using Elastos::Droid::Hardware::Input::IInputManager;
 using Elastos::Droid::Hardware::Input::IInputDeviceListener;
 using Elastos::Droid::Internal::App::IIBatteryStats;
 using Elastos::Droid::Internal::App::IIAppOpsService;
+using Elastos::Core::Thread;
 using Elastos::Core::IThread;
 using Elastos::Utility::Etl::List;
 
@@ -64,6 +65,8 @@ public:
         friend class CVibratorService;
 
     public:
+        CAR_INTERFACE_DECL()
+
         Vibration(
             /* [in] */ IBinder* token,
             /* [in] */ Int64 millis,
@@ -81,8 +84,6 @@ public:
             /* [in] */ const String& opPkg,
             /* [in] */ CVibratorService* owner);
 
-        CAR_INTERFACE_DECL()
-
         CARAPI ProxyDied();
 
         CARAPI_(Boolean) HasLongerTimeout(
@@ -90,6 +91,8 @@ public:
 
         CARAPI_(Boolean) IsSystemHapticFeedback();
 
+        CARAPI ToString(
+            /* [out] */ String* str);
     private:
         AutoPtr<IBinder> mToken;
         Int64 mTimeout;
@@ -149,7 +152,6 @@ public:
         MyBroadcastReceiver(
             /* [in] */ CVibratorService* owner);
 
-    public:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
@@ -160,7 +162,7 @@ public:
     };
 
     class VibrateThread
-        : public Runnable
+        : public Thread
     {
         friend class CVibratorService;
 
@@ -171,8 +173,6 @@ public:
 
         CARAPI Run();
 
-        CARAPI Start();
-
     private:
         CARAPI_(void) Delay(
             /* [in] */ Int64 duration);
@@ -181,7 +181,6 @@ public:
         AutoPtr<Vibration> mVibration;
         Boolean mDone;
         CVibratorService* mHost;
-        AutoPtr<IThread> mThread;
     };
 
     class IntentReceiver
@@ -190,6 +189,8 @@ public:
         friend class CVibratorService;
 
     public:
+        TO_STRING_IMPL("CVibratorService::IntentReceiver: ")
+
         IntentReceiver(
             /* [in] */ CVibratorService* owner)
             : mHost(owner)
@@ -199,7 +200,6 @@ public:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        TO_STRING_IMPL("CVibratorService::IntentReceiver: ")
     private:
         CVibratorService* mHost;
     };

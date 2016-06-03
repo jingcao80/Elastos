@@ -12,6 +12,8 @@ namespace Monkey {
 CarClass(CMonkeyUtilsHelper)
 {
 public:
+    CAR_SINGLETON_DECL()
+
     CARAPI ToCalendarTime(
         /* [in] */ Int64 time,
         /* [out] */ String *formatedTime);

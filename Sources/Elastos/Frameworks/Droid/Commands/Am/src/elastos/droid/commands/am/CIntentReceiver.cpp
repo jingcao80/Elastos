@@ -11,6 +11,8 @@ namespace Am {
 
 CAR_INTERFACE_IMPL_2(CIntentReceiver, Object, IIntentReceiver, IBinder);
 
+CAR_OBJECT_IMPL(CIntentReceiver)
+
 ECode CIntentReceiver::constructor()
 {
     return NOERROR;

@@ -13,6 +13,8 @@ namespace Monkey {
 CarClass(CMonkeyKeyEvent) , public MonkeyKeyEvent
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetEventType(
         /* [out] */ Int32 *eventType);
 

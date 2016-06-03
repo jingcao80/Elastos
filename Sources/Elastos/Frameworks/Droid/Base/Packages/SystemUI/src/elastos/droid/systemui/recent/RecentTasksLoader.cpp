@@ -335,7 +335,7 @@ ECode RecentTasksLoader::ThumbnailLoaderAsyncTask::DoInBackground(
 //======================================================================
 
 const String RecentTasksLoader::TAG("RecentTasksLoader");
-const Boolean RecentTasksLoader::DEBUG = TRUE;
+const Boolean RecentTasksLoader::DEBUG = FALSE;
 const Int32 RecentTasksLoader::DISPLAY_TASKS = 20;
 const Int32 RecentTasksLoader::MAX_TASKS = 21 /*DISPLAY_TASKS + 1*/; // allow extra for non-apps
 AutoPtr<RecentTasksLoader> RecentTasksLoader::sInstance;

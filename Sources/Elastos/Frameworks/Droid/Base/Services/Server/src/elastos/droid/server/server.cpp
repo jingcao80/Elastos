@@ -1,4 +1,6 @@
 #include "elastos/droid/server/CAlarmManagerBinderService.h"
+#include "elastos/droid/server/CBasePermissionDialog.h"
+#include "elastos/droid/server/CPermissionDialog.h"
 #include "elastos/droid/server/CBatteryBinderService.h"
 #include "elastos/droid/server/CBluetoothManagerServiceBluetoothCallback.h"
 #include "elastos/droid/server/CCommonTimeManagementServiceIfaceObserver.h"
@@ -10,11 +12,14 @@
 #include "elastos/droid/server/CUiModeManagerBinderService.h"
 #include "elastos/droid/server/CUiModeManagerService.h"
 
+
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
 CAR_OBJECT_IMPL(CAlarmManagerBinderService)
+CAR_OBJECT_IMPL(CBasePermissionDialog)
+CAR_OBJECT_IMPL(CPermissionDialog)
 CAR_OBJECT_IMPL(CBatteryBinderService)
 CAR_OBJECT_IMPL(CBluetoothManagerServiceBluetoothCallback)
 CAR_OBJECT_IMPL(CCommonTimeManagementServiceIfaceObserver)

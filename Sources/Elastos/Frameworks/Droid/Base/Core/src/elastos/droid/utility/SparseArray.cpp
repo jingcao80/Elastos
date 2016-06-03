@@ -148,8 +148,6 @@ ECode SparseArray::RemoveAtRange(
 
 void SparseArray::Gc()
 {
-    Logger::E("SparseArray", "gc start with %d", mSize);
-
     Int32 o = 0;
     AutoPtr< ArrayOf<Int32> > keys = mKeys;
     AutoPtr< ArrayOf<IInterface*> > values = mValues;
@@ -170,8 +168,6 @@ void SparseArray::Gc()
 
     mGarbage = FALSE;
     mSize = o;
-
-    Logger::E("SparseArray", "gc end with %d", mSize);
 }
 
 ECode SparseArray::Put(

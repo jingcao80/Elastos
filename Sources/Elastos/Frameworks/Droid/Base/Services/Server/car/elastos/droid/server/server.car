@@ -347,6 +347,22 @@ module
     }
 
     [local]
+    class CPermissionDialog {
+        constructor(
+            [in] IContext* context,
+            [in] IIAppOpsService* service,
+            [in] Int32 code,
+            [in] Int32 uid,
+            [in] String packageName);
+
+        interface IPermissionDialog;
+        interface IBasePermissionDialog;
+        interface IAlertDialog;
+        interface IDialogInterface;
+        interface IDialog;
+    }
+
+    [local]
     class CKillSwitchService {
         constructor(
             [in] IContext* context);

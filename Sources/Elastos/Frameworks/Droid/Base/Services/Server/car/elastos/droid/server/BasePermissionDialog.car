@@ -21,6 +21,16 @@ module
             [out] Boolean* result);
     }
 
+    /**
+     * @Involve
+     * interface Elastos.Droid.App.IDialog
+     * interface Elastos.Droid.App.IDialogInterface
+     * interface Elastos.Droid.App.IAlertDialog
+     * interface Elastos.Droid.Server.IBasePermissionDialog
+     */
+    interface IPermissionDialog {
+    }
+
     } // namespace Server
     } // namespace Droid
     } // namespace Elastos

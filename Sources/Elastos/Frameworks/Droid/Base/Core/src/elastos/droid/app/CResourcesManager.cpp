@@ -241,7 +241,8 @@ ECode CResourcesManager::GetTopLevelResources(
             overrideConfiguration, scale, isThemeable, themeConfig, token);
 
     AutoPtr<IResources> r;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         // Resources is app scale dependent.
         AutoPtr<IInterface> obj, resObj;
         mActiveResources->Get(TO_IINTERFACE(key), (IInterface**)&obj);

@@ -4,11 +4,18 @@
 namespace Elastos {
 namespace Droid {
 namespace View {
+
 CAR_INTERFACE_IMPL(HardwareCanvas, Canvas, IHardwareCanvas)
+
+ECode HardwareCanvas::constructor()
+{
+    return Canvas::constructor();
+}
 
 ECode HardwareCanvas::IsHardwareAccelerated(
     /* [out] */ Boolean* isAccelerated)
 {
+    VALIDATE_NOT_NULL(isAccelerated)
     *isAccelerated = TRUE;
     return NOERROR;
 }
@@ -46,6 +53,7 @@ ECode HardwareCanvas::CallDrawGLFunction(
     /* [in] */ Int64 drawGLFunction,
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = IRenderNode::STATUS_DONE;
     return NOERROR;
 }

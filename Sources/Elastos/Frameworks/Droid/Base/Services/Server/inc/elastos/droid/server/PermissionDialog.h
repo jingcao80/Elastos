@@ -1,12 +1,14 @@
 #ifndef __ELASTOS_DROID_SERVER_PERMISSIONDIALOG_H__
 #define __ELASTOS_DROID_SERVER_PERMISSIONDIALOG_H__
 
-#include "elastos/droid/server/CAppOpsService.h"
+#include "elastos/droid/server/BasePermissionDialog.h"
+#include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include <elastos/droid/os/Handler.h>
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::Internal::App::IIAppOpsService;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IMessage;
@@ -19,7 +21,8 @@ namespace Droid {
 namespace Server {
 
 class PermissionDialog
-    : public Object
+    : public BasePermissionDialog
+    , public IPermissionDialog
 {
 private:
     class MyHandler
@@ -39,9 +42,13 @@ private:
     };
 
 public:
-    PermissionDialog(
+    CAR_INTERFACE_DECL()
+
+    PermissionDialog();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
-        /* [in] */ CAppOpsService* service,
+        /* [in] */ IIAppOpsService* service,
         /* [in] */ Int32 code,
         /* [in] */ Int32 uid,
         /* [in] */ const String& packageName);
@@ -52,7 +59,7 @@ private:
 
 private:
     static const String TAG;
-    AutoPtr<CAppOpsService> mService;
+    AutoPtr<IIAppOpsService> mService;
     String mPackageName;
     Int32 mCode;
     AutoPtr<IView> mView;

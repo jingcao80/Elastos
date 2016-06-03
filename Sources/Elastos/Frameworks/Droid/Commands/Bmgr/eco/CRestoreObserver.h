@@ -19,6 +19,8 @@ namespace Bmgr {
 CarClass(CRestoreObserver)
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI RestoreSetsAvailable(
         /* [in] */ ArrayOf<Elastos::Droid::App::Backup::IRestoreSet *> * pResult);
 

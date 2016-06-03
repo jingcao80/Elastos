@@ -1,7 +1,8 @@
 #ifndef __ELASTOS_DROID_SERVER_PERMISSIONDIALOGREQQUEUE_H__
 #define __ELASTOS_DROID_SERVER_PERMISSIONDIALOGREQQUEUE_H__
 
-#include "elastos/droid/server/PermissionDialog.h"
+#include <_Elastos.Droid.Server.h>
+#include <elastos/droid/ext/frameworkext.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/core/Object.h>
 
@@ -20,6 +21,8 @@ public:
         : public Object
     {
     public:
+        TO_STRING_IMPL("PermissionDialogReqQueue::PermissionDialogReq")
+
         PermissionDialogReq();
 
         CARAPI_(void) Set(
@@ -33,9 +36,11 @@ public:
     };
 
 public:
+    TO_STRING_IMPL("PermissionDialogReqQueue")
+
     PermissionDialogReqQueue();
 
-    CARAPI_(AutoPtr<PermissionDialog>) GetDialog();
+    CARAPI_(AutoPtr<IPermissionDialog>) GetDialog();
 
     CARAPI_(void) NotifyAll(
         /* [in] */ Int32 mode);
@@ -44,11 +49,11 @@ public:
         /* [in] */ PermissionDialogReq* res);
 
     CARAPI_(void) SetDialog(
-        /* [in] */ PermissionDialog* dialog);
+        /* [in] */ IPermissionDialog* dialog);
 
 private:
-    AutoPtr<PermissionDialog> mDialog;
-    AutoPtr<List<AutoPtr<PermissionDialogReq> > > mResultList;
+    AutoPtr<IPermissionDialog> mDialog;
+    List<AutoPtr<PermissionDialogReq> > mResultList;
 };
 
 } // Server

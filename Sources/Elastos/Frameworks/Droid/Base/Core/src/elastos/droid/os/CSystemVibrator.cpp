@@ -88,8 +88,10 @@ ECode CSystemVibrator::Vibrate(
     // not be null, let that be checked, because the server will drop it
     // anyway
     if (pattern != NULL && repeat < pattern->GetLength()) {
-        if(FAILED(mService->VibratePattern(uid, opPkg, pattern, repeat, UsageForAttributes(attributes), mToken))) {
-            // Log.w(TAG, "Failed to vibrate.", e);
+        ECode ec = mService->VibratePattern(uid, opPkg, pattern, repeat, UsageForAttributes(attributes), mToken);
+        if(FAILED(ec)) {
+            Logger::W(TAG, "Failed to vibrate. ec=%08x", ec);
+            assert(0);
         }
         return NOERROR;
     }

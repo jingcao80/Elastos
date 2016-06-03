@@ -493,7 +493,7 @@ void _DumpInterfaceProxy(CInterfaceProxy* ip)
 void _DumpObjectProxy(CObjectProxy* op)
 {
     if (op->mInfo) {
-        ALOGD(" >>> module: %s, CLSID:", op->mInfo->mUunm, op->mInfo->mInterfaceNum);
+        ALOGD(" >>> module: %s, CLSID:", op->mInfo->mUunm);
         _DumpGUID(op->mInfo->mCLSID);
     }
 
@@ -918,7 +918,7 @@ void CObjectProxy::OnLastStrongRef(
     if (mBinder->transact(IStub::RELEASE, data, &reply) != android::NO_ERROR) {
 #if defined(_DEBUG)
         MARSHAL_DBGOUT(MSHDBG_ERROR,
-            ALOGE("CObjectProxy: Call stub [%s] release failed.\n", dbgInfo.string()));
+            ALOGE("CObjectProxy: Call stub %s release failed.\n", dbgInfo.string()));
 #endif
     }
 }
@@ -1136,30 +1136,8 @@ ECode CObjectProxy::ToString(
     /* [out] */ String* info)
 {
     if (info == NULL) return E_INVALID_ARGUMENT;
-    String str("CObjectProxy{");
-    Int32 index = -1;
-    for (Int32 n = 0; n < mInterfaceNum; n++) {
-        REIID riid = mInterfaces[n].mInfo->mIID;
-        if (riid != EIID_IInterface
-            && riid != EIID_IProxy
-            && riid != EIID_IObject
-            && riid != EIID_IWeakReferenceSource
-            && riid != EIID_CALLBACK_CONNECTOR) {
-            index = n;
-            break;
-        }
-    }
-
-    if (index > 0) {
-        IInterface* stubObj = (IInterface *)&(mInterfaces[index].mVTPtr);
-        String stubInfo;
-        IObject::Probe(stubObj)->ToString(&stubInfo);
-        str.AppendFormat("0x%08x, stub:%s}", this, stubInfo.string());
-    }
-    else {
-        str.AppendFormat("0x%08x}", this);
-    }
-
+    String str("CObjectProxy{0x");
+    str.AppendFormat("0x%08x}", this);
     *info = str;
     return NOERROR;
 }
