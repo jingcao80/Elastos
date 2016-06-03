@@ -121,23 +121,18 @@ void ValueAnimator::AnimationHandler::DoAnimationFrame(
 
     // Now process all active animations. The return value from animationFrame()
     // tells the handler whether it should now be ended
-    Int32 numAnims = mAnimations.GetSize();
-    for (it = mAnimations.Begin(); it != mAnimations.End(); it++) {
+    for (it = mAnimations.Begin(); it != mAnimations.End(); ++it) {
         mTmpAnimations.PushBack(*it);
     }
-    if (!mTmpAnimations.IsEmpty()) {
-        it = mTmpAnimations.Begin();
-        for (Int32 i = 0; i < numAnims && it != mTmpAnimations.End(); ++i, ++it) {
-            AutoPtr<IValueAnimator> anim = *it;
-            ValueAnimator* va = (ValueAnimator*)anim.Get();
-            List<AutoPtr<IValueAnimator> >::Iterator findResult =
-                    Find(mAnimations.Begin(), mAnimations.End(), anim);
-            if (findResult != mAnimations.End() && va->DoAnimationFrame(frameTime)) {
-                mEndingAnims.PushBack(anim);
-            }
+    for (it = mTmpAnimations.Begin(); it != mTmpAnimations.End(); ++it) {
+        AutoPtr<IValueAnimator> anim = *it;
+        ValueAnimator* va = (ValueAnimator*)anim.Get();
+        if (Find(mAnimations.Begin(), mAnimations.End(), anim) != mAnimations.End()
+                && va->DoAnimationFrame(frameTime)) {
+            mEndingAnims.PushBack(anim);
         }
-        mTmpAnimations.Clear();
     }
+    mTmpAnimations.Clear();
     if (!mEndingAnims.IsEmpty()) {
         for (it = mEndingAnims.Begin(); it != mEndingAnims.End(); ++it) {
             AutoPtr<IValueAnimator> anim = *it;
@@ -163,7 +158,8 @@ ECode ValueAnimator::AnimationHandler::Run()
     return NOERROR;
 }
 
-void ValueAnimator::AnimationHandler::ScheduleAnimation() {
+void ValueAnimator::AnimationHandler::ScheduleAnimation()
+{
     if (!mAnimationScheduled) {
         mChoreographer->PostCallback(IChoreographer::CALLBACK_ANIMATION, this, NULL);
         mAnimationScheduled = TRUE;

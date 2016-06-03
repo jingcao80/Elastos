@@ -675,7 +675,7 @@ ECode CAppsCustomizeTabHost::SetVisibilityOfSiblingsWithLowerZOrder(
 {
     AutoPtr<IViewParent> p;
     GetParent((IViewParent**)&p);
-    AutoPtr<IViewGroup> parent = IViewGroup::Probe(p);
+    IViewGroup* parent = IViewGroup::Probe(p);
     if (parent == NULL) return NOERROR;
 
     Int32 count;
@@ -684,7 +684,7 @@ ECode CAppsCustomizeTabHost::SetVisibilityOfSiblingsWithLowerZOrder(
         for (Int32 i = 0; i < count; i++) {
             AutoPtr<IView> child;
             parent->GetChildAt(i, (IView**)&child);
-            if (TO_IINTERFACE(this) == TO_IINTERFACE(child)) {
+            if (child.Get() == (IView*)this) {
                 break;
             }
             else {
@@ -696,13 +696,13 @@ ECode CAppsCustomizeTabHost::SetVisibilityOfSiblingsWithLowerZOrder(
                 child->SetVisibility(visibility);
             }
         }
+        return NOERROR;
     }
     else {
         //throw new RuntimeException("Failed; can't get z-order of views");
         Slogger::E("AppsCustomizeTabHost", "Failed; can't get z-order of views");
         return E_RUNTIME_EXCEPTION;
     }
-    return NOERROR;
 }
 
 ECode CAppsCustomizeTabHost::OnWindowVisible()

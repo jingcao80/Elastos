@@ -85,8 +85,7 @@ ECode LauncherAnimUtils::MyOnDrawListener::OnDraw()
     }
     mAnimator->Start();
 
-    AutoPtr<IOnDrawListener> listener = this;
-    AutoPtr<MyRunnable> run = new MyRunnable(mView, listener);
+    AutoPtr<MyRunnable> run = new MyRunnable(mView, this);
     Boolean res;
     return mView->Post(run, &res);
 }
@@ -113,7 +112,7 @@ AutoPtr<IAnimatorListener> LauncherAnimUtils::GetEndAnimListener()
 void LauncherAnimUtils::CancelOnDestroyActivity(
     /* [in] */ IAnimator* a)
 {
-    sAnimators->Add(TO_IINTERFACE(a));
+    sAnimators->Add(a);
     a->AddListener(GetEndAnimListener());
 }
 
@@ -178,7 +177,7 @@ AutoPtr<IObjectAnimator> LauncherAnimUtils::OfFloat(
     anim->SetPropertyName(propertyName);
     IValueAnimator::Probe(anim)->SetFloatValues(values);
     CancelOnDestroyActivity(IAnimator::Probe(anim));
-    AutoPtr<FirstFrameAnimatorHelper> helper = new FirstFrameAnimatorHelper(IValueAnimator::Probe(anim), target);;
+    AutoPtr<FirstFrameAnimatorHelper> helper = new FirstFrameAnimatorHelper(IValueAnimator::Probe(anim), target);
     return anim;
 }
 

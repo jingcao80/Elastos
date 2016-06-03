@@ -2135,8 +2135,8 @@ ECode PagedView::LoadAssociatedPages(
                 lowerPageBound, upperPageBound);
             // First, clear any pages that should no longer be loaded
             for (Int32 i = 0; i < count; ++i) {
-                AutoPtr<IPage> layout = IPage::Probe(GetPageAt(i));
                 if ((i < lowerPageBound) || (i > upperPageBound)) {
+                    AutoPtr<IPage> layout = IPage::Probe(GetPageAt(i));
                     Int32 pageCount;
                     layout->GetPageChildCount(&pageCount);
                     if (pageCount > 0) {

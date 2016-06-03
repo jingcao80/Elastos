@@ -734,23 +734,22 @@ ECode AnimatorSet::Start()
     mPaused = FALSE;
 
     List<AutoPtr<Node> >::Iterator it = mNodes.Begin();
-    for (; it != mNodes.End(); it++) {
+    for (; it != mNodes.End(); ++it) {
         (*it)->mAnimation->SetAllowRunningAsynchronously(FALSE);
     }
 
     if (mDuration >= 0) {
         // If the duration was set on this AnimatorSet, pass it along to all child animations
         List<AutoPtr<Node> >::Iterator it = mNodes.Begin();
-        for (; it != mNodes.End(); it++) {
+        for (; it != mNodes.End(); ++it) {
             // TODO: don't set the duration of the timing-only nodes created by AnimatorSet to
             // insert "play-after" delays
             (*it)->mAnimation->SetDuration(mDuration);
         }
     }
-
     if (mInterpolator != NULL) {
         List<AutoPtr<Node> >::Iterator it = mNodes.Begin();
-        for (; it != mNodes.End(); it++) {
+        for (; it != mNodes.End(); ++it) {
             (*it)->mAnimation->SetInterpolator(mInterpolator);
         }
     }
@@ -759,25 +758,23 @@ ECode AnimatorSet::Start()
     // contains the animation nodes in the correct order.
     SortNodes();
 
-    it = mSortedNodes.Begin();
-    for (; it!= mSortedNodes.End(); ++it) {
+    for (it = mSortedNodes.Begin(); it!= mSortedNodes.End(); ++it) {
         AutoPtr<Node> node = *it;
         // First, clear out the old listeners
         AutoPtr<IArrayList> oldListeners;
         node->mAnimation->GetListeners((IArrayList**)&oldListeners);
         Int32 size;
         if (oldListeners != NULL && (oldListeners->GetSize(&size), size > 0)) {
-            AutoPtr<IInterface> cloneObj;
-            ICloneable::Probe(oldListeners)->Clone((IInterface**)&cloneObj);
-            IArrayList* clonedListeners = IArrayList::Probe(cloneObj);
+            AutoPtr<IArrayList> clonedListeners;
+            CArrayList::New(ICollection::Probe(oldListeners), (IArrayList**)&clonedListeners);
+
             Int32 numListeners;
             clonedListeners->GetSize(&numListeners);
             for (Int32 i = 0; i < numListeners; ++i) {
-                AutoPtr<IInterface> obj;
-                clonedListeners->Get(i, (IInterface**)&obj);
-                IAnimatorListener* listener = IAnimatorListener::Probe(obj);
+                AutoPtr<IInterface> listener;
+                clonedListeners->Get(i, (IInterface**)&listener);
                 if (IDependencyListener::Probe(listener) || IAnimatorSetListener::Probe(listener)) {
-                    node->mAnimation->RemoveListener(listener);
+                    node->mAnimation->RemoveListener(IAnimatorListener::Probe(listener));
                 }
             }
         }
@@ -787,46 +784,42 @@ ECode AnimatorSet::Start()
     // start the animations in the loop directly because we first need to set up
     // dependencies on all of the nodes. For example, we don't want to start an animation
     // when some other animation also wants to start when the first animation begins.
-    AutoPtr< List<AutoPtr<Node> > > nodesToStart = new List<AutoPtr<Node> >;
-    if (!mSortedNodes.IsEmpty()) {
+    AutoPtr< List<AutoPtr<Node> > > nodesToStart = new List<AutoPtr<Node> >();
+    for (it = mSortedNodes.Begin(); it!= mSortedNodes.End(); ++it) {
+        AutoPtr<Node> node = *it;
         if (mSetListener == NULL) {
             mSetListener = new AnimatorSetListener();
             mSetListener->constructor(this);
         }
-
-        for (it = mSortedNodes.Begin(); it != mSortedNodes.End(); ++it) {
-            AutoPtr<Node> node = *it;
-            if (node->mDependencies.IsEmpty()) {
-                nodesToStart->PushBack(node);
-            }
-            else {
-                List<AutoPtr<Dependency> >::Iterator dependencyIt= node->mDependencies.Begin();
-                for (; dependencyIt != node->mDependencies.End(); ++dependencyIt) {
-                    AutoPtr<Dependency> dependency = *dependencyIt;
-                    AutoPtr<DependencyListener> lTemp = new DependencyListener(this, node, dependency->mRule);
-                    dependency->mNode->mAnimation->AddListener(lTemp);
-                }
-                node->mTmpDependencies.Clear();
-                node->mTmpDependencies.Assign(node->mDependencies.Begin(), node->mDependencies.End());
-            }
-
-            // hold refcount of AnimationSet
-            ((Animator*)node->mAnimation.Get())->SetParent(this);
-            node->mAnimation->AddListener(mSetListener);
+        if (node->mDependencies.IsEmpty()) {
+            nodesToStart->PushBack(node);
         }
+        else {
+            List<AutoPtr<Dependency> >::Iterator dit;
+            for (dit = node->mDependencies.Begin(); dit != node->mDependencies.End(); ++dit) {
+                AutoPtr<Dependency> dependency = *dit;
+                AutoPtr<DependencyListener> dl = new DependencyListener(this, node, dependency->mRule);
+                dependency->mNode->mAnimation->AddListener(dl);
+            }
+            node->mTmpDependencies.Clear();
+            node->mTmpDependencies.Assign(node->mDependencies.Begin(), node->mDependencies.End());
+        }
+        // hold refcount of AnimationSet
+        ((Animator*)node->mAnimation.Get())->SetParent(this);
+        node->mAnimation->AddListener(mSetListener);
     }
-
     // Now that all dependencies are set up, start the animations that should be started.
     if (mStartDelay <= 0) {
-        for (it = nodesToStart->Begin(); it != nodesToStart->End(); it++) {
-            Animator* anim = (Animator*)((*it)->mAnimation.Get());
-            anim->Start();
-            mPlayingSet.PushBack((*it)->mAnimation);
+        for (it = nodesToStart->Begin(); it != nodesToStart->End(); ++it) {
+            Node* node = (*it);
+            node->mAnimation->Start();
+            mPlayingSet.PushBack(node->mAnimation);
         }
     }
     else {
         AutoPtr<ArrayOf<Float> > fArray = ArrayOf<Float>::Alloc(2);
-        (*fArray)[0] = 0.0f; (*fArray)[1] = 1.0f;
+        (*fArray)[0] = 0.0f;
+        (*fArray)[1] = 1.0f;
         mDelayAnim = ValueAnimator::OfFloat(fArray);
         IAnimator* da = IAnimator::Probe(mDelayAnim);
         da->SetDuration(mStartDelay);
@@ -834,7 +827,6 @@ ECode AnimatorSet::Start()
         da->AddListener(aladapter);
         da->Start();
     }
-
     if (mListeners != NULL) {
         AutoPtr<IInterface> cloneObj;
         ICloneable::Probe(mListeners)->Clone((IInterface**)&cloneObj);

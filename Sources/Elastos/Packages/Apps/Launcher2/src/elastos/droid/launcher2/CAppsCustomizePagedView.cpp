@@ -1645,12 +1645,12 @@ ECode CAppsCustomizePagedView::SyncAppsPageItems(
     for (Int32 i = startIndex; i < endIndex; ++i) {
         AutoPtr<IInterface> obj;
         mApps->Get(i, (IInterface**)&obj);
-        AutoPtr<IApplicationInfo> info = IApplicationInfo::Probe(obj);
+        IApplicationInfo* info = IApplicationInfo::Probe(obj);
         AutoPtr<IView> view;
         mLayoutInflater->Inflate(
                 Elastos::Droid::Launcher2::R::layout::apps_customize_application,
                 IViewGroup::Probe(layout), FALSE, (IView**)&view);
-        AutoPtr<IPagedViewIcon> icon = IPagedViewIcon::Probe(view);
+        IPagedViewIcon* icon = IPagedViewIcon::Probe(view);
         icon->ApplyFromApplicationInfo(info, TRUE, this);
         view->SetOnClickListener(this);
         view->SetOnLongClickListener(this);
@@ -1668,10 +1668,10 @@ ECode CAppsCustomizePagedView::SyncAppsPageItems(
         params->constructor(x, y, 1, 1);
         Boolean tmp;
         layout->AddViewToCellLayout(view, -1, i,
-                IPagedViewCellLayoutLayoutParams::Probe(params), &tmp);
+                (IPagedViewCellLayoutLayoutParams*)params, &tmp);
 
         items->Add(info);
-        images->Add(((ApplicationInfo*)info.Get())->mIconBitmap);
+        images->Add(((ApplicationInfo*)info)->mIconBitmap);
     }
 
     EnableHwLayersOnVisiblePages();
