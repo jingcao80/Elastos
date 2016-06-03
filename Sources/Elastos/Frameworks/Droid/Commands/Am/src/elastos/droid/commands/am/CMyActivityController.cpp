@@ -11,6 +11,8 @@ namespace Am {
 
 CAR_INTERFACE_IMPL_2(CMyActivityController, Object, IIActivityController, IBinder);
 
+CAR_OBJECT_IMPL(CMyActivityController)
+
 ECode CMyActivityController::constructor(
     /* [in] */ IIActivityManager* am,
     /* [in] */ const String& gdbPort)

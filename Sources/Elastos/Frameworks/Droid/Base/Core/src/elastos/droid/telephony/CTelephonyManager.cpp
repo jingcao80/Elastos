@@ -1665,7 +1665,7 @@ ECode CTelephonyManager::Call(
     /* [in] */ const String& number)
 {
     // try {
-    GetITelephony()->Call(callingPackage, number);
+    return GetITelephony()->Call(callingPackage, number);
     // } catch (RemoteException e) {
     //     Log.e(TAG, "Error calling ITelephony#call", e);
     // }
@@ -1696,7 +1696,7 @@ ECode CTelephonyManager::AnswerRingingCall()
 ECode CTelephonyManager::SilenceRinger()
 {
     // try {
-    GetTelecomService()->SilenceRinger();
+    return GetTelecomService()->SilenceRinger();
     // } catch (RemoteException e) {
     //     Log.e(TAG, "Error calling ITelecomService#silenceRinger", e);
     // }

@@ -13,6 +13,8 @@ namespace Monkey {
 CarClass(CMonkeySourceRandom), public MonkeySourceRandom
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetNextEvent(
         /* [out] */ IMonkeyEvent **event);
 

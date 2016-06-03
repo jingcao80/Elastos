@@ -402,7 +402,6 @@ Boolean AnimatedStateListDrawable::OnStateChange(
     Int32 keyframeIndex = mState->IndexOfKeyframe(stateSet);
     Int32 value = 0;
     GetCurrentIndex(&value);
-    Logger::I(LOGTAG, " keyframeIndex:%d, value:%d", keyframeIndex, value);
     if (keyframeIndex == value) {
         // Propagate state change to current keyframe.
         AutoPtr<IDrawable> current;
@@ -436,7 +435,6 @@ Boolean AnimatedStateListDrawable::SelectTransition(
     AutoPtr<Transition> currentTransition = mTransition;
     if (currentTransition != NULL) {
         if (toIndex == mTransitionToIndex) {
-            Logger::I(LOGTAG, " SelectTransition: Already animating to that keyframe. %d", __LINE__);
             // Already animating to that keyframe.
             return TRUE;
         }
@@ -445,7 +443,6 @@ Boolean AnimatedStateListDrawable::SelectTransition(
             currentTransition->Reverse();
             mTransitionToIndex = mTransitionFromIndex;
             mTransitionFromIndex = toIndex;
-            Logger::I(LOGTAG, " SelectTransition: Reverse the current animation. %d", __LINE__);
             return TRUE;
         }
 
@@ -458,7 +455,7 @@ Boolean AnimatedStateListDrawable::SelectTransition(
     else {
         GetCurrentIndex(&fromIndex);
     }
-    
+
     // Reset state.
     mTransition = NULL;
     mTransitionFromIndex = -1;
@@ -507,7 +504,6 @@ Boolean AnimatedStateListDrawable::SelectTransition(
     mTransitionFromIndex = fromIndex;
     mTransitionToIndex = toIndex;
 
-    Logger::I(LOGTAG, " SelectTransition: %d", __LINE__);
     return TRUE;
 }
 

@@ -1,6 +1,7 @@
 
 #include "elastos/droid/server/CAppOpsService.h"
 #include "elastos/droid/server/AppOpsPolicy.h"
+#include "elastos/droid/server/CPermissionDialog.h"
 #include "elastos/droid/app/AppOpsManager.h"
 #include <elastos/droid/Manifest.h>
 #include <elastos/droid/os/Binder.h>
@@ -18,10 +19,9 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::App::AppOpsManager;
+using Elastos::Droid::App::IDialog;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::EIID_IBinder;
@@ -57,6 +57,7 @@ using Elastos::Droid::Utility::CSparseInt32Array;
 using Elastos::Droid::Internal::App::EIID_IIAppOpsService;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
@@ -145,36 +146,40 @@ ECode CAppOpsService::ChangedRunner::Run()
 // CAppOpsService::AskRunnable
 //================================================================================
 
-// CAppOpsService::AskRunnable::AskRunnable(
-//     /* [in] */ Int32 code,
-//     /* [in] */ Int32 uid,
-//     /* [in] */ String packageName,
-//     /* [in] */ Op* op,
-//     /* [in] */ PermissionDialogReq* request)
-// {
-//     mCode = code;
-//     mUid = uid;
-//     mPackageName = packageName;
-//     mOp = op;
-//     mRequest = request;
-// }
+CAppOpsService::AskRunnable::AskRunnable(
+    /* [in] */ Int32 code,
+    /* [in] */ Int32 uid,
+    /* [in] */ const String& packageName,
+    /* [in] */ CAppOpsService::Op* op,
+    /* [in] */ PermissionDialogReqQueue::PermissionDialogReq* request,
+    /* [in] */ CAppOpsService* host)
+    : mCode(code)
+    , mUid(uid)
+    , mPackageName(packageName)
+    , mOp(op)
+    , mRequest(request)
+    , mHost(host)
+{
+}
 
 ECode CAppOpsService::AskRunnable::Run()
 {
-    assert(0 && "TODO");
-    // AutoPtr<IPermissionDialog> permDialog;
-    // {    AutoLock syncLock(AppOpsService.this);
-    //     Logger::E(TAG, "Creating dialog box");
-    //     mOp->mDialogReqQueue->Register(request);
-    //     if (mOp->mDialogReqQueue->GetDialog() == NULL) {
-    //         permDialog = new PermissionDialog(mContext,
-    //                 AppOpsService.this, code, uid, packageName);
-    //         mOp->mDialogReqQueue->SetDialog(permDialog);
-    //     }
-    // }
-    // if (permDialog != NULL) {
-    //     permDialog->Show();
-    // }
+    AutoPtr<IPermissionDialog> permDialog;
+    {
+        AutoLock syncLock(mHost);
+
+        mOp->mDialogReqQueue->Register(mRequest);
+        if (mOp->mDialogReqQueue->GetDialog() == NULL) {
+            CPermissionDialog::New(mHost->mContext, (IIAppOpsService*)mHost, mCode, mUid, mPackageName,
+                (IPermissionDialog**)&permDialog);
+            mOp->mDialogReqQueue->SetDialog(permDialog);
+        }
+    }
+
+    Logger::I(TAG, "Creating dialog box: %s", TO_CSTR(permDialog));
+    if (permDialog != NULL) {
+        IDialog::Probe(permDialog)->Show();
+    }
     return NOERROR;
 }
 
@@ -195,7 +200,7 @@ CAppOpsService::Op::Op(
     , mRejectTime(0)
     , mNesting(0)
 {
-    // mDialogReqQueue = new PermissionDialogReqQueue();
+    mDialogReqQueue = new PermissionDialogReqQueue();
     CArrayList::New((IArrayList**)&mClientTokens);
 }
 
@@ -258,14 +263,6 @@ ECode CAppOpsService::Callback::ProxyDied()
     return NOERROR;
 }
 
-ECode CAppOpsService::Callback::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str)
-    *str = "CAppOpsService::Callback";
-    return NOERROR;
-}
-
 //================================================================================
 // CAppOpsService::ClientState
 //================================================================================
@@ -296,7 +293,9 @@ ECode CAppOpsService::ClientState::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    StringBuilder sb("ClientState{");
+    StringBuilder sb("CAppOpsService::ClientState{0x");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", appToken:";
     sb += Object::ToString(mAppToken);
     sb += ",";
     if (mStartedOps != NULL) {
@@ -313,7 +312,8 @@ ECode CAppOpsService::ClientState::ToString(
 //@Override
 ECode CAppOpsService::ClientState::ProxyDied()
 {
-    {    AutoLock syncLock(mHost);
+    {
+        AutoLock syncLock(mHost);
         Int32 size;
         mStartedOps->GetSize(&size);
         for (Int32 i = size - 1; i >= 0; i--) {
@@ -509,7 +509,7 @@ ECode CAppOpsService::SystemReady()
                 appInfo->GetFlags(&flags);
                 if (appInfo != NULL
                         && (flags & IApplicationInfo::FLAG_PRIVILEGED) != 0) {
-                    Slogger::I(TAG, "Privileged package %s", (const char*)pkg);
+                    Slogger::I(TAG, "Privileged package %s", pkg.string());
                     AutoPtr<Ops> newOps = new Ops();
                     newOps->constructor(pkg, uid, TRUE);
                     Int32 s = 0;
@@ -974,44 +974,43 @@ ECode CAppOpsService::StartWatchingMode(
     /* [in] */ const String& packageName,
     /* [in] */ IIAppOpsCallback* callback)
 {
+    AutoLock syncLock(this);
+    AutoPtr<IAppOpsManagerHelper> aom;
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
 
-    {    AutoLock syncLock(this);
-        AutoPtr<IAppOpsManagerHelper> aom;
-        CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
-
-        Int32 op = inOp;
-        aom->OpToSwitch(inOp, &op);
-        IBinder* binder = IBinder::Probe(callback);
-        AutoPtr<IInterface> obj;
-        mModeWatchers->Get(binder, (IInterface**)&obj);
-        Callback* cb = (Callback*)IObject::Probe(obj);
-        if (cb == NULL) {
-            cb = new Callback(callback, this);
-            mModeWatchers->Put(binder, TO_IINTERFACE(cb));
-        }
-        if (op != IAppOpsManager::OP_NONE) {
-            AutoPtr<IInterface> omwObj;
-            mOpModeWatchers->Get(op, (IInterface**)&omwObj);
-            AutoPtr<IArrayList> cbs = IArrayList::Probe(omwObj);
-            if (cbs == NULL) {
-                CArrayList::New((IArrayList**)&cbs);
-                mOpModeWatchers->Put(op, cbs.Get());
-            }
-            cbs->Add(TO_IINTERFACE(cb));
-        }
-
-        if (packageName != NULL) {
-            AutoPtr<ICharSequence> csq = CoreUtils::Convert(packageName);
-            AutoPtr<IInterface> pmwObj;
-            mPackageModeWatchers->Get(csq.Get(), (IInterface**)&pmwObj);
-            AutoPtr<IArrayList> cbs = IArrayList::Probe(pmwObj);
-            if (cbs == NULL) {
-                CArrayList::New((IArrayList**)&cbs);
-                mPackageModeWatchers->Put(csq.Get(), cbs.Get());
-            }
-            cbs->Add(TO_IINTERFACE(cb));
-        }
+    Int32 op = inOp;
+    aom->OpToSwitch(inOp, &op);
+    IBinder* binder = IBinder::Probe(callback);
+    AutoPtr<IInterface> obj;
+    mModeWatchers->Get(binder, (IInterface**)&obj);
+    Callback* cb = (Callback*)IObject::Probe(obj);
+    if (cb == NULL) {
+        cb = new Callback(callback, this);
+        mModeWatchers->Put(binder, TO_IINTERFACE(cb));
     }
+    if (op != IAppOpsManager::OP_NONE) {
+        AutoPtr<IInterface> omwObj;
+        mOpModeWatchers->Get(op, (IInterface**)&omwObj);
+        AutoPtr<IArrayList> cbs = IArrayList::Probe(omwObj);
+        if (cbs == NULL) {
+            CArrayList::New((IArrayList**)&cbs);
+            mOpModeWatchers->Put(op, cbs.Get());
+        }
+        cbs->Add(TO_IINTERFACE(cb));
+    }
+
+    if (packageName != NULL) {
+        AutoPtr<ICharSequence> csq = CoreUtils::Convert(packageName);
+        AutoPtr<IInterface> pmwObj;
+        mPackageModeWatchers->Get(csq.Get(), (IInterface**)&pmwObj);
+        AutoPtr<IArrayList> cbs = IArrayList::Probe(pmwObj);
+        if (cbs == NULL) {
+            CArrayList::New((IArrayList**)&cbs);
+            mPackageModeWatchers->Put(csq.Get(), cbs.Get());
+        }
+        cbs->Add(TO_IINTERFACE(cb));
+    }
+
     return NOERROR;
 }
 
@@ -1019,35 +1018,34 @@ ECode CAppOpsService::StartWatchingMode(
 ECode CAppOpsService::StopWatchingMode(
     /* [in] */ IIAppOpsCallback* callback)
 {
-    {    AutoLock syncLock(this);
-        IBinder* binder = IBinder::Probe(callback);
-        AutoPtr<IInterface> obj;
-        mModeWatchers->Remove(binder, (IInterface**)&obj);
-        if (obj != NULL) {
-            AutoPtr<Callback> cb = (Callback*)IObject::Probe(obj);
-            cb->UnlinkToDeath();
+    AutoLock syncLock(this);
+    IBinder* binder = IBinder::Probe(callback);
+    AutoPtr<IInterface> obj;
+    mModeWatchers->Remove(binder, (IInterface**)&obj);
+    if (obj != NULL) {
+        AutoPtr<Callback> cb = (Callback*)IObject::Probe(obj);
+        cb->UnlinkToDeath();
 
-            Int32 size;
-            mOpModeWatchers->GetSize(&size);
-            for (Int32 i = size - 1; i >= 0; i--) {
-                AutoPtr<IInterface> omwObj;
-                mOpModeWatchers->ValueAt(i, (IInterface**)&omwObj);
-                AutoPtr<IArrayList> cbs = IArrayList::Probe(omwObj);
-                cbs->Remove(obj);
-                cbs->GetSize(&size);
-                if (size <= 0) {
-                    mOpModeWatchers->RemoveAt(i);
-                }
+        Int32 size;
+        mOpModeWatchers->GetSize(&size);
+        for (Int32 i = size - 1; i >= 0; i--) {
+            AutoPtr<IInterface> omwObj;
+            mOpModeWatchers->ValueAt(i, (IInterface**)&omwObj);
+            AutoPtr<IArrayList> cbs = IArrayList::Probe(omwObj);
+            cbs->Remove(obj);
+            cbs->GetSize(&size);
+            if (size <= 0) {
+                mOpModeWatchers->RemoveAt(i);
             }
-            for (Int32 i=mPackageModeWatchers->GetSize(&size)-1; i>=0; i--) {
-                AutoPtr<IInterface> omwObj;
-                mPackageModeWatchers->GetValueAt(i, (IInterface**)&omwObj);
-                AutoPtr<IArrayList> cbs = IArrayList::Probe(omwObj);
-                cbs->Remove(obj);
-                cbs->GetSize(&size);
-                if (size <= 0) {
-                    mPackageModeWatchers->RemoveAt(i);
-                }
+        }
+        for (Int32 i=mPackageModeWatchers->GetSize(&size)-1; i>=0; i--) {
+            AutoPtr<IInterface> omwObj;
+            mPackageModeWatchers->GetValueAt(i, (IInterface**)&omwObj);
+            AutoPtr<IArrayList> cbs = IArrayList::Probe(omwObj);
+            cbs->Remove(obj);
+            cbs->GetSize(&size);
+            if (size <= 0) {
+                mPackageModeWatchers->RemoveAt(i);
             }
         }
     }
@@ -1060,18 +1058,18 @@ ECode CAppOpsService::GetToken(
     /* [out] */ IBinder** token)
 {
     VALIDATE_NOT_NULL(token)
-    *token = NULL;
-    {    AutoLock syncLock(this);
-        AutoPtr<IInterface> obj;
-        mClients->Get(clientToken, (IInterface**)&obj);
-        AutoPtr<ClientState> cs = (ClientState*)IObject::Probe(obj);
-        if (cs == NULL) {
-            cs = new ClientState(clientToken, this);
-            mClients->Put(clientToken, TO_IINTERFACE(cs));
-        }
-        *token = IBinder::Probe(cs);
-        REFCOUNT_ADD(*token)
+
+    AutoLock syncLock(this);
+    AutoPtr<IInterface> obj;
+    mClients->Get(clientToken, (IInterface**)&obj);
+    AutoPtr<ClientState> cs = (ClientState*)IObject::Probe(obj);
+    if (cs == NULL) {
+        cs = new ClientState(clientToken, this);
+        mClients->Put(clientToken, TO_IINTERFACE(cs));
     }
+    *token = IBinder::Probe(cs);
+    REFCOUNT_ADD(*token)
+
     return NOERROR;
 }
 
@@ -1091,7 +1089,8 @@ ECode CAppOpsService::CheckOperation(
     AutoPtr<IAppOpsManagerHelper> aom;
     CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (IsOpRestricted(uid, code, packageName)) {
             *result = IAppOpsManager::MODE_IGNORED;
             return NOERROR;
@@ -1206,10 +1205,9 @@ ECode CAppOpsService::CheckPackage(
     VALIDATE_NOT_NULL(mode)
     *mode = IAppOpsManager::MODE_ERRORED;
 
-    {    AutoLock syncLock(this);
-        if (GetOpsRawLocked(uid, packageName, TRUE) != NULL) {
-            *mode = IAppOpsManager::MODE_ALLOWED;
-        }
+    AutoLock syncLock(this);
+    if (GetOpsRawLocked(uid, packageName, TRUE) != NULL) {
+        *mode = IAppOpsManager::MODE_ALLOWED;
     }
     return NOERROR;
 }
@@ -1224,7 +1222,7 @@ ECode CAppOpsService::NoteOperation(
     VALIDATE_NOT_NULL(mode)
     *mode = IAppOpsManager::MODE_ERRORED;
 
-    // AutoPtr<IPermissionDialogReq> req;
+    AutoPtr<PermissionDialogReqQueue::PermissionDialogReq> req;
     FAIL_RETURN(VerifyIncomingUid(uid))
     FAIL_RETURN(VerifyIncomingOp(code))
 
@@ -1272,7 +1270,7 @@ ECode CAppOpsService::NoteOperation(
         else if (switchOp->mMode == IAppOpsManager::MODE_ALLOWED) {
             if (DEBUG) {
                 Logger::D(TAG, "noteOperation: allowing code %d uid %d package %s",
-                        code, uid, (const char*)packageName);
+                    code, uid, packageName.string());
             }
             system->GetCurrentTimeMillis(&(op->mTime));
             op->mRejectTime = 0;
@@ -1288,18 +1286,18 @@ ECode CAppOpsService::NoteOperation(
             hlp->GetMyLooper((ILooper**)&lp);
             if (lp == mLooper) {
                 Logger::E(TAG,
-                    "noteOperation: This method will deadlock if called from the main thread. (Code: %d uid: %d package: %s)",
-                    code, uid, (const char*)packageName);
+                    "noteOperation: This method will deadlock "
+                    "if called from the main thread. (Code: %d uid: %d package: %s)",
+                    code, uid, packageName.string());
                 *mode = switchOp->mMode;
                 return NOERROR;
             }
             op->mNoteOpCount++;
-            // req = AskOperationLocked(code, uid, packageName, switchOp);
+            req = AskOperationLocked(code, uid, packageName, switchOp);
         }
     }
 
-    assert(0 && "TODO");
-    Int32 result = 0;// req.get();
+    Int32 result = req->Get();
     BroadcastOpIfNeeded(code);
     *mode = result;
     return NOERROR;
@@ -1316,7 +1314,7 @@ ECode CAppOpsService::StartOperation(
     VALIDATE_NOT_NULL(mode)
     *mode = IAppOpsManager::MODE_ERRORED;
 
-    //AutoPtr<PermissionDialogReq> req;
+    AutoPtr<PermissionDialogReqQueue::PermissionDialogReq> req;
     FAIL_RETURN(VerifyIncomingUid(uid))
     FAIL_RETURN(VerifyIncomingOp(code))
 
@@ -1326,7 +1324,8 @@ ECode CAppOpsService::StartOperation(
     AutoPtr<IAppOpsManagerHelper> aom;
     CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
     ClientState* client = (ClientState*)token;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<Ops> ops = GetOpsLocked(uid, packageName, TRUE);
         if (ops == NULL) {
             if (DEBUG) {
@@ -1339,6 +1338,10 @@ ECode CAppOpsService::StartOperation(
 
         AutoPtr<Op> op = GetOpLocked(ops, code, TRUE);
         if (IsOpRestricted(uid, code, packageName)) {
+            if (DEBUG) {
+                Slogger::D(TAG, "startOperation: IsOpRestricted for code %d uid %d package %s",
+                    code, uid, packageName.string());
+            }
             op->mIgnoredCount++;
             *mode = IAppOpsManager::MODE_IGNORED;
             return NOERROR;
@@ -1359,7 +1362,7 @@ ECode CAppOpsService::StartOperation(
         else if (switchOp->mMode == IAppOpsManager::MODE_ALLOWED) {
             if (DEBUG) {
                 Logger::D(TAG, "startOperation: allowing code %d uid %d package %s",
-                        code, uid, (const char*)packageName);
+                    code, uid, packageName.string());
             }
             if (op->mNesting == 0) {
                 system->GetCurrentTimeMillis(&op->mTime);
@@ -1381,19 +1384,19 @@ ECode CAppOpsService::StartOperation(
             AutoPtr<ILooper> lp;
             hlp->GetMyLooper((ILooper**)&lp);
             if (lp == mLooper) {
-                Logger::E(TAG,
-                    "startOperation: This method will deadlock if called from the main thread. (Code: %d uid: %d package: %s)",
-                    code, uid, (const char*)packageName);
+                Logger::E(TAG, "startOperation: This method will deadlock"
+                    " if called from the main thread. (Code: %d uid: %d package: %s)",
+                    code, uid, packageName.string());
                 *mode = switchOp->mMode;
                 return NOERROR;
             }
             op->mStartOpCount++;
             AutoPtr<IBinder> clientToken = client->mAppToken;
             op->mClientTokens->Add(clientToken);
-            // req = AskOperationLocked(code, uid, packageName, switchOp);
+            req = AskOperationLocked(code, uid, packageName, switchOp);
         }
     }
-    Int32 result = 0;// = req.get();
+    Int32 result = req->Get();
     BroadcastOpIfNeeded(code);
     *mode = result;
     return NOERROR;
@@ -1650,11 +1653,10 @@ Boolean CAppOpsService::IsOpRestricted(
             CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
             aom->OpAllowSystemBypassRestriction(code, &bval);
             if (bval) {
-                {    AutoLock syncLock(this);
-                    AutoPtr<Ops> ops = GetOpsLocked(uid, packageName, TRUE);
-                    if ((ops != NULL) && ops->mIsPrivileged) {
-                        return FALSE;
-                    }
+                AutoLock syncLock(this);
+                AutoPtr<Ops> ops = GetOpsLocked(uid, packageName, TRUE);
+                if ((ops != NULL) && ops->mIsPrivileged) {
+                    return FALSE;
                 }
             }
             return TRUE;
@@ -1749,6 +1751,9 @@ _ERROR_:
             else if (ec == (ECode)E_INDEX_OUT_OF_BOUNDS_EXCEPTION)  {
                 Slogger::W(TAG, "Failed parsing E_INDEX_OUT_OF_BOUNDS_EXCEPTION");
             }
+            else if (FAILED(ec)) {
+                Slogger::W(TAG, "Failed parsing, ec=%08x", ec);
+            }
 
 _EXIT_:
             if (!success) {
@@ -1838,8 +1843,7 @@ ECode CAppOpsService::ReadUid(
                 || code >= IAppOpsManager::_NUM_OP) {
                 continue;
             }
-            AutoPtr<Op> op = new Op(uid, pkgName, code,
-                    IAppOpsManager::MODE_ERRORED);
+            AutoPtr<Op> op = new Op(uid, pkgName, code, IAppOpsManager::MODE_ERRORED);
 
             String mode;
             parser->GetAttributeValue(nullStr, String("m"), &mode);
@@ -2224,13 +2228,11 @@ ECode CAppOpsService::IsControlAllowed(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = TRUE;
 
-// TODO: Need mPolicy
-    // Boolean isShow = TRUE;
-    // if (mPolicy != NULL) {
-    //     mPolicy->IsControlAllowed(code, packageName, &isShow);
-    // }
-    // *result = isShow;
+    if (mPolicy != NULL) {
+        return mPolicy->IsControlAllowed(code, packageName, result);
+    }
     return NOERROR;
 }
 
@@ -2360,24 +2362,31 @@ Int32 CAppOpsService::GetDefaultMode(
     Int32 mode;
     helper->OpToDefaultMode(code, IsStrict(code, uid, packageName), &mode);
 
-    //assert(0 && "TODO");
-    // if (AppOpsManager::IsStrictOp(code) && mPolicy != NULL) {
-    //     Int32 policyMode;
-    //     mPolicy->GetDefualtMode(code, packageName, &policyMode);
-    //     if (policyMode != IAppOpsManager::MODE_ERRORED) {
-    //         mode = policyMode;
-    //     }
-    // }
+    Boolean bval;
+    helper->IsStrictOp(code, &bval);
+    if (bval && mPolicy != NULL) {
+        Int32 policyMode;
+        mPolicy->GetDefualtMode(code, packageName, &policyMode);
+        if (policyMode != IAppOpsManager::MODE_ERRORED) {
+            mode = policyMode;
+        }
+    }
     return mode;
 }
 
-// private PermissionDialogReq askOperationLocked(int code, int uid,
-//         String packageName, Op op)
-// {
-//     PermissionDialogReq request = new PermissionDialogReq();
-//     mHandler.post(new AskRunnable(code, uid, packageName, op, request));
-//     return request;
-// }
+AutoPtr<PermissionDialogReqQueue::PermissionDialogReq> CAppOpsService::AskOperationLocked(
+    /* [in] */ Int32 code,
+    /* [in] */ Int32 uid,
+    /* [in] */ const String& packageName,
+    /* [in] */ CAppOpsService::Op* op)
+{
+    AutoPtr<PermissionDialogReqQueue::PermissionDialogReq> request;
+    request = new PermissionDialogReqQueue::PermissionDialogReq();
+    AutoPtr<IRunnable> runnable = new AskRunnable(code, uid, packageName, op, request, this);
+    Boolean bval;
+    mHandler->Post(runnable, &bval);
+    return request;
+}
 
 void CAppOpsService::PrintOperationLocked(
     /* [in] */ Op* op,
@@ -2392,14 +2401,14 @@ void CAppOpsService::PrintOperationLocked(
         if (mode == IAppOpsManager::MODE_IGNORED) {
             if (DEBUG) {
                 Logger::D(TAG, "%s: reject #%d for code %d (%d) uid %d package %s",
-                        (const char*)operation, mode, switchCode, op->mOp,
-                        op->mUid, (const char*)op->mPackageName);
+                    operation.string(), mode, switchCode, op->mOp,
+                    op->mUid, op->mPackageName.string());
             }
         }
         else if (mode == IAppOpsManager::MODE_ALLOWED) {
             if (DEBUG) {
                 Logger::D(TAG, "%s: allowing code %d uid %d package %s",
-                        (const char*)operation, op->mOp, op->mUid, (const char*)op->mPackageName);
+                    operation.string(), op->mOp, op->mUid, op->mPackageName.string());
             }
         }
     }
@@ -2441,7 +2450,6 @@ void CAppOpsService::RecordOperationLocked(
                 while(tokSize != 0) {
                     AutoPtr<IInterface> clientToken;
                     op->mClientTokens->Get(0, (IInterface**)&clientToken);
-                    // AutoPtr<IBinder> _clientToken = IBinder::Probe(clientToken);
                     AutoPtr<IInterface> pC;
                     mClients->Get(clientToken, (IInterface**)&pC);
                     AutoPtr<ClientState> client = (ClientState*)IProxyDeathRecipient::Probe(pC);
@@ -2479,11 +2487,10 @@ ECode CAppOpsService::NotifyOperation(
         AutoPtr<Op> op = GetOpLocked(switchCode, uid, packageName, TRUE);
         if (op != NULL) {
             // Send result to all waiting client
-            assert(0 && "TODO");
-            // if (op->mDialogReqQueue->GetDialog() != NULL) {
-            //     op->mDialogReqQueue->NotifyAll(mode);
-            //     op->mDialogReqQueue->SetDialog(NULL);
-            // }
+            if (op->mDialogReqQueue->GetDialog() != NULL) {
+                op->mDialogReqQueue->NotifyAll(mode);
+                op->mDialogReqQueue->SetDialog(NULL);
+            }
             if (remember && op->mMode != mode) {
                 op->mMode = mode;
                 AutoPtr<IInterface> pCbs;

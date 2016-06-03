@@ -19,6 +19,8 @@ class HardwareCanvas
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     CARAPI IsHardwareAccelerated(
         /* [out] */ Boolean* isAccelerated);
 

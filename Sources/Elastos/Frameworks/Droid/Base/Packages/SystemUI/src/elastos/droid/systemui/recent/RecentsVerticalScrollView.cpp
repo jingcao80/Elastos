@@ -245,7 +245,6 @@ ECode RecentsVerticalScrollView::FindViewForTask(
     /* [in] */ Int32 persistentTaskId,
     /* [out] */ IView** view)
 {
-    Logger::I(TAG, " >> FindViewForTask: %08x, %d", persistentTaskId, persistentTaskId);
     VALIDATE_NOT_NULL(view);
     Int32 count;
     IViewGroup::Probe(mLinearLayout)->GetChildCount(&count);
@@ -365,7 +364,6 @@ ECode RecentsVerticalScrollView::OnInterceptTouchEvent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    if (DEBUG) Logger::V(TAG, "OnInterceptTouchEvent()");
     Boolean b1, b2;
     *result = (mSwipeHelper->OnInterceptTouchEvent(ev, &b1), b1)
         || (ScrollView::OnInterceptTouchEvent(ev, &b2), b2);
@@ -538,7 +536,7 @@ void RecentsVerticalScrollView::OnScrollChanged(
     /* [in] */ Int32 oldl,
     /* [in] */ Int32 oldt)
 {
-   OnScrollChanged(l, t, oldl, oldt);
+   ScrollView::OnScrollChanged(l, t, oldl, oldt);
    if (mOnScrollListener != NULL) {
        mOnScrollListener->Run();
    }
@@ -656,8 +654,6 @@ void RecentsVerticalScrollView::OnSizeChanged(
 ECode RecentsVerticalScrollView::SetAdapter(
     /* [in] */ ITaskDescriptionAdapter* adapter)
 {
-    Logger::I(TAG, " >> SetAdapter: %s", TO_CSTR(adapter));
-
     mAdapter = adapter;
     AutoPtr<AdapterDataSetObserver> observer = new AdapterDataSetObserver(this);
     IAdapter::Probe(mAdapter)->RegisterDataSetObserver(observer);

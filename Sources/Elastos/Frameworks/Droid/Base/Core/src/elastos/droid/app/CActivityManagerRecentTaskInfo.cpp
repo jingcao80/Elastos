@@ -59,8 +59,7 @@ ECode CActivityManagerRecentTaskInfo::WriteToParcel(
     }
 
     dest->WriteInterfacePtr(mOrigActivity);
-    TextUtils::WriteToParcel(mDescription,
-        dest/*, Parcelable.PARCELABLE_WRITE_RETURN_VALUE*/);
+    TextUtils::WriteToParcel(mDescription, dest);
 
     if (mTaskDescription != NULL) {
         dest->WriteInt32(1);

@@ -68,7 +68,7 @@ ECode CKeyButtonView::CheckLongPressRunnable::Run()
 //                  CKeyButtonView
 //==============================================================================
 const String CKeyButtonView::TAG("CKeyButtonView");
-const Boolean CKeyButtonView::DEBUG = FALSE;
+const Boolean CKeyButtonView::DEBUG = TRUE;
 const Float CKeyButtonView::DEFAULT_QUIESCENT_ALPHA = 1.f;
 
 CAR_INTERFACE_IMPL(CKeyButtonView, ImageView, IKeyButtonView)

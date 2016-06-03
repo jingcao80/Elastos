@@ -15,6 +15,8 @@ namespace Monkey {
 CarClass(CMonkeySourceScript), public MonkeySourceScript
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetNextEvent(
         /* [out] */ IMonkeyEvent **event);
 

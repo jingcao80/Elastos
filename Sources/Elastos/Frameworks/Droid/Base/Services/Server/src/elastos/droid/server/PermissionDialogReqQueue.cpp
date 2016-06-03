@@ -1,8 +1,6 @@
 #include "elastos/droid/server/PermissionDialogReqQueue.h"
 #include <elastos/core/AutoLock.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Core::AutoLock;
 
 namespace Elastos {
@@ -19,24 +17,20 @@ PermissionDialogReqQueue::PermissionDialogReq::PermissionDialogReq()
 void PermissionDialogReqQueue::PermissionDialogReq::Set(
     /* [in] */ Int32 res)
 {
-    {    AutoLock syncLock(this);
+    AutoLock syncLock(this);
     mHasResult = TRUE;
     mResult = res;
-    assert(0 && "TODO");
-    // NotifyAll();
-    }
+    NotifyAll();
 }
 
 Int32 PermissionDialogReqQueue::PermissionDialogReq::Get()
 {
-    {    AutoLock syncLock(this);
-        while (!mHasResult) {
-            // try {
-            assert(0 && "TODO");
-                // wait();
-            // } catch (InterruptedException e) {
-            // }
-        }
+    AutoLock syncLock(this);
+    while (!mHasResult) {
+        // try {
+        Wait();
+        // } catch (InterruptedException e) {
+        // }
     }
 
     return mResult;
@@ -47,16 +41,15 @@ Int32 PermissionDialogReqQueue::PermissionDialogReq::Get()
 //-----------------------------------------------------------------------------------------
 PermissionDialogReqQueue::PermissionDialogReqQueue()
 {
-    mResultList = new List<AutoPtr<PermissionDialogReq> >();
 }
 
-AutoPtr<PermissionDialog> PermissionDialogReqQueue::GetDialog()
+AutoPtr<IPermissionDialog> PermissionDialogReqQueue::GetDialog()
 {
     return mDialog;
 }
 
 void PermissionDialogReqQueue::SetDialog(
-    /* [in] */ PermissionDialog* dialog)
+    /* [in] */ IPermissionDialog* dialog)
 {
     mDialog = dialog;
 }
@@ -64,20 +57,19 @@ void PermissionDialogReqQueue::SetDialog(
 void PermissionDialogReqQueue::Register(
     /* [in] */ PermissionDialogReq* res)
 {
-    {    AutoLock syncLock(this);
-        mResultList->PushBack(res);
-    }
+    AutoLock syncLock(this);
+    mResultList.PushBack(res);
 }
 
 void PermissionDialogReqQueue::NotifyAll(
     /* [in] */ Int32 mode)
 {
-    {    AutoLock syncLock(this);
-        while (mResultList->GetSize() != 0) {
-            AutoPtr<PermissionDialogReq> res = (*mResultList)[0];
-            res->Set(mode);
-            mResultList->Remove(0);
-        }
+    AutoLock syncLock(this);
+    while (!mResultList.IsEmpty()) {
+        List<AutoPtr<PermissionDialogReq> >::Iterator it = mResultList.Begin();
+        AutoPtr<PermissionDialogReq> res = *it;
+        res->Set(mode);
+        mResultList.Erase(it);
     }
 }
 

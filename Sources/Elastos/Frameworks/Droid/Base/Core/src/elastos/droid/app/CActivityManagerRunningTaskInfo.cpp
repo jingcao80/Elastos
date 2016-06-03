@@ -2,8 +2,10 @@
 #include "elastos/droid/app/CActivityManagerRunningTaskInfo.h"
 #include "elastos/droid/content/CComponentNameHelper.h"
 #include "elastos/droid/graphics/CBitmap.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/ext/frameworkext.h"
 
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Content::CComponentNameHelper;
 using Elastos::Droid::Content::IComponentNameHelper;
 using Elastos::Droid::Graphics::CBitmap;
@@ -48,7 +50,8 @@ ECode CActivityManagerRunningTaskInfo::WriteToParcel(
         dest->WriteInt32(0);
     }
 
-    dest->WriteInterfacePtr(mDescription);
+    TextUtils::WriteToParcel(mDescription, dest);
+
     dest->WriteInt32(mNumActivities);
     dest->WriteInt32(mNumRunning);
 
@@ -75,13 +78,14 @@ ECode CActivityManagerRunningTaskInfo::ReadFromParcel(
         IParcelable* parcel = IParcelable::Probe(bitmap);
         parcel->ReadFromParcel(source);
         mThumbnail = bitmap;
-    } else {
+    }
+    else {
         mThumbnail = NULL;
     }
 
-    AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
-    mDescription = ICharSequence::Probe(obj);
+    TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
+        source, (ICharSequence**)&mDescription);
+
     source->ReadInt32(&mNumActivities);
     source->ReadInt32(&mNumRunning);
 

@@ -11,6 +11,7 @@
 #include <elastos/droid/Manifest.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.App.h>
@@ -23,8 +24,6 @@
 #include <Elastos.Droid.Internal.h>
 #include <hardware_legacy/vibrator.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::Process;
@@ -60,7 +59,9 @@ using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Hardware::Input::EIID_IInputDeviceListener;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::Core::CThread;
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -68,7 +69,7 @@ namespace Droid {
 namespace Server {
 
 const String CVibratorService::TAG("VibratorService");
-const Boolean CVibratorService::DBG = FALSE;
+const Boolean CVibratorService::DBG = TRUE;
 
 ECode CVibratorService::VibrationRunnable::Run()
 {
@@ -156,6 +157,31 @@ Boolean CVibratorService::Vibration::IsSystemHapticFeedback()
     return (mUid == IProcess::SYSTEM_UID || mUid == 0) && mRepeat < 0;
 }
 
+ECode CVibratorService::Vibration::ToString(
+    /* [in] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+
+    StringBuilder sb("vibration{0x");
+    sb += StringUtils::ToHexString((Int32)this);
+    if (mOpPkg != NULL) {
+        sb += ", opPkg=";
+        sb += mOpPkg;
+    }
+    sb += ", timeout=";
+    sb += mTimeout;
+    sb += ", startTime=";
+    sb += mStartTime;
+    sb += ", repeat=";
+    sb += mRepeat;
+    sb += ", usageHint=";
+    sb += mUsageHint;
+    sb += ", uid=";
+    sb += mUid;
+    *str = sb.ToString();
+    return NOERROR;
+}
+
 //====================================================================
 // CVibratorService::SettingsObserver
 //====================================================================
@@ -203,7 +229,6 @@ CVibratorService::VibrateThread::VibrateThread(
     mHost->mTmpWorkSource->Set(vib->mUid);
     mHost->mWakeLock->SetWorkSource(mHost->mTmpWorkSource);
     mHost->mWakeLock->AcquireLock();
-    CThread::New((IThread**)&mThread);
 }
 
 void CVibratorService::VibrateThread::Delay(
@@ -213,7 +238,7 @@ void CVibratorService::VibrateThread::Delay(
         Int64 bedtime = duration + SystemClock::GetUptimeMillis();
         do {
             //try {
-            ISynchronize::Probe(mThread)->Wait(duration);
+            Wait(duration);
             //}
             //catch (InterruptedException e) {
             //}
@@ -229,7 +254,7 @@ ECode CVibratorService::VibrateThread::Run()
 {
     Process::SetThreadPriority(IProcess::THREAD_PRIORITY_URGENT_DISPLAY);
     {
-        ISynchronize::Probe(mThread)->Lock();
+        AutoLock lock(this);
         Int32 index = 0;
         AutoPtr<ArrayOf<Int64> > pattern = mVibration->mPattern;
         Int32 len = pattern->GetLength();
@@ -269,10 +294,10 @@ ECode CVibratorService::VibrateThread::Run()
             }
         }
         mHost->mWakeLock->ReleaseLock();
-        ISynchronize::Probe(mThread)->Unlock();
     }
+
     AutoLock Lock(mHost->mVibrationsLock);
-    // TODO: this object will be free?
+    AutoPtr<VibrateThread> holdThis(this);
     if (mHost->mThread.Get() == this) {
         mHost->mThread = NULL;
     }
@@ -286,10 +311,6 @@ ECode CVibratorService::VibrateThread::Run()
     return NOERROR;
 }
 
-ECode CVibratorService::VibrateThread::Start()
-{
-    return mThread->Start();
-}
 
 //====================================================================
 // CVibratorService::IntentReceiver
@@ -391,13 +412,13 @@ Boolean CVibratorService::VibratorExists()
 void CVibratorService::VibratorOn(
     /* [in] */ Int64 milliseconds)
 {
-    Slogger::I(TAG, "vibratorOn");
+    Slogger::I(TAG, " >> vibrator_on");
     vibrator_on(milliseconds);
 }
 
 void CVibratorService::VibratorOff()
 {
-    Slogger::I(TAG, "vibratorOff");
+    Slogger::I(TAG, " >> vibrator_off");
     vibrator_off();
 }
 
@@ -480,10 +501,11 @@ ECode CVibratorService::Vibrate(
         Slogger::D(TAG, "Vibrating for %lld ms.", milliseconds);
     }
 
-    AutoPtr<Vibration> vib = new Vibration(token, milliseconds, usageHint, uid, opPkg, this);
+    AutoPtr<Vibration> vib = new Vibration(token, milliseconds, uid, usageHint, opPkg, this);
 
     Int64 ident = Binder::ClearCallingIdentity();
-    {    AutoLock syncLock(mVibrationsLock);
+    {
+        AutoLock syncLock(mVibrationsLock);
         RemoveVibrationLocked(token);
         DoCancelVibrateLocked();
         mCurrentVibration = vib;
@@ -515,7 +537,8 @@ ECode CVibratorService::VibratePattern(
     /* [in] */ IBinder* token)
 {
     Int32 result = 0;
-    FAIL_RETURN(mContext->CheckCallingOrSelfPermission(Elastos::Droid::Manifest::permission::VIBRATE, &result));
+    FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
+        Elastos::Droid::Manifest::permission::VIBRATE, &result));
     if (result != IPackageManager::PERMISSION_GRANTED) {
         //throw new SecurityException("Requires VIBRATE permission");
         Slogger::E(TAG, "Requires VIBRATE permission");
@@ -532,17 +555,19 @@ ECode CVibratorService::VibratePattern(
             sb += " ";
             sb += (*pattern)[i];
         }
-        Slogger::D(TAG, "vibrating with pattern: %s", sb.ToString().string());
+        Slogger::D(TAG, "vibrating with pattern: {%s}", sb.ToString().string());
     }
 
     // we're running in the server so we can't fail
     if (pattern == NULL || pattern->GetLength() == 0
-            || IsAll0(*pattern)
-            || repeat >= pattern->GetLength() || token == NULL) {
+        || IsAll0(*pattern)
+        || repeat >= pattern->GetLength() || token == NULL) {
+        Binder::RestoreCallingIdentity(identity);
         return NOERROR;
     }
 
-    AutoPtr<Vibration> vib = new Vibration(token, pattern, repeat, usageHint, uid, packageName, this);
+    AutoPtr<Vibration> vib = new Vibration(token, pattern, repeat,
+        uid, usageHint, packageName, this);
     AutoPtr<IProxy> proxy = (IProxy*)token->Probe(EIID_IProxy);
     //try {
     if (proxy != NULL) proxy->LinkToDeath(vib, 0);
@@ -600,11 +625,9 @@ ECode CVibratorService::CancelVibrate(
 void CVibratorService::DoCancelVibrateLocked()
 {
     if (mThread != NULL) {
-        ISynchronize* sync = ISynchronize::Probe(mThread->mThread);
-        sync->Lock();
+        AutoLock lock(mThread.Get());
         mThread->mDone = TRUE;
-        sync->Notify();
-        sync->Unlock();
+        mThread->Notify();
         mThread = NULL;
     }
     DoVibratorOff();
@@ -628,8 +651,8 @@ void CVibratorService::StartNextVibrationLocked()
 void CVibratorService::StartVibrationLocked(
     /* [in] */ Vibration* vib)
 {
-    if (mLowPowerMode
-            && vib->mUsageHint != IAudioAttributes::USAGE_NOTIFICATION_RINGTONE) {
+    if (mLowPowerMode &&
+        vib->mUsageHint != IAudioAttributes::USAGE_NOTIFICATION_RINGTONE) {
         return;
     }
 
@@ -646,6 +669,7 @@ void CVibratorService::StartVibrationLocked(
         mAppOpsService->StartOperation(token,
             IAppOpsManager::OP_VIBRATE, vib->mUid, vib->mOpPkg, &mode);
     }
+
     if (mode != IAppOpsManager::MODE_ALLOWED) {
         if (mode == IAppOpsManager::MODE_ERRORED) {
             Slogger::W(TAG, "Would be an error: vibrate from uid %d", vib->mUid);
@@ -663,6 +687,7 @@ void CVibratorService::StartVibrationLocked(
         // mThread better be null here. doCancelVibrate should always be
         // called before startNextVibrationLocked or startVibrationLocked.
         mThread = new VibrateThread(vib, this);
+        mThread->constructor();
         mThread->Start();
     }
 }

@@ -3,14 +3,15 @@
 #include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
 #include "../../R.h"
 #include "Elastos.Droid.Content.h"
-#include <elastos/core/Math.h>
 #include <elastos/droid/graphics/CanvasProperty.h>
 #include <elastos/droid/R.h>
+#include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Animation::CObjectAnimatorHelper;
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Animation::IObjectAnimatorHelper;
-using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Animation::CObjectAnimatorHelper;
+using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::CanvasProperty;
 using Elastos::Droid::Graphics::CPaint;
@@ -23,6 +24,7 @@ using Elastos::Droid::View::Animation::EIID_IInterpolator;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::ICollection;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -30,7 +32,13 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-CAR_INTERFACE_IMPL(CKeyButtonRipple::LogInterpolator, Object, IInterpolator)
+static const String TAG("CKeyButtonRipple");
+
+//==========================================================
+// CKeyButtonRipple::LogInterpolator
+//==========================================================
+CAR_INTERFACE_IMPL_2(CKeyButtonRipple::LogInterpolator, Object, IInterpolator, ITimeInterpolator)
+
 ECode CKeyButtonRipple::LogInterpolator::GetInterpolation(
     /* [in] */ Float input,
     /* [out] */ Float* result)
@@ -40,6 +48,17 @@ ECode CKeyButtonRipple::LogInterpolator::GetInterpolation(
     return NOERROR;
 }
 
+ECode CKeyButtonRipple::LogInterpolator::HasNativeInterpolator(
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
+}
+
+//==========================================================
+// CKeyButtonRipple::AnimatorListener
+//==========================================================
 CKeyButtonRipple::AnimatorListener::AnimatorListener(
     /* [in] */ CKeyButtonRipple* host)
     : mHost(host)
@@ -57,13 +76,18 @@ ECode CKeyButtonRipple::AnimatorListener::OnAnimationEnd(
     return NOERROR;
 }
 
+//==========================================================
+// CKeyButtonRipple
+//==========================================================
 const Float CKeyButtonRipple::GLOW_MAX_SCALE_FACTOR = 1.35f;
 const Float CKeyButtonRipple::GLOW_MAX_ALPHA = 0.2f;
 const Int32 CKeyButtonRipple::ANIMATION_DURATION_SCALE = 350;
 const Int32 CKeyButtonRipple::ANIMATION_DURATION_FADE = 450;
 
 CAR_OBJECT_IMPL(CKeyButtonRipple)
+
 CAR_INTERFACE_IMPL(CKeyButtonRipple, Drawable, IKeyButtonRipple)
+
 CKeyButtonRipple::CKeyButtonRipple()
     : mGlowAlpha(0.f)
     , mGlowScale(1.f)
@@ -77,8 +101,9 @@ CKeyButtonRipple::constructor(
     /* [in] */ IContext* ctx,
     /* [in] */ IView* targetView)
 {
+    Logger::I(TAG, " >> CKeyButtonRipple::constructor()");
     mInterpolator = new LogInterpolator();
-    mAlphaExitInterpolator = CPhoneStatusBar::ALPHA_OUT;
+    mAlphaExitInterpolator = ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT);
     CHashSet::New((IHashSet**)&mRunningAnimations);
     CArrayList::New((IArrayList**)&mTmpArray);
     mAnimatorListener = new AnimatorListener(this);
@@ -102,6 +127,7 @@ AutoPtr<IPaint> CKeyButtonRipple::GetRipplePaint()
 void CKeyButtonRipple::DrawSoftware(
     /* [in] */ ICanvas* canvas)
 {
+    Logger::I(TAG, " >> CKeyButtonRipple::DrawSoftware()");
     if (mGlowAlpha > 0.f) {
         AutoPtr<IPaint> p = GetRipplePaint();
         p->SetAlpha((Int32)(mGlowAlpha * 255.f));
@@ -123,14 +149,14 @@ void CKeyButtonRipple::DrawSoftware(
         const Float corner = horizontal ? cy : cx;
 
         canvas->DrawRoundRect(cx - rx, cy - ry,
-                cx + rx, cy + ry,
-                corner, corner, p);
+            cx + rx, cy + ry, corner, corner, p);
     }
 }
 
 ECode CKeyButtonRipple::Draw(
     /* [in] */ ICanvas* canvas)
 {
+    Logger::I(TAG, " >> CKeyButtonRipple::Draw()");
     canvas->IsHardwareAccelerated(&mSupportHardware);
     if (mSupportHardware) {
         DrawHardware(IHardwareCanvas::Probe(canvas));
@@ -176,9 +202,10 @@ Boolean CKeyButtonRipple::IsHorizontal()
 void CKeyButtonRipple::DrawHardware(
     /* [in] */ IHardwareCanvas* c)
 {
+    Logger::I(TAG, " >> CKeyButtonRipple::DrawHardware()");
     if (mDrawingHardwareGlow) {
-        c->DrawRoundRect(mLeftProp, mTopProp, mRightProp, mBottomProp, mRxProp, mRyProp,
-                mPaintProp);
+        c->DrawRoundRect(mLeftProp, mTopProp, mRightProp, mBottomProp,
+            mRxProp, mRyProp, mPaintProp);
     }
 }
 
@@ -281,6 +308,7 @@ void CKeyButtonRipple::SetPressedSoftware(
 
 void CKeyButtonRipple::EnterSoftware()
 {
+    Logger::I(TAG, " >> CKeyButtonRipple::EnterSoftware()");
     CancelAnimations();
     mGlowAlpha = GLOW_MAX_ALPHA;
 
@@ -292,15 +320,17 @@ void CKeyButtonRipple::EnterSoftware()
 
     AutoPtr<IObjectAnimator> scaleAnimator;
     helper->OfFloat(TO_IINTERFACE(this), String("glowScale"), fa, (IObjectAnimator**)&scaleAnimator);
-    IAnimator::Probe(scaleAnimator)->SetInterpolator(ITimeInterpolator::Probe(mInterpolator));
-    IAnimator::Probe(scaleAnimator)->SetDuration(ANIMATION_DURATION_SCALE);
-    IAnimator::Probe(scaleAnimator)->AddListener(mAnimatorListener);
-    IAnimator::Probe(scaleAnimator)->Start();
+    IAnimator* animator = IAnimator::Probe(scaleAnimator);
+    animator->SetInterpolator(mInterpolator);
+    animator->SetDuration(ANIMATION_DURATION_SCALE);
+    animator->AddListener(mAnimatorListener);
+    animator->Start();
     mRunningAnimations->Add(scaleAnimator);
 }
 
 void CKeyButtonRipple::ExitSoftware()
 {
+    Logger::I(TAG, " >> CKeyButtonRipple::ExitSoftware()");
     AutoPtr<IObjectAnimatorHelper> helper;
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
     AutoPtr<ArrayOf<Float> > fa = ArrayOf<Float>::Alloc(2);
@@ -308,10 +338,11 @@ void CKeyButtonRipple::ExitSoftware()
     (*fa)[1] = 0.f;
     AutoPtr<IObjectAnimator> alphaAnimator;
     helper->OfFloat(TO_IINTERFACE(this), String("glowAlpha"), fa, (IObjectAnimator**)&alphaAnimator);
-    IAnimator::Probe(alphaAnimator)->SetInterpolator(ITimeInterpolator::Probe(mAlphaExitInterpolator));
-    IAnimator::Probe(alphaAnimator)->SetDuration(ANIMATION_DURATION_FADE);
-    IAnimator::Probe(alphaAnimator)->AddListener(mAnimatorListener);
-    IAnimator::Probe(alphaAnimator)->Start();
+    IAnimator* animator = IAnimator::Probe(alphaAnimator);
+    animator->SetInterpolator(mAlphaExitInterpolator);
+    animator->SetDuration(ANIMATION_DURATION_FADE);
+    animator->AddListener(mAnimatorListener);
+    animator->Start();
     mRunningAnimations->Add(alphaAnimator);
 }
 
@@ -369,6 +400,7 @@ Int32 CKeyButtonRipple::GetExtendSize()
     else {
         bounds->GetHeight(&v);
     }
+    Logger::I(TAG, " >> CKeyButtonRipple::GetExtendSize: %d", v);
     return v;
 }
 
@@ -383,31 +415,35 @@ Int32 CKeyButtonRipple::GetRippleSize()
     else {
         bounds->GetHeight(&size);
     }
+    Logger::I(TAG, " >> CKeyButtonRipple::GetExtendSize: size:%d, mMaxWidth:%d", size, mMaxWidth);
     return Elastos::Core::Math::Min(size, mMaxWidth);
 }
 
 void CKeyButtonRipple::EnterHardware()
 {
+    Logger::I(TAG, " >> CKeyButtonRipple::EnterHardware()");
     CancelAnimations();
     mDrawingHardwareGlow = TRUE;
     SetExtendStart(CanvasProperty::CreateFloat(GetExtendSize() / 2));
     AutoPtr<IRenderNodeAnimator> startAnim;
     CRenderNodeAnimator::New(GetExtendStart(),
-            GetExtendSize() / 2 - GLOW_MAX_SCALE_FACTOR * GetRippleSize() / 2,
-            (IRenderNodeAnimator**)&startAnim);
-    IAnimator::Probe(startAnim)->SetDuration(ANIMATION_DURATION_SCALE);
-    IAnimator::Probe(startAnim)->SetInterpolator(ITimeInterpolator::Probe(mInterpolator));
-    IAnimator::Probe(startAnim)->AddListener(mAnimatorListener);
+        GetExtendSize() / 2 - GLOW_MAX_SCALE_FACTOR * GetRippleSize() / 2,
+        (IRenderNodeAnimator**)&startAnim);
+    IAnimator* sa = IAnimator::Probe(startAnim);
+    sa->SetDuration(ANIMATION_DURATION_SCALE);
+    sa->SetInterpolator(mInterpolator);
+    sa->AddListener(mAnimatorListener);
     startAnim->SetTarget(mTargetView);
 
     SetExtendEnd(CanvasProperty::CreateFloat(GetExtendSize() / 2));
     AutoPtr<IRenderNodeAnimator> endAnim;
     CRenderNodeAnimator::New(GetExtendEnd(),
-            GetExtendSize() / 2 + GLOW_MAX_SCALE_FACTOR * GetRippleSize() / 2,
-            (IRenderNodeAnimator**)&endAnim);
-    IAnimator::Probe(endAnim)->SetDuration(ANIMATION_DURATION_SCALE);
-    IAnimator::Probe(endAnim)->SetInterpolator(ITimeInterpolator::Probe(mInterpolator));
-    IAnimator::Probe(endAnim)->AddListener(mAnimatorListener);
+        GetExtendSize() / 2 + GLOW_MAX_SCALE_FACTOR * GetRippleSize() / 2,
+        (IRenderNodeAnimator**)&endAnim);
+    IAnimator* ea = IAnimator::Probe(endAnim);
+    ea->SetDuration(ANIMATION_DURATION_SCALE);
+    ea->SetInterpolator(mInterpolator);
+    ea->AddListener(mAnimatorListener);
     endAnim->SetTarget(mTargetView);
 
     if (IsHorizontal()) {
@@ -419,7 +455,7 @@ void CKeyButtonRipple::EnterHardware()
         bounds->GetHeight(&value);
         mBottomProp = CanvasProperty::CreateFloat(value);
         mRxProp = CanvasProperty::CreateFloat(value / 2);
-        mRyProp = CanvasProperty::CreateFloat(value / 2);
+        mRyProp = mRyProp;
     }
     else {
         AutoPtr<IRect> bounds;
@@ -429,7 +465,7 @@ void CKeyButtonRipple::EnterHardware()
         mLeftProp = CanvasProperty::CreateFloat(0.f);
         mRightProp = CanvasProperty::CreateFloat(value);
         mRxProp = CanvasProperty::CreateFloat(value / 2);
-        mRyProp = CanvasProperty::CreateFloat(value / 2);
+        mRyProp = mRxProp;
     }
 
     mGlowScale = GLOW_MAX_SCALE_FACTOR;
@@ -438,8 +474,8 @@ void CKeyButtonRipple::EnterHardware()
     mRipplePaint->SetAlpha((Int32) (mGlowAlpha * 255));
     mPaintProp = CanvasProperty::CreatePaint(mRipplePaint);
 
-    IAnimator::Probe(startAnim)->Start();
-    IAnimator::Probe(endAnim)->Start();
+    sa->Start();
+    ea->Start();
     mRunningAnimations->Add(startAnim);
     mRunningAnimations->Add(endAnim);
 
@@ -448,16 +484,18 @@ void CKeyButtonRipple::EnterHardware()
 
 void CKeyButtonRipple::ExitHardware()
 {
+    Logger::I(TAG, " >> CKeyButtonRipple::ExitHardware()");
     mPaintProp = CanvasProperty::CreatePaint(GetRipplePaint());
     AutoPtr<IRenderNodeAnimator> opacityAnim;
     CRenderNodeAnimator::New(mPaintProp,
-            IRenderNodeAnimator::PAINT_ALPHA, 0, (IRenderNodeAnimator**)&opacityAnim);
-    IAnimator::Probe(opacityAnim)->SetDuration(ANIMATION_DURATION_FADE);
-    IAnimator::Probe(opacityAnim)->SetInterpolator(ITimeInterpolator::Probe(mAlphaExitInterpolator));
-    IAnimator::Probe(opacityAnim)->AddListener(mAnimatorListener);
+        IRenderNodeAnimator::PAINT_ALPHA, 0, (IRenderNodeAnimator**)&opacityAnim);
+    IAnimator* animator = IAnimator::Probe(opacityAnim);
+    animator->SetDuration(ANIMATION_DURATION_FADE);
+    animator->SetInterpolator(mAlphaExitInterpolator);
+    animator->AddListener(mAnimatorListener);
     opacityAnim->SetTarget(mTargetView);
 
-    IAnimator::Probe(opacityAnim)->Start();
+    animator->Start();
     mRunningAnimations->Add(opacityAnim);
 
     InvalidateSelf();

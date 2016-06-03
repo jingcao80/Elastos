@@ -1017,7 +1017,6 @@ void ViewRootImpl::RunQueue::ExecuteActions(
 
     List<AutoPtr<HandlerAction> >::Iterator iter;
     for (iter = mActions.Begin(); iter != mActions.End(); ++iter) {
-        Logger::I(TAG, " >> ExecuteActions %s, delay:%lld", TO_CSTR((*iter)->mAction), (*iter)->mDelay);
         handler->PostDelayed((*iter)->mAction, (*iter)->mDelay, &result);
     }
 

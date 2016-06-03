@@ -76,6 +76,8 @@ using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IViewTreeObserver;
 using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::View::IGLES20CanvasHelper;
+using Elastos::Droid::View::CGLES20CanvasHelper;
 using Elastos::Droid::View::Animation::AnimationUtils;
 using Elastos::Droid::View::Animation::CAccelerateDecelerateInterpolator;
 using Elastos::Droid::View::Animation::CAccelerateInterpolator;
@@ -101,6 +103,7 @@ using Elastos::Droid::SystemUI::StatusBar::Policy::KeyguardUserSwitcher;
 using Elastos::Droid::SystemUI::StatusBar::Policy::PreviewInflater;
 using Elastos::Droid::SystemUI::StatusBar::Stack::EIID_IOnChildLocationsChangedListener;
 using Elastos::Droid::SystemUI::StatusBar::Stack::StackScrollState;
+using Elastos::Droid::SystemUI::StatusBar::Stack::IStackScrollAlgorithm;
 using Elastos::Droid::SystemUI::Volume::EIID_IVolumeComponent;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CString;
@@ -1131,13 +1134,19 @@ ECode CPhoneStatusBar::OnPreDrawListener::OnPreDraw(
         IView::Probe(mHost->mStatusBarView)->GetViewTreeObserver((IViewTreeObserver**)&vto);
         vto->RemoveOnPreDrawListener(this);
         Logger::D("CPhoneStatusBar::OnPreDrawListener", "TODO: Need HardwareCanvas.");
-        // HardwareCanvas.SetProperty("extraRasterBucket",
-        //         Float.toString(StackScrollAlgorithm.DIMMED_SCALE));
-        // HardwareCanvas.setProperty("extraRasterBucket", Float.toString(
-        //         mHost->mContext.getResources().getDimensionPixelSize(
-        //                 R.dimen.qs_time_collapsed_size)
-        //         / mHost->mContext.getResources().getDimensionPixelSize(
-        //                 R.dimen.qs_time_expanded_size)));
+        AutoPtr<IGLES20CanvasHelper> helper;
+        CGLES20CanvasHelper::AcquireSingleton((IGLES20CanvasHelper**)&helper);
+        helper->SetProperty(
+            String("extraRasterBucket"),
+            StringUtils::ToString((Float)IStackScrollAlgorithm::DIMMED_SCALE));
+
+        AutoPtr<IResources> res;
+        mHost->mContext->GetResources((IResources**)&res);
+        Int32 collapseSize, expandedSize;
+        res->GetDimensionPixelSize(R::dimen::qs_time_collapsed_size, &collapseSize);
+        res->GetDimensionPixelSize(R::dimen::qs_time_expanded_size, &expandedSize);
+        Float value = collapseSize * 1.0f / expandedSize;
+        helper->SetProperty(String("extraRasterBucket"), StringUtils::ToString(value));
     }
     mHost->mDrawCount++;
     *result = TRUE;
@@ -4863,6 +4872,8 @@ ECode CPhoneStatusBar::PostStartTracing()
 
 ECode CPhoneStatusBar::Vibrate()
 {
+    Logger::D("CPhoneStatusBar", "Vibrate");
+
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::VIBRATOR_SERVICE, (IInterface**)&obj);
     AutoPtr<IVibrator> vib = IVibrator::Probe(obj);
@@ -5627,7 +5638,6 @@ void CPhoneStatusBar::HandleLongPressBackRecents(
         Boolean tmp = FALSE;
         Int32 id = 0;
         v->GetId(&id);
-        Logger::I(TAG, " activityManager:%s", TO_CSTR(activityManager));
         ec = activityManager->IsInLockTaskMode(&tmp);
         if (FAILED(ec)) {
             break;

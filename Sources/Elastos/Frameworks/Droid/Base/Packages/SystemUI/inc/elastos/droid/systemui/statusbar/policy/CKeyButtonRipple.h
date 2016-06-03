@@ -13,6 +13,7 @@
 
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::ICanvasProperty;
@@ -42,19 +43,28 @@ private:
     class LogInterpolator
         : public Object
         , public IInterpolator
+        , public ITimeInterpolator
     {
     public:
         CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("CKeyButtonRipple::LogInterpolator")
 
         // @Override
         CARAPI GetInterpolation(
             /* [in] */ Float input,
             /* [out] */ Float* result);
+
+        CARAPI HasNativeInterpolator(
+            /* [out] */ Boolean* res);
     };
 
-    class AnimatorListener: public AnimatorListenerAdapter
+    class AnimatorListener
+        : public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("CKeyButtonRipple::AnimatorListener")
+
         AnimatorListener(
             /* [in] */ CKeyButtonRipple* host);
 
@@ -186,8 +196,8 @@ private:
     Boolean mDrawingHardwareGlow;
     Int32 mMaxWidth;
 
-    AutoPtr<IInterpolator> mInterpolator;
-    AutoPtr<IInterpolator> mAlphaExitInterpolator;
+    AutoPtr<ITimeInterpolator> mInterpolator;
+    AutoPtr<ITimeInterpolator> mAlphaExitInterpolator;
     Boolean mSupportHardware;
     AutoPtr<IView> mTargetView;
 

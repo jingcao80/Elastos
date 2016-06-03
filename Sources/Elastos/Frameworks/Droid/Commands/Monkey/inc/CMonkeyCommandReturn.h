@@ -13,6 +13,8 @@ namespace Monkey {
 CarClass(CMonkeyCommandReturn), public MonkeyCommandReturn
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI HasMessage(
         /* [out] */ Boolean *result);
 

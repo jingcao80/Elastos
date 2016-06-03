@@ -372,7 +372,7 @@ ECode MobileDataStateTracker::constructor(
     AutoPtr<ITelephonyManager> telManager;
     // TODO: Waiting for TelephonyManager
     // CTelephonyManager::GetDefault((ITelephonyManager**)&telManager);
-    Int32 n;
+    Int32 n = 0;
     String str;
     // telManager->GetNetworkType(&n);
     // telManager->GetNetworkTypeName(&str);

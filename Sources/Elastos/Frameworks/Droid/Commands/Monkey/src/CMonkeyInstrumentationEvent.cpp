@@ -6,6 +6,7 @@ namespace Droid {
 namespace Commands {
 namespace Monkey {
 
+CAR_OBJECT_IMPL(CMonkeyInstrumentationEvent)
 
 ECode CMonkeyInstrumentationEvent::GetEventType(
     /* [out] */ Int32 *eventType)
