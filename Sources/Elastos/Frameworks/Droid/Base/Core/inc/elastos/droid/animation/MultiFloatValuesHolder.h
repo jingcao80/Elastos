@@ -58,6 +58,11 @@ public:
         /* [in] */ IClassInfo* target);
 
 private:
+    CARAPI CallGetter(
+        /* [in] */ IInterface* target,
+        /* [out] */ IInterface** value);
+
+private:
     AutoPtr<IMethodInfo> mNativeSetter;
 
     typedef HashMap<String, AutoPtr<IMethodInfo> > MethodMap;
@@ -66,7 +71,7 @@ private:
     typedef HashMap<AutoPtr<IClassInfo>, AutoPtr<MethodMap> > ClassMethodMap;
     typedef typename ClassMethodMap::Iterator ClassMethodMapIterator;
 
-    static ClassMethodMap sNativeSetterPropertyMap;
+    static ClassMethodMap sNativeGetterSetterPropertyMap;
 };
 
 } // namespace Animation

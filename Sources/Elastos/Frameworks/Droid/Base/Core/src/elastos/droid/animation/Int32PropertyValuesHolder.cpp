@@ -14,7 +14,7 @@ namespace Elastos {
 namespace Droid {
 namespace Animation {
 
-Int32PropertyValuesHolder::ClassMethodMap Int32PropertyValuesHolder::sNativeSetterPropertyMap;
+Int32PropertyValuesHolder::ClassMethodMap Int32PropertyValuesHolder::sNativeGetterSetterPropertyMap;
 
 CAR_INTERFACE_IMPL(Int32PropertyValuesHolder, PropertyValuesHolder, IInt32PropertyValuesHolder);
 
@@ -122,13 +122,15 @@ ECode Int32PropertyValuesHolder::SetupSetter(
     {
         AutoLock lock(mPropertyMapLock);
 
+        String methodName = GetMethodName(String("Set"), mPropertyName);
+
         AutoPtr<MethodMap> propertyMap;
-        ClassMethodMapIterator it = sNativeSetterPropertyMap.Find(target);
-        if (it != sNativeSetterPropertyMap.End()) {
+        ClassMethodMapIterator it = sNativeGetterSetterPropertyMap.Find(target);
+        if (it != sNativeGetterSetterPropertyMap.End()) {
             propertyMap = it->mSecond;
         }
         if (propertyMap != NULL) {
-            MethodMapIterator mit = propertyMap->Find(mPropertyName);
+            MethodMapIterator mit = propertyMap->Find(methodName);
             AutoPtr<IMethodInfo> mtInfo;
             if (mit != propertyMap->End()) {
                 mtInfo = mit->mSecond;
@@ -138,14 +140,13 @@ ECode Int32PropertyValuesHolder::SetupSetter(
             }
         }
         if (mNativeSetter == NULL) {
-            String methodName = GetMethodName(String("Set"), mPropertyName);
             mNativeSetter = nGetInt32Method(target, methodName);
             if (mNativeSetter != NULL) {
                 if (propertyMap == NULL) {
                     propertyMap = new MethodMap();
-                    sNativeSetterPropertyMap[target] = propertyMap;
+                    sNativeGetterSetterPropertyMap[target] = propertyMap;
                 }
-                (*propertyMap)[mPropertyName] = mNativeSetter;
+                (*propertyMap)[methodName] = mNativeSetter;
             }
         }
     }
@@ -162,13 +163,15 @@ ECode Int32PropertyValuesHolder::SetupGetter(
     {
         AutoLock lock(mPropertyMapLock);
 
+        String methodName = GetMethodName(String("Get"), mPropertyName);
+
         AutoPtr<MethodMap> propertyMap;
-        ClassMethodMapIterator it = sNativeSetterPropertyMap.Find(target);
-        if (it != sNativeSetterPropertyMap.End()) {
+        ClassMethodMapIterator it = sNativeGetterSetterPropertyMap.Find(target);
+        if (it != sNativeGetterSetterPropertyMap.End()) {
             propertyMap = it->mSecond;
         }
         if (propertyMap != NULL) {
-            MethodMapIterator mit = propertyMap->Find(mPropertyName);
+            MethodMapIterator mit = propertyMap->Find(methodName);
             AutoPtr<IMethodInfo> mtInfo;
             if (mit != propertyMap->End()) {
                 mtInfo = mit->mSecond;
@@ -178,17 +181,36 @@ ECode Int32PropertyValuesHolder::SetupGetter(
             }
         }
         if (mGetter == NULL) {
-            String methodName = GetMethodName(String("Get"), mPropertyName);
             target->GetMethodInfo(methodName, String("(I32*)E"), (IMethodInfo**)&mGetter);
             if (mGetter != NULL) {
                 if (propertyMap == NULL) {
                     propertyMap = new MethodMap();
-                    sNativeSetterPropertyMap[target] = propertyMap;
+                    sNativeGetterSetterPropertyMap[target] = propertyMap;
                 }
-                (*propertyMap)[mPropertyName] = mGetter;
+                (*propertyMap)[methodName] = mGetter;
             }
         }
     }
+    return NOERROR;
+}
+
+ECode Int32PropertyValuesHolder::CallGetter(
+    /* [in] */ IInterface* target,
+    /* [out] */ IInterface** value)
+{
+    AutoPtr<IArgumentList> arg;
+    mGetter->CreateArgumentList((IArgumentList**)&arg);
+    Int32 result;
+    arg->SetOutputArgumentOfInt32Ptr(0, &result);
+    ECode ec = mGetter->Invoke(target, arg);
+    if (FAILED(ec)) {
+        *value = NULL;
+        return ec;
+    }
+    AutoPtr<IInteger32> resultObj;
+    CInteger32::New(result, (IInteger32**)&resultObj);
+    *value = resultObj;
+    REFCOUNT_ADD(*value);
     return NOERROR;
 }
 

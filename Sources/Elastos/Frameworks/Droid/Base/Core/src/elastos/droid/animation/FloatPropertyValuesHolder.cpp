@@ -13,7 +13,7 @@ namespace Elastos {
 namespace Droid {
 namespace Animation {
 
-FloatPropertyValuesHolder::ClassMethodMap FloatPropertyValuesHolder::sNativeSetterPropertyMap;
+FloatPropertyValuesHolder::ClassMethodMap FloatPropertyValuesHolder::sNativeGetterSetterPropertyMap;
 
 CAR_INTERFACE_IMPL(FloatPropertyValuesHolder, PropertyValuesHolder, IFloatPropertyValuesHolder);
 
@@ -122,13 +122,15 @@ ECode FloatPropertyValuesHolder::SetupSetter(
     {
         AutoLock lock(mPropertyMapLock);
 
+        String methodName = GetMethodName(String("Set"), mPropertyName);
+
         AutoPtr<MethodMap> propertyMap;
-        ClassMethodMapIterator it = sNativeSetterPropertyMap.Find(target);
-        if (it != sNativeSetterPropertyMap.End()) {
+        ClassMethodMapIterator it = sNativeGetterSetterPropertyMap.Find(target);
+        if (it != sNativeGetterSetterPropertyMap.End()) {
             propertyMap = it->mSecond;
         }
         if (propertyMap != NULL) {
-            MethodMapIterator mit = propertyMap->Find(mPropertyName);
+            MethodMapIterator mit = propertyMap->Find(methodName);
             AutoPtr<IMethodInfo> mtInfo;
             if (mit != propertyMap->End()) {
                 mtInfo = mit->mSecond;
@@ -138,14 +140,13 @@ ECode FloatPropertyValuesHolder::SetupSetter(
             }
         }
         if (mNativeSetter == NULL) {
-            String methodName = GetMethodName(String("Set"), mPropertyName);
             mNativeSetter = nGetFloatMethod(target, methodName);
             if (mNativeSetter != NULL) {
                 if (propertyMap == NULL) {
                     propertyMap = new MethodMap();
-                    sNativeSetterPropertyMap[target] = propertyMap;
+                    sNativeGetterSetterPropertyMap[target] = propertyMap;
                 }
-                (*propertyMap)[mPropertyName] = mNativeSetter;
+                (*propertyMap)[methodName] = mNativeSetter;
             }
         }
     }
@@ -162,13 +163,15 @@ ECode FloatPropertyValuesHolder::SetupGetter(
     {
         AutoLock lock(mPropertyMapLock);
 
+        String methodName = GetMethodName(String("Get"), mPropertyName);
+
         AutoPtr<MethodMap> propertyMap;
-        ClassMethodMapIterator it = sNativeSetterPropertyMap.Find(target);
-        if (it != sNativeSetterPropertyMap.End()) {
+        ClassMethodMapIterator it = sNativeGetterSetterPropertyMap.Find(target);
+        if (it != sNativeGetterSetterPropertyMap.End()) {
             propertyMap = it->mSecond;
         }
         if (propertyMap != NULL) {
-            MethodMapIterator mit = propertyMap->Find(mPropertyName);
+            MethodMapIterator mit = propertyMap->Find(methodName);
             AutoPtr<IMethodInfo> mtInfo;
             if (mit != propertyMap->End()) {
                 mtInfo = mit->mSecond;
@@ -178,17 +181,36 @@ ECode FloatPropertyValuesHolder::SetupGetter(
             }
         }
         if (mGetter == NULL) {
-            String methodName = GetMethodName(String("Get"), mPropertyName);
             target->GetMethodInfo(methodName, String("(F*)E"), (IMethodInfo**)&mGetter);
             if (mGetter != NULL) {
                 if (propertyMap == NULL) {
                     propertyMap = new MethodMap();
-                    sNativeSetterPropertyMap[target] = propertyMap;
+                    sNativeGetterSetterPropertyMap[target] = propertyMap;
                 }
-                (*propertyMap)[mPropertyName] = mGetter;
+                (*propertyMap)[methodName] = mGetter;
             }
         }
     }
+    return NOERROR;
+}
+
+ECode FloatPropertyValuesHolder::CallGetter(
+    /* [in] */ IInterface* target,
+    /* [out] */ IInterface** value)
+{
+    AutoPtr<IArgumentList> arg;
+    mGetter->CreateArgumentList((IArgumentList**)&arg);
+    Float result;
+    arg->SetOutputArgumentOfFloatPtr(0, &result);
+    ECode ec = mGetter->Invoke(target, arg);
+    if (FAILED(ec)) {
+        *value = NULL;
+        return ec;
+    }
+    AutoPtr<IFloat> resultObj;
+    CFloat::New(result, (IFloat**)&resultObj);
+    *value = resultObj;
+    REFCOUNT_ADD(*value);
     return NOERROR;
 }
 

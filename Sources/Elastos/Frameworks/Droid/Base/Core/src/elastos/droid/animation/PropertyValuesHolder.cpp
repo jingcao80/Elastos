@@ -652,136 +652,22 @@ NEXT:
                     return NOERROR;
                 }
             }
-            AutoPtr<IArgumentList> arg;
-            mGetter->CreateArgumentList((IArgumentList**)&arg);
-            AutoPtr<IParamInfo> paramInfo;
-            mGetter->GetParamInfoByIndex(0, (IParamInfo**)&paramInfo);
-            AutoPtr<IDataTypeInfo> dataTypeInfo;
-            paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
-            CarDataType carType;
-            dataTypeInfo->GetDataType(&carType);
-            if (mValueType == ECLSID_CInteger32) {
-                if (carType == CarDataType_Int32) {
-                    Int32 getRst;
-                    arg->SetOutputArgumentOfInt32Ptr(0, &getRst);
-                    FAIL_RETURN(mGetter->Invoke(target, arg));
-                    AutoPtr<IInteger32> carRst;
-                    CInteger32::New(getRst, (IInteger32**)&carRst);
-
-                    AutoPtr<IInterface> value;
-                    FAIL_RETURN(ConvertBack(carRst, (IInterface**)&value));
-                    kf->SetValue(value);
-                    ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
-                }
-                else if(carType == CarDataType_Interface) {
-                    AutoPtr<IInterface> getRst;
-                    arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
-                    FAIL_RETURN(mGetter->Invoke(target, arg));
-
-                    AutoPtr<IInterface> value;
-                    FAIL_RETURN(ConvertBack(IInteger32::Probe(getRst), (IInterface**)&value));
-                    kf->SetValue(value);
-                    ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
-                }
-                else {
-                    assert(0);
-                }
+            AutoPtr<IInterface> result;
+            ECode ec = CallGetter(target, (IInterface**)&result);
+            if (FAILED(ec)) {
+                Logger::E(TAG, "Invoke mGetter failed.");
+                continue;
             }
-            else if (mValueType == ECLSID_CFloat) {
-                if (carType == CarDataType_Float) {
-                    Float getRst;
-                    arg->SetOutputArgumentOfFloatPtr(0, &getRst);
-                    FAIL_RETURN(mGetter->Invoke(target, arg));
-                    AutoPtr<IFloat> carRst;
-                    CFloat::New(getRst, (IFloat**)&carRst);
-
-                    AutoPtr<IInterface> value;
-                    FAIL_RETURN(ConvertBack(carRst, (IInterface**)&value));
-                    kf->SetValue(value);
-                    ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
-                }
-                else if (carType == CarDataType_Interface) {
-                    AutoPtr<IInterface> getRst;
-                    arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
-                    FAIL_RETURN(mGetter->Invoke(target, arg));
-
-                    AutoPtr<IInterface> value;
-                    FAIL_RETURN(ConvertBack(IFloat::Probe(getRst), (IInterface**)&value));
-                    kf->SetValue(value);
-                    ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
-                }
-                else{
-                    assert(0);
-                }
+            AutoPtr<IInterface> value;
+            ec = ConvertBack(result, (IInterface**)&value);
+            if (FAILED(ec)) {
+                Logger::E(TAG, "ConvertBack failed.");
+                continue;
             }
-            else if (mValueType == ECLSID_CDouble) {
-                if(carType == CarDataType_Double) {
-                    Double getRst;
-                    arg->SetOutputArgumentOfDoublePtr(0, &getRst);
-                    FAIL_RETURN(mGetter->Invoke(target, arg));
-                    AutoPtr<IDouble> carRst;
-                    CDouble::New(getRst, (IDouble**)&carRst);
-
-                    AutoPtr<IInterface> value;
-                    FAIL_RETURN(ConvertBack(carRst, (IInterface**)&value));
-                    kf->SetValue(value);
-                    ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
-                }
-                else if(carType == CarDataType_Interface) {
-                    AutoPtr<IInterface> getRst;
-                    arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
-                    FAIL_RETURN(mGetter->Invoke(target, arg));
-
-                    AutoPtr<IInterface> value;
-                    FAIL_RETURN(ConvertBack(IDouble::Probe(getRst), (IInterface**)&value));
-                    kf->SetValue(value);
-                    ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
-                }
-                else {
-                    assert(0);
-                }
-            }
-            else {
-                if (carType == CarDataType_Float) {
-                    Float getRst;
-                    arg->SetOutputArgumentOfFloatPtr(0, &getRst);
-                    FAIL_RETURN(mGetter->Invoke(target, arg));
-                    AutoPtr<IFloat> carRst;
-                    CFloat::New(getRst, (IFloat**)&carRst);
-
-                    AutoPtr<IInterface> value;
-                    FAIL_RETURN(ConvertBack(carRst, (IInterface**)&value));
-                    kf->SetValue(value);
-                    ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
-                }
-                else if (carType == CarDataType_Int32) {
-                    Int32 getRst;
-                    arg->SetOutputArgumentOfInt32Ptr(0, &getRst);
-                    FAIL_RETURN(mGetter->Invoke(target, arg));
-                    AutoPtr<IInteger32> carRst;
-                    CInteger32::New(getRst, (IInteger32**)&carRst);
-
-                    AutoPtr<IInterface> value;
-                    FAIL_RETURN(ConvertBack(carRst, (IInterface**)&value));
-                    kf->SetValue(value);
-                    ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
-                }
-                else if(carType == CarDataType_Interface) {
-                    AutoPtr<IInterface> getRst;
-                    arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
-                    FAIL_RETURN(mGetter->Invoke(target, arg));
-                    AutoPtr<IInterface> value;
-                    FAIL_RETURN(ConvertBack(getRst, (IInterface**)&value));
-                    kf->SetValue(value);
-                    ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
-                }
-                else {
-                    assert(0 && "TODO please add process to carType!");
-                }
-            }
+            kf->SetValue(value);
+            ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
         }
     }
-
     return NOERROR;
 }
 
@@ -820,128 +706,19 @@ ECode PropertyValuesHolder::SetupValue(
             return NOERROR;
         }
     }
-
-    AutoPtr<IArgumentList> arg;
-    mGetter->CreateArgumentList((IArgumentList**)&arg);
-    AutoPtr<IParamInfo> paramInfo;
-    mGetter->GetParamInfoByIndex(0, (IParamInfo**)&paramInfo);
-    AutoPtr<IDataTypeInfo> dataTypeInfo;
-    paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
-    CarDataType carType;
-    dataTypeInfo->GetDataType(&carType);
-    if (mValueType == ECLSID_CInteger32) {
-        if (carType == CarDataType_Int32) {
-            Int32 getRst;
-            arg->SetOutputArgumentOfInt32Ptr(0, &getRst);
-            FAIL_RETURN(mGetter->Invoke(target, arg));
-            AutoPtr<IInteger32> carRst;
-            CInteger32::New(getRst, (IInteger32**)&carRst);
-
-            AutoPtr<IInterface> cValue;
-            FAIL_RETURN(ConvertBack(carRst, (IInterface**)&cValue));
-            kf->SetValue(cValue);
-        }
-        else if (carType == CarDataType_Interface) {
-            AutoPtr<IInterface> getRst;
-            arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
-            FAIL_RETURN(mGetter->Invoke(target, arg));
-
-            AutoPtr<IInterface> cValue;
-            FAIL_RETURN(ConvertBack(IInteger32::Probe(getRst), (IInterface**)&cValue));
-            kf->SetValue(cValue);
-        }
-        else{
-            assert(0);
-        }
+    AutoPtr<IInterface> result;
+    ECode ec = CallGetter(target, (IInterface**)&result);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Invoke mGetter failed.");
+        return NOERROR;
     }
-    else if (mValueType == ECLSID_CFloat) {
-        if (carType == CarDataType_Float) {
-            Float getRst;
-            arg->SetOutputArgumentOfFloatPtr(0, &getRst);
-            FAIL_RETURN(mGetter->Invoke(target, arg));
-            AutoPtr<IFloat> carRst;
-            CFloat::New(getRst, (IFloat**)&carRst);
-
-            AutoPtr<IInterface> cValue;
-            FAIL_RETURN(ConvertBack(carRst, (IInterface**)&cValue));
-            kf->SetValue(cValue);
-        }
-        else if (carType == CarDataType_Interface) {
-            AutoPtr<IInterface> getRst;
-            arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
-            FAIL_RETURN(mGetter->Invoke(target, arg));
-
-            AutoPtr<IInterface> cValue;
-            FAIL_RETURN(ConvertBack(IFloat::Probe(getRst), (IInterface**)&cValue));
-            kf->SetValue(cValue);
-        }
-        else{
-            assert(0);
-        }
+    AutoPtr<IInterface> value;
+    ec = ConvertBack(result, (IInterface**)&value);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "ConvertBack failed.");
+        return NOERROR;
     }
-    else if(mValueType == ECLSID_CDouble) {
-        if (carType == CarDataType_Double) {
-            Double getRst;
-            arg->SetOutputArgumentOfDoublePtr(0, &getRst);
-            FAIL_RETURN(mGetter->Invoke(target, arg));
-            AutoPtr<IDouble> carRst;
-            CDouble::New(getRst, (IDouble**)&carRst);
-
-            AutoPtr<IInterface> cValue;
-            FAIL_RETURN(ConvertBack(carRst, (IInterface**)&cValue));
-            kf->SetValue(cValue);
-        }
-        else if (carType == CarDataType_Interface) {
-            AutoPtr<IInterface> getRst;
-            arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
-            FAIL_RETURN(mGetter->Invoke(target, arg));
-
-            AutoPtr<IInterface> cValue;
-            FAIL_RETURN(ConvertBack(IDouble::Probe(getRst), (IInterface**)&cValue));
-            kf->SetValue(cValue);
-        }
-        else{
-            assert(0);
-        }
-    }
-    else {
-        if (carType == CarDataType_Float) {
-            Float getRst;
-            arg->SetOutputArgumentOfFloatPtr(0, &getRst);
-            FAIL_RETURN(mGetter->Invoke(target, arg));
-            AutoPtr<IFloat> carRst;
-            CFloat::New(getRst, (IFloat**)&carRst);
-
-            AutoPtr<IInterface> value;
-            FAIL_RETURN(ConvertBack(carRst, (IInterface**)&value));
-            kf->SetValue(value);
-            ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
-        }
-        else if (carType == CarDataType_Int32) {
-            Int32 getRst;
-            arg->SetOutputArgumentOfInt32Ptr(0, &getRst);
-            FAIL_RETURN(mGetter->Invoke(target, arg));
-            AutoPtr<IInteger32> carRst;
-            CInteger32::New(getRst, (IInteger32**)&carRst);
-
-            AutoPtr<IInterface> value;
-            FAIL_RETURN(ConvertBack(carRst, (IInterface**)&value));
-            kf->SetValue(value);
-            ((Keyframe*)kf)->SetValueWasSetOnStart(TRUE);
-        }
-        else if (carType == CarDataType_Interface) {
-            AutoPtr<IInterface> getRst;
-            arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&getRst);
-            FAIL_RETURN(mGetter->Invoke(target, arg));
-
-            AutoPtr<IInterface> cValue;
-            FAIL_RETURN(ConvertBack(getRst, (IInterface**)&cValue));
-            kf->SetValue(cValue);
-        }
-        else {
-            assert(0 && "TODO please add process to carType!");
-        }
-    }
+    kf->SetValue(value);
     return NOERROR;
 }
 
@@ -992,79 +769,12 @@ ECode PropertyValuesHolder::SetAnimatedValue(
         mProperty->Set(target, animatedValue);
     }
     if (mSetter != NULL) {
-        AutoPtr<IArgumentList> args;
-        mSetter->CreateArgumentList((IArgumentList**)&args);
-        AutoPtr<IParamInfo> paramInfo;
-        mSetter->GetParamInfoByIndex(0, (IParamInfo**)&paramInfo);
-        AutoPtr<IDataTypeInfo> dataTypeInfo;
-        paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
-        CarDataType carType;
-        dataTypeInfo->GetDataType(&carType);
-        if (mValueType == ECLSID_CInteger32) {
-            if(carType == CarDataType_Int32) {
-                Int32 setRst;
-                AutoPtr<IInteger32> valTemp = IInteger32::Probe(animatedValue);
-                if(!valTemp)
-                    return NOERROR;
-                valTemp->GetValue(&setRst);
-                args->SetInputArgumentOfInt32(0, setRst);
-                FAIL_RETURN(mSetter->Invoke(target, args));
-            }
-            else if(carType == CarDataType_Interface) {
-                if(!animatedValue)
-                    return NOERROR;
-                args->SetInputArgumentOfObjectPtr(0, animatedValue);
-                FAIL_RETURN(mSetter->Invoke(target, args));
-            }
-            else{
-                return NOERROR;
-            }
-        }
-        else if(mValueType == ECLSID_CFloat) {
-            if (carType == CarDataType_Float) {
-                Float setRst;
-                AutoPtr<IFloat> valTemp = IFloat::Probe(animatedValue);
-                if (!valTemp)
-                    return NOERROR;
-                valTemp->GetValue(&setRst);
-                args->SetInputArgumentOfInt32(0, setRst);
-                FAIL_RETURN(mSetter->Invoke(target, args));
-            }
-            else if (carType == CarDataType_Interface) {
-                if(!animatedValue)
-                    return NOERROR;
-                args->SetInputArgumentOfObjectPtr(0, animatedValue);
-                FAIL_RETURN(mSetter->Invoke(target, args));
-            }
-            else{
-                return NOERROR;
-            }
-        }
-        else if (mValueType == ECLSID_CDouble) {
-            if (carType == CarDataType_Double) {
-                Double setRst;
-                AutoPtr<IDouble> valTemp = IDouble::Probe(animatedValue);
-                if (!valTemp)
-                    return NOERROR;
-                valTemp->GetValue(&setRst);
-                args->SetInputArgumentOfInt32(0, setRst);
-                FAIL_RETURN(mSetter->Invoke(target, args));
-            }
-            else if (carType == CarDataType_Interface) {
-                if(!animatedValue)
-                    return NOERROR;
-                args->SetInputArgumentOfObjectPtr(0, animatedValue);
-                FAIL_RETURN(mSetter->Invoke(target, args));
-            }
-            else {
-                return NOERROR;
-            }
-        }
-        else {
-            if (!animatedValue)
-                return E_ILLEGAL_ARGUMENT_EXCEPTION;
-            args->SetInputArgumentOfObjectPtr(0, animatedValue);
-            FAIL_RETURN(mSetter->Invoke(target, args));
+        AutoPtr<IArgumentList> arg;
+        mSetter->CreateArgumentList((IArgumentList**)&arg);
+        arg->SetInputArgumentOfObjectPtr(0, animatedValue);
+        ECode ec = mSetter->Invoke(target, arg);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "Invoke mSetter failed.");
         }
     }
     return NOERROR;
@@ -1189,7 +899,7 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::nGetFloatMethod(
     return mi;
 }
 
-static AutoPtr<IMethodInfo> GetMultiparameterMethod(
+AutoPtr<IMethodInfo> PropertyValuesHolder::nGetMultiparameterMethod(
     /* [in] */ IClassInfo* targetClass,
     /* [in] */ const String& methodName,
     /* [in] */ Int32 parameterCount,
@@ -1211,7 +921,7 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::nGetMultipleInt32Method(
     /* [in] */ const String& methodName,
     /* [in] */ Int32 numParams)
 {
-    return GetMultiparameterMethod(targetClass, methodName, numParams, String("I32"));
+    return nGetMultiparameterMethod(targetClass, methodName, numParams, String("I32"));
 }
 
 AutoPtr<IMethodInfo> PropertyValuesHolder::nGetMultipleFloatMethod(
@@ -1219,7 +929,7 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::nGetMultipleFloatMethod(
     /* [in] */ const String& methodName,
     /* [in] */ Int32 numParams)
 {
-    return GetMultiparameterMethod(targetClass, methodName, numParams, String("F"));
+    return nGetMultiparameterMethod(targetClass, methodName, numParams, String("F"));
 }
 
 void PropertyValuesHolder::nCallInt32Method(
@@ -1385,6 +1095,24 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetMethodInfo(
         return methodInfo;
     }
     return NULL;
+}
+
+ECode PropertyValuesHolder::CallGetter(
+    /* [in] */ IInterface* target,
+    /* [out] */ IInterface** value)
+{
+    AutoPtr<IArgumentList> arg;
+    mGetter->CreateArgumentList((IArgumentList**)&arg);
+    AutoPtr<IInterface> result;
+    arg->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&result);
+    ECode ec = mGetter->Invoke(target, arg);
+    if (FAILED(ec)) {
+        *value = NULL;
+        return ec;
+    }
+    *value = result;
+    REFCOUNT_ADD(*value);
+    return NOERROR;
 }
 
 }   //namespace Animation

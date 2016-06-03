@@ -3170,7 +3170,7 @@ void ViewRootImpl::PerformTraversals()
         if (DBG) {
             Logger::D(TAG, "======================================");
             Logger::D(TAG, "performTraversals -- after setFrame");
-            // host->Debug();
+            host->Debug();
         }
     }
     if (triggerGlobalLayoutListener) {

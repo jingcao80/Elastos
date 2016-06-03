@@ -54,6 +54,11 @@ public:
     CARAPI SetupGetter(
         /* [in] */ IClassInfo* target);
 
+private:
+    CARAPI CallGetter(
+        /* [in] */ IInterface* target,
+        /* [out] */ IInterface** value);
+
 protected:
     AutoPtr<IMethodInfo> mNativeSetter;
     AutoPtr<IInt32Keyframes> mInt32Keyframes;
@@ -66,7 +71,7 @@ private:
     typedef HashMap<AutoPtr<IClassInfo>, AutoPtr<MethodMap> > ClassMethodMap;
     typedef typename ClassMethodMap::Iterator ClassMethodMapIterator;
 
-    static ClassMethodMap sNativeSetterPropertyMap;
+    static ClassMethodMap sNativeGetterSetterPropertyMap;
     AutoPtr<IInt32Property> mInt32Property;
 };
 

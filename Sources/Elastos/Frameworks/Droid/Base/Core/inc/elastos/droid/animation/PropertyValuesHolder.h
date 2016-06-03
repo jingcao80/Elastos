@@ -731,8 +731,18 @@ protected:
         /* [in] */ IMethodInfo* methodID,
         /* [in] */ ArrayOf<Float>* args);
 
+    static CARAPI_(AutoPtr<IMethodInfo>) nGetMultiparameterMethod(
+        /* [in] */ IClassInfo* targetClass,
+        /* [in] */ const String& methodName,
+        /* [in] */ Int32 parameterCount,
+        /* [in] */ const String& parameterType);
+
     static CARAPI_(AutoPtr<IClassInfo>) GetClassInfo(
         /* [in] */ IInterface* o);
+
+    virtual CARAPI CallGetter(
+        /* [in] */ IInterface* target,
+        /* [out] */ IInterface** value);
 
 private:
     /**

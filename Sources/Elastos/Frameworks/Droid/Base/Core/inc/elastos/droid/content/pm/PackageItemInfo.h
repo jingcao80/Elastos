@@ -314,7 +314,6 @@ public:
      * @hide
      */
     Int32 mShowUserIcon;
-
 };
 
 } // namespace Pm
