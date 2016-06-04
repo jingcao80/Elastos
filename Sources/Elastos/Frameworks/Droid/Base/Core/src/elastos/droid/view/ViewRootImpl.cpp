@@ -2388,7 +2388,7 @@ Boolean ViewRootImpl::MeasureHierarchy(
     if (DBG) {
         Logger::D(TAG, "======================================");
         Logger::D(TAG, "performTraversals -- after measure");
-        // host->Debug();
+        host->Debug();
     }
 
     return windowSizeMayChange;
