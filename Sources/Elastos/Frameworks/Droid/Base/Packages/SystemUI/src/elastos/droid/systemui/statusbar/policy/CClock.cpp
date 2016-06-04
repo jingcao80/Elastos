@@ -63,7 +63,6 @@ ECode CClockIntentReceiver::OnReceive(
 {
     String action;
     intent->GetAction(&action);
-    assert(0 && "TODO : not excute????");
     if (action.Equals(IIntent::ACTION_TIMEZONE_CHANGED)) {
         String tz;
         intent->GetStringExtra(String("time-zone"), &tz);

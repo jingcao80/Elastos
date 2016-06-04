@@ -1317,13 +1317,13 @@ Boolean Util::SetJavaBaseBundle(
         jclass parcelClass = env->FindClass("android/os/Parcel");
         Util::CheckErrorAndLog(env, "ToJavaBundle", "FindClass: Parcel : %d", __LINE__);
 
-        jmethodID m = env->GetStaticMethodID(parcelClass, "obtain", "(J)Landroid/os/Parcel;");
+        jmethodID m = env->GetStaticMethodID(parcelClass, "obtain", "()Landroid/os/Parcel;");
         Util::CheckErrorAndLog(env, "ToJavaBundle", "GetStaticMethodID: obtain : %d", __LINE__);
 
-        jobject jparcel = env->CallStaticObjectMethod(parcelClass, m, 0);
+        jobject jparcel = env->CallStaticObjectMethod(parcelClass, m);
         Util::CheckErrorAndLog(env, "ToJavaBundle", "GetStaticMethodID: obtain : %d", __LINE__);
 
-        Int32 nativePtr = Util::GetJavaIntField(env, parcelClass, jparcel, "mNativePtr", "ToJavaBundle");
+        Int64 nativePtr = Util::GetJavalongField(env, jparcel, "mNativePtr", "ToJavaBundle");
         android::Parcel* parcel =  reinterpret_cast< android::Parcel*>(nativePtr);
         assert(parcel);
         Int32 length = data->GetLength() * sizeof(Byte);
@@ -1825,7 +1825,7 @@ Boolean Util::GetElBitmap(
     env->CallVoidMethod(jbitmap, m, jparcel, 0);
     CheckErrorAndLog(env, "CallVoidMethod: writeToParcel : %d!\n", __LINE__);
 
-    Int32 nativePtr = GetJavaIntField(env, parcelClass, jparcel, "mNativePtr", "GetElBitmap");
+    Int64 nativePtr = GetJavalongField(env, jparcel, "mNativePtr", "GetElBitmap");
     android::Parcel* source = reinterpret_cast< android::Parcel*>(nativePtr);
 
     AutoPtr<IParcel> parcel;
@@ -4595,7 +4595,7 @@ jobject Util::ToJavaInputChannel(
     AutoPtr<IParcel> parcel;
     CParcel::New((IParcel**)&parcel);
 
-    IParcelable::Probe(channel)->ReadFromParcel(parcel);
+    IParcelable::Probe(channel)->WriteToParcel(parcel);
     parcel->SetDataPosition(0);
     Handle32 source;
     parcel->GetElementPayload(&source);
@@ -9094,10 +9094,10 @@ jobject Util::ToJavaMotionEvent(
     android::MotionEvent* sourceEvent = (android::MotionEvent*)nativeEvent;
     destEvent->copyFrom(sourceEvent, true);
 
-    jfieldID f = env->GetFieldID(eventKlass, "mNativePtr", "I");
+    jfieldID f = env->GetFieldID(eventKlass, "mNativePtr", "J");
     Util::CheckErrorAndLog(env, "ToJavaMotionEvent", "GetFieldID: mNativePtr line: %d", __LINE__);
 
-    env->SetIntField(jevent, f, reinterpret_cast<jint>(destEvent));
+    env->SetLongField(jevent, f, reinterpret_cast<jlong>(destEvent));
     Util::CheckErrorAndLog(env, "ToJavaMotionEvent", "SetIntField: mNativePtr line: %d", __LINE__);
 
     env->DeleteLocalRef(eventKlass);
@@ -10356,10 +10356,10 @@ jobject Util::ToJavaWifiEnterpriseConfig(
     jclass parcelClass = env->FindClass("android/os/Parcel");
     Util::CheckErrorAndLog(env, "ToJavaWifiEnterpriseConfig", "FindClass: Parcel : %d", __LINE__);
 
-    jmethodID m = env->GetStaticMethodID(parcelClass, "obtain", "(J)Landroid/os/Parcel;");
+    jmethodID m = env->GetStaticMethodID(parcelClass, "obtain", "()Landroid/os/Parcel;");
     Util::CheckErrorAndLog(env, "ToJavaWifiEnterpriseConfig", "GetStaticMethodID: obtain : %d", __LINE__);
 
-    jobject jparcel = env->CallStaticObjectMethod(parcelClass, m, 0);
+    jobject jparcel = env->CallStaticObjectMethod(parcelClass, m);
     Util::CheckErrorAndLog(env, "ToJavaWifiEnterpriseConfig", "CallStaticObjectMethod: obtain : %d", __LINE__);
 
     jmethodID mWriteInt = env->GetMethodID(parcelClass, "writeInt", "(I)V");
@@ -11432,17 +11432,17 @@ jobject Util::ToJavaParcelable(
     jclass parcelClass = env->FindClass("android/os/Parcel");
     Util::CheckErrorAndLog(env, "ToJavaParcelable", "FindClass: Parcel : %d", __LINE__);
 
-    jmethodID m = env->GetStaticMethodID(parcelClass, "obtain", "(J)Landroid/os/Parcel;");
+    jmethodID m = env->GetStaticMethodID(parcelClass, "obtain", "()Landroid/os/Parcel;");
     Util::CheckErrorAndLog(env, "ToJavaParcelable", "GetStaticMethodID: obtain : %d", __LINE__);
 
-    jobject jparcel = env->CallStaticObjectMethod(parcelClass, m, 0);
+    jobject jparcel = env->CallStaticObjectMethod(parcelClass, m);
     Util::CheckErrorAndLog(env, "ToJavaParcelable", "GetStaticMethodID: obtain : %d", __LINE__);
 
     CIParcelableNative* parcelNative = (CIParcelableNative*)parcelable;
     AutoPtr<ArrayOf<Byte> > parcelObj;
     parcelNative->GetObject((ArrayOf<Byte>**)&parcelObj);
     if (parcelObj != NULL) {
-        Int32 nativePtr = Util::GetJavaIntField(env, parcelClass, jparcel, "mNativePtr", "ToJavaParcelable");
+        Int64 nativePtr = Util::GetJavalongField(env, jparcel, "mNativePtr", "ToJavaParcelable");
         android::Parcel* parcel =  reinterpret_cast< android::Parcel*>(nativePtr);
 
         if (parcel == NULL) {

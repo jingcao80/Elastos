@@ -27,6 +27,7 @@ ECode LauncherAppWidgetInfo::constructor(
     /* [in] */ Int32 appWidgetId,
     /* [in] */ IComponentName* providerName)
 {
+    ItemInfo::constructor();
     mItemType = LauncherSettings::Favorites::ITEM_TYPE_APPWIDGET;
     mAppWidgetId = appWidgetId;
     mProviderName = providerName;

@@ -30,6 +30,7 @@ ShortcutInfo::ShortcutInfo()
 
 ECode ShortcutInfo::constructor()
 {
+    ItemInfo::constructor();
     mItemType = ILauncherSettingsBaseLauncherColumns::ITEM_TYPE_SHORTCUT;
     return NOERROR;
 }

@@ -3052,6 +3052,7 @@ AutoPtr<IPackageManager> BaseStatusBar::GetPackageManagerForUser(
         contextForUser = NULL;
         mContext->CreatePackageContextAsUser(pkgname, IContext::CONTEXT_RESTRICTED,
             uh, (IContext**)&contextForUser);
+        mContextForUser = contextForUser; // someone should hold contextForUser's reference
         // } catch (NameNotFoundException e) {
         //     // Shouldn't fail to find the package name for system ui.
         // }

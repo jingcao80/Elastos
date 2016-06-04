@@ -777,6 +777,8 @@ private:
     AutoPtr<IBroadcastReceiver> mBroadcastReceiver;
     AutoPtr<INotificationListenerService> mNotificationListener;
 
+    AutoPtr<IContext> mContextForUser;
+
     friend class CSettingsObserver;
     friend class CLockscreenSettingsObserver;
     friend class CBaseBroadcastReceiver;

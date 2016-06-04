@@ -29,6 +29,7 @@ ApplicationInfo::ApplicationInfo()
 
 ECode ApplicationInfo::constructor()
 {
+    ItemInfo::constructor();
     mItemType = ILauncherSettingsBaseLauncherColumns::ITEM_TYPE_SHORTCUT;
     return NOERROR;
 }
@@ -39,6 +40,7 @@ ECode ApplicationInfo::constructor(
     /* [in] */ IconCache* iconCache,
     /* [in] */ IHashMap* labelCache)
 {
+    ItemInfo::constructor();
     info->GetComponentName((IComponentName**)&mComponentName);
     mContainer = ItemInfo::NO_ID;
     SetActivity(mComponentName,

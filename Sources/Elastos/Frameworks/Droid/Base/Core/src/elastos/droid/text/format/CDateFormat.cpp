@@ -36,10 +36,9 @@ ECode CDateFormat::GetBestDateTimePattern(
     /* [in] */ const String& skeleton,
     /* [out] */ String* pattern)
 {
-    AutoPtr<IICUUtil> icu;
-    CICUUtil::AcquireSingleton((IICUUtil**)&icu);
-    String ret;
-    return icu->GetBestDateTimePattern(skeleton, locale, &ret);
+    VALIDATE_NOT_NULL(pattern)
+    *pattern = DateFormat::GetBestDateTimePattern(locale, skeleton);
+    return NOERROR;
 }
 
 ECode CDateFormat::GetTimeFormat(

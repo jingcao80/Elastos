@@ -3638,6 +3638,9 @@ ECode LauncherModel::GetSortedWidgetsAndShortcuts(
 
     AutoPtr<IList> activities;
     packageManager->QueryIntentActivities(shortcutsIntent, 0, (IList**)&activities);
+    Int32 size;
+    activities->GetSize(&size);
+    Slogger::D("xihaoc", "activities.size = %d", size);
     widgetsAndShortcuts->AddAll(ICollection::Probe(activities));
 
     AutoPtr<IComparator> c = new WidgetAndShortcutNameComparator(packageManager);
@@ -4114,6 +4117,7 @@ ECode LauncherModel::InfoFromShortcutIntent(
     }
 
     AutoPtr<ShortcutInfo> info = new ShortcutInfo();
+    info->constructor();
 
     if (icon == NULL) {
         if (fallbackIcon != NULL) {

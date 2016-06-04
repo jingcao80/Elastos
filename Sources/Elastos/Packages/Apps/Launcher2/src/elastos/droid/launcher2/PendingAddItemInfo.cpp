@@ -20,7 +20,6 @@ CAR_INTERFACE_IMPL(PendingAddShortcutInfo, PendingAddItemInfo,
 
 ECode PendingAddShortcutInfo::constructor(
     /* [in] */ IActivityInfo* activityInfo)
-
 {
     mShortcutActivityInfo = activityInfo;
     return NOERROR;
@@ -52,6 +51,7 @@ ECode PendingAddWidgetInfo::constructor(
     /* [in] */ const String& dataMimeType,
     /* [in] */ IParcelable* data)
 {
+    ItemInfo::constructor();
     mItemType = LauncherSettings::Favorites::ITEM_TYPE_APPWIDGET;
     mInfo = i;
     i->GetProvider((IComponentName**)&mComponentName);
@@ -65,6 +65,7 @@ ECode PendingAddWidgetInfo::constructor(
 ECode PendingAddWidgetInfo::constructor(
     /* [in] */ PendingAddWidgetInfo* copy)
 {
+    ItemInfo::constructor();
     mInfo = copy->mInfo;
     mBoundWidget = copy->mBoundWidget;
     mMimeType = copy->mMimeType;

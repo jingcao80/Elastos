@@ -1063,6 +1063,7 @@ AlarmManagerService::AlarmHandler::AlarmHandler(
     /* [in] */ AlarmManagerService* host)
     : mHost(host)
 {
+    Handler::constructor();
 }
 
 ECode AlarmManagerService::AlarmHandler::HandleMessage(
@@ -2004,7 +2005,7 @@ ECode AlarmManagerService::OnStart()
     intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
     piHelper->GetBroadcastAsUser(context, 0, intent,
         IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT, UserHandle::ALL,
-        (IPendingIntent**)&mTimeTickSender);
+        (IPendingIntent**)&mDateChangeSender);
 
     AutoPtr<IInterface> ops;
     context->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&ops);
@@ -2567,7 +2568,7 @@ void AlarmManagerService::UpdateNextAlarmClockLocked()
         mAlarms->GetSize(&M);
         for (Int32 j = 0; j < M; j++) {
             obj = NULL;
-            mAlarms->Get(i, (IInterface**)&obj);
+            mAlarms->Get(j, (IInterface**)&obj);
             AutoPtr<Alarm> a = (Alarm*)IObject::Probe(obj);
             if (a->mAlarmClock != NULL) {
                 Int32 userId = a->mUserId;

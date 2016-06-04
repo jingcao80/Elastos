@@ -53,9 +53,7 @@ ECode SpamFilter::GetNotificationContent(
     AutoPtr<ICharSequence> notificationMessage;
     extras->GetCharSequence(INotification::EXTRA_TEXT, (ICharSequence**)&notificationMessage);
 
-    String str;
-    notificationMessage->ToString(&str);
-    if (str.IsEmpty()) {
+    if (TextUtils::IsEmpty(notificationMessage)) {
         AutoPtr<ArrayOf<ICharSequence*> > inboxLines;
         extras->GetCharSequenceArray(INotification::EXTRA_TEXT_LINES,
                 (ArrayOf<ICharSequence*>**)&inboxLines);

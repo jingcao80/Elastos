@@ -8193,6 +8193,10 @@ Int32 AppWidgetServiceImpl::ReadProfileStateFromFileLocked(
                     provider->mId = providerId;
                     mProviders->Add(TO_IINTERFACE(provider));
                 }
+                else if (provider == NULL) {
+                    Slogger::W(TAG, "Failed parsing NullPointerException");
+                    return -1;
+                }
 
                 String tagAttribute;
                 parser->GetAttributeValue(nullStr, String("tag"), &tagAttribute);

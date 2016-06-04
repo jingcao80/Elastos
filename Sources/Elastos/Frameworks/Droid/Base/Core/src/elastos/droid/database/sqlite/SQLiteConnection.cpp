@@ -2056,7 +2056,7 @@ ECode SQLiteConnection::AcquirePreparedStatement(
     ECode ec = NativePrepareStatement(mConnectionPtr, sql, &statementPtr);
     if (FAILED(ec)) {
         Slogger::E(TAG, "AcquirePreparedStatement %s faield.", sql.string());
-        return NOERROR;
+        return ec;
     }
     //try {
     Int32 numParameters = NativeGetParameterCount(mConnectionPtr, statementPtr);

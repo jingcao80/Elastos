@@ -18,6 +18,7 @@ FolderInfo::FolderInfo()
 
 ECode FolderInfo::constructor()
 {
+    ItemInfo::constructor();
     CArrayList::New((IArrayList**)&mContents);
     CArrayList::New((IArrayList**)&mListeners);
     mItemType = LauncherSettings::Favorites::ITEM_TYPE_FOLDER;
