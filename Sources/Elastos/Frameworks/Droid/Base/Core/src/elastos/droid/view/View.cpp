@@ -3657,24 +3657,21 @@ ECode View::FitSystemWindows(
         // that means we're not in the compatibility path. Dispatch into the newer
         // apply insets path and take things from there.
         //try {
-            ECode ec;
-            mPrivateFlags3 |= PFLAG3_FITTING_SYSTEM_WINDOWS;
-            AutoPtr<IWindowInsets> sets;
-            CWindowInsets::New(_insets, (IWindowInsets**)&sets);
-            ec = DispatchApplyWindowInsets(sets, (IWindowInsets**)&sets);
-            sets->IsConsumed(res);
-            return ec;
+        mPrivateFlags3 |= PFLAG3_FITTING_SYSTEM_WINDOWS;
+        AutoPtr<IWindowInsets> sets;
+        CWindowInsets::New(_insets, (IWindowInsets**)&sets);
+        ECode ec = DispatchApplyWindowInsets(sets, (IWindowInsets**)&sets);
+        if (SUCCEEDED(ec)) sets->IsConsumed(res);
+        mPrivateFlags3 &= ~PFLAG3_FITTING_SYSTEM_WINDOWS;
+        return ec;
         //} finally {
-            mPrivateFlags3 &= ~PFLAG3_FITTING_SYSTEM_WINDOWS;
         //}
-    } else {
+    }
+    else {
         // We're being called from the newer apply insets path.
         // Perform the standard fallback behavior.
-        ECode ec;
-        ec = FitSystemWindowsInt(_insets, res);
-        return ec;
+        return FitSystemWindowsInt(_insets, res);
     }
-    return NOERROR;
 }
 
 ECode View::FitSystemWindowsInt(
@@ -3743,8 +3740,7 @@ ECode View::OnApplyWindowInsets(
         Boolean fitSystemWindows;
         FitSystemWindows(rect, &fitSystemWindows);
         if (fitSystemWindows) {
-            insets->ConsumeSystemWindowInsets(res);
-            return NOERROR;
+            return insets->ConsumeSystemWindowInsets(res);
         }
     }
     else {
@@ -3836,18 +3832,19 @@ Boolean View::ComputeFitSystemWindows(
         outLocalInsets->Set(inoutInsets);
         inoutInsets->Set(0, 0, 0, 0);
         return TRUE;
-    } else {
+    }
+    else {
         // The application wants to take care of fitting system window for
         // the content...  however we still need to take care of any overscan here.
         AutoPtr<IRect> overscan = mAttachInfo->mOverscanInsets;
         outLocalInsets->Set(overscan);
         Int32 left = 0, top = 0, right = 0, bottom = 0;
         overscan->Get(&left, &top, &right, &bottom);
-
-        ((CRect*)inoutInsets)->mLeft -= left;
-        ((CRect*)inoutInsets)->mTop -= top;
-        ((CRect*)inoutInsets)->mRight -= right;
-        ((CRect*)inoutInsets)->mBottom -= bottom;
+        CRect* inoutInsetsObj = (CRect*)inoutInsets;
+        inoutInsetsObj->mLeft -= left;
+        inoutInsetsObj->mTop -= top;
+        inoutInsetsObj->mRight -= right;
+        inoutInsetsObj->mBottom -= bottom;
         return FALSE;
     }
 }

@@ -445,8 +445,7 @@ PhoneWindowManager::SystemGesturesPointerEventListenerCallbacks::SystemGesturesP
 
 ECode PhoneWindowManager::SystemGesturesPointerEventListenerCallbacks::OnSwipeFromTop()
 {
-    if (mHost->mStatusBar != NULL)
-    {
+    if (mHost->mStatusBar != NULL) {
         mHost->RequestTransientBars(mHost->mStatusBar);
     }
     return NOERROR;
@@ -3780,7 +3779,7 @@ ECode PhoneWindowManager::SelectAnimationLw(
 
     AutoPtr<IWindowManagerLayoutParams> attrs;
     win->GetAttrs((IWindowManagerLayoutParams**)&attrs);
-    if (win == mStatusBar) {
+    if (win == mStatusBar.Get()) {
         Int32 privateFlags;
         attrs->GetPrivateFlags(&privateFlags);
         Boolean isKeyguard = (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0;

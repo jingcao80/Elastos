@@ -689,27 +689,27 @@ ECode CWindowManagerService::LocalService::WaitForAllWindowsDrawn(
     /* [in] */ IRunnable* callback,
     /* [in] */ Int64 timeout)
 {
-    Slogger::W(TAG, "TODO: wait for launcher app");
-    // {    AutoLock syncLock(mHost->mWindowMapLock);
-    //     mHost->mWaitingForDrawnCallback = callback;
-    //     AutoPtr<WindowList> windows = mHost->GetDefaultWindowListLocked();
-    //     Int32 size;
-    //     windows->GetSize(&size);
-    //     for (Int32 winNdx = size - 1; winNdx >= 0; --winNdx) {
-    //         AutoPtr<IInterface> obj;
-    //         windows->Get(winNdx, (IInterface**)&obj);
-    //         WindowState* win = To_WindowState(obj);
-    //         Boolean isVisible, isHiding;
-    //         if ((win->IsVisibleLw(&isVisible), isVisible)
-    //                 && (win->mAppToken != NULL || (mHost->mPolicy->IsForceHiding(win->mAttrs, &isHiding), isHiding))) {
-    //             win->mWinAnimator->mDrawState = WindowStateAnimator::DRAW_PENDING;
-    //             // Force add to mResizingWindows.
-    //             win->mLastContentInsets->Set(-1, -1, -1, -1);
-    //             mHost->mWaitingForDrawn->Add(obj);
-    //         }
-    //     }
-    //     mHost->RequestTraversalLocked();
-    // }
+    {
+        AutoLock syncLock(mHost->mWindowMapLock);
+        mHost->mWaitingForDrawnCallback = callback;
+        AutoPtr<WindowList> windows = mHost->GetDefaultWindowListLocked();
+        Int32 size;
+        windows->GetSize(&size);
+        for (Int32 winNdx = size - 1; winNdx >= 0; --winNdx) {
+            AutoPtr<IInterface> obj;
+            windows->Get(winNdx, (IInterface**)&obj);
+            WindowState* win = To_WindowState(obj);
+            Boolean isVisible, isHiding;
+            if ((win->IsVisibleLw(&isVisible), isVisible)
+                    && (win->mAppToken != NULL || (mHost->mPolicy->IsForceHiding(win->mAttrs, &isHiding), isHiding))) {
+                win->mWinAnimator->mDrawState = WindowStateAnimator::DRAW_PENDING;
+                // Force add to mResizingWindows.
+                win->mLastContentInsets->Set(-1, -1, -1, -1);
+                mHost->mWaitingForDrawn->Add(obj);
+            }
+        }
+        mHost->RequestTraversalLocked();
+    }
     mHost->mH->RemoveMessages(CWindowManagerService::H::WAITING_FOR_DRAWN_TIMEOUT);
     Boolean isEmpty;
     if (mHost->mWaitingForDrawn->IsEmpty(&isEmpty), isEmpty) {
@@ -2788,7 +2788,8 @@ Int32 CWindowManagerService::AddWindow(
     Int32 type;
     attrs->GetType(&type);
 
-    {    AutoLock syncLock(mWindowMapLock);
+    {
+        AutoLock syncLock(mWindowMapLock);
         assert(mDisplayReady);
         // if (!mDisplayReady) {
         //     throw new IllegalStateException("Display has not been initialialized");
@@ -3709,7 +3710,8 @@ Int32 CWindowManagerService::RelayoutWindow(
 
     Int64 origId = Binder::ClearCallingIdentity();
 
-    {    AutoLock syncLock(mWindowMapLock);
+    {
+        AutoLock syncLock(mWindowMapLock);
         AutoPtr<WindowState> win;
         WindowForClientLocked(session, client, FALSE, (WindowState**)&win);
         if (win == NULL) {

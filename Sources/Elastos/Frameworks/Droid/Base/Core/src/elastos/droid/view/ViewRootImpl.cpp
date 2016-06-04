@@ -2428,9 +2428,10 @@ ECode ViewRootImpl::DispatchApplyInsets(
     mDispatchContentInsets->Set(mAttachInfo->mContentInsets);
     mDispatchStableInsets->Set(mAttachInfo->mStableInsets);
     Boolean isRound = (mIsEmulator && mIsCircularEmulator) || mWindowIsRound;
-    AutoPtr<IWindowInsets> temp;
-    CWindowInsets::New(mDispatchContentInsets, NULL, mDispatchStableInsets, isRound, (IWindowInsets**)&temp);
-    host->DispatchApplyWindowInsets(temp, (IWindowInsets**)&temp);
+    AutoPtr<IWindowInsets> winInsets;
+    CWindowInsets::New(mDispatchContentInsets, NULL, mDispatchStableInsets, isRound, (IWindowInsets**)&winInsets);
+    AutoPtr<IWindowInsets> result;
+    host->DispatchApplyWindowInsets(winInsets, (IWindowInsets**)&result);
     return NOERROR;
 }
 
