@@ -204,8 +204,11 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                 case CarDataType.Double:
                     oArgumentList.SetInputArgumentOfDouble(i,arg);
                     break;
-                case CarDataType.Char:
-                    oArgumentList.SetInputArgumentOfChar(i,arg);
+                case CarDataType.Char8:
+                case CarDataType.Char16:
+                case CarDataType.Char32:
+                    //oArgumentList.SetInputArgumentOfChar(i,arg);
+                    oArgumentList.SetInputArgumentOfString(0,String(arg));
                     break;
                 case CarDataType.String:
                     oArgumentList.SetInputArgumentOfString(i,arg);
@@ -239,7 +242,7 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                     break;
                 default:
                     var sCarDataType = getDataTypeCarString(iDataType);
-                    elog('==============argument type: to be finished===========rc:'+ i +'======datatype:'+iDataType);
+                    elog('==============classinfo__createObject ===========argument type: to be finished===========rc:'+ i +'======datatype:'+iDataType);
                     break;
             }
         }
@@ -251,7 +254,8 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         //for (var p in oConstructorInfo)aa.push(p);
         //var sAnnotation = oConstructorInfo.GetAnnotation();
 
-        newObject = oConstructorInfo.CreateObject(oArgumentList);
+        //newObject = oConstructorInfo.CreateObject(oArgumentList);
+        newObject = oConstructorInfo.LocalCreateObject(oArgumentList);
     }
 
     return newObject;
