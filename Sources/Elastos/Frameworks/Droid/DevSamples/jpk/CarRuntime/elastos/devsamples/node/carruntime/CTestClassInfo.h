@@ -150,6 +150,12 @@ public:
     CARAPI CreateObject(
         /* [out] */ PInterface * ppObject);
 
+    CARAPI LocalCreateObject(
+        /* [out] */ PInterface * ppObject);
+
+    CARAPI RemoteCreateObject(
+        /* [out] */ PInterface * ppObject);
+
     CARAPI CreateObjectInRegime(
         /* [in] */ PRegime pRgm,
         /* [out] */ PInterface * ppObject);

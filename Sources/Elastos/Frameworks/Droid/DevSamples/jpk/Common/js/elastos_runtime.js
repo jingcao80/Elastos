@@ -9,31 +9,25 @@ var _getModuleInfo = function (asEcoName) {
 };
 
 var CarDataType = {
-        Int16 : 1,
-        Int32 : 2,
-        Int64 : 3,
-        Byte : 4,
-        Float : 5,
-        Double : 6,
-        Char8 : 7,
-        Char16 : 8,
-        Char32 : 9,
-        CString : 10,
-        String : 11,
-        Boolean : 12,
-        EMuid : 13,
-        EGuid : 14,
-        ECode : 15,
-        LocalPtr : 16,
-        LocalType : 17,
-        Enum : 18,
-        StringBuf : 19,
-        ArrayOf : 20,
-        BufferOf : 21,
-        MemoryBuf : 22,
-        CppVector : 23,
-        Struct : 24,
-        Interface : 25,
+    Int16       : 1,
+    Int32       : 2,
+    Int64       : 3,
+    Byte        : 4,
+    Float       : 5,
+    Double      : 6,
+    Char32      : 7,
+    String      : 8,
+    Boolean     : 9,
+    EMuid       : 10,
+    EGuid       : 11,
+    ECode       : 12,
+    LocalPtr    : 13,
+    LocalType   : 14,
+    Enum        : 15,
+    ArrayOf     : 16,
+    CppVector   : 17,
+    Struct      : 18,
+    Interface   : 19
 };
 
 var CarToJsDataTypeMap = {
@@ -51,17 +45,17 @@ var CarToJsDataTypeMap = {
         CarDataType.Enum,
     ],
     string:[
-        CarDataType.Char8,
-        CarDataType.Char16,
+        //CarDataType.Char8,
+        //CarDataType.Char16,
         CarDataType.Char32,
-        CarDataType.CString,
+        //CarDataType.CString,
         CarDataType.String,
-        CarDataType.StringBuf,
+        //CarDataType.StringBuf,
     ],
     array:[
         CarDataType.ArrayOf,
-        CarDataType.BufferOf,
-        CarDataType.MemoryBuf,
+        //CarDataType.BufferOf,
+        //CarDataType.MemoryBuf,
         CarDataType.CppVector,
     ],
     object:[
@@ -117,18 +111,31 @@ function getDataTypeJavascriptString(ai_datatype){
 function classinfo__createObject(oModuleInfo,oClassInfo){
     var newObject;
 
+    var bCreateOnUIThread = false;
+
     if(typeof(oModuleInfo)=='string') {
         //oModuleInfo = Elastos.Runtime.getModuleInfo(oModuleInfo);
         oModuleInfo = _getModuleInfo(oModuleInfo);
     }
     if(typeof(oClassInfo)=='string') {
         elog('====classinfo__createObject====begin====ClassName:'+oClassInfo);
+
+        if (oClassInfo == "Elastos.Droid.Widget.CPopupWindow") {
+            bCreateOnUIThread = true;
+        }
+
         oClassInfo = oModuleInfo.GetClassInfo(oClassInfo);
     }
 
     var length = arguments.length;
     if(length==2){
-        newObject = oClassInfo.CreateObject();
+        //newObject = oClassInfo.CreateObject();
+        if (bCreateOnUIThread) {
+            newObject = oClassInfo.RemoteCreateObject();
+        }
+        else {
+            newObject = oClassInfo.LocalCreateObject();
+        }
     }
     else {
         var aConstructorInfos = oClassInfo.GetAllConstructorInfos();
@@ -158,7 +165,15 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
 
                     var arg_in = arguments[j+2];
                     var type_in = typeof(arg_in);
-                    if (sJsDataType == type_in) continue;
+                    if (sJsDataType == type_in) {
+                        if (iDataType == CarDataType.Interface) {
+                            //TODO:compare the interface name
+                            continue;
+                        }
+                        else {
+                            continue;
+                        }
+                    }
 
                     bSameArgs = false
                     break;
@@ -204,8 +219,8 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                 case CarDataType.Double:
                     oArgumentList.SetInputArgumentOfDouble(i,arg);
                     break;
-                case CarDataType.Char8:
-                case CarDataType.Char16:
+                //case CarDataType.Char8:
+                //case CarDataType.Char16:
                 case CarDataType.Char32:
                     //oArgumentList.SetInputArgumentOfChar(i,arg);
                     oArgumentList.SetInputArgumentOfString(0,String(arg));
@@ -255,7 +270,12 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         //var sAnnotation = oConstructorInfo.GetAnnotation();
 
         //newObject = oConstructorInfo.CreateObject(oArgumentList);
-        newObject = oConstructorInfo.LocalCreateObject(oArgumentList);
+        if (bCreateOnUIThread) {
+            newObject = oConstructorInfo.RemoteCreateObject(oArgumentList);
+        }
+        else {
+            newObject = oConstructorInfo.LocalCreateObject(oArgumentList);
+        }
     }
 
     return newObject;

@@ -1455,6 +1455,12 @@ module
         CreateObject(
             [out] PInterface* object);
 
+        LocalCreateObject(
+            [out] PInterface* object);
+
+        RemoteCreateObject(
+            [out] PInterface* object);
+
         CreateObjectInRegime(
             [in] PRegime rgm,
             [out] PInterface* object);

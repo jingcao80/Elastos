@@ -340,6 +340,38 @@ ECode CTestClassInfo::CreateObject(
     return ec;
 }
 
+ECode CTestClassInfo::LocalCreateObject(
+    /* [out] */ PInterface * ppObject)
+{
+    //ECode ec =  mClassInfo->CreateObject((IInterface**)&ppObject);
+    ECode ec =  mClassInfo->CreateObject(ppObject);
+
+    if (FAILED(ec)) {
+        ALOGD("========CTestClassInfo::LocalCreateObject========fail========");
+    }
+    else {
+        ALOGD("========CTestClassInfo::LocalCreateObject========success========");
+    }
+
+    return ec;
+}
+
+ECode CTestClassInfo::RemoteCreateObject(
+    /* [out] */ PInterface * ppObject)
+{
+    //ECode ec =  mClassInfo->CreateObject((IInterface**)&ppObject);
+    ECode ec =  mClassInfo->CreateObject(ppObject);
+
+    if (FAILED(ec)) {
+        ALOGD("========CTestClassInfo::RemoteCreateObject========fail========");
+    }
+    else {
+        ALOGD("========CTestClassInfo::RemoteCreateObject========success========");
+    }
+
+    return ec;
+}
+
 ECode CTestClassInfo::CreateObjectInRegime(
     /* [in] */ PRegime pRgm,
     /* [out] */ PInterface * ppObject)

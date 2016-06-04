@@ -20,10 +20,10 @@ module.exports = function(aoElastos, aoActivity){
 
     function _startEPK(asName) {
         var IContext__ACTIVITY_SERVICE = "activity";
-        var sm = Droid_New('CServiceManager');
+        var sm = Droid_New('Elastos.Droid.Os.CServiceManager');
         var am = sm.GetService(IContext__ACTIVITY_SERVICE);
 
-        var intent = Droid_New('CIntent');
+        var intent = Droid_New('Elastos.Droid.Content.CIntent');
         intent.SetPackage(asName);
         intent.SetAction("android.intent.action.MAIN");
 
@@ -170,6 +170,8 @@ module.exports = function(aoElastos, aoActivity){
 
             //----------------PopupWindowButton begin----------------
             function OnCreatePopupWindow(){
+                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====1====");
+
                 _showInfo("====PopupWindow will be shown!");
 
                 var IGravity__AXIS_X_SHIFT = 0;
@@ -180,15 +182,28 @@ module.exports = function(aoElastos, aoActivity){
                 var IGravity__CENTER = IGravity__CENTER_VERTICAL | IGravity__CENTER_HORIZONTAL;
 
                 var IContext__LAYOUT_INFLATER_SERVICE = "layout_inflater";
+
+                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====2====");
+
                 var oInflater = oActivity.GetSystemService(IContext__LAYOUT_INFLATER_SERVICE);
+                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====2.1====");
                 var oLayout = oInflater.Inflate(R.layout.popupwindow, null);
 
-                var oPopupWindow = Droid_New("CPopupWindow", oLayout, 350, 350, true);
+                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====3====");
+
+                var oPopupWindow = Droid_New("Elastos.Droid.Widget.CPopupWindow", oLayout, 350, 350, true);
+
+                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====4====");
 
                 oPopupWindow.ShowAtLocation(oLayout, IGravity__CENTER, 0, 0);
 
+                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====5====");
+
                 var oTextView = oLayout.FindViewById(R.id.txtView);
+                //textView->SetText(CoreUtils::Convert("PopupWindow 测试程序!"));
+                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====6====");
                 oTextView.SetText(CString("PopupWindow 测试程序!"));
+                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====7====");
 
                 var jso_button_DismissButton_cb = (function(ao_PopupWindow){
                     return {
@@ -200,8 +215,12 @@ module.exports = function(aoElastos, aoActivity){
                         }
                     }
                 })(oPopupWindow);
+
+                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====8====");
                 var oDismissButton = oLayout.FindViewById(R.id.btn_close_popup);
+                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====9====");
                 oDismissButton.SetOnClickListener(jso_button_DismissButton_cb);
+                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====10====");
 
                 return;
             }
@@ -274,40 +293,63 @@ module.exports = function(aoElastos, aoActivity){
             elog("========CActivityOne.js====OnCreate====begin.9========");
 
             //----------------myListView begin----------------
-if (true) {
+            elog("========CActivityOne.js====OnCreate====begin.9.1========");
             var oListView = oActivity.FindViewById(R.id.myListView);
-            //var oDataList = Droid_New("CParcelableObjectContainer");
-            var oDataList = Droid_New("Elastos.Droid.Utility.CParcelableObjectContainer");
+            elog("========CActivityOne.js====OnCreate====begin.9.2========");
 
-            for (var i = 0; i < 5; ++i) {
-                var s = 'Item--' + i;
-                if (i == 0) {
-                    s += " Click to start ImageViewDemo EPK!";
-                }
-                else if (i == 1) {
-                    s += " Click to start Gallery EPK!";
-                }
-                oDataList.Add( CString(s) );
+            // var oDataList = Droid_New("Elastos.Droid.Utility.CParcelableObjectContainer");
+            // elog("========CActivityOne.js====OnCreate====begin.9.3========");
+            // for (var i = 0; i < 5; ++i) {
+            //     var s = 'Item--' + i;
+            //     if (i == 0) {
+            //         s += " Click to start ImageViewDemo EPK!";
+            //     }
+            //     else if (i == 1) {
+            //         s += " Click to start Gallery EPK!";
+            //     }
+            //     oDataList.Add( CString(s) );
+            // }
+
+
+            //var oDataList = Droid_New("Elastos.Utility.CArrayList");
+            var oDataList = Core_New("Elastos.Utility.CArrayList");
+
+            elog("========CActivityOne.js====OnCreate====begin.9.3========");
+            for (var i=0; i< 2; i++) {
+                elog("========CActivityOne.js====OnCreate====begin.9.3.0========"+i);
+                var s = "Item " + i;
+                elog("========CActivityOne.js====OnCreate====begin.9.3.1========");
+                var s1 = CString(s);
+                elog("========CActivityOne.js====OnCreate====begin.9.3.2========" + s1.ToString());
+                oDataList.Add(s1);
+                elog("========CActivityOne.js====OnCreate====begin.9.3.3========");
+                //oDataList.add(CString("Item " + i));
             }
 
-            //var oAdapter = Droid_New("CArrayAdapter", oActivity, R.layout.list_item, oDataList);
+            elog("========CActivityOne.js====OnCreate====begin.9.4========");
+
             var oAdapter = Droid_New("Elastos.Droid.Widget.CArrayAdapter", oActivity, R.layout.list_item, oDataList);
+            elog("========CActivityOne.js====OnCreate====begin.9.5========");
 
             oListView.SetAdapter(oAdapter);
+            elog("========CActivityOne.js====OnCreate====begin.9.6========");
 
-            //var oDrawable = Droid_New("CColorDrawable", 0xFF0000FF);
             var oDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CColorDrawable", 0xFF0000FF);
+            elog("========CActivityOne.js====OnCreate====begin.9.7========");
 
             oListView.SetDivider(oDrawable);
+            elog("========CActivityOne.js====OnCreate====begin.9.8========");
 
             oListView.SetDividerHeight(1);
+            elog("========CActivityOne.js====OnCreate====begin.9.9========");
 
             var jso_ListView_cb = (function(){
                 var iPosition = 0;
                 var sEpkNames = ["ImageViewDemo", "Gallery"];
 
                 function ShowAlert(asInfo) {
-                    var oBuilder = Droid_New("CAlertDialogBuilder", oActivity);
+                    var oBuilder = Droid_New("Elastos.Droid.App.CAlertDialogBuilder", oActivity);
+
                     oBuilder.SetTitleEx( CString("CAR NODE DUANG!") );
                     oBuilder.SetMessageEx( CString(asInfo) );
 
@@ -367,8 +409,9 @@ if (true) {
                     }
                 }
             })();
+            elog("========CActivityOne.js====OnCreate====begin.9.10========");
+
             oListView.SetOnItemClickListener(jso_ListView_cb);
-}
             //----------------myListView end----------------
 
             elog("========CActivityOne.js====OnCreate====begin.10========");
@@ -403,7 +446,7 @@ if (true) {
             elog('====jso_activity_cb====OnActivityResult.begin====');
         },
         OnCreateDialog:function(aoContext, aiId, out_aoDialog){
-            var builder = Droid_New("CAlertDialogBuilder", oActivity);
+            var builder = Droid_New("Elastos.Droid.App.CAlertDialogBuilder", oActivity);
 
             builder.SetTitleEx(CString("NodeJS对话框"));
             builder.SetMessageEx(CString("这是一个NodeJS对话框"));
