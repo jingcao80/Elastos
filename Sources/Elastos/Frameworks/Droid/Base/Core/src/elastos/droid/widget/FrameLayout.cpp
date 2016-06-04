@@ -245,7 +245,7 @@ ECode FrameLayout::SetForegroundGravity(
 }
 
 ECode FrameLayout::SetVisibility(
-    /* [in] */ /*@Visibility*/ Int32 visibility)
+    /* [in] */ Int32 visibility)
 {
     ViewGroup::SetVisibility(visibility);
     if (mForeground != NULL) {

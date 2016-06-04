@@ -7361,7 +7361,6 @@ void View::SetFlags(
             if (HasFocus(&hasFocus), hasFocus) ClearFocus();
             ClearAccessibilityFocus();
             DestroyDrawingCache();
-
             IView* vp = IView::Probe(mParent);
             if (vp != NULL) {
                 // GONE views noop invalidation, so invalidate the parent
@@ -7389,7 +7388,7 @@ void View::SetFlags(
             AutoPtr<IView> rootView;
             GetRootView((IView**)&rootView);
             // root view becoming invisible shouldn't clear focus and accessibility focus
-            if ((IView*)this != rootView) {
+            if ((IView*)this != rootView.Get()) {
                 Boolean hasFocus;
                 if (HasFocus(&hasFocus), hasFocus) ClearFocus();
                 ClearAccessibilityFocus();
@@ -7416,7 +7415,6 @@ void View::SetFlags(
         else if (mParent != NULL) {
             mParent->InvalidateChild(this, NULL);
         }
-
         DispatchVisibilityChanged(this, newVisibility);
 
         NotifySubtreeAccessibilityStateChangedIfNeeded();
@@ -7467,11 +7465,13 @@ void View::SetFlags(
             IncludeForAccessibility(&res);
             if (oldIncludeForAccessibility != res) {
                 NotifySubtreeAccessibilityStateChangedIfNeeded();
-            } else {
+            }
+            else {
                 NotifyViewAccessibilityStateChangedIfNeeded(
                         IAccessibilityEvent::CONTENT_CHANGE_TYPE_UNDEFINED);
             }
-        } else if ((changed & ENABLED_MASK) != 0) {
+        }
+        else if ((changed & ENABLED_MASK) != 0) {
             NotifyViewAccessibilityStateChangedIfNeeded(
                     IAccessibilityEvent::CONTENT_CHANGE_TYPE_UNDEFINED);
         }
