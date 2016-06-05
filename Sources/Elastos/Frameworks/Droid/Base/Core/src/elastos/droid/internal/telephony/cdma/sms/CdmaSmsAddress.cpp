@@ -16,8 +16,8 @@ namespace Sms {
 //=====================================================================
 CAR_INTERFACE_IMPL(CdmaSmsAddress, Object, ISmsAddress);
 
-AutoPtr<ArrayOf<Byte> > CdmaSmsAddress::numericCharsDialable = CdmaSmsAddress::MiddleInitNumericcharsdialable();
-AutoPtr<ArrayOf<Byte> > CdmaSmsAddress::numericCharsSugar = CdmaSmsAddress::MiddleInitNumericcharssugar();
+// AutoPtr<ArrayOf<Byte> > CdmaSmsAddress::numericCharsDialable = CdmaSmsAddress::MiddleInitNumericcharsdialable();
+// AutoPtr<ArrayOf<Byte> > CdmaSmsAddress::numericCharsSugar = CdmaSmsAddress::MiddleInitNumericcharssugar();
 AutoPtr<ISparseBooleanArray> CdmaSmsAddress::InitSparseBooleanArray()
 {
     AutoPtr<ISparseBooleanArray> array;
@@ -25,7 +25,7 @@ AutoPtr<ISparseBooleanArray> CdmaSmsAddress::InitSparseBooleanArray()
     CSparseBooleanArray::New(length, (ISparseBooleanArray**)&array);
     return array;
 }
-AutoPtr<ISparseBooleanArray> CdmaSmsAddress::numericCharDialableMap = CdmaSmsAddress::InitSparseBooleanArray();
+// AutoPtr<ISparseBooleanArray> CdmaSmsAddress::numericCharDialableMap = CdmaSmsAddress::InitSparseBooleanArray();
 
 CdmaSmsAddress::CdmaSmsAddress()
 {

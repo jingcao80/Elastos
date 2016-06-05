@@ -16,7 +16,7 @@ namespace Cdma {
 //=====================================================================
 CAR_INTERFACE_IMPL(SignalToneUtil, Object, ISignalToneUtil);
 
-AutoPtr<IHashMap> SignalToneUtil::mHm = InitHashMap();
+// AutoPtr<IHashMap> SignalToneUtil::mHm = InitHashMap();
 
 Int32 SignalToneUtil::GetAudioToneFromSignalInfo(
     /* [in] */ Int32 signalType,
