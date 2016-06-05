@@ -131,6 +131,7 @@ using Elastos::Utility::IIterator;
 using Elastos::Utility::IMap;
 using Elastos::Utility::IMapEntry;
 using Elastos::Utility::ISet;
+using Elastos::Utility::CLinkedHashMap;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 
@@ -1917,6 +1918,7 @@ ECode CAccountManagerService::ValidateAccountsInternal(
         do {
             accounts->mAccountCache->Clear();
             AutoPtr<IHashMap> accountNamesByType;
+            CLinkedHashMap::New((IHashMap**)&accountNamesByType);
             Boolean result = FALSE;
             while (cursor->MoveToNext(&result), result) {
                 Int64 accountId;

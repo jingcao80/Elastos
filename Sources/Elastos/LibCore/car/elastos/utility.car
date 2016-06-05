@@ -423,6 +423,7 @@ module
             [in] IMap* Map);
 
         interface ILinkedHashMap;
+        interface IHashMap;
         interface IMap;
         interface ISerializable;
         interface ICloneable;

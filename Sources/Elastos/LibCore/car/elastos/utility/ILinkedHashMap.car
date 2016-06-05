@@ -5,6 +5,7 @@ module
 
     /**
      * @Involve
+     * interface IHashMap;
      * interface IMap;
      * interface ICloneable;
      * interface ISerializable;
