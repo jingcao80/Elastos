@@ -832,16 +832,10 @@ ECode DragLayer::OnLayout(
         GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> param;
         child->GetLayoutParams((IViewGroupLayoutParams**)&param);
-        AutoPtr<IFrameLayoutLayoutParams> flp = IFrameLayoutLayoutParams::Probe(param);
-        if (IDragLayerLayoutParams::Probe(flp) != NULL) {
-            AutoPtr<IDragLayerLayoutParams> lp = IDragLayerLayoutParams::Probe(flp);
-            AutoPtr<DragLayerLayoutParams> _lp = (DragLayerLayoutParams*)lp.Get();
-            if (_lp->mCustomPosition) {
-                Int32 width;
-                lp->GetWidth(&width);
-                Int32 height;
-                lp->GetHeight(&height);
-                child->Layout(_lp->mX, _lp->mY, _lp->mX + width, _lp->mY + height);
+        if (IDragLayerLayoutParams::Probe(param) != NULL) {
+            DragLayerLayoutParams* lp = (DragLayerLayoutParams*)IDragLayerLayoutParams::Probe(param);
+            if (lp->mCustomPosition) {
+                child->Layout(lp->mX, lp->mY, lp->mX + lp->mWidth, lp->mY + lp->mHeight);
             }
         }
     }

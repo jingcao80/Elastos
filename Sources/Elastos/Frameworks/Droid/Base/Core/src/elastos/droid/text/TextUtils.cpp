@@ -731,22 +731,20 @@ ECode TextUtils::WriteToParcel(
 {
     ISpanned* sp = ISpanned::Probe(cs);
     if (sp) {
-        FAIL_RETURN(p->WriteInt32(0));
+        p->WriteInt32(0);
         String str;
         cs->ToString(&str);
-        FAIL_RETURN(p->WriteString(str));
+        p->WriteString(str);
 
-        AutoPtr<ISpanned> sp = ISpanned::Probe(cs);
-        AutoPtr<ArrayOf<IInterface*> > os;
         Int32 len;
         cs->GetLength(&len);
+        AutoPtr<ArrayOf<IInterface*> > os;
         sp->GetSpans(0, len, EIID_IInterface, (ArrayOf<IInterface*>**)&os);
 
         // note to people adding to this: check more specific types
         // before more generic types.  also notice that it uses
         // "if" instead of "else if" where there are interfaces
         // so one object can be several.
-
         len = os->GetLength();
         for (Int32 i = 0; i < len; i++) {
             AutoPtr<IInterface> o = (*os)[i];
@@ -770,24 +768,24 @@ ECode TextUtils::WriteToParcel(
                         " use the frameworks-only ParcelableSpan interface", str.string());
                 }
                 else {
-                    FAIL_RETURN(p->WriteInt32(typeId));
-                    FAIL_RETURN(IParcelable::Probe(ps)->WriteToParcel(p));
-                    FAIL_RETURN(WriteWhere(p, sp, o));
+                    p->WriteInt32(typeId);
+                    IParcelable::Probe(ps)->WriteToParcel(p);
+                    WriteWhere(p, sp, o);
                 }
             }
         }
 
-        FAIL_RETURN(p->WriteInt32(0));
+        p->WriteInt32(0);
    }
    else {
-       FAIL_RETURN(p->WriteInt32(1));
+       p->WriteInt32(1);
        if (cs != NULL) {
             String str;
             cs->ToString(&str);
-            FAIL_RETURN(p->WriteString(str));
+            p->WriteString(str);
        }
        else {
-            FAIL_RETURN(p->WriteString(String(NULL)));
+            p->WriteString(String(NULL));
        }
    }
 
@@ -801,11 +799,11 @@ ECode TextUtils::WriteWhere(
 {
     Int32 start, end, flags;
     sp->GetSpanStart(o, &start);
-    FAIL_RETURN(p->WriteInt32(start));
+    p->WriteInt32(start);
     sp->GetSpanEnd(o, &end);
-    FAIL_RETURN(p->WriteInt32(end));
+    p->WriteInt32(end);
     sp->GetSpanFlags(o, &flags);
-    FAIL_RETURN(p->WriteInt32(flags));
+    p->WriteInt32(flags);
     return NOERROR;
 }
 
@@ -816,16 +814,16 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
     VALIDATE_NOT_NULL(csq);
     *csq = NULL;
 
-    AutoPtr<ICharSequence> cs;
     Int32 kind;
-    FAIL_RETURN(p->ReadInt32(&kind));
+    p->ReadInt32(&kind);
 
     String string;
-    FAIL_RETURN(p->ReadString(&string));
+    p->ReadString(&string);
     if (string.IsNull()) {
         return NOERROR;
     }
 
+    AutoPtr<ICharSequence> cs;
     CString::New(string, (ICharSequence**)&cs);
     if (kind == 1) {
         *csq = cs;
@@ -837,17 +835,18 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
     CSpannableString::New(cs, (ISpannableString**)&sp);
 
     while (TRUE) {
-        FAIL_RETURN(p->ReadInt32(&kind));
+        p->ReadInt32(&kind);
 
-        if (kind == 0)
+        if (kind == 0) {
             break;
+        }
 
         switch (kind) {
         case ITextUtils::ALIGNMENT_SPAN: {
             AutoPtr<IAlignmentSpan> object;
             CAlignmentSpanStandard::New((IAlignmentSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -855,7 +854,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<IForegroundColorSpan> object;
             CForegroundColorSpan::New((IForegroundColorSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -863,7 +862,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<IRelativeSizeSpan> object;
             CRelativeSizeSpan::New((IRelativeSizeSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -871,7 +870,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<IScaleXSpan> object;
             CScaleXSpan::New((IScaleXSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -879,7 +878,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<IStrikethroughSpan> object;
             CStrikethroughSpan::New((IStrikethroughSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -887,7 +886,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<IUnderlineSpan> object;
             CUnderlineSpan::New((IUnderlineSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -895,7 +894,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<IStyleSpan> object;
             CStyleSpan::New((IStyleSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -903,7 +902,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<IBulletSpan> object;
             CBulletSpan::New((IBulletSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -911,7 +910,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<IQuoteSpan> object;
             CQuoteSpan::New((IQuoteSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -919,7 +918,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<ILeadingMarginSpan> object;
             CLeadingMarginSpanStandard::New((ILeadingMarginSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -927,7 +926,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<IURLSpan> object;
             CURLSpan::New((IURLSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -935,7 +934,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<IBackgroundColorSpan> object;
             CBackgroundColorSpan::New((IBackgroundColorSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -943,7 +942,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<ITypefaceSpan> object;
             CTypefaceSpan::New((ITypefaceSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -951,7 +950,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<ISuperscriptSpan> object;
             CSuperscriptSpan::New((ISuperscriptSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -959,7 +958,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<ISubscriptSpan> object;
             CSubscriptSpan::New((ISubscriptSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -967,7 +966,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<IAbsoluteSizeSpan> object;
             CAbsoluteSizeSpan::New((IAbsoluteSizeSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -975,7 +974,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<ITextAppearanceSpan> object;
             CTextAppearanceSpan::New((ITextAppearanceSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -983,7 +982,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<IAnnotation> object;
             CAnnotation::New((IAnnotation**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -991,7 +990,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<ISuggestionSpan> object;
             CSuggestionSpan::New((ISuggestionSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -999,7 +998,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<ISpellCheckSpan> object;
             CSpellCheckSpan::New((ISpellCheckSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -1007,7 +1006,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<ISuggestionRangeSpan> object;
             CSuggestionRangeSpan::New((ISuggestionRangeSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -1015,7 +1014,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<IEasyEditSpan> object;
             CEasyEditSpan::New((IEasyEditSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -1023,7 +1022,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<ILocaleSpan> object;
             CLocaleSpan::New((ILocaleSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 
@@ -1031,7 +1030,7 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
             AutoPtr<ITtsSpan> object;
             CTtsSpan::New((ITtsSpan**)&object);
             IParcelable::Probe(object)->ReadFromParcel(p);
-            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get());
             break;
         }
 

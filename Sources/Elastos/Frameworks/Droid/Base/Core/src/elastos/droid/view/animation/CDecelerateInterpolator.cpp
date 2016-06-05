@@ -76,7 +76,8 @@ ECode CDecelerateInterpolator::constructor(
 
     a->GetFloat(R::styleable::DecelerateInterpolator_factor, 1.0f, &mFactor);
 
-    return a->Recycle();
+    a->Recycle();
+    return NOERROR;
 }
 
 ECode CDecelerateInterpolator::GetInterpolation(
@@ -86,10 +87,10 @@ ECode CDecelerateInterpolator::GetInterpolation(
     VALIDATE_NOT_NULL(output);
 
     if (mFactor == 1.0f) {
-        *output = (Float)(1.0f - (1.0f - input) * (1.0f - input));
+        *output = 1.0f - (1.0f - input) * (1.0f - input);
     }
     else {
-        *output = (Float)(1.0f - Elastos::Core::Math::Pow((1.0f - input), 2 * mFactor));
+        *output = 1.0f - Elastos::Core::Math::Pow((1.0f - input), 2 * mFactor);
     }
 
     return NOERROR;

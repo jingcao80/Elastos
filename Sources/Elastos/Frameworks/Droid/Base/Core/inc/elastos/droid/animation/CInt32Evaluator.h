@@ -5,7 +5,7 @@
 #include "_Elastos_Droid_Animation_CInt32Evaluator.h"
 #include <elastos/core/Object.h>
 
-using Elastos::Core::INumber;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -50,7 +50,6 @@ public:
         /* [in] */ IInterface* endValue,
         /* [out] */ IInterface** result);
 };
-
 
 }   //namespace Animation
 }   //namespace Droid

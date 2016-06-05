@@ -21,22 +21,16 @@
 using Elastos::Droid::Graphics::EIID_IPointF;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
-using Elastos::Core::EIID_IArrayOf;
 using Elastos::Core::EIID_ICloneable;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
-using Elastos::Core::IDouble;
+using Elastos::Core::EIID_IArrayOf;
 using Elastos::Core::IFloat;
-using Elastos::Core::CFloat;
 using Elastos::Core::EIID_IFloat;
-using Elastos::Core::ECLSID_CFloat;
-using Elastos::Core::CDouble;
+using Elastos::Core::IDouble;
 using Elastos::Core::EIID_IDouble;
-using Elastos::Core::ECLSID_CDouble;
 using Elastos::Core::IInteger32;
-using Elastos::Core::CInteger32;
 using Elastos::Core::EIID_IInteger32;
-using Elastos::Core::ECLSID_CInteger32;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
@@ -509,13 +503,13 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetPropertyFunction(
     AutoPtr<IMethodInfo> returnVal;
     String methodName = GetMethodName(prefix, mPropertyName);
     AutoPtr< ArrayOf<InterfaceID> > typeVariants;
-    if (valueType == ECLSID_CFloat) {
+    if (valueType == EIID_IFloat) {
         typeVariants = FLOAT_VARIANTS;
     }
-    else if (valueType == ECLSID_CInteger32) {
+    else if (valueType == EIID_IInteger32) {
         typeVariants = INTEGER_VARIANTS;
     }
-    else if (valueType == ECLSID_CDouble) {
+    else if (valueType == EIID_IDouble) {
         typeVariants = DOUBLE_VARIANTS;
     }
     else {
@@ -785,8 +779,8 @@ ECode PropertyValuesHolder::Init()
     if (mEvaluator == NULL) {
         // We already handle int and float automatically, but not their Object
         // equivalents
-        mEvaluator = (mValueType == ECLSID_CInteger32) ? sInt32Evaluator :
-            (mValueType == ECLSID_CFloat) ? sFloatEvaluator : NULL;
+        mEvaluator = (mValueType == EIID_IInteger32) ? sInt32Evaluator :
+            (mValueType == EIID_IFloat) ? sFloatEvaluator : NULL;
     }
     if (mEvaluator != NULL) {
         // KeyframeSet knows how to evaluate the common types - only give it a custom

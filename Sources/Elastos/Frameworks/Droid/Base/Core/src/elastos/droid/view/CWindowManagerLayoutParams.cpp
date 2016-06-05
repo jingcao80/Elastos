@@ -776,8 +776,7 @@ ECode CWindowManagerLayoutParams::ReadFromParcel(
     source->ReadInt32(&mRotationAnimation);
     source->ReadInterfacePtr((Handle32*)&mToken);
     source->ReadString(&mPackageName);
-    mTitle = NULL;
-    source->ReadInterfacePtr((Handle32*)&mTitle);
+    TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(source, (ICharSequence**)&mTitle);
     source->ReadInt32(&mScreenOrientation);
     source->ReadFloat(&mPreferredRefreshRate);
     source->ReadInt32(&mSystemUiVisibility);
@@ -823,7 +822,7 @@ ECode CWindowManagerLayoutParams::WriteToParcel(
     dest->WriteInt32(mRotationAnimation);
     dest->WriteInterfacePtr((IInterface*)mToken.Get());
     dest->WriteString(mPackageName);
-    dest->WriteInterfacePtr((IInterface*)mTitle.Get());
+    TextUtils::WriteToParcel(mTitle, dest);
     dest->WriteInt32(mScreenOrientation);
     dest->WriteFloat(mPreferredRefreshRate);
     dest->WriteInt32(mSystemUiVisibility);

@@ -30,13 +30,10 @@ ECode CInt32Evaluator::Evaluate(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(startValue != NULL && IInteger32::Probe(startValue) != NULL);
-    assert(endValue != NULL && IInteger32::Probe(endValue) != NULL);
 
     Int32 startInt = 0, endInt = 0;
     IInteger32::Probe(startValue)->GetValue(&startInt);
     IInteger32::Probe(endValue)->GetValue(&endInt);
-
     Int32 retValue = (Int32)(startInt + fraction * (endInt - startInt));
 
     AutoPtr<IInteger32> obj;

@@ -4,6 +4,7 @@
 
 using Elastos::Core::IFloat;
 using Elastos::Core::CFloat;
+using Elastos::Core::INumber;
 
 namespace Elastos {
 namespace Droid {
@@ -30,16 +31,14 @@ ECode CFloatEvaluator::Evaluate(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(startValue != NULL && INumber::Probe(startValue) != NULL);
-    assert(endValue != NULL && INumber::Probe(endValue) != NULL);
 
     Float startFloat = 0.0f, endFloat = 0.0f;
     INumber::Probe(startValue)->FloatValue(&startFloat);
     INumber::Probe(endValue)->FloatValue(&endFloat);
+    Float retValue = startFloat + fraction * (endFloat - startFloat);
 
     AutoPtr<IFloat> r;
-    CFloat::New(startFloat + fraction * (endFloat - startFloat),
-            (IFloat**)&r);
+    CFloat::New(retValue, (IFloat**)&r);
     *result = r;
     REFCOUNT_ADD(*result);
     return NOERROR;
