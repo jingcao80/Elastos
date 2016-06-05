@@ -67,13 +67,10 @@ AutoPtr<IKeyframeSet> KeyframeSet::OfInt32(
 AutoPtr<IKeyframeSet> KeyframeSet::OfFloat(
     /* [in] */ ArrayOf<Float>* values)
 {
-    assert(values != NULL);
-
     Boolean badValue = FALSE;
     Int32 numKeyframes = values->GetLength();
     AutoPtr<ArrayOf<IFloatKeyframe*> > keyframes =
             ArrayOf<IFloatKeyframe*>::Alloc(Elastos::Core::Math::Max(numKeyframes, 2));
-
     if (numKeyframes == 1) {
         AutoPtr<IKeyframe> temp;
         Keyframe::OfFloat(0.0f, (IKeyframe**)&temp);
@@ -84,7 +81,8 @@ AutoPtr<IKeyframeSet> KeyframeSet::OfFloat(
         if (Elastos::Core::Math::IsNaN((*values)[0])) {
             badValue = TRUE;
         }
-    } else {
+    }
+    else {
         AutoPtr<IKeyframe> temp;
         Keyframe::OfFloat(0.0f, (*values)[0], (IKeyframe**)&temp);
         keyframes->Set(0, IFloatKeyframe::Probe(temp));
@@ -97,11 +95,9 @@ AutoPtr<IKeyframeSet> KeyframeSet::OfFloat(
             }
         }
     }
-
     if (badValue) {
-        Slogger::W(String("Animator"), String("Bad value (NaN) in float animator"));
+        Slogger::W(String("Animator"), "Bad value (NaN) in float animator");
     }
-
     return new FloatKeyframeSet(keyframes);
 }
 

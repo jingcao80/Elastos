@@ -613,14 +613,14 @@ ECode Launcher::MyRunnable7::Run()
 {
     // Check that mStateAnimation hasn't changed while
     // we waited for a layout/draw pass
-    if (TO_IINTERFACE(mHost->mStateAnimation) != TO_IINTERFACE(mStateAnimation)) {
+    if (mHost->mStateAnimation != mStateAnimation) {
         return NOERROR;
     }
-    mHost->SetPivotsForZoom(IView::Probe(mToView), mScale);
+    IView* v = IView::Probe(mToView);
+    mHost->SetPivotsForZoom(v, mScale);
     mHost->DispatchOnLauncherTransitionStart(mFromView, mAnimated, FALSE);
-    mHost->DispatchOnLauncherTransitionStart(IView::Probe(mToView), mAnimated, FALSE);
-    LauncherAnimUtils::StartAnimationAfterNextDraw(IAnimator::Probe(mHost->mStateAnimation),
-            IView::Probe(mToView));
+    mHost->DispatchOnLauncherTransitionStart(v, mAnimated, FALSE);
+    LauncherAnimUtils::StartAnimationAfterNextDraw(IAnimator::Probe(mHost->mStateAnimation), v);
     return NOERROR;
 }
 
@@ -659,9 +659,8 @@ ECode Launcher::MyAnimatorUpdateListener2::OnAnimationUpdate(
 {
     AutoPtr<IInterface> value;
     animation->GetAnimatedValue((IInterface**)&value);
-    AutoPtr<IFloat> obj = IFloat::Probe(value);
     Float t;
-    obj->GetValue(&t);
+    IFloat::Probe(value)->GetValue(&t);
     mHost->DispatchOnLauncherTransitionStep(mFromView, t);
     mHost->DispatchOnLauncherTransitionStep(mToView, t);
     return NOERROR;
@@ -695,7 +694,8 @@ ECode Launcher::MyAnimatorListenerAdapter3::OnAnimationEnd(
         mOnCompleteRunnable->Run();
     }
     IPagedView::Probe(mHost->mAppsCustomizeContent)->UpdateCurrentPageScroll();
-    return IPagedView::Probe(mHost->mAppsCustomizeContent)->ResumeScrolling();
+    IPagedView::Probe(mHost->mAppsCustomizeContent)->ResumeScrolling();
+    return NOERROR;
 }
 
 Launcher::MyRunnable8::MyRunnable8(
@@ -3252,13 +3252,11 @@ ECode Launcher::DispatchKeyEvent(
 ECode Launcher::OnBackPressed()
 {
     Boolean res;
-    IsAllAppsVisible(&res);
     AutoPtr<IFolder> folder;
-    mWorkspace->GetOpenFolder((IFolder**)&folder);
-    if (res) {
+    if (IsAllAppsVisible(&res), res) {
         ShowWorkspace(TRUE);
     }
-    else if (folder != NULL) {
+    else if (mWorkspace->GetOpenFolder((IFolder**)&folder), folder != NULL) {
         AutoPtr<IFolder> openFolder = folder;
         Boolean res;
         openFolder->IsEditingName(&res);
@@ -4352,9 +4350,9 @@ void Launcher::ShowAppsCustomizeHelper(
         AutoPtr<IAnimatorSetBuilder> builder;
         mStateAnimation->Play(scaleAnim, (IAnimatorSetBuilder**)&builder);
         builder->After(startDelay);
-        AutoPtr<IAnimatorSetBuilder> builder2;
-        mStateAnimation->Play(IAnimator::Probe(alphaAnim), (IAnimatorSetBuilder**)&builder2);
-        builder2->After(startDelay);
+        builder = NULL;
+        mStateAnimation->Play(IAnimator::Probe(alphaAnim), (IAnimatorSetBuilder**)&builder);
+        builder->After(startDelay);
 
         AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter2(this,
                 fromView, IAppsCustomizeTabHost::Probe(toView), animated, springLoaded);
@@ -4372,21 +4370,16 @@ void Launcher::ShowAppsCustomizeHelper(
 
         // If any of the objects being animated haven't been measured/laid out
         // yet, delay the animation until we get a layout pass
-        AutoPtr<ILauncherTransitionable> transitionable = ILauncherTransitionable::Probe(toView);
         AutoPtr<IView> view;
-        transitionable->GetContent((IView**)&view);
-        Int32 width1;
-        view->GetMeasuredWidth(&width1);
-        Int32 width2;
-        IView::Probe(mWorkspace)->GetMeasuredWidth(&width2);
-        Int32 width3;
-        toView->GetMeasuredWidth(&width3);
-        if ((width1 == 0) || (width2 == 0) || (width3 == 0)) {
+        ILauncherTransitionable::Probe(toView)->GetContent((IView**)&view);
+        Int32 width;
+        if ((view->GetMeasuredWidth(&width), width == 0) ||
+            (IView::Probe(mWorkspace)->GetMeasuredWidth(&width), width == 0) ||
+            (toView->GetMeasuredWidth(&width), width == 0)) {
             delayAnim = TRUE;
         }
 
-        AutoPtr<IAnimatorSet> stateAnimation = mStateAnimation;
-        AutoPtr<IRunnable> startAnimRunnable = new MyRunnable7(this, stateAnimation,
+        AutoPtr<IRunnable> startAnimRunnable = new MyRunnable7(this, mStateAnimation,
                 fromView, IAppsCustomizeTabHost::Probe(toView), animated, scale);
         if (delayAnim) {
             AutoPtr<IViewTreeObserver> observer;
@@ -4733,17 +4726,17 @@ ECode Launcher::ShowHotseat(
     LauncherApplication::IsScreenLarge(&res);
     if (!res) {
         if (animated) {
-            Float tmp;
-            IView::Probe(mHotseat)->GetAlpha(&tmp);
-            if (tmp != 1.0f) {
+            Float alpha;
+            IView::Probe(mHotseat)->GetAlpha(&alpha);
+            if (alpha != 1.0f) {
                 Int32 duration = 0;
                 if (mSearchDropTargetBar != NULL) {
                     mSearchDropTargetBar->GetTransitionInDuration(&duration);
                 }
-                AutoPtr<IViewPropertyAnimator> res;
-                IView::Probe(mHotseat)->Animate((IViewPropertyAnimator**)&res);
-                res->Alpha(1.0f);
-                res->SetDuration(duration);
+                AutoPtr<IViewPropertyAnimator> animator;
+                IView::Probe(mHotseat)->Animate((IViewPropertyAnimator**)&animator);
+                animator->Alpha(1.0f);
+                animator->SetDuration(duration);
             }
         }
         else {

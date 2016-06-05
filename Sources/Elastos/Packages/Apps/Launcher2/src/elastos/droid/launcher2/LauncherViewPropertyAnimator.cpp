@@ -35,8 +35,6 @@ LauncherViewPropertyAnimator::LauncherViewPropertyAnimator(
     , mDuration(0)
     , mRunning(FALSE)
 {
-    mPropertiesToSet.Clear();
-
     CArrayList::New((IArrayList**)&mListeners);
 }
 
