@@ -13,6 +13,7 @@ SOURCES = CDateUtils.cpp
 SOURCES += DateUtils.cpp
 SOURCES += CFormatter.cpp
 SOURCES += Formatter.cpp
+SOURCES += Time.cpp
 SOURCES += CTime.cpp
 SOURCES += CTimeHelper.cpp
 SOURCES += CTimeFormatter.cpp

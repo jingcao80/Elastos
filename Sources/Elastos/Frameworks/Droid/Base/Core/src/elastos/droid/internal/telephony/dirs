@@ -1,1 +1,2 @@
+DIRS += cdma
 DIRS += utility

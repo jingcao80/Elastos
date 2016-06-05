@@ -6,6 +6,7 @@ module {
     namespace Internal {
     namespace Telephony {
     namespace Cdma {
+    namespace Sms {
 
     interface ISmsEnvelope {
         /**
@@ -49,6 +50,7 @@ module {
         const Int32 SERVICE_CATEGORY_CMAS_LAST_RESERVED_VALUE       = 0x10ff;
     }
 
+    }//Sms
     }//Cdma
     }//Telephony
     }//Internal

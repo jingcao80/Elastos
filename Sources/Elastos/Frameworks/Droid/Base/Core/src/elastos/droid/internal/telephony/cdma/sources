@@ -1,0 +1,33 @@
+TARGET_NAME= cdma
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = CDMALTEPhone.cpp
+SOURCES += CDMAPhone.cpp
+#SOURCES += CallFailCause.cpp
+SOURCES += CdmaCall.cpp
+SOURCES += CdmaCallTracker.cpp
+SOURCES += CdmaCallWaitingNotification.cpp
+SOURCES += CdmaConnection.cpp
+SOURCES += CdmaInboundSmsHandler.cpp
+SOURCES += CdmaInformationRecords.cpp
+SOURCES += CdmaLteServiceStateTracker.cpp
+SOURCES += CdmaMmiCode.cpp
+SOURCES += CdmaSMSDispatcher.cpp
+SOURCES += CdmaServiceCategoryProgramHandler.cpp
+SOURCES += CdmaServiceStateTracker.cpp
+SOURCES += CdmaSmsBroadcastConfigInfo.cpp
+SOURCES += CdmaSubscriptionSourceManager.cpp
+SOURCES += EriInfo.cpp
+SOURCES += EriManager.cpp
+SOURCES += RuimPhoneBookInterfaceManager.cpp
+SOURCES += SignalToneUtil.cpp
+SOURCES += SmsMessage.cpp
+
+ELASTOS_LIBS += sms/cdmasms.lib

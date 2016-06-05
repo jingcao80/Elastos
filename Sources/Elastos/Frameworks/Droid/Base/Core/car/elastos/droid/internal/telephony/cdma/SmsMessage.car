@@ -3,6 +3,7 @@ module
 {
     interface Elastos.Droid.Internal.Telephony.ISmsHeader;
     interface Elastos.Droid.Internal.Telephony.IGsmAlphabetTextEncodingDetails;
+    interface Elastos.Droid.Internal.Telephony.Cdma.Sms.IUserData;
 
     using interface Elastos.Core.ICharSequence;
     using interface Elastos.Utility.IArrayList;

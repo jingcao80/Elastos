@@ -6,6 +6,7 @@ module {
     namespace Internal {
     namespace Telephony {
     namespace Cdma {
+    namespace Sms {
 
     interface IUserData {
         /**
@@ -60,6 +61,7 @@ module {
             [out, callee] ArrayOf<Byte>* result);
     }
 
+    }//Sms
     }//Cdma
     }//Telephony
     }//Internal
