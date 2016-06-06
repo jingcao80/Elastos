@@ -1,0 +1,74 @@
+#ifndef __ELASTOS_APPS_DIALER_UTIL_ASYNCTASKEXECUTORS_H__
+#define __ELASTOS_APPS_DIALER_UTIL_ASYNCTASKEXECUTORS_H__
+
+namespace Elastos{
+namespace Apps{
+namespace Dialer {
+namespace Util {
+
+/**
+ * Factory methods for creating AsyncTaskExecutors.
+ * <p>
+ * All of the factory methods on this class check first to see if you have set a static
+ * {@link AsyncTaskExecutorFactory} set through the
+ * {@link #setFactoryForTest(AsyncTaskExecutorFactory)} method, and if so delegate to that instead,
+ * which is one way of injecting dependencies for testing classes whose construction cannot be
+ * controlled such as {@link android.app.Activity}.
+ */
+class AsyncTaskExecutors
+{
+private:
+    class SimpleAsyncTaskExecutor
+        : public Object
+        , public IAsyncTaskExecutor
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        SimpleAsyncTaskExecutor(
+            /* [in] */ IExecutor* executor);
+
+        CARAPI Submit(
+            /* [in] */ IInterface* identifier,
+            /* [in] */ IAsyncTask* task,
+            /* [in] */ ArrayOf<IInteface*>* params,
+            /* [out] */ IAsyncTask** result);
+
+    private:
+        AutoPtr<IExecutor> mExecutor;
+    };
+
+public:
+    /**
+     * Creates an AsyncTaskExecutor that submits tasks to run with
+     * {@link AsyncTask#SERIAL_EXECUTOR}.
+     */
+    static CARAPI_(AutoPtr<IAsyncTaskExecutor>) CreateAsyncTaskExecutor();
+
+    /**
+     * Creates an AsyncTaskExecutor that submits tasks to run with
+     * {@link AsyncTask#THREAD_POOL_EXECUTOR}.
+     */
+    static CARAPI_(AutoPtr<IAsyncTaskExecutor>) CreateThreadPoolExecutor();
+
+    // @NeededForTesting
+    static CARAPI_(void) SetFactoryForTest(
+        /* [in] */ IAsyncTaskExecutorFactory* factory);
+
+    static CARAPI_(void) CheckCalledFromUiThread();
+
+private:
+    /**
+     * A single instance of the {@link AsyncTaskExecutorFactory}, to which we delegate if it is
+     * non-null, for injecting when testing.
+     */
+    static AutoPtr<IAsyncTaskExecutorFactory> mInjectedAsyncTaskExecutorFactory;
+    static Object sSyncObject;
+};
+
+} // Util
+} // Dialer
+} // Apps
+} // Elastos
+
+#endif //__ELASTOS_APPS_DIALER_UTIL_ASYNCTASKEXECUTORS_H__

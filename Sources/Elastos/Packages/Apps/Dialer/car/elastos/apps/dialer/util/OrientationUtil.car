@@ -1,0 +1,21 @@
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace Util {
+
+    interface IOrientationUtil {
+        /**
+         * @return if the context is in landscape orientation.
+         */
+        IsLandscape(
+            [in] IContext* context,
+            [out] Boolean* result);
+    }
+
+    } // Util
+    } // Dailer
+    } // Apps
+    } // Elastos
+}

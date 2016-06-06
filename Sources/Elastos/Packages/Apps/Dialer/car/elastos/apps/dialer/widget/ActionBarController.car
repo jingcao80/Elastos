@@ -1,0 +1,97 @@
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace Widget {
+
+    interface IActionBarControllerActivityUi {
+        IsInSearchUi(
+            [out] Boolean* result);
+
+        HasSearchQuery(
+            [out] Boolean* result);
+
+        ShouldShowActionBar(
+            [out] Boolean* result);
+
+        GetActionBarHeight(
+            [out] Int32* height);
+
+        GetActionBar(
+            [out] IActionBar* actionBar);
+    }
+
+    interface IActionBarController {
+        /**
+         * @return Whether or not the action bar is currently showing (both slid down and visible)
+         */
+        IsActionBarShowing(
+            [out] Boolean* result);
+
+        /**
+         * Called when the user has tapped on the collapsed search box, to start a new search query.
+         */
+        OnSearchBoxTapped();
+
+        /**
+         * Called when search UI has been exited for some reason.
+         */
+        OnSearchUiExited();
+
+        /**
+         * Called to indicate that the user is trying to hide the dialpad. Should be called before
+         * any state changes have actually occurred.
+         */
+        OnDialpadDown();
+
+        /**
+         * Called to indicate that the user is trying to show the dialpad. Should be called before
+         * any state changes have actually occurred.
+         */
+        OnDialpadUp();
+
+        SlideActionBar(
+            [in] Boolean slideUp,
+            [in] Boolean animate);
+
+        SetAlpha(
+            [in] Float alphaValue);
+
+        SetHideOffset(
+            [in] Int32 offset);
+
+        /**
+         * @return The offset the action bar is being translated upwards by
+         */
+        GetHideOffset(
+            [out] Int32* offset);
+
+        /**
+         * Saves the current state of the action bar into a provided {@link Bundle}
+         */
+        SaveInstanceState(
+            [in] IBundle* outState);
+
+        /**
+         * Restores the action bar state from a provided {@link Bundle}.
+         */
+        RestoreInstanceState(
+            [in] IBundle* inState);
+
+        /**
+         * This should be called after onCreateOptionsMenu has been called, when the actionbar has
+         * been laid out and actually has a height.
+         */
+        RestoreActionBarOffset();
+
+        // @VisibleForTesting
+        GetIsActionBarSlidUp(
+            [out] Boolean* result);
+    }
+
+    } // Widget
+    } // Dailer
+    } // Apps
+    } // Elastos
+}
