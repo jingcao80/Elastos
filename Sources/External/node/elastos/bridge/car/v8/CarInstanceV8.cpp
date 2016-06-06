@@ -100,7 +100,7 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool& 
     if (numParams > 0) {
         ec = aMethod->CreateArgumentList((IArgumentList**)&argumentList);
         if (FAILED(ec)) {
-           LOG_ERROR("CarInstanceV8::invokeMethod unable to create argumentList on method %p", method);
+           //LOG_ERROR("CarInstanceV8::invokeMethod unable to create argumentList on method %p", method);
            ALOGD("CarInstanceV8::invokeMethod unable to create argumentList on method %p", method);
            return;
         }
@@ -140,7 +140,7 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool& 
                             ec = argumentList->SetInputArgumentOfByte(i, args[i].mByteValue);
                             break;
                         case CarDataType_Char32:
-//                            ec = argumentList->SetInputArgumentOfChar32(i, args[i].mCharValue);
+                            //ec = argumentList->SetInputArgumentOfChar32(i, args[i].mCharValue);
                             ec = argumentList->SetInputArgumentOfChar(i, args[i].mCharValue);
                             break;
                         case CarDataType_Float:
@@ -276,6 +276,7 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool& 
                     break;
 
                 default:
+                    //LOG_ERROR("CarInstanceV8::invokeMethod unknown ParamIOAttribute");
                     ALOGD("CarInstanceV8::invokeMethod unknown ParamIOAttribute");
                     break;
             }
@@ -283,6 +284,7 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool& 
             if (FAILED(ec)) {
                 Elastos::String nameBuf;
                 aParameter->GetName(&nameBuf);
+                //LOG_ERROR("CarInstanceV8::invokeMethod SetArgument error %s", (const char*)nameBuf);
                 ALOGD("CarInstanceV8::invokeMethod SetArgument error %s", (const char*)nameBuf);
                 return;
             }
@@ -300,7 +302,8 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool& 
     else {
         ec = aMethod->Invoke(object, argumentList);
         if (FAILED(ec)) {
-            ALOGD("CarInstanceV8::invokeMethod invoke failed!");
+            //LOG_ERROR("CarInstanceV8::invokeMethod invoke failed!");
+            ALOGD("CarInstanceV8::invokeMethod invoke failed! Ecode:%x", ec);
             return;
         }
         else {

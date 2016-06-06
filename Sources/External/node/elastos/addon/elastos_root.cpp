@@ -432,6 +432,7 @@ void Back(uv_work_t* r) {
     TryCatch try_catch;
 
     Local<Function> callback = Local<Function>::New(isolate, req->callback);
+    //callback->Call(isolate->GetCurrentContext()->Global(), 2, argv);
     callback->Call(context->Global(), 2, argv);
 
     Receive_(req->input,callback);

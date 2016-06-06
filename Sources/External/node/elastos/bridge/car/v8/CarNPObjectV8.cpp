@@ -169,6 +169,10 @@ bool _BeRunOnUiThread(
         bRunOnUiThread = true;
     }
 
+    if (!strcmp(name,"RemoteCreateObject")) {
+        bRunOnUiThread = true;
+    }
+
     // if (!strcmp(name,"New_CSimpleAdapter")) {
     //     bRunOnUiThread = true;
     // }
@@ -319,6 +323,56 @@ bool _BeRunOnUiThread(
     return bRunOnUiThread;
 }   //_BeRunOnUiThread
 
+bool _compatible(NPVariantType jt, CarDataType ct)
+{
+    //NPVariantType_Int32 is not used in v8
+    if (jt == NPVariantType_Void || jt == NPVariantType_Null) return true;
+
+    bool result = false;
+
+    switch (ct) {
+    case CarDataType_Boolean:
+        result = (jt == NPVariantType_Bool);
+        break;
+    case CarDataType_Int16:
+    case CarDataType_Int32:
+    case CarDataType_Int64:
+    case CarDataType_Byte:
+    case CarDataType_Float:
+    case CarDataType_Double:
+    case CarDataType_ECode:
+    case CarDataType_Enum:
+        result = (jt == NPVariantType_Double);
+        break;
+    case CarDataType_Char32:
+    case CarDataType_String:
+        result = (jt == NPVariantType_String);
+        break;
+    case CarDataType_ArrayOf:
+        //TODO:js instance of Array
+    case CarDataType_CppVector:
+        //TODO:js instance of Array
+    case CarDataType_EMuid:
+        //TODO:js object compatible with EMuid
+    case CarDataType_EGuid:
+        //TODO:js object compatible with EGuid
+    case CarDataType_LocalPtr:
+        //TODO:???
+    case CarDataType_LocalType:
+        //TODO:???
+    case CarDataType_Struct:
+        //TODO:js object with compatible properties
+    case CarDataType_Interface:
+        //TODO:js object with compatible car object wrapper
+        result = (jt == NPVariantType_Object);
+        break;
+    default:
+        ALOGD("ConvertCarDataTypeToNPVariantType fail!");
+        break;
+    }
+
+    return result;
+}
 
 bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant* args, uint32_t argCount, NPVariant* result)
 {
@@ -355,20 +409,72 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
     // type checking as well as checking the number of parameters.
     size_t numMethods = methodList.size();
     CarMethod* carMethod = 0;
+    CarMethod* tmpCarMethod = 0;
 
     //TODO: more than one out parameters and with default input parameters
     //bool result_0 = (methodList.size() > 0);
-    //if (result_0) {
+    if (numMethods > 0) {
         for (size_t methodIndex = 0; methodIndex < numMethods; methodIndex++) {
-            //To be Fixed: shuld compare with only input parameters count
-            //if (aMethod->numParameters() == static_cast<int>(argCount)) {
-                carMethod = methodList[methodIndex];
+            tmpCarMethod = methodList[methodIndex];
+            //TODO: shuld compare with only input parameters count.
+            //NOTE: different from callback output parms.
+            Int32 numParams = tmpCarMethod->numParameters();
+            Int32 numIn = 0;
+            Int32 numOut = 0;
+
+            AutoPtr<IMethodInfo> methodInfo;
+
+            methodInfo = tmpCarMethod->methodInfo();
+
+            ArrayOf<IParamInfo*>* paramInfos = ArrayOf<IParamInfo*>::Alloc(numParams);
+            methodInfo->GetAllParamInfos(paramInfos);
+
+            bool bSameInArg = true;
+
+            for (Int32 i = 0; i < numParams; i++) {
+
+                AutoPtr<IParamInfo> paramInfo = (*paramInfos)[i];
+                ParamIOAttribute paramIOAttribute;
+                paramInfo->GetIOAttribute(&paramIOAttribute);
+                AutoPtr<IDataTypeInfo> dataTypeInfo;
+                paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
+                CarDataType dataType;
+                dataTypeInfo->GetDataType(&dataType);
+
+                if (paramIOAttribute == ParamIOAttribute_In) {
+                    numIn++;
+                    if (static_cast<int>(argCount) < numIn) {
+                        bSameInArg = false;
+                        break;
+                    }
+
+                    //if (dataType != dataType)
+                    if (_compatible(args[numIn].type, dataType)) {
+                        //
+                    }
+                    else {
+                        bSameInArg = false;
+                        break;
+                    }
+                }
+                else {
+                    numOut++;
+                }
+
+            }
+
+            //if (tmpCarMethod->numParameters() == static_cast<int>(argCount)) {
+            //if (numIn == static_cast<int>(argCount)) {
+            if (bSameInArg) {
+                //TODO:compare the param type one by one
+                carMethod = tmpCarMethod;
                 break;
-            //}
+            }
         }
-    //}
+    }
 
     if (!carMethod) {
+        ALOGD("CarNPObjectInvoke : can't found carMethod name: %s====",name);
         //TODO:
         //result->value.objectValue = *(NPObject**)&identifier;
         //bool retDefault = CarNPObjectInvokeDefault(npobj, args, argCount, result);
@@ -458,7 +564,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
     carMethod->setRunOnUiThread(bRunOnUiThread);
     //-----------------bRunOnUiThread end-------------------
 
-    free(name);
+    //free(name);
 
     unsigned int numParams = carMethod->numParameters();
     ArrayOf<IParamInfo*>* paramInfos = ArrayOf<IParamInfo*>::Alloc(numParams);
@@ -518,6 +624,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
                         //(*paramInfos)[j] = NULL;
                     }
                     ArrayOf<IParamInfo*>::Free(paramInfos);
+                    free(name);
                     return false;
                 }
                 convertNPVariantToCarValue(args[inParamsPos], &jArgs[i]);
@@ -550,6 +657,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
 
     if (exceptionOccurred) {
         LOG_ERROR("CarNPObjectInvoke: exception occurred!");
+        free(name);
         delete[] jArgs;
         return false;
     }
@@ -558,7 +666,9 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
 
     convertCarValuesToNPVariant(carMethod, jArgs, outParamsPosBuf, result);
 
+    free(name);
     delete[] jArgs;
+
     return true;
 }
 
