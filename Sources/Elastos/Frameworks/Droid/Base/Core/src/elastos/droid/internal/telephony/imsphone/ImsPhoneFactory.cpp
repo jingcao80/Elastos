@@ -1,47 +1,38 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.imsphone;
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/telephony/imsphone/ImsPhoneFactory.h"
 
-using Elastos::Droid::Internal::Telephony::IPhone;
-using Elastos::Droid::Internal::Telephony::IPhoneNotifier;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace ImsPhone {
 
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Telephony::IRlog;
-
-/**
- * {@hide}
- */
-public class ImsPhoneFactory {
-
-    /**
-     * Makes a {@link ImsPhone} object.
-     * @param context {@code Context} needed to create a Phone object
-     * @param phoneNotifier {@code PhoneNotifier} needed to create a Phone
-     *      object
-     * @return the {@code ImsPhone} object
-     */
-    public static ImsPhone MakePhone(Context context,
-            PhoneNotifier phoneNotifier, Phone defaultPhone) {
-
-        try {
-            return new ImsPhone(context, phoneNotifier, defaultPhone);
-        } Catch (Exception e) {
-            Rlog->E("VoltePhoneFactory", "makePhone", e);
-            return NULL;
-        }
-    }
+//=====================================================================
+//                           ImsPhoneFactory
+//=====================================================================
+AutoPtr<IImsPhone> ImsPhoneFactory::MakePhone(
+    /* [in] */ IContext* context,
+    /* [in] */ IPhoneNotifier* phoneNotifier,
+    /* [in] */ IPhone* defaultPhone)
+{
+    // ==================before translated======================
+    //
+    // try {
+    //     return new ImsPhone(context, phoneNotifier, defaultPhone);
+    // } catch (Exception e) {
+    //     Rlog.e("VoltePhoneFactory", "makePhone", e);
+    //     return null;
+    // }
+    assert(0);
+    AutoPtr<IImsPhone> empty;
+    return empty;
 }
+
+} // namespace Imsphone
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos
+
+

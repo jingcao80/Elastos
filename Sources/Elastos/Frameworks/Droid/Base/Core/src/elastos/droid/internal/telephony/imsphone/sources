@@ -1,0 +1,18 @@
+TARGET_NAME= imsphone
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = ImsPhone.cpp
+SOURCES += ImsPhoneBase.cpp
+SOURCES += ImsPhoneCall.cpp
+SOURCES += ImsPhoneCallTracker.cpp
+SOURCES += ImsPhoneCommandInterface.cpp
+SOURCES += ImsPhoneConnection.cpp
+SOURCES += ImsPhoneFactory.cpp
+SOURCES += ImsPhoneMmiCode.cpp
