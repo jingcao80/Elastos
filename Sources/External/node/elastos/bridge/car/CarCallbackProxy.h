@@ -164,6 +164,7 @@ public:
 
     pthread_t mMainThread;
     v8::Isolate* mIsolate;
+    v8::Handle<v8::Context> mContext;
 };
 
 } // namespace Bindings

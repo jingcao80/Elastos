@@ -1059,6 +1059,7 @@ void ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch) {
     // print the exception.
     ALOGD("js error====%s\n", exception_string);
   } else {
+    // Print (filename):(line number): (message).
     v8::String::Utf8Value filename(message->GetScriptOrigin().ResourceName());
     const char* filename_string = ToCString(filename);
     int linenum = message->GetLineNumber();
@@ -1087,16 +1088,30 @@ void ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch) {
 
 void CarCallbackInterfaceProxy::Callback::Call()
 {
+    ALOGD("====CarCallbackInterfaceProxy::Callback::Call======begin======");
+
     Int32 paramCount;
     mMethodInfo->GetParamCount(&paramCount);
 
     if (paramCount != mParamCount) {
-        ALOG("CarCallbackInterfaceProxy::Callback::Call paramCount is wrong");
+        //LOG_ERROR("CarCallbackInterfaceProxy::Callback::Call paramCount is wrong");
+        ALOGD("CarCallbackInterfaceProxy::Callback::Call paramCount is wrong");
         return;
     }
 
+    ALOGD("====CarCallbackInterfaceProxy::Callback::Call============thread id:%x",pthread_self());
+
     v8::Isolate* isolate = mObject->mIsolate;
+    //v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    //isolate->Enter();
+
+    //v8::Handle<v8::Context> context = v8::Isolate::GetCurrent()->GetCurrentContext();
     v8::Handle<v8::Context> context = isolate->GetCurrentContext();
+    //v8::Handle<v8::Context> context = mObject->mContext;
+
+    //v8::Isolate::Scope isolateScope(isolate);
+    //v8::Context::Scope contextScope(context);
+
     v8::HandleScope scope(isolate);
 
     NPObject* obj = mObject->mObject;
@@ -1113,10 +1128,12 @@ void CarCallbackInterfaceProxy::Callback::Call()
             v8::Local<v8::Object> jsObject;
             v8::Local<v8::Function> jsFunc;
             if (v8NPFuncObject->v8Object.IsWeak()) {
+                ALOGD("====CarCallbackInterfaceProxy::Callback::Call======weak======");
                 jsObject = v8::Local<v8::Object>::New(isolate,v8NPFuncObject->v8Object);
                 jsFunc = v8::Local<v8::Function>::Cast(jsObject);
             }
             else {
+                ALOGD("====CarCallbackInterfaceProxy::Callback::Call======strong======");
                 jsObject = *reinterpret_cast<v8::Local<v8::Object>*>(const_cast<v8::Persistent<v8::Object>*>(&v8NPFuncObject->v8Object));
                 jsFunc = v8::Local<v8::Function>::Cast(jsObject);
             }
@@ -1127,9 +1144,8 @@ void CarCallbackInterfaceProxy::Callback::Call()
             jsFunc->Call(context->Global(), mParamCount, argv);
 
             if (try_catch.HasCaught()) {
-                ALOGD("====CarCallbackInterfaceProxy::Callback::Call======7.0======callbakc error");
+                //FatalException(try_catch);
                 ReportException(isolate, &try_catch);
-                //assert(0); just crash again
                 jsFunc->Call(context->Global(), mParamCount, argv);
             }
 
@@ -1138,6 +1154,7 @@ void CarCallbackInterfaceProxy::Callback::Call()
                 if (!mOutParamPtrs[i]) continue;
 
                 v8::Handle<v8::Value> outV8Handle = argv[i];
+
                 v8::Local<v8::Object> outV8Object(v8::Handle<v8::Object>::Cast(outV8Handle));
 
                 WebCore::V8NPObject* v8NPObject = (WebCore::V8NPObject*)_NPN_CreateObject(NULL, WebCore::npScriptObjectClass);
@@ -1148,8 +1165,6 @@ void CarCallbackInterfaceProxy::Callback::Call()
                 _NPN_GetProperty(0, (NPObject*)v8NPObject, _NPN_GetStringIdentifier("data"), &npvOutValue);
 
                 switch (mOutParamTypes[i]) {
-
-
                     case CarDataType_Int16:
                     {
                         ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===to do====Int16====CarDataType:%d", mOutParamTypes[i]);
@@ -1388,14 +1403,21 @@ void CarCallbackInterfaceProxy::Callback::Call()
                         break;
                     }
                 }   //switch (mOutParamTypes[i])
+
+                ALOGD("CarCallbackInterfaceProxy::Callback::Call======get output param value===2===");
             }
 
             delete[] argv;
         }
     }
     else {
+        //LOG_ERROR("CarCallbackInterfaceProxy::Callback::Call object is not js object");
         ALOGD("CarCallbackInterfaceProxy::Callback::Call object is not js object");
     }
+
+    //isolate->Exit();
+
+    ALOGD("====CarCallbackInterfaceProxy::Callback::Call======end======");
 }
 
 v8::Handle<v8::Value>* CarCallbackInterfaceProxy::Callback::ConvertParams()
@@ -1551,6 +1573,8 @@ CarCallbackObject* CarCallbackObject::S_CreateObject(
     cbObject->mMainThread = pthread_self();     //webview/node.js main thread
     cbObject->mObject = _NPN_RetainObject(object);
     cbObject->mIsolate = v8::Isolate::GetCurrent();
+
+    cbObject->mContext = v8::Isolate::GetCurrent()->GetCurrentContext();
 
     itfProxy->mOwner = cbObject;
 

@@ -657,7 +657,7 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
                 }
             }
             else {
-                ALOGD("=================convertNPVariantToCarValue CarDataType_Interface===========TODO:the value is not a car or js object");
+                ALOGD("=================convertNPVariantToCarValue CarDataType_Interface===========TODO:the value is not a car or js object, type:%d", type);
             }
 
             break;
