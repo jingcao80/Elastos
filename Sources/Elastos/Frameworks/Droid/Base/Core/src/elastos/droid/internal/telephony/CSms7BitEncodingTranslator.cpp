@@ -31,7 +31,7 @@ CAR_SINGLETON_IMPL(CSms7BitEncodingTranslator)
 CAR_INTERFACE_IMPL(CSms7BitEncodingTranslator, Singleton, ISms7BitEncodingTranslator)
 
 const String TAG("CSms7BitEncodingTranslator");
-const Boolean DBG = Build::IS_DEBUGGABLE ;
+const Boolean DBG = IBuild::IS_DEBUGGABLE ;
 Boolean mIs7BitTranslationTableLoaded = FALSE;
 
 // Parser variables

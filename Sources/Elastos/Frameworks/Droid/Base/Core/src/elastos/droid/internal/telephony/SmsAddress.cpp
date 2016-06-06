@@ -8,7 +8,7 @@ namespace Telephony {
 
 CAR_INTERFACE_IMPL(SmsAddress, Object, ISmsAddress)
 
-CARAPI SmsAddress::GetAddressString(
+ECode SmsAddress::GetAddressString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -16,7 +16,7 @@ CARAPI SmsAddress::GetAddressString(
     return NOERROR;
 }
 
-CARAPI SmsAddress::IsAlphanumeric(
+ECode SmsAddress::IsAlphanumeric(
         /* [out] */  Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -24,7 +24,7 @@ CARAPI SmsAddress::IsAlphanumeric(
     return NOERROR;
 }
 
-CARAPI SmsAddress::IsNetworkSpecific(
+ECode SmsAddress::IsNetworkSpecific(
         /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -32,7 +32,7 @@ CARAPI SmsAddress::IsNetworkSpecific(
     return NOERROR;
 }
 
-CARAPI SmsAddress::CouldBeEmailGateway(
+ECode SmsAddress::CouldBeEmailGateway(
         /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)

@@ -13,7 +13,6 @@ using Elastos::IO::IPrintWriter;
 using Elastos::Core::Object;
 using Elastos::Droid::Os::Handler;
 
-
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntentFilter;

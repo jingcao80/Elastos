@@ -7,8 +7,11 @@ module
     namespace Internal {
     namespace Telephony {
 
-    [deprecated]
     interface ISmsHeader {
+    }
+
+    [deprecated]
+    interface ISmsHeaderHelper {
         /** SMS user data header information element identifiers.
          * (see TS 23.040 9.2.3.24)
          */

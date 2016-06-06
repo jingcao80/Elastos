@@ -240,6 +240,8 @@ module
 
     merge("telephony/utility/BlacklistUtils.car");
 
+    using interface Elastos.Core.IRunnable;
+
     interface Elastos.Droid.Telephony.ICellInfo;
 
     namespace Elastos {
@@ -302,6 +304,21 @@ module
         class CSmsAddress {
 
             interface ISmsAddress;
+        }
+
+        class CSmsBroadcastUndelivered {
+
+            interface IRunnable;
+        }
+
+        class CSmsHeader {
+
+            interface ISmsHeader;
+        }
+
+        singleton class CSmsHeaderHelper {
+
+            interface ISmsHeaderHelper;
         }
 
         [deprecated]
