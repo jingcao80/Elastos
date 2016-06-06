@@ -1,0 +1,26 @@
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+    namespace Util {
+
+    /**
+     * @Involve
+     * interface ILoader
+     */
+    interface IEmptyLoader {
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.App.ILoaderManagerLoaderCallbacks
+     */
+    interface IEmptyLoaderCallback {
+    }
+
+    } // Util
+    } // Dailer
+    } // Apps
+    } // Elastos
+}
