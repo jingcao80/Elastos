@@ -37,9 +37,10 @@ module {
 
     }
 
+    interface IClientRange {}
+
     }//Telephony
     }//Internal
     }//Droid
     }//Elastos
-
 }

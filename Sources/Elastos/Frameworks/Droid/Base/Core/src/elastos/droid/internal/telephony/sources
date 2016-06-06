@@ -36,6 +36,8 @@ SOURCES += IccPhoneBookInterfaceManager.cpp
 SOURCES += IccPhoneBookInterfaceManagerProxy.cpp
 SOURCES += HbpcdUtils.cpp
 SOURCES += IccProvider.cpp
+SOURCES += IntRangeManager.cpp
+SOURCES += IccSmsInterfaceManager.cpp
 
 ELASTOS_LIBS += utility/utility.lib
 ELASTOS_LIBS += cdma/cdma.lib
