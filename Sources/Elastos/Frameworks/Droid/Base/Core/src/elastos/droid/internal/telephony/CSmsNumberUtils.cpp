@@ -1,21 +1,24 @@
 
+#include <elastos/core/IntegralToString.h>
+#include "elastos/droid/internal/telephony/CSmsNumberUtils.h"
+#include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include "elastos/droid/os/Build.h"
 
-using Elastos::Utility::IArrayList;
-using Elastos::Utility::IArrays;
-using Elastos::Utility::IHashMap;
+using Elastos::Core::IntegralToString;
+//using Elastos::Utility::IArrays;
 using Elastos::Utility::IList;
 
-using Elastos::Droid::Content::IContext;
+
 using Elastos::Droid::Os::ISystemProperties;
-using Elastos::Droid::Os::IBuild;
+using Elastos::Droid::Os::Build;
 using Elastos::Droid::Text::ITextUtils;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Database::ICursor;
-using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::PhoneNumberUtils;
 using Elastos::Droid::Telephony::ITelephonyManager;
-using Elastos::Droid::Telephony::IRlog;
-using Elastos::Droid::Internal::Telephony::HbpcdLookup::IMccIdd;
-using Elastos::Droid::Internal::Telephony::HbpcdLookup::IMccLookup;
+//using Elastos::Droid::Telephony::IRlog;
+//using Elastos::Droid::Internal::Telephony::HbpcdLookup::IMccIdd;
+//using Elastos::Droid::Internal::Telephony::HbpcdLookup::IMccLookup;
 
 namespace Elastos {
 namespace Droid {
@@ -33,7 +36,7 @@ CAR_SINGLETON_IMPL(CSmsNumberUtils)
 CAR_INTERFACE_IMPL(CSmsNumberUtils, Singleton, ISmsNumberUtils)
 
 const String TAG("SmsNumberUtils");
-const Boolean DBG = Build::S_DEBUGGABLE;
+const Boolean DBG = Build::IS_DEBUGGABLE;
 
 const String PLUS_SIGN("+");
 
@@ -91,15 +94,6 @@ const Int32 NP_CC_AREA_LOCAL = NP_INTERNATIONAL_BEGIN + 4;
 //TODO
 //HashMap<String, ArrayList<String>> IDDS_MAPS =
 //        new HashMap<String, ArrayList<String>>();
-
-//private static class NumberEntry {
-//    public String number;
-//    public String IDD;
-//    public Int32 countryCode;
-//    public NumberEntry(String number) {
-//        this.number = number;
-//    }
-//}
 
 String CSmsNumberUtils::FormatNumber(
     /* [in] */ IContext* context,
@@ -216,7 +210,7 @@ String CSmsNumberUtils::FormatNumber(
 }
 
 AutoPtr<IArrayList> CSmsNumberUtils::GetAllIDDs(
-    /* [in] */ IContext context,
+    /* [in] */ IContext* context,
     /* [in] */ String mcc)
 {
     assert(0 && "TODO");
@@ -265,7 +259,7 @@ AutoPtr<IArrayList> CSmsNumberUtils::GetAllIDDs(
 }
 
 Int32 CSmsNumberUtils::CheckNANP(
-    /* [in] */ INumberEntry* numberEntry,
+    /* [in] */ NumberEntry* numberEntry,
     /* [in] */ IArrayList* allIDDs)
 {
     assert(0 && "TODO");
@@ -333,22 +327,25 @@ Int32 CSmsNumberUtils::CheckNANP(
 //    return NP_NONE;
 }
 
-Boolean CSmsNumberUtils::IsNANP(String number)
+Boolean CSmsNumberUtils::IsNANP(
+    /* [in] */ String number)
 {
-    Int32 len = number->GetLength();
+    Int32 len = number.GetLength();
     if (len == NANP_MEDIUM_LENGTH
-        || (len == NANP_LONG_LENGTH  && number->StartsWith(NANP_NDD))) {
+        || (len == NANP_LONG_LENGTH  && number.StartWith(NANP_NDD))) {
         if (len == NANP_LONG_LENGTH) {
-            number = number->Substring(1);
+            number = number.Substring(1);
         }
-        return (PhoneNumberUtils::IsNanp(number));
+        Boolean result;
+        PhoneNumberUtils::IsNanp(number, &result);
+        return result;
     }
     return FALSE;
 }
 
 Int32 CSmsNumberUtils::CheckInternationalNumberPlan(
     /* [in] */ IContext* context,
-    /* [in] */ NumberEntry numberEntry,
+    /* [in] */ NumberEntry* numberEntry,
     /* [in] */ IArrayList* allIDDs,
     /* [in] */ String homeIDD)
 {
@@ -430,193 +427,219 @@ Int32 CSmsNumberUtils::GetCountryCode(
 //    return countryCode;
 }
 
-    /**
-     *  Gets all country Codes information with given MCC.
-     */
-    private static Int32[] GetAllCountryCodes(Context context) {
-        if (ALL_COUNTRY_CODES != NULL) {
-            return ALL_COUNTRY_CODES;
-        }
+/**
+ *  Gets all country Codes information with given MCC.
+ */
+AutoPtr<ArrayOf<Int32> > CSmsNumberUtils::GetAllCountryCodes(
+    /* [in] */ IContext* context)
+{
+    assert(0 && "TODO");
+//    if (ALL_COUNTRY_CODES != NULL) {
+//        return ALL_COUNTRY_CODES;
+//    }
+//
+//    Cursor cursor = NULL;
+//    try {
+//        String projection[] = {MccLookup.COUNTRY_CODE};
+//        cursor = context->GetContentResolver()->Query(MccLookup.CONTENT_URI,
+//                projection, NULL, NULL, NULL);
+//
+//        if (cursor->GetCount() > 0) {
+//            ALL_COUNTRY_CODES = new Int32[cursor->GetCount()];
+//            Int32 i = 0;
+//            While (cursor->MoveToNext()) {
+//                Int32 countryCode = cursor->GetInt(0);
+//                ALL_COUNTRY_CODES[i++] = countryCode;
+//                Int32 length = String->ValueOf(countryCode).Trim()->Length();
+//                if (length > MAX_COUNTRY_CODES_LENGTH) {
+//                    MAX_COUNTRY_CODES_LENGTH = length;
+//                }
+//            }
+//        }
+//    } Catch (SQLException e) {
+//        Rlog->E(TAG, "Can't access HbpcdLookup database", e);
+//    } finally {
+//        if (cursor != NULL) {
+//            cursor->Close();
+//        }
+//    }
+    return ALL_COUNTRY_CODES;
+}
 
-        Cursor cursor = NULL;
-        try {
-            String projection[] = {MccLookup.COUNTRY_CODE};
-            cursor = context->GetContentResolver()->Query(MccLookup.CONTENT_URI,
-                    projection, NULL, NULL, NULL);
+Boolean CSmsNumberUtils::InExceptionListForNpCcAreaLocal(
+    /* [in] */ NumberEntry* numberEntry)
+{
+    assert(0 && "TODO");
+//    Int32 countryCode = numberEntry.countryCode;
+//    Boolean result = (numberEntry.number->Length() == 12
+//                      && (countryCode == 7 || countryCode == 20
+//                          || countryCode == 65 || countryCode == 90));
+//    return result;
+}
 
-            if (cursor->GetCount() > 0) {
-                ALL_COUNTRY_CODES = new Int32[cursor->GetCount()];
-                Int32 i = 0;
-                While (cursor->MoveToNext()) {
-                    Int32 countryCode = cursor->GetInt(0);
-                    ALL_COUNTRY_CODES[i++] = countryCode;
-                    Int32 length = String->ValueOf(countryCode).Trim()->Length();
-                    if (length > MAX_COUNTRY_CODES_LENGTH) {
-                        MAX_COUNTRY_CODES_LENGTH = length;
-                    }
-                }
-            }
-        } Catch (SQLException e) {
-            Rlog->E(TAG, "Can't access HbpcdLookup database", e);
-        } finally {
-            if (cursor != NULL) {
-                cursor->Close();
-            }
-        }
-        return ALL_COUNTRY_CODES;
+String CSmsNumberUtils::GetNumberPlanType(
+    /* [in] */ Int32 state)
+{
+    String numberPlanType = String("Number Plan Type (") + IntegralToString::ToString(state) + String("): ");
+
+    if (state == NP_NANP_LOCAL) {
+        numberPlanType = String("NP_NANP_LOCAL");
+    } else if (state == NP_NANP_AREA_LOCAL) {
+        numberPlanType = String("NP_NANP_AREA_LOCAL");
+    } else if (state  == NP_NANP_NDD_AREA_LOCAL) {
+        numberPlanType = String("NP_NANP_NDD_AREA_LOCAL");
+    } else if (state == NP_NANP_NBPCD_CC_AREA_LOCAL) {
+        numberPlanType = String("NP_NANP_NBPCD_CC_AREA_LOCAL");
+    } else if (state == NP_NANP_LOCALIDD_CC_AREA_LOCAL) {
+        numberPlanType = String("NP_NANP_LOCALIDD_CC_AREA_LOCAL");
+    } else if (state == NP_NANP_NBPCD_HOMEIDD_CC_AREA_LOCAL) {
+        numberPlanType = String("NP_NANP_NBPCD_HOMEIDD_CC_AREA_LOCAL");
+    } else if (state == NP_NBPCD_HOMEIDD_CC_AREA_LOCAL) {
+        numberPlanType = String("NP_NBPCD_IDD_CC_AREA_LOCAL");
+    } else if (state == NP_HOMEIDD_CC_AREA_LOCAL) {
+        numberPlanType = String("NP_IDD_CC_AREA_LOCAL");
+    } else if (state == NP_NBPCD_CC_AREA_LOCAL) {
+        numberPlanType = String("NP_NBPCD_CC_AREA_LOCAL");
+    } else if (state == NP_LOCALIDD_CC_AREA_LOCAL) {
+        numberPlanType = String("NP_IDD_CC_AREA_LOCAL");
+    } else if (state == NP_CC_AREA_LOCAL) {
+        numberPlanType = String("NP_CC_AREA_LOCAL");
+    } else {
+        numberPlanType = String("Unknown type");
     }
+    return numberPlanType;
+}
 
-    private static Boolean InExceptionListForNpCcAreaLocal(NumberEntry numberEntry) {
-        Int32 countryCode = numberEntry.countryCode;
-        Boolean result = (numberEntry.number->Length() == 12
-                          && (countryCode == 7 || countryCode == 20
-                              || countryCode == 65 || countryCode == 90));
-        return result;
-    }
+/**
+ *  Filter the destination number if using VZW sim card.
+ */
+ECode CSmsNumberUtils::FilterDestAddr(
+    /* [in] */ IPhoneBase* phoneBase,
+    /* [in] */ const String& destAddr,
+    /* [out] */ String* result)
+{
+    assert(0 && "TODO");
+    return NOERROR;
+//    if (DBG) Rlog->D(TAG, "enter filterDestAddr. destAddr=\"" + destAddr + "\"" );
+//
+//    if (destAddr == NULL || !PhoneNumberUtils->IsGlobalPhoneNumber(destAddr)) {
+//        Rlog->W(TAG, "destAddr" + destAddr + " is not a global phone number!");
+//        return destAddr;
+//    }
+//
+//    final String networkOperator = TelephonyManager->GetDefault()->GetNetworkOperator();
+//    String result = NULL;
+//
+//    if (NeedToConvert(phoneBase)) {
+//        final Int32 networkType = GetNetworkType(phoneBase);
+//        if (networkType != -1) {
+//            String networkMcc = networkOperator->Substring(0, 3);
+//            if (networkMcc != NULL && networkMcc->Trim()->Length() > 0) {
+//                result = FormatNumber(phoneBase->GetContext(), destAddr, networkMcc, networkType);
+//            }
+//        }
+//    }
+//
+//    if (DBG) Rlog->D(TAG, "leave filterDestAddr, new destAddr=\"" + result + "\"" );
+//    return result != NULL ? result : destAddr;
+}
 
-    private static String GetNumberPlanType(Int32 state) {
-        String numberPlanType = "Number Plan Type (" + state + "): ";
+/**
+ * Returns the current network type
+ */
+Int32 CSmsNumberUtils::GetNetworkType(
+    /* [in] */ IPhoneBase* phoneBase)
+{
+    assert(0 && "TODO");
+//    Int32 networkType = -1;
+//    Int32 phoneType = TelephonyManager->GetDefault()->GetPhoneType();
+//
+//    if (phoneType == TelephonyManager.PHONE_TYPE_GSM) {
+//        networkType = GSM_UMTS_NETWORK;
+//    } else if (phoneType == TelephonyManager.PHONE_TYPE_CDMA) {
+//        if (IsInternationalRoaming(phoneBase)) {
+//            networkType = CDMA_ROAMING_NETWORK;
+//        } else {
+//            networkType = CDMA_HOME_NETWORK;
+//        }
+//    } else {
+//        if (DBG) Rlog->W(TAG, "warning! unknown mPhoneType value=" + phoneType);
+//    }
+//
+//    return networkType;
+}
 
-        if (state == NP_NANP_LOCAL) {
-            numberPlanType = "NP_NANP_LOCAL";
-        } else if (state == NP_NANP_AREA_LOCAL) {
-            numberPlanType = "NP_NANP_AREA_LOCAL";
-        } else if (state  == NP_NANP_NDD_AREA_LOCAL) {
-            numberPlanType = "NP_NANP_NDD_AREA_LOCAL";
-        } else if (state == NP_NANP_NBPCD_CC_AREA_LOCAL) {
-            numberPlanType = "NP_NANP_NBPCD_CC_AREA_LOCAL";
-        } else if (state == NP_NANP_LOCALIDD_CC_AREA_LOCAL) {
-            numberPlanType = "NP_NANP_LOCALIDD_CC_AREA_LOCAL";
-        } else if (state == NP_NANP_NBPCD_HOMEIDD_CC_AREA_LOCAL) {
-            numberPlanType = "NP_NANP_NBPCD_HOMEIDD_CC_AREA_LOCAL";
-        } else if (state == NP_NBPCD_HOMEIDD_CC_AREA_LOCAL) {
-            numberPlanType = "NP_NBPCD_IDD_CC_AREA_LOCAL";
-        } else if (state == NP_HOMEIDD_CC_AREA_LOCAL) {
-            numberPlanType = "NP_IDD_CC_AREA_LOCAL";
-        } else if (state == NP_NBPCD_CC_AREA_LOCAL) {
-            numberPlanType = "NP_NBPCD_CC_AREA_LOCAL";
-        } else if (state == NP_LOCALIDD_CC_AREA_LOCAL) {
-            numberPlanType = "NP_IDD_CC_AREA_LOCAL";
-        } else if (state == NP_CC_AREA_LOCAL) {
-            numberPlanType = "NP_CC_AREA_LOCAL";
-        } else {
-            numberPlanType = "Unknown type";
-        }
-        return numberPlanType;
-    }
+Boolean CSmsNumberUtils::IsInternationalRoaming(
+    /* [in] */ IPhoneBase* phoneBase)
+{
+    assert(0 && "TODO");
+//    String operatorIsoCountry = phoneBase->GetSystemProperty(
+//            TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, "");
+//    String simIsoCountry = phoneBase->GetSystemProperty(
+//            TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY, "");
+//    Boolean internationalRoaming = !TextUtils->IsEmpty(operatorIsoCountry)
+//            && !TextUtils->IsEmpty(simIsoCountry)
+//            && !simIsoCountry->Equals(operatorIsoCountry);
+//    if (internationalRoaming) {
+//        if ("us".Equals(simIsoCountry)) {
+//            internationalRoaming = !"vi".Equals(operatorIsoCountry);
+//        } else if ("vi".Equals(simIsoCountry)) {
+//            internationalRoaming = !"us".Equals(operatorIsoCountry);
+//        }
+//    }
+//    return internationalRoaming;
+}
 
-    /**
-     *  Filter the destination number if using VZW sim card.
-     */
-    public static String FilterDestAddr(PhoneBase phoneBase, String destAddr) {
-        if (DBG) Rlog->D(TAG, "enter filterDestAddr. destAddr=\"" + destAddr + "\"" );
+Boolean CSmsNumberUtils::NeedToConvert(
+    /* [in] */ IPhoneBase* phoneBase)
+{
+    assert(0 && "TODO");
+//    Boolean bNeedToConvert  = FALSE;
+//    String[] listArray = phoneBase->GetContext()->GetResources()
+//            .GetStringArray(R.array
+//            .config_sms_convert_destination_number_support);
+//    if (listArray != NULL && listArray.length > 0) {
+//        For (Int32 i=0; i<listArray.length; i++) {
+//            if (!TextUtils->IsEmpty(listArray[i])) {
+//                String[] needToConvertArray = listArray[i].Split(";");
+//                if (needToConvertArray != NULL && needToConvertArray.length > 0) {
+//                    if (needToConvertArray.length == 1) {
+//                        bNeedToConvert = "TRUE".EqualsIgnoreCase(needToConvertArray[0]);
+//                    } else if (needToConvertArray.length == 2 &&
+//                            !TextUtils->IsEmpty(needToConvertArray[1]) &&
+//                            CompareGid1(phoneBase, needToConvertArray[1])) {
+//                        bNeedToConvert = "TRUE".EqualsIgnoreCase(needToConvertArray[0]);
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    return bNeedToConvert;
+}
 
-        if (destAddr == NULL || !PhoneNumberUtils->IsGlobalPhoneNumber(destAddr)) {
-            Rlog->W(TAG, "destAddr" + destAddr + " is not a global phone number!");
-            return destAddr;
-        }
-
-        final String networkOperator = TelephonyManager->GetDefault()->GetNetworkOperator();
-        String result = NULL;
-
-        if (NeedToConvert(phoneBase)) {
-            final Int32 networkType = GetNetworkType(phoneBase);
-            if (networkType != -1) {
-                String networkMcc = networkOperator->Substring(0, 3);
-                if (networkMcc != NULL && networkMcc->Trim()->Length() > 0) {
-                    result = FormatNumber(phoneBase->GetContext(), destAddr, networkMcc, networkType);
-                }
-            }
-        }
-
-        if (DBG) Rlog->D(TAG, "leave filterDestAddr, new destAddr=\"" + result + "\"" );
-        return result != NULL ? result : destAddr;
-    }
-
-    /**
-     * Returns the current network type
-     */
-    private static Int32 GetNetworkType(PhoneBase phoneBase) {
-        Int32 networkType = -1;
-        Int32 phoneType = TelephonyManager->GetDefault()->GetPhoneType();
-
-        if (phoneType == TelephonyManager.PHONE_TYPE_GSM) {
-            networkType = GSM_UMTS_NETWORK;
-        } else if (phoneType == TelephonyManager.PHONE_TYPE_CDMA) {
-            if (IsInternationalRoaming(phoneBase)) {
-                networkType = CDMA_ROAMING_NETWORK;
-            } else {
-                networkType = CDMA_HOME_NETWORK;
-            }
-        } else {
-            if (DBG) Rlog->W(TAG, "warning! unknown mPhoneType value=" + phoneType);
-        }
-
-        return networkType;
-    }
-
-    private static Boolean IsInternationalRoaming(PhoneBase phoneBase) {
-        String operatorIsoCountry = phoneBase->GetSystemProperty(
-                TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, "");
-        String simIsoCountry = phoneBase->GetSystemProperty(
-                TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY, "");
-        Boolean internationalRoaming = !TextUtils->IsEmpty(operatorIsoCountry)
-                && !TextUtils->IsEmpty(simIsoCountry)
-                && !simIsoCountry->Equals(operatorIsoCountry);
-        if (internationalRoaming) {
-            if ("us".Equals(simIsoCountry)) {
-                internationalRoaming = !"vi".Equals(operatorIsoCountry);
-            } else if ("vi".Equals(simIsoCountry)) {
-                internationalRoaming = !"us".Equals(operatorIsoCountry);
-            }
-        }
-        return internationalRoaming;
-    }
-
-    private static Boolean NeedToConvert(PhoneBase phoneBase) {
-        Boolean bNeedToConvert  = FALSE;
-        String[] listArray = phoneBase->GetContext()->GetResources()
-                .GetStringArray(R.array
-                .config_sms_convert_destination_number_support);
-        if (listArray != NULL && listArray.length > 0) {
-            For (Int32 i=0; i<listArray.length; i++) {
-                if (!TextUtils->IsEmpty(listArray[i])) {
-                    String[] needToConvertArray = listArray[i].Split(";");
-                    if (needToConvertArray != NULL && needToConvertArray.length > 0) {
-                        if (needToConvertArray.length == 1) {
-                            bNeedToConvert = "TRUE".EqualsIgnoreCase(needToConvertArray[0]);
-                        } else if (needToConvertArray.length == 2 &&
-                                !TextUtils->IsEmpty(needToConvertArray[1]) &&
-                                CompareGid1(phoneBase, needToConvertArray[1])) {
-                            bNeedToConvert = "TRUE".EqualsIgnoreCase(needToConvertArray[0]);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        return bNeedToConvert;
-    }
-
-    private static Boolean CompareGid1(PhoneBase phoneBase, String serviceGid1) {
-        String gid1 = phoneBase->GetGroupIdLevel1();
-        Boolean ret = TRUE;
-
-        if (TextUtils->IsEmpty(serviceGid1)) {
-            if (DBG) Rlog->D(TAG, "compareGid1 serviceGid is empty, return " + ret);
-            return ret;
-        }
-
-        Int32 gid_length = serviceGid1->Length();
-        // Check if gid1 match service GID1
-        if (!((gid1 != NULL) && (gid1->Length() >= gid_length) &&
-                gid1->Substring(0, gid_length).EqualsIgnoreCase(serviceGid1))) {
-            if (DBG) Rlog->D(TAG, " gid1 " + gid1 + " serviceGid1 " + serviceGid1);
-            ret = FALSE;
-        }
-        if (DBG) Rlog->D(TAG, "compareGid1 is " + (ret?"Same":"Different"));
-        return ret;
-    }
+Boolean CSmsNumberUtils::CompareGid1(
+    /* [in] */ IPhoneBase* phoneBase,
+    /* [in] */ String serviceGid1)
+{
+    assert(0 && "TODO");
+//    String gid1 = phoneBase->GetGroupIdLevel1();
+//    Boolean ret = TRUE;
+//
+//    if (TextUtils->IsEmpty(serviceGid1)) {
+//        if (DBG) Rlog->D(TAG, "compareGid1 serviceGid is empty, return " + ret);
+//        return ret;
+//    }
+//
+//    Int32 gid_length = serviceGid1->Length();
+//    // Check if gid1 match service GID1
+//    if (!((gid1 != NULL) && (gid1->Length() >= gid_length) &&
+//            gid1->Substring(0, gid_length).EqualsIgnoreCase(serviceGid1))) {
+//        if (DBG) Rlog->D(TAG, " gid1 " + gid1 + " serviceGid1 " + serviceGid1);
+//        ret = FALSE;
+//    }
+//    if (DBG) Rlog->D(TAG, "compareGid1 is " + (ret?"Same":"Different"));
+//    return ret;
 }
 
 } // namespace Telephony

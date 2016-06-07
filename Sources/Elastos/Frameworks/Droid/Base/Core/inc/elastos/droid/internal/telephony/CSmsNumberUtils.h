@@ -6,12 +6,13 @@
 
 #include "_Elastos.Droid.Internal.h"
 #include "elastos/core/Singleton.h"
-#include "elastos/droid/utility/SparseInt32Array.h"
 
 using Elastos::Core::Singleton;
-using Elastos::Core::ICharSequence;
 
-using Elastos::Droid::Utility::ISparseInt32Array;
+using Elastos::Droid::Content::IContext;
+
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::IHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -22,6 +23,19 @@ CarClass(CSmsNumberUtils)
     , public Singleton
     , public ISmsNumberUtils
 {
+private:
+    class NumberEntry : public Object
+    {
+    public:
+        NumberEntry(String number) {
+            mNumber = number;
+        }
+    public:
+        String mNumber;
+        String mIDD;
+        Int32 mCountryCode;
+    };
+
 public:
     CAR_SINGLETON_DECL()
 
@@ -32,7 +46,7 @@ public:
      */
     CARAPI FilterDestAddr(
         /* [in] */ IPhoneBase* phoneBase,
-        /* [in] */ String destAddr,
+        /* [in] */ const String& destAddr,
         /* [out] */ String* result);
 
 
@@ -50,7 +64,7 @@ private:
         /* [in] */ IContext* context,
         /* [in] */ String number,
         /* [in] */ String activeMcc,
-        /* [in] */ Int32 networkType)
+        /* [in] */ Int32 networkType);
 
     /* Query International direct dialing from HbpcdLookup.db
      * for specified country code
@@ -71,10 +85,11 @@ private:
      * @return the number plan type related NANP
      */
     static Int32 CheckNANP(
-        /* [in] */ INumberEntry* numberEntry,
+        /* [in] */ NumberEntry* numberEntry,
         /* [in] */ IArrayList* allIDDs);
 
-    static Boolean IsNANP(String number);
+    static Boolean IsNANP(
+        /* [in] */ String number);
 
     /* Verify if the the destination number is an internal number
      *
@@ -85,7 +100,7 @@ private:
      */
     static Int32 CheckInternationalNumberPlan(
         /* [in] */ IContext* context,
-        /* [in] */ NumberEntry numberEntry,
+        /* [in] */ NumberEntry* numberEntry,
         /* [in] */ IArrayList* allIDDs,
         /* [in] */ String homeIDD);
 
@@ -95,6 +110,34 @@ private:
     static Int32 GetCountryCode(
         /* [in] */ IContext* context,
         /* [in] */ String number);
+
+    /**
+     *  Gets all country Codes information with given MCC.
+     */
+    static AutoPtr<ArrayOf<Int32> > GetAllCountryCodes(
+        /* [in] */ IContext* context);
+
+    static Boolean InExceptionListForNpCcAreaLocal(
+        /* [in] */ NumberEntry* numberEntry);
+
+    static String GetNumberPlanType(
+        /* [in] */ Int32 state);
+
+    /**
+     * Returns the current network type
+     */
+    static Int32 GetNetworkType(
+        /* [in] */ IPhoneBase* phoneBase);
+
+    static Boolean IsInternationalRoaming(
+        /* [in] */ IPhoneBase* phoneBase);
+
+    static Boolean NeedToConvert(
+        /* [in] */ IPhoneBase* phoneBase);
+
+    static Boolean CompareGid1(
+        /* [in] */ IPhoneBase* phoneBase,
+        /* [in] */ String serviceGid1);
 
 private:
     static const String TAG;

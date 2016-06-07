@@ -321,6 +321,11 @@ module
             interface ISmsHeaderHelper;
         }
 
+        singleton class CSmsNumberUtils {
+
+            interface ISmsNumberUtils;
+        }
+
         [deprecated]
         class CSmsRawData {
 
@@ -331,6 +336,15 @@ module
 
             interface ISmsRawData;
             interface IParcelable;
+        }
+
+        class CSmsResponse {
+            constructor(
+                [in] Int32 messageRef,
+                [in] String ackPdu,
+                [in] Int32 errorCode);
+
+            interface ISmsResponse;
         }
 
         //class CServiceStateTracker {
