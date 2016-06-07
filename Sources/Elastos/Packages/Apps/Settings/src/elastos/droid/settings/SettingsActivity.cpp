@@ -123,7 +123,7 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
 {
     AutoPtr< ArrayOf<String> > args = ArrayOf<String>::Alloc(61);
     (*args)[0] = "Elastos.Droid.Settings.WirelessSettings";
-    (*args)[1] = "Elastos.Droid.Settings.WiFi.WifiSettings";
+    (*args)[1] = "Elastos.Droid.Settings.WiFi.CWifiSettings";
     (*args)[2] = "Elastos.Droid.Settings.WiFi.AdvancedWifiSettings";
     (*args)[3] = "Elastos.Droid.Settings.WiFi.SavedAccessPointsWifiSettings";
     (*args)[4] = "Elastos.Droid.Settings.Bluetooth.BluetoothSettings";
@@ -387,6 +387,8 @@ ECode SettingsActivity::constructor()
     CArrayList::New((IArrayList**)&mCategories);
 
     mHandler = new BuildCategoriesHandler(this);
+    mHandler->constructor();
+
     return NOERROR;
 }
 
@@ -602,9 +604,8 @@ ECode SettingsActivity::OnCreate(
     String initialFragmentName;
     intent->GetStringExtra(EXTRA_SHOW_FRAGMENT, &initialFragmentName);
 
-    intent->GetBooleanExtra(EXTRA_SHOW_FRAGMENT_AS_SHORTCUT, FALSE, &res);
-    mIsShortcut = IsShortCutIntent(intent)
-            || IsLikeShortCutIntent(intent) || res;
+    mIsShortcut = IsShortCutIntent(intent) || IsLikeShortCutIntent(intent)
+            || (intent->GetBooleanExtra(EXTRA_SHOW_FRAGMENT_AS_SHORTCUT, FALSE, &res), res);
 
     AutoPtr<IComponentName> cn;
     intent->GetComponent((IComponentName**)&cn);
@@ -616,8 +617,8 @@ ECode SettingsActivity::OnCreate(
     // This is a "Sub Settings" when:
     // - this is a real SubSettings
     // - or :settings:show_fragment_as_subsetting is passed to the Intent
-    intent->GetBooleanExtra(EXTRA_SHOW_FRAGMENT_AS_SUBSETTING, FALSE, &res);
-    Boolean isSubSettings = className.Equals("Elastos.Droid.Settings.CSubSettings") || res;
+    Boolean isSubSettings = className.Equals("Elastos.Droid.Settings.CSubSettings")
+            || (intent->GetBooleanExtra(EXTRA_SHOW_FRAGMENT_AS_SUBSETTING, FALSE, &res), res);
 
     // If this is a sub settings, then apply the SubSettings Theme for the ActionBar content insets
     if (isSubSettings) {
@@ -912,11 +913,9 @@ ECode SettingsActivity::OnResume()
         InvalidateCategories(TRUE);
     }
 
-    mDevelopmentPreferencesListener =
-            new OnResumeOnSharedPreferenceChangeListener(this);
+    mDevelopmentPreferencesListener = new OnResumeOnSharedPreferenceChangeListener(this);
 
-    mDevelopmentPreferences->RegisterOnSharedPreferenceChangeListener(
-            mDevelopmentPreferencesListener);
+    mDevelopmentPreferences->RegisterOnSharedPreferenceChangeListener(mDevelopmentPreferencesListener);
 
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(IIntent::ACTION_BATTERY_CHANGED, (IIntentFilter**)&filter);
@@ -926,7 +925,7 @@ ECode SettingsActivity::OnResume()
 
     // TODO:
     Slogger::I("SettingsActivity::OnResume", "Register is TODO");
-    // mDynamicIndexableContentMonitor->Register(IContext::Probe(this));
+    // mDynamicIndexableContentMonitor->Register(this);
 
     if (mDisplaySearch && !TextUtils::IsEmpty(mSearchQuery)) {
         Boolean res;
@@ -1012,7 +1011,7 @@ String SettingsActivity::GetStartingFragmentClass(
     intent->GetComponent((IComponentName**)&comp);
     String intentClass;
     comp->GetClassName(&intentClass);
-    if (intentClass.Equals("Elastos.Droid.Settings.SettingsActivity")) return String(NULL);
+    if (intentClass.Equals("Elastos.Droid.Settings.CSettingsActivity")) return String(NULL);
 
     if (String("Elastos.Droid.Settings.ManageApplications").Equals(intentClass)
             || String("Elastos.Droid.Settings.RunningServices").Equals(intentClass)

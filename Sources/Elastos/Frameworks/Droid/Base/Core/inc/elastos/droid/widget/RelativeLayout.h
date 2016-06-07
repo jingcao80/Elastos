@@ -175,6 +175,29 @@ public:
 
         RelativeLayoutLayoutParams();
 
+        CARAPI constructor(
+            /* [in] */ IContext* c,
+            /* [in] */ IAttributeSet* attrs);
+
+        CARAPI constructor(
+            /* [in] */ Int32 width,
+            /* [in] */ Int32 height);
+
+        CARAPI constructor(
+            /* [in] */ IViewGroupLayoutParams* source);
+
+        CARAPI constructor(
+            /* [in] */ IViewGroupMarginLayoutParams* source);
+
+        /**
+         * Copy constructor. Clones the width, height, margin values, and rules
+         * of the source.
+         *
+         * @param source The layout params to copy from.
+         */
+        CARAPI constructor(
+            /* [in] */ IRelativeLayoutLayoutParams* source);
+
         CARAPI AddRule(
             /* [in] */ Int32 verb);
 
@@ -201,34 +224,7 @@ public:
         virtual CARAPI ResolveLayoutDirection(
             /* [in] */ Int32 layoutDirection);
 
-        CARAPI constructor(
-            /* [in] */ IContext* c,
-            /* [in] */ IAttributeSet* attrs);
-
-        CARAPI constructor(
-            /* [in] */ Int32 width,
-            /* [in] */ Int32 height);
-
-        CARAPI constructor(
-            /* [in] */ IViewGroupLayoutParams* source);
-
-        CARAPI constructor(
-            /* [in] */ IViewGroupMarginLayoutParams* source);
-
-        /**
-         * Copy constructor. Clones the width, height, margin values, and rules
-         * of the source.
-         *
-         * @param source The layout params to copy from.
-         */
-        CARAPI constructor(
-            /* [in] */ IRelativeLayoutLayoutParams* source);
-
     private:
-        CARAPI InitFromAttributes(
-            /* [in] */ IContext* context,
-            /* [in] */ IAttributeSet* attrs);
-
         // The way we are resolving rules depends on the layout direction and if we are pre JB MR1
         // or not.
         //
@@ -265,7 +261,6 @@ public:
          */
         Boolean mAlignWithParent;
     };
-
 
 public:
     CAR_INTERFACE_DECL()
@@ -319,10 +314,13 @@ public:
     virtual CARAPI_(AutoPtr<IViewGroupLayoutParams>) GenerateLayoutParams(
         /* [in] */ IViewGroupLayoutParams* p);
 
-    virtual CARAPI_(Boolean) DispatchPopulateAccessibilityEvent(
-        /* [in] */ IAccessibilityEvent* event);
+    // @Override
+    virtual CARAPI DispatchPopulateAccessibilityEvent(
+        /* [in] */ IAccessibilityEvent* event,
+        /* [out] */ Boolean* res);
 
-    virtual CARAPI_(Boolean) ShouldDelayChildPressedState();
+    virtual CARAPI ShouldDelayChildPressedState(
+        /* [out] */ Boolean* res);
 
     virtual CARAPI OnInitializeAccessibilityEvent(
         /* [in] */ IAccessibilityEvent* event);
@@ -466,6 +464,8 @@ private:
 
 private:
     friend class RelativeLayoutLayoutParams;
+
+    ECO_LOCAL static const Int32 VERB_COUNT;
 
     ECO_LOCAL static const AutoPtr<ArrayOf<Int32> > RULES_VERTICAL;
     ECO_LOCAL static const AutoPtr<ArrayOf<Int32> > RULES_HORIZONTAL;

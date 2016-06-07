@@ -275,6 +275,7 @@ Boolean Utils::UpdateTileToSpecificActivityFromMetaDataOrRemove(
                 // meta-data is found
                 if (TextUtils::IsEmpty(title)) {
                     AutoPtr<ICharSequence> seq;
+                    resolveInfo->LoadLabel(pm, (ICharSequence**)&seq);
                     seq->ToString(&title);
                 }
 
@@ -875,7 +876,7 @@ AutoPtr<IIntent> Utils::OnBuildStartFragmentIntent(
     intent->PutExtra(SettingsActivity::EXTRA_SHOW_FRAGMENT_ARGUMENTS, args);
     intent->PutExtra(SettingsActivity::EXTRA_SHOW_FRAGMENT_TITLE_RESID, titleResId);
     intent->PutExtra(SettingsActivity::EXTRA_SHOW_FRAGMENT_TITLE, title);
-    intent->PutExtra(SettingsActivity::EXTRA_SHOW_FRAGMENT_AS_SHORTCUT, isShortcut);
+    intent->PutBooleanExtra(SettingsActivity::EXTRA_SHOW_FRAGMENT_AS_SHORTCUT, isShortcut);
     return intent;
 }
 

@@ -138,7 +138,7 @@ private:
     AutoPtr<IList> mPrintServices;
     AutoPtr<IList> mImeServices;
 
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<MyHandler> mHandler;
 
     AutoPtr<IContentObserver> mUserDictionaryContentObserver;
 

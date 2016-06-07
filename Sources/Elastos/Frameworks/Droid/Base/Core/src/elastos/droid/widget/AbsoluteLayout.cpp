@@ -169,9 +169,12 @@ ECode AbsoluteLayout::GenerateDefaultLayoutParams(
 }
 
 //@Override
-Boolean AbsoluteLayout::ShouldDelayChildPressedState()
+ECode AbsoluteLayout::ShouldDelayChildPressedState(
+    /* [out] */ Boolean* res)
 {
-    return FALSE;
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
 }
 
 ECode AbsoluteLayout::OnLayout(
