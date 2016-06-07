@@ -7,10 +7,10 @@
 #include "elastos/droid/settings/wifi/WpsDialog.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/os/Build.h"
+#include "elastos/droid/R.h"
+#include "../R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
-#include "../R.h"
-#include "elastos/droid/R.h"
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IAlertDialog;
@@ -431,6 +431,8 @@ ECode WifiSettings::constructor()
     mReceiver = new MyBroadcastReceiver(this);
 
     mScanner = new Scanner(this);
+    mScanner->constructor();
+
     return NOERROR;
 }
 
@@ -1146,7 +1148,7 @@ AutoPtr<ITextView> WifiSettings::InitEmptyView()
     AutoPtr<ITextView> emptyView = ITextView::Probe(view);
     AutoPtr<IListView> listView;
     GetListView((IListView**)&listView);
-    IAdapterView::Probe(listView)->SetEmptyView(IView::Probe(emptyView));
+    IAdapterView::Probe(listView)->SetEmptyView(view);
     return emptyView;
 }
 

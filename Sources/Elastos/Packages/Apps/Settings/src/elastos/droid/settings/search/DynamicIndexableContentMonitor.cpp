@@ -125,6 +125,7 @@ DynamicIndexableContentMonitor::DynamicIndexableContentMonitor()
     CArrayList::New((IList**)&mImeServices);
 
     mHandler = new MyHandler(this);
+    mHandler->constructor();
 
     mUserDictionaryContentObserver = new UserDictionaryContentObserver(mHandler, this);
 }

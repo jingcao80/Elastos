@@ -129,6 +129,7 @@ WifiEnabler::WifiEnabler(
     CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&mConnected);
     mReceiver = new InitBroadcastReceiver(this);
     mHandler = new InitHandler(this);
+    mHandler->constructor();
 
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);

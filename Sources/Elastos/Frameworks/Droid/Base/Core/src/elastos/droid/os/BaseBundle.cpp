@@ -22,6 +22,8 @@ using Elastos::Core::CFloat;
 using Elastos::Core::CDouble;
 using Elastos::Core::CString;
 using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IList;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::IMapEntry;
 using Elastos::Droid::Utility::CArrayMap;
@@ -1465,10 +1467,22 @@ ECode BaseBundle::WriteValue(
         }
         return NOERROR;
     }
-    // else if (v instanceof List) {
-    //     writeInt(VAL_LIST);
+    else if (IList::Probe(obj) != NULL) {
+        dest->WriteInt32(VAL_LIST);
     //     writeList((List) v);
-    // }
+        AutoPtr<IList> list = IList::Probe(obj);
+        Int32 N;
+        list->GetSize(&N);
+        dest->WriteInt32(N);
+        Int32 i = 0;
+        while (i < N) {
+            AutoPtr<IInterface> elem;
+            list->Get(i, (IInterface**)&elem);
+            WriteValue(dest, elem);
+            i++;
+        }
+        return NOERROR;
+    }
     else if (ISparseArray::Probe(obj) != NULL) {
         dest->WriteInt32(VAL_SPARSEARRAY);
         // WriteSparseArray((SparseArray) v);
@@ -1622,8 +1636,23 @@ AutoPtr<IInterface> BaseBundle::ReadValue(
         CString::New(v, (ICharSequence**)&obj);
         return obj;
     }
-    // case VAL_LIST:
-    //     return readArrayList(loader);
+    case VAL_LIST:{
+        Int32 N;
+        source->ReadInt32(&N);
+        if (N < 0) {
+            return NULL;
+        }
+
+        AutoPtr<IList> list;
+        CArrayList::New(N, (IList**)&list);
+        while (N > 0) {
+            AutoPtr<IInterface> value = ReadValue(source);
+            list->Add(value);
+            N--;
+        }
+        return list;
+    }
+
     // case VAL_BOOLEANARRAY:
     //     return createBooleanArray();
     // case VAL_BYTEARRAY:

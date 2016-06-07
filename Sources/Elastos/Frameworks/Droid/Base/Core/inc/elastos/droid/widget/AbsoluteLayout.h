@@ -153,7 +153,8 @@ public:
         /* [in] */ Int32 heightMeasureSpec);
 
     //@Override
-    CARAPI_(Boolean) ShouldDelayChildPressedState();
+    CARAPI ShouldDelayChildPressedState(
+        /* [out] */ Boolean* res);
 
     /**
      * Returns a set of layout parameters with a width of
