@@ -43,6 +43,8 @@ private:
     class Receiver: public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("AirplaneModeTile.Receiver")
+
         Receiver(
             /* [in] */ AirplaneModeTile* host);
 
@@ -50,13 +52,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("AirplaneModeTile.Receiver");
-            return NOERROR;
-        }
 
     private:
         AirplaneModeTile* mHost;

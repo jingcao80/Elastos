@@ -84,6 +84,12 @@ ECode CInnerReceiver::PerformReceive(
     return NOERROR;
 }
 
+ECode CInnerReceiver::ToString(
+    /* [out] */ String* str)
+{
+    return Object::ToString(str);
+}
+
 } // namespace App
 } // namespace Droid
 } // namespace Elastos

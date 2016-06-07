@@ -62,6 +62,37 @@ class RecentsActivity
     , public IDebugOverlayViewCallbacks
     , public IRecentsActivity
 {
+public:
+    class ServiceBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        CARAPI constructor(
+            /* [in] */ IRecentsActivity* host);
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        RecentsActivity* mHost;
+    };
+
+    class SystemBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        CARAPI constructor(
+            /* [in] */ IRecentsActivity* host);
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        RecentsActivity* mHost;
+    };
+
 private:
     /**
      * A common Runnable to finish Recents either by calling finish() (with a custom animation) or
@@ -94,55 +125,11 @@ private:
         RecentsActivity* mHost;
     };
 
-    class BR1
-        : public BroadcastReceiver
-    {
-    public:
-        BR1(
-            /* [in] */ RecentsActivity* host);
-
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("RecentsActivity.BR1");
-            return NOERROR;
-        }
-
-    private:
-        RecentsActivity* mHost;
-    };
-
-    class BR2
-        : public BroadcastReceiver
-    {
-    public:
-        BR2(
-            /* [in] */ RecentsActivity* host);
-
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("RecentsActivity.BR2");
-            return NOERROR;
-        }
-
-    private:
-        RecentsActivity* mHost;
-    };
-
-    class MR
+    class OnDebugModeTriggeredRunnable
         : public Runnable
     {
     public:
-        MR(
+        OnDebugModeTriggeredRunnable(
             /* [in] */ RecentsActivity* host);
 
         CARAPI Run();
@@ -151,7 +138,7 @@ private:
         RecentsActivity* mHost;
     };
 
-    class MRunnable
+    class AppWidgetHostCallbackRunnable
         : public Runnable
     {
     public:
@@ -159,7 +146,7 @@ private:
          * Creates a finish runnable that starts the specified intent, using the given
          * ActivityOptions.
          */
-        MRunnable(
+        AppWidgetHostCallbackRunnable(
             /* [in] */ IWeakReference* callback,
             /* [in] */ RecentsActivity* host);
 
@@ -305,12 +292,12 @@ public:
     /**
      * Broadcast receiver to handle messages from AlternateRecentsComponent.
      */
-    AutoPtr<BroadcastReceiver> mServiceBroadcastReceiver;
+    AutoPtr<IBroadcastReceiver> mServiceBroadcastReceiver;
 
     /**
      * Broadcast receiver to handle messages from the system
      */
-    AutoPtr<BroadcastReceiver> mSystemBroadcastReceiver;
+    AutoPtr<IBroadcastReceiver> mSystemBroadcastReceiver;
 
     /**
      * A custom debug trigger to listen for a debug key chord.

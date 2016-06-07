@@ -477,7 +477,7 @@ ECode CUninstallerActivity::StartUninstallProgress()
     Boolean resTmp = FALSE;
     intent->GetBooleanExtra(IIntent::EXTRA_RETURN_RESULT, FALSE, &resTmp);
     if (resTmp) {
-        newIntent->PutExtra(IIntent::EXTRA_RETURN_RESULT, TRUE);
+        newIntent->PutBooleanExtra(IIntent::EXTRA_RETURN_RESULT, TRUE);
         newIntent->AddFlags(IIntent::FLAG_ACTIVITY_FORWARD_RESULT);
     }
 

@@ -104,14 +104,14 @@ void Console::LogError(
     AutoPtr<IToast> toast;
     toastHelper->MakeText(condition, cs, IToast::LENGTH_SHORT, (IToast**)&toast);
     toast->Show();
-    Logger::E("Recents%s", msg.string());
+    Logger::E("Recents", msg.string());
 }
 
 void Console::LogRawError(
     /* [in] */ const String& msg,
     /* [in] */ ECode e)
 {
-    Logger::E("Recents%s %08x", msg.string(), e);
+    Logger::E("Recents", "%s, ec=%08x", msg.string(), e);
 }
 
 void Console::LogDivider(

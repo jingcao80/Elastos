@@ -201,6 +201,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CKeyguardViewMediator.MyBroadcastReceiver")
+
         MyBroadcastReceiver(
             /* [in] */ CKeyguardViewMediator* host);
 
@@ -208,13 +210,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("CKeyguardViewMediator.MyBroadcastReceiver");
-            return NOERROR;
-        }
 
     private:
         CKeyguardViewMediator* mHost;

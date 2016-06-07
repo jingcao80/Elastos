@@ -72,7 +72,7 @@ ECode MtpReceiver::HandleUsbState(
         assert(0 && "TODO");
         // CIntent::New(context, ECLSID_CMtpService, (IIntent**)&temp);
         if (ptpEnabled) {
-            temp->PutExtra(IUsbManager::USB_FUNCTION_PTP, TRUE);
+            temp->PutBooleanExtra(IUsbManager::USB_FUNCTION_PTP, TRUE);
         }
         AutoPtr<IComponentName> cn;
         context->StartService(temp, (IComponentName**)&cn);

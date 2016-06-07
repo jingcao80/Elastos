@@ -41,6 +41,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("PowerNotificationWarnings.Receiver")
+
         Receiver(
             /* [in] */ PowerNotificationWarnings* host);
 
@@ -50,13 +52,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("PowerNotificationWarnings.Receiver");
-            return NOERROR;
-        }
 
     private:
         PowerNotificationWarnings* mHost;

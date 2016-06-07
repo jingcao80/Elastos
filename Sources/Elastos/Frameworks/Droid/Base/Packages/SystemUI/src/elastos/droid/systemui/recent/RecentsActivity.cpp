@@ -26,7 +26,8 @@ namespace Droid {
 namespace SystemUI {
 namespace Recent {
 
-static const String TAG("RecentsActivity");
+static const String TAG("Recent::RecentsActivity");
+
 //-------------------------------------------------------------
 // RecentsActivity::IntentReceiver
 //-------------------------------------------------------------
@@ -40,10 +41,9 @@ ECode RecentsActivity::IntentReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    Logger::I(TAG, " IntentReceiver::OnReceive: %s", TO_CSTR(intent));
-
     String action;
     intent->GetAction(&action);
+    Logger::I(TAG, " >> IntentReceiver: %s", action.string());
     if (IRecentsActivity::CLOSE_RECENTS_INTENT.Equals(action)) {
         Boolean isShowing;
         mHost->mRecentsPanel->IsShowing(&isShowing);
@@ -109,11 +109,11 @@ RecentsActivity::RecentsActivity()
     : mShowing(FALSE)
     , mForeground(FALSE)
 {
-    mIntentReceiver = new IntentReceiver(this);
 }
 
 ECode RecentsActivity::constructor()
 {
+    mIntentReceiver = new IntentReceiver(this);
     return Activity::constructor();
 }
 
@@ -169,6 +169,8 @@ ECode RecentsActivity::ForceOpaqueBackground(
 
 ECode RecentsActivity::OnStart()
 {
+    Logger::I(TAG, " >> OnStart");
+
     // Hide wallpaper if it's not a static image
     Boolean b;
     ForceOpaqueBackground(this, &b);
@@ -201,7 +203,6 @@ ECode RecentsActivity::OnBackPressed()
 
 ECode RecentsActivity::DismissAndGoHome()
 {
-    Logger::I(TAG, " >>> RecentsActivity::DismissAndGoHome");
     if (mRecentsPanel != NULL) {
         AutoPtr<IIntent> homeIntent;
         CIntent::New(IIntent::ACTION_MAIN, NULL, (IIntent**)&homeIntent);
@@ -218,7 +219,6 @@ ECode RecentsActivity::DismissAndGoHome()
 
 ECode RecentsActivity::DismissAndGoBack()
 {
-    Logger::I(TAG, " >>> RecentsActivity::DismissAndGoBack");
     if (mRecentsPanel != NULL) {
         AutoPtr<IInterface> amObj;
         GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&amObj);
@@ -255,7 +255,8 @@ ECode RecentsActivity::DismissAndGoBack()
 ECode RecentsActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
-    Logger::I(TAG, " >>> RecentsActivity::OnCreate");
+    Logger::I(TAG, " >> OnCreate: %s", TO_CSTR(savedInstanceState));
+
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);
     window->AddPrivateFlags(IWindowManagerLayoutParams::PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR);
@@ -300,6 +301,7 @@ ECode RecentsActivity::OnSaveInstanceState(
     Boolean isShowing;
     mRecentsPanel->IsShowing(&isShowing);
     outState->PutBoolean(WAS_SHOWING, isShowing);
+    Logger::I(TAG, " >> OnSaveInstanceState: %s, value:%d", WAS_SHOWING.string(), isShowing);
     return NOERROR;
 }
 
@@ -314,6 +316,7 @@ ECode RecentsActivity::OnDestroy()
 ECode RecentsActivity::OnNewIntent(
     /* [in] */ IIntent* intent)
 {
+    Logger::I(TAG, " >> OnNewIntent: %s", TO_CSTR(intent));
     HandleIntent(intent, TRUE);
     return NOERROR;
 }
@@ -329,7 +332,6 @@ void RecentsActivity::HandleIntent(
     intent->GetAction(&action);
     if (TOGGLE_RECENTS_INTENT.Equals(action)) {
         if (mRecentsPanel != NULL) {
-
             Boolean isShowing;
             mRecentsPanel->IsShowing(&isShowing);
             if (isShowing) {
@@ -362,6 +364,7 @@ ECode RecentsActivity::IsActivityShowing(
     *result = mShowing;
     return NOERROR;
 }
+
 
 } // namespace Recent
 } // namespace SystemUI

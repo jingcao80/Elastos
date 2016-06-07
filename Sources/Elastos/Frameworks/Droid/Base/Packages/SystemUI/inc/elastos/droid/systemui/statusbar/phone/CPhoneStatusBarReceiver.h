@@ -15,7 +15,8 @@ namespace Phone {
 
 class CPhoneStatusBar;
 
-CarClass(CPhoneStatusBarReceiver), public BroadcastReceiver
+CarClass(CPhoneStatusBarReceiver)
+    , public BroadcastReceiver
 {
 public:
     CAR_OBJECT_DECL()

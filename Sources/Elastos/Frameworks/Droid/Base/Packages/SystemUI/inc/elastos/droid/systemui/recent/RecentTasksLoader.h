@@ -213,7 +213,6 @@ private:
         /* [in] */ IBlockingQueue* tasksWaitingForThumbnails);
 
 private:
-    static const String TAG;
     static const Boolean DEBUG;
 
     static const Int32 DISPLAY_TASKS;

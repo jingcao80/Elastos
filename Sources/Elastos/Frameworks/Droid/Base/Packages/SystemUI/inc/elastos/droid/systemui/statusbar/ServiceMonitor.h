@@ -90,22 +90,18 @@ public:
         ServiceMonitor* mHost;
     };
 
-    class MonitorBroadcastReceiver: public BroadcastReceiver
+    class MonitorBroadcastReceiver
+        : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("ServiceMonitor::MonitorBroadcastReceiver")
+
         MonitorBroadcastReceiver(
             /* [in] */ ServiceMonitor* host);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("ServiceMonitor.MonitorBroadcastReceiver");
-            return NOERROR;
-        }
 
     private:
         ServiceMonitor* mHost;

@@ -14,7 +14,8 @@ namespace Policy {
 
 class CClock;
 
-CarClass(CClockIntentReceiver), public BroadcastReceiver
+CarClass(CClockIntentReceiver)
+    , public BroadcastReceiver
 {
 public:
     CAR_OBJECT_DECL()

@@ -14,7 +14,8 @@ namespace Policy {
 
 class LocationControllerImpl;
 
-CarClass(CLocationControllerBroadcastReceiver), public BroadcastReceiver
+CarClass(CLocationControllerBroadcastReceiver)
+    , public BroadcastReceiver
 {
 public:
     CAR_OBJECT_DECL()

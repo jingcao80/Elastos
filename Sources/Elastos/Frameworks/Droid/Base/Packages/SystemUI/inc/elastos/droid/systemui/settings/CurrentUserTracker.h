@@ -19,6 +19,9 @@ class CurrentUserTracker
     : public BroadcastReceiver
 {
 public:
+
+    TO_STRING_IMPL("CurrentUserTracker")
+
     CurrentUserTracker(
         /* [in] */ IContext* context);
 
@@ -37,13 +40,6 @@ public:
         /* [in] */ Int32 newUserId) = 0;
 
     CARAPI_(Boolean) IsCurrentUserOwner();
-
-    CARAPI ToString(
-        /* [out] */ String* str)
-    {
-        *str = String("CurrentUserTracker");
-        return NOERROR;
-    }
 
 private:
     AutoPtr<IContext> mContext;

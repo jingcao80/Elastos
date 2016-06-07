@@ -20,10 +20,16 @@ namespace Recents {
 namespace Views {
 
 /* An outline provider that has a clip and outline that can be animated. */
-class AnimateableViewBounds : public ViewOutlineProvider
+class AnimateableViewBounds
+    : public ViewOutlineProvider
+    , public IAnimateableViewBounds
 {
 public:
-    AnimateableViewBounds(
+    CAR_INTERFACE_DECL()
+
+    AnimateableViewBounds();
+
+    CARAPI constructor(
         /* [in] */ ITaskView* source,
         /* [in] */ Int32 cornerRadius);
 
@@ -43,8 +49,11 @@ public:
         /* [in] */ IAnimatorUpdateListener* updateListener);
 
     /** Sets the top clip. */
-    CARAPI_(void) SetClipTop(
+    CARAPI SetClipTop(
         /* [in] */ Int32 top);
+
+    CARAPI GetClipTop(
+        /* [out] */ Int32* top);
 
     /** Returns the top clip. */
     CARAPI_(Int32) GetClipTop();
@@ -55,8 +64,11 @@ public:
         /* [in] */ Int32 duration);
 
     /** Sets the right clip. */
-    CARAPI_(void) SetClipRight(
+    CARAPI SetClipRight(
         /* [in] */ Int32 right);
+
+    CARAPI GetClipRight(
+        /* [out] */ Int32* right);
 
     /** Returns the right clip. */
     CARAPI_(Int32) GetClipRight();
@@ -67,8 +79,11 @@ public:
         /* [in] */ Int32 duration);
 
     /** Sets the bottom clip. */
-    CARAPI_(void) SetClipBottom(
+    CARAPI SetClipBottom(
         /* [in] */ Int32 bottom);
+
+    CARAPI GetClipBottom(
+        /* [in] */ Int32* bottom);
 
     /** Returns the bottom clip. */
     CARAPI_(Int32) GetClipBottom();

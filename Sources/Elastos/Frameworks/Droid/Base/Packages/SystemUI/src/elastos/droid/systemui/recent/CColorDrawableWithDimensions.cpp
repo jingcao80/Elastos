@@ -6,6 +6,7 @@ namespace SystemUI {
 namespace Recent {
 
 CAR_OBJECT_IMPL(CColorDrawableWithDimensions)
+
 CColorDrawableWithDimensions::CColorDrawableWithDimensions()
     : mWidth(0)
     , mHeight(0)

@@ -152,22 +152,22 @@ ECode RecentsHorizontalScrollView::AdapterDataSetObserver::OnInvalidated()
 //============================================================================================
 // RecentsHorizontalScrollView
 //============================================================================================
-const String RecentsHorizontalScrollView::TAG("RecentsPanelView"); // = RecentsPanelView.TAG;
+const String RecentsHorizontalScrollView::TAG("RecentsHorizontalScrollView"); // = RecentsPanelView.TAG;
 const Boolean RecentsHorizontalScrollView::DEBUG = FALSE; // = RecentsPanelView.DEBUG;
 
-// CAR_INTERFACE_IMPL_2(RecentsHorizontalScrollView, HorizontalScrollView, ISwipeHelperCallback, IRecentsScrollView)
-CAR_INTERFACE_IMPL_3(RecentsHorizontalScrollView, FrameLayout, IHorizontalScrollView, ISwipeHelperCallback, IRecentsScrollView)
+CAR_INTERFACE_IMPL_2(RecentsHorizontalScrollView, HorizontalScrollView, ISwipeHelperCallback, IRecentsScrollView)
 
-RecentsHorizontalScrollView::RecentsHorizontalScrollView(
-    /* [in] */ IContext* ctx,
-    /* [in] */ IAttributeSet* attrs)
+RecentsHorizontalScrollView::RecentsHorizontalScrollView()
     : mLastScrollPosition(0)
     , mCallback(NULL)
     , mNumItemsInOneScreenful(0)
+{}
+
+ECode RecentsHorizontalScrollView::constructor(
+    /* [in] */ IContext* ctx,
+    /* [in] */ IAttributeSet* attrs)
 {
-    assert(0 && "TODO");
-    //TODO
-    // HorizontalScrollView::constructor(ctx, attrs, 0);
+    HorizontalScrollView::constructor(ctx, attrs, 0);
 
     CSwipeHelper::New(ISwipeHelper::Y, this, ctx, (ISwipeHelper**)&mSwipeHelper);
 
@@ -307,14 +307,15 @@ ECode RecentsHorizontalScrollView::RemoveViewInLayout(
     return DismissChild(view);
 }
 
-Boolean RecentsHorizontalScrollView::OnInterceptTouchEvent(
-    /* [in] */ IMotionEvent* ev)
+ECode RecentsHorizontalScrollView::OnInterceptTouchEvent(
+    /* [in] */ IMotionEvent* ev,
+    /* [out] */ Boolean* result)
 {
-    if (DEBUG) Logger::V(TAG, "onInterceptTouchEvent()");
+    VALIDATE_NOT_NULL(result)
     Boolean b1, b2;
     mSwipeHelper->OnInterceptTouchEvent(ev, &b1);
-    b2 = this->OnInterceptTouchEvent(ev);
-    return b1 || b2;
+    *result = b1 || (HorizontalScrollView::OnInterceptTouchEvent(ev, &b2), b2);
+    return NOERROR;
 }
 
 ECode RecentsHorizontalScrollView::OnTouchEvent(
@@ -324,8 +325,7 @@ ECode RecentsHorizontalScrollView::OnTouchEvent(
     VALIDATE_NOT_NULL(result)
     Boolean b1, b2;
     mSwipeHelper->OnTouchEvent(ev, &b1);
-    this->OnTouchEvent(ev, &b2);
-    *result = b1 || b2;
+    *result = b1 || (HorizontalScrollView::OnTouchEvent(ev, &b2), b2);
     return NOERROR;
 }
 

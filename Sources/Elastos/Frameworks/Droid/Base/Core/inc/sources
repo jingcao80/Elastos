@@ -198,6 +198,7 @@ EXPORT_HEADERS += elastos/droid/widget/EditText.h
 EXPORT_HEADERS += elastos/droid/widget/Filter.h
 EXPORT_HEADERS += elastos/droid/widget/LinearLayout.h
 EXPORT_HEADERS += elastos/droid/widget/FrameLayout.h
+EXPORT_HEADERS += elastos/droid/widget/HorizontalScrollView.h
 EXPORT_HEADERS += elastos/droid/widget/ImageView.h
 EXPORT_HEADERS += elastos/droid/widget/ImageButton.h
 EXPORT_HEADERS += elastos/droid/widget/Button.h

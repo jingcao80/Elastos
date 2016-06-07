@@ -1823,7 +1823,7 @@ void SyncManager::SyncHandler::SendSyncStateIntent()
     CIntent::New(IIntent::ACTION_SYNC_STATE_CHANGED, (IIntent**)&syncStateIntent);
     syncStateIntent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
     syncStateIntent->PutExtra(String("active"), mHost->mNeedSyncActiveNotification);
-    syncStateIntent->PutExtra(String("failing"), FALSE);
+    syncStateIntent->PutBooleanExtra(String("failing"), FALSE);
     mHost->mContext->SendBroadcastAsUser(syncStateIntent, UserHandle::OWNER);
 }
 

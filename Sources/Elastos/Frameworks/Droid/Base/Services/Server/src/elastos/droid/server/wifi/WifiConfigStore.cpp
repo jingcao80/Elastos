@@ -3446,7 +3446,7 @@ void WifiConfigStore::SendConfiguredNetworksChangedBroadcast(
     AutoPtr<IIntent> intent;
     CIntent::New(IWifiManager::CONFIGURED_NETWORKS_CHANGED_ACTION, (IIntent**)&intent);
     intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-    intent->PutExtra(IWifiManager::EXTRA_MULTIPLE_NETWORKS_CHANGED, FALSE);
+    intent->PutBooleanExtra(IWifiManager::EXTRA_MULTIPLE_NETWORKS_CHANGED, FALSE);
     intent->PutExtra(IWifiManager::EXTRA_WIFI_CONFIGURATION, IParcelable::Probe(network));
     intent->PutExtra(IWifiManager::EXTRA_CHANGE_REASON, reason);
     AutoPtr<IUserHandleHelper> uhHelper;
@@ -3462,7 +3462,7 @@ void WifiConfigStore::SendConfiguredNetworksChangedBroadcast()
     AutoPtr<IIntent> intent;
     CIntent::New(IWifiManager::CONFIGURED_NETWORKS_CHANGED_ACTION, (IIntent**)&intent);
     intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-    intent->PutExtra(IWifiManager::EXTRA_MULTIPLE_NETWORKS_CHANGED, TRUE);
+    intent->PutBooleanExtra(IWifiManager::EXTRA_MULTIPLE_NETWORKS_CHANGED, TRUE);
 
     AutoPtr<IUserHandleHelper> uhHelper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);

@@ -162,6 +162,8 @@ private:
     class ReturnAllViewsToPoolRunnable : public Runnable
     {
     public:
+        TO_STRING_IMPL("TaskStackView::ReturnAllViewsToPoolRunnable")
+
         ReturnAllViewsToPoolRunnable(
             /* [in] */ TaskStackView* host);
 
@@ -200,6 +202,8 @@ private:
     class LastDecrementRunnable : public Runnable
     {
     public:
+        TO_STRING_IMPL("TaskStackView::LastDecrementRunnable")
+
         LastDecrementRunnable(
             /* [in] */ TaskStackView* host);
 
@@ -212,6 +216,8 @@ private:
     class DeleteTaskRunnable : public Runnable
     {
     public:
+        TO_STRING_IMPL("TaskStackView::DeleteTaskRunnable")
+
         DeleteTaskRunnable(
             /* [in] */ TaskStackView* host,
             /* [in] */ Task* t);
@@ -224,9 +230,9 @@ private:
     };
 
 public:
-    TaskStackView();
-
     CAR_INTERFACE_DECL()
+
+    TaskStackView();
 
     CARAPI constructor(
         /* [in] */ IContext* context,

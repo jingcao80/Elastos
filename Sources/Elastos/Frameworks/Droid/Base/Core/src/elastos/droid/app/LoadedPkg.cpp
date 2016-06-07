@@ -112,9 +112,8 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
         mCurIntent->GetInt32Extra(String("seq"), -1, &seq);
         String action;
         mCurIntent->GetAction(&action);
-        Slogger::I(CActivityThread::TAG, "Dispatching broadcast %s seq=%d to %s",
-            action.string(), seq, TO_CSTR(mHost->mReceiver));
-        Slogger::I(CActivityThread::TAG, "  mRegistered=%d mOrderedHint=%d", mHost->mRegistered, ordered);
+        Slogger::I(CActivityThread::TAG, "Dispatching broadcast (%s seq=%d registered=%d ordered=%d) to %s",
+            action.string(), seq, mHost->mRegistered, ordered, TO_CSTR(mHost->mReceiver));
     }
 
     AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
@@ -124,7 +123,7 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
     if (receiver == NULL || mHost->mForgotten) {
         if (mHost->mRegistered && ordered) {
             if (CActivityThread::DEBUG_BROADCAST) {
-                Slogger::I(CActivityThread::TAG, "Finishing NULL broadcast to %d", mHost->mReceiver.Get());
+                Slogger::I(CActivityThread::TAG, "Finishing NULL broadcast to %s", TO_CSTR(mHost->mReceiver));
             }
             SendFinished(mgr);
         }
@@ -145,14 +144,14 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
     if (FAILED(ec)) {
         if (mHost->mRegistered && ordered) {
             if (CActivityThread::DEBUG_BROADCAST) {
-                Slogger::I(CActivityThread::TAG, "Finishing failed broadcast to %p", mHost->mReceiver.Get());
+                Slogger::I(CActivityThread::TAG, "Finishing failed broadcast to %s", TO_CSTR(mHost->mReceiver));
             }
 
             SendFinished(mgr);
         }
         Boolean result;
-        if (mHost->mInstrumentation == NULL ||
-                (mHost->mInstrumentation->OnException(mHost->mReceiver, ec, &result), !result)) {
+        if (mHost->mInstrumentation == NULL
+            || (mHost->mInstrumentation->OnException(mHost->mReceiver, ec, &result), !result)) {
             // Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             Slogger::E(CActivityThread::TAG, "Error receiving broadcast %s in %s ec: 0x%08x",
                 TO_CSTR(intent), TO_CSTR(mHost->mReceiver), ec);
@@ -239,13 +238,13 @@ ECode LoadedPkg::ReceiverDispatcher::Validate(
    /* [in] */ IHandler* activityThread)
 {
     if (mContext.Get() != context) {
-        Slogger::E(LoadedPkg::TAG, "Receiver %p registered with differing Context (was %p now %p)"
-                , mReceiver.Get(), mContext.Get(), context);
+        Slogger::E(LoadedPkg::TAG, "Receiver %s registered with differing Context (was %s now %s)",
+            TO_CSTR(mReceiver), TO_CSTR(mContext), TO_CSTR(context));
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (mActivityThread.Get() != activityThread) {
-        Slogger::E(LoadedPkg::TAG, "Receiver %p registered with differing handler (was %p now %p)"
-                , mReceiver.Get(), mActivityThread.Get(), activityThread);
+        Slogger::E(LoadedPkg::TAG, "Receiver %s registered with differing handler (was %s now %s)",
+            TO_CSTR(mReceiver), TO_CSTR(mActivityThread), TO_CSTR(activityThread));
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;
@@ -281,8 +280,8 @@ void LoadedPkg::ReceiverDispatcher::PerformReceive(
         intent->GetInt32Extra(String("seq"), -1, &seq);
         String action;
         intent->GetAction(&action);
-        Slogger::I(CActivityThread::TAG, "Enqueueing broadcast %s seq=%d to %p"
-                , action.string(),  seq, mReceiver.Get());
+        Slogger::I(CActivityThread::TAG, "Enqueueing broadcast %s seq=%d to %s",
+            action.string(),  seq, TO_CSTR(mReceiver));
     }
 
     AutoPtr<Args> args = new Args();
@@ -293,7 +292,7 @@ void LoadedPkg::ReceiverDispatcher::PerformReceive(
         if (mRegistered && ordered) {
             AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
             if (CActivityThread::DEBUG_BROADCAST) {
-                Slogger::I(CActivityThread::TAG, "Finishing sync broadcast to %p", mReceiver.Get());
+                Slogger::I(CActivityThread::TAG, "Finishing sync broadcast to %s", TO_CSTR(mReceiver));
             }
             args->SendFinished(mgr);
         }

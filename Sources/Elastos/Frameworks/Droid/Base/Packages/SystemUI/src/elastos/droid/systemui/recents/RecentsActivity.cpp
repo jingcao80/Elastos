@@ -1,8 +1,6 @@
 #include "elastos/droid/systemui/recents/RecentsActivity.h"
-#include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Widget.h"
-#include "Elastos.CoreLibrary.Core.h"
-#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/systemui/recents/CRecentsActivitySystemBroadcastReceiver.h"
+#include "elastos/droid/systemui/recents/CRecentsActivityServiceBroadcastReceiver.h"
 #include "elastos/droid/systemui/recents/Constants.h"
 #include "elastos/droid/systemui/recents/misc/SystemServicesProxy.h"
 #include "elastos/droid/systemui/recents/misc/Utilities.h"
@@ -12,6 +10,11 @@
 #include "../R.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
 using Elastos::Droid::App::CActivityOptionsHelper;
 using Elastos::Droid::App::IActivityOptions;
@@ -54,11 +57,14 @@ using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Recents {
+
+static const String TAG("SystemUI::Recents::RecentsActivity");
 
 //---------------------------------------------------------------------
 // RecentsActivity::FinishRecentsRunnable
@@ -88,52 +94,52 @@ ECode RecentsActivity::FinishRecentsRunnable::Run()
         if (mLaunchOpts != NULL) {
             AutoPtr<IBundle> bundle;
             mLaunchOpts->ToBundle((IBundle**)&bundle);
-            (IActivity*)mHost->StartActivityAsUser(mLaunchIntent, bundle, current);
+            mHost->StartActivityAsUser(mLaunchIntent, bundle, current);
         }
         else {
-            (IActivity*)mHost->StartActivityAsUser(mLaunchIntent, current);
+            mHost->StartActivityAsUser(mLaunchIntent, current);
         }
     }
     else {
-        (IActivity*)mHost->Finish();
-        (IActivity*)mHost->OverridePendingTransition(R::anim::recents_to_launcher_enter,
+        mHost->Finish();
+        mHost->OverridePendingTransition(R::anim::recents_to_launcher_enter,
             R::anim::recents_to_launcher_exit);
     }
     return NOERROR;
 }
 
 //---------------------------------------------------------------------
-// RecentsActivity::BR1
+// RecentsActivity::ServiceBroadcastReceiver
 //----------------------------------------------------------------------
 
-RecentsActivity::BR1::BR1(
-    /* [in] */ RecentsActivity* host)
-    : mHost(host)
-{}
+ECode RecentsActivity::ServiceBroadcastReceiver::constructor(
+    /* [in] */ IRecentsActivity* host)
+{
+    mHost = (RecentsActivity*)host;
+    return BroadcastReceiver::constructor();
+}
 
-ECode RecentsActivity::BR1::OnReceive(
+ECode RecentsActivity::ServiceBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
     String action;
     intent->GetAction(&action);
+    Logger::I(TAG, " >> ServiceBroadcastReceiver OnReceive: %s", action.string());
+
     if (action.Equals(IAlternateRecentsComponent::ACTION_HIDE_RECENTS_ACTIVITY)) {
         // Mark Recents as no longer visible
         AlternateRecentsComponent::NotifyVisibilityChanged(FALSE);
-        Boolean b1, b2;
-        intent->GetBooleanExtra(IAlternateRecentsComponent::EXTRA_TRIGGERED_FROM_ALT_TAB,
-            FALSE, &b1);
-        intent->GetBooleanExtra(IAlternateRecentsComponent::EXTRA_TRIGGERED_FROM_HOME_KEY,
-            FALSE, &b2);
-        if (b1) {
+        Boolean bval;
+        if (intent->GetBooleanExtra(
+            IAlternateRecentsComponent::EXTRA_TRIGGERED_FROM_ALT_TAB, FALSE, &bval), bval) {
             // If we are hiding from releasing Alt-Tab, dismiss Recents to the focused app
-            Boolean b;
-            mHost->DismissRecentsToFocusedTaskOrHome(FALSE, &b);
+            mHost->DismissRecentsToFocusedTaskOrHome(FALSE, &bval);
         }
-        else if (b2) {
+        else if (intent->GetBooleanExtra(
+            IAlternateRecentsComponent::EXTRA_TRIGGERED_FROM_HOME_KEY, FALSE, &bval), bval) {
             // Otherwise, dismiss Recents to Home
-            Boolean b;
-            mHost->DismissRecentsToHome(TRUE, &b);
+            mHost->DismissRecentsToHome(TRUE, &bval);
         }
         else {
             // Do nothing, another activity is being launched on top of Recents
@@ -152,28 +158,28 @@ ECode RecentsActivity::BR1::OnReceive(
         mHost->OnEnterAnimationTriggered();
         // Notify the fallback receiver that we have successfully got the broadcast
         // See AlternateRecentsComponent.onAnimationStarted()
-        assert(0);
-        // mHost->SetResultCode(IActivity::RESULT_OK);
+        SetResultCode(IActivity::RESULT_OK);
     }
     return NOERROR;
 }
 
 //---------------------------------------------------------------------
-// RecentsActivity::BR2
+// RecentsActivity::SystemBroadcastReceiver
 //----------------------------------------------------------------------
+ECode RecentsActivity::SystemBroadcastReceiver::constructor(
+    /* [in] */ IRecentsActivity* host)
+{
+    mHost = (RecentsActivity*)host;
+    return BroadcastReceiver::constructor();
+}
 
-RecentsActivity::BR2::BR2(
-    /* [in] */ RecentsActivity* host)
-    : mHost(host)
-{}
-
-ECode RecentsActivity::BR2::OnReceive(
+ECode RecentsActivity::SystemBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
-
 {
     String action;
     intent->GetAction(&action);
+    Logger::I(TAG, " >> SystemBroadcastReceiver OnReceive: %s", action.string());
     if (action.Equals(IIntent::ACTION_SCREEN_OFF)) {
         // When the screen turns off, dismiss Recents to Home
         Boolean b;
@@ -187,31 +193,31 @@ ECode RecentsActivity::BR2::OnReceive(
 }
 
 //---------------------------------------------------------------------
-// RecentsActivity::MR
+// RecentsActivity::OnDebugModeTriggeredRunnable
 //----------------------------------------------------------------------
 
-RecentsActivity::MR::MR(
+RecentsActivity::OnDebugModeTriggeredRunnable::OnDebugModeTriggeredRunnable(
     /* [in] */ RecentsActivity* host)
     : mHost(host)
 {}
 
-ECode RecentsActivity::MR::Run()
+ECode RecentsActivity::OnDebugModeTriggeredRunnable::Run()
 {
     return mHost->OnDebugModeTriggered();
 }
 
 //---------------------------------------------------------------------
-// RecentsActivity::MRunnable
+// RecentsActivity::AppWidgetHostCallbackRunnable
 //----------------------------------------------------------------------
 
-RecentsActivity::MRunnable::MRunnable(
+RecentsActivity::AppWidgetHostCallbackRunnable::AppWidgetHostCallbackRunnable(
     /* [in] */ IWeakReference* callback,
     /* [in] */ RecentsActivity* host)
     : mCallback(callback)
     , mHost(host)
 {}
 
-ECode RecentsActivity::MRunnable::Run()
+ECode RecentsActivity::AppWidgetHostCallbackRunnable::Run()
 {
     AutoPtr<IInterface> obj;
     mCallback->Resolve(EIID_IInterface, (IInterface**)&obj);
@@ -227,7 +233,8 @@ ECode RecentsActivity::MRunnable::Run()
 // RecentsActivity
 //----------------------------------------------------------------------
 
-CAR_INTERFACE_IMPL_4(RecentsActivity, Activity, IRecentsViewCallbacks, IRecentsAppWidgetHostCallbacks, IDebugOverlayViewCallbacks, IRecentsActivity)
+CAR_INTERFACE_IMPL_4(RecentsActivity, Activity, IRecentsViewCallbacks, \
+    IRecentsAppWidgetHostCallbacks, IDebugOverlayViewCallbacks, IRecentsActivity)
 
 RecentsActivity::RecentsActivity()
     : mVisible(FALSE)
@@ -237,13 +244,11 @@ RecentsActivity::RecentsActivity()
 
 ECode RecentsActivity::constructor()
 {
-    AutoPtr<BR1> br1 = new BR1(this);
-    mServiceBroadcastReceiver = (BroadcastReceiver*)br1.Get();
+    Logger::I(TAG, " >>> RecentsActivity::constructor()");
+    CRecentsActivityServiceBroadcastReceiver::New(this, (IBroadcastReceiver**)&mServiceBroadcastReceiver);
+    CRecentsActivitySystemBroadcastReceiver::New(this, (IBroadcastReceiver**)&mSystemBroadcastReceiver);
 
-    AutoPtr<BR2> br2 = new BR2(this);
-    mSystemBroadcastReceiver = (BroadcastReceiver*)br2.Get();
-
-    AutoPtr<MR> mr = new MR(this);
+    AutoPtr<OnDebugModeTriggeredRunnable> mr = new OnDebugModeTriggeredRunnable(this);
     mDebugTrigger = new DebugTrigger((IRunnable*)mr);
     return Activity::constructor();
 }
@@ -251,6 +256,7 @@ ECode RecentsActivity::constructor()
 ECode RecentsActivity::UpdateRecentsTasks(
     /* [in] */ IIntent* launchIntent)
 {
+    Logger::I(TAG, " >>> RecentsActivity::UpdateRecentsTasks()");
     // Update the configuration based on the launch intent
     Boolean fromSearchHome;
     launchIntent->GetBooleanExtra(
@@ -277,7 +283,7 @@ ECode RecentsActivity::UpdateRecentsTasks(
 
     // Load all the tasks
     AutoPtr<RecentsTaskLoader> loader = RecentsTaskLoader::GetInstance();
-    AutoPtr<ISpaceNode> root = loader->Reload((IContext*)this,
+    AutoPtr<ISpaceNode> root = loader->Reload(this,
         Constants::Values::RecentsTaskLoader::PreloadFirstTasksCount,
         mConfig->mLaunchedFromHome);
     AutoPtr<IArrayList> stacks;
@@ -300,7 +306,7 @@ ECode RecentsActivity::UpdateRecentsTasks(
     AutoPtr<IActivityOptionsHelper> aoh;
     CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&aoh);
     AutoPtr<IActivityOptions> ao;
-    aoh->MakeCustomAnimation((IContext*)this,
+    aoh->MakeCustomAnimation(this,
         fromSearchHome ? R::anim::recents_to_search_launcher_enter :
             R::anim::recents_to_launcher_enter,
         fromSearchHome ? R::anim::recents_to_search_launcher_exit :
@@ -391,7 +397,7 @@ ECode RecentsActivity::BindSearchBarAppWidget()
                 AutoPtr<IInteger32> _first = IInteger32::Probe(o1);
                 Int32 first;
                 _first->GetValue(&first);
-                mConfig->UpdateSearchBarAppWidgetId((IContext*)this, first);
+                mConfig->UpdateSearchBarAppWidgetId(this, first);
                 AutoPtr<IInterface> o2;
                 widgetInfo->GetSecond((IInterface**)&o2);
                 AutoPtr<IAppWidgetProviderInfo> second = IAppWidgetProviderInfo::Probe(o2);
@@ -407,7 +413,7 @@ ECode RecentsActivity::AddSearchBarAppWidgetView()
     if (Constants::DebugFlags::App::EnableSearchLayout) {
         Int32 appWidgetId = mConfig->mSearchBarAppWidgetId;
         if (appWidgetId >= 0) {
-            mAppWidgetHost->CreateView((IContext*)this, appWidgetId,
+            mAppWidgetHost->CreateView(this, appWidgetId,
                 mSearchAppWidgetInfo, (IAppWidgetHostView**)&mSearchAppWidgetHostView);
             AutoPtr<IBundle> opts;
             CBundle::New((IBundle**)&opts);
@@ -429,6 +435,7 @@ ECode RecentsActivity::DismissRecentsToFocusedTaskOrHome(
     /* [in] */ Boolean checkFilteredStackState,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, " >>> RecentsActivity::DismissRecentsToFocusedTaskOrHome()");
     VALIDATE_NOT_NULL(result)
     if (mVisible) {
         // If we currently have filtered stacks, then unfilter those first
@@ -465,9 +472,10 @@ ECode RecentsActivity::DismissRecentsToFocusedTaskOrHome(
 ECode RecentsActivity::DismissRecentsToHomeRaw(
     /* [in] */ Boolean animated)
 {
+    Logger::I(TAG, " >>> RecentsActivity::DismissRecentsToHomeRaw()");
     if (animated) {
         AutoPtr<ReferenceCountedTrigger> exitTrigger = new ReferenceCountedTrigger(
-            (IContext*)this, NULL, mFinishLaunchHomeRunnable, NULL);
+            this, NULL, mFinishLaunchHomeRunnable, NULL);
         AutoPtr<ViewAnimation::TaskViewExitContext> tvec =
             new ViewAnimation::TaskViewExitContext(exitTrigger);
         mRecentsView->StartExitToHomeAnimation(tvec);
@@ -482,6 +490,7 @@ ECode RecentsActivity::DismissRecentsToHome(
     /* [in] */ Boolean animated,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, " >>> RecentsActivity::DismissRecentsToHome()");
     VALIDATE_NOT_NULL(result)
     if (mVisible) {
         // Return to Home
@@ -496,19 +505,20 @@ ECode RecentsActivity::DismissRecentsToHome(
 ECode RecentsActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
+    Logger::I(TAG, " >> OnCreate");
     Activity::OnCreate(savedInstanceState);
     // For the non-primary user, ensure that the SystemSericesProxy is initialized
-    RecentsTaskLoader::Initialize((IContext*)this);
+    RecentsTaskLoader::Initialize(this);
 
     // Initialize the loader and the configuration
     AutoPtr<RecentsTaskLoader> rtl = RecentsTaskLoader::GetInstance();
     AutoPtr<SystemServicesProxy> ssp;
     rtl->GetSystemServicesProxy((SystemServicesProxy**)&ssp);
 
-    mConfig = RecentsConfiguration::Reinitialize((IContext*)this, ssp);
+    mConfig = RecentsConfiguration::Reinitialize(this, ssp);
 
     // Initialize the widget host (the host id is static and does not change)
-    mAppWidgetHost = new RecentsAppWidgetHost((IContext*)this, Constants::Values::App::AppWidgetHostId);
+    mAppWidgetHost = new RecentsAppWidgetHost(this, Constants::Values::App::AppWidgetHostId);
 
     // Set the Recents layout
     SetContentView(R::layout::recents);
@@ -545,7 +555,7 @@ ECode RecentsActivity::OnCreate(
     filter->AddAction(IIntent::ACTION_SCREEN_OFF);
     filter->AddAction(ISearchManager::INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
     AutoPtr<IIntent> intent2;
-    RegisterReceiver((IBroadcastReceiver*)mSystemBroadcastReceiver, filter, (IIntent**)&intent2);
+    RegisterReceiver(mSystemBroadcastReceiver, filter, (IIntent**)&intent2);
 
     // Private API calls to make the shadows look better
     // try {
@@ -565,11 +575,10 @@ ECode RecentsActivity::OnCreate(
     // Start listening for widget package changes if there is one bound, post it since we don't
     // want it stalling the startup
     if (mConfig->mSearchBarAppWidgetId >= 0) {
-        AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe((IRecentsAppWidgetHostCallbacks*)this);
         AutoPtr<IWeakReference> callback;
-        wrs->GetWeakReference((IWeakReference**)&callback);
+        GetWeakReference((IWeakReference**)&callback);
 
-        AutoPtr<MRunnable> mr = new MRunnable(callback, this);
+        AutoPtr<AppWidgetHostCallbackRunnable> mr = new AppWidgetHostCallbackRunnable(callback, this);
         Boolean b;
         mRecentsView->Post(mr, &b);
     }
@@ -596,11 +605,11 @@ ECode RecentsActivity::OnConfigurationChange()
     AutoPtr<SystemServicesProxy> ssp;
     rtl->GetSystemServicesProxy((SystemServicesProxy**)&ssp);
 
-    mConfig = RecentsConfiguration::Reinitialize((IContext*)this, ssp);
+    mConfig = RecentsConfiguration::Reinitialize(this, ssp);
 
     // Try and start the enter animation (or restart it on configuration changed)
     AutoPtr<ReferenceCountedTrigger> t = new ReferenceCountedTrigger(
-        (IContext*)this, NULL, NULL, NULL);
+        this, NULL, NULL, NULL);
     AutoPtr<ViewAnimation::TaskViewEnterContext> tvec =
         new ViewAnimation::TaskViewEnterContext(t);
     mRecentsView->StartEnterRecentsAnimation(tvec);
@@ -611,6 +620,7 @@ ECode RecentsActivity::OnConfigurationChange()
 ECode RecentsActivity::OnNewIntent(
     /* [in] */ IIntent* intent)
 {
+    Logger::I(TAG, " >> OnNewIntent");
     Activity::OnNewIntent(intent);
     Activity::SetIntent(intent);
 
@@ -619,7 +629,7 @@ ECode RecentsActivity::OnNewIntent(
     AutoPtr<SystemServicesProxy> ssp;
     rtl->GetSystemServicesProxy((SystemServicesProxy**)&ssp);
 
-    RecentsConfiguration::Reinitialize((IContext*)this, ssp);
+    RecentsConfiguration::Reinitialize(this, ssp);
 
     // Clear any debug rects
     if (mDebugOverlay != NULL) {
@@ -633,8 +643,10 @@ ECode RecentsActivity::OnNewIntent(
 
 ECode RecentsActivity::OnStart()
 {
+    Logger::I(TAG, " >> OnStart");
     Activity::OnStart();
 
+    Logger::I(TAG, "Register the broadcast receiver to handle messages from our service");
     // Register the broadcast receiver to handle messages from our service
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
@@ -646,12 +658,13 @@ ECode RecentsActivity::OnStart()
 
     // Register any broadcast receivers for the task loader
     AutoPtr<RecentsTaskLoader> rtl = RecentsTaskLoader::GetInstance();
-    rtl->RegisterReceivers((IContext*)this, (IPackageCallbacks*)mRecentsView);
+    rtl->RegisterReceivers(this, (IPackageCallbacks*)mRecentsView.Get());
     return NOERROR;
 }
 
 ECode RecentsActivity::OnResume()
 {
+    Logger::I(TAG, " >> OnResume");
     Activity::OnResume();
 
     // Mark Recents as visible
@@ -661,13 +674,14 @@ ECode RecentsActivity::OnResume()
 
 ECode RecentsActivity::OnStop()
 {
+    Logger::I(TAG, " >> OnStop");
     Activity::OnStop();
 
     // Remove all the views
     mRecentsView->RemoveAllTaskStacks();
 
     // Unregister the RecentsService receiver
-    UnregisterReceiver((IBroadcastReceiver*)mServiceBroadcastReceiver);
+    UnregisterReceiver(mServiceBroadcastReceiver);
 
     // Unregister any broadcast receivers for the task loader
     AutoPtr<RecentsTaskLoader> rtl = RecentsTaskLoader::GetInstance();
@@ -677,10 +691,11 @@ ECode RecentsActivity::OnStop()
 
 ECode RecentsActivity::OnDestroy()
 {
+    Logger::I(TAG, " >> OnDestroy");
     Activity::OnDestroy();
 
     // Unregister the system broadcast receivers
-    UnregisterReceiver((IBroadcastReceiver*)mSystemBroadcastReceiver);
+    UnregisterReceiver(mSystemBroadcastReceiver);
 
     // Stop listening for widget package changes if there was one bound
     Boolean result;
@@ -706,6 +721,7 @@ ECode RecentsActivity::OnKeyDown(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     switch (keyCode) {
         case IKeyEvent::KEYCODE_TAB: {
             AutoPtr<ISystem> sys;
@@ -811,7 +827,7 @@ ECode RecentsActivity::OnDebugModeTriggered()
         AutoPtr<ICharSequence> cs;
         CString::New(sb.ToString(), (ICharSequence**)&cs);
         AutoPtr<IToast> toast;
-        th->MakeText((IContext*)this, cs, IToast::LENGTH_SHORT, (IToast**)&toast);
+        th->MakeText(this, cs, IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
     }
     return NOERROR;

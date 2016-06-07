@@ -145,8 +145,8 @@ const String BaseStatusBar::SYSTEM_DIALOG_REASON_RECENT_APPS("recentapps");
 const Int32 BaseStatusBar::EXPANDED_LEAVE_ALONE = -10000;
 const Int32 BaseStatusBar::EXPANDED_FULL_OPEN = -10001;
 const Int32 BaseStatusBar::HIDDEN_NOTIFICATION_ID = 10000;
-const String BaseStatusBar::BANNER_ACTION_CANCEL("Elastos.Droid.SystemUI.StatusBar.banner_action_cancel");
-const String BaseStatusBar::BANNER_ACTION_SETUP("Elastos.Droid.SystemUI.StatusBar.banner_action_setup");
+const String BaseStatusBar::BANNER_ACTION_CANCEL("com.android.systemui.statusbar.banner_action_cancel");
+const String BaseStatusBar::BANNER_ACTION_SETUP("com.android.systemui.statusbar.banner_action_setup");
 
 //==============================================================================
 //                  CSettingsObserver

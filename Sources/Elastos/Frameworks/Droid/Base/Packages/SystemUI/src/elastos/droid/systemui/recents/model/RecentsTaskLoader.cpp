@@ -1,7 +1,8 @@
 #include "elastos/droid/systemui/recents/model/RecentsTaskLoader.h"
+#include "elastos/droid/systemui/recents/model/TaskStack.h"
+#include "elastos/droid/systemui/recents/model/SpaceNode.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/systemui/recents/Constants.h"
-#include "elastos/droid/systemui/recents/model/SpaceNode.h"
 #include "../../R.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>

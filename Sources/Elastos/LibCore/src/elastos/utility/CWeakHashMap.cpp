@@ -931,9 +931,9 @@ ECode CWeakHashMap::Put(
         index = (Object::GetHashCode(key) & 0x7FFFFFFF) % mElementData->GetLength();
         entry = (*mElementData)[index];
         AutoPtr<IInterface> entryKey;
-        while (entry != NULL &&
-                !Object::Equals(key, (entryKey = NULL, entry->GetKey((IInterface**)&entryKey), entryKey))) {
+        while (entry != NULL && !Object::Equals(key, (entry->GetKey((IInterface**)&entryKey), entryKey))) {
             entry = entry->mNext;
+            entryKey = NULL;
         }
     }
     else {
@@ -1018,10 +1018,10 @@ ECode CWeakHashMap::Remove(
         index = (Object::GetHashCode(key) & 0x7FFFFFFF) % mElementData->GetLength();
         entry = (*mElementData)[index];
         AutoPtr<IInterface> entryKey;
-        while (entry != NULL &&
-                !Object::Equals(key, (entryKey = NULL, entry->GetKey((IInterface**)&entryKey), entryKey))) {
+        while (entry != NULL && !Object::Equals(key, (entry->GetKey((IInterface**)&entryKey), entryKey))) {
             last = entry;
             entry = entry->mNext;
+            entryKey = NULL;
         }
     }
     else {

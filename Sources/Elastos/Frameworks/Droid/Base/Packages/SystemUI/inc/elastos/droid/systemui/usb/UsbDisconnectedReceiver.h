@@ -24,6 +24,8 @@ class UsbDisconnectedReceiver
     : public BroadcastReceiver
 {
 public:
+    TO_STRING_IMPL("UsbDisconnectedReceiver")
+
     UsbDisconnectedReceiver(
         /* [in] */ IActivity* activity,
         /* [in] */ IUsbDevice* device);
@@ -36,13 +38,6 @@ public:
     CARAPI OnReceive(
         /* [in] */ IContext* context,
         /* [in] */ IIntent* intent);
-
-    CARAPI ToString(
-        /* [out] */ String* str)
-    {
-        *str = String("UsbDisconnectedReceiver");
-        return NOERROR;
-    }
 
 private:
     AutoPtr<IActivity> mActivity;

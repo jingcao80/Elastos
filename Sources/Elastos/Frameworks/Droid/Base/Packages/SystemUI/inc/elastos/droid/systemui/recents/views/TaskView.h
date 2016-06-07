@@ -67,12 +67,12 @@ private:
         TaskView* mHost;
     };
 
-    class AnimatorUpdateListener
+    class TaskProgressAnimatorUpdateListener
         : public Object
         , public IAnimatorUpdateListener
     {
     public:
-        AnimatorUpdateListener(
+        TaskProgressAnimatorUpdateListener(
             /* [in] */ TaskView* host);
 
         CAR_INTERFACE_DECL()
@@ -85,12 +85,12 @@ private:
         TaskView* mHost;
     };
 
-    class AnimatorUpdateListener2
+    class ClipTopAnimatorUpdateListener
         : public Object
         , public IAnimatorUpdateListener
     {
     public:
-        AnimatorUpdateListener2(
+        ClipTopAnimatorUpdateListener(
             /* [in] */ TaskView* host);
 
         CAR_INTERFACE_DECL()
@@ -118,10 +118,10 @@ private:
         TaskView* mHost;
     };
 
-    class EndActionRunnable : public Runnable
+    class EndLaunchedFromAppWithScreenshotRunnable : public Runnable
     {
     public:
-        EndActionRunnable(
+        EndLaunchedFromAppWithScreenshotRunnable(
             /* [in] */ TaskView* host,
             /* [in] */ ViewAnimation::TaskViewEnterContext* ctx);
 
@@ -148,10 +148,10 @@ private:
         AutoPtr<ViewAnimation::TaskViewEnterContext> mCtx;
     };
 
-    class EndActionRunnable2 : public Runnable
+    class EndLaunchedFromAppWithThumbnailRunnable : public Runnable
     {
     public:
-        EndActionRunnable2(
+        EndLaunchedFromAppWithThumbnailRunnable(
             /* [in] */ ViewAnimation::TaskViewEnterContext* ctx);
 
         // @Override

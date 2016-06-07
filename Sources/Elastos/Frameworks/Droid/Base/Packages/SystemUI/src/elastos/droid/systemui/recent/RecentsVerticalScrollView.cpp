@@ -2,8 +2,9 @@
 #include "elastos/droid/systemui/recent/RecentsPanelView.h"
 #include "elastos/droid/systemui/CSwipeHelper.h"
 #include "../R.h"
-#include "elastos/droid/utility/FloatMath.h"
 #include <elastos/core/Math.h>
+#include <elastos/core/CoreUtils.h>
+#include "elastos/droid/utility/FloatMath.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Database::EIID_IDataSetObserver;
@@ -20,7 +21,7 @@ using Elastos::Droid::View::EIID_IViewOnLongClickListener;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnTouchListener;
 using Elastos::Droid::Widget::IAdapter;
-using Elastos::Core::CString;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::CHashSet;
@@ -194,7 +195,7 @@ ECode RecentsVerticalScrollView::AdapterDataSetObserver::OnInvalidated()
 //=================================================================================
 
 const String RecentsVerticalScrollView::TAG("RecentsVerticalScrollView");
-const Boolean RecentsVerticalScrollView::DEBUG = FALSE;
+const Boolean RecentsVerticalScrollView::DEBUG = TRUE;
 
 CAR_INTERFACE_IMPL_2(RecentsVerticalScrollView, ScrollView, ISwipeHelperCallback, IRecentsScrollView)
 
@@ -246,11 +247,12 @@ ECode RecentsVerticalScrollView::FindViewForTask(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view);
+    IViewGroup* vg = IViewGroup::Probe(mLinearLayout);
     Int32 count;
-    IViewGroup::Probe(mLinearLayout)->GetChildCount(&count);
+    vg->GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> v;
-        IViewGroup::Probe(mLinearLayout)->GetChildAt(i, (IView**)&v);
+        vg->GetChildAt(i, (IView**)&v);
 
         AutoPtr<IInterface> tag;
         v->GetTag((IInterface**)&tag);
@@ -269,7 +271,6 @@ ECode RecentsVerticalScrollView::FindViewForTask(
 
 void RecentsVerticalScrollView::Update()
 {
-    Logger::I(TAG, " >> Update()");
     Int32 count;
     IViewGroup::Probe(mLinearLayout)->GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
@@ -331,8 +332,7 @@ void RecentsVerticalScrollView::Update()
         // app title is a small target and doesn't have great click feedback)
         AutoPtr<IView> appTitle;
         view->FindViewById(R::id::app_label, (IView**)&appTitle);
-        AutoPtr<ICharSequence> cs;
-        CString::New(String(" "), (ICharSequence**)&cs);
+        AutoPtr<ICharSequence> cs = CoreUtils::Convert(" ");
         appTitle->SetContentDescription(cs);
         appTitle->SetOnTouchListener(noOpListener);
         AutoPtr<IView> calloutLine;
@@ -350,7 +350,6 @@ void RecentsVerticalScrollView::Update()
     AutoPtr<IViewTreeObserver> vto;
     GetViewTreeObserver((IViewTreeObserver**)&vto);
     vto->AddOnGlobalLayoutListener(updateScroll);
-    Logger::I(TAG, " << Update()");
 }
 
 ECode RecentsVerticalScrollView::RemoveViewInLayout(

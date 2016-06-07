@@ -16,6 +16,14 @@ module
             [in] Float p);
     }
 
+    interface ITaskStackViewScroller {
+        GetStackScroll(
+            [out] Float* scroll);
+
+        SetStackScroll(
+            [in] Float scroll);
+    }
+
     } // namespace Views
     } // namespace Recents
     } // namespace SystemUI

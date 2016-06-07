@@ -1,5 +1,7 @@
 
 #include "elastos/droid/systemui/recents/views/TaskStackViewScroller.h"
+#include "elastos/droid/systemui/recents/views/TaskStackViewLayoutAlgorithm.h"
+#include "elastos/droid/systemui/recents/RecentsConfiguration.h"
 #include <elastos/core/Math.h>
 #include "Elastos.Droid.Widget.h"
 
@@ -16,6 +18,9 @@ namespace SystemUI {
 namespace Recents {
 namespace Views {
 
+//==================================================================
+// TaskStackViewScroller::MyAnimatorListenerAdapter
+//==================================================================
 TaskStackViewScroller::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
     /* [in] */ IRunnable* postRunnable,
     /* [in] */ IObjectAnimator* scrollAnimator)
@@ -34,6 +39,9 @@ ECode TaskStackViewScroller::MyAnimatorListenerAdapter::OnAnimationEnd(
     return NOERROR;
 }
 
+//==================================================================
+// TaskStackViewScroller::AnimatorUpdateListener
+//==================================================================
 CAR_INTERFACE_IMPL(TaskStackViewScroller::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
 
 TaskStackViewScroller::AnimatorUpdateListener::AnimatorUpdateListener(
@@ -53,15 +61,25 @@ ECode TaskStackViewScroller::AnimatorUpdateListener::OnAnimationUpdate(
     return NOERROR;
 }
 
-TaskStackViewScroller::TaskStackViewScroller(
+//==================================================================
+// TaskStackViewScroller
+//==================================================================
+CAR_INTERFACE_IMPL(TaskStackViewScroller, Object, ITaskStackViewScroller)
+
+TaskStackViewScroller::TaskStackViewScroller()
+{}
+
+ECode TaskStackViewScroller::constructor(
     /* [in] */ IContext* context,
-    /* [in] */ RecentsConfiguration* config,
-    /* [in] */ TaskStackViewLayoutAlgorithm* layoutAlgorithm)
-    : mConfig(config)
-    , mLayoutAlgorithm(layoutAlgorithm)
+    /* [in] */ IRecentsConfiguration* config,
+    /* [in] */ ITaskStackViewLayoutAlgorithm* layoutAlgorithm)
 {
+    mConfig = (RecentsConfiguration*)config;
+    mLayoutAlgorithm = (TaskStackViewLayoutAlgorithm*)layoutAlgorithm;
+
     COverScroller::New(context, (IOverScroller**)&mScroller);
     SetStackScroll(GetStackScroll());
+    return NOERROR;
 }
 
 /** Sets the callbacks */
@@ -77,14 +95,23 @@ Float TaskStackViewScroller::GetStackScroll()
     return mStackScrollP;
 }
 
+ECode TaskStackViewScroller::GetStackScroll(
+    /* [out] */ Float* scroll)
+{
+    VALIDATE_NOT_NULL(scroll)
+    *scroll = mStackScrollP;
+    return NOERROR;
+}
+
 /** Sets the current stack scroll */
-void TaskStackViewScroller::SetStackScroll(
+ECode TaskStackViewScroller::SetStackScroll(
     /* [in] */ Float s)
 {
     mStackScrollP = s;
     if (mCb != NULL) {
         mCb->OnScrollChanged(mStackScrollP);
     }
+    return NOERROR;
 }
 
 /** Sets the current stack scroll without calling the callback. */
@@ -258,3 +285,4 @@ void TaskStackViewScroller::StopScroller()
 } // namespace SystemUI
 } // namespace Droid
 } // namespace Elastos
+

@@ -39,6 +39,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CDozeService::DozeBroadcastReceiver")
+
         DozeBroadcastReceiver(
             /* [in] */ CDozeService* host);
 
@@ -46,14 +48,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("CDozeService.DozeBroadcastReceiver");
-            return NOERROR;
-        }
-
     private:
         CDozeService* mHost;
     };
@@ -288,7 +282,6 @@ private:
     static const String TAG;
     static Boolean DEBUG;
 
-    static const String ACTION_BASE;
     static const String PULSE_ACTION;
     static const String NOTIFICATION_PULSE_ACTION;
     static const String EXTRA_INSTANCE;

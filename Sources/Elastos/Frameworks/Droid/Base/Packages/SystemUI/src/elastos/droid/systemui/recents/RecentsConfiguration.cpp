@@ -30,6 +30,8 @@ namespace Recents {
 AutoPtr<RecentsConfiguration> RecentsConfiguration::sInstance;
 Int32 RecentsConfiguration::sPrevConfigurationHashCode;
 
+CAR_INTERFACE_IMPL(RecentsConfiguration, Object, IRecentsConfiguration)
+
 RecentsConfiguration::RecentsConfiguration(
     /* [in] */ IContext* context)
     : mAnimationPxMovementPerSecond(0.0f)
@@ -130,7 +132,7 @@ AutoPtr<RecentsConfiguration> RecentsConfiguration::GetInstance()
 }
 
 /** Updates the state, given the specified context */
-void RecentsConfiguration::Update(
+ECode RecentsConfiguration::Update(
     /* [in] */ IContext* context)
 {
     String pkgName;
@@ -264,17 +266,18 @@ void RecentsConfiguration::Update(
     res->GetBoolean(R::bool_::config_recents_use_hardware_layers, &mUseHardwareLayers);
     res->GetInteger(R::integer::recents_alt_tab_key_delay, &mAltTabKeyDelay);
     res->GetBoolean(R::bool_::config_recents_fake_shadows, &mFakeShadows);
+    return NOERROR;
 }
 
 /** Updates the system insets */
-void RecentsConfiguration::UpdateSystemInsets(
+ECode RecentsConfiguration::UpdateSystemInsets(
     /* [in] */ IRect* insets)
 {
-    mSystemInsets->Set(insets);
+    return mSystemInsets->Set(insets);
 }
 
 /** Updates the search bar app widget */
-void RecentsConfiguration::UpdateSearchBarAppWidgetId(
+ECode RecentsConfiguration::UpdateSearchBarAppWidgetId(
     /* [in] */ IContext* context,
     /* [in] */ Int32 appWidgetId)
 {
@@ -287,11 +290,11 @@ void RecentsConfiguration::UpdateSearchBarAppWidgetId(
     settings->Edit((ISharedPreferencesEditor**)&edit);
     edit->PutInt32(Constants::Values::App::Key_SearchAppWidgetId,
             appWidgetId);
-    edit->Apply();
+    return edit->Apply();
 }
 
 /** Updates the states that need to be re-read whenever we re-initialize. */
-void RecentsConfiguration::UpdateOnReinitialize(
+ECode RecentsConfiguration::UpdateOnReinitialize(
     /* [in] */ IContext* context,
     /* [in] */ SystemServicesProxy* ssp)
 {
@@ -300,11 +303,12 @@ void RecentsConfiguration::UpdateOnReinitialize(
             ISettingsGlobal::DEVELOPMENT_SETTINGS_ENABLED) != 0;
     mLockToAppEnabled = ssp->GetSystemSetting(context,
             ISettingsSystem::LOCK_TO_APP_ENABLED) != 0;
+    return NOERROR;
 }
 
 /** Called when the configuration has changed, and we want to reset any configuration specific
  * members. */
-void RecentsConfiguration::UpdateOnConfigurationChange()
+ECode RecentsConfiguration::UpdateOnConfigurationChange()
 {
     mLaunchedWithAltTab = FALSE;
     mLaunchedWithNoRecentTasks = FALSE;
@@ -312,6 +316,7 @@ void RecentsConfiguration::UpdateOnConfigurationChange()
     mLaunchedFromAppWithScreenshot = FALSE;
     mLaunchedFromHome = FALSE;
     mLaunchedToTaskId = -1;
+    return NOERROR;
 }
 
 /** Returns whether the search bar app widget exists. */
@@ -355,7 +360,7 @@ Boolean RecentsConfiguration::HasHorizontalLayout()
  * Returns the task stack bounds in the current orientation. These bounds do not account for
  * the system insets.
  */
-void RecentsConfiguration::GetTaskStackBounds(
+ECode RecentsConfiguration::GetTaskStackBounds(
     /* [in] */ Int32 windowWidth,
     /* [in] */ Int32 windowHeight,
     /* [in] */ Int32 topInset,
@@ -375,13 +380,14 @@ void RecentsConfiguration::GetTaskStackBounds(
         searchBarBounds->GetBottom(&bottom);
         taskStackBounds->Set(0, bottom, windowWidth, windowHeight);
     }
+    return NOERROR;
 }
 
 /**
  * Returns the search bar bounds in the current orientation.  These bounds do not account for
  * the system insets.
  */
-void RecentsConfiguration::GetSearchBarBounds(
+ECode RecentsConfiguration::GetSearchBarBounds(
     /* [in] */ Int32 windowWidth,
     /* [in] */ Int32 windowHeight,
     /* [in] */ Int32 topInset,
@@ -401,6 +407,8 @@ void RecentsConfiguration::GetSearchBarBounds(
         // In portrait, the search bar appears on the top
         searchBarSpaceBounds->Set(0, topInset, windowWidth, topInset + searchBarSize);
     }
+
+    return NOERROR;
 }
 
 } // namespace Recents

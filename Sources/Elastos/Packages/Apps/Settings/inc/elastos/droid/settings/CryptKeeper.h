@@ -896,7 +896,7 @@ public class CryptKeeper extends Activity implements TextView.OnEditorActionList
             Logger::D(TAG, "Going into airplane mode.");
             Settings::Global::>PutInt(GetContentResolver(), Settings::Global::AIRPLANE_MODE_ON, 1);
             final Intent intent = new Intent(IIntent::ACTION_AIRPLANE_MODE_CHANGED);
-            intent->PutExtra("state", TRUE);
+            intent->PutBooleanExtra("state", TRUE);
             SendBroadcastAsUser(intent, UserHandle.ALL);
         }
     }

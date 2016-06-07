@@ -423,7 +423,7 @@ public class StorageVolumePreferenceCategory extends PreferenceCategory {
             intent->SetType("audio/mp3");
         } else if (pref == mItemDcim) {
             intent = new Intent(IIntent::ACTION_VIEW);
-            intent->PutExtra(Intent.EXTRA_LOCAL_ONLY, TRUE);
+            intent->PutBooleanExtra(Intent.EXTRA_LOCAL_ONLY, TRUE);
             // TODO Create a Videos category, MediaStore.Video.Media.EXTERNAL_CONTENT_URI
             intent->SetData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         } else if (pref == mItemMisc) {

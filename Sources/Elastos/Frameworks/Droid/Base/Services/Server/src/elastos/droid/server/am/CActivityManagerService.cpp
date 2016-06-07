@@ -498,12 +498,12 @@ const String CActivityManagerService::TAG_MU("CActivityManagerServiceMU");
 const Boolean CActivityManagerService::DEBUG = FALSE;
 const Boolean CActivityManagerService::localLOGV = DEBUG;
 const Boolean CActivityManagerService::DEBUG_BACKUP = localLOGV || FALSE;
-const Boolean CActivityManagerService::DEBUG_BROADCAST = FALSE;//localLOGV || FALSE;
-const Boolean CActivityManagerService::DEBUG_BROADCAST_LIGHT = FALSE;//DEBUG_BROADCAST || FALSE;
-const Boolean CActivityManagerService::DEBUG_BACKGROUND_BROADCAST = FALSE;//DEBUG_BROADCAST || FALSE;
+const Boolean CActivityManagerService::DEBUG_BROADCAST = localLOGV || FALSE;
+const Boolean CActivityManagerService::DEBUG_BROADCAST_LIGHT = DEBUG_BROADCAST || FALSE;
+const Boolean CActivityManagerService::DEBUG_BACKGROUND_BROADCAST = DEBUG_BROADCAST || FALSE;
 const Boolean CActivityManagerService::DEBUG_CLEANUP = localLOGV || FALSE;
-const Boolean CActivityManagerService::DEBUG_CONFIGURATION = localLOGV || TRUE;
-const Boolean CActivityManagerService::DEBUG_FOCUS = FALSE;
+const Boolean CActivityManagerService::DEBUG_CONFIGURATION = localLOGV || FALSE;
+const Boolean CActivityManagerService::DEBUG_FOCUS = localLOGV || FALSE;
 const Boolean CActivityManagerService::DEBUG_IMMERSIVE = localLOGV || FALSE;
 const Boolean CActivityManagerService::DEBUG_MU = localLOGV || FALSE;
 const Boolean CActivityManagerService::DEBUG_OOM_ADJ = localLOGV || FALSE;
@@ -13729,7 +13729,7 @@ ECode CActivityManagerService::ReportAssistContextExtras(
     }
     pae->mIntent->ReplaceExtras(extras);
     if (pae->mHint != NULL) {
-        pae->mIntent->PutExtra(pae->mHint, TRUE);
+        pae->mIntent->PutBooleanExtra(pae->mHint, TRUE);
     }
     pae->mIntent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK
             | IIntent::FLAG_ACTIVITY_SINGLE_TOP
@@ -14214,7 +14214,7 @@ ECode CActivityManagerService::Restart()
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_SHUTDOWN, (IIntent**)&intent);
     intent->AddFlags(IIntent::FLAG_RECEIVER_FOREGROUND);
-    intent->PutExtra(IIntent::EXTRA_SHUTDOWN_USERSPACE_ONLY, TRUE);
+    intent->PutBooleanExtra(IIntent::EXTRA_SHUTDOWN_USERSPACE_ONLY, TRUE);
     /* For now we are not doing a clean shutdown, because things seem to get unhappy.
     mContext.sendOrderedBroadcastAsUser(intent,
             UserHandle.ALL, null, br, mHandler, 0, null, null);
@@ -24132,7 +24132,7 @@ Int32 CActivityManagerService::StopUserLocked(
             CIntent::New(IIntent::ACTION_USER_STOPPING, (IIntent**)&stoppingIntent);
             stoppingIntent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY);
             stoppingIntent->PutExtra(IIntent::EXTRA_USER_HANDLE, userId);
-            stoppingIntent->PutExtra(IIntent::EXTRA_SHUTDOWN_USERSPACE_ONLY, TRUE);
+            stoppingIntent->PutBooleanExtra(IIntent::EXTRA_SHUTDOWN_USERSPACE_ONLY, TRUE);
             AutoPtr<IIntent> shutdownIntent;
             CIntent::New(IIntent::ACTION_SHUTDOWN, (IIntent**)&shutdownIntent);
 

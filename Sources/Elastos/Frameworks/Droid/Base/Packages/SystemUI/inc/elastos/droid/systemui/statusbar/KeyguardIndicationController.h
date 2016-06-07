@@ -28,9 +28,12 @@ class KeyguardIndicationController
     , public IKeyguardIndicationController
 {
 private:
-    class ControllerBroadcastReceiver: public BroadcastReceiver
+    class ControllerBroadcastReceiver
+        : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("KeyguardIndicationController.ControllerBroadcastReceiver")
+
         ControllerBroadcastReceiver(
             /* [in] */ KeyguardIndicationController* host);
 
@@ -39,20 +42,16 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("KeyguardIndicationController.ControllerBroadcastReceiver");
-            return NOERROR;
-        }
-
     private:
         KeyguardIndicationController* mHost;
     };
 
-    class ControllerHandler: public Handler
+    class ControllerHandler
+        : public Handler
     {
     public:
+        TO_STRING_IMPL("KeyguardIndicationController::ControllerHandler")
+
         ControllerHandler(
             /* [in] */ KeyguardIndicationController* host);
 

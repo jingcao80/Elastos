@@ -34,6 +34,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("UsbDebuggingActivity::UsbDisconnectedReceiver")
+
         UsbDisconnectedReceiver(
             /* [in] */ IActivity* activity,
             /* [in] */ UsbDebuggingActivity* host);
@@ -42,13 +44,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* content,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("UsbDebuggingActivity.UsbDisconnectedReceiver");
-            return NOERROR;
-        }
 
     private:
         UsbDebuggingActivity* mHost;

@@ -3,12 +3,10 @@
 #define __ELASTOS_DROID_WIDGET_HORIZONTALSCROLLVIEW_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/widget/FrameLayout.h"
 #include "elastos/droid/view/VelocityTracker.h"
 #include "elastos/droid/R.h"
 
-using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::VelocityTracker;
@@ -17,7 +15,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class HorizontalScrollView
+class ECO_PUBLIC HorizontalScrollView
     : public FrameLayout
     , public IHorizontalScrollView
 {

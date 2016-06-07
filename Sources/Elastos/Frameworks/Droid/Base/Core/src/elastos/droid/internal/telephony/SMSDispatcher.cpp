@@ -363,6 +363,7 @@ ECode SMSDispatcher::ConfirmDialogListener::constructor(SmsTracker* tracker, ITe
     return NOERROR;
 }
 
+
 void SMSDispatcher::ConfirmDialogListener::SetPositiveButton(IButton* button)
 {
     mPositiveButton = button;
@@ -454,6 +455,7 @@ const Int32 SMSDispatcher::EVENT_SEND_SMS_COMPLETE = 2;
 
 /** Retry sending a previously failed SMS message */
 const Int32 SMSDispatcher::EVENT_SEND_RETRY = 3;
+
 
 /** Confirmation required for sending a large number of messages. */
 const Int32 SMSDispatcher::EVENT_SEND_LIMIT_REACHED_CONFIRMATION = 4;

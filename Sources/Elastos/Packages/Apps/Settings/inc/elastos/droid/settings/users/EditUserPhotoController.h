@@ -228,8 +228,8 @@ public class EditUserPhotoController {
 
     private void AppendCropExtras(Intent intent) {
         intent->PutExtra("crop", "TRUE");
-        intent->PutExtra("scale", TRUE);
-        intent->PutExtra("scaleUpIfNeeded", TRUE);
+        intent->PutBooleanExtra("scale", TRUE);
+        intent->PutBooleanExtra("scaleUpIfNeeded", TRUE);
         intent->PutExtra("aspectX", 1);
         intent->PutExtra("aspectY", 1);
         intent->PutExtra("outputX", mPhotoSize);

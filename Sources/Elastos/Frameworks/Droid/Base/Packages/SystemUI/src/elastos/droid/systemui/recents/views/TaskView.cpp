@@ -1,9 +1,13 @@
 
 #include "elastos/droid/systemui/recents/views/TaskView.h"
 #include "elastos/droid/systemui/recents/views/CFakeShadowDrawable.h"
+#include "elastos/droid/systemui/recents/views/CAnimateableViewBounds.h"
 #include "elastos/droid/systemui/recents/Constants.h"
-#include <elastos/core/Math.h>
+#include "elastos/droid/systemui/recents/AlternateRecentsComponent.h"
+#include "elastos/droid/systemui/recents/model/RecentsTaskLoader.h"
 #include "../../R.h"
+#include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
@@ -23,9 +27,11 @@ using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnLongClickListener;
 using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::View::Animation::CAccelerateInterpolator;
+using Elastos::Droid::SystemUI::Recents::Model::RecentsTaskLoader;
+using Elastos::Droid::SystemUI::Recents::Model::EIID_ITaskCallbacks;
 using Elastos::Core::IFloat;
 using Elastos::Core::IInteger32;
-using Elastos::Droid::SystemUI::Recents::Model::EIID_ITaskCallbacks;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -33,6 +39,11 @@ namespace SystemUI {
 namespace Recents {
 namespace Views {
 
+static const String TAG("TaskView");
+
+//======================================================================
+// TaskView::Wrapper
+//======================================================================
 CAR_INTERFACE_IMPL_4(TaskView::Wrapper, Object, ITaskCallbacks,
     ITaskFooterViewCallbacks, IViewOnClickListener, IViewOnLongClickListener)
 
@@ -71,14 +82,17 @@ ECode TaskView::Wrapper::OnLongClick(
     return mHost->OnLongClick(v, result);
 }
 
-CAR_INTERFACE_IMPL(TaskView::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
+//======================================================================
+// TaskView::TaskProgressAnimatorUpdateListener
+//======================================================================
+CAR_INTERFACE_IMPL(TaskView::TaskProgressAnimatorUpdateListener, Object, IAnimatorUpdateListener)
 
-TaskView::AnimatorUpdateListener::AnimatorUpdateListener(
+TaskView::TaskProgressAnimatorUpdateListener::TaskProgressAnimatorUpdateListener(
     /* [in] */ TaskView* host)
     : mHost(host)
 {}
 
-ECode TaskView::AnimatorUpdateListener::OnAnimationUpdate(
+ECode TaskView::TaskProgressAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IInterface> value;
@@ -89,14 +103,17 @@ ECode TaskView::AnimatorUpdateListener::OnAnimationUpdate(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(TaskView::AnimatorUpdateListener2, Object, IAnimatorUpdateListener)
+//======================================================================
+// TaskView::ClipTopAnimatorUpdateListener
+//======================================================================
+CAR_INTERFACE_IMPL(TaskView::ClipTopAnimatorUpdateListener, Object, IAnimatorUpdateListener)
 
-TaskView::AnimatorUpdateListener2::AnimatorUpdateListener2(
+TaskView::ClipTopAnimatorUpdateListener::ClipTopAnimatorUpdateListener(
     /* [in] */ TaskView* host)
     : mHost(host)
 {}
 
-ECode TaskView::AnimatorUpdateListener2::OnAnimationUpdate(
+ECode TaskView::ClipTopAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IInterface> value;
@@ -107,6 +124,9 @@ ECode TaskView::AnimatorUpdateListener2::OnAnimationUpdate(
     return NOERROR;
 }
 
+//======================================================================
+// TaskView::MyViewOutlineProvider
+//======================================================================
 TaskView::MyViewOutlineProvider::MyViewOutlineProvider(
     /* [in] */ TaskView* host)
     : mHost(host)
@@ -124,14 +144,17 @@ ECode TaskView::MyViewOutlineProvider::GetOutline(
     return NOERROR;
 }
 
-TaskView::EndActionRunnable::EndActionRunnable(
+//======================================================================
+// TaskView::EndLaunchedFromAppWithScreenshotRunnable
+//======================================================================
+TaskView::EndLaunchedFromAppWithScreenshotRunnable::EndLaunchedFromAppWithScreenshotRunnable(
     /* [in] */ TaskView* host,
     /* [in] */ ViewAnimation::TaskViewEnterContext* ctx)
     : mHost(host)
     , mCtx(ctx)
 {}
 
-ECode TaskView::EndActionRunnable::Run()
+ECode TaskView::EndLaunchedFromAppWithScreenshotRunnable::Run()
 {
     mHost->SetIsFullScreen(FALSE);
     mHost->RequestLayout();
@@ -146,10 +169,9 @@ ECode TaskView::EndActionRunnable::Run()
     mHost->AnimateFooterVisibility(TRUE, mHost->mConfig->mTaskBarEnterAnimDuration);
 
     // Unbind the thumbnail from the screenshot
-    assert(0);
-    // RecentsTaskLoader::GetInstance()->LoadTaskData(mHost->mTask);
+    RecentsTaskLoader::GetInstance()->LoadTaskData(mHost->mTask);
     // Recycle the full screen screenshot
-    // AlternateRecentsComponent::ConsumeLastScreenshot();
+    AlternateRecentsComponent::ConsumeLastScreenshot();
 
     mHost->mCb->OnTaskViewFullScreenTransitionCompleted();
 
@@ -158,6 +180,9 @@ ECode TaskView::EndActionRunnable::Run()
     return NOERROR;
 }
 
+//======================================================================
+// TaskView::AnimateDimRunnable
+//======================================================================
 TaskView::AnimateDimRunnable::AnimateDimRunnable(
     /* [in] */ TaskView* host,
     /* [in] */ ViewAnimation::TaskViewEnterContext* ctx)
@@ -167,24 +192,30 @@ TaskView::AnimateDimRunnable::AnimateDimRunnable(
 
 ECode TaskView::AnimateDimRunnable::Run()
 {
-    assert(0);
-    // mHost->AnimateDimToProgress(0, mHost->mConfig->mTaskBarEnterAnimDuration,
-    //     mCtx->mPostAnimationTrigger->DecrementOnAnimationEnd());
+    mHost->AnimateDimToProgress(0,
+        mHost->mConfig->mTaskBarEnterAnimDuration,
+        mCtx->mPostAnimationTrigger->DecrementOnAnimationEnd());
     return NOERROR;
 }
 
-TaskView::EndActionRunnable2::EndActionRunnable2(
+//======================================================================
+// TaskView::EndLaunchedFromAppWithThumbnailRunnable
+//======================================================================
+TaskView::EndLaunchedFromAppWithThumbnailRunnable::EndLaunchedFromAppWithThumbnailRunnable(
     /* [in] */ ViewAnimation::TaskViewEnterContext* ctx)
     : mCtx(ctx)
 {}
 
-ECode TaskView::EndActionRunnable2::Run()
+ECode TaskView::EndLaunchedFromAppWithThumbnailRunnable::Run()
 {
     // Decrement the post animation trigger
     mCtx->mPostAnimationTrigger->Decrement();
     return NOERROR;
 }
 
+//======================================================================
+// TaskView::EnableFocusAnimationsDimRunnable
+//======================================================================
 TaskView::EnableFocusAnimationsDimRunnable::EnableFocusAnimationsDimRunnable(
     /* [in] */ TaskView* host)
     : mHost(host)
@@ -196,6 +227,9 @@ ECode TaskView::EnableFocusAnimationsDimRunnable::Run()
     return NOERROR;
 }
 
+//======================================================================
+// TaskView::EndActionRunnable3
+//======================================================================
 TaskView::EndActionRunnable3::EndActionRunnable3(
     /* [in] */ TaskView* host,
     /* [in] */ IRunnable* r)
@@ -217,6 +251,9 @@ ECode TaskView::EndActionRunnable3::Run()
     return NOERROR;
 }
 
+//======================================================================
+// TaskView::DismissTaskRunnable
+//======================================================================
 TaskView::DismissTaskRunnable::DismissTaskRunnable(
     /* [in] */ TaskView* host)
     : mHost(host)
@@ -229,6 +266,9 @@ ECode TaskView::DismissTaskRunnable::Run()
     return NOERROR;
 }
 
+//======================================================================
+// TaskView::OnClickRunnable
+//======================================================================
 TaskView::OnClickRunnable::OnClickRunnable(
     /* [in] */ TaskView* host,
     /* [in] */ IView* v)
@@ -249,6 +289,9 @@ ECode TaskView::OnClickRunnable::Run()
     return NOERROR;
 }
 
+//======================================================================
+// TaskView
+//======================================================================
 CAR_INTERFACE_IMPL(TaskView, FrameLayout, ITaskView)
 
 TaskView::TaskView()
@@ -261,11 +304,6 @@ TaskView::TaskView()
     , mIsFullScreenView(FALSE)
     , mClipViewInStack(FALSE)
 {
-    CAccelerateInterpolator::New(1.0f, (IAccelerateInterpolator**)&mDimInterpolator);
-    CPorterDuffColorFilter::New(0, PorterDuffMode_MULTIPLY, (IPorterDuffColorFilter**)&mDimColorFilter);
-    CPaint::New((IPaint**)&mLayerPaint);
-    mUpdateDimListener = new AnimatorUpdateListener(this);
-    mWrapper = new Wrapper(this);
 }
 
 ECode TaskView::constructor(
@@ -296,10 +334,20 @@ ECode TaskView::constructor(
     /* [in] */ Int32 defStyleRes)
 {
     FAIL_RETURN(FrameLayout::constructor(context, attrs, defStyleAttr, defStyleRes));
+
+    CAccelerateInterpolator::New(1.0f, (IAccelerateInterpolator**)&mDimInterpolator);
+    CPorterDuffColorFilter::New(0, PorterDuffMode_MULTIPLY, (IPorterDuffColorFilter**)&mDimColorFilter);
+    CPaint::New((IPaint**)&mLayerPaint);
+    mUpdateDimListener = new TaskProgressAnimatorUpdateListener(this);
+    mWrapper = new Wrapper(this);
+
     mConfig = RecentsConfiguration::GetInstance();
     mMaxDimScale = mConfig->mTaskStackMaxDim / 255.0f;
     mClipViewInStack = TRUE;
-    mViewBounds = new AnimateableViewBounds(this, mConfig->mTaskViewRoundedCornerRadiusPx);
+    AutoPtr<IAnimateableViewBounds> avb;
+    CAnimateableViewBounds::New(this, mConfig->mTaskViewRoundedCornerRadiusPx,
+        (IAnimateableViewBounds**)&avb);
+    mViewBounds = (AnimateableViewBounds*)avb.Get();
     SetTaskProgress(GetTaskProgress());
     SetDim(GetDim());
     if (mConfig->mFakeShadows) {
@@ -310,6 +358,8 @@ ECode TaskView::constructor(
         SetBackground(drawable);
     }
     SetOutlineProvider(mViewBounds);
+    Logger::I(TAG, " >> constructor: mMaxDimScale:%.2f, mConfig->mFakeShadows:%d",
+        mMaxDimScale, mConfig->mFakeShadows);
     return NOERROR;
 }
 
@@ -360,6 +410,7 @@ void TaskView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
+    Logger::I(TAG, " >> OnMeasure");
     Int32 width = MeasureSpec::GetSize(widthMeasureSpec);
     Int32 height = MeasureSpec::GetSize(heightMeasureSpec);
 
@@ -367,35 +418,37 @@ void TaskView::OnMeasure(
     Int32 heightWithoutPadding = height - mPaddingTop - mPaddingBottom;
 
     // Measure the content
-    mContent->Measure(MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::EXACTLY),
-            MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::EXACTLY));
+    mContent->Measure(
+        MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::EXACTLY),
+        MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::EXACTLY));
 
     // Measure the bar view, thumbnail, and footer
-    mHeaderView->Measure(MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::EXACTLY),
-            MeasureSpec::MakeMeasureSpec(mConfig->mTaskBarHeight, MeasureSpec::EXACTLY));
+    mHeaderView->Measure(
+        MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::EXACTLY),
+        MeasureSpec::MakeMeasureSpec(mConfig->mTaskBarHeight, MeasureSpec::EXACTLY));
     if (mFooterView != NULL) {
         mFooterView->Measure(
-                MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::EXACTLY),
-                MeasureSpec::MakeMeasureSpec(mConfig->mTaskViewLockToAppButtonHeight,
-                        MeasureSpec::EXACTLY));
+            MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::EXACTLY),
+            MeasureSpec::MakeMeasureSpec(mConfig->mTaskViewLockToAppButtonHeight, MeasureSpec::EXACTLY));
     }
     mActionButtonView->Measure(
-            MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::AT_MOST),
-            MeasureSpec::MakeMeasureSpec(heightWithoutPadding, MeasureSpec::AT_MOST));
+        MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::AT_MOST),
+        MeasureSpec::MakeMeasureSpec(heightWithoutPadding, MeasureSpec::AT_MOST));
     if (mIsFullScreenView) {
         // Measure the thumbnail height to be the full dimensions
         mThumbnailView->Measure(
-                MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::EXACTLY),
-                MeasureSpec::MakeMeasureSpec(heightWithoutPadding, MeasureSpec::EXACTLY));
+            MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::EXACTLY),
+            MeasureSpec::MakeMeasureSpec(heightWithoutPadding, MeasureSpec::EXACTLY));
     }
     else {
         // Measure the thumbnail to be square
         mThumbnailView->Measure(
-                MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::EXACTLY),
-                MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::EXACTLY));
+            MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::EXACTLY),
+            MeasureSpec::MakeMeasureSpec(widthWithoutPadding, MeasureSpec::EXACTLY));
     }
     SetMeasuredDimension(width, height);
     InvalidateOutline();
+    Logger::I(TAG, " << OnMeasure w:h=(%d, %d)", width, height);
 }
 
 /** Synchronizes this view's properties with the task's transform */
@@ -552,7 +605,7 @@ void TaskView::StartEnterRecentsAnimation(
             startDelay = mConfig->mTaskViewEnterFromHomeStaggerDelay;
 
             // Animate the top clip
-            AutoPtr<IAnimatorUpdateListener> listener = new AnimatorUpdateListener2(this);
+            AutoPtr<IAnimatorUpdateListener> listener = new ClipTopAnimatorUpdateListener(this);
             mViewBounds->AnimateClipTop(windowInsetTop, duration, listener);
             // Animate the bottom or right clip
             Int32 size = Elastos::Core::Math::Round(width / taskScale);
@@ -563,7 +616,7 @@ void TaskView::StartEnterRecentsAnimation(
                 mViewBounds->AnimateClipBottom(measuredHeight - (windowInsetTop + size), duration);
             }
             // Animate the task bar of the first task view
-            AutoPtr<Runnable> runnable = new EndActionRunnable(this, ctx);
+            AutoPtr<Runnable> runnable = new EndLaunchedFromAppWithScreenshotRunnable(this, ctx);
             AutoPtr<IViewPropertyAnimator> animator;
             Animate((IViewPropertyAnimator**)&animator);
             animator->ScaleX(taskScale);
@@ -590,10 +643,9 @@ void TaskView::StartEnterRecentsAnimation(
             }
             else {
                 // Immediately start the dim animation
-                assert(0);
-                // AnimateDimToProgress(mConfig->mTaskBarEnterAnimDelay,
-                //         mConfig->mTaskBarEnterAnimDuration,
-                //         ctx->mPostAnimationTrigger->DecrementOnAnimationEnd());
+                AnimateDimToProgress(mConfig->mTaskBarEnterAnimDelay,
+                    mConfig->mTaskBarEnterAnimDuration,
+                    ctx->mPostAnimationTrigger->DecrementOnAnimationEnd());
             }
             ctx->mPostAnimationTrigger->Increment();
 
@@ -625,7 +677,7 @@ void TaskView::StartEnterRecentsAnimation(
                 animator->SetInterpolator(
                     ITimeInterpolator::Probe(mConfig->mFastOutSlowInInterpolator));
                 animator->SetDuration(mConfig->mTaskViewEnterFromHomeDuration);
-                AutoPtr<Runnable> runnable = new EndActionRunnable2(ctx);
+                AutoPtr<Runnable> runnable = new EndLaunchedFromAppWithThumbnailRunnable(ctx);
                 animator->WithEndAction(runnable);
                 animator->Start();
                 ctx->mPostAnimationTrigger->Increment();
@@ -653,7 +705,7 @@ void TaskView::StartEnterRecentsAnimation(
             ITimeInterpolator::Probe(mConfig->mQuintOutInterpolator));
         animator->SetDuration(mConfig->mTaskViewEnterFromHomeDuration +
                         frontIndex * mConfig->mTaskViewEnterFromHomeStaggerDelay);
-        AutoPtr<Runnable> runnable = new EndActionRunnable2(ctx);
+        AutoPtr<Runnable> runnable = new EndLaunchedFromAppWithThumbnailRunnable(ctx);
         animator->WithEndAction(runnable);
         animator->Start();
         ctx->mPostAnimationTrigger->Increment();
@@ -687,8 +739,7 @@ void TaskView::StartExitToHomeAnimation(
     animator->SetInterpolator(
         ITimeInterpolator::Probe(mConfig->mFastOutLinearInInterpolator));
     animator->SetDuration(mConfig->mTaskViewExitToHomeDuration);
-    assert(0);
-    // animator->WithEndAction(ctx->mPostAnimationTrigger->DecrementAsRunnable())
+    animator->WithEndAction(ctx->mPostAnimationTrigger->DecrementAsRunnable());
     animator->Start();
     ctx->mPostAnimationTrigger->Increment();
 }
@@ -712,10 +763,10 @@ void TaskView::StartLaunchTaskAnimation(
             (*params)[0] = 0;
             AutoPtr<IObjectAnimator> anim;
             oaHelper->OfInt32(TO_IINTERFACE(this), String("dim"), params, (IObjectAnimator**)&anim);
-            IAnimator::Probe(anim)->SetDuration(mConfig->mTaskBarExitAnimDuration);
-            IAnimator::Probe(anim)->SetInterpolator(
-                ITimeInterpolator::Probe(mConfig->mFastOutLinearInInterpolator));
-            IAnimator::Probe(anim)->Start();
+            IAnimator* animator = IAnimator::Probe(anim);
+            animator->SetDuration(mConfig->mTaskBarExitAnimDuration);
+            animator->SetInterpolator(ITimeInterpolator::Probe(mConfig->mFastOutLinearInInterpolator));
+            animator->Start();
         }
 
         // Animate the action button away
@@ -1075,8 +1126,9 @@ ECode TaskView::OnTaskDataLoaded()
     if (mThumbnailView != NULL && mHeaderView != NULL) {
         // Bind each of the views to the new task data
         if (mIsFullScreenView) {
-            assert(0);
-            // mThumbnailView->BindToScreenshot(AlternateRecentsComponent::GetLastScreenshot());
+            AutoPtr<IBitmap> bmp;
+            AlternateRecentsComponent::GetLastScreenshot((IBitmap**)&bmp);
+            mThumbnailView->BindToScreenshot(bmp);
         }
         else {
             mThumbnailView->RebindToTask(mTask);

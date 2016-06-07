@@ -1322,7 +1322,7 @@ ECode ActivityStackSupervisor::StartActivityMayWait(
                             CIntent::New((IIntent**)&newIntent);
                             if (requestCode >= 0) {
                                 // Caller is requesting a result.
-                                newIntent->PutExtra(IHeavyWeightSwitcherActivity::KEY_HAS_RESULT, TRUE);
+                                newIntent->PutBooleanExtra(IHeavyWeightSwitcherActivity::KEY_HAS_RESULT, TRUE);
                             }
                             AutoPtr<IIntentSender> tmpIntentSender;
                             CIntentSender::New(target, (IIntentSender**)&tmpIntentSender);// IParcelable

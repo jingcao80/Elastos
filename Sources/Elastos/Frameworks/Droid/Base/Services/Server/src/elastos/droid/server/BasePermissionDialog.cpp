@@ -40,13 +40,16 @@ CAR_INTERFACE_IMPL(BasePermissionDialog, AlertDialog, IBasePermissionDialog)
 BasePermissionDialog::BasePermissionDialog()
     : mConsuming(TRUE)
 {
-    mHandler = new MyHandler(this);
 }
 
 ECode BasePermissionDialog::constructor(
     /* [in] */ IContext* context)
 {
     AlertDialog::constructor(context, R::style::Theme_Dialog_AppError);
+
+    AutoPtr<MyHandler> mh = new MyHandler(this);
+    mh->constructor();
+    mHandler = mh.Get();
 
     AutoPtr<IWindow> wd;
     GetWindow((IWindow**)&wd);
@@ -91,21 +94,20 @@ ECode BasePermissionDialog::SetEnabled(
 {
     AutoPtr<IView> v;
     FindViewById(R::id::button1, (IView**)&v);
-    AutoPtr<IButton> b = IButton::Probe(v);
-    if (b != NULL) {
-        IView::Probe(b)->SetEnabled(enabled);
+    if (v != NULL) {
+        v->SetEnabled(enabled);
     }
+
     v = NULL;
     FindViewById(R::id::button2, (IView**)&v);
-    b = IButton::Probe(v);
-    if (b != NULL) {
-        IView::Probe(b)->SetEnabled(enabled);
+    if (v != NULL) {
+        v->SetEnabled(enabled);
     }
+
     v = NULL;
     FindViewById(R::id::button3, (IView**)&v);
-    b = IButton::Probe(v);
-    if (b != NULL) {
-        IView::Probe(b)->SetEnabled(enabled);
+    if (v != NULL) {
+        v->SetEnabled(enabled);
     }
     return NOERROR;
 }

@@ -13,6 +13,8 @@ namespace Monkey {
 CarClass(CMonkeySourceRandomHelper), public MonkeySourceRandomHelper
 {
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI GetKeyName(
         /* [in] */ Int32 keycode,
         /* [out] */ String *ret);

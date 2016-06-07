@@ -1,5 +1,7 @@
 #include "elastos/droid/systemui/recents/model/TaskGrouping.h"
+#include "elastos/droid/systemui/recents/model/RecentsTaskLoader.h"
 #include "elastos/droid/systemui/recents/views/TaskStackView.h"
+#include "elastos/droid/systemui/recents/views/CTaskStackViewScroller.h"
 #include "elastos/droid/systemui/recents/misc/Utilities.h"
 #include "elastos/droid/systemui/recents/Constants.h"
 #include <elastos/droid/view/LayoutInflater.h>
@@ -15,6 +17,7 @@ using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::SystemUI::Recents::Model::EIID_IPackageCallbacks;
 using Elastos::Droid::SystemUI::Recents::Model::EIID_ITaskStackCallbacks;
 using Elastos::Droid::SystemUI::Recents::Model::TaskGrouping;
+using Elastos::Droid::SystemUI::Recents::Model::RecentsTaskLoader;
 using Elastos::Droid::SystemUI::Recents::Misc::Utilities;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
@@ -33,6 +36,9 @@ namespace Views {
 
 static const String TAG("TaskStackView");
 
+//=======================================================
+// TaskStackView::Wrapper
+//=======================================================
 CAR_INTERFACE_IMPL_5(TaskStackView::Wrapper, Object, ITaskStackCallbacks, ITaskViewCallbacks,
     ITaskStackViewScrollerCallbacks, IViewPoolConsumer, IPackageCallbacks)
 
@@ -157,6 +163,9 @@ ECode TaskStackView::Wrapper::OnComponentRemoved(
     return mHost->OnComponentRemoved(cns);
 }
 
+//=======================================================
+// TaskStackView::AnimatorUpdateListener
+//=======================================================
 CAR_INTERFACE_IMPL(TaskStackView::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
 
 TaskStackView::AnimatorUpdateListener::AnimatorUpdateListener(
@@ -171,6 +180,9 @@ ECode TaskStackView::AnimatorUpdateListener::OnAnimationUpdate(
     return NOERROR;
 }
 
+//=======================================================
+// TaskStackView::ReturnAllViewsToPoolRunnable
+//=======================================================
 TaskStackView::ReturnAllViewsToPoolRunnable::ReturnAllViewsToPoolRunnable(
     /* [in] */ TaskStackView* host)
     : mHost(host)
@@ -191,6 +203,9 @@ ECode TaskStackView::ReturnAllViewsToPoolRunnable::Run()
     return NOERROR;
 }
 
+//=======================================================
+// TaskStackView::SleepRunnable
+//=======================================================
 TaskStackView::SleepRunnable::SleepRunnable(
     /* [in] */ TaskStackView* host)
     : mHost(host)
@@ -209,6 +224,9 @@ ECode TaskStackView::SleepRunnable::Run()
     return NOERROR;
 }
 
+//=======================================================
+// TaskStackView::PostScrollRunnable
+//=======================================================
 TaskStackView::PostScrollRunnable::PostScrollRunnable(
     /* [in] */ TaskStackView* host)
     : mHost(host)
@@ -226,6 +244,9 @@ ECode TaskStackView::PostScrollRunnable::Run()
     return NOERROR;
 }
 
+//=======================================================
+// TaskStackView::LastDecrementRunnable
+//=======================================================
 TaskStackView::LastDecrementRunnable::LastDecrementRunnable(
     /* [in] */ TaskStackView* host)
     : mHost(host)
@@ -235,14 +256,14 @@ ECode TaskStackView::LastDecrementRunnable::Run()
 {
     mHost->mStartEnterAnimationCompleted = TRUE;
     // Start dozing
-    assert(0);
-    // mHost->mUIDozeTrigger->StartDozing();
-    // // Focus the first view if accessibility is enabled
-    // AutoPtr<RecentsTaskLoader> loader = RecentsTaskLoader::GetInstance();
-    // AutoPtr<SystemServicesProxy> ssp = loader->GetSystemServicesProxy();
+    mHost->mUIDozeTrigger->StartDozing();
+    // Focus the first view if accessibility is enabled
+    AutoPtr<RecentsTaskLoader> loader = RecentsTaskLoader::GetInstance();
+    AutoPtr<SystemServicesProxy> ssp;
+    loader->GetSystemServicesProxy((SystemServicesProxy**)&ssp);
     Int32 childCount;
     mHost->GetChildCount(&childCount);
-    if (childCount > 0 /*&& ssp.isTouchExplorationEnabled()*/) {
+    if (childCount > 0 && ssp->IsTouchExplorationEnabled()) {
         AutoPtr<IView> v;
         mHost->GetChildAt(childCount - 1, (IView**)&v);
         TaskView* tv = (TaskView*)ITaskView::Probe(v);
@@ -253,6 +274,9 @@ ECode TaskStackView::LastDecrementRunnable::Run()
     return NOERROR;
 }
 
+//=======================================================
+// TaskStackView::DeleteTaskRunnable
+//=======================================================
 TaskStackView::DeleteTaskRunnable::DeleteTaskRunnable(
     /* [in] */ TaskStackView* host,
     /* [in] */ Task* t)
@@ -266,6 +290,9 @@ ECode TaskStackView::DeleteTaskRunnable::Run()
     return NOERROR;
 }
 
+//=======================================================
+// TaskStackView
+//=======================================================
 CAR_INTERFACE_IMPL(TaskStackView, FrameLayout, ITaskStackView)
 
 TaskStackView::TaskStackView()
@@ -278,6 +305,14 @@ TaskStackView::TaskStackView()
     , mStartEnterAnimationRequestedAfterLayout(FALSE)
     , mStartEnterAnimationCompleted(FALSE)
 {
+}
+
+ECode TaskStackView::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ ITaskStack* stack)
+{
+    FAIL_RETURN(FrameLayout::constructor(context));
+
     CArrayList::New((IArrayList**)&mCurrentTaskTransforms);
     CRect::New((IRect**)&mTaskStackBounds);
     mTmpVisibleRange = ArrayOf<Int32>::Alloc(2);
@@ -289,13 +324,7 @@ TaskStackView::TaskStackView()
     mRequestUpdateClippingListener = new AnimatorUpdateListener(this);
     mReturnAllViewsToPoolRunnable = new ReturnAllViewsToPoolRunnable(this);
     mWrapper = new Wrapper(this);
-}
 
-ECode TaskStackView::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ ITaskStack* stack)
-{
-    FAIL_RETURN(FrameLayout::constructor(context));
     mConfig = RecentsConfiguration::GetInstance();
     mStack = (TaskStack*)stack;
     mStack->SetCallbacks(mWrapper);
@@ -303,7 +332,12 @@ ECode TaskStackView::constructor(
     LayoutInflater::From(context, (ILayoutInflater**)&mInflater);
     mLayoutAlgorithm = new TaskStackViewLayoutAlgorithm(mConfig);
     mFilterAlgorithm = new TaskStackViewFilterAlgorithm(mConfig, this, mViewPool);
-    mStackScroller = new TaskStackViewScroller(context, mConfig, mLayoutAlgorithm);
+
+    AutoPtr<ITaskStackViewScroller> scroller;
+    CTaskStackViewScroller::New(context, mConfig.Get(), mLayoutAlgorithm.Get(),
+        (ITaskStackViewScroller**)&scroller);
+    mStackScroller = (TaskStackViewScroller*)scroller.Get();
+
     mStackScroller->SetCallbacks(mWrapper);
     mTouchHandler = new TaskStackViewTouchHandler(context, this, mConfig, mStackScroller);
     AutoPtr<Runnable> runnable = new SleepRunnable(this);
@@ -481,9 +515,9 @@ AutoPtr<IArrayList> TaskStackView::GetStackTransforms(
 Boolean TaskStackView::SynchronizeStackViewsWithModel()
 {
     if (mStackViewsDirty) {
-        assert(0);
-        // AutoPtr<RecentsTaskLoader> loader = RecentsTaskLoader::GetInstance();
-        // AutoPtr<SystemServicesProxy> ssp = loader->GetSystemServicesProxy();
+        AutoPtr<RecentsTaskLoader> loader = RecentsTaskLoader::GetInstance();
+        AutoPtr<SystemServicesProxy> ssp;
+        loader->GetSystemServicesProxy((SystemServicesProxy**)&ssp);
 
         // Get all the task transforms
         AutoPtr<IArrayList> tasks = mStack->GetTasks();
@@ -555,8 +589,7 @@ Boolean TaskStackView::SynchronizeStackViewsWithModel()
             // Request accessibility focus on the next view if we removed the task
             // that previously held accessibility focus
             GetChildCount(&childCount);
-            assert(0);
-            if (childCount > 0 /*&& ssp.isTouchExplorationEnabled()*/) {
+            if (childCount > 0 && ssp->IsTouchExplorationEnabled()) {
                 AutoPtr<IView> v;
                 GetChildAt(childCount - 1, (IView**)&v);
                 TaskView* atv = (TaskView*)ITaskView::Probe(v);
@@ -820,6 +853,7 @@ void TaskStackView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
+    Logger::I(TAG, " >> OnMeasure");
     Int32 width = MeasureSpec::GetSize(widthMeasureSpec);
     Int32 height = MeasureSpec::GetSize(heightMeasureSpec);
 
@@ -877,6 +911,7 @@ void TaskStackView::OnMeasure(
     }
 
     SetMeasuredDimension(width, height);
+    Logger::I(TAG, " << OnMeasure: w:h=(%d, %d)", width, height);
 }
 
 /**
@@ -891,6 +926,7 @@ ECode TaskStackView::OnLayout(
     /* [in] */ Int32 right,
     /* [in] */ Int32 bottom)
 {
+    Logger::I(TAG, " >> OnLayout");
     // Layout each of the children
     Int32 childCount;
     GetChildCount(&childCount);
@@ -915,15 +951,9 @@ ECode TaskStackView::OnLayout(
                 mTmpRect->SetEmpty();
             }
             Int32 l1, r1, t1, b1;
-            mLayoutAlgorithm->mTaskRect->GetLeft(&l1);
-            mLayoutAlgorithm->mTaskRect->GetRight(&r1);
-            mLayoutAlgorithm->mTaskRect->GetTop(&t1);
-            mLayoutAlgorithm->mTaskRect->GetBottom(&b1);
+            mLayoutAlgorithm->mTaskRect->Get(&l1, &t1, &r1, &b1);
             Int32 l2, r2, t2, b2;
-            mTmpRect->GetLeft(&l2);
-            mTmpRect->GetRight(&r2);
-            mTmpRect->GetTop(&t2);
-            mTmpRect->GetBottom(&b2);
+            mTmpRect->Get(&l2, &t2, &r2, &b2);
             tv->Layout(l1 - l2, t1 - t2, r1 + r2, b1 + b2 + tv->GetMaxFooterHeight());
         }
     }
@@ -932,6 +962,7 @@ ECode TaskStackView::OnLayout(
         mAwaitingFirstLayout = FALSE;
         OnFirstLayout();
     }
+    Logger::I(TAG, " << OnLayout");
     return NOERROR;
 }
 
@@ -965,9 +996,11 @@ void TaskStackView::OnFirstLayout()
         GetChildAt(i, (IView**)&v);
         TaskView* tv = (TaskView*)ITaskView::Probe(v);
         AutoPtr<Task> task = tv->GetTask();
-        AutoPtr<TaskGrouping> tg = (TaskGrouping*)(launchTargetTask->mGroup).Get();
-        Boolean occludesLaunchTarget = (launchTargetTask != NULL) &&
-            tg->IsTaskAboveTask(task, launchTargetTask);
+        AutoPtr<TaskGrouping> tg;
+        if (launchTargetTask != NULL) {
+            tg = (TaskGrouping*)launchTargetTask->mGroup.Get();
+        }
+        Boolean occludesLaunchTarget = (tg != NULL) && tg->IsTaskAboveTask(task, launchTargetTask);
         tv->PrepareEnterRecentsAnimation(task->mIsLaunchTarget, occludesLaunchTarget, offscreenY);
     }
 
@@ -1027,9 +1060,12 @@ void TaskStackView::StartEnterRecentsAnimation(
             ctx->mCurrentStackViewIndex = i;
             ctx->mCurrentStackViewCount = childCount;
             ctx->mCurrentTaskRect = mLayoutAlgorithm->mTaskRect;
-            AutoPtr<TaskGrouping> tg = (TaskGrouping*)(launchTargetTask->mGroup).Get();
-            ctx->mCurrentTaskOccludesLaunchTarget = (launchTargetTask != NULL) &&
-                tg->IsTaskAboveTask(task, launchTargetTask);
+            AutoPtr<TaskGrouping> tg;
+            if (launchTargetTask != NULL) {
+                tg = (TaskGrouping*)launchTargetTask->mGroup.Get();
+            }
+            ctx->mCurrentTaskOccludesLaunchTarget = (tg != NULL)
+                && tg->IsTaskAboveTask(task, launchTargetTask);
             ctx->mUpdateListener = mRequestUpdateClippingListener;
             mLayoutAlgorithm->GetStackTransform(task, mStackScroller->GetStackScroll(),
                 ctx->mCurrentTaskTransform, NULL);
@@ -1152,8 +1188,8 @@ ECode TaskStackView::OnStackTaskRemoved(
     // Offset the stack by as much as the anchor task would otherwise move back
     if (pullStackForward) {
         Float anchorTaskScroll = mLayoutAlgorithm->GetStackScrollForTask(anchorTask);
-        mStackScroller->SetStackScroll(mStackScroller->GetStackScroll() + (anchorTaskScroll
-                - prevAnchorTaskScroll));
+        mStackScroller->SetStackScroll(mStackScroller->GetStackScroll()
+            + (anchorTaskScroll - prevAnchorTaskScroll));
         mStackScroller->BoundScroll();
     }
 
@@ -1278,8 +1314,7 @@ ECode TaskStackView::PrepareViewToEnterPool(
     }
 
     // Report that this tasks's data is no longer being used
-    assert(0);
-    // RecentsTaskLoader::GetInstance()->UnloadTaskData(task);
+    RecentsTaskLoader::GetInstance()->UnloadTaskData(task);
 
     // Detach the view from the hierarchy
     DetachViewFromParent(tv);
@@ -1307,18 +1342,16 @@ ECode TaskStackView::PrepareViewToLeavePool(
     }
 
     // Load the task data
-    assert(0);
-    // RecentsTaskLoader::GetInstance()->LoadTaskData(task);
+    RecentsTaskLoader::GetInstance()->LoadTaskData(task);
 
     // Sanity check, the task view should always be clipping against the stack at this point,
     // but just in case, re-enable it here
     tv->SetClipViewInStack(TRUE);
 
     // If the doze trigger has already fired, then update the state for this task view
-    assert(0);
-    // if (mUIDozeTrigger->HasTriggered()) {
-    //     tv->SetNoUserInteractionState();
-    // }
+    if (mUIDozeTrigger->HasTriggered()) {
+        tv->SetNoUserInteractionState();
+    }
 
     // If we've finished the start animation, then ensure we always enable the focus animations
     if (mStartEnterAnimationCompleted) {

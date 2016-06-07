@@ -24,4 +24,4 @@ SOURCES += TaskViewHeader.cpp
 SOURCES += TaskViewThumbnail.cpp
 SOURCES += TaskViewTransform.cpp
 SOURCES += ViewPool.cpp
-SOURCES += Views.cpp
+SOURCES += views.cpp

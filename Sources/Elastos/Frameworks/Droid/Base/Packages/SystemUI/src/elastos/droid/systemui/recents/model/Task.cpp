@@ -33,11 +33,8 @@ ECode Task::ComponentNameKey::GetHashCode(
 {
     VALIDATE_NOT_NULL(hashCode);
     // return Objects.hash(mComponent, mUserId);
-    *hashCode = 1;
-    if (mComponent != NULL) {
-        IObject::Probe(mComponent)->GetHashCode(hashCode);
-    }
-    *hashCode = 31 * (*hashCode) + mUserId;
+    Int32 hash = Object::GetHashCode(mComponent);
+    *hashCode = 31 * hash + mUserId;
     return NOERROR;
 }
 
@@ -47,14 +44,13 @@ ECode Task::ComponentNameKey::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+
     if (!IComponentNameKey::Probe(o)) {
-        *result = FALSE;
         return NOERROR;
     }
     ComponentNameKey* other = (ComponentNameKey*)IComponentNameKey::Probe(o);
-    Boolean res;
-    *result = (IObject::Probe(mComponent)->Equals(other->mComponent, &res), res) &&
-            mUserId == other->mUserId;
+    *result = Object::Equals(mComponent, other->mComponent) && mUserId == other->mUserId;
     return NOERROR;
 }
 

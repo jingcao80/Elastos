@@ -174,6 +174,8 @@ private:
     class Receiver: public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("UserSwitcherController::Receiver")
+
         Receiver(
             /* [in] */ UserSwitcherController* host);
 
@@ -181,13 +183,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("UserSwitcherController.Receiver");
-            return NOERROR;
-        }
 
     private:
         UserSwitcherController* mHost;

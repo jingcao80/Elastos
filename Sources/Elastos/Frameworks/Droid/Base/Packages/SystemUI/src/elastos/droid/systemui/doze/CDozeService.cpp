@@ -42,9 +42,8 @@ namespace Doze {
 
 const String CDozeService::TAG("DozeService");
 Boolean CDozeService::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
-const String CDozeService::ACTION_BASE("Elastos.Droid.SystemUI.Doze");
-const String CDozeService::PULSE_ACTION = ACTION_BASE + ".pulse";
-const String CDozeService::NOTIFICATION_PULSE_ACTION = ACTION_BASE + ".notification_pulse";
+const String CDozeService::PULSE_ACTION("com.android.systemui.doze.pulse");
+const String CDozeService::NOTIFICATION_PULSE_ACTION("com.android.systemui.doze.notification_pulse");
 const String CDozeService::EXTRA_INSTANCE("instance");
 
 CDozeService::DozeBroadcastReceiver::DozeBroadcastReceiver(

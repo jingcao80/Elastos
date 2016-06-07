@@ -14,7 +14,8 @@ namespace Policy {
 
 class BatteryController;
 
-CarClass(CBatteryControllerBroadcastReceiver), public BroadcastReceiver
+CarClass(CBatteryControllerBroadcastReceiver)
+    , public BroadcastReceiver
 {
 public:
     CAR_OBJECT_DECL()

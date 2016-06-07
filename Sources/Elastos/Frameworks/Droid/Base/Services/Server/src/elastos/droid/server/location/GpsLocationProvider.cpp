@@ -1964,7 +1964,7 @@ void GpsLocationProvider::ReportLocation(
         // send an intent to notify that the GPS is receiving fixes.
         AutoPtr<IIntent> intent;
         CIntent::New(ILocationManager::GPS_FIX_CHANGE_ACTION, (IIntent**)&intent);
-        intent->PutExtra(ILocationManager::EXTRA_GPS_ENABLED, TRUE);
+        intent->PutBooleanExtra(ILocationManager::EXTRA_GPS_ENABLED, TRUE);
         mContext->SendBroadcastAsUser(intent, UserHandle::ALL);
         UpdateStatus(ILocationProvider::AVAILABLE, mSvCount);
     }
@@ -2043,7 +2043,7 @@ void GpsLocationProvider::ReportSvStatus()
         // send an intent to notify that the GPS is no longer receiving fixes.
         AutoPtr<IIntent> intent;
         CIntent::New(ILocationManager::GPS_FIX_CHANGE_ACTION, (IIntent**)&intent);
-        intent->PutExtra(ILocationManager::EXTRA_GPS_ENABLED, FALSE);
+        intent->PutBooleanExtra(ILocationManager::EXTRA_GPS_ENABLED, FALSE);
         mContext->SendBroadcastAsUser(intent, UserHandle::ALL);
         UpdateStatus(ILocationProvider::TEMPORARILY_UNAVAILABLE, mSvCount);
     }

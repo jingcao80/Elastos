@@ -62,6 +62,9 @@ private:
     class Receiver: public BroadcastReceiver
     {
     public:
+
+        TO_STRING_IMPL("ZenModeControllerImpl::Receiver")
+
         Receiver(
             /* [in] */ ZenModeControllerImpl* host);
 
@@ -69,13 +72,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("ZenModeControllerImpl.Receiver");
-            return NOERROR;
-        }
 
     private:
         ZenModeControllerImpl* mHost;

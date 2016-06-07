@@ -211,7 +211,7 @@ module
     //merge("../../../../car/elastos/droid/recents/Constants.car");
     merge("../../../../car/elastos/droid/recents/RecentsActivity.car");
     merge("../../../../car/elastos/droid/recents/RecentsAppWidgetHost.car");
-    //merge("../../../../car/elastos/droid/recents/RecentsConfiguration.car");
+    merge("../../../../car/elastos/droid/recents/RecentsConfiguration.car");
 
     //recents/model
     merge("../../../../car/elastos/droid/recents/model/RecentsPackageMonitor.car");
@@ -233,6 +233,8 @@ module
     merge("../../../../car/elastos/droid/recents/views/TaskViewHeader.car");
     merge("../../../../car/elastos/droid/recents/views/TaskViewThumbnail.car");
     merge("../../../../car/elastos/droid/recents/views/ViewPool.car");
+    merge("../../../../car/elastos/droid/recents/views/TaskStackViewLayoutAlgorithm.car");
+    merge("../../../../car/elastos/droid/recents/views/AnimateableViewBounds.car");
 
     //settings
     merge("../../../../car/elastos/droid/settings/BrightnessController.car");
@@ -244,8 +246,6 @@ module
     using interface Elastos.Droid.App.INotification;
     using interface Elastos.Droid.App.IService;
     using interface Elastos.Droid.App.IActivity;
-//     using interface Elastos.Droid.App.INotification;
-//     using interface Elastos.Droid.App.IActivityOptionsOnAnimationStartedListener;
     using interface Elastos.Droid.Animation.IAnimatorListener;
     using interface Elastos.Droid.Content.IBroadcastReceiver;
     using interface Elastos.Droid.Content.IContext;
@@ -279,14 +279,10 @@ module
     using interface Elastos.Droid.Service.Wallpaper.IWallpaperService;
     using interface Elastos.Droid.View.IView;
     using interface Elastos.Droid.View.IViewOnLayoutChangeListener;
-//     using interface Elastos.Droid.View.IViewParent;
-//     using interface Elastos.Droid.View.IViewManager;
-//     using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOutlineProvider;
     using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
     using interface Elastos.Droid.View.IViewOnClickListener;
     using interface Elastos.Droid.View.IViewOnLongClickListener;
-//     using interface Elastos.Droid.View.IOnComputeInternalInsetsListener;
-//     using interface Elastos.Droid.View.IOnPreDrawListener;
     using interface Elastos.Droid.View.IContextThemeWrapper;
     using interface Elastos.Droid.View.ILayoutInflaterFactory;
     using interface Elastos.Droid.View.ILayoutInflaterFactory2;
@@ -318,6 +314,7 @@ module
     using interface Elastos.Droid.Widget.IViewAnimator;
     using interface Elastos.Droid.Widget.IViewSwitcher;
     using interface Elastos.Core.ICharSequence;
+
     interface Elastos.Droid.SystemUI.IDemoMode;
     interface Elastos.Droid.SystemUI.IExpandHelperCallback;
     interface Elastos.Droid.SystemUI.IRecentsComponent;
@@ -325,9 +322,7 @@ module
     interface Elastos.Droid.SystemUI.ISystemUI;
     interface Elastos.Droid.SystemUI.ISwipeHelperCallback;
     interface Elastos.Droid.SystemUI.Qs.IQSPanel;
-    interface Elastos.Droid.SystemUI.Recents.IRecentsAppWidgetHostCallbacks;
     interface Elastos.Droid.SystemUI.Qs.IQSTile;
-    interface Elastos.Droid.SystemUI.Recents.Model.ITaskStack;
     interface Elastos.Droid.SystemUI.StatusBar.IActivatableNotificationViewOnActivatedListener;
     interface Elastos.Droid.SystemUI.StatusBar.IBaseStatusBar;
     interface Elastos.Droid.SystemUI.StatusBar.ICommandQueueCallbacks;
@@ -350,6 +345,9 @@ module
     interface Elastos.Droid.SystemUI.StatusBar.Policy.IZenModeController;
     interface Elastos.Droid.SystemUI.StatusBar.Phone.IIconMerger;
     interface Elastos.Droid.SystemUI.StatusBar.Phone.ISystemUIDialog;
+    interface Elastos.Droid.SystemUI.Recents.Model.ITaskStack;
+    interface Elastos.Droid.SystemUI.Recents.IRecentsConfiguration;
+    interface Elastos.Droid.SystemUI.Recents.IRecentsAppWidgetHostCallbacks;
     interface Elastos.Droid.SystemUI.Recents.Views.IRecentsViewCallbacks;
     interface Elastos.Droid.SystemUI.Recents.Views.IDebugOverlayViewCallbacks;
 
@@ -1229,6 +1227,22 @@ module
             interface IBroadcastReceiver;
         }
 
+        [local]
+        class CRecentsActivityServiceBroadcastReceiver {
+            constructor(
+                [in] IRecentsActivity* host);
+
+            interface IBroadcastReceiver;
+        }
+
+        [local]
+        class CRecentsActivitySystemBroadcastReceiver {
+            constructor(
+                [in] IRecentsActivity* host);
+
+            interface IBroadcastReceiver;
+        }
+
     namespace Views {
         [local]
         class CDebugOverlayView {
@@ -1464,6 +1478,27 @@ module
 
             interface IDrawable;
         }
+
+        [local]
+        class CTaskStackViewScroller {
+            constructor(
+                [in] IContext* context,
+                [in] IRecentsConfiguration* config,
+                [in] ITaskStackViewLayoutAlgorithm* layoutAlgorithm);
+
+            interface ITaskStackViewScroller;
+        }
+
+        [local]
+        class CAnimateableViewBounds {
+            constructor(
+                [in] ITaskView* taskView,
+                [in] Int32 cornerRadius);
+
+            interface IAnimateableViewBounds;
+            interface IViewOutlineProvider;
+        }
+
 
     } // namespace Views
     } // namespace Recents
@@ -2610,7 +2645,7 @@ module
         [local]
         class CTrustDrawable {
             constructor(
-                [in] IContext* context);
+                [in] IContext* ctx);
 
             interface IDrawable;
         }

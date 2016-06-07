@@ -412,13 +412,18 @@ Boolean CVibratorService::VibratorExists()
 void CVibratorService::VibratorOn(
     /* [in] */ Int64 milliseconds)
 {
-    Slogger::I(TAG, " >> vibrator_on");
+    if (DBG) {
+        Slogger::D(TAG, "Turning vibrator on for %lld ms.", milliseconds);
+    }
+
     vibrator_on(milliseconds);
 }
 
 void CVibratorService::VibratorOff()
 {
-    Slogger::I(TAG, " >> vibrator_off");
+    if (DBG) {
+        Slogger::D(TAG, "Turning vibrator off.");
+    }
     vibrator_off();
 }
 
@@ -840,10 +845,6 @@ void CVibratorService::DoVibratorOn(
 {
     AutoLock Lock(mInputDeviceVibratorsLock);
 
-    if (DBG) {
-        Slogger::D(TAG, "Turning vibrator on for %lld ms.", millis);
-    }
-
     mBatteryStatsService->NoteVibratorOn(uid, millis);
     mCurVibUid = uid;
 
@@ -867,9 +868,6 @@ void CVibratorService::DoVibratorOn(
 void CVibratorService::DoVibratorOff()
 {
     AutoLock Lock(mInputDeviceVibratorsLock);
-    if (DBG) {
-        Slogger::D(TAG, "Turning vibrator off.");
-    }
     if (mCurVibUid >= 0) {
         mBatteryStatsService->NoteVibratorOff(mCurVibUid);
         mCurVibUid = -1;

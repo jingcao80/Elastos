@@ -89,7 +89,8 @@ private:
         CKeyguardBottomAreaView* mHost;
     };
 
-    class DevicePolicyReceiver: public BroadcastReceiver
+    class DevicePolicyReceiver
+        : public BroadcastReceiver
     {
     private:
         class DevicePolicyReceiverRun: public Runnable
@@ -106,19 +107,14 @@ private:
         };
 
     public:
+        TO_STRING_IMPL("CKeyguardBottomAreaView::DevicePolicyReceiver")
+
         DevicePolicyReceiver(
             /* [in] */ CKeyguardBottomAreaView* host);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("CKeyguardBottomAreaView.DevicePolicyReceiver");
-            return NOERROR;
-        }
 
     private:
         CKeyguardBottomAreaView* mHost;

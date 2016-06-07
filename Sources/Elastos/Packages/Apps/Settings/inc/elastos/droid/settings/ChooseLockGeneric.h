@@ -383,8 +383,8 @@ public class ChooseLockGeneric extends SettingsActivity {
         private Intent GetBiometricSensorIntent() {
             Intent fallBackIntent = new Intent()->SetClass(GetActivity(),
                     ChooseLockGeneric.InternalActivity.class);
-            fallBackIntent->PutExtra(LockPatternUtils.LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK, TRUE);
-            fallBackIntent->PutExtra(CONFIRM_CREDENTIALS, FALSE);
+            fallBackIntent->PutBooleanExtra(LockPatternUtils.LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK, TRUE);
+            fallBackIntent->PutBooleanExtra(CONFIRM_CREDENTIALS, FALSE);
             fallBackIntent->PutExtra(EXTRA_SHOW_FRAGMENT_TITLE,
                     R::string::backup_lock_settings_picker_title);
 
@@ -392,7 +392,7 @@ public class ChooseLockGeneric extends SettingsActivity {
                     !mChooseLockSettingsHelper->Utils()->IsBiometricWeakEverChosen();
             Intent intent = new Intent();
             intent->SetClassName("com.android.facelock", "com.android.facelock.SetupIntro");
-            intent->PutExtra("showTutorial", showTutorial);
+            intent->PutBooleanExtra("showTutorial", showTutorial);
             PendingIntent pending = PendingIntent->GetActivity(GetActivity(), 0, fallBackIntent, 0);
             intent->PutExtra("PendingIntent", pending);
             return intent;

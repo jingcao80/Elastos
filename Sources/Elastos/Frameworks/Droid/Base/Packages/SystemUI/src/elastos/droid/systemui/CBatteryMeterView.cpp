@@ -62,12 +62,12 @@ ECode CBatteryMeterView::Runnable_1::Run()
         mTestmode = FALSE;
         mDummy->PutExtra(String("level"), mSaveLevel);
         mDummy->PutExtra(String("plugged"), mSavePlugged);
-        mDummy->PutExtra(String("testmode"), FALSE);
+        mDummy->PutBooleanExtra(String("testmode"), FALSE);
     }
     else {
         mDummy->PutExtra(String("level"), mCurLevel);
         mDummy->PutExtra(String("plugged"), mIncr > 0 ? IBatteryManager::BATTERY_PLUGGED_AC : 0);
-        mDummy->PutExtra(String("testmode"), TRUE);
+        mDummy->PutBooleanExtra(String("testmode"), TRUE);
     }
     AutoPtr<IContext> ctx;
     mOwner->GetContext((IContext**)&ctx);
@@ -88,7 +88,7 @@ ECode CBatteryMeterView::Runnable_1::Run()
 // CBatteryMeterView::
 //===============================================================
 String CBatteryMeterView::TAG("BatteryMeterView");// = BatteryMeterView.class.getSimpleName();
-String CBatteryMeterView::ACTION_LEVEL_TEST = String("Elastos.Droid.SystemUI.BATTERY_LEVEL_TEST");
+String CBatteryMeterView::ACTION_LEVEL_TEST("com.android.systemui.BATTERY_LEVEL_TEST");
 Boolean CBatteryMeterView::ENABLE_PERCENT = TRUE;
 Boolean CBatteryMeterView::SINGLE_DIGIT_PERCENT = FALSE;
 Boolean CBatteryMeterView::SHOW_100_PERCENT = FALSE;

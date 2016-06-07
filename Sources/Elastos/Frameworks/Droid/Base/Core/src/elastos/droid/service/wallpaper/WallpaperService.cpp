@@ -659,7 +659,9 @@ ECode WallpaperService::Engine::UpdateSurface(
             Boolean hasValue = FALSE;
             if (shouldUseBottomOutset && (windowStyle->HasValue(
                     R::styleable::Window_windowOutsetBottom, &hasValue), hasValue)) {
-                if (mOutsetBottom == NULL) CTypedValue::New((ITypedValue**)&mOutsetBottom);
+                if (mOutsetBottom == NULL) {
+                    CTypedValue::New((ITypedValue**)&mOutsetBottom);
+                }
                 Boolean result;
                 windowStyle->GetValue(R::styleable::Window_windowOutsetBottom,
                         mOutsetBottom, &result);

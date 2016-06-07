@@ -4397,7 +4397,7 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
                 CIntent::New(IRecognizerIntent::ACTION_WEB_SEARCH, (IIntent**)&voiceIntent);
             } else {
                 CIntent::New(IRecognizerIntent::ACTION_VOICE_SEARCH_HANDS_FREE, (IIntent**)&voiceIntent);
-                voiceIntent->PutExtra(IRecognizerIntent::EXTRA_SECURE, TRUE);
+                voiceIntent->PutBooleanExtra(IRecognizerIntent::EXTRA_SECURE, TRUE);
             }
             mContext->StartActivityAsUser(voiceIntent, UserHandle::CURRENT_OR_SELF);
         }
@@ -4818,7 +4818,7 @@ void PhoneWindowManager::LaunchAssistAction(
 
     if (intent != NULL) {
         if (!hint.IsNull()) {
-            intent->PutExtra(hint, TRUE);
+            intent->PutBooleanExtra(hint, TRUE);
         }
         intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK
                 | IIntent::FLAG_ACTIVITY_SINGLE_TOP

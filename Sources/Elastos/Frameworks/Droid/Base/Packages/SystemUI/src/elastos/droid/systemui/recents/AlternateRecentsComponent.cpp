@@ -15,10 +15,12 @@
 #include "elastos/droid/systemui/recents/views/CTaskStackView.h"
 #include "elastos/droid/systemui/recents/views/TaskStackViewLayoutAlgorithm.h"
 #include "elastos/droid/systemui/recents/views/TaskStackViewScroller.h"
+#include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/R.h"
 #include "../R.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::CActivityOptionsHelper;
 using Elastos::Droid::App::EIID_IActivityOptionsOnAnimationStartedListener;
@@ -36,10 +38,8 @@ using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::IBitmapHelper;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Os::CHandler;
-using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::SystemUI::Recents::Constants;
 using Elastos::Droid::SystemUI::Recents::RecentsAppWidgetHost;
 using Elastos::Droid::SystemUI::Recents::Misc::Console;
@@ -64,6 +64,7 @@ using Elastos::Core::ISystem;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
 using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
+using Elastos::Utility::Logging::Logger;
 
 typedef Elastos::Droid::View::View::MeasureSpec MeasureSpec;
 
@@ -72,16 +73,18 @@ namespace Droid {
 namespace SystemUI {
 namespace Recents {
 
+static const String TAG("AlternateRecentsComponent");
+
 //-----------------------------------------------------------------------------------
-// AlternateRecentsComponent::MR
+// AlternateRecentsComponent::OnAnimationStartedRunnable
 //-----------------------------------------------------------------------------------
 
-AlternateRecentsComponent::MR::MR(
+AlternateRecentsComponent::OnAnimationStartedRunnable::OnAnimationStartedRunnable(
     /* [in] */ AlternateRecentsComponent* host)
     : mHost(host)
 {}
 
-ECode AlternateRecentsComponent::MR::Run()
+ECode AlternateRecentsComponent::OnAnimationStartedRunnable::Run()
 {
     return mHost->OnAnimationStarted();
 }
@@ -114,7 +117,7 @@ ECode AlternateRecentsComponent::RecentAnimationEndedReceiver::OnReceive(
     }
 
     // Schedule for the broadcast to be sent again after some time
-    AutoPtr<IRunnable> mr = new MR(mHost);
+    AutoPtr<IRunnable> mr = new OnAnimationStartedRunnable(mHost);
     Boolean b;
     mHost->mHandler->PostDelayed(mr, 75, &b);
     return NOERROR;
@@ -124,27 +127,16 @@ ECode AlternateRecentsComponent::RecentAnimationEndedReceiver::OnReceive(
 // AlternateRecentsComponent
 //-----------------------------------------------------------------------------------
 
-const String AlternateRecentsComponent::EXTRA_FROM_HOME("Recents.TriggeredOverHome");
-const String AlternateRecentsComponent::EXTRA_FROM_SEARCH_HOME("Recents.TriggeredOverSearchHome");
-const String AlternateRecentsComponent::EXTRA_FROM_APP_THUMBNAIL("Recents.AnimatingWithThumbnail");
-const String AlternateRecentsComponent::EXTRA_FROM_APP_FULL_SCREENSHOT("Recents.Thumbnail");
-const String AlternateRecentsComponent::EXTRA_FROM_TASK_ID("Recents.ActiveTaskId");
-const String AlternateRecentsComponent::EXTRA_TRIGGERED_FROM_ALT_TAB("Recents.TriggeredFromAltTab");
-const String AlternateRecentsComponent::EXTRA_TRIGGERED_FROM_HOME_KEY("Recents.TriggeredFromHomeKey");
-
-const String AlternateRecentsComponent::ACTION_START_ENTER_ANIMATION("action_start_enter_animation");
-const String AlternateRecentsComponent::ACTION_TOGGLE_RECENTS_ACTIVITY("action_toggle_recents_activity");
-const String AlternateRecentsComponent::ACTION_HIDE_RECENTS_ACTIVITY("action_hide_recents_activity");
-
 const Int32 AlternateRecentsComponent::sMinToggleDelay;
 
-const String AlternateRecentsComponent::sToggleRecentsAction("Elastos.Droid.SystemUI.Recents.SHOW_RECENTS");
+const String AlternateRecentsComponent::sToggleRecentsAction("com.android.systemui.recents.SHOW_RECENTS");
 const String AlternateRecentsComponent::sRecentsPackage("Elastos.Droid.SystemUI");
 const String AlternateRecentsComponent::sRecentsActivity("Elastos.Droid.SystemUI.Recents.CRecentsActivity");
 AutoPtr<IBitmap> AlternateRecentsComponent::sLastScreenshot;
 AutoPtr<IRecentsComponentCallbacks> AlternateRecentsComponent::sRecentsComponentCallbacks;
 
-CAR_INTERFACE_IMPL_2(AlternateRecentsComponent, Object, IActivityOptionsOnAnimationStartedListener, IAlternateRecentsComponent)
+CAR_INTERFACE_IMPL_2(AlternateRecentsComponent, Object, IActivityOptionsOnAnimationStartedListener, \
+    IAlternateRecentsComponent)
 
 AlternateRecentsComponent::AlternateRecentsComponent(
     /* [in] */ IContext* context)
@@ -229,19 +221,15 @@ ECode AlternateRecentsComponent::OnHideRecents(
         if (isRecentsTopMost) {
             // Notify recents to hide itself
             AutoPtr<IIntent> intent;
-            CIntent::New(ACTION_HIDE_RECENTS_ACTIVITY, (IIntent**)&intent);
+            CIntent::New(IAlternateRecentsComponent::ACTION_HIDE_RECENTS_ACTIVITY, (IIntent**)&intent);
             String pkgn;
             mContext->GetPackageName(&pkgn);
             intent->SetPackage(pkgn);
             intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
                 IIntent::FLAG_RECEIVER_FOREGROUND);
-            intent->PutExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, triggeredFromAltTab);
-            intent->PutExtra(EXTRA_TRIGGERED_FROM_HOME_KEY, triggeredFromHomeKey);
-            AutoPtr<IUserHandleHelper> uhh;
-            CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-            AutoPtr<IUserHandle> current;
-            uhh->GetCURRENT((IUserHandle**)&current);
-            mContext->SendBroadcastAsUser(intent, current);
+            intent->PutBooleanExtra(IAlternateRecentsComponent::EXTRA_TRIGGERED_FROM_ALT_TAB, triggeredFromAltTab);
+            intent->PutBooleanExtra(IAlternateRecentsComponent::EXTRA_TRIGGERED_FROM_HOME_KEY, triggeredFromHomeKey);
+            mContext->SendBroadcastAsUser(intent, UserHandle::CURRENT);
         }
     }
     return NOERROR;
@@ -250,12 +238,13 @@ ECode AlternateRecentsComponent::OnHideRecents(
 ECode AlternateRecentsComponent::OnToggleRecents(
     /* [in] */ IView* statusBarView)
 {
+    Logger::I(TAG, " >> OnToggleRecents");
     mStatusBarView = statusBarView;
     mTriggeredFromAltTab = FALSE;
 
     ECode ec = ToggleRecentsActivity();
     if (FAILED(ec)) {
-        Console::LogRawError(String("Failed to launch RecentAppsIntent"), ec);
+        Console::LogRawError(String("Failed to toggle RecentAppsIntent"), ec);
         return E_ACTIVITY_NOT_FOUND_EXCEPTION;
     }
     return NOERROR;
@@ -459,8 +448,7 @@ ECode AlternateRecentsComponent::IsRecentsTopMost(
         String packageName, className;
         topActivity->GetPackageName(&packageName);
         topActivity->GetClassName(&className);
-        if (packageName.Equals(sRecentsPackage) &&
-            className.Equals(sRecentsActivity)) {
+        if (packageName.Equals(sRecentsPackage) && className.Equals(sRecentsActivity)) {
             if (isHomeTopMost != NULL) {
                 isHomeTopMost->Set(FALSE);
             }
@@ -499,22 +487,20 @@ ECode AlternateRecentsComponent::ToggleRecentsActivity()
     CAtomicBoolean::New((IAtomicBoolean**)&isTopTaskHome);
     Boolean isRecentsTopMost;
     IsRecentsTopMost(topTask, isTopTaskHome, &isRecentsTopMost);
+    Logger::I(TAG, " >> ToggleRecentsActivity : %d", isRecentsTopMost);
     if (isRecentsTopMost) {
         // Notify recents to toggle itself
         AutoPtr<IIntent> intent;
-        CIntent::New(ACTION_TOGGLE_RECENTS_ACTIVITY, (IIntent**)&intent);
+        CIntent::New(IAlternateRecentsComponent::ACTION_TOGGLE_RECENTS_ACTIVITY, (IIntent**)&intent);
         String pn;
         mContext->GetPackageName(&pn);
         intent->SetPackage(pn);
-        intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
-            IIntent::FLAG_RECEIVER_FOREGROUND);
-        AutoPtr<IUserHandleHelper> uhh;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-        AutoPtr<IUserHandle> CURRENT;
-        uhh->GetCURRENT((IUserHandle**)&CURRENT);
-        mContext->SendBroadcastAsUser(intent, CURRENT);
+        intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+            | IIntent::FLAG_RECEIVER_FOREGROUND);
+        Logger::I(TAG, " >> ToggleRecentsActivity send broadcast: %s", TO_CSTR(intent));
+        mContext->SendBroadcastAsUser(intent, UserHandle::CURRENT);
         sys->GetCurrentTimeMillis(&mLastToggleTime);
-        return E_NULL_POINTER_EXCEPTION;
+        return NOERROR;
     }
     else {
         // Otherwise, start the recents activity
@@ -534,6 +520,7 @@ ECode AlternateRecentsComponent::StartRecentsActivity()
     CAtomicBoolean::New((IAtomicBoolean**)&isTopTaskHome);
     Boolean isRecentsTopMost;
     IsRecentsTopMost(topTask, isTopTaskHome, &isRecentsTopMost);
+    Logger::I(TAG, " >> StartRecentsActivity: isRecentsTopMost: %d", isRecentsTopMost);
     if (!isRecentsTopMost) {
         Boolean b;
         isTopTaskHome->Get(&b);
@@ -711,13 +698,8 @@ ECode AlternateRecentsComponent::StartRecentsActivity(
     // simple transition.  Otherwise, we animate to the rects defined by the Recents service,
     // which can differ depending on the number of items in the list.
     AutoPtr<SystemServicesProxy> ssp = mSystemServicesProxy;
-
-    AutoPtr<IUserHandleHelper> uhh;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-    AutoPtr<IUserHandle> current;
-    uhh->GetCURRENT((IUserHandle**)&current);
     Int32 id;
-    current->GetIdentifier(&id);
+    UserHandle::CURRENT->GetIdentifier(&id);
 
     AutoPtr<IList> recentTasks = ssp->GetRecentTasks(3, id, isTopTaskHome);
     Boolean useThumbnailTransition = !isTopTaskHome;
@@ -731,10 +713,12 @@ ECode AlternateRecentsComponent::StartRecentsActivity(
         GetThumbnailTransitionActivityOptions(topTask, isTopTaskHome, (IActivityOptions**)&opts);
         if (opts != NULL) {
             if (sLastScreenshot != NULL) {
-                StartAlternateRecentsActivity(topTask, opts, EXTRA_FROM_APP_FULL_SCREENSHOT);
+                StartAlternateRecentsActivity(topTask, opts,
+                    IAlternateRecentsComponent::EXTRA_FROM_APP_FULL_SCREENSHOT);
             }
             else {
-                StartAlternateRecentsActivity(topTask, opts, EXTRA_FROM_APP_THUMBNAIL);
+                StartAlternateRecentsActivity(topTask, opts,
+                    IAlternateRecentsComponent::EXTRA_FROM_APP_THUMBNAIL);
             }
         }
         else {
@@ -777,7 +761,8 @@ ECode AlternateRecentsComponent::StartRecentsActivity(
             AutoPtr<IActivityOptions> opts;
             GetHomeTransitionActivityOptions(fromSearchHome, (IActivityOptions**)&opts);
             StartAlternateRecentsActivity(topTask, opts,
-                fromSearchHome ? EXTRA_FROM_SEARCH_HOME : EXTRA_FROM_HOME);
+                fromSearchHome ? IAlternateRecentsComponent::EXTRA_FROM_SEARCH_HOME
+                    : IAlternateRecentsComponent::EXTRA_FROM_HOME);
         }
         else {
             // Otherwise we do the normal fade from an unknown source
@@ -801,26 +786,23 @@ ECode AlternateRecentsComponent::StartAlternateRecentsActivity(
     CIntent::New(sToggleRecentsAction, (IIntent**)&intent);
     intent->SetClassName(sRecentsPackage, sRecentsActivity);
     intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK
-            | IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-            | IIntent::FLAG_ACTIVITY_TASK_ON_HOME);
+        | IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+        | IIntent::FLAG_ACTIVITY_TASK_ON_HOME);
     if (!extraFlag.IsNull()) {
-        intent->PutExtra(extraFlag, TRUE);
+        intent->PutBooleanExtra(extraFlag, TRUE);
     }
-    intent->PutExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, mTriggeredFromAltTab);
+    intent->PutBooleanExtra(IAlternateRecentsComponent::EXTRA_TRIGGERED_FROM_ALT_TAB, mTriggeredFromAltTab);
     Int32 id;
     topTask->GetId(&id);
-    intent->PutExtra(EXTRA_FROM_TASK_ID, (topTask != NULL) ? id : -1);
-    AutoPtr<IUserHandleHelper> uhh;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-    AutoPtr<IUserHandle> CURRENT;
-    uhh->GetCURRENT((IUserHandle**)&CURRENT);
+    intent->PutExtra(IAlternateRecentsComponent::EXTRA_FROM_TASK_ID, (topTask != NULL) ? id : -1);
+    Logger::I(TAG, " >> StartAlternateRecentsActivity: %s", TO_CSTR(intent));
     if (opts != NULL) {
         AutoPtr<IBundle> bundle;
         opts->ToBundle((IBundle**)&bundle);
-        mContext->StartActivityAsUser(intent, bundle, CURRENT);
+        mContext->StartActivityAsUser(intent, bundle, UserHandle::CURRENT);
     }
     else {
-        mContext->StartActivityAsUser(intent, CURRENT);
+        mContext->StartActivityAsUser(intent, UserHandle::CURRENT);
     }
     return NOERROR;
 }
@@ -873,18 +855,14 @@ ECode AlternateRecentsComponent::OnAnimationStarted()
 
         // Send the broadcast to notify Recents that the animation has started
         AutoPtr<IIntent> intent;
-        CIntent::New(ACTION_START_ENTER_ANIMATION, (IIntent**)&intent);
+        CIntent::New(IAlternateRecentsComponent::ACTION_START_ENTER_ANIMATION, (IIntent**)&intent);
         String pn;
         mContext->GetPackageName(&pn);
         intent->SetPackage(pn);
         intent->AddFlags(
             IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
             IIntent::FLAG_RECEIVER_FOREGROUND);
-        AutoPtr<IUserHandleHelper> uhh;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-        AutoPtr<IUserHandle> current;
-        uhh->GetCURRENT((IUserHandle**)&current);
-        mContext->SendOrderedBroadcastAsUser(intent, current, String(NULL),
+        mContext->SendOrderedBroadcastAsUser(intent, UserHandle::CURRENT, String(NULL),
             fallbackReceiver, NULL, IActivity::RESULT_CANCELED, String(NULL), NULL);
     }
     return NOERROR;

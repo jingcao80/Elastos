@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/recents/views/AnimateableViewBounds.h"
+#include "elastos/droid/systemui/recents/views/TaskView.h"
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Animation::ITimeInterpolator;
@@ -14,12 +15,17 @@ namespace SystemUI {
 namespace Recents {
 namespace Views {
 
-AnimateableViewBounds::AnimateableViewBounds(
-    /* [in] */ ITaskView* source,
-    /* [in] */ Int32 cornerRadius)
+CAR_INTERFACE_IMPL(AnimateableViewBounds, ViewOutlineProvider, IAnimateableViewBounds)
+
+AnimateableViewBounds::AnimateableViewBounds()
     : mCornerRadius(0)
     , mAlpha(1.0f)
     , mMinAlpha(0.25f)
+{}
+
+ECode AnimateableViewBounds::constructor(
+    /* [in] */ ITaskView* source,
+    /* [in] */ Int32 cornerRadius)
 {
     CRect::New((IRect**)&mTmpRect);
     CRect::New((IRect**)&mClipRect);
@@ -33,6 +39,7 @@ AnimateableViewBounds::AnimateableViewBounds(
     SetClipRight(GetClipRight());
     SetClipBottom(GetClipBottom());
     SetOutlineClipBottom(GetOutlineClipBottom());
+    return NOERROR;
 }
 
 // @Override
@@ -97,7 +104,7 @@ void AnimateableViewBounds::AnimateClipTop(
 }
 
 /** Sets the top clip. */
-void AnimateableViewBounds::SetClipTop(
+ECode AnimateableViewBounds::SetClipTop(
     /* [in] */ Int32 top)
 {
     Int32 ct;
@@ -107,6 +114,15 @@ void AnimateableViewBounds::SetClipTop(
         mSourceView->InvalidateOutline();
         UpdateClipBounds();
     }
+    return NOERROR;
+}
+
+ECode AnimateableViewBounds::GetClipTop(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = GetClipTop();
+    return NOERROR;
 }
 
 /** Returns the top clip. */
@@ -140,7 +156,7 @@ void AnimateableViewBounds::AnimateClipRight(
 }
 
 /** Sets the right clip. */
-void AnimateableViewBounds::SetClipRight(
+ECode AnimateableViewBounds::SetClipRight(
     /* [in] */ Int32 right)
 {
     Int32 cr;
@@ -150,6 +166,15 @@ void AnimateableViewBounds::SetClipRight(
         mSourceView->InvalidateOutline();
         UpdateClipBounds();
     }
+    return NOERROR;
+}
+
+ECode AnimateableViewBounds::GetClipRight(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = GetClipRight();
+    return NOERROR;
 }
 
 /** Returns the right clip. */
@@ -177,13 +202,12 @@ void AnimateableViewBounds::AnimateClipBottom(
     oaHelper->OfInt32(TO_IINTERFACE(this), String("clipBottom"), params, (IObjectAnimator**)&objectAnimator);
     mClipBottomAnimator = IAnimator::Probe(objectAnimator);
     mClipBottomAnimator->SetDuration(duration);
-    mClipBottomAnimator->SetInterpolator(
-        ITimeInterpolator::Probe(mConfig->mFastOutSlowInInterpolator));
+    mClipBottomAnimator->SetInterpolator(ITimeInterpolator::Probe(mConfig->mFastOutSlowInInterpolator));
     mClipBottomAnimator->Start();
 }
 
 /** Sets the bottom clip. */
-void AnimateableViewBounds::SetClipBottom(
+ECode AnimateableViewBounds::SetClipBottom(
     /* [in] */ Int32 bottom)
 {
     Int32 cb;
@@ -195,10 +219,19 @@ void AnimateableViewBounds::SetClipBottom(
         if (!mConfig->mUseHardwareLayers) {
             Int32 pb;
             mSourceView->GetPaddingBottom(&pb);
-            assert(0);
-            // ((TaskView*)mSourceView.Get())->mThumbnailView->UpdateVisibility(bottom - pb);
+            TaskView* taskView = (TaskView*)ITaskView::Probe(mSourceView);
+            taskView->mThumbnailView->UpdateVisibility(bottom - pb);
         }
     }
+    return NOERROR;
+}
+
+ECode AnimateableViewBounds::GetClipBottom(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = GetClipBottom();
+    return NOERROR;
 }
 
 /** Returns the bottom clip. */

@@ -2250,7 +2250,7 @@ ECode CActivityThread::PerformLaunchActivity(
     lp->MakeApplication(FALSE, mInstrumentation, (IApplication**)&app);
 
     if (localLOGV) {
-        Slogger::V(TAG, "Performing launch of %s", TO_CSTR(r));
+        Slogger::V(TAG, "Performing launch of %s:", TO_CSTR(r));
         String appName, pkg, comp, dir;
         IContext::Probe(app)->GetPackageName(&appName);
         lp->GetPackageName(&pkg);
@@ -2258,8 +2258,9 @@ ECode CActivityThread::PerformLaunchActivity(
         r->mIntent->GetComponent((IComponentName**)&component);
         component->ToShortString(&comp);
         lp->GetAppDir(&dir);
-        Slogger::V(TAG, "app=%s, appName=%s, pkg=%s, comp=%s, dir=%s",
+        Slogger::V(TAG, "  > app=%s, appName=%s, pkg=%s, comp=%s, dir=%s",
             TO_CSTR(app), appName.string(), pkg.string(), comp.string(), dir.string());
+        Slogger::V(TAG, "  > activity: %s", TO_CSTR(a));
     }
 
     if (a != NULL) {
@@ -2306,7 +2307,6 @@ ECode CActivityThread::PerformLaunchActivity(
         }
 
         a->SetCalled(FALSE);
-
         if (r->IsPersistable()) {
             mInstrumentation->CallActivityOnCreate(a, r->mState, r->mPersistentState);
         }

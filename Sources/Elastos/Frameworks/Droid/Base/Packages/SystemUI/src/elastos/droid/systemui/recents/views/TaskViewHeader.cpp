@@ -3,10 +3,11 @@
 #include "elastos/droid/systemui/recents/model/Task.h"
 #include "elastos/droid/systemui/recents/misc/Utilities.h"
 #include "elastos/droid/systemui/recents/Constants.h"
-#include <elastos/core/CoreUtils.h>
-#include <elastos/core/Math.h>
 #include <elastos/droid/R.h>
 #include "../../R.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::CAnimatorSet;
 using Elastos::Droid::Animation::CArgbEvaluator;
@@ -38,16 +39,19 @@ using Elastos::Droid::Graphics::Drawable::IDrawableConstantState;
 using Elastos::Droid::Graphics::Drawable::ILayerDrawable;
 using Elastos::Droid::Graphics::Drawable::IShapeDrawable;
 using Elastos::Droid::View::IViewPropertyAnimator;
-using Elastos::Core::CoreUtils;
-using Elastos::Core::IFloat;
 using Elastos::Droid::SystemUI::Recents::Model::Task;
 using Elastos::Droid::SystemUI::Recents::Misc::Utilities;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IFloat;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Recents {
 namespace Views {
+
+static const String TAG("TaskViewHeader");
 
 TaskViewHeader::OutlineProvider::OutlineProvider(
     /* [in] */ TaskViewHeader* host)
@@ -143,6 +147,8 @@ ECode TaskViewHeader::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
+    Logger::I(TAG, " >> constructor");
+
     FAIL_RETURN(FrameLayout::constructor(context, attrs, defStyleAttr, defStyleRes));
     mConfig = RecentsConfiguration::GetInstance();
     SetWillNotDraw(FALSE);
@@ -175,6 +181,7 @@ ECode TaskViewHeader::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     // We ignore taps on the task bar except on the filter and dismiss buttons
     if (!Constants::DebugFlags::App::EnableTaskBarTouchEvents) {
         *result = TRUE;
@@ -187,6 +194,7 @@ ECode TaskViewHeader::OnTouchEvent(
 // @Override
 ECode TaskViewHeader::OnFinishInflate()
 {
+    Logger::I(TAG, " >> OnFinishInflate");
     // Set the outline provider
     AutoPtr<ViewOutlineProvider> provider = new OutlineProvider(this);
     SetOutlineProvider(provider);
@@ -213,29 +221,32 @@ ECode TaskViewHeader::OnFinishInflate()
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<IDrawable> drawable;
-    context->GetDrawable(R::drawable::recents_task_view_header_bg_color, (IDrawable**)&drawable);
-    mBackgroundColorDrawable = IGradientDrawable::Probe(drawable);
+    AutoPtr<IDrawable> colorDrawable;
+    context->GetDrawable(R::drawable::recents_task_view_header_bg_color, (IDrawable**)&colorDrawable);
+    mBackgroundColorDrawable = IGradientDrawable::Probe(colorDrawable);
+
     // Copy the ripple drawable since we are going to be manipulating it
-    drawable = NULL;
-    context->GetDrawable(R::drawable::recents_task_view_header_bg, (IDrawable**)&drawable);
-    mBackground = IRippleDrawable::Probe(drawable);
-    drawable->Mutate();
+    AutoPtr<IColorStateListHelper> helper;
+    CColorStateListHelper::AcquireSingleton((IColorStateListHelper**)&helper);
+
+    AutoPtr<IDrawable> bgDrawable;
+    context->GetDrawable(R::drawable::recents_task_view_header_bg, (IDrawable**)&bgDrawable);
+    bgDrawable->Mutate();
     AutoPtr<IDrawableConstantState> state;
-    drawable->GetConstantState((IDrawableConstantState**)&state);
-    drawable = NULL;
+    bgDrawable->GetConstantState((IDrawableConstantState**)&state);
+    AutoPtr<IDrawable> drawable;
     state->NewDrawable((IDrawable**)&drawable);
     mBackground = IRippleDrawable::Probe(drawable);
-    AutoPtr<IColorStateListHelper> cslHelper;
-    CColorStateListHelper::AcquireSingleton((IColorStateListHelper**)&cslHelper);
+    ILayerDrawable* layerDrawable = ILayerDrawable::Probe(drawable);
+
     AutoPtr<IColorStateList> csList;
-    cslHelper->ValueOf(0, (IColorStateList**)&csList);
+    helper->ValueOf(0, (IColorStateList**)&csList);
     mBackground->SetColor(csList);
+
     Int32 id;
-    ILayerDrawable::Probe(mBackground)->GetId(0, &id);
     Boolean res;
-    ILayerDrawable::Probe(mBackground)->SetDrawableByLayerId(
-        id, IDrawable::Probe(mBackgroundColorDrawable), &res);
+    layerDrawable->GetId(0, &id);
+    layerDrawable->SetDrawableByLayerId(id, colorDrawable, &res);
     SetBackground(drawable);
     return NOERROR;
 }
@@ -244,6 +255,7 @@ ECode TaskViewHeader::OnFinishInflate()
 void TaskViewHeader::OnDraw(
     /* [in] */ ICanvas* canvas)
 {
+    Logger::I(TAG, " >> OnDraw %s : %d", TO_CSTR(this), mIsFullscreen);
     if (!mIsFullscreen) {
         // Draw the highlight at the top edge (but put the bottom edge just out of view)
         Float offset = (Float) Elastos::Core::Math::Ceil(mConfig->mTaskViewHighlightPx / 2.0f);
@@ -330,8 +342,7 @@ ECode TaskViewHeader::RebindToTask(
     AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
     array->Set(0, CoreUtils::Convert(t->mActivityLabel));
     String str;
-    context->GetString(R::string::accessibility_recents_item_will_be_dismissed,
-            array, &str);
+    context->GetString(R::string::accessibility_recents_item_will_be_dismissed, array, &str);
     IView::Probe(mDismissButton)->SetContentDescription(CoreUtils::Convert(str));
     return NOERROR;
 }
@@ -403,7 +414,7 @@ ECode TaskViewHeader::OnCreateDrawableState(
     // Don't forward our state to the drawable - we do it manually in onTaskViewFocusChanged.
     // This is to prevent layer trashing when the view is pressed.
     *drawableState = ArrayOf<Int32>::Alloc(0);
-    (*drawableState)->AddRef();
+    REFCOUNT_ADD(*drawableState)
     return NOERROR;
 }
 
@@ -438,6 +449,7 @@ ECode TaskViewHeader::OnTaskViewFocusChanged(
         mBackground->SetColor(csList);
         Boolean res;
         IDrawable::Probe(mBackground)->SetState(newStates, &res);
+
         // Pulse the background color
         Int32 currentColor = mBackgroundColor;
         Int32 lightPrimaryColor = GetSecondaryColor(mCurrentPrimaryColor, mCurrentPrimaryColorIsDark);
@@ -454,9 +466,10 @@ ECode TaskViewHeader::OnTaskViewFocusChanged(
         AutoPtr<AnimatorListenerAdapter> adapter = new MyAnimatorListenerAdapter(this);
         animator->AddListener(adapter);
         AutoPtr<IAnimatorUpdateListener> listener = new AnimatorUpdateListener(this);
-        IValueAnimator::Probe(animator)->AddUpdateListener(listener);
+        backgroundColor->AddUpdateListener(listener);
         backgroundColor->SetRepeatCount(IValueAnimator::ANIMATION_INFINITE);
         backgroundColor->SetRepeatMode(IValueAnimator::ANIMATION_REVERSE);
+
         // Pulse the translation
         AutoPtr<IObjectAnimatorHelper> oaHelper;
         CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&oaHelper);
@@ -493,7 +506,8 @@ ECode TaskViewHeader::OnTaskViewFocusChanged(
             AutoPtr<IValueAnimator> backgroundColor;
             vaHelper->OfObject(evaluator, params, (IValueAnimator**)&backgroundColor);
             AutoPtr<IAnimatorUpdateListener> listener = new AnimatorUpdateListener(this);
-            IValueAnimator::Probe(backgroundColor)->AddUpdateListener(listener);
+            backgroundColor->AddUpdateListener(listener);
+
             // Restore the translation
             AutoPtr<IObjectAnimatorHelper> oaHelper;
             CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&oaHelper);

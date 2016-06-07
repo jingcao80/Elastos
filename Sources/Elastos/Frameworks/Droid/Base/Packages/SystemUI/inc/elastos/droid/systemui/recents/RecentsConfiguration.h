@@ -21,9 +21,13 @@ namespace Recents {
 
 /** A static Recents configuration for the current context
  * NOTE: We should not hold any references to a Context from a static instance */
-class RecentsConfiguration : public Object
+class RecentsConfiguration
+    : public Object
+    , public IRecentsConfiguration
 {
 public:
+    CAR_INTERFACE_DECL()
+
     /** Updates the configuration to the current context */
     static CARAPI_(AutoPtr<RecentsConfiguration>) Reinitialize(
         /* [in] */ IContext* context,
@@ -33,26 +37,26 @@ public:
     static CARAPI_(AutoPtr<RecentsConfiguration>) GetInstance();
 
     /** Updates the state, given the specified context */
-    CARAPI_(void) Update(
+    CARAPI Update(
         /* [in] */ IContext* context);
 
     /** Updates the system insets */
-    CARAPI_(void) UpdateSystemInsets(
+    CARAPI UpdateSystemInsets(
         /* [in] */ IRect* insets);
 
     /** Updates the search bar app widget */
-    CARAPI_(void) UpdateSearchBarAppWidgetId(
+    CARAPI UpdateSearchBarAppWidgetId(
         /* [in] */ IContext* context,
         /* [in] */ Int32 appWidgetId);
 
     /** Updates the states that need to be re-read whenever we re-initialize. */
-    CARAPI_(void) UpdateOnReinitialize(
+    CARAPI UpdateOnReinitialize(
         /* [in] */ IContext* context,
         /* [in] */ SystemServicesProxy* ssp);
 
     /** Called when the configuration has changed, and we want to reset any configuration specific
      * members. */
-    CARAPI_(void) UpdateOnConfigurationChange();
+    CARAPI UpdateOnConfigurationChange();
 
     /** Returns whether the search bar app widget exists. */
     CARAPI_(Boolean) HasSearchBarAppWidget();
@@ -76,7 +80,7 @@ public:
      * Returns the task stack bounds in the current orientation. These bounds do not account for
      * the system insets.
      */
-    CARAPI_(void) GetTaskStackBounds(
+    CARAPI GetTaskStackBounds(
         /* [in] */ Int32 windowWidth,
         /* [in] */ Int32 windowHeight,
         /* [in] */ Int32 topInset,
@@ -87,7 +91,7 @@ public:
      * Returns the search bar bounds in the current orientation.  These bounds do not account for
      * the system insets.
      */
-    CARAPI_(void) GetSearchBarBounds(
+    CARAPI GetSearchBarBounds(
         /* [in] */ Int32 windowWidth,
         /* [in] */ Int32 windowHeight,
         /* [in] */ Int32 topInset,

@@ -28,20 +28,14 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CDateView::DateViewBroadcastReceiver")
+
         DateViewBroadcastReceiver(
             /* [in] */ CDateView* bar);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("CDateView.DateViewBroadcastReceiver");
-            return NOERROR;
-        }
-
     private:
         CDateView* mHost;
     };

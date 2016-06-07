@@ -257,7 +257,13 @@ ECode Activity::ToString(
 
 String Activity::ToString()
 {
-    StringBuilder sb("Activity:(");
+    String className = Object::GetFullClassName((IActivity*)this);
+    if (className.IsNull()) {
+        className = "Activity";
+    }
+
+    StringBuilder sb(className);
+    sb += "{0x";
     sb += StringUtils::ToHexString((Int32)this);
     sb += " embeddedID=";
     sb += mEmbeddedID;

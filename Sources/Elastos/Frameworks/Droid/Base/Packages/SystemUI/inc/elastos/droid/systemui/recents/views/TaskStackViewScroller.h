@@ -2,17 +2,21 @@
 #ifndef  __ELASTOS_DROID_SYSTEMUI_RECENTS_VIEWS_TASKSTACKVIEWSCROLLER_H__
 #define  __ELASTOS_DROID_SYSTEMUI_RECENTS_VIEWS_TASKSTACKVIEWSCROLLER_H__
 
-#include "elastos/droid/systemui/recents/RecentsConfiguration.h"
-#include "elastos/droid/systemui/recents/views/TaskStackViewLayoutAlgorithm.h"
-#include "Elastos.Droid.Animation.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
+#include "elastos/droid/systemui/recents/views/TaskStackViewLayoutAlgorithm.h"
+#include "elastos/droid/systemui/recents/RecentsConfiguration.h"
+#include "_Elastos.Droid.SystemUI.h"
+#include "Elastos.Droid.Animation.h"
 
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Animation::IValueAnimator;
 using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Widget::IOverScroller;
+using Elastos::Droid::SystemUI::Recents::IRecentsConfiguration;
+using Elastos::Droid::SystemUI::Recents::RecentsConfiguration;
 using Elastos::Core::IRunnable;
 
 namespace Elastos {
@@ -22,13 +26,17 @@ namespace Recents {
 namespace Views {
 
 /* The scrolling logic for a TaskStackView */
-class TaskStackViewScroller : public Object
+class TaskStackViewScroller
+    : public Object
+    , public ITaskStackViewScroller
 {
 private:
     class MyAnimatorListenerAdapter
         : public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("TaskStackViewScroller::MyAnimatorListenerAdapter")
+
         MyAnimatorListenerAdapter(
             /* [in] */ IRunnable* postRunnable,
             /* [in] */ IObjectAnimator* scrollAnimator);
@@ -47,10 +55,12 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("TaskStackViewScroller::AnimatorUpdateListener")
+
         AnimatorUpdateListener(
             /* [in] */ TaskStackViewScroller* host);
-
-        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI OnAnimationUpdate(
@@ -61,20 +71,28 @@ private:
     };
 
 public:
-    TaskStackViewScroller(
+    CAR_INTERFACE_DECL()
+
+    TaskStackViewScroller();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
-        /* [in] */ RecentsConfiguration* config,
-        /* [in] */ TaskStackViewLayoutAlgorithm* layoutAlgorithm);
+        /* [in] */ IRecentsConfiguration* config,
+        /* [in] */ ITaskStackViewLayoutAlgorithm* layoutAlgorithm);
 
     /** Sets the callbacks */
     CARAPI_(void) SetCallbacks(
         /* [in] */ ITaskStackViewScrollerCallbacks* cb);
 
     /** Gets the current stack scroll */
+    CARAPI GetStackScroll(
+        /* [out] */ Float* scroll);
+
+    /** Gets the current stack scroll */
     CARAPI_(Float) GetStackScroll();
 
     /** Sets the current stack scroll */
-    CARAPI_(void) SetStackScroll(
+    CARAPI SetStackScroll(
         /* [in] */ Float s);
 
     /** Sets the current stack scroll without calling the callback. */

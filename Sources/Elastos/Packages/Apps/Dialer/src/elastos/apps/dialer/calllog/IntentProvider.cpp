@@ -92,7 +92,7 @@ ECode IntentProvider::PlayVoicemailIntentProvider::GetIntent(
         result->PutExtra(ICallDetailActivity::EXTRA_VOICEMAIL_URI,
                 Uri::Parse(voicemailUri));
     }
-    result->putExtra(ICallDetailActivity::EXTRA_VOICEMAIL_START_PLAYBACK, TRUE);
+    result->PutBooleanExtra(ICallDetailActivity::EXTRA_VOICEMAIL_START_PLAYBACK, TRUE);
     *intent = result;
     REFCOUNT_ADD(*intent);
     return NOERROR;
@@ -126,7 +126,7 @@ ECode IntentProvider::CallDetailIntentProvider::GetIntent(
         result->PutExtra(ICallDetailActivity::EXTRA_VOICEMAIL_URI,
                 Uri::Parse(mVoicemailUri));
     }
-    result->PutExtra(ICallDetailActivity::EXTRA_VOICEMAIL_START_PLAYBACK, FALSE);
+    result->PutBooleanExtra(ICallDetailActivity::EXTRA_VOICEMAIL_START_PLAYBACK, FALSE);
 
     if (mExtraIds != NULL && mExtraIds->GetLength() > 0) {
         result->PutExtra(ICallDetailActivity::EXTRA_CALL_LOG_IDS, mExtraIds);

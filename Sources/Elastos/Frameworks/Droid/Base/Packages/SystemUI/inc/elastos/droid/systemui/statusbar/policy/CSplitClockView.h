@@ -30,6 +30,8 @@ private:
     class IntentReceiver: public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CSplitClockView::IntentReceiver")
+
         IntentReceiver(
             /* [in] */ CSplitClockView* host);
 
@@ -37,13 +39,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("CSplitClockView.IntentReceiver");
-            return NOERROR;
-        }
 
     private:
         CSplitClockView* mHost;

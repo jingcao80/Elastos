@@ -15,7 +15,8 @@ namespace Phone {
 
 class PhoneStatusBarPolicy;
 
-CarClass(CPhoneStatusBarPolicyIntentReceiver), public BroadcastReceiver
+CarClass(CPhoneStatusBarPolicyIntentReceiver)
+    , public BroadcastReceiver
 {
 public:
     CAR_OBJECT_DECL()

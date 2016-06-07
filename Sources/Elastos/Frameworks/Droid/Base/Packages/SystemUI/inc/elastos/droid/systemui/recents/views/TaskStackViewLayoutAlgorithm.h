@@ -24,9 +24,13 @@ namespace Views {
  * The curve is defined such that at curve progress p = 0 is the end of the curve (the top of the
  * stack rect), and p = 1 at the start of the curve and the bottom of the stack rect.
  */
-class TaskStackViewLayoutAlgorithm : public Object
+class TaskStackViewLayoutAlgorithm
+    : public Object
+    , public ITaskStackViewLayoutAlgorithm
 {
 public:
+    CAR_INTERFACE_DECL()
+
     TaskStackViewLayoutAlgorithm(
         /* [in] */ RecentsConfiguration* config);
 

@@ -51,6 +51,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("UsbStorageActivity::MyUsbStateReceiver")
+
         MyUsbStateReceiver(
             /* [in] */ UsbStorageActivity* host);
 
@@ -58,13 +60,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("UsbStorageActivity.MyStorageListener");
-            return NOERROR;
-        }
 
     private:
         UsbStorageActivity* mHost;

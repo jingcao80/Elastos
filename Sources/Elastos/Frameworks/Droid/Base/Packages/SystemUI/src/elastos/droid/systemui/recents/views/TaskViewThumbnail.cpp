@@ -2,6 +2,7 @@
 #include "elastos/droid/systemui/recents/views/TaskViewThumbnail.h"
 #include "elastos/droid/systemui/recents/model/Task.h"
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Animation::ITimeInterpolator;
@@ -20,12 +21,15 @@ using Elastos::Droid::Graphics::IShader;
 using Elastos::Droid::Graphics::MatrixScaleToFit_FILL;
 using Elastos::Droid::Graphics::ShaderTileMode_CLAMP;
 using Elastos::Core::IFloat;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Recents {
 namespace Views {
+
+static const String TAG("TaskViewThumbnail");
 
 CAR_INTERFACE_IMPL(TaskViewThumbnail::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
 
@@ -88,14 +92,14 @@ TaskViewThumbnail::TaskViewThumbnail()
 ECode TaskViewThumbnail::constructor(
     /* [in] */ IContext* context)
 {
-    return View::constructor(context, NULL);
+    return constructor(context, NULL);
 }
 
 ECode TaskViewThumbnail::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    return View::constructor(context, attrs, 0);
+    return constructor(context, attrs, 0);
 }
 
 ECode TaskViewThumbnail::constructor(
@@ -103,7 +107,7 @@ ECode TaskViewThumbnail::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyleAttr)
 {
-    return View::constructor(context, attrs, defStyleAttr, 0);
+    return constructor(context, attrs, defStyleAttr, 0);
 }
 
 ECode TaskViewThumbnail::constructor(
@@ -125,6 +129,7 @@ ECode TaskViewThumbnail::constructor(
 void TaskViewThumbnail::OnDraw(
     /* [in] */ ICanvas* canvas)
 {
+    Logger::I(TAG, " >> OnDraw");
     if (mInvisible) {
         return;
     }
@@ -319,6 +324,7 @@ void TaskViewThumbnail::PrepareEnterRecentsAnimation(
         mBitmapAlpha = 1.0f;
     }
     else {
+        assert(mConfig != NULL);
         mBitmapAlpha = mConfig->mTaskViewThumbnailAlpha;
     }
     UpdateFilter();

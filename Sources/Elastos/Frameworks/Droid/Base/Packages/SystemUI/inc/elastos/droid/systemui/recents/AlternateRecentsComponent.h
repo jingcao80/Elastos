@@ -60,24 +60,16 @@ public:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            VALIDATE_NOT_NULL(str)
-            *str = "AlternateRecentsComponent.RecentAnimationEndedReceiver";
-            return NOERROR;
-        }
-
     private:
         AlternateRecentsComponent* mHost;
     };
 
 private:
-    class MR
+    class OnAnimationStartedRunnable
         : public Runnable
     {
     public:
-        MR(
+        OnAnimationStartedRunnable(
             /* [in] */ AlternateRecentsComponent* host);
 
         CARAPI Run();
@@ -204,18 +196,6 @@ public:
     CARAPI OnAnimationStarted();
 
 public:
-    const static String EXTRA_FROM_HOME;
-    const static String EXTRA_FROM_SEARCH_HOME;
-    const static String EXTRA_FROM_APP_THUMBNAIL;
-    const static String EXTRA_FROM_APP_FULL_SCREENSHOT;
-    const static String EXTRA_FROM_TASK_ID;
-    const static String EXTRA_TRIGGERED_FROM_ALT_TAB;
-    const static String EXTRA_TRIGGERED_FROM_HOME_KEY;
-
-    const static String ACTION_START_ENTER_ANIMATION;
-    const static String ACTION_TOGGLE_RECENTS_ACTIVITY;
-    const static String ACTION_HIDE_RECENTS_ACTIVITY;
-
     const static Int32 sMinToggleDelay = 350;
 
     const static String sToggleRecentsAction;

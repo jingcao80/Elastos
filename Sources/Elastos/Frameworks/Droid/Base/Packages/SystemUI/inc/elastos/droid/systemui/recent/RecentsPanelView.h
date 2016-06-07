@@ -63,6 +63,11 @@ public:
         : public Object
     {
     public:
+        ViewHolder();
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
         AutoPtr<IView> mThumbnailView;
         AutoPtr<IImageView> mThumbnailViewImage;
         AutoPtr<IDrawable> mThumbnailViewDrawable;

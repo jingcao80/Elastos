@@ -14,7 +14,8 @@ namespace Policy {
 
 class HotspotControllerImpl;
 
-CarClass(CHotspotControllerReceiver), public BroadcastReceiver
+CarClass(CHotspotControllerReceiver)
+    , public BroadcastReceiver
 {
 public:
     CAR_OBJECT_DECL()

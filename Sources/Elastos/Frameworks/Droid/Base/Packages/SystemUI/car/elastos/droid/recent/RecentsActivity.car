@@ -7,13 +7,13 @@ module
     namespace Recent {
 
     interface IRecentsActivity {
-        const String TOGGLE_RECENTS_INTENT = "Elastos.Droid.SystemUI.Recent.Action.TOGGLE_RECENTS";
-        const String PRELOAD_INTENT = "Elastos.Droid.SystemUI.Recent.Action.PRELOAD";
-        const String CANCEL_PRELOAD_INTENT = "Elastos.Droid.SystemUI.Recent.CANCEL_PRELOAD";
-        const String CLOSE_RECENTS_INTENT = "Elastos.Droid.SystemUI.Recent.Action.CLOSE";
-        const String WINDOW_ANIMATION_START_INTENT = "Elastos.Droid.SystemUI.Recent.Action.WINDOW_ANIMATION_START";
-        const String PRELOAD_PERMISSION = "Elastos.Droid.SystemUI.Recent.Permission.PRELOAD";
-        const String WAITING_FOR_WINDOW_ANIMATION_PARAM = "Elastos.Droid.SystemUI.Recent.WAITING_FOR_WINDOW_ANIMATION";
+        const String TOGGLE_RECENTS_INTENT = "com.android.systemui.recent.action.TOGGLE_RECENTS";
+        const String PRELOAD_INTENT = "com.android.systemui.recent.action.PRELOAD";
+        const String CANCEL_PRELOAD_INTENT = "com.android.systemui.recent.CANCEL_PRELOAD";
+        const String CLOSE_RECENTS_INTENT = "com.android.systemui.recent.action.CLOSE";
+        const String WINDOW_ANIMATION_START_INTENT = "com.android.systemui.recent.action.WINDOW_ANIMATION_START";
+        const String PRELOAD_PERMISSION = "com.android.systemui.recent.permission.PRELOAD";
+        const String WAITING_FOR_WINDOW_ANIMATION_PARAM = "com.android.systemui.recent.WAITING_FOR_WINDOW_ANIMATION";
 
         DismissAndGoHome();
 

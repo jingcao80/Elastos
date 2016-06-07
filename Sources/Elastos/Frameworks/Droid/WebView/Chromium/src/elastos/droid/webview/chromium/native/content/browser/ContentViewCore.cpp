@@ -689,7 +689,7 @@ ECode ContentViewCore::InnerActionHandler::Search()
 
     AutoPtr<IIntent> i;
     CIntent::New(IIntent::ACTION_WEB_SEARCH, (IIntent**)&i);
-    i->PutExtra(ISearchManager::EXTRA_NEW_SEARCH, TRUE);
+    i->PutBooleanExtra(ISearchManager::EXTRA_NEW_SEARCH, TRUE);
     i->PutExtra(ISearchManager::QUERY, query);
     String name;
     mOwner->GetContext()->GetPackageName(&name);
@@ -774,7 +774,7 @@ ECode ContentViewCore::InnerActionHandler::IsWebSearchAvailable(
 
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_WEB_SEARCH, (IIntent**)&intent);
-    intent->PutExtra(ISearchManager::EXTRA_NEW_SEARCH, TRUE);
+    intent->PutBooleanExtra(ISearchManager::EXTRA_NEW_SEARCH, TRUE);
     AutoPtr<IPackageManager> pm;
     mOwner->GetContext()->GetPackageManager((IPackageManager**)&pm);
     AutoPtr<IList> resolves;

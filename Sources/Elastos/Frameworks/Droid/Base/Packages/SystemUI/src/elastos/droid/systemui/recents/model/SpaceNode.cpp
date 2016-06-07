@@ -1,4 +1,5 @@
 #include "elastos/droid/systemui/recents/model/SpaceNode.h"
+#include "elastos/droid/systemui/recents/model/TaskStack.h"
 
 using Elastos::Utility::CArrayList;
 
@@ -8,16 +9,19 @@ namespace SystemUI {
 namespace Recents {
 namespace Model {
 
-SpaceNode::SpaceNode() {
+CAR_INTERFACE_IMPL(SpaceNode, Object, ISpaceNode)
+
+SpaceNode::SpaceNode()
+    : mStartNode(NULL)
+    , mEndNode(NULL)
+{
     // Do nothing
 }
-
-CAR_INTERFACE_IMPL(SpaceNode, Object, ISpaceNode)
 
 ECode SpaceNode::SetStack(
     /* [in] */ ITaskStack* stack)
 {
-    mStack = (TaskStack*)stack;
+    mStack = stack;
     return NOERROR;
 }
 
@@ -34,13 +38,12 @@ ECode SpaceNode::HasTasks(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    Int32 tc = mStack->GetTaskCount();
+    TaskStack* stack = (TaskStack*)mStack.Get();
+    Int32 tc = stack->GetTaskCount();
     Boolean b1,b2;
-    mStartNode->HasTasks(&b1);
-    mEndNode->HasTasks(&b2);
-    *result = (tc > 0) ||
-        (mStartNode != NULL && b1) ||
-        (mEndNode != NULL && b2);
+    *result = (tc > 0)
+        || (mStartNode != NULL && (mStartNode->HasTasks(&b1), b1))
+        || (mEndNode != NULL && (mEndNode->HasTasks(&b2), b2));
     return NOERROR;
 }
 
@@ -58,7 +61,7 @@ void SpaceNode::GetStacksRec(
     Boolean isLeafNode;
     IsLeafNode(&isLeafNode);
     if (isLeafNode) {
-        stacks->Add((ITaskStack*)mStack);
+        stacks->Add(mStack);
     }
     else {
         mStartNode->GetStacksRec(stacks);

@@ -5643,7 +5643,7 @@ void CConnectivityService::SendLegacyNetworkBroadcast(
         intent->PutExtra(IConnectivityManager::EXTRA_NETWORK_INFO, IParcelable::Probe(info));
         intent->PutExtra(IConnectivityManager::EXTRA_NETWORK_TYPE, niType);
         if (info->IsFailover(&bval), bval) {
-            intent->PutExtra(IConnectivityManager::EXTRA_IS_FAILOVER, TRUE);
+            intent->PutBooleanExtra(IConnectivityManager::EXTRA_IS_FAILOVER, TRUE);
             nai->mNetworkInfo->SetFailover(FALSE);
         }
 
@@ -5671,7 +5671,7 @@ void CConnectivityService::SendLegacyNetworkBroadcast(
                     IParcelable::Probe(newDefaultAgent->mNetworkInfo));
             }
             else {
-                intent->PutExtra(IConnectivityManager::EXTRA_NO_CONNECTIVITY, TRUE);
+                intent->PutBooleanExtra(IConnectivityManager::EXTRA_NO_CONNECTIVITY, TRUE);
             }
         }
         intent->PutExtra(IConnectivityManager::EXTRA_INET_CONDITION, mDefaultInetConditionPublished);

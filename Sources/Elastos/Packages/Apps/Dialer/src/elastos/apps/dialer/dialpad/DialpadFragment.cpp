@@ -1796,7 +1796,7 @@ void DialpadFragment::QueryLastOutgoingCall()
 AutoPtr<IIntent> DialpadFragment::NewFlashIntent()
 {
     AutoPtr<IIntent> intent = CallUtil::GetCallIntent(EMPTY_NUMBER);
-    intent->PutExtra(EXTRA_SEND_EMPTY_FLASH, TRUE);
+    intent->PutBooleanExtra(EXTRA_SEND_EMPTY_FLASH, TRUE);
     return intent;
 }
 

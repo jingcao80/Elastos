@@ -1,5 +1,9 @@
 #include "elastos/droid/systemui/recents/misc/ReferenceCountedTrigger.h"
 #include "elastos/droid/systemui/recents/misc/Console.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -69,6 +73,9 @@ ReferenceCountedTrigger::ReferenceCountedTrigger(
     , mCount(0)
     , mErrorRunnable(errorRunanable)
 {
+    CArrayList::New((IArrayList**)&mFirstIncRunnables);
+    CArrayList::New((IArrayList**)&mLastDecRunnables);
+
     mIncrementRunnable = new IncrementRunnable(this);
     mDecrementRunnable = new DecrementRunnable(this);
     if (firstIncRunnable != NULL) mFirstIncRunnables->Add(firstIncRunnable);
@@ -101,9 +108,11 @@ void ReferenceCountedTrigger::AddLastDecrementRunnable(
 {
     // To ensure that the last decrement always calls, we increment and decrement after setting
     // the last decrement runnable
+    assert(r != NULL);
     Boolean ensureLastDecrement = (mCount == 0);
     if (ensureLastDecrement) Increment();
     mLastDecRunnables->Add(r);
+    Logger::I("ReferenceCountedTrigger", "mLastDecRunnables Add: [%s]", TO_CSTR(r));
     if (ensureLastDecrement) Decrement();
 }
 
@@ -111,13 +120,13 @@ void ReferenceCountedTrigger::Decrement()
 {
     mCount--;
     Boolean isEmpty;
-    mLastDecRunnables->IsEmpty(&isEmpty);
-    if (mCount == 0 && !isEmpty) {
+    if (mCount == 0 && (mLastDecRunnables->IsEmpty(&isEmpty), !isEmpty)) {
         Int32 numRunnables;
         mLastDecRunnables->GetSize(&numRunnables);
         for (Int32 i = 0; i < numRunnables; i++) {
             AutoPtr<IInterface> obj;
             mLastDecRunnables->Get(i, (IInterface**)&obj);
+            Logger::I("ReferenceCountedTrigger", "Get lastDecRunnable %d: [%s]", i, TO_CSTR(obj));
             IRunnable::Probe(obj)->Run();
         }
     }
@@ -140,7 +149,8 @@ AutoPtr<IRunnable> ReferenceCountedTrigger::DecrementAsRunnable()
 
 AutoPtr<IAnimatorListener> ReferenceCountedTrigger::DecrementOnAnimationEnd()
 {
-    return (IAnimatorListener*)(new MyAnimatorListenerAdapter(this));
+    AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter(this);
+    return listener;
 }
 
 Int32 ReferenceCountedTrigger::GetCount()

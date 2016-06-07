@@ -11,7 +11,7 @@ module
             [in] String command,
             [in] IBundle* args);
 
-        const String ACTION_DEMO = "Elastos.Droid.SystemUI.Demo";
+        const String ACTION_DEMO = "com.android.systemui.demo";
 
         const String COMMAND_ENTER = "enter";
         const String COMMAND_EXIT = "exit";

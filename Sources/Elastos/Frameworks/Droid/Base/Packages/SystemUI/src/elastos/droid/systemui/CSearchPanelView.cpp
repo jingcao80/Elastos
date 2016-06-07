@@ -90,7 +90,7 @@ ECode CSearchPanelView::Runnable4::Run()
 }
 
 const String CSearchPanelView::TAG("SearchPanelView");
-const String CSearchPanelView::ASSIST_ICON_METADATA_NAME("Elastos.Droid.SystemUI.action_assist_icon");
+const String CSearchPanelView::ASSIST_ICON_METADATA_NAME("com.android.systemui.action_assist_icon");
 Boolean CSearchPanelView::sInit = InitStatic();
 AutoPtr<IAudioAttributes> CSearchPanelView::VIBRATION_ATTRIBUTES;
 CAR_OBJECT_IMPL(CSearchPanelView)

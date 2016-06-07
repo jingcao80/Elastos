@@ -23,6 +23,8 @@ const Int32 TaskStackViewLayoutAlgorithm::PrecisionSteps;
 AutoPtr<ArrayOf<Float> > TaskStackViewLayoutAlgorithm::sXp;
 AutoPtr<ArrayOf<Float> > TaskStackViewLayoutAlgorithm::sPx;
 
+CAR_INTERFACE_IMPL(TaskStackViewLayoutAlgorithm, Object, ITaskStackViewLayoutAlgorithm)
+
 TaskStackViewLayoutAlgorithm::TaskStackViewLayoutAlgorithm(
     /* [in] */ RecentsConfiguration* config)
     : mConfig (config)

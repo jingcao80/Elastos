@@ -32,9 +32,13 @@ class BluetoothControllerImpl
     , public IBluetoothController
 {
 private:
-    class Receiver : public BroadcastReceiver
+    class Receiver
+        : public BroadcastReceiver
     {
     public:
+
+        TO_STRING_IMPL("BluetoothControllerImpl::Receiver")
+
         Receiver(
             /* [in] */ BluetoothControllerImpl* host);
 
@@ -44,13 +48,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("BluetoothControllerImpl.Receiver");
-            return NOERROR;
-        }
 
     private:
         BluetoothControllerImpl* mHost;

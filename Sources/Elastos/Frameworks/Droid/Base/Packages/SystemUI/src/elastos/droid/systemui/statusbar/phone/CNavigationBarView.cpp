@@ -763,17 +763,18 @@ void CNavigationBarView::SwapChildrenOrderIfVertical(
         Int32 o = 0;
         linearLayout->GetOrientation(&o);
         if (o == ILinearLayout::VERTICAL) {
+            IViewGroup* vg = IViewGroup::Probe(linearLayout);
             Int32 childCount = 0;
-            IViewGroup::Probe(linearLayout)->GetChildCount(&childCount);
+            vg->GetChildCount(&childCount);
             AutoPtr<ArrayOf<IView*> > childList = ArrayOf<IView*>::Alloc(childCount);
             for (Int32 i = 0; i < childCount; i++) {
                 AutoPtr<IView> child;
-                IViewGroup::Probe(linearLayout)->GetChildAt(i, (IView**)&child);
+                vg->GetChildAt(i, (IView**)&child);
                 childList->Set(i, child);
             }
-            IViewGroup::Probe(linearLayout)->RemoveAllViews();
+            vg->RemoveAllViews();
             for (Int32 i = childCount - 1; i >= 0; i--) {
-                IViewGroup::Probe(linearLayout)->AddView((*childList)[i]);
+                vg->AddView((*childList)[i]);
             }
         }
     }

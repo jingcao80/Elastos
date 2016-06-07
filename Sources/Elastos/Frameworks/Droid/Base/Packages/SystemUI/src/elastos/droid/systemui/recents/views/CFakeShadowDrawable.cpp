@@ -28,6 +28,7 @@ const Double CFakeShadowDrawable::COS_45 = Elastos::Core::Math::Cos(Elastos::Cor
 const Float CFakeShadowDrawable::SHADOW_MULTIPLIER;
 
 CAR_OBJECT_IMPL(CFakeShadowDrawable)
+
 CFakeShadowDrawable::CFakeShadowDrawable()
     : mInsetShadow(.0)
     , mCornerRadius(.0)

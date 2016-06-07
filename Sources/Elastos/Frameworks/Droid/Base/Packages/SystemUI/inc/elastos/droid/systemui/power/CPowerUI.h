@@ -32,17 +32,12 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("CPowerUI.Receiver")
+
         Receiver(
             /* [in] */ CPowerUI* host);
 
         CARAPI Init();
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("CPowerUI.Receiver");
-            return NOERROR;
-        }
 
     private:
         CARAPI_(void) UpdateSaverMode();

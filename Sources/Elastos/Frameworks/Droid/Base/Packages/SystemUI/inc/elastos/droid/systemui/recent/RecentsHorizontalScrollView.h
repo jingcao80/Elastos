@@ -13,7 +13,7 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/systemui/recent/FadedEdgeDrawHelper.h"
 #include "elastos/droid/widget/FrameLayout.h"
-// #include "elastos/droid/widget/HorizontalScrollView.h"
+#include "elastos/droid/widget/HorizontalScrollView.h"
 
 using Elastos::Droid::Animation::ILayoutTransition;
 using Elastos::Droid::Content::IContext;
@@ -32,7 +32,7 @@ using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IViewOnLongClickListener;
 using Elastos::Droid::View::IViewOnTouchListener;
 using Elastos::Droid::Widget::FrameLayout;
-// using Elastos::Droid::Widget::HorizontalScrollView;
+using Elastos::Droid::Widget::HorizontalScrollView;
 using Elastos::Droid::Widget::IHorizontalScrollView;
 using Elastos::Droid::Widget::ILinearLayout;
 using Elastos::Core::IRunnable;
@@ -44,8 +44,7 @@ namespace SystemUI {
 namespace Recent {
 
 class RecentsHorizontalScrollView
-    // : public HorizontalScrollView
-    : public FrameLayout
+    : public HorizontalScrollView
     , public IHorizontalScrollView
     , public ISwipeHelperCallback
     , public IRecentsScrollView
@@ -195,7 +194,9 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    RecentsHorizontalScrollView(
+    RecentsHorizontalScrollView();
+
+    CARAPI constructor(
         /* [in] */ IContext* ctx,
         /* [in] */ IAttributeSet* attrs);
 
@@ -209,8 +210,9 @@ public:
     CARAPI RemoveViewInLayout(
         /* [in] */ IView* view);
 
-    CARAPI_(Boolean) OnInterceptTouchEvent(
-        /* [in] */ IMotionEvent* ev);
+    CARAPI OnInterceptTouchEvent(
+        /* [in] */ IMotionEvent* ev,
+        /* [out] */ Boolean* result);
 
     CARAPI OnTouchEvent(
         /* [in] */ IMotionEvent* ev,

@@ -34,6 +34,8 @@ private:
     class Receiver: public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("WifiAccessPointController::Receiver")
+
         Receiver(
             /* [in] */ WifiAccessPointController* host);
 
@@ -44,13 +46,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("WifiAccessPointController.Receiver");
-            return NOERROR;
-        }
 
     private:
         Boolean mRegistered;

@@ -62,11 +62,13 @@ ECode CRecents::MyOnAnimationStartedListener::OnAnimationStarted()
 //---------------------------------------------------------------------------------------
 // CRecents
 //---------------------------------------------------------------------------------------
+CAR_OBJECT_IMPL(CRecents)
+
+CAR_INTERFACE_IMPL(CRecents, SystemUI, IRecentsComponent)
 
 const String CRecents::TAG("CRecents");
 const Boolean CRecents::DEBUG = TRUE;
-CAR_OBJECT_IMPL(CRecents)
-CAR_INTERFACE_IMPL(CRecents, SystemUI, IRecentsComponent)
+
 CRecents::CRecents()
     : mUseAlternateRecents(TRUE)
     , mBootCompleted(FALSE)
@@ -100,6 +102,7 @@ ECode CRecents::ShowRecents(
     /* [in] */ Boolean triggeredFromAltTab,
     /* [in] */ IView* statusBarView)
 {
+    Logger::I(TAG, " >> ShowRecents");
     if (mUseAlternateRecents) {
         if (mAlternateRecents != NULL) {
             mAlternateRecents->OnShowRecents(triggeredFromAltTab, statusBarView);
@@ -112,6 +115,7 @@ ECode CRecents::HideRecents(
     /* [in] */ Boolean triggeredFromAltTab,
     /* [in] */ Boolean triggeredFromHomeKey)
 {
+    Logger::I(TAG, " >> HideRecents");
     if (mUseAlternateRecents) {
         if (mAlternateRecents != NULL) {
             mAlternateRecents->OnHideRecents(triggeredFromAltTab, triggeredFromHomeKey);
@@ -135,6 +139,7 @@ ECode CRecents::ToggleRecents(
     /* [in] */ Int32 layoutDirection,
     /* [in] */ IView* statusBarView)
 {
+    Logger::I(TAG, " >> ToggleRecents");
     if (mUseAlternateRecents) {
         // Launch the alternate recents if required
         if (mAlternateRecents != NULL) {
@@ -325,9 +330,6 @@ ECode CRecents::ToggleRecents(
             y = (Int32) ((heightPixels - statusBarHeight - height) / 2.0f + thumbTopMargin
                 + recentsItemTopPadding + thumbBgPadding + statusBarHeight);
         }
-
-
-        Logger::I(TAG, " >>>>++++++ x,y: (%d, %d)", x, y);
 
         AutoPtr<IActivityOptionsHelper> aoh;
         CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&aoh);

@@ -338,8 +338,8 @@ ECode DefaultVoicemailNotifier::UpdateNotification(
         playIntent.setData(newCalls[0].callsUri);
         playIntent.putExtra(CallDetailActivity.EXTRA_VOICEMAIL_URI,
                 (*newCalls)[0]->mVoicemailUri);
-        playIntent->PutExtra(ICallDetailActivity::EXTRA_VOICEMAIL_START_PLAYBACK, TRUE);
-        playIntent->PutExtra(ICallDetailActivity::EXTRA_FROM_NOTIFICATION, TRUE);
+        playIntent->PutBooleanExtra(ICallDetailActivity::EXTRA_VOICEMAIL_START_PLAYBACK, TRUE);
+        playIntent->PutBooleanExtra(ICallDetailActivity::EXTRA_FROM_NOTIFICATION, TRUE);
 
         String action;
         resources->GetString(R::string::notification_action_voicemail_play, &action);

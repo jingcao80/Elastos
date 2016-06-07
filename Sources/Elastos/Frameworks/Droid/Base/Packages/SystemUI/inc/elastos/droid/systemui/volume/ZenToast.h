@@ -47,19 +47,14 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("ZenToast::MyReceiver")
+
         MyReceiver(
             /* [in] */ ZenToast* host);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("ZenToast.MyReceiver");
-            return NOERROR;
-        }
 
     private:
         ZenToast* mHost;

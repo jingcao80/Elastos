@@ -1473,7 +1473,7 @@ ECode CTelephonyRegistry::BroadcastDataConnectionStateChanged(
     // dpnHelper->ConvertCallState(state, &ival);
     intent->PutExtra(IPhoneConstants::STATE_KEY, StringUtils::ToString(ival));
     if (!isDataConnectivityPossible) {
-        intent->PutExtra(IPhoneConstants::NETWORK_UNAVAILABLE_KEY, TRUE);
+        intent->PutBooleanExtra(IPhoneConstants::NETWORK_UNAVAILABLE_KEY, TRUE);
     }
     if (reason != NULL) {
         intent->PutExtra(IPhoneConstants::STATE_CHANGE_REASON_KEY, reason);
@@ -1489,7 +1489,7 @@ ECode CTelephonyRegistry::BroadcastDataConnectionStateChanged(
     if (networkCapabilities != NULL) {
         intent->PutExtra(IPhoneConstants::DATA_NETWORK_CAPABILITIES_KEY, IParcelable::Probe(networkCapabilities));
     }
-    if (roaming) intent->PutExtra(IPhoneConstants::DATA_NETWORK_ROAMING_KEY, TRUE);
+    if (roaming) intent->PutBooleanExtra(IPhoneConstants::DATA_NETWORK_ROAMING_KEY, TRUE);
 
     intent->PutExtra(IPhoneConstants::DATA_APN_KEY, apn);
     intent->PutExtra(IPhoneConstants::DATA_APN_TYPE_KEY, apnType);

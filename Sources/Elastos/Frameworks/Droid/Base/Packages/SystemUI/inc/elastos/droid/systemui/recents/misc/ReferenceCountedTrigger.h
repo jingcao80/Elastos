@@ -36,6 +36,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("ReferenceCountedTrigger::IncrementRunnable")
+
         IncrementRunnable(
             /* [in] */ ReferenceCountedTrigger* host);
 
@@ -50,6 +52,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("ReferenceCountedTrigger::DecrementRunnable")
+
         DecrementRunnable(
             /* [in] */ ReferenceCountedTrigger* host);
 

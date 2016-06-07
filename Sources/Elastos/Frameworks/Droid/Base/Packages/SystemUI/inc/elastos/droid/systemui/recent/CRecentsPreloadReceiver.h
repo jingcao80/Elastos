@@ -15,7 +15,8 @@ namespace Droid {
 namespace SystemUI {
 namespace Recent {
 
-CarClass(CRecentsPreloadReceiver), public BroadcastReceiver
+CarClass(CRecentsPreloadReceiver)
+    , public BroadcastReceiver
 {
 public:
     CAR_OBJECT_DECL()

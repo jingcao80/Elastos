@@ -134,6 +134,7 @@ ECode RecentTasksLoader::TaskLoaderAsyncTask::DoInBackground(
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** result)
 {
+    Logger::I("RecentTasksLoader::TaskLoaderAsyncTask", " >>>> TaskLoaderAsyncTask::DoInBackground");
     VALIDATE_NOT_NULL(result)
     // We load in two stages: first, we update progress with just the first screenful
     // of items. Then, we update with the rest of the items
@@ -263,6 +264,7 @@ ECode RecentTasksLoader::TaskLoaderAsyncTask::DoInBackground(
 
     Process::SetThreadPriority(origPri);
     *result = NULL;
+    Logger::I("RecentTasksLoader::TaskLoaderAsyncTask", " <<<< TaskLoaderAsyncTask::DoInBackground");
     return NOERROR;
 }
 
@@ -334,7 +336,6 @@ ECode RecentTasksLoader::ThumbnailLoaderAsyncTask::DoInBackground(
 // RecentTasksLoader
 //======================================================================
 
-const String RecentTasksLoader::TAG("RecentTasksLoader");
 const Boolean RecentTasksLoader::DEBUG = FALSE;
 const Int32 RecentTasksLoader::DISPLAY_TASKS = 20;
 const Int32 RecentTasksLoader::MAX_TASKS = 21 /*DISPLAY_TASKS + 1*/; // allow extra for non-apps

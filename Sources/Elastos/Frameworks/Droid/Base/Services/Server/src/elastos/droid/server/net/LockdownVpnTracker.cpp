@@ -125,7 +125,7 @@ ECode LockdownVpnTracker::constructor(
 
     AutoPtr<IIntent> configIntent;
     CIntent::New(ACTION_VPN_SETTINGS, (IIntent**)&configIntent);
-    configIntent->PutExtra(EXTRA_PICK_LOCKDOWN, TRUE);
+    configIntent->PutBooleanExtra(EXTRA_PICK_LOCKDOWN, TRUE);
     AutoPtr<IPendingIntentHelper> helper;
     CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
     helper->GetActivity(mContext, 0, configIntent, 0, (IPendingIntent**)&mConfigIntent);

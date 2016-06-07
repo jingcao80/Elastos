@@ -13,9 +13,11 @@
 #include "elastos/droid/view/animation/AnimationUtils.h"
 #include "elastos/droid/R.h"
 #include "../R.h"
-#include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::CLayoutTransition;
@@ -77,12 +79,13 @@ using Elastos::Droid::Widget::ImageViewScaleType_FIT_XY;
 using Elastos::Droid::R;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
-using Elastos::Core::CInteger32;
-using Elastos::Core::CString;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IInteger32;
-using Elastos::Core::ISystem;
+using Elastos::Core::CInteger32;
 using Elastos::Core::Math;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
@@ -92,6 +95,60 @@ namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Recent {
+
+//=================================================================================
+// RecentsPanelView::ViewHolder
+//=================================================================================
+
+RecentsPanelView::ViewHolder::ViewHolder()
+    : mLoadedThumbnailAndIcon(FALSE)
+{}
+
+ECode RecentsPanelView::ViewHolder::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("ViewHolder{0x");
+    sb += StringUtils::ToHexString((Int32)this);
+
+    if (mTaskDescription != NULL) {
+        TaskDescription* td = (TaskDescription*)mTaskDescription.Get();
+        sb += ", packageName:";
+        sb += td->mPackageName;
+    }
+
+    if (mLabelView != NULL) {
+        AutoPtr<ICharSequence> csq;
+        mLabelView->GetText((ICharSequence**)&csq);
+        sb += ", label:";
+        sb += TO_CSTR(csq);
+    }
+
+    if (mDescriptionView != NULL) {
+        AutoPtr<ICharSequence> csq;
+        mDescriptionView->GetText((ICharSequence**)&csq);
+        sb += ", description:";
+        sb += TO_CSTR(csq);
+    }
+
+    if (mIconView != NULL) {
+        sb += ", iconView:";
+        sb += TO_CSTR(mIconView);
+    }
+
+    if (mThumbnailViewImage != NULL) {
+        sb += ", iconView:";
+        sb += TO_CSTR(mThumbnailViewImage);
+    }
+
+    if (mThumbnailViewDrawable != NULL) {
+        sb += ", thumbnailViewDrawable:";
+        sb += TO_CSTR(mThumbnailViewDrawable);
+    }
+
+    *str = sb.ToString();
+    return NOERROR;
+}
 
 //=================================================================================
 // RecentsPanelView::OnLongClickDelegate
@@ -183,6 +240,7 @@ ECode RecentsPanelView::TaskDescriptionAdapter::CreateView(
     VALIDATE_NOT_NULL(view);
     AutoPtr<IView> convertView;
     mInflater->Inflate(mHost->mRecentItemLayoutId, parent, FALSE, (IView**)&convertView);
+    Logger::I(TAG, " >> CreateView: %08x", mHost->mRecentItemLayoutId);
     AutoPtr<ViewHolder> holder = new ViewHolder();
     AutoPtr<IView> v;
     convertView->FindViewById(R::id::app_thumbnail, (IView**)&v);
@@ -228,21 +286,23 @@ AutoPtr<IView> RecentsPanelView::TaskDescriptionAdapter::GetView(
     }
     AutoPtr<IInterface> tag;
     convertView->GetTag((IInterface**)&tag);
-    const AutoPtr<ViewHolder> holder = (ViewHolder*)(IObject::Probe(tag));
+    AutoPtr<ViewHolder> holder = (ViewHolder*)(IObject::Probe(tag));
 
     // index is reverse since most recent appears at the bottom...
     Int32 size;
     mHost->mRecentTaskDescriptions->GetSize(&size);
     Int32 index = size - position - 1;
 
-    AutoPtr<IInterface> _td;
-    mHost->mRecentTaskDescriptions->Get(index, (IInterface**)&_td);
-    AutoPtr<ITaskDescription> td = ITaskDescription::Probe(_td);
+    AutoPtr<IInterface> tdObj;
+    mHost->mRecentTaskDescriptions->Get(index, (IInterface**)&tdObj);
+    AutoPtr<ITaskDescription> td = ITaskDescription::Probe(tdObj);
 
     AutoPtr<ICharSequence> cs;
     td->GetLabel((ICharSequence**)&cs);
     holder->mLabelView->SetText(cs);
     holder->mThumbnailView->SetContentDescription(cs);
+    Logger::I(TAG, " TaskDescriptionAdapter >> GetView: %s", TO_CSTR(cs));
+
     td->IsLoaded(&holder->mLoadedThumbnailAndIcon);
     if (holder->mLoadedThumbnailAndIcon) {
         AutoPtr<IDrawable> tn;
@@ -252,6 +312,7 @@ AutoPtr<IView> RecentsPanelView::TaskDescriptionAdapter::GetView(
         mHost->UpdateThumbnail(holder, tn, TRUE, FALSE);
         mHost->UpdateIcon(holder, dr, TRUE, FALSE);
     }
+
     if (index == 0) {
         if (mHost->mAnimateIconOfFirstTask) {
             if (mHost->mItemToAnimateInWhenWindowAnimationIsFinished != NULL) {
@@ -272,13 +333,14 @@ AutoPtr<IView> RecentsPanelView::TaskDescriptionAdapter::GetView(
                     }
                 }
             }
+
             mHost->mItemToAnimateInWhenWindowAnimationIsFinished = holder;
             AutoPtr<IResources> resources;
             mHost->GetResources((IResources**)&resources);
-            Int32 _translation;
+            Int32 ival;
             resources->GetDimensionPixelSize(
-                R::dimen::status_bar_recents_app_icon_translate_distance, &_translation);
-            Int32 translation = -_translation;
+                R::dimen::status_bar_recents_app_icon_translate_distance, &ival);
+            Int32 translation = -ival;
             AutoPtr<IConfiguration> config;
             resources->GetConfiguration((IConfiguration**)&config);
             Int32 orientation;
@@ -289,14 +351,18 @@ AutoPtr<IView> RecentsPanelView::TaskDescriptionAdapter::GetView(
                 if (direction == IView::LAYOUT_DIRECTION_RTL) {
                     translation = -translation;
                 }
+                Logger::I(TAG, " >> ORIENTATION_PORTRAIT: %d", translation);
+                IView* iconView = IView::Probe(holder->mIconView);
                 holder->mIconView->SetAlpha(0);
-                IView::Probe(holder->mIconView)->SetTranslationX(translation);
-                IView::Probe(holder->mLabelView)->SetAlpha(0);
-                IView::Probe(holder->mLabelView)->SetTranslationX(translation);
+                iconView->SetTranslationX(translation);
+                IView* lableView = IView::Probe(holder->mLabelView);
+                lableView->SetAlpha(0);
+                lableView->SetTranslationX(translation);
                 holder->mCalloutLine->SetAlpha(0);
                 holder->mCalloutLine->SetTranslationX(translation);
             }
             else {
+                Logger::I(TAG, " >> not ORIENTATION_PORTRAIT: %d", translation);
                 holder->mIconView->SetAlpha(0);
                 IView::Probe(holder->mIconView)->SetTranslationY(translation);
             }
@@ -329,6 +395,7 @@ ECode RecentsPanelView::TaskDescriptionAdapter::GetView(
 ECode RecentsPanelView::TaskDescriptionAdapter::RecycleView(
     /* [in] */ IView* v)
 {
+    Logger::I(TAG, " >> RecycleView");
     AutoPtr<IInterface> tag;
     v->GetTag((IInterface**)&tag);
     AutoPtr<ViewHolder> holder = (ViewHolder*)(IObject::Probe(tag));
@@ -388,35 +455,33 @@ ECode RecentsPanelView::OnMenuItemClickListener::OnMenuItemClick(
     /* [in] */ IMenuItem* item,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
     Int32 id;
     item->GetItemId(&id);
-    if (id == R::id::recent_remove_item) {
+        if (id == R::id::recent_remove_item) {
         IViewGroup::Probe(mHost->mRecentsContainer)->RemoveViewInLayout(mSelectedView);
+        *result = TRUE;
+        return NOERROR;
     }
     else if (id == R::id::recent_inspect_item) {
         AutoPtr<IInterface> tag;
         mSelectedView->GetTag((IInterface**)&tag);
-        AutoPtr<ViewHolder> viewHolder;
         if (tag != NULL) {
-            viewHolder = (RecentsPanelView::ViewHolder*)(IObject::Probe(tag));
-        }
-        if (viewHolder != NULL) {
-            AutoPtr<ITaskDescription> ad = viewHolder->mTaskDescription;
-            AutoPtr<TaskDescription> _ad = (TaskDescription*)ad.Get();
-            String name = _ad->mPackageName;
-            mHost->StartApplicationDetailsActivity(name, _ad->mUserId);
+            ViewHolder* viewHolder = (RecentsPanelView::ViewHolder*)(IObject::Probe(tag));
+            AutoPtr<TaskDescription> ad = (TaskDescription*)viewHolder->mTaskDescription.Get();
+            mHost->StartApplicationDetailsActivity(ad->mPackageName, ad->mUserId);
             mHost->Show(FALSE);
+            *result = TRUE;
+            return NOERROR;
         }
         else {
             // throw new IllegalStateException("Oops, no tag on view " + mSelectedView);
             return E_ILLEGAL_STATE_EXCEPTION;
         }
     }
-    else {
-        *result = FALSE;
-        return NOERROR;
-    }
-    *result = TRUE;
+
     return NOERROR;
 }
 
@@ -537,6 +602,7 @@ ECode RecentsPanelView::IsInContentArea(
 ECode RecentsPanelView::Show(
     /* [in] */ Boolean show)
 {
+    Logger::I(TAG, " >> Show: %d", show);
     return Show(show, NULL, FALSE, FALSE);
 }
 
@@ -546,6 +612,8 @@ ECode RecentsPanelView::Show(
     /* [in] */ Boolean firstScreenful,
     /* [in] */ Boolean animateIconOfFirstTask)
 {
+    Logger::I(TAG, " >> Show: %d, recentTaskDescriptions:%s, firstScreenful:%s, animateIconOfFirstTask:%s",
+        show, TO_CSTR(recentTaskDescriptions), firstScreenful, animateIconOfFirstTask);
     if (show && mCallUiHiddenBeforeNextReload) {
         OnUiHidden();
         recentTaskDescriptions = NULL;
@@ -569,6 +637,7 @@ ECode RecentsPanelView::Show(
 
 void RecentsPanelView::ShowIfReady()
 {
+    Logger::I(TAG, " >> ShowIfReady: %d, %s", mWaitingToShow, TO_CSTR(mRecentTaskDescriptions));
     // mWaitingToShow => there was a touch up on the recents button
     // (!mRecentTaskDescriptions.IsEmpty()) => we've created views for the first screenful of items
     if (mWaitingToShow && mRecentTaskDescriptions != NULL) {
@@ -591,6 +660,7 @@ ECode RecentsPanelView::SendCloseSystemWindows(
 void RecentsPanelView::ShowImpl(
     /* [in] */ Boolean show)
 {
+    Logger::I(TAG, " >> ShowImpl:%d", show);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     SendCloseSystemWindows(context, IBaseStatusBar::SYSTEM_DIALOG_REASON_RECENT_APPS);
@@ -603,6 +673,7 @@ void RecentsPanelView::ShowImpl(
         if (mRecentTaskDescriptions != NULL) {
             mRecentTaskDescriptions->IsEmpty(&noApps);
         }
+        Logger::I(TAG, " >> noApps：%d", noApps);
         mRecentsNoApps->SetAlpha(1);
         mRecentsNoApps->SetVisibility(noApps ? IView::VISIBLE : IView::INVISIBLE);
 
@@ -613,6 +684,7 @@ void RecentsPanelView::ShowImpl(
         RequestFocus(&b);
     }
     else {
+        Logger::I(TAG, " >> call onAnimationEnd() and clearRecentTasksList() in onUiHidden()");
         mWaitingToShow = FALSE;
         // call onAnimationEnd() and clearRecentTasksList() in onUiHidden()
         mCallUiHiddenBeforeNextReload = TRUE;
@@ -741,6 +813,8 @@ ECode RecentsPanelView::UpdateValuesFromResources()
     res->GetDimension(R::dimen::status_bar_recents_thumbnail_width, &dim);
     mThumbnailWidth = Elastos::Core::Math::Round(dim);
     res->GetBoolean(R::bool_::config_recents_thumbnail_image_fits_to_xy, &mFitThumbnailToXY);
+    Logger::I(TAG, " UpdateValuesFromResources: mThumbnailWidth: (%.2f, %d), mFitThumbnailToXY:%d",
+        dim, mThumbnailWidth, mFitThumbnailToXY);
     return NOERROR;
 }
 
@@ -802,20 +876,21 @@ void RecentsPanelView::UpdateIcon(
     /* [in] */ Boolean anim)
 {
     if (icon != NULL) {
+        IView* iconView = IView::Probe(h->mIconView);
         h->mIconView->SetImageDrawable(icon);
         Int32 v;
-        IView::Probe(h->mIconView)->GetVisibility(&v);
-        if (show && v != IView::VISIBLE) {
+        if (show && (iconView->GetVisibility(&v), v != IView::VISIBLE)) {
             if (anim) {
                 AutoPtr<IContext> context;
                 GetContext((IContext**)&context);
                 AutoPtr<IAnimation> animation;
                 AnimationUtils::LoadAnimation(context, R::anim::recent_appear, (IAnimation**)&animation);
-                IView::Probe(h->mIconView)->SetAnimation(animation);
+                iconView->SetAnimation(animation);
             }
-            IView::Probe(h->mIconView)->SetVisibility(IView::VISIBLE);
+            iconView->SetVisibility(IView::VISIBLE);
         }
     }
+    Logger::I(TAG, "UpdateIcon: %s", TO_CSTR(h));
 }
 
 void RecentsPanelView::UpdateThumbnail(
@@ -833,14 +908,14 @@ void RecentsPanelView::UpdateThumbnail(
         // scale the image to fill the full width of the ImageView. do this only if
         // we haven't set a bitmap before, or if the bitmap size has changed
         Int32 w1 = 0, w2 = 0, h1 = 0, h2 = 0;
-        if(h->mThumbnailViewDrawable != NULL) {
+        if (h->mThumbnailViewDrawable != NULL) {
             h->mThumbnailViewDrawable->GetIntrinsicWidth(&w1);
             h->mThumbnailViewDrawable->GetIntrinsicHeight(&h1);
         }
         thumbnail->GetIntrinsicWidth(&w2);
         thumbnail->GetIntrinsicHeight(&h2);
-        if (h->mThumbnailViewDrawable == NULL ||
-            w1 != w2 || h1 != h2) {
+        Logger::I(TAG, "older w:h=(%d, %d), new w:h=(%d, %d)", w1, h1, w2, h2);
+        if (h->mThumbnailViewDrawable == NULL || w1 != w2 || h1 != h2) {
             if (mFitThumbnailToXY) {
                 h->mThumbnailViewImage->SetScaleType(ImageViewScaleType_FIT_XY);
             }
@@ -848,6 +923,7 @@ void RecentsPanelView::UpdateThumbnail(
                 AutoPtr<IMatrix> scaleMatrix;
                 CMatrix::New((IMatrix**)&scaleMatrix);
                 Float scale = mThumbnailWidth / (Float)w2;
+                Logger::I(TAG, " mThumbnailWidth:%d, SetScale: %.2f", mThumbnailWidth, scale);
                 scaleMatrix->SetScale(scale, scale);
                 h->mThumbnailViewImage->SetScaleType(ImageViewScaleType_MATRIX);
                 h->mThumbnailViewImage->SetImageMatrix(scaleMatrix);
@@ -867,11 +943,13 @@ void RecentsPanelView::UpdateThumbnail(
         }
         h->mThumbnailViewDrawable = thumbnail;
     }
+    Logger::I(TAG, "UpdateThumbnail: %s", TO_CSTR(h));
 }
 
 ECode RecentsPanelView::OnTaskThumbnailLoaded(
     /* [in] */ ITaskDescription* td)
 {
+    Logger::I(TAG, " >>> OnTaskThumbnailLoaded: %s", TO_CSTR(td));
     AutoLock syncLock(td);
     if (mRecentsContainer != NULL) {
         AutoPtr<IViewGroup> container = IViewGroup::Probe(mRecentsContainer);
@@ -914,6 +992,7 @@ ECode RecentsPanelView::OnTaskThumbnailLoaded(
     }
 
     ShowIfReady();
+    Logger::I(TAG, " <<< OnTaskThumbnailLoaded: %s", TO_CSTR(td));
     return NOERROR;
 }
 
@@ -993,9 +1072,11 @@ ECode RecentsPanelView::OnTaskLoadingCancelled()
 
 ECode RecentsPanelView::RefreshViews()
 {
+    Logger::I(TAG, " >>> RefreshViews");
     mListAdapter->NotifyDataSetInvalidated();
     UpdateUiElements();
     ShowIfReady();
+    Logger::I(TAG, " <<< RefreshViews");
     return NOERROR;
 }
 
@@ -1009,6 +1090,8 @@ void RecentsPanelView::RefreshRecentTasksList(
     /* [in] */ IArrayList* recentTasksList,
     /* [in] */ Boolean firstScreenful)
 {
+    Logger::I(TAG, " >> RefreshRecentTasksList: %s, firstScreenful: %d",
+        TO_CSTR(recentTasksList), firstScreenful);
     if (mRecentTaskDescriptions == NULL && recentTasksList != NULL) {
         OnTasksLoaded(recentTasksList, firstScreenful);
     }
@@ -1022,7 +1105,8 @@ ECode RecentsPanelView::OnTasksLoaded(
     /* [in] */ Boolean firstScreenful)
 {
     if (DEBUG) {
-        Logger::I(TAG, " >> OnTasksLoaded: %s", TO_CSTR(tasks));
+        Logger::I(TAG, " >> OnTasksLoaded: %s, firstScreenful: %d",
+            TO_CSTR(tasks), firstScreenful);
     }
 
     if (mRecentTaskDescriptions == NULL) {
@@ -1065,6 +1149,9 @@ void RecentsPanelView::UpdateUiElements()
         res->GetQuantityString(R::plurals::status_bar_accessibility_recent_apps,
             numRecentApps, array, &recentAppsAccessibilityDescription);
     }
+
+    Logger::I(TAG, " >> UpdateUiElements: %d, recentAppsAccessibilityDescription: %s",
+        numRecentApps, recentAppsAccessibilityDescription.string());
     AutoPtr<ICharSequence> cs = CoreUtils::Convert(recentAppsAccessibilityDescription);
     SetContentDescription(cs);
 }
@@ -1088,6 +1175,7 @@ ECode RecentsPanelView::SimulateClick(
 ECode RecentsPanelView::HandleOnClick(
     /* [in] */ IView* view)
 {
+    Logger::I(TAG, " HandleOnClick: %s", TO_CSTR(view));
     AutoPtr<IInterface> tag;
     view->GetTag((IInterface**)&tag);
     AutoPtr<ViewHolder> holder = (ViewHolder*)(IObject::Probe(tag));
@@ -1143,8 +1231,6 @@ ECode RecentsPanelView::HandleOnClick(
                 | IIntent::FLAG_ACTIVITY_TASK_ON_HOME
                 | IIntent::FLAG_ACTIVITY_NEW_TASK);
         if (DEBUG) {
-
-
             Logger::V(TAG, "Starting activity %s", TO_CSTR(intent));
         }
         AutoPtr<IUserHandle> userHandle;
@@ -1232,6 +1318,7 @@ void RecentsPanelView::StartApplicationDetailsActivity(
     /* [in] */ const String& packageName,
     /* [in] */ Int32 userId)
 {
+    Logger::I(TAG, " >> StartApplicationDetailsActivity %s, userId: %d", packageName.string(), userId);
     AutoPtr<IUriHelper> uriHelper;
     CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
     AutoPtr<IUri> uri;

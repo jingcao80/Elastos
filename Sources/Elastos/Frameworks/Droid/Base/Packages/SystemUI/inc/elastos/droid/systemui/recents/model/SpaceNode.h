@@ -4,11 +4,8 @@
 
 #include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.CoreLibrary.Core.h"
-#include "elastos/droid/systemui/recents/model/TaskStack.h"
 #include <elastos/core/Object.h>
 
-using Elastos::Droid::SystemUI::Recents::Model::ITaskStack;
-using Elastos::Droid::SystemUI::Recents::Model::TaskStack;
 using Elastos::Core::Object;
 using Elastos::Utility::IArrayList;
 
@@ -59,7 +56,7 @@ public:
     SpaceNode* mStartNode;
     SpaceNode* mEndNode;
 
-    AutoPtr<TaskStack> mStack;
+    AutoPtr<ITaskStack> mStack;
 };
 
 } // namespace Model

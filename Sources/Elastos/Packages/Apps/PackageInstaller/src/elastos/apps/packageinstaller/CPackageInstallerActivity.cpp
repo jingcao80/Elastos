@@ -744,7 +744,7 @@ ECode CPackageInstallerActivity::OnClick(
                 Boolean extraVal = FALSE;
                 intent->GetBooleanExtra(IIntent::EXTRA_RETURN_RESULT, FALSE, &extraVal);
                 if (extraVal) {
-                    newIntent->PutExtra(IIntent::EXTRA_RETURN_RESULT, TRUE);
+                    newIntent->PutBooleanExtra(IIntent::EXTRA_RETURN_RESULT, TRUE);
                     newIntent->AddFlags(IIntent::FLAG_ACTIVITY_FORWARD_RESULT);
                 }
                 if(localLOGV) {

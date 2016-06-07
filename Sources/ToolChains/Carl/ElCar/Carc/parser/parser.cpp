@@ -1538,15 +1538,24 @@ void GenIIDSeedString(
 
     while (1) {
         nSize = strlen(pInterface->mName);
-        if (nSize + nTotalSize + 1 > 256) break;
+        if (nSize + nTotalSize + 1 > MAX_SEED_SIZE) break;
         memcpy(pszBuf, pInterface->mName, nSize);
         pszBuf += nSize;
         *pszBuf++ = '/';
         nTotalSize += nSize + 1;
 
+        if (pInterface->mNameSpace != NULL) {
+            nSize = strlen(pInterface->mNameSpace);
+            if (nSize + nTotalSize + 1 > MAX_SEED_SIZE) break;
+            memcpy(pszBuf, pInterface->mNameSpace, nSize);
+            pszBuf += nSize;
+            *pszBuf++ = '/';
+            nTotalSize += nSize + 1;
+        }
+
         for (n = 0; n < pDesc->mMethodCount; n++) {
             nSize = strlen(pDesc->mMethods[n]->mName);
-            if (nSize + nTotalSize > 256) goto ExitEntry;
+            if (nSize + nTotalSize > MAX_SEED_SIZE) goto ExitEntry;
             memcpy(pszBuf, pDesc->mMethods[n]->mName, nSize);
             pszBuf += nSize;
             nTotalSize += nSize;
@@ -5922,6 +5931,15 @@ void GenIIDSeedString(InterfaceDirEntry *pInterface, char *pszBuf)
         *pszBuf++ = '/';
         nTotalSize += nSize + 1;
 
+        if (pInterface->mNameSpace != NULL) {
+            nSize = strlen(pInterface->mNameSpace);
+            if (nSize + nTotalSize + 1 > MAX_SEED_SIZE) break;
+            memcpy(pszBuf, pInterface->mNameSpace, nSize);
+            pszBuf += nSize;
+            *pszBuf++ = '/';
+            nTotalSize += nSize + 1;
+        }
+
         for (n = 0; n < pDesc->mMethodCount; n++) {
             nSize = strlen(pDesc->mMethods[n]->mName);
             if (nSize + nTotalSize > MAX_SEED_SIZE) goto ExitEntry;
@@ -6020,6 +6038,10 @@ void ClassLastCheck(ClassDirEntry *pClass)
     if (!(pDesc->mAttribs & ClassAttrib_t_sink)) {
         strcpy(szSeedBuf, pClass->mName);
         strcat(szSeedBuf, "/");
+        if (pClass->mNameSpace != NULL) {
+            strcat(szSeedBuf, pClass->mNameSpace);
+            strcat(szSeedBuf, "/");
+        }
         strcat(szSeedBuf, s_pModule->mName);
         GuidFromSeedString(szSeedBuf, &pDesc->mClsid);
     }

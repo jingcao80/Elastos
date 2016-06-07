@@ -35,6 +35,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("RecentsActivity.IntentReceiver")
+
         IntentReceiver(
             /* [in] */ RecentsActivity* host);
 
@@ -42,13 +44,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* str)
-        {
-            *str = String("RecentsActivity.IntentReceiver");
-            return NOERROR;
-        }
 
     private:
         RecentsActivity* mHost;

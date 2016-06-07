@@ -11,6 +11,7 @@
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include <elastos/droid/R.h>
 #include <elastos/core/Math.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
@@ -72,6 +73,7 @@ using Elastos::Droid::View::Accessibility::IAccessibilityManagerHelper;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::IInteger32;
 using Elastos::Core::Math;
 using Elastos::Core::StringBuilder;
@@ -92,7 +94,7 @@ namespace SystemUI {
 namespace Recents {
 namespace Misc {
 
-static AutoPtr<IBitmapFactoryOptions> Init()
+static AutoPtr<IBitmapFactoryOptions> InitBitmapOptions()
 {
     AutoPtr<IBitmapFactoryOptions> bfo;
     CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&bfo);
@@ -101,7 +103,7 @@ static AutoPtr<IBitmapFactoryOptions> Init()
 }
 
 const String SystemServicesProxy::TAG("SystemServicesProxy");
-const AutoPtr<IBitmapFactoryOptions> SystemServicesProxy::sBitmapOptions = Init();
+const AutoPtr<IBitmapFactoryOptions> SystemServicesProxy::sBitmapOptions = InitBitmapOptions();
 
 SystemServicesProxy::SystemServicesProxy(
     /* [in] */ IContext* context)
@@ -701,11 +703,12 @@ Boolean SystemServicesProxy::StartActivityFromRecents(
         Int32 i;
         ECode ec = mIam->StartActivityFromRecents(taskId, options == NULL ? NULL : bundle, &i);
         if (FAILED(ec)) {
-            // String str;
-            // context->GetString(R::string::recents_launch_error_message, taskName, &str);
-            // Console::LogError(context, str);
-            assert(0);
-            // return ec;
+            AutoPtr<ArrayOf<IInterface*> > params = ArrayOf<IInterface*>::Alloc(1);
+            params->Set(0, CoreUtils::Convert(taskName));
+            String str;
+            context->GetString(R::string::recents_launch_error_message, params, &str);
+            Logger::E(TAG, str.string());
+            return ec;
         }
         return TRUE;
     }
