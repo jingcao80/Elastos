@@ -41,8 +41,10 @@ ECode VoiceInputOutputSettings::OnCreate()
             (IPreference**)&pref);
     mVoiceCategory = IPreferenceCategory::Probe(pref);
     AutoPtr<IPreferenceGroup> prefGroup = IPreferenceGroup::Probe(mVoiceCategory);
+    mVoiceInputSettingsPref = NULL;
     prefGroup->FindPreference(CoreUtils::Convert(KEY_VOICE_INPUT_SETTINGS),
             (IPreference**)&mVoiceInputSettingsPref);
+    mTtsSettingsPref = NULL;
     prefGroup->FindPreference(CoreUtils::Convert(KEY_TTS_SETTINGS),
             (IPreference**)&mTtsSettingsPref);
 

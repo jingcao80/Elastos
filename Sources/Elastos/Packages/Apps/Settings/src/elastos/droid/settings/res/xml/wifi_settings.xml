@@ -14,9 +14,9 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:title="@string/wifi_settings"
         settings:keywords="@string/keywords_wifi">
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

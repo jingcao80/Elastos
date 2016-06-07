@@ -172,7 +172,7 @@
         <activity-alias android:name="Elastos.Droid.Settings.Wifi.CWifiSettings"
                 android:taskAffinity="Elastos.Droid.Settings"
                 android:label="@string/wifi_settings"
-                android:targetActivity="CSettings$WifiSettingsActivity"
+                android:targetActivity="Elastos.Droid.Settings.CSettings$WifiSettingsActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize"
                 android:exported="true">
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"

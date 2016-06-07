@@ -330,6 +330,7 @@ void InputMethodPreference::ShowSecurityWarnDialog(
     builder->SetPositiveButton(Elastos::Droid::R::string::ok, listener);
     AutoPtr<DialogInterfaceOnClickListener> listener1 = new DialogInterfaceOnClickListener(this, 1);
     builder->SetNegativeButton(Elastos::Droid::R::string::cancel, listener1);
+    mDialog = NULL;
     builder->Create((IAlertDialog**)&mDialog);
     IDialog::Probe(mDialog)->Show();
 }

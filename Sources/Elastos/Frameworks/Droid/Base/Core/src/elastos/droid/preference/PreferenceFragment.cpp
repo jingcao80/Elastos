@@ -159,7 +159,7 @@ ECode PreferenceFragment::OnActivityCreated(
         BindPreferences();
     }
 
-    mInitDone = true;
+    mInitDone = TRUE;
 
     if (savedInstanceState != NULL) {
         AutoPtr<IBundle> container;
@@ -206,7 +206,7 @@ ECode PreferenceFragment::OnDestroy()
 }
 
 ECode PreferenceFragment::OnSaveInstanceState(
-      /*[in]*/ IBundle* outState)
+    /*[in]*/ IBundle* outState)
 {
     Fragment::OnSaveInstanceState(outState);
 
@@ -222,9 +222,9 @@ ECode PreferenceFragment::OnSaveInstanceState(
 }
 
 ECode PreferenceFragment::OnActivityResult(
-     /*[in]*/ Int32 requestCode,
-     /*[in]*/ Int32 resultCode,
-     /*[in]*/ IIntent* data)
+    /*[in]*/ Int32 requestCode,
+    /*[in]*/ Int32 resultCode,
+    /*[in]*/ IIntent* data)
 {
     Fragment::OnActivityResult(requestCode, resultCode, data);
     mPreferenceManager->DispatchActivityResult(requestCode, resultCode, data);
@@ -278,7 +278,7 @@ ECode PreferenceFragment::AddPreferencesFromIntent(
 }
 
 ECode PreferenceFragment::AddPreferencesFromResource(
-        /*[in]*/ Int32 preferencesResId)
+    /*[in]*/ Int32 preferencesResId)
 {
     RequirePreferenceManager();
 
@@ -381,7 +381,7 @@ ECode PreferenceFragment::HasListView(
         return NOERROR;
     }
     AutoPtr<IView> root;
-    Fragment::GetView((IView**)&root);
+    GetView((IView**)&root);
     if (root == NULL) {
         *result = FALSE;
         return NOERROR;

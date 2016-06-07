@@ -12,6 +12,7 @@ using Elastos::Core::AutoLock;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::R;
 using Elastos::Core::AutoLock;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::Logging::Slogger;
@@ -36,6 +37,9 @@ ECode PreferenceGroup::constructor(
     /* [in] */ Int32 defStyleRes)
 {
     FAIL_RETURN(Preference::constructor(context, attrs, defStyleAttr, defStyleRes));
+
+    CArrayList::New((IList**)&mPreferenceList);
+
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
             const_cast<Int32 *>(R::styleable::PreferenceGroup),
             ArraySize(R::styleable::PreferenceGroup));
@@ -188,9 +192,9 @@ ECode PreferenceGroup::RemoveAll()
 {
     {    AutoLock syncLock(this);
         AutoPtr<IList> preferenceList = mPreferenceList;
-        Int32 i;
-        preferenceList->GetSize(&i);
-        for (i = i - 1; i >= 0; i--) {
+        Int32 size;
+        preferenceList->GetSize(&size);
+        for (Int32 i = size - 1; i >= 0; i--) {
             AutoPtr<IInterface> obj;
             preferenceList->Get(0, (IInterface**)&obj);
             RemovePreferenceInt(IPreference::Probe(obj));

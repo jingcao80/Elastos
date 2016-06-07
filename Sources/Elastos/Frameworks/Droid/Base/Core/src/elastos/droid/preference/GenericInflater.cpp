@@ -19,7 +19,7 @@ namespace Droid {
 namespace Preference {
 
 const Boolean GenericInflater::DEBUG = FALSE;
-const String GenericInflater::sConstructorSignature("CtxAttrs");
+const String GenericInflater::sConstructorSignature("CtxAttrs(LElastos/Droid/Content/IContext;*LElastos/Droid/Utility/IAttributeSet;*LIInterface;**)E");
 HashMap<String, AutoPtr<IConstructorInfo> > GenericInflater::sConstructorMap;
 
 #define LAYOUT_INFLATOR_CATCH_EXCEPTION1(expr) \
@@ -311,7 +311,7 @@ ECode GenericInflater::CreateItem(
         if (!prefix.IsNull()) {
             prefixName = prefix + name;
         }
-        // ec = cl->LoadClass(prefixName, (IClassInfo**)&clazz);
+        ec = cl->LoadClass(prefixName, (IClassInfo**)&clazz);
         FAIL_GOTO(ec, fail)
         ec = clazz->GetConstructorInfoByParamNames(sConstructorSignature, (IConstructorInfo**)&constructor);
         FAIL_GOTO(ec, fail)

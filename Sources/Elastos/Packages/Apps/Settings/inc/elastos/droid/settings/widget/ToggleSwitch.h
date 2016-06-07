@@ -21,6 +21,8 @@ class ToggleSwitch
 public:
     CAR_INTERFACE_DECL();
 
+    TO_STRING_IMPL("ToggleSwitch");
+
     ToggleSwitch();
 
     ~ToggleSwitch();

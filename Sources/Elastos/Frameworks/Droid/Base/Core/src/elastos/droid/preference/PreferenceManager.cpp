@@ -170,13 +170,15 @@ ECode PreferenceManager::InflateFromResource(
     /* [out] */ IPreferenceScreen** screen)
 {
     VALIDATE_NOT_NULL(screen)
+    *screen = NULL;
+
     // Block commits
     SetNoCommit(TRUE);
 
     AutoPtr<IGenericInflater> inflater;
     CPreferenceInflater::New(context, this, (IGenericInflater**)&inflater);
     AutoPtr<IInterface> pfObj;
-    inflater->Inflate(resId, rootPreferences, TRUE, (IInterface**)&pfObj);
+    FAIL_RETURN(inflater->Inflate(resId, rootPreferences, TRUE, (IInterface**)&pfObj));
     AutoPtr<IPreference> pf = IPreference::Probe(pfObj);
     if (pf != NULL) pf->OnAttachedToHierarchy(this);
 

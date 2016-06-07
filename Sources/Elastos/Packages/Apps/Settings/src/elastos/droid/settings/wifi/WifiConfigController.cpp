@@ -648,6 +648,7 @@ Boolean WifiConfigController::IpAndProxyFieldsAreValid()
     }
 
     if (mIpAssignment == STATIC_IpAssignment) {
+        mStaticIpConfiguration = NULL;
         CStaticIpConfiguration::New((IStaticIpConfiguration**)&mStaticIpConfiguration);
         Int32 result = ValidateIpConfigFields(mStaticIpConfiguration);
         if (result != 0) {

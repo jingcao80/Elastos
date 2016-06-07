@@ -454,6 +454,7 @@ ECode WifiSettings::OnActivityCreated(
         savedInstanceState->GetBoolean(SAVE_DIALOG_EDIT_MODE, &mDlgEdit);
         Boolean res;
         if (savedInstanceState->ContainsKey(SAVE_DIALOG_ACCESS_POINT_STATE, &res), res) {
+            mAccessPointSavedState = NULL;
             savedInstanceState->GetBundle(SAVE_DIALOG_ACCESS_POINT_STATE,
                     (IBundle**)&mAccessPointSavedState);
         }
@@ -484,7 +485,7 @@ ECode WifiSettings::OnActivityCreated(
         }
     }
 
-    AddPreferencesFromResource(R::xml::wifi_settings);
+    FAIL_RETURN(AddPreferencesFromResource(R::xml::wifi_settings));
 
     PrepareWifiAssistantCard();
 
@@ -643,6 +644,7 @@ ECode WifiSettings::OnSaveInstanceState(
     if (mDialog != NULL && (mDialog->IsShowing(&res), res)) {
         outState->PutBoolean(SAVE_DIALOG_EDIT_MODE, mDlgEdit);
         if (mDlgAccessPoint != NULL) {
+            mAccessPointSavedState = NULL;
             CBundle::New((IBundle**)&mAccessPointSavedState);
             mDlgAccessPoint->SaveWifiState(mAccessPointSavedState);
             outState->PutBundle(SAVE_DIALOG_ACCESS_POINT_STATE, mAccessPointSavedState);
@@ -1344,6 +1346,7 @@ void WifiSettings::UpdateConnectionState(
         mScanner->Resume();
     }
 
+    mLastInfo = NULL;
     mWifiManager->GetConnectionInfo((IWifiInfo**)&mLastInfo);
     if (state != NetworkInfoDetailedState_NONE) {
         mLastState = state;

@@ -584,6 +584,7 @@ ECode InputMethodAndLanguageSettings::OnCreate(
         IPreferenceGroup::Probe(screen)->RemovePreference(pref, &res);
     }
     else {
+        mLanguagePref = NULL;
         FindPreference(CoreUtils::Convert(KEY_PHONE_LANGUAGE),
                 (IPreference**)&mLanguagePref);
     }
@@ -659,6 +660,7 @@ ECode InputMethodAndLanguageSettings::OnCreate(
         spellChecker->SetIntent(intent);
     }
 
+    mHandler = NULL;
     CHandler::New((IHandler**)&mHandler);
     mSettingsObserver = new SettingsObserver(mHandler, conObj, this);
     obj = NULL;

@@ -123,9 +123,9 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
 {
     AutoPtr< ArrayOf<String> > args = ArrayOf<String>::Alloc(61);
     (*args)[0] = "Elastos.Droid.Settings.WirelessSettings";
-    (*args)[1] = "Elastos.Droid.Settings.WiFi.CWifiSettings";
-    (*args)[2] = "Elastos.Droid.Settings.WiFi.AdvancedWifiSettings";
-    (*args)[3] = "Elastos.Droid.Settings.WiFi.SavedAccessPointsWifiSettings";
+    (*args)[1] = "Elastos.Droid.Settings.Wifi.CWifiSettings";
+    (*args)[2] = "Elastos.Droid.Settings.Wifi.AdvancedWifiSettings";
+    (*args)[3] = "Elastos.Droid.Settings.Wifi.SavedAccessPointsWifiSettings";
     (*args)[4] = "Elastos.Droid.Settings.Bluetooth.BluetoothSettings";
     (*args)[5] = "Elastos.Droid.Settings.Sim.SimSettings";
     (*args)[6] = "Elastos.Droid.Settings.TetherSettings";
@@ -520,6 +520,7 @@ ECode SettingsActivity::OnCreateOptionsMenu(
     // Cache the search query (can be overriden by the OnQueryTextListener)
     const String query = mSearchQuery;
 
+    mSearchMenuItem = NULL;
     menu->FindItem(R::id::search, (IMenuItem**)&mSearchMenuItem);
     AutoPtr<IView> view;
     mSearchMenuItem->GetActionView((IView**)&view);
@@ -597,6 +598,7 @@ ECode SettingsActivity::OnCreate(
         window->SetUiOptions(value);
     }
 
+    mDevelopmentPreferences = NULL;
     GetSharedPreferences(DevelopmentSettings::PREF_FILE,
             IContext::MODE_PRIVATE, (ISharedPreferences**)&mDevelopmentPreferences);
 
@@ -708,6 +710,7 @@ ECode SettingsActivity::OnCreate(
         }
     }
 
+    mActionBar = NULL;
     GetActionBar((IActionBar**)&mActionBar);
     if (mActionBar != NULL) {
         mActionBar->SetDisplayHomeAsUpEnabled(mDisplayHomeAsUpEnabled);
@@ -808,6 +811,7 @@ void SettingsActivity::SetTitleFromIntent(
             mInitialTitle = CoreUtils::Convert(initialTitle);
         }
         else {
+            mInitialTitle = NULL;
             GetTitle((ICharSequence**)&mInitialTitle);
         }
         SetTitle(mInitialTitle);
@@ -974,6 +978,7 @@ ECode SettingsActivity::GetIntent(
 
     AutoPtr<IIntent> superIntent;
     Activity::GetIntent((IIntent**)&superIntent);
+
     String startingFragment = GetStartingFragmentClass(superIntent);
     // This is called from super.onCreate, IsMultiPane() is not yet reliable
     // Do not use onIsHidingHeaders either, which relies itself on this method
@@ -1011,7 +1016,13 @@ String SettingsActivity::GetStartingFragmentClass(
     intent->GetComponent((IComponentName**)&comp);
     String intentClass;
     comp->GetClassName(&intentClass);
-    if (intentClass.Equals("Elastos.Droid.Settings.CSettingsActivity")) return String(NULL);
+
+    AutoPtr<IClassInfo> thisKlass;
+    CObject::ReflectClassInfo((IActivity*)this, (IClassInfo**)&thisKlass);
+    String klassName, klassNamespace;
+    thisKlass->GetName(&klassName);
+    thisKlass->GetNamespace(&klassNamespace);
+    if (intentClass.Equals(klassNamespace + "." + klassName)) return String(NULL);
 
     if (String("Elastos.Droid.Settings.ManageApplications").Equals(intentClass)
             || String("Elastos.Droid.Settings.RunningServices").Equals(intentClass)

@@ -151,6 +151,7 @@ ECode WriteWifiConfigToNfcDialog::OnCreate(
 {
     AutoPtr<ILayoutInflater> inflate;
     GetLayoutInflater((ILayoutInflater**)&inflate);
+    mView = NULL;
     inflate->Inflate(R::layout::write_wifi_config_to_nfc, NULL, (IView**)&mView);
 
     SetView(mView);
@@ -184,10 +185,12 @@ ECode WriteWifiConfigToNfcDialog::OnCreate(
 
     AlertDialog::OnCreate(savedInstanceState);
 
+    mSubmitButton = NULL;
     GetButton(IDialogInterface::BUTTON_NEUTRAL, (IButton**)&mSubmitButton);
     IView::Probe(mSubmitButton)->SetOnClickListener((IViewOnClickListener*)this);
     IView::Probe(mSubmitButton)->SetEnabled(FALSE);
 
+    mCancelButton = NULL;
     GetButton(IDialogInterface::BUTTON_NEGATIVE, (IButton**)&mCancelButton);
     return NOERROR;
 }

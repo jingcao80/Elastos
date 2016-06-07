@@ -176,6 +176,7 @@ ECode VoiceInputHelper::BuildUi()
     AutoPtr<IComponentNameHelper> helper;
     CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&helper);
     if (!currentSetting.IsNull() && !currentSetting.IsEmpty()) {
+        mCurrentVoiceInteraction = NULL;
         helper->UnflattenFromString(currentSetting,
                 (IComponentName**)&mCurrentVoiceInteraction);
     }
@@ -236,6 +237,7 @@ ECode VoiceInputHelper::BuildUi()
     secure->GetString(
             resolver, ISettingsSecure::VOICE_RECOGNITION_SERVICE, &currentSetting);
     if (!currentSetting.IsNull() && !currentSetting.IsEmpty()) {
+        mCurrentRecognizer = NULL;
         helper->UnflattenFromString(currentSetting,
                 (IComponentName**)&mCurrentRecognizer);
     }

@@ -538,6 +538,7 @@ AutoPtr<IContentResolver> SettingsPreferenceFragment::GetContentResolver()
     GetActivity((IActivity**)&activity);
     AutoPtr<IContext> context = IContext::Probe(activity);
     if (context != NULL) {
+        mContentResolver = NULL;
         context->GetContentResolver((IContentResolver**)&mContentResolver);
     }
     return mContentResolver;

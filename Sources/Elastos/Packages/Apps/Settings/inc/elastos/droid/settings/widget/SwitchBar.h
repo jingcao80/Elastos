@@ -85,6 +85,8 @@ private:
 public:
     CAR_INTERFACE_DECL();
 
+    TO_STRING_IMPL("SwitchBar");
+
     SwitchBar();
 
     ~SwitchBar();

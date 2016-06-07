@@ -120,4 +120,3 @@ ECode DashboardTileView::OnClick(
 } // namespace Settings
 } // namespace Droid
 } // namespace Elastos
-
