@@ -1,7 +1,7 @@
 TARGET_NAME = widget
 TARGET_TYPE = lib
 
-INCLUDES += ../
+INCLUDES += ../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
 SOURCES = SwitchBar.cpp

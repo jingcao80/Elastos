@@ -1,7 +1,7 @@
 TARGET_NAME = voice
 TARGET_TYPE = lib
 
-INCLUDES += ../
+INCLUDES += ../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
 SOURCES += VoiceInputHelper.cpp

@@ -1,7 +1,7 @@
 TARGET_NAME = drawable
 TARGET_TYPE = lib
 
-INCLUDES += ../
+INCLUDES += ../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
 SOURCES = CircleFramedDrawable.cpp

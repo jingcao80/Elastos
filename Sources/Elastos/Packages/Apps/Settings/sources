@@ -3,8 +3,10 @@ TARGET_TYPE= eco
 
 EXPORT_ALL_SYMBOLS = 1
 
-#include $(MAKEDIR)/../../../../../../../sources.inc
-INCLUDES += $(MAKEDIR)/../../../../inc/
+INCLUDES += $(MAKEDIR)/inc
+INCLUDES += $(MAKEDIR)/src
+
+VPATH += $(MAKEDIR)/src/elastos/droid/settings
 
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
@@ -31,13 +33,13 @@ SOURCES += CSubSettings.cpp
 SOURCES += VoiceInputOutputSettings.cpp
 SOURCES += settings.cpp
 
-ELASTOS_LIBS += dashboard/dashboard.lib
-ELASTOS_LIBS += drawable/drawable.lib
-ELASTOS_LIBS += inputmethod/inputmethod.lib
-ELASTOS_LIBS += search/search.lib
-ELASTOS_LIBS += voice/voice.lib
-ELASTOS_LIBS += widget/widget.lib
-ELASTOS_LIBS += wifi/wifi.lib
+ELASTOS_LIBS += src/elastos/droid/settings/dashboard/dashboard.lib
+ELASTOS_LIBS += src/elastos/droid/settings/drawable/drawable.lib
+ELASTOS_LIBS += src/elastos/droid/settings/inputmethod/inputmethod.lib
+ELASTOS_LIBS += src/elastos/droid/settings/search/search.lib
+ELASTOS_LIBS += src/elastos/droid/settings/voice/voice.lib
+ELASTOS_LIBS += src/elastos/droid/settings/widget/widget.lib
+ELASTOS_LIBS += src/elastos/droid/settings/wifi/wifi.lib
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
