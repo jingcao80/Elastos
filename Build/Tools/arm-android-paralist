@@ -384,8 +384,8 @@
 > Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui
 
 # ==== build SettingsProvider ====
-  Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider Elastos.Droid.SettingsProvider.car
-> Elastos/Frameworks/Droid/Base/Packages/SettingsProvider/src/elastos/droid/settingsprovider
+  Elastos/Frameworks/Droid/Base/Packages/SettingsProvider Elastos.Droid.SettingsProvider.car
+> Elastos/Frameworks/Droid/Base/Packages/SettingsProvider
 
 # ==== build DefContainer ====
   Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService/src/elastos/droid/defcontainer Elastos.Droid.DefContainer.car
@@ -437,8 +437,8 @@
 > Elastos/Frameworks/Droid/Base/Test-runner
 
 # ==== buid Packages/Apps/Calculator ====
-> Elastos/Packages/Apps/Calculator/src/elastos/droid/calculator2 Elastos.Droid.Calculator2.car
-> Elastos/Packages/Apps/Calculator/src/elastos/droid/calculator2
+> Elastos/Packages/Apps/Calculator Elastos.Droid.Calculator2.car
+> Elastos/Packages/Apps/Calculator
 
 # ==== build Packages/Apps/Settings ====
 > Elastos/Packages/Apps/Settings/src/elastos/droid/settings Elastos.Droid.Settings.car
@@ -452,8 +452,8 @@
 > Elastos/Packages/Apps/Settings/src/elastos/droid/settings
 
 # ==== build Packages/Apps/Settings ====
-> Elastos/Packages/Apps/Launcher2/src/elastos/droid/launcher2 Elastos.Droid.Launcher2.car
-> Elastos/Packages/Apps/Launcher2/src/elastos/droid/launcher2
+> Elastos/Packages/Apps/Launcher2 Elastos.Droid.Launcher2.car
+> Elastos/Packages/Apps/Launcher2
 
 # ==== Elastos/Packages/InputMethods ====
 > Elastos/Packages/InputMethods/PinyinIME Elastos.Droid.InputMethod.Pinyin.car
@@ -461,8 +461,8 @@
 > Elastos/Packages/InputMethods/PinyinIME
 
 # ==== build Packages/Providers/MediaProvider ====
-> Elastos/Packages/Providers/MediaProvider/src/elastos/droid/providers/media Elastos.Droid.Providers.Media.car
-> Elastos/Packages/Providers/MediaProvider/src/elastos/droid/providers/media
+> Elastos/Packages/Providers/MediaProvider Elastos.Droid.Providers.Media.car
+> Elastos/Packages/Providers/MediaProvider
 
 # ==== build Packages/Service/Telecomm ====
 > Elastos/Packages/Service/Telecomm Elastos.Droid.Server.Telecom.car

@@ -1,2 +1,0 @@
-DIRS += inc
-DIRS += src/elastos/droid/defcontainer

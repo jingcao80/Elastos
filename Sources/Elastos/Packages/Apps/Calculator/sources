@@ -5,8 +5,10 @@ TARGET_TYPE = eco
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
-INCLUDES += $(MAKEDIR)/../../../../inc/
-INCLUDES += $(PREBUILD_INC)
+INCLUDES += $(MAKEDIR)/inc
+INCLUDES += $(MAKEDIR)/src
+
+VPATH += $(MAKEDIR)/src/elastos/droid/calculator2
 
 SOURCES += Elastos.Droid.Calculator2.car
 SOURCES += Elastos.CoreLibrary.cpp

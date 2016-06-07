@@ -2,16 +2,16 @@ module
 {
     importlib("Elastos.Droid.Core.eco");
 
-    merge("IMtpService.car");
-    merge("MediaDocumentsProvider.car");
-    merge("MediaProvider.car");
-    merge("MediaScannerReceiver.car");
-    merge("MediaScannerService.car");
-    merge("MediaUpgradeReceiver.car");
-    merge("MtpReceiver.car");
-    merge("MtpService.car");
-    merge("RingtonePickerActivity.car");
-    merge("MediaThumbRequest.car");
+    merge("car/elastos/droid/providers/media/IMtpService.car");
+    merge("car/elastos/droid/providers/media/MediaDocumentsProvider.car");
+    merge("car/elastos/droid/providers/media/MediaProvider.car");
+    merge("car/elastos/droid/providers/media/MediaScannerReceiver.car");
+    merge("car/elastos/droid/providers/media/MediaScannerService.car");
+    merge("car/elastos/droid/providers/media/MediaUpgradeReceiver.car");
+    merge("car/elastos/droid/providers/media/MtpReceiver.car");
+    merge("car/elastos/droid/providers/media/MtpService.car");
+    merge("car/elastos/droid/providers/media/RingtonePickerActivity.car");
+    merge("car/elastos/droid/providers/media/MediaThumbRequest.car");
 
 
     using interface Elastos.Droid.App.IActivity;

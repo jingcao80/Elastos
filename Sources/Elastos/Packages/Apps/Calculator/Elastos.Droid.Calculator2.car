@@ -3,13 +3,13 @@ module
     importlib("Elastos.Droid.Core.eco");
     importlib("Elastos.CoreLibrary.eco");
 
-    merge("../../../../car/elastos/droid/calculator2/calculatorEditText.car");
-    merge("../../../../car/elastos/droid/calculator2/calculatorExpressionEvaluator.car");
-    merge("../../../../car/elastos/droid/calculator2/calculator.car");
-    merge("../../../../car/elastos/droid/calculator2/calculatorExpressionBuilder.car");
-    merge("../../../../car/elastos/droid/calculator2/calculatorExpressionTokenizer.car");
-    merge("../../../../car/elastos/droid/calculator2/calculatorPadLayout.car");
-    merge("../../../../car/elastos/droid/calculator2/calculatorPadViewPager.car");
+    merge("car/elastos/droid/calculator2/calculatorEditText.car");
+    merge("car/elastos/droid/calculator2/calculatorExpressionEvaluator.car");
+    merge("car/elastos/droid/calculator2/calculator.car");
+    merge("car/elastos/droid/calculator2/calculatorExpressionBuilder.car");
+    merge("car/elastos/droid/calculator2/calculatorExpressionTokenizer.car");
+    merge("car/elastos/droid/calculator2/calculatorPadLayout.car");
+    merge("car/elastos/droid/calculator2/calculatorPadViewPager.car");
 
 
     interface Elastos.Droid.Calculator2.ICalculator;

@@ -3,9 +3,11 @@ TARGET_TYPE= eco
 
 EXPORT_ALL_SYMBOLS = 1
 
-include $(MAKEDIR)/../../../../../../../sources.inc
+include $(MAKEDIR)/../../../sources.inc
+INCLUDES += $(MAKEDIR)/../inc/
+INCLUDES += $(MAKEDIR)/src
 
-INCLUDES += $(MAKEDIR)/../../../../inc/
+VPATH += $(MAKEDIR)/src/elastos/droid/defcontainer
 
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
