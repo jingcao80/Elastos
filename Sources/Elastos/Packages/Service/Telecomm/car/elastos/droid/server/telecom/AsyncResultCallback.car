@@ -1,0 +1,27 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Telecom {
+
+    /**
+     * Generic result interface for use with async method callback.
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IAsyncResultCallback {
+        OnResult(
+            [in] IInterface* result,
+            [in] Int32 errorCode,
+            [in] String errorMsg);
+    }
+
+    } // namespace Telecom
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

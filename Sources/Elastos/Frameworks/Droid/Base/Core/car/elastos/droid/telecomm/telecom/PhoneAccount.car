@@ -120,6 +120,45 @@ module
          */
         const String SCHEME_SIP = "sip";
 
+        /**
+         * {@hide}
+         */
+        const String SCHEME_SMSTO = "smsto";
+
+        /**
+         * {@hide}
+         */
+        const Int32 LCH = 1;
+
+        /**
+         * {@hide}
+         */
+        const Int32 ACTIVE = 2;
+
+        /**
+         * {@hide}
+         */
+        const Int32 LCHMUTE = 3;
+
+        /**
+         * {@hide}
+         */
+        SetBit(
+            [in] Int32 bit);
+
+        /**
+         * {@hide}
+         */
+        UnSetBit(
+            [in] Int32 bit);
+
+        /**
+         * {@hide}
+         */
+        IsSet(
+            [in] Int32 bit,
+            [out] Boolean* result);
+
         ToBuilder(
             [out] IPhoneAccountBuilder** res);
 

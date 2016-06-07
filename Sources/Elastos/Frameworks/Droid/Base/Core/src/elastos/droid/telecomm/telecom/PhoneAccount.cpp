@@ -12,6 +12,7 @@ using Elastos::Core::CString;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::CBitSet;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::Logging::Logger;
@@ -158,6 +159,11 @@ ECode PhoneAccount::Builder::Build(
 //===============================================================
 CAR_INTERFACE_IMPL_2(PhoneAccount, Object, IPhoneAccount, IParcelable)
 
+PhoneAccount::PhoneAccount()
+{
+    CBitSet::New((IBitSet**)&mDsda);
+}
+
 ECode PhoneAccount::constructor()
 {
     return NOERROR;
@@ -193,6 +199,25 @@ AutoPtr<IPhoneAccountBuilder> PhoneAccount::_Builder(
     AutoPtr<Builder> res = new Builder();
     res->constructor(accountHandle, label);
     return IPhoneAccountBuilder::Probe(res);
+}
+
+ECode PhoneAccount::SetBit(
+    /* [in] */ Int32 bit)
+{
+    return mDsda->Set(bit);
+}
+
+ECode PhoneAccount::UnSetBit(
+    /* [in] */ Int32 bit)
+{
+    return mDsda->Set(bit, FALSE);
+}
+
+ECode PhoneAccount::IsSet(
+    /* [in] */ Int32 bit,
+    /* [out] */ Boolean* result)
+{
+    return mDsda->Get(bit, result);
 }
 
 ECode PhoneAccount::ToBuilder(

@@ -1,3 +1,4 @@
 
 DIRS += Apps
 DIRS += Providers
+DIRS += Service

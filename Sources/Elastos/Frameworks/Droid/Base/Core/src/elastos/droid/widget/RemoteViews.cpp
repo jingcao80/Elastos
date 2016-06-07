@@ -3465,7 +3465,7 @@ ECode RemoteViews::SetUri(
         CStrictMode::AcquireSingleton((IStrictMode**)&helper);
         helper->VmFileUriExposureEnabled(&isVmFileUriExposureEnabled);
         if (isVmFileUriExposureEnabled) {
-            value->CheckFileUriExposed(String("RemoteViews.setUri()"));
+            FAIL_RETURN(value->CheckFileUriExposed(String("RemoteViews.setUri()")))
         }
     }
     AutoPtr<IRemoteViewsAction> action = new ReflectionAction(viewId, methodName, ReflectionAction::URI, pValue);

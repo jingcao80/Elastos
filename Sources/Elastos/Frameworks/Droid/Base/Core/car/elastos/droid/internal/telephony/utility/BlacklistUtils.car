@@ -51,7 +51,6 @@ module
         IsBlacklistRegexEnabled(
             [in] IContext* context,
             [out] Boolean* result);
-
     }
 
     }//Utility

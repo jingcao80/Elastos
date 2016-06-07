@@ -1,0 +1,81 @@
+
+module
+{
+    using interface Elastos.Droid.Telecomm.Telecom.IAudioState;
+
+    interface Elastos.Droid.Server.Telecom.IConnectionServiceWrapper;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Telecom {
+
+    // TODO: Consider renaming this CallsManagerPlugin.
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface ICallsManagerListener {
+        OnCallAdded(
+            [in] ICall* call);
+
+        OnCallRemoved(
+            [in] ICall* call);
+
+        OnCallStateChanged(
+            [in] ICall* call,
+            [in] Int32 oldState,
+            [in] Int32 newState);
+
+        OnCallExtrasUpdated(
+            [in] ICall* call);
+
+        OnConnectionServiceChanged(
+            [in] ICall* call,
+            [in] IConnectionServiceWrapper* oldService,
+            [in] IConnectionServiceWrapper* newService);
+
+        OnIncomingCallAnswered(
+            [in] ICall* call);
+
+        OnIncomingCallRejected(
+            [in] ICall* call,
+            [in] Boolean rejectWithMessage,
+            [in] String textMessage);
+
+        OnForegroundCallChanged(
+            [in] ICall* oldForegroundCall,
+            [in] ICall* newForegroundCall);
+
+        OnAudioStateChanged(
+            [in] IAudioState* oldAudioState,
+            [in] IAudioState* newAudioState);
+
+        OnRingbackRequested(
+            [in] ICall* call,
+            [in] Boolean ringback);
+
+        OnIsConferencedChanged(
+            [in] ICall* call);
+
+        OnIsVoipAudioModeChanged(
+            [in] ICall* call);
+
+        OnVideoStateChanged(
+            [in] ICall* call);
+
+        OnCallSubstateChanged(
+            [in] ICall* call);
+
+        OnCanAddCallChanged(
+            [in] Boolean canAddCall);
+
+        OnProcessIncomingCall(
+            [in] ICall* call);
+    }
+
+    } // namespace Telecom
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

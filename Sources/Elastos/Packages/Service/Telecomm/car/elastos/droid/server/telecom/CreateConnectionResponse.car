@@ -1,0 +1,34 @@
+
+module
+{
+    using interface Elastos.Droid.Telecomm.Telecom.IDisconnectCause;
+    using interface Elastos.Droid.Telecomm.Telecom.IParcelableConnection;
+
+    interface Elastos.Droid.Server.Telecom.ICallIdMapper;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Telecom {
+
+    /**
+     * A callback for providing the result of creating a connection.
+     */
+    /**
+     * @Involved
+     * interface ;
+     */
+    interface ICreateConnectionResponse {
+        HandleCreateConnectionSuccess(
+            [in] ICallIdMapper* idMapper,
+            [in] IParcelableConnection* connection);
+
+        HandleCreateConnectionFailure(
+            [in] IDisconnectCause* disconnectCaused);
+    }
+
+    } // namespace Telecom
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

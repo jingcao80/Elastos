@@ -14,7 +14,7 @@ module
         interface IResponse {
             OnResult(
                 [in] IInterface* request,
-                [in] ArrayOf<IInterface> * result);
+                [in] ArrayOf<IInterface*> * result);
 
             OnError(
                 [in] IInterface* request,

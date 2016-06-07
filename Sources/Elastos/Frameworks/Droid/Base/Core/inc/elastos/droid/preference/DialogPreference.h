@@ -2,10 +2,10 @@
 #ifndef __ELASTOS_DROID_PREFERENCE_DIALOGPREFERENCE_H__
 #define __ELASTOS_DROID_PREFERENCE_DIALOGPREFERENCE_H__
 
-#include "elastos/droid/ext/frameworkext.h"
-#include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Content.h"
-#include "elastos/droid/preference/Preference.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <Elastos.Droid.App.h>
+#include <Elastos.Droid.Content.h>
+#include <elastos/droid/preference/Preference.h>
 
 using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::App::IDialog;
@@ -29,7 +29,7 @@ namespace Preference {
 * @attr ref android.R.styleable#DialogPreference_positiveButtonText
 * @attr ref android.R.styleable#DialogPreference_negativeButtonText
  */
-class DialogPreference
+class ECO_PUBLIC DialogPreference
     : public Preference
     , public IDialogPreference
     , public IDialogInterfaceOnClickListener
@@ -54,7 +54,7 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
-    virtual ~DialogPreference() {}
+    virtual ~DialogPreference();
 
     CAR_INTERFACE_DECL()
 

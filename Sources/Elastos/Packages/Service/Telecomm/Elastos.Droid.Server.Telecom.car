@@ -1,0 +1,208 @@
+
+module
+{
+    importlib("Elastos.CoreLibrary.eco");
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("car/elastos/droid/server/telecom/AccountSelection.car");
+    merge("car/elastos/droid/server/telecom/AsyncResultCallback.car");
+    merge("car/elastos/droid/server/telecom/BluetoothPhoneService.car");
+    merge("car/elastos/droid/server/telecom/Call.car");
+    merge("car/elastos/droid/server/telecom/CallActivity.car");
+    merge("car/elastos/droid/server/telecom/CallIdMapper.car");
+    merge("car/elastos/droid/server/telecom/CallReceiver.car");
+    merge("car/elastos/droid/server/telecom/CallsManager.car");
+    merge("car/elastos/droid/server/telecom/ContactsAsyncHelper.car");
+    merge("car/elastos/droid/server/telecom/ConnectionServiceWrapper.car");
+    merge("car/elastos/droid/server/telecom/CreateConnectionResponse.car");
+    merge("car/elastos/droid/server/telecom/CreateConnectionProcessor.car");
+    merge("car/elastos/droid/server/telecom/ErrorDialogActivity.car");
+    merge("car/elastos/droid/server/telecom/NewOutgoingCallIntentBroadcaster.car");
+    merge("car/elastos/droid/server/telecom/PhoneAccountBroadcastReceiver.car");
+    merge("car/elastos/droid/server/telecom/RespondViaSmsSettings.car");
+    merge("car/elastos/droid/server/telecom/ServiceBinder.car");
+    merge("car/elastos/droid/server/telecom/TelecomBroadcastReceiver.car");
+    merge("car/elastos/droid/server/telecom/TelecomServiceImpl.car");
+    merge("car/elastos/droid/server/telecom/TtyManager.car");
+    merge("car/elastos/droid/server/telecom/WiredHeadsetManager.car");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IListActivity;
+    using interface Elastos.Droid.App.IService;
+    using interface Elastos.Droid.Bluetooth.IIBluetoothHeadsetPhone;
+    using interface Elastos.Droid.Content.IBroadcastReceiver;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Os.IBinder;
+    using interface Elastos.Droid.Preference.IPreferenceActivity;
+    using interface Elastos.Droid.Telecomm.Internal.IIConnectionServiceAdapter;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+
+    interface Elastos.Droid.Server.Telecom.IConnectionServiceWrapper;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Telecom {
+
+    class CAccountSelection {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+        interface IAccountSelection;
+    }
+
+    class CBluetoothPhoneService {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IService;
+        interface IBluetoothPhoneService;
+    }
+
+    class CBluetoothPhoneServiceSubIBluetoothHeadsetPhone {
+        constructor(
+            [in] IInterface* host);
+
+        interface IBinder;
+        interface IIBluetoothHeadsetPhone;
+    }
+
+    class CCallActivity {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+        interface ICallActivity;
+    }
+
+    class CCallReceiver {
+        constructor();
+
+        interface IBroadcastReceiver;
+        interface ICallReceiver;
+    }
+
+    class CConnectionServiceWrapperAdapter {
+        constructor(
+            [in] IInterface* host);
+
+        interface IIConnectionServiceAdapter;
+        interface IBinder;
+    }
+
+    class CErrorDialogActivity {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+        interface IErrorDialogActivity;
+    }
+
+    class CNewOutgoingCallIntentBroadcasterNewOutgoingCallBroadcastIntentReceiver {
+        constructor(
+            [in] IInterface* host);
+
+        interface IBroadcastReceiver;
+        interface INewOutgoingCallIntentBroadcasterNewOutgoingCallBroadcastIntentReceiver;
+    }
+
+    class CPhoneAccountBroadcastReceiver {
+        constructor();
+
+        interface IBroadcastReceiver;
+        interface IPhoneAccountBroadcastReceiver;
+    }
+
+    class CRespondViaSmsSettingsSettings {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+        interface IListActivity;
+        interface IPreferenceActivity;
+        interface IRespondViaSmsSettingsSettings;
+    }
+
+    class CTelecomBroadcastReceiver {
+        constructor();
+
+        interface IBroadcastReceiver;
+        interface ITelecomBroadcastReceiver;
+    }
+
+    class CTtyManagerTtyBroadcastReceiver {
+        constructor(
+            [in] IInterface* host);
+
+        interface IBroadcastReceiver;
+        interface ITtyManagerTtyBroadcastReceiver;
+    }
+
+    class CWiredHeadsetManagerWiredHeadsetBroadcastReceiver {
+        constructor(
+            [in] IInterface* host);
+
+        interface IBroadcastReceiver;
+        interface IWiredHeadsetManagerWiredHeadsetBroadcastReceiver;
+    }
+
+    } // namespace Telecom
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -706,6 +706,11 @@ module
         interface IDocumentsContract;
     }
 
+    singleton class CTelephonyBlacklist
+    {
+        interface ITelephonyBlacklist;
+    }
+
     singleton class CUserDictionary
     {
         interface IUserDictionary;

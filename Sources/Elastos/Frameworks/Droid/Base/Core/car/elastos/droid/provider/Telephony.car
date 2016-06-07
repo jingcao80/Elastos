@@ -2653,6 +2653,18 @@ module
          * <P>Type: INTEGER (int)</P>
          */
         const String MESSAGE_MODE = "message";
+
+        GetCONTENT_URI(
+            [out] IUri** result);
+
+        GetCONTENT_FILTER_BYNUMBER_URI(
+            [out] IUri** result);
+
+        GetCONTENT_PHONE_URI(
+            [out] IUri** result);
+
+        GetCONTENT_MESSAGE_URI(
+            [out] IUri** result);
     }
 
     interface ITelephony {

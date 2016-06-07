@@ -146,11 +146,126 @@ module
          */
         const Int32 OUTGOING_CANCELED = 44;
 
+        /**
+         * Stk Call Control modified DIAL request to USSD request.
+         * {@hide}
+         */
+        const Int32 DIAL_MODIFIED_TO_USSD = 45;
+
+        /**
+         * Stk Call Control modified DIAL request to SS request.
+         * {@hide}
+         */
+        const Int32 DIAL_MODIFIED_TO_SS = 46;
+
+        /**
+         * Stk Call Control modified DIAL request to DIAL with modified data.
+         * {@hide}
+         */
+        const Int32 DIAL_MODIFIED_TO_DIAL = 47;
+
+        /**
+         * Call was rejected due to number being blacklisted by user.
+         * {@@hide}
+         */
+        const Int32 CALL_BLACKLISTED = 400;
+
+        const Int32 NO_CIRCUIT_AVAIL = 48;
+
+        const Int32 NO_ROUTE_TO_DESTINAON = 49;
+
+        const Int32 OPERATOR_DETERMINED_BARRING = 50;
+
+        const Int32 CALL_FAIL_NO_USER_RESPONDING = 51;
+
+        const Int32 CALL_FAIL_NO_ANSWER_FROM_USER = 52;
+
+        const Int32 CALL_FAIL_DESTINATION_OUT_OF_ORDER = 53;
+
+        const Int32 BEARER_CAPABILITY_NOT_AUTHORIZED = 54;
+
+        const Int32 CHANNEL_UNACCEPTABLE = 55;
+
+        const Int32 CALL_REJECTED = 56;
+
+        const Int32 NUMBER_CHANGED = 57;
+
+        const Int32 PREEMPTION = 58;
+
+        const Int32 FACILITY_REJECTED = 59;
+
+        const Int32 RESP_TO_STATUS_ENQUIRY = 60;
+
+        const Int32 NORMAL_UNSPECIFIED = 61;
+
+        const Int32 NETWORK_OUT_OF_ORDER = 62;
+
+        const Int32 TEMPORARY_FAILURE = 63;
+
+        const Int32 SWITCHING_EQUIPMENT_CONGESTION = 64;
+
+        const Int32 ACCESS_INFORMATION_DISCARDED = 65;
+
+        const Int32 REQUESTED_CIRCUIT_OR_CHANNEL_NOT_AVAILABLE = 66;
+
+        const Int32 RESOURCES_UNAVAILABLE_OR_UNSPECIFIED = 67;
+
+        const Int32 QOS_UNAVAILABLE = 68;
+
+        const Int32 REQUESTED_FACILITY_NOT_SUBSCRIBED = 69;
+
+        const Int32 INCOMING_CALLS_BARRED_WITHIN_CUG = 70;
+
+        const Int32 BEARER_CAPABILITY_UNAVAILABLE = 71;
+
+        const Int32 SERVICE_OPTION_NOT_AVAILABLE = 72;
+
+        const Int32 BEARER_SERVICE_NOT_IMPLEMENTED = 73;
+
+        const Int32 REQUESTED_FACILITY_NOT_IMPLEMENTED = 74;
+
+        const Int32 ONLY_DIGITAL_INFORMATION_BEARER_AVAILABLE = 75;
+
+        const Int32 SERVICE_OR_OPTION_NOT_IMPLEMENTED = 76;
+
+        const Int32 INVALID_TRANSACTION_IDENTIFIER = 77;
+
+        const Int32 USER_NOT_MEMBER_OF_CUG = 78;
+
+        const Int32 INCOMPATIBLE_DESTINATION = 79;
+
+        const Int32 INVALID_TRANSIT_NW_SELECTION = 80;
+
+        const Int32 SEMANTICALLY_INCORRECT_MESSAGE = 81;
+
+        const Int32 INVALID_MANDATORY_INFORMATION = 82;
+
+        const Int32 MESSAGE_TYPE_NON_IMPLEMENTED = 83;
+
+        const Int32 MESSAGE_TYPE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE = 84;
+
+        const Int32 INFORMATION_ELEMENT_NON_EXISTENT = 85;
+
+        const Int32 CONDITIONAL_IE_ERROR = 86;
+
+        const Int32 MESSAGE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE = 87;
+
+        const Int32 RECOVERY_ON_TIMER_EXPIRED = 88;
+
+        const Int32 PROTOCOL_ERROR_UNSPECIFIED = 89;
+
+        const Int32 INTERWORKING_UNSPECIFIED = 90;
+
+        /**
+         * The call, which was an IMS call, disconnected because it merged with another call.
+         */
+        const Int32 IMS_MERGED_SUCCESSFULLY = 91;
+
         /** Smallest valid value for call disconnect codes. */
         const Int32 MINIMUM_VALID_VALUE = 0; //NOT_DISCONNECTED;
 
         /** Largest valid value for call disconnect codes. */
-        const Int32 MAXIMUM_VALID_VALUE = 44; //OUTGOING_CANCELED;
+        const Int32 MAXIMUM_VALID_VALUE = 91; // IMS_MERGED_SUCCESSFULLY;
 
         /** Returns descriptive string for the specified disconnect cause. */
         ToString(

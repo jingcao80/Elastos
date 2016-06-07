@@ -227,16 +227,7 @@ const Int32 NotificationManagerService::REASON_LISTENER_CANCEL = 10;
 const Int32 NotificationManagerService::REASON_LISTENER_CANCEL_ALL = 11;
 const Int32 NotificationManagerService::REASON_GROUP_SUMMARY_CANCELED = 12;
 
-String InitIsFilteredQuery()
-{
-    String rev = ISpamFilterSpamContractNotificationTable::NORMALIZED_TEXT;
-    rev += "=? AND ";
-    rev += ISpamFilterSpamContractPackageTable::PACKAGE_NAME;
-    rev += "=?";
-    return rev;
-}
-
-const String NotificationManagerService::IS_FILTERED_QUERY = InitIsFilteredQuery();
+const String NotificationManagerService::IS_FILTERED_QUERY(ISpamFilterSpamContractNotificationTable::NORMALIZED_TEXT + "=? AND " + ISpamFilterSpamContractPackageTable::PACKAGE_NAME + "=?");
 
 static AutoPtr<IUri> InitFilterUri()
 {
@@ -3522,6 +3513,7 @@ ECode NotificationManagerService::EnqueueNotificationInternal(
     /* [out] */ ArrayOf<Int32>** _idOut)
 {
     VALIDATE_NOT_NULL(_idOut)
+    *_idOut = NULL;
 
     AutoPtr<ArrayOf<Int32> > idOut;
     if (NULL == idIn) {
@@ -3544,7 +3536,7 @@ ECode NotificationManagerService::EnqueueNotificationInternal(
     }
 
     CheckCallerIsSystemOrSameApp(pkg);
-    Boolean isSystemNotification = IsUidSystem(callingUid)|| pkg.Equals("android");
+    Boolean isSystemNotification = IsUidSystem(callingUid) || pkg.Equals("android");
     Boolean isNotificationFromListener = mListeners->IsListenerPackage(pkg);
 
     AutoPtr<IActivityManagerHelper> activityMgrHelper;

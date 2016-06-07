@@ -1,0 +1,21 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Telecom {
+
+    /** Utility to map {@link Call} objects to unique IDs. IDs are generated when a call is added. */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface ICallIdMapper {
+    }
+
+    } // namespace Telecom
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -141,6 +141,7 @@ SOURCES += CLocalGroups.cpp
 SOURCES += CLocalGroupsGroup.cpp
 SOURCES += CLocalGroupsGroupHelper.cpp
 SOURCES += CContactsContractCommonDataKindsLocalGroup.cpp
+SOURCES += CTelephonyBlacklist.cpp
 SOURCES += CThemesContract.cpp
 SOURCES += CThemesContractMixnMatchColumns.cpp
 SOURCES += CThemesContractPreviewColumns.cpp

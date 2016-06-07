@@ -1,0 +1,81 @@
+
+TARGET_NAME = Elastos.Droid.Server.Telecom
+TARGET_TYPE = eco
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+VPATH  = $(MAKEDIR)/src/elastos/droid/server/spam_filter
+VPATH += $(MAKEDIR)/src/elastos/droid/server/telecom
+
+INCLUDES += $(MAKEDIR)/inc/
+INCLUDES += $(MAKEDIR)
+
+SOURCES = Elastos.CoreLibrary.cpp
+SOURCES += Elastos.Droid.Core.cpp
+SOURCES += Elastos.Droid.Server.Telecom.car
+
+SOURCES += R.cpp
+SOURCES += telecom.cpp
+SOURCES += SpamBlocker.cpp
+SOURCES += AccountSelection.cpp
+SOURCES += AsyncRingtonePlayer.cpp
+SOURCES += Blacklist.cpp
+SOURCES += BlacklistCallNotifier.cpp
+SOURCES += BluetoothManager.cpp
+SOURCES += BluetoothPhoneService.cpp
+SOURCES += Call.cpp
+SOURCES += CallActivity.cpp
+SOURCES += CallAudioManager.cpp
+SOURCES += CallIdMapper.cpp
+SOURCES += CallLogManager.cpp
+SOURCES += CallReceiver.cpp
+SOURCES += CallsManager.cpp
+SOURCES += CallsManagerListenerBase.cpp
+SOURCES += ConnectionServiceRepository.cpp
+SOURCES += ConnectionServiceWrapper.cpp
+SOURCES += Constants.cpp
+SOURCES += ContactsAsyncHelper.cpp
+SOURCES += CreateConnectionProcessor.cpp
+SOURCES += DtmfLocalTonePlayer.cpp
+SOURCES += ErrorDialogActivity.cpp
+SOURCES += HeadsetMediaButton.cpp
+SOURCES += InCallAdapter.cpp
+SOURCES += InCallController.cpp
+SOURCES += InCallToneMonitor.cpp
+SOURCES += InCallTonePlayer.cpp
+SOURCES += Log.cpp
+SOURCES += MissedCallNotifier.cpp
+SOURCES += MultiLineTitleEditTextPreference.cpp
+SOURCES += NewOutgoingCallIntentBroadcaster.cpp
+SOURCES += PhoneAccountBroadcastReceiver.cpp
+SOURCES += PhoneAccountRegistrar.cpp
+SOURCES += PhoneStateBroadcaster.cpp
+SOURCES += ProximitySensorManager.cpp
+SOURCES += QuickResponseUtils.cpp
+SOURCES += RespondViaSmsManager.cpp
+SOURCES += RespondViaSmsSettings.cpp
+SOURCES += RingbackPlayer.cpp
+SOURCES += Ringer.cpp
+SOURCES += ServiceBinder.cpp
+SOURCES += StatusBarNotifier.cpp
+SOURCES += TelecomApp.cpp
+SOURCES += TelecomBroadcastReceiver.cpp
+SOURCES += TelecomServiceImpl.cpp
+SOURCES += TelephonyUtil.cpp
+SOURCES += ThreadUtil.cpp
+SOURCES += Timeouts.cpp
+SOURCES += TtyManager.cpp
+SOURCES += WiredHeadsetManager.cpp
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += -lm -lcutils -licuuc -llog -lutils -landroidfw
+
+AAPT_FLAGS = -0 .dat
+RES_NAMESPACE = Elastos.Droid.Server.Telecom
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;
+APP_PACKAGE_NAME = Elastos.Droid.Server.Telecom

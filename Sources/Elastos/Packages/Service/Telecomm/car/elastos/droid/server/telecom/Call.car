@@ -1,0 +1,222 @@
+
+module
+{
+    using interface Elastos.Droid.Net.IUri;
+    using interface Elastos.Droid.Telecomm.Internal.IIVideoProvider;
+    using interface Elastos.Droid.Telecomm.Telecom.IDisconnectCause;
+    using interface Elastos.Droid.Telecomm.Telecom.IStatusHints;
+
+    interface Elastos.Droid.Server.Telecom.ICall;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Telecom {
+
+    /**
+     * Listener for events on the call.
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface ICallListener {
+        OnSuccessfulOutgoingCall(
+            [in] ICall* call,
+            [in] Int32 callState);
+
+        OnFailedOutgoingCall(
+            [in] ICall* call,
+            [in] IDisconnectCause* disconnectCause);
+
+        OnSuccessfulIncomingCall(
+            [in] ICall* call);
+
+        OnFailedIncomingCall(
+            [in] ICall* call);
+
+        OnSuccessfulUnknownCall(
+            [in] ICall* call,
+            [in] Int32 callState);
+
+        OnFailedUnknownCall(
+            [in] ICall* call);
+
+        OnRingbackRequested(
+            [in] ICall* call,
+            [in] Boolean ringbackRequested);
+
+        OnPostDialWait(
+            [in] ICall* call,
+            [in] String remaining);
+
+        OnCallCapabilitiesChanged(
+            [in] ICall* call);
+
+        OnCallPropertiesChanged(
+            [in] ICall* call);
+
+        OnParentChanged(
+            [in] ICall* call);
+
+        OnChildrenChanged(
+            [in] ICall* call);
+
+        OnCannedSmsResponsesLoaded(
+            [in] ICall* call);
+
+        OnVideoCallProviderChanged(
+            [in] ICall* call);
+
+        OnCallerInfoChanged(
+            [in] ICall* call);
+
+        OnIsVoipAudioModeChanged(
+            [in] ICall* call);
+
+        OnStatusHintsChanged(
+            [in] ICall* call);
+
+        OnHandleChanged(
+            [in] ICall* call);
+
+        OnCallerDisplayNameChanged(
+            [in] ICall* call);
+
+        OnVideoStateChanged(
+            [in] ICall* call);
+
+        OnTargetPhoneAccountChanged(
+            [in] ICall* call);
+
+        OnConnectionManagerPhoneAccountChanged(
+            [in] ICall* call);
+
+        OnPhoneAccountChanged(
+            [in] ICall* call);
+
+        OnConferenceableCallsChanged(
+            [in] ICall* call);
+
+        OnCallSubstateChanged(
+            [in] ICall* call);
+    }
+
+    /**
+     *  Encapsulates all aspects of a given phone call throughout its lifecycle, starting
+     *  from the time the call intent was received by Telecom (vs. the time the call was
+     *  connected etc).
+     */
+    /**
+     * @Involved
+     * interface ;
+     */
+    interface ICall {
+        // CallsManager.
+        const String KEY_OEM_EXTRAS = "OEMExtras";
+
+        /**
+         * @return The original handle this call is associated with. In-call services should use this
+         * handle when indicating in their UI the handle that is being called.
+         */
+        GetOriginalHandle(
+            [out] IUri** result);
+
+        /**
+         * Sets speakerphone option on when call begins.
+         */
+        SetStartWithSpeakerphoneOn(
+            [in] Boolean startWithSpeakerphone);
+
+        /**
+         * Returns speakerphone option.
+         *
+         * @return Whether or not speakerphone should be set automatically when call begins.
+         */
+        GetStartWithSpeakerphoneOn(
+            [out] Boolean* result);
+
+        /**
+         * Sets a video call provider for the call.
+         */
+        SetVideoProvider(
+            [in] IIVideoProvider* videoProvider);
+
+        /**
+         * @return Return the {@link Connection.VideoProvider} binder.
+         */
+        GetVideoProvider(
+            [out] IIVideoProvider** result);
+
+        /**
+         * The current video state for the call.
+         * Valid values: see {@link VideoProfile.VideoState}.
+         */
+        GetVideoState(
+            [out] Int32* result);
+
+        /**
+         * Returns the video states which were applicable over the duration of a call.
+         * See {@link VideoProfile} for a list of valid video states.
+         *
+         * @return The video states applicable over the duration of the call.
+         */
+        GetVideoStateHistory(
+            [out] Int32* result);
+
+        /**
+         * Determines the current video state for the call.
+         * For an outgoing call determines the desired video state for the call.
+         * Valid values: see {@link VideoProfile.VideoState}
+         *
+         * @param videoState The video state for the call.
+         */
+        SetVideoState(
+            [in] Int32 videoState);
+
+        GetIsVoipAudioMode(
+            [out] Boolean* result);
+
+        SetIsVoipAudioMode(
+            [in] Boolean audioModeIsVoip);
+
+        GetStatusHints(
+            [out] IStatusHints** result);
+
+        SetStatusHints(
+            [in] IStatusHints* statusHints);
+
+        IsUnknown(
+            [out] Boolean* result);
+
+        SetIsUnknown(
+            [in] Boolean isUnknown);
+
+        /**
+         * Determines if this call is in a disconnecting state.
+         *
+         * @return {@code true} if this call is locally disconnecting.
+         */
+        IsLocallyDisconnecting(
+            [out] Boolean* result);
+
+        /**
+         * The current call substate.
+         */
+        GetCallSubstate(
+            [out] Int32* result);
+
+        /**
+         * Determines the current substate for the call.
+         *
+         * @param callSubstate The substate for the call.
+         */
+        SetCallSubstate(
+            [in] Int32 callSubstate);
+    }
+
+    } // namespace Telecom
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

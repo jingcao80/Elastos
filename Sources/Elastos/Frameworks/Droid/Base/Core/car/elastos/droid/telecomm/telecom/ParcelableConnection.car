@@ -30,6 +30,9 @@ module
             GetCapabilities(
                 [out] Int32* res);
 
+            GetProperties(
+                [out] Int32* res);
+
             GetHandle(
                 [out] IUri** res);
 
@@ -62,6 +65,9 @@ module
 
             GetConferenceableConnectionIds(
                 [out] IList** res);
+
+            GetCallSubstate(
+                [out] Int32* res);
         }
 
     } // namespace Telecom

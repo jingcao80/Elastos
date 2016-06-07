@@ -1,0 +1,48 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Telecom {
+
+    /**
+     * Activity that handles system CALL actions and forwards them to {@link CallReceiver}.
+     * Handles all three CALL action types: CALL, CALL_PRIVILEGED, and CALL_EMERGENCY.
+     *
+     * Pre-L, the only way apps were were allowed to make outgoing emergency calls was the
+     * ACTION_CALL_PRIVILEGED action (which requires the system only CALL_PRIVILEGED permission).
+     *
+     * In L, any app that has the CALL_PRIVILEGED permission can continue to make outgoing emergency
+     * calls via ACTION_CALL_PRIVILEGED.
+     *
+     * In addition, the default dialer (identified via
+     * {@link android.telecom.TelecomManager#getDefaultPhoneApp()} will also be granted the ability to
+     * make emergency outgoing calls using the CALL action. In order to do this, it must call
+     * startActivityForResult on the CALL intent to allow its package name to be passed to
+     * {@link CallActivity}. Calling startActivity will continue to work on all non-emergency numbers
+     * just like it did pre-L.
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface Elastos.Droid.View.IContextThemeWrapper
+     * interface ILayoutInflaterFactory
+     * interface ILayoutInflaterFactory2
+     * interface IWindowCallback
+     * interface IKeyEventCallback
+     * interface IViewOnCreateContextMenuListener
+     * interface IComponentCallbacks
+     * interface IComponentCallbacks2
+     * interface IOnWindowDismissedCallback
+     * interface IActivity
+     */
+    interface ICallActivity {
+    }
+
+    } // namespace Telecom
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

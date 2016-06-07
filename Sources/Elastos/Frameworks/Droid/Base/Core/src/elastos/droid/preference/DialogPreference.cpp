@@ -38,6 +38,9 @@ DialogPreference::DialogPreference()
     , mWhichButtonClicked(0)
 {}
 
+DialogPreference::~DialogPreference()
+{}
+
 ECode DialogPreference::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,

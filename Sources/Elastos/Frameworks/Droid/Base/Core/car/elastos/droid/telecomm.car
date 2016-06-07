@@ -320,6 +320,14 @@ module
         interface IParcelable;
     }
 
+    class CPhoneAccountBuilder {
+        constructor(
+            [in] IPhoneAccountHandle* accountHandle,
+            [in] ICharSequence* label);
+
+        interface IPhoneAccountBuilder;
+    }
+
     class CPhoneAccountHandle {
         constructor();
 

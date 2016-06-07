@@ -39,6 +39,18 @@ module
          */
         const Int32 ROUTE_ALL = ROUTE_EARPIECE | ROUTE_BLUETOOTH | ROUTE_WIRED_HEADSET |
                 ROUTE_SPEAKER;
+
+        /** True if the call is muted, false otherwise. */
+        GetIsMuted(
+            [out] Boolean* result);
+
+        /** The route to use for the audio stream. */
+        GetRoute(
+            [out] Int32* result);
+
+        /** Bit vector of all routes supported by this call. */
+        GetSupportedRouteMask(
+            [out] Int32* result);
     }
 
     interface IAudioStateHelper {

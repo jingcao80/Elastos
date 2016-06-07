@@ -1,0 +1,31 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Telecom {
+
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IWiredHeadsetManagerListener {
+        OnWiredHeadsetPluggedInChanged(
+            [in] Boolean oldIsPluggedIn,
+            [in] Boolean newIsPluggedIn);
+    }
+
+    /** Receiver for wired headset plugged and unplugged events. */
+    /**
+     * @Involved
+     * interface IBroadcastReceiver
+     */
+    interface IWiredHeadsetManagerWiredHeadsetBroadcastReceiver {
+    }
+
+    } // namespace Telecom
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

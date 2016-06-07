@@ -3,6 +3,7 @@ module
     using interface Elastos.Core.IClassLoader;
     using interface Elastos.Core.ICharSequence;
     using interface Elastos.IO.ISerializable;
+    using interface Elastos.Utility.IList;
     using interface Elastos.Utility.ISet;
     using interface Elastos.Utility.IArrayList;
 
@@ -53,6 +54,10 @@ module
         PutParcelableArrayList(
             [in] String key,
             [in] IArrayList* value);
+
+        PutParcelableList(
+            [in] String key,
+            [in] IList* value);
 
         PutSparseParcelableArray(
             [in] String key,

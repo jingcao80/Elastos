@@ -47,6 +47,18 @@ public:
     CARAPI WriteToParcel(
         /* [in] */ IParcel* dest);
 
+    /** True if the call is muted, false otherwise. */
+    CARAPI GetIsMuted(
+        /* [out] */ Boolean* result);
+
+    /** The route to use for the audio stream. */
+    CARAPI GetRoute(
+        /* [out] */ Int32* result);
+
+    /** Bit vector of all routes supported by this call. */
+    CARAPI GetSupportedRouteMask(
+        /* [out] */ Int32* result);
+
     static CARAPI_(String) AudioRouteToString(
         /* [in] */ Int32 route);
 

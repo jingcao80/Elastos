@@ -197,6 +197,13 @@ module
          * Set to the sim count.
          */
         const String PROPERTY_SIM_COUNT = "ro.telephony.sim.count";
+
+        const String EXTRAS_IS_CONFERENCE_URI = "isConferenceUri";
+
+        const String EXTRA_DIAL_CONFERENCE_URI = "org.codeaurora.extra.DIAL_CONFERENCE_URI";
+        const String ADD_PARTICIPANT_KEY = "add_participant";
+
+        const String EXTRA_SKIP_SCHEMA_PARSING = "org.codeaurora.extra.SKIP_SCHEMA_PARSING";
     }
 
     } // namespace Telephony

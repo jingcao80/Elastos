@@ -58,17 +58,6 @@ module
 
     }}} // Elastos.Droid.Privacy
 
-    //
-    // Elastos.Droid.telecom
-    //
-    namespace Elastos {
-    namespace Droid {
-    namespace Telecom {
-
-        interface IPhoneAccountHandle {}
-
-    }}} // Elastos.Droid.telecom
-
     namespace Elastos {
     namespace Droid {
     namespace Utility {

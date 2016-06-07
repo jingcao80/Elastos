@@ -17,7 +17,7 @@ namespace Session {
  * Receives media buttons, transport controls, and commands from controllers
  * and the system. A callback may be set using {@link #setCallback}.
  */
-class MediaSessionCallback
+class ECO_PUBLIC MediaSessionCallback
     : public Object
     , public IMediaSessionCallback
 {

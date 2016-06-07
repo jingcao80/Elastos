@@ -18,7 +18,7 @@ namespace Content {
  * A helper class to help make handling asynchronous {@link ContentResolver}
  * queries easier.
  */
-class AsyncQueryHandler
+class ECO_PUBLIC AsyncQueryHandler
     : public Handler
     , public IAsyncQueryHandler
 {
@@ -237,15 +237,15 @@ protected:
         /* [in] */ Int32 result);
 
 private:
-    static const String TAG;
-    static const Boolean localLOGV;
+    ECO_LOCAL static const String TAG;
+    ECO_LOCAL static const Boolean localLOGV;
 
-    static const Int32 EVENT_ARG_QUERY = 1;
-    static const Int32 EVENT_ARG_INSERT = 2;
-    static const Int32 EVENT_ARG_UPDATE = 3;
-    static const Int32 EVENT_ARG_DELETE = 4;
+    ECO_LOCAL static const Int32 EVENT_ARG_QUERY = 1;
+    ECO_LOCAL static const Int32 EVENT_ARG_INSERT = 2;
+    ECO_LOCAL static const Int32 EVENT_ARG_UPDATE = 3;
+    ECO_LOCAL static const Int32 EVENT_ARG_DELETE = 4;
 
-    static AutoPtr<ILooper> sLooper;
+    ECO_LOCAL static AutoPtr<ILooper> sLooper;
 
 private:
     /* package */

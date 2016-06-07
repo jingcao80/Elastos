@@ -23,8 +23,10 @@ namespace Preference {
 CAR_INTERFACE_IMPL(EditTextPreference, DialogPreference, IEditTextPreference)
 
 EditTextPreference::EditTextPreference()
-{
-}
+{}
+
+EditTextPreference::~EditTextPreference()
+{}
 
 ECode EditTextPreference::constructor(
     /* [in] */ IContext* context,

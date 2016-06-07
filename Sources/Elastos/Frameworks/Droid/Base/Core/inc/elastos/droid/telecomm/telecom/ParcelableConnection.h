@@ -30,6 +30,8 @@ class ParcelableConnection
 public:
     CAR_INTERFACE_DECL()
 
+    ParcelableConnection();
+
     CARAPI constructor();
 
     /** @hide */
@@ -58,6 +60,9 @@ public:
     // Bit mask of actions a call supports, values are defined in {@link CallCapabilities}.
     CARAPI GetCapabilities(
         /* [out] */ Int32* result);
+
+    CARAPI GetProperties(
+        /* [out] */ Int32* res);
 
     CARAPI GetHandle(
         /* [out] */ IUri** result);
@@ -92,6 +97,9 @@ public:
     CARAPI GetConferenceableConnectionIds(
         /* [out] */ IList** result);
 
+    CARAPI GetCallSubstate(
+        /* [out] */ Int32* res);
+
     CARAPI ToString(
         /* [out] */ String* result);
 
@@ -106,6 +114,7 @@ private:
     AutoPtr<IPhoneAccountHandle> mPhoneAccount;
     Int32 mState;
     Int32 mCapabilities;
+    Int32 mProperties;
     AutoPtr<IUri> mAddress;
     Int32 mAddressPresentation;
     String mCallerDisplayName;
@@ -117,6 +126,7 @@ private:
     AutoPtr<IStatusHints> mStatusHints;
     AutoPtr<IDisconnectCause> mDisconnectCause;
     AutoPtr<IList> mConferenceableConnectionIds;
+    Int32 mCallSubstate;
 };
 
 } // namespace Telecom

@@ -16,6 +16,18 @@ namespace Telecom {
 //===============================================================
 CAR_INTERFACE_IMPL_2(ParcelableConnection, Object, IParcelableConnection, IParcelable)
 
+ParcelableConnection::ParcelableConnection()
+    : mState(0)
+    , mCapabilities(0)
+    , mProperties(0)
+    , mAddressPresentation(0)
+    , mCallerDisplayNamePresentation(0)
+    , mVideoState(0)
+    , mRingbackRequested(FALSE)
+    , mIsVoipAudioMode(FALSE)
+    , mCallSubstate(0)
+{}
+
 ECode ParcelableConnection::constructor()
 {
     return NOERROR;
@@ -76,6 +88,14 @@ ECode ParcelableConnection::GetCapabilities(
 {
     VALIDATE_NOT_NULL(result)
     *result = mCapabilities;
+    return NOERROR;
+}
+
+ECode ParcelableConnection::GetProperties(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mProperties;
     return NOERROR;
 }
 
@@ -169,6 +189,14 @@ ECode ParcelableConnection::GetConferenceableConnectionIds(
     VALIDATE_NOT_NULL(result)
     *result = mConferenceableConnectionIds;
     REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode ParcelableConnection::GetCallSubstate(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mCallSubstate;
     return NOERROR;
 }
 

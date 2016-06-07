@@ -116,6 +116,30 @@ ECode AudioState::WriteToParcel(
     return NOERROR;
 }
 
+ECode AudioState::GetIsMuted(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mIsMuted;
+    return NOERROR;
+}
+
+ECode AudioState::GetRoute(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mRoute;
+    return NOERROR;
+}
+
+ECode AudioState::GetSupportedRouteMask(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mSupportedRouteMask;
+    return NOERROR;
+}
+
 String AudioState::AudioRouteToString(
     /* [in] */ Int32 route)
 {

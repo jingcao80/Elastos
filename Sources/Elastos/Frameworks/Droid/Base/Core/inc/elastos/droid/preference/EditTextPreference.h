@@ -2,9 +2,9 @@
 #ifndef __ELASTOS_DROID_PREFERENCE_EDITTEXTPREFERENCE_H__
 #define __ELASTOS_DROID_PREFERENCE_EDITTEXTPREFERENCE_H__
 
-#include "Elastos.Droid.Widget.h"
+#include <Elastos.Droid.Widget.h>
 #include <elastos/droid/ext/frameworkext.h>
-#include "elastos/droid/preference/DialogPreference.h"
+#include <elastos/droid/preference/DialogPreference.h>
 
 using Elastos::Droid::Widget::IEditText;
 
@@ -25,7 +25,7 @@ namespace Preference {
 * <p>
 * See {@link android.R.styleable#EditText EditText Attributes}.
  */
-class EditTextPreference
+class ECO_PUBLIC EditTextPreference
     : public DialogPreference
     , public IEditTextPreference
 {
@@ -33,6 +33,8 @@ public:
     CAR_INTERFACE_DECL()
 
     EditTextPreference();
+
+    virtual ~EditTextPreference();
 
     CARAPI constructor(
         /* [in] */ IContext* context,

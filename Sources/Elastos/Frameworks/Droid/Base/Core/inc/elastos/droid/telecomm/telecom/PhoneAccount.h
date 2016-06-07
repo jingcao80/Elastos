@@ -10,6 +10,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Net::IUri;
 using Elastos::Core::Object;
+using Elastos::Utility::IBitSet;
 using Elastos::Utility::IList;
 
 namespace Elastos {
@@ -106,6 +107,8 @@ public:
 public:
     CAR_INTERFACE_DECL()
 
+    PhoneAccount();
+
     CARAPI constructor();
 
     CARAPI constructor(
@@ -121,6 +124,25 @@ public:
     static AutoPtr<IPhoneAccountBuilder> _Builder(
         /* [in] */ IPhoneAccountHandle* accountHandle,
         /* [in] */ ICharSequence* label);
+
+    /**
+     * {@hide}
+     */
+    CARAPI SetBit(
+        /* [in] */ Int32 bit);
+
+    /**
+     * {@hide}
+     */
+    CARAPI UnSetBit(
+        /* [in] */ Int32 bit);
+
+    /**
+     * {@hide}
+     */
+    CARAPI IsSet(
+        /* [in] */ Int32 bit,
+        /* [out] */ Boolean* result);
 
     /**
      * Returns a builder initialized with the current {@link PhoneAccount} instance.
@@ -176,7 +198,7 @@ public:
      * @return {@code True} if the phone account has the capability.
      */
     CARAPI HasCapabilities(
-        /* [in] */ int capability,
+        /* [in] */ Int32 capability,
         /* [out] */ Boolean* result);
 
     /**
@@ -252,6 +274,7 @@ private:
     AutoPtr<ICharSequence> mLabel;
     AutoPtr<ICharSequence> mShortDescription;
     AutoPtr<IList> mSupportedUriSchemes;
+    AutoPtr<IBitSet> mDsda;
 };
 
 } // namespace Telecom

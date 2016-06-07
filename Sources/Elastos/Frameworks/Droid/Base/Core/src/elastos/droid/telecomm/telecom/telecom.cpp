@@ -13,6 +13,7 @@
 #include "elastos/droid/telecomm/telecom/CParcelableConnection.h"
 #include "elastos/droid/telecomm/telecom/CPhone.h"
 #include "elastos/droid/telecomm/telecom/CPhoneAccount.h"
+#include "elastos/droid/telecomm/telecom/CPhoneAccountBuilder.h"
 #include "elastos/droid/telecomm/telecom/CPhoneAccountHandle.h"
 #include "elastos/droid/telecomm/telecom/CRemoteConference.h"
 #include "elastos/droid/telecomm/telecom/CRemoteConnection.h"
@@ -43,6 +44,7 @@ CAR_OBJECT_IMPL(CParcelableConference)
 CAR_OBJECT_IMPL(CParcelableConnection)
 CAR_OBJECT_IMPL(CPhone)
 CAR_OBJECT_IMPL(CPhoneAccount)
+CAR_OBJECT_IMPL(CPhoneAccountBuilder)
 CAR_OBJECT_IMPL(CPhoneAccountHandle)
 CAR_OBJECT_IMPL(CRemoteConference)
 CAR_OBJECT_IMPL(CRemoteConnection)
