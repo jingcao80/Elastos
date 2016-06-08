@@ -1,109 +1,88 @@
-/*
- * Copyright (c) 2014, The Linux Foundation. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above
- *       copyright notice, this list of conditions and the following
- *       disclaimer in the documentation and/or other materials provided
- *       with the distribution.
- *     * Neither the name of The Linux Foundation nor the names of its
- *       contributors may be used to endorse or promote products derived
- *       from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
- * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
- * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- */
 
-package com.android.internal.telephony.cat;
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/telephony/cat/CatServiceFactory.h"
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Telephony::ITelephonyManager;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Cat {
 
-using Elastos::Droid::Internal::Telephony::ICommandsInterface;
-using Elastos::Droid::Internal::Telephony::Cat::ICatService;
-using Elastos::Droid::Internal::Telephony::Uicc::IccCardApplicationStatus::IAppType;
-using Elastos::Droid::Internal::Telephony::Uicc::IIccFileHandler;
-using Elastos::Droid::Internal::Telephony::Uicc::IUiccCard;
-using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
-using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
+//=====================================================================
+//                          CatServiceFactory
+//=====================================================================
+CAR_INTERFACE_IMPL(CatServiceFactory, Object, ICatServiceFactory);
 
-
-/**
- * Class that creates the CatServices for each card.
- *
- * {@hide}
- */
-public class CatServiceFactory {
-
-    private static CatService sCatServices[] = NULL;
-    private static const Int32 sSimCount = TelephonyManager->GetDefault()->GetSimCount();
-
-    // Protects singleton instance lazy initialization.
-    private static const Object sInstanceLock = new Object();
-
-    /**
-     * Used for instantiating the Service from the Card.
-     *
-     * @param ci CommandsInterface object
-     * @param context phone app context
-     * @param ic Icc card
-     * @param slotId to know the index of card
-     * @return The only Service object in the system
-     */
-    public static CatService MakeCatService(CommandsInterface ci,
-            Context context, UiccCard ic, Int32 slotId) {
-        UiccCardApplication ca = NULL;
-        IccFileHandler fh = NULL;
-
-        If (sCatServices == NULL) {
-            sCatServices = new CatService[sSimCount];
-        }
-
-        If (ci == NULL || context == NULL || ic == NULL) return NULL;
-
-        //get first valid filehandler in the card.
-        For (Int32 i = 0; i < ic->GetNumApplications(); i++) {
-            ca = ic->GetApplicationIndex(i);
-            If (ca != NULL && (ca->GetType() != AppType.APPTYPE_UNKNOWN)) {
-                fh = ca->GetIccFileHandler();
-                break;
-            }
-        }
-
-        {    AutoLock syncLock(sInstanceLock);
-            If (fh == NULL) return NULL;
-
-            If (sCatServices[slotId] == NULL) {
-                sCatServices[slotId] = new CatService(ci, context, fh, slotId);
-            }
-        }
-        return sCatServices[slotId];
-    }
-
-    public static CatService GetCatService(Int32 slotId) {
-        Return ((sCatServices == NULL) ? NULL : sCatServices[slotId]);
-    }
-
-    public static void DisposeCatService (Int32 slotId) {
-        If (sCatServices != NULL) {
-            sCatServices[slotId].Dispose();
-            sCatServices[slotId] = NULL;
-        }
-    }
+static Int32 InitSimCount()
+{
+    //TODO return TelephonyManager.getDefault().getSimCount();
+    return 1;
 }
+const Int32 CatServiceFactory::sSimCount = InitSimCount();
+Object CatServiceFactory::sInstanceLock;
+
+AutoPtr<ICatService> CatServiceFactory::MakeCatService(
+    /* [in] */ ICommandsInterface* ci,
+    /* [in] */ IContext* context,
+    /* [in] */ IUiccCard* ic,
+    /* [in] */ Int32 slotId)
+{
+    // ==================before translated======================
+    // UiccCardApplication ca = null;
+    // IccFileHandler fh = null;
+    //
+    // if (sCatServices == null) {
+    //     sCatServices = new CatService[sSimCount];
+    // }
+    //
+    // if (ci == null || context == null || ic == null) return null;
+    //
+    // //get first valid filehandler in the card.
+    // for (int i = 0; i < ic.getNumApplications(); i++) {
+    //     ca = ic.getApplicationIndex(i);
+    //     if (ca != null && (ca.getType() != AppType.APPTYPE_UNKNOWN)) {
+    //         fh = ca.getIccFileHandler();
+    //         break;
+    //     }
+    // }
+    //
+    // synchronized (sInstanceLock) {
+    //     if (fh == null) return null;
+    //
+    //     if (sCatServices[slotId] == null) {
+    //         sCatServices[slotId] = new CatService(ci, context, fh, slotId);
+    //     }
+    // }
+    // return sCatServices[slotId];
+    assert(0);
+    AutoPtr<ICatService> empty;
+    return empty;
+}
+
+AutoPtr<ICatService> CatServiceFactory::GetCatService(
+    /* [in] */ Int32 slotId)
+{
+    // ==================before translated======================
+    // return ((sCatServices == null) ? null : sCatServices[slotId]);
+    assert(0);
+    AutoPtr<ICatService> empty;
+    return empty;
+}
+
+ECode CatServiceFactory::DisposeCatService(
+    /* [in] */ Int32 slotId)
+{
+    // ==================before translated======================
+    // if (sCatServices != null) {
+    //     sCatServices[slotId].dispose();
+    //     sCatServices[slotId] = null;
+    // }
+    assert(0);
+    return NOERROR;
+}
+
+} // namespace Cat
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

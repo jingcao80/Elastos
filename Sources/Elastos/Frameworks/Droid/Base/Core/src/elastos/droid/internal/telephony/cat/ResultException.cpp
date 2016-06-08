@@ -1,101 +1,143 @@
-/*
- * Copyright (C) 2006 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.cat;
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/telephony/cat/ResultException.h"
 
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Cat {
 
-/**
- * Class for errors in the Result object.
- *
- * {@hide}
- */
-public class ResultException extends CatException {
-    private ResultCode mResult;
-    private Int32 mAdditionalInfo;
-    private String mExplanation;
+//=====================================================================
+//                           ResultException
+//=====================================================================
+CAR_INTERFACE_IMPL(ResultException, Object, IResultException);
 
-    public ResultException(ResultCode result) {
-        Super();
-
-        // ETSI TS 102 223, 8.12 -- For the general results '20', '21', '26',
-        // '38', '39', '3A', '3C', and '3D', it is mandatory for the terminal
-        // to provide a specific cause value as additional information.
-        Switch (result) {
-            case TERMINAL_CRNTLY_UNABLE_TO_PROCESS:    // 0x20
-            case NETWORK_CRNTLY_UNABLE_TO_PROCESS:     // 0x21
-            case LAUNCH_BROWSER_ERROR:                 // 0x26
-            case MULTI_CARDS_CMD_ERROR:                // 0x38
-            case USIM_CALL_CONTROL_PERMANENT:          // 0x39
-            case BIP_ERROR:                            // 0x3a
-            case FRAMES_ERROR:                         // 0x3c
-            case MMS_ERROR:                            // 0x3d
-                throw new AssertionError(
-                        "For result code, " + result +
-                        ", additional information must be given!");
-            default:
-                break;
-        }
-
-        mResult = result;
-        mAdditionalInfo = -1;
-        mExplanation = "";
-    }
-
-    public ResultException(ResultCode result, String explanation) {
-        This(result);
-        mExplanation = explanation;
-    }
-
-    public ResultException(ResultCode result, Int32 additionalInfo) {
-        This(result);
-
-        If (additionalInfo < 0) {
-            throw new AssertionError(
-                    "Additional info must be greater than zero!");
-        }
-
-        mAdditionalInfo = additionalInfo;
-    }
-
-    public ResultException(ResultCode result, Int32 additionalInfo, String explanation) {
-        This(result, additionalInfo);
-        mExplanation = explanation;
-    }
-
-    public ResultCode Result() {
-        return mResult;
-    }
-
-    public Boolean HasAdditionalInfo() {
-        return mAdditionalInfo >= 0;
-    }
-
-    public Int32 AdditionalInfo() {
-        return mAdditionalInfo;
-    }
-
-    public String Explanation() {
-        return mExplanation;
-    }
-
-    //@Override
-    CARAPI ToString(
-        /* [out] */ String* str)
-    {
-        return "result=" + mResult + " additionalInfo=" + mAdditionalInfo +
-                " explantion=" + mExplanation;
-    }
+ResultException::ResultException()
+{
 }
+
+ECode ResultException::constructor(
+    /* [in] */ ResultCode result)
+{
+    // ==================before translated======================
+    // super();
+    //
+    // // ETSI TS 102 223, 8.12 -- For the general results '20', '21', '26',
+    // // '38', '39', '3A', '3C', and '3D', it is mandatory for the terminal
+    // // to provide a specific cause value as additional information.
+    // switch (result) {
+    //     case TERMINAL_CRNTLY_UNABLE_TO_PROCESS:    // 0x20
+    //     case NETWORK_CRNTLY_UNABLE_TO_PROCESS:     // 0x21
+    //     case LAUNCH_BROWSER_ERROR:                 // 0x26
+    //     case MULTI_CARDS_CMD_ERROR:                // 0x38
+    //     case USIM_CALL_CONTROL_PERMANENT:          // 0x39
+    //     case BIP_ERROR:                            // 0x3a
+    //     case FRAMES_ERROR:                         // 0x3c
+    //     case MMS_ERROR:                            // 0x3d
+    //         throw new AssertionError(
+    //                 "For result code, " + result +
+    //                 ", additional information must be given!");
+    //     default:
+    //         break;
+    // }
+    //
+    // mResult = result;
+    // mAdditionalInfo = -1;
+    // mExplanation = "";
+    return NOERROR;
+}
+
+ECode ResultException::constructor(
+    /* [in] */ ResultCode result,
+    /* [in] */ const String& explanation)
+{
+    // ==================before translated======================
+    // this(result);
+    // mExplanation = explanation;
+    return NOERROR;
+}
+
+ECode ResultException::constructor(
+    /* [in] */ ResultCode result,
+    /* [in] */ Int32 additionalInfo)
+{
+    // ==================before translated======================
+    // this(result);
+    //
+    // if (additionalInfo < 0) {
+    //     throw new AssertionError(
+    //             "Additional info must be greater than zero!");
+    // }
+    //
+    // mAdditionalInfo = additionalInfo;
+    return NOERROR;
+}
+
+ECode ResultException::constructor(
+    /* [in] */ ResultCode result,
+    /* [in] */ Int32 additionalInfo,
+    /* [in] */ const String& explanation)
+{
+    // ==================before translated======================
+    // this(result, additionalInfo);
+    // mExplanation = explanation;
+    return NOERROR;
+}
+
+ECode ResultException::Result(
+    /* [out] */ ResultCode* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mResult;
+    assert(0);
+    return NOERROR;
+}
+
+ECode ResultException::HasAdditionalInfo(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mAdditionalInfo >= 0;
+    assert(0);
+    return NOERROR;
+}
+
+ECode ResultException::AdditionalInfo(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mAdditionalInfo;
+    assert(0);
+    return NOERROR;
+}
+
+ECode ResultException::Explanation(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mExplanation;
+    assert(0);
+    return NOERROR;
+}
+
+ECode ResultException::ToString(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return "result=" + mResult + " additionalInfo=" + mAdditionalInfo +
+    //         " explantion=" + mExplanation;
+    assert(0);
+    return NOERROR;
+}
+
+} // namespace Cat
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

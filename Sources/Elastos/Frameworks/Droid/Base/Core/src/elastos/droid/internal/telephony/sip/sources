@@ -1,0 +1,16 @@
+TARGET_NAME= sip
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = SipCallBase.cpp
+SOURCES += SipCommandInterface.cpp
+SOURCES += SipConnectionBase.cpp
+SOURCES += SipPhone.cpp
+SOURCES += SipPhoneBase.cpp
+SOURCES += SipPhoneFactory.cpp

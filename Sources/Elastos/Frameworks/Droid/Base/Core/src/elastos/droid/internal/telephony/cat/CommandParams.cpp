@@ -1,248 +1,337 @@
-/*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.cat;
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/telephony/cat/CommandParams.h"
 
-using Elastos::Droid::Graphics::IBitmap;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Cat {
 
-/**
- * Container class for proactive command parameters.
- *
- */
-class CommandParams {
-    CommandDetails mCmdDet;
- // Variable to track if an optional icon load has failed.
-    Boolean mLoadIconFailed = FALSE;
-
-    CommandParams(CommandDetails cmdDet) {
-        mCmdDet = cmdDet;
-    }
-
-    AppInterface.CommandType GetCommandType() {
-        return AppInterface.CommandType->FromInt(mCmdDet.typeOfCommand);
-    }
-
-    Boolean SetIcon(Bitmap icon) { return TRUE; }
-
-    //@Override
-    CARAPI ToString(
-        /* [out] */ String* str)
-    {
-        return mCmdDet->ToString();
-    }
+//=====================================================================
+//                            CommandParams
+//=====================================================================
+CommandParams::CommandParams(
+    /* [in] */ CommandDetails* cmdDet)
+{
+    // ==================before translated======================
+    // mCmdDet = cmdDet;
 }
 
-class DisplayTextParams extends CommandParams {
-    TextMessage mTextMsg;
-
-    DisplayTextParams(CommandDetails cmdDet, TextMessage textMsg) {
-        Super(cmdDet);
-        mTextMsg = textMsg;
-    }
-
-    //@Override
-    Boolean SetIcon(Bitmap icon) {
-        If (icon != NULL && mTextMsg != NULL) {
-            mTextMsg.icon = icon;
-            return TRUE;
-        }
-        return FALSE;
-    }
+ECode CommandParams::GetCommandType(
+    /* [out] */ CommandType* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return AppInterface.CommandType.fromInt(mCmdDet.typeOfCommand);
+    assert(0);
+    return NOERROR;
 }
 
-class LaunchBrowserParams extends CommandParams {
-    TextMessage mConfirmMsg;
-    LaunchBrowserMode mMode;
-    String mUrl;
-
-    LaunchBrowserParams(CommandDetails cmdDet, TextMessage confirmMsg,
-            String url, LaunchBrowserMode mode) {
-        Super(cmdDet);
-        mConfirmMsg = confirmMsg;
-        mMode = mode;
-        mUrl = url;
-    }
-
-    //@Override
-    Boolean SetIcon(Bitmap icon) {
-        If (icon != NULL && mConfirmMsg != NULL) {
-            mConfirmMsg.icon = icon;
-            return TRUE;
-        }
-        return FALSE;
-    }
+ECode CommandParams::SetIcon(
+    /* [in] */ IBitmap* icon,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return true;
+    assert(0);
+    return NOERROR;
 }
 
-class SetEventListParams extends CommandParams {
-    Int32[] mEventInfo;
-    SetEventListParams(CommandDetails cmdDet, Int32[] eventInfo) {
-        Super(cmdDet);
-        this.mEventInfo = eventInfo;
-    }
+ECode CommandParams::ToString(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mCmdDet.toString();
+    assert(0);
+    return NOERROR;
 }
 
-class PlayToneParams extends CommandParams {
-    TextMessage mTextMsg;
-    ToneSettings mSettings;
-
-    PlayToneParams(CommandDetails cmdDet, TextMessage textMsg,
-            Tone tone, Duration duration, Boolean vibrate) {
-        Super(cmdDet);
-        mTextMsg = textMsg;
-        mSettings = new ToneSettings(duration, tone, vibrate);
-    }
-
-    //@Override
-    Boolean SetIcon(Bitmap icon) {
-        If (icon != NULL && mTextMsg != NULL) {
-            mTextMsg.icon = icon;
-            return TRUE;
-        }
-        return FALSE;
-    }
+//=====================================================================
+//                          DisplayTextParams
+//=====================================================================
+DisplayTextParams::DisplayTextParams(
+    /* [in] */ CommandDetails* cmdDet,
+    /* [in] */ ITextMessage* textMsg)
+    : CommandParams(cmdDet)
+{
+    // ==================before translated======================
+    // super(cmdDet);
+    // mTextMsg = textMsg;
 }
 
-class CallSetupParams extends CommandParams {
-    TextMessage mConfirmMsg;
-    TextMessage mCallMsg;
-
-    CallSetupParams(CommandDetails cmdDet, TextMessage confirmMsg,
-            TextMessage callMsg) {
-        Super(cmdDet);
-        mConfirmMsg = confirmMsg;
-        mCallMsg = callMsg;
-    }
-
-    //@Override
-    Boolean SetIcon(Bitmap icon) {
-        If (icon == NULL) {
-            return FALSE;
-        }
-        If (mConfirmMsg != NULL && mConfirmMsg.icon == NULL) {
-            mConfirmMsg.icon = icon;
-            return TRUE;
-        } else If (mCallMsg != NULL && mCallMsg.icon == NULL) {
-            mCallMsg.icon = icon;
-            return TRUE;
-        }
-        return FALSE;
-    }
+ECode DisplayTextParams::SetIcon(
+    /* [in] */ IBitmap* icon,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if (icon != null && mTextMsg != null) {
+    //     mTextMsg.icon = icon;
+    //     return true;
+    // }
+    // return false;
+    assert(0);
+    return NOERROR;
 }
 
-class SelectItemParams extends CommandParams {
-    Menu mMenu = NULL;
-    Boolean mLoadTitleIcon = FALSE;
-
-    SelectItemParams(CommandDetails cmdDet, Menu menu, Boolean loadTitleIcon) {
-        Super(cmdDet);
-        mMenu = menu;
-        mLoadTitleIcon = loadTitleIcon;
-    }
-
-    //@Override
-    Boolean SetIcon(Bitmap icon) {
-        If (icon != NULL && mMenu != NULL) {
-            If (mLoadTitleIcon && mMenu.titleIcon == NULL) {
-                mMenu.titleIcon = icon;
-            } else {
-                For (Item item : mMenu.items) {
-                    If (item.icon != NULL) {
-                        continue;
-                    }
-                    item.icon = icon;
-                    break;
-                }
-            }
-            return TRUE;
-        }
-        return FALSE;
-    }
+//=====================================================================
+//                         LaunchBrowserParams
+//=====================================================================
+LaunchBrowserParams::LaunchBrowserParams(
+    /* [in] */ CommandDetails* cmdDet,
+    /* [in] */ ITextMessage* confirmMsg,
+    /* [in] */ const String& url,
+    /* [in] */ LaunchBrowserMode mode)
+    : CommandParams(cmdDet)
+{
+    // ==================before translated======================
+    // super(cmdDet);
+    // mConfirmMsg = confirmMsg;
+    // mMode = mode;
+    // mUrl = url;
 }
 
-class GetInputParams extends CommandParams {
-    Input mInput = NULL;
-
-    GetInputParams(CommandDetails cmdDet, Input input) {
-        Super(cmdDet);
-        mInput = input;
-    }
-
-    //@Override
-    Boolean SetIcon(Bitmap icon) {
-        If (icon != NULL && mInput != NULL) {
-            mInput.icon = icon;
-        }
-        return TRUE;
-    }
+ECode LaunchBrowserParams::SetIcon(
+    /* [in] */ IBitmap* icon,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if (icon != null && mConfirmMsg != null) {
+    //     mConfirmMsg.icon = icon;
+    //     return true;
+    // }
+    // return false;
+    assert(0);
+    return NOERROR;
 }
 
-/*
- * BIP (Bearer Independent Protocol) is the mechanism for SIM card applications
- * to access data connection through the mobile device.
- *
- * SIM utilizes proactive Commands (OPEN CHANNEL, CLOSE CHANNEL, SEND DATA and
- * RECEIVE DATA to control/read/write data for BIP. Refer to ETSI TS 102 223 for
- * the details of proactive commands procedures and their structures.
- */
-class BIPClientParams extends CommandParams {
-    TextMessage mTextMsg;
-    Boolean mHasAlphaId;
-
-    BIPClientParams(CommandDetails cmdDet, TextMessage textMsg, Boolean has_alpha_id) {
-        Super(cmdDet);
-        mTextMsg = textMsg;
-        mHasAlphaId = has_alpha_id;
-    }
-
-    //@Override
-    Boolean SetIcon(Bitmap icon) {
-        If (icon != NULL && mTextMsg != NULL) {
-            mTextMsg.icon = icon;
-            return TRUE;
-        }
-        return FALSE;
-    }
-}
-class ActivateParams extends CommandParams {
-    Int32 mActivateTarget;
-
-
-    ActivateParams(CommandDetails cmdDet, Int32 target) {
-        Super(cmdDet);
-        mActivateTarget = target;
-    }
+//=====================================================================
+//                          SetEventListParams
+//=====================================================================
+SetEventListParams::SetEventListParams(
+    /* [in] */ CommandDetails* cmdDet,
+    /* [in] */ ArrayOf<Int32>* eventInfo)
+    : CommandParams(cmdDet)
+{
+    // ==================before translated======================
+    // super(cmdDet);
+    // this.mEventInfo = eventInfo;
 }
 
-// Samsung STK
-class SendSMSParams extends DisplayTextParams {
-    String pdu;
-    String smscAddress;
-
-    SendSMSParams(CommandDetails cmdDet, TextMessage textmessage, String smscaddress, String smsPdu) {
-        Super(cmdDet, textmessage);
-        smscAddress = smscaddress;
-        pdu = smsPdu;
-    }
+//=====================================================================
+//                            PlayToneParams
+//=====================================================================
+PlayToneParams::PlayToneParams(
+    /* [in] */ CommandDetails* cmdDet,
+    /* [in] */ ITextMessage* textMsg,
+    /* [in] */ Tone tone,
+    /* [in] */ IDuration* duration,
+    /* [in] */ Boolean vibrate)
+    : CommandParams(cmdDet)
+{
+    // ==================before translated======================
+    // super(cmdDet);
+    // mTextMsg = textMsg;
+    // mSettings = new ToneSettings(duration, tone, vibrate);
 }
 
-class SendUSSDParams extends DisplayTextParams {
-    String ussdString;
-
-    SendUSSDParams(CommandDetails cmdDet, TextMessage textmessage, String ussdstring) {
-        Super(cmdDet, textmessage);
-        ussdString = ussdstring;
-    }
+ECode PlayToneParams::SetIcon(
+    /* [in] */ IBitmap* icon,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if (icon != null && mTextMsg != null) {
+    //     mTextMsg.icon = icon;
+    //     return true;
+    // }
+    // return false;
+    assert(0);
+    return NOERROR;
 }
+
+//=====================================================================
+//                           CallSetupParams
+//=====================================================================
+CallSetupParams::CallSetupParams(
+    /* [in] */ CommandDetails* cmdDet,
+    /* [in] */ ITextMessage* confirmMsg,
+    /* [in] */ ITextMessage* callMsg)
+    : CommandParams(cmdDet)
+{
+    // ==================before translated======================
+    // super(cmdDet);
+    // mConfirmMsg = confirmMsg;
+    // mCallMsg = callMsg;
+}
+
+ECode CallSetupParams::SetIcon(
+    /* [in] */ IBitmap* icon,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if (icon == null) {
+    //     return false;
+    // }
+    // if (mConfirmMsg != null && mConfirmMsg.icon == null) {
+    //     mConfirmMsg.icon = icon;
+    //     return true;
+    // } else if (mCallMsg != null && mCallMsg.icon == null) {
+    //     mCallMsg.icon = icon;
+    //     return true;
+    // }
+    // return false;
+    assert(0);
+    return NOERROR;
+}
+
+//=====================================================================
+//                           SelectItemParams
+//=====================================================================
+SelectItemParams::SelectItemParams(
+    /* [in] */ CommandDetails* cmdDet,
+    /* [in] */ IMenu* menu,
+    /* [in] */ Boolean loadTitleIcon)
+    : CommandParams(cmdDet)
+{
+    // ==================before translated======================
+    // super(cmdDet);
+    // mMenu = menu;
+    // mLoadTitleIcon = loadTitleIcon;
+}
+
+ECode SelectItemParams::SetIcon(
+    /* [in] */ IBitmap* icon,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if (icon != null && mMenu != null) {
+    //     if (mLoadTitleIcon && mMenu.titleIcon == null) {
+    //         mMenu.titleIcon = icon;
+    //     } else {
+    //         for (Item item : mMenu.items) {
+    //             if (item.icon != null) {
+    //                 continue;
+    //             }
+    //             item.icon = icon;
+    //             break;
+    //         }
+    //     }
+    //     return true;
+    // }
+    // return false;
+    assert(0);
+    return NOERROR;
+}
+
+//=====================================================================
+//                            GetInputParams
+//=====================================================================
+GetInputParams::GetInputParams(
+    /* [in] */ CommandDetails* cmdDet,
+    /* [in] */ IInput* input)
+    : CommandParams(cmdDet)
+{
+    // ==================before translated======================
+    // super(cmdDet);
+    // mInput = input;
+}
+
+ECode GetInputParams::SetIcon(
+    /* [in] */ IBitmap* icon,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if (icon != null && mInput != null) {
+    //     mInput.icon = icon;
+    // }
+    // return true;
+    assert(0);
+    return NOERROR;
+}
+
+//=====================================================================
+//                           BIPClientParams
+//=====================================================================
+BIPClientParams::BIPClientParams(
+    /* [in] */ CommandDetails* cmdDet,
+    /* [in] */ ITextMessage* textMsg,
+    /* [in] */ Boolean has_alpha_id)
+    : CommandParams(cmdDet)
+{
+    // ==================before translated======================
+    // super(cmdDet);
+    // mTextMsg = textMsg;
+    // mHasAlphaId = has_alpha_id;
+}
+
+ECode BIPClientParams::SetIcon(
+    /* [in] */ IBitmap* icon,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if (icon != null && mTextMsg != null) {
+    //     mTextMsg.icon = icon;
+    //     return true;
+    // }
+    // return false;
+    assert(0);
+    return NOERROR;
+}
+
+//=====================================================================
+//                            ActivateParams
+//=====================================================================
+ActivateParams::ActivateParams(
+    /* [in] */ CommandDetails* cmdDet,
+    /* [in] */ Int32 target)
+    : CommandParams(cmdDet)
+{
+    // ==================before translated======================
+    // super(cmdDet);
+    // mActivateTarget = target;
+}
+
+//=====================================================================
+//                            SendSMSParams
+//=====================================================================
+SendSMSParams::SendSMSParams(
+    /* [in] */ CommandDetails* cmdDet,
+    /* [in] */ ITextMessage* textmessage,
+    /* [in] */ const String& smscaddress,
+    /* [in] */ const String& smsPdu)
+    : DisplayTextParams(cmdDet, textmessage)
+{
+    // ==================before translated======================
+    // super(cmdDet, textmessage);
+    // smscAddress = smscaddress;
+    // pdu = smsPdu;
+}
+
+//=====================================================================
+//                            SendUSSDParams
+//=====================================================================
+SendUSSDParams::SendUSSDParams(
+    /* [in] */ CommandDetails* cmdDet,
+    /* [in] */ ITextMessage* textmessage,
+    /* [in] */ const String& ussdstring)
+    : DisplayTextParams(cmdDet, textmessage)
+{
+    // ==================before translated======================
+    // super(cmdDet, textmessage);
+    // ussdString = ussdstring;
+}
+
+} // namespace Cat
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

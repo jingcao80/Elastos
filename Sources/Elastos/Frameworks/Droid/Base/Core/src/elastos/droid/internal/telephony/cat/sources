@@ -1,0 +1,34 @@
+TARGET_NAME= cat
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = BerTlv.cpp
+SOURCES += CatCmdMessage.cpp
+SOURCES += CatException.cpp
+SOURCES += CatLog.cpp
+SOURCES += CatResponseMessage.cpp
+SOURCES += CatService.cpp
+SOURCES += CatServiceFactory.cpp
+SOURCES += CommandDetails.cpp
+SOURCES += CommandParams.cpp
+SOURCES += CommandParamsFactory.cpp
+SOURCES += ComprehensionTlv.cpp
+SOURCES += Duration.cpp
+SOURCES += IconLoader.cpp
+SOURCES += ImageDescriptor.cpp
+SOURCES += Input.cpp
+SOURCES += Item.cpp
+SOURCES += Menu.cpp
+SOURCES += ResponseData.cpp
+SOURCES += ResultException.cpp
+SOURCES += RilMessageDecoder.cpp
+SOURCES += TextAttribute.cpp
+SOURCES += TextMessage.cpp
+SOURCES += ToneSettings.cpp
+SOURCES += ValueParser.cpp

@@ -1,75 +1,113 @@
-/*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.cat;
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/telephony/cat/TextMessage.h"
 
-using Elastos::Droid::Graphics::IBitmap;
-using Elastos::Droid::Os::IParcel;
-using Elastos::Droid::Os::IParcelable;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Cat {
 
-public class TextMessage implements Parcelable {
-    public String title = "";
-    public String text = NULL;
-    public Bitmap icon = NULL;
-    public Boolean iconSelfExplanatory = FALSE;
-    public Boolean isHighPriority = FALSE;
-    public Boolean responseNeeded = TRUE;
-    public Boolean userClear = FALSE;
-    public Duration duration = NULL;
+////=====================================================================
+////                 TextMessage::InnerParcelableCreator
+////=====================================================================
+//TextMessage::InnerParcelableCreator::InnerParcelableCreator(
+//    /* [in] */ TextMessage* owner)
+//    : mOwner(owner)
+//{
+//    // ==================before translated======================
+//    // mOwner = owner;
+//}
+//
+//ECode TextMessage::InnerParcelableCreator::CreateFromParcel(
+//    /* [in] */ IParcel* in,
+//    /* [out] */ TextMessage** result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return new TextMessage(in);
+//    assert(0);
+//    return NOERROR;
+//}
+//
+//ECode TextMessage::InnerParcelableCreator::NewArray(
+//    /* [in] */ Int32 size,
+//    /* [out] */ TextMessage[]** result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return new TextMessage[size];
+//    assert(0);
+//    return NOERROR;
+//}
+//
+////=====================================================================
+////                             TextMessage
+////=====================================================================
+//const AutoPtr<IParcelable> AutoPtr< ::Creator<TextMessage> > TextMessage::CREATOR = new InnerParcelableCreator(this);
+CAR_INTERFACE_IMPL_2(TextMessage, Object, ITextMessage, IParcelable);
 
-    TextMessage() {
-    }
-
-    private TextMessage(Parcel in) {
-        title = in->ReadString();
-        text = in->ReadString();
-        icon = in->ReadParcelable(NULL);
-        iconSelfExplanatory = in->ReadInt() == 1 ? TRUE : FALSE;
-        isHighPriority = in->ReadInt() == 1 ? TRUE : FALSE;
-        responseNeeded = in->ReadInt() == 1 ? TRUE : FALSE;
-        userClear = in->ReadInt() == 1 ? TRUE : FALSE;
-        duration = in->ReadParcelable(NULL);
-    }
-
-    //@Override
-    public Int32 DescribeContents() {
-        return 0;
-    }
-
-    //@Override
-    CARAPI WriteToParcel(Parcel dest, Int32 flags) {
-        dest->WriteString(title);
-        dest->WriteString(text);
-        dest->WriteParcelable(icon, 0);
-        dest->WriteInt(iconSelfExplanatory ? 1 : 0);
-        dest->WriteInt(isHighPriority ? 1 : 0);
-        dest->WriteInt(responseNeeded ? 1 : 0);
-        dest->WriteInt(userClear ? 1 : 0);
-        dest->WriteParcelable(duration, 0);
-    }
-
-    public static const Parcelable.Creator<TextMessage> CREATOR = new Parcelable.Creator<TextMessage>() {
-        //@Override
-        public TextMessage CreateFromParcel(Parcel in) {
-            return new TextMessage(in);
-        }
-
-        //@Override
-        public TextMessage[] NewArray(Int32 size) {
-            return new TextMessage[size];
-        }
-    };
+TextMessage::TextMessage()
+{
 }
+
+ECode TextMessage::constructor()
+{
+    return NOERROR;
+}
+
+//ECode TextMessage::DescribeContents(
+//    /* [out] */ Int32* result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return 0;
+//    assert(0);
+//    return NOERROR;
+//}
+
+ECode TextMessage::WriteToParcel(
+    /* [in] */ IParcel* dest)
+    ///* [in] */ Int32 flags)
+{
+    // ==================before translated======================
+    // dest.writeString(title);
+    // dest.writeString(text);
+    // dest.writeParcelable(icon, 0);
+    // dest.writeInt(iconSelfExplanatory ? 1 : 0);
+    // dest.writeInt(isHighPriority ? 1 : 0);
+    // dest.writeInt(responseNeeded ? 1 : 0);
+    // dest.writeInt(userClear ? 1 : 0);
+    // dest.writeParcelable(duration, 0);
+    assert(0);
+    return NOERROR;
+}
+
+ECode TextMessage::ReadFromParcel(
+    /* [in] */ IParcel* source)
+{
+    constructor(source);
+    return NOERROR;
+}
+
+ECode TextMessage::constructor(
+    /* [in] */ IParcel* in)
+{
+    // ==================before translated======================
+    // title = in.readString();
+    // text = in.readString();
+    // icon = in.readParcelable(null);
+    // iconSelfExplanatory = in.readInt() == 1 ? true : false;
+    // isHighPriority = in.readInt() == 1 ? true : false;
+    // responseNeeded = in.readInt() == 1 ? true : false;
+    // userClear = in.readInt() == 1 ? true : false;
+    // duration = in.readParcelable(null);
+    return NOERROR;
+}
+
+} // namespace Cat
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

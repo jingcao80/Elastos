@@ -1,54 +1,64 @@
-/*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.sip;
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/telephony/sip/SipCallBase.h"
 
-using Elastos::Droid::Internal::Telephony::ICall;
-using Elastos::Droid::Internal::Telephony::IConnection;
-using Elastos::Utility::IIterator;
-using Elastos::Utility::IList;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Sip {
 
-abstract class SipCallBase extends Call {
+//=====================================================================
+//                             SipCallBase
+//=====================================================================
+//CAR_INTERFACE_IMPL(SipCallBase, Call, ISipCallBase);
 
-    protected abstract void SetState(State newState);
-
-    //@Override
-    public List<Connection> GetConnections() {
-        // FIXME should return Collections->UnmodifiableList();
-        return mConnections;
-    }
-
-    //@Override
-    public Boolean IsMultiparty() {
-        return mConnections->Size() > 1;
-    }
-
-    //@Override
-    CARAPI ToString(
-        /* [out] */ String* str)
-    {
-        return mState->ToString() + ":" + super->ToString();
-    }
-
-    void ClearDisconnected() {
-        For (Iterator<Connection> it = mConnections->Iterator(); it->HasNext(); ) {
-            Connection c = it->Next();
-            If (c->GetState() == State.DISCONNECTED) it->Remove();
-        }
-
-        If (mConnections->IsEmpty()) SetState(State.IDLE);
-    }
+ECode SipCallBase::GetConnections(
+    /* [out] */ IList/*<Connection>*/** result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // // FIXME should return Collections.unmodifiableList();
+    // return mConnections;
+    assert(0);
+    return NOERROR;
 }
+
+ECode SipCallBase::IsMultiparty(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mConnections.size() > 1;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipCallBase::ToString(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mState.toString() + ":" + super.toString();
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipCallBase::ClearDisconnected()
+{
+    // ==================before translated======================
+    // for (Iterator<Connection> it = mConnections.iterator(); it.hasNext(); ) {
+    //     Connection c = it.next();
+    //     if (c.getState() == State.DISCONNECTED) it.remove();
+    // }
+    //
+    // if (mConnections.isEmpty()) setState(State.IDLE);
+    assert(0);
+    return NOERROR;
+}
+
+} // namespace Sip
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

@@ -1,68 +1,108 @@
-/*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.cat;
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/telephony/cat/CatResponseMessage.h"
 
-public class CatResponseMessage {
-        CommandDetails mCmdDet = NULL;
-        ResultCode mResCode  = ResultCode.OK;
-        Int32 mUsersMenuSelection = 0;
-        String mUsersInput  = NULL;
-        Boolean mUsersYesNoSelection = FALSE;
-        Boolean mUsersConfirm = FALSE;
-        Boolean mIncludeAdditionalInfo = FALSE;
-        Int32 mAdditionalInfo = 0;
-        Int32 mEventValue = -1;
-        Byte[] mAddedInfo = NULL;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Cat {
 
-        public CatResponseMessage(CatCmdMessage cmdMsg) {
-            mCmdDet = cmdMsg.mCmdDet;
-        }
+//=====================================================================
+//                          CatResponseMessage
+//=====================================================================
+CAR_INTERFACE_IMPL(CatResponseMessage, Object, ICatResponseMessage);
 
-        CARAPI SetResultCode(ResultCode resCode) {
-            mResCode = resCode;
-        }
+CatResponseMessage::CatResponseMessage()
+{
+}
 
-        CARAPI SetMenuSelection(Int32 selection) {
-            mUsersMenuSelection = selection;
-        }
+ECode CatResponseMessage::constructor(
+    /* [in] */ ICatCmdMessage* cmdMsg)
+{
+    // ==================before translated======================
+    // mCmdDet = cmdMsg.mCmdDet;
+    return NOERROR;
+}
 
-        CARAPI SetInput(String input) {
-            mUsersInput = input;
-        }
+ECode CatResponseMessage::SetResultCode(
+    /* [in] */ ResultCode resCode)
+{
+    // ==================before translated======================
+    // mResCode = resCode;
+    assert(0);
+    return NOERROR;
+}
 
-        CARAPI SetEventDownload(Int32 event, Byte[] addedInfo) {
-            this.mEventValue = event;
-            this.mAddedInfo = addedInfo;
-        }
+ECode CatResponseMessage::SetMenuSelection(
+    /* [in] */ Int32 selection)
+{
+    // ==================before translated======================
+    // mUsersMenuSelection = selection;
+    assert(0);
+    return NOERROR;
+}
 
-        CARAPI SetYesNo(Boolean yesNo) {
-            mUsersYesNoSelection = yesNo;
-        }
+ECode CatResponseMessage::SetInput(
+    /* [in] */ const String& input)
+{
+    // ==================before translated======================
+    // mUsersInput = input;
+    assert(0);
+    return NOERROR;
+}
 
-        CARAPI SetConfirmation(Boolean confirm) {
-            mUsersConfirm = confirm;
-        }
+ECode CatResponseMessage::SetEventDownload(
+    /* [in] */ Int32 event,
+    /* [in] */ ArrayOf<Byte>* addedInfo)
+{
+    // ==================before translated======================
+    // this.mEventValue = event;
+    // this.mAddedInfo = addedInfo;
+    assert(0);
+    return NOERROR;
+}
 
-        CARAPI SetAdditionalInfo(Int32 info) {
-            mIncludeAdditionalInfo = TRUE;
-            mAdditionalInfo = info;
-        }
+ECode CatResponseMessage::SetYesNo(
+    /* [in] */ Boolean yesNo)
+{
+    // ==================before translated======================
+    // mUsersYesNoSelection = yesNo;
+    assert(0);
+    return NOERROR;
+}
 
-        CommandDetails GetCmdDetails() {
-            return mCmdDet;
-        }
-    }
+ECode CatResponseMessage::SetConfirmation(
+    /* [in] */ Boolean confirm)
+{
+    // ==================before translated======================
+    // mUsersConfirm = confirm;
+    assert(0);
+    return NOERROR;
+}
+
+ECode CatResponseMessage::SetAdditionalInfo(
+    /* [in] */ Int32 info)
+{
+    // ==================before translated======================
+    // mIncludeAdditionalInfo = true;
+    // mAdditionalInfo = info;
+    assert(0);
+    return NOERROR;
+}
+
+ECode CatResponseMessage::GetCmdDetails(
+    /* [out] */ CommandDetails** result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mCmdDet;
+    assert(0);
+    return NOERROR;
+}
+
+} // namespace Cat
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

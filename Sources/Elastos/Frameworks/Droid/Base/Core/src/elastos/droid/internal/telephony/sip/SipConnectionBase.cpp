@@ -1,221 +1,285 @@
-/*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.sip;
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/telephony/sip/SipConnectionBase.h"
 
-using Elastos::Droid::Internal::Telephony::ICall;
-using Elastos::Droid::Internal::Telephony::IConnection;
-using Elastos::Droid::Internal::Telephony::IPhone;
-using Elastos::Droid::Internal::Telephony::IPhoneConstants;
-using Elastos::Droid::Internal::Telephony::IUUSInfo;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Sip {
 
-using Elastos::Droid::Os::ISystemClock;
-using Elastos::Droid::Telephony::IDisconnectCause;
-using Elastos::Droid::Telephony::IRlog;
-using Elastos::Droid::Telephony::IPhoneNumberUtils;
+//=====================================================================
+//                          SipConnectionBase
+//=====================================================================
+const String SipConnectionBase::LOGTAG("SipConnBase");
+const Boolean SipConnectionBase::DBG = TRUE;
+const Boolean SipConnectionBase::VDBG = FALSE;
 
-abstract class SipConnectionBase extends Connection {
-    private static const String LOG_TAG = "SipConnBase";
-    private static const Boolean DBG = TRUE;
-    private static const Boolean VDBG = FALSE; // STOPSHIP if TRUE
-
-    private String mPostDialString;      // outgoing calls only
-    private Int32 mNextPostDialChar;       // index into postDialString
-    /*
-     * These time/timespan values are based on System->CurrentTimeMillis(),
-     * i.e., "wall clock" time.
-     */
-    private Int64 mCreateTime;
-    private Int64 mConnectTime;
-    private Int64 mDisconnectTime;
-
-    /*
-     * These time/timespan values are based on SystemClock->ElapsedRealTime(),
-     * i.e., time since boot.  They are appropriate for comparison and
-     * calculating deltas.
-     */
-    private Int64 mConnectTimeReal;
-    private Int64 mDuration = -1L;
-    private Int64 mHoldingStartTime;  // The time when the Connection last transitioned
-                            // into HOLDING
-
-    private Int32 mCause = DisconnectCause.NOT_DISCONNECTED;
-    private PostDialState mPostDialState = PostDialState.NOT_STARTED;
-
-    SipConnectionBase(String dialString) {
-        If (DBG) Log("SipConnectionBase: ctor dialString=" + dialString);
-        mPostDialString = PhoneNumberUtils->ExtractPostDialPortion(dialString);
-
-        mCreateTime = System->CurrentTimeMillis();
-    }
-
-    protected void SetState(Call.State state) {
-        If (DBG) Log("setState: state=" + state);
-        Switch (state) {
-            case ACTIVE:
-                If (mConnectTime == 0) {
-                    mConnectTimeReal = SystemClock->ElapsedRealtime();
-                    mConnectTime = System->CurrentTimeMillis();
-                }
-                break;
-            case DISCONNECTED:
-                mDuration = GetDurationMillis();
-                mDisconnectTime = System->CurrentTimeMillis();
-                break;
-            case HOLDING:
-                mHoldingStartTime = SystemClock->ElapsedRealtime();
-                break;
-            default:
-                // Ignore
-                break;
-        }
-    }
-
-    //@Override
-    public Int64 GetCreateTime() {
-        If (VDBG) Log("getCreateTime: ret=" + mCreateTime);
-        return mCreateTime;
-    }
-
-    //@Override
-    public Int64 GetConnectTime() {
-        If (VDBG) Log("getConnectTime: ret=" + mConnectTime);
-        return mConnectTime;
-    }
-
-    //@Override
-    public Int64 GetDisconnectTime() {
-        If (VDBG) Log("getDisconnectTime: ret=" + mDisconnectTime);
-        return mDisconnectTime;
-    }
-
-    //@Override
-    public Int64 GetDurationMillis() {
-        Int64 dur;
-        If (mConnectTimeReal == 0) {
-            dur = 0;
-        } else If (mDuration < 0) {
-            dur = SystemClock->ElapsedRealtime() - mConnectTimeReal;
-        } else {
-            dur = mDuration;
-        }
-        If (VDBG) Log("getDurationMillis: ret=" + dur);
-        return dur;
-    }
-
-    //@Override
-    public Int64 GetHoldDurationMillis() {
-        Int64 dur;
-        If (GetState() != Call.State.HOLDING) {
-            // If not holding, return 0
-            dur = 0;
-        } else {
-            dur = SystemClock->ElapsedRealtime() - mHoldingStartTime;
-        }
-        If (VDBG) Log("getHoldDurationMillis: ret=" + dur);
-        return dur;
-    }
-
-    //@Override
-    public Int32 GetDisconnectCause() {
-        If (VDBG) Log("getDisconnectCause: ret=" + mCause);
-        return mCause;
-    }
-
-    void SetDisconnectCause(Int32 cause) {
-        If (DBG) Log("setDisconnectCause: prev=" + mCause + " new=" + cause);
-        mCause = cause;
-    }
-
-    //@Override
-    public PostDialState GetPostDialState() {
-        If (VDBG) Log("getPostDialState: ret=" + mPostDialState);
-        return mPostDialState;
-    }
-
-    //@Override
-    CARAPI ProceedAfterWaitChar() {
-        If (DBG) Log("proceedAfterWaitChar: ignore");
-    }
-
-    //@Override
-    CARAPI ProceedAfterWildChar(String str) {
-        If (DBG) Log("proceedAfterWildChar: ignore");
-    }
-
-    //@Override
-    CARAPI CancelPostDial() {
-        If (DBG) Log("cancelPostDial: ignore");
-    }
-
-    protected abstract Phone GetPhone();
-
-    //@Override
-    public String GetRemainingPostDialString() {
-        If (mPostDialState == PostDialState.CANCELLED
-            || mPostDialState == PostDialState.COMPLETE
-            || mPostDialString == NULL
-            || mPostDialString->Length() <= mNextPostDialChar) {
-            If (DBG) Log("getRemaingPostDialString: ret empty string");
-            return "";
-        }
-
-        return mPostDialString->Substring(mNextPostDialChar);
-    }
-
-    private void Log(String msg) {
-        Rlog->D(LOG_TAG, msg);
-    }
-
-    //@Override
-    public Int32 GetNumberPresentation() {
-        // TODO: add PRESENTATION_URL
-        If (VDBG) Log("getNumberPresentation: ret=PRESENTATION_ALLOWED");
-        return PhoneConstants.PRESENTATION_ALLOWED;
-    }
-
-    //@Override
-    public UUSInfo GetUUSInfo() {
-        // FIXME: what's this for SIP?
-        If (VDBG) Log("getUUSInfo: ? ret=NULL");
-        return NULL;
-    }
-
-    //@Override
-    public Int32 GetPreciseDisconnectCause() {
-        return 0;
-    }
-
-    //@Override
-    public Int64 GetHoldingStartTime() {
-        return mHoldingStartTime;
-    }
-
-    //@Override
-    public Int64 GetConnectTimeReal() {
-        return mConnectTimeReal;
-    }
-
-    //@Override
-    public Connection GetOrigConnection() {
-        return NULL;
-    }
-
-    //@Override
-    public Boolean IsMultiparty() {
-        return FALSE;
-    }
+SipConnectionBase::SipConnectionBase(
+    /* [in] */ const String& dialString)
+{
+    // ==================before translated======================
+    // if (DBG) log("SipConnectionBase: ctor dialString=" + dialString);
+    // mPostDialString = PhoneNumberUtils.extractPostDialPortion(dialString);
+    //
+    // mCreateTime = System.currentTimeMillis();
 }
+
+ECode SipConnectionBase::GetCreateTime(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if (VDBG) log("getCreateTime: ret=" + mCreateTime);
+    // return mCreateTime;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::GetConnectTime(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if (VDBG) log("getConnectTime: ret=" + mConnectTime);
+    // return mConnectTime;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::GetDisconnectTime(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if (VDBG) log("getDisconnectTime: ret=" + mDisconnectTime);
+    // return mDisconnectTime;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::GetDurationMillis(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // long dur;
+    // if (mConnectTimeReal == 0) {
+    //     dur = 0;
+    // } else if (mDuration < 0) {
+    //     dur = SystemClock.elapsedRealtime() - mConnectTimeReal;
+    // } else {
+    //     dur = mDuration;
+    // }
+    // if (VDBG) log("getDurationMillis: ret=" + dur);
+    // return dur;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::GetHoldDurationMillis(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // long dur;
+    // if (getState() != Call.State.HOLDING) {
+    //     // If not holding, return 0
+    //     dur = 0;
+    // } else {
+    //     dur = SystemClock.elapsedRealtime() - mHoldingStartTime;
+    // }
+    // if (VDBG) log("getHoldDurationMillis: ret=" + dur);
+    // return dur;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::GetDisconnectCause(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if (VDBG) log("getDisconnectCause: ret=" + mCause);
+    // return mCause;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::SetDisconnectCause(
+    /* [in] */ Int32 cause)
+{
+    // ==================before translated======================
+    // if (DBG) log("setDisconnectCause: prev=" + mCause + " new=" + cause);
+    // mCause = cause;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::GetPostDialState(
+    /* [out] */ IConnectionPostDialState* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if (VDBG) log("getPostDialState: ret=" + mPostDialState);
+    // return mPostDialState;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::ProceedAfterWaitChar()
+{
+    // ==================before translated======================
+    // if (DBG) log("proceedAfterWaitChar: ignore");
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::ProceedAfterWildChar(
+    /* [in] */ const String& str)
+{
+    // ==================before translated======================
+    // if (DBG) log("proceedAfterWildChar: ignore");
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::CancelPostDial()
+{
+    // ==================before translated======================
+    // if (DBG) log("cancelPostDial: ignore");
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::GetRemainingPostDialString(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // if (mPostDialState == PostDialState.CANCELLED
+    //     || mPostDialState == PostDialState.COMPLETE
+    //     || mPostDialString == null
+    //     || mPostDialString.length() <= mNextPostDialChar) {
+    //     if (DBG) log("getRemaingPostDialString: ret empty string");
+    //     return "";
+    // }
+    //
+    // return mPostDialString.substring(mNextPostDialChar);
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::GetNumberPresentation(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // // TODO: add PRESENTATION_URL
+    // if (VDBG) log("getNumberPresentation: ret=PRESENTATION_ALLOWED");
+    // return PhoneConstants.PRESENTATION_ALLOWED;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::GetUUSInfo(
+    /* [out] */ IUUSInfo** result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // // FIXME: what's this for SIP?
+    // if (VDBG) log("getUUSInfo: ? ret=null");
+    // return null;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::GetPreciseDisconnectCause(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return 0;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::GetHoldingStartTime(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mHoldingStartTime;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::GetConnectTimeReal(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mConnectTimeReal;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::GetOrigConnection(
+    /* [out] */ IConnection** result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return null;
+    assert(0);
+    return NOERROR;
+}
+
+ECode SipConnectionBase::IsMultiparty(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return false;
+    assert(0);
+    return NOERROR;
+}
+
+void SipConnectionBase::SetState(
+    /* [in] */ ICallState state)
+{
+    // ==================before translated======================
+    // if (DBG) log("setState: state=" + state);
+    // switch (state) {
+    //     case ACTIVE:
+    //         if (mConnectTime == 0) {
+    //             mConnectTimeReal = SystemClock.elapsedRealtime();
+    //             mConnectTime = System.currentTimeMillis();
+    //         }
+    //         break;
+    //     case DISCONNECTED:
+    //         mDuration = getDurationMillis();
+    //         mDisconnectTime = System.currentTimeMillis();
+    //         break;
+    //     case HOLDING:
+    //         mHoldingStartTime = SystemClock.elapsedRealtime();
+    //         break;
+    //     default:
+    //         // Ignore
+    //         break;
+    // }
+    assert(0);
+}
+
+void SipConnectionBase::Log(
+    /* [in] */ const String& msg)
+{
+    // ==================before translated======================
+    // Rlog.d(LOGTAG, msg);
+    assert(0);
+}
+
+} // namespace Sip
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

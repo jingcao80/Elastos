@@ -1,134 +1,188 @@
-/*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.cat;
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/telephony/cat/CommandDetails.h"
 
-using Elastos::Droid::Os::IParcel;
-using Elastos::Droid::Os::IParcelable;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Cat {
 
-abstract class ValueObject {
-    abstract ComprehensionTlvTag GetTag();
+////=====================================================================
+////                CommandDetails::InnerParcelableCreator
+////=====================================================================
+//CommandDetails::InnerParcelableCreator::InnerParcelableCreator(
+//    /* [in] */ CommandDetails* owner)
+//    : mOwner(owner)
+//{
+//    // ==================before translated======================
+//    // mOwner = owner;
+//}
+//
+//ECode CommandDetails::InnerParcelableCreator::CreateFromParcel(
+//    /* [in] */ IParcel* in,
+//    /* [out] */ CommandDetails** result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return new CommandDetails(in);
+//    assert(0);
+//    return NOERROR;
+//}
+//
+//ECode CommandDetails::InnerParcelableCreator::NewArray(
+//    /* [in] */ Int32 size,
+//    /* [out] */ CommandDetails[]** result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return new CommandDetails[size];
+//    assert(0);
+//    return NOERROR;
+//}
+
+//=====================================================================
+//                            CommandDetails
+//=====================================================================
+//const AutoPtr<IParcelable> AutoPtr< ::Creator<CommandDetails> > CommandDetails::CREATOR = new InnerParcelableCreator(this);
+CAR_INTERFACE_IMPL(CommandDetails, ValueObject, IParcelable);
+
+CommandDetails::CommandDetails()
+{
 }
 
-/**
- * Class for Command Details object of proactive commands from SIM.
- * {@hide}
- */
-class CommandDetails extends ValueObject implements Parcelable {
-    public Boolean compRequired;
-    public Int32 commandNumber;
-    public Int32 typeOfCommand;
-    public Int32 commandQualifier;
-
-    //@Override
-    public ComprehensionTlvTag GetTag() {
-        return ComprehensionTlvTag.COMMAND_DETAILS;
-    }
-
-    CommandDetails() {
-    }
-
-    public Boolean CompareTo(CommandDetails other) {
-        Return (this.compRequired == other.compRequired &&
-                this.commandNumber == other.commandNumber &&
-                this.commandQualifier == other.commandQualifier &&
-                this.typeOfCommand == other.typeOfCommand);
-    }
-
-    public CommandDetails(Parcel in) {
-        compRequired = in->ReadInt() != 0;
-        commandNumber = in->ReadInt();
-        typeOfCommand = in->ReadInt();
-        commandQualifier = in->ReadInt();
-    }
-
-    //@Override
-    CARAPI WriteToParcel(Parcel dest, Int32 flags) {
-        dest->WriteInt(compRequired ? 1 : 0);
-        dest->WriteInt(commandNumber);
-        dest->WriteInt(typeOfCommand);
-        dest->WriteInt(commandQualifier);
-    }
-
-    public static const Parcelable.Creator<CommandDetails> CREATOR =
-                                new Parcelable.Creator<CommandDetails>() {
-        //@Override
-        public CommandDetails CreateFromParcel(Parcel in) {
-            return new CommandDetails(in);
-        }
-
-        //@Override
-        public CommandDetails[] NewArray(Int32 size) {
-            return new CommandDetails[size];
-        }
-    };
-
-    //@Override
-    public Int32 DescribeContents() {
-        return 0;
-    }
-
-    //@Override
-    CARAPI ToString(
-        /* [out] */ String* str)
-    {
-        return "CmdDetails: compRequired=" + compRequired +
-                " commandNumber=" + commandNumber +
-                " typeOfCommand=" + typeOfCommand +
-                " commandQualifier=" + commandQualifier;
-    }
+ECode CommandDetails::constructor(
+    /* [in] */ IParcel* in)
+{
+    // ==================before translated======================
+    // compRequired = in.readInt() != 0;
+    // commandNumber = in.readInt();
+    // typeOfCommand = in.readInt();
+    // commandQualifier = in.readInt();
+    return NOERROR;
 }
 
-class DeviceIdentities extends ValueObject {
-    public Int32 sourceId;
-    public Int32 destinationId;
-
-    //@Override
-    ComprehensionTlvTag GetTag() {
-        return ComprehensionTlvTag.DEVICE_IDENTITIES;
-    }
+ECode CommandDetails::GetTag(
+    /* [out] */ ComprehensionTlvTag* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return ComprehensionTlvTag.COMMAND_DETAILS;
+    assert(0);
+    return NOERROR;
 }
 
-// Container class to hold icon identifier value.
-class IconId extends ValueObject {
-    Int32 recordNumber;
-    Boolean selfExplanatory;
-
-    //@Override
-    ComprehensionTlvTag GetTag() {
-        return ComprehensionTlvTag.ICON_ID;
-    }
+ECode CommandDetails::CompareTo(
+    /* [in] */ CommandDetails* other,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return (this.compRequired == other.compRequired &&
+    //         this.commandNumber == other.commandNumber &&
+    //         this.commandQualifier == other.commandQualifier &&
+    //         this.typeOfCommand == other.typeOfCommand);
+    assert(0);
+    return NOERROR;
 }
 
-// Container class to hold item icon identifier list value.
-class ItemsIconId extends ValueObject {
-    Int32 [] recordNumbers;
-    Boolean selfExplanatory;
-
-    //@Override
-    ComprehensionTlvTag GetTag() {
-        return ComprehensionTlvTag.ITEM_ICON_ID_LIST;
-    }
+ECode CommandDetails::WriteToParcel(
+    /* [in] */ IParcel* dest)
+    ///* [in] */ Int32 flags)
+{
+    // ==================before translated======================
+    // dest.writeInt(compRequired ? 1 : 0);
+    // dest.writeInt(commandNumber);
+    // dest.writeInt(typeOfCommand);
+    // dest.writeInt(commandQualifier);
+    assert(0);
+    return NOERROR;
 }
 
-class ActivateDescriptor extends ValueObject {
-    public Int32 target;
-
-    //@Override
-    ComprehensionTlvTag GetTag() {
-        return ComprehensionTlvTag.ACTIVATE_DESCRIPTOR;
-    }
+ECode CommandDetails::ReadFromParcel(
+    /* [in] */ IParcel* source)
+{
+    constructor(source);
+    return NOERROR;
 }
+
+//ECode CommandDetails::DescribeContents(
+//    /* [out] */ Int32* result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return 0;
+//    assert(0);
+//    return NOERROR;
+//}
+
+ECode CommandDetails::ToString(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return "CmdDetails: compRequired=" + compRequired +
+    //         " commandNumber=" + commandNumber +
+    //         " typeOfCommand=" + typeOfCommand +
+    //         " commandQualifier=" + commandQualifier;
+    assert(0);
+    return NOERROR;
+}
+
+//=====================================================================
+//                           DeviceIdentities
+//=====================================================================
+ECode DeviceIdentities::GetTag(
+    /* [out] */ ComprehensionTlvTag* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return ComprehensionTlvTag.DEVICE_IDENTITIES;
+    assert(0);
+    return NOERROR;
+}
+
+//=====================================================================
+//                                IconId
+//=====================================================================
+ECode IconId::GetTag(
+    /* [out] */ ComprehensionTlvTag* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return ComprehensionTlvTag.ICON_ID;
+    assert(0);
+    return NOERROR;
+}
+
+//=====================================================================
+//                             ItemsIconId
+//=====================================================================
+ECode ItemsIconId::GetTag(
+    /* [out] */ ComprehensionTlvTag* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return ComprehensionTlvTag.ITEM_ICON_ID_LIST;
+    assert(0);
+    return NOERROR;
+}
+
+//=====================================================================
+//                          ActivateDescriptor
+//=====================================================================
+ECode ActivateDescriptor::GetTag(
+    /* [out] */ ComprehensionTlvTag* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return ComprehensionTlvTag.ACTIVATE_DESCRIPTOR;
+    assert(0);
+    return NOERROR;
+}
+
+} // namespace Cat
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

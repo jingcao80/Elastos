@@ -1,66 +1,109 @@
-/*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.cat;
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/telephony/cat/ToneSettings.h"
 
-using Elastos::Droid::Os::IParcel;
-using Elastos::Droid::Os::IParcelable;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Cat {
 
-/**
- * Container class for PlayTone commands parameters.
- *
- */
-public class ToneSettings implements Parcelable {
-    public Duration duration;
-    public Tone tone;
-    public Boolean vibrate;
+////=====================================================================
+////                 ToneSettings::InnerParcelableCreator
+////=====================================================================
+//ToneSettings::InnerParcelableCreator::InnerParcelableCreator(
+//    /* [in] */ ToneSettings* owner)
+//    : mOwner(owner)
+//{
+//    // ==================before translated======================
+//    // mOwner = owner;
+//}
+//
+//ECode ToneSettings::InnerParcelableCreator::CreateFromParcel(
+//    /* [in] */ IParcel* in,
+//    /* [out] */ ToneSettings** result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return new ToneSettings(in);
+//    assert(0);
+//    return NOERROR;
+//}
+//
+//ECode ToneSettings::InnerParcelableCreator::NewArray(
+//    /* [in] */ Int32 size,
+//    /* [out] */ ToneSettings[]** result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return new ToneSettings[size];
+//    assert(0);
+//    return NOERROR;
+//}
+//
+////=====================================================================
+////                             ToneSettings
+////=====================================================================
+//const AutoPtr<IParcelable> AutoPtr< ::Creator<ToneSettings> > ToneSettings::CREATOR = new InnerParcelableCreator(this);
+CAR_INTERFACE_IMPL_2(ToneSettings, Object, IToneSettings, IParcelable);
 
-    public ToneSettings(Duration duration, Tone tone, Boolean vibrate) {
-        this.duration = duration;
-        this.tone = tone;
-        this.vibrate = vibrate;
-    }
-
-    private ToneSettings(Parcel in) {
-        duration = in->ReadParcelable(NULL);
-        tone = in->ReadParcelable(NULL);
-        vibrate = in->ReadInt() == 1;
-    }
-
-    //@Override
-    public Int32 DescribeContents() {
-        return 0;
-    }
-
-    //@Override
-    CARAPI WriteToParcel(Parcel dest, Int32 flags) {
-        dest->WriteParcelable(duration, 0);
-        dest->WriteParcelable(tone, 0);
-        dest->WriteInt(vibrate ? 1 : 0);
-    }
-
-    public static const Parcelable.Creator<ToneSettings> CREATOR = new Parcelable.Creator<ToneSettings>() {
-        //@Override
-        public ToneSettings CreateFromParcel(Parcel in) {
-            return new ToneSettings(in);
-        }
-
-        //@Override
-        public ToneSettings[] NewArray(Int32 size) {
-            return new ToneSettings[size];
-        }
-    };
+ToneSettings::ToneSettings()
+{
 }
+
+ECode ToneSettings::constructor(
+    /* [in] */ IDuration* duration,
+    /* [in] */ Tone tone,
+    /* [in] */ Boolean vibrate)
+{
+    // ==================before translated======================
+    // this.duration = duration;
+    // this.tone = tone;
+    // this.vibrate = vibrate;
+    return NOERROR;
+}
+
+//ECode ToneSettings::DescribeContents(
+//    /* [out] */ Int32* result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return 0;
+//    assert(0);
+//    return NOERROR;
+//}
+
+ECode ToneSettings::WriteToParcel(
+    /* [in] */ IParcel* dest)
+    ///* [in] */ Int32 flags)
+{
+    // ==================before translated======================
+    // dest.writeParcelable(duration, 0);
+    // dest.writeParcelable(tone, 0);
+    // dest.writeInt(vibrate ? 1 : 0);
+    assert(0);
+    return NOERROR;
+}
+
+ECode ToneSettings::ReadFromParcel(
+    /* [in] */ IParcel* source)
+{
+    constructor(source);
+    return NOERROR;
+}
+
+ECode ToneSettings::constructor(
+    /* [in] */ IParcel* in)
+{
+    // ==================before translated======================
+    // duration = in.readParcelable(null);
+    // tone = in.readParcelable(null);
+    // vibrate = in.readInt() == 1;
+    return NOERROR;
+}
+
+} // namespace Cat
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

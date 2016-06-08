@@ -1,50 +1,74 @@
-/*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.cat;
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/telephony/cat/CatLog.h"
 
-using Elastos::Droid::Telephony::IRlog;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Cat {
 
-public abstract class CatLog {
-    static const Boolean DEBUG = TRUE;
+//=====================================================================
+//                                CatLog
+//=====================================================================
+const Boolean CatLog::DEBUG = TRUE;
 
-    public static void D(Object caller, String msg) {
-        If (!DEBUG) {
-            return;
-        }
-
-        String className = caller->GetClass()->GetName();
-        Rlog->D("CAT", className->Substring(className->LastIndexOf('.') + 1) + ": "
-                + msg);
-    }
-
-    public static void D(String caller, String msg) {
-        If (!DEBUG) {
-            return;
-        }
-
-        Rlog->D("CAT", caller + ": " + msg);
-    }
-    public static void E(Object caller, String msg) {
-        String className = caller->GetClass()->GetName();
-        Rlog->E("CAT", className->Substring(className->LastIndexOf('.') + 1) + ": "
-                + msg);
-    }
-
-    public static void E(String caller, String msg) {
-        Rlog->E("CAT", caller + ": " + msg);
-    }
+ECode CatLog::D(
+    /* [in] */ IInterface* caller,
+    /* [in] */ const String& msg)
+{
+    // ==================before translated======================
+    // if (!DEBUG) {
+    //     return;
+    // }
+    //
+    // String className = caller.getClass().getName();
+    // Rlog.d("CAT", className.substring(className.lastIndexOf('.') + 1) + ": "
+    //         + msg);
+    assert(0);
+    return NOERROR;
 }
+
+ECode CatLog::D(
+    /* [in] */ const String& caller,
+    /* [in] */ const String& msg)
+{
+    // ==================before translated======================
+    // if (!DEBUG) {
+    //     return;
+    // }
+    //
+    // Rlog.d("CAT", caller + ": " + msg);
+    assert(0);
+    return NOERROR;
+}
+
+ECode CatLog::E(
+    /* [in] */ IInterface* caller,
+    /* [in] */ const String& msg)
+{
+    // ==================before translated======================
+    // String className = caller.getClass().getName();
+    // Rlog.e("CAT", className.substring(className.lastIndexOf('.') + 1) + ": "
+    //         + msg);
+    assert(0);
+    return NOERROR;
+}
+
+ECode CatLog::E(
+    /* [in] */ const String& caller,
+    /* [in] */ const String& msg)
+{
+    // ==================before translated======================
+    // Rlog.e("CAT", caller + ": " + msg);
+    assert(0);
+    return NOERROR;
+}
+
+} // namespace Cat
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos
+
+

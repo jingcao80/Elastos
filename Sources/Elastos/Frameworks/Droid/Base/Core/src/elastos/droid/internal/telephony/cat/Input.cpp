@@ -1,105 +1,140 @@
-/*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.cat;
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/telephony/cat/Input.h"
 
-using Elastos::Droid::Graphics::IBitmap;
-using Elastos::Droid::Os::IParcel;
-using Elastos::Droid::Os::IParcelable;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Cat {
 
-/**
- * Container class for CAT GET INPUT, GET IN KEY commands parameters.
- *
- */
-public class Input implements Parcelable {
-    public String text;
-    public String defaultText;
-    public Bitmap icon;
-    public Int32 minLen;
-    public Int32 maxLen;
-    public Boolean ucs2;
-    public Boolean packed;
-    public Boolean digitOnly;
-    public Boolean echo;
-    public Boolean yesNo;
-    public Boolean helpAvailable;
-    public Duration duration;
+////=====================================================================
+////                    Input::InnerParcelableCreator
+////=====================================================================
+//Input::InnerParcelableCreator::InnerParcelableCreator(
+//    /* [in] */ Input* owner)
+//    : mOwner(owner)
+//{
+//    // ==================before translated======================
+//    // mOwner = owner;
+//}
+//
+//ECode Input::InnerParcelableCreator::CreateFromParcel(
+//    /* [in] */ IParcel* in,
+//    /* [out] */ Input** result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return new Input(in);
+//    assert(0);
+//    return NOERROR;
+//}
+//
+//ECode Input::InnerParcelableCreator::NewArray(
+//    /* [in] */ Int32 size,
+//    /* [out] */ Input[]** result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return new Input[size];
+//    assert(0);
+//    return NOERROR;
+//}
+//
+////=====================================================================
+////                                Input
+////=====================================================================
+//const AutoPtr<IParcelable> AutoPtr< ::Creator<Input> > Input::CREATOR = new InnerParcelableCreator(this);
+CAR_INTERFACE_IMPL_2(Input, Object, IInput, IParcelable);
 
-    Input() {
-        text = "";
-        defaultText = NULL;
-        icon = NULL;
-        minLen = 0;
-        maxLen = 1;
-        ucs2 = FALSE;
-        packed = FALSE;
-        digitOnly = FALSE;
-        echo = FALSE;
-        yesNo = FALSE;
-        helpAvailable = FALSE;
-        duration = NULL;
-    }
-
-    private Input(Parcel in) {
-        text = in->ReadString();
-        defaultText = in->ReadString();
-        icon = in->ReadParcelable(NULL);
-        minLen = in->ReadInt();
-        maxLen = in->ReadInt();
-        ucs2 = in->ReadInt() == 1 ? TRUE : FALSE;
-        packed = in->ReadInt() == 1 ? TRUE : FALSE;
-        digitOnly = in->ReadInt() == 1 ? TRUE : FALSE;
-        echo = in->ReadInt() == 1 ? TRUE : FALSE;
-        yesNo = in->ReadInt() == 1 ? TRUE : FALSE;
-        helpAvailable = in->ReadInt() == 1 ? TRUE : FALSE;
-        duration = in->ReadParcelable(NULL);
-    }
-
-    //@Override
-    public Int32 DescribeContents() {
-        return 0;
-    }
-
-    //@Override
-    CARAPI WriteToParcel(Parcel dest, Int32 flags) {
-        dest->WriteString(text);
-        dest->WriteString(defaultText);
-        dest->WriteParcelable(icon, 0);
-        dest->WriteInt(minLen);
-        dest->WriteInt(maxLen);
-        dest->WriteInt(ucs2 ? 1 : 0);
-        dest->WriteInt(packed ? 1 : 0);
-        dest->WriteInt(digitOnly ? 1 : 0);
-        dest->WriteInt(echo ? 1 : 0);
-        dest->WriteInt(yesNo ? 1 : 0);
-        dest->WriteInt(helpAvailable ? 1 : 0);
-        dest->WriteParcelable(duration, 0);
-    }
-
-    public static const Parcelable.Creator<Input> CREATOR = new Parcelable.Creator<Input>() {
-        //@Override
-        public Input CreateFromParcel(Parcel in) {
-            return new Input(in);
-        }
-
-        //@Override
-        public Input[] NewArray(Int32 size) {
-            return new Input[size];
-        }
-    };
-
-    Boolean SetIcon(Bitmap Icon) { return TRUE; }
+Input::Input()
+{
+    // ==================before translated======================
+    // text = "";
+    // defaultText = null;
+    // icon = null;
+    // minLen = 0;
+    // maxLen = 1;
+    // ucs2 = false;
+    // packed = false;
+    // digitOnly = false;
+    // echo = false;
+    // yesNo = false;
+    // helpAvailable = false;
+    // duration = null;
 }
+
+//ECode Input::DescribeContents(
+//    /* [out] */ Int32* result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return 0;
+//    assert(0);
+//    return NOERROR;
+//}
+
+ECode Input::WriteToParcel(
+    /* [in] */ IParcel* dest)
+    ///* [in] */ Int32 flags)
+{
+    // ==================before translated======================
+    // dest.writeString(text);
+    // dest.writeString(defaultText);
+    // dest.writeParcelable(icon, 0);
+    // dest.writeInt(minLen);
+    // dest.writeInt(maxLen);
+    // dest.writeInt(ucs2 ? 1 : 0);
+    // dest.writeInt(packed ? 1 : 0);
+    // dest.writeInt(digitOnly ? 1 : 0);
+    // dest.writeInt(echo ? 1 : 0);
+    // dest.writeInt(yesNo ? 1 : 0);
+    // dest.writeInt(helpAvailable ? 1 : 0);
+    // dest.writeParcelable(duration, 0);
+    assert(0);
+    return NOERROR;
+}
+
+ECode Input::ReadFromParcel(
+    /* [in] */ IParcel* source)
+{
+    constructor(source);
+    return NOERROR;
+}
+
+ECode Input::SetIcon(
+    /* [in] */ IBitmap* Icon,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return true;
+    assert(0);
+    return NOERROR;
+}
+
+ECode Input::constructor(
+    /* [in] */ IParcel* in)
+{
+    // ==================before translated======================
+    // text = in.readString();
+    // defaultText = in.readString();
+    // icon = in.readParcelable(null);
+    // minLen = in.readInt();
+    // maxLen = in.readInt();
+    // ucs2 = in.readInt() == 1 ? true : false;
+    // packed = in.readInt() == 1 ? true : false;
+    // digitOnly = in.readInt() == 1 ? true : false;
+    // echo = in.readInt() == 1 ? true : false;
+    // yesNo = in.readInt() == 1 ? true : false;
+    // helpAvailable = in.readInt() == 1 ? true : false;
+    // duration = in.readParcelable(null);
+    return NOERROR;
+}
+
+} // namespace Cat
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

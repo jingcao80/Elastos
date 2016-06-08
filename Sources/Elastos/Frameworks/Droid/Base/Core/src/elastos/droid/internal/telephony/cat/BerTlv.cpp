@@ -1,161 +1,155 @@
-/*
- * Copyright (C) 2006 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.cat;
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/internal/telephony/cat/BerTlv.h"
 
-using Elastos::Utility::IList;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Cat {
 
-/**
- * Class for representing BER-TLV objects.
- *
- * @see "ETSI TS 102 223 Annex C" for more information.
- *
- * {@hide}
- */
-class BerTlv {
-    private Int32 mTag = BER_UNKNOWN_TAG;
-    private List<ComprehensionTlv> mCompTlvs = NULL;
-    private Boolean mLengthValid = TRUE;
+//=====================================================================
+//                                BerTlv
+//=====================================================================
+const Int32 BerTlv::BER_UNKNOWN_TAG;
+const Int32 BerTlv::BER_PROACTIVE_COMMAND_TAG;
+const Int32 BerTlv::BER_MENU_SELECTION_TAG;
+const Int32 BerTlv::BER_EVENT_DOWNLOAD_TAG;
 
-    public static const Int32 BER_UNKNOWN_TAG             = 0x00;
-    public static const Int32 BER_PROACTIVE_COMMAND_TAG   = 0xd0;
-    public static const Int32 BER_MENU_SELECTION_TAG      = 0xd3;
-    public static const Int32 BER_EVENT_DOWNLOAD_TAG      = 0xd6;
-
-    private BerTlv(Int32 tag, List<ComprehensionTlv> ctlvs, Boolean lengthValid) {
-        mTag = tag;
-        mCompTlvs = ctlvs;
-        mLengthValid = lengthValid;
-    }
-
-    /**
-     * Gets a list of ComprehensionTlv objects contained in this BER-TLV object.
-     *
-     * @return A list of COMPREHENSION-TLV object
-     */
-    public List<ComprehensionTlv> GetComprehensionTlvs() {
-        return mCompTlvs;
-    }
-
-    /**
-     * Gets a tag id of the BER-TLV object.
-     *
-     * @return A tag integer.
-     */
-    public Int32 GetTag() {
-        return mTag;
-    }
-
-    /**
-     * Gets if the length of the BER-TLV object is valid
-     *
-     * @return if length valid
-     */
-     public Boolean IsLengthValid() {
-         return mLengthValid;
-     }
-
-    /**
-     * Decodes a BER-TLV object from a Byte array.
-     *
-     * @param data A Byte array to decode from
-     * @return A BER-TLV object decoded
-     * @throws ResultException
-     */
-    public static BerTlv Decode(Byte[] data) throws ResultException {
-        Int32 curIndex = 0;
-        Int32 endIndex = data.length;
-        Int32 tag, length = 0;
-        Boolean isLengthValid = TRUE;
-
-        try {
-            /* tag */
-            tag = data[curIndex++] & 0xff;
-            If (tag == BER_PROACTIVE_COMMAND_TAG) {
-                /* length */
-                Int32 temp = data[curIndex++] & 0xff;
-                If (temp < 0x80) {
-                    length = temp;
-                } else If (temp == 0x81) {
-                    temp = data[curIndex++] & 0xff;
-                    If (temp < 0x80) {
-                        throw new ResultException(
-                                ResultCode.CMD_DATA_NOT_UNDERSTOOD,
-                                "length < 0x80 length=" + Integer->ToHexString(length) +
-                                " curIndex=" + curIndex + " endIndex=" + endIndex);
-
-                    }
-                    length = temp;
-                } else {
-                    throw new ResultException(
-                            ResultCode.CMD_DATA_NOT_UNDERSTOOD,
-                            "Expected first Byte to be length or a length tag and < 0x81" +
-                            " Byte= " + Integer->ToHexString(temp) + " curIndex=" + curIndex +
-                            " endIndex=" + endIndex);
-                }
-            } else {
-                If (ComprehensionTlvTag.COMMAND_DETAILS->Value() == (tag & ~0x80)) {
-                    tag = BER_UNKNOWN_TAG;
-                    curIndex = 0;
-                }
-            }
-        } Catch (IndexOutOfBoundsException e) {
-            throw new ResultException(ResultCode.REQUIRED_VALUES_MISSING,
-                    "IndexOutOfBoundsException " +
-                    " curIndex=" + curIndex + " endIndex=" + endIndex);
-        } Catch (ResultException e) {
-            throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD, e->Explanation());
-        }
-
-        /* COMPREHENSION-TLVs */
-        If (endIndex - curIndex < length) {
-            throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD,
-                    "Command had extra data endIndex=" + endIndex + " curIndex=" + curIndex +
-                    " length=" + length);
-        }
-
-        List<ComprehensionTlv> ctlvs = ComprehensionTlv->DecodeMany(data,
-                curIndex);
-
-        If (tag == BER_PROACTIVE_COMMAND_TAG) {
-            Int32 totalLength = 0;
-            For (ComprehensionTlv item : ctlvs) {
-                Int32 itemLength = item->GetLength();
-                If (itemLength >= 0x80 && itemLength <= 0xFF) {
-                    totalLength += itemLength + 3; //3: 'tag'(1 Byte) and 'length'(2 bytes).
-                } else If (itemLength >= 0 && itemLength < 0x80) {
-                    totalLength += itemLength + 2; //2: 'tag'(1 Byte) and 'length'(1 Byte).
-                } else {
-                    isLengthValid = FALSE;
-                    break;
-                }
-            }
-
-            // According to 3gpp11.14, chapter 6.10.6 "Length errors",
-
-            // If the total lengths of the SIMPLE-TLV data objects are not
-            // consistent with the length given in the BER-TLV data object,
-            // then the whole BER-TLV data object shall be rejected. The
-            // result field in the TERMINAL RESPONSE shall have the error
-            // condition "Command data not understood by ME".
-            If (length != totalLength) {
-                isLengthValid = FALSE;
-            }
-        }
-
-        return new BerTlv(tag, ctlvs, isLengthValid);
-    }
+ECode BerTlv::GetComprehensionTlvs(
+    /* [out] */ IList/*<ComprehensionTlv>*/** result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mCompTlvs;
+    assert(0);
+    return NOERROR;
 }
+
+ECode BerTlv::GetTag(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mTag;
+    assert(0);
+    return NOERROR;
+}
+
+ECode BerTlv::IsLengthValid(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // return mLengthValid;
+    assert(0);
+    return NOERROR;
+}
+
+AutoPtr<BerTlv> BerTlv::Decode(
+    /* [in] */ ArrayOf<Byte>* data)
+{
+    // ==================before translated======================
+    // int curIndex = 0;
+    // int endIndex = data.length;
+    // int tag, length = 0;
+    // boolean isLengthValid = true;
+    //
+    // try {
+    //     /* tag */
+    //     tag = data[curIndex++] & 0xff;
+    //     if (tag == BER_PROACTIVE_COMMAND_TAG) {
+    //         /* length */
+    //         int temp = data[curIndex++] & 0xff;
+    //         if (temp < 0x80) {
+    //             length = temp;
+    //         } else if (temp == 0x81) {
+    //             temp = data[curIndex++] & 0xff;
+    //             if (temp < 0x80) {
+    //                 throw new ResultException(
+    //                         ResultCode.CMD_DATA_NOT_UNDERSTOOD,
+    //                         "length < 0x80 length=" + Integer.toHexString(length) +
+    //                         " curIndex=" + curIndex + " endIndex=" + endIndex);
+    //
+    //             }
+    //             length = temp;
+    //         } else {
+    //             throw new ResultException(
+    //                     ResultCode.CMD_DATA_NOT_UNDERSTOOD,
+    //                     "Expected first byte to be length or a length tag and < 0x81" +
+    //                     " byte= " + Integer.toHexString(temp) + " curIndex=" + curIndex +
+    //                     " endIndex=" + endIndex);
+    //         }
+    //     } else {
+    //         if (ComprehensionTlvTag.COMMAND_DETAILS.value() == (tag & ~0x80)) {
+    //             tag = BER_UNKNOWN_TAG;
+    //             curIndex = 0;
+    //         }
+    //     }
+    // } catch (IndexOutOfBoundsException e) {
+    //     throw new ResultException(ResultCode.REQUIRED_VALUES_MISSING,
+    //             "IndexOutOfBoundsException " +
+    //             " curIndex=" + curIndex + " endIndex=" + endIndex);
+    // } catch (ResultException e) {
+    //     throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD, e.explanation());
+    // }
+    //
+    // /* COMPREHENSION-TLVs */
+    // if (endIndex - curIndex < length) {
+    //     throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD,
+    //             "Command had extra data endIndex=" + endIndex + " curIndex=" + curIndex +
+    //             " length=" + length);
+    // }
+    //
+    // List<ComprehensionTlv> ctlvs = ComprehensionTlv.decodeMany(data,
+    //         curIndex);
+    //
+    // if (tag == BER_PROACTIVE_COMMAND_TAG) {
+    //     int totalLength = 0;
+    //     for (ComprehensionTlv item : ctlvs) {
+    //         int itemLength = item.getLength();
+    //         if (itemLength >= 0x80 && itemLength <= 0xFF) {
+    //             totalLength += itemLength + 3; //3: 'tag'(1 byte) and 'length'(2 bytes).
+    //         } else if (itemLength >= 0 && itemLength < 0x80) {
+    //             totalLength += itemLength + 2; //2: 'tag'(1 byte) and 'length'(1 byte).
+    //         } else {
+    //             isLengthValid = false;
+    //             break;
+    //         }
+    //     }
+    //
+    //     // According to 3gpp11.14, chapter 6.10.6 "Length errors",
+    //
+    //     // If the total lengths of the SIMPLE-TLV data objects are not
+    //     // consistent with the length given in the BER-TLV data object,
+    //     // then the whole BER-TLV data object shall be rejected. The
+    //     // result field in the TERMINAL RESPONSE shall have the error
+    //     // condition "Command data not understood by ME".
+    //     if (length != totalLength) {
+    //         isLengthValid = false;
+    //     }
+    // }
+    //
+    // return new BerTlv(tag, ctlvs, isLengthValid);
+    assert(0);
+    AutoPtr<BerTlv> empty;
+    return empty;
+}
+
+BerTlv::BerTlv(
+    /* [in] */ Int32 tag,
+    /* [in] */ IList/*<ComprehensionTlv*>*/* ctlvs,
+    /* [in] */ Boolean lengthValid)
+{
+    // ==================before translated======================
+    // mTag = tag;
+    // mCompTlvs = ctlvs;
+    // mLengthValid = lengthValid;
+}
+
+} // namespace Cat
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

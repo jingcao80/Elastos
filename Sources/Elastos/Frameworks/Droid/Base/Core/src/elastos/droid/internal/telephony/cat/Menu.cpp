@@ -1,109 +1,135 @@
-/*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.cat;
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/internal/telephony/cat/Menu.h"
 
-using Elastos::Droid::Graphics::IBitmap;
-using Elastos::Droid::Os::IParcel;
-using Elastos::Droid::Os::IParcelable;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Cat {
 
-using Elastos::Utility::IArrayList;
-using Elastos::Utility::IList;
+////=====================================================================
+////                     Menu::InnerParcelableCreator
+////=====================================================================
+//Menu::InnerParcelableCreator::InnerParcelableCreator(
+//    /* [in] */ Menu* owner)
+//    : mOwner(owner)
+//{
+//    // ==================before translated======================
+//    // mOwner = owner;
+//}
+//
+//ECode Menu::InnerParcelableCreator::CreateFromParcel(
+//    /* [in] */ IParcel* in,
+//    /* [out] */ Menu** result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return new Menu(in);
+//    assert(0);
+//    return NOERROR;
+//}
+//
+//ECode Menu::InnerParcelableCreator::NewArray(
+//    /* [in] */ Int32 size,
+//    /* [out] */ Menu[]** result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return new Menu[size];
+//    assert(0);
+//    return NOERROR;
+//}
+//
+////=====================================================================
+////                                 Menu
+////=====================================================================
+//const AutoPtr<IParcelable> AutoPtr< ::Creator<Menu> > Menu::CREATOR = new InnerParcelableCreator(this);
+CAR_INTERFACE_IMPL_2(Menu, Object, IMenu, IParcelable);
 
-/**
- * Container class for CAT Menu (SET UP MENU, SELECT ITEM) parameters.
- *
- */
-public class Menu implements Parcelable {
-    public List<Item> items;
-    public List<TextAttribute> titleAttrs;
-    public PresentationType presentationType;
-    public String title;
-    public Bitmap titleIcon;
-    public Int32 defaultItem;
-    public Boolean softKeyPreferred;
-    public Boolean helpAvailable;
-    public Boolean titleIconSelfExplanatory;
-    public Boolean itemsIconSelfExplanatory;
-
-    public Menu() {
-        // Create an empty list.
-        items = new ArrayList<Item>();
-        title = NULL;
-        titleAttrs = NULL;
-        defaultItem = 0;
-        softKeyPreferred = FALSE;
-        helpAvailable = FALSE;
-        titleIconSelfExplanatory = FALSE;
-        itemsIconSelfExplanatory = FALSE;
-        titleIcon = NULL;
-        // set default style to be navigation menu.
-        presentationType = PresentationType.NAVIGATION_OPTIONS;
-    }
-
-    private Menu(Parcel in) {
-        title = in->ReadString();
-        titleIcon = in->ReadParcelable(NULL);
-        // rebuild items list.
-        items = new ArrayList<Item>();
-        Int32 size = in->ReadInt();
-        For (Int32 i=0; i<size; i++) {
-            Item item = in->ReadParcelable(NULL);
-            items->Add(item);
-        }
-        defaultItem = in->ReadInt();
-        softKeyPreferred = in->ReadInt() == 1 ? TRUE : FALSE;
-        helpAvailable = in->ReadInt() == 1 ? TRUE : FALSE;
-        titleIconSelfExplanatory = in->ReadInt() == 1 ? TRUE : FALSE;
-        itemsIconSelfExplanatory = in->ReadInt() == 1 ? TRUE : FALSE;
-        presentationType = PresentationType->Values()[in->ReadInt()];
-    }
-
-    //@Override
-    public Int32 DescribeContents() {
-        return 0;
-    }
-
-    //@Override
-    CARAPI WriteToParcel(Parcel dest, Int32 flags) {
-        dest->WriteString(title);
-        dest->WriteParcelable(titleIcon, flags);
-        // write items list to the parcel.
-        Int32 size = items->Size();
-        dest->WriteInt(size);
-        For (Int32 i=0; i<size; i++) {
-            dest->WriteParcelable(items->Get(i), flags);
-        }
-        dest->WriteInt(defaultItem);
-        dest->WriteInt(softKeyPreferred ? 1 : 0);
-        dest->WriteInt(helpAvailable ? 1 : 0);
-        dest->WriteInt(titleIconSelfExplanatory ? 1 : 0);
-        dest->WriteInt(itemsIconSelfExplanatory ? 1 : 0);
-        dest->WriteInt(presentationType->Ordinal());
-    }
-
-    public static const Parcelable.Creator<Menu> CREATOR = new Parcelable.Creator<Menu>() {
-        //@Override
-        public Menu CreateFromParcel(Parcel in) {
-            return new Menu(in);
-        }
-
-        //@Override
-        public Menu[] NewArray(Int32 size) {
-            return new Menu[size];
-        }
-    };
+Menu::Menu()
+{
+    // ==================before translated======================
+    // // Create an empty list.
+    // items = new ArrayList<Item>();
+    // title = null;
+    // titleAttrs = null;
+    // defaultItem = 0;
+    // softKeyPreferred = false;
+    // helpAvailable = false;
+    // titleIconSelfExplanatory = false;
+    // itemsIconSelfExplanatory = false;
+    // titleIcon = null;
+    // // set default style to be navigation menu.
+    // presentationType = PresentationType.NAVIGATION_OPTIONS;
 }
+
+//ECode Menu::DescribeContents(
+//    /* [out] */ Int32* result)
+//{
+//    VALIDATE_NOT_NULL(result);
+//    // ==================before translated======================
+//    // return 0;
+//    assert(0);
+//    return NOERROR;
+//}
+
+ECode Menu::WriteToParcel(
+    /* [in] */ IParcel* dest)
+    ///* [in] */ Int32 flags)
+{
+    // ==================before translated======================
+    // dest.writeString(title);
+    // dest.writeParcelable(titleIcon, flags);
+    // // write items list to the parcel.
+    // int size = items.size();
+    // dest.writeInt(size);
+    // for (int i=0; i<size; i++) {
+    //     dest.writeParcelable(items.get(i), flags);
+    // }
+    // dest.writeInt(defaultItem);
+    // dest.writeInt(softKeyPreferred ? 1 : 0);
+    // dest.writeInt(helpAvailable ? 1 : 0);
+    // dest.writeInt(titleIconSelfExplanatory ? 1 : 0);
+    // dest.writeInt(itemsIconSelfExplanatory ? 1 : 0);
+    // dest.writeInt(presentationType.ordinal());
+    assert(0);
+    return NOERROR;
+}
+
+ECode Menu::ReadFromParcel(
+    /* [in] */ IParcel* source)
+{
+    constructor(source);
+    return NOERROR;
+}
+
+ECode Menu::constructor(
+    /* [in] */ IParcel* in)
+{
+    // ==================before translated======================
+    // title = in.readString();
+    // titleIcon = in.readParcelable(null);
+    // // rebuild items list.
+    // items = new ArrayList<Item>();
+    // int size = in.readInt();
+    // for (int i=0; i<size; i++) {
+    //     Item item = in.readParcelable(null);
+    //     items.add(item);
+    // }
+    // defaultItem = in.readInt();
+    // softKeyPreferred = in.readInt() == 1 ? true : false;
+    // helpAvailable = in.readInt() == 1 ? true : false;
+    // titleIconSelfExplanatory = in.readInt() == 1 ? true : false;
+    // itemsIconSelfExplanatory = in.readInt() == 1 ? true : false;
+    // presentationType = PresentationType.values()[in.readInt()];
+    return NOERROR;
+}
+
+} // namespace Cat
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos
