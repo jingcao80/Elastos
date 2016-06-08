@@ -37,19 +37,26 @@ private:
         : public PackageMonitor
     {
     public:
-        SmsPackageMonitor(IContext* context);
+        SmsPackageMonitor(
+            /* [in] */ IContext* context);
 
         //@Override
-        CARAPI OnPackageDisappeared(String packageName, Int32 reason);
+        CARAPI OnPackageDisappeared(
+            /* [in] */ const String& packageName,
+            /* [in] */ Int32 reason);
 
         //@Override
-        CARAPI OnPackageAppeared(String packageName, Int32 reason);
+        CARAPI OnPackageAppeared(
+            /* [in] */ const String& packageName,
+            /* [in] */ Int32 reason);
 
         //@Override
-        CARAPI OnPackageModified(String packageName);
+        CARAPI OnPackageModified(
+            /* [in] */ const String& packageName);
 
     private:
-        void OnPackageChanged(String packageName);
+        void OnPackageChanged(
+            /* [in] */ const String& packageName);
 
     private:
         AutoPtr<IContext> mContext;
@@ -64,8 +71,8 @@ public:
         CAR_INTERFACE_DECL()
 
         CARAPI constructor(
-            /* [in] */ String applicationName,
-            /* [in] */ String packageName,
+            /* [in] */ const String& applicationName,
+            /* [in] */ const String& packageName,
             /* [in] */ Int32 uid);
 
         /**
@@ -145,7 +152,7 @@ public:
      * needs to have permission to set AppOps and write to secure settings.
      */
     CARAPI SetDefaultApplication(
-        /* [in] */ String packageName,
+        /* [in] */ const String& packageName,
         /* [in] */ IContext* context);
 
     CARAPI InitSmsPackageMonitor(
@@ -156,7 +163,7 @@ public:
      * default SMS application.
      */
     CARAPI GetSmsApplicationData(
-        /* [in] */ String packageName,
+        /* [in] */ const String& packageName,
         /* [in] */ IContext* context,
         /* [out] */ ISmsApplicationData** result);
 
@@ -212,22 +219,23 @@ public:
      * Caller must pass in the correct user context if calling from a singleton service.
      */
     CARAPI ShouldWriteMessageForPackage(
-        /* [in] */ String packageName,
+        /* [in] */ const String& packageName,
         /* [in] */ IContext* context,
         /* [out] */ Boolean* result);
 
 private:
-    static Int32 getIncomingUserId(IContext* context);
+    static Int32 getIncomingUserId(
+        /* [in] */ IContext* context);
     static AutoPtr<ICollection> GetApplicationCollectionInternal(
-        IContext* context,
-        Int32 userId);
+        /* [in] */ IContext* context,
+        /* [in] */ Int32 userId);
     /**
      * Checks to see if we have a valid installed SMS application for the specified package name
      * @return Data for the specified package name or null if there isn't one
      */
     static AutoPtr<ISmsApplicationData> GetApplicationForPackage(
-            ICollection* applications,
-            String packageName);
+        /* [in] */ ICollection* applications,
+        /* [in] */ const String& packageName);
 
     /**
      * Get the application we will use for delivering SMS/MMS messages.
@@ -239,21 +247,28 @@ private:
      * (4) Null
      */
     static AutoPtr<SmsApplicationData> GetApplication(
-            IContext* context,
-            Boolean updateIfNeeded,
-            Int32 userId);
+        /* [in] */ IContext* context,
+        /* [in] */ Boolean updateIfNeeded,
+        /* [in] */ Int32 userId);
 
-    static void SetDefaultApplicationInternal(String packageName, IContext* context,
-            Int32 userId);
+    static void SetDefaultApplicationInternal(
+        /* [in] */ const String& packageName,
+        /* [in] */ IContext* context,
+        /* [in] */ Int32 userId);
 
-    static void ConfigurePreferredActivity(IPackageManager* packageManager,
-            IComponentName* componentName, Int32 userId);
+    static void ConfigurePreferredActivity(
+        /* [in] */ IPackageManager* packageManager,
+        /* [in] */ IComponentName* componentName,
+        /* [in] */ Int32 userId);
 
     /**
      * Updates the ACTION_SENDTO activity to the specified component for the specified scheme.
      */
-    static void ReplacePreferredActivity(IPackageManager* packageManager,
-            IComponentName* componentName, Int32 userId, String scheme);
+    static void ReplacePreferredActivity(
+        /* [in] */ IPackageManager* packageManager,
+        /* [in] */ IComponentName* componentName,
+        /* [in] */ Int32 userId,
+        /* [in] */ const String& scheme);
 public:
     static const String LOG_TAG;
 

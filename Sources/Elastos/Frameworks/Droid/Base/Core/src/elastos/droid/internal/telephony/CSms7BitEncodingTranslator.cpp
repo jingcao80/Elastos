@@ -30,16 +30,16 @@ CAR_SINGLETON_IMPL(CSms7BitEncodingTranslator)
 
 CAR_INTERFACE_IMPL(CSms7BitEncodingTranslator, Singleton, ISms7BitEncodingTranslator)
 
-const String TAG("CSms7BitEncodingTranslator");
-const Boolean DBG = IBuild::IS_DEBUGGABLE ;
-Boolean mIs7BitTranslationTableLoaded = FALSE;
+const String CSms7BitEncodingTranslator::TAG("CSms7BitEncodingTranslator");
+const Boolean CSms7BitEncodingTranslator::DBG = IBuild::IS_DEBUGGABLE ;
+Boolean CSms7BitEncodingTranslator::mIs7BitTranslationTableLoaded = FALSE;
 
 // Parser variables
-const String XML_START_TAG("SmsEnforce7BitTranslationTable");
-const String XML_TRANSLATION_TYPE_TAG("TranslationType");
-const String XML_CHARACTOR_TAG("Character");
-const String XML_FROM_TAG("from");
-const String XML_TO_TAG("to");
+const String CSms7BitEncodingTranslator::XML_START_TAG("SmsEnforce7BitTranslationTable");
+const String CSms7BitEncodingTranslator::XML_TRANSLATION_TYPE_TAG("TranslationType");
+const String CSms7BitEncodingTranslator::XML_CHARACTOR_TAG("Character");
+const String CSms7BitEncodingTranslator::XML_FROM_TAG("from");
+const String CSms7BitEncodingTranslator::XML_TO_TAG("to");
 
 /**
  * Translates each message character that is not supported by GSM 7bit

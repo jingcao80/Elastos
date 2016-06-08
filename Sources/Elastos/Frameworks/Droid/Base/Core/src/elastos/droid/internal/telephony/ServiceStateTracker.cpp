@@ -43,70 +43,70 @@ namespace Telephony {
  */
 CAR_INTERFACE_IMPL(ServiceStateTracker, Handler, IServiceStateTracker)
 
-const Boolean DBG = TRUE;
-const Boolean VDBG = FALSE;
-const String PROP_FORCE_ROAMING("telephony.test.forceRoaming");
+const Boolean ServiceStateTracker::DBG = TRUE;
+const Boolean ServiceStateTracker::VDBG = FALSE;
+const String ServiceStateTracker::PROP_FORCE_ROAMING("telephony.test.forceRoaming");
 
 /** Signal strength poll rate. */
-const Int32 POLL_PERIOD_MILLIS = 20 * 1000;
+const Int32 ServiceStateTracker::POLL_PERIOD_MILLIS = 20 * 1000;
 
 /** GSM events */
-const Int32 EVENT_RADIO_STATE_CHANGED               = 1;
-const Int32 EVENT_NETWORK_STATE_CHANGED             = 2;
-const Int32 EVENT_GET_SIGNAL_STRENGTH               = 3;
-const Int32 EVENT_POLL_STATE_REGISTRATION           = 4;
-const Int32 EVENT_POLL_STATE_GPRS                   = 5;
-const Int32 EVENT_POLL_STATE_OPERATOR               = 6;
-const Int32 EVENT_POLL_SIGNAL_STRENGTH              = 10;
-const Int32 EVENT_NITZ_TIME                         = 11;
-const Int32 EVENT_SIGNAL_STRENGTH_UPDATE            = 12;
-const Int32 EVENT_RADIO_AVAILABLE                   = 13;
-const Int32 EVENT_POLL_STATE_NETWORK_SELECTION_MODE = 14;
-const Int32 EVENT_GET_LOC_DONE                      = 15;
-const Int32 EVENT_SIM_RECORDS_LOADED                = 16;
-const Int32 EVENT_SIM_READY                         = 17;
-const Int32 EVENT_LOCATION_UPDATES_ENABLED          = 18;
-const Int32 EVENT_GET_PREFERRED_NETWORK_TYPE        = 19;
-const Int32 EVENT_SET_PREFERRED_NETWORK_TYPE        = 20;
-const Int32 EVENT_RESET_PREFERRED_NETWORK_TYPE      = 21;
-const Int32 EVENT_CHECK_REPORT_GPRS                 = 22;
-const Int32 EVENT_RESTRICTED_STATE_CHANGED          = 23;
+const Int32 ServiceStateTracker::EVENT_RADIO_STATE_CHANGED               = 1;
+const Int32 ServiceStateTracker::EVENT_NETWORK_STATE_CHANGED             = 2;
+const Int32 ServiceStateTracker::EVENT_GET_SIGNAL_STRENGTH               = 3;
+const Int32 ServiceStateTracker::EVENT_POLL_STATE_REGISTRATION           = 4;
+const Int32 ServiceStateTracker::EVENT_POLL_STATE_GPRS                   = 5;
+const Int32 ServiceStateTracker::EVENT_POLL_STATE_OPERATOR               = 6;
+const Int32 ServiceStateTracker::EVENT_POLL_SIGNAL_STRENGTH              = 10;
+const Int32 ServiceStateTracker::EVENT_NITZ_TIME                         = 11;
+const Int32 ServiceStateTracker::EVENT_SIGNAL_STRENGTH_UPDATE            = 12;
+const Int32 ServiceStateTracker::EVENT_RADIO_AVAILABLE                   = 13;
+const Int32 ServiceStateTracker::EVENT_POLL_STATE_NETWORK_SELECTION_MODE = 14;
+const Int32 ServiceStateTracker::EVENT_GET_LOC_DONE                      = 15;
+const Int32 ServiceStateTracker::EVENT_SIM_RECORDS_LOADED                = 16;
+const Int32 ServiceStateTracker::EVENT_SIM_READY                         = 17;
+const Int32 ServiceStateTracker::EVENT_LOCATION_UPDATES_ENABLED          = 18;
+const Int32 ServiceStateTracker::EVENT_GET_PREFERRED_NETWORK_TYPE        = 19;
+const Int32 ServiceStateTracker::EVENT_SET_PREFERRED_NETWORK_TYPE        = 20;
+const Int32 ServiceStateTracker::EVENT_RESET_PREFERRED_NETWORK_TYPE      = 21;
+const Int32 ServiceStateTracker::EVENT_CHECK_REPORT_GPRS                 = 22;
+const Int32 ServiceStateTracker::EVENT_RESTRICTED_STATE_CHANGED          = 23;
 
 /** CDMA events */
-const Int32 EVENT_POLL_STATE_REGISTRATION_CDMA      = 24;
-const Int32 EVENT_POLL_STATE_OPERATOR_CDMA          = 25;
-const Int32 EVENT_RUIM_READY                        = 26;
-const Int32 EVENT_RUIM_RECORDS_LOADED               = 27;
-const Int32 EVENT_POLL_SIGNAL_STRENGTH_CDMA         = 28;
-const Int32 EVENT_GET_SIGNAL_STRENGTH_CDMA          = 29;
-const Int32 EVENT_NETWORK_STATE_CHANGED_CDMA        = 30;
-const Int32 EVENT_GET_LOC_DONE_CDMA                 = 31;
-//const Int32 EVENT_UNUSED                            = 32;
-const Int32 EVENT_NV_LOADED                         = 33;
-const Int32 EVENT_POLL_STATE_CDMA_SUBSCRIPTION      = 34;
-const Int32 EVENT_NV_READY                          = 35;
-const Int32 EVENT_ERI_FILE_LOADED                   = 36;
-const Int32 EVENT_OTA_PROVISION_STATUS_CHANGE       = 37;
-const Int32 EVENT_SET_RADIO_POWER_OFF               = 38;
-const Int32 EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED  = 39;
-const Int32 EVENT_CDMA_PRL_VERSION_CHANGED          = 40;
-const Int32 EVENT_RADIO_ON                          = 41;
-const Int32 EVENT_ICC_CHANGED                       = 42;
-const Int32 EVENT_GET_CELL_INFO_LIST                = 43;
-const Int32 EVENT_UNSOL_CELL_INFO_LIST              = 44;
-const Int32 EVENT_CHANGE_IMS_STATE                  = 45;
+const Int32 ServiceStateTracker::EVENT_POLL_STATE_REGISTRATION_CDMA      = 24;
+const Int32 ServiceStateTracker::EVENT_POLL_STATE_OPERATOR_CDMA          = 25;
+const Int32 ServiceStateTracker::EVENT_RUIM_READY                        = 26;
+const Int32 ServiceStateTracker::EVENT_RUIM_RECORDS_LOADED               = 27;
+const Int32 ServiceStateTracker::EVENT_POLL_SIGNAL_STRENGTH_CDMA         = 28;
+const Int32 ServiceStateTracker::EVENT_GET_SIGNAL_STRENGTH_CDMA          = 29;
+const Int32 ServiceStateTracker::EVENT_NETWORK_STATE_CHANGED_CDMA        = 30;
+const Int32 ServiceStateTracker::EVENT_GET_LOC_DONE_CDMA                 = 31;
+//const Int32 ServiceStateTracker::EVENT_UNUSED                            = 32;
+const Int32 ServiceStateTracker::EVENT_NV_LOADED                         = 33;
+const Int32 ServiceStateTracker::EVENT_POLL_STATE_CDMA_SUBSCRIPTION      = 34;
+const Int32 ServiceStateTracker::EVENT_NV_READY                          = 35;
+const Int32 ServiceStateTracker::EVENT_ERI_FILE_LOADED                   = 36;
+const Int32 ServiceStateTracker::EVENT_OTA_PROVISION_STATUS_CHANGE       = 37;
+const Int32 ServiceStateTracker::EVENT_SET_RADIO_POWER_OFF               = 38;
+const Int32 ServiceStateTracker::EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED  = 39;
+const Int32 ServiceStateTracker::EVENT_CDMA_PRL_VERSION_CHANGED          = 40;
+const Int32 ServiceStateTracker::EVENT_RADIO_ON                          = 41;
+const Int32 ServiceStateTracker::EVENT_ICC_CHANGED                       = 42;
+const Int32 ServiceStateTracker::EVENT_GET_CELL_INFO_LIST                = 43;
+const Int32 ServiceStateTracker::EVENT_UNSOL_CELL_INFO_LIST              = 44;
+const Int32 ServiceStateTracker::EVENT_CHANGE_IMS_STATE                  = 45;
 
 const AutoPtr<ArrayOf<String> > ServiceStateTracker::GMT_COUNTRY_CODES = InitCOUNTCODE();
 
-const String TIMEZONE_PROPERTY("persist.sys.timezone");
+const String ServiceStateTracker::TIMEZONE_PROPERTY("persist.sys.timezone");
 
 /** Reason for registration denial. */
-static const String REGISTRATION_DENIED_GEN("General");
-static const String REGISTRATION_DENIED_AUTH("Authentication Failure");
+const String ServiceStateTracker::REGISTRATION_DENIED_GEN("General");
+const String ServiceStateTracker::REGISTRATION_DENIED_AUTH("Authentication Failure");
 
-static const String ACTION_RADIO_OFF("android.intent.action.ACTION_RADIO_OFF");
+const String ServiceStateTracker::ACTION_RADIO_OFF("android.intent.action.ACTION_RADIO_OFF");
 
-const Int64 LAST_CELL_INFO_LIST_MAX_AGE_MS = 2000;
+const ServiceStateTracker::Int64 LAST_CELL_INFO_LIST_MAX_AGE_MS = 2000;
 
 ServiceStateTracker::CellInfoResult::CellInfoResult()
 {

@@ -97,8 +97,8 @@ const Int32 NP_CC_AREA_LOCAL = NP_INTERNATIONAL_BEGIN + 4;
 
 String CSmsNumberUtils::FormatNumber(
     /* [in] */ IContext* context,
-    /* [in] */ String number,
-    /* [in] */ String activeMcc,
+    /* [in] */ const String& number,
+    /* [in] */ const String& activeMcc,
     /* [in] */ Int32 networkType)
 {
     assert(0 && "TODO");
@@ -211,7 +211,7 @@ String CSmsNumberUtils::FormatNumber(
 
 AutoPtr<IArrayList> CSmsNumberUtils::GetAllIDDs(
     /* [in] */ IContext* context,
-    /* [in] */ String mcc)
+    /* [in] */ const String& mcc)
 {
     assert(0 && "TODO");
 //    ArrayList<String> allIDDs = IDDS_MAPS->Get(mcc);
@@ -328,16 +328,17 @@ Int32 CSmsNumberUtils::CheckNANP(
 }
 
 Boolean CSmsNumberUtils::IsNANP(
-    /* [in] */ String number)
+    /* [in] */ const String& number)
 {
     Int32 len = number.GetLength();
-    if (len == NANP_MEDIUM_LENGTH
-        || (len == NANP_LONG_LENGTH  && number.StartWith(NANP_NDD))) {
+    if (len == NANP_MEDIUM_LENGTH || (len == NANP_LONG_LENGTH  && number.StartWith(NANP_NDD))) {
+        String str;
         if (len == NANP_LONG_LENGTH) {
-            number = number.Substring(1);
+            str = number.Substring(1);
         }
+        else str = number;
         Boolean result;
-        PhoneNumberUtils::IsNanp(number, &result);
+        PhoneNumberUtils::IsNanp(str, &result);
         return result;
     }
     return FALSE;
@@ -347,7 +348,7 @@ Int32 CSmsNumberUtils::CheckInternationalNumberPlan(
     /* [in] */ IContext* context,
     /* [in] */ NumberEntry* numberEntry,
     /* [in] */ IArrayList* allIDDs,
-    /* [in] */ String homeIDD)
+    /* [in] */ const String& homeIDD)
 {
     assert(0 && "TODO");
 //    String number = numberEntry.number;
@@ -397,7 +398,7 @@ Int32 CSmsNumberUtils::CheckInternationalNumberPlan(
 
 Int32 CSmsNumberUtils::GetCountryCode(
     /* [in] */ IContext* context,
-    /* [in] */ String number)
+    /* [in] */ const String& number)
 {
     assert(0 && "TODO");
 //    Int32 countryCode = -1;
@@ -620,7 +621,7 @@ Boolean CSmsNumberUtils::NeedToConvert(
 
 Boolean CSmsNumberUtils::CompareGid1(
     /* [in] */ IPhoneBase* phoneBase,
-    /* [in] */ String serviceGid1)
+    /* [in] */ const String& serviceGid1)
 {
     assert(0 && "TODO");
 //    String gid1 = phoneBase->GetGroupIdLevel1();

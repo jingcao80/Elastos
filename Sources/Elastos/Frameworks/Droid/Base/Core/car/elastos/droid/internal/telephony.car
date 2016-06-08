@@ -240,9 +240,10 @@ module
 
     merge("telephony/utility/BlacklistUtils.car");
 
-    using interface Elastos.Core.IRunnable;
-
+    interface Elastos.Droid.Os.IHandler;
     interface Elastos.Droid.Telephony.ICellInfo;
+
+    using interface Elastos.Core.IRunnable;
 
     namespace Elastos {
     namespace Droid {
@@ -347,6 +348,23 @@ module
             interface ISmsResponse;
         }
 
+        [local]
+        class CSmsStorageMonitor {
+            constructor(
+                [in] IPhoneBase* phoneBase);
+
+            //interface IHandler;
+            interface ISmsStorageMonitor;
+        }
+
+        class CSmsUsageMonitor {
+            constructor(
+                [in]  IContext* context);
+
+            //interface IHandler;
+            interface ISmsUsageMonitor;
+        }
+
         //class CServiceStateTracker {
         //    constructor(
         //        [in] IPhoneBase* phoneBase,
@@ -354,6 +372,7 @@ module
         //        [in] ICellInfo* cellInfo);
         //
         //    interface IServiceStateTracker;
+        //    interface IHandler;
         //}
 
     } // Telephony

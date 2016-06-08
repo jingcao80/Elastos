@@ -62,8 +62,8 @@ private:
      */
     static String FormatNumber(
         /* [in] */ IContext* context,
-        /* [in] */ String number,
-        /* [in] */ String activeMcc,
+        /* [in] */ const String& number,
+        /* [in] */ const String& activeMcc,
         /* [in] */ Int32 networkType);
 
     /* Query International direct dialing from HbpcdLookup.db
@@ -75,7 +75,7 @@ private:
      */
     static AutoPtr<IArrayList> GetAllIDDs(
         /* [in] */ IContext* context,
-        /* [in] */ String mcc);
+        /* [in] */ const String& mcc);
 
     /* Verify if the the destination number is a NANP number
      *
@@ -89,7 +89,7 @@ private:
         /* [in] */ IArrayList* allIDDs);
 
     static Boolean IsNANP(
-        /* [in] */ String number);
+        /* [in] */ const String& number);
 
     /* Verify if the the destination number is an internal number
      *
@@ -102,14 +102,14 @@ private:
         /* [in] */ IContext* context,
         /* [in] */ NumberEntry* numberEntry,
         /* [in] */ IArrayList* allIDDs,
-        /* [in] */ String homeIDD);
+        /* [in] */ const String& homeIDD);
 
     /**
      *  Returns the country code from the given number.
      */
     static Int32 GetCountryCode(
         /* [in] */ IContext* context,
-        /* [in] */ String number);
+        /* [in] */ const String& number);
 
     /**
      *  Gets all country Codes information with given MCC.
@@ -137,7 +137,7 @@ private:
 
     static Boolean CompareGid1(
         /* [in] */ IPhoneBase* phoneBase,
-        /* [in] */ String serviceGid1);
+        /* [in] */ const String& serviceGid1);
 
 private:
     static const String TAG;
