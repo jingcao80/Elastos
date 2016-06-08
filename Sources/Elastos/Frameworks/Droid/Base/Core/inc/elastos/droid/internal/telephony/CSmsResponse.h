@@ -23,7 +23,7 @@ public:
 
     CARAPI constructor(
         /* [in] */ Int32 messageRef,
-        /* [in] */ String ackPdu,
+        /* [in] */ const String& ackPdu,
         /* [in] */ Int32 errorCode);
 
     CARAPI ToString(
@@ -39,7 +39,6 @@ private:
     Int32 mErrorCode;
     /** ackPdu for the just-sent SMS. */
     String mAckPdu;
-
 };
 
 } //namespace Telephony

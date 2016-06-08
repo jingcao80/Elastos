@@ -45,30 +45,37 @@ namespace Droid {
 namespace Internal {
 namespace Telephony {
 
-SmsApplication::SmsPackageMonitor::SmsPackageMonitor(IContext* context)
+SmsApplication::SmsPackageMonitor::SmsPackageMonitor(
+    /* [in] */ IContext* context)
     : mContext(context)
 {
 }
 
 //@Override
-ECode SmsApplication::SmsPackageMonitor::OnPackageDisappeared(String packageName, Int32 reason)
+ECode SmsApplication::SmsPackageMonitor::OnPackageDisappeared(
+    /* [in] */ const String& packageName,
+    /* [in] */ Int32 reason)
 {
     return OnPackageChanged(packageName);
 }
 
 //@Override
-ECode SmsApplication::SmsPackageMonitor::OnPackageAppeared(String packageName, Int32 reason)
+ECode SmsApplication::SmsPackageMonitor::OnPackageAppeared(
+    /* [in] */ const String& packageName,
+    /* [in] */ Int32 reason)
 {
     return OnPackageChanged(packageName);
 }
 
 //@Override
-ECode SmsApplication::SmsPackageMonitor::OnPackageModified(String packageName)
+ECode SmsApplication::SmsPackageMonitor::OnPackageModified(
+    /* [in] */ const String& packageName)
 {
     return OnPackageChanged(packageName);
 }
 
-void SmsApplication::SmsPackageMonitor::OnPackageChanged(String packageName)
+void SmsApplication::SmsPackageMonitor::OnPackageChanged(
+    /* [in] */ const String& packageName)
 {
     AutoPtr<IPackageManager> packageManager;
     mContext->GetPackageManager((IPackageManager**)&packageManager);
@@ -126,8 +133,8 @@ ECode SmsApplication::SmsApplicationData::IsComplete(
 }
 
 ECode SmsApplication::SmsApplicationData::constructor(
-    /* [in] */ String applicationName,
-    /* [in] */ String packageName,
+    /* [in] */ const String& applicationName,
+    /* [in] */ const String& packageName,
     /* [in] */ Int32 uid)
 {
     mApplicationName = applicationName;
@@ -338,7 +345,7 @@ AutoPtr<ICollection> SmsApplication::GetApplicationCollectionInternal(
 
 AutoPtr<ISmsApplicationData> SmsApplication::GetApplicationForPackage(
     /* [in] */ ICollection* applications,
-    /* [in] */ String packageName)
+    /* [in] */ const String& packageName)
 {
     if (packageName == NULL) {
         return NULL;
@@ -525,7 +532,7 @@ AutoPtr<ISmsApplicationData> SmsApplication::GetApplication(
 }
 
 ECode SmsApplication::SetDefaultApplication(
-    /* [in] */ String packageName,
+    /* [in] */ const String& packageName,
     /* [in] */ IContext* context)
 {
     AutoPtr<IInterface> obj;
@@ -547,7 +554,7 @@ ECode SmsApplication::SetDefaultApplication(
 }
 
 void SmsApplication::SetDefaultApplicationInternal(
-    /* [in] */ String packageName,
+    /* [in] */ const String& packageName,
     /* [in] */ IContext* context,
     /* [in] */ Int32 userId)
 {
@@ -672,7 +679,7 @@ ECode SmsApplication::ReplacePreferredActivity(
     /* [in] */ IPackageManager* packageManager,
     /* [in] */ IComponentName* componentName,
     /* [in] */ Int32 userId,
-    /* [in] */ String scheme)
+    /* [in] */ const String& scheme)
 {
     // Build the set of existing activities that handle this scheme
     AutoPtr<IUri> uri;
@@ -714,7 +721,7 @@ ECode SmsApplication::ReplacePreferredActivity(
 }
 
 ECode SmsApplication::GetSmsApplicationData(
-    /* [in] */ String packageName,
+    /* [in] */ const String& packageName,
     /* [in] */ IContext* context,
     /* [out] */ ISmsApplicationData** result)
 {
@@ -798,7 +805,7 @@ ECode SmsApplication::GetDefaultSendToApplication(
 }
 
 ECode SmsApplication::ShouldWriteMessageForPackage(
-    /* [in] */ String packageName,
+    /* [in] */ const String& packageName,
     /* [in] */ IContext* context,
     /* [out] */ Boolean* result)
 {

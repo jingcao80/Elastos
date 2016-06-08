@@ -20,7 +20,7 @@ CAR_INTERFACE_IMPL(CSmsResponse, Object, ISmsResponse)
 
 ECode CSmsResponse::constructor(
     /* [in] */ Int32 messageRef,
-    /* [in] */ String ackPdu,
+    /* [in] */ const String& ackPdu,
     /* [in] */ Int32 errorCode)
 {
     mMessageRef = messageRef;
