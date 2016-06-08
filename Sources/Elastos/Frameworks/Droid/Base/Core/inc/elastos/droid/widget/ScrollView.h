@@ -427,8 +427,8 @@ private:
         /* [in] */ Int32 velocityY);
 
 public:
-    static const Int32 ANIMATED_SCROLL_GAP = 250;
-    static const Float MAX_SCROLL_FACTOR = 0.5;
+    static const Int32 ANIMATED_SCROLL_GAP;
+    static const Float MAX_SCROLL_FACTOR;
     static const String TAG;// = "ScrollView";
 
 private:
@@ -436,7 +436,7 @@ private:
      * Sentinel value for no current active pointer.
      * Used by {@link #mActivePointerId}.
      */
-    ECO_LOCAL static const Int32 INVALID_POINTER = -1;
+    ECO_LOCAL static const Int32 INVALID_POINTER;
 
 private:
     Int64 mLastScroll;

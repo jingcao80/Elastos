@@ -1,20 +1,20 @@
 
 #include "Elastos.Droid.Os.h"
-#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/widget/ScrollView.h"
-#include "elastos/droid/os/CStrictMode.h"
 #include "elastos/droid/widget/COverScroller.h"
 #include "elastos/droid/widget/CFrameLayoutLayoutParams.h"
 #include "elastos/droid/widget/CEdgeEffect.h"
 #include "elastos/droid/widget/CScrollViewSavedState.h"
+#include "elastos/droid/graphics/CRect.h"
+#include "elastos/droid/os/CStrictMode.h"
 #include "elastos/droid/os/Build.h"
-#include "elastos/droid/R.h"
-#include "elastos/droid/view/FocusFinder.h"
-#include "elastos/droid/view/ViewConfiguration.h"
+#include "elastos/droid/view/animation/AnimationUtils.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include "elastos/droid/view/CViewGroupMarginLayoutParams.h"
-#include "elastos/droid/view/animation/AnimationUtils.h"
+#include "elastos/droid/view/FocusFinder.h"
 #include "elastos/droid/view/MotionEvent.h"
+#include "elastos/droid/view/ViewConfiguration.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -23,7 +23,7 @@ using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::IStrictMode;
-using Elastos::Droid::R;
+using Elastos::Droid::Os::CStrictMode;
 using Elastos::Droid::View::EIID_IView;
 using Elastos::Droid::View::EIID_IViewGroup;
 using Elastos::Droid::View::EIID_IViewParent;
@@ -41,7 +41,7 @@ using Elastos::Droid::View::IInputEvent;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::Animation::AnimationUtils;
-using Elastos::Droid::Os::CStrictMode;
+using Elastos::Droid::R;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -93,10 +93,10 @@ ECode ScrollView::ScrollViewSavedState::ToString(
     return sb.ToString(str);
 }
 
-const Int32 ScrollView::ANIMATED_SCROLL_GAP;
-const Float ScrollView::MAX_SCROLL_FACTOR;
-const Int32 ScrollView::INVALID_POINTER;
+const Int32 ScrollView::ANIMATED_SCROLL_GAP = 250;
+const Float ScrollView::MAX_SCROLL_FACTOR = 0.5;
 const String ScrollView::TAG("ScrollView");
+const Int32 ScrollView::INVALID_POINTER = -1;
 
 CAR_INTERFACE_IMPL(ScrollView, FrameLayout, IScrollView);
 ScrollView::ScrollView()
@@ -147,7 +147,7 @@ ECode ScrollView::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    ASSERT_SUCCEEDED(FrameLayout::constructor(context, attrs, defStyleAttr, defStyleRes));
+    FAIL_RETURN(FrameLayout::constructor(context, attrs, defStyleAttr, defStyleRes));
     InitScrollView();
 
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
@@ -247,7 +247,8 @@ ECode ScrollView::AddView(
 {
     Int32 count = 0;
     if ((GetChildCount(&count), count) > 0) {
-//        throw new IllegalStateException("ScrollView can host only one direct child");
+        Logger::E(TAG, "ScrollView can host only one direct child");
+        // throw new IllegalStateException("ScrollView can host only one direct child");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -260,7 +261,8 @@ ECode ScrollView::AddView(
 {
     Int32 count = 0;
     if ((GetChildCount(&count), count) > 0) {
-//        throw new IllegalStateException("ScrollView can host only one direct child");
+        Logger::E(TAG, "ScrollView can host only one direct child");
+        // throw new IllegalStateException("ScrollView can host only one direct child");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -273,7 +275,8 @@ ECode ScrollView::AddView(
 {
     Int32 count = 0;
     if ((GetChildCount(&count), count) > 0) {
-//        throw new IllegalStateException("ScrollView can host only one direct child");
+        Logger::E(TAG, "ScrollView can host only one direct child");
+        // throw new IllegalStateException("ScrollView can host only one direct child");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -287,7 +290,8 @@ ECode ScrollView::AddView(
 {
     Int32 count = 0;
     if ((GetChildCount(&count), count) > 0) {
-//        throw new IllegalStateException("ScrollView can host only one direct child");
+        Logger::E(TAG, "ScrollView can host only one direct child");
+        // throw new IllegalStateException("ScrollView can host only one direct child");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -362,7 +366,7 @@ void ScrollView::OnMeasure(
         AutoPtr<IView> child;
         GetChildAt(0, (IView**)&child);
         Int32 height = 0;
-        FrameLayout::GetMeasuredHeight(&height);
+        GetMeasuredHeight(&height);
         Int32 childHeight = 0;
         child->GetMeasuredHeight(&childHeight);
         if (childHeight < height) {
@@ -404,9 +408,8 @@ ECode ScrollView::ExecuteKeyEvent(
 
     if (!CanScroll()) {
         Int32 keyCode;
-        event->GetKeyCode(&keyCode);
         Boolean focused = FALSE;
-        if ((IsFocused(&focused)) && keyCode != IKeyEvent::KEYCODE_BACK) {
+        if ((IsFocused(&focused)) && (event->GetKeyCode(&keyCode), keyCode) != IKeyEvent::KEYCODE_BACK) {
             AutoPtr<IView> currentFocused;
             FindFocus((IView**)&currentFocused);
             if (currentFocused.Get() == (IView*)this) {
@@ -477,14 +480,10 @@ Boolean ScrollView::InChild(
         AutoPtr<IView> child;
         GetChildAt(0, (IView**)&child);
         Int32 top, bottom, left, right;
-        child->GetTop(&top);
-        child->GetBottom(&bottom);
-        child->GetLeft(&left);
-        child->GetRight(&right);
-        return !(y < top - scrollY
-                || y >= bottom - scrollY
-                || x < left
-                || x >= right);
+        return !(y < (child->GetTop(&top), top) - scrollY
+                || y >= (child->GetBottom(&bottom), bottom) - scrollY
+                || x < (child->GetLeft(&left), left)
+                || x >= (child->GetRight(&right), right));
     }
 
     return FALSE;
@@ -494,7 +493,8 @@ void ScrollView::InitOrResetVelocityTracker()
 {
     if (mVelocityTracker == NULL) {
         mVelocityTracker = VelocityTracker::Obtain();
-    } else {
+    }
+    else {
         mVelocityTracker->Clear();
     }
 }
@@ -551,8 +551,8 @@ ECode ScrollView::OnInterceptTouchEvent(
      * Don't try to intercept touch if we can't scroll anyway.
      */
     Int32 sy = 0;
-    Boolean can = 0;
-    if ((GetScrollY(&sy), sy) == 0 && (CanScrollVertically(1, &can), can)) {
+    Boolean can = FALSE;
+    if ((GetScrollY(&sy), sy) == 0 && (CanScrollVertically(1, &can), !can)) {
         *value = FALSE;
         return NOERROR;
     }
@@ -577,14 +577,14 @@ ECode ScrollView::OnInterceptTouchEvent(
             Int32 pointerIndex;
             ev->FindPointerIndex(activePointerId, &pointerIndex);
             if (pointerIndex == -1) {
-//                Log.e(TAG, "Invalid pointerId=" + activePointerId
-//                    + " in onInterceptTouchEvent");
+                Logger::E(TAG, "Invalid pointerId= %d in onInterceptTouchEvent", activePointerId);
                 break;
             }
 
-            Float y;
-            ev->GetY(pointerIndex, &y);
-            Int32 yDiff = (Int32)Elastos::Core::Math::Abs(y - mLastMotionY);
+            Float fy;
+            ev->GetY(pointerIndex, &fy);
+            Int32 y = (Int32) fy;
+            Int32 yDiff = Elastos::Core::Math::Abs(y - mLastMotionY);
             Int32 axes = 0;
             if (yDiff > mTouchSlop && ((GetNestedScrollAxes(&axes), axes) & SCROLL_AXIS_VERTICAL) == 0) {
                 mIsBeingDragged = TRUE;
@@ -632,8 +632,9 @@ ECode ScrollView::OnInterceptTouchEvent(
             * otherwise don't.  mScroller.isFinished should be FALSE when
             * being flinged.
             */
-            mScroller->IsFinished(&mIsBeingDragged);
-            mIsBeingDragged = !mIsBeingDragged;
+            Boolean finished;
+            mScroller->IsFinished(&finished);
+            mIsBeingDragged = !finished;
 
             if (mIsBeingDragged && mScrollStrictSpan == NULL) {
                 AutoPtr<IStrictMode> mode;
@@ -690,6 +691,8 @@ ECode ScrollView::OnTouchEvent(
     }
     vtev->OffsetLocation(0, mNestedYOffset);
 
+    using Elastos::Core::Math;
+
     switch (actionMasked) {
         case IMotionEvent::ACTION_DOWN: {
             Int32 count = 0;
@@ -697,7 +700,7 @@ ECode ScrollView::OnTouchEvent(
                 *value = FALSE;
                 return NOERROR;
             }
-            Boolean finished = 0;
+            Boolean finished = FALSE;
             if ((mIsBeingDragged = (mScroller->IsFinished(&finished), !finished))) {
                 AutoPtr<IViewParent> parent;
                 GetParent((IViewParent**)&parent);
@@ -722,7 +725,7 @@ ECode ScrollView::OnTouchEvent(
             // Remember where the motion event started
             Float lasty;
             ev->GetY(&lasty);
-            mLastMotionY = lasty;
+            mLastMotionY = (Int32)lasty;
             ev->GetPointerId(0, &mActivePointerId);
             Boolean tmp = FALSE;
             StartNestedScroll(SCROLL_AXIS_VERTICAL, &tmp);
@@ -732,13 +735,13 @@ ECode ScrollView::OnTouchEvent(
             Int32 activePointerIndex;
             ev->FindPointerIndex(mActivePointerId, &activePointerIndex);
             if (activePointerIndex == -1) {
-//                Log.e(TAG, "Invalid pointerId=" + mActivePointerId + " in onTouchEvent");
+                Logger::E(TAG, "Invalid pointerId=%d in onTouchEvent", mActivePointerId);
                 break;
             }
 
             Float lasty;
             ev->GetY(activePointerIndex, &lasty);
-            Int32 y = lasty;
+            Int32 y = (Int32)lasty;
             Int32 deltaY = mLastMotionY - y;
 
             Boolean result = FALSE;
@@ -748,7 +751,7 @@ ECode ScrollView::OnTouchEvent(
                 mNestedYOffset += (*mScrollOffset)[1];
             }
 
-            if (!mIsBeingDragged && Elastos::Core::Math::Abs(deltaY) > mTouchSlop) {
+            if (!mIsBeingDragged && Math::Abs(deltaY) > mTouchSlop) {
                 AutoPtr<IViewParent> parent;
                 GetParent((IViewParent**)&parent);
                 if (parent != NULL) {
@@ -757,7 +760,8 @@ ECode ScrollView::OnTouchEvent(
                 mIsBeingDragged = TRUE;
                 if (deltaY > 0) {
                     deltaY -= mTouchSlop;
-                } else {
+                }
+                else {
                     deltaY += mTouchSlop;
                 }
             }
@@ -777,7 +781,7 @@ ECode ScrollView::OnTouchEvent(
                 // calls onScrollChanged if applicable.
                 Boolean has = FALSE;
                 if (OverScrollBy(0, deltaY, 0, mScrollY, 0, range, 0, mOverscrollDistance, TRUE)
-                        && (HasNestedScrollingParent(&has), has)) {
+                        && (HasNestedScrollingParent(&has), !has)) {
                     // Break our velocity if we hit a scroll barrier.
                     mVelocityTracker->Clear();
                 }
@@ -821,9 +825,7 @@ ECode ScrollView::OnTouchEvent(
 
                     if (mEdgeGlowTop != NULL) {
                         Boolean tf, bf;
-                        mEdgeGlowTop->IsFinished(&tf);
-                        mEdgeGlowTop->IsFinished(&bf);
-                        if (!tf || !bf) {
+                        if ((mEdgeGlowTop->IsFinished(&tf), !tf) || (mEdgeGlowBottom->IsFinished(&bf), !bf)) {
                             PostInvalidateOnAnimation();
                         }
                     }
@@ -839,7 +841,7 @@ ECode ScrollView::OnTouchEvent(
                 Int32 initialVelocity = (Int32)y;
 
                 Boolean tmp = FALSE;
-                if ((Elastos::Core::Math::Abs(initialVelocity) > mMinimumVelocity)) {
+                if ((Math::Abs(initialVelocity) > mMinimumVelocity)) {
                     FlingWithNestedDispatch(-initialVelocity);
                 }
                 else if ((mScroller->SpringBack(mScrollX, mScrollY, 0, 0, 0, GetScrollRange(), &tmp), tmp)) {
@@ -868,7 +870,7 @@ ECode ScrollView::OnTouchEvent(
             ev->GetActionIndex(&index);
             Float lasty;
             ev->GetY(index, &lasty);
-            mLastMotionY = lasty;
+            mLastMotionY = (Int32)lasty;
             ev->GetPointerId(index, &mActivePointerId);
             break;
         }
@@ -878,7 +880,7 @@ ECode ScrollView::OnTouchEvent(
             ev->FindPointerIndex(mActivePointerId, &index);
             Float lasty;
             ev->GetY(index, &lasty);
-            mLastMotionY = lasty;
+            mLastMotionY = (Int32)lasty;
             break;
     }
     if (mVelocityTracker != NULL) {
@@ -887,6 +889,30 @@ ECode ScrollView::OnTouchEvent(
     IInputEvent::Probe(vtev)->Recycle();
     *value = TRUE;
     return NOERROR;
+}
+
+void ScrollView::OnSecondaryPointerUp(
+    /* [in] */ IMotionEvent* ev)
+{
+    Int32 action;
+    ev->GetAction(&action);
+    Int32 pointerIndex = (action & IMotionEvent::ACTION_POINTER_INDEX_MASK) >>
+            IMotionEvent::ACTION_POINTER_INDEX_SHIFT;
+    Int32 pointerId;
+    ev->GetPointerId(pointerIndex, &pointerId);
+    if (pointerId == mActivePointerId) {
+        // This was our active pointer going up. Choose a new
+        // active pointer and adjust accordingly.
+        // TODO: Make this decision more intelligent.
+        Int32 newPointerIndex = pointerIndex == 0 ? 1 : 0;
+        Float lastY;
+        ev->GetY(newPointerIndex, &lastY);
+        mLastMotionY = (Int32)lastY;
+        ev->GetPointerId(newPointerIndex, &mActivePointerId);
+        if (mVelocityTracker != NULL) {
+            mVelocityTracker->Clear();
+        }
+    }
 }
 
 ECode ScrollView::OnGenericMotionEvent(
@@ -914,7 +940,8 @@ ECode ScrollView::OnGenericMotionEvent(
                         Int32 newScrollY = oldScrollY - delta;
                         if (newScrollY < 0) {
                             newScrollY = 0;
-                        } else if (newScrollY > range) {
+                        }
+                        else if (newScrollY > range) {
                             newScrollY = range;
                         }
                         if (newScrollY != oldScrollY) {
@@ -930,31 +957,6 @@ ECode ScrollView::OnGenericMotionEvent(
     return FrameLayout::OnGenericMotionEvent(event, handled);
 }
 
-void ScrollView::OnSecondaryPointerUp(
-    /* [in] */ IMotionEvent* ev)
-{
-    //PEL("ScrollView::OnSecondaryPointerUp")
-    Int32 action;
-    ev->GetAction(&action);
-    Int32 pointerIndex = (action & IMotionEvent::ACTION_POINTER_INDEX_MASK) >>
-            IMotionEvent::ACTION_POINTER_INDEX_SHIFT;
-    Int32 pointerId;
-    ev->GetPointerId(pointerIndex, &pointerId);
-    if (pointerId == mActivePointerId) {
-        // This was our active pointer going up. Choose a new
-        // active pointer and adjust accordingly.
-        // TODO: Make this decision more intelligent.
-        Int32 newPointerIndex = pointerIndex == 0 ? 1 : 0;
-        Float lastY;
-        ev->GetY(newPointerIndex, &lastY);
-        mLastMotionY = lastY;
-        ev->GetPointerId(newPointerIndex, &mActivePointerId);
-        if (mVelocityTracker != NULL) {
-            mVelocityTracker->Clear();
-        }
-    }
-}
-
 void ScrollView::OnOverScrolled(
     /* [in] */ Int32 scrollX,
     /* [in] */ Int32 scrollY,
@@ -962,7 +964,7 @@ void ScrollView::OnOverScrolled(
     /* [in] */ Boolean clampedY)
 {
     // Treat animating scrolls differently; see #computeScroll() for why.
-    Boolean finished = 0;
+    Boolean finished = FALSE;
     if ((mScroller->IsFinished(&finished), !finished)) {
         const Int32 oldX = mScrollX;
         const Int32 oldY = mScrollY;
@@ -997,12 +999,15 @@ ECode ScrollView::PerformAccessibilityAction(
     if ((IsEnabled(&enabled), !enabled)) {
         return NOERROR;
     }
+
+    using Elastos::Core::Math;
+
     switch (action) {
         case IAccessibilityNodeInfo::ACTION_SCROLL_FORWARD: {
             Int32 height = 0;
             GetHeight(&height);
             Int32 viewportHeight = height - mPaddingBottom - mPaddingTop;
-            Int32 targetScrollY = Elastos::Core::Math::Min(mScrollY + viewportHeight, GetScrollRange());
+            Int32 targetScrollY = Math::Min(mScrollY + viewportHeight, GetScrollRange());
             if (targetScrollY != mScrollY) {
                 SmoothScrollTo(0, targetScrollY);
                 *performed = TRUE;
@@ -1014,7 +1019,7 @@ ECode ScrollView::PerformAccessibilityAction(
             Int32 height = 0;
             GetHeight(&height);
             Int32 viewportHeight = height - mPaddingBottom - mPaddingTop;
-            Int32 targetScrollY = Elastos::Core::Math::Max(mScrollY - viewportHeight, 0);
+            Int32 targetScrollY = Math::Max(mScrollY - viewportHeight, 0);
             if (targetScrollY != mScrollY) {
                 SmoothScrollTo(0, targetScrollY);
                 *performed = TRUE;
@@ -1055,20 +1060,20 @@ ECode ScrollView::OnInitializeAccessibilityEvent(
     FrameLayout::OnInitializeAccessibilityEvent(event);
     AutoPtr<ICharSequence> csq;
     CString::New(String("CScrollView"), (ICharSequence**)&csq);
-    IAccessibilityRecord::Probe(event)->SetClassName(csq);
+    IAccessibilityRecord* _event = IAccessibilityRecord::Probe(event);
+    _event->SetClassName(csq);
 
     Boolean scrollable = GetScrollRange() > 0;
-    IAccessibilityRecord::Probe(event)->SetScrollable(scrollable);
-    IAccessibilityRecord::Probe(event)->SetScrollX(mScrollX);
-    IAccessibilityRecord::Probe(event)->SetScrollY(mScrollY);
-    IAccessibilityRecord::Probe(event)->SetMaxScrollX(mScrollX);
-    IAccessibilityRecord::Probe(event)->SetMaxScrollY(GetScrollRange());
+    _event->SetScrollable(scrollable);
+    _event->SetScrollX(mScrollX);
+    _event->SetScrollY(mScrollY);
+    _event->SetMaxScrollX(mScrollX);
+    _event->SetMaxScrollY(GetScrollRange());
     return NOERROR;
 }
 
 Int32 ScrollView::GetScrollRange()
 {
-    //PEL("ScrollView::GetScrollRange")
     Int32 scrollRange = 0, count = 0;
     if ((GetChildCount(&count), count) > 0) {
         AutoPtr<IView> child;
@@ -1077,7 +1082,7 @@ Int32 ScrollView::GetScrollRange()
         child->GetHeight(&childHeight);
         GetHeight(&h);
         scrollRange = Elastos::Core::Math::Max(0,
-                 childHeight- (h - mPaddingBottom - mPaddingTop));
+                childHeight- (h - mPaddingBottom - mPaddingTop));
     }
     return scrollRange;
 }
@@ -1087,7 +1092,6 @@ AutoPtr<IView> ScrollView::FindFocusableViewInBounds(
     /* [in] */ Int32 top,
     /* [in] */ Int32 bottom)
 {
-    //PEL("ScrollView::FindFocusableViewInBounds")
     AutoPtr<IArrayList> focusables;
     ASSERT_SUCCEEDED(GetFocusables(IView::FOCUS_FORWARD, (IArrayList**)&focusables));
 
@@ -1129,10 +1133,9 @@ AutoPtr<IView> ScrollView::FindFocusableViewInBounds(
             }
             else {
                 Int32 t, b;
-                focusCandidate->GetTop(&t);
-                focusCandidate->GetBottom(&b);
                 Boolean viewIsCloserToBoundary =
-                        (topFocus && viewTop < t) || (!topFocus && viewBottom > b);
+                        (topFocus && viewTop < (focusCandidate->GetTop(&t), t))
+                        || (!topFocus && viewBottom > (focusCandidate->GetBottom(&b), b));
 
                 if (foundFullyContainedFocusable) {
                     if (viewIsFullyContained && viewIsCloserToBoundary) {
@@ -1270,8 +1273,9 @@ Boolean ScrollView::ScrollAndFocus(
 
     AutoPtr<IView> currentFocused;
     FindFocus((IView**)&currentFocused);
-    if (newFocused != currentFocused)
+    if (newFocused != currentFocused) {
         newFocused->RequestFocus(direction, &up);
+    }
 
     return handled;
 }
@@ -1282,6 +1286,7 @@ ECode ScrollView::ArrowScroll(
 {
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
+
     AutoPtr<IView> currentFocused;
     FindFocus((IView**)&currentFocused);
     if (currentFocused.Get() == (IView*)this) {
@@ -1290,8 +1295,7 @@ ECode ScrollView::ArrowScroll(
 
     AutoPtr<FocusFinder> finder = FocusFinder::GetInstance();
     AutoPtr<IView> nextFocused;
-    finder->FindNextFocus(this,
-            currentFocused, direction, (IView**)&nextFocused);
+    finder->FindNextFocus(this, currentFocused, direction, (IView**)&nextFocused);
 
     Int32 maxJump = 0;
     GetMaxScrollAmount(&maxJump);
@@ -1323,7 +1327,7 @@ ECode ScrollView::ArrowScroll(
                 GetHeight(&h);
                 Int32 screenBottom = 0;
                 GetScrollY(&screenBottom);
-                screenBottom += h;
+                screenBottom += h - mPaddingBottom;
 
                 if (daBottom - screenBottom < maxJump) {
                     scrollDelta = daBottom - screenBottom;
@@ -1401,6 +1405,8 @@ ECode ScrollView::SmoothScrollBy(
         return NOERROR;
     }
 
+    using Elastos::Core::Math;
+
     Int64 duration = 0;
     AnimationUtils::CurrentAnimationTimeMillis(&duration);
     duration -= mLastScroll;
@@ -1412,9 +1418,9 @@ ECode ScrollView::SmoothScrollBy(
         AutoPtr<IView> child;
         GetChildAt(0, (IView**)&child);
         child->GetHeight(&bottom);
-        Int32 maxY = Elastos::Core::Math::Max(0, bottom - height);
+        Int32 maxY = Math::Max(0, bottom - height);
         Int32 scrollY = mScrollY;
-        dy = Elastos::Core::Math::Max(0, Elastos::Core::Math::Min(scrollY + dy, maxY)) - scrollY;
+        dy = Math::Max(0, Math::Min(scrollY + dy, maxY)) - scrollY;
 
         mScroller->StartScroll(mScrollX, scrollY, 0, dy);
         PostInvalidateOnAnimation();
@@ -1517,7 +1523,7 @@ void ScrollView::MeasureChildWithMargins(
 
 ECode ScrollView::ComputeScroll()
 {
-    Boolean value = 0;
+    Boolean value = FALSE;
     if (mScroller->ComputeScrollOffset(&value), value) {
         // This is called at drawing time by ViewGroup.  We don't want to
         // re-show the scrollbars at this point, which scrollTo will do,
@@ -1572,7 +1578,8 @@ ECode ScrollView::ComputeScroll()
             // Keep on drawing until the animation has finished.
             PostInvalidateOnAnimation();
         }
-    } else {
+    }
+    else {
         if (mFlingStrictSpan != NULL) {
             mFlingStrictSpan->Finish();
             mFlingStrictSpan = NULL;
@@ -1586,7 +1593,6 @@ ECode ScrollView::ComputeScroll()
 void ScrollView::ScrollToChild(
     /* [in] */ IView* child)
 {
-    //PEL("ScrollView::ScrollToChild")
     child->GetDrawingRect(mTempRect);
 
     /* Offset from child's local coordinates to ScrollView coordinates */
@@ -1603,7 +1609,6 @@ Boolean ScrollView::ScrollToChildRect(
     /* [in] */ IRect* rect,
     /* [in] */ Boolean immediate)
 {
-    //PEL("ScrollView::ScrollToChildRect")
     Int32 delta = ComputeScrollDeltaToGetChildRectOnScreen(rect);
     Boolean scroll = delta != 0;
     if (scroll) {
@@ -1651,9 +1656,9 @@ Int32 ScrollView::ComputeScrollDeltaToGetChildRectOnScreen(
     }
 
     // leave room for bottom fading edge as long as rect isn't at very bottom
-    Int32 childHeight;
     AutoPtr<IView> child;
     GetChildAt(0, (IView**)&child);
+    Int32 childHeight;
     child->GetHeight(&childHeight);
     if (b < childHeight) {
         screenBottom -= fadingEdge;
@@ -1661,6 +1666,7 @@ Int32 ScrollView::ComputeScrollDeltaToGetChildRectOnScreen(
 
     Int32 scrollYDelta = 0;
 
+    using Elastos::Core::Math;
     if (b > screenBottom && t > screenTop) {
         // need to move down to get it in view: move down just enough so
         // that the entire rectangle is in view (or at least the first
@@ -1679,7 +1685,7 @@ Int32 ScrollView::ComputeScrollDeltaToGetChildRectOnScreen(
         Int32 bottom;
         child->GetBottom(&bottom);
         Int32 distanceToBottom = bottom - screenBottom;
-        scrollYDelta = Elastos::Core::Math::Min(scrollYDelta, distanceToBottom);
+        scrollYDelta = Math::Min(scrollYDelta, distanceToBottom);
 
     }
     else if (t < screenTop && b < screenBottom) {
@@ -1699,7 +1705,7 @@ Int32 ScrollView::ComputeScrollDeltaToGetChildRectOnScreen(
         // make sure we aren't scrolling any further than the top our content
         Int32 sy = 0;
         GetScrollY(&sy);
-        scrollYDelta = Elastos::Core::Math::Max(scrollYDelta, -sy);
+        scrollYDelta = Math::Max(scrollYDelta, -sy);
     }
     return scrollYDelta;
 }
@@ -1738,10 +1744,16 @@ Boolean ScrollView::OnRequestFocusInDescendants(
         direction = IView::FOCUS_UP;
     }
 
-    AutoPtr<FocusFinder> finder = FocusFinder::GetInstance();
     AutoPtr<IView> nextFocus;
-    finder->FindNextFocusFromRect(this,
-            previouslyFocusedRect, direction, (IView**)&nextFocus);
+    AutoPtr<FocusFinder> finder = FocusFinder::GetInstance();
+    if (previouslyFocusedRect == NULL) {
+        finder->FindNextFocusFromRect(this,
+                NULL, direction, (IView**)&nextFocus);
+    }
+    else {
+        finder->FindNextFocusFromRect(this,
+                previouslyFocusedRect, direction, (IView**)&nextFocus);
+    }
 
     if (nextFocus == NULL) {
         return FALSE;
@@ -1821,12 +1833,15 @@ ECode ScrollView::OnLayout(
             mSavedState = NULL;
         } // mScrollY default value is "0"
 
-        Int32 height = 0, count = 0;
+        Int32 childHeight = 0;
+        Int32 count = 0;
         GetChildCount(&count);
-        AutoPtr<IView> child;
-        GetChildAt(0, (IView**)&child);
-        child->GetMeasuredHeight(&height);
-        const Int32 childHeight = (count > 0) ? height : 0;
+        if (count > 0) {
+            AutoPtr<IView> child;
+            GetChildAt(0, (IView**)&child);
+            child->GetMeasuredHeight(&childHeight);
+        }
+
         const Int32 scrollRange = Elastos::Core::Math::Max(0,
                 childHeight - (bottom - top - mPaddingBottom - mPaddingTop));
 
@@ -1890,7 +1905,7 @@ ECode ScrollView::Fling(
     /* [in] */ Int32 velocityY)
 {
     Int32 count = 0;
-    if ((GetChildCount(&count)) > 0) {
+    if ((GetChildCount(&count), count) > 0) {
         Int32 height = 0;
         GetHeight(&height);
         height = height - mPaddingBottom - mPaddingTop;
@@ -1901,7 +1916,6 @@ ECode ScrollView::Fling(
 
         mScroller->Fling(mScrollX, mScrollY, 0, velocityY, 0, 0, 0,
                 Elastos::Core::Math::Max(0, bottom - height), 0, height / 2);
-
 
         if (mFlingStrictSpan == NULL) {
             AutoPtr<IStrictMode> mode;
@@ -2050,8 +2064,11 @@ ECode ScrollView::OnNestedFling(
 ECode ScrollView::Draw(
     /* [in] */ ICanvas* canvas)
 {
-    Boolean result;
     FAIL_RETURN(FrameLayout::Draw(canvas));
+
+    Boolean result;
+
+    using Elastos::Core::Math;
 
     if (mEdgeGlowTop != NULL) {
         Int32 scrollY = mScrollY;
@@ -2063,7 +2080,7 @@ ECode ScrollView::Draw(
             GetWidth(&width);
             width = width - mPaddingLeft - mPaddingRight;
 
-            canvas->Translate(mPaddingLeft, Elastos::Core::Math::Min(0, scrollY));
+            canvas->Translate(mPaddingLeft, Math::Min(0, scrollY));
             mEdgeGlowTop->SetSize(width, (GetHeight(&height), height));
             if (mEdgeGlowTop->Draw(canvas, &result), result) {
                 PostInvalidateOnAnimation();
@@ -2081,7 +2098,7 @@ ECode ScrollView::Draw(
             Int32 height = 0;
             GetHeight(&height);
 
-            canvas->Translate(-width + mPaddingLeft, Elastos::Core::Math::Max(GetScrollRange(), scrollY) + height);
+            canvas->Translate(-width + mPaddingLeft, Math::Max(GetScrollRange(), scrollY) + height);
             canvas->Rotate(180, width, 0);
             mEdgeGlowBottom->SetSize(width, height);
 
