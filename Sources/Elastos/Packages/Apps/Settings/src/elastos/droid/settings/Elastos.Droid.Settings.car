@@ -37,6 +37,7 @@ module
     using interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
     using interface Elastos.Droid.Utility.IAttributeSet;
     using interface Elastos.Droid.Settings.IDialogCreatable;
+    using interface Elastos.Droid.Settings.Search.IIndexable;
     using interface Elastos.Droid.Settings.ISettingsPreferenceFragment;
     using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
     using interface Elastos.Droid.View.IAbsSavedState;
@@ -227,6 +228,7 @@ module
         constructor();
 
         interface ISettingsPreferenceFragment;
+        interface IIndexable;
         interface IPreferenceFragment;
         interface IFragment;
         interface IPreferenceManagerOnPreferenceTreeClickListener;

@@ -6,6 +6,7 @@
 #include "Elastos.CoreLibrary.External.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Text.h"
+#include "elastos/droid/settings/wifi/CWifiSettings.h"
 #include "elastos/droid/settings/search/Index.h"
 #include "elastos/droid/settings/search/IndexDatabaseHelper.h"
 #include "elastos/droid/settings/search/SearchIndexableResources.h"
@@ -44,6 +45,7 @@ using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Provider::CSearchIndexablesContract;
 using Elastos::Droid::Provider::ISearchIndexablesContract;
 using Elastos::Droid::Provider::CSearchIndexableResource;
+using Elastos::Droid::Settings::Wifi::CWifiSettings;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Utility::ITypedValue;
@@ -437,8 +439,8 @@ ECode Index::SaveSearchQueryTask::DoInBackground(
 
     AutoPtr<IContentValues> values;
     CContentValues::New((IContentValues**)&values);
-    values->Put(IIndexDatabaseHelperSavedQueriesColums::QUERY,
-            ICharSequence::Probe((*params)[0]));
+    AutoPtr<ICharSequence> seq = ICharSequence::Probe((*params)[0]);
+    values->Put(IIndexDatabaseHelperSavedQueriesColums::QUERY, seq);
     values->Put(IIndexDatabaseHelperSavedQueriesColums::TIME_STAMP, now);
 
     AutoPtr<ISQLiteDatabase> database = mHost->GetWritableDatabase();
@@ -447,7 +449,7 @@ ECode Index::SaveSearchQueryTask::DoInBackground(
     // try {
     // First, delete all saved queries that are the same
     String str;
-    ICharSequence::Probe((*params)[0])->ToString(&str);
+    seq->ToString(&str);
     AutoPtr< ArrayOf<String> > whereArgs = ArrayOf<String>::Alloc(1);
     (*whereArgs)[0] = str;
 
@@ -753,7 +755,6 @@ ECode Index::GetNonIndexablesKeys(
 
     if (cursor == NULL) {
         Logger::W(TAG, "Cannot add index data for Uri: %s", TO_CSTR(uri));
-        ICloseable::Probe(cursor)->Close();
         *list = EMPTY_LIST;
         REFCOUNT_ADD(*list);
         return NOERROR;
@@ -898,20 +899,21 @@ ECode Index::UpdateFromClassNameResource(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
         // throw new IllegalArgumentException("class name cannot be NULL!");
     }
-    AutoPtr<ISearchIndexableResource> res = SearchIndexableResources::GetResourceByName(className);
-    if (res == NULL ) {
+    AutoPtr<ISearchIndexableResource> _res = SearchIndexableResources::GetResourceByName(className);
+    if (_res == NULL ) {
         Logger::E(TAG, "Cannot find SearchIndexableResources for class name: %s", className.string());
         return NOERROR;
     }
-    ISearchIndexableData::Probe(res)->SetContext(mContext);
-    ISearchIndexableData::Probe(res)->SetEnabled(includeInSearchResults);
+    ISearchIndexableData* res = ISearchIndexableData::Probe(_res);
+    res->SetContext(mContext);
+    res->SetEnabled(includeInSearchResults);
     if (rebuild) {
-        DeleteIndexableData(ISearchIndexableData::Probe(res));
+        DeleteIndexableData(res);
     }
-    AddIndexableData(ISearchIndexableData::Probe(res));
+    AddIndexableData(res);
     mDataToProcess->mForceUpdate = TRUE;
     UpdateInternal();
-    ISearchIndexableData::Probe(res)->SetEnabled(FALSE);
+    res->SetEnabled(FALSE);
     return NOERROR;
 }
 
@@ -1072,18 +1074,19 @@ void Index::AddIndexablesForXmlResourceUri(
                     ISearchIndexablesContract::COLUMN_INDEX_XML_RES_INTENT_TARGET_CLASS,
                     &targetClass);
 
-            AutoPtr<ISearchIndexableResource> sir;
-            CSearchIndexableResource::New(packageContext, (ISearchIndexableResource**)&sir);
-            ISearchIndexableData::Probe(sir)->SetRank(rank);
-            sir->SetXmlResId(xmlResId);
-            ISearchIndexableData::Probe(sir)->SetClassName(className);
-            ISearchIndexableData::Probe(sir)->SetPackageName(packageName);
-            ISearchIndexableData::Probe(sir)->SetIconResId(iconResId);
-            ISearchIndexableData::Probe(sir)->SetIntentAction(action);
-            ISearchIndexableData::Probe(sir)->SetIntentTargetPackage(targetPackage);
-            ISearchIndexableData::Probe(sir)->SetIntentTargetClass(targetClass);
+            AutoPtr<ISearchIndexableResource> _sir;
+            CSearchIndexableResource::New(packageContext, (ISearchIndexableResource**)&_sir);
+            ISearchIndexableData* sir = ISearchIndexableData::Probe(_sir);
+            sir->SetRank(rank);
+            _sir->SetXmlResId(xmlResId);
+            sir->SetClassName(className);
+            sir->SetPackageName(packageName);
+            sir->SetIconResId(iconResId);
+            sir->SetIntentAction(action);
+            sir->SetIntentTargetPackage(targetPackage);
+            sir->SetIntentTargetClass(targetClass);
 
-            AddIndexableData(ISearchIndexableData::Probe(sir));
+            AddIndexableData(sir);
         }
     }
     // } finally {
@@ -1283,8 +1286,9 @@ void Index::IndexOneSearchIndexableData(
     /* [in] */ ISearchIndexableData* data,
     /* [in] */ IMap* nonIndexableKeys) //Map<String, List<String>>
 {
-    if (ISearchIndexableResource::Probe(data) != NULL) {
-        IndexOneResource(database, localeStr, ISearchIndexableResource::Probe(data), nonIndexableKeys);
+    ISearchIndexableResource* resData = ISearchIndexableResource::Probe(data);
+    if (resData != NULL) {
+        IndexOneResource(database, localeStr, resData, nonIndexableKeys);
     }
     else if (ISearchIndexableRaw::Probe(data) != NULL) {
         IndexOneRaw(database, localeStr, ISearchIndexableRaw::Probe(data));
@@ -1322,31 +1326,22 @@ void Index::IndexOneRaw(
             siRaw->mUserId);
 }
 
-// Boolean Index::IsIndexableClass(final Class<?> clazz)
-// {
-//     return (clazz != NULL) && Indexable.class->IsAssignableFrom(clazz);
-// }
-
-// Class<?> Index::GetIndexableClass(
-//     /* [in] */ const String& className)
-// {
-//     final Class<?> clazz;
-//     try {
-//         clazz = Class.ForName(className);
-//     } catch (ClassNotFoundException e) {
-//         Logger::D(TAG, "Cannot find class: " + className);
-//         return NULL;
-//     }
-//     return IsIndexableClass(clazz) ? clazz : NULL;
-// }
+Boolean Index::IsIndexableClass(
+    /* [in] */ const String& className)
+{
+    if (className.Equals("Elastos.Droid.Settings.Wifi.CWifiSettings")) return TRUE;
+    // TODO
+    // else if....  other  class implements Indexable
+    return FALSE;
+}
 
 void Index::IndexOneResource(
     /* [in] */ ISQLiteDatabase* database,
     /* [in] */ const String& localeStr,
-    /* [in] */ ISearchIndexableResource* sir,
+    /* [in] */ ISearchIndexableResource* _sir,
     /* [in] */ IMap* nonIndexableKeysFromResource) //Map<String, List<String>>
 {
-    if (sir == NULL) {
+    if (_sir == NULL) {
         Logger::E(TAG, "Cannot index a NULL resource!");
         return;
     }
@@ -1355,17 +1350,18 @@ void Index::IndexOneResource(
     CArrayList::New((IList**)&nonIndexableKeys);
 
     Int32 xmlResId;
-    sir->GetXmlResId(&xmlResId);
+    _sir->GetXmlResId(&xmlResId);
     String packageName;
-    ISearchIndexableData::Probe(sir)->GetPackageName(&packageName);
+    AutoPtr<ISearchIndexableData> sir = ISearchIndexableData::Probe(_sir);
+    sir->GetPackageName(&packageName);
     AutoPtr<IContext> context;
-    ISearchIndexableData::Probe(sir)->GetContext((IContext**)&context);
+    sir->GetContext((IContext**)&context);
     String className;
-    ISearchIndexableData::Probe(sir)->GetClassName(&className);
+    sir->GetClassName(&className);
     Int32 iconResId;
-    ISearchIndexableData::Probe(sir)->GetIconResId(&iconResId);
+    sir->GetIconResId(&iconResId);
     Int32 rank;
-    ISearchIndexableData::Probe(sir)->GetRank(&rank);
+    sir->GetRank(&rank);
 
     if (xmlResId > SearchIndexableResources::NO_DATA_RES_ID) {
         AutoPtr<IInterface> obj;
@@ -1377,11 +1373,11 @@ void Index::IndexOneResource(
         }
 
         String intentAction;
-        ISearchIndexableData::Probe(sir)->GetIntentAction(&intentAction);
+        sir->GetIntentAction(&intentAction);
         String intentTargetPackage;
-        ISearchIndexableData::Probe(sir)->GetIntentTargetPackage(&intentTargetPackage);
+        sir->GetIntentTargetPackage(&intentTargetPackage);
         String intentTargetClass;
-        ISearchIndexableData::Probe(sir)->GetIntentTargetClass(&intentTargetClass);
+        sir->GetIntentTargetClass(&intentTargetClass);
 
         IndexFromResource(context, database, localeStr,
                 xmlResId, className, iconResId, rank,
@@ -1394,56 +1390,44 @@ void Index::IndexOneResource(
             return;
         }
 
-        assert(0 && "TODO");
+        if (!IsIndexableClass(className)) {
+            // TODO, other class implements Indexable
+            Logger::D(TAG, "other class implements Indexable is TODO");
+            Logger::D(TAG, "SearchIndexableResource '%s' should implement the IIndexable interface!",
+                    className.string());
+            return;
+        }
 
-        // final Class<?> clazz = GetIndexableClass(className);
-        // if (clazz == NULL) {
-        //     Logger::D(TAG, "SearchIndexableResource '%s' should implement the "
-        //             + Indexable.class->GetName() + " interface!",
-        //             className.string());
-        //     return;
-        // }
+        // Will be non null only for a Local provider implementing a
+        // SEARCH_INDEX_DATA_PROVIDER field
+        AutoPtr<IIndexableSearchIndexProvider> provider = GetSearchIndexProvider(className);
+        if (provider != NULL) {
+            AutoPtr<IList> providerNonIndexableKeys;
+            provider->GetNonIndexableKeys(context, (IList**)&providerNonIndexableKeys);
+            Int32 size;
+            if (providerNonIndexableKeys != NULL && (providerNonIndexableKeys->GetSize(&size), size) > 0) {
+                nonIndexableKeys->AddAll(ICollection::Probe(providerNonIndexableKeys));
+            }
 
-        // // Will be non NULL only for a Local provider implementing a
-        // // SEARCH_INDEX_DATA_PROVIDER field
-        // AutoPtr<IIndexableSearchIndexProvider> provider = GetSearchIndexProvider(clazz);
-        // if (provider != NULL) {
-        //     AutoPtr<IList> providerNonIndexableKeys;
-        //     provider->GetNonIndexableKeys(context, (IList**)&providerNonIndexableKeys);
-        //     Int32 size;
-        //     if (providerNonIndexableKeys != NULL && (providerNonIndexableKeys->GetSize(&size), size) > 0) {
-        //         nonIndexableKeys->AddAll(ICollection::Probe(providerNonIndexableKeys));
-        //     }
+            Boolean enabled;
+            sir->GetEnabled(&enabled);
 
-        //     Boolean enabled;
-        //     ISearchIndexableData::Probe(sir)->GetEnabled(&enabled);
-
-        //     IndexFromProvider(mContext, database, localeStr, provider, className,
-        //             iconResId, rank, enabled, nonIndexableKeys);
-        // }
+            IndexFromProvider(mContext, database, localeStr, provider, className,
+                    iconResId, rank, enabled, nonIndexableKeys);
+        }
     }
 }
 
-// AutoPtr<IIndexableSearchIndexProvider> Index::GetSearchIndexProvider(final Class<?> clazz)
-// {
-//     try {
-//         final Field f = clazz->GetField(FIELD_NAME_SEARCH_INDEX_DATA_PROVIDER);
-//         return (Indexable.SearchIndexProvider) f->Get(NULL);
-//     } catch (NoSuchFieldException e) {
-//         Logger::D(TAG, "Cannot find field '" + FIELD_NAME_SEARCH_INDEX_DATA_PROVIDER + "'");
-//     } catch (SecurityException se) {
-//         Logger::D(TAG,
-//                 "Security exception for field '" + FIELD_NAME_SEARCH_INDEX_DATA_PROVIDER + "'");
-//     } catch (IllegalAccessException e) {
-//         Logger::D(TAG,
-//                 "Illegal access to field '" + FIELD_NAME_SEARCH_INDEX_DATA_PROVIDER + "'");
-//     } catch (IllegalArgumentException e) {
-//         Logger::D(TAG,
-//                 "Illegal argument when accessing field '" +
-//                         FIELD_NAME_SEARCH_INDEX_DATA_PROVIDER + "'");
-//     }
-//     return NULL;
-// }
+AutoPtr<IIndexableSearchIndexProvider> Index::GetSearchIndexProvider(const String& className)
+{
+    if (className.Equals("Elastos.Droid.Settings.Wifi.CWifiSettings")) {
+        return CWifiSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+    }
+    // TODO
+    // else if ()....  other  class implements Indexable
+
+    return NULL;
+}
 
 ECode Index::IndexFromResource(
     /* [in] */ IContext* context,

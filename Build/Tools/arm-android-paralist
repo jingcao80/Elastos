@@ -451,7 +451,7 @@
   Elastos/Packages/Apps/Settings/src/elastos/droid/settings/wifi
 > Elastos/Packages/Apps/Settings/src/elastos/droid/settings
 
-# ==== build Packages/Apps/Settings ====
+# ==== build Packages/Apps/Launcher2 ====
 > Elastos/Packages/Apps/Launcher2 Elastos.Droid.Launcher2.car
 > Elastos/Packages/Apps/Launcher2
 

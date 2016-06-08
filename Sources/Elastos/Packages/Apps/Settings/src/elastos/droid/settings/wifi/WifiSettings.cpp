@@ -42,6 +42,7 @@ using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::Settings::Search::SearchIndexableRaw;
 using Elastos::Droid::Settings::Search::ISearchIndexableRaw;
+using Elastos::Droid::Settings::Search::EIID_IIndexable;
 using Elastos::Droid::Settings::Search::EIID_IIndexableSearchIndexProvider;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::LayoutInflater;
@@ -401,8 +402,8 @@ ECode WifiSettings::ViewOnClickListener::OnClick(
 //                  WifiSettings
 //===============================================================================
 
-CAR_INTERFACE_IMPL(WifiSettings, RestrictedSettingsFragment,
-        IDialogInterfaceOnClickListener);
+CAR_INTERFACE_IMPL_2(WifiSettings, RestrictedSettingsFragment,
+        IDialogInterfaceOnClickListener, IIndexable);
 
 WifiSettings::WifiSettings()
     : mLastState(NetworkInfoDetailedState_NONE)

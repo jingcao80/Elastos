@@ -4,7 +4,6 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/os/AsyncTask.h"
 #include <elastos/core/Object.h>
-#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IResolveInfo;
@@ -286,7 +285,8 @@ private:
         /* [in] */ const String& localeStr,
         /* [in] */ ISearchIndexableRaw* raw);
 
-    // static CARAPI_(Boolean) IsIndexableClass(final Class<?> clazz);
+    static CARAPI_(Boolean) IsIndexableClass(
+        /* [in] */ const String& className);
 
     // static Class<?> GetIndexableClass(
     //     /* [in] */ const String& className);
@@ -297,7 +297,8 @@ private:
         /* [in] */ ISearchIndexableResource* sir,
         /* [in] */ IMap* nonIndexableKeysFromResource); //Map<String, List<String>>
 
-    // CARAPI_(AutoPtr<IIndexableSearchIndexProvider>) GetSearchIndexProvider(final Class<?> clazz);
+    CARAPI_(AutoPtr<IIndexableSearchIndexProvider>) GetSearchIndexProvider(
+        /* [in] */ const String& className);
 
     CARAPI IndexFromResource(
         /* [in] */ IContext* context,

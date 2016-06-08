@@ -8,6 +8,8 @@ module
     namespace Settings {
     namespace Search {
 
+    interface IIndexable {}
+
     /**
      * Interface for classes whose instances can provide data for indexing.
      *

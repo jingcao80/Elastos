@@ -22,6 +22,7 @@ using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Preference::IPreference;
 using Elastos::Droid::Preference::IPreferenceScreen;
 using Elastos::Droid::Settings::Search::BaseSearchIndexProvider;
+using Elastos::Droid::Settings::Search::IIndexable;
 using Elastos::Droid::Settings::Search::IIndexableSearchIndexProvider;
 using Elastos::Droid::View::IContextMenu;
 using Elastos::Droid::View::IContextMenuInfo;
@@ -55,6 +56,7 @@ namespace Wifi {
 class WifiSettings
     : public RestrictedSettingsFragment
     , public IDialogInterfaceOnClickListener
+    , public IIndexable
 {
 public:
     class MyBaseSearchIndexProvider
