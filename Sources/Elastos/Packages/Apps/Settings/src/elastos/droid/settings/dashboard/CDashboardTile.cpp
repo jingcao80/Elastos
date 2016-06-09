@@ -1,5 +1,5 @@
 
-#include "elastos/droid/settings/dashboard/DashboardTile.h"
+#include "elastos/droid/settings/dashboard/CDashboardTile.h"
 #include "elastos/droid/text/TextUtils.h"
 
 using Elastos::Droid::Content::CIntent;
@@ -10,21 +10,28 @@ namespace Droid {
 namespace Settings {
 namespace Dashboard {
 
-const Int64 DashboardTile::TILE_ID_UNDEFINED = -1;
+const Int64 CDashboardTile::TILE_ID_UNDEFINED = -1;
 
-CAR_INTERFACE_IMPL(DashboardTile, Object, IParcelable);
+CAR_INTERFACE_IMPL(CDashboardTile, Object, IParcelable);
 
-DashboardTile::DashboardTile()
+CAR_OBJECT_IMPL(CDashboardTile)
+
+CDashboardTile::CDashboardTile()
     : mId(TILE_ID_UNDEFINED)
     , mTitleRes(0)
     , mSummaryRes(0)
     , mIconRes(0)
 {}
 
-DashboardTile::~DashboardTile()
+CDashboardTile::~CDashboardTile()
 {}
 
-AutoPtr<ICharSequence> DashboardTile::GetTitle(
+ECode CDashboardTile::constructor()
+{
+    return NOERROR;
+}
+
+AutoPtr<ICharSequence> CDashboardTile::GetTitle(
     /* [in] */ IResources* res)
 {
     if (mTitleRes != 0) {
@@ -35,7 +42,7 @@ AutoPtr<ICharSequence> DashboardTile::GetTitle(
     return mTitle;
 }
 
-AutoPtr<ICharSequence> DashboardTile::GetSummary(
+AutoPtr<ICharSequence> CDashboardTile::GetSummary(
     /* [in] */ IResources* res)
 {
     if (mSummaryRes != 0) {
@@ -46,7 +53,7 @@ AutoPtr<ICharSequence> DashboardTile::GetSummary(
     return mSummary;
 }
 
-ECode DashboardTile::WriteToParcel(
+ECode CDashboardTile::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     dest->WriteInt64(mId);
@@ -68,7 +75,7 @@ ECode DashboardTile::WriteToParcel(
     return NOERROR;
 }
 
-ECode DashboardTile::ReadFromParcel(
+ECode CDashboardTile::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
     in->ReadInt64(&mId);

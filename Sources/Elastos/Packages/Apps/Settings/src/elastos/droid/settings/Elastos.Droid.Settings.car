@@ -74,6 +74,18 @@ module
     namespace Settings {
     namespace Dashboard {
 
+    class CDashboardCategory {
+        constructor();
+
+        interface IParcelable;
+    }
+
+    class CDashboardTile {
+        constructor();
+
+        interface IParcelable;
+    }
+
     [local]
     class CDashboardContainerView {
         constructor(

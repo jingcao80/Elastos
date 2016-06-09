@@ -1,6 +1,6 @@
 
 #include "Elastos.Droid.Content.h"
-#include "elastos/droid/settings/dashboard/DashboardCategory.h"
+#include "elastos/droid/settings/dashboard/CDashboardCategory.h"
 #include "elastos/droid/text/TextUtils.h"
 
 using Elastos::Droid::Text::TextUtils;
@@ -11,65 +11,72 @@ namespace Droid {
 namespace Settings {
 namespace Dashboard {
 
-const Int64 DashboardCategory::CAT_ID_UNDEFINED = -1;
+const Int64 CDashboardCategory::CAT_ID_UNDEFINED = -1;
 
-CAR_INTERFACE_IMPL(DashboardCategory, Object, IParcelable);
+CAR_INTERFACE_IMPL(CDashboardCategory, Object, IParcelable);
 
-DashboardCategory::DashboardCategory()
+CAR_OBJECT_IMPL(CDashboardCategory)
+
+CDashboardCategory::CDashboardCategory()
     : mId(CAT_ID_UNDEFINED)
     , mTitleRes(0)
 {
     CArrayList::New((IList**)&mTiles);
 }
 
-DashboardCategory::~DashboardCategory()
+CDashboardCategory::~CDashboardCategory()
 {}
 
-ECode DashboardCategory::AddTile(
-    /* [in] */ DashboardTile* tile)
+ECode CDashboardCategory::constructor()
+{
+    return NOERROR;
+}
+
+ECode CDashboardCategory::AddTile(
+    /* [in] */ CDashboardTile* tile)
 {
     mTiles->Add((IObject*)tile);
     return NOERROR;
 }
 
-ECode DashboardCategory::AddTile(
+ECode CDashboardCategory::AddTile(
     /* [in] */ Int32 n,
-    /* [in] */ DashboardTile* tile)
+    /* [in] */ CDashboardTile* tile)
 {
     mTiles->Add(n, (IObject*)tile);
     return NOERROR;
 }
 
-ECode DashboardCategory::RemoveTile(
-    /* [in] */ DashboardTile* tile)
+ECode CDashboardCategory::RemoveTile(
+    /* [in] */ CDashboardTile* tile)
 {
     mTiles->Remove((IObject*)tile);
     return NOERROR;
 }
 
-ECode DashboardCategory::RemoveTile(
+ECode CDashboardCategory::RemoveTile(
     /* [in] */ Int32 n)
 {
     mTiles->Remove(n);
     return NOERROR;
 }
 
-Int32 DashboardCategory::GetTilesCount()
+Int32 CDashboardCategory::GetTilesCount()
 {
     Int32 size;
     mTiles->GetSize(&size);
     return size;
 }
 
-AutoPtr<DashboardTile> DashboardCategory::GetTile(
+AutoPtr<CDashboardTile> CDashboardCategory::GetTile(
     /* [in] */ Int32 n)
 {
     AutoPtr<IInterface> obj;
     mTiles->Get(n, (IInterface**)&obj);
-    return (DashboardTile*)IObject::Probe(obj);
+    return (CDashboardTile*)IObject::Probe(obj);
 }
 
-AutoPtr<ICharSequence> DashboardCategory::GetTitle(
+AutoPtr<ICharSequence> CDashboardCategory::GetTitle(
     /* [in] */ IResources* res)
 {
     if (mTitleRes != 0) {
@@ -80,7 +87,7 @@ AutoPtr<ICharSequence> DashboardCategory::GetTitle(
     return mTitle;
 }
 
-ECode DashboardCategory::WriteToParcel(
+ECode CDashboardCategory::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     dest->WriteInt32(mTitleRes);
@@ -93,13 +100,12 @@ ECode DashboardCategory::WriteToParcel(
     for (Int32 n = 0; n < count; n++) {
         AutoPtr<IInterface> obj;
         mTiles->Get(n, (IInterface**)&obj);
-        AutoPtr<DashboardTile> tile = (DashboardTile*)IObject::Probe(obj);
-        tile->WriteToParcel(dest);
+        IParcelable::Probe(obj)->WriteToParcel(dest);
     }
     return NOERROR;
 }
 
-ECode DashboardCategory::ReadFromParcel(
+ECode CDashboardCategory::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
     in->ReadInt32(&mTitleRes);
@@ -109,8 +115,9 @@ ECode DashboardCategory::ReadFromParcel(
     in->ReadInt32(&count);
 
     for (Int32 n = 0; n < count; n++) {
-        AutoPtr<DashboardTile> tile = new DashboardTile();
-        IParcelable::Probe((IObject*)tile)->ReadFromParcel(in);
+        AutoPtr<CDashboardTile> tile;
+        CDashboardTile::NewByFriend((CDashboardTile**)&tile);
+        tile->ReadFromParcel(in);
         mTiles->Add((IObject*)tile);
     }
     return NOERROR;

@@ -4,7 +4,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/widget/FrameLayout.h"
-#include "elastos/droid/settings/dashboard/DashboardTile.h"
+#include "elastos/droid/settings/dashboard/CDashboardTile.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Utility::IAttributeSet;
@@ -45,7 +45,7 @@ public:
     CARAPI_(AutoPtr<IImageView>) GetImageView();
 
     CARAPI SetTile(
-        /* [in] */ DashboardTile* tile);
+        /* [in] */ CDashboardTile* tile);
 
     CARAPI SetDividerVisibility(
         /* [in] */ Boolean visible);
@@ -69,7 +69,7 @@ private:
 
     Int32 mColSpan;
 
-    AutoPtr<DashboardTile> mTile;
+    AutoPtr<CDashboardTile> mTile;
 };
 
 } // namespace Dashboard

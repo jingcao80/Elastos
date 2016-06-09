@@ -73,7 +73,7 @@ AutoPtr<IImageView> DashboardTileView::GetImageView()
 }
 
 ECode DashboardTileView::SetTile(
-    /* [in] */ DashboardTile* tile)
+    /* [in] */ CDashboardTile* tile)
 {
     mTile = tile;
     return NOERROR;

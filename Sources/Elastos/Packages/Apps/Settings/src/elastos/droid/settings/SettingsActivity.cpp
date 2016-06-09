@@ -3,7 +3,7 @@
 #include "elastos/droid/settings/SettingsActivity.h"
 #include "elastos/droid/settings/DevelopmentSettings.h"
 #include "elastos/droid/settings/HomeSettings.h"
-#include "elastos/droid/settings/dashboard/DashboardCategory.h"
+#include "elastos/droid/settings/dashboard/CDashboardCategory.h"
 #include "elastos/droid/settings/dashboard/NoHomeDialogFragment.h"
 #include "elastos/droid/settings/dashboard/SearchResultsSummary.h"
 #include "elastos/droid/settings/search/Index.h"
@@ -55,7 +55,7 @@ using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Preference::EIID_IPreferenceFragmentOnPreferenceStartFragmentCallback;
 using Elastos::Droid::Preference::EIID_IPreferenceManagerOnPreferenceTreeClickListener;
-using Elastos::Droid::Settings::Dashboard::DashboardCategory;
+using Elastos::Droid::Settings::Dashboard::CDashboardCategory;
 using Elastos::Droid::Settings::Dashboard::SearchResultsSummary;
 using Elastos::Droid::Settings::Dashboard::NoHomeDialogFragment;
 using Elastos::Droid::Settings::Search::Index;
@@ -403,7 +403,7 @@ ECode SettingsActivity::GetSwitchBar(
 
 ECode SettingsActivity::GetDashboardCategories(
     /* [in] */ Boolean forceRefresh,
-    /* [out] */ IList** categories) //List<DashboardCategory>
+    /* [out] */ IList** categories)
 {
     VALIDATE_NOT_NULL(categories);
 
@@ -1164,7 +1164,7 @@ ECode SettingsActivity::SwitchToFragment(
 }
 
 ECode SettingsActivity::BuildDashboardCategories(
-    /* [in] */ IList* categories) //List<DashboardCategory>
+    /* [in] */ IList* categories)
 {
     categories->Clear();
     FAIL_RETURN(LoadCategoriesFromResource(R::xml::dashboard_categories, categories));
@@ -1174,7 +1174,7 @@ ECode SettingsActivity::BuildDashboardCategories(
 
 ECode SettingsActivity::LoadCategoriesFromResource(
     /* [in] */ Int32 resid,
-    /* [in] */ IList* target) //List<DashboardCategory>
+    /* [in] */ IList* target)
 {
     AutoPtr<IXmlResourceParser> parser;
     // try {
@@ -1218,7 +1218,8 @@ ECode SettingsActivity::LoadCategoriesFromResource(
         nodeName = String(NULL);
         IXmlPullParser::Probe(parser)->GetName(&nodeName);
         if (String("dashboard-category").Equals(nodeName)) {
-            AutoPtr<DashboardCategory> category = new DashboardCategory();
+            AutoPtr<CDashboardCategory> category;
+            CDashboardCategory::NewByFriend((CDashboardCategory**)&category);
 
             AutoPtr< ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
                     const_cast<Int32 *>(Elastos::Droid::R::styleable::PreferenceHeader),
@@ -1228,7 +1229,7 @@ ECode SettingsActivity::LoadCategoriesFromResource(
             Int32 id;
             sa->GetResourceId(
                     Elastos::Droid::R::styleable::PreferenceHeader_id,
-                    (Int32)DashboardCategory::CAT_ID_UNDEFINED, &id);
+                    (Int32)CDashboardCategory::CAT_ID_UNDEFINED, &id);
             category->mId = id;
 
             AutoPtr<ITypedValue> tv;
@@ -1258,14 +1259,15 @@ ECode SettingsActivity::LoadCategoriesFromResource(
                 String innerNodeName;
                 IXmlPullParser::Probe(parser)->GetName(&innerNodeName);
                 if (innerNodeName.Equals("dashboard-tile")) {
-                    AutoPtr<DashboardTile> tile = new DashboardTile();
+                    AutoPtr<CDashboardTile> tile;
+                    CDashboardTile::NewByFriend((CDashboardTile**)&tile);
 
                     sa = NULL;
                     ObtainStyledAttributes(
                             attrs, attrIds, (ITypedArray**)&sa);
                     sa->GetResourceId(
                             Elastos::Droid::R::styleable::PreferenceHeader_id,
-                            (Int32)DashboardTile::TILE_ID_UNDEFINED, &id);
+                            (Int32)CDashboardTile::TILE_ID_UNDEFINED, &id);
                     tile->mId = id;
                     tv = NULL;
                     sa->PeekValue(
@@ -1364,7 +1366,7 @@ ECode SettingsActivity::LoadCategoriesFromResource(
 }
 
 ECode SettingsActivity::UpdateTilesList(
-    /* [in] */ IList* target) // List<DashboardCategory>
+    /* [in] */ IList* target)
 {
     Boolean showDev;
     mDevelopmentPreferences->GetBoolean(
@@ -1378,18 +1380,16 @@ ECode SettingsActivity::UpdateTilesList(
     Int32 size;
     target->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
-
         AutoPtr<IInterface> obj;
         target->Get(i, (IInterface**)&obj);
-        AutoPtr<DashboardCategory> category = (DashboardCategory*)IObject::Probe(obj);
+        CDashboardCategory* category = (CDashboardCategory*)IObject::Probe(obj);
 
         // Ids are integers, so downcasting is ok
         Int32 id = (Int32) category->mId;
         Int32 n = category->GetTilesCount() - 1;
         Boolean res;
         while (n >= 0) {
-
-            AutoPtr<DashboardTile> tile = category->GetTile(n);
+            AutoPtr<CDashboardTile> tile = category->GetTile(n);
             Boolean removeTile = FALSE;
             id = (Int32) tile->mId;
             if (id == R::id::operator_settings || id == R::id::manufacturer_settings) {
@@ -1510,7 +1510,7 @@ ECode SettingsActivity::UpdateTilesList(
 }
 
 ECode SettingsActivity::UpdateHomeSettingTiles(
-    /* [in] */ DashboardTile* tile,
+    /* [in] */ CDashboardTile* tile,
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);

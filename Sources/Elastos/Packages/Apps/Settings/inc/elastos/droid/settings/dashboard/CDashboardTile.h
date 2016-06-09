@@ -1,10 +1,11 @@
 
-#ifndef __ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDTITLE_H__
-#define __ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDTITLE_H__
+#ifndef __ELASTOS_DROID_SETTINGS_DASHBOARD_CDASHBOARDTITLE_H__
+#define __ELASTOS_DROID_SETTINGS_DASHBOARD_CDASHBOARDTITLE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
+#include "_Elastos_Droid_Settings_Dashboard_CDashboardTile.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IIntent;
@@ -19,16 +20,20 @@ namespace Dashboard {
 /**
  * Description of a single dashboard tile that the user can select.
  */
-class DashboardTile
-    : public Object
+CarClass(CDashboardTile)
+    , public Object
     , public IParcelable
 {
 public:
     CAR_INTERFACE_DECL();
 
-    DashboardTile();
+    CAR_OBJECT_DECL();
 
-    ~DashboardTile();
+    CDashboardTile();
+
+    ~CDashboardTile();
+
+    CARAPI constructor();
 
     /**
      * Return the currently set title.  If {@link #titleRes} is set,
@@ -128,4 +133,4 @@ public:
 } // namespace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDTITLE_H__
+#endif //__ELASTOS_DROID_SETTINGS_DASHBOARD_CDASHBOARDTITLE_H__

@@ -9,7 +9,7 @@
 #include <Elastos.Droid.Widget.h>
 #include <elastos/core/Object.h>
 #include "elastos/droid/settings/UserSpinnerAdapter.h"
-#include "elastos/droid/settings/dashboard/DashboardTile.h"
+#include "elastos/droid/settings/dashboard/CDashboardTile.h"
 
 using Elastos::Droid::App::IDialog;
 using Elastos::Droid::App::IFragment;
@@ -34,7 +34,7 @@ using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Settings::UserSpinnerAdapter;
-using Elastos::Droid::Settings::Dashboard::DashboardTile;
+using Elastos::Droid::Settings::Dashboard::CDashboardTile;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IRunnable;
 using Elastos::Utility::IList;
@@ -92,7 +92,7 @@ public:
 
     static CARAPI_(Boolean) UpdateTileToSpecificActivityFromMetaDataOrRemove(
         /* [in] */ IContext* context,
-        /* [in] */ DashboardTile* tile);
+        /* [in] */ CDashboardTile* tile);
 
     /**
      * Returns TRUE if Monkey is running.

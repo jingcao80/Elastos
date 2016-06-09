@@ -3,7 +3,7 @@
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/settings/dashboard/DashboardSummary.h"
 #include "elastos/droid/settings/SettingsActivity.h"
-#include "elastos/droid/settings/dashboard/DashboardCategory.h"
+#include "elastos/droid/settings/dashboard/CDashboardCategory.h"
 #include "elastos/droid/settings/dashboard/DashboardTileView.h"
 #include "elastos/droid/settings/dashboard/CDashboardTileView.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -173,7 +173,7 @@ void DashboardSummary::RebuildUI(
     for (Int32 n = 0; n < count; n++) {
         AutoPtr<IInterface> obj;
         categories->Get(n, (IInterface**)&obj);
-        AutoPtr<DashboardCategory> category = (DashboardCategory*)IObject::Probe(obj);
+        CDashboardCategory* category = (CDashboardCategory*)IObject::Probe(obj);
 
         AutoPtr<IView> categoryView;
         mLayoutInflater->Inflate(R::layout::dashboard_category, mDashboard,
@@ -190,7 +190,7 @@ void DashboardSummary::RebuildUI(
 
         const Int32 tilesCount = category->GetTilesCount();
         for (Int32 i = 0; i < tilesCount; i++) {
-            AutoPtr<DashboardTile> tile = category->GetTile(i);
+            AutoPtr<CDashboardTile> tile = category->GetTile(i);
 
             AutoPtr<IFrameLayout> layout;
             CDashboardTileView::New(context, (IFrameLayout**)&layout);
@@ -217,7 +217,7 @@ void DashboardSummary::RebuildUI(
 void DashboardSummary::UpdateTileView(
     /* [in] */ IContext* context,
     /* [in] */ IResources* res,
-    /* [in] */ DashboardTile* tile,
+    /* [in] */ CDashboardTile* tile,
     /* [in] */ IImageView* tileIcon,
     /* [in] */ ITextView* tileTextView,
     /* [in] */ ITextView* statusTextView)

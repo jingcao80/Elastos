@@ -1,9 +1,10 @@
 
-#ifndef __ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDCATEGORY_H__
-#define __ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDCATEGORY_H__
+#ifndef __ELASTOS_DROID_SETTINGS_DASHBOARD_CDASHBOARDCATEGORY_H__
+#define __ELASTOS_DROID_SETTINGS_DASHBOARD_CDASHBOARDCATEGORY_H__
 
 #include "Elastos.CoreLibrary.Utility.h"
-#include "elastos/droid/settings/dashboard/DashboardTile.h"
+#include "_Elastos_Droid_Settings_Dashboard_CDashboardCategory.h"
+#include "elastos/droid/settings/dashboard/CDashboardTile.h"
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Utility::IList;
@@ -13,33 +14,37 @@ namespace Droid {
 namespace Settings {
 namespace Dashboard {
 
-class DashboardCategory
-    : public Object
+CarClass(CDashboardCategory)
+    , public Object
     , public IParcelable
 {
 public:
     CAR_INTERFACE_DECL();
 
-    DashboardCategory();
+    CAR_OBJECT_DECL();
 
-    ~DashboardCategory();
+    CDashboardCategory();
+
+    ~CDashboardCategory();
+
+    CARAPI constructor();
 
     CARAPI AddTile(
-        /* [in] */ DashboardTile* tile);
+        /* [in] */ CDashboardTile* tile);
 
     CARAPI AddTile(
         /* [in] */ Int32 n,
-        /* [in] */ DashboardTile* tile);
+        /* [in] */ CDashboardTile* tile);
 
     CARAPI RemoveTile(
-        /* [in] */ DashboardTile* tile);
+        /* [in] */ CDashboardTile* tile);
 
     CARAPI RemoveTile(
         /* [in] */ Int32 n);
 
     CARAPI_(Int32) GetTilesCount();
 
-    CARAPI_(AutoPtr<DashboardTile>) GetTile(
+    CARAPI_(AutoPtr<CDashboardTile>) GetTile(
         /* [in] */ Int32 n);
 
     /**
@@ -86,7 +91,6 @@ public:
     /**
      * List of the category's children
      */
-    /*public List<DashboardTile> tiles = new ArrayList<DashboardTile>();*/
     AutoPtr<IList> mTiles;
 };
 
@@ -95,4 +99,4 @@ public:
 } // namespace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDCATEGORY_H__
+#endif //__ELASTOS_DROID_SETTINGS_DASHBOARD_CDASHBOARDCATEGORY_H__

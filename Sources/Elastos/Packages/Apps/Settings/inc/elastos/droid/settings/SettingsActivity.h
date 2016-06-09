@@ -7,12 +7,17 @@
 #include "Elastos.Droid.Preference.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/app/Activity.h"
-#include "elastos/droid/settings/dashboard/DashboardTile.h"
+#include "elastos/droid/settings/dashboard/CDashboardTile.h"
 #include "elastos/droid/settings/search/DynamicIndexableContentMonitor.h"
 #include "elastos/droid/settings/widget/SwitchBar.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/os/Handler.h"
 #include "_Elastos.Droid.Settings.h"
+
+using Elastos::Droid::Settings::Dashboard::ISearchResultsSummary;
+using Elastos::Droid::Settings::Dashboard::CDashboardTile;
+using Elastos::Droid::Settings::Search::DynamicIndexableContentMonitor;
+using Elastos::Droid::Settings::Widget::SwitchBar;
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::IActionBar;
@@ -34,10 +39,6 @@ using Elastos::Droid::Preference::IPreferenceFragment;
 using Elastos::Droid::Preference::IPreferenceScreen;
 using Elastos::Droid::Preference::IPreferenceManagerOnPreferenceTreeClickListener;
 using Elastos::Droid::Preference::IPreferenceFragmentOnPreferenceStartFragmentCallback;
-using Elastos::Droid::Settings::Dashboard::ISearchResultsSummary;
-using Elastos::Droid::Settings::Dashboard::DashboardTile;
-using Elastos::Droid::Settings::Search::DynamicIndexableContentMonitor;
-using Elastos::Droid::Settings::Widget::SwitchBar;
 using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::View::IMenu;
 using Elastos::Droid::View::IMenuItem;
@@ -396,7 +397,7 @@ private:
         /* [in] */ IList* target); // List<DashboardCategory>
 
     CARAPI UpdateHomeSettingTiles(
-        /* [in] */ DashboardTile* tile,
+        /* [in] */ CDashboardTile* tile,
         /* [out] */ Boolean* res);
 
     CARAPI GetMetaData();

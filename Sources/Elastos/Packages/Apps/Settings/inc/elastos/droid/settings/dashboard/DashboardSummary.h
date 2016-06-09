@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_SETTINGS_DASHBOARD_DASHBOARDSUMMARY_H__
 
 #include "Elastos.CoreLibrary.Utility.h"
-#include "elastos/droid/settings/dashboard/DashboardTile.h"
+#include "elastos/droid/settings/dashboard/CDashboardTile.h"
 #include "elastos/droid/app/Fragment.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/os/Handler.h"
@@ -94,7 +94,7 @@ private:
     CARAPI_(void) UpdateTileView(
         /* [in] */ IContext* context,
         /* [in] */ IResources* res,
-        /* [in] */ DashboardTile* tile,
+        /* [in] */ CDashboardTile* tile,
         /* [in] */ IImageView* tileIcon,
         /* [in] */ ITextView* tileTextView,
         /* [in] */ ITextView* statusTextView);

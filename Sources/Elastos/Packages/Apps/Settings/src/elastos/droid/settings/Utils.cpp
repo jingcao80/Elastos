@@ -219,7 +219,7 @@ Boolean Utils::UpdatePreferenceToSpecificActivityOrRemove(
 
 Boolean Utils::UpdateTileToSpecificActivityFromMetaDataOrRemove(
     /* [in] */ IContext* context,
-    /* [in] */ DashboardTile* tile)
+    /* [in] */ CDashboardTile* tile)
 {
     AutoPtr<IIntent> intent = tile->mIntent;
     if (intent != NULL) {

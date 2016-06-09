@@ -5,9 +5,9 @@ INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
 SOURCES += CDashboardContainerView.cpp
-SOURCES += DashboardCategory.cpp
+SOURCES += CDashboardCategory.cpp
 SOURCES += DashboardSummary.cpp
-SOURCES += DashboardTile.cpp
+SOURCES += CDashboardTile.cpp
 SOURCES += DashboardTileView.cpp
 SOURCES += NoHomeDialogFragment.cpp
 SOURCES += SearchResultsSummary.cpp
