@@ -51,6 +51,9 @@ namespace Droid {
 namespace Server {
 namespace Am {
 
+#define TO_ActivityRecord(obj) \
+    ((ActivityRecord*)IActivityRecord::Probe(obj))
+
 const String TaskRecord::TAG("TaskRecord");
 const String TaskRecord::ATTR_TASKID("task_id");
 const String TaskRecord::TAG_INTENT("intent");
@@ -131,7 +134,7 @@ ECode TaskRecord::constructor(
     mVoiceSession = voiceSession;
     mVoiceInteractor = voiceInteractor;
     mIsAvailable = TRUE;
-    mActivities = new List<AutoPtr<ActivityRecord> >();
+    CArrayList::New((IArrayList**)&mActivities);
     SetIntent(intent, info);
     return NOERROR;
 }
@@ -151,7 +154,7 @@ ECode TaskRecord::constructor(
     mVoiceSession = NULL;
     mVoiceInteractor = NULL;
     mIsAvailable = TRUE;
-    mActivities = new List<AutoPtr<ActivityRecord> >();
+    CArrayList::New((IArrayList**)&mActivities);
     SetIntent(intent, info);
 
     mTaskType = ActivityRecord::APPLICATION_ACTIVITY_TYPE;
@@ -196,7 +199,7 @@ ECode TaskRecord::constructor(
     /* [in] */ Int32 userId,
     /* [in] */ Int32 effectiveUid,
     /* [in] */ const String& lastDescription,
-    /* [in] */ List<AutoPtr<ActivityRecord> >* activities,
+    /* [in] */ IArrayList* activities,
     /* [in] */ Int64 firstActiveTime,
     /* [in] */ Int64 lastActiveTime,
     /* [in] */ Int64 lastTimeMoved,
@@ -537,9 +540,12 @@ AutoPtr<IIntent> TaskRecord::GetBaseIntent()
 /** Returns the first non-finishing activity from the root. */
 AutoPtr<ActivityRecord> TaskRecord::GetRootActivity()
 {
-    List<AutoPtr<ActivityRecord> >::Iterator iter;
-    for (iter = mActivities->Begin(); iter != mActivities->End(); ++iter) {
-        AutoPtr<ActivityRecord> r = *iter;
+    Int32 N;
+    mActivities->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        mActivities->Get(i, (IInterface**)&obj);
+        ActivityRecord* r = TO_ActivityRecord(obj);
         if (r->mFinishing) {
             continue;
         }
@@ -550,9 +556,12 @@ AutoPtr<ActivityRecord> TaskRecord::GetRootActivity()
 
 AutoPtr<ActivityRecord> TaskRecord::GetTopActivity()
 {
-    List<AutoPtr<ActivityRecord> >::ReverseIterator riter;
-    for (riter = mActivities->RBegin(); riter != mActivities->REnd(); ++riter) {
-        AutoPtr<ActivityRecord> r = *riter;
+    Int32 N;
+    mActivities->GetSize(&N);
+    for (Int32 i = N - 1; i >= 0; --i) {
+        AutoPtr<IInterface> obj;
+        mActivities->Get(i, (IInterface**)&obj);
+        ActivityRecord* r = TO_ActivityRecord(obj);
         if (r->mFinishing) {
             continue;
         }
@@ -564,9 +573,12 @@ AutoPtr<ActivityRecord> TaskRecord::GetTopActivity()
 AutoPtr<ActivityRecord> TaskRecord::TopRunningActivityLocked(
     /* [in] */ ActivityRecord* notTop)
 {
-    List<AutoPtr<ActivityRecord> >::ReverseIterator riter;
-    for (riter = mActivities->RBegin(); riter != mActivities->REnd(); ++riter) {
-        ActivityRecord* r = *riter;
+    Int32 N;
+    mActivities->GetSize(&N);
+    for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+        AutoPtr<IInterface> obj;
+        mActivities->Get(activityNdx, (IInterface**)&obj);
+        ActivityRecord* r = TO_ActivityRecord(obj);
         if (!r->mFinishing && r != notTop && mStack->OkToShowLocked(r)) {
             return r;
         }
@@ -578,9 +590,12 @@ AutoPtr<ActivityRecord> TaskRecord::TopRunningActivityLocked(
 void TaskRecord::SetFrontOfTask()
 {
     Boolean foundFront = FALSE;
-    List<AutoPtr<ActivityRecord> >::Iterator iter;
-    for (iter = mActivities->Begin(); iter != mActivities->End(); ++iter) {
-        AutoPtr<ActivityRecord> r = *iter;
+    Int32 numActivities;
+    mActivities->GetSize(&numActivities);
+    for (Int32 activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
+        AutoPtr<IInterface> obj;
+        mActivities->Get(activityNdx, (IInterface**)&obj);
+        ActivityRecord* r = TO_ActivityRecord(obj);
         if (foundFront || r->mFinishing) {
             r->mFrontOfTask = FALSE;
         }
@@ -590,10 +605,13 @@ void TaskRecord::SetFrontOfTask()
             foundFront = TRUE;
         }
     }
-    if (!foundFront && mActivities->GetSize() > 0) {
+    if (!foundFront && numActivities > 0) {
         // All activities of this task are finishing. As we ought to have a frontOfTask
         // activity, make the bottom activity front.
-        (*mActivities->Begin())->mFrontOfTask = TRUE;
+        AutoPtr<IInterface> obj;
+        mActivities->Get(0, (IInterface**)&obj);
+        ActivityRecord* r = TO_ActivityRecord(obj);
+        r->mFrontOfTask = TRUE;
     }
 }
 
@@ -607,8 +625,8 @@ void TaskRecord::MoveActivityToFrontLocked(
         Slogger::I(TAG, "Removing and adding activity %s to stack at top",
             newTop->ToString().string()/*, new RuntimeException("here").fillInStackTrace()*/);
 
-    mActivities->Remove(newTop);
-    mActivities->PushBack(newTop);
+    mActivities->Remove((IActivityRecord*)newTop);
+    mActivities->Add((IActivityRecord*)newTop);
     UpdateEffectiveIntent();
 
     SetFrontOfTask();
@@ -623,7 +641,9 @@ void TaskRecord::AddActivityAtBottom(
 void TaskRecord::AddActivityToTop(
     /* [in] */ ActivityRecord* r)
 {
-    AddActivityAtIndex(mActivities->GetSize(), r);
+    Int32 N;
+    mActivities->GetSize(&N);
+    AddActivityAtIndex(N, r);
 }
 
 void TaskRecord::AddActivityAtIndex(
@@ -631,19 +651,13 @@ void TaskRecord::AddActivityAtIndex(
     /* [in] */ ActivityRecord* r)
 {
     // Remove r first, and if it wasn't already in the list and it's fullscreen, count it.
-    List<AutoPtr<ActivityRecord> >::Iterator find = Find(
-        mActivities->Begin(), mActivities->End(), AutoPtr<ActivityRecord>(r));
-    Boolean hasIt = FALSE;
-    if (find != mActivities->End()) {
-        hasIt = TRUE;
-        mActivities->Erase(find);
-    }
-    if (!hasIt && r->mFullscreen) {
+    Boolean result;
+    if ((mActivities->Remove((IActivityRecord*)r, &result), !result) && r->mFullscreen) {
         // Was not previously in list.
         mNumFullscreen++;
     }
     // Only set this based on the first activity
-    if (mActivities->IsEmpty()) {
+    if (mActivities->IsEmpty(&result), result) {
         mTaskType = r->mActivityType;
         mIsPersistable = r->IsPersistable();
         mCallingUid = r->mLaunchedFromUid;
@@ -662,10 +676,7 @@ void TaskRecord::AddActivityAtIndex(
         // Otherwise make all added activities match this one.
         r->mActivityType = mTaskType;
     }
-    List<AutoPtr<ActivityRecord> >::Iterator it = mActivities->Begin();
-    for (Int32 pos = index; pos > 0; --pos)
-        ++it;
-    mActivities->Insert(it, r);
+    mActivities->Add(index, (IActivityRecord*)r);
     UpdateEffectiveIntent();
     if (r->IsPersistable()) {
         mService->NotifyTaskPersisterLocked(this, FALSE);
@@ -675,22 +686,15 @@ void TaskRecord::AddActivityAtIndex(
 Boolean TaskRecord::RemoveActivity(
     /* [in] */ ActivityRecord* r)
 {
-    List<AutoPtr<ActivityRecord> >::Iterator find = Find(
-        mActivities->Begin(), mActivities->End(), AutoPtr<ActivityRecord>(r));
-    Boolean hasIt = FALSE;
-    if (find != mActivities->End()) {
-        hasIt = TRUE;
-        mActivities->Erase(find);
-    }
-
-    if (hasIt && r->mFullscreen) {
+    Boolean result;
+    if ((mActivities->Remove((IActivityRecord*)r, &result), result) && r->mFullscreen) {
         // Was previously in list.
         mNumFullscreen--;
     }
     if (r->IsPersistable()) {
         mService->NotifyTaskPersisterLocked(this, FALSE);
     }
-    if (mActivities->IsEmpty()) {
+    if (mActivities->IsEmpty(&result), result) {
         return !mReuseTask;
     }
     UpdateEffectiveIntent();
@@ -702,35 +706,35 @@ Boolean TaskRecord::AutoRemoveFromRecents()
     // We will automatically remove the task either if it has explicitly asked for
     // this, or it is empty and has never contained an activity that got shown to
     // the user->
-    return mAutoRemoveRecents || (mActivities->IsEmpty() && !mHasBeenVisible);
+    Boolean result;
+    return mAutoRemoveRecents || ((mActivities->IsEmpty(&result), result) && !mHasBeenVisible);
 }
 
 void TaskRecord::PerformClearTaskAtIndexLocked(
     /* [in] */ Int32 activityNdx)
 {
-    List<AutoPtr<ActivityRecord> >::Iterator iter = mActivities->Begin();
-    for (Int32 pos = activityNdx; pos > 0; --pos)
-        ++iter;
-    while (iter != mActivities->End()) {
-        AutoPtr<ActivityRecord> r = *iter;
+    Int32 numActivities;
+    mActivities->GetSize(&numActivities);
+    for (; activityNdx < numActivities; ++activityNdx) {
+        AutoPtr<IInterface> obj;
+        mActivities->Get(activityNdx, (IInterface**)&obj);
+        ActivityRecord* r = TO_ActivityRecord(obj);
         if (r->mFinishing) {
-            ++iter;
             continue;
         }
 
-        List<AutoPtr<ActivityRecord> >::Iterator nextIter = iter;
-        ++nextIter;
         if (mStack == NULL) {
             // Task was restored from persistent storage.
             r->TakeFromHistory();
-            iter = mActivities->Erase(iter);
+            mActivities->Remove(activityNdx);
+            --activityNdx;
+            --numActivities;
         }
         else if (mStack->FinishActivityLocked(r, IActivity::RESULT_CANCELED, NULL, String("clear"),
                 FALSE)) {
-            iter = nextIter;
+            --activityNdx;
+            --numActivities;
         }
-        else
-            ++iter;
     }
 }
 
@@ -745,9 +749,12 @@ AutoPtr<ActivityRecord> TaskRecord::PerformClearTaskLocked(
     /* [in] */ ActivityRecord* newR,
     /* [in] */ Int32 launchFlags)
 {
-    List<AutoPtr<ActivityRecord> >::ReverseIterator riter;
-    for (riter = mActivities->RBegin(); riter != mActivities->REnd(); ++riter) {
-        AutoPtr<ActivityRecord> r = *riter;
+    Int32 numActivities;
+    mActivities->GetSize(&numActivities);
+    for (Int32 activityNdx = numActivities - 1; activityNdx >= 0; --activityNdx) {
+        AutoPtr<IInterface> obj;
+        mActivities->Get(activityNdx, (IInterface**)&obj);
+        ActivityRecord* r = TO_ActivityRecord(obj);
         if (r->mFinishing) {
             continue;
         }
@@ -758,25 +765,22 @@ AutoPtr<ActivityRecord> TaskRecord::PerformClearTaskLocked(
             // Here it is!  Now finish everything in front...
             AutoPtr<ActivityRecord> ret = r;
 
-            List<AutoPtr<ActivityRecord> >::Iterator iter = riter.GetBase();
-            while (iter != mActivities->End()) {
-                r = *iter;
+            for (++activityNdx; activityNdx < numActivities; ++activityNdx) {
+                AutoPtr<IInterface> obj;
+                mActivities->Get(activityNdx, (IInterface**)&obj);
+                r = TO_ActivityRecord(obj);
                 if (r->mFinishing) {
-                    ++iter;
                     continue;
                 }
                 AutoPtr<IActivityOptions> opts = r->TakeOptionsLocked();
                 if (opts != NULL) {
                     ret->UpdateOptionsLocked(opts);
                 }
-                List<AutoPtr<ActivityRecord> >::Iterator nextIter = iter;
-                ++nextIter;
                 if (mStack->FinishActivityLocked(r, IActivity::RESULT_CANCELED,
                     NULL, String("clear"), FALSE)) {
-                    iter = nextIter;
+                    --activityNdx;
+                    --numActivities;
                 }
-                else
-                    ++iter;
             }
 
             // Finally, if this is a normal launch mode (that is, not
@@ -839,9 +843,12 @@ AutoPtr<ActivityRecord> TaskRecord::FindActivityInHistoryLocked(
     /* [in] */ ActivityRecord* r)
 {
     AutoPtr<IComponentName> realActivity = r->mRealActivity;
-    List<AutoPtr<ActivityRecord> >::ReverseIterator riter;
-    for (riter = mActivities->RBegin(); riter != mActivities->REnd(); ++riter) {
-        AutoPtr<ActivityRecord> candidate = *riter;
+    Int32 N;
+    mActivities->GetSize(&N);
+    for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+        AutoPtr<IInterface> obj;
+        mActivities->Get(activityNdx, (IInterface**)&obj);
+        ActivityRecord* candidate = TO_ActivityRecord(obj);
         if (candidate->mFinishing) {
             continue;
         }
@@ -858,21 +865,27 @@ void TaskRecord::UpdateTaskDescription()
 {
     // Traverse upwards looking for any break between main task activities and
     // utility activities.
-    Int32 numActivities = mActivities->GetSize();
-    Int32 flags;
-    Boolean relinquish = numActivities == 0 ? FALSE : ((*mActivities->Begin())->mInfo->GetFlags(&flags),
-                flags & IActivityInfo::FLAG_RELINQUISH_TASK_IDENTITY) != 0;
-    List<AutoPtr<ActivityRecord> >::Iterator iter = mActivities->Begin();
-    if (numActivities > 0)
-        ++iter;
-    for (; iter != mActivities->End(); ++iter) {
-        AutoPtr<ActivityRecord> r = *iter;
+    Int32 activityNdx;
+    Int32 numActivities;
+    mActivities->GetSize(&numActivities);
+    Boolean relinquish = FALSE;
+    if (numActivities != 0) {
+        AutoPtr<IInterface> obj;
+        mActivities->Get(0, (IInterface**)&obj);
+        ActivityRecord* r = TO_ActivityRecord(obj);
         Int32 flags;
         r->mInfo->GetFlags(&flags);
-        if (relinquish && (flags & IActivityInfo::FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
+        relinquish = (flags & IActivityInfo::FLAG_RELINQUISH_TASK_IDENTITY) != 0;
+    }
+    for (activityNdx = Elastos::Core::Math::Min(numActivities, 1); activityNdx < numActivities; ++activityNdx) {
+        AutoPtr<IInterface> obj;
+        mActivities->Get(activityNdx, (IInterface**)&obj);
+        ActivityRecord* r = TO_ActivityRecord(obj);
+        Int32 flags;
+        if (relinquish && (r->mInfo->GetFlags(&flags), flags & IActivityInfo::FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
             // This will be the top activity for determining taskDescription. Pre-inc to
             // overcome initial decrement below.
-            ++iter;
+            ++activityNdx;
             break;
         }
         if (r->mIntent != NULL && (r->mIntent->GetFlags(&flags),
@@ -880,7 +893,7 @@ void TaskRecord::UpdateTaskDescription()
             break;
         }
     }
-    if (iter != mActivities->Begin()) {
+    if (activityNdx > 0) {
         // Traverse downwards starting below break looking for set label, icon.
         // Note that if there are activities in the task but none of them set the
         // recent activity values, then we do not fall back to the last set
@@ -888,8 +901,10 @@ void TaskRecord::UpdateTaskDescription()
         String label;
         String iconFilename;
         Int32 colorPrimary = 0;
-        for (--iter; iter != mActivities->End(); --iter) {
-            AutoPtr<ActivityRecord> r = *iter;
+        for (--activityNdx; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            mActivities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             if (r->mTaskDescription != NULL) {
                 if (label == NULL) {
                     r->mTaskDescription->GetLabel(&label);
@@ -915,9 +930,13 @@ void TaskRecord::UpdateTaskDescription()
 Int32 TaskRecord::FindEffectiveRootIndex()
 {
     Int32 effectiveNdx = 0;
-    List<AutoPtr<ActivityRecord> >::ReverseIterator riter;
-    for (riter = mActivities->RBegin(); riter != mActivities->REnd(); ++riter, ++effectiveNdx) {
-        AutoPtr<ActivityRecord> r = *riter;
+    Int32 N;
+    mActivities->GetSize(&N);
+    Int32 topActivityNdx = N - 1;
+    for (Int32 activityNdx = 0; activityNdx <= topActivityNdx; ++activityNdx) {
+        AutoPtr<IInterface> obj;
+        mActivities->Get(activityNdx, (IInterface**)&obj);
+        ActivityRecord* r = TO_ActivityRecord(obj);
         if (r->mFinishing) {
             continue;
         }
@@ -933,7 +952,9 @@ Int32 TaskRecord::FindEffectiveRootIndex()
 void TaskRecord::UpdateEffectiveIntent()
 {
     Int32 effectiveRootIndex = FindEffectiveRootIndex();
-    AutoPtr<ActivityRecord> r = (*mActivities)[effectiveRootIndex];
+    AutoPtr<IInterface> obj;
+    mActivities->Get(effectiveRootIndex, (IInterface**)&obj);
+    ActivityRecord* r = TO_ActivityRecord(obj);
     SetIntent(r);
 }
 
@@ -1005,15 +1026,18 @@ ECode TaskRecord::SaveToXml(
     FAIL_RETURN(mIntent->SaveToXml(out));
     FAIL_RETURN(out->WriteEndTag(String(NULL), TAG_INTENT));
 
-    List<AutoPtr<ActivityRecord> >::Iterator iter;
-    for (iter = mActivities->Begin(); iter != mActivities->End(); ++iter) {
-        AutoPtr<ActivityRecord> r = *iter;
+    Int32 numActivities;
+    mActivities->GetSize(&numActivities);
+    for (Int32 activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
+        AutoPtr<IInterface> obj;
+        mActivities->Get(activityNdx, (IInterface**)&obj);
+        ActivityRecord* r = TO_ActivityRecord(obj);
         Int32 persistableMode;
         r->mInfo->GetPersistableMode(&persistableMode);
         Int32 flags;
         if ((persistableMode == IActivityInfo::PERSIST_ROOT_ONLY || !r->IsPersistable() ||
             (r->mIntent->GetFlags(&flags), (flags & IIntent::FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0)) &&
-                iter != mActivities->Begin()) {
+                activityNdx > 0) {
             // Stop at first non-persistable or first break in task (CLEAR_WHEN_TASK_RESET).
             break;
         }
@@ -1032,7 +1056,8 @@ ECode TaskRecord::RestoreFromXml(
     VALIDATE_NOT_NULL(taskRecord)
     AutoPtr<IIntent> intent;
     AutoPtr<IIntent> affinityIntent;
-    AutoPtr<List<AutoPtr<ActivityRecord> > > activities = new List<AutoPtr<ActivityRecord> >();
+    AutoPtr<IArrayList> activities;
+    CArrayList::New((IArrayList**)&activities);
     AutoPtr<IComponentName> realActivity;
     AutoPtr<IComponentName> origActivity;
     String affinity;
@@ -1178,7 +1203,7 @@ ECode TaskRecord::RestoreFromXml(
                     Slogger::D(TaskPersister::TAG, "TaskRecord: activity=%s",
                         activity->ToString().string());
                 if (activity != NULL) {
-                    activities->PushBack(activity);
+                    activities->Add((IActivityRecord*)activity);
                 }
             }
             else {
@@ -1225,10 +1250,12 @@ ECode TaskRecord::RestoreFromXml(
             taskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
             callingUid, callingPackage);
 
-    List<AutoPtr<ActivityRecord> >::ReverseIterator riter;
-    for (riter = activities->RBegin(); riter != activities->REnd(); ++riter) {
-        AutoPtr<ActivityRecord> r = *riter;
-        r->mTask = task;
+    Int32 N;
+    activities->GetSize(&N);
+    for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+        AutoPtr<IInterface> obj;
+        activities->Get(activityNdx, (IInterface**)&obj);
+        TO_ActivityRecord(obj)->mTask = task;
     }
 
     if (CActivityManagerService::DEBUG_RECENTS)
@@ -1402,7 +1429,9 @@ String TaskRecord::ToString()
         sb.Append(" U=");
         sb.Append(mUserId);
         sb.Append(" sz=");
-        sb.Append((Int32)mActivities->GetSize());
+        Int32 N;
+        mActivities->GetSize(&N);
+        sb.Append(N);
         sb.AppendChar('}');
         return sb.ToString();
     }

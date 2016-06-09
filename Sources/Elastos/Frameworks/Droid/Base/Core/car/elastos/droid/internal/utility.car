@@ -47,6 +47,7 @@ module
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Utility.IPrinter;
     using interface Elastos.Core.IAppendable;
+    using interface Elastos.Core.ICharSequence;
     using interface Elastos.Core.ICloneable;
     using interface Elastos.IO.ICloseable;
     using interface Elastos.IO.IFlushable;
@@ -393,7 +394,14 @@ module
     class CParcelableString{
         constructor();
 
+        constructor(
+            [in] String str);
+
+        constructor(
+            [in] ICharSequence* cs);
+
         interface IParcelableString;
+        interface ICharSequence;
         interface IParcelable;
     }
 

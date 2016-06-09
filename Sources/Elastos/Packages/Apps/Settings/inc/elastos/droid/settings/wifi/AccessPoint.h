@@ -169,8 +169,7 @@ public:
      *  For now this data is used only with Verbose Logging so as to show the band and number
      *  of BSSIDs on which that network is seen.
      */
-    // public LruCache<String, ScanResult> mScanResultCache;
-    LruCache< String, AutoPtr<IScanResult> > mScanResultCache;
+    AutoPtr< LruCache< String, AutoPtr<IScanResult> > > mScanResultCache;
 
     /**
      * These values are matched in string arrays -- changes must be kept in sync

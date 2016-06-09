@@ -81,6 +81,7 @@ using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Text::Format::IDateUtils;
 using Elastos::Droid::Utility::IAtomicFile;
 using Elastos::Droid::Utility::CAtomicFile;
+using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Graphics::IBitmapFactory;
 using Elastos::Droid::Graphics::CBitmapFactory;
@@ -418,7 +419,8 @@ ECode CUserManagerService::GetProfiles(
     }
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         AutoPtr<IList> list = GetProfilesLocked(userId, enabledOnly);
         *result = list;
         REFCOUNT_ADD(*result)
@@ -436,7 +438,7 @@ AutoPtr<IList> CUserManagerService::GetProfilesLocked(
 {
     AutoPtr<IUserInfo> user = GetUserInfoLocked(userId);
     AutoPtr<IList> users;
-    CArrayList::New(mUsers.GetSize(), (IList**)&users);
+    CParcelableList::New(mUsers.GetSize(), (IList**)&users);
     if (user == NULL) {
         // Probably a dying user
         return users;
@@ -578,7 +580,8 @@ ECode CUserManagerService::SetUserName(
 {
     FAIL_RETURN(CheckManageUsersPermission(String("rename users")))
     Boolean changed = FALSE;
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> info;
         HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it = mUsers.Find(userId);
         if (it != mUsers.End()) {
@@ -609,7 +612,8 @@ ECode CUserManagerService::SetUserIcon(
     FAIL_RETURN(CheckManageUsersPermission(String("update users")))
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> info;
         HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it = mUsers.Find(userId);
         if (it != mUsers.End()) {
@@ -647,7 +651,8 @@ ECode CUserManagerService::GetUserIcon(
 {
     VALIDATE_NOT_NULL(userIcon)
     *userIcon = NULL;
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> info;
         HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it = mUsers.Find(userId);
         if (it != mUsers.End()) {
@@ -686,7 +691,8 @@ ECode CUserManagerService::MakeInitialized(
     /* [in] */ Int32 userId)
 {
     FAIL_RETURN(CheckManageUsersPermission(String("makeInitialized")))
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> info;
         HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it = mUsers.Find(userId);
         if (it != mUsers.End()) {
@@ -789,7 +795,8 @@ ECode CUserManagerService::SetUserRestrictions(
     FAIL_RETURN(CheckManageUsersPermission(String("setUserRestrictions")))
     if (restrictions == NULL) return NOERROR;
 
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         AutoPtr<IBundle> bundle;
         HashMap<Int32, AutoPtr<IBundle> >::Iterator it = mUserRestrictions.Find(userId);
         if (it != mUserRestrictions.End()) {

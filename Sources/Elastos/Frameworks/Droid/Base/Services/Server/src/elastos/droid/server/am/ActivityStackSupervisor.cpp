@@ -1655,8 +1655,10 @@ ECode ActivityStackSupervisor::RealStartActivityLocked(
     if (r->IsHomeActivity() && r->IsNotResolverActivity()) {
         // Home process is the root process of the task.
         //mService->mHomeProcess = r->mTask->mActivities.get(0).app;
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = r->mTask->mActivities;
-        AutoPtr<ActivityRecord> ar = (*activities)[0];
+        IArrayList* activities = r->mTask->mActivities;
+        AutoPtr<IInterface> obj;
+        activities->Get(0, (IInterface**)&obj);
+        ActivityRecord* ar = (ActivityRecord*)IActivityRecord::Probe(obj);
         mService->mHomeProcess = ar->mApp;
     }
 
@@ -3505,9 +3507,13 @@ AutoPtr<ActivityRecord> ActivityStackSupervisor::GetHomeActivity()
         tasks->Get(taskNdx, (IInterface**)&obj);
         TaskRecord* task = (TaskRecord*)(IObject::Probe(obj));
         if (task->IsHomeTask()) {
-            AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-            for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-                AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+            IArrayList* activities = task->mActivities;
+            Int32 N;
+            activities->GetSize(&N);
+            for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+                AutoPtr<IInterface> obj;
+                activities->Get(activityNdx, (IInterface**)&obj);
+                ActivityRecord* r = (ActivityRecord*)IActivityRecord::Probe(obj);
                 if (r->IsHomeActivity()) {
                     return r;
                 }
@@ -3584,11 +3590,14 @@ ECode ActivityStackSupervisor::CreateStackForRestoredTaskHistory(
         TaskRecord* task = *rit;
         stack->AddTask(task, FALSE, FALSE);
         Int32 taskId = task->mTaskId;
-        //final ArrayList<ActivityRecord> activities = task.mActivities;
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
-            AutoPtr<IActivityInfo> info = r->mInfo;
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = (ActivityRecord*)IActivityRecord::Probe(obj);
+            IActivityInfo* info = r->mInfo;
             //r.info.screenOrientation
             Int32 screenOrientation;
             info->GetScreenOrientation(&screenOrientation);

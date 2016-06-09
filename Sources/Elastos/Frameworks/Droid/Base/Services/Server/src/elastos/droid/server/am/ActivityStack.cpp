@@ -79,6 +79,9 @@ namespace Droid {
 namespace Server {
 namespace Am {
 
+#define TO_ActivityRecord(obj) \
+    ((ActivityRecord*)IActivityRecord::Probe(obj))
+
 static const String TAG("ActivityStack");
 
 //=====================================================================
@@ -112,7 +115,7 @@ ECode ActivityStack::ActivityStackHandler::HandleMessage(
         case PAUSE_TIMEOUT_MSG: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ActivityRecord* r = (ActivityRecord*)IObject::Probe(obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             // We don't at this point know if the activity is fullscreen,
             // so we need to be conservative and assume it isn't.
             Slogger::W("ActivityStack::ActivityStackHandler::HandleMessage", "Activity pause timeout for %s", TO_CSTR(r));
@@ -127,7 +130,7 @@ ECode ActivityStack::ActivityStackHandler::HandleMessage(
         case LAUNCH_TICK_MSG: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ActivityRecord* r = (ActivityRecord*)IObject::Probe(obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             {
                 AutoLock lock(mOwner->mService);
                 if (r->ContinueLaunchTickingLocked()) {
@@ -138,7 +141,7 @@ ECode ActivityStack::ActivityStackHandler::HandleMessage(
         case DESTROY_TIMEOUT_MSG: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ActivityRecord* r = (ActivityRecord*)IObject::Probe(obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             // We don't at this point know if the activity is fullscreen,
             // so we need to be conservative and assume it isn't.
             Slogger::W("ActivityStack::ActivityStackHandler::HandleMessage",
@@ -151,7 +154,7 @@ ECode ActivityStack::ActivityStackHandler::HandleMessage(
         case STOP_TIMEOUT_MSG: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ActivityRecord* r = (ActivityRecord*)IObject::Probe(obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             // We don't at this point know if the activity is fullscreen,
             // so we need to be conservative and assume it isn't.
             Slogger::W("ActivityStack::ActivityStackHandler::HandleMessage",
@@ -260,7 +263,9 @@ Int32 ActivityStack::NumActivities()
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
         TaskRecord* tr = (TaskRecord*)IObject::Probe(obj);
-        count += tr->mActivities->GetSize();
+        Int32 N;
+        tr->mActivities->GetSize(&N);
+        count += N;
     }
     return count;
 }
@@ -281,7 +286,7 @@ AutoPtr<ActivityRecord> ActivityStack::TopRunningActivityLocked(
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> tr = (TaskRecord*)IObject::Probe(obj);
+        TaskRecord* tr = (TaskRecord*)IObject::Probe(obj);
         AutoPtr<ActivityRecord> r = tr->TopRunningActivityLocked(notTop);
         if (r != NULL) {
             return r;
@@ -298,11 +303,15 @@ AutoPtr<ActivityRecord> ActivityStack::TopRunningNonDelayedActivityLocked(
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> task = (TaskRecord*)IObject::Probe(obj);
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
-            if (!r->mFinishing && !r->mDelayedResume && r.Get() != notTop && OkToShowLocked(r)) {
+        TaskRecord* task = (TaskRecord*)IObject::Probe(obj);
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
+            if (!r->mFinishing && !r->mDelayedResume && r != notTop && OkToShowLocked(r)) {
                 return r;
             }
         }
@@ -319,15 +328,17 @@ AutoPtr<ActivityRecord> ActivityStack::TopRunningActivityLocked(
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> task = (TaskRecord*)IObject::Probe(obj);
+        TaskRecord* task = (TaskRecord*)IObject::Probe(obj);
         if (task->mTaskId == taskId) {
             continue;
         }
-        //ArrayList<ActivityRecord> activities = task.mActivities;
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        //List<AutoPtr<ActivityRecord> >::Iterator iterator = activities.RBegin();
-        for (Int32 i = activities->GetSize() - 1; i >= 0; --i) {
-            AutoPtr<ActivityRecord> r = (*activities)[i];
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 i = N - 1; i >= 0; --i) {
+            AutoPtr<IInterface> obj;
+            activities->Get(i, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             // Note: the taskId check depends on real taskId fields being non-zero
             if (!r->mFinishing && (token != IBinder::Probe(r->mAppToken)) && OkToShowLocked(r)) {
                 return r;
@@ -344,12 +355,14 @@ AutoPtr<ActivityRecord> ActivityStack::TopActivity()
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> tr = (TaskRecord*)IObject::Probe(obj);
-        //ArrayList<ActivityRecord> activities = tr->mActivities;
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = tr->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            //final ActivityRecord r = activities.get(activityNdx);
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+        TaskRecord* tr = (TaskRecord*)IObject::Probe(obj);
+        IArrayList* activities = tr->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             if (!r->mFinishing) {
                 return r;
             }
@@ -395,11 +408,10 @@ AutoPtr<ActivityRecord> ActivityStack::IsInStackLocked(
     if (r != NULL) {
         AutoPtr<TaskRecord> task = r->mTask;
         if (task != NULL) {
-            List<AutoPtr<ActivityRecord> >::Iterator it = Find(
-                    task->mActivities->Begin(), task->mActivities->End(), r);
-            if (it != task->mActivities->End()) {
+            Boolean contains;
+            if (task->mActivities->Contains((IActivityRecord*)r, &contains), contains) {
                 Boolean taskHistoryContainsTask;
-                mTaskHistory->Contains(TO_IINTERFACE(task), &taskHistoryContainsTask);
+                mTaskHistory->Contains((IObject*)task, &taskHistoryContainsTask);
                 if (taskHistoryContainsTask) {
                     if (task->mStack != this) {
                         Slogger::W(TAG, "Illegal state! task does not point to stack it is in.");
@@ -595,14 +607,17 @@ AutoPtr<ActivityRecord> ActivityStack::FindActivityLocked(
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> task = (TaskRecord*)IObject::Probe(obj);
+        TaskRecord* task = (TaskRecord*)IObject::Probe(obj);
         if (!IsCurrentProfileLocked(task->mUserId)) {
             return NULL;
         }
-        //final ArrayList<ActivityRecord> activities = task->mActivities;
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
 
             if (!r->mFinishing) {
                 AutoPtr<IComponentName> clstmp;
@@ -704,10 +719,15 @@ void ActivityStack::AwakeFromSleepingLocked()
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> tr = (TaskRecord*)IObject::Probe(obj);
-        List<AutoPtr<ActivityRecord> >::ReverseIterator rit = tr->mActivities->RBegin();
-        for (; rit != tr->mActivities->REnd(); ++rit) {
-            (*rit)->SetSleeping(FALSE);
+        TaskRecord* tr = (TaskRecord*)IObject::Probe(obj);
+        IArrayList* activities = tr->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
+            r->SetSleeping(FALSE);
         }
     }
 }
@@ -742,13 +762,16 @@ void ActivityStack::GoToSleep()
     Int32 size;
     mTaskHistory->GetSize(&size);
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
-        //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<IInterface> obj;
         mTaskHistory->Get(taskNdx, (IInterface**)&obj);
-        AutoPtr<TaskRecord> tr = (TaskRecord*)IObject::Probe(obj);
-        List<AutoPtr<ActivityRecord> >::ReverseIterator rit = tr->mActivities->RBegin();
-        for (; rit != tr->mActivities->REnd(); ++rit) {
-            AutoPtr<ActivityRecord> r = (*rit);
+        TaskRecord* tr = (TaskRecord*)IObject::Probe(obj);
+        IArrayList* activities = tr->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             if (r->mState == ActivityState_STOPPING || r->mState == ActivityState_STOPPED) {
                 r->SetSleeping(TRUE);
             }
@@ -1015,17 +1038,10 @@ AutoPtr<ActivityRecord> ActivityStack::FindNextTranslucentActivity(
     Int32 taskNdx;
     tasks->IndexOf(TO_IINTERFACE(task), &taskNdx);
 
-    //ArrayList<ActivityRecord> activities = task.mActivities;
-    AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-    //activities.indexOf(r) + 1;
-    Int32 activityNdx = -1;//IndexOf
-    for(UInt32 i = 0; i < activities->GetSize(); ++i) {
-        if (((*activities)[i]).Get() == r) {
-            activityNdx = i;
-            break;
-        }
-    }
-    ++activityNdx;
+    AutoPtr<IArrayList> activities = task->mActivities;
+    Int32 activityNdx;
+    activities->IndexOf((IActivityRecord*)r, &activityNdx);
+    activityNdx = activityNdx + 1;
 
     Int32 numStacks;
     mStacks->GetSize(&numStacks);
@@ -1039,11 +1055,13 @@ AutoPtr<ActivityRecord> ActivityStack::FindNextTranslucentActivity(
         while (taskNdx < numTasks) {
             AutoPtr<IInterface> taskobj;
             tasks->Get(taskNdx, (IInterface**)&taskobj);
-            //activities = tasks.get(taskNdx).mActivities;
             activities = ((TaskRecord*)IObject::Probe(taskobj))->mActivities;
-            Int32 numActivities = activities->GetSize();
+            Int32 numActivities;
+            activities->GetSize(&numActivities);;
             while (activityNdx < numActivities) {
-                AutoPtr<ActivityRecord> activity = (*activities)[activityNdx];
+                AutoPtr<IInterface> obj;
+                activities->Get(activityNdx, (IInterface**)&obj);
+                ActivityRecord* activity = TO_ActivityRecord(obj);
                 if (!activity->mFinishing) {
                     return activity->mFullscreen ? NULL: activity;
                 }
@@ -1093,13 +1111,18 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        //ArrayList<ActivityRecord> activities = task.mActivities;
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            if (activityNdx >= activities->GetSize()) {
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            Int32 N2;
+            activities->GetSize(&N2);
+            if (activityNdx >= N2) {
                 continue;
             }
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             if (r->mFinishing) {
                 continue;
             }
@@ -1116,7 +1139,7 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
 
                 // First: if this is not the current activity being started, make
                 // sure it matches the current configuration.
-                if (r.Get() != starting) {
+                if (r != starting) {
                     EnsureActivityConfigurationLocked(r, 0);
                 }
 
@@ -1127,7 +1150,7 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                     if (CActivityManagerService::DEBUG_VISBILITY) {
                         Slogger::V(TAG, "Start and freeze screen for %s", TO_CSTR(r));
                     }
-                    if (r.Get() != starting) {
+                    if (r != starting) {
                         r->StartFreezingScreenLocked(r->mApp, configChanges);
                     }
                     if (!r->mVisible || r->mLaunchTaskBehind) {
@@ -1136,7 +1159,7 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                         }
                         SetVisibile(r, TRUE);
                     }
-                    if (r.Get() != starting) {
+                    if (r != starting) {
                         mStackSupervisor->StartSpecificActivityLocked(r, FALSE, FALSE);
                     }
 
@@ -1159,7 +1182,7 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                     // This activity is not currently visible, but is running.
                     // Tell it to become visible.
                     r->mVisible = TRUE;
-                    if (r->mState != ActivityState_RESUMED && r.Get() != starting) {
+                    if (r->mState != ActivityState_RESUMED && r != starting) {
                         // If this activity is paused, tell it
                         // to now show its window.
                         if (CActivityManagerService::DEBUG_VISBILITY) {
@@ -1231,7 +1254,7 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                         case ActivityState_PAUSED:
                             // This case created for transitioning activities from
                             // translucent to opaque {@link Activity#convertToOpaque}.
-                            if (GetVisibleBehindActivity() == r) {
+                            if (GetVisibleBehindActivity().Get() == r) {
                                 ReleaseBackgroundResources();
                             } else {
                                 Boolean result;
@@ -1317,9 +1340,13 @@ void ActivityStack::CancelInitializingActivities()
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             if (aboveTop) {
                 if (r == topActivity) {
                     aboveTop = FALSE;
@@ -1963,14 +1990,8 @@ void ActivityStack::StartActivityLocked(
                     }
                     task->AddActivityToTop(r);
                     r->PutInHistory();
-                    AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-                    Int32 activityNdx = -1;
-                    for(UInt32 i = 0; i < activities->GetSize(); ++i) {
-                        if (((*activities)[i]).Get() == r) {
-                            activityNdx = i;
-                            break;
-                        }
-                    }
+                    Int32 activityNdx;
+                    task->mActivities->IndexOf((IActivityRecord*)r, &activityNdx);
                     AutoPtr<IActivityInfo> info = r->mInfo;
                     Int32 screenOrientation, flags, configChanges;
                     info->GetScreenOrientation(&screenOrientation);
@@ -2054,14 +2075,8 @@ void ActivityStack::StartActivityLocked(
             mNoAnimActivities->Remove(TO_IINTERFACE(r));
         }
 
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        Int32 activityNdx = -1;//IndexOf
-        for (UInt32 i = 0; i < activities->GetSize(); ++i) {
-            if (((*activities)[i]).Get() == r) {
-                activityNdx = i;
-                break;
-            }
-        }
+        Int32 activityNdx;
+        task->mActivities->IndexOf((IActivityRecord*)r, &activityNdx);
         AutoPtr<IActivityInfo> info = r->mInfo;
         Int32 screenOrientation, flags, configChanges;
         info->GetScreenOrientation(&screenOrientation);
@@ -2130,14 +2145,8 @@ void ActivityStack::StartActivityLocked(
     else {
         // If this is the first activity, don't do any fancy animations,
         // because there is nothing for it to animate on top of.
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        Int32 activityNdx = -1;//IndexOf
-        for(UInt32 i = 0; i < activities->GetSize(); ++i) {
-            if (((*activities)[i]).Get() == r) {
-                activityNdx = i;
-                break;
-            }
-        }
+        Int32 activityNdx;
+        task->mActivities->IndexOf((IActivityRecord*)r, &activityNdx);
         AutoPtr<IActivityInfo> info = r->mInfo;
         Int32 screenOrientation, flags;
         info->GetScreenOrientation(&screenOrientation);
@@ -2173,19 +2182,20 @@ void ActivityStack::ValidateAppTokensLocked()
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        //ArrayList<ActivityRecord> activities = task.mActivities;
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        //if (activities.isEmpty())
-        if (activities->IsEmpty()) {
+        IArrayList* activities = task->mActivities;
+        Boolean isEmpty;
+        if (activities->IsEmpty(&isEmpty), isEmpty) {
             continue;
         }
-
         AutoPtr<TaskGroup> group = new TaskGroup();
         group->mTaskId = task->mTaskId;
         mValidateAppTokens->Add(TO_IINTERFACE(group));
-        Int32 numActivities = activities->GetSize();
+        Int32 numActivities;
+        activities->GetSize(&numActivities);
         for (Int32 activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];//->get(activityNdx);
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             group->mTokens.PushBack(r->mAppToken);
         }
     }
@@ -2203,12 +2213,14 @@ AutoPtr<IActivityOptions> ActivityStack::ResetTargetTaskIfNeededLocked(
 
     // We only do this for activities that are not the root of the task (since if we finish
     // the root, we may no longer have the task!).
-    //ArrayList<ActivityRecord> activities = task.mActivities;
-    AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-    Int32 numActivities = activities->GetSize();
+    AutoPtr<IArrayList> activities = task->mActivities;
+    Int32 numActivities;
+    activities->GetSize(&numActivities);
     Int32 rootActivityNdx = task->FindEffectiveRootIndex();
     for (Int32 i = numActivities - 1; i > rootActivityNdx; --i ) {
-        AutoPtr<ActivityRecord> target = (*activities)[i];
+        AutoPtr<IInterface> obj;
+        activities->Get(i, (IInterface**)&obj);
+        ActivityRecord* target = TO_ActivityRecord(obj);
         if (target->mFrontOfTask)
             break;
 
@@ -2255,9 +2267,12 @@ AutoPtr<IActivityOptions> ActivityStack::ResetTargetTaskIfNeededLocked(
                 AutoPtr<IInterface> taskobj;
                 mTaskHistory->Get(0, (IInterface**)&taskobj);
                 TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-                AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-                if (!activities->IsEmpty()) {
-                    bottom = (*(activities->Begin()));
+                IArrayList* activities = task->mActivities;
+                Boolean isEmpty;
+                if (activities->IsEmpty(&isEmpty), !isEmpty) {
+                    AutoPtr<IInterface> obj;
+                    activities->Get(0, (IInterface**)&obj);
+                    bottom = TO_ActivityRecord(obj);
                 }
             }
 
@@ -2284,7 +2299,9 @@ AutoPtr<IActivityOptions> ActivityStack::ResetTargetTaskIfNeededLocked(
             Boolean noOptions = canMoveOptions;
             Int32 start = replyChainEnd < 0 ? i : replyChainEnd;
             for (Int32 srcPos = start; srcPos >= i; --srcPos) {
-                AutoPtr<ActivityRecord> p = (*activities)[srcPos];
+                AutoPtr<IInterface> obj;
+                activities->Get(srcPos, (IInterface**)&obj);
+                ActivityRecord* p = TO_ActivityRecord(obj);
                 if (p->mFinishing) {
                     continue;
                 }
@@ -2313,7 +2330,8 @@ AutoPtr<IActivityOptions> ActivityStack::ResetTargetTaskIfNeededLocked(
             }
 
             replyChainEnd = -1;
-        } else if (forceReset || finishOnTaskLaunch || clearWhenTaskReset) {
+        }
+        else if (forceReset || finishOnTaskLaunch || clearWhenTaskReset) {
             // If the activity should just be removed -- either
             // because it asks for it, or the task should be
             // cleared -- then finish it and anything that is
@@ -2323,15 +2341,21 @@ AutoPtr<IActivityOptions> ActivityStack::ResetTargetTaskIfNeededLocked(
                 // In this case, we want to finish this activity
                 // and everything above it, so be sneaky and pretend
                 // like these are all in the reply chain.
-                end = activities->GetSize() - 1;
-            } else if (replyChainEnd < 0) {
+                Int32 N;
+                activities->GetSize(&N);
+                end = N - 1;
+            }
+            else if (replyChainEnd < 0) {
                 end = i;
-            } else {
+            }
+            else {
                 end = replyChainEnd;
             }
             Boolean noOptions = canMoveOptions;
             for (Int32 srcPos = i; srcPos <= end; srcPos++) {
-                AutoPtr<ActivityRecord> p = (*activities)[srcPos];
+                AutoPtr<IInterface> obj;
+                activities->Get(srcPos, (IInterface**)&obj);
+                ActivityRecord* p = TO_ActivityRecord(obj);
                 if (p->mFinishing) {
                     continue;
                 }
@@ -2553,13 +2577,16 @@ void ActivityStack::FinishSubActivityLocked(
     Int32 historySize;
     mTaskHistory->GetSize(&historySize);
     for (Int32 taskNdx = historySize - 1; taskNdx >= 0; --taskNdx) {
-        //ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             if (r->mResultTo.Get() == self && r->mRequestCode == requestCode) {
                 if ((r->mResultWho == NULL && resultWho == NULL) ||
                     (//r->mResultWho != NULL &&
@@ -2583,15 +2610,8 @@ void ActivityStack::FinishTopRunningActivityLocked(
         //Slogger::W(TAG, "  Force finishing activity " + r.intent.getComponent().flattenToShortString());
         Int32 taskNdx;
         mTaskHistory->IndexOf(TO_IINTERFACE(r->mTask), &taskNdx);
-        //int activityNdx = r.task.mActivities.IndexOf(r);
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = r->mTask->mActivities;
-        Int32 activityNdx = -1;//IndexOf
-        for(UInt32 i = 0; i < activities->GetSize(); ++i) {
-            if ((*activities)[i] == r) {
-                activityNdx = i;
-                break;
-            }
-        }
+        Int32 activityNdx;
+        r->mTask->mActivities->IndexOf((IActivityRecord*)r, &activityNdx);
         FinishActivityLocked(r, IActivity::RESULT_CANCELED, NULL, String("crashed"), FALSE);
         // Also terminate any activities below it that aren't yet
         // stopped, to avoid a situation where one will get
@@ -2606,7 +2626,9 @@ void ActivityStack::FinishTopRunningActivityLocked(
                 AutoPtr<IInterface> taskobj;
                 mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
                 TaskRecord* tr = (TaskRecord*)IObject::Probe(taskobj);
-                activityNdx = tr->mActivities->GetSize() - 1;
+                Int32 N;
+                tr->mActivities->GetSize(&N);
+                activityNdx = N - 1;
             } while (activityNdx < 0);
         }
 
@@ -2614,8 +2636,9 @@ void ActivityStack::FinishTopRunningActivityLocked(
             AutoPtr<IInterface> taskobj;
             mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
             TaskRecord* tr = (TaskRecord*)IObject::Probe(taskobj);
-            AutoPtr<List<AutoPtr<ActivityRecord> > > activities = tr->mActivities;
-            r = (*activities)[activityNdx];
+            AutoPtr<IInterface> obj;
+            tr->mActivities->Get(activityNdx, (IInterface**)&obj);
+            r = TO_ActivityRecord(obj);
             if (r->mState == ActivityState_RESUMED
                     || r->mState == ActivityState_PAUSING
                     || r->mState == ActivityState_PAUSED) {
@@ -2644,9 +2667,12 @@ void ActivityStack::FinishVoiceTask(
         if (tr->mVoiceSession != NULL) {
             AutoPtr<IBinder> trSessionBinder = IBinder::Probe(tr->mVoiceSession);
             if (trSessionBinder == sessionBinder) {
-                AutoPtr<List<AutoPtr<ActivityRecord> > > activities = tr->mActivities;
-                for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-                    AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+                Int32 N;
+                tr->mActivities->GetSize(&N);
+                for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+                    AutoPtr<IInterface> obj;
+                    tr->mActivities->Get(activityNdx, (IInterface**)&obj);
+                    ActivityRecord* r = TO_ActivityRecord(obj);
                     if (!r->mFinishing) {
                         FinishActivityLocked(r, IActivity::RESULT_CANCELED, NULL, String("finish-voice"),
                                 FALSE);
@@ -2664,17 +2690,13 @@ void ActivityStack::FinishVoiceTask(
 Boolean ActivityStack::FinishActivityAffinityLocked(
     /* [in] */ ActivityRecord* r)
 {
-    //ArrayList<ActivityRecord> activities = r.task.mActivities;
-    AutoPtr<List<AutoPtr<ActivityRecord> > > activities = r->mTask->mActivities;
-    Int32 activityNdx = -1;//IndexOf
-    for(UInt32 i = 0; i < activities->GetSize(); ++i) {
-        if (((*activities)[i]).Get() == r) {
-            activityNdx = i;
-            break;
-        }
-    }
+    IArrayList* activities = r->mTask->mActivities;
+    Int32 activityNdx;
+    activities->IndexOf((IActivityRecord*)r, &activityNdx);
     for (Int32 index = activityNdx; index >= 0; --index) {
-        AutoPtr<ActivityRecord> cur = (*activities)[index];
+        AutoPtr<IInterface> obj;
+        activities->Get(index, (IInterface**)&obj);
+        ActivityRecord* cur = TO_ActivityRecord(obj);
         if (!cur->mTaskAffinity.Equals(r->mTaskAffinity)) {
             break;
         }
@@ -2747,16 +2769,12 @@ Boolean ActivityStack::FinishActivityLocked(
     //EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
     //        r.userId, System.identityHashCode(r),
     //        task.taskId, r.shortComponentName, reason);
-
-    AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-    Int32 index = -1;
-    for(UInt32 i = 0; i < activities->GetSize(); ++i) {
-        if (((*activities)[i]).Get() == r) {
-            index = i;
-            break;
-        }
-    }
-    if (index < (Int32)(activities->GetSize() - 1)) {
+    IArrayList* activities = task->mActivities;
+    Int32 index;
+    activities->IndexOf((IActivityRecord*)r, &index);
+    Int32 N;
+    activities->GetSize(&N);
+    if (index < N - 1) {
         task->SetFrontOfTask();
         Int32 flags;
         r->mIntent->GetFlags(&flags);
@@ -2764,7 +2782,9 @@ Boolean ActivityStack::FinishActivityLocked(
             // If the caller asked that this activity (and all above it)
             // be cleared when the task is reset, don't lose that information,
             // but propagate it up to the next activity.
-            AutoPtr<ActivityRecord> next = (*activities)[index+1];
+            AutoPtr<IInterface> obj;
+            activities->Get(index + 1, (IInterface**)&obj);
+            ActivityRecord* next = TO_ActivityRecord(obj);
             next->mIntent->AddFlags(IIntent::FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         }
     }
@@ -2904,9 +2924,13 @@ void ActivityStack::FinishAllActivitiesLocked(
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             noActivitiesInStack = FALSE;
             if (r->mFinishing && !immediately) {
                 continue;
@@ -2978,21 +3002,21 @@ Boolean ActivityStack::NavigateUpToLocked(
 {
     AutoPtr<ActivityRecord> srec = ActivityRecord::ForToken(token);
     AutoPtr<TaskRecord> task = srec->mTask;
-    AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-    Int32 start = -1;//IndexOf
-    for(UInt32 i = 0; i < activities->GetSize(); ++i) {
-        if ((*activities)[i] == srec) {
-            start = i;
-            break;
-        }
-    }
+    IArrayList* activities = task->mActivities;
+    Int32 start;
+    activities->IndexOf((IActivityRecord*)srec, &start);
     Boolean contains;
     mTaskHistory->Contains(TO_IINTERFACE(task), &contains);
     if (!contains || (start < 0)) {
         return FALSE;
     }
     Int32 finishTo = start - 1;
-    AutoPtr<ActivityRecord> parent = finishTo < 0 ? NULL : (*activities)[finishTo];
+    AutoPtr<ActivityRecord> parent;
+    if (finishTo >= 0) {
+        AutoPtr<IInterface> obj;
+        activities->Get(finishTo, (IInterface**)&obj);
+        parent = TO_ActivityRecord(obj);
+    }
     Boolean foundParentInTask = FALSE;
     AutoPtr<IComponentName> dest;
     destIntent->GetComponent((IComponentName**)&dest);
@@ -3000,7 +3024,9 @@ Boolean ActivityStack::NavigateUpToLocked(
 
     if (start > 0 && dest != NULL) {
         for (Int32 i = finishTo; i >= 0; i--) {
-            AutoPtr<ActivityRecord> r = (*activities)[i];
+            AutoPtr<IInterface> obj;
+            activities->Get(i, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             IPackageItemInfo::Probe(r->mInfo)->GetPackageName(&packageName);
             IPackageItemInfo::Probe(r->mInfo)->GetName(&name);
             dest->GetPackageName(&pName);
@@ -3040,7 +3066,9 @@ Boolean ActivityStack::NavigateUpToLocked(
     CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
     binderHelper->ClearCallingIdentity(&origId);
     for (Int32 i = start; i > finishTo; i--) {
-        AutoPtr<ActivityRecord> r = (*activities)[i];
+        AutoPtr<IInterface> obj;
+        activities->Get(i, (IInterface**)&obj);
+        ActivityRecord* r = TO_ActivityRecord(obj);
         RequestFinishActivityLocked(IBinder::Probe(r->mAppToken), resultCode, resultData,
             String("navigate-up"), TRUE);
         // Only return the supplied result for the first activity finished
@@ -3198,10 +3226,13 @@ void ActivityStack::DestroyActivitiesLocked(
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        List<AutoPtr<ActivityRecord> >::ReverseIterator rit = task->mActivities->RBegin();
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (; rit != task->mActivities->REnd(); ++rit) {
-            AutoPtr<ActivityRecord> r = *rit;
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             if (r->mFinishing) {
                 continue;
             }
@@ -3277,15 +3308,21 @@ Int32 ActivityStack::ReleaseSomeActivitiesLocked(
             Slogger::D(TAG, "Looking for activities to release in %s", TO_CSTR(task));
         }
         Int32 curNum = 0;
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (UInt32 actNdx = 0; actNdx < activities->GetSize(); actNdx++) {
-            AutoPtr<ActivityRecord> activity = (*activities)[actNdx];
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 actNdx = 0; actNdx < N; actNdx++) {
+            AutoPtr<IInterface> obj;
+            activities->Get(actNdx, (IInterface**)&obj);
+            ActivityRecord* activity = TO_ActivityRecord(obj);
             if (activity->mApp.Get() == app && activity->IsDestroyable()) {
                 //if (ActivityStackSupervisor::DEBUG_RELEASE) Slogger::V(TAG, "Destroying " + activity
                 //        + " in state " + activity.state + " resumed=" + mResumedActivity
                 //        + " pausing=" + mPausingActivity + " for reason " + reason);
                 DestroyActivityLocked(activity, TRUE, reason);
-                if ((*activities)[actNdx] != activity) {
+                AutoPtr<IInterface> obj2;
+                activities->Get(actNdx, (IInterface**)&obj2);
+                if (TO_ActivityRecord(obj2) != activity) {
                     // Was removed from list, back up so we don't miss the next one.
                     actNdx--;
                 }
@@ -3543,13 +3580,16 @@ Boolean ActivityStack::RemoveHistoryRecordsForAppLocked(
     Int32 taskSize;
     mTaskHistory->GetSize(&taskSize);
     for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
-        //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             --i;
             //if (CActivityManagerService::DEBUG_CLEANUP) Slogger::V(
             //    TAG, "Record #" + i + " " + r + ": app=" + r.app);
@@ -3996,11 +4036,13 @@ Boolean ActivityStack::WillActivityBeVisibleLocked(
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            //final ActivityRecord r = activities.get(activityNdx);
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             if (IBinder::Probe(r->mAppToken) == token) {
                 return TRUE;
             }
@@ -4026,10 +4068,13 @@ void ActivityStack::CloseSystemDialogsLocked()
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             Int32 flags;
             r->mInfo->GetFlags(&flags);
             if ((flags&IActivityInfo::FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
@@ -4055,10 +4100,13 @@ Boolean ActivityStack::ForceStopPackageLocked(
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        Int32 numActivities = activities->GetSize();
+        IArrayList* activities = task->mActivities;
+        Int32 numActivities;
+        activities->GetSize(&numActivities);
         for (Int32 activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             Boolean samePackage = r->mPackageName.Equals(name)
                     || (name == NULL && r->mUserId == userId);
             if ((userId == IUserHandle::USER_ALL || r->mUserId == userId)
@@ -4112,24 +4160,27 @@ void ActivityStack::GetTasksLocked(
     Int32 taskSize;
     mTaskHistory->GetSize(&taskSize);
     for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
-        //final TaskRecord task = mTaskHistory.get(taskNdx);
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        AutoPtr<ActivityRecord> r = NULL;
-        AutoPtr<ActivityRecord> top = NULL;
+        AutoPtr<ActivityRecord> r;
+        AutoPtr<ActivityRecord> top;
         Int32 numActivities = 0;
         Int32 numRunning = 0;
-        //final ArrayList<ActivityRecord> activities = task.mActivities;
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        if (activities->IsEmpty()) {
+        IArrayList* activities = task->mActivities;
+        Boolean isEmpty;
+        if (activities->IsEmpty(&isEmpty), isEmpty) {
             continue;
         }
         if (!allowed && !task->IsHomeTask() && task->mEffectiveUid != callingUid) {
             continue;
         }
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            r = (*activities)[activityNdx];
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            r = TO_ActivityRecord(obj);
 
             // Initialize state for next task if needed.
             if (top == NULL || (top->mState == ActivityState_INITIALIZING)) {
@@ -4179,14 +4230,17 @@ void ActivityStack::UnhandledBackLocked()
     //  Slogger::D(
     //    TAG, "Performing unhandledBack(): top activity at " + top);
     if (top >= 0) {
-        //final ArrayList<ActivityRecord> activities = mTaskHistory.get(top).mActivities;
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(top, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        Int32 activityTop = activities->GetSize() - 1;
+        IArrayList* activities = task->mActivities;
+        Int32 activityTop;
+        activities->GetSize(&activityTop);
+        activityTop = activityTop - 1;
         if (activityTop > 0) {
-            FinishActivityLocked((*activities)[activityTop], IActivity::RESULT_CANCELED, NULL,
+            AutoPtr<IInterface> obj;
+            activities->Get(activityTop, (IInterface**)&obj);
+            FinishActivityLocked(TO_ActivityRecord(obj), IActivity::RESULT_CANCELED, NULL,
                     String("unhandled-back"), TRUE);
         }
     }
@@ -4215,13 +4269,16 @@ void ActivityStack::HandleAppCrashLocked(
     Int32 taskSize;
     mTaskHistory->GetSize(&taskSize);
     for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
-        //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* r = TO_ActivityRecord(obj);
             if (r->mApp.Get() == app) {
                 //Slogger::W(TAG, "  Force finishing activity "
                 //        + r.intent.getComponent().flattenToShortString());
@@ -4247,19 +4304,11 @@ Boolean ActivityStack::DumpActivitiesLocked(
     Int32 taskSize;
     mTaskHistory->GetSize(&taskSize);
     for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
-        //final TaskRecord task = mTaskHistory.get(taskNdx);
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        AutoPtr<IList> list;
-        CArrayList::New((IList**)&list);
-        AutoPtr<List<AutoPtr<ActivityRecord> > > ars = task->mActivities;
-        for (UInt32 activityNdx = 0; activityNdx < ars->GetSize(); ++activityNdx) {
-            AutoPtr<ActivityRecord> ar = (*ars)[activityNdx];
-            list->Add(TO_IINTERFACE(ar.Get()));
-        }
         printed |= ActivityStackSupervisor::DumpHistoryList(fd, pw,
-                list, String("    "), String("Hist"), TRUE, !dumpAll,
+                IList::Probe(task->mActivities), String("    "), String("Hist"), TRUE, !dumpAll,
                 dumpClient, dumpPackage, needSep, header,
                 String("    Task id #") + StringUtils::ToString(task->mTaskId));
         if (printed) {
@@ -4272,7 +4321,6 @@ Boolean ActivityStack::DumpActivitiesLocked(
 AutoPtr<IArrayList> ActivityStack::GetDumpActivitiesLocked(
     /* [in] */ const String& name)
 {
-    //ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
     AutoPtr<IArrayList> activities;
     CArrayList::New((IArrayList**)&activities);
 
@@ -4283,26 +4331,24 @@ AutoPtr<IArrayList> ActivityStack::GetDumpActivitiesLocked(
             AutoPtr<IInterface> taskobj;
             mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
             TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-            AutoPtr<List<AutoPtr<ActivityRecord> > > ars = task->mActivities;
-            for (Int32 activityNdx = ars->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-                AutoPtr<ActivityRecord> r = (*ars)[activityNdx];
-                activities->Add(TO_IINTERFACE(r));
-            }
+            activities->AddAll(ICollection::Probe(task->mActivities));
         }
     } else if (String("top").Equals(name)) {
         Int32 top;
         mTaskHistory->GetSize(&top);
         --top;
         if (top >= 0) {
-            //final ArrayList<ActivityRecord> list = mTaskHistory.get(top).mActivities;
             AutoPtr<IInterface> taskobj;
             mTaskHistory->Get(top, (IInterface**)&taskobj);
             TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-            AutoPtr<List<AutoPtr<ActivityRecord> > > list = task->mActivities;
-            Int32 listTop = list->GetSize() - 1;
+            IArrayList* list = task->mActivities;
+            Int32 listTop;
+            list->GetSize(&listTop);
+            listTop = listTop - 1;
             if (listTop >= 0) {
-                AutoPtr<ActivityRecord> r = (*list)[listTop];
-                activities->Add(TO_IINTERFACE(r));
+                AutoPtr<IInterface> obj;
+                list->Get(listTop, (IInterface**)&obj);
+                activities->Add(obj);
             }
         }
     } else {
@@ -4312,21 +4358,20 @@ AutoPtr<IArrayList> ActivityStack::GetDumpActivitiesLocked(
         Int32 taskSize;
         mTaskHistory->GetSize(&taskSize);
         for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
-            //for (ActivityRecord r1 : mTaskHistory.get(taskNdx).mActivities) {
-            //    if (matcher.match(r1, r1.intent.getComponent())) {
-            //        activities.add(r1);
-            //    }
-            //}
             AutoPtr<IInterface> taskobj;
             mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
             TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-            AutoPtr<List<AutoPtr<ActivityRecord> > > ars = task->mActivities;
-            for (Int32 activityNdx = ars->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-                AutoPtr<ActivityRecord> r = (*ars)[activityNdx];
+            IArrayList* activities = task->mActivities;
+            Int32 N;
+            activities->GetSize(&N);
+            for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+                AutoPtr<IInterface> obj;
+                activities->Get(activityNdx, (IInterface**)&obj);
+                ActivityRecord* r = TO_ActivityRecord(obj);
                 AutoPtr<IComponentName> cn;
                 r->mIntent->GetComponent((IComponentName**)&cn);
-                if (matcher->Match(TO_IINTERFACE(r), cn)) {
-                    activities->Add(TO_IINTERFACE(r));
+                if (matcher->Match((IActivityRecord*)r, cn)) {
+                    activities->Add(obj);
                 }
             }
         }
@@ -4344,14 +4389,16 @@ AutoPtr<ActivityRecord> ActivityStack::RestartPackage(
     Int32 taskSize;
     mTaskHistory->GetSize(&taskSize);
     for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
-        //final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
         AutoPtr<IInterface> taskobj;
         mTaskHistory->Get(taskNdx, (IInterface**)&taskobj);
         TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-        for (Int32 activityNdx = activities->GetSize() - 1; activityNdx >= 0; --activityNdx) {
-            //final ActivityRecord a = activities.get(activityNdx);
-            AutoPtr<ActivityRecord> a = (*activities)[activityNdx];
+        IArrayList* activities = task->mActivities;
+        Int32 N;
+        activities->GetSize(&N);
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
+            AutoPtr<IInterface> obj;
+            activities->Get(activityNdx, (IInterface**)&obj);
+            ActivityRecord* a = TO_ActivityRecord(obj);
             String pn;
             IPackageItemInfo::Probe(a->mInfo)->GetPackageName(&pn);
             if (pn.Equals(packageName)) {
@@ -4393,7 +4440,8 @@ void ActivityStack::RemoveTask(
     mTaskHistory->Remove(TO_IINTERFACE(task));
     UpdateTaskMovement(task, TRUE);
 
-    if (task->mActivities->IsEmpty()) {
+    Boolean isEmpty;
+    if (task->mActivities->IsEmpty(&isEmpty), isEmpty) {
         Boolean isVoiceSession = task->mVoiceSession != NULL;
         if (isVoiceSession) {
             //try {
@@ -4657,8 +4705,9 @@ ECode ActivityStack::CompleteResumeLocked(
     next->mNewIntents = NULL;
 
     if (next->IsHomeActivity() && next->IsNotResolverActivity()) {
-        AutoPtr<List<AutoPtr<ActivityRecord> > > activities = next->mTask->mActivities;
-        AutoPtr<ProcessRecord> app = ((*activities)[0])->mApp;
+        AutoPtr<IInterface> obj;
+        next->mTask->mActivities->Get(0, (IInterface**)&obj);
+        AutoPtr<ProcessRecord> app = TO_ActivityRecord(obj)->mApp;
         if (app != NULL && app != mService->mHomeProcess) {
             mService->mHomeProcess = app;
         }
@@ -4747,10 +4796,13 @@ Boolean ActivityStack::IsStackVisible()
             AutoPtr<IInterface> taskobj;
             tasks->Get(taskNdx, (IInterface**)&taskobj);
             TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
-            //ArrayList<ActivityRecord> activities = task.mActivities;
-            AutoPtr<List<AutoPtr<ActivityRecord> > > activities = task->mActivities;
-            for (UInt32 activityNdx = 0; activityNdx < activities->GetSize(); activityNdx++) {
-                AutoPtr<ActivityRecord> r = (*activities)[activityNdx];
+            IArrayList* activities = task->mActivities;
+            Int32 N;
+            activities->GetSize(&N);
+            for (Int32 activityNdx = 0; activityNdx < N; activityNdx++) {
+                AutoPtr<IInterface> obj;
+                activities->Get(activityNdx, (IInterface**)&obj);
+                ActivityRecord* r = TO_ActivityRecord(obj);
 
                 // Conditions for an activity to obscure the stack we're
                 // examining:
@@ -4875,14 +4927,16 @@ Int32 ActivityStack::ResetAffinityTaskIfNeededLocked(
     Int32 taskId = task->mTaskId;
     String taskAffinity = task->mAffinity;
 
-    //final ArrayList<ActivityRecord> activities = affinityTask.mActivities;
-    AutoPtr<List<AutoPtr<ActivityRecord> > > activities = affinityTask->mActivities;
-    Int32 numActivities = activities->GetSize();
+    IArrayList* activities = affinityTask->mActivities;
+    Int32 numActivities;
+    activities->GetSize(&numActivities);
     Int32 rootActivityNdx = affinityTask->FindEffectiveRootIndex();
 
     // Do not operate on or below the effective root Activity.
     for (Int32 i = numActivities - 1; i > rootActivityNdx; --i) {
-        AutoPtr<ActivityRecord> target = (*activities)[i];
+        AutoPtr<IInterface> obj;
+        activities->Get(i, (IInterface**)&obj);
+        ActivityRecord* target = TO_ActivityRecord(obj);
         if (target->mFrontOfTask)
             break;
 
@@ -4919,7 +4973,9 @@ Int32 ActivityStack::ResetAffinityTaskIfNeededLocked(
                 Int32 start = replyChainEnd >= 0 ? replyChainEnd : i;
                 //if (CActivityManagerService::DEBUG_TASKS) Slogger::V(TAG, "Finishing task at index " + start + " to " + i);
                 for (Int32 srcPos = start; srcPos >= i; --srcPos) {
-                    AutoPtr<ActivityRecord> p = (*activities)[srcPos];
+                    AutoPtr<IInterface> obj;
+                    activities->Get(srcPos, (IInterface**)&obj);
+                    ActivityRecord* p = TO_ActivityRecord(obj);
                     if (p->mFinishing) {
                         continue;
                     }
@@ -4927,14 +4983,16 @@ Int32 ActivityStack::ResetAffinityTaskIfNeededLocked(
                 }
             } else {
                 if (taskInsertionPoint < 0) {
-                    taskInsertionPoint = task->mActivities->GetSize();
+                    task->mActivities->GetSize(&taskInsertionPoint);
                 }
 
                 Int32 start = replyChainEnd >= 0 ? replyChainEnd : i;
                 //if (CActivityManagerService::DEBUG_TASKS) Slogger::V(TAG, "Reparenting from task=" + affinityTask + ":"
                 //        + start + "-" + i + " to task=" + task + ":" + taskInsertionPoint);
                 for (Int32 srcPos = start; srcPos >= i; --srcPos) {
-                    AutoPtr<ActivityRecord> p = (*activities)[srcPos];
+                    AutoPtr<IInterface> obj;
+                    activities->Get(srcPos, (IInterface**)&obj);
+                    ActivityRecord* p = TO_ActivityRecord(obj);
                     p->SetTask(task, NULL);
                     task->AddActivityAtIndex(taskInsertionPoint, p);
 
@@ -4958,19 +5016,13 @@ Int32 ActivityStack::ResetAffinityTaskIfNeededLocked(
                 Int32 launchMode;
                 info->GetLaunchMode(&launchMode);
                 if (launchMode == IActivityInfo::LAUNCH_SINGLE_TOP) {
-                    //ArrayList<ActivityRecord> taskActivities = task.mActivities;
-                    AutoPtr<List<AutoPtr<ActivityRecord> > > taskActivities = task->mActivities;
-                    //int targetNdx = taskActivities.IndexOf(target);
-                    Int32 targetNdx = -1;//IndexOf
-                    for(UInt32 i = 0; i < taskActivities->GetSize(); ++i) {
-                        if (((*activities)[i]).Get() == target) {
-                            targetNdx = i;
-                            break;
-                        }
-                    }
-
+                    IArrayList* taskActivities = task->mActivities;
+                    Int32 targetNdx;
+                    taskActivities->IndexOf((IActivityRecord*)target, &targetNdx);
                     if (targetNdx > 0) {
-                        AutoPtr<ActivityRecord> p = (*taskActivities)[targetNdx - 1];
+                        AutoPtr<IInterface> obj;
+                        taskActivities->Get(targetNdx - 1, (IInterface**)&obj);
+                        ActivityRecord* p = TO_ActivityRecord(obj);
                         AutoPtr<IIntent> pIntent = p->mIntent;
                         AutoPtr<IComponentName> pcls;
                         pIntent->GetComponent((IComponentName**)&pcls);
@@ -5094,9 +5146,9 @@ void ActivityStack::RemoveHistoryRecordsForAppLocked(
     //    + " with " + i + " entries");
     while (i > 0) {
         i--;
-        AutoPtr<IInterface> activityobj;
-        list->Get(i, (IInterface**)&activityobj);
-        ActivityRecord* r = (ActivityRecord*)(IObject::Probe(activityobj));
+        AutoPtr<IInterface> obj;
+        list->Get(i, (IInterface**)&obj);
+        ActivityRecord* r = TO_ActivityRecord(obj);
         if (CActivityManagerService::DEBUG_CLEANUP)
             Slogger::V(TAG, "Record #%d %s",  i, TO_CSTR(r));
         if (r->mApp.Get() == app) {

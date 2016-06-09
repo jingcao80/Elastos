@@ -90,8 +90,7 @@ const Int32 AccessPoint::SECOND_TO_MILLI = 1000;
 CAR_INTERFACE_IMPL(AccessPoint, Preference, IAccessPoint);
 
 AccessPoint::AccessPoint()
-    : mScanResultCache(0)
-    , mSecurity(0)
+    : mSecurity(0)
     , mNetworkId(-1)
     , mWpsAvailable(FALSE)
     , mShowSummary(TRUE)
@@ -468,12 +467,12 @@ Boolean AccessPoint::Update(
         mSeen = seen;
     }
     if (WifiSettings::mVerboseLogging > 0) {
-        if (mScanResultCache.Size()) {
-            mScanResultCache.Resize(32);
+        if (mScanResultCache == NULL) {
+            mScanResultCache = new LruCache< String, AutoPtr<IScanResult> >(32);
         }
         String BSSID;
         result->GetBSSID(&BSSID);
-        mScanResultCache.Put(BSSID, result);
+        mScanResultCache->Put(BSSID, result);
     }
 
     String SSID;
@@ -633,7 +632,7 @@ String AccessPoint::GetVisibilityStatus()
         visibility->Append(str);
     }
 
-    if (!mScanResultCache.Size()) {
+    if (mScanResultCache != NULL) {
         AutoPtr<IWifiConfigurationHelper> helper;
         CWifiConfigurationHelper::AcquireSingleton((IWifiConfigurationHelper**)&helper);
         Int32 INVALID_RSSI;
@@ -646,8 +645,7 @@ String AccessPoint::GetVisibilityStatus()
         Int32 n24 = 0; // Number scan results we included in the string
         Int32 n5 = 0; // Number scan results we included in the string
 
-        // Map<String, ScanResult> list = mScanResultCache->Snapshot();
-        AutoPtr< HashMap<String, AutoPtr<IScanResult> > > list = mScanResultCache.Snapshot();
+        AutoPtr< HashMap<String, AutoPtr<IScanResult> > > list = mScanResultCache->Snapshot();
 
         // // TODO: sort list by RSSI or age
         Int32 i = 0;
@@ -822,20 +820,14 @@ void AccessPoint::Refresh()
     // Update to new summary
     StringBuilder summary;
 
-    Int32 status;
-    mConfig->GetStatus(&status);
-    Int32 disableReason;
-    mConfig->GetDisableReason(&disableReason);
-    Int32 autoJoinStatus;
-    mConfig->GetAutoJoinStatus(&autoJoinStatus);
+    Int32 status, disableReason, autoJoinStatus;
     String str;
-
     if (mState != NetworkInfoDetailedState_NONE) { // This is the active connection
         summary.Append(Summary::Get(context, mState));
     }
-    else if (mConfig != NULL && ((status == IWifiConfigurationStatus::DISABLED &&
-            disableReason != IWifiConfiguration::DISABLED_UNKNOWN_REASON)
-           || autoJoinStatus >= IWifiConfiguration::AUTO_JOIN_DISABLED_ON_AUTH_FAILURE)) {
+    else if (mConfig != NULL && (((mConfig->GetStatus(&status), status == IWifiConfigurationStatus::DISABLED) &&
+            (mConfig->GetDisableReason(&disableReason), disableReason != IWifiConfiguration::DISABLED_UNKNOWN_REASON))
+           || (mConfig->GetAutoJoinStatus(&autoJoinStatus), autoJoinStatus >= IWifiConfiguration::AUTO_JOIN_DISABLED_ON_AUTH_FAILURE))) {
         if (autoJoinStatus >= IWifiConfiguration::AUTO_JOIN_DISABLED_ON_AUTH_FAILURE) {
             if (disableReason == IWifiConfiguration::DISABLED_DHCP_FAILURE) {
                 context->GetString(R::string::wifi_disabled_network_failure, &str);

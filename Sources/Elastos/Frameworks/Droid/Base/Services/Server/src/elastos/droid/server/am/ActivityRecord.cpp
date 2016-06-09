@@ -1281,15 +1281,8 @@ Int32 ActivityRecord::GetTaskForActivityLocked(
         return -1;
     }
     TaskRecord* task = r->mTask;
-    Int32 activityNdx = 0;
-    List<AutoPtr<ActivityRecord> >::Iterator iter = task->mActivities->Begin();
-    for (Int32 i = 0; iter != task->mActivities->End(); ++iter, ++i) {
-        if (iter->Get() == r) {
-            activityNdx = i;
-            break;
-        }
-    }
-
+    Int32 activityNdx;
+    task->mActivities->IndexOf((IActivityRecord*)r, &activityNdx);
     if (activityNdx < 0 || (onlyRoot && activityNdx > task->FindEffectiveRootIndex())) {
         return -1;
     }

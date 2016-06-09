@@ -5,8 +5,8 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Service.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
-#include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::App::IActivityManagerTaskThumbnail;
 using Elastos::Droid::App::IActivityManagerTaskDescription;
@@ -19,7 +19,7 @@ using Elastos::Droid::Internal::App::IIVoiceInteractor;
 using Elastos::Core::ICharSequence;
 using Elastos::IO::IFile;
 using Elastos::IO::IPrintWriter;
-using Elastos::Utility::Etl::List;
+using Elastos::Utility::IArrayList;
 using Org::Xmlpull::V1::IXmlPullParser;
 using Org::Xmlpull::V1::IXmlSerializer;
 
@@ -70,7 +70,7 @@ public:
         /* [in] */ Int32 userId,
         /* [in] */ Int32 effectiveUid,
         /* [in] */ const String& lastDescription,
-        /* [in] */ List<AutoPtr<ActivityRecord> >* activities,
+        /* [in] */ IArrayList* activities,
         /* [in] */ Int64 firstActiveTime,
         /* [in] */ Int64 lastActiveTime,
         /* [in] */ Int64 lastTimeMoved,
@@ -271,7 +271,7 @@ public:
     AutoPtr<IActivityManagerTaskDescription> mLastTaskDescription;
 
     /** List of all activities in the task arranged in history order */
-    AutoPtr<List<AutoPtr<ActivityRecord> > > mActivities;
+    AutoPtr<IArrayList> mActivities;
 
     /** Current stack */
     ActivityStack* mStack;

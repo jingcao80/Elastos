@@ -2870,8 +2870,6 @@ ECode CActivityManagerService::constructor(
     mServices = new ActiveServices(this);
     mProviderMap = new ProviderMap(this);
 
-    ECode ec = NOERROR;
-
     // TODO: Move creation of battery stats service outside of activity manager service.
     AutoPtr<IEnvironment> env;
     CEnvironment::AcquireSingleton((IEnvironment**)&env);
@@ -2891,14 +2889,16 @@ ECode CActivityManagerService::constructor(
     AutoPtr<IBatteryStatsImpl> bstats = mBatteryStatsService->GetActiveStatistics();
     bstats->ReadLocked();
     bstats->WriteAsyncLocked();
-    if (DEBUG_POWER)
+    if (DEBUG_POWER) {
         mOnBattery = TRUE;
-    else
+    }
+    else {
         bstats->IsOnBattery(&mOnBattery);
+    }
     bstats->SetCallback(this);
 
     AutoPtr<IFile> file;
-    ec = CFile::New(systemDir, String("procstats"), (IFile**)&file);
+    ECode ec = CFile::New(systemDir, String("procstats"), (IFile**)&file);
     CProcessStatsService::NewByFriend(this, file, (CProcessStatsService**)&mProcessStats);
 
     file = NULL;
@@ -13817,14 +13817,12 @@ ECode CActivityManagerService::ConvertToTranslucent(
             Binder::RestoreCallingIdentity(origId);
             return NOERROR;
         }
-        List<AutoPtr<ActivityRecord> >::ReverseIterator rit = r->mTask->mActivities->RBegin();
-        for (; rit != r->mTask->mActivities->REnd(); ++rit) {
-            if (*rit == r)
-                break;
-        }
-
-        if (rit != r->mTask->mActivities->REnd()) {
-            AutoPtr<ActivityRecord> under = *(++rit);
+        Int32 index;
+        r->mTask->mActivities->LastIndexOf((IActivityRecord*)r, &index);
+        if (index > 0) {
+            AutoPtr<IInterface> obj;
+            r->mTask->mActivities->Get(index - 1, (IInterface**)&obj);
+            ActivityRecord* under = (ActivityRecord*)IActivityRecord::Probe(obj);
             under->mReturningOptions = options;
         }
         Boolean translucentChanged = r->ChangeWindowTranslucency(FALSE);

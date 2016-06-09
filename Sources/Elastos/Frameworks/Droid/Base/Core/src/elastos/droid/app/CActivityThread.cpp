@@ -39,6 +39,7 @@
 #include "elastos/droid/os/CMessage.h"
 #include "elastos/droid/os/Environment.h"
 #include "elastos/droid/internal/os/CRuntimeInit.h"
+#include "elastos/droid/internal/utility/CParcelableString.h"
 #include "elastos/droid/database/sqlite/CSQLiteDatabaseHelper.h"
 #include "elastos/droid/hardware/display/DisplayManagerGlobal.h"
 #include "elastos/droid/R.h"
@@ -113,6 +114,7 @@ using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Utility::IPair;
 using Elastos::Droid::Internal::Os::IRuntimeInit;
 using Elastos::Droid::Internal::Os::CRuntimeInit;
+using Elastos::Droid::Internal::Utility::CParcelableString;
 
 using Elastos::Core::ISystem;
 using Elastos::Core::IClassLoader;
@@ -613,8 +615,12 @@ ECode CActivityThread::StopInfo::Run()
 {
     // Tell activity manager we have been stopped.
     if (DEBUG_MEMORY_TRIM) Slogger::V(TAG, "Reporting activity stopped: %s", TO_CSTR(mActivity));
+    AutoPtr<ICharSequence> description;
+    if (mDescription != NULL) {
+        CParcelableString::New(mDescription, (ICharSequence**)&description);
+    }
     return ActivityManagerNative::GetDefault()->ActivityStopped(
-        mActivity->mToken, mState, mPersistentState, mDescription);
+        mActivity->mToken, mState, mPersistentState, description);
 }
 
 //==============================================================================
