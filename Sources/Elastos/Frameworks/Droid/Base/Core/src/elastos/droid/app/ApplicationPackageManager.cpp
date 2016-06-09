@@ -2508,7 +2508,7 @@ AutoPtr<IUserInfo> ApplicationPackageManager::GetUserIfProfile(
     AutoPtr<IIterator> it;
     userProfiles->GetIterator((IIterator**)&it);
     Boolean hasNext;
-    while (it->HasNext(&hasNext), &hasNext) {
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         IUserInfo* user = IUserInfo::Probe(obj);

@@ -2,8 +2,12 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/pm/CUserInfo.h"
 #include "elastos/droid/os/CUserHandle.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::Os::CUserHandle;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -144,9 +148,15 @@ ECode CUserInfo::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    // return "UserInfo{" + id + ":" + name + ":" + Integer.toHexString(flags) + "}";
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    StringBuilder sb("UserInfo{");
+    sb += mId;
+    sb += ":";
+    sb += mName;
+    sb += ":";
+    sb += StringUtils::ToHexString(mFlags);
+    sb += "}";
+    *str = sb.ToString();
+    return NOERROR;
 }
 
 ECode CUserInfo::ReadFromParcel(
