@@ -17,6 +17,7 @@ using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IOnPreDrawListener;
 using Elastos::Droid::Utility::IArrayMap;
 using Elastos::Droid::Utility::IPair;
+using Elastos::Droid::Utility::ISparseArray;
 
 using Elastos::Core::IRunnable;
 using Elastos::Core::ICharSequence;
@@ -366,11 +367,24 @@ public:
 
     virtual CARAPI Run();
 
+    /**
+     * Finds the first removed fragment and last added fragments when popping the back stack.
+     * If none of the fragments have transitions, then both lists will be empty.
+     *
+     * @param firstOutFragments The list of first fragments to be removed, keyed on the
+     *                          container ID. This list will be modified by the method.
+     * @param lastInFragments The list of last fragments to be added, keyed on the
+     *                        container ID. This list will be modified by the method.
+     */
+    virtual CARAPI CalculateBackFragments(
+        /* [in] */ ISparseArray* firstOutFragments, //SparseArray<Fragment>
+        /* [in] */ ISparseArray* lastInFragments); //SparseArray<Fragment>
+
     virtual CARAPI PopFromBackStack(
         /* [in] */ Boolean doStateMove,
         /* [in] */ IBackStackRecordTransitionState* state,
-        /* [in] */ IHashMap* firstOutFragments, //SparseArray<Fragment>
-        /* [in] */ IHashMap* lastInFragments, //SparseArray<Fragment>
+        /* [in] */ ISparseArray* firstOutFragments, //SparseArray<Fragment>
+        /* [in] */ ISparseArray* lastInFragments, //SparseArray<Fragment>
         /* [out] */ IBackStackRecordTransitionState** result);
 
     virtual CARAPI GetName(
@@ -408,11 +422,11 @@ private:
         /* [in] */ Int32 opcmd);
 
     static CARAPI_(void) SetFirstOut(
-        /* [in] */ IHashMap* fragments, //SparseArray<Fragment>
+        /* [in] */ ISparseArray* fragments, //SparseArray<Fragment>
         /* [in] */ IFragment* fragment);
 
     CARAPI_(void) SetLastIn(
-        /* [in] */ IHashMap* fragments, //SparseArray<Fragment>
+        /* [in] */ ISparseArray* fragments, //SparseArray<Fragment>
         /* [in] */ IFragment* fragment);
     /**
      * Finds the first removed fragment and last added fragments when going forward.
@@ -424,21 +438,8 @@ private:
      *                        container ID. This list will be modified by the method.
      */
     CARAPI_(void) CalculateFragments(
-        /* [in] */ IHashMap* firstOutFragments, //SparseArray<Fragment>
-        /* [in] */ IHashMap* lastInFragments); //SparseArray<Fragment>
-
-    /**
-     * Finds the first removed fragment and last added fragments when popping the back stack.
-     * If none of the fragments have transitions, then both lists will be empty.
-     *
-     * @param firstOutFragments The list of first fragments to be removed, keyed on the
-     *                          container ID. This list will be modified by the method.
-     * @param lastInFragments The list of last fragments to be added, keyed on the
-     *                        container ID. This list will be modified by the method.
-     */
-    CARAPI_(void) CalculateBackFragments(
-        /* [in] */ IHashMap* firstOutFragments, //SparseArray<Fragment>
-        /* [in] */ IHashMap* lastInFragments); //SparseArray<Fragment>
+        /* [in] */ ISparseArray* firstOutFragments, //SparseArray<Fragment>
+        /* [in] */ ISparseArray* lastInFragments); //SparseArray<Fragment>
 
     /**
      * When custom fragment transitions are used, this sets up the state for each transition
@@ -472,8 +473,8 @@ private:
      * java.util.ArrayList)}.
      */
     AutoPtr<IBackStackRecordTransitionState> BeginTransition(
-        /* [in] */ IHashMap* firstOutFragments, //SparseArray<Fragment>
-        /* [in] */ IHashMap* lastInFragments, //SparseArray<Fragment>
+        /* [in] */ ISparseArray* firstOutFragments, //SparseArray<Fragment>
+        /* [in] */ ISparseArray* lastInFragments, //SparseArray<Fragment>
         /* [in] */ Boolean isBack);
 
     static AutoPtr<ITransition> CloneTransition(
@@ -563,8 +564,8 @@ private:
     void ConfigureTransitions(int containerId,
         /* [in] */ IBackStackRecordTransitionState* state,
         /* [in] */ Boolean isBack,
-        /* [in] */ IHashMap* firstOutFragments, //SparseArray<Fragment>
-        /* [in] */ IHashMap* lastInFragments);//SparseArray<Fragment>
+        /* [in] */ ISparseArray* firstOutFragments, //SparseArray<Fragment>
+        /* [in] */ ISparseArray* lastInFragments);//SparseArray<Fragment>
 
     /**
      * After the transition has started, remove all targets that we added to the transitions

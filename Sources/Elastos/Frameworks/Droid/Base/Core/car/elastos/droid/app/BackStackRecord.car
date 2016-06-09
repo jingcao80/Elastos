@@ -2,9 +2,9 @@
 module
 {
     using interface Elastos.Core.ICharSequence;
-    using interface Elastos.Utility.IHashMap;
 
     interface Elastos.Droid.Utility.IArrayMap;
+    interface Elastos.Droid.Utility.ISparseArray;
     interface Elastos.Droid.View.IView;
     interface Elastos.Droid.App.IFragmentManagerImpl;
     interface Elastos.Droid.App.IBackStackRecord;
@@ -66,11 +66,15 @@ module
         GetBreadCrumbShortTitle(
             [out] ICharSequence** shortTitle);
 
+        CalculateBackFragments(
+            [in] ISparseArray* firstOutFragments,
+            [in] ISparseArray* lastInFragments);
+
         PopFromBackStack(
             [in] Boolean doStateMove,
             [in] IBackStackRecordTransitionState* state,
-            [in] IHashMap* firstOutFragments,
-            [in] IHashMap* lastInFragments,
+            [in] ISparseArray* firstOutFragments,
+            [in] ISparseArray* lastInFragments,
             [out] IBackStackRecordTransitionState** result);
 
         GetName(

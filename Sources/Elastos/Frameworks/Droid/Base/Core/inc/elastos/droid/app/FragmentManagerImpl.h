@@ -442,23 +442,23 @@ private:
 
 public:
     static Boolean DEBUG;
-    static const String TAG;// = "FragmentManager";
+    static const String TAG;
 
-    List<AutoPtr<IRunnable> > mPendingActions;
+    AutoPtr<IArrayList> mPendingActions;
     AutoPtr< ArrayOf<IRunnable* > > mTmpActions;
     Boolean mExecutingActions;
 
-    List<AutoPtr<IFragment> > mActive;
-    List<AutoPtr<IFragment> > mAdded;
-    List<Int32> mAvailIndices;
-    List<AutoPtr<IBackStackRecord> > mBackStack;
-    List<AutoPtr<IFragment> > mCreatedMenus;
+    AutoPtr<IArrayList> mActive;
+    AutoPtr<IArrayList> mAdded;
+    AutoPtr<IArrayList> mAvailIndices;
+    AutoPtr<IArrayList> mBackStack;
+    AutoPtr<IArrayList> mCreatedMenus;
 
     // Must be accessed while locked.
-    List<AutoPtr<IBackStackRecord> > mBackStackIndices;
-    List<Int32> mAvailBackStackIndices;
+    AutoPtr<IArrayList> mBackStackIndices;
+    AutoPtr<IArrayList> mAvailBackStackIndices;
 
-    List<AutoPtr<IFragmentManagerOnBackStackChangedListener> > mBackStackChangeListeners;
+    AutoPtr<IArrayList> mBackStackChangeListeners;
 
     Int32 mCurState;
     IActivity* mActivity;

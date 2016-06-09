@@ -212,13 +212,28 @@ CAR_INTERFACE_IMPL(AsyncChannel::DeathMonitor, Object, IProxyDeathRecipient)
 AsyncChannel::DeathMonitor::DeathMonitor(
     /* [in] */ AsyncChannel* owner)
     : mOwner(owner)
+    , mIsLinked(FALSE)
 {
+}
+
+AsyncChannel::DeathMonitor::~DeathMonitor()
+{
+    if (mIsLinked) {
+        mOwner->Release();
+        mOwner = NULL;
+    }
 }
 
 ECode AsyncChannel::DeathMonitor::ProxyDied()
 {
     mOwner->ReplyDisconnected(STATUS_REMOTE_DISCONNECTION);
     return NOERROR;
+}
+
+void AsyncChannel::DeathMonitor::LinkToDeath()
+{
+    mIsLinked = TRUE;
+    mOwner->AddRef();
 }
 
 //=============================================
@@ -673,6 +688,7 @@ void AsyncChannel::ReplyHalfConnected(
                 // Override status to indicate failure
                 msg->SetArg1(STATUS_BINDING_UNSUCCESSFUL);
             }
+            else mDeathMonitor->LinkToDeath();
         }
     }
 

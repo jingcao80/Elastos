@@ -11,6 +11,7 @@
 #include "elastos/droid/transition/CTransitionManager.h"
 #include "elastos/droid/transition/CTransitionSet.h"
 #include "elastos/droid/utility/CArrayMap.h"
+#include "elastos/droid/utility/CSparseArray.h"
 #include "elastos/droid/view/CView.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringBuilder.h>
@@ -27,7 +28,7 @@ using Elastos::Droid::View::CView;
 using Elastos::Droid::View::IViewTreeObserver;
 using Elastos::Droid::View::EIID_IOnPreDrawListener;
 using Elastos::Droid::Utility::CArrayMap;
-
+using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Core::CoreUtils;
@@ -155,8 +156,9 @@ ECode CBackStackState::Instantiate(
         }
         Int32 findex = (*mOps)[pos++];
         if (findex >= 0) {
-            AutoPtr<IFragment> f = fmObj->mActive[findex];
-            op->mFragment = f;
+            AutoPtr<IInterface> obj;
+            fmObj->mActive->Get(findex, (IInterface**)&obj);
+            op->mFragment = IFragment::Probe(obj);
         }
         else {
             op->mFragment = NULL;
@@ -174,8 +176,9 @@ ECode CBackStackState::Instantiate(
                         "Instantiate %s set remove fragment #%d",
                         TO_CSTR(bse), (*mOps)[pos]);
                 }
-                AutoPtr<IFragment> r = fmObj->mActive[(*mOps)[pos++]];
-                op->mRemoved->Add(TO_IINTERFACE(r));
+                AutoPtr<IInterface> obj;
+                fmObj->mActive->Get((*mOps)[pos++], (IInterface**)&obj);
+                op->mRemoved->Add(obj);
             }
         }
         bse->AddOp(op);
@@ -880,10 +883,9 @@ ECode BackStackRecord::Run()
 
     BumpBackStackNesting(1);
 
-    AutoPtr<IHashMap> firstOutFragments, lastInFragments; //SparseArray<Fragment>
-    CHashMap::New((IHashMap**)&firstOutFragments);
-    CHashMap::New((IHashMap**)&lastInFragments);
-
+    AutoPtr<ISparseArray> firstOutFragments, lastInFragments;
+    CSparseArray::New((ISparseArray**)&firstOutFragments);
+    CSparseArray::New((ISparseArray**)&lastInFragments);
     CalculateFragments(firstOutFragments, lastInFragments);
     BeginTransition(firstOutFragments, lastInFragments, FALSE);
 
@@ -899,36 +901,39 @@ ECode BackStackRecord::Run()
 
             case OP_REPLACE: {
                 AutoPtr<IFragment> f = op->mFragment;
-                // must make a copy, because mManager->RemoveFragment modifies mManager->mAdded when iterate.
-                List<AutoPtr<IFragment> > addedCopy(mManager->mAdded);
-                List<AutoPtr<IFragment> >::Iterator it;
-                for (it = addedCopy.Begin(); it != addedCopy.End(); ++it) {
-                    AutoPtr<IFragment> old = *it;
-                    if (FragmentManagerImpl::DEBUG) {
-                        Logger::V(TAG, "OP_REPLACE: adding=%s old=%s", TO_CSTR(f), TO_CSTR(old));
-                    }
-                    Int32 oldId, fId;
-                    if (f == NULL || (old->GetContainerId(&oldId), oldId) == (f->GetContainerId(&fId), fId)) {
-                        if (old == f) {
-                            op->mFragment = f = NULL;
+                if (mManager->mAdded != NULL) {
+                    Int32 N;
+                    mManager->mAdded->GetSize(&N);
+                    for (Int32 i = 0; i < N; i++) {
+                        AutoPtr<IInterface> obj;
+                        mManager->mAdded->Get(i, (IInterface**)&obj);
+                        IFragment* old = IFragment::Probe(obj);
+                        if (FragmentManagerImpl::DEBUG) {
+                            Logger::V(TAG, "OP_REPLACE: adding=%s old=%s", TO_CSTR(f), TO_CSTR(old));
                         }
-                        else {
-                            if (op->mRemoved == NULL) {
-                                CArrayList::New((IArrayList**)&op->mRemoved);
+                        Int32 oldId, fId;
+                        if (f == NULL || (old->GetContainerId(&oldId), oldId) == (f->GetContainerId(&fId), fId)) {
+                            if (old == f.Get()) {
+                                op->mFragment = f = NULL;
                             }
-
-                            op->mRemoved->Add(old);
-                            old->SetNextAnim(op->mExitAnim);
-                            if (mAddToBackStack) {
-                                Int32 oldNesting;
-                                old->GetBackStackNesting(&oldNesting);
-                                oldNesting += 1;
-                                old->SetBackStackNesting(oldNesting);
-                                if (FragmentManagerImpl::DEBUG) {
-                                    Logger::V(TAG, "Bump nesting of %s to %d", TO_CSTR(old), oldNesting);
+                            else {
+                                if (op->mRemoved == NULL) {
+                                    CArrayList::New((IArrayList**)&op->mRemoved);
                                 }
+                                op->mRemoved->Add(old);
+                                old->SetNextAnim(op->mExitAnim);
+                                if (mAddToBackStack) {
+                                    Int32 oldNesting;
+                                    old->GetBackStackNesting(&oldNesting);
+                                    oldNesting += 1;
+                                    old->SetBackStackNesting(oldNesting);
+                                    if (FragmentManagerImpl::DEBUG) {
+                                        Logger::V(TAG, "Bump nesting of %s to %d", TO_CSTR(old), oldNesting);
+                                    }
+                                }
+                                mManager->RemoveFragment(old, mTransition, mTransitionStyle);
+                                mManager->mAdded->GetSize(&N);
                             }
-                            mManager->RemoveFragment(old, mTransition, mTransitionStyle);
                         }
                     }
                 }
@@ -992,7 +997,7 @@ ECode BackStackRecord::Run()
 }
 
 void BackStackRecord::SetFirstOut(
-    /* [in] */ IHashMap* fragments, //SparseArray<Fragment>
+    /* [in] */ ISparseArray* fragments,
     /* [in] */ IFragment* fragment)
 {
     if (fragment != NULL) {
@@ -1004,35 +1009,31 @@ void BackStackRecord::SetFirstOut(
         AutoPtr<IView> view;
         fragment->GetView((IView**)&view);
         if (containerId != 0 && !hidden && added && view != NULL) {
-            AutoPtr<IInteger32> ikey = CoreUtils::Convert(containerId);
-            IInterface* key = TO_IINTERFACE(ikey);
-            AutoPtr<IInterface> value;
-            fragments->Get(key, (IInterface**)&value);
-            if (value == NULL) {
-                fragments->Put(key, TO_IINTERFACE(fragment));
+            AutoPtr<IInterface> obj;
+            fragments->Get(containerId, (IInterface**)&obj);
+            if (obj == NULL) {
+                fragments->Put(containerId, fragment);
             }
         }
     }
 }
 
 void BackStackRecord::SetLastIn(
-    /* [in] */ IHashMap* fragments, //SparseArray<Fragment>
+    /* [in] */ ISparseArray* fragments,
     /* [in] */ IFragment* fragment)
 {
     if (fragment != NULL) {
         Int32 containerId;
         fragment->GetContainerId(&containerId);
         if (containerId != 0) {
-            AutoPtr<IInteger32> ikey = CoreUtils::Convert(containerId);
-            IInterface* key = TO_IINTERFACE(ikey);
-            fragments->Put(key, TO_IINTERFACE(fragment));
+            fragments->Put(containerId, fragment);
         }
     }
 }
 
 void BackStackRecord::CalculateFragments(
-    /* [in] */ IHashMap* firstOutFragments, //SparseArray<Fragment>
-    /* [in] */ IHashMap* lastInFragments)   //SparseArray<Fragment>
+    /* [in] */ ISparseArray* firstOutFragments,
+    /* [in] */ ISparseArray* lastInFragments)
 {
     Boolean bval;
     mManager->mContainer->HasView(&bval);
@@ -1048,15 +1049,16 @@ void BackStackRecord::CalculateFragments(
 
             case OP_REPLACE: {
                 AutoPtr<IFragment> f = op->mFragment;
-                if (mManager->mAdded.GetSize() > 0) {
-                    List<AutoPtr<IFragment> >::Iterator it;
-                    for (it = mManager->mAdded.Begin(); it != mManager->mAdded.End(); ++it) {
-                        AutoPtr<IFragment> old = *it;
-                        Int32 oid = 0, id = 0;
-                        if (old) old->GetContainerId(&oid);
-                        if (f) f->GetContainerId(&id);
-                        if (f == NULL || oid == id) {
-                            if (old == f) {
+                if (mManager->mAdded != NULL) {
+                    Int32 N;
+                    mManager->mAdded->GetSize(&N);
+                    for (Int32 i = 0; i < N; i++) {
+                        AutoPtr<IInterface> obj;
+                        mManager->mAdded->Get(i, (IInterface**)&obj);
+                        IFragment* old = IFragment::Probe(obj);
+                        Int32 oldId = 0, fId = 0;
+                        if (f == NULL || (old->GetContainerId(&oldId), oldId) == (f->GetContainerId(&fId), fId)) {
+                            if (old == f.Get()) {
                                 f = NULL;
                             }
                             else {
@@ -1094,14 +1096,14 @@ void BackStackRecord::CalculateFragments(
     }
 }
 
-void BackStackRecord::CalculateBackFragments(
-    /* [in] */ IHashMap* firstOutFragments, //SparseArray<Fragment>
-    /* [in] */ IHashMap* lastInFragments)  //SparseArray<Fragment>
+ECode BackStackRecord::CalculateBackFragments(
+    /* [in] */ ISparseArray* firstOutFragments,
+    /* [in] */ ISparseArray* lastInFragments)
 {
     Boolean bval;
     mManager->mContainer->HasView(&bval);
     if (!bval) {
-        return; // nothing to see, so no transitions
+        return NOERROR; // nothing to see, so no transitions
     }
 
     AutoPtr<Op> op = mHead;
@@ -1148,11 +1150,12 @@ void BackStackRecord::CalculateBackFragments(
 
         op = op->mNext;
     }
+    return NOERROR;
 }
 
 AutoPtr<IBackStackRecordTransitionState> BackStackRecord::BeginTransition(
-    /* [in] */ IHashMap* firstOutFragments, //SparseArray<Fragment>
-    /* [in] */ IHashMap* lastInFragments,   //SparseArray<Fragment>
+    /* [in] */ ISparseArray* firstOutFragments,
+    /* [in] */ ISparseArray* lastInFragments,
     /* [in] */ Boolean isBack)
 {
     AutoPtr<IBackStackRecordTransitionState> state;
@@ -1165,35 +1168,26 @@ AutoPtr<IBackStackRecordTransitionState> BackStackRecord::BeginTransition(
     CView::New(IContext::Probe(mManager->mActivity), (IView**)&view);
     state->SetNonExistentView(view);
 
-    Boolean hasNext;
-    Int32 containerId;
-
     // Go over all leaving fragments.
-    AutoPtr<ISet> fkeyset;
-    firstOutFragments->GetKeySet((ISet**)&fkeyset);
-    AutoPtr<IIterator> fit;
-    fkeyset->GetIterator((IIterator**)&fit);
-    while (fit->HasNext(&hasNext), hasNext) {
-        AutoPtr<IInterface> ko;
-        fit->GetNext((IInterface**)&ko);
-        IInteger32::Probe(ko)->GetValue(&containerId);
-        ConfigureTransitions(containerId, state, isBack, firstOutFragments, lastInFragments);
-
+    Int32 N;
+    firstOutFragments->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        Int32 containerId;
+        firstOutFragments->KeyAt(i, &containerId);
+        ConfigureTransitions(containerId, state, isBack, firstOutFragments,
+                lastInFragments);
     }
 
     // Now go over all entering fragments that didn't have a leaving fragment.
-    AutoPtr<ISet> lkeyset;
-    lastInFragments->GetKeySet((ISet**)&lkeyset);
-    AutoPtr<IIterator> lit;
-    lkeyset->GetIterator((IIterator**)&lit);
-    while (lit->HasNext(&hasNext), hasNext) {
-        AutoPtr<IInterface> ko;
-        lit->GetNext((IInterface**)&ko);
-        AutoPtr<IInterface> value;
-        firstOutFragments->Get(ko, (IInterface**)&value);
-        if (value == NULL) {
-            IInteger32::Probe(ko)->GetValue(&containerId);
-            ConfigureTransitions(containerId, state, isBack, firstOutFragments, lastInFragments);
+    lastInFragments->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        Int32 containerId;
+        lastInFragments->KeyAt(i, &containerId);
+        AutoPtr<IInterface> obj;
+        firstOutFragments->Get(containerId, (IInterface**)&obj);
+        if (obj == NULL) {
+            ConfigureTransitions(containerId, state, isBack, firstOutFragments,
+                    lastInFragments);
         }
     }
     return state;
@@ -1579,21 +1573,19 @@ AutoPtr<ITransition> BackStackRecord::MergeTransitions(
 void BackStackRecord::ConfigureTransitions(Int32 containerId,
     /* [in] */ IBackStackRecordTransitionState* state,
     /* [in] */ Boolean isBack,
-    /* [in] */ IHashMap* /*<Fragment>*/ firstOutFragments,
-    /* [in] */ IHashMap* /*<Fragment>*/ lastInFragments)
+    /* [in] */ ISparseArray* /*<Fragment>*/ firstOutFragments,
+    /* [in] */ ISparseArray* /*<Fragment>*/ lastInFragments)
 {
     AutoPtr<IView> view;
     mManager->mContainer->FindViewById(containerId, (IView**)&view);
     AutoPtr<IViewGroup> sceneRoot = IViewGroup::Probe(view);
     if (sceneRoot != NULL) {
-        AutoPtr<IInteger32> idObj = CoreUtils::Convert(containerId);
         AutoPtr<IInterface> obj;
-        lastInFragments->Get(idObj, (IInterface**)&obj);
-        AutoPtr<IFragment> inFragment = IFragment::Probe(obj);
-
+        lastInFragments->Get(containerId, (IInterface**)&obj);
+        IFragment* inFragment = IFragment::Probe(obj);
         obj = NULL;
-        firstOutFragments->Get(idObj, (IInterface**)&obj);
-        AutoPtr<IFragment> outFragment = IFragment::Probe(obj);
+        firstOutFragments->Get(containerId, (IInterface**)&obj);
+        IFragment* outFragment = IFragment::Probe(obj);
 
         AutoPtr<ITransition> enterTransition = GetEnterTransition(inFragment, isBack);
         AutoPtr<ITransition> sharedElementTransition = GetSharedElementTransition(inFragment, outFragment,
@@ -1631,23 +1623,18 @@ void BackStackRecord::ConfigureTransitions(Int32 containerId,
             AddTargets(sharedElementTransition, sharedElementTargets);
 
             // Notify the start of the transition->
+            AutoPtr<ISharedElementCallback> callback = isBack ?
+                ((Fragment*)outFragment)->mEnterTransitionCallback :
+                ((Fragment*)inFragment)->mEnterTransitionCallback;
+
             AutoPtr<ISet> keyset;
             AutoPtr<ICollection> values;
             IMap::Probe(namedViews)->GetKeySet((ISet**)&keyset);
             IMap::Probe(namedViews)->GetValues((ICollection**)&values);
-
             AutoPtr<IList> names, views;
             CArrayList::New(ICollection::Probe(keyset), (IList**)&names);
             CArrayList::New(values, (IList**)&views);
-
-            Fragment* fragment = NULL;
-            if (isBack) {
-                fragment = (Fragment*)outFragment.Get();
-            }
-            else {
-                fragment = (Fragment*)inFragment.Get();
-            }
-            fragment->mEnterTransitionCallback->OnSharedElementStart(names, views, NULL);
+            callback->OnSharedElementStart(names, views, NULL);
         }
 
         Boolean empty;
@@ -1870,26 +1857,33 @@ void BackStackRecord::ExcludeHiddenFragments(
     /* [in] */ Int32 containerId,
     /* [in] */ ITransition* transition)
 {
-    {
-        Int32 size = mManager->mAdded.GetSize();
-        for (Int32 i = 0; i < size; i++) {
-            AutoPtr<IFragment> obj = mManager->mAdded[i];
-            Fragment* fragment = (Fragment*)obj.Get();
-            if (fragment->mView != NULL && fragment->mContainer != NULL
-                && fragment->mContainerId == containerId) {
-                AutoPtr<IView> view;
-                fragment->GetView((IView**)&view);
-                IInterface* viewObj = TO_IINTERFACE(view);
-                if (fragment->mHidden) {
+    if (mManager->mAdded != NULL) {
+        Int32 N;
+        mManager->mAdded->GetSize(&N);
+        for (Int32 i = 0; i < N; i++) {
+            AutoPtr<IInterface> obj;
+            mManager->mAdded->Get(i, (IInterface**)&obj);
+            IFragment* fragment = IFragment::Probe(obj);
+            AutoPtr<IView> view;
+            fragment->GetView((IView**)&view);
+            AutoPtr<IViewGroup> container;
+            fragment->GetContainer((IViewGroup**)&container);
+            Int32 id;
+            fragment->GetContainerId(&id);
+            if (view != NULL && container != NULL && id == containerId) {
+                Boolean hidden;
+                fragment->IsHidden(&hidden);
+                if (hidden) {
                     Boolean contains;
-                    hiddenFragmentViews->Contains(viewObj, &contains);
+                    hiddenFragmentViews->Contains(view, &contains);
                     if (!contains) {
                         transition->ExcludeTarget(view, TRUE);
-                        hiddenFragmentViews->Add(viewObj);
+                        hiddenFragmentViews->Add(view);
                     }
-                } else {
+                }
+                else {
                     transition->ExcludeTarget(view, FALSE);
-                    hiddenFragmentViews->Remove(viewObj);
+                    hiddenFragmentViews->Remove(view);
                 }
             }
         }
@@ -1967,8 +1961,8 @@ void BackStackRecord::SetSharedElementEpicenter(
 ECode BackStackRecord::PopFromBackStack(
     /* [in] */ Boolean doStateMove,
     /* [in] */ IBackStackRecordTransitionState* inState,
-    /* [in] */ IHashMap* firstOutFragments, //SparseArray<Fragment>
-    /* [in] */ IHashMap* lastInFragments, //SparseArray<Fragment>
+    /* [in] */ ISparseArray* firstOutFragments,
+    /* [in] */ ISparseArray* lastInFragments,
     /* [out] */ IBackStackRecordTransitionState** result)
 {
     VALIDATE_NOT_NULL(result)
@@ -1985,9 +1979,8 @@ ECode BackStackRecord::PopFromBackStack(
     AutoPtr<IBackStackRecordTransitionState> state = inState;
     if (state == NULL) {
         Int32 fsize, lsize;
-        firstOutFragments->GetSize(&fsize);
-        lastInFragments->GetSize(&lsize);
-        if (fsize != 0 || lsize != 0) {
+        if ((firstOutFragments->GetSize(&fsize), fsize != 0) ||
+            (lastInFragments->GetSize(&lsize), lsize != 0)) {
             state = BeginTransition(firstOutFragments, lastInFragments, TRUE);
         }
     } else if (!doStateMove) {

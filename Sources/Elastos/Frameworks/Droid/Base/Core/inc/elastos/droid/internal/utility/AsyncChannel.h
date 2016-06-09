@@ -147,10 +147,15 @@ private:
         DeathMonitor(
             /* [in] */ AsyncChannel* owner);
 
+        ~DeathMonitor();
+
         CARAPI ProxyDied();
+
+        CARAPI_(void) LinkToDeath();
 
     private:
         AsyncChannel* mOwner;
+        Boolean mIsLinked;
     };
 
 public:
