@@ -1,0 +1,26 @@
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+
+    interface ISpecialCharSequenceMgr {
+        HandleChars(
+            [in] IContext* context,
+            [in] String input,
+            [in] IEditText* textField,
+            [out] Boolean* result);
+
+        /**
+         * Cleanup everything around this class. Must be run inside the main thread.
+         *
+         * This should be called when the screen becomes background.
+         */
+        Cleanup();
+    }
+
+    } //Dailer
+    } //Apps
+    } //Elastos
+    }
+}

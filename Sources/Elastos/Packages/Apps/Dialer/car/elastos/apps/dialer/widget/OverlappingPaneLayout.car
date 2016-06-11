@@ -53,6 +53,16 @@ module
             [out] Boolean* result);
     }
 
+    /**
+     * @Involve
+     * interface IView;
+     * interface IDrawableCallback;
+     * interface IKeyEventCallback;
+     * interface IAccessibilityEventSource;
+     * interface IViewParent;
+     * interface IViewManager;
+     * interface IViewGroup;
+     */
     interface IOverlappingPaneLayout{
         /**
          * Set an offset, somewhere in between the panel's fully closed state and fully opened state,
@@ -107,6 +117,14 @@ module
          */
         IsSlideable(
             [out] Boolean* result);
+    }
+
+    /**
+     * @Involve
+     * interface IViewGroupLayoutParams
+     * interface IViewGroupMarginLayoutParams
+     */
+    interface IOverlappingPaneLayoutLayoutParams {
     }
 
     } // Widget

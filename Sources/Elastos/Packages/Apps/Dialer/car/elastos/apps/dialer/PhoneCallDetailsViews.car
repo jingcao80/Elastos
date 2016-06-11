@@ -1,0 +1,31 @@
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+
+    interface IPhoneCallDetailsViews {
+    }
+
+    interface IPhoneCallDetailsViewsHelper {
+        /**
+         * Create a new instance by extracting the elements from the given view.
+         * <p>
+         * The view should contain three text views with identifiers {@code R.id.name},
+         * {@code R.id.date}, and {@code R.id.number}, and a linear layout with identifier
+         * {@code R.id.call_types}.
+         */
+        FromView(
+            [in] IView* view,
+            [out] IPhoneCallDetailsViews** detailsViews);
+
+        CreateForTest(
+            [in] IContext* context,
+            [out] IPhoneCallDetailsViews** detailsViews);
+    }
+
+    } //Dailer
+    } //Apps
+    } //Elastos
+}

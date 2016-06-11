@@ -1,0 +1,18 @@
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+
+    /**
+     * @Involve
+     * interface IBackupAgent
+     * interface IBackupAgentHelper
+     */
+    interface IDialerBackupAgent {
+    }
+
+    } //Dailer
+    } //Apps
+    } //Elastos
+}

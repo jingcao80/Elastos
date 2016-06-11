@@ -1,0 +1,65 @@
+module
+{
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface Elastos.Droid.View.IContextThemeWrapper
+     * interface ILayoutInflaterFactory
+     * interface ILayoutInflaterFactory2
+     * interface IWindowCallback
+     * interface IKeyEventCallback
+     * interface IViewOnCreateContextMenuListener
+     * interface IComponentCallbacks
+     * interface IComponentCallbacks2
+     * interface IOnWindowDismissedCallback
+     * interface ITransactionSafeActivity
+     */
+    interface IDialtactsActivity {
+        const String SHARED_PREFS_NAME = "com.android.dialer_preferences";
+
+        /**
+         * Callback from child DialpadFragment when the dialpad is shown.
+         */
+        OnDialpadShown();
+
+        /**
+         * Initiates animations and other visual updates to hide the dialpad. The fragment is hidden in
+         * a callback after the hide animation ends.
+         * @see #commitDialpadFragmentHide
+         */
+        HideDialpadFragment(
+            [in] Boolean animate,
+            [in] Boolean clearDialpad);
+
+        /**
+         * Returns an appropriate call origin for this Activity. May return null when no call origin
+         * should be used (e.g. when some 3rd party application launched the screen. Call origin is
+         * for remembering the tab in which the user made a phone call, so the external app's DIAL
+         * request should not be counted.)
+         */
+        GetCallOrigin(
+            [out] String* origin);
+
+        IsDialpadShown(
+            [out] Boolean* result);
+    }
+
+    interface IDialtactsActivityHelper {
+        /** Returns an Intent to launch Call Settings screen */
+        GetCallSettingsIntent(
+            [out] IIntent** intent);
+
+        GetAddNumberToContactIntent(
+            [in] ICharSequence* text,
+            [out] IIntent** intent);
+    }
+
+    } //Dailer
+    } //Apps
+    } //Elastos
+}

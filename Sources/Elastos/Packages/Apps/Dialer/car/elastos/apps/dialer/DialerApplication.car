@@ -1,0 +1,14 @@
+module
+{
+
+    namespace Elastos{
+    namespace Apps {
+    namespace Dailer {
+
+    interface IDialerApplication {
+    }
+
+    } //Dailer
+    } //Apps
+    } //Elastos
+}
