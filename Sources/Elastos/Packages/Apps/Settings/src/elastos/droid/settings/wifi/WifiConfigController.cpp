@@ -7,6 +7,7 @@
 #include "Elastos.CoreLibrary.Net.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/settings/wifi/WifiConfigController.h"
+#include "elastos/droid/settings/wifi/AccessPoint.h"
 #include "elastos/droid/settings/wifi/WifiSettingsForSetupWizardXL.h"
 #include "elastos/droid/settings/wifi/Summary.h"
 #include "elastos/droid/settings/ProxySelector.h"
@@ -128,7 +129,7 @@ CAR_INTERFACE_IMPL_5(WifiConfigController, Object, IWifiConfigController, ITextW
 WifiConfigController::WifiConfigController(
     /* [in] */ IWifiConfigUiBase* parent,
     /* [in] */ IView* _view,
-    /* [in] */ AccessPoint* accessPoint,
+    /* [in] */ IAccessPoint* accessPoint,
     /* [in] */ Boolean edit)
     : mInXlSetupWizard(FALSE)
     , mAccessPointSecurity(0)
@@ -143,7 +144,7 @@ WifiConfigController::WifiConfigController(
     mView = _view;
     mAccessPoint = accessPoint;
     mAccessPointSecurity = (accessPoint == NULL) ? AccessPoint::SECURITY_NONE :
-            accessPoint->mSecurity;
+            ((AccessPoint*)accessPoint)->mSecurity;
     mEdit = edit;
 
     CHandler::New((IHandler**)&mTextViewChangedHandler);
@@ -239,15 +240,16 @@ WifiConfigController::WifiConfigController(
         mConfigUi->SetSubmitButton(CoreUtils::Convert(str));
     }
     else {
-        mConfigUi->SetTitle(CoreUtils::Convert(mAccessPoint->mSsid));
+        AccessPoint* _mAccessPoint = (AccessPoint*)mAccessPoint.Get();
+        mConfigUi->SetTitle(CoreUtils::Convert(_mAccessPoint->mSsid));
 
         view = NULL;
         mView->FindViewById(R::id::info, (IView**)&view);
         AutoPtr<IViewGroup> group = IViewGroup::Probe(view);
 
         Boolean showAdvancedFields = FALSE;
-        if (mAccessPoint->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
-            AutoPtr<IWifiConfiguration> config = mAccessPoint->GetConfig();
+        if (_mAccessPoint->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
+            AutoPtr<IWifiConfiguration> config = _mAccessPoint->GetConfig();
             IpConfigurationIpAssignment ips;
             config->GetIpAssignment(&ips);
             if (ips == STATIC_IpAssignment) {
@@ -286,7 +288,7 @@ WifiConfigController::WifiConfigController(
             }
         }
 
-        if (mAccessPoint->mNetworkId == IWifiConfiguration::INVALID_NETWORK_ID || mEdit) {
+        if (_mAccessPoint->mNetworkId == IWifiConfiguration::INVALID_NETWORK_ID || mEdit) {
             ShowSecurityFields();
             ShowIpConfigFields();
             ShowProxyFields();
@@ -313,7 +315,7 @@ WifiConfigController::WifiConfigController(
             mConfigUi->SetSubmitButton(CoreUtils::Convert(str));
         }
         else {
-            NetworkInfoDetailedState state = mAccessPoint->GetState();
+            NetworkInfoDetailedState state = _mAccessPoint->GetState();
             String signalLevel = GetSignalString();
 
             if (state == NetworkInfoDetailedState_NONE && !signalLevel.IsNull()) {
@@ -332,7 +334,7 @@ WifiConfigController::WifiConfigController(
                     AddRow(group, R::string::wifi_signal, signalLevel);
                 }
 
-                AutoPtr<IWifiInfo> info = mAccessPoint->GetInfo();
+                AutoPtr<IWifiInfo> info = _mAccessPoint->GetInfo();
                 Int32 linkSpeed;
                 if (info != NULL && (info->GetLinkSpeed(&linkSpeed), linkSpeed) != -1) {
                     AddRow(group, R::string::wifi_speed, StringUtils::ToString(linkSpeed)
@@ -360,7 +362,7 @@ WifiConfigController::WifiConfigController(
                     }
                 }
 
-                AddRow(group, R::string::wifi_security, mAccessPoint->GetSecurityString(FALSE));
+                AddRow(group, R::string::wifi_security, _mAccessPoint->GetSecurityString(FALSE));
                 view = NULL;
                 mView->FindViewById(R::id::ip_fields, (IView**)&view);
                 view->SetVisibility(IView::GONE);
@@ -370,7 +372,7 @@ WifiConfigController::WifiConfigController(
             CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
             Int32 currentUser;
             helper->GetCurrentUser(&currentUser);
-            if (mAccessPoint->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID
+            if (_mAccessPoint->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID
                     && currentUser == IUserHandle::USER_OWNER) {
                 String str;
                 res->GetString(R::string::wifi_forget, &str);
@@ -379,8 +381,9 @@ WifiConfigController::WifiConfigController(
         }
     }
 
-    if (mEdit || (mAccessPoint->GetState() == NetworkInfoDetailedState_NONE
-            && mAccessPoint->GetLevel() != -1)){
+    AccessPoint* _mAccessPoint = (AccessPoint*)mAccessPoint.Get();
+    if (mEdit || (_mAccessPoint->GetState() == NetworkInfoDetailedState_NONE
+            && _mAccessPoint->GetLevel() != -1)){
         String str;
         res->GetString(R::string::wifi_cancel, &str);
         mConfigUi->SetCancelButton(CoreUtils::Convert(str));
@@ -417,7 +420,7 @@ void WifiConfigController::AddRow(
 
 String WifiConfigController::GetSignalString()
 {
-    Int32 level = mAccessPoint->GetLevel();
+    Int32 level = ((AccessPoint*)mAccessPoint.Get())->GetLevel();
 
     return (level > -1 && level < mLevels->GetLength()) ? (*mLevels)[level] : String(NULL);
 }
@@ -448,7 +451,7 @@ void WifiConfigController::EnableSubmitIfAppropriate()
     }
 
     if ((mSsidView != NULL && (mSsidView->GetLength(&length), length) == 0) ||
-        ((mAccessPoint == NULL || mAccessPoint->mNetworkId == IWifiConfiguration::INVALID_NETWORK_ID) &&
+        ((mAccessPoint == NULL || ((AccessPoint*)mAccessPoint.Get())->mNetworkId == IWifiConfiguration::INVALID_NETWORK_ID) &&
         passwordInvalid)) {
         enabled = FALSE;
     }
@@ -465,7 +468,7 @@ void WifiConfigController::EnableSubmitIfAppropriate()
 
 AutoPtr<IWifiConfiguration> WifiConfigController::GetConfig()
 {
-    if (mAccessPoint != NULL && mAccessPoint->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID && !mEdit) {
+    if (mAccessPoint != NULL && ((AccessPoint*)mAccessPoint.Get())->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID && !mEdit) {
         return NULL;
     }
 
@@ -479,11 +482,11 @@ AutoPtr<IWifiConfiguration> WifiConfigController::GetConfig()
         // If the user adds a network manually, assume that it is hidden.
         config->SetHiddenSSID(TRUE);
     }
-    else if (mAccessPoint->mNetworkId == IWifiConfiguration::INVALID_NETWORK_ID) {
-        config->SetSSID(AccessPoint::ConvertToQuotedString(mAccessPoint->mSsid));
+    else if (((AccessPoint*)mAccessPoint.Get())->mNetworkId == IWifiConfiguration::INVALID_NETWORK_ID) {
+        config->SetSSID(AccessPoint::ConvertToQuotedString(((AccessPoint*)mAccessPoint.Get())->mSsid));
     }
     else {
-        config->SetNetworkId(mAccessPoint->mNetworkId);
+        config->SetNetworkId(((AccessPoint*)mAccessPoint.Get())->mNetworkId);
     }
 
     AutoPtr<IBitSet> allowedKeyManagement;
@@ -876,7 +879,7 @@ void WifiConfigController::ShowSecurityFields()
         mView->FindViewById(R::id::show_password, (IView**)&view);
         ICompoundButton::Probe(view)->SetOnCheckedChangeListener((ICompoundButtonOnCheckedChangeListener*)this);
 
-        if (mAccessPoint != NULL && mAccessPoint->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
+        if (mAccessPoint != NULL && ((AccessPoint*)mAccessPoint.Get())->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
             mPasswordView->SetHint(R::string::wifi_unchanged);
         }
     }
@@ -916,9 +919,9 @@ void WifiConfigController::ShowSecurityFields()
         LoadCertificates(mEapUserCertSpinner, ICredentials::USER_PRIVATE_KEY);
 
         // Modifying an existing network
-        if (mAccessPoint != NULL && mAccessPoint->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
+        if (mAccessPoint != NULL && ((AccessPoint*)mAccessPoint.Get())->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
             AutoPtr<IWifiEnterpriseConfig> enterpriseConfig;
-            mAccessPoint->GetConfig()->GetEnterpriseConfig((IWifiEnterpriseConfig**)&enterpriseConfig);
+            ((AccessPoint*)mAccessPoint.Get())->GetConfig()->GetEnterpriseConfig((IWifiEnterpriseConfig**)&enterpriseConfig);
             Int32 eapMethod;
             enterpriseConfig->GetEapMethod(&eapMethod);
             Int32 phase2Method;
@@ -1091,8 +1094,8 @@ void WifiConfigController::ShowIpConfigFields()
     mView->FindViewById(R::id::ip_fields, (IView**)&view);
     view->SetVisibility(IView::VISIBLE);
 
-    if (mAccessPoint != NULL && mAccessPoint->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
-        config = mAccessPoint->GetConfig();
+    if (mAccessPoint != NULL && ((AccessPoint*)mAccessPoint.Get())->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
+        config = ((AccessPoint*)mAccessPoint.Get())->GetConfig();
     }
 
     Int32 position;
@@ -1187,8 +1190,8 @@ void WifiConfigController::ShowProxyFields()
     mView->FindViewById(R::id::proxy_settings_fields, (IView**)&view);
     view->SetVisibility(IView::VISIBLE);
 
-    if (mAccessPoint != NULL && mAccessPoint->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
-        config = mAccessPoint->GetConfig();
+    if (mAccessPoint != NULL && ((AccessPoint*)mAccessPoint.Get())->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
+        config = ((AccessPoint*)mAccessPoint.Get())->GetConfig();
     }
 
     Int32 position;

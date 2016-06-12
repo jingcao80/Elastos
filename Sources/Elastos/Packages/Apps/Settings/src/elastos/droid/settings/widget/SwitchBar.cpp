@@ -121,7 +121,7 @@ ECode SwitchBar::SwitchBarOnSwitchChangeListener::OnSwitchChanged(
 //                  SwitchBar
 //===============================================================================
 
-CAR_INTERFACE_IMPL_2(SwitchBar, LinearLayout, ICompoundButtonOnCheckedChangeListener, IViewOnClickListener);
+CAR_INTERFACE_IMPL_3(SwitchBar, LinearLayout, ISwitchBar, ICompoundButtonOnCheckedChangeListener, IViewOnClickListener);
 
 SwitchBar::SwitchBar()
 {

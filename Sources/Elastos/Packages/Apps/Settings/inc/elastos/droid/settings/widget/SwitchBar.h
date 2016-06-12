@@ -25,6 +25,7 @@ namespace Widget {
 
 class SwitchBar
     : public LinearLayout
+    , public ISwitchBar
     , public ICompoundButtonOnCheckedChangeListener
     , public IViewOnClickListener
 {

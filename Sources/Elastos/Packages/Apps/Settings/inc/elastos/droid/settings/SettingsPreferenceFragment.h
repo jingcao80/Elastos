@@ -1,6 +1,7 @@
 #ifndef __ELASTOS_DROID_SETTINGS_SETTINGSPREFERENCEFRAGMENT_H__
 #define __ELASTOS_DROID_SETTINGS_SETTINGSPREFERENCEFRAGMENT_H__
 
+#include "Elastos.Droid.Graphics.h"
 #include "elastos/droid/app/DialogFragment.h"
 #include "elastos/droid/database/DataSetObserver.h"
 #include "elastos/droid/preference/PreferenceFragment.h"

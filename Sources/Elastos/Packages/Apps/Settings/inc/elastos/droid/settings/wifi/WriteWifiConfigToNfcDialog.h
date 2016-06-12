@@ -1,9 +1,11 @@
 #ifndef __ELASTOS_DROID_SETTINGS_WIFI_WRITEWIFICONFIGTONFCDIALOG_H__
 #define __ELASTOS_DROID_SETTINGS_WIFI_WRITEWIFICONFIGTONFCDIALOG_H__
 
+#include "Elastos.Droid.Text.h"
 #include "Elastos.Droid.Widget.h"
+#include "Elastos.Droid.Wifi.h"
 #include "elastos/droid/app/AlertDialog.h"
-#include "elastos/droid/settings/wifi/AccessPoint.h"
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::App::AlertDialog;
 using Elastos::Droid::Content::IContext;
@@ -20,6 +22,7 @@ using Elastos::Droid::Widget::ICompoundButtonOnCheckedChangeListener;
 using Elastos::Droid::Widget::ICompoundButton;
 using Elastos::Droid::Widget::ICheckBox;
 using Elastos::Droid::Widget::IProgressBar;
+using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Wifi::IWifiManager;
 
 namespace Elastos {
@@ -100,7 +103,7 @@ public:
 
     CARAPI constructor(
         /* [in] */ IContext* context,
-        /* [in] */ AccessPoint* accessPoint,
+        /* [in] */ IAccessPoint* accessPoint,
         /* [in] */ IWifiManager* wifiManager);
 
     // //@Override
@@ -163,7 +166,7 @@ private:
 
     AutoPtr<IPowerManagerWakeLock> mWakeLock;
 
-    AutoPtr<AccessPoint> mAccessPoint;
+    AutoPtr<IAccessPoint> mAccessPoint;
     AutoPtr<IView> mView;
     AutoPtr<IButton> mSubmitButton;
     AutoPtr<IButton> mCancelButton;

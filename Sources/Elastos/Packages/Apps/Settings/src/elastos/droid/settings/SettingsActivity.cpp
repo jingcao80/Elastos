@@ -72,6 +72,7 @@ using Elastos::Droid::View::EIID_IOnActionExpandListener;
 using Elastos::Droid::Widget::EIID_ISearchViewOnCloseListener;
 using Elastos::Droid::Widget::EIID_ISearchViewOnQueryTextListener;
 using Elastos::Droid::Widget::ILinearLayout;
+using Elastos::Droid::Widget::ITextView;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
@@ -393,7 +394,7 @@ ECode SettingsActivity::constructor()
 }
 
 ECode SettingsActivity::GetSwitchBar(
-    /* [out] */ SwitchBar** switchBar)
+    /* [out] */ ISwitchBar** switchBar)
 {
     VALIDATE_NOT_NULL(switchBar);
     *switchBar = mSwitchBar;
@@ -719,7 +720,7 @@ ECode SettingsActivity::OnCreate(
 
     view = NULL;
     FindViewById(R::id::switch_bar, (IView**)&view);
-    mSwitchBar = (SwitchBar*)ILinearLayout::Probe(view);
+    mSwitchBar = ISwitchBar::Probe(view);
 
     // see if we should show Back/Next buttons
     if (intent->GetBooleanExtra(EXTRA_PREFS_SHOW_BUTTON_BAR, FALSE, &res), res) {

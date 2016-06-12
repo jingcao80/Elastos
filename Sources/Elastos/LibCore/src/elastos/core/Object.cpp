@@ -231,7 +231,7 @@ String Object::GetFullClassName(
         String className, ns;
         classInfo->GetName(&className);
         classInfo->GetNamespace(&ns);
-        fullClassName = ns + String("::") + className;
+        fullClassName = ns + String(".") + className;
     }
     else {
         ALOGD("error: failed to GetFullClassName with %s. It is not a Car class.", TO_CSTR(obj));

@@ -9,7 +9,6 @@
 #include "elastos/droid/app/Activity.h"
 #include "elastos/droid/settings/dashboard/CDashboardTile.h"
 #include "elastos/droid/settings/search/DynamicIndexableContentMonitor.h"
-#include "elastos/droid/settings/widget/SwitchBar.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/os/Handler.h"
 #include "_Elastos.Droid.Settings.h"
@@ -17,7 +16,7 @@
 using Elastos::Droid::Settings::Dashboard::ISearchResultsSummary;
 using Elastos::Droid::Settings::Dashboard::CDashboardTile;
 using Elastos::Droid::Settings::Search::DynamicIndexableContentMonitor;
-using Elastos::Droid::Settings::Widget::SwitchBar;
+using Elastos::Droid::Settings::Widget::ISwitchBar;
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::IActionBar;
@@ -159,7 +158,7 @@ public:
     CARAPI constructor();
 
     CARAPI GetSwitchBar(
-       /* [out] */ SwitchBar** switchBar);
+       /* [out] */ ISwitchBar** switchBar);
 
     CARAPI GetDashboardCategories(
         /* [in] */ Boolean forceRefresh,
@@ -497,7 +496,7 @@ private:
     AutoPtr<DynamicIndexableContentMonitor> mDynamicIndexableContentMonitor;
 
     AutoPtr<IActionBar> mActionBar;
-    AutoPtr<SwitchBar> mSwitchBar;
+    AutoPtr<ISwitchBar> mSwitchBar;
 
     AutoPtr<IButton> mNextButton;
 

@@ -448,7 +448,7 @@ private:
 
     AutoPtr<WifiEnabler> mWifiEnabler;
     // An access point being editted is stored here.
-    AutoPtr<AccessPoint> mSelectedAccessPoint;
+    AutoPtr<IAccessPoint> mSelectedAccessPoint;
 
     NetworkInfoDetailedState mLastState;
     AutoPtr<IWifiInfo> mLastInfo;
@@ -465,7 +465,7 @@ private:
 
     // Save the dialog details
     Boolean mDlgEdit;
-    AutoPtr<AccessPoint> mDlgAccessPoint;
+    AutoPtr<IAccessPoint> mDlgAccessPoint;
     AutoPtr<IBundle> mAccessPointSavedState;
     AutoPtr<IView> mWifiAssistantCard;
     AutoPtr<INetworkScorerAppData> mWifiAssistantApp;

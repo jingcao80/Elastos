@@ -32,6 +32,8 @@ module
     using interface Elastos.Droid.Content.IComponentCallbacks2;
     using interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    using interface Elastos.Droid.Os.IBundle;
+    using interface Elastos.Droid.Preference.IPreference;
     using interface Elastos.Droid.Preference.IPreferenceFragment;
     using interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener;
     using interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
@@ -67,6 +69,9 @@ module
     using interface Elastos.Droid.Widget.ITextView;
     using interface Elastos.Droid.Widget.ISearchViewOnQueryTextListener;
     using interface Elastos.Droid.Widget.ISearchViewOnCloseListener;
+    using interface Elastos.Droid.Wifi.IScanResult;
+    using interface Elastos.Droid.Wifi.IWifiConfiguration;
+    using interface Elastos.Core.IComparable;
     using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
@@ -171,6 +176,7 @@ module
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);
 
+        interface ISwitchBar;
         interface ILinearLayout;
         interface IViewGroup;
         interface IView;
@@ -235,6 +241,25 @@ module
     namespace Droid {
     namespace Settings {
     namespace Wifi {
+
+    [local]
+    class CAccessPoint {
+        constructor(
+            [in] IContext* context,
+            [in] IWifiConfiguration* config);
+
+        constructor(
+            [in] IContext* context,
+            [in] IScanResult* result);
+
+        constructor(
+            [in] IContext* context,
+            [in] IBundle* savedState);
+
+        interface IAccessPoint;
+        interface IPreference;
+        interface IComparable;
+    }
 
     class CWifiSettings {
         constructor();

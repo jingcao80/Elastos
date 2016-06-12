@@ -1,6 +1,7 @@
 
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/settings/wifi/WifiSettingsForSetupWizardXL.h"
+#include "elastos/droid/settings/wifi/AccessPoint.h"
 #include "elastos/droid/settings/wifi/WifiConfigUiForSetupWizardXL.h"
 #include "../R.h"
 #include <elastos/utility/logging/Logger.h>

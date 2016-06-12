@@ -4,7 +4,6 @@
 #include <Elastos.Droid.Wifi.h>
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "elastos/droid/settings/widget/SwitchBar.h"
 #include "elastos/droid/os/Handler.h"
 #include <elastos/core/Object.h>
 #include "_Elastos.Droid.Settings.h"
@@ -17,7 +16,7 @@ using Elastos::Droid::Net::NetworkInfoDetailedState;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Settings::Widget::ISwitchBarOnSwitchChangeListener;
-using Elastos::Droid::Settings::Widget::SwitchBar;
+using Elastos::Droid::Settings::Widget::ISwitchBar;
 using Elastos::Droid::Widget::ISwitch;
 using Elastos::Droid::Wifi::IWifiManager;
 using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
@@ -72,7 +71,7 @@ public:
 
     WifiEnabler(
         /* [in] */ IContext* context,
-        /* [in] */ SwitchBar* switchBar);
+        /* [in] */ ISwitchBar* switchBar);
 
     ~WifiEnabler();
 
@@ -105,7 +104,7 @@ private:
 
 private:
     AutoPtr<IContext> mContext;
-    AutoPtr<SwitchBar> mSwitchBar;
+    AutoPtr<ISwitchBar> mSwitchBar;
     Boolean mListeningToOnSwitchChange;
     AutoPtr<IAtomicBoolean> mConnected;
 

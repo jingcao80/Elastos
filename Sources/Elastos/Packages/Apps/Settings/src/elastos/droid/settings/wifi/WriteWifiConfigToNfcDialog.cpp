@@ -1,5 +1,6 @@
 #include "Elastos.Droid.Nfc.h"
 #include "elastos/droid/settings/wifi/WriteWifiConfigToNfcDialog.h"
+#include "elastos/droid/settings/wifi/AccessPoint.h"
 #include "../R.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Character.h>
@@ -8,6 +9,7 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Nfc::INdefMessage;
 // using Elastos::Droid::Nfc::CNdefMessage;
 using Elastos::Droid::Nfc::Tech::INdef;
@@ -129,7 +131,7 @@ WriteWifiConfigToNfcDialog::~WriteWifiConfigToNfcDialog()
 
 ECode WriteWifiConfigToNfcDialog::constructor(
     /* [in] */ IContext* context,
-    /* [in] */ AccessPoint* accessPoint,
+    /* [in] */ IAccessPoint* accessPoint,
     /* [in] */ IWifiManager* wifiManager)
 {
     AlertDialog::constructor(context);
@@ -203,7 +205,7 @@ ECode WriteWifiConfigToNfcDialog::OnClick(
     mPasswordView->GetText((ICharSequence**)&seq);
     String password = TO_STR(seq);
     String wpsNfcConfigurationToken;
-    mWifiManager->GetWpsNfcConfigurationToken(mAccessPoint->mNetworkId, &wpsNfcConfigurationToken);
+    mWifiManager->GetWpsNfcConfigurationToken(((AccessPoint*)mAccessPoint.Get())->mNetworkId, &wpsNfcConfigurationToken);
     String passwordHex = ByteArrayToHexString(password.GetBytes());
 
     StringBuilder builder;
@@ -338,12 +340,12 @@ ECode WriteWifiConfigToNfcDialog::OnTextChanged(
 void WriteWifiConfigToNfcDialog::EnableSubmitIfAppropriate()
 {
     if (mPasswordView != NULL) {
-        if (mAccessPoint->mSecurity == AccessPoint::SECURITY_WEP) {
+        if (((AccessPoint*)mAccessPoint.Get())->mSecurity == AccessPoint::SECURITY_WEP) {
             Int32 length;
             mPasswordView->GetLength(&length);
             IView::Probe(mSubmitButton)->SetEnabled(length > 0);
         }
-        else if (mAccessPoint->mSecurity == AccessPoint::SECURITY_PSK) {
+        else if (((AccessPoint*)mAccessPoint.Get())->mSecurity == AccessPoint::SECURITY_PSK) {
             Int32 length;
             mPasswordView->GetLength(&length);
             IView::Probe(mSubmitButton)->SetEnabled(length >= 8);

@@ -218,9 +218,10 @@ ECode Switch::SetSwitchTextAppearance(
     a->GetDimensionPixelSize(R::styleable::TextAppearance_textSize, 0, &ts);
     if (ts != 0) {
         Float textSize = 0;
-        IPaint::Probe(mTextPaint)->GetTextSize(&textSize);
+        IPaint* textPaint = IPaint::Probe(mTextPaint);
+        textPaint->GetTextSize(&textSize);
         if (ts != textSize) {
-            IPaint::Probe(mTextPaint)->SetTextSize(ts);
+            textPaint->SetTextSize(ts);
             RequestLayout();
         }
     }
@@ -239,7 +240,7 @@ ECode Switch::SetSwitchTextAppearance(
         AutoPtr<IContext> ctx;
         GetContext((IContext**)&ctx);
         CAllCapsTransformationMethod::New(ctx, (IAllCapsTransformationMethod**)&atm);
-        mSwitchTransformationMethod = ITransformationMethod2::Probe(atm.Get());
+        mSwitchTransformationMethod = ITransformationMethod2::Probe(atm);
         mSwitchTransformationMethod->SetLengthChangesAllowed(TRUE);
     }
     else {
@@ -275,6 +276,7 @@ ECode Switch::SetSwitchTypeface(
     /* [in] */ ITypeface* tf,
     /* [in] */ Int32 style)
 {
+    IPaint* textPaint = IPaint::Probe(mTextPaint);
     if (style > 0) {
         AutoPtr<ITypeface> typeface;
         if (!tf) {
@@ -291,12 +293,12 @@ ECode Switch::SetSwitchTypeface(
         tf->GetStyle(&sty);
         Int32 typefaceStyle = tf ? sty : 0;
         Int32 need = style & ~typefaceStyle;
-        IPaint::Probe(mTextPaint)->SetFakeBoldText((need & ITypeface::BOLD) != 0);
-        IPaint::Probe(mTextPaint)->SetTextSkewX((need & ITypeface::BOLD) != 0 ? -0.25f : 0);
+        textPaint->SetFakeBoldText((need & ITypeface::BOLD) != 0);
+        textPaint->SetTextSkewX((need & ITypeface::BOLD) != 0 ? -0.25f : 0);
     }
     else {
-        IPaint::Probe(mTextPaint)->SetFakeBoldText(FALSE);
-        IPaint::Probe(mTextPaint)->SetTextSkewX(0);
+        textPaint->SetFakeBoldText(FALSE);
+        textPaint->SetTextSkewX(0);
         SetSwitchTypeface(tf);
     }
     return NOERROR;
@@ -305,10 +307,11 @@ ECode Switch::SetSwitchTypeface(
 ECode Switch::SetSwitchTypeface(
     /* [in] */ ITypeface* tf)
 {
+    IPaint* textPaint = IPaint::Probe(mTextPaint);
     AutoPtr<ITypeface> face;
-    IPaint::Probe(mTextPaint)->GetTypeface((ITypeface**)&face);
+    textPaint->GetTypeface((ITypeface**)&face);
     if (tf != face) {
-        IPaint::Probe(mTextPaint)->SetTypeface(tf);
+        textPaint->SetTypeface(tf);
 
         RequestLayout();
         Invalidate();
@@ -741,9 +744,9 @@ ECode Switch::OnTouchEvent(
         case IMotionEvent::ACTION_CANCEL: {
             if (mTouchMode == TOUCH_MODE_DRAGGING) {
                 StopDrag(ev);
-                assert(0 && "TODO");
-                // Boolean res;
-                // CompoundButton::OnTouchEvent(ev, &res);
+                // Allow super class to handle pressed state, etc
+                Boolean result;
+                CompoundButton::OnTouchEvent(ev, &result);
                 *res = TRUE;
                 return NOERROR;
             }
@@ -752,9 +755,8 @@ ECode Switch::OnTouchEvent(
             break;
         }
     }
-    assert(0 && "TODO");
-    // return CompoundButton::OnTouchEvent(ev, res);
-    return NOERROR;
+
+    return CompoundButton::OnTouchEvent(ev, res);
 }
 
 void Switch::CancelSuperTouch(
@@ -764,9 +766,8 @@ void Switch::CancelSuperTouch(
     AutoPtr<IMotionEvent> cancle;
     CMotionEvent::Obtain(cev, (IMotionEvent**)&cancle);
     cancle->SetAction(IMotionEvent::ACTION_CANCEL);
-    assert(0 && "TODO");
-    // Boolean res;
-    // CompoundButton::OnTouchEvent(cancle, &res);
+    Boolean res;
+    CompoundButton::OnTouchEvent(cancle, &res);
     IInputEvent::Probe(cancle)->Recycle();
 }
 
@@ -816,9 +817,10 @@ void Switch::AnimateThumbToCheckedState(
     (*param)[0] = targetPosition;
     mPositionAnimator = ObjectAnimator::OfFloat(
         TO_IINTERFACE(this), IProperty::Probe(THUMB_POS), param);
-    IAnimator::Probe(mPositionAnimator)->SetDuration(THUMB_ANIMATION_DURATION);
+    IAnimator * positionAnimator = IAnimator::Probe(mPositionAnimator);
+    positionAnimator->SetDuration(THUMB_ANIMATION_DURATION);
     mPositionAnimator->SetAutoCancel(TRUE);
-    IAnimator::Probe(mPositionAnimator)->Start();
+    positionAnimator->Start();
 }
 
 void Switch::CancelPositionAnimator()

@@ -8,8 +8,6 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Preference::IPreference;
 using Elastos::Droid::View::CViewGroupLayoutParams;
@@ -159,7 +157,7 @@ AutoPtr<IViewGroupLayoutParams> PreferenceGroupAdapter::sWrapperLayoutParams = i
 
 const String PreferenceGroupAdapter::TAG("PreferenceGroupAdapter");
 
-CAR_INTERFACE_IMPL_2(PreferenceGroupAdapter, BaseAdapter, IPreferenceOnPreferenceChangeInternalListener, IPreferenceGroupAdapter)
+CAR_INTERFACE_IMPL_2(PreferenceGroupAdapter, BaseAdapter, IPreferenceGroupAdapter, IPreferenceOnPreferenceChangeInternalListener)
 
 PreferenceGroupAdapter::PreferenceGroupAdapter()
     : mHasReturnedViewTypeCount(FALSE)
@@ -191,7 +189,8 @@ ECode PreferenceGroupAdapter::constructor(
 
 void PreferenceGroupAdapter::SyncMyPreferences()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (mIsSyncing) {
             return;
         }
@@ -201,7 +200,7 @@ void PreferenceGroupAdapter::SyncMyPreferences()
 
     Int32 size;
     mPreferenceList->GetSize(&size);
-    AutoPtr<IList>  newPreferenceList;
+    AutoPtr<IList> newPreferenceList;
     CArrayList::New(size, (IList**)&newPreferenceList);
     AutoPtr<IPreferenceGroup> group;
     mWeakPreferenceGroup->Resolve(EIID_IPreferenceGroup, (IInterface**)&group);
@@ -210,7 +209,8 @@ void PreferenceGroupAdapter::SyncMyPreferences()
 
     BaseAdapter::NotifyDataSetChanged();
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mIsSyncing = FALSE;
         mLock.NotifyAll();
     }
@@ -221,7 +221,7 @@ void PreferenceGroupAdapter::FlattenPreferenceGroup(
     /* [in] */ IPreferenceGroup* group)
 {
     // TODO: shouldn't always?
-     group->SortPreferences();
+    group->SortPreferences();
 
     Int32 groupSize;
     group->GetPreferenceCount(&groupSize);
@@ -253,8 +253,9 @@ AutoPtr<IPreferenceLayout> PreferenceGroupAdapter::CreatePreferenceLayout(
     /* [in] */ IPreferenceLayout* in)
 {
     AutoPtr<IPreferenceLayout> pl = in != NULL ? in : new PreferenceLayout();
-    assert(0);
-    // pl.name = preference.getClass().getName();
+
+    pl->SetName(Object::GetFullClassName(preference));
+
     Int32 resId, widgetResId;
     preference->GetLayoutResource(&resId);
     pl->SetResId(resId);

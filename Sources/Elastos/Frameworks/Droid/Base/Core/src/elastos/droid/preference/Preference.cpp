@@ -77,15 +77,13 @@ ECode Preference::constructor(
                 a->GetResourceId(attr, 0, &mTitleRes);
                 String str;
                 a->GetString(attr, &str);
-                StringBuilder sb(str);
-                mTitle = sb.ToCharSequence();
+                CString::New(str, (ICharSequence**)&mTitle);
                 break;
             }
             case R::styleable::Preference_summary: {
                 String str;
                 a->GetString(attr, &str);
-                StringBuilder sb(str);
-                mSummary = sb.ToCharSequence();
+                CString::New(str, (ICharSequence**)&mSummary);
                 break;
             }
             case R::styleable::Preference_order:
@@ -121,14 +119,14 @@ ECode Preference::constructor(
         }
     }
     a->Recycle();
-    #if 0
-    //TODO: Wait for the getName() from classId
-    //    if (!getClass().getName().startsWith("android.preference")
-    //            && !getClass().getName().startsWith("com.android")) {
-            // For non-framework subclasses, assume the worst and don't cache views.
-    //        mCanRecycleLayout = false;
-    //    }
-    #endif
+
+    String str = Object::GetFullClassName((IPreference*)this);
+    if (!str.StartWith("Elastos.Droid.Preference")
+            && !str.StartWith("Elastos.Droid")) {
+        // For non-framework subclasses, assume the worst and don't cache views.
+        mCanRecycleLayout = FALSE;
+    }
+
     return NOERROR;
 }
 
@@ -144,13 +142,13 @@ ECode Preference::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    return constructor(context, attrs, Elastos::Droid::R::attr::preferenceStyle, 0);
+    return constructor(context, attrs, Elastos::Droid::R::attr::preferenceStyle);
 }
 
 ECode Preference::constructor(
     /* [in] */ IContext* context)
 {
-    return constructor(context, NULL, Elastos::Droid::R::attr::preferenceStyle, 0);
+    return constructor(context, NULL);
 }
 
 ECode Preference::OnGetDefaultValue(
@@ -343,9 +341,7 @@ ECode Preference::OnBindView(
             if (mIcon == NULL) {
                 AutoPtr<IContext> ctx;
                 GetContext((IContext**)&ctx);
-                AutoPtr<IResources> res;
-                ctx->GetResources((IResources**)&res);
-                res->GetDrawable(mIconResId, (IDrawable**)&mIcon);
+                ctx->GetDrawable(mIconResId, (IDrawable**)&mIcon);
             }
             if (mIcon != NULL) {
                 imageView->SetImageDrawable(mIcon);
@@ -411,16 +407,14 @@ ECode Preference::GetOrder(
 ECode Preference::SetTitle(
     /* [in] */ ICharSequence* title)
 {
-    AutoPtr<IObject> obj = IObject::Probe(title);
     Boolean isEquals;
-    if (obj != NULL) {
-        obj->Equals(mTitle, &isEquals);
-        if ((title == NULL && mTitle != NULL) || (title != NULL && !isEquals)) {
-            mTitleRes = 0;
-            mTitle = title;
-            NotifyChanged();
-        }
+    if ((title == NULL && mTitle != NULL) ||
+            (title != NULL && (IObject::Probe(title)->Equals(mTitle, &isEquals), !isEquals))) {
+        mTitleRes = 0;
+        mTitle = title;
+        NotifyChanged();
     }
+
     return NOERROR;
 }
 
@@ -494,15 +488,13 @@ ECode Preference::GetSummary(
 ECode Preference::SetSummary(
     /* [in] */ ICharSequence* summary)
 {
-    AutoPtr<IObject> obj = IObject::Probe(summary);
     Boolean isEquals;
-    if (obj != NULL) {
-        obj->Equals(mSummary, &isEquals);
-        if ((summary == NULL && mSummary != NULL) || (summary != NULL && !isEquals)) {
-            mSummary = summary;
-            NotifyChanged();
-        }
+    if ((summary == NULL && mSummary != NULL) ||
+            (summary != NULL && (IObject::Probe(summary)->Equals(mSummary, &isEquals), !isEquals))) {
+        mSummary = summary;
+        NotifyChanged();
     }
+
     return NOERROR;
 }
 
@@ -802,10 +794,12 @@ ECode Preference::CompareTo(
     if (mOrder != preference->mOrder) {
         // Do order comparison
         *result = mOrder - preference->mOrder;
-    } else if (mTitle == preference->mTitle) {
+    }
+    else if (mTitle == preference->mTitle) {
         // If titles are null or share same object comparison
         *result = 0;
-    } else if (mTitle == NULL) {
+    }
+    else if (mTitle == NULL) {
         *result = 1;
     }
     else {
@@ -883,7 +877,6 @@ ECode Preference::RegisterDependency()
     if (preference != NULL) {
         AutoPtr<Preference> p = (Preference*)(preference.Get());
         return p->RegisterDependent(this);
-        return NOERROR;
     }
     else {
         String str;
@@ -900,8 +893,8 @@ void Preference::UnregisterDependency()
         AutoPtr<IPreference> oldDependency;
         FindPreferenceInHierarchy(mDependencyKey, (IPreference**)&oldDependency);
         if (oldDependency != NULL) {
-           AutoPtr<Preference> preference = (Preference*)(oldDependency.Get());
-           return preference->UnRegisterDependent(this);
+            AutoPtr<Preference> preference = (Preference*)(oldDependency.Get());
+            preference->UnRegisterDependent(this);
         }
     }
 }

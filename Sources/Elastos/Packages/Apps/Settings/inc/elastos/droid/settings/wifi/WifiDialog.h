@@ -31,14 +31,14 @@ public:
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IDialogInterfaceOnClickListener* listener,
-        /* [in] */ AccessPoint* accessPoint,
+        /* [in] */ IAccessPoint* accessPoint,
         /* [in] */ Boolean edit,
         /* [in] */ Boolean hideSubmitButton);
 
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IDialogInterfaceOnClickListener* listener,
-        /* [in] */ AccessPoint* accessPoint,
+        /* [in] */ IAccessPoint* accessPoint,
         /* [in] */ Boolean edit);
 
     //@Override
@@ -102,7 +102,7 @@ public:
 private:
     Boolean mEdit;
     AutoPtr<IDialogInterfaceOnClickListener> mListener;
-    AutoPtr<AccessPoint> mAccessPoint;
+    AutoPtr<IAccessPoint> mAccessPoint;
 
     AutoPtr<IView> mView;
     AutoPtr<WifiConfigController> mController;

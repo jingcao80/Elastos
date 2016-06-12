@@ -54,7 +54,7 @@ CAR_INTERFACE_IMPL_3(WifiConfigUiForSetupWizardXL, Object, IWifiConfigUiForSetup
 WifiConfigUiForSetupWizardXL::WifiConfigUiForSetupWizardXL(
     /* [in] */ WifiSettingsForSetupWizardXL* activity,
     /* [in] */ IViewGroup* parent,
-    /* [in] */ AccessPoint* accessPoint,
+    /* [in] */ IAccessPoint* accessPoint,
     /* [in] */ Boolean edit)
     : mEdit(FALSE)
 {
@@ -141,7 +141,7 @@ AutoPtr<IView> WifiConfigUiForSetupWizardXL::GetView()
     return mView;
 }
 
-AutoPtr<AccessPoint> WifiConfigUiForSetupWizardXL::GetAccessPoint()
+AutoPtr<IAccessPoint> WifiConfigUiForSetupWizardXL::GetAccessPoint()
 {
     return mAccessPoint;
 }

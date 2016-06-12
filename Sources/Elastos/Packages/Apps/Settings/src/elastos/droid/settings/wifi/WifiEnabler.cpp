@@ -3,6 +3,7 @@
 #include <Elastos.Droid.Net.h>
 #include "elastos/droid/settings/wifi/WifiEnabler.h"
 #include "elastos/droid/settings/search/Index.h"
+#include "elastos/droid/settings/widget/CSwitchBar.h"
 #include "elastos/droid/settings/WirelessSettings.h"
 #include "../R.h"
 
@@ -11,6 +12,7 @@ using Elastos::Droid::Net::INetworkInfo;
 using Elastos::Droid::Os::CMessage;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Settings::Search::Index;
+using Elastos::Droid::Settings::Widget::CSwitchBar;
 using Elastos::Droid::Settings::Widget::EIID_ISwitchBarOnSwitchChangeListener;
 using Elastos::Droid::Widget::ISwitch;
 using Elastos::Droid::Widget::IToast;
@@ -69,7 +71,7 @@ ECode WifiEnabler::InitBroadcastReceiver::OnReceive(
     else if (IWifiManager::NETWORK_STATE_CHANGED_ACTION.Equals(action)) {
         AutoPtr<IParcelable> parcel;
         intent->GetParcelableExtra(IWifiManager::EXTRA_NETWORK_INFO, (IParcelable**)&parcel);
-        AutoPtr<INetworkInfo> info = INetworkInfo::Probe(intent);
+        AutoPtr<INetworkInfo> info = INetworkInfo::Probe(parcel);
         Boolean isConnected;
         info->IsConnected(&isConnected);
         mHost->mConnected->Set(isConnected);
@@ -119,7 +121,7 @@ CAR_INTERFACE_IMPL(WifiEnabler, Object, ISwitchBarOnSwitchChangeListener);
 
 WifiEnabler::WifiEnabler(
     /* [in] */ IContext* context,
-    /* [in] */ SwitchBar* switchBar)
+    /* [in] */ ISwitchBar* switchBar)
     : mListeningToOnSwitchChange(FALSE)
     , mStateMachineEvent(FALSE)
 {
@@ -151,21 +153,23 @@ ECode WifiEnabler::SetupSwitchBar()
     Int32 state;
     mWifiManager->GetWifiState(&state);
     HandleWifiStateChanged(state);
+    CSwitchBar* switchBar = (CSwitchBar*)mSwitchBar.Get();
     if (!mListeningToOnSwitchChange) {
-        mSwitchBar->AddOnSwitchChangeListener((ISwitchBarOnSwitchChangeListener*)this);
+        switchBar->AddOnSwitchChangeListener(this);
         mListeningToOnSwitchChange = TRUE;
     }
-    mSwitchBar->Show();
+    switchBar->Show();
     return NOERROR;
 }
 
 ECode WifiEnabler::TeardownSwitchBar()
 {
+    CSwitchBar* switchBar = (CSwitchBar*)mSwitchBar.Get();
     if (mListeningToOnSwitchChange) {
-        mSwitchBar->RemoveOnSwitchChangeListener((ISwitchBarOnSwitchChangeListener*)this);
+        switchBar->RemoveOnSwitchChangeListener(this);
         mListeningToOnSwitchChange = FALSE;
     }
-    mSwitchBar->Hide();
+    switchBar->Hide();
     return NOERROR;
 }
 
@@ -177,7 +181,7 @@ ECode WifiEnabler::Resume(
     AutoPtr<IIntent> intent;
     mContext->RegisterReceiver(mReceiver, mIntentFilter, (IIntent**)&intent);
     if (!mListeningToOnSwitchChange) {
-        mSwitchBar->AddOnSwitchChangeListener((ISwitchBarOnSwitchChangeListener*)this);
+        ((CSwitchBar*)mSwitchBar.Get())->AddOnSwitchChangeListener(this);
         mListeningToOnSwitchChange = TRUE;
     }
     return NOERROR;
@@ -187,7 +191,7 @@ ECode WifiEnabler::Pause()
 {
     mContext->UnregisterReceiver(mReceiver);
     if (mListeningToOnSwitchChange) {
-        mSwitchBar->RemoveOnSwitchChangeListener((ISwitchBarOnSwitchChangeListener*)this);
+        ((CSwitchBar*)mSwitchBar.Get())->RemoveOnSwitchChangeListener(this);
         mListeningToOnSwitchChange = FALSE;
     }
     return NOERROR;
@@ -196,26 +200,27 @@ ECode WifiEnabler::Pause()
 void WifiEnabler::HandleWifiStateChanged(
     /* [in] */ Int32 state)
 {
+    CSwitchBar* switchBar = (CSwitchBar*)mSwitchBar.Get();
     switch (state) {
         case IWifiManager::WIFI_STATE_ENABLING:
-            mSwitchBar->SetEnabled(FALSE);
+            switchBar->SetEnabled(FALSE);
             break;
         case IWifiManager::WIFI_STATE_ENABLED:
             SetSwitchBarChecked(TRUE);
-            mSwitchBar->SetEnabled(TRUE);
+            switchBar->SetEnabled(TRUE);
             UpdateSearchIndex(TRUE);
             break;
         case IWifiManager::WIFI_STATE_DISABLING:
-            mSwitchBar->SetEnabled(FALSE);
+            switchBar->SetEnabled(FALSE);
             break;
         case IWifiManager::WIFI_STATE_DISABLED:
             SetSwitchBarChecked(FALSE);
-            mSwitchBar->SetEnabled(TRUE);
+            switchBar->SetEnabled(TRUE);
             UpdateSearchIndex(FALSE);
             break;
         default:
             SetSwitchBarChecked(FALSE);
-            mSwitchBar->SetEnabled(TRUE);
+            switchBar->SetEnabled(TRUE);
             UpdateSearchIndex(FALSE);
     }
 }
@@ -239,7 +244,7 @@ void WifiEnabler::SetSwitchBarChecked(
     /* [in] */ Boolean checked)
 {
     mStateMachineEvent = TRUE;
-    mSwitchBar->SetChecked(checked);
+    ((CSwitchBar*)mSwitchBar.Get())->SetChecked(checked);
     mStateMachineEvent = FALSE;
 }
 
@@ -273,6 +278,8 @@ ECode WifiEnabler::OnSwitchChanged(
     AutoPtr<IToastHelper> helper;
     CToastHelper::AcquireSingleton((IToastHelper**)&helper);
 
+    CSwitchBar* switchBar = (CSwitchBar*)mSwitchBar.Get();
+
     // Show toast message if Wi-Fi is not allowed in airplane mode
     if (isChecked && !WirelessSettings::IsRadioAllowed(mContext, ISettingsGlobal::RADIO_WIFI)) {
         AutoPtr<IToast> toast;
@@ -280,7 +287,7 @@ ECode WifiEnabler::OnSwitchChanged(
                 IToast::LENGTH_SHORT, (IToast**)&toast);
         toast->Show();
         // Reset switch to off. No infinite check/listenenr loop.
-        mSwitchBar->SetChecked(FALSE);
+        switchBar->SetChecked(FALSE);
         return NOERROR;
     }
 
@@ -295,7 +302,7 @@ ECode WifiEnabler::OnSwitchChanged(
 
     if (mWifiManager->SetWifiEnabled(isChecked, &res), !res) {
         // Error
-        mSwitchBar->SetEnabled(TRUE);
+        switchBar->SetEnabled(TRUE);
         AutoPtr<IToast> toast;
         helper->MakeText(mContext, R::string::wifi_error,
                 IToast::LENGTH_SHORT, (IToast**)&toast);

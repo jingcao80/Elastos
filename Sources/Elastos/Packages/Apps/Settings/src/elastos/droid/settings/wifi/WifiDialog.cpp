@@ -25,7 +25,7 @@ WifiDialog::~WifiDialog()
 ECode WifiDialog::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IDialogInterfaceOnClickListener* listener,
-    /* [in] */ AccessPoint* accessPoint,
+    /* [in] */ IAccessPoint* accessPoint,
     /* [in] */ Boolean edit,
     /* [in] */ Boolean hideSubmitButton)
 {
@@ -37,7 +37,7 @@ ECode WifiDialog::constructor(
 ECode WifiDialog::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IDialogInterfaceOnClickListener* listener,
-    /* [in] */ AccessPoint* accessPoint,
+    /* [in] */ IAccessPoint* accessPoint,
     /* [in] */ Boolean edit)
 {
     AlertDialog::constructor(context);

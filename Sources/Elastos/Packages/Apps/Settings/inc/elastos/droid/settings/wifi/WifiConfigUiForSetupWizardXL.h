@@ -1,8 +1,8 @@
 #ifndef __ELASTOS_DROID_SETTINGS_WIFI_WIFICONFIGUIFORSETUPWIZARDXL_H__
 #define __ELASTOS_DROID_SETTINGS_WIFI_WIFICONFIGUIFORSETUPWIZARDXL_H__
 
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/settings/wifi/WifiSettingsForSetupWizardXL.h"
-#include "elastos/droid/settings/wifi/AccessPoint.h"
 #include "elastos/droid/settings/wifi/WifiConfigController.h"
 
 using Elastos::Droid::View::ILayoutInflater;
@@ -58,7 +58,7 @@ public:
     WifiConfigUiForSetupWizardXL(
         /* [in] */ WifiSettingsForSetupWizardXL* activity,
         /* [in] */ IViewGroup* parent,
-        /* [in] */ AccessPoint* accessPoint,
+        /* [in] */ IAccessPoint* accessPoint,
         /* [in] */ Boolean edit);
 
     ~WifiConfigUiForSetupWizardXL();
@@ -71,7 +71,7 @@ public:
 
     CARAPI_(AutoPtr<IView>) GetView();
 
-    CARAPI_(AutoPtr<AccessPoint>) GetAccessPoint();
+    CARAPI_(AutoPtr<IAccessPoint>) GetAccessPoint();
 
     //@Override
     CARAPI GetController(
@@ -135,7 +135,7 @@ private:
     AutoPtr<WifiSettingsForSetupWizardXL> mActivity;
     AutoPtr<IView> mView;
     AutoPtr<WifiConfigController> mController;
-    AutoPtr<AccessPoint> mAccessPoint;
+    AutoPtr<IAccessPoint> mAccessPoint;
     Boolean mEdit;
     AutoPtr<IHandler> mHandler;
 

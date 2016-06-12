@@ -5,7 +5,6 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Text.h"
 #include "Elastos.Droid.Widget.h"
-#include "elastos/droid/settings/wifi/AccessPoint.h"
 #include "elastos/droid/os/Runnable.h"
 #include <elastos/core/Object.h>
 #include "_Elastos.Droid.Settings.h"
@@ -29,6 +28,7 @@ using Elastos::Droid::Widget::ICompoundButton;
 using Elastos::Droid::Widget::ICompoundButtonOnCheckedChangeListener;
 using Elastos::Droid::Widget::ISpinner;
 using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Wifi::IWifiConfiguration;
 using Elastos::Net::IInet4Address;
 
 namespace Elastos {
@@ -70,7 +70,7 @@ public:
     WifiConfigController(
         /* [in] */ IWifiConfigUiBase* parent,
         /* [in] */ IView* view,
-        /* [in] */ AccessPoint* accessPoint,
+        /* [in] */ IAccessPoint* accessPoint,
         /* [in] */ Boolean edit);
 
     CARAPI_(void) HideSubmitButton();
@@ -213,7 +213,7 @@ private:
 
     AutoPtr<IWifiConfigUiBase> mConfigUi;
     AutoPtr<IView> mView;
-    AutoPtr<AccessPoint> mAccessPoint;
+    AutoPtr<IAccessPoint> mAccessPoint;
 
     /* This value comes from "wifi_ip_settings" resource array */
     static const Int32 DHCP;

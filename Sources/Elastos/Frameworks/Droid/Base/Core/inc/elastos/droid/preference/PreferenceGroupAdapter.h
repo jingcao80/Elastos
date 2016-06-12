@@ -27,8 +27,8 @@ namespace Preference {
 
 class PreferenceGroupAdapter
     : public BaseAdapter
-    , public IPreferenceOnPreferenceChangeInternalListener
     , public IPreferenceGroupAdapter
+    , public IPreferenceOnPreferenceChangeInternalListener
 {
 private:
     class PreferenceLayout
