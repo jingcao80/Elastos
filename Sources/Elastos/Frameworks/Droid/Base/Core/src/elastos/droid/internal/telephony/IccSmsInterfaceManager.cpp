@@ -91,7 +91,8 @@ ECode IccSmsInterfaceManager::InnerHandler::HandleMessage(
                     mHost->mSms = IList::Probe(mHost->BuildValidRawData(IArrayList::Probe(ar->mResult)));
                     //Mark SMS as read after importing it from card.
                     mHost->MarkMessagesAsRead(IArrayList::Probe(ar->mResult));
-                } else {
+                }
+                else {
                     if (Logger::IsLoggable("SMS", Logger::___DEBUG)) {
                         mHost->Log(String("Cannot load Sms records"));
                     }

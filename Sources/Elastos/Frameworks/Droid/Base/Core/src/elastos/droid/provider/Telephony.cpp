@@ -445,14 +445,9 @@ AutoPtr<IUri> Telephony::Sms::Conversations::CONTENT_URI = InitURI(String("conte
 //end =============Telephony::Sms::Conversations===============
 
 //begin =============Telephony::Sms::Intents===============
-CAR_INTERFACE_IMPL(Telephony::Sms::Intents, Object, ITelephonySmsIntents);
-
-ECode Telephony::Sms::Intents::GetMessagesFromIntent(
-    /* [in] */ IIntent* intent,
-    /* [out] */ ArrayOf<ISmsMessage*>** smsMessages)
+AutoPtr<ArrayOf<ISmsMessage*> > Telephony::Sms::Intents::GetMessagesFromIntent(
+    /* [in] */ IIntent* intent)
 {
-    VALIDATE_NOT_NULL(smsMessages);
-
     //Object[] messages = (Object[]) intent->GetSerializableExtra("pdus");
     AutoPtr<ISerializable> serializable;
     intent->GetSerializableExtra(String("pdus"), (ISerializable**)&serializable);
@@ -482,18 +477,13 @@ ECode Telephony::Sms::Intents::GetMessagesFromIntent(
         smsMessage->SetSubId(subId);
     }
 
-    *smsMessages = msgs;
-    REFCOUNT_ADD(*smsMessages);
-    return NOERROR;
+    return msgs;
 }
 
-ECode Telephony::Sms::Intents::GetNormalizedAddressesFromPdus(
-    /* [in] */ ArrayOf<AutoPtr<ArrayOf<Byte> > >* pdus,
-    /* [in] */ const String& format,
-    /* [out] */ IList** _addresses)//String
+AutoPtr<IList> Telephony::Sms::Intents::GetNormalizedAddressesFromPdus(
+    /* [in] */ ArrayOf<ArrayOf<Byte>*>* pdus,
+    /* [in] */ const String& format)//String
 {
-    VALIDATE_NOT_NULL(_addresses);
-
     Int32 pduCount = pdus->GetLength();
     AutoPtr<ArrayOf<ISmsMessage*> > msgs = ArrayOf<ISmsMessage*>::Alloc(pduCount);
     AutoPtr<IList> addresses;
@@ -525,9 +515,7 @@ ECode Telephony::Sms::Intents::GetNormalizedAddressesFromPdus(
             addresses->Add(CoreUtils::Convert(normalized));
         }
     }
-    *_addresses = addresses;
-    REFCOUNT_ADD(*_addresses);
-    return NOERROR;
+    return addresses;
 }
 
 String Telephony::Sms::Intents::NormalizeDigitsOnly(

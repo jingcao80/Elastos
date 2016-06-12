@@ -417,12 +417,8 @@ public:
          * Contains constants for SMS related Intents that are broadcast.
          */
         class Intents
-            : public ITelephonySmsIntents
-            , public Object
         {
         public:
-            CAR_INTERFACE_DECL();
-
             /**
              * Read the PDUs out of an {@link #SMS_RECEIVED_ACTION} or a
              * {@link #DATA_SMS_RECEIVED_ACTION} intent.
@@ -430,9 +426,8 @@ public:
              * @param intent the intent to read from
              * @return an array of SmsMessages for the PDUs
              */
-            /*static*/ CARAPI GetMessagesFromIntent(
-                /* [in] */ IIntent* intent,
-                /* [out] */ ArrayOf<ISmsMessage*>** smsMessage);
+            static CARAPI_(AutoPtr<ArrayOf<ISmsMessage*> >) GetMessagesFromIntent(
+                /* [in] */ IIntent* intent);
 
             /**
              * Read the normalized addresses out of PDUs
@@ -441,10 +436,9 @@ public:
              * @return a list of Addresses for the PDUs
              * @hide
              */
-            /*static*/ CARAPI GetNormalizedAddressesFromPdus(
-                    /* [in] */ ArrayOf<AutoPtr<ArrayOf<Byte> > > * pdus,
-                    /* [in] */ const String& format,
-                    /* [out] */ IList** addresses);
+            static CARAPI_(AutoPtr<IList>) GetNormalizedAddressesFromPdus(
+                    /* [in] */ ArrayOf<ArrayOf<Byte>*> * pdus,
+                    /* [in] */ const String& format);
         private:
             /**
              * Not instantiable.

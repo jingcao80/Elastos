@@ -46,6 +46,9 @@ SOURCES += HbpcdUtils.cpp
 SOURCES += IccProvider.cpp
 SOURCES += IntRangeManager.cpp
 SOURCES += IccSmsInterfaceManager.cpp
+SOURCES += IccUtils.cpp
+SOURCES += InboundSmsTracker.cpp
+SOURCES += InboundSmsHandler.cpp
 
 ELASTOS_LIBS += cat/cat.lib
 ELASTOS_LIBS += cdma/cdma.lib

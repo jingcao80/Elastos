@@ -2482,6 +2482,23 @@ module
             [in] IBundle* initialExtras);
 
         /**
+         * Similar to above but takes an appOp as well, to enforce restrictions.
+         * @see #sendOrderedBroadcastAsUser(Intent, UserHandle, String,
+         *       BroadcastReceiver, Handler, int, String, Bundle)
+         * @hide
+         */
+        SendOrderedBroadcastAsUser(
+            [in] IIntent* intent,
+            [in] IUserHandle* user,
+            [in] String receiverPermission,
+            [in] Int32 appOp,
+            [in] IBroadcastReceiver* resultReceiver,
+            [in] IHandler* scheduler,
+            [in] Int32 initialCode,
+            [in] String initialData,
+            [in] IBundle* initialExtras);
+
+        /**
          * Perform a {@sa #sendBroadcast(Intent)} that is "sticky," meaning the
          * Intent you are sending stays around after the broadcast is complete,
          * so that others can quickly retrieve that data through the return
