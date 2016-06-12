@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Net.IUri;
 
     namespace Elastos {
     namespace Droid {
@@ -7,29 +9,23 @@ module {
     namespace Mms {
     namespace Utility {
 
+    /**
+     * @Involve
+     * interface IAbstractCache
+     */
     interface IPduCache {
-        GetInstance(
-            [out] PduCache* result);
-
-        Put(
-            [in] Uri uri, 
-            [in] PduCacheEntry entry,
-            [out] Boolean* result);
-
         SetUpdating(
-            [in] Uri uri, 
+            [in] IUri* uri,
             [in] Boolean updating);
 
         IsUpdating(
-            [in] Uri uri,
+            [in] IUri* uri,
             [out] Boolean* result);
+    }
 
-        Purge(
-            [in] Uri uri,
-            [out] PduCacheEntry* result);
-
-        PurgeAll();
-
+    interface IPduCacheHelper {
+        GetInstance(
+            [out] IPduCache** result);
     }
 
     }//Utility

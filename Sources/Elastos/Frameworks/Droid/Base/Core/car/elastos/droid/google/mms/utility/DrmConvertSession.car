@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
 
     namespace Elastos {
     namespace Droid {
@@ -7,11 +9,44 @@ module {
     namespace Mms {
     namespace Utility {
 
+    [deprecated]
     interface IDrmConvertSession {
-        DrmConvertSession Open(Context context, String mimeType);
 
+        /**
+         * Convert a buffer of data to protected format.
+         *
+         * @param buffer Buffer filled with data to convert.
+         * @param size The number of bytes that shall be converted.
+         * @return A Buffer filled with converted data, if execution is ok, in all
+         *         other case null.
+         */
+        Convert(
+            [in] ArrayOf<Byte>* inBuffer,
+            [in] Int32 size,
+            [out, callee] ArrayOf<Byte>* result);
 
+        /**
+         * Ends a conversion session of a file.
+         *
+         * @param fileName The filename of the converted file.
+         * @return Downloads.Impl.STATUS_SUCCESS if execution is ok.
+         *         Downloads.Impl.STATUS_FILE_ERROR in case converted file can not
+         *         be accessed. Downloads.Impl.STATUS_NOT_ACCEPTABLE if a problem
+         *         occurs when accessing drm framework.
+         *         Downloads.Impl.STATUS_UNKNOWN_ERROR if a general error occurred.
+         */
+        Close(
+            [in] String filename,
+            [out] Int32* result);
 
+    }
+
+    [local]
+    interface IDrmConvertSessionHelper {
+        Open(
+            [in] IContext* context,
+            [in] String mimeType,
+            [out] IDrmConvertSession** result);
     }
 
     }//Utility

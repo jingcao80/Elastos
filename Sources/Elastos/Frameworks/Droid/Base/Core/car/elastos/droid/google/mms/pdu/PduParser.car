@@ -9,7 +9,7 @@ module {
 
     interface IPduParser {
         Parse(
-            [out] GenericPdu* result);
+            [out] IGenericPdu** result);
 
     }
 

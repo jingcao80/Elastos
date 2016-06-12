@@ -7,21 +7,65 @@ module {
     namespace Mms {
     namespace Pdu {
 
+    /**
+     * @Involve
+     * interface IMultimediaMessagePdu
+     */
+    [deprecated]
     interface ISendReq {
-        GetBcc();
+        GetBcc(
+            [out, callee] ArrayOf<IEncodedStringValue*>* result);
 
         AddBcc(
-            [in] EncodedStringValue value);
+            [in] IEncodedStringValue* value);
 
-        GetCc();
+        /**
+         * Set "BCC" value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         */
+        SetBcc(
+            [in] ArrayOf<IEncodedStringValue*>* value);
+
+        GetCc(
+            [out, callee] ArrayOf<IEncodedStringValue*>* result);
 
         AddCc(
-            [in] EncodedStringValue value);
+            [in] IEncodedStringValue* value);
 
-        GetContentType();
+        /**
+         * Set "CC" value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         */
+        SetCc(
+            [in] ArrayOf<IEncodedStringValue*>* value);
+
+        GetContentType(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Set Content-type value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         */
+        SetContentType(
+            [in] ArrayOf<Byte>* value);
 
         GetDeliveryReport(
             [out] Int32* result);
+
+        /**
+         * Set X-Mms-Delivery-Report value.
+         *
+         * @param value the value
+         * @throws InvalidHeaderValueException if the value is invalid.
+         */
+        SetDeliveryReport(
+            [in] Int32 value);
 
         GetExpiry(
             [out] Int64* result);
@@ -35,12 +79,50 @@ module {
         SetMessageSize(
             [in] Int64 value);
 
-        GetMessageClass();
+        GetMessageClass(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Set X-Mms-Message-Class value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         */
+        SetMessageClass(
+            [in] ArrayOf<Byte>* value);
 
         GetReadReport(
             [out] Int32* result);
 
-        GetTransactionId();
+        /**
+         * Set X-Mms-Read-Report value.
+         *
+         * @param value the value
+         * @throws InvalidHeaderValueException if the value is invalid.
+         */
+        SetReadReport(
+            [in] Int32 value);
+
+        /**
+         * Set "To" value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         */
+        SetTo(
+            [in] ArrayOf<IEncodedStringValue*>* value);
+
+        GetTransactionId(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Set X-Mms-Transaction-Id field value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         */
+        SetTransactionId(
+            [in] ArrayOf<Byte>* value);
 
     }
 

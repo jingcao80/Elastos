@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Google.Mms.Pdu.IEncodedStringValue;
 
     namespace Elastos {
     namespace Droid {
@@ -7,6 +9,11 @@ module {
     namespace Mms {
     namespace Pdu {
 
+    /**
+     * @Involve
+     * interface IGenericPdu
+     */
+    [deprecated]
     interface IDeliveryInd {
         GetDate(
             [out] Int64* result);
@@ -14,12 +21,41 @@ module {
         SetDate(
             [in] Int64 value);
 
-        GetMessageId();
+        GetMessageId(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Set Message-ID value.
+         *
+         * @param value the value, should not be null
+         * @throws NullPointerException if the value is null.
+         */
+        SetMessageId(
+            [in] ArrayOf<Byte>* value);
 
         GetStatus(
             [out] Int32* result);
 
-        GetTo();
+        /**
+         * Set Status value.
+         *
+         * @param value the value
+         * @throws InvalidHeaderValueException if the value is invalid.
+         */
+        SetStatus(
+            [in] Int32 value);
+
+        GetTo(
+            [out, callee] ArrayOf<IEncodedStringValue*>* result);
+
+        /**
+         * set To value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         */
+        SetTo(
+            [in] ArrayOf<IEncodedStringValue*>* value);
 
     }
 

@@ -8,6 +8,302 @@ module {
     namespace Pdu {
 
     interface IPduHeaders {
+        /**
+         * All pdu header fields.
+         */
+        const Int32 BCC                             = 0x81;
+        const Int32 CC                              = 0x82;
+        const Int32 CONTENT_LOCATION                = 0x83;
+        const Int32 CONTENT_TYPE                    = 0x84;
+        const Int32 DATE                            = 0x85;
+        const Int32 DELIVERY_REPORT                 = 0x86;
+        const Int32 DELIVERY_TIME                   = 0x87;
+        const Int32 EXPIRY                          = 0x88;
+        const Int32 FROM                            = 0x89;
+        const Int32 MESSAGE_CLASS                   = 0x8A;
+        const Int32 MESSAGE_ID                      = 0x8B;
+        const Int32 MESSAGE_TYPE                    = 0x8C;
+        const Int32 MMS_VERSION                     = 0x8D;
+        const Int32 MESSAGE_SIZE                    = 0x8E;
+        const Int32 PRIORITY                        = 0x8F;
+
+        const Int32 READ_REPLY                      = 0x90;
+        const Int32 READ_REPORT                     = 0x90;
+        const Int32 REPORT_ALLOWED                  = 0x91;
+        const Int32 RESPONSE_STATUS                 = 0x92;
+        const Int32 RESPONSE_TEXT                   = 0x93;
+        const Int32 SENDER_VISIBILITY               = 0x94;
+        const Int32 STATUS                          = 0x95;
+        const Int32 SUBJECT                         = 0x96;
+        const Int32 TO                              = 0x97;
+        const Int32 TRANSACTION_ID                  = 0x98;
+        const Int32 RETRIEVE_STATUS                 = 0x99;
+        const Int32 RETRIEVE_TEXT                   = 0x9A;
+        const Int32 READ_STATUS                     = 0x9B;
+        const Int32 REPLY_CHARGING                  = 0x9C;
+        const Int32 REPLY_CHARGING_DEADLINE         = 0x9D;
+        const Int32 REPLY_CHARGING_ID               = 0x9E;
+        const Int32 REPLY_CHARGING_SIZE             = 0x9F;
+
+        const Int32 PREVIOUSLY_SENT_BY              = 0xA0;
+        const Int32 PREVIOUSLY_SENT_DATE            = 0xA1;
+        const Int32 STORE                           = 0xA2;
+        const Int32 MM_STATE                        = 0xA3;
+        const Int32 MM_FLAGS                        = 0xA4;
+        const Int32 STORE_STATUS                    = 0xA5;
+        const Int32 STORE_STATUS_TEXT               = 0xA6;
+        const Int32 STORED                          = 0xA7;
+        const Int32 ATTRIBUTES                      = 0xA8;
+        const Int32 TOTALS                          = 0xA9;
+        const Int32 MBOX_TOTALS                     = 0xAA;
+        const Int32 QUOTAS                          = 0xAB;
+        const Int32 MBOX_QUOTAS                     = 0xAC;
+        const Int32 MESSAGE_COUNT                   = 0xAD;
+        const Int32 CONTENT                         = 0xAE;
+        const Int32 START                           = 0xAF;
+
+        const Int32 ADDITIONAL_HEADERS              = 0xB0;
+        const Int32 DISTRIBUTION_INDICATOR          = 0xB1;
+        const Int32 ELEMENT_DESCRIPTOR              = 0xB2;
+        const Int32 LIMIT                           = 0xB3;
+        const Int32 RECOMMENDED_RETRIEVAL_MODE      = 0xB4;
+        const Int32 RECOMMENDED_RETRIEVAL_MODE_TEXT = 0xB5;
+        const Int32 STATUS_TEXT                     = 0xB6;
+        const Int32 APPLIC_ID                       = 0xB7;
+        const Int32 REPLY_APPLIC_ID                 = 0xB8;
+        const Int32 AUX_APPLIC_ID                   = 0xB9;
+        const Int32 CONTENT_CLASS                   = 0xBA;
+        const Int32 DRM_CONTENT                     = 0xBB;
+        const Int32 ADAPTATION_ALLOWED              = 0xBC;
+        const Int32 REPLACE_ID                      = 0xBD;
+        const Int32 CANCEL_ID                       = 0xBE;
+        const Int32 CANCEL_STATUS                   = 0xBF;
+
+        /**
+         * X-Mms-Message-Type field types.
+         */
+        const Int32 MESSAGE_TYPE_SEND_REQ           = 0x80;
+        const Int32 MESSAGE_TYPE_SEND_CONF          = 0x81;
+        const Int32 MESSAGE_TYPE_NOTIFICATION_IND   = 0x82;
+        const Int32 MESSAGE_TYPE_NOTIFYRESP_IND     = 0x83;
+        const Int32 MESSAGE_TYPE_RETRIEVE_CONF      = 0x84;
+        const Int32 MESSAGE_TYPE_ACKNOWLEDGE_IND    = 0x85;
+        const Int32 MESSAGE_TYPE_DELIVERY_IND       = 0x86;
+        const Int32 MESSAGE_TYPE_READ_REC_IND       = 0x87;
+        const Int32 MESSAGE_TYPE_READ_ORIG_IND      = 0x88;
+        const Int32 MESSAGE_TYPE_FORWARD_REQ        = 0x89;
+        const Int32 MESSAGE_TYPE_FORWARD_CONF       = 0x8A;
+        const Int32 MESSAGE_TYPE_MBOX_STORE_REQ     = 0x8B;
+        const Int32 MESSAGE_TYPE_MBOX_STORE_CONF    = 0x8C;
+        const Int32 MESSAGE_TYPE_MBOX_VIEW_REQ      = 0x8D;
+        const Int32 MESSAGE_TYPE_MBOX_VIEW_CONF     = 0x8E;
+        const Int32 MESSAGE_TYPE_MBOX_UPLOAD_REQ    = 0x8F;
+        const Int32 MESSAGE_TYPE_MBOX_UPLOAD_CONF   = 0x90;
+        const Int32 MESSAGE_TYPE_MBOX_DELETE_REQ    = 0x91;
+        const Int32 MESSAGE_TYPE_MBOX_DELETE_CONF   = 0x92;
+        const Int32 MESSAGE_TYPE_MBOX_DESCR         = 0x93;
+        const Int32 MESSAGE_TYPE_DELETE_REQ         = 0x94;
+        const Int32 MESSAGE_TYPE_DELETE_CONF        = 0x95;
+        const Int32 MESSAGE_TYPE_CANCEL_REQ         = 0x96;
+        const Int32 MESSAGE_TYPE_CANCEL_CONF        = 0x97;
+
+        /**
+         *  X-Mms-Delivery-Report |
+         *  X-Mms-Read-Report |
+         *  X-Mms-Report-Allowed |
+         *  X-Mms-Sender-Visibility |
+         *  X-Mms-Store |
+         *  X-Mms-Stored |
+         *  X-Mms-Totals |
+         *  X-Mms-Quotas |
+         *  X-Mms-Distribution-Indicator |
+         *  X-Mms-DRM-Content |
+         *  X-Mms-Adaptation-Allowed |
+         *  field types.
+         */
+        const Int32 VALUE_YES                       = 0x80;
+        const Int32 VALUE_NO                        = 0x81;
+
+        /**
+         *  Delivery-Time |
+         *  Expiry and Reply-Charging-Deadline |
+         *  field type components.
+         */
+        const Int32 VALUE_ABSOLUTE_TOKEN            = 0x80;
+        const Int32 VALUE_RELATIVE_TOKEN            = 0x81;
+
+        /**
+         * X-Mms-MMS-Version field types.
+         */
+        const Int32 MMS_VERSION_1_3                 = 0x13; // ((1 << 4) | 3);
+        const Int32 MMS_VERSION_1_2                 = 0x12; // ((1 << 4) | 2);
+        const Int32 MMS_VERSION_1_1                 = 0x11; // ((1 << 4) | 1);
+        const Int32 MMS_VERSION_1_0                 = 0x10; // ((1 << 4) | 0);
+
+        // Current version is 1.2.
+        const Int32 CURRENT_MMS_VERSION             = 0x12; // MMS_VERSION_1_2;
+
+        /**
+         *  From field type components.
+         */
+        const Int32 FROM_ADDRESS_PRESENT_TOKEN      = 0x80;
+        const Int32 FROM_INSERT_ADDRESS_TOKEN       = 0x81;
+
+        const String FROM_ADDRESS_PRESENT_TOKEN_STR = "address-present-token";
+        const String FROM_INSERT_ADDRESS_TOKEN_STR = "insert-address-token";
+
+        /**
+         *  X-Mms-Status Field.
+         */
+        const Int32 STATUS_EXPIRED                  = 0x80;
+        const Int32 STATUS_RETRIEVED                = 0x81;
+        const Int32 STATUS_REJECTED                 = 0x82;
+        const Int32 STATUS_DEFERRED                 = 0x83;
+        const Int32 STATUS_UNRECOGNIZED             = 0x84;
+        const Int32 STATUS_INDETERMINATE            = 0x85;
+        const Int32 STATUS_FORWARDED                = 0x86;
+        const Int32 STATUS_UNREACHABLE              = 0x87;
+
+        /**
+         *  MM-Flags field type components.
+         */
+        const Int32 MM_FLAGS_ADD_TOKEN              = 0x80;
+        const Int32 MM_FLAGS_REMOVE_TOKEN           = 0x81;
+        const Int32 MM_FLAGS_FILTER_TOKEN           = 0x82;
+
+        /**
+         *  X-Mms-Message-Class field types.
+         */
+        const Int32 MESSAGE_CLASS_PERSONAL          = 0x80;
+        const Int32 MESSAGE_CLASS_ADVERTISEMENT     = 0x81;
+        const Int32 MESSAGE_CLASS_INFORMATIONAL     = 0x82;
+        const Int32 MESSAGE_CLASS_AUTO              = 0x83;
+
+        const String MESSAGE_CLASS_PERSONAL_STR = "personal";
+        const String MESSAGE_CLASS_ADVERTISEMENT_STR = "advertisement";
+        const String MESSAGE_CLASS_INFORMATIONAL_STR = "informational";
+        const String MESSAGE_CLASS_AUTO_STR = "auto";
+
+        /**
+         *  X-Mms-Priority field types.
+         */
+        const Int32 PRIORITY_LOW                    = 0x80;
+        const Int32 PRIORITY_NORMAL                 = 0x81;
+        const Int32 PRIORITY_HIGH                   = 0x82;
+
+        /**
+         *  X-Mms-Response-Status field types.
+         */
+        const Int32 RESPONSE_STATUS_OK                   = 0x80;
+        const Int32 RESPONSE_STATUS_ERROR_UNSPECIFIED    = 0x81;
+        const Int32 RESPONSE_STATUS_ERROR_SERVICE_DENIED = 0x82;
+
+        const Int32 RESPONSE_STATUS_ERROR_MESSAGE_FORMAT_CORRUPT     = 0x83;
+        const Int32 RESPONSE_STATUS_ERROR_SENDING_ADDRESS_UNRESOLVED = 0x84;
+
+        const Int32 RESPONSE_STATUS_ERROR_MESSAGE_NOT_FOUND    = 0x85;
+        const Int32 RESPONSE_STATUS_ERROR_NETWORK_PROBLEM      = 0x86;
+        const Int32 RESPONSE_STATUS_ERROR_CONTENT_NOT_ACCEPTED = 0x87;
+        const Int32 RESPONSE_STATUS_ERROR_UNSUPPORTED_MESSAGE  = 0x88;
+        const Int32 RESPONSE_STATUS_ERROR_TRANSIENT_FAILURE    = 0xC0;
+
+        const Int32 RESPONSE_STATUS_ERROR_TRANSIENT_SENDNG_ADDRESS_UNRESOLVED = 0xC1;
+        const Int32 RESPONSE_STATUS_ERROR_TRANSIENT_MESSAGE_NOT_FOUND         = 0xC2;
+        const Int32 RESPONSE_STATUS_ERROR_TRANSIENT_NETWORK_PROBLEM           = 0xC3;
+        const Int32 RESPONSE_STATUS_ERROR_TRANSIENT_PARTIAL_SUCCESS           = 0xC4;
+
+        const Int32 RESPONSE_STATUS_ERROR_PERMANENT_FAILURE                             = 0xE0;
+        const Int32 RESPONSE_STATUS_ERROR_PERMANENT_SERVICE_DENIED                      = 0xE1;
+        const Int32 RESPONSE_STATUS_ERROR_PERMANENT_MESSAGE_FORMAT_CORRUPT              = 0xE2;
+        const Int32 RESPONSE_STATUS_ERROR_PERMANENT_SENDING_ADDRESS_UNRESOLVED          = 0xE3;
+        const Int32 RESPONSE_STATUS_ERROR_PERMANENT_MESSAGE_NOT_FOUND                   = 0xE4;
+        const Int32 RESPONSE_STATUS_ERROR_PERMANENT_CONTENT_NOT_ACCEPTED                = 0xE5;
+        const Int32 RESPONSE_STATUS_ERROR_PERMANENT_REPLY_CHARGING_LIMITATIONS_NOT_MET  = 0xE6;
+        const Int32 RESPONSE_STATUS_ERROR_PERMANENT_REPLY_CHARGING_REQUEST_NOT_ACCEPTED = 0xE6;
+        const Int32 RESPONSE_STATUS_ERROR_PERMANENT_REPLY_CHARGING_FORWARDING_DENIED    = 0xE8;
+        const Int32 RESPONSE_STATUS_ERROR_PERMANENT_REPLY_CHARGING_NOT_SUPPORTED        = 0xE9;
+        const Int32 RESPONSE_STATUS_ERROR_PERMANENT_ADDRESS_HIDING_NOT_SUPPORTED        = 0xEA;
+        const Int32 RESPONSE_STATUS_ERROR_PERMANENT_LACK_OF_PREPAID                     = 0xEB;
+        const Int32 RESPONSE_STATUS_ERROR_PERMANENT_END                                 = 0xFF;
+
+        /**
+         *  X-Mms-Retrieve-Status field types.
+         */
+        const Int32 RETRIEVE_STATUS_OK                                  = 0x80;
+        const Int32 RETRIEVE_STATUS_ERROR_TRANSIENT_FAILURE             = 0xC0;
+        const Int32 RETRIEVE_STATUS_ERROR_TRANSIENT_MESSAGE_NOT_FOUND   = 0xC1;
+        const Int32 RETRIEVE_STATUS_ERROR_TRANSIENT_NETWORK_PROBLEM     = 0xC2;
+        const Int32 RETRIEVE_STATUS_ERROR_PERMANENT_FAILURE             = 0xE0;
+        const Int32 RETRIEVE_STATUS_ERROR_PERMANENT_SERVICE_DENIED      = 0xE1;
+        const Int32 RETRIEVE_STATUS_ERROR_PERMANENT_MESSAGE_NOT_FOUND   = 0xE2;
+        const Int32 RETRIEVE_STATUS_ERROR_PERMANENT_CONTENT_UNSUPPORTED = 0xE3;
+        const Int32 RETRIEVE_STATUS_ERROR_END                           = 0xFF;
+
+        /**
+         *  X-Mms-Sender-Visibility field types.
+         */
+        const Int32 SENDER_VISIBILITY_HIDE          = 0x80;
+        const Int32 SENDER_VISIBILITY_SHOW          = 0x81;
+
+        /**
+         *  X-Mms-Read-Status field types.
+         */
+        const Int32 READ_STATUS_READ                        = 0x80;
+        const Int32 READ_STATUS__DELETED_WITHOUT_BEING_READ = 0x81;
+
+        /**
+         *  X-Mms-Cancel-Status field types.
+         */
+        const Int32 CANCEL_STATUS_REQUEST_SUCCESSFULLY_RECEIVED = 0x80;
+        const Int32 CANCEL_STATUS_REQUEST_CORRUPTED             = 0x81;
+
+        /**
+         *  X-Mms-Reply-Charging field types.
+         */
+        const Int32 REPLY_CHARGING_REQUESTED           = 0x80;
+        const Int32 REPLY_CHARGING_REQUESTED_TEXT_ONLY = 0x81;
+        const Int32 REPLY_CHARGING_ACCEPTED            = 0x82;
+        const Int32 REPLY_CHARGING_ACCEPTED_TEXT_ONLY  = 0x83;
+
+        /**
+         *  X-Mms-MM-State field types.
+         */
+        const Int32 MM_STATE_DRAFT                  = 0x80;
+        const Int32 MM_STATE_SENT                   = 0x81;
+        const Int32 MM_STATE_NEW                    = 0x82;
+        const Int32 MM_STATE_RETRIEVED              = 0x83;
+        const Int32 MM_STATE_FORWARDED              = 0x84;
+
+        /**
+         * X-Mms-Recommended-Retrieval-Mode field types.
+         */
+        const Int32 RECOMMENDED_RETRIEVAL_MODE_MANUAL = 0x80;
+
+        /**
+         *  X-Mms-Content-Class field types.
+         */
+        const Int32 CONTENT_CLASS_TEXT              = 0x80;
+        const Int32 CONTENT_CLASS_IMAGE_BASIC       = 0x81;
+        const Int32 CONTENT_CLASS_IMAGE_RICH        = 0x82;
+        const Int32 CONTENT_CLASS_VIDEO_BASIC       = 0x83;
+        const Int32 CONTENT_CLASS_VIDEO_RICH        = 0x84;
+        const Int32 CONTENT_CLASS_MEGAPIXEL         = 0x85;
+        const Int32 CONTENT_CLASS_CONTENT_BASIC     = 0x86;
+        const Int32 CONTENT_CLASS_CONTENT_RICH      = 0x87;
+
+        /**
+         *  X-Mms-Store-Status field types.
+         */
+        const Int32 STORE_STATUS_SUCCESS                                = 0x80;
+        const Int32 STORE_STATUS_ERROR_TRANSIENT_FAILURE                = 0xC0;
+        const Int32 STORE_STATUS_ERROR_TRANSIENT_NETWORK_PROBLEM        = 0xC1;
+        const Int32 STORE_STATUS_ERROR_PERMANENT_FAILURE                = 0xE0;
+        const Int32 STORE_STATUS_ERROR_PERMANENT_SERVICE_DENIED         = 0xE1;
+        const Int32 STORE_STATUS_ERROR_PERMANENT_MESSAGE_FORMAT_CORRUPT = 0xE2;
+        const Int32 STORE_STATUS_ERROR_PERMANENT_MESSAGE_NOT_FOUND      = 0xE3;
+        const Int32 STORE_STATUS_ERROR_PERMANENT_MMBOX_FULL             = 0xE4;
+        const Int32 STORE_STATUS_ERROR_END                              = 0xFF;
+
     }
 
     }//Pdu

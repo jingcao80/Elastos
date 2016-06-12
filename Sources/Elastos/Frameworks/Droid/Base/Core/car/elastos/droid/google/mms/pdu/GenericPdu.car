@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Google.Mms.Pdu.IPduHeaders;
 
     namespace Elastos {
     namespace Droid {
@@ -9,19 +11,39 @@ module {
 
     interface IGenericPdu {
         GetPduHeaders(
-            [out] PduHeaders* result);
+            [out] IPduHeaders** result);
 
         GetMessageType(
             [out] Int32* result);
 
+        /**
+         * Set X-Mms-Message-Type field value.
+         *
+         * @param value the value
+         * @throws InvalidHeaderValueException if the value is invalid.
+         *         RuntimeException if field's value is not Octet.
+         */
+        SetMessageType(
+            [in] Int32 value);
+
         GetMmsVersion(
             [out] Int32* result);
 
+        /**
+         * Set X-Mms-MMS-Version field value.
+         *
+         * @param value the value
+         * @throws InvalidHeaderValueException if the value is invalid.
+         *         RuntimeException if field's value is not Octet.
+         */
+        SetMmsVersion(
+            [in] Int32 value);
+
         GetFrom(
-            [out] EncodedStringValue* result);
+            [out] IEncodedStringValue** result);
 
         SetFrom(
-            [in] EncodedStringValue value);
+            [in] IEncodedStringValue* value);
 
     }
 

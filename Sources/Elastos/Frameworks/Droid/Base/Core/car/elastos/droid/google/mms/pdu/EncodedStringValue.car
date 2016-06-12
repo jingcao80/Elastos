@@ -7,6 +7,11 @@ module {
     namespace Mms {
     namespace Pdu {
 
+    /**
+     * @Involve
+     * interface ICloneable
+     */
+    [deprecated]
     interface IEncodedStringValue {
         GetCharacterSet(
             [out] Int32* result);
@@ -14,20 +19,63 @@ module {
         SetCharacterSet(
             [in] Int32 charset);
 
-        GetTextString();
+        GetTextString(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Set Text-string value.
+         *
+         * @param textString the Text-string value
+         * @throws NullPointerException if Text-string value is null.
+         */
+        SetTextString(
+            [in] ArrayOf<Byte>* textString);
 
         GetString(
             [out] String* result);
 
+        /**
+         * Append to Text-string.
+         *
+         * @param textString the textString to append
+         * @throws NullPointerException if the text String is null
+         *                      or an IOException occured.
+         */
+        AppendTextString(
+            [in] ArrayOf<Byte>* textString);
 
+        /**
+         * Split this encoded string around matches of the given pattern.
+         *
+         * @param pattern the delimiting pattern
+         * @return the array of encoded strings computed by splitting this encoded
+         *         string around matches of the given pattern
+         */
+        Split(
+            [in] String pattern,
+            [out, callee] ArrayOf<IEncodedStringValue*>* result);
+    }
 
+    [deprecated]
+    interface IEncodedStringValueHelper {
         Extract(
-            [in] String src);
+            [in] String src,
+            [out, callee] ArrayOf<IEncodedStringValue*>* result);
+
+        /**
+         * Concatenate an EncodedStringValue[] into a single String.
+         */
+        Concat(
+            [in] ArrayOf<IEncodedStringValue*>* addr,
+            [out] String* result);
 
         Copy(
-            [in] EncodedStringValue value,
-            [out] EncodedStringValue* result);
+            [in] IEncodedStringValue* value,
+            [out] IEncodedStringValue** result);
 
+        EncodeStrings(
+            [in] ArrayOf<String>* array,
+            [out, callee] ArrayOf<IEncodedStringValue*>* result);
     }
 
     }//Pdu

@@ -7,11 +7,37 @@ module {
     namespace Mms {
     namespace Pdu {
 
+    /**
+     * @Involve
+     * interface IGenericPdu
+     */
+    [deprecated]
     interface INotificationInd {
         GetContentClass(
             [out] Int32* result);
 
-        GetContentLocation();
+        /**
+         * Set X-Mms-Content-Class Value.
+         *
+         * @param value the value
+         * @throws InvalidHeaderValueException if the value is invalid.
+         *         RuntimeException if an undeclared error occurs.
+         */
+        SetContentClass(
+            [in] Int32 value);
+
+        GetContentLocation(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Set X-Mms-Content-Location value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         *         RuntimeException if an undeclared error occurs.
+         */
+        SetContentLocation(
+            [in] ArrayOf<Byte>* value);
 
         GetExpiry(
             [out] Int64* result);
@@ -20,12 +46,23 @@ module {
             [in] Int64 value);
 
         GetFrom(
-            [out] EncodedStringValue* result);
+            [out] IEncodedStringValue** result);
 
         SetFrom(
-            [in] EncodedStringValue value);
+            [in] IEncodedStringValue* value);
 
-        GetMessageClass();
+        GetMessageClass(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Set X-Mms-Message-Class value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         *         RuntimeException if an undeclared error occurs.
+         */
+        SetMessageClass(
+            [in] ArrayOf<Byte>* value);
 
         GetMessageSize(
             [out] Int64* result);
@@ -34,15 +71,36 @@ module {
             [in] Int64 value);
 
         GetSubject(
-            [out] EncodedStringValue* result);
+            [out] IEncodedStringValue** result);
 
         SetSubject(
-            [in] EncodedStringValue value);
+            [in] IEncodedStringValue* value);
 
-        GetTransactionId();
+        GetTransactionId(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Set X-Mms-Transaction-Id.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         *         RuntimeException if an undeclared error occurs.
+         */
+        SetTransactionId(
+            [in] ArrayOf<Byte>* value);
 
         GetDeliveryReport(
             [out] Int32* result);
+
+        /**
+         * Set X-Mms-Delivery-Report Value.
+         *
+         * @param value the value
+         * @throws InvalidHeaderValueException if the value is invalid.
+         *         RuntimeException if an undeclared error occurs.
+         */
+        SetDeliveryReport(
+            [in] Int32 value);
 
     }
 

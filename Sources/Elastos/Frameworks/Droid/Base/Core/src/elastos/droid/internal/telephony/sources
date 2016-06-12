@@ -49,6 +49,7 @@ SOURCES += IccSmsInterfaceManager.cpp
 SOURCES += IccUtils.cpp
 SOURCES += InboundSmsTracker.cpp
 SOURCES += InboundSmsHandler.cpp
+SOURCES += RIL.cpp
 
 ELASTOS_LIBS += cat/cat.lib
 ELASTOS_LIBS += cdma/cdma.lib

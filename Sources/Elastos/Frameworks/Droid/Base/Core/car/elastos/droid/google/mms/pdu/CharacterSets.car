@@ -8,6 +8,79 @@ module {
     namespace Pdu {
 
     interface ICharacterSets {
+        /**
+         * IANA assigned MIB enum numbers.
+         *
+         * From wap-230-wsp-20010705-a.pdf
+         * Any-charset = <Octet 128>
+         * Equivalent to the special RFC2616 charset value "*"
+         */
+        const Int32 ANY_CHARSET = 0x00;
+        const Int32 US_ASCII    = 0x03;
+        const Int32 ISO_8859_1  = 0x04;
+        const Int32 ISO_8859_2  = 0x05;
+        const Int32 ISO_8859_3  = 0x06;
+        const Int32 ISO_8859_4  = 0x07;
+        const Int32 ISO_8859_5  = 0x08;
+        const Int32 ISO_8859_6  = 0x09;
+        const Int32 ISO_8859_7  = 0x0A;
+        const Int32 ISO_8859_8  = 0x0B;
+        const Int32 ISO_8859_9  = 0x0C;
+        const Int32 SHIFT_JIS   = 0x11;
+        const Int32 UTF_8       = 0x6A;
+        const Int32 BIG5        = 0x07EA;
+        const Int32 UCS2        = 0x03E8;
+        const Int32 UTF_16      = 0x03F7;
+
+        /**
+         * If the encoding of given data is unsupported, use UTF_8 to decode it.
+         */
+        const Int32 DEFAULT_CHARSET = UTF_8;
+
+        /**
+         * The Well-known-charset Mime name.
+         */
+        const String MIMENAME_ANY_CHARSET = "*";
+        const String MIMENAME_US_ASCII    = "us-ascii";
+        const String MIMENAME_ISO_8859_1  = "iso-8859-1";
+        const String MIMENAME_ISO_8859_2  = "iso-8859-2";
+        const String MIMENAME_ISO_8859_3  = "iso-8859-3";
+        const String MIMENAME_ISO_8859_4  = "iso-8859-4";
+        const String MIMENAME_ISO_8859_5  = "iso-8859-5";
+        const String MIMENAME_ISO_8859_6  = "iso-8859-6";
+        const String MIMENAME_ISO_8859_7  = "iso-8859-7";
+        const String MIMENAME_ISO_8859_8  = "iso-8859-8";
+        const String MIMENAME_ISO_8859_9  = "iso-8859-9";
+        const String MIMENAME_SHIFT_JIS   = "shift_JIS";
+        const String MIMENAME_UTF_8       = "utf-8";
+        const String MIMENAME_BIG5        = "big5";
+        const String MIMENAME_UCS2        = "iso-10646-ucs-2";
+        const String MIMENAME_UTF_16      = "utf-16";
+
+        const String DEFAULT_CHARSET_NAME = "utf-8";
+
+        /**
+         * Map an MIBEnum number to the name of the charset which this number
+         * is assigned to by IANA.
+         *
+         * @param mibEnumValue An IANA assigned MIBEnum number.
+         * @return The name string of the charset.
+         * @throws UnsupportedEncodingException
+         */
+        GetMimeName(
+            [in] Int32 mibEnumValue,
+            [out] String* result);
+
+        /**
+         * Map a well-known charset name to its assigned MIBEnum number.
+         *
+         * @param mimeName The charset name.
+         * @return The MIBEnum number assigned by IANA for this charset.
+         * @throws UnsupportedEncodingException
+         */
+        GetMibEnumValue(
+            [in] String mimeName,
+            [out] Int32* result);
     }
 
     }//Pdu

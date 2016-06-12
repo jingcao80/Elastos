@@ -88,6 +88,10 @@ module
     merge("../../../car/elastos/droid/gesture.car");
     }
 
+    submodule Elastos.Droid.Gesture {
+    merge("../../../car/elastos/droid/google.car");
+    }
+
     submodule Elastos.Droid.Accounts {
     merge("../../../car/elastos/droid/accounts.car");
     }

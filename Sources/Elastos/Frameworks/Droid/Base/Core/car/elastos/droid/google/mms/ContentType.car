@@ -7,6 +7,65 @@ module {
     namespace Mms {
 
     interface IContentType {
+        const String MMS_MESSAGE       = "application/vnd.wap.mms-message";
+        // The phony content type for generic PDUs (e.g. ReadOrig.ind,
+        // Notification.ind, Delivery.ind).
+        const String MMS_GENERIC       = "application/vnd.wap.mms-generic";
+        const String MULTIPART_MIXED   = "application/vnd.wap.multipart.mixed";
+        const String MULTIPART_RELATED = "application/vnd.wap.multipart.related";
+        const String MULTIPART_ALTERNATIVE = "application/vnd.wap.multipart.alternative";
+
+        const String TEXT_PLAIN        = "text/plain";
+        const String TEXT_HTML         = "text/html";
+        const String TEXT_VCALENDAR    = "text/x-vCalendar";
+        const String TEXT_VCARD        = "text/x-vCard";
+
+        const String IMAGE_UNSPECIFIED = "image/*";
+        const String IMAGE_JPEG        = "image/jpeg";
+        const String IMAGE_JPG         = "image/jpg";
+        const String IMAGE_GIF         = "image/gif";
+        const String IMAGE_WBMP        = "image/vnd.wap.wbmp";
+        const String IMAGE_PNG         = "image/png";
+        const String IMAGE_X_MS_BMP    = "image/x-ms-bmp";
+
+        const String AUDIO_UNSPECIFIED = "audio/*";
+        const String AUDIO_AAC         = "audio/aac";
+        const String AUDIO_AAC_MP4     = "audio/aac_mp4";
+        const String AUDIO_QCELP       = "audio/qcelp";
+        const String AUDIO_EVRC        = "audio/evrc";
+        const String AUDIO_AMR_WB      = "audio/amr-wb";
+        const String AUDIO_AMR         = "audio/amr";
+        const String AUDIO_IMELODY     = "audio/imelody";
+        const String AUDIO_MID         = "audio/mid";
+        const String AUDIO_MIDI        = "audio/midi";
+        const String AUDIO_MP3         = "audio/mp3";
+        const String AUDIO_MPEG3       = "audio/mpeg3";
+        const String AUDIO_MPEG        = "audio/mpeg";
+        const String AUDIO_MPG         = "audio/mpg";
+        const String AUDIO_MP4         = "audio/mp4";
+        const String AUDIO_X_MID       = "audio/x-mid";
+        const String AUDIO_X_MIDI      = "audio/x-midi";
+        const String AUDIO_X_MP3       = "audio/x-mp3";
+        const String AUDIO_X_MPEG3     = "audio/x-mpeg3";
+        const String AUDIO_X_MPEG      = "audio/x-mpeg";
+        const String AUDIO_X_MPG       = "audio/x-mpg";
+        const String AUDIO_3GPP        = "audio/3gpp";
+        const String AUDIO_X_WAV       = "audio/x-wav";
+        const String AUDIO_OGG         = "application/ogg";
+
+        const String VIDEO_UNSPECIFIED = "video/*";
+        const String VIDEO_3GPP        = "video/3gpp";
+        const String VIDEO_3G2         = "video/3gpp2";
+        const String VIDEO_H263        = "video/h263";
+        const String VIDEO_MP4         = "video/mp4";
+
+        const String APP_SMIL          = "application/smil";
+        const String APP_WAP_XHTML     = "application/vnd.wap.xhtml+xml";
+        const String APP_XHTML         = "application/xhtml+xml";
+
+        const String APP_DRM_CONTENT   = "application/vnd.oma.drm.content";
+        const String APP_DRM_MESSAGE   = "application/vnd.oma.drm.message";
+
         IsSupportedType(
             [in] String contentType,
             [out] Boolean* result);

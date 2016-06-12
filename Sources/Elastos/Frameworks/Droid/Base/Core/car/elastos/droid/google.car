@@ -1,0 +1,36 @@
+module
+{
+    merge("google/mms/pdu/AcknowledgeInd.car");
+    merge("google/mms/pdu/Base64.car");
+    merge("google/mms/pdu/CharacterSets.car");
+    merge("google/mms/pdu/DeliveryInd.car");
+    merge("google/mms/pdu/EncodedStringValue.car");
+    merge("google/mms/pdu/GenericPdu.car");
+    merge("google/mms/pdu/MultimediaMessagePdu.car");
+    merge("google/mms/pdu/NotificationInd.car");
+    merge("google/mms/pdu/NotifyRespInd.car");
+    merge("google/mms/pdu/PduBody.car");
+    merge("google/mms/pdu/PduComposer.car");
+    merge("google/mms/pdu/PduContentTypes.car");
+    merge("google/mms/pdu/PduHeaders.car");
+    merge("google/mms/pdu/PduParser.car");
+    merge("google/mms/pdu/PduPart.car");
+    merge("google/mms/pdu/PduPersister.car");
+    merge("google/mms/pdu/QuotedPrintable.car");
+    merge("google/mms/pdu/ReadOrigInd.car");
+    merge("google/mms/pdu/ReadRecInd.car");
+    merge("google/mms/pdu/RetrieveConf.car");
+    merge("google/mms/pdu/SendConf.car");
+    merge("google/mms/pdu/SendReq.car");
+
+    merge("google/mms/utility/AbstractCache.car");
+    merge("google/mms/utility/DownloadDrmHelper.car");
+    merge("google/mms/utility/DrmConvertSession.car");
+    merge("google/mms/utility/PduCache.car");
+    merge("google/mms/utility/PduCacheEntry.car");
+    merge("google/mms/utility/SqliteWrapper.car");
+
+    merge("google/mms/ContentType.car");
+    merge("google/mms/InvalidHeaderValueException.car");
+    merge("google/mms/MmsException.car");
+}

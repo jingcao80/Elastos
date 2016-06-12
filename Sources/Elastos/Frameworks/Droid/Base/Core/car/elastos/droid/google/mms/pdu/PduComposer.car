@@ -8,7 +8,8 @@ module {
     namespace Pdu {
 
     interface IPduComposer {
-        Make();
+        Make(
+            [out, callee] ArrayOf<Byte>* result);
 
     }
 

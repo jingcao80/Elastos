@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Google.Mms.Pdu.IPduPart;
 
     namespace Elastos {
     namespace Droid {
@@ -9,25 +11,25 @@ module {
 
     interface IPduBody {
         AddPart(
-            [in] PduPart part,
+            [in] IPduPart* part,
             [out] Boolean* result);
 
         AddPart(
-            [in] Int32 index, 
-            [in] PduPart part);
+            [in] Int32 index,
+            [in] IPduPart* part);
 
         RemovePart(
             [in] Int32 index,
-            [out] PduPart* result);
+            [out] IPduPart** result);
 
         RemoveAll();
 
         GetPart(
             [in] Int32 index,
-            [out] PduPart* result);
+            [out] IPduPart** result);
 
         GetPartIndex(
-            [in] PduPart part,
+            [in] IPduPart* part,
             [out] Int32* result);
 
         GetPartsNum(
@@ -35,19 +37,19 @@ module {
 
         GetPartByContentId(
             [in] String cid,
-            [out] PduPart* result);
+            [out] IPduPart** result);
 
         GetPartByContentLocation(
             [in] String contentLocation,
-            [out] PduPart* result);
+            [out] IPduPart** result);
 
         GetPartByName(
             [in] String name,
-            [out] PduPart* result);
+            [out] IPduPart** result);
 
         GetPartByFileName(
             [in] String filename,
-            [out] PduPart* result);
+            [out] IPduPart** result);
 
     }
 

@@ -6,6 +6,10 @@ module {
     namespace Google {
     namespace Mms {
 
+    /**
+     * @Involve
+     * interface IException
+     */
     interface IMmsException {
     }
 

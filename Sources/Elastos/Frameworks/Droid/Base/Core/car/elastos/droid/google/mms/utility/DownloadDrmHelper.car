@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
 
     namespace Elastos {
     namespace Droid {
@@ -7,9 +9,18 @@ module {
     namespace Mms {
     namespace Utility {
 
+    [local]
     interface IDownloadDrmHelper {
+        /** The MIME type of special DRM files */
+        const String MIMETYPE_DRM_MESSAGE = "application/vnd.oma.drm.message";
+
+        /** The extensions of special DRM files */
+        const String EXTENSION_DRM_MESSAGE = ".dm";
+
+        const String EXTENSION_INTERNAL_FWDL = ".fl";
+
         IsDrmMimeType(
-            [in] Context context, 
+            [in] IContext* context,
             [in] String mimetype,
             [out] Boolean* result);
 
@@ -22,8 +33,8 @@ module {
             [out] String* result);
 
         GetOriginalMimeType(
-            [in] Context context, 
-            [in] String path, 
+            [in] IContext* context,
+            [in] String path,
             [in] String containingMime,
             [out] String* result);
 

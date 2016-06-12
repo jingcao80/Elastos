@@ -7,7 +7,45 @@ module {
     namespace Mms {
     namespace Pdu {
 
+    [deprecated]
     interface IBase64 {
+        /**
+         * Used to get the number of Quadruples.
+         */
+        const Int32 FOURBYTE = 4;
+
+        /**
+         * Byte used to pad output.
+         */
+        // const Byte PAD = (Byte) '=';
+
+        /**
+         * The base length.
+         */
+        const Int32 BASELENGTH = 255;
+
+        /**
+         * Decodes Base64 data into octects
+         *
+         * @param base64Data Byte array containing Base64 data
+         * @return Array containing decoded data.
+         */
+        DecodeBase64(
+            [in] ArrayOf<Byte>* base64Data,
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Discards any characters outside of the base64 alphabet, per
+         * the requirements on page 25 of RFC 2045 - "Any characters
+         * outside of the base64 alphabet are to be ignored in base64
+         * encoded data."
+         *
+         * @param data The base-64 encoded data to groom
+         * @return The data, less non-base64 characters (see RFC 2045).
+         */
+        DiscardNonBase64(
+            [in] ArrayOf<Byte>* data,
+            [out, callee] ArrayOf<Byte>* result);
     }
 
     }//Pdu

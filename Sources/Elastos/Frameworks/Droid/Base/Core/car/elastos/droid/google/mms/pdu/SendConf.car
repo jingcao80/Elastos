@@ -7,13 +7,47 @@ module {
     namespace Mms {
     namespace Pdu {
 
+    /**
+     * @Involve
+     * interface IGenericPdu
+     */
+    [deprecated]
     interface ISendConf {
-        GetMessageId();
+        GetMessageId(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Set Message-ID value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         */
+        SetMessageId(
+            [in] ArrayOf<Byte>* value);
 
         GetResponseStatus(
             [out] Int32* result);
 
-        GetTransactionId();
+        /**
+         * Set X-Mms-Response-Status.
+         *
+         * @param value the values
+         * @throws InvalidHeaderValueException if the value is invalid.
+         */
+        SetResponseStatus(
+            [in] Int32 value);
+
+        GetTransactionId(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Set X-Mms-Transaction-Id field value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         */
+        SetTransactionId(
+            [in] ArrayOf<Byte>* value);
 
     }
 

@@ -148,7 +148,7 @@ module
         const Int32 RIL_REQUEST_ENTER_SIM_PUK2 = 5;
         const Int32 RIL_REQUEST_CHANGE_SIM_PIN = 6;
         const Int32 RIL_REQUEST_CHANGE_SIM_PIN2 = 7;
-        const Int32 RIL_REQUEST_ENTER_NETWORK_DEPERSONALIZATION = 8;
+        const Int32 RIL_REQUEST_ENTER_DEPERSONALIZATION_CODE = 8;
         const Int32 RIL_REQUEST_GET_CURRENT_CALLS = 9;
         const Int32 RIL_REQUEST_DIAL = 10;
         const Int32 RIL_REQUEST_GET_IMSI = 11;
@@ -270,6 +270,8 @@ module
         const Int32 RIL_REQUEST_SET_DC_RT_INFO_RATE = 127;
         const Int32 RIL_REQUEST_SET_DATA_PROFILE = 128;
         const Int32 RIL_REQUEST_SHUTDOWN = 129;
+        const Int32 RIL_REQUEST_GET_DATA_CALL_PROFILE = 130;
+        const Int32 RIL_REQUEST_SIM_GET_ATR = 131;
 
         const Int32 RIL_UNSOL_RESPONSE_BASE = 1000;
         const Int32 RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED = 1000;
@@ -313,6 +315,9 @@ module
         const Int32 RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED = 1038;
         const Int32 RIL_UNSOL_SRVCC_STATE_NOTIFY = 1039;
         const Int32 RIL_UNSOL_HARDWARE_CONFIG_CHANGED = 1040;
+        const Int32 RIL_UNSOL_ON_SS = 1042;
+        const Int32 RIL_UNSOL_STK_CC_ALPHA_NOTIFY = 1043;
+        const Int32 RIL_UNSOL_STK_SEND_SMS_RESULT = 11002; /* Samsung STK */
     }
 
     } // namespace Telephony

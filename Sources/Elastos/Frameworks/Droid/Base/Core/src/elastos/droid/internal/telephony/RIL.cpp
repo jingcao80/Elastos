@@ -1,5096 +1,6937 @@
-/*
- * Copyright (c) 2012-2014, The Linux Foundation. All rights reserved.
- * Not a Contribution.
- *
- * Copyright (C) 2006 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony;
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include <Elastos.CoreLibrary.Utility.Concurrent.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include "elastos/droid/content/res/CResourcesHelper.h"
+#include "elastos/droid/internal/telephony/RIL.h"
+#include "elastos/droid/internal/telephony/CallForwardInfo.h"
+#include "elastos/droid/net/CLocalSocket.h"
+#include "elastos/droid/net/CLocalSocketAddress.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/os/CSystemProperties.h"
+#include "elastos/droid/os/CHandlerThread.h"
+#include "elastos/droid/telephony/CPhoneNumberUtils.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/utility/CSparseArray.h"
+#include "elastos/droid/R.h"
 
 #include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
-using static com::Android::Internal::Telephony::RILConstants::I*;
-using static android::Telephony::TelephonyManager::INETWORK_TYPE_UNKNOWN;
-using static android::Telephony::TelephonyManager::INETWORK_TYPE_EDGE;
-using static android::Telephony::TelephonyManager::INETWORK_TYPE_GPRS;
-using static android::Telephony::TelephonyManager::INETWORK_TYPE_UMTS;
-using static android::Telephony::TelephonyManager::INETWORK_TYPE_HSDPA;
-using static android::Telephony::TelephonyManager::INETWORK_TYPE_HSUPA;
-using static android::Telephony::TelephonyManager::INETWORK_TYPE_HSPA;
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/Math.h>
+#include <elastos/core/StringUtils.h>
 
-using Elastos::Droid::Content::IBroadcastReceiver;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Res::IResourcesHelper;
+using Elastos::Droid::Content::Res::CResourcesHelper;
+using Elastos::Droid::Hardware::Display::EIID_IDisplayListener;
 using Elastos::Droid::Hardware::Display::IDisplayManager;
-using Elastos::Droid::Net::IConnectivityManager;
-using Elastos::Droid::Net::ILocalSocket;
-using Elastos::Droid::Net::ILocalSocketAddress;
-using Elastos::Droid::Os::IAsyncResult;
-using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::IHandlerThread;
-using Elastos::Droid::Os::ILooper;
-using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::IParcel;
-using Elastos::Droid::Os::IPowerManager;
-using Elastos::Droid::Os::ISystemProperties;
-using Elastos::Droid::Os::PowerManager::IWakeLock;
-using Elastos::Droid::Telephony::ICellInfo;
-using Elastos::Droid::Telephony::INeighboringCellInfo;
-using Elastos::Droid::Telephony::IPhoneNumberUtils;
-using Elastos::Droid::Telephony::IRlog;
-using Elastos::Droid::Telephony::ISignalStrength;
-using Elastos::Droid::Telephony::ISmsManager;
-using Elastos::Droid::Telephony::ISmsMessage;
-using Elastos::Droid::Text::ITextUtils;
-using Elastos::Droid::Utility::ISparseArray;
-using Elastos::Droid::View::IDisplay;
-
-using Elastos::Droid::Internal::Telephony::Gsm::ISmsBroadcastConfigInfo;
+using Elastos::Droid::Internal::Telephony::IRILConstants;
+using Elastos::Droid::Internal::Telephony::ICommandsInterfaceRadioState;
+using Elastos::Droid::Internal::Telephony::CallForwardInfo;
+using Elastos::Droid::Internal::Telephony::IOperatorInfo;
+using Elastos::Droid::Internal::Telephony::Cdma::ICdmaCallWaitingNotification;
+using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecordsCdmaSignalInfoRec;
+using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecordsCdmaNumberInfoRec;
+using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecordsCdmaRedirectingNumberInfoRec;
+using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecordsCdmaLineControlInfoRec;
+using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecordsCdmaT53ClirInfoRec;
+using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecordsCdmaT53AudioControlInfoRec;
+using Elastos::Droid::Internal::Telephony::DataConnection::IApnProfileOmh;
 using Elastos::Droid::Internal::Telephony::Gsm::ISsData;
 using Elastos::Droid::Internal::Telephony::Gsm::ISuppServiceNotification;
+using Elastos::Droid::Internal::Telephony::Uicc::IIccIoResult;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccCardApplicationStatus;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccCardStatus;
-using Elastos::Droid::Internal::Telephony::Uicc::IIccIoResult;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccRefreshResponse;
-using Elastos::Droid::Internal::Telephony::Uicc::IIccUtils;
-using Elastos::Droid::Internal::Telephony::Cdma::ICdmaCallWaitingNotification;
-using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecords;
-using Elastos::Droid::Internal::Telephony::Cdma::ICdmaSmsBroadcastConfigInfo;
-using Elastos::Droid::Internal::Telephony::Dataconnection::IApnProfileOmh;
-using Elastos::Droid::Internal::Telephony::Dataconnection::IApnSetting;
-using Elastos::Droid::Internal::Telephony::Dataconnection::IDcFailCause;
-using Elastos::Droid::Internal::Telephony::Dataconnection::IDataCallResponse;
-using Elastos::Droid::Internal::Telephony::Dataconnection::IDataProfile;
-using Elastos::Droid::Internal::Telephony::ITelephonyDevController;
-using Elastos::Droid::Internal::Telephony::IHardwareConfig;
+using Elastos::Droid::Net::CLocalSocket;
+using Elastos::Droid::Net::ILocalSocketAddress;
+using Elastos::Droid::Net::CLocalSocketAddress;
+using Elastos::Droid::Net::LocalSocketAddressNamespace_RESERVED;
+using Elastos::Droid::Net::IConnectivityManager;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::CHandlerThread;
+using Elastos::Droid::Telephony::ISmsManager;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
+using Elastos::Droid::Telephony::ISmsMessage;
+using Elastos::Droid::Telephony::ISmsMessageHelper;
+using Elastos::Droid::Telephony::ISignalStrength;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::ICellInfo;
+using Elastos::Droid::Telephony::INeighboringCellInfo;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Utility::CSparseArray;
 
+using Elastos::Core::AutoLock;
+using Elastos::Core::CInteger32;
+using Elastos::Core::IInteger64;
+using Elastos::Core::CInteger64;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::Math;
+using Elastos::Core::EIID_IRunnable;
+using Elastos::Core::StringUtils;
+using Elastos::Core::CThread;
+using Elastos::Core::IThread;
+using Elastos::Core::IBoolean;
+using Elastos::Core::CBoolean;
+using Elastos::Core::CString;
+using Elastos::IO::IOutputStream;
+using Elastos::IO::ICloseable;
 using Elastos::IO::IByteArrayInputStream;
+using Elastos::IO::CByteArrayInputStream;
 using Elastos::IO::IDataInputStream;
-using Elastos::IO::IFileDescriptor;
-using Elastos::IO::IInputStream;
-using Elastos::IO::IPrintWriter;
-using Elastos::Nio::IByteBuffer;
-using Elastos::Nio::IByteOrder;
-using Elastos::Utility::IArrayList;
+using Elastos::IO::CDataInputStream;
+using Elastos::IO::IDataInput;
+using Elastos::IO::IByteBufferHelper;
+using Elastos::IO::CByteBufferHelper;
+using Elastos::IO::IByteOrderHelper;
+using Elastos::IO::CByteOrderHelper;
+using Elastos::IO::ByteOrder;
+using Elastos::IO::IBuffer;
+using Elastos::Utility::CRandom;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::ICollections;
-using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
-using Elastos::Utility::Concurrent::Atomic::IAtomicInteger;
-using Elastos::Utility::IRandom;
+using Elastos::Utility::CCollections;
+using Elastos::Utility::IList;
+using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
+using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
 
-/**
- * {@hide}
- */
-class RILRequest {
-    static const String LOG_TAG = "RilRequest";
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
 
-    //***** Class Variables
-    static Random sRandom = new Random();
-    static AtomicInteger sNextSerial = new AtomicInteger(0);
-    private static Object sPoolSync = new Object();
-    private static RILRequest sPool = NULL;
-    private static Int32 sPoolSize = 0;
-    private static const Int32 MAX_POOL_SIZE = 4;
-    private Context mContext;
+//==============================================================
+//  RILRequest::
+//==============================================================
 
-    //***** Instance Variables
-    Int32 mSerial;
-    Int32 mRequest;
-    Message mResult;
-    Parcel mParcel;
-    RILRequest mNext;
+// const String RILRequest::LOG_TAG("RilRequest");
 
-    /**
-     * Retrieves a new RILRequest instance from the pool.
-     *
-     * @param request RIL_REQUEST_*
-     * @param result sent when operation completes
-     * @return a RILRequest instance from the pool.
-     */
-    static RILRequest Obtain(Int32 request, Message result) {
-        RILRequest rr = NULL;
+static AutoPtr<IRandom> InitRandom()
+{
+    AutoPtr<IRandom> r;
+    CRandom::New((IRandom**)&r);
+    return r;
+}
+AutoPtr<IRandom> RILRequest::sRandom = InitRandom();
 
-        {    AutoLock syncLock(sPoolSync);
-            If (sPool != NULL) {
-                rr = sPool;
-                sPool = rr.mNext;
-                rr.mNext = NULL;
-                sPoolSize--;
+static AutoPtr<IAtomicInteger32> InitAtomic()
+{
+    AutoPtr<IAtomicInteger32> a;
+    CAtomicInteger32::New(0, (IAtomicInteger32**)&a);
+    return a;
+}
+
+AutoPtr<IAtomicInteger32> RILRequest::sNextSerial = InitAtomic();
+Object RILRequest::sPoolSync; // = new Object();
+AutoPtr<RILRequest> RILRequest::sPool;
+Int32 RILRequest::sPoolSize = 0;
+Int32 RILRequest::MAX_POOL_SIZE = 4;
+
+AutoPtr<RILRequest> RILRequest::Obtain(
+    /* [in] */ Int32 request,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr;
+
+    // synchronized(sPoolSync)
+    {
+        AutoLock lock(sPoolSync);
+        if (sPool != NULL) {
+            rr = sPool;
+            sPool = rr->mNext;
+            rr->mNext = NULL;
+            sPoolSize--;
+        }
+    }
+
+    if (rr == NULL) {
+        rr = new RILRequest();
+    }
+
+    sNextSerial->GetAndIncrement(&(rr->mSerial));
+
+    rr->mRequest = request;
+    rr->mResult = result;
+    assert(0 && "TODO");
+    // rr->mParcel = Parcel::Obtain();
+
+    if (result != NULL) {
+        AutoPtr<IHandler> hdl;
+        result->GetTarget((IHandler**)&hdl);
+        if (hdl == NULL) {
+            // throw new NullPointerException("Message target must not be NULL");
+            return NULL;
+        }
+    }
+
+    // first elements in any RIL Parcel
+    rr->mParcel->WriteInt32(request);
+    rr->mParcel->WriteInt32(rr->mSerial);
+
+    return rr;
+}
+
+UInt32 RILRequest::Release()
+{
+    // synchronized (sPoolSync)
+    {
+        AutoLock lock(sPoolSync);
+        if (sPoolSize < MAX_POOL_SIZE) {
+            mNext = sPool;
+            sPool = this;
+            sPoolSize++;
+            mResult = NULL;
+        }
+    }
+    return 0;
+}
+
+RILRequest::RILRequest()
+{
+}
+
+void RILRequest::ResetSerial()
+{
+    // use a random so that on recovery we probably don't mix old requests
+    // with new.
+    Int32 num = 0;
+    sRandom->NextInt32(&num);
+    sNextSerial->Set(num);
+}
+
+String RILRequest::SerialString()
+{
+    //Cheesy way to do %04d
+    StringBuilder sb;
+    String sn;
+
+    Int64 adjustedSerial = (((Int64)mSerial) - Elastos::Core::Math::INT32_MIN_VALUE)%10000;
+
+    sn = StringUtils::ToString(adjustedSerial);
+
+    //sb.append("J[");
+    sb.Append('[');
+    for (Int32 i = 0, s = sn.GetLength() ; i < 4 - s; i++) {
+        sb.Append('0');
+    }
+
+    sb.Append(sn);
+    sb.Append(']');
+    return sb.ToString();
+}
+
+void RILRequest::OnError(
+    /* [in] */ Int32 error,
+    /* [in] */ IInterface* ret)
+{
+    AutoPtr<ICommandException> ex;
+
+    assert(0 && "TODO");
+    // ex = CommandException::FromRilErrno(error);
+
+    // if (RIL::RILJ_LOGD) {
+    //     Rlog.d(LOG_TAG, serialString() + "< "
+    //     + RIL.requestToString(mRequest)
+    //     + " error: " + ex + " ret=" + RIL.retToString(mRequest, ret));
+    // }
+
+    if (mResult != NULL) {
+        assert(0 && "TODO");
+        // AsyncResult::ForMessage(mResult, ret, ex);
+        mResult->SendToTarget();
+    }
+
+    if (mParcel != NULL) {
+        // mParcel->Recycle();
+        mParcel = NULL;
+    }
+}
+
+//==============================================================
+//  RIL::RILSender::
+//==============================================================
+CAR_INTERFACE_IMPL(RIL::RILSender, Handler, IRunnable)
+
+RIL::RILSender::RILSender(
+    /* [in] */ ILooper* looper,
+    /* [in] */ RIL* host)
+    : Handler(looper)
+    , mHost(host)
+{
+    mDataLength = ArrayOf<Byte>::Alloc(4);
+}
+
+ECode RIL::RILSender::Run()
+{
+    //setup if needed
+    return NOERROR;
+}
+
+ECode RIL::RILSender::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    AutoPtr<RILRequest> rr = (RILRequest*)IObject::Probe(obj);
+    AutoPtr<RILRequest> req;
+
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    switch (what) {
+        case 1: {
+            // try {
+                AutoPtr<ILocalSocket> s;
+
+                s = mHost->mSocket;
+
+                if (s == NULL) {
+                    rr->OnError(IRILConstants::RADIO_NOT_AVAILABLE, NULL);
+                    rr->Release();
+                    mHost->DecrementWakeLock();
+                    return NOERROR;
+                }
+
+                // synchronized (mRequestList)
+                {
+                    AutoLock lock(mHost->listLock);
+                    mHost->mRequestList->Append(rr->mSerial, (IInterface*)(IObject*)rr.Get());
+                }
+
+                AutoPtr<ArrayOf<Byte> > data;
+
+                rr->mParcel->Marshall((ArrayOf<Byte>**)&data);
+                assert(0 && "TODO");
+                // rr->mParcel->Recycle();
+                rr->mParcel = NULL;
+
+                if (data->GetLength() > RIL_MAX_COMMAND_BYTES) {
+                    // throw new RuntimeException(
+                    //         "Parcel larger than max bytes allowed! "
+                    //                               + data.length);
+                    return E_RUNTIME_EXCEPTION;
+                }
+
+                // parcel length in big endian
+                (*mDataLength)[0] = (*mDataLength)[1] = 0;
+                (*mDataLength)[2] = (Byte)((data->GetLength() >> 8) & 0xff);
+                (*mDataLength)[3] = (Byte)((data->GetLength()) & 0xff);
+
+                //Rlog.v(RILJ_LOG_TAG, "writing packet: " + data.length + " bytes");
+
+                AutoPtr<IOutputStream> os;
+                s->GetOutputStream((IOutputStream**)&os);
+                os->Write(mDataLength);
+                os->Write(data);
+            // } catch (IOException ex) {
+            //     Rlog.e(RILJ_LOG_TAG, "IOException", ex);
+            //     req = findAndRemoveRequestFromList(rr.mSerial);
+            //     // make sure this request has not already been handled,
+            //     // eg, if RILReceiver cleared the list.
+            //     if (req != NULL) {
+            //         rr.onError(IRILConstants::RADIO_NOT_AVAILABLE, NULL);
+            //         rr.release();
+            //         decrementWakeLock();
+            //     }
+            // } catch (RuntimeException exc) {
+            //     Rlog.e(RILJ_LOG_TAG, "Uncaught exception ", exc);
+            //     req = findAndRemoveRequestFromList(rr.mSerial);
+            //     // make sure this request has not already been handled,
+            //     // eg, if RILReceiver cleared the list.
+            //     if (req != NULL) {
+            //         rr.onError(GENERIC_FAILURE, NULL);
+            //         rr.release();
+            //         decrementWakeLock();
+            //     }
+            // }
+        }
+        break;
+        case 2: {
+            // Haven't heard back from the last request.  Assume we're
+            // not getting a response and  release the wake lock.
+
+            // The timer of WAKE_LOCK_TIMEOUT is reset with each
+            // new Send request. So when WAKE_LOCK_TIMEOUT occurs
+            // all requests in mRequestList already waited at
+            // least DEFAULT_WAKE_LOCK_TIMEOUT but no response.
+            //
+            // Note: Keep mRequestList so that delayed response
+            // can still be handled when response finally comes.
+
+            // synchronized (mRequestList)
+            {
+                AutoLock lock(mHost->listLock);
+                if (mHost->ClearWakeLock()) {
+                    if (RILJ_LOGD) {
+                        Int32 count = 0;
+                        mHost->mRequestList->GetSize(&count);
+                        // Rlog.d(RILJ_LOG_TAG, "WAKE_LOCK_TIMEOUT " +
+                        //         " mRequestList=" + count);
+                        for (Int32 i = 0; i < count; i++) {
+                            AutoPtr<IInterface> _rr;
+                            mHost->mRequestList->ValueAt(i, (IInterface**)&_rr);
+                            rr = (RILRequest*)IObject::Probe(_rr);
+                            // Rlog.d(RILJ_LOG_TAG, i + ": [" + rr.mSerial + "] "
+                            //         + requestToString(rr.mRequest));
+                        }
+                    }
+                }
             }
         }
-
-        If (rr == NULL) {
-            rr = new RILRequest();
-        }
-
-        rr.mSerial = sNextSerial->GetAndIncrement();
-
-        rr.mRequest = request;
-        rr.mResult = result;
-        rr.mParcel = Parcel->Obtain();
-
-        If (result != NULL && result->GetTarget() == NULL) {
-            throw new NullPointerException("Message target must not be NULL");
-        }
-
-        // first elements in any RIL Parcel
-        rr.mParcel->WriteInt(request);
-        rr.mParcel->WriteInt(rr.mSerial);
-
-        return rr;
+        break;
     }
+    return NOERROR;
+}
 
-    /**
-     * Returns a RILRequest instance to the pool.
-     *
-     * Note: This should only be called once per use.
-     */
-    void Release() {
-        {    AutoLock syncLock(sPoolSync);
-            If (sPoolSize < MAX_POOL_SIZE) {
-                mNext = sPool;
-                sPool = this;
-                sPoolSize++;
-                mResult = NULL;
+//==============================================================
+//  RIL::RILReceiver::
+//==============================================================
+CAR_INTERFACE_IMPL(RIL::RILReceiver, Object, IRunnable)
+
+RIL::RILReceiver::RILReceiver(
+    /* [in] */ RIL* host)
+    : mHost(host)
+{
+    mBuffer = ArrayOf<Byte>::Alloc(RIL_MAX_COMMAND_BYTES);
+}
+
+ECode RIL::RILReceiver::Run()
+{
+    Int32 retryCount = 0;
+    String rilSocket("rild");
+
+    // try {
+    for (;;) {
+        AutoPtr<ILocalSocket> s;
+        AutoPtr<ILocalSocketAddress> l;
+
+        if (mHost->mInstanceId == NULL) {
+            rilSocket = (*SOCKET_NAME_RIL)[0];
+        }
+        else {
+            Int32 id = 0;
+            mHost->mInstanceId->GetValue(&id);
+            rilSocket = (*SOCKET_NAME_RIL)[id];
+        }
+
+        // try {
+            CLocalSocket::New((ILocalSocket**)&s);
+            CLocalSocketAddress::New(rilSocket,
+                    LocalSocketAddressNamespace_RESERVED, (ILocalSocketAddress**)&l);
+            s->Connect(l);
+        // } catch (IOException ex){
+        //     try {
+        //         if (s != NULL) {
+        //             s.close();
+        //         }
+        //     } catch (IOException ex2) {
+        //         //ignore failure to close after failure to connect
+        //     }
+
+        //     // don't print an error message after the the first time
+        //     // or after the 8th time
+
+        //     if (retryCount == 8) {
+        //         Rlog.e (RILJ_LOG_TAG,
+        //             "Couldn't find '" + rilSocket
+        //             + "' socket after " + retryCount
+        //             + " times, continuing to retry silently");
+        //     }
+        //     else if (retryCount > 0 && retryCount < 8) {
+        //         Rlog.i (RILJ_LOG_TAG,
+        //             "Couldn't find '" + rilSocket
+        //             + "' socket; retrying after timeout");
+        //     }
+
+        //     try {
+        //         Thread.sleep(SOCKET_OPEN_RETRY_MILLIS);
+        //     } catch (InterruptedException er) {
+        //     }
+
+        //     retryCount++;
+        //     continue;
+        // }
+
+        retryCount = 0;
+
+        mHost->mSocket = s;
+        // Rlog.i(RILJ_LOG_TAG, "Connected to '" + rilSocket + "' socket");
+
+        /* Compatibility with qcom's DSDS (Dual SIM) stack */
+        Boolean bNeeds = FALSE;
+        mHost->NeedsOldRilFeature(String("qcomdsds"), &bNeeds);
+        if (bNeeds) {
+            String str("SUB1");
+            AutoPtr<ArrayOf<Byte> > data = str.GetBytes();
+            // try {
+                AutoPtr<IOutputStream> os;
+                mHost->mSocket->GetOutputStream((IOutputStream**)&os);
+                os->Write(data);
+                // Rlog.i(RILJ_LOG_TAG, "Data sent!!");
+            // } catch (IOException ex) {
+            //         Rlog.e(RILJ_LOG_TAG, "IOException", ex);
+            // } catch (RuntimeException exc) {
+            //     Rlog.e(RILJ_LOG_TAG, "Uncaught exception ", exc);
+            // }
+        }
+
+        Int32 length = 0;
+        // try {
+            AutoPtr<IInputStream> is;
+            mHost->mSocket->GetInputStream((IInputStream**)&is);
+
+            for (;;) {
+                AutoPtr<IParcel> p;
+
+                length = ReadRilMessage(is, mBuffer);
+
+                if (length < 0) {
+                    // End-of-stream reached
+                    break;
+                }
+
+                // p = Parcel::Obtain();
+                p->Unmarshall(mBuffer, 0, length);
+                p->SetDataPosition(0);
+
+                //Rlog.v(RILJ_LOG_TAG, "Read packet: " + length + " bytes");
+
+                mHost->ProcessResponse(p);
+                // p->Recycle();
             }
+        // } catch (java.io.IOException ex) {
+        //     Rlog.i(RILJ_LOG_TAG, "'" + rilSocket + "' socket closed",
+        //           ex);
+        // } catch (Throwable tr) {
+        //     Rlog.e(RILJ_LOG_TAG, "Uncaught exception read length=" + length +
+        //         "Exception:" + tr.toString());
+        // }
+
+        // Rlog.i(RILJ_LOG_TAG, "Disconnected from '" + rilSocket
+        //       + "' socket");
+
+        mHost->SetRadioState(RADIO_UNAVAILABLE);
+
+        // try {
+            ICloseable::Probe(mHost->mSocket)->Close();
+        // } catch (IOException ex) {
+        // }
+
+        mHost->mSocket = NULL;
+        RILRequest::ResetSerial();
+
+        // Clear request list on close
+        mHost->ClearRequestList(IRILConstants::RADIO_NOT_AVAILABLE, FALSE);
+    }
+    // } catch (Throwable tr) {
+    //     Rlog.e(RILJ_LOG_TAG,"Uncaught exception", tr);
+    // }
+
+    /* We're disconnected so we don't know the ril version */
+    mHost->NotifyRegistrantsRilConnectionChanged(-1);
+    return NOERROR;
+}
+
+//==============================================================
+//  RIL::UnsolOemHookBuffer::
+//==============================================================
+
+RIL::UnsolOemHookBuffer::UnsolOemHookBuffer(
+    /* [in] */ Int32 rilInstance,
+    /* [in] */ ArrayOf<Byte>* data)
+    : mRilInstance(rilInstance)
+    , mData(data)
+{
+}
+
+ECode RIL::UnsolOemHookBuffer::GetRilInstance(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mRilInstance;
+    return NOERROR;
+}
+
+ECode RIL::UnsolOemHookBuffer::GetUnsolOemHookBuffer(
+    /* [out] */ ArrayOf<Byte>** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mData;
+    return NOERROR;
+}
+
+//==============================================================
+//  RIL::DisplayListener::
+//==============================================================
+CAR_INTERFACE_IMPL(RIL::DisplayListener, Object, IDisplayListener)
+
+RIL::DisplayListener::DisplayListener(
+    /* [in] */ RIL* host)
+    : mHost(host)
+{
+}
+
+ECode RIL::DisplayListener::OnDisplayAdded(
+    /* [in] */ Int32 displayId)
+{
+    return NOERROR;
+}
+
+ECode RIL::DisplayListener::OnDisplayRemoved(
+    /* [in] */ Int32 displayId)
+{
+    return NOERROR;
+}
+
+ECode RIL::DisplayListener::OnDisplayChanged(
+    /* [in] */ Int32 displayId)
+{
+    if (displayId == IDisplay::DEFAULT_DISPLAY) {
+        mHost->UpdateScreenState();
+    }
+    return NOERROR;
+}
+
+//==============================================================
+//  RIL::
+//==============================================================
+String RIL::RILJ_LOG_TAG("RILJ");
+Boolean RIL::RILJ_LOGD = TRUE;
+Boolean RIL::RILJ_LOGV = FALSE; // STOPSHIP if TRUE
+
+Int32 RIL::DEFAULT_WAKE_LOCK_TIMEOUT = 60000;
+Int32 RIL::BYTE_SIZE = 1;
+
+Int32 RIL::OEMHOOK_BASE = 0x80000;
+
+Int32 RIL::OEMHOOK_EVT_HOOK_SET_LOCAL_CALL_HOLD = OEMHOOK_BASE + 13;
+
+Int32 RIL::OEMHOOK_EVT_HOOK_GET_MODEM_CAPABILITY = OEMHOOK_BASE + 35;
+
+Int32 RIL::OEMHOOK_EVT_HOOK_UPDATE_SUB_BINDING = OEMHOOK_BASE + 36;
+
+Int32 RIL::INT_SIZE = 4;
+String RIL::OEM_IDENTIFIER("QOEMHOOK");
+
+const Int32 RIL::EVENT_SEND                 = 1;
+const Int32 RIL::EVENT_WAKE_LOCK_TIMEOUT    = 2;
+
+Int32 RIL::RIL_MAX_COMMAND_BYTES = (8 * 1024);
+Int32 RIL::RESPONSE_SOLICITED = 0;
+Int32 RIL::RESPONSE_UNSOLICITED = 1;
+
+static AutoPtr<ArrayOf<String> > InitSOCKET_NAME_RIL()
+{
+    AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(3);
+    (*arr)[0] = String("rild");
+    (*arr)[1] = String("rild2");
+    (*arr)[2] = String("rild3");
+    return arr;
+}
+
+AutoPtr<ArrayOf<String> > RIL::SOCKET_NAME_RIL = InitSOCKET_NAME_RIL();
+
+Int32 RIL::SOCKET_OPEN_RETRY_MILLIS = 4 * 1000;
+
+Int32 RIL::CDMA_BSI_NO_OF_INTS_STRUCT = 3;
+
+Int32 RIL::CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES = 31;
+
+Int32 RIL::ReadRilMessage(
+    /* [in] */ IInputStream* is,
+    /* [in] */ ArrayOf<Byte>* buffer)
+{
+    Int32 countRead = 0;
+    Int32 offset = 0;
+    Int32 remaining = 0;
+    Int32 messageLength = 0;
+
+    // First, read in the length of the message
+    offset = 0;
+    remaining = 4;
+    do {
+        is->Read(buffer, offset, remaining, &countRead);
+
+        if (countRead < 0 ) {
+            // Rlog.e(RILJ_LOG_TAG, "Hit EOS reading message length");
+            return -1;
+        }
+
+        offset += countRead;
+        remaining -= countRead;
+    } while (remaining > 0);
+
+    messageLength = (((*buffer)[0] & 0xff) << 24)
+            | (((*buffer)[1] & 0xff) << 16)
+            | (((*buffer)[2] & 0xff) << 8)
+            | ((*buffer)[3] & 0xff);
+
+    // Then, re-use the buffer and read in the message itself
+    offset = 0;
+    remaining = messageLength;
+    do {
+        is->Read(buffer, offset, remaining, &countRead);
+
+        if (countRead < 0 ) {
+            // Rlog.e(RILJ_LOG_TAG, "Hit EOS reading message.  messageLength=" + messageLength
+            //         + " remaining=" + remaining);
+            return -1;
+        }
+
+        offset += countRead;
+        remaining -= countRead;
+    } while (remaining > 0);
+
+    return messageLength;
+}
+
+RIL::RIL(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 preferredNetworkType,
+    /* [in] */ Int32 cdmaSubscription)
+    : BaseCommands(context)
+    , OEMHOOK_UNSOL_SIM_REFRESH(OEMHOOK_BASE + 1016)
+    , OEMHOOK_UNSOL_WWAN_IWLAN_COEXIST(OEMHOOK_BASE + 1018)
+{
+    Init(context, preferredNetworkType, cdmaSubscription, NULL);
+}
+
+RIL::RIL(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 preferredNetworkType,
+    /* [in] */ Int32 cdmaSubscription,
+    /* [in] */ IInteger32* instanceId)
+    : BaseCommands(context)
+    , OEMHOOK_UNSOL_SIM_REFRESH(OEMHOOK_BASE + 1016)
+    , OEMHOOK_UNSOL_WWAN_IWLAN_COEXIST(OEMHOOK_BASE + 1018)
+{
+    Init(context, preferredNetworkType, cdmaSubscription, instanceId);
+}
+
+ECode RIL::Init(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 preferredNetworkType,
+    /* [in] */ Int32 cdmaSubscription,
+    /* [in] */ IInteger32* instanceId)
+{
+    mHeaderSize = OEM_IDENTIFIER.GetLength() + 2 * INT_SIZE;
+    QCRIL_EVT_HOOK_UNSOL_MODEM_CAPABILITY = OEMHOOK_BASE + 1020;
+
+    mDefaultDisplayState = IDisplay::STATE_UNKNOWN;
+    mWakeLockTimeout = 0;
+
+    mWakeLockCount = 0;
+
+    CSparseArray::New((ISparseArray**)&mRequestList);
+
+    CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&mTestingEmergencyCall);
+
+    mQANElements = 4;
+    mDisplayListener = new DisplayListener(this);
+
+    if (RILJ_LOGD) {
+        String str("RIL(context, preferredNetworkType=");
+        str += preferredNetworkType;
+        str += " cdmaSubscription=";
+        str += cdmaSubscription;
+        str += ")";
+        RiljLog(str);
+    }
+
+    mContext = context;
+    mCdmaSubscription  = cdmaSubscription;
+    mPreferredNetworkType = preferredNetworkType;
+    mPhoneType = IRILConstants::NO_PHONE;
+    mInstanceId = instanceId;
+
+    AutoPtr<IInterface> p;
+    context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&p);
+    AutoPtr<IPowerManager> pm = IPowerManager::Probe(p);
+    pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, RILJ_LOG_TAG, (IPowerManagerWakeLock**)&mWakeLock);
+    mWakeLock->SetReferenceCounted(FALSE);
+    AutoPtr<ISystemProperties> sp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
+    sp->GetInt32(ITelephonyProperties::PROPERTY_WAKE_LOCK_TIMEOUT,
+            DEFAULT_WAKE_LOCK_TIMEOUT, &mWakeLockTimeout);
+    mWakeLockCount = 0;
+
+    CHandlerThread::New(String("RILSender"), (IHandlerThread**)&mSenderThread);
+    IThread::Probe(mSenderThread)->Start();
+
+    AutoPtr<ILooper> looper;
+    mSenderThread->GetLooper((ILooper**)&looper);
+    mSender = new RILSender(looper, this);
+
+    AutoPtr<IInterface> cs;
+    context->GetSystemService(
+            IContext::CONNECTIVITY_SERVICE, (IInterface**)&cs);
+    AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(cs);
+    Boolean bSupported = FALSE;
+    cm->IsNetworkSupported(IConnectivityManager::TYPE_MOBILE, &bSupported);
+    if (bSupported == FALSE) {
+        RiljLog(String("Not starting RILReceiver: wifi-only"));
+    }
+    else {
+        RiljLog(String("Starting RILReceiver"));
+        mReceiver = new RILReceiver(this);
+        CThread::New(mReceiver, String("RILReceiver"), (IThread**)&mReceiverThread);
+        IThread::Probe(mReceiverThread)->Start();
+
+        AutoPtr<IInterface> ds;
+        context->GetSystemService(
+                IContext::DISPLAY_SERVICE, (IInterface**)&ds);
+        AutoPtr<IDisplayManager> dm = IDisplayManager::Probe(ds);
+        dm->GetDisplay(IDisplay::DEFAULT_DISPLAY, (IDisplay**)&mDefaultDisplay);
+        dm->RegisterDisplayListener(mDisplayListener, NULL);
+    }
+
+    assert(0 && "TODO");
+    //TelephonyDevController tdc = TelephonyDevController.getInstance();
+    //tdc->RegisterRIL(this);
+    return NOERROR;
+}
+
+ECode RIL::GetVoiceRadioTechnology(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_VOICE_RADIO_TECH, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+
+ECode RIL::GetImsRegistrationState(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_IMS_REGISTRATION_STATE, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetOnNITZTime(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
+{
+    BaseCommands::SetOnNITZTime(h, what, obj);
+
+    // Send the last NITZ time if we have it
+    if (mLastNITZTimeInfo != NULL) {
+        AutoPtr<AsyncResult> ar = new AsyncResult(NULL, mLastNITZTimeInfo, NULL);
+        assert(0 && "TODO");
+        // mNITZTimeRegistrant->NotifyRegistrant(ar);
+        mLastNITZTimeInfo = NULL;
+    }
+    return NOERROR;
+}
+
+ECode RIL::GetIccCardStatus(
+    /* [in] */ IMessage* result)
+{
+    //Note: This RIL request has not been renamed to ICC,
+    //       but this request is also valid for SIM and RUIM
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_GET_SIM_STATUS, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetUiccSubscription(
+    /* [in] */ Int32 slotId,
+    /* [in] */ Int32 appIndex,
+    /* [in] */ Int32 subId,
+    /* [in] */ Int32 subStatus,
+    /* [in] */ IMessage* result)
+{
+    //Note: This RIL request is also valid for SIM and RUIM (ICC card)
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SET_UICC_SUBSCRIPTION, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " slot: "; str += slotId;
+        str += " appIndex: "; str += appIndex;
+        str += " subId: "; str += subId;
+        str += " subStatus: "; str += subStatus;
+        RiljLog(str);
+    }
+
+    rr->mParcel->WriteInt32(slotId);
+    rr->mParcel->WriteInt32(appIndex);
+    rr->mParcel->WriteInt32(subId);
+    rr->mParcel->WriteInt32(subStatus);
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetDataAllowed(
+    /* [in] */ Boolean allowed,
+    /* [in] */ IMessage* result)
+{
+    if(mRilVersion < 10 && mInstanceId == NULL) {
+        if (result != NULL) {
+            AutoPtr<ICommandException> ex;
+            assert(0 && "TODO");
+            // CCommandException::New(
+            //     ICommandException::Error::REQUEST_NOT_SUPPORTED, (ICommandException**)&ex);
+            // AsyncResult::ForMessage(result, NULL, ex);
+            result->SendToTarget();
+        }
+        return NOERROR;
+    }
+
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_ALLOW_DATA, result);
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += allowed;
+        RiljLog(str);
+    }
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(allowed ? 1 : 0);
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetDataCallProfile(
+    /* [in] */ Int32 appType,
+    /* [in] */ IMessage* result)
+{
+    if (mRilVersion < 10) {
+        if (result != NULL) {
+            AutoPtr<ICommandException> ex;
+            assert(0 && "TODO");
+            // CCommandException::New(
+            //     ICommandException::Error::REQUEST_NOT_SUPPORTED, (ICommandException**)&ex);
+            // AsyncResult::ForMessage(result, NULL, ex);
+            result->SendToTarget();
+        }
+        return NOERROR;
+    }
+
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+                                IRILConstants::RIL_REQUEST_GET_DATA_CALL_PROFILE,
+                                result);
+
+    // count of ints
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(appType);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " : ";
+        str += appType;
+        RiljLog(str);
+    }
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SupplyIccPin(
+    /* [in] */ String pin,
+    /* [in] */ IMessage* result)
+{
+    return SupplyIccPinForApp(pin, String(NULL), result);
+}
+
+ECode RIL::SupplyIccPinForApp(
+    /* [in] */ String pin,
+    /* [in] */ String aid,
+    /* [in] */ IMessage* result)
+{
+    //Note: This RIL request has not been renamed to ICC,
+    //       but this request is also valid for SIM and RUIM
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_ENTER_SIM_PIN, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Boolean oldRil = FALSE;
+    NeedsOldRilFeature(String("facilitylock"), &oldRil);
+
+    rr->mParcel->WriteInt32(oldRil ? 1 : 2);
+    rr->mParcel->WriteString(pin);
+
+    if (!oldRil) {
+        rr->mParcel->WriteString(aid);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SupplyIccPuk(
+    /* [in] */ String puk,
+    /* [in] */ String newPin,
+    /* [in] */ IMessage* result)
+{
+    return SupplyIccPukForApp(puk, newPin, String(NULL), result);
+}
+
+ECode RIL::SupplyIccPukForApp(
+    /* [in] */ String puk,
+    /* [in] */ String newPin,
+    /* [in] */ String aid,
+    /* [in] */ IMessage* result)
+{
+    //Note: This RIL request has not been renamed to ICC,
+    //       but this request is also valid for SIM and RUIM
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_ENTER_SIM_PUK, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Boolean oldRil = FALSE;
+    NeedsOldRilFeature(String("facilitylock"), &oldRil);
+
+    rr->mParcel->WriteInt32(oldRil ? 2 : 3);
+    rr->mParcel->WriteString(puk);
+    rr->mParcel->WriteString(newPin);
+
+    if (!oldRil) {
+        rr->mParcel->WriteString(aid);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SupplyIccPin2(
+    /* [in] */ String pin,
+    /* [in] */ IMessage* result)
+{
+    return SupplyIccPin2ForApp(pin, String(NULL), result);
+}
+
+ECode RIL::SupplyIccPin2ForApp(
+    /* [in] */ String pin,
+    /* [in] */ String aid,
+    /* [in] */ IMessage* result)
+{
+    //Note: This RIL request has not been renamed to ICC,
+    //       but this request is also valid for SIM and RUIM
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_ENTER_SIM_PIN2, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Boolean oldRil = FALSE;
+    NeedsOldRilFeature(String("facilitylock"), &oldRil);
+
+    rr->mParcel->WriteInt32(oldRil ? 1 : 2);
+    rr->mParcel->WriteString(pin);
+
+    if (!oldRil) {
+        rr->mParcel->WriteString(aid);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SupplyIccPuk2(
+    /* [in] */ String puk2,
+    /* [in] */ String newPin2,
+    /* [in] */ IMessage* result)
+{
+    return SupplyIccPuk2ForApp(puk2, newPin2, String(NULL), result);
+}
+
+ECode RIL::SupplyIccPuk2ForApp(
+    /* [in] */ String puk,
+    /* [in] */ String newPin2,
+    /* [in] */ String aid,
+    /* [in] */ IMessage* result)
+{
+    //Note: This RIL request has not been renamed to ICC,
+    //       but this request is also valid for SIM and RUIM
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_ENTER_SIM_PUK2, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Boolean oldRil = FALSE;
+    NeedsOldRilFeature(String("facilitylock"), &oldRil);
+
+    rr->mParcel->WriteInt32(oldRil ? 2 : 3);
+    rr->mParcel->WriteString(puk);
+    rr->mParcel->WriteString(newPin2);
+
+    if (!oldRil) {
+        rr->mParcel->WriteString(aid);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::ChangeIccPin(
+    /* [in] */ String oldPin,
+    /* [in] */ String newPin,
+    /* [in] */ IMessage* result)
+{
+    return ChangeIccPinForApp(oldPin, newPin, String(NULL), result);
+}
+
+ECode RIL::ChangeIccPinForApp(
+    /* [in] */ String oldPin,
+    /* [in] */ String newPin,
+    /* [in] */ String aid,
+    /* [in] */ IMessage* result)
+{
+    //Note: This RIL request has not been renamed to ICC,
+    //       but this request is also valid for SIM and RUIM
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_CHANGE_SIM_PIN, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Boolean oldRil = FALSE;
+    NeedsOldRilFeature(String("facilitylock"), &oldRil);
+
+    rr->mParcel->WriteInt32(oldRil ? 2 : 3);
+    rr->mParcel->WriteString(oldPin);
+    rr->mParcel->WriteString(newPin);
+
+    if (!oldRil) {
+        rr->mParcel->WriteString(aid);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::ChangeIccPin2(
+    /* [in] */ String oldPin2,
+    /* [in] */ String newPin2,
+    /* [in] */ IMessage* result)
+{
+    return ChangeIccPin2ForApp(oldPin2, newPin2, String(NULL), result);
+}
+
+ECode RIL::ChangeIccPin2ForApp(
+    /* [in] */ String oldPin2,
+    /* [in] */ String newPin2,
+    /* [in] */ String aid,
+    /* [in] */ IMessage* result)
+{
+    //Note: This RIL request has not been renamed to ICC,
+    //       but this request is also valid for SIM and RUIM
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_CHANGE_SIM_PIN2, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Boolean oldRil = FALSE;
+    NeedsOldRilFeature(String("facilitylock"), &oldRil);
+
+    rr->mParcel->WriteInt32(oldRil ? 2 : 3);
+    rr->mParcel->WriteString(oldPin2);
+    rr->mParcel->WriteString(newPin2);
+
+    if (!oldRil) {
+        rr->mParcel->WriteString(aid);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::ChangeBarringPassword(
+    /* [in] */ String facility,
+    /* [in] */ String oldPwd,
+    /* [in] */ String newPwd,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+                                IRILConstants::RIL_REQUEST_CHANGE_BARRING_PASSWORD,
+                                result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    rr->mParcel->WriteInt32(3);
+    rr->mParcel->WriteString(facility);
+    rr->mParcel->WriteString(oldPwd);
+    rr->mParcel->WriteString(newPwd);
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SupplyDepersonalization(
+    /* [in] */ String netpin,
+    /* [in] */ String type,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+                                IRILConstants::RIL_REQUEST_ENTER_DEPERSONALIZATION_CODE,
+                                result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " Type:";
+        str += type;
+        RiljLog(str);
+    }
+
+    rr->mParcel->WriteInt32(2);
+    rr->mParcel->WriteString(type);
+    rr->mParcel->WriteString(netpin);
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetCurrentCalls(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+                                IRILConstants::RIL_REQUEST_GET_CURRENT_CALLS,
+                                result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetPDPContextList(
+    /* [in] */ IMessage* result)
+{
+    return GetDataCallList(result);
+}
+
+ECode RIL::GetDataCallList(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+                                IRILConstants::RIL_REQUEST_DATA_CALL_LIST,
+                                result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::Dial(
+    /* [in] */ String address,
+    /* [in] */ Int32 clirMode,
+    /* [in] */ IMessage* result)
+{
+    return Dial(address, clirMode, NULL, result);
+}
+
+ECode RIL::Dial(
+    /* [in] */ String address,
+    /* [in] */ Int32 clirMode,
+    /* [in] */ IUUSInfo* uusInfo,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+                                IRILConstants::RIL_REQUEST_DIAL,
+                                result);
+
+    rr->mParcel->WriteString(address);
+    rr->mParcel->WriteInt32(clirMode);
+
+    if (uusInfo == NULL) {
+        rr->mParcel->WriteInt32(0); // UUS information is absent
+    }
+    else {
+        rr->mParcel->WriteInt32(1); // UUS information is present
+        Int32 type = 0;
+        uusInfo->GetType(&type);
+        rr->mParcel->WriteInt32(type);
+        Int32 dcs = 0;
+        uusInfo->GetDcs(&dcs);
+        rr->mParcel->WriteInt32(dcs);
+        AutoPtr<ArrayOf<Byte> > usdata;
+        uusInfo->GetUserData((ArrayOf<Byte>**)&usdata);
+        assert(0 && "TODO");
+        //rr->mParcel->WriteByteArray(usdata);
+    }
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetIMSI(
+    /* [in] */ IMessage* result)
+{
+    return GetIMSIForApp(String(NULL), result);
+}
+
+ECode RIL::GetIMSIForApp(
+    /* [in] */ String aid,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+                                IRILConstants::RIL_REQUEST_GET_IMSI,
+                                result);
+
+    Boolean skipNullAid = FALSE;
+    NeedsOldRilFeature(String("skipnullaid"), &skipNullAid);
+    Boolean writeAidOnly = FALSE;
+    NeedsOldRilFeature(String("writeaidonly"), &writeAidOnly);
+
+    if (!writeAidOnly && (aid != NULL || !skipNullAid)) {
+        rr->mParcel->WriteInt32(1);
+        rr->mParcel->WriteString(aid);
+    }
+
+    if (writeAidOnly) {
+        rr->mParcel->WriteString(aid);
+    }
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> getIMSI: ";
+        str += RequestToString(rr->mRequest);
+        str += " aid: ";
+        str += aid;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetIMEI(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_GET_IMEI, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetIMEISV(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_GET_IMEISV, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::HangupConnection(
+    /* [in] */ Int32 gsmIndex,
+    /* [in] */ IMessage* result)
+{
+    if (RILJ_LOGD) {
+        String str("hangupConnection: gsmIndex=");
+        str += gsmIndex;
+        RiljLog(str);
+    }
+
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_HANGUP, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += gsmIndex;
+        RiljLog(str);
+    }
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(gsmIndex);
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::HangupWaitingOrBackground(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_HANGUP_WAITING_OR_BACKGROUND,
+                                    result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::HangupForegroundResumeBackground(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                    IRILConstants::RIL_REQUEST_HANGUP_FOREGROUND_RESUME_BACKGROUND,
+                                    result);
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SwitchWaitingOrHoldingAndActive(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                    IRILConstants::RIL_REQUEST_SWITCH_WAITING_OR_HOLDING_AND_ACTIVE,
+                                    result);
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::Conference(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_CONFERENCE, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetPreferredVoicePrivacy(
+    /* [in] */ Boolean enable,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_CDMA_SET_PREFERRED_VOICE_PRIVACY_MODE,
+            result);
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(enable ? 1:0);
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetPreferredVoicePrivacy(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_CDMA_QUERY_PREFERRED_VOICE_PRIVACY_MODE,
+            result);
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SeparateConnection(
+    /* [in] */ Int32 gsmIndex,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_SEPARATE_CONNECTION, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += gsmIndex;
+        RiljLog(str);
+    }
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(gsmIndex);
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::AcceptCall(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_ANSWER, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::RejectCall(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_UDUB, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::ExplicitCallTransfer(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_EXPLICIT_CALL_TRANSFER, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetLastCallFailCause(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_LAST_CALL_FAIL_CAUSE, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetLastPdpFailCause(
+    /* [in] */ IMessage* result)
+{
+    return GetLastDataCallFailCause(result);
+}
+
+ECode RIL::GetLastDataCallFailCause(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_LAST_DATA_CALL_FAIL_CAUSE, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetMute(
+    /* [in] */ Boolean enableMute,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SET_MUTE, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += enableMute;
+        RiljLog(str);
+    }
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(enableMute ? 1 : 0);
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetMute(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_GET_MUTE, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetSignalStrength(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SIGNAL_STRENGTH, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetVoiceRegistrationState(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_VOICE_REGISTRATION_STATE, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetDataRegistrationState(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_DATA_REGISTRATION_STATE, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetOperator(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_OPERATOR, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetHardwareConfig(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+        IRILConstants::RIL_REQUEST_GET_HARDWARE_CONFIG, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SendDtmf(
+    /* [in] */ Char32 c,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_DTMF, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    rr->mParcel->WriteChar(c);
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::StartDtmf(
+    /* [in] */ Char32 c,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_DTMF_START, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    rr->mParcel->WriteChar(c);
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::StopDtmf(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_DTMF_STOP, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SendBurstDtmf(
+    /* [in] */ String dtmfString,
+    /* [in] */ Int32 on,
+    /* [in] */ Int32 off,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+                                IRILConstants::RIL_REQUEST_CDMA_BURST_DTMF, result);
+
+    rr->mParcel->WriteInt32(3);
+    rr->mParcel->WriteString(dtmfString);
+    rr->mParcel->WriteInt32(on);
+    rr->mParcel->WriteInt32(off);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " : ";
+        str += dtmfString;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+void ConstructGsmSendSmsRilRequest(
+    /* [in] */ RILRequest* rr,
+    /* [in] */ String smscPDU,
+    /* [in] */ String pdu)
+{
+    rr->mParcel->WriteInt32(2);
+    rr->mParcel->WriteString(smscPDU);
+    rr->mParcel->WriteString(pdu);
+}
+
+ECode RIL::SendSMS(
+    /* [in] */ String smscPDU,
+    /* [in] */ String pdu,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SEND_SMS, result);
+
+    ConstructGsmSendSmsRilRequest(rr, smscPDU, pdu);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SendSMSExpectMore(
+    /* [in] */ String smscPDU,
+    /* [in] */ String pdu,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SEND_SMS_EXPECT_MORE, result);
+
+    ConstructGsmSendSmsRilRequest(rr, smscPDU, pdu);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+void RIL::ConstructCdmaSendSmsRilRequest(
+    /* [in] */ RILRequest* rr,
+    /* [in] */ ArrayOf<Byte>* pdu)
+{
+    Int32 address_nbr_of_digits = 0;
+    Int32 subaddr_nbr_of_digits = 0;
+    Int32 bearerDataLength = 0;
+    AutoPtr<IByteArrayInputStream> bais;
+    CByteArrayInputStream::New(pdu, (IByteArrayInputStream**)&bais);
+    AutoPtr<IDataInputStream> dis;
+    CDataInputStream::New(IInputStream::Probe(bais), (IDataInputStream**)&dis);
+
+    // try {
+        Int32 teleServiceId = 0;
+        IInputStream::Probe(dis)->Read(&teleServiceId);
+        rr->mParcel->WriteInt32(teleServiceId); //teleServiceId
+
+        Int32 servicePresent = 0;
+        IInputStream::Probe(dis)->Read(&servicePresent);
+        rr->mParcel->WriteByte((Byte) servicePresent); //servicePresent
+
+        Int32 serviceCategory = 0;
+        IInputStream::Probe(dis)->Read(&serviceCategory);
+        rr->mParcel->WriteInt32(serviceCategory); //serviceCategory
+
+        Int32 address_digit_mode = 0;
+        IInputStream::Probe(dis)->Read(&address_digit_mode);
+        rr->mParcel->WriteInt32(address_digit_mode); //address_digit_mode
+
+        Int32 address_nbr_mode = 0;
+        IInputStream::Probe(dis)->Read(&address_nbr_mode);
+        rr->mParcel->WriteInt32(address_nbr_mode); //address_nbr_mode
+
+        Int32 address_ton = 0;
+        IInputStream::Probe(dis)->Read(&address_ton);
+        rr->mParcel->WriteInt32(address_ton); //address_ton
+
+        Int32 address_nbr_plan = 0;
+        IInputStream::Probe(dis)->Read(&address_nbr_plan);
+        rr->mParcel->WriteInt32(address_nbr_plan); //address_nbr_plan
+
+        IInputStream::Probe(dis)->Read(&address_nbr_of_digits);
+        rr->mParcel->WriteByte((Byte) address_nbr_of_digits);
+        for(Int32 i = 0; i < address_nbr_of_digits; i++) {
+            Byte address_orig_bytes = 0;
+            IDataInput::Probe(dis)->ReadByte(&address_orig_bytes);
+            rr->mParcel->WriteByte(address_orig_bytes); // address_orig_bytes[i]
+        }
+        Int32 subaddressType = 0;
+        IInputStream::Probe(dis)->Read(&subaddressType);
+        rr->mParcel->WriteInt32(subaddressType); //subaddressType
+        Int32 subaddr_odd = 0;
+        IInputStream::Probe(dis)->Read(&subaddr_odd);
+        rr->mParcel->WriteByte((Byte) subaddr_odd); //subaddr_odd
+        IInputStream::Probe(dis)->Read(&subaddr_nbr_of_digits);
+        rr->mParcel->WriteByte((Byte) subaddr_nbr_of_digits);
+        for(Int32 i = 0; i < subaddr_nbr_of_digits; i++) {
+            Byte subaddr_orig_bytes = 0;
+            IDataInput::Probe(dis)->ReadByte(&subaddr_orig_bytes);
+            rr->mParcel->WriteByte(subaddr_orig_bytes); //subaddr_orig_bytes[i]
+        }
+
+        IInputStream::Probe(dis)->Read(&bearerDataLength);
+        rr->mParcel->WriteInt32(bearerDataLength);
+        for(Int32 i = 0; i < bearerDataLength; i++) {
+            Byte bearerData = 0;
+            IDataInput::Probe(dis)->ReadByte(&bearerData);
+            rr->mParcel->WriteByte(bearerData); //bearerData[i]
+        }
+    // }catch (IOException ex){
+    //     if (RILJ_LOGD) {
+    //         RiljLog("sendSmsCdma: conversion from input stream to object failed: "
+    //             + ex);
+    //     }
+    // }
+}
+
+ECode RIL::SendCdmaSms(
+    /* [in] */ ArrayOf<Byte>* pdu,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_CDMA_SEND_SMS, result);
+
+    ConstructCdmaSendSmsRilRequest(rr, pdu);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SendImsGsmSms(
+    /* [in] */ String smscPDU,
+    /* [in] */ String pdu,
+    /* [in] */ Int32 retry,
+    /* [in] */ Int32 messageRef,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_IMS_SEND_SMS, result);
+
+    rr->mParcel->WriteInt32(IRILConstants::GSM_PHONE);
+    rr->mParcel->WriteByte((Byte)retry);
+    rr->mParcel->WriteInt32(messageRef);
+
+    ConstructGsmSendSmsRilRequest(rr, smscPDU, pdu);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SendImsCdmaSms(
+    /* [in] */ ArrayOf<Byte>* pdu,
+    /* [in] */ Int32 retry,
+    /* [in] */ Int32 messageRef,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_IMS_SEND_SMS, result);
+
+    rr->mParcel->WriteInt32(IRILConstants::CDMA_PHONE);
+    rr->mParcel->WriteByte((Byte)retry);
+    rr->mParcel->WriteInt32(messageRef);
+
+    ConstructCdmaSendSmsRilRequest(rr, pdu);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::DeleteSmsOnSim(
+    /* [in] */ Int32 index,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_DELETE_SMS_ON_SIM,
+            response);
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(index);
+
+    if (RILJ_LOGV) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += index;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::DeleteSmsOnRuim(
+    /* [in] */ Int32 index,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_CDMA_DELETE_SMS_ON_RUIM,
+            response);
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(index);
+
+    if (RILJ_LOGV) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " "; str += index;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::WriteSmsToSim(
+    /* [in] */ Int32 status,
+    /* [in] */ String smsc,
+    /* [in] */ String pdu,
+    /* [in] */ IMessage* response)
+{
+    status = TranslateStatus(status);
+
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_WRITE_SMS_TO_SIM,
+            response);
+
+    rr->mParcel->WriteInt32(status);
+    rr->mParcel->WriteString(pdu);
+    rr->mParcel->WriteString(smsc);
+
+    if (RILJ_LOGV) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += status;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::WriteSmsToRuim(
+    /* [in] */ Int32 status,
+    /* [in] */ String pdu,
+    /* [in] */ IMessage* response)
+{
+    status = TranslateStatus(status);
+
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+                                IRILConstants::RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM,
+                                response);
+
+    rr->mParcel->WriteInt32(status);
+    assert(0 && "TODO");
+    // ConstructCdmaWriteSmsRilRequest(rr, IccUtils::HexStringToBytes(pdu));
+
+    if (RILJ_LOGV) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += status;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+void RIL::ConstructCdmaWriteSmsRilRequest(
+    /* [in] */ RILRequest* rr,
+    /* [in] */ ArrayOf<Byte>* pdu)
+{
+    Byte address_nbr_of_digits = 0;
+    Byte subaddr_nbr_of_digits = 0;
+    Byte bearerDataLength = 0;
+    AutoPtr<IByteArrayInputStream> bais;
+    CByteArrayInputStream::New(pdu, (IByteArrayInputStream**)&bais);
+    AutoPtr<IDataInputStream> dis;
+    CDataInputStream::New(IInputStream::Probe(bais), (IDataInputStream**)&dis);
+
+    // try {
+        Int32 teleServiceId = 0;
+        Byte servicePresent = 0;
+        Int32 serviceCategory = 0;
+
+        Byte address_digit_mode = 0;
+        Byte address_nbr_mode = 0;
+        Byte address_ton = 0;
+        Byte address_nbr_plan = 0;
+
+        Byte subaddressType = 0;
+        Byte subaddr_odd = 0;
+
+        IDataInput::Probe(dis)->ReadInt32(&teleServiceId);
+        rr->mParcel->WriteInt32(teleServiceId);
+        Int32 iP = 0;
+        IDataInput::Probe(dis)->ReadInt32(&iP);
+        servicePresent = (Byte) iP;
+        rr->mParcel->WriteByte(servicePresent);
+        IDataInput::Probe(dis)->ReadInt32(&serviceCategory);
+        rr->mParcel->WriteInt32(serviceCategory);
+
+        IDataInput::Probe(dis)->ReadByte(&address_digit_mode);
+        rr->mParcel->WriteInt32((Int32) address_digit_mode);
+        IDataInput::Probe(dis)->ReadByte(&address_nbr_mode);
+        rr->mParcel->WriteInt32(address_nbr_mode);
+        IDataInput::Probe(dis)->ReadByte(&address_ton);
+        rr->mParcel->WriteInt32(address_ton);
+        IDataInput::Probe(dis)->ReadByte(&address_nbr_plan);
+        rr->mParcel->WriteInt32(address_nbr_plan);
+
+        IDataInput::Probe(dis)->ReadByte(&address_nbr_of_digits);
+        rr->mParcel->WriteByte(address_nbr_of_digits);
+        for (Int32 i = 0; i < address_nbr_of_digits; i++) {
+            Byte address_orig_bytes_node = 0;
+            IDataInput::Probe(dis)->ReadByte(&address_orig_bytes_node);
+            rr->mParcel->WriteByte(address_orig_bytes_node); // address_orig_bytes[i]
+        }
+
+        // Int32
+        IDataInput::Probe(dis)->ReadByte(&subaddressType);
+        rr->mParcel->WriteInt32(subaddressType); // subaddressType
+        IDataInput::Probe(dis)->ReadByte(&subaddr_odd);
+        rr->mParcel->WriteByte(subaddr_odd); // subaddr_odd
+        IDataInput::Probe(dis)->ReadByte(&subaddr_nbr_of_digits);
+        rr->mParcel->WriteByte((Byte) subaddr_nbr_of_digits);
+        for (Int32 i = 0; i < subaddr_nbr_of_digits; i++) {
+            Byte subaddr_orig_bytes = 0;
+            IDataInput::Probe(dis)->ReadByte(&subaddr_orig_bytes);
+            rr->mParcel->WriteByte(subaddr_orig_bytes); // subaddr_orig_bytes[i]
+        }
+
+        IDataInput::Probe(dis)->ReadByte(&bearerDataLength);
+        bearerDataLength = bearerDataLength & 0xff;
+        rr->mParcel->WriteInt32(bearerDataLength);
+        for (Int32 i = 0; i < bearerDataLength; i++) {
+            Byte bearerData = 0;
+            IDataInput::Probe(dis)->ReadByte(&bearerData);
+            rr->mParcel->WriteByte(bearerData); // bearerData[i]
+        }
+
+        String logMsg(" teleServiceId=");
+        logMsg += teleServiceId; logMsg += " servicePresent=";
+        logMsg += servicePresent; logMsg += " serviceCategory=";
+        logMsg += serviceCategory; logMsg += " address_digit_mode=";
+        logMsg += address_digit_mode; logMsg += " address_nbr_mode=";
+        logMsg += address_nbr_mode; logMsg += " address_ton=";
+        logMsg += address_ton; logMsg += " address_nbr_plan=";
+        logMsg += address_nbr_plan; logMsg += " address_nbr_of_digits=";
+        logMsg += address_nbr_of_digits; logMsg += " subaddressType=";
+        logMsg += subaddressType; logMsg += " subaddr_odd= ";
+        logMsg += subaddr_odd; logMsg += " subaddr_nbr_of_digits=";
+        logMsg += subaddr_nbr_of_digits; logMsg += " bearerDataLength=";
+        logMsg += bearerDataLength;
+
+        RiljLog(logMsg);
+    // } catch (IOException ex) {
+    //     if (RILJ_LOGD) {
+    //         RiljLog("sendSmsCdma: conversion from input stream to object failed: "
+    //             + ex);
+    //     }
+    // } finally {
+        // try {
+            if (NULL != bais) {
+                ICloseable::Probe(bais)->Close();
+            }
+
+            if (NULL != dis) {
+                ICloseable::Probe(dis)->Close();
+            }
+        // } catch (IOException e) {
+        //     if (RILJ_LOGD) {
+        //         RiljLog("sendSmsCdma: close input stream exception" + e);
+        //     }
+        // }
+    // }
+}
+
+Int32 RIL::TranslateStatus(
+    /* [in] */ Int32 status)
+{
+    switch(status & 0x7) {
+        case ISmsManager::STATUS_ON_ICC_READ:
+            return 1;
+        case ISmsManager::STATUS_ON_ICC_UNREAD:
+            return 0;
+        case ISmsManager::STATUS_ON_ICC_SENT:
+            return 3;
+        case ISmsManager::STATUS_ON_ICC_UNSENT:
+            return 2;
+    }
+
+    // Default to READ.
+    return 1;
+}
+
+ECode RIL::SetupDataCall(
+    /* [in] */ String radioTechnology,
+    /* [in] */ String profile,
+    /* [in] */ String apn,
+    /* [in] */ String user,
+    /* [in] */ String password,
+    /* [in] */ String authType,
+    /* [in] */ String protocol,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SETUP_DATA_CALL, result);
+
+    rr->mParcel->WriteInt32(7);
+
+    rr->mParcel->WriteString(radioTechnology);
+    rr->mParcel->WriteString(profile);
+    rr->mParcel->WriteString(apn);
+    rr->mParcel->WriteString(user);
+    rr->mParcel->WriteString(password);
+    rr->mParcel->WriteString(authType);
+    rr->mParcel->WriteString(protocol);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " "; str += radioTechnology;
+        str += " "; str += profile;
+        str += " "; str += apn;
+        str += " "; str += user;
+        str += " "; str += password;
+        str += " "; str += authType;
+        str += " "; str += protocol;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::DeactivateDataCall(
+    /* [in] */ Int32 cid,
+    /* [in] */ Int32 reason,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_DEACTIVATE_DATA_CALL,
+                result);
+
+    rr->mParcel->WriteInt32(2);
+    rr->mParcel->WriteInt32(cid);
+    rr->mParcel->WriteInt32(reason);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += cid;
+        str += " ";
+        str += reason;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetRadioPower(
+    /* [in] */ Boolean on,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+                                IRILConstants::RIL_REQUEST_RADIO_POWER,
+                                result);
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(on ? 1 : 0);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += (on ? " on" : " off");
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::RequestShutdown(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+                                IRILConstants::RIL_REQUEST_SHUTDOWN,
+                                result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetSuppServiceNotifications(
+    /* [in] */ Boolean enable,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_SET_SUPP_SVC_NOTIFICATION,
+                result);
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(enable ? 1 : 0);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::AcknowledgeLastIncomingGsmSms(
+    /* [in] */ Boolean success,
+    /* [in] */ Int32 cause,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_SMS_ACKNOWLEDGE,
+                result);
+
+    rr->mParcel->WriteInt32(2);
+    rr->mParcel->WriteInt32(success ? 1 : 0);
+    rr->mParcel->WriteInt32(cause);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += success;
+        str += " ";
+        str += cause;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::AcknowledgeLastIncomingCdmaSms(
+    /* [in] */ Boolean success,
+    /* [in] */ Int32 cause,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                    IRILConstants::RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE,
+                    result);
+
+    rr->mParcel->WriteInt32(success ? 0 : 1); //RIL_CDMA_SMS_ErrorClass
+    // cause code according to X.S004-550E
+    rr->mParcel->WriteInt32(cause);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += success;
+        str += " ";
+        str += cause;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::AcknowledgeIncomingGsmSmsWithPdu(
+    /* [in] */ Boolean success,
+    /* [in] */ String ackPdu,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_ACKNOWLEDGE_INCOMING_GSM_SMS_WITH_PDU,
+                result);
+
+    rr->mParcel->WriteInt32(2);
+    rr->mParcel->WriteString(success ? String("1") : String("0"));
+    rr->mParcel->WriteString(ackPdu);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += ' ';
+        str += success;
+        str += " [";
+        str += ackPdu;
+        str += ']';
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::IccIO(
+    /* [in] */ Int32 command,
+    /* [in] */ Int32 fileid,
+    /* [in] */ String path,
+    /* [in] */ Int32 p1,
+    /* [in] */ Int32 p2,
+    /* [in] */ Int32 p3,
+    /* [in] */ String data,
+    /* [in] */ String pin2,
+    /* [in] */ IMessage* result)
+{
+    return IccIOForApp(command, fileid, path, p1, p2, p3, data, pin2, String(NULL), result);
+}
+
+ECode RIL::IccIOForApp(
+    /* [in] */ Int32 command,
+    /* [in] */ Int32 fileid,
+    /* [in] */ String path,
+    /* [in] */ Int32 p1,
+    /* [in] */ Int32 p2,
+    /* [in] */ Int32 p3,
+    /* [in] */ String data,
+    /* [in] */ String pin2,
+    /* [in] */ String aid,
+    /* [in] */ IMessage* result)
+{
+    //Note: This RIL request has not been renamed to ICC,
+    //       but this request is also valid for SIM and RUIM
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SIM_IO, result);
+
+    rr->mParcel->WriteInt32(command);
+    rr->mParcel->WriteInt32(fileid);
+    rr->mParcel->WriteString(path);
+    rr->mParcel->WriteInt32(p1);
+    rr->mParcel->WriteInt32(p2);
+    rr->mParcel->WriteInt32(p3);
+    rr->mParcel->WriteString(data);
+    rr->mParcel->WriteString(pin2);
+    rr->mParcel->WriteString(aid);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> iccIO: ";
+        str += RequestToString(rr->mRequest);
+        str += " 0x";
+        str += StringUtils::ToHexString(command);
+        str += " 0x";
+        str += StringUtils::ToHexString(fileid);
+        str += " ";
+        str += " path: "; str += path; str += ",";
+        str += p1; str += ","; str += p2;
+        str += ","; str += p3;
+        str += " aid: "; str += aid;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetCLIR(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_GET_CLIR, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetCLIR(
+    /* [in] */ Int32 clirMode,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SET_CLIR, result);
+
+    // count ints
+    rr->mParcel->WriteInt32(1);
+
+    rr->mParcel->WriteInt32(clirMode);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += clirMode;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::QueryCallWaiting(
+    /* [in] */ Int32 serviceClass,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_QUERY_CALL_WAITING,
+                response);
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(serviceClass);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += serviceClass;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetCallWaiting(
+    /* [in] */ Boolean enable,
+    /* [in] */ Int32 serviceClass,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_SET_CALL_WAITING,
+                response);
+
+    rr->mParcel->WriteInt32(2);
+    rr->mParcel->WriteInt32(enable ? 1 : 0);
+    rr->mParcel->WriteInt32(serviceClass);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += enable;
+        str += ", ";
+        str += serviceClass;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetNetworkSelectionModeAutomatic(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_SET_NETWORK_SELECTION_AUTOMATIC,
+                response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetNetworkSelectionModeManual(
+    /* [in] */ String operatorNumeric,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_SET_NETWORK_SELECTION_MANUAL,
+                response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += operatorNumeric;
+        RiljLog(str);
+    }
+
+    rr->mParcel->WriteString(operatorNumeric);
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetNetworkSelectionMode(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_QUERY_NETWORK_SELECTION_MODE,
+                response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetAvailableNetworks(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_QUERY_AVAILABLE_NETWORKS,
+                response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetCallForward(
+    /* [in] */ Int32 action,
+    /* [in] */ Int32 cfReason,
+    /* [in] */ Int32 serviceClass,
+    /* [in] */ String number,
+    /* [in] */ Int32 timeSeconds,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_SET_CALL_FORWARD, response);
+
+    rr->mParcel->WriteInt32(action);
+    rr->mParcel->WriteInt32(cfReason);
+    rr->mParcel->WriteInt32(serviceClass);
+    AutoPtr<IPhoneNumberUtils> pu;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&pu);
+    Int32 iNum = 0;
+    pu->ToaFromString(number, &iNum);
+    rr->mParcel->WriteInt32(iNum);
+    rr->mParcel->WriteString(number);
+    rr->mParcel->WriteInt32 (timeSeconds);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " "; str += action;
+        str += " "; str += cfReason;
+        str += " "; str += serviceClass;
+        str += timeSeconds;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::QueryCallForwardStatus(
+    /* [in] */ Int32 cfReason,
+    /* [in] */ Int32 serviceClass,
+    /* [in] */ String number,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+        = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_QUERY_CALL_FORWARD_STATUS,
+            response);
+
+    rr->mParcel->WriteInt32(2); // 2 is for query action, not in used anyway
+    rr->mParcel->WriteInt32(cfReason);
+    rr->mParcel->WriteInt32(serviceClass);
+    AutoPtr<IPhoneNumberUtils> pu;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&pu);
+    Int32 iNum = 0;
+    pu->ToaFromString(number, &iNum);
+    rr->mParcel->WriteInt32(iNum);
+    rr->mParcel->WriteString(number);
+    rr->mParcel->WriteInt32 (0);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += cfReason;
+        str += " ";
+        str += serviceClass;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::QueryCLIP(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+        = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_QUERY_CLIP, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetBasebandVersion(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_BASEBAND_VERSION, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::QueryFacilityLock(
+    /* [in] */ String facility,
+    /* [in] */ String password,
+    /* [in] */ Int32 serviceClass,
+    /* [in] */ IMessage* response)
+{
+    return QueryFacilityLockForApp(facility, password, serviceClass, String(NULL), response);
+}
+
+ECode RIL::QueryFacilityLockForApp(
+    /* [in] */ String facility,
+    /* [in] */ String password,
+    /* [in] */ Int32 serviceClass,
+    /* [in] */ String appId,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+                                IRILConstants::RIL_REQUEST_QUERY_FACILITY_LOCK,
+                                response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Boolean oldRil = FALSE;
+    NeedsOldRilFeature(String("facilitylock"), &oldRil);
+
+    // count strings
+    rr->mParcel->WriteInt32(oldRil ? 3 : 4);
+
+    rr->mParcel->WriteString(facility);
+    rr->mParcel->WriteString(password);
+
+    rr->mParcel->WriteString(StringUtils::ToString(serviceClass));
+
+    if (!oldRil) {
+        rr->mParcel->WriteString(appId);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetFacilityLock(
+    /* [in] */ String facility,
+    /* [in] */ Boolean lockState,
+    /* [in] */ String password,
+    /* [in] */ Int32 serviceClass,
+    /* [in] */ IMessage* response)
+{
+    return SetFacilityLockForApp(facility, lockState, password, serviceClass, String(NULL), response);
+}
+
+ECode RIL::SetFacilityLockForApp(
+    /* [in] */ String facility,
+    /* [in] */ Boolean lockState,
+    /* [in] */ String password,
+    /* [in] */ Int32 serviceClass,
+    /* [in] */ String appId,
+    /* [in] */ IMessage* response)
+{
+    String lockString;
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_SET_FACILITY_LOCK,
+                response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ["; str += facility;
+        str += " "; str += lockState;
+        str += " "; str += serviceClass;
+        str += " "; str += appId;
+        str += "]";
+        RiljLog(str);
+    }
+
+    Boolean oldRil = FALSE;
+    NeedsOldRilFeature(String("facilitylock"), &oldRil);
+
+    // count strings
+    rr->mParcel->WriteInt32(oldRil ? 4 : 5);
+
+    rr->mParcel->WriteString(facility);
+    lockString = (lockState) ? "1" : "0";
+    rr->mParcel->WriteString(lockString);
+    rr->mParcel->WriteString(password);
+    rr->mParcel->WriteString(StringUtils::ToString(serviceClass));
+
+    if (!oldRil) {
+        rr->mParcel->WriteString(appId);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SendUSSD(
+    /* [in] */ String ussdString,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_SEND_USSD, response);
+
+    if (RILJ_LOGD) {
+        String logUssdString("*******");
+        if (RILJ_LOGV) {
+            logUssdString = ussdString;
+        }
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += logUssdString;
+        RiljLog(str);
+    }
+
+    rr->mParcel->WriteString(ussdString);
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::CancelPendingUssd(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_CANCEL_USSD,
+                response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::ResetRadio(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_RESET_RADIO, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetLocalCallHold(
+    /* [in] */ Int32 lchStatus)
+{
+    AutoPtr<ArrayOf<Byte> > payload = ArrayOf<Byte>::Alloc(1);
+    (*payload)[0] = (Byte)(lchStatus & 0x7F);
+    // Rlog.d(RILJ_LOG_TAG, "setLocalCallHold: lchStatus is " + lchStatus);
+
+    SendOemRilRequestRaw(OEMHOOK_EVT_HOOK_SET_LOCAL_CALL_HOLD, 1, payload, NULL);
+    return NOERROR;
+}
+
+ECode RIL::GetModemCapability(
+    /* [in] */ IMessage* response)
+{
+    // Rlog.d(RILJ_LOG_TAG, "GetModemCapability");
+    SendOemRilRequestRaw(OEMHOOK_EVT_HOOK_GET_MODEM_CAPABILITY, 0, NULL, response);
+    return NOERROR;
+}
+
+ECode RIL::UpdateStackBinding(
+    /* [in] */ Int32 stack,
+    /* [in] */ Int32 enable,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<ArrayOf<Byte> > payload = ArrayOf<Byte>::Alloc(2);
+    (*payload)[0] = (Byte)stack;
+    (*payload)[1] = (Byte)enable;
+    // Rlog.d(RILJ_LOG_TAG, "UpdateStackBinding: on Stack: " + stack +
+    //         ", enable/disable: " + enable);
+
+    SendOemRilRequestRaw(OEMHOOK_EVT_HOOK_UPDATE_SUB_BINDING, 2, payload, response);
+    return NOERROR;
+}
+
+void RIL::SendOemRilRequestRaw(
+    /* [in] */ Int32 requestId,
+    /* [in] */ Int32 numPayload,
+    /* [in] */ ArrayOf<Byte>* payload,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<ArrayOf<Byte> > request = ArrayOf<Byte>::Alloc(1);
+    (*request)[0] = mHeaderSize + numPayload * BYTE_SIZE;
+
+    AutoPtr<IByteBufferHelper> bbf;
+    CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&bbf);
+    AutoPtr<IByteBuffer> buf;
+    bbf->Wrap(request, (IByteBuffer**)&buf);
+    AutoPtr<IByteOrderHelper> bod;
+    CByteOrderHelper::AcquireSingleton((IByteOrderHelper**)&bod);
+    ByteOrder bo;
+    bod->GetNativeOrder(&bo);
+    buf->SetOrder(bo);
+
+    // Add OEM identifier String
+    buf->Put(OEM_IDENTIFIER.GetBytes());
+    // Add Request ID
+    buf->PutInt32(requestId);
+    if (numPayload > 0 && payload != NULL) {
+        // Add Request payload length
+        buf->PutInt32(numPayload * BYTE_SIZE);
+        for (Int32 i = 0; i < payload->GetLength(); i++) {
+            Byte b = (*payload)[i];
+            buf->Put(b);
         }
     }
 
-    private RILRequest() {
+    InvokeOemRilRequestRaw(request, response);
+}
+
+ECode RIL::InvokeOemRilRequestRaw(
+    /* [in] */ ArrayOf<Byte>* data,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_OEM_HOOK_RAW, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += "[";
+        str += StringUtils::ToHexString(*data);
+        str += "]";
+        RiljLog(str);
     }
 
-    static void
-    ResetSerial() {
-        // use a random so that on recovery we probably don't mix old requests
-        // with new.
-        sNextSerial->Set(sRandom->NextInt());
+    assert(0 && "TODO");
+    // rr->mParcel->WriteByteArray(data);
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::InvokeOemRilRequestStrings(
+    /* [in] */ ArrayOf<String>* strings,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_OEM_HOOK_STRINGS, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
     }
 
-    String
-    SerialString() {
-        //Cheesy way to do %04d
-        StringBuilder sb = new StringBuilder(8);
-        String sn;
+    assert(0 && "TODO");
+    // rr->mParcel->WriteStringArray(strings);
 
-        Int64 adjustedSerial = (((Int64)mSerial) - Integer.MIN_VALUE)%10000;
+    Send(rr);
+    return NOERROR;
+}
 
-        sn = Long->ToString(adjustedSerial);
+ECode RIL::SetBandMode(
+    /* [in] */ Int32 bandMode,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(
+                IRILConstants::RIL_REQUEST_SET_BAND_MODE, response);
 
-        //sb->Append("J[");
-        sb->Append('[');
-        For (Int32 i = 0, s = sn->Length() ; i < 4 - s; i++) {
-            sb->Append('0');
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(bandMode);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += bandMode;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::QueryAvailableBandMode(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr
+            = RILRequest::Obtain(IRILConstants::RIL_REQUEST_QUERY_AVAILABLE_BAND_MODE,
+                                response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SendTerminalResponse(
+    /* [in] */ String contents,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_STK_SEND_TERMINAL_RESPONSE, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    rr->mParcel->WriteString(contents);
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SendEnvelope(
+    /* [in] */ String contents,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_STK_SEND_ENVELOPE_COMMAND, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    rr->mParcel->WriteString(contents);
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SendEnvelopeWithStatus(
+    /* [in] */ String contents,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_STK_SEND_ENVELOPE_WITH_STATUS, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += '[';
+        str += contents;
+        str += ']';
+        RiljLog(str);
+    }
+
+    rr->mParcel->WriteString(contents);
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::HandleCallSetupRequestFromSim(
+    /* [in] */ Boolean accept,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+        IRILConstants::RIL_REQUEST_STK_HANDLE_CALL_SETUP_REQUESTED_FROM_SIM,
+        response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    AutoPtr<ArrayOf<Int32> > param = ArrayOf<Int32>::Alloc(1);
+    (*param)[0] = accept ? 1 : 0;
+    assert(0 && "TODO");
+    // rr->mParcel->WriteInt32Array(param);
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetPreferredNetworkType(
+    /* [in] */ Int32 networkType,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE, response);
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(networkType);
+
+    mPreferredNetworkType = networkType;
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " : ";
+        str += networkType;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetPreferredNetworkType(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_GET_PREFERRED_NETWORK_TYPE, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetNeighboringCids(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_GET_NEIGHBORING_CELL_IDS, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetLocationUpdates(
+    /* [in] */ Boolean enable,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SET_LOCATION_UPDATES, response);
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(enable ? 1 : 0);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += ": ";
+        str += enable;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetSmscAddress(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_GET_SMSC_ADDRESS, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetSmscAddress(
+    /* [in] */ String address,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SET_SMSC_ADDRESS, result);
+
+    rr->mParcel->WriteString(address);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " : ";
+        str += address;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::ReportSmsMemoryStatus(
+    /* [in] */ Boolean available,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_REPORT_SMS_MEMORY_STATUS, result);
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(available ? 1 : 0);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += ": ";
+        str += available;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::ReportStkServiceIsRunning(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetGsmBroadcastConfig(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_GSM_GET_BROADCAST_CONFIG, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetGsmBroadcastConfig(
+    /* [in] */ ArrayOf<ISmsBroadcastConfigInfo*>* config,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_GSM_SET_BROADCAST_CONFIG, response);
+
+    Int32 numOfConfig = config->GetLength();
+    rr->mParcel->WriteInt32(numOfConfig);
+
+    for(Int32 i = 0; i < numOfConfig; i++) {
+        Int32 formServiceId = 0;
+        (*config)[i]->GetFromServiceId(&formServiceId);
+        rr->mParcel->WriteInt32(formServiceId);
+
+        Int32 toServiceId = 0;
+        (*config)[i]->GetToServiceId(&toServiceId);
+        rr->mParcel->WriteInt32(toServiceId);
+
+        Int32 fromCodeScheme = 0;
+        (*config)[i]->GetFromCodeScheme(&fromCodeScheme);
+        rr->mParcel->WriteInt32(fromCodeScheme);
+
+        Int32 toCodeScheme = 0;
+        (*config)[i]->GetToCodeScheme(&toCodeScheme);
+        rr->mParcel->WriteInt32(toCodeScheme);
+
+        Boolean bSelected = 0;
+        (*config)[i]->IsSelected(&bSelected);
+        rr->mParcel->WriteInt32(bSelected ? 1 : 0);
+    }
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " with ";
+        str += numOfConfig;
+        str += " configs : ";
+        RiljLog(str);
+        for (Int32 i = 0; i < numOfConfig; i++) {
+            assert(0 && "TODO");
+            // RiljLog((*config)[i]->ToString());
         }
-
-        sb->Append(sn);
-        sb->Append(']');
-        return sb->ToString();
     }
 
-    void
-    OnError(Int32 error, Object ret) {
-        CommandException ex;
+    Send(rr);
+    return NOERROR;
+}
 
-        ex = CommandException->FromRilErrno(error);
+ECode RIL::SetGsmBroadcastActivation(
+    /* [in] */ Boolean activate,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_GSM_BROADCAST_ACTIVATION, response);
 
-        If (RIL.RILJ_LOGD) Rlog->D(LOG_TAG, SerialString() + "< "
-            + RIL->RequestToString(mRequest)
-            + " error: " + ex + " ret=" + RIL->RetToString(mRequest, ret));
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(activate ? 0 : 1);
 
-        If (mResult != NULL) {
-            AsyncResult->ForMessage(mResult, ret, ex);
-            mResult->SendToTarget();
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+void RIL::UpdateScreenState()
+{
+    Int32 oldState = mDefaultDisplayState;
+    mDefaultDisplay->GetState(&mDefaultDisplayState);
+    if (mDefaultDisplayState != oldState) {
+        if (oldState != IDisplay::STATE_ON
+                && mDefaultDisplayState == IDisplay::STATE_ON) {
+            SendScreenState(TRUE);
         }
-
-        If (mParcel != NULL) {
-            mParcel->Recycle();
-            mParcel = NULL;
+        else if ((oldState == IDisplay::STATE_ON || oldState == IDisplay::STATE_UNKNOWN)
+                    && mDefaultDisplayState != IDisplay::STATE_ON) {
+            SendScreenState(FALSE);
         }
     }
 }
 
+void RIL::SendScreenState(
+    /* [in] */ Boolean on)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SCREEN_STATE, NULL);
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(on ? 1 : 0);
 
-/**
- * RIL implementation of the CommandsInterface.
- *
- * {@hide}
- */
-public class RIL extends BaseCommands implements CommandsInterface {
-    static const String RILJ_LOG_TAG = "RILJ";
-    static const Boolean RILJ_LOGD = TRUE;
-    static const Boolean RILJ_LOGV = FALSE; // STOPSHIP if TRUE
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += ": ";
+        str += on;
+        RiljLog(str);
+    }
 
-    /**
-     * Wake lock timeout should be longer than the longest timeout in
-     * the vendor ril.
-     */
-    private static const Int32 DEFAULT_WAKE_LOCK_TIMEOUT = 60000;
-    private static const Int32 BYTE_SIZE = 1;
+    Send(rr);
+}
 
-    /** Starting number for OEMHOOK request and response IDs */
-    private static const Int32 OEMHOOK_BASE = 0x80000;
-    final Int32 OEMHOOK_UNSOL_SIM_REFRESH = OEMHOOK_BASE + 1016;
-    final Int32 OEMHOOK_UNSOL_WWAN_IWLAN_COEXIST = OEMHOOK_BASE + 1018;
+ECode RIL::OnRadioAvailable()
+{
+    // In case screen state was lost (due to process crash),
+    // this ensures that the RIL knows the correct screen state.
+    UpdateScreenState();
+    return NOERROR;
+}
 
-    /** Set Local Call Hold subscription */
-    private static const Int32 OEMHOOK_EVT_HOOK_SET_LOCAL_CALL_HOLD = OEMHOOK_BASE + 13;
-    /** Get Modem Capabilities*/
-    private static const Int32 OEMHOOK_EVT_HOOK_GET_MODEM_CAPABILITY = OEMHOOK_BASE + 35;
-    /** Update Stack Binding*/
-    private static const Int32 OEMHOOK_EVT_HOOK_UPDATE_SUB_BINDING = OEMHOOK_BASE + 36;
+ICommandsInterfaceRadioState RIL::GetRadioStateFromInt(
+    /* [in] */ Int32 stateInt)
+{
+    ICommandsInterfaceRadioState state;
 
+    /* RIL_RadioState ril.h */
+    switch(stateInt) {
+        case 0: state = RADIO_OFF; break;
+        case 1: state = RADIO_UNAVAILABLE; break;
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10: state = RADIO_ON; break;
 
-    private static const Int32 INT_SIZE = 4;
-    private static const String OEM_IDENTIFIER = "QOEMHOOK";
-    Int32 mHeaderSize = OEM_IDENTIFIER->Length() + 2 * INT_SIZE;
-    final Int32 QCRIL_EVT_HOOK_UNSOL_MODEM_CAPABILITY = OEMHOOK_BASE + 1020;
+        default:
+            // throw new RuntimeException(
+            //             "Unrecognized RIL_RadioState: " + stateInt);
+        break;
+    }
+    return state;
+}
 
-    //***** Instance Variables
+void RIL::SwitchToRadioState(
+    /* [in] */ ICommandsInterfaceRadioState newState)
+{
+    SetRadioState(newState);
+}
 
-    LocalSocket mSocket;
-    HandlerThread mSenderThread;
-    RILSender mSender;
-    Thread mReceiverThread;
-    RILReceiver mReceiver;
-    Display mDefaultDisplay;
-    Int32 mDefaultDisplayState = Display.STATE_UNKNOWN;
-    WakeLock mWakeLock;
-    final Int32 mWakeLockTimeout;
-    // The number of wakelock requests currently active.  Don't release the lock
-    // until dec'd to 0
-    Int32 mWakeLockCount;
+void RIL::AcquireWakeLock()
+{
+    // synchronized (mWakeLock)
+    {
+        AutoLock lock(wakeLock);
+        mWakeLock->AcquireLock();
+        mWakeLockCount++;
 
-    SparseArray<RILRequest> mRequestList = new SparseArray<RILRequest>();
+        mSender->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
+        AutoPtr<IMessage> msg;
+        mSender->ObtainMessage(EVENT_WAKE_LOCK_TIMEOUT, (IMessage**)&msg);
+        Boolean bSnd = FALSE;
+        mSender->SendMessageDelayed(msg, mWakeLockTimeout, &bSnd);
+    }
+}
 
-    Object     mLastNITZTimeInfo;
-
-    // When we are testing emergency calls
-    AtomicBoolean mTestingEmergencyCall = new AtomicBoolean(FALSE);
-
-    protected Integer mInstanceId;
-
-    // Number of per-network elements expected in QUERY_AVAILABLE_NETWORKS's response.
-    // 4 elements is default, but many RILs actually return 5, making it impossible to
-    // divide the response array without prior knowledge of the number of elements.
-    protected Int32 mQANElements = 4;
-
-    //***** Events
-
-    static const Int32 EVENT_SEND                 = 1;
-    static const Int32 EVENT_WAKE_LOCK_TIMEOUT    = 2;
-
-    //***** Constants
-
-    // match with constant in ril.cpp
-    static const Int32 RIL_MAX_COMMAND_BYTES = (8 * 1024);
-    static const Int32 RESPONSE_SOLICITED = 0;
-    static const Int32 RESPONSE_UNSOLICITED = 1;
-
-    static const String[] SOCKET_NAME_RIL = {"rild", "rild2", "rild3"};
-
-    static const Int32 SOCKET_OPEN_RETRY_MILLIS = 4 * 1000;
-
-    // The number of the required config values for broadcast SMS stored in the C struct
-    // RIL_CDMA_BroadcastServiceInfo
-    private static const Int32 CDMA_BSI_NO_OF_INTS_STRUCT = 3;
-
-    private static const Int32 CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES = 31;
-
-    private final DisplayManager.DisplayListener mDisplayListener =
-            new DisplayManager->DisplayListener() {
-        //@Override
-        CARAPI OnDisplayAdded(Int32 displayId) { }
-
-        //@Override
-        CARAPI OnDisplayRemoved(Int32 displayId) { }
-
-        //@Override
-        CARAPI OnDisplayChanged(Int32 displayId) {
-            If (displayId == Display.DEFAULT_DISPLAY) {
-                UpdateScreenState();
-            }
+void RIL::DecrementWakeLock()
+{
+    // synchronized (mWakeLock)
+    {
+        AutoLock lock(wakeLock);
+        if (mWakeLockCount > 1) {
+            mWakeLockCount--;
         }
-    };
-
-    class RILSender extends Handler implements Runnable {
-        public RILSender(Looper looper) {
-            Super(looper);
-        }
-
-        // Only allocated once
-        Byte[] dataLength = new Byte[4];
-
-        //***** Runnable implementation
-        //@Override
-        CARAPI
-        Run() {
-            //setup if needed
-        }
-
-
-        //***** Handler implementation
-        //@Override CARAPI
-        HandleMessage(Message msg) {
-            RILRequest rr = (RILRequest)(msg.obj);
-            RILRequest req = NULL;
-
-            Switch (msg.what) {
-                case EVENT_SEND:
-                    try {
-                        LocalSocket s;
-
-                        s = mSocket;
-
-                        If (s == NULL) {
-                            rr->OnError(RADIO_NOT_AVAILABLE, NULL);
-                            rr->ReleaseSources();
-                            DecrementWakeLock();
-                            return;
-                        }
-
-                        {    AutoLock syncLock(mRequestList);
-                            mRequestList->Append(rr.mSerial, rr);
-                        }
-
-                        Byte[] data;
-
-                        data = rr.mParcel->Marshall();
-                        rr.mParcel->Recycle();
-                        rr.mParcel = NULL;
-
-                        If (data.length > RIL_MAX_COMMAND_BYTES) {
-                            throw new RuntimeException(
-                                    "Parcel larger than max bytes allowed! "
-                                                          + data.length);
-                        }
-
-                        // parcel length in big endian
-                        dataLength[0] = dataLength[1] = 0;
-                        dataLength[2] = (Byte)((data.length >> 8) & 0xff);
-                        dataLength[3] = (Byte)((data.length) & 0xff);
-
-                        //Rlog->V(RILJ_LOG_TAG, "writing packet: " + data.length + " bytes");
-
-                        s->GetOutputStream()->Write(dataLength);
-                        s->GetOutputStream()->Write(data);
-                    } Catch (IOException ex) {
-                        Rlog->E(RILJ_LOG_TAG, "IOException", ex);
-                        req = FindAndRemoveRequestFromList(rr.mSerial);
-                        // make sure this request has not already been handled,
-                        // eg, if RILReceiver cleared the list.
-                        If (req != NULL) {
-                            rr->OnError(RADIO_NOT_AVAILABLE, NULL);
-                            rr->ReleaseSources();
-                            DecrementWakeLock();
-                        }
-                    } Catch (RuntimeException exc) {
-                        Rlog->E(RILJ_LOG_TAG, "Uncaught exception ", exc);
-                        req = FindAndRemoveRequestFromList(rr.mSerial);
-                        // make sure this request has not already been handled,
-                        // eg, if RILReceiver cleared the list.
-                        If (req != NULL) {
-                            rr->OnError(GENERIC_FAILURE, NULL);
-                            rr->ReleaseSources();
-                            DecrementWakeLock();
-                        }
-                    }
-
-                    break;
-
-                case EVENT_WAKE_LOCK_TIMEOUT:
-                    // Haven't heard back from the last request.  Assume we're
-                    // not getting a response and  release the wake lock.
-
-                    // The timer of WAKE_LOCK_TIMEOUT is reset with each
-                    // new send request. So when WAKE_LOCK_TIMEOUT occurs
-                    // all requests in mRequestList already waited at
-                    // least DEFAULT_WAKE_LOCK_TIMEOUT but no response.
-                    //
-                    // Note: Keep mRequestList so that delayed response
-                    // can still be handled when response finally comes.
-
-                    {    AutoLock syncLock(mRequestList);
-                        If (ClearWakeLock()) {
-                            If (RILJ_LOGD) {
-                                Int32 count = mRequestList->Size();
-                                Rlog->D(RILJ_LOG_TAG, "WAKE_LOCK_TIMEOUT " +
-                                        " mRequestList=" + count);
-                                For (Int32 i = 0; i < count; i++) {
-                                    rr = mRequestList->ValueAt(i);
-                                    Rlog->D(RILJ_LOG_TAG, i + ": [" + rr.mSerial + "] "
-                                            + RequestToString(rr.mRequest));
-                                }
-                            }
-                        }
-                    }
-                    break;
-            }
-        }
-    }
-
-    /**
-     * Reads in a single RIL message off the wire. A RIL message consists
-     * of a 4-Byte little-endian length and a subsequent series of bytes.
-     * The final Message (length header omitted) is read into
-     * <code>buffer</code> and the length of the final Message (less header)
-     * is returned. A return value of -1 indicates end-of-stream.
-     *
-     * @param is non-NULL; Stream to read from
-     * @param buffer Buffer to fill in. Must be as large as maximum
-     * message size, or an ArrayOutOfBounds exception will be thrown.
-     * @return Length of message less header, or -1 on end of stream.
-     * @throws IOException
-     */
-    private static Int32 ReadRilMessage(InputStream is, Byte[] buffer)
-            throws IOException {
-        Int32 countRead;
-        Int32 offset;
-        Int32 remaining;
-        Int32 messageLength;
-
-        // First, read in the length of the message
-        offset = 0;
-        remaining = 4;
-        do {
-            countRead = is->Read(buffer, offset, remaining);
-
-            If (countRead < 0 ) {
-                Rlog->E(RILJ_LOG_TAG, "Hit EOS reading message length");
-                return -1;
-            }
-
-            offset += countRead;
-            remaining -= countRead;
-        } While (remaining > 0);
-
-        messageLength = ((buffer[0] & 0xff) << 24)
-                | ((buffer[1] & 0xff) << 16)
-                | ((buffer[2] & 0xff) << 8)
-                | (buffer[3] & 0xff);
-
-        // Then, re-use the buffer and read in the message itself
-        offset = 0;
-        remaining = messageLength;
-        do {
-            countRead = is->Read(buffer, offset, remaining);
-
-            If (countRead < 0 ) {
-                Rlog->E(RILJ_LOG_TAG, "Hit EOS reading message.  messageLength=" + messageLength
-                        + " remaining=" + remaining);
-                return -1;
-            }
-
-            offset += countRead;
-            remaining -= countRead;
-        } While (remaining > 0);
-
-        return messageLength;
-    }
-
-    class RILReceiver implements Runnable {
-        Byte[] buffer;
-
-        RILReceiver() {
-            buffer = new Byte[RIL_MAX_COMMAND_BYTES];
-        }
-
-        //@Override
-        CARAPI
-        Run() {
-            Int32 retryCount = 0;
-            String rilSocket = "rild";
-
-            try {For (;;) {
-                LocalSocket s = NULL;
-                LocalSocketAddress l;
-
-                If (mInstanceId == NULL || mInstanceId == 0 ) {
-                    rilSocket = SOCKET_NAME_RIL[0];
-                } else {
-                    rilSocket = SOCKET_NAME_RIL[mInstanceId];
-                }
-
-                try {
-                    s = new LocalSocket();
-                    l = new LocalSocketAddress(rilSocket,
-                            LocalSocketAddress.Namespace.RESERVED);
-                    s->Connect(l);
-                } Catch (IOException ex){
-                    try {
-                        If (s != NULL) {
-                            s->Close();
-                        }
-                    } Catch (IOException ex2) {
-                        //ignore failure to close after failure to connect
-                    }
-
-                    // don't print an error message after the the first time
-                    // or after the 8th time
-
-                    If (retryCount == 8) {
-                        Rlog.E (RILJ_LOG_TAG,
-                            "Couldn't find '" + rilSocket
-                            + "' socket after " + retryCount
-                            + " times, continuing to retry silently");
-                    } else If (retryCount > 0 && retryCount < 8) {
-                        Rlog.I (RILJ_LOG_TAG,
-                            "Couldn't find '" + rilSocket
-                            + "' socket; retrying after timeout");
-                    }
-
-                    try {
-                        Thread->Sleep(SOCKET_OPEN_RETRY_MILLIS);
-                    } Catch (InterruptedException er) {
-                    }
-
-                    retryCount++;
-                    continue;
-                }
-
-                retryCount = 0;
-
-                mSocket = s;
-                Rlog->I(RILJ_LOG_TAG, "Connected to '" + rilSocket + "' socket");
-
-                /* Compatibility with qcom's DSDS (Dual SIM) stack */
-                If (NeedsOldRilFeature("qcomdsds")) {
-                    String str = "SUB1";
-                    Byte[] data = str->GetBytes();
-                    try {
-                        mSocket->GetOutputStream()->Write(data);
-                        Rlog->I(RILJ_LOG_TAG, "Data sent!!");
-                    } Catch (IOException ex) {
-                            Rlog->E(RILJ_LOG_TAG, "IOException", ex);
-                    } Catch (RuntimeException exc) {
-                        Rlog->E(RILJ_LOG_TAG, "Uncaught exception ", exc);
-                    }
-                }
-
-                Int32 length = 0;
-                try {
-                    InputStream is = mSocket->GetInputStream();
-
-                    For (;;) {
-                        Parcel p;
-
-                        length = ReadRilMessage(is, buffer);
-
-                        If (length < 0) {
-                            // End-of-stream reached
-                            break;
-                        }
-
-                        p = Parcel->Obtain();
-                        p->Unmarshall(buffer, 0, length);
-                        p->SetDataPosition(0);
-
-                        //Rlog->V(RILJ_LOG_TAG, "Read packet: " + length + " bytes");
-
-                        ProcessResponse(p);
-                        p->Recycle();
-                    }
-                } Catch (java.io.IOException ex) {
-                    Rlog->I(RILJ_LOG_TAG, "'" + rilSocket + "' socket closed",
-                          ex);
-                } Catch (Throwable tr) {
-                    Rlog->E(RILJ_LOG_TAG, "Uncaught exception read length=" + length +
-                        "Exception:" + tr->ToString());
-                }
-
-                Rlog->I(RILJ_LOG_TAG, "Disconnected from '" + rilSocket
-                      + "' socket");
-
-                SetRadioState (RadioState.RADIO_UNAVAILABLE);
-
-                try {
-                    mSocket->Close();
-                } Catch (IOException ex) {
-                }
-
-                mSocket = NULL;
-                RILRequest->ResetSerial();
-
-                // Clear request list on close
-                ClearRequestList(RADIO_NOT_AVAILABLE, FALSE);
-            }} Catch (Throwable tr) {
-                Rlog->E(RILJ_LOG_TAG,"Uncaught exception", tr);
-            }
-
-            /* We're disconnected so we don't know the ril version */
-            NotifyRegistrantsRilConnectionChanged(-1);
-        }
-    }
-
-
-
-    //***** Constructors
-
-    public RIL(Context context, Int32 preferredNetworkType, Int32 cdmaSubscription) {
-        This(context, preferredNetworkType, cdmaSubscription, NULL);
-    }
-
-    public RIL(Context context, Int32 preferredNetworkType,
-            Int32 cdmaSubscription, Integer instanceId) {
-        Super(context);
-        If (RILJ_LOGD) {
-            RiljLog("RIL(context, preferredNetworkType=" + preferredNetworkType +
-                    " cdmaSubscription=" + cdmaSubscription + ")");
-        }
-
-        mContext = context;
-        mCdmaSubscription  = cdmaSubscription;
-        mPreferredNetworkType = preferredNetworkType;
-        mPhoneType = RILConstants.NO_PHONE;
-        mInstanceId = instanceId;
-
-        PowerManager pm = (PowerManager)context->GetSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm->NewWakeLock(PowerManager.PARTIAL_WAKE_LOCK, RILJ_LOG_TAG);
-        mWakeLock->SetReferenceCounted(FALSE);
-        mWakeLockTimeout = SystemProperties->GetInt(TelephonyProperties.PROPERTY_WAKE_LOCK_TIMEOUT,
-                DEFAULT_WAKE_LOCK_TIMEOUT);
-        mWakeLockCount = 0;
-
-        mSenderThread = new HandlerThread("RILSender");
-        mSenderThread->Start();
-
-        Looper looper = mSenderThread->GetLooper();
-        mSender = new RILSender(looper);
-
-        ConnectivityManager cm = (ConnectivityManager)context->GetSystemService(
-                Context.CONNECTIVITY_SERVICE);
-        If (cm->IsNetworkSupported(ConnectivityManager.TYPE_MOBILE) == FALSE) {
-            RiljLog("Not starting RILReceiver: wifi-only");
-        } else {
-            RiljLog("Starting RILReceiver");
-            mReceiver = new RILReceiver();
-            mReceiverThread = new Thread(mReceiver, "RILReceiver");
-            mReceiverThread->Start();
-
-            DisplayManager dm = (DisplayManager)context->GetSystemService(
-                    Context.DISPLAY_SERVICE);
-            mDefaultDisplay = dm->GetDisplay(Display.DEFAULT_DISPLAY);
-            dm->RegisterDisplayListener(mDisplayListener, NULL);
-        }
-
-        TelephonyDevController tdc = TelephonyDevController->GetInstance();
-        tdc->RegisterRIL(this);
-    }
-
-    //***** CommandsInterface implementation
-
-    //@Override
-    CARAPI GetVoiceRadioTechnology(Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_VOICE_RADIO_TECH, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-
-    CARAPI GetImsRegistrationState(Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_IMS_REGISTRATION_STATE, result);
-
-        If (RILJ_LOGD) {
-            RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-        }
-        Send(rr);
-    }
-
-    //@Override CARAPI
-    SetOnNITZTime(Handler h, Int32 what, Object obj) {
-        super->SetOnNITZTime(h, what, obj);
-
-        // Send the last NITZ time if we have it
-        If (mLastNITZTimeInfo != NULL) {
-            mNITZTimeRegistrant
-                .NotifyRegistrant(
-                    new AsyncResult (NULL, mLastNITZTimeInfo, NULL));
-            mLastNITZTimeInfo = NULL;
-        }
-    }
-
-    //@Override
-    CARAPI
-    GetIccCardStatus(Message result) {
-        //Note: This RIL request has not been renamed to ICC,
-        //       but this request is also valid for SIM and RUIM
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_GET_SIM_STATUS, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    CARAPI SetUiccSubscription(Int32 slotId, Int32 appIndex, Int32 subId,
-            Int32 subStatus, Message result) {
-        //Note: This RIL request is also valid for SIM and RUIM (ICC card)
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_SET_UICC_SUBSCRIPTION, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + " slot: " + slotId + " appIndex: " + appIndex
-                + " subId: " + subId + " subStatus: " + subStatus);
-
-        rr.mParcel->WriteInt(slotId);
-        rr.mParcel->WriteInt(appIndex);
-        rr.mParcel->WriteInt(subId);
-        rr.mParcel->WriteInt(subStatus);
-
-        Send(rr);
-    }
-
-    // FIXME This API should take an AID and slot ID
-    CARAPI SetDataAllowed(Boolean allowed, Message result) {
-        If(mRilVersion < 10 && mInstanceId == NULL) {
-            If (result != NULL) {
-                CommandException ex = new CommandException(
-                    CommandException.Error.REQUEST_NOT_SUPPORTED);
-                AsyncResult->ForMessage(result, NULL, ex);
-                result->SendToTarget();
-            }
-            return;
-        }
-
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_ALLOW_DATA, result);
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + " " + allowed);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(allowed ? 1 : 0);
-        Send(rr);
-    }
-
-    CARAPI
-    GetDataCallProfile(Int32 appType, Message result) {
-        If(mRilVersion < 10) {
-            If (result != NULL) {
-                CommandException ex = new CommandException(
-                    CommandException.Error.REQUEST_NOT_SUPPORTED);
-                AsyncResult->ForMessage(result, NULL, ex);
-                result->SendToTarget();
-            }
-            return;
-        }
-
-        RILRequest rr = RILRequest->Obtain(
-                RILConstants.RIL_REQUEST_GET_DATA_CALL_PROFILE, result);
-
-        // count of ints
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(appType);
-
-        If (RILJ_LOGD) {
-            RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                   + " : " + appType);
-        }
-        Send(rr);
-    }
-
-    //@Override CARAPI
-    SupplyIccPin(String pin, Message result) {
-        SupplyIccPinForApp(pin, NULL, result);
-    }
-
-    //@Override CARAPI
-    SupplyIccPinForApp(String pin, String aid, Message result) {
-        //Note: This RIL request has not been renamed to ICC,
-        //       but this request is also valid for SIM and RUIM
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_ENTER_SIM_PIN, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Boolean oldRil = NeedsOldRilFeature("facilitylock");
-
-        rr.mParcel->WriteInt(oldRil ? 1 : 2);
-        rr.mParcel->WriteString(pin);
-
-        If (!oldRil)
-            rr.mParcel->WriteString(aid);
-
-        Send(rr);
-    }
-
-    //@Override CARAPI
-    SupplyIccPuk(String puk, String newPin, Message result) {
-        SupplyIccPukForApp(puk, newPin, NULL, result);
-    }
-
-    //@Override CARAPI
-    SupplyIccPukForApp(String puk, String newPin, String aid, Message result) {
-        //Note: This RIL request has not been renamed to ICC,
-        //       but this request is also valid for SIM and RUIM
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_ENTER_SIM_PUK, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Boolean oldRil = NeedsOldRilFeature("facilitylock");
-
-        rr.mParcel->WriteInt(oldRil ? 2 : 3);
-        rr.mParcel->WriteString(puk);
-        rr.mParcel->WriteString(newPin);
-
-        If (!oldRil)
-            rr.mParcel->WriteString(aid);
-
-        Send(rr);
-    }
-
-    //@Override CARAPI
-    SupplyIccPin2(String pin, Message result) {
-        SupplyIccPin2ForApp(pin, NULL, result);
-    }
-
-    //@Override CARAPI
-    SupplyIccPin2ForApp(String pin, String aid, Message result) {
-        //Note: This RIL request has not been renamed to ICC,
-        //       but this request is also valid for SIM and RUIM
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_ENTER_SIM_PIN2, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Boolean oldRil = NeedsOldRilFeature("facilitylock");
-
-        rr.mParcel->WriteInt(oldRil ? 1 : 2);
-        rr.mParcel->WriteString(pin);
-
-        If (!oldRil)
-            rr.mParcel->WriteString(aid);
-
-        Send(rr);
-    }
-
-    //@Override CARAPI
-    SupplyIccPuk2(String puk2, String newPin2, Message result) {
-        SupplyIccPuk2ForApp(puk2, newPin2, NULL, result);
-    }
-
-    //@Override CARAPI
-    SupplyIccPuk2ForApp(String puk, String newPin2, String aid, Message result) {
-        //Note: This RIL request has not been renamed to ICC,
-        //       but this request is also valid for SIM and RUIM
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_ENTER_SIM_PUK2, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Boolean oldRil = NeedsOldRilFeature("facilitylock");
-
-        rr.mParcel->WriteInt(oldRil ? 2 : 3);
-        rr.mParcel->WriteString(puk);
-        rr.mParcel->WriteString(newPin2);
-
-        If (!oldRil)
-            rr.mParcel->WriteString(aid);
-
-        Send(rr);
-    }
-
-    //@Override CARAPI
-    ChangeIccPin(String oldPin, String newPin, Message result) {
-        ChangeIccPinForApp(oldPin, newPin, NULL, result);
-    }
-
-    //@Override CARAPI
-    ChangeIccPinForApp(String oldPin, String newPin, String aid, Message result) {
-        //Note: This RIL request has not been renamed to ICC,
-        //       but this request is also valid for SIM and RUIM
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_CHANGE_SIM_PIN, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Boolean oldRil = NeedsOldRilFeature("facilitylock");
-
-        rr.mParcel->WriteInt(oldRil ? 2 : 3);
-        rr.mParcel->WriteString(oldPin);
-        rr.mParcel->WriteString(newPin);
-
-        If (!oldRil)
-            rr.mParcel->WriteString(aid);
-
-        Send(rr);
-    }
-
-    //@Override CARAPI
-    ChangeIccPin2(String oldPin2, String newPin2, Message result) {
-        ChangeIccPin2ForApp(oldPin2, newPin2, NULL, result);
-    }
-
-    //@Override CARAPI
-    ChangeIccPin2ForApp(String oldPin2, String newPin2, String aid, Message result) {
-        //Note: This RIL request has not been renamed to ICC,
-        //       but this request is also valid for SIM and RUIM
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_CHANGE_SIM_PIN2, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Boolean oldRil = NeedsOldRilFeature("facilitylock");
-
-        rr.mParcel->WriteInt(oldRil ? 2 : 3);
-        rr.mParcel->WriteString(oldPin2);
-        rr.mParcel->WriteString(newPin2);
-
-        If (!oldRil)
-            rr.mParcel->WriteString(aid);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    ChangeBarringPassword(String facility, String oldPwd, String newPwd, Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_CHANGE_BARRING_PASSWORD, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        rr.mParcel->WriteInt(3);
-        rr.mParcel->WriteString(facility);
-        rr.mParcel->WriteString(oldPwd);
-        rr.mParcel->WriteString(newPwd);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SupplyDepersonalization(String netpin, String type, Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_ENTER_DEPERSONALIZATION_CODE, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest) +
-                        " Type:" + type);
-
-        rr.mParcel->WriteInt(2);
-        rr.mParcel->WriteString(type);
-        rr.mParcel->WriteString(netpin);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetCurrentCalls (Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_GET_CURRENT_CALLS, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    //@Deprecated CARAPI
-    GetPDPContextList(Message result) {
-        GetDataCallList(result);
-    }
-
-    //@Override
-    CARAPI
-    GetDataCallList(Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_DATA_CALL_LIST, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    Dial (String address, Int32 clirMode, Message result) {
-        Dial(address, clirMode, NULL, result);
-    }
-
-    //@Override
-    CARAPI
-    Dial(String address, Int32 clirMode, UUSInfo uusInfo, Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_DIAL, result);
-
-        rr.mParcel->WriteString(address);
-        rr.mParcel->WriteInt(clirMode);
-
-        If (uusInfo == NULL) {
-            rr.mParcel->WriteInt(0); // UUS information is absent
-        } else {
-            rr.mParcel->WriteInt(1); // UUS information is present
-            rr.mParcel->WriteInt(uusInfo->GetType());
-            rr.mParcel->WriteInt(uusInfo->GetDcs());
-            rr.mParcel->WriteByteArray(uusInfo->GetUserData());
-        }
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetIMSI(Message result) {
-        GetIMSIForApp(NULL, result);
-    }
-
-    //@Override
-    CARAPI
-    GetIMSIForApp(String aid, Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_GET_IMSI, result);
-
-        Boolean skipNullAid = NeedsOldRilFeature("skipnullaid");
-        Boolean writeAidOnly = NeedsOldRilFeature("writeaidonly");
-
-        If (!writeAidOnly && (aid != NULL || !skipNullAid)) {
-            rr.mParcel->WriteInt(1);
-            rr.mParcel->WriteString(aid);
-        }
-
-        If (writeAidOnly)
-            rr.mParcel->WriteString(aid);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() +
-                              "> getIMSI: " + RequestToString(rr.mRequest)
-                              + " aid: " + aid);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetIMEI(Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_GET_IMEI, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetIMEISV(Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_GET_IMEISV, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-
-    //@Override
-    CARAPI
-    HangupConnection (Int32 gsmIndex, Message result) {
-        If (RILJ_LOGD) RiljLog("hangupConnection: gsmIndex=" + gsmIndex);
-
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_HANGUP, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest) + " " +
-                gsmIndex);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(gsmIndex);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    HangupWaitingOrBackground (Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_HANGUP_WAITING_OR_BACKGROUND,
-                                        result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    HangupForegroundResumeBackground (Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(
-                        RIL_REQUEST_HANGUP_FOREGROUND_RESUME_BACKGROUND,
-                                        result);
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SwitchWaitingOrHoldingAndActive (Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(
-                        RIL_REQUEST_SWITCH_WAITING_OR_HOLDING_AND_ACTIVE,
-                                        result);
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    Conference (Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_CONFERENCE, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-
-    //@Override
-    CARAPI SetPreferredVoicePrivacy(Boolean enable, Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_CDMA_SET_PREFERRED_VOICE_PRIVACY_MODE,
-                result);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(enable ? 1:0);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI GetPreferredVoicePrivacy(Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_CDMA_QUERY_PREFERRED_VOICE_PRIVACY_MODE,
-                result);
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SeparateConnection (Int32 gsmIndex, Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SEPARATE_CONNECTION, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                            + " " + gsmIndex);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(gsmIndex);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    AcceptCall (Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_ANSWER, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    RejectCall (Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_UDUB, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    ExplicitCallTransfer (Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_EXPLICIT_CALL_TRANSFER, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetLastCallFailCause (Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_LAST_CALL_FAIL_CAUSE, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * @deprecated
-     */
-    //@Deprecated
-    //@Override
-    CARAPI
-    GetLastPdpFailCause (Message result) {
-        GetLastDataCallFailCause (result);
-    }
-
-    /**
-     * The preferred new alternative to getLastPdpFailCause
-     */
-    //@Override
-    CARAPI
-    GetLastDataCallFailCause (Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_LAST_DATA_CALL_FAIL_CAUSE, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SetMute (Boolean enableMute, Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SET_MUTE, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                            + " " + enableMute);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(enableMute ? 1 : 0);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetMute (Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_GET_MUTE, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetSignalStrength (Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SIGNAL_STRENGTH, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetVoiceRegistrationState (Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_VOICE_REGISTRATION_STATE, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetDataRegistrationState (Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_DATA_REGISTRATION_STATE, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetOperator(Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_OPERATOR, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetHardwareConfig (Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_GET_HARDWARE_CONFIG, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SendDtmf(Char32 c, Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_DTMF, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        rr.mParcel->WriteString(Character->ToString(c));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    StartDtmf(Char32 c, Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_DTMF_START, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        rr.mParcel->WriteString(Character->ToString(c));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    StopDtmf(Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_DTMF_STOP, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SendBurstDtmf(String dtmfString, Int32 on, Int32 off, Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_CDMA_BURST_DTMF, result);
-
-        rr.mParcel->WriteInt(3);
-        rr.mParcel->WriteString(dtmfString);
-        rr.mParcel->WriteString(Integer->ToString(on));
-        rr.mParcel->WriteString(Integer->ToString(off));
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + " : " + dtmfString);
-
-        Send(rr);
-    }
-
-    private void
-    ConstructGsmSendSmsRilRequest (RILRequest rr, String smscPDU, String pdu) {
-        rr.mParcel->WriteInt(2);
-        rr.mParcel->WriteString(smscPDU);
-        rr.mParcel->WriteString(pdu);
-    }
-
-    CARAPI
-    SendSMS (String smscPDU, String pdu, Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SEND_SMS, result);
-
-        ConstructGsmSendSmsRilRequest(rr, smscPDU, pdu);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SendSMSExpectMore (String smscPDU, String pdu, Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SEND_SMS_EXPECT_MORE, result);
-
-        ConstructGsmSendSmsRilRequest(rr, smscPDU, pdu);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    private void
-    ConstructCdmaSendSmsRilRequest(RILRequest rr, Byte[] pdu) {
-        Int32 address_nbr_of_digits;
-        Int32 subaddr_nbr_of_digits;
-        Int32 bearerDataLength;
-        ByteArrayInputStream bais = new ByteArrayInputStream(pdu);
-        DataInputStream dis = new DataInputStream(bais);
-
-        try {
-            rr.mParcel->WriteInt(dis->ReadInt()); //teleServiceId
-            rr.mParcel->WriteByte((Byte) dis->ReadInt()); //servicePresent
-            rr.mParcel->WriteInt(dis->ReadInt()); //serviceCategory
-            rr.mParcel->WriteInt(dis->Read()); //address_digit_mode
-            rr.mParcel->WriteInt(dis->Read()); //address_nbr_mode
-            rr.mParcel->WriteInt(dis->Read()); //address_ton
-            rr.mParcel->WriteInt(dis->Read()); //address_nbr_plan
-            address_nbr_of_digits = (Byte) dis->Read();
-            rr.mParcel->WriteByte((Byte) address_nbr_of_digits);
-            For(Int32 i=0; i < address_nbr_of_digits; i++){
-                rr.mParcel->WriteByte(dis->ReadByte()); // address_orig_bytes[i]
-            }
-            rr.mParcel->WriteInt(dis->Read()); //subaddressType
-            rr.mParcel->WriteByte((Byte) dis->Read()); //subaddr_odd
-            subaddr_nbr_of_digits = (Byte) dis->Read();
-            rr.mParcel->WriteByte((Byte) subaddr_nbr_of_digits);
-            For(Int32 i=0; i < subaddr_nbr_of_digits; i++){
-                rr.mParcel->WriteByte(dis->ReadByte()); //subaddr_orig_bytes[i]
-            }
-
-            bearerDataLength = dis->Read();
-            rr.mParcel->WriteInt(bearerDataLength);
-            For(Int32 i=0; i < bearerDataLength; i++){
-                rr.mParcel->WriteByte(dis->ReadByte()); //bearerData[i]
-            }
-        }Catch (IOException ex){
-            If (RILJ_LOGD) RiljLog("sendSmsCdma: conversion from input stream to object failed: "
-                    + ex);
-        }
-    }
-
-    CARAPI
-    SendCdmaSms(Byte[] pdu, Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_CDMA_SEND_SMS, result);
-
-        ConstructCdmaSendSmsRilRequest(rr, pdu);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    CARAPI
-    SendImsGsmSms (String smscPDU, String pdu, Int32 retry, Int32 messageRef,
-            Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_IMS_SEND_SMS, result);
-
-        rr.mParcel->WriteInt(RILConstants.GSM_PHONE);
-        rr.mParcel->WriteByte((Byte)retry);
-        rr.mParcel->WriteInt(messageRef);
-
-        ConstructGsmSendSmsRilRequest(rr, smscPDU, pdu);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    CARAPI
-    SendImsCdmaSms(Byte[] pdu, Int32 retry, Int32 messageRef, Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_IMS_SEND_SMS, result);
-
-        rr.mParcel->WriteInt(RILConstants.CDMA_PHONE);
-        rr.mParcel->WriteByte((Byte)retry);
-        rr.mParcel->WriteInt(messageRef);
-
-        ConstructCdmaSendSmsRilRequest(rr, pdu);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI DeleteSmsOnSim(Int32 index, Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_DELETE_SMS_ON_SIM,
-                response);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(index);
-
-        If (RILJ_LOGV) RiljLog(rr->SerialString() + "> "
-                + RequestToString(rr.mRequest)
-                + " " + index);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI DeleteSmsOnRuim(Int32 index, Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_CDMA_DELETE_SMS_ON_RUIM,
-                response);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(index);
-
-        If (RILJ_LOGV) RiljLog(rr->SerialString() + "> "
-                + RequestToString(rr.mRequest)
-                + " " + index);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI WriteSmsToSim(Int32 status, String smsc, String pdu, Message response) {
-        status = TranslateStatus(status);
-
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_WRITE_SMS_TO_SIM,
-                response);
-
-        rr.mParcel->WriteInt(status);
-        rr.mParcel->WriteString(pdu);
-        rr.mParcel->WriteString(smsc);
-
-        If (RILJ_LOGV) RiljLog(rr->SerialString() + "> "
-                + RequestToString(rr.mRequest)
-                + " " + status);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI WriteSmsToRuim(Int32 status, String pdu, Message response) {
-        status = TranslateStatus(status);
-
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM,
-                response);
-
-        rr.mParcel->WriteInt(status);
-        ConstructCdmaWriteSmsRilRequest(rr, IccUtils->HexStringToBytes(pdu));
-
-        If (RILJ_LOGV) RiljLog(rr->SerialString() + "> "
-                + RequestToString(rr.mRequest)
-                + " " + status);
-
-        Send(rr);
-    }
-
-    /**
-     *  Restructures PDU data so that it is consistent with RIL
-     *  data structure.
-     *
-     *  @param pdu The data to be written to the RUIM card.
-     */
-    private void ConstructCdmaWriteSmsRilRequest(RILRequest rr, Byte[] pdu) {
-        Int32 address_nbr_of_digits;
-        Int32 subaddr_nbr_of_digits;
-        Int32 bearerDataLength;
-        ByteArrayInputStream bais = new ByteArrayInputStream(pdu);
-        DataInputStream dis = new DataInputStream(bais);
-
-        try {
-            Int32 teleServiceId = 0;
-            Byte servicePresent = 0;
-            Int32 serviceCategory = 0;
-
-            Int32 address_digit_mode = 0;
-            Int32 address_nbr_mode = 0;
-            Int32 address_ton = 0;
-            Int32 address_nbr_plan = 0;
-
-            Int32 subaddressType = 0;
-            Byte subaddr_odd = 0;
-
-            teleServiceId = dis->ReadInt();
-            rr.mParcel->WriteInt(teleServiceId);
-            servicePresent = (Byte) dis->ReadInt();
-            rr.mParcel->WriteByte(servicePresent);
-            serviceCategory = dis->ReadInt();
-            rr.mParcel->WriteInt(serviceCategory);
-
-            address_digit_mode = dis->ReadByte();
-            rr.mParcel->WriteInt(address_digit_mode);
-            address_nbr_mode = dis->ReadByte();
-            rr.mParcel->WriteInt(address_nbr_mode);
-            address_ton = dis->ReadByte();
-            rr.mParcel->WriteInt(address_ton);
-            address_nbr_plan = dis->ReadByte();
-            rr.mParcel->WriteInt(address_nbr_plan);
-
-            address_nbr_of_digits = dis->ReadByte();
-            rr.mParcel->WriteByte((Byte) address_nbr_of_digits);
-            For (Int32 i = 0; i < address_nbr_of_digits; i++) {
-                rr.mParcel->WriteByte(dis->ReadByte()); // address_orig_bytes[i]
-            }
-
-            // Int32
-            subaddressType = dis->ReadByte();
-            rr.mParcel->WriteInt(subaddressType); // subaddressType
-            subaddr_odd = (Byte) dis->ReadByte();
-            rr.mParcel->WriteByte(subaddr_odd); // subaddr_odd
-            subaddr_nbr_of_digits = (Byte) dis->ReadByte();
-            rr.mParcel->WriteByte((Byte) subaddr_nbr_of_digits);
-            For (Int32 i = 0; i < subaddr_nbr_of_digits; i++) {
-                rr.mParcel->WriteByte(dis->ReadByte()); // subaddr_orig_bytes[i]
-            }
-
-            bearerDataLength = dis->ReadByte() & 0xff;
-            rr.mParcel->WriteInt(bearerDataLength);
-            For (Int32 i = 0; i < bearerDataLength; i++) {
-                rr.mParcel->WriteByte(dis->ReadByte()); // bearerData[i]
-            }
-
-            RiljLog(" teleServiceId=" + teleServiceId + " servicePresent=" + servicePresent
-                + " serviceCategory=" + serviceCategory
-                + " address_digit_mode=" + address_digit_mode
-                + " address_nbr_mode=" + address_nbr_mode + " address_ton=" + address_ton
-                + " address_nbr_plan=" + address_nbr_plan
-                + " address_nbr_of_digits=" + address_nbr_of_digits
-                + " subaddressType=" + subaddressType + " subaddr_odd= " + subaddr_odd
-                + " subaddr_nbr_of_digits=" + subaddr_nbr_of_digits
-                + " bearerDataLength=" + bearerDataLength);
-        } Catch (IOException ex) {
-            If (RILJ_LOGD) RiljLog("sendSmsCdma: conversion from input stream to object failed: "
-                    + ex);
-        } finally {
-            try {
-                If (NULL != bais) {
-                    bais->Close();
-                }
-
-                If (NULL != dis) {
-                    dis->Close();
-                }
-            } Catch (IOException e) {
-                If (RILJ_LOGD) RiljLog("sendSmsCdma: close input stream exception" + e);
-            }
-        }
-    }
-
-    /**
-     *  Translates EF_SMS status bits to a status value compatible with
-     *  SMS AT commands.  See TS 27.005 3.1.
-     */
-    private Int32 TranslateStatus(Int32 status) {
-        Switch(status & 0x7) {
-            case SmsManager.STATUS_ON_ICC_READ:
-                return 1;
-            case SmsManager.STATUS_ON_ICC_UNREAD:
-                return 0;
-            case SmsManager.STATUS_ON_ICC_SENT:
-                return 3;
-            case SmsManager.STATUS_ON_ICC_UNSENT:
-                return 2;
-        }
-
-        // Default to READ.
-        return 1;
-    }
-
-    //@Override
-    CARAPI
-    SetupDataCall(String radioTechnology, String profile, String apn,
-            String user, String password, String authType, String protocol,
-            Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SETUP_DATA_CALL, result);
-
-        rr.mParcel->WriteInt(7);
-
-        rr.mParcel->WriteString(radioTechnology);
-        rr.mParcel->WriteString(profile);
-        rr.mParcel->WriteString(apn);
-        rr.mParcel->WriteString(user);
-        rr.mParcel->WriteString(password);
-        rr.mParcel->WriteString(authType);
-        rr.mParcel->WriteString(protocol);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> "
-                + RequestToString(rr.mRequest) + " " + radioTechnology + " "
-                + profile + " " + apn + " " + user + " "
-                + password + " " + authType + " " + protocol);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    DeactivateDataCall(Int32 cid, Int32 reason, Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_DEACTIVATE_DATA_CALL, result);
-
-        rr.mParcel->WriteInt(2);
-        rr.mParcel->WriteString(Integer->ToString(cid));
-        rr.mParcel->WriteString(Integer->ToString(reason));
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " +
-                RequestToString(rr.mRequest) + " " + cid + " " + reason);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SetRadioPower(Boolean on, Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_RADIO_POWER, result);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(on ? 1 : 0);
-
-        If (RILJ_LOGD) {
-            RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                    + (on ? " on" : " off"));
-        }
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI RequestShutdown(Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_SHUTDOWN, result);
-
-        If (RILJ_LOGD)
-            RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SetSuppServiceNotifications(Boolean enable, Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SET_SUPP_SVC_NOTIFICATION, result);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(enable ? 1 : 0);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> "
-                + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    AcknowledgeLastIncomingGsmSms(Boolean success, Int32 cause, Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SMS_ACKNOWLEDGE, result);
-
-        rr.mParcel->WriteInt(2);
-        rr.mParcel->WriteInt(success ? 1 : 0);
-        rr.mParcel->WriteInt(cause);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + " " + success + " " + cause);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    AcknowledgeLastIncomingCdmaSms(Boolean success, Int32 cause, Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE, result);
-
-        rr.mParcel->WriteInt(success ? 0 : 1); //RIL_CDMA_SMS_ErrorClass
-        // cause code according to X.S004-550E
-        rr.mParcel->WriteInt(cause);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + " " + success + " " + cause);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    AcknowledgeIncomingGsmSmsWithPdu(Boolean success, String ackPdu, Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_ACKNOWLEDGE_INCOMING_GSM_SMS_WITH_PDU, result);
-
-        rr.mParcel->WriteInt(2);
-        rr.mParcel->WriteString(success ? "1" : "0");
-        rr.mParcel->WriteString(ackPdu);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + ' ' + success + " [" + ackPdu + ']');
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    IccIO (Int32 command, Int32 fileid, String path, Int32 p1, Int32 p2, Int32 p3,
-            String data, String pin2, Message result) {
-        IccIOForApp(command, fileid, path, p1, p2, p3, data, pin2, NULL, result);
-    }
-    //@Override
-    CARAPI
-    IccIOForApp (Int32 command, Int32 fileid, String path, Int32 p1, Int32 p2, Int32 p3,
-            String data, String pin2, String aid, Message result) {
-        //Note: This RIL request has not been renamed to ICC,
-        //       but this request is also valid for SIM and RUIM
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SIM_IO, result);
-
-        rr.mParcel->WriteInt(command);
-        rr.mParcel->WriteInt(fileid);
-        rr.mParcel->WriteString(path);
-        rr.mParcel->WriteInt(p1);
-        rr.mParcel->WriteInt(p2);
-        rr.mParcel->WriteInt(p3);
-        rr.mParcel->WriteString(data);
-        rr.mParcel->WriteString(pin2);
-        rr.mParcel->WriteString(aid);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> iccIO: "
-                + RequestToString(rr.mRequest)
-                + " 0x" + Integer->ToHexString(command)
-                + " 0x" + Integer->ToHexString(fileid) + " "
-                + " path: " + path + ","
-                + p1 + "," + p2 + "," + p3
-                + " aid: " + aid);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetCLIR(Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_GET_CLIR, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SetCLIR(Int32 clirMode, Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SET_CLIR, result);
-
-        // count ints
-        rr.mParcel->WriteInt(1);
-
-        rr.mParcel->WriteInt(clirMode);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                    + " " + clirMode);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    QueryCallWaiting(Int32 serviceClass, Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_QUERY_CALL_WAITING, response);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(serviceClass);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                    + " " + serviceClass);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SetCallWaiting(Boolean enable, Int32 serviceClass, Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SET_CALL_WAITING, response);
-
-        rr.mParcel->WriteInt(2);
-        rr.mParcel->WriteInt(enable ? 1 : 0);
-        rr.mParcel->WriteInt(serviceClass);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + " " + enable + ", " + serviceClass);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SetNetworkSelectionModeAutomatic(Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SET_NETWORK_SELECTION_AUTOMATIC,
-                                    response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SetNetworkSelectionModeManual(String operatorNumeric, Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SET_NETWORK_SELECTION_MANUAL,
-                                    response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                    + " " + operatorNumeric);
-
-        rr.mParcel->WriteString(operatorNumeric);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetNetworkSelectionMode(Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_QUERY_NETWORK_SELECTION_MODE,
-                                    response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetAvailableNetworks(Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_QUERY_AVAILABLE_NETWORKS,
-                                    response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SetCallForward(Int32 action, Int32 cfReason, Int32 serviceClass,
-                String number, Int32 timeSeconds, Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SET_CALL_FORWARD, response);
-
-        rr.mParcel->WriteInt(action);
-        rr.mParcel->WriteInt(cfReason);
-        rr.mParcel->WriteInt(serviceClass);
-        rr.mParcel->WriteInt(PhoneNumberUtils->ToaFromString(number));
-        rr.mParcel->WriteString(number);
-        rr.mParcel.WriteInt (timeSeconds);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                    + " " + action + " " + cfReason + " " + serviceClass
-                    + timeSeconds);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    QueryCallForwardStatus(Int32 cfReason, Int32 serviceClass,
-                String number, Message response) {
-        RILRequest rr
-            = RILRequest->Obtain(RIL_REQUEST_QUERY_CALL_FORWARD_STATUS, response);
-
-        rr.mParcel->WriteInt(2); // 2 is for query action, not in used anyway
-        rr.mParcel->WriteInt(cfReason);
-        rr.mParcel->WriteInt(serviceClass);
-        rr.mParcel->WriteInt(PhoneNumberUtils->ToaFromString(number));
-        rr.mParcel->WriteString(number);
-        rr.mParcel.WriteInt (0);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + " " + cfReason + " " + serviceClass);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    QueryCLIP(Message response) {
-        RILRequest rr
-            = RILRequest->Obtain(RIL_REQUEST_QUERY_CLIP, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-
-    //@Override
-    CARAPI
-    GetBasebandVersion (Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_BASEBAND_VERSION, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    QueryFacilityLock(String facility, String password, Int32 serviceClass,
-                            Message response) {
-        QueryFacilityLockForApp(facility, password, serviceClass, NULL, response);
-    }
-
-    //@Override
-    CARAPI
-    QueryFacilityLockForApp(String facility, String password, Int32 serviceClass, String appId,
-                            Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_QUERY_FACILITY_LOCK, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Boolean oldRil = NeedsOldRilFeature("facilitylock");
-
-        // count strings
-        rr.mParcel->WriteInt(oldRil ? 3 : 4);
-
-        rr.mParcel->WriteString(facility);
-        rr.mParcel->WriteString(password);
-
-        rr.mParcel->WriteString(Integer->ToString(serviceClass));
-
-        If (!oldRil)
-            rr.mParcel->WriteString(appId);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    SetFacilityLock (String facility, Boolean lockState, String password,
-                        Int32 serviceClass, Message response) {
-        SetFacilityLockForApp(facility, lockState, password, serviceClass, NULL, response);
-    }
-
-    //@Override
-    CARAPI
-    SetFacilityLockForApp(String facility, Boolean lockState, String password,
-                        Int32 serviceClass, String appId, Message response) {
-        String lockString;
-         RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SET_FACILITY_LOCK, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                                                        + " [" + facility + " " + lockState
-                                                        + " " + serviceClass + " " + appId + "]");
-
-        Boolean oldRil = NeedsOldRilFeature("facilitylock");
-
-        // count strings
-        rr.mParcel->WriteInt(oldRil ? 4 : 5);
-
-        rr.mParcel->WriteString(facility);
-        lockString = (lockState)?"1":"0";
-        rr.mParcel->WriteString(lockString);
-        rr.mParcel->WriteString(password);
-        rr.mParcel->WriteString(Integer->ToString(serviceClass));
-
-        If (!oldRil)
-            rr.mParcel->WriteString(appId);
-
-        Send(rr);
-
-    }
-
-    //@Override
-    CARAPI
-    SendUSSD (String ussdString, Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SEND_USSD, response);
-
-        If (RILJ_LOGD) {
-            String logUssdString = "*******";
-            If (RILJ_LOGV) logUssdString = ussdString;
-            RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                                   + " " + logUssdString);
-        }
-
-        rr.mParcel->WriteString(ussdString);
-
-        Send(rr);
-    }
-
-    // inherited javadoc suffices
-    //@Override
-    CARAPI CancelPendingUssd (Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_CANCEL_USSD, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString()
-                + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-
-    //@Override
-    CARAPI ResetRadio(Message result) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_RESET_RADIO, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-
-    //@Override
-    CARAPI SetLocalCallHold(Int32 lchStatus) {
-        Byte[] payload = new Byte[]{(Byte)(lchStatus & 0x7F)};
-        Rlog->D(RILJ_LOG_TAG, "setLocalCallHold: lchStatus is " + lchStatus);
-
-        SendOemRilRequestRaw(OEMHOOK_EVT_HOOK_SET_LOCAL_CALL_HOLD, 1, payload, NULL);
-    }
-
-    //@Override
-    CARAPI GetModemCapability(Message response) {
-        Rlog->D(RILJ_LOG_TAG, "GetModemCapability");
-        SendOemRilRequestRaw(OEMHOOK_EVT_HOOK_GET_MODEM_CAPABILITY, 0, NULL, response);
-    }
-
-    //@Override
-    CARAPI UpdateStackBinding(Int32 stack, Int32 enable, Message response) {
-        Byte[] payload = new Byte[]{(Byte)stack,(Byte)enable};
-        Rlog->D(RILJ_LOG_TAG, "UpdateStackBinding: on Stack: " + stack +
-                ", enable/disable: " + enable);
-
-        SendOemRilRequestRaw(OEMHOOK_EVT_HOOK_UPDATE_SUB_BINDING, 2, payload, response);
-    }
-
-
-    private void SendOemRilRequestRaw(Int32 requestId, Int32 numPayload, Byte[] payload,
-            Message response) {
-        Byte[] request = new Byte[mHeaderSize + numPayload * BYTE_SIZE];
-
-        ByteBuffer buf= ByteBuffer->Wrap(request);
-        buf->Order(ByteOrder->NativeOrder());
-
-        // Add OEM identifier String
-        buf->Put(OEM_IDENTIFIER->GetBytes());
-        // Add Request ID
-        buf->PutInt(requestId);
-        If (numPayload > 0 && payload != NULL) {
-            // Add Request payload length
-            buf->PutInt(numPayload * BYTE_SIZE);
-            For (Byte b : payload) {
-                buf->Put(b);
-            }
-        }
-
-        InvokeOemRilRequestRaw(request, response);
-    }
-
-    //@Override
-    CARAPI InvokeOemRilRequestRaw(Byte[] data, Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_OEM_HOOK_RAW, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-               + "[" + IccUtils->BytesToHexString(data) + "]");
-
-        rr.mParcel->WriteByteArray(data);
-
-        Send(rr);
-
-    }
-
-    //@Override
-    CARAPI InvokeOemRilRequestStrings(String[] strings, Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_OEM_HOOK_STRINGS, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        rr.mParcel->WriteStringArray(strings);
-
-        Send(rr);
-    }
-
-     /**
-     * Assign a specified band for RF configuration.
-     *
-     * @param bandMode one of BM_*_BAND
-     * @param response is callback message
-     */
-    //@Override
-    CARAPI SetBandMode (Int32 bandMode, Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_SET_BAND_MODE, response);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(bandMode);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                 + " " + bandMode);
-
-        Send(rr);
-     }
-
-    /**
-     * Query the list of band mode supported by RF.
-     *
-     * @param response is callback message
-     *        ((AsyncResult)response.obj).result  is an Int32[] where Int32[0] is
-     *        the size of the array and the rest of each element representing
-     *        one available BM_*_BAND
-     */
-    //@Override
-    CARAPI QueryAvailableBandMode (Message response) {
-        RILRequest rr
-                = RILRequest->Obtain(RIL_REQUEST_QUERY_AVAILABLE_BAND_MODE,
-                response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI SendTerminalResponse(String contents, Message response) {
-        RILRequest rr = RILRequest->Obtain(
-                RILConstants.RIL_REQUEST_STK_SEND_TERMINAL_RESPONSE, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        rr.mParcel->WriteString(contents);
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI SendEnvelope(String contents, Message response) {
-        RILRequest rr = RILRequest->Obtain(
-                RILConstants.RIL_REQUEST_STK_SEND_ENVELOPE_COMMAND, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        rr.mParcel->WriteString(contents);
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI SendEnvelopeWithStatus(String contents, Message response) {
-        RILRequest rr = RILRequest->Obtain(
-                RILConstants.RIL_REQUEST_STK_SEND_ENVELOPE_WITH_STATUS, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + '[' + contents + ']');
-
-        rr.mParcel->WriteString(contents);
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI HandleCallSetupRequestFromSim(
-            Boolean accept, Message response) {
-
-        RILRequest rr = RILRequest->Obtain(
-            RILConstants.RIL_REQUEST_STK_HANDLE_CALL_SETUP_REQUESTED_FROM_SIM,
-            response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Int32[] param = new Int32[1];
-        param[0] = accept ? 1 : 0;
-        rr.mParcel->WriteIntArray(param);
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI SetPreferredNetworkType(Int32 networkType , Message response) {
-        RILRequest rr = RILRequest->Obtain(
-                RILConstants.RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE, response);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(networkType);
-
-        mPreferredNetworkType = networkType;
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + " : " + networkType);
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI GetPreferredNetworkType(Message response) {
-        RILRequest rr = RILRequest->Obtain(
-                RILConstants.RIL_REQUEST_GET_PREFERRED_NETWORK_TYPE, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI GetNeighboringCids(Message response) {
-        RILRequest rr = RILRequest->Obtain(
-                RILConstants.RIL_REQUEST_GET_NEIGHBORING_CELL_IDS, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI SetLocationUpdates(Boolean enable, Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_SET_LOCATION_UPDATES, response);
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(enable ? 1 : 0);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> "
-                + RequestToString(rr.mRequest) + ": " + enable);
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI GetSmscAddress(Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_GET_SMSC_ADDRESS, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI SetSmscAddress(String address, Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_SET_SMSC_ADDRESS, result);
-
-        rr.mParcel->WriteString(address);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + " : " + address);
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI ReportSmsMemoryStatus(Boolean available, Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_REPORT_SMS_MEMORY_STATUS, result);
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(available ? 1 : 0);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> "
-                + RequestToString(rr.mRequest) + ": " + available);
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI ReportStkServiceIsRunning(Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI GetGsmBroadcastConfig(Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_GSM_GET_BROADCAST_CONFIG, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI SetGsmBroadcastConfig(SmsBroadcastConfigInfo[] config, Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_GSM_SET_BROADCAST_CONFIG, response);
-
-        Int32 numOfConfig = config.length;
-        rr.mParcel->WriteInt(numOfConfig);
-
-        For(Int32 i = 0; i < numOfConfig; i++) {
-            rr.mParcel->WriteInt(config[i].GetFromServiceId());
-            rr.mParcel->WriteInt(config[i].GetToServiceId());
-            rr.mParcel->WriteInt(config[i].GetFromCodeScheme());
-            rr.mParcel->WriteInt(config[i].GetToCodeScheme());
-            rr.mParcel->WriteInt(config[i].IsSelected() ? 1 : 0);
-        }
-
-        If (RILJ_LOGD) {
-            RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                    + " with " + numOfConfig + " configs : ");
-            For (Int32 i = 0; i < numOfConfig; i++) {
-                RiljLog(config[i].ToString());
-            }
-        }
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI SetGsmBroadcastActivation(Boolean activate, Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_GSM_BROADCAST_ACTIVATION, response);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(activate ? 0 : 1);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //***** Private Methods
-
-    // TODO(jeffbrown): Delete me.
-    // The RIL should *not* be listening for screen state changes since they are
-    // becoming increasingly ambiguous on our devices.  The RIL_REQUEST_SCREEN_STATE
-    // message should be deleted and replaced with more precise messages to control
-    // behavior such as signal strength reporting or power managements based on
-    // more robust signals.
-    private void UpdateScreenState() {
-        final Int32 oldState = mDefaultDisplayState;
-        mDefaultDisplayState = mDefaultDisplay->GetState();
-        If (mDefaultDisplayState != oldState) {
-            If (oldState != Display.STATE_ON
-                    && mDefaultDisplayState == Display.STATE_ON) {
-                SendScreenState(TRUE);
-            } else If ((oldState == Display.STATE_ON || oldState == Display.STATE_UNKNOWN)
-                        && mDefaultDisplayState != Display.STATE_ON) {
-                SendScreenState(FALSE);
-            }
-        }
-    }
-
-    protected void SendScreenState(Boolean on) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_SCREEN_STATE, NULL);
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(on ? 1 : 0);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString()
-                + "> " + RequestToString(rr.mRequest) + ": " + on);
-
-        Send(rr);
-    }
-
-    //@Override
-    protected void
-    OnRadioAvailable() {
-        // In case screen state was Lost (due to process crash),
-        // this ensures that the RIL knows the correct screen state.
-        UpdateScreenState();
-   }
-
-    protected RadioState GetRadioStateFromInt(Int32 stateInt) {
-        RadioState state;
-
-        /* RIL_RadioState ril.h */
-        Switch(stateInt) {
-            case 0: state = RadioState.RADIO_OFF; break;
-            case 1: state = RadioState.RADIO_UNAVAILABLE; break;
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-            case 9:
-            case 10: state = RadioState.RADIO_ON; break;
-
-            default:
-                throw new RuntimeException(
-                            "Unrecognized RIL_RadioState: " + stateInt);
-        }
-        return state;
-    }
-
-    protected void SwitchToRadioState(RadioState newState) {
-        SetRadioState(newState);
-    }
-
-    /**
-     * Holds a PARTIAL_WAKE_LOCK whenever
-     * a) There is outstanding RIL request sent to RIL deamon and no replied
-     * b) There is a request pending to be sent out.
-     *
-     * There is a WAKE_LOCK_TIMEOUT to release the lock, though it shouldn't
-     * happen often.
-     */
-
-    private void
-    AcquireWakeLock() {
-        {    AutoLock syncLock(mWakeLock);
-            mWakeLock->Acquire();
-            mWakeLockCount++;
-
-            mSender->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
-            Message msg = mSender->ObtainMessage(EVENT_WAKE_LOCK_TIMEOUT);
-            mSender->SendMessageDelayed(msg, mWakeLockTimeout);
-        }
-    }
-
-    private void
-    DecrementWakeLock() {
-        {    AutoLock syncLock(mWakeLock);
-            If (mWakeLockCount > 1) {
-                mWakeLockCount--;
-            } else {
-                mWakeLockCount = 0;
-                mWakeLock->ReleaseLock();
-                mSender->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
-            }
-        }
-    }
-
-    // TRUE if we had the wakelock
-    private Boolean
-    ClearWakeLock() {
-        {    AutoLock syncLock(mWakeLock);
-            If (mWakeLockCount == 0 && mWakeLock->IsHeld() == FALSE) return FALSE;
-            Rlog->D(RILJ_LOG_TAG, "NOTE: mWakeLockCount is " + mWakeLockCount + "at time of clearing");
+        else {
             mWakeLockCount = 0;
             mWakeLock->ReleaseLock();
             mSender->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
-            return TRUE;
         }
     }
-
-    protected void
-    Send(RILRequest rr) {
-        Message msg;
-
-        If (mSocket == NULL) {
-            rr->OnError(RADIO_NOT_AVAILABLE, NULL);
-            rr->ReleaseSources();
-            return;
-        }
-
-        msg = mSender->ObtainMessage(EVENT_SEND, rr);
-
-        AcquireWakeLock();
-
-        msg->SendToTarget();
-    }
-
-    protected void
-    ProcessResponse (Parcel p) {
-        Int32 type;
-
-        type = p->ReadInt();
-
-        If (type == RESPONSE_UNSOLICITED) {
-            ProcessUnsolicited (p);
-        } else If (type == RESPONSE_SOLICITED) {
-            RILRequest rr = ProcessSolicited (p);
-            If (rr != NULL) {
-                rr->ReleaseSources();
-                DecrementWakeLock();
-            }
-        }
-    }
-
-    /**
-     * Release each request in mRequestList then clear the list
-     * @param error is the RIL_Errno sent back
-     * @param loggable TRUE means to print all requests in mRequestList
-     */
-    protected void ClearRequestList(Int32 error, Boolean loggable) {
-        RILRequest rr;
-        {    AutoLock syncLock(mRequestList);
-            Int32 count = mRequestList->Size();
-            If (RILJ_LOGD && loggable) {
-                Rlog->D(RILJ_LOG_TAG, "clearRequestList " +
-                        " mWakeLockCount=" + mWakeLockCount +
-                        " mRequestList=" + count);
-            }
-
-            For (Int32 i = 0; i < count ; i++) {
-                rr = mRequestList->ValueAt(i);
-                If (RILJ_LOGD && loggable) {
-                    Rlog->D(RILJ_LOG_TAG, i + ": [" + rr.mSerial + "] " +
-                            RequestToString(rr.mRequest));
-                }
-                rr->OnError(error, NULL);
-                rr->ReleaseSources();
-                DecrementWakeLock();
-            }
-            mRequestList->Clear();
-        }
-    }
-
-    protected RILRequest FindAndRemoveRequestFromList(Int32 serial) {
-        RILRequest rr = NULL;
-        {    AutoLock syncLock(mRequestList);
-            rr = mRequestList->Get(serial);
-            If (rr != NULL) {
-                mRequestList->Remove(serial);
-            }
-        }
-
-        return rr;
-    }
-
-    protected RILRequest
-    ProcessSolicited (Parcel p) {
-        Int32 serial, error;
-        Boolean found = FALSE;
-
-        serial = p->ReadInt();
-        error = p->ReadInt();
-
-        RILRequest rr;
-
-        rr = FindAndRemoveRequestFromList(serial);
-
-        If (rr == NULL) {
-            Rlog->W(RILJ_LOG_TAG, "Unexpected solicited response! sn: "
-                            + serial + " error: " + error);
-            return NULL;
-        }
-
-        Object ret = NULL;
-
-        If (error == 0 || p->DataAvail() > 0) {
-            // either command succeeds or command fails but with data payload
-            try {Switch (rr.mRequest) {
-            /*
- cat libs/telephony/ril_commands.h \
- | egrep "^ *{RIL_" \
- | sed -re 's/\{([^,]+),[^,]+,([^}]+).+/case \1: ret = \2(p); break;/'
-             */
-            case RIL_REQUEST_GET_SIM_STATUS: ret =  ResponseIccCardStatus(p); break;
-            case RIL_REQUEST_ENTER_SIM_PIN: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_ENTER_SIM_PUK: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_ENTER_SIM_PIN2: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_ENTER_SIM_PUK2: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_CHANGE_SIM_PIN: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_CHANGE_SIM_PIN2: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_ENTER_DEPERSONALIZATION_CODE: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_GET_CURRENT_CALLS: ret =  ResponseCallList(p); break;
-            case RIL_REQUEST_DIAL: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_GET_IMSI: ret =  ResponseString(p); break;
-            case RIL_REQUEST_HANGUP: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_HANGUP_WAITING_OR_BACKGROUND: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_HANGUP_FOREGROUND_RESUME_BACKGROUND: {
-                If (mTestingEmergencyCall->GetAndSet(FALSE)) {
-                    If (mEmergencyCallbackModeRegistrant != NULL) {
-                        RiljLog("testing emergency call, notify ECM Registrants");
-                        mEmergencyCallbackModeRegistrant->NotifyRegistrant();
-                    }
-                }
-                ret =  ResponseVoid(p);
-                break;
-            }
-            case RIL_REQUEST_SWITCH_WAITING_OR_HOLDING_AND_ACTIVE: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_CONFERENCE: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_UDUB: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_LAST_CALL_FAIL_CAUSE: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_SIGNAL_STRENGTH: ret =  ResponseSignalStrength(p); break;
-            case RIL_REQUEST_VOICE_REGISTRATION_STATE: ret =  ResponseStrings(p); break;
-            case RIL_REQUEST_DATA_REGISTRATION_STATE: ret =  ResponseStrings(p); break;
-            case RIL_REQUEST_OPERATOR: ret =  ResponseStrings(p); break;
-            case RIL_REQUEST_RADIO_POWER: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_DTMF: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_SEND_SMS: ret =  ResponseSMS(p); break;
-            case RIL_REQUEST_SEND_SMS_EXPECT_MORE: ret =  ResponseSMS(p); break;
-            case RIL_REQUEST_SETUP_DATA_CALL: ret =  ResponseSetupDataCall(p); break;
-            case RIL_REQUEST_SIM_IO: ret =  ResponseICC_IO(p); break;
-            case RIL_REQUEST_SEND_USSD: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_CANCEL_USSD: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_GET_CLIR: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_SET_CLIR: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_QUERY_CALL_FORWARD_STATUS: ret =  ResponseCallForward(p); break;
-            case RIL_REQUEST_SET_CALL_FORWARD: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_QUERY_CALL_WAITING: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_SET_CALL_WAITING: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_SMS_ACKNOWLEDGE: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_GET_IMEI: ret =  ResponseString(p); break;
-            case RIL_REQUEST_GET_IMEISV: ret =  ResponseString(p); break;
-            case RIL_REQUEST_ANSWER: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_DEACTIVATE_DATA_CALL: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_QUERY_FACILITY_LOCK: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_SET_FACILITY_LOCK: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_CHANGE_BARRING_PASSWORD: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_QUERY_NETWORK_SELECTION_MODE: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_SET_NETWORK_SELECTION_AUTOMATIC: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_SET_NETWORK_SELECTION_MANUAL: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_QUERY_AVAILABLE_NETWORKS : ret =  ResponseOperatorInfos(p); break;
-            case RIL_REQUEST_DTMF_START: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_DTMF_STOP: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_BASEBAND_VERSION: ret =  ResponseString(p); break;
-            case RIL_REQUEST_SEPARATE_CONNECTION: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_SET_MUTE: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_GET_MUTE: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_QUERY_CLIP: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_LAST_DATA_CALL_FAIL_CAUSE: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_DATA_CALL_LIST: ret =  ResponseDataCallList(p); break;
-            case RIL_REQUEST_RESET_RADIO: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_OEM_HOOK_RAW: ret =  ResponseRaw(p); break;
-            case RIL_REQUEST_OEM_HOOK_STRINGS: ret =  ResponseStrings(p); break;
-            case RIL_REQUEST_SCREEN_STATE: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_SET_SUPP_SVC_NOTIFICATION: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_WRITE_SMS_TO_SIM: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_DELETE_SMS_ON_SIM: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_SET_BAND_MODE: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_QUERY_AVAILABLE_BAND_MODE: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_STK_GET_PROFILE: ret =  ResponseString(p); break;
-            case RIL_REQUEST_STK_SET_PROFILE: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_STK_SEND_ENVELOPE_COMMAND: ret =  ResponseString(p); break;
-            case RIL_REQUEST_STK_SEND_TERMINAL_RESPONSE: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_STK_HANDLE_CALL_SETUP_REQUESTED_FROM_SIM: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_EXPLICIT_CALL_TRANSFER: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_GET_PREFERRED_NETWORK_TYPE: ret =  ResponseGetPreferredNetworkType(p); break;
-            case RIL_REQUEST_GET_NEIGHBORING_CELL_IDS: ret = ResponseCellList(p); break;
-            case RIL_REQUEST_SET_LOCATION_UPDATES: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_CDMA_SET_ROAMING_PREFERENCE: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_CDMA_QUERY_ROAMING_PREFERENCE: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_SET_TTY_MODE: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_QUERY_TTY_MODE: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_CDMA_SET_PREFERRED_VOICE_PRIVACY_MODE: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_CDMA_QUERY_PREFERRED_VOICE_PRIVACY_MODE: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_CDMA_FLASH: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_CDMA_BURST_DTMF: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_CDMA_SEND_SMS: ret =  ResponseSMS(p); break;
-            case RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_GSM_GET_BROADCAST_CONFIG: ret =  ResponseGmsBroadcastConfig(p); break;
-            case RIL_REQUEST_GSM_SET_BROADCAST_CONFIG: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_GSM_BROADCAST_ACTIVATION: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG: ret =  ResponseCdmaBroadcastConfig(p); break;
-            case RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_CDMA_BROADCAST_ACTIVATION: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_CDMA_VALIDATE_AND_WRITE_AKEY: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_CDMA_SUBSCRIPTION: ret =  ResponseStrings(p); break;
-            case RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_CDMA_DELETE_SMS_ON_RUIM: ret =  ResponseVoid(p); break;
-            case RIL_REQUEST_DEVICE_IDENTITY: ret =  ResponseStrings(p); break;
-            case RIL_REQUEST_GET_SMSC_ADDRESS: ret = ResponseString(p); break;
-            case RIL_REQUEST_SET_SMSC_ADDRESS: ret = ResponseVoid(p); break;
-            case RIL_REQUEST_EXIT_EMERGENCY_CALLBACK_MODE: ret = ResponseVoid(p); break;
-            case RIL_REQUEST_REPORT_SMS_MEMORY_STATUS: ret = ResponseVoid(p); break;
-            case RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING: ret = ResponseVoid(p); break;
-            case RIL_REQUEST_CDMA_GET_SUBSCRIPTION_SOURCE: ret =  ResponseInts(p); break;
-            case RIL_REQUEST_GET_DATA_CALL_PROFILE: ret =  ResponseGetDataCallProfile(p); break;
-            case RIL_REQUEST_ISIM_AUTHENTICATION: ret =  ResponseString(p); break;
-            case RIL_REQUEST_ACKNOWLEDGE_INCOMING_GSM_SMS_WITH_PDU: ret = ResponseVoid(p); break;
-            case RIL_REQUEST_STK_SEND_ENVELOPE_WITH_STATUS: ret = ResponseICC_IO(p); break;
-            case RIL_REQUEST_VOICE_RADIO_TECH: ret = ResponseInts(p); break;
-            case RIL_REQUEST_GET_CELL_INFO_LIST: ret = ResponseCellInfoList(p); break;
-            case RIL_REQUEST_SET_UNSOL_CELL_INFO_LIST_RATE: ret = ResponseVoid(p); break;
-            case RIL_REQUEST_SET_INITIAL_ATTACH_APN: ret = ResponseVoid(p); break;
-            case RIL_REQUEST_SET_DATA_PROFILE: ret = ResponseVoid(p); break;
-            case RIL_REQUEST_IMS_REGISTRATION_STATE: ret = ResponseInts(p); break;
-            case RIL_REQUEST_IMS_SEND_SMS: ret =  ResponseSMS(p); break;
-            case RIL_REQUEST_SIM_TRANSMIT_APDU_BASIC: ret =  ResponseICC_IO(p); break;
-            case RIL_REQUEST_SIM_OPEN_CHANNEL: ret  = ResponseInts(p); break;
-            case RIL_REQUEST_SIM_CLOSE_CHANNEL: ret  = ResponseVoid(p); break;
-            case RIL_REQUEST_SIM_TRANSMIT_APDU_CHANNEL: ret = ResponseICC_IO(p); break;
-            case RIL_REQUEST_SIM_GET_ATR: ret = ResponseString(p); break;
-            case RIL_REQUEST_NV_READ_ITEM: ret = ResponseString(p); break;
-            case RIL_REQUEST_NV_WRITE_ITEM: ret = ResponseVoid(p); break;
-            case RIL_REQUEST_NV_WRITE_CDMA_PRL: ret = ResponseVoid(p); break;
-            case RIL_REQUEST_NV_RESET_CONFIG: ret = ResponseVoid(p); break;
-            case RIL_REQUEST_SET_UICC_SUBSCRIPTION: ret = ResponseVoid(p); break;
-            case RIL_REQUEST_ALLOW_DATA: ret = ResponseVoid(p); break;
-            case RIL_REQUEST_GET_HARDWARE_CONFIG: ret = ResponseHardwareConfig(p); break;
-            case RIL_REQUEST_SIM_AUTHENTICATION: ret =  ResponseICC_IOBase64(p); break;
-            case RIL_REQUEST_SHUTDOWN: ret = ResponseVoid(p); break;
-            default:
-                throw new RuntimeException("Unrecognized solicited response: " + rr.mRequest);
-            //break;
-            }} Catch (Throwable tr) {
-                // Exceptions here usually mean invalid RIL responses
-
-                Rlog->W(RILJ_LOG_TAG, rr->SerialString() + "< "
-                        + RequestToString(rr.mRequest)
-                        + " exception, possible invalid RIL response", tr);
-
-                If (rr.mResult != NULL) {
-                    AsyncResult->ForMessage(rr.mResult, NULL, tr);
-                    rr.mResult->SendToTarget();
-                }
-                return rr;
-            }
-        }
-
-        If (rr.mRequest == RIL_REQUEST_SHUTDOWN) {
-            // Set RADIO_STATE to RADIO_UNAVAILABLE to continue shutdown process
-            // regardless of error code to continue shutdown procedure.
-            RiljLog("Response to RIL_REQUEST_SHUTDOWN received. Error is " +
-                    error + " Setting Radio State to Unavailable regardless of error.");
-            SetRadioState(RadioState.RADIO_UNAVAILABLE);
-        }
-
-        // Here and below fake RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED, see b/7255789.
-        // This is needed otherwise we don't automatically transition to the main lock
-        // screen when the pin or puk is entered incorrectly.
-        Switch (rr.mRequest) {
-            case RIL_REQUEST_ENTER_SIM_PUK:
-            case RIL_REQUEST_ENTER_SIM_PUK2:
-                If (mIccStatusChangedRegistrants != NULL) {
-                    If (RILJ_LOGD) {
-                        RiljLog("ON enter sim puk fakeSimStatusChanged: reg count="
-                                + mIccStatusChangedRegistrants->Size());
-                    }
-                    mIccStatusChangedRegistrants->NotifyRegistrants();
-                }
-                break;
-        }
-
-        If (error != 0) {
-            Switch (rr.mRequest) {
-                case RIL_REQUEST_ENTER_SIM_PIN:
-                case RIL_REQUEST_ENTER_SIM_PIN2:
-                case RIL_REQUEST_CHANGE_SIM_PIN:
-                case RIL_REQUEST_CHANGE_SIM_PIN2:
-                case RIL_REQUEST_SET_FACILITY_LOCK:
-                    If (mIccStatusChangedRegistrants != NULL) {
-                        If (RILJ_LOGD) {
-                            RiljLog("ON some errors fakeSimStatusChanged: reg count="
-                                    + mIccStatusChangedRegistrants->Size());
-                        }
-                        mIccStatusChangedRegistrants->NotifyRegistrants();
-                    }
-                    break;
-            }
-
-            rr->OnError(error, ret);
-        } else {
-
-            If (RILJ_LOGD) RiljLog(rr->SerialString() + "< " + RequestToString(rr.mRequest)
-                    + " " + RetToString(rr.mRequest, ret));
-
-            If (rr.mResult != NULL) {
-                AsyncResult->ForMessage(rr.mResult, ret, NULL);
-                rr.mResult->SendToTarget();
-            }
-        }
-        return rr;
-    }
-
-    static String
-    RetToString(Int32 req, Object ret) {
-        If (ret == NULL) return "";
-        Switch (req) {
-            // Don't log these return values, for privacy's sake.
-            case RIL_REQUEST_GET_IMSI:
-            case RIL_REQUEST_GET_IMEI:
-            case RIL_REQUEST_GET_IMEISV:
-            case RIL_REQUEST_SIM_OPEN_CHANNEL:
-            case RIL_REQUEST_SIM_TRANSMIT_APDU_CHANNEL:
-
-                If (!RILJ_LOGV) {
-                    // If not versbose logging just return and don't display IMSI and IMEI, IMEISV
-                    return "";
-                }
-        }
-
-        StringBuilder sb;
-        String s;
-        Int32 length;
-        If (ret instanceof Int32[]){
-            Int32[] intArray = (Int32[]) ret;
-            length = intArray.length;
-            sb = new StringBuilder("{");
-            If (length > 0) {
-                Int32 i = 0;
-                sb->Append(intArray[i++]);
-                While ( i < length) {
-                    sb->Append(", ").Append(intArray[i++]);
-                }
-            }
-            sb->Append("}");
-            s = sb->ToString();
-        } else If (ret instanceof String[]) {
-            String[] strings = (String[]) ret;
-            length = strings.length;
-            sb = new StringBuilder("{");
-            If (length > 0) {
-                Int32 i = 0;
-                sb->Append(strings[i++]);
-                While ( i < length) {
-                    sb->Append(", ").Append(strings[i++]);
-                }
-            }
-            sb->Append("}");
-            s = sb->ToString();
-        }else If (req == RIL_REQUEST_GET_CURRENT_CALLS) {
-            ArrayList<DriverCall> calls = (ArrayList<DriverCall>) ret;
-            sb = new StringBuilder(" ");
-            For (DriverCall dc : calls) {
-                sb->Append("[").Append(dc).Append("] ");
-            }
-            s = sb->ToString();
-        } else If (req == RIL_REQUEST_GET_NEIGHBORING_CELL_IDS) {
-            ArrayList<NeighboringCellInfo> cells;
-            cells = (ArrayList<NeighboringCellInfo>) ret;
-            sb = new StringBuilder(" ");
-            For (NeighboringCellInfo cell : cells) {
-                sb->Append(cell).Append(" ");
-            }
-            s = sb->ToString();
-        } else If (req == RIL_REQUEST_GET_HARDWARE_CONFIG) {
-            ArrayList<HardwareConfig> hwcfgs = (ArrayList<HardwareConfig>) ret;
-            sb = new StringBuilder(" ");
-            For (HardwareConfig hwcfg : hwcfgs) {
-                sb->Append("[").Append(hwcfg).Append("] ");
-            }
-            s = sb->ToString();
-        } else {
-            s = ret->ToString();
-        }
-        return s;
-    }
-
-    protected void
-    ProcessUnsolicited (Parcel p) {
-        Int32 response;
-        Object ret;
-
-        response = p->ReadInt();
-
-        try {Switch(response) {
-/*
- cat libs/telephony/ril_unsol_commands.h \
- | egrep "^ *{RIL_" \
- | sed -re 's/\{([^,]+),[^,]+,([^}]+).+/case \1: \2(rr, p); break;/'
-*/
-
-            case RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED: ret =  ResponseVoid(p); break;
-            case RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED: ret =  ResponseVoid(p); break;
-            case RIL_UNSOL_RESPONSE_VOICE_NETWORK_STATE_CHANGED: ret =  ResponseVoid(p); break;
-            case RIL_UNSOL_RESPONSE_NEW_SMS: ret =  ResponseString(p); break;
-            case RIL_UNSOL_RESPONSE_NEW_SMS_STATUS_REPORT: ret =  ResponseString(p); break;
-            case RIL_UNSOL_RESPONSE_NEW_SMS_ON_SIM: ret =  ResponseInts(p); break;
-            case RIL_UNSOL_ON_USSD: ret =  ResponseStrings(p); break;
-            case RIL_UNSOL_NITZ_TIME_RECEIVED: ret =  ResponseString(p); break;
-            case RIL_UNSOL_SIGNAL_STRENGTH: ret = ResponseSignalStrength(p); break;
-            case RIL_UNSOL_DATA_CALL_LIST_CHANGED: ret = ResponseDataCallList(p);break;
-            case RIL_UNSOL_SUPP_SVC_NOTIFICATION: ret = ResponseSuppServiceNotification(p); break;
-            case RIL_UNSOL_STK_SESSION_END: ret = ResponseVoid(p); break;
-            case RIL_UNSOL_STK_PROACTIVE_COMMAND: ret = ResponseString(p); break;
-            case RIL_UNSOL_STK_EVENT_NOTIFY: ret = ResponseString(p); break;
-            case RIL_UNSOL_STK_CALL_SETUP: ret = ResponseInts(p); break;
-            case RIL_UNSOL_SIM_SMS_STORAGE_FULL: ret =  ResponseVoid(p); break;
-            case RIL_UNSOL_SIM_REFRESH: ret =  ResponseSimRefresh(p); break;
-            case RIL_UNSOL_CALL_RING: ret =  ResponseCallRing(p); break;
-            case RIL_UNSOL_RESTRICTED_STATE_CHANGED: ret = ResponseInts(p); break;
-            case RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED:  ret =  ResponseVoid(p); break;
-            case RIL_UNSOL_RESPONSE_CDMA_NEW_SMS:  ret =  ResponseCdmaSms(p); break;
-            case RIL_UNSOL_RESPONSE_NEW_BROADCAST_SMS:  ret =  ResponseRaw(p); break;
-            case RIL_UNSOL_CDMA_RUIM_SMS_STORAGE_FULL:  ret =  ResponseVoid(p); break;
-            case RIL_UNSOL_ENTER_EMERGENCY_CALLBACK_MODE: ret = ResponseVoid(p); break;
-            case RIL_UNSOL_CDMA_CALL_WAITING: ret = ResponseCdmaCallWaiting(p); break;
-            case RIL_UNSOL_CDMA_OTA_PROVISION_STATUS: ret = ResponseInts(p); break;
-            case RIL_UNSOL_CDMA_INFO_REC: ret = ResponseCdmaInformationRecord(p); break;
-            case RIL_UNSOL_OEM_HOOK_RAW: ret = ResponseRaw(p); break;
-            case RIL_UNSOL_RINGBACK_TONE: ret = ResponseInts(p); break;
-            case RIL_UNSOL_RESEND_INCALL_MUTE: ret = ResponseVoid(p); break;
-            case RIL_UNSOL_CDMA_SUBSCRIPTION_SOURCE_CHANGED: ret = ResponseInts(p); break;
-            case RIL_UNSOl_CDMA_PRL_CHANGED: ret = ResponseInts(p); break;
-            case RIL_UNSOL_EXIT_EMERGENCY_CALLBACK_MODE: ret = ResponseVoid(p); break;
-            case RIL_UNSOL_RIL_CONNECTED: ret = ResponseInts(p); break;
-            case RIL_UNSOL_VOICE_RADIO_TECH_CHANGED: ret =  ResponseInts(p); break;
-            case RIL_UNSOL_CELL_INFO_LIST: ret = ResponseCellInfoList(p); break;
-            case RIL_UNSOL_RESPONSE_IMS_NETWORK_STATE_CHANGED: ret =  ResponseVoid(p); break;
-            case RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED: ret =  ResponseInts(p); break;
-            case RIL_UNSOL_SRVCC_STATE_NOTIFY: ret = ResponseInts(p); break;
-            case RIL_UNSOL_HARDWARE_CONFIG_CHANGED: ret = ResponseHardwareConfig(p); break;
-            case RIL_UNSOL_ON_SS: ret =  ResponseSsData(p); break;
-            case RIL_UNSOL_STK_CC_ALPHA_NOTIFY: ret =  ResponseString(p); break;
-            case RIL_UNSOL_STK_SEND_SMS_RESULT: ret = ResponseInts(p); break; // Samsung STK
-
-            default:
-                throw new RuntimeException("Unrecognized unsol response: " + response);
-            //break; (implied)
-        }} Catch (Throwable tr) {
-            Rlog->E(RILJ_LOG_TAG, "Exception processing unsol response: " + response +
-                "Exception:" + tr->ToString());
-            return;
-        }
-
-        Switch(response) {
-            case RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED:
-                /* has bonus radio state Int32 */
-                RadioState newState = GetRadioStateFromInt(p->ReadInt());
-                If (RILJ_LOGD) UnsljLogMore(response, newState->ToString());
-
-                SwitchToRadioState(newState);
-            break;
-            case RIL_UNSOL_RESPONSE_IMS_NETWORK_STATE_CHANGED:
-                If (RILJ_LOGD) UnsljLog(response);
-
-                mImsNetworkStateChangedRegistrants
-                    .NotifyRegistrants(new AsyncResult(NULL, NULL, NULL));
-            break;
-            case RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED:
-                If (RILJ_LOGD) UnsljLog(response);
-
-                mCallStateRegistrants
-                    .NotifyRegistrants(new AsyncResult(NULL, NULL, NULL));
-            break;
-            case RIL_UNSOL_RESPONSE_VOICE_NETWORK_STATE_CHANGED:
-                If (RILJ_LOGD) UnsljLog(response);
-
-                mVoiceNetworkStateRegistrants
-                    .NotifyRegistrants(new AsyncResult(NULL, NULL, NULL));
-            break;
-            case RIL_UNSOL_RESPONSE_NEW_SMS: {
-                If (RILJ_LOGD) UnsljLog(response);
-
-                // FIXME this should move up a layer
-                String a[] = new String[2];
-
-                a[1] = (String)ret;
-
-                SmsMessage sms;
-
-                sms = SmsMessage->NewFromCMT(a);
-                If (mGsmSmsRegistrant != NULL) {
-                    mGsmSmsRegistrant
-                        .NotifyRegistrant(new AsyncResult(NULL, sms, NULL));
-                }
-            break;
-            }
-            case RIL_UNSOL_RESPONSE_NEW_SMS_STATUS_REPORT:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mSmsStatusRegistrant != NULL) {
-                    mSmsStatusRegistrant->NotifyRegistrant(
-                            new AsyncResult(NULL, ret, NULL));
-                }
-            break;
-            case RIL_UNSOL_RESPONSE_NEW_SMS_ON_SIM:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                Int32[] smsIndex = (Int32[])ret;
-
-                If(smsIndex.length == 1) {
-                    If (mSmsOnSimRegistrant != NULL) {
-                        mSmsOnSimRegistrant.
-                                NotifyRegistrant(new AsyncResult(NULL, smsIndex, NULL));
-                    }
-                } else {
-                    If (RILJ_LOGD) RiljLog(" NEW_SMS_ON_SIM ERROR with wrong length "
-                            + smsIndex.length);
-                }
-            break;
-            case RIL_UNSOL_ON_USSD:
-                String[] resp = (String[])ret;
-
-                If (resp.length < 2) {
-                    resp = new String[2];
-                    resp[0] = ((String[])ret)[0];
-                    resp[1] = NULL;
-                }
-                If (RILJ_LOGD) UnsljLogMore(response, resp[0]);
-                If (mUSSDRegistrant != NULL) {
-                    mUSSDRegistrant->NotifyRegistrant(
-                        new AsyncResult (NULL, resp, NULL));
-                }
-            break;
-            case RIL_UNSOL_NITZ_TIME_RECEIVED:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                // has bonus Int64 containing milliseconds since boot that the NITZ
-                // time was received
-                Int64 nitzReceiveTime = p->ReadLong();
-
-                Object[] result = new Object[2];
-
-                result[0] = ret;
-                result[1] = Long->ValueOf(nitzReceiveTime);
-
-                Boolean ignoreNitz = SystemProperties->GetBoolean(
-                        TelephonyProperties.PROPERTY_IGNORE_NITZ, FALSE);
-
-                If (ignoreNitz) {
-                    If (RILJ_LOGD) RiljLog("ignoring UNSOL_NITZ_TIME_RECEIVED");
-                } else {
-                    If (mNITZTimeRegistrant != NULL) {
-
-                        mNITZTimeRegistrant
-                            .NotifyRegistrant(new AsyncResult (NULL, result, NULL));
-                    } else {
-                        // in case NITZ time registrant isnt registered yet
-                        mLastNITZTimeInfo = result;
-                    }
-                }
-            break;
-
-            case RIL_UNSOL_SIGNAL_STRENGTH:
-                // Note this is set to "verbose" because it happens
-                // frequently
-                If (RILJ_LOGV) UnsljLogvRet(response, ret);
-
-                If (mSignalStrengthRegistrant != NULL) {
-                    mSignalStrengthRegistrant->NotifyRegistrant(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-            break;
-            case RIL_UNSOL_DATA_CALL_LIST_CHANGED:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                Boolean oldRil = NeedsOldRilFeature("skipbrokendatacall");
-                If (oldRil && "IP".Equals(((ArrayList<DataCallResponse>)ret).Get(0).type))
-                    break;
-
-                mDataNetworkStateRegistrants->NotifyRegistrants(new AsyncResult(NULL, ret, NULL));
-            break;
-
-            case RIL_UNSOL_SUPP_SVC_NOTIFICATION:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mSsnRegistrant != NULL) {
-                    mSsnRegistrant->NotifyRegistrant(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_STK_SESSION_END:
-                If (RILJ_LOGD) UnsljLog(response);
-
-                If (mCatSessionEndRegistrant != NULL) {
-                    mCatSessionEndRegistrant->NotifyRegistrant(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_STK_PROACTIVE_COMMAND:
-                If (RILJ_LOGD) UnsljLog(response);
-
-                If (mCatProCmdRegistrant != NULL) {
-                    mCatProCmdRegistrant->NotifyRegistrant(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_STK_EVENT_NOTIFY:
-                If (RILJ_LOGD) UnsljLog(response);
-
-                If (mCatEventRegistrant != NULL) {
-                    mCatEventRegistrant->NotifyRegistrant(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_STK_CALL_SETUP:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mCatCallSetUpRegistrant != NULL) {
-                    mCatCallSetUpRegistrant->NotifyRegistrant(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_SIM_SMS_STORAGE_FULL:
-                If (RILJ_LOGD) UnsljLog(response);
-
-                If (mIccSmsFullRegistrant != NULL) {
-                    mIccSmsFullRegistrant->NotifyRegistrant();
-                }
-                break;
-
-            case RIL_UNSOL_SIM_REFRESH:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mIccRefreshRegistrants != NULL) {
-                    mIccRefreshRegistrants->NotifyRegistrants(
-                            new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_CALL_RING:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mRingRegistrant != NULL) {
-                    mRingRegistrant->NotifyRegistrant(
-                            new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_RESTRICTED_STATE_CHANGED:
-                If (RILJ_LOGD) UnsljLogvRet(response, ret);
-                If (mRestrictedStateRegistrant != NULL) {
-                    mRestrictedStateRegistrant->NotifyRegistrant(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED:
-                If (RILJ_LOGD) UnsljLog(response);
-
-                If (mIccStatusChangedRegistrants != NULL) {
-                    mIccStatusChangedRegistrants->NotifyRegistrants();
-                }
-                break;
-
-            case RIL_UNSOL_RESPONSE_CDMA_NEW_SMS:
-                If (RILJ_LOGD) UnsljLog(response);
-
-                SmsMessage sms = (SmsMessage) ret;
-
-                If (mCdmaSmsRegistrant != NULL) {
-                    mCdmaSmsRegistrant
-                        .NotifyRegistrant(new AsyncResult(NULL, sms, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_RESPONSE_NEW_BROADCAST_SMS:
-                If (RILJ_LOGD) UnsljLog(response);
-
-                If (mGsmBroadcastSmsRegistrant != NULL) {
-                    mGsmBroadcastSmsRegistrant
-                        .NotifyRegistrant(new AsyncResult(NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_CDMA_RUIM_SMS_STORAGE_FULL:
-                If (RILJ_LOGD) UnsljLog(response);
-
-                If (mIccSmsFullRegistrant != NULL) {
-                    mIccSmsFullRegistrant->NotifyRegistrant();
-                }
-                break;
-
-            case RIL_UNSOL_ENTER_EMERGENCY_CALLBACK_MODE:
-                If (RILJ_LOGD) UnsljLog(response);
-
-                If (mEmergencyCallbackModeRegistrant != NULL) {
-                    mEmergencyCallbackModeRegistrant->NotifyRegistrant();
-                }
-                break;
-
-            case RIL_UNSOL_CDMA_CALL_WAITING:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mCallWaitingInfoRegistrants != NULL) {
-                    mCallWaitingInfoRegistrants->NotifyRegistrants(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_CDMA_OTA_PROVISION_STATUS:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mOtaProvisionRegistrants != NULL) {
-                    mOtaProvisionRegistrants->NotifyRegistrants(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_CDMA_INFO_REC:
-                ArrayList<CdmaInformationRecords> listInfoRecs;
-
-                try {
-                    listInfoRecs = (ArrayList<CdmaInformationRecords>)ret;
-                } Catch (ClassCastException e) {
-                    Rlog->E(RILJ_LOG_TAG, "Unexpected exception casting to listInfoRecs", e);
-                    break;
-                }
-
-                For (CdmaInformationRecords rec : listInfoRecs) {
-                    If (RILJ_LOGD) UnsljLogRet(response, rec);
-                    NotifyRegistrantsCdmaInfoRec(rec);
-                }
-                break;
-
-            case RIL_UNSOL_OEM_HOOK_RAW:
-                If (RILJ_LOGD) UnsljLogvRet(response, IccUtils->BytesToHexString((Byte[]) ret));
-                ByteBuffer oemHookResponse = ByteBuffer->Wrap((Byte[]) ret);
-                oemHookResponse->Order(ByteOrder->NativeOrder());
-                If (IsQcUnsolOemHookResp(oemHookResponse)) {
-                    Rlog->D(RILJ_LOG_TAG, "OEM ID check Passed");
-                    ProcessUnsolOemhookResponse(oemHookResponse);
-                } else If (mUnsolOemHookRawRegistrant != NULL) {
-                    Rlog->D(RILJ_LOG_TAG, "External OEM message, to be notified");
-                    mUnsolOemHookRawRegistrant->NotifyRegistrant(new AsyncResult(NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_RINGBACK_TONE:
-                If (RILJ_LOGD) UnsljLogvRet(response, ret);
-                If (mRingbackToneRegistrants != NULL) {
-                    Boolean playtone = (((Int32[])ret)[0] == 1);
-                    mRingbackToneRegistrants->NotifyRegistrants(
-                                        new AsyncResult (NULL, playtone, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_RESEND_INCALL_MUTE:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mResendIncallMuteRegistrants != NULL) {
-                    mResendIncallMuteRegistrants->NotifyRegistrants(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_VOICE_RADIO_TECH_CHANGED:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mVoiceRadioTechChangedRegistrants != NULL) {
-                    mVoiceRadioTechChangedRegistrants->NotifyRegistrants(
-                            new AsyncResult(NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_CDMA_SUBSCRIPTION_SOURCE_CHANGED:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mCdmaSubscriptionChangedRegistrants != NULL) {
-                    mCdmaSubscriptionChangedRegistrants->NotifyRegistrants(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOl_CDMA_PRL_CHANGED:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mCdmaPrlChangedRegistrants != NULL) {
-                    mCdmaPrlChangedRegistrants->NotifyRegistrants(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_EXIT_EMERGENCY_CALLBACK_MODE:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mExitEmergencyCallbackModeRegistrants != NULL) {
-                    mExitEmergencyCallbackModeRegistrants->NotifyRegistrants(
-                                        new AsyncResult (NULL, NULL, NULL));
-                }
-                break;
-
-            case RIL_UNSOL_RIL_CONNECTED: {
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                // Initial conditions
-                SetRadioPower(FALSE, NULL);
-                SetPreferredNetworkType(mPreferredNetworkType, NULL);
-                SetCdmaSubscriptionSource(mCdmaSubscription, NULL);
-                SetCellInfoListRate(Integer.MAX_VALUE, NULL);
-                NotifyRegistrantsRilConnectionChanged(((Int32[])ret)[0]);
-                break;
-            }
-            case RIL_UNSOL_CELL_INFO_LIST: {
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mRilCellInfoListRegistrants != NULL) {
-                    mRilCellInfoListRegistrants->NotifyRegistrants(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-            }
-            case RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED: {
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mSubscriptionStatusRegistrants != NULL) {
-                    mSubscriptionStatusRegistrants->NotifyRegistrants(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-            }
-            case RIL_UNSOL_SRVCC_STATE_NOTIFY: {
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mSrvccStateRegistrants != NULL) {
-                    mSrvccStateRegistrants
-                            .NotifyRegistrants(new AsyncResult(NULL, ret, NULL));
-                }
-                break;
-            }
-            case RIL_UNSOL_HARDWARE_CONFIG_CHANGED:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mHardwareConfigChangeRegistrants != NULL) {
-                    mHardwareConfigChangeRegistrants->NotifyRegistrants(
-                                             new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-            case RIL_UNSOL_ON_SS:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mSsRegistrant != NULL) {
-                    mSsRegistrant->NotifyRegistrant(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-            case RIL_UNSOL_STK_CC_ALPHA_NOTIFY:
-                If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                If (mCatCcAlphaRegistrant != NULL) {
-                    mCatCcAlphaRegistrant->NotifyRegistrant(
-                                        new AsyncResult (NULL, ret, NULL));
-                }
-                break;
-            // Samsung STK
-            case RIL_UNSOL_STK_SEND_SMS_RESULT:
-                If (Resources->GetSystem().
-                        GetBoolean(R.bool.config_samsung_stk)) {
-                    If (RILJ_LOGD) UnsljLogRet(response, ret);
-
-                    If (mCatSendSmsResultRegistrant != NULL) {
-                        mCatSendSmsResultRegistrant->NotifyRegistrant(
-                                new AsyncResult (NULL, ret, NULL));
-                    }
-                }
-                break;
-        }
-    }
-
-    /**
-     * Notifiy all registrants that the ril has connected or disconnected.
-     *
-     * @param rilVer is the version of the ril or -1 if disconnected.
-     */
-    protected void NotifyRegistrantsRilConnectionChanged(Int32 rilVer) {
-        mRilVersion = rilVer;
-        If (mRilConnectedRegistrants != NULL) {
-            mRilConnectedRegistrants->NotifyRegistrants(
-                                new AsyncResult (NULL, new Integer(rilVer), NULL));
-        }
-    }
-
-    private Boolean IsQcUnsolOemHookResp(ByteBuffer oemHookResponse) {
-
-        /* Check OEM ID in UnsolOemHook response */
-        If (oemHookResponse->Capacity() < mHeaderSize) {
-            /*
-             * size of UnsolOemHook message is less than expected, considered as
-             * External OEM's message
-             */
-            Rlog->D(RILJ_LOG_TAG,
-                    "RIL_UNSOL_OEM_HOOK_RAW data size is " + oemHookResponse->Capacity());
-            return FALSE;
-        } else {
-            Byte[] oemIdBytes = new Byte[OEM_IDENTIFIER->Length()];
-            oemHookResponse->Get(oemIdBytes);
-            String oemIdString = new String(oemIdBytes);
-            Rlog->D(RILJ_LOG_TAG, "Oem ID in RIL_UNSOL_OEM_HOOK_RAW is " + oemIdString);
-            If (!oemIdString->Equals(OEM_IDENTIFIER)) {
-                /* OEM ID not matched, considered as External OEM's message */
-                return FALSE;
-            }
-        }
+}
+
+Boolean RIL::ClearWakeLock()
+{
+    // synchronized (mWakeLock)
+    {
+        AutoLock lock(wakeLock);
+        Boolean bHeld = FALSE;
+        mWakeLock->IsHeld(&bHeld);
+        if (mWakeLockCount == 0 && bHeld == FALSE) return FALSE;
+        // Rlog.d(RILJ_LOG_TAG, "NOTE: mWakeLockCount is " + mWakeLockCount + "at time of clearing");
+        mWakeLockCount = 0;
+        mWakeLock->Release();
+        mSender->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
         return TRUE;
     }
+}
 
-    final public class UnsolOemHookBuffer {
-        private Int32 mRilInstance;
-        private Byte[] mData;
+void RIL::Send(
+    /* [in] */ RILRequest* rr)
+{
+    AutoPtr<IMessage> msg;
 
-        public UnsolOemHookBuffer(Int32 rilInstance, Byte[] data) {
-            mRilInstance = rilInstance;
-            mData = data;
+    if (mSocket == NULL) {
+        rr->OnError(IRILConstants::RADIO_NOT_AVAILABLE, NULL);
+        rr->Release();
+        return;
+    }
+
+    mSender->ObtainMessage(EVENT_SEND, (IInterface*)(IObject*)rr, (IMessage**)&msg);
+
+    AcquireWakeLock();
+
+    msg->SendToTarget();
+}
+
+void RIL::ProcessResponse(
+    /* [in] */ IParcel* p)
+{
+    Int32 type = 0;
+
+    p->ReadInt32(&type);
+
+    if (type == RESPONSE_UNSOLICITED) {
+        ProcessUnsolicited(p);
+    }
+    else if (type == RESPONSE_SOLICITED) {
+        AutoPtr<RILRequest> rr = ProcessSolicited(p);
+        if (rr != NULL) {
+            rr->Release();
+            DecrementWakeLock();
+        }
+    }
+}
+
+void RIL::ClearRequestList(
+    /* [in] */ Int32 error,
+    /* [in] */ Boolean loggable)
+{
+    AutoPtr<RILRequest> rr;
+    // synchronized (mRequestList)
+    {
+        AutoLock lock(listLock);
+        Int32 count = 0;
+        mRequestList->GetSize(&count);
+        if (RILJ_LOGD && loggable) {
+            // Rlog.d(RILJ_LOG_TAG, "clearRequestList " +
+            //         " mWakeLockCount=" + mWakeLockCount +
+            //         " mRequestList=" + count);
         }
 
-        public Int32 GetRilInstance() {
-            return mRilInstance;
+        for (Int32 i = 0; i < count ; i++) {
+            AutoPtr<IInterface> val;
+            mRequestList->ValueAt(i, (IInterface**)&val);
+            rr = (RILRequest*)IObject::Probe(val);
+            if (RILJ_LOGD && loggable) {
+                // Rlog.d(RILJ_LOG_TAG, i + ": [" + rr.mSerial + "] " +
+                //         requestToString(rr.mRequest));
+            }
+            rr->OnError(error, NULL);
+            rr->Release();
+            DecrementWakeLock();
         }
+        mRequestList->Clear();
+    }
+}
 
-        public Byte[] GetUnsolOemHookBuffer() {
-            return mData;
+AutoPtr<RILRequest> RIL::FindAndRemoveRequestFromList(
+    /* [in] */ Int32 serial)
+{
+    AutoPtr<RILRequest> rr = NULL;
+    // synchronized (mRequestList)
+    {
+        AutoLock lock(listLock);
+        AutoPtr<IInterface> p;
+        mRequestList->Get(serial, (IInterface**)&p);
+        rr = (RILRequest*)IObject::Probe(p);
+        if (rr != NULL) {
+            mRequestList->Remove(serial);
         }
     }
 
-    private void ProcessUnsolOemhookResponse(ByteBuffer oemHookResponse) {
-        Int32 responseId = 0, responseSize = 0, responseVoiceId = 0;
+    return rr;
+}
 
-        responseId = oemHookResponse->GetInt();
-        Rlog->D(RILJ_LOG_TAG, "Response ID in RIL_UNSOL_OEM_HOOK_RAW is " + responseId);
+AutoPtr<RILRequest> RIL::ProcessSolicited(
+    /* [in] */ IParcel* p)
+{
+    Int32 serial = 0, error = 0;
+    // Boolean found = FALSE;
 
-        responseSize = oemHookResponse->GetInt();
-        If (responseSize < 0) {
-            Rlog->E(RILJ_LOG_TAG, "Response Size is Invalid " + responseSize);
-            return;
-        }
+    p->ReadInt32(&serial);
+    p->ReadInt32(&error);
 
-        Byte[] responseData = new Byte[responseSize];
-        If (oemHookResponse->Remaining() == responseSize) {
-            oemHookResponse->Get(responseData, 0, responseSize);
-        } else {
-            Rlog->E(RILJ_LOG_TAG, "Response Size(" + responseSize
-                    + ") doesnot match remaining Bytes(" +
-                    oemHookResponse->Remaining() + ") in the buffer. So, don't process further");
-            return;
-        }
+    AutoPtr<RILRequest> rr;
 
-        Switch (responseId) {
-            case OEMHOOK_UNSOL_WWAN_IWLAN_COEXIST:
-                NotifyWwanIwlanCoexist(responseData);
-                break;
+    rr = FindAndRemoveRequestFromList(serial);
 
-            case OEMHOOK_UNSOL_SIM_REFRESH:
-                NotifySimRefresh(responseData);
-                break;
-
-            case QCRIL_EVT_HOOK_UNSOL_MODEM_CAPABILITY:
-                Rlog->D(RILJ_LOG_TAG, "QCRIL_EVT_HOOK_UNSOL_MODEM_CAPABILITY = mInstanceId"
-                        + mInstanceId);
-                NotifyModemCap(responseData, mInstanceId);
-                break;
-
-            default:
-                Rlog->D(RILJ_LOG_TAG, "Response ID " + responseId
-                        + " is not served in this process.");
-                break;
-        }
-    }
-
-    /** Notify registrants of WWAN coexistence event. */
-    protected void NotifyWwanIwlanCoexist(Byte[] data) {
-        AsyncResult ar = new AsyncResult(NULL, data, NULL);
-        mWwanIwlanCoexistenceRegistrants->NotifyRegistrants(ar);
-        Rlog->D(RILJ_LOG_TAG, "WWAN, IWLAN coexistence notified to registrants");
-    }
-
-    /** Notify registrants of SIM_REFRESH event. */
-    protected void NotifySimRefresh(Byte[] data) {
-        Int32 len = data.length;
-        Byte[] userdata = new Byte[1 + len];
-        System->Arraycopy(data, 0, userdata, 0, len);
-        //Add slot id in SIM_REFRESH event to notify framework: IccRecords.
-        userdata[len] = (mInstanceId == NULL) ? 0 : (Byte)(mInstanceId & 0xFF);
-
-        AsyncResult ar = new AsyncResult(NULL, userdata, NULL);
-        mSimRefreshRegistrants->NotifyRegistrants(ar);
-        Rlog->D(RILJ_LOG_TAG, "SIM_REFRESH notified to registrants");
-    }
-
-    /** Notify registrants of MODEM_CAPABILITY event. */
-    protected void NotifyModemCap(Byte[] data, Integer phoneId) {
-        UnsolOemHookBuffer buffer = new UnsolOemHookBuffer(phoneId, data);
-
-        //Had notifyRegistrants not discarded userObj, we could have easily
-        //passed the subId as ar.userObj.
-        AsyncResult ar = new AsyncResult(NULL, buffer, NULL);
-
-        mModemCapRegistrants->NotifyRegistrants(ar);
-        Rlog->D(RILJ_LOG_TAG, "MODEM_CAPABILITY on phone=" + phoneId + " notified to registrants");
-    }
-
-    protected Object
-    ResponseInts(Parcel p) {
-        Int32 numInts;
-        Int32 response[];
-
-        numInts = p->ReadInt();
-
-        response = new Int32[numInts];
-
-        For (Int32 i = 0 ; i < numInts ; i++) {
-            response[i] = p->ReadInt();
-        }
-
-        return response;
-    }
-
-
-    protected Object
-    ResponseVoid(Parcel p) {
+    if (rr == NULL) {
+        // Rlog.w(RILJ_LOG_TAG, "Unexpected solicited response! sn: "
+        //                 + serial + " error: " + error);
         return NULL;
     }
 
-    protected Object
-    ResponseCallForward(Parcel p) {
-        Int32 numInfos;
-        CallForwardInfo infos[];
+    AutoPtr<IInterface> ret;
 
-        numInfos = p->ReadInt();
+    assert(0 && "TODO");
+    // if (error == 0 || p->DataAvail() > 0) {
+        // either command succeeds or command fails but with data payload
+        // try {
+        switch (rr->mRequest) {
+            /*
+            cat libs/telephony/ril_commands.h \
+            | egrep "^ *{RIL_" \
+            | sed -re 's/\{([^,]+),[^,]+,([^}]+).+/case \1: ret = \2(p); break;/'
+             */
+            case IRILConstants::RIL_REQUEST_GET_SIM_STATUS: ret = ResponseIccCardStatus(p); break;
+            case IRILConstants::RIL_REQUEST_ENTER_SIM_PIN: ret = ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_ENTER_SIM_PUK: ret = ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_ENTER_SIM_PIN2: ret = ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_ENTER_SIM_PUK2: ret = ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_CHANGE_SIM_PIN: ret = ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_CHANGE_SIM_PIN2: ret = ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_ENTER_DEPERSONALIZATION_CODE: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_GET_CURRENT_CALLS: ret =  ResponseCallList(p); break;
+            case IRILConstants::RIL_REQUEST_DIAL: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_GET_IMSI: ret =  ResponseString(p); break;
+            case IRILConstants::RIL_REQUEST_HANGUP: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_HANGUP_WAITING_OR_BACKGROUND: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_HANGUP_FOREGROUND_RESUME_BACKGROUND: {
+                Boolean bGetAndSet = FALSE;
+                mTestingEmergencyCall->GetAndSet(FALSE, &bGetAndSet);
+                if (bGetAndSet) {
+                    if (mEmergencyCallbackModeRegistrant != NULL) {
+                        RiljLog(String("testing emergency call, notify ECM Registrants"));
+                        mEmergencyCallbackModeRegistrant->NotifyRegistrant();
+                    }
+                }
+                ret = ResponseVoid(p);
+                break;
+            }
+            case IRILConstants::RIL_REQUEST_SWITCH_WAITING_OR_HOLDING_AND_ACTIVE: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_CONFERENCE: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_UDUB: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_LAST_CALL_FAIL_CAUSE: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_SIGNAL_STRENGTH: ret =  ResponseSignalStrength(p); break;
+            case IRILConstants::RIL_REQUEST_VOICE_REGISTRATION_STATE: ret =  ResponseStrings(p); break;
+            case IRILConstants::RIL_REQUEST_DATA_REGISTRATION_STATE: ret =  ResponseStrings(p); break;
+            case IRILConstants::RIL_REQUEST_OPERATOR: ret =  ResponseStrings(p); break;
+            case IRILConstants::RIL_REQUEST_RADIO_POWER: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_DTMF: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_SEND_SMS: ret =  ResponseSMS(p); break;
+            case IRILConstants::RIL_REQUEST_SEND_SMS_EXPECT_MORE: ret =  ResponseSMS(p); break;
+            case IRILConstants::RIL_REQUEST_SETUP_DATA_CALL: ret =  ResponseSetupDataCall(p); break;
+            case IRILConstants::RIL_REQUEST_SIM_IO: ret =  ResponseICC_IO(p); break;
+            case IRILConstants::RIL_REQUEST_SEND_USSD: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_CANCEL_USSD: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_GET_CLIR: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_SET_CLIR: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_QUERY_CALL_FORWARD_STATUS: ret =  ResponseCallForward(p); break;
+            case IRILConstants::RIL_REQUEST_SET_CALL_FORWARD: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_QUERY_CALL_WAITING: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_SET_CALL_WAITING: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_SMS_ACKNOWLEDGE: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_GET_IMEI: ret =  ResponseString(p); break;
+            case IRILConstants::RIL_REQUEST_GET_IMEISV: ret =  ResponseString(p); break;
+            case IRILConstants::RIL_REQUEST_ANSWER: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_DEACTIVATE_DATA_CALL: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_QUERY_FACILITY_LOCK: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_SET_FACILITY_LOCK: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_CHANGE_BARRING_PASSWORD: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_QUERY_NETWORK_SELECTION_MODE: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_SET_NETWORK_SELECTION_AUTOMATIC: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_SET_NETWORK_SELECTION_MANUAL: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_QUERY_AVAILABLE_NETWORKS : ret =  ResponseOperatorInfos(p); break;
+            case IRILConstants::RIL_REQUEST_DTMF_START: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_DTMF_STOP: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_BASEBAND_VERSION: ret =  ResponseString(p); break;
+            case IRILConstants::RIL_REQUEST_SEPARATE_CONNECTION: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_SET_MUTE: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_GET_MUTE: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_QUERY_CLIP: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_LAST_DATA_CALL_FAIL_CAUSE: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_DATA_CALL_LIST: ret =  ResponseDataCallList(p); break;
+            case IRILConstants::RIL_REQUEST_RESET_RADIO: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_OEM_HOOK_RAW: ret =  ResponseRaw(p); break;
+            case IRILConstants::RIL_REQUEST_OEM_HOOK_STRINGS: ret =  ResponseStrings(p); break;
+            case IRILConstants::RIL_REQUEST_SCREEN_STATE: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_SET_SUPP_SVC_NOTIFICATION: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_WRITE_SMS_TO_SIM: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_DELETE_SMS_ON_SIM: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_SET_BAND_MODE: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_QUERY_AVAILABLE_BAND_MODE: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_STK_GET_PROFILE: ret =  ResponseString(p); break;
+            case IRILConstants::RIL_REQUEST_STK_SET_PROFILE: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_STK_SEND_ENVELOPE_COMMAND: ret =  ResponseString(p); break;
+            case IRILConstants::RIL_REQUEST_STK_SEND_TERMINAL_RESPONSE: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_STK_HANDLE_CALL_SETUP_REQUESTED_FROM_SIM: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_EXPLICIT_CALL_TRANSFER: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_GET_PREFERRED_NETWORK_TYPE: ret =  ResponseGetPreferredNetworkType(p); break;
+            case IRILConstants::RIL_REQUEST_GET_NEIGHBORING_CELL_IDS: ret = ResponseCellList(p); break;
+            case IRILConstants::RIL_REQUEST_SET_LOCATION_UPDATES: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_SET_ROAMING_PREFERENCE: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_QUERY_ROAMING_PREFERENCE: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_SET_TTY_MODE: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_QUERY_TTY_MODE: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_SET_PREFERRED_VOICE_PRIVACY_MODE: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_QUERY_PREFERRED_VOICE_PRIVACY_MODE: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_FLASH: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_BURST_DTMF: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_SEND_SMS: ret =  ResponseSMS(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_GSM_GET_BROADCAST_CONFIG: ret =  ResponseGmsBroadcastConfig(p); break;
+            case IRILConstants::RIL_REQUEST_GSM_SET_BROADCAST_CONFIG: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_GSM_BROADCAST_ACTIVATION: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG: ret =  ResponseCdmaBroadcastConfig(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_BROADCAST_ACTIVATION: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_VALIDATE_AND_WRITE_AKEY: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_SUBSCRIPTION: ret =  ResponseStrings(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_DELETE_SMS_ON_RUIM: ret =  ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_DEVICE_IDENTITY: ret =  ResponseStrings(p); break;
+            case IRILConstants::RIL_REQUEST_GET_SMSC_ADDRESS: ret = ResponseString(p); break;
+            case IRILConstants::RIL_REQUEST_SET_SMSC_ADDRESS: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_EXIT_EMERGENCY_CALLBACK_MODE: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_REPORT_SMS_MEMORY_STATUS: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_CDMA_GET_SUBSCRIPTION_SOURCE: ret =  ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_GET_DATA_CALL_PROFILE: ret =  ResponseGetDataCallProfile(p); break;
+            case IRILConstants::RIL_REQUEST_ISIM_AUTHENTICATION: ret =  ResponseString(p); break;
+            case IRILConstants::RIL_REQUEST_ACKNOWLEDGE_INCOMING_GSM_SMS_WITH_PDU: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_STK_SEND_ENVELOPE_WITH_STATUS: ret = ResponseICC_IO(p); break;
+            case IRILConstants::RIL_REQUEST_VOICE_RADIO_TECH: ret = ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_GET_CELL_INFO_LIST: ret = ResponseCellInfoList(p); break;
+            case IRILConstants::RIL_REQUEST_SET_UNSOL_CELL_INFO_LIST_RATE: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_SET_INITIAL_ATTACH_APN: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_SET_DATA_PROFILE: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_IMS_REGISTRATION_STATE: ret = ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_IMS_SEND_SMS: ret =  ResponseSMS(p); break;
+            case IRILConstants::RIL_REQUEST_SIM_TRANSMIT_APDU_BASIC: ret =  ResponseICC_IO(p); break;
+            case IRILConstants::RIL_REQUEST_SIM_OPEN_CHANNEL: ret  = ResponseInts(p); break;
+            case IRILConstants::RIL_REQUEST_SIM_CLOSE_CHANNEL: ret  = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_SIM_TRANSMIT_APDU_CHANNEL: ret = ResponseICC_IO(p); break;
+            case IRILConstants::RIL_REQUEST_SIM_GET_ATR: ret = ResponseString(p); break;
+            case IRILConstants::RIL_REQUEST_NV_READ_ITEM: ret = ResponseString(p); break;
+            case IRILConstants::RIL_REQUEST_NV_WRITE_ITEM: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_NV_WRITE_CDMA_PRL: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_NV_RESET_CONFIG: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_SET_UICC_SUBSCRIPTION: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_ALLOW_DATA: ret = ResponseVoid(p); break;
+            case IRILConstants::RIL_REQUEST_GET_HARDWARE_CONFIG: ret = ResponseHardwareConfig(p); break;
+            case IRILConstants::RIL_REQUEST_SIM_AUTHENTICATION: ret =  ResponseICC_IOBase64(p); break;
+            case IRILConstants::RIL_REQUEST_SHUTDOWN: ret = ResponseVoid(p); break;
+            default:
+                // throw new RuntimeException("Unrecognized solicited response: " + rr.mRequest);
+            break;
+        }
+        // } catch (Throwable tr) {
+        //     // Exceptions here usually mean invalid RIL responses
 
-        infos = new CallForwardInfo[numInfos];
+        //     Rlog.w(RILJ_LOG_TAG, rr.serialString() + "< "
+        //             + requestToString(rr.mRequest)
+        //             + " exception, possible invalid RIL response", tr);
 
-        For (Int32 i = 0 ; i < numInfos ; i++) {
-            infos[i] = new CallForwardInfo();
+        //     if (rr.mResult != NULL) {
+        //         AsyncResult.forMessage(rr.mResult, NULL, tr);
+        //         rr.mResult.sendToTarget();
+        //     }
+        //     return rr;
+        // }
+    // }
 
-            infos[i].status = p->ReadInt();
-            infos[i].reason = p->ReadInt();
-            infos[i].serviceClass = p->ReadInt();
-            infos[i].toa = p->ReadInt();
-            infos[i].number = p->ReadString();
-            infos[i].timeSeconds = p->ReadInt();
+    if (rr->mRequest == IRILConstants::RIL_REQUEST_SHUTDOWN) {
+        // Set RADIO_STATE to RADIO_UNAVAILABLE to continue shutdown process
+        // regardless of error code to continue shutdown procedure.
+        String str("Response to RIL_REQUEST_SHUTDOWN received. Error is ");
+        str += error;
+        str += " Setting Radio State to Unavailable regardless of error.";
+        RiljLog(str);
+        SetRadioState(RADIO_UNAVAILABLE);
+    }
+
+    // Here and below fake RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED, see b/7255789.
+    // This is needed otherwise we don't automatically transition to the main lock
+    // screen when the pin or puk is entered incorrectly.
+    switch (rr->mRequest) {
+        case IRILConstants::RIL_REQUEST_ENTER_SIM_PUK:
+        case IRILConstants::RIL_REQUEST_ENTER_SIM_PUK2:
+            if (mIccStatusChangedRegistrants != NULL) {
+                if (RILJ_LOGD) {
+                    String str("ON enter sim puk fakeSimStatusChanged: reg count=");
+                    str += mIccStatusChangedRegistrants->GetSize();
+                    RiljLog(str);
+                }
+                mIccStatusChangedRegistrants->NotifyRegistrants();
+            }
+            break;
+    }
+
+    if (error != 0) {
+        switch (rr->mRequest) {
+            case IRILConstants::RIL_REQUEST_ENTER_SIM_PIN:
+            case IRILConstants::RIL_REQUEST_ENTER_SIM_PIN2:
+            case IRILConstants::RIL_REQUEST_CHANGE_SIM_PIN:
+            case IRILConstants::RIL_REQUEST_CHANGE_SIM_PIN2:
+            case IRILConstants::RIL_REQUEST_SET_FACILITY_LOCK:
+                if (mIccStatusChangedRegistrants != NULL) {
+                    if (RILJ_LOGD) {
+                        String str("ON some errors fakeSimStatusChanged: reg count=");
+                        str += mIccStatusChangedRegistrants->GetSize();
+                        RiljLog(str);
+                    }
+                    mIccStatusChangedRegistrants->NotifyRegistrants();
+                }
+                break;
         }
 
-        return infos;
+        rr->OnError(error, ret);
     }
+    else {
 
-    protected Object
-    ResponseSuppServiceNotification(Parcel p) {
-        SuppServiceNotification notification = new SuppServiceNotification();
-
-        notification.notificationType = p->ReadInt();
-        notification.code = p->ReadInt();
-        notification.index = p->ReadInt();
-        notification.type = p->ReadInt();
-        notification.number = p->ReadString();
-
-        return notification;
-    }
-
-    protected Object
-    ResponseCdmaSms(Parcel p) {
-        SmsMessage sms;
-        sms = SmsMessage->NewFromParcel(p);
-
-        return sms;
-    }
-
-    protected Object
-    ResponseString(Parcel p) {
-        String response;
-
-        response = p->ReadString();
-
-        return response;
-    }
-
-    protected Object
-    ResponseStrings(Parcel p) {
-        Int32 num;
-        String response[];
-
-        response = p->ReadStringArray();
-
-        return response;
-    }
-
-    protected Object
-    ResponseRaw(Parcel p) {
-        Int32 num;
-        Byte response[];
-
-        response = p->CreateByteArray();
-
-        return response;
-    }
-
-    protected Object
-    ResponseSMS(Parcel p) {
-        Int32 messageRef, errorCode;
-        String ackPDU;
-
-        messageRef = p->ReadInt();
-        ackPDU = p->ReadString();
-        errorCode = p->ReadInt();
-
-        SmsResponse response = new SmsResponse(messageRef, ackPDU, errorCode);
-
-        return response;
-    }
-
-
-    protected Object
-    ResponseICC_IO(Parcel p) {
-        Int32 sw1, sw2;
-        Message ret;
-
-        sw1 = p->ReadInt();
-        sw2 = p->ReadInt();
-
-        String s = p->ReadString();
-
-        If (RILJ_LOGV) RiljLog("< iccIO: "
-                + " 0x" + Integer->ToHexString(sw1)
-                + " 0x" + Integer->ToHexString(sw2) + " "
-                + s);
-
-        return new IccIoResult(sw1, sw2, s);
-    }
-
-    private Object
-    ResponseICC_IOBase64(Parcel p) {
-        Int32 sw1, sw2;
-        Message ret;
-
-        sw1 = p->ReadInt();
-        sw2 = p->ReadInt();
-
-        String s = p->ReadString();
-
-        If (RILJ_LOGV) RiljLog("< iccIO: "
-                + " 0x" + Integer->ToHexString(sw1)
-                + " 0x" + Integer->ToHexString(sw2) + " "
-                + s);
-
-
-        return new IccIoResult(sw1, sw2, android.util.Base64->Decode(s, android.util.Base64.DEFAULT));
-    }
-
-    //@Override
-    public Boolean NeedsOldRilFeature(String feature) {
-        String[] features = SystemProperties->Get("ro.telephony.ril.config", "").Split(",");
-        For (String found: features) {
-            If (found->Equals(feature))
-                return TRUE;
+        if (RILJ_LOGD) {
+            String str = rr->SerialString();
+            str += "< ";
+            str += RequestToString(rr->mRequest);
+            str += " ";
+            str += RetToString(rr->mRequest, ret);
+            RiljLog(str);
         }
-        return FALSE;
+
+        if (rr->mResult != NULL) {
+            AsyncResult::ForMessage(rr->mResult, ret, NULL);
+            rr->mResult->SendToTarget();
+        }
+    }
+    return rr;
+}
+
+String RIL::RetToString(
+    /* [in] */ Int32 req,
+    /* [in] */ IInterface* ret)
+{
+    if (ret == NULL) return String("");
+    switch (req) {
+        // Don't log these return values, for privacy's sake.
+        case IRILConstants::RIL_REQUEST_GET_IMSI:
+        case IRILConstants::RIL_REQUEST_GET_IMEI:
+        case IRILConstants::RIL_REQUEST_GET_IMEISV:
+        case IRILConstants::RIL_REQUEST_SIM_OPEN_CHANNEL:
+        case IRILConstants::RIL_REQUEST_SIM_TRANSMIT_APDU_CHANNEL:
+
+            if (!RILJ_LOGV) {
+                // If not versbose logging just return and don't display IMSI and IMEI, IMEISV
+                return String("");
+            }
     }
 
-    protected Object
-    ResponseIccCardStatus(Parcel p) {
-        IccCardApplicationStatus appStatus;
+    StringBuilder sb;
+    String s;
+    Int32 length = 0;
+    assert(0 && "TODO");
+    // if (ret instanceof Int32[]){
+    //     AutoPtr<ArrayOf<Int32> > intArray = (Int32[]) ret;
+    //     length = intArray->GetLength();
+    //     sb = new StringBuilder("{");
+    //     if (length > 0) {
+    //         Int32 i = 0;
+    //         sb.Append(intArray[i++]);
+    //         while ( i < length) {
+    //             sb.Append(", ");
+    //             sb.Append((*intArray)[i++]);
+    //         }
+    //     }
+    //     sb.Append("}");
+    //     s = sb.ToString();
+    // }
+    // else if (ret instanceof String[]) {
+    //     AutoPtr<ArrayOf<String> > strings = (String[]) ret;
+    //     length = strings->GetLength();
+    //     sb = new StringBuilder("{");
+    //     if (length > 0) {
+    //         Int32 i = 0;
+    //         sb.append(strings[i++]);
+    //         while ( i < length) {
+    //             sb.Append(", ");
+    //             sb.Append(strings[i++]);
+    //         }
+    //     }
+    //     sb.Append("}");
+    //     s = sb.toString();
+    // }
+    // else if (req == IRILConstants::RIL_REQUEST_GET_CURRENT_CALLS) {
+    //     AutoPtr<IArrayList> calls = IArrayList::Probe(ret);
+    //     sb = new StringBuilder(" ");
+    //     for (DriverCall dc : calls) {
+    //         sb.Append("[");
+    //         sb.Append(dc);
+    //         sb.Append("] ");
+    //     }
+    //     s = sb.toString();
+    // }
+    // else if (req == RIL_REQUEST_GET_NEIGHBORING_CELL_IDS) {
+    //     AutoPtr<IArrayList> cells = IArrayList::Probe(ret); // ArrayList<NeighboringCellInfo>
+    //     sb = new StringBuilder(" ");
+    //     for (NeighboringCellInfo cell : cells) {
+    //         sb.Append(cell);
+    //         sb.Append(" ");
+    //     }
+    //     s = sb.ToString();
+    // }
+    // else if (req == IRILConstants::RIL_REQUEST_GET_HARDWARE_CONFIG) {
+    //     AutoPtr<IArrayList> hwcfgs = IArrayList::Probe(ret); // ArrayList<HardwareConfig>
+    //     sb = new StringBuilder(" ");
+    //     for (HardwareConfig hwcfg : hwcfgs) {
+    //         sb.Append("[");
+    //         sb.Append(hwcfg);
+    //         sb.Append("] ");
+    //     }
+    //     s = sb.ToString();
+    // }
+    // else {
+    //     s = ret.ToString();
+    // }
+    return s;
+}
 
-        Boolean oldRil = NeedsOldRilFeature("icccardstatus");
+void RIL::ProcessUnsolicited(
+    /* [in] */ IParcel* p)
+{
+    Int32 response = 0;
+    AutoPtr<IInterface> ret;
 
-        IccCardStatus cardStatus = new IccCardStatus();
-        cardStatus->SetCardState(p->ReadInt());
-        cardStatus->SetUniversalPinState(p->ReadInt());
-        cardStatus.mGsmUmtsSubscriptionAppIndex = p->ReadInt();
-        cardStatus.mCdmaSubscriptionAppIndex = p->ReadInt();
+    p->ReadInt32(&response);
 
-        If (!oldRil)
-            cardStatus.mImsSubscriptionAppIndex = p->ReadInt();
+    // try {
+    switch(response) {
+        /*
+        cat libs/telephony/ril_unsol_commands.h \
+        | egrep "^ *{RIL_" \
+        | sed -re 's/\{([^,]+),[^,]+,([^}]+).+/case \1: \2(rr, p); break;/'
+        */
 
-        Int32 numApplications = p->ReadInt();
+        case IRILConstants::RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED: ret =  ResponseVoid(p); break;
+        case IRILConstants::RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED: ret =  ResponseVoid(p); break;
+        case IRILConstants::RIL_UNSOL_RESPONSE_VOICE_NETWORK_STATE_CHANGED: ret =  ResponseVoid(p); break;
+        case IRILConstants::RIL_UNSOL_RESPONSE_NEW_SMS: ret =  ResponseString(p); break;
+        case IRILConstants::RIL_UNSOL_RESPONSE_NEW_SMS_STATUS_REPORT: ret =  ResponseString(p); break;
+        case IRILConstants::RIL_UNSOL_RESPONSE_NEW_SMS_ON_SIM: ret =  ResponseInts(p); break;
+        case IRILConstants::RIL_UNSOL_ON_USSD: ret =  ResponseStrings(p); break;
+        case IRILConstants::RIL_UNSOL_NITZ_TIME_RECEIVED: ret =  ResponseString(p); break;
+        case IRILConstants::RIL_UNSOL_SIGNAL_STRENGTH: ret = ResponseSignalStrength(p); break;
+        case IRILConstants::RIL_UNSOL_DATA_CALL_LIST_CHANGED: ret = ResponseDataCallList(p);break;
+        case IRILConstants::RIL_UNSOL_SUPP_SVC_NOTIFICATION: ret = ResponseSuppServiceNotification(p); break;
+        case IRILConstants::RIL_UNSOL_STK_SESSION_END: ret = ResponseVoid(p); break;
+        case IRILConstants::RIL_UNSOL_STK_PROACTIVE_COMMAND: ret = ResponseString(p); break;
+        case IRILConstants::RIL_UNSOL_STK_EVENT_NOTIFY: ret = ResponseString(p); break;
+        case IRILConstants::RIL_UNSOL_STK_CALL_SETUP: ret = ResponseInts(p); break;
+        case IRILConstants::RIL_UNSOL_SIM_SMS_STORAGE_FULL: ret =  ResponseVoid(p); break;
+        case IRILConstants::RIL_UNSOL_SIM_REFRESH: ret =  ResponseSimRefresh(p); break;
+        case IRILConstants::RIL_UNSOL_CALL_RING: ret =  ResponseCallRing(p); break;
+        case IRILConstants::RIL_UNSOL_RESTRICTED_STATE_CHANGED: ret = ResponseInts(p); break;
+        case IRILConstants::RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED:  ret =  ResponseVoid(p); break;
+        case IRILConstants::RIL_UNSOL_RESPONSE_CDMA_NEW_SMS:  ret =  ResponseCdmaSms(p); break;
+        case IRILConstants::RIL_UNSOL_RESPONSE_NEW_BROADCAST_SMS:  ret =  ResponseRaw(p); break;
+        case IRILConstants::RIL_UNSOL_CDMA_RUIM_SMS_STORAGE_FULL:  ret =  ResponseVoid(p); break;
+        case IRILConstants::RIL_UNSOL_ENTER_EMERGENCY_CALLBACK_MODE: ret = ResponseVoid(p); break;
+        case IRILConstants::RIL_UNSOL_CDMA_CALL_WAITING: ret = ResponseCdmaCallWaiting(p); break;
+        case IRILConstants::RIL_UNSOL_CDMA_OTA_PROVISION_STATUS: ret = ResponseInts(p); break;
+        case IRILConstants::RIL_UNSOL_CDMA_INFO_REC: ret = ResponseCdmaInformationRecord(p); break;
+        case IRILConstants::RIL_UNSOL_OEM_HOOK_RAW: ret = ResponseRaw(p); break;
+        case IRILConstants::RIL_UNSOL_RINGBACK_TONE: ret = ResponseInts(p); break;
+        case IRILConstants::RIL_UNSOL_RESEND_INCALL_MUTE: ret = ResponseVoid(p); break;
+        case IRILConstants::RIL_UNSOL_CDMA_SUBSCRIPTION_SOURCE_CHANGED: ret = ResponseInts(p); break;
+        case IRILConstants::RIL_UNSOl_CDMA_PRL_CHANGED: ret = ResponseInts(p); break;
+        case IRILConstants::RIL_UNSOL_EXIT_EMERGENCY_CALLBACK_MODE: ret = ResponseVoid(p); break;
+        case IRILConstants::RIL_UNSOL_RIL_CONNECTED: ret = ResponseInts(p); break;
+        case IRILConstants::RIL_UNSOL_VOICE_RADIO_TECH_CHANGED: ret =  ResponseInts(p); break;
+        case IRILConstants::RIL_UNSOL_CELL_INFO_LIST: ret = ResponseCellInfoList(p); break;
+        case IRILConstants::RIL_UNSOL_RESPONSE_IMS_NETWORK_STATE_CHANGED: ret =  ResponseVoid(p); break;
+        case IRILConstants::RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED: ret =  ResponseInts(p); break;
+        case IRILConstants::RIL_UNSOL_SRVCC_STATE_NOTIFY: ret = ResponseInts(p); break;
+        case IRILConstants::RIL_UNSOL_HARDWARE_CONFIG_CHANGED: ret = ResponseHardwareConfig(p); break;
+        case IRILConstants::RIL_UNSOL_ON_SS: ret =  ResponseSsData(p); break;
+        case IRILConstants::RIL_UNSOL_STK_CC_ALPHA_NOTIFY: ret =  ResponseString(p); break;
+        case IRILConstants::RIL_UNSOL_STK_SEND_SMS_RESULT: ret = ResponseInts(p); break; // Samsung STK
 
-        // limit to maximum allowed applications
-        If (numApplications > IccCardStatus.CARD_MAX_APPS) {
-            numApplications = IccCardStatus.CARD_MAX_APPS;
-        }
-        cardStatus.mApplications = new IccCardApplicationStatus[numApplications];
-
-        For (Int32 i = 0 ; i < numApplications ; i++) {
-            appStatus = new IccCardApplicationStatus();
-            appStatus.app_type       = appStatus->AppTypeFromRILInt(p->ReadInt());
-            appStatus.app_state      = appStatus->AppStateFromRILInt(p->ReadInt());
-            appStatus.perso_substate = appStatus->PersoSubstateFromRILInt(p->ReadInt());
-            appStatus.aid            = p->ReadString();
-            appStatus.app_label      = p->ReadString();
-            appStatus.pin1_replaced  = p->ReadInt();
-            appStatus.pin1           = appStatus->PinStateFromRILInt(p->ReadInt());
-            appStatus.pin2           = appStatus->PinStateFromRILInt(p->ReadInt());
-            cardStatus.mApplications[i] = appStatus;
-        }
-        return cardStatus;
+        default:
+            // throw new RuntimeException("Unrecognized unsol response: " + response);
+        break; // (implied)
     }
+    // } catch (Throwable tr) {
+    //     Rlog.e(RILJ_LOG_TAG, "Exception processing unsol response: " + response +
+    //         "Exception:" + tr.toString());
+    //     return;
+    // }
 
-    protected Object
-    ResponseSimRefresh(Parcel p) {
-        IccRefreshResponse response = new IccRefreshResponse();
+    AutoPtr<AsyncResult> ar = new AsyncResult(NULL, NULL, NULL);
+    switch(response) {
+        case IRILConstants::RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED: {
+            /* has bonus radio state Int32 */
+            Int32 st = 0;
+            p->ReadInt32(&st);
+            ICommandsInterfaceRadioState newState = GetRadioStateFromInt(st);
+            if (RILJ_LOGD) UnsljLogMore(response, StringUtils::ToString(newState));
 
-        response.refreshResult = p->ReadInt();
-        response.efId   = p->ReadInt();
-        response.aid = p->ReadString();
-        return response;
-    }
-
-    protected Object
-    ResponseCallList(Parcel p) {
-        Int32 num;
-        Int32 voiceSettings;
-        ArrayList<DriverCall> response;
-        DriverCall dc;
-
-        num = p->ReadInt();
-        response = new ArrayList<DriverCall>(num);
-
-        If (RILJ_LOGV) {
-            RiljLog("responseCallList: num=" + num +
-                    " mEmergencyCallbackModeRegistrant=" + mEmergencyCallbackModeRegistrant +
-                    " mTestingEmergencyCall=" + mTestingEmergencyCall->Get());
+            SwitchToRadioState(newState);
+        break;
         }
-        For (Int32 i = 0 ; i < num ; i++) {
-            dc = new DriverCall();
-
-            dc.state = DriverCall->StateFromCLCC(p->ReadInt());
-            dc.index = p->ReadInt();
-            dc.TOA = p->ReadInt();
-            dc.isMpty = (0 != p->ReadInt());
-            dc.isMT = (0 != p->ReadInt());
-            dc.als = p->ReadInt();
-            voiceSettings = p->ReadInt();
-            dc.isVoice = (0 == voiceSettings) ? FALSE : TRUE;
-            dc.isVoicePrivacy = (0 != p->ReadInt());
-            dc.number = p->ReadString();
-            Int32 np = p->ReadInt();
-            dc.numberPresentation = DriverCall->PresentationFromCLIP(np);
-            dc.name = p->ReadString();
-            // according to ril.h, namePresentation should be handled as numberPresentation;
-            dc.namePresentation = DriverCall->PresentationFromCLIP(p->ReadInt());
-            Int32 uusInfoPresent = p->ReadInt();
-            If (uusInfoPresent == 1) {
-                dc.uusInfo = new UUSInfo();
-                dc.uusInfo->SetType(p->ReadInt());
-                dc.uusInfo->SetDcs(p->ReadInt());
-                Byte[] userData = p->CreateByteArray();
-                dc.uusInfo->SetUserData(userData);
-                RiljLogv(String->Format("Incoming UUS : type=%d, dcs=%d, length=%d",
-                                dc.uusInfo->GetType(), dc.uusInfo->GetDcs(),
-                                dc.uusInfo->GetUserData().length));
-                RiljLogv("Incoming UUS : Data (string)="
-                        + new String(dc.uusInfo->GetUserData()));
-                RiljLogv("Incoming UUS : Data (hex): "
-                        + IccUtils->BytesToHexString(dc.uusInfo->GetUserData()));
-            } else {
-                RiljLogv("Incoming UUS : NOT present!");
+        case IRILConstants::RIL_UNSOL_RESPONSE_IMS_NETWORK_STATE_CHANGED: {
+            if (RILJ_LOGD) {
+                UnsljLog(response);
             }
 
-            // Make sure there's a leading + on addresses with a TOA of 145
-            dc.number = PhoneNumberUtils->StringFromStringAndTOA(dc.number, dc.TOA);
+            mImsNetworkStateChangedRegistrants->NotifyRegistrants(ar);
+        break;
+        }
+        case IRILConstants::RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED: {
+            if (RILJ_LOGD) UnsljLog(response);
 
-            response->Add(dc);
+            mCallStateRegistrants->NotifyRegistrants(ar);
+        break;
+        }
+        case IRILConstants::RIL_UNSOL_RESPONSE_VOICE_NETWORK_STATE_CHANGED: {
+            if (RILJ_LOGD) UnsljLog(response);
 
-            If (dc.isVoicePrivacy) {
-                mVoicePrivacyOnRegistrants->NotifyRegistrants();
-                RiljLog("InCall VoicePrivacy is enabled");
-            } else {
-                mVoicePrivacyOffRegistrants->NotifyRegistrants();
-                RiljLog("InCall VoicePrivacy is disabled");
+            mVoiceNetworkStateRegistrants->NotifyRegistrants(ar);
+        break;
+        }
+        case IRILConstants::RIL_UNSOL_RESPONSE_NEW_SMS: {
+            if (RILJ_LOGD) UnsljLog(response);
+
+            // FIXME this should move up a layer
+            AutoPtr<ArrayOf<String> > a = ArrayOf<String>::Alloc(2);
+
+            AutoPtr<ICharSequence> pRet = ICharSequence::Probe(ret);
+            pRet->ToString(&((*a)[1]));
+
+            AutoPtr<ISmsMessage> sms;
+
+            AutoPtr<ISmsMessageHelper> hlp;
+            assert(0 && "TODO");
+            // CSmsMessageHelper::AcquireSingleton((ISmsMessageHelper**)&hlp);
+            hlp->NewFromCMT(a, (ISmsMessage**)&sms);
+            if (mGsmSmsRegistrant != NULL) {
+                AutoPtr<AsyncResult> arSms = new AsyncResult(NULL, sms, NULL);
+                mGsmSmsRegistrant->NotifyRegistrant(arSms);
             }
+        break;
+        }
+        case IRILConstants::RIL_UNSOL_RESPONSE_NEW_SMS_STATUS_REPORT: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mSmsStatusRegistrant != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mSmsStatusRegistrant->NotifyRegistrant(arRet);
+            }
+        break;
+        }
+        case IRILConstants::RIL_UNSOL_RESPONSE_NEW_SMS_ON_SIM: {
+            if (RILJ_LOGD) {
+                UnsljLogRet(response, ret);
+            }
+
+            assert(0 && "TODO");
+            AutoPtr<ArrayOf<Int32> > smsIndex;// = (Int32[])ret;
+
+            if(smsIndex->GetLength() == 1) {
+                if (mSmsOnSimRegistrant != NULL) {
+                    assert(0 && "TODO");
+                    AutoPtr<AsyncResult> arSmsIndex;// = new AsyncResult(NULL, smsIndex, NULL);
+                    mSmsOnSimRegistrant->NotifyRegistrant(arSmsIndex);
+                }
+            }
+            else {
+                if (RILJ_LOGD) {
+                    String str(" NEW_SMS_ON_SIM ERROR with wrong length ");
+                    str += smsIndex->GetLength();
+                    RiljLog(str);
+                }
+            }
+        break;
+        }
+        case IRILConstants::RIL_UNSOL_ON_USSD: {
+            assert(0 && "TODO");
+            AutoPtr<ArrayOf<String> > resp; // = (String[])ret;
+
+            if (resp->GetLength() < 2) {
+                resp = ArrayOf<String>::Alloc(2);
+                assert(0 && "TODO");
+                // (*resp)[0] = ((String[])ret)[0];
+                (*resp)[1] = NULL;
+            }
+            if (RILJ_LOGD) UnsljLogMore(response, (*resp)[0]);
+            if (mUSSDRegistrant != NULL) {
+                assert(0 && "TODO");
+                AutoPtr<AsyncResult> ar;// = new AsyncResult(NULL, resp, NULL);
+                mUSSDRegistrant->NotifyRegistrant(ar);
+            }
+        break;
+        }
+        case IRILConstants::RIL_UNSOL_NITZ_TIME_RECEIVED: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            // has bonus long containing milliseconds since boot that the NITZ
+            // time was received
+            Int64 nitzReceiveTime = 0;
+            p->ReadInt64(&nitzReceiveTime);
+
+            AutoPtr<ArrayOf<IInterface*> > result = ArrayOf<IInterface*>::Alloc(2);
+
+            (*result)[0] = ret;
+            AutoPtr<IInteger64> pTime;
+            CInteger64::New(nitzReceiveTime, (IInteger64**)&pTime);
+            (*result)[1] = pTime;
+
+            AutoPtr<ISystemProperties> sp;
+            CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
+            Boolean ignoreNitz = FALSE;
+            sp->GetBoolean(
+                    ITelephonyProperties::PROPERTY_IGNORE_NITZ, FALSE, &ignoreNitz);
+
+            if (ignoreNitz) {
+                if (RILJ_LOGD) RiljLog(String("ignoring UNSOL_NITZ_TIME_RECEIVED"));
+            }
+            else {
+                if (mNITZTimeRegistrant != NULL) {
+                    assert(0 && "TODO");
+                    AutoPtr<AsyncResult> arResult;// = new AsyncResult(NULL, result, NULL);
+                    mNITZTimeRegistrant->NotifyRegistrant(arResult);
+                }
+                else {
+                    // in case NITZ time registrant isnt registered yet
+                    assert(0 && "TODO");
+                    // mLastNITZTimeInfo = result;
+                }
+            }
+        break;
         }
 
-        Collections->Sort(response);
+        case IRILConstants::RIL_UNSOL_SIGNAL_STRENGTH: {
+            // Note this is set to "verbose" because it happens
+            // frequently
+            if (RILJ_LOGV) UnsljLogvRet(response, ret);
 
-        If ((num == 0) && mTestingEmergencyCall->GetAndSet(FALSE)) {
-            If (mEmergencyCallbackModeRegistrant != NULL) {
-                RiljLog("responseCallList: call ended, testing emergency call," +
-                            " notify ECM Registrants");
+            if (mSignalStrengthRegistrant != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mSignalStrengthRegistrant->NotifyRegistrant(arRet);
+            }
+        break;
+        }
+        case IRILConstants::RIL_UNSOL_DATA_CALL_LIST_CHANGED: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            Boolean oldRil = FALSE;
+            NeedsOldRilFeature(String("skipbrokendatacall"), &oldRil);
+            AutoPtr<IArrayList> retList = IArrayList::Probe(ret);
+            AutoPtr<IInterface> pNode;
+            retList->Get(0, (IInterface**)&pNode);
+            AutoPtr<IDataCallResponse> _pNode = IDataCallResponse::Probe(pNode);
+            assert(0 && "TODO");
+            // if (oldRil && _pNode->mType.Equals("IP"))
+            //     break;
+
+            AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+            mDataNetworkStateRegistrants->NotifyRegistrants(arRet);
+        break;
+        }
+        case IRILConstants::RIL_UNSOL_SUPP_SVC_NOTIFICATION: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mSsnRegistrant != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mSsnRegistrant->NotifyRegistrant(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_STK_SESSION_END: {
+            if (RILJ_LOGD) UnsljLog(response);
+
+            if (mCatSessionEndRegistrant != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mCatSessionEndRegistrant->NotifyRegistrant(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_STK_PROACTIVE_COMMAND: {
+            if (RILJ_LOGD) UnsljLog(response);
+
+            if (mCatProCmdRegistrant != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mCatProCmdRegistrant->NotifyRegistrant(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_STK_EVENT_NOTIFY: {
+            if (RILJ_LOGD) UnsljLog(response);
+
+            if (mCatEventRegistrant != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mCatEventRegistrant->NotifyRegistrant(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_STK_CALL_SETUP: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mCatCallSetUpRegistrant != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mCatCallSetUpRegistrant->NotifyRegistrant(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_SIM_SMS_STORAGE_FULL: {
+            if (RILJ_LOGD) UnsljLog(response);
+
+            if (mIccSmsFullRegistrant != NULL) {
+                mIccSmsFullRegistrant->NotifyRegistrant();
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_SIM_REFRESH: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mIccRefreshRegistrants != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mIccRefreshRegistrants->NotifyRegistrants(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_CALL_RING: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mRingRegistrant != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mRingRegistrant->NotifyRegistrant(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_RESTRICTED_STATE_CHANGED: {
+            if (RILJ_LOGD) UnsljLogvRet(response, ret);
+            if (mRestrictedStateRegistrant != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mRestrictedStateRegistrant->NotifyRegistrant(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED: {
+            if (RILJ_LOGD) UnsljLog(response);
+
+            if (mIccStatusChangedRegistrants != NULL) {
+                mIccStatusChangedRegistrants->NotifyRegistrants();
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_RESPONSE_CDMA_NEW_SMS: {
+            if (RILJ_LOGD) UnsljLog(response);
+
+            AutoPtr<ISmsMessage> sms = ISmsMessage::Probe(ret);
+
+            if (mCdmaSmsRegistrant != NULL) {
+                AutoPtr<AsyncResult> arSms = new AsyncResult(NULL, sms, NULL);
+                mCdmaSmsRegistrant->NotifyRegistrant(arSms);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_RESPONSE_NEW_BROADCAST_SMS: {
+            if (RILJ_LOGD) UnsljLog(response);
+
+            if (mGsmBroadcastSmsRegistrant != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mGsmBroadcastSmsRegistrant->NotifyRegistrant(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_CDMA_RUIM_SMS_STORAGE_FULL: {
+            if (RILJ_LOGD) UnsljLog(response);
+
+            if (mIccSmsFullRegistrant != NULL) {
+                mIccSmsFullRegistrant->NotifyRegistrant();
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_ENTER_EMERGENCY_CALLBACK_MODE: {
+            if (RILJ_LOGD) UnsljLog(response);
+
+            if (mEmergencyCallbackModeRegistrant != NULL) {
                 mEmergencyCallbackModeRegistrant->NotifyRegistrant();
             }
+            break;
         }
+        case IRILConstants::RIL_UNSOL_CDMA_CALL_WAITING: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
 
-        return response;
-    }
+            if (mCallWaitingInfoRegistrants != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mCallWaitingInfoRegistrants->NotifyRegistrants(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_CDMA_OTA_PROVISION_STATUS: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
 
-    protected DataCallResponse GetDataCallResponse(Parcel p, Int32 version) {
-        DataCallResponse dataCall = new DataCallResponse();
+            if (mOtaProvisionRegistrants != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mOtaProvisionRegistrants->NotifyRegistrants(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_CDMA_INFO_REC: {
+            AutoPtr<IArrayList> listInfoRecs;
 
-        dataCall.version = version;
-        If (version < 5) {
-            dataCall.cid = p->ReadInt();
-            dataCall.active = p->ReadInt();
-            dataCall.type = p->ReadString();
-            If (version < 4 || NeedsOldRilFeature("datacallapn")) {
-                p->ReadString(); // APN - not used
+            // try {
+                listInfoRecs = IArrayList::Probe(ret);
+            // } catch (ClassCastException e) {
+            //     Rlog.e(RILJ_LOG_TAG, "Unexpected exception casting to listInfoRecs", e);
+            //     break;
+            // }
+            AutoPtr<IIterator> it;
+            listInfoRecs->GetIterator((IIterator**)&it);
+            Boolean bHasNext = FALSE;
+            while ((it->HasNext(&bHasNext), bHasNext)) {
+                AutoPtr<IInterface> p;
+                it->GetNext((IInterface**)&p);
+                AutoPtr<ICdmaInformationRecords> rec = ICdmaInformationRecords::Probe(p);
+                if (RILJ_LOGD) UnsljLogRet(response, rec);
+                NotifyRegistrantsCdmaInfoRec(rec);
             }
-            String addresses = p->ReadString();
-            If (!TextUtils->IsEmpty(addresses)) {
-                dataCall.addresses = addresses->Split(" ");
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_OEM_HOOK_RAW: {
+            assert(0 && "TODO");
+            // if (RILJ_LOGD) UnsljLogvRet(response, StringUtils::ToHexString((Byte[]) ret));
+            AutoPtr<IByteBufferHelper> bbf;
+            CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&bbf);
+            AutoPtr<IByteBuffer> oemHookResponse;
+            assert(0 && "TODO");
+            // bbf->Wrap((Byte[]) ret, (IByteBuffer**)&oemHookResponse);
+            AutoPtr<IByteOrderHelper> bod;
+            CByteOrderHelper::AcquireSingleton((IByteOrderHelper**)&bod);
+            ByteOrder bo;
+            bod->GetNativeOrder(&bo);
+            oemHookResponse->SetOrder(bo);
+            if (IsQcUnsolOemHookResp(oemHookResponse)) {
+                assert(0 && "TODO");
+                // Rlog.d(RILJ_LOG_TAG, "OEM ID check Passed");
+                ProcessUnsolOemhookResponse(oemHookResponse);
             }
-            // DataCallState needs an ifname. Since we don't have one use the name from the ThrottleService Resource (default=rmnet0).
-            dataCall.ifname = Resources->GetSystem()->GetString(R::string::config_datause_iface);
-        } else {
-            dataCall.status = p->ReadInt();
-            If (NeedsOldRilFeature("usehcradio"))
-                dataCall.suggestedRetryTime = -1;
-            else
-	      dataCall.suggestedRetryTime = p->ReadInt();
-            dataCall.cid = p->ReadInt();
-            dataCall.active = p->ReadInt();
-            dataCall.type = p->ReadString();
-            dataCall.ifname = p->ReadString();
-            If ((dataCall.status == DcFailCause.NONE->GetErrorCode()) &&
-                    TextUtils->IsEmpty(dataCall.ifname)) {
-              throw new RuntimeException("getDataCallResponse, no ifname");
+            else if (mUnsolOemHookRawRegistrant != NULL) {
+                assert(0 && "TODO");
+                // Rlog.d(RILJ_LOG_TAG, "External OEM message, to be notified");
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mUnsolOemHookRawRegistrant->NotifyRegistrant(arRet);
             }
-            String addresses = p->ReadString();
-            If (!TextUtils->IsEmpty(addresses)) {
-                dataCall.addresses = addresses->Split(" ");
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_RINGBACK_TONE: {
+            if (RILJ_LOGD) UnsljLogvRet(response, ret);
+            if (mRingbackToneRegistrants != NULL) {
+                assert(0 && "TODO");
+                Boolean playtone;// = (((Int32[])ret)[0] == 1);
+                AutoPtr<IBoolean> _playtone;
+                CBoolean::New(playtone, (IBoolean**)&_playtone);
+                AutoPtr<AsyncResult> arPlaytone = new AsyncResult(NULL, _playtone, NULL);
+                mRingbackToneRegistrants->NotifyRegistrants(arPlaytone);
             }
-            String dnses = p->ReadString();
-            If (!TextUtils->IsEmpty(dnses)) {
-                dataCall.dnses = dnses->Split(" ");
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_RESEND_INCALL_MUTE: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mResendIncallMuteRegistrants != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mResendIncallMuteRegistrants->NotifyRegistrants(arRet);
             }
-            String gateways = p->ReadString();
-            If (!TextUtils->IsEmpty(gateways)) {
-                dataCall.gateways = gateways->Split(" ");
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_VOICE_RADIO_TECH_CHANGED: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mVoiceRadioTechChangedRegistrants != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mVoiceRadioTechChangedRegistrants->NotifyRegistrants(arRet);
             }
-            If (version >= 10) {
-                String pcscf = p->ReadString();
-                If (!TextUtils->IsEmpty(pcscf)) {
-                    dataCall.pcscf = pcscf->Split(" ");
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_CDMA_SUBSCRIPTION_SOURCE_CHANGED: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mCdmaSubscriptionChangedRegistrants != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mCdmaSubscriptionChangedRegistrants->NotifyRegistrants(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOl_CDMA_PRL_CHANGED: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mCdmaPrlChangedRegistrants != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mCdmaPrlChangedRegistrants->NotifyRegistrants(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_EXIT_EMERGENCY_CALLBACK_MODE: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mExitEmergencyCallbackModeRegistrants != NULL) {
+                mExitEmergencyCallbackModeRegistrants->NotifyRegistrants(ar);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_RIL_CONNECTED: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            // Initial conditions
+            SetRadioPower(FALSE, NULL);
+            SetPreferredNetworkType(mPreferredNetworkType, NULL);
+            SetCdmaSubscriptionSource(mCdmaSubscription, NULL);
+            SetCellInfoListRate(Elastos::Core::Math::INT32_MAX_VALUE, NULL);
+            // NotifyRegistrantsRilConnectionChanged(((Int32[])ret)[0]);
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_CELL_INFO_LIST: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mRilCellInfoListRegistrants != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mRilCellInfoListRegistrants->NotifyRegistrants(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mSubscriptionStatusRegistrants != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mSubscriptionStatusRegistrants->NotifyRegistrants(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_SRVCC_STATE_NOTIFY: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mSrvccStateRegistrants != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mSrvccStateRegistrants->NotifyRegistrants(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_HARDWARE_CONFIG_CHANGED: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mHardwareConfigChangeRegistrants != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mHardwareConfigChangeRegistrants->NotifyRegistrants(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_ON_SS: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mSsRegistrant != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mSsRegistrant->NotifyRegistrant(arRet);
+            }
+            break;
+        }
+        case IRILConstants::RIL_UNSOL_STK_CC_ALPHA_NOTIFY: {
+            if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+            if (mCatCcAlphaRegistrant != NULL) {
+                AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                mCatCcAlphaRegistrant->NotifyRegistrant(arRet);
+            }
+            break; // Samsung STK
+        }
+        case IRILConstants::RIL_UNSOL_STK_SEND_SMS_RESULT: {
+            AutoPtr<IResourcesHelper> hlp;
+            CResourcesHelper::AcquireSingleton((IResourcesHelper**)&hlp);
+            AutoPtr<IResources> res;
+            hlp->GetSystem((IResources**)&res);
+            Boolean b = FALSE;
+            res->GetBoolean(R::bool_::config_samsung_stk, &b);
+            if (b) {
+                if (RILJ_LOGD) UnsljLogRet(response, ret);
+
+                if (mCatSendSmsResultRegistrant != NULL) {
+                    AutoPtr<AsyncResult> arRet = new AsyncResult(NULL, ret, NULL);
+                    mCatSendSmsResultRegistrant->NotifyRegistrant(arRet);
                 }
-                If (version >= 11) {
-                    dataCall.mtu = p->ReadInt();
-                }
             }
+            break;
         }
-        return dataCall;
-    }
-
-    protected Object
-    ResponseDataCallList(Parcel p) {
-        ArrayList<DataCallResponse> response;
-        Boolean oldRil = NeedsOldRilFeature("datacall");
-        Int32 ver = (oldRil ? 3 : p->ReadInt());
-        Int32 num = p->ReadInt();
-        RiljLog("responseDataCallList ver=" + ver + " num=" + num);
-
-        response = new ArrayList<DataCallResponse>(num);
-        For (Int32 i = 0; i < num; i++) {
-            response->Add(GetDataCallResponse(p, ver));
-        }
-
-        return response;
-    }
-
-    protected Object
-    ResponseSetupDataCall(Parcel p) {
-        Boolean oldRil = NeedsOldRilFeature("datacall");
-        Int32 ver = (oldRil ? 3 : p->ReadInt());
-        Int32 num = p->ReadInt();
-        If (RILJ_LOGV) RiljLog("responseSetupDataCall ver=" + ver + " num=" + num);
-
-        DataCallResponse dataCall;
-
-        If (ver < 5) {
-            dataCall = new DataCallResponse();
-            dataCall.version = ver;
-            dataCall.cid = Integer->ParseInt(p->ReadString());
-            dataCall.ifname = p->ReadString();
-            If (TextUtils->IsEmpty(dataCall.ifname)) {
-                throw new RuntimeException(
-                        "RIL_REQUEST_SETUP_DATA_CALL response, no ifname");
-            }
-            String addresses = p->ReadString();
-            If (!TextUtils->IsEmpty(addresses)) {
-              dataCall.addresses = addresses->Split(" ");
-            }
-            If (num >= 4) {
-                String dnses = p->ReadString();
-                If (RILJ_LOGD) RiljLog("responseSetupDataCall got dnses=" + dnses);
-                If (!TextUtils->IsEmpty(dnses)) {
-                    dataCall.dnses = dnses->Split(" ");
-                }
-            }
-            If (num >= 5) {
-                String gateways = p->ReadString();
-                If (RILJ_LOGD) RiljLog("responseSetupDataCall got gateways=" + gateways);
-                If (!TextUtils->IsEmpty(gateways)) {
-                    dataCall.gateways = gateways->Split(" ");
-                }
-            }
-            If (num >= 6) {
-                String pcscf = p->ReadString();
-                If (RILJ_LOGD) RiljLog("responseSetupDataCall got pcscf=" + pcscf);
-                If (!TextUtils->IsEmpty(pcscf)) {
-                    dataCall.pcscf = pcscf->Split(" ");
-                }
-            }
-            If (num >= 7) {
-                dataCall.mtu = Integer->ParseInt(p->ReadString());
-                If (RILJ_LOGD) RiljLog("responseSetupDataCall got mtu=" + dataCall.mtu);
-            }
-        } else {
-            If (num != 1) {
-                throw new RuntimeException(
-                        "RIL_REQUEST_SETUP_DATA_CALL response expecting 1 RIL_Data_Call_response_v5"
-                        + " got " + num);
-            }
-            dataCall = GetDataCallResponse(p, ver);
-        }
-
-        return dataCall;
-    }
-
-    protected Object
-    ResponseOperatorInfos(Parcel p) {
-        String strings[] = (String [])ResponseStrings(p);
-        ArrayList<OperatorInfo> ret;
-
-        If (strings.length % mQANElements != 0) {
-            throw new RuntimeException(
-                "RIL_REQUEST_QUERY_AVAILABLE_NETWORKS: invalid response. Got "
-                + strings.length + " strings, expected multiple of " + mQANElements);
-        }
-
-        ret = new ArrayList<OperatorInfo>(strings.length / mQANElements);
-
-        For (Int32 i = 0 ; i < strings.length ; i += mQANElements) {
-            ret.Add (
-                new OperatorInfo(
-                    strings[i+0],
-                    strings[i+1],
-                    strings[i+2],
-                    strings[i+3]));
-        }
-
-        return ret;
-    }
-
-    protected Object
-    ResponseCellList(Parcel p) {
-       Int32 num, rssi;
-       String location;
-       ArrayList<NeighboringCellInfo> response;
-       NeighboringCellInfo cell;
-
-       num = p->ReadInt();
-       response = new ArrayList<NeighboringCellInfo>();
-
-       // Determine the radio access type
-       String radioString = SystemProperties->Get(
-               TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE, "unknown");
-       Int32 radioType;
-       If (radioString->Equals("GPRS")) {
-           radioType = NETWORK_TYPE_GPRS;
-       } else If (radioString->Equals("EDGE")) {
-           radioType = NETWORK_TYPE_EDGE;
-       } else If (radioString->Equals("UMTS")) {
-           radioType = NETWORK_TYPE_UMTS;
-       } else If (radioString->Equals("HSDPA")) {
-           radioType = NETWORK_TYPE_HSDPA;
-       } else If (radioString->Equals("HSUPA")) {
-           radioType = NETWORK_TYPE_HSUPA;
-       } else If (radioString->Equals("HSPA")) {
-           radioType = NETWORK_TYPE_HSPA;
-       } else {
-           radioType = NETWORK_TYPE_UNKNOWN;
-       }
-
-       // Interpret the location based on radio access type
-       If (radioType != NETWORK_TYPE_UNKNOWN) {
-           For (Int32 i = 0 ; i < num ; i++) {
-               rssi = p->ReadInt();
-               location = p->ReadString();
-               cell = new NeighboringCellInfo(rssi, location, radioType);
-               response->Add(cell);
-           }
-       }
-       return response;
-    }
-
-    protected Object ResponseGetPreferredNetworkType(Parcel p) {
-       Int32 [] response = (Int32[]) ResponseInts(p);
-
-       If (response.length >= 1) {
-           // Since this is the response for getPreferredNetworkType
-           // we'll assume that it should be the value we want the
-           // vendor ril to take if we reestablish a connection to it.
-           mPreferredNetworkType = response[0];
-       }
-       return response;
-    }
-
-    protected Object ResponseGmsBroadcastConfig(Parcel p) {
-        Int32 num;
-        ArrayList<SmsBroadcastConfigInfo> response;
-        SmsBroadcastConfigInfo info;
-
-        num = p->ReadInt();
-        response = new ArrayList<SmsBroadcastConfigInfo>(num);
-
-        For (Int32 i = 0; i < num; i++) {
-            Int32 fromId = p->ReadInt();
-            Int32 toId = p->ReadInt();
-            Int32 fromScheme = p->ReadInt();
-            Int32 toScheme = p->ReadInt();
-            Boolean selected = (p->ReadInt() == 1);
-
-            info = new SmsBroadcastConfigInfo(fromId, toId, fromScheme,
-                    toScheme, selected);
-            response->Add(info);
-        }
-        return response;
-    }
-
-    protected Object
-    ResponseCdmaBroadcastConfig(Parcel p) {
-        Int32 numServiceCategories;
-        Int32 response[];
-
-        numServiceCategories = p->ReadInt();
-
-        If (numServiceCategories == 0) {
-            // TODO: The logic of providing default values should
-            // not be done by this transport layer. And needs to
-            // be done by the vendor ril or application logic.
-            Int32 numInts;
-            numInts = CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES * CDMA_BSI_NO_OF_INTS_STRUCT + 1;
-            response = new Int32[numInts];
-
-            // Faking a default record for all possible records.
-            response[0] = CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES;
-
-            // Loop over CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES set 'english' as
-            // default language and selection status to FALSE for all.
-            For (Int32 i = 1; i < numInts; i += CDMA_BSI_NO_OF_INTS_STRUCT ) {
-                response[i + 0] = i / CDMA_BSI_NO_OF_INTS_STRUCT;
-                response[i + 1] = 1;
-                response[i + 2] = 0;
-            }
-        } else {
-            Int32 numInts;
-            numInts = (numServiceCategories * CDMA_BSI_NO_OF_INTS_STRUCT) + 1;
-            response = new Int32[numInts];
-
-            response[0] = numServiceCategories;
-            For (Int32 i = 1 ; i < numInts; i++) {
-                 response[i] = p->ReadInt();
-             }
-        }
-
-        return response;
-    }
-
-    protected Object
-    ResponseSignalStrength(Parcel p) {
-        // Assume this is gsm, but doesn't matter as ServiceStateTracker
-        // sets the proper value.
-        SignalStrength signalStrength = SignalStrength->MakeSignalStrengthFromRilParcel(p);
-        return signalStrength;
-    }
-
-    protected ArrayList<CdmaInformationRecords>
-    ResponseCdmaInformationRecord(Parcel p) {
-        Int32 numberOfInfoRecs;
-        ArrayList<CdmaInformationRecords> response;
-
-        /**
-         * Loop through all of the information records unmarshalling them
-         * and converting them to Java Objects.
-         */
-        numberOfInfoRecs = p->ReadInt();
-        response = new ArrayList<CdmaInformationRecords>(numberOfInfoRecs);
-
-        For (Int32 i = 0; i < numberOfInfoRecs; i++) {
-            CdmaInformationRecords InfoRec = new CdmaInformationRecords(p);
-            response->Add(InfoRec);
-        }
-
-        return response;
-    }
-
-    protected Object
-    ResponseCdmaCallWaiting(Parcel p) {
-        CdmaCallWaitingNotification notification = new CdmaCallWaitingNotification();
-
-        notification.number = p->ReadString();
-        notification.numberPresentation =
-                CdmaCallWaitingNotification->PresentationFromCLIP(p->ReadInt());
-        notification.name = p->ReadString();
-        notification.namePresentation = notification.numberPresentation;
-        notification.isPresent = p->ReadInt();
-        notification.signalType = p->ReadInt();
-        notification.alertPitch = p->ReadInt();
-        notification.signal = p->ReadInt();
-        notification.numberType = p->ReadInt();
-        notification.numberPlan = p->ReadInt();
-
-        return notification;
-    }
-
-    protected Object
-    ResponseCallRing(Parcel p){
-        Char32 response[] = new Char32[4];
-
-        response[0] = (Char32) p->ReadInt();    // isPresent
-        response[1] = (Char32) p->ReadInt();    // signalType
-        response[2] = (Char32) p->ReadInt();    // alertPitch
-        response[3] = (Char32) p->ReadInt();    // signal
-
-        return response;
-    }
-
-    private ArrayList<ApnSetting> ResponseGetDataCallProfile(Parcel p) {
-        Int32 nProfiles = p->ReadInt();
-        If (RILJ_LOGD) RiljLog("# data call profiles:" + nProfiles);
-
-        ArrayList<ApnSetting> response = new ArrayList<ApnSetting>(nProfiles);
-
-        Int32 profileId = 0;
-        Int32 priority = 0;
-        For (Int32 i = 0; i < nProfiles; i++) {
-            profileId = p->ReadInt();
-            priority = p->ReadInt();
-            ApnProfileOmh profile = new ApnProfileOmh(profileId, priority);
-            If (RILJ_LOGD) {
-                RiljLog("ResponseGetDataCallProfile()" +
-                        profile->GetProfileId() + ":" + profile->GetPriority());
-            }
-            response->Add(profile);
-        }
-
-        return response;
-    }
-
-    protected void
-    NotifyRegistrantsCdmaInfoRec(CdmaInformationRecords infoRec) {
-        Int32 response = RIL_UNSOL_CDMA_INFO_REC;
-        If (infoRec.record instanceof CdmaInformationRecords.CdmaDisplayInfoRec) {
-            If (mDisplayInfoRegistrants != NULL) {
-                If (RILJ_LOGD) UnsljLogRet(response, infoRec.record);
-                mDisplayInfoRegistrants->NotifyRegistrants(
-                        new AsyncResult (NULL, infoRec.record, NULL));
-            }
-        } else If (infoRec.record instanceof CdmaInformationRecords.CdmaSignalInfoRec) {
-            If (mSignalInfoRegistrants != NULL) {
-                If (RILJ_LOGD) UnsljLogRet(response, infoRec.record);
-                mSignalInfoRegistrants->NotifyRegistrants(
-                        new AsyncResult (NULL, infoRec.record, NULL));
-            }
-        } else If (infoRec.record instanceof CdmaInformationRecords.CdmaNumberInfoRec) {
-            If (mNumberInfoRegistrants != NULL) {
-                If (RILJ_LOGD) UnsljLogRet(response, infoRec.record);
-                mNumberInfoRegistrants->NotifyRegistrants(
-                        new AsyncResult (NULL, infoRec.record, NULL));
-            }
-        } else If (infoRec.record instanceof CdmaInformationRecords.CdmaRedirectingNumberInfoRec) {
-            If (mRedirNumInfoRegistrants != NULL) {
-                If (RILJ_LOGD) UnsljLogRet(response, infoRec.record);
-                mRedirNumInfoRegistrants->NotifyRegistrants(
-                        new AsyncResult (NULL, infoRec.record, NULL));
-            }
-        } else If (infoRec.record instanceof CdmaInformationRecords.CdmaLineControlInfoRec) {
-            If (mLineControlInfoRegistrants != NULL) {
-                If (RILJ_LOGD) UnsljLogRet(response, infoRec.record);
-                mLineControlInfoRegistrants->NotifyRegistrants(
-                        new AsyncResult (NULL, infoRec.record, NULL));
-            }
-        } else If (infoRec.record instanceof CdmaInformationRecords.CdmaT53ClirInfoRec) {
-            If (mT53ClirInfoRegistrants != NULL) {
-                If (RILJ_LOGD) UnsljLogRet(response, infoRec.record);
-                mT53ClirInfoRegistrants->NotifyRegistrants(
-                        new AsyncResult (NULL, infoRec.record, NULL));
-            }
-        } else If (infoRec.record instanceof CdmaInformationRecords.CdmaT53AudioControlInfoRec) {
-            If (mT53AudCntrlInfoRegistrants != NULL) {
-               If (RILJ_LOGD) UnsljLogRet(response, infoRec.record);
-               mT53AudCntrlInfoRegistrants->NotifyRegistrants(
-                       new AsyncResult (NULL, infoRec.record, NULL));
-            }
-        }
-    }
-
-    protected ArrayList<CellInfo> ResponseCellInfoList(Parcel p) {
-        Int32 numberOfInfoRecs;
-        ArrayList<CellInfo> response;
-
-        /**
-         * Loop through all of the information records unmarshalling them
-         * and converting them to Java Objects.
-         */
-        numberOfInfoRecs = p->ReadInt();
-        response = new ArrayList<CellInfo>(numberOfInfoRecs);
-
-        For (Int32 i = 0; i < numberOfInfoRecs; i++) {
-            CellInfo InfoRec = CellInfo.CREATOR->CreateFromParcel(p);
-            response->Add(InfoRec);
-        }
-
-        return response;
-    }
-
-   private Object
-   ResponseHardwareConfig(Parcel p) {
-      Int32 num;
-      ArrayList<HardwareConfig> response;
-      HardwareConfig hw;
-
-      num = p->ReadInt();
-      response = new ArrayList<HardwareConfig>(num);
-
-      If (RILJ_LOGV) {
-         RiljLog("responseHardwareConfig: num=" + num);
-      }
-      For (Int32 i = 0 ; i < num ; i++) {
-         Int32 type = p->ReadInt();
-         Switch(type) {
-            case HardwareConfig.DEV_HARDWARE_TYPE_MODEM: {
-               hw = new HardwareConfig(type);
-               hw->AssignModem(p->ReadString(), p->ReadInt(), p->ReadInt(),
-                  p->ReadInt(), p->ReadInt(), p->ReadInt(), p->ReadInt());
-               break;
-            }
-            case HardwareConfig.DEV_HARDWARE_TYPE_SIM: {
-               hw = new HardwareConfig(type);
-               hw->AssignSim(p->ReadString(), p->ReadInt(), p->ReadString());
-               break;
-            }
-            default: {
-               throw new RuntimeException(
-                  "RIL_REQUEST_GET_HARDWARE_CONFIG invalid hardward type:" + type);
-            }
-         }
-
-         response->Add(hw);
-      }
-
-      return response;
-   }
-
-    static String
-    RequestToString(Int32 request) {
-/*
- cat libs/telephony/ril_commands.h \
- | egrep "^ *{RIL_" \
- | sed -re 's/\{RIL_([^,]+),[^,]+,([^}]+).+/case RIL_\1: return "\1";/'
-*/
-        Switch(request) {
-            case RIL_REQUEST_GET_SIM_STATUS: return "GET_SIM_STATUS";
-            case RIL_REQUEST_ENTER_SIM_PIN: return "ENTER_SIM_PIN";
-            case RIL_REQUEST_ENTER_SIM_PUK: return "ENTER_SIM_PUK";
-            case RIL_REQUEST_ENTER_SIM_PIN2: return "ENTER_SIM_PIN2";
-            case RIL_REQUEST_ENTER_SIM_PUK2: return "ENTER_SIM_PUK2";
-            case RIL_REQUEST_CHANGE_SIM_PIN: return "CHANGE_SIM_PIN";
-            case RIL_REQUEST_CHANGE_SIM_PIN2: return "CHANGE_SIM_PIN2";
-            case RIL_REQUEST_ENTER_DEPERSONALIZATION_CODE: return "ENTER_DEPERSONALIZATION_CODE";
-            case RIL_REQUEST_GET_CURRENT_CALLS: return "GET_CURRENT_CALLS";
-            case RIL_REQUEST_DIAL: return "DIAL";
-            case RIL_REQUEST_GET_IMSI: return "GET_IMSI";
-            case RIL_REQUEST_HANGUP: return "HANGUP";
-            case RIL_REQUEST_HANGUP_WAITING_OR_BACKGROUND: return "HANGUP_WAITING_OR_BACKGROUND";
-            case RIL_REQUEST_HANGUP_FOREGROUND_RESUME_BACKGROUND: return "HANGUP_FOREGROUND_RESUME_BACKGROUND";
-            case RIL_REQUEST_SWITCH_WAITING_OR_HOLDING_AND_ACTIVE: return "REQUEST_SWITCH_WAITING_OR_HOLDING_AND_ACTIVE";
-            case RIL_REQUEST_CONFERENCE: return "CONFERENCE";
-            case RIL_REQUEST_UDUB: return "UDUB";
-            case RIL_REQUEST_LAST_CALL_FAIL_CAUSE: return "LAST_CALL_FAIL_CAUSE";
-            case RIL_REQUEST_SIGNAL_STRENGTH: return "SIGNAL_STRENGTH";
-            case RIL_REQUEST_VOICE_REGISTRATION_STATE: return "VOICE_REGISTRATION_STATE";
-            case RIL_REQUEST_DATA_REGISTRATION_STATE: return "DATA_REGISTRATION_STATE";
-            case RIL_REQUEST_OPERATOR: return "OPERATOR";
-            case RIL_REQUEST_RADIO_POWER: return "RADIO_POWER";
-            case RIL_REQUEST_DTMF: return "DTMF";
-            case RIL_REQUEST_SEND_SMS: return "SEND_SMS";
-            case RIL_REQUEST_SEND_SMS_EXPECT_MORE: return "SEND_SMS_EXPECT_MORE";
-            case RIL_REQUEST_SETUP_DATA_CALL: return "SETUP_DATA_CALL";
-            case RIL_REQUEST_SIM_IO: return "SIM_IO";
-            case RIL_REQUEST_SEND_USSD: return "SEND_USSD";
-            case RIL_REQUEST_CANCEL_USSD: return "CANCEL_USSD";
-            case RIL_REQUEST_GET_CLIR: return "GET_CLIR";
-            case RIL_REQUEST_SET_CLIR: return "SET_CLIR";
-            case RIL_REQUEST_QUERY_CALL_FORWARD_STATUS: return "QUERY_CALL_FORWARD_STATUS";
-            case RIL_REQUEST_SET_CALL_FORWARD: return "SET_CALL_FORWARD";
-            case RIL_REQUEST_QUERY_CALL_WAITING: return "QUERY_CALL_WAITING";
-            case RIL_REQUEST_SET_CALL_WAITING: return "SET_CALL_WAITING";
-            case RIL_REQUEST_SMS_ACKNOWLEDGE: return "SMS_ACKNOWLEDGE";
-            case RIL_REQUEST_GET_IMEI: return "GET_IMEI";
-            case RIL_REQUEST_GET_IMEISV: return "GET_IMEISV";
-            case RIL_REQUEST_ANSWER: return "ANSWER";
-            case RIL_REQUEST_DEACTIVATE_DATA_CALL: return "DEACTIVATE_DATA_CALL";
-            case RIL_REQUEST_QUERY_FACILITY_LOCK: return "QUERY_FACILITY_LOCK";
-            case RIL_REQUEST_SET_FACILITY_LOCK: return "SET_FACILITY_LOCK";
-            case RIL_REQUEST_CHANGE_BARRING_PASSWORD: return "CHANGE_BARRING_PASSWORD";
-            case RIL_REQUEST_QUERY_NETWORK_SELECTION_MODE: return "QUERY_NETWORK_SELECTION_MODE";
-            case RIL_REQUEST_SET_NETWORK_SELECTION_AUTOMATIC: return "SET_NETWORK_SELECTION_AUTOMATIC";
-            case RIL_REQUEST_SET_NETWORK_SELECTION_MANUAL: return "SET_NETWORK_SELECTION_MANUAL";
-            case RIL_REQUEST_QUERY_AVAILABLE_NETWORKS : return "QUERY_AVAILABLE_NETWORKS ";
-            case RIL_REQUEST_DTMF_START: return "DTMF_START";
-            case RIL_REQUEST_DTMF_STOP: return "DTMF_STOP";
-            case RIL_REQUEST_BASEBAND_VERSION: return "BASEBAND_VERSION";
-            case RIL_REQUEST_SEPARATE_CONNECTION: return "SEPARATE_CONNECTION";
-            case RIL_REQUEST_SET_MUTE: return "SET_MUTE";
-            case RIL_REQUEST_GET_MUTE: return "GET_MUTE";
-            case RIL_REQUEST_QUERY_CLIP: return "QUERY_CLIP";
-            case RIL_REQUEST_LAST_DATA_CALL_FAIL_CAUSE: return "LAST_DATA_CALL_FAIL_CAUSE";
-            case RIL_REQUEST_DATA_CALL_LIST: return "DATA_CALL_LIST";
-            case RIL_REQUEST_RESET_RADIO: return "RESET_RADIO";
-            case RIL_REQUEST_OEM_HOOK_RAW: return "OEM_HOOK_RAW";
-            case RIL_REQUEST_OEM_HOOK_STRINGS: return "OEM_HOOK_STRINGS";
-            case RIL_REQUEST_SCREEN_STATE: return "SCREEN_STATE";
-            case RIL_REQUEST_SET_SUPP_SVC_NOTIFICATION: return "SET_SUPP_SVC_NOTIFICATION";
-            case RIL_REQUEST_WRITE_SMS_TO_SIM: return "WRITE_SMS_TO_SIM";
-            case RIL_REQUEST_DELETE_SMS_ON_SIM: return "DELETE_SMS_ON_SIM";
-            case RIL_REQUEST_SET_BAND_MODE: return "SET_BAND_MODE";
-            case RIL_REQUEST_QUERY_AVAILABLE_BAND_MODE: return "QUERY_AVAILABLE_BAND_MODE";
-            case RIL_REQUEST_STK_GET_PROFILE: return "REQUEST_STK_GET_PROFILE";
-            case RIL_REQUEST_STK_SET_PROFILE: return "REQUEST_STK_SET_PROFILE";
-            case RIL_REQUEST_STK_SEND_ENVELOPE_COMMAND: return "REQUEST_STK_SEND_ENVELOPE_COMMAND";
-            case RIL_REQUEST_STK_SEND_TERMINAL_RESPONSE: return "REQUEST_STK_SEND_TERMINAL_RESPONSE";
-            case RIL_REQUEST_STK_HANDLE_CALL_SETUP_REQUESTED_FROM_SIM: return "REQUEST_STK_HANDLE_CALL_SETUP_REQUESTED_FROM_SIM";
-            case RIL_REQUEST_EXPLICIT_CALL_TRANSFER: return "REQUEST_EXPLICIT_CALL_TRANSFER";
-            case RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE: return "REQUEST_SET_PREFERRED_NETWORK_TYPE";
-            case RIL_REQUEST_GET_PREFERRED_NETWORK_TYPE: return "REQUEST_GET_PREFERRED_NETWORK_TYPE";
-            case RIL_REQUEST_GET_NEIGHBORING_CELL_IDS: return "REQUEST_GET_NEIGHBORING_CELL_IDS";
-            case RIL_REQUEST_SET_LOCATION_UPDATES: return "REQUEST_SET_LOCATION_UPDATES";
-            case RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE: return "RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE";
-            case RIL_REQUEST_CDMA_SET_ROAMING_PREFERENCE: return "RIL_REQUEST_CDMA_SET_ROAMING_PREFERENCE";
-            case RIL_REQUEST_CDMA_QUERY_ROAMING_PREFERENCE: return "RIL_REQUEST_CDMA_QUERY_ROAMING_PREFERENCE";
-            case RIL_REQUEST_SET_TTY_MODE: return "RIL_REQUEST_SET_TTY_MODE";
-            case RIL_REQUEST_QUERY_TTY_MODE: return "RIL_REQUEST_QUERY_TTY_MODE";
-            case RIL_REQUEST_CDMA_SET_PREFERRED_VOICE_PRIVACY_MODE: return "RIL_REQUEST_CDMA_SET_PREFERRED_VOICE_PRIVACY_MODE";
-            case RIL_REQUEST_CDMA_QUERY_PREFERRED_VOICE_PRIVACY_MODE: return "RIL_REQUEST_CDMA_QUERY_PREFERRED_VOICE_PRIVACY_MODE";
-            case RIL_REQUEST_CDMA_FLASH: return "RIL_REQUEST_CDMA_FLASH";
-            case RIL_REQUEST_CDMA_BURST_DTMF: return "RIL_REQUEST_CDMA_BURST_DTMF";
-            case RIL_REQUEST_CDMA_SEND_SMS: return "RIL_REQUEST_CDMA_SEND_SMS";
-            case RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE: return "RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE";
-            case RIL_REQUEST_GSM_GET_BROADCAST_CONFIG: return "RIL_REQUEST_GSM_GET_BROADCAST_CONFIG";
-            case RIL_REQUEST_GSM_SET_BROADCAST_CONFIG: return "RIL_REQUEST_GSM_SET_BROADCAST_CONFIG";
-            case RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG: return "RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG";
-            case RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG: return "RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG";
-            case RIL_REQUEST_GSM_BROADCAST_ACTIVATION: return "RIL_REQUEST_GSM_BROADCAST_ACTIVATION";
-            case RIL_REQUEST_CDMA_VALIDATE_AND_WRITE_AKEY: return "RIL_REQUEST_CDMA_VALIDATE_AND_WRITE_AKEY";
-            case RIL_REQUEST_CDMA_BROADCAST_ACTIVATION: return "RIL_REQUEST_CDMA_BROADCAST_ACTIVATION";
-            case RIL_REQUEST_CDMA_SUBSCRIPTION: return "RIL_REQUEST_CDMA_SUBSCRIPTION";
-            case RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM: return "RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM";
-            case RIL_REQUEST_CDMA_DELETE_SMS_ON_RUIM: return "RIL_REQUEST_CDMA_DELETE_SMS_ON_RUIM";
-            case RIL_REQUEST_DEVICE_IDENTITY: return "RIL_REQUEST_DEVICE_IDENTITY";
-            case RIL_REQUEST_GET_SMSC_ADDRESS: return "RIL_REQUEST_GET_SMSC_ADDRESS";
-            case RIL_REQUEST_SET_SMSC_ADDRESS: return "RIL_REQUEST_SET_SMSC_ADDRESS";
-            case RIL_REQUEST_EXIT_EMERGENCY_CALLBACK_MODE: return "REQUEST_EXIT_EMERGENCY_CALLBACK_MODE";
-            case RIL_REQUEST_REPORT_SMS_MEMORY_STATUS: return "RIL_REQUEST_REPORT_SMS_MEMORY_STATUS";
-            case RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING: return "RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING";
-            case RIL_REQUEST_CDMA_GET_SUBSCRIPTION_SOURCE: return "RIL_REQUEST_CDMA_GET_SUBSCRIPTION_SOURCE";
-            case RIL_REQUEST_GET_DATA_CALL_PROFILE: return "RIL_REQUEST_GET_DATA_CALL_PROFILE";
-            case RIL_REQUEST_ISIM_AUTHENTICATION: return "RIL_REQUEST_ISIM_AUTHENTICATION";
-            case RIL_REQUEST_ACKNOWLEDGE_INCOMING_GSM_SMS_WITH_PDU: return "RIL_REQUEST_ACKNOWLEDGE_INCOMING_GSM_SMS_WITH_PDU";
-            case RIL_REQUEST_STK_SEND_ENVELOPE_WITH_STATUS: return "RIL_REQUEST_STK_SEND_ENVELOPE_WITH_STATUS";
-            case RIL_REQUEST_VOICE_RADIO_TECH: return "RIL_REQUEST_VOICE_RADIO_TECH";
-            case RIL_REQUEST_GET_CELL_INFO_LIST: return "RIL_REQUEST_GET_CELL_INFO_LIST";
-            case RIL_REQUEST_SET_UNSOL_CELL_INFO_LIST_RATE: return "RIL_REQUEST_SET_CELL_INFO_LIST_RATE";
-            case RIL_REQUEST_SET_INITIAL_ATTACH_APN: return "RIL_REQUEST_SET_INITIAL_ATTACH_APN";
-            case RIL_REQUEST_SET_DATA_PROFILE: return "RIL_REQUEST_SET_DATA_PROFILE";
-            case RIL_REQUEST_IMS_REGISTRATION_STATE: return "RIL_REQUEST_IMS_REGISTRATION_STATE";
-            case RIL_REQUEST_IMS_SEND_SMS: return "RIL_REQUEST_IMS_SEND_SMS";
-            case RIL_REQUEST_SIM_TRANSMIT_APDU_BASIC: return "RIL_REQUEST_SIM_TRANSMIT_APDU_BASIC";
-            case RIL_REQUEST_SIM_OPEN_CHANNEL: return "RIL_REQUEST_SIM_OPEN_CHANNEL";
-            case RIL_REQUEST_SIM_CLOSE_CHANNEL: return "RIL_REQUEST_SIM_CLOSE_CHANNEL";
-            case RIL_REQUEST_SIM_TRANSMIT_APDU_CHANNEL: return "RIL_REQUEST_SIM_TRANSMIT_APDU_CHANNEL";
-            case RIL_REQUEST_NV_READ_ITEM: return "RIL_REQUEST_NV_READ_ITEM";
-            case RIL_REQUEST_NV_WRITE_ITEM: return "RIL_REQUEST_NV_WRITE_ITEM";
-            case RIL_REQUEST_NV_WRITE_CDMA_PRL: return "RIL_REQUEST_NV_WRITE_CDMA_PRL";
-            case RIL_REQUEST_NV_RESET_CONFIG: return "RIL_REQUEST_NV_RESET_CONFIG";
-            case RIL_REQUEST_SET_UICC_SUBSCRIPTION: return "RIL_REQUEST_SET_UICC_SUBSCRIPTION";
-            case RIL_REQUEST_ALLOW_DATA: return "RIL_REQUEST_ALLOW_DATA";
-            case RIL_REQUEST_GET_HARDWARE_CONFIG: return "GET_HARDWARE_CONFIG";
-            case RIL_REQUEST_SIM_AUTHENTICATION: return "RIL_REQUEST_SIM_AUTHENTICATION";
-            case RIL_REQUEST_SHUTDOWN: return "RIL_REQUEST_SHUTDOWN";
-            default: return "<unknown request>";
-        }
-    }
-
-    static String
-    ResponseToString(Int32 request)
-    {
-/*
- cat libs/telephony/ril_unsol_commands.h \
- | egrep "^ *{RIL_" \
- | sed -re 's/\{RIL_([^,]+),[^,]+,([^}]+).+/case RIL_\1: return "\1";/'
-*/
-        Switch(request) {
-            case RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED: return "UNSOL_RESPONSE_RADIO_STATE_CHANGED";
-            case RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED: return "UNSOL_RESPONSE_CALL_STATE_CHANGED";
-            case RIL_UNSOL_RESPONSE_VOICE_NETWORK_STATE_CHANGED: return "UNSOL_RESPONSE_VOICE_NETWORK_STATE_CHANGED";
-            case RIL_UNSOL_RESPONSE_NEW_SMS: return "UNSOL_RESPONSE_NEW_SMS";
-            case RIL_UNSOL_RESPONSE_NEW_SMS_STATUS_REPORT: return "UNSOL_RESPONSE_NEW_SMS_STATUS_REPORT";
-            case RIL_UNSOL_RESPONSE_NEW_SMS_ON_SIM: return "UNSOL_RESPONSE_NEW_SMS_ON_SIM";
-            case RIL_UNSOL_ON_USSD: return "UNSOL_ON_USSD";
-            case RIL_UNSOL_ON_USSD_REQUEST: return "UNSOL_ON_USSD_REQUEST";
-            case RIL_UNSOL_NITZ_TIME_RECEIVED: return "UNSOL_NITZ_TIME_RECEIVED";
-            case RIL_UNSOL_SIGNAL_STRENGTH: return "UNSOL_SIGNAL_STRENGTH";
-            case RIL_UNSOL_DATA_CALL_LIST_CHANGED: return "UNSOL_DATA_CALL_LIST_CHANGED";
-            case RIL_UNSOL_SUPP_SVC_NOTIFICATION: return "UNSOL_SUPP_SVC_NOTIFICATION";
-            case RIL_UNSOL_STK_SESSION_END: return "UNSOL_STK_SESSION_END";
-            case RIL_UNSOL_STK_PROACTIVE_COMMAND: return "UNSOL_STK_PROACTIVE_COMMAND";
-            case RIL_UNSOL_STK_EVENT_NOTIFY: return "UNSOL_STK_EVENT_NOTIFY";
-            case RIL_UNSOL_STK_CALL_SETUP: return "UNSOL_STK_CALL_SETUP";
-            case RIL_UNSOL_SIM_SMS_STORAGE_FULL: return "UNSOL_SIM_SMS_STORAGE_FULL";
-            case RIL_UNSOL_SIM_REFRESH: return "UNSOL_SIM_REFRESH";
-            case RIL_UNSOL_CALL_RING: return "UNSOL_CALL_RING";
-            case RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED: return "UNSOL_RESPONSE_SIM_STATUS_CHANGED";
-            case RIL_UNSOL_RESPONSE_CDMA_NEW_SMS: return "UNSOL_RESPONSE_CDMA_NEW_SMS";
-            case RIL_UNSOL_RESPONSE_NEW_BROADCAST_SMS: return "UNSOL_RESPONSE_NEW_BROADCAST_SMS";
-            case RIL_UNSOL_CDMA_RUIM_SMS_STORAGE_FULL: return "UNSOL_CDMA_RUIM_SMS_STORAGE_FULL";
-            case RIL_UNSOL_RESTRICTED_STATE_CHANGED: return "UNSOL_RESTRICTED_STATE_CHANGED";
-            case RIL_UNSOL_ENTER_EMERGENCY_CALLBACK_MODE: return "UNSOL_ENTER_EMERGENCY_CALLBACK_MODE";
-            case RIL_UNSOL_CDMA_CALL_WAITING: return "UNSOL_CDMA_CALL_WAITING";
-            case RIL_UNSOL_CDMA_OTA_PROVISION_STATUS: return "UNSOL_CDMA_OTA_PROVISION_STATUS";
-            case RIL_UNSOL_CDMA_INFO_REC: return "UNSOL_CDMA_INFO_REC";
-            case RIL_UNSOL_OEM_HOOK_RAW: return "UNSOL_OEM_HOOK_RAW";
-            case RIL_UNSOL_RINGBACK_TONE: return "UNSOL_RINGBACK_TONE";
-            case RIL_UNSOL_RESEND_INCALL_MUTE: return "UNSOL_RESEND_INCALL_MUTE";
-            case RIL_UNSOL_CDMA_SUBSCRIPTION_SOURCE_CHANGED: return "CDMA_SUBSCRIPTION_SOURCE_CHANGED";
-            case RIL_UNSOl_CDMA_PRL_CHANGED: return "UNSOL_CDMA_PRL_CHANGED";
-            case RIL_UNSOL_EXIT_EMERGENCY_CALLBACK_MODE: return "UNSOL_EXIT_EMERGENCY_CALLBACK_MODE";
-            case RIL_UNSOL_RIL_CONNECTED: return "UNSOL_RIL_CONNECTED";
-            case RIL_UNSOL_VOICE_RADIO_TECH_CHANGED: return "UNSOL_VOICE_RADIO_TECH_CHANGED";
-            case RIL_UNSOL_CELL_INFO_LIST: return "UNSOL_CELL_INFO_LIST";
-            case RIL_UNSOL_RESPONSE_IMS_NETWORK_STATE_CHANGED:
-                return "UNSOL_RESPONSE_IMS_NETWORK_STATE_CHANGED";
-            case RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED:
-                    return "RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED";
-            case RIL_UNSOL_SRVCC_STATE_NOTIFY:
-                    return "UNSOL_SRVCC_STATE_NOTIFY";
-            case RIL_UNSOL_HARDWARE_CONFIG_CHANGED: return "RIL_UNSOL_HARDWARE_CONFIG_CHANGED";
-            case RIL_UNSOL_ON_SS: return "UNSOL_ON_SS";
-            case RIL_UNSOL_STK_CC_ALPHA_NOTIFY: return "UNSOL_STK_CC_ALPHA_NOTIFY";
-            case RIL_UNSOL_STK_SEND_SMS_RESULT: return "RIL_UNSOL_STK_SEND_SMS_RESULT";
-            default: return "<unknown response>";
-        }
-    }
-
-    protected void RiljLog(String msg) {
-        Rlog->D(RILJ_LOG_TAG, msg
-                + (mInstanceId != NULL ? (" [SUB" + mInstanceId + "]") : ""));
-    }
-
-    protected void RiljLogv(String msg) {
-        Rlog->V(RILJ_LOG_TAG, msg
-                + (mInstanceId != NULL ? (" [SUB" + mInstanceId + "]") : ""));
-    }
-
-    protected void UnsljLog(Int32 response) {
-        RiljLog("[UNSL]< " + ResponseToString(response));
-    }
-
-    protected void UnsljLogMore(Int32 response, String more) {
-        RiljLog("[UNSL]< " + ResponseToString(response) + " " + more);
-    }
-
-    protected void UnsljLogRet(Int32 response, Object ret) {
-        RiljLog("[UNSL]< " + ResponseToString(response) + " " + RetToString(response, ret));
-    }
-
-    protected void UnsljLogvRet(Int32 response, Object ret) {
-        RiljLogv("[UNSL]< " + ResponseToString(response) + " " + RetToString(response, ret));
-    }
-
-    private Object
-    ResponseSsData(Parcel p) {
-        Int32 num;
-        SsData ssData = new SsData();
-
-        ssData.serviceType = ssData->ServiceTypeFromRILInt(p->ReadInt());
-        ssData.requestType = ssData->RequestTypeFromRILInt(p->ReadInt());
-        ssData.teleserviceType = ssData->TeleserviceTypeFromRILInt(p->ReadInt());
-        ssData.serviceClass = p->ReadInt(); // This is service class sent in the SS request.
-        ssData.result = p->ReadInt(); // This is the result of the SS request.
-        num = p->ReadInt();
-
-        If (ssData.serviceType->IsTypeCF() &&
-            ssData.requestType->IsTypeInterrogation()) {
-            ssData.cfInfo = new CallForwardInfo[num];
-
-            For (Int32 i = 0; i < num; i++) {
-                ssData.cfInfo[i] = new CallForwardInfo();
-
-                ssData.cfInfo[i].status = p->ReadInt();
-                ssData.cfInfo[i].reason = p->ReadInt();
-                ssData.cfInfo[i].serviceClass = p->ReadInt();
-                ssData.cfInfo[i].toa = p->ReadInt();
-                ssData.cfInfo[i].number = p->ReadString();
-                ssData.cfInfo[i].timeSeconds = p->ReadInt();
-
-                RiljLog("[SS Data] CF Info " + i + " : " +  ssData.cfInfo[i]);
-            }
-        } else {
-            ssData.ssInfo = new Int32[num];
-            For (Int32 i = 0; i < num; i++) {
-                ssData.ssInfo[i] = p->ReadInt();
-                RiljLog("[SS Data] SS Info " + i + " : " +  ssData.ssInfo[i]);
-            }
-        }
-
-        return ssData;
-    }
-
-
-    // ***** Methods for CDMA support
-    //@Override
-    CARAPI
-    GetDeviceIdentity(Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_DEVICE_IDENTITY, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI
-    GetCDMASubscription(Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_CDMA_SUBSCRIPTION, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI SetPhoneType(Int32 phoneType) { // Called by CDMAPhone and GSMPhone constructor
-        If (RILJ_LOGD) RiljLog("setPhoneType=" + phoneType + " old value=" + mPhoneType);
-        mPhoneType = phoneType;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI QueryCdmaRoamingPreference(Message response) {
-        RILRequest rr = RILRequest->Obtain(
-                RILConstants.RIL_REQUEST_CDMA_QUERY_ROAMING_PREFERENCE, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI SetCdmaRoamingPreference(Int32 cdmaRoamingType, Message response) {
-        RILRequest rr = RILRequest->Obtain(
-                RILConstants.RIL_REQUEST_CDMA_SET_ROAMING_PREFERENCE, response);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(cdmaRoamingType);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + " : " + cdmaRoamingType);
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI SetCdmaSubscriptionSource(Int32 cdmaSubscription , Message response) {
-        RILRequest rr = RILRequest->Obtain(
-                RILConstants.RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE, response);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(cdmaSubscription);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + " : " + cdmaSubscription);
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI GetCdmaSubscriptionSource(Message response) {
-        RILRequest rr = RILRequest->Obtain(
-                RILConstants.RIL_REQUEST_CDMA_GET_SUBSCRIPTION_SOURCE, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI QueryTTYMode(Message response) {
-        RILRequest rr = RILRequest->Obtain(
-                RILConstants.RIL_REQUEST_QUERY_TTY_MODE, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI SetTTYMode(Int32 ttyMode, Message response) {
-        RILRequest rr = RILRequest->Obtain(
-                RILConstants.RIL_REQUEST_SET_TTY_MODE, response);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(ttyMode);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + " : " + ttyMode);
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI
-    SendCDMAFeatureCode(String FeatureCode, Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_CDMA_FLASH, response);
-
-        rr.mParcel->WriteString(FeatureCode);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + " : " + FeatureCode);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI GetCdmaBroadcastConfig(Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG, response);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI SetCdmaBroadcastConfig(CdmaSmsBroadcastConfigInfo[] configs, Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG, response);
-
-        // Convert to 1 service category per Config (the way RIL takes is)
-        ArrayList<CdmaSmsBroadcastConfigInfo> processedConfigs =
-            new ArrayList<CdmaSmsBroadcastConfigInfo>();
-        For (CdmaSmsBroadcastConfigInfo config : configs) {
-            For (Int32 i = config->GetFromServiceCategory(); i <= config->GetToServiceCategory(); i++) {
-                processedConfigs->Add(new CdmaSmsBroadcastConfigInfo(i,
-                        i,
-                        config->GetLanguage(),
-                        config->IsSelected()));
-            }
-        }
-
-        CdmaSmsBroadcastConfigInfo[] rilConfigs = processedConfigs->ToArray(configs);
-        rr.mParcel->WriteInt(rilConfigs.length);
-        For(Int32 i = 0; i < rilConfigs.length; i++) {
-            rr.mParcel->WriteInt(rilConfigs[i].GetFromServiceCategory());
-            rr.mParcel->WriteInt(rilConfigs[i].GetLanguage());
-            rr.mParcel->WriteInt(rilConfigs[i].IsSelected() ? 1 : 0);
-        }
-
-        If (RILJ_LOGD) {
-            RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                    + " with " + rilConfigs.length + " configs : ");
-            For (Int32 i = 0; i < rilConfigs.length; i++) {
-                RiljLog(rilConfigs[i].ToString());
-            }
-        }
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI SetCdmaBroadcastActivation(Boolean activate, Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_CDMA_BROADCAST_ACTIVATION, response);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(activate ? 0 :1);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI ExitEmergencyCallbackMode(Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_EXIT_EMERGENCY_CALLBACK_MODE, response);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI RequestIsimAuthentication(String nonce, Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_ISIM_AUTHENTICATION, response);
-
-        rr.mParcel->WriteString(nonce);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI RequestIccSimAuthentication(Int32 authContext, String data, String aid,
-                                            Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_SIM_AUTHENTICATION, response);
-
-        rr.mParcel->WriteInt(authContext);
-        rr.mParcel->WriteString(data);
-        rr.mParcel->WriteString(aid);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI GetCellInfoList(Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_GET_CELL_INFO_LIST, result);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI SetCellInfoListRate(Int32 rateInMillis, Message response) {
-        If (RILJ_LOGD) RiljLog("setCellInfoListRate: " + rateInMillis);
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_SET_UNSOL_CELL_INFO_LIST_RATE, response);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(rateInMillis);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    CARAPI SetInitialAttachApn(String apn, String protocol, Int32 authType, String username,
-            String password, Message result) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_SET_INITIAL_ATTACH_APN, result);
-
-        If (RILJ_LOGD) RiljLog("Set RIL_REQUEST_SET_INITIAL_ATTACH_APN");
-
-        rr.mParcel->WriteString(apn);
-        rr.mParcel->WriteString(protocol);
-        rr.mParcel->WriteInt(authType);
-        rr.mParcel->WriteString(username);
-        rr.mParcel->WriteString(password);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + ", apn:" + apn + ", protocol:" + protocol + ", authType:" + authType
-                + ", username:" + username + ", password:" + password);
-
-        Send(rr);
-    }
-
-    CARAPI SetDataProfile(DataProfile[] dps, Message result) {
-        If (RILJ_LOGD) RiljLog("Set RIL_REQUEST_SET_DATA_PROFILE");
-
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_SET_DATA_PROFILE, NULL);
-        DataProfile->ToParcel(rr.mParcel, dps);
-
-        If (RILJ_LOGD) {
-            RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                    + " with " + dps + " Data Profiles : ");
-            For (Int32 i = 0; i < dps.length; i++) {
-                RiljLog(dps[i].ToString());
-            }
-        }
-
-        Send(rr);
-    }
-
-    /* (non-Javadoc)
-     * @see com.android.internal.telephony.BaseCommands#TestingEmergencyCall()
-     */
-    //@Override
-    CARAPI TestingEmergencyCall() {
-        If (RILJ_LOGD) RiljLog("testingEmergencyCall");
-        mTestingEmergencyCall->Set(TRUE);
-    }
-
-    CARAPI Dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw->Println("RIL: " + this);
-        pw->Println(" mSocket=" + mSocket);
-        pw->Println(" mSenderThread=" + mSenderThread);
-        pw->Println(" mSender=" + mSender);
-        pw->Println(" mReceiverThread=" + mReceiverThread);
-        pw->Println(" mReceiver=" + mReceiver);
-        pw->Println(" mWakeLock=" + mWakeLock);
-        pw->Println(" mWakeLockTimeout=" + mWakeLockTimeout);
-        {    AutoLock syncLock(mRequestList);
-            {    AutoLock syncLock(mWakeLock);
-                pw->Println(" mWakeLockCount=" + mWakeLockCount);
-            }
-            Int32 count = mRequestList->Size();
-            pw->Println(" mRequestList count=" + count);
-            For (Int32 i = 0; i < count; i++) {
-                RILRequest rr = mRequestList->ValueAt(i);
-                pw->Println("  [" + rr.mSerial + "] " + RequestToString(rr.mRequest));
-            }
-        }
-        pw->Println(" mLastNITZTimeInfo=" + mLastNITZTimeInfo);
-        pw->Println(" mTestingEmergencyCall=" + mTestingEmergencyCall->Get());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI IccOpenLogicalChannel(String AID, Message response) {
-        If(mRilVersion < 10) {
-            If (response != NULL) {
-                CommandException ex = new CommandException(
-                    CommandException.Error.REQUEST_NOT_SUPPORTED);
-                AsyncResult->ForMessage(response, NULL, ex);
-                response->SendToTarget();
-            }
-            return;
-        }
-
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_SIM_OPEN_CHANNEL, response);
-        rr.mParcel->WriteString(AID);
-
-        If (RILJ_LOGD)
-            RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI IccCloseLogicalChannel(Int32 channel, Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_SIM_CLOSE_CHANNEL, response);
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(channel);
-
-        If (RILJ_LOGD)
-            RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI IccTransmitApduLogicalChannel(Int32 channel, Int32 cla, Int32 instruction,
-            Int32 p1, Int32 p2, Int32 p3, String data, Message response) {
-
-        If(mRilVersion < 10) {
-            If (response != NULL) {
-                CommandException ex = new CommandException(
-                    CommandException.Error.REQUEST_NOT_SUPPORTED);
-                AsyncResult->ForMessage(response, NULL, ex);
-                response->SendToTarget();
-            }
-            return;
-        }
-
-        If (channel <= 0) {
-            throw new RuntimeException(
-                "Invalid channel in iccTransmitApduLogicalChannel: " + channel);
-        }
-
-        IccTransmitApduHelper(RIL_REQUEST_SIM_TRANSMIT_APDU_CHANNEL, channel, cla,
-                instruction, p1, p2, p3, data, response);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI IccTransmitApduBasicChannel(Int32 cla, Int32 instruction, Int32 p1, Int32 p2,
-            Int32 p3, String data, Message response) {
-        IccTransmitApduHelper(RIL_REQUEST_SIM_TRANSMIT_APDU_BASIC, 0, cla, instruction,
-                p1, p2, p3, data, response);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //@Override
-    CARAPI GetAtr(Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_SIM_GET_ATR, response);
-        Int32 slotId = 0;
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(slotId);
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> iccGetAtr: "
-                + RequestToString(rr.mRequest) + " " + slotId);
-
-        Send(rr);
-    }
-
-    /*
-     * Helper function for the iccTransmitApdu* commands above.
-     */
-    private void IccTransmitApduHelper(Int32 rilCommand, Int32 channel, Int32 cla,
-            Int32 instruction, Int32 p1, Int32 p2, Int32 p3, String data, Message response) {
-
-        If(mRilVersion < 10) {
-            If (response != NULL) {
-                CommandException ex = new CommandException(
-                    CommandException.Error.REQUEST_NOT_SUPPORTED);
-                AsyncResult->ForMessage(response, NULL, ex);
-                response->SendToTarget();
-            }
-            return;
-        }
-
-        RILRequest rr = RILRequest->Obtain(rilCommand, response);
-        rr.mParcel->WriteInt(channel);
-        rr.mParcel->WriteInt(cla);
-        rr.mParcel->WriteInt(instruction);
-        rr.mParcel->WriteInt(p1);
-        rr.mParcel->WriteInt(p2);
-        rr.mParcel->WriteInt(p3);
-        rr.mParcel->WriteString(data);
-
-        If (RILJ_LOGD)
-            RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest));
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI NvReadItem(Int32 itemID, Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_NV_READ_ITEM, response);
-
-        rr.mParcel->WriteInt(itemID);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + ' ' + itemID);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI NvWriteItem(Int32 itemID, String itemValue, Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_NV_WRITE_ITEM, response);
-
-        rr.mParcel->WriteInt(itemID);
-        rr.mParcel->WriteString(itemValue);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + ' ' + itemID + ": " + itemValue);
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI NvWriteCdmaPrl(Byte[] preferredRoamingList, Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_NV_WRITE_CDMA_PRL, response);
-
-        rr.mParcel->WriteByteArray(preferredRoamingList);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + " (" + preferredRoamingList.length + " bytes)");
-
-        Send(rr);
-    }
-
-    //@Override
-    CARAPI NvResetConfig(Int32 resetType, Message response) {
-        RILRequest rr = RILRequest->Obtain(RIL_REQUEST_NV_RESET_CONFIG, response);
-
-        rr.mParcel->WriteInt(1);
-        rr.mParcel->WriteInt(resetType);
-
-        If (RILJ_LOGD) RiljLog(rr->SerialString() + "> " + RequestToString(rr.mRequest)
-                + ' ' + resetType);
-
-        Send(rr);
     }
 }
+
+void RIL::NotifyRegistrantsRilConnectionChanged(
+    /* [in] */ Int32 rilVer)
+{
+    mRilVersion = rilVer;
+    if (mRilConnectedRegistrants != NULL) {
+        AutoPtr<IInteger32> p;
+        CInteger32::New(rilVer, (IInteger32**)&p);
+        AutoPtr<AsyncResult> ar = new AsyncResult(NULL, p, NULL);
+        mRilConnectedRegistrants->NotifyRegistrants(ar);
+    }
+}
+
+Boolean RIL::IsQcUnsolOemHookResp(
+    /* [in] */ IByteBuffer* oemHookResponse)
+{
+    /* Check OEM ID in UnsolOemHook response */
+    Int32 cap = 0;
+    IBuffer::Probe(oemHookResponse)->GetCapacity(&cap);
+    if (cap < mHeaderSize) {
+        /*
+         * size of UnsolOemHook message is less than expected, considered as
+         * External OEM's message
+         */
+        // Rlog.d(RILJ_LOG_TAG,
+        //         "RIL_UNSOL_OEM_HOOK_RAW data size is " + oemHookResponse.capacity());
+        return FALSE;
+    }
+    else {
+        AutoPtr<ArrayOf<Byte> > oemIdBytes = ArrayOf<Byte>::Alloc(OEM_IDENTIFIER.GetLength());
+        oemHookResponse->Get(oemIdBytes);
+        String oemIdString;// = new String(oemIdBytes);
+        // Rlog.d(RILJ_LOG_TAG, "Oem ID in RIL_UNSOL_OEM_HOOK_RAW is " + oemIdString);
+        if (!oemIdString.Equals(OEM_IDENTIFIER)) {
+            /* OEM ID not matched, considered as External OEM's message */
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+void RIL::ProcessUnsolOemhookResponse(
+    /* [in] */ IByteBuffer* oemHookResponse)
+{
+    Int32 responseId = 0, responseSize = 0, responseVoiceId = 0;
+
+    oemHookResponse->GetInt32(&responseId);
+    // Rlog.d(RILJ_LOG_TAG, "Response ID in RIL_UNSOL_OEM_HOOK_RAW is " + responseId);
+
+    oemHookResponse->GetInt32(&responseSize);
+    if (responseSize < 0) {
+        // Rlog.e(RILJ_LOG_TAG, "Response Size is Invalid " + responseSize);
+        return;
+    }
+
+    AutoPtr<ArrayOf<Byte> > responseData = ArrayOf<Byte>::Alloc(responseSize);
+    Int32 remain = 0;
+    IBuffer::Probe(oemHookResponse)->GetRemaining(&remain);
+    if (remain == responseSize) {
+        oemHookResponse->Get(responseData, 0, responseSize);
+    }
+    else {
+        // Rlog.e(RILJ_LOG_TAG, "Response Size(" + responseSize
+        //         + ") doesnot match remaining bytes(" +
+        //         oemHookResponse.remaining() + ") in the buffer. So, don't process further");
+        return;
+    }
+
+    switch (responseId) {
+        case 0x80000 + 1018:    // OEMHOOK_UNSOL_WWAN_IWLAN_COEXIST
+            NotifyWwanIwlanCoexist(responseData);
+            break;
+
+        case 0x80000 + 1016:    // OEMHOOK_UNSOL_SIM_REFRESH
+            NotifySimRefresh(responseData);
+            break;
+
+        case 0x80000 + 1020:    // QCRIL_EVT_HOOK_UNSOL_MODEM_CAPABILITY
+            // Rlog.d(RILJ_LOG_TAG, "QCRIL_EVT_HOOK_UNSOL_MODEM_CAPABILITY = mInstanceId"
+            //         + mInstanceId);
+            NotifyModemCap(responseData, mInstanceId);
+            break;
+
+        default:
+            // Rlog.d(RILJ_LOG_TAG, "Response ID " + responseId
+            //         + " is not served in this process.");
+            break;
+    }
+}
+
+void RIL::NotifyWwanIwlanCoexist(
+    /* [in] */ ArrayOf<Byte>* data)
+{
+    assert(0 && "TODO");
+    AutoPtr<AsyncResult> ar;// = new AsyncResult(NULL, data, NULL);
+    mWwanIwlanCoexistenceRegistrants->NotifyRegistrants(ar);
+    // Rlog.d(RILJ_LOG_TAG, "WWAN, IWLAN coexistence notified to registrants");
+}
+
+void RIL::NotifySimRefresh(
+    /* [in] */ ArrayOf<Byte>* data)
+{
+    Int32 len = data->GetLength();
+    AutoPtr<ArrayOf<Byte> > userdata = ArrayOf<Byte>::Alloc(1 + len);
+    data->Copy(userdata, 0, len);
+    //Add slot id in SIM_REFRESH event to notify framework: IccRecords.
+    if (mInstanceId == NULL) {
+        (*userdata)[len] = 0;
+    }
+    else {
+        Int32 id = 0;
+        mInstanceId->GetValue(&id);
+        (*userdata)[len] = (Byte)(id & 0xFF);
+    }
+
+    assert(0 && "TODO");
+    AutoPtr<AsyncResult> ar;// = new AsyncResult(NULL, userdata, NULL);
+    mSimRefreshRegistrants->NotifyRegistrants(ar);
+    // Rlog.d(RILJ_LOG_TAG, "SIM_REFRESH notified to registrants");
+}
+
+void RIL::NotifyModemCap(
+    /* [in] */ ArrayOf<Byte>* data,
+    /* [in] */ IInteger32* phoneId)
+{
+    Int32 id = 0;
+    phoneId->GetValue(&id);
+    AutoPtr<UnsolOemHookBuffer> buffer = new UnsolOemHookBuffer(id, data);
+
+    //Had notifyRegistrants not discarded userObj, we could have easily
+    //passed the subId as ar.userObj.
+    AutoPtr<AsyncResult> ar = new AsyncResult(NULL, (IInterface*)(IObject*)buffer.Get(), NULL);
+
+    mModemCapRegistrants->NotifyRegistrants(ar);
+    // Rlog.d(RILJ_LOG_TAG, "MODEM_CAPABILITY on phone=" + phoneId + " notified to registrants");
+}
+
+AutoPtr<IInterface> RIL::ResponseInts(
+    /* [in] */ IParcel* p)
+{
+    Int32 numInts = 0;
+
+    p->ReadInt32(&numInts);
+
+    AutoPtr<ArrayOf<Int32> > response = ArrayOf<Int32>::Alloc(numInts);
+
+    for (Int32 i = 0 ; i < numInts ; i++) {
+        p->ReadInt32(&((*response)[i]));
+    }
+
+    assert(0 && "TODO");
+    // return response;
+    return NULL;
+}
+
+AutoPtr<IInterface> RIL::ResponseVoid(
+    /* [in] */ IParcel* p)
+{
+    return NULL;
+}
+
+AutoPtr<IInterface> RIL::ResponseCallForward(
+    /* [in] */ IParcel* p)
+{
+    Int32 numInfos = 0;
+
+    p->ReadInt32(&numInfos);
+
+    AutoPtr<ArrayOf<ICallForwardInfo*> > infos = ArrayOf<ICallForwardInfo*>::Alloc(numInfos);
+
+    for (Int32 i = 0 ; i < numInfos ; i++) {
+        assert(0 && "TODO");
+        // (*infos)[i] = new CallForwardInfo();
+        AutoPtr<CallForwardInfo> pInfo = (CallForwardInfo*)((*infos)[i]);
+
+        Int32 status = 0;
+        p->ReadInt32(&status);
+        pInfo->mStatus = status;
+
+        Int32 reason = 0;
+        p->ReadInt32(&reason);
+        pInfo->mReason = reason;
+
+        Int32 serviceClass = 0;
+        p->ReadInt32(&serviceClass);
+        pInfo->mServiceClass = serviceClass;
+
+        Int32 toa = 0;
+        p->ReadInt32(&toa);
+        pInfo->mToa = toa;
+
+        String number;
+        p->ReadString(&number);
+        pInfo->mNumber = number;
+
+        Int32 timeSeconds = 0;
+        p->ReadInt32(&timeSeconds);
+        pInfo->mTimeSeconds = timeSeconds;
+    }
+
+    assert(0 && "TODO");
+    // return infos;
+    return NULL;
+}
+
+AutoPtr<IInterface> RIL::ResponseSuppServiceNotification(
+    /* [in] */ IParcel* p)
+{
+    AutoPtr<ISuppServiceNotification> notification;
+    assert(0 && "TODO");
+    // CSuppServiceNotification::New((ISuppServiceNotification**)&notification);
+
+    Int32 notificationType = 0;
+    p->ReadInt32(&notificationType);
+    // notification->mNotificationType = notificationType;
+
+    Int32 code = 0;
+    p->ReadInt32(&code);
+    // notification->mCode = code;
+
+    Int32 index = 0;
+    p->ReadInt32(&index);
+    // notification->mIndex = index;
+
+    Int32 type = 0;
+    p->ReadInt32(&type);
+    // notification->mType = type;
+
+    String number;
+    p->ReadString(&number);
+    // notification->mNumber = number;
+
+    return notification;
+}
+
+AutoPtr<IInterface> RIL::ResponseCdmaSms(
+    /* [in] */ IParcel* p)
+{
+    AutoPtr<ISmsMessage> sms;
+    assert(0 && "TODO");
+    // sms = SmsMessage::NewFromParcel(p);
+
+    return sms;
+}
+
+AutoPtr<IInterface> RIL::ResponseString(
+    /* [in] */ IParcel* p)
+{
+    String response;
+
+    p->ReadString(&response);
+
+    AutoPtr<ICharSequence> pResult;
+    CString::New(response, (ICharSequence**)&pResult);
+    return pResult;
+}
+
+AutoPtr<IInterface> RIL::ResponseStrings(
+    /* [in] */ IParcel* p)
+{
+    Int32 num;
+    AutoPtr<ArrayOf<String> > response;
+
+    assert(0 && "TODO");
+    // p->ReadStringArray((ArrayOf<String>**)&response);
+
+    // return response;
+    return NULL;
+}
+
+AutoPtr<IInterface> RIL::ResponseRaw(
+    /* [in] */ IParcel* p)
+{
+    Int32 num;
+    AutoPtr<ArrayOf<Byte> > response;
+
+    assert(0 && "TODO");
+    // p->CreateByteArray((ArrayOf<Byte>**)&response);
+
+    // return response;
+    return NULL;
+}
+
+AutoPtr<IInterface> RIL::ResponseSMS(
+    /* [in] */ IParcel* p)
+{
+    Int32 messageRef = 0, errorCode = 0;
+    String ackPDU;
+
+    p->ReadInt32(&messageRef);
+    p->ReadString(&ackPDU);
+    p->ReadInt32(&errorCode);
+
+    AutoPtr<ISmsResponse> response;
+    assert(0 && "TODO");
+    // CSmsResponse::New(messageRef, ackPDU, errorCode, (ISmsResponse**)&response);
+
+    return response;
+}
+
+AutoPtr<IInterface> RIL::ResponseICC_IO(
+    /* [in] */ IParcel* p)
+{
+    Int32 sw1 = 0, sw2 = 0;
+    AutoPtr<IMessage> ret;
+
+    p->ReadInt32(&sw1);
+    p->ReadInt32(&sw2);
+
+    String s;
+    p->ReadString(&s);
+
+    if (RILJ_LOGV) {
+        String str("< iccIO: ");
+        str += " 0x";
+        str += StringUtils::ToHexString(sw1);
+        str += " 0x";
+        str += StringUtils::ToHexString(sw2);
+        str += " ";
+        str += s;
+        RiljLog(str);
+    }
+
+    AutoPtr<IIccIoResult> res;
+    assert(0 && "TODO");
+    // CIccIoResult::New(sw1, sw2, s, (IIccIoResult**)&res);
+    return res;
+}
+
+AutoPtr<IInterface> RIL::ResponseICC_IOBase64(
+    /* [in] */ IParcel* p)
+{
+    Int32 sw1 = 0, sw2 = 0;
+    AutoPtr<IMessage> ret;
+
+    p->ReadInt32(&sw1);
+    p->ReadInt32(&sw2);
+
+    String s;
+    p->ReadString(&s);
+
+    if (RILJ_LOGV) {
+        String str("< iccIO: ");
+        str += " 0x";
+        str += StringUtils::ToHexString(sw1);
+        str += " 0x";
+        str += StringUtils::ToHexString(sw2);
+        str += " ";
+        str += s;
+        RiljLog(str);
+    }
+
+    AutoPtr<IIccIoResult> res;
+    assert(0 && "TODO");
+    // CIccIoResult::New(sw1, sw2, android.util.Base64.decode(s, android.util.Base64.DEFAULT), (IIccIoResult**)&res);
+    return res;
+}
+
+ECode RIL::NeedsOldRilFeature(
+    /* [in] */ String feature,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<ISystemProperties> sp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
+    String res;
+    sp->Get(String("ro.telephony.ril.config"), String(""), &res);
+    AutoPtr<ArrayOf<String> > features;
+    StringUtils::Split(res, String(","), (ArrayOf<String>**)&features);
+    for (Int32 i = 0; i < features->GetLength(); i++) {
+        String found = (*features)[i];
+        if (found.Equals(feature)) {
+            *result = TRUE;
+            return NOERROR;
+        }
+    }
+    *result = FALSE;
+    return NOERROR;
+}
+
+AutoPtr<IInterface> RIL::ResponseIccCardStatus(
+    /* [in] */ IParcel* p)
+{
+    AutoPtr<IIccCardApplicationStatus> appStatus;
+
+    Boolean oldRil = FALSE;
+    NeedsOldRilFeature(String("icccardstatus"), &oldRil);
+
+    AutoPtr<IIccCardStatus> cardStatus;
+    assert(0 && "TODO");
+    // CIccCardStatus::New((IIccCardStatus**)&cardStatus);
+    Int32 cardState = 0;
+    p->ReadInt32(&cardState);
+    cardStatus->SetCardState(cardState);
+    Int32 pinState = 0;
+    p->ReadInt32(&pinState);
+    cardStatus->SetUniversalPinState(pinState);
+    assert(0 && "TODO");
+    // p->ReadInt32(&(cardStatus->mGsmUmtsSubscriptionAppIndex));
+    // p->ReadInt32(&(cardStatus->mCdmaSubscriptionAppIndex));
+
+    // if (!oldRil) {
+    //     p->ReadInt32(*(cardStatus->mImsSubscriptionAppIndex));
+    // }
+
+    Int32 numApplications = 0;
+    p->ReadInt32(&numApplications);
+
+    // limit to maximum allowed applications
+    if (numApplications > IIccCardStatus::CARD_MAX_APPS) {
+        numApplications = IIccCardStatus::CARD_MAX_APPS;
+    }
+    assert(0 && "TODO");
+    // cardStatus->mApplications = new IccCardApplicationStatus[numApplications];
+
+    for (Int32 i = 0 ; i < numApplications ; i++) {
+        // appStatus = new IccCardApplicationStatus();
+        Int32 typeFromRILInt = 0;
+        p->ReadInt32(&typeFromRILInt);
+        // appStatus->mApp_type       = appStatus->AppTypeFromRILInt(typeFromRILInt);
+
+        Int32 stateFromRILInt = 0;
+        p->ReadInt32(&stateFromRILInt);
+        // appStatus->mApp_state      = appStatus->AppStateFromRILInt(stateFromRILInt);
+
+        Int32 perso_substate = 0;
+        p->ReadInt32(&perso_substate);
+        // appStatus->mPerso_substate = appStatus->PersoSubstateFromRILInt(perso_substate);
+
+        // p->ReadString(&(appStatus->mAid));
+        // p->ReadString(&(appStatus->mApp_label));
+        // p->ReadInt32(&(appStatus->mPin1_replaced));
+        Int32 pin1 = 0;
+        p->ReadInt32(&pin1);
+        // appStatus->mPin1           = appStatus->PinStateFromRILInt(pin1);
+        Int32 pin2 = 0;
+        p->ReadInt32(&pin2);
+        // appStatus->mPin2           = appStatus->PinStateFromRILInt(pin2);
+        // cardStatus->mApplications[i] = appStatus;
+    }
+    return cardStatus;
+}
+
+AutoPtr<IInterface> RIL::ResponseSimRefresh(
+    /* [in] */ IParcel* p)
+{
+    AutoPtr<IIccRefreshResponse> response;// = new IccRefreshResponse();
+
+    assert(0 && "TODO");
+    // p->ReadInt32(&(response->mRefreshResult));
+    // p->ReadInt32(&(response->mEfId));
+    // p->ReadString(&(response->mAid));
+    return response;
+}
+
+AutoPtr<IInterface> RIL::ResponseCallList(
+    /* [in] */ IParcel* p)
+{
+    Int32 num = 0;
+    Int32 voiceSettings = 0;
+    AutoPtr<IArrayList> response;
+    AutoPtr<IDriverCall> dc;
+
+    p->ReadInt32(&num);
+    CArrayList::New(num, (IArrayList**)&response);
+
+    if (RILJ_LOGV) {
+        String str("responseCallList: num=");
+        str += num;
+        str += " mEmergencyCallbackModeRegistrant=";
+        assert(0 && "TODO");
+        // str += mEmergencyCallbackModeRegistrant.Get();
+        str += " mTestingEmergencyCall=";
+        // str += mTestingEmergencyCall.Get();
+        RiljLog(str);
+    }
+    for (Int32 i = 0; i < num; i++) {
+        assert(0 && "TODO");
+        // dc = new DriverCall();
+
+        Int32 state = 0;
+        p->ReadInt32(&state);
+        // dc->mState = DriverCall::StateFromCLCC(state);
+        // p->ReadInt32(&(dc->mIndex));
+        // p->ReadInt32(&(dc->mTOA));
+        Int32 iMpty = 0;
+        p->ReadInt32(&iMpty);
+        // dc->mIsMpty = (0 != iMpty);
+        Int32 iMT = 0;
+        p->ReadInt32(&iMT);
+        // dc->mIsMT = (0 != iMT);
+        // p->ReadInt32(&(dc->mAls));
+        p->ReadInt32(&voiceSettings);
+        // dc->mIsVoice = (0 == voiceSettings) ? FALSE : TRUE;
+        Int32 isVoicePrivacy = 0;
+        p->ReadInt32(&isVoicePrivacy);
+        // dc->mIsVoicePrivacy = (0 != isVoicePrivacy);
+        // p->ReadString(&(dc->mNumber));
+        Int32 np = 0;
+        p->ReadInt32(&np);
+        // dc->mNumberPresentation = DriverCall::PresentationFromCLIP(np);
+        // p->ReadString(&(dc->mName));
+        // according to ril.h, namePresentation should be handled as numberPresentation;
+        Int32 namePresentation = 0;
+        p->ReadInt32(&namePresentation);
+        // dc->mNamePresentation = DriverCall::PresentationFromCLIP(namePresentation);
+        Int32 uusInfoPresent = 0;
+        p->ReadInt32(&uusInfoPresent);
+        if (uusInfoPresent == 1) {
+            // dc->mUusInfo = new UUSInfo();
+            Int32 type = 0;
+            p->ReadInt32(&type);
+            // dc->mUusInfo->SetType(type);
+            Int32 dcs = 0;
+            p->ReadInt32(&dcs);
+            // dc->mUusInfo->SetDcs(dcs);
+            AutoPtr<ArrayOf<Byte> > userData;
+            // p->CreateByteArray((ArrayOf<Byte>**)&userData);
+            // dc->mUusInfo->SetUserData(userData);
+            String str1("Incoming UUS : type=");
+            // str1 += dc->mUusInfo->GetType();
+            str1 += ", dcs=";
+            // str1 += dc->mUusInfo->GetDcs();
+            str1 += ", length=";
+            // str1 += dc->mUusInfo->GetUserData()->GetLength();
+            RiljLogv(str1);
+
+            String str2("Incoming UUS : data (string)=");
+            // str2 += new String(dc->mUusInfo->GetUserData());
+            RiljLogv(str2);
+
+            String str3("Incoming UUS : data (hex): ");
+            // str3 += StringUtils::ToHexString(dc->mUusInfo->GetUserData());
+            RiljLogv(str3);
+        }
+        else {
+            RiljLogv(String("Incoming UUS : NOT present!"));
+        }
+
+        // Make sure there's a leading + on addresses with a TOA of 145
+        // dc->mNumber = PhoneNumberUtils::StringFromStringAndTOA(dc->mNumber, dc->mTOA);
+
+        response->Add(dc);
+
+        assert(0 && "TODO");
+        // if (dc->mIsVoicePrivacy) {
+        //     mVoicePrivacyOnRegistrants->NotifyRegistrants();
+        //     RiljLog(String("InCall VoicePrivacy is enabled"));
+        // }
+        // else {
+        //     mVoicePrivacyOffRegistrants->NotifyRegistrants();
+        //     RiljLog(String("InCall VoicePrivacy is disabled"));
+        // }
+    }
+
+    AutoPtr<ICollections> cls;
+    CCollections::AcquireSingleton((ICollections**)&cls);
+    cls->Sort(IList::Probe(response));
+
+    Boolean bGetAndSet = FALSE;
+    mTestingEmergencyCall->GetAndSet(FALSE, &bGetAndSet);
+    if ((num == 0) && bGetAndSet) {
+        if (mEmergencyCallbackModeRegistrant != NULL) {
+            String str("responseCallList: call ended, testing emergency call,");
+            str += " notify ECM Registrants";
+            RiljLog(str);
+            mEmergencyCallbackModeRegistrant->NotifyRegistrant();
+        }
+    }
+
+    return response;
+}
+
+AutoPtr<IDataCallResponse> RIL::GetDataCallResponse(
+    /* [in] */ IParcel* p,
+    /* [in] */ Int32 version)
+{
+    assert(0 && "TODO");
+    AutoPtr<IDataCallResponse> dataCall;// = new DataCallResponse();
+
+    // dataCall->mVersion = version;
+    if (version < 5) {
+        // p->ReadInt32(&(dataCall->mCid));
+        // p->ReadInt32(&(dataCall->mActive));
+        // p->ReadString(&(dataCall->mType));
+        Boolean oldRil = FALSE;
+        NeedsOldRilFeature(String("datacallapn"), &oldRil);
+        if (version < 4 || oldRil) {
+            String APN;
+            p->ReadString(&APN); // APN - not used
+        }
+        String addresses;
+        p->ReadString(&addresses);
+        if (!TextUtils::IsEmpty(addresses)) {
+            // StringUtils::Split(addresses, String(" "), &(dataCall->mAddresses));
+        }
+        // DataCallState needs an ifname. Since we don't have one use the name from the ThrottleService resource (default=rmnet0).
+        AutoPtr<IResourcesHelper> hlp;
+        CResourcesHelper::AcquireSingleton((IResourcesHelper**)&hlp);
+        AutoPtr<IResources> res;
+        hlp->GetSystem((IResources**)&res);
+        // res->GetString(R::string::config_datause_iface, &(dataCall->mIfname));
+    }
+    else {
+        // p->ReadInt32(&(dataCall->mStatus));
+        Boolean oldRil = FALSE;
+        NeedsOldRilFeature(String("usehcradio"), &oldRil);
+        if (oldRil) {
+            // dataCall->mSuggestedRetryTime = -1;
+        }
+        else {
+            // p->ReadInt32(&(dataCall->mSuggestedRetryTime));
+        }
+        // p->ReadInt32(&(dataCall->mCid));
+        // p->ReadInt32(&(dataCall->mActive));
+        // p->ReadString(&(dataCall->mType));
+        // p->ReadString(&(dataCall->mIfname));
+        // if ((dataCall.status == DcFailCause.NONE.getErrorCode()) &&
+                // TextUtils::IsEmpty(dataCall->mIfname)) {
+          // throw new RuntimeException("getDataCallResponse, no ifname");
+        // }
+        String addresses;
+        p->ReadString(&addresses);
+        if (!TextUtils::IsEmpty(addresses)) {
+            // StringUtils::Split(addresses, String(" "), &(dataCall->mAddresses));
+        }
+        String dnses;
+        p->ReadString(&dnses);
+        if (!TextUtils::IsEmpty(dnses)) {
+            // StringUtils::Split(dnses, String(" "), &(dataCall->mDnses));
+        }
+        String gateways;
+        p->ReadString(&gateways);
+        if (!TextUtils::IsEmpty(gateways)) {
+            // StringUtils::Split(gateways, String(" "), &(dataCall->mGateways));
+        }
+        if (version >= 10) {
+            String pcscf;
+            p->ReadString(&pcscf);
+            if (!TextUtils::IsEmpty(pcscf)) {
+                // StringUtils::Split(pcscf, String(" "), &(dataCall->mPcscf));
+            }
+            if (version >= 11) {
+                // p->ReadInt32(&(dataCall->mMtu));
+            }
+        }
+    }
+    return dataCall;
+}
+
+AutoPtr<IInterface> RIL::ResponseDataCallList(
+    /* [in] */ IParcel* p)
+{
+    AutoPtr<IArrayList> response;
+    Boolean oldRil = FALSE;
+    NeedsOldRilFeature(String("datacall"), &oldRil);
+    Int32 ver = 0;
+    if (oldRil) {
+        ver = 3;
+    }
+    else {
+        p->ReadInt32(&ver);
+    }
+    Int32 num = 0;
+    p->ReadInt32(&num);
+    String str("responseDataCallList ver=");
+    str += ver;
+    str += " num=";
+    str += num;
+    RiljLog(str);
+
+    CArrayList::New(num, (IArrayList**)&response);
+    for (Int32 i = 0; i < num; i++) {
+        response->Add(GetDataCallResponse(p, ver));
+    }
+
+    return response;
+}
+
+AutoPtr<IInterface> RIL::ResponseSetupDataCall(
+    /* [in] */ IParcel* p)
+{
+    Boolean oldRil = FALSE;
+    NeedsOldRilFeature(String("datacall"), &oldRil);
+    Int32 ver = 0;
+    if (oldRil) {
+        ver = 3;
+    }
+    else {
+        p->ReadInt32(&ver);
+    }
+    Int32 num = 0;
+    p->ReadInt32(&num);
+    if (RILJ_LOGV) {
+        String str("responseSetupDataCall ver=");
+        str += ver;
+        str += " num=";
+        str += num;
+        RiljLog(str);
+    }
+
+    AutoPtr<IDataCallResponse> dataCall;
+
+    if (ver < 5) {
+        assert(0 && "TODO");
+        // CDataCallResponse::New((IDataCallResponse**)&dataCall);
+        // dataCall->mVersion = ver;
+        String cid;
+        p->ReadString(&cid);
+        // dataCall->mCid = StringUtils::ParseInt32(cid);
+        // p->ReadString(&(dataCall->mIfname));
+        // if (TextUtils::IsEmpty(dataCall->mIfname)) {
+            // throw new RuntimeException(
+            //         "RIL_REQUEST_SETUP_DATA_CALL response, no ifname");
+            return NULL;
+        // }
+        String addresses;
+        p->ReadString(&addresses);
+        if (!TextUtils::IsEmpty(addresses)) {
+            // StringUtils::Split(addresses, String(" "), &(dataCall->mAddresses))
+        }
+        if (num >= 4) {
+            String dnses;
+            p->ReadString(&dnses);
+            if (RILJ_LOGD) {
+                String str("responseSetupDataCall got dnses=");
+                str += dnses;
+                RiljLog(str);
+            }
+            if (!TextUtils::IsEmpty(dnses)) {
+                // StringUtils::Split(dnses, String(" "), &(dataCall->mDnses));
+            }
+        }
+        if (num >= 5) {
+            String gateways;
+            p->ReadString(&gateways);
+            if (RILJ_LOGD) {
+                String str("responseSetupDataCall got gateways=");
+                str += gateways;
+                RiljLog(str);
+            }
+            if (!TextUtils::IsEmpty(gateways)) {
+                // StringUtils::Split(gateways, String(" "), &(dataCall->mGateways));
+            }
+        }
+        if (num >= 6) {
+            String pcscf;
+            p->ReadString(&pcscf);
+            if (RILJ_LOGD) {
+                String str("responseSetupDataCall got pcscf=");
+                str += pcscf;
+                RiljLog(str);
+            }
+            if (!TextUtils::IsEmpty(pcscf)) {
+                // StringUtils::Split(pcscf, String(" "), &(dataCall->mPcscf));
+            }
+        }
+        if (num >= 7) {
+            String mtu;
+            p->ReadString(&mtu);
+            // dataCall->mMtu = StringUtils::ParseInt32(mtu);
+            if (RILJ_LOGD) {
+                String str("responseSetupDataCall got mtu=");
+                // str += dataCall->mMtu;
+                RiljLog(str);
+            }
+        }
+    }
+    else {
+        if (num != 1) {
+            // throw new RuntimeException(
+            //         "RIL_REQUEST_SETUP_DATA_CALL response expecting 1 RIL_Data_Call_response_v5"
+            //         + " got " + num);
+            return NULL;
+        }
+        dataCall = GetDataCallResponse(p, ver);
+    }
+
+    return dataCall;
+}
+
+AutoPtr<IInterface> RIL::ResponseOperatorInfos(
+    /* [in] */ IParcel* p)
+{
+    assert(0 && "TODO");
+    AutoPtr<ArrayOf<String> > strings;// = (String [])ResponseStrings(p);
+    AutoPtr<IArrayList> ret;
+
+    if (strings->GetLength() % mQANElements != 0) {
+        // throw new RuntimeException(
+        //     "RIL_REQUEST_QUERY_AVAILABLE_NETWORKS: invalid response. Got "
+        //     + strings.length + " strings, expected multiple of " + mQANElements);
+        return NULL;
+    }
+
+    CArrayList::New(strings->GetLength() / mQANElements, (IArrayList**)&ret);
+
+    for (Int32 i = 0; i < strings->GetLength(); i += mQANElements) {
+        AutoPtr<IOperatorInfo> p;
+        // COperatorInfo::New(
+        //                 (*strings)[i+0],
+        //                 (*strings)[i+1],
+        //                 (*strings)[i+2],
+        //                 (*strings)[i+3],
+        //                 (IOperatorInfo**)&p);
+        ret->Add(p);
+    }
+
+    return ret;
+}
+
+AutoPtr<IInterface> RIL::ResponseCellList(
+    /* [in] */ IParcel* p)
+{
+    Int32 num = 0, rssi = 0;
+    String location;
+    AutoPtr<IArrayList> response;
+    AutoPtr<INeighboringCellInfo> cell;
+
+    p->ReadInt32(&num);
+    CArrayList::New((IArrayList**)&response);
+
+    // Determine the radio access type
+    AutoPtr<ISystemProperties> sp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
+    String radioString;
+    sp->Get(
+            ITelephonyProperties::PROPERTY_DATA_NETWORK_TYPE, String("unknown"), &radioString);
+    Int32 radioType = 0;
+    if (radioString.Equals("GPRS")) {
+        radioType = ITelephonyManager::NETWORK_TYPE_GPRS;
+    }
+    else if (radioString.Equals("EDGE")) {
+        radioType = ITelephonyManager::NETWORK_TYPE_EDGE;
+    }
+    else if (radioString.Equals("UMTS")) {
+        radioType = ITelephonyManager::NETWORK_TYPE_UMTS;
+    }
+    else if (radioString.Equals("HSDPA")) {
+        radioType = ITelephonyManager::NETWORK_TYPE_HSDPA;
+    }
+    else if (radioString.Equals("HSUPA")) {
+        radioType = ITelephonyManager::NETWORK_TYPE_HSUPA;
+    }
+    else if (radioString.Equals("HSPA")) {
+        radioType = ITelephonyManager::NETWORK_TYPE_HSPA;
+    }
+    else {
+        radioType = ITelephonyManager::NETWORK_TYPE_UNKNOWN;
+    }
+
+    // Interpret the location based on radio access type
+    if (radioType != ITelephonyManager::NETWORK_TYPE_UNKNOWN) {
+        for (Int32 i = 0 ; i < num ; i++) {
+            p->ReadInt32(&rssi);
+            p->ReadString(&location);
+            assert(0 && "TODO");
+            // cell = new NeighboringCellInfo(rssi, location, radioType);
+            response->Add(cell);
+        }
+    }
+    return response;
+}
+
+AutoPtr<IInterface> RIL::ResponseGetPreferredNetworkType(
+    /* [in] */ IParcel* p)
+{
+    assert(0 && "TODO");
+    AutoPtr<ArrayOf<Int32> > response;// = (Int32[]) ResponseInts(p);
+
+    if (response->GetLength() >= 1) {
+        // Since this is the response for getPreferredNetworkType
+        // we'll assume that it should be the value we want the
+        // vendor ril to take if we reestablish a connection to it.
+        mPreferredNetworkType = (*response)[0];
+    }
+    // return response;
+    return NULL;
+}
+
+AutoPtr<IInterface> RIL::ResponseGmsBroadcastConfig(
+    /* [in] */ IParcel* p)
+{
+    Int32 num = 0;
+    AutoPtr<IArrayList> response;
+    AutoPtr<ISmsBroadcastConfigInfo> info;
+
+    p->ReadInt32(&num);
+    CArrayList::New(num, (IArrayList**)&response);
+
+    for (Int32 i = 0; i < num; i++) {
+        Int32 fromId = 0;
+        p->ReadInt32(&fromId);
+        Int32 toId = 0;
+        p->ReadInt32(&toId);
+        Int32 fromScheme = 0;
+        p->ReadInt32(&fromScheme);
+        Int32 toScheme = 0;
+        p->ReadInt32(&toScheme);
+        Int32 iSel = 0;
+        p->ReadInt32(&iSel);
+        Boolean selected = (iSel == 1);
+
+        assert(0 && "TODO");
+        // info = new SmsBroadcastConfigInfo(fromId, toId, fromScheme,
+        //         toScheme, selected);
+        response->Add(info);
+    }
+    return response;
+}
+
+AutoPtr<IInterface> RIL::ResponseCdmaBroadcastConfig(
+    /* [in] */ IParcel* p)
+{
+    Int32 numServiceCategories;
+    AutoPtr<ArrayOf<Int32> > response;
+
+    p->ReadInt32(&numServiceCategories);
+
+    if (numServiceCategories == 0) {
+        // TODO: The logic of providing default values should
+        // not be done by this transport layer. And needs to
+        // be done by the vendor ril or application logic.
+        Int32 numInts = CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES * CDMA_BSI_NO_OF_INTS_STRUCT + 1;
+        response = ArrayOf<Int32>::Alloc(numInts);
+
+        // Faking a default record for all possible records.
+        (*response)[0] = CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES;
+
+        // Loop over CDMA_BROADCAST_SMS_NO_OF_SERVICE_CATEGORIES set 'english' as
+        // default language and selection status to FALSE for all.
+        for (Int32 i = 1; i < numInts; i += CDMA_BSI_NO_OF_INTS_STRUCT ) {
+            (*response)[i + 0] = i / CDMA_BSI_NO_OF_INTS_STRUCT;
+            (*response)[i + 1] = 1;
+            (*response)[i + 2] = 0;
+        }
+    }
+    else {
+        Int32 numInts = (numServiceCategories * CDMA_BSI_NO_OF_INTS_STRUCT) + 1;
+        response = ArrayOf<Int32>::Alloc(numInts);
+
+        (*response)[0] = numServiceCategories;
+        for (Int32 i = 1 ; i < numInts; i++) {
+            p->ReadInt32(&((*response)[i]));
+        }
+    }
+
+    assert(0 && "TODO");
+    // return response;
+    return NULL;
+}
+
+AutoPtr<IInterface> RIL::ResponseSignalStrength(
+    /* [in] */ IParcel* p)
+{
+    // Assume this is gsm, but doesn't matter as ServiceStateTracker
+    // sets the proper value.
+    assert(0 && "TODO");
+    AutoPtr<ISignalStrength> signalStrength;// = SignalStrength::MakeSignalStrengthFromRilParcel(p);
+    return signalStrength;
+}
+
+AutoPtr<IArrayList> RIL::ResponseCdmaInformationRecord(
+    /* [in] */ IParcel* p)
+{
+    Int32 numberOfInfoRecs = 0;
+    AutoPtr<IArrayList> response;
+
+    /**
+     * Loop through all of the information records unmarshalling them
+     * and converting them to Java Objects.
+     */
+    p->ReadInt32(&numberOfInfoRecs);
+    CArrayList::New(numberOfInfoRecs, (IArrayList**)&response);
+
+    for (Int32 i = 0; i < numberOfInfoRecs; i++) {
+        AutoPtr<ICdmaInformationRecords> InfoRec;
+        assert(0 && "TODO");
+        // CCdmaInformationRecords::New(p, (ICdmaInformationRecords**)&InfoRec);
+        response->Add(InfoRec);
+    }
+
+    return response;
+}
+
+AutoPtr<IInterface> RIL::ResponseCdmaCallWaiting(
+    /* [in] */ IParcel* p)
+{
+    AutoPtr<ICdmaCallWaitingNotification> notification;
+    assert(0 && "TODO");
+    // CCdmaCallWaitingNotification::New((ICdmaCallWaitingNotification**)&notification);
+
+    // p->ReadString(&(notification->mNumber));
+    Int32 numberPresentation = 0;
+    p->ReadInt32(&numberPresentation);
+    // notification->mNumberPresentation;// =
+            // CCdmaCallWaitingNotification::PresentationFromCLIP(numberPresentation);
+    // p->ReadString(&(notification->mName));
+    // notification->mNamePresentation = notification->mNumberPresentation;
+    // p->ReadInt32(&(notification->mIsPresent));
+    // p->ReadInt32(&(notification->mSignalType));
+    // p->ReadInt32(&(notification->mAlertPitch));
+    // p->ReadInt32(&(notification->mSignal));
+    // p->ReadInt32(&(notification->mNumberType));
+    // p->ReadInt32(&(notification->mNumberPlan));
+
+    return notification;
+}
+
+AutoPtr<IInterface> RIL::ResponseCallRing(
+    /* [in] */ IParcel* p)
+{
+    AutoPtr<ArrayOf<Char32> > response = ArrayOf<Char32>::Alloc(4);
+
+    Int32 isPresent = 0;
+    p->ReadInt32(&isPresent);
+    (*response)[0] = (Char32) isPresent;
+
+    Int32 signalType = 0;
+    p->ReadInt32(&signalType);
+    (*response)[1] = (Char32) signalType;
+
+    Int32 alertPitch = 0;
+    p->ReadInt32(&alertPitch);
+    (*response)[2] = (Char32) alertPitch;
+
+    Int32 isignal = 0;
+    p->ReadInt32(&isignal);
+    (*response)[3] = (Char32) isignal;
+
+    assert(0 && "TODO");
+    // return response;
+    return NULL;
+}
+
+AutoPtr<IArrayList> RIL::ResponseGetDataCallProfile(
+    /* [in] */ IParcel* p)
+{
+    Int32 nProfiles = 0;
+    p->ReadInt32(&nProfiles);
+    if (RILJ_LOGD) {
+        String str("# data call profiles:");
+        str += nProfiles;
+        RiljLog(str);
+    }
+
+    AutoPtr<IArrayList> response;
+    CArrayList::New(nProfiles, (IArrayList**)&response);
+
+    Int32 profileId = 0;
+    Int32 priority = 0;
+    for (Int32 i = 0; i < nProfiles; i++) {
+        p->ReadInt32(&profileId);
+        p->ReadInt32(&priority);
+        AutoPtr<IApnProfileOmh> profile;
+        assert(0 && "TODO");
+        // CApnProfileOmh::New(profileId, priority, (IApnProfileOmh**)&profiles);
+        if (RILJ_LOGD) {
+            String str("responseGetDataCallProfile()");
+            Int32 profileIdget = 0, priorityget = 0;
+            profile->GetProfileId(&profileIdget);
+            profile->GetPriority(&priorityget);
+            str += profileIdget;
+            str += ":";
+            str += priorityget;
+            RiljLog(str);
+        }
+        response->Add(profile);
+    }
+
+    return response;
+}
+
+void RIL::NotifyRegistrantsCdmaInfoRec(
+    /* [in] */ ICdmaInformationRecords* infoRec)
+{
+    Int32 response = IRILConstants::RIL_UNSOL_CDMA_INFO_REC;
+    assert(0 && "TODO");
+    // if (ICdmaInformationRecordsCdmaDisplayInfoRec::Probe(infoRec->mRecord) != NULL) {
+    //     if (mDisplayInfoRegistrants != NULL) {
+    //         if (RILJ_LOGD) UnsljLogRet(response, infoRec->mRecord);
+    //         AutoPtr<AsyncResult> p = new AsyncResult(NULL, infoRec->mRecord, NULL);
+    //         mDisplayInfoRegistrants->NotifyRegistrants(p);
+    //     }
+    // }
+    // else if (ICdmaInformationRecordsCdmaSignalInfoRec::Probe(infoRec->mRecord) != NULL) {
+    //     if (mSignalInfoRegistrants != NULL) {
+    //         if (RILJ_LOGD) UnsljLogRet(response, infoRec->mRecord);
+    //         AutoPtr<AsyncResult> p = new AsyncResult(NULL, infoRec->mRecord, NULL);
+    //         mSignalInfoRegistrants->NotifyRegistrants(p);
+    //     }
+    // }
+    // else if (ICdmaInformationRecordsCdmaNumberInfoRec::Probe(infoRec->mRecord) != NULL) {
+    //     if (mNumberInfoRegistrants != NULL) {
+    //         if (RILJ_LOGD) UnsljLogRet(response, infoRec->mRecord);
+    //         AutoPtr<AsyncResult> p = new AsyncResult(NULL, infoRec->mRecord, NULL);
+    //         mNumberInfoRegistrants->NotifyRegistrants(p);
+    //     }
+    // }
+    // else if (ICdmaInformationRecordsCdmaRedirectingNumberInfoRec::Probe(infoRec->mRecord) != NULL) {
+    //     if (mRedirNumInfoRegistrants != NULL) {
+    //         if (RILJ_LOGD) UnsljLogRet(response, infoRec->mRecord);
+    //         AutoPtr<AsyncResult> p = new AsyncResult(NULL, infoRec->mRecord, NULL);
+    //         mRedirNumInfoRegistrants->NotifyRegistrants(p);
+    //     }
+    // }
+    // else if (ICdmaInformationRecordsCdmaLineControlInfoRec::Probe(infoRec->mRecord) != NULL) {
+    //     if (mLineControlInfoRegistrants != NULL) {
+    //         if (RILJ_LOGD) UnsljLogRet(response, infoRec->mRecord);
+    //         AutoPtr<AsyncResult> p = new AsyncResult(NULL, infoRec->mRecord, NULL);
+    //         mLineControlInfoRegistrants->NotifyRegistrants(p);
+    //     }
+    // }
+    // else if (ICdmaInformationRecordsCdmaT53ClirInfoRec::Probe(infoRec->mRecord) != NULL) {
+    //     if (mT53ClirInfoRegistrants != NULL) {
+    //         if (RILJ_LOGD) UnsljLogRet(response, infoRec->mRecord);
+    //         AutoPtr<AsyncResult> p = new AsyncResult(NULL, infoRec->mRecord, NULL);
+    //         mT53ClirInfoRegistrants->NotifyRegistrants(p);
+    //     }
+    // }
+    // else if (ICdmaInformationRecordsCdmaT53AudioControlInfoRec::Probe(infoRec->mRecord) != NULL) {
+    //     if (mT53AudCntrlInfoRegistrants != NULL) {
+    //         if (RILJ_LOGD) UnsljLogRet(response, infoRec->mRecord);
+    //         AutoPtr<AsyncResult> p = new AsyncResult(NULL, infoRec->mRecord, NULL);
+    //         mT53AudCntrlInfoRegistrants->NotifyRegistrants(p);
+    //     }
+    // }
+}
+
+AutoPtr<IArrayList> RIL::ResponseCellInfoList(
+    /* [in] */ IParcel* p)
+{
+    Int32 numberOfInfoRecs = 0;
+    AutoPtr<IArrayList> response;
+
+    /**
+     * Loop through all of the information records unmarshalling them
+     * and converting them to Java Objects.
+     */
+    p->ReadInt32(&numberOfInfoRecs);
+    CArrayList::New(numberOfInfoRecs, (IArrayList**)&response);
+
+    for (Int32 i = 0; i < numberOfInfoRecs; i++) {
+        assert(0 && "TODO");
+        AutoPtr<ICellInfo> InfoRec;// = CellInfo.CREATOR.createFromParcel(p);
+        response->Add(InfoRec);
+    }
+
+    return response;
+}
+
+AutoPtr<IInterface> RIL::ResponseHardwareConfig(
+    /* [in] */ IParcel* p)
+{
+    Int32 num = 0;
+    AutoPtr<IArrayList> response;
+    AutoPtr<IHardwareConfig> hw;
+
+    p->ReadInt32(&num);
+    CArrayList::New(num, (IArrayList**)&response);
+
+    if (RILJ_LOGV) {
+        String str("responseHardwareConfig: num=");
+        str += num;
+        RiljLog(str);
+    }
+    for (Int32 i = 0 ; i < num ; i++) {
+        Int32 type = 0;
+        p->ReadInt32(&type);
+        switch(type) {
+            case IHardwareConfig::DEV_HARDWARE_TYPE_MODEM: {
+                assert(0 && "TODO");
+                // hw = new HardwareConfig(type);
+                String id;
+                p->ReadString(&id);
+                Int32 state = 0;
+                p->ReadInt32(&state);
+                Int32 model = 0;
+                p->ReadInt32(&model);
+                Int32 ratBits = 0;
+                p->ReadInt32(&ratBits);
+                Int32 maxV = 0;
+                p->ReadInt32(&maxV);
+                Int32 maxD = 0;
+                p->ReadInt32(&maxD);
+                Int32 maxS = 0;
+                p->ReadInt32(&maxS);
+                hw->AssignModem(id, state, model, ratBits, maxV, maxD, maxS);
+            break;
+            }
+            case IHardwareConfig::DEV_HARDWARE_TYPE_SIM: {
+                assert(0 && "TODO");
+                // hw = new HardwareConfig(type);
+                String id;
+                p->ReadString(&id);
+                Int32 state = 0;
+                p->ReadInt32(&state);
+                String link;
+                p->ReadString(&link);
+                hw->AssignSim(id, state, link);
+                break;
+            }
+            default: {
+                // throw new RuntimeException(
+                //    "RIL_REQUEST_GET_HARDWARE_CONFIG invalid hardward type:" + type);
+                break;
+            }
+        }
+
+        response->Add(hw);
+    }
+
+  return response;
+}
+
+String RIL::RequestToString(
+    /* [in] */ Int32 request)
+{
+    /*
+    cat libs/telephony/ril_commands.h \
+    | egrep "^ *{RIL_" \
+    | sed -re 's/\{RIL_([^,]+),[^,]+,([^}]+).+/case RIL_\1: return "\1";/'
+    */
+    switch(request) {
+        case IRILConstants::RIL_REQUEST_GET_SIM_STATUS: return String("GET_SIM_STATUS");
+        case IRILConstants::RIL_REQUEST_ENTER_SIM_PIN: return String("ENTER_SIM_PIN");
+        case IRILConstants::RIL_REQUEST_ENTER_SIM_PUK: return String("ENTER_SIM_PUK");
+        case IRILConstants::RIL_REQUEST_ENTER_SIM_PIN2: return String("ENTER_SIM_PIN2");
+        case IRILConstants::RIL_REQUEST_ENTER_SIM_PUK2: return String("ENTER_SIM_PUK2");
+        case IRILConstants::RIL_REQUEST_CHANGE_SIM_PIN: return String("CHANGE_SIM_PIN");
+        case IRILConstants::RIL_REQUEST_CHANGE_SIM_PIN2: return String("CHANGE_SIM_PIN2");
+        case IRILConstants::RIL_REQUEST_ENTER_DEPERSONALIZATION_CODE: return String("ENTER_DEPERSONALIZATION_CODE");
+        case IRILConstants::RIL_REQUEST_GET_CURRENT_CALLS: return String("GET_CURRENT_CALLS");
+        case IRILConstants::RIL_REQUEST_DIAL: return String("DIAL");
+        case IRILConstants::RIL_REQUEST_GET_IMSI: return String("GET_IMSI");
+        case IRILConstants::RIL_REQUEST_HANGUP: return String("HANGUP");
+        case IRILConstants::RIL_REQUEST_HANGUP_WAITING_OR_BACKGROUND: return String("HANGUP_WAITING_OR_BACKGROUND");
+        case IRILConstants::RIL_REQUEST_HANGUP_FOREGROUND_RESUME_BACKGROUND: return String("HANGUP_FOREGROUND_RESUME_BACKGROUND");
+        case IRILConstants::RIL_REQUEST_SWITCH_WAITING_OR_HOLDING_AND_ACTIVE: return String("REQUEST_SWITCH_WAITING_OR_HOLDING_AND_ACTIVE");
+        case IRILConstants::RIL_REQUEST_CONFERENCE: return String("CONFERENCE");
+        case IRILConstants::RIL_REQUEST_UDUB: return String("UDUB");
+        case IRILConstants::RIL_REQUEST_LAST_CALL_FAIL_CAUSE: return String("LAST_CALL_FAIL_CAUSE");
+        case IRILConstants::RIL_REQUEST_SIGNAL_STRENGTH: return String("SIGNAL_STRENGTH");
+        case IRILConstants::RIL_REQUEST_VOICE_REGISTRATION_STATE: return String("VOICE_REGISTRATION_STATE");
+        case IRILConstants::RIL_REQUEST_DATA_REGISTRATION_STATE: return String("DATA_REGISTRATION_STATE");
+        case IRILConstants::RIL_REQUEST_OPERATOR: return String("OPERATOR");
+        case IRILConstants::RIL_REQUEST_RADIO_POWER: return String("RADIO_POWER");
+        case IRILConstants::RIL_REQUEST_DTMF: return String("DTMF");
+        case IRILConstants::RIL_REQUEST_SEND_SMS: return String("SEND_SMS");
+        case IRILConstants::RIL_REQUEST_SEND_SMS_EXPECT_MORE: return String("SEND_SMS_EXPECT_MORE");
+        case IRILConstants::RIL_REQUEST_SETUP_DATA_CALL: return String("SETUP_DATA_CALL");
+        case IRILConstants::RIL_REQUEST_SIM_IO: return String("SIM_IO");
+        case IRILConstants::RIL_REQUEST_SEND_USSD: return String("SEND_USSD");
+        case IRILConstants::RIL_REQUEST_CANCEL_USSD: return String("CANCEL_USSD");
+        case IRILConstants::RIL_REQUEST_GET_CLIR: return String("GET_CLIR");
+        case IRILConstants::RIL_REQUEST_SET_CLIR: return String("SET_CLIR");
+        case IRILConstants::RIL_REQUEST_QUERY_CALL_FORWARD_STATUS: return String("QUERY_CALL_FORWARD_STATUS");
+        case IRILConstants::RIL_REQUEST_SET_CALL_FORWARD: return String("SET_CALL_FORWARD");
+        case IRILConstants::RIL_REQUEST_QUERY_CALL_WAITING: return String("QUERY_CALL_WAITING");
+        case IRILConstants::RIL_REQUEST_SET_CALL_WAITING: return String("SET_CALL_WAITING");
+        case IRILConstants::RIL_REQUEST_SMS_ACKNOWLEDGE: return String("SMS_ACKNOWLEDGE");
+        case IRILConstants::RIL_REQUEST_GET_IMEI: return String("GET_IMEI");
+        case IRILConstants::RIL_REQUEST_GET_IMEISV: return String("GET_IMEISV");
+        case IRILConstants::RIL_REQUEST_ANSWER: return String("ANSWER");
+        case IRILConstants::RIL_REQUEST_DEACTIVATE_DATA_CALL: return String("DEACTIVATE_DATA_CALL");
+        case IRILConstants::RIL_REQUEST_QUERY_FACILITY_LOCK: return String("QUERY_FACILITY_LOCK");
+        case IRILConstants::RIL_REQUEST_SET_FACILITY_LOCK: return String("SET_FACILITY_LOCK");
+        case IRILConstants::RIL_REQUEST_CHANGE_BARRING_PASSWORD: return String("CHANGE_BARRING_PASSWORD");
+        case IRILConstants::RIL_REQUEST_QUERY_NETWORK_SELECTION_MODE: return String("QUERY_NETWORK_SELECTION_MODE");
+        case IRILConstants::RIL_REQUEST_SET_NETWORK_SELECTION_AUTOMATIC: return String("SET_NETWORK_SELECTION_AUTOMATIC");
+        case IRILConstants::RIL_REQUEST_SET_NETWORK_SELECTION_MANUAL: return String("SET_NETWORK_SELECTION_MANUAL");
+        case IRILConstants::RIL_REQUEST_QUERY_AVAILABLE_NETWORKS : return String("QUERY_AVAILABLE_NETWORKS ");
+        case IRILConstants::RIL_REQUEST_DTMF_START: return String("DTMF_START");
+        case IRILConstants::RIL_REQUEST_DTMF_STOP: return String("DTMF_STOP");
+        case IRILConstants::RIL_REQUEST_BASEBAND_VERSION: return String("BASEBAND_VERSION");
+        case IRILConstants::RIL_REQUEST_SEPARATE_CONNECTION: return String("SEPARATE_CONNECTION");
+        case IRILConstants::RIL_REQUEST_SET_MUTE: return String("SET_MUTE");
+        case IRILConstants::RIL_REQUEST_GET_MUTE: return String("GET_MUTE");
+        case IRILConstants::RIL_REQUEST_QUERY_CLIP: return String("QUERY_CLIP");
+        case IRILConstants::RIL_REQUEST_LAST_DATA_CALL_FAIL_CAUSE: return String("LAST_DATA_CALL_FAIL_CAUSE");
+        case IRILConstants::RIL_REQUEST_DATA_CALL_LIST: return String("DATA_CALL_LIST");
+        case IRILConstants::RIL_REQUEST_RESET_RADIO: return String("RESET_RADIO");
+        case IRILConstants::RIL_REQUEST_OEM_HOOK_RAW: return String("OEM_HOOK_RAW");
+        case IRILConstants::RIL_REQUEST_OEM_HOOK_STRINGS: return String("OEM_HOOK_STRINGS");
+        case IRILConstants::RIL_REQUEST_SCREEN_STATE: return String("SCREEN_STATE");
+        case IRILConstants::RIL_REQUEST_SET_SUPP_SVC_NOTIFICATION: return String("SET_SUPP_SVC_NOTIFICATION");
+        case IRILConstants::RIL_REQUEST_WRITE_SMS_TO_SIM: return String("WRITE_SMS_TO_SIM");
+        case IRILConstants::RIL_REQUEST_DELETE_SMS_ON_SIM: return String("DELETE_SMS_ON_SIM");
+        case IRILConstants::RIL_REQUEST_SET_BAND_MODE: return String("SET_BAND_MODE");
+        case IRILConstants::RIL_REQUEST_QUERY_AVAILABLE_BAND_MODE: return String("QUERY_AVAILABLE_BAND_MODE");
+        case IRILConstants::RIL_REQUEST_STK_GET_PROFILE: return String("REQUEST_STK_GET_PROFILE");
+        case IRILConstants::RIL_REQUEST_STK_SET_PROFILE: return String("REQUEST_STK_SET_PROFILE");
+        case IRILConstants::RIL_REQUEST_STK_SEND_ENVELOPE_COMMAND: return String("REQUEST_STK_SEND_ENVELOPE_COMMAND");
+        case IRILConstants::RIL_REQUEST_STK_SEND_TERMINAL_RESPONSE: return String("REQUEST_STK_SEND_TERMINAL_RESPONSE");
+        case IRILConstants::RIL_REQUEST_STK_HANDLE_CALL_SETUP_REQUESTED_FROM_SIM: return String("REQUEST_STK_HANDLE_CALL_SETUP_REQUESTED_FROM_SIM");
+        case IRILConstants::RIL_REQUEST_EXPLICIT_CALL_TRANSFER: return String("REQUEST_EXPLICIT_CALL_TRANSFER");
+        case IRILConstants::RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE: return String("REQUEST_SET_PREFERRED_NETWORK_TYPE");
+        case IRILConstants::RIL_REQUEST_GET_PREFERRED_NETWORK_TYPE: return String("REQUEST_GET_PREFERRED_NETWORK_TYPE");
+        case IRILConstants::RIL_REQUEST_GET_NEIGHBORING_CELL_IDS: return String("REQUEST_GET_NEIGHBORING_CELL_IDS");
+        case IRILConstants::RIL_REQUEST_SET_LOCATION_UPDATES: return String("REQUEST_SET_LOCATION_UPDATES");
+        case IRILConstants::RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE: return String("RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE");
+        case IRILConstants::RIL_REQUEST_CDMA_SET_ROAMING_PREFERENCE: return String("RIL_REQUEST_CDMA_SET_ROAMING_PREFERENCE");
+        case IRILConstants::RIL_REQUEST_CDMA_QUERY_ROAMING_PREFERENCE: return String("RIL_REQUEST_CDMA_QUERY_ROAMING_PREFERENCE");
+        case IRILConstants::RIL_REQUEST_SET_TTY_MODE: return String("RIL_REQUEST_SET_TTY_MODE");
+        case IRILConstants::RIL_REQUEST_QUERY_TTY_MODE: return String("RIL_REQUEST_QUERY_TTY_MODE");
+        case IRILConstants::RIL_REQUEST_CDMA_SET_PREFERRED_VOICE_PRIVACY_MODE: return String("RIL_REQUEST_CDMA_SET_PREFERRED_VOICE_PRIVACY_MODE");
+        case IRILConstants::RIL_REQUEST_CDMA_QUERY_PREFERRED_VOICE_PRIVACY_MODE: return String("RIL_REQUEST_CDMA_QUERY_PREFERRED_VOICE_PRIVACY_MODE");
+        case IRILConstants::RIL_REQUEST_CDMA_FLASH: return String("RIL_REQUEST_CDMA_FLASH");
+        case IRILConstants::RIL_REQUEST_CDMA_BURST_DTMF: return String("RIL_REQUEST_CDMA_BURST_DTMF");
+        case IRILConstants::RIL_REQUEST_CDMA_SEND_SMS: return String("RIL_REQUEST_CDMA_SEND_SMS");
+        case IRILConstants::RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE: return String("RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE");
+        case IRILConstants::RIL_REQUEST_GSM_GET_BROADCAST_CONFIG: return String("RIL_REQUEST_GSM_GET_BROADCAST_CONFIG");
+        case IRILConstants::RIL_REQUEST_GSM_SET_BROADCAST_CONFIG: return String("RIL_REQUEST_GSM_SET_BROADCAST_CONFIG");
+        case IRILConstants::RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG: return String("RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG");
+        case IRILConstants::RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG: return String("RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG");
+        case IRILConstants::RIL_REQUEST_GSM_BROADCAST_ACTIVATION: return String("RIL_REQUEST_GSM_BROADCAST_ACTIVATION");
+        case IRILConstants::RIL_REQUEST_CDMA_VALIDATE_AND_WRITE_AKEY: return String("RIL_REQUEST_CDMA_VALIDATE_AND_WRITE_AKEY");
+        case IRILConstants::RIL_REQUEST_CDMA_BROADCAST_ACTIVATION: return String("RIL_REQUEST_CDMA_BROADCAST_ACTIVATION");
+        case IRILConstants::RIL_REQUEST_CDMA_SUBSCRIPTION: return String("RIL_REQUEST_CDMA_SUBSCRIPTION");
+        case IRILConstants::RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM: return String("RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM");
+        case IRILConstants::RIL_REQUEST_CDMA_DELETE_SMS_ON_RUIM: return String("RIL_REQUEST_CDMA_DELETE_SMS_ON_RUIM");
+        case IRILConstants::RIL_REQUEST_DEVICE_IDENTITY: return String("RIL_REQUEST_DEVICE_IDENTITY");
+        case IRILConstants::RIL_REQUEST_GET_SMSC_ADDRESS: return String("RIL_REQUEST_GET_SMSC_ADDRESS");
+        case IRILConstants::RIL_REQUEST_SET_SMSC_ADDRESS: return String("RIL_REQUEST_SET_SMSC_ADDRESS");
+        case IRILConstants::RIL_REQUEST_EXIT_EMERGENCY_CALLBACK_MODE: return String("REQUEST_EXIT_EMERGENCY_CALLBACK_MODE");
+        case IRILConstants::RIL_REQUEST_REPORT_SMS_MEMORY_STATUS: return String("RIL_REQUEST_REPORT_SMS_MEMORY_STATUS");
+        case IRILConstants::RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING: return String("RIL_REQUEST_REPORT_STK_SERVICE_IS_RUNNING");
+        case IRILConstants::RIL_REQUEST_CDMA_GET_SUBSCRIPTION_SOURCE: return String("RIL_REQUEST_CDMA_GET_SUBSCRIPTION_SOURCE");
+        case IRILConstants::RIL_REQUEST_GET_DATA_CALL_PROFILE: return String("RIL_REQUEST_GET_DATA_CALL_PROFILE");
+        case IRILConstants::RIL_REQUEST_ISIM_AUTHENTICATION: return String("RIL_REQUEST_ISIM_AUTHENTICATION");
+        case IRILConstants::RIL_REQUEST_ACKNOWLEDGE_INCOMING_GSM_SMS_WITH_PDU: return String("RIL_REQUEST_ACKNOWLEDGE_INCOMING_GSM_SMS_WITH_PDU");
+        case IRILConstants::RIL_REQUEST_STK_SEND_ENVELOPE_WITH_STATUS: return String("RIL_REQUEST_STK_SEND_ENVELOPE_WITH_STATUS");
+        case IRILConstants::RIL_REQUEST_VOICE_RADIO_TECH: return String("RIL_REQUEST_VOICE_RADIO_TECH");
+        case IRILConstants::RIL_REQUEST_GET_CELL_INFO_LIST: return String("RIL_REQUEST_GET_CELL_INFO_LIST");
+        case IRILConstants::RIL_REQUEST_SET_UNSOL_CELL_INFO_LIST_RATE: return String("RIL_REQUEST_SET_CELL_INFO_LIST_RATE");
+        case IRILConstants::RIL_REQUEST_SET_INITIAL_ATTACH_APN: return String("RIL_REQUEST_SET_INITIAL_ATTACH_APN");
+        case IRILConstants::RIL_REQUEST_SET_DATA_PROFILE: return String("RIL_REQUEST_SET_DATA_PROFILE");
+        case IRILConstants::RIL_REQUEST_IMS_REGISTRATION_STATE: return String("RIL_REQUEST_IMS_REGISTRATION_STATE");
+        case IRILConstants::RIL_REQUEST_IMS_SEND_SMS: return String("RIL_REQUEST_IMS_SEND_SMS");
+        case IRILConstants::RIL_REQUEST_SIM_TRANSMIT_APDU_BASIC: return String("RIL_REQUEST_SIM_TRANSMIT_APDU_BASIC");
+        case IRILConstants::RIL_REQUEST_SIM_OPEN_CHANNEL: return String("RIL_REQUEST_SIM_OPEN_CHANNEL");
+        case IRILConstants::RIL_REQUEST_SIM_CLOSE_CHANNEL: return String("RIL_REQUEST_SIM_CLOSE_CHANNEL");
+        case IRILConstants::RIL_REQUEST_SIM_TRANSMIT_APDU_CHANNEL: return String("RIL_REQUEST_SIM_TRANSMIT_APDU_CHANNEL");
+        case IRILConstants::RIL_REQUEST_NV_READ_ITEM: return String("RIL_REQUEST_NV_READ_ITEM");
+        case IRILConstants::RIL_REQUEST_NV_WRITE_ITEM: return String("RIL_REQUEST_NV_WRITE_ITEM");
+        case IRILConstants::RIL_REQUEST_NV_WRITE_CDMA_PRL: return String("RIL_REQUEST_NV_WRITE_CDMA_PRL");
+        case IRILConstants::RIL_REQUEST_NV_RESET_CONFIG: return String("RIL_REQUEST_NV_RESET_CONFIG");
+        case IRILConstants::RIL_REQUEST_SET_UICC_SUBSCRIPTION: return String("RIL_REQUEST_SET_UICC_SUBSCRIPTION");
+        case IRILConstants::RIL_REQUEST_ALLOW_DATA: return String("RIL_REQUEST_ALLOW_DATA");
+        case IRILConstants::RIL_REQUEST_GET_HARDWARE_CONFIG: return String("GET_HARDWARE_CONFIG");
+        case IRILConstants::RIL_REQUEST_SIM_AUTHENTICATION: return String("RIL_REQUEST_SIM_AUTHENTICATION");
+        case IRILConstants::RIL_REQUEST_SHUTDOWN: return String("RIL_REQUEST_SHUTDOWN");
+        default: return String("<unknown request>");
+    }
+}
+
+String RIL::ResponseToString(
+    /* [in] */ Int32 request)
+{
+    /*
+    cat libs/telephony/ril_unsol_commands.h \
+    | egrep "^ *{RIL_" \
+    | sed -re 's/\{RIL_([^,]+),[^,]+,([^}]+).+/case RIL_\1: return "\1";/'
+    */
+    switch(request) {
+        case IRILConstants::RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED: return String("UNSOL_RESPONSE_RADIO_STATE_CHANGED");
+        case IRILConstants::RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED: return String("UNSOL_RESPONSE_CALL_STATE_CHANGED");
+        case IRILConstants::RIL_UNSOL_RESPONSE_VOICE_NETWORK_STATE_CHANGED: return String("UNSOL_RESPONSE_VOICE_NETWORK_STATE_CHANGED");
+        case IRILConstants::RIL_UNSOL_RESPONSE_NEW_SMS: return String("UNSOL_RESPONSE_NEW_SMS");
+        case IRILConstants::RIL_UNSOL_RESPONSE_NEW_SMS_STATUS_REPORT: return String("UNSOL_RESPONSE_NEW_SMS_STATUS_REPORT");
+        case IRILConstants::RIL_UNSOL_RESPONSE_NEW_SMS_ON_SIM: return String("UNSOL_RESPONSE_NEW_SMS_ON_SIM");
+        case IRILConstants::RIL_UNSOL_ON_USSD: return String("UNSOL_ON_USSD");
+        case IRILConstants::RIL_UNSOL_ON_USSD_REQUEST: return String("UNSOL_ON_USSD_REQUEST");
+        case IRILConstants::RIL_UNSOL_NITZ_TIME_RECEIVED: return String("UNSOL_NITZ_TIME_RECEIVED");
+        case IRILConstants::RIL_UNSOL_SIGNAL_STRENGTH: return String("UNSOL_SIGNAL_STRENGTH");
+        case IRILConstants::RIL_UNSOL_DATA_CALL_LIST_CHANGED: return String("UNSOL_DATA_CALL_LIST_CHANGED");
+        case IRILConstants::RIL_UNSOL_SUPP_SVC_NOTIFICATION: return String("UNSOL_SUPP_SVC_NOTIFICATION");
+        case IRILConstants::RIL_UNSOL_STK_SESSION_END: return String("UNSOL_STK_SESSION_END");
+        case IRILConstants::RIL_UNSOL_STK_PROACTIVE_COMMAND: return String("UNSOL_STK_PROACTIVE_COMMAND");
+        case IRILConstants::RIL_UNSOL_STK_EVENT_NOTIFY: return String("UNSOL_STK_EVENT_NOTIFY");
+        case IRILConstants::RIL_UNSOL_STK_CALL_SETUP: return String("UNSOL_STK_CALL_SETUP");
+        case IRILConstants::RIL_UNSOL_SIM_SMS_STORAGE_FULL: return String("UNSOL_SIM_SMS_STORAGE_FULL");
+        case IRILConstants::RIL_UNSOL_SIM_REFRESH: return String("UNSOL_SIM_REFRESH");
+        case IRILConstants::RIL_UNSOL_CALL_RING: return String("UNSOL_CALL_RING");
+        case IRILConstants::RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED: return String("UNSOL_RESPONSE_SIM_STATUS_CHANGED");
+        case IRILConstants::RIL_UNSOL_RESPONSE_CDMA_NEW_SMS: return String("UNSOL_RESPONSE_CDMA_NEW_SMS");
+        case IRILConstants::RIL_UNSOL_RESPONSE_NEW_BROADCAST_SMS: return String("UNSOL_RESPONSE_NEW_BROADCAST_SMS");
+        case IRILConstants::RIL_UNSOL_CDMA_RUIM_SMS_STORAGE_FULL: return String("UNSOL_CDMA_RUIM_SMS_STORAGE_FULL");
+        case IRILConstants::RIL_UNSOL_RESTRICTED_STATE_CHANGED: return String("UNSOL_RESTRICTED_STATE_CHANGED");
+        case IRILConstants::RIL_UNSOL_ENTER_EMERGENCY_CALLBACK_MODE: return String("UNSOL_ENTER_EMERGENCY_CALLBACK_MODE");
+        case IRILConstants::RIL_UNSOL_CDMA_CALL_WAITING: return String("UNSOL_CDMA_CALL_WAITING");
+        case IRILConstants::RIL_UNSOL_CDMA_OTA_PROVISION_STATUS: return String("UNSOL_CDMA_OTA_PROVISION_STATUS");
+        case IRILConstants::RIL_UNSOL_CDMA_INFO_REC: return String("UNSOL_CDMA_INFO_REC");
+        case IRILConstants::RIL_UNSOL_OEM_HOOK_RAW: return String("UNSOL_OEM_HOOK_RAW");
+        case IRILConstants::RIL_UNSOL_RINGBACK_TONE: return String("UNSOL_RINGBACK_TONE");
+        case IRILConstants::RIL_UNSOL_RESEND_INCALL_MUTE: return String("UNSOL_RESEND_INCALL_MUTE");
+        case IRILConstants::RIL_UNSOL_CDMA_SUBSCRIPTION_SOURCE_CHANGED: return String("CDMA_SUBSCRIPTION_SOURCE_CHANGED");
+        case IRILConstants::RIL_UNSOl_CDMA_PRL_CHANGED: return String("UNSOL_CDMA_PRL_CHANGED");
+        case IRILConstants::RIL_UNSOL_EXIT_EMERGENCY_CALLBACK_MODE: return String("UNSOL_EXIT_EMERGENCY_CALLBACK_MODE");
+        case IRILConstants::RIL_UNSOL_RIL_CONNECTED: return String("UNSOL_RIL_CONNECTED");
+        case IRILConstants::RIL_UNSOL_VOICE_RADIO_TECH_CHANGED: return String("UNSOL_VOICE_RADIO_TECH_CHANGED");
+        case IRILConstants::RIL_UNSOL_CELL_INFO_LIST: return String("UNSOL_CELL_INFO_LIST");
+        case IRILConstants::RIL_UNSOL_RESPONSE_IMS_NETWORK_STATE_CHANGED:
+            return String("UNSOL_RESPONSE_IMS_NETWORK_STATE_CHANGED");
+        case IRILConstants::RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED:
+                return String("RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED");
+        case IRILConstants::RIL_UNSOL_SRVCC_STATE_NOTIFY:
+                return String("UNSOL_SRVCC_STATE_NOTIFY");
+        case IRILConstants::RIL_UNSOL_HARDWARE_CONFIG_CHANGED: return String("RIL_UNSOL_HARDWARE_CONFIG_CHANGED");
+        case IRILConstants::RIL_UNSOL_ON_SS: return String("UNSOL_ON_SS");
+        case IRILConstants::RIL_UNSOL_STK_CC_ALPHA_NOTIFY: return String("UNSOL_STK_CC_ALPHA_NOTIFY");
+        case IRILConstants::RIL_UNSOL_STK_SEND_SMS_RESULT: return String("RIL_UNSOL_STK_SEND_SMS_RESULT");
+        default: return String("<unknown response>");
+    }
+}
+
+void RIL::RiljLog(
+    /* [in] */ String msg)
+{
+    // Rlog.d(RILJ_LOG_TAG, msg
+    //         + (mInstanceId != NULL ? (" [SUB" + mInstanceId + "]") : ""));
+}
+
+void RIL::RiljLogv(
+    /* [in] */ String msg)
+{
+    // Rlog.v(RILJ_LOG_TAG, msg
+    //         + (mInstanceId != NULL ? (" [SUB" + mInstanceId + "]") : ""));
+}
+
+void RIL::UnsljLog(
+    /* [in] */ Int32 response)
+{
+    String str("[UNSL]< ");
+    str += ResponseToString(response);
+    RiljLog(str);
+}
+
+void RIL::UnsljLogMore(
+    /* [in] */ Int32 response,
+    /* [in] */ String more)
+{
+    String str("[UNSL]< ");
+    str += ResponseToString(response);
+    str += " ";
+    str += more;
+    RiljLog(str);
+}
+
+void RIL::UnsljLogRet(
+    /* [in] */ Int32 response,
+    /* [in] */ IInterface* ret)
+{
+    String str("[UNSL]< ");
+    str += ResponseToString(response);
+    str += " ";
+    str += RetToString(response, ret);
+    RiljLog(str);
+}
+
+void RIL::UnsljLogvRet(
+    /* [in] */ Int32 response,
+    /* [in] */ IInterface* ret)
+{
+    String str("[UNSL]< ");
+    str += ResponseToString(response);
+    str += " ";
+    str += RetToString(response, ret);
+    RiljLogv(str);
+}
+
+AutoPtr<IInterface> RIL::ResponseSsData(
+    /* [in] */ IParcel* p)
+{
+    Int32 num = 0;
+    AutoPtr<ISsData> ssData;
+    assert(0 && "TODO");
+    // CSsData::New((ISsData**)&ssData);
+
+    Int32 serviceType = 0;
+    p->ReadInt32(&serviceType);
+    // ssData->mServiceType = ssData->ServiceTypeFromRILInt(serviceType);
+    Int32 requestType = 0;
+    p->ReadInt32(&requestType);
+    // ssData->mRequestType = ssData->RequestTypeFromRILInt(requestType);
+    Int32 teleserviceType = 0;
+    p->ReadInt32(&teleserviceType);
+    // ssData->mTeleserviceType = ssData->TeleserviceTypeFromRILInt(teleserviceType);
+    // p->ReadInt32(&(ssData->mServiceClass)); // This is service class sent in the SS request.
+    // p->ReadInt32(&(ssData->mResult)); // This is the result of the SS request.
+    p->ReadInt32(&num);
+
+    // if (ssData->mServiceType->IsTypeCF() &&
+    //     ssData->mRequestType->IsTypeInterrogation()) {
+    //     ssData->mCfInfo = new CallForwardInfo[num];
+
+    //     for (Int32 i = 0; i < num; i++) {
+    //         AutoPtr<ICallForwardInfo> pInfo;
+    //         CCallForwardInfo::New((ICallForwardInfo**)&pInfo);
+    //         ssData->mCfInfo[i] = pInfo;
+
+    //         Int32 status = 0;
+    //         p->ReadInt32(&status);
+    //         pInfo->mStatus = status;
+    //         Int32 reason = 0;
+    //         p->ReadInt32(&reason);
+    //         pInfo->mReason = reason;
+    //         Int32 serviceClass = 0;
+    //         p->ReadInt32(&serviceClass);
+    //         pInfo->mServiceClass = serviceClass;
+    //         Int32 toa = 0;
+    //         p->ReadInt32(&toa);
+    //         pInfo->mToa = toa;
+    //         String number;
+    //         p->ReadString(&number);
+    //         pInfo->mNumber = number;
+    //         Int32 timeSeconds = 0;
+    //         p->ReadInt32(&timeSeconds);
+    //         pInfo->mTimeSeconds = timeSeconds;
+
+    //         String str("[SS Data] CF Info ");
+    //         str += i;
+    //         str += " : ";
+    //         str += pInfo;
+    //         RiljLog(str);
+    //     }
+    // }
+    // else {
+    //     ssData->mSsInfo = ArrayOf<Int32>::Alloc(num);
+    //     for (Int32 i = 0; i < num; i++) {
+    //         Int32 iInfoNode = 0;
+    //         p->ReadInt32(&iInfoNode);
+    //         ssData->mSsInfo[i] = iInfoNode;
+    //         String str("[SS Data] SS Info ");
+    //         str += i;
+    //         str += " : ";
+    //         str += iInfoNode;
+    //         RiljLog(str);
+    //     }
+    // }
+
+    return ssData;
+}
+
+ECode RIL::GetDeviceIdentity(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_DEVICE_IDENTITY, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetCDMASubscription(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_CDMA_SUBSCRIPTION, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetPhoneType(
+    /* [in] */ Int32 phoneType)
+{
+    // Called by CDMAPhone and GSMPhone constructor
+    if (RILJ_LOGD) {
+        String str("setPhoneType=");
+        str += phoneType;
+        str += " old value=";
+        str += mPhoneType;
+        RiljLog(str);
+    }
+    mPhoneType = phoneType;
+    return NOERROR;
+}
+
+ECode RIL::QueryCdmaRoamingPreference(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_CDMA_QUERY_ROAMING_PREFERENCE, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetCdmaRoamingPreference(
+    /* [in] */ Int32 cdmaRoamingType,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_CDMA_SET_ROAMING_PREFERENCE, response);
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(cdmaRoamingType);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " : ";
+        str += cdmaRoamingType;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetCdmaSubscriptionSource(
+    /* [in] */ Int32 cdmaSubscription,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE, response);
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(cdmaSubscription);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " : ";
+        str += cdmaSubscription;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetCdmaSubscriptionSource(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_CDMA_GET_SUBSCRIPTION_SOURCE, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::QueryTTYMode(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_QUERY_TTY_MODE, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetTTYMode(
+    /* [in] */ Int32 ttyMode,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(
+            IRILConstants::RIL_REQUEST_SET_TTY_MODE, response);
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(ttyMode);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " : ";
+        str += ttyMode;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SendCDMAFeatureCode(
+    /* [in] */ String FeatureCode,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_CDMA_FLASH, response);
+
+    rr->mParcel->WriteString(FeatureCode);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " : ";
+        str += FeatureCode;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetCdmaBroadcastConfig(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG, response);
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetCdmaBroadcastConfig(
+    /* [in] */ ArrayOf<ICdmaSmsBroadcastConfigInfo*>* configs,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG, response);
+
+    // Convert to 1 service category per config (the way RIL takes is)
+    AutoPtr<IArrayList> processedConfigs;
+    CArrayList::New((IArrayList**)&processedConfigs);
+    for (Int32 k = 0; k < configs->GetLength(); k++) {
+        AutoPtr<ICdmaSmsBroadcastConfigInfo> config = (*configs)[k];
+        Int32 i = 0;
+        config->GetFromServiceCategory(&i);
+        Int32 iMax = 0;
+        config->GetToServiceCategory(&iMax);
+        for (; i <= iMax; i++) {
+            Int32 language = 0;
+            config->GetLanguage(&language);
+            Boolean bSelected = FALSE;
+            config->IsSelected(&bSelected);
+            AutoPtr<ICdmaSmsBroadcastConfigInfo> pCI;
+            assert(0 && "TODO");
+            // CCdmaSmsBroadcastConfigInfo::New(i,
+            //         i,
+            //         language,
+            //         bSelected,
+            //         (ICdmaSmsBroadcastConfigInfo**)&pCI);
+            processedConfigs->Add(pCI);
+        }
+    }
+
+    AutoPtr<ArrayOf<ICdmaSmsBroadcastConfigInfo*> > rilConfigs;
+    assert(0 && "TODO");
+    // processedConfigs->ToArray(configs, (ArrayOf<IInterface*>**)&rilConfigs);
+    rr->mParcel->WriteInt32(rilConfigs->GetLength());
+    for(Int32 i = 0; i < rilConfigs->GetLength(); i++) {
+        Int32 cate = 0;
+        (*rilConfigs)[i]->GetFromServiceCategory(&cate);
+        rr->mParcel->WriteInt32(cate);
+        Int32 language = 0;
+        (*rilConfigs)[i]->GetLanguage(&language);
+        rr->mParcel->WriteInt32(language);
+        Boolean bSelected = FALSE;
+        (*rilConfigs)[i]->IsSelected(&bSelected);
+        rr->mParcel->WriteInt32(bSelected ? 1 : 0);
+    }
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " with ";
+        str += rilConfigs->GetLength();
+        str += " configs : ";
+        RiljLog(str);
+        for (Int32 i = 0; i < rilConfigs->GetLength(); i++) {
+            assert(0 && "TODO");
+            // RiljLog((*rilConfigs)[i]->ToString());
+        }
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetCdmaBroadcastActivation(
+    /* [in] */ Boolean activate,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_CDMA_BROADCAST_ACTIVATION, response);
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(activate ? 0 : 1);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::ExitEmergencyCallbackMode(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_EXIT_EMERGENCY_CALLBACK_MODE, response);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::RequestIsimAuthentication(
+    /* [in] */ String nonce,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_ISIM_AUTHENTICATION, response);
+
+    rr->mParcel->WriteString(nonce);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::RequestIccSimAuthentication(
+    /* [in] */ Int32 authContext,
+    /* [in] */ String data,
+    /* [in] */ String aid,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SIM_AUTHENTICATION, response);
+
+    rr->mParcel->WriteInt32(authContext);
+    rr->mParcel->WriteString(data);
+    rr->mParcel->WriteString(aid);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::GetCellInfoList(
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_GET_CELL_INFO_LIST, result);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetCellInfoListRate(
+    /* [in] */ Int32 rateInMillis,
+    /* [in] */ IMessage* response)
+{
+    if (RILJ_LOGD) {
+        String str("setCellInfoListRate: ");
+        str += rateInMillis;
+        RiljLog(str);
+    }
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SET_UNSOL_CELL_INFO_LIST_RATE, response);
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(rateInMillis);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetInitialAttachApn(
+    /* [in] */ String apn,
+    /* [in] */ String protocol,
+    /* [in] */ Int32 authType,
+    /* [in] */ String username,
+    /* [in] */ String password,
+    /* [in] */ IMessage* result)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SET_INITIAL_ATTACH_APN, result);
+
+    if (RILJ_LOGD) RiljLog(String("Set RIL_REQUEST_SET_INITIAL_ATTACH_APN"));
+
+    rr->mParcel->WriteString(apn);
+    rr->mParcel->WriteString(protocol);
+    rr->mParcel->WriteInt32(authType);
+    rr->mParcel->WriteString(username);
+    rr->mParcel->WriteString(password);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += ", apn:"; str += apn;
+        str += ", protocol:"; str += protocol;
+        str += ", authType:"; str += authType;
+        str += ", username:"; str += username;
+        str += ", password:"; str += password;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::SetDataProfile(
+    /* [in] */ ArrayOf<IDataProfile*>* dps,
+    /* [in] */ IMessage* result)
+{
+    if (RILJ_LOGD) RiljLog(String("Set RIL_REQUEST_SET_DATA_PROFILE"));
+
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SET_DATA_PROFILE, NULL);
+    assert(0 && "TODO");
+    // DataProfile::ToParcel(rr->mParcel, dps);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " with ";
+        // str += dps;
+        str += " Data Profiles : ";
+        RiljLog(str);
+        for (Int32 i = 0; i < dps->GetLength(); i++) {
+            assert(0 && "TODO");
+            // RiljLog((*dps)[i].ToString());
+        }
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::TestingEmergencyCall()
+{
+    if (RILJ_LOGD) RiljLog(String("testingEmergencyCall"));
+    mTestingEmergencyCall->Set(TRUE);
+    return NOERROR;
+}
+
+ECode RIL::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    pw->Println(String("RIL: "));
+    assert(0 && "TODO");
+    // pw->Println(this);
+    pw->Println(String(" mSocket="));
+    pw->Println(mSocket);
+    pw->Println(String(" mSenderThread="));
+    pw->Println(mSenderThread);
+    pw->Println(String(" mSender="));
+    // pw->Println(mSender);
+    pw->Println(String(" mReceiverThread="));
+    pw->Println(mReceiverThread);
+    pw->Println(String(" mReceiver="));
+    // pw->Println(mReceiver);
+    pw->Println(String(" mWakeLock="));
+    pw->Println(mWakeLock);
+    pw->Println(String(" mWakeLockTimeout="));
+    pw->Println(mWakeLockTimeout);
+    // synchronized (listLock)
+    {
+        AutoLock lock(listLock);
+        // synchronized (mWakeLock)
+        {
+            AutoLock lock(wakeLock);
+            pw->Println(String(" mWakeLockCount="));
+            pw->Println(mWakeLockCount);
+        }
+        Int32 count = 0;
+        mRequestList->GetSize(&count);
+        pw->Println(String(" mRequestList count="));
+        pw->Println(count);
+        for (Int32 i = 0; i < count; i++) {
+            assert(0 && "TODO");
+            // AutoPtr<RILRequest> rr = mRequestList.valueAt(i);
+            // pw->Println("  [" + rr.mSerial + "] " + RequestToString(rr->mRequest));
+        }
+    }
+    pw->Println(String(" mLastNITZTimeInfo="));
+    pw->Println(mLastNITZTimeInfo);
+    pw->Println(String(" mTestingEmergencyCall="));
+    pw->Println(mTestingEmergencyCall.Get());
+    return NOERROR;
+}
+
+ECode RIL::IccOpenLogicalChannel(
+    /* [in] */ String AID,
+    /* [in] */ IMessage* response)
+{
+    if(mRilVersion < 10) {
+        if (response != NULL) {
+            AutoPtr<ICommandException> ex;
+            assert(0 && "TODO");
+            // CCommandException::New(
+            //     ICommandException::Error::REQUEST_NOT_SUPPORTED, (ICommandException**)&ex);
+            // AsyncResult::ForMessage(response, NULL, ex);
+            response->SendToTarget();
+        }
+        return NOERROR;
+    }
+
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SIM_OPEN_CHANNEL, response);
+    rr->mParcel->WriteString(AID);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::IccCloseLogicalChannel(
+    /* [in] */ Int32 channel,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SIM_CLOSE_CHANNEL, response);
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(channel);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::IccTransmitApduLogicalChannel(
+    /* [in] */ Int32 channel,
+    /* [in] */ Int32 cla,
+    /* [in] */ Int32 instruction,
+    /* [in] */ Int32 p1,
+    /* [in] */ Int32 p2,
+    /* [in] */ Int32 p3,
+    /* [in] */ String data,
+    /* [in] */ IMessage* response)
+{
+    if(mRilVersion < 10) {
+        if (response != NULL) {
+            AutoPtr<ICommandException> ex;
+            assert(0 && "TODO");
+            // CCommandException::New(
+            //     ICommandException::Error::REQUEST_NOT_SUPPORTED, (ICommandException**)&ex);
+            // AsyncResult::ForMessage(response, NULL, ex);
+            response->SendToTarget();
+        }
+        return NOERROR;
+    }
+
+    if (channel <= 0) {
+        // throw new RuntimeException(
+        //     "Invalid channel in iccTransmitApduLogicalChannel: " + channel);
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    IccTransmitApduHelper(IRILConstants::RIL_REQUEST_SIM_TRANSMIT_APDU_CHANNEL, channel, cla,
+            instruction, p1, p2, p3, data, response);
+    return NOERROR;
+}
+
+ECode RIL::IccTransmitApduBasicChannel(
+    /* [in] */ Int32 cla,
+    /* [in] */ Int32 instruction,
+    /* [in] */ Int32 p1,
+    /* [in] */ Int32 p2,
+    /* [in] */ Int32 p3,
+    /* [in] */ String data,
+    /* [in] */ IMessage* response)
+{
+    IccTransmitApduHelper(IRILConstants::RIL_REQUEST_SIM_TRANSMIT_APDU_BASIC, 0, cla, instruction,
+            p1, p2, p3, data, response);
+    return NOERROR;
+}
+
+ECode RIL::GetAtr(
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SIM_GET_ATR, response);
+    Int32 slotId = 0;
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(slotId);
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> iccGetAtr: ";
+        str += RequestToString(rr->mRequest);
+        str += " ";
+        str += slotId;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+void RIL::IccTransmitApduHelper(
+    /* [in] */ Int32 rilCommand,
+    /* [in] */ Int32 channel,
+    /* [in] */ Int32 cla,
+    /* [in] */ Int32 instruction,
+    /* [in] */ Int32 p1,
+    /* [in] */ Int32 p2,
+    /* [in] */ Int32 p3,
+    /* [in] */ String data,
+    /* [in] */ IMessage* response)
+{
+    if (mRilVersion < 10) {
+        if (response != NULL) {
+            AutoPtr<ICommandException> ex;
+            assert(0 && "TODO");
+            // CCommandException::New(
+            //     ICommandException::Error::REQUEST_NOT_SUPPORTED, (ICommandException**)&ex);
+            // AsyncResult::ForMessage(response, NULL, ex);
+            response->SendToTarget();
+        }
+        return;
+    }
+
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(rilCommand, response);
+    rr->mParcel->WriteInt32(channel);
+    rr->mParcel->WriteInt32(cla);
+    rr->mParcel->WriteInt32(instruction);
+    rr->mParcel->WriteInt32(p1);
+    rr->mParcel->WriteInt32(p2);
+    rr->mParcel->WriteInt32(p3);
+    rr->mParcel->WriteString(data);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return;
+}
+
+ECode RIL::NvReadItem(
+    /* [in] */ Int32 itemID,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_NV_READ_ITEM, response);
+
+    rr->mParcel->WriteInt32(itemID);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += ' ';
+        str += itemID;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::NvWriteItem(
+    /* [in] */ Int32 itemID,
+    /* [in] */ String itemValue,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_NV_WRITE_ITEM, response);
+
+    rr->mParcel->WriteInt32(itemID);
+    rr->mParcel->WriteString(itemValue);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += ' ';
+        str += itemID;
+        str += ": ";
+        str += itemValue;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::NvWriteCdmaPrl(
+    /* [in] */ ArrayOf<Byte>* preferredRoamingList,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_NV_WRITE_CDMA_PRL, response);
+
+    assert(0 && "TODO");
+    // rr->mParcel->WriteByteArray(preferredRoamingList);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += " (";
+        str += preferredRoamingList->GetLength();
+        str += " bytes)";
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+ECode RIL::NvResetConfig(
+    /* [in] */ Int32 resetType,
+    /* [in] */ IMessage* response)
+{
+    AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_NV_RESET_CONFIG, response);
+
+    rr->mParcel->WriteInt32(1);
+    rr->mParcel->WriteInt32(resetType);
+
+    if (RILJ_LOGD) {
+        String str = rr->SerialString();
+        str += "> ";
+        str += RequestToString(rr->mRequest);
+        str += ' ';
+        str += resetType;
+        RiljLog(str);
+    }
+
+    Send(rr);
+    return NOERROR;
+}
+
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

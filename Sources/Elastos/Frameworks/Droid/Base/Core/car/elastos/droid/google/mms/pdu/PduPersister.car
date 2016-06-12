@@ -1,5 +1,12 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Google.Mms.Pdu.ISendReq;
+
+    using interface Elastos.Utility.IHashMap;
 
     namespace Elastos {
     namespace Droid {
@@ -8,32 +15,130 @@ module {
     namespace Pdu {
 
     interface IPduPersister {
-        GetPduPersister(
-            [in] Context context,
-            [out] PduPersister* result);
+        /**
+         * Indicate that we transiently failed to process a MM.
+         */
+        const Int32 PROC_STATUS_TRANSIENT_FAILURE   = 1;
+        /**
+         * Indicate that we permanently failed to process a MM.
+         */
+        const Int32 PROC_STATUS_PERMANENTLY_FAILURE = 2;
+        /**
+         * Indicate that we have successfully processed a MM.
+         */
+        const Int32 PROC_STATUS_COMPLETED           = 3;
 
+        /**
+         * Load a PDU from storage by given Uri.
+         *
+         * @param uri The Uri of the PDU to be loaded.
+         * @return A generic PDU object, it may be cast to dedicated PDU.
+         * @throws MmsException Failed to load some fields of a PDU.
+         */
+        Load(
+            [in] IUri* uri,
+            [out] IGenericPdu** result);
 
-
-
-        ConvertUriToPath(
-            [in] Context context, 
-            [in] Uri uri,
-            [out] String* result);
+        PersistPart(
+            [in] IPduPart* part,
+            [in] Int64 msgId,
+            [in] IHashMap* preOpenedFiles,
+            [out] IUri** result);
 
         UpdateHeaders(
-            [in] Uri uri, 
-            [in] SendReq sendReq);
+            [in] IUri* uri,
+            [in] ISendReq* sendReq);
 
+        /**
+         * Update all parts of a PDU.
+         *
+         * @param uri The PDU which need to be updated.
+         * @param body New message body of the PDU.
+         * @param preOpenedFiles if not null, a map of preopened InputStreams for the parts.
+         * @throws MmsException Bad URI or updating failed.
+         */
+        UpdateParts(
+            [in] IUri* uri,
+            [in] IPduBody* body,
+            [in] IHashMap* preOpenedFiles);
 
-        GetBytes(
-            [in] String data);
+        /**
+         * Persist a PDU object to specific location in the storage.
+         *
+         * @param pdu The PDU object to be stored.
+         * @param uri Where to store the given PDU object.
+         * @param createThreadId if true, this function may create a thread id for the recipients
+         * @param groupMmsEnabled if true, all of the recipients addressed in the PDU will be used
+         *  to create the associated thread. When false, only the sender will be used in finding or
+         *  creating the appropriate thread or conversation.
+         * @param preOpenedFiles if not null, a map of preopened InputStreams for the parts.
+         * @return A Uri which can be used to access the stored PDU.
+         */
+        Persist(
+            [in] IGenericPdu* pdu,
+            [in] IUri* uri,
+            [in] Boolean createThreadId,
+            [in] Boolean groupMmsEnabled,
+            [in] IHashMap* preOpenedFiles,
+            [out] IUri** result);
 
-        Release();
+        /**
+         * Move a PDU object from one location to another.
+         *
+         * @param from Specify the PDU object to be moved.
+         * @param to The destination location, should be one of the following:
+         *        "content://mms/inbox", "content://mms/sent",
+         *        "content://mms/drafts", "content://mms/outbox",
+         *        "content://mms/trash".
+         * @return New Uri of the moved PDU.
+         * @throws MmsException Error occurred while moving the message.
+         */
+        Move(
+            [in] IUri* from,
+            [in] IUri* to,
+            [out] IUri** result);
 
         GetPendingMessages(
             [in] Int64 dueTime,
-            [out] Cursor* result);
+            [out] ICursor** result);
 
+    }
+
+    [local, deprecated]
+    interface IPduPersisterHelper {
+
+        /** Get(or create if not exist) an instance of PduPersister */
+        GetPduPersister(
+            [in] IContext* context,
+            [out] IPduPersister** result);
+
+        /**
+         * This method expects uri in the following format
+         *     content://media/<table_name>/<row_index> (or)
+         *     file://sdcard/test.mp4
+         *     http://test.com/test.mp4
+         *
+         * Here <table_name> shall be "video" or "audio" or "images"
+         * <row_index> the index of the content in given table
+         */
+        ConvertUriToPath(
+            [in] IContext* context,
+            [in] IUri* uri,
+            [out] String* result);
+
+        /**
+         * Wrap a byte[] into a String.
+         */
+        ToIsoString(
+            [in] ArrayOf<Byte>* bytes,
+            [out] String* result);
+
+        /**
+         * Unpack a given String into a byte[].
+         */
+        GetBytes(
+            [in] String data,
+            [out, callee] ArrayOf<Byte>* result);
     }
 
     }//Pdu

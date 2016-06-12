@@ -9,17 +9,17 @@ module {
 
     interface IAbstractCache {
         Put(
-            [in] K key, 
-            [in] V value,
+            [in] IInterface* key,
+            [in] IInterface* value,
             [out] Boolean* result);
 
         Get(
-            [in] K key,
-            [out] V* result);
+            [in] IInterface* key,
+            [out] IInterface** result);
 
         Purge(
-            [in] K key,
-            [out] V* result);
+            [in] IInterface* key,
+            [out] IInterface** result);
 
         PurgeAll();
 

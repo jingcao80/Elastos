@@ -7,14 +7,50 @@ module {
     namespace Mms {
     namespace Pdu {
 
+    /**
+     * @Involve
+     * interface IGenericPdu
+     */
+    [deprecated]
     interface INotifyRespInd {
         GetReportAllowed(
             [out] Int32* result);
 
+        /**
+         * Set X-Mms-Report-Allowed field value.
+         *
+         * @param value the value
+         * @throws InvalidHeaderValueException if the value is invalid.
+         *         RuntimeException if an undeclared error occurs.
+         */
+        SetReportAllowed(
+            [in] Int32 value);
+
+        /**
+         * Set X-Mms-Status field value.
+         *
+         * @param value the value
+         * @throws InvalidHeaderValueException if the value is invalid.
+         *         RuntimeException if an undeclared error occurs.
+         */
+        SetStatus(
+            [in] Int32 value);
+
         GetStatus(
             [out] Int32* result);
 
-        GetTransactionId();
+        GetTransactionId(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Set X-Mms-Transaction-Id field value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         *         RuntimeException if an undeclared error occurs.
+         */
+        SetTransactionId(
+            [in] ArrayOf<Byte>* value);
 
     }
 

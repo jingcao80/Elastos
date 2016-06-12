@@ -7,40 +7,113 @@ module {
     namespace Mms {
     namespace Pdu {
 
+    /**
+     * @Involve
+     * interface IMultimediaMessagePdu
+     */
+    [deprecated]
     interface IRetrieveConf {
-        GetCc();
+        GetCc(
+            [out, callee] ArrayOf<IEncodedStringValue*>* result);
 
         AddCc(
-            [in] EncodedStringValue value);
+            [in] IEncodedStringValue* value);
 
-        GetContentType();
+        GetContentType(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Set Content-type value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         */
+        SetContentType(
+            [out, callee] ArrayOf<Byte>* value);
 
         GetDeliveryReport(
             [out] Int32* result);
 
+        /**
+         * Set X-Mms-Delivery-Report value.
+         *
+         * @param value the value
+         * @throws InvalidHeaderValueException if the value is invalid.
+         */
+        SetDeliveryReport(
+            [in] Int32 value);
+
         GetFrom(
-            [out] EncodedStringValue* result);
+            [out] IEncodedStringValue** result);
 
         SetFrom(
-            [in] EncodedStringValue value);
+            [in] IEncodedStringValue* value);
 
-        GetMessageClass();
+        GetMessageClass(
+            [out, callee] ArrayOf<Byte>* result);
 
-        GetMessageId();
+        /**
+         * Set X-Mms-Message-Class value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         */
+        SetMessageClass(
+            [in] ArrayOf<Byte>* value);
+
+        GetMessageId(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Set Message-ID value.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         */
+        SetMessageId(
+            [out, callee] ArrayOf<Byte>* value);
 
         GetReadReport(
             [out] Int32* result);
 
+        /**
+         * Set X-Mms-Read-Report value.
+         *
+         * @param value the value
+         * @throws InvalidHeaderValueException if the value is invalid.
+         */
+        SetReadReport(
+            [in] Int32 value);
+
         GetRetrieveStatus(
             [out] Int32* result);
 
+        /**
+         * Set X-Mms-Retrieve-Status value.
+         *
+         * @param value the value
+         * @throws InvalidHeaderValueException if the value is invalid.
+         */
+        SetRetrieveStatus(
+            [in] Int32 value);
+
         GetRetrieveText(
-            [out] EncodedStringValue* result);
+            [out] IEncodedStringValue** result);
 
         SetRetrieveText(
-            [in] EncodedStringValue value);
+            [in] IEncodedStringValue* value);
 
-        GetTransactionId();
+        GetTransactionId(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Set X-Mms-Transaction-Id.
+         *
+         * @param value the value
+         * @throws NullPointerException if the value is null.
+         */
+        SetTransactionId(
+            [in] ArrayOf<Byte>* value);
 
     }
 
