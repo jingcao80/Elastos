@@ -504,7 +504,8 @@ const Int32 SMSDispatcher::MO_MSG_QUEUE_LIMIT = 5;
  * incremented for each set of concatenated messages.
  * Static field shared by all dispatcher objects.
  */
-Int32 SMSDispatcher::sConcatenatedRef = InitConcatenatedRef();
+// TODO:
+// Int32 SMSDispatcher::sConcatenatedRef = InitConcatenatedRef();
 
 CAR_INTERFACE_IMPL(SMSDispatcher, Handler, ISMSDispatcher)
 

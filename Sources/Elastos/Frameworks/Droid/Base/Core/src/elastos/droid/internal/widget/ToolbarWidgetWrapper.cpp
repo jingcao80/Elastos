@@ -1,17 +1,19 @@
 
+#include "elastos/droid/internal/view/menu/CActionMenuItem.h"
 #include "elastos/droid/internal/widget/ToolbarWidgetWrapper.h"
-#include "elastos/droid/R.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/widget/CActionMenuPresenter.h"
 #include "elastos/droid/widget/CSpinner.h"
 #include "elastos/droid/widget/CToolbarLayoutParams.h"
+#include "elastos/droid/R.h"
 #include "elastos/core/Math.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::IAnimatorListener;
 using Elastos::Droid::App::IActionBarLayoutParams;
 using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Internal::View::Menu::CActionMenuItem;
 using Elastos::Droid::Internal::View::Menu::IBaseMenuPresenter;
 using Elastos::Droid::Internal::Widget::EIID_IDecorToolbar;
 using Elastos::Droid::Internal::Widget::EIID_IToolbarWidgetWrapper;
@@ -47,7 +49,11 @@ CAR_INTERFACE_IMPL(ToolbarWidgetWrapper::InnerViewOnClickListener, Object, IView
 ToolbarWidgetWrapper::InnerViewOnClickListener::InnerViewOnClickListener(
     /* [in] */ ToolbarWidgetWrapper* owner)
     : mOwner(owner)
-{}
+{
+    AutoPtr<IContext> context;
+    IView::Probe(owner->mToolbar)->GetContext((IContext**)&context);
+    CActionMenuItem::New(context, 0, R::id::home, 0, 0, owner->mTitle, (IActionMenuItem**)&mNavItem);
+}
 
 ECode ToolbarWidgetWrapper::InnerViewOnClickListener::OnClick(
     /* [in] */ IView* v)
