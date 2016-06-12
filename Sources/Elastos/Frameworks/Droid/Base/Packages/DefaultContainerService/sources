@@ -4,7 +4,7 @@ TARGET_TYPE= eco
 EXPORT_ALL_SYMBOLS = 1
 
 include $(MAKEDIR)/../../../sources.inc
-INCLUDES += $(MAKEDIR)/../inc/
+INCLUDES += $(MAKEDIR)/inc/
 INCLUDES += $(MAKEDIR)/src
 
 VPATH += $(MAKEDIR)/src/elastos/droid/defcontainer

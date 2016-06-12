@@ -390,8 +390,8 @@
 > Elastos/Frameworks/Droid/Base/Packages/SettingsProvider
 
 # ==== build DefContainer ====
-  Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService/src/elastos/droid/defcontainer Elastos.Droid.DefContainer.car
-> Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService/src/elastos/droid/defcontainer
+  Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService/ Elastos.Droid.DefContainer.car
+> Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService/
 
 # ==== build DevSamples ====
  Elastos/Frameworks/Droid/DevSamples/ImageDemo Elastos.DevSamples.ImageDemo.car
