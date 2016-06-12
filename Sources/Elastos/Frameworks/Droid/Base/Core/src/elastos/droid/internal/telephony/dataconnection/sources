@@ -1,0 +1,37 @@
+TARGET_NAME= dataconnection
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = dataconnection.cpp
+SOURCES += ApnContext.cpp
+SOURCES += ApnProfileOmh.cpp
+SOURCES += ApnSetting.cpp
+SOURCES += CApnSettingHelper.cpp
+SOURCES += CDataProfileHelper.cpp
+SOURCES += CDcFailCauseHelper.cpp
+SOURCES += CDctControllerHelper.cpp
+SOURCES += CDdsSchedulerHelper.cpp
+SOURCES += CdmaApnProfileTracker.cpp
+SOURCES += DataCallResponse.cpp
+SOURCES += DataConnection.cpp
+SOURCES += DataProfile.cpp
+SOURCES += DcAsyncChannel.cpp
+SOURCES += DcController.cpp
+SOURCES += DcFailBringUp.cpp
+SOURCES += DcFailCause.cpp
+SOURCES += DcRetryAlarmController.cpp
+SOURCES += DcSwitchAsyncChannel.cpp
+SOURCES += DcSwitchState.cpp
+SOURCES += DcTesterDeactivateAll.cpp
+SOURCES += DcTesterFailBringUpAll.cpp
+SOURCES += DcTracker.cpp
+SOURCES += DcTrackerBase.cpp
+SOURCES += DctController.cpp
+SOURCES += DdsScheduler.cpp
+SOURCES += DdsSchedulerAc.cpp

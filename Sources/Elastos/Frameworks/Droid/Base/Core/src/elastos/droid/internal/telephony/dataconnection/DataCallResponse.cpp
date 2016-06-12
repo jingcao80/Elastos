@@ -1,260 +1,395 @@
-/*
- * Copyright (C) 2009 Qualcomm Innovation Center, Inc.  All Rights Reserved.
- * Copyright (C) 2009 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.dataconnection;
+#include "elastos/droid/internal/telephony/dataconnection/DataCallResponse.h"
 
-using Elastos::Droid::Net::ILinkAddress;
-using Elastos::Droid::Net::ILinkProperties;
-using Elastos::Droid::Net::INetworkUtils;
-using Elastos::Droid::Net::IRouteInfo;
-using Elastos::Droid::Os::ISystemProperties;
-using Elastos::Droid::Telephony::IRlog;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace DataConnection {
 
-using Elastos::Droid::Internal::Telephony::IPhoneConstants;
-using Elastos::Droid::Internal::Telephony::Dataconnection::IDcFailCause;
+CAR_INTERFACE_IMPL(DataCallResponse, Object, IDataCallResponse)
 
-using Elastos::Net::IInet4Address;
-using Elastos::Net::IInetAddress;
+DataCallResponse::DataCallResponse()
+    : DBG(true)
+    , LOG__TAG("DataCallResponse")
+    , mVersion(0)
+    , mStatus(0)
+    , mCid(0)
+    , mActive(0)
+    , mType("")
+    , mIfname("")
+    , mAddresses(ArrayOf<String>::Alloc(0))
+    , mDnses(ArrayOf<String>::Alloc(0))
+    , mGateways(ArrayOf<String>::Alloc(0))
+    , mSuggestedRetryTime(-1)
+    , mPcscf(ArrayOf<String>::Alloc(0))
+    , mMtu(IPhoneConstants::UNSET_MTU)
+{}
 
-/**
- * This is RIL_Data_Call_Response_v5 from ril.h
- */
-public class DataCallResponse {
-    private final Boolean DBG = TRUE;
-    private final String LOG_TAG = "DataCallResponse";
-
-    public Int32 version = 0;
-    public Int32 status = 0;
-    public Int32 cid = 0;
-    public Int32 active = 0;
-    public String type = "";
-    public String ifname = "";
-    public String [] addresses = new String[0];
-    public String [] dnses = new String[0];
-    public String[] gateways = new String[0];
-    public Int32 suggestedRetryTime = -1;
-    public String [] pcscf = new String[0];
-    public Int32 mtu = PhoneConstants.UNSET_MTU;
-
-    /**
-     * Class returned by onSetupConnectionCompleted.
-     */
-    public enum SetupResult {
-        SUCCESS,
-        ERR_BadCommand,
-        ERR_UnacceptableParameter,
-        ERR_GetLastErrorFromRil,
-        ERR_Stale,
-        ERR_RilError;
-
-        public DcFailCause mFailCause;
-
-        SetupResult() {
-            mFailCause = DcFailCause->FromInt(0);
-        }
-
-        //@Override
-        CARAPI ToString(
-        /* [out] */ String* str)
-    {
-            return Name() + "  SetupResult.mFailCause=" + mFailCause;
-        }
-    }
-
-    //@Override
-    CARAPI ToString(
-        /* [out] */ String* str)
-    {
+ECode DataCallResponse::ToString(
+    /* [out] */ String* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         StringBuffer sb = new StringBuffer();
-        sb->Append("DataCallResponse: {")
-           .Append("version=").Append(version)
-           .Append(" status=").Append(status)
-           .Append(" retry=").Append(suggestedRetryTime)
-           .Append(" cid=").Append(cid)
-           .Append(" active=").Append(active)
-           .Append(" type=").Append(type)
-           .Append(" ifname=").Append(ifname)
-           .Append(" mtu=").Append(mtu)
-           .Append(" addresses=[");
-        For (String addr : addresses) {
-            sb->Append(addr);
-            sb->Append(",");
+        sb.append("DataCallResponse: {")
+           .append("version=").append(version)
+           .append(" status=").append(status)
+           .append(" retry=").append(suggestedRetryTime)
+           .append(" cid=").append(cid)
+           .append(" active=").append(active)
+           .append(" type=").append(type)
+           .append(" ifname=").append(ifname)
+           .append(" mtu=").append(mtu)
+           .append(" addresses=[");
+        for (String addr : addresses) {
+            sb.append(addr);
+            sb.append(",");
         }
-        If (addresses.length > 0) sb->DeleteCharAt(sb->Length()-1);
-        sb->Append("] dnses=[");
-        For (String addr : dnses) {
-            sb->Append(addr);
-            sb->Append(",");
+        if (addresses.length > 0) sb.deleteCharAt(sb.length()-1);
+        sb.append("] dnses=[");
+        for (String addr : dnses) {
+            sb.append(addr);
+            sb.append(",");
         }
-        If (dnses.length > 0) sb->DeleteCharAt(sb->Length()-1);
-        sb->Append("] gateways=[");
-        For (String addr : gateways) {
-            sb->Append(addr);
-            sb->Append(",");
+        if (dnses.length > 0) sb.deleteCharAt(sb.length()-1);
+        sb.append("] gateways=[");
+        for (String addr : gateways) {
+            sb.append(addr);
+            sb.append(",");
         }
-        If (gateways.length > 0) sb->DeleteCharAt(sb->Length()-1);
-        sb->Append("] pcscf=[");
-        For (String addr : pcscf) {
-            sb->Append(addr);
-            sb->Append(",");
+        if (gateways.length > 0) sb.deleteCharAt(sb.length()-1);
+        sb.append("] pcscf=[");
+        for (String addr : pcscf) {
+            sb.append(addr);
+            sb.append(",");
         }
-        If (pcscf.length > 0) sb->DeleteCharAt(sb->Length()-1);
-        sb->Append("]}");
-        return sb->ToString();
-    }
+        if (pcscf.length > 0) sb.deleteCharAt(sb.length()-1);
+        sb.append("]}");
+        return sb.toString();
 
-    public SetupResult SetLinkProperties(LinkProperties linkProperties,
-            Boolean okToUseSystemPropertyDns) {
+#endif
+}
+
+ECode DataCallResponse::SetLinkProperties(
+    /* [in] */ ILinkProperties* linkProperties,
+    /* [in] */ Boolean okToUseSystemPropertyDns,
+    /* [out] */ DataCallResponseSetupResult* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         SetupResult result;
-
         // Start with clean network properties and if we have
         // a failure we'll clear again at the bottom of this code.
-        If (linkProperties == NULL)
+        if (linkProperties == null)
             linkProperties = new LinkProperties();
         else
-            linkProperties->Clear();
-
-        If (status == DcFailCause.NONE->GetErrorCode()) {
+            linkProperties.clear();
+        if (status == DcFailCause.NONE.getErrorCode()) {
             String propertyPrefix = "net." + ifname + ".";
-
             try {
                 // set interface name
-                linkProperties->SetInterfaceName(ifname);
-
+                linkProperties.setInterfaceName(ifname);
                 // set link addresses
-                If (addresses != NULL && addresses.length > 0) {
-                    For (String addr : addresses) {
-                        addr = addr->Trim();
-                        If (addr->IsEmpty()) continue;
+                if (addresses != null && addresses.length > 0) {
+                    for (String addr : addresses) {
+                        addr = addr.trim();
+                        if (addr.isEmpty()) continue;
                         LinkAddress la;
-                        Int32 addrPrefixLen;
-
-                        String [] ap = addr->Split("/");
-                        If (ap.length == 2) {
+                        int addrPrefixLen;
+                        String [] ap = addr.split("/");
+                        if (ap.length == 2) {
                             addr = ap[0];
-                            addrPrefixLen = Integer->ParseInt(ap[1].ReplaceAll("[\\D]",""));
+                            addrPrefixLen = Integer.parseInt(ap[1].replaceAll("[\\D]",""));
                         } else {
                             addrPrefixLen = 0;
                         }
                         InetAddress ia;
                         try {
-                            ia = NetworkUtils->NumericToInetAddress(addr);
-                        } Catch (IllegalArgumentException e) {
+                            ia = NetworkUtils.numericToInetAddress(addr);
+                        } catch (IllegalArgumentException e) {
                             throw new UnknownHostException("Non-numeric ip addr=" + addr);
                         }
-                        If (! ia->IsAnyLocalAddress()) {
-                            If (addrPrefixLen == 0) {
+                        if (! ia.isAnyLocalAddress()) {
+                            if (addrPrefixLen == 0) {
                                 // Assume point to point
                                 addrPrefixLen = (ia instanceof Inet4Address) ? 32 : 128;
                             }
-                            If (DBG) Rlog->D(LOG_TAG, "addr/pl=" + addr + "/" + addrPrefixLen);
+                            if (DBG) Rlog.d(LOG__TAG, "addr/pl=" + addr + "/" + addrPrefixLen);
                             la = new LinkAddress(ia, addrPrefixLen);
-                            linkProperties->AddLinkAddress(la);
+                            linkProperties.addLinkAddress(la);
                         }
                     }
                 } else {
                     throw new UnknownHostException("no address for ifname=" + ifname);
                 }
-
                 // set dns servers
-                If (dnses != NULL && dnses.length > 0) {
-                    For (String addr : dnses) {
-                        addr = addr->Trim();
-                        If (addr->IsEmpty()) continue;
+                if (dnses != null && dnses.length > 0) {
+                    for (String addr : dnses) {
+                        addr = addr.trim();
+                        if (addr.isEmpty()) continue;
                         InetAddress ia;
                         try {
-                            ia = NetworkUtils->NumericToInetAddress(addr);
-                        } Catch (IllegalArgumentException e) {
+                            ia = NetworkUtils.numericToInetAddress(addr);
+                        } catch (IllegalArgumentException e) {
                             throw new UnknownHostException("Non-numeric dns addr=" + addr);
                         }
-                        If (! ia->IsAnyLocalAddress()) {
-                            linkProperties->AddDnsServer(ia);
+                        if (! ia.isAnyLocalAddress()) {
+                            linkProperties.addDnsServer(ia);
                         }
                     }
-                } else If (okToUseSystemPropertyDns){
+                } else if (okToUseSystemPropertyDns){
                     String dnsServers[] = new String[2];
-                    dnsServers[0] = SystemProperties->Get(propertyPrefix + "dns1");
-                    dnsServers[1] = SystemProperties->Get(propertyPrefix + "dns2");
-                    For (String dnsAddr : dnsServers) {
-                        dnsAddr = dnsAddr->Trim();
-                        If (dnsAddr->IsEmpty()) continue;
+                    dnsServers[0] = SystemProperties.get(propertyPrefix + "dns1");
+                    dnsServers[1] = SystemProperties.get(propertyPrefix + "dns2");
+                    for (String dnsAddr : dnsServers) {
+                        dnsAddr = dnsAddr.trim();
+                        if (dnsAddr.isEmpty()) continue;
                         InetAddress ia;
                         try {
-                            ia = NetworkUtils->NumericToInetAddress(dnsAddr);
-                        } Catch (IllegalArgumentException e) {
+                            ia = NetworkUtils.numericToInetAddress(dnsAddr);
+                        } catch (IllegalArgumentException e) {
                             throw new UnknownHostException("Non-numeric dns addr=" + dnsAddr);
                         }
-                        If (! ia->IsAnyLocalAddress()) {
-                            linkProperties->AddDnsServer(ia);
+                        if (! ia.isAnyLocalAddress()) {
+                            linkProperties.addDnsServer(ia);
                         }
                     }
                 } else {
                     throw new UnknownHostException("Empty dns response and no system default dns");
                 }
-
                 // set gateways
-                If ((gateways == NULL) || (gateways.length == 0)) {
-                    String sysGateways = SystemProperties->Get(propertyPrefix + "gw");
-                    If (sysGateways != NULL) {
-                        gateways = sysGateways->Split(" ");
+                if ((gateways == null) || (gateways.length == 0)) {
+                    String sysGateways = SystemProperties.get(propertyPrefix + "gw");
+                    if (sysGateways != null) {
+                        gateways = sysGateways.split(" ");
                     } else {
                         gateways = new String[0];
                     }
                 }
-                For (String addr : gateways) {
-                    addr = addr->Trim();
-                    If (addr->IsEmpty()) continue;
+                for (String addr : gateways) {
+                    addr = addr.trim();
+                    if (addr.isEmpty()) continue;
                     InetAddress ia;
                     try {
-                        ia = NetworkUtils->NumericToInetAddress(addr);
-                    } Catch (IllegalArgumentException e) {
+                        ia = NetworkUtils.numericToInetAddress(addr);
+                    } catch (IllegalArgumentException e) {
                         throw new UnknownHostException("Non-numeric gateway addr=" + addr);
                     }
                     // Allow 0.0.0.0 or :: as a gateway; this indicates a point-to-point interface.
-                    linkProperties->AddRoute(new RouteInfo(ia));
+                    linkProperties.addRoute(new RouteInfo(ia));
                 }
-
                 // set interface MTU
                 // this may clobber the setting read from the APN db, but that's ok
-                linkProperties->SetMtu(mtu);
-
+                linkProperties.setMtu(mtu);
                 result = SetupResult.SUCCESS;
-            } Catch (UnknownHostException e) {
-                Rlog->D(LOG_TAG, "setLinkProperties: UnknownHostException " + e);
-                e->PrintStackTrace();
+            } catch (UnknownHostException e) {
+                Rlog.d(LOG__TAG, "setLinkProperties: UnknownHostException " + e);
+                e.printStackTrace();
                 result = SetupResult.ERR_UnacceptableParameter;
             }
         } else {
-            If (version < 4) {
+            if (version < 4) {
                 result = SetupResult.ERR_GetLastErrorFromRil;
             } else {
                 result = SetupResult.ERR_RilError;
             }
         }
-
         // An error occurred so clear properties
-        If (result != SetupResult.SUCCESS) {
-            If(DBG) {
-                Rlog->D(LOG_TAG, "setLinkProperties: error clearing LinkProperties " +
+        if (result != SetupResult.SUCCESS) {
+            if(DBG) {
+                Rlog.d(LOG__TAG, "setLinkProperties: error clearing LinkProperties " +
                         "status=" + status + " result=" + result);
             }
-            linkProperties->Clear();
+            linkProperties.clear();
         }
-
         return result;
-    }
+
+#endif
 }
+
+ECode DataCallResponse::GetVersion(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mVersion;
+    return NOERROR;
+}
+
+ECode DataCallResponse::SetVersion(
+    /* [in] */ Int32 version)
+{
+    mVersion = version;
+    return NOERROR;
+}
+
+ECode DataCallResponse::GetStatus(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mStatus;
+    return NOERROR;
+}
+
+ECode DataCallResponse::SetStatus(
+    /* [in] */ Int32 status)
+{
+    mStatus = status;
+    return NOERROR;
+}
+
+ECode DataCallResponse::GetCid(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mCid;
+    return NOERROR;
+}
+
+ECode DataCallResponse::SetCid(
+    /* [in] */ Int32 cid)
+{
+    mCid = cid;
+    return NOERROR;
+}
+
+ECode DataCallResponse::GetActive(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mActive;
+    return NOERROR;
+}
+
+ECode DataCallResponse::SetActive(
+    /* [in] */ Int32 active)
+{
+    mActive = active;
+    return NOERROR;
+}
+
+ECode DataCallResponse::GetType(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mType;
+    return NOERROR;
+}
+
+ECode DataCallResponse::SetType(
+    /* [in] */ String type)
+{
+    mType = type;
+    return NOERROR;
+}
+
+ECode DataCallResponse::GetIfname(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mIfname;
+    return NOERROR;
+}
+
+ECode DataCallResponse::SetIfname(
+    /* [in] */ String ifname)
+{
+    mIfname = ifname;
+    return NOERROR;
+}
+
+ECode DataCallResponse::GetAddresses(
+    /* [out, callee] */ ArrayOf<String>** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mAddresses;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode DataCallResponse::SetAddresses(
+    /* [in] */ ArrayOf<String>* addresses)
+{
+    mAddresses = addresses;
+    return NOERROR;
+}
+
+ECode DataCallResponse::GetDnses(
+    /* [out, callee] */ ArrayOf<String>** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mDnses;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode DataCallResponse::SetDnses(
+    /* [in] */ ArrayOf<String>* dnses)
+{
+    mDnses = dnses;
+    return NOERROR;
+}
+
+ECode DataCallResponse::GetGateways(
+    /* [out] */ ArrayOf<String>** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mGateways;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode DataCallResponse::SetGateways(
+    /* [in] */ ArrayOf<String>* gateways)
+{
+    mGateways = gateways;
+    return NOERROR;
+}
+
+ECode DataCallResponse::GetSuggestedRetryTime(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mSuggestedRetryTime;
+    return NOERROR;
+}
+
+ECode DataCallResponse::SetSuggestedRetryTime(
+    /* [in] */ Int32 suggestedRetryTime)
+{
+    mSuggestedRetryTime = suggestedRetryTime;
+    return NOERROR;
+}
+
+ECode DataCallResponse::GetPcscf(
+    /* [out, callee] */ ArrayOf<String>** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mPcscf;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode DataCallResponse::SetPcscf(
+    /* [in] */ ArrayOf<String>* pcscf)
+{
+    mPcscf = pcscf;
+    return NOERROR;
+}
+
+ECode DataCallResponse::GetMtu(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mMtu;
+    return NOERROR;
+}
+
+    CARAPI SetMtu(
+        /* [in] */ Int32 mtu);
+
+} // namespace DataConnection
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

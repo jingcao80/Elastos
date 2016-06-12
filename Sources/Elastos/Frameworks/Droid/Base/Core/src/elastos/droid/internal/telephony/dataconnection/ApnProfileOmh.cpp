@@ -1,210 +1,275 @@
-/*
- * Copyright (c) 2010-2014, The Linux Foundation. All rights reserved.
- * Not a Contribution.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above
- *       copyright notice, this list of conditions and the following
- *       disclaimer in the documentation and/or other materials provided
- *       with the distribution.
- *     * Neither the name of The Linux Foundation nor the names of its
- *       contributors may be used to endorse or promote products derived
- *       from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
- * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
- * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 
-package com.android.internal.telephony.dataconnection;
+#include "elastos/droid/internal/telephony/dataconnection/ApnProfileOmh.h"
 
-using Elastos::Utility::IArrayList;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace DataConnection {
 
-using Elastos::Droid::Text::ITextUtils;
-using Elastos::Droid::Internal::Telephony::IPhone;
-using Elastos::Droid::Internal::Telephony::Dataconnection::IApnSetting;
-using Elastos::Droid::Internal::Telephony::IPhoneConstants;
-using Elastos::Droid::Internal::Telephony::IRILConstants;
+//=============================================================================
+// ApnProfileOmh::ApnProfileTypeModem
+//=============================================================================
+CAR_INTERFACE_IMPL(ApnProfileOmh::ApnProfileTypeModem, Object, IApnProfileTypeModem)
 
-public class ApnProfileOmh extends ApnSetting {
+AutoPtr<IApnProfileTypeModem> ApnProfileOmh::ApnProfileTypeModem::PROFILE_TYPE_UNSPECIFIED = GetApnProfileTypeModem(IPhoneConstants::APN_TYPE_DEFAULT);
+AutoPtr<IApnProfileTypeModem> ApnProfileOmh::ApnProfileTypeModem::PROFILE_TYPE_MMS = GetApnProfileTypeModem(IPhoneConstants::APN_TYPE_MMS);
+AutoPtr<IApnProfileTypeModem> ApnProfileOmh::ApnProfileTypeModem::PROFILE_TYPE_LBS = GetApnProfileTypeModem(IPhoneConstants::APN_TYPE_SUPL);
+AutoPtr<IApnProfileTypeModem> ApnProfileOmh::ApnProfileTypeModem::PROFILE_TYPE_TETHERED = GetApnProfileTypeModem(IPhoneConstants::APN_TYPE_DUN);
 
-    /**
-     *  OMH spec 3GPP2 C.S0023-D defines the application types in terms of a
-     *  32-bit mask where each bit represents one application
-     *
-     *  Application bit and the correspondign app type is listed below:
-     *  1 Unspecified (all applications use the same profile)
-     *  2 MMS
-     *  3 Browser
-     *  4 BREW
-     *  5 Java
-     *  6 LBS
-     *  7 Terminal (tethered mode for terminal access)
-     *  8-32 Reserved for future use
-     *
-     *  From this list all the implemented app types are listed in the enum
-     */
-    enum ApnProfileTypeModem {
-        /* Static mapping of OMH profiles to Android Service Types */
-        PROFILE_TYPE_UNSPECIFIED(0x00000001, PhoneConstants.APN_TYPE_DEFAULT),
-        PROFILE_TYPE_MMS(0x00000002, PhoneConstants.APN_TYPE_MMS),
-        PROFILE_TYPE_LBS(0x00000020, PhoneConstants.APN_TYPE_SUPL),
-        PROFILE_TYPE_TETHERED(0x00000040, PhoneConstants.APN_TYPE_DUN);
+ApnProfileOmh::ApnProfileTypeModem::ApnProfileTypeModem(
+    /* [in] */ Int32 i,
+    /* [in] */ const String& serviceType)
+    : mId(i)
+    , mServiceType(serviceType)
+{}
 
-        Int32 id;
-        String serviceType;
-
-        private ApnProfileTypeModem(Int32 i, String serviceType) {
-            this.id = i;
-            this.serviceType = serviceType;
-        }
-
-        public Int32 Getid() {
+ECode ApnProfileOmh::ApnProfileTypeModem::Getid(
+    /* [out] */ Int32* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
             return id;
-        }
 
-        public String GetDataServiceType() {
+#endif
+}
+
+ECode ApnProfileOmh::ApnProfileTypeModem::GetDataServiceType(
+    /* [out] */ String* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
             return serviceType;
-        }
 
-        public static ApnProfileTypeModem GetApnProfileTypeModem(String serviceType) {
+#endif
+}
 
-            If (TextUtils->Equals(serviceType, PhoneConstants.APN_TYPE_DEFAULT)) {
-                return PROFILE_TYPE_UNSPECIFIED;
-            } else If (TextUtils->Equals(serviceType, PhoneConstants.APN_TYPE_MMS)) {
-                return PROFILE_TYPE_MMS;
-            } else If (TextUtils->Equals(serviceType, PhoneConstants.APN_TYPE_SUPL)) {
-                return PROFILE_TYPE_LBS;
-            } else If (TextUtils->Equals(serviceType, PhoneConstants.APN_TYPE_DUN)) {
-                return PROFILE_TYPE_TETHERED;
+AutoPtr<IApnProfileTypeModem> ApnProfileOmh::ApnProfileTypeModem::GetApnProfileTypeModem(
+    /* [in] */ const String& serviceType)
+{
+    AutoPtr<IApnProfileTypeModem> rev;
+    return rev;
+#if 0 // TODO: Translate codes below
+            if (TextUtils.equals(serviceType, PhoneConstants.APN_TYPE_DEFAULT)) {
+                return ApnProfileTypeModem(0x00000001, IPhoneConstants::APN_TYPE_DEFAULT);
+            } else if (TextUtils.equals(serviceType, PhoneConstants.APN_TYPE_MMS)) {
+                return ApnProfileTypeModem(0x00000002, IPhoneConstants::APN_TYPE_MMS);
+            } else if (TextUtils.equals(serviceType, PhoneConstants.APN_TYPE_SUPL)) {
+                return ApnProfileTypeModem(0x00000020, IPhoneConstants::APN_TYPE_SUPL);
+            } else if (TextUtils.equals(serviceType, PhoneConstants.APN_TYPE_DUN)) {
+                return ApnProfileTypeModem(0x00000040, IPhoneConstants::APN_TYPE_DUN);
             } else {
                 /* For all other service types, return unspecified */
-                return PROFILE_TYPE_UNSPECIFIED;
+                return ApnProfileTypeModem(0x00000001, IPhoneConstants::APN_TYPE_DEFAULT);
             }
-        }
-    }
 
-    private static const Int32 DATA_PROFILE_OMH_PRIORITY_LOWEST = 255;
+#endif
+}
 
-    private static const Int32 DATA_PROFILE_OMH_PRIORITY_HIGHEST = 0;
+//=============================================================================
+// ApnProfileOmh
+//=============================================================================
+CAR_INTERFACE_IMPL(ApnProfileOmh, ApnSetting, IApnProfileOmh)
 
-    private ApnProfileTypeModem mApnProfileModem;
+const Int32 ApnProfileOmh::DATA_PROFILE_OMH_PRIORITY_LOWEST = 255;
+const Int32 ApnProfileOmh::DATA_PROFILE_OMH_PRIORITY_HIGHEST = 0;
 
-    private Int32 mServiceTypeMasks = 0;
+ApnProfileOmh::ApnProfileOmh()
+    : mServiceTypeMasks(0)
+    , mPriority(0)
+{}
 
-    /* Priority of this profile in the modem */
-    private Int32 mPriority = 0;
-
-    public ApnProfileOmh(Int32 profileId, Int32 priority) {
+ECode ApnProfileOmh::constructor(
+    /* [in] */ Int32 profileId,
+    /* [in] */ Int32 priority)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         /**
          * Default values if the profile is being used for only selective
          * fields e.g: just profileId and Priority. use case is when rest of the
          * fields can be read and processed only by the modem
          */
-        Super(0, "", NULL, "", NULL, NULL, NULL, NULL, NULL,
-                NULL, NULL, RILConstants.SETUP_DATA_AUTH_PAP_CHAP,
-                new String[0], "IP", "IP", TRUE, 0, profileId, FALSE, 0,
+        super(0, "", null, "", null, null, null, null, null,
+                null, null, RILConstants.SETUP_DATA_AUTH_PAP_CHAP,
+                new String[0], "IP", "IP", true, 0, profileId, false, 0,
                 0, 0, 0, "", "");
         this.mPriority = priority;
-    }
 
-    //@Override
-    public Boolean CanHandleType(String serviceType) {
-        Return ( 0 != (mServiceTypeMasks & ApnProfileTypeModem.
-                GetApnProfileTypeModem(serviceType).Getid()));
-    }
-
-    //@Override
-    public ApnProfileType GetApnProfileType() {
-        return ApnProfileType.PROFILE_TYPE_OMH;
-    }
-
-    //@Override
-    public String ToShortString() {
-        return "ApnProfile OMH";
-    }
-
-    //@Override
-    public String ToHash() {
-        return this->ToString();
-    }
-
-    //@Override
-    CARAPI ToString(
-        /* [out] */ String* str)
-    {
-        StringBuilder sb = new StringBuilder();
-
-        sb->Append(super->ToString())
-                .Append(profileId)
-                .Append(", ").Append(mPriority);
-        sb->Append("]");
-        return sb->ToString();
-    }
-
-    CARAPI SetApnProfileTypeModem(ApnProfileTypeModem modemProfile) {
-        mApnProfileModem = modemProfile;
-    }
-
-    public ApnProfileTypeModem GetApnProfileTypeModem() {
-        return mApnProfileModem;
-    }
-
-    CARAPI SetPriority(Int32 priority) {
-        mPriority = priority;
-    }
-
-    /* priority defined from 0..255; 0 is highest */
-    public Boolean IsPriorityHigher(Int32 priority) {
-        return IsValidPriority(priority) && (mPriority < priority);
-    }
-
-    /* priority defined from 0..255; 0 is highest */
-    public Boolean IsPriorityLower(Int32 priority) {
-        return IsValidPriority(priority) && mPriority > priority;
-    }
-
-    public Boolean IsValidPriority() {
-        return IsValidPriority(mPriority);
-    }
-
-    /* NOTE: priority values are reverse, lower number = higher priority */
-    private Boolean IsValidPriority(Int32 priority) {
-        return priority >= DATA_PROFILE_OMH_PRIORITY_HIGHEST &&
-                priority <= DATA_PROFILE_OMH_PRIORITY_LOWEST;
-    }
-
-    public Int32 GetProfileId() {
-        return profileId;
-    }
-
-    public Int32 GetPriority() {
-        return mPriority;
-    }
-
-    CARAPI AddServiceType(ApnProfileTypeModem modemProfile) {
-        mServiceTypeMasks |= modemProfile->Getid();
-
-        // Update the types
-        ArrayList<String> serviceTypes = new ArrayList<String>();
-        For (ApnProfileTypeModem apt : ApnProfileTypeModem->Values()) {
-            If (0 != (mServiceTypeMasks & apt->Getid())) {
-                serviceTypes->Add(apt->GetDataServiceType());
-            }
-        }
-        types = serviceTypes->ToArray(new String[0]);
-    }
+#endif
 }
 
+ECode ApnProfileOmh::CanHandleType(
+    /* [in] */ const String& serviceType,
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return ( 0 != (mServiceTypeMasks & ApnProfileTypeModem.
+                getApnProfileTypeModem(serviceType).getid()));
+
+#endif
+}
+
+ECode ApnProfileOmh::GetApnProfileType(
+    /* [out] */ ApnProfileType* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return ApnProfileType.PROFILE_TYPE_OMH;
+
+#endif
+}
+
+ECode ApnProfileOmh::ToShortString(
+    /* [out] */ String* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return "ApnProfile OMH";
+
+#endif
+}
+
+ECode ApnProfileOmh::ToHash(
+    /* [out] */ String* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return this.toString();
+
+#endif
+}
+
+ECode ApnProfileOmh::ToString(
+    /* [out] */ String* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        StringBuilder sb = new StringBuilder();
+        sb.append(super.toString())
+                .append(profileId)
+                .append(", ").append(mPriority);
+        sb.append("]");
+        return sb.toString();
+
+#endif
+}
+
+ECode ApnProfileOmh::SetApnProfileTypeModem(
+    /* [in] */ IApnProfileTypeModem* modemProfile)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        mApnProfileModem = modemProfile;
+
+#endif
+}
+
+ECode ApnProfileOmh::GetApnProfileTypeModem(
+    /* [out] */ IApnProfileTypeModem** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return mApnProfileModem;
+
+#endif
+}
+
+ECode ApnProfileOmh::SetPriority(
+    /* [in] */ Int32 priority)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        mPriority = priority;
+
+#endif
+}
+
+ECode ApnProfileOmh::IsPriorityHigher(
+    /* [in] */ Int32 priority,
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return isValidPriority(priority) && (mPriority < priority);
+
+#endif
+}
+
+ECode ApnProfileOmh::IsPriorityLower(
+    /* [in] */ Int32 priority,
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return isValidPriority(priority) && mPriority > priority;
+
+#endif
+}
+
+ECode ApnProfileOmh::IsValidPriority(
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return isValidPriority(mPriority);
+
+#endif
+}
+
+ECode ApnProfileOmh::IsValidPriority(
+    /* [in] */ Int32 priority,
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return priority >= DATA_PROFILE_OMH_PRIORITY_HIGHEST &&
+                priority <= DATA_PROFILE_OMH_PRIORITY_LOWEST;
+
+#endif
+}
+
+ECode ApnProfileOmh::GetProfileId(
+    /* [out] */ Int32* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return profileId;
+
+#endif
+}
+
+ECode ApnProfileOmh::GetPriority(
+    /* [out] */ Int32* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return mPriority;
+
+#endif
+}
+
+ECode ApnProfileOmh::AddServiceType(
+    /* [in] */ IApnProfileTypeModem* modemProfile)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        mServiceTypeMasks |= modemProfile.getid();
+        // Update the types
+        ArrayList<String> serviceTypes = new ArrayList<String>();
+        for (ApnProfileTypeModem apt : ApnProfileTypeModem.values()) {
+            if (0 != (mServiceTypeMasks & apt.getid())) {
+                serviceTypes.add(apt.getDataServiceType());
+            }
+        }
+        types = serviceTypes.toArray(new String[0]);
+
+#endif
+}
+
+} // namespace DataConnection
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

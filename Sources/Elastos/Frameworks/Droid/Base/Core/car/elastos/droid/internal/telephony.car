@@ -159,6 +159,7 @@ module
     merge("telephony/dataconnection/DataConnection.car");
     merge("telephony/dataconnection/DataProfile.car");
     merge("telephony/dataconnection/DcAsyncChannel.car");
+    merge("telephony/dataconnection/DcController.car");
     merge("telephony/dataconnection/DcFailCause.car");
     merge("telephony/dataconnection/DcRetryAlarmController.car");
     merge("telephony/dataconnection/DcSwitchAsyncChannel.car");
@@ -240,7 +241,13 @@ module
 
     merge("telephony/utility/BlacklistUtils.car");
 
+    interface Elastos.Droid.Internal.Telephony.IPhone;
+    interface Elastos.Droid.Internal.Telephony.IPhoneBase;
+    interface Elastos.Droid.Internal.Telephony.IPhoneProxy;
+    interface Elastos.Droid.Internal.Telephony.Cdma.ICDMAPhone;
+    interface Elastos.Droid.Net.INetworkConfig;
     interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.ILooper;
     interface Elastos.Droid.Telephony.ICellInfo;
 
     using interface Elastos.Core.IRunnable;
@@ -380,4 +387,208 @@ module
     } // Droid
     } // Elastos
 
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace DataConnection {
+
+        class CApnContext {
+            constructor(
+                [in] IContext* context,
+                [in] String apnType,
+                [in] String logTag,
+                [in] INetworkConfig* config,
+                [in] IDcTrackerBase* tracker);
+
+            interface IApnContext;
+        }
+
+        class CApnProfileOmh {
+            constructor(
+                [in] Int32 profileId,
+                [in] Int32 priority);
+
+            interface IApnProfileOmh;
+        }
+
+        [deprecated]
+        class CApnSetting {
+            constructor(
+                [in] Int32 id,
+                [in] String numeric,
+                [in] String carrier,
+                [in] String apn,
+                [in] String proxy,
+                [in] String port,
+                [in] String mmsc,
+                [in] String mmsProxy,
+                [in] String mmsPort,
+                [in] String user,
+                [in] String password,
+                [in] Int32 authType,
+                [in] ArrayOf<String>* types,
+                [in] String protocol,
+                [in] String roamingProtocol,
+                [in] Boolean carrierEnabled,
+                [in] Int32 bearer,
+                [in] Int32 profileId,
+                [in] Boolean modemCognitive,
+                [in] Int32 maxConns,
+                [in] Int32 waitTime,
+                [in] Int32 maxConnsTime,
+                [in] Int32 mtu,
+                [in] String mvnoType,
+                [in] String mvnoMatchData);
+
+            interface IApnSetting;
+        }
+
+        singleton class CApnSettingHelper {
+            interface IApnSettingHelper;
+        }
+
+        class CCdmaApnProfileTracker {
+            constructor(
+                [in] ICDMAPhone* phone);
+
+            interface ICdmaApnProfileTracker;
+        }
+
+        class CDataCallResponse {
+            constructor();
+
+            interface IDataCallResponse;
+        }
+
+        class CDataConnection {
+            constructor();
+
+            interface IDataConnection;
+        }
+
+        class CDataProfile {
+            constructor(
+                [in] Int32 profileId,
+                [in] String apn,
+                [in] String protocol,
+                [in] Int32 authType,
+                [in] String user,
+                [in] String password,
+                [in] Int32 type,
+                [in] Int32 maxConnsTime,
+                [in] Int32 maxConns,
+                [in] Int32 waitTime,
+                [in] Boolean enabled);
+            constructor(
+                [in] IApnSetting* apn,
+                [in] Boolean isRoaming);
+
+            interface IDataProfile;
+        }
+
+        singleton class CDataProfileHelper {
+            interface IDataProfileHelper;
+        }
+
+        class CDcAsyncChannel {
+            constructor(
+                [in] IDataConnection* dc,
+                [in] String logTag);
+
+            interface IDcAsyncChannel;
+        }
+
+        class CDcFailCause {
+            constructor(
+                [in] Int32 errorCode);
+
+            interface IDcFailCause;
+        }
+
+        singleton class CDcFailCauseHelper {
+            interface IDcFailCauseHelper;
+        }
+
+        [local]
+        class CDcRetryAlarmController {
+            constructor(
+                [in] IPhoneBase* phone,
+                [in] IDataConnection* dc);
+
+            interface IDcRetryAlarmController;
+        }
+
+        class CDcSwitchAsyncChannel {
+            constructor(
+                [in] IDcSwitchState* dcSwitchState,
+                [in] Int32 id);
+
+            interface IDcSwitchAsyncChannel;
+        }
+
+        class CDcSwitchState {
+            constructor(
+                [in] IPhone* phone,
+                [in] String name,
+                [in] Int32 id);
+
+            interface IDcSwitchState;
+        }
+
+        [local]
+        class CDcTesterDeactivateAll {
+            constructor(
+                [in] IPhoneBase* phone,
+                [in] IDcController* dcc,
+                [in] IHandler* handler);
+
+            interface IDcTesterDeactivateAll;
+        }
+
+        [local]
+        class CDcTesterFailBringUpAll {
+            constructor(
+                [in] IPhoneBase* phone,
+                [in] IHandler* handler);
+
+            interface IDcTesterFailBringUpAll;
+        }
+
+        [local]
+        class CDcTracker {
+            constructor(
+                [in] IPhoneBase* p);
+
+            interface IDcTracker;
+        }
+
+        [deprecated]
+        class CDctController {
+            interface IDctController;
+        }
+
+        singleton class CDctControllerHelper {
+            interface IDctControllerHelper;
+        }
+
+        class CDdsScheduler {
+            interface IDdsScheduler;
+        }
+
+        singleton class CDdsSchedulerHelper {
+            interface IDdsSchedulerHelper;
+        }
+
+        class CDdsSchedulerAc {
+            constructor();
+
+            interface IDdsSchedulerAc;
+        }
+
+    } // DataConnection
+    } // Telephony
+    } // Internal
+    } // Droid
+    } // Elastos
 }

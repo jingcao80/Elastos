@@ -1,62 +1,33 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.dataconnection;
+#include "elastos/droid/internal/telephony/dataconnection/DataProfile.h"
 
-using Elastos::Droid::Os::IParcel;
-using Elastos::Droid::Telephony::IServiceState;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace DataConnection {
 
-public class DataProfile {
+CAR_INTERFACE_IMPL(DataProfile, Object, IDataProfile)
 
-    static const Int32 TYPE_COMMON = 0;
-    static const Int32 TYPE_3GPP = 1;
-    static const Int32 TYPE_3GPP2 = 2;
+const Int32 DataProfile::TYPE_COMMON = 0;
+const Int32 DataProfile::TYPE_3GPP = 1;
+const Int32 DataProfile::TYPE_3GPP2 = 2;
 
-    //id of the data profile
-    public final Int32 profileId;
-    //the APN to connect to
-    public final String apn;
-    //one of the PDP_type values in TS 27.007 section 10.1.1.
-    //For example, "IP", "IPV6", "IPV4V6", or "PPP".
-    public final String protocol;
-    //authentication protocol used for this PDP context
-    //(None: 0, PAP: 1, CHAP: 2, PAP&CHAP: 3)
-    public final Int32 authType;
-    //the username for APN, or NULL
-    public final String user;
-    //the password for APN, or NULL
-    public final String password;
-    //the profile type, TYPE_COMMON, TYPE_3GPP, TYPE_3GPP2
-    public final Int32 type;
-    //the period in seconds to limit the maximum connections
-    public final Int32 maxConnsTime;
-    //the maximum connections during maxConnsTime
-    public final Int32 maxConns;
-    //the required wait time in seconds after a successful UE initiated
-    //disconnect of a given PDN connection before the device can send
-    //a new PDN connection request for that given PDN
-    public final Int32 waitTime;
-    //TRUE to enable the profile, FALSE to disable
-    public final Boolean enabled;
-
-
-    DataProfile(Int32 profileId, String apn, String protocol, Int32 authType,
-            String user, String password, Int32 type, Int32 maxConnsTime, Int32 maxConns,
-            Int32 waitTime, Boolean enabled) {
-
+ECode DataProfile::constructor(
+    /* [in] */ Int32 profileId,
+    /* [in] */ const String& apn,
+    /* [in] */ const String& protocol,
+    /* [in] */ Int32 authType,
+    /* [in] */ const String& user,
+    /* [in] */ const String& password,
+    /* [in] */ Int32 type,
+    /* [in] */ Int32 maxConnsTime,
+    /* [in] */ Int32 maxConns,
+    /* [in] */ Int32 waitTime,
+    /* [in] */ Boolean enabled)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         this.profileId = profileId;
         this.apn = apn;
         this.protocol = protocol;
@@ -68,50 +39,167 @@ public class DataProfile {
         this.maxConns = maxConns;
         this.waitTime = waitTime;
         this.enabled = enabled;
-    }
 
-    DataProfile(ApnSetting apn, Boolean isRoaming) {
-        This(apn.profileId, apn.apn, isRoaming? apn.protocol : apn.roamingProtocol,
+#endif
+}
+
+ECode DataProfile::constructor(
+    /* [in] */ IApnSetting* apn,
+    /* [in] */ Boolean isRoaming)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        this(apn.profileId, apn.apn, isRoaming? apn.protocol : apn.roamingProtocol,
                 apn.authType, apn.user, apn.password, apn.bearer == 0 ? TYPE_COMMON :
-                (ServiceState->IsCdma(apn.bearer) ? TYPE_3GPP2 : TYPE_3GPP), apn.maxConnsTime,
+                (ServiceState.isCdma(apn.bearer) ? TYPE_3GPP2 : TYPE_3GPP), apn.maxConnsTime,
                 apn.maxConns, apn.waitTime, apn.carrierEnabled);
-    }
 
-    public static Parcel ToParcel(Parcel pc, DataProfile[] dps) {
+#endif
+}
 
-        If(pc == NULL) {
-            return NULL;
+ECode DataProfile::ToParcel(
+    /* [in] */ IParcel* pc,
+    /* [in] */ ArrayOf<IDataProfile*>* dps,
+    /* [out] */ IParcel** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if(pc == null) {
+            return null;
         }
-
-        pc->WriteInt(dps.length);
-        For(Int32 i = 0; i < dps.length; i++) {
-            pc->WriteInt(dps[i].profileId);
-            pc->WriteString(dps[i].apn);
-            pc->WriteString(dps[i].protocol);
-            pc->WriteInt(dps[i].authType);
-            pc->WriteString(dps[i].user);
-            pc->WriteString(dps[i].password);
-            pc->WriteInt(dps[i].type);
-            pc->WriteInt(dps[i].maxConnsTime);
-            pc->WriteInt(dps[i].maxConns);
-            pc->WriteInt(dps[i].waitTime);
-            pc->WriteInt(dps[i].enabled ? 1 : 0);
+        pc.writeInt(dps.length);
+        for(int i = 0; i < dps.length; i++) {
+            pc.writeInt(dps[i].profileId);
+            pc.writeString(dps[i].apn);
+            pc.writeString(dps[i].protocol);
+            pc.writeInt(dps[i].authType);
+            pc.writeString(dps[i].user);
+            pc.writeString(dps[i].password);
+            pc.writeInt(dps[i].type);
+            pc.writeInt(dps[i].maxConnsTime);
+            pc.writeInt(dps[i].maxConns);
+            pc.writeInt(dps[i].waitTime);
+            pc.writeInt(dps[i].enabled ? 1 : 0);
         }
         return pc;
-    }
 
-    //@Override
-    CARAPI ToString(
-        /* [out] */ String* str)
-    {
+#endif
+}
+
+ECode DataProfile::ToString(
+    /* [out] */ String* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         return "DataProfile " + profileId + "/" + apn + "/" + protocol + "/" + authType
                 + "/" + user + "/" + password + "/" + type + "/" + maxConnsTime
                 + "/" + maxConns + "/" + waitTime + "/" + enabled;
-    }
 
-    //@Override
-    public Boolean Equals(Object o) {
-        If (o instanceof DataProfile == FALSE) return FALSE;
-        Return (ToString()->Equals(o->ToString()));
-    }
+#endif
 }
+
+ECode DataProfile::Equals(
+    /* [in] */ IInterface* o,
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (o instanceof DataProfile == false) return false;
+        return (toString().equals(o.toString()));
+
+#endif
+}
+
+ECode DataProfile::GetProfileId(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mProfileId;
+    return NOERROR;
+}
+
+ECode DataProfile::GetApn(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mApn;
+    return NOERROR;
+}
+
+ECode DataProfile::GetProtocol(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mProtocol;
+    return NOERROR;
+}
+
+ECode DataProfile::GetAuthType(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mAuthType;
+    return NOERROR;
+}
+
+ECode DataProfile::GetUser(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mUser;
+    return NOERROR;
+}
+
+ECode DataProfile::GetPassword(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mPassword;
+    return NOERROR;
+}
+
+ECode DataProfile::GetType(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mType;
+    return NOERROR;
+}
+
+ECode DataProfile::GetMaxConnsTime(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mMaxConnsTime;
+    return NOERROR;
+}
+
+ECode DataProfile::GetMaxConns(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mMaxConns;
+    return NOERROR;
+}
+
+ECode DataProfile::GetWaitTime(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mWaitTime;
+    return NOERROR;
+}
+
+ECode DataProfile::GetEnabled(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mEnabled;
+    return NOERROR;
+}
+
+} // namespace DataConnection
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

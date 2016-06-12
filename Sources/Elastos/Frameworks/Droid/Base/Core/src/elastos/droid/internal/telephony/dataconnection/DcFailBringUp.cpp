@@ -1,82 +1,80 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.dataconnection;
+#include "elastos/droid/internal/telephony/dataconnection/DcFailBringUp.h"
 
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Telephony::IRlog;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace DataConnection {
 
-/**
- * A package visible class for supporting testing failing bringUp commands. This
- * saves the parameters from a action_fail_bringup intent. See
- * {@link DataConnection#doOnConnect} and {@see DcTesterFailBringUpAll} for more info.
- */
-class DcFailBringUp {
-    private static const String LOG_TAG = "DcFailBringUp";
-    private static const Boolean DBG = TRUE;
+const String DcFailBringUp::INTENT_BASE("Elastos.Droid.Internal.Telephony.DataConnection");
+const String DcFailBringUp::LOG__TAG("DcFailBringUp");
+const Boolean DcFailBringUp::DBG = true;
+const String DcFailBringUp::ACTION_FAIL_BRINGUP("action_fail_bringup");
+const String DcFailBringUp::COUNTER("counter");
+const Int32 DcFailBringUp::DEFAULT_COUNTER = 1;
+const String DcFailBringUp::FAIL_CAUSE("fail_cause");
+const EnumDcFailCause DcFailBringUp::DEFAULT_FAIL_CAUSE = DcFailCause_ERROR_UNSPECIFIED;
+const String DcFailBringUp::SUGGESTED_RETRY_TIME("suggested_retry_time");
+const Int32 DcFailBringUp::DEFAULT_SUGGESTED_RETRY_TIME = -1;
 
-    static const String INTENT_BASE = DataConnection.class->GetPackage()->GetName();
-
-    static const String ACTION_FAIL_BRINGUP = "action_fail_bringup";
-
-    // counter with its --ei option name and default value
-    static const String COUNTER = "counter";
-    static const Int32 DEFAULT_COUNTER = 1;
-    Int32 mCounter;
-
-    // failCause with its --ei option name and default value
-    static const String FAIL_CAUSE = "fail_cause";
-    static const DcFailCause DEFAULT_FAIL_CAUSE = DcFailCause.ERROR_UNSPECIFIED;
-    DcFailCause mFailCause;
-
-    // suggestedRetryTime with its --ei option name and default value
-    static const String SUGGESTED_RETRY_TIME = "suggested_retry_time";
-    static const Int32 DEFAULT_SUGGESTED_RETRY_TIME = -1;
-    Int32 mSuggestedRetryTime;
-
-    // Get the Extra Intent parameters
-    void SaveParameters(Intent intent, String s) {
-        If (DBG) Log(s + ".saveParameters: action=" + intent->GetAction());
-        mCounter = intent->GetIntExtra(COUNTER, DEFAULT_COUNTER);
-        mFailCause = DcFailCause->FromInt(
-                intent->GetIntExtra(FAIL_CAUSE, DEFAULT_FAIL_CAUSE->GetErrorCode()));
+ECode DcFailBringUp::SaveParameters(
+    /* [in] */ IIntent* intent,
+    /* [in] */ const String& s)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (DBG) log(s + ".saveParameters: action=" + intent.getAction());
+        mCounter = intent.getIntExtra(COUNTER, DEFAULT_COUNTER);
+        mFailCause = DcFailCause.fromInt(
+                intent.getIntExtra(FAIL_CAUSE, DEFAULT_FAIL_CAUSE.getErrorCode()));
         mSuggestedRetryTime =
-                intent->GetIntExtra(SUGGESTED_RETRY_TIME, DEFAULT_SUGGESTED_RETRY_TIME);
-        If (DBG) {
-            Log(s + ".saveParameters: " + this);
+                intent.getIntExtra(SUGGESTED_RETRY_TIME, DEFAULT_SUGGESTED_RETRY_TIME);
+        if (DBG) {
+            log(s + ".saveParameters: " + this);
         }
-    }
 
-    void SaveParameters(Int32 counter, Int32 failCause, Int32 suggestedRetryTime) {
+#endif
+}
+
+ECode DcFailBringUp::SaveParameters(
+    /* [in] */ Int32 counter,
+    /* [in] */ Int32 failCause,
+    /* [in] */ Int32 suggestedRetryTime)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         mCounter = counter;
-        mFailCause = DcFailCause->FromInt(failCause);
+        mFailCause = DcFailCause.fromInt(failCause);
         mSuggestedRetryTime = suggestedRetryTime;
-    }
 
-    //@Override
-    CARAPI ToString(
-        /* [out] */ String* str)
-    {
+#endif
+}
+
+ECode DcFailBringUp::ToString(
+    /* [out] */ String* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         return "{mCounter=" + mCounter +
                 " mFailCause=" + mFailCause +
                 " mSuggestedRetryTime=" + mSuggestedRetryTime + "}";
 
-    }
-
-    private static void Log(String s) {
-        Rlog->D(LOG_TAG, s);
-    }
+#endif
 }
+
+ECode DcFailBringUp::Log(
+    /* [in] */ const String& s)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        Rlog.d(LOG__TAG, s);
+
+#endif
+}
+
+} // namespace DataConnection
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

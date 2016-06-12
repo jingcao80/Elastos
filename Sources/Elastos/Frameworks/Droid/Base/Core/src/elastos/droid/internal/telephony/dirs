@@ -1,5 +1,6 @@
 DIRS += cat
 DIRS += cdma
+DIRS += dataconnection
 DIRS += imsphone
 DIRS += sip
 DIRS += utility

@@ -1,438 +1,439 @@
-/*
- * Copyright (C) 2011 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.dataconnection;
+#include "elastos/droid/internal/telephony/dataconnection/DcAsyncChannel.h"
 
-using Elastos::Droid::Internal::Telephony::Dataconnection::DataConnection::IConnectionParams;
-using Elastos::Droid::Internal::Telephony::Dataconnection::DataConnection::IDisconnectParams;
-using Elastos::Droid::Internal::Utility::IAsyncChannel;
-using Elastos::Droid::Internal::Utility::IProtocol;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace DataConnection {
 
-using Elastos::Droid::Net::ILinkProperties;
-using Elastos::Droid::Net::INetworkCapabilities;
-using Elastos::Droid::Net::IProxyInfo;
-using Elastos::Droid::Os::IMessage;
+CAR_INTERFACE_IMPL(DcAsyncChannel, AsyncChannel, IDcAsyncChannel)
 
-/**
- * AsyncChannel to a DataConnection
- */
-public class DcAsyncChannel extends AsyncChannel {
-    private static const Boolean DBG = FALSE;
-    private String mLogTag;
+const Boolean DcAsyncChannel::DBG = false;
+const Int32 DcAsyncChannel::CMD_TO_STRING_COUNT = RSP_RESET - BASE + 1;
+AutoPtr<ArrayOf<String> > DcAsyncChannel::sCmdToString = InitCmdToString();
 
-    private DataConnection mDc;
-    private Int64 mDcThreadId;
-
-    public static const Int32 BASE = Protocol.BASE_DATA_CONNECTION_AC;
-
-    public static const Int32 REQ_IS_INACTIVE = BASE + 0;
-    public static const Int32 RSP_IS_INACTIVE = BASE + 1;
-
-    public static const Int32 REQ_GET_CID = BASE + 2;
-    public static const Int32 RSP_GET_CID = BASE + 3;
-
-    public static const Int32 REQ_GET_APNSETTING = BASE + 4;
-    public static const Int32 RSP_GET_APNSETTING = BASE + 5;
-
-    public static const Int32 REQ_GET_LINK_PROPERTIES = BASE + 6;
-    public static const Int32 RSP_GET_LINK_PROPERTIES = BASE + 7;
-
-    public static const Int32 REQ_SET_LINK_PROPERTIES_HTTP_PROXY = BASE + 8;
-    public static const Int32 RSP_SET_LINK_PROPERTIES_HTTP_PROXY = BASE + 9;
-
-    public static const Int32 REQ_GET_NETWORK_CAPABILITIES = BASE + 10;
-    public static const Int32 RSP_GET_NETWORK_CAPABILITIES = BASE + 11;
-
-    public static const Int32 REQ_RESET = BASE + 12;
-    public static const Int32 RSP_RESET = BASE + 13;
-
-    private static const Int32 CMD_TO_STRING_COUNT = RSP_RESET - BASE + 1;
-    private static String[] sCmdToString = new String[CMD_TO_STRING_COUNT];
-    static {
-        sCmdToString[REQ_IS_INACTIVE - BASE] = "REQ_IS_INACTIVE";
-        sCmdToString[RSP_IS_INACTIVE - BASE] = "RSP_IS_INACTIVE";
-        sCmdToString[REQ_GET_CID - BASE] = "REQ_GET_CID";
-        sCmdToString[RSP_GET_CID - BASE] = "RSP_GET_CID";
-        sCmdToString[REQ_GET_APNSETTING - BASE] = "REQ_GET_APNSETTING";
-        sCmdToString[RSP_GET_APNSETTING - BASE] = "RSP_GET_APNSETTING";
-        sCmdToString[REQ_GET_LINK_PROPERTIES - BASE] = "REQ_GET_LINK_PROPERTIES";
-        sCmdToString[RSP_GET_LINK_PROPERTIES - BASE] = "RSP_GET_LINK_PROPERTIES";
-        sCmdToString[REQ_SET_LINK_PROPERTIES_HTTP_PROXY - BASE] =
-                "REQ_SET_LINK_PROPERTIES_HTTP_PROXY";
-        sCmdToString[RSP_SET_LINK_PROPERTIES_HTTP_PROXY - BASE] =
-                "RSP_SET_LINK_PROPERTIES_HTTP_PROXY";
-        sCmdToString[REQ_GET_NETWORK_CAPABILITIES - BASE] = "REQ_GET_NETWORK_CAPABILITIES";
-        sCmdToString[RSP_GET_NETWORK_CAPABILITIES - BASE] = "RSP_GET_NETWORK_CAPABILITIES";
-        sCmdToString[REQ_RESET - BASE] = "REQ_RESET";
-        sCmdToString[RSP_RESET - BASE] = "RSP_RESET";
-    }
-
-    // Convert cmd to string or NULL if unknown
-    protected static String CmdToString(Int32 cmd) {
+ECode DcAsyncChannel::CmdToString(
+    /* [in] */ Int32 cmd,
+    /* [out] */ String* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         cmd -= BASE;
-        If ((cmd >= 0) && (cmd < sCmdToString.length)) {
+        if ((cmd >= 0) && (cmd < sCmdToString.length)) {
             return sCmdToString[cmd];
         } else {
-            return AsyncChannel->CmdToString(cmd + BASE);
+            return AsyncChannel.cmdToString(cmd + BASE);
         }
-    }
 
-    /**
-     * enum used to notify action taken or necessary to be
-     * taken after the link property is changed.
-     */
-    public enum LinkPropertyChangeAction {
-        NONE, CHANGED, RESET;
+#endif
+}
 
-        public static LinkPropertyChangeAction FromInt(Int32 value) {
-            If (value == NONE->Ordinal()) {
-                return NONE;
-            } else If (value == CHANGED->Ordinal()) {
-                return CHANGED;
-            } else If (value == RESET->Ordinal()) {
-                return RESET;
-            } else {
-                throw new RuntimeException("LinkPropertyChangeAction.fromInt: bad value=" + value);
-            }
-        }
-    }
-
-    public DcAsyncChannel(DataConnection dc, String logTag) {
+ECode DcAsyncChannel::constructor(
+    /* [in] */ IDataConnection* dc,
+    /* [in] */ const String& logTag)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         mDc = dc;
-        mDcThreadId = mDc->GetHandler()->GetLooper().GetThread()->GetId();
+        mDcThreadId = mDc.getHandler().getLooper().getThread().getId();
         mLogTag = logTag;
-    }
 
-    /**
-     * Request if the state machine is in the inactive state.
-     * Response {@link #rspIsInactive}
-     */
-    CARAPI ReqIsInactive() {
-        SendMessage(REQ_IS_INACTIVE);
-        If (DBG) Log("reqIsInactive");
-    }
+#endif
+}
 
-    /**
-     * Evaluate RSP_IS_INACTIVE.
-     *
-     * @return TRUE if the state machine is in the inactive state.
-     */
-    public Boolean RspIsInactive(Message response) {
-        Boolean retVal = response.arg1 == 1;
-        If (DBG) Log("rspIsInactive=" + retVal);
+ECode DcAsyncChannel::ReqIsInactive()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        sendMessage(REQ_IS_INACTIVE);
+        if (DBG) log("reqIsInactive");
+
+#endif
+}
+
+ECode DcAsyncChannel::RspIsInactive(
+    /* [in] */ IMessage* response,
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        boolean retVal = response.arg1 == 1;
+        if (DBG) log("rspIsInactive=" + retVal);
         return retVal;
-    }
 
-    /**
-     * @return TRUE if the state machine is in the inactive state
-     * and can be used for a new connection.
-     */
-    public Boolean IsInactiveSync() {
-        Boolean value;
-        If (IsCallerOnDifferentThread()) {
-            Message response = SendMessageSynchronously(REQ_IS_INACTIVE);
-            If ((response != NULL) && (response.what == RSP_IS_INACTIVE)) {
-                value = RspIsInactive(response);
+#endif
+}
+
+ECode DcAsyncChannel::IsInactiveSync(
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        boolean value;
+        if (isCallerOnDifferentThread()) {
+            Message response = sendMessageSynchronously(REQ_IS_INACTIVE);
+            if ((response != null) && (response.what == RSP_IS_INACTIVE)) {
+                value = rspIsInactive(response);
             } else {
-                Log("rspIsInactive error response=" + response);
-                value = FALSE;
+                log("rspIsInactive error response=" + response);
+                value = false;
             }
         } else {
-            value = mDc->GetIsInactive();
+            value = mDc.getIsInactive();
         }
         return value;
-    }
 
-    /**
-     * Request the Connection ID.
-     * Response {@link #rspCid}
-     */
-    CARAPI ReqCid() {
-        SendMessage(REQ_GET_CID);
-        If (DBG) Log("reqCid");
-    }
+#endif
+}
 
-    /**
-     * Evaluate a RSP_GET_CID message and return the cid.
-     *
-     * @param response Message
-     * @return connection id or -1 if an error
-     */
-    public Int32 RspCid(Message response) {
-        Int32 retVal = response.arg1;
-        If (DBG) Log("rspCid=" + retVal);
+ECode DcAsyncChannel::ReqCid()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        sendMessage(REQ_GET_CID);
+        if (DBG) log("reqCid");
+
+#endif
+}
+
+ECode DcAsyncChannel::RspCid(
+    /* [in] */ IMessage* response,
+    /* [out] */ Int32* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        int retVal = response.arg1;
+        if (DBG) log("rspCid=" + retVal);
         return retVal;
-    }
 
-    /**
-     * @return connection id or -1 if an error
-     */
-    public Int32 GetCidSync() {
-        Int32 value;
-        If (IsCallerOnDifferentThread()) {
-            Message response = SendMessageSynchronously(REQ_GET_CID);
-            If ((response != NULL) && (response.what == RSP_GET_CID)) {
-                value = RspCid(response);
+#endif
+}
+
+ECode DcAsyncChannel::GetCidSync(
+    /* [out] */ Int32* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        int value;
+        if (isCallerOnDifferentThread()) {
+            Message response = sendMessageSynchronously(REQ_GET_CID);
+            if ((response != null) && (response.what == RSP_GET_CID)) {
+                value = rspCid(response);
             } else {
-                Log("rspCid error response=" + response);
+                log("rspCid error response=" + response);
                 value = -1;
             }
         } else {
-            value = mDc->GetCid();
+            value = mDc.getCid();
         }
         return value;
-    }
 
-    /**
-     * Request the connections ApnSetting.
-     * Response {@link #rspApnSetting}
-     */
-    CARAPI ReqApnSetting() {
-        SendMessage(REQ_GET_APNSETTING);
-        If (DBG) Log("reqApnSetting");
-    }
+#endif
+}
 
-    /**
-     * Evaluate a RSP_APN_SETTING message and return the ApnSetting.
-     *
-     * @param response Message
-     * @return ApnSetting, maybe NULL
-     */
-    public ApnSetting RspApnSetting(Message response) {
+ECode DcAsyncChannel::ReqApnSetting()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        sendMessage(REQ_GET_APNSETTING);
+        if (DBG) log("reqApnSetting");
+
+#endif
+}
+
+ECode DcAsyncChannel::RspApnSetting(
+    /* [in] */ IMessage* response,
+    /* [out] */ IApnSetting** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         ApnSetting retVal = (ApnSetting) response.obj;
-        If (DBG) Log("rspApnSetting=" + retVal);
+        if (DBG) log("rspApnSetting=" + retVal);
         return retVal;
-    }
 
-    /**
-     * Get the connections ApnSetting.
-     *
-     * @return ApnSetting or NULL if an error
-     */
-    public ApnSetting GetApnSettingSync() {
+#endif
+}
+
+ECode DcAsyncChannel::GetApnSettingSync(
+    /* [out] */ IApnSetting** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         ApnSetting value;
-        If (IsCallerOnDifferentThread()) {
-            Message response = SendMessageSynchronously(REQ_GET_APNSETTING);
-            If ((response != NULL) && (response.what == RSP_GET_APNSETTING)) {
-                value = RspApnSetting(response);
+        if (isCallerOnDifferentThread()) {
+            Message response = sendMessageSynchronously(REQ_GET_APNSETTING);
+            if ((response != null) && (response.what == RSP_GET_APNSETTING)) {
+                value = rspApnSetting(response);
             } else {
-                Log("getApnSetting error response=" + response);
-                value = NULL;
+                log("getApnSetting error response=" + response);
+                value = null;
             }
         } else {
-            value = mDc->GetApnSetting();
+            value = mDc.getApnSetting();
         }
         return value;
-    }
 
-    /**
-     * Request the connections LinkProperties.
-     * Response {@link #rspLinkProperties}
-     */
-    CARAPI ReqLinkProperties() {
-        SendMessage(REQ_GET_LINK_PROPERTIES);
-        If (DBG) Log("reqLinkProperties");
-    }
+#endif
+}
 
-    /**
-     * Evaluate RSP_GET_LINK_PROPERTIES
-     *
-     * @param response
-     * @return LinkProperties, maybe NULL.
-     */
-    public LinkProperties RspLinkProperties(Message response) {
+ECode DcAsyncChannel::ReqLinkProperties()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        sendMessage(REQ_GET_LINK_PROPERTIES);
+        if (DBG) log("reqLinkProperties");
+
+#endif
+}
+
+ECode DcAsyncChannel::RspLinkProperties(
+    /* [in] */ IMessage* response,
+    /* [out] */ ILinkProperties** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         LinkProperties retVal = (LinkProperties) response.obj;
-        If (DBG) Log("rspLinkProperties=" + retVal);
+        if (DBG) log("rspLinkProperties=" + retVal);
         return retVal;
-    }
 
-    /**
-     * Get the connections LinkProperties.
-     *
-     * @return LinkProperties or NULL if an error
-     */
-    public LinkProperties GetLinkPropertiesSync() {
+#endif
+}
+
+ECode DcAsyncChannel::GetLinkPropertiesSync(
+    /* [out] */ ILinkProperties** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         LinkProperties value;
-        If (IsCallerOnDifferentThread()) {
-            Message response = SendMessageSynchronously(REQ_GET_LINK_PROPERTIES);
-            If ((response != NULL) && (response.what == RSP_GET_LINK_PROPERTIES)) {
-                value = RspLinkProperties(response);
+        if (isCallerOnDifferentThread()) {
+            Message response = sendMessageSynchronously(REQ_GET_LINK_PROPERTIES);
+            if ((response != null) && (response.what == RSP_GET_LINK_PROPERTIES)) {
+                value = rspLinkProperties(response);
             } else {
-                Log("getLinkProperties error response=" + response);
-                value = NULL;
+                log("getLinkProperties error response=" + response);
+                value = null;
             }
         } else {
-            value = mDc->GetCopyLinkProperties();
+            value = mDc.getCopyLinkProperties();
         }
         return value;
-    }
 
-    /**
-     * Request setting the connections LinkProperties.HttpProxy.
-     * Response RSP_SET_LINK_PROPERTIES when complete.
-     */
-    CARAPI ReqSetLinkPropertiesHttpProxy(ProxyInfo proxy) {
-        SendMessage(REQ_SET_LINK_PROPERTIES_HTTP_PROXY, proxy);
-        If (DBG) Log("reqSetLinkPropertiesHttpProxy proxy=" + proxy);
-    }
+#endif
+}
 
-    /**
-     * Set the connections LinkProperties.HttpProxy
-     */
-    CARAPI SetLinkPropertiesHttpProxySync(ProxyInfo proxy) {
-        If (IsCallerOnDifferentThread()) {
+ECode DcAsyncChannel::ReqSetLinkPropertiesHttpProxy(
+    /* [in] */ IProxyInfo* proxy)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        sendMessage(REQ_SET_LINK_PROPERTIES_HTTP_PROXY, proxy);
+        if (DBG) log("reqSetLinkPropertiesHttpProxy proxy=" + proxy);
+
+#endif
+}
+
+ECode DcAsyncChannel::SetLinkPropertiesHttpProxySync(
+    /* [in] */ IProxyInfo* proxy)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (isCallerOnDifferentThread()) {
             Message response =
-                SendMessageSynchronously(REQ_SET_LINK_PROPERTIES_HTTP_PROXY, proxy);
-            If ((response != NULL) && (response.what == RSP_SET_LINK_PROPERTIES_HTTP_PROXY)) {
-                If (DBG) Log("setLinkPropertiesHttpPoxy ok");
+                sendMessageSynchronously(REQ_SET_LINK_PROPERTIES_HTTP_PROXY, proxy);
+            if ((response != null) && (response.what == RSP_SET_LINK_PROPERTIES_HTTP_PROXY)) {
+                if (DBG) log("setLinkPropertiesHttpPoxy ok");
             } else {
-                Log("setLinkPropertiesHttpPoxy error response=" + response);
+                log("setLinkPropertiesHttpPoxy error response=" + response);
             }
         } else {
-            mDc->SetLinkPropertiesHttpProxy(proxy);
+            mDc.setLinkPropertiesHttpProxy(proxy);
         }
-    }
 
-    /**
-     * Request the connections NetworkCapabilities.
-     * Response {@link #rspNetworkCapabilities}
-     */
-    CARAPI ReqNetworkCapabilities() {
-        SendMessage(REQ_GET_NETWORK_CAPABILITIES);
-        If (DBG) Log("reqNetworkCapabilities");
-    }
+#endif
+}
 
-    /**
-     * Evaluate RSP_GET_NETWORK_CAPABILITIES
-     *
-     * @param response
-     * @return NetworkCapabilites, maybe NULL.
-     */
-    public NetworkCapabilities RspNetworkCapabilities(Message response) {
+ECode DcAsyncChannel::ReqNetworkCapabilities()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        sendMessage(REQ_GET_NETWORK_CAPABILITIES);
+        if (DBG) log("reqNetworkCapabilities");
+
+#endif
+}
+
+ECode DcAsyncChannel::RspNetworkCapabilities(
+    /* [in] */ IMessage* response,
+    /* [out] */ INetworkCapabilities** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         NetworkCapabilities retVal = (NetworkCapabilities) response.obj;
-        If (DBG) Log("rspNetworkCapabilities=" + retVal);
+        if (DBG) log("rspNetworkCapabilities=" + retVal);
         return retVal;
-    }
 
-    /**
-     * Get the connections NetworkCapabilities.
-     *
-     * @return NetworkCapabilities or NULL if an error
-     */
-    public NetworkCapabilities GetNetworkCapabilitiesSync() {
+#endif
+}
+
+ECode DcAsyncChannel::GetNetworkCapabilitiesSync(
+    /* [out] */ INetworkCapabilities** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         NetworkCapabilities value;
-        If (IsCallerOnDifferentThread()) {
-            Message response = SendMessageSynchronously(REQ_GET_NETWORK_CAPABILITIES);
-            If ((response != NULL) && (response.what == RSP_GET_NETWORK_CAPABILITIES)) {
-                value = RspNetworkCapabilities(response);
+        if (isCallerOnDifferentThread()) {
+            Message response = sendMessageSynchronously(REQ_GET_NETWORK_CAPABILITIES);
+            if ((response != null) && (response.what == RSP_GET_NETWORK_CAPABILITIES)) {
+                value = rspNetworkCapabilities(response);
             } else {
-                value = NULL;
+                value = null;
             }
         } else {
-            value = mDc->GetCopyNetworkCapabilities();
+            value = mDc.getCopyNetworkCapabilities();
         }
         return value;
-    }
 
-    /**
-     * Response RSP_RESET when complete
-     */
-    CARAPI ReqReset() {
-        SendMessage(REQ_RESET);
-        If (DBG) Log("reqReset");
-    }
+#endif
+}
 
-    /**
-     * Bring up a connection to the apn and return an AsyncResult in onCompletedMsg.
-     * Used for cellular networks that use Acesss Point Names (APN) such
-     * as GSM networks.
-     *
-     * @param apnContext is the Access Point Name to bring up a connection to
-     * @param initialMaxRetry the number of retires for initial bringup.
-     * @param profileId for the conneciton
-     * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
-     *        With AsyncResult.userObj set to the original msg.obj,
-     *        AsyncResult.result = FailCause and AsyncResult.exception = Exception().
-     */
-    CARAPI BringUp(ApnContext apnContext, Int32 initialMaxRetry, Int32 profileId,
-            Int32 rilRadioTechnology, Boolean retryWhenSSChange, Message onCompletedMsg) {
-        If (DBG) {
-            Log("bringUp: apnContext=" + apnContext + " initialMaxRetry=" + initialMaxRetry
+ECode DcAsyncChannel::ReqReset()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        sendMessage(REQ_RESET);
+        if (DBG) log("reqReset");
+
+#endif
+}
+
+ECode DcAsyncChannel::BringUp(
+    /* [in] */ IApnContext* apnContext,
+    /* [in] */ Int32 initialMaxRetry,
+    /* [in] */ Int32 profileId,
+    /* [in] */ Int32 rilRadioTechnology,
+    /* [in] */ Boolean retryWhenSSChange,
+    /* [in] */ IMessage* onCompletedMsg)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (DBG) {
+            log("bringUp: apnContext=" + apnContext + " initialMaxRetry=" + initialMaxRetry
                 + " onCompletedMsg=" + onCompletedMsg);
         }
-        SendMessage(DataConnection.EVENT_CONNECT,
+        sendMessage(DataConnection.EVENT_CONNECT,
                     new ConnectionParams(apnContext, initialMaxRetry, profileId,
                             rilRadioTechnology, retryWhenSSChange, onCompletedMsg));
-    }
 
-    /**
-     * Tear down the connection through the apn on the network.
-     *
-     * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
-     *        With AsyncResult.userObj set to the original msg.obj.
-     */
-    CARAPI TearDown(ApnContext apnContext, String reason, Message onCompletedMsg) {
-        If (DBG) {
-            Log("tearDown: apnContext=" + apnContext
+#endif
+}
+
+ECode DcAsyncChannel::TearDown(
+    /* [in] */ IApnContext* apnContext,
+    /* [in] */ const String& reason,
+    /* [in] */ IMessage* onCompletedMsg)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (DBG) {
+            log("tearDown: apnContext=" + apnContext
                     + " reason=" + reason + " onCompletedMsg=" + onCompletedMsg);
         }
-        SendMessage(DataConnection.EVENT_DISCONNECT,
+        sendMessage(DataConnection.EVENT_DISCONNECT,
                         new DisconnectParams(apnContext, reason, onCompletedMsg));
-    }
 
-    /**
-     * Tear down the connection through the apn on the network.  Ignores refcount and
-     * and always tears down.
-     *
-     * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
-     *        With AsyncResult.userObj set to the original msg.obj.
-     */
-    CARAPI TearDownAll(String reason, Message onCompletedMsg) {
-        If (DBG) Log("tearDownAll: reason=" + reason + " onCompletedMsg=" + onCompletedMsg);
-        SendMessage(DataConnection.EVENT_DISCONNECT_ALL,
-                new DisconnectParams(NULL, reason, onCompletedMsg));
-    }
-
-    /**
-     * @return connection id
-     */
-    public Int32 GetDataConnectionIdSync() {
-        // Safe because this is owned by the caller.
-        return mDc->GetDataConnectionId();
-    }
-
-    //@Override
-    CARAPI ToString(
-        /* [out] */ String* str)
-    {
-        return mDc->GetName();
-    }
-
-    private Boolean IsCallerOnDifferentThread() {
-        Int64 curThreadId = Thread->CurrentThread()->GetId();
-        Boolean value = mDcThreadId != curThreadId;
-        If (DBG) Log("isCallerOnDifferentThread: " + value);
-        return value;
-    }
-
-    private void Log(String s) {
-        android.telephony.Rlog->D(mLogTag, "DataConnectionAc " + s);
-    }
-
-    public String[] GetPcscfAddr() {
-        return mDc.mPcscfAddr;
-    }
+#endif
 }
+
+ECode DcAsyncChannel::TearDownAll(
+    /* [in] */ const String& reason,
+    /* [in] */ IMessage* onCompletedMsg)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (DBG) log("tearDownAll: reason=" + reason + " onCompletedMsg=" + onCompletedMsg);
+        sendMessage(DataConnection.EVENT_DISCONNECT_ALL,
+                new DisconnectParams(null, reason, onCompletedMsg));
+
+#endif
+}
+
+ECode DcAsyncChannel::GetDataConnectionIdSync(
+    /* [out] */ Int32* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        // Safe because this is owned by the caller.
+        return mDc.getDataConnectionId();
+
+#endif
+}
+
+ECode DcAsyncChannel::ToString(
+    /* [out] */ String* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return mDc.getName();
+
+#endif
+}
+
+ECode DcAsyncChannel::IsCallerOnDifferentThread(
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        long curThreadId = Thread.currentThread().getId();
+        boolean value = mDcThreadId != curThreadId;
+        if (DBG) log("isCallerOnDifferentThread: " + value);
+        return value;
+
+#endif
+}
+
+ECode DcAsyncChannel::Log(
+    /* [in] */ const String& s)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        android.telephony.Rlog.d(mLogTag, "DataConnectionAc " + s);
+
+#endif
+}
+
+ECode DcAsyncChannel::GetPcscfAddr(
+    /* [out, callee] */ ArrayOf<String>** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return mDc.mPcscfAddr;
+
+#endif
+}
+
+AutoPtr<ArrayOf<String> > DcAsyncChannel::InitCmdToString()
+{
+    AutoPtr<ArrayOf<String> > rev = ArrayOf<String>::Alloc(CMD_TO_STRING_COUNT);
+    (*rev)[REQ_IS_INACTIVE - BASE] = "REQ_IS_INACTIVE";
+    (*rev)[RSP_IS_INACTIVE - BASE] = "RSP_IS_INACTIVE";
+    (*rev)[REQ_GET_CID - BASE] = "REQ_GET_CID";
+    (*rev)[RSP_GET_CID - BASE] = "RSP_GET_CID";
+    (*rev)[REQ_GET_APNSETTING - BASE] = "REQ_GET_APNSETTING";
+    (*rev)[RSP_GET_APNSETTING - BASE] = "RSP_GET_APNSETTING";
+    (*rev)[REQ_GET_LINK_PROPERTIES - BASE] = "REQ_GET_LINK_PROPERTIES";
+    (*rev)[RSP_GET_LINK_PROPERTIES - BASE] = "RSP_GET_LINK_PROPERTIES";
+    (*rev)[REQ_SET_LINK_PROPERTIES_HTTP_PROXY - BASE] = "REQ_SET_LINK_PROPERTIES_HTTP_PROXY";
+    (*rev)[RSP_SET_LINK_PROPERTIES_HTTP_PROXY - BASE] = "RSP_SET_LINK_PROPERTIES_HTTP_PROXY";
+    (*rev)[REQ_GET_NETWORK_CAPABILITIES - BASE] = "REQ_GET_NETWORK_CAPABILITIES";
+    (*rev)[RSP_GET_NETWORK_CAPABILITIES - BASE] = "RSP_GET_NETWORK_CAPABILITIES";
+    (*rev)[REQ_RESET - BASE] = "REQ_RESET";
+    (*rev)[RSP_RESET - BASE] = "RSP_RESET";
+    return rev;
+}
+
+} // namespace DataConnection
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

@@ -12,13 +12,13 @@ module
     /**
      * Class returned by onSetupConnectionCompleted.
      */
-    enum SetupResult {
-        SUCCESS,
-        ERR_BadCommand,
-        ERR_UnacceptableParameter,
-        ERR_GetLastErrorFromRil,
-        ERR_Stale,
-        ERR_RilError
+    enum DataCallResponseSetupResult {
+        DataCallResponse_SUCCESS,
+        DataCallResponse_ERR_BadCommand,
+        DataCallResponse_ERR_UnacceptableParameter,
+        DataCallResponse_ERR_GetLastErrorFromRil,
+        DataCallResponse_ERR_Stale,
+        DataCallResponse_ERR_RilError
 
         // public DcFailCause mFailCause;
 
@@ -37,7 +37,7 @@ module
         SetLinkProperties(
             [in] ILinkProperties* linkProperties,
             [in] Boolean okToUseSystemPropertyDns,
-            [out] SetupResult* result);
+            [out] DataCallResponseSetupResult* result);
 
     }
 

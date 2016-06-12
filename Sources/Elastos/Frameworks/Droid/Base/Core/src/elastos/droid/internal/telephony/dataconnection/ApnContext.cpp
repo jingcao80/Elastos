@@ -1,287 +1,427 @@
-/*
- * Copyright (C) 2006 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.dataconnection;
+#include "elastos/droid/internal/telephony/dataconnection/ApnContext.h"
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
-using Elastos::Droid::App::IPendingIntent;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Net::INetworkConfig;
-using Elastos::Droid::Telephony::IRlog;
-using Elastos::Droid::Text::ITextUtils;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace DataConnection {
 
-using Elastos::Droid::Internal::IR;
-using Elastos::Droid::Internal::Telephony::IDctConstants;
-using Elastos::Droid::Internal::Telephony::IPhone;
+CAR_INTERFACE_IMPL(ApnContext, Object, IApnContext)
 
-using Elastos::IO::IFileDescriptor;
-using Elastos::IO::IPrintWriter;
-using Elastos::Utility::IArrayList;
-using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
-using Elastos::Utility::Concurrent::Atomic::IAtomicInteger;
+const Boolean ApnContext::DBG = false;
 
-/**
- * Maintain the Apn context
- */
-public class ApnContext {
+ApnContext::ApnContext()
+    : mWaitingApns(NULL)
+    , mRefCount(0)
+{
+    Elastos::Core::CObject::New((IObject**)&mRefCountLock);
+}
 
-    public final String LOG_TAG;
-
-    protected static const Boolean DBG = FALSE;
-
-    private final Context mContext;
-
-    private final String mApnType;
-
-    private DctConstants.State mState;
-
-    private ArrayList<ApnSetting> mWaitingApns = NULL;
-
-    public final Int32 priority;
-
-    /** A zero indicates that all waiting APNs had a permanent error */
-    private AtomicInteger mWaitingApnsPermanentFailureCountDown;
-
-    private ApnSetting mApnSetting;
-
-    DcAsyncChannel mDcAc;
-
-    String mReason;
-
-    PendingIntent mReconnectAlarmIntent;
-
-    /**
-     * user/app requested connection on this APN
-     */
-    AtomicBoolean mDataEnabled;
-
-    private final Object mRefCountLock = new Object();
-    private Int32 mRefCount = 0;
-
-    /**
-     * carrier requirements met
-     */
-    AtomicBoolean mDependencyMet;
-
-    private final DcTrackerBase mDcTracker;
-
-    public ApnContext(Context context, String apnType, String logTag, NetworkConfig config,
-            DcTrackerBase tracker) {
+ECode ApnContext::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ const String& apnType,
+    /* [in] */ const String& logTag,
+    /* [in] */ INetworkConfig* config,
+    /* [in] */ IDcTrackerBase* tracker)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         mContext = context;
         mApnType = apnType;
         mState = DctConstants.State.IDLE;
-        SetReason(Phone.REASON_DATA_ENABLED);
-        mDataEnabled = new AtomicBoolean(FALSE);
+        setReason(Phone.REASON_DATA_ENABLED);
+        mDataEnabled = new AtomicBoolean(false);
         mDependencyMet = new AtomicBoolean(config.dependencyMet);
         mWaitingApnsPermanentFailureCountDown = new AtomicInteger(0);
         priority = config.priority;
-        LOG_TAG = logTag;
+        LOG__TAG = logTag;
         mDcTracker = tracker;
-    }
 
-    public String GetApnType() {
+#endif
+}
+
+ECode ApnContext::GetApnType(
+    /* [out] */ String* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         return mApnType;
-    }
 
-    public synchronized DcAsyncChannel GetDcAc() {
+#endif
+}
+
+ECode ApnContext::GetDcAc(
+    /* [out] */ IDcAsyncChannel** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         return mDcAc;
-    }
 
-    public synchronized void SetDataConnectionAc(DcAsyncChannel dcac) {
-        If (DBG) {
-            Log("setDataConnectionAc: old dcac=" + mDcAc + " new dcac=" + dcac
+#endif
+}
+
+ECode ApnContext::SetDataConnectionAc(
+    /* [in] */ IDcAsyncChannel* dcac)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (DBG) {
+            log("setDataConnectionAc: old dcac=" + mDcAc + " new dcac=" + dcac
                     + " this=" + this);
         }
         mDcAc = dcac;
-    }
 
-    public synchronized PendingIntent GetReconnectIntent() {
+#endif
+}
+
+ECode ApnContext::GetReconnectIntent(
+    /* [out] */ IPendingIntent** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         return mReconnectAlarmIntent;
-    }
 
-    public synchronized void SetReconnectIntent(PendingIntent intent) {
+#endif
+}
+
+ECode ApnContext::SetReconnectIntent(
+    /* [in] */ IPendingIntent* intent)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         mReconnectAlarmIntent = intent;
-    }
 
-    public synchronized ApnSetting GetApnSetting() {
-        Log("getApnSetting: apnSetting=" + mApnSetting);
+#endif
+}
+
+ECode ApnContext::GetApnSetting(
+    /* [out] */ IApnSetting** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        log("getApnSetting: apnSetting=" + mApnSetting);
         return mApnSetting;
-    }
 
-    public synchronized void SetApnSetting(ApnSetting apnSetting) {
-        Log("setApnSetting: apnSetting=" + apnSetting);
+#endif
+}
+
+ECode ApnContext::SetApnSetting(
+    /* [in] */ IApnSetting* apnSetting)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        log("setApnSetting: apnSetting=" + apnSetting);
         mApnSetting = apnSetting;
-    }
 
-    public synchronized void SetWaitingApns(ArrayList<ApnSetting> waitingApns) {
+#endif
+}
+
+ECode ApnContext::SetWaitingApns(
+    /* [in] */ IArrayList* waitingApns)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         mWaitingApns = waitingApns;
-        mWaitingApnsPermanentFailureCountDown->Set(mWaitingApns->Size());
-    }
+        mWaitingApnsPermanentFailureCountDown.set(mWaitingApns.size());
 
-    public Int32 GetWaitingApnsPermFailCount() {
-        return mWaitingApnsPermanentFailureCountDown->Get();
-    }
+#endif
+}
 
-    CARAPI DecWaitingApnsPermFailCount() {
-        mWaitingApnsPermanentFailureCountDown->DecrementAndGet();
-    }
+ECode ApnContext::GetWaitingApnsPermFailCount(
+    /* [out] */ Int32* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return mWaitingApnsPermanentFailureCountDown.get();
 
-    public synchronized ApnSetting GetNextWaitingApn() {
+#endif
+}
+
+ECode ApnContext::DecWaitingApnsPermFailCount()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        mWaitingApnsPermanentFailureCountDown.decrementAndGet();
+
+#endif
+}
+
+ECode ApnContext::GetNextWaitingApn(
+    /* [out] */ IApnSetting** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         ArrayList<ApnSetting> list = mWaitingApns;
-        ApnSetting apn = NULL;
-
-        If (list != NULL) {
-            If (!list->IsEmpty()) {
-                apn = list->Get(0);
+        ApnSetting apn = null;
+        if (list != null) {
+            if (!list.isEmpty()) {
+                apn = list.get(0);
             }
         }
         return apn;
-    }
 
-    public synchronized void RemoveWaitingApn(ApnSetting apn) {
-        If (mWaitingApns != NULL) {
-            mWaitingApns->Remove(apn);
+#endif
+}
+
+ECode ApnContext::RemoveWaitingApn(
+    /* [in] */ IApnSetting* apn)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (mWaitingApns != null) {
+            mWaitingApns.remove(apn);
         }
-    }
 
-    public synchronized ArrayList<ApnSetting> GetWaitingApns() {
+#endif
+}
+
+ECode ApnContext::GetWaitingApns(
+    /* [out] */ IArrayList** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         return mWaitingApns;
-    }
 
-    public synchronized void SetState(DctConstants.State s) {
-        If (DBG) {
-            Log("setState: " + s + ", previous state:" + mState);
+#endif
+}
+
+ECode ApnContext::SetState(
+    /* [in] */ DctConstantsState s)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (DBG) {
+            log("setState: " + s + ", previous state:" + mState);
         }
-
         mState = s;
-
-        If (mState == DctConstants.State.FAILED) {
-            If (mWaitingApns != NULL) {
-                mWaitingApns->Clear(); // when teardown the connection and set to IDLE
+        if (mState == DctConstants.State.FAILED) {
+            if (mWaitingApns != null) {
+                mWaitingApns.clear(); // when teardown the connection and set to IDLE
             }
         }
-    }
 
-    public synchronized DctConstants.State GetState() {
+#endif
+}
+
+ECode ApnContext::GetState(
+    /* [out] */ DctConstantsState* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         return mState;
-    }
 
-    public Boolean IsDisconnected() {
-        DctConstants.State currentState = GetState();
-        Return ((currentState == DctConstants.State.IDLE) ||
+#endif
+}
+
+ECode ApnContext::IsDisconnected(
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        DctConstants.State currentState = getState();
+        return ((currentState == DctConstants.State.IDLE) ||
                     currentState == DctConstants.State.FAILED);
-    }
 
-    public synchronized void SetReason(String reason) {
-        If (DBG) {
-            Log("set reason as " + reason + ",current state " + mState);
+#endif
+}
+
+ECode ApnContext::SetReason(
+    /* [in] */ const String& reason)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (DBG) {
+            log("set reason as " + reason + ",current state " + mState);
         }
         mReason = reason;
-    }
 
-    public synchronized String GetReason() {
+#endif
+}
+
+ECode ApnContext::GetReason(
+    /* [out] */ String* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         return mReason;
-    }
 
-    public Boolean IsReady() {
-        return mDataEnabled->Get() && mDependencyMet->Get();
-    }
+#endif
+}
 
-    public Boolean IsConnectable() {
-        return IsReady() && ((mState == DctConstants.State.IDLE)
+ECode ApnContext::IsReady(
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return mDataEnabled.get() && mDependencyMet.get();
+
+#endif
+}
+
+ECode ApnContext::IsConnectable(
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return isReady() && ((mState == DctConstants.State.IDLE)
                                 || (mState == DctConstants.State.SCANNING)
                                 || (mState == DctConstants.State.RETRYING)
                                 || (mState == DctConstants.State.FAILED));
-    }
 
-    public Boolean IsConnectedOrConnecting() {
-        return IsReady() && ((mState == DctConstants.State.CONNECTED)
+#endif
+}
+
+ECode ApnContext::IsConnectedOrConnecting(
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return isReady() && ((mState == DctConstants.State.CONNECTED)
                                 || (mState == DctConstants.State.CONNECTING)
                                 || (mState == DctConstants.State.SCANNING)
                                 || (mState == DctConstants.State.RETRYING));
-    }
 
-    CARAPI SetEnabled(Boolean enabled) {
-        If (DBG) {
-            Log("set enabled as " + enabled + ", current state is " + mDataEnabled->Get());
+#endif
+}
+
+ECode ApnContext::SetEnabled(
+    /* [in] */ Boolean enabled)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (DBG) {
+            log("set enabled as " + enabled + ", current state is " + mDataEnabled.get());
         }
-        mDataEnabled->Set(enabled);
-    }
+        mDataEnabled.set(enabled);
 
-    public Boolean IsEnabled() {
-        return mDataEnabled->Get();
-    }
+#endif
+}
 
-    CARAPI SetDependencyMet(Boolean met) {
-        If (DBG) {
-            Log("set mDependencyMet as " + met + " current state is " + mDependencyMet->Get());
+ECode ApnContext::IsEnabled(
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return mDataEnabled.get();
+
+#endif
+}
+
+ECode ApnContext::SetDependencyMet(
+    /* [in] */ Boolean met)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (DBG) {
+            log("set mDependencyMet as " + met + " current state is " + mDependencyMet.get());
         }
-        mDependencyMet->Set(met);
-    }
+        mDependencyMet.set(met);
 
-    public Boolean GetDependencyMet() {
-       return mDependencyMet->Get();
-    }
+#endif
+}
 
-    public Boolean IsProvisioningApn() {
-        String provisioningApn = mContext->GetResources()
-                .GetString(R::string::mobile_provisioning_apn);
-        If (!TextUtils->IsEmpty(provisioningApn) &&
-                (mApnSetting != NULL) && (mApnSetting.apn != NULL)) {
-            Return (mApnSetting.apn->Equals(provisioningApn));
+ECode ApnContext::GetDependencyMet(
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+       return mDependencyMet.get();
+
+#endif
+}
+
+ECode ApnContext::IsProvisioningApn(
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        String provisioningApn = mContext.getResources()
+                .getString(R.string.mobile_provisioning_apn);
+        if (!TextUtils.isEmpty(provisioningApn) &&
+                (mApnSetting != null) && (mApnSetting.apn != null)) {
+            return (mApnSetting.apn.equals(provisioningApn));
         } else {
-            return FALSE;
+            return false;
         }
-    }
 
-    CARAPI IncRefCount() {
-        {    AutoLock syncLock(mRefCountLock);
-            If (mRefCount++ == 0) {
-                mDcTracker->SetEnabled(mDcTracker->ApnTypeToId(mApnType), TRUE);
+#endif
+}
+
+ECode ApnContext::IncRefCount()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        synchronized (mRefCountLock) {
+            if (mRefCount++ == 0) {
+                mDcTracker.setEnabled(mDcTracker.apnTypeToId(mApnType), true);
             }
         }
-    }
 
-    CARAPI DecRefCount() {
-        {    AutoLock syncLock(mRefCountLock);
-            If ((mRefCount > 0) && (mRefCount-- == 1)) {
-                mDcTracker->SetEnabled(mDcTracker->ApnTypeToId(mApnType), FALSE);
+#endif
+}
+
+ECode ApnContext::DecRefCount()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        synchronized (mRefCountLock) {
+            if ((mRefCount > 0) && (mRefCount-- == 1)) {
+                mDcTracker.setEnabled(mDcTracker.apnTypeToId(mApnType), false);
             } else {
-                Log("Ignoring defCount request as mRefCount is: " + mRefCount);
+                log("Ignoring defCount request as mRefCount is: " + mRefCount);
             }
         }
-    }
 
-    //@Override
-    public synchronized CARAPI ToString(
-        /* [out] */ String* str)
-    {
+#endif
+}
+
+ECode ApnContext::ToString(
+    /* [out] */ String* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         // We don't print mDataConnection because its recursive.
-        return "{mApnType=" + mApnType + " mState=" + GetState() + " mWaitingApns={" + mWaitingApns +
+        return "{mApnType=" + mApnType + " mState=" + getState() + " mWaitingApns={" + mWaitingApns +
                 "} mWaitingApnsPermanentFailureCountDown=" + mWaitingApnsPermanentFailureCountDown +
                 " mApnSetting={" + mApnSetting + "} mReason=" + mReason +
                 " mDataEnabled=" + mDataEnabled + " mDependencyMet=" + mDependencyMet + "}";
-    }
 
-    protected void Log(String s) {
-        Rlog->D(LOG_TAG, "[ApnContext:" + mApnType + "] " + s);
-    }
-
-    CARAPI Dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw->Println("ApnContext: " + this->ToString());
-    }
+#endif
 }
+
+ECode ApnContext::Log(
+    /* [in] */ const String& s)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        Rlog.d(LOG__TAG, "[ApnContext:" + mApnType + "] " + s);
+
+#endif
+}
+
+ECode ApnContext::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        pw.println("ApnContext: " + this.toString());
+
+#endif
+}
+
+ECode ApnContext::GetPriority(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mPriority;
+    return NOERROR;
+}
+
+} // namespace DataConnection
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

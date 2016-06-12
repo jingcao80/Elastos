@@ -1,275 +1,210 @@
-/*
- * Copyright (c) 2010-2014, The Linux Foundation. All rights reserved.
- * Not a Contribution.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above
- *       copyright notice, this list of conditions and the following
- *       disclaimer in the documentation and/or other materials provided
- *       with the distribution.
- *     * Neither the name of The Linux Foundation nor the names of its
- *       contributors may be used to endorse or promote products derived
- *       from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
- * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
- * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 
-package com.android.internal.telephony.dataconnection;
+#include "elastos/droid/internal/telephony/dataconnection/CdmaApnProfileTracker.h"
+#include <_Elastos.Droid.Core.h>
+#include <Elastos.CoreLibrary.Utility.h>
 
-using Elastos::Droid::Database::ICursor;
-using Elastos::Droid::Os::IAsyncResult;
-using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::IRegistrant;
-using Elastos::Droid::Os::IRegistrantList;
-using Elastos::Droid::Os::ISystemProperties;
-using Elastos::Droid::Provider::ITelephony;
-using Elastos::Droid::Text::ITextUtils;
-using Elastos::Droid::Utility::ILog;
+using Elastos::Utility::CArrayList;
 
-using Elastos::Utility::IArrayList;
-using Elastos::Utility::IHashMap;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace DataConnection {
 
-using Elastos::Droid::Internal::Telephony::Cdma::ICDMAPhone;
-using Elastos::Droid::Internal::Telephony::Cdma::ICdmaSubscriptionSourceManager;
-using Elastos::Droid::Internal::Telephony::Dataconnection::ApnProfileOmh::IApnProfileTypeModem;
-using Elastos::Droid::Internal::Telephony::Dataconnection::IApnSetting;
-using Elastos::Droid::Internal::Telephony::Dataconnection::IDcTracker;
-using Elastos::Droid::Internal::Telephony::IPhone;
-using Elastos::Droid::Internal::Telephony::IPhoneConstants;
-using Elastos::Droid::Internal::Telephony::IRILConstants;
+CAR_INTERFACE_IMPL(CdmaApnProfileTracker, Handler, ICdmaApnProfileTracker)
 
-/**
- * {@hide}
- */
-public class CdmaApnProfileTracker extends Handler {
-    protected final String LOG_TAG = "CDMA";
+AutoPtr<ArrayOf<String> > CdmaApnProfileTracker::mSupportedApnTypes = InitSupportedApnTypes();
+AutoPtr<ArrayOf<String> > CdmaApnProfileTracker::mDefaultApnTypes = InitDefaultApnTypes();
+const Int32 CdmaApnProfileTracker::EVENT_READ_MODEM_PROFILES = 0;
+const Int32 CdmaApnProfileTracker::EVENT_GET_DATA_CALL_PROFILE_DONE = 1;
+const Int32 CdmaApnProfileTracker::EVENT_LOAD_PROFILES = 2;
 
-    private CDMAPhone mPhone;
-    private CdmaSubscriptionSourceManager mCdmaSsm;
+CdmaApnProfileTracker::CdmaApnProfileTracker()
+    : LOG__TAG("CDMA")
+    , mOmhReadProfileContext(0)
+    , mOmhReadProfileCount(0)
+{
+    CArrayList::New((IArrayList**)&mTempOmhApnProfilesList);
+    CArrayList::New((IArrayList**)&mApnProfilesList);
+    assert(0 && "TODO CRegistrantList IRegistrantList");
+    // CRegistrantList::New((IRegistrantList**)&mModemApnProfileRegistrants);
+}
 
-    /**
-     * mApnProfilesList holds all the Apn profiles for cdma
-     */
-    private ArrayList<ApnSetting> mApnProfilesList = new ArrayList<ApnSetting>();
-
-    private static const String[] mSupportedApnTypes = {
-            PhoneConstants.APN_TYPE_DEFAULT,
-            PhoneConstants.APN_TYPE_MMS,
-            PhoneConstants.APN_TYPE_SUPL,
-            PhoneConstants.APN_TYPE_DUN,
-            PhoneConstants.APN_TYPE_HIPRI,
-            PhoneConstants.APN_TYPE_FOTA,
-            PhoneConstants.APN_TYPE_IMS,
-            PhoneConstants.APN_TYPE_CBS };
-
-    private static const String[] mDefaultApnTypes = {
-            PhoneConstants.APN_TYPE_DEFAULT,
-            PhoneConstants.APN_TYPE_MMS,
-            PhoneConstants.APN_TYPE_SUPL,
-            PhoneConstants.APN_TYPE_HIPRI,
-            PhoneConstants.APN_TYPE_FOTA,
-            PhoneConstants.APN_TYPE_IMS,
-            PhoneConstants.APN_TYPE_CBS };
-
-    // if we have no active ApnProfile this is NULL
-    protected ApnSetting mActiveApn;
-
-    /*
-     * Context for read profiles for OMH.
-     */
-    private Int32 mOmhReadProfileContext = 0;
-
-    /*
-     * Count to track if all read profiles for OMH are completed or not.
-     */
-    private Int32 mOmhReadProfileCount = 0;
-
-    // Temp. ApnProfile list from the modem.
-    ArrayList<ApnSetting> mTempOmhApnProfilesList = new ArrayList<ApnSetting>();
-
-    // Map of the service type to its priority
-    HashMap<String, Integer> mOmhServicePriorityMap;
-
-    /* Registrant list for objects interested in modem profile related events */
-    private RegistrantList mModemApnProfileRegistrants = new RegistrantList();
-
-    private static const Int32 EVENT_READ_MODEM_PROFILES = 0;
-    private static const Int32 EVENT_GET_DATA_CALL_PROFILE_DONE = 1;
-    private static const Int32 EVENT_LOAD_PROFILES = 2;
-
-    /* Constructor */
-
-    CdmaApnProfileTracker(CDMAPhone phone) {
+ECode CdmaApnProfileTracker::constructor(
+    /* [in] */ ICDMAPhone* phone)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         mPhone = phone;
-        mCdmaSsm = CdmaSubscriptionSourceManager.GetInstance (phone->GetContext(), phone.mCi, this,
-                EVENT_LOAD_PROFILES, NULL);
-
+        mCdmaSsm = CdmaSubscriptionSourceManager.getInstance (phone.getContext(), phone.mCi, this,
+                EVENT_LOAD_PROFILES, null);
         mOmhServicePriorityMap = new HashMap<String, Integer>();
+        sendMessage(obtainMessage(EVENT_LOAD_PROFILES));
 
-        SendMessage(ObtainMessage(EVENT_LOAD_PROFILES));
-    }
+#endif
+}
 
-    /**
-     * Load the CDMA profiles
-     */
-    void LoadProfiles() {
-        Log("loadProfiles...");
-        mApnProfilesList->Clear();
+ECode CdmaApnProfileTracker::LoadProfiles()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        log("loadProfiles...");
+        mApnProfilesList.clear();
+        readApnProfilesFromModem();
 
-        ReadApnProfilesFromModem();
-    }
+#endif
+}
 
-
-    /**
-     * @param types comma delimited list of data service types
-     * @return array of data service types
-     */
-    private String[] ParseTypes(String types) {
+ECode CdmaApnProfileTracker::ParseTypes(
+    /* [in] */ const String& types,
+    /* [out, callee] */ ArrayOf<String>** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         String[] result;
         // If unset, set to DEFAULT.
-        If (types == NULL || types->Equals("")) {
+        if (types == null || types.equals("")) {
             result = new String[1];
             result[0] = PhoneConstants.APN_TYPE_ALL;
         } else {
-            result = types->Split(",");
+            result = types.split(",");
         }
         return result;
-    }
 
-    protected void Finalize() {
-        Logger::D(LOG_TAG, "CdmaApnProfileTracker finalized");
-    }
+#endif
+}
 
-    CARAPI RegisterForModemProfileReady(Handler h, Int32 what, Object obj) {
+ECode CdmaApnProfileTracker::Finalize()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        Log.d(LOG__TAG, "CdmaApnProfileTracker finalized");
+
+#endif
+}
+
+ECode CdmaApnProfileTracker::RegisterForModemProfileReady(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         Registrant r = new Registrant(h, what, obj);
-        mModemApnProfileRegistrants->Add(r);
-    }
+        mModemApnProfileRegistrants.add(r);
 
-    CARAPI UnregisterForModemProfileReady(Handler h) {
-        mModemApnProfileRegistrants->Remove(h);
-    }
+#endif
+}
 
-    CARAPI HandleMessage (Message msg) {
+ECode CdmaApnProfileTracker::UnregisterForModemProfileReady(
+    /* [in] */ IHandler* h)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        mModemApnProfileRegistrants.remove(h);
 
-        If (!mPhone.mIsTheCurrentActivePhone) {
-            Logger::D(LOG_TAG, "Ignore CDMA msgs since CDMA phone is inactive");
+#endif
+}
+
+ECode CdmaApnProfileTracker::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (!mPhone.mIsTheCurrentActivePhone) {
+            Log.d(LOG__TAG, "Ignore CDMA msgs since CDMA phone is inactive");
             return;
         }
-
-        Switch (msg.what) {
+        switch (msg.what) {
             case EVENT_LOAD_PROFILES:
-                LoadProfiles();
+                loadProfiles();
                 break;
             case EVENT_READ_MODEM_PROFILES:
-                OnReadApnProfilesFromModem();
+                onReadApnProfilesFromModem();
                 break;
-
             case EVENT_GET_DATA_CALL_PROFILE_DONE:
-                OnGetDataCallProfileDone((AsyncResult) msg.obj, (Int32)msg.arg1);
+                onGetDataCallProfileDone((AsyncResult) msg.obj, (int)msg.arg1);
                 break;
-
             default:
                 break;
         }
-    }
 
-    /*
-     * Trigger modem read for data profiles
-     */
-    private void ReadApnProfilesFromModem() {
-        SendMessage(ObtainMessage(EVENT_READ_MODEM_PROFILES));
-    }
+#endif
+}
 
-    /*
-     * Reads all the data profiles from the modem
-     */
-    private void OnReadApnProfilesFromModem() {
-        Log("OMH: OnReadApnProfilesFromModem()");
+ECode CdmaApnProfileTracker::ReadApnProfilesFromModem()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        sendMessage(obtainMessage(EVENT_READ_MODEM_PROFILES));
+
+#endif
+}
+
+ECode CdmaApnProfileTracker::OnReadApnProfilesFromModem()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        log("OMH: onReadApnProfilesFromModem()");
         mOmhReadProfileContext++;
-
-        mOmhReadProfileCount = 0; // Reset the count and List(s)
-        /* Clear out the modem profiles Lists (main and temp) which were read/saved */
-        mTempOmhApnProfilesList->Clear();
-        mOmhServicePriorityMap->Clear();
-
+        mOmhReadProfileCount = 0; // Reset the count and list(s)
+        /* Clear out the modem profiles lists (main and temp) which were read/saved */
+        mTempOmhApnProfilesList.clear();
+        mOmhServicePriorityMap.clear();
         // For all the service types known in modem, read the data profies
-        For (ApnProfileTypeModem p : ApnProfileTypeModem->Values()) {
-            Log("OMH: Reading profiles for:" + p->Getid());
+        for (ApnProfileTypeModem p : ApnProfileTypeModem.values()) {
+            log("OMH: Reading profiles for:" + p.getid());
             mOmhReadProfileCount++;
-            mPhone.mCi->GetDataCallProfile(p->Getid(),
-                            ObtainMessage(EVENT_GET_DATA_CALL_PROFILE_DONE, //what
+            mPhone.mCi.getDataCallProfile(p.getid(),
+                            obtainMessage(EVENT_GET_DATA_CALL_PROFILE_DONE, //what
                             mOmhReadProfileContext, //arg1
                             0 , //arg2  -- ignore
                             p));//userObj
         }
 
-    }
+#endif
+}
 
-    /*
-     * Process the response for the RIL request GET_DATA_CALL_PROFILE.
-     * Save the profile details received.
-     */
-    private void OnGetDataCallProfileDone(AsyncResult ar, Int32 context) {
-        If (context != mOmhReadProfileContext) {
-            //we have other OnReadOmhDataprofiles() on the way.
+ECode CdmaApnProfileTracker::OnGetDataCallProfileDone(
+    /* [in] */ IAsyncResult* ar,
+    /* [in] */ Int32 context)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (context != mOmhReadProfileContext) {
+            //we have other onReadOmhDataprofiles() on the way.
             return;
         }
-
-        If (ar.exception != NULL) {
-            Log("OMH: Exception in onGetDataCallProfileDone:" + ar.exception);
+        if (ar.exception != null) {
+            log("OMH: Exception in onGetDataCallProfileDone:" + ar.exception);
             mOmhReadProfileCount--;
             return;
         }
-
         // ApnProfile list from the modem for a given SERVICE_TYPE. These may
         // be from RUIM in case of OMH
         ArrayList<ApnSetting> dataProfileListModem = (ArrayList<ApnSetting>)ar.result;
-
         ApnProfileTypeModem modemProfile = (ApnProfileTypeModem)ar.userObj;
-
         mOmhReadProfileCount--;
-
-        If (dataProfileListModem != NULL && dataProfileListModem->Size() > 0) {
+        if (dataProfileListModem != null && dataProfileListModem.size() > 0) {
             String serviceType;
-
             /* For the modem service type, get the android DataServiceType */
-            serviceType = modemProfile->GetDataServiceType();
-
-            Log("OMH: # profiles returned from modem:" + dataProfileListModem->Size()
+            serviceType = modemProfile.getDataServiceType();
+            log("OMH: # profiles returned from modem:" + dataProfileListModem.size()
                     + " for " + serviceType);
-
-            mOmhServicePriorityMap->Put(serviceType,
-                    OmhListGetArbitratedPriority(dataProfileListModem, serviceType));
-
-            For (ApnSetting apn : dataProfileListModem) {
-
+            mOmhServicePriorityMap.put(serviceType,
+                    omhListGetArbitratedPriority(dataProfileListModem, serviceType));
+            for (ApnSetting apn : dataProfileListModem) {
                 /* Store the modem profile type in the data profile */
-                ((ApnProfileOmh)apn).SetApnProfileTypeModem(modemProfile);
-
+                ((ApnProfileOmh)apn).setApnProfileTypeModem(modemProfile);
                 /* Look through mTempOmhApnProfilesList for existing profile id's
-                 * before adding it. This implies that The (similar) profile with same
+                 * before adding it. This implies that the (similar) profile with same
                  * priority already exists.
                  */
-                ApnProfileOmh omhDuplicateDp = GetDuplicateProfile(apn);
-                If (NULL == omhDuplicateDp) {
-                    mTempOmhApnProfilesList->Add(apn);
-                    ((ApnProfileOmh)apn).AddServiceType(ApnProfileTypeModem.
-                            GetApnProfileTypeModem(serviceType));
+                ApnProfileOmh omhDuplicateDp = getDuplicateProfile(apn);
+                if (null == omhDuplicateDp) {
+                    mTempOmhApnProfilesList.add(apn);
+                    ((ApnProfileOmh)apn).addServiceType(ApnProfileTypeModem.
+                            getApnProfileTypeModem(serviceType));
                 } else {
                     /*  To share the already established data connection
                      * (say between SUPL and DUN) in cases such as below:
@@ -277,138 +212,215 @@ public class CdmaApnProfileTracker extends Handler {
                      *  'apn' instance is found at this point. Add the non-provisioned
                      *   service type to this 'apn' instance
                      */
-                    Log("OMH: Duplicate Profile " + omhDuplicateDp);
-                    omhDuplicateDp->AddServiceType(ApnProfileTypeModem.
-                            GetApnProfileTypeModem(serviceType));
+                    log("OMH: Duplicate Profile " + omhDuplicateDp);
+                    omhDuplicateDp.addServiceType(ApnProfileTypeModem.
+                            getApnProfileTypeModem(serviceType));
                 }
             }
         }
-
         //(Re)Load APN List
-        If (mOmhReadProfileCount == 0) {
-            Log("OMH: Modem omh profile read complete.");
-            AddServiceTypeToUnSpecified();
-            mApnProfilesList->AddAll(mTempOmhApnProfilesList);
-            mModemApnProfileRegistrants->NotifyRegistrants();
+        if (mOmhReadProfileCount == 0) {
+            log("OMH: Modem omh profile read complete.");
+            addServiceTypeToUnSpecified();
+            mApnProfilesList.addAll(mTempOmhApnProfilesList);
+            mModemApnProfileRegistrants.notifyRegistrants();
         }
-
         return;
-    }
 
-    /*
-     * returns the object 'OMH dataProfile' if a match with the same profile id
-     * exists in the enumerated list of OMH profile list
-     */
-    private ApnProfileOmh GetDuplicateProfile(ApnSetting apn) {
-        For (ApnSetting dataProfile : mTempOmhApnProfilesList) {
-            If (((ApnProfileOmh)apn).GetProfileId() ==
-                ((ApnProfileOmh)dataProfile).GetProfileId()){
-                Return (ApnProfileOmh)dataProfile;
+#endif
+}
+
+ECode CdmaApnProfileTracker::GetDuplicateProfile(
+    /* [in] */ IApnSetting* apn,
+    /* [out] */ IApnProfileOmh** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        for (ApnSetting dataProfile : mTempOmhApnProfilesList) {
+            if (((ApnProfileOmh)apn).getProfileId() ==
+                ((ApnProfileOmh)dataProfile).getProfileId()){
+                return (ApnProfileOmh)dataProfile;
             }
         }
-        return NULL;
-    }
+        return null;
 
-    public ApnSetting GetApnProfile(String serviceType) {
-        Log("getApnProfile: serviceType="+serviceType);
-        ApnSetting profile = NULL;
+#endif
+}
 
+ECode CdmaApnProfileTracker::GetApnProfile(
+    /* [in] */ const String& serviceType,
+    /* [out] */ IApnSetting** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        log("getApnProfile: serviceType="+serviceType);
+        ApnSetting profile = null;
         // Go through all the profiles to find one
-        For (ApnSetting apn: mApnProfilesList) {
-            If (apn->CanHandleType(serviceType)) {
+        for (ApnSetting apn: mApnProfilesList) {
+            if (apn.canHandleType(serviceType)) {
                 profile = apn;
                 break;
             }
         }
-
-        Log("getApnProfile: return profile=" + profile);
+        log("getApnProfile: return profile=" + profile);
         return profile;
-    }
 
-    public ArrayList<ApnSetting> GetOmhApnProfilesList() {
-        Log("getOmhApnProfilesList:" + mApnProfilesList);
+#endif
+}
+
+ECode CdmaApnProfileTracker::GetOmhApnProfilesList(
+    /* [out] */ IArrayList** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        log("getOmhApnProfilesList:" + mApnProfilesList);
         return mApnProfilesList;
-    }
 
-    /* For all the OMH service types not present in the card, add them to the
-     * UNSPECIFIED/DEFAULT data profile.
-     */
-    private void AddServiceTypeToUnSpecified() {
-        For (String apntype : mSupportedApnTypes) {
-            If(!mOmhServicePriorityMap->ContainsKey(apntype)) {
+#endif
+}
 
+ECode CdmaApnProfileTracker::AddServiceTypeToUnSpecified()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        for (String apntype : mSupportedApnTypes) {
+            if(!mOmhServicePriorityMap.containsKey(apntype)) {
                 // ServiceType :apntype is not provisioned in the card,
                 // Look through the profiles read from the card to locate
                 // the UNSPECIFIED profile and add the service type to it.
-                For (ApnSetting apn : mTempOmhApnProfilesList) {
-                    If (((ApnProfileOmh)apn).GetApnProfileTypeModem() ==
+                for (ApnSetting apn : mTempOmhApnProfilesList) {
+                    if (((ApnProfileOmh)apn).getApnProfileTypeModem() ==
                                 ApnProfileTypeModem.PROFILE_TYPE_UNSPECIFIED) {
-                        ((ApnProfileOmh)apn).AddServiceType(ApnProfileTypeModem.
-                                GetApnProfileTypeModem(apntype));
-                        Log("OMH: Service Type added to UNSPECIFIED is : " +
-                                ApnProfileTypeModem->GetApnProfileTypeModem(apntype));
+                        ((ApnProfileOmh)apn).addServiceType(ApnProfileTypeModem.
+                                getApnProfileTypeModem(apntype));
+                        log("OMH: Service Type added to UNSPECIFIED is : " +
+                                ApnProfileTypeModem.getApnProfileTypeModem(apntype));
                         break;
                     }
                 }
             }
         }
-    }
 
-    /*
-     * Retrieves the highest priority for all APP types except SUPL. Note that
-     * for SUPL, retrieve the least priority among its profiles.
-     */
-    private Int32 OmhListGetArbitratedPriority(
-            ArrayList<ApnSetting> dataProfileListModem,
-            String serviceType) {
-        ApnSetting profile = NULL;
+#endif
+}
 
-        For (ApnSetting apn : dataProfileListModem) {
-            If (!((ApnProfileOmh) apn).IsValidPriority()) {
-                Log("[OMH] Invalid priority... skipping");
+ECode CdmaApnProfileTracker::OmhListGetArbitratedPriority(
+    /* [in] */ IArrayList* dataProfileListModem,
+    /* [in] */ const String& serviceType,
+    /* [out] */ Int32* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        ApnSetting profile = null;
+        for (ApnSetting apn : dataProfileListModem) {
+            if (!((ApnProfileOmh) apn).isValidPriority()) {
+                log("[OMH] Invalid priority... skipping");
                 continue;
             }
-
-            If (profile == NULL) {
+            if (profile == null) {
                 profile = apn; // first hit
             } else {
-                If (serviceType == PhoneConstants.APN_TYPE_SUPL) {
+                if (serviceType == PhoneConstants.APN_TYPE_SUPL) {
                     // Choose the profile with lower priority
-                    profile = ((ApnProfileOmh) apn).IsPriorityLower(((ApnProfileOmh) profile)
-                            .GetPriority()) ? apn : profile;
+                    profile = ((ApnProfileOmh) apn).isPriorityLower(((ApnProfileOmh) profile)
+                            .getPriority()) ? apn : profile;
                 } else {
                     // Choose the profile with higher priority
-                    profile = ((ApnProfileOmh) apn).IsPriorityHigher(((ApnProfileOmh) profile)
-                            .GetPriority()) ? apn : profile;
+                    profile = ((ApnProfileOmh) apn).isPriorityHigher(((ApnProfileOmh) profile)
+                            .getPriority()) ? apn : profile;
                 }
             }
         }
-        Return ((ApnProfileOmh) profile).GetPriority();
-    }
+        return ((ApnProfileOmh) profile).getPriority();
 
-    CARAPI ClearActiveApnProfile() {
-        mActiveApn = NULL;
-    }
-
-    public Boolean IsApnTypeActive(String type) {
-        return mActiveApn != NULL && mActiveApn->CanHandleType(type);
-    }
-
-    protected Boolean IsApnTypeAvailable(String type) {
-        For (String s : mSupportedApnTypes) {
-            If (TextUtils->Equals(type, s)) {
-                return TRUE;
-            }
-        }
-        return FALSE;
-    }
-
-    protected void Log(String s) {
-        Logger::D(LOG_TAG, "[CdmaApnProfileTracker] " + s);
-    }
-
-    protected void Loge(String s) {
-        Logger::E(LOG_TAG, "[CdmaApnProfileTracker] " + s);
-    }
+#endif
 }
 
+ECode CdmaApnProfileTracker::ClearActiveApnProfile()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        mActiveApn = null;
+
+#endif
+}
+
+ECode CdmaApnProfileTracker::IsApnTypeActive(
+    /* [in] */ const String& type,
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return mActiveApn != null && mActiveApn.canHandleType(type);
+
+#endif
+}
+
+ECode CdmaApnProfileTracker::IsApnTypeAvailable(
+    /* [in] */ const String& type,
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        for (String s : mSupportedApnTypes) {
+            if (TextUtils.equals(type, s)) {
+                return true;
+            }
+        }
+        return false;
+
+#endif
+}
+
+ECode CdmaApnProfileTracker::Log(
+    /* [in] */ const String& s)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        Log.d(LOG__TAG, "[CdmaApnProfileTracker] " + s);
+
+#endif
+}
+
+ECode CdmaApnProfileTracker::Loge(
+    /* [in] */ const String& s)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        Log.e(LOG__TAG, "[CdmaApnProfileTracker] " + s);
+
+#endif
+}
+
+AutoPtr<ArrayOf<String> > CdmaApnProfileTracker::InitSupportedApnTypes()
+{
+    AutoPtr<ArrayOf<String> > rev = ArrayOf<String>::Alloc(8);
+    (*rev)[0] = IPhoneConstants::APN_TYPE_DEFAULT;
+    (*rev)[1] = IPhoneConstants::APN_TYPE_MMS;
+    (*rev)[2] = IPhoneConstants::APN_TYPE_SUPL;
+    (*rev)[3] = IPhoneConstants::APN_TYPE_DUN;
+    (*rev)[4] = IPhoneConstants::APN_TYPE_HIPRI;
+    (*rev)[5] = IPhoneConstants::APN_TYPE_FOTA;
+    (*rev)[6] = IPhoneConstants::APN_TYPE_IMS;
+    (*rev)[7] = IPhoneConstants::APN_TYPE_CBS;
+    return rev;
+}
+
+AutoPtr<ArrayOf<String> > CdmaApnProfileTracker::InitDefaultApnTypes()
+{
+    AutoPtr<ArrayOf<String> > rev = ArrayOf<String>::Alloc(7);
+    (*rev)[0] = IPhoneConstants::APN_TYPE_DEFAULT;
+    (*rev)[1] = IPhoneConstants::APN_TYPE_MMS;
+    (*rev)[2] = IPhoneConstants::APN_TYPE_SUPL;
+    (*rev)[3] = IPhoneConstants::APN_TYPE_HIPRI;
+    (*rev)[4] = IPhoneConstants::APN_TYPE_FOTA;
+    (*rev)[5] = IPhoneConstants::APN_TYPE_IMS;
+    (*rev)[6] = IPhoneConstants::APN_TYPE_CBS;
+    return rev;
+}
+
+} // namespace DataConnection
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

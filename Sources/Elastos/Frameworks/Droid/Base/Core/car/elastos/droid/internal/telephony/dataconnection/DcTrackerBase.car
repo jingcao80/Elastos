@@ -1,14 +1,19 @@
 
 module
 {
-    // interface Elastos.Droid.Os.IAsyncResult;
+    interface Elastos.Droid.Os.IAsyncResult;
     interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Content.IIntent;
     interface Elastos.Droid.Net.ILinkProperties;
     interface Elastos.Droid.Net.INetworkCapabilities;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccRecords;
     enum Elastos.Droid.Internal.Telephony.DctConstantsActivity;
     enum Elastos.Droid.Internal.Telephony.DctConstantsState;
     // interface Elastos.Droid.Internal.Telephony.Uicc.IIccRecords;
     // interface Elastos.Droid.Internal.Telephony.DataConnection.IDcFailCause;
+
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IPrintWriter;
 
     namespace Elastos {
     namespace Droid {
@@ -29,7 +34,17 @@ module
      */
     [deprecated]
     interface IDcTrackerBase {
-        Run();
+        GetInitialMaxRetry(
+            [out] Int32* result);
+
+        OnActionIntentReconnectAlarm(
+            [in] IIntent* intent);
+
+        OnActionIntentRestartTrySetupAlarm(
+            [in] IIntent* intent);
+
+        OnActionIntentDataStallAlarm(
+            [in] IIntent* intent);
 
         Dispose();
 
@@ -39,6 +54,9 @@ module
         IsApnTypeActive(
             [in] String type,
             [out] Boolean* result);
+
+        FetchDunApn(
+            [out] IApnSetting** result);
 
         GetActiveApnTypes(
             [out, callee] ArrayOf<String>* result);
@@ -84,7 +102,7 @@ module
             [out] Boolean* result);
 
         SetState(
-            [in] DctConstantsState* s);
+            [in] DctConstantsState s);
 
         GotoIdleAndNotifyDataConnection(
             [in] String reason);
@@ -101,19 +119,19 @@ module
 
         OnRadioOffOrNotAvailable();
 
-        // OnDataSetupComplete(
-        //     [in] IAsyncResult* ar);
+        OnDataSetupComplete(
+            [in] IAsyncResult* ar);
 
-        // OnDataSetupCompleteError(
-        //     [in] IAsyncResult* ar);
+        OnDataSetupCompleteError(
+            [in] IAsyncResult* ar);
 
-        // OnDisconnectDone(
-        //     [in] Int32 connId,
-        //     [in] IAsyncResult* ar);
+        OnDisconnectDone(
+            [in] Int32 connId,
+            [in] IAsyncResult* ar);
 
-        // OnDisconnectDcRetrying(
-        //     [in] Int32 connId,
-        //     [in] IAsyncResult* ar);
+        OnDisconnectDcRetrying(
+            [in] Int32 connId,
+            [in] IAsyncResult* ar);
 
         OnVoiceCallStarted();
 
@@ -152,18 +170,29 @@ module
         SetImsRegistrationState(
             [in] Boolean registered);
 
-        // MvnoMatches(
-        //     [in] IIccRecords* r,
-        //     [in] String mvno_type,
-        //     [in] String mvno_match_data,
-        //     [out] Boolean* result);
+        MvnoMatches(
+            [in] IIccRecords* r,
+            [in] String mvno_type,
+            [in] String mvno_match_data,
+            [out] Boolean* result);
 
-        // IsPermanentFail(
-        //     [in] IDcFailCause* dcFailCause,
-        //     [out] Boolean* result);
+        IsPermanentFail(
+            [in] IDcFailCause* dcFailCause,
+            [out] Boolean* result);
 
         GetAnyDataEnabled(
             [out] Boolean* result);
+
+        IsEmergency(
+            [out] Boolean* result);
+
+        ApnTypeToId(
+            [in] String type,
+            [out] Int32* result);
+
+        ApnIdToType(
+            [in] Int32 id,
+            [out] String* result);
 
         GetLinkProperties(
             [in] String apnType,
@@ -173,13 +202,39 @@ module
             [in] String apnType,
             [out] INetworkCapabilities** result);
 
+        NotifyDataConnection(
+            [in] String reason);
+
+        NotifyOffApnsOfAvailability(
+            [in] String reason);
+
         IsApnTypeEnabled(
             [in] String apnType,
             [out] Boolean* result);
 
+        IsApnIdEnabled(
+            [in] Int32 id,
+            [out] Boolean* result);
+
+        SetEnabled(
+            [in] Int32 id,
+            [in] Boolean enabled);
+
+        OnEnableApn(
+            [in] Int32 apnId,
+            [in] Int32 enabled);
+
+        OnEnableNewApn();
+
+        OnResetDone(
+            [in] IAsyncResult* ar);
+
         SetInternalDataEnabled(
             [in] Boolean enbl,
             [out] Boolean* result);
+
+        OnSetInternalDataEnabled(
+            [in] Boolean enabled);
 
         CleanUpAllConnections(
             [in] String cause);
@@ -187,10 +242,35 @@ module
         IsDisconnected(
             [out] Boolean* result);
 
+        OnSetUserDataEnabled(
+            [in] Boolean enabled);
+
+        OnSetDependencyMet(
+            [in] String apnType,
+            [in] Boolean met);
+
+        OnSetPolicyDataEnabled(
+            [in] Boolean enabled);
+
+        GetReryConfig(
+            [in] Boolean forDefault,
+            [out] String* result);
+
+        ResetPollStats();
+
+        GetOverallState(
+            [out] DctConstantsState* result);
+
         SendStartNetStatPoll(
             [in] DctConstantsActivity activity);
 
+        HandleStartNetStatPoll(
+            [in] DctConstantsActivity activity);
+
         SendStopNetStatPoll(
+            [in] DctConstantsActivity activity);
+
+        HandleStopNetStatPoll(
             [in] DctConstantsActivity activity);
 
         UpdateDataActivity();
@@ -201,6 +281,37 @@ module
         PutRecoveryAction(
             [in] Int32 action);
 
+        IsConnected(
+            [out] Boolean* result);
+
+
+        DoRecovery();
+
+        OnDataStallAlarm(
+            [in] Int32 tag);
+
+        StartDataStallAlarm(
+            [in] Boolean suspectedStall);
+
+        StopDataStallAlarm();
+
+        RestartDataStallAlarm();
+
+        SetInitialAttachApn();
+
+        SetDataProfilesAsNeeded();
+
+        OnActionIntentProvisioningApnAlarm(
+            [in] IIntent* intent);
+
+        StartProvisioningApnAlarm();
+
+        StopProvisioningApnAlarm();
+
+        Dump(
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* pw,
+            [in] ArrayOf<String>* args);
     }
 
     }//DataConnection

@@ -4,6 +4,21 @@ module
     enum Elastos.Droid.Internal.Telephony.IccCardConstantsState;
 
     //
+    // Elastos.Droid.Os
+    //
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+        interface IAsyncResult {}
+
+        interface IRegistrantList {}
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+
+    //
     // Elastos.Droid.Net
     //
     namespace Elastos {

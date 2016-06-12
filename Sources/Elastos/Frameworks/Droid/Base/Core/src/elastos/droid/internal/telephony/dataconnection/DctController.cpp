@@ -1,359 +1,583 @@
-/*
- * Copyright (C) 2014 MediaTek Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.dataconnection;
+#include "elastos/droid/internal/telephony/dataconnection/DctController.h"
+#include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.Droid.Net.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
-using Elastos::Droid::Content::IBroadcastReceiver;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::IIntentFilter;
-using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::IHandlerThread;
-using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::IAsyncResult;
-using Elastos::Droid::Os::ILooper;
-using Elastos::Droid::Os::ISystemProperties;
-using Elastos::Droid::Os::IMessenger;
-using Elastos::Droid::Provider::ISettings;
-using Elastos::Droid::Telephony::IServiceState;
-using Elastos::Droid::Telephony::ITelephonyManager;
-using Elastos::Droid::Telephony::ISubscriptionManager;
-using Elastos::Droid::Net::INetworkRequest;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace DataConnection {
 
-using Elastos::Droid::Internal::Os::ISomeArgs;
-using Elastos::Droid::Internal::Telephony::IIccCardConstants;
-using Elastos::Droid::Internal::Telephony::IPhone;
-using Elastos::Droid::Internal::Telephony::IPhoneConstants;
-using Elastos::Droid::Internal::Telephony::IPhoneBase;
-using Elastos::Droid::Internal::Telephony::IPhoneProxy;
-using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
-using Elastos::Droid::Internal::Utility::IAsyncChannel;
-using Elastos::Droid::Internal::Telephony::IPhoneFactory;
-using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
-using Elastos::Droid::Internal::Telephony::IDefaultPhoneNotifier;
-using Elastos::Droid::Internal::Telephony::ISubscriptionController;
-using Elastos::Droid::Internal::Telephony::Dataconnection::IDdsScheduler;
+//=============================================================================
+// DctController::SubHandler
+//=============================================================================
+DctController::SubHandler::SubHandler(
+    /* [in] */ DctController* host)
+    : mHost(host)
+{}
 
-using Elastos::Droid::Utility::ILog;
-using Elastos::Utility::IHashSet;
-using Elastos::Utility::IIterator;
-using Elastos::Droid::Os::IRegistrant;
-using Elastos::Droid::Os::IRegistrantList;
-using Elastos::Droid::Telephony::IRlog;
-
-public class DctController extends Handler {
-    private static const String LOG_TAG = "DctController";
-    private static const Boolean DBG = TRUE;
-
-    private static const Int32 EVENT_PHONE1_DETACH = 1;
-    private static const Int32 EVENT_PHONE2_DETACH = 2;
-    private static const Int32 EVENT_PHONE3_DETACH = 3;
-    private static const Int32 EVENT_PHONE4_DETACH = 4;
-    private static const Int32 EVENT_PHONE1_RADIO_OFF = 5;
-    private static const Int32 EVENT_PHONE2_RADIO_OFF = 6;
-    private static const Int32 EVENT_PHONE3_RADIO_OFF = 7;
-    private static const Int32 EVENT_PHONE4_RADIO_OFF = 8;
-    private static const Int32 EVENT_START_DDS_SWITCH = 9;
-
-    private static const Int32 PHONE_NONE = -1;
-
-    private static DctController sDctController;
-
-    private static const Int32 EVENT_ALL_DATA_DISCONNECTED = 1;
-    private static const Int32 EVENT_SET_DATA_ALLOW_DONE = 2;
-    private static const Int32 EVENT_DELAYED_RETRY = 3;
-    private static const Int32 EVENT_LEGACY_SET_DATA_SUBSCRIPTION = 4;
-    private static const Int32 EVENT_SET_DATA_ALLOW_FALSE = 5;
-
-    private RegistrantList mNotifyDefaultDataSwitchInfo = new RegistrantList();
-    private RegistrantList mNotifyOnDemandDataSwitchInfo = new RegistrantList();
-    private RegistrantList mNotifyOnDemandPsAttach = new RegistrantList();
-    private SubscriptionController mSubController = SubscriptionController->GetInstance();
-
-    private Phone mActivePhone;
-    private Int32 mPhoneNum;
-    private Boolean[] mServicePowerOffFlag;
-    private PhoneProxy[] mPhones;
-    private DcSwitchState[] mDcSwitchState;
-    private DcSwitchAsyncChannel[] mDcSwitchAsyncChannel;
-    private Handler[] mDcSwitchStateHandler;
-
-    private HashSet<String> mApnTypes = new HashSet<String>();
-
-    private BroadcastReceiver mDataStateReceiver;
-    private Context mContext;
-
-    private AsyncChannel mDdsSwitchPropService;
-
-    private Int32 mCurrentDataPhone = PHONE_NONE;
-    private Int32 mRequestedDataPhone = PHONE_NONE;
-
-    private DdsSwitchSerializerHandler mDdsSwitchSerializer;
-    private Boolean mIsDdsSwitchCompleted = TRUE;
-
-    private final Int32 MAX_RETRY_FOR_ATTACH = 6;
-    private final Int32 ATTACH_RETRY_DELAY = 1000 * 10;
-
-    private Handler mRspHander = new Handler() {
-        CARAPI HandleMessage(Message msg){
-            AsyncResult ar;
-            Switch(msg.what) {
-                case EVENT_PHONE1_DETACH:
-                case EVENT_PHONE2_DETACH:
-                case EVENT_PHONE3_DETACH:
-                case EVENT_PHONE4_DETACH:
-                    Logd("EVENT_PHONE" + msg.what +
-                            "_DETACH: mRequestedDataPhone=" + mRequestedDataPhone);
-                    mCurrentDataPhone = PHONE_NONE;
-                    If (mRequestedDataPhone != PHONE_NONE) {
-                        mCurrentDataPhone = mRequestedDataPhone;
-                        mRequestedDataPhone = PHONE_NONE;
-
-                        Iterator<String> itrType = mApnTypes->Iterator();
-                        While (itrType->HasNext()) {
-                            mDcSwitchAsyncChannel[mCurrentDataPhone].ConnectSync(itrType->Next());
+ECode DctController::SubHandler::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+                AsyncResult ar;
+                switch(msg.what) {
+                    case EVENT_PHONE1_DETACH:
+                    case EVENT_PHONE2_DETACH:
+                    case EVENT_PHONE3_DETACH:
+                    case EVENT_PHONE4_DETACH:
+                        logd("EVENT_PHONE" + msg.what +
+                                "_DETACH: mRequestedDataPhone=" + mRequestedDataPhone);
+                        mCurrentDataPhone = PHONE_NONE;
+                        if (mRequestedDataPhone != PHONE_NONE) {
+                            mCurrentDataPhone = mRequestedDataPhone;
+                            mRequestedDataPhone = PHONE_NONE;
+                            Iterator<String> itrType = mApnTypes.iterator();
+                            while (itrType.hasNext()) {
+                                mDcSwitchAsyncChannel[mCurrentDataPhone].connectSync(itrType.next());
+                            }
+                            mApnTypes.clear();
                         }
-                        mApnTypes->Clear();
-                    }
-                break;
+                    break;
+                    case EVENT_PHONE1_RADIO_OFF:
+                    case EVENT_PHONE2_RADIO_OFF:
+                    case EVENT_PHONE3_RADIO_OFF:
+                    case EVENT_PHONE4_RADIO_OFF:
+                        logd("EVENT_PHONE" + (msg.what - EVENT_PHONE1_RADIO_OFF + 1) + "_RADIO_OFF.");
+                        mServicePowerOffFlag[msg.what - EVENT_PHONE1_RADIO_OFF] = true;
+                    break;
+                    default:
+                    break;
+                }
 
-                case EVENT_PHONE1_RADIO_OFF:
-                case EVENT_PHONE2_RADIO_OFF:
-                case EVENT_PHONE3_RADIO_OFF:
-                case EVENT_PHONE4_RADIO_OFF:
-                    Logd("EVENT_PHONE" + (msg.what - EVENT_PHONE1_RADIO_OFF + 1) + "_RADIO_OFF.");
-                    mServicePowerOffFlag[msg.what - EVENT_PHONE1_RADIO_OFF] = TRUE;
-                break;
+#endif
+}
 
-                default:
-                break;
-            }
-        }
-    };
+//=============================================================================
+// DctController::SubIDataStateChangedCallback
+//=============================================================================
+CAR_INTERFACE_IMPL(DctController::SubIDataStateChangedCallback, Object, IDataStateChangedCallback)
 
-    private DefaultPhoneNotifier.IDataStateChangedCallback mDataStateChangedCallback =
-            new DefaultPhoneNotifier->IDataStateChangedCallback() {
-        CARAPI OnDataStateChanged(Int64 subId, String state, String reason,
-                String apnName, String apnType, Boolean unavailable) {
-            Logd("[DataStateChanged]:" + "state=" + state + ",reason=" + reason
-                      + ",apnName=" + apnName + ",apnType=" + apnType + ",from subId=" + subId);
-            Int32 phoneId = SubscriptionManager->GetPhoneId(subId);
-            mDcSwitchState[phoneId].NotifyDataConnection(phoneId, state, reason,
-                    apnName, apnType, unavailable);
-        }
-    };
+DctController::SubIDataStateChangedCallback::SubIDataStateChangedCallback(
+    /* [in] */ DctController* host)
+    : mHost(host)
+{}
 
-    Boolean IsActiveSubId(Int64 subId) {
-        Int64[] activeSubs = mSubController->GetActiveSubIdList();
-        For (Int32 i = 0; i < activeSubs.length; i++) {
-            If (subId == activeSubs[i]) {
-                return TRUE;
-            }
-        }
-        return FALSE;
-    }
+ECode DctController::SubIDataStateChangedCallback::OnDataStateChanged(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& state,
+    /* [in] */ const String& reason,
+    /* [in] */ const String& apnName,
+    /* [in] */ const String& apnType,
+    /* [in] */ Boolean unavailable)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+                logd("[DataStateChanged]:" + "state=" + state + ",reason=" + reason
+                          + ",apnName=" + apnName + ",apnType=" + apnType + ",from subId=" + subId);
+                int phoneId = SubscriptionManager.getPhoneId(subId);
+                mDcSwitchState[phoneId].notifyDataConnection(phoneId, state, reason,
+                        apnName, apnType, unavailable);
 
+#endif
+}
 
-    private class DataStateReceiver extends BroadcastReceiver {
-        CARAPI OnReceive(Context context, Intent intent) {
-            {    AutoLock syncLock(this);
-                If (intent->GetAction()->Equals(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED)) {
-                    ServiceState ss = ServiceState->NewFromBundle(intent->GetExtras());
+//=============================================================================
+// DctController::DataStateReceiver
+//=============================================================================
+DctController::DataStateReceiver::DataStateReceiver(
+    /* [in] */ DctController* host)
+    : mHost(host)
+{}
 
-                    Int64 subId = intent->GetLongExtra(PhoneConstants.SUBSCRIPTION_KEY, PhoneConstants.SUB1);
-                    Int32 phoneId = SubscriptionManager->GetPhoneId(subId);
-                    // for the case of network out of service when Bootup (ignore dummy values too)
-                    If (!SubscriptionManager->IsValidSubId(subId) || (subId < 0) ||
-                            !IsActiveSubId(subId)) {
-                        // FIXME: Maybe add SM->IsRealSubId(subId)??
-                        Logd("DataStateReceiver: ignore invalid subId=" + subId
-                                + " phoneId = " + phoneId);
-                        return;
-                    }
-                    If (!SubscriptionManager->IsValidPhoneId(phoneId)) {
-                        Logd("DataStateReceiver: ignore invalid phoneId=" + phoneId);
-                        return;
-                    }
-
-                    Boolean prevPowerOff = mServicePowerOffFlag[phoneId];
-                    If (ss != NULL) {
-                        Int32 state = ss->GetState();
-                        Switch (state) {
-                            case ServiceState.STATE_POWER_OFF:
-                                mServicePowerOffFlag[phoneId] = TRUE;
-                                Logd("DataStateReceiver: STATE_POWER_OFF Intent from phoneId="
-                                        + phoneId);
-                                break;
-                            case ServiceState.STATE_IN_SERVICE:
-                                mServicePowerOffFlag[phoneId] = FALSE;
-                                Logd("DataStateReceiver: STATE_IN_SERVICE Intent from phoneId="
-                                        + phoneId);
-                                break;
-                            case ServiceState.STATE_OUT_OF_SERVICE:
-                                Logd("DataStateReceiver: STATE_OUT_OF_SERVICE Intent from phoneId="
-                                        + phoneId);
-                                If (mServicePowerOffFlag[phoneId]) {
-                                    mServicePowerOffFlag[phoneId] = FALSE;
-                                }
-                                break;
-                            case ServiceState.STATE_EMERGENCY_ONLY:
-                                Logd("DataStateReceiver: STATE_EMERGENCY_ONLY Intent from phoneId="
-                                        + phoneId);
-                                break;
-                            default:
-                                Logd("DataStateReceiver: SERVICE_STATE_CHANGED invalid state");
-                                break;
+ECode DctController::DataStateReceiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+                synchronized(this) {
+                    if (intent.getAction().equals(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED)) {
+                        ServiceState ss = ServiceState.newFromBundle(intent.getExtras());
+                        long subId = intent.getLongExtra(PhoneConstants.SUBSCRIPTION_KEY, PhoneConstants.SUB1);
+                        int phoneId = SubscriptionManager.getPhoneId(subId);
+                        // for the case of network out of service when bootup (ignore dummy values too)
+                        if (!SubscriptionManager.isValidSubId(subId) || (subId < 0) ||
+                                !isActiveSubId(subId)) {
+                            // FIXME: Maybe add SM.isRealSubId(subId)??
+                            logd("DataStateReceiver: ignore invalid subId=" + subId
+                                    + " phoneId = " + phoneId);
+                            return;
                         }
-
-                        If (prevPowerOff && mServicePowerOffFlag[phoneId] == FALSE &&
-                                mCurrentDataPhone == PHONE_NONE &&
-                                phoneId == GetDataConnectionFromSetting()) {
-                            Logd("DataStateReceiver: Current Phone is none and default phoneId="
-                                    + phoneId + ", then EnableApnType()");
-                            EnableApnType(subId, PhoneConstants.APN_TYPE_DEFAULT);
+                        if (!SubscriptionManager.isValidPhoneId(phoneId)) {
+                            logd("DataStateReceiver: ignore invalid phoneId=" + phoneId);
+                            return;
+                        }
+                        boolean prevPowerOff = mServicePowerOffFlag[phoneId];
+                        if (ss != null) {
+                            int state = ss.getState();
+                            switch (state) {
+                                case ServiceState.STATE_POWER_OFF:
+                                    mServicePowerOffFlag[phoneId] = true;
+                                    logd("DataStateReceiver: STATE_POWER_OFF Intent from phoneId="
+                                            + phoneId);
+                                    break;
+                                case ServiceState.STATE_IN_SERVICE:
+                                    mServicePowerOffFlag[phoneId] = false;
+                                    logd("DataStateReceiver: STATE_IN_SERVICE Intent from phoneId="
+                                            + phoneId);
+                                    break;
+                                case ServiceState.STATE_OUT_OF_SERVICE:
+                                    logd("DataStateReceiver: STATE_OUT_OF_SERVICE Intent from phoneId="
+                                            + phoneId);
+                                    if (mServicePowerOffFlag[phoneId]) {
+                                        mServicePowerOffFlag[phoneId] = false;
+                                    }
+                                    break;
+                                case ServiceState.STATE_EMERGENCY_ONLY:
+                                    logd("DataStateReceiver: STATE_EMERGENCY_ONLY Intent from phoneId="
+                                            + phoneId);
+                                    break;
+                                default:
+                                    logd("DataStateReceiver: SERVICE_STATE_CHANGED invalid state");
+                                    break;
+                            }
+                            if (prevPowerOff && mServicePowerOffFlag[phoneId] == false &&
+                                    mCurrentDataPhone == PHONE_NONE &&
+                                    phoneId == getDataConnectionFromSetting()) {
+                                logd("DataStateReceiver: Current Phone is none and default phoneId="
+                                        + phoneId + ", then enableApnType()");
+                                enableApnType(subId, PhoneConstants.APN_TYPE_DEFAULT);
+                            }
                         }
                     }
                 }
+
+#endif
+}
+
+//=============================================================================
+// DctController::
+//=============================================================================
+DctController::SwitchInfo::SwitchInfo(
+    /* [in] */ DctController* host)
+    : mRetryCount(0)
+    , mHost(host)
+{}
+
+ECode DctController::SwitchInfo::constructor(
+    /* [in] */ Int32 phoneId,
+    /* [in] */ INetworkRequest* n,
+    /* [in] */ Boolean flag,
+    /* [in] */ Boolean isAttachReq)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+                mPhoneId = phoneId;
+                mNetworkRequest = n;
+                mIsDefaultDataSwitchRequested = flag;
+                mIsOnDemandPsAttachRequested = isAttachReq;
+
+#endif
+}
+
+ECode DctController::SwitchInfo::constructor(
+    /* [in] */ Int32 phoneId,
+    /* [in] */ Boolean flag)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+                mPhoneId = phoneId;
+                mNetworkRequest = null;
+                mIsDefaultDataSwitchRequested = flag;
+
+#endif
+}
+
+ECode DctController::SwitchInfo::IncRetryCount()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+                mRetryCount++;
+
+#endif
+}
+
+ECode DctController::SwitchInfo::IsRetryPossible(
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+                return (mRetryCount < MAX_RETRY_FOR_ATTACH);
+
+#endif
+}
+
+ECode DctController::SwitchInfo::ToString(
+    /* [out] */ String* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+                return "SwitchInfo[phoneId = " + mPhoneId
+                    + ", NetworkRequest =" + mNetworkRequest
+                    + ", isDefaultSwitchRequested = " + mIsDefaultDataSwitchRequested
+                    + ", isOnDemandPsAttachRequested = " + mIsOnDemandPsAttachRequested
+                    + ", RetryCount = " + mRetryCount;
+
+#endif
+}
+
+ECode DctController::SwitchInfo::GetMPhoneId(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mPhoneId;
+    return NOERROR;
+}
+
+ECode DctController::SwitchInfo::SetMPhoneId(
+    /* [in] */ Int32 phoneId)
+{
+    mPhoneId = phoneId;
+    return NOERROR;
+}
+
+ECode DctController::SwitchInfo::GetMNetworkRequest(
+    /* [out] */ INetworkRequest** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mNetworkRequest;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode DctController::SwitchInfo::SetMNetworkRequest(
+    /* [in] */ INetworkRequest* networkRequest)
+{
+    mNetworkRequest = networkRequest;
+    return NOERROR;
+}
+
+ECode DctController::SwitchInfo::GetMIsDefaultDataSwitchRequested(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mIsDefaultDataSwitchRequested;
+    return NOERROR;
+}
+
+ECode DctController::SwitchInfo::SetMIsDefaultDataSwitchRequested(
+    /* [in] */ Boolean isDefaultDataSwitchRequested)
+{
+    mIsDefaultDataSwitchRequested = isDefaultDataSwitchRequested;
+    return NOERROR;
+}
+
+ECode DctController::SwitchInfo::GetMIsOnDemandPsAttachRequested(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mIsOnDemandPsAttachRequested;
+    return NOERROR;
+}
+
+ECode DctController::SwitchInfo::SetMIsOnDemandPsAttachRequested(
+    /* [in] */ Boolean isOnDemandPsAttachRequested)
+{
+    mIsOnDemandPsAttachRequested = isOnDemandPsAttachRequested;
+    return NOERROR;
+}
+
+//=============================================================================
+// DctController::DdsSwitchSerializerHandler
+//=============================================================================
+const String DctController::DdsSwitchSerializerHandler::TAG("DdsSwitchSerializer");
+
+DctController::DdsSwitchSerializerHandler::DdsSwitchSerializerHandler(
+    /* [in] */ DctController* host)
+    : mHost(host)
+{}
+
+ECode DctController::DdsSwitchSerializerHandler::constructor(
+    /* [in] */ ILooper* looper)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+                super(looper);
+
+#endif
+}
+
+ECode DctController::DdsSwitchSerializerHandler::UnLock()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+                Rlog.d(TAG, "unLock the DdsSwitchSerializer");
+                synchronized(this) {
+                    mIsDdsSwitchCompleted = true;
+                    Rlog.d(TAG, "unLocked the DdsSwitchSerializer");
+                    notifyAll();
+                }
+
+#endif
+}
+
+ECode DctController::DdsSwitchSerializerHandler::IsLocked(
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+                synchronized(this) {
+                    Rlog.d(TAG, "isLocked = " + !mIsDdsSwitchCompleted);
+                    return !mIsDdsSwitchCompleted;
+                }
+
+#endif
+}
+
+ECode DctController::DdsSwitchSerializerHandler::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+                switch(msg.what) {
+                    case EVENT_START_DDS_SWITCH: {
+                        Rlog.d(TAG, "EVENT_START_DDS_SWITCH");
+                        try {
+                            synchronized(this) {
+                                while(!mIsDdsSwitchCompleted) {
+                                    Rlog.d(TAG, "DDS switch in progress, wait");
+                                    wait();
+                                }
+                                Rlog.d(TAG, "Locked!");
+                                mIsDdsSwitchCompleted = false;
+                            }
+                        } catch (Exception e) {
+                            Rlog.d(TAG, "Exception while serializing the DDS"
+                                    + " switch request , e=" + e);
+                            return;
+                        }
+                        NetworkRequest n = (NetworkRequest)msg.obj;
+                        Rlog.d(TAG, "start the DDS switch for req " + n);
+                        long subId = mSubController.getSubIdFromNetworkRequest(n);
+                        if(subId == mSubController.getCurrentDds()) {
+                            Rlog.d(TAG, "No change in DDS, respond back");
+                            mIsDdsSwitchCompleted = true;
+                            mNotifyOnDemandDataSwitchInfo.notifyRegistrants(
+                                    new AsyncResult(null, n, null));
+                            return;
+                        }
+                        int phoneId = mSubController.getPhoneId(subId);
+                        int prefPhoneId = mSubController.getPhoneId(
+                                mSubController.getCurrentDds());
+                        Phone phone = mPhones[prefPhoneId].getActivePhone();
+                        DcTrackerBase dcTracker =((PhoneBase)phone).mDcTracker;
+                        SwitchInfo s = new SwitchInfo(new Integer(phoneId), n, false, false);
+                        Message dataAllowFalse = Message.obtain(DctController.this,
+                                EVENT_SET_DATA_ALLOW_FALSE, s);
+                        dcTracker.setDataAllowed(false, dataAllowFalse);
+                        if (phone.getPhoneType() == PhoneConstants.PHONE_TYPE_CDMA) {
+                            //cleanup data from apss as there is no detach procedure for CDMA
+                            dcTracker.cleanUpAllConnections("Ondemand DDS switch");
+                        }
+                        mPhones[prefPhoneId].registerForAllDataDisconnected(
+                                sDctController, EVENT_ALL_DATA_DISCONNECTED, s);
+                        break;
+                    }
+                }
+
+#endif
+}
+
+//=============================================================================
+// DctController
+//=============================================================================
+CAR_INTERFACE_IMPL(DctController, Handler, IDctController)
+
+const String DctController::LOG__TAG("DctController");
+const Boolean DctController::DBG = true;
+const Int32 DctController::EVENT_PHONE1_DETACH = 1;
+const Int32 DctController::EVENT_PHONE2_DETACH = 2;
+const Int32 DctController::EVENT_PHONE3_DETACH = 3;
+const Int32 DctController::EVENT_PHONE4_DETACH = 4;
+const Int32 DctController::EVENT_PHONE1_RADIO_OFF = 5;
+const Int32 DctController::EVENT_PHONE2_RADIO_OFF = 6;
+const Int32 DctController::EVENT_PHONE3_RADIO_OFF = 7;
+const Int32 DctController::EVENT_PHONE4_RADIO_OFF = 8;
+const Int32 DctController::EVENT_START_DDS_SWITCH = 9;
+const Int32 DctController::PHONE_NONE = -1;
+const Int32 DctController::EVENT_ALL_DATA_DISCONNECTED = 1;
+const Int32 DctController::EVENT_SET_DATA_ALLOW_DONE = 2;
+const Int32 DctController::EVENT_DELAYED_RETRY = 3;
+const Int32 DctController::EVENT_LEGACY_SET_DATA_SUBSCRIPTION = 4;
+const Int32 DctController::EVENT_SET_DATA_ALLOW_FALSE = 5;
+
+ECode DctController::IsActiveSubId(
+    /* [in] */ Int64 subId,
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        long[] activeSubs = mSubController.getActiveSubIdList();
+        for (int i = 0; i < activeSubs.length; i++) {
+            if (subId == activeSubs[i]) {
+                return true;
             }
         }
-    }
+        return false;
 
-    public DefaultPhoneNotifier.IDataStateChangedCallback GetDataStateChangedCallback() {
+#endif
+}
+
+ECode DctController::GetDataStateChangedCallback(
+    /* [out] */ IDataStateChangedCallback** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         return mDataStateChangedCallback;
-    }
 
-    public static DctController GetInstance() {
-       If (sDctController == NULL) {
+#endif
+}
+
+ECode DctController::GetInstance(
+    /* [out] */ IDctController** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+       if (sDctController == null) {
         throw new RuntimeException(
-            "DCTrackerController.getInstance can't be called before MakeDCTController()");
+            "DCTrackerController.getInstance can't be called before makeDCTController()");
         }
        return sDctController;
-    }
 
-    public static DctController MakeDctController(PhoneProxy[] phones, Looper looper) {
-        If (sDctController == NULL) {
+#endif
+}
+
+ECode DctController::MakeDctController(
+    /* [in] */ ArrayOf<IPhoneProxy*>* phones,
+    /* [in] */ ILooper* looper,
+    /* [out] */ IDctController** result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (sDctController == null) {
             sDctController = new DctController(phones, looper);
-            DdsScheduler->Init();
+            DdsScheduler.init();
         }
         return sDctController;
-    }
 
-    private DctController(PhoneProxy[] phones, Looper looper) {
-        Super(looper);
-        If (phones == NULL || phones.length == 0) {
-            If (phones == NULL) {
-                Loge("DctController(phones): UNEXPECTED phones=NULL, ignore");
+#endif
+}
+
+DctController::DctController()
+    : mCurrentDataPhone(PHONE_NONE)
+    , mRequestedDataPhone(PHONE_NONE)
+    , mIsDdsSwitchCompleted(true)
+    , MAX_RETRY_FOR_ATTACH(6)
+    , ATTACH_RETRY_DELAY(1000 * 10)
+{}
+
+ECode DctController::constructor(
+    /* [in] */ ArrayOf<IPhoneProxy*>* phones,
+    /* [in] */ ILooper* looper)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        super(looper);
+        if (phones == null || phones.length == 0) {
+            if (phones == null) {
+                loge("DctController(phones): UNEXPECTED phones=null, ignore");
             } else {
-                Loge("DctController(phones): UNEXPECTED phones.length=0, ignore");
+                loge("DctController(phones): UNEXPECTED phones.length=0, ignore");
             }
             return;
         }
         mPhoneNum = phones.length;
-        mServicePowerOffFlag = new Boolean[mPhoneNum];
+        mServicePowerOffFlag = new boolean[mPhoneNum];
         mPhones = phones;
-
         mDcSwitchState = new DcSwitchState[mPhoneNum];
         mDcSwitchAsyncChannel = new DcSwitchAsyncChannel[mPhoneNum];
         mDcSwitchStateHandler = new Handler[mPhoneNum];
-
         mActivePhone = mPhones[0];
-
-        For (Int32 i = 0; i < mPhoneNum; ++i) {
-            Int32 phoneId = i;
-            mServicePowerOffFlag[i] = TRUE;
+        for (int i = 0; i < mPhoneNum; ++i) {
+            int phoneId = i;
+            mServicePowerOffFlag[i] = true;
             mDcSwitchState[i] = new DcSwitchState(mPhones[i], "DcSwitchState-" + phoneId, phoneId);
-            mDcSwitchState[i].Start();
+            mDcSwitchState[i].start();
             mDcSwitchAsyncChannel[i] = new DcSwitchAsyncChannel(mDcSwitchState[i], phoneId);
             mDcSwitchStateHandler[i] = new Handler();
-
-            Int32 status = mDcSwitchAsyncChannel[i].FullyConnectSync(mPhones[i].GetContext(),
-                mDcSwitchStateHandler[i], mDcSwitchState[i].GetHandler());
-
-            If (status == AsyncChannel.STATUS_SUCCESSFUL) {
-                Logd("DctController(phones): Connect success: " + i);
+            int status = mDcSwitchAsyncChannel[i].fullyConnectSync(mPhones[i].getContext(),
+                mDcSwitchStateHandler[i], mDcSwitchState[i].getHandler());
+            if (status == AsyncChannel.STATUS_SUCCESSFUL) {
+                logd("DctController(phones): Connect success: " + i);
             } else {
-                Loge("DctController(phones): Could not connect to " + i);
+                loge("DctController(phones): Could not connect to " + i);
             }
-
-            mDcSwitchState[i].RegisterForIdle(mRspHander, EVENT_PHONE1_DETACH + i, NULL);
-
+            mDcSwitchState[i].registerForIdle(mRspHander, EVENT_PHONE1_DETACH + i, null);
             // Register for radio state change
-            PhoneBase phoneBase = (PhoneBase)((PhoneProxy)mPhones[i]).GetActivePhone();
-            phoneBase.mCi->RegisterForOffOrNotAvailable(mRspHander, EVENT_PHONE1_RADIO_OFF + i, NULL);
+            PhoneBase phoneBase = (PhoneBase)((PhoneProxy)mPhones[i]).getActivePhone();
+            phoneBase.mCi.registerForOffOrNotAvailable(mRspHander, EVENT_PHONE1_RADIO_OFF + i, null);
         }
-
-        mContext = mActivePhone->GetContext();
-
+        mContext = mActivePhone.getContext();
         IntentFilter filter = new IntentFilter();
-        filter->AddAction(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
-        filter->AddAction(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
-
+        filter.addAction(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
+        filter.addAction(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
         mDataStateReceiver = new DataStateReceiver();
-        Intent intent = mContext->RegisterReceiver(mDataStateReceiver, filter);
-
+        Intent intent = mContext.registerReceiver(mDataStateReceiver, filter);
         HandlerThread t = new HandlerThread("DdsSwitchSerializer");
-        t->Start();
+        t.start();
+        mDdsSwitchSerializer = new DdsSwitchSerializerHandler(t.getLooper());
 
-        mDdsSwitchSerializer = new DdsSwitchSerializerHandler(t->GetLooper());
+    CRegistrantList::New((IRegistrantList**)&mNotifyDefaultDataSwitchInfo);
+    CRegistrantList::New((IRegistrantList**)&mNotifyOnDemandDataSwitchInfo);
+    CRegistrantList::New((IRegistrantList**)&mNotifyOnDemandPsAttach);
+    CHashSet::New((IHashSet**)&mApnTypes);
+    mRspHander = new SubHandler(this);
+    mDataStateChangedCallback = new SubIDataStateChangedCallback(this);
+    AutoPtr<ISubscriptionController> mSubController = SubscriptionController.getInstance();
+#endif
+}
 
-    }
+ECode DctController::GetIccCardState(
+    /* [in] */ Int32 phoneId,
+    /* [out] */ IccCardConstantsState* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return mPhones[phoneId].getIccCard().getState();
 
-    private IccCardConstants.State GetIccCardState(Int32 phoneId) {
-        return mPhones[phoneId].GetIccCard()->GetState();
-    }
+#endif
+}
 
-    /**
-     * Enable PDP interface by apn type and phone id
-     *
-     * @param type enable pdp interface by apn type, such as PhoneConstants.APN_TYPE_MMS, etc.
-     * @param subId Indicate which sub to query
-     * @return PhoneConstants.APN_REQUEST_STARTED: action is already started
-     * PhoneConstants.APN_ALREADY_ACTIVE: interface has already active
-     * PhoneConstants.APN_TYPE_NOT_AVAILABLE: invalid APN type
-     * PhoneConstants.APN_REQUEST_FAILED: request failed
-     * PhoneConstants.APN_REQUEST_FAILED_DUE_TO_RADIO_OFF: readio turn off
-     * @see #DisableApnType()
-     */
-    public synchronized Int32 EnableApnType(Int64 subId, String type) {
-        Int32 phoneId = SubscriptionManager->GetPhoneId(subId);
-
-        If (phoneId == PHONE_NONE || !IsValidphoneId(phoneId)) {
-            Logw("EnableApnType(): with PHONE_NONE or Invalid PHONE ID");
+ECode DctController::EnableApnType(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& type,
+    /* [out] */ Int32* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        int phoneId = SubscriptionManager.getPhoneId(subId);
+        if (phoneId == PHONE_NONE || !isValidphoneId(phoneId)) {
+            logw("enableApnType(): with PHONE_NONE or Invalid PHONE ID");
             return PhoneConstants.APN_REQUEST_FAILED;
         }
-
-        Logd("EnableApnType():type=" + type + ",phoneId=" + phoneId +
+        logd("enableApnType():type=" + type + ",phoneId=" + phoneId +
                 ",powerOff=" + mServicePowerOffFlag[phoneId]);
-
-        If (!PhoneConstants.APN_TYPE_DEFAULT->Equals(type)) {
-            For (Int32 peerphoneId =0; peerphoneId < mPhoneNum; peerphoneId++) {
+        if (!PhoneConstants.APN_TYPE_DEFAULT.equals(type)) {
+            for (int peerphoneId =0; peerphoneId < mPhoneNum; peerphoneId++) {
                 // check peer Phone has non default APN activated as receiving non default APN request.
-                If (phoneId == peerphoneId) {
+                if (phoneId == peerphoneId) {
                     continue;
                 }
-
-                String[] activeApnTypes = mPhones[peerphoneId].GetActiveApnTypes();
-                If (activeApnTypes != NULL && activeApnTypes.length != 0) {
-                    For (Int32 i=0; i<activeApnTypes.length; i++) {
-                        If (!PhoneConstants.APN_TYPE_DEFAULT->Equals(activeApnTypes[i]) &&
-                                mPhones[peerphoneId].GetDataConnectionState(activeApnTypes[i]) !=
+                String[] activeApnTypes = mPhones[peerphoneId].getActiveApnTypes();
+                if (activeApnTypes != null && activeApnTypes.length != 0) {
+                    for (int i=0; i<activeApnTypes.length; i++) {
+                        if (!PhoneConstants.APN_TYPE_DEFAULT.equals(activeApnTypes[i]) &&
+                                mPhones[peerphoneId].getDataConnectionState(activeApnTypes[i]) !=
                                 PhoneConstants.DataState.DISCONNECTED) {
-                            Logd("enableApnType:Peer Phone still have non-default active APN type:"+
+                            logd("enableApnType:Peer Phone still have non-default active APN type:"+
                                     "activeApnTypes[" + i + "]=" + activeApnTypes[i]);
                             return PhoneConstants.APN_REQUEST_FAILED;
                         }
@@ -361,532 +585,513 @@ public class DctController extends Handler {
                 }
             }
         }
-
-        Logd("EnableApnType(): CurrentDataPhone=" +
+        logd("enableApnType(): CurrentDataPhone=" +
                     mCurrentDataPhone + ", RequestedDataPhone=" + mRequestedDataPhone);
-
-        If (phoneId == mCurrentDataPhone &&
-               !mDcSwitchAsyncChannel[mCurrentDataPhone].IsIdleOrDeactingSync()) {
+        if (phoneId == mCurrentDataPhone &&
+               !mDcSwitchAsyncChannel[mCurrentDataPhone].isIdleOrDeactingSync()) {
            mRequestedDataPhone = PHONE_NONE;
-           Logd("EnableApnType(): mRequestedDataPhone equals request PHONE ID.");
-           return mDcSwitchAsyncChannel[phoneId].ConnectSync(type);
+           logd("enableApnType(): mRequestedDataPhone equals request PHONE ID.");
+           return mDcSwitchAsyncChannel[phoneId].connectSync(type);
         } else {
             // Only can switch data when mCurrentDataPhone is PHONE_NONE,
             // it is set to PHONE_NONE only as receiving EVENT_PHONEX_DETACH
-            If (mCurrentDataPhone == PHONE_NONE) {
+            if (mCurrentDataPhone == PHONE_NONE) {
                 mCurrentDataPhone = phoneId;
                 mRequestedDataPhone = PHONE_NONE;
-                Logd("EnableApnType(): current PHONE is NONE or IDLE, mCurrentDataPhone=" +
+                logd("enableApnType(): current PHONE is NONE or IDLE, mCurrentDataPhone=" +
                         mCurrentDataPhone);
-                return mDcSwitchAsyncChannel[phoneId].ConnectSync(type);
+                return mDcSwitchAsyncChannel[phoneId].connectSync(type);
             } else {
-                Logd("EnableApnType(): current PHONE:" + mCurrentDataPhone + " is active.");
-                If (phoneId != mRequestedDataPhone) {
-                    mApnTypes->Clear();
+                logd("enableApnType(): current PHONE:" + mCurrentDataPhone + " is active.");
+                if (phoneId != mRequestedDataPhone) {
+                    mApnTypes.clear();
                 }
-                mApnTypes->Add(type);
+                mApnTypes.add(type);
                 mRequestedDataPhone = phoneId;
-                mDcSwitchState[mCurrentDataPhone].CleanupAllConnection();
+                mDcSwitchState[mCurrentDataPhone].cleanupAllConnection();
             }
         }
         return PhoneConstants.APN_REQUEST_STARTED;
-    }
 
-    /**
-     * disable PDP interface by apn type and sub id
-     *
-     * @param type enable pdp interface by apn type, such as PhoneConstants.APN_TYPE_MMS, etc.
-     * @param subId Indicate which sub to query
-     * @return PhoneConstants.APN_REQUEST_STARTED: action is already started
-     * PhoneConstants.APN_ALREADY_ACTIVE: interface has already active
-     * PhoneConstants.APN_TYPE_NOT_AVAILABLE: invalid APN type
-     * PhoneConstants.APN_REQUEST_FAILED: request failed
-     * PhoneConstants.APN_REQUEST_FAILED_DUE_TO_RADIO_OFF: readio turn off
-     * @see #EnableApnTypeGemini()
-     */
-    public synchronized Int32 DisableApnType(Int64 subId, String type) {
+#endif
+}
 
-        Int32 phoneId = SubscriptionManager->GetPhoneId(subId);
-
-        If (phoneId == PHONE_NONE || !IsValidphoneId(phoneId)) {
-            Logw("DisableApnType(): with PHONE_NONE or Invalid PHONE ID");
+ECode DctController::DisableApnType(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& type,
+    /* [out] */ Int32* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        int phoneId = SubscriptionManager.getPhoneId(subId);
+        if (phoneId == PHONE_NONE || !isValidphoneId(phoneId)) {
+            logw("disableApnType(): with PHONE_NONE or Invalid PHONE ID");
             return PhoneConstants.APN_REQUEST_FAILED;
         }
-        Logd("DisableApnType():type=" + type + ",phoneId=" + phoneId +
+        logd("disableApnType():type=" + type + ",phoneId=" + phoneId +
                 ",powerOff=" + mServicePowerOffFlag[phoneId]);
-        return mDcSwitchAsyncChannel[phoneId].DisconnectSync(type);
-    }
+        return mDcSwitchAsyncChannel[phoneId].disconnectSync(type);
 
-    public Boolean IsDataConnectivityPossible(String type, Int32 phoneId) {
-        If (phoneId == PHONE_NONE || !IsValidphoneId(phoneId)) {
-            Logw("IsDataConnectivityPossible(): with PHONE_NONE or Invalid PHONE ID");
-            return FALSE;
+#endif
+}
+
+ECode DctController::IsDataConnectivityPossible(
+    /* [in] */ const String& type,
+    /* [in] */ Int32 phoneId,
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (phoneId == PHONE_NONE || !isValidphoneId(phoneId)) {
+            logw("isDataConnectivityPossible(): with PHONE_NONE or Invalid PHONE ID");
+            return false;
         } else {
-            return mPhones[phoneId].IsDataConnectivityPossible(type);
+            return mPhones[phoneId].isDataConnectivityPossible(type);
         }
-    }
 
-    public Boolean IsIdleOrDeacting(Int32 phoneId) {
-        If (mDcSwitchAsyncChannel[phoneId].IsIdleOrDeactingSync()) {
-            return TRUE;
+#endif
+}
+
+ECode DctController::IsIdleOrDeacting(
+    /* [in] */ Int32 phoneId,
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (mDcSwitchAsyncChannel[phoneId].isIdleOrDeactingSync()) {
+            return true;
         } else {
-            return FALSE;
+            return false;
         }
-    }
 
-    private Boolean IsValidphoneId(Int32 phoneId) {
+#endif
+}
+
+ECode DctController::IsValidphoneId(
+    /* [in] */ Int32 phoneId,
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         return phoneId >= 0 && phoneId < mPhoneNum;
-    }
 
-    private Boolean IsValidApnType(String apnType) {
-         If (apnType->Equals(PhoneConstants.APN_TYPE_DEFAULT)
-             || apnType->Equals(PhoneConstants.APN_TYPE_MMS)
-             || apnType->Equals(PhoneConstants.APN_TYPE_SUPL)
-             || apnType->Equals(PhoneConstants.APN_TYPE_DUN)
-             || apnType->Equals(PhoneConstants.APN_TYPE_HIPRI)
-             || apnType->Equals(PhoneConstants.APN_TYPE_FOTA)
-             || apnType->Equals(PhoneConstants.APN_TYPE_IMS)
-             || apnType->Equals(PhoneConstants.APN_TYPE_CBS))
+#endif
+}
+
+ECode DctController::IsValidApnType(
+    /* [in] */ const String& apnType,
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+         if (apnType.equals(PhoneConstants.APN_TYPE_DEFAULT)
+             || apnType.equals(PhoneConstants.APN_TYPE_MMS)
+             || apnType.equals(PhoneConstants.APN_TYPE_SUPL)
+             || apnType.equals(PhoneConstants.APN_TYPE_DUN)
+             || apnType.equals(PhoneConstants.APN_TYPE_HIPRI)
+             || apnType.equals(PhoneConstants.APN_TYPE_FOTA)
+             || apnType.equals(PhoneConstants.APN_TYPE_IMS)
+             || apnType.equals(PhoneConstants.APN_TYPE_CBS))
         {
-            return TRUE;
+            return true;
         } else {
-            return FALSE;
+            return false;
         }
-    }
 
-    private Int32 GetDataConnectionFromSetting(){
-        Int64 subId = mSubController->GetDefaultDataSubId();
-        Int32 phoneId = SubscriptionManager->GetPhoneId(subId);
+#endif
+}
+
+ECode DctController::GetDataConnectionFromSetting(
+    /* [out] */ Int32* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        long subId = mSubController.getDefaultDataSubId();
+        int phoneId = SubscriptionManager.getPhoneId(subId);
         return phoneId;
-    }
 
-    private static void Logv(String s) {
-        Rlog->V(LOG_TAG, "[DctController] " + s);
-    }
+#endif
+}
 
-    private static void Logd(String s) {
-        Rlog->D(LOG_TAG, "[DctController] " + s);
-    }
+ECode DctController::Logv(
+    /* [in] */ const String& s)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        Rlog.v(LOG__TAG, "[DctController] " + s);
 
-    private static void Logw(String s) {
-        Rlog->W(LOG_TAG, "[DctController] " + s);
-    }
+#endif
+}
 
-    private static void Loge(String s) {
-        Rlog->E(LOG_TAG, "[DctController] " + s);
-    }
+ECode DctController::Logd(
+    /* [in] */ const String& s)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        Rlog.d(LOG__TAG, "[DctController] " + s);
 
-    private class SwitchInfo {
-        private Int32 mRetryCount = 0;
+#endif
+}
 
-        public Int32 mPhoneId;
-        public NetworkRequest mNetworkRequest;
-        public Boolean mIsDefaultDataSwitchRequested;
-        public Boolean mIsOnDemandPsAttachRequested;
+ECode DctController::Logw(
+    /* [in] */ const String& s)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        Rlog.w(LOG__TAG, "[DctController] " + s);
 
-        public SwitchInfo(Int32 phoneId, NetworkRequest n, Boolean flag, Boolean isAttachReq) {
-            mPhoneId = phoneId;
-            mNetworkRequest = n;
-            mIsDefaultDataSwitchRequested = flag;
-            mIsOnDemandPsAttachRequested = isAttachReq;
-        }
+#endif
+}
 
-        public SwitchInfo(Int32 phoneId,Boolean flag) {
-            mPhoneId = phoneId;
-            mNetworkRequest = NULL;
-            mIsDefaultDataSwitchRequested = flag;
-        }
+ECode DctController::Loge(
+    /* [in] */ const String& s)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        Rlog.e(LOG__TAG, "[DctController] " + s);
 
-        CARAPI IncRetryCount() {
-            mRetryCount++;
+#endif
+}
 
-        }
-
-        public Boolean IsRetryPossible() {
-            Return (mRetryCount < MAX_RETRY_FOR_ATTACH);
-        }
-
-        CARAPI ToString(
-        /* [out] */ String* str)
-    {
-            return "SwitchInfo[phoneId = " + mPhoneId
-                + ", NetworkRequest =" + mNetworkRequest
-                + ", isDefaultSwitchRequested = " + mIsDefaultDataSwitchRequested
-                + ", isOnDemandPsAttachRequested = " + mIsOnDemandPsAttachRequested
-                + ", RetryCount = " + mRetryCount;
-        }
-    }
-
-    private void DoDetach(Int32 phoneId) {
-        Phone phone = mPhones[phoneId].GetActivePhone();
+ECode DctController::DoDetach(
+    /* [in] */ Int32 phoneId)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        Phone phone = mPhones[phoneId].getActivePhone();
         DcTrackerBase dcTracker =((PhoneBase)phone).mDcTracker;
-        dcTracker->SetDataAllowed(FALSE, NULL);
-        If (phone->GetPhoneType() == PhoneConstants.PHONE_TYPE_CDMA) {
+        dcTracker.setDataAllowed(false, null);
+        if (phone.getPhoneType() == PhoneConstants.PHONE_TYPE_CDMA) {
             //cleanup data from apss as there is no detach procedure for CDMA
-            dcTracker->CleanUpAllConnections("DDS switch");
+            dcTracker.cleanUpAllConnections("DDS switch");
         }
-    }
-    CARAPI SetDefaultDataSubId(Int64 reqSubId) {
-        Int32 reqPhoneId = mSubController->GetPhoneId(reqSubId);
-        Int64 currentDds = mSubController->GetCurrentDds();
-        Int64 defaultDds = mSubController->GetDefaultDataSubId();
-        SwitchInfo s = new SwitchInfo(new Integer(reqPhoneId), TRUE);
-        Int32 currentDdsPhoneId = mSubController->GetPhoneId(currentDds);
-        If (currentDdsPhoneId < 0 || currentDdsPhoneId >= mPhoneNum) {
+
+#endif
+}
+
+ECode DctController::SetDefaultDataSubId(
+    /* [in] */ Int64 reqSubId)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        int reqPhoneId = mSubController.getPhoneId(reqSubId);
+        long currentDds = mSubController.getCurrentDds();
+        long defaultDds = mSubController.getDefaultDataSubId();
+        SwitchInfo s = new SwitchInfo(new Integer(reqPhoneId), true);
+        int currentDdsPhoneId = mSubController.getPhoneId(currentDds);
+        if (currentDdsPhoneId < 0 || currentDdsPhoneId >= mPhoneNum) {
             // If Current dds subId is invalid set the received subId as current DDS
             // This generally happens when device power-up first time.
-            Logd(" setDefaultDataSubId,  reqSubId = " + reqSubId + " currentDdsPhoneId  "
+            logd(" setDefaultDataSubId,  reqSubId = " + reqSubId + " currentDdsPhoneId  "
                     + currentDdsPhoneId);
-            mSubController->SetDataSubId(reqSubId);
+            mSubController.setDataSubId(reqSubId);
             defaultDds = reqSubId;
-            currentDdsPhoneId = mSubController->GetPhoneId(defaultDds);
+            currentDdsPhoneId = mSubController.getPhoneId(defaultDds);
         }
-        Rlog->D(LOG_TAG, "setDefaultDataSubId reqSubId :" + reqSubId + " reqPhoneId = "
+        Rlog.d(LOG__TAG, "setDefaultDataSubId reqSubId :" + reqSubId + " reqPhoneId = "
                 + reqPhoneId);
-
-        // Avoid sending data allow FALSE and TRUE on same sub .
-        If ((reqSubId != defaultDds) && (reqPhoneId != currentDdsPhoneId)) {
-            DoDetach(currentDdsPhoneId);
+        // Avoid sending data allow false and true on same sub .
+        if ((reqSubId != defaultDds) && (reqPhoneId != currentDdsPhoneId)) {
+            doDetach(currentDdsPhoneId);
         } else {
-            Logd("setDefaultDataSubId for default DDS, skip PS detach on DDS subs");
-            SendMessage(ObtainMessage(EVENT_LEGACY_SET_DATA_SUBSCRIPTION,
-                        new AsyncResult(s, NULL, NULL)));
+            logd("setDefaultDataSubId for default DDS, skip PS detach on DDS subs");
+            sendMessage(obtainMessage(EVENT_LEGACY_SET_DATA_SUBSCRIPTION,
+                        new AsyncResult(s, null, null)));
             return;
         }
-
-        mPhones[currentDdsPhoneId].RegisterForAllDataDisconnected(
+        mPhones[currentDdsPhoneId].registerForAllDataDisconnected(
                 this, EVENT_ALL_DATA_DISCONNECTED, s);
-    }
 
-    private void InformDefaultDdsToPropServ(Int32 defDdsPhoneId) {
-        If (mDdsSwitchPropService != NULL) {
-            Logd("Inform OemHookDDS service of current DDS = " + defDdsPhoneId);
-            mDdsSwitchPropService->SendMessageSynchronously(1, defDdsPhoneId,
+#endif
+}
+
+ECode DctController::InformDefaultDdsToPropServ(
+    /* [in] */ Int32 defDdsPhoneId)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        if (mDdsSwitchPropService != null) {
+            logd("Inform OemHookDDS service of current DDS = " + defDdsPhoneId);
+            mDdsSwitchPropService.sendMessageSynchronously(1, defDdsPhoneId,
                     mPhoneNum);
-            Logd("OemHookDDS service finished");
+            logd("OemHookDDS service finished");
         } else {
-            Logd("OemHookDds service not ready yet");
+            logd("OemHookDds service not ready yet");
         }
 
-    }
+#endif
+}
 
-    CARAPI DoPsAttach(NetworkRequest n) {
-        Rlog->D(LOG_TAG, "doPsAttach for :" + n);
-
-        Int64 subId = mSubController->GetSubIdFromNetworkRequest(n);
-
-        Int32 phoneId = mSubController->GetPhoneId(subId);
-        Phone phone = mPhones[phoneId].GetActivePhone();
+ECode DctController::DoPsAttach(
+    /* [in] */ INetworkRequest* n)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        Rlog.d(LOG__TAG, "doPsAttach for :" + n);
+        long subId = mSubController.getSubIdFromNetworkRequest(n);
+        int phoneId = mSubController.getPhoneId(subId);
+        Phone phone = mPhones[phoneId].getActivePhone();
         DcTrackerBase dcTracker =((PhoneBase)phone).mDcTracker;
-
         //request only PS ATTACH on requested subscription.
         //No DdsSerealization lock required.
-        SwitchInfo s = new SwitchInfo(new Integer(phoneId), n, FALSE, TRUE);
-
-        Message psAttachDone = Message->Obtain(this,
+        SwitchInfo s = new SwitchInfo(new Integer(phoneId), n, false, true);
+        Message psAttachDone = Message.obtain(this,
                 EVENT_SET_DATA_ALLOW_DONE, s);
+        int defDdsPhoneId = getDataConnectionFromSetting();
+        informDefaultDdsToPropServ(defDdsPhoneId);
+        dcTracker.setDataAllowed(true, psAttachDone);
 
-        Int32 defDdsPhoneId = GetDataConnectionFromSetting();
-        InformDefaultDdsToPropServ(defDdsPhoneId);
-        dcTracker->SetDataAllowed(TRUE, psAttachDone);
-    }
+#endif
+}
 
-    /**
-     * This is public API and client might call doPsDetach on DDS sub.
-     * Ignore if thats the case.
-     */
-    CARAPI DoPsDetach() {
-        Int64 currentDds = mSubController->GetCurrentDds();
-        Int64 defaultDds = mSubController->GetDefaultDataSubId();
-
-        If (currentDds == defaultDds) {
-            Rlog->D(LOG_TAG, "PS DETACH on DDS sub is not allowed.");
+ECode DctController::DoPsDetach()
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        long currentDds = mSubController.getCurrentDds();
+        long defaultDds = mSubController.getDefaultDataSubId();
+        if (currentDds == defaultDds) {
+            Rlog.d(LOG__TAG, "PS DETACH on DDS sub is not allowed.");
             return;
         }
-        Rlog->D(LOG_TAG, "doPsDetach for sub:" + currentDds);
-
-        Int32 phoneId = mSubController->GetPhoneId(
-                mSubController->GetCurrentDds());
-
-        Phone phone = mPhones[phoneId].GetActivePhone();
+        Rlog.d(LOG__TAG, "doPsDetach for sub:" + currentDds);
+        int phoneId = mSubController.getPhoneId(
+                mSubController.getCurrentDds());
+        Phone phone = mPhones[phoneId].getActivePhone();
         DcTrackerBase dcTracker =((PhoneBase)phone).mDcTracker;
-        dcTracker->SetDataAllowed(FALSE, NULL);
-    }
+        dcTracker.setDataAllowed(false, null);
 
-    CARAPI SetOnDemandDataSubId(NetworkRequest n) {
-        Rlog->D(LOG_TAG, "setDataAllowed for :" + n);
-        mDdsSwitchSerializer->SendMessage(mDdsSwitchSerializer
-                .ObtainMessage(EVENT_START_DDS_SWITCH, n));
-    }
+#endif
+}
 
-    CARAPI RegisterForDefaultDataSwitchInfo(Handler h, Int32 what, Object obj) {
+ECode DctController::SetOnDemandDataSubId(
+    /* [in] */ INetworkRequest* n)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        Rlog.d(LOG__TAG, "setDataAllowed for :" + n);
+        mDdsSwitchSerializer.sendMessage(mDdsSwitchSerializer
+                .obtainMessage(EVENT_START_DDS_SWITCH, n));
+
+#endif
+}
+
+ECode DctController::RegisterForDefaultDataSwitchInfo(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         Registrant r = new Registrant (h, what, obj);
-        {    AutoLock syncLock(mNotifyDefaultDataSwitchInfo);
-            mNotifyDefaultDataSwitchInfo->Add(r);
+        synchronized (mNotifyDefaultDataSwitchInfo) {
+            mNotifyDefaultDataSwitchInfo.add(r);
         }
-    }
 
-    CARAPI RegisterForOnDemandDataSwitchInfo(Handler h, Int32 what, Object obj) {
+#endif
+}
+
+ECode DctController::RegisterForOnDemandDataSwitchInfo(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         Registrant r = new Registrant (h, what, obj);
-        {    AutoLock syncLock(mNotifyOnDemandDataSwitchInfo);
-            mNotifyOnDemandDataSwitchInfo->Add(r);
+        synchronized (mNotifyOnDemandDataSwitchInfo) {
+            mNotifyOnDemandDataSwitchInfo.add(r);
         }
-    }
 
-    CARAPI RegisterForOnDemandPsAttach(Handler h, Int32 what, Object obj) {
+#endif
+}
+
+ECode DctController::RegisterForOnDemandPsAttach(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
         Registrant r = new Registrant (h, what, obj);
-        {    AutoLock syncLock(mNotifyOnDemandPsAttach);
-            mNotifyOnDemandPsAttach->Add(r);
+        synchronized (mNotifyOnDemandPsAttach) {
+            mNotifyOnDemandPsAttach.add(r);
         }
-    }
 
-    CARAPI RegisterDdsSwitchPropService(Messenger messenger) {
-        Logd("Got messenger from DDS switch service, messenger = " + messenger);
+#endif
+}
+
+ECode DctController::RegisterDdsSwitchPropService(
+    /* [in] */ IMessenger* messenger)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        logd("Got messenger from DDS switch service, messenger = " + messenger);
         AsyncChannel ac = new AsyncChannel();
-        ac->Connect(mContext, sDctController, messenger);
-    }
+        ac.connect(mContext, sDctController, messenger);
 
-    //@Override
-        CARAPI HandleMessage (Message msg) {
-            Boolean isLegacySetDds = FALSE;
-            Rlog->D(LOG_TAG, "handleMessage msg=" + msg);
+#endif
+}
 
-            Switch (msg.what) {
+ECode DctController::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+            boolean isLegacySetDds = false;
+            Rlog.d(LOG__TAG, "handleMessage msg=" + msg);
+            switch (msg.what) {
                 case EVENT_LEGACY_SET_DATA_SUBSCRIPTION:
-                    isLegacySetDds = TRUE;
+                    isLegacySetDds = true;
                     //intentional fall through, no break.
                 case EVENT_ALL_DATA_DISCONNECTED: {
                     AsyncResult ar = (AsyncResult)msg.obj;
                     SwitchInfo s = (SwitchInfo)ar.userObj;
                     Integer phoneId = s.mPhoneId;
-                    Rlog->D(LOG_TAG, "EVENT_ALL_DATA_DISCONNECTED switchInfo :" + s +
+                    Rlog.d(LOG__TAG, "EVENT_ALL_DATA_DISCONNECTED switchInfo :" + s +
                             " isLegacySetDds = " + isLegacySetDds);
                     // In this case prefPhoneId points to the newDds we are trying to
                     // set, hence we do not need to call unregister for data disconnected
-                    If (!isLegacySetDds) {
-                        Int32 prefPhoneId = mSubController->GetPhoneId(
-                                 mSubController->GetCurrentDds());
-                        mPhones[prefPhoneId].UnregisterForAllDataDisconnected(this);
+                    if (!isLegacySetDds) {
+                        int prefPhoneId = mSubController.getPhoneId(
+                                 mSubController.getCurrentDds());
+                        mPhones[prefPhoneId].unregisterForAllDataDisconnected(this);
                     }
-                    Message allowedDataDone = Message->Obtain(this,
+                    Message allowedDataDone = Message.obtain(this,
                             EVENT_SET_DATA_ALLOW_DONE, s);
-                    Phone phone = mPhones[phoneId].GetActivePhone();
-
-                    InformDefaultDdsToPropServ(phoneId);
-
+                    Phone phone = mPhones[phoneId].getActivePhone();
+                    informDefaultDdsToPropServ(phoneId);
                     DcTrackerBase dcTracker =((PhoneBase)phone).mDcTracker;
-                    dcTracker->SetDataAllowed(TRUE, allowedDataDone);
-
+                    dcTracker.setDataAllowed(true, allowedDataDone);
                    break;
                 }
-
                 case EVENT_DELAYED_RETRY: {
-                    Rlog->D(LOG_TAG, "EVENT_DELAYED_RETRY");
+                    Rlog.d(LOG__TAG, "EVENT_DELAYED_RETRY");
                     SomeArgs args = (SomeArgs)msg.obj;
                     try {
                         SwitchInfo s = (SwitchInfo)args.arg1;
-                        Boolean psAttach = (Boolean)args.arg2;
-                        Rlog->D(LOG_TAG, " Retry, switchInfo = " + s);
-
+                        boolean psAttach = (boolean)args.arg2;
+                        Rlog.d(LOG__TAG, " Retry, switchInfo = " + s);
                         Integer phoneId = s.mPhoneId;
-                        Int64[] subId = mSubController->GetSubId(phoneId);
-                        Phone phone = mPhones[phoneId].GetActivePhone();
+                        long[] subId = mSubController.getSubId(phoneId);
+                        Phone phone = mPhones[phoneId].getActivePhone();
                         DcTrackerBase dcTracker =((PhoneBase)phone).mDcTracker;
-
-                        If(psAttach) {
-                            Message psAttachDone = Message->Obtain(this,
+                        if(psAttach) {
+                            Message psAttachDone = Message.obtain(this,
                                     EVENT_SET_DATA_ALLOW_DONE, s);
-                            dcTracker->SetDataAllowed(TRUE, psAttachDone);
+                            dcTracker.setDataAllowed(true, psAttachDone);
                         } else {
-                            Message psDetachDone = Message->Obtain(this,
+                            Message psDetachDone = Message.obtain(this,
                                     EVENT_SET_DATA_ALLOW_FALSE, s);
-                            dcTracker->SetDataAllowed(FALSE, psDetachDone);
+                            dcTracker.setDataAllowed(false, psDetachDone);
                         }
                     } finally {
-                        args->Recycle();
+                        args.recycle();
                     }
                     break;
                 }
-
                 case EVENT_SET_DATA_ALLOW_DONE: {
                     AsyncResult ar = (AsyncResult)msg.obj;
                     SwitchInfo s = (SwitchInfo)ar.userObj;
-
-                    Exception errorEx = NULL;
-
+                    Exception errorEx = null;
                     Integer phoneId = s.mPhoneId;
-                    Int64[] subId = mSubController->GetSubId(phoneId);
-                    Rlog->D(LOG_TAG, "EVENT_SET_DATA_ALLOWED_DONE  phoneId :" + subId[0]
+                    long[] subId = mSubController.getSubId(phoneId);
+                    Rlog.d(LOG__TAG, "EVENT_SET_DATA_ALLOWED_DONE  phoneId :" + subId[0]
                             + ", switchInfo = " + s);
-
-                    If (ar.exception != NULL) {
-                        Rlog->D(LOG_TAG, "Failed, switchInfo = " + s
+                    if (ar.exception != null) {
+                        Rlog.d(LOG__TAG, "Failed, switchInfo = " + s
                                 + " attempt delayed retry");
-                        s->IncRetryCount();
-                        If ( s->IsRetryPossible()) {
-                            SomeArgs args = SomeArgs->Obtain();
+                        s.incRetryCount();
+                        if ( s.isRetryPossible()) {
+                            SomeArgs args = SomeArgs.obtain();
                             args.arg1 = s;
-                            args.arg2 = TRUE;
-                            SendMessageDelayed(ObtainMessage(EVENT_DELAYED_RETRY, args),
+                            args.arg2 = true;
+                            sendMessageDelayed(obtainMessage(EVENT_DELAYED_RETRY, args),
                                     ATTACH_RETRY_DELAY);
                             return;
                         } else {
-                            Rlog->D(LOG_TAG, "Already did max retries, notify failure");
+                            Rlog.d(LOG__TAG, "Already did max retries, notify failure");
                             errorEx = new RuntimeException("PS ATTACH failed");
                        }
                     } else {
-                        Rlog->D(LOG_TAG, "PS ATTACH success = " + s);
+                        Rlog.d(LOG__TAG, "PS ATTACH success = " + s);
                     }
-
-                    mDdsSwitchSerializer->UnLock();
-
-                    If (s.mIsDefaultDataSwitchRequested) {
-                        mNotifyDefaultDataSwitchInfo->NotifyRegistrants(
-                                new AsyncResult(NULL, subId[0], errorEx));
-                    } else If (s.mIsOnDemandPsAttachRequested) {
-                        mNotifyOnDemandPsAttach->NotifyRegistrants(
-                                new AsyncResult(NULL, s.mNetworkRequest, errorEx));
+                    mDdsSwitchSerializer.unLock();
+                    if (s.mIsDefaultDataSwitchRequested) {
+                        mNotifyDefaultDataSwitchInfo.notifyRegistrants(
+                                new AsyncResult(null, subId[0], errorEx));
+                    } else if (s.mIsOnDemandPsAttachRequested) {
+                        mNotifyOnDemandPsAttach.notifyRegistrants(
+                                new AsyncResult(null, s.mNetworkRequest, errorEx));
                     } else {
-                        mNotifyOnDemandDataSwitchInfo->NotifyRegistrants(
-                                new AsyncResult(NULL, s.mNetworkRequest, errorEx));
+                        mNotifyOnDemandDataSwitchInfo.notifyRegistrants(
+                                new AsyncResult(null, s.mNetworkRequest, errorEx));
                     }
                     break;
                 }
-
                 case EVENT_SET_DATA_ALLOW_FALSE: {
                     AsyncResult ar = (AsyncResult)msg.obj;
                     SwitchInfo s = (SwitchInfo)ar.userObj;
-
-                    Exception errorEx = NULL;
-
+                    Exception errorEx = null;
                     Integer phoneId = s.mPhoneId;
-                    Int64[] subId = mSubController->GetSubId(phoneId);
-                    Rlog->D(LOG_TAG, "EVENT_SET_DATA_FALSE  phoneId :" + subId[0]
+                    long[] subId = mSubController.getSubId(phoneId);
+                    Rlog.d(LOG__TAG, "EVENT_SET_DATA_FALSE  phoneId :" + subId[0]
                             + ", switchInfo = " + s);
-
-                    If (ar.exception != NULL) {
-                        Rlog->D(LOG_TAG, "Failed, switchInfo = " + s
+                    if (ar.exception != null) {
+                        Rlog.d(LOG__TAG, "Failed, switchInfo = " + s
                                 + " attempt delayed retry");
-                        s->IncRetryCount();
-                        If (s->IsRetryPossible()) {
-                            SomeArgs args = SomeArgs->Obtain();
+                        s.incRetryCount();
+                        if (s.isRetryPossible()) {
+                            SomeArgs args = SomeArgs.obtain();
                             args.arg1 = s;
-                            args.arg2 = FALSE;
-                            SendMessageDelayed(ObtainMessage(EVENT_DELAYED_RETRY, args),
+                            args.arg2 = false;
+                            sendMessageDelayed(obtainMessage(EVENT_DELAYED_RETRY, args),
                                     ATTACH_RETRY_DELAY);
                             return;
                         } else {
-                            Rlog->D(LOG_TAG, "Already did max retries, notify failure");
+                            Rlog.d(LOG__TAG, "Already did max retries, notify failure");
                             errorEx = new RuntimeException("PS DETACH failed");
-                            mNotifyOnDemandDataSwitchInfo->NotifyRegistrants(
-                                    new AsyncResult(NULL, s.mNetworkRequest, errorEx));
+                            mNotifyOnDemandDataSwitchInfo.notifyRegistrants(
+                                    new AsyncResult(null, s.mNetworkRequest, errorEx));
                        }
                     } else {
-                        Rlog->D(LOG_TAG, "PS DETACH success = " + s);
+                        Rlog.d(LOG__TAG, "PS DETACH success = " + s);
                     }
                     break;
                 }
-
                 case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED: {
-                    If(msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-                        Logd("HALF_CONNECTED: Connection successful with DDS switch"
+                    if(msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
+                        logd("HALF_CONNECTED: Connection successful with DDS switch"
                                 + " service");
                         mDdsSwitchPropService = (AsyncChannel) msg.obj;
                     } else {
-                        Logd("HALF_CONNECTED: Connection failed with"
+                        logd("HALF_CONNECTED: Connection failed with"
                                 +" DDS switch service, err = " + msg.arg1);
                     }
                        break;
                 }
-
                 case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
-                    Logd("Connection disconnected with DDS switch service");
-                    mDdsSwitchPropService = NULL;
+                    logd("Connection disconnected with DDS switch service");
+                    mDdsSwitchPropService = null;
                     break;
                 }
         }
-    }
 
-    class DdsSwitchSerializerHandler extends Handler {
-        static const String TAG = "DdsSwitchSerializer";
-
-        public DdsSwitchSerializerHandler(Looper looper) {
-            Super(looper);
-        }
-
-        CARAPI UnLock() {
-            Rlog->D(TAG, "unLock the DdsSwitchSerializer");
-            {    AutoLock syncLock(this);
-                mIsDdsSwitchCompleted = TRUE;
-                Rlog->D(TAG, "unLocked the DdsSwitchSerializer");
-                NotifyAll();
-            }
-
-        }
-
-        public Boolean IsLocked() {
-            {    AutoLock syncLock(this);
-                Rlog->D(TAG, "isLocked = " + !mIsDdsSwitchCompleted);
-                return !mIsDdsSwitchCompleted;
-            }
-
-        }
-
-        //@Override
-        CARAPI HandleMessage (Message msg) {
-            Switch(msg.what) {
-                case EVENT_START_DDS_SWITCH: {
-                    Rlog->D(TAG, "EVENT_START_DDS_SWITCH");
-
-                    try {
-                        {    AutoLock syncLock(this);
-                            While(!mIsDdsSwitchCompleted) {
-                                Rlog->D(TAG, "DDS switch in progress, wait");
-                                Wait();
-                            }
-
-                            Rlog->D(TAG, "Locked!");
-                            mIsDdsSwitchCompleted = FALSE;
-                        }
-                    } Catch (Exception e) {
-                        Rlog->D(TAG, "Exception while serializing the DDS"
-                                + " switch request , e=" + e);
-                        return;
-                    }
-
-                    NetworkRequest n = (NetworkRequest)msg.obj;
-
-                    Rlog->D(TAG, "start the DDS switch for req " + n);
-                    Int64 subId = mSubController->GetSubIdFromNetworkRequest(n);
-
-                    If(subId == mSubController->GetCurrentDds()) {
-                        Rlog->D(TAG, "No change in DDS, respond back");
-                        mIsDdsSwitchCompleted = TRUE;
-                        mNotifyOnDemandDataSwitchInfo->NotifyRegistrants(
-                                new AsyncResult(NULL, n, NULL));
-                        return;
-                    }
-                    Int32 phoneId = mSubController->GetPhoneId(subId);
-                    Int32 prefPhoneId = mSubController->GetPhoneId(
-                            mSubController->GetCurrentDds());
-                    Phone phone = mPhones[prefPhoneId].GetActivePhone();
-                    DcTrackerBase dcTracker =((PhoneBase)phone).mDcTracker;
-                    SwitchInfo s = new SwitchInfo(new Integer(phoneId), n, FALSE, FALSE);
-                    Message dataAllowFalse = Message->Obtain(DctController.this,
-                            EVENT_SET_DATA_ALLOW_FALSE, s);
-                    dcTracker->SetDataAllowed(FALSE, dataAllowFalse);
-                    If (phone->GetPhoneType() == PhoneConstants.PHONE_TYPE_CDMA) {
-                        //cleanup data from apss as there is no detach procedure for CDMA
-                        dcTracker->CleanUpAllConnections("Ondemand DDS switch");
-                    }
-                    mPhones[prefPhoneId].RegisterForAllDataDisconnected(
-                            sDctController, EVENT_ALL_DATA_DISCONNECTED, s);
-                    break;
-                }
-            }
-        }
-    }
-    public Boolean IsDctControllerLocked() {
-        return mDdsSwitchSerializer->IsLocked();
-    }
+#endif
 }
+
+ECode DctController::IsDctControllerLocked(
+    /* [out] */ Boolean* result)
+{
+    return E_NOT_IMPLEMENTED;
+#if 0 // TODO: Translate codes below
+        return mDdsSwitchSerializer.isLocked();
+
+#endif
+}
+
+} // namespace DataConnection
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos
