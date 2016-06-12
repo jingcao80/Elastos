@@ -29,6 +29,7 @@ SOURCES += CallManager.cpp
 SOURCES += DriverCall.cpp
 SOURCES += CallTracker.cpp
 SOURCES += SmsAddress.cpp
+SOURCES += SMSDispatcher.cpp
 SOURCES += SmsHeader.cpp
 SOURCES += CSmsHeaderHelper.cpp
 SOURCES += SmsMessageBase.cpp
