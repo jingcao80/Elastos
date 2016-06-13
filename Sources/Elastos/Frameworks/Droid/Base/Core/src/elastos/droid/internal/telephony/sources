@@ -57,5 +57,6 @@ ELASTOS_LIBS += cat/cat.lib
 ELASTOS_LIBS += cdma/cdma.lib
 ELASTOS_LIBS += imsphone/imsphone.lib
 ELASTOS_LIBS += sip/sip.lib
+ELASTOS_LIBS += uicc/uicc.lib
 ELASTOS_LIBS += utility/utility.lib
 ELASTOS_LIBS += dataconnection/dataconnection.lib

@@ -1,89 +1,103 @@
-/*
- * Copyright (C) 2006, 2012 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony.uicc;
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/telephony/uicc/UsimFileHandler.h"
 
-using Elastos::Droid::Telephony::IRlog;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Uicc {
 
-using Elastos::Droid::Internal::Telephony::ICommandsInterface;
-using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
+//=====================================================================
+//                           UsimFileHandler
+//=====================================================================
+const String UsimFileHandler::LOGTAG("UsimFH");
 
-/**
- * {@hide}
- * This class should be used to access files in USIM ADF
- */
-public class UsimFileHandler extends IccFileHandler implements IccConstants {
-    static const String LOG_TAG = "UsimFH";
-
-    public UsimFileHandler(UiccCardApplication app, String aid, CommandsInterface ci) {
-        Super(app, aid, ci);
-    }
-
-    //@Override
-    protected String GetEFPath(Int32 efid) {
-        Switch(efid) {
-        case EF_SMS:
-        case EF_EXT6:
-        case EF_EXT5:
-        case EF_MWIS:
-        case EF_MBI:
-        case EF_SPN:
-        case EF_AD:
-        case EF_MBDN:
-        case EF_PNN:
-        case EF_OPL:
-        case EF_SPDI:
-        case EF_SST:
-        case EF_CFIS:
-        case EF_MAILBOX_CPHS:
-        case EF_VOICE_MAIL_INDICATOR_CPHS:
-        case EF_CFF_CPHS:
-        case EF_SPN_CPHS:
-        case EF_SPN_SHORT_CPHS:
-        case EF_FDN:
-        case EF_MSISDN:
-        case EF_EXT2:
-        case EF_INFO_CPHS:
-        case EF_CSP_CPHS:
-        case EF_GID1:
-        case EF_LI:
-        case EF_PLMNWACT:
-            return MF_SIM + DF_ADF;
-
-        case EF_PBR:
-            // we only support global phonebook.
-            return MF_SIM + DF_TELECOM + DF_PHONEBOOK;
-        }
-        String path = GetCommonIccEFPath(efid);
-        If (path == NULL) {
-            // The EFids in USIM phone book entries are decided by the card manufacturer.
-            // So if we don't match any of the cases above and if its a USIM return
-            // the phone book path.
-            return MF_SIM + DF_TELECOM + DF_PHONEBOOK;
-        }
-        return path;
-    }
-
-    //@Override
-    protected void Logd(String msg) {
-        Rlog->D(LOG_TAG, msg);
-    }
-
-    //@Override
-    protected void Loge(String msg) {
-        Rlog->E(LOG_TAG, msg);
-    }
+UsimFileHandler::UsimFileHandler()
+{
 }
+
+ECode UsimFileHandler::constructor(
+    /* [in] */ IUiccCardApplication* app,
+    /* [in] */ const String& aid,
+    /* [in] */ ICommandsInterface* ci)
+{
+    // ==================before translated======================
+    // super(app, aid, ci);
+    return NOERROR;
+}
+
+ECode UsimFileHandler::GetEFPath(
+    /* [in] */ Int32 efid,
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // ==================before translated======================
+    // switch(efid) {
+    // case EF_SMS:
+    // case EF_EXT6:
+    // case EF_EXT5:
+    // case EF_MWIS:
+    // case EF_MBI:
+    // case EF_SPN:
+    // case EF_AD:
+    // case EF_MBDN:
+    // case EF_PNN:
+    // case EF_OPL:
+    // case EF_SPDI:
+    // case EF_SST:
+    // case EF_CFIS:
+    // case EF_MAILBOX_CPHS:
+    // case EF_VOICE_MAIL_INDICATOR_CPHS:
+    // case EF_CFF_CPHS:
+    // case EF_SPN_CPHS:
+    // case EF_SPN_SHORT_CPHS:
+    // case EF_FDN:
+    // case EF_MSISDN:
+    // case EF_EXT2:
+    // case EF_INFO_CPHS:
+    // case EF_CSP_CPHS:
+    // case EF_GID1:
+    // case EF_LI:
+    // case EF_PLMNWACT:
+    //     return MF_SIM + DF_ADF;
+    //
+    // case EF_PBR:
+    //     // we only support global phonebook.
+    //     return MF_SIM + DF_TELECOM + DF_PHONEBOOK;
+    // }
+    // String path = getCommonIccEFPath(efid);
+    // if (path == null) {
+    //     // The EFids in USIM phone book entries are decided by the card manufacturer.
+    //     // So if we don't match any of the cases above and if its a USIM return
+    //     // the phone book path.
+    //     return MF_SIM + DF_TELECOM + DF_PHONEBOOK;
+    // }
+    // return path;
+    assert(0);
+    return NOERROR;
+}
+
+ECode UsimFileHandler::Logd(
+    /* [in] */ const String& msg)
+{
+    // ==================before translated======================
+    // Rlog.d(LOGTAG, msg);
+    assert(0);
+    return NOERROR;
+}
+
+ECode UsimFileHandler::Loge(
+    /* [in] */ const String& msg)
+{
+    // ==================before translated======================
+    // Rlog.e(LOGTAG, msg);
+    assert(0);
+    return NOERROR;
+}
+
+} // namespace Uicc
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

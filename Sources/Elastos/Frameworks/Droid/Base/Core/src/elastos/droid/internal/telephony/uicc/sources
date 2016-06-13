@@ -1,0 +1,44 @@
+TARGET_NAME= uicc
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = AdnRecord.cpp
+SOURCES += AdnRecordCache.cpp
+SOURCES += AdnRecordLoader.cpp
+SOURCES += CsimFileHandler.cpp
+SOURCES += IccCardApplicationStatus.cpp
+SOURCES += IccCardProxy.cpp
+SOURCES += IccCardStatus.cpp
+SOURCES += IccException.cpp
+SOURCES += IccFileHandler.cpp
+SOURCES += IccFileNotFound.cpp
+SOURCES += IccFileTypeMismatch.cpp
+SOURCES += IccIoResult.cpp
+SOURCES += IccRecords.cpp
+SOURCES += IccRefreshResponse.cpp
+SOURCES += IccServiceTable.cpp
+SOURCES += IccUtils.cpp
+SOURCES += IccVmFixedException.cpp
+SOURCES += IccVmNotSupportedException.cpp
+SOURCES += IsimFileHandler.cpp
+SOURCES += IsimUiccRecords.cpp
+SOURCES += RuimFileHandler.cpp
+SOURCES += RuimRecords.cpp
+SOURCES += SIMFileHandler.cpp
+SOURCES += SIMRecords.cpp
+SOURCES += SpnOverride.cpp
+SOURCES += UICCConfig.cpp
+SOURCES += UiccCard.cpp
+SOURCES += UiccCardApplication.cpp
+SOURCES += UiccCarrierPrivilegeRules.cpp
+SOURCES += UiccController.cpp
+SOURCES += UiccTlvData.cpp
+SOURCES += UsimFileHandler.cpp
+SOURCES += UsimServiceTable.cpp
+SOURCES += VoiceMailConstants.cpp
