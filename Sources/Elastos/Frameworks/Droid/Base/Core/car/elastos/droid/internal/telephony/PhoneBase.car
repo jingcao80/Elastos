@@ -3,6 +3,7 @@ module
 {
     interface Elastos.Droid.Os.IHandler;
     interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Os.IRegistrantList;
     interface Elastos.Droid.Internal.Telephony.IServiceStateTracker;
     enum Elastos.Droid.Internal.Telephony.PhoneConstantsDataState;
     enum Elastos.Droid.Internal.Telephony.Uicc.AppType;
@@ -102,9 +103,9 @@ module
         MigrateFrom(
             [in] IPhoneBase* from);
 
-        // Migrate(
-        //    [in] IRegistrantList* to,
-        //    [in] IRegistrantList* from);
+        Migrate(
+           [in] IRegistrantList* to,
+           [in] IRegistrantList* from);
 
         RegisterForSimRecordsLoaded(
             [in] IHandler* h,
@@ -278,6 +279,8 @@ module
             [in] ICall* call,
             [out] Int32* result);
     }
+
+    interface IPhoneBaseNetworkSelectMessage {}
 
     }//Telephony
     }//Internal

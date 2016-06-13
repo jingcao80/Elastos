@@ -4,6 +4,7 @@
 
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Preference.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/List.h>

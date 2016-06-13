@@ -37,7 +37,7 @@ module
             [in] IPhone* sender,
             [in] String reason,
             [in] String apnType,
-            [in] PhoneConstantsDataState* state);
+            [in] PhoneConstantsDataState state);
 
         NotifyDataConnectionFailed(
             [in] IPhone* sender,

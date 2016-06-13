@@ -43,6 +43,15 @@ public:
             /* [out] */ Boolean* result);
 
         /**
+         * Whether the video state is any of the video type
+         * @param videoState The video state.
+         * @return Returns true if the video state TX or RX or Bidirectional
+         */
+        static CARAPI IsVideo(
+            /* [in] */ Int32 videoState,
+            /* [out] */ Boolean* result);
+
+        /**
          * Whether the video transmission is enabled.
          * @param videoState The video state.
          * @return Returns true if the video transmission is enabled.

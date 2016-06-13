@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_DROID_OS_REGISTRANTLIST_H__
 #define __ELASTOS_DROID_OS_REGISTRANTLIST_H__
 
+#include "_Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/os/AsyncResult.h"
@@ -16,8 +17,11 @@ namespace Os {
 /** @hide */
 class RegistrantList
     : public Object
+    , public IRegistrantList
 {
 public:
+    CAR_INTERFACE_DECL()
+
     RegistrantList();
 
     //synchronized

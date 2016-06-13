@@ -11,6 +11,7 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
+CAR_INTERFACE_IMPL(RegistrantList, Object, IRegistrantList)
 RegistrantList::RegistrantList()
 {
     CArrayList::New((IArrayList**)&mRegistrants);

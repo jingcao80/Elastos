@@ -143,6 +143,9 @@ public:
         /* [in] */ Int32 type2,
         /* [in] */ Int32* result);
 
+    /** Clear the SMS application list for disposal. */
+    void Dispose();
+
 private:
     /**
      * Return a pattern matcher object for the specified country.
@@ -158,9 +161,6 @@ private:
     AutoPtr<ShortCodePatternMatcher> GetPatternMatcherFromXmlParser(
         /* [in] */ IXmlPullParser* parser,
         /* [in] */ const String& country);
-
-    /** Clear the SMS application list for disposal. */
-    void Dispose();
 
     /**
      * Load the premium SMS policy from an XML file.

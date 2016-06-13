@@ -59,6 +59,10 @@ public:
         /* [in] */ IPrintWriter* pw,
         /* [in] */ ArrayOf<String>* args);
 
+    virtual CARAPI_(void) NotifySrvccState(
+        /* [in] */ ICallSrvccState state,
+        /* [in] */ IArrayList* c);
+
 protected:
     virtual CARAPI_(void) PollCallsWhenSafe();
 
@@ -72,10 +76,6 @@ protected:
 
     virtual CARAPI_(AutoPtr<IConnection>) GetHoConnection(
         /* [in] */ DriverCall* dc);
-
-    virtual CARAPI_(void) NotifySrvccState(
-        /* [in] */ ICallSrvccState state,
-        /* [in] */ IArrayList* c);
 
     virtual CARAPI_(void) HandleRadioAvailable();
 

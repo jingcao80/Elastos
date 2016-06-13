@@ -24,6 +24,17 @@ ECode VideoProfile::VideoState::IsAudioOnly(
     return NOERROR;
 }
 
+ECode VideoProfile::VideoState::IsVideo(
+    /* [in] */ Int32 videoState,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Boolean v = FALSE;
+    *result = (HasState(videoState, TX_ENABLED, &v), v) || (HasState(videoState, RX_ENABLED, &v), v)
+            || (HasState(videoState, BIDIRECTIONAL, &v), v);
+    return NOERROR;
+}
+
 ECode VideoProfile::VideoState::IsTransmissionEnabled(
     /* [in] */ Int32 videoState,
     /* [out] */ Boolean* result)

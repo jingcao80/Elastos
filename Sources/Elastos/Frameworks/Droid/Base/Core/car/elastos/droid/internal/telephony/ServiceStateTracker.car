@@ -30,6 +30,8 @@ module
         /** Waiting period before recheck gprs and voice registration. */
         const Int32 DEFAULT_GPRS_CHECK_PERIOD_MILLIS = 60 * 1000;
 
+        RequestShutdown();
+
         Dispose();
 
         GetDesiredPowerState(
