@@ -124,7 +124,7 @@ using Elastos::Core::ISystem;
 using Elastos::Core::StringBuilder;
 
 #ifndef TRACE_IN_TERMINAL
-#define TRACE_IN_TERMINAL          1
+#define TRACE_IN_TERMINAL          0
 #endif
 
 namespace Elastos {
@@ -3867,7 +3867,7 @@ void ViewRootImpl::Draw(
         if (mAttachInfo->mHardwareRenderer) {
             mAttachInfo->mHardwareRenderer->IsEnabled(&isHardwareRenderEnable);
         }
-        Logger::I(TAG, "%s Draw with hardware renderer : %d", TO_CSTR(mView), isHardwareRenderEnable);
+        // Logger::I(TAG, "%s Draw with hardware renderer : %d", TO_CSTR(mView), isHardwareRenderEnable);
         if (isHardwareRenderEnable) {
             // Draw with hardware renderer.
             mIsAnimating = FALSE;
@@ -3892,6 +3892,7 @@ void ViewRootImpl::Draw(
             ((HardwareRenderer*)mAttachInfo->mHardwareRenderer.Get())->Draw(mView, mAttachInfo, this);
         }
         else {
+            // Logger::I(TAG, "%s Draw with DrawSoftware", TO_CSTR(mView));
             // If we get here with a disabled & requested hardware renderer, something went
             // wrong (an invalidate posted right before we destroyed the hardware surface
             // for instance) so we should just bail out. Locking the surface with software

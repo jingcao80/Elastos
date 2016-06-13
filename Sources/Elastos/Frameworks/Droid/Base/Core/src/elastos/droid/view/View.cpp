@@ -11172,7 +11172,6 @@ ECode View::DispatchAttachedToWindow(
     if (mID == 0x7F0E00BF) {
         Logger::I(TAG, " >>> DispatchAttachedToWindow: %s, info->mHardwareAccelerated:",
             TO_CSTR(info), info->mHardwareAccelerated);
-        assert(0);
     }
     //System.out.println("Attached! " + this);
     mAttachInfo = info;
@@ -12630,12 +12629,11 @@ Boolean View::Draw(
     /* [in] */ Int64 drawingTime)
 {
     Boolean usingRenderNodeProperties = mAttachInfo != NULL && mAttachInfo->mHardwareAccelerated;
-    Logger::D(TAG, " >>>>>>>> Draw %s", TO_CSTR(this));
-    // if (mID == 0x7F0E00BF)
-    {
-        Logger::D(TAG, " >>>>>>> Draw usingRenderNodeProperties: mAttachInfo: %s, mHardwareAccelerated: %d",
-            TO_CSTR(mAttachInfo), mAttachInfo != NULL ? mAttachInfo->mHardwareAccelerated : 0);
-    }
+    // if (mID == 0x7F0E00BF) {
+    //     Logger::D(TAG, " >>>>>>>> Draw %s", TO_CSTR(this));
+    //     Logger::D(TAG, " >>>>>>> Draw usingRenderNodeProperties: mAttachInfo: %s, mHardwareAccelerated: %d",
+    //         TO_CSTR(mAttachInfo), mAttachInfo != NULL ? mAttachInfo->mHardwareAccelerated : 0);
+    // }
     Boolean more = FALSE;
     const Boolean childHasIdentityMatrix = HasIdentityMatrix();
     ViewGroup* parent = (ViewGroup*)parentObj;
@@ -12759,11 +12757,10 @@ Boolean View::Draw(
     }
 
     usingRenderNodeProperties &= hasDisplayList;
-    // if (mID == 0x7F0E00BF)
-    {
-        Logger::D(TAG, " >>>>>>> GetDisplayList: usingRenderNodeProperties:%d, hasDisplayList:%d",
-            usingRenderNodeProperties, hasDisplayList);
-    }
+    // if (mID == 0x7F0E00BF) {
+    //     Logger::D(TAG, " >>>>>>> GetDisplayList: usingRenderNodeProperties:%d, hasDisplayList:%d",
+    //         usingRenderNodeProperties, hasDisplayList);
+    // }
     if (usingRenderNodeProperties) {
         GetDisplayList((IRenderNode**)&renderNode);
         assert(renderNode != NULL);
