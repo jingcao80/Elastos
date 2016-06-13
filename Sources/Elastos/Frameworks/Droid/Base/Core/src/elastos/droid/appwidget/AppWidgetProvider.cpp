@@ -32,7 +32,7 @@ ECode AppWidgetProvider::OnReceive(
                     IAppWidgetManager::EXTRA_APPWIDGET_IDS, (ArrayOf<Int32>**)&appWidgetIds);
             if (appWidgetIds != NULL && appWidgetIds->GetLength() > 0) {
                 AutoPtr<IAppWidgetManager> manager = AppWidgetManager::GetInstance(context);
-                OnUpdate(context, manager, *appWidgetIds);
+                OnUpdate(context, manager, appWidgetIds);
             }
         }
     }
@@ -45,7 +45,7 @@ ECode AppWidgetProvider::OnReceive(
             extras->GetInt32(IAppWidgetManager::EXTRA_APPWIDGET_ID, &appWidgetId);
             AutoPtr< ArrayOf<Int32> > idsArray = ArrayOf<Int32>::Alloc(1);
             (*idsArray)[0] = appWidgetId;
-            OnDeleted(context, *idsArray);
+            OnDeleted(context, idsArray);
         }
     }
     else if (IAppWidgetManager::ACTION_APPWIDGET_OPTIONS_CHANGED.Equals(action)) {
@@ -81,7 +81,7 @@ ECode AppWidgetProvider::OnReceive(
             if (oldIds != NULL && oldIds->GetLength() > 0) {
                 OnRestored(context, oldIds, newIds);
                 AutoPtr<IAppWidgetManager> manager = AppWidgetManager::GetInstance(context);
-                OnUpdate(context, manager, *newIds);
+                OnUpdate(context, manager, newIds);
             }
         }
     }
@@ -92,7 +92,7 @@ ECode AppWidgetProvider::OnReceive(
 ECode AppWidgetProvider::OnUpdate(
     /* [in] */ IContext* context,
     /* [in] */ IAppWidgetManager* appWidgetManager,
-    /* [in] */ const ArrayOf<Int32>& appWidgetIds)
+    /* [in] */ ArrayOf<Int32>* appWidgetIds)
 {
     return NOERROR;
 }
@@ -108,7 +108,7 @@ ECode AppWidgetProvider::OnAppWidgetOptionsChanged(
 
 ECode AppWidgetProvider::OnDeleted(
     /* [in] */ IContext* context,
-    /* [in] */ const ArrayOf<Int32>& appWidgetIds)
+    /* [in] */ ArrayOf<Int32>* appWidgetIds)
 {
     return NOERROR;
 }

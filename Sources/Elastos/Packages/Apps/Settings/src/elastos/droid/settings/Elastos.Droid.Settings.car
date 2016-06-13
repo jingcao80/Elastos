@@ -14,6 +14,7 @@ module
     merge("../../../../car/elastos/droid/search/IndexDatabaseHelper.car");
     merge("../../../../car/elastos/droid/search/SearchIndexableRaw.car");
     merge("../../../../car/elastos/droid/widget/ChartAxis.car");
+    merge("../../../../car/elastos/droid/widget/SettingsAppWidgetProvider.car");
     merge("../../../../car/elastos/droid/widget/SwitchBar.car");
     merge("../../../../car/elastos/droid/widget/ToggleSwitch.car");
     merge("../../../../car/elastos/droid/wifi/AccessPoint.car");
@@ -26,6 +27,8 @@ module
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IFragment;
     using interface Elastos.Droid.App.IFragmentManagerOnBackStackChangedListener;
+    using interface Elastos.Droid.AppWidget.IAppWidgetProvider;
+    using interface Elastos.Droid.Content.IBroadcastReceiver;
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Content.IComponentCallbacks;
@@ -37,10 +40,10 @@ module
     using interface Elastos.Droid.Preference.IPreferenceFragment;
     using interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener;
     using interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
-    using interface Elastos.Droid.Utility.IAttributeSet;
     using interface Elastos.Droid.Settings.IDialogCreatable;
     using interface Elastos.Droid.Settings.Search.IIndexable;
     using interface Elastos.Droid.Settings.ISettingsPreferenceFragment;
+    using interface Elastos.Droid.Utility.IAttributeSet;
     using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
     using interface Elastos.Droid.View.IAbsSavedState;
     using interface Elastos.Droid.View.IKeyEventCallback;
@@ -155,6 +158,14 @@ module
     namespace Droid {
     namespace Settings {
     namespace Widget {
+
+    class CSettingsAppWidgetProvider {
+        constructor();
+
+        interface ISettingsAppWidgetProvider;
+        interface IAppWidgetProvider;
+        interface IBroadcastReceiver;
+    }
 
     [local]
     class CSwitchBar {

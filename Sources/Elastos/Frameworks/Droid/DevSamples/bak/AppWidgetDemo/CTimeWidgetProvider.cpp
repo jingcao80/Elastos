@@ -17,7 +17,7 @@ printf("File=[%s], Func=[%s], line=[%d] ======================== . \n", __FILE__
 ECode CTimeWidgetProvider::OnUpdate(
     /* [in] */ IContext* context,
     /* [in] */ IAppWidgetManager* appWidgetManager,
-    /* [in] */ const ArrayOf<Int32>& appWidgetIds)
+    /* [in] */ ArrayOf<Int32>* appWidgetIds)
 {
     printf("File=[%s], Func=[%s], line=[%d] ======================== . \n", __FILE__, __FUNCTION__, __LINE__);
     return NOERROR;
@@ -25,7 +25,7 @@ ECode CTimeWidgetProvider::OnUpdate(
 
 ECode CTimeWidgetProvider::OnDeleted(
     /* [in] */ IContext* context,
-    /* [in] */ const ArrayOf<Int32>& appWidgetIds)
+    /* [in] */ ArrayOf<Int32>* appWidgetIds)
 {
     printf("File=[%s], Func=[%s], line=[%d] ======================== . \n", __FILE__, __FUNCTION__, __LINE__);
     return NOERROR;

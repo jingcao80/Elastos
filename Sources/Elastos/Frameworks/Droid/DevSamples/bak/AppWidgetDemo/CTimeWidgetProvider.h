@@ -21,11 +21,11 @@ public:
     CARAPI OnUpdate(
         /* [in] */ IContext* context,
         /* [in] */ IAppWidgetManager* appWidgetManager,
-        /* [in] */ const ArrayOf<Int32>& appWidgetIds);
+        /* [in] */ ArrayOf<Int32>* appWidgetIds);
 
     CARAPI OnDeleted(
         /* [in] */ IContext* context,
-        /* [in] */ const ArrayOf<Int32>& appWidgetIds);
+        /* [in] */ ArrayOf<Int32>* appWidgetIds);
 
     CARAPI OnEnabled(
         /* [in] */ IContext* context);

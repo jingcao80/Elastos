@@ -94,10 +94,7 @@ public:
     CARAPI GetCount(
         /* [out] */ Int32* count);
 
-    CARAPI GetItem(
-        /* [in] */ Int32 position,
-        /* [out] */ IPreference** item);
-
+    // override
     CARAPI GetItem(
         /* [in] */ Int32 position,
         /* [out] */ IInterface** item);

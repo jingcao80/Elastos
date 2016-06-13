@@ -54,7 +54,7 @@ module
         OnUpdate(
             [in] IContext* ctx,
             [in] IAppWidgetManager* appWidgetManager,
-            [in] ArrayOf<Int32> appWidgetIds);
+            [in] ArrayOf<Int32>* appWidgetIds);
 
         /**
          * Called in response to the {@sa AppWidgetManager#ACTION_APPWIDGET_OPTIONS_CHANGED}
@@ -92,7 +92,7 @@ module
          */
         OnDeleted(
             [in] IContext* ctx,
-            [in] ArrayOf<Int32> appWidgetIds);
+            [in] ArrayOf<Int32>* appWidgetIds);
 
         /**
          * Called in response to the {@sa AppWidgetManager#ACTION_APPWIDGET_ENABLED} broadcast when

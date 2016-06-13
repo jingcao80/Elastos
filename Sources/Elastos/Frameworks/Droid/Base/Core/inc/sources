@@ -24,7 +24,7 @@ EXPORT_HEADERS += elastos/droid/app/IntentService.h
 EXPORT_HEADERS += elastos/droid/app/job/JobService.h
 //EXPORT_HEADERS += elastos/droid/app/backup/BackupAgent.h
 //EXPORT_HEADERS += elastos/droid/app/backup/BackupAgentHelper.h
-//EXPORT_HEADERS += elastos/droid/appwidget/AppWidgetProvider.h
+EXPORT_HEADERS += elastos/droid/appwidget/AppWidgetProvider.h
 EXPORT_HEADERS += elastos/droid/appwidget/AppWidgetHost.h
 EXPORT_HEADERS += elastos/droid/appwidget/AppWidgetHostView.h
 

@@ -133,30 +133,26 @@ ECode WifiDialog::GetContext(
     /* [out] */ IContext** context)
 {
     VALIDATE_NOT_NULL(context)
-    assert(0 && "TODO");
-    return NOERROR;
+    return AlertDialog::GetContext(context);
 }
 
 ECode WifiDialog::SetTitle(
     /* [in] */ Int32 id)
 {
-    Logger::D("WifiDialog", "Ignoring setTitle");
-    return NOERROR;
+    return AlertDialog::SetTitle(id);
 }
 
 ECode WifiDialog::SetTitle(
     /* [in] */ ICharSequence* title)
 {
-    Logger::D("WifiDialog", "Ignoring setTitle");
-    return NOERROR;
+    return AlertDialog::SetTitle(title);
 }
 
 ECode WifiDialog::GetLayoutInflater(
     /* [out] */ ILayoutInflater** inflater)
 {
     VALIDATE_NOT_NULL(inflater);
-    assert(0 && "TODO");
-    return NOERROR;
+    return AlertDialog::GetLayoutInflater(inflater);
 }
 
 } // namespace Wifi

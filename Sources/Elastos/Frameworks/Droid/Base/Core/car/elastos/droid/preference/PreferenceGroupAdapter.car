@@ -42,10 +42,6 @@ module
         GetCount(
             [out] Int32* result);
 
-        GetItem(
-            [in] Int32 position,
-            [out] IPreference** result);
-
         GetItemId(
             [in] Int32 position,
             [out] Int64* result);

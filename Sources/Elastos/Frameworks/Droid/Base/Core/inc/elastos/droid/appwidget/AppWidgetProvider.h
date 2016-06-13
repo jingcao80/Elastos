@@ -34,7 +34,7 @@ namespace AppWidget {
  * developer guide.</p>
  * </div>
  */
-class AppWidgetProvider
+class ECO_PUBLIC AppWidgetProvider
     : public BroadcastReceiver
     , public IAppWidgetProvider
 {
@@ -83,7 +83,7 @@ public:
     CARAPI OnUpdate(
         /* [in] */ IContext* context,
         /* [in] */ IAppWidgetManager* appWidgetManager,
-        /* [in] */ const ArrayOf<Int32>& appWidgetIds);
+        /* [in] */ ArrayOf<Int32>* appWidgetIds);
 
     /**
      * Called in response to the {@link AppWidgetManager#ACTION_APPWIDGET_OPTIONS_CHANGED}
@@ -121,7 +121,7 @@ public:
      */
     CARAPI OnDeleted(
         /* [in] */ IContext* context,
-        /* [in] */ const ArrayOf<Int32>& appWidgetIds);
+        /* [in] */ ArrayOf<Int32>* appWidgetIds);
 
     /**
      * Called in response to the {@link AppWidgetManager#ACTION_APPWIDGET_ENABLED} broadcast when

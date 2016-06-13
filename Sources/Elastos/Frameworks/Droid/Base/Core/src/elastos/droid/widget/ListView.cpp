@@ -1442,6 +1442,12 @@ ECode ListView::LayoutChildren()
     if (mAdapter == NULL) {
         ResetList();
         InvokeOnItemScrollListener();
+
+        // finally
+        if (!blockLayoutRequests) {
+            mBlockLayoutRequests = FALSE;
+        }
+
         return NOERROR;
     }
 
@@ -1497,6 +1503,12 @@ ECode ListView::LayoutChildren()
     if (mItemCount == 0) {
         ResetList();
         InvokeOnItemScrollListener();
+
+        // finally
+        if (!blockLayoutRequests) {
+            mBlockLayoutRequests = FALSE;
+        }
+
         return NOERROR;
     }
     else if (mItemCount != adaCount) {
@@ -1505,6 +1517,12 @@ ECode ListView::LayoutChildren()
             "your adapter is not modified from a background thread, but only " \
             "from the UI thread. Make sure your adapter calls notifyDataSetChanged() " \
             "when its content changes. [in ListView(0x%08x), with Adapter(%p)]", mID, mAdapter.Get());
+
+        // finally
+        if (!blockLayoutRequests) {
+            mBlockLayoutRequests = FALSE;
+        }
+
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     SetSelectedPositionInt(mNextSelectedPosition);

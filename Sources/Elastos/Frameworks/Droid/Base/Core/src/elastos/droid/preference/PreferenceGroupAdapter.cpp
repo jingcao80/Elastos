@@ -285,13 +285,12 @@ ECode PreferenceGroupAdapter::GetCount(
     /* [out] */ Int32* count)
 {
     VALIDATE_NOT_NULL(count)
-    mPreferenceList->GetSize(count);
-    return NOERROR;
+    return mPreferenceList->GetSize(count);
 }
 
 ECode PreferenceGroupAdapter::GetItem(
     /* [in] */ Int32 position,
-    /* [out] */ IPreference** item)
+    /* [out] */ IInterface** item)
 {
     VALIDATE_NOT_NULL(item)
     Int32 count;
@@ -301,15 +300,8 @@ ECode PreferenceGroupAdapter::GetItem(
     }
     AutoPtr<IInterface> obj;
     mPreferenceList->Get(position, (IInterface**)&obj);
-    *item = IPreference::Probe(obj);
+    *item = obj;
     REFCOUNT_ADD(*item)
-    return NOERROR;
-}
-
-ECode PreferenceGroupAdapter::GetItem(
-    /* [in] */ Int32 position,
-    /* [out] */ IInterface** item)
-{
     return NOERROR;
 }
 
@@ -323,9 +315,9 @@ ECode PreferenceGroupAdapter::GetItemId(
         *id = IAdapterView::INVALID_ROW_ID;
         return NOERROR;
     }
-    AutoPtr<IPreference> p;
-    GetItem(position, (IPreference**)&p);
-    return p->GetId(id);
+    AutoPtr<IInterface> p;
+    GetItem(position, (IInterface**)&p);
+    return IPreference::Probe(p)->GetId(id);
 }
 
 ECode PreferenceGroupAdapter::SetHighlighted(
@@ -350,8 +342,9 @@ ECode PreferenceGroupAdapter::GetView(
 {
     VALIDATE_NOT_NULL(view)
 
-    AutoPtr<IPreference> preference;
-    GetItem(position, (IPreference**)&preference);
+    AutoPtr<IInterface> obj;
+    GetItem(position, (IInterface**)&obj);
+    AutoPtr<IPreference> preference = IPreference::Probe(obj);
     // Build a PreferenceLayout to compare with known ones that are cacheable.
     mTempPreferenceLayout = CreatePreferenceLayout(preference, mTempPreferenceLayout);
 
@@ -392,9 +385,9 @@ ECode PreferenceGroupAdapter::IsEnabled(
         *enabled = TRUE;
         return NOERROR;
     }
-    AutoPtr<IPreference> p;
-    GetItem(position, (IPreference**)&p);
-    return p->IsSelectable(enabled);
+    AutoPtr<IInterface> p;
+    GetItem(position, (IInterface**)&p);
+    return IPreference::Probe(p)->IsSelectable(enabled);
 }
 
 ECode PreferenceGroupAdapter::AreAllItemsEnabled(
@@ -450,8 +443,9 @@ ECode PreferenceGroupAdapter::GetItemViewType(
         mHasReturnedViewTypeCount = TRUE;
     }
 
-    AutoPtr<IPreference> preference;
-    GetItem(position, (IPreference**)&preference);
+    AutoPtr<IInterface> obj;
+    GetItem(position, (IInterface**)&obj);
+    AutoPtr<IPreference> preference = IPreference::Probe(obj);
     Boolean canRecycleLayout;
     if (preference->CanRecycleLayout(&canRecycleLayout), !canRecycleLayout) {
         *type = IAdapter::IGNORE_ITEM_VIEW_TYPE;
@@ -467,8 +461,10 @@ ECode PreferenceGroupAdapter::GetItemViewType(
     if (viewType < 0) {
         // This is a class that was seen after we returned the count, so
         // don't recycle it.
-        return IAdapter::IGNORE_ITEM_VIEW_TYPE;
-    } else {
+        *type = IAdapter::IGNORE_ITEM_VIEW_TYPE;
+        return NOERROR;
+    }
+    else {
         *type = viewType;
         return NOERROR;
     }
