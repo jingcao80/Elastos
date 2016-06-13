@@ -3,4 +3,5 @@ DIRS += cdma
 DIRS += dataconnection
 DIRS += imsphone
 DIRS += sip
+DIRS += uicc
 DIRS += utility

@@ -105,7 +105,8 @@ const Int32 SIMRecords::EVENT_GET_CFIS_DONE;
 const Int32 SIMRecords::EVENT_GET_CSP_CPHS_DONE;
 const Int32 SIMRecords::EVENT_GET_GID1_DONE;
 const Int32 SIMRecords::EVENT_APP_LOCKED;
-AutoPtr<ArrayOf<String> > SIMRecords::MCCMNC_CODES_HAVING_3DIGITS_MNC = SIMRecords::MiddleInitMccmncCodesHaving3digitsMnc();
+// TODO:
+// AutoPtr<ArrayOf<String> > SIMRecords::MCCMNC_CODES_HAVING_3DIGITS_MNC = SIMRecords::MiddleInitMccmncCodesHaving3digitsMnc();
 
 SIMRecords::SIMRecords()
 {
