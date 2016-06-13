@@ -2,6 +2,7 @@
 #include "elastos/droid/systemui/recents/views/TaskStackView.h"
 #include "elastos/droid/systemui/recents/Constants.h"
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::View::CMotionEventHelper;
 using Elastos::Droid::View::IMotionEventHelper;
@@ -12,12 +13,15 @@ using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::CVelocityTrackerHelper;
 using Elastos::Droid::View::IVelocityTrackerHelper;
 using Elastos::Droid::View::IVelocityTracker;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Recents {
 namespace Views {
+
+static const String TAG("TaskStackViewTouchHandler");
 
 CAR_INTERFACE_IMPL(TaskStackViewTouchHandler::CallBack, Object, ISwipeHelperCallback)
 
@@ -94,9 +98,10 @@ TaskStackViewTouchHandler::TaskStackViewTouchHandler(
     Int32 pagingTouchSlop;
     configuration->GetScaledPagingTouchSlop(&pagingTouchSlop);
     mPagingTouchSlop = pagingTouchSlop;
-    mSv = sv;
     mScroller = scroller;
     mConfig = config;
+
+    sv->GetWeakReference((IWeakReference**)&mWeakTaskStackView);
 
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
@@ -107,6 +112,17 @@ TaskStackViewTouchHandler::TaskStackViewTouchHandler(
     mCallback = new CallBack(this);
     mSwipeHelper = new SwipeHelper(SwipeHelper::X, mCallback, densityScale, mPagingTouchSlop);
     mSwipeHelper->SetMinAlpha(1.0f);
+}
+
+AutoPtr<TaskStackView> TaskStackViewTouchHandler::GetTaskStackView()
+{
+    AutoPtr<ITaskStackView> tsv;
+    mWeakTaskStackView->Resolve(EIID_ITaskStackView, (IInterface**)&tsv);
+    if (tsv != NULL) {
+        AutoPtr<TaskStackView> statckView = (TaskStackView*)tsv.Get();
+        return statckView;
+    }
+    return NULL;
 }
 
 /** Velocity tracker helpers */
@@ -144,16 +160,17 @@ AutoPtr<TaskView> TaskStackViewTouchHandler::FindViewAtPoint(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y)
 {
+    AutoPtr<TaskStackView> statckView = GetTaskStackView();
     Int32 childCount;
-    mSv->GetChildCount(&childCount);
+    statckView->GetChildCount(&childCount);
     for (Int32 i = childCount - 1; i >= 0; i--) {
         AutoPtr<IView> view;
-        mSv->GetChildAt(i, (IView**)&view);
+        statckView->GetChildAt(i, (IView**)&view);
         TaskView* tv = (TaskView*)ITaskView::Probe(view);
         Int32 visibility;
         tv->GetVisibility(&visibility);
         if (visibility == IView::VISIBLE) {
-            if (mSv->IsTransformedTouchPointInView(x, y, tv)) {
+            if (statckView->IsTransformedTouchPointInView(x, y, tv)) {
                 return tv;
             }
         }
@@ -177,9 +194,10 @@ AutoPtr<IMotionEvent> TaskStackViewTouchHandler::CreateMotionEventForStackScroll
 Boolean TaskStackViewTouchHandler::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* ev)
 {
+    AutoPtr<TaskStackView> stackView = GetTaskStackView();
     // Return early if we have no children
     Int32 childCount;
-    mSv->GetChildCount(&childCount);
+    stackView->GetChildCount(&childCount);
     Boolean hasChildren = (childCount > 0);
     if (!hasChildren) {
         return FALSE;
@@ -204,7 +222,7 @@ Boolean TaskStackViewTouchHandler::OnInterceptTouchEvent(
             ev->GetY(&y);
             mInitialMotionX = mLastMotionX = (Int32)x;
             mInitialMotionY = mLastMotionY = (Int32)y;
-            mInitialP = mLastP = mSv->mLayoutAlgorithm->ScreenYToCurveProgress(mLastMotionY);
+            mInitialP = mLastP = stackView->mLayoutAlgorithm->ScreenYToCurveProgress(mLastMotionY);
             ev->GetPointerId(0, &mActivePointerId);
             mActiveTaskView = FindViewAtPoint(mLastMotionX, mLastMotionY);
             // Stop the current scroll if it is still flinging
@@ -235,7 +253,7 @@ Boolean TaskStackViewTouchHandler::OnInterceptTouchEvent(
                 mVelocityTracker->AddMovement(CreateMotionEventForStackScroll(ev));
                 // Disallow parents from intercepting touch events
                 AutoPtr<IViewParent> parent;
-                mSv->GetParent((IViewParent**)&parent);
+                stackView->GetParent((IViewParent**)&parent);
                 if (parent != NULL) {
                     parent->RequestDisallowInterceptTouchEvent(TRUE);
                 }
@@ -243,7 +261,7 @@ Boolean TaskStackViewTouchHandler::OnInterceptTouchEvent(
 
             mLastMotionX = x;
             mLastMotionY = y;
-            mLastP = mSv->mLayoutAlgorithm->ScreenYToCurveProgress(mLastMotionY);
+            mLastP = stackView->mLayoutAlgorithm->ScreenYToCurveProgress(mLastMotionY);
             break;
         }
         case IMotionEvent::ACTION_CANCEL:
@@ -267,8 +285,10 @@ Boolean TaskStackViewTouchHandler::OnInterceptTouchEvent(
 Boolean TaskStackViewTouchHandler::OnTouchEvent(
     /* [in] */ IMotionEvent* ev)
 {
+    AutoPtr<TaskStackView> stackView = GetTaskStackView();
+
     Int32 childCount;
-    mSv->GetChildCount(&childCount);
+    stackView->GetChildCount(&childCount);
     // Short circuit if we have no children
     Boolean hasChildren = (childCount > 0);
     if (!hasChildren) {
@@ -293,7 +313,7 @@ Boolean TaskStackViewTouchHandler::OnTouchEvent(
             ev->GetY(&y);
             mInitialMotionX = mLastMotionX = (Int32)x;
             mInitialMotionY = mLastMotionY = (Int32)y;
-            mInitialP = mLastP = mSv->mLayoutAlgorithm->ScreenYToCurveProgress(mLastMotionY);
+            mInitialP = mLastP = stackView->mLayoutAlgorithm->ScreenYToCurveProgress(mLastMotionY);
             ev->GetPointerId(0, &mActivePointerId);
             mActiveTaskView = FindViewAtPoint(mLastMotionX, mLastMotionY);
             // Stop the current scroll if it is still flinging
@@ -304,7 +324,7 @@ Boolean TaskStackViewTouchHandler::OnTouchEvent(
             mVelocityTracker->AddMovement(CreateMotionEventForStackScroll(ev));
             // Disallow parents from intercepting touch events
             AutoPtr<IViewParent> parent;
-            mSv->GetParent((IViewParent**)&parent);
+            stackView->GetParent((IViewParent**)&parent);
             if (parent != NULL) {
                 parent->RequestDisallowInterceptTouchEvent(TRUE);
             }
@@ -319,7 +339,7 @@ Boolean TaskStackViewTouchHandler::OnTouchEvent(
             ev->GetY(index, &y);
             mLastMotionX = (Int32)x;
             mLastMotionY = (Int32)y;
-            mLastP = mSv->mLayoutAlgorithm->ScreenYToCurveProgress(mLastMotionY);
+            mLastP = stackView->mLayoutAlgorithm->ScreenYToCurveProgress(mLastMotionY);
             break;
         }
         case IMotionEvent::ACTION_MOVE: {
@@ -333,7 +353,7 @@ Boolean TaskStackViewTouchHandler::OnTouchEvent(
             Int32 x = (Int32)px;
             Int32 y = (Int32)py;
             Int32 yTotal = Elastos::Core::Math::Abs(y - mInitialMotionY);
-            Float curP = mSv->mLayoutAlgorithm->ScreenYToCurveProgress(y);
+            Float curP = stackView->mLayoutAlgorithm->ScreenYToCurveProgress(y);
             Float deltaP = mLastP - curP;
             if (!mIsScrolling) {
                 if (yTotal > mScrollTouchSlop) {
@@ -343,7 +363,7 @@ Boolean TaskStackViewTouchHandler::OnTouchEvent(
                     mVelocityTracker->AddMovement(CreateMotionEventForStackScroll(ev));
                     // Disallow parents from intercepting touch events
                     AutoPtr<IViewParent> parent;
-                    mSv->GetParent((IViewParent**)&parent);
+                    stackView->GetParent((IViewParent**)&parent);
                     if (parent != NULL) {
                         parent->RequestDisallowInterceptTouchEvent(TRUE);
                     }
@@ -369,7 +389,7 @@ Boolean TaskStackViewTouchHandler::OnTouchEvent(
             }
             mLastMotionX = x;
             mLastMotionY = y;
-            mLastP = mSv->mLayoutAlgorithm->ScreenYToCurveProgress(mLastMotionY);
+            mLastP = stackView->mLayoutAlgorithm->ScreenYToCurveProgress(mLastMotionY);
             mTotalPMotion += Elastos::Core::Math::Abs(deltaP);
             break;
         }
@@ -387,11 +407,11 @@ Boolean TaskStackViewTouchHandler::OnTouchEvent(
                 mScroller->mScroller->Fling(0, mScroller->ProgressToScrollRange(mScroller->GetStackScroll()),
                         0, velocity,
                         0, 0,
-                        mScroller->ProgressToScrollRange(mSv->mLayoutAlgorithm->mMinScrollP),
-                        mScroller->ProgressToScrollRange(mSv->mLayoutAlgorithm->mMaxScrollP),
+                        mScroller->ProgressToScrollRange(stackView->mLayoutAlgorithm->mMinScrollP),
+                        mScroller->ProgressToScrollRange(stackView->mLayoutAlgorithm->mMaxScrollP),
                         0, overscrollRange);
                 // Invalidate to kick off computeScroll
-                mSv->Invalidate();
+                stackView->Invalidate();
             }
             else if (mScroller->IsScrollOutOfBounds()) {
                 // Animate the scroll back into bounds
@@ -418,7 +438,7 @@ Boolean TaskStackViewTouchHandler::OnTouchEvent(
                 ev->GetY(newPointerIndex, &y);
                 mLastMotionX = (Int32)x;
                 mLastMotionY = (Int32)y;
-                mLastP = mSv->mLayoutAlgorithm->ScreenYToCurveProgress(mLastMotionY);
+                mLastP = stackView->mLayoutAlgorithm->ScreenYToCurveProgress(mLastMotionY);
                 mVelocityTracker->Clear();
             }
             break;
@@ -466,16 +486,17 @@ ECode TaskStackViewTouchHandler::CanChildBeDismissed(
 ECode TaskStackViewTouchHandler::OnBeginDrag(
     /* [in] */ IView* v)
 {
-    TaskView* tv = (TaskView*)ITaskView::Probe(v);
+    AutoPtr<TaskStackView> stackView = GetTaskStackView();
+    AutoPtr<TaskView> tv = (TaskView*)ITaskView::Probe(v);
     // Disable clipping with the stack while we are swiping
     tv->SetClipViewInStack(FALSE);
     // Disallow touch events from this task view
     tv->SetTouchEnabled(FALSE);
     // Hide the footer
-    tv->AnimateFooterVisibility(FALSE, mSv->mConfig->mTaskViewLockToAppShortAnimDuration);
+    tv->AnimateFooterVisibility(FALSE, stackView->mConfig->mTaskViewLockToAppShortAnimDuration);
     // Disallow parents from intercepting touch events
     AutoPtr<IViewParent> parent;
-    mSv->GetParent((IViewParent**)&parent);
+    stackView->GetParent((IViewParent**)&parent);
     if (parent != NULL) {
         parent->RequestDisallowInterceptTouchEvent(TRUE);
     }
@@ -493,26 +514,34 @@ ECode TaskStackViewTouchHandler::OnSwipeChanged(
 ECode TaskStackViewTouchHandler::OnChildDismissed(
     /* [in] */ IView* v)
 {
-    TaskView* tv = (TaskView*)ITaskView::Probe(v);
+    AutoPtr<TaskView> tv = (TaskView*)ITaskView::Probe(v);
     // Re-enable clipping with the stack (we will reuse this view)
     tv->SetClipViewInStack(TRUE);
     // Re-enable touch events from this task view
     tv->SetTouchEnabled(TRUE);
     // Remove the task view from the stack
-    mSv->OnTaskViewDismissed(tv);
+    GetTaskStackView()->OnTaskViewDismissed(tv);
+
+    AutoPtr<TaskStackView> tsv = GetTaskStackView();
+    if (tsv != NULL) {
+        tsv->OnTaskViewDismissed(tv);
+    }
+    else {
+        Logger::I(TAG, "waring: TaskStackView has been released.");
+    }
     return NOERROR;
 }
 
 ECode TaskStackViewTouchHandler::OnSnapBackCompleted(
     /* [in] */ IView* v)
 {
-    TaskView* tv = (TaskView*)ITaskView::Probe(v);
+    AutoPtr<TaskView> tv = (TaskView*)ITaskView::Probe(v);
     // Re-enable clipping with the stack
     tv->SetClipViewInStack(TRUE);
     // Re-enable touch events from this task view
     tv->SetTouchEnabled(TRUE);
     // Restore the footer
-    tv->AnimateFooterVisibility(TRUE, mSv->mConfig->mTaskViewLockToAppShortAnimDuration);
+    tv->AnimateFooterVisibility(TRUE, GetTaskStackView()->mConfig->mTaskViewLockToAppShortAnimDuration);
     return NOERROR;
 }
 

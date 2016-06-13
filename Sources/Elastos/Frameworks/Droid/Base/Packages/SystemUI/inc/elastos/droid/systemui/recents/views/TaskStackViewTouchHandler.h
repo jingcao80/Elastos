@@ -15,7 +15,8 @@ namespace Views {
 class TaskStackView;
 
 /* Handles touch events for a TaskStackView. */
-class TaskStackViewTouchHandler : public Object
+class TaskStackViewTouchHandler
+    : public Object
 {
 private:
     class CallBack
@@ -23,12 +24,12 @@ private:
         , public ISwipeHelperCallback
     {
     public:
+        CAR_INTERFACE_DECL()
+
         CallBack(
             /* [in] */ TaskStackViewTouchHandler* host)
             : mHost(host)
         {}
-
-        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI GetChildAtPosition(
@@ -122,11 +123,13 @@ public:
     CARAPI OnDragCancelled(
         /* [in] */ IView* v);
 
+    CARAPI_(AutoPtr<TaskStackView>) GetTaskStackView();
+
 public:
     static Int32 INACTIVE_POINTER_ID;
 
     AutoPtr<RecentsConfiguration> mConfig;
-    TaskStackView* mSv; // TaskStackView has this's reference
+    AutoPtr<IWeakReference> mWeakTaskStackView; // TaskStackView has this's reference
     AutoPtr<TaskStackViewScroller> mScroller;
     AutoPtr<IVelocityTracker> mVelocityTracker;
 

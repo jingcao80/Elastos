@@ -169,10 +169,8 @@ void CPdfDocument::Page::Finish()
 
 
 ///////////////////////////////////////////// CPdfDocument::PdfCanvas /////////
-CPdfDocument::PdfCanvas::PdfCanvas(
-    /* [in] */ Int64 nativeCanvas)
+CPdfDocument::PdfCanvas::PdfCanvas()
 {
-    Canvas::constructor(nativeCanvas);
 }
 
 ECode CPdfDocument::PdfCanvas::SetBitmap(
@@ -332,10 +330,10 @@ ECode CPdfDocument::StartPage(
     PageInfo* info = (PageInfo*)pageInfo;
     Int32 left = 0, right = 0, top = 0, bottom = 0;
     info->mContentRect->Get(&left, &top, &right, &bottom);
-    AutoPtr<ICanvas> canvas = new PdfCanvas(NativeStartPage(mNativeDocument, info->mPageWidth,
-            info->mPageHeight, left, top,
-            right, bottom));
-    mCurrentPage = new Page(canvas, info);
+    AutoPtr<PdfCanvas> pc = new PdfCanvas();
+    pc->constructor(NativeStartPage(mNativeDocument, info->mPageWidth, info->mPageHeight,
+        left, top, right, bottom));
+    mCurrentPage = new Page(pc.Get(), info);
     *page = mCurrentPage;
     REFCOUNT_ADD(*page);
     return NOERROR;

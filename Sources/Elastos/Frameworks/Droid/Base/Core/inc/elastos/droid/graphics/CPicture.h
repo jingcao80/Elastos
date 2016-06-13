@@ -30,9 +30,10 @@ private:
         : public Canvas
     {
     public:
+        TO_STRING_IMPL("CPicture::RecordingCanvas")
+
         RecordingCanvas(
-            /* [in] */ CPicture* pic,
-            /* [in] */ Int64 nativeCanvas);
+            /* [in] */ CPicture* pic);
 
         CARAPI SetBitmap(
             /* [in] */ IBitmap* bitmap);

@@ -180,6 +180,24 @@ public:
         Int32 mAllocCount;
     };
 
+    /** A helper class for accessing Java-heap-allocated bitmaps.
+     *  This should be used when calling into a JNI method that retains a
+     *  reference to the bitmap longer than the lifetime of the Java Bitmap.
+     *
+     *  After creating an instance of this class, a call to
+     *  AndroidPixelRef::globalRef() will allocate a JNI global reference
+     *  to the backing buffer object.
+     */
+    class ElastosHeapBitmapRef {
+    public:
+        ElastosHeapBitmapRef(SkBitmap* nativeBitmap, ArrayOf<Byte>* buffer);
+        ~ElastosHeapBitmapRef();
+
+    private:
+        SkBitmap* fNativeBitmap;
+        AutoPtr<ArrayOf<Byte> > fBuffer;
+    };
+
 public:
     static CARAPI_(SkRect*) IRect2SkRect(
         /* [in] */ IRect* obj,

@@ -23,7 +23,7 @@
 #include "elastos/droid/R.h"
 
 #include <elastos/core/StringUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -66,6 +66,7 @@ using Elastos::Core::StringUtils;
 using Elastos::IO::IFlushable;
 using Elastos::Utility::IHashSet;
 using Elastos::Utility::CHashSet;
+using Elastos::Utility::Logging::Logger;
 
 using namespace android;
 using namespace android::uirenderer;
@@ -349,8 +350,8 @@ void ThreadedRenderer::UpdateViewTreeDisplayList(
 {
     View* cv = (View*)view;
     cv->mPrivateFlags |= View::PFLAG_DRAWN;
-    cv->mRecreateDisplayList = (cv->mPrivateFlags & View::PFLAG_INVALIDATED)
-            == View::PFLAG_INVALIDATED;
+    cv->mRecreateDisplayList =
+        (cv->mPrivateFlags & View::PFLAG_INVALIDATED) == View::PFLAG_INVALIDATED;
     cv->mPrivateFlags &= ~View::PFLAG_INVALIDATED;
     AutoPtr<IRenderNode> nodes;
     view->GetDisplayList((IRenderNode**)&nodes);
@@ -361,11 +362,13 @@ void ThreadedRenderer::UpdateRootDisplayList(
     /* [in] */ IView* view,
     /* [in] */ IHardwareDrawCallbacks* callbacks)
 {
+    Logger::I(LOGTAG, " >> UpdateRootDisplayList");
 //    Trace::TraceBegin(Trace::TRACE_TAG_VIEW, "getDisplayList");
     UpdateViewTreeDisplayList(view);
 
-    Boolean bVld = FALSE;
-    if (mRootNodeNeedsUpdate || !(mRootNode->IsValid(&bVld), bVld)) {
+    Boolean bval = FALSE;
+    if (mRootNodeNeedsUpdate || (mRootNode->IsValid(&bval), !bval)) {
+        Logger::I(LOGTAG, " >> UpdateRootDisplayList mRootNode->Start");
         AutoPtr<IHardwareCanvas> canvas;
         mRootNode->Start(mSurfaceWidth, mSurfaceHeight, (IHardwareCanvas**)&canvas);
         Int32 saveCount = 0;
@@ -387,6 +390,7 @@ void ThreadedRenderer::UpdateRootDisplayList(
         mRootNode->End(canvas);
     }
 //    Trace::TraceEnd(Trace::TRACE_TAG_VIEW);
+    Logger::I(LOGTAG, " << UpdateRootDisplayList");
 }
 
 ECode ThreadedRenderer::InvalidateRoot()
@@ -400,6 +404,7 @@ ECode ThreadedRenderer::Draw(
     /* [in] */ View::AttachInfo* attachInfo,
     /* [in] */ IHardwareDrawCallbacks* callbacks)
 {
+    Logger::I(LOGTAG, " >> ThreadedRenderer::Draw ", TO_CSTR(view));
     attachInfo->mIgnoreDirtyState = TRUE;
     Int64 frameTimeNanos = 0;
     mChoreographer->GetFrameTimeNanos(&frameTimeNanos);
@@ -414,7 +419,6 @@ ECode ThreadedRenderer::Draw(
         system->GetNanoTime(&nanoTime);
         recordDuration = nanoTime;
     }
-
 
     UpdateRootDisplayList(view, callbacks);
 
@@ -433,8 +437,7 @@ ECode ThreadedRenderer::Draw(
         for (Int32 i = 0; i < count; i++) {
             AutoPtr<IInterface> tmp;
             attachInfo->mPendingAnimatingRenderNodes->Get(i, (IInterface**)&tmp);
-            AutoPtr<IRenderNode> node = IRenderNode::Probe(tmp);
-            RegisterAnimatingRenderNode(node);
+            RegisterAnimatingRenderNode(IRenderNode::Probe(tmp));
         }
         attachInfo->mPendingAnimatingRenderNodes->Clear();
         // We don't need this anymore as subsequent calls to
@@ -706,7 +709,7 @@ public:
     }
 
     static void throwException(const std::string& message) {
-        SLOGGERE("ThreadedRenderer", message.c_str())
+        Logger::E("ThreadedRenderer", message.c_str());
     }
 
 private:

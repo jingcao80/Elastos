@@ -11,6 +11,8 @@ namespace SystemUI {
 namespace Recents {
 namespace Misc {
 
+static const String TAG("ReferenceCountedTrigger");
+
 //=================================
 // ReferenceCountedTrigger::IncrementRunnable
 //=================================
@@ -22,6 +24,7 @@ ReferenceCountedTrigger::IncrementRunnable::IncrementRunnable(
 
 ECode ReferenceCountedTrigger::IncrementRunnable::Run()
 {
+    Logger::W("ReferenceCountedTrigger::IncrementRunnable", " Run > Increment");
     mHost->Increment();
     return NOERROR;
 }
@@ -37,6 +40,7 @@ ReferenceCountedTrigger::DecrementRunnable::DecrementRunnable(
 
 ECode ReferenceCountedTrigger::DecrementRunnable::Run()
 {
+    Logger::W("ReferenceCountedTrigger::DecrementRunnable", " Run > Decrement");
     mHost->Decrement();
     return NOERROR;
 }
@@ -46,16 +50,26 @@ ECode ReferenceCountedTrigger::DecrementRunnable::Run()
 //=================================
 
 ReferenceCountedTrigger::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
-    /* [in] */ ReferenceCountedTrigger* host)
-    : AnimatorListenerAdapter()
-    , mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {
 }
 
 ECode ReferenceCountedTrigger::MyAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    mHost->Decrement();
+    AutoPtr<IObject> obj;
+    mWeakHost->Resolve(EIID_IObject, (IInterface**)&obj);
+    if (obj != NULL) {
+        Logger::W("ReferenceCountedTrigger::MyAnimatorListenerAdapter", " OnAnimationEnd > trigger Decrement");
+        ReferenceCountedTrigger* trigger = (ReferenceCountedTrigger*)obj.Get();
+        trigger->Decrement();
+    }
+    else {
+        Logger::W("ReferenceCountedTrigger::MyAnimatorListenerAdapter",
+            " OnAnimationEnd > ReferenceCountedTrigger has released!");
+    }
+
     return NOERROR;
 }
 
@@ -63,16 +77,26 @@ ECode ReferenceCountedTrigger::MyAnimatorListenerAdapter::OnAnimationEnd(
 //=================================
 // ReferenceCountedTrigger
 //=================================
+ReferenceCountedTrigger::ReferenceCountedTrigger()
+    : mCount(0)
+{
+    Logger::I(TAG, " > create ReferenceCountedTrigger: %p", this);
+}
 
-ReferenceCountedTrigger::ReferenceCountedTrigger(
+ReferenceCountedTrigger::~ReferenceCountedTrigger()
+{
+    Logger::I(TAG, " > destroy ReferenceCountedTrigger: %p", this);
+}
+
+ECode ReferenceCountedTrigger::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IRunnable* firstIncRunnable,
     /* [in] */ IRunnable* lastDecRunnable,
     /* [in] */ IRunnable* errorRunanable)
-    : mContext(context)
-    , mCount(0)
-    , mErrorRunnable(errorRunanable)
 {
+    mContext = context;
+    mErrorRunnable = errorRunanable;
+
     CArrayList::New((IArrayList**)&mFirstIncRunnables);
     CArrayList::New((IArrayList**)&mLastDecRunnables);
 
@@ -80,6 +104,7 @@ ReferenceCountedTrigger::ReferenceCountedTrigger(
     mDecrementRunnable = new DecrementRunnable(this);
     if (firstIncRunnable != NULL) mFirstIncRunnables->Add(firstIncRunnable);
     if (lastDecRunnable != NULL) mLastDecRunnables->Add(lastDecRunnable);
+    return NOERROR;
 }
 
 void ReferenceCountedTrigger::Increment()
@@ -112,12 +137,12 @@ void ReferenceCountedTrigger::AddLastDecrementRunnable(
     Boolean ensureLastDecrement = (mCount == 0);
     if (ensureLastDecrement) Increment();
     mLastDecRunnables->Add(r);
-    Logger::I("ReferenceCountedTrigger", "mLastDecRunnables Add: [%s]", TO_CSTR(r));
     if (ensureLastDecrement) Decrement();
 }
 
 void ReferenceCountedTrigger::Decrement()
 {
+    Logger::I("ReferenceCountedTrigger", " > %p Decrement %d -> %d", this, mCount, mCount - 1);
     mCount--;
     Boolean isEmpty;
     if (mCount == 0 && (mLastDecRunnables->IsEmpty(&isEmpty), !isEmpty)) {
@@ -126,7 +151,6 @@ void ReferenceCountedTrigger::Decrement()
         for (Int32 i = 0; i < numRunnables; i++) {
             AutoPtr<IInterface> obj;
             mLastDecRunnables->Get(i, (IInterface**)&obj);
-            Logger::I("ReferenceCountedTrigger", "Get lastDecRunnable %d: [%s]", i, TO_CSTR(obj));
             IRunnable::Probe(obj)->Run();
         }
     }
@@ -149,7 +173,9 @@ AutoPtr<IRunnable> ReferenceCountedTrigger::DecrementAsRunnable()
 
 AutoPtr<IAnimatorListener> ReferenceCountedTrigger::DecrementOnAnimationEnd()
 {
-    AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter(this);
+    AutoPtr<IWeakReference> weakHost;
+    GetWeakReference((IWeakReference**)&weakHost);
+    AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter(weakHost);
     return listener;
 }
 

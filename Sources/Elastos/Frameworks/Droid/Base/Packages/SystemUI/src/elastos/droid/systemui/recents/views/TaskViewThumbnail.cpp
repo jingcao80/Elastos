@@ -31,6 +31,9 @@ namespace Views {
 
 static const String TAG("TaskViewThumbnail");
 
+//===========================================================
+// TaskViewThumbnail::AnimatorUpdateListener
+//===========================================================
 CAR_INTERFACE_IMPL(TaskViewThumbnail::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
 
 TaskViewThumbnail::AnimatorUpdateListener::AnimatorUpdateListener(
@@ -49,6 +52,9 @@ ECode TaskViewThumbnail::AnimatorUpdateListener::OnAnimationUpdate(
     return NOERROR;
 }
 
+//===========================================================
+// TaskViewThumbnail::MyAnimatorListenerAdapter
+//===========================================================
 TaskViewThumbnail::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
     /* [in] */ IRunnable* postAnimRunnable)
     : mPostAnimRunnable(postAnimRunnable)
@@ -72,6 +78,9 @@ ECode TaskViewThumbnail::MyAnimatorListenerAdapter::OnAnimationEnd(
     return NOERROR;
 }
 
+//===========================================================
+// TaskViewThumbnail
+//===========================================================
 CAR_INTERFACE_IMPL(TaskViewThumbnail, Elastos::Droid::View::View, ITaskViewThumbnail)
 
 TaskViewThumbnail::TaskViewThumbnail()
@@ -80,13 +89,6 @@ TaskViewThumbnail::TaskViewThumbnail()
     , mDimAlpha(0.0f)
     , mInvisible(FALSE)
 {
-    CRect::New((IRect**)&mClipRect);
-    CPaint::New((IPaint**)&mDrawPaint);
-    CLightingColorFilter::New(0xffffffff, 0, (ILightingColorFilter**)&mLightingColorFilter);
-    CMatrix::New((IMatrix**)&mScaleMatrix);
-    CRectF::New((IRectF**)&mBitmapRect);
-    CRectF::New((IRectF**)&mLayoutRect);
-    mAlphaUpdateListener = new AnimatorUpdateListener(this);
 }
 
 ECode TaskViewThumbnail::constructor(
@@ -117,6 +119,15 @@ ECode TaskViewThumbnail::constructor(
     /* [in] */ Int32 defStyleRes)
 {
     FAIL_RETURN(View::constructor(context, attrs, defStyleAttr, defStyleRes));
+
+    CMatrix::New((IMatrix**)&mScaleMatrix);
+    CRect::New((IRect**)&mClipRect);
+    CPaint::New((IPaint**)&mDrawPaint);
+    CLightingColorFilter::New(0xffffffff, 0, (ILightingColorFilter**)&mLightingColorFilter);
+    CRectF::New((IRectF**)&mBitmapRect);
+    CRectF::New((IRectF**)&mLayoutRect);
+    mAlphaUpdateListener = new AnimatorUpdateListener(this);
+
     mConfig = RecentsConfiguration::GetInstance();
     mCornerRadius = mConfig->mTaskViewRoundedCornerRadiusPx;
     mDrawPaint->SetColorFilter(IColorFilter::Probe(mLightingColorFilter));
@@ -129,13 +140,15 @@ ECode TaskViewThumbnail::constructor(
 void TaskViewThumbnail::OnDraw(
     /* [in] */ ICanvas* canvas)
 {
-    Logger::I(TAG, " >> OnDraw");
     if (mInvisible) {
         return;
     }
+
     Int32 w, h;
     GetWidth(&w);
     GetHeight(&h);
+    Logger::I(TAG, " >>>>>>>>>>>>>> OnDraw: w:h = (%d, %d), mCornerRadius:%d, canvas:%s",
+        w, h, mCornerRadius, TO_CSTR(canvas));
     canvas->DrawRoundRect(0, 0, w, h, mCornerRadius, mCornerRadius, mDrawPaint);
 }
 
@@ -159,9 +172,9 @@ void TaskViewThumbnail::UpdateFilter()
     if (mBitmapShader != NULL) {
         Int32 argb;
         color->Argb(255, mul, mul, mul, &argb);
-        // mLightingColorFilter->SetColorMultiply(argb);
+        mLightingColorFilter->SetColorMultiply(argb);
         color->Argb(0, add, add, add, &argb);
-        // mLightingColorFilter->SetColorAdd(argb);
+        mLightingColorFilter->SetColorAdd(argb);
         mDrawPaint->SetColorFilter(IColorFilter::Probe(mLightingColorFilter));
         mDrawPaint->SetColor(0xffffffff);
     }
@@ -189,6 +202,7 @@ void TaskViewThumbnail::EnableTaskBarClip(
     GetMeasuredHeight(&width);
     GetMeasuredHeight(&height);
     mClipRect->Set(0, top, width, height);
+    Logger::I(TAG, " EnableTaskBarClip: (%d, %d), (%d, %d).", 0, top, width, height);
     SetClipBounds(mClipRect);
 }
 
@@ -196,8 +210,13 @@ void TaskViewThumbnail::UpdateVisibility(
     /* [in] */ Int32 clipBottom)
 {
     Int32 h, th;
-    Boolean invisible = mTaskBar != NULL && (GetHeight(&h),
-        mTaskBar->GetHeight(&th), h - clipBottom < th);
+    Boolean invisible = FALSE;
+    if (mTaskBar != NULL) {
+        GetHeight(&h);
+        mTaskBar->GetHeight(&th);
+        invisible = h - clipBottom < th;
+    }
+
     if (invisible != mInvisible) {
         mInvisible = invisible;
         if (!mInvisible) {
@@ -240,7 +259,7 @@ ECode TaskViewThumbnail::SetImageBitmap(
     if (bm != NULL) {
         mBitmapShader = NULL;
         CBitmapShader::New(bm, ShaderTileMode_CLAMP,
-                ShaderTileMode_CLAMP, (IBitmapShader**)&mBitmapShader);
+            ShaderTileMode_CLAMP, (IBitmapShader**)&mBitmapShader);
         mDrawPaint->SetShader(IShader::Probe(mBitmapShader));
         Int32 width, height;
         bm->GetWidth(&width);
@@ -324,7 +343,6 @@ void TaskViewThumbnail::PrepareEnterRecentsAnimation(
         mBitmapAlpha = 1.0f;
     }
     else {
-        assert(mConfig != NULL);
         mBitmapAlpha = mConfig->mTaskViewThumbnailAlpha;
     }
     UpdateFilter();
@@ -336,7 +354,7 @@ void TaskViewThumbnail::StartEnterRecentsAnimation(
     /* [in] */ IRunnable* postAnimRunnable)
 {
     StartFadeAnimation(mConfig->mTaskViewThumbnailAlpha, delay,
-            mConfig->mTaskBarEnterAnimDuration, postAnimRunnable);
+        mConfig->mTaskBarEnterAnimDuration, postAnimRunnable);
 }
 
 /** Animates this task thumbnail as it exits recents */
@@ -366,7 +384,7 @@ void TaskViewThumbnail::StartFadeAnimation(
     IAnimator* animator = IAnimator::Probe(mAlphaAnimator);
     mAlphaAnimator->AddUpdateListener(mAlphaUpdateListener);
     animator->SetStartDelay(delay);
-    animator->SetInterpolator(ITimeInterpolator::Probe(mConfig->mFastOutSlowInInterpolator));
+    animator->SetInterpolator(mConfig->mFastOutSlowInInterpolator);
     animator->SetDuration(duration);
     animator->Start();
     if (postAnimRunnable != NULL) {

@@ -76,6 +76,7 @@ using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::View::Surface;
@@ -123,7 +124,7 @@ using Elastos::Core::ISystem;
 using Elastos::Core::StringBuilder;
 
 #ifndef TRACE_IN_TERMINAL
-#define TRACE_IN_TERMINAL          0
+#define TRACE_IN_TERMINAL          1
 #endif
 
 namespace Elastos {
@@ -368,9 +369,7 @@ ECode ViewRootImpl::ViewRootHandler::HandleMessage(
             break;
         }
         case ViewRootImpl::MSG_WINDOW_FOCUS_CHANGED: {
-            Boolean hasWindowFocus = arg1 != 0;
-            Boolean inTouchMode = arg2 != 0;
-            mHost->HandleWindowFocusChanged(hasWindowFocus, inTouchMode);
+            mHost->HandleWindowFocusChanged(this, what, arg1, arg2);
             break;
         }
         case ViewRootImpl::MSG_DIE: {
@@ -561,14 +560,6 @@ ECode ViewRootImpl::WindowInputEventReceiver::Dispose()
     }
 
     return InputEventReceiver::Dispose();
-}
-
-ECode ViewRootImpl::WindowInputEventReceiver::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str)
-    *str = "WindowInputEventReceiver";
-    return NOERROR;
 }
 
 //=======================================================================================
@@ -1517,8 +1508,7 @@ ECode ViewRootImpl::SetView(
         IRootViewSurfaceTaker* rootViewST = IRootViewSurfaceTaker::Probe(view);
         if (rootViewST) {
             mSurfaceHolderCallback = NULL;
-            rootViewST->WillYouTakeTheSurface(
-                (ISurfaceHolderCallback2**)&mSurfaceHolderCallback);
+            rootViewST->WillYouTakeTheSurface((ISurfaceHolderCallback2**)&mSurfaceHolderCallback);
             if (mSurfaceHolderCallback != NULL) {
                 mSurfaceHolder = new TakenSurfaceHolder(this);
                 mSurfaceHolder->SetFormat(IPixelFormat::UNKNOWN);
@@ -1539,6 +1529,7 @@ ECode ViewRootImpl::SetView(
         mDisplayAdjustments->SetActivityToken(temp->mToken);
 
         // If the application owns the surface, don't enable hardware acceleration
+        Logger::I(TAG, " >> SetView: mSurfaceHolder:%s, call EnableHardwareAcceleration ?", TO_CSTR(mSurfaceHolder));
         if (mSurfaceHolder == NULL) {
             EnableHardwareAcceleration(attrs);
         }
@@ -1809,7 +1800,7 @@ ECode ViewRootImpl::RegisterAnimatingRenderNode(
 void ViewRootImpl::EnableHardwareAcceleration(
     /* [in] */ IWindowManagerLayoutParams* attrs)
 {
-    Logger::D("ViewRootImpl", "TODO no impl, EnableHardwareAcceleration,line:%d ,", __LINE__);
+    Logger::D(TAG, " >> EnableHardwareAcceleration, mView:%s", TO_CSTR(mView));
     mAttachInfo->mHardwareAccelerated = FALSE;
     mAttachInfo->mHardwareAccelerationRequested = FALSE;
 
@@ -1820,9 +1811,8 @@ void ViewRootImpl::EnableHardwareAcceleration(
     // Try to enable hardware acceleration if requested
     Int32 flags;
     attrs->GetFlags(&flags);
-    const Boolean hardwareAccelerated =
-            (flags & IWindowManagerLayoutParams::FLAG_HARDWARE_ACCELERATED) != 0;
-
+    Boolean hardwareAccelerated = (flags & IWindowManagerLayoutParams::FLAG_HARDWARE_ACCELERATED) != 0;
+    Logger::D(TAG, " >> EnableHardwareAcceleration, hardwareAccelerated:%d", hardwareAccelerated);
     if (hardwareAccelerated) {
         Boolean available;
         if (HardwareRenderer::IsAvailable(&available), !available) {
@@ -1865,6 +1855,7 @@ void ViewRootImpl::EnableHardwareAcceleration(
                 mAttachInfo->mHardwareRenderer->SetName(name);
                 mAttachInfo->mHardwareAccelerated =
                         mAttachInfo->mHardwareAccelerationRequested = TRUE;
+                Logger::D(TAG, " >> EnableHardwareAcceleration, enable hardwareAccelerated");
             }
         }
     }
@@ -2956,23 +2947,24 @@ void ViewRootImpl::PerformTraversals()
             }
             DisposeResizeBuffer();
             // Our surface is gone
-            // if (mAttachInfo->mHardwareRenderer != NULL &&
-            //     mAttachInfo->mHardwareRenderer->IsEnabled()) {
-            //     mAttachInfo->mHardwareRenderer->Destroy(TRUE);
+            Boolean bval;
+            if (mAttachInfo->mHardwareRenderer != NULL
+                && (mAttachInfo->mHardwareRenderer->IsEnabled(&bval), bval)) {
+                mAttachInfo->mHardwareRenderer->Destroy();
+            }
+        }
+        else if (surfaceGenerationId != (mSurface->GetGenerationId(&gId), gId)
+            && mSurfaceHolder == NULL && mAttachInfo->mHardwareRenderer != NULL) {
+            mFullRedrawNeeded = TRUE;
+            // try {
+            ECode ec = mAttachInfo->mHardwareRenderer->UpdateSurface(mSurface);
+            // } catch (OutOfResourcesException e) {
+            if (ec == (ECode) E_OUT_OF_RESOURCES_EXCEPTION) {
+                HandleOutOfResourcesException(ec);
+                return;
+            }
             // }
         }
-        // else if (surfaceGenerationId != (mSurface->GetGenerationId(&gId), gId) &&
-        //     mSurfaceHolder == NULL && mAttachInfo->mHardwareRenderer != NULL) {
-        //     mFullRedrawNeeded = TRUE;
-        //     try {
-        //     ECode ec = mAttachInfo->mHardwareRenderer->UpdateSurface(mSurface);
-        //     } catch (OutOfResourcesException e) {
-        //     if (ec == (ECode) E_OUT_OF_RESOURCES_EXCEPTION) {
-        //         handleOutOfResourcesException(e);
-        //     }
-        //         return;
-        //     }
-        // }
 
         if (DEBUG_ORIENTATION) {
             Logger::V(TAG, "Relayout returned: frame=%s", TO_CSTR(mWinFrame));
@@ -3321,15 +3313,14 @@ void ViewRootImpl::PerformTraversals()
 void ViewRootImpl::HandleOutOfResourcesException(
     /* [in] */ ECode ec)
 {
-    Logger::D(TAG, "OutOfResourcesException initializing HW surface", ec);
-    /*try {
-        if (!mWindowSession.outOfMemory(mWindow) &&
-                Process.myUid() != Process.SYSTEM_UID) {*/
-            Logger::D(TAG, "No processes killed for memory; killing self");
-    /*        Process.killProcess(Process.myPid());
-        }
-    } catch (RemoteException ex) {
-    }*/
+    Logger::E(TAG, "OutOfResourcesException initializing HW surface, ec=", ec);
+    Boolean bval;
+    if ((mWindowSession->OutOfMemory(mWindow, &bval), !bval)
+        && Process::MyUid() != IProcess::SYSTEM_UID) {
+        Logger::W(TAG, "No processes killed for memory; killing self");
+        Process::KillProcess(Process::MyPid());
+    }
+
     mLayoutRequested = TRUE;    // ask wm for a new surface next time.
 }
 
@@ -3383,19 +3374,20 @@ ECode ViewRootImpl::IsInLayout(
  * @return true if request should proceed, false otherwise.
  */
 ECode ViewRootImpl::RequestLayoutDuringLayout(
-    /* [in] */ IView* view,
+    /* [in] */ IView* v,
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
-    if (VIEW_PROBE(view)->mParent == NULL || VIEW_PROBE(view)->mAttachInfo == NULL) {
+    View* view = (View*)v;
+    if (view->mParent == NULL ||view->mAttachInfo == NULL) {
         // Would not normally trigger another layout, so just let it pass through as usual
         *res = TRUE;
         return NOERROR;
     }
     Boolean contains;
-    mLayoutRequesters->Contains(view, &contains);
+    mLayoutRequesters->Contains(v, &contains);
     if (!contains) {
-        mLayoutRequesters->Add(view);
+        mLayoutRequesters->Add(v);
     }
     if (!mHandlingLayoutInLayoutRequest) {
         // Let the request proceed normally; it will be processed in a second layout pass
@@ -3610,6 +3602,7 @@ Int32 ViewRootImpl::GetRootMeasureSpec(
 ECode ViewRootImpl::OnHardwarePreDraw(
     /* [in] */ IHardwareCanvas* canvas)
 {
+    Logger::I(TAG, " >> OnHardwarePreDraw");
     ICanvas::Probe(canvas)->Translate(-mHardwareXOffset, -mHardwareYOffset);
     return NOERROR;
 }
@@ -3617,6 +3610,7 @@ ECode ViewRootImpl::OnHardwarePreDraw(
 ECode ViewRootImpl::OnHardwarePostDraw(
     /* [in] */ IHardwareCanvas* canvas)
 {
+    Logger::I(TAG, " >> OnHardwarePostDraw: %s", TO_CSTR(mResizeBuffer));
     if (mResizeBuffer != NULL) {
         mResizePaint->SetAlpha(mResizeAlpha);
         canvas->DrawHardwareLayer(mResizeBuffer, mHardwareXOffset, mHardwareYOffset, mResizePaint);
@@ -3869,9 +3863,12 @@ void ViewRootImpl::Draw(
     Boolean isEmpty;
     dirty->IsEmpty(&isEmpty);
     if (!isEmpty || mIsAnimating) {
-        Boolean isEnabled;
-        if (mAttachInfo->mHardwareRenderer != NULL
-            && (mAttachInfo->mHardwareRenderer->IsEnabled(&isEnabled), isEnabled)) {
+        Boolean isHardwareRenderEnable = FALSE;
+        if (mAttachInfo->mHardwareRenderer) {
+            mAttachInfo->mHardwareRenderer->IsEnabled(&isHardwareRenderEnable);
+        }
+        Logger::I(TAG, "%s Draw with hardware renderer : %d", TO_CSTR(mView), isHardwareRenderEnable);
+        if (isHardwareRenderEnable) {
             // Draw with hardware renderer.
             mIsAnimating = FALSE;
             if (mHardwareYOffset != yOffset || mHardwareXOffset != xOffset) {
@@ -3891,7 +3888,7 @@ void ViewRootImpl::Draw(
 
             dirty->SetEmpty();
 
-            mBlockResizeBuffer = false;
+            mBlockResizeBuffer = FALSE;
             ((HardwareRenderer*)mAttachInfo->mHardwareRenderer.Get())->Draw(mView, mAttachInfo, this);
         }
         else {
@@ -3905,12 +3902,11 @@ void ViewRootImpl::Draw(
             // eglTerminate() for instance.
             Boolean isEnabled, isRequested;
             if (mAttachInfo->mHardwareRenderer != NULL &&
-                    (mAttachInfo->mHardwareRenderer->IsEnabled(&isEnabled), !isEnabled) &&
-                    (mAttachInfo->mHardwareRenderer->IsRequested(&isRequested), isRequested)) {
+                (mAttachInfo->mHardwareRenderer->IsEnabled(&isEnabled), !isEnabled) &&
+                (mAttachInfo->mHardwareRenderer->IsRequested(&isRequested), isRequested)) {
                 //try {
                 ECode ec = mAttachInfo->mHardwareRenderer->InitializeIfNeeded(
                     mWidth, mHeight, mSurface, obj, &isEnabled);
-
                 //} catch (OutOfResourcesException e) {
                 if (ec == (ECode) E_OUT_OF_RESOURCES_EXCEPTION) {
                     HandleOutOfResourcesException(ec);
@@ -6405,9 +6401,13 @@ ECode ViewRootImpl::ChangeCanvasOpacity(
 }
 
 void ViewRootImpl::HandleWindowFocusChanged(
-    /* [in] */ Boolean hasWindowFocus,
-    /* [in] */ Boolean inTouchMode)
+    /* [in] */ ViewRootHandler* handle,
+    /* [in] */ Int32 what,
+    /* [in] */ Int32 arg1,
+    /* [in] */ Int32 arg2)
 {
+    Boolean hasWindowFocus = arg1 != 0;
+    Boolean inTouchMode = arg2 != 0;
     if (mAdded) {
         mAttachInfo->mHasWindowFocus = hasWindowFocus;
 
@@ -6418,30 +6418,29 @@ void ViewRootImpl::HandleWindowFocusChanged(
             Boolean isValid;
             if (mAttachInfo->mHardwareRenderer != NULL && (mSurface->IsValid(&isValid), isValid)){
                 mFullRedrawNeeded = TRUE;
-                // try {
-                    AutoPtr<IWindowManagerLayoutParams> lp = mWindowAttributes;
-                    AutoPtr<IRect> surfaceInsets;
-                    if (lp != NULL) {
-                        lp->GetSurfaceInsets((IRect**)&surfaceInsets);
+                AutoPtr<IWindowManagerLayoutParams> lp = mWindowAttributes;
+                AutoPtr<IRect> surfaceInsets;
+                if (lp != NULL) {
+                    lp->GetSurfaceInsets((IRect**)&surfaceInsets);
+                }
+                Boolean bval;
+                ECode ec = mAttachInfo->mHardwareRenderer->InitializeIfNeeded(
+                    mWidth, mHeight, mSurface, surfaceInsets, &bval);
+                if (ec == (ECode)E_OUT_OF_RESOURCES_EXCEPTION) {
+                    Logger::E(TAG, "OutOfResourcesException locking surface");
+                    if (mWindowSession->OutOfMemory(mWindow, &bval), !bval) {
+                        Logger::W(TAG, "No processes killed for memory; killing self");
+                        Process::KillProcess(Process::MyPid());
                     }
-                    Boolean result;
-                    mAttachInfo->mHardwareRenderer->InitializeIfNeeded(
-                            mWidth, mHeight, mSurface, surfaceInsets, &result);
-                // } catch (OutOfResourcesException e) {
-                //     Log.e(TAG, "OutOfResourcesException locking surface", e);
-                //     try {
-                //         if (!mWindowSession.outOfMemory(mWindow)) {
-                //             Slog.w(TAG, "No processes killed for memory; killing self");
-                //             Process.killProcess(Process.myPid());
-                //         }
-                //     } catch (RemoteException ex) {
-                //     }
-                //     // Retry in a bit.
-                //     sendMessageDelayed(obtainMessage(msg.what, msg.arg1, msg.arg2), 500);
-                //     return;
-                // }
+                    // Retry in a bit.
+                    AutoPtr<IMessage> m;
+                    handle->ObtainMessage(what, arg1, arg2, (IMessage**)&m);
+                    handle->SendMessageDelayed(m, 500, &bval);
+                    return;
+                }
             }
         }
+
         CWindowManagerLayoutParams* wmlp = (CWindowManagerLayoutParams*)mWindowAttributes.Get();
         mLastWasImTarget = CWindowManagerLayoutParams::MayUseInputMethod(wmlp->mFlags);
         AutoPtr<IInputMethodManager> imm = CInputMethodManager::PeekInstance();

@@ -147,8 +147,6 @@ ECode TaskViewHeader::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    Logger::I(TAG, " >> constructor");
-
     FAIL_RETURN(FrameLayout::constructor(context, attrs, defStyleAttr, defStyleRes));
     mConfig = RecentsConfiguration::GetInstance();
     SetWillNotDraw(FALSE);
@@ -194,7 +192,6 @@ ECode TaskViewHeader::OnTouchEvent(
 // @Override
 ECode TaskViewHeader::OnFinishInflate()
 {
-    Logger::I(TAG, " >> OnFinishInflate");
     // Set the outline provider
     AutoPtr<ViewOutlineProvider> provider = new OutlineProvider(this);
     SetOutlineProvider(provider);
@@ -255,7 +252,6 @@ ECode TaskViewHeader::OnFinishInflate()
 void TaskViewHeader::OnDraw(
     /* [in] */ ICanvas* canvas)
 {
-    Logger::I(TAG, " >> OnDraw %s : %d", TO_CSTR(this), mIsFullscreen);
     if (!mIsFullscreen) {
         // Draw the highlight at the top edge (but put the bottom edge just out of view)
         Float offset = (Float) Elastos::Core::Math::Ceil(mConfig->mTaskViewHighlightPx / 2.0f);

@@ -53,7 +53,7 @@ namespace View {
     do { \
         ECode ec = expr; \
         if (ec == (Int32)E_NO_SUCH_METHOD_EXCEPTION) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION1: %s when %s, Error: E_NO_SUCH_METHOD_EXCEPTION.", name.string(), whereInfo); \
+            Slogger::E(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION1: %s when %s, Error: E_NO_SUCH_METHOD_EXCEPTION.", name.string(), whereInfo); \
             /*InflateException ie = new InflateException(attrs.getPositionDescription()*/ \
                   /*+ ": Error inflating class "*/ \
                   /*+ (prefix != null ? (prefix + name) : name));*/ \
@@ -61,12 +61,12 @@ namespace View {
             return ec; \
         } \
         else if (ec == (Int32)E_CLASS_NOT_FOUND_EXCEPTION) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION1: %s when %s, Error: E_CLASS_NOT_FOUND_EXCEPTION.", name.string(), whereInfo); \
+            Slogger::E(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION1: %s when %s, Error: E_CLASS_NOT_FOUND_EXCEPTION.", name.string(), whereInfo); \
             /* If loadClass fails, we should propagate the exception. */ \
             return ec; \
         } \
         else if (FAILED(ec)) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION1: %s when %s, Error: %08x.", name.string(), whereInfo, ec); \
+            Slogger::E(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION1: %s when %s, Error: %08x.", name.string(), whereInfo, ec); \
             /*InflateException ie = new InflateException(attrs.getPositionDescription()*/ \
                     /*+ ": Error inflating class "*/ \
                     /*+ (clazz == null ? "<unknown>" : clazz.getName()));*/ \
@@ -80,7 +80,7 @@ namespace View {
     do { \
         ECode ec = expr; \
         if (ec == (Int32)E_XML_PULL_PARSER_EXCEPTION) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION2: Error: E_XML_PULL_PARSER_EXCEPTION."); \
+            Slogger::E(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION2: Error: E_XML_PULL_PARSER_EXCEPTION."); \
             /*InflateException ex = new InflateException(e.getMessage());*/ \
             /*ie.initCause(e);*/ \
             mConstructorArgs->Set(0, lastContext); \
@@ -88,7 +88,7 @@ namespace View {
             return ec; \
         } \
         else if (ec == (Int32)E_IO_EXCEPTION) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION2: Error: E_IO_EXCEPTION."); \
+            Slogger::E(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION2: Error: E_IO_EXCEPTION."); \
             /*InflateException ie = new InflateException(*/ \
                     /*parser.getPositionDescription()*/ \
                     /*+ ": " + e.getMessage());*/ \
@@ -98,7 +98,7 @@ namespace View {
             return ec; \
         } \
         else if (FAILED(ec)) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION2: Error: %08x.", ec); \
+            Slogger::E(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION2: Error: %08x.", ec); \
             mConstructorArgs->Set(0, lastContext); \
             mConstructorArgs->Set(1, NULL); \
             return ec; \
@@ -110,18 +110,18 @@ namespace View {
     do { \
         ECode ec = expr; \
         if (ec == (Int32)E_INFLATE_EXCEPTION) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION3: %s, Error: E_INFLATE_EXCEPTION.", name.string()); \
+            Slogger::E(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION3: %s, Error: E_INFLATE_EXCEPTION.", name.string()); \
             return ec; \
         } \
         else if (ec == (Int32)E_CLASS_NOT_FOUND_EXCEPTION) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION3: %s, Error: E_CLASS_NOT_FOUND_EXCEPTION.", name.string()); \
+            Slogger::E(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION3: %s, Error: E_CLASS_NOT_FOUND_EXCEPTION.", name.string()); \
             /*InflateException ie = new InflateException(attrs.getPositionDescription()*/ \
                     /*+ ": Error inflating class " + name);*/ \
             /*ie.initCause(e);*/ \
             return ec;; \
         } \
         else if (FAILED(ec)) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION3: %s, Error: %08x.", name.string(), ec); \
+            Slogger::E(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION3: %s, Error: %08x.", name.string(), ec); \
             /*InflateException ie = new InflateException(attrs.getPositionDescription()*/ \
                     /*+ ": Error inflating class " + name);*/ \
             /*ie.initCause(e);*/ \
@@ -133,12 +133,12 @@ namespace View {
     do { \
         ECode ec = expr; \
         if (ec == (Int32)E_INFLATE_EXCEPTION) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION3: %s, Error: E_INFLATE_EXCEPTION.", name.string()); \
+            Slogger::E(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION3: %s, Error: E_INFLATE_EXCEPTION.", name.string()); \
             finallyCode; \
             return ec; \
         } \
         else if (ec == (Int32)E_CLASS_NOT_FOUND_EXCEPTION) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION3: %s, Error: E_CLASS_NOT_FOUND_EXCEPTION.", name.string()); \
+            Slogger::E(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION3: %s, Error: E_CLASS_NOT_FOUND_EXCEPTION.", name.string()); \
             /*InflateException ie = new InflateException(attrs.getPositionDescription()*/ \
                     /*+ ": Error inflating class " + name);*/ \
             /*ie.initCause(e);*/ \
@@ -146,7 +146,7 @@ namespace View {
             return ec;; \
         } \
         else if (FAILED(ec)) { \
-            Slogger::D(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION3: %s, Error: %08x.", name.string(), ec); \
+            Slogger::E(TAG, "LAYOUT_INFLATOR_CATCH_EXCEPTION3: %s, Error: %08x.", name.string(), ec); \
             /*InflateException ie = new InflateException(attrs.getPositionDescription()*/ \
                     /*+ ": Error inflating class " + name);*/ \
             /*ie.initCause(e);*/ \
@@ -688,8 +688,9 @@ ECode LayoutInflater::CreateView(
     /* [out] */ IView** view)
 {
     String prefix = inPrefix;
-    if (name.Equals("ViewStub") && !inPrefix.IsNull()) {
-        prefix = "Elastos.Droid.View."; // speed up for ViewStub
+    if (!inPrefix.IsNull()
+        && (name.Equals("ViewStub") || name.Equals("View"))) {
+        prefix = "Elastos.Droid.View."; // speed up for View or ViewStub
     }
     String reflectionClassName = GetReflectionClassName(prefix, name);
 
@@ -709,7 +710,10 @@ ECode LayoutInflater::CreateView(
         AutoPtr<IClassLoader> cl;
         LAYOUT_INFLATOR_CATCH_EXCEPTION1(mContext->GetClassLoader((IClassLoader**)&cl), "GetClassLoader")
         assert(cl != NULL);
-        LAYOUT_INFLATOR_CATCH_EXCEPTION1(cl->LoadClass(reflectionClassName, (IClassInfo**)&clazz), "LoadClass");
+
+        StringBuilder sb("LoadClass ");
+        sb += reflectionClassName;
+        LAYOUT_INFLATOR_CATCH_EXCEPTION1(cl->LoadClass(reflectionClassName, (IClassInfo**)&clazz), sb.ToString().string());
 
         if (mFilter != NULL && clazz != NULL) {
             Boolean allowed;

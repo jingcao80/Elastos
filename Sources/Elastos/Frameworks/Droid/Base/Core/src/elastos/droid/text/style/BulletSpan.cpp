@@ -118,8 +118,7 @@ ECode BulletSpan::DrawLeadingMargin(
         p->SetStyle(PaintStyle_FILL);
 
         Boolean bIsHardwareAccelerated;
-        if ((c->IsHardwareAccelerated(&bIsHardwareAccelerated), bIsHardwareAccelerated))
-        {
+        if ((c->IsHardwareAccelerated(&bIsHardwareAccelerated), bIsHardwareAccelerated)) {
             if (sBulletPath == NULL) {
                 CPath::New( (IPath**)&sBulletPath );
 

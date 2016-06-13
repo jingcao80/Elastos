@@ -13,7 +13,7 @@
 #include "elastos/droid/graphics/Paint.h"
 #include "elastos/droid/graphics/COutline.h"
 #include "elastos/droid/graphics/CPath.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/graphics/NativePaint.h"
 #include "elastos/droid/view/RenderNodeAnimator.h"
 
@@ -28,6 +28,7 @@ using Elastos::Droid::Graphics::IPath;
 using Elastos::Droid::Graphics::Matrix;
 using Elastos::Droid::Graphics::Paint;
 using Elastos::Droid::Graphics::NativePaint;
+using Elastos::Utility::Logging::Logger;
 
 using android::uirenderer::DisplayListData;
 using android::uirenderer::LayerType;
@@ -54,15 +55,18 @@ RenderNode::RenderNode()
 ECode RenderNode::Start(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
-    /* [out] */ IHardwareCanvas** rCanvas)
+    /* [out] */ IHardwareCanvas** result)
 {
-    AutoPtr<IHardwareCanvas> canvas;// = GLES20RecordingCanvas.obtain(this); zhangjingcheng
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    AutoPtr<IHardwareCanvas> canvas = GLES20RecordingCanvas::Obtain(this);
     ICanvas::Probe(canvas)->SetViewport(width, height);
     // The dirty rect should always be null for a display list
     Int32 r;
     canvas->OnPreDraw(NULL, &r);
-    *rCanvas = canvas;
-    REFCOUNT_ADD(*rCanvas)
+    *result = canvas;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -70,7 +74,7 @@ ECode RenderNode::End(
     /* [in] */ IHardwareCanvas* endCanvas)
 {
     if (IGLES20RecordingCanvas::Probe(endCanvas) == NULL) {
-        SLOGGERE("RenderNode", "Passed an invalid canvas to end!")
+        Logger::E("RenderNode", "Passed an invalid canvas to end!");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -97,16 +101,18 @@ ECode RenderNode::DestroyDisplayListData()
 ECode RenderNode::IsValid(
     /* [out] */ Boolean* isValid)
 {
+    VALIDATE_NOT_NULL(isValid)
     *isValid = mValid;
     return NOERROR;
 }
 
 ECode RenderNode::GetNativeDisplayList(
-        /* [out] */ Int64* list)
+    /* [out] */ Int64* list)
 {
+    VALIDATE_NOT_NULL(list)
     if (!mValid) {
         // throw new IllegalStateException("The display list is not valid.");
-        SLOGGERE("RenderNode", "The display list is not valid.")
+        Logger::E("RenderNode", "The display list is not valid.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     *list = mNativeRenderNode;
@@ -116,6 +122,7 @@ ECode RenderNode::GetNativeDisplayList(
 ECode RenderNode::HasIdentityMatrix(
     /* [out] */ Boolean* hasIdentityMatrix)
 {
+    VALIDATE_NOT_NULL(hasIdentityMatrix)
     *hasIdentityMatrix = nHasIdentityMatrix(mNativeRenderNode);
     return NOERROR;
 }
@@ -138,6 +145,7 @@ ECode RenderNode::SetLayerType(
     /* [in] */ Int32 layerType,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetLayerType(mNativeRenderNode, layerType);
     return NOERROR;
 }
@@ -146,7 +154,8 @@ ECode RenderNode::SetLayerPaint(
     /* [in] */ IPaint* paint,
     /* [out] */ Boolean* result)
 {
-    nSetLayerPaint(mNativeRenderNode, paint != NULL ? ((Paint*)paint)->mNativePaint : 0);
+    VALIDATE_NOT_NULL(result)
+    *result = nSetLayerPaint(mNativeRenderNode, paint != NULL ? ((Paint*)paint)->mNativePaint : 0);
     return NOERROR;
 }
 
@@ -154,6 +163,7 @@ ECode RenderNode::SetClipBounds(
     /* [in] */ IRect* rect,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (rect == NULL) {
         *result = nSetClipBoundsEmpty(mNativeRenderNode);
     } else {
@@ -177,6 +187,7 @@ ECode RenderNode::SetClipToBounds(
     /* [in] */ Boolean clipToBounds,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetClipToBounds(mNativeRenderNode, clipToBounds);
     return NOERROR;
 }
@@ -192,6 +203,7 @@ ECode RenderNode::SetProjectBackwards(
     /* [in] */ Boolean shouldProject,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetProjectBackwards(mNativeRenderNode, shouldProject);
     return NOERROR;
 }
@@ -205,6 +217,7 @@ ECode RenderNode::SetProjectionReceiver(
     /* [in] */ Boolean  shouldRecieve,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetProjectionReceiver(mNativeRenderNode, shouldRecieve);
     return NOERROR;
 }
@@ -219,6 +232,7 @@ ECode RenderNode::SetOutline(
     /* [in] */ IOutline* outline,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (outline == NULL) {
         *result = nSetOutlineNone(mNativeRenderNode);
         return NOERROR;
@@ -228,31 +242,34 @@ ECode RenderNode::SetOutline(
         *result = nSetOutlineEmpty(mNativeRenderNode);
         return NOERROR;
     }
-    AutoPtr<IRect> rect = ((COutline*)outline)->mRect;
+    COutline* ol = (COutline*)outline;
+    AutoPtr<IRect> rect = ol->mRect;
     if (rect != NULL) {
         Int32 left, top, right, bottom;
         rect->GetLeft(&left);
         rect->GetTop(&top);
         rect->GetRight(&right);
         rect->GetBottom(&bottom);
-        Float radius = ((COutline*)outline)->mRadius;
-        Float alpha = ((COutline*)outline)->mAlpha;
+        Float radius = ol->mRadius;
+        Float alpha = ol->mAlpha;
         *result = nSetOutlineRoundRect(mNativeRenderNode, left, top,
                 right, bottom, radius, alpha);
         return NOERROR;
-    } else if (((COutline*)outline)->mPath != NULL) {
-        AutoPtr<IPath> path = ((COutline*)outline)->mPath;
-        Float alpha = ((COutline*)outline)->mAlpha;
+    }
+    else if (ol->mPath != NULL) {
+        AutoPtr<IPath> path = ol->mPath;
+        Float alpha = ol->mAlpha;
         *result = nSetOutlineConvexPath(mNativeRenderNode,((CPath*)path.Get())->mNativePath, alpha);
         return NOERROR;
     }
-    SLOGGERE("RenderNode","Unrecognized outline?")
+    Logger::E("RenderNode","Unrecognized outline?");
     return E_ILLEGAL_ARGUMENT_EXCEPTION;
 }
 
 ECode RenderNode::HasShadow(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nHasShadow(mNativeRenderNode);
     return NOERROR;
 }
@@ -266,6 +283,7 @@ ECode RenderNode::SetClipToOutline(
     /* [in] */ Boolean clipToOutline,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetClipToOutline(mNativeRenderNode, clipToOutline);
     return NOERROR;
 }
@@ -273,6 +291,7 @@ ECode RenderNode::SetClipToOutline(
 ECode RenderNode::GetClipToOutline(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nGetClipToOutline(mNativeRenderNode);
     return NOERROR;
 }
@@ -287,6 +306,7 @@ ECode RenderNode::SetRevealClip(
     /* [in] */ Float radius,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetRevealClip(mNativeRenderNode, shouldClip, x, y, radius);
     return NOERROR;
 }
@@ -301,6 +321,7 @@ ECode RenderNode::SetStaticMatrix(
     /* [in] */ IMatrix* matrix,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetStaticMatrix(mNativeRenderNode, ((Matrix*)matrix)->mNativeMatrix);
     return NOERROR;
 }
@@ -317,6 +338,7 @@ ECode RenderNode::SetAnimationMatrix(
     /* [in] */ IMatrix* matrix,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetAnimationMatrix(mNativeRenderNode,
             (matrix != NULL) ? ((Matrix*)matrix)->mNativeMatrix : 0);
     return NOERROR;
@@ -334,6 +356,7 @@ ECode RenderNode::SetAlpha(
     /* [in] */ Float alpha,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetAlpha(mNativeRenderNode, alpha);
     return NOERROR;
 }
@@ -348,6 +371,7 @@ ECode RenderNode::SetAlpha(
 ECode RenderNode::GetAlpha(
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nGetAlpha(mNativeRenderNode);
     return NOERROR;
 }
@@ -367,6 +391,7 @@ ECode RenderNode::SetHasOverlappingRendering(
     /* [in] */ Boolean hasOverlappingRendering,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetHasOverlappingRendering(mNativeRenderNode, hasOverlappingRendering);
     return NOERROR;
 }
@@ -381,6 +406,7 @@ ECode RenderNode::SetHasOverlappingRendering(
 ECode RenderNode::HasOverlappingRendering(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nHasOverlappingRendering(mNativeRenderNode);
     return NOERROR;
 }
@@ -389,6 +415,7 @@ ECode RenderNode::SetElevation(
     /* [in] */ Float lift,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetElevation(mNativeRenderNode, lift);
     return NOERROR;
 }
@@ -396,6 +423,7 @@ ECode RenderNode::SetElevation(
 ECode RenderNode::GetElevation(
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nGetElevation(mNativeRenderNode);
     return NOERROR;
 }
@@ -412,6 +440,7 @@ ECode RenderNode::SetTranslationX(
     /* [in] */ Float translationX,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetTranslationX(mNativeRenderNode, translationX);
     return NOERROR;
 }
@@ -424,6 +453,7 @@ ECode RenderNode::SetTranslationX(
 ECode RenderNode::GetTranslationX(
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nGetTranslationX(mNativeRenderNode);
     return NOERROR;
 }
@@ -440,6 +470,7 @@ ECode RenderNode::SetTranslationY(
     /* [in] */ Float translationY,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetTranslationY(mNativeRenderNode, translationY);
     return NOERROR;
 }
@@ -452,6 +483,7 @@ ECode RenderNode::SetTranslationY(
 ECode RenderNode::GetTranslationY(
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nGetTranslationY(mNativeRenderNode);
     return NOERROR;
 }
@@ -466,6 +498,7 @@ ECode RenderNode::SetTranslationZ(
     /* [in] */ Float translationZ,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetTranslationZ(mNativeRenderNode, translationZ);
     return NOERROR;
 }
@@ -478,6 +511,7 @@ ECode RenderNode::SetTranslationZ(
 ECode RenderNode::GetTranslationZ(
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nGetTranslationZ(mNativeRenderNode);
     return NOERROR;
 }
@@ -494,6 +528,7 @@ ECode RenderNode::SetRotation(
     /* [in] */ Float rotation,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetRotation(mNativeRenderNode, rotation);
     return NOERROR;
 }
@@ -506,6 +541,7 @@ ECode RenderNode::SetRotation(
 ECode RenderNode::GetRotation(
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nGetRotation(mNativeRenderNode);
     return NOERROR;
 }
@@ -522,6 +558,7 @@ ECode RenderNode::SetRotationX(
     /* [in] */ Float rotationX,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetRotationX(mNativeRenderNode, rotationX);
     return NOERROR;
 }
@@ -534,6 +571,7 @@ ECode RenderNode::SetRotationX(
 ECode RenderNode::GetRotationX(
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nGetRotationX(mNativeRenderNode);
     return NOERROR;
 }
@@ -550,6 +588,7 @@ ECode RenderNode::SetRotationY(
     /* [in] */ Float rotationY,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetRotationY(mNativeRenderNode, rotationY);
     return NOERROR;
 }
@@ -562,6 +601,7 @@ ECode RenderNode::SetRotationY(
 ECode RenderNode::GetRotationY(
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nGetRotationY(mNativeRenderNode);
     return NOERROR;
 }
@@ -578,6 +618,7 @@ ECode RenderNode::SetScaleX(
     /* [in] */ Float scaleX,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetScaleX(mNativeRenderNode, scaleX);
     return NOERROR;
 }
@@ -590,6 +631,7 @@ ECode RenderNode::SetScaleX(
 ECode RenderNode::GetScaleX(
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nGetScaleX(mNativeRenderNode);
     return NOERROR;
 }
@@ -606,6 +648,7 @@ ECode RenderNode::SetScaleY(
     /* [in] */ Float scaleY,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetScaleY(mNativeRenderNode, scaleY);
     return NOERROR;
 }
@@ -618,6 +661,7 @@ ECode RenderNode::SetScaleY(
 ECode RenderNode::GetScaleY(
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nGetScaleY(mNativeRenderNode);
     return NOERROR;
 }
@@ -634,6 +678,7 @@ ECode RenderNode::SetPivotX(
     /* [in] */ Float pivotX,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetPivotX(mNativeRenderNode, pivotX);
     return NOERROR;
 }
@@ -646,6 +691,7 @@ ECode RenderNode::SetPivotX(
 ECode RenderNode::GetPivotX(
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nGetPivotX(mNativeRenderNode);
     return NOERROR;
 }
@@ -662,6 +708,7 @@ ECode RenderNode::SetPivotY(
     /* [in] */ Float pivotY,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetPivotY(mNativeRenderNode, pivotY);
     return NOERROR;
 }
@@ -674,6 +721,7 @@ ECode RenderNode::SetPivotY(
 ECode RenderNode::GetPivotY(
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nGetPivotY(mNativeRenderNode);
     return NOERROR;
 }
@@ -681,6 +729,7 @@ ECode RenderNode::GetPivotY(
 ECode RenderNode::IsPivotExplicitlySet(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nIsPivotExplicitlySet(mNativeRenderNode);
     return NOERROR;
 }
@@ -699,6 +748,7 @@ ECode RenderNode::SetCameraDistance(
     /* [in] */ Float distance,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetCameraDistance(mNativeRenderNode, distance);
     return NOERROR;
 }
@@ -711,6 +761,7 @@ ECode RenderNode::SetCameraDistance(
 ECode RenderNode::GetCameraDistance(
     /* [out] */ Float* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nGetCameraDistance(mNativeRenderNode);
     return NOERROR;
 }
@@ -726,6 +777,7 @@ ECode RenderNode::SetLeft(
     /* [in] */ Int32 left,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetLeft(mNativeRenderNode, left);
     return NOERROR;
 }
@@ -741,6 +793,7 @@ ECode RenderNode::SetTop(
     /* [in] */ Int32 top,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetTop(mNativeRenderNode, top);
     return NOERROR;
 }
@@ -756,6 +809,7 @@ ECode RenderNode::SetRight(
     /* [in] */ Int32 right,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetRight(mNativeRenderNode, right);
     return NOERROR;
 }
@@ -771,6 +825,7 @@ ECode RenderNode::SetBottom(
     /* [in] */ Int32 bottom,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetBottom(mNativeRenderNode, bottom);
     return NOERROR;
 }
@@ -795,6 +850,7 @@ ECode RenderNode::SetLeftTopRightBottom(
     /* [in] */ Int32 bottom,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nSetLeftTopRightBottom(mNativeRenderNode, left, top, right, bottom);
     return NOERROR;
 }
@@ -811,6 +867,7 @@ ECode RenderNode::OffsetLeftAndRight(
     /* [in] */ Int32 offset,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nOffsetLeftAndRight(mNativeRenderNode, offset);
     return NOERROR;
 }
@@ -827,6 +884,7 @@ ECode RenderNode::OffsetTopAndBottom(
     /* [in] */ Int32 offset,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = nOffsetTopAndBottom(mNativeRenderNode, offset);
     return NOERROR;
 }
@@ -847,6 +905,7 @@ ECode RenderNode::Output()
 ECode RenderNode::GetDebugSize(
     /* [out] */ Int32* size)
 {
+    VALIDATE_NOT_NULL(size)
     *size = nGetDebugSize(mNativeRenderNode);
     return NOERROR;
 }
@@ -859,7 +918,7 @@ ECode RenderNode::AddAnimator(
     /* [in] */ IRenderNodeAnimator* animator)
 {
     if (mOwningView == NULL || ((View*)mOwningView.Get())->mAttachInfo == NULL) {
-        SLOGGERE("RenderNode", "Cannot start this animator on a detached view!")
+        Logger::E("RenderNode", "Cannot start this animator on a detached view!");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 

@@ -72,10 +72,12 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        TaskProgressAnimatorUpdateListener(
-            /* [in] */ TaskView* host);
+        TO_STRING_IMPL("TaskView::TaskProgressAnimatorUpdateListener")
 
         CAR_INTERFACE_DECL()
+
+        TaskProgressAnimatorUpdateListener(
+            /* [in] */ TaskView* host);
 
         // @Override
         CARAPI OnAnimationUpdate(
@@ -90,10 +92,12 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        ClipTopAnimatorUpdateListener(
-            /* [in] */ TaskView* host);
+        TO_STRING_IMPL("TaskView::ClipTopAnimatorUpdateListener")
 
         CAR_INTERFACE_DECL()
+
+        ClipTopAnimatorUpdateListener(
+            /* [in] */ TaskView* host);
 
         // @Override
         CARAPI OnAnimationUpdate(
@@ -106,6 +110,8 @@ private:
     class MyViewOutlineProvider : public ViewOutlineProvider
     {
     public:
+        TO_STRING_IMPL("TaskView::MyViewOutlineProvider")
+
         MyViewOutlineProvider(
             /* [in] */ TaskView* host);
 
@@ -118,9 +124,12 @@ private:
         TaskView* mHost;
     };
 
-    class EndLaunchedFromAppWithScreenshotRunnable : public Runnable
+    class EndLaunchedFromAppWithScreenshotRunnable
+        : public Runnable
     {
     public:
+        TO_STRING_IMPL("TaskView::EndLaunchedFromAppWithScreenshotRunnable")
+
         EndLaunchedFromAppWithScreenshotRunnable(
             /* [in] */ TaskView* host,
             /* [in] */ ViewAnimation::TaskViewEnterContext* ctx);
@@ -136,6 +145,8 @@ private:
     class AnimateDimRunnable : public Runnable
     {
     public:
+        TO_STRING_IMPL("TaskView::AnimateDimRunnable")
+
         AnimateDimRunnable(
             /* [in] */ TaskView* host,
             /* [in] */ ViewAnimation::TaskViewEnterContext* ctx);
@@ -151,6 +162,8 @@ private:
     class EndLaunchedFromAppWithThumbnailRunnable : public Runnable
     {
     public:
+        TO_STRING_IMPL("TaskView::EndLaunchedFromAppWithThumbnailRunnable")
+
         EndLaunchedFromAppWithThumbnailRunnable(
             /* [in] */ ViewAnimation::TaskViewEnterContext* ctx);
 
@@ -164,6 +177,8 @@ private:
     class EnableFocusAnimationsDimRunnable : public Runnable
     {
     public:
+        TO_STRING_IMPL("TaskView::EnableFocusAnimationsDimRunnable")
+
         EnableFocusAnimationsDimRunnable(
             /* [in] */ TaskView* host);
 
@@ -174,10 +189,12 @@ private:
         TaskView* mHost;
     };
 
-    class EndActionRunnable3 : public Runnable
+    class EndDeleteTaskAnimationRunnable : public Runnable
     {
     public:
-        EndActionRunnable3(
+        TO_STRING_IMPL("TaskView::EndDeleteTaskAnimationRunnable")
+
+        EndDeleteTaskAnimationRunnable(
             /* [in] */ TaskView* host,
             /* [in] */ IRunnable* r);
 
@@ -192,6 +209,8 @@ private:
     class DismissTaskRunnable : public Runnable
     {
     public:
+        TO_STRING_IMPL("TaskView::DismissTaskRunnable")
+
         DismissTaskRunnable(
             /* [in] */ TaskView* host);
 
@@ -205,6 +224,8 @@ private:
     class OnClickRunnable : public Runnable
     {
     public:
+        TO_STRING_IMPL("TaskView::OnClickRunnable")
+
         OnClickRunnable(
             /* [in] */ TaskView* host,
             /* [in] */ IView* v);
@@ -338,15 +359,21 @@ public:
         /* [in] */ Int32 duration);
 
     /** Sets the current task progress. */
-    CARAPI_(void) SetTaskProgress(
+    CARAPI SetTaskProgress(
         /* [in] */ Float p);
+
+    CARAPI GetTaskProgress(
+        /* [out] */ Float* p);
 
     /** Returns the current task progress. */
     CARAPI_(Float) GetTaskProgress();
 
     /** Returns the current dim. */
-    CARAPI_(void) SetDim(
+    CARAPI SetDim(
         /* [in] */ Int32 dim);
+
+    CARAPI GetDim(
+        /* [out] */ Int32* dim);
 
     /** Returns the current dim. */
     CARAPI_(Int32) GetDim();

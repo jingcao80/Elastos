@@ -4,6 +4,7 @@
 
 #include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/recents/misc/SystemServicesProxy.h"
+#include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.View.h"
@@ -12,6 +13,7 @@
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::SystemUI::Recents::Misc::SystemServicesProxy;
+using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::View::Animation::IInterpolator;
 
 namespace Elastos {
@@ -110,10 +112,10 @@ public:
     Float mAnimationPxMovementPerSecond;
 
     /** Interpolators */
-    AutoPtr<IInterpolator> mFastOutSlowInInterpolator;
-    AutoPtr<IInterpolator> mFastOutLinearInInterpolator;
-    AutoPtr<IInterpolator> mLinearOutSlowInInterpolator;
-    AutoPtr<IInterpolator> mQuintOutInterpolator;
+    AutoPtr<ITimeInterpolator> mFastOutSlowInInterpolator;
+    AutoPtr<ITimeInterpolator> mFastOutLinearInInterpolator;
+    AutoPtr<ITimeInterpolator> mLinearOutSlowInInterpolator;
+    AutoPtr<ITimeInterpolator> mQuintOutInterpolator;
 
     /** Filtering */
     Int32 mFilteringCurrentViewsAnimDuration;

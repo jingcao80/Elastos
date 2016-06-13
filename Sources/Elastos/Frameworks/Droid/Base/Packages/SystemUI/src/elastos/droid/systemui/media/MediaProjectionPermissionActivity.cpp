@@ -107,7 +107,7 @@ ECode MediaProjectionPermissionActivity::OnCreate(
     AutoPtr<ICharSequence> csappname;
     CString::New(appName, (ICharSequence**)&csappname);
     AutoPtr<ArrayOf<IInterface*> > arrappname = ArrayOf<IInterface*>::Alloc(1);
-    (*arrappname)[0] = csappname;
+    arrappname->Set(0, csappname);
     String str;
     GetString(R::string::media_projection_dialog_text, arrappname, &str);
     AutoPtr<ICharSequence> message;

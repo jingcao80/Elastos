@@ -35,7 +35,8 @@ ECode HardwareCanvas::SetBitmap(
 ECode HardwareCanvas::DrawRenderNode(
     /* [in] */ IRenderNode* renderNode)
 {
-    return DrawRenderNode(renderNode, NULL, IRenderNode::FLAG_CLIP_CHILDREN);
+    Int32 status;
+    return DrawRenderNode(renderNode, NULL, IRenderNode::FLAG_CLIP_CHILDREN, &status);
 }
 
 /**
@@ -62,8 +63,7 @@ ECode HardwareCanvas::SetProperty(
     /* [in] */ const String& name,
     /* [in] */ const String& value)
 {
-    GLES20Canvas::SetProperty(name, value);
-    return NOERROR;
+    return GLES20Canvas::SetProperty(name, value);
 }
 
 } // namespace Elastos

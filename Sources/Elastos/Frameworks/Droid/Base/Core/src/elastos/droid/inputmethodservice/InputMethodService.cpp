@@ -477,14 +477,13 @@ InputMethodService::~InputMethodService()
         delete mTmpLocation;
         mTmpLocation = NULL;
     }
-
 }
 
 ECode InputMethodService::SetTheme(
     /* [in] */ Int32 theme)
 {
     if (mWindow != NULL) {
-        // throw new IllegalStateException("Must be called before onCreate()");
+        Logger::E(TAG, "Must be called before onCreate()");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     mTheme = theme;
@@ -494,10 +493,11 @@ ECode InputMethodService::SetTheme(
 ECode InputMethodService::EnableHardwareAcceleration(
     /* [out] */ Boolean* enable)
 {
-    assert(enable != NULL);
+    VALIDATE_NOT_NULL(enable)
+    *enable = FALSE;
     if (mWindow != NULL) {
-        assert(0);
-        // throw new IllegalStateException("Must be called before onCreate()");
+        Logger::E(TAG, "Must be called before onCreate()");
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     AutoPtr<IActivityManagerHelper> helper;

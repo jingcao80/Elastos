@@ -7,6 +7,7 @@
 
 using Elastos::Droid::Graphics::Canvas;
 using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::IRect;
 
 namespace Elastos {
 namespace Droid {
@@ -18,6 +19,8 @@ class HardwareCanvas
 {
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("HardwareCanvas")
 
     CARAPI constructor();
 
@@ -35,6 +38,12 @@ public:
      */
     CARAPI DrawRenderNode(
         /* [in] */ IRenderNode* renderNode);
+
+    virtual CARAPI DrawRenderNode(
+        /* [in] */ IRenderNode* renderNode,
+        /* [in] */ IRect* dirty,
+        /* [in] */ Int32 flags,
+        /* [out] */ Int32* result) = 0;
 
     /**
      * Calls the function specified with the drawGLFunction function pointer. This is

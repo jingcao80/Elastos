@@ -16,7 +16,7 @@
 #include "elastos/droid/text/TextUtils.h"
 
 #include <elastos/core/Math.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <androidfw/ResourceTypes.h>
 #include <private/hwui/DrawGlInfo.h>
@@ -61,6 +61,7 @@ using Elastos::Droid::Text::ISpannableString;
 using Elastos::Droid::Text::IGraphicsOperations;
 
 using Elastos::Core::IString;
+using Elastos::Utility::Logging::Logger;
 
 using namespace android;
 using namespace android::uirenderer;
@@ -68,20 +69,67 @@ using namespace android::uirenderer;
 namespace Elastos {
 namespace Droid {
 namespace View {
-CAR_INTERFACE_IMPL(GLES20Canvas, HardwareCanvas, IGLES20Canvas)
 
+
+static Boolean NativeIsAvailable()
+{
+#ifdef USE_OPENGL_RENDERER
+    char prop[PROPERTY_VALUE_MAX];
+    if (property_get("ro.kernel.qemu", prop, NULL) == 0) {
+        // not in the emulator
+        return TRUE;
+    }
+    // In the emulator this property will be set to 1 when hardware GLES is
+    // enabled, 0 otherwise. On old emulator versions it will be undefined.
+    property_get("ro.kernel.qemu.gles", prop, "0");
+    return atoi(prop) == 1 ? TRUE : FALSE;
+#else
+    return FALSE;
+#endif
+}
+
+//============================================================================
+// GLES20Canvas::CanvasFinalizer
+//============================================================================
 GLES20Canvas::CanvasFinalizer::CanvasFinalizer(
-/* [in] */ Int64 rendererPtr)
+    /* [in] */ Int64 rendererPtr)
+    : mRenderer(rendererPtr)
 {}
 
 GLES20Canvas::CanvasFinalizer::~CanvasFinalizer()
+{
+    GLES20Canvas::nDestroyRenderer(mRenderer);
+}
+
+//============================================================================
+// GLES20Canvas
+//============================================================================
+
+CAR_INTERFACE_IMPL(GLES20Canvas, HardwareCanvas, IGLES20Canvas)
+
+Boolean GLES20Canvas::sIsAvailable = NativeIsAvailable();
+
+GLES20Canvas::GLES20Canvas()
+    : mRenderer(0)
+    , mOpaque(FALSE)
+    , mWidth(0)
+    , mHeight(0)
 {}
 
-Boolean GLES20Canvas::sIsAvailable = GLES20Canvas::nIsAvailable();
+ECode GLES20Canvas::constructor()
+{
+    FAIL_RETURN(HardwareCanvas::constructor())
+
+    mOpaque = FALSE;
+    mRenderer = nCreateDisplayListRenderer();
+    SetupFinalizer();
+    return NOERROR;
+}
 
 ECode GLES20Canvas::GetWidth(
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = mWidth;
     return NOERROR;
 }
@@ -89,6 +137,7 @@ ECode GLES20Canvas::GetWidth(
 ECode GLES20Canvas::GetHeight(
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = mHeight;
     return NOERROR;
 }
@@ -96,6 +145,7 @@ ECode GLES20Canvas::GetHeight(
 ECode GLES20Canvas::GetMaximumBitmapWidth(
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = nGetMaximumTextureWidth();
     return NOERROR;
 }
@@ -103,6 +153,7 @@ ECode GLES20Canvas::GetMaximumBitmapWidth(
 ECode GLES20Canvas::GetMaximumBitmapHeight(
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = nGetMaximumTextureHeight();
     return NOERROR;
 }
@@ -141,12 +192,10 @@ ECode GLES20Canvas::OnPreDraw(
     /* [in] */ IRect* dirty,
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     if (dirty != NULL) {
         Int32 left ,top ,right ,bottom;
-        dirty->GetLeft(&left);
-        dirty->GetTop(&top);
-        dirty->GetRight(&right);
-        dirty->GetBottom(&bottom);
+        dirty->Get(&left, &top, &right, &bottom);
         *res = nPrepareDirty(mRenderer, left, top, right, bottom, mOpaque);
     } else {
         *res = nPrepare(mRenderer, mOpaque);
@@ -164,6 +213,7 @@ ECode GLES20Canvas::CallDrawGLFunction(
     /* [in] */ Int64 drawGLFunction,
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = nCallDrawGLFunction(mRenderer, drawGLFunction);
     return NOERROR;
 }
@@ -174,6 +224,7 @@ ECode GLES20Canvas::DrawRenderNode(
     /* [in] */ Int32 flags,
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     Int64 list;
     renderNode->GetNativeDisplayList(&list);
     *res = nDrawRenderNode(mRenderer, list, dirty, flags);
@@ -197,6 +248,7 @@ ECode GLES20Canvas::ClipPath(
     /* [in] */ IPath* path,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     CPath* p = (CPath*)path;
     *res = nClipPath(mRenderer, p->mNativePath, RegionOp_INTERSECT);
 
@@ -208,6 +260,7 @@ ECode GLES20Canvas::ClipPath(
     /* [in] */ RegionOp op,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     CPath* p = (CPath*)path;
     *res = nClipPath(mRenderer, p->mNativePath, op);
     return NOERROR;
@@ -220,6 +273,7 @@ ECode GLES20Canvas::ClipRect(
     /* [in] */ Float bottom,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = nClipRect(mRenderer, left, top, right, bottom, RegionOp_INTERSECT);
     return NOERROR;
 }
@@ -232,6 +286,7 @@ ECode GLES20Canvas::ClipRect(
     /* [in] */ RegionOp op,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = nClipRect(mRenderer, left, top, right, bottom, op);
     return NOERROR;
 }
@@ -243,6 +298,7 @@ ECode GLES20Canvas::ClipRect(
     /* [in] */ Int32 bottom,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = nClipRect(mRenderer, left, top, right, bottom, RegionOp_INTERSECT);
     return NOERROR;
 }
@@ -251,10 +307,7 @@ ECode GLES20Canvas::ClipRect(
     /* [in] */ IRect* rect)
 {
     Int32 left ,top ,right ,bottom;
-    rect->GetLeft(&left);
-    rect->GetTop(&top);
-    rect->GetRight(&right);
-    rect->GetBottom(&bottom);
+    rect->Get(&left, &top, &right, &bottom);
     nClipRect(mRenderer, left, top, right, bottom, RegionOp_INTERSECT);
     return NOERROR;
 }
@@ -264,10 +317,7 @@ ECode GLES20Canvas::ClipRect(
     /* [in] */ RegionOp op)
 {
     Int32 left ,top ,right ,bottom;
-    rect->GetLeft(&left);
-    rect->GetTop(&top);
-    rect->GetRight(&right);
-    rect->GetBottom(&bottom);
+    rect->Get(&left, &top, &right, &bottom);
     nClipRect(mRenderer, left, top, right, bottom, op);
     return NOERROR;
 }
@@ -276,10 +326,7 @@ ECode GLES20Canvas::ClipRect(
     /* [in] */ IRectF* rect)
 {
     Float left ,top ,right ,bottom;
-    rect->GetLeft(&left);
-    rect->GetTop(&top);
-    rect->GetRight(&right);
-    rect->GetBottom(&bottom);
+    rect->Get(&left, &top, &right, &bottom);
     nClipRect(mRenderer, left, top, right, bottom, RegionOp_INTERSECT);
     return NOERROR;
 }
@@ -289,10 +336,7 @@ ECode GLES20Canvas::ClipRect(
     /* [in] */ RegionOp op)
 {
     Float left ,top ,right ,bottom;
-    rect->GetLeft(&left);
-    rect->GetTop(&top);
-    rect->GetRight(&right);
-    rect->GetBottom(&bottom);
+    rect->Get(&left, &top, &right, &bottom);
     nClipRect(mRenderer, left, top, right, bottom, op);
     return NOERROR;
 }
@@ -320,6 +364,7 @@ ECode GLES20Canvas::GetClipBounds(
     /* [in] */ IRect* bounds,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = nGetClipBounds(mRenderer, bounds);
     return NOERROR;
 }
@@ -332,6 +377,7 @@ ECode GLES20Canvas::QuickReject(
     /* [in] */ CanvasEdgeType type,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = nQuickReject(mRenderer, left, top, right, bottom);
     return NOERROR;
 }
@@ -341,13 +387,11 @@ ECode GLES20Canvas::QuickReject(
     /* [in] */ CanvasEdgeType type,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     AutoPtr<IRectF> pathBounds = GetPathBounds();
     path->ComputeBounds(pathBounds, TRUE);
     Float left, top, right, bottom;
-    pathBounds->GetLeft(&left);
-    pathBounds->GetLeft(&top);
-    pathBounds->GetRight(&right);
-    pathBounds->GetBottom(&bottom);
+    pathBounds->Get(&left, &top, &right, &bottom);
     *res = nQuickReject(mRenderer, left, top, right, bottom);
     return NOERROR;
 }
@@ -357,11 +401,9 @@ ECode GLES20Canvas::QuickReject(
     /* [in] */ CanvasEdgeType type,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     Float left, top, right, bottom;
-    rect->GetLeft(&left);
-    rect->GetLeft(&top);
-    rect->GetRight(&right);
-    rect->GetBottom(&bottom);
+    rect->Get(&left, &top, &right, &bottom);
     nQuickReject(mRenderer, left, top, right, bottom);
     return NOERROR;
 }
@@ -433,6 +475,7 @@ ECode GLES20Canvas::Concat(
 ECode GLES20Canvas::Save(
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = nSave(mRenderer, ICanvas::CLIP_SAVE_FLAG | ICanvas::MATRIX_SAVE_FLAG);
     return NOERROR;
 }
@@ -441,6 +484,7 @@ ECode GLES20Canvas::Save(
     /* [in] */ Int32 saveFlags,
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = nSave(mRenderer, saveFlags);
     return NOERROR;
 }
@@ -451,12 +495,10 @@ ECode GLES20Canvas::SaveLayer(
     /* [in] */ Int32 saveFlags,
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     if (bounds != NULL) {
         Float left, top, right, bottom;
-        bounds->GetLeft(&left);
-        bounds->GetLeft(&top);
-        bounds->GetRight(&right);
-        bounds->GetBottom(&bottom);
+        bounds->Get(&left, &top, &right, &bottom);
         return SaveLayer(left, top, right, bottom, paint, saveFlags, res);
     }
 
@@ -475,6 +517,7 @@ ECode GLES20Canvas::SaveLayer(
     /* [in] */ Int32 saveFlags,
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     if (left < right && top < bottom) {
         Paint* p = (Paint*)paint;
         Int64 nativePaint = p == NULL ? 0 : p->mNativePaint;
@@ -490,12 +533,10 @@ ECode GLES20Canvas::SaveLayerAlpha(
     /* [in] */ Int32 saveFlags,
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     if (bounds != NULL) {
         Float left, top, right, bottom;
-        bounds->GetLeft(&left);
-        bounds->GetLeft(&top);
-        bounds->GetRight(&right);
-        bounds->GetBottom(&bottom);
+        bounds->Get(&left, &top, &right, &bottom);
         return SaveLayerAlpha(left, top, right, bottom,
                 alpha, saveFlags, res);
     }
@@ -512,6 +553,7 @@ ECode GLES20Canvas::SaveLayerAlpha(
     /* [in] */ Int32 saveFlags,
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     if (left < right && top < bottom) {
         *res = nSaveLayerAlpha(mRenderer, left, top, right, bottom, alpha, saveFlags);
         return NOERROR;
@@ -535,6 +577,7 @@ ECode GLES20Canvas::RestoreToCount(
 ECode GLES20Canvas::GetSaveCount(
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = nGetSaveCount(mRenderer);
     return NOERROR;
 }
@@ -560,6 +603,7 @@ ECode GLES20Canvas::SetDrawFilter(
 ECode GLES20Canvas::GetDrawFilter(
     /* [out] */ IDrawFilter** filter)
 {
+    VALIDATE_NOT_NULL(filter)
     *filter = mFilter;
     REFCOUNT_ADD(*filter)
 
@@ -608,10 +652,7 @@ ECode GLES20Canvas::DrawPatch(
     CBitmap* nBitmap = (CBitmap*)bitmap.Get();
     NinePatch* nPatch = (NinePatch*)patch;
     Int32 left, top, right, bottom;
-    dst->GetLeft(&left);
-    dst->GetLeft(&top);
-    dst->GetRight(&right);
-    dst->GetBottom(&bottom);
+    dst->Get(&left, &top, &right, &bottom);
     nDrawPatch(mRenderer, nBitmap->mNativeBitmap, nBitmap->mBuffer, nPatch->mNativeChunk,
             left, top, right, bottom, nativePaint);
     return NOERROR;
@@ -630,10 +671,7 @@ ECode GLES20Canvas::DrawPatch(
     CBitmap* nBitmap = (CBitmap*)bitmap.Get();
     NinePatch* nPatch = (NinePatch*)patch;
     Float left, top, right, bottom;
-    dst->GetLeft(&left);
-    dst->GetLeft(&top);
-    dst->GetRight(&right);
-    dst->GetBottom(&bottom);
+    dst->Get(&left, &top, &right, &bottom);
     nDrawPatch(mRenderer, nBitmap->mNativeBitmap, nBitmap->mBuffer, nPatch->mNativeChunk,
             left, top, right, bottom, nativePaint);
     return NOERROR;
@@ -684,17 +722,11 @@ ECode GLES20Canvas::DrawBitmap(
         bitmap->GetWidth(&right);
         bitmap->GetHeight(&bottom);
     } else {
-        src->GetLeft(&left);
-        src->GetLeft(&top);
-        src->GetRight(&right);
-        src->GetBottom(&bottom);
+        src->Get(&left, &top, &right, &bottom);
     }
 
     Int32 dstLeft, dstTop, dstRight, dstBottom;
-    dst->GetLeft(&dstLeft);
-    dst->GetLeft(&dstTop);
-    dst->GetRight(&dstRight);
-    dst->GetBottom(&dstBottom);
+    dst->Get(&dstLeft, &dstTop, &dstRight, &dstBottom);
     CBitmap* nBitmap = (CBitmap*)bitmap;
     nDrawBitmap(mRenderer, nBitmap->mNativeBitmap, nBitmap->mBuffer, left, top, right, bottom,
             dstLeft, dstTop, dstRight, dstBottom, nativePaint);
@@ -717,17 +749,11 @@ ECode GLES20Canvas::DrawBitmap(
         bitmap->GetWidth(&right);
         bitmap->GetHeight(&bottom);
     } else {
-        src->GetLeft(&left);
-        src->GetLeft(&top);
-        src->GetRight(&right);
-        src->GetBottom(&bottom);
+        src->Get(&left, &top, &right, &bottom);
     }
 
     Float dstLeft, dstTop, dstRight, dstBottom;
-    dst->GetLeft(&dstLeft);
-    dst->GetLeft(&dstTop);
-    dst->GetRight(&dstRight);
-    dst->GetBottom(&dstBottom);
+    dst->Get(&dstLeft, &dstTop, &dstRight, &dstBottom);
     CBitmap* nBitmap = (CBitmap*)bitmap;
     nDrawBitmap(mRenderer, nBitmap->mNativeBitmap, nBitmap->mBuffer, left, top, right, bottom,
             dstLeft, dstTop, dstRight, dstBottom, nativePaint);
@@ -746,17 +772,17 @@ ECode GLES20Canvas::DrawBitmap(
     /* [in] */ IPaint* paint)
 {
     if (width < 0) {
-        SLOGGERE("GLES20Canvas", "width must be >= 0")
+        Logger::E("GLES20Canvas", "width must be >= 0");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     if (height < 0) {
-        SLOGGERE("GLES20Canvas", "height must be >= 0")
+        Logger::E("GLES20Canvas", "height must be >= 0");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     if (Elastos::Core::Math::Abs(stride) < width) {
-        SLOGGERE("GLES20Canvas", "abs(stride) must be >= width")
+        Logger::E("GLES20Canvas", "abs(stride) must be >= width");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -910,7 +936,7 @@ ECode GLES20Canvas::DrawLines(
     if (count < 4) return NOERROR;
 
     if ((offset | count) < 0 || offset + count > pts->GetLength()) {
-        SLOGGERE("GLES20Canvas", "The lines array must contain 4 elements per line.")
+        Logger::E("GLES20Canvas", "The lines array must contain 4 elements per line.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Paint* p = (Paint*)paint;
@@ -943,10 +969,7 @@ ECode GLES20Canvas::DrawPaint(
     AutoPtr<IRect> r = GetInternalClipBounds();
     nGetClipBounds(mRenderer, r);
     Int32 left, top, right, bottom;
-    r->GetLeft(&left);
-    r->GetTop(&top);
-    r->GetRight(&right);
-    r->GetBottom(&bottom);
+    r->Get(&left, &top, &right, &bottom);
     return DrawRect(left, top, right, bottom, paint);
 }
 
@@ -1027,10 +1050,7 @@ ECode GLES20Canvas::DrawRect(
     /* [in] */ IPaint* paint)
 {
     Int32 left, top, right, bottom;
-    r->GetLeft(&left);
-    r->GetLeft(&top);
-    r->GetRight(&right);
-    r->GetBottom(&bottom);
+    r->Get(&left, &top, &right, &bottom);
     return DrawRect(left, top, right, bottom, paint);
 }
 
@@ -1039,10 +1059,7 @@ ECode GLES20Canvas::DrawRect(
     /* [in] */ IPaint* paint)
 {
     Float left, top, right, bottom;
-    r->GetLeft(&left);
-    r->GetLeft(&top);
-    r->GetRight(&right);
-    r->GetBottom(&bottom);
+    r->Get(&left, &top, &right, &bottom);
     return DrawRect(left, top, right, bottom, paint);
 }
 
@@ -1265,6 +1282,7 @@ ECode GLES20Canvas::DrawVertices(
 ECode GLES20Canvas::GetRenderer(
     /* [out] */ Int64* renderer)
 {
+    VALIDATE_NOT_NULL(renderer)
     *renderer = mRenderer;
     return NOERROR;
 }
@@ -1277,9 +1295,6 @@ ECode GLES20Canvas::SetProperty(
     return NOERROR;
 }
 
-GLES20Canvas::GLES20Canvas()
-    : mFinalizer(NULL)
-{}
 
 //.......................Native......................
 
@@ -1396,12 +1411,13 @@ void GLES20Canvas::nSetProperty(
     /* [in] */ const String& value)
 {
     if (!Caches::hasInstance()) {
-        ALOGW("can't set property, no Caches instance");
+        Logger::W("GLES20Canvas", "can't set property %s, value:%s, no Caches instance.",
+            name.string(), value.string());
         return;
     }
 
     if (name == NULL || value == NULL) {
-        ALOGW("can't set prop, null passed");
+        Logger::W("GLES20Canvas", "can't set prop, null passed");
     }
 
     Caches::getInstance().setTempProperty(name.string(), value.string());
@@ -1411,6 +1427,7 @@ ECode GLES20Canvas::nFinishRecording(
     /* [in] */ Int64 rendererPtr,
     /* [out] */ Int64* res)
 {
+    VALIDATE_NOT_NULL(res)
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     *res = reinterpret_cast<Int64>(renderer->finishRecording());
     return NOERROR;
@@ -1433,10 +1450,9 @@ AutoPtr<IRectF> GLES20Canvas::GetPathBounds()
 void GLES20Canvas::SetupFinalizer()
 {
     if (mRenderer == 0) {
-        SLOGGERE("GLES20Canvas", "Could not create GLES20Canvas renderer")
-    } else {
-        if (mFinalizer != NULL)
-            delete mFinalizer;
+        Logger::E("GLES20Canvas", "Could not create GLES20Canvas renderer");
+    }
+    else {
         mFinalizer = new CanvasFinalizer(mRenderer);
     }
 }
@@ -1455,26 +1471,12 @@ AutoPtr<ArrayOf<Float> > GLES20Canvas::GetLineStorage()
 
 Boolean GLES20Canvas::nIsAvailable()
 {
-#ifdef USE_OPENGL_RENDERER
-    char prop[PROPERTY_VALUE_MAX];
-    if (property_get("ro.kernel.qemu", prop, NULL) == 0) {
-        // not in the emulator
-        return TRUE;
-    }
-    // In the emulator this property will be set to 1 when hardware GLES is
-    // enabled, 0 otherwise. On old emulator versions it will be undefined.
-    property_get("ro.kernel.qemu.gles", prop, "0");
-    return atoi(prop) == 1 ? TRUE : FALSE;
-#else
-    return FALSE;
-#endif
+    return NativeIsAvailable();
 }
 
 GLES20Canvas::~GLES20Canvas()
 {
-    if (mFinalizer != NULL) {
-        delete mFinalizer;
-    }
+    mFinalizer = NULL;
 }
 
 Boolean GLES20Canvas::IsAvailable()
@@ -1497,8 +1499,9 @@ void GLES20Canvas::nDestroyRenderer(
     /* [in] */ Int64 rendererPtr)
 {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
-    SLOGGERE("GLES20Canvas", "Destroy DisplayListRenderer");
-    delete renderer;
+    if (renderer != NULL) {
+        delete renderer;
+    }
 }
 
 Int32 GLES20Canvas::nGetMaximumTextureWidth()
@@ -1861,6 +1864,8 @@ void GLES20Canvas::nDrawPatch(
     /* [in] */ Int64 paintPtr)
 {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
+    // This object allows the renderer to allocate a global JNI ref to the buffer object.
+    GraphicsNative::ElastosHeapBitmapRef bitmapRef(bitmap, buffer);
 
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     Res_png_9patch* patch = reinterpret_cast<Res_png_9patch*>(patchPtr);
@@ -1877,6 +1882,9 @@ void GLES20Canvas::nDrawBitmap(
     /* [in] */ Int64 paintPtr)
 {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
+    // This object allows the renderer to allocate a global JNI ref to the buffer object.
+    GraphicsNative::ElastosHeapBitmapRef bitmapRef(bitmap, buffer);
+
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintPtr);
 
@@ -1895,6 +1903,8 @@ void GLES20Canvas::nDrawBitmap(
     /* [in] */ Int64 paintPtr)
 {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
+    // This object allows the renderer to allocate a global JNI ref to the buffer object.
+    GraphicsNative::ElastosHeapBitmapRef bitmapRef(bitmap, buffer);
 
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
@@ -1922,6 +1932,8 @@ void GLES20Canvas::nDrawBitmap(
     /* [in] */ Int64 paintPtr)
 {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
+    // This object allows the renderer to allocate a global JNI ref to the buffer object.
+    GraphicsNative::ElastosHeapBitmapRef bitmapRef(bitmap, buffer);
 
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintPtr);
@@ -1984,6 +1996,7 @@ void GLES20Canvas::nDrawBitmapMesh(
 {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
     // This object allows the renderer to allocate a global JNI ref to the buffer object.
+    GraphicsNative::ElastosHeapBitmapRef bitmapRef(bitmap, buffer);
 
     Float* verticesArray = vertices ? vertices->GetPayload() + offset : NULL;
     Int32* colorsArray = colors ? colors->GetPayload() + colorOffset : NULL;

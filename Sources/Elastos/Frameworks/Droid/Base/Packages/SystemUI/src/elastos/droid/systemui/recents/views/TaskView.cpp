@@ -228,16 +228,16 @@ ECode TaskView::EnableFocusAnimationsDimRunnable::Run()
 }
 
 //======================================================================
-// TaskView::EndActionRunnable3
+// TaskView::EndDeleteTaskAnimationRunnable
 //======================================================================
-TaskView::EndActionRunnable3::EndActionRunnable3(
+TaskView::EndDeleteTaskAnimationRunnable::EndDeleteTaskAnimationRunnable(
     /* [in] */ TaskView* host,
     /* [in] */ IRunnable* r)
     : mHost(host)
     , mR(r)
 {}
 
-ECode TaskView::EndActionRunnable3::Run()
+ECode TaskView::EndDeleteTaskAnimationRunnable::Run()
 {
     // We just throw this into a runnable because starting a view property
     // animation using layers can cause inconsisten results if we try and
@@ -354,12 +354,10 @@ ECode TaskView::constructor(
         AutoPtr<IResources> res;
         context->GetResources((IResources**)&res);
         AutoPtr<IDrawable> drawable;
-        CFakeShadowDrawable::New(res, mConfig->Probe(EIID_IInterface), (IDrawable**)&drawable);
+        CFakeShadowDrawable::New(res, mConfig.Get(), (IDrawable**)&drawable);
         SetBackground(drawable);
     }
     SetOutlineProvider(mViewBounds);
-    Logger::I(TAG, " >> constructor: mMaxDimScale:%.2f, mConfig->mFakeShadows:%d",
-        mMaxDimScale, mConfig->mFakeShadows);
     return NOERROR;
 }
 
@@ -410,7 +408,6 @@ void TaskView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    Logger::I(TAG, " >> OnMeasure");
     Int32 width = MeasureSpec::GetSize(widthMeasureSpec);
     Int32 height = MeasureSpec::GetSize(heightMeasureSpec);
 
@@ -448,7 +445,6 @@ void TaskView::OnMeasure(
     }
     SetMeasuredDimension(width, height);
     InvalidateOutline();
-    Logger::I(TAG, " << OnMeasure w:h=(%d, %d)", width, height);
 }
 
 /** Synchronizes this view's properties with the task's transform */
@@ -476,8 +472,9 @@ void TaskView::UpdateViewPropertiesToTaskTransform(
     }
 
     // Apply the transform
-    toTransform->ApplyToTaskView(this, duration, mConfig->mFastOutSlowInInterpolator, FALSE,
-            !mConfig->mFakeShadows, updateCallback);
+    toTransform->ApplyToTaskView(this, duration,
+        IInterpolator::Probe(mConfig->mFastOutSlowInInterpolator), FALSE,
+        !mConfig->mFakeShadows, updateCallback);
 
     // Update the task progress
     if (mTaskProgressAnimator != NULL) {
@@ -658,8 +655,7 @@ void TaskView::StartEnterRecentsAnimation(
             animator->Alpha(1.0f);
             animator->SetStartDelay(mConfig->mTaskBarEnterAnimDelay);
             animator->SetDuration(mConfig->mTaskBarEnterAnimDuration);
-            animator->SetInterpolator(
-                ITimeInterpolator::Probe(mConfig->mFastOutLinearInInterpolator));
+            animator->SetInterpolator(mConfig->mFastOutLinearInInterpolator);
             animator->WithLayer();
             animator->Start();
         }
@@ -674,8 +670,7 @@ void TaskView::StartEnterRecentsAnimation(
                 animator->TranslationY(transform->mTranslationY);
                 animator->SetStartDelay(mConfig->mTaskBarEnterAnimDelay);
                 animator->SetUpdateListener(NULL);
-                animator->SetInterpolator(
-                    ITimeInterpolator::Probe(mConfig->mFastOutSlowInInterpolator));
+                animator->SetInterpolator(mConfig->mFastOutSlowInInterpolator);
                 animator->SetDuration(mConfig->mTaskViewEnterFromHomeDuration);
                 AutoPtr<Runnable> runnable = new EndLaunchedFromAppWithThumbnailRunnable(ctx);
                 animator->WithEndAction(runnable);
@@ -701,10 +696,9 @@ void TaskView::StartEnterRecentsAnimation(
         animator->TranslationY(transform->mTranslationY);
         animator->SetStartDelay(delay);
         animator->SetUpdateListener(ctx->mUpdateListener);
-        animator->SetInterpolator(
-            ITimeInterpolator::Probe(mConfig->mQuintOutInterpolator));
-        animator->SetDuration(mConfig->mTaskViewEnterFromHomeDuration +
-                        frontIndex * mConfig->mTaskViewEnterFromHomeStaggerDelay);
+        animator->SetInterpolator(mConfig->mQuintOutInterpolator);
+        animator->SetDuration(mConfig->mTaskViewEnterFromHomeDuration
+            + frontIndex * mConfig->mTaskViewEnterFromHomeStaggerDelay);
         AutoPtr<Runnable> runnable = new EndLaunchedFromAppWithThumbnailRunnable(ctx);
         animator->WithEndAction(runnable);
         animator->Start();
@@ -737,7 +731,7 @@ void TaskView::StartExitToHomeAnimation(
     animator->SetStartDelay(0);
     animator->SetUpdateListener(NULL);
     animator->SetInterpolator(
-        ITimeInterpolator::Probe(mConfig->mFastOutLinearInInterpolator));
+        mConfig->mFastOutLinearInInterpolator);
     animator->SetDuration(mConfig->mTaskViewExitToHomeDuration);
     animator->WithEndAction(ctx->mPostAnimationTrigger->DecrementAsRunnable());
     animator->Start();
@@ -765,7 +759,7 @@ void TaskView::StartLaunchTaskAnimation(
             oaHelper->OfInt32(TO_IINTERFACE(this), String("dim"), params, (IObjectAnimator**)&anim);
             IAnimator* animator = IAnimator::Probe(anim);
             animator->SetDuration(mConfig->mTaskBarExitAnimDuration);
-            animator->SetInterpolator(ITimeInterpolator::Probe(mConfig->mFastOutLinearInInterpolator));
+            animator->SetInterpolator(mConfig->mFastOutLinearInInterpolator);
             animator->Start();
         }
 
@@ -781,7 +775,7 @@ void TaskView::StartLaunchTaskAnimation(
         animator->SetStartDelay(0);
         animator->SetDuration(mConfig->mTaskBarExitAnimDuration);
         animator->SetInterpolator(
-            ITimeInterpolator::Probe(mConfig->mFastOutLinearInInterpolator));
+            mConfig->mFastOutLinearInInterpolator);
         animator->WithLayer();
         animator->Start();
     }
@@ -799,8 +793,7 @@ void TaskView::StartLaunchTaskAnimation(
             animator->TranslationY(y + mConfig->mTaskViewAffiliateGroupEnterOffsetPx);
             animator->SetStartDelay(0);
             animator->SetUpdateListener(NULL);
-            animator->SetInterpolator(
-                ITimeInterpolator::Probe(mConfig->mFastOutLinearInInterpolator));
+            animator->SetInterpolator(mConfig->mFastOutLinearInInterpolator);
             animator->SetDuration(mConfig->mTaskBarExitAnimDuration);
             animator->Start();
         }
@@ -820,10 +813,9 @@ void TaskView::StartDeleteTaskAnimation(
     animator->Alpha(0.0f);
     animator->SetStartDelay(0);
     animator->SetUpdateListener(NULL);
-    animator->SetInterpolator(
-        ITimeInterpolator::Probe(mConfig->mFastOutSlowInInterpolator));
+    animator->SetInterpolator(mConfig->mFastOutSlowInInterpolator);
     animator->SetDuration(mConfig->mTaskViewRemoveAnimDuration);
-    AutoPtr<Runnable> runnable = new EndActionRunnable3(this, r);
+    AutoPtr<Runnable> runnable = new EndDeleteTaskAnimationRunnable(this, r);
     animator->WithEndAction(runnable);
     animator->Start();
 }
@@ -915,12 +907,21 @@ void TaskView::AnimateFooterVisibility(
 }
 
 /** Sets the current task progress. */
-void TaskView::SetTaskProgress(
+ECode TaskView::SetTaskProgress(
     /* [in] */ Float p)
 {
     mTaskProgress = p;
     mViewBounds->SetAlpha(p);
     UpdateDimFromTaskProgress();
+    return NOERROR;
+}
+
+ECode TaskView::GetTaskProgress(
+    /* [out] */ Float* p)
+{
+    VALIDATE_NOT_NULL(p)
+    *p = mTaskProgress;
+    return NOERROR;
 }
 
 /** Returns the current task progress. */
@@ -930,7 +931,7 @@ Float TaskView::GetTaskProgress()
 }
 
 /** Returns the current dim. */
-void TaskView::SetDim(
+ECode TaskView::SetDim(
     /* [in] */ Int32 dim)
 {
     mDim = dim;
@@ -968,6 +969,15 @@ void TaskView::SetDim(
             mHeaderView->SetDimAlpha(dim);
         }
     }
+    return NOERROR;
+}
+
+ECode TaskView::GetDim(
+    /* [out] */ Int32* dim)
+{
+    VALIDATE_NOT_NULL(dim)
+    *dim = mDim;
+    return NOERROR;
 }
 
 /** Returns the current dim. */

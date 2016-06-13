@@ -5977,9 +5977,9 @@ ECode TextView::HasOverlappingRendering(
     AutoPtr<IDrawable> background;
     GetBackground((IDrawable**)&background);
     AutoPtr<IDrawable> current;
-    background->GetCurrent((IDrawable**)&current);
     Boolean isHorizontalFadingEdgeEnabled, hasSelection;
-    *res = ((background && current) || ISpannable::Probe(mText)
+    *res = ((background && (background->GetCurrent((IDrawable**)&current), current != NULL))
+        || ISpannable::Probe(mText)
         || (HasSelection(&hasSelection), hasSelection)
         || (IsHorizontalFadingEdgeEnabled(&isHorizontalFadingEdgeEnabled), isHorizontalFadingEdgeEnabled));
     return NOERROR;

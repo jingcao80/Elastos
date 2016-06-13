@@ -39,7 +39,8 @@ const Int32 ViewPropertyAnimator::TRANSFORM_MASK;
 //=====================================================================
 //         ViewPropertyAnimator::AnimatorEventListener
 //=====================================================================
-CAR_INTERFACE_IMPL_2(ViewPropertyAnimator::AnimatorEventListener, Object, IAnimatorUpdateListener, IAnimatorListener)
+CAR_INTERFACE_IMPL_2(ViewPropertyAnimator::AnimatorEventListener, Object, \
+    IAnimatorUpdateListener, IAnimatorListener)
 
 ViewPropertyAnimator::AnimatorEventListener::AnimatorEventListener(
     /* [in] */ ViewPropertyAnimator* host)
@@ -51,7 +52,7 @@ ViewPropertyAnimator::AnimatorEventListener::AnimatorEventListener(
 ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationStart(
     /* [in] */ IAnimator* animation)
 {
-    IInterface* animObj = TO_IINTERFACE(animation);
+    AutoPtr<IInterface> animObj = TO_IINTERFACE(animation);
     if (mHost->mAnimatorSetupMap != NULL) {
         Boolean containKey = FALSE;
         mHost->mAnimatorSetupMap->ContainsKey(animObj, &containKey);
@@ -83,7 +84,7 @@ ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationStart(
 ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    IInterface* animObj = TO_IINTERFACE(animation);
+    AutoPtr<IInterface> animObj = TO_IINTERFACE(animation);
     mHost->mView->SetHasTransientState(FALSE);
     if (mHost->mListener != NULL) {
         mHost->mListener->OnAnimationEnd(animation);
@@ -117,6 +118,7 @@ ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationEnd(
 ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
 {
+    AutoPtr<IInterface> animObj = TO_IINTERFACE(animation);
     if (mHost->mListener != NULL) {
         mHost->mListener->OnAnimationCancel(animation);
     }
@@ -125,7 +127,7 @@ ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationCancel(
         Boolean isEmpty = FALSE;
         mHost->mAnimatorOnEndMap->IsEmpty(&isEmpty);
         if (!isEmpty) {
-            mHost->mAnimatorOnEndMap->Remove(TO_IINTERFACE(animation));
+            mHost->mAnimatorOnEndMap->Remove(animObj);
         }
     }
     return NOERROR;
@@ -156,8 +158,9 @@ ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationUpdate(
         return NOERROR;
     }
 
+    View* hostView = VIEW_PROBE(mHost->mView);
     Boolean hardwareAccelerated = FALSE;
-    mHost->mView->IsHardwareAccelerated(&hardwareAccelerated);
+    hostView->IsHardwareAccelerated(&hardwareAccelerated);
 
     // alpha requires slightly different treatment than the other (transform) properties.
     // The logic in setAlpha() is not simply setting mAlpha, plus the invalidation
@@ -166,13 +169,13 @@ ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationUpdate(
     // set, and perform the invalidation steps appropriately.
     Boolean alphaHandled = FALSE;
     if (!hardwareAccelerated) {
-        VIEW_PROBE(mHost->mView)->InvalidateParentCaches();
+        hostView->InvalidateParentCaches();
     }
     Float fraction;
     animation->GetAnimatedFraction(&fraction);
     Int32 propertyMask = propertyBundle->mPropertyMask;
     if ((propertyMask & TRANSFORM_MASK) != 0) {
-        VIEW_PROBE(mHost->mView)->InvalidateViewProperty(hardwareAccelerated, FALSE);
+        hostView->InvalidateViewProperty(hardwareAccelerated, FALSE);
     }
     AutoPtr< List<AutoPtr<NameValuesHolder> > > valueList = propertyBundle->mNameValuesHolder;
     if (valueList != NULL) {
@@ -181,7 +184,7 @@ ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationUpdate(
             AutoPtr<NameValuesHolder> values = *lsIt;
             Float value = values->mFromValue + fraction * values->mDeltaValue;
             if (values->mNameConstant == ViewPropertyAnimator::ALPHA) {
-                alphaHandled = VIEW_PROBE(mHost->mView)->SetAlphaNoInvalidation(value);
+                alphaHandled = hostView->SetAlphaNoInvalidation(value);
             } else {
                 mHost->SetValue(values->mNameConstant, value);
             }
@@ -189,16 +192,16 @@ ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationUpdate(
     }
     if ((propertyMask & TRANSFORM_MASK) != 0) {
         if (!hardwareAccelerated) {
-            VIEW_PROBE(mHost->mView)->mPrivateFlags |= View::PFLAG_DRAWN; // force another invalidation
+            hostView->mPrivateFlags |= View::PFLAG_DRAWN; // force another invalidation
         }
     }
     // invalidate(false) in all cases except if alphaHandled gets set to true
     // via the call to setAlphaNoInvalidation(), above
     if (alphaHandled) {
-        VIEW_PROBE(mHost->mView)->Invalidate(TRUE);
+        hostView->Invalidate(TRUE);
     }
     else {
-        VIEW_PROBE(mHost->mView)->InvalidateViewProperty(FALSE, FALSE);
+        hostView->InvalidateViewProperty(FALSE, FALSE);
     }
 
     if (mHost->mUpdateListener != NULL) {

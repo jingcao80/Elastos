@@ -46,6 +46,7 @@ class GLES20Canvas
 {
     friend class HardwareRenderer;
     class CanvasFinalizer
+        : public Object
     {
     public:
         CanvasFinalizer(
@@ -59,6 +60,10 @@ class GLES20Canvas
 
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("GLES20Canvas")
+
+    CARAPI constructor();
 
     virtual ~GLES20Canvas();
 
@@ -986,7 +991,7 @@ private:
 
     // The native renderer will be destroyed when this object dies.
     // DO NOT overwrite this reference once it is set.
-    CanvasFinalizer* mFinalizer;
+    AutoPtr<CanvasFinalizer> mFinalizer;
 
     Int32 mWidth;
     Int32 mHeight;

@@ -29,6 +29,8 @@
 #include <skia/core/SkStream.h>
 #include <binder/Parcel.h>
 
+#include <Caches.h>
+
 using Elastos::Droid::Utility::CDisplayMetrics;
 using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Logger;

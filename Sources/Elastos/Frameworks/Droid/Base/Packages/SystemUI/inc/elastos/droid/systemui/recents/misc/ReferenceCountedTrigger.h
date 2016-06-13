@@ -68,18 +68,24 @@ private:
         : public AnimatorListenerAdapter
     {
     public:
+        TO_STRING_IMPL("ReferenceCountedTrigger::MyAnimatorListenerAdapter")
+
         MyAnimatorListenerAdapter(
-            /* [in] */ ReferenceCountedTrigger* host);
+            /* [in] */ IWeakReference* host);
 
         CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
 
     private:
-        ReferenceCountedTrigger* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
 public:
-    ReferenceCountedTrigger(
+    ReferenceCountedTrigger();
+
+    ~ReferenceCountedTrigger();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IRunnable* firstIncRunnable,
         /* [in] */ IRunnable* lastDecRunnable,

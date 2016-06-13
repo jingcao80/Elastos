@@ -97,6 +97,7 @@ void Console::LogError(
     /* [in] */ IContext* condition,
     /* [in] */ const String& msg)
 {
+    Logger::E("Recents", msg.string());
     AutoPtr<ICharSequence> cs;
     CString::New(msg, (ICharSequence**)&cs);
     AutoPtr<IToastHelper> toastHelper;
@@ -104,7 +105,6 @@ void Console::LogError(
     AutoPtr<IToast> toast;
     toastHelper->MakeText(condition, cs, IToast::LENGTH_SHORT, (IToast**)&toast);
     toast->Show();
-    Logger::E("Recents", msg.string());
 }
 
 void Console::LogRawError(
@@ -124,7 +124,7 @@ void Console::LogDivider(
         sys->GetOut((IPrintStream**)&out);
         Int64 value;
         sys->GetCurrentTimeMillis(&value);
-        String str = String("==== [") + value + String("] ============================================================");
+        String str = String("==== [") + value + String("] ====");
         out->Println(str);
     }
 }

@@ -146,6 +146,8 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
+        TO_STRING_IMPL("TaskStackView::AnimatorUpdateListener")
+
         AnimatorUpdateListener(
             /* [in] */ TaskStackView* host);
 
@@ -170,13 +172,19 @@ private:
         // @Override
         CARAPI Run();
 
+        CARAPI SetTaskViewExitContext(
+            /* [in] */ ViewAnimation::TaskViewExitContext* ctx);
+
     private:
         TaskStackView* mHost;
+        AutoPtr<ViewAnimation::TaskViewExitContext> mTaskViewExitContext;
     };
 
     class SleepRunnable : public Runnable
     {
     public:
+        TO_STRING_IMPL("TaskStackView::SleepRunnable")
+
         SleepRunnable(
             /* [in] */ TaskStackView* host);
 
@@ -190,6 +198,8 @@ private:
     class PostScrollRunnable : public Runnable
     {
     public:
+        TO_STRING_IMPL("TaskStackView::PostScrollRunnable")
+
         PostScrollRunnable(
             /* [in] */ TaskStackView* host);
 
@@ -209,8 +219,12 @@ private:
 
         CARAPI Run();
 
+        CARAPI SetTaskViewEnterContext(
+            /* [in] */ ViewAnimation::TaskViewEnterContext* ctx);
+
     private:
         TaskStackView* mHost;
+        AutoPtr<ViewAnimation::TaskViewEnterContext> mTaskViewEnterContext;
     };
 
     class DeleteTaskRunnable : public Runnable
@@ -524,7 +538,7 @@ public:
     AutoPtr<IAnimatorUpdateListener> mRequestUpdateClippingListener;
 
     // A convenience runnable to return all views to the pool
-    AutoPtr<Runnable> mReturnAllViewsToPoolRunnable;
+    AutoPtr<ReturnAllViewsToPoolRunnable> mReturnAllViewsToPoolRunnable;
 
 private:
     AutoPtr<Wrapper> mWrapper;

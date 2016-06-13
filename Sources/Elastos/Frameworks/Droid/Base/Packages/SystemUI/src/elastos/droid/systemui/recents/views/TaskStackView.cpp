@@ -188,6 +188,13 @@ TaskStackView::ReturnAllViewsToPoolRunnable::ReturnAllViewsToPoolRunnable(
     : mHost(host)
 {}
 
+TaskStackView::ReturnAllViewsToPoolRunnable::SetTaskViewExitContext(
+    /* [in] */ ViewAnimation::TaskViewExitContext* ctx)
+{
+    mTaskViewExitContext = ctx;
+    return NOERROR;
+}
+
 ECode TaskStackView::ReturnAllViewsToPoolRunnable::Run()
 {
     Int32 childCount;
@@ -200,6 +207,7 @@ ECode TaskStackView::ReturnAllViewsToPoolRunnable::Run()
         // Also hide the view since we don't need it anymore
         tv->SetVisibility(IView::INVISIBLE);
     }
+    mTaskViewExitContext = NULL;
     return NOERROR;
 }
 
@@ -252,6 +260,13 @@ TaskStackView::LastDecrementRunnable::LastDecrementRunnable(
     : mHost(host)
 {}
 
+ECode TaskStackView::LastDecrementRunnable::SetTaskViewEnterContext(
+    /* [in] */ ViewAnimation::TaskViewEnterContext* ctx)
+{
+    mTaskViewEnterContext = ctx;
+    return NOERROR;
+}
+
 ECode TaskStackView::LastDecrementRunnable::Run()
 {
     mHost->mStartEnterAnimationCompleted = TRUE;
@@ -271,6 +286,7 @@ ECode TaskStackView::LastDecrementRunnable::Run()
         tv->RequestAccessibilityFocus(&res);
         mHost->mPrevAccessibilityFocusedIndex = mHost->mStack->IndexOfTask(tv->GetTask());
     }
+    mTaskViewEnterContext = NULL;
     return NOERROR;
 }
 
@@ -853,7 +869,6 @@ void TaskStackView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    Logger::I(TAG, " >> OnMeasure");
     Int32 width = MeasureSpec::GetSize(widthMeasureSpec);
     Int32 height = MeasureSpec::GetSize(heightMeasureSpec);
 
@@ -911,7 +926,6 @@ void TaskStackView::OnMeasure(
     }
 
     SetMeasuredDimension(width, height);
-    Logger::I(TAG, " << OnMeasure: w:h=(%d, %d)", width, height);
 }
 
 /**
@@ -926,7 +940,6 @@ ECode TaskStackView::OnLayout(
     /* [in] */ Int32 right,
     /* [in] */ Int32 bottom)
 {
-    Logger::I(TAG, " >> OnLayout");
     // Layout each of the children
     Int32 childCount;
     GetChildCount(&childCount);
@@ -962,7 +975,6 @@ ECode TaskStackView::OnLayout(
         mAwaitingFirstLayout = FALSE;
         OnFirstLayout();
     }
-    Logger::I(TAG, " << OnLayout");
     return NOERROR;
 }
 
@@ -1074,6 +1086,7 @@ void TaskStackView::StartEnterRecentsAnimation(
 
         // Add a runnable to the post animation ref counter to clear all the views
         AutoPtr<LastDecrementRunnable> runnable = new LastDecrementRunnable(this);
+        runnable->SetTaskViewEnterContext(ctx); // holder refcount of ctx here.
         ctx->mPostAnimationTrigger->AddLastDecrementRunnable(runnable);
     }
 }
@@ -1102,6 +1115,7 @@ void TaskStackView::StartExitToHomeAnimation(
     }
 
     // Add a runnable to the post animation ref counter to clear all the views
+    mReturnAllViewsToPoolRunnable->SetTaskViewExitContext(ctx); // holder refcount of ctx here.
     ctx->mPostAnimationTrigger->AddLastDecrementRunnable(mReturnAllViewsToPoolRunnable);
 }
 
@@ -1447,11 +1461,12 @@ ECode TaskStackView::OnTaskViewDismissed(
     AutoPtr<Task> task = tv->GetTask();
     Int32 taskIndex = mStack->IndexOfTask(task);
     Boolean taskWasFocused = tv->IsFocusedTask();
+
     // Announce for accessibility
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    (*args)[0] = CoreUtils::Convert(tv->GetTask()->mActivityLabel);
+    args->Set(0, CoreUtils::Convert(task->mActivityLabel));
     String str;
     context->GetString(R::string::accessibility_recents_item_dismissed, args, &str);
     tv->AnnounceForAccessibility(CoreUtils::Convert(str));

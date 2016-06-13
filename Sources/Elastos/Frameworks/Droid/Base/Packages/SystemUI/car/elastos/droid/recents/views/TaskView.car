@@ -54,6 +54,17 @@ module
      */
     [local]
     interface ITaskView {
+        SetTaskProgress(
+            [in] Float p);
+
+        GetTaskProgress(
+            [out] Float* p);
+
+        SetDim(
+            [in] Int32 dim);
+
+        GetDim(
+            [out] Int32* dim);
     }
 
     } // namespace Views

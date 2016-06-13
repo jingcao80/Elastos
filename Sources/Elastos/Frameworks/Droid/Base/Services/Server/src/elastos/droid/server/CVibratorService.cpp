@@ -69,7 +69,7 @@ namespace Droid {
 namespace Server {
 
 const String CVibratorService::TAG("VibratorService");
-const Boolean CVibratorService::DBG = TRUE;
+const Boolean CVibratorService::DBG = FALSE;
 
 ECode CVibratorService::VibrationRunnable::Run()
 {

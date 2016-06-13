@@ -1063,7 +1063,7 @@ ECode ValueAnimator::ToString(
 {
     VALIDATE_NOT_NULL(info);
     StringBuilder sb;
-    sb += "ValueAnimator@";
+    sb += "ValueAnimator{0x";
     Int32 hashCode;
     GetHashCode(&hashCode);
     sb += StringUtils::ToHexString(hashCode);
@@ -1075,6 +1075,7 @@ ECode ValueAnimator::ToString(
             sb += info;
         }
     }
+    sb += "}";
     *info = sb.ToString();
     return NOERROR;
 }

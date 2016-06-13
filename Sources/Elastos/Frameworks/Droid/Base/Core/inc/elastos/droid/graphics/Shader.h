@@ -11,8 +11,6 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-extern "C" const InterfaceID EIID_Shader;
-
 /**
  * Shader is the based class for objects that return horizontal spans of colors
  * during drawing. A subclass of Shader is installed in a Paint calling
@@ -25,6 +23,8 @@ class Shader
 {
 public:
     CAR_INTERFACE_DECL()
+
+    Shader();
 
     virtual ~Shader();
 

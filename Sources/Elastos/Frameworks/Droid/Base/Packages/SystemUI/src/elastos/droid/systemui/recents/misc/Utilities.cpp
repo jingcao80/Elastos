@@ -10,7 +10,6 @@ using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IGLES20CanvasHelper;
 using Elastos::Droid::View::CGLES20CanvasHelper;
 using Elastos::Droid::SystemUI::Recents::RecentsConfiguration;
-using Elastos::Core::Math;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IArrayList;
 
@@ -67,9 +66,7 @@ Float Utilities::MapCoordInDescendentToSelf(
     (*pt)[1] = (*coord)[1];
 
     AutoPtr<IView> v = descendant;
-    Boolean equaled;
-    IObject::Probe(v)->Equals(root, &equaled);
-    while(!equaled && v != NULL) {
+    while(v != NULL && !Object::Equals(v, root)) {
         ancestorChain->Add(v);
         AutoPtr<IViewParent> parent;
         v->GetParent((IViewParent**)&parent);
@@ -86,9 +83,7 @@ Float Utilities::MapCoordInDescendentToSelf(
         AutoPtr<IView> v0 = IView::Probe(obj);
         // For TextViews, scroll has a meaning which relates to the text position
         // which is very strange... ignore the scroll.
-        Boolean equaled2;
-        IObject::Probe(v0)->Equals(descendant, &equaled2);
-        if (!equaled2 || includeRootScroll) {
+        if (!Object::Equals(v0, descendant) || includeRootScroll) {
             Int32 sx, sy;
             v0->GetScrollX(&sx);
             v0->GetScrollY(&sy);
@@ -127,9 +122,7 @@ Float Utilities::MapCoordInSelfToDescendent(
     (*pt)[1] = (*coord)[1];
 
     AutoPtr<IView> v = descendant;
-    Boolean equaled;
-    IObject::Probe(v)->Equals(root, &equaled);
-    while(!equaled) {
+    while (!Object::Equals(v, root)) {
         ancestorChain->Add(v);
         AutoPtr<IViewParent> parent;
         v->GetParent((IViewParent**)&parent);
@@ -182,6 +175,7 @@ Float Utilities::ComputeContrastBetweenColors(
     /* [in] */ Int32 bg,
     /* [in] */ Int32 fg)
 {
+    using Elastos::Core::Math;
     AutoPtr<IColor> color;
     CColor::AcquireSingleton((IColor**)&color);
     Int32 red, green, blue;
@@ -192,9 +186,9 @@ Float Utilities::ComputeContrastBetweenColors(
     Float bgR = red / 255.0f;
     Float bgG = green / 255.0f;
     Float bgB = blue / 255.0f;
-    bgR = (bgR < 0.03928f) ? bgR / 12.92f : (Float) Elastos::Core::Math::Pow((bgR + 0.055f) / 1.055f, 2.4f);
-    bgG = (bgG < 0.03928f) ? bgG / 12.92f : (Float) Elastos::Core::Math::Pow((bgG + 0.055f) / 1.055f, 2.4f);
-    bgB = (bgB < 0.03928f) ? bgB / 12.92f : (Float) Elastos::Core::Math::Pow((bgB + 0.055f) / 1.055f, 2.4f);
+    bgR = (bgR < 0.03928f) ? bgR / 12.92f : (Float) Math::Pow((bgR + 0.055f) / 1.055f, 2.4f);
+    bgG = (bgG < 0.03928f) ? bgG / 12.92f : (Float) Math::Pow((bgG + 0.055f) / 1.055f, 2.4f);
+    bgB = (bgB < 0.03928f) ? bgB / 12.92f : (Float) Math::Pow((bgB + 0.055f) / 1.055f, 2.4f);
     Float bgL = 0.2126f * bgR + 0.7152f * bgG + 0.0722f * bgB;
 
     color->Red(fg, &red);
@@ -203,12 +197,12 @@ Float Utilities::ComputeContrastBetweenColors(
     Float fgR = red / 255.0f;
     Float fgG = green / 255.0f;
     Float fgB = blue / 255.0f;
-    fgR = (fgR < 0.03928f) ? fgR / 12.92f : (Float) Elastos::Core::Math::Pow((fgR + 0.055f) / 1.055f, 2.4f);
-    fgG = (fgG < 0.03928f) ? fgG / 12.92f : (Float) Elastos::Core::Math::Pow((fgG + 0.055f) / 1.055f, 2.4f);
-    fgB = (fgB < 0.03928f) ? fgB / 12.92f : (Float) Elastos::Core::Math::Pow((fgB + 0.055f) / 1.055f, 2.4f);
+    fgR = (fgR < 0.03928f) ? fgR / 12.92f : (Float) Math::Pow((fgR + 0.055f) / 1.055f, 2.4f);
+    fgG = (fgG < 0.03928f) ? fgG / 12.92f : (Float) Math::Pow((fgG + 0.055f) / 1.055f, 2.4f);
+    fgB = (fgB < 0.03928f) ? fgB / 12.92f : (Float) Math::Pow((fgB + 0.055f) / 1.055f, 2.4f);
     Float fgL = 0.2126f * fgR + 0.7152f * fgG + 0.0722f * fgB;
 
-    return Elastos::Core::Math::Abs((fgL + 0.05f) / (bgL + 0.05f));
+    return Math::Abs((fgL + 0.05f) / (bgL + 0.05f));
 }
 
 Int32 Utilities::GetColorWithOverlay(

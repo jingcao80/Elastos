@@ -570,7 +570,7 @@ AutoPtr<IAnimation> AppTransition::CreateThumbnailAspectScaleAnimationLocked(
         Int32 top;
         mNextAppTransitionInsets->GetTop(&top);
         AutoPtr<IAnimation> translate;
-        CTranslateAnimation::New(0, 0, 0, -unscaledStartY + top, (ITranslateAnimation**)&translate);
+        CTranslateAnimation::New(0, 0, 0, -unscaledStartY + top, (IAnimation**)&translate);
         translate->SetInterpolator(mThumbnailFastOutSlowInInterpolator);
         translate->SetDuration(THUMBNAIL_APP_TRANSITION_DURATION);
 
@@ -677,13 +677,11 @@ AutoPtr<IAnimation> AppTransition::CreateAspectScaledThumbnailEnterExitAnimation
             }
             mNextAppTransitionInsets->Set(contentInsets);
 
-            AutoPtr<IAnimation> scaleAnim;
+            AutoPtr<IAnimation> scaleAnim, clipAnim, translateAnim;
             CScaleAnimation::New(scale, 1, scale, 1,
                 ComputePivot(mNextAppTransitionStartX, scale),
                 ComputePivot(mNextAppTransitionStartY, scale), (IAnimation**)&scaleAnim);
-            AutoPtr<IAnimation> clipAnim;
             CClipRectAnimation::New(mTmpFromClipRect, mTmpToClipRect, (IAnimation**)&clipAnim);
-            AutoPtr<IAnimation> translateAnim;
             CTranslateAnimation::New(0, 0, -scaledTopDecor, 0, (IAnimation**)&translateAnim);
 
             AutoPtr<IAnimationSet> set;

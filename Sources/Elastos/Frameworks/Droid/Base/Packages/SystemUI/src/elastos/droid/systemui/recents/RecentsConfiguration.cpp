@@ -94,14 +94,25 @@ RecentsConfiguration::RecentsConfiguration(
     // here.
 
     // Interpolators
+    AutoPtr<IInterpolator> interpolator;
     AnimationUtils::LoadInterpolator(context, Elastos::Droid::R::interpolator::fast_out_slow_in,
-        (IInterpolator**)&mFastOutSlowInInterpolator);
+        (IInterpolator**)&interpolator);
+    mFastOutSlowInInterpolator = ITimeInterpolator::Probe(interpolator);
+    interpolator = NULL;
+
     AnimationUtils::LoadInterpolator(context, Elastos::Droid::R::interpolator::fast_out_linear_in,
-        (IInterpolator**)&mFastOutLinearInInterpolator);
+        (IInterpolator**)&interpolator);
+    mFastOutLinearInInterpolator = ITimeInterpolator::Probe(interpolator);
+    interpolator = NULL;
+
     AnimationUtils::LoadInterpolator(context, Elastos::Droid::R::interpolator::linear_out_slow_in,
-        (IInterpolator**)&mLinearOutSlowInInterpolator);
+        (IInterpolator**)&interpolator);
+    mLinearOutSlowInInterpolator = ITimeInterpolator::Probe(interpolator);
+    interpolator = NULL;
+
     AnimationUtils::LoadInterpolator(context, Elastos::Droid::R::interpolator::decelerate_quint,
-        (IInterpolator**)&mQuintOutInterpolator);
+        (IInterpolator**)&interpolator);
+    mQuintOutInterpolator = ITimeInterpolator::Probe(interpolator);
 }
 
 AutoPtr<RecentsConfiguration> RecentsConfiguration::Reinitialize(

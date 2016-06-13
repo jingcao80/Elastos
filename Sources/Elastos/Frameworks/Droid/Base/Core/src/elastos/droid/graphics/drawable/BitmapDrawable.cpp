@@ -495,7 +495,8 @@ void BitmapDrawable::OnBoundsChange(
             UpdateMirrorMatrix(right - left);
             shader->SetLocalMatrix(mMirrorMatrix);
             mBitmapState->mPaint->SetShader(shader);
-        } else {
+        }
+        else {
             if (mMirrorMatrix != NULL) {
                 mMirrorMatrix = NULL;
                 shader->SetLocalMatrix(CMatrix::IDENTITY_MATRIX);
@@ -524,8 +525,8 @@ ECode BitmapDrawable::Draw(
         else {
             AutoPtr<IShader> s;
             CBitmapShader::New(bitmap,
-                    tmx == -1 ? ShaderTileMode_CLAMP : tmx,
-                    tmy == -1 ? ShaderTileMode_CLAMP : tmy, (IShader**)&s);
+                tmx == -1 ? ShaderTileMode_CLAMP : tmx,
+                tmy == -1 ? ShaderTileMode_CLAMP : tmy, (IShader**)&s);
             paint->SetShader(s);
         }
 
@@ -539,7 +540,6 @@ ECode BitmapDrawable::Draw(
         p->GetAlpha(&restoreAlpha);
         Int32 newAlpha = (Int32) (restoreAlpha * state->mBaseAlpha + 0.5f);
         p->SetAlpha(newAlpha);
-        Logger::I("BitmapDrawable", "mBaseAlpha:%d, alpha:%d", state->mBaseAlpha, newAlpha);
     }
     else {
         restoreAlpha = -1;

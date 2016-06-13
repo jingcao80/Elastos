@@ -224,11 +224,12 @@ private:
         AutoPtr<IWeakReference> mHost;
     };
 
-
     class WindowInputEventReceiver
         : public InputEventReceiver
     {
     public:
+        TO_STRING_IMPL("ViewRootImpl::WindowInputEventReceiver")
+
         CARAPI constructor(
             /* [in] */ IInputChannel* inputChannel,
             /* [in] */ ILooper* looper,
@@ -242,9 +243,6 @@ private:
         CARAPI OnBatchedInputEventPending();
 
         CARAPI Dispose();
-
-        CARAPI ToString(
-            /* [out] */ String* str);
 
     private:
         AutoPtr<IWeakReference> mHost;
@@ -1801,8 +1799,10 @@ private:
         /* [in] */ IView* second);
 
     CARAPI_(void) HandleWindowFocusChanged(
-        /* [in] */ Boolean hasWindowFocus,
-        /* [in] */ Boolean inTouchMode);
+        /* [in] */ ViewRootHandler* h,
+        /* [in] */ Int32 what,
+        /* [in] */ Int32 arg1,
+        /* [in] */ Int32 arg2);
 
     CARAPI_(void) LogView(
         /* [in] */ const String& info = String(""));

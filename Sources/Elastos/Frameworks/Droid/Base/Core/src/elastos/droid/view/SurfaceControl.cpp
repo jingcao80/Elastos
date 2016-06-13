@@ -67,7 +67,7 @@ static void assert_premultiplied(const SkBitmap& bitmap, bool isPremultiplied) {
     }
 }
 
-AutoPtr<IBitmap> CreateBitmap(
+static AutoPtr<IBitmap> CreateBitmap(
     /* [in] */ SkBitmap* bitmap,
     /* [in] */ ArrayOf<Byte>* buffer,
     /* [in] */ Int32 bitmapCreateFlags,

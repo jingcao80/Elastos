@@ -231,8 +231,9 @@ ECode CalculatorEditText::SetTextSize(
 
     Float fvol;
     if (mOnTextSizeChangeListener != NULL && (GetTextSize(&fvol), fvol != oldTextSize)) {
-        mOnTextSizeChangeListener->OnTextSizeChanged(ITextView::Probe(this), oldTextSize);
+        mOnTextSizeChangeListener->OnTextSizeChanged(this, oldTextSize);
     }
+    return NOERROR;
 }
 
 ECode CalculatorEditText::SetOnTextSizeChangeListener(

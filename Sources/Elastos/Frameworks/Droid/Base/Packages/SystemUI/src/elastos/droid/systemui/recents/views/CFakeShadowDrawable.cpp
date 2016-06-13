@@ -45,7 +45,7 @@ CFakeShadowDrawable::CFakeShadowDrawable()
 
 ECode CFakeShadowDrawable::constructor(
     /* [in] */ IResources* resources,
-    /* [in] */ IInterface* config)
+    /* [in] */ IRecentsConfiguration* config)
 {
     resources->GetColor(R::color::fake_shadow_start_color, &mShadowStartColor);
     resources->GetColor(R::color::fake_shadow_end_color, &mShadowEndColor);
@@ -56,7 +56,8 @@ ECode CFakeShadowDrawable::constructor(
     CPaint::New(IPaint::ANTI_ALIAS_FLAG | IPaint::DITHER_FLAG, (IPaint**)&mCornerShadowPaint);
     mCornerShadowPaint->SetStyle(PaintStyle_FILL);
     mCornerShadowPaint->SetDither(TRUE);
-    mCornerRadius = ((RecentsConfiguration*)IObject::Probe(config))->mTaskViewRoundedCornerRadiusPx;
+    RecentsConfiguration* rc = (RecentsConfiguration*)config;
+    mCornerRadius = rc->mTaskViewRoundedCornerRadiusPx;
     CRectF::New((IRectF**)&mCardBounds);
     CPaint::New(mCornerShadowPaint, (IPaint**)&mEdgeShadowPaint);
     return Drawable::constructor();
@@ -195,10 +196,7 @@ void CFakeShadowDrawable::DrawShadow(
     Int32 saved;
     canvas->Save(&saved);
     Float left, right, top, bottom;
-    mCardBounds->GetLeft(&left);
-    mCardBounds->GetRight(&right);
-    mCardBounds->GetTop(&top);
-    mCardBounds->GetBottom(&bottom);
+    mCardBounds->Get(&left, &top, &right, &bottom);
     canvas->Translate(left + inset, top + inset);
     canvas->DrawPath(mCornerShadowPath, mCornerShadowPaint);
     if (drawHorizontalEdges) {
@@ -300,12 +298,10 @@ void CFakeShadowDrawable::BuildComponents(
     // center aligning Views inside the CardView would be problematic.
     Float verticalOffset = mMaxShadowSize * SHADOW_MULTIPLIER;
     Int32 left, right, top, bottom;
-    bounds->GetLeft(&left);
-    bounds->GetRight(&right);
-    bounds->GetTop(&top);
-    bounds->GetBottom(&bottom);
-    mCardBounds->Set(left + mMaxShadowSize, top + verticalOffset,
-            right - mMaxShadowSize, bottom - verticalOffset);
+    bounds->Get(&left, &top, &right, &bottom);
+    mCardBounds->Set(
+        left + mMaxShadowSize, top + verticalOffset,
+        right - mMaxShadowSize, bottom - verticalOffset);
     BuildShadowCorners();
 }
 

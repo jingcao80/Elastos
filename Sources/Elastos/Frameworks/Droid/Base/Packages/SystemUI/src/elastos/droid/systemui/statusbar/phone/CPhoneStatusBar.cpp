@@ -1133,12 +1133,10 @@ ECode CPhoneStatusBar::OnPreDrawListener::OnPreDraw(
         AutoPtr<IViewTreeObserver> vto;
         IView::Probe(mHost->mStatusBarView)->GetViewTreeObserver((IViewTreeObserver**)&vto);
         vto->RemoveOnPreDrawListener(this);
-        Logger::D("CPhoneStatusBar::OnPreDrawListener", "TODO: Need HardwareCanvas.");
         AutoPtr<IGLES20CanvasHelper> helper;
         CGLES20CanvasHelper::AcquireSingleton((IGLES20CanvasHelper**)&helper);
-        helper->SetProperty(
-            String("extraRasterBucket"),
-            StringUtils::ToString((Float)IStackScrollAlgorithm::DIMMED_SCALE));
+        helper->SetProperty(String("extraRasterBucket"),
+            StringUtils::ToString(IStackScrollAlgorithm::DIMMED_SCALE));
 
         AutoPtr<IResources> res;
         mHost->mContext->GetResources((IResources**)&res);

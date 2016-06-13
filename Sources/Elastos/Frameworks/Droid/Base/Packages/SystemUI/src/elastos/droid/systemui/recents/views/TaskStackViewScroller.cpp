@@ -208,7 +208,7 @@ void TaskStackViewScroller::AnimateScroll(
     oaHelper->OfFloat(TO_IINTERFACE(this), String("stackScroll"), values, (IObjectAnimator**)&mScrollAnimator);
     IAnimator* animator = IAnimator::Probe(mScrollAnimator);
     animator->SetDuration(mConfig->mTaskStackScrollDuration);
-    animator->SetInterpolator(ITimeInterpolator::Probe(mConfig->mLinearOutSlowInInterpolator));
+    animator->SetInterpolator(mConfig->mLinearOutSlowInInterpolator);
     AutoPtr<IAnimatorUpdateListener> listener = new AnimatorUpdateListener(this);
     IValueAnimator::Probe(mScrollAnimator)->AddUpdateListener(listener);
     AutoPtr<AnimatorListenerAdapter> adapter = new MyAnimatorListenerAdapter(

@@ -163,6 +163,8 @@ public:
 
     RecentsActivity();
 
+    ~RecentsActivity();
+
     CARAPI constructor();
 
     /** Updates the set of recent tasks */

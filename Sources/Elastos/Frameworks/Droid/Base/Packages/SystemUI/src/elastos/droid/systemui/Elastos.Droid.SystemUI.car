@@ -1471,10 +1471,11 @@ module
             interface IAccessibilityEventSource;
         }
 
+        [local]
         class CFakeShadowDrawable {
             constructor(
                 [in] IResources* res,
-                [in] IInterface* obj);
+                [in] IRecentsConfiguration* config);
 
             interface IDrawable;
         }

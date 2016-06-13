@@ -88,7 +88,6 @@ Surface::CompatibleCanvas::CompatibleCanvas(
     /* [in] */ Surface* owner)
     : mOwner(owner)
 {
-    ASSERT_SUCCEEDED(Canvas::constructor());
 }
 
 ECode Surface::CompatibleCanvas::SetMatrix(
@@ -433,7 +432,9 @@ Surface::Surface()
     CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);
     helper->Get((ICloseGuard**)&mCloseGuard);
 
-    mCanvas = new CompatibleCanvas(this);
+    AutoPtr<CompatibleCanvas> cc = new CompatibleCanvas(this);
+    cc->constructor();
+    mCanvas = cc.Get();
 }
 
 Surface::~Surface()

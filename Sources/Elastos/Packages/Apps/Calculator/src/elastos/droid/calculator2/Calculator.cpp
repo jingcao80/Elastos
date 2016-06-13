@@ -289,7 +289,7 @@ Calculator::MyFourthAnimatorListenerAdapter::~MyFourthAnimatorListenerAdapter()
 ECode Calculator::MyFourthAnimatorListenerAdapter::OnAnimationStart(
     /* [in] */ IAnimator* animation)
 {
-    ITextView::Probe(mHost->mResultEditText)->SetText(StringUtils::ParseCharSequence(mResult).Get());
+    return ITextView::Probe(mHost->mResultEditText)->SetText(StringUtils::ParseCharSequence(mResult).Get());
 }
 
 ECode Calculator::MyFourthAnimatorListenerAdapter::OnAnimationEnd(
@@ -297,10 +297,11 @@ ECode Calculator::MyFourthAnimatorListenerAdapter::OnAnimationEnd(
 {
     // Reset all of the values modified during the animation.
     ITextView::Probe(mHost->mResultEditText)->SetTextColor(mColor);
-    IView::Probe(mHost->mResultEditText)->SetScaleX(1.0f);
-    IView::Probe(mHost->mResultEditText)->SetScaleY(1.0f);
-    IView::Probe(mHost->mResultEditText)->SetTranslationX(0.0f);
-    IView::Probe(mHost->mResultEditText)->SetTranslationY(0.0f);
+    IView* ret = IView::Probe(mHost->mResultEditText);
+    ret->SetScaleX(1.0f);
+    ret->SetScaleY(1.0f);
+    ret->SetTranslationX(0.0f);
+    ret->SetTranslationY(0.0f);
     IView::Probe(mHost->mFormulaEditText)->SetTranslationY(0.0f);
 
     // Finally update the formula to use the current result.
@@ -458,6 +459,7 @@ ECode Calculator::OnUserInteraction()
     if (mCurrentAnimator != NULL) {
         mCurrentAnimator->Cancel();
     }
+    return NOERROR;
 }
 
 ECode Calculator::OnButtonClick(

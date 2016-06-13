@@ -39,7 +39,7 @@ public:
 
     CARAPI constructor(
         /* [in] */ IResources* resources,
-        /* [in] */ IInterface* config);
+        /* [in] */ IRecentsConfiguration* config);
 
     // @Override
     CARAPI SetAlpha(

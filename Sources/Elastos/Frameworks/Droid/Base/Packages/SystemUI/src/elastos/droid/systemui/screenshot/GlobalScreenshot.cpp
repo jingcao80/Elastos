@@ -495,7 +495,7 @@ void GlobalScreenshot::SaveScreenshotInWorkerThread(
     mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data, mNotificationManager,
             SCREENSHOT_NOTIFICATION_ID);
     AutoPtr<ArrayOf<IInterface*> > params = ArrayOf<IInterface*>::Alloc(1);
-    (*params)[0] = IInterface::Probe((IObject*)data);
+    params->Set(0, (IObject*)data.Get());
     mSaveInBgTask->Execute(params.Get());
 }
 

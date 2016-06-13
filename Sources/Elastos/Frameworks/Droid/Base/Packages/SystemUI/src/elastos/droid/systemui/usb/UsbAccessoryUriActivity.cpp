@@ -87,7 +87,7 @@ ECode UsbAccessoryUriActivity::OnCreate(
         ap->SetTitle(title2);
     }
     AutoPtr<ArrayOf<IInterface*> > aa = ArrayOf<IInterface*>::Alloc(1);
-    (*aa)[0] = IInterface::Probe(mUri);
+    aa->Set(0, mUri.Get());
     String str2;
     GetString(R::string::usb_accessory_uri_prompt, aa, &str2);
     AutoPtr<ICharSequence> message;

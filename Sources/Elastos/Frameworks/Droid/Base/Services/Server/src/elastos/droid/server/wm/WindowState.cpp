@@ -3,6 +3,7 @@
 #include "elastos/droid/server/wm/CWindowId.h"
 #include "elastos/droid/server/wm/AccessibilityController.h"
 #include "elastos/droid/server/wm/DisplayContent.h"
+#include "elastos/droid/os/UserHandle.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/Math.h>
@@ -15,8 +16,7 @@ using Elastos::Droid::Graphics::CRectF;
 using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Graphics::CRegion;
 using Elastos::Droid::Graphics::IPixelFormat;
-using Elastos::Droid::Os::IUserHandleHelper;
-using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::CRemoteCallbackList;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::CGravity;
@@ -1336,19 +1336,14 @@ Boolean WindowState::IsHiddenFromUserLocked()
         Int32 left, top, right, bottom, appWidth, appHeight;
         displayInfo->GetAppWidth(&appWidth);
         displayInfo->GetAppHeight(&appHeight);
-        if ((win->mFrame->GetLeft(&left), left <= 0) &&
-                (win->mFrame->GetTop(&top), top <= 0) &&
-                (win->mFrame->GetRight(&right), right >= appWidth) &&
-                (win->mFrame->GetBottom(&bottom), bottom >= appHeight)) {
+        win->mFrame->Get(&left, &top, &right, &bottom);
+        if (left <= 0 && top <= 0 && right >= appWidth && bottom >= appHeight) {
             // Is a fullscreen window, like the clock alarm. Show to everyone.
             return FALSE;
         }
     }
 
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    Int32 id;
-    helper->GetUserId(win->mOwnerUid, &id);
+    Int32 id = UserHandle::GetUserId(win->mOwnerUid);
     return win->mShowToOwnerOnly && !mService->IsCurrentProfileLocked(id);
 }
 
@@ -1555,11 +1550,7 @@ ECode WindowState::ToString(
         StringBuilder sb("Window{");
         sb += StringUtils::ToHexString((Int32)this);
         sb += " userId=";
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        Int32 uid;
-        helper->GetUserId(mSession->mUid, &uid);
-        sb += uid;
+        sb += UserHandle::GetUserId(mSession->mUid);
         sb += " ";
         sb.Append(info.string());
         // sb += " token=";

@@ -142,8 +142,10 @@ ECode Settings::NameValueCache::LazyGetProvider(
     /* [in] */ IContentResolver* cr,
     /* [out] */ IIContentProvider** provider)
 {
-    VALIDATE_NOT_NULL(cr);
     VALIDATE_NOT_NULL(provider);
+    *provider = NULL;
+    VALIDATE_NOT_NULL(cr);
+
     AutoPtr<IIContentProvider> cp;
 
     {
@@ -170,6 +172,8 @@ ECode Settings::NameValueCache::PutStringForUser(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
     // try {
     AutoPtr<IBundle> arg, tmp;
     CBundle::New((IBundle**)&arg);
@@ -179,7 +183,6 @@ ECode Settings::NameValueCache::PutStringForUser(
     ECode ec = LazyGetProvider(cr, (IIContentProvider**)&cp);
     if (FAILED(ec)) {
         Slogger::W(TAG, "Can't set key %s in %s", name.string(), TO_CSTR(mUri));
-        *result = FALSE;
         return ec == (ECode)E_REMOTE_EXCEPTION ? NOERROR : ec;
     }
 
@@ -243,7 +246,7 @@ ECode Settings::NameValueCache::GetStringForUser(
     AutoPtr<IIContentProvider> cp;
     ECode ec = LazyGetProvider(cr, (IIContentProvider**)&cp);
     if (FAILED(ec) || cp == NULL) {
-        *value = String(NULL);
+        Slogger::W(TAG, "Can't get key %s from %s", name.string(), TO_CSTR(mUri));
         return ec;
     }
 
@@ -292,7 +295,7 @@ ECode Settings::NameValueCache::GetStringForUser(
     cr->GetPackageName(&package);
     if (FAILED(cp->Query(package, mUri, SELECT_VALUE,
         NAME_EQ_PLACEHOLDER, selectionArgs, String(NULL), NULL, (ICursor**)&c))) {
-        Slogger::W(TAG, "Can't get key %s from %p", name.string(), mUri.Get());
+        Slogger::W(TAG, "Can't get key %s from %s", name.string(), TO_CSTR(mUri));
         if (c != NULL) {
             ICloseable::Probe(c)->Close();
         }
@@ -300,7 +303,7 @@ ECode Settings::NameValueCache::GetStringForUser(
         return NOERROR;
     }
     if (c == NULL) {
-        Slogger::W(TAG, "Can't get key %s from %p", name.string(), mUri.Get());
+        Slogger::W(TAG, "Can't get key %s from %s", name.string(), TO_CSTR(mUri));
         *value = String(NULL);
         return NOERROR;
     }
@@ -318,7 +321,8 @@ ECode Settings::NameValueCache::GetStringForUser(
     if (LOCAL_LOGV) {
         String segment;
         mUri->GetLastPathSegment(&segment);
-        Slogger::V(TAG, "cache miss [%s]: %s = %s", segment.string(), name.string(), (_value.IsNull()? "(null)" : _value.string()));
+        Slogger::V(TAG, "cache miss [%s]: %s = %s", segment.string(), name.string(),
+            (_value.IsNull()? "(null)" : _value.string()));
     }
     if (c != NULL) {
         ICloseable::Probe(c)->Close();

@@ -188,7 +188,7 @@ ECode TextureView::OnAttachedToWindow()
     View::OnAttachedToWindow();
 
     Boolean bIsAcc = FALSE;
-    if (!(IsHardwareAccelerated(&bIsAcc), bIsAcc)) {
+    if (IsHardwareAccelerated(&bIsAcc), !bIsAcc) {
         Logger::W(LOG_TAG,
             "A TextureView or a subclass can only be used with hardware acceleration enabled.");
     }

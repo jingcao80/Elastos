@@ -14,6 +14,7 @@
 #include <elastos/utility/logging/Logger.h>
 #include <androidfw/ResourceTypes.h>
 #include <skia/core/SkCanvas.h>
+#include <Caches.h>
 
 using Elastos::Utility::Logging::Logger;
 
@@ -37,7 +38,7 @@ extern ECode NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
         const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
         const SkPaint* paint, SkRegion** outRegion);
 
-static const char* TAG = "NinePatch";
+// static const char* TAG = "NinePatch";
 
 CAR_INTERFACE_IMPL(NinePatch::InsetStruct, Object, INinePatchInsetStruct);
 NinePatch::InsetStruct::InsetStruct(
@@ -306,7 +307,7 @@ void NinePatch::NativeFinalize(
     int8_t* patch = reinterpret_cast<int8_t*>(patchHandle);
 #ifdef USE_OPENGL_RENDERER
     if (android::uirenderer::Caches::hasInstance()) {
-        Res_png_9patch* p = (Res_png_9patch*) patch;
+        android::Res_png_9patch* p = (android::Res_png_9patch*) patch;
         android::uirenderer::Caches::getInstance().resourceCache.destructor(p);
         return;
     }
@@ -324,7 +325,7 @@ static void draw(
     /* [in] */ Int32 srcDensity)
 {
     if (destDensity == srcDensity || destDensity == 0 || srcDensity == 0) {
-        // Logger::V(TAG, String("Drawing unscaled 9-patch: (%g,%g)-(%g,%g)"),
+        // Logger::V(TAG, "Drawing unscaled 9-patch: (%g,%g)-(%g,%g)",
         //         SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
         //         SkScalarToFloat(bounds.fRight), SkScalarToFloat(bounds.fBottom));
         NinePatch_Draw(canvas, bounds, *bitmap, *chunk, paint, NULL);

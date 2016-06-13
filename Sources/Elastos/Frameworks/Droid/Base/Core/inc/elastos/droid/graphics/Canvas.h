@@ -32,6 +32,8 @@ class Canvas
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("Canvas")
+
     Canvas();
 
     virtual ~Canvas();

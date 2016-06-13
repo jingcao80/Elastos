@@ -8,12 +8,12 @@ module
     namespace Graphics {
 
     enum RegionOp {
-        RegionOp_DIFFERENCE = 0x00,
-        RegionOp_INTERSECT = 0x01,
-        RegionOp_UNION = 0x02,
-        RegionOp_XOR = 0x03,
-        RegionOp_REVERSE_DIFFERENCE = 0x04,
-        RegionOp_REPLACE = 0x05,
+        RegionOp_DIFFERENCE         = 0,
+        RegionOp_INTERSECT          = 1,
+        RegionOp_UNION              = 2,
+        RegionOp_XOR                = 3,
+        RegionOp_REVERSE_DIFFERENCE = 4,
+        RegionOp_REPLACE            = 5,
     }
 
     /**

@@ -4,7 +4,7 @@
 namespace Elastos {
 namespace Droid {
 namespace View {
-CAR_INTERFACE_IMPL(GLES20RecordingCanvas, GLES20Canvas, IGLES20RecordingCanvas)
+
 
 static Pools::SynchronizedPool<GLES20RecordingCanvas>* InitPoll()
 {
@@ -15,16 +15,19 @@ static Pools::SynchronizedPool<GLES20RecordingCanvas>* InitPoll()
 
 Pools::SynchronizedPool<GLES20RecordingCanvas>* GLES20RecordingCanvas::sPool = InitPoll();
 
-AutoPtr<GLES20RecordingCanvas> GLES20RecordingCanvas::Obtain(
+CAR_INTERFACE_IMPL(GLES20RecordingCanvas, GLES20Canvas, IGLES20RecordingCanvas)
+
+AutoPtr<IHardwareCanvas> GLES20RecordingCanvas::Obtain(
     /* [in] */ IRenderNode* node)
 {
     assert(node != NULL);
     AutoPtr<GLES20RecordingCanvas> canvas = sPool->AcquireItem();
     if (canvas == NULL) {
         canvas = new GLES20RecordingCanvas();
+        canvas->constructor();
     }
     canvas->mNode = node;
-    return canvas;
+    return canvas.Get();
 }
 
 ECode GLES20RecordingCanvas::Recycle()

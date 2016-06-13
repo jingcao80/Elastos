@@ -11,6 +11,11 @@ namespace Droid {
 namespace Graphics {
 
 CAR_INTERFACE_IMPL(Shader, Object, IShader);
+
+Shader::Shader()
+    : mNativeInstance(0)
+{}
+
 Shader::~Shader()
 {
     NativeDestructor(mNativeInstance);
@@ -37,7 +42,7 @@ ECode Shader::SetLocalMatrix(
 {
     mLocalMatrix = localM;
     NativeSetLocalMatrix(mNativeInstance,
-            localM == NULL ? 0 : ((Matrix*)localM)->mNativeMatrix);
+        localM == NULL ? 0 : ((Matrix*)localM)->mNativeMatrix);
     return NOERROR;
 }
 
@@ -90,8 +95,8 @@ void Shader::NativeSetLocalMatrix(
     /* [in] */ Int64 matrixHandle)
 {
     SkShader* shader       = reinterpret_cast<SkShader*>(shaderHandle);
-    const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
     if (shader) {
+        SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         if (matrix) {
             shader->setLocalMatrix(*matrix);
         } else {

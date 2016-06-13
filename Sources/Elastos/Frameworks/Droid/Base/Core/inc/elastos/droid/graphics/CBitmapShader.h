@@ -18,6 +18,8 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    CBitmapShader();
+
     CARAPI constructor(
         /* [in] */ IBitmap* bitmap,
         /* [in] */ ShaderTileMode tileX,
@@ -34,8 +36,8 @@ protected:
 private:
     static CARAPI_(Int64) NativeCreate(
         /* [in] */ Int64 nBitmap,
-        /* [in] */ Int32 tileModeX,
-        /* [in] */ Int32 tileModeY);
+        /* [in] */ ShaderTileMode tileModeX,
+        /* [in] */ ShaderTileMode tileModeY);
 
 public:
     /**

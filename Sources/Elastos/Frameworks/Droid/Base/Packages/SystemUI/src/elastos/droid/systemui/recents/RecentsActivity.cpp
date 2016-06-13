@@ -125,7 +125,8 @@ ECode RecentsActivity::ServiceBroadcastReceiver::OnReceive(
 {
     String action;
     intent->GetAction(&action);
-    Logger::I(TAG, " >> ServiceBroadcastReceiver OnReceive: %s", action.string());
+    Logger::I(TAG, " >> ServiceBroadcastReceiver OnReceive: action:%s, context: %s",
+        action.string(), TO_CSTR(context));
 
     if (action.Equals(IAlternateRecentsComponent::ACTION_HIDE_RECENTS_ACTIVITY)) {
         // Mark Recents as no longer visible
@@ -152,7 +153,8 @@ ECode RecentsActivity::ServiceBroadcastReceiver::OnReceive(
     }
     else if (action.Equals(IAlternateRecentsComponent::ACTION_START_ENTER_ANIMATION)) {
         // Try and start the enter animation (or restart it on configuration changed)
-        AutoPtr<ReferenceCountedTrigger> t = new ReferenceCountedTrigger(context, NULL, NULL, NULL);
+        AutoPtr<ReferenceCountedTrigger> t = new ReferenceCountedTrigger();
+        t->constructor(context, NULL, NULL, NULL);
         AutoPtr<ViewAnimation::TaskViewEnterContext> tvec = new ViewAnimation::TaskViewEnterContext(t);
         mHost->mRecentsView->StartEnterRecentsAnimation(tvec);
         mHost->OnEnterAnimationTriggered();
@@ -240,6 +242,11 @@ RecentsActivity::RecentsActivity()
     : mVisible(FALSE)
     , mLastTabKeyEventTime(0L)
 {
+}
+
+RecentsActivity::~RecentsActivity()
+{
+    Logger::I(TAG, " ===========> destory RecentsActivity: %p", this);
 }
 
 ECode RecentsActivity::constructor()
@@ -474,8 +481,8 @@ ECode RecentsActivity::DismissRecentsToHomeRaw(
 {
     Logger::I(TAG, " >>> RecentsActivity::DismissRecentsToHomeRaw()");
     if (animated) {
-        AutoPtr<ReferenceCountedTrigger> exitTrigger = new ReferenceCountedTrigger(
-            this, NULL, mFinishLaunchHomeRunnable, NULL);
+        AutoPtr<ReferenceCountedTrigger> exitTrigger = new ReferenceCountedTrigger();
+        exitTrigger->constructor(this, NULL, mFinishLaunchHomeRunnable, NULL);
         AutoPtr<ViewAnimation::TaskViewExitContext> tvec =
             new ViewAnimation::TaskViewExitContext(exitTrigger);
         mRecentsView->StartExitToHomeAnimation(tvec);
@@ -483,6 +490,7 @@ ECode RecentsActivity::DismissRecentsToHomeRaw(
     else {
         mFinishLaunchHomeRunnable->Run();
     }
+    Logger::I(TAG, " <<< RecentsActivity::DismissRecentsToHomeRaw()");
     return NOERROR;
 }
 
@@ -608,8 +616,8 @@ ECode RecentsActivity::OnConfigurationChange()
     mConfig = RecentsConfiguration::Reinitialize(this, ssp);
 
     // Try and start the enter animation (or restart it on configuration changed)
-    AutoPtr<ReferenceCountedTrigger> t = new ReferenceCountedTrigger(
-        this, NULL, NULL, NULL);
+    AutoPtr<ReferenceCountedTrigger> t = new ReferenceCountedTrigger();
+    t->constructor(this, NULL, NULL, NULL);
     AutoPtr<ViewAnimation::TaskViewEnterContext> tvec =
         new ViewAnimation::TaskViewEnterContext(t);
     mRecentsView->StartEnterRecentsAnimation(tvec);

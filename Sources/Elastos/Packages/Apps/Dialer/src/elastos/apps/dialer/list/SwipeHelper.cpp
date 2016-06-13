@@ -457,11 +457,13 @@ ECode SwipeHelper::SnapChild(
     mCallback->GetChildContentView(view, (IView**)&animView);
     Boolean canAnimViewBeDismissed;
     mCallback->CanChildBeDismissed(view, &canAnimViewBeDismissed);
-    AutoPtr<IObjectAnimator> anim = createTranslationAnimation(animView, 0);
+    AutoPtr<IObjectAnimator> anim = CreateTranslationAnimation(animView, 0);
     Int32 duration = SNAP_ANIM_LEN;
     anim->SetDuration(duration);
-    anim->AddUpdateListener((IAnimatorUpdateListener*)new SnapAnimatorUpdateListener(this));
-    anim->AddListener((IAnimatorListener*)new SnapAnimatorListenerAdapter(this));
+    AutoPtr<IAnimatorUpdateListener> updateListener = new SnapAnimatorUpdateListener(this);
+    AutoPtr<IAnimatorListener> snapListener = new SnapAnimatorListenerAdapter(this);
+    anim->AddUpdateListener(updateListener);
+    anim->AddListener(snapListener);
     anim->Start();
 
     return NOERROR;

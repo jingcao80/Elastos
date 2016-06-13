@@ -62,6 +62,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("ThreadedRenderer")
+
     ThreadedRenderer();
 
     virtual ~ThreadedRenderer();

@@ -34,6 +34,170 @@ static void assert_premultiplied(
     }
 }
 
+
+
+///////////////////////////////////////////////////////////////////////////////
+GraphicsNative::DroidPixelRef::DroidPixelRef(
+    /* [in] */ const SkImageInfo& info,
+    /* [in] */ void* storage,
+    /* [in] */ size_t rowBytes,
+    /* [in] */ ArrayOf<Byte>* storageObj,
+    /* [in] */ SkColorTable* ctable)
+    : SkMallocPixelRef(info, storage, rowBytes, ctable, (storageObj == NULL)), fWrappedPixelRef(NULL)
+{
+    SkASSERT(storage);
+    SkASSERT(env);
+
+    fStorageObj = storageObj;
+    fHasGlobalRef = false;
+    fGlobalRefCnt = 0;
+
+    // If storageObj is NULL, the memory was NOT allocated on the Java heap
+    fOnJavaHeap = (storageObj != NULL);
+}
+
+GraphicsNative::DroidPixelRef::DroidPixelRef(
+    /* [in] */ DroidPixelRef& wrappedPixelRef,
+    /* [in] */ const SkImageInfo& info,
+    /* [in] */ size_t rowBytes,
+    /* [in] */ SkColorTable* ctable)
+    : SkMallocPixelRef(info, wrappedPixelRef.getAddr(), rowBytes, ctable, false),
+        fWrappedPixelRef(wrappedPixelRef.fWrappedPixelRef ?
+                wrappedPixelRef.fWrappedPixelRef : &wrappedPixelRef)
+{
+    SkASSERT(fWrappedPixelRef);
+    SkSafeRef(fWrappedPixelRef);
+
+    // don't need to initialize these, as all the relevant logic delegates to the wrapped ref
+    fStorageObj = NULL;
+    fHasGlobalRef = false;
+    fGlobalRefCnt = 0;
+    fOnJavaHeap = false;
+}
+
+GraphicsNative::DroidPixelRef::~DroidPixelRef()
+{
+    if (fWrappedPixelRef) {
+        SkSafeUnref(fWrappedPixelRef);
+    } else if (fOnJavaHeap) {
+        if (fStorageObj && fHasGlobalRef) {
+            // env->DeleteGlobalRef(fStorageObj);
+            REFCOUNT_RELEASE(fStorageObj);
+        }
+        fStorageObj = NULL;
+    }
+}
+AutoPtr<ArrayOf<Byte> > GraphicsNative::DroidPixelRef::getStorageObj()
+{
+    if (fWrappedPixelRef) {
+        return fWrappedPixelRef->fStorageObj;
+    }
+    return fStorageObj;
+}
+
+void GraphicsNative::DroidPixelRef::setLocalJNIRef(
+    /* [in] */ ArrayOf<Byte>* arr)
+{
+    if (fWrappedPixelRef) {
+        // delegate java obj management to the wrapped ref
+        fWrappedPixelRef->setLocalJNIRef(arr);
+    } else if (!fHasGlobalRef) {
+        fStorageObj = arr;
+    }
+}
+
+void GraphicsNative::DroidPixelRef::globalRef(
+    /* [in] */ void* localref)
+{
+    if (fWrappedPixelRef) {
+        // delegate java obj management to the wrapped ref
+        fWrappedPixelRef->globalRef(localref);
+
+        // Note: we only ref and unref the wrapped DroidPixelRef so that
+        // bitmap->pixelRef()->globalRef() and globalUnref() can be used in a pair, even if
+        // the bitmap has its underlying DroidPixelRef swapped out/wrapped
+        return;
+    }
+    if (fOnJavaHeap && sk_atomic_inc(&fGlobalRefCnt) == 0) {
+        // If JNI ref was passed, it is always used
+        if (localref) fStorageObj = (ArrayOf<Byte>*) localref;
+
+        if (fStorageObj == NULL) {
+            SkDebugf("No valid local ref to create a JNI global ref\n");
+            sk_throw();
+        }
+        if (fHasGlobalRef) {
+            // This should never happen
+            SkDebugf("Already holding a JNI global ref");
+            sk_throw();
+        }
+
+        // fStorageObj = (jbyteArray) env->NewGlobalRef(fStorageObj);
+        REFCOUNT_ADD(fStorageObj);
+        // TODO: Check for failure here
+        fHasGlobalRef = true;
+    }
+    ref();
+}
+
+void GraphicsNative::DroidPixelRef::globalUnref()
+{
+    if (fWrappedPixelRef) {
+        // delegate java obj management to the wrapped ref
+        fWrappedPixelRef->globalUnref();
+        return;
+    }
+    if (fOnJavaHeap && sk_atomic_dec(&fGlobalRefCnt) == 1) {
+        if (!fHasGlobalRef) {
+            SkDebugf("We don't have a global ref!");
+            sk_throw();
+        }
+        // env->DeleteGlobalRef(fStorageObj);
+        REFCOUNT_RELEASE(fStorageObj);
+        fStorageObj = NULL;
+        fHasGlobalRef = false;
+    }
+    unref();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+GraphicsNative::DroidPixelAllocator::DroidPixelAllocator()
+    : mAllocCount(0)
+{}
+
+bool GraphicsNative::DroidPixelAllocator::allocPixelRef(
+    /* [in] */ SkBitmap* bitmap,
+    /* [in] */ SkColorTable* ctable)
+{
+    mStorageObj = NULL;
+    GraphicsNative::AllocateDroidPixelRef(bitmap, ctable, (ArrayOf<Byte>**)&mStorageObj);
+    mAllocCount += 1;
+    return mStorageObj != NULL;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+GraphicsNative::ElastosHeapBitmapRef::ElastosHeapBitmapRef(SkBitmap* nativeBitmap, ArrayOf<Byte>* buffer)
+{
+    fNativeBitmap = nativeBitmap;
+    fBuffer = buffer;
+
+    // If the buffer is NULL, the backing memory wasn't allocated on the Java heap
+    if (fBuffer) {
+        ((DroidPixelRef*) fNativeBitmap->pixelRef())->setLocalJNIRef(fBuffer);
+    }
+}
+
+GraphicsNative::ElastosHeapBitmapRef::~ElastosHeapBitmapRef()
+{
+    if (fBuffer) {
+        ((DroidPixelRef*) fNativeBitmap->pixelRef())->setLocalJNIRef(NULL);
+    }
+}
+///////////////////////////////////////////////////////////////////////////////
+
 SkRect* GraphicsNative::IRect2SkRect(
     /* [in] */ IRect* obj,
     /* [in] */ SkRect* sr)
@@ -214,130 +378,6 @@ ECode GraphicsNative::CreateBitmapRegionDecoder(
     return NOERROR;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-GraphicsNative::DroidPixelRef::DroidPixelRef(
-    /* [in] */ const SkImageInfo& info,
-    /* [in] */ void* storage,
-    /* [in] */ size_t rowBytes,
-    /* [in] */ ArrayOf<Byte>* storageObj,
-    /* [in] */ SkColorTable* ctable)
-    : SkMallocPixelRef(info, storage, rowBytes, ctable, (storageObj == NULL)), fWrappedPixelRef(NULL)
-{
-    SkASSERT(storage);
-    SkASSERT(env);
-
-    fStorageObj = storageObj;
-    fHasGlobalRef = false;
-    fGlobalRefCnt = 0;
-
-    // If storageObj is NULL, the memory was NOT allocated on the Java heap
-    fOnJavaHeap = (storageObj != NULL);
-}
-
-GraphicsNative::DroidPixelRef::DroidPixelRef(
-    /* [in] */ DroidPixelRef& wrappedPixelRef,
-    /* [in] */ const SkImageInfo& info,
-    /* [in] */ size_t rowBytes,
-    /* [in] */ SkColorTable* ctable)
-    : SkMallocPixelRef(info, wrappedPixelRef.getAddr(), rowBytes, ctable, false),
-        fWrappedPixelRef(wrappedPixelRef.fWrappedPixelRef ?
-                wrappedPixelRef.fWrappedPixelRef : &wrappedPixelRef)
-{
-    SkASSERT(fWrappedPixelRef);
-    SkSafeRef(fWrappedPixelRef);
-
-    // don't need to initialize these, as all the relevant logic delegates to the wrapped ref
-    fStorageObj = NULL;
-    fHasGlobalRef = false;
-    fGlobalRefCnt = 0;
-    fOnJavaHeap = false;
-}
-
-GraphicsNative::DroidPixelRef::~DroidPixelRef()
-{
-    if (fWrappedPixelRef) {
-        SkSafeUnref(fWrappedPixelRef);
-    } else if (fOnJavaHeap) {
-        if (fStorageObj && fHasGlobalRef) {
-            // env->DeleteGlobalRef(fStorageObj);
-            REFCOUNT_RELEASE(fStorageObj);
-        }
-        fStorageObj = NULL;
-    }
-}
-AutoPtr<ArrayOf<Byte> > GraphicsNative::DroidPixelRef::getStorageObj()
-{
-    if (fWrappedPixelRef) {
-        return fWrappedPixelRef->fStorageObj;
-    }
-    return fStorageObj;
-}
-
-void GraphicsNative::DroidPixelRef::setLocalJNIRef(
-    /* [in] */ ArrayOf<Byte>* arr)
-{
-    if (fWrappedPixelRef) {
-        // delegate java obj management to the wrapped ref
-        fWrappedPixelRef->setLocalJNIRef(arr);
-    } else if (!fHasGlobalRef) {
-        fStorageObj = arr;
-    }
-}
-
-void GraphicsNative::DroidPixelRef::globalRef(
-    /* [in] */ void* localref)
-{
-    if (fWrappedPixelRef) {
-        // delegate java obj management to the wrapped ref
-        fWrappedPixelRef->globalRef(localref);
-
-        // Note: we only ref and unref the wrapped DroidPixelRef so that
-        // bitmap->pixelRef()->globalRef() and globalUnref() can be used in a pair, even if
-        // the bitmap has its underlying DroidPixelRef swapped out/wrapped
-        return;
-    }
-    if (fOnJavaHeap && sk_atomic_inc(&fGlobalRefCnt) == 0) {
-        // If JNI ref was passed, it is always used
-        if (localref) fStorageObj = (ArrayOf<Byte>*) localref;
-
-        if (fStorageObj == NULL) {
-            SkDebugf("No valid local ref to create a JNI global ref\n");
-            sk_throw();
-        }
-        if (fHasGlobalRef) {
-            // This should never happen
-            SkDebugf("Already holding a JNI global ref");
-            sk_throw();
-        }
-
-        // fStorageObj = (jbyteArray) env->NewGlobalRef(fStorageObj);
-        REFCOUNT_ADD(fStorageObj);
-        // TODO: Check for failure here
-        fHasGlobalRef = true;
-    }
-    ref();
-}
-
-void GraphicsNative::DroidPixelRef::globalUnref()
-{
-    if (fWrappedPixelRef) {
-        // delegate java obj management to the wrapped ref
-        fWrappedPixelRef->globalUnref();
-        return;
-    }
-    if (fOnJavaHeap && sk_atomic_dec(&fGlobalRefCnt) == 1) {
-        if (!fHasGlobalRef) {
-            SkDebugf("We don't have a global ref!");
-            sk_throw();
-        }
-        // env->DeleteGlobalRef(fStorageObj);
-        REFCOUNT_RELEASE(fStorageObj);
-        fStorageObj = NULL;
-        fHasGlobalRef = false;
-    }
-    unref();
-}
-
 ECode GraphicsNative::AllocateDroidPixelRef(
     /* [in] */ SkBitmap* bitmap,
     /* [in] */ SkColorTable* ctable,
@@ -371,22 +411,6 @@ ECode GraphicsNative::AllocateDroidPixelRef(
     *pixelRef = arrayObj;
     REFCOUNT_ADD(*pixelRef)
     return NOERROR;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-GraphicsNative::DroidPixelAllocator::DroidPixelAllocator()
-    : mAllocCount(0)
-{}
-
-bool GraphicsNative::DroidPixelAllocator::allocPixelRef(
-    /* [in] */ SkBitmap* bitmap,
-    /* [in] */ SkColorTable* ctable)
-{
-    mStorageObj = NULL;
-    GraphicsNative::AllocateDroidPixelRef(bitmap, ctable, (ArrayOf<Byte>**)&mStorageObj);
-    mAllocCount += 1;
-    return mStorageObj != NULL;
 }
 
 void GraphicsNative::ReinitBitmap(

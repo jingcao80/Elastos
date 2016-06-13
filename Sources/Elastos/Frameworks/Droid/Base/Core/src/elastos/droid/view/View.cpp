@@ -96,6 +96,8 @@ using Elastos::Droid::Graphics::CPathMeasure;
 using Elastos::Droid::Graphics::IPorterDuffXfermode;
 using Elastos::Droid::Graphics::CPorterDuffXfermode;
 using Elastos::Droid::Graphics::PorterDuffMode_NONE;
+using Elastos::Droid::Graphics::ShaderTileMode_CLAMP;
+using Elastos::Droid::Graphics::PorterDuffMode_DST_OUT;
 using Elastos::Droid::Graphics::Insets;
 using Elastos::Droid::Graphics::Drawable::Drawable;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
@@ -984,12 +986,12 @@ View::ScrollabilityCache::ScrollabilityCache(
     // use use a height of 1, and then wack the matrix each time we
     // actually use it.
     AutoPtr<ILinearGradient> lg;
-    CLinearGradient::New(0, 0, 0, 1, 0xFF000000, 0, Elastos::Droid::Graphics::ShaderTileMode_CLAMP, (ILinearGradient**)&lg);
+    CLinearGradient::New(0, 0, 0, 1, 0xFF000000, 0, ShaderTileMode_CLAMP, (ILinearGradient**)&lg);
     mShader = IShader::Probe(lg);
 
     mPaint->SetShader(mShader);
     AutoPtr<IPorterDuffXfermode> mode;
-    CPorterDuffXfermode::New(Elastos::Droid::Graphics::PorterDuffMode_DST_OUT, (IPorterDuffXfermode**)&mode);
+    CPorterDuffXfermode::New(PorterDuffMode_DST_OUT, (IPorterDuffXfermode**)&mode);
     mPaint->SetXfermode(IXfermode::Probe(mode));
 }
 
@@ -1007,8 +1009,7 @@ ECode View::ScrollabilityCache::Run()
         // Start opaque
         AutoPtr<ArrayOf<Float> > tmp1 = ArrayOf<Float>::Alloc(1);
         (*tmp1)[0] = (*OPAQUE)[0];
-        if(mScrollBarInterpolator)
-        {
+        if (mScrollBarInterpolator) {
             mScrollBarInterpolator->SetKeyFrame(framesCount++, nextFrame, tmp1);
         }
 
@@ -1034,19 +1035,19 @@ void View::ScrollabilityCache::SetFadeColor(
         AutoPtr<ILinearGradient> lg;
         if (color != 0) {
             CLinearGradient::New(0, 0, 0, 1, color | 0xFF000000,
-                    color & 0x00FFFFFF, Elastos::Droid::Graphics::ShaderTileMode_CLAMP, (ILinearGradient**)&lg);
+                color & 0x00FFFFFF, ShaderTileMode_CLAMP, (ILinearGradient**)&lg);
             mShader = IShader::Probe(lg);
             mPaint->SetShader(mShader);
             // Restore the default transfer mode (src_over)
             mPaint->SetXfermode(NULL);
         }
         else {
-            CLinearGradient::New(0, 0, 0, 1, 0xFF000000, 0, Elastos::Droid::Graphics::ShaderTileMode_CLAMP, (ILinearGradient**)&lg);
+            CLinearGradient::New(0, 0, 0, 1, 0xFF000000, 0, ShaderTileMode_CLAMP, (ILinearGradient**)&lg);
             mShader = IShader::Probe(lg);
             mPaint->SetShader(mShader);
 
             AutoPtr<IPorterDuffXfermode> mode;
-            CPorterDuffXfermode::New(Elastos::Droid::Graphics::PorterDuffMode_DST_OUT, (IPorterDuffXfermode**)&mode);
+            CPorterDuffXfermode::New(PorterDuffMode_DST_OUT, (IPorterDuffXfermode**)&mode);
             mPaint->SetXfermode(IXfermode::Probe(mode));
         }
     }
@@ -9035,7 +9036,7 @@ ECode View::SetLayoutParams(
     /* [in] */ IViewGroupLayoutParams* params)
 {
     if (params == NULL) {
-//        throw new NullPointerException("params == NULL");
+        Logger::E(TAG, "SetLayoutParams: params == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
 
@@ -11168,6 +11169,11 @@ ECode View::DispatchAttachedToWindow(
     /* [in] */ AttachInfo* info,
     /* [in] */ Int32 visibility)
 {
+    if (mID == 0x7F0E00BF) {
+        Logger::I(TAG, " >>> DispatchAttachedToWindow: %s, info->mHardwareAccelerated:",
+            TO_CSTR(info), info->mHardwareAccelerated);
+        assert(0);
+    }
     //System.out.println("Attached! " + this);
     mAttachInfo = info;
     if (mOverlay != NULL) {
@@ -11728,6 +11734,7 @@ ECode View::CanHaveDisplayList(
 
 ECode View::UpdateDisplayListIfDirty()
 {
+    Logger::I(TAG, " >> UpdateDisplayListIfDirty");
     AutoPtr<IRenderNode> renderNode = mRenderNode;
     Boolean canHaveDisplayList;
     CanHaveDisplayList(&canHaveDisplayList);
@@ -11735,15 +11742,16 @@ ECode View::UpdateDisplayListIfDirty()
         // can't populate RenderNode, don't try
         return NOERROR;
     }
-    Boolean isValid;
-    renderNode->IsValid(&isValid);
+    Boolean bval;
     if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0
-            || ! isValid || (mRecreateDisplayList)) {
+        || (renderNode->IsValid(&bval), !bval)
+        || mRecreateDisplayList) {
         // Don't need to recreate the display list, just need to tell our
         // children to restore/recreate theirs
-        if (isValid && !mRecreateDisplayList) {
+        if ((renderNode->IsValid(&bval), bval) && !mRecreateDisplayList) {
             mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
+            Logger::I(TAG, " >> UpdateDisplayListIfDirty: DispatchGetDisplayList");
             DispatchGetDisplayList();
 
             return NOERROR; // no work needed
@@ -11758,48 +11766,50 @@ ECode View::UpdateDisplayListIfDirty()
         Int32 layerType;
         GetLayerType(&layerType);
 
+        Logger::I(TAG, " >> UpdateDisplayListIfDirty: renderNode->Start(");
         AutoPtr<IHardwareCanvas> canvas;
         renderNode->Start(width, height, (IHardwareCanvas**)&canvas);
-        ICanvas::Probe(canvas)->SetHighContrastText(mAttachInfo->mHighContrastText);
+        ICanvas* c = ICanvas::Probe(canvas);
+        c->SetHighContrastText(mAttachInfo->mHighContrastText);
 
         //try {
         AutoPtr<IHardwareLayer> layer = GetHardwareLayer();
-        Boolean layerIsValid;
-        layer->IsValid(&layerIsValid);
-        if (layer != NULL && layerIsValid) {
+        if (layer != NULL && (layer->IsValid(&bval), bval)) {
+            Logger::I(TAG, " >> UpdateDisplayListIfDirty: DrawHardwareLayer");
             canvas->DrawHardwareLayer(layer, 0, 0, mLayerPaint);
         }
         else if (layerType == IView::LAYER_TYPE_SOFTWARE) {
+            Logger::I(TAG, " >> UpdateDisplayListIfDirty: DrawBitmap");
             BuildDrawingCache(TRUE);
             AutoPtr<IBitmap> cache;
             GetDrawingCache(TRUE, (IBitmap**)&cache);
             if (cache != NULL) {
-                ICanvas::Probe(canvas)->DrawBitmap(cache, 0.0f, 0.0f, mLayerPaint);
+                c->DrawBitmap(cache, 0.0f, 0.0f, mLayerPaint);
             }
         }
         else {
+
             ComputeScroll();
 
-            ICanvas* _canvas = ICanvas::Probe(canvas);
-
-            _canvas->Translate(-mScrollX, -mScrollY);
+            c->Translate(-mScrollX, -mScrollY);
             mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
 
             // Fast path for layouts with no backgrounds
             if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
-                DispatchDraw(_canvas);
-                Boolean isEmpty;
-                if (mOverlay != NULL && (mOverlay->IsEmpty(&isEmpty), !isEmpty)) {
+                Logger::I(TAG, " >> UpdateDisplayListIfDirty: DispatchDraw %s", TO_CSTR(c));
+                DispatchDraw(c);
+                if (mOverlay != NULL && (mOverlay->IsEmpty(&bval), !bval)) {
                     AutoPtr<IViewGroup> group;
                     mOverlay->GetOverlayView((IViewGroup**)&group);
-                    IView::Probe(group)->Draw(_canvas);
+                    IView::Probe(group)->Draw(c);
                 }
             }
             else {
-                Draw(_canvas);
+                Logger::I(TAG, " >> UpdateDisplayListIfDirty: Draw %s", TO_CSTR(c));
+                Draw(c);
             }
-            DrawAccessibilityFocus(_canvas);
+            DrawAccessibilityFocus(c);
         }
         //} finally {
         renderNode->End(canvas);
@@ -11810,6 +11820,7 @@ ECode View::UpdateDisplayListIfDirty()
         mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
         mPrivateFlags &= ~PFLAG_DIRTY_MASK;
     }
+    Logger::I(TAG, " << UpdateDisplayListIfDirty");
     return NOERROR;
 }
 
@@ -12619,6 +12630,12 @@ Boolean View::Draw(
     /* [in] */ Int64 drawingTime)
 {
     Boolean usingRenderNodeProperties = mAttachInfo != NULL && mAttachInfo->mHardwareAccelerated;
+    Logger::D(TAG, " >>>>>>>> Draw %s", TO_CSTR(this));
+    // if (mID == 0x7F0E00BF)
+    {
+        Logger::D(TAG, " >>>>>>> Draw usingRenderNodeProperties: mAttachInfo: %s, mHardwareAccelerated: %d",
+            TO_CSTR(mAttachInfo), mAttachInfo != NULL ? mAttachInfo->mHardwareAccelerated : 0);
+    }
     Boolean more = FALSE;
     const Boolean childHasIdentityMatrix = HasIdentityMatrix();
     ViewGroup* parent = (ViewGroup*)parentObj;
@@ -12742,6 +12759,11 @@ Boolean View::Draw(
     }
 
     usingRenderNodeProperties &= hasDisplayList;
+    // if (mID == 0x7F0E00BF)
+    {
+        Logger::D(TAG, " >>>>>>> GetDisplayList: usingRenderNodeProperties:%d, hasDisplayList:%d",
+            usingRenderNodeProperties, hasDisplayList);
+    }
     if (usingRenderNodeProperties) {
         GetDisplayList((IRenderNode**)&renderNode);
         assert(renderNode != NULL);
@@ -12800,9 +12822,15 @@ Boolean View::Draw(
     }
 
     Float tempAlpha, transitionAlpha;
-    Float alpha = usingRenderNodeProperties ? 1 : ((GetAlpha(&tempAlpha), tempAlpha) * (GetTransitionAlpha(&transitionAlpha), transitionAlpha));
-    if (transformToApply != NULL || alpha < 1 || !HasIdentityMatrix() ||
-            (mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_ALPHA) == PFLAG3_VIEW_IS_ANIMATING_ALPHA) {
+    Float alpha = 1;
+    if (!usingRenderNodeProperties) {
+        GetAlpha(&tempAlpha);
+        GetTransitionAlpha(&transitionAlpha);
+        alpha = tempAlpha * transitionAlpha;
+    }
+
+    if (transformToApply != NULL || alpha < 1 || !HasIdentityMatrix()
+        || (mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_ALPHA) == PFLAG3_VIEW_IS_ANIMATING_ALPHA) {
         if (transformToApply != NULL || !childHasIdentityMatrix) {
             Int32 transX = 0;
             Int32 transY = 0;
@@ -12954,8 +12982,8 @@ Boolean View::Draw(
                 const Int32 scrollY = hasDisplayList ? 0 : sy;
                 Int32 result;
                 canvas->SaveLayer(scrollX, scrollY,
-                        scrollX + mRight - mLeft, scrollY + mBottom - mTop, mLayerPaint,
-                        ICanvas::HAS_ALPHA_LAYER_SAVE_FLAG | ICanvas::CLIP_TO_LAYER_SAVE_FLAG, &result);
+                    scrollX + mRight - mLeft, scrollY + mBottom - mTop, mLayerPaint,
+                    ICanvas::HAS_ALPHA_LAYER_SAVE_FLAG | ICanvas::CLIP_TO_LAYER_SAVE_FLAG, &result);
             }
         }
 
@@ -13380,10 +13408,7 @@ AutoPtr<IRenderNode> View::GetDrawableRenderNode(
 {
     AutoPtr<IRenderNode> renderNode = inRenderNode;
     if (renderNode == NULL) {
-        AutoPtr<IClassInfo> cInfo;
-        CObject::ReflectClassInfo(drawable, (IClassInfo**)&cInfo);
-        String name;
-        cInfo->GetName(&name);
+        String name = Object::GetFullClassName(drawable);
         renderNode = RenderNode::Create(name, this);
     }
 
@@ -15832,14 +15857,16 @@ ECode View::GetBaseline(
  * @return whether the view hierarchy is currently undergoing a layout pass
  */
 ECode View::IsInLayout(
-    /* [out] */ Boolean* res)
+    /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(res)
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
     AutoPtr<IViewRootImpl> viewRoot;
     GetViewRootImpl((IViewRootImpl**)&viewRoot);
-    Boolean isInLayout;
-    *res = (viewRoot != NULL
-        && (viewRoot->IsInLayout(&isInLayout), isInLayout));
+    if (viewRoot != NULL) {
+        viewRoot->IsInLayout(result);
+    }
     return NOERROR;
 }
 
@@ -15864,9 +15891,8 @@ ECode View::RequestLayout()
         AutoPtr<IViewRootImpl> viewRoot;
         GetViewRootImpl((IViewRootImpl**)&viewRoot);
         Boolean isInLayout;
-        if (viewRoot != NULL
-            && (viewRoot->IsInLayout(&isInLayout), isInLayout)) {
-            if (viewRoot->RequestLayoutDuringLayout(this, &isInLayout), isInLayout) {
+        if (viewRoot != NULL && (viewRoot->IsInLayout(&isInLayout), isInLayout)) {
+            if (viewRoot->RequestLayoutDuringLayout(this, &isInLayout), !isInLayout) {
                 return NOERROR;
             }
         }
@@ -15967,9 +15993,7 @@ ECode View::Measure(
         // flag not set, setMeasuredDimension() was not invoked, we raise
         // an exception to warn the developer
         if ((mPrivateFlags & PFLAG_MEASURED_DIMENSION_SET) != PFLAG_MEASURED_DIMENSION_SET) {
-            //throw new IllegalStateException("onMeasure() did not set the"
-              //      + " measured dimension by calling"
-                //    + " setMeasuredDimension()");
+            Logger::E(TAG, "onMeasure() did not set the measured dimension by calling setMeasuredDimension()");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
 
@@ -16036,7 +16060,7 @@ void View::OnMeasure(
     /* [in] */ Int32 heightMeasureSpec)
 {
     SetMeasuredDimension(GetDefaultSize(GetSuggestedMinimumWidth(), widthMeasureSpec),
-            GetDefaultSize(GetSuggestedMinimumHeight(), heightMeasureSpec));
+        GetDefaultSize(GetSuggestedMinimumHeight(), heightMeasureSpec));
 }
 
 /**
@@ -16083,8 +16107,8 @@ void View::SetMeasuredDimension(
  * {@link #MEASURED_STATE_TOO_SMALL}.
  */
 ECode View::SetMeasuredDimensionRaw(
-        /* [in] */ Int32 measuredWidth,
-        /* [in] */ Int32 measuredHeight)
+    /* [in] */ Int32 measuredWidth,
+    /* [in] */ Int32 measuredHeight)
 {
     mMeasuredWidth = measuredWidth;
     mMeasuredHeight = measuredHeight;

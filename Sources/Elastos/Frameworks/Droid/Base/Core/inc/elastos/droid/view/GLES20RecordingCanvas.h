@@ -15,9 +15,11 @@ class GLES20RecordingCanvas
     , public IGLES20RecordingCanvas
 {
 public:
+    TO_STRING_IMPL("GLES20RecordingCanvas")
+
     CAR_INTERFACE_DECL()
 
-    static CARAPI_(AutoPtr<GLES20RecordingCanvas>) Obtain(
+    static CARAPI_(AutoPtr<IHardwareCanvas>) Obtain(
         /* [in] */ IRenderNode* node);
 
     CARAPI Recycle();

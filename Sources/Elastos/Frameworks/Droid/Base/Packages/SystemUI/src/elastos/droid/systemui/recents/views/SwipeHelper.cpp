@@ -401,13 +401,12 @@ void SwipeHelper::SnapChild(
     AutoPtr<IValueAnimator> anim = IValueAnimator::Probe(CreateTranslationAnimation(view, 0));
     Int32 duration = SNAP_ANIM_LEN;
     anim->SetDuration(duration);
-    IAnimator::Probe(anim)->SetInterpolator(
-        ITimeInterpolator::Probe(RecentsConfiguration::GetInstance()->mLinearOutSlowInInterpolator));
+    IAnimator::Probe(anim)->SetInterpolator(RecentsConfiguration::GetInstance()->mLinearOutSlowInInterpolator);
     AutoPtr<IAnimatorUpdateListener> listener = new AnimatorUpdateListener2(
-            this, view, canAnimViewBeDismissed);
+        this, view, canAnimViewBeDismissed);
     anim->AddUpdateListener(listener);
     AutoPtr<AnimatorListenerAdapter> adapter = new MyAnimatorListenerAdapter2(
-            mCallback, view, canAnimViewBeDismissed);
+        mCallback, view, canAnimViewBeDismissed);
     IAnimator::Probe(anim)->AddListener(adapter);
     IAnimator::Probe(anim)->Start();
 }

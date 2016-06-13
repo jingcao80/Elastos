@@ -47,6 +47,8 @@ private:
     class CompatibleCanvas : public Canvas
     {
     public:
+        TO_STRING_IMPL("Surface::CompatibleCanvas")
+
         CompatibleCanvas(
             /* [in] */ Surface* owner);
 

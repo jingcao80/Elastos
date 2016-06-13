@@ -244,11 +244,15 @@ ECode ImageView::HasOverlappingRendering(
     /* [out] */ Boolean* has)
 {
     VALIDATE_NOT_NULL(has);
+    *has = FALSE;
+
     AutoPtr<IDrawable> bk;
     GetBackground((IDrawable**)&bk);
-    AutoPtr<IDrawable> current;
-    bk->GetCurrent((IDrawable**)&current);
-    *has = (bk.Get() !=  NULL && current.Get() != NULL);
+    if (bk != NULL) {
+        AutoPtr<IDrawable> current;
+        bk->GetCurrent((IDrawable**)&current);
+        *has = current != NULL;
+    }
     return NOERROR;
 }
 

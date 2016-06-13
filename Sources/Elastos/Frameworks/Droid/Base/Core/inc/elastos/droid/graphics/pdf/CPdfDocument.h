@@ -247,8 +247,9 @@ private:
         : public Canvas
     {
     public:
-        PdfCanvas(
-            /* [in] */ Int64 nativeCanvas);
+        TO_STRING_IMPL("CPdfDocument::PdfCanvas")
+
+        PdfCanvas();
 
         // @Override
         CARAPI SetBitmap(

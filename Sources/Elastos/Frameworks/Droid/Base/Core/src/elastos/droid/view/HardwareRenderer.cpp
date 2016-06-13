@@ -80,6 +80,7 @@ ECode HardwareRenderer::EnableForegroundTrimming()
 ECode HardwareRenderer::IsAvailable(
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = GLES20Canvas::IsAvailable();
     return NOERROR;
 }
@@ -102,6 +103,7 @@ ECode HardwareRenderer::InitializeIfNeeded(
     /* [in] */ IRect* surfaceInsets,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (mRequested) {
         // We lost the gl context, so recreate it.
         Boolean enabled;
@@ -140,6 +142,7 @@ ECode HardwareRenderer::TrimMemory(
 ECode HardwareRenderer::IsEnabled(
     /* [out] */ Boolean* enabled)
 {
+    VALIDATE_NOT_NULL(enabled)
     *enabled = mEnabled;
     return NOERROR;
 }
@@ -154,6 +157,7 @@ ECode HardwareRenderer::SetEnabled(
 ECode HardwareRenderer::IsRequested(
     /* [out] */ Boolean* requested)
 {
+    VALIDATE_NOT_NULL(requested)
     *requested = mRequested;
     return NOERROR;
 }

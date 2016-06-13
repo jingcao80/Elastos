@@ -15,10 +15,8 @@ namespace Droid {
 namespace Graphics {
 
 CPicture::RecordingCanvas::RecordingCanvas(
-    /* [in] */ CPicture* pict,
-    /* [in] */ Int64 nativeCanvas)
+    /* [in] */ CPicture* pict)
 {
-    Canvas::constructor(nativeCanvas);
     mPicture = pict;
 }
 
@@ -88,7 +86,9 @@ ECode CPicture::BeginRecording(
 {
     VALIDATE_NOT_NULL(canvas);
     Int64 ni = NativeBeginRecording(mNativePicture, width, height);
-    mRecordingCanvas = new RecordingCanvas(this, ni);
+    AutoPtr<RecordingCanvas> rc = new RecordingCanvas(this);
+    rc->constructor(ni);
+    mRecordingCanvas = rc.Get();
     *canvas = mRecordingCanvas;
     REFCOUNT_ADD(*canvas);
     return NOERROR;

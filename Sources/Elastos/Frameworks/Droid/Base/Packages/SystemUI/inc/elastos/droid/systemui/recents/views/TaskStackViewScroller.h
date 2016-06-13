@@ -7,6 +7,7 @@
 #include "elastos/droid/systemui/recents/RecentsConfiguration.h"
 #include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::AnimatorListenerAdapter;

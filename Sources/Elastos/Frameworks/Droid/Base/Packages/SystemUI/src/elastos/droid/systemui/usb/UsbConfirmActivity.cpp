@@ -90,7 +90,7 @@ ECode UsbConfirmActivity::OnCreate(
     ap->SetTitle(label);
 
     AutoPtr<ArrayOf<IInterface*> > aa = ArrayOf<IInterface*>::Alloc(1);
-    (*aa)[0] = IInterface::Probe(label);
+    aa->Set(0, label.Get());
     if (mDevice == NULL) {
         String str1;
         GetString(R::string::usb_accessory_confirm_prompt, aa, &str1);

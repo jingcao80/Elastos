@@ -64,6 +64,7 @@ SOURCES += CRenderNodeHelper.cpp
 SOURCES += RenderNodeAnimator.cpp
 SOURCES += NativeDisplayEventReceiver.cpp
 SOURCES += DisplayEventReceiver.cpp
+SOURCES += HardwareCanvas.cpp
 
 SOURCES += NativeInputChannel.cpp
 
