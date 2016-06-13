@@ -12,8 +12,6 @@ module
 
         interface IAsyncResult {}
 
-        interface IRegistrantList {}
-
     } // namespace Os
     } // namespace Droid
     } // namespace Elastos
