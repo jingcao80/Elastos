@@ -451,8 +451,6 @@ Boolean TaskStackView::UpdateStackTransforms(
     Int32 frontMostVisibleIndex = -1;
     Int32 backMostVisibleIndex = -1;
 
-    Logger::I(TAG, "UpdateStackTransforms: taskTransformCount: %d", taskTransformCount);
-
     // We can reuse the task transforms where possible to reduce object allocation
     if (taskTransformCount < taskCount) {
         // If there are less transforms than tasks, then add as many transforms as necessary

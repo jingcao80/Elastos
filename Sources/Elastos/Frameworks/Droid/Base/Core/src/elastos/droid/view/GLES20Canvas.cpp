@@ -1,7 +1,6 @@
 #include "elastos/droid/view/GLES20Canvas.h"
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/graphics/GraphicsNative.h"
-
 #include "elastos/droid/graphics/Matrix.h"
 #include "elastos/droid/graphics/MinikinUtils.h"
 #include "elastos/droid/graphics/NativePaint.h"
@@ -14,6 +13,7 @@
 #include "elastos/droid/graphics/TypefaceImpl.h"
 #include "elastos/droid/graphics/Paint.h"
 #include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/internal/utility/ArrayUtils.h"
 
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
@@ -59,6 +59,7 @@ using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::ISpannedString;
 using Elastos::Droid::Text::ISpannableString;
 using Elastos::Droid::Text::IGraphicsOperations;
+using Elastos::Droid::Internal::Utility::ArrayUtils;
 
 using Elastos::Core::IString;
 using Elastos::Utility::Logging::Logger;
@@ -252,7 +253,6 @@ ECode GLES20Canvas::ClipPath(
     VALIDATE_NOT_NULL(res)
     CPath* p = (CPath*)path;
     *res = nClipPath(mRenderer, p->mNativePath, RegionOp_INTERSECT);
-
     return NOERROR;
 }
 
@@ -305,59 +305,71 @@ ECode GLES20Canvas::ClipRect(
 }
 
 ECode GLES20Canvas::ClipRect(
-    /* [in] */ IRect* rect)
+    /* [in] */ IRect* rect,
+    /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     Int32 left ,top ,right ,bottom;
     rect->Get(&left, &top, &right, &bottom);
-    nClipRect(mRenderer, left, top, right, bottom, RegionOp_INTERSECT);
+    *res = nClipRect(mRenderer, left, top, right, bottom, RegionOp_INTERSECT);
     return NOERROR;
 }
 
 ECode GLES20Canvas::ClipRect(
     /* [in] */ IRect* rect,
-    /* [in] */ RegionOp op)
+    /* [in] */ RegionOp op,
+    /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     Int32 left ,top ,right ,bottom;
     rect->Get(&left, &top, &right, &bottom);
-    nClipRect(mRenderer, left, top, right, bottom, op);
-    return NOERROR;
-}
-
-ECode GLES20Canvas::ClipRect(
-    /* [in] */ IRectF* rect)
-{
-    Float left ,top ,right ,bottom;
-    rect->Get(&left, &top, &right, &bottom);
-    nClipRect(mRenderer, left, top, right, bottom, RegionOp_INTERSECT);
+    *res = nClipRect(mRenderer, left, top, right, bottom, op);
     return NOERROR;
 }
 
 ECode GLES20Canvas::ClipRect(
     /* [in] */ IRectF* rect,
-    /* [in] */ RegionOp op)
+    /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     Float left ,top ,right ,bottom;
     rect->Get(&left, &top, &right, &bottom);
-    nClipRect(mRenderer, left, top, right, bottom, op);
+    *res = nClipRect(mRenderer, left, top, right, bottom, RegionOp_INTERSECT);
     return NOERROR;
 }
 
-ECode GLES20Canvas::ClipRegion(
-    /* [in] */ IRegion* region)
+ECode GLES20Canvas::ClipRect(
+    /* [in] */ IRectF* rect,
+    /* [in] */ RegionOp op,
+    /* [out] */ Boolean* res)
 {
-    Handle64 nRegion;
-    region->GetNativeRegion(&nRegion);
-    nClipRegion(mRenderer, nRegion, RegionOp_INTERSECT);
+    VALIDATE_NOT_NULL(res)
+    Float left ,top ,right ,bottom;
+    rect->Get(&left, &top, &right, &bottom);
+    *res = nClipRect(mRenderer, left, top, right, bottom, op);
     return NOERROR;
 }
 
 ECode GLES20Canvas::ClipRegion(
     /* [in] */ IRegion* region,
-    /* [in] */ RegionOp op)
+    /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     Handle64 nRegion;
     region->GetNativeRegion(&nRegion);
-    nClipRegion(mRenderer, nRegion, op);
+    *res = nClipRegion(mRenderer, nRegion, RegionOp_INTERSECT);
+    return NOERROR;
+}
+
+ECode GLES20Canvas::ClipRegion(
+    /* [in] */ IRegion* region,
+    /* [in] */ RegionOp op,
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+    Handle64 nRegion;
+    region->GetNativeRegion(&nRegion);
+    *res = nClipRegion(mRenderer, nRegion, op);
     return NOERROR;
 }
 
@@ -1318,7 +1330,7 @@ public:
             pos[2 * i + 1] = layout.getY(i);
         }
         size_t glyphsCount = end - start;
-        int bytesCount = glyphsCount * sizeof(char);
+        int bytesCount = glyphsCount * sizeof(Char16);
         renderer->drawText((const char*) (glyphs + start), bytesCount, glyphsCount,
             x, y, pos + 2 * start, paint, totalAdvance, bounds);
     }
@@ -2185,13 +2197,13 @@ void GLES20Canvas::nDrawText(
     /* [in] */ Int64 paintPtr,
     /* [in] */ Int64 typefacePtr)
 {
-    String str(*text);
+    AutoPtr<ArrayOf<Char16> > chars = ArrayUtils::ToChar16Array(text);
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
 
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintPtr);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefacePtr);
 
-    renderText(renderer, str.GetChar16s()->GetPayload() + index, count, x, y, bidiFlags, paint, typeface);
+    renderText(renderer, chars->GetPayload() + index, count, x, y, bidiFlags, paint, typeface);
 }
 
 void GLES20Canvas::nDrawText(
@@ -2210,7 +2222,9 @@ void GLES20Canvas::nDrawText(
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintPtr);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefacePtr);
 
-    renderText(renderer, text.GetChar16s()->GetPayload() + start, end - start, x, y, bidiFlags, paint, typeface);
+    const int count = end - start;
+    const AutoPtr<ArrayOf<Char16> > chars = text.GetChar16s();
+    renderText(renderer, chars->GetPayload() + start, count, x, y, bidiFlags, paint, typeface);
 }
 
 void GLES20Canvas::nDrawTextOnPath(
@@ -2226,12 +2240,12 @@ void GLES20Canvas::nDrawTextOnPath(
     /* [in] */ Int64 typefacePtr)
 {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
-    String str(*text);
+    AutoPtr<ArrayOf<Char16> > chars = ArrayUtils::ToChar16Array(text);
     SkPath* path = reinterpret_cast<SkPath*>(pathPtr);
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintPtr);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefacePtr);
 
-    renderTextOnPath(renderer, str.GetChar16s()->GetPayload() + index, count, path,
+    renderTextOnPath(renderer, chars->GetPayload() + index, count, path,
             hOffset, vOffset, bidiFlags, paint, typeface);
 }
 
@@ -2270,12 +2284,12 @@ void GLES20Canvas::nDrawTextRun(
     /* [in] */ Int64 typefacePtr)
 {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
-    String str(*text);
+    AutoPtr<ArrayOf<Char16> > chars = ArrayUtils::ToChar16Array(text);
     NativePaint* paint = reinterpret_cast<NativePaint*>(paintPtr);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefacePtr);
 
     int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
-    renderTextRun(renderer, str.GetChar16s()->GetPayload() + contextIndex, index - contextIndex,
+    renderTextRun(renderer, chars->GetPayload() + contextIndex, index - contextIndex,
             count, contextCount, x, y, bidiFlags, paint, typeface);
 }
 

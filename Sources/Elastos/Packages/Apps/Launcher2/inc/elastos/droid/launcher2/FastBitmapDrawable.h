@@ -21,6 +21,8 @@ class FastBitmapDrawable
     , public IFastBitmapDrawable
 {
 public:
+    TO_STRING_IMPL("FastBitmapDrawable")
+
     CAR_INTERFACE_DECL();
 
     FastBitmapDrawable();

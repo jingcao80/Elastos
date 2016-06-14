@@ -144,25 +144,31 @@ public:
         /* [out] */ Boolean* res);
 
     CARAPI ClipRect(
-        /* [in] */ IRect* left);
+        /* [in] */ IRect* left,
+        /* [out] */ Boolean* res);
 
     CARAPI ClipRect(
         /* [in] */ IRect* rect,
-        /* [in] */ RegionOp op);
+        /* [in] */ RegionOp op,
+        /* [out] */ Boolean* res);
 
     CARAPI ClipRect(
-        /* [in] */ IRectF* left);
+        /* [in] */ IRectF* left,
+        /* [out] */ Boolean* res);
 
     CARAPI ClipRect(
         /* [in] */ IRectF* rect,
-        /* [in] */ RegionOp op);
-
-    CARAPI ClipRegion(
-        /* [in] */ IRegion* region);
+        /* [in] */ RegionOp op,
+        /* [out] */ Boolean* res);
 
     CARAPI ClipRegion(
         /* [in] */ IRegion* region,
-        /* [in] */ RegionOp op);
+        /* [out] */ Boolean* res);
+
+    CARAPI ClipRegion(
+        /* [in] */ IRegion* region,
+        /* [in] */ RegionOp op,
+        /* [out] */ Boolean* res);
 
     CARAPI GetClipBounds(
         /* [in] */ IRect* bounds,

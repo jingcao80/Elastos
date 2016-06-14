@@ -22,6 +22,8 @@ public:
 
     ~CCamera();
 
+    CARAPI constructor();
+
     CARAPI Save();
 
     CARAPI Restore();

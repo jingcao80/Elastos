@@ -127,7 +127,8 @@ AutoPtr<IBitmap> Utilities::CreateIconBitmap(
     /* [in] */ IDrawable* icon,
     /* [in] */ IContext* context)
 {
-    {    AutoLock syncLock(sCanvasLock); // we share the statics :-(
+    {
+        AutoLock syncLock(sCanvasLock); // we share the statics :-(
         if (sIconWidth == -1) {
             InitStatics(context);
         }
@@ -259,7 +260,8 @@ AutoPtr<IBitmap> Utilities::ResampleIconBitmap(
     /* [in] */ IBitmap* bitmap,
     /* [in] */ IContext* context)
 {
-    {    AutoLock syncLock(sCanvasLock); // we share the statics :-(
+    {
+        AutoLock syncLock(sCanvasLock); // we share the statics :-(
         if (sIconWidth == -1) {
             InitStatics(context);
         }
@@ -286,7 +288,8 @@ AutoPtr<IBitmap> Utilities::DrawDisabledBitmap(
     /* [in] */ IBitmap* bitmap,
     /* [in] */ IContext* context)
 {
-    {    AutoLock syncLock(sCanvasLock); // we share the statics :-(
+    {
+        AutoLock syncLock(sCanvasLock); // we share the statics :-(
         if (sIconWidth == -1) {
             InitStatics(context);
         }

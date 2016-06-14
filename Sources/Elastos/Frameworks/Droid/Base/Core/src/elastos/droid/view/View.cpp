@@ -11169,10 +11169,6 @@ ECode View::DispatchAttachedToWindow(
     /* [in] */ AttachInfo* info,
     /* [in] */ Int32 visibility)
 {
-    if (mID == 0x7F0E00BF) {
-        Logger::I(TAG, " >>> DispatchAttachedToWindow: %s, info->mHardwareAccelerated:",
-            TO_CSTR(info), info->mHardwareAccelerated);
-    }
     //System.out.println("Attached! " + this);
     mAttachInfo = info;
     if (mOverlay != NULL) {
@@ -11733,7 +11729,6 @@ ECode View::CanHaveDisplayList(
 
 ECode View::UpdateDisplayListIfDirty()
 {
-    Logger::I(TAG, " >> UpdateDisplayListIfDirty");
     AutoPtr<IRenderNode> renderNode = mRenderNode;
     Boolean canHaveDisplayList;
     CanHaveDisplayList(&canHaveDisplayList);
@@ -11750,9 +11745,7 @@ ECode View::UpdateDisplayListIfDirty()
         if ((renderNode->IsValid(&bval), bval) && !mRecreateDisplayList) {
             mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-            Logger::I(TAG, " >> UpdateDisplayListIfDirty: DispatchGetDisplayList");
             DispatchGetDisplayList();
-
             return NOERROR; // no work needed
         }
 
@@ -11765,7 +11758,6 @@ ECode View::UpdateDisplayListIfDirty()
         Int32 layerType;
         GetLayerType(&layerType);
 
-        Logger::I(TAG, " >> UpdateDisplayListIfDirty: renderNode->Start(");
         AutoPtr<IHardwareCanvas> canvas;
         renderNode->Start(width, height, (IHardwareCanvas**)&canvas);
         ICanvas* c = ICanvas::Probe(canvas);
@@ -11774,11 +11766,11 @@ ECode View::UpdateDisplayListIfDirty()
         //try {
         AutoPtr<IHardwareLayer> layer = GetHardwareLayer();
         if (layer != NULL && (layer->IsValid(&bval), bval)) {
-            Logger::I(TAG, " >> UpdateDisplayListIfDirty: DrawHardwareLayer");
+            // Logger::I(TAG, "   >> UpdateDisplayListIfDirty: DrawHardwareLayer");
             canvas->DrawHardwareLayer(layer, 0, 0, mLayerPaint);
         }
         else if (layerType == IView::LAYER_TYPE_SOFTWARE) {
-            Logger::I(TAG, " >> UpdateDisplayListIfDirty: DrawBitmap");
+            // Logger::I(TAG, "   >> UpdateDisplayListIfDirty: DrawBitmap");
             BuildDrawingCache(TRUE);
             AutoPtr<IBitmap> cache;
             GetDrawingCache(TRUE, (IBitmap**)&cache);
@@ -11787,7 +11779,6 @@ ECode View::UpdateDisplayListIfDirty()
             }
         }
         else {
-
             ComputeScroll();
 
             c->Translate(-mScrollX, -mScrollY);
@@ -11796,7 +11787,7 @@ ECode View::UpdateDisplayListIfDirty()
 
             // Fast path for layouts with no backgrounds
             if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
-                Logger::I(TAG, " >> UpdateDisplayListIfDirty: DispatchDraw %s", TO_CSTR(c));
+                // Logger::I(TAG, "   >> UpdateDisplayListIfDirty: DispatchDraw");
                 DispatchDraw(c);
                 if (mOverlay != NULL && (mOverlay->IsEmpty(&bval), !bval)) {
                     AutoPtr<IViewGroup> group;
@@ -11805,7 +11796,7 @@ ECode View::UpdateDisplayListIfDirty()
                 }
             }
             else {
-                Logger::I(TAG, " >> UpdateDisplayListIfDirty: Draw %s", TO_CSTR(c));
+                // Logger::I(TAG, "   >> UpdateDisplayListIfDirty: Draw");
                 Draw(c);
             }
             DrawAccessibilityFocus(c);
@@ -11819,7 +11810,6 @@ ECode View::UpdateDisplayListIfDirty()
         mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
         mPrivateFlags &= ~PFLAG_DIRTY_MASK;
     }
-    Logger::I(TAG, " << UpdateDisplayListIfDirty");
     return NOERROR;
 }
 
@@ -12629,11 +12619,6 @@ Boolean View::Draw(
     /* [in] */ Int64 drawingTime)
 {
     Boolean usingRenderNodeProperties = mAttachInfo != NULL && mAttachInfo->mHardwareAccelerated;
-    // if (mID == 0x7F0E00BF) {
-    //     Logger::D(TAG, " >>>>>>>> Draw %s", TO_CSTR(this));
-    //     Logger::D(TAG, " >>>>>>> Draw usingRenderNodeProperties: mAttachInfo: %s, mHardwareAccelerated: %d",
-    //         TO_CSTR(mAttachInfo), mAttachInfo != NULL ? mAttachInfo->mHardwareAccelerated : 0);
-    // }
     Boolean more = FALSE;
     const Boolean childHasIdentityMatrix = HasIdentityMatrix();
     ViewGroup* parent = (ViewGroup*)parentObj;
@@ -12757,10 +12742,6 @@ Boolean View::Draw(
     }
 
     usingRenderNodeProperties &= hasDisplayList;
-    // if (mID == 0x7F0E00BF) {
-    //     Logger::D(TAG, " >>>>>>> GetDisplayList: usingRenderNodeProperties:%d, hasDisplayList:%d",
-    //         usingRenderNodeProperties, hasDisplayList);
-    // }
     if (usingRenderNodeProperties) {
         GetDisplayList((IRenderNode**)&renderNode);
         assert(renderNode != NULL);

@@ -137,6 +137,21 @@ module
     }
 
     [local]
+    class CShortcutAndWidgetContainer {
+        constructor(
+            [in] IContext* ctx);
+
+        interface IShortcutAndWidgetContainer;
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+    }
+
+    [local]
     class CAppsCustomizeTabHost {
         constructor(
             [in] IContext* ctx,

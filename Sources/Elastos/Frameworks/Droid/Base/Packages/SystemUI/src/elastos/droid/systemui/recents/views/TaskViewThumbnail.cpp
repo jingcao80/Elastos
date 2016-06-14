@@ -147,8 +147,6 @@ void TaskViewThumbnail::OnDraw(
     Int32 w, h;
     GetWidth(&w);
     GetHeight(&h);
-    Logger::I(TAG, " >>>>>>>>>>>>>> OnDraw: w:h = (%d, %d), mCornerRadius:%d, canvas:%s",
-        w, h, mCornerRadius, TO_CSTR(canvas));
     canvas->DrawRoundRect(0, 0, w, h, mCornerRadius, mCornerRadius, mDrawPaint);
 }
 
@@ -202,7 +200,6 @@ void TaskViewThumbnail::EnableTaskBarClip(
     GetMeasuredHeight(&width);
     GetMeasuredHeight(&height);
     mClipRect->Set(0, top, width, height);
-    Logger::I(TAG, " EnableTaskBarClip: (%d, %d), (%d, %d).", 0, top, width, height);
     SetClipBounds(mClipRect);
 }
 

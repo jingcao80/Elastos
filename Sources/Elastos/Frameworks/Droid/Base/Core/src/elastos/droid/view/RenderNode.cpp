@@ -73,12 +73,13 @@ ECode RenderNode::Start(
 ECode RenderNode::End(
     /* [in] */ IHardwareCanvas* endCanvas)
 {
-    if (IGLES20RecordingCanvas::Probe(endCanvas) == NULL) {
+    IGLES20RecordingCanvas* gles20RC = IGLES20RecordingCanvas::Probe(endCanvas);
+    if (gles20RC == NULL) {
         Logger::E("RenderNode", "Passed an invalid canvas to end!");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    GLES20RecordingCanvas* canvas = (GLES20RecordingCanvas*) endCanvas;
+    GLES20RecordingCanvas* canvas = (GLES20RecordingCanvas*)gles20RC;
     canvas->OnPostDraw();
     Int64 renderNodeData;
     canvas->FinishRecording(&renderNodeData);
@@ -166,12 +167,10 @@ ECode RenderNode::SetClipBounds(
     VALIDATE_NOT_NULL(result)
     if (rect == NULL) {
         *result = nSetClipBoundsEmpty(mNativeRenderNode);
-    } else {
+    }
+    else {
         Int32 left, top, right, bottom;
-        rect->GetLeft(&left);
-        rect->GetTop(&top);
-        rect->GetRight(&right);
-        rect->GetBottom(&bottom);
+        rect->Get(&left, &top, &right, &bottom);
         *result = nSetClipBounds(mNativeRenderNode, left, top, right, bottom);
     }
     return NOERROR;
@@ -246,10 +245,7 @@ ECode RenderNode::SetOutline(
     AutoPtr<IRect> rect = ol->mRect;
     if (rect != NULL) {
         Int32 left, top, right, bottom;
-        rect->GetLeft(&left);
-        rect->GetTop(&top);
-        rect->GetRight(&right);
-        rect->GetBottom(&bottom);
+        rect->Get(&left, &top, &right, &bottom);
         Float radius = ol->mRadius;
         Float alpha = ol->mAlpha;
         *result = nSetOutlineRoundRect(mNativeRenderNode, left, top,

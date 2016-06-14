@@ -362,13 +362,12 @@ void ThreadedRenderer::UpdateRootDisplayList(
     /* [in] */ IView* view,
     /* [in] */ IHardwareDrawCallbacks* callbacks)
 {
-    Logger::I(LOGTAG, " >> UpdateRootDisplayList");
 //    Trace::TraceBegin(Trace::TRACE_TAG_VIEW, "getDisplayList");
     UpdateViewTreeDisplayList(view);
 
     Boolean bval = FALSE;
     if (mRootNodeNeedsUpdate || (mRootNode->IsValid(&bval), !bval)) {
-        Logger::I(LOGTAG, " >> UpdateRootDisplayList mRootNode->Start");
+        Logger::I(LOGTAG, " >> UpdateRootDisplayList RootNodeNeedsUpdate");
         AutoPtr<IHardwareCanvas> canvas;
         mRootNode->Start(mSurfaceWidth, mSurfaceHeight, (IHardwareCanvas**)&canvas);
         Int32 saveCount = 0;
@@ -390,7 +389,6 @@ void ThreadedRenderer::UpdateRootDisplayList(
         mRootNode->End(canvas);
     }
 //    Trace::TraceEnd(Trace::TRACE_TAG_VIEW);
-    Logger::I(LOGTAG, " << UpdateRootDisplayList");
 }
 
 ECode ThreadedRenderer::InvalidateRoot()
@@ -404,7 +402,7 @@ ECode ThreadedRenderer::Draw(
     /* [in] */ View::AttachInfo* attachInfo,
     /* [in] */ IHardwareDrawCallbacks* callbacks)
 {
-    Logger::I(LOGTAG, " >> ThreadedRenderer::Draw ", TO_CSTR(view));
+    Logger::I(LOGTAG, " >>>>>>>> ThreadedRenderer::Draw %s", TO_CSTR(view));
     attachInfo->mIgnoreDirtyState = TRUE;
     Int64 frameTimeNanos = 0;
     mChoreographer->GetFrameTimeNanos(&frameTimeNanos);
@@ -456,6 +454,7 @@ ECode ThreadedRenderer::Draw(
     if ((syncResult & SYNC_INVALIDATE_REQUIRED) != 0) {
         attachInfo->mViewRootImpl->Invalidate();
     }
+    Logger::I(LOGTAG, " <<<<<<<< ThreadedRenderer::Draw %s", TO_CSTR(view));
     return NOERROR;
 }
 

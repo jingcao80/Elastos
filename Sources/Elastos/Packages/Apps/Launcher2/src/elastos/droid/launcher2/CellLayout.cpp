@@ -4,6 +4,7 @@
 #include "elastos/droid/launcher2/LauncherModel.h"
 #include "elastos/droid/launcher2/LauncherAppWidgetInfo.h"
 #include "elastos/droid/launcher2/PendingAddItemInfo.h"
+#include "elastos/droid/launcher2/CShortcutAndWidgetContainer.h"
 #include "Elastos.Droid.Widget.h"
 #include <elastos/droid/R.h>
 #include <elastos/core/Math.h>
@@ -1062,8 +1063,9 @@ ECode CellLayout::constructor(
     CRect::New((IRect**)&mBackgroundRect);
     CRect::New((IRect**)&mForegroundRect);
 
-    mShortcutsAndWidgets = new ShortcutAndWidgetContainer();
-    mShortcutsAndWidgets->constructor(context);
+    AutoPtr<IShortcutAndWidgetContainer> sawc;
+    CShortcutAndWidgetContainer::New(context, (IShortcutAndWidgetContainer**)&sawc);
+    mShortcutsAndWidgets = (ShortcutAndWidgetContainer*)sawc.Get();
     mShortcutsAndWidgets->SetCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap,
             mCountX);
 
@@ -1625,7 +1627,7 @@ ECode CellLayout::RemoveViewAt(
     /* [in] */ Int32 index)
 {
     AutoPtr<IView> child;
-    IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(index, (IView**)&child);
+    mShortcutsAndWidgets->GetChildAt(index, (IView**)&child);
     MarkCellsAsUnoccupiedForView(child);
     mShortcutsAndWidgets->RemoveViewAt(index);
     return NOERROR;
@@ -1645,7 +1647,7 @@ ECode CellLayout::RemoveViews(
 {
     for (Int32 i = start; i < start + count; i++) {
         AutoPtr<IView> child;
-        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
+        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
         MarkCellsAsUnoccupiedForView(child);
     }
     mShortcutsAndWidgets->RemoveViews(start, count);
@@ -1658,7 +1660,7 @@ ECode CellLayout::RemoveViewsInLayout(
 {
     for (Int32 i = start; i < start + count; i++) {
         AutoPtr<IView> child;
-        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
+        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
         MarkCellsAsUnoccupiedForView(child);
     }
     mShortcutsAndWidgets->RemoveViewsInLayout(start, count);
@@ -1691,7 +1693,7 @@ ECode CellLayout::SetTagToCellInfoForPoint(
     Boolean found = FALSE;
     for (Int32 i = count - 1; i >= 0; i--) {
         AutoPtr<IView> child;
-        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
+        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
         CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)ICellLayoutLayoutParams::Probe(_lp);
@@ -1897,9 +1899,10 @@ ECode CellLayout::GetDistanceFromCell(
 {
     VALIDATE_NOT_NULL(cell);
 
+    using Elastos::Core::Math;
     CellToCenterPoint((*cell)[0], (*cell)[1], mTmpPoint);
-    Float distance = (Float) Elastos::Core::Math::Sqrt( Elastos::Core::Math::Pow(x - (*mTmpPoint)[0], 2) +
-            Elastos::Core::Math::Pow(y - (*mTmpPoint)[1], 2));
+    Float distance = (Float) Math::Sqrt(
+        Math::Pow(x - (*mTmpPoint)[0], 2) + Math::Pow(y - (*mTmpPoint)[1], 2));
     *result = distance;
     return NOERROR;
 }
@@ -1950,10 +1953,7 @@ ECode CellLayout::GetContentRect(
         CRect::New((IRect**)&r);
     }
     Int32 left, top, right, bottom;
-    GetPaddingLeft(&left);
-    GetPaddingTop(&top);
-    GetPaddingRight(&right);
-    GetPaddingBottom(&bottom);
+    GetPadding(&left, &top, &right, &bottom);
     Int32 w, h;
     GetWidth(&w);
     GetHeight(&h);
@@ -2040,10 +2040,7 @@ void CellLayout::OnMeasure(
     Int32 numWidthGaps = mCountX - 1;
     Int32 numHeightGaps = mCountY - 1;
     Int32 left, top, right, bottom;
-    GetPaddingLeft(&left);
-    GetPaddingTop(&top);
-    GetPaddingRight(&right);
-    GetPaddingBottom(&bottom);
+    GetPadding(&left, &top, &right, &bottom);
     if (mOriginalWidthGap < 0 || mOriginalHeightGap < 0) {
         Int32 hSpace = widthSpecSize - left - right;
         Int32 vSpace = heightSpecSize - top - bottom;
@@ -2094,10 +2091,7 @@ ECode CellLayout::OnLayout(
     Int32 count;
     GetChildCount(&count);
     Int32 left, top, right, bottom;
-    GetPaddingLeft(&left);
-    GetPaddingTop(&top);
-    GetPaddingRight(&right);
-    GetPaddingBottom(&bottom);
+    GetPadding(&left, &top, &right, &bottom);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
         ViewGroup::GetChildAt(i, (IView**)&child);
@@ -2289,9 +2283,10 @@ ECode CellLayout::AnimateChildToPosition(
             lp, oldX, oldY, newX, newY, child);
         va->AddUpdateListener(listener);
         AutoPtr<AnimatorListenerAdapter> adapter = new MyAnimatorListenerAdapter3(this, lp, child);
-        IAnimator::Probe(va)->AddListener(adapter);
-        IAnimator::Probe(va)->SetStartDelay(delay);
-        IAnimator::Probe(va)->Start();
+        IAnimator* a = IAnimator::Probe(va);
+        a->AddListener(adapter);
+        a->SetStartDelay(delay);
+        a->Start();
         *result = TRUE;
         return NOERROR;
     }
@@ -2438,8 +2433,6 @@ ECode CellLayout::FindNearestVacantArea(
     /* [in] */ ArrayOf<Int32>* result,
     /* [out, callee] */ ArrayOf<Int32>** outarray)
 {
-    VALIDATE_NOT_NULL(outarray);
-
     return FindNearestVacantArea(pixelX, pixelY, spanX, spanY, NULL, result, outarray);
 }
 
@@ -2454,8 +2447,6 @@ ECode CellLayout::FindNearestVacantArea(
     /* [in] */ ArrayOf<Int32>* resultSpan,
     /* [out, callee] */ ArrayOf<Int32>** outarray)
 {
-    VALIDATE_NOT_NULL(outarray);
-
     return FindNearestVacantArea(pixelX, pixelY, minSpanX, minSpanY, spanX, spanY, NULL,
             result, resultSpan, outarray);
 }
@@ -2470,8 +2461,6 @@ ECode CellLayout::FindNearestArea(
     /* [in] */ ArrayOf<Int32>* result,
     /* [out, callee] */ ArrayOf<Int32>** outarray)
 {
-    VALIDATE_NOT_NULL(outarray);
-
     return FindNearestArea(pixelX, pixelY, spanX, spanY,
             spanX, spanY, ignoreView, ignoreOccupied, result, NULL, mOccupied, outarray);
 }
@@ -2669,10 +2658,11 @@ AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
     /* [in] */ ArrayOf<ArrayOf<Boolean>* >* blockOccupied,
     /* [in] */ ArrayOf<Int32>* result)
 {
+    using Elastos::Core::Math;
     // Keep track of best-scoring drop area
     AutoPtr<ArrayOf<Int32> > bestXY = result != NULL ? result : ArrayOf<Int32>::Alloc(2);
-    Float bestDistance = Elastos::Core::Math::FLOAT_MAX_VALUE;
-    Int32 bestDirectionScore = Elastos::Core::Math::INT32_MIN_VALUE;
+    Float bestDistance = Math::FLOAT_MAX_VALUE;
+    Int32 bestDirectionScore = Math::INT32_MIN_VALUE;
 
     Int32 countX = mCountX;
     Int32 countY = mCountY;
@@ -2704,10 +2694,8 @@ AutoPtr<ArrayOf<Int32> > CellLayout::FindNearestArea(
             Boolean exactDirectionOnly = FALSE;
             Boolean directionMatches = (*direction)[0] == (*curDirection)[0] &&
                     (*direction)[0] == (*curDirection)[0];
-            if (((directionMatches || !exactDirectionOnly) &&
-                Elastos::Core::Math::Compare(distance,  bestDistance) < 0)
-                || (Elastos::Core::Math::Compare(distance, bestDistance) == 0
-                && curDirectionScore > bestDirectionScore)) {
+            if (((directionMatches || !exactDirectionOnly) && Math::Compare(distance,  bestDistance) < 0)
+                || (Math::Compare(distance, bestDistance) == 0 && curDirectionScore > bestDirectionScore)) {
                 bestDistance = distance;
                 bestDirectionScore = curDirectionScore;
                 (*bestXY)[0] = x;
@@ -3170,15 +3158,16 @@ void CellLayout::ComputeDirectionVector(
     /* [in] */ Float deltaY,
     /* [in] */ ArrayOf<Int32>* result)
 {
-    Double angle = Elastos::Core::Math::Atan(((Float) deltaY) / deltaX);
+    using Elastos::Core::Math;
+    Double angle = Math::Atan(((Float) deltaY) / deltaX);
 
     (*result)[0] = 0;
     (*result)[1] = 0;
-    if (Elastos::Core::Math::Abs(Elastos::Core::Math::Cos(angle)) > 0.5f) {
-        (*result)[0] = (Int32) Elastos::Core::Math::Signum(deltaX);
+    if (Math::Abs(Math::Cos(angle)) > 0.5f) {
+        (*result)[0] = (Int32) Math::Signum(deltaX);
     }
-    if (Elastos::Core::Math::Abs(Elastos::Core::Math::Sin(angle)) > 0.5f) {
-        (*result)[1] = (Int32) Elastos::Core::Math::Signum(deltaY);
+    if (Math::Abs(Math::Sin(angle)) > 0.5f) {
+        (*result)[1] = (Int32) Math::Signum(deltaY);
     }
 }
 
@@ -3252,7 +3241,7 @@ void CellLayout::CopyCurrentStateToSolution(
     mShortcutsAndWidgets->GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
+        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
         CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
@@ -3281,7 +3270,7 @@ void CellLayout::CopySolutionToTempState(
     mShortcutsAndWidgets->GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
+        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
         if (child.Get() == dragView) continue;
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
@@ -3317,7 +3306,7 @@ void CellLayout::AnimateItemsToSolution(
     mShortcutsAndWidgets->GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
+        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
         if (child.Get() == dragView) continue;
         AutoPtr<IInterface> value;
         solution->mMap->Get(child, (IInterface**)&value);
@@ -3345,7 +3334,7 @@ void CellLayout::BeginOrAdjustHintAnimations(
     mShortcutsAndWidgets->GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
+        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
         if (child.Get() == dragView) continue;
         AutoPtr<IInterface> value;
         solution->mMap->Get(child, (IInterface**)&value);
@@ -3384,7 +3373,7 @@ void CellLayout::CommitTempPlacement()
     mShortcutsAndWidgets->GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
+        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
         CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
@@ -3416,7 +3405,7 @@ ECode CellLayout::SetUseTempCoords(
     mShortcutsAndWidgets->GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
         AutoPtr<IView> child;
-        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
+        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
         CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
@@ -3540,7 +3529,7 @@ void CellLayout::GetViewsIntersectingRegion(
     CRectHelper::AcquireSingleton((IRectHelper**)&rHelper);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
-        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
+        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
         if (child.Get() == dragView) continue;
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
@@ -3587,7 +3576,7 @@ ECode CellLayout::RevertTempState()
     mShortcutsAndWidgets->GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
-        IViewGroup::Probe(mShortcutsAndWidgets)->GetChildAt(i, (IView**)&child);
+        mShortcutsAndWidgets->GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> _lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&_lp);
         CellLayoutLayoutParams* lp = (CellLayoutLayoutParams*)_lp.Get();
@@ -3764,7 +3753,6 @@ ECode CellLayout::IsItemPlacementDirty(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-
     *result = mItemPlacementDirty;
     return NOERROR;
 }
@@ -3778,8 +3766,6 @@ ECode CellLayout::FindNearestVacantArea(
     /* [in] */ ArrayOf<Int32>* result,
     /* [out, callee] */ ArrayOf<Int32>** outarray)
 {
-    VALIDATE_NOT_NULL(outarray);
-
     return FindNearestArea(pixelX, pixelY, spanX, spanY, ignoreView, TRUE, result, outarray);
 }
 
@@ -3795,8 +3781,6 @@ ECode CellLayout::FindNearestVacantArea(
     /* [in] */ ArrayOf<Int32>* resultSpan,
     /* [out, callee] */ ArrayOf<Int32>** outarray)
 {
-    VALIDATE_NOT_NULL(outarray);
-
     return FindNearestArea(pixelX, pixelY, minSpanX, minSpanY, spanX, spanY, ignoreView, TRUE,
             result, resultSpan, mOccupied, outarray);
 }
@@ -3809,16 +3793,12 @@ ECode CellLayout::FindNearestArea(
     /* [in] */ ArrayOf<Int32>* result,
     /* [out, callee] */ ArrayOf<Int32>** outarray)
 {
-    VALIDATE_NOT_NULL(outarray);
-
     return FindNearestArea(pixelX, pixelY, spanX, spanY, NULL, FALSE, result, outarray);
 }
 
 ECode CellLayout::ExistsEmptyCell(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-
     return FindCellForSpan(NULL, 1, 1, result);
 }
 
@@ -3828,8 +3808,6 @@ ECode CellLayout::FindCellForSpan(
     /* [in] */ Int32 spanY,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-
     return FindCellForSpanThatIntersectsIgnoring(cellXY, spanX,
             spanY, -1, -1, NULL, mOccupied, result);
 }
@@ -3841,8 +3819,6 @@ ECode CellLayout::FindCellForSpanIgnoring(
     /* [in] */ IView* ignoreView,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-
     return FindCellForSpanThatIntersectsIgnoring(cellXY, spanX, spanY, -1, -1,
             ignoreView, mOccupied, result);
 }
@@ -3855,8 +3831,6 @@ ECode CellLayout::FindCellForSpanThatIntersects(
     /* [in] */ Int32 intersectY,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-
     return FindCellForSpanThatIntersectsIgnoring(
             cellXY, spanX, spanY, intersectX, intersectY, NULL, mOccupied, result);
 }
@@ -3873,6 +3847,8 @@ ECode CellLayout::FindCellForSpanThatIntersectsIgnoring(
 {
     VALIDATE_NOT_NULL(result);
 
+    using Elastos::Core::Math;
+
     // mark space take by ignoreView as available (method checks if ignoreView is NULL)
     MarkCellsAsUnoccupiedForView(ignoreView, occupied);
 
@@ -3880,19 +3856,19 @@ ECode CellLayout::FindCellForSpanThatIntersectsIgnoring(
     while (TRUE) {
         Int32 startX = 0;
         if (intersectX >= 0) {
-            startX = Elastos::Core::Math::Max(startX, intersectX - (spanX - 1));
+            startX = Math::Max(startX, intersectX - (spanX - 1));
         }
         Int32 endX = mCountX - (spanX - 1);
         if (intersectX >= 0) {
-            endX = Elastos::Core::Math::Min(endX, intersectX + (spanX - 1) + (spanX == 1 ? 1 : 0));
+            endX = Math::Min(endX, intersectX + (spanX - 1) + (spanX == 1 ? 1 : 0));
         }
         Int32 startY = 0;
         if (intersectY >= 0) {
-            startY = Elastos::Core::Math::Max(startY, intersectY - (spanY - 1));
+            startY = Math::Max(startY, intersectY - (spanY - 1));
         }
         Int32 endY = mCountY - (spanY - 1);
         if (intersectY >= 0) {
-            endY = Elastos::Core::Math::Min(endY, intersectY + (spanY - 1) + (spanY == 1 ? 1 : 0));
+            endY = Math::Min(endY, intersectY + (spanY - 1) + (spanY == 1 ? 1 : 0));
         }
 
         for (Int32 y = startY; y < endY && !foundCell; y++) {
@@ -4029,17 +4005,18 @@ ECode CellLayout::RectToCell(
 {
     VALIDATE_NOT_NULL(outArray);
 
+    using Elastos::Core::Math;
     // Always assume we're working with the smallest span to make sure we
     // reserve enough space in both orientations.
     Int32 actualWidth;
     resources->GetDimensionPixelSize(R::dimen::workspace_cell_width, &actualWidth);
     Int32 actualHeight;
     resources->GetDimensionPixelSize(R::dimen::workspace_cell_height, &actualHeight);
-    Int32 smallerSize = Elastos::Core::Math::Min(actualWidth, actualHeight);
+    Int32 smallerSize = Math::Min(actualWidth, actualHeight);
 
     // Always round up to next largest cell
-    Int32 spanX = (Int32)Elastos::Core::Math::Ceil(width / (Float)smallerSize);
-    Int32 spanY = (Int32)Elastos::Core::Math::Ceil(height / (Float)smallerSize);
+    Int32 spanX = (Int32)Math::Ceil(width / (Float)smallerSize);
+    Int32 spanY = (Int32)Math::Ceil(height / (Float)smallerSize);
 
     if (result == NULL) {
         AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(2);
@@ -4106,8 +4083,6 @@ ECode CellLayout::GetVacantCell(
     /* [in] */ Int32 spanY,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-
     return FindVacantCell(vacant, spanX, spanY, mCountX, mCountY, mOccupied, result);
 }
 

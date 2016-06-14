@@ -1185,6 +1185,12 @@ protected:
     CARAPI GetCurrentPageDescription(
         /* [out] */ String* str);
 
+    CARAPI ToString(
+        /* [out] */ String* str)
+    {
+        return Object::ToString(str);
+    }
+
 private:
     /**
      * Check if the point (x, y) hits a given page.

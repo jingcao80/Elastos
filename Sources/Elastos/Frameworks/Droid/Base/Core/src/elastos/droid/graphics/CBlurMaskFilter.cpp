@@ -28,12 +28,14 @@ ECode CBlurMaskFilter::NativeConstructor(
     /* [in] */ Int32 blurStyle,
     /* [out] */ Int64* outfilter)
 {
-    VALIDATE_NOT_NULL(outfilter);
+    VALIDATE_NOT_NULL(outfilter)
+    *outfilter = 0;
 
     SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(radius);
     SkMaskFilter* filter = SkBlurMaskFilter::Create((SkBlurStyle)blurStyle, sigma);
     if (filter == NULL) {
-        Slogger::E("CBlurMaskFilter", "java/lang/IllegalArgumentException");
+        Slogger::E("CBlurMaskFilter", "IllegalArgumentException: radius:%.2f, blurStyle:%d, sigma: %d",
+            radius, blurStyle, sigma);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 

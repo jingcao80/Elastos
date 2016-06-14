@@ -13,7 +13,9 @@ namespace SystemUI {
 namespace StatusBar {
 
 CAR_OBJECT_IMPL(CNotificationBackgroundView)
+
 CAR_INTERFACE_IMPL(CNotificationBackgroundView, View, INotificationBackgroundView)
+
 CNotificationBackgroundView::CNotificationBackgroundView()
     : mClipTopAmount(0)
     , mActualHeight(0)

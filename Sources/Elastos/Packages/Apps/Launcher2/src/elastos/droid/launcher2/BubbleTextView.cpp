@@ -253,7 +253,7 @@ AutoPtr<IBitmap> BubbleTextView::CreateGlowingOutline(
     /* [in] */ Int32 outlineColor,
     /* [in] */ Int32 glowColor)
 {
-    Int32 padding = HolographicOutlineHelper::MAX_OUTER_BLUR_RADIUS;
+    Int32 padding = HolographicOutlineHelper::GetMAX_OUTER_BLUR_RADIUS();
 
     Int32 width;
     GetWidth(&width);
@@ -381,7 +381,7 @@ ECode BubbleTextView::GetPressedOrFocusedBackgroundPadding(
 {
     VALIDATE_NOT_NULL(res);
 
-    *res = HolographicOutlineHelper::MAX_OUTER_BLUR_RADIUS / 2;
+    *res = HolographicOutlineHelper::GetMAX_OUTER_BLUR_RADIUS() / 2;
     return NOERROR;
 }
 

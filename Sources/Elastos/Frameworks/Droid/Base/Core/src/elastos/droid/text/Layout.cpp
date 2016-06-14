@@ -560,6 +560,13 @@ ECode Layout::DrawText(
     AutoPtr<ITextPaint> paint = mPaint;
     IPaint* p = IPaint::Probe(mPaint);
     AutoPtr<ICharSequence> buf = mText;
+    Int32 textLength = 0;
+    AutoPtr<ISpanned> sp;
+    if (mSpannedText) {
+        sp = ISpanned::Probe(buf);
+        buf->GetLength(&textLength);
+    }
+
 
     LayoutAlignment paraAlign = mAlignment;
     AutoPtr<TabStops> tabStops;
@@ -587,9 +594,6 @@ ECode Layout::DrawText(
         Int32 right = mWidth;
 
         if (mSpannedText) {
-            AutoPtr<ISpanned> sp = ISpanned::Probe(buf);
-            Int32 textLength = 0;
-            buf->GetLength(&textLength);
             Char32 ch;
             Boolean isFirstParaLine = (start == 0 || (buf->GetCharAt(start - 1, &ch), ch) == '\n');
 
@@ -622,20 +626,6 @@ ECode Layout::DrawText(
             // Draw all leading margin spans.  Adjust left or right according
             // to the paragraph direction of the line.
             Int32 length = spans.Get()->GetLength();
-            // for (Int32 n = 0; n < length; n++) {
-            //     if ((*spans)[n] != NULL && (*spans)[n]->Probe(EIID_ILeadingMarginSpan)) {
-            //         AutoPtr<ILeadingMarginSpan> margin = (ILeadingMarginSpan*)((*spans)[n]->Probe(EIID_ILeadingMarginSpan));
-            //         Boolean useFirstLineMargin = isFirstParaLine;
-            //         if (margin != NULL && margin->Probe(EIID_ILeadingMarginSpan2)) {
-            //             ILeadingMarginSpan2* margin2 = (ILeadingMarginSpan2*)(margin->Probe(EIID_ILeadingMarginSpan2));
-            //             Int32 count;
-            //             margin2->GetLeadingMarginLineCount(&count);
-            //             Int32 tmp;
-            //             sp->GetSpanStart(margin, &tmp);
-            //             Int32 startLine = GetLineForOffset(tmp);
-            //             useFirstLineMargin = i < startLine + count;
-            //         }
-
             Boolean useFirstLineMargin = isFirstParaLine;
             for (Int32 n = 0; n < length; n++) {
                 ILeadingMarginSpan2* lms2 = ILeadingMarginSpan2::Probe((*spans)[n]);
@@ -682,10 +672,10 @@ ECode Layout::DrawText(
         // Can't tell if we have tabs for sure, currently
         if (hasTabOrEmoji && !tabStopsIsInitialized) {
             if (tabStops == NULL) {
-                tabStops = new TabStops(TAB_INCREMENT, (ArrayOf<IInterface*>*)(spans.Get()));
+                tabStops = new TabStops(TAB_INCREMENT, spans.Get());
             }
             else {
-                tabStops->Reset(TAB_INCREMENT, (ArrayOf<IInterface*>*)(spans.Get()));
+                tabStops->Reset(TAB_INCREMENT, spans.Get());
             }
             tabStopsIsInitialized = TRUE;
         }

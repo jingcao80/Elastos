@@ -152,9 +152,11 @@ private:
     };
 
 public:
-    PagedView();
-
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("PagedView")
+
+    PagedView();
 
     CARAPI constructor(
         /* [in] */ IContext* context);

@@ -3863,12 +3863,10 @@ void ViewRootImpl::Draw(
     Boolean isEmpty;
     dirty->IsEmpty(&isEmpty);
     if (!isEmpty || mIsAnimating) {
-        Boolean isHardwareRenderEnable = FALSE;
-        if (mAttachInfo->mHardwareRenderer) {
-            mAttachInfo->mHardwareRenderer->IsEnabled(&isHardwareRenderEnable);
-        }
-        // Logger::I(TAG, "%s Draw with hardware renderer : %d", TO_CSTR(mView), isHardwareRenderEnable);
-        if (isHardwareRenderEnable) {
+        Boolean bval = FALSE;
+        if (mAttachInfo->mHardwareRenderer && (mAttachInfo->mHardwareRenderer->IsEnabled(&bval), bval)) {
+            Logger::I(TAG, " >> %s Draw with hardware renderer", TO_CSTR(mView));
+
             // Draw with hardware renderer.
             mIsAnimating = FALSE;
             if (mHardwareYOffset != yOffset || mHardwareXOffset != xOffset) {
@@ -3876,6 +3874,7 @@ void ViewRootImpl::Draw(
                 mHardwareXOffset = xOffset;
                 mAttachInfo->mHardwareRenderer->InvalidateRoot();
             }
+            // mAttachInfo->mHardwareRenderer->InvalidateRoot();
             mResizeAlpha = resizeAlpha;
 
             // sometimes we get the dirty rect as null
@@ -3892,7 +3891,6 @@ void ViewRootImpl::Draw(
             ((HardwareRenderer*)mAttachInfo->mHardwareRenderer.Get())->Draw(mView, mAttachInfo, this);
         }
         else {
-            // Logger::I(TAG, "%s Draw with DrawSoftware", TO_CSTR(mView));
             // If we get here with a disabled & requested hardware renderer, something went
             // wrong (an invalidate posted right before we destroyed the hardware surface
             // for instance) so we should just bail out. Locking the surface with software

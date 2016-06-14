@@ -43,6 +43,8 @@ public:
         /* [in] */ Int32 y,
         /* [out] */ IView** view);
 
+    using ViewGroup::GetChildAt;
+
     CARAPI SetupLp(
         /* [in] */ ICellLayoutLayoutParams* lp);
 

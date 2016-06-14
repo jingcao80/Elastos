@@ -210,6 +210,8 @@ module
     }
 
     class CCamera {
+        constructor();
+
         interface ICamera;
     }
 

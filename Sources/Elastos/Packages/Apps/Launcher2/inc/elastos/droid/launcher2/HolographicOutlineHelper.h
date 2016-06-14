@@ -79,14 +79,29 @@ public:
         /* [in] */ Int32 color,
         /* [in] */ Int32 outlineColor);
 
-private:
-    static CARAPI_(Boolean) InitStaticBlock();
+    static CARAPI_(Int32) GetMAX_OUTER_BLUR_RADIUS();
 
-public:
+    static CARAPI_(Int32) GetMIN_OUTER_BLUR_RADIUS();
+
+private:
+    CARAPI_(AutoPtr<IBlurMaskFilter>) GetExtraThickOuterBlurMaskFilter();
+
+    CARAPI_(AutoPtr<IBlurMaskFilter>) GetThickOuterBlurMaskFilter();
+
+    CARAPI_(AutoPtr<IBlurMaskFilter>) GetMediumOuterBlurMaskFilter();
+
+    CARAPI_(AutoPtr<IBlurMaskFilter>) GetThinOuterBlurMaskFilter();
+
+    CARAPI_(AutoPtr<IBlurMaskFilter>) GetThickInnerBlurMaskFilter();
+
+    CARAPI_(AutoPtr<IBlurMaskFilter>) GetExtraThickInnerBlurMaskFilter();
+
+    CARAPI_(AutoPtr<IBlurMaskFilter>) GetMediumInnerBlurMaskFilter();
+
+private:
     static /*const*/ Int32 MAX_OUTER_BLUR_RADIUS;
     static /*const*/ Int32 MIN_OUTER_BLUR_RADIUS;
 
-private:
     AutoPtr<IPaint> mHolographicPaint;
     AutoPtr<IPaint> mBlurPaint;
     AutoPtr<IPaint> mErasePaint;
@@ -102,8 +117,6 @@ private:
     static const Int32 THICK;
     static const Int32 MEDIUM;
     static const Int32 EXTRA_THICK;
-
-    static Boolean initStaticBlock;
 };
 
 } // namespace Launcher2

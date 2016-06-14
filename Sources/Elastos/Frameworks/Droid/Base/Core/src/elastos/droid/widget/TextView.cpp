@@ -6136,13 +6136,10 @@ void TextView::OnDraw(
     RestartMarqueeIfNeeded();
     // Draw the background for this view
     View::OnDraw(canvas);
-    Int32 compoundPaddingLeft = 0;
+    Int32 compoundPaddingLeft, compoundPaddingTop, compoundPaddingRight, compoundPaddingBottom;
     GetCompoundPaddingLeft(&compoundPaddingLeft);
-    Int32 compoundPaddingTop = 0;
     GetCompoundPaddingTop(&compoundPaddingTop);
-    Int32 compoundPaddingRight = 0;
     GetCompoundPaddingRight(&compoundPaddingRight);
-    Int32 compoundPaddingBottom = 0;
     GetCompoundPaddingBottom(&compoundPaddingBottom);
     Int32 scrollX = mScrollX;
     Int32 scrollY = mScrollY;

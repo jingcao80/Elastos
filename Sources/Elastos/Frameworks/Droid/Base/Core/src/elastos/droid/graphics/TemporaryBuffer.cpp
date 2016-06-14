@@ -16,12 +16,14 @@ namespace Graphics {
 
 AutoPtr< ArrayOf<Char32> > TemporaryBuffer::sTemp;
 Object TemporaryBuffer::sObject;
+
 AutoPtr< ArrayOf<Char32> > TemporaryBuffer::Obtain(
     /* [in] */ Int32 len)
 {
     AutoPtr< ArrayOf<Char32> > buf;
 
-    {    AutoLock syncLock(sObject);
+    {
+        AutoLock syncLock(sObject);
         buf = sTemp;
         sTemp = NULL;
     }
@@ -38,7 +40,8 @@ void TemporaryBuffer::Recycle(
 {
     if (temp->GetLength() > 1000) return;
 
-    {    AutoLock syncLock(sObject);
+    {
+        AutoLock syncLock(sObject);
         sTemp = temp;
     }
 }

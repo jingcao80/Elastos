@@ -24,8 +24,18 @@ namespace Elastos {
 namespace Droid {
 namespace Launcher2 {
 
-/*const*/ Int32 HolographicOutlineHelper::MAX_OUTER_BLUR_RADIUS;
-/*const*/ Int32 HolographicOutlineHelper::MIN_OUTER_BLUR_RADIUS;
+static AutoPtr<IBlurMaskFilter> CreateBlurMaskFilter(Float radius, Int32 type)
+{
+    Float scale;
+    LauncherApplication::GetScreenDensity(&scale);
+
+    AutoPtr<IBlurMaskFilter> filter;
+    CBlurMaskFilter::New(scale * radius, type, (IBlurMaskFilter**)&filter);
+    return filter;
+}
+
+/*const*/ Int32 HolographicOutlineHelper::MAX_OUTER_BLUR_RADIUS = 0;
+/*const*/ Int32 HolographicOutlineHelper::MIN_OUTER_BLUR_RADIUS = 0;
 
 AutoPtr<IBlurMaskFilter> HolographicOutlineHelper::sExtraThickOuterBlurMaskFilter;
 AutoPtr<IBlurMaskFilter> HolographicOutlineHelper::sThickOuterBlurMaskFilter;
@@ -39,33 +49,82 @@ const Int32 HolographicOutlineHelper::THICK = 0;
 const Int32 HolographicOutlineHelper::MEDIUM = 1;
 const Int32 HolographicOutlineHelper::EXTRA_THICK = 2;
 
-Boolean HolographicOutlineHelper::InitStaticBlock()
+
+Int32 HolographicOutlineHelper::GetMAX_OUTER_BLUR_RADIUS()
 {
-    Float scale;
-    LauncherApplication::GetScreenDensity(&scale);
-
-    MIN_OUTER_BLUR_RADIUS = (Int32)(scale * 1.0f);
-    MAX_OUTER_BLUR_RADIUS = (Int32)(scale * 12.0f);
-
-    CBlurMaskFilter::New(scale * 12.0f, BlurMaskFilterBlur_OUTER,
-            (IBlurMaskFilter**)&sExtraThickOuterBlurMaskFilter);
-    CBlurMaskFilter::New(scale * 6.0f, BlurMaskFilterBlur_OUTER,
-            (IBlurMaskFilter**)&sThickOuterBlurMaskFilter);
-    CBlurMaskFilter::New(scale * 2.0f, BlurMaskFilterBlur_OUTER,
-            (IBlurMaskFilter**)&sMediumOuterBlurMaskFilter);
-    CBlurMaskFilter::New(scale * 1.0f, BlurMaskFilterBlur_OUTER,
-            (IBlurMaskFilter**)&sThinOuterBlurMaskFilter);
-    CBlurMaskFilter::New(scale * 6.0f, BlurMaskFilterBlur_NORMAL,
-            (IBlurMaskFilter**)&sExtraThickInnerBlurMaskFilter);
-    CBlurMaskFilter::New(scale * 4.0f, BlurMaskFilterBlur_NORMAL,
-            (IBlurMaskFilter**)&sThickInnerBlurMaskFilter);
-    CBlurMaskFilter::New(scale * 2.0f, BlurMaskFilterBlur_NORMAL,
-            (IBlurMaskFilter**)&sMediumInnerBlurMaskFilter);
-
-    return TRUE;
+    if (MAX_OUTER_BLUR_RADIUS == 0) {
+        Float scale;
+        LauncherApplication::GetScreenDensity(&scale);
+        MAX_OUTER_BLUR_RADIUS = (Int32)(scale * 12);
+    }
+    return MAX_OUTER_BLUR_RADIUS;
 }
 
-Boolean HolographicOutlineHelper::initStaticBlock = InitStaticBlock();
+Int32 HolographicOutlineHelper::GetMIN_OUTER_BLUR_RADIUS()
+{
+    if (MIN_OUTER_BLUR_RADIUS == 0) {
+        Float scale;
+        LauncherApplication::GetScreenDensity(&scale);
+        MIN_OUTER_BLUR_RADIUS = (Int32)(scale * 1);
+    }
+    return MIN_OUTER_BLUR_RADIUS;
+}
+
+AutoPtr<IBlurMaskFilter> HolographicOutlineHelper::GetExtraThickOuterBlurMaskFilter()
+{
+    if (sExtraThickOuterBlurMaskFilter == NULL) {
+        sExtraThickOuterBlurMaskFilter = CreateBlurMaskFilter(12.0, BlurMaskFilterBlur_OUTER);
+    }
+    return sExtraThickOuterBlurMaskFilter;
+}
+
+AutoPtr<IBlurMaskFilter> HolographicOutlineHelper::GetThickOuterBlurMaskFilter()
+{
+    if (sThickOuterBlurMaskFilter == NULL) {
+        sThickOuterBlurMaskFilter = CreateBlurMaskFilter(6.0, BlurMaskFilterBlur_OUTER);
+    }
+    return sThickOuterBlurMaskFilter;
+}
+
+AutoPtr<IBlurMaskFilter> HolographicOutlineHelper::GetMediumOuterBlurMaskFilter()
+{
+    if (sMediumOuterBlurMaskFilter == NULL) {
+        sMediumOuterBlurMaskFilter = CreateBlurMaskFilter(2.0, BlurMaskFilterBlur_OUTER);
+    }
+    return sMediumOuterBlurMaskFilter;
+}
+
+AutoPtr<IBlurMaskFilter> HolographicOutlineHelper::GetThinOuterBlurMaskFilter()
+{
+    if (sThinOuterBlurMaskFilter == NULL) {
+        sThinOuterBlurMaskFilter = CreateBlurMaskFilter(1.0, BlurMaskFilterBlur_OUTER);
+    }
+    return sThinOuterBlurMaskFilter;
+}
+
+AutoPtr<IBlurMaskFilter> HolographicOutlineHelper::GetExtraThickInnerBlurMaskFilter()
+{
+    if (sExtraThickInnerBlurMaskFilter == NULL) {
+        sExtraThickInnerBlurMaskFilter = CreateBlurMaskFilter(6.0, BlurMaskFilterBlur_NORMAL);
+    }
+    return sExtraThickInnerBlurMaskFilter;
+}
+
+AutoPtr<IBlurMaskFilter> HolographicOutlineHelper::GetThickInnerBlurMaskFilter()
+{
+    if (sThickInnerBlurMaskFilter == NULL) {
+        sThickInnerBlurMaskFilter = CreateBlurMaskFilter(4.0, BlurMaskFilterBlur_NORMAL);
+    }
+    return sThickInnerBlurMaskFilter;
+}
+
+AutoPtr<IBlurMaskFilter> HolographicOutlineHelper::GetMediumInnerBlurMaskFilter()
+{
+    if (sMediumInnerBlurMaskFilter == NULL) {
+        sMediumInnerBlurMaskFilter = CreateBlurMaskFilter(2.0, BlurMaskFilterBlur_NORMAL);
+    }
+    return sMediumInnerBlurMaskFilter;
+}
 
 HolographicOutlineHelper::HolographicOutlineHelper()
 {
@@ -146,13 +205,13 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
     AutoPtr<IBlurMaskFilter> outerBlurMaskFilter;
     switch (thickness) {
         case EXTRA_THICK:
-            outerBlurMaskFilter = sExtraThickOuterBlurMaskFilter;
+            outerBlurMaskFilter = GetExtraThickOuterBlurMaskFilter();
             break;
         case THICK:
-            outerBlurMaskFilter = sThickOuterBlurMaskFilter;
+            outerBlurMaskFilter = GetThickOuterBlurMaskFilter();
             break;
         case MEDIUM:
-            outerBlurMaskFilter = sMediumOuterBlurMaskFilter;
+            outerBlurMaskFilter = GetMediumOuterBlurMaskFilter();
             break;
         default:
             //throw new RuntimeException("Invalid blur thickness");
@@ -164,10 +223,10 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
     AutoPtr<IBitmap> thickOuterBlur;
     glowShape->ExtractAlpha(mBlurPaint, outerBlurOffset, (IBitmap**)&thickOuterBlur);
     if (thickness == EXTRA_THICK) {
-        mBlurPaint->SetMaskFilter(IMaskFilter::Probe(sMediumOuterBlurMaskFilter));
+        mBlurPaint->SetMaskFilter(IMaskFilter::Probe(GetMediumOuterBlurMaskFilter()));
     }
     else {
-        mBlurPaint->SetMaskFilter(IMaskFilter::Probe(sThinOuterBlurMaskFilter));
+        mBlurPaint->SetMaskFilter(IMaskFilter::Probe(GetThinOuterBlurMaskFilter()));
     }
 
     AutoPtr<ArrayOf<Int32> > brightOutlineOffset = ArrayOf<Int32>::Alloc(2);
@@ -180,13 +239,13 @@ ECode HolographicOutlineHelper::ApplyExpensiveOutlineWithBlur(
     AutoPtr<IBlurMaskFilter> innerBlurMaskFilter;
     switch (thickness) {
         case EXTRA_THICK:
-            innerBlurMaskFilter = sExtraThickInnerBlurMaskFilter;
+            innerBlurMaskFilter = GetExtraThickInnerBlurMaskFilter();
             break;
         case THICK:
-            innerBlurMaskFilter = sThickInnerBlurMaskFilter;
+            innerBlurMaskFilter = GetThickInnerBlurMaskFilter();
             break;
         case MEDIUM:
-            innerBlurMaskFilter = sMediumInnerBlurMaskFilter;
+            innerBlurMaskFilter = GetMediumInnerBlurMaskFilter();
             break;
         default:
             //throw new RuntimeException("Invalid blur thickness");

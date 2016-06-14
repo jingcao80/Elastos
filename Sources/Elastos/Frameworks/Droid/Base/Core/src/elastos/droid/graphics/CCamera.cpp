@@ -13,11 +13,13 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-CAR_OBJECT_IMPL(CCamera);
-CAR_INTERFACE_IMPL(CCamera, Object, ICamera);
+CAR_OBJECT_IMPL(CCamera)
+
+CAR_INTERFACE_IMPL(CCamera, Object, ICamera)
+
 CCamera::CCamera()
+    : mNativeInstance(0)
 {
-    NativeConstructor();
 }
 
 CCamera::~CCamera()
@@ -25,15 +27,23 @@ CCamera::~CCamera()
     NativeDestructor();
 }
 
+ECode CCamera::constructor()
+{
+    NativeConstructor();
+    return NOERROR;
+}
+
 ECode CCamera::Save()
 {
-    ((Sk3DView*)mNativeInstance)->save();
+    Sk3DView* v = reinterpret_cast<Sk3DView*>(mNativeInstance);
+    v->save();
     return NOERROR;
 }
 
 ECode CCamera::Restore()
 {
-    ((Sk3DView*)mNativeInstance)->restore();
+    Sk3DView* v = reinterpret_cast<Sk3DView*>(mNativeInstance);
+    v->restore();
     return NOERROR;
 }
 
@@ -42,28 +52,32 @@ ECode CCamera::Translate(
     /* [in] */ Float y,
     /* [in] */ Float z)
 {
-    ((Sk3DView*)mNativeInstance)->translate(x, y, z);
+    Sk3DView* v = reinterpret_cast<Sk3DView*>(mNativeInstance);
+    v->translate(x, y, z);
     return NOERROR;
 }
 
 ECode CCamera::RotateX(
     /* [in] */ Float deg)
 {
-    ((Sk3DView*)mNativeInstance)->rotateX(deg);
+    Sk3DView* v = reinterpret_cast<Sk3DView*>(mNativeInstance);
+    v->rotateX(deg);
     return NOERROR;
 }
 
 ECode CCamera::RotateY(
     /* [in] */ Float deg)
 {
-    ((Sk3DView*)mNativeInstance)->rotateY(deg);
+    Sk3DView* v = reinterpret_cast<Sk3DView*>(mNativeInstance);
+    v->rotateY(deg);
     return NOERROR;
 }
 
 ECode CCamera::RotateZ(
     /* [in] */ Float deg)
 {
-    ((Sk3DView*)mNativeInstance)->rotateZ(deg);
+    Sk3DView* v = reinterpret_cast<Sk3DView*>(mNativeInstance);
+    v->rotateZ(deg);
     return NOERROR;
 }
 
@@ -72,9 +86,10 @@ ECode CCamera::Rotate(
     /* [in] */ Float y,
     /* [in] */ Float z)
 {
-    ((Sk3DView*)mNativeInstance)->rotateX(x);
-    ((Sk3DView*)mNativeInstance)->rotateY(y);
-    ((Sk3DView*)mNativeInstance)->rotateZ(z);
+    Sk3DView* v = reinterpret_cast<Sk3DView*>(mNativeInstance);
+    v->rotateX(x);
+    v->rotateY(y);
+    v->rotateZ(z);
     return NOERROR;
 }
 
@@ -82,7 +97,8 @@ ECode CCamera::GetLocationX(
     /* [out] */ Float* locationX)
 {
     VALIDATE_NOT_NULL(locationX);
-    *locationX = SkScalarToFloat(((Sk3DView*)mNativeInstance)->getCameraLocationX());
+    Sk3DView* v = reinterpret_cast<Sk3DView*>(mNativeInstance);
+    *locationX = SkScalarToFloat(v->getCameraLocationX());
     return NOERROR;
 }
 
@@ -90,7 +106,8 @@ ECode CCamera::GetLocationY(
     /* [out] */ Float* locationY)
 {
     VALIDATE_NOT_NULL(locationY);
-    *locationY = SkScalarToFloat(((Sk3DView*)mNativeInstance)->getCameraLocationY());
+    Sk3DView* v = reinterpret_cast<Sk3DView*>(mNativeInstance);
+    *locationY = SkScalarToFloat(v->getCameraLocationY());
     return NOERROR;
 }
 
@@ -98,7 +115,8 @@ ECode CCamera::GetLocationZ(
     /* [out] */ Float* locationZ)
 {
     VALIDATE_NOT_NULL(locationZ);
-    *locationZ = SkScalarToFloat(((Sk3DView*)mNativeInstance)->getCameraLocationZ());
+    Sk3DView* v = reinterpret_cast<Sk3DView*>(mNativeInstance);
+    *locationZ = SkScalarToFloat(v->getCameraLocationZ());
     return NOERROR;
 }
 
@@ -107,7 +125,8 @@ ECode CCamera::SetLocation(
     /* [in] */ Float y,
     /* [in] */ Float z)
 {
-    ((Sk3DView*)mNativeInstance)->setCameraLocation(x, y, z);
+    Sk3DView* v = reinterpret_cast<Sk3DView*>(mNativeInstance);
+    v->setCameraLocation(x, y, z);
     return NOERROR;
 }
 
@@ -142,19 +161,27 @@ ECode CCamera::DotWithNormal(
 {
     VALIDATE_NOT_NULL(result);
 
-    SkScalar dot = ((Sk3DView*)mNativeInstance)->dotWithNormal(dx, dy, dz);
+    Sk3DView* v = reinterpret_cast<Sk3DView*>(mNativeInstance);
+    SkScalar dot = v->dotWithNormal(dx, dy, dz);
     *result = SkScalarToFloat(dot);
     return NOERROR;
 }
 
 void CCamera::NativeConstructor()
 {
-    mNativeInstance = (Int64)new Sk3DView;
+    if (mNativeInstance == 0) {
+        Sk3DView* view = new Sk3DView();
+        mNativeInstance = reinterpret_cast<Int64>(view);
+    }
 }
 
 void CCamera::NativeDestructor()
 {
-    delete (Sk3DView*)mNativeInstance;
+    if (mNativeInstance != 0) {
+        Sk3DView* view = reinterpret_cast<Sk3DView*>(mNativeInstance);
+        delete view;
+        mNativeInstance = 0;
+    }
 }
 
 void CCamera::NativeGetMatrix(
