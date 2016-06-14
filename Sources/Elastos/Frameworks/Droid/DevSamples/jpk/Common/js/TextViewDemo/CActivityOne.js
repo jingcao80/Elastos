@@ -315,7 +315,7 @@ module.exports = function(aoElastos, aoActivity){
             var oDataList = Core_New("Elastos.Utility.CArrayList");
 
             elog("========CActivityOne.js====OnCreate====begin.9.3========");
-            for (var i=0; i< 2; i++) {
+            for (var i=0; i< 5; i++) {
                 elog("========CActivityOne.js====OnCreate====begin.9.3.0========"+i);
                 var s = "Item " + i;
                 elog("========CActivityOne.js====OnCreate====begin.9.3.1========");
@@ -328,8 +328,21 @@ module.exports = function(aoElastos, aoActivity){
 
             elog("========CActivityOne.js====OnCreate====begin.9.4========");
 
+var a = [];
+for (var p in oDataList) a.push(p);
+elog("====oDataList methods : " + a.join("::"));
+
+            elog("========CActivityOne.js====OnCreate====begin.9.4.1========");
+
             var oAdapter = Droid_New("Elastos.Droid.Widget.CArrayAdapter", oActivity, R.layout.list_item, oDataList);
+
             elog("========CActivityOne.js====OnCreate====begin.9.5========");
+
+var b = [];
+for (var p in oAdapter) b.push(p);
+elog("====oAdatper methods : " + b.join("::"));
+
+            elog("========CActivityOne.js====OnCreate====begin.9.5.1========");
 
             oListView.SetAdapter(oAdapter);
             elog("========CActivityOne.js====OnCreate====begin.9.6========");

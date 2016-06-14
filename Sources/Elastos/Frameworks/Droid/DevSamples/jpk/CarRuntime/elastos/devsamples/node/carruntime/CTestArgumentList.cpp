@@ -109,48 +109,13 @@ ECode CTestArgumentList::SetInputArgumentOfLocalPtr(
     ///* [in] */ Int32 * pValue)
     /* [in] */ Int32 value)
 {
-    ALOGD("==============CTestArgumentList::SetInputArgumentOfLocalPtr.begin============");
+    ECode ec = mArgumentList->SetInputArgumentOfLocalPtr(index, (LocalPtr)value);
 
-    PCarQuintet pCarQuintet = (PCarQuintet)value;
-    Int32 carQuintetType = pCarQuintet->mFlags & 0xFFFF;
-
-    ALOGD("=========87878787========CTestArgumentList::SetInputArgumentOfLocalPtr=========CarQuitet Type:%d=======", pCarQuintet->mFlags);
-
-    Int32 length;
-    if (carQuintetType == CarQuintetFlag_Type_Int32) {
-        ArrayOf<Int32> * pArrayOfInt32 = (ArrayOf<Int32>*)value;
-        length = pArrayOfInt32->GetLength();
-        ALOGD("=========88888888========CTestArgumentList::SetInputArgumentOfLocalPtr=========Int32=====================length:%d", length);
-        ALOGD("=========88888888========CTestArgumentList::SetInputArgumentOfLocalPtr=========Int32.0=====================value:0x%x", (*pArrayOfInt32)[0]);
-        ALOGD("=========88888888========CTestArgumentList::SetInputArgumentOfLocalPtr=========Int32.1=====================value:0x%x", (*pArrayOfInt32)[1]);
-        ALOGD("=========88888888========CTestArgumentList::SetInputArgumentOfLocalPtr=========Int32.2=====================value:0x%x", (*pArrayOfInt32)[2]);
-        ALOGD("=========88888888========CTestArgumentList::SetInputArgumentOfLocalPtr=========Int32.3=====================value:0x%x", (*pArrayOfInt32)[3]);
-        ALOGD("=========88888888========CTestArgumentList::SetInputArgumentOfLocalPtr=========Int32.4=====================value:0x%x", (*pArrayOfInt32)[4]);
-        return mArgumentList->SetInputArgumentOfLocalPtr(index, (LocalPtr)value);
+    if (FAILED(ec)) {
+        ALOGD("==============CTestArgumentList::SetInputArgumentOfLocalPtr.Error============ECode:%x", ec);
     }
-    else if (carQuintetType == CarQuintetFlag_Type_String) {
-        ArrayOf<String> * pArrayOfString = (ArrayOf<String>*)value;
-        length = pArrayOfString->GetLength();
-        ALOGD("=========88888888========CTestArgumentList::SetInputArgumentOfLocalPtr=========String=====================length:%d", length);
-        ALOGD("=========88888888========CTestArgumentList::SetInputArgumentOfLocalPtr=========String.0=====================value:%s", (*pArrayOfString)[0].string());
-        ALOGD("=========88888888========CTestArgumentList::SetInputArgumentOfLocalPtr=========String.1=====================value:%s", (*pArrayOfString)[1].string());
-        ALOGD("=========88888888========CTestArgumentList::SetInputArgumentOfLocalPtr=========String.2=====================value:%s", (*pArrayOfString)[2].string());
-        ALOGD("=========88888888========CTestArgumentList::SetInputArgumentOfLocalPtr=========String.3=====================value:%s", (*pArrayOfString)[3].string());
-        ALOGD("=========88888888========CTestArgumentList::SetInputArgumentOfLocalPtr=========String.4=====================value:%s", (*pArrayOfString)[4].string());
-        return mArgumentList->SetInputArgumentOfLocalPtr(index, (LocalPtr)value);
-    }
-    else {
-        ALOGD("=========88888888========CTestArgumentList::SetInputArgumentOfLocalPtr=========other type=====================");
-    }
-    //ArrayOf<String> * pArrayOfString = *(ArrayOf<String>**)&pValue;
-    //ArrayOf<String> * pArrayOfString = *(ArrayOf<String>**)pValue;
-    //LocalPtr value = (LocalPtr)*pValue;
-    //ArrayOf<Int32> * pArrayOfInt32)
 
-    //return mArgumentList->SetInputArgumentOfLocalPtr(index, pValue);
-    //return mArgumentList->SetInputArgumentOfLocalPtr(index, (LocalPtr)value);
-
-    return NOERROR;
+    return ec;
 }
 
 ECode CTestArgumentList::SetInputArgumentOfLocalType(

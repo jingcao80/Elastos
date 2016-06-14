@@ -117,14 +117,18 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         //oModuleInfo = Elastos.Runtime.getModuleInfo(oModuleInfo);
         oModuleInfo = _getModuleInfo(oModuleInfo);
     }
+
+    var sClassName = "null";
     if(typeof(oClassInfo)=='string') {
-        elog('====classinfo__createObject====begin====ClassName:'+oClassInfo);
-
-        if (oClassInfo == "Elastos.Droid.Widget.CPopupWindow") {
-            bCreateOnUIThread = true;
-        }
-
+        sClassName = oClassInfo;
         oClassInfo = oModuleInfo.GetClassInfo(oClassInfo);
+    }
+    else {
+        sClassName = oClassInfo.GetName();
+    }
+    elog('====classinfo__createObject====begin====ClassName:'+sClassName);
+    if (sClassName == "Elastos.Droid.Widget.CPopupWindow") {
+        bCreateOnUIThread = true;
     }
 
     var length = arguments.length;
@@ -165,10 +169,16 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
 
                     var arg_in = arguments[j+2];
                     var type_in = typeof(arg_in);
+
+                    elog("====classinfo__createObject====param:"+j+" js type:"+sJsDataType+" carType:"+type_in+" carDataType:"+iDataType);
+
                     if (sJsDataType == type_in) {
                         if (iDataType == CarDataType.Interface) {
                             //TODO:compare the interface name
                             continue;
+                        }
+                        else if (iDataType == CarDataType.Interface) {
+
                         }
                         else {
                             continue;
@@ -184,8 +194,11 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
 
         var bFoundConstructor = (i < im);
         if (!bFoundConstructor) {
-            elog('====classinfo__createObject====can not find constructor ==============');
+            elog("====classinfo__createObject====can not find constructor : " + sClassName);
             return null;
+        }
+        else {
+            elog("====classinfo__createObject====find constructor : " + sClassName);
         }
 
         var aParamInfos = oConstructorInfo.GetAllParamInfos();

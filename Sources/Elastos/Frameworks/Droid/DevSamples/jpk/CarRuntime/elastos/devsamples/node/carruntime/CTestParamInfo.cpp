@@ -2,6 +2,12 @@
 #include "CTestParamInfo.h"
 
 #include "CTestDataTypeInfo.h"
+#include "CTestEnumInfo.h"
+#include "CTestCarArrayInfo.h"
+#include "CTestCppVectorInfo.h"
+#include "CTestStructInfo.h"
+#include "CTestInterfaceInfo.h"
+#include "CTestLocalPtrInfo.h"
 
 #include <cutils/log.h>
 
@@ -51,10 +57,7 @@ ECode CTestParamInfo::IsReturnValue(
 ECode CTestParamInfo::GetTypeInfo(
     /* [out] */ ITestDataTypeInfo ** ppTypeInfo)
 {
-    //mParamInfo->GetTypeInfo((IDataTypeInfo **)&ppTypeInfo);
-    //return NOERROR;
-
-    ECode ec;
+    ECode ec = NOERROR;
 
     AutoPtr<IDataTypeInfo> dataTypeInfo;
     ec = mParamInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
@@ -63,18 +66,40 @@ ECode CTestParamInfo::GetTypeInfo(
         return ec;
     }
 
+    CarDataType dataType;
+    dataTypeInfo->GetDataType(&dataType);
+
     AutoPtr<ITestDataTypeInfo> testDataTypeInfo;
-    ec = CTestDataTypeInfo::New(dataTypeInfo,(ITestDataTypeInfo**)&testDataTypeInfo);
+
+    switch (dataType) {
+        //TODO:
+        // case CarDataType_Enum:
+        //     ec = CTestEnumInfo::New(*(IEnumInfo**)&dataTypeInfo,(ITestEnumInfo**)&testDataTypeInfo);
+        // case CarDataType_ArrayOf:
+        //     ec = CTestCarArrayInfo::New(*(ICarArrayInfo**)&dataTypeInfo,(ITestCarArrayInfo**)&testDataTypeInfo);
+        // case CarDataType_CppVector:
+        //     ec = CTestCppVectorInfo::New(*(ICppVectorInfo**)&dataTypeInfo,(ITestCppVectorInfo**)&testDataTypeInfo);
+        // case CarDataType_Struct:
+        //     ec = CTestStructInfo::New(*(IStructInfo**)&dataTypeInfo,(ITestStructInfo**)&testDataTypeInfo);
+        // case CarDataType_Interface:
+        //     ec = CTestInterfaceInfo::New(*(IInterfaceInfo**)&dataTypeInfo,(ITestInterfaceInfo**)&testDataTypeInfo);
+        case CarDataType_LocalPtr:
+            ec = CTestLocalPtrInfo::New(*(ILocalPtrInfo**)&dataTypeInfo,(ITestLocalPtrInfo**)&testDataTypeInfo);
+            break;
+        default:
+            ec = CTestDataTypeInfo::New(dataTypeInfo,(ITestDataTypeInfo**)&testDataTypeInfo);
+            break;
+    }
+
     if (FAILED(ec)) {
         ALOGD("CTestParamInfo::GetTypeInfo error: CTestDataTypeInfo::New fail!");
         return ec;
     }
+
     *ppTypeInfo = testDataTypeInfo;
 
     dataTypeInfo->AddRef();
     testDataTypeInfo->AddRef();
-
-    ec = NOERROR;
 
     return ec;
 }
