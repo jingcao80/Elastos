@@ -32,10 +32,10 @@ public:
      */
     CARAPI NewCallLogAdapter(
         /* [in] */ IContext* context,
-        /* [in] */ ICallFetcher* callFetcher,
+        /* [in] */ ICallLogAdapterCallFetcher* callFetcher,
         /* [in] */ IContactInfoHelper* contactInfoHelper,
-        /* [in] */ ICallItemExpandedListener* callItemExpandedListener,
-        /* [in] */ IOnReportButtonClickListener* onReportButtonClickListener,
+        /* [in] */ ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
+        /* [in] */ ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
         /* [in] */ Boolean isCallLog,
         /* [out] */ ICallLogAdapter** adapter);
 
@@ -47,10 +47,10 @@ public:
 
     static CARAPI_(AutoPtr<ICallLogAdapter>) NewCallLogAdapter(
         /* [in] */ IContext* context,
-        /* [in] */ ICallFetcher* callFetcher,
+        /* [in] */ ICallLogAdapterCallFetcher* callFetcher,
         /* [in] */ IContactInfoHelper* contactInfoHelper,
-        /* [in] */ ICallItemExpandedListener* callItemExpandedListener,
-        /* [in] */ IOnReportButtonClickListener* onReportButtonClickListener,
+        /* [in] */ ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
+        /* [in] */ ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
         /* [in] */ Boolean isCallLog);
 
     static CARAPI_(AutoPtr<IDialogFragment>) GetReportDialogFragment(

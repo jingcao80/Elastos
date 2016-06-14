@@ -1,6 +1,7 @@
 
 module
 {
+    using interface Elastos.Droid.Widget.IEditText;
 
     namespace Elastos{
     namespace Apps {
@@ -14,10 +15,17 @@ module
      * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
      * interface Elastos.Droid.App.IFragment
      * interface Elastos.Apps.DailerBind.Analytics.IAnalyticsFragment
+     * interface IViewOnClickListener
+     * interface IViewOnLongClickListener
+     * interface IViewOnKeyListener
+     * interface IAdapterViewOnItemClickListener
+     * interface ITextWatcher
+     * interface IPopupMenuOnMenuItemClickListener
+     * interface IDialpadKeyButtonOnPressedListener
      */
     interface IDialpadFragment {
         GetDigitsWidget(
-            [out] IEditText* text);
+            [out] IEditText** text);
 
         SetStartedFromNewIntent(
             [in] Boolean value);

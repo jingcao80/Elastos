@@ -1,6 +1,11 @@
 
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContentResolver;
+    interface Elastos.Apps.Dailer.CallLog.IDefaultVoicemailNotifierNewCallsQuery;
+    interface Elastos.Apps.Dailer.CallLog.IPhoneNumberDisplayHelper;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
@@ -9,16 +14,17 @@ module
     interface IDefaultVoicemailNotifier {
     }
 
+    [deprecated, local]
     interface IDefaultVoicemailNotifierHelper {
         /** Returns the singleton instance of the {@link DefaultVoicemailNotifier}. */
         GetInstance(
             [in] IContext* ctx,
-            [out] IDefaultVoicemailNotifier* notifier);
+            [out] IDefaultVoicemailNotifier** notifier);
 
         /** Create a new instance of {@link NewCallsQuery}. */
         CreateNewCallsQuery(
             [in] IContentResolver* contentResolver,
-            [out] IDefaultVoicemailNotifierNewCallsQuery* query);
+            [out] IDefaultVoicemailNotifierNewCallsQuery** query);
 
         /**
          * Create a new PhoneNumberHelper.
@@ -28,10 +34,10 @@ module
          */
         CreatePhoneNumberHelper(
             [in] IContext* ctx,
-            [out] IPhoneNumberDisplayHelper* helper);
+            [out] IPhoneNumberDisplayHelper** helper);
     }
 
-    inteface IDefaultVoicemailNotifierNewCall {
+    interface IDefaultVoicemailNotifierNewCall {
     }
 
     /** Allows determining the new calls for which a notification should be generated. */
@@ -44,7 +50,7 @@ module
     }
 
     /** Allows determining the name associated with a given phone number. */
-    inteface IDefaultVoicemailNotifierNameLookupQuery {
+    interface IDefaultVoicemailNotifierNameLookupQuery {
         /**
          * Returns the name associated with the given number in the contacts database, or null if
          * the number does not correspond to any of the contacts.

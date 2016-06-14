@@ -13,6 +13,7 @@ namespace CallLog {
 
 class CallLogActivity
     : public AnalyticsActivity
+    , public ICallLogActivity
     , public ICallLogQueryHandlerListener
 {
 public:

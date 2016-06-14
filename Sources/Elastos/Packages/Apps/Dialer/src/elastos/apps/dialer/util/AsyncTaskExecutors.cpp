@@ -18,14 +18,14 @@ AsyncTaskExecutors::SimpleAsyncTaskExecutor::SimpleAsyncTaskExecutor(
 
 ECode AsyncTaskExecutors::SimpleAsyncTaskExecutor::Submit(
     /* [in] */ IInterface* identifier,
-    /* [in] */ IAsyncTask* task,
+    /* [in] */ IObject* task,
     /* [in] */ ArrayOf<IInteface*>* params,
-    /* [out] */ IAsyncTask** result)
+    /* [out] */ IObject** resultTask)
 {
-    VALUE_NOT_NULL(result);
+    VALUE_NOT_NULL(resultTask);
 
     AsyncTaskExecutors::CheckCalledFromUiThread();
-    return task.executeOnExecutor(mExecutor, params);
+    return ((AsyncTask*)task)->ExecuteOnExecutor(mExecutor, params);
 }
 
 //=================================================================

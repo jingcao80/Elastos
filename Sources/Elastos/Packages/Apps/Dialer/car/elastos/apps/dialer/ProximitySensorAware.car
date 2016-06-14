@@ -18,6 +18,8 @@ module
         disableProximitySensor(
             [in] Boolean waitForFarState);
 
+    }
+
     } //Dailer
     } //Apps
     } //Elastos

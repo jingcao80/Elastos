@@ -38,7 +38,7 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    AllContactsFragment()
+    AllContactsFragment();
 
     // @Override
     CARAPI OnViewCreated(

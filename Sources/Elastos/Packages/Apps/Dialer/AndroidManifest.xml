@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.dialer"
+    package="Elastos.Apps.Dialer"
     coreApp="true">
 
     <uses-permission android:name="android.permission.CALL_PHONE" />
@@ -55,12 +55,12 @@
     <uses-permission android:name="android.permission.STOP_APP_SWITCHES" />
 
     <application
-        android:name="DialerApplication"
+        android:name="Elastos.Apps.Dialer.CDialerApplication"
         android:label="@string/applicationLabel"
         android:icon="@mipmap/ic_launcher_phone"
         android:hardwareAccelerated="true"
         android:supportsRtl="true"
-        android:backupAgent='com.android.dialer.DialerBackupAgent'>
+        android:backupAgent='Elastos.Apps.Dialer.CDialerBackupAgent'>
 
         <meta-data android:name="com.google.android.backup.api_key"
             android:value="AEdPqrEAAAAIBXgtCEKQ6W0PXVnW-ZVia2KmlV2AxsTw3GjAeQ" />
@@ -68,7 +68,7 @@
         <!-- The entrance point for Phone UI.
              stateAlwaysHidden is set to suppress keyboard show up on
              dialpad screen. -->
-        <activity android:name=".DialtactsActivity"
+        <activity android:name="Elastos.Apps.Dialer.CDialtactsActivity"
             android:label="@string/launcherActivityLabel"
             android:theme="@style/DialtactsActivityTheme"
             android:launchMode="singleTask"
@@ -128,14 +128,14 @@
                 android:resource="@layout/keyguard_preview" />
         </activity>
 
-        <activity android:name="com.android.dialer.settings.DialerSettingsActivity"
+        <activity android:name="Elastos.Apps.Dialer.Settings.CDialerSettingsActivity"
                   android:label="@string/dialer_settings_label"
-                  android:parentActivityName="com.android.dialer.DialtactsActivity"
+                  android:parentActivityName="Elastos.Apps.Dialer.CDialtactsActivity"
                   android:theme="@style/SettingsStyle"
                   android:exported="false">
         </activity>
 
-        <activity android:name="com.android.dialer.calllog.CallLogActivity"
+        <activity android:name="Elastos.Apps.Dialer.Calllog.CCallLogActivity"
             android:label="@string/call_log_activity_title"
             android:theme="@style/DialtactsThemeWithoutActionBarOverlay"
             android:icon="@mipmap/ic_launcher_phone">
@@ -147,11 +147,11 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.android.dialer.CallDetailActivity"
+        <activity android:name="Elastos.Apps.Dialer.CCallDetailActivity"
                   android:label="@string/callDetailTitle"
                   android:theme="@style/CallDetailActivityTheme"
                   android:icon="@mipmap/ic_launcher_phone"
-                  android:parentActivityName="com.android.dialer.calllog.CallLogActivity"
+                  android:parentActivityName="Elastos.Apps.Dialer.Calllog.CCallLogActivity"
             >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
@@ -160,7 +160,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.android.contacts.common.test.FragmentTestActivity">
+        <activity android:name="Elastos.Apps.Contacts.Common.Test.CFragmentTestActivity">
             <intent-filter>
                 <category android:name="android.intent.category.TEST"/>
             </intent-filter>
@@ -174,54 +174,54 @@
 
         <!-- Backwards compatibility: "Call log" from Gingerbread and earlier -->
         <activity-alias android:name="RecentCallsListActivity"
-            android:targetActivity=".DialtactsActivity"
+            android:targetActivity="Elastos.Apps.Dialer.CDialtactsActivity"
             android:exported="true"
         />
 
         <!-- Backwards compatibility: "Call log" from ICS -->
         <activity-alias android:name=".activities.CallLogActivity"
-            android:targetActivity=".DialtactsActivity"
+            android:targetActivity="Elastos.Apps.Dialer.CDialtactsActivity"
             android:exported="true"
         />
 
         <!-- Used to filter contacts list by account -->
         <activity
-            android:name="com.android.contacts.common.list.AccountFilterActivity"
+            android:name="Elastos.Apps.Contacts.Common.List.CAccountFilterActivity"
             android:label="@string/activity_title_contacts_filter"
             android:theme="@style/ContactListFilterTheme"/>
 
         <!-- Used to select display and sync groups -->
         <activity
-            android:name="com.android.contacts.common.list.CustomContactListFilterActivity"
+            android:name="Elastos.Apps.Contacts.Common.List.CCustomContactListFilterActivity"
             android:label="@string/custom_list_filter"
             android:theme="@style/ContactListFilterTheme"/>
 
         <!-- vCard related -->
-        <activity android:name="com.android.contacts.common.vcard.ImportVCardActivity"
+        <activity android:name="Elastos.Apps.Contacts.Common.Vcard.CImportVCardActivity"
                   android:configChanges="orientation|screenSize|keyboardHidden"
                   android:theme="@style/BackgroundOnlyTheme">
         </activity>
 
-        <activity android:name="com.android.contacts.common.vcard.NfcImportVCardActivity"
+        <activity android:name="Elastos.Apps.Contacts.Common.Vcard.CNfcImportVCardActivity"
                   android:configChanges="orientation|screenSize|keyboardHidden"
                   android:theme="@style/BackgroundOnlyTheme">
         </activity>
 
-        <activity android:name="com.android.contacts.common.vcard.CancelActivity"
+        <activity android:name="Elastos.Apps.Contacts.Common.Vcard.CCancelActivity"
                   android:theme="@style/BackgroundOnlyTheme"/>
 
-        <activity android:name="com.android.contacts.common.vcard.SelectAccountActivity"
+        <activity android:name="Elastos.Apps.Contacts.Common.Vcard.CSelectAccountActivity"
                   android:theme="@style/BackgroundOnlyTheme"/>
 
-        <activity android:name="com.android.contacts.common.vcard.ExportVCardActivity"
+        <activity android:name="Elastos.Apps.Contacts.Common.Vcard.CExportVCardActivity"
                   android:theme="@style/BackgroundOnlyTheme"/>
 
         <service
-            android:name="com.android.contacts.common.vcard.VCardService"
+            android:name="Elastos.Apps.Contacts.Common.Vcard.CVCardService"
             android:exported="false"/>
         <!-- end vCard related -->
 
-        <receiver android:name=".calllog.CallLogReceiver"
+        <receiver android:name="Elastos.Apps.Dialer.Calllog.CCallLogReceiver"
             android:enabled="@*android:bool/config_voice_capable">
             <intent-filter>
                 <action android:name="android.intent.action.NEW_VOICEMAIL" />
@@ -236,34 +236,34 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".interactions.UndemoteOutgoingCallReceiver">
+        <receiver android:name="Elastos.Apps.Dialer.Interactions.CUndemoteOutgoingCallReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
             </intent-filter>
         </receiver>
 
         <service
-            android:name=".calllog.CallLogNotificationsService"
+            android:name="Elastos.Apps.Dialer.Calllog.CCallLogNotificationsService"
             android:exported="false"
         />
 
         <!-- Service to update a contact -->
         <service
-            android:name=".contact.ContactUpdateService"
+            android:name="Elastos.Apps.Dialer.Contact.CContactUpdateService"
             android:exported="false" />
 
         <!-- Broadcast receiver that passively listens to location updates -->
-        <receiver android:name="com.android.contacts.common.location.CountryDetector$LocationChangedReceiver"/>
+        <receiver android:name="Elastos.Apps.Contacts.Common.Location.CCountryDetector$LocationChangedReceiver"/>
 
         <!-- IntentService to update the user's current country -->
-        <service android:name="com.android.contacts.common.location.UpdateCountryService"
+        <service android:name="Elastos.Apps.Contacts.Common.Location.CUpdateCountryService"
             android:exported="false"/>
 
         <!-- Main in-call UI activity.  This is never launched directly
              from outside the phone app; instead, it's either launched by
              the OutgoingCallBroadcaster (for outgoing calls), or as the
              fullScreenIntent of a notification (for incoming calls.) -->
-        <activity android:name="com.android.incallui.InCallActivity"
+        <activity android:name="Elastos.Apps.Incallui.CInCallActivity"
                   android:theme="@style/Theme.InCallScreen"
                   android:label="@string/phoneAppLabel"
                   android:excludeFromRecents="true"
@@ -275,7 +275,7 @@
         </activity>
 
         <!-- BroadcastReceiver for receiving Intents from Notification mechanism. -->
-        <receiver android:name="com.android.incallui.InCallApp$NotificationBroadcastReceiver"
+        <receiver android:name="Elastos.Apps.Incallui.CInCallApp$NotificationBroadcastReceiver"
                   android:exported="false"
                   android:process="com.android.incallui">
             <intent-filter>
@@ -283,7 +283,7 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="com.android.incallui.InCallServiceImpl"
+        <service android:name="Elastos.Apps.Incallui.CInCallServiceImpl"
                  android:process="com.android.incallui"
                  android:permission="android.permission.BIND_INCALL_SERVICE" >
             <intent-filter>

@@ -50,11 +50,12 @@ ECode CDialerUtils::ConfigureEmptyListView(
     return NOERROR;
 }
 
-ECode CDialerUtils::CloseQuietly(
-    /* [in] */ IAutoCloseable* closeable)
-{
-    return DialerUtils::CloseQuietly(closeable);
-}
+//TODO:
+// ECode CDialerUtils::CloseQuietly(
+//     /* [in] */ IAutoCloseable* closeable)
+// {
+//     return DialerUtils::CloseQuietly(closeable);
+// }
 
 ECode CDialerUtils::Join(
     /* [in] */ IResources* resources,

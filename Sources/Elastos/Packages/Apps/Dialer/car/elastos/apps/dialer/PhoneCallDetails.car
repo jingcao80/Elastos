@@ -1,6 +1,9 @@
 
 module
 {
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.Net.IUri;
+    using interface Elastos.Core.ICharSequence;
 
     namespace Elastos{
     namespace Apps {

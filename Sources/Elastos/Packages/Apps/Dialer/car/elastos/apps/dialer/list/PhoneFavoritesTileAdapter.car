@@ -1,11 +1,15 @@
 
 module
 {
+    using interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Apps.Contacts.Common.IContactPhotoManager;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
     namespace List {
 
+    [deprecated]
     interface IOnDataSetChangedForAnimationListener {
         OnDataSetChangedForAnimation(
             [in] ArrayOf<Int64>* idsInPlace);
@@ -19,6 +23,7 @@ module
      * interface Elastos.Droid.Widget.ISpinnerAdapter
      * interface Elastos.Droid.Widget.IAdapter
      * interface Elastos.Droid.Widget.IBaseAdapter
+     * interface IOnDragDropListener
      */
     interface IPhoneFavoritesTileAdapter {
         const Int32 NO_ROW_LIMIT = -1;
@@ -41,7 +46,7 @@ module
 
         /** Gets whether the drag is in process. */
         GetInDragging(
-            [out] Boolean result);
+            [out] Boolean* result);
 
         /**
          * Creates {@link ContactTileView}s for each item in {@link Cursor}.

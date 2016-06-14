@@ -18,6 +18,9 @@ module
      * interface IComponentCallbacks
      * interface IComponentCallbacks2
      * interface IOnWindowDismissedCallback
+     * interface IActivity
+     * interface IAnalyticsActivity
+     * interface IAnalyticsInterface
      */
     interface ITransactionSafeActivity {
         /**

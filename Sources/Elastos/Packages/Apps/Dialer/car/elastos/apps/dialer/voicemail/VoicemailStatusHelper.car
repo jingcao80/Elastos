@@ -1,5 +1,8 @@
 module
 {
+    using interface Elastos.Droid.Database.ICursor;
+    using interface Elastos.Utility.IList;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {

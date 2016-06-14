@@ -12,6 +12,7 @@ module
      * interface Elastos.Droid.Content.IComponentCallbacks2
      * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
      * interface Elastos.Droid.Preference.IPreferenceFragment
+     * interface IPreferenceOnPreferenceChangeListener
      */
     interface IGeneralSettingsFragment {
     }

@@ -1,6 +1,9 @@
 
 module
 {
+    using interface Elastos.Droid.Widget.IImageView;
+    interface Elastos.Apps.Dailer.List.IView;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
@@ -25,13 +28,16 @@ module
      * interface Elastos.Droid.Widget.IFilterListener
      * interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback
      * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface IOnDragDropListener
+     * interface IDragItemContainer
      */
+    [local]
     interface IPhoneFavoriteListView {
         SetDragShadowOverlay(
             [in] IImageView* overlay);
 
         GetDragDropController(
-            [out] IDragDropController* controller);
+            [out] IDragDropController** controller);
     }
 
     } //List

@@ -1,5 +1,9 @@
 module
 {
+    using interface Elastos.Droid.View.IView;
+    interface Elastos.Apps.Dailer.List.IRemoveView;
+    interface Elastos.Apps.Dailer.List.ISpeedDialFragment;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
@@ -22,14 +26,18 @@ module
      * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
      * interface Elastos.Droid.App.IFragment
      * interface Elastos.Apps.DailerBind.Analytics.IAnalyticsFragment
+     * interface ICallLogQueryHandlerListener
+     * interface ICallLogAdapterCallFetcher
+     * interface IViewPagerOnPageChangeListener
      */
+    [local]
     interface IListsFragment {
         const Int32 TAB_INDEX_SPEED_DIAL = 0;
         const Int32 TAB_INDEX_RECENTS = 1;
         const Int32 TAB_INDEX_ALL_CONTACTS = 2;
         const Int32 TAB_INDEX_COUNT = 3;
 
-        const Float REMOVE_VIEW_SHOWN_ALPHA = 0.5f;
+        const Float REMOVE_VIEW_SHOWN_ALPHA = 0.5;
         const Float REMOVE_VIEW_HIDDEN_ALPHA = 1;
 
         DismissShortcut(

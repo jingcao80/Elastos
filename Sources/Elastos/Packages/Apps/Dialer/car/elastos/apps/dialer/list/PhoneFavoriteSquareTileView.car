@@ -1,6 +1,9 @@
 
 module
 {
+    // TODO:
+    // using interface Elastos.Apps.Contacts.Common.List.IContactEntry;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
@@ -20,8 +23,9 @@ module
      * interface Elastos.Apps.Common.List.IContactTileView
      */
     interface IPhoneFavoriteSquareTileView {
-        GetContactEntry(
-            [out] IContactEntry** entry);
+        // TODO:
+        // GetContactEntry(
+        //    [out] IContactEntry** entry);
     }
 
     } //List

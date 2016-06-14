@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<com.android.dialer.widget.OverlappingPaneLayout
+<Elastos.Apps.Dialer.Widget.COverlappingPaneLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/lists_frame"
     android:layout_width="match_parent"
@@ -58,7 +58,7 @@
 
         </LinearLayout>
 
-        <com.android.dialer.list.RemoveView
+        <Elastos.Apps.Dialer.List.CRemoveView
             android:id="@+id/remove_view"
             android:layout_width="match_parent"
             android:layout_height="@dimen/tab_height"
@@ -93,8 +93,8 @@
 
             </LinearLayout>
 
-        </com.android.dialer.list.RemoveView >
+        </Elastos.Apps.Dialer.List.CRemoveView >
 
     </FrameLayout>
 
-</com.android.dialer.widget.OverlappingPaneLayout>
+</Elastos.Apps.Dialer.Widget.COverlappingPaneLayout>

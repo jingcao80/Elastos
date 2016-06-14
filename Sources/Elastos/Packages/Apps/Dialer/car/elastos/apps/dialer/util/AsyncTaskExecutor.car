@@ -19,6 +19,7 @@ module
      * interface is planned to allow Activities to easily cancel all the submitted tasks that are still
      * pending in the onDestroy() method of the Activity.
      */
+    [deprecated]
     interface IAsyncTaskExecutor {
         /**
          * Executes the given AsyncTask with the default Executor.
@@ -31,9 +32,9 @@ module
          */
         Submit(
             [in] IInterface* identifier,
-            [in] IAsyncTask* task,
-            [in] ArrayOf<IInteface*>* params,
-            [out] IAsyncTask** result);
+            [in] IObject* task,
+            [in] ArrayOf<IInterface*>* params,
+            [out] IObject** resultTask);
     }
 
     } // Util

@@ -1,6 +1,9 @@
 
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+    interface Elastos.Apps.Dailer.CallLog.IContactInfo;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
@@ -22,6 +25,7 @@ module
             [in] String lookupKey);
     }
 
+    [deprecated, local]
     interface ICachedNumberLookupService {
         BuildCachedContactInfo(
             [in] IContactInfo* info,

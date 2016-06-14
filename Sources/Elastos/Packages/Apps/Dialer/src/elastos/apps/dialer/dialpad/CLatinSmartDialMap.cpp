@@ -6,11 +6,11 @@ namespace Apps{
 namespace Dialer {
 namespace Dialpad {
 
-CAR_INTERFACE_IMPL_2(CDialpadFragment, Object, ILatinSmartDialMap, ISmartDialMap)
+CAR_INTERFACE_IMPL_2(CLatinSmartDialMap, Object, ILatinSmartDialMap, ISmartDialMap)
 
-CAR_OBJECT_IMPL(CDialpadFragment)
+CAR_OBJECT_IMPL(CLatinSmartDialMap)
 
-const Char32 CDialpadFragment::LATIN_LETTERS_TO_DIGITS[] = {
+const Char32 CLatinSmartDialMap::LATIN_LETTERS_TO_DIGITS[] = {
     '2', '2', '2', // A,B,C -> 2
     '3', '3', '3', // D,E,F -> 3
     '4', '4', '4', // G,H,I -> 4
@@ -21,7 +21,7 @@ const Char32 CDialpadFragment::LATIN_LETTERS_TO_DIGITS[] = {
     '9', '9', '9', '9' // W,X,Y,Z -> 9
 };
 
-ECode CDialpadFragment::IsValidDialpadAlphabeticChar(
+ECode CLatinSmartDialMap::IsValidDialpadAlphabeticChar(
     /* [in] */ Char32 ch,
     /* [out] */ Boolean* result)
 {
@@ -31,7 +31,7 @@ ECode CDialpadFragment::IsValidDialpadAlphabeticChar(
     return NOERROR;
 }
 
-ECode CDialpadFragment::IsValidDialpadNumericChar(
+ECode CLatinSmartDialMap::IsValidDialpadNumericChar(
     /* [in] */ Char32 ch,
     /* [out] */ Boolean* result)
 {
@@ -41,7 +41,7 @@ ECode CDialpadFragment::IsValidDialpadNumericChar(
     return NOERROR;
 }
 
-ECode CDialpadFragment::IsValidDialpadCharacter(
+ECode CLatinSmartDialMap::IsValidDialpadCharacter(
     /* [in] */ Char32 ch,
     /* [out] */ Boolean* result)
 {
@@ -53,7 +53,7 @@ ECode CDialpadFragment::IsValidDialpadCharacter(
     return NOERROR;
 }
 
-ECode CDialpadFragment::NormalizeCharacter(
+ECode CLatinSmartDialMap::NormalizeCharacter(
     /* [in] */ Char32 ch,
     /* [out] */ Char32* result)
 {
@@ -1082,7 +1082,7 @@ ECode CDialpadFragment::NormalizeCharacter(
     return NOERROR;
 }
 
-ECode CDialpadFragment::GetDialpadIndex(
+ECode CLatinSmartDialMap::GetDialpadIndex(
     /* [in] */ Char32 ch,
     /* [out] */ Byte* result)
 {
@@ -1101,7 +1101,7 @@ ECode CDialpadFragment::GetDialpadIndex(
     return NOERROR;
 }
 
-ECode CDialpadFragment::GetDialpadNumericCharacter(
+ECode CLatinSmartDialMap::GetDialpadNumericCharacter(
     /* [in] */ Char32 ch,
     /* [out] */ Char32* result)
 {

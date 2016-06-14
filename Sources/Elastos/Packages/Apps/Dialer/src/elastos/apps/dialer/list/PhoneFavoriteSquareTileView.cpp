@@ -85,17 +85,18 @@ void PhoneFavoriteSquareTileView::LaunchQuickContact()
                 uri, IContactsContractQuickContact::MODE_LARGE, NULL);
 }
 
-ECode PhoneFavoriteSquareTileView::LoadFromContact(
-    /* [in] */ IContactEntry* entry)
-{
-    PhoneFavoriteTileView::LoadFromContact(entry);
-    if (entry != NULL) {
-        mSecondaryButton->SetOnClickListener(new SecondaryButtonOnClickListener(this));
-    }
-    mContactEntry = entry;
+// TODO:
+// ECode PhoneFavoriteSquareTileView::LoadFromContact(
+//     /* [in] */ IContactEntry* entry)
+// {
+//     PhoneFavoriteTileView::LoadFromContact(entry);
+//     if (entry != NULL) {
+//         mSecondaryButton->SetOnClickListener(new SecondaryButtonOnClickListener(this));
+//     }
+//     mContactEntry = entry;
 
-    return NOERROR;
-}
+//     return NOERROR;
+// }
 
 ECode PhoneFavoriteSquareTileView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
@@ -117,14 +118,15 @@ ECode PhoneFavoriteSquareTileView::OnMeasure(
     return NOERROR;
 }
 
-ECode PhoneFavoriteSquareTileView::GetContactEntry(
-    /* [out] */ IContactEntry** entry)
-{
-    VALUE_NOT_NULL(entry);
-    *entry = mContactEntry;
-    REFCOUNT_ADD(*entry);
-    return NOERROR;
-}
+// TODO:
+// ECode PhoneFavoriteSquareTileView::GetContactEntry(
+//     /* [out] */ IContactEntry** entry)
+// {
+//     VALUE_NOT_NULL(entry);
+//     *entry = mContactEntry;
+//     REFCOUNT_ADD(*entry);
+//     return NOERROR;
+// }
 
 } // List
 } // Dialer

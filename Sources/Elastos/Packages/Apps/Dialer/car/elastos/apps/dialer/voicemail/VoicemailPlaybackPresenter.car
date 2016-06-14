@@ -1,11 +1,21 @@
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Database.IContentObserver;
+    using interface Elastos.Droid.Media.IMediaPlayer;
+    using interface Elastos.Droid.Net.IUri;
+    using interface Elastos.Droid.Os.IBundle;
+    using interface Elastos.Droid.View.IViewOnClickListener;
+    using interface Elastos.Droid.Widget.ISeekBarOnSeekBarChangeListener;
+    using interface Elastos.Core.IRunnable;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
     namespace Voicemail {
 
     /** Contract describing the behaviour we need from the ui we are controlling. */
+    [local]
     interface IVoicemailPlaybackPresenterPlaybackView {
         GetDataSourceContext(
             [out] IContext** context);
@@ -76,7 +86,7 @@ module
             [in] IContentObserver* observer);
 
         UnregisterContentObserver(
-            [in] ContentObserver observer);
+            [in] IContentObserver* observer);
 
         EnableProximitySensor();
 
@@ -86,15 +96,16 @@ module
             [in] Int32 streamType);
     }
 
-    interface IVoicemailPlaybackPresenter {
-        /** The enumeration of {@link AsyncTask} objects we use in this class. */
-        enmu Tasks {
-            CHECK_FOR_CONTENT,
-            CHECK_CONTENT_AFTER_CHANGE,
-            PREPARE_MEDIA_PLAYER,
-            RESET_PREPARE_START_MEDIA_PLAYER,
-        }
+    /** The enumeration of {@link AsyncTask} objects we use in this class. */
+    enum VoicemailPlaybackPresenterTasks {
+        VoicemailPlaybackPresenterTasks_CHECK_FOR_CONTENT,
+        VoicemailPlaybackPresenterTasks_CHECK_CONTENT_AFTER_CHANGE,
+        VoicemailPlaybackPresenterTasks_PREPARE_MEDIA_PLAYER,
+        VoicemailPlaybackPresenterTasks_RESET_PREPARE_START_MEDIA_PLAYER,
+    }
 
+    [local]
+    interface IVoicemailPlaybackPresenter {
         OnCreate(
             [in] IBundle* bundle);
 

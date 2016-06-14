@@ -1,5 +1,7 @@
 module
 {
+    interface Elastos.Apps.Dailer.List.IShortcutCardsAdapter;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
@@ -19,7 +21,7 @@ module
      */
     interface ITileInteractionTeaserView {
         GetShouldDisplayInList(
-            [out] Boolean result);
+            [out] Boolean* result);
 
         SetAdapter(
             [in] IShortcutCardsAdapter* adapter);

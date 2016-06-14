@@ -94,7 +94,7 @@ ECode CallLogActivity::WaitForVoicemailTimeoutRunnable::Run()
 //=================================================================
 // CallLogActivity
 //=================================================================
-CAR_INTERFACE_IMPL(CallLogActivity, AnalyticsActivity, ICallLogQueryHandlerListener)
+CAR_INTERFACE_IMPL_2(CallLogActivity, AnalyticsActivity, ICallLogActivity, ICallLogQueryHandlerListener)
 
 CallLogActivity::CallLogActivity()
 {

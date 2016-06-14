@@ -1,6 +1,7 @@
 
 module
 {
+    interface Elastos.Utility.IArrayList;
 
     namespace Elastos{
     namespace Apps {

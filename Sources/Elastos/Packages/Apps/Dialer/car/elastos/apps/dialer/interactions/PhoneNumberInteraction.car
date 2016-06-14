@@ -1,5 +1,11 @@
 module
 {
+    using interface Elastos.Droid.App.IFragmentManager;
+    using interface Elastos.Droid.Net.IUri;
+    using interface Elastos.Utility.IArrayList;
+    using interface Elastos.Apps.Dailer.IActivity;
+
+    interface Elastos.Apps.Dailer.Activity.ITransactionSafeActivity;
 
     namespace Elastos{
     namespace Apps {
@@ -9,6 +15,7 @@ module
     interface IPhoneDisambiguationDialogFragment{
     }
 
+    [local]
     interface IPhoneDisambiguationDialogFragmentHelper{
         Show(
             [in] IFragmentManager* fragmentManager,

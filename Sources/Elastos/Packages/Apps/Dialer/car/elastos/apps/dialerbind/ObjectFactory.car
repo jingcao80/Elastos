@@ -1,9 +1,20 @@
 module
 {
+    using interface Elastos.Droid.App.IDialogFragment;
+    using interface Elastos.Droid.Content.IContext;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogAdapter;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogAdapterCallFetcher;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogAdapterCallItemExpandedListener;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogAdapterOnReportButtonClickListener;
+    interface Elastos.Apps.Dailer.CallLog.IContactInfoHelper;
+    interface Elastos.Apps.Dailer.Service.ICachedNumberLookupService;
+
+
     namespace Elastos{
     namespace Apps {
     namespace DailerBind {
 
+    [deprecated, local]
     interface IObjectFactory {
         NewCachedNumberLookupService(
             [out] ICachedNumberLookupService** service);
@@ -18,10 +29,10 @@ module
          */
         NewCallLogAdapter(
             [in] IContext* ctx,
-            [in] ICallFetcher* callFetcher,
+            [in] ICallLogAdapterCallFetcher* callFetcher,
             [in] IContactInfoHelper* contactInfoHelper,
-            [in] ICallItemExpandedListener* callItemExpandedListener,
-            [in] IOnReportButtonClickListener* onReportButtonClickListener,
+            [in] ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
+            [in] ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
             [in] Boolean isCallLog,
             [out] ICallLogAdapter** adapter);
 

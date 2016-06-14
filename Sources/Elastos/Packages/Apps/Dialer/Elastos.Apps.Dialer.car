@@ -1,0 +1,1255 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("car/elastos/apps/dialer/activity/TransactionSafeActivity.car");
+    merge("car/elastos/apps/dialer/calllog/CallDetailHistoryAdapter.car");
+    merge("car/elastos/apps/dialer/calllog/CallLogActivity.car");
+    merge("car/elastos/apps/dialer/calllog/CallLogAdapter.car");
+    merge("car/elastos/apps/dialer/calllog/CallLogFragment.car");
+    merge("car/elastos/apps/dialer/calllog/CallLogGroupBuilder.car");
+    merge("car/elastos/apps/dialer/calllog/CallLogListItemView.car");
+    merge("car/elastos/apps/dialer/calllog/CallLogListItemViews.car");
+    merge("car/elastos/apps/dialer/calllog/CallLogNotificationsHelper.car");
+    merge("car/elastos/apps/dialer/calllog/CallLogNotificationsService.car");
+    merge("car/elastos/apps/dialer/calllog/CallLogQuery.car");
+    merge("car/elastos/apps/dialer/calllog/CallLogQueryHandler.car");
+    merge("car/elastos/apps/dialer/calllog/CallTypeHelper.car");
+    merge("car/elastos/apps/dialer/calllog/CallTypeIconsView.car");
+    merge("car/elastos/apps/dialer/calllog/ClearCallLogDialog.car");
+    merge("car/elastos/apps/dialer/calllog/ContactInfo.car");
+    merge("car/elastos/apps/dialer/calllog/ContactInfoHelper.car");
+    merge("car/elastos/apps/dialer/calllog/DefaultVoicemailNotifier.car");
+    merge("car/elastos/apps/dialer/calllog/IntentProvider.car");
+    merge("car/elastos/apps/dialer/calllog/PhoneAccountUtils.car");
+    merge("car/elastos/apps/dialer/calllog/PhoneNumberDisplayHelper.car");
+    merge("car/elastos/apps/dialer/calllog/PhoneNumberUtilsWrapper.car");
+    merge("car/elastos/apps/dialer/calllog/PhoneQuery.car");
+    merge("car/elastos/apps/dialer/calllog/VoicemailNotifier.car");
+    merge("car/elastos/apps/dialer/contact/ContactUpdateService.car");
+    merge("car/elastos/apps/dialer/database/DialerDatabaseHelper.car");
+    merge("car/elastos/apps/dialer/dialpad/DialpadFragment.car");
+    merge("car/elastos/apps/dialer/dialpad/LatinSmartDialMap.car");
+    merge("car/elastos/apps/dialer/dialpad/SmartDialCursorLoader.car");
+    merge("car/elastos/apps/dialer/dialpad/SmartDialMap.car");
+    merge("car/elastos/apps/dialer/dialpad/SmartDialMatchPosition.car");
+    merge("car/elastos/apps/dialer/dialpad/SmartDialNameMatcher.car");
+    merge("car/elastos/apps/dialer/dialpad/SmartDialPrefix.car");
+    merge("car/elastos/apps/dialer/dialpad/UnicodeDialerKeyListener.car");
+    merge("car/elastos/apps/dialer/interactions/PhoneNumberInteraction.car");
+    merge("car/elastos/apps/dialer/interactions/UndemoteOutgoingCallReceiver.car");
+    merge("car/elastos/apps/dialer/list/AllContactsFragment.car");
+    merge("car/elastos/apps/dialer/list/DialerPhoneNumberListAdapter.car");
+    merge("car/elastos/apps/dialer/list/DragDropController.car");
+    merge("car/elastos/apps/dialer/list/ListsFragment.car");
+    merge("car/elastos/apps/dialer/list/OnDragDropListener.car");
+    merge("car/elastos/apps/dialer/list/OnListFragmentScrolledListener.car");
+    merge("car/elastos/apps/dialer/list/PhoneFavoriteListView.car");
+    merge("car/elastos/apps/dialer/list/PhoneFavoriteSquareTileView.car");
+    merge("car/elastos/apps/dialer/list/PhoneFavoritesTileAdapter.car");
+    merge("car/elastos/apps/dialer/list/PhoneFavoriteTileView.car");
+    merge("car/elastos/apps/dialer/list/RegularSearchFragment.car");
+    merge("car/elastos/apps/dialer/list/RegularSearchListAdapter.car");
+    merge("car/elastos/apps/dialer/list/RemoveView.car");
+    merge("car/elastos/apps/dialer/list/SearchFragment.car");
+    merge("car/elastos/apps/dialer/list/ShortcutCardsAdapter.car");
+    merge("car/elastos/apps/dialer/list/SmartDialNumberListAdapter.car");
+    merge("car/elastos/apps/dialer/list/SmartDialSearchFragment.car");
+    merge("car/elastos/apps/dialer/list/SpeedDialFragment.car");
+    merge("car/elastos/apps/dialer/list/SwipeHelper.car");
+    merge("car/elastos/apps/dialer/list/TileInteractionTeaserView.car");
+    merge("car/elastos/apps/dialer/service/CachedNumberLookupService.car");
+    merge("car/elastos/apps/dialer/settings/DefaultRingtonePreference.car");
+    merge("car/elastos/apps/dialer/settings/DialerSettingsActivity.car");
+    merge("car/elastos/apps/dialer/settings/GeneralSettingsFragment.car");
+    merge("car/elastos/apps/dialer/util/AsyncTaskExecutor.car");
+    merge("car/elastos/apps/dialer/util/AsyncTaskExecutors.car");
+    merge("car/elastos/apps/dialer/util/DialerUtils.car");
+    merge("car/elastos/apps/dialer/util/EmptyLoader.car");
+    merge("car/elastos/apps/dialer/util/ExpirableCache.car");
+    merge("car/elastos/apps/dialer/util/OrientationUtil.car");
+    merge("car/elastos/apps/dialer/voicemail/VoicemailPlaybackFragment.car");
+    merge("car/elastos/apps/dialer/voicemail/VoicemailPlaybackPresenter.car");
+    merge("car/elastos/apps/dialer/voicemail/VoicemailStatusHelper.car");
+    merge("car/elastos/apps/dialer/voicemail/VoicemailStatusHelperImpl.car");
+    merge("car/elastos/apps/dialer/widget/ActionBarController.car");
+    merge("car/elastos/apps/dialer/widget/OverlappingPaneLayout.car");
+    merge("car/elastos/apps/dialer/widget/SearchEditTextLayout.car");
+    merge("car/elastos/apps/dialer/widget/ViewDragHelper.car");
+    merge("car/elastos/apps/dialer/CallDetailActivity.car");
+    merge("car/elastos/apps/dialer/CallDetailActivityQueryHandler.car");
+    merge("car/elastos/apps/dialer/DialerApplication.car");
+    merge("car/elastos/apps/dialer/DialerBackupAgent.car");
+    merge("car/elastos/apps/dialer/DialtactsActivity.car");
+    merge("car/elastos/apps/dialer/PhoneCallDetails.car");
+    merge("car/elastos/apps/dialer/PhoneCallDetailsHelper.car");
+    merge("car/elastos/apps/dialer/PhoneCallDetailsViews.car");
+    merge("car/elastos/apps/dialer/ProximitySensorAware.car");
+    merge("car/elastos/apps/dialer/ProximitySensorManager.car");
+    merge("car/elastos/apps/dialer/SpecialCharSequenceMgr.car");
+    merge("car/elastos/apps/dialerbind/DatabaseHelperManager.car");
+    merge("car/elastos/apps/dialerbind/ObjectFactory.car");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IFragment;
+    using interface Elastos.Droid.App.IListFragment;
+    using interface Elastos.Droid.App.IApplication;
+    using interface Elastos.Droid.App.IDialogFragment;
+    using interface Elastos.Droid.App.IService;
+    using interface Elastos.Droid.App.IIntentService;
+    using interface Elastos.Droid.App.IListActivity;
+    using interface Elastos.Droid.App.Backup.IBackupAgent;
+    using interface Elastos.Droid.App.Backup.IBackupAgentHelper;
+    using interface Elastos.Droid.Content.IAsyncQueryHandler;
+    using interface Elastos.Droid.Content.IAsyncTaskLoader;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContentProvider;
+    using interface Elastos.Droid.Content.IContentResolver;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IBroadcastReceiver;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Content.ILoader;
+    using interface Elastos.Droid.Content.Res.IResources;
+    using interface Elastos.Droid.Database.IContentObserver;
+    using interface Elastos.Droid.Net.IUri;
+    using interface Elastos.Droid.Text.IInputFilter;
+    using interface Elastos.Droid.Text.ITextWatcher;
+    using interface Elastos.Droid.Text.INoCopySpan;
+    using interface Elastos.Droid.Text.Method.IBaseKeyListener;
+    using interface Elastos.Droid.Text.Method.IDialerKeyListener;
+    using interface Elastos.Droid.Text.Method.IKeyListener;
+    using interface Elastos.Droid.Text.Method.IMetaKeyKeyListener;
+    using interface Elastos.Droid.Text.Method.INumberKeyListener;
+    using interface Elastos.Droid.Preference.IPreference;
+    using interface Elastos.Droid.Preference.IPreferenceOnPreferenceChangeListener;
+    using interface Elastos.Droid.Preference.IPreferenceManagerOnActivityResultListener;
+    using interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener;
+    using interface Elastos.Droid.Preference.IRingtonePreference;
+    using interface Elastos.Droid.Preference.IPreferenceFragment;
+    using interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
+    using interface Elastos.Droid.Preference.IPreferenceActivity;
+    using interface Elastos.Droid.Os.IHandler;
+    using interface Elastos.Droid.Utility.IAttributeSet;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.View.IViewParent;
+    using interface Elastos.Droid.View.IViewManager;
+    using interface Elastos.Droid.View.IOnPreDrawListener;
+    using interface Elastos.Droid.View.IViewOnKeyListener;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOnLongClickListener;
+    using interface Elastos.Droid.View.IViewOnClickListener;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.ILayoutInflater;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IViewOnLongClickListener;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    using interface Elastos.Droid.View.IViewGroupOnHierarchyChangeListener;
+    using interface Elastos.Droid.View.IViewOnFocusChangeListener;
+    using interface Elastos.Droid.View.IViewOnTouchListener;
+    using interface Elastos.Droid.View.IOnGlobalLayoutListener;
+    using interface Elastos.Droid.View.IOnTouchModeChangeListener;
+    using interface Elastos.Droid.Widget.ILinearLayout;
+    using interface Elastos.Droid.Widget.IAdapter;
+    using interface Elastos.Droid.Widget.IAdapterView;
+    using interface Elastos.Droid.Widget.IAbsListView;
+    using interface Elastos.Droid.Widget.IGridView;
+    using interface Elastos.Droid.Widget.IBaseAdapter;
+    using interface Elastos.Droid.Widget.IListAdapter;
+    using interface Elastos.Droid.Widget.ISpinnerAdapter;
+    using interface Elastos.Droid.Widget.IFrameLayout;
+    using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
+    using interface Elastos.Droid.Widget.IPopupMenuOnMenuItemClickListener;
+    using interface Elastos.Droid.Widget.IRelativeLayout;
+    using interface Elastos.Droid.Widget.IFilterListener;
+    using interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    using interface Elastos.Core.IComparable;
+    using interface Elastos.Core.ICharSequence;
+
+
+    interface Elastos.Apps.Dailer.Activity.ITransactionSafeActivity;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogActivity;
+    interface Elastos.Apps.Dailer.CallLog.ICallTypeHelper;
+    interface Elastos.Apps.Dailer.CallLog.ICallDetailHistoryAdapter;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogGroupBuilder;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogGroupBuilderGroupCreator;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogAdapterHelper;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogFragment;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogQuery;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogQueryHandler;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogQueryHandlerListener;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogListItemView;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogNotificationsHelper;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogNotificationsService;
+    interface Elastos.Apps.Dailer.CallLog.ICallTypeIconsView;
+    interface Elastos.Apps.Dailer.CallLog.IClearCallLogDialog;
+    interface Elastos.Apps.Dailer.CallLog.IClearCallLogDialogHelper;
+    interface Elastos.Apps.Dailer.CallLog.IContactInfo;
+    interface Elastos.Apps.Dailer.CallLog.IDefaultVoicemailNotifierHelper;
+    interface Elastos.Apps.Dailer.CallLog.IIntentProviderHelper;
+    interface Elastos.Apps.Dailer.CallLog.IPhoneAccountUtils;
+    interface Elastos.Apps.Dailer.CallLog.IPhoneNumberUtilsWrapper;
+    interface Elastos.Apps.Dailer.CallLog.IPhoneNumberUtilsWrapperHelper;
+    interface Elastos.Apps.Dailer.CallLog.IPhoneNumberDisplayHelper;
+    interface Elastos.Apps.Dailer.CallLog.IPhoneQuery;
+    interface Elastos.Apps.Dailer.Contact.IContactUpdateService;
+    interface Elastos.Apps.Dailer.Contact.IContactUpdateServiceHelper;
+    interface Elastos.Apps.Dailer.Database.IDialerDatabaseHelper;
+    interface Elastos.Apps.Dailer.Database.IDialerDatabaseHelperHelper;
+    interface Elastos.Apps.Dailer.Dialpad.IDialpadFragment;
+    interface Elastos.Apps.Dailer.Dialpad.IOnDialpadQueryChangedListener;
+    interface Elastos.Apps.Dailer.Dialpad.IDialpadSlidingRelativeLayout;
+    interface Elastos.Apps.Dailer.Dialpad.ILatinSmartDialMap;
+    interface Elastos.Apps.Dailer.Dialpad.ISmartDialMap;
+    interface Elastos.Apps.Dailer.Dialpad.ISmartDialCursorLoader;
+    interface Elastos.Apps.Dailer.Dialpad.ISmartDialMatchPosition;
+    interface Elastos.Apps.Dailer.Dialpad.ISmartDialPrefix;
+    interface Elastos.Apps.Dailer.Dialpad.ISmartDialNameMatcher;
+    interface Elastos.Apps.Dailer.Dialpad.IUnicodeDialerKeyListener;
+    interface Elastos.Apps.Dailer.Dialpad.IUnicodeDialerKeyListenerHelper;
+    interface Elastos.Apps.Dailer.Interactions.IPhoneNumberInteraction;
+    interface Elastos.Apps.Dailer.Interactions.IUndemoteOutgoingCallReceiver;
+    interface Elastos.Apps.Dailer.List.IAllContactsFragment;
+    interface Elastos.Apps.Dailer.List.IDialerPhoneNumberListAdapter;
+    interface Elastos.Apps.Dailer.List.IDragItemContainer;
+    interface Elastos.Apps.Dailer.List.IDragDropController;
+    interface Elastos.Apps.Dailer.List.IListsFragment;
+    interface Elastos.Apps.Dailer.List.IListsFragmentHostInterface;
+    interface Elastos.Apps.Dailer.List.IOnDragDropListener;
+    interface Elastos.Apps.Dailer.List.IPhoneFavoriteListView;
+    interface Elastos.Apps.Dailer.List.IPhoneFavoriteTileView;
+    interface Elastos.Apps.Dailer.List.IPhoneFavoriteSquareTileView;
+    interface Elastos.Apps.Dailer.List.IPhoneFavoritesTileAdapter;
+    interface Elastos.Apps.Dailer.List.ISearchFragment;
+    interface Elastos.Apps.Dailer.List.ISearchFragmentHostInterface;
+    interface Elastos.Apps.Dailer.List.IRegularSearchFragment;
+    interface Elastos.Apps.Dailer.List.IRegularSearchListAdapter;
+    interface Elastos.Apps.Dailer.List.IRemoveView;
+    interface Elastos.Apps.Dailer.List.IShortcutCardsAdapter;
+    interface Elastos.Apps.Dailer.List.ISmartDialNumberListAdapter;
+    interface Elastos.Apps.Dailer.List.ISmartDialSearchFragment;
+    interface Elastos.Apps.Dailer.List.ISpeedDialFragment;
+    interface Elastos.Apps.Dailer.List.ISpeedDialFragmentHostInterface;
+    interface Elastos.Apps.Dailer.List.ISwipeHelper;
+    interface Elastos.Apps.Dailer.List.ISwipeHelperCallback;
+    interface Elastos.Apps.Dailer.List.ISwipeHelperHelper;
+    interface Elastos.Apps.Dailer.List.IOnDataSetChangedForAnimationListener;
+    interface Elastos.Apps.Dailer.List.ITileInteractionTeaserView;
+    interface Elastos.Apps.Dailer.Settings.IDefaultRingtonePreference;
+    interface Elastos.Apps.Dailer.Settings.IGeneralSettingsFragment;
+    interface Elastos.Apps.Dailer.Util.IAsyncTaskExecutors;
+    interface Elastos.Apps.Dailer.Util.IDialerUtils;
+    interface Elastos.Apps.Dailer.Util.IEmptyLoader;
+    interface Elastos.Apps.Dailer.Util.IExpirableCacheHelper;
+    interface Elastos.Apps.Dailer.Util.IOrientationUtil;
+    interface Elastos.Apps.Dailer.Voicemail.IVoicemailPlaybackFragment;
+    interface Elastos.Apps.Dailer.Voicemail.IVoicemailPlaybackPresenterPlaybackView;
+    interface Elastos.Apps.Dailer.Voicemail.IVoicemailPlaybackPresenter;
+    interface Elastos.Apps.Dailer.Voicemail.IVoicemailStatusHelper;
+    interface Elastos.Apps.Dailer.Voicemail.IVoicemailStatusHelperImpl;
+    interface Elastos.Apps.Dailer.Widget.IActionBarControllerActivityUi;
+    interface Elastos.Apps.Dailer.Widget.IActionBarController;
+    interface Elastos.Apps.Dailer.Widget.ISearchEditTextLayout;
+    interface Elastos.Apps.Dailer.Widget.IOverlappingPaneLayout;
+    interface Elastos.Apps.Dailer.Widget.IViewDragHelperHelper;
+    interface Elastos.Apps.Dailer.IPhoneCallDetails;
+    interface Elastos.Apps.Dailer.IProximitySensorAware;
+    interface Elastos.Apps.Dailer.ICallDetailActivity;
+    interface Elastos.Apps.Dailer.ICallDetailActivityQueryHandler;
+    interface Elastos.Apps.Dailer.IDialerApplication;
+    interface Elastos.Apps.Dailer.IDialerBackupAgent;
+    interface Elastos.Apps.Dailer.IDialtactsActivity;
+    interface Elastos.Apps.Dailer.IDialtactsActivityHelper;
+    interface Elastos.Apps.Dailer.IPhoneCallDetailsHelper;
+    interface Elastos.Apps.Dailer.IPhoneCallDetailsViewsHelper;
+    interface Elastos.Apps.Dailer.IProximitySensorManager;
+    interface Elastos.Apps.Dailer.IProximitySensorManagerListener;
+    interface Elastos.Apps.Dailer.ISpecialCharSequenceMgr;
+    interface Elastos.Apps.DailerBind.IDatabaseHelperManager;
+    interface Elastos.Apps.DailerBind.IObjectFactory;
+
+    namespace Elastos {
+    namespace Apps {
+    namespace Dialer {
+
+    class CTransactionSafeActivity {
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+        // TODO:
+        // interface IAnalyticsInterface;
+        interface ITransactionSafeActivity;
+    }
+
+    [deprecated, local]
+    class CCallDetailHistoryAdapter {
+        constructor(
+            [in] IContext* context,
+            [in] ILayoutInflater* layoutInflater,
+            [in] ICallTypeHelper* callTypeHelper,
+            [in] ArrayOf<IPhoneCallDetails*>* phoneCallDetails);
+
+        interface IListAdapter;
+        interface ISpinnerAdapter;
+        interface IAdapter;
+        interface IBaseAdapter;
+        interface ICallDetailHistoryAdapter;
+    }
+
+    class CCallLogActivity {
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+        // TODO:
+        // interface IAnalyticsInterface;
+        interface ICallLogActivity;
+    }
+
+    [local]
+    class CCallLogAdapter {
+        constructor(
+            [in] IContext* context,
+            [in] ICallLogAdapterCallFetcher* callFetcher,
+            [in] IContactInfoHelper* contactInfoHelper,
+            [in] ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
+            [in] ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
+            [in] Boolean isCallLog);
+
+        // TODO:
+        // interface IGroupingListAdapter;
+        interface ICallLogAdapter;
+        interface IOnPreDrawListener;
+        interface ICallLogGroupBuilderGroupCreator;
+    }
+
+    singleton class CCallLogAdapterHelper {
+        interface ICallLogAdapterHelper;
+    }
+
+    class CCallLogFragment {
+        constructor();
+
+        constructor(
+            [in] Int32 filterType);
+
+        constructor(
+            [in] Int32 filterType,
+            [in] Int32 logLimit);
+
+        constructor(
+            [in] Int32 filterType,
+            [in] Int64 dateLimit);
+
+        constructor(
+            [in] Int32 filterType,
+            [in] Int32 logLimit,
+            [in] Int64 dateLimit);
+
+        interface IListFragment;
+        // TODO:
+        // interface IAnalyticsListFragment;
+        interface ICallLogFragment;
+        interface ICallLogQueryHandlerListener;
+        interface ICallLogAdapterOnReportButtonClickListener;
+        interface ICallLogAdapterCallItemExpandedListener;
+    }
+
+    class CCallLogGroupBuilder {
+        constructor(
+            [in] ICallLogGroupBuilderGroupCreator* groupCreator);
+
+        interface ICallLogGroupBuilder;
+    }
+
+    [local]
+    class CCallLogListItemView {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ILinearLayout;
+        interface ICallLogListItemView;
+    }
+
+    singleton class CCallLogNotificationsHelper {
+        interface ICallLogNotificationsHelper;
+    }
+
+    class CCallLogNotificationsService {
+        constructor();
+
+        interface IService;
+        interface IIntentService;
+        interface ICallLogNotificationsService;
+    }
+
+    singleton class CCallLogQuery {
+        interface ICallLogQuery;
+    }
+
+    class CCallLogQueryHandler {
+        constructor(
+            [in] IContentResolver* contentResolver,
+            [in] ICallLogQueryHandlerListener* listener);
+
+        constructor(
+            [in] IContentResolver* contentResolver,
+            [in] ICallLogQueryHandlerListener* listener,
+            [in] Int32 limit);
+
+        interface IHandler;
+        interface IAsyncQueryHandler;
+        // TODO:
+        // interface INoNullCursorAsyncQueryHandler;
+        interface ICallLogQueryHandler;
+    }
+
+    class CCallTypeHelper {
+        constructor(
+            [in] IResources* resources);
+
+        interface ICallTypeHelper;
+    }
+
+    [local]
+    class CCallTypeIconsView {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface IView;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ICallTypeIconsView;
+    }
+
+    class CClearCallLogDialog {
+        interface IFragment;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IDialogFragment;
+        interface IClearCallLogDialog;
+    }
+
+    singleton class CClearCallLogDialogHelper {
+        interface IClearCallLogDialogHelper;
+    }
+
+    class CContactInfo {
+        interface IContactInfo;
+    }
+
+    [local]
+    class CContactInfoHelper {
+        constructor(
+            [in] IContext* context,
+            [in] String currentCountryIso);
+
+        interface IContactInfoHelper;
+    }
+
+    singleton class CDefaultVoicemailNotifierHelper {
+        interface IDefaultVoicemailNotifierHelper;
+    }
+
+    singleton class CIntentProviderHelper {
+        interface IIntentProviderHelper;
+    }
+
+    singleton class CPhoneAccountUtils {
+        interface IPhoneAccountUtils;
+    }
+
+    class CPhoneNumberDisplayHelper {
+        constructor(
+            [in] IResources* resources);
+
+        constructor(
+            [in] IPhoneNumberUtilsWrapper* phoneNumberUtils,
+            [in] IResources* resources);
+
+        interface IPhoneNumberDisplayHelper;
+    }
+
+    class CPhoneNumberUtilsWrapper {
+        interface IPhoneNumberUtilsWrapper;
+    }
+
+    singleton class CPhoneNumberUtilsWrapperHelper {
+        interface IPhoneNumberUtilsWrapperHelper;
+    }
+
+    singleton class CPhoneQuery {
+        interface IPhoneQuery;
+    }
+
+    class CContactUpdateService {
+        constructor();
+
+        interface IService;
+        interface IIntentService;
+        interface IContactUpdateService;
+    }
+
+    singleton class CContactUpdateServiceHelper {
+        interface IContactUpdateServiceHelper;
+    }
+
+    singleton class CDialerDatabaseHelperHelper {
+        interface IDialerDatabaseHelperHelper;
+    }
+
+    class CDialpadFragment {
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IFragment;
+        // TODO:
+        // interface IAnalyticsFragment;
+        interface IViewOnClickListener;
+        interface IViewOnLongClickListener;
+        interface IViewOnKeyListener;
+        interface IAdapterViewOnItemClickListener;
+        interface ITextWatcher;
+        interface IPopupMenuOnMenuItemClickListener;
+        // TODO:
+        // interface IDialpadKeyButtonOnPressedListener;
+        interface IDialpadFragment;
+    }
+
+    [local]
+    class CDialpadSlidingRelativeLayout {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IRelativeLayout;
+        interface IDialpadSlidingRelativeLayout;
+    }
+
+    class CLatinSmartDialMap {
+        interface ILatinSmartDialMap;
+        interface ISmartDialMap;
+    }
+
+    [local]
+    class CSmartDialCursorLoader{
+        constructor(
+            [in] IContext* context);
+
+        interface ILoader;
+        interface IAsyncTaskLoader;
+        interface ISmartDialCursorLoader;
+    }
+
+    class CSmartDialMatchPosition {
+        constructor(
+            [in] Int32 start,
+            [in] Int32 end);
+
+        interface ISmartDialMatchPosition;
+    }
+
+    class CSmartDialNameMatcher {
+        constructor(
+            [in] String query);
+
+        constructor(
+            [in] String query,
+            [in] ISmartDialMap* map);
+
+        interface ISmartDialNameMatcher;
+    }
+
+    singleton class CSmartDialPrefix {
+        interface ISmartDialPrefix;
+    }
+
+    class CUnicodeDialerKeyListener {
+        interface IKeyListener;
+        interface IMetaKeyKeyListener;
+        interface IInputFilter;
+        interface IBaseKeyListener;
+        interface INumberKeyListener;
+        interface IDialerKeyListener;
+        interface IUnicodeDialerKeyListener;
+    }
+
+    singleton class CUnicodeDialerKeyListenerHelper {
+        interface IUnicodeDialerKeyListenerHelper;
+    }
+
+    singleton class CPhoneNumberInteraction {
+        interface IPhoneNumberInteraction;
+    }
+
+    class CUndemoteOutgoingCallReceiver {
+        interface IBroadcastReceiver;
+        interface IUndemoteOutgoingCallReceiver;
+    }
+
+    class CAllContactsFragment {
+        // TODO:
+        // interface IContactEntryListFragment;
+        interface IAllContactsFragment;
+    }
+
+    [local]
+    class CDialerPhoneNumberListAdapter {
+        constructor(
+            [in] IContext* context);
+
+        // TODO:
+        // interface IPinnedHeaderListAdapter;
+        // interface IIndexerListAdapter;
+        // interface IContactEntryListAdapter;
+        // interface IPhoneNumberListAdapter;
+        interface IDialerPhoneNumberListAdapter;
+    }
+
+    class CDragDropController {
+        constructor(
+            [in] IDragItemContainer* dragItemContainer);
+
+        interface IDragDropController;
+    }
+
+    class CListsFragment {
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IFragment;
+        // TODO:
+        // interface IAnalyticsFragment;
+        interface ICallLogQueryHandlerListener;
+        interface ICallLogAdapterCallFetcher;
+        // TODO:
+        // interface IViewPagerOnPageChangeListener;
+        interface IListsFragment;
+    }
+
+    [local]
+    class CPhoneFavoriteListView {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IAdapterView;
+        interface IAbsListView;
+        interface IGridView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IOnGlobalLayoutListener;
+        interface IOnTouchModeChangeListener;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface ITextWatcher;
+        interface INoCopySpan;
+        interface IFilterListener;
+        interface IRemoteAdapterConnectionCallback;
+        interface IDrawableCallback;
+        interface IOnDragDropListener;
+        interface IDragItemContainer;
+        interface IPhoneFavoriteListView;
+    }
+
+    [local]
+    class CPhoneFavoriteSquareTileView {
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface IView;
+        interface IViewGroup;
+        interface IPhoneFavoriteTileView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        // TODO:
+        // interface IContactTileView;
+        interface IPhoneFavoriteSquareTileView;
+    }
+
+    [local]
+    class CPhoneFavoriteTileView {
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface IView;
+        interface IViewGroup;
+        // TODO:
+        // interface IContactTileView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IPhoneFavoriteTileView;
+    }
+
+    [local]
+    class CPhoneFavoritesTileAdapter {
+        // TODO:
+        // constructor(
+        //     [in] IContext* context,
+        //     [in] IContactTileViewListener* listener,
+        //     [in] IOnDataSetChangedForAnimationListener* dataSetChangedListener);
+
+        interface IListAdapter;
+        interface ISpinnerAdapter;
+        interface IAdapter;
+        interface IBaseAdapter;
+        interface IOnDragDropListener;
+        interface IPhoneFavoritesTileAdapter;
+    }
+
+    class CRegularSearchFragment {
+        constructor();
+
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IFragment;
+        // TODO:
+        // interface IAnalyticsFragment;
+        // interface IContactEntryListFragment;
+        // interface IPhoneNumberPickerFragment;
+        interface ISearchFragment;
+        interface IRegularSearchFragment;
+    }
+
+    [local]
+    class CRegularSearchListAdapter {
+        constructor(
+            [in] IContext* context);
+
+        // TODO:
+        // interface IPinnedHeaderListAdapter;
+        // interface IIndexerListAdapter;
+        // interface IContactEntryListAdapter;
+        // interface IPhoneNumberListAdapter;
+        interface IDialerPhoneNumberListAdapter;
+        interface IRegularSearchListAdapter;
+    }
+
+    [local]
+    class CRemoveView {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IFrameLayout;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IRemoveView;
+    }
+
+    class CSearchFragment {
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IFragment;
+        // TODO:
+        // interface IAnalyticsFragment;
+        // interface IContactEntryListFragment;
+        // interface IPhoneNumberPickerFragment;
+        interface ISearchFragment;
+    }
+
+    [local]
+    class CShortcutCardsAdapter {
+        constructor(
+            [in] IContext* context,
+            [in] IListsFragment* fragment,
+            [in] ICallLogAdapter* callLogAdapter);
+
+        interface IListAdapter;
+        interface ISpinnerAdapter;
+        interface IAdapter;
+        interface IBaseAdapter;
+        interface IShortcutCardsAdapter;
+    }
+
+    [local]
+    class CSmartDialNumberListAdapter {
+        constructor(
+            [in] IContext* context);
+
+        // TODO:
+        // interface IPinnedHeaderListAdapter;
+        // interface IIndexerListAdapter;
+        // interface IContactEntryListAdapter;
+        // interface IPhoneNumberListAdapter;
+        interface IDialerPhoneNumberListAdapter;
+        interface ISmartDialNumberListAdapter;
+    }
+
+    class CSmartDialSearchFragment {
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IFragment;
+        // TODO:
+        // interface IAnalyticsFragment;
+        // interface IContactEntryListFragment;
+        // interface IPhoneNumberPickerFragment;
+        interface ISearchFragment;
+        interface ISmartDialSearchFragment;
+    }
+
+    class CSpeedDialFragment {
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IFragment;
+        // TODO:
+        // interface IAnalyticsFragment;
+        interface ISpeedDialFragment;
+        interface IAdapterViewOnItemClickListener;
+        interface IOnDataSetChangedForAnimationListener;
+    }
+
+    [local]
+    class CSwipeHelper {
+        constructor(
+            [in] IContext* context,
+            [in] Int32 swipeDirection,
+            [in] ISwipeHelperCallback* swipeCallback,
+            [in] Float densityScale,
+            [in] Float pagingTouchSlop);
+
+        interface ISwipeHelper;
+    }
+
+    singleton class CSwipeHelperHelper {
+        interface ISwipeHelperHelper;
+    }
+
+    [local]
+    class CTileInteractionTeaserView {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface IView;
+        interface IViewGroup;
+        interface IFrameLayout;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ITileInteractionTeaserView;
+    }
+
+    [local]
+    class CDefaultRingtonePreference {
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface IPreference;
+        interface IComparable;
+        interface IPreferenceManagerOnActivityResultListener;
+        interface IRingtonePreference;
+        interface IDefaultRingtonePreference;
+    }
+
+    class CDialerSettingsActivity {
+        interface IListActivity;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IActivity;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks2;
+        interface IComponentCallbacks;
+        interface IOnWindowDismissedCallback;
+        interface IContextWrapper;
+        interface IContext;
+        interface IPreferenceActivity;
+        // TODO:
+        // interface IAnalyticsPreferenceActivity;
+        interface IDefaultRingtonePreference;
+    }
+
+    class CGeneralSettingsFragment {
+        interface IFragment;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IPreferenceFragment;
+        interface IPreferenceOnPreferenceChangeListener;
+        interface IGeneralSettingsFragment;
+    }
+
+    singleton class CAsyncTaskExecutors {
+        interface IAsyncTaskExecutors;
+    }
+
+    singleton class CDialerUtils {
+        interface IDialerUtils;
+    }
+
+    [local]
+    class CEmptyLoader {
+        constructor(
+            [in] IContext* context);
+
+        interface ILoader;
+        interface IEmptyLoader;
+    }
+
+    singleton class CExpirableCacheHelper {
+        interface IExpirableCacheHelper;
+    }
+
+    singleton class COrientationUtil {
+        interface IOrientationUtil;
+    }
+
+    class CVoicemailPlaybackFragment {
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IFragment;
+        // TODO:
+        // interface IAnalyticsFragment;
+        interface IVoicemailPlaybackFragment;
+    }
+
+    [local]
+    class CVoicemailPlaybackPresenter {
+        // constructor(
+        //     [in] IVoicemailPlaybackPresenterPlaybackView* view,
+        //     [in] IMediaPlayerProxy* player,
+        //     [in] IUri* voicemailUri,
+        //     [in] IScheduledExecutorService* executorService,
+        //     [in] Boolean startPlayingImmediately,
+        //     [in] IAsyncTaskExecutor* asyncTaskExecutor,
+        //     [in] IPowerManagerWakeLock* wakeLock);
+
+        interface IVoicemailPlaybackPresenter;
+    }
+
+    class CVoicemailStatusHelperImpl {
+        interface IVoicemailStatusHelper;
+        interface IVoicemailStatusHelperImpl;
+    }
+
+    [local]
+    class CActionBarController {
+        constructor(
+            [in] IActionBarControllerActivityUi* activityUi,
+            [in] ISearchEditTextLayout* searchBox);
+
+        interface IActionBarController;
+    }
+
+    [local]
+    class COverlappingPaneLayout {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IViewParent;
+        interface IViewManager;
+        interface IViewGroup;
+        interface IOverlappingPaneLayout;
+    }
+
+    [local]
+    class CSearchEditTextLayout {
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface IView;
+        interface IViewGroup;
+        interface IFrameLayout;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ISearchEditTextLayout;
+    }
+
+    singleton class CViewDragHelperHelper {
+        interface IViewDragHelperHelper;
+    }
+
+    class CCallDetailActivity {
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IProximitySensorAware;
+        interface ICallDetailActivity;
+    }
+
+    [local]
+    class CCallDetailActivityQueryHandler {
+        constructor(
+            [in] ICallDetailActivity* callDetailActivity);
+
+        interface IHandler;
+        interface IAsyncQueryHandler;
+        // TODO:
+        // interface INoNullCursorAsyncQueryHandler;
+        interface ICallDetailActivityQueryHandler;
+    }
+
+    class CDialerApplication {
+        interface IContextWrapper;
+        interface IContext;
+        interface IComponentCallbacks2;
+        interface IComponentCallbacks;
+        interface IApplication;
+        interface IDialerApplication;
+    }
+
+    class CDialerBackupAgent {
+        interface IBackupAgent;
+        interface IBackupAgentHelper;
+        interface IDialerBackupAgent;
+    }
+
+    class CDialtactsActivity {
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+        // TODO:
+        // interface IAnalyticsInterface;
+        interface ITransactionSafeActivity;
+        interface IDialtactsActivity;
+        interface IViewOnClickListener;
+        interface IOnDialpadQueryChangedListener;
+        interface IListsFragmentHostInterface;
+        interface ISpeedDialFragmentHostInterface;
+        interface ISearchFragmentHostInterface;
+        interface IOnDragDropListener;
+        // TODO:
+        // interface IOnPhoneNumberPickerActionListener;
+        interface IPopupMenuOnMenuItemClickListener;
+        // TODO:
+        // interface IViewPagerOnPageChangeListener;
+        interface IActionBarControllerActivityUi;
+    }
+
+    singleton class CDialtactsActivityHelper {
+        interface IDialtactsActivityHelper;
+    }
+
+    [deprecated]
+    class CPhoneCallDetails {
+        constructor(
+            [in] ICharSequence* number,
+            [in] Int32 numberPresentation,
+            [in] ICharSequence* formattedNumber,
+            [in] String countryIso,
+            [in] String geocode,
+            [in] ArrayOf<Int32>* callTypes,
+            [in] Int64 date,
+            [in] Int64 duration);
+
+        constructor(
+            [in] ICharSequence* number,
+            [in] Int32 numberPresentation,
+            [in] ICharSequence* formattedNumber,
+            [in] String countryIso,
+            [in] String geocode,
+            [in] ArrayOf<Int32>* callTypes,
+            [in] Int64 date,
+            [in] Int64 duration,
+            [in] String accountLabel,
+            [in] IDrawable* accountIcon,
+            [in] Int32 features,
+            [in] Int64 dataUsage,
+            [in] String transcription);
+
+        constructor(
+            [in] ICharSequence* number,
+            [in] Int32 numberPresentation,
+            [in] ICharSequence* formattedNumber,
+            [in] String countryIso,
+            [in] String geocode,
+            [in] ArrayOf<Int32>* callTypes,
+            [in] Int64 date,
+            [in] Int64 duration,
+            [in] ICharSequence* name,
+            [in] Int32 numberType,
+            [in] ICharSequence* numberLabel,
+            [in] IUri* contactUri,
+            [in] IUri* photoUri,
+            [in] Int32 sourceType,
+            [in] String accountLabel,
+            [in] IDrawable* accountIcon,
+            [in] Int32 features,
+            [in] Int64 dataUsage,
+            [in] String transcription);
+
+        interface IPhoneCallDetails;
+    }
+
+    class CPhoneCallDetailsHelper {
+        constructor(
+            [in] IResources* resources,
+            [in] ICallTypeHelper* callTypeHelper,
+            [in] IPhoneNumberUtilsWrapper* phoneUtils);
+
+        interface IPhoneCallDetailsHelper;
+    }
+
+    singleton class CPhoneCallDetailsViewsHelper {
+        interface IPhoneCallDetailsViewsHelper;
+    }
+
+    [local]
+    class CProximitySensorManager {
+        constructor(
+            [in] IContext* context,
+            [in] IProximitySensorManagerListener* listener);
+
+        interface IProximitySensorManager;
+    }
+
+    singleton class CSpecialCharSequenceMgr {
+        interface ISpecialCharSequenceMgr;
+    }
+
+    singleton class CDatabaseHelperManager {
+        interface IDatabaseHelperManager;
+    }
+
+    singleton class CObjectFactory {
+        interface IObjectFactory;
+    }
+
+    } //namespace Dialer
+    } //namespace Droid
+    } //namespace Elastos
+
+}

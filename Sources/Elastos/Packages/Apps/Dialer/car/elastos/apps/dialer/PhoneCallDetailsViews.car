@@ -1,5 +1,7 @@
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.View.IView;
 
     namespace Elastos{
     namespace Apps {
@@ -8,6 +10,7 @@ module
     interface IPhoneCallDetailsViews {
     }
 
+    [local]
     interface IPhoneCallDetailsViewsHelper {
         /**
          * Create a new instance by extracting the elements from the given view.

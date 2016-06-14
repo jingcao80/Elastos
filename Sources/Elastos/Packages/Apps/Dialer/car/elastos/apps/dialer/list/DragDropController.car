@@ -1,5 +1,9 @@
 module
 {
+    using interface Elastos.Droid.View.IView;
+    interface Elastos.Apps.Dailer.List.IOnDragDropListener;
+    interface Elastos.Apps.Dailer.List.IPhoneFavoriteSquareTileView;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
@@ -14,9 +18,10 @@ module
         GetViewForLocation(
             [in] Int32 x,
             [in] Int32 y,
-            [out] IPhoneFavoriteSquareTileView* view);
+            [out] IPhoneFavoriteSquareTileView** view);
     }
 
+    [deprecated, local]
     interface IDragDropController {
         HandleDragHovered(
             [in] IView* v,

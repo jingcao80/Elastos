@@ -18,7 +18,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/all_contacts_frame">
-    <fragment android:name="com.android.dialer.list.AllContactsFragment"
+    <fragment android:name="Elastos.Apps.Dialer.List.CAllContactsFragment"
               android:id="@+id/all_contacts_fragment"
               android:layout_width="match_parent"
               android:layout_height="match_parent" />

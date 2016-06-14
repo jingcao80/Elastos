@@ -1,6 +1,8 @@
 
 module
 {
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntent;
 
     namespace Elastos{
     namespace Apps {
@@ -12,13 +14,12 @@ module
       * interface IService
       * interface IIntentService
       */
-    interface IContactUpdateService
-    {
+    interface IContactUpdateService {
         const String EXTRA_PHONE_NUMBER_DATA_ID = "phone_number_data_id";
     }
 
-    interface IContactUpdateServiceHelper
-    {
+    [local]
+    interface IContactUpdateServiceHelper {
         /** Creates an intent that sets the selected data item as super primary (default) */
         CreateSetSuperPrimaryIntent(
             [in] IContext* ctx,

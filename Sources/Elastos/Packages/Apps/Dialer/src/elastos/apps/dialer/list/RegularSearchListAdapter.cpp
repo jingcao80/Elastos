@@ -17,7 +17,7 @@ ECode RegularSearchListAdapter::constructor(
 ECode RegularSearchListAdapter::GetContactInfo(
     /* [in] */ ICachedNumberLookupService* lookupService,
     /* [in] */ Int32 position,
-    /* [out] */ ICachedNumberLookupServiceCachedContactInfo** info)
+    /* [out] */ ICachedContactInfo** info)
 {
     VALUE_NOT_NULL(info);
 
@@ -57,7 +57,7 @@ ECode RegularSearchListAdapter::GetContactInfo(
             cacheInfo->SetDirectorySource(sourceName, directoryId);
         }
     }
-    *info = ICachedNumberLookupServiceCachedContactInfo::Probe(cacheInfo);
+    *info = ICachedContactInfo::Probe(cacheInfo);
     REFCOUNT_ADD(*info);
     return NOERROR;
 }

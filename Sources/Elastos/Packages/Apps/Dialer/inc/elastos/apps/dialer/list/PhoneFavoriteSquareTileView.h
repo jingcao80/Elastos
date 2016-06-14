@@ -39,12 +39,13 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
+    // TODO:
     // @Override
-    CARAPI LoadFromContact(
-        /* [in] */ IContactEntry* entry);
+    // CARAPI LoadFromContact(
+    //     /* [in] */ IContactEntry* entry);
 
-    CARAPI GetContactEntry(
-        /* [out] */ IContactEntry** entry);
+    // CARAPI GetContactEntry(
+    //     /* [out] */ IContactEntry** entry);
 
 protected:
     // @Override
@@ -68,7 +69,7 @@ private:
 
     AutoPtr<IImageButton> mSecondaryButton;
 
-    AutoPtr<IContactEntry> mContactEntry;
+    // AutoPtr<IContactEntry> mContactEntry;
 };
 
 } // List

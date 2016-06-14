@@ -1,9 +1,13 @@
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+    interface Elastos.App.Dailer.Database.IDialerDatabaseHelper;
+
     namespace Elastos{
     namespace Apps {
     namespace DailerBind {
 
+    [local]
     interface IDatabaseHelperManager {
         GetDatabaseHelper(
             [in] IContext* ctx,

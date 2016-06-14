@@ -1,17 +1,22 @@
 module
 {
+    using interface Elastos.Droid.Graphics.IRectF;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IMotionEvent;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
     namespace List {
 
+    [local]
     interface ISwipeHelper {
-        const Int32 IS_SWIPEABLE_TAG = R.id.is_swipeable_tag;
+        const Int32 IS_SWIPEABLE_TAG = 0; // = R.id.is_swipeable_tag;
 
         const Int32 X = 0;
         const Int32 Y = 1;
 
-        const Float ALPHA_FADE_START = 0f; // fraction of thumbnail width
+        const Float ALPHA_FADE_START = 0; // fraction of thumbnail width
                                            // where fade starts
 
         SetDensityScale(
@@ -42,6 +47,7 @@ module
             [out] Boolean* result);
     }
 
+    [local]
     interface ISwipeHelperHelper {
         // invalidate the view's own bounds all the way up the view hierarchy
         InvalidateGlobalRegion(
@@ -65,6 +71,7 @@ module
             [out] IInterface** obj);
     }
 
+    [local]
     interface ISwipeHelperCallback {
         GetChildAtPosition(
             [in] IMotionEvent* ev,
@@ -90,6 +97,7 @@ module
             [in] IView* v);
     }
 
+    [local]
     interface ISwipeHelperOnItemGestureListener {
         OnSwipe(
             [in] IView* view);

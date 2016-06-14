@@ -17,13 +17,18 @@ namespace CallLog {
 
 class CallDetailHistoryAdapter
     : public BaseAdapter
+    , public ICallDetailHistoryAdapter
 {
 public:
-    CallDetailHistoryAdapter(
+    CAR_INTERFACE_DECL();
+
+    CallDetailHistoryAdapter();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ ILayoutInflater* layoutInflater,
         /* [in] */ ICallTypeHelper* callTypeHelper,
-        /* [in] */ ArrayOf<IPhoneCallDetails>* phoneCallDetails);
+        /* [in] */ ArrayOf<IPhoneCallDetails*>* phoneCallDetails);
 
     // @Override
     CARAPI IsEnabled(

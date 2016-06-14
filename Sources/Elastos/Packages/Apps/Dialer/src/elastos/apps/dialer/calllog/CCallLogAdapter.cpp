@@ -6,7 +6,7 @@ namespace Apps{
 namespace Dialer {
 namespace CallLog {
 
-CAR_OBJECT_IMPL()
+CAR_OBJECT_IMPL(CCallLogAdapter)
 
 } // CallLog
 } // Dialer

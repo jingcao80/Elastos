@@ -1,11 +1,16 @@
 
 module
 {
+    using interface Elastos.Droid.View.IMotionEvent;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewGroup;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
     namespace Widget {
 
+    [local]
     interface IViewDragHelperCallback {
         /**
          * Called when the drag state changes. See the <code>STATE_*</code> constants
@@ -218,6 +223,7 @@ module
             [out] Int32* position);
     }
 
+    [deprecated, local]
     interface IViewDragHelper {
         /**
          * A null/invalid pointer ID.
@@ -306,7 +312,7 @@ module
          * @return The current drag state
          */
         GetViewDragState(
-            [out] Int32 state);
+            [out] Int32* state);
 
         /**
          * Enable edge tracking for the selected edges of the parent view.
@@ -653,6 +659,7 @@ module
             [in] ArrayOf<Int32>* consumed);
     }
 
+    [local]
     interface IViewDragHelperHelper {
         /**
          * Factory method to create a new ViewDragHelper.

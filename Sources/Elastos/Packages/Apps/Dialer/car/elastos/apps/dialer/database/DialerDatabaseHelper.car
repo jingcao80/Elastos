@@ -1,6 +1,10 @@
 
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Database.Sqlite.ISQLiteDatabase;
+    using interface Elastos.Utility.IArrayList;
+    interface Elastos.App.Dailer.Dialpad.ISmartDialNameMatcher;
 
     namespace Elastos{
     namespace Apps {
@@ -94,9 +98,10 @@ module
     interface IDialerDatabaseHelperDeleteContactQuery {
         /** Selects only rows that have been deleted after a certain time stamp.*/
         const String SELECT_UPDATED_CLAUSE = /*ContactsContract.DeletedContacts.CONTACT_DELETED_TIMESTAMP*/
-                 "contact_deleted_timestamp" + " > ?";
+                 "contact_deleted_timestamp > ?";
     }
 
+    [local]
     interface IDialerDatabaseHelperHelper {
         /**
          * Access function to get the singleton instance of DialerDatabaseHelper.

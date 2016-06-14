@@ -1,10 +1,14 @@
 module
 {
+    using interface Elastos.Droid.App.IActionBar;
+    using interface Elastos.Droid.Os.IBundle;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
     namespace Widget {
 
+    [local]
     interface IActionBarControllerActivityUi {
         IsInSearchUi(
             [out] Boolean* result);
@@ -19,7 +23,7 @@ module
             [out] Int32* height);
 
         GetActionBar(
-            [out] IActionBar* actionBar);
+            [out] IActionBar** actionBar);
     }
 
     interface IActionBarController {

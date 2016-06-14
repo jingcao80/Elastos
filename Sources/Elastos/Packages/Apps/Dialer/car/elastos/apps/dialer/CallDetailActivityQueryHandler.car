@@ -1,5 +1,7 @@
 module
 {
+    using interface Elastos.Droid.Net.IUri;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {

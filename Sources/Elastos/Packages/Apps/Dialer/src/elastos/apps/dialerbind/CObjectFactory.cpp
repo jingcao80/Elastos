@@ -23,10 +23,10 @@ ECode CObjectFactory::NewCachedNumberLookupService(
 
 ECode CObjectFactory::NewCallLogAdapter(
     /* [in] */ IContext* context,
-    /* [in] */ ICallFetcher* callFetcher,
+    /* [in] */ ICallLogAdapterCallFetcher* callFetcher,
     /* [in] */ IContactInfoHelper* contactInfoHelper,
-    /* [in] */ ICallItemExpandedListener* callItemExpandedListener,
-    /* [in] */ IOnReportButtonClickListener* onReportButtonClickListener,
+    /* [in] */ ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
+    /* [in] */ ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
     /* [in] */ Boolean isCallLog,
     /* [out] */ ICallLogAdapter** adapter)
 {
@@ -60,10 +60,10 @@ AutoPtr<ICachedNumberLookupService> CObjectFactory::NewCachedNumberLookupService
 
 AutoPtr<ICallLogAdapter> CObjectFactory::NewCallLogAdapter(
     /* [in] */ IContext* context,
-    /* [in] */ ICallFetcher* callFetcher,
+    /* [in] */ ICallLogAdapterCallFetcher* callFetcher,
     /* [in] */ IContactInfoHelper* contactInfoHelper,
-    /* [in] */ ICallItemExpandedListener* callItemExpandedListener,
-    /* [in] */ IOnReportButtonClickListener* onReportButtonClickListener,
+    /* [in] */ ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
+    /* [in] */ ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
     /* [in] */ Boolean isCallLog)
 {
     AutoPtr<ICallLogAdapter> adapter;

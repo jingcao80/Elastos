@@ -1,6 +1,9 @@
 
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Utility.IArrayList;
+    interface Elastos.Apps.Dailer.Dialpad.ISmartDialMap;
 
     namespace Elastos{
     namespace Apps {
@@ -10,6 +13,7 @@ module
     interface ISmartDialPrefixPhoneNumberTokens {
     }
 
+    [local]
     interface ISmartDialPrefix {
         /** Initializes the Nanp settings, and finds out whether user is in a NANP region.*/
         InitializeNanpSettings(

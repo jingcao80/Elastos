@@ -1,6 +1,8 @@
 
 module
 {
+    using interface Elastos.Droid.Database.ICursor;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
@@ -10,13 +12,14 @@ module
      * @Involve
      * interface IHandler
      * interface IAsyncQueryHandler
+     * interface INoNullCursorAsyncQueryHandler
      */
      interface ICallLogQueryHandler {
         /**
          * Call type similar to Calls.INCOMING_TYPE used to specify all types instead of one particular
          * type.
          */
-        Int32 CALL_TYPE_ALL = -1;
+        const Int32 CALL_TYPE_ALL = -1;
 
         /**
          * Fetches the list of calls from the call log for a given type.

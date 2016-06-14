@@ -30,9 +30,9 @@ private:
 
         CARAPI Submit(
             /* [in] */ IInterface* identifier,
-            /* [in] */ IAsyncTask* task,
+            /* [in] */ IObject* task,
             /* [in] */ ArrayOf<IInteface*>* params,
-            /* [out] */ IAsyncTask** result);
+            /* [out] */ IObject** resultTask);
 
     private:
         AutoPtr<IExecutor> mExecutor;

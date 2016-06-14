@@ -1,11 +1,16 @@
 module
 {
+    using interface Elastos.Droid.Widget.ITextView;
+    using interface Elastos.Core.ICharSequence;
+    interface Elastos.Apps.Dailer.IPhoneCallDetails;
+    interface Elastos.Apps.Dailer.IPhoneCallDetailsViews;
 
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
 
-    interface IPhoneCallDetailsHeper {
+    [local]
+    interface IPhoneCallDetailsHelper {
         /** Fills the call details views with content. */
         SetPhoneCallDetails(
             [in] IPhoneCallDetailsViews* views,

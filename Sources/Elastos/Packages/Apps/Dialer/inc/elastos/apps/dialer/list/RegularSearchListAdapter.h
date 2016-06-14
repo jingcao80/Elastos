@@ -24,7 +24,7 @@ public:
     CARAPI GetContactInfo(
         /* [in] */ ICachedNumberLookupService* lookupService,
         /* [in] */ Int32 position,
-        /* [out] */ ICachedNumberLookupServiceCachedContactInfo** info);
+        /* [out] */ ICachedContactInfo** info);
 
     // @Override
     CARAPI SetQueryString(

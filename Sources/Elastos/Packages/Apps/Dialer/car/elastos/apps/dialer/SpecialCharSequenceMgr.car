@@ -1,9 +1,13 @@
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Widget.IEditText;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
 
+    [local]
     interface ISpecialCharSequenceMgr {
         HandleChars(
             [in] IContext* context,

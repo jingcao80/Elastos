@@ -1,16 +1,17 @@
 module
 {
+    interface Elastos.Apps.Dailer.CallLog.ICallLogListItemView;
+    interface Elastos.Apps.Dailer.CallLog.ICallLogListItemViews;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
     namespace CallLog {
 
     interface ICallLogAdapterNumberWithCountryIso {
-
     }
 
     interface ICallLogAdapterContactInfoRequest {
-
     }
 
     /** Interface used to inform a parent UI element that a list item has been expanded. */
@@ -45,15 +46,18 @@ module
             [in] String number);
     }
 
+    enum CallLogAdapterTasks {
+        CallLogAdapterTasks_REMOVE_CALL_LOG_ENTRIES = 0
+    }
+
     /**
      * @Involve
      * interface IGroupingListAdapter
+     * interface IOnPreDrawListener
+     * interface ICallLogGroupBuilderGroupCreator
      */
     interface ICallLogAdapter {
         /** The enumeration of {@link android.os.AsyncTask} objects used in this class. */
-        enum Tasks {
-            REMOVE_CALL_LOG_ENTRIES,
-        }
 
         SetLoading(
             [in] Boolean loading);
@@ -78,7 +82,7 @@ module
         GetBetterNumberFromContacts(
             [in] String number,
             [in] String countryIso,
-            [out] String* number);
+            [out] String* result);
 
         OnBadDataReported(
             [in] String number);

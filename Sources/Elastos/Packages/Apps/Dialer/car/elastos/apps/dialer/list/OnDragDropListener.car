@@ -1,5 +1,7 @@
 module
 {
+    interface Elastos.Apps.Dailer.List.IPhoneFavoriteSquareTileView;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {

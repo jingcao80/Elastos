@@ -1,5 +1,8 @@
 module
 {
+    using interface Elastos.Droid.Widget.IAbsListView;
+    interface Elastos.Apps.Dailer.List.IDragDropController;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
@@ -12,7 +15,10 @@ module
      * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
      * interface Elastos.Droid.Apps.IFragment
      * interface Elastos.Apps.DailerBind.Analytics.IAnalyticsFragment
+     * interface IAdapterViewOnItemClickListener
+     * interface IOnDataSetChangedForAnimationListener
      */
+    [local]
     interface ISpeedDialFragment {
         HasFrequents(
             [out] Boolean* result);
@@ -21,6 +27,7 @@ module
             [out] IAbsListView** listView);
     }
 
+    [local]
     interface ISpeedDialFragmentHostInterface {
         SetDragDropController(
             [in] IDragDropController* controller);

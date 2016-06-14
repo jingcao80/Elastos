@@ -1,6 +1,9 @@
 
 module
 {
+    using interface Elastos.Utility.IArrayList;
+    interface Elastos.Apps.Dailer.Dialpad.ISmartDialMap;
+    interface Elastos.Apps.Dailer.Dialpad.ISmartDialMatchPosition;
 
     namespace Elastos{
     namespace Apps {
@@ -34,7 +37,7 @@ module
          */
         MatchesNumber(
             [in] String phoneNumber,
-            [out] ISmartDialMatchPosition* position);
+            [out] ISmartDialMatchPosition** position);
 
         /**
          * Matches a phone number against a query, taking care of formatting characters and also
@@ -48,7 +51,7 @@ module
         MatchesNumber(
             [in] String phoneNumber,
             [in] String query,
-            [out] ISmartDialMatchPosition* position);
+            [out] ISmartDialMatchPosition** position);
 
         Matches(
             [in] String displayName,

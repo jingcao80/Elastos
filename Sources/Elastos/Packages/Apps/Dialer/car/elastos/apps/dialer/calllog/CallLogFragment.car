@@ -1,5 +1,7 @@
 module
 {
+    using interface Elastos.Droid.Content.IIntent;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
@@ -9,6 +11,9 @@ module
      * @Involve
      * interface IListFragment
      * interface IAnalyticsListFragment
+     * interface ICallLogQueryHandlerListener
+     * interface ICallLogAdapterOnReportButtonClickListener
+     * interface ICallLogAdapterCallItemExpandedListener
      */
     interface ICallLogFragment {
         /**

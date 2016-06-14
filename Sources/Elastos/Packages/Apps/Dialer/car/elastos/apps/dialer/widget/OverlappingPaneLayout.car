@@ -1,5 +1,8 @@
 module
 {
+    using interface Elastos.Droid.View.IView;
+    interface Elastos.Apps.Dailer.Widget.IOverlappingPaneLayoutPanelSlideCallbacks;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
@@ -8,6 +11,7 @@ module
     /**
      * Callbacks for interacting with sliding panes.
      */
+    [local]
     interface IOverlappingPaneLayoutPanelSlideCallbacks{
         /**
          * Called when a sliding pane's position changes.
@@ -63,7 +67,8 @@ module
      * interface IViewManager;
      * interface IViewGroup;
      */
-    interface IOverlappingPaneLayout{
+    [local]
+    interface IOverlappingPaneLayout {
         /**
          * Set an offset, somewhere in between the panel's fully closed state and fully opened state,
          * where the panel can be temporarily pinned or opened up to.

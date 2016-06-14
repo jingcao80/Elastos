@@ -64,8 +64,9 @@ public:
      *
      * @param closeable to close.
      */
-    static CARAPI CloseQuietly(
-        /* [in] */ IAutoCloseable closeable);
+    // TODO:
+    // static CARAPI CloseQuietly(
+    //     /* [in] */ IAutoCloseable* closeable);
 
     /**
      * Joins a list of {@link CharSequence} into a single {@link CharSequence} seperated by a

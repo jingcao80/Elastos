@@ -1,6 +1,8 @@
 
 module
 {
+    using interface Elastos.Core.ICharSequence;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {

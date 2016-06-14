@@ -15,17 +15,24 @@ namespace CallLog {
 const CallDetailHistoryAdapter::Int32 VIEW_TYPE_HEADER = 0;
 const CallDetailHistoryAdapter::Int32 VIEW_TYPE_HISTORY_ITEM = 1;
 
-CallDetailHistoryAdapter::CallDetailHistoryAdapter(
+CAR_INTERFACE_IMPL(CallDetailHistoryAdapter, BaseAdapter, ICallDetailHistoryAdapter)
+
+CallDetailHistoryAdapter::CallDetailHistoryAdapter()
+{
+    CArrayList::New((IArrayList**)&mDurationItems);
+}
+
+ECode CallDetailHistoryAdapter::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ILayoutInflater* layoutInflater,
     /* [in] */ ICallTypeHelper* callTypeHelper,
-    /* [in] */ ArrayOf<IPhoneCallDetails>* phoneCallDetails)
-    : mContext(context)
-    , mLayoutInflater(layoutInflater)
-    , mCallTypeHelper(callTypeHelper)
-    , mPhoneCallDetails(phoneCallDetails)
+    /* [in] */ ArrayOf<IPhoneCallDetails*>* phoneCallDetails)
 {
-    CArrayList::New((IArrayList**)&mDurationItems);
+    mContext = context;
+    mLayoutInflater = layoutInflater;
+    mCallTypeHelper = callTypeHelper;
+    mPhoneCallDetails = phoneCallDetails;
+    return NOERROR
 }
 
 ECode CallDetailHistoryAdapter::IsEnabled(

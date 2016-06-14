@@ -1,5 +1,8 @@
 module
 {
+    using interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Core.ICharSequence;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
@@ -18,6 +21,16 @@ module
      * interface IComponentCallbacks2
      * interface IOnWindowDismissedCallback
      * interface ITransactionSafeActivity
+     * interface IViewOnClickListener
+     * interface IOnDialpadQueryChangedListener
+     * interface ISpeedDialFragmentHostInterface
+     * interface IListsFragmentHostInterface
+     * interface ISearchFragmentHostInterface
+     * interface IOnDragDropListener
+     * interface IOnPhoneNumberPickerActionListener
+     * interface IPopupMenuOnMenuItemClickListener
+     * interface IViewPagerOnPageChangeListener
+     * interface IActionBarControllerActivityUi
      */
     interface IDialtactsActivity {
         const String SHARED_PREFS_NAME = "com.android.dialer_preferences";

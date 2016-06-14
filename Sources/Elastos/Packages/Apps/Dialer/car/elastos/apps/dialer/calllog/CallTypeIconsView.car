@@ -39,7 +39,7 @@ module
             [out] Int32* count);
 
         // @NeededForTesting
-        CARAPI GetCallType(
+        GetCallType(
             [in] Int32 index,
             [out] Int32* result);
     }

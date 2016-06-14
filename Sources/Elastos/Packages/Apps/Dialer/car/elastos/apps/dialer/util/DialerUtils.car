@@ -1,10 +1,19 @@
 module
 {
+    using interface Elastos.Droid.Content.IComponentName;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Droid.Content.Res.IResources;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IIterable;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
     namespace Util {
 
+    [local]
     interface IDialerUtils {
         /**
          * Attempts to start an activity and displays a toast with the default error message if the
@@ -15,7 +24,7 @@ module
          */
         StartActivityWithErrorToast(
             [in] IContext* context,
-            [in] Intent* intent);
+            [in] IIntent* intent);
 
         /**
          * Attempts to start an activity and displays a toast with a provided error message if the
@@ -28,7 +37,7 @@ module
          */
         StartActivityWithErrorToast(
             [in] IContext* context,
-            [in] Intent* intent,
+            [in] IIntent* intent,
             [in] Int32 msgId);
 
         /**
@@ -59,8 +68,9 @@ module
          *
          * @param closeable to close.
          */
-        CloseQuietly(
-            [in] IAutoCloseable* closeable);
+        // TODO:
+        // CloseQuietly(
+        //    [in] IAutoCloseable* closeable);
 
         /**
          * Joins a list of {@link CharSequence} into a single {@link CharSequence} seperated by a

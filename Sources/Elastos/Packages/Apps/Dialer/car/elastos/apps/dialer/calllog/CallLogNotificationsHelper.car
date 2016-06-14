@@ -1,10 +1,13 @@
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
     namespace CallLog {
 
+    [local]
     interface ICallLogNotificationsHelper {
         /** Removes the missed call notifications. */
         RemoveMissedCallNotifications(

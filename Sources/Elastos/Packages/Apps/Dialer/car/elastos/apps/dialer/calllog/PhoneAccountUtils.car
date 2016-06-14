@@ -1,6 +1,10 @@
 
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.Telecomm.Telecom.IPhoneAccountHandle;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
@@ -9,6 +13,7 @@ module
     /**
      * Methods to help extract {@code PhoneAccount} information from database and Telecomm sources
      */
+    [local]
     interface IPhoneAccountUtils {
         /**
          * Generate account info from data in Telecomm database
@@ -16,7 +21,7 @@ module
         GetAccount(
             [in] String componentString,
             [in] String accountId,
-            [out] IPhoneAccountHandle* handle);
+            [out] IPhoneAccountHandle** handle);
 
         /**
          * Generate account icon from data in Telecomm database

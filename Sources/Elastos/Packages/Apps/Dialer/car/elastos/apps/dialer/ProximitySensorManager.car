@@ -4,15 +4,15 @@ module
     namespace Apps {
     namespace Dailer {
 
+    enum ProximitySensorManagerState {
+        ProximitySensorManagerState_NEAR,
+        ProximitySensorManagerState_FAR
+    }
+
     /**
      * Manages the proximity sensor and notifies a listener when enabled.
      */
     interface IProximitySensorManager {
-        enum State {
-            NEAR,
-            FAR
-        }
-
         /**
          * Enables the proximity manager.
          * <p>

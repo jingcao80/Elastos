@@ -120,22 +120,23 @@ void DialerUtils::ConfigureEmptyListView(
     ITextView::Probe(emptyListViewMessage)->SetText(str);
 }
 
-ECode DialerUtils::CloseQuietly(
-    /* [in] */ IAutoCloseable closeable)
-{
-    if (closeable != NULL) {
-        // try {
-        ECode ec = closeable->Close();
-        if (ec == (ECode)E_RUNTIME_EXCEPTION) {
-            return ec;
-        }
-        // } catch (RuntimeException rethrown) {
-        //     throw rethrown;
-        // } catch (Exception ignored) {
-        // }
-    }
-    return NOERROR;
-}
+// TODO:
+// ECode DialerUtils::CloseQuietly(
+//     /* [in] */ IAutoCloseable closeable)
+// {
+//     if (closeable != NULL) {
+//         // try {
+//         ECode ec = closeable->Close();
+//         if (ec == (ECode)E_RUNTIME_EXCEPTION) {
+//             return ec;
+//         }
+//         // } catch (RuntimeException rethrown) {
+//         //     throw rethrown;
+//         // } catch (Exception ignored) {
+//         // }
+//     }
+//     return NOERROR;
+// }
 
 AutoPtr<ICharSequence> DialerUtils::Join(
     /* [in] */ IResources* resources,

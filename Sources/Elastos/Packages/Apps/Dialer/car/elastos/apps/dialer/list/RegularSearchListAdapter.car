@@ -1,5 +1,8 @@
 module
 {
+    interface Elastos.Apps.Dailer.Service.ICachedContactInfo;
+    interface Elastos.Apps.Dailer.Service.ICachedNumberLookupService;
+
     namespace Elastos{
     namespace Apps {
     namespace Dailer {
@@ -17,7 +20,7 @@ module
         GetContactInfo(
             [in] ICachedNumberLookupService* lookupService,
             [in] Int32 position,
-            [out] ICachedNumberLookupServiceCachedContactInfo** info);
+            [out] ICachedContactInfo** info);
     }
 
 
