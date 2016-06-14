@@ -183,6 +183,14 @@ public:
         ALOGD("NodeMessage_FireCallback================2.0================mTag:%d",callback_1->mTag);
         ALOGD("NodeMessage_FireCallback================2.1================mTag:%d",callback->mTag);
 
+        ALOGD("NodeMessage_FireCallback================2.2================check args");
+        IMethodInfo* _methodInfo = callback_1->mMethod.Get();
+        ALOGD("NodeMessage_FireCallback================2.3================mMethod:%p",_methodInfo);
+        IInterface* _object = callback_1->mObject.Get();
+        ALOGD("NodeMessage_FireCallback================2.4================mObject:%p",_object);
+        IArgumentList* _argumentList = callback_1->mArgumentList.Get();
+        ALOGD("NodeMessage_FireCallback================2.5================mArgumentList:%p",_argumentList);
+
         //ec = callback->mMethod->Invoke(callback->mObject, callback->mArgumentList);
         ec = callback_1->mMethod->Invoke(callback_1->mObject, callback_1->mArgumentList);
 
