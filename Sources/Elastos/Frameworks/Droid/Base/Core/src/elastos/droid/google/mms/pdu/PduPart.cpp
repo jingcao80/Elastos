@@ -1,4 +1,6 @@
-
+#include "Elastos.Droid.Google.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/pdu/PduPart.h"
 
 namespace Elastos {

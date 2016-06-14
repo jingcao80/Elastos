@@ -1,5 +1,11 @@
-
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Google.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/pdu/PduPersister.h"
+#include "elastos/core/StringUtils.h"
+
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -12,7 +18,7 @@ namespace Pdu {
 //=====================================================================
 CAR_INTERFACE_IMPL(PduPersister, Object, IPduPersister);
 
-const String PduPersister::TEMPORARY_DRM_OBJECT_URI("content://mms/" + Long.MAX_VALUE + "/part");
+const String PduPersister::TEMPORARY_DRM_OBJECT_URI = String("content://mms/") + StringUtils::ToString(Elastos::Core::Math::INT64_MAX_VALUE) + String("/part");
 const Int32 PduPersister::PROC_STATUS_TRANSIENT_FAILURE;
 const Int32 PduPersister::PROC_STATUS_PERMANENTLY_FAILURE;
 const Int32 PduPersister::PROC_STATUS_COMPLETED;
@@ -859,7 +865,7 @@ AutoPtr< ArrayOf<Byte> > PduPersister::GetBytes(
     return empty;
 }
 
-ECode PduPersister::Release()
+ECode PduPersister::ReleaseResources()
 {
     // ==================before translated======================
     // Uri uri = Uri.parse(TEMPORARY_DRM_OBJECT_URI);
@@ -1033,7 +1039,7 @@ void PduPersister::SetLongToHeaders(
     assert(0);
 }
 
-AutoPtr<Integer> PduPersister::GetIntegerFromPartColumn(
+AutoPtr<IInteger32> PduPersister::GetIntegerFromPartColumn(
     /* [in] */ ICursor* c,
     /* [in] */ Int32 columnIndex)
 {
@@ -1043,7 +1049,7 @@ AutoPtr<Integer> PduPersister::GetIntegerFromPartColumn(
     // }
     // return null;
     assert(0);
-    AutoPtr<Integer> empty;
+    AutoPtr<IInteger32> empty;
     return empty;
 }
 
@@ -1061,7 +1067,7 @@ AutoPtr< ArrayOf<Byte> > PduPersister::GetByteArrayFromPartColumn(
     return empty;
 }
 
-AutoPtr< ArrayOf< AutoPtr<PduPart> > > PduPersister::LoadParts(
+AutoPtr< ArrayOf<IPduPart*> > PduPersister::LoadParts(
     /* [in] */ Int64 msgId)
 {
     // ==================before translated======================
@@ -1188,7 +1194,7 @@ AutoPtr< ArrayOf< AutoPtr<PduPart> > > PduPersister::LoadParts(
     //
     // return parts;
     assert(0);
-    AutoPtr< ArrayOf< AutoPtr<PduPart> > > empty;
+    AutoPtr< ArrayOf<IPduPart*> > empty;
     return empty;
 }
 

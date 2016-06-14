@@ -243,6 +243,9 @@
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/widget
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/gesture
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/emoji
+- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/google/mms/utility
+- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/google/mms/pdu
+> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/google/mms
 
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit
 #- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/privacy/surrogate

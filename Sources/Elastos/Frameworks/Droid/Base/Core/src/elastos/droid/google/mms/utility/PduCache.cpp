@@ -1,4 +1,7 @@
-
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Google.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/utility/PduCache.h"
 
 namespace Elastos {
@@ -140,7 +143,7 @@ AutoPtr<IPduCacheEntry> PduCache::Purge(
     //         return null;
     // }
     assert(0);
-    AutoPtr<PduCacheEntry> empty;
+    AutoPtr<IPduCacheEntry> empty;
     return empty;
 }
 
@@ -178,7 +181,7 @@ AutoPtr<IPduCacheEntry> PduCache::PurgeSingleEntry(
     // }
     // return null;
     assert(0);
-    AutoPtr<PduCacheEntry> empty;
+    AutoPtr<IPduCacheEntry> empty;
     return empty;
 }
 

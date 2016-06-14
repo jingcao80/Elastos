@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_GOOGLE_MMS_PDU_ACKNOWLEDGEIND_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/core/Object.h"
+#include "elastos/droid/google/mms/pdu/GenericPdu.h"
 
 // package com.google.android.mms.pdu;
 // import com.google.android.mms.InvalidHeaderValueException;

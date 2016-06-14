@@ -8,4 +8,25 @@ INCLUDES += $(MAKEDIR)/../../../../../../inc/
 
 C_DEFINES += -DDROID_CORE
 
-#SOURCES = CGsmCellLocation.cpp
+SOURCES = AcknowledgeInd.cpp
+SOURCES += Base64.cpp
+SOURCES += CharacterSets.cpp
+SOURCES += DeliveryInd.cpp
+SOURCES += EncodedStringValue.cpp
+SOURCES += GenericPdu.cpp
+SOURCES += MultimediaMessagePdu.cpp
+SOURCES += NotificationInd.cpp
+SOURCES += NotifyRespInd.cpp
+SOURCES += PduBody.cpp
+SOURCES += PduComposer.cpp
+SOURCES += PduContentTypes.cpp
+SOURCES += PduHeaders.cpp
+SOURCES += PduParser.cpp
+SOURCES += PduPart.cpp
+SOURCES += PduPersister.cpp
+SOURCES += QuotedPrintable.cpp
+SOURCES += ReadOrigInd.cpp
+SOURCES += ReadRecInd.cpp
+SOURCES += RetrieveConf.cpp
+SOURCES += SendConf.cpp
+SOURCES += SendReq.cpp

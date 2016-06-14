@@ -1,4 +1,5 @@
-
+#include "Elastos.Droid.Google.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/google/mms/pdu/ReadRecInd.h"
 
 namespace Elastos {

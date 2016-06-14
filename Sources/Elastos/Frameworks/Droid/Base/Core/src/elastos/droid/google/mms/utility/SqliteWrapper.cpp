@@ -1,4 +1,6 @@
-
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Google.h"
+#include "Elastos.Droid.Net.h"
 #include "elastos/droid/google/mms/utility/SqliteWrapper.h"
 
 namespace Elastos {
@@ -14,11 +16,9 @@ const String SqliteWrapper::TAG("SqliteWrapper");
 const String SqliteWrapper::SQLITE_EXCEPTION_DETAIL_MESSAGE("unable to open database file");
 
 ECode SqliteWrapper::CheckSQLiteException(
-    /* [in] */ IContext* context,
-    /* [in] */ ISQLiteException* e)
+    /* [in] */ IContext* context)
+    ///* [in] */ ISQLiteException* e)
 {
-    VALIDATE_NOT_NULL(context);
-    VALIDATE_NOT_NULL(e);
     // ==================before translated======================
     // if (isLowMemory(e)) {
     //     Toast.makeText(context, com.android.internal.R.string.low_memory,
@@ -150,8 +150,8 @@ Boolean SqliteWrapper::IsLowMemory(
     return FALSE;
 }
 
-Boolean SqliteWrapper::IsLowMemory(
-    /* [in] */ ISQLiteException* e)
+Boolean SqliteWrapper::IsLowMemory()
+    ///* [in] */ ISQLiteException* e)
 {
     // ==================before translated======================
     // return e.getMessage().equals(SQLITE_EXCEPTION_DETAIL_MESSAGE);

@@ -16,7 +16,7 @@ namespace Mms {
   */
 class MmsException
     : public Object
-    , public Exception
+    //, public Exception
 {
 public:
     /**
@@ -37,8 +37,8 @@ public:
       *
       * @param cause the cause.
       */
-    MmsException(
-        /* [in] */ Throwable* cause);
+    //MmsException(
+        ///* [in] */ Throwable* cause);
 
     /**
       * Creates a new MmsException with the specified detail message and cause.
@@ -46,9 +46,9 @@ public:
       * @param message the detail message.
       * @param cause the cause.
       */
-    MmsException(
-        /* [in] */ const String& message,
-        /* [in] */ Throwable* cause);
+    //MmsException(
+        ///* [in] */ const String& message,
+        ///* [in] */ Throwable* cause);
 
 private:
     static const Int64 serialVersionUID = -7323249827281485390L;

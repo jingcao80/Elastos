@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_GOOGLE_MMS_PDU_BASE64_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/core/Object.h"
 
 // package com.google.android.mms.pdu;
 

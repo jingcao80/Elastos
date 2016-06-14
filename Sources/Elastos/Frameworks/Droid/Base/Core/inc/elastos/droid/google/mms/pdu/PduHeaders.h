@@ -81,7 +81,7 @@ protected:
       * @return the EncodedStringValue value of the pdu header
       *          with specified header field
       */
-    virtual CARAPI_(AutoPtr<IEncodedStringValue*>) GetEncodedStringValue(
+    virtual CARAPI_(AutoPtr<IEncodedStringValue>) GetEncodedStringValue(
         /* [in] */ Int32 field);
 
     /**

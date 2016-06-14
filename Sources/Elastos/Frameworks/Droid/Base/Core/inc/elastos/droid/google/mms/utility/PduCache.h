@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_GOOGLE_MMS_UTILITY_PDUCACHE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/core/Object.h"
+#include "elastos/droid/google/mms/utility/AbstractCache.h"
 
 // package com.google.android.mms.util;
 // import android.content.ContentUris;
@@ -13,9 +13,11 @@
 // import java.util.HashMap;
 // import java.util.HashSet;
 
+using Elastos::Droid::Content::IUriMatcher;
 using Elastos::Droid::Net::IUri;
 using Elastos::Utility::IHashMap;
 using Elastos::Utility::IHashSet;
+using Elastos::Core::IInteger32;
 
 namespace Elastos {
 namespace Droid {
@@ -28,6 +30,8 @@ class PduCache
     , public IPduCache
 {
 public:
+    CAR_INTERFACE_DECL();
+
     // synchronized
     static CARAPI_(AutoPtr<IPduCache>) GetInstance();
 
@@ -99,8 +103,8 @@ private:
     static const Int32 MMS_OUTBOX_ID = 9;
     static const Int32 MMS_CONVERSATION = 10;
     static const Int32 MMS_CONVERSATION_ID = 11;
-    static const AutoPtr<IUriMatcher> URI_MATCHER;
-    static const AutoPtr<IHashMap> MATCH_TO_MSGBOX_ID_MAP;//Integer,Integer
+    static AutoPtr<IUriMatcher> URI_MATCHER;
+    static AutoPtr<IHashMap> MATCH_TO_MSGBOX_ID_MAP;//Integer,Integer
     static AutoPtr<IPduCache> sInstance;
     /*const*/ AutoPtr<IHashMap> mMessageBoxes;//HashMap<Integer, HashSet<Uri>>
     /*const*/ AutoPtr<IHashMap> mThreads;//HashMap<Long, HashSet<Uri>>

@@ -24,20 +24,20 @@ MmsException::MmsException(
     // super(message);
 }
 
-MmsException::MmsException(
-    /* [in] */ Throwable* cause)
-{
-    // ==================before translated======================
-    // super(cause);
-}
-
-MmsException::MmsException(
-    /* [in] */ const String& message,
-    /* [in] */ Throwable* cause)
-{
-    // ==================before translated======================
-    // super(message, cause);
-}
+//MmsException::MmsException(
+//    /* [in] */ Throwable* cause)
+//{
+//    // ==================before translated======================
+//    // super(cause);
+//}
+//
+//MmsException::MmsException(
+//    /* [in] */ const String& message,
+//    /* [in] */ Throwable* cause)
+//{
+//    // ==================before translated======================
+//    // super(message, cause);
+//}
 
 } // namespace Mms
 } // namespace Google

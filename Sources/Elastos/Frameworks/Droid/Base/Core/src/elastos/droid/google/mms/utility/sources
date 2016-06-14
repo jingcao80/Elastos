@@ -8,4 +8,9 @@ INCLUDES += $(MAKEDIR)/../../../../../../inc/
 
 C_DEFINES += -DDROID_CORE
 
-#SOURCES = CGsmCellLocation.cpp
+SOURCES = AbstractCache.cpp
+SOURCES += DownloadDrmHelper.cpp
+SOURCES += DrmConvertSession.cpp
+SOURCES += PduCache.cpp
+SOURCES += PduCacheEntry.cpp
+SOURCES += SqliteWrapper.cpp

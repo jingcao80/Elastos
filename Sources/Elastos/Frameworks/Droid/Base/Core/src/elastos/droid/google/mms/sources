@@ -8,7 +8,9 @@ INCLUDES += $(MAKEDIR)/../../../../../inc/
 
 C_DEFINES += -DDROID_CORE
 
-#SOURCES = CGsmCellLocation.cpp
+SOURCES = ContentType.cpp
+SOURCES += InvalidHeaderValueException.cpp
+SOURCES += MmsException.cpp
 
 
 ELASTOS_LIBS += pdu/pdu.lib

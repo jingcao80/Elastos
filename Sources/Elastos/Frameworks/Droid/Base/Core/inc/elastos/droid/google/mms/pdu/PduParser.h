@@ -4,20 +4,19 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// package com.google.android.mms.pdu;
 // import com.google.android.mms.ContentType;
 // import com.google.android.mms.InvalidHeaderValueException;
 // import com.google.android.mms.pdu.EncodedStringValue;
 // import android.util.Log;
-// import java.io.ByteArrayInputStream;
 // import java.io.ByteArrayOutputStream;
 // import java.io.UnsupportedEncodingException;
 // import java.util.Arrays;
 // import java.util.HashMap;
 // import android.content.res.Resources;
 
-using Elastos::Io::IByteArrayInputStream;
-using Com.google.android.mms.pdu.EncodedStringValue;
+using Elastos::IO::IByteArrayInputStream;
+using Elastos::Utility::IHashMap;
+using Elastos::Core::IInteger32;
 
 namespace Elastos {
 namespace Droid {
