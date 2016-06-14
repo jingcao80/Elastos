@@ -200,7 +200,7 @@ void TaskViewThumbnail::EnableTaskBarClip(
     GetMeasuredHeight(&width);
     GetMeasuredHeight(&height);
     mClipRect->Set(0, top, width, height);
-    // SetClipBounds(mClipRect); // disabled by luo.zhaohui
+    SetClipBounds(mClipRect);
 }
 
 void TaskViewThumbnail::UpdateVisibility(

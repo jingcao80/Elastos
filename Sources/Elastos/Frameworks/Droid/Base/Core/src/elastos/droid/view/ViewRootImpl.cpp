@@ -3875,6 +3875,7 @@ void ViewRootImpl::Draw(
                 mHardwareXOffset = xOffset;
                 mAttachInfo->mHardwareRenderer->InvalidateRoot();
             }
+            // mAttachInfo->mHardwareRenderer->InvalidateRoot();
             mResizeAlpha = resizeAlpha;
 
             // sometimes we get the dirty rect as null
