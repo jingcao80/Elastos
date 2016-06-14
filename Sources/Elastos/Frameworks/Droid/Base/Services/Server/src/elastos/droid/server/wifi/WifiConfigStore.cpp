@@ -61,6 +61,7 @@ using Elastos::Droid::Wifi::CWifiSsidHelper;
 using Elastos::Droid::Wifi::IWifiSsid;
 using Elastos::Droid::Wifi::IWifiConfigurationProtocol;
 using Elastos::Droid::Wifi::CWifiConfigurationProtocol;
+using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Core::StringBuffer;
 using Elastos::Core::StringBuilder;
@@ -3281,7 +3282,7 @@ AutoPtr<IList> WifiConfigStore::GetConfiguredNetworks(
     /* [in] */ IMap* pskMap)//String, String
 {
     AutoPtr<IList> networks;
-    CArrayList::New((IList**)&networks);//WifiConfiguration
+    CParcelableList::New((IList**)&networks);//WifiConfiguration
 
     AutoPtr<ICollection> values;
     mConfiguredNetworks->GetValues((ICollection**)&values);

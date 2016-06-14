@@ -435,31 +435,16 @@ CAR_OBJECT_IMPL(CWifiManager)
 CWifiManager::CWifiManager()
     : mActiveLockCount(0)
 {
-    //sAsyncChannel = new AsyncChannel();
     CCountDownLatch::New(1, (ICountDownLatch**)&sConnected);
 }
 
 CWifiManager::~CWifiManager()
 {
-    //Logger::E("CWifiManager", "destructor CWifiManager line:%d, func:%s, sAsyncChannel:%p, sThreadRefCount;%d\n",
-    //        __LINE__, __func__, sAsyncChannel.Get(), sThreadRefCount);
-
     //try {
     {
         AutoLock lock(sThreadRefLock);
-        if (--sThreadRefCount == 0) {
-            if (sAsyncChannel) {
-                sAsyncChannel->Disconnect();
-                //sAsyncChannel->Disconnected();
-                //sAsyncChannel = NULL;
-            }
-            //if (sHandlerThread != NULL) {
-            //    AutoPtr<ILooper> l;
-            //    sHandlerThread->GetLooper((ILooper**)&l);
-            //    if (l != NULL) {
-            //        l->Quit();
-            //    }
-            //}
+        if (--sThreadRefCount == 0 && sAsyncChannel != NULL) {
+            sAsyncChannel->Disconnect();
         }
     }
     //} finally {
@@ -809,7 +794,7 @@ ECode CWifiManager::IsWifiEnabled(
 ECode CWifiManager::GetTxPacketCount(
     /* [in] */ IWifiManagerTxPacketCountListener* listener)
 {
-    ValidateChannel();
+    FAIL_RETURN(ValidateChannel());
     sAsyncChannel->SendMessage(IWifiManager::RSSI_PKTCNT_FETCH, 0, PutListener(listener));
     return NOERROR;
 }
@@ -1016,7 +1001,6 @@ AutoPtr<IInterface> CWifiManager::RemoveListener(
 void CWifiManager::Init()
 {
     AutoLock lock(sThreadRefLock);
-    //Logger::E("CWifiManager", "enter CWifiManager::Init line:%d, func:%s, sThreadRefCount:%d\n", __LINE__, __func__, sThreadRefCount);
     if (++sThreadRefCount == 1) {
         AutoPtr<IMessenger> messenger;
         GetWifiServiceMessenger((IMessenger**)&messenger);
@@ -1033,11 +1017,9 @@ void CWifiManager::Init()
         AutoPtr<ILooper> looper;
         sHandlerThread->GetLooper((ILooper**)&looper);
         AutoPtr<IHandler> handler = new ServiceHandler(looper);
-        //Logger::E("CWifiManager", "before async channel connect line:%d, func:%s, sAsyncChannel:%p, handler:%p\n",
-        //        __LINE__, __func__, sAsyncChannel.Get(), handler.Get());
         sAsyncChannel->Connect(mContext, handler, messenger);
         // try {
-            sConnected->Await();
+        sConnected->Await();
         // } catch (InterruptedException e) {
         //     Log.e(TAG, "interrupted wait at init");
         // }
@@ -1080,7 +1062,7 @@ ECode CWifiManager::Connect(
         // throw new IllegalArgumentException("config cannot be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    ValidateChannel();
+    FAIL_RETURN(ValidateChannel());
     // Use INVALID_NETWORK_ID for arg1 when passing a config object
     // arg1 is used to pass network id when the network already exists
     sAsyncChannel->SendMessage(CONNECT_NETWORK, IWifiConfiguration::INVALID_NETWORK_ID,
@@ -1096,7 +1078,7 @@ ECode CWifiManager::Connect(
         // throw new IllegalArgumentException("Network id cannot be negative");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    ValidateChannel();
+    FAIL_RETURN(ValidateChannel());
     sAsyncChannel->SendMessage(CONNECT_NETWORK, networkId, PutListener(listener));
     return NOERROR;
 }
@@ -1109,7 +1091,7 @@ ECode CWifiManager::Save(
         // throw new IllegalArgumentException("config cannot be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    ValidateChannel();
+    FAIL_RETURN(ValidateChannel());
     sAsyncChannel->SendMessage(SAVE_NETWORK, 0, PutListener(listener), config);
     return NOERROR;
 }
@@ -1122,7 +1104,7 @@ ECode CWifiManager::Forget(
         // throw new IllegalArgumentException("Network id cannot be negative");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    ValidateChannel();
+    FAIL_RETURN(ValidateChannel());
     sAsyncChannel->SendMessage(FORGET_NETWORK, netId, PutListener(listener));
     return NOERROR;
 }
@@ -1135,7 +1117,7 @@ ECode CWifiManager::Disable(
         // throw new IllegalArgumentException("Network id cannot be negative");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    ValidateChannel();
+    FAIL_RETURN(ValidateChannel());
     sAsyncChannel->SendMessage(DISABLE_NETWORK, netId, PutListener(listener));
     return NOERROR;
 }
@@ -1148,14 +1130,14 @@ ECode CWifiManager::StartWps(
         // throw new IllegalArgumentException("config cannot be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    ValidateChannel();
+    FAIL_RETURN(ValidateChannel());
     return sAsyncChannel->SendMessage(START_WPS, 0, PutListener(listener), config);
 }
 
 ECode CWifiManager::CancelWps(
     /* [in] */ IWifiManagerWpsCallback* listener)
 {
-    ValidateChannel();
+    FAIL_RETURN(ValidateChannel());
     return sAsyncChannel->SendMessage(CANCEL_WPS, 0, PutListener(listener));
 }
 

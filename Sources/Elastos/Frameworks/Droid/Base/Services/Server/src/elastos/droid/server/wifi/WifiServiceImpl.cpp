@@ -20,7 +20,6 @@
 #include <elastos/utility/logging/Slogger.h>
 
 #include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::Bluetooth::IBluetoothAdapter;
@@ -59,12 +58,14 @@ using Elastos::Droid::Net::IConnectivityManagerHelper;
 using Elastos::Droid::Net::CConnectivityManagerHelper;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Server::Am::BatteryStatsService;
-using Elastos::Droid::R;
+using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Droid::Wifi::CScanSettings;
 using Elastos::Droid::Wifi::EIID_IIWifiManager;
 using Elastos::Droid::Wifi::IWifiManager;
 using Elastos::Droid::Wifi::CBatchedScanSettings;
 using Elastos::Droid::Wifi::CWifiActivityEnergyInfo;
+using Elastos::Droid::R;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::IO::ICloseable;
@@ -1352,6 +1353,7 @@ ECode WifiServiceImpl::GetScanResults(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
     EnforceAccessPermission();
     AutoPtr<IUserHandleHelper> uhHelper;
     Int32 userId;
@@ -1367,11 +1369,13 @@ ECode WifiServiceImpl::GetScanResults(
     Int32 noteOp;
     if ((mAppOps->NoteOp(IAppOpsManager::OP_WIFI_SCAN, uid, callingPackage, &noteOp), noteOp)
             != IAppOpsManager::MODE_ALLOWED) {
-        CArrayList::New(result);
+        CParcelableList::New(result);
+        binderHelper->RestoreCallingIdentity(ident);
         return NOERROR;
     }
     if (!IsCurrentProfile(userId)) {
-        CArrayList::New(result);
+        CParcelableList::New(result);
+        binderHelper->RestoreCallingIdentity(ident);
         return NOERROR;
     }
     mWifiStateMachine->SyncGetScanResultsList(result);

@@ -338,7 +338,7 @@ Int32 CSettingsAppWidgetProvider::WifiStateTracker::GetActualState(
 {
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
-    AutoPtr<IWifiManager> wifiManager = IWifiManager::Probe(obj);
+    IWifiManager* wifiManager = IWifiManager::Probe(obj);
     if (wifiManager != NULL) {
         Int32 state;
         wifiManager->GetWifiState(&state);

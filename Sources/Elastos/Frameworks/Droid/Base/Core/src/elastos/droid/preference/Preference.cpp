@@ -302,7 +302,6 @@ ECode Preference::OnCreateView(
 ECode Preference::OnBindView(
     /* [in] */ IView* view)
 {
-    Slogger::E("Preference", "~~~~~~~~~~~~~~~~~~~~~OnBindView");
     AutoPtr<IView> vv;
     view->FindViewById(R::id::title, (IView**)&vv);
     AutoPtr<ITextView> titleView = ITextView::Probe(vv);
@@ -357,7 +356,6 @@ ECode Preference::OnBindView(
     }
 
     if (mShouldDisableView) {
-        Slogger::E("Preference", "~~~~~~~~~~~~~~~~~~~~~OnBindView, oh no");
         Boolean enabled;
         IsEnabled(&enabled);
         SetEnabledStateOnViews(view, enabled);

@@ -431,6 +431,9 @@ ECode AsyncChannel::Disconnected()
     mSrcHandler = NULL;
     mSrcMessenger = NULL;
     mDstMessenger = NULL;
+    // Assign NULL to mDeathMonitor maybe lead to call ~AsyncChannel,
+    // should assign mDeathMonitor to a local variable.
+    AutoPtr<DeathMonitor> dm = mDeathMonitor;
     mDeathMonitor = NULL;
     mConnection = NULL;
     return NOERROR;
@@ -470,6 +473,9 @@ ECode AsyncChannel::Disconnect()
         if (proxy != NULL) {
             Boolean res;
             proxy->UnlinkToDeath(mDeathMonitor, 0, &res);
+            // Assign NULL to mDeathMonitor maybe lead to call ~AsyncChannel,
+            // should assign mDeathMonitor to a local variable.
+            AutoPtr<DeathMonitor> dm = mDeathMonitor;
             mDeathMonitor = NULL;
         }
         else {
@@ -684,6 +690,9 @@ void AsyncChannel::ReplyHalfConnected(
         //only when the dst is not local
         if (proxy != NULL) {
             if (FAILED(proxy->LinkToDeath(mDeathMonitor, 0))) {
+                // Assign NULL to mDeathMonitor maybe lead to call ~AsyncChannel,
+                // should assign mDeathMonitor to a local variable.
+                AutoPtr<DeathMonitor> dm = mDeathMonitor;
                 mDeathMonitor = NULL;
                 // Override status to indicate failure
                 msg->SetArg1(STATUS_BINDING_UNSUCCESSFUL);
