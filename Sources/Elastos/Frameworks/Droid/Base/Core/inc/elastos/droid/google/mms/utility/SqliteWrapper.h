@@ -16,7 +16,7 @@
 // import android.widget.Toast;
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Database::Sqlite::ISQLiteException;
+//using Elastos::Droid::Database::Sqlite::ISQLiteException;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Net::IUri;
@@ -33,8 +33,8 @@ class SqliteWrapper
 {
 public:
     static CARAPI CheckSQLiteException(
-        /* [in] */ IContext* context,
-        /* [in] */ ISQLiteException* e);
+        /* [in] */ IContext* context);
+        ///* [in] */ ISQLiteException* e);
 
     static CARAPI_(AutoPtr<ICursor>) Query(
         /* [in] */ IContext* context,
@@ -79,8 +79,8 @@ private:
         /* [in] */ IContext* context);
 
     // FIXME: need to optimize this method.
-    static CARAPI_(Boolean) IsLowMemory(
-        /* [in] */ ISQLiteException* e);
+    static CARAPI_(Boolean) IsLowMemory();
+        ///* [in] */ ISQLiteException* e);
 
 private:
     static const String TAG;

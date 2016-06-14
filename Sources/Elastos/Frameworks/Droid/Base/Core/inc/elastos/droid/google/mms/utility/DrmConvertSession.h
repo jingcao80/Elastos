@@ -14,7 +14,7 @@
 // import java.io.RandomAccessFile;
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Drm::IDrmManagerClient;
+//TODO using Elastos::Droid::Drm::IDrmManagerClient;
 
 namespace Elastos {
 namespace Droid {
@@ -69,11 +69,11 @@ public:
 
 private:
     DrmConvertSession(
-        /* [in] */ IDrmManagerClient* drmClient,
+        /* [in] */ IInterface/*TODO IDrmManagerClient*/* drmClient,
         /* [in] */ Int32 convertSessionId);
 
 private:
-    AutoPtr<IDrmManagerClient> mDrmClient;
+    AutoPtr<IInterface/*TODO IDrmManagerClient*/> mDrmClient;
     Int32 mConvertSessionId;
     static const String TAG;
 };

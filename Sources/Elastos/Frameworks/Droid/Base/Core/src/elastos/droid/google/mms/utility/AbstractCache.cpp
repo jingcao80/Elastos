@@ -1,4 +1,5 @@
-
+#include "Elastos.Droid.Google.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/utility/AbstractCache.h"
 
 namespace Elastos {

@@ -1,4 +1,7 @@
-
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Google.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/pdu/PduComposer.h"
 
 namespace Elastos {
@@ -519,7 +522,7 @@ AutoPtr<IEncodedStringValue> PduComposer::AppendAddressType(
     //
     // return temp;
     assert(0);
-    AutoPtr<EncodedStringValue> empty;
+    AutoPtr<IEncodedStringValue> empty;
     return empty;
 }
 

@@ -1,4 +1,5 @@
 
+#include "Elastos.Droid.Google.h"
 #include "elastos/droid/google/mms/pdu/SendConf.h"
 
 namespace Elastos {
@@ -10,7 +11,7 @@ namespace Pdu {
 //=====================================================================
 //                               SendConf
 //=====================================================================
-CAR_INTERFACE_IMPL(SendConf, GenericPdu, ISentConf);
+CAR_INTERFACE_IMPL(SendConf, GenericPdu, ISendConf);
 
 SendConf::SendConf()
 {

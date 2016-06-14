@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_GOOGLE_MMS_INVALIDHEADERVALUEEXCEPTION_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/core/Object.h"
+#include "elastos/droid/google/mms/MmsException.h"
 
 // package com.google.android.mms;
 

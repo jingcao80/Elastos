@@ -1,5 +1,7 @@
-
+#include "Elastos.Droid.Google.h"
 #include "elastos/droid/google/mms/pdu/EncodedStringValue.h"
+
+using Elastos::Core::EIID_ICloneable;
 
 namespace Elastos {
 namespace Droid {
@@ -215,7 +217,7 @@ AutoPtr<ArrayOf<EncodedStringValue*> > EncodedStringValue::Extract(
     //     return null;
     // }
     assert(0);
-    AutoPtr< ArrayOf< AutoPtr<EncodedStringValue> > > empty;
+    AutoPtr< ArrayOf<EncodedStringValue*> > empty;
     return empty;
 }
 
@@ -265,7 +267,7 @@ AutoPtr<ArrayOf<EncodedStringValue*> > EncodedStringValue::EncodeStrings(
     // }
     // return null;
     assert(0);
-    AutoPtr< ArrayOf< AutoPtr<EncodedStringValue> > > empty;
+    AutoPtr< ArrayOf<EncodedStringValue*> > empty;
     return empty;
 }
 

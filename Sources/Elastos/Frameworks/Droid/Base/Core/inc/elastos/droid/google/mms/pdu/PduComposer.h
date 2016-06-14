@@ -2,13 +2,11 @@
 #define __ELASTOS_DROID_GOOGLE_MMS_PDU_PDUCOMPOSER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/core/Object.h"
 
-// package com.google.android.mms.pdu;
 // import android.content.ContentResolver;
-// import android.content.Context;
 // import android.util.Log;
 // import android.text.TextUtils;
-// import java.io.ByteArrayOutputStream;
 // import java.io.FileNotFoundException;
 // import java.io.IOException;
 // import java.io.InputStream;
@@ -16,6 +14,9 @@
 // import java.util.HashMap;
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::IO::IByteArrayOutputStream;
+using Elastos::Utility::IHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -246,7 +247,7 @@ protected:
         /* [in] */ const String& address);
 
 private:
-    CARAPI_(AutoPtr<EncodedStringValue>) AppendAddressType(
+    CARAPI_(AutoPtr<IEncodedStringValue>) AppendAddressType(
         /* [in] */ IEncodedStringValue* address);
 
     /**

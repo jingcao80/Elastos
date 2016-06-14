@@ -3,6 +3,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
+#include "elastos/core/Math.h"
 
 // package com.google.android.mms.pdu;
 // import com.google.android.mms.ContentType;
@@ -50,8 +51,14 @@
 // import com.google.android.mms.pdu.EncodedStringValue;
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Google::Mms::Utility::IPduCache;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IHashSet;
+using Elastos::Core::IInteger32;
 
 namespace Elastos {
 namespace Droid {
@@ -67,6 +74,8 @@ class PduPersister
     , public IPduPersister
 {
 public:
+    CAR_INTERFACE_DECL();
+
     /** Get(or create if not exist) an instance of PduPersister */
     static CARAPI_(AutoPtr<IPduPersister>) GetPduPersister(
         /* [in] */ IContext* context);
@@ -176,7 +185,7 @@ public:
     /**
       * Remove all objects in the temporary path.
       */
-    virtual CARAPI Release();
+    virtual CARAPI ReleaseResources();
 
     /**
       * Find all messages to be sent or downloaded before certain time.
@@ -227,7 +236,7 @@ private:
         /* [in] */ ICursor* c,
         /* [in] */ Int32 columnIndex);
 
-    CARAPI_(AutoPtr< ArrayOf<IPduPart> >) LoadParts(
+    CARAPI_(AutoPtr< ArrayOf<IPduPart*> >) LoadParts(
         /* [in] */ Int64 msgId);
 
     CARAPI_(void) LoadAddress(
@@ -308,7 +317,7 @@ private:
     static const String TAG;
     static const Boolean DEBUG;
     static const Boolean LOCAL_LOGV;
-    static const Int64 DUMMY_THREAD_ID = Elastos::Core::Math::INT64_MAX_VALUE;
+    static const Int64 DUMMY_THREAD_ID = 0x7FFFFFFFFFFFFFFFLL;//TODO Elastos::Core::Math::INT64_MAX_VALUE;
     static AutoPtr<IPduPersister> sPersister;
     static const AutoPtr<IPduCache> PDU_CACHE_INSTANCE;
     static AutoPtr< ArrayOf<Int32> > ADDRESS_FIELDS;
@@ -364,7 +373,7 @@ private:
     static AutoPtr<IHashMap> LONG_COLUMN_NAME_MAP; // Integer, String
     /*const*/ AutoPtr<IContext> mContext;
     /*const*/ AutoPtr<IContentResolver> mContentResolver;
-    /*const*/ AutoPtr<IDrmManagerClient> mDrmManagerClient;
+    /*const*/ AutoPtr<IInterface/*TODO IDrmManagerClient*/> mDrmManagerClient;
     /*const*/ AutoPtr<ITelephonyManager> mTelephonyManager;
 };
 

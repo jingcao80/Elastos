@@ -1,4 +1,5 @@
-
+#include "Elastos.Droid.Google.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/pdu/PduHeaders.h"
 
 namespace Elastos {
@@ -412,7 +413,7 @@ AutoPtr<IEncodedStringValue> PduHeaders::GetEncodedStringValue(
     // ==================before translated======================
     // return (EncodedStringValue) mHeaderMap.get(field);
     assert(0);
-    AutoPtr<EncodedStringValue> empty;
+    AutoPtr<IEncodedStringValue> empty;
     return empty;
 }
 
@@ -428,7 +429,7 @@ AutoPtr<ArrayOf<IEncodedStringValue*> > PduHeaders::GetEncodedStringValues(
     // EncodedStringValue[] values = new EncodedStringValue[list.size()];
     // return list.toArray(values);
     assert(0);
-    AutoPtr< ArrayOf< AutoPtr<EncodedStringValue> > > empty;
+    AutoPtr< ArrayOf<IEncodedStringValue*> > empty;
     return empty;
 }
 
@@ -466,7 +467,7 @@ void PduHeaders::SetEncodedStringValue(
 }
 
 void PduHeaders::SetEncodedStringValues(
-    /* [in] */ ArrayOf<EncodedStringValue*>* value,
+    /* [in] */ ArrayOf<IEncodedStringValue*>* value,
     /* [in] */ Int32 field)
 {
     // ==================before translated======================

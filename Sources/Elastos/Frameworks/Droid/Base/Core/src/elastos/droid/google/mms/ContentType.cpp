@@ -1,5 +1,8 @@
-
+#include "Elastos.Droid.Google.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/ContentType.h"
+
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -169,7 +172,7 @@ AutoPtr<IArrayList> ContentType::GetImageTypes()
     // ==================before translated======================
     // return (ArrayList<String>) sSupportedImageTypes.clone();
     assert(0);
-    AutoPtr< IArrayList<String> > empty;
+    AutoPtr<IArrayList> empty;
     return empty;
 }
 
@@ -178,7 +181,7 @@ AutoPtr<IArrayList> ContentType::GetAudioTypes()
     // ==================before translated======================
     // return (ArrayList<String>) sSupportedAudioTypes.clone();
     assert(0);
-    AutoPtr< IArrayList<String> > empty;
+    AutoPtr< IArrayList> empty;
     return empty;
 }
 
@@ -187,7 +190,7 @@ AutoPtr<IArrayList> ContentType::GetVideoTypes()
     // ==================before translated======================
     // return (ArrayList<String>) sSupportedVideoTypes.clone();
     assert(0);
-    AutoPtr< IArrayList<String> > empty;
+    AutoPtr< IArrayList> empty;
     return empty;
 }
 
@@ -196,7 +199,7 @@ AutoPtr<IArrayList> ContentType::GetSupportedTypes()
     // ==================before translated======================
     // return (ArrayList<String>) sSupportedContentTypes.clone();
     assert(0);
-    AutoPtr< IArrayList<String> > empty;
+    AutoPtr< IArrayList> empty;
     return empty;
 }
 

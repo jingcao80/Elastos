@@ -10,6 +10,7 @@
 // import java.io.IOException;
 // import java.io.UnsupportedEncodingException;
 // import java.util.ArrayList;
+using Elastos::Core::ICloneable;
 
 namespace Elastos {
 namespace Droid {

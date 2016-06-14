@@ -1,4 +1,4 @@
-
+#include "Elastos.Droid.Google.h"
 #include "elastos/droid/google/mms/utility/DrmConvertSession.h"
 
 namespace Elastos {
@@ -147,7 +147,7 @@ ECode DrmConvertSession::Close(
 }
 
 DrmConvertSession::DrmConvertSession(
-    /* [in] */ IDrmManagerClient* drmClient,
+    /* [in] */ IInterface/*TODO IDrmManagerClient*/* drmClient,
     /* [in] */ Int32 convertSessionId)
 {
     // ==================before translated======================

@@ -16,6 +16,7 @@ DIRS += content
 DIRS += database
 DIRS += emoji
 DIRS += gesture
+DIRS += google
 DIRS += graphics
 DIRS += hardware
 DIRS += ims

@@ -1,4 +1,6 @@
-
+#include "Elastos.Droid.Google.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/pdu/PduParser.h"
 
 namespace Elastos {
@@ -165,7 +167,7 @@ ECode PduParser::Parse(
     return NOERROR;
 }
 
-AutoPtr<PduHeaders> PduParser::ParseHeaders(
+AutoPtr<IPduHeaders> PduParser::ParseHeaders(
     /* [in] */ IByteArrayInputStream* pduDataStream)
 {
     // ==================before translated======================
@@ -760,7 +762,7 @@ AutoPtr<PduHeaders> PduParser::ParseHeaders(
     //
     // return headers;
     assert(0);
-    AutoPtr<PduHeaders> empty;
+    AutoPtr<IPduHeaders> empty;
     return empty;
 }
 
@@ -875,7 +877,7 @@ AutoPtr<IPduBody> PduParser::ParseParts(
     //
     // return body;
     assert(0);
-    AutoPtr<PduBody> empty;
+    AutoPtr<IPduBody> empty;
     return empty;
 }
 

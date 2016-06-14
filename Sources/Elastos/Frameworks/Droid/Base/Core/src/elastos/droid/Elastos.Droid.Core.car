@@ -88,7 +88,7 @@ module
     merge("../../../car/elastos/droid/gesture.car");
     }
 
-    submodule Elastos.Droid.Gesture {
+    submodule Elastos.Droid.Google {
     merge("../../../car/elastos/droid/google.car");
     }
 

@@ -15,7 +15,7 @@ namespace Pdu {
 
 class SendConf
     : public GenericPdu
-    , public ISentConf
+    , public ISendConf
 {
 public:
     CAR_INTERFACE_DECL();

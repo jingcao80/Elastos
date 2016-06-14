@@ -1,4 +1,4 @@
-
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/pdu/CharacterSets.h"
 
 namespace Elastos {

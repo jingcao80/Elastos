@@ -1,4 +1,4 @@
-
+#include "Elastos.Droid.Google.h"
 #include "elastos/droid/google/mms/pdu/MultimediaMessagePdu.h"
 
 namespace Elastos {
