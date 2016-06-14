@@ -68,12 +68,13 @@ ECode PhoneFavoritesTileAdapter::constructor(
     return NOERROR;
 }
 
-ECode PhoneFavoritesTileAdapter::SetPhotoLoader(
-    /* [in] */ IContactPhotoManager* photoLoader)
-{
-    mPhotoManager = photoLoader;
-    return NOERROR;
-}
+// TODO:
+// ECode PhoneFavoritesTileAdapter::SetPhotoLoader(
+//     /* [in] */ IContactPhotoManager* photoLoader)
+// {
+//     mPhotoManager = photoLoader;
+//     return NOERROR;
+// }
 
 ECode PhoneFavoritesTileAdapter::SetInDragging(
     /* [in] */ Boolean inDragging)

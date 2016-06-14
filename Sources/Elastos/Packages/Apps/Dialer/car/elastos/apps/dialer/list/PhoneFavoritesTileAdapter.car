@@ -2,7 +2,7 @@
 module
 {
     using interface Elastos.Droid.Database.ICursor;
-    interface Elastos.Apps.Contacts.Common.IContactPhotoManager;
+    // interface Elastos.Apps.Contacts.Common.IContactPhotoManager;
 
     namespace Elastos{
     namespace Apps {
@@ -33,8 +33,9 @@ module
         // Pinned positions start from 1, so there are a total of 20 maximum pinned contacts
         const Int32 PIN_LIMIT = 21;
 
-        SetPhotoLoader(
-            [in] IContactPhotoManager* photoLoader);
+        // TODO:
+        // SetPhotoLoader(
+        //     [in] IContactPhotoManager* photoLoader);
 
         /**
          * Indicates whether a drag is in process.

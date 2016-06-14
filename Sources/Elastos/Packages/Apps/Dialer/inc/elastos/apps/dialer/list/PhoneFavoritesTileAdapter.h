@@ -54,8 +54,9 @@ public:
         /* [in] */ IContactTileViewListener* listener,
         /* [in] */ IOnDataSetChangedForAnimationListener* dataSetChangedListener);
 
-    CARAPI SetPhotoLoader(
-        /* [in] */ IContactPhotoManager* photoLoader);
+    // TODO:
+    // CARAPI SetPhotoLoader(
+    //     /* [in] */ IContactPhotoManager* photoLoader);
 
     /**
      * Indicates whether a drag is in process.

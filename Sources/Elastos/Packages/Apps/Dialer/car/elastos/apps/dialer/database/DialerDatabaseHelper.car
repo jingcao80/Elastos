@@ -4,7 +4,7 @@ module
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Database.Sqlite.ISQLiteDatabase;
     using interface Elastos.Utility.IArrayList;
-    interface Elastos.App.Dailer.Dialpad.ISmartDialNameMatcher;
+    interface Elastos.Apps.Dailer.Dialpad.ISmartDialNameMatcher;
 
     namespace Elastos{
     namespace Apps {
