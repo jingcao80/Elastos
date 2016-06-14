@@ -70,8 +70,8 @@ static AutoPtr<IFloatProperty> GetThumbPos()
     return temp;
 }
 
-const String Switch::SWITCH_NAME = String("Switch");
-const Int32 Switch::THUMB_ANIMATION_DURATION;
+const String Switch::SWITCH_NAME("Switch");
+const Int32 Switch::THUMB_ANIMATION_DURATION = 250;
 const Int32 Switch::TOUCH_MODE_IDLE;
 const Int32 Switch::TOUCH_MODE_DOWN;
 const Int32 Switch::TOUCH_MODE_DRAGGING;
@@ -289,12 +289,14 @@ ECode Switch::SetSwitchTypeface(
         }
 
         SetSwitchTypeface(tf);
-        Int32 sty = 0;
-        tf->GetStyle(&sty);
-        Int32 typefaceStyle = tf ? sty : 0;
+        // now compute what (if any) algorithmic styling is needed
+        Int32 typefaceStyle = 0;
+        if (tf != NULL) {
+            tf->GetStyle(&typefaceStyle);
+        }
         Int32 need = style & ~typefaceStyle;
         textPaint->SetFakeBoldText((need & ITypeface::BOLD) != 0);
-        textPaint->SetTextSkewX((need & ITypeface::BOLD) != 0 ? -0.25f : 0);
+        textPaint->SetTextSkewX((need & ITypeface::ITALIC) != 0 ? -0.25f : 0);
     }
     else {
         textPaint->SetFakeBoldText(FALSE);
@@ -310,7 +312,7 @@ ECode Switch::SetSwitchTypeface(
     IPaint* textPaint = IPaint::Probe(mTextPaint);
     AutoPtr<ITypeface> face;
     textPaint->GetTypeface((ITypeface**)&face);
-    if (tf != face) {
+    if (face.Get() != tf) {
         textPaint->SetTypeface(tf);
 
         RequestLayout();
@@ -395,9 +397,8 @@ ECode Switch::SetTrackResource(
 ECode Switch::GetTrackDrawable(
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> temp = mTrackDrawable;
-    *drawable = temp;
+    VALIDATE_NOT_NULL(drawable)
+    *drawable = mTrackDrawable;
     REFCOUNT_ADD(*drawable)
     return NOERROR;
 }
@@ -431,8 +432,7 @@ ECode Switch::GetThumbDrawable(
     /* [out] */ IDrawable** drawable)
 {
     VALIDATE_NOT_NULL(drawable)
-    AutoPtr<IDrawable> temp = mThumbDrawable;
-    *drawable = temp;
+    *drawable = mThumbDrawable;
     REFCOUNT_ADD(*drawable)
     return NOERROR;
 }
@@ -471,8 +471,7 @@ ECode Switch::GetTextOn(
     /* [out] */ ICharSequence** c)
 {
     VALIDATE_NOT_NULL(c)
-    AutoPtr<ICharSequence> temp = mTextOn;
-    *c = temp;
+    *c = mTextOn;
     REFCOUNT_ADD(*c)
     return NOERROR;
 }
@@ -489,8 +488,7 @@ ECode Switch::GetTextOff(
     /* [out] */ ICharSequence** off)
 {
     VALIDATE_NOT_NULL(off)
-    AutoPtr<ICharSequence> temp = mTextOff;
-    *off = temp;
+    *off = mTextOff;
     REFCOUNT_ADD(*off)
     return NOERROR;
 }
@@ -557,16 +555,18 @@ void Switch::OnMeasure(
         mThumbDrawable->GetIntrinsicHeight(&thumbHeight);
     }
 
+    using Elastos::Core::Math;
+
     Int32 maxTextWidth = 0;
     if (mShowText) {
         Int32 onLayoutWidth, offLayoutWidth;
         mOnLayout->GetWidth(&onLayoutWidth);
         mOffLayout->GetWidth(&offLayoutWidth);
-        maxTextWidth = Elastos::Core::Math::Max(onLayoutWidth, offLayoutWidth)
+        maxTextWidth = Math::Max(onLayoutWidth, offLayoutWidth)
                 + mThumbTextPadding * 2;
     }
 
-    mThumbWidth = Elastos::Core::Math::Max(maxTextWidth, thumbWidth);
+    mThumbWidth = Math::Max(maxTextWidth, thumbWidth);
 
     Int32 trackHeight = 0;
     if (mTrackDrawable != NULL) {
@@ -586,17 +586,19 @@ void Switch::OnMeasure(
         AutoPtr<IInsets> inset;
         mThumbDrawable->GetOpticalInsets((IInsets**)&inset);
         Insets* in = (Insets*)inset.Get();
-        paddingLeft = Elastos::Core::Math::Max(paddingLeft, in->mLeft);
-        paddingRight = Elastos::Core::Math::Max(paddingRight, in->mRight);
+        paddingLeft = Math::Max(paddingLeft, in->mLeft);
+        paddingRight = Math::Max(paddingRight, in->mRight);
     }
 
-    Int32 switchWidth = Elastos::Core::Math::Max(mSwitchMinWidth,
+    Int32 switchWidth = Math::Max(mSwitchMinWidth,
             2 * mThumbWidth + paddingLeft + paddingRight);
-    Int32 switchHeight = Elastos::Core::Math::Max(trackHeight, thumbHeight);
+    Int32 switchHeight = Math::Max(trackHeight, thumbHeight);
 
     mSwitchWidth = switchWidth;
     mSwitchHeight = switchHeight;
+
     CompoundButton::OnMeasure(widthMeasureSpec, heightMeasureSpec);
+
     Int32 measuredHeight;
     GetMeasuredHeight(&measuredHeight);
     if (measuredHeight < switchHeight) {
@@ -626,9 +628,9 @@ AutoPtr<ILayout> Switch::MakeLayout(
     /* [in] */ ICharSequence* text)
 {
     AutoPtr<ICharSequence> transformed;
-    if (mSwitchTransformationMethod) {
-        ITransformationMethod::Probe(mSwitchTransformationMethod)->GetTransformation
-            (text, this, (ICharSequence**)&transformed);
+    if (mSwitchTransformationMethod != NULL) {
+        ITransformationMethod::Probe(mSwitchTransformationMethod)->GetTransformation(text,
+                this, (ICharSequence**)&transformed);
     }
     else {
         transformed = text;
@@ -639,11 +641,11 @@ AutoPtr<ILayout> Switch::MakeLayout(
     Float res = 0;
     helper->GetDesiredWidth(transformed, mTextPaint, &res);
 
-    AutoPtr<IStaticLayout> layout;
+    AutoPtr<ILayout> layout;
     CStaticLayout::New(transformed, mTextPaint,
-        (Int32)(Elastos::Core::Math::Ceil(res)), ALIGN_NORMAL, 1.f, 0, TRUE, (IStaticLayout**)&layout);
-    AutoPtr<ILayout> result = ILayout::Probe(layout);
-    return result;
+            (Int32)(Elastos::Core::Math::Ceil(res)), ALIGN_NORMAL, 1.f, 0,
+            TRUE, (ILayout**)&layout);
+    return layout;
 }
 
 Boolean Switch::HitThumb(
@@ -762,9 +764,8 @@ ECode Switch::OnTouchEvent(
 void Switch::CancelSuperTouch(
     /* [in] */ IMotionEvent* ev)
 {
-    AutoPtr<CMotionEvent> cev = (CMotionEvent*)ev;
     AutoPtr<IMotionEvent> cancle;
-    CMotionEvent::Obtain(cev, (IMotionEvent**)&cancle);
+    CMotionEvent::Obtain(ev, (IMotionEvent**)&cancle);
     cancle->SetAction(IMotionEvent::ACTION_CANCEL);
     Boolean res;
     CompoundButton::OnTouchEvent(cancle, &res);
@@ -775,6 +776,9 @@ void Switch::StopDrag(
     /* [in] */ IMotionEvent* ev)
 {
     mTouchMode = TOUCH_MODE_IDLE;
+
+    // Commit the change if the event is up and not canceled and the switch
+    // has not been disabled during the drag.
     Int32 action = 0;
     ev->GetAction(&action);
     Boolean isEnabled;
@@ -788,21 +792,15 @@ void Switch::StopDrag(
 
         if (Elastos::Core::Math::Abs(xvel) > mMinFlingVelocity) {
             Boolean isLayoutRtl;
-            if (IsLayoutRtl(&isLayoutRtl), isLayoutRtl) {
-                newState = (xvel < 0);
-            }
-            else {
-                newState = (xvel > 0);
-            }
+            IsLayoutRtl(&isLayoutRtl);
+            newState = isLayoutRtl ? (xvel < 0) : (xvel > 0);
         }
         else {
             newState = GetTargetCheckedState();
         }
     }
     else {
-        Boolean res;
-        IsChecked(&res);
-        newState = res;
+        IsChecked(&newState);
     }
 
     SetChecked(newState);
@@ -889,7 +887,6 @@ ECode Switch::OnLayout(
     Int32 opticalInsetRight = 0;
     if (mThumbDrawable != NULL) {
         AutoPtr<IRect> trackPadding = mTempRect;
-        CRect* temp = (CRect*)trackPadding.Get();
         if (mTrackDrawable != NULL) {
             Boolean isGetPadding;
             mTrackDrawable->GetPadding(trackPadding, &isGetPadding);
@@ -901,12 +898,13 @@ ECode Switch::OnLayout(
         AutoPtr<IInsets> insets;
         mThumbDrawable->GetOpticalInsets((IInsets**)&insets);
         Insets* in = (Insets*)insets.Get();
+        CRect* temp = (CRect*)trackPadding.Get();
         opticalInsetLeft = Elastos::Core::Math::Max(0, in->mLeft - temp->mLeft);
         opticalInsetRight = Elastos::Core::Math::Max(0, in->mRight - temp->mRight);
     }
 
     Int32 switchRight, switchLeft;
-    Boolean  isLayoutRtl;
+    Boolean isLayoutRtl;
     if (IsLayoutRtl(&isLayoutRtl), isLayoutRtl) {
         GetPaddingLeft(&switchLeft);
         switchLeft += opticalInsetLeft;
@@ -1208,7 +1206,7 @@ ECode Switch::OnCreateDrawableState(
     Boolean res;
     IsChecked(&res);
     if (res) {
-        MergeDrawableStates(*drawableState, (ArrayOf<Int32>*)CHECKED_STATE_SET);
+        MergeDrawableStates(*drawableState, CHECKED_STATE_SET);
     }
     return NOERROR;
 }
@@ -1216,6 +1214,7 @@ ECode Switch::OnCreateDrawableState(
 ECode Switch::DrawableStateChanged()
 {
     CompoundButton::DrawableStateChanged();
+
     AutoPtr< ArrayOf<Int32> > myDrawableState;
     GetDrawableState((ArrayOf<Int32>**)&myDrawableState);
 
@@ -1228,6 +1227,7 @@ ECode Switch::DrawableStateChanged()
         mTrackDrawable->SetState(myDrawableState, &isStateful);
     }
 
+    Invalidate();
     return NOERROR;
 }
 
@@ -1251,14 +1251,15 @@ ECode Switch::DrawableHotspotChanged(
 Boolean Switch::VerifyDrawable(
     /* [in] */ IDrawable* who)
 {
-    return CompoundButton::VerifyDrawable(who) || who == mThumbDrawable || who == mTrackDrawable;
+    return CompoundButton::VerifyDrawable(who) || who == mThumbDrawable.Get() || who == mTrackDrawable.Get();
 }
 
 ECode Switch::JumpDrawablesToCurrentState()
 {
     CompoundButton::JumpDrawablesToCurrentState();
-    if (mThumbDrawable) mThumbDrawable->JumpToCurrentState();
-    if (mTrackDrawable) mTrackDrawable->JumpToCurrentState();
+
+    if (mThumbDrawable != NULL) mThumbDrawable->JumpToCurrentState();
+    if (mTrackDrawable != NULL) mTrackDrawable->JumpToCurrentState();
 
     Boolean isRunning;
     if (mPositionAnimator != NULL
@@ -1298,10 +1299,9 @@ ECode Switch::OnInitializeAccessibilityNodeInfo(
         else {
             StringBuilder sb;
             sb.Append(oldText);
-            sb.Append("");
+            sb.AppendChar(' ');
             sb.Append(switchText);
-            AutoPtr<ICharSequence> seq = sb.ToCharSequence();
-            info->SetText(seq);
+            info->SetText(sb.ToCharSequence());
         }
     }
     return NOERROR;
@@ -1314,16 +1314,6 @@ Switch::SwitchProperty::SwitchProperty(
     /* [in] */ const String& name)
     : FloatProperty(name)
 {
-}
-
-ECode Switch::SwitchProperty::Set(
-    /* [in] */ IInterface* obj,
-    /* [in] */ IInterface* value)
-{
-    Float param;
-    IFloat::Probe(value)->GetValue(&param);
-    SetValue(obj, param);
-    return NOERROR;
 }
 
 ECode Switch::SwitchProperty::Get(

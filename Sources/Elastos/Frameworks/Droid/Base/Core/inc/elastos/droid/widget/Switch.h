@@ -56,10 +56,6 @@ public:
         SwitchProperty(
             /* [in] */ const String& name);
 
-        CARAPI Set(
-            /* [in] */ IInterface* obj,
-            /* [in] */ IInterface* value);
-
         CARAPI Get(
             /* [in] */ IInterface* obj,
             /* [out] */ IInterface** rst);
@@ -407,7 +403,7 @@ private:
     ECO_LOCAL CARAPI_(void) CancelPositionAnimator();
 
 private:
-    ECO_LOCAL static const Int32 THUMB_ANIMATION_DURATION = 250;
+    ECO_LOCAL static const Int32 THUMB_ANIMATION_DURATION;
     ECO_LOCAL static const Int32 TOUCH_MODE_IDLE = 0;
     ECO_LOCAL static const Int32 TOUCH_MODE_DOWN = 1;
     ECO_LOCAL static const Int32 TOUCH_MODE_DRAGGING = 2;

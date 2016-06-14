@@ -60,7 +60,7 @@ const Int32 CSettingsAppWidgetProvider::STATE_DISABLED;
 const Int32 CSettingsAppWidgetProvider::STATE_ENABLED;
 const Int32 CSettingsAppWidgetProvider::STATE_TURNING_ON;
 const Int32 CSettingsAppWidgetProvider::STATE_TURNING_OFF;
-const Int32 CSettingsAppWidgetProvider::STATE_UNKNOWN;
+const Int32 CSettingsAppWidgetProvider::STATE_UNKNOWN = 4;
 const Int32 CSettingsAppWidgetProvider::STATE_INTERMEDIATE;
 
 const Int32 CSettingsAppWidgetProvider::POS_LEFT = 0;

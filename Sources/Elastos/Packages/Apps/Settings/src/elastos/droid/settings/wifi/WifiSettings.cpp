@@ -1002,7 +1002,6 @@ void WifiSettings::UpdateAccessPoints()
             accessPoints->GetIterator((IIterator**)&iter);
             Boolean hasNext;
             while (iter->HasNext(&hasNext), hasNext) {
-Logger::D("WifiSettings::UpdateAccessPoints", "================= Line:%d ==================", __LINE__);
                 AutoPtr<IInterface> obj;
                 iter->GetNext((IInterface**)&obj);
                 AutoPtr<IAccessPoint> accessPoint = IAccessPoint::Probe(obj);
@@ -1010,7 +1009,6 @@ Logger::D("WifiSettings::UpdateAccessPoints", "================= Line:%d =======
                 if (((AccessPoint*)accessPoint.Get())->GetLevel() != -1) {
                     Boolean res;
                     IPreferenceGroup::Probe(screen)->AddPreference(IPreference::Probe(accessPoint), &res);
-Logger::D("WifiSettings::UpdateAccessPoints", "================= Line:%d ==================", __LINE__);
                 }
             }
             break;

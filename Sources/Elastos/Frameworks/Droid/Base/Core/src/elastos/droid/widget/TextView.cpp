@@ -184,6 +184,7 @@ using Elastos::Droid::View::IHapticFeedbackConstants;
 using Elastos::Droid::View::Gravity;
 using Elastos::Droid::View::CKeyEvent;
 using Elastos::Droid::View::IViewConfiguration;
+using Elastos::Droid::View::IViewRootImpl;
 using Elastos::Droid::View::Accessibility::IAccessibilityManager;
 using Elastos::Droid::View::Accessibility::CAccessibilityManager;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
@@ -5163,13 +5164,12 @@ ECode TextView::SetOnEditorActionListener(
 ECode TextView::OnEditorAction(
     /* [in] */ Int32 actionCode)
 {
-    assert(0);
-    /*InputContentType* ict = mEditor == NULL ? NULL :mEditor->mInputContentType.Get();
+    AutoPtr<InputContentType> ict = mEditor == NULL ? NULL : TO_EDITOR(mEditor)->mInputContentType;
     if (ict != NULL) {
         if (ict->mOnEditorActionListener != NULL) {
             Boolean state = FALSE;
             ict->mOnEditorActionListener->OnEditorAction(
-                 this, actionCode, NULL, &state);
+                    this, actionCode, NULL, &state);
             if (state) {
                 return NOERROR;
             }
@@ -5181,24 +5181,29 @@ ECode TextView::OnEditorAction(
         // instead turning this into the normal enter key codes that an
         // app may be expecting.
         if (actionCode == IEditorInfo::IME_ACTION_NEXT) {
-            AutoPtr<IView> v = FocusSearch(IView::FOCUS_FORWARD);
+            AutoPtr<IView> v;
+            FocusSearch(IView::FOCUS_FORWARD, (IView**)&v);
             if (v != NULL) {
                 Boolean focus = FALSE;
                 if (v->RequestFocus(IView::FOCUS_FORWARD, &focus), !focus) {
+                    Logger::E("TextView::OnEditorAction", "focus search returned a view that wasn't able to take focus!");
+                    return E_ILLEGAL_STATE_EXCEPTION;
                     // throw new IllegalStateException("focus search returned a view " +
                     //         "that wasn't able to take focus!");
-                    return E_ILLEGAL_STATE_EXCEPTION;
                 }
             }
             return NOERROR;
         }
         else if (actionCode == IEditorInfo::IME_ACTION_PREVIOUS) {
-            AutoPtr<IView> v = FocusSearch(IView::FOCUS_BACKWARD);
+            AutoPtr<IView> v;
+            FocusSearch(IView::FOCUS_BACKWARD, (IView**)&v);
             if (v != NULL) {
                 Boolean focus = FALSE;
                 if (v->RequestFocus(IView::FOCUS_BACKWARD, &focus), !focus) {
-                    throw new IllegalStateException("focus search returned a view " +
-                        "that wasn't able to take focus!");
+                    Logger::E("TextView::OnEditorAction", "focus search returned a view that wasn't able to take focus!");
+                    return E_ILLEGAL_STATE_EXCEPTION;
+                    // throw new IllegalStateException("focus search returned a view " +
+                    //     "that wasn't able to take focus!");
                 }
             }
             return NOERROR;
@@ -5206,18 +5211,21 @@ ECode TextView::OnEditorAction(
         else if (actionCode == IEditorInfo::IME_ACTION_DONE) {
             AutoPtr<IInputMethodManager> imm = CInputMethodManager::PeekInstance();
             if (imm != NULL) {
-                Boolean active;
+                Boolean active = FALSE;
                 imm->IsActive(this, &active);
                 if (active) {
+                    AutoPtr<IBinder> temp;
+                    GetWindowToken((IBinder**)&temp);
                     Boolean ret;
-                    imm->HideSoftInputFromWindow(GetWindowToken(), 0, &ret);
+                    imm->HideSoftInputFromWindow(temp, 0, &ret);
                 }
             }
             return NOERROR;
         }
     }
 
-    AutoPtr<ViewRootImpl> viewRootImpl = GetViewRootImpl();
+    AutoPtr<IViewRootImpl> viewRootImpl;
+    GetViewRootImpl((IViewRootImpl**)&viewRootImpl);
     if (viewRootImpl != NULL) {
         Int64 eventTime = SystemClock::GetUptimeMillis();
 
@@ -5238,7 +5246,7 @@ ECode TextView::OnEditorAction(
                 IKeyEvent::FLAG_SOFT_KEYBOARD | IKeyEvent::FLAG_KEEP_TOUCH_MODE
                 | IKeyEvent::FLAG_EDITOR_ACTION, (IKeyEvent**)&upKV);
         viewRootImpl->DispatchKeyFromIme(upKV);
-    }*/
+    }
 
     return NOERROR;
 }

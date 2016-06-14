@@ -656,7 +656,7 @@ private:
     static const Int32 STATE_ENABLED = 1;
     static const Int32 STATE_TURNING_ON = 2;
     static const Int32 STATE_TURNING_OFF = 3;
-    static const Int32 STATE_UNKNOWN = 4;
+    static const Int32 STATE_UNKNOWN;
     static const Int32 STATE_INTERMEDIATE = 5;
 
     // Position in the widget bar, to enable different graphics for left, center and right buttons
