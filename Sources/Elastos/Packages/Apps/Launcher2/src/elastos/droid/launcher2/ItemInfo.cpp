@@ -97,7 +97,7 @@ void ItemInfo::UpdateUser(
     return;
 }
 
-void ItemInfo::OnAddToDatabase(
+ECode ItemInfo::OnAddToDatabase(
     /* [in] */ IContext* context,
     /* [in] */ IContentValues* values)
 {
@@ -115,17 +115,17 @@ void ItemInfo::OnAddToDatabase(
     Int64 serialNumber;
     manager->GetSerialNumberForUser(mUser, &serialNumber);
     values->Put(LauncherSettings::Favorites::PROFILE_ID, serialNumber);
-    return;
+    return NOERROR;
 }
 
-void ItemInfo::UpdateValuesWithCoordinates(
+ECode ItemInfo::UpdateValuesWithCoordinates(
     /* [in] */ IContentValues* values,
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY)
 {
     values->Put(LauncherSettings::Favorites::CELLX, cellX);
     values->Put(LauncherSettings::Favorites::CELLY, cellY);
-    return;
+    return NOERROR;
 }
 
 AutoPtr<ArrayOf<Byte> > ItemInfo::FlattenBitmap(
@@ -169,9 +169,9 @@ void ItemInfo::WriteBitmap(
     }
 }
 
-void ItemInfo::Unbind()
+ECode ItemInfo::Unbind()
 {
-    return;
+    return NOERROR;
 }
 
 ECode ItemInfo::ToString(

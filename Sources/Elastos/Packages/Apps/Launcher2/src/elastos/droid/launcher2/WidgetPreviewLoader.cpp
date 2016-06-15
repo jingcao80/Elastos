@@ -593,7 +593,7 @@ String WidgetPreviewLoader::GetObjectPackage(
         AutoPtr<IComponentName> name;
         info->GetProvider((IComponentName**)&name);
         String pname;
-        IPackageItemInfo::Probe(name)->GetPackageName(&pname);
+        name->GetPackageName(&pname);
         return pname;
     }
     else {
@@ -821,6 +821,7 @@ ECode WidgetPreviewLoader::GenerateWidgetPreview(
     VALIDATE_NOT_NULL(bitmap);
     *bitmap = NULL;
 
+    assert(maxPreviewWidth != 0);
     // Load the preview image if possible
     if (maxPreviewWidth < 0) maxPreviewWidth = Elastos::Core::Math::INT32_MAX_VALUE;
     if (maxPreviewHeight < 0) maxPreviewHeight = Elastos::Core::Math::INT32_MAX_VALUE;

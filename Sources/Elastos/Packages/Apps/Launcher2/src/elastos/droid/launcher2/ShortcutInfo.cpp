@@ -113,7 +113,7 @@ void ShortcutInfo::SetActivity(
     return;
 }
 
-void ShortcutInfo::OnAddToDatabase(
+ECode ShortcutInfo::OnAddToDatabase(
     /* [in] */ IContext* context,
     /* [in] */ IContentValues* values)
 {
@@ -158,7 +158,7 @@ void ShortcutInfo::OnAddToDatabase(
                     resourceName);
         }
     }
-    return;
+    return NOERROR;
 }
 
 ECode ShortcutInfo::ToString(

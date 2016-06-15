@@ -131,13 +131,6 @@ module
             [out] IRect** rect);
     }
 
-    /**
-     * @Involve
-     * interface Elastos.Droid.Utility.ISparseArray
-     */
-    interface IParcelableSparseArray {
-    }
-
     }//namespace AppWidget
     }//namespace Droid
     }//namespace Elastos

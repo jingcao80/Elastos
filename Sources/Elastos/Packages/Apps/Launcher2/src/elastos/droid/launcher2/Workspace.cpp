@@ -1088,6 +1088,7 @@ ECode Workspace::EstimateItemSize(
         EstimateItemPosition(cl, itemInfo, 0, 0, hSpan, vSpan, (IRect**)&r);
         r->GetWidth(&((*size)[0]));
         r->GetHeight(&((*size)[1]));
+        assert((*size)[0] != 0);
         if (springLoaded) {
             (*size)[0] *= mSpringLoadedShrinkFactor;
             (*size)[1] *= mSpringLoadedShrinkFactor;

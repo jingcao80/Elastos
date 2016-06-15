@@ -1292,39 +1292,39 @@ String RemoteViews::ReflectionAction::GetParameterType()
     switch (mType) {
         case BOOLEAN:
         {
-            return String("(Z)E)");
+            return String("(Z)E");
         }
         case BYTE:
         {
-            return String("(B)E)");
+            return String("(B)E");
         }
         case SHORT:
         {
-            return String("(I16)E)");
+            return String("(I16)E");
         }
         case INT:
         {
-            return String("(I32)E)");
+            return String("(I32)E");
         }
         case LONG:
         {
-            return String("(I64)E)");
+            return String("(I64)E");
         }
         case FLOAT:
         {
-            return String("(F)E)");
+            return String("(F)E");
         }
         case DOUBLE:
         {
-            return String("(D)E)");
+            return String("(D)E");
         }
         case CHAR:
         {
-            return String("(C32)E)");
+            return String("(C32)E");
         }
         case STRING:
         {
-            return String("(LElastos/String;)E)");
+            return String("(LElastos/String;)E");
         }
         case CHAR_SEQUENCE:
         {
@@ -1391,7 +1391,8 @@ ECode RemoteViews::ReflectionAction::Apply(
     AutoPtr<IMethodInfo> methodInfo;
     if (FAILED(klass->GetMethodInfo(mMethodName, param, (IMethodInfo**)&methodInfo)) || methodInfo == NULL)
     {
-        SLOGGERE("RemoteViews ", String("can not find method named: ") + mMethodName + "in view:" + className)
+        SLOGGERE("RemoteViews ", "can not find method named: %s(%s) in view: %s",
+            mMethodName.string(), param.string(), className.string())
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -2762,15 +2763,15 @@ AutoPtr<IContext> RemoteViews::GetContextForResources(
         if (ctxUid == userHandleId && pkgName.Equals(appPkgName)) {
             return context;
         }
-        // try {
-            AutoPtr<IContext> result;
-            if (FAILED(context->CreateApplicationContext(mApplication, themePackageName,
-                    IContext::CONTEXT_RESTRICTED, (IContext**)&result)))
-            {
-                SLOGGERE(TAG, String("Package name ") + appPkgName + " not found");
-            }
-        // } catch (NameNotFoundException e) {
-        // }
+
+        AutoPtr<IContext> result;
+        if (FAILED(context->CreateApplicationContext(mApplication, themePackageName,
+            IContext::CONTEXT_RESTRICTED, (IContext**)&result))) {
+            SLOGGERE(TAG, String("Package name ") + appPkgName + " not found");
+        }
+        else {
+            return result;
+        }
     }
 
     return context;
@@ -3550,6 +3551,9 @@ ECode RemoteViews::Apply(
     AutoPtr<IView> result;
     AutoPtr<IContext> contextForResources = GetContextForResources(ctx, themePackageName);
     AutoPtr<IContext> inflationContext = new MyContextWrapper(ctx, contextForResources);
+    // TODO: inflationContext should be released after view destructor
+    // add by xihao
+    inflationContext->AddRef();
 
     AutoPtr<IInterface> tmp;
     ctx->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&tmp);
@@ -3559,6 +3563,7 @@ ECode RemoteViews::Apply(
     // we don't add a filter to the static version returned by getSystemService.
     AutoPtr<ILayoutInflater> newInflater;
     inflater->CloneInContext(inflationContext, (ILayoutInflater**)&newInflater);
+    inflater = newInflater;
     inflater->SetFilter(this);
     Int32 layoutId;
     rvToApply->GetLayoutId(&layoutId);

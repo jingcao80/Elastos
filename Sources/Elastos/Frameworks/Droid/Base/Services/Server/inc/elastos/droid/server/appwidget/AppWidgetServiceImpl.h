@@ -241,6 +241,8 @@ public:
         : public Object
     {
     public:
+        Provider();
+
         // for use while saving state (the index)
         virtual CARAPI GetUserId(
             /* [out] */ Int32* result);

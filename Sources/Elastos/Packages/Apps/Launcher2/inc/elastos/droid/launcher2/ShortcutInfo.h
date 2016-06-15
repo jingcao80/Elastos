@@ -62,7 +62,7 @@ public:
         /* [in] */ IIntent* intent);
 
     //@Override
-    CARAPI_(void) OnAddToDatabase(
+    CARAPI OnAddToDatabase(
         /* [in] */ IContext* context,
         /* [in] */ IContentValues* values);
 

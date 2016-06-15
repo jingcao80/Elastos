@@ -152,6 +152,7 @@ CDeleteDropTarget::MyThread::MyThread(
     : mAppWidgetHost(appWidgetHost)
     , mLauncherAppWidgetInfo(launcherAppWidgetInfo)
 {
+    Thread::constructor();
 }
 
 ECode CDeleteDropTarget::MyThread::Run()

@@ -14,6 +14,7 @@ module
     interface Elastos.Droid.Internal.AppWidget.IIAppWidgetService;
     interface Elastos.Droid.Os.ILooper;
     interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Utility.ISparseArray;
     interface Elastos.Droid.View.IViewGroup;
     interface Elastos.Droid.View.IView;
     interface Elastos.Droid.View.IViewParent;
@@ -78,6 +79,13 @@ module
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
+    }
+
+    class CParcelableSparseArray {
+        constructor();
+
+        interface ISparseArray;
+        interface IParcelable;
     }
 
     [local]

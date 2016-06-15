@@ -23,6 +23,21 @@ class ECO_PUBLIC AppWidgetHostView
     : public FrameLayout
     , public IAppWidgetHostView
 {
+public:
+    ECO_LOCAL class ParcelableSparseArray
+        : public SparseArray
+        , public IParcelable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI WriteToParcel(
+            /* [in] */ IParcel* dest);
+
+        CARAPI ReadFromParcel(
+            /* [in] */ IParcel* source);
+    };
+
 private:
     // When we're inflating the initialLayout for a AppWidget, we only allow
     // views that are allowed in RemoteViews.
@@ -36,25 +51,6 @@ private:
         CARAPI OnLoadClass(
             /* [in] */ IClassInfo* clazz,
             /* [out] */ Boolean* allowed);
-    };
-
-    class ParcelableSparseArray
-        : public SparseArray
-        , public IParcelableSparseArray
-        , public IParcelable
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        ParcelableSparseArray();
-
-        ~ParcelableSparseArray();
-
-        CARAPI WriteToParcel(
-            /* [in] */ IParcel* dest);
-
-        CARAPI ReadFromParcel(
-            /* [in] */ IParcel* source);
     };
 
 public:

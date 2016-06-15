@@ -51,11 +51,11 @@ public:
      *            instance.
      * @param values
      */
-    CARAPI_(void) OnAddToDatabase(
+    virtual CARAPI OnAddToDatabase(
         /* [in] */ IContext* context,
         /* [in] */ IContentValues* values);
 
-    CARAPI_(void) UpdateValuesWithCoordinates(
+    virtual CARAPI UpdateValuesWithCoordinates(
         /* [in] */ IContentValues* values,
         /* [in] */ Int32 cellX,
         /* [in] */ Int32 cellY);
@@ -73,7 +73,7 @@ public:
      * ItemInfo objects persist across rotation and can hence leak by holding stale references
      * to the old view hierarchy / activity.
      */
-    CARAPI_(void) Unbind();
+    virtual CARAPI Unbind();
 
     //@Override
     CARAPI ToString(

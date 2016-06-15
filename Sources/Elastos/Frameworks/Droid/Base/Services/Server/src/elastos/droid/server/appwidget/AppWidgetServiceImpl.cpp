@@ -16,12 +16,12 @@
 #include <Elastos.CoreLibrary.Libcore.h>
 #include <elastos/core/AutoLock.h>
 #include "elastos/core/CoreUtils.h"
+#include "elastos/core/StringBuilder.h"
 #include "elastos/core/StringUtils.h"
 #include "elastos/utility/logging/Slogger.h"
+#include "elastos/droid/R.h"
 
-//using Elastos::Droid::App::Admin::CDevicePolicyManager;
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
+// using Elastos::Droid::App::Admin::CDevicePolicyManager;
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::App::CPendingIntentHelper;
@@ -84,16 +84,20 @@ using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::IWindowManager;
-//using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::CString;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::ICloneable;
 using Elastos::Core::IComparable;
 using Elastos::Core::IInteger32;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::IO::CFile;
 using Elastos::IO::ICloseable;
+using Elastos::IO::CByteArrayInputStream;
+using Elastos::IO::CByteArrayOutputStream;
+using Elastos::IO::IByteArrayInputStream;
+using Elastos::IO::IByteArrayOutputStream;
 using Elastos::IO::IOutputStream;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashSet;
@@ -246,10 +250,6 @@ AppWidgetServiceImpl::SecurityPolicy::SecurityPolicy(
 Boolean AppWidgetServiceImpl::SecurityPolicy::IsEnabledGroupProfile(
     /* [in] */ Int32 profileId)
 {
-    // ==================before translated======================
-    // final int parentId = UserHandle.getCallingUserId();
-    // return isParentOrProfile(parentId, profileId) && isProfileEnabled(profileId);
-
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 parentId = 0;
@@ -262,36 +262,6 @@ ECode AppWidgetServiceImpl::SecurityPolicy::GetEnabledGroupProfileIds(
     /* [out] */ ArrayOf<Int32>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int parentId = getGroupParent(userId);
-    //
-    // final List<UserInfo> profiles;
-    // final long identity = Binder.clearCallingIdentity();
-    // try {
-    //     profiles = mUserManager.getProfiles(parentId);
-    // } finally {
-    //     Binder.restoreCallingIdentity(identity);
-    // }
-    //
-    // int enabledProfileCount = 0;
-    // final int profileCount = profiles.size();
-    // for (int i = 0; i < profileCount; i++) {
-    //     if (profiles.get(i).isEnabled()) {
-    //         enabledProfileCount++;
-    //     }
-    // }
-    //
-    // int enabledProfileIndex = 0;
-    // final int[] profileIds = new int[enabledProfileCount];
-    // for (int i = 0; i < profileCount; i++) {
-    //     UserInfo profile = profiles.get(i);
-    //     if (profile.isEnabled()) {
-    //         profileIds[enabledProfileIndex] = profile.getUserHandle().getIdentifier();
-    //         enabledProfileIndex++;
-    //     }
-    // }
-    //
-    // return profileIds;
 
     Int32 parentId = 0;
     GetGroupParent(userId, &parentId);
@@ -347,25 +317,6 @@ ECode AppWidgetServiceImpl::SecurityPolicy::EnforceServiceExistsAndRequiresBindR
     /* [in] */ Int32 userId)
 {
     VALIDATE_NOT_NULL(componentName);
-    // ==================before translated======================
-    // final long identity = Binder.clearCallingIdentity();
-    // try {
-    //     ServiceInfo serviceInfo = mPackageManager.getServiceInfo(componentName,
-    //             PackageManager.GET_PERMISSIONS, userId);
-    //     if (serviceInfo == null) {
-    //         throw new SecurityException("Service " + componentName
-    //                 + " not installed for user " + userId);
-    //     }
-    //     if (!android.Manifest.permission.BIND_REMOTEVIEWS.equals(serviceInfo.permission)) {
-    //         throw new SecurityException("Service " + componentName
-    //                 + " in user " + userId + "does not require "
-    //                 + android.Manifest.permission.BIND_REMOTEVIEWS);
-    //     }
-    // } catch (RemoteException re) {
-    //     // Local call - shouldn't happen.
-    // } finally {
-    //     Binder.restoreCallingIdentity(identity);
-    // }
 
     Int64 identity = Binder::ClearCallingIdentity();
     //try {
@@ -397,11 +348,6 @@ ECode AppWidgetServiceImpl::SecurityPolicy::EnforceServiceExistsAndRequiresBindR
 ECode AppWidgetServiceImpl::SecurityPolicy::EnforceModifyAppWidgetBindPermissions(
     /* [in] */ const String& packageName)
 {
-    // ==================before translated======================
-    // mContext.enforceCallingPermission(
-    //         android.Manifest.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS,
-    //         "hasBindAppWidgetPermission packageName=" + packageName);
-
     mOwner->mContext->EnforceCallingPermission(
             Manifest::permission::MODIFY_APPWIDGET_BIND_PERMISSIONS,
             String("hasBindAppWidgetPermission packageName=") + packageName);
@@ -420,20 +366,10 @@ ECode AppWidgetServiceImpl::SecurityPolicy::HasCallerBindPermissionOrBindWhiteLi
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // try {
-    //     mContext.enforceCallingOrSelfPermission(
-    //             android.Manifest.permission.BIND_APPWIDGET, null);
-    // } catch (SecurityException se) {
-    //     if (!isCallerBindAppWidgetWhiteListedLocked(packageName)) {
-    //         return false;
-    //     }
-    // }
-    // return true;
 
     //try {
         mOwner->mContext->EnforceCallingOrSelfPermission(
-                Manifest::permission::BIND_APPWIDGET, String(""));
+                Manifest::permission::BIND_APPWIDGET, String(NULL));
     //} catch (SecurityException se) {
         //if (!isCallerBindAppWidgetWhiteListedLocked(packageName)) {
         //    return false;
@@ -449,31 +385,7 @@ ECode AppWidgetServiceImpl::SecurityPolicy::CanAccessAppWidget(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(widget);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (isHostInPackageForUid(widget.host, uid, packageName)) {
-    //     // Apps hosting the AppWidget have access to it.
-    //     return true;
-    // }
-    // if (isProviderInPackageForUid(widget.provider, uid, packageName)) {
-    //     // Apps providing the AppWidget have access to it.
-    //     return true;
-    // }
-    // if (isHostAccessingProvider(widget.host, widget.provider, uid, packageName)) {
-    //     // Apps hosting the AppWidget get to bind to a remote view service in the provider.
-    //     return true;
-    // }
-    // final int userId = UserHandle.getUserId(uid);
-    // if ((widget.host.getUserId() == userId || (widget.provider != null
-    //         && widget.provider.getUserId() == userId))
-    //     && mContext.checkCallingPermission(android.Manifest.permission.BIND_APPWIDGET)
-    //         == PackageManager.PERMISSION_GRANTED) {
-    //     // Apps that run in the same user as either the host or the provider and
-    //     // have the bind widget permission have access to the widget.
-    //     return true;
-    // }
-    // return false;
 
     Boolean resTmp = FALSE;
     IsHostInPackageForUid(widget->mHost, uid, packageName, &resTmp);
@@ -525,16 +437,6 @@ ECode AppWidgetServiceImpl::SecurityPolicy::IsProviderInCallerOrInProfileAndWhit
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int callerId = UserHandle.getCallingUserId();
-    // if (profileId == callerId) {
-    //     return true;
-    // }
-    // final int parentId = getProfileParent(profileId);
-    // if (parentId != callerId) {
-    //     return false;
-    // }
-    // return isProviderWhitelListed(packageName, profileId);
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
@@ -560,19 +462,6 @@ ECode AppWidgetServiceImpl::SecurityPolicy::IsProviderWhitelListed(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // DevicePolicyManagerInternal devicePolicyManager = LocalServices.getService(
-    //         DevicePolicyManagerInternal.class);
-    //
-    // // If the policy manager is not available on the device we deny it all.
-    // if (devicePolicyManager == null) {
-    //     return false;
-    // }
-    //
-    // List<String> crossProfilePackages = devicePolicyManager
-    //         .getCrossProfileWidgetProviders(profileId);
-    //
-    // return crossProfilePackages.contains(packageName);
 
     assert(0);
     AutoPtr<IInterface> interfaceTmp;// = LocalServices::GetService(EIID_IDevicePolicyManagerInternal);
@@ -599,22 +488,11 @@ ECode AppWidgetServiceImpl::SecurityPolicy::GetProfileParent(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final long identity = Binder.clearCallingIdentity();
-    // try {
-    //     UserInfo parent = mUserManager.getProfileParent(profileId);
-    //     if (parent != null) {
-    //         return parent.getUserHandle().getIdentifier();
-    //     }
-    // } finally {
-    //     Binder.restoreCallingIdentity(identity);
-    // }
-    // return UNKNOWN_USER_ID;
 
     Int64 identity = Binder::ClearCallingIdentity();
     //try {
         AutoPtr<IUserInfo> parent;
-        //mUserManager->GetProfileParent(profileId, (IUserInfo**)&parent);
+        mOwner->mUserManager->GetProfileParent(profileId, (IUserInfo**)&parent);
         if (parent != NULL) {
             AutoPtr<IUserHandle> userHandle;
             parent->GetUserHandle((IUserHandle**)&userHandle);
@@ -632,9 +510,6 @@ ECode AppWidgetServiceImpl::SecurityPolicy::GetGroupParent(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int parentId = mSecurityPolicy.getProfileParent(profileId);
-    // return (parentId != UNKNOWN_USER_ID) ? parentId : profileId;
 
     Int32 parentId = 0;
     mOwner->mSecurityPolicy->GetProfileParent(profileId, &parentId);
@@ -648,10 +523,7 @@ ECode AppWidgetServiceImpl::SecurityPolicy::IsHostInPackageForUid(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(host);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return host.id.uid == uid && host.id.packageName.equals(packageName);
 
     *result = host->mId->mUid == uid && host->mId->mPackageName.Equals(packageName);
     return NOERROR;
@@ -663,7 +535,6 @@ ECode AppWidgetServiceImpl::SecurityPolicy::IsProviderInPackageForUid(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(provider);
     VALIDATE_NOT_NULL(result);
 
     // Packages providing the AppWidget have access to it.
@@ -681,13 +552,7 @@ ECode AppWidgetServiceImpl::SecurityPolicy::IsHostAccessingProvider(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(host);
-    VALIDATE_NOT_NULL(provider);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // The host creates a package context to bind to remote views service in the provider.
-    // return host.id.uid == uid && provider != null
-    //         && provider.id.componentName.getPackageName().equals(packageName);
 
     // The host creates a package context to bind to remote views service in the provider.
     String packageNameTmp;
@@ -702,23 +567,6 @@ ECode AppWidgetServiceImpl::SecurityPolicy::IsCallerBindAppWidgetWhiteListedLock
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    // final int packageUid = getUidForPackage(packageName, userId);
-    // if (packageUid < 0) {
-    //     throw new IllegalArgumentException("No package " + packageName
-    //             + " for user " + userId);
-    // }
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     Pair<Integer, String> packageId = Pair.create(userId, packageName);
-    //     if (mPackagesWithBindWidgetPermission.contains(packageId)) {
-    //         return true;
-    //     }
-    // }
-    //
-    // return false;
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
@@ -728,7 +576,8 @@ ECode AppWidgetServiceImpl::SecurityPolicy::IsCallerBindAppWidgetWhiteListedLock
     if (packageUid < 0) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    //{    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(mOwner->mLock);
         mOwner->EnsureGroupStateLoadedLocked(userId);
         AutoPtr<IPairHelper> pairHelper;
         CPairHelper::AcquireSingleton((IPairHelper**)&pairHelper);
@@ -745,7 +594,7 @@ ECode AppWidgetServiceImpl::SecurityPolicy::IsCallerBindAppWidgetWhiteListedLock
             *result = TRUE;
             return NOERROR;
         }
-    //}
+    }
     *result = FALSE;
     return NOERROR;
 }
@@ -754,12 +603,6 @@ Boolean AppWidgetServiceImpl::SecurityPolicy::IsParentOrProfile(
     /* [in] */ Int32 parentId,
     /* [in] */ Int32 profileId)
 {
-    // ==================before translated======================
-    // if (parentId == profileId) {
-    //     return true;
-    // }
-    // return getProfileParent(profileId) == parentId;
-
     if (parentId == profileId) {
         return TRUE;
     }
@@ -772,18 +615,6 @@ Boolean AppWidgetServiceImpl::SecurityPolicy::IsParentOrProfile(
 Boolean AppWidgetServiceImpl::SecurityPolicy::IsProfileEnabled(
     /* [in] */ Int32 profileId)
 {
-    // ==================before translated======================
-    // final long identity = Binder.clearCallingIdentity();
-    // try {
-    //     UserInfo userInfo = mUserManager.getUserInfo(profileId);
-    //     if (userInfo == null || !userInfo.isEnabled()) {
-    //         return false;
-    //     }
-    // } finally {
-    //     Binder.restoreCallingIdentity(identity);
-    // }
-    // return true;
-
     Int64 identity = Binder::ClearCallingIdentity();
     //try {
         AutoPtr<IUserInfo> userInfo;
@@ -806,30 +637,7 @@ ECode AppWidgetServiceImpl::ProviderId::Equals(
     /* [in] */ IInterface* obj,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(obj);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (this == obj) {
-    //     return true;
-    // }
-    // if (obj == null) {
-    //     return false;
-    // }
-    // if (getClass() != obj.getClass()) {
-    //     return false;
-    // }
-    // ProviderId other = (ProviderId) obj;
-    // if (uid != other.uid)  {
-    //     return false;
-    // }
-    // if (componentName == null) {
-    //     if (other.componentName != null) {
-    //         return false;
-    //     }
-    // } else if (!componentName.equals(other.componentName)) {
-    //     return false;
-    // }
-    // return true;
 
     if (TO_IINTERFACE(this) == TO_IINTERFACE(obj)) {
         *result = TRUE;
@@ -870,11 +678,6 @@ ECode AppWidgetServiceImpl::ProviderId::GetHashCode(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // int result = uid;
-    // result = 31 * result + ((componentName != null)
-    //         ? componentName.hashCode() : 0);
-    // return result;
 
     Int32 resultTmp = mUid;
     IObject* objTmp = IObject::Probe(mComponentName);
@@ -889,9 +692,6 @@ ECode AppWidgetServiceImpl::ProviderId::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "ProviderId{user:" + UserHandle.getUserId(uid) + ", app:"
-    //         + UserHandle.getAppId(uid) + ", cmp:" + componentName + '}';
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
@@ -901,8 +701,15 @@ ECode AppWidgetServiceImpl::ProviderId::ToString(
     helper->GetAppId(mUid, &appId);
     String strComponentName;
     mComponentName->ToString(&strComponentName);
-    *result = String("ProviderId{user:") + StringUtils::ToString(userId) + String(", app:")
-            + StringUtils::ToString(appId) + String(", cmp:") + strComponentName + String("}");
+    StringBuilder sb;
+    sb += "ProviderId{user:";
+    sb += userId;
+    sb += ", app:";
+    sb += appId;
+    sb += ", cmp:";
+    sb += strComponentName;
+    sb += "}";
+    sb.ToString(result);
     return NOERROR;
 }
 
@@ -912,20 +719,23 @@ AppWidgetServiceImpl::ProviderId::ProviderId(
     : mUid(uid)
     , mComponentName(componentName)
 {
-    // ==================before translated======================
-    // this.uid = uid;
-    // this.componentName = componentName;
 }
 
 //=====================================================================
 //                    AppWidgetServiceImpl::Provider
 //=====================================================================
+
+AppWidgetServiceImpl::Provider::Provider()
+    : mZombie(FALSE)
+    , mTag(0)
+{
+    CArrayList::New((IList**)&mWidgets);
+}
+
 ECode AppWidgetServiceImpl::Provider::GetUserId(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return UserHandle.getUserId(id.uid);
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
@@ -938,9 +748,6 @@ ECode AppWidgetServiceImpl::Provider::IsInPackageForUser(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return getUserId() == userId
-    //         && id.componentName.getPackageName().equals(packageName);
 
     Int32 userIdTmp = 0;
     GetUserId(&userIdTmp);
@@ -956,16 +763,6 @@ ECode AppWidgetServiceImpl::Provider::HostedByPackageForUser(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int N = widgets.size();
-    // for (int i = 0; i < N; i++) {
-    //     Widget widget = widgets.get(i);
-    //     if (packageName.equals(widget.host.id.packageName)
-    //             && widget.host.getUserId() == userId) {
-    //         return true;
-    //     }
-    // }
-    // return false;
 
     Int32 N = 0;
     mWidgets->GetSize(&N);
@@ -993,8 +790,6 @@ ECode AppWidgetServiceImpl::Provider::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "Provider{" + id + (zombie ? " Z" : "") + '}';
 
     String strIdTmp;
     mId->ToString(&strIdTmp);
@@ -1029,8 +824,6 @@ ECode AppWidgetServiceImpl::Host::IsInPackageForUser(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return getUserId() == userId && id.packageName.equals(packageName);
 
     Int32 userIdTmp = 0;
     GetUserId(&userIdTmp);
@@ -1042,8 +835,6 @@ ECode AppWidgetServiceImpl::Host::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "Host{" + id + (zombie ? " Z" : "") + '}';
 
     String strIdTmp;
     mId->ToString(&strIdTmp);
@@ -1057,16 +848,6 @@ ECode AppWidgetServiceImpl::Host::HostsPackageForUser(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int N = widgets.size();
-    // for (int i = 0; i < N; i++) {
-    //     Provider provider = widgets.get(i).provider;
-    //     if (provider != null && provider.getUserId() == userId && provider.info != null
-    //             && pkg.equals(provider.info.provider.getPackageName())) {
-    //         return true;
-    //     }
-    // }
-    // return false;
 
     Int32 N = 0;
     mWidgets->GetSize(&N);
@@ -1106,10 +887,6 @@ AppWidgetServiceImpl::HostId::HostId(
     , mHostId(hostId)
     , mPackageName(packageName)
 {
-    // ==================before translated======================
-    // this.uid = uid;
-    // this.hostId = hostId;
-    // this.packageName = packageName;
 }
 
 ECode AppWidgetServiceImpl::HostId::Equals(
@@ -1118,31 +895,6 @@ ECode AppWidgetServiceImpl::HostId::Equals(
 {
     VALIDATE_NOT_NULL(obj);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (this == obj) {
-    //     return true;
-    // }
-    // if (obj == null) {
-    //     return false;
-    // }
-    // if (getClass() != obj.getClass()) {
-    //     return false;
-    // }
-    // HostId other = (HostId) obj;
-    // if (uid != other.uid)  {
-    //     return false;
-    // }
-    // if (hostId != other.hostId) {
-    //     return false;
-    // }
-    // if (packageName == null) {
-    //     if (other.packageName != null) {
-    //         return false;
-    //     }
-    // } else if (!packageName.equals(other.packageName)) {
-    //     return false;
-    // }
-    // return true;
 
     if (TO_IINTERFACE(this)== TO_IINTERFACE(obj)) {
         *result = TRUE;
@@ -1167,7 +919,7 @@ ECode AppWidgetServiceImpl::HostId::Equals(
         return NOERROR;
     }
     if (mPackageName == NULL) {
-        if (other->mPackageName != String("")) {
+        if (other->mPackageName != NULL) {
             *result = FALSE;
             return NOERROR;
         }
@@ -1184,16 +936,10 @@ ECode AppWidgetServiceImpl::HostId::GetHashCode(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // int result = uid;
-    // result = 31 * result + hostId;
-    // result = 31 * result + ((packageName != null)
-    //         ? packageName.hashCode() : 0);
-    // return result;
 
     Int32 resultTmp = mUid;
     resultTmp = 31 * resultTmp + mHostId;
-    resultTmp = 31 * resultTmp + ((mPackageName != String(""))
+    resultTmp = 31 * resultTmp + ((mPackageName != NULL)
             ? mPackageName.GetHashCode() : 0);
     *result = resultTmp;
     return NOERROR;
@@ -1203,10 +949,6 @@ ECode AppWidgetServiceImpl::HostId::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "HostId{user:" + UserHandle.getUserId(uid) + ", app:"
-    //         + UserHandle.getAppId(uid) + ", hostId:" + hostId
-    //         + ", pkg:" + packageName + '}';
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
@@ -1214,9 +956,17 @@ ECode AppWidgetServiceImpl::HostId::ToString(
     helper->GetUserId(mUid, &userIdTmp);
     Int32 appIdTmp = 0;
     helper->GetAppId(mUid, &appIdTmp);
-    *result = String("HostId{user:") + StringUtils::ToString(userIdTmp) + String(", app:")
-            + StringUtils::ToString(appIdTmp) + String(", hostId:") + StringUtils::ToString(mHostId)
-            + String(", pkg:") + mPackageName + String("}");
+    StringBuilder sb;
+    sb += "HostId{user:";
+    sb += userIdTmp;
+    sb += ", app:";
+    sb += appIdTmp;
+    sb += ", hostId:";
+    sb += mHostId;
+    sb += ", pkg:";
+    sb += mPackageName;
+    sb += "}";
+    sb.ToString(result);
     return NOERROR;
 }
 
@@ -1227,15 +977,16 @@ ECode AppWidgetServiceImpl::Widget::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "AppWidgetId{" + appWidgetId + ':' + host + ':' + provider + '}';
 
-    String strHost;
-    mHost->ToString(&strHost);
-    String strProvider;
-    mProvider->ToString(&strProvider);
-    *result = String("AppWidgetId{") + StringUtils::ToString(mAppWidgetId)
-        + String(":") + strHost + String(":") + strProvider + String("}");
+    StringBuilder sb;
+    sb += "AppWidgetId{";
+    sb += mAppWidgetId;
+    sb += ":";
+    sb += mHost;
+    sb += ":";
+    sb += mProvider;
+    sb += "}";
+    sb.ToString(result);
     return NOERROR;
 }
 
@@ -1247,10 +998,6 @@ CAR_INTERFACE_IMPL(AppWidgetServiceImpl::ServiceConnectionProxy, Object, IServic
 AppWidgetServiceImpl::ServiceConnectionProxy::ServiceConnectionProxy(
     /* [in] */ IBinder* connectionCb)
 {
-    // ==================before translated======================
-    // mConnectionCb = IRemoteViewsAdapterConnection.Stub
-    //         .asInterface(connectionCb);
-
     mConnectionCb = IIRemoteViewsAdapterConnection::Probe(connectionCb);
 }
 
@@ -1258,15 +1005,6 @@ ECode AppWidgetServiceImpl::ServiceConnectionProxy::OnServiceConnected(
     /* [in] */ IComponentName* name,
     /* [in] */ IBinder* service)
 {
-    VALIDATE_NOT_NULL(name);
-    VALIDATE_NOT_NULL(service);
-    // ==================before translated======================
-    // try {
-    //     mConnectionCb.onServiceConnected(service);
-    // } catch (RemoteException re) {
-    //     Slog.e(TAG, "Error passing service interface", re);
-    // }
-
     //try {
         mConnectionCb->OnServiceConnected(service);
     //} catch (RemoteException re) {
@@ -1278,23 +1016,12 @@ ECode AppWidgetServiceImpl::ServiceConnectionProxy::OnServiceConnected(
 ECode AppWidgetServiceImpl::ServiceConnectionProxy::OnServiceDisconnected(
     /* [in] */ IComponentName* name)
 {
-    VALIDATE_NOT_NULL(name);
-    // ==================before translated======================
-    // disconnect();
-
     Disconnect();
     return NOERROR;
 }
 
 ECode AppWidgetServiceImpl::ServiceConnectionProxy::Disconnect()
 {
-    // ==================before translated======================
-    // try {
-    //     mConnectionCb.onServiceDisconnected();
-    // } catch (RemoteException re) {
-    //     Slog.e(TAG, "Error clearing service interface", re);
-    // }
-
     //try {
         mConnectionCb->OnServiceDisconnected();
     //} catch (RemoteException re) {
@@ -1314,25 +1041,14 @@ AppWidgetServiceImpl::SaveStateRunnable::SaveStateRunnable(
     : mUserId(userId)
     , mOwner(owner)
 {
-    // ==================before translated======================
-    // mUserId = userId;
-
     assert(NULL != mOwner);
 }
 
 ECode AppWidgetServiceImpl::SaveStateRunnable::Run()
 {
-    // ==================before translated======================
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(mUserId);
-    //     saveStateLocked(mUserId);
-    // }
-
-    assert(0);
-    //{    AutoLock syncLock(this);
-        mOwner->EnsureGroupStateLoadedLocked(mUserId);
-        mOwner->SaveStateLocked(mUserId);
-    //}
+    AutoLock syncLock(mOwner->mLock);
+    mOwner->EnsureGroupStateLoadedLocked(mUserId);
+    mOwner->SaveStateLocked(mUserId);
     return NOERROR;
 }
 
@@ -1346,10 +1062,6 @@ AppWidgetServiceImpl::BackupRestoreController::RestoreUpdateRecord::RestoreUpdat
     , mNewId(theNewId)
     , mNotified(FALSE)
 {
-    // ==================before translated======================
-    // oldId = theOldId;
-    // newId = theNewId;
-    // notified = false;
 }
 
 //=====================================================================
@@ -1371,70 +1083,45 @@ ECode AppWidgetServiceImpl::BackupRestoreController::GetWidgetParticipants(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DEBUG) {
-    //     Slog.i(TAG, "Getting widget participants for user: " + userId);
-    // }
-    //
-    // HashSet<String> packages = new HashSet<>();
-    // {    AutoLock syncLock(mLock);
-    //     final int N = mWidgets.size();
-    //     for (int i = 0; i < N; i++) {
-    //         Widget widget = mWidgets.get(i);
-    //
-    //         // Skip cross-user widgets.
-    //         if (!isProviderAndHostInUser(widget, userId)) {
-    //             continue;
-    //         }
-    //
-    //         packages.add(widget.host.id.packageName);
-    //         Provider provider = widget.provider;
-    //         if (provider != null) {
-    //             packages.add(provider.id.componentName.getPackageName());
-    //         }
-    //     }
-    // }
-    // return new ArrayList<>(packages);
 
     if (DEBUG) {
-        Slogger::I(TAG, String("Getting widget participants for user: ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "Getting widget participants for user: %d", userId);
     }
 
     CArrayList::New(result);
-    //{    AutoLock syncLock(this);
-        Int32 N = 0;
-        mOwner->mWidgets->GetSize(&N);
+    AutoLock syncLock(mOwner->mLock);
+    Int32 N = 0;
+    mOwner->mWidgets->GetSize(&N);
 
-        AutoPtr<IInterface> interfaceTmp;
-        IObject* objTmp = NULL;
-        Widget* widget = NULL;
-        AutoPtr<ICharSequence> charSequenceTmp;
-        Provider* provider = NULL;
-        String strTmp;
+    AutoPtr<IInterface> interfaceTmp;
+    IObject* objTmp = NULL;
+    Widget* widget = NULL;
+    AutoPtr<ICharSequence> charSequenceTmp;
+    Provider* provider = NULL;
+    String strTmp;
 
-        for (Int32 i = 0; i < N; ++i) {
-            interfaceTmp = NULL;
-            mOwner->mWidgets->Get(i, (IInterface**)&interfaceTmp);
-            objTmp = IObject::Probe(interfaceTmp);
-            widget = (Widget*)objTmp;
+    for (Int32 i = 0; i < N; ++i) {
+        interfaceTmp = NULL;
+        mOwner->mWidgets->Get(i, (IInterface**)&interfaceTmp);
+        objTmp = IObject::Probe(interfaceTmp);
+        widget = (Widget*)objTmp;
 
-            // Skip cross-user widgets.
-            if (!IsProviderAndHostInUser(widget, userId)) {
-                continue;
-            }
-
-            charSequenceTmp = NULL;
-            CString::New(widget->mHost->mId->mPackageName, (ICharSequence**)&charSequenceTmp);
-            (*result)->Add(TO_IINTERFACE(charSequenceTmp));
-            provider = widget->mProvider;
-            if (provider != NULL) {
-                provider->mId->mComponentName->GetPackageName(&strTmp);
-                charSequenceTmp = NULL;
-                CString::New(strTmp, (ICharSequence**)&charSequenceTmp);
-                (*result)->Add(TO_IINTERFACE(charSequenceTmp));
-            }
+        // Skip cross-user widgets.
+        if (!IsProviderAndHostInUser(widget, userId)) {
+            continue;
         }
-    //}
+
+        charSequenceTmp = NULL;
+        CString::New(widget->mHost->mId->mPackageName, (ICharSequence**)&charSequenceTmp);
+        (*result)->Add(TO_IINTERFACE(charSequenceTmp));
+        provider = widget->mProvider;
+        if (provider != NULL) {
+            provider->mId->mComponentName->GetPackageName(&strTmp);
+            charSequenceTmp = NULL;
+            CString::New(strTmp, (ICharSequence**)&charSequenceTmp);
+            (*result)->Add(TO_IINTERFACE(charSequenceTmp));
+        }
+    }
     return NOERROR;
 }
 
@@ -1444,104 +1131,29 @@ ECode AppWidgetServiceImpl::BackupRestoreController::GetWidgetState(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DEBUG) {
-    //     Slog.i(TAG, "Getting widget state for user: " + userId);
-    // }
-    //
-    // ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    // {    AutoLock syncLock(mLock);
-    //     // Preflight: if this app neither hosts nor provides any live widgets
-    //     // we have no work to do.
-    //     if (!packageNeedsWidgetBackupLocked(backedupPackage, userId)) {
-    //         return null;
-    //     }
-    //
-    //     try {
-    //         XmlSerializer out = new FastXmlSerializer();
-    //         out.setOutput(stream, "utf-8");
-    //         out.startDocument(null, true);
-    //         out.startTag(null, "ws");      // widget state
-    //         out.attribute(null, "version", String.valueOf(WIDGET_STATE_VERSION));
-    //         out.attribute(null, "pkg", backedupPackage);
-    //
-    //         // Remember all the providers that are currently hosted or published
-    //         // by this package: that is, all of the entities related to this app
-    //         // which will need to be told about id remapping.
-    //         int index = 0;
-    //         int N = mProviders.size();
-    //         for (int i = 0; i < N; i++) {
-    //             Provider provider = mProviders.get(i);
-    //
-    //             if (!provider.widgets.isEmpty()
-    //                     && (provider.isInPackageForUser(backedupPackage, userId)
-    //                     || provider.hostedByPackageForUser(backedupPackage, userId))) {
-    //                 provider.tag = index;
-    //                 serializeProvider(out, provider);
-    //                 index++;
-    //             }
-    //         }
-    //
-    //         N = mHosts.size();
-    //         index = 0;
-    //         for (int i = 0; i < N; i++) {
-    //             Host host = mHosts.get(i);
-    //
-    //             if (!host.widgets.isEmpty()
-    //                     && (host.isInPackageForUser(backedupPackage, userId)
-    //                     || host.hostsPackageForUser(backedupPackage, userId))) {
-    //                 host.tag = index;
-    //                 serializeHost(out, host);
-    //                 index++;
-    //             }
-    //         }
-    //
-    //         // All widget instances involving this package,
-    //         // either as host or as provider
-    //         N = mWidgets.size();
-    //         for (int i = 0; i < N; i++) {
-    //             Widget widget = mWidgets.get(i);
-    //
-    //             Provider provider = widget.provider;
-    //             if (widget.host.isInPackageForUser(backedupPackage, userId)
-    //                     || (provider != null
-    //                     &&  provider.isInPackageForUser(backedupPackage, userId))) {
-    //                 serializeAppWidget(out, widget);
-    //             }
-    //         }
-    //
-    //         out.endTag(null, "ws");
-    //         out.endDocument();
-    //     } catch (IOException e) {
-    //         Slog.w(TAG, "Unable to save widget state for " + backedupPackage);
-    //         return null;
-    //     }
-    // }
-    //
-    // return stream.toByteArray();
 
     if (DEBUG) {
-        Slogger::I(TAG, String("Getting widget state for user: ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "Getting widget state for user: %d", userId);
     }
 
-    assert(0);
-    // need export: AutoPtr<ByteArrayOutputStream> stream = new ByteArrayOutputStream();
-    // stream->constructor();
+    AutoPtr<IByteArrayOutputStream> stream;
+    CByteArrayOutputStream::New((IByteArrayOutputStream**)&stream);
 
-    //{    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(mOwner->mLock);
         if (!PackageNeedsWidgetBackupLocked(backedupPackage, userId)) {
             *result = NULL;
             return NOERROR;
         }
 
         //try {
-            //AutoPtr<IXmlSerializer> out;
-            //CFastXmlSerializer::New((IXmlSerializer**)&out);
-            //out->SetOutput(IOutputStream::Probe(NULL/*stream*/), String("utf-8"));
-            //out->StartDocument(String(""), TRUE);
-            //out->WriteStartTag(String(""), String("ws"));
-            //out->WriteAttribute(String(""), String("version"), StringUtils::ToString(WIDGET_STATE_VERSION)));
-            //out->WriteAttribute(String(""), String("pkg"), backedupPackage);
+            AutoPtr<IXmlSerializer> out;
+            CFastXmlSerializer::New((IXmlSerializer**)&out);
+            out->SetOutput(IOutputStream::Probe(stream), String("utf-8"));
+            out->StartDocument(String(NULL), TRUE);
+            out->WriteStartTag(String(NULL), String("ws"));
+            out->WriteAttribute(String(NULL), String("version"), StringUtils::ToString(WIDGET_STATE_VERSION));
+            out->WriteAttribute(String(NULL), String("pkg"), backedupPackage);
 
             Int32 index = 0;
             Int32 N = 0;
@@ -1564,7 +1176,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::GetWidgetState(
                 provider->HostedByPackageForUser(backedupPackage, userId, &boolTmp2);
                 if (!boolTmp && (boolTmp1 || boolTmp2)) {
                     provider->mTag = index;
-                    //SerializeProvider(out, provider);
+                    SerializeProvider(out, provider);
                     ++index;
                 }
             }
@@ -1582,7 +1194,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::GetWidgetState(
                 host->HostsPackageForUser(backedupPackage, userId, &boolTmp2);
                 if (!boolTmp && (boolTmp1 || boolTmp2)) {
                     host->mTag = index;
-                    //SerializeHost(out, host);
+                    SerializeHost(out, host);
                     ++index;
                 }
             }
@@ -1598,51 +1210,38 @@ ECode AppWidgetServiceImpl::BackupRestoreController::GetWidgetState(
                 widget->mHost->IsInPackageForUser(backedupPackage, userId, &boolTmp);
                 provider->IsInPackageForUser(backedupPackage, userId, &boolTmp1);
                 if (boolTmp || (provider != NULL &&  boolTmp1)) {
-                    //SerializeAppWidget(out, widget);
+                    SerializeAppWidget(out, widget);
                 }
             }
 
-            //out->WriteEndTag(String(""), String("ws"));
-            //out->EndDocument();
+            out->WriteEndTag(String(NULL), String("ws"));
+            out->EndDocument();
         //} catch (IOException e) {
             //Slog.w(TAG, "Unable to save widget state for " + backedupPackage);
             //return null;
         //}
-    //}
+    }
 
-    //stream->ToByteArray((ArrayOf<Byte>**)result);
+    stream->ToByteArray(result);
     return NOERROR;
 }
 
 ECode AppWidgetServiceImpl::BackupRestoreController::RestoreStarting(
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // if (DEBUG) {
-    //     Slog.i(TAG, "Restore starting for user: " + userId);
-    // }
-    //
-    // {    AutoLock syncLock(mLock);
-    //     // We're starting a new "system" restore operation, so any widget restore
-    //     // state that we see from here on is intended to replace the current
-    //     // widget configuration of any/all of the affected apps.
-    //     mPrunedApps.clear();
-    //     mUpdatesByProvider.clear();
-    //     mUpdatesByHost.clear();
-    // }
-
     if (DEBUG) {
-        Slogger::I(TAG, String("Restore starting for user: ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "Restore starting for user: %d", userId);
     }
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mOwner->mLock);
         // We're starting a new "system" restore operation, so any widget restore
         // state that we see from here on is intended to replace the current
         // widget configuration of any/all of the affected apps.
         mPrunedApps->Clear();
         mUpdatesByProvider->Clear();
         mUpdatesByHost->Clear();
-    //}
+    }
     return NOERROR;
 }
 
@@ -1652,166 +1251,13 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
     /* [in] */ Int32 userId)
 {
     VALIDATE_NOT_NULL(restoredState);
-    // ==================before translated======================
-    // if (DEBUG) {
-    //     Slog.i(TAG, "Restoring widget state for user:" + userId
-    //             + " package: " + packageName);
-    // }
-    //
-    // ByteArrayInputStream stream = new ByteArrayInputStream(restoredState);
-    // try {
-    //     // Providers mentioned in the widget dataset by ordinal
-    //     ArrayList<Provider> restoredProviders = new ArrayList<>();
-    //
-    //     // Hosts mentioned in the widget dataset by ordinal
-    //     ArrayList<Host> restoredHosts = new ArrayList<>();
-    //
-    //     XmlPullParser parser = Xml.newPullParser();
-    //     parser.setInput(stream, null);
-    //
-    //     {    AutoLock syncLock(mLock);
-    //         int type;
-    //         do {
-    //             type = parser.next();
-    //             if (type == XmlPullParser.START_TAG) {
-    //                 final String tag = parser.getName();
-    //                 if ("ws".equals(tag)) {
-    //                     String version = parser.getAttributeValue(null, "version");
-    //
-    //                     final int versionNumber = Integer.parseInt(version);
-    //                     if (versionNumber > WIDGET_STATE_VERSION) {
-    //                         Slog.w(TAG, "Unable to process state version " + version);
-    //                         return;
-    //                     }
-    //
-    //                     // TODO: fix up w.r.t. canonical vs current package names
-    //                     String pkg = parser.getAttributeValue(null, "pkg");
-    //                     if (!packageName.equals(pkg)) {
-    //                         Slog.w(TAG, "Package mismatch in ws");
-    //                         return;
-    //                     }
-    //                 } else if ("p".equals(tag)) {
-    //                     String pkg = parser.getAttributeValue(null, "pkg");
-    //                     String cl = parser.getAttributeValue(null, "cl");
-    //
-    //                     // hostedProviders index will match 'p' attribute in widget's
-    //                     // entry in the xml file being restored
-    //                     // If there's no live entry for this provider, add an inactive one
-    //                     // so that widget IDs referring to them can be properly allocated
-    //
-    //                     // Backup and resotre only for the parent profile.
-    //                     ComponentName componentName = new ComponentName(pkg, cl);
-    //
-    //                     Provider p = findProviderLocked(componentName, userId);
-    //                     if (p == null) {
-    //                         p = new Provider();
-    //                         p.id = new ProviderId(UNKNOWN_UID, componentName);
-    //                         p.info = new AppWidgetProviderInfo();
-    //                         p.info.provider = componentName;
-    //                         p.zombie = true;
-    //                         mProviders.add(p);
-    //                     }
-    //                     if (DEBUG) {
-    //                         Slog.i(TAG, "   provider " + p.id);
-    //                     }
-    //                     restoredProviders.add(p);
-    //                 } else if ("h".equals(tag)) {
-    //                     // The host app may not yet exist on the device.  If it's here we
-    //                     // just use the existing Host entry, otherwise we create a
-    //                     // placeholder whose uid will be fixed up at PACKAGE_ADDED time.
-    //                     String pkg = parser.getAttributeValue(null, "pkg");
-    //
-    //                     final int uid = getUidForPackage(pkg, userId);
-    //                     final int hostId = Integer.parseInt(
-    //                             parser.getAttributeValue(null, "id"), 16);
-    //
-    //                     HostId id = new HostId(uid, hostId, pkg);
-    //                     Host h = lookupOrAddHostLocked(id);
-    //                     restoredHosts.add(h);
-    //
-    //                     if (DEBUG) {
-    //                         Slog.i(TAG, "   host[" + restoredHosts.size()
-    //                                 + "]: {" + h.id + "}");
-    //                     }
-    //                 } else if ("g".equals(tag)) {
-    //                     int restoredId = Integer.parseInt(
-    //                             parser.getAttributeValue(null, "id"), 16);
-    //                     int hostIndex = Integer.parseInt(
-    //                             parser.getAttributeValue(null, "h"), 16);
-    //                     Host host = restoredHosts.get(hostIndex);
-    //                     Provider p = null;
-    //                     String prov = parser.getAttributeValue(null, "p");
-    //                     if (prov != null) {
-    //                         // could have been null if the app had allocated an id
-    //                         // but not yet established a binding under that id
-    //                         int which = Integer.parseInt(prov, 16);
-    //                         p = restoredProviders.get(which);
-    //                     }
-    //
-    //                     // We'll be restoring widget state for both the host and
-    //                     // provider sides of this widget ID, so make sure we are
-    //                     // beginning from a clean slate on both fronts.
-    //                     pruneWidgetStateLocked(host.id.packageName, userId);
-    //                     if (p != null) {
-    //                         pruneWidgetStateLocked(p.id.componentName.getPackageName(),
-    //                                 userId);
-    //                     }
-    //
-    //                     // Have we heard about this ancestral widget instance before?
-    //                     Widget id = findRestoredWidgetLocked(restoredId, host, p);
-    //                     if (id == null) {
-    //                         id = new Widget();
-    //                         id.appWidgetId = incrementAndGetAppWidgetIdLocked(userId);
-    //                         id.restoredId = restoredId;
-    //                         id.options = parseWidgetIdOptions(parser);
-    //                         id.host = host;
-    //                         id.host.widgets.add(id);
-    //                         id.provider = p;
-    //                         if (id.provider != null) {
-    //                             id.provider.widgets.add(id);
-    //                         }
-    //                         if (DEBUG) {
-    //                             Slog.i(TAG, "New restored id " + restoredId
-    //                                     + " now " + id);
-    //                         }
-    //                         mWidgets.add(id);
-    //                     }
-    //                     if (id.provider.info != null) {
-    //                         stashProviderRestoreUpdateLocked(id.provider,
-    //                                 restoredId, id.appWidgetId);
-    //                     } else {
-    //                         Slog.w(TAG, "Missing provider for restored widget " + id);
-    //                     }
-    //                     stashHostRestoreUpdateLocked(id.host, restoredId, id.appWidgetId);
-    //
-    //                     if (DEBUG) {
-    //                         Slog.i(TAG, "   instance: " + restoredId
-    //                                 + " -> " + id.appWidgetId
-    //                                 + " :: p=" + id.provider);
-    //                     }
-    //                 }
-    //             }
-    //         } while (type != XmlPullParser.END_DOCUMENT);
-    //
-    //         // We've updated our own bookkeeping.  We'll need to notify the hosts and
-    //         // providers about the changes, but we can't do that yet because the restore
-    //         // target is not necessarily fully live at this moment.  Set aside the
-    //         // information for now; the backup manager will call us once more at the
-    //         // end of the process when all of the targets are in a known state, and we
-    //         // will update at that point.
-    //     }
-    // } catch (XmlPullParserException | IOException e) {
-    //     Slog.w(TAG, "Unable to restore widget state for " + packageName);
-    // } finally {
-    //     saveGroupStateAsync(userId);
-    // }
 
     if (DEBUG) {
-        Slogger::I(TAG, String("Restoring widget state for user:") + StringUtils::ToString(userId)
-                + String(" package: ") + packageName);
+        Slogger::I(TAG, "Restoring widget state for user:%d package: %s", userId, packageName.string());
     }
 
-    //AutoPtr<ByteArrayInputStream> stream = new ByteArrayInputStream(restoredState);
+    AutoPtr<IByteArrayInputStream> stream;
+    CByteArrayInputStream::New(restoredState, (IByteArrayInputStream**)&stream);
     //try {
         // Providers mentioned in the widget dataset by ordinal
         AutoPtr<IList> restoredProviders;
@@ -1823,9 +1269,10 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
 
         AutoPtr<IXmlPullParser> parser;
         Xml::NewPullParser((IXmlPullParser**)&parser);
-        //parser->SetInput(IInputStream::Probe(stream), String(""));
+        parser->SetInput(IInputStream::Probe(stream), String(NULL));
 
-        //{    AutoLock syncLock(mLock);
+        {
+            AutoLock syncLock(mOwner->mLock);
             Int32 type = 0;
             do {
                 parser->Next(&type);
@@ -1834,15 +1281,15 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
                     parser->GetName(&tag);
                     if (String("ws").Equals(tag)) {
                         String version;
-                        parser->GetAttributeValue(String(""), String("version"), &version);
+                        parser->GetAttributeValue(String(NULL), String("version"), &version);
                         Int32 versionNumber = StringUtils::ParseInt32(version);
                         if (versionNumber > WIDGET_STATE_VERSION) {
-                            Slogger::W(TAG, String("Unable to process state version ") + version);
+                            Slogger::W(TAG, "Unable to process state version %s", version.string());
                             return NOERROR;
                         }
 
                         String pkg;
-                        parser->GetAttributeValue(String(""), String("pkg"), &pkg);
+                        parser->GetAttributeValue(String(NULL), String("pkg"), &pkg);
                         if (!packageName.Equals(pkg)) {
                             Slogger::W(TAG, "Package mismatch in ws");
                             return NOERROR;
@@ -1850,9 +1297,9 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
                     }
                     else if (String("p").Equals(tag)) {
                         String pkg;
-                        parser->GetAttributeValue(String(""), String("pkg"), &pkg);
+                        parser->GetAttributeValue(String(NULL), String("pkg"), &pkg);
                         String cl;
-                        parser->GetAttributeValue(String(""), String("cl"), &cl);
+                        parser->GetAttributeValue(String(NULL), String("cl"), &cl);
 
                         AutoPtr<IComponentName> componentName;
                         CComponentName::New(pkg, cl, (IComponentName**)&componentName);
@@ -1867,19 +1314,17 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
                             mOwner->mProviders->Add(TO_IINTERFACE(p));
                         }
                         if (DEBUG) {
-                            String strTmp;
-                            p->mId->ToString(&strTmp);
-                            Slogger::I(TAG, String("   provider ") + strTmp);
+                            Slogger::I(TAG, "   provider %s", TO_CSTR(p->mId));
                         }
                         restoredProviders->Add(TO_IINTERFACE(p));
                     }
                     else if (String("h").Equals(tag)) {
                         String pkg;
-                        parser->GetAttributeValue(String(""), String("pkg"), &pkg);
+                        parser->GetAttributeValue(String(NULL), String("pkg"), &pkg);
                         Int32 uid = mOwner->GetUidForPackage(pkg, userId);
 
                         String strTmp;
-                        parser->GetAttributeValue(String(""), String("id"), &strTmp);
+                        parser->GetAttributeValue(String(NULL), String("id"), &strTmp);
                         Int32 hostId = StringUtils::ParseInt32(strTmp, 16);
 
                         AutoPtr<HostId> id = new HostId(uid, hostId, pkg);
@@ -1890,16 +1335,15 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
                             Int32 size = 0;
                             restoredHosts->GetSize(&size);
                             h->mId->ToString(&strTmp);
-                            Slogger::I(TAG, String("   host[") + StringUtils::ToString(size)
-                                    + String("]: {") + strTmp + String("}"));
+                            Slogger::I(TAG, "   host[%d]: {%s}", size, TO_CSTR(h->mId));
                         }
                     }
                     else if (String("g").Equals(tag)) {
                         String strTmp;
-                        parser->GetAttributeValue(String(""), String("id"), &strTmp);
+                        parser->GetAttributeValue(String(NULL), String("id"), &strTmp);
                         Int32 restoredId = StringUtils::ParseInt32(strTmp, 16);
 
-                        parser->GetAttributeValue(String(""), String("h"), &strTmp);
+                        parser->GetAttributeValue(String(NULL), String("h"), &strTmp);
                         Int32 hostIndex = StringUtils::ParseInt32(strTmp, 16);
 
                         AutoPtr<IInterface> interfaceTmp;
@@ -1908,7 +1352,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
                         Host* host = (Host*)objTmp;
                         Provider* p = NULL;
                         String prov;
-                        parser->GetAttributeValue(String(""), String("p"), &prov);
+                        parser->GetAttributeValue(String(NULL), String("p"), &prov);
                         if (!prov.IsEmpty()) {
                             Int32 which = StringUtils::ParseInt32(prov, 16);
                             interfaceTmp = NULL;
@@ -1937,10 +1381,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
                                 id->mProvider->mWidgets->Add(TO_IINTERFACE(id));
                             }
                             if (DEBUG) {
-                                String strTmp;
-                                id->ToString(&strTmp);
-                                Slogger::I(TAG, String("New restored id ") + StringUtils::ToString(restoredId)
-                                        + String(" now ") + strTmp);
+                                Slogger::I(TAG, "New restored id %d now %s", restoredId, TO_CSTR(id));
                             }
                             mOwner->mWidgets->Add(TO_IINTERFACE(id));
                         }
@@ -1948,23 +1389,18 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
                             StashProviderRestoreUpdateLocked(id->mProvider, restoredId, id->mAppWidgetId);
                         }
                         else {
-                            String strTmp;
-                            id->ToString(&strTmp);
-                            Slogger::W(TAG, String("Missing provider for restored widget ") + strTmp);
+                            Slogger::W(TAG, "Missing provider for restored widget %s", TO_CSTR(id));
                         }
                         StashHostRestoreUpdateLocked(id->mHost, restoredId, id->mAppWidgetId);
 
                         if (DEBUG) {
-                            String strTmp;
-                            id->mProvider->ToString(&strTmp);
-                            Slogger::I(TAG, String("   instance: ") + StringUtils::ToString(restoredId)
-                                    + String(" -> ") + StringUtils::ToString(id->mAppWidgetId)
-                                    + String(" :: p=") + strTmp);
+                            Slogger::I(TAG, "   instance: %d -> %d :: p=%s", restoredId,
+                                id->mAppWidgetId, TO_CSTR(id->mProvider));
                         }
                     }
                 }
             } while (type != IXmlPullParser::END_DOCUMENT);
-        //}
+        }
     //} catch (XmlPullParserException | IOException e) {
         //Slog.w(TAG, "Unable to restore widget state for " + packageName);
     //} finally {
@@ -1976,90 +1412,14 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
 ECode AppWidgetServiceImpl::BackupRestoreController::RestoreFinished(
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // if (DEBUG) {
-    //     Slog.i(TAG, "restoreFinished for " + userId);
-    // }
-    //
-    // final UserHandle userHandle = new UserHandle(userId);
-    // {    AutoLock syncLock(mLock);
-    //     // Build the providers' broadcasts and send them off
-    //     Set<Map.Entry<Provider, ArrayList<RestoreUpdateRecord>>> providerEntries
-    //             = mUpdatesByProvider.entrySet();
-    //     for (Map.Entry<Provider, ArrayList<RestoreUpdateRecord>> e : providerEntries) {
-    //         // For each provider there's a list of affected IDs
-    //         Provider provider = e.getKey();
-    //         ArrayList<RestoreUpdateRecord> updates = e.getValue();
-    //         final int pending = countPendingUpdates(updates);
-    //         if (DEBUG) {
-    //             Slog.i(TAG, "Provider " + provider + " pending: " + pending);
-    //         }
-    //         if (pending > 0) {
-    //             int[] oldIds = new int[pending];
-    //             int[] newIds = new int[pending];
-    //             final int N = updates.size();
-    //             int nextPending = 0;
-    //             for (int i = 0; i < N; i++) {
-    //                 RestoreUpdateRecord r = updates.get(i);
-    //                 if (!r.notified) {
-    //                     r.notified = true;
-    //                     oldIds[nextPending] = r.oldId;
-    //                     newIds[nextPending] = r.newId;
-    //                     nextPending++;
-    //                     if (DEBUG) {
-    //                         Slog.i(TAG, "   " + r.oldId + " => " + r.newId);
-    //                     }
-    //                 }
-    //             }
-    //             sendWidgetRestoreBroadcastLocked(
-    //                     AppWidgetManager.ACTION_APPWIDGET_RESTORED,
-    //                     provider, null, oldIds, newIds, userHandle);
-    //         }
-    //     }
-    //
-    //     // same thing per host
-    //     Set<Map.Entry<Host, ArrayList<RestoreUpdateRecord>>> hostEntries
-    //             = mUpdatesByHost.entrySet();
-    //     for (Map.Entry<Host, ArrayList<RestoreUpdateRecord>> e : hostEntries) {
-    //         Host host = e.getKey();
-    //         if (host.id.uid != UNKNOWN_UID) {
-    //             ArrayList<RestoreUpdateRecord> updates = e.getValue();
-    //             final int pending = countPendingUpdates(updates);
-    //             if (DEBUG) {
-    //                 Slog.i(TAG, "Host " + host + " pending: " + pending);
-    //             }
-    //             if (pending > 0) {
-    //                 int[] oldIds = new int[pending];
-    //                 int[] newIds = new int[pending];
-    //                 final int N = updates.size();
-    //                 int nextPending = 0;
-    //                 for (int i = 0; i < N; i++) {
-    //                     RestoreUpdateRecord r = updates.get(i);
-    //                     if (!r.notified) {
-    //                         r.notified = true;
-    //                         oldIds[nextPending] = r.oldId;
-    //                         newIds[nextPending] = r.newId;
-    //                         nextPending++;
-    //                         if (DEBUG) {
-    //                             Slog.i(TAG, "   " + r.oldId + " => " + r.newId);
-    //                         }
-    //                     }
-    //                 }
-    //                 sendWidgetRestoreBroadcastLocked(
-    //                         AppWidgetManager.ACTION_APPWIDGET_HOST_RESTORED,
-    //                         null, host, oldIds, newIds, userHandle);
-    //             }
-    //         }
-    //     }
-    // }
-
     if (DEBUG) {
-        Slogger::I(TAG, String("restoreFinished for ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "restoreFinished for %d", userId);
     }
 
     AutoPtr<IUserHandle> userHandle;
     CUserHandle::New(userId, (IUserHandle**)&userHandle);
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mOwner->mLock);
         AutoPtr<ISet> providerEntries;
         mUpdatesByProvider->GetEntrySet((ISet**)&providerEntries);
         AutoPtr<IIterator> itor;
@@ -2080,9 +1440,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreFinished(
             IList* updates = IList::Probe(valueInterfaceTmp);
             Int32 pending = CountPendingUpdates(updates);
             if (DEBUG) {
-                String strTmp;
-                provider->ToString(&strTmp);
-                Slogger::I(TAG, String("Provider ") + strTmp + String(" pending: ") + StringUtils::ToString(pending));
+                Slogger::I(TAG, "Provider %s pending: %d", TO_CSTR(provider), pending);
             }
             if (pending > 0) {
                 AutoPtr< ArrayOf<Int32> > oldIds = ArrayOf<Int32>::Alloc(pending);
@@ -2101,8 +1459,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreFinished(
                         newIds->Set(nextPending, r->mNewId);
                         ++nextPending;
                         if (DEBUG) {
-                            Slogger::I(TAG, String("   ") + StringUtils::ToString(r->mOldId)
-                                + String(" => ") + StringUtils::ToString(r->mNewId));
+                            Slogger::I(TAG, "   %d => %d", r->mOldId, r->mNewId);
                         }
                     }
                 }
@@ -2133,9 +1490,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreFinished(
                 IList* updates = IList::Probe(valueInterfaceTmp);
                 Int32 pending = CountPendingUpdates(updates);
                 if (DEBUG) {
-                    String strTmp;
-                    host->ToString(&strTmp);
-                    Slogger::I(TAG, String("Host ") + strTmp + String(" pending: ") + StringUtils::ToString(pending));
+                    Slogger::I(TAG, "Host %s pending: %d", TO_CSTR(host), pending);
                 }
                 if (pending > 0) {
                     AutoPtr< ArrayOf<Int32> > oldIds = ArrayOf<Int32>::Alloc(pending);
@@ -2156,8 +1511,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreFinished(
                             newIds->Set(nextPending, r->mNewId);
                             ++nextPending;
                             if (DEBUG) {
-                                Slogger::I(TAG, String("   ") + StringUtils::ToString(r->mOldId)
-                                    + String(" => ") + StringUtils::ToString(r->mNewId));
+                                Slogger::I(TAG, "   %d => %d", r->mOldId, r->mNewId);
                             }
                         }
                     }
@@ -2167,7 +1521,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreFinished(
                 }
             }
         }
-    //}
+    }
     return NOERROR;
 }
 
@@ -2175,17 +1529,6 @@ AutoPtr<AppWidgetServiceImpl::Provider> AppWidgetServiceImpl::BackupRestoreContr
     /* [in] */ IComponentName* componentName,
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // final int providerCount = mProviders.size();
-    // for (int i = 0; i < providerCount; i++) {
-    //     Provider provider = mProviders.get(i);
-    //     if (provider.getUserId() == userId
-    //             && provider.id.componentName.equals(componentName)) {
-    //         return provider;
-    //     }
-    // }
-    // return null;
-
     Int32 providerCount = 0;
     mOwner->mProviders->GetSize(&providerCount);
     for (Int32 i = 0; i < providerCount; ++i) {
@@ -2212,36 +1555,12 @@ AutoPtr<AppWidgetServiceImpl::Widget> AppWidgetServiceImpl::BackupRestoreControl
     /* [in] */ Host* host,
     /* [in] */ Provider* p)
 {
-    // ==================before translated======================
-    // if (DEBUG) {
-    //     Slog.i(TAG, "Find restored widget: id=" + restoredId
-    //             + " host=" + host + " provider=" + p);
-    // }
-    //
-    // if (p == null || host == null) {
-    //     return null;
-    // }
-    //
-    // final int N = mWidgets.size();
-    // for (int i = 0; i < N; i++) {
-    //     Widget widget = mWidgets.get(i);
-    //     if (widget.restoredId == restoredId
-    //             && widget.host.id.equals(host.id)
-    //             && widget.provider.id.equals(p.id)) {
-    //         if (DEBUG) {
-    //             Slog.i(TAG, "   Found at " + i + " : " + widget);
-    //         }
-    //         return widget;
-    //     }
-    // }
-    // return null;
-
     if (DEBUG) {
         String strTmp, str1Tmp;
         host->ToString(&strTmp);
         p->ToString(&str1Tmp);
-        Slogger::I(TAG, String("Find restored widget: id=") + StringUtils::ToString(restoredId)
-                + String(" host=") + strTmp + String(" provider=") + str1Tmp);
+        Slogger::I(TAG, "Find restored widget: id=%d, host=%s, provider=%s",
+            restoredId, TO_CSTR(host), TO_CSTR(p));
     }
 
     if (p == NULL || host == NULL) {
@@ -2260,9 +1579,7 @@ AutoPtr<AppWidgetServiceImpl::Widget> AppWidgetServiceImpl::BackupRestoreControl
         widget->mProvider->mId->Equals(TO_IINTERFACE(p->mId), &res1Tmp);
         if (widget->mRestoredId == restoredId && resTmp && res1Tmp) {
             if (DEBUG) {
-                String strTmp;
-                widget->ToString(&strTmp);
-                Slogger::I(TAG, String("   Found at ") + StringUtils::ToString(i) + String(" : ") + strTmp);
+                Slogger::I(TAG, "   Found at %d : %s", i, TO_CSTR(widget));
             }
             return widget;
         }
@@ -2274,29 +1591,6 @@ Boolean AppWidgetServiceImpl::BackupRestoreController::PackageNeedsWidgetBackupL
     /* [in] */ const String& packageName,
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // int N = mWidgets.size();
-    // for (int i = 0; i < N; i++) {
-    //     Widget widget = mWidgets.get(i);
-    //
-    //     // Skip cross-user widgets.
-    //     if (!isProviderAndHostInUser(widget, userId)) {
-    //         continue;
-    //     }
-    //
-    //     if (widget.host.isInPackageForUser(packageName, userId)) {
-    //         // this package is hosting widgets, so it knows widget IDs.
-    //         return true;
-    //     }
-    //
-    //     Provider provider = widget.provider;
-    //     if (provider != null && provider.isInPackageForUser(packageName, userId)) {
-    //         // someone is hosting this app's widgets, so it knows widget IDs.
-    //         return true;
-    //     }
-    // }
-    // return false;
-
     Int32 N = 0;
     mOwner->mWidgets->GetSize(&N);
     for (Int32 i = 0; i < N; ++i) {
@@ -2331,23 +1625,6 @@ void AppWidgetServiceImpl::BackupRestoreController::StashProviderRestoreUpdateLo
     /* [in] */ Int32 oldId,
     /* [in] */ Int32 newId)
 {
-    // ==================before translated======================
-    // ArrayList<RestoreUpdateRecord> r = mUpdatesByProvider.get(provider);
-    // if (r == null) {
-    //     r = new ArrayList<>();
-    //     mUpdatesByProvider.put(provider, r);
-    // } else {
-    //     // don't duplicate
-    //     if (alreadyStashed(r, oldId, newId)) {
-    //         if (DEBUG) {
-    //             Slog.i(TAG, "ID remap " + oldId + " -> " + newId
-    //                     + " already stashed for " + provider);
-    //         }
-    //         return;
-    //     }
-    // }
-    // r.add(new RestoreUpdateRecord(oldId, newId));
-
     AutoPtr<IInterface> valueTmp;
     mUpdatesByProvider->Get(TO_IINTERFACE(provider), (IInterface**)&valueTmp);
     AutoPtr<IList> r = IList::Probe(valueTmp);
@@ -2362,8 +1639,7 @@ void AppWidgetServiceImpl::BackupRestoreController::StashProviderRestoreUpdateLo
             if (DEBUG) {
                 String strTmp;
                 provider->ToString(&strTmp);
-                Slogger::I(TAG, String("ID remap ") + StringUtils::ToString(oldId) + String(" -> ")
-                    + StringUtils::ToString(newId) + String(" already stashed for ") + strTmp);
+                Slogger::I(TAG, "ID remap %d -> %d already stashed for %s", oldId, newId, TO_CSTR(provider));
             }
             return;
         }
@@ -2378,16 +1654,6 @@ Boolean AppWidgetServiceImpl::BackupRestoreController::AlreadyStashed(
     /* [in] */ Int32 oldId,
     /* [in] */ Int32 newId)
 {
-    // ==================before translated======================
-    // final int N = stash.size();
-    // for (int i = 0; i < N; i++) {
-    //     RestoreUpdateRecord r = stash.get(i);
-    //     if (r.oldId == oldId && r.newId == newId) {
-    //         return true;
-    //     }
-    // }
-    // return false;
-
     Int32 N = 0;
     stash->GetSize(&N);
     for (Int32 i = 0; i < N; ++i) {
@@ -2407,22 +1673,6 @@ void AppWidgetServiceImpl::BackupRestoreController::StashHostRestoreUpdateLocked
     /* [in] */ Int32 oldId,
     /* [in] */ Int32 newId)
 {
-    // ==================before translated======================
-    // ArrayList<RestoreUpdateRecord> r = mUpdatesByHost.get(host);
-    // if (r == null) {
-    //     r = new ArrayList<>();
-    //     mUpdatesByHost.put(host, r);
-    // } else {
-    //     if (alreadyStashed(r, oldId, newId)) {
-    //         if (DEBUG) {
-    //             Slog.i(TAG, "ID remap " + oldId + " -> " + newId
-    //                     + " already stashed for " + host);
-    //         }
-    //         return;
-    //     }
-    // }
-    // r.add(new RestoreUpdateRecord(oldId, newId));
-
     AutoPtr<IInterface> valueTmp;
     mUpdatesByHost->Get(TO_IINTERFACE(host), (IInterface**)&valueTmp);
     AutoPtr<IList> r = IList::Probe(valueTmp);
@@ -2435,8 +1685,7 @@ void AppWidgetServiceImpl::BackupRestoreController::StashHostRestoreUpdateLocked
             if (DEBUG) {
                 String strTmp;
                 host->ToString(&strTmp);
-                Slogger::I(TAG, String("ID remap ") + StringUtils::ToString(oldId) + String(" -> ")
-                    + StringUtils::ToString(newId) + String(" already stashed for ") + strTmp);
+                Slogger::I(TAG, "ID remap %d -> %d already stashed for %s", oldId, newId, TO_CSTR(host));
             }
             return;
         }
@@ -2454,21 +1703,6 @@ void AppWidgetServiceImpl::BackupRestoreController::SendWidgetRestoreBroadcastLo
     /* [in] */ ArrayOf<Int32>* newIds,
     /* [in] */ IUserHandle* userHandle)
 {
-    // ==================before translated======================
-    // Intent intent = new Intent(action);
-    // intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OLD_IDS, oldIds);
-    // intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, newIds);
-    // if (provider != null) {
-    //     intent.setComponent(provider.info.provider);
-    //     sendBroadcastAsUser(intent, userHandle);
-    // }
-    // if (host != null) {
-    //     intent.setComponent(null);
-    //     intent.setPackage(host.id.packageName);
-    //     intent.putExtra(AppWidgetManager.EXTRA_HOST_ID, host.id.hostId);
-    //     sendBroadcastAsUser(intent, userHandle);
-    // }
-
     AutoPtr<IIntent> intent;
     CIntent::New(action, (IIntent**)&intent);
     intent->PutExtra(IAppWidgetManager::EXTRA_APPWIDGET_OLD_IDS, oldIds);
@@ -2491,42 +1725,13 @@ void AppWidgetServiceImpl::BackupRestoreController::PruneWidgetStateLocked(
     /* [in] */ const String& pkg,
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // if (!mPrunedApps.contains(pkg)) {
-    //     if (DEBUG) {
-    //         Slog.i(TAG, "pruning widget state for restoring package " + pkg);
-    //     }
-    //     for (int i = mWidgets.size() - 1; i >= 0; i--) {
-    //         Widget widget = mWidgets.get(i);
-    //
-    //         Host host = widget.host;
-    //         Provider provider = widget.provider;
-    //
-    //         if (host.hostsPackageForUser(pkg, userId)
-    //                 || (provider != null && provider.isInPackageForUser(pkg, userId))) {
-    //             // 'pkg' is either the host or the provider for this instances,
-    //             // so we tear it down in anticipation of it (possibly) being
-    //             // reconstructed due to the restore
-    //             host.widgets.remove(widget);
-    //             provider.widgets.remove(widget);
-    //             unbindAppWidgetRemoteViewsServicesLocked(widget);
-    //             mWidgets.remove(i);
-    //         }
-    //     }
-    //     mPrunedApps.add(pkg);
-    // } else {
-    //     if (DEBUG) {
-    //         Slog.i(TAG, "already pruned " + pkg + ", continuing normally");
-    //     }
-    // }
-
     AutoPtr<ICharSequence> pkgTmp;
     CString::New(pkg, (ICharSequence**)&pkgTmp);
     Boolean resTmp = FALSE;
     mPrunedApps->Contains(TO_IINTERFACE(pkgTmp), &resTmp);
     if (!resTmp) {
         if (DEBUG) {
-            Slogger::I(TAG, String("pruning widget state for restoring package ") + pkg);
+            Slogger::I(TAG, "pruning widget state for restoring package %s", pkg.string());
         }
         Int32 widgetSize = 0;
         mOwner->mWidgets->GetSize(&widgetSize);
@@ -2556,7 +1761,7 @@ void AppWidgetServiceImpl::BackupRestoreController::PruneWidgetStateLocked(
     }
     else {
         if (DEBUG) {
-            Slogger::I(TAG, String("already pruned ") + pkg + String(", continuing normally"));
+            Slogger::I(TAG, "already pruned %s, continuing normally", pkg.string());
         }
     }
 }
@@ -2565,11 +1770,6 @@ Boolean AppWidgetServiceImpl::BackupRestoreController::IsProviderAndHostInUser(
     /* [in] */ Widget* widget,
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // // Backup only widgets hosted or provided by the owner profile.
-    // return widget.host.getUserId() == userId && (widget.provider == null
-    //         || widget.provider.getUserId() == userId);
-
     Int32 userIdTmp = 0;
     widget->mHost->GetUserId(&userIdTmp);
     Int32 userId1Tmp = 0;
@@ -2580,67 +1780,38 @@ Boolean AppWidgetServiceImpl::BackupRestoreController::IsProviderAndHostInUser(
 AutoPtr<IBundle> AppWidgetServiceImpl::BackupRestoreController::ParseWidgetIdOptions(
     /* [in] */ IXmlPullParser* parser)
 {
-    // ==================before translated======================
-    // Bundle options = new Bundle();
-    // String minWidthString = parser.getAttributeValue(null, "min_width");
-    // if (minWidthString != null) {
-    //     options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
-    //             Integer.parseInt(minWidthString, 16));
-    // }
-    // String minHeightString = parser.getAttributeValue(null, "min_height");
-    // if (minHeightString != null) {
-    //     options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
-    //             Integer.parseInt(minHeightString, 16));
-    // }
-    // String maxWidthString = parser.getAttributeValue(null, "max_width");
-    // if (maxWidthString != null) {
-    //     options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
-    //             Integer.parseInt(maxWidthString, 16));
-    // }
-    // String maxHeightString = parser.getAttributeValue(null, "max_height");
-    // if (maxHeightString != null) {
-    //     options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
-    //             Integer.parseInt(maxHeightString, 16));
-    // }
-    // String categoryString = parser.getAttributeValue(null, "host_category");
-    // if (categoryString != null) {
-    //     options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-    //             Integer.parseInt(categoryString, 16));
-    // }
-    // return options;
-
     AutoPtr<IBundle> options;
     CBundle::New((IBundle**)&options);
     String minWidthString;
-    parser->GetAttributeValue(String(""), String("min_width"), &minWidthString);
+    parser->GetAttributeValue(String(NULL), String("min_width"), &minWidthString);
     if (!minWidthString.IsEmpty()) {
         options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_MIN_WIDTH,
                 StringUtils::ParseInt32(minWidthString, 16));
     }
 
     String minHeightString;
-    parser->GetAttributeValue(String(""), String("min_height"), &minHeightString);
+    parser->GetAttributeValue(String(NULL), String("min_height"), &minHeightString);
     if (!minHeightString.IsEmpty()) {
         options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_MIN_HEIGHT,
                 StringUtils::ParseInt32(minHeightString, 16));
     }
 
     String maxWidthString;
-    parser->GetAttributeValue(String(""), String("max_width"), &maxWidthString);
+    parser->GetAttributeValue(String(NULL), String("max_width"), &maxWidthString);
     if (!maxWidthString.IsEmpty()) {
         options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_MAX_WIDTH,
                 StringUtils::ParseInt32(maxWidthString, 16));
     }
 
     String maxHeightString;
-    parser->GetAttributeValue(String(""), String("max_height"), &maxHeightString);
+    parser->GetAttributeValue(String(NULL), String("max_height"), &maxHeightString);
     if (!maxHeightString.IsEmpty()) {
         options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_MAX_HEIGHT,
                 StringUtils::ParseInt32(maxHeightString, 16));
     }
 
     String categoryString;
-    parser->GetAttributeValue(String(""), String("host_category"), &categoryString);
+    parser->GetAttributeValue(String(NULL), String("host_category"), &categoryString);
     if (!categoryString.IsEmpty()) {
         options->PutInt32(IAppWidgetManager::OPTION_APPWIDGET_HOST_CATEGORY,
                 StringUtils::ParseInt32(categoryString, 16));
@@ -2651,17 +1822,6 @@ AutoPtr<IBundle> AppWidgetServiceImpl::BackupRestoreController::ParseWidgetIdOpt
 Int32 AppWidgetServiceImpl::BackupRestoreController::CountPendingUpdates(
     /* [in] */ IList* updates)
 {
-    // ==================before translated======================
-    // int pending = 0;
-    // final int N = updates.size();
-    // for (int i = 0; i < N; i++) {
-    //     RestoreUpdateRecord r = updates.get(i);
-    //     if (!r.notified) {
-    //         pending++;
-    //     }
-    // }
-    // return pending;
-
     Int32 pending = 0;
     Int32 N = 0;
     updates->GetSize(&N);
@@ -2704,7 +1864,7 @@ ECode AppWidgetServiceImpl::InnerBroadcastReceiver::OnReceive(
     intent->GetAction(&action);
 
     if (DEBUG) {
-        Slogger::I(TAG, String("Received broadcast: ") + action);
+        Slogger::I(TAG, "Received broadcast: %s", action.string());
     }
 
     if (IIntent::ACTION_CONFIGURATION_CHANGED.Equals(action)) {
@@ -2739,9 +1899,6 @@ AppWidgetServiceImpl::InnerServiceConnection::InnerServiceConnection(
     : mOwner(owner)
     , mIntent(intent)
 {
-    // ==================before translated======================
-    // mOwner = owner;
-
     assert(NULL != mOwner);
     assert(NULL != mIntent);
 }
@@ -2750,17 +1907,6 @@ ECode AppWidgetServiceImpl::InnerServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
     /* [in] */ IBinder* service)
 {
-    VALIDATE_NOT_NULL(name);
-    VALIDATE_NOT_NULL(service);
-    // ==================before translated======================
-    // final IRemoteViewsFactory cb = IRemoteViewsFactory.Stub.asInterface(service);
-    // try {
-    //     cb.onDestroy(intent);
-    // } catch (RemoteException re) {
-    //     Slog.e(TAG, "Error calling remove view factory", re);
-    // }
-    // mContext.unbindService(this);
-
     IIRemoteViewsFactory* cb = IIRemoteViewsFactory::Probe(service);
     //try {
         cb->OnDestroy(mIntent);
@@ -2774,10 +1920,7 @@ ECode AppWidgetServiceImpl::InnerServiceConnection::OnServiceConnected(
 ECode AppWidgetServiceImpl::InnerServiceConnection::OnServiceDisconnected(
     /* [in] */ IComponentName* name)
 {
-    VALIDATE_NOT_NULL(name);
-    // ==================before translated======================
-    // // Do nothing
-
+    // Do nothing
     return NOERROR;
 }
 
@@ -2790,9 +1933,6 @@ AppWidgetServiceImpl::InnerServiceConnection1::InnerServiceConnection1(
     /* [in] */ AppWidgetServiceImpl* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
-
     assert(NULL != mOwner);
 }
 
@@ -2800,17 +1940,6 @@ ECode AppWidgetServiceImpl::InnerServiceConnection1::OnServiceConnected(
     /* [in] */ IComponentName* name,
     /* [in] */ IBinder* service)
 {
-    VALIDATE_NOT_NULL(name);
-    VALIDATE_NOT_NULL(service);
-    // ==================before translated======================
-    // IRemoteViewsFactory cb = IRemoteViewsFactory.Stub
-    //         .asInterface(service);
-    // try {
-    //     cb.onDataSetChangedAsync();
-    // } catch (RemoteException e) {
-    //     Slog.e(TAG, "Error calling onDataSetChangedAsync()", e);
-    // }
-    // mContext.unbindService(this);
 
     IIRemoteViewsFactory* cb = IIRemoteViewsFactory::Probe(service);
     //try {
@@ -2825,10 +1954,7 @@ ECode AppWidgetServiceImpl::InnerServiceConnection1::OnServiceConnected(
 ECode AppWidgetServiceImpl::InnerServiceConnection1::OnServiceDisconnected(
     /* [in] */ IComponentName* name)
 {
-    VALIDATE_NOT_NULL(name);
-    // ==================before translated======================
-    // // Do nothing
-
+    // Do nothing
     return NOERROR;
 }
 
@@ -2843,10 +1969,6 @@ AppWidgetServiceImpl::LoadedWidgetState::LoadedWidgetState(
     , mHostTag(hostTag)
     , mProviderTag(providerTag)
 {
-    // ==================before translated======================
-    // this.widget = widget;
-    // this.hostTag = hostTag;
-    // this.providerTag = providerTag;
 }
 
 //=====================================================================
@@ -2931,53 +2053,15 @@ ECode AppWidgetServiceImpl::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    VALIDATE_NOT_NULL(fd);
-    VALIDATE_NOT_NULL(pw);
-    VALIDATE_NOT_NULL(args);
-    // ==================before translated======================
-    // mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP,
-    //                                         "Permission Denial: can't dump from from pid="
-    //                                         + Binder.getCallingPid()
-    //                                         + ", uid=" + Binder.getCallingUid());
-    //
-    // {    AutoLock syncLock(mLock);
-    //     int N = mProviders.size();
-    //     pw.println("Providers:");
-    //     for (int i = 0; i < N; i++) {
-    //         dumpProvider(mProviders.get(i), i, pw);
-    //     }
-    //
-    //     N = mWidgets.size();
-    //     pw.println(" ");
-    //     pw.println("Widgets:");
-    //     for (int i = 0; i < N; i++) {
-    //         dumpWidget(mWidgets.get(i), i, pw);
-    //     }
-    //
-    //     N = mHosts.size();
-    //     pw.println(" ");
-    //     pw.println("Hosts:");
-    //     for (int i = 0; i < N; i++) {
-    //         dumpHost(mHosts.get(i), i, pw);
-    //     }
-    //
-    //
-    //     N = mPackagesWithBindWidgetPermission.size();
-    //     pw.println(" ");
-    //     pw.println("Grants:");
-    //     for (int i = 0; i < N; i++) {
-    //         Pair<Integer, String> grant = mPackagesWithBindWidgetPermission.valueAt(i);
-    //         dumpGrant(grant, i, pw);
-    //     }
-    // }
+    StringBuilder sb;
+    sb += "Permission Denial: can't dump from from pid=";
+    sb += Binder::GetCallingPid();
+    sb += ", uid=";
+    sb += Binder::GetCallingUid();
+    mContext->EnforceCallingOrSelfPermission(Manifest::permission::DUMP, sb.ToString());
 
-    mContext->EnforceCallingOrSelfPermission(Manifest::permission::DUMP,
-        String("Permission Denial: can't dump from from pid=")
-        + StringUtils::ToString(Binder::GetCallingPid())
-        + String(", uid=") + StringUtils::ToString(Binder::GetCallingUid()));
-
-    assert(0);
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         Int32 N = 0;
         mProviders->GetSize(&N);
         pw->Println(String("Providers:"));
@@ -3020,7 +2104,7 @@ ECode AppWidgetServiceImpl::Dump(
             IPair* grant = IPair::Probe(interfaceTmp);
             DumpGrant(grant, i, pw);
         }
-    //}
+    }
     return NOERROR;
 }
 
@@ -3031,8 +2115,6 @@ ECode AppWidgetServiceImpl::StartListening(
     /* [out] */ IList** updatedViews,
     /* [out, callee] */ ArrayOf<Int32>** result)
 {
-    VALIDATE_NOT_NULL(callbacks);
-    VALIDATE_NOT_NULL(updatedViews);
     VALIDATE_NOT_NULL(result);
 
     AutoPtr<IList> newUpdatedViews;
@@ -3043,13 +2125,14 @@ ECode AppWidgetServiceImpl::StartListening(
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("startListening() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "startListening() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
         AutoPtr<HostId> id = new HostId(Binder::GetCallingUid(), hostId, callingPackage);
         AutoPtr<Host> host = LookupOrAddHostLocked(id);
@@ -3079,42 +2162,19 @@ ECode AppWidgetServiceImpl::StopListening(
     /* [in] */ const String& callingPackage,
     /* [in] */ Int32 hostId)
 {
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "stopListening() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can only access hosts it owns.
-    //     HostId id = new HostId(Binder.getCallingUid(), hostId, callingPackage);
-    //     Host host = lookupHostLocked(id);
-    //
-    //     if (host != null) {
-    //         host.callbacks = null;
-    //         pruneHostLocked(host);
-    //     }
-    // }
-
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("stopListening() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "stopListening() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -3125,7 +2185,7 @@ ECode AppWidgetServiceImpl::StopListening(
             host->mCallbacks = NULL;
             PruneHostLocked(host);
         }
-    //}
+    }
     return NOERROR;
 }
 
@@ -3135,59 +2195,20 @@ ECode AppWidgetServiceImpl::AllocateAppWidgetId(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "allocateAppWidgetId() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     if (mNextAppWidgetIds.indexOfKey(userId) < 0) {
-    //         mNextAppWidgetIds.put(userId, AppWidgetManager.INVALID_APPWIDGET_ID + 1);
-    //     }
-    //
-    //     final int appWidgetId = incrementAndGetAppWidgetIdLocked(userId);
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can only access hosts it owns.
-    //     HostId id = new HostId(Binder.getCallingUid(), hostId, callingPackage);
-    //     Host host = lookupOrAddHostLocked(id);
-    //
-    //     Widget widget = new Widget();
-    //     widget.appWidgetId = appWidgetId;
-    //     widget.host = host;
-    //
-    //     host.widgets.add(widget);
-    //     mWidgets.add(widget);
-    //
-    //     saveGroupStateAsync(userId);
-    //
-    //     if (DEBUG) {
-    //         Slog.i(TAG, "Allocated widget id " + appWidgetId
-    //                 + " for host " + host.id);
-    //     }
-    //
-    //     return appWidgetId;
-    // }
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("allocateAppWidgetId() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "allocateAppWidgetId() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
         Int32 idxOfKey = 0;
         mNextAppWidgetIds->IndexOfKey(userId, &idxOfKey);
@@ -3208,14 +2229,11 @@ ECode AppWidgetServiceImpl::AllocateAppWidgetId(
         SaveGroupStateAsync(userId);
 
         if (DEBUG) {
-            String strTmp;
-            host->mId->ToString(&strTmp);
-            Slogger::I(TAG, String("Allocated widget id ") + StringUtils::ToString(appWidgetId)
-                    + String(" for host ") + strTmp);
+            Slogger::I(TAG, "Allocated widget id %d for host %s", appWidgetId, TO_CSTR(host->mId));
         }
 
         *result = appWidgetId;
-    //}
+    }
     return NOERROR;
 }
 
@@ -3223,50 +2241,19 @@ ECode AppWidgetServiceImpl::DeleteAppWidgetId(
     /* [in] */ const String& callingPackage,
     /* [in] */ Int32 appWidgetId)
 {
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "deleteAppWidgetId() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can only access widgets it hosts or provides.
-    //     Widget widget = lookupWidgetLocked(appWidgetId,
-    //             Binder.getCallingUid(), callingPackage);
-    //
-    //     if (widget == null) {
-    //         return;
-    //     }
-    //
-    //     deleteAppWidgetLocked(widget);
-    //
-    //     saveGroupStateAsync(userId);
-    //
-    //     if (DEBUG) {
-    //         Slog.i(TAG, "Deleted widget id " + appWidgetId
-    //                 + " for host " + widget.host.id);
-    //     }
-    // }
-
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("deleteAppWidgetId() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "deleteAppWidgetId() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -3279,12 +2266,9 @@ ECode AppWidgetServiceImpl::DeleteAppWidgetId(
         DeleteAppWidgetLocked(widget);
         SaveGroupStateAsync(userId);
         if (DEBUG) {
-            String strTmp;
-            widget->mHost->mId->ToString(&strTmp);
-            Slogger::I(TAG, String("Deleted widget id ") + StringUtils::ToString(appWidgetId)
-                    + String(" for host ") + strTmp);
+            Slogger::I(TAG, "Deleted widget id %d for host %s", appWidgetId, TO_CSTR(widget->mHost->mId));
         }
-    //}
+    }
     return NOERROR;
 }
 
@@ -3294,39 +2278,20 @@ ECode AppWidgetServiceImpl::HasBindAppWidgetPermission(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DEBUG) {
-    //     Slog.i(TAG, "hasBindAppWidgetPermission() " + UserHandle.getCallingUserId());
-    // }
-    //
-    // // A special permission is required for managing white listing.
-    // mSecurityPolicy.enforceModifyAppWidgetBindPermissions(packageName);
-    //
-    // {    AutoLock syncLock(mLock);
-    //     // The grants are stored in user state wich gets the grant.
-    //     ensureGroupStateLoadedLocked(grantId);
-    //
-    //     final int packageUid = getUidForPackage(packageName, grantId);
-    //     if (packageUid < 0) {
-    //         return false;
-    //     }
-    //
-    //     Pair<Integer, String> packageId = Pair.create(grantId, packageName);
-    //     return mPackagesWithBindWidgetPermission.contains(packageId);
-    // }
 
     if (DEBUG) {
         AutoPtr<IUserHandleHelper> helper;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
         Int32 userId = 0;
         helper->GetCallingUserId(&userId);
-        Slogger::I(TAG, String("hasBindAppWidgetPermission() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "hasBindAppWidgetPermission() %d", userId);
     }
 
     // A special permission is required for managing white listing.
     mSecurityPolicy->EnforceModifyAppWidgetBindPermissions(packageName);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         // The grants are stored in user state wich gets the grant.
         EnsureGroupStateLoadedLocked(grantId);
 
@@ -3345,7 +2310,7 @@ ECode AppWidgetServiceImpl::HasBindAppWidgetPermission(
         AutoPtr<IPair> packageId;
         helper->Create(TO_IINTERFACE(firstTmp), TO_IINTERFACE(secondTmp), (IPair**)&packageId);
         return ICollection::Probe(mPackagesWithBindWidgetPermission)->Contains(TO_IINTERFACE(packageId), result);
-    //}
+    }
     return NOERROR;
 }
 
@@ -3354,45 +2319,19 @@ ECode AppWidgetServiceImpl::SetBindAppWidgetPermission(
     /* [in] */ Int32 grantId,
     /* [in] */ Boolean grantPermission)
 {
-    // ==================before translated======================
-    // if (DEBUG) {
-    //     Slog.i(TAG, "setBindAppWidgetPermission() " + UserHandle.getCallingUserId());
-    // }
-    //
-    // // A special permission is required for managing white listing.
-    // mSecurityPolicy.enforceModifyAppWidgetBindPermissions(packageName);
-    //
-    // {    AutoLock syncLock(mLock);
-    //     // The grants are stored in user state wich gets the grant.
-    //     ensureGroupStateLoadedLocked(grantId);
-    //
-    //     final int packageUid = getUidForPackage(packageName, grantId);
-    //     if (packageUid < 0) {
-    //         return;
-    //     }
-    //
-    //     Pair<Integer, String> packageId = Pair.create(grantId, packageName);
-    //     if (grantPermission) {
-    //         mPackagesWithBindWidgetPermission.add(packageId);
-    //     } else {
-    //         mPackagesWithBindWidgetPermission.remove(packageId);
-    //     }
-    //
-    //     saveGroupStateAsync(grantId);
-    // }
-
     if (DEBUG) {
         AutoPtr<IUserHandleHelper> helper;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
         Int32 userId = 0;
         helper->GetCallingUserId(&userId);
-        Slogger::I(TAG, String("setBindAppWidgetPermission() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "setBindAppWidgetPermission() %d", userId);
     }
 
     // A special permission is required for managing white listing.
     mSecurityPolicy->EnforceModifyAppWidgetBindPermissions(packageName);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         // The grants are stored in user state wich gets the grant.
         EnsureGroupStateLoadedLocked(grantId);
 
@@ -3417,7 +2356,7 @@ ECode AppWidgetServiceImpl::SetBindAppWidgetPermission(
         }
 
         SaveGroupStateAsync(grantId);
-    //}
+    }
     return NOERROR;
 }
 
@@ -3427,62 +2366,20 @@ ECode AppWidgetServiceImpl::CreateAppWidgetConfigIntentSender(
     /* [out] */ IIntentSender** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "createAppWidgetConfigIntentSender() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can only access widgets it hosts or provides.
-    //     Widget widget = lookupWidgetLocked(appWidgetId,
-    //             Binder.getCallingUid(), callingPackage);
-    //
-    //     if (widget == null) {
-    //         throw new IllegalArgumentException("Bad widget id " + appWidgetId);
-    //     }
-    //
-    //     Provider provider = widget.provider;
-    //     if (provider == null) {
-    //         throw new IllegalArgumentException("Widget not bound " + appWidgetId);
-    //     }
-    //
-    //     Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
-    //     intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-    //     intent.setComponent(provider.info.configure);
-    //
-    //     // All right, create the sender.
-    //     final long identity = Binder.clearCallingIdentity();
-    //     try {
-    //         return PendingIntent.getActivityAsUser(
-    //                 mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
-    //                         | PendingIntent.FLAG_CANCEL_CURRENT, null,
-    //                         new UserHandle(provider.getUserId()))
-    //                 .getIntentSender();
-    //     } finally {
-    //         Binder.restoreCallingIdentity(identity);
-    //     }
-    // }
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("createAppWidgetConfigIntentSender() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "createAppWidgetConfigIntentSender() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -3524,7 +2421,7 @@ ECode AppWidgetServiceImpl::CreateAppWidgetConfigIntentSender(
         //} finally {
             Binder::RestoreCallingIdentity(identity);
         //}
-    //}
+    }
     return NOERROR;
 }
 
@@ -3536,122 +2433,14 @@ ECode AppWidgetServiceImpl::BindAppWidgetId(
     /* [in] */ IBundle* options,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(providerComponent);
-    VALIDATE_NOT_NULL(options);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "bindAppWidgetId() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // // Check that if a cross-profile binding is attempted, it is allowed.
-    // if (!mSecurityPolicy.isEnabledGroupProfile(providerProfileId)) {
-    //     return false;
-    // }
-    //
-    // // If the provider is not under the calling user, make sure this
-    // // provider is white listed for access from the parent.
-    // if (!mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
-    //         providerComponent.getPackageName(), providerProfileId)) {
-    //     return false;
-    // }
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // A special permission or white listing is required to bind widgets.
-    //     if (!mSecurityPolicy.hasCallerBindPermissionOrBindWhiteListedLocked(
-    //             callingPackage)) {
-    //         return false;
-    //     }
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can only access widgets it hosts or provides.
-    //     Widget widget = lookupWidgetLocked(appWidgetId,
-    //             Binder.getCallingUid(), callingPackage);
-    //
-    //     if (widget == null) {
-    //         Slog.e(TAG, "Bad widget id " + appWidgetId);
-    //         return false;
-    //     }
-    //
-    //     if (widget.provider != null) {
-    //         Slog.e(TAG, "Widget id " + appWidgetId
-    //                 + " already bound to: " + widget.provider.id);
-    //         return false;
-    //     }
-    //
-    //     final int providerUid = getUidForPackage(providerComponent.getPackageName(),
-    //             providerProfileId);
-    //     if (providerUid < 0) {
-    //         Slog.e(TAG, "Package " + providerComponent.getPackageName() + " not installed "
-    //                 + " for profile " + providerProfileId);
-    //         return false;
-    //     }
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the provider is in the already vetted user profile.
-    //     ProviderId providerId = new ProviderId(providerUid, providerComponent);
-    //     Provider provider = lookupProviderLocked(providerId);
-    //
-    //     if (provider == null) {
-    //         Slog.e(TAG, "No widget provider " + providerComponent + " for profile "
-    //                 + providerProfileId);
-    //         return false;
-    //     }
-    //
-    //     if (provider.zombie) {
-    //         Slog.e(TAG, "Can't bind to a 3rd party provider in"
-    //                 + " safe mode " + provider);
-    //         return false;
-    //     }
-    //
-    //     widget.provider = provider;
-    //     widget.options = (options != null) ? cloneIfLocalBinder(options) : new Bundle();
-    //
-    //     // We need to provide a default value for the widget category if it is not specified
-    //     if (!widget.options.containsKey(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY)) {
-    //         widget.options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-    //                 AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN);
-    //     }
-    //
-    //     provider.widgets.add(widget);
-    //
-    //     final int widgetCount = provider.widgets.size();
-    //     if (widgetCount == 1) {
-    //         // Tell the provider that it's ready.
-    //         sendEnableIntentLocked(provider);
-    //     }
-    //
-    //     // Send an update now -- We need this update now, and just for this appWidgetId.
-    //     // It's less critical when the next one happens, so when we schedule the next one,
-    //     // we add updatePeriodMillis to its start time. That time will have some slop,
-    //     // but that's okay.
-    //     sendUpdateIntentLocked(provider, new int[] {appWidgetId});
-    //
-    //     // Schedule the future updates.
-    //     registerForBroadcastsLocked(provider, getWidgetIds(provider.widgets));
-    //
-    //     saveGroupStateAsync(userId);
-    //
-    //     if (DEBUG) {
-    //         Slog.i(TAG, "Bound widget " + appWidgetId + " to provider " + provider.id);
-    //     }
-    // }
-    //
-    // return true;
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("bindAppWidgetId() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "bindAppWidgetId() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
@@ -3674,7 +2463,8 @@ ECode AppWidgetServiceImpl::BindAppWidgetId(
         return NOERROR;
     }
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // A special permission or white listing is required to bind widgets.
@@ -3690,24 +2480,20 @@ ECode AppWidgetServiceImpl::BindAppWidgetId(
         AutoPtr<Widget> widget = LookupWidgetLocked(appWidgetId,
                 Binder::GetCallingUid(), callingPackage);
         if (widget == NULL) {
-            Slogger::E(TAG, String("Bad widget id ") + StringUtils::ToString(appWidgetId));
+            Slogger::E(TAG, "Bad widget id %d", appWidgetId);
             *result = FALSE;
             return NOERROR;
         }
 
         if (widget->mProvider != NULL) {
-            String strTmp;
-            widget->mProvider->mId->ToString(&strTmp);
-            Slogger::E(TAG, String("Widget id ") + StringUtils::ToString(appWidgetId)
-                    + String(" already bound to: ") + strTmp);
+            Slogger::E(TAG, "Widget id %d already bound to: %s", appWidgetId, TO_CSTR(widget->mProvider->mId));
             *result = FALSE;
             return NOERROR;
         }
 
         Int32 providerUid = GetUidForPackage(packageName, providerProfileId);
         if (providerUid < 0) {
-            Slogger::E(TAG, String("Package ") + packageName + String(" not installed ")
-                    + String(" for profile ") + StringUtils::ToString(providerProfileId));
+            Slogger::E(TAG, "Package %s not installed  for profile %d", packageName.string(), providerProfileId);
             *result = FALSE;
             return NOERROR;
         }
@@ -3717,19 +2503,13 @@ ECode AppWidgetServiceImpl::BindAppWidgetId(
         AutoPtr<ProviderId> providerId = new ProviderId(providerUid, providerComponent);
         AutoPtr<Provider> provider = LookupProviderLocked(providerId);
         if (provider == NULL) {
-            String strTmp;
-            providerComponent->ToString(&strTmp);
-            Slogger::E(TAG, String("No widget provider ") + strTmp + String(" for profile ")
-                    + StringUtils::ToString(providerProfileId));
+            Slogger::E(TAG, "No widget provider %s for profile %d", TO_CSTR(providerComponent), providerProfileId);
             *result = FALSE;
             return NOERROR;
         }
 
         if (provider->mZombie) {
-            String strTmp;
-            provider->ToString(&strTmp);
-            Slogger::E(TAG, String("Can't bind to a 3rd party provider in")
-                    + String(" safe mode ") + strTmp);
+            Slogger::E(TAG, "Can't bind to a 3rd party provider in safe mode %s", TO_CSTR(provider));
             *result = FALSE;
             return NOERROR;
         }
@@ -3770,12 +2550,9 @@ ECode AppWidgetServiceImpl::BindAppWidgetId(
         SaveGroupStateAsync(userId);
 
         if (DEBUG) {
-            String strTmp;
-            provider->mId->ToString(&strTmp);
-            Slogger::I(TAG, String("Bound widget ") + StringUtils::ToString(appWidgetId)
-                + String(" to provider ") + strTmp);
+            Slogger::I(TAG, "Bound widget %d to provider %s", appWidgetId, TO_CSTR(provider->mId));
         }
-    //}
+    }
 
     *result = TRUE;
     return NOERROR;
@@ -3785,39 +2562,14 @@ ECode AppWidgetServiceImpl::GetAppWidgetIds(
     /* [in] */ IComponentName* componentName,
     /* [out] */ ArrayOf<Int32>** result)
 {
-    VALIDATE_NOT_NULL(componentName);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "getAppWidgetIds() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(componentName.getPackageName());
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can access only its providers.
-    //     ProviderId providerId = new ProviderId(Binder.getCallingUid(), componentName);
-    //     Provider provider = lookupProviderLocked(providerId);
-    //
-    //     if (provider != null) {
-    //         return getWidgetIds(provider.widgets);
-    //     }
-    //
-    //     return new int[0];
-    // }
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("getAppWidgetIds() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "getAppWidgetIds() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
@@ -3825,7 +2577,8 @@ ECode AppWidgetServiceImpl::GetAppWidgetIds(
     componentName->GetPackageName(&packageName);
     mSecurityPolicy->EnforceCallFromPackage(packageName);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -3840,7 +2593,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetIds(
         }
 
         *result = ArrayOf<Int32>::Alloc(0);
-    //}
+    }
     return NOERROR;
 }
 
@@ -3850,43 +2603,20 @@ ECode AppWidgetServiceImpl::GetAppWidgetIdsForHost(
     /* [out] */ ArrayOf<Int32>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "getAppWidgetIdsForHost() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can only access its hosts.
-    //     HostId id = new HostId(Binder.getCallingUid(), hostId, callingPackage);
-    //     Host host = lookupHostLocked(id);
-    //
-    //     if (host != null) {
-    //         return getWidgetIds(host.widgets);
-    //     }
-    //
-    //     return new int[0];
-    // }
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("getAppWidgetIdsForHost() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "getAppWidgetIdsForHost() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -3901,7 +2631,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetIdsForHost(
         }
 
         *result = ArrayOf<Int32>::Alloc(0);
-    //}
+    }
     return NOERROR;
 }
 
@@ -3911,94 +2641,19 @@ ECode AppWidgetServiceImpl::BindRemoteViewsService(
     /* [in] */ IIntent* intent,
     /* [in] */ IBinder* callbacks)
 {
-    VALIDATE_NOT_NULL(intent);
-    VALIDATE_NOT_NULL(callbacks);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "bindRemoteViewsService() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can only access widgets it hosts or provides.
-    //     Widget widget = lookupWidgetLocked(appWidgetId,
-    //             Binder.getCallingUid(), callingPackage);
-    //
-    //     if (widget == null) {
-    //         throw new IllegalArgumentException("Bad widget id");
-    //     }
-    //
-    //     // Make sure the widget has a provider.
-    //     if (widget.provider == null) {
-    //         throw new IllegalArgumentException("No provider for widget "
-    //                 + appWidgetId);
-    //     }
-    //
-    //     ComponentName componentName = intent.getComponent();
-    //
-    //     // Ensure that the service belongs to the same package as the provider.
-    //     // But this is not enough as they may be under different users - see below...
-    //     String providerPackage = widget.provider.id.componentName.getPackageName();
-    //     String servicePackage = componentName.getPackageName();
-    //     if (!servicePackage.equals(providerPackage)) {
-    //         throw new SecurityException("The taget service not in the same package"
-    //                 + " as the widget provider");
-    //     }
-    //
-    //     // Make sure this service exists under the same user as the provider and
-    //     // requires a permission which allows only the system to bind to it.
-    //     mSecurityPolicy.enforceServiceExistsAndRequiresBindRemoteViewsPermission(
-    //             componentName, widget.provider.getUserId());
-    //
-    //     // Good to go - the service pakcage is correct, it exists for the correct
-    //     // user, and requires the bind permission.
-    //
-    //     // If there is already a connection made for this service intent, then
-    //     // disconnect from that first. (This does not allow multiple connections
-    //     // to the same service under the same key).
-    //     ServiceConnectionProxy connection = null;
-    //     FilterComparison fc = new FilterComparison(intent);
-    //     Pair<Integer, FilterComparison> key = Pair.create(appWidgetId, fc);
-    //
-    //     if (mBoundRemoteViewsServices.containsKey(key)) {
-    //         connection = (ServiceConnectionProxy) mBoundRemoteViewsServices.get(key);
-    //         connection.disconnect();
-    //         unbindService(connection);
-    //         mBoundRemoteViewsServices.remove(key);
-    //     }
-    //
-    //     // Bind to the RemoteViewsService (which will trigger a callback to the
-    //     // RemoteViewsAdapter.onServiceConnected())
-    //     connection = new ServiceConnectionProxy(callbacks);
-    //     bindService(intent, connection, widget.provider.info.getProfile());
-    //     mBoundRemoteViewsServices.put(key, connection);
-    //
-    //     // Add it to the mapping of RemoteViewsService to appWidgetIds so that we
-    //     // can determine when we can call back to the RemoteViewsService later to
-    //     // destroy associated factories.
-    //     Pair<Integer, FilterComparison> serviceId = Pair.create(widget.provider.id.uid, fc);
-    //     incrementAppWidgetServiceRefCount(appWidgetId, serviceId);
-    // }
-
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("bindRemoteViewsService() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "bindRemoteViewsService() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -4084,7 +2739,7 @@ ECode AppWidgetServiceImpl::BindRemoteViewsService(
         AutoPtr<IPair> serviceId;
         pairHelper->Create(TO_IINTERFACE(firstTmp), TO_IINTERFACE(fc), (IPair**)&serviceId);
         IncrementAppWidgetServiceRefCount(appWidgetId, serviceId);
-    //}
+    }
     return NOERROR;
 }
 
@@ -4093,58 +2748,19 @@ ECode AppWidgetServiceImpl::UnbindRemoteViewsService(
     /* [in] */ Int32 appWidgetId,
     /* [in] */ IIntent* intent)
 {
-    VALIDATE_NOT_NULL(intent);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "unbindRemoteViewsService() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // Unbind from the RemoteViewsService (which will trigger a callback to the bound
-    //     // RemoteViewsAdapter)
-    //     Pair<Integer, FilterComparison> key = Pair.create(appWidgetId,
-    //             new FilterComparison(intent));
-    //     if (mBoundRemoteViewsServices.containsKey(key)) {
-    //         // We don't need to use the appWidgetId until after we are sure there is something
-    //         // to unbind. Note that this may mask certain issues with apps calling unbind()
-    //         // more than necessary.
-    //
-    //         // NOTE: The lookup is enforcing security across users by making
-    //         // sure the caller can only access widgets it hosts or provides.
-    //         Widget widget = lookupWidgetLocked(appWidgetId,
-    //                 Binder.getCallingUid(), callingPackage);
-    //
-    //         if (widget == null) {
-    //             throw new IllegalArgumentException("Bad widget id " + appWidgetId);
-    //         }
-    //
-    //         ServiceConnectionProxy connection = (ServiceConnectionProxy)
-    //                 mBoundRemoteViewsServices.get(key);
-    //         connection.disconnect();
-    //         mContext.unbindService(connection);
-    //         mBoundRemoteViewsServices.remove(key);
-    //     }
-    // }
-
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("unbindRemoteViewsService() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "unbindRemoteViewsService() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // Unbind from the RemoteViewsService (which will trigger a callback to the bound
@@ -4181,7 +2797,7 @@ ECode AppWidgetServiceImpl::UnbindRemoteViewsService(
             mContext->UnbindService(IServiceConnection::Probe(connection));
             mBoundRemoteViewsServices->Remove(TO_IINTERFACE(key));
         }
-    //}
+    }
     return NOERROR;
 }
 
@@ -4189,50 +2805,19 @@ ECode AppWidgetServiceImpl::DeleteHost(
     /* [in] */ const String& callingPackage,
     /* [in] */ Int32 hostId)
 {
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "deleteHost() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can only access hosts in its uid and package.
-    //     HostId id = new HostId(Binder.getCallingUid(), hostId, callingPackage);
-    //     Host host = lookupHostLocked(id);
-    //
-    //     if (host == null) {
-    //         return;
-    //     }
-    //
-    //     deleteHostLocked(host);
-    //
-    //     saveGroupStateAsync(userId);
-    //
-    //     if (DEBUG) {
-    //         Slog.i(TAG, "Deleted host " + host.id);
-    //     }
-    // }
-
-
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("deleteHost() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "deleteHost() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -4246,57 +2831,24 @@ ECode AppWidgetServiceImpl::DeleteHost(
         DeleteHostLocked(host);
         SaveGroupStateAsync(userId);
         if (DEBUG) {
-            String strTmp;
-            host->mId->ToString(&strTmp);
-            Slogger::I(TAG, String("Deleted host ") + strTmp);
+            Slogger::I(TAG, "Deleted host %s", TO_CSTR(host->mId));
         }
-    //}
+    }
     return NOERROR;
 }
 
 ECode AppWidgetServiceImpl::DeleteAllHosts()
 {
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "deleteAllHosts() " + userId);
-    // }
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     boolean changed = false;
-    //
-    //     final int N = mHosts.size();
-    //     for (int i = N - 1; i >= 0; i--) {
-    //         Host host = mHosts.get(i);
-    //
-    //         // Delete only hosts in the calling uid.
-    //         if (host.id.uid == Binder.getCallingUid()) {
-    //             deleteHostLocked(host);
-    //             changed = true;
-    //
-    //             if (DEBUG) {
-    //                 Slog.i(TAG, "Deleted host " + host.id);
-    //             }
-    //         }
-    //     }
-    //
-    //     if (changed) {
-    //         saveGroupStateAsync(userId);
-    //     }
-    // }
-
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("deleteAllHosts() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "deleteAllHosts() %d", userId);
     }
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
         Boolean changed = false;
         Int32 N = 0;
@@ -4311,9 +2863,7 @@ ECode AppWidgetServiceImpl::DeleteAllHosts()
                 DeleteHostLocked(host);
                 changed = TRUE;
                 if (DEBUG) {
-                    String strTmp;
-                    host->mId->ToString(&strTmp);
-                    Slogger::I(TAG, String("Deleted host ") + strTmp);
+                    Slogger::I(TAG, "Deleted host %s", TO_CSTR(host->mId));
                 }
             }
         }
@@ -4321,7 +2871,7 @@ ECode AppWidgetServiceImpl::DeleteAllHosts()
         if (changed) {
             SaveGroupStateAsync(userId);
         }
-    //}
+    }
     return NOERROR;
 }
 
@@ -4331,43 +2881,20 @@ ECode AppWidgetServiceImpl::GetAppWidgetInfo(
     /* [out] */ IAppWidgetProviderInfo** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "getAppWidgetInfo() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can only access widgets it hosts or provides.
-    //     Widget widget = lookupWidgetLocked(appWidgetId,
-    //             Binder.getCallingUid(), callingPackage);
-    //
-    //     if (widget != null && widget.provider != null && !widget.provider.zombie) {
-    //         return cloneIfLocalBinder(widget.provider.info);
-    //     }
-    //
-    //     return null;
-    // }
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("getAppWidgetInfo() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "getAppWidgetInfo() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -4383,7 +2910,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetInfo(
         }
 
         *result = NULL;
-    //}
+    }
     return NOERROR;
 }
 
@@ -4393,43 +2920,20 @@ ECode AppWidgetServiceImpl::GetAppWidgetViews(
     /* [out] */ IRemoteViews** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "getAppWidgetViews() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can only access widgets it hosts or provides.
-    //     Widget widget = lookupWidgetLocked(appWidgetId,
-    //             Binder.getCallingUid(), callingPackage);
-    //
-    //     if (widget != null) {
-    //         return cloneIfLocalBinder(widget.views);
-    //     }
-    //
-    //     return null;
-    // }
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("getAppWidgetViews() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "getAppWidgetViews() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -4445,7 +2949,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetViews(
         }
 
         *result = NULL;
-    //}
+    }
     return NOERROR;
 }
 
@@ -4454,50 +2958,19 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetOptions(
     /* [in] */ Int32 appWidgetId,
     /* [in] */ IBundle* options)
 {
-    VALIDATE_NOT_NULL(options);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "updateAppWidgetOptions() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can only access widgets it hosts or provides.
-    //     Widget widget = lookupWidgetLocked(appWidgetId,
-    //             Binder.getCallingUid(), callingPackage);
-    //
-    //     if (widget == null) {
-    //         return;
-    //     }
-    //
-    //     // Merge the options.
-    //     widget.options.putAll(options);
-    //
-    //     // Send the broacast to notify the provider that options changed.
-    //     sendOptionsChangedIntentLocked(widget);
-    //
-    //     saveGroupStateAsync(userId);
-    // }
-
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("updateAppWidgetOptions() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "updateAppWidgetOptions() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -4515,7 +2988,7 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetOptions(
         // Send the broacast to notify the provider that options changed.
         SendOptionsChangedIntentLocked(widget);
         SaveGroupStateAsync(userId);
-    //}
+    }
     return NOERROR;
 }
 
@@ -4525,43 +2998,20 @@ ECode AppWidgetServiceImpl::GetAppWidgetOptions(
     /* [out] */ IBundle** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "getAppWidgetOptions() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can only access widgets it hosts or provides.
-    //     Widget widget = lookupWidgetLocked(appWidgetId,
-    //             Binder.getCallingUid(), callingPackage);
-    //
-    //     if (widget != null && widget.options != null) {
-    //         return cloneIfLocalBinder(widget.options);
-    //     }
-    //
-    //     return Bundle.EMPTY;
-    // }
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("getAppWidgetOptions() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "getAppWidgetOptions() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
     mSecurityPolicy->EnforceCallFromPackage(callingPackage);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -4579,7 +3029,7 @@ ECode AppWidgetServiceImpl::GetAppWidgetOptions(
         AutoPtr<IBundleHelper> bundleHelper;
         CBundleHelper::AcquireSingleton((IBundleHelper**)&bundleHelper);
         bundleHelper->GetEMPTY(result);
-    //}
+    }
     return NOERROR;
 }
 
@@ -4588,21 +3038,12 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetIds(
     /* [in] */ ArrayOf<Int32>* appWidgetIds,
     /* [in] */ IRemoteViews* views)
 {
-    VALIDATE_NOT_NULL(appWidgetIds);
-    VALIDATE_NOT_NULL(views);
-    // ==================before translated======================
-    // if (DEBUG) {
-    //     Slog.i(TAG, "updateAppWidgetIds() " + UserHandle.getCallingUserId());
-    // }
-    //
-    // updateAppWidgetIds(callingPackage, appWidgetIds, views, false);
-
     if (DEBUG) {
         AutoPtr<IUserHandleHelper> helper;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
         Int32 userId = 0;
         helper->GetCallingUserId(&userId);
-        Slogger::I(TAG, String("updateAppWidgetIds() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "updateAppWidgetIds() %d", userId);
     }
 
     UpdateAppWidgetIds(callingPackage, appWidgetIds, views, FALSE);
@@ -4614,21 +3055,12 @@ ECode AppWidgetServiceImpl::PartiallyUpdateAppWidgetIds(
     /* [in] */ ArrayOf<Int32>* appWidgetIds,
     /* [in] */ IRemoteViews* views)
 {
-    VALIDATE_NOT_NULL(appWidgetIds);
-    VALIDATE_NOT_NULL(views);
-    // ==================before translated======================
-    // if (DEBUG) {
-    //     Slog.i(TAG, "partiallyUpdateAppWidgetIds() " + UserHandle.getCallingUserId());
-    // }
-    //
-    // updateAppWidgetIds(callingPackage, appWidgetIds, views, true);
-
     if (DEBUG) {
         AutoPtr<IUserHandleHelper> helper;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
         Int32 userId = 0;
         helper->GetCallingUserId(&userId);
-        Slogger::I(TAG, String("partiallyUpdateAppWidgetIds() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "partiallyUpdateAppWidgetIds() %d", userId);
     }
 
     UpdateAppWidgetIds(callingPackage, appWidgetIds, views, TRUE);
@@ -4640,45 +3072,12 @@ ECode AppWidgetServiceImpl::NotifyAppWidgetViewDataChanged(
     /* [in] */ ArrayOf<Int32>* appWidgetIds,
     /* [in] */ Int32 viewId)
 {
-    VALIDATE_NOT_NULL(appWidgetIds);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "notifyAppWidgetViewDataChanged() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // if (appWidgetIds == null || appWidgetIds.length == 0) {
-    //     return;
-    // }
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     final int N = appWidgetIds.length;
-    //     for (int i = 0; i < N; i++) {
-    //         final int appWidgetId = appWidgetIds[i];
-    //
-    //         // NOTE: The lookup is enforcing security across users by making
-    //         // sure the caller can only access widgets it hosts or provides.
-    //         Widget widget = lookupWidgetLocked(appWidgetId,
-    //                 Binder.getCallingUid(), callingPackage);
-    //
-    //         if (widget != null) {
-    //             scheduleNotifyAppWidgetViewDataChanged(widget, viewId);
-    //         }
-    //     }
-    // }
-
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("notifyAppWidgetViewDataChanged() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "notifyAppWidgetViewDataChanged() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
@@ -4688,7 +3087,8 @@ ECode AppWidgetServiceImpl::NotifyAppWidgetViewDataChanged(
         return NOERROR;
     }
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
         Int32 N = appWidgetIds->GetLength();
         Int32 appWidgetId = 0;
@@ -4705,7 +3105,7 @@ ECode AppWidgetServiceImpl::NotifyAppWidgetViewDataChanged(
                 ScheduleNotifyAppWidgetViewDataChanged(widget, viewId);
             }
         }
-    //}
+    }
     return NOERROR;
 }
 
@@ -4713,45 +3113,12 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetProvider(
     /* [in] */ IComponentName* componentName,
     /* [in] */ IRemoteViews* views)
 {
-    VALIDATE_NOT_NULL(componentName);
-    VALIDATE_NOT_NULL(views);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "updateAppWidgetProvider() " + userId);
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(componentName.getPackageName());
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     // NOTE: The lookup is enforcing security across users by making
-    //     // sure the caller can access only its providers.
-    //     ProviderId providerId = new ProviderId(Binder.getCallingUid(), componentName);
-    //     Provider provider = lookupProviderLocked(providerId);
-    //
-    //     if (provider == null) {
-    //         Slog.w(TAG, "Provider doesn't exist " + providerId);
-    //         return;
-    //     }
-    //
-    //     ArrayList<Widget> instances = provider.widgets;
-    //     final int N = instances.size();
-    //     for (int i = 0; i < N; i++) {
-    //         Widget widget = instances.get(i);
-    //         updateAppWidgetInstanceLocked(widget, views, false);
-    //     }
-    // }
-
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("updateAppWidgetProvider() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "updateAppWidgetProvider() %d", userId);
     }
 
     // Make sure the package runs under the caller uid.
@@ -4759,7 +3126,8 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetProvider(
     componentName->GetPackageName(&packageName);
     mSecurityPolicy->EnforceCallFromPackage(packageName);
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
 
         // NOTE: The lookup is enforcing security across users by making
@@ -4768,9 +3136,7 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetProvider(
         AutoPtr<Provider> provider = LookupProviderLocked(providerId);
 
         if (provider == NULL) {
-            String strTmp;
-            providerId->ToString(&strTmp);
-            Slogger::W(TAG, String("Provider doesn't exist ") + strTmp);
+            Slogger::W(TAG, "Provider doesn't exist %s", TO_CSTR(providerId));
             return NOERROR;
         }
 
@@ -4784,7 +3150,7 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetProvider(
             Widget* widget = (Widget*)objTmp;
             UpdateAppWidgetInstanceLocked(widget, views, FALSE);
         }
-    //}
+    }
     return NOERROR;
 }
 
@@ -4795,54 +3161,13 @@ ECode AppWidgetServiceImpl::GetInstalledProvidersForProfile(
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (DEBUG) {
-    //     Slog.i(TAG, "getInstalledProvidersForProfiles() " + userId);
-    // }
-    //
-    // // Ensure the profile is in the group and enabled.
-    // if (!mSecurityPolicy.isEnabledGroupProfile(profileId)) {
-    //     return null;
-    // }
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     ArrayList<AppWidgetProviderInfo> result = null;
-    //
-    //     final int providerCount = mProviders.size();
-    //     for (int i = 0; i < providerCount; i++) {
-    //         Provider provider = mProviders.get(i);
-    //         AppWidgetProviderInfo info = provider.info;
-    //
-    //         // Ignore an invalid provider or one not matching the filter.
-    //         if (provider.zombie || (info.widgetCategory & categoryFilter) == 0) {
-    //             continue;
-    //         }
-    //
-    //         // Add providers only for the requested profile that are white-listed.
-    //         final int providerProfileId = info.getProfile().getIdentifier();
-    //         if (providerProfileId == profileId
-    //                 && mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
-    //                     provider.id.componentName.getPackageName(), providerProfileId)) {
-    //             if (result == null) {
-    //                 result = new ArrayList<>();
-    //             }
-    //             result.add(cloneIfLocalBinder(info));
-    //         }
-    //     }
-    //
-    //     return result;
-    // }
 
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
     helper->GetCallingUserId(&userId);
     if (DEBUG) {
-        Slogger::I(TAG, String("getInstalledProvidersForProfiles() ") + StringUtils::ToString(userId));
+        Slogger::I(TAG, "getInstalledProvidersForProfiles() %d", userId);
     }
 
     // Ensure the profile is in the group and enabled.
@@ -4850,56 +3175,47 @@ ECode AppWidgetServiceImpl::GetInstalledProvidersForProfile(
         return NOERROR;
     }
 
-    //{    AutoLock syncLock(mLock);
-        EnsureGroupStateLoadedLocked(userId);
-        Int32 providerCount = 0;
-        mProviders->GetSize(&providerCount);
-        for (Int32 i = 0; i < providerCount; ++i) {
-            AutoPtr<IInterface> interfaceTmp;
-            mProviders->Get(i, (IInterface**)&interfaceTmp);
-            IObject* objTmp = IObject::Probe(interfaceTmp);
-            Provider* provider = (Provider*)objTmp;
-            IAppWidgetProviderInfo* info = provider->mInfo;
-
-            // Ignore an invalid provider or one not matching the filter.
-            Int32 widgetCategory = 0;
-            info->GetWidgetCategory(&widgetCategory);
-            if (provider->mZombie || (widgetCategory & categoryFilter) == 0) {
-                continue;
-            }
-
-            // Add providers only for the requested profile that are white-listed.
-            AutoPtr<IUserHandle> userHandle;
-            info->GetProfile((IUserHandle**)&userHandle);
-            Int32 providerProfileId = 0;
-            userHandle->GetIdentifier(&providerProfileId);
-
-            String packageName;
-            provider->mId->mComponentName->GetPackageName(&packageName);
-            Boolean resTmp = FALSE;
-            mSecurityPolicy->IsProviderInCallerOrInProfileAndWhitelListed(packageName, providerProfileId, &resTmp);
-            if (providerProfileId == profileId && resTmp) {
-                if (*result == NULL) {
-                    CArrayList::New(result);
-                }
-                (*result)->Add(TO_IINTERFACE(CloneIfLocalBinder(info)));
-            }
+    AutoLock syncLock(mLock);
+    EnsureGroupStateLoadedLocked(userId);
+    Int32 providerCount = 0;
+    mProviders->GetSize(&providerCount);
+    for (Int32 i = 0; i < providerCount; ++i) {
+        AutoPtr<IInterface> interfaceTmp;
+        mProviders->Get(i, (IInterface**)&interfaceTmp);
+        IObject* objTmp = IObject::Probe(interfaceTmp);
+        Provider* provider = (Provider*)objTmp;
+        IAppWidgetProviderInfo* info = provider->mInfo;
+        // Ignore an invalid provider or one not matching the filter.
+        Int32 widgetCategory = 0;
+        info->GetWidgetCategory(&widgetCategory);
+        if (provider->mZombie || (widgetCategory & categoryFilter) == 0) {
+            continue;
         }
-    //}
+
+        // Add providers only for the requested profile that are white-listed.
+        AutoPtr<IUserHandle> userHandle;
+        info->GetProfile((IUserHandle**)&userHandle);
+        Int32 providerProfileId = 0;
+        userHandle->GetIdentifier(&providerProfileId);
+
+        String packageName;
+        provider->mId->mComponentName->GetPackageName(&packageName);
+        Boolean resTmp = FALSE;
+        mSecurityPolicy->IsProviderInCallerOrInProfileAndWhitelListed(packageName, providerProfileId, &resTmp);
+        if (providerProfileId == profileId && resTmp) {
+            if (*result == NULL) {
+                CParcelableList::New(result);
+            }
+            (*result)->Add(TO_IINTERFACE(CloneIfLocalBinder(info)));
+        }
+    }
+
     return NOERROR;
 }
 
 ECode AppWidgetServiceImpl::SendOptionsChangedIntentLocked(
     /* [in] */ Widget* widget)
 {
-    VALIDATE_NOT_NULL(widget);
-    // ==================before translated======================
-    // Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED);
-    // intent.setComponent(widget.provider.info.provider);
-    // intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widget.appWidgetId);
-    // intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, widget.options);
-    // sendBroadcastAsUser(intent, widget.provider.info.getProfile());
-
     AutoPtr<IIntent> intent;
     CIntent::New(IAppWidgetManager::ACTION_APPWIDGET_OPTIONS_CHANGED, (IIntent**)&intent);
     AutoPtr<IComponentName> provider;
@@ -4918,9 +3234,6 @@ ECode AppWidgetServiceImpl::GetWidgetParticipants(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mBackupRestoreController.getWidgetParticipants(userId);
-
     return mBackupRestoreController->GetWidgetParticipants(userId, result);
 }
 
@@ -4930,18 +3243,12 @@ ECode AppWidgetServiceImpl::GetWidgetState(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mBackupRestoreController.getWidgetState(packageName, userId);
-
     return mBackupRestoreController->GetWidgetState(packageName, userId, result);
 }
 
 ECode AppWidgetServiceImpl::RestoreStarting(
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // mBackupRestoreController.restoreStarting(userId);
-
     return mBackupRestoreController->RestoreStarting(userId);
 }
 
@@ -4950,19 +3257,12 @@ ECode AppWidgetServiceImpl::RestoreWidgetState(
     /* [in] */ ArrayOf<Byte>* restoredState,
     /* [in] */ Int32 userId)
 {
-    VALIDATE_NOT_NULL(restoredState);
-    // ==================before translated======================
-    // mBackupRestoreController.restoreWidgetState(packageName, restoredState, userId);
-
     return mBackupRestoreController->RestoreWidgetState(packageName, restoredState, userId);
 }
 
 ECode AppWidgetServiceImpl::RestoreFinished(
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // mBackupRestoreController.restoreFinished(userId);
-
     return mBackupRestoreController->RestoreFinished(userId);
 }
 
@@ -4971,28 +3271,6 @@ ECode AppWidgetServiceImpl::OnCrossProfileWidgetProvidersChanged(
     /* [in] */ IList* packages)
 {
     VALIDATE_NOT_NULL(packages);
-    // ==================before translated======================
-    // final int parentId = mSecurityPolicy.getProfileParent(userId);
-    // // We care only if the white-listed package is in a profile of
-    // // the group parent as only the parent can add widgets from the
-    // // profile and not the other way around.
-    // if (parentId != userId) {
-    //     {    AutoLock syncLock(mLock);
-    //         boolean providersChanged = false;
-    //
-    //         final int packageCount = packages.size();
-    //         for (int i = 0; i < packageCount; i++) {
-    //             String packageName = packages.get(i);
-    //             providersChanged |= updateProvidersForPackageLocked(packageName,
-    //                     userId, null);
-    //         }
-    //
-    //         if (providersChanged) {
-    //             saveGroupStateAsync(userId);
-    //             scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
-    //         }
-    //     }
-    // }
 
     Int32 parentId = 0;
     mSecurityPolicy->GetProfileParent(userId, &parentId);
@@ -5000,25 +3278,24 @@ ECode AppWidgetServiceImpl::OnCrossProfileWidgetProvidersChanged(
     // the group parent as only the parent can add widgets from the
     // profile and not the other way around.
     if (parentId != userId) {
-        //{    AutoLock syncLock(mLock);
-            Boolean providersChanged = false;
-            Int32 packageCount = 0;
-            String packageName;
-            packages->GetSize(&packageCount);
-            for (Int32 i = 0; i < packageCount; ++i) {
-                AutoPtr<IInterface> interfaceTmp;
-                packages->Get(i, (IInterface**)&interfaceTmp);
-                ICharSequence* charSequenceTmp = ICharSequence::Probe(interfaceTmp);
-                charSequenceTmp->ToString(&packageName);
-                providersChanged |= UpdateProvidersForPackageLocked(packageName,
-                        userId, NULL);
-            }
+        AutoLock syncLock(mLock);
+        Boolean providersChanged = false;
+        Int32 packageCount = 0;
+        String packageName;
+        packages->GetSize(&packageCount);
+        for (Int32 i = 0; i < packageCount; ++i) {
+            AutoPtr<IInterface> interfaceTmp;
+            packages->Get(i, (IInterface**)&interfaceTmp);
+            ICharSequence* charSequenceTmp = ICharSequence::Probe(interfaceTmp);
+            charSequenceTmp->ToString(&packageName);
+            providersChanged |= UpdateProvidersForPackageLocked(packageName,
+                    userId, NULL);
+        }
 
-            if (providersChanged) {
-                SaveGroupStateAsync(userId);
-                ScheduleNotifyGroupHostsForProvidersChangedLocked(userId);
-            }
-        //}
+        if (providersChanged) {
+            SaveGroupStateAsync(userId);
+            ScheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+        }
     }
     return NOERROR;
 }
@@ -5034,15 +3311,6 @@ ECode AppWidgetServiceImpl::ToString(
 
 void AppWidgetServiceImpl::ComputeMaximumWidgetBitmapMemory()
 {
-    // ==================before translated======================
-    // WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-    // Display display = wm.getDefaultDisplay();
-    // Point size = new Point();
-    // display.getRealSize(size);
-    // // Cap memory usage at 1.5 times the size of the display
-    // // 1.5 * 4 bytes/pixel * w * h ==> 6 * w * h
-    // mMaxWidgetBitmapMemory = 6 * size.x * size.y;
-
     AutoPtr<IInterface> interfaceTmp;
     mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&interfaceTmp);
     IWindowManager* wm = IWindowManager::Probe(interfaceTmp);
@@ -5061,37 +3329,6 @@ void AppWidgetServiceImpl::ComputeMaximumWidgetBitmapMemory()
 
 void AppWidgetServiceImpl::RegisterBroadcastReceiver()
 {
-    // ==================before translated======================
-    // // Register for configuration changes so we can update the names
-    // // of the widgets when the locale changes.
-    // IntentFilter configFilter = new IntentFilter();
-    // configFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-    // mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
-    //         configFilter, null, null);
-    //
-    // // Register for broadcasts about package install, etc., so we can
-    // // update the provider list.
-    // IntentFilter packageFilter = new IntentFilter();
-    // packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-    // packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-    // packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-    // packageFilter.addDataScheme("package");
-    // mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
-    //         packageFilter, null, null);
-    //
-    // // Register for events related to sdcard installation.
-    // IntentFilter sdFilter = new IntentFilter();
-    // sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
-    // sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-    // mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
-    //         sdFilter, null, null);
-    //
-    // IntentFilter userFilter = new IntentFilter();
-    // userFilter.addAction(Intent.ACTION_USER_STARTED);
-    // userFilter.addAction(Intent.ACTION_USER_STOPPED);
-    // mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
-    //         userFilter, null, null);
-
     // Register for configuration changes so we can update the names
     // of the widgets when the locale changes.
     AutoPtr<IIntentFilter> configFilter;
@@ -5105,7 +3342,7 @@ void AppWidgetServiceImpl::RegisterBroadcastReceiver()
 
     AutoPtr<IIntent> intentTmp;
     mContext->RegisterReceiverAsUser(mBroadcastReceiver, userHandleAllTmp,
-            configFilter, String(""), NULL, (IIntent**)&intentTmp);
+            configFilter, String(NULL), NULL, (IIntent**)&intentTmp);
 
     // Register for broadcasts about package install, etc., so we can
     // update the provider list.
@@ -5118,7 +3355,7 @@ void AppWidgetServiceImpl::RegisterBroadcastReceiver()
 
     intentTmp = NULL;
     mContext->RegisterReceiverAsUser(mBroadcastReceiver, userHandleAllTmp,
-            packageFilter, String(""), NULL, (IIntent**)&intentTmp);
+            packageFilter, String(NULL), NULL, (IIntent**)&intentTmp);
 
     // Register for events related to sdcard installation.
     AutoPtr<IIntentFilter> sdFilter;
@@ -5128,7 +3365,7 @@ void AppWidgetServiceImpl::RegisterBroadcastReceiver()
 
     intentTmp = NULL;
     mContext->RegisterReceiverAsUser(mBroadcastReceiver, userHandleAllTmp,
-            sdFilter, String(""), NULL, (IIntent**)&intentTmp);
+            sdFilter, String(NULL), NULL, (IIntent**)&intentTmp);
 
     AutoPtr<IIntentFilter> userFilter;
     CIntentFilter::New((IIntentFilter**)&userFilter);
@@ -5137,7 +3374,7 @@ void AppWidgetServiceImpl::RegisterBroadcastReceiver()
 
     intentTmp = NULL;
     mContext->RegisterReceiverAsUser(mBroadcastReceiver, userHandleAllTmp,
-            userFilter, String(""), NULL, (IIntent**)&intentTmp);
+            userFilter, String(NULL), NULL, (IIntent**)&intentTmp);
 }
 
 void AppWidgetServiceImpl::RegisterOnCrossProfileProvidersChangedListener()
@@ -5153,56 +3390,6 @@ void AppWidgetServiceImpl::RegisterOnCrossProfileProvidersChangedListener()
 
 void AppWidgetServiceImpl::OnConfigurationChanged()
 {
-    // ==================before translated======================
-    // if (DEBUG) {
-    //     Slog.i(TAG, "onConfigurationChanged()");
-    // }
-    //
-    // Locale revised = Locale.getDefault();
-    // if (revised == null || mLocale == null || !revised.equals(mLocale)) {
-    //     mLocale = revised;
-    //
-    //     {    AutoLock syncLock(mLock);
-    //         SparseIntArray changedGroups = null;
-    //
-    //         // Note: updateProvidersForPackageLocked() may remove providers, so we must copy the
-    //         // list of installed providers and skip providers that we don't need to update.
-    //         // Also note that remove the provider does not clear the Provider component data.
-    //         ArrayList<Provider> installedProviders = new ArrayList<>(mProviders);
-    //         HashSet<ProviderId> removedProviders = new HashSet<>();
-    //
-    //         int N = installedProviders.size();
-    //         for (int i = N - 1; i >= 0; i--) {
-    //             Provider provider = installedProviders.get(i);
-    //
-    //             ensureGroupStateLoadedLocked(provider.getUserId());
-    //
-    //             if (!removedProviders.contains(provider.id)) {
-    //                 final boolean changed = updateProvidersForPackageLocked(
-    //                         provider.id.componentName.getPackageName(),
-    //                         provider.getUserId(), removedProviders);
-    //
-    //                 if (changed) {
-    //                     if (changedGroups == null) {
-    //                         changedGroups = new SparseIntArray();
-    //                     }
-    //                     final int groupId = mSecurityPolicy.getGroupParent(
-    //                             provider.getUserId());
-    //                     changedGroups.put(groupId, groupId);
-    //                 }
-    //             }
-    //         }
-    //
-    //         if (changedGroups != null) {
-    //             final int groupCount = changedGroups.size();
-    //             for (int i = 0; i < groupCount; i++) {
-    //                 final int groupId = changedGroups.get(i);
-    //                 saveGroupStateAsync(groupId);
-    //             }
-    //         }
-    //     }
-    // }
-
     if (DEBUG) {
         Slogger::I(TAG, "onConfigurationChanged()");
     }
@@ -5222,7 +3409,8 @@ void AppWidgetServiceImpl::OnConfigurationChanged()
         mLocale = NULL;
         mLocale = revised;
 
-        //{    AutoLock syncLock(mLock);
+        {
+            AutoLock syncLock(mLock);
             AutoPtr<ISparseInt32Array> changedGroups;
 
             // Note: updateProvidersForPackageLocked() may remove providers, so we must copy the
@@ -5271,7 +3459,7 @@ void AppWidgetServiceImpl::OnConfigurationChanged()
                     SaveGroupStateAsync(groupId);
                 }
             }
-        //}
+        }
     }
 }
 
@@ -5279,80 +3467,6 @@ void AppWidgetServiceImpl::OnPackageBroadcastReceived(
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // final String action = intent.getAction();
-    // boolean added = false;
-    // boolean changed = false;
-    // boolean componentsModified = false;
-    //
-    // String pkgList[] = null;
-    // if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
-    //     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-    //     added = true;
-    // } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
-    //     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-    //     added = false;
-    // } else {
-    //     Uri uri = intent.getData();
-    //     if (uri == null) {
-    //         return;
-    //     }
-    //     String pkgName = uri.getSchemeSpecificPart();
-    //     if (pkgName == null) {
-    //         return;
-    //     }
-    //     pkgList = new String[] { pkgName };
-    //     added = Intent.ACTION_PACKAGE_ADDED.equals(action);
-    //     changed = Intent.ACTION_PACKAGE_CHANGED.equals(action);
-    // }
-    // if (pkgList == null || pkgList.length == 0) {
-    //     return;
-    // }
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     Bundle extras = intent.getExtras();
-    //
-    //     if (added || changed) {
-    //         final boolean newPackageAdded = added && (extras == null
-    //                 || !extras.getBoolean(Intent.EXTRA_REPLACING, false));
-    //
-    //         for (String pkgName : pkgList) {
-    //             // Fix up the providers - add/remove/update.
-    //             componentsModified |= updateProvidersForPackageLocked(pkgName, userId, null);
-    //
-    //             // ... and see if these are hosts we've been awaiting.
-    //             // NOTE: We are backing up and restoring only the owner.
-    //             if (newPackageAdded && userId == UserHandle.USER_OWNER) {
-    //                 final int uid = getUidForPackage(pkgName, userId);
-    //                 if (uid >= 0 ) {
-    //                     resolveHostUidLocked(pkgName, uid);
-    //                 }
-    //             }
-    //         }
-    //     } else {
-    //         // If the package is being updated, we'll receive a PACKAGE_ADDED
-    //         // shortly, otherwise it is removed permanently.
-    //         final boolean packageRemovedPermanently = (extras == null
-    //                 || !extras.getBoolean(Intent.EXTRA_REPLACING, false));
-    //
-    //         if (packageRemovedPermanently) {
-    //             for (String pkgName : pkgList) {
-    //                 componentsModified |= removeHostsAndProvidersForPackageLocked(
-    //                         pkgName, userId);
-    //             }
-    //         }
-    //     }
-    //
-    //     if (componentsModified) {
-    //         saveGroupStateAsync(userId);
-    //
-    //         // If the set of providers has been modified, notify each active AppWidgetHost
-    //         scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
-    //     }
-    // }
-
     String action;
     intent->GetAction(&action);
     Boolean added = FALSE;
@@ -5388,7 +3502,8 @@ void AppWidgetServiceImpl::OnPackageBroadcastReceived(
         return;
     }
 
-    //{    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
         AutoPtr<IBundle> extras;
         intent->GetExtras((IBundle**)&extras);
@@ -5434,26 +3549,13 @@ void AppWidgetServiceImpl::OnPackageBroadcastReceived(
             // If the set of providers has been modified, notify each active AppWidgetHost
             ScheduleNotifyGroupHostsForProvidersChangedLocked(userId);
         }
-    //}
+    }
 }
 
 void AppWidgetServiceImpl::ResolveHostUidLocked(
     /* [in] */ const String& pkg,
     /* [in] */ Int32 uid)
 {
-    // ==================before translated======================
-    // final int N = mHosts.size();
-    // for (int i = 0; i < N; i++) {
-    //     Host host = mHosts.get(i);
-    //     if (host.id.uid == UNKNOWN_UID && pkg.equals(host.id.packageName)) {
-    //         if (DEBUG) {
-    //             Slog.i(TAG, "host " + host.id + " resolved to uid " + uid);
-    //         }
-    //         host.id = new HostId(uid, host.id.hostId, host.id.packageName);
-    //         return;
-    //     }
-    // }
-
     Int32 N = 0;
     mHosts->GetSize(&N);
     for (Int32 i = 0; i < N; ++i) {
@@ -5463,9 +3565,7 @@ void AppWidgetServiceImpl::ResolveHostUidLocked(
         Host* host = (Host*)objTmp;
         if (host->mId->mUid == UNKNOWN_UID && pkg.Equals(host->mId->mPackageName)) {
             if (DEBUG) {
-                String strTmp;
-                host->mId->ToString(&strTmp);
-                Slogger::I(TAG, String("host ") + strTmp + String(" resolved to uid ") + StringUtils::ToString(uid));
+                Slogger::I(TAG, "host %s resolved to uid %d", TO_CSTR(host->mId), uid);
             }
             host->mId = new HostId(uid, host->mId->mHostId, host->mId->mPackageName);
             return;
@@ -5523,43 +3623,6 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetIds(
     /* [in] */ IRemoteViews* views,
     /* [in] */ Boolean partially)
 {
-    VALIDATE_NOT_NULL(appWidgetIds);
-    VALIDATE_NOT_NULL(views);
-    // ==================before translated======================
-    // final int userId = UserHandle.getCallingUserId();
-    //
-    // if (appWidgetIds == null || appWidgetIds.length == 0) {
-    //     return;
-    // }
-    //
-    // // Make sure the package runs under the caller uid.
-    // mSecurityPolicy.enforceCallFromPackage(callingPackage);
-    //
-    // final int bitmapMemoryUsage = (views != null) ? views.estimateMemoryUsage() : 0;
-    // if (bitmapMemoryUsage > mMaxWidgetBitmapMemory) {
-    //     throw new IllegalArgumentException("RemoteViews for widget update exceeds"
-    //             + " maximum bitmap memory usage (used: " + bitmapMemoryUsage
-    //             + ", max: " + mMaxWidgetBitmapMemory + ")");
-    // }
-    //
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     final int N = appWidgetIds.length;
-    //     for (int i = 0; i < N; i++) {
-    //         final int appWidgetId = appWidgetIds[i];
-    //
-    //         // NOTE: The lookup is enforcing security across users by making
-    //         // sure the caller can only access widgets it hosts or provides.
-    //         Widget widget = lookupWidgetLocked(appWidgetId,
-    //                 Binder.getCallingUid(), callingPackage);
-    //
-    //         if (widget != null) {
-    //             updateAppWidgetInstanceLocked(widget, views, partially);
-    //         }
-    //     }
-    // }
-
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId = 0;
@@ -5578,29 +3641,24 @@ ECode AppWidgetServiceImpl::UpdateAppWidgetIds(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    //{    AutoLock syncLock(mLock);
-        EnsureGroupStateLoadedLocked(userId);
-        Int32 N = appWidgetIds->GetLength();
-        Int32 appWidgetId = 0;
-        for (Int32 i = 0; i < N; ++i) {
-            appWidgetId = (*appWidgetIds)[i];
-            AutoPtr<Widget> widget = LookupWidgetLocked(appWidgetId, Binder::GetCallingUid(), callingPackage);
-            if (widget != NULL) {
-                UpdateAppWidgetInstanceLocked(widget, views, partially);
-            }
+    AutoLock syncLock(mLock);
+    EnsureGroupStateLoadedLocked(userId);
+    Int32 N = appWidgetIds->GetLength();
+    Int32 appWidgetId = 0;
+    for (Int32 i = 0; i < N; ++i) {
+        appWidgetId = (*appWidgetIds)[i];
+        AutoPtr<Widget> widget = LookupWidgetLocked(appWidgetId, Binder::GetCallingUid(), callingPackage);
+        if (widget != NULL) {
+            UpdateAppWidgetInstanceLocked(widget, views, partially);
         }
-    //}
+    }
+
     return NOERROR;
 }
 
 Int32 AppWidgetServiceImpl::IncrementAndGetAppWidgetIdLocked(
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // final int appWidgetId = peekNextAppWidgetIdLocked(userId) + 1;
-    // mNextAppWidgetIds.put(userId, appWidgetId);
-    // return appWidgetId;
-
     Int32 appWidgetId = PeekNextAppWidgetIdLocked(userId) + 1;
     mNextAppWidgetIds->Put(userId, appWidgetId);
     return appWidgetId;
@@ -5610,12 +3668,6 @@ void AppWidgetServiceImpl::SetMinAppWidgetIdLocked(
     /* [in] */ Int32 userId,
     /* [in] */ Int32 minWidgetId)
 {
-    // ==================before translated======================
-    // final int nextAppWidgetId = peekNextAppWidgetIdLocked(userId);
-    // if (nextAppWidgetId < minWidgetId) {
-    //     mNextAppWidgetIds.put(userId, minWidgetId);
-    // }
-
     Int32 nextAppWidgetId = PeekNextAppWidgetIdLocked(userId);
     if (nextAppWidgetId < minWidgetId) {
         mNextAppWidgetIds->Put(userId, minWidgetId);
@@ -5625,13 +3677,6 @@ void AppWidgetServiceImpl::SetMinAppWidgetIdLocked(
 Int32 AppWidgetServiceImpl::PeekNextAppWidgetIdLocked(
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // if (mNextAppWidgetIds.indexOfKey(userId) < 0) {
-    //     return AppWidgetManager.INVALID_APPWIDGET_ID + 1;
-    // } else {
-    //     return mNextAppWidgetIds.get(userId);
-    // }
-
     Int32 resTmp = 0;
     mNextAppWidgetIds->IndexOfKey(userId, &resTmp);
     if (resTmp < 0) {
@@ -5646,18 +3691,6 @@ Int32 AppWidgetServiceImpl::PeekNextAppWidgetIdLocked(
 AutoPtr<AppWidgetServiceImpl::Host> AppWidgetServiceImpl::LookupOrAddHostLocked(
     /* [in] */ HostId* id)
 {
-    // ==================before translated======================
-    // Host host = lookupHostLocked(id);
-    // if (host != null) {
-    //     return host;
-    // }
-    //
-    // host = new Host();
-    // host.id = id;
-    // mHosts.add(host);
-    //
-    // return host;
-
     AutoPtr<Host> host = LookupHostLocked(id);
     if (host != NULL) {
         return host;
@@ -5672,17 +3705,6 @@ AutoPtr<AppWidgetServiceImpl::Host> AppWidgetServiceImpl::LookupOrAddHostLocked(
 void AppWidgetServiceImpl::DeleteHostLocked(
     /* [in] */ Host* host)
 {
-    // ==================before translated======================
-    // final int N = host.widgets.size();
-    // for (int i = N - 1; i >= 0; i--) {
-    //     Widget widget = host.widgets.remove(i);
-    //     deleteAppWidgetLocked(widget);
-    // }
-    // mHosts.remove(host);
-    //
-    // // it's gone or going away, abruptly drop the callback connection
-    // host.callbacks = null;
-
     Int32 N = 0;
     host->mWidgets->GetSize(&N);
     for (Int32 i = N - 1; i >= 0; --i) {
@@ -5702,33 +3724,6 @@ void AppWidgetServiceImpl::DeleteHostLocked(
 void AppWidgetServiceImpl::DeleteAppWidgetLocked(
     /* [in] */ Widget* widget)
 {
-    // ==================before translated======================
-    // // We first unbind all services that are bound to this id
-    // unbindAppWidgetRemoteViewsServicesLocked(widget);
-    //
-    // Host host = widget.host;
-    // host.widgets.remove(widget);
-    // pruneHostLocked(host);
-    //
-    // mWidgets.remove(widget);
-    //
-    // Provider provider = widget.provider;
-    // if (provider != null) {
-    //     provider.widgets.remove(widget);
-    //     if (!provider.zombie) {
-    //         // send the broacast saying that this appWidgetId has been deleted
-    //         sendDeletedIntentLocked(widget);
-    //
-    //         if (provider.widgets.isEmpty()) {
-    //             // cancel the future updates
-    //             cancelBroadcasts(provider);
-    //
-    //             // send the broacast saying that the provider is not in use any more
-    //             sendDisabledIntentLocked(provider);
-    //         }
-    //     }
-    // }
-
     // We first unbind all services that are bound to this id
     UnbindAppWidgetRemoteViewsServicesLocked(widget);
 
@@ -5760,25 +3755,8 @@ void AppWidgetServiceImpl::DeleteAppWidgetLocked(
 void AppWidgetServiceImpl::CancelBroadcasts(
     /* [in] */ Provider* provider)
 {
-    // ==================before translated======================
-    // if (DEBUG) {
-    //     Slog.i(TAG, "cancelBroadcasts() for " + provider);
-    // }
-    // if (provider.broadcast != null) {
-    //     mAlarmManager.cancel(provider.broadcast);
-    //     long token = Binder.clearCallingIdentity();
-    //     try {
-    //         provider.broadcast.cancel();
-    //     } finally {
-    //         Binder.restoreCallingIdentity(token);
-    //     }
-    //     provider.broadcast = null;
-    // }
-
     if (DEBUG) {
-        String strTmp;
-        provider->ToString(&strTmp);
-        Slogger::I(TAG, String("cancelBroadcasts() for ") + strTmp);
+        Slogger::I(TAG, "cancelBroadcasts() for %s", TO_CSTR(provider));
     }
     if (provider->mBroadcast != NULL) {
         mAlarmManager->Cancel(provider->mBroadcast);
@@ -5795,26 +3773,6 @@ void AppWidgetServiceImpl::CancelBroadcasts(
 void AppWidgetServiceImpl::UnbindAppWidgetRemoteViewsServicesLocked(
     /* [in] */ Widget* widget)
 {
-    // ==================before translated======================
-    // int appWidgetId = widget.appWidgetId;
-    // // Unbind all connections to Services bound to this AppWidgetId
-    // Iterator<Pair<Integer, Intent.FilterComparison>> it = mBoundRemoteViewsServices.keySet()
-    //         .iterator();
-    // while (it.hasNext()) {
-    //     final Pair<Integer, Intent.FilterComparison> key = it.next();
-    //     if (key.first == appWidgetId) {
-    //         final ServiceConnectionProxy conn = (ServiceConnectionProxy)
-    //                 mBoundRemoteViewsServices.get(key);
-    //         conn.disconnect();
-    //         mContext.unbindService(conn);
-    //         it.remove();
-    //     }
-    // }
-    //
-    // // Check if we need to destroy any services (if no other app widgets are
-    // // referencing the same service)
-    // decrementAppWidgetServiceRefCount(widget);
-
     Int32 appWidgetId = widget->mAppWidgetId;
     // Unbind all connections to Services bound to this AppWidgetId
     AutoPtr<ISet> keySet;
@@ -5852,35 +3810,6 @@ void AppWidgetServiceImpl::DestroyRemoteViewsService(
     /* [in] */ IIntent* intent,
     /* [in] */ Widget* widget)
 {
-    // ==================before translated======================
-    // final ServiceConnection conn = new ServiceConnection() {
-    //     @Override
-    //     public void onServiceConnected(ComponentName name, IBinder service) {
-    //         final IRemoteViewsFactory cb = IRemoteViewsFactory.Stub.asInterface(service);
-    //         try {
-    //             cb.onDestroy(intent);
-    //         } catch (RemoteException re) {
-    //             Slog.e(TAG, "Error calling remove view factory", re);
-    //         }
-    //         mContext.unbindService(this);
-    //     }
-    //
-    //     @Override
-    //     public void onServiceDisconnected(ComponentName name) {
-    //         // Do nothing
-    //     }
-    // };
-    //
-    // // Bind to the service and remove the static intent->factory mapping in the
-    // // RemoteViewsService.
-    // final long token = Binder.clearCallingIdentity();
-    // try {
-    //     mContext.bindServiceAsUser(intent, conn, Context.BIND_AUTO_CREATE,
-    //             widget.provider.info.getProfile());
-    // } finally {
-    //     Binder.restoreCallingIdentity(token);
-    // }
-
     AutoPtr<IServiceConnection> conn = new InnerServiceConnection(this, intent);
     // Bind to the service and remove the static intent->factory mapping in the
     // RemoteViewsService.
@@ -5899,16 +3828,6 @@ void AppWidgetServiceImpl::IncrementAppWidgetServiceRefCount(
     /* [in] */ Int32 appWidgetId,
     /* [in] */ IPair* serviceId)
 {
-    // ==================before translated======================
-    // HashSet<Integer> appWidgetIds = null;
-    // if (mRemoteViewsServicesAppWidgets.containsKey(serviceId)) {
-    //     appWidgetIds = mRemoteViewsServicesAppWidgets.get(serviceId);
-    // } else {
-    //     appWidgetIds = new HashSet<>();
-    //     mRemoteViewsServicesAppWidgets.put(serviceId, appWidgetIds);
-    // }
-    // appWidgetIds.add(appWidgetId);
-
     AutoPtr<IHashSet> appWidgetIds;
     Boolean resTmp = FALSE;
     mRemoteViewsServicesAppWidgets->ContainsKey(TO_IINTERFACE(serviceId), &resTmp);
@@ -5929,22 +3848,6 @@ void AppWidgetServiceImpl::IncrementAppWidgetServiceRefCount(
 void AppWidgetServiceImpl::DecrementAppWidgetServiceRefCount(
     /* [in] */ Widget* widget)
 {
-    // ==================before translated======================
-    // Iterator<Pair<Integer, FilterComparison>> it = mRemoteViewsServicesAppWidgets
-    //         .keySet().iterator();
-    // while (it.hasNext()) {
-    //     final Pair<Integer, FilterComparison> key = it.next();
-    //     final HashSet<Integer> ids = mRemoteViewsServicesAppWidgets.get(key);
-    //     if (ids.remove(widget.appWidgetId)) {
-    //         // If we have removed the last app widget referencing this service, then we
-    //         // should destroy it and remove it from this set
-    //         if (ids.isEmpty()) {
-    //             destroyRemoteViewsService(key.second.getIntent(), widget);
-    //             it.remove();
-    //         }
-    //     }
-    // }
-
     AutoPtr<ISet> keySet;
     mRemoteViewsServicesAppWidgets->GetKeySet((ISet**)&keySet);
     AutoPtr<IIterator> it;
@@ -5981,9 +3884,6 @@ void AppWidgetServiceImpl::DecrementAppWidgetServiceRefCount(
 void AppWidgetServiceImpl::SaveGroupStateAsync(
     /* [in] */ Int32 groupId)
 {
-    // ==================before translated======================
-    // mSaveStateHandler.post(new SaveStateRunnable(groupId));
-
     AutoPtr<SaveStateRunnable> runnable = new SaveStateRunnable(groupId, this);
     Boolean resTmp;
     mSaveStateHandler->Post(IRunnable::Probe(runnable), &resTmp);
@@ -5994,21 +3894,6 @@ void AppWidgetServiceImpl::UpdateAppWidgetInstanceLocked(
     /* [in] */ IRemoteViews* views,
     /* [in] */ Boolean isPartialUpdate)
 {
-    // ==================before translated======================
-    // if (widget != null && widget.provider != null
-    //         && !widget.provider.zombie && !widget.host.zombie) {
-    //
-    //     if (isPartialUpdate && widget.views != null) {
-    //         // For a partial update, we merge the new RemoteViews with the old.
-    //         widget.views.mergeRemoteViews(views);
-    //     } else {
-    //         // For a full update we replace the RemoteViews completely.
-    //         widget.views = views;
-    //     }
-    //
-    //     scheduleNotifyUpdateAppWidgetLocked(widget, views);
-    // }
-
     if (widget != NULL && widget->mProvider != NULL
         && !widget->mProvider->mZombie && !widget->mHost->mZombie) {
         if (isPartialUpdate && widget->mViews != NULL) {
@@ -6027,23 +3912,6 @@ void AppWidgetServiceImpl::ScheduleNotifyAppWidgetViewDataChanged(
     /* [in] */ Widget* widget,
     /* [in] */ Int32 viewId)
 {
-    // ==================before translated======================
-    // if (widget == null || widget.host == null || widget.host.zombie
-    //         || widget.host.callbacks == null || widget.provider == null
-    //         || widget.provider.zombie) {
-    //     return;
-    // }
-    //
-    // SomeArgs args = SomeArgs.obtain();
-    // args.arg1 = widget.host;
-    // args.arg2 = widget.host.callbacks;
-    // args.argi1 = widget.appWidgetId;
-    // args.argi2 = viewId;
-    //
-    // mCallbackHandler.obtainMessage(
-    //         CallbackHandler.MSG_NOTIFY_VIEW_DATA_CHANGED,
-    //         args).sendToTarget();
-
     if (widget == NULL || widget->mHost == NULL || widget->mHost->mZombie
             || widget->mHost->mCallbacks == NULL || widget->mProvider == NULL
             || widget->mProvider->mZombie) {
@@ -6071,53 +3939,6 @@ void AppWidgetServiceImpl::HandleNotifyAppWidgetViewDataChanged(
     /* [in] */ Int32 appWidgetId,
     /* [in] */ Int32 viewId)
 {
-    // ==================before translated======================
-    // try {
-    //     callbacks.viewDataChanged(appWidgetId, viewId);
-    // } catch (RemoteException re) {
-    //     // It failed; remove the callback. No need to prune because
-    //     // we know that this host is still referenced by this instance.
-    //     callbacks = null;
-    // }
-    //
-    // // If the host is unavailable, then we call the associated
-    // // RemoteViewsFactory.onDataSetChanged() directly
-    // {    AutoLock syncLock(mLock);
-    //     if (callbacks == null) {
-    //         host.callbacks = null;
-    //
-    //         Set<Pair<Integer, FilterComparison>> keys = mRemoteViewsServicesAppWidgets.keySet();
-    //         for (Pair<Integer, FilterComparison> key : keys) {
-    //             if (mRemoteViewsServicesAppWidgets.get(key).contains(appWidgetId)) {
-    //                 final ServiceConnection connection = new ServiceConnection() {
-    //                     @Override
-    //                     public void onServiceConnected(ComponentName name, IBinder service) {
-    //                         IRemoteViewsFactory cb = IRemoteViewsFactory.Stub
-    //                                 .asInterface(service);
-    //                         try {
-    //                             cb.onDataSetChangedAsync();
-    //                         } catch (RemoteException e) {
-    //                             Slog.e(TAG, "Error calling onDataSetChangedAsync()", e);
-    //                         }
-    //                         mContext.unbindService(this);
-    //                     }
-    //
-    //                     @Override
-    //                     public void onServiceDisconnected(android.content.ComponentName name) {
-    //                         // Do nothing
-    //                     }
-    //                 };
-    //
-    //                 final int userId = UserHandle.getUserId(key.first);
-    //                 Intent intent = key.second.getIntent();
-    //
-    //                 // Bind to the service and call onDataSetChanged()
-    //                 bindService(intent, connection, new UserHandle(userId));
-    //             }
-    //         }
-    //     }
-    // }
-
     //try {
         callbacks->ViewDataChanged(appWidgetId, viewId);
     //} catch (RemoteException re) {
@@ -6128,76 +3949,60 @@ void AppWidgetServiceImpl::HandleNotifyAppWidgetViewDataChanged(
 
     // If the host is unavailable, then we call the associated
     // RemoteViewsFactory.onDataSetChanged() directly
-    //{    AutoLock syncLock(mLock);
-        if (callbacks == NULL) {
-            host->mCallbacks = NULL;
 
-            AutoPtr<ISet> keySet;
-            mRemoteViewsServicesAppWidgets->GetKeySet((ISet**)&keySet);
-            AutoPtr<IIterator> it;
-            keySet->GetIterator((IIterator**)&it);
-            Boolean hasNext = FALSE;
-            while (it->HasNext(&hasNext), hasNext) {
-                AutoPtr<IInterface> interfaceTmp;
-                it->GetNext((IInterface**)&interfaceTmp);
-                IPair* key = IPair::Probe(interfaceTmp);
+    AutoLock syncLock(mLock);
+    if (callbacks == NULL) {
+        host->mCallbacks = NULL;
 
-                AutoPtr<IInterface> getKeyTmp;
-                mRemoteViewsServicesAppWidgets->Get(TO_IINTERFACE(key), (IInterface**)&getKeyTmp);
-                IHashSet* valueTmp = IHashSet::Probe(getKeyTmp);
-                AutoPtr<IInteger32> widgetIdTmp = CoreUtils::Convert(appWidgetId);
-                Boolean resTmp = FALSE;
-                valueTmp->Contains(TO_IINTERFACE(widgetIdTmp), &resTmp);
-                if (resTmp) {
-                    AutoPtr<InnerServiceConnection1> connection = new InnerServiceConnection1(this);
+        AutoPtr<ISet> keySet;
+        mRemoteViewsServicesAppWidgets->GetKeySet((ISet**)&keySet);
+        AutoPtr<IIterator> it;
+        keySet->GetIterator((IIterator**)&it);
+        Boolean hasNext = FALSE;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> interfaceTmp;
+            it->GetNext((IInterface**)&interfaceTmp);
+            IPair* key = IPair::Probe(interfaceTmp);
 
-                    AutoPtr<IUserHandleHelper> helper;
-                    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
+            AutoPtr<IInterface> getKeyTmp;
+            mRemoteViewsServicesAppWidgets->Get(TO_IINTERFACE(key), (IInterface**)&getKeyTmp);
+            IHashSet* valueTmp = IHashSet::Probe(getKeyTmp);
+            AutoPtr<IInteger32> widgetIdTmp = CoreUtils::Convert(appWidgetId);
+            Boolean resTmp = FALSE;
+            valueTmp->Contains(TO_IINTERFACE(widgetIdTmp), &resTmp);
+            if (resTmp) {
+                AutoPtr<InnerServiceConnection1> connection = new InnerServiceConnection1(this);
 
-                    AutoPtr<IInterface> keyFirstTmp;
-                    key->GetFirst((IInterface**)&keyFirstTmp);
-                    IInteger32* keyFirst1Tmp = IInteger32::Probe(keyFirstTmp);
-                    Int32 keyFirst = 0;
-                    keyFirst1Tmp->GetValue(&keyFirst);
-                    Int32 userId = 0;
-                    helper->GetUserId(keyFirst, &userId);
+                AutoPtr<IUserHandleHelper> helper;
+                CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
 
-                    AutoPtr<IInterface> keySecondTmp;
-                    key->GetSecond((IInterface**)&keySecondTmp);
-                    IIntentFilterComparison* keySecond1Tmp = IIntentFilterComparison::Probe(keySecondTmp);
-                    AutoPtr<IIntent> intent;
-                    keySecond1Tmp->GetIntent((IIntent**)&intent);
+                AutoPtr<IInterface> keyFirstTmp;
+                key->GetFirst((IInterface**)&keyFirstTmp);
+                IInteger32* keyFirst1Tmp = IInteger32::Probe(keyFirstTmp);
+                Int32 keyFirst = 0;
+                keyFirst1Tmp->GetValue(&keyFirst);
+                Int32 userId = 0;
+                helper->GetUserId(keyFirst, &userId);
 
-                    // Bind to the service and call onDataSetChanged()
-                    AutoPtr<IUserHandle> userHandle;
-                    CUserHandle::New(userId, (IUserHandle**)&userHandle);
-                    BindService(intent, connection, userHandle);
-                }
+                AutoPtr<IInterface> keySecondTmp;
+                key->GetSecond((IInterface**)&keySecondTmp);
+                IIntentFilterComparison* keySecond1Tmp = IIntentFilterComparison::Probe(keySecondTmp);
+                AutoPtr<IIntent> intent;
+                keySecond1Tmp->GetIntent((IIntent**)&intent);
+
+                // Bind to the service and call onDataSetChanged()
+                AutoPtr<IUserHandle> userHandle;
+                CUserHandle::New(userId, (IUserHandle**)&userHandle);
+                BindService(intent, connection, userHandle);
             }
         }
-    //}
+    }
 }
 
 void AppWidgetServiceImpl::ScheduleNotifyUpdateAppWidgetLocked(
     /* [in] */ Widget* widget,
     /* [in] */ IRemoteViews* updateViews)
 {
-    // ==================before translated======================
-    // if (widget == null || widget.provider == null || widget.provider.zombie
-    //         || widget.host.callbacks == null || widget.host.zombie) {
-    //     return;
-    // }
-    //
-    // SomeArgs args = SomeArgs.obtain();
-    // args.arg1 = widget.host;
-    // args.arg2 = widget.host.callbacks;
-    // args.arg3 = updateViews;
-    // args.argi1 = widget.appWidgetId;
-    //
-    // mCallbackHandler.obtainMessage(
-    //         CallbackHandler.MSG_NOTIFY_UPDATE_APP_WIDGET,
-    //         args).sendToTarget();
-
     if (widget == NULL || widget->mProvider == NULL || widget->mProvider->mZombie
             || widget->mHost->mCallbacks == NULL || widget->mHost->mZombie) {
         return;
@@ -6224,16 +4029,6 @@ void AppWidgetServiceImpl::HandleNotifyUpdateAppWidget(
     /* [in] */ Int32 appWidgetId,
     /* [in] */ IRemoteViews* views)
 {
-    // ==================before translated======================
-    // try {
-    //     callbacks.updateAppWidget(appWidgetId, views);
-    // } catch (RemoteException re) {
-    //     {    AutoLock syncLock(mLock);
-    //         Slog.e(TAG, "Widget host dead: " + host.id, re);
-    //         host.callbacks = null;
-    //     }
-    // }
-
     //try {
         callbacks->UpdateAppWidget(appWidgetId, views);
     //} catch (RemoteException re) {
@@ -6247,22 +4042,6 @@ void AppWidgetServiceImpl::HandleNotifyUpdateAppWidget(
 void AppWidgetServiceImpl::ScheduleNotifyProviderChangedLocked(
     /* [in] */ Widget* widget)
 {
-    // ==================before translated======================
-    // if (widget == null || widget.provider == null || widget.provider.zombie
-    //         || widget.host.callbacks == null || widget.host.zombie) {
-    //     return;
-    // }
-    //
-    // SomeArgs args = SomeArgs.obtain();
-    // args.arg1 = widget.host;
-    // args.arg2 = widget.host.callbacks;
-    // args.arg3 = widget.provider.info;
-    // args.argi1 = widget.appWidgetId;
-    //
-    // mCallbackHandler.obtainMessage(
-    //         CallbackHandler.MSG_NOTIFY_PROVIDER_CHANGED,
-    //         args).sendToTarget();
-
     if (widget == NULL || widget->mProvider == NULL || widget->mProvider->mZombie
             || widget->mHost->mCallbacks == NULL || widget->mHost->mZombie) {
         return;
@@ -6289,16 +4068,6 @@ void AppWidgetServiceImpl::HandleNotifyProviderChanged(
     /* [in] */ Int32 appWidgetId,
     /* [in] */ IAppWidgetProviderInfo* info)
 {
-    // ==================before translated======================
-    // try {
-    //     callbacks.providerChanged(appWidgetId, info);
-    // } catch (RemoteException re) {
-    //     {    AutoLock syncLock(mLock);
-    //         Slog.e(TAG, "Widget host dead: " + host.id, re);
-    //         host.callbacks = null;
-    //     }
-    // }
-
     //try {
         callbacks->ProviderChanged(appWidgetId, info);
     //} catch (RemoteException re) {
@@ -6312,40 +4081,6 @@ void AppWidgetServiceImpl::HandleNotifyProviderChanged(
 void AppWidgetServiceImpl::ScheduleNotifyGroupHostsForProvidersChangedLocked(
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // final int[] profileIds = mSecurityPolicy.getEnabledGroupProfileIds(userId);
-    //
-    // final int N = mHosts.size();
-    // for (int i = N - 1; i >= 0; i--) {
-    //     Host host = mHosts.get(i);
-    //
-    //     boolean hostInGroup = false;
-    //     final int M = profileIds.length;
-    //     for (int j = 0; j < M; j++) {
-    //         final int profileId = profileIds[j];
-    //         if (host.getUserId() == profileId) {
-    //             hostInGroup = true;
-    //             break;
-    //         }
-    //     }
-    //
-    //     if (!hostInGroup) {
-    //         continue;
-    //     }
-    //
-    //     if (host == null || host.zombie || host.callbacks == null) {
-    //         continue;
-    //     }
-    //
-    //     SomeArgs args = SomeArgs.obtain();
-    //     args.arg1 = host;
-    //     args.arg2 = host.callbacks;
-    //
-    //     mCallbackHandler.obtainMessage(
-    //             CallbackHandler.MSG_NOTIFY_PROVIDERS_CHANGED,
-    //             args).sendToTarget();
-    // }
-
     AutoPtr< ArrayOf<Int32> > profileIds;
     mSecurityPolicy->GetEnabledGroupProfileIds(userId, (ArrayOf<Int32>**)&profileIds);
 
@@ -6394,16 +4129,6 @@ void AppWidgetServiceImpl::HandleNotifyProvidersChanged(
     /* [in] */ Host* host,
     /* [in] */ IIAppWidgetHost* callbacks)
 {
-    // ==================before translated======================
-    // try {
-    //     callbacks.providersChanged();
-    // } catch (RemoteException re) {
-    //     {    AutoLock syncLock(mLock);
-    //         Slog.e(TAG, "Widget host dead: " + host.id, re);
-    //         host.callbacks = null;
-    //     }
-    // }
-
     //try {
         callbacks->ProvidersChanged();
     //} catch (RemoteException re) {
@@ -6416,21 +4141,12 @@ void AppWidgetServiceImpl::HandleNotifyProvidersChanged(
 
 Boolean AppWidgetServiceImpl::IsLocalBinder()
 {
-    // ==================before translated======================
-    // return Process.myPid() == Binder.getCallingPid();
-
     return Process::MyPid() == Binder::GetCallingPid();
 }
 
 AutoPtr<IRemoteViews> AppWidgetServiceImpl::CloneIfLocalBinder(
     /* [in] */ IRemoteViews* rv)
 {
-    // ==================before translated======================
-    // if (isLocalBinder() && rv != null) {
-    //     return rv.clone();
-    // }
-    // return rv;
-
     if (IsLocalBinder() && rv != NULL) {
         AutoPtr<IRemoteViews> result;
         rv->Clone((IRemoteViews**)&result);
@@ -6442,12 +4158,6 @@ AutoPtr<IRemoteViews> AppWidgetServiceImpl::CloneIfLocalBinder(
 AutoPtr<IAppWidgetProviderInfo> AppWidgetServiceImpl::CloneIfLocalBinder(
     /* [in] */ IAppWidgetProviderInfo* info)
 {
-    // ==================before translated======================
-    // if (isLocalBinder() && info != null) {
-    //     return info.clone();
-    // }
-    // return info;
-
     if (IsLocalBinder() && info != NULL) {
         AutoPtr<IAppWidgetProviderInfo> result;
         info->Clone((IAppWidgetProviderInfo**)&result);
@@ -6459,15 +4169,6 @@ AutoPtr<IAppWidgetProviderInfo> AppWidgetServiceImpl::CloneIfLocalBinder(
 AutoPtr<IBundle> AppWidgetServiceImpl::CloneIfLocalBinder(
     /* [in] */ IBundle* bundle)
 {
-    // ==================before translated======================
-    // // Note: this is only a shallow copy. For now this will be fine, but it could be problematic
-    // // if we start adding objects to the options. Further, it would only be an issue if keyguard
-    // // used such options.
-    // if (isLocalBinder() && bundle != null) {
-    //     return (Bundle) bundle.clone();
-    // }
-    // return bundle;
-
     if (IsLocalBinder() && bundle != NULL) {
         AutoPtr<IInterface> resultTmp;
         ICloneable::Probe(bundle)->Clone((IInterface**)&resultTmp);
@@ -6482,17 +4183,6 @@ AutoPtr<AppWidgetServiceImpl::Widget> AppWidgetServiceImpl::LookupWidgetLocked(
     /* [in] */ Int32 uid,
     /* [in] */ const String& packageName)
 {
-    // ==================before translated======================
-    // final int N = mWidgets.size();
-    // for (int i = 0; i < N; i++) {
-    //     Widget widget = mWidgets.get(i);
-    //     if (widget.appWidgetId == appWidgetId
-    //             && mSecurityPolicy.canAccessAppWidget(widget, uid, packageName)) {
-    //         return widget;
-    //     }
-    // }
-    // return null;
-
     Int32 N = 0;
     mWidgets->GetSize(&N);
     for (Int32 i = 0; i < N; ++i) {
@@ -6512,16 +4202,6 @@ AutoPtr<AppWidgetServiceImpl::Widget> AppWidgetServiceImpl::LookupWidgetLocked(
 AutoPtr<AppWidgetServiceImpl::Provider> AppWidgetServiceImpl::LookupProviderLocked(
     /* [in] */ ProviderId* id)
 {
-    // ==================before translated======================
-    // final int N = mProviders.size();
-    // for (int i = 0; i < N; i++) {
-    //     Provider provider = mProviders.get(i);
-    //     if (provider.id.equals(id)) {
-    //         return provider;
-    //     }
-    // }
-    // return null;
-
     Int32 N = 0;
     mProviders->GetSize(&N);
     for (Int32 i = 0; i < N; ++i) {
@@ -6544,16 +4224,6 @@ AutoPtr<AppWidgetServiceImpl::Provider> AppWidgetServiceImpl::LookupProviderLock
 AutoPtr<AppWidgetServiceImpl::Host> AppWidgetServiceImpl::LookupHostLocked(
     /* [in] */ HostId* hostId)
 {
-    // ==================before translated======================
-    // final int N = mHosts.size();
-    // for (int i = 0; i < N; i++) {
-    //     Host host = mHosts.get(i);
-    //     if (host.id.equals(hostId)) {
-    //         return host;
-    //     }
-    // }
-    // return null;
-
     Int32 N = 0;
     mHosts->GetSize(&N);
     for (int i = 0; i < N; i++) {
@@ -6576,21 +4246,11 @@ AutoPtr<AppWidgetServiceImpl::Host> AppWidgetServiceImpl::LookupHostLocked(
 void AppWidgetServiceImpl::PruneHostLocked(
     /* [in] */ Host* host)
 {
-    // ==================before translated======================
-    // if (host.widgets.size() == 0 && host.callbacks == null) {
-    //     if (DEBUG) {
-    //         Slog.i(TAG, "Pruning host " + host.id);
-    //     }
-    //     mHosts.remove(host);
-    // }
-
     Int32 size = 0;
     host->mWidgets->GetSize(&size);
     if (size == 0 && host->mCallbacks == NULL) {
         if (DEBUG) {
-            String strTmp;
-            host->mId->ToString(&strTmp);
-            Slogger::I(TAG, String("Pruning host ") + strTmp);
+            Slogger::I(TAG, "Pruning host %s", TO_CSTR(host->mId));
         }
         mHosts->Remove(TO_IINTERFACE(host));
     }
@@ -6629,51 +4289,6 @@ void AppWidgetServiceImpl::LoadGroupWidgetProvidersLocked(
 Boolean AppWidgetServiceImpl::AddProviderLocked(
     /* [in] */ IResolveInfo* ri)
 {
-    // ==================before translated======================
-    // if ((ri.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
-    //     return false;
-    // }
-    //
-    // if (!ri.activityInfo.isEnabled()) {
-    //     return false;
-    // }
-    //
-    // ComponentName componentName = new ComponentName(ri.activityInfo.packageName,
-    //         ri.activityInfo.name);
-    // ProviderId providerId = new ProviderId(ri.activityInfo.applicationInfo.uid, componentName);
-    //
-    // Provider provider = parseProviderInfoXml(providerId, ri);
-    // if (provider != null) {
-    //     // we might have an inactive entry for this provider already due to
-    //     // a preceding restore operation.  if so, fix it up in place; otherwise
-    //     // just add this new one.
-    //     Provider existing = lookupProviderLocked(providerId);
-    //
-    //     // If the provider was not found it may be because it was restored and
-    //     // we did not know its UID so let us find if there is such one.
-    //     if (existing == null) {
-    //         ProviderId restoredProviderId = new ProviderId(UNKNOWN_UID, componentName);
-    //         existing = lookupProviderLocked(restoredProviderId);
-    //     }
-    //
-    //     if (existing != null) {
-    //         if (existing.zombie && !mSafeMode) {
-    //             // it's a placeholder that was set up during an app restore
-    //             existing.id = providerId;
-    //             existing.zombie = false;
-    //             existing.info = provider.info; // the real one filled out from the ResolveInfo
-    //             if (DEBUG) {
-    //                 Slog.i(TAG, "Provider placeholder now reified: " + existing);
-    //             }
-    //         }
-    //     } else {
-    //         mProviders.add(provider);
-    //     }
-    //     return true;
-    // }
-    //
-    // return false;
-
     AutoPtr<IActivityInfo> activityInfo;
     ri->GetActivityInfo((IActivityInfo**)&activityInfo);
     AutoPtr<IApplicationInfo> applicationInfo;
@@ -6716,9 +4331,7 @@ Boolean AppWidgetServiceImpl::AddProviderLocked(
                 existing->mZombie = FALSE;
                 existing->mInfo = provider->mInfo; // the real one filled out from the ResolveInfo
                 if (DEBUG) {
-                    String strTmp;
-                    existing->ToString(&strTmp);
-                    Slogger::I(TAG, String("Provider placeholder now reified: ") + strTmp);
+                    Slogger::I(TAG, "Provider placeholder now reified: %s", TO_CSTR(existing));
                 }
             }
         }
@@ -6733,24 +4346,6 @@ Boolean AppWidgetServiceImpl::AddProviderLocked(
 void AppWidgetServiceImpl::DeleteProviderLocked(
     /* [in] */ Provider* provider)
 {
-    // ==================before translated======================
-    // int N = provider.widgets.size();
-    // for (int i = N - 1; i >= 0; i--) {
-    //     Widget widget = provider.widgets.remove(i);
-    //     // Call back with empty RemoteViews
-    //     updateAppWidgetInstanceLocked(widget, null, false);
-    //     // clear out references to this appWidgetId
-    //     widget.host.widgets.remove(widget);
-    //     mWidgets.remove(widget);
-    //     widget.provider = null;
-    //     pruneHostLocked(widget.host);
-    //     widget.host = null;
-    // }
-    // mProviders.remove(provider);
-    //
-    // // no need to send the DISABLE broadcast, since the receiver is gone anyway
-    // cancelBroadcasts(provider);
-
     Int32 N = 0;
     provider->mWidgets->GetSize(&N);
     for (Int32 i = N - 1; i >= 0; --i) {
@@ -6774,11 +4369,6 @@ void AppWidgetServiceImpl::DeleteProviderLocked(
 void AppWidgetServiceImpl::SendEnableIntentLocked(
     /* [in] */ Provider* p)
 {
-    // ==================before translated======================
-    // Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_ENABLED);
-    // intent.setComponent(p.info.provider);
-    // sendBroadcastAsUser(intent, p.info.getProfile());
-
     AutoPtr<IIntent> intent;
     CIntent::New(IAppWidgetManager::ACTION_APPWIDGET_ENABLED, (IIntent**)&intent);
     AutoPtr<IComponentName> componentName;
@@ -6794,12 +4384,6 @@ void AppWidgetServiceImpl::SendUpdateIntentLocked(
     /* [in] */ Provider* provider,
     /* [in] */ ArrayOf<Int32>* appWidgetIds)
 {
-    // ==================before translated======================
-    // Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-    // intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
-    // intent.setComponent(provider.info.provider);
-    // sendBroadcastAsUser(intent, provider.info.getProfile());
-
     AutoPtr<IIntent> intent;
     CIntent::New(IAppWidgetManager::ACTION_APPWIDGET_UPDATE, (IIntent**)&intent);
     intent->PutExtra(IAppWidgetManager::EXTRA_APPWIDGET_IDS, appWidgetIds);
@@ -6816,12 +4400,6 @@ void AppWidgetServiceImpl::SendUpdateIntentLocked(
 void AppWidgetServiceImpl::SendDeletedIntentLocked(
     /* [in] */ Widget* widget)
 {
-    // ==================before translated======================
-    // Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_DELETED);
-    // intent.setComponent(widget.provider.info.provider);
-    // intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widget.appWidgetId);
-    // sendBroadcastAsUser(intent, widget.provider.info.getProfile());
-
     AutoPtr<IIntent> intent;
     CIntent::New(IAppWidgetManager::ACTION_APPWIDGET_DELETED, (IIntent**)&intent);
 
@@ -6838,11 +4416,6 @@ void AppWidgetServiceImpl::SendDeletedIntentLocked(
 void AppWidgetServiceImpl::SendDisabledIntentLocked(
     /* [in] */ Provider* provider)
 {
-    // ==================before translated======================
-    // Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_DISABLED);
-    // intent.setComponent(provider.info.provider);
-    // sendBroadcastAsUser(intent, provider.info.getProfile());
-
     AutoPtr<IIntent> intent;
     CIntent::New(IAppWidgetManager::ACTION_APPWIDGET_DISABLED, (IIntent**)&intent);
 
@@ -6859,32 +4432,6 @@ void AppWidgetServiceImpl::RegisterForBroadcastsLocked(
     /* [in] */ Provider* provider,
     /* [in] */ ArrayOf<Int32>* appWidgetIds)
 {
-    // ==================before translated======================
-    // if (provider.info.updatePeriodMillis > 0) {
-    //     // if this is the first instance, set the alarm. otherwise,
-    //     // rely on the fact that we've already set it and that
-    //     // PendingIntent.getBroadcast will update the extras.
-    //     boolean alreadyRegistered = provider.broadcast != null;
-    //     Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-    //     intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
-    //     intent.setComponent(provider.info.provider);
-    //     long token = Binder.clearCallingIdentity();
-    //     try {
-    //         provider.broadcast = PendingIntent.getBroadcastAsUser(mContext, 1, intent,
-    //                 PendingIntent.FLAG_UPDATE_CURRENT, provider.info.getProfile());
-    //     } finally {
-    //         Binder.restoreCallingIdentity(token);
-    //     }
-    //     if (!alreadyRegistered) {
-    //         long period = provider.info.updatePeriodMillis;
-    //         if (period < MIN_UPDATE_PERIOD) {
-    //             period = MIN_UPDATE_PERIOD;
-    //         }
-    //         mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-    //                 SystemClock.elapsedRealtime() + period, period, provider.broadcast);
-    //     }
-    // }
-
     Int32 updatePeriodMillis = 0;
     provider->mInfo->GetUpdatePeriodMillis(&updatePeriodMillis);
     if (updatePeriodMillis > 0) {
@@ -6926,14 +4473,6 @@ void AppWidgetServiceImpl::RegisterForBroadcastsLocked(
 AutoPtr< ArrayOf<Int32> > AppWidgetServiceImpl::GetWidgetIds(
     /* [in] */ IList* widgets)
 {
-    // ==================before translated======================
-    // int instancesSize = widgets.size();
-    // int appWidgetIds[] = new int[instancesSize];
-    // for (int i = 0; i < instancesSize; i++) {
-    //     appWidgetIds[i] = widgets.get(i).appWidgetId;
-    // }
-    // return appWidgetIds;
-
     Int32 instancesSize = 0;
     widgets->GetSize(&instancesSize);
     AutoPtr< ArrayOf<Int32> > appWidgetIds = ArrayOf<Int32>::Alloc(instancesSize);
@@ -6952,27 +4491,6 @@ void AppWidgetServiceImpl::DumpProvider(
     /* [in] */ Int32 index,
     /* [in] */ IPrintWriter* pw)
 {
-    // ==================before translated======================
-    // AppWidgetProviderInfo info = provider.info;
-    // pw.print("  ["); pw.print(index); pw.print("] provider ");
-    // pw.println(provider.id);
-    // pw.print("    min=("); pw.print(info.minWidth);
-    // pw.print("x"); pw.print(info.minHeight);
-    // pw.print(")   minResize=("); pw.print(info.minResizeWidth);
-    // pw.print("x"); pw.print(info.minResizeHeight);
-    // pw.print(") updatePeriodMillis=");
-    // pw.print(info.updatePeriodMillis);
-    // pw.print(" resizeMode=");
-    // pw.print(info.resizeMode);
-    // pw.print(info.widgetCategory);
-    // pw.print(" autoAdvanceViewId=");
-    // pw.print(info.autoAdvanceViewId);
-    // pw.print(" initialLayout=#");
-    // pw.print(Integer.toHexString(info.initialLayout));
-    // pw.print(" initialKeyguardLayout=#");
-    // pw.print(Integer.toHexString(info.initialKeyguardLayout));
-    // pw.print(" zombie="); pw.println(provider.zombie);
-
     IAppWidgetProviderInfo* info = provider->mInfo;
     pw->Print(String("  ["));
     pw->Print(index);
@@ -7040,13 +4558,6 @@ void AppWidgetServiceImpl::DumpHost(
     /* [in] */ Int32 index,
     /* [in] */ IPrintWriter* pw)
 {
-    // ==================before translated======================
-    // pw.print("  ["); pw.print(index); pw.print("] hostId=");
-    // pw.println(host.id);
-    // pw.print("    callbacks="); pw.println(host.callbacks);
-    // pw.print("    widgets.size="); pw.print(host.widgets.size());
-    // pw.print(" zombie="); pw.println(host.zombie);
-
     pw->Print(String("  ["));
     pw->Print(index);
 
@@ -7071,11 +4582,6 @@ void AppWidgetServiceImpl::DumpGrant(
     /* [in] */ Int32 index,
     /* [in] */ IPrintWriter* pw)
 {
-    // ==================before translated======================
-    // pw.print("  ["); pw.print(index); pw.print(']');
-    // pw.print(" user="); pw.print(grant.first);
-    // pw.print(" package="); pw.println(grant.second);
-
     pw->Print(String("  ["));
     pw->Print(index);
     pw->Print(']');
@@ -7102,24 +4608,6 @@ void AppWidgetServiceImpl::DumpWidget(
     /* [in] */ Int32 index,
     /* [in] */ IPrintWriter* pw)
 {
-    // ==================before translated======================
-    // pw.print("  ["); pw.print(index); pw.print("] id=");
-    // pw.println(widget.appWidgetId);
-    // pw.print("    host=");
-    // pw.println(widget.host.id);
-    // if (widget.provider != null) {
-    //     pw.print("    provider="); pw.println(widget.provider.id);
-    // }
-    // if (widget.host != null) {
-    //     pw.print("    host.callbacks="); pw.println(widget.host.callbacks);
-    // }
-    // if (widget.views != null) {
-    //     pw.print("    views="); pw.println(widget.views);
-    // }
-    // if (widget.options != null) {
-    //     pw.print("    options="); pw.println(widget.options);
-    // }
-
     pw->Print(String("  ["));
     pw->Print(index);
     pw->Print(String("] id="));
@@ -7151,207 +4639,67 @@ void AppWidgetServiceImpl::SerializeProvider(
     /* [in] */ IXmlSerializer* out,
     /* [in] */ Provider* p)
 {
-    // ==================before translated======================
-    // out.startTag(null, "p");
-    // out.attribute(null, "pkg", p.info.provider.getPackageName());
-    // out.attribute(null, "cl", p.info.provider.getClassName());
-    // out.attribute(null, "tag", Integer.toHexString(p.tag));
-    // out.endTag(null, "p");
-
-    out->WriteStartTag(String(""), String("p"));
+    out->WriteStartTag(String(NULL), String("p"));
 
     AutoPtr<IComponentName> componentName;
     p->mInfo->GetProvider((IComponentName**)&componentName);
     String packageName;
     componentName->GetPackageName(&packageName);
-    out->WriteAttribute(String(""), String("pkg"), packageName);
+    out->WriteAttribute(String(NULL), String("pkg"), packageName);
 
     String className;
     componentName->GetClassName(&className);
-    out->WriteAttribute(String(""), String("cl"), className);
-    out->WriteAttribute(String(""), String("tag"), StringUtils::ToHexString(p->mTag));
-    out->WriteEndTag(String(""), String("p"));
+    out->WriteAttribute(String(NULL), String("cl"), className);
+    out->WriteAttribute(String(NULL), String("tag"), StringUtils::ToHexString(p->mTag));
+    out->WriteEndTag(String(NULL), String("p"));
 }
 
 void AppWidgetServiceImpl::SerializeHost(
     /* [in] */ IXmlSerializer* out,
     /* [in] */ Host* host)
 {
-    // ==================before translated======================
-    // out.startTag(null, "h");
-    // out.attribute(null, "pkg", host.id.packageName);
-    // out.attribute(null, "id", Integer.toHexString(host.id.hostId));
-    // out.attribute(null, "tag", Integer.toHexString(host.tag));
-    // out.endTag(null, "h");
-
-    out->WriteStartTag(String(""), String("h"));
-    out->WriteAttribute(String(""), String("pkg"), host->mId->mPackageName);
-    out->WriteAttribute(String(""), String("id"), StringUtils::ToHexString(host->mId->mHostId));
-    out->WriteAttribute(String(""), String("tag"), StringUtils::ToHexString(host->mTag));
-    out->WriteEndTag(String(""), String("h"));
+    out->WriteStartTag(String(NULL), String("h"));
+    out->WriteAttribute(String(NULL), String("pkg"), host->mId->mPackageName);
+    out->WriteAttribute(String(NULL), String("id"), StringUtils::ToHexString(host->mId->mHostId));
+    out->WriteAttribute(String(NULL), String("tag"), StringUtils::ToHexString(host->mTag));
+    out->WriteEndTag(String(NULL), String("h"));
 }
 
 void AppWidgetServiceImpl::SerializeAppWidget(
     /* [in] */ IXmlSerializer* out,
     /* [in] */ Widget* widget)
 {
-    // ==================before translated======================
-    // out.startTag(null, "g");
-    // out.attribute(null, "id", Integer.toHexString(widget.appWidgetId));
-    // out.attribute(null, "rid", Integer.toHexString(widget.restoredId));
-    // out.attribute(null, "h", Integer.toHexString(widget.host.tag));
-    // if (widget.provider != null) {
-    //     out.attribute(null, "p", Integer.toHexString(widget.provider.tag));
-    // }
-    // if (widget.options != null) {
-    //     out.attribute(null, "min_width", Integer.toHexString(widget.options.getInt(
-    //             AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)));
-    //     out.attribute(null, "min_height", Integer.toHexString(widget.options.getInt(
-    //             AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)));
-    //     out.attribute(null, "max_width", Integer.toHexString(widget.options.getInt(
-    //             AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)));
-    //     out.attribute(null, "max_height", Integer.toHexString(widget.options.getInt(
-    //             AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)));
-    //     out.attribute(null, "host_category", Integer.toHexString(widget.options.getInt(
-    //             AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY)));
-    // }
-    // out.endTag(null, "g");
-
-    out->WriteStartTag(String(""), String("g"));
-    out->WriteAttribute(String(""), String("id"), StringUtils::ToHexString(widget->mAppWidgetId));
-    out->WriteAttribute(String(""), String("rid"), StringUtils::ToHexString(widget->mRestoredId));
-    out->WriteAttribute(String(""), String("h"), StringUtils::ToHexString(widget->mHost->mTag));
+    out->WriteStartTag(String(NULL), String("g"));
+    out->WriteAttribute(String(NULL), String("id"), StringUtils::ToHexString(widget->mAppWidgetId));
+    out->WriteAttribute(String(NULL), String("rid"), StringUtils::ToHexString(widget->mRestoredId));
+    out->WriteAttribute(String(NULL), String("h"), StringUtils::ToHexString(widget->mHost->mTag));
     if (widget->mProvider != NULL) {
-        out->WriteAttribute(String(""), String("p"), StringUtils::ToHexString(widget->mProvider->mTag));
+        out->WriteAttribute(String(NULL), String("p"), StringUtils::ToHexString(widget->mProvider->mTag));
     }
     if (widget->mOptions != NULL) {
         Int32 resTmp = 0;
         widget->mOptions->GetInt32(IAppWidgetManager::OPTION_APPWIDGET_MIN_WIDTH, &resTmp);
-        out->WriteAttribute(String(""), String("min_width"), StringUtils::ToHexString(resTmp));
+        out->WriteAttribute(String(NULL), String("min_width"), StringUtils::ToHexString(resTmp));
 
         widget->mOptions->GetInt32(IAppWidgetManager::OPTION_APPWIDGET_MIN_HEIGHT, &resTmp);
-        out->WriteAttribute(String(""), String("min_height"), StringUtils::ToHexString(resTmp));
+        out->WriteAttribute(String(NULL), String("min_height"), StringUtils::ToHexString(resTmp));
 
         widget->mOptions->GetInt32(IAppWidgetManager::OPTION_APPWIDGET_MAX_WIDTH, &resTmp);
-        out->WriteAttribute(String(""), String("max_width"), StringUtils::ToHexString(resTmp));
+        out->WriteAttribute(String(NULL), String("max_width"), StringUtils::ToHexString(resTmp));
 
         widget->mOptions->GetInt32(IAppWidgetManager::OPTION_APPWIDGET_MAX_HEIGHT, &resTmp);
-        out->WriteAttribute(String(""), String("max_height"), StringUtils::ToHexString(resTmp));
+        out->WriteAttribute(String(NULL), String("max_height"), StringUtils::ToHexString(resTmp));
 
         widget->mOptions->GetInt32(IAppWidgetManager::OPTION_APPWIDGET_HOST_CATEGORY, &resTmp);
-        out->WriteAttribute(String(""), String("host_category"), StringUtils::ToHexString(resTmp));
+        out->WriteAttribute(String(NULL), String("host_category"), StringUtils::ToHexString(resTmp));
     }
-    out->WriteEndTag(String(""), String("g"));
+    out->WriteEndTag(String(NULL), String("g"));
 }
 
 AutoPtr<AppWidgetServiceImpl::Provider> AppWidgetServiceImpl::ParseProviderInfoXml(
     /* [in] */ ProviderId* providerId,
     /* [in] */ IResolveInfo* ri)
 {
-    // ==================before translated======================
-    // Provider provider = null;
-    //
-    // ActivityInfo activityInfo = ri.activityInfo;
-    // XmlResourceParser parser = null;
-    // try {
-    //     parser = activityInfo.loadXmlMetaData(mContext.getPackageManager(),
-    //             AppWidgetManager.META_DATA_APPWIDGET_PROVIDER);
-    //     if (parser == null) {
-    //         Slog.w(TAG, "No " + AppWidgetManager.META_DATA_APPWIDGET_PROVIDER
-    //                 + " meta-data for " + "AppWidget provider '" + providerId + '\'');
-    //         return null;
-    //     }
-    //
-    //     AttributeSet attrs = Xml.asAttributeSet(parser);
-    //
-    //     int type;
-    //     while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-    //             && type != XmlPullParser.START_TAG) {
-    //         // drain whitespace, comments, etc.
-    //     }
-    //
-    //     String nodeName = parser.getName();
-    //     if (!"appwidget-provider".equals(nodeName)) {
-    //         Slog.w(TAG, "Meta-data does not start with appwidget-provider tag for"
-    //                 + " AppWidget provider " + providerId.componentName
-    //                 + " for user " + providerId.uid);
-    //         return null;
-    //     }
-    //
-    //     provider = new Provider();
-    //     provider.id = providerId;
-    //     AppWidgetProviderInfo info = provider.info = new AppWidgetProviderInfo();
-    //     info.provider = providerId.componentName;
-    //     info.providerInfo = activityInfo;
-    //
-    //     final Resources resources;
-    //     final long identity = Binder.clearCallingIdentity();
-    //     try {
-    //         resources = mContext.getPackageManager()
-    //                 .getResourcesForApplicationAsUser(activityInfo.packageName,
-    //                         UserHandle.getUserId(providerId.uid));
-    //     } finally {
-    //         Binder.restoreCallingIdentity(identity);
-    //     }
-    //
-    //     TypedArray sa = resources.obtainAttributes(attrs,
-    //             com.android.internal.R.styleable.AppWidgetProviderInfo);
-    //
-    //     // These dimensions has to be resolved in the application's context.
-    //     // We simply send back the raw complex data, which will be
-    //     // converted to dp in {@link AppWidgetManager#getAppWidgetInfo}.
-    //     TypedValue value = sa
-    //             .peekValue(com.android.internal.R.styleable.AppWidgetProviderInfo_minWidth);
-    //     info.minWidth = value != null ? value.data : 0;
-    //     value = sa.peekValue(com.android.internal.R.styleable.AppWidgetProviderInfo_minHeight);
-    //     info.minHeight = value != null ? value.data : 0;
-    //     value = sa.peekValue(
-    //             com.android.internal.R.styleable.AppWidgetProviderInfo_minResizeWidth);
-    //     info.minResizeWidth = value != null ? value.data : info.minWidth;
-    //     value = sa.peekValue(
-    //             com.android.internal.R.styleable.AppWidgetProviderInfo_minResizeHeight);
-    //     info.minResizeHeight = value != null ? value.data : info.minHeight;
-    //     info.updatePeriodMillis = sa.getInt(
-    //             com.android.internal.R.styleable.AppWidgetProviderInfo_updatePeriodMillis, 0);
-    //     info.initialLayout = sa.getResourceId(
-    //             com.android.internal.R.styleable.AppWidgetProviderInfo_initialLayout, 0);
-    //     info.initialKeyguardLayout = sa.getResourceId(com.android.internal.R.styleable.
-    //             AppWidgetProviderInfo_initialKeyguardLayout, 0);
-    //
-    //     String className = sa
-    //             .getString(com.android.internal.R.styleable.AppWidgetProviderInfo_configure);
-    //     if (className != null) {
-    //         info.configure = new ComponentName(providerId.componentName.getPackageName(),
-    //                 className);
-    //     }
-    //     info.label = activityInfo.loadLabel(mContext.getPackageManager()).toString();
-    //     info.icon = ri.getIconResource();
-    //     info.previewImage = sa.getResourceId(
-    //             com.android.internal.R.styleable.AppWidgetProviderInfo_previewImage, 0);
-    //     info.autoAdvanceViewId = sa.getResourceId(
-    //             com.android.internal.R.styleable.AppWidgetProviderInfo_autoAdvanceViewId, -1);
-    //     info.resizeMode = sa.getInt(
-    //             com.android.internal.R.styleable.AppWidgetProviderInfo_resizeMode,
-    //             AppWidgetProviderInfo.RESIZE_NONE);
-    //     info.widgetCategory = sa.getInt(
-    //             com.android.internal.R.styleable.AppWidgetProviderInfo_widgetCategory,
-    //             AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN);
-    //
-    //     sa.recycle();
-    // } catch (IOException | PackageManager.NameNotFoundException | XmlPullParserException e) {
-    //     // Ok to catch Exception here, because anything going wrong because
-    //     // of what a client process passes to us should not be fatal for the
-    //     // system process.
-    //     Slog.w(TAG, "XML parsing failed for AppWidget provider "
-    //             + providerId.componentName + " for user " + providerId.uid, e);
-    //     return null;
-    // } finally {
-    //     if (parser != null) {
-    //         parser.close();
-    //     }
-    // }
-    // return provider;
-
     AutoPtr<Provider> provider;
     AutoPtr<IActivityInfo> activityInfo;
     ri->GetActivityInfo((IActivityInfo**)&activityInfo);
@@ -7362,16 +4710,14 @@ AutoPtr<AppWidgetServiceImpl::Provider> AppWidgetServiceImpl::ParseProviderInfoX
         IPackageItemInfo::Probe(activityInfo)->LoadXmlMetaData(packageManagerTmp,
                 IAppWidgetManager::META_DATA_APPWIDGET_PROVIDER, (IXmlResourceParser**)&parser);
         if (parser == NULL) {
-            String strTmp;
-            providerId->ToString(&strTmp);
-            Slogger::W(TAG, String("No ") + IAppWidgetManager::META_DATA_APPWIDGET_PROVIDER
-                    + String(" meta-data for ") + String("AppWidget provider '") + strTmp + String("\'"));
+            Slogger::W(TAG, "No %s meta-data for AppWidget provider \'%s\'",
+                IAppWidgetManager::META_DATA_APPWIDGET_PROVIDER.string(), TO_CSTR(providerId));
             return NULL;
         }
 
         AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(IXmlPullParser::Probe(parser));
-        Int32 type = 0, next = 0;
-        while ((type = IXmlPullParser::Probe(parser)->Next(&next), next) != IXmlPullParser::END_DOCUMENT
+        Int32 type = 0;
+        while ((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_DOCUMENT
                 && type != IXmlPullParser::START_TAG) {
             // drain whitespace, comments, etc.
         }
@@ -7379,11 +4725,8 @@ AutoPtr<AppWidgetServiceImpl::Provider> AppWidgetServiceImpl::ParseProviderInfoX
         String nodeName;
         IXmlPullParser::Probe(parser)->GetName(&nodeName);
         if (!String("appwidget-provider").Equals(nodeName)) {
-            String componentName;
-            providerId->mComponentName->ToString(&componentName);
-            Slogger::W(TAG, String("Meta-data does not start with appwidget-provider tag for")
-                    + String(" AppWidget provider ") + componentName
-                    + String(" for user ") + StringUtils::ToString(providerId->mUid));
+            Slogger::W(TAG, "Meta-data does not start with appwidget-provider tag for"
+                " AppWidget provider %s for user %d", TO_CSTR(providerId->mComponentName), providerId->mUid);
             return NULL;
         }
 
@@ -7411,48 +4754,53 @@ AutoPtr<AppWidgetServiceImpl::Provider> AppWidgetServiceImpl::ParseProviderInfoX
             Binder::RestoreCallingIdentity(identity);
         //}
 
-        AutoPtr< ArrayOf<Int32> > styleAttrsTmp;// = ArrayOf<Int32>::Alloc(const_cast<Int32*>(R::styleable::AppWidgetProviderInfo),
-            //ArraySize(R::styleable::AppWidgetProviderInfo));
+        AutoPtr< ArrayOf<Int32> > styleAttrsTmp = ArrayOf<Int32>::Alloc(const_cast<Int32*>(R::styleable::AppWidgetProviderInfo),
+            ArraySize(R::styleable::AppWidgetProviderInfo));
         AutoPtr<ITypedArray> sa;
         resources->ObtainAttributes(attrs, styleAttrsTmp, (ITypedArray**)&sa);
 
         AutoPtr<ITypedValue> value;
-        sa->PeekValue(-1/*R::styleable::AppWidgetProviderInfo_minWidth*/, (ITypedValue**)&value);
+        sa->PeekValue(R::styleable::AppWidgetProviderInfo_minWidth, (ITypedValue**)&value);
         Int32 intDataTmp = 0;
-        value->GetData(&intDataTmp);
-        info->SetMinWidth(value != NULL ? intDataTmp : 0);
+        if (value != NULL)
+            value->GetData(&intDataTmp);
+        info->SetMinWidth(intDataTmp);
 
         value = NULL;
-        sa->PeekValue(-1/*R::styleable::AppWidgetProviderInfo_minHeight*/, (ITypedValue**)&value);
-        value->GetData(&intDataTmp);
-        info->SetMinHeight(value != NULL ? intDataTmp : 0);
+        sa->PeekValue(R::styleable::AppWidgetProviderInfo_minHeight, (ITypedValue**)&value);
+        intDataTmp = 0;
+        if (value != NULL)
+            value->GetData(&intDataTmp);
+        info->SetMinHeight(intDataTmp);
 
         value = NULL;
-        sa->PeekValue(-1/*R::styleable::AppWidgetProviderInfo_minResizeWidth*/, (ITypedValue**)&value);
-        value->GetData(&intDataTmp);
-        Int32 minWidthTmp = 0;
-        info->GetMinWidth(&minWidthTmp);
-        info->SetMinResizeWidth(value != NULL ? intDataTmp : minWidthTmp);
+        sa->PeekValue(R::styleable::AppWidgetProviderInfo_minResizeWidth, (ITypedValue**)&value);
+        if (value != NULL)
+            value->GetData(&intDataTmp);
+        else
+            info->GetMinWidth(&intDataTmp);
+        info->SetMinResizeWidth(intDataTmp);
 
         value = NULL;
-        sa->PeekValue(-1/*R::styleable::AppWidgetProviderInfo_minResizeHeight*/, (ITypedValue**)&value);
-        value->GetData(&intDataTmp);
-        Int32 minHeightTmp = 0;
-        info->GetMinHeight(&minHeightTmp);
-        info->SetMinResizeHeight(value != NULL ? intDataTmp : minHeightTmp);
+        sa->PeekValue(R::styleable::AppWidgetProviderInfo_minResizeHeight, (ITypedValue**)&value);
+        if (value != NULL)
+            value->GetData(&intDataTmp);
+        else
+            info->GetMinHeight(&intDataTmp);
+        info->SetMinResizeHeight(intDataTmp);
 
-        sa->GetInt32(-1/*R::styleable::AppWidgetProviderInfo_updatePeriodMillis*/, 0, &intDataTmp);
+        sa->GetInt32(R::styleable::AppWidgetProviderInfo_updatePeriodMillis, 0, &intDataTmp);
         info->SetUpdatePeriodMillis(intDataTmp);
 
-        sa->GetResourceId(-1/*R::styleable::AppWidgetProviderInfo_initialLayout*/, 0, &intDataTmp);
+        sa->GetResourceId(R::styleable::AppWidgetProviderInfo_initialLayout, 0, &intDataTmp);
         info->SetInitialLayout(intDataTmp);
 
-        sa->GetResourceId(-1/*R::styleable::AppWidgetProviderInfo_initialKeyguardLayout*/, 0, &intDataTmp);
+        sa->GetResourceId(R::styleable::AppWidgetProviderInfo_initialKeyguardLayout, 0, &intDataTmp);
         info->SetInitialKeyguardLayout(intDataTmp);
 
         String className;
-        sa->GetString(-1/*R::styleable::AppWidgetProviderInfo_configure*/, &className);
-        if (!className.IsEmpty()) {
+        sa->GetString(R::styleable::AppWidgetProviderInfo_configure, &className);
+        if (className != NULL) {
             String packageName;
             providerId->mComponentName->GetPackageName(&packageName);
             AutoPtr<IComponentName> componentName;
@@ -7471,17 +4819,17 @@ AutoPtr<AppWidgetServiceImpl::Provider> AppWidgetServiceImpl::ParseProviderInfoX
         info->SetIcon(iconResourcesTmp);
 
         Int32 resourceIdTmp = 0;
-        sa->GetResourceId(-1/*R::styleable::AppWidgetProviderInfo_previewImage*/, 0, &resourceIdTmp);
+        sa->GetResourceId(R::styleable::AppWidgetProviderInfo_previewImage, 0, &resourceIdTmp);
         info->SetPreviewImage(resourceIdTmp);
 
-        sa->GetResourceId(-1/*R::styleable::AppWidgetProviderInfo_autoAdvanceViewId*/, -1, &resourceIdTmp);
+        sa->GetResourceId(R::styleable::AppWidgetProviderInfo_autoAdvanceViewId, -1, &resourceIdTmp);
         info->SetAutoAdvanceViewId(resourceIdTmp);
 
         Int32 intTmp = 0;
-        sa->GetInt32(-1/*R::styleable::AppWidgetProviderInfo_resizeMode*/, IAppWidgetProviderInfo::RESIZE_NONE, &intTmp);
+        sa->GetInt32(R::styleable::AppWidgetProviderInfo_resizeMode, IAppWidgetProviderInfo::RESIZE_NONE, &intTmp);
         info->SetResizeMode(intTmp);
 
-        sa->GetInt32(-1/*R::styleable::AppWidgetProviderInfo_widgetCategory*/,
+        sa->GetInt32(R::styleable::AppWidgetProviderInfo_widgetCategory,
             IAppWidgetProviderInfo::WIDGET_CATEGORY_HOME_SCREEN, &intTmp);
         info->SetWidgetCategory(intTmp);
 
@@ -7505,24 +4853,6 @@ Int32 AppWidgetServiceImpl::GetUidForPackage(
     /* [in] */ const String& packageName,
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // PackageInfo pkgInfo = null;
-    //
-    // final long identity = Binder.clearCallingIdentity();
-    // try {
-    //     pkgInfo = mPackageManager.getPackageInfo(packageName, 0, userId);
-    // } catch (RemoteException re) {
-    //     // Shouldn't happen, local call
-    // } finally {
-    //     Binder.restoreCallingIdentity(identity);
-    // }
-    //
-    // if (pkgInfo == null || pkgInfo.applicationInfo == null) {
-    //     return -1;
-    // }
-    //
-    // return pkgInfo.applicationInfo.uid;
-
     AutoPtr<IPackageInfo> pkgInfo;
 
     Int64 identity = Binder::ClearCallingIdentity();
@@ -7549,18 +4879,6 @@ AutoPtr<IActivityInfo> AppWidgetServiceImpl::GetProviderInfo(
     /* [in] */ IComponentName* componentName,
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-    // intent.setComponent(componentName);
-    //
-    // List<ResolveInfo> receivers = queryIntentReceivers(intent, userId);
-    // // We are setting component, so there is only one or none.
-    // if (!receivers.isEmpty()) {
-    //     return receivers.get(0).activityInfo;
-    // }
-    //
-    // return null;
-
     AutoPtr<IIntent> intent;
     CIntent::New(IAppWidgetManager::ACTION_APPWIDGET_UPDATE, (IIntent**)&intent);
     intent->SetComponent(componentName);
@@ -7584,24 +4902,6 @@ AutoPtr<IList> AppWidgetServiceImpl::QueryIntentReceivers(
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // final long identity = Binder.clearCallingIdentity();
-    // try {
-    //     int flags = PackageManager.GET_META_DATA;
-    //
-    //     // Widgets referencing shared libraries need to have their
-    //     // dependencies loaded.
-    //     flags |= PackageManager.GET_SHARED_LIBRARY_FILES;
-    //
-    //     return mPackageManager.queryIntentReceivers(intent,
-    //             intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-    //             flags, userId);
-    // } catch (RemoteException re) {
-    //     return Collections.emptyList();
-    // } finally {
-    //     Binder.restoreCallingIdentity(identity);
-    // }
-
     Int64 identity = Binder::ClearCallingIdentity();
     AutoPtr<IList> result;
     //try {
@@ -7626,55 +4926,32 @@ AutoPtr<IList> AppWidgetServiceImpl::QueryIntentReceivers(
 void AppWidgetServiceImpl::OnUserStarted(
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // {    AutoLock syncLock(mLock);
-    //     ensureGroupStateLoadedLocked(userId);
-    //
-    //     final int N = mProviders.size();
-    //     for (int i = 0; i < N; i++) {
-    //         Provider provider = mProviders.get(i);
-    //
-    //         // Send broadcast only to the providers of the user.
-    //         if (provider.getUserId() != userId) {
-    //             continue;
-    //         }
-    //
-    //         if (provider.widgets.size() > 0) {
-    //             sendEnableIntentLocked(provider);
-    //             int[] appWidgetIds = getWidgetIds(provider.widgets);
-    //             sendUpdateIntentLocked(provider, appWidgetIds);
-    //             registerForBroadcastsLocked(provider, appWidgetIds);
-    //         }
-    //     }
-    // }
+    AutoLock syncLock(mLock);
+    EnsureGroupStateLoadedLocked(userId);
+    Int32 N = 0;
+    mProviders->GetSize(&N);
+    for (Int32 i = 0; i < N; ++i) {
+        AutoPtr<IInterface> interfaceTmp;
+        mProviders->Get(0, (IInterface**)&interfaceTmp);
+        IObject* objTmp = IObject::Probe(interfaceTmp);
+        Provider* provider = (Provider*)objTmp;
 
-    //{    AutoLock syncLock(mLock);
-        EnsureGroupStateLoadedLocked(userId);
-        Int32 N = 0;
-        mProviders->GetSize(&N);
-        for (Int32 i = 0; i < N; ++i) {
-            AutoPtr<IInterface> interfaceTmp;
-            mProviders->Get(0, (IInterface**)&interfaceTmp);
-            IObject* objTmp = IObject::Probe(interfaceTmp);
-            Provider* provider = (Provider*)objTmp;
-
-            // Send broadcast only to the providers of the user.
-            Int32 userId = 0;
-            provider->GetUserId(&userId);
-            if (userId != userId) {
-                continue;
-            }
-
-            Int32 size = 0;
-            provider->mWidgets->GetSize(&size);
-            if (size > 0) {
-                SendEnableIntentLocked(provider);
-                AutoPtr< ArrayOf<Int32> > appWidgetIds = GetWidgetIds(provider->mWidgets);
-                SendUpdateIntentLocked(provider, appWidgetIds);
-                RegisterForBroadcastsLocked(provider, appWidgetIds);
-            }
+        // Send broadcast only to the providers of the user.
+        Int32 userId = 0;
+        provider->GetUserId(&userId);
+        if (userId != userId) {
+            continue;
         }
-    //}
+
+        Int32 size = 0;
+        provider->mWidgets->GetSize(&size);
+        if (size > 0) {
+            SendEnableIntentLocked(provider);
+            AutoPtr< ArrayOf<Int32> > appWidgetIds = GetWidgetIds(provider->mWidgets);
+            SendUpdateIntentLocked(provider, appWidgetIds);
+            RegisterForBroadcastsLocked(provider, appWidgetIds);
+        }
+    }
 }
 
 void AppWidgetServiceImpl::LoadGroupStateLocked(
@@ -7727,30 +5004,6 @@ void AppWidgetServiceImpl::LoadGroupStateLocked(
 void AppWidgetServiceImpl::BindLoadedWidgets(
     /* [in] */ IList* loadedWidgets)
 {
-    // ==================before translated======================
-    // final int loadedWidgetCount = loadedWidgets.size();
-    // for (int i = loadedWidgetCount - 1; i >= 0; i--) {
-    //     LoadedWidgetState loadedWidget = loadedWidgets.remove(i);
-    //     Widget widget = loadedWidget.widget;
-    //
-    //     widget.provider = findProviderByTag(loadedWidget.providerTag);
-    //     if (widget.provider == null) {
-    //         // This provider is gone. We just let the host figure out
-    //         // that this happened when it fails to load it.
-    //         continue;
-    //     }
-    //
-    //     widget.host = findHostByTag(loadedWidget.hostTag);
-    //     if (widget.host == null) {
-    //         // This host is gone.
-    //         continue;
-    //     }
-    //
-    //     widget.provider.widgets.add(widget);
-    //     widget.host.widgets.add(widget);
-    //     mWidgets.add(widget);
-    // }
-
     Int32 loadedWidgetCount = 0;
     loadedWidgets->GetSize(&loadedWidgetCount);
     for (Int32 i = loadedWidgetCount - 1; i >= 0; --i) {
@@ -7785,19 +5038,6 @@ void AppWidgetServiceImpl::BindLoadedWidgets(
 AutoPtr<AppWidgetServiceImpl::Provider> AppWidgetServiceImpl::FindProviderByTag(
     /* [in] */ Int32 tag)
 {
-    // ==================before translated======================
-    // if (tag < 0) {
-    //     return null;
-    // }
-    // final int providerCount = mProviders.size();
-    // for (int i = 0; i < providerCount; i++) {
-    //     Provider provider = mProviders.get(i);
-    //     if (provider.tag == tag) {
-    //         return provider;
-    //     }
-    // }
-    // return null;
-
     if (tag < 0) {
         return NULL;
     }
@@ -7818,19 +5058,6 @@ AutoPtr<AppWidgetServiceImpl::Provider> AppWidgetServiceImpl::FindProviderByTag(
 AutoPtr<AppWidgetServiceImpl::Host> AppWidgetServiceImpl::FindHostByTag(
     /* [in] */ Int32 tag)
 {
-    // ==================before translated======================
-    // if (tag < 0) {
-    //     return null;
-    // }
-    // final int hostCount = mHosts.size();
-    // for (int i = 0; i < hostCount; i++) {
-    //     Host host = mHosts.get(i);
-    //     if (host.tag == tag) {
-    //         return host;
-    //     }
-    // }
-    // return null;
-
     if (tag < 0) {
         return NULL;
     }
@@ -7851,30 +5078,6 @@ AutoPtr<AppWidgetServiceImpl::Host> AppWidgetServiceImpl::FindHostByTag(
 void AppWidgetServiceImpl::SaveStateLocked(
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // tagProvidersAndHosts();
-    //
-    // final int[] profileIds = mSecurityPolicy.getEnabledGroupProfileIds(userId);
-    //
-    // final int profileCount = profileIds.length;
-    // for (int i = 0; i < profileCount; i++) {
-    //     final int profileId = profileIds[i];
-    //
-    //     AtomicFile file = getSavedStateFile(profileId);
-    //     FileOutputStream stream;
-    //     try {
-    //         stream = file.startWrite();
-    //         if (writeProfileStateToFileLocked(stream, profileId)) {
-    //             file.finishWrite(stream);
-    //         } else {
-    //             file.failWrite(stream);
-    //             Slog.w(TAG, "Failed to save state, restoring backup.");
-    //         }
-    //     } catch (IOException e) {
-    //         Slog.w(TAG, "Failed open state file for write: " + e);
-    //     }
-    // }
-
     TagProvidersAndHosts();
     AutoPtr< ArrayOf<Int32> > profileIds;
     mSecurityPolicy->GetEnabledGroupProfileIds(userId, (ArrayOf<Int32>**)&profileIds);
@@ -7900,19 +5103,6 @@ void AppWidgetServiceImpl::SaveStateLocked(
 
 void AppWidgetServiceImpl::TagProvidersAndHosts()
 {
-    // ==================before translated======================
-    // final int providerCount = mProviders.size();
-    // for (int i = 0; i < providerCount; i++) {
-    //     Provider provider = mProviders.get(i);
-    //     provider.tag = i;
-    // }
-    //
-    // final int hostCount = mHosts.size();
-    // for (int i = 0; i < hostCount; i++) {
-    //     Host host = mHosts.get(i);
-    //     host.tag = i;
-    // }
-
     Int32 providerCount = 0;
     mProviders->GetSize(&providerCount);
     for (Int32 i = 0; i < providerCount; ++i) {
@@ -7936,19 +5126,6 @@ void AppWidgetServiceImpl::TagProvidersAndHosts()
 
 void AppWidgetServiceImpl::ClearProvidersAndHostsTagsLocked()
 {
-    // ==================before translated======================
-    // final int providerCount = mProviders.size();
-    // for (int i = 0; i < providerCount; i++) {
-    //     Provider provider = mProviders.get(i);
-    //     provider.tag = TAG_UNDEFINED;
-    // }
-    //
-    // final int hostCount = mHosts.size();
-    // for (int i = 0; i < hostCount; i++) {
-    //     Host host = mHosts.get(i);
-    //     host.tag = TAG_UNDEFINED;
-    // }
-
     Int32 providerCount = 0;
     mProviders->GetSize(&providerCount);
     for (Int32 i = 0; i < providerCount; ++i) {
@@ -7974,76 +5151,14 @@ Boolean AppWidgetServiceImpl::WriteProfileStateToFileLocked(
     /* [in] */ IFileOutputStream* stream,
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // int N;
-    //
-    // try {
-    //     XmlSerializer out = new FastXmlSerializer();
-    //     out.setOutput(stream, "utf-8");
-    //     out.startDocument(null, true);
-    //     out.startTag(null, "gs");
-    //     out.attribute(null, "version", String.valueOf(CURRENT_VERSION));
-    //
-    //     N = mProviders.size();
-    //     for (int i = 0; i < N; i++) {
-    //         Provider provider = mProviders.get(i);
-    //         // Save only providers for the user.
-    //         if (provider.getUserId() != userId) {
-    //             continue;
-    //         }
-    //         if (provider.widgets.size() > 0) {
-    //             serializeProvider(out, provider);
-    //         }
-    //     }
-    //
-    //     N = mHosts.size();
-    //     for (int i = 0; i < N; i++) {
-    //         Host host = mHosts.get(i);
-    //         // Save only hosts for the user.
-    //         if (host.getUserId() != userId) {
-    //             continue;
-    //         }
-    //         serializeHost(out, host);
-    //     }
-    //
-    //     N = mWidgets.size();
-    //     for (int i = 0; i < N; i++) {
-    //         Widget widget = mWidgets.get(i);
-    //         // Save only widgets hosted by the user.
-    //         if (widget.host.getUserId() != userId) {
-    //             continue;
-    //         }
-    //         serializeAppWidget(out, widget);
-    //     }
-    //
-    //     Iterator<Pair<Integer, String>> it = mPackagesWithBindWidgetPermission.iterator();
-    //     while (it.hasNext()) {
-    //         Pair<Integer, String> binding = it.next();
-    //         // Save only white listings for the user.
-    //         if (binding.first != userId) {
-    //             continue;
-    //         }
-    //         out.startTag(null, "b");
-    //         out.attribute(null, "packageName", binding.second);
-    //         out.endTag(null, "b");
-    //     }
-    //
-    //     out.endTag(null, "gs");
-    //     out.endDocument();
-    //     return true;
-    // } catch (IOException e) {
-    //     Slog.w(TAG, "Failed to write state: " + e);
-    //     return false;
-    // }
-
     Int32 N = 0;
     //try {
-        //AutoPtr<IXmlSerializer> out;
-        //CFastXmlSerializer::New((IXmlSerializer**)&out);
-        //out->SetOutput(stream, String("utf-8"));
-        //out->StartDocument(String(""), TRUE);
-        //out->StartTag(String(""), String("gs"));
-        //out->WriteAttribute(String(""), String("version"), StringUtils::ToString(CURRENT_VERSION));
+        AutoPtr<IXmlSerializer> out;
+        CFastXmlSerializer::New((IXmlSerializer**)&out);
+        out->SetOutput(IOutputStream::Probe(stream), String("utf-8"));
+        out->StartDocument(String(NULL), TRUE);
+        out->WriteStartTag(String(NULL), String("gs"));
+        out->WriteAttribute(String(NULL), String("version"), StringUtils::ToString(CURRENT_VERSION));
 
         mProviders->GetSize(&N);
         Int32 userIdTmp = 0;
@@ -8060,7 +5175,7 @@ Boolean AppWidgetServiceImpl::WriteProfileStateToFileLocked(
             Int32 size = 0;
             provider->mWidgets->GetSize(&size);
             if (size > 0) {
-                //SerializeProvider(out, provider);
+                SerializeProvider(out, provider);
             }
         }
 
@@ -8074,7 +5189,7 @@ Boolean AppWidgetServiceImpl::WriteProfileStateToFileLocked(
             if (userIdTmp != userId) {
                 continue;
             }
-            //SerializeHost(out, host);
+            SerializeHost(out, host);
         }
 
         mWidgets->GetSize(&N);
@@ -8087,7 +5202,7 @@ Boolean AppWidgetServiceImpl::WriteProfileStateToFileLocked(
             if (userIdTmp != userId) {
                 continue;
             }
-            //SerializeAppWidget(out, widget);
+            SerializeAppWidget(out, widget);
         }
 
         AutoPtr<IIterator> it;
@@ -8098,22 +5213,24 @@ Boolean AppWidgetServiceImpl::WriteProfileStateToFileLocked(
             it->GetNext((IInterface**)&interfaceTmp);
             IPair* binding = IPair::Probe(interfaceTmp);
 
-            AutoPtr<IInterface> firstTmp;
+            AutoPtr<IInterface> firstTmp, secondTmp;
             binding->GetFirst((IInterface**)&firstTmp);
-            IInteger32* first1Tmp = IInteger32::Probe(firstTmp);
+            binding->GetSecond((IInterface**)&secondTmp);
             Int32 first = 0;
-            first1Tmp->GetValue(&first);
+            IInteger32::Probe(firstTmp)->GetValue(&first);
+            String second;
+            ICharSequence::Probe(secondTmp)->ToString(&second);
 
             if (first != userId) {
                 continue;
             }
-            //out->StartTag(null, "b");
-            //out->WriteAttribute(null, "packageName", binding.second);
-            //out->EndTag(null, "b");
+            out->WriteStartTag(String(NULL), String("b"));
+            out->WriteAttribute(String(NULL), String("packageName"), second);
+            out->WriteEndTag(String(NULL), String("b"));
         }
 
-        //out->EndTag(null, "gs");
-        //out->EndDocument();
+        out->WriteEndTag(String(NULL), String("gs"));
+        out->EndDocument();
         return TRUE;
     //} catch (IOException e) {
         //Slog.w(TAG, "Failed to write state: " + e);
@@ -8299,9 +5416,9 @@ Int32 AppWidgetServiceImpl::ReadProfileStateFromFileLocked(
 
                 parser->GetAttributeValue(nullStr, String("h"), &attrValue);
                 Int32 hostTag = StringUtils::ParseInt32(attrValue, 16);
-                String providerString;
+
                 parser->GetAttributeValue(nullStr, String("p"), &attrValue);
-                Int32 providerTag = (!providerString.IsNull()) ? StringUtils::ParseInt32(
+                Int32 providerTag = (!attrValue.IsNull()) ? StringUtils::ParseInt32(
                         attrValue, 16) : TAG_UNDEFINED;
 
                 // We can match widgets with hosts and providers only after hosts
@@ -8327,38 +5444,8 @@ Int32 AppWidgetServiceImpl::ReadProfileStateFromFileLocked(
 ECode AppWidgetServiceImpl::PerformUpgradeLocked(
     /* [in] */ Int32 fromVersion)
 {
-    // ==================before translated======================
-    // if (fromVersion < CURRENT_VERSION) {
-    //     Slog.v(TAG, "Upgrading widget database from " + fromVersion + " to "
-    //             + CURRENT_VERSION);
-    // }
-    //
-    // int version = fromVersion;
-    //
-    // // Update 1: keyguard moved from package "android" to "com.android.keyguard"
-    // if (version == 0) {
-    //     HostId oldHostId = new HostId(Process.myUid(),
-    //             KEYGUARD_HOST_ID, OLD_KEYGUARD_HOST_PACKAGE);
-    //
-    //     Host host = lookupHostLocked(oldHostId);
-    //     if (host != null) {
-    //         final int uid = getUidForPackage(NEW_KEYGUARD_HOST_PACKAGE,
-    //                 UserHandle.USER_OWNER);
-    //         if (uid >= 0) {
-    //             host.id = new HostId(uid, KEYGUARD_HOST_ID, NEW_KEYGUARD_HOST_PACKAGE);
-    //         }
-    //     }
-    //
-    //     version = 1;
-    // }
-    //
-    // if (version != CURRENT_VERSION) {
-    //     throw new IllegalStateException("Failed to upgrade widget database");
-    // }
-
     if (fromVersion < CURRENT_VERSION) {
-        Slogger::V(TAG, String("Upgrading widget database from ") + StringUtils::ToString(fromVersion) + String(" to ")
-                + StringUtils::ToString(CURRENT_VERSION));
+        Slogger::V(TAG, "Upgrading widget database from %d to %d", fromVersion, CURRENT_VERSION);
     }
 
     Int32 version = fromVersion;
@@ -8385,9 +5472,6 @@ ECode AppWidgetServiceImpl::PerformUpgradeLocked(
 AutoPtr<IFile> AppWidgetServiceImpl::GetStateFile(
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // return new File(Environment.getUserSystemDirectory(userId), STATE_FILENAME);
-
     AutoPtr<IFile> result;
     CFile::New(Environment::GetUserSystemDirectory(userId), STATE_FILENAME, (IFile**)&result);
     return result;
@@ -8396,21 +5480,6 @@ AutoPtr<IFile> AppWidgetServiceImpl::GetStateFile(
 AutoPtr<IAtomicFile> AppWidgetServiceImpl::GetSavedStateFile(
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // File dir = Environment.getUserSystemDirectory(userId);
-    // File settingsFile = getStateFile(userId);
-    // if (!settingsFile.exists() && userId == UserHandle.USER_OWNER) {
-    //     if (!dir.exists()) {
-    //         dir.mkdirs();
-    //     }
-    //     // Migrate old data
-    //     File oldFile = new File("/data/system/" + STATE_FILENAME);
-    //     // Method doesn't throw an exception on failure. Ignore any errors
-    //     // in moving the file (like non-existence)
-    //     oldFile.renameTo(settingsFile);
-    // }
-    // return new AtomicFile(settingsFile);
-
     AutoPtr<IFile> dir = Environment::GetUserSystemDirectory(userId);
     AutoPtr<IFile> settingsFile = GetStateFile(userId);
     Boolean exists = FALSE;
@@ -8437,209 +5506,126 @@ AutoPtr<IAtomicFile> AppWidgetServiceImpl::GetSavedStateFile(
 void AppWidgetServiceImpl::OnUserStopped(
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // {    AutoLock syncLock(mLock);
-    //     boolean providersChanged = false;
-    //     boolean crossProfileWidgetsChanged = false;
-    //
-    //     // Remove widgets that have both host and provider in the user.
-    //     final int widgetCount = mWidgets.size();
-    //     for (int i = widgetCount - 1; i >= 0; i--) {
-    //         Widget widget = mWidgets.get(i);
-    //
-    //         final boolean hostInUser = widget.host.getUserId() == userId;
-    //         final boolean hasProvider = widget.provider != null;
-    //         final boolean providerInUser = hasProvider && widget.provider.getUserId() == userId;
-    //
-    //         // If both host and provider are in the user, just drop the widgets
-    //         // as we do not want to make host callbacks and provider broadcasts
-    //         // as the host and the provider will be killed.
-    //         if (hostInUser && (!hasProvider || providerInUser)) {
-    //             mWidgets.remove(i);
-    //             widget.host.widgets.remove(widget);
-    //             widget.host = null;
-    //             if (hasProvider) {
-    //                 widget.provider.widgets.remove(widget);
-    //                 widget.provider = null;
-    //             }
-    //         }
-    //     }
-    //
-    //     // Remove hosts and notify providers in other profiles.
-    //     final int hostCount = mHosts.size();
-    //     for (int i = hostCount - 1; i >= 0; i--) {
-    //         Host host = mHosts.get(i);
-    //         if (host.getUserId() == userId) {
-    //             crossProfileWidgetsChanged |= !host.widgets.isEmpty();
-    //             deleteHostLocked(host);
-    //         }
-    //     }
-    //
-    //     // Remove the providers and notify hosts in other profiles.
-    //     final int providerCount = mProviders.size();
-    //     for (int i = providerCount - 1; i >= 0; i--) {
-    //         Provider provider = mProviders.get(i);
-    //         if (provider.getUserId() == userId) {
-    //             crossProfileWidgetsChanged |= !provider.widgets.isEmpty();
-    //             providersChanged = true;
-    //             deleteProviderLocked(provider);
-    //         }
-    //     }
-    //
-    //     // Remove grants for this user.
-    //     final int grantCount = mPackagesWithBindWidgetPermission.size();
-    //     for (int i = grantCount - 1; i >= 0; i--) {
-    //         Pair<Integer, String> packageId = mPackagesWithBindWidgetPermission.valueAt(i);
-    //         if (packageId.first == userId) {
-    //             mPackagesWithBindWidgetPermission.removeAt(i);
-    //         }
-    //     }
-    //
-    //     // Take a note we no longer have state for this user.
-    //     final int userIndex = mLoadedUserIds.indexOfKey(userId);
-    //     if (userIndex >= 0) {
-    //         mLoadedUserIds.removeAt(userIndex);
-    //     }
-    //
-    //     // Remove the widget id counter.
-    //     final int nextIdIndex = mNextAppWidgetIds.indexOfKey(userId);
-    //     if (nextIdIndex >= 0) {
-    //         mNextAppWidgetIds.removeAt(nextIdIndex);
-    //     }
-    //
-    //     // Announce removed provider changes to all hosts in the group.
-    //     if (providersChanged) {
-    //         scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
-    //     }
-    //
-    //     // Save state if removing a profile changed the group state.
-    //     // Nothing will be saved if the group parent was removed.
-    //     if (crossProfileWidgetsChanged) {
-    //         saveGroupStateAsync(userId);
-    //     }
-    // }
+    AutoLock syncLock(mLock);
+    Boolean providersChanged = FALSE;
+    Boolean crossProfileWidgetsChanged = FALSE;
 
-    //{    AutoLock syncLock(mLock);
-        Boolean providersChanged = FALSE;
-        Boolean crossProfileWidgetsChanged = FALSE;
+    // Remove widgets that have both host and provider in the user.
+    Int32 widgetCount = 0;
+    mWidgets->GetSize(&widgetCount);
+    for (Int32 i = widgetCount - 1; i >= 0; --i) {
+        AutoPtr<IInterface> interfaceTmp;
+        mWidgets->Get(i, (IInterface**)&interfaceTmp);
+        IObject* objTmp = IObject::Probe(interfaceTmp);
+        Widget* widget = (Widget*)objTmp;
 
-        // Remove widgets that have both host and provider in the user.
-        Int32 widgetCount = 0;
-        mWidgets->GetSize(&widgetCount);
-        for (Int32 i = widgetCount - 1; i >= 0; --i) {
-            AutoPtr<IInterface> interfaceTmp;
-            mWidgets->Get(i, (IInterface**)&interfaceTmp);
-            IObject* objTmp = IObject::Probe(interfaceTmp);
-            Widget* widget = (Widget*)objTmp;
+        Int32 userIdTmp = 0;
+        widget->mHost->GetUserId(&userIdTmp);
+        Boolean hostInUser = userIdTmp == userId;
+        Boolean hasProvider = widget->mProvider != NULL;
 
-            Int32 userIdTmp = 0;
-            widget->mHost->GetUserId(&userIdTmp);
-            Boolean hostInUser = userIdTmp == userId;
-            Boolean hasProvider = widget->mProvider != NULL;
+        widget->mProvider->GetUserId(&userIdTmp);
+        Boolean providerInUser = hasProvider && userIdTmp == userId;
 
-            widget->mProvider->GetUserId(&userIdTmp);
-            Boolean providerInUser = hasProvider && userIdTmp == userId;
+        // If both host and provider are in the user, just drop the widgets
+        // as we do not want to make host callbacks and provider broadcasts
+        // as the host and the provider will be killed.
+        if (hostInUser && (!hasProvider || providerInUser)) {
+            AutoPtr<IInterface> widgetTmp;
+            mWidgets->Get(i, (IInterface**)&widgetTmp);
+            mWidgets->Remove(TO_IINTERFACE(widgetTmp));
 
-            // If both host and provider are in the user, just drop the widgets
-            // as we do not want to make host callbacks and provider broadcasts
-            // as the host and the provider will be killed.
-            if (hostInUser && (!hasProvider || providerInUser)) {
-                AutoPtr<IInterface> widgetTmp;
-                mWidgets->Get(i, (IInterface**)&widgetTmp);
-                mWidgets->Remove(TO_IINTERFACE(widgetTmp));
-
-                widget->mHost->mWidgets->Remove(TO_IINTERFACE(widget));
-                widget->mHost = NULL;
-                if (hasProvider) {
-                    widget->mProvider->mWidgets->Remove(TO_IINTERFACE(widget));
-                    widget->mProvider = NULL;
-                }
+            widget->mHost->mWidgets->Remove(TO_IINTERFACE(widget));
+            widget->mHost = NULL;
+            if (hasProvider) {
+                widget->mProvider->mWidgets->Remove(TO_IINTERFACE(widget));
+                widget->mProvider = NULL;
             }
         }
+    }
 
-        // Remove hosts and notify providers in other profiles.
-        Int32 hostCount = 0;
-        mHosts->GetSize(&hostCount);
-        for (Int32 i = hostCount - 1; i >= 0; --i) {
-            AutoPtr<IInterface> interfaceTmp;
-            mHosts->Get(i, (IInterface**)&interfaceTmp);
-            IObject* objTmp = IObject::Probe(interfaceTmp);
-            Host* host = (Host*)objTmp;
+    // Remove hosts and notify providers in other profiles.
+    Int32 hostCount = 0;
+    mHosts->GetSize(&hostCount);
+    for (Int32 i = hostCount - 1; i >= 0; --i) {
+        AutoPtr<IInterface> interfaceTmp;
+        mHosts->Get(i, (IInterface**)&interfaceTmp);
+        IObject* objTmp = IObject::Probe(interfaceTmp);
+        Host* host = (Host*)objTmp;
 
-            Int32 userIdTmp = 0;
-            host->GetUserId(&userIdTmp);
-            if (userIdTmp == userId) {
-                Boolean resTmp = FALSE;
-                host->mWidgets->IsEmpty(&resTmp);
-                crossProfileWidgetsChanged |= !resTmp;
-                DeleteHostLocked(host);
-            }
+        Int32 userIdTmp = 0;
+        host->GetUserId(&userIdTmp);
+        if (userIdTmp == userId) {
+            Boolean resTmp = FALSE;
+            host->mWidgets->IsEmpty(&resTmp);
+            crossProfileWidgetsChanged |= !resTmp;
+            DeleteHostLocked(host);
         }
+    }
 
-        // Remove the providers and notify hosts in other profiles.
-        Int32 providerCount = 0;
-        mProviders->GetSize(&providerCount);
-        for (Int32 i = providerCount - 1; i >= 0; --i) {
-            AutoPtr<IInterface> interfaceTmp;
-            mProviders->Get(i, (IInterface**)&interfaceTmp);
-            IObject* objTmp = IObject::Probe(interfaceTmp);
-            Provider* provider = (Provider*)objTmp;
+    // Remove the providers and notify hosts in other profiles.
+    Int32 providerCount = 0;
+    mProviders->GetSize(&providerCount);
+    for (Int32 i = providerCount - 1; i >= 0; --i) {
+        AutoPtr<IInterface> interfaceTmp;
+        mProviders->Get(i, (IInterface**)&interfaceTmp);
+        IObject* objTmp = IObject::Probe(interfaceTmp);
+        Provider* provider = (Provider*)objTmp;
 
-            Int32 userIdTmp = 0;
-            provider->GetUserId(&userIdTmp);
-            if (userIdTmp == userId) {
-                Boolean resTmp = FALSE;
-                provider->mWidgets->IsEmpty(&resTmp);
-                crossProfileWidgetsChanged |= !resTmp;
-                providersChanged = TRUE;
-                DeleteProviderLocked(provider);
-            }
+        Int32 userIdTmp = 0;
+        provider->GetUserId(&userIdTmp);
+        if (userIdTmp == userId) {
+            Boolean resTmp = FALSE;
+            provider->mWidgets->IsEmpty(&resTmp);
+            crossProfileWidgetsChanged |= !resTmp;
+            providersChanged = TRUE;
+            DeleteProviderLocked(provider);
         }
+    }
 
-        // Remove grants for this user.
-        Int32 grantCount = 0;
-        ICollection::Probe(mPackagesWithBindWidgetPermission)->GetSize(&grantCount);
-        for (Int32 i = grantCount - 1; i >= 0; --i) {
-            AutoPtr<IInterface> interfaceTmp;
-            mPackagesWithBindWidgetPermission->GetValueAt(i, (IInterface**)&interfaceTmp);
-            IPair* packageId = IPair::Probe(interfaceTmp);
+    // Remove grants for this user.
+    Int32 grantCount = 0;
+    ICollection::Probe(mPackagesWithBindWidgetPermission)->GetSize(&grantCount);
+    for (Int32 i = grantCount - 1; i >= 0; --i) {
+        AutoPtr<IInterface> interfaceTmp;
+        mPackagesWithBindWidgetPermission->GetValueAt(i, (IInterface**)&interfaceTmp);
+        IPair* packageId = IPair::Probe(interfaceTmp);
 
-            AutoPtr<IInterface> firstTmp;
-            packageId->GetFirst((IInterface**)&firstTmp);
-            IInteger32* first1Tmp = IInteger32::Probe(firstTmp);
-            Int32 first = 0;
-            first1Tmp->GetValue(&first);
-            if (first == userId) {
-                AutoPtr<IInterface> removeAtTmp;
-                mPackagesWithBindWidgetPermission->RemoveAt(i, (IInterface**)&removeAtTmp);
-            }
+        AutoPtr<IInterface> firstTmp;
+        packageId->GetFirst((IInterface**)&firstTmp);
+        IInteger32* first1Tmp = IInteger32::Probe(firstTmp);
+        Int32 first = 0;
+        first1Tmp->GetValue(&first);
+        if (first == userId) {
+            AutoPtr<IInterface> removeAtTmp;
+            mPackagesWithBindWidgetPermission->RemoveAt(i, (IInterface**)&removeAtTmp);
         }
+    }
 
-        // Take a note we no longer have state for this user.
-        Int32 userIndex = 0;
-        mLoadedUserIds->IndexOfKey(userId, &userIndex);
-        if (userIndex >= 0) {
-            mLoadedUserIds->RemoveAt(userIndex);
-        }
+    // Take a note we no longer have state for this user.
+    Int32 userIndex = 0;
+    mLoadedUserIds->IndexOfKey(userId, &userIndex);
+    if (userIndex >= 0) {
+        mLoadedUserIds->RemoveAt(userIndex);
+    }
 
-        // Remove the widget id counter.
-        Int32 nextIdIndex = 0;
-        mNextAppWidgetIds->IndexOfKey(userId, &nextIdIndex);
-        if (nextIdIndex >= 0) {
-            mNextAppWidgetIds->RemoveAt(nextIdIndex);
-        }
+    // Remove the widget id counter.
+    Int32 nextIdIndex = 0;
+    mNextAppWidgetIds->IndexOfKey(userId, &nextIdIndex);
+    if (nextIdIndex >= 0) {
+        mNextAppWidgetIds->RemoveAt(nextIdIndex);
+    }
 
-        // Announce removed provider changes to all hosts in the group.
-        if (providersChanged) {
-            ScheduleNotifyGroupHostsForProvidersChangedLocked(userId);
-        }
+    // Announce removed provider changes to all hosts in the group.
+    if (providersChanged) {
+        ScheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+    }
 
-        // Save state if removing a profile changed the group state.
-        // Nothing will be saved if the group parent was removed.
-        if (crossProfileWidgetsChanged) {
-            SaveGroupStateAsync(userId);
-        }
-    //}
+    // Save state if removing a profile changed the group state.
+    // Nothing will be saved if the group parent was removed.
+    if (crossProfileWidgetsChanged) {
+        SaveGroupStateAsync(userId);
+    }
 }
 
 Boolean AppWidgetServiceImpl::UpdateProvidersForPackageLocked(
@@ -8647,82 +5633,6 @@ Boolean AppWidgetServiceImpl::UpdateProvidersForPackageLocked(
     /* [in] */ Int32 userId,
     /* [in] */ ISet* removedProviders)
 {
-    // ==================before translated======================
-    // boolean providersUpdated = false;
-    //
-    // HashSet<ProviderId> keep = new HashSet<>();
-    // Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-    // intent.setPackage(packageName);
-    // List<ResolveInfo> broadcastReceivers = queryIntentReceivers(intent, userId);
-    //
-    // // add the missing ones and collect which ones to keep
-    // int N = broadcastReceivers == null ? 0 : broadcastReceivers.size();
-    // for (int i = 0; i < N; i++) {
-    //     ResolveInfo ri = broadcastReceivers.get(i);
-    //     ActivityInfo ai = ri.activityInfo;
-    //
-    //     if ((ai.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
-    //         continue;
-    //     }
-    //
-    //     if (packageName.equals(ai.packageName)) {
-    //         ProviderId providerId = new ProviderId(ai.applicationInfo.uid,
-    //                 new ComponentName(ai.packageName, ai.name));
-    //
-    //         Provider provider = lookupProviderLocked(providerId);
-    //         if (provider == null) {
-    //             if (addProviderLocked(ri)) {
-    //                 keep.add(providerId);
-    //                 providersUpdated = true;
-    //             }
-    //         } else {
-    //             Provider parsed = parseProviderInfoXml(providerId, ri);
-    //             if (parsed != null) {
-    //                 keep.add(providerId);
-    //                 // Use the new AppWidgetProviderInfo.
-    //                 provider.info = parsed.info;
-    //                 // If it's enabled
-    //                 final int M = provider.widgets.size();
-    //                 if (M > 0) {
-    //                     int[] appWidgetIds = getWidgetIds(provider.widgets);
-    //                     // Reschedule for the new updatePeriodMillis (don't worry about handling
-    //                     // it specially if updatePeriodMillis didn't change because we just sent
-    //                     // an update, and the next one will be updatePeriodMillis from now).
-    //                     cancelBroadcasts(provider);
-    //                     registerForBroadcastsLocked(provider, appWidgetIds);
-    //                     // If it's currently showing, call back with the new
-    //                     // AppWidgetProviderInfo.
-    //                     for (int j = 0; j < M; j++) {
-    //                         Widget widget = provider.widgets.get(j);
-    //                         widget.views = null;
-    //                         scheduleNotifyProviderChangedLocked(widget);
-    //                     }
-    //                     // Now that we've told the host, push out an update.
-    //                     sendUpdateIntentLocked(provider, appWidgetIds);
-    //                     providersUpdated = true;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    //
-    // // prune the ones we don't want to keep
-    // N = mProviders.size();
-    // for (int i = N - 1; i >= 0; i--) {
-    //     Provider provider = mProviders.get(i);
-    //     if (packageName.equals(provider.info.provider.getPackageName())
-    //             && provider.getUserId() == userId
-    //             && !keep.contains(provider.id)) {
-    //         if (removedProviders != null) {
-    //             removedProviders.add(provider.id);
-    //         }
-    //         deleteProviderLocked(provider);
-    //         providersUpdated = true;
-    //     }
-    // }
-    //
-    // return providersUpdated;
-
     Boolean providersUpdated = FALSE;
 
     AutoPtr<IHashSet> keep;
@@ -8826,6 +5736,7 @@ Boolean AppWidgetServiceImpl::UpdateProvidersForPackageLocked(
             providersUpdated = TRUE;
         }
     }
+
     return providersUpdated;
 }
 
@@ -8833,34 +5744,6 @@ Boolean AppWidgetServiceImpl::RemoveHostsAndProvidersForPackageLocked(
     /* [in] */ const String& pkgName,
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // boolean removed = false;
-    //
-    // int N = mProviders.size();
-    // for (int i = N - 1; i >= 0; i--) {
-    //     Provider provider = mProviders.get(i);
-    //     if (pkgName.equals(provider.info.provider.getPackageName())
-    //             && provider.getUserId() == userId) {
-    //         deleteProviderLocked(provider);
-    //         removed = true;
-    //     }
-    // }
-    //
-    // // Delete the hosts for this package too
-    // // By now, we have removed any AppWidgets that were in any hosts here,
-    // // so we don't need to worry about sending DISABLE broadcasts to them.
-    // N = mHosts.size();
-    // for (int i = N - 1; i >= 0; i--) {
-    //     Host host = mHosts.get(i);
-    //     if (pkgName.equals(host.id.packageName)
-    //             && host.getUserId() == userId) {
-    //         deleteHostLocked(host);
-    //         removed = true;
-    //     }
-    // }
-    //
-    // return removed;
-
     Boolean removed = FALSE;
     Int32 N = 0;
     mProviders->GetSize(&N);
@@ -8908,25 +5791,6 @@ String AppWidgetServiceImpl::GetCanonicalPackageName(
     /* [in] */ const String& className,
     /* [in] */ Int32 userId)
 {
-    // ==================before translated======================
-    // final long identity = Binder.clearCallingIdentity();
-    // try {
-    //     try {
-    //         AppGlobals.getPackageManager().getReceiverInfo(new ComponentName(packageName,
-    //                 className), 0, userId);
-    //         return packageName;
-    //     } catch (RemoteException re) {
-    //         String[] packageNames = mContext.getPackageManager()
-    //                 .currentToCanonicalPackageNames(new String[]{packageName});
-    //         if (packageNames != null && packageNames.length > 0) {
-    //             return packageNames[0];
-    //         }
-    //     }
-    // } finally {
-    //     Binder.restoreCallingIdentity(identity);
-    // }
-    // return null;
-
     Int64 identity = Binder::ClearCallingIdentity();
     //try {
         //try {
@@ -8946,21 +5810,13 @@ String AppWidgetServiceImpl::GetCanonicalPackageName(
     //} finally {
         Binder::RestoreCallingIdentity(identity);
     //}
-    return String("");
+    return String(NULL);
 }
 
 void AppWidgetServiceImpl::SendBroadcastAsUser(
     /* [in] */ IIntent* intent,
     /* [in] */ IUserHandle* userHandle)
 {
-    // ==================before translated======================
-    // final long identity = Binder.clearCallingIdentity();
-    // try {
-    //     mContext.sendBroadcastAsUser(intent, userHandle);
-    // } finally {
-    //     Binder.restoreCallingIdentity(identity);
-    // }
-
     Int64 identity = Binder::ClearCallingIdentity();
     //try {
         mContext->SendBroadcastAsUser(intent, userHandle);
@@ -8974,15 +5830,6 @@ void AppWidgetServiceImpl::BindService(
     /* [in] */ IServiceConnection* connection,
     /* [in] */ IUserHandle* userHandle)
 {
-    // ==================before translated======================
-    // final long token = Binder.clearCallingIdentity();
-    // try {
-    //     mContext.bindServiceAsUser(intent, connection, Context.BIND_AUTO_CREATE,
-    //             userHandle);
-    // } finally {
-    //     Binder.restoreCallingIdentity(token);
-    // }
-
     Int64 token = Binder::ClearCallingIdentity();
     //try {
         Boolean resTmp;
@@ -8995,14 +5842,6 @@ void AppWidgetServiceImpl::BindService(
 void AppWidgetServiceImpl::UnbindService(
     /* [in] */ IServiceConnection* connection)
 {
-    // ==================before translated======================
-    // final long token = Binder.clearCallingIdentity();
-    // try {
-    //     mContext.unbindService(connection);
-    // } finally {
-    //     Binder.restoreCallingIdentity(token);
-    // }
-
     Int64 token = Binder::ClearCallingIdentity();
     //try {
         mContext->UnbindService(connection);
@@ -9020,5 +5859,3 @@ Int32 AppWidgetServiceImpl::InitMinUpdatePeriod()
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
-
-

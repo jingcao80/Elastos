@@ -1127,6 +1127,7 @@ void CAppsCustomizePagedView::CleanupWidgetPreloading(
             AutoPtr<IAppWidgetHostView> widget =
                     ((PendingAddWidgetInfo*)info.Get())->mBoundWidget;
             AutoPtr<IDragLayer> dragLayer;
+            mLauncher->GetDragLayer((IDragLayer**)&dragLayer);
             IViewGroup::Probe(dragLayer)->RemoveView(IView::Probe(widget));
         }
     }
@@ -1198,6 +1199,7 @@ Boolean CAppsCustomizePagedView::BeginDraggingWidget(
         Int32 maxWidth, maxHeight;
         Int32 width;
         IDrawable::Probe(previewDrawable)->GetIntrinsicWidth(&width);
+        assert(width != 0);
         maxWidth = Elastos::Core::Math::Min((Int32)(width * minScale), (*size)[0]);
         Int32 height;
         IDrawable::Probe(previewDrawable)->GetIntrinsicHeight(&height);

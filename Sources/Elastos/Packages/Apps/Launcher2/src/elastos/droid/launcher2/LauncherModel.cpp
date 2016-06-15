@@ -174,7 +174,7 @@ ECode LauncherModel::WidgetAndShortcutNameComparator::Compare(
         AutoPtr<IInterface> obj;
         mLabelCache->Get(TO_IINTERFACE(a), (IInterface**)&obj);
         AutoPtr<ICharSequence> cchar = ICharSequence::Probe(obj);
-        cchar->ToString(&labelA);
+        labelA = TO_STR(cchar);
     }
     else {
         AutoPtr<ICharSequence> cchar;
@@ -184,7 +184,7 @@ ECode LauncherModel::WidgetAndShortcutNameComparator::Compare(
         }
         else {
             IResolveInfo::Probe(a)->LoadLabel(mPackageManager, (ICharSequence**)&cchar);
-            cchar->ToString(&labelA);
+            labelA = TO_STR(cchar);
         }
         mLabelCache->Put(TO_IINTERFACE(a), TO_IINTERFACE(cchar));
     }
@@ -193,7 +193,7 @@ ECode LauncherModel::WidgetAndShortcutNameComparator::Compare(
         AutoPtr<IInterface> obj;
         mLabelCache->Get(TO_IINTERFACE(b), (IInterface**)&obj);
         AutoPtr<ICharSequence> cchar = ICharSequence::Probe(obj);
-        cchar->ToString(&labelB);
+        labelB = TO_STR(cchar);
     }
     else {
         AutoPtr<ICharSequence> cchar;
@@ -203,7 +203,7 @@ ECode LauncherModel::WidgetAndShortcutNameComparator::Compare(
         }
         else {
             IResolveInfo::Probe(b)->LoadLabel(mPackageManager, (ICharSequence**)&cchar);
-            cchar->ToString(&labelB);
+            labelB = TO_STR(cchar);
         }
         mLabelCache->Put(TO_IINTERFACE(b), TO_IINTERFACE(cchar));
     }
@@ -380,9 +380,7 @@ ECode LauncherModel::MyRunnable5::Run()
 {
     StringBuilder sb;
     sb += "DbDebug    Add item (";
-    String title;
-    mItem->mTitle->ToString(&title);
-    sb += title;
+    sb += mItem->mTitle;
     sb += ") to db, id: ";
     sb += mItem->mId;
     sb += " (";
@@ -460,9 +458,7 @@ ECode LauncherModel::MyRunnable6::Run()
 {
     StringBuilder sb;
     sb += "DbDebug    Delete item (";
-    String title;
-    mItem->mTitle->ToString(&title);
-    sb += title;
+    sb += mItem->mTitle;
     sb += ") from db, id: ";
     sb += mItem->mId;
     sb += " (";
@@ -1675,51 +1671,25 @@ void LauncherModel::LoaderTask::LoadWorkspace()
                     FAIL_GOTO(widgets->GetAppWidgetInfo(appWidgetId,
                             (IAppWidgetProviderInfo**)&provider), FAILED)
 
-                    if (!isSafeMode) {
-                        if (provider == NULL) {
-                            StringBuilder log;
-                            log += "Deleting widget that isn't installed anymore: id=";
-                            log += id;
-                            log += " appWidgetId=";
-                            log += appWidgetId;
-                            Slogger::E(TAG, log.ToString());
-                            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(log.ToString());
-                            Launcher::sDumpLogs->Add(TO_IINTERFACE(cchar));
-                            AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
-                            itemsToRemove->Add(TO_IINTERFACE(obj));
-                        }
-                        else {
-                            AutoPtr<IComponentName> name;
-                            provider->GetProvider((IComponentName**)&name);
-                            if (name == NULL) {
-                                StringBuilder log;
-                                log += "Deleting widget that isn't installed anymore: id=";
-                                log += id;
-                                log += " appWidgetId=";
-                                log += appWidgetId;
-                                Slogger::E(TAG, log.ToString());
-                                AutoPtr<ICharSequence> cchar = CoreUtils::Convert(log.ToString());
-                                Launcher::sDumpLogs->Add(TO_IINTERFACE(cchar));
-                                AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
-                                itemsToRemove->Add(TO_IINTERFACE(obj));
-                            }
-                            else {
-                                String packageName;
-                                name->GetPackageName(&packageName);
-                                if (packageName.IsNull()) {
-                                    StringBuilder log;
-                                    log +=  "Deleting widget that isn't installed anymore: id=";
-                                    log += id;
-                                    log += " appWidgetId=";
-                                    log += appWidgetId;
-                                    Slogger::E(TAG, log.ToString());
-                                    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(log.ToString());
-                                    Launcher::sDumpLogs->Add(TO_IINTERFACE(cchar));
-                                    AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
-                                    itemsToRemove->Add(TO_IINTERFACE(obj));
-                                }
-                            }
-                        }
+                    String packageName;
+                    if (provider != NULL) {
+                        AutoPtr<IComponentName> name;
+                        provider->GetProvider((IComponentName**)&name);
+                        if (name != NULL)
+                            name->GetPackageName(&packageName);
+                    }
+
+                    if (!isSafeMode && packageName == NULL) {
+                        StringBuilder log;
+                        log += "Deleting widget that isn't installed anymore: id=";
+                        log += id;
+                        log += " appWidgetId=";
+                        log += appWidgetId;
+                        Slogger::E(TAG, log.ToString());
+                        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(log.ToString());
+                        Launcher::sDumpLogs->Add(TO_IINTERFACE(cchar));
+                        AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
+                        itemsToRemove->Add(TO_IINTERFACE(obj));
                     }
                     else {
                         AutoPtr<IComponentName> name;
@@ -1752,6 +1722,7 @@ void LauncherModel::LoaderTask::LoadWorkspace()
                         if (!CheckItemPlacement(occupied, appWidgetInfo)) {
                             break;
                         }
+
                         AutoPtr<IInteger64> obj = CoreUtils::Convert(appWidgetInfo->mId);
                         FAIL_GOTO(sBgItemsIdMap->Put(TO_IINTERFACE(obj), TO_IINTERFACE(appWidgetInfo)), FAILED)
                         FAIL_GOTO(sBgAppWidgets->Add(TO_IINTERFACE(appWidgetInfo)), FAILED)
@@ -2527,10 +2498,8 @@ ECode LauncherModel::MyComparator3::Compare(
     Boolean res;
     (IObject::Probe(_a->mUser))->Equals(_b->mUser, &res);
     if (res) {
-        String astr;
-        _a->mTitle->ToString(&astr);
-        String bstr;
-        _b->mTitle->ToString(&bstr);
+        String astr = TO_STR(_a->mTitle);
+        String bstr = TO_STR(_b->mTitle);
         Int32 result;
         mCollator->Compare(astr, bstr, &result);
         if (result == 0) {
@@ -2541,10 +2510,8 @@ ECode LauncherModel::MyComparator3::Compare(
     }
     else {
         // TODO: Order this based on profile type rather than string compares.
-        String astr;
-        _a->mUser->ToString(&astr);
-        String bstr;
-        _b->mUser->ToString(&bstr);
+        String astr = TO_STR(_a->mUser);
+        String bstr = TO_STR(_b->mUser);
         *outresult = astr.Compare(bstr);
         return NOERROR;
     }
@@ -2832,10 +2799,8 @@ ECode LauncherModel::CheckItemInfoLocked(
             AutoPtr<IShortcutInfo> shortcut = IShortcutInfo::Probe(item);
             ShortcutInfo* _shortcut = (ShortcutInfo*)shortcut.Get();
 
-            String str;
-            _modelShortcut->mTitle->ToString(&str);
-            String str2;
-            _shortcut->mTitle->ToString(&str2);
+            String str = TO_STR(_modelShortcut->mTitle);
+            String str2 = TO_STR(_shortcut->mTitle);
             Boolean res;
             _modelShortcut->mIntent->FilterEquals(_shortcut->mIntent, &res);
             if (str.Equals(str2) && res &&
@@ -3638,9 +3603,6 @@ ECode LauncherModel::GetSortedWidgetsAndShortcuts(
 
     AutoPtr<IList> activities;
     packageManager->QueryIntentActivities(shortcutsIntent, 0, (IList**)&activities);
-    Int32 size;
-    activities->GetSize(&size);
-    Slogger::D("xihaoc", "activities.size = %d", size);
     widgetsAndShortcuts->AddAll(ICollection::Probe(activities));
 
     AutoPtr<IComparator> c = new WidgetAndShortcutNameComparator(packageManager);

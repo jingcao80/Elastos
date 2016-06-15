@@ -6,11 +6,10 @@
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/ServiceManager.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::IIntentSender;
 using Elastos::Droid::Internal::AppWidget::EIID_IIAppWidgetHost;
@@ -20,7 +19,9 @@ using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Utility::CTypedValue;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -156,6 +157,7 @@ AppWidgetHost::AppWidgetHost()
     : mHostId(0)
 {
     CAppWidgetHostCallbacks::New(this, (IIAppWidgetHost**)&mCallbacks);
+    CHashMap::New((IHashMap**)&mViews);
 }
 
 AppWidgetHost::~AppWidgetHost()
@@ -192,7 +194,8 @@ ECode AppWidgetHost::constructor(
 
 void AppWidgetHost::BindService()
 {
-    {    AutoLock syncLock(sServiceLock);
+    {
+        AutoLock syncLock(sServiceLock);
         if (sService == NULL) {
             sService = IIAppWidgetService::Probe(ServiceManager::GetService(IContext::APPWIDGET_SERVICE));
         }
@@ -346,7 +349,8 @@ Boolean AppWidgetHost::IsLocalBinder()
 ECode AppWidgetHost::DeleteAppWidgetId(
     /* [in] */ Int32 appWidgetId)
 {
-    {    AutoLock syncLock(mViewsLock);
+    {
+        AutoLock syncLock(mViews);
         mViews->Remove(CoreUtils::Convert(appWidgetId));
         // try {
         String packageName;
@@ -410,7 +414,8 @@ ECode AppWidgetHost::CreateView(
     AutoPtr<IAppWidgetHostView> view = OnCreateView(mContext, appWidgetId, appWidget);
     view->SetOnClickHandler(mOnClickHandler);
     view->SetAppWidget(appWidgetId, appWidget);
-    {    AutoLock syncLock(mViewsLock);
+    {
+        AutoLock syncLock(mViews);
         mViews->Put(CoreUtils::Convert(appWidgetId), view);
     }
 
@@ -467,7 +472,8 @@ void AppWidgetHost::OnProviderChanged(
     minResizeHeight = CTypedValue::ComplexToDimensionPixelSize(minResizeHeight, mDisplayMetrics);
     app->SetMinResizeHeight(minResizeHeight);
 
-    {    AutoLock syncLock(mViewsLock);
+    {
+        AutoLock syncLock(mViews);
         AutoPtr<IInterface> obj;
         mViews->Get(CoreUtils::Convert(appWidgetId), (IInterface**)&obj);
         v = IAppWidgetHostView::Probe(obj);
@@ -488,7 +494,8 @@ ECode AppWidgetHost::UpdateAppWidgetView(
     /* [in] */ IRemoteViews* views)
 {
     AutoPtr<IAppWidgetHostView> v;
-    {    AutoLock syncLock(mViewsLock);
+    {
+        AutoLock syncLock(mViews);
         AutoPtr<IInterface> obj;
         mViews->Get(CoreUtils::Convert(appWidgetId), (IInterface**)&obj);
         v = IAppWidgetHostView::Probe(obj);
@@ -505,7 +512,8 @@ ECode AppWidgetHost::ViewDataChanged(
     /* [in] */ Int32 viewId)
 {
     AutoPtr<IAppWidgetHostView> v;
-    {    AutoLock syncLock(mViewsLock);
+    {
+        AutoLock syncLock(mViews);
         AutoPtr<IInterface> obj;
         mViews->Get(CoreUtils::Convert(appWidgetId), (IInterface**)&obj);
         v = IAppWidgetHostView::Probe(obj);

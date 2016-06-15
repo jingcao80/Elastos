@@ -291,7 +291,6 @@ ECode AnalogClock::OnDetachedFromWindow()
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
         context->UnregisterReceiver(mIntentReceiver);
-        delete mIntentReceiver;
         mAttached = FALSE;
     }
     return NOERROR;

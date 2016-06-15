@@ -1,6 +1,7 @@
 
 #include "elastos/droid/appwidget/AppWidgetHostView.h"
 #include "elastos/droid/appwidget/AppWidgetManager.h"
+#include "elastos/droid/appwidget/CParcelableSparseArray.h"
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/graphics/Color.h"
 #include "elastos/droid/graphics/CPaint.h"
@@ -74,7 +75,7 @@ AppWidgetHostView::MyLayoutInflaterFilter::OnLoadClass(
     /* [out] */ Boolean* allowed)
 {
     VALIDATE_NOT_NULL(allowed);
-    assert(0 && "TODO");
+    // assert(0 && "TODO");
 
     *allowed = TRUE;
     //return clazz.isAnnotationPresent(RemoteViews.RemoteView.class);
@@ -85,13 +86,7 @@ AppWidgetHostView::MyLayoutInflaterFilter::OnLoadClass(
 //          AppWidgetHostView::ParcelableSparseArray
 //==============================================================================
 
-CAR_INTERFACE_IMPL_2(AppWidgetHostView::ParcelableSparseArray, SparseArray, IParcelableSparseArray, IParcelable);
-
-AppWidgetHostView::ParcelableSparseArray::ParcelableSparseArray()
-{}
-
-AppWidgetHostView::ParcelableSparseArray::~ParcelableSparseArray()
-{}
+CAR_INTERFACE_IMPL(AppWidgetHostView::ParcelableSparseArray, SparseArray, IParcelable);
 
 AppWidgetHostView::ParcelableSparseArray::WriteToParcel(
     /* [in] */ IParcel* dest)
@@ -107,7 +102,6 @@ AppWidgetHostView::ParcelableSparseArray::WriteToParcel(
         dest->WriteInt32(key);
         AutoPtr<IInterface> obj;
         ValueAt(i, (IInterface**)&obj);
-        AutoPtr<IParcelable> parcelable = IParcelable::Probe(obj);
         dest->WriteInterfacePtr(obj);
     }
     return NOERROR;
@@ -274,9 +268,10 @@ ECode AppWidgetHostView::GetAppWidgetInfo(
 ECode AppWidgetHostView::DispatchSaveInstanceState(
     /* [in] */ ISparseArray* container)
 {
-    AutoPtr<ParcelableSparseArray> jail = new ParcelableSparseArray();
-    FrameLayout::DispatchSaveInstanceState((ISparseArray*)jail.Get());
-    container->Put(GenerateId(), (IParcelableSparseArray*)jail.Get());
+    AutoPtr<ISparseArray> jail;
+    CParcelableSparseArray::New((ISparseArray**)&jail);
+    FrameLayout::DispatchSaveInstanceState(jail);
+    container->Put(GenerateId(), jail);
 
     return NOERROR;
 }
@@ -295,14 +290,13 @@ ECode AppWidgetHostView::DispatchRestoreInstanceState(
     container->Get(GenerateId(), (IInterface**)&obj);
     AutoPtr<IParcelable> parcelable = IParcelable::Probe(obj);
 
-    AutoPtr<IParcelableSparseArray> jail;
-    if (parcelable != NULL && IParcelableSparseArray::Probe(parcelable) != NULL) {
-        jail = IParcelableSparseArray::Probe(parcelable);
+    AutoPtr<ISparseArray> jail;
+    if (parcelable != NULL && ISparseArray::Probe(parcelable) != NULL) {
+        jail = ISparseArray::Probe(parcelable);
     }
 
     if (jail == NULL) {
-        AutoPtr<ParcelableSparseArray> object = new ParcelableSparseArray();
-        jail = (IParcelableSparseArray*)object.Get();
+        CParcelableSparseArray::New((ISparseArray**)&jail);
     }
 
     // try  {
