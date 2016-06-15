@@ -58,6 +58,7 @@ using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::ITelephonySmsIntents;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::Telephony;
+using Elastos::Droid::Provider::ITelephonyTextBasedSmsColumns;
 using Elastos::Droid::Telephony::CTelephonyManager;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::SmsManager;
@@ -1005,8 +1006,8 @@ Boolean InboundSmsHandler::ProcessMessagePart(
     Settings::Secure::GetDelimitedStringAsList(cr, ISettingsSecure::PROTECTED_SMS_ADDRESSES
             , String("|"), (IList**)&regAddresses);
 
-    AutoPtr<IList/*<String*/> allAddresses = Elastos::Droid::Provider::Telephony::Sms::Intents::GetNormalizedAddressesFromPdus(
-                    pdus, tracker->GetFormat());
+    AutoPtr<IList/*<String*/> allAddresses;
+    Elastos::Droid::Provider::Telephony::Sms::Intents::GetNormalizedAddressesFromPdus(pdus, tracker->GetFormat(), (IList**)&allAddresses);
 
     AutoPtr<ICollections> collections;
     CCollections::AcquireSingleton((ICollections**)&collections);
@@ -1426,31 +1427,31 @@ AutoPtr<IContentValues> InboundSmsHandler::ParseSmsMessage(
     CContentValues::New((IContentValues**)&values);
     String s;
     sms->GetDisplayOriginatingAddress(&s);
-    values->Put(Elastos::Droid::Provider::Telephony::Sms::Inbox::ADDRESS, s);
-    values->Put(Elastos::Droid::Provider::Telephony::Sms::Inbox::BODY, BuildMessageBodyFromPdus(msgs));
+    values->Put(ITelephonyTextBasedSmsColumns::ADDRESS, s);
+    values->Put(ITelephonyTextBasedSmsColumns::BODY, BuildMessageBodyFromPdus(msgs));
     Int64 v = 0;
     sms->GetTimestampMillis(&v);
-    values->Put(Elastos::Droid::Provider::Telephony::Sms::Inbox::DATE_SENT, v);
+    values->Put(ITelephonyTextBasedSmsColumns::DATE_SENT, v);
 
     AutoPtr<ISystem> system;
     CSystem::AcquireSingleton((ISystem**)&system);
     system->GetCurrentTimeMillis(&v);
-    values->Put(Elastos::Droid::Provider::Telephony::Sms::Inbox::DATE, v);
+    values->Put(ITelephonyTextBasedSmsColumns::DATE, v);
     Int32 iv = 0;
     sms->GetProtocolIdentifier(&iv);
-    values->Put(Elastos::Droid::Provider::Telephony::Sms::Inbox::PROTOCOL, iv);
-    values->Put(Elastos::Droid::Provider::Telephony::Sms::Inbox::SEEN, 0);
-    values->Put(Elastos::Droid::Provider::Telephony::Sms::Inbox::READ, 0);
+    values->Put(ITelephonyTextBasedSmsColumns::PROTOCOL, iv);
+    values->Put(ITelephonyTextBasedSmsColumns::SEEN, 0);
+    values->Put(ITelephonyTextBasedSmsColumns::READ, 0);
     String subject;
     sms->GetPseudoSubject(&subject);
     if (!TextUtils::IsEmpty(subject)) {
-        values->Put(Elastos::Droid::Provider::Telephony::Sms::Inbox::SUBJECT, subject);
+        values->Put(ITelephonyTextBasedSmsColumns::SUBJECT, subject);
     }
     Boolean tmp = FALSE;
     sms->IsReplyPathPresent(&tmp);
-    values->Put(Elastos::Droid::Provider::Telephony::Sms::Inbox::REPLY_PATH_PRESENT, tmp ? 1 : 0);
+    values->Put(ITelephonyTextBasedSmsColumns::REPLY_PATH_PRESENT, tmp ? 1 : 0);
     sms->GetServiceCenterAddress(&s);
-    values->Put(Elastos::Droid::Provider::Telephony::Sms::Inbox::SERVICE_CENTER, s);
+    values->Put(ITelephonyTextBasedSmsColumns::SERVICE_CENTER, s);
     return values;
 }
 

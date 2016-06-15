@@ -52,6 +52,13 @@ SOURCES += CSubscriptionManager.cpp
 SOURCES += CTelephonyManager.cpp
 SOURCES += CTelephonyManagerHelper.cpp
 SOURCES += CVoLteServiceState.cpp
+SOURCES += CCellBroadcastMessage.cpp
+SOURCES += CSmsCbCmasInfo.cpp
+SOURCES += CSmsCbEtwsInfo.cpp
+SOURCES += CSmsCbLocation.cpp
+SOURCES += CSmsCbMessage.cpp
+SOURCES += CSmsManagerHelper.cpp
+SOURCES += CSmsMessageHelper.cpp
 
 ELASTOS_LIBS += cdma/cdma.lib
 ELASTOS_LIBS += gsm/gsm.lib

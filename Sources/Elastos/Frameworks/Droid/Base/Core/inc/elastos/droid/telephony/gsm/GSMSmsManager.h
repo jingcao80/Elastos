@@ -1,5 +1,5 @@
-#ifndef __ELASTOS_DROID_TELEPHONY_GSM_SMSMANAGER_H__
-#define __ELASTOS_DROID_TELEPHONY_GSM_SMSMANAGER_H__
+#ifndef __ELASTOS_DROID_TELEPHONY_GSM_GSMSMSMANAGER_H__
+#define __ELASTOS_DROID_TELEPHONY_GSM_GSMSMSMANAGER_H__
 
 #include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
@@ -19,9 +19,9 @@ namespace Gsm {
   * @deprecated Replaced by android.telephony.SmsManager that supports both GSM and CDMA.
   */
 // @Deprecated public final
-class SmsManager
-    : public ISmsManager
-    , public Object
+class GSMSmsManager
+    : public Object
+    , public ISmsManager
 {
 public:
     CAR_INTERFACE_DECL();
@@ -32,7 +32,7 @@ public:
      * @deprecated Use android.telephony.SmsManager.
      */
     // @Deprecated
-    static CARAPI_(AutoPtr<SmsManager>) GetDefault();
+    static CARAPI_(AutoPtr<GSMSmsManager>) GetDefault();
 
     /**
      * Send a text based SMS.
@@ -215,10 +215,10 @@ public:
 
 private:
     // @Deprecated
-    SmsManager();
+    GSMSmsManager();
 
 private:
-    static AutoPtr<SmsManager> sInstance;
+    static AutoPtr<GSMSmsManager> sInstance;
     AutoPtr<Elastos::Droid::Telephony::ISmsManager> mSmsMgrProxy;
 };
 
@@ -227,4 +227,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_TELEPHONY_GSM_SMSMANAGER_H__
+#endif // __ELASTOS_DROID_TELEPHONY_GSM_GSMSMSMANAGER_H__

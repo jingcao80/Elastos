@@ -52,6 +52,7 @@ module
     interface Elastos.Droid.Net.ILinkProperties;
     interface Elastos.Droid.Os.IBundle;
     interface Elastos.Droid.Os.ILooper;
+    interface Elastos.Droid.Os.IParcel;
     interface Elastos.Droid.Provider.IBaseColumns;
     interface Elastos.Droid.Telephony.ICellLocation;
     interface Elastos.Droid.Text.ITextWatcher;
@@ -125,6 +126,26 @@ module
                 [in] IBundle* bundle);
 
             interface IGsmCellLocation;
+        }
+
+        singleton class CGSMSmsManagerHelper {
+            interface ISmsManagerHelper;
+        }
+
+        class CGSMSubmitPdu {
+            constructor();
+
+            interface ISubmitPdu;
+        }
+
+        class CGSMSmsMessage {
+            constructor();
+
+            interface ISmsMessage;
+        }
+
+        singleton class CGSMSmsMessageHelper {
+            interface ISmsMessageHelper;
         }
 
     } // Gsm
@@ -557,6 +578,100 @@ module
         singleton class CTelephonyManagerHelper {
 
             interface ITelephonyManagerHelper;
+        }
+
+        class CCellBroadcastMessage {
+            constructor();
+
+            constructor(
+                [in] ISmsCbMessage* message);
+
+            interface ICellBroadcastMessage;
+            interface IParcelable;
+        }
+
+        class CSmsCbCmasInfo {
+            constructor();
+
+            constructor(
+                [in] Int32 messageClass,
+                [in] Int32 category,
+                [in] Int32 responseType,
+                [in] Int32 severity,
+                [in] Int32 urgency,
+                [in] Int32 certainty);
+
+            //constructor(
+            //    [in] IParcel* parcel);
+
+            interface ISmsCbCmasInfo;
+            interface IParcelable;
+        }
+
+        [deprecated]
+        class CSmsCbEtwsInfo {
+            constructor();
+
+            constructor(
+                [in] Int32 warningType,
+                [in] Boolean emergencyUserAlert,
+                [in] Boolean activatePopup,
+                [in] ArrayOf<Byte>* warningSecurityInformation);
+
+            constructor(
+                [in] IParcel* parcel);
+
+            interface ISmsCbEtwsInfo;
+            interface IParcelable;
+        }
+
+        class CSmsCbLocation {
+            constructor();
+
+            constructor(
+                [in] String plmn);
+
+            constructor(
+                [in] String plmn,
+                [in] Int32 lac,
+                [in] Int32 cid);
+
+            constructor(
+                [in] IParcel* parcel);
+
+            interface ISmsCbLocation;
+            interface IParcelable;
+        }
+
+        class CSmsCbMessage {
+            constructor();
+
+            constructor(
+                [in] Int32 messageFormat,
+                [in] Int32 geographicalScope,
+                [in] Int32 serialNumber,
+                [in] ISmsCbLocation* location,
+                [in] Int32 serviceCategory,
+                [in] String language,
+                [in] String body,
+                [in] Int32 priority,
+                [in] ISmsCbEtwsInfo* etwsWarningInfo,
+                [in] ISmsCbCmasInfo* cmasWarningInfo);
+
+            constructor(
+                [in] IParcel* parcel);
+
+            interface ISmsCbMessage;
+            interface IParcelable;
+
+        }
+
+        singleton class CSmsManagerHelper {
+            interface ISmsManagerHelper;
+        }
+
+        singleton class CSmsMessageHelper {
+            interface ISmsMessageHelper;
         }
 
     } // Telephony

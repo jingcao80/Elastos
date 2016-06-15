@@ -9,3 +9,4 @@ INCLUDES += $(MAKEDIR)/../../../../../../inc/
 C_DEFINES += -DDROID_CORE
 
 SOURCES = BlacklistUtils.cpp
+SOURCES += CBlacklistUtils.cpp

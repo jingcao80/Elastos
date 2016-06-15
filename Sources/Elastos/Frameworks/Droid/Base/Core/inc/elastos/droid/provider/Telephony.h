@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_PROVIDER_TELEPHONE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/core/Singleton.h"
 #include "elastos/core/Object.h"
 #include "Elastos.Droid.Provider.h"
 #include "elastos/core/StringBuilder.h"
@@ -84,34 +85,35 @@ namespace Provider {
  *
  */
 class Telephony
-    : public ITelephony
-    , public Object
+    : public Object
+    , public ITelephony
 {
 public:
     /**
      * Contains all text-based SMS messages.
      */
     class Sms
-        : public ITelephonySms
-        , public IBaseColumns
-        , public ITelephonyTextBasedSmsColumns
-        , public Object
+        //: public Singleton
+        //, public ITelephonySms
+        //, public IBaseColumns
+        //, public ITelephonyTextBasedSmsColumns
     {
     public:
         /**
          * Contains all text-based SMS messages in the SMS app inbox.
          */
         class Inbox
-            : public ITelephonySmsInbox
-            , public IBaseColumns
-            , public ITelephonyTextBasedSmsColumns
-            , public Object
+            //: public Singleton
+            //, public ITelephonySmsInbox
+            //, public IBaseColumns
+            //, public ITelephonyTextBasedSmsColumns
         {
         public:
-            Inbox(
-                /* [in] */ Sms* owner);
+            Inbox();
 
-            CAR_INTERFACE_DECL();
+            //CAR_SINGLETON_DECL();
+
+            //CAR_INTERFACE_DECL();
 
             /**
              * Add an SMS to the Draft box.
@@ -125,7 +127,7 @@ public:
              * @return the URI for the new message
              * @hide
              */
-            /*static*/ CARAPI AddMessage(
+            static CARAPI AddMessage(
                 /* [in] */ IContentResolver* resolver,
                 /* [in] */ const String& address,
                 /* [in] */ const String& body,
@@ -147,7 +149,7 @@ public:
              * @return the URI for the new message
              * @hide
              */
-            /*static*/ CARAPI AddMessage(
+            static CARAPI AddMessage(
                 /* [in] */ Int64 subId,
                 /* [in] */ IContentResolver* resolver,
                 /* [in] */ const String& address,
@@ -162,15 +164,9 @@ public:
              */
             static AutoPtr<IUri> CONTENT_URI;// = Uri->Parse("content://sms/inbox");
 
-        private:
-            /**
-             * Not instantiable.
-             * @hide
-             */
-            Inbox() {
-            }
+        //private:
 
-            Sms* mOwner;
+            //AutoPtr<ITelephonySms> mOwner;
 
         };
 
@@ -178,16 +174,16 @@ public:
          * Contains all sent text-based SMS messages in the SMS app.
          */
         class Sent
-            : public ITelephonySmsSent
-            , public IBaseColumns
-            , public ITelephonyTextBasedSmsColumns
-            , public Object
+            //: public Singleton
+            //, public ITelephonySmsSent
+            //, public IBaseColumns
+            //, public ITelephonyTextBasedSmsColumns
         {
         public:
-            Sent(
-                /* [in] */ Sms* owner);
+            Sent();
 
-            CAR_INTERFACE_DECL();
+            //CAR_SINGLETON_DECL();
+            //CAR_INTERFACE_DECL();
 
             /**
              * Add an SMS to the Draft box.
@@ -200,7 +196,7 @@ public:
              * @return the URI for the new message
              * @hide
              */
-            /*static*/ CARAPI AddMessage(
+            static CARAPI AddMessage(
                 /* [in] */ IContentResolver* resolver,
                 /* [in] */ const String& address,
                 /* [in] */ const String& body,
@@ -220,7 +216,7 @@ public:
              * @return the URI for the new message
              * @hide
              */
-            /*static*/ CARAPI AddMessage(
+            static CARAPI AddMessage(
                 /* [in] */ Int64 subId,
                 /* [in] */ IContentResolver* resolver,
                 /* [in] */ const String& address,
@@ -234,36 +230,31 @@ public:
              */
             static AutoPtr<IUri> CONTENT_URI;// = Uri->Parse("content://sms/sent");
 
-        private:
-            /**
-             * Not instantiable.
-             * @hide
-             */
-            Sent() {
-            }
+        //private:
 
-            Sms* mOwner;
+            //AutoPtr<ITelephonySmsSent> mOwner;
         };
 
         /**
          * Contains all sent text-based SMS messages in the SMS app.
          */
         class Draft
-            : public ITelephonySmsDraft
-            , public IBaseColumns
-            , public ITelephonyTextBasedSmsColumns
-            , public Object
+            //: public Singleton
+            //, public ITelephonySmsDraft
+            //, public IBaseColumns
+            //, public ITelephonyTextBasedSmsColumns
         {
         public:
-            Draft(
-                /* [in] */ Sms* owner);
+            Draft();
 
-            CAR_INTERFACE_DECL();
+            //CAR_INTERFACE_DECL();
+
+            //CAR_INTERFACE_DECL();
 
            /**
             * @hide
             */
-            /*static*/ CARAPI AddMessage(
+            static CARAPI AddMessage(
                 /* [in] */ IContentResolver* resolver,
                 /* [in] */ const String& address,
                 /* [in] */ const String& body,
@@ -283,7 +274,7 @@ public:
              * @return the URI for the new message
              * @hide
              */
-            /*static*/ CARAPI AddMessage(
+            static CARAPI AddMessage(
                 /* [in] */ Int64 subId,
                 /* [in] */ IContentResolver* resolver,
                 /* [in] */ const String& address,
@@ -298,31 +289,25 @@ public:
              */
             static AutoPtr<IUri> CONTENT_URI;// = Uri->Parse("content://sms/draft");
 
-        private:
-            /**
-             * Not instantiable.
-             * @hide
-             */
-            Draft() {
-            }
+        //private:
 
-            Sms* mOwner;
+            //AutoPtr<ITelephonySmsDraft> mOwner;
         };
 
         /**
          * Contains all pending outgoing text-based SMS messages.
          */
         class Outbox
-            : public ITelephonySmsOutbox
-            , public IBaseColumns
-            , public ITelephonyTextBasedSmsColumns
-            , public Object
+            //: public Singleton
+            //, public ITelephonySmsOutbox
+            //, public IBaseColumns
+            //, public ITelephonyTextBasedSmsColumns
         {
         public:
-            Outbox(
-                /* [in] */ Sms* owner);
+            Outbox();
 
-            CAR_INTERFACE_DECL();
+            //CAR_SINGLETON_DECL();
+            //CAR_INTERFACE_DECL();
 
             /**
              * Add an SMS to the outbox.
@@ -336,7 +321,7 @@ public:
              * @return the URI for the new message
              * @hide
              */
-            /*static*/ CARAPI AddMessage(
+            static CARAPI AddMessage(
                 /* [in] */ IContentResolver* resolver,
                 /* [in] */ const String& address,
                 /* [in] */ const String& body,
@@ -359,7 +344,7 @@ public:
              * @return the URI for the new message
              * @hide
              */
-            /*static*/ CARAPI AddMessage(
+            static CARAPI AddMessage(
                 /* [in] */ Int64 subId,
                 /* [in] */ IContentResolver* resolver,
                 /* [in] */ const String& address,
@@ -369,15 +354,9 @@ public:
                 /* [in] */ Boolean deliveryReport,
                 /* [in] */ Int64 threadId,
                 /* [out] */ IUri** uri);
-        private:
-            /**
-             * Not instantiable.
-             * @hide
-             */
-            Outbox() {
-            }
+        //private:
 
-            Sms* mOwner;
+            //AutoPtr<ITelephonySmsOutbox> mOwner;
         public:
             /**
              * The {@code content://} style URL for this table.
@@ -390,13 +369,13 @@ public:
          * Contains all sent text-based SMS messages in the SMS app.
          */
         class Conversations
-            : public ITelephonySmsConversations
-            , public IBaseColumns
-            , public ITelephonyTextBasedSmsColumns
-            , public Object
+            //: public Object
+            //, public ITelephonySmsConversations
+            //, public IBaseColumns
+            //, public ITelephonyTextBasedSmsColumns
         {
-        public:
-            CAR_INTERFACE_DECL();
+        //public:
+            //CAR_INTERFACE_DECL();
 
         private:
             /**
@@ -417,8 +396,12 @@ public:
          * Contains constants for SMS related Intents that are broadcast.
          */
         class Intents
+            //: public Singleton
+            //, public ITelephonySmsIntents
         {
         public:
+            //CAR_INTERFACE_DECL();
+            //CAR_SINGLETON_DECL();
             /**
              * Read the PDUs out of an {@link #SMS_RECEIVED_ACTION} or a
              * {@link #DATA_SMS_RECEIVED_ACTION} intent.
@@ -426,8 +409,9 @@ public:
              * @param intent the intent to read from
              * @return an array of SmsMessages for the PDUs
              */
-            static CARAPI_(AutoPtr<ArrayOf<ISmsMessage*> >) GetMessagesFromIntent(
-                /* [in] */ IIntent* intent);
+            static CARAPI GetMessagesFromIntent(
+                /* [in] */ IIntent* intent,
+                /* [out] */ ArrayOf<ISmsMessage*>** result);
 
             /**
              * Read the normalized addresses out of PDUs
@@ -436,17 +420,11 @@ public:
              * @return a list of Addresses for the PDUs
              * @hide
              */
-            static CARAPI_(AutoPtr<IList>) GetNormalizedAddressesFromPdus(
+            static CARAPI GetNormalizedAddressesFromPdus(
                     /* [in] */ ArrayOf<ArrayOf<Byte>*> * pdus,
-                    /* [in] */ const String& format);
+                    /* [in] */ const String& format,
+                    /* [out] */ IList** result);
         private:
-            /**
-             * Not instantiable.
-             * @hide
-             */
-            Intents() {
-            }
-
 
             static String NormalizeDigitsOnly(
                 /* [in] */ const String& number);
@@ -457,14 +435,16 @@ public:
         };
     public:
 
-        CAR_INTERFACE_DECL();
+        //CAR_INTERFACE_DECL();
+
+        //CAR_SINGLETON_DECL();
 
         /**
          * Used to determine the currently configured default SMS package.
          * @param context context of the requesting application
          * @return package name for the default SMS package or NULL
          */
-        /*static*/ CARAPI GetDefaultSmsPackage(
+        static CARAPI GetDefaultSmsPackage(
             /* [in] */ IContext* context,
             /* [out] */ String* smsPackage);
 
@@ -472,7 +452,7 @@ public:
          * Return cursor for table query.
          * @hide
          */
-        /*static*/ CARAPI Query(
+        static CARAPI Query(
             /* [in] */ IContentResolver* cr,
             /* [in] */ ArrayOf<String>* projection,
             /* [out] */ ICursor** cursor);
@@ -481,7 +461,7 @@ public:
          * Return cursor for table query.
          * @hide
          */
-        /*static*/ CARAPI Query(
+        static CARAPI Query(
             /* [in] */ IContentResolver* cr,
             /* [in] */ ArrayOf<String>* projection,
             /* [in] */ const String& where,
@@ -502,7 +482,7 @@ public:
          * @return the URI for the new message
          * @hide
          */
-        /*static*/ CARAPI AddMessageToUri(
+        static CARAPI AddMessageToUri(
             /* [in] */ IContentResolver* resolver,
             /* [in] */ IUri* uri,
             /* [in] */ const String& address,
@@ -528,7 +508,7 @@ public:
          * @return the URI for the new message
          * @hide
          */
-        /*static*/ CARAPI AddMessageToUri(
+        static CARAPI AddMessageToUri(
             /* [in] */ Int64 subId,
             /* [in] */ IContentResolver* resolver,
             /* [in] */ IUri* uri,
@@ -555,7 +535,7 @@ public:
          * @return the URI for the new message
          * @hide
          */
-        /*static*/ CARAPI AddMessageToUri(
+        static CARAPI AddMessageToUri(
             /* [in] */ IContentResolver* resolver,
             /* [in] */ IUri* uri,
             /* [in] */ const String& address,
@@ -583,7 +563,7 @@ public:
          * @return the URI for the new message
          * @hide
          */
-        /*static*/ CARAPI AddMessageToUri(
+        static CARAPI AddMessageToUri(
             /* [in] */ Int64 subId,
             /* [in] */ IContentResolver* resolver,
             /* [in] */ IUri* uri,
@@ -613,7 +593,7 @@ public:
          * @return the URI for the new message
          * @hide
          */
-        /*static*/ CARAPI AddMessageToUri(
+        static CARAPI AddMessageToUri(
             /* [in] */ Int64 subId,
             /* [in] */ IContentResolver* resolver,
             /* [in] */ IUri* uri,
@@ -636,7 +616,7 @@ public:
          * @return TRUE if the operation succeeded
          * @hide
          */
-        /*static*/ CARAPI MoveMessageToFolder(
+        static CARAPI MoveMessageToFolder(
             /* [in] */ IContext* context,
             /* [in] */ IUri* uri,
             /* [in] */ Int32 folder,
@@ -648,7 +628,7 @@ public:
          * outgoing message.
          * @hide
          */
-        /*static*/ CARAPI IsOutgoingFolder(
+        static CARAPI IsOutgoingFolder(
             /* [in] */ Int32 messageType,
             /* [out] */ Boolean* result);
 
@@ -658,26 +638,18 @@ public:
          */
         static AutoPtr<IUri> CONTENT_URI;// = Uri->Parse("content://sms");
 
-    private:
-        /**
-         * Not instantiable.
-         * @hide
-         */
-        Sms() {
-        }
-
     };
 
     /**
      * Helper functions for the "threads" table used by MMS and SMS.
      */
     class Threads
-        : public ITelephonyThreads
-        , public ITelephonyThreadsColumns
-        , public Object
+        //: public Object
+        //, public ITelephonyThreads
+        //, public ITelephonyThreadsColumns
     {
     public:
-        CAR_INTERFACE_DECL()
+        //CAR_INTERFACE_DECL()
 
         /**
          * This is a single-recipient version of {@code getOrCreateThreadId}.
@@ -686,7 +658,7 @@ public:
          * @param recipient the recipient to send to.
          * @hide
          */
-        /*static*/ CARAPI GetOrCreateThreadId(
+        static CARAPI GetOrCreateThreadId(
             /* [in] */ IContext* context,
             /* [in] */ const String& recipient,
             /* [out] */ Int64* threadId);
@@ -702,7 +674,7 @@ public:
          * return a unique thread ID.</p>
          * @hide
          */
-        /*static*/ CARAPI GetOrCreateThreadId(
+        static CARAPI GetOrCreateThreadId(
             /* [in] */ IContext* context,
             /* [in] */ ISet* recipients,//String
             /* [out] */ Int64* threadId);
@@ -740,21 +712,21 @@ public:
      * Contains all MMS messages.
      */
     class Mms
-        : public ITelephonyMms
-        , public ITelephonyBaseMmsColumns
-        , public Object
+        //: public Object
+        //, public ITelephonyMms
+        //, public ITelephonyBaseMmsColumns
     {
     public:
         /**
          * Contains all MMS messages in the MMS app inbox.
          */
         class Inbox
-            : public ITelephonyMmsInbox
-            , public ITelephonyBaseMmsColumns
-            , public Object
+            //: public Object
+            //, public ITelephonyMmsInbox
+            //, public ITelephonyBaseMmsColumns
         {
-        public:
-            CAR_INTERFACE_DECL();
+        //public:
+        //    CAR_INTERFACE_DECL();
 
         private:
             /**
@@ -776,12 +748,12 @@ public:
          * Contains all MMS messages in the MMS app sent folder.
          */
         class Sent
-            : public ITelephonyMmsSent
-            , public ITelephonyBaseMmsColumns
-            , public Object
+            //: public Object
+            //, public ITelephonyMmsSent
+            //, public ITelephonyBaseMmsColumns
         {
-        public:
-            CAR_INTERFACE_DECL();
+        //public:
+            //CAR_INTERFACE_DECL();
 
         private:
 
@@ -804,12 +776,12 @@ public:
          * Contains all MMS messages in the MMS app drafts folder.
          */
         class Draft
-            : public ITelephonyMmsDraft
-            , public ITelephonyBaseMmsColumns
-            , public Object
+            //: public Object
+            //, public ITelephonyMmsDraft
+            //, public ITelephonyBaseMmsColumns
         {
-        public:
-            CAR_INTERFACE_DECL();
+        //public:
+        //    CAR_INTERFACE_DECL();
 
         private:
             /**
@@ -830,12 +802,12 @@ public:
          * Contains all MMS messages in the MMS app outbox.
          */
         class Outbox
-            : public ITelephonyMmsOutbox
-            , public ITelephonyBaseMmsColumns
-            , public Object
+            //: public Object
+            //, public ITelephonyMmsOutbox
+            //, public ITelephonyBaseMmsColumns
         {
-        public:
-            CAR_INTERFACE_DECL();
+        //public:
+        //    CAR_INTERFACE_DECL();
 
         private:
             /**
@@ -856,12 +828,12 @@ public:
          * Contains address information for an MMS message.
          */
         class Addr
-            : public ITelephonyMmsAddr
-            , public IBaseColumns
-            , public Object
+            //: public Object
+            //, public ITelephonyMmsAddr
+            //, public IBaseColumns
         {
-        public:
-            CAR_INTERFACE_DECL();
+        //public:
+        //    CAR_INTERFACE_DECL();
 
         private:
             /**
@@ -876,12 +848,12 @@ public:
          * Contains message parts.
          */
         class Part
-            : public ITelephonyMmsPart
-            , public IBaseColumns
-            , public Object
+            //: public Object
+            //, public ITelephonyMmsPart
+            //, public IBaseColumns
         {
-        public:
-            CAR_INTERFACE_DECL();
+        //public:
+        //    CAR_INTERFACE_DECL();
 
         private:
             /**
@@ -897,11 +869,11 @@ public:
          * Message send rate table.
          */
         class Rate
-            : public ITelephonyMmsRate
-            , public Object
+            //: public Object
+            //, public ITelephonyMmsRate
         {
-        public:
-            CAR_INTERFACE_DECL();
+        //public:
+        //    CAR_INTERFACE_DECL();
 
         private:
             /**
@@ -922,11 +894,11 @@ public:
          * Intents class.
          */
         class Intents
-            : public ITelephonyMmsIntents
-            , public Object
+            //: public Object
+            //, public ITelephonyMmsIntents
         {
-        public:
-            CAR_INTERFACE_DECL();
+        //public:
+        //    CAR_INTERFACE_DECL();
 
         private:
             /**
@@ -939,13 +911,13 @@ public:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        //CAR_INTERFACE_DECL();
 
         /**
          * Helper method to query this table.
          * @hide
          */
-        /*static*/ CARAPI Query(
+        static CARAPI Query(
             /* [in] */ IContentResolver* cr,
             /* [in] */ ArrayOf<String>* projection,
             /* [out] */ ICursor** cursor);
@@ -954,7 +926,7 @@ public:
          * Helper method to query this table.
          * @hide
          */
-        /*static*/ CARAPI Query(
+        static CARAPI Query(
             /* [in] */ IContentResolver* cr,
             /* [in] */ ArrayOf<String>* projection,
             /* [in] */ const String& where,
@@ -965,7 +937,7 @@ public:
          * Helper method to extract email address from address string.
          * @hide
          */
-        /*static*/ CARAPI ExtractAddrSpec(
+        static CARAPI ExtractAddrSpec(
             /* [in] */ const String& address,
             /* [out] */ String* addrSpec);
 
@@ -976,7 +948,7 @@ public:
          * @return TRUE if address is an email address; FALSE otherwise.
          * @hide
          */
-        /*static*/ CARAPI IsEmailAddress(
+        static CARAPI IsEmailAddress(
             /* [in] */ const String& address,
             /* [out] */ Boolean* result);
 
@@ -987,7 +959,7 @@ public:
          * @return TRUE if number is a phone number; FALSE otherwise.
          * @hide
          */
-        /*static*/ CARAPI IsPhoneNumber(
+        static CARAPI IsPhoneNumber(
             /* [in] */ const String& number,
             /* [out] */ Boolean* result);
 
@@ -1032,21 +1004,21 @@ public:
      * Contains all MMS and SMS messages.
      */
     class MmsSms
-        : public ITelephonyMmsSms
-        , public IBaseColumns
-        , public Object
+        //: public Object
+        //, public ITelephonyMmsSms
+        //, public IBaseColumns
     {
     public:
         /**
          * Contains pending messages info.
          */
         class PendingMessages
-            : public ITelephonyMmsSmsPendingMessages
-            , public IBaseColumns
-            , public Object
+            //: public Object
+            //, public ITelephonyMmsSmsPendingMessages
+            //, public IBaseColumns
         {
-        public:
-            CAR_INTERFACE_DECL();
+        //public:
+        //    CAR_INTERFACE_DECL();
 
         private:
             /**
@@ -1066,11 +1038,11 @@ public:
          * @hide
          */
         class WordsTable
-            : public ITelephonyMmsSmsWordsTable
-            , public Object
+            //: public Object
+            //, public ITelephonyMmsSmsWordsTable
         {
-        public:
-            CAR_INTERFACE_DECL();
+        //public:
+        //    CAR_INTERFACE_DECL();
 
         private:
             /**
@@ -1081,8 +1053,8 @@ public:
 
         };
 
-    public:
-        CAR_INTERFACE_DECL();
+    //public:
+    //    CAR_INTERFACE_DECL();
 
     private:
         /**
@@ -1135,12 +1107,12 @@ public:
      * Carriers class contains information about APNs, including MMSC information.
      */
     class Carriers
-        : public ITelephonyCarriers
-        , public IBaseColumns
-        , public Object
+        //: public Object
+        //, public ITelephonyCarriers
+        //, public IBaseColumns
     {
-    public:
-        CAR_INTERFACE_DECL();
+    //public:
+    //    CAR_INTERFACE_DECL();
 
     private:
         /**
@@ -1162,12 +1134,12 @@ public:
      * @hide
      */
     class CellBroadcasts
-        : public ITelephonyCellBroadcasts
-        , public IBaseColumns
-        , public Object
+        //: public Object
+        //, public ITelephonyCellBroadcasts
+        //, public IBaseColumns
     {
-    public:
-        CAR_INTERFACE_DECL();
+    //public:
+    //    CAR_INTERFACE_DECL();
 
     private:
         /**
@@ -1216,12 +1188,12 @@ public:
      * @hide
      */
     class Blacklist
-        : public ITelephonyBlacklist
-        , public IBaseColumns
-        , public Object
+        //: public Object
+        //, public ITelephonyBlacklist
+        //, public IBaseColumns
     {
     public:
-        CAR_INTERFACE_DECL();
+    //    CAR_INTERFACE_DECL();
 
         /**
          * The content:// style URL for this table
@@ -1246,15 +1218,21 @@ public:
         static AutoPtr<IUri> CONTENT_MESSAGE_URI;// = Uri->Parse("content://blacklist/message");
 
     };
-private:
-    static const String TAG;// = "Telephony";
 
+    CAR_INTERFACE_DECL();
     /**
      * Not instantiable.
      * @hide
      */
     Telephony() {
     }
+
+    CARAPI constructor()
+    {
+        return NOERROR;
+    }
+private:
+    static const String TAG;// = "Telephony";
 
 };
 

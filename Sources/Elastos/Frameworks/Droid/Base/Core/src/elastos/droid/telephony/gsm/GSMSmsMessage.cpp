@@ -1,5 +1,5 @@
 #include "Elastos.Droid.Internal.h"
-#include "elastos/droid/telephony/gsm/SmsMessage.h"
+#include "elastos/droid/telephony/gsm/GSMSmsMessage.h"
 
 namespace Elastos {
 namespace Droid {
@@ -7,15 +7,20 @@ namespace Telephony {
 namespace Gsm {
 
 //=====================================================================
-//                        SmsMessage::SubmitPdu
+//                        GSMSmsMessage::SubmitPdu
 //=====================================================================
-CAR_INTERFACE_IMPL(SmsMessage::SubmitPdu, Object, ISubmitPdu);
+CAR_INTERFACE_IMPL(GSMSmsMessage::SubmitPdu, Object, ISubmitPdu);
 
-SmsMessage::SubmitPdu::SubmitPdu()
+GSMSmsMessage::SubmitPdu::SubmitPdu()
 {
 }
 
-ECode SmsMessage::SubmitPdu::ToString(
+ECode GSMSmsMessage::SubmitPdu::constructor()
+{
+    return NOERROR;
+}
+
+ECode GSMSmsMessage::SubmitPdu::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
@@ -29,7 +34,7 @@ ECode SmsMessage::SubmitPdu::ToString(
     return NOERROR;
 }
 
-//SmsMessage::SubmitPdu::SubmitPdu(
+//GSMSmsMessage::SubmitPdu::SubmitPdu(
 //    /* [in] */ ISmsMessageBaseSubmitPduBase* spb)
 //{
 //    // ==================before translated======================
@@ -38,17 +43,22 @@ ECode SmsMessage::SubmitPdu::ToString(
 //}
 
 //=====================================================================
-//                              SmsMessage
+//                              GSMSmsMessage
 //=====================================================================
-CAR_INTERFACE_IMPL(SmsMessage, Object, ISmsMessage);
+CAR_INTERFACE_IMPL(GSMSmsMessage, Object, ISmsMessage);
 
-SmsMessage::SmsMessage()
+GSMSmsMessage::GSMSmsMessage()
 {
     // ==================before translated======================
     // this(getSmsFacility());
 }
 
-AutoPtr<SmsMessage> SmsMessage::CreateFromPdu(
+ECode GSMSmsMessage::constructor()
+{
+    return NOERROR;
+}
+
+AutoPtr<GSMSmsMessage> GSMSmsMessage::CreateFromPdu(
     /* [in] */ ArrayOf<Byte>* pdu)
 {
     // ==================before translated======================
@@ -58,7 +68,7 @@ AutoPtr<SmsMessage> SmsMessage::CreateFromPdu(
     // if (PHONE_TYPE_CDMA == activePhone) {
     //     wrappedMessage = com.android.internal.telephony.cdma.SmsMessage.createFromPdu(pdu);
     // } else {
-    //     wrappedMessage = com.android.internal.telephony.gsm.SmsMessage.createFromPdu(pdu);
+    //     wrappedMessage = com.android.internal.telephony.gsm.GSMSmsMessage.createFromPdu(pdu);
     // }
     //
     // // Hangouts, and some other bad citizens, are using this deprecated API call.
@@ -69,13 +79,13 @@ AutoPtr<SmsMessage> SmsMessage::CreateFromPdu(
     //     wrappedMessage = com.android.internal.telephony.SyntheticSmsMessage.createFromPdu(pdu);
     // }
     //
-    // return new SmsMessage(wrappedMessage);
+    // return new GSMSmsMessage(wrappedMessage);
     assert(0);
-    AutoPtr<SmsMessage> empty;
+    AutoPtr<GSMSmsMessage> empty;
     return empty;
 }
 
-Int32 SmsMessage::GetTPLayerLengthForPDU(
+Int32 GSMSmsMessage::GetTPLayerLengthForPDU(
     /* [in] */ const String& pdu)
 {
     // ==================before translated======================
@@ -84,19 +94,19 @@ Int32 SmsMessage::GetTPLayerLengthForPDU(
     // if (PHONE_TYPE_CDMA == activePhone) {
     //     return com.android.internal.telephony.cdma.SmsMessage.getTPLayerLengthForPDU(pdu);
     // } else {
-    //     return com.android.internal.telephony.gsm.SmsMessage.getTPLayerLengthForPDU(pdu);
+    //     return com.android.internal.telephony.gsm.GSMSmsMessage.getTPLayerLengthForPDU(pdu);
     // }
     assert(0);
     return 0;
 }
 
-AutoPtr< ArrayOf<Int32> > SmsMessage::CalculateLength(
+AutoPtr< ArrayOf<Int32> > GSMSmsMessage::CalculateLength(
     /* [in] */ ICharSequence* messageBody,
     /* [in] */ Boolean use7bitOnly)
 {
     // ==================before translated======================
     // GsmAlphabet.TextEncodingDetails ted =
-    //         com.android.internal.telephony.gsm.SmsMessage
+    //         com.android.internal.telephony.gsm.GSMSmsMessage
     //                 .calculateLength(messageBody, use7bitOnly);
     // int ret[] = new int[4];
     // ret[0] = ted.msgCount;
@@ -109,7 +119,7 @@ AutoPtr< ArrayOf<Int32> > SmsMessage::CalculateLength(
     return empty;
 }
 
-AutoPtr< ArrayOf<Int32> > SmsMessage::CalculateLength(
+AutoPtr< ArrayOf<Int32> > GSMSmsMessage::CalculateLength(
     /* [in] */ const String& messageBody,
     /* [in] */ Boolean use7bitOnly)
 {
@@ -120,7 +130,7 @@ AutoPtr< ArrayOf<Int32> > SmsMessage::CalculateLength(
     return empty;
 }
 
-AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
+AutoPtr<GSMSmsMessage::SubmitPdu> GSMSmsMessage::GetSubmitPdu(
     /* [in] */ const String& scAddress,
     /* [in] */ const String& destinationAddress,
     /* [in] */ const String& message,
@@ -136,7 +146,7 @@ AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
     //             destinationAddress, message, statusReportRequested,
     //             SmsHeader.fromByteArray(header));
     // } else {
-    //     spb = com.android.internal.telephony.gsm.SmsMessage.getSubmitPdu(scAddress,
+    //     spb = com.android.internal.telephony.gsm.GSMSmsMessage.getSubmitPdu(scAddress,
     //             destinationAddress, message, statusReportRequested, header);
     // }
     //
@@ -146,7 +156,7 @@ AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
     return empty;
 }
 
-AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
+AutoPtr<GSMSmsMessage::SubmitPdu> GSMSmsMessage::GetSubmitPdu(
     /* [in] */ const String& scAddress,
     /* [in] */ const String& destinationAddress,
     /* [in] */ const String& message,
@@ -160,7 +170,7 @@ AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
     //     spb = com.android.internal.telephony.cdma.SmsMessage.getSubmitPdu(scAddress,
     //             destinationAddress, message, statusReportRequested, null);
     // } else {
-    //     spb = com.android.internal.telephony.gsm.SmsMessage.getSubmitPdu(scAddress,
+    //     spb = com.android.internal.telephony.gsm.GSMSmsMessage.getSubmitPdu(scAddress,
     //             destinationAddress, message, statusReportRequested);
     // }
     //
@@ -170,7 +180,7 @@ AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
     return empty;
 }
 
-AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
+AutoPtr<GSMSmsMessage::SubmitPdu> GSMSmsMessage::GetSubmitPdu(
     /* [in] */ const String& scAddress,
     /* [in] */ const String& destinationAddress,
     /* [in] */ Int16 destinationPort,
@@ -185,7 +195,7 @@ AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
     //     spb = com.android.internal.telephony.cdma.SmsMessage.getSubmitPdu(scAddress,
     //             destinationAddress, destinationPort, data, statusReportRequested);
     // } else {
-    //     spb = com.android.internal.telephony.gsm.SmsMessage.getSubmitPdu(scAddress,
+    //     spb = com.android.internal.telephony.gsm.GSMSmsMessage.getSubmitPdu(scAddress,
     //             destinationAddress, destinationPort, data, statusReportRequested);
     // }
     //
@@ -195,7 +205,7 @@ AutoPtr<SmsMessage::SubmitPdu> SmsMessage::GetSubmitPdu(
     return empty;
 }
 
-ECode SmsMessage::GetServiceCenterAddress(
+ECode GSMSmsMessage::GetServiceCenterAddress(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -206,7 +216,7 @@ ECode SmsMessage::GetServiceCenterAddress(
     return NOERROR;
 }
 
-ECode SmsMessage::GetOriginatingAddress(
+ECode GSMSmsMessage::GetOriginatingAddress(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -217,7 +227,7 @@ ECode SmsMessage::GetOriginatingAddress(
     return NOERROR;
 }
 
-ECode SmsMessage::GetDisplayOriginatingAddress(
+ECode GSMSmsMessage::GetDisplayOriginatingAddress(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -228,7 +238,7 @@ ECode SmsMessage::GetDisplayOriginatingAddress(
     return NOERROR;
 }
 
-ECode SmsMessage::GetMessageBody(
+ECode GSMSmsMessage::GetMessageBody(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -239,7 +249,7 @@ ECode SmsMessage::GetMessageBody(
     return NOERROR;
 }
 
-ECode SmsMessage::GetMessageClass(
+ECode GSMSmsMessage::GetMessageClass(
     /* [out] */ Int32/*TODO MessageClass*/* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -252,7 +262,7 @@ ECode SmsMessage::GetMessageClass(
     return NOERROR;
 }
 
-ECode SmsMessage::GetDisplayMessageBody(
+ECode GSMSmsMessage::GetDisplayMessageBody(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -263,7 +273,7 @@ ECode SmsMessage::GetDisplayMessageBody(
     return NOERROR;
 }
 
-ECode SmsMessage::GetPseudoSubject(
+ECode GSMSmsMessage::GetPseudoSubject(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -274,7 +284,7 @@ ECode SmsMessage::GetPseudoSubject(
     return NOERROR;
 }
 
-ECode SmsMessage::GetTimestampMillis(
+ECode GSMSmsMessage::GetTimestampMillis(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -285,7 +295,7 @@ ECode SmsMessage::GetTimestampMillis(
     return NOERROR;
 }
 
-ECode SmsMessage::IsEmail(
+ECode GSMSmsMessage::IsEmail(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -296,7 +306,7 @@ ECode SmsMessage::IsEmail(
     return NOERROR;
 }
 
-ECode SmsMessage::GetEmailBody(
+ECode GSMSmsMessage::GetEmailBody(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -307,7 +317,7 @@ ECode SmsMessage::GetEmailBody(
     return NOERROR;
 }
 
-ECode SmsMessage::GetEmailFrom(
+ECode GSMSmsMessage::GetEmailFrom(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -318,7 +328,7 @@ ECode SmsMessage::GetEmailFrom(
     return NOERROR;
 }
 
-ECode SmsMessage::GetProtocolIdentifier(
+ECode GSMSmsMessage::GetProtocolIdentifier(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -329,7 +339,7 @@ ECode SmsMessage::GetProtocolIdentifier(
     return NOERROR;
 }
 
-ECode SmsMessage::IsReplace(
+ECode GSMSmsMessage::IsReplace(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -340,7 +350,7 @@ ECode SmsMessage::IsReplace(
     return NOERROR;
 }
 
-ECode SmsMessage::IsCphsMwiMessage(
+ECode GSMSmsMessage::IsCphsMwiMessage(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -351,7 +361,7 @@ ECode SmsMessage::IsCphsMwiMessage(
     return NOERROR;
 }
 
-ECode SmsMessage::IsMWIClearMessage(
+ECode GSMSmsMessage::IsMWIClearMessage(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -362,7 +372,7 @@ ECode SmsMessage::IsMWIClearMessage(
     return NOERROR;
 }
 
-ECode SmsMessage::IsMWISetMessage(
+ECode GSMSmsMessage::IsMWISetMessage(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -373,7 +383,7 @@ ECode SmsMessage::IsMWISetMessage(
     return NOERROR;
 }
 
-ECode SmsMessage::IsMwiDontStore(
+ECode GSMSmsMessage::IsMwiDontStore(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -384,7 +394,7 @@ ECode SmsMessage::IsMwiDontStore(
     return NOERROR;
 }
 
-ECode SmsMessage::GetUserData(
+ECode GSMSmsMessage::GetUserData(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
@@ -395,7 +405,7 @@ ECode SmsMessage::GetUserData(
     return NOERROR;
 }
 
-ECode SmsMessage::GetPdu(
+ECode GSMSmsMessage::GetPdu(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
@@ -406,7 +416,7 @@ ECode SmsMessage::GetPdu(
     return NOERROR;
 }
 
-ECode SmsMessage::GetStatusOnSim(
+ECode GSMSmsMessage::GetStatusOnSim(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -417,7 +427,7 @@ ECode SmsMessage::GetStatusOnSim(
     return NOERROR;
 }
 
-ECode SmsMessage::GetStatusOnIcc(
+ECode GSMSmsMessage::GetStatusOnIcc(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -429,7 +439,7 @@ ECode SmsMessage::GetStatusOnIcc(
     return NOERROR;
 }
 
-ECode SmsMessage::GetIndexOnSim(
+ECode GSMSmsMessage::GetIndexOnSim(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -440,7 +450,7 @@ ECode SmsMessage::GetIndexOnSim(
     return NOERROR;
 }
 
-ECode SmsMessage::GetIndexOnIcc(
+ECode GSMSmsMessage::GetIndexOnIcc(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -452,7 +462,7 @@ ECode SmsMessage::GetIndexOnIcc(
     return NOERROR;
 }
 
-ECode SmsMessage::GetStatus(
+ECode GSMSmsMessage::GetStatus(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -463,7 +473,7 @@ ECode SmsMessage::GetStatus(
     return NOERROR;
 }
 
-ECode SmsMessage::IsStatusReportMessage(
+ECode GSMSmsMessage::IsStatusReportMessage(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -474,7 +484,7 @@ ECode SmsMessage::IsStatusReportMessage(
     return NOERROR;
 }
 
-ECode SmsMessage::IsReplyPathPresent(
+ECode GSMSmsMessage::IsReplyPathPresent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -485,21 +495,21 @@ ECode SmsMessage::IsReplyPathPresent(
     return NOERROR;
 }
 
-SmsMessage::SmsMessage(
+GSMSmsMessage::GSMSmsMessage(
     /* [in] */ ISmsMessageBase* smb)
 {
     // ==================before translated======================
     // mWrappedSmsMessage = smb;
 }
 
-AutoPtr<ISmsMessageBase> SmsMessage::GetSmsFacility()
+AutoPtr<ISmsMessageBase> GSMSmsMessage::GetSmsFacility()
 {
     // ==================before translated======================
     // int activePhone = TelephonyManager.getDefault().getCurrentPhoneType();
     // if (PHONE_TYPE_CDMA == activePhone) {
     //     return new com.android.internal.telephony.cdma.SmsMessage();
     // } else {
-    //     return new com.android.internal.telephony.gsm.SmsMessage();
+    //     return new com.android.internal.telephony.gsm.GSMSmsMessage();
     // }
     assert(0);
     AutoPtr<ISmsMessageBase> empty;

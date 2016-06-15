@@ -52,9 +52,9 @@ namespace Telephony {
   * @hide
   */
 class SmsCbMessage
-    : public ISmsCbMessage
+    : public Object
+    , public ISmsCbMessage
     , public IParcelable
-    , public Object
 {
 //private:
 //    class InnerParcelableCreator
@@ -85,7 +85,7 @@ public:
     /**
       * Create a new SmsCbMessage with the specified data.
       */
-    SmsCbMessage(
+    CARAPI constructor(
         /* [in] */ Int32 messageFormat,
         /* [in] */ Int32 geographicalScope,
         /* [in] */ Int32 serialNumber,
@@ -98,7 +98,7 @@ public:
         /* [in] */ ISmsCbCmasInfo* cmasWarningInfo);
 
     /** Create a new SmsCbMessage object from a Parcel. */
-    SmsCbMessage(
+    CARAPI constructor(
         /* [in] */ IParcel* in);
 
     CARAPI constructor();

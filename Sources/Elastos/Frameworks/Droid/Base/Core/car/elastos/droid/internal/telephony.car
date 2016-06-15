@@ -425,6 +425,20 @@ module
     namespace Droid {
     namespace Internal {
     namespace Telephony {
+    namespace Utility {
+        singleton class CBlacklistUtils {
+                interface IBlacklistUtils;
+        }
+    } // Utility
+    } // Telephony
+    } // Internal
+    } // Droid
+    } // Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
     namespace DataConnection {
 
         class CApnContext {

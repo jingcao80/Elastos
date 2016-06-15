@@ -49,16 +49,17 @@ SmsCbLocation::SmsCbLocation()
     // mCid = -1;
 }
 
-SmsCbLocation::SmsCbLocation(
+ECode SmsCbLocation::constructor(
     /* [in*/ const String& plmn)
 {
     // ==================before translated======================
     // mPlmn = plmn;
     // mLac = -1;
     // mCid = -1;
+    return NOERROR;
 }
 
-SmsCbLocation::SmsCbLocation(
+ECode SmsCbLocation::constructor(
     /* [in*/ const String& plmn,
     /* [in] */ Int32 lac,
     /* [in] */ Int32 cid)
@@ -67,15 +68,17 @@ SmsCbLocation::SmsCbLocation(
     // mPlmn = plmn;
     // mLac = lac;
     // mCid = cid;
+    return NOERROR;
 }
 
-SmsCbLocation::SmsCbLocation(
+ECode SmsCbLocation::constructor(
     /* [in] */ IParcel* in)
 {
     // ==================before translated======================
     // mPlmn = in.readString();
     // mLac = in.readInt();
     // mCid = in.readInt();
+    return NOERROR;
 }
 
 ECode SmsCbLocation::constructor()

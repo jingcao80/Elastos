@@ -18,9 +18,9 @@ namespace Telephony {
   * @hide
   */
 class SmsCbLocation
-    : public ISmsCbLocation
+    : public Object
+    , public ISmsCbLocation
     , public IParcelable
-    , public Object
 {
 //private:
 //    class InnerParcelableCreator
@@ -56,22 +56,22 @@ public:
       * Construct a location object for the PLMN. This class is immutable, so
       * the same object can be reused for multiple broadcasts.
       */
-    SmsCbLocation(
-        /* [in*/ const String& plmn);
+    CARAPI constructor(
+        /* [in] */ const String& plmn);
 
     /**
       * Construct a location object for the PLMN, LAC, and Cell ID. This class is immutable, so
       * the same object can be reused for multiple broadcasts.
       */
-    SmsCbLocation(
-        /* [in*/ const String& plmn,
+    CARAPI constructor(
+        /* [in] */ const String& plmn,
         /* [in] */ Int32 lac,
         /* [in] */ Int32 cid);
 
     /**
       * Initialize the object from a Parcel.
       */
-    SmsCbLocation(
+    CARAPI constructor(
         /* [in] */ IParcel* in);
 
     CARAPI constructor();

@@ -35,8 +35,8 @@ namespace Telephony {
   * @see android.provider.Telephony.Sms.Intents#getMessagesFromIntent
   */
 class SmsMessage
-    : public ISmsMessage
-    , public Object
+    : public Object
+    , public ISmsMessage
 {
 public:
     class SubmitPdu

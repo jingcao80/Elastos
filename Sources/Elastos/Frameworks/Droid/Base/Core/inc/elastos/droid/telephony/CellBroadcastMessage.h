@@ -37,9 +37,9 @@ namespace Telephony {
   * {@hide}
   */
 class CellBroadcastMessage
-    : public ICellBroadcastMessage
+    : public Object
+    , public ICellBroadcastMessage
     , public IParcelable
-    , public Object
 {
 //private:
 //    class InnerParcelableCreator
@@ -67,7 +67,7 @@ public:
 
     CellBroadcastMessage();
 
-    CellBroadcastMessage(
+    CARAPI constructor(
         /* [in] */ ISmsCbMessage* message);
 
     CARAPI constructor();

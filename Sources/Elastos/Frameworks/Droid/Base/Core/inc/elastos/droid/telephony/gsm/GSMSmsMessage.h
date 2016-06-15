@@ -1,5 +1,5 @@
-#ifndef __ELASTOS_DROID_TELEPHONY_GSM_SMSMESSAGE_H__
-#define __ELASTOS_DROID_TELEPHONY_GSM_SMSMESSAGE_H__
+#ifndef __ELASTOS_DROID_TELEPHONY_GSM_GSMSMSMESSAGE_H__
+#define __ELASTOS_DROID_TELEPHONY_GSM_GSMSMSMESSAGE_H__
 
 #include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
@@ -29,16 +29,16 @@ namespace Gsm {
   * @deprecated Replaced by android.telephony.SmsMessage that supports both GSM and CDMA.
   */
 // @Deprecated
-class SmsMessage
-    : public ISmsMessage
-    , public Object
+class GSMSmsMessage
+    : public Object
+    , public ISmsMessage
 {
 public:
     /** @deprecated Use android.telephony.SmsMessage. */
     // @Deprecated
     class SubmitPdu
-        : public ISubmitPdu
-        , public Object
+        : public Object
+        , public ISubmitPdu
     {
     public:
         CAR_INTERFACE_DECL();
@@ -47,6 +47,8 @@ public:
         /** @deprecated Use android.telephony.SmsMessage. */
         // @Deprecated
         SubmitPdu();
+
+        CARAPI constructor();
 
         /** @deprecated Use android.telephony.SmsMessage. */
         // @Override
@@ -76,14 +78,16 @@ public:
     // Constructor
     /** @deprecated Use android.telephony.SmsMessage. */
     // @Deprecated
-    SmsMessage();
+    GSMSmsMessage();
+
+    CARAPI constructor();
 
     /**
       * Create an SmsMessage from a raw PDU.
       * @deprecated Use android.telephony.SmsMessage.
       */
     // @Deprecated
-    static CARAPI_(AutoPtr<SmsMessage>) CreateFromPdu(
+    static CARAPI_(AutoPtr<GSMSmsMessage>) CreateFromPdu(
         /* [in] */ ArrayOf<Byte>* pdu);
 
     /**
@@ -461,7 +465,7 @@ public:
 
 private:
 
-    SmsMessage(
+    GSMSmsMessage(
         /* [in] */ ISmsMessageBase* smb);
 
     /** This method returns the reference to a specific

@@ -47,7 +47,7 @@ CellBroadcastMessage::CellBroadcastMessage()
 {
 }
 
-CellBroadcastMessage::CellBroadcastMessage(
+ECode CellBroadcastMessage::constructor(
     /* [in] */ ISmsCbMessage* message)
 {
     // ==================before translated======================
@@ -55,6 +55,7 @@ CellBroadcastMessage::CellBroadcastMessage(
     // mDeliveryTime = System.currentTimeMillis();
     // mIsRead = false;
     // mSubId = SubscriptionManager.getDefaultSmsSubId();
+    return NOERROR;
 }
 
 ECode CellBroadcastMessage::constructor()
@@ -101,6 +102,19 @@ ECode CellBroadcastMessage::WriteToParcel(
     assert(0);
     return NOERROR;
 }
+
+ECode CellBroadcastMessage::ReadFromParcel(
+    /* [in] */ IParcel* source)
+{
+    // ==================before translated======================
+    // mSmsCbMessage = new SmsCbMessage(in);
+    // mDeliveryTime = in.readLong();
+    // mIsRead = (in.readInt() != 0);
+    // mSubId = in.readLong();
+    assert(0);
+    return NOERROR;
+}
+
 
 AutoPtr<CellBroadcastMessage> CellBroadcastMessage::CreateFromCursor(
     /* [in] */ ICursor* cursor)

@@ -1,5 +1,5 @@
 #include "Elastos.CoreLibrary.Utility.h"
-#include "elastos/droid/telephony/gsm/SmsManager.h"
+#include "elastos/droid/telephony/gsm/GSMSmsManager.h"
 
 namespace Elastos {
 namespace Droid {
@@ -9,27 +9,27 @@ namespace Gsm {
 //=====================================================================
 //
 //=====================================================================
-AutoPtr<SmsManager> SmsManager::sInstance;
+AutoPtr<GSMSmsManager> GSMSmsManager::sInstance;
 
-AutoPtr<SmsManager> SmsManager::GetDefault()
+AutoPtr<GSMSmsManager> GSMSmsManager::GetDefault()
 {
     // ==================before translated======================
     // if (sInstance == null) {
-    //     sInstance = new SmsManager();
+    //     sInstance = new GSMSmsManager();
     // }
     // return sInstance;
     assert(0);
-    AutoPtr<SmsManager> empty;
+    AutoPtr<GSMSmsManager> empty;
     return empty;
 }
 
-SmsManager::SmsManager()
+GSMSmsManager::GSMSmsManager()
 {
     // ==================before translated======================
-    // mSmsMgrProxy = android.telephony.SmsManager.getDefault();
+    // mSmsMgrProxy = android.telephony.GSMSmsManager.getDefault();
 }
 
-ECode SmsManager::SendTextMessage(
+ECode GSMSmsManager::SendTextMessage(
     /* [in] */ const String& destinationAddress,
     /* [in] */ const String& scAddress,
     /* [in] */ const String& text,
@@ -43,7 +43,7 @@ ECode SmsManager::SendTextMessage(
     return NOERROR;
 }
 
-ECode SmsManager::DivideMessage(
+ECode GSMSmsManager::DivideMessage(
     /* [in] */ const String& text,
     /* [out] */ IArrayList** result)//String
 {
@@ -55,7 +55,7 @@ ECode SmsManager::DivideMessage(
     return NOERROR;
 }
 
-ECode SmsManager::SendMultipartTextMessage(
+ECode GSMSmsManager::SendMultipartTextMessage(
     /* [in] */ const String& destinationAddress,
     /* [in] */ const String& scAddress,
     /* [in] */ IArrayList* parts,//String
@@ -69,7 +69,7 @@ ECode SmsManager::SendMultipartTextMessage(
     return NOERROR;
 }
 
-ECode SmsManager::SendDataMessage(
+ECode GSMSmsManager::SendDataMessage(
     /* [in] */ const String& destinationAddress,
     /* [in] */ const String& scAddress,
     /* [in] */ Int16 destinationPort,
@@ -84,7 +84,7 @@ ECode SmsManager::SendDataMessage(
     return NOERROR;
 }
 
-ECode SmsManager::CopyMessageToSim(
+ECode GSMSmsManager::CopyMessageToSim(
     /* [in] */ ArrayOf<Byte>* smsc,
     /* [in] */ ArrayOf<Byte>* pdu,
     /* [in] */ Int32 status,
@@ -98,7 +98,7 @@ ECode SmsManager::CopyMessageToSim(
     return NOERROR;
 }
 
-ECode SmsManager::DeleteMessageFromSim(
+ECode GSMSmsManager::DeleteMessageFromSim(
     /* [in] */ Int32 messageIndex,
     /* [out] */ Boolean* result)
 {
@@ -110,7 +110,7 @@ ECode SmsManager::DeleteMessageFromSim(
     return NOERROR;
 }
 
-ECode SmsManager::UpdateMessageOnSim(
+ECode GSMSmsManager::UpdateMessageOnSim(
     /* [in] */ Int32 messageIndex,
     /* [in] */ Int32 newStatus,
     /* [in] */ ArrayOf<Byte>* pdu,
@@ -124,7 +124,7 @@ ECode SmsManager::UpdateMessageOnSim(
     return NOERROR;
 }
 
-ECode SmsManager::GetAllMessagesFromSim(
+ECode GSMSmsManager::GetAllMessagesFromSim(
     /* [out] */ IArrayList** result)//SmsMessage
 {
     VALIDATE_NOT_NULL(result);

@@ -54,13 +54,6 @@ public:
         /* [in] */ IContext* context);
 
 public:
-    // Blacklist matching type
-    static const Int32 MATCH_NONE = 0;
-    static const Int32 MATCH_PRIVATE = 1;
-    static const Int32 MATCH_UNKNOWN = 2;
-    static const Int32 MATCH_LIST = 3;
-    static const Int32 MATCH_REGEX = 4;
-
     static const Int32 BLOCK_CALLS = ISettingsSystem::BLACKLIST_BLOCK << ISettingsSystem::BLACKLIST_PHONE_SHIFT;
     static const Int32 BLOCK_MESSAGES = ISettingsSystem::BLACKLIST_BLOCK << ISettingsSystem::BLACKLIST_MESSAGE_SHIFT;
 

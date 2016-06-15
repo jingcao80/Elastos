@@ -57,8 +57,8 @@ namespace Telephony {
   * and higher, see {@link android.provider.Telephony}.
   */
 class SmsManager
-    : public ISmsManager
-    , public Object
+    : public Object
+    , public ISmsManager
 {
 public:
     CAR_INTERFACE_DECL();

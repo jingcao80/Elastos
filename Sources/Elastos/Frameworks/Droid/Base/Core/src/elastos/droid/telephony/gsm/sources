@@ -9,5 +9,9 @@ INCLUDES += $(MAKEDIR)/../../../../../inc/
 C_DEFINES += -DDROID_CORE
 
 SOURCES = CGsmCellLocation.cpp
-SOURCES += SmsMessage.cpp
-SOURCES += SmsManager.cpp
+SOURCES += GSMSmsMessage.cpp
+SOURCES += GSMSmsManager.cpp
+SOURCES += CGSMSmsManagerHelper.cpp
+SOURCES += CGSMSmsMessage.cpp
+SOURCES += CGSMSmsMessageHelper.cpp
+SOURCES += CGSMSubmitPdu.cpp

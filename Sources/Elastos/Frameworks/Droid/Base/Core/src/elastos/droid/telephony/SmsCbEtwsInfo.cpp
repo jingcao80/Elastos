@@ -45,7 +45,7 @@ SmsCbEtwsInfo::SmsCbEtwsInfo()
 {
 }
 
-SmsCbEtwsInfo::SmsCbEtwsInfo(
+ECode SmsCbEtwsInfo::constructor(
     /* [in] */ Int32 warningType,
     /* [in] */ Boolean emergencyUserAlert,
     /* [in] */ Boolean activatePopup,
@@ -56,9 +56,10 @@ SmsCbEtwsInfo::SmsCbEtwsInfo(
     // mEmergencyUserAlert = emergencyUserAlert;
     // mActivatePopup = activatePopup;
     // mWarningSecurityInformation = warningSecurityInformation;
+    return NOERROR;
 }
 
-SmsCbEtwsInfo::SmsCbEtwsInfo(
+ECode SmsCbEtwsInfo::constructor(
     /* [in] */ IParcel* in)
 {
     // ==================before translated======================
@@ -66,6 +67,7 @@ SmsCbEtwsInfo::SmsCbEtwsInfo(
     // mEmergencyUserAlert = (in.readInt() != 0);
     // mActivatePopup = (in.readInt() != 0);
     // mWarningSecurityInformation = in.createByteArray();
+    return NOERROR;
 }
 
 ECode SmsCbEtwsInfo::constructor()

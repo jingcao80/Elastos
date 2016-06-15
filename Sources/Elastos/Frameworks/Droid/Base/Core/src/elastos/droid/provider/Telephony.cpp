@@ -59,10 +59,12 @@ namespace Droid {
 namespace Provider {
 
 const String Telephony::TAG("Telephony");
+CAR_INTERFACE_IMPL(Telephony, Object, ITelephony);
 
 
 //begin  ===Telephony::Sms============
-CAR_INTERFACE_IMPL_3(Telephony::Sms, Object, ITelephonySms, IBaseColumns, ITelephonyTextBasedSmsColumns);
+//CAR_INTERFACE_IMPL_3(Telephony::Sms, Object, ITelephonySms, IBaseColumns, ITelephonyTextBasedSmsColumns);
+//CAR_SINGLETON_IMPL(Telephony::Sms);
 
 static AutoPtr<IUri> InitURI(const String& str)
 {
@@ -94,7 +96,7 @@ ECode Telephony::Sms::Query(
     /* [in] */ ArrayOf<String>* projection,
     /* [out] */ ICursor** cursor)
 {
-    return cr->Query(CONTENT_URI, projection, String(NULL), NULL, DEFAULT_SORT_ORDER, cursor);
+    return cr->Query(CONTENT_URI, projection, String(NULL), NULL, ITelephonySms::DEFAULT_SORT_ORDER, cursor);
 }
 
 ECode Telephony::Sms::Query(
@@ -104,7 +106,7 @@ ECode Telephony::Sms::Query(
     /* [in] */ const String& orderBy,
     /* [out] */ ICursor** cursor)
 {
-    return cr->Query(CONTENT_URI, projection, where, NULL, orderBy.IsNull() ? DEFAULT_SORT_ORDER : orderBy, cursor);
+    return cr->Query(CONTENT_URI, projection, where, NULL, orderBy.IsNull() ? ITelephonySms::DEFAULT_SORT_ORDER : orderBy, cursor);
 }
 
 ECode Telephony::Sms::AddMessageToUri(
@@ -196,20 +198,20 @@ ECode Telephony::Sms::AddMessageToUri(
 
     Int32 phoneId;
     SubscriptionManager::GetPhoneId(subId, &phoneId);
-    values->Put(PHONE_ID, phoneId);
-    values->Put(ADDRESS, address);
+    values->Put(ITelephonyTextBasedSmsColumns::PHONE_ID, phoneId);
+    values->Put(ITelephonyTextBasedSmsColumns::ADDRESS, address);
     //if (date != NULL) {
-    values->Put(DATE, date);
+    values->Put(ITelephonyTextBasedSmsColumns::DATE, date);
     //}
-    values->Put(READ, read ? 1 : 0);
-    values->Put(SUBJECT, subject);
-    values->Put(BODY, body);
-    values->Put(PRIORITY, priority);
+    values->Put(ITelephonyTextBasedSmsColumns::READ, read ? 1 : 0);
+    values->Put(ITelephonyTextBasedSmsColumns::SUBJECT, subject);
+    values->Put(ITelephonyTextBasedSmsColumns::BODY, body);
+    values->Put(ITelephonyTextBasedSmsColumns::PRIORITY, priority);
     if (deliveryReport) {
-        values->Put(STATUS, STATUS_PENDING);
+        values->Put(ITelephonyTextBasedSmsColumns::STATUS, ITelephonyTextBasedSmsColumns::STATUS_PENDING);
     }
     if (threadId != -1L) {
-        values->Put(THREAD_ID, threadId);
+        values->Put(ITelephonyTextBasedSmsColumns::THREAD_ID, threadId);
     }
     return resolver->Insert(uri, values, _uri);
 }
@@ -231,15 +233,15 @@ ECode Telephony::Sms::MoveMessageToFolder(
     Boolean markAsUnread = FALSE;
     Boolean markAsRead = FALSE;
     switch(folder) {
-        case MESSAGE_TYPE_INBOX:
-        case MESSAGE_TYPE_DRAFT:
+        case ITelephonyTextBasedSmsColumns::MESSAGE_TYPE_INBOX:
+        case ITelephonyTextBasedSmsColumns::MESSAGE_TYPE_DRAFT:
             break;
-        case MESSAGE_TYPE_OUTBOX:
-        case MESSAGE_TYPE_SENT:
+        case ITelephonyTextBasedSmsColumns::MESSAGE_TYPE_OUTBOX:
+        case ITelephonyTextBasedSmsColumns::MESSAGE_TYPE_SENT:
             markAsRead = TRUE;
             break;
-        case MESSAGE_TYPE_FAILED:
-        case MESSAGE_TYPE_QUEUED:
+        case ITelephonyTextBasedSmsColumns::MESSAGE_TYPE_FAILED:
+        case ITelephonyTextBasedSmsColumns::MESSAGE_TYPE_QUEUED:
             markAsUnread = TRUE;
             break;
         default:
@@ -249,13 +251,13 @@ ECode Telephony::Sms::MoveMessageToFolder(
     AutoPtr<IContentValues> values;
     CContentValues::New(3, (IContentValues**)&values);
 
-    values->Put(TYPE, folder);
+    values->Put(ITelephonyTextBasedSmsColumns::TYPE, folder);
     if (markAsUnread) {
-        values->Put(READ, 0);
+        values->Put(ITelephonyTextBasedSmsColumns::READ, 0);
     } else if (markAsRead) {
-        values->Put(READ, 1);
+        values->Put(ITelephonyTextBasedSmsColumns::READ, 1);
     }
-    values->Put(ERROR_CODE, error);
+    values->Put(ITelephonyTextBasedSmsColumns::ERROR_CODE, error);
 
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
@@ -268,22 +270,22 @@ ECode Telephony::Sms::IsOutgoingFolder(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = (messageType == MESSAGE_TYPE_FAILED)
-        || (messageType == MESSAGE_TYPE_OUTBOX)
-        || (messageType == MESSAGE_TYPE_SENT)
-        || (messageType == MESSAGE_TYPE_QUEUED);
+    *result = (messageType == ITelephonyTextBasedSmsColumns::MESSAGE_TYPE_FAILED)
+        || (messageType == ITelephonyTextBasedSmsColumns::MESSAGE_TYPE_OUTBOX)
+        || (messageType == ITelephonyTextBasedSmsColumns::MESSAGE_TYPE_SENT)
+        || (messageType == ITelephonyTextBasedSmsColumns::MESSAGE_TYPE_QUEUED);
     return NOERROR;
 }
 
 //begin ===========Telephony::Sms::Inbox========================
-CAR_INTERFACE_IMPL_3(Telephony::Sms::Inbox, Object, ITelephonySms, IBaseColumns, ITelephonyTextBasedSmsColumns);
+//CAR_INTERFACE_IMPL_3(Telephony::Sms::Inbox, Object, ITelephonySms, IBaseColumns, ITelephonyTextBasedSmsColumns);
+//CAR_SINGLETON_IMPL(Telephony::Sms::Inbox);
 
 AutoPtr<IUri> Telephony::Sms::Inbox::CONTENT_URI = InitURI(String("content://sms/inbox"));
 
-Telephony::Sms::Inbox::Inbox(
-    /* [in] */ Sms* owner)
-    : mOwner(owner)
+Telephony::Sms::Inbox::Inbox()
 {
+    //CTelephonySms::AcquireSingleton((ITelephonySms**)&mOwner);
 }
 
 ECode Telephony::Sms::Inbox::AddMessage(
@@ -297,7 +299,7 @@ ECode Telephony::Sms::Inbox::AddMessage(
 {
     Int64 subId;
     SubscriptionManager::GetDefaultSmsSubId(&subId);
-    return mOwner->AddMessageToUri(subId,
+    return Telephony::Sms::AddMessageToUri(subId,
             resolver, CONTENT_URI, address, body, subject, date, read, FALSE, result);
 }
 
@@ -311,18 +313,18 @@ ECode Telephony::Sms::Inbox::AddMessage(
     /* [in] */ Boolean read,
     /* [out] */ IUri** uri)
 {
-    return mOwner->AddMessageToUri(subId, resolver, CONTENT_URI, address, body,
+    return Telephony::Sms::AddMessageToUri(subId, resolver, CONTENT_URI, address, body,
             subject, date, read, FALSE, uri);
 }
 //end===========Telephony::Sms::Inbox========================
 //begin =============Telephony::Sms::Sent===============
-CAR_INTERFACE_IMPL_3(Telephony::Sms::Sent, Object, ITelephonySmsSent, IBaseColumns, ITelephonyTextBasedSmsColumns);
+//CAR_INTERFACE_IMPL_3(Telephony::Sms::Sent, Object, ITelephonySmsSent, IBaseColumns, ITelephonyTextBasedSmsColumns);
+//CAR_SINGLETON_IMPL(Telephony::Sms::Sent);
 AutoPtr<IUri> Telephony::Sms::Sent::CONTENT_URI = InitURI(String("content://sms/sent"));
 
-Telephony::Sms::Sent::Sent(
-    /* [in] */ Sms* owner)
-    : mOwner(owner)
+Telephony::Sms::Sent::Sent()
 {
+    //CTelephonySms::AcquireSingleton((ITelephonySms**)&mOwner);
 }
 
 ECode Telephony::Sms::Sent::AddMessage(
@@ -335,7 +337,7 @@ ECode Telephony::Sms::Sent::AddMessage(
 {
     Int64 subId;
     SubscriptionManager::GetDefaultSmsSubId(&subId);
-    return mOwner->AddMessageToUri(subId,
+    return Telephony::Sms::AddMessageToUri(subId,
             resolver, CONTENT_URI, address, body, subject, date, TRUE, FALSE, uri);
 }
 
@@ -348,20 +350,21 @@ ECode Telephony::Sms::Sent::AddMessage(
     /* [in] */ Int64 date,
     /* [out] */ IUri** uri)
 {
-    return mOwner->AddMessageToUri(subId, resolver, CONTENT_URI, address, body,
+    return Telephony::Sms::AddMessageToUri(subId, resolver, CONTENT_URI, address, body,
             subject, date, TRUE, FALSE, uri);
 }
 //end =============Telephony::Sms::Sent===============
 
 
 //begin =============Telephony::Sms::Draft===============
-CAR_INTERFACE_IMPL_3(Telephony::Sms::Draft, Object, ITelephonySmsDraft, IBaseColumns, ITelephonyTextBasedSmsColumns);
+//CAR_INTERFACE_IMPL_3(Telephony::Sms::Draft, Object, ITelephonySmsDraft, IBaseColumns, ITelephonyTextBasedSmsColumns);
+//CAR_SINGLETON_IMPL(Telephony::Sms::Draft);
+
 AutoPtr<IUri> Telephony::Sms::Draft::CONTENT_URI = InitURI(String("content://sms/draft"));
 
-Telephony::Sms::Draft::Draft(
-    /* [in] */ Sms* owner)
-    : mOwner(owner)
+Telephony::Sms::Draft::Draft()
 {
+    //CTelephonySms::AcquireSingleton((ITelephonySms**)&mOwner);
 }
 
 ECode Telephony::Sms::Draft::AddMessage(
@@ -374,7 +377,7 @@ ECode Telephony::Sms::Draft::AddMessage(
 {
     Int64 subId;
     SubscriptionManager::GetDefaultSmsSubId(&subId);
-    return mOwner->AddMessageToUri(subId,
+    return Telephony::Sms::AddMessageToUri(subId,
             resolver, CONTENT_URI, address, body, subject, date, TRUE, FALSE, uri);
 }
 
@@ -387,20 +390,21 @@ ECode Telephony::Sms::Draft::AddMessage(
     /* [in] */ Int64 date,
     /* [out] */ IUri** uri)
 {
-    return mOwner->AddMessageToUri(subId, resolver, CONTENT_URI, address, body,
+    return Telephony::Sms::AddMessageToUri(subId, resolver, CONTENT_URI, address, body,
             subject, date, TRUE, FALSE, uri);
 }
 
 //end =============Telephony::Sms::Draft===============
 
 //begin =============Telephony::Sms::Outbox===============
-CAR_INTERFACE_IMPL_3(Telephony::Sms::Outbox, Object, ITelephonySmsOutbox, IBaseColumns, ITelephonyTextBasedSmsColumns);
+//CAR_INTERFACE_IMPL_3(Telephony::Sms::Outbox, Object, ITelephonySmsOutbox, IBaseColumns, ITelephonyTextBasedSmsColumns);
+//CAR_SINGLETON_DECL(Telephony::Sms::Outbox);
+
 AutoPtr<IUri> Telephony::Sms::Outbox::CONTENT_URI = InitURI(String("content://sms/outbox"));
 
-Telephony::Sms::Outbox::Outbox(
-    /* [in] */ Sms* owner)
-    : mOwner(owner)
+Telephony::Sms::Outbox::Outbox()
 {
+    //CTelephonySms::AcquireSingleton((ITelephonySms**)&mOwner);
 }
 
 ECode Telephony::Sms::Outbox::AddMessage(
@@ -415,7 +419,7 @@ ECode Telephony::Sms::Outbox::AddMessage(
 {
     Int64 subId;
     SubscriptionManager::GetDefaultSmsSubId(&subId);
-    return mOwner->AddMessageToUri(subId,
+    return Telephony::Sms::AddMessageToUri(subId,
             resolver, CONTENT_URI, address, body, subject, date,
             TRUE, deliveryReport, threadId, uri);
 }
@@ -431,23 +435,26 @@ ECode Telephony::Sms::Outbox::AddMessage(
     /* [in] */ Int64 threadId,
     /* [out] */ IUri** uri)
 {
-    return mOwner->AddMessageToUri(subId, resolver, CONTENT_URI, address, body,
+    return Telephony::Sms::AddMessageToUri(subId, resolver, CONTENT_URI, address, body,
             subject, date, TRUE, deliveryReport, threadId, uri);
 }
 
 //end =============Telephony::Sms::Outbox===============
 
 //begin =============Telephony::Sms::Conversations===============
-CAR_INTERFACE_IMPL_3(Telephony::Sms::Conversations, Object, ITelephonySmsConversations, IBaseColumns, ITelephonyTextBasedSmsColumns);
+//CAR_INTERFACE_IMPL_3(Telephony::Sms::Conversations, Object, ITelephonySmsConversations, IBaseColumns, ITelephonyTextBasedSmsColumns);
 
 AutoPtr<IUri> Telephony::Sms::Conversations::CONTENT_URI = InitURI(String("content://sms/conversations"));
 
 //end =============Telephony::Sms::Conversations===============
 
 //begin =============Telephony::Sms::Intents===============
-AutoPtr<ArrayOf<ISmsMessage*> > Telephony::Sms::Intents::GetMessagesFromIntent(
-    /* [in] */ IIntent* intent)
+ECode Telephony::Sms::Intents::GetMessagesFromIntent(
+    /* [in] */ IIntent* intent,
+    /* [out] */ ArrayOf<ISmsMessage*>** result)
 {
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
     //Object[] messages = (Object[]) intent->GetSerializableExtra("pdus");
     AutoPtr<ISerializable> serializable;
     intent->GetSerializableExtra(String("pdus"), (ISerializable**)&serializable);
@@ -477,13 +484,18 @@ AutoPtr<ArrayOf<ISmsMessage*> > Telephony::Sms::Intents::GetMessagesFromIntent(
         smsMessage->SetSubId(subId);
     }
 
-    return msgs;
+    *result = msgs;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
-AutoPtr<IList> Telephony::Sms::Intents::GetNormalizedAddressesFromPdus(
+ECode Telephony::Sms::Intents::GetNormalizedAddressesFromPdus(
     /* [in] */ ArrayOf<ArrayOf<Byte>*>* pdus,
-    /* [in] */ const String& format)//String
+    /* [in] */ const String& format,
+    /* [out] */ IList** result)//String
 {
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
     Int32 pduCount = pdus->GetLength();
     AutoPtr<ArrayOf<ISmsMessage*> > msgs = ArrayOf<ISmsMessage*>::Alloc(pduCount);
     AutoPtr<IList> addresses;
@@ -515,7 +527,9 @@ AutoPtr<IList> Telephony::Sms::Intents::GetNormalizedAddressesFromPdus(
             addresses->Add(CoreUtils::Convert(normalized));
         }
     }
-    return addresses;
+    *result = addresses;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 String Telephony::Sms::Intents::NormalizeDigitsOnly(
@@ -546,6 +560,7 @@ AutoPtr<StringBuilder> Telephony::Sms::Intents::NormalizeDigits(
 //end =============Telephony::Sms::Intents===============
 //end =============Telephony::Sms===============
 
+
 //begin =============Telephony::Mms===============
 static AutoPtr<IUri> Init_Uri_WithAppendedPath(
     /* [in] */ IUri* path,
@@ -558,7 +573,7 @@ static AutoPtr<IUri> Init_Uri_WithAppendedPath(
     return uri;
 }
 
-CAR_INTERFACE_IMPL_2(Telephony::Mms, Object, ITelephonyMms, ITelephonyBaseMmsColumns);
+//CAR_INTERFACE_IMPL_2(Telephony::Mms, Object, ITelephonyMms, ITelephonyBaseMmsColumns);
 
 AutoPtr<IUri> Telephony::Mms::CONTENT_URI = InitURI(String("content://mms"));
 AutoPtr<IUri> Telephony::Mms::REPORT_REQUEST_URI = Init_Uri_WithAppendedPath(CONTENT_URI, String("report-request"));
@@ -581,7 +596,7 @@ ECode Telephony::Mms::Query(
     /* [in] */ ArrayOf<String>* projection,
     /* [out] */ ICursor** cursor)
 {
-    return cr->Query(CONTENT_URI, projection, String(NULL), NULL, DEFAULT_SORT_ORDER, cursor);
+    return cr->Query(CONTENT_URI, projection, String(NULL), NULL, ITelephonyMms::DEFAULT_SORT_ORDER, cursor);
 }
 
 ECode Telephony::Mms::Query(
@@ -592,7 +607,7 @@ ECode Telephony::Mms::Query(
     /* [out] */ ICursor** cursor)
 {
     return cr->Query(CONTENT_URI, projection,
-            where, NULL, orderBy.IsNull() ? DEFAULT_SORT_ORDER : orderBy, cursor);
+            where, NULL, orderBy.IsNull() ? ITelephonyMms::DEFAULT_SORT_ORDER : orderBy, cursor);
 }
 
 ECode Telephony::Mms::ExtractAddrSpec(
@@ -644,55 +659,55 @@ ECode Telephony::Mms::IsPhoneNumber(
 }
 
 //== begin Telephony::Mms::Inbox ============
-CAR_INTERFACE_IMPL_2(Telephony::Mms::Inbox, Object, ITelephonyMmsInbox, ITelephonyBaseMmsColumns);
+//CAR_INTERFACE_IMPL_2(Telephony::Mms::Inbox, Object, ITelephonyMmsInbox, ITelephonyBaseMmsColumns);
 AutoPtr<IUri> Telephony::Mms::Inbox::CONTENT_URI = InitURI(String("content://mms/inbox"));
 
 //== end Telephony::Mms::Inbox ============
 
 //== begin Telephony::Mms::Sent ============
-CAR_INTERFACE_IMPL_2(Telephony::Mms::Sent, Object, ITelephonyMmsSent, ITelephonyBaseMmsColumns);
+//CAR_INTERFACE_IMPL_2(Telephony::Mms::Sent, Object, ITelephonyMmsSent, ITelephonyBaseMmsColumns);
 AutoPtr<IUri> Telephony::Mms::Sent::CONTENT_URI = InitURI(String("content://mms/sent"));
 
 //== end Telephony::Mms::Sent ============
 
 //== begin Telephony::Mms::Draft============
 
-CAR_INTERFACE_IMPL_2(Telephony::Mms::Draft, Object, ITelephonyMmsDraft, ITelephonyBaseMmsColumns);
+//CAR_INTERFACE_IMPL_2(Telephony::Mms::Draft, Object, ITelephonyMmsDraft, ITelephonyBaseMmsColumns);
 AutoPtr<IUri> Telephony::Mms::Draft::CONTENT_URI = InitURI(String("content://mms/drafts"));
 
 //== end Telephony::Mms::Draft============
 
 //== begin Telephony::Mms::Outbox ============
-CAR_INTERFACE_IMPL_2(Telephony::Mms::Outbox, Object, ITelephonyMmsOutbox, ITelephonyBaseMmsColumns);
+//CAR_INTERFACE_IMPL_2(Telephony::Mms::Outbox, Object, ITelephonyMmsOutbox, ITelephonyBaseMmsColumns);
 AutoPtr<IUri> Telephony::Mms::Outbox::CONTENT_URI = InitURI(String("content://mms/outbox"));
 
 //== end Telephony::Mms::Outbox ============
 
 //== begin Telephony::Mms::Addr============
-CAR_INTERFACE_IMPL_2(Telephony::Mms::Addr, Object, ITelephonyMmsAddr, IBaseColumns);
+//CAR_INTERFACE_IMPL_2(Telephony::Mms::Addr, Object, ITelephonyMmsAddr, IBaseColumns);
 
 //== end Telephony::Mms::Addr============
 
 //== begin Telephony::Mms::Part============
-CAR_INTERFACE_IMPL_2(Telephony::Mms::Part, Object, ITelephonyMmsPart, IBaseColumns);
+//CAR_INTERFACE_IMPL_2(Telephony::Mms::Part, Object, ITelephonyMmsPart, IBaseColumns);
 
 //== end Telephony::Mms::Part============
 
 //== begin Telephony::Mms::Rate============
-CAR_INTERFACE_IMPL(Telephony::Mms::Rate, Object, ITelephonyMmsRate);
+//CAR_INTERFACE_IMPL(Telephony::Mms::Rate, Object, ITelephonyMmsRate);
 
 AutoPtr<IUri> Telephony::Mms::Rate::CONTENT_URI = Init_Uri_WithAppendedPath(Mms::CONTENT_URI, String("rate"));
 
 //== end Telephony::Mms::Rate============
 
 //== begin Telephony::Mms::Intents============
-CAR_INTERFACE_IMPL(Telephony::Mms::Intents, Object, ITelephonyMmsIntents);
+//CAR_INTERFACE_IMPL(Telephony::Mms::Intents, Object, ITelephonyMmsIntents);
 
 //== begin Telephony::Mms::Intents============
 //end =============Telephony::Mms===============
 
 //begin =============Telephony::MmsSms===============
-CAR_INTERFACE_IMPL_2(Telephony::MmsSms, Object, ITelephonyMmsSms, IBaseColumns);
+//CAR_INTERFACE_IMPL_2(Telephony::MmsSms, Object, ITelephonyMmsSms, IBaseColumns);
 
 AutoPtr<IUri> Telephony::MmsSms::CONTENT_URI = InitURI(String("content://mms-sms/"));
 AutoPtr<IUri> Telephony::MmsSms::CONTENT_CONVERSATIONS_URI = InitURI(String("content://mms-sms/conversations"));
@@ -703,20 +718,20 @@ AutoPtr<IUri> Telephony::MmsSms::CONTENT_LOCKED_URI = InitURI(String("content://
 AutoPtr<IUri> Telephony::MmsSms::SEARCH_URI = InitURI(String("content://mms-sms/search"));
 
 //begin =============Telephony::MmsSms::PendingMessages===============
-CAR_INTERFACE_IMPL_2(Telephony::MmsSms::PendingMessages, Object, ITelephonyMmsSmsPendingMessages, IBaseColumns);
+//CAR_INTERFACE_IMPL_2(Telephony::MmsSms::PendingMessages, Object, ITelephonyMmsSmsPendingMessages, IBaseColumns);
 
 AutoPtr<IUri> Telephony::MmsSms::PendingMessages::CONTENT_URI = Init_Uri_WithAppendedPath(MmsSms::CONTENT_URI, String("pending"));
 
 //end =============Telephony::MmsSms::PendingMessages===============
 
 //begin =============Telephony::MmsSms::WordsTable===============
-CAR_INTERFACE_IMPL(Telephony::MmsSms::WordsTable, Object, ITelephonyMmsSmsWordsTable);
+//CAR_INTERFACE_IMPL(Telephony::MmsSms::WordsTable, Object, ITelephonyMmsSmsWordsTable);
 
 //end =============Telephony::MmsSms::WordsTable===============
 //end =============Telephony::MmsSms===============
 
 //begin =============Telephony::Threads===============
-CAR_INTERFACE_IMPL_2(Telephony::Threads, Object, ITelephonyThreads, ITelephonyThreadsColumns);
+//CAR_INTERFACE_IMPL_2(Telephony::Threads, Object, ITelephonyThreads, ITelephonyThreadsColumns);
 
 static AutoPtr<ArrayOf<String> > InitID_PROJECTION()
 {
@@ -794,14 +809,14 @@ ECode Telephony::Threads::GetOrCreateThreadId(
 //end =============Telephony::Threads===============
 
 //begin =============Telephony::Carriers===============
-CAR_INTERFACE_IMPL_2(Telephony::Carriers, Object, ITelephonyCarriers, IBaseColumns);
+//CAR_INTERFACE_IMPL_2(Telephony::Carriers, Object, ITelephonyCarriers, IBaseColumns);
 
 AutoPtr<IUri> Telephony::Carriers::CONTENT_URI = InitURI(String("content://telephony/carriers"));
 
 //end =============Telephony::Carriers===============
 
 //begin =============Telephony::CellBroadcasts===============
-CAR_INTERFACE_IMPL_2(Telephony::CellBroadcasts, Object, ITelephonyCellBroadcasts, IBaseColumns);
+//CAR_INTERFACE_IMPL_2(Telephony::CellBroadcasts, Object, ITelephonyCellBroadcasts, IBaseColumns);
 
 AutoPtr<IUri> Telephony::CellBroadcasts::CONTENT_URI = InitURI(String("content://cellbroadcasts"));
 
@@ -830,11 +845,11 @@ static AutoPtr<ArrayOf<String> > Init_QUERY_COLUMNS()
     array->Set(19, ITelephonyCellBroadcasts::CMAS_CERTAINTY);
     return array;
 }
-AutoPtr<ArrayOf<String> >  QUERY_COLUMNS = Init_QUERY_COLUMNS();
+AutoPtr<ArrayOf<String> >  Telephony::CellBroadcasts::QUERY_COLUMNS = Init_QUERY_COLUMNS();
 //end =============Telephony::CellBroadcasts===============
 
 //begin =============Telephony::Blacklist===============
-CAR_INTERFACE_IMPL_2(Telephony::Blacklist, Object, ITelephonyBlacklist, IBaseColumns);
+//CAR_INTERFACE_IMPL_2(Telephony::Blacklist, Object, ITelephonyBlacklist, IBaseColumns);
 
 AutoPtr<IUri> Telephony::Blacklist::CONTENT_URI = InitURI(String("content://blacklist"));
 

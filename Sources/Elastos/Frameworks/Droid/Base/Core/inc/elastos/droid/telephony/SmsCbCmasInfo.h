@@ -17,9 +17,9 @@ namespace Telephony {
   * {@hide}
   */
 class SmsCbCmasInfo
-    : public ISmsCbCmasInfo
+    : public Object
+    , public ISmsCbCmasInfo
     , public IParcelable
-    , public Object
 {
 //private:
     //class InnerParcelableCreator
@@ -48,7 +48,7 @@ public:
     SmsCbCmasInfo();
 
     /** Create a new SmsCbCmasInfo object with the specified values. */
-    SmsCbCmasInfo(
+    CARAPI constructor(
         /* [in] */ Int32 messageClass,
         /* [in] */ Int32 category,
         /* [in] */ Int32 responseType,
@@ -57,7 +57,7 @@ public:
         /* [in] */ Int32 certainty);
 
     /** Create a new SmsCbCmasInfo object from a Parcel. */
-    SmsCbCmasInfo(
+    CARAPI constructor(
         /* [in] */ IParcel* in);
 
     CARAPI constructor();

@@ -706,10 +706,10 @@ module
         interface IDocumentsContract;
     }
 
-    singleton class CTelephonyBlacklist
-    {
-        interface ITelephonyBlacklist;
-    }
+    //singleton class CTelephonyBlacklist
+    //{
+    //    interface ITelephonyBlacklist;
+    //}
 
     singleton class CUserDictionary
     {
@@ -807,6 +807,115 @@ module
     singleton class CThemesContractPreviewColumns
     {
         interface IThemesContractPreviewColumns;
+    }
+
+    class CTelephony {
+        constructor();
+
+        interface ITelephony;
+    }
+
+    singleton class CTelephonySms {
+        interface ITelephonySms;
+        interface IBaseColumns;
+        interface ITelephonyTextBasedSmsColumns;
+    }
+
+    singleton class CTelephonySmsInbox {
+
+        interface ITelephonySmsInbox;
+        interface IBaseColumns;
+        interface ITelephonyTextBasedSmsColumns;
+    }
+
+    singleton class CTelephonySmsSent {
+        interface ITelephonySmsSent;
+        interface IBaseColumns;
+        interface ITelephonyTextBasedSmsColumns;
+    }
+
+    singleton class CTelephonySmsDraft {
+        interface ITelephonySmsDraft;
+        interface IBaseColumns;
+        interface ITelephonyTextBasedSmsColumns;
+    }
+
+    singleton class CTelephonySmsOutbox {
+
+        interface ITelephonySmsOutbox;
+        interface IBaseColumns;
+        interface ITelephonyTextBasedSmsColumns;
+    }
+
+    singleton class CTelephonySmsConversations {
+
+        interface ITelephonySmsConversations;
+        interface IBaseColumns;
+        interface ITelephonyTextBasedSmsColumns;
+    }
+
+    singleton class CTelephonySmsIntents {
+        interface ITelephonySmsIntents;
+    }
+
+    singleton class CTelephonyThreads {
+        interface ITelephonyThreads;
+        interface ITelephonyThreadsColumns;
+    }
+
+    singleton class CTelephonyMms {
+        interface ITelephonyMms;
+        interface ITelephonyBaseMmsColumns;
+    }
+
+    singleton class CTelephonyMmsInbox {
+        interface ITelephonyMmsInbox;
+        interface ITelephonyBaseMmsColumns;
+    }
+
+    singleton class CTelephonyMmsSent {
+        interface ITelephonyMmsSent;
+        interface ITelephonyBaseMmsColumns;
+    }
+
+    singleton class CTelephonyMmsDraft {
+        interface ITelephonyMmsDraft;
+        interface ITelephonyBaseMmsColumns;
+    }
+
+    singleton class CTelephonyMmsOutbox {
+        interface ITelephonyMmsOutbox;
+        interface ITelephonyBaseMmsColumns;
+    }
+
+    singleton class CTelephonyMmsRate {
+        interface ITelephonyMmsRate;
+        interface ITelephonyBaseMmsColumns;
+    }
+
+    singleton class CTelephonyMmsSms {
+        interface ITelephonyMmsSms;
+        interface IBaseColumns;
+    }
+
+    singleton class CTelephonyMmsSmsPendingMessages {
+        interface ITelephonyMmsSmsPendingMessages;
+        interface IBaseColumns;
+    }
+
+    singleton class CTelephonyCarriers {
+        interface ITelephonyCarriers;
+        interface IBaseColumns;
+    }
+
+    singleton class CTelephonyCellBroadcasts {
+        interface ITelephonyCellBroadcasts;
+        interface IBaseColumns;
+    }
+
+    singleton class CTelephonyBlacklist {
+        interface ITelephonyBlacklist;
+        interface IBaseColumns;
     }
 
     } // namespace Provider

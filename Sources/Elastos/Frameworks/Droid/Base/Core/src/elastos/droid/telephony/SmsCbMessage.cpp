@@ -47,7 +47,7 @@ SmsCbMessage::SmsCbMessage()
 {
 }
 
-SmsCbMessage::SmsCbMessage(
+ECode SmsCbMessage::constructor(
     /* [in] */ Int32 messageFormat,
     /* [in] */ Int32 geographicalScope,
     /* [in] */ Int32 serialNumber,
@@ -70,9 +70,10 @@ SmsCbMessage::SmsCbMessage(
     // mPriority = priority;
     // mEtwsWarningInfo = etwsWarningInfo;
     // mCmasWarningInfo = cmasWarningInfo;
+    return NOERROR;
 }
 
-SmsCbMessage::SmsCbMessage(
+ECode SmsCbMessage::constructor(
     /* [in] */ IParcel* in)
 {
     // ==================before translated======================
@@ -102,6 +103,7 @@ SmsCbMessage::SmsCbMessage(
     //         mEtwsWarningInfo = null;
     //         mCmasWarningInfo = null;
     // }
+    return NOERROR;
 }
 
 ECode SmsCbMessage::constructor()

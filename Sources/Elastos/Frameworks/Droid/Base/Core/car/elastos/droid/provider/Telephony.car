@@ -2,13 +2,14 @@
 module
 {
     using interface Elastos.Utility.ISet;
+    using interface Elastos.Utility.Regex.IPattern;
 
     interface Elastos.Droid.Content.IContentResolver;
     interface Elastos.Droid.Content.IIntent;
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Database.ICursor;
     interface Elastos.Droid.Net.IUri;
-    // interface Elastos.Droid.Telephony.ISmsMessage;
+    interface Elastos.Droid.Telephony.ISmsMessage;
 
     namespace Elastos {
     namespace Droid {
@@ -232,6 +233,9 @@ module
             [in] Int64 date,
             [in] Boolean read,
             [out] IUri** result);
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
     }
 
     /**
@@ -288,6 +292,9 @@ module
             [in] String subject,
             [in] Int64 date,
             [out] IUri** result);
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
     }
 
     /**
@@ -336,6 +343,9 @@ module
          * The default sort order for this table.
          */
         const String DEFAULT_SORT_ORDER = "date DESC";
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
     }
 
     /**
@@ -398,6 +408,9 @@ module
             [in] Boolean deliveryReport,
             [in] Int64 threadId,
             [out] IUri** result);
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
     }
 
     /**
@@ -426,6 +439,9 @@ module
          * <P>Type: INTEGER</P>
          */
         const String MESSAGE_COUNT = "msg_count";
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
     }
 
     /**
@@ -817,9 +833,9 @@ module
          * @param intent the intent to read from
          * @return an array of SmsMessages for the PDUs
          */
-        // GetMessagesFromIntent(
-        //     [in] IIntent* intent,
-        //     [out, callee] ArrayOf<ISmsMessage*>* result);
+        GetMessagesFromIntent(
+             [in] IIntent* intent,
+             [out, callee] ArrayOf<ISmsMessage*>* result);
 
         /**
          * Read the normalized addresses out of PDUs
@@ -828,8 +844,8 @@ module
          * @return a list of Addresses for the PDUs
          * @hide
          */
-        // GetNormalizedAddressesFromPdus(
-        //     [in] byte[][] pdus,
+        //GetNormalizedAddressesFromPdus(
+        //     [in] ArrayOf<ArrayOf<Byte>*>* pdus,
         //     [in] String format,
         //     [out] IList** result);
     }
@@ -1039,6 +1055,9 @@ module
         IsOutgoingFolder(
             [in] Int32 messageType,
             [out] Boolean* result);
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
     }
 
     /**
@@ -1709,6 +1728,13 @@ module
             [in] IContext* ctx,
             [in] ISet* recipients,
             [out] Int64* result);
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
+
+        GetOBSOLETE_THREADS_URI(
+            [out] IUri** uri);
+
     }
 
     /**
@@ -1724,6 +1750,9 @@ module
          * The default sort order for this table.
          */
         const String DEFAULT_SORT_ORDER = "date DESC";
+
+        GetCONTENT_URI(
+             [out] IUri** uri);
     }
 
     /**
@@ -1739,6 +1768,9 @@ module
          * The default sort order for this table.
          */
         const String DEFAULT_SORT_ORDER = "date DESC";
+
+        GetCONTENT_URI(
+             [out] IUri** uri);
     }
 
     /**
@@ -1754,6 +1786,9 @@ module
          * The default sort order for this table.
          */
         const String DEFAULT_SORT_ORDER = "date DESC";
+
+        GetCONTENT_URI(
+             [out] IUri** uri);
     }
 
     /**
@@ -1769,6 +1804,9 @@ module
          * The default sort order for this table.
          */
         const String DEFAULT_SORT_ORDER = "date DESC";
+
+        GetCONTENT_URI(
+             [out] IUri** uri);
     }
 
     /**
@@ -1910,6 +1948,9 @@ module
          * <P>Type: INTEGER (long)</P>
          */
         const String SENT_TIME = "sent_time";
+
+        GetCONTENT_URI(
+             [out] IUri** uri);
     }
 
     /**
@@ -2097,6 +2138,18 @@ module
         IsPhoneNumber(
             [in] String number,
             [out] Boolean* result);
+
+        GetCONTENT_URI(
+             [out] IUri** uri);
+
+        GetREPORT_REQUEST_URI(
+             [out] IUri** uri);
+
+        GetREPORT_STATUS_URI(
+             [out] IUri** uri);
+
+        GetNAME_ADDR_EMAIL_PATTERN(
+             [out] IPattern** pattern);
     }
 
     /**
@@ -2163,6 +2216,10 @@ module
          * @hide
          */
         const String PHONE_ID = "pending_phone_id";
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
+
     }
 
     /**
@@ -2251,6 +2308,27 @@ module
 
         /** Error type: MMS protocol permanent error. */
         const Int32 ERR_TYPE_MMS_PROTO_PERMANENT  = 12;
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
+
+        GetCONTENT_CONVERSATIONS_URI(
+            [out] IUri** uri);
+
+        GetCONTENT_FILTER_BYPHONE_URI(
+            [out] IUri** uri);
+
+        GetCONTENT_UNDELIVERED_URI(
+            [out] IUri** uri);
+
+        GetCONTENT_DRAFT_URI(
+            [out] IUri** uri);
+
+        GetCONTENT_LOCKED_URI(
+            [out] IUri** uri);
+
+        GetSEARCH_URI(
+            [out] IUri** uri);
     }
 
     /**
@@ -2461,6 +2539,10 @@ module
          * @hide
          */
         const String MTU = "mtu";
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
+
     }
 
     /**
@@ -2604,6 +2686,13 @@ module
 
         /** The default sort order for this table. */
         const String DEFAULT_SORT_ORDER = "date DESC";
+
+        GetCONTENT_URI(
+            [out] IUri** uri);
+
+        GetQUERY_COLUMNS(
+            [out, callee] ArrayOf<String>* result);
+
     }
 
     /**

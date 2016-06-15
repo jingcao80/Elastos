@@ -45,7 +45,7 @@ SmsCbCmasInfo::SmsCbCmasInfo()
 {
 }
 
-SmsCbCmasInfo::SmsCbCmasInfo(
+ECode SmsCbCmasInfo::constructor(
     /* [in] */ Int32 messageClass,
     /* [in] */ Int32 category,
     /* [in] */ Int32 responseType,
@@ -60,9 +60,10 @@ SmsCbCmasInfo::SmsCbCmasInfo(
     // mSeverity = severity;
     // mUrgency = urgency;
     // mCertainty = certainty;
+    return NOERROR;
 }
 
-SmsCbCmasInfo::SmsCbCmasInfo(
+ECode SmsCbCmasInfo::constructor(
     /* [in] */ IParcel* in)
 {
     // ==================before translated======================
@@ -72,6 +73,7 @@ SmsCbCmasInfo::SmsCbCmasInfo(
     // mSeverity = in.readInt();
     // mUrgency = in.readInt();
     // mCertainty = in.readInt();
+    return NOERROR;
 }
 
 ECode SmsCbCmasInfo::constructor()

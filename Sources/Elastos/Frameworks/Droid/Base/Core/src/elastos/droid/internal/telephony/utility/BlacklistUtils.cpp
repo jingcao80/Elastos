@@ -75,7 +75,7 @@ Int32 BlacklistUtils::IsListed(
     /* [in] */ Int32 mode)
 {
     if (!IsBlacklistEnabled(context)) {
-        return MATCH_NONE;
+        return IBlacklistUtils::MATCH_NONE;
     }
 
     if (DEBUG) {
@@ -92,16 +92,16 @@ Int32 BlacklistUtils::IsListed(
         type = ITelephonyBlacklist::MESSAGE_MODE;
     } else {
         Logger::E(TAG, "Invalid mode %d", mode);
-        return MATCH_NONE;
+        return IBlacklistUtils::MATCH_NONE;
     }
 
     // Private and unknown number matching
     if (TextUtils::IsEmpty(number)) {
         if (IsBlacklistPrivateNumberEnabled(context, mode)) {
             if (DEBUG) Logger::D(TAG, "Blacklist matched due to private number");
-            return MATCH_PRIVATE;
+            return IBlacklistUtils::MATCH_PRIVATE;
         }
-        return MATCH_NONE;
+        return IBlacklistUtils::MATCH_NONE;
     }
 
     if (IsBlacklistUnknownNumberEnabled(context, mode)) {
@@ -111,7 +111,7 @@ Int32 BlacklistUtils::IsListed(
         ci->GetContactExists(&contactExists);
         if (!contactExists) {
             if (DEBUG) Logger::D(TAG, "Blacklist matched due to unknown number");
-            return MATCH_UNKNOWN;
+            return IBlacklistUtils::MATCH_UNKNOWN;
         }
     }
 
@@ -122,7 +122,7 @@ Int32 BlacklistUtils::IsListed(
         builder->AppendQueryParameter(ITelephonyBlacklist::REGEX_KEY, String("1"));
     }
 
-    Int32 result = MATCH_NONE;
+    Int32 result = IBlacklistUtils::MATCH_NONE;
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
     AutoPtr<ICursor> c;
@@ -155,17 +155,17 @@ Int32 BlacklistUtils::IsListed(
 
             if (!isRegex) {
                 whitelisted = !blocked;
-                result = MATCH_LIST;
+                result = IBlacklistUtils::MATCH_LIST;
                 if (blocked) {
                     break;
                 }
             }
             else if (blocked) {
-                result = MATCH_REGEX;
+                result = IBlacklistUtils::MATCH_REGEX;
             }
         }
         if (whitelisted) {
-            result = MATCH_NONE;
+            result = IBlacklistUtils::MATCH_NONE;
         }
         ICloseable::Probe(c)->Close();
     }

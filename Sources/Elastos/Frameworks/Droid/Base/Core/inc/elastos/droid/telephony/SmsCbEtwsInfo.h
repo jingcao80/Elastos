@@ -20,9 +20,9 @@ namespace Telephony {
   * {@hide}
   */
 class SmsCbEtwsInfo
-    : public ISmsCbEtwsInfo
+    : public Object
+    , public ISmsCbEtwsInfo
     , public IParcelable
-    , public Object
 {
 //private:
 //    class InnerCreator
@@ -51,14 +51,14 @@ public:
     SmsCbEtwsInfo();
 
     /** Create a new SmsCbEtwsInfo object with the specified values. */
-    SmsCbEtwsInfo(
+    CARAPI constructor(
         /* [in] */ Int32 warningType,
         /* [in] */ Boolean emergencyUserAlert,
         /* [in] */ Boolean activatePopup,
         /* [in] */ ArrayOf<Byte>* warningSecurityInformation);
 
     /** Create a new SmsCbEtwsInfo object from a Parcel. */
-    SmsCbEtwsInfo(
+    CARAPI constructor(
         /* [in] */ IParcel* in);
 
     CARAPI constructor();
