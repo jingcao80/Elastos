@@ -147,7 +147,7 @@ ServiceStateTracker::ServiceStateTracker()
     CRegistrantList::New((IRegistrantList**)&mPsRestrictDisabledRegistrants);
 }
 
-static CARAPI_(AutoPtr<ArrayOf<String> >) InitCOUNTCODE()
+static CARAPI_(AutoPtr<ArrayOf<String> >) ServiceStateTracker::InitCOUNTCODE()
 {
     AutoPtr<ArrayOf<String> > sArray = ArrayOf<String>::Alloc(20);
 

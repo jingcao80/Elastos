@@ -372,6 +372,21 @@ module
             interface ISmsUsageMonitor;
         }
 
+        [deprecated]
+        class CSubInfoRecordUpdater {
+            constructor(
+                [in]  IContext* context,
+                [in]  ArrayOf<IPhone*>* phoneProxy,
+                [in]  ArrayOf<ICommandsInterface*>* ci);
+
+            interface ISubInfoRecordUpdater;
+        }
+
+        singleton class CSubInfoRecordUpdaterHelper {
+
+            interface ISubInfoRecordUpdaterHelper;
+        }
+
         //class CServiceStateTracker {
         //    constructor(
         //        [in] IPhoneBase* phoneBase,
