@@ -39,8 +39,6 @@ module.exports = function(aoElastos, aoActivity){
             oActivity.SetContentView(R.layout.main);
             //----------------SetContentView end----------------
 
-            elog("========CActivityOne.js====OnCreate====begin.1========");
-
             //----------------myTextView begin----------------
             var oMyTextView = oActivity.FindViewById(R.id.myTextView);
             var jso_button_MyTextView_cb = (function(){
@@ -51,9 +49,7 @@ module.exports = function(aoElastos, aoActivity){
                 }
             })();
             oMyTextView.SetOnClickListener(jso_button_MyTextView_cb);
-            //----------------myTextView begin----------------
-
-            elog("========CActivityOne.js====OnCreate====begin.2========");
+            //----------------myTextView end----------------
 
             //----------------myEditText begin----------------
             var oMyEditText = oActivity.FindViewById(R.id.myEditText);
@@ -87,9 +83,7 @@ module.exports = function(aoElastos, aoActivity){
                 }
             })();
             oMyTextView.SetOnKeyListener(jso_button_MyEditText_OnKeyListener);
-            //----------------myEditText begin----------------
-
-            elog("========CActivityOne.js====OnCreate====begin.3========");
+            //----------------myEditText end----------------
 
             //----------------chkAndroid/chkIos begin----------------
             var oChkAndroid = oActivity.FindViewById(R.id.chkAndroid);
@@ -98,34 +92,21 @@ module.exports = function(aoElastos, aoActivity){
 
             var jso_button_group_cb = {
                 OnClick:function(aoView){
-                    //var id = aoView.GetId();
-                    //var check = ( id == R.id.chkAndroid );
-                    //_showInfo( (check?"Android":"Ios") + " button clicked" );
-                    //oChkAndroid.SetChecked(check);
-                    //oChkIos.SetChecked(!check);
-
                     oChkAndroid.SetChecked(false);
                     oChkIos.SetChecked(false);
                     oChkUbuntu.SetChecked(false);
                     aoView.SetChecked(true);
 
-                    elog("========CActivityOne.js====chkButton====clicked====0====");
-                    _showInfo("========CActivityOne.js====chkButton====clicked====1====");
-                    elog("========CActivityOne.js====chkButton====clicked====2====");
-
+                    _showInfo("========CActivityOne.js====chkButton====clicked========");
                 }
             };
             oChkAndroid.SetOnClickListener(jso_button_group_cb);
             oChkIos.SetOnClickListener(jso_button_group_cb);
             oChkUbuntu.SetOnClickListener(jso_button_group_cb);
-            //----------------chkAndroid/chkIos end----------------
-
-            elog("========CActivityOne.js====OnCreate====begin.4========");
+            //----------------chkAndroid/chkIos/chkUbuntu end----------------
 
             //----------------AnamtionButton begin----------------
             oActivity.FindViewById(R.id.AnamtionButton).SetOnClickListener( (function(){
-                elog("========CActivityOne.js====OnCreate====begin.4.1========");
-
                 var iSelf = 1;  //RELATIVE_TO_SELF;
                 var oAnimation = {
                     Alpha :     Droid_New("Elastos.Droid.View.Animation.CAlphaAnimation", 0.3, 1.0),
@@ -134,39 +115,26 @@ module.exports = function(aoElastos, aoActivity){
                     Translate : Droid_New("Elastos.Droid.View.Animation.CTranslateAnimation", 300.0, -20.0, -10.0, 30.0)
                 };
 
-                elog("========CActivityOne.js====OnCreate====begin.4.2========");
-
                 var keys = [];  //Object.keys()
                 for (var prop in oAnimation) {
-                    elog("========CActivityOne.js====OnCreate====begin.4.2.1========"+prop);
                     keys.push(prop);
-                    elog("========CActivityOne.js====OnCreate====begin.4.2.2.1========"+typeof oAnimation[prop]);
-                    elog("========CActivityOne.js====OnCreate====begin.4.2.2.2========"+typeof oAnimation[prop].SetDuration);
                     oAnimation[prop].SetDuration(3000);
-                    elog("========CActivityOne.js====OnCreate====begin.4.2.3========"+prop);
                 }
-
-                elog("========CActivityOne.js====OnCreate====begin.4.3========");
 
                 var oButton = oActivity.FindViewById(R.id.DialogButton);
                 var count = 0;
-
-                elog("========CActivityOne.js====OnCreate====begin.4.4========");
 
                 return {
                     OnClick:function(aoView){
                         elog("========CActivityOne.js====Annimation::OnClick====begin========");
                         count = count % 4;
                         var key = keys[count];
-                        //_showInfo("====" + key + " Animation Selected!");
                         oButton.StartAnimation(oAnimation[key]);
                         count++;
                     }
                 }
             })() );
             //----------------AnamtionButton end----------------
-
-            elog("========CActivityOne.js====OnCreate====begin.5========");
 
             //----------------PopupWindowButton begin----------------
             function OnCreatePopupWindow(){
@@ -185,7 +153,11 @@ module.exports = function(aoElastos, aoActivity){
 
                 elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====2====");
 
+                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====2.0.0====" + typeof oActivity);
+                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====2.0.1====" + typeof oActivity.GetSystemService);
+
                 var oInflater = oActivity.GetSystemService(IContext__LAYOUT_INFLATER_SERVICE);
+
                 elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====2.1====");
                 var oLayout = oInflater.Inflate(R.layout.popupwindow, null);
 
@@ -200,9 +172,11 @@ module.exports = function(aoElastos, aoActivity){
                 elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====5====");
 
                 var oTextView = oLayout.FindViewById(R.id.txtView);
-                //textView->SetText(CoreUtils::Convert("PopupWindow 测试程序!"));
+
                 elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====6====");
+
                 oTextView.SetText(CString("PopupWindow 测试程序!"));
+
                 elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====7====");
 
                 var jso_button_DismissButton_cb = (function(ao_PopupWindow){
@@ -237,8 +211,6 @@ module.exports = function(aoElastos, aoActivity){
             oPopupWindowButton.SetOnClickListener(jso_button_PopupWindowButton_cb);
             //----------------PopupWindowButton end----------------
 
-            elog("========CActivityOne.js====OnCreate====begin.6========");
-
             //----------------DialogButton begin----------------
             var oDialogButton = oActivity.FindViewById(R.id.DialogButton);
             var jso_button_DialogButton_cb = (function(){
@@ -251,8 +223,6 @@ module.exports = function(aoElastos, aoActivity){
             })();
             oDialogButton.SetOnClickListener(jso_button_DialogButton_cb);
             //----------------DialogButton end----------------
-
-            elog("========CActivityOne.js====OnCreate====begin.7========");
 
             //----------------ConnectivityManagerButton begin----------------
             function OnTestConnectivityManager(){
@@ -271,8 +241,6 @@ module.exports = function(aoElastos, aoActivity){
             oConnectivityManagerButton.SetOnClickListener(jso_button_ConnectivityManagerButton_cb);
             //----------------ConnectivityManagerButton end----------------
 
-            elog("========CActivityOne.js====OnCreate====begin.8========");
-
             //----------------PowerManagerButton begin----------------
             function OnTestPowerManager(){
                 elog('====jso_activity_cb====OnTestPowerManager.begin====');
@@ -290,71 +258,21 @@ module.exports = function(aoElastos, aoActivity){
             oPowerManagerButton.SetOnClickListener(jso_button_PowerManagerButton_cb);
             //----------------PowerManagerButton end----------------
 
-            elog("========CActivityOne.js====OnCreate====begin.9========");
-
             //----------------myListView begin----------------
-            elog("========CActivityOne.js====OnCreate====begin.9.1========");
             var oListView = oActivity.FindViewById(R.id.myListView);
-            elog("========CActivityOne.js====OnCreate====begin.9.2========");
-
-            // var oDataList = Droid_New("Elastos.Droid.Utility.CParcelableObjectContainer");
-            // elog("========CActivityOne.js====OnCreate====begin.9.3========");
-            // for (var i = 0; i < 5; ++i) {
-            //     var s = 'Item--' + i;
-            //     if (i == 0) {
-            //         s += " Click to start ImageViewDemo EPK!";
-            //     }
-            //     else if (i == 1) {
-            //         s += " Click to start Gallery EPK!";
-            //     }
-            //     oDataList.Add( CString(s) );
-            // }
-
-
-            //var oDataList = Droid_New("Elastos.Utility.CArrayList");
             var oDataList = Core_New("Elastos.Utility.CArrayList");
 
-            elog("========CActivityOne.js====OnCreate====begin.9.3========");
-            for (var i=0; i< 5; i++) {
-                elog("========CActivityOne.js====OnCreate====begin.9.3.0========"+i);
-                var s = "Item " + i;
-                elog("========CActivityOne.js====OnCreate====begin.9.3.1========");
-                var s1 = CString(s);
-                elog("========CActivityOne.js====OnCreate====begin.9.3.2========" + s1.ToString());
-                oDataList.Add(s1);
-                elog("========CActivityOne.js====OnCreate====begin.9.3.3========");
-                //oDataList.add(CString("Item " + i));
+            for (var i=0; i< 15; i++) {
+                oDataList.Add(CString("Item " + i));
             }
 
-            elog("========CActivityOne.js====OnCreate====begin.9.4========");
-
-var a = [];
-for (var p in oDataList) a.push(p);
-elog("====oDataList methods : " + a.join("::"));
-
-            elog("========CActivityOne.js====OnCreate====begin.9.4.1========");
-
             var oAdapter = Droid_New("Elastos.Droid.Widget.CArrayAdapter", oActivity, R.layout.list_item, oDataList);
-
-            elog("========CActivityOne.js====OnCreate====begin.9.5========");
-
-var b = [];
-for (var p in oAdapter) b.push(p);
-elog("====oAdatper methods : " + b.join("::"));
-
-            elog("========CActivityOne.js====OnCreate====begin.9.5.1========");
-
             oListView.SetAdapter(oAdapter);
-            elog("========CActivityOne.js====OnCreate====begin.9.6========");
 
             var oDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CColorDrawable", 0xFF0000FF);
-            elog("========CActivityOne.js====OnCreate====begin.9.7========");
-
             oListView.SetDivider(oDrawable);
-            elog("========CActivityOne.js====OnCreate====begin.9.8========");
 
             oListView.SetDividerHeight(1);
-            elog("========CActivityOne.js====OnCreate====begin.9.9========");
 
             var jso_ListView_cb = (function(){
                 var iPosition = 0;
@@ -362,9 +280,8 @@ elog("====oAdatper methods : " + b.join("::"));
 
                 function ShowAlert(asInfo) {
                     var oBuilder = Droid_New("Elastos.Droid.App.CAlertDialogBuilder", oActivity);
-
-                    oBuilder.SetTitleEx( CString("CAR NODE DUANG!") );
-                    oBuilder.SetMessageEx( CString(asInfo) );
+                    oBuilder.SetTitle( CString("CAR NODE DUANG!") );
+                    oBuilder.SetMessage( CString(asInfo) );
 
                     var jso_Alert_cb = (function(){
                         return {
@@ -393,7 +310,7 @@ elog("====oAdatper methods : " + b.join("::"));
                         }
                     })();
 
-                    oBuilder.SetPositiveButtonEx( CString("确定"), jso_Alert_cb);
+                    oBuilder.SetPositiveButton( CString("确定"), jso_Alert_cb);
 
                     var oDialog = oBuilder.Create();
                     oDialog.Show();
@@ -403,6 +320,7 @@ elog("====oAdatper methods : " + b.join("::"));
 
                 return {
                     OnItemClick:function(aoParent, aoView, aiPosition, aiId){
+
                         iPosition = aiPosition;
 
                         _showInfo("====CActivityOne::OnItemClick position = "+ iPosition  + ", id = " + aiId);
@@ -422,12 +340,9 @@ elog("====oAdatper methods : " + b.join("::"));
                     }
                 }
             })();
-            elog("========CActivityOne.js====OnCreate====begin.9.10========");
 
             oListView.SetOnItemClickListener(jso_ListView_cb);
             //----------------myListView end----------------
-
-            elog("========CActivityOne.js====OnCreate====begin.10========");
 
             //----------------NavigationBar begin----------------
 
@@ -461,8 +376,10 @@ elog("====oAdatper methods : " + b.join("::"));
         OnCreateDialog:function(aoContext, aiId, out_aoDialog){
             var builder = Droid_New("Elastos.Droid.App.CAlertDialogBuilder", oActivity);
 
-            builder.SetTitleEx(CString("NodeJS对话框"));
-            builder.SetMessageEx(CString("这是一个NodeJS对话框"));
+            //builder.SetTitleEx(CString("NodeJS对话框"));
+            builder.SetTitle(CString("NodeJS对话框"));
+            //builder.SetMessageEx(CString("这是一个NodeJS对话框"));
+            builder.SetMessage(CString("这是一个NodeJS对话框"));
 
             var clickListener = (function(){
                 return {
@@ -488,9 +405,13 @@ elog("====oAdatper methods : " + b.join("::"));
                 }
             })();
 
-            builder.SetPositiveButtonEx(CString("确定EPK"), clickListener);
-            builder.SetNeutralButtonEx(CString("中立NODE"), clickListener);
-            builder.SetNegativeButtonEx(CString("取消JS"), clickListener);
+            //builder.SetPositiveButtonEx(CString("确定EPK"), clickListener);
+            //builder.SetNeutralButtonEx(CString("中立NODE"), clickListener);
+            //builder.SetNegativeButtonEx(CString("取消JS"), clickListener);
+
+            builder.SetPositiveButton(CString("确定EPK"), clickListener);
+            builder.SetNeutralButton(CString("中立NODE"), clickListener);
+            builder.SetNegativeButton(CString("取消JS"), clickListener);
 
             var dlg = builder.Create();
             out_aoDialog.data = dlg;
