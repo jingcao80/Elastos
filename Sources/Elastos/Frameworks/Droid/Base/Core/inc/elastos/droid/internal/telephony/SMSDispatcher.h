@@ -182,7 +182,7 @@ public:
      *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_ALWAYS_ALLOW}
      */
     CARAPI GetPremiumSmsPermission(
-        /* [in] */ String packageName,
+        /* [in] */ const String& packageName,
         /* [out] */ Int32* result);
 
     /**
@@ -194,7 +194,7 @@ public:
      *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_ALWAYS_ALLOW}
      */
     CARAPI SetPremiumSmsPermission(
-        /* [in] */ String packageName,
+        /* [in] */ const String& packageName,
         /* [in] */ Int32 permission);
 
     /**
@@ -281,7 +281,7 @@ protected:
      *  broadcast when the message is delivered to the recipient.  The
      *  raw pdu of the status report is in the extended Data ("pdu").
      */
-    virtual void SendData(String destAddr, String scAddr, Int32 destPort, Int32 origPort,
+    virtual void SendData(const String& destAddr, const String& scAddr, Int32 destPort, Int32 origPort,
             ArrayOf<Byte> data, IPendingIntent* sentIntent, IPendingIntent* deliveryIntent) = 0;
 
     /**
@@ -326,9 +326,9 @@ protected:
      *  Validity Period(Maximum) -> 635040 Mins(i.e.63 weeks).
      *  Any Other values included Negative considered as Invalid Validity Period of the message.
      */
-    virtual void SendText(String destAddr, String scAddr, String text,
+    virtual void SendText(const String& destAddr, const String& scAddr, const String& text,
             IPendingIntent* sentIntent, IPendingIntent* deliveryIntent, IUri* messageUri,
-            String callingPkg, Int32 priority, Boolean isExpectMore, Int32 validityPeriod) = 0;
+            const String& callingPkg, Int32 priority, Boolean isExpectMore, Int32 validityPeriod) = 0;
 
     /**
      * Inject an SMS PDU into the android platform.
@@ -340,7 +340,7 @@ protected:
      *  android telephony layer. This intent is broadcasted at
      *  the same time an SMS received from radio is responded back.
      */
-    virtual void InjectSmsPdu(ArrayOf<Byte> pdu, String format, IPendingIntent* receivedIntent) = 0;
+    virtual void InjectSmsPdu(ArrayOf<Byte> pdu, const String& format, IPendingIntent* receivedIntent) = 0;
 
     /**
      * Calculate the number of septets needed to encode the message.
@@ -364,22 +364,22 @@ protected:
      */
     virtual void UpdateSmsSendStatus(Int32 messageRef, Boolean success) = 0;
 
-    void SendMultipartText(String destAddr, String scAddr,
+    void SendMultipartText(const String& destAddr, const String& scAddr,
         IArrayList* parts, IArrayList* sentIntents,
-        IArrayList* deliveryIntents, IUri* messageUri, String callingPkg,
+        IArrayList* deliveryIntents, IUri* messageUri, const String& callingPkg,
         Int32 priority, Boolean isExpectMore, Int32 validityPeriod);
 
-    void SendPseudoMultipartText(String destAddr, String scAddr,
+    void SendPseudoMultipartText(const String& destAddr, const String& scAddr,
         IArrayList* parts, IArrayList* sentIntents,
         IArrayList* deliveryIntents,
-        IUri* messageUri, String callingPkg,
+        IUri* messageUri, const String& callingPkg,
         Int32 priority, Boolean isExpectMore, Int32 validityPeriod);
 
     /**
      * Create a new SubmitPdu and send it.
      */
-    virtual void SendNewSubmitPdu(String destinationAddress, String scAddress,
-            String message, ISmsHeader* smsHeader, Int32 encoding,
+    virtual void SendNewSubmitPdu(const String& destinationAddress, const String& scAddress,
+            const String& message, ISmsHeader* smsHeader, Int32 encoding,
             IPendingIntent* sentIntent, IPendingIntent* deliveryIntent, Boolean lastPart, Int32 priority,
             Boolean isExpectMore, Int32 validityPeriod, IAtomicInteger32* unsentPartCount,
             IAtomicBoolean* anyPartFailed, IUri* messageUri) = 0;
@@ -422,10 +422,10 @@ protected:
 //    AutoPtr<IHashMap> GetSmsTrackerMap(String destAddr, String scAddr,
 //        Int32 destPort, Int32 origPort, Byte[] data, SmsMessageBase.SubmitPduBase pdu);
 
-    AutoPtr<IUri> WriteOutboxMessage(Int64 subId, String address, String text,
-        Boolean requireDeliveryReport, String creator);
+    AutoPtr<IUri> WriteOutboxMessage(Int64 subId, const String& address, const String& text,
+        Boolean requireDeliveryReport, const String& creator);
 
-    void MoveToOutbox(Int64 subId, IUri* messageUri, String creator);
+    void MoveToOutbox(Int64 subId, IUri* messageUri, const String& creator);
 
     String GetCarrierAppPackageName(IIntent* intent);
 
@@ -436,13 +436,13 @@ private:
 
     static Boolean IsSystemUid(
         /* [in] */ IContext* context,
-        /* [in] */ String pkgName);
+        /* [in] */ const String& pkgName);
 
     Boolean CheckDestination(SmsTracker* tracker);
 
     Boolean DenyIfQueueLimitReached(SmsTracker* tracker);
 
-    AutoPtr<ICharSequence> GetAppLabel(String appPackage);
+    AutoPtr<ICharSequence> GetAppLabel(const String& appPackage);
 
     String ResolvePackageName(SmsTracker* tracker);
 

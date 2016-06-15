@@ -3,6 +3,7 @@
 #include "elastos/droid/internal/telephony/CSmsHeader.h"
 #include "elastos/droid/internal/telephony/CSmsStorageMonitor.h"
 #include "elastos/droid/internal/telephony/CSmsUsageMonitor.h"
+#include "elastos/droid/internal/telephony/CSubInfoRecordUpdater.h"
 
 namespace Elastos {
 namespace Droid {
@@ -16,6 +17,8 @@ CAR_OBJECT_IMPL(CSmsHeader)
 CAR_OBJECT_IMPL(CSmsStorageMonitor)
 
 CAR_OBJECT_IMPL(CSmsUsageMonitor)
+
+CAR_OBJECT_IMPL(CSubInfoRecordUpdater)
 
 } // namespace Telephony
 } // namespace Internal

@@ -674,7 +674,7 @@ ECode SMSDispatcher::HandleMessage(
 
 Boolean SMSDispatcher::IsSystemUid(
     /* [in] */ IContext* context,
-    /* [in] */ String pkgName)
+    /* [in] */ const String& pkgName)
 {
     assert(0 && "TODO");
 //    final PackageManager packageManager = context->GetPackageManager();
@@ -851,9 +851,9 @@ Int32 SMSDispatcher::GetNotInServiceError(
  *  Validity Period(Maximum) -> 635040 Mins(i.e.63 weeks).
  *  Any Other values included Negative considered as Invalid Validity Period of the message.
  */
-void SMSDispatcher::SendMultipartText(String destAddr, String scAddr,
+void SMSDispatcher::SendMultipartText(const String& destAddr, const String& scAddr,
         IArrayList* parts, IArrayList* sentIntents,
-        IArrayList* deliveryIntents, IUri* messageUri, String callingPkg,
+        IArrayList* deliveryIntents, IUri* messageUri, const String& callingPkg,
         Int32 priority, Boolean isExpectMore, Int32 validityPeriod)
 {
     assert(0 && "TODO");
@@ -979,10 +979,10 @@ void SMSDispatcher::SendMultipartText(String destAddr, String scAddr,
  *  Validity Period(Maximum) -> 635040 Mins(i.e.63 weeks).
  *  Any Other values included Negative considered as Invalid Validity Period of the message.
  */
-void SMSDispatcher::SendPseudoMultipartText(String destAddr, String scAddr,
+void SMSDispatcher::SendPseudoMultipartText(const String& destAddr, const String& scAddr,
         IArrayList* parts, IArrayList* sentIntents,
         IArrayList* deliveryIntents,
-        IUri* messageUri, String callingPkg,
+        IUri* messageUri, const String& callingPkg,
         Int32 priority, Boolean isExpectMore, Int32 validityPeriod)
 {
     assert(0 && "TODO");
@@ -1195,7 +1195,7 @@ Boolean SMSDispatcher::CheckDestination(SmsTracker* tracker)
  * @param appPackage the package name of the app requesting to send an SMS
  * @return the label for the specified app, or the package name if GetApplicationInfo() fails
  */
-AutoPtr<ICharSequence> SMSDispatcher::GetAppLabel(String appPackage)
+AutoPtr<ICharSequence> SMSDispatcher::GetAppLabel(const String& appPackage)
 {
     assert(0 && "TODO");
 //    PackageManager pm = mContext->GetPackageManager();
@@ -1328,7 +1328,7 @@ void SMSDispatcher::HandleConfirmShortCode(Boolean isPremium, SmsTracker* tracke
  *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_NEVER_ALLOW}, or
  *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_ALWAYS_ALLOW}
  */
-ECode SMSDispatcher::GetPremiumSmsPermission(String packageName, Int32* result)
+ECode SMSDispatcher::GetPremiumSmsPermission(const String& packageName, Int32* result)
 {
     return mUsageMonitor->GetPremiumSmsPermission(packageName, result);
 }
@@ -1341,7 +1341,7 @@ ECode SMSDispatcher::GetPremiumSmsPermission(String packageName, Int32* result)
  *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_NEVER_ALLOW}, or
  *  {@link SmsUsageMonitor#PREMIUM_SMS_PERMISSION_ALWAYS_ALLOW}
  */
-ECode SMSDispatcher::SetPremiumSmsPermission(String packageName, Int32 permission)
+ECode SMSDispatcher::SetPremiumSmsPermission(const String& packageName, Int32 permission)
 {
     return mUsageMonitor->SetPremiumSmsPermission(packageName, permission);
 }
@@ -1454,8 +1454,8 @@ void SMSDispatcher::SendMultipartSms(SmsTracker* tracker)
 //            NULL/*anyPartFailed*/, messageUri, NULL/*smsHeader*/, isExpectMore, validityPeriod);
 //}
 
-//AutoPtr<IHashMap> SMSDispatcher::GetSmsTrackerMap(String destAddr, String scAddr,
-//        String text, SmsMessageBase::SubmitPduBase* pdu)
+//AutoPtr<IHashMap> SMSDispatcher::GetSmsTrackerMap(const String& destAddr, const String& scAddr,
+//        const String& text, SmsMessageBase::SubmitPduBase* pdu)
 //{
 //    assert(0 && "TODO");
 //    HashMap<String, Object> map = new HashMap<String, Object>();
@@ -1467,7 +1467,7 @@ void SMSDispatcher::SendMultipartSms(SmsTracker* tracker)
 //    return map;
 //}
 
-//AutoPtr<IHashMap> SMSDispatcher::GetSmsTrackerMap(String destAddr, String scAddr,
+//AutoPtr<IHashMap> SMSDispatcher::GetSmsTrackerMap(const String& destAddr, const String& scAddr,
 //        Int32 destPort, Int32 origPort, Byte[] data, SmsMessageBase.SubmitPduBase pdu)
 //{
 //    assert(0 && "TODO");
@@ -1509,8 +1509,8 @@ ECode SMSDispatcher::GetImsSmsFormat(
 //    }
 }
 
-AutoPtr<IUri> SMSDispatcher::WriteOutboxMessage(Int64 subId, String address, String text,
-        Boolean requireDeliveryReport, String creator)
+AutoPtr<IUri> SMSDispatcher::WriteOutboxMessage(Int64 subId, const String& address, const String& text,
+        Boolean requireDeliveryReport, const String& creator)
 {
     assert(0 && "TODO");
 //    final ContentValues values = new ContentValues(8);
@@ -1540,7 +1540,7 @@ AutoPtr<IUri> SMSDispatcher::WriteOutboxMessage(Int64 subId, String address, Str
 //    }
 }
 
-void SMSDispatcher::MoveToOutbox(Int64 subId, IUri* messageUri, String creator)
+void SMSDispatcher::MoveToOutbox(Int64 subId, IUri* messageUri, const String& creator)
 {
     assert(0 && "TODO");
 //    final ContentValues values = new ContentValues(4);

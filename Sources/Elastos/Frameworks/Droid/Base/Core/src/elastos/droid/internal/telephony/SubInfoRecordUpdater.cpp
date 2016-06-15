@@ -1,617 +1,761 @@
-/*
-* Copyright (C) 2011-2014 MediaTek Inc.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
 
-package com.android.internal.telephony;
+#include "elastos/droid/app/ActivityManagerNative.h"
+#include "elastos/droid/content/CContentValues.h"
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/content/CIntentFilter.h"
+#include "elastos/droid/R.h"
+#include "elastos/droid/Manifest.h"
+#include "elastos/droid/internal/telephony/SubInfoRecordUpdater.h"
+#include "elastos/droid/telephony/CTelephonyManagerHelper.h"
+#include "elastos/droid/telephony/SubscriptionManager.h"
+#include <elastos/core/IntegralToString.h>
 
-using static android::Manifest::Permission::IREAD_PHONE_STATE;
-using Elastos::Droid::App::IActivityManagerNative;
+using Elastos::Core::IntegralToString;
+
+//using Elastos::Droid::Manifest;
+using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::CContentValues;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Provider::IBaseColumns;
 using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Telephony::IRlog;
-using Elastos::Droid::Telephony::ISubscriptionManager;
-using Elastos::Droid::Telephony::ISubInfoRecord;
-using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Internal::Telephony::ICommandsInterface;
 using Elastos::Droid::Internal::Telephony::IIccCardConstants;
 using Elastos::Droid::Internal::Telephony::IPhone;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Internal::Telephony::IPhoneProxy;
 using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
-using Elastos::Droid::Internal::Telephony::Uicc::IccCardApplicationStatus::IAppType;
-using Elastos::Droid::Internal::Telephony::Uicc::IccCardStatus::ICardState;
+using Elastos::Droid::Internal::Telephony::Uicc::AppType;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccConstants;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccFileHandler;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccUtils;
+//using Elastos::Droid::Internal::Telephony::Uicc::CSpnOverride;
 using Elastos::Droid::Internal::Telephony::Uicc::ISpnOverride;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCard;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
+//using Elastos::Droid::Internal::Telephony::Uicc::CUiccControllerHelper;
+//using Elastos::Droid::Telephony::IRlog;
+using Elastos::Droid::Telephony::SubscriptionManager;
+using Elastos::Droid::Telephony::ISubscriptionManager;
+using Elastos::Droid::Telephony::ISubInfoRecord;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
 
 using Elastos::Utility::IList;
+
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+
+const String SubInfoRecordUpdater::LOGTAG("SUB");
+const Int32 SubInfoRecordUpdater::PROJECT_SIM_NUM = InitPhoneCount();
+const Int32 SubInfoRecordUpdater::EVENT_OFFSET = 8;
+const Int32 SubInfoRecordUpdater::EVENT_QUERY_ICCID_DONE = 1;
+const Int32 SubInfoRecordUpdater::EVENT_ICC_CHANGED = 2;
+const Int32 SubInfoRecordUpdater::EVENT_STACK_READY = 3;
+const String SubInfoRecordUpdater::ICCID_STRING_FOR_NO_SIM("");
+const String SubInfoRecordUpdater::ICCID_STRING_FOR_NV("DUMMY_NV_ID");
+
+AutoPtr<ArrayOf<CardState> > SubInfoRecordUpdater::sCardState = InitCardState();
+AutoPtr<ArrayOf<IIccFileHandler*> > SubInfoRecordUpdater::sFh = InitIccFileHandler();
+AutoPtr<ArrayOf<String> > SubInfoRecordUpdater::sIccId = InitIccId();
+AutoPtr<ArrayOf<Int32> > SubInfoRecordUpdater::sInsertSimState = InitInsertSimState();
+
+AutoPtr<ArrayOf<IPhone*> > SubInfoRecordUpdater::sPhone;
+AutoPtr<IContext> SubInfoRecordUpdater::sContext;
+AutoPtr<IUiccController> SubInfoRecordUpdater::mUiccController;
+AutoPtr<ArrayOf<ICommandsInterface*> > SubInfoRecordUpdater::sCi;
+AutoPtr<ITelephonyManager> SubInfoRecordUpdater::sTelephonyMgr;
+AutoPtr<ITelephonyManagerHelper> SubInfoRecordUpdater::sTelephonyManagerHelper;
+
+// To prevent repeatedly update flow every time receiver SIM_STATE_CHANGE
+Boolean SubInfoRecordUpdater::sNeedUpdate = TRUE;
+
+SubInfoRecordUpdater::MyBroadcastReceiver::MyBroadcastReceiver(
+    /* [in] */ SubInfoRecordUpdater* host)
+    : mHost(host)
+{
+    BroadcastReceiver::constructor();
+}
+
+//@Override
+ECode SubInfoRecordUpdater::MyBroadcastReceiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    Logd(String("[Receiver]+"));
+    String action;
+    intent->GetAction(&action);
+    Logd(String("Action: ") + action);
+    Int32 slotId;
+    if (action.Equals(ITelephonyIntents::ACTION_SIM_STATE_CHANGED)) {
+        String simStatus;
+        intent->GetStringExtra(IIccCardConstants::INTENT_KEY_ICC_STATE, &simStatus);
+        intent->GetInt32Extra(IPhoneConstants::SLOT_KEY, ISubscriptionManager::INVALID_SLOT_ID, &slotId);
+        Logd(String("slotId: ") + IntegralToString::ToString(slotId) + String(" simStatus: ") + simStatus);
+        if (slotId == ISubscriptionManager::INVALID_SLOT_ID) {
+            return NOERROR;
+        }
+
+        if (IIccCardConstants::INTENT_VALUE_ICC_LOADED.Equals(simStatus)) {
+            if (sTelephonyMgr == NULL) {
+                sTelephonyManagerHelper->From(sContext, (ITelephonyManager**)&sTelephonyMgr);
+            }
+
+            Int64 subId;
+            intent->GetInt64Extra(IPhoneConstants::SUBSCRIPTION_KEY, ISubscriptionManager::INVALID_SUB_ID, &subId);
+
+            Boolean bRet;
+            if (SubscriptionManager::IsValidSubId(subId, &bRet), bRet) {
+                AutoPtr<ITelephonyManager> defaultTelephonyMgr;
+                sTelephonyManagerHelper->GetDefault((ITelephonyManager**)&defaultTelephonyMgr);
+
+                String msisdn;
+                defaultTelephonyMgr->GetLine1NumberForSubscriber(subId, &msisdn);
+
+                AutoPtr<IContentResolver> contentResolver;
+                sContext->GetContentResolver((IContentResolver**)&contentResolver);
+
+                if (msisdn != NULL) {
+                    AutoPtr<IContentValues> number;
+                    CContentValues::New(1, (IContentValues**)&number);
+                    number->Put(ISubscriptionManager::NUMBER, msisdn);
+                    AutoPtr<IUri> uri;
+                    SubscriptionManager::GetCONTENT_URI((IUri**)&uri);
+
+                    Int32 rowsAffected;
+                    contentResolver->Update(uri, number, String("_id") + String("=") + IntegralToString::ToString(subId), NULL, &rowsAffected);
+//                    contentResolver->Update(uri, number, IBaseColumns::ID + String("=") + IntegralToString::ToString(subId), &rowsAffected);
+                }
+
+                AutoPtr<ISubInfoRecord> subInfo;
+                SubscriptionManager::GetSubInfoForSubscriber(subId, (ISubInfoRecord**)&subInfo);
+                assert(0 && "TODO");
+                Int32 nameSource;
+//                if (subInfo != NULL && (subInfo->GetNameSource(&nameSource), nameSource != ISubscriptionManager::NAME_SOURCE_USER_INPUT)) {
+//                    AutoPtr<ISpnOverride> mSpnOverride;
+//                    CSpnOverride::New((ISpnOverride**)&mSpnOverride);
+                    String nameToSet;
+                    String Carrier;
+                    defaultTelephonyMgr->GetSimOperator(subId, &Carrier);
+                    Logd(String("Carrier = ") + Carrier);
+                    String CarrierName;
+                    defaultTelephonyMgr->GetSimOperatorName(subId, &CarrierName);
+                    Logd(String("CarrierName = ") + CarrierName);
+//
+//                    if (mSpnOverride->ContainsCarrier(Carrier)) {
+//                        mSpnOverride->GetSpn(Carrier, &nameToSet);
+//                        Logd(String("Found, name = ") + nameToSet);
+//                    } else if (CarrierName != "") {
+//                        nameToSet = CarrierName;
+//                    } else {
+//                        nameToSet = String("SIM ") + IntegralToString::ToString(slotId + 1);
+//                        Logd(String("Not found, name = ") + nameToSet);
+//                    }
+//
+                    AutoPtr<IContentValues> name;
+                    CContentValues::New(1, (IContentValues**)&name);
+                    name->Put(ISubscriptionManager::DISPLAY_NAME, nameToSet);
+                    AutoPtr<IUri> uri;
+                    SubscriptionManager::GetCONTENT_URI((IUri**)&uri);
+                    Int32 rowsAffected;
+                    contentResolver->Update(uri, name, String("_id") + String("=") + IntegralToString::ToString(subId), NULL, &rowsAffected);
+//                    contentResolver->Update(uri, name, IBaseColumns::ID + String("=") + IntegralToString::ToString(subId), NULL, &rowsAffected);
+//                }
+            } else {
+                Logd(String("[Receiver] Invalid subId, could not update ContentResolver"));
+            }
+        }
+    }
+    Logd(String("[Receiver]-"));
+    return NOERROR;
+}
+
+ECode SubInfoRecordUpdater::MyBroadcastReceiver::ToString(
+    /* [out] */ String* info)
+{
+    VALIDATE_NOT_NULL(info);
+    *info = String("SubInfoRecordUpdater::MyBroadcastReceiver: ");
+    (*info).AppendFormat("%p", this);
+    return NOERROR;
+}
 
 /**
  *@hide
  */
-public class SubInfoRecordUpdater extends Handler {
-    private static const String LOG_TAG = "SUB";
-    private static const Int32 PROJECT_SIM_NUM = TelephonyManager->GetDefault()->GetPhoneCount();
-    private static const Int32 EVENT_OFFSET = 8;
-    private static const Int32 EVENT_QUERY_ICCID_DONE = 1;
-    private static const Int32 EVENT_ICC_CHANGED = 2;
-    private static const Int32 EVENT_STACK_READY = 3;
-    private static const String ICCID_STRING_FOR_NO_SIM = "";
-    private static const String ICCID_STRING_FOR_NV = "DUMMY_NV_ID";
-    /**
-     *  Int32[] sInsertSimState maintains all slots' SIM inserted status currently,
-     *  it may contain 4 kinds of values:
-     *    SIM_NOT_INSERT : no SIM inserted in slot i now
-     *    SIM_CHANGED    : a valid SIM insert in slot i and is different SIM from last time
-     *                     it will later become SIM_NEW or SIM_REPOSITION during update procedure
-     *    SIM_NOT_CHANGE : a valid SIM insert in slot i and is the same SIM as last time
-     *    SIM_NEW        : a valid SIM insert in slot i and is a new SIM
-     *    SIM_REPOSITION : a valid SIM insert in slot i and is inserted in different slot last time
-     *    positive integer #: index to distinguish SIM cards with the same IccId
-     */
-    public static const Int32 SIM_NOT_CHANGE = 0;
-    public static const Int32 SIM_CHANGED    = -1;
-    public static const Int32 SIM_NEW        = -2;
-    public static const Int32 SIM_REPOSITION = -3;
-    public static const Int32 SIM_NOT_INSERT = -99;
+CAR_INTERFACE_IMPL(SubInfoRecordUpdater, Handler, ISubInfoRecordUpdater)
 
-    public static const Int32 STATUS_NO_SIM_INSERTED = 0x00;
-    public static const Int32 STATUS_SIM1_INSERTED = 0x01;
-    public static const Int32 STATUS_SIM2_INSERTED = 0x02;
-    public static const Int32 STATUS_SIM3_INSERTED = 0x04;
-    public static const Int32 STATUS_SIM4_INSERTED = 0x08;
+Int32 SubInfoRecordUpdater::InitPhoneCount()
+{
+    AutoPtr<ITelephonyManager> telephonyMgr;
+    AutoPtr<ITelephonyManagerHelper> telephonyManagerHelper;
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&telephonyManagerHelper);
+    telephonyManagerHelper->GetDefault((ITelephonyManager**)&telephonyMgr);
 
-    private static Phone[] sPhone;
-    private static Context sContext = NULL;
-    private static CardState[] sCardState = new CardState[PROJECT_SIM_NUM];
-    private static UiccController mUiccController = NULL;
-    private static CommandsInterface[] sCi;
-    private static IccFileHandler[] sFh = new IccFileHandler[PROJECT_SIM_NUM];
-    private static String sIccId[] = new String[PROJECT_SIM_NUM];
-    private static Int32[] sInsertSimState = new Int32[PROJECT_SIM_NUM];
-    private static TelephonyManager sTelephonyMgr = NULL;
-    // To prevent repeatedly update flow every time receiver SIM_STATE_CHANGE
-    private static Boolean sNeedUpdate = TRUE;
-    private Boolean isNVSubAvailable = FALSE;
+    Int32 count;
+    telephonyMgr->GetPhoneCount(&count);
+    return count;
+}
 
-    public SubInfoRecordUpdater(Context context, Phone[] phoneProxy, CommandsInterface[] ci) {
-        Logd("Constructor invoked");
+AutoPtr<ArrayOf<CardState> > SubInfoRecordUpdater::InitCardState()
+{
+    AutoPtr<ArrayOf<CardState> > sArray = ArrayOf<CardState>::Alloc(PROJECT_SIM_NUM);
+    return sArray;
+}
 
-        sContext = context;
-        sPhone = phoneProxy;
-        sCi = ci;
-        SubscriptionHelper->Init(context, ci);
-        mUiccController = UiccController->GetInstance();
-        mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
-        ModemStackController->GetInstance()->RegisterForStackReady(this, EVENT_STACK_READY, NULL);
-        For (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
-            sCardState[i] = CardState.CARDSTATE_ABSENT;
+AutoPtr<ArrayOf<IIccFileHandler*> > SubInfoRecordUpdater::InitIccFileHandler()
+{
+    AutoPtr<ArrayOf<IIccFileHandler*> > sArray = ArrayOf<IIccFileHandler*>::Alloc(PROJECT_SIM_NUM);
+    return sArray;
+}
+
+AutoPtr<ArrayOf<String> > SubInfoRecordUpdater::InitIccId()
+{
+    AutoPtr<ArrayOf<String> > sArray = ArrayOf<String>::Alloc(PROJECT_SIM_NUM);
+    return sArray;
+}
+
+AutoPtr<ArrayOf<Int32> > SubInfoRecordUpdater::InitInsertSimState()
+{
+    AutoPtr<ArrayOf<Int32> > sArray = ArrayOf<Int32>::Alloc(PROJECT_SIM_NUM);
+    return sArray;
+}
+
+ECode SubInfoRecordUpdater::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ ArrayOf<IPhone*>* phoneProxy,
+    /* [in] */ ArrayOf<ICommandsInterface*>* ci)
+{
+    Logd(String("Constructor invoked"));
+
+    sContext = context;
+    sPhone = phoneProxy;
+    sCi = ci;
+    assert(0 && "TODO");
+//    SubscriptionHelper->Init(context, ci);
+
+//    AutoPtr<IUiccControllerHelper> uiccCtrlHelper;
+//    CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&uiccCtrlHelper);
+//    uiccCtrlHelper->GetInstance((IUiccController**)&mUiccController);
+    mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
+
+    AutoPtr<IModemStackControllerHelper> msCtrlHelper;
+    AutoPtr<IModemStackController> msCtrl;
+//    CModemStackControllerHelper::AcquireSingleton((IModemStackControllerHelper**)&msCtrlHelper);
+//    msCtrlHelper->GetInstance((IModemStackController**)&msCtrl);
+    msCtrl->RegisterForStackReady(this, EVENT_STACK_READY, NULL);
+    for (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
+        (*sCardState)[i] = Elastos::Droid::Internal::Telephony::Uicc::CARDSTATE_ABSENT;
+    }
+    AutoPtr<IIntentFilter> intentFilter;
+    AutoPtr<IIntent> intent;
+    CIntentFilter::New(ITelephonyIntents::ACTION_SIM_STATE_CHANGED, (IIntentFilter**)&intentFilter);
+    sContext->RegisterReceiver(sReceiver, intentFilter, (IIntent**)&intent);
+
+    sReceiver = new MyBroadcastReceiver(this);
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&sTelephonyManagerHelper);
+    isNVSubAvailable = FALSE;
+    return NOERROR;
+}
+
+Int32 SubInfoRecordUpdater::EncodeEventId(
+    /* [in] */ Int32 event,
+    /* [in] */ Int32 slotId)
+{
+    return event << (slotId * EVENT_OFFSET);
+}
+
+Boolean SubInfoRecordUpdater::IsAllIccIdQueryDone()
+{
+    for (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
+        if ((*sIccId)[i] == NULL) {
+            Logd(String("Wait for SIM") + IntegralToString::ToString(i + 1) + String(" IccId"));
+            return FALSE;
         }
-        IntentFilter intentFilter = new IntentFilter(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-        sContext->RegisterReceiver(sReceiver, intentFilter);
+    }
+    Logd(String("All IccIds query complete"));
+    return TRUE;
+}
+
+ECode SubInfoRecordUpdater::SetDisplayNameForNewSub(
+    /* [in] */ const String& newSubName,
+    /* [in] */ Int32 subId,
+    /* [in] */ Int32 newNameSource)
+{
+    AutoPtr<ISubInfoRecord> subInfo;
+    SubscriptionManager::GetSubInfoForSubscriber(subId, (ISubInfoRecord**)&subInfo);
+    if (subInfo != NULL) {
+        // overwrite SIM display name if it is not assigned by user
+        assert(0 && "TODO");
+        Int32 oldNameSource;// = subInfo.nameSource;
+        String oldSubName;// = subInfo.displayName;
+        Logd(String("[setDisplayNameForNewSub] mSubInfoIdx = ") + /*IntegralToString::ToString(subInfo.subId) + */String(", oldSimName = ")
+                + oldSubName + String(", oldNameSource = ") + IntegralToString::ToString(oldNameSource) + String(", newSubName = ")
+                + newSubName + String(", newNameSource = ") + IntegralToString::ToString(newNameSource));
+        if (oldSubName == NULL ||
+            (oldNameSource == ISubscriptionManager::NAME_SOURCE_DEFAULT_SOURCE && newSubName != NULL) ||
+            (oldNameSource == ISubscriptionManager::NAME_SOURCE_SIM_SOURCE && newSubName != NULL
+                    && !newSubName.Equals(oldSubName))) {
+            assert(0 && "TODO");
+//            SubscriptionManager::SetDisplayName(newSubName, subInfo.subId, newNameSource);
+        }
+    } else {
+        Logd(String("SUB") + IntegralToString::ToString(subId + 1) + String(" SubInfo not created yet"));
+    }
+    return NOERROR;
+}
+
+//@Override
+CARAPI SubInfoRecordUpdater::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    assert(0 && "TODO");
+    Int32 msgNum, arg1, arg2;
+    msg->GetWhat(&msgNum);
+    msg->GetArg1(&arg1);
+    msg->GetArg2(&arg2);
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+
+//    IAsyncResult* ar = IAsyncResult::Probe(obj);
+//    Int32 slotId;
+//    for (slotId = IPhoneConstants::SUB1; slotId <= IPhoneConstants::SUB3; slotId++) {
+//        Int32 pivot = 1 << (slotId * EVENT_OFFSET);
+//        if (msgNum >= pivot) {
+//            continue;
+//        } else {
+//            break;
+//        }
+//    }
+//    slotId--;
+//    Int32 event = msgNum >> (slotId * EVENT_OFFSET);
+//    switch (event) {
+//        case EVENT_QUERY_ICCID_DONE:
+//            Logd(String("handleMessage : <EVENT_QUERY_ICCID_DONE> SIM") + IntegralToString::ToString(slotId + 1));
+//            if (ar.exception == NULL) {
+//                if (ar.result != NULL) {
+//                    Byte[] data = (Byte[])ar.result;
+//                    (*sIccId)[slotId] = IccUtils->BcdToString(data, 0, data.length);
+//                } else {
+//                    Logd(String("Null ar"));
+//                    (*sIccId)[slotId] = ICCID_STRING_FOR_NO_SIM;
+//                }
+//            } else {
+//                (*sIccId)[slotId] = ICCID_STRING_FOR_NO_SIM;
+//                Logd(String("Query IccId fail: ") + ar.exception);
+//            }
+//            Logd(String("(*sIccId)[") + IntegralToString::ToString(slotId) + String("] = ") + (*sIccId)[slotId]);
+//            if (IsAllIccIdQueryDone() && sNeedUpdate) {
+//                UpdateSimInfoByIccId();
+//            }
+//            break;
+//        case EVENT_ICC_CHANGED:
+//            AutoPtr<IInteger32> cardIndex;
+//            IInteger32::New(IPhoneConstants::DEFAULT_CARD_INDEX, (IInteger32**)&cardIndex);
+//            if (ar.result != NULL) {
+//                cardIndex = (Integer) ar.result;
+//            } else {
+//                Rlog->E(LOGTAG, "Error: Invalid card index EVENT_ICC_CHANGED ");
+//                return;
+//            }
+//            UpdateIccAvailability(cardIndex);
+//            break;
+//        case EVENT_STACK_READY:
+//            Logd(String("EVENT_STACK_READY" ));
+//            if (IsAllIccIdQueryDone() && PROJECT_SIM_NUM > 1) {
+//                SubscriptionHelper->GetInstance()->UpdateSubActivation(sInsertSimState, TRUE);
+//            }
+//            break;
+//        default:
+//            Logd(String("Unknown msg:") + IntegralToString::ToString(msgNum));
+//    }
+}
+
+void SubInfoRecordUpdater::UpdateIccAvailability(
+    /* [in] */ Int32 slotId)
+{
+    if (NULL == mUiccController) {
+        return;
+    }
+    assert(0 && "TODO");
+//    SubscriptionHelper subHelper = SubscriptionHelper->GetInstance();
+//    Logd(String("updateIccAvailability: Enter, slotId ") + IntegralToString::ToString(slotId));
+//    if (PROJECT_SIM_NUM > 1 && !subHelper->ProceedToHandleIccEvent(slotId)) {
+//        Logd(String("updateIccAvailability: radio is OFF/unavailable, ignore "));
+//        if (!subHelper->IsApmSIMNotPwdn()) {
+//            // set the iccid to NULL so that once SIM card detected
+//            //  ICCID will be read from the card again.
+//            (*sIccId)[slotId] = NULL;
+//        }
+//        return;
+//    }
+//
+//    CardState newState = Elastos::Droid::Internal::Telephony::Uicc::CARDSTATE_ABSENT;
+//    UiccCard newCard = mUiccController->GetUiccCard(slotId);
+//    if (newCard != NULL) {
+//        newState = newCard->GetCardState();
+//    }
+//    CardState oldState = sCardState[slotId];
+//    (*sCardState)[slotId] = newState;
+//    Logd(String("Slot[") + IntegralToString::ToString(slotId) + String("]: New Card State = ")
+//            + IntegralToString::ToString(newState) + String(" ") + String("Old Card State = ") + IntegralToString::ToString(oldState));
+//    if (!newState->IsCardPresent()) {
+//        //Card moved to ABSENT State
+//        if ((*sIccId)[slotId] != NULL && !(*sIccId)[slotId].Equals(ICCID_STRING_FOR_NO_SIM)) {
+//            Logd(String("SIM") + IntegralToString::ToString(slotId + 1) + String(" hot plug out"));
+//            sNeedUpdate = TRUE;
+//        }
+//        (*sFh)[slotId] = NULL;
+//        (*sIccId)[slotId] = ICCID_STRING_FOR_NO_SIM;
+//        if (IsAllIccIdQueryDone() && sNeedUpdate) {
+//            UpdateSimInfoByIccId();
+//        }
+//    } else if (!oldState->IsCardPresent() && newState->IsCardPresent()) {
+//        // Card moved to PRESENT State.
+//        if ((*sIccId)[slotId] != NULL && (*sIccId)[slotId].Equals(ICCID_STRING_FOR_NO_SIM)) {
+//            Logd(String("SIM") + IntegralToString::ToString(slotId + 1) + String(" hot plug in"));
+//            (*sIccId)[slotId] = NULL;
+//            sNeedUpdate = TRUE;
+//        }
+//        QueryIccId(slotId);
+//    } else if (oldState->IsCardPresent() && newState->IsCardPresent() &&
+//            (!subHelper->IsApmSIMNotPwdn()) && ((*sIccId)[slotId] == NULL)) {
+//        Logd(String("SIM") + IntegralToString::ToString(slotId + 1) + String(" powered up from APM "));
+//        (*sFh)[slotId] = NULL;
+//        sNeedUpdate = TRUE;
+//        QueryIccId(slotId);
+//    }
+}
+
+void SubInfoRecordUpdater::QueryIccId(
+    /* [in] */ Int32 slotId)
+{
+    Logd(String("queryIccId: slotid=") + IntegralToString::ToString(slotId));
+    if ((*sFh)[slotId] == NULL) {
+        Logd(String("Getting IccFileHandler"));
+
+        AutoPtr<IUiccCardApplication> validApp;
+        AutoPtr<IUiccCard> uiccCard;
+        mUiccController->GetUiccCard(slotId, (IUiccCard**)&uiccCard);
+        Int32 numApps;
+        uiccCard->GetNumApplications(&numApps);
+        for (Int32 i = 0; i < numApps; i++) {
+            AutoPtr<IUiccCardApplication> app;
+            uiccCard->GetApplicationIndex(i, (IUiccCardApplication**)&app);
+            AppType aType;
+            if (app != NULL && (app->GetType(&aType), aType != Elastos::Droid::Internal::Telephony::Uicc::APPTYPE_UNKNOWN)) {
+                validApp = app;
+                break;
+            }
+        }
+        if (validApp != NULL) validApp->GetIccFileHandler((IIccFileHandler**)&(*sFh)[slotId]);
     }
 
-    private static Int32 EncodeEventId(Int32 event, Int32 slotId) {
-        return event << (slotId * EVENT_OFFSET);
-    }
-
-    private final BroadcastReceiver sReceiver = new  BroadcastReceiver() {
-        //@Override
-        CARAPI OnReceive(Context context, Intent intent) {
-            Logd("[Receiver]+");
-            String action = intent->GetAction();
-            Int32 slotId;
-            Logd("Action: " + action);
-            If (action->Equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
-                String simStatus = intent->GetStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE);
-                slotId = intent->GetIntExtra(PhoneConstants.SLOT_KEY,
-                        SubscriptionManager.INVALID_SLOT_ID);
-                Logd("slotId: " + slotId + " simStatus: " + simStatus);
-                If (slotId == SubscriptionManager.INVALID_SLOT_ID) {
-                    return;
-                }
-
-                If (IccCardConstants.INTENT_VALUE_ICC_LOADED->Equals(simStatus)) {
-                    If (sTelephonyMgr == NULL) {
-                        sTelephonyMgr = TelephonyManager->From(sContext);
-                    }
-
-                    Int64 subId = intent->GetLongExtra(PhoneConstants.SUBSCRIPTION_KEY,
-                            SubscriptionManager.INVALID_SUB_ID);
-
-                    If (SubscriptionManager->IsValidSubId(subId)) {
-                        String msisdn = TelephonyManager->GetDefault()->GetLine1NumberForSubscriber(subId);
-                        ContentResolver contentResolver = sContext->GetContentResolver();
-
-                        If (msisdn != NULL) {
-                            ContentValues number = new ContentValues(1);
-                            number->Put(SubscriptionManager.NUMBER, msisdn);
-                            contentResolver->Update(SubscriptionManager.CONTENT_URI, number,
-                                    SubscriptionManager._ID + "=" + Long->ToString(subId), NULL);
-                        }
-
-                        SubInfoRecord subInfo =
-                                SubscriptionManager->GetSubInfoForSubscriber(subId);
-
-                        If (subInfo != NULL
-                                && subInfo.nameSource != SubscriptionManager.NAME_SOURCE_USER_INPUT) {
-                            SpnOverride mSpnOverride = new SpnOverride();
-                            String nameToSet;
-                            String Carrier =
-                                    TelephonyManager->GetDefault()->GetSimOperator(subId);
-                            Logd("Carrier = " + Carrier);
-                            String CarrierName =
-                                    TelephonyManager->GetDefault()->GetSimOperatorName(subId);
-                            Logd("CarrierName = " + CarrierName);
-
-                            If (mSpnOverride->ContainsCarrier(Carrier)) {
-                                nameToSet = mSpnOverride->GetSpn(Carrier);
-                                Logd("Found, name = " + nameToSet);
-                            } else If (CarrierName != "") {
-                                nameToSet = CarrierName;
-                            } else {
-                                nameToSet = "SIM " + Integer->ToString(slotId + 1);
-                                Logd("Not found, name = " + nameToSet);
-                            }
-
-                            ContentValues name = new ContentValues(1);
-                            name->Put(SubscriptionManager.DISPLAY_NAME, nameToSet);
-                            contentResolver->Update(SubscriptionManager.CONTENT_URI, name,
-                                    SubscriptionManager._ID + "=" + Long->ToString(subId), NULL);
-                        }
-                    } else {
-                        Logd("[Receiver] Invalid subId, could not update ContentResolver");
-                    }
-                }
-            }
-            Logd("[Receiver]-");
-        }
-    };
-
-    private Boolean IsAllIccIdQueryDone() {
-        For (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
-            If (sIccId[i] == NULL) {
-                Logd("Wait for SIM" + (i + 1) + " IccId");
-                return FALSE;
-            }
-        }
-        Logd("All IccIds query complete");
-
-        return TRUE;
-    }
-
-    public static void SetDisplayNameForNewSub(String newSubName, Int32 subId, Int32 newNameSource) {
-        SubInfoRecord subInfo = SubscriptionManager->GetSubInfoForSubscriber(subId);
-        If (subInfo != NULL) {
-            // overwrite SIM display name if it is not assigned by user
-            Int32 oldNameSource = subInfo.nameSource;
-            String oldSubName = subInfo.displayName;
-            Logd("[setDisplayNameForNewSub] mSubInfoIdx = " + subInfo.subId + ", oldSimName = "
-                    + oldSubName + ", oldNameSource = " + oldNameSource + ", newSubName = "
-                    + newSubName + ", newNameSource = " + newNameSource);
-            If (oldSubName == NULL ||
-                (oldNameSource == SubscriptionManager.NAME_SOURCE_DEFAULT_SOURCE && newSubName != NULL) ||
-                (oldNameSource == SubscriptionManager.NAME_SOURCE_SIM_SOURCE && newSubName != NULL
-                        && !newSubName->Equals(oldSubName))) {
-                SubscriptionManager->SetDisplayName(newSubName,
-                        subInfo.subId, newNameSource);
-            }
+    if ((*sFh)[slotId] != NULL) {
+        String iccId = (*sIccId)[slotId];
+        if (iccId == NULL) {
+            Logd(String("Querying IccId"));
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EncodeEventId(EVENT_QUERY_ICCID_DONE, slotId), (IMessage**)&msg);
+            (*sFh)[slotId]->LoadEFTransparent(IIccConstants::EF_ICCID, msg);
         } else {
-            Logd("SUB" + (subId + 1) + " SubInfo not created yet");
+            Logd(String("NOT Querying IccId its already set (*sIccId)[") + IntegralToString::ToString(slotId) + String("]=") + iccId);
         }
-    }
-
-    //@Override
-    CARAPI HandleMessage(Message msg) {
-        AsyncResult ar = (AsyncResult)msg.obj;
-        Int32 msgNum = msg.what;
-        Int32 slotId;
-        For (slotId = PhoneConstants.SUB1; slotId <= PhoneConstants.SUB3; slotId++) {
-            Int32 pivot = 1 << (slotId * EVENT_OFFSET);
-            If (msgNum >= pivot) {
-                continue;
-            } else {
-                break;
-            }
-        }
-        slotId--;
-        Int32 event = msgNum >> (slotId * EVENT_OFFSET);
-        Switch (event) {
-            case EVENT_QUERY_ICCID_DONE:
-                Logd("handleMessage : <EVENT_QUERY_ICCID_DONE> SIM" + (slotId + 1));
-                If (ar.exception == NULL) {
-                    If (ar.result != NULL) {
-                        Byte[] data = (Byte[])ar.result;
-                        sIccId[slotId] = IccUtils->BcdToString(data, 0, data.length);
-                    } else {
-                        Logd("Null ar");
-                        sIccId[slotId] = ICCID_STRING_FOR_NO_SIM;
-                    }
-                } else {
-                    sIccId[slotId] = ICCID_STRING_FOR_NO_SIM;
-                    Logd("Query IccId fail: " + ar.exception);
-                }
-                Logd("sIccId[" + slotId + "] = " + sIccId[slotId]);
-                If (IsAllIccIdQueryDone() && sNeedUpdate) {
-                    UpdateSimInfoByIccId();
-                }
-                break;
-            case EVENT_ICC_CHANGED:
-                Integer cardIndex = new Integer(PhoneConstants.DEFAULT_CARD_INDEX);
-                If (ar.result != NULL) {
-                    cardIndex = (Integer) ar.result;
-                } else {
-                    Rlog->E(LOG_TAG, "Error: Invalid card index EVENT_ICC_CHANGED ");
-                    return;
-                }
-                UpdateIccAvailability(cardIndex);
-                break;
-            case EVENT_STACK_READY:
-                Logd("EVENT_STACK_READY" );
-                If (IsAllIccIdQueryDone() && PROJECT_SIM_NUM > 1) {
-                    SubscriptionHelper->GetInstance()->UpdateSubActivation(sInsertSimState, TRUE);
-                }
-                break;
-            default:
-                Logd("Unknown msg:" + msg.what);
-        }
-    }
-
-    private void UpdateIccAvailability(Int32 slotId) {
-        If (NULL == mUiccController) {
-            return;
-        }
-        SubscriptionHelper subHelper = SubscriptionHelper->GetInstance();
-        Logd("updateIccAvailability: Enter, slotId " + slotId);
-        If (PROJECT_SIM_NUM > 1 && !subHelper->ProceedToHandleIccEvent(slotId)) {
-            Logd("updateIccAvailability: radio is OFF/unavailable, ignore ");
-            If (!subHelper->IsApmSIMNotPwdn()) {
-                // set the iccid to NULL so that once SIM card detected
-                //  ICCID will be read from the card again.
-                sIccId[slotId] = NULL;
-            }
-            return;
-        }
-
-        CardState newState = CardState.CARDSTATE_ABSENT;
-        UiccCard newCard = mUiccController->GetUiccCard(slotId);
-        If (newCard != NULL) {
-            newState = newCard->GetCardState();
-        }
-        CardState oldState = sCardState[slotId];
-        sCardState[slotId] = newState;
-        Logd("Slot[" + slotId + "]: New Card State = "
-                + newState + " " + "Old Card State = " + oldState);
-        If (!newState->IsCardPresent()) {
-            //Card moved to ABSENT State
-            If (sIccId[slotId] != NULL && !sIccId[slotId].Equals(ICCID_STRING_FOR_NO_SIM)) {
-                Logd("SIM" + (slotId + 1) + " hot plug out");
-                sNeedUpdate = TRUE;
-            }
-            sFh[slotId] = NULL;
-            sIccId[slotId] = ICCID_STRING_FOR_NO_SIM;
-            If (IsAllIccIdQueryDone() && sNeedUpdate) {
-                UpdateSimInfoByIccId();
-            }
-        } else If (!oldState->IsCardPresent() && newState->IsCardPresent()) {
-            // Card moved to PRESENT State.
-            If (sIccId[slotId] != NULL && sIccId[slotId].Equals(ICCID_STRING_FOR_NO_SIM)) {
-                Logd("SIM" + (slotId + 1) + " hot plug in");
-                sIccId[slotId] = NULL;
-                sNeedUpdate = TRUE;
-            }
-            QueryIccId(slotId);
-        } else If (oldState->IsCardPresent() && newState->IsCardPresent() &&
-                (!subHelper->IsApmSIMNotPwdn()) && (sIccId[slotId] == NULL)) {
-            Logd("SIM" + (slotId + 1) + " powered up from APM ");
-            sFh[slotId] = NULL;
-            sNeedUpdate = TRUE;
-            QueryIccId(slotId);
-        }
-    }
-
-    private void QueryIccId(Int32 slotId) {
-        Logd("queryIccId: slotid=" + slotId);
-        If (sFh[slotId] == NULL) {
-            Logd("Getting IccFileHandler");
-
-            UiccCardApplication validApp = NULL;
-            UiccCard uiccCard = mUiccController->GetUiccCard(slotId);
-            Int32 numApps = uiccCard->GetNumApplications();
-            For (Int32 i = 0; i < numApps; i++) {
-                UiccCardApplication app = uiccCard->GetApplicationIndex(i);
-                If (app != NULL && app->GetType() != AppType.APPTYPE_UNKNOWN) {
-                    validApp = app;
-                    break;
-                }
-            }
-            If (validApp != NULL) sFh[slotId] = validApp->GetIccFileHandler();
-        }
-
-        If (sFh[slotId] != NULL) {
-            String iccId = sIccId[slotId];
-            If (iccId == NULL) {
-                Logd("Querying IccId");
-                sFh[slotId].LoadEFTransparent(IccConstants.EF_ICCID, ObtainMessage(EncodeEventId(EVENT_QUERY_ICCID_DONE, slotId)));
-            } else {
-                Logd("NOT Querying IccId its already set sIccid[" + slotId + "]=" + iccId);
-            }
-        } else {
-            //Reset to CardState to ABSENT so that on next EVENT_ICC_CHANGED, ICCID can be read.
-            sCardState[slotId] = CardState.CARDSTATE_ABSENT;
-            Logd("sFh[" + slotId + "] is NULL, SIM not inserted");
-        }
-    }
-
-    CARAPI UpdateSubIdForNV(Int32 slotId) {
-        sIccId[slotId] = ICCID_STRING_FOR_NV;
-        sNeedUpdate = TRUE;
-        Logd("[updateSubIdForNV]+ Start");
-        If (IsAllIccIdQueryDone()) {
-            Logd("[updateSubIdForNV]+ updating");
-            UpdateSimInfoByIccId();
-            isNVSubAvailable = TRUE;
-        }
-    }
-
-    synchronized CARAPI UpdateSimInfoByIccId() {
-        Logd("[updateSimInfoByIccId]+ Start");
-        sNeedUpdate = FALSE;
-
-        SubscriptionManager->ClearSubInfo();
-
-        For (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
-            sInsertSimState[i] = SIM_NOT_CHANGE;
-        }
-
-        Int32 insertedSimCount = PROJECT_SIM_NUM;
-        For (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
-            If (ICCID_STRING_FOR_NO_SIM->Equals(sIccId[i])) {
-                insertedSimCount--;
-                sInsertSimState[i] = SIM_NOT_INSERT;
-            }
-        }
-        Logd("insertedSimCount = " + insertedSimCount);
-
-        Int32 index = 0;
-        For (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
-            If (sInsertSimState[i] == SIM_NOT_INSERT) {
-                continue;
-            }
-            index = 2;
-            For (Int32 j = i + 1; j < PROJECT_SIM_NUM; j++) {
-                If (sInsertSimState[j] == SIM_NOT_CHANGE && sIccId[i].Equals(sIccId[j])) {
-                    sInsertSimState[i] = 1;
-                    sInsertSimState[j] = index;
-                    index++;
-                }
-            }
-        }
-
-        ContentResolver contentResolver = sContext->GetContentResolver();
-        String[] oldIccId = new String[PROJECT_SIM_NUM];
-        For (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
-            oldIccId[i] = NULL;
-            List<SubInfoRecord> oldSubInfo =
-                    SubscriptionController->GetInstance()->GetSubInfoUsingSlotIdWithCheck(i, FALSE);
-            If (oldSubInfo != NULL) {
-                oldIccId[i] = oldSubInfo->Get(0).iccId;
-                Logd("oldSubId = " + oldSubInfo->Get(0).subId);
-                If (sInsertSimState[i] == SIM_NOT_CHANGE && !sIccId[i].Equals(oldIccId[i])) {
-                    sInsertSimState[i] = SIM_CHANGED;
-                }
-                If (sInsertSimState[i] != SIM_NOT_CHANGE) {
-                    ContentValues value = new ContentValues(1);
-                    value->Put(SubscriptionManager.SIM_ID, SubscriptionManager.INVALID_SLOT_ID);
-                    contentResolver->Update(SubscriptionManager.CONTENT_URI, value,
-                            SubscriptionManager._ID + "="
-                            + Long->ToString(oldSubInfo->Get(0).subId), NULL);
-                }
-            } else {
-                If (sInsertSimState[i] == SIM_NOT_CHANGE) {
-                    // no SIM inserted last time, but there is one SIM inserted now
-                    sInsertSimState[i] = SIM_CHANGED;
-                }
-                oldIccId[i] = ICCID_STRING_FOR_NO_SIM;
-                Logd("No SIM in slot " + i + " last time");
-            }
-        }
-
-        For (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
-            Logd("oldIccId[" + i + "] = " + oldIccId[i] + ", sIccId[" + i + "] = " + sIccId[i]);
-        }
-
-        //check if the inserted SIM is new SIM
-        Int32 nNewCardCount = 0;
-        Int32 nNewSimStatus = 0;
-        For (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
-            If (sInsertSimState[i] == SIM_NOT_INSERT) {
-                Logd("No SIM inserted in slot " + i + " this time");
-            } else {
-                If (sInsertSimState[i] > 0) {
-                    //some special SIMs may have the same IccIds, add suffix to distinguish them
-                    //FIXME: addSubInfoRecord can return an error.
-                    SubscriptionManager->AddSubInfoRecord(sIccId[i]
-                            + Integer->ToString(sInsertSimState[i]), i);
-                    Logd("SUB" + (i + 1) + " has invalid IccId");
-                } else /*If (sInsertSimState[i] != SIM_NOT_INSERT)*/ {
-                    SubscriptionManager->AddSubInfoRecord(sIccId[i], i);
-                }
-                If (IsNewSim(sIccId[i], oldIccId)) {
-                    nNewCardCount++;
-                    Switch (i) {
-                        case PhoneConstants.SUB1:
-                            nNewSimStatus |= STATUS_SIM1_INSERTED;
-                            break;
-                        case PhoneConstants.SUB2:
-                            nNewSimStatus |= STATUS_SIM2_INSERTED;
-                            break;
-                        case PhoneConstants.SUB3:
-                            nNewSimStatus |= STATUS_SIM3_INSERTED;
-                            break;
-                        //case PhoneConstants.SUB3:
-                        //    nNewSimStatus |= STATUS_SIM4_INSERTED;
-                        //    break;
-                    }
-
-                    sInsertSimState[i] = SIM_NEW;
-                }
-            }
-        }
-
-        For (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
-            If (sInsertSimState[i] == SIM_CHANGED) {
-                sInsertSimState[i] = SIM_REPOSITION;
-            }
-        }
-        SubscriptionHelper->GetInstance()->UpdateNwMode();
-        If (ModemStackController->GetInstance()->IsStackReady() && PROJECT_SIM_NUM > 1) {
-            SubscriptionHelper->GetInstance()->UpdateSubActivation(sInsertSimState, FALSE);
-        }
-
-        List<SubInfoRecord> subInfos = SubscriptionManager->GetActiveSubInfoList();
-        Int32 nSubCount = (subInfos == NULL) ? 0 : subInfos->Size();
-        Logd("nSubCount = " + nSubCount);
-        For (Int32 i=0; i<nSubCount; i++) {
-            SubInfoRecord temp = subInfos->Get(i);
-
-            String msisdn = TelephonyManager->GetDefault()->GetLine1NumberForSubscriber(temp.subId);
-
-            If (msisdn != NULL) {
-                ContentValues value = new ContentValues(1);
-                value->Put(SubscriptionManager.NUMBER, msisdn);
-                contentResolver->Update(SubscriptionManager.CONTENT_URI, value,
-                        SubscriptionManager._ID + "=" + Long->ToString(temp.subId), NULL);
-            }
-        }
-
-        // TRUE if any slot has no SIM this time, but has SIM last time
-        Boolean hasSimRemoved = FALSE;
-        For (Int32 i=0; i < PROJECT_SIM_NUM; i++) {
-            If (sIccId[i] != NULL && sIccId[i].Equals(ICCID_STRING_FOR_NO_SIM)
-                    && !oldIccId[i].Equals("")) {
-                hasSimRemoved = TRUE;
-                break;
-            }
-        }
-
-        If (nNewCardCount == 0) {
-            Int32 i;
-            If (hasSimRemoved) {
-                // no new SIM, at least one SIM is removed, check if any SIM is repositioned first
-                For (i=0; i < PROJECT_SIM_NUM; i++) {
-                    If (sInsertSimState[i] == SIM_REPOSITION) {
-                        Logd("No new SIM detected and SIM repositioned");
-                        SetUpdatedData(SubscriptionManager.EXTRA_VALUE_REPOSITION_SIM,
-                                nSubCount, nNewSimStatus);
-                        break;
-                    }
-                }
-                If (i == PROJECT_SIM_NUM) {
-                    // no new SIM, no SIM is repositioned => at least one SIM is removed
-                    Logd("No new SIM detected and SIM removed");
-                    SetUpdatedData(SubscriptionManager.EXTRA_VALUE_REMOVE_SIM,
-                            nSubCount, nNewSimStatus);
-                }
-            } else {
-                // no SIM is removed, no new SIM, just check if any SIM is repositioned
-                For (i=0; i< PROJECT_SIM_NUM; i++) {
-                    If (sInsertSimState[i] == SIM_REPOSITION) {
-                        Logd("No new SIM detected and SIM repositioned");
-                        SetUpdatedData(SubscriptionManager.EXTRA_VALUE_REPOSITION_SIM,
-                                nSubCount, nNewSimStatus);
-                        break;
-                    }
-                }
-                If (i == PROJECT_SIM_NUM) {
-                    // all status remain unchanged
-                    Logd("[updateSimInfoByIccId] All SIM inserted into the same slot");
-                    SetUpdatedData(SubscriptionManager.EXTRA_VALUE_NOCHANGE,
-                            nSubCount, nNewSimStatus);
-                }
-            }
-        } else {
-            Logd("New SIM detected");
-            SetUpdatedData(SubscriptionManager.EXTRA_VALUE_NEW_SIM, nSubCount, nNewSimStatus);
-        }
-
-        Logd("[updateSimInfoByIccId]- SimInfo update complete");
-    }
-
-    private static void SetUpdatedData(Int32 detectedType, Int32 subCount, Int32 newSimStatus) {
-
-        Intent intent = new Intent(TelephonyIntents.ACTION_SUBINFO_RECORD_UPDATED);
-
-        Logd("[setUpdatedData]+ ");
-
-        If (detectedType == SubscriptionManager.EXTRA_VALUE_NEW_SIM ) {
-            intent->PutExtra(SubscriptionManager.INTENT_KEY_DETECT_STATUS,
-                    SubscriptionManager.EXTRA_VALUE_NEW_SIM);
-            intent->PutExtra(SubscriptionManager.INTENT_KEY_SIM_COUNT, subCount);
-            intent->PutExtra(SubscriptionManager.INTENT_KEY_NEW_SIM_SLOT, newSimStatus);
-        } else If (detectedType == SubscriptionManager.EXTRA_VALUE_REPOSITION_SIM) {
-            intent->PutExtra(SubscriptionManager.INTENT_KEY_DETECT_STATUS,
-                    SubscriptionManager.EXTRA_VALUE_REPOSITION_SIM);
-            intent->PutExtra(SubscriptionManager.INTENT_KEY_SIM_COUNT, subCount);
-        } else If (detectedType == SubscriptionManager.EXTRA_VALUE_REMOVE_SIM) {
-            intent->PutExtra(SubscriptionManager.INTENT_KEY_DETECT_STATUS,
-                    SubscriptionManager.EXTRA_VALUE_REMOVE_SIM);
-            intent->PutExtra(SubscriptionManager.INTENT_KEY_SIM_COUNT, subCount);
-        } else If (detectedType == SubscriptionManager.EXTRA_VALUE_NOCHANGE) {
-            intent->PutExtra(SubscriptionManager.INTENT_KEY_DETECT_STATUS,
-                    SubscriptionManager.EXTRA_VALUE_NOCHANGE);
-        }
-
-        Logd("broadcast intent ACTION_SUBINFO_RECORD_UPDATED : [" + detectedType + ", "
-                + subCount + ", " + newSimStatus+ "]");
-        ActivityManagerNative->BroadcastStickyIntent(intent, READ_PHONE_STATE, UserHandle.USER_ALL);
-        Logd("[setUpdatedData]- ");
-    }
-
-    private static Boolean IsNewSim(String iccId, String[] oldIccId) {
-        Boolean newSim = TRUE;
-        For(Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
-            If(iccId->Equals(oldIccId[i])) {
-                newSim = FALSE;
-                break;
-            }
-        }
-        Logd("newSim = " + newSim);
-
-        return newSim;
-    }
-
-    CARAPI Dispose() {
-        Logd("[dispose]");
-        sContext->UnregisterReceiver(sReceiver);
-    }
-
-    private static void Logd(String message) {
-        Rlog->D(LOG_TAG, "[SubInfoRecordUpdater]" + message);
+    } else {
+        //Reset to CardState to ABSENT so that on next EVENT_ICC_CHANGED, ICCID can be read.
+        (*sCardState)[slotId] = Elastos::Droid::Internal::Telephony::Uicc::CARDSTATE_ABSENT;
+        Logd(String("sFh[") + IntegralToString::ToString(slotId) + String("] is NULL, SIM not inserted"));
     }
 }
 
+CARAPI SubInfoRecordUpdater::UpdateSubIdForNV(
+    /* [in] */ Int32 slotId)
+{
+    (*sIccId)[slotId] = ICCID_STRING_FOR_NV;
+    sNeedUpdate = TRUE;
+    Logd(String("[updateSubIdForNV]+ Start"));
+    if (IsAllIccIdQueryDone()) {
+        Logd(String("[updateSubIdForNV]+ updating"));
+        UpdateSimInfoByIccId();
+        isNVSubAvailable = TRUE;
+    }
+    return NOERROR;
+}
+
+//TODO
+//synchronized
+CARAPI SubInfoRecordUpdater::UpdateSimInfoByIccId()
+{
+    Logd(String("[updateSimInfoByIccId]+ Start"));
+    sNeedUpdate = FALSE;
+
+    SubscriptionManager::ClearSubInfo();
+
+    for (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
+        (*sInsertSimState)[i] = SIM_NOT_CHANGE;
+    }
+
+    Int32 insertedSimCount = PROJECT_SIM_NUM;
+    for (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
+        if (ICCID_STRING_FOR_NO_SIM.Equals((*sIccId)[i])) {
+            insertedSimCount--;
+            (*sInsertSimState)[i] = SIM_NOT_INSERT;
+        }
+    }
+    Logd(String("insertedSimCount = ") + IntegralToString::ToString(insertedSimCount));
+
+    Int32 index = 0;
+    for (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
+        if ((*sInsertSimState)[i] == SIM_NOT_INSERT) {
+            continue;
+        }
+        index = 2;
+        for (Int32 j = i + 1; j < PROJECT_SIM_NUM; j++) {
+            if ((*sInsertSimState)[j] == SIM_NOT_CHANGE && (*sIccId)[i].Equals((*sIccId)[j])) {
+                (*sInsertSimState)[i] = 1;
+                (*sInsertSimState)[j] = index;
+                index++;
+            }
+        }
+    }
+
+    AutoPtr<IContentResolver> contentResolver;
+    sContext->GetContentResolver((IContentResolver**)&contentResolver);
+    AutoPtr<ArrayOf<String> > oldIccId = ArrayOf<String>::Alloc(PROJECT_SIM_NUM);
+    for (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
+        assert(0 && "TODO");
+//        (*oldIccId)[i] = NULL;
+//        List<SubInfoRecord> oldSubInfo =
+//                SubscriptionController->GetInstance()->GetSubInfoUsingSlotIdWithCheck(i, FALSE);
+//        if (oldSubInfo != NULL) {
+//            (*oldIccId)[i] = oldSubInfo->Get(0).iccId;
+//            Logd(String("oldSubId = ") + oldSubInfo->Get(0).subId);
+//            if ((*sInsertSimState)[i] == SIM_NOT_CHANGE && !(*sIccId)[i].Equals((*oldIccId)[i])) {
+//                (*sInsertSimState)[i] = SIM_CHANGED;
+//            }
+//            if ((*sInsertSimState)[i] != SIM_NOT_CHANGE) {
+//                AutoPtr<IContentValues> value
+//                CContentValues::New(1, (IContentValues**)&value);
+//                value->Put(ISubscriptionManager::SIM_ID, ISubscriptionManager::INVALID_SLOT_ID);
+//                contentResolver->Update(ISubscriptionManager::CONTENT_URI, value,
+//                        ISubscriptionManager::_ID + "="
+//                        + IntegralToString::ToString(oldSubInfo->Get(0).subId), NULL);
+//            }
+//        } else {
+//            if ((*sInsertSimState)[i] == SIM_NOT_CHANGE) {
+//                // no SIM inserted last time, but there is one SIM inserted now
+//                (*sInsertSimState)[i] = SIM_CHANGED;
+//            }
+//            (*oldIccId)[i] = ICCID_STRING_FOR_NO_SIM;
+//            Logd(String("No SIM in slot ") + IntegralToString::ToString(i) + String(" last time"));
+//        }
+    }
+
+    for (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
+        Logd(String("oldIccId[") + IntegralToString::ToString(i) + String("] = ") + \
+            (*oldIccId)[i] + String(", (*sIccId)[") + IntegralToString::ToString(i) + String("] = ") + (*sIccId)[i]);
+    }
+
+    //check if the inserted SIM is new SIM
+    Int32 nNewCardCount = 0;
+    Int32 nNewSimStatus = 0;
+    for (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
+        if ((*sInsertSimState)[i] == SIM_NOT_INSERT) {
+            Logd(String("No SIM inserted in slot ") + IntegralToString::ToString(i) + String(" this time"));
+        } else {
+            AutoPtr<IUri> uri;
+            if ((*sInsertSimState)[i] > 0) {
+                //some special SIMs may have the same IccIds, add suffix to distinguish them
+                //FIXME: addSubInfoRecord can return an error.
+                SubscriptionManager::AddSubInfoRecord((*sIccId)[i]
+                        + IntegralToString::ToString((*sInsertSimState)[i]), i, (IUri**)&uri);
+                Logd(String("SUB") + IntegralToString::ToString(i + 1) + String(" has invalid IccId"));
+            } else /*if ((*sInsertSimState)[i] != SIM_NOT_INSERT)*/ {
+                SubscriptionManager::AddSubInfoRecord((*sIccId)[i], i, (IUri**)&uri);
+            }
+            if (IsNewSim((*sIccId)[i], oldIccId.Get())) {
+                nNewCardCount++;
+                switch (i) {
+                    case IPhoneConstants::SUB1:
+                        nNewSimStatus |= STATUS_SIM1_INSERTED;
+                        break;
+                    case IPhoneConstants::SUB2:
+                        nNewSimStatus |= STATUS_SIM2_INSERTED;
+                        break;
+                    case IPhoneConstants::SUB3:
+                        nNewSimStatus |= STATUS_SIM3_INSERTED;
+                        break;
+                    //case IPhoneConstants::SUB3:
+                    //    nNewSimStatus |= STATUS_SIM4_INSERTED;
+                    //    break;
+                }
+
+                (*sInsertSimState)[i] = SIM_NEW;
+            }
+        }
+    }
+
+    for (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
+        if ((*sInsertSimState)[i] == SIM_CHANGED) {
+            (*sInsertSimState)[i] = SIM_REPOSITION;
+        }
+    }
+    assert(0 && "TODO");
+//    SubscriptionHelper->GetInstance()->UpdateNwMode();
+//    if (ModemStackController->GetInstance()->IsStackReady() && PROJECT_SIM_NUM > 1) {
+//        SubscriptionHelper->GetInstance()->UpdateSubActivation(sInsertSimState, FALSE);
+//    }
+
+//    List<SubInfoRecord> subInfos = SubscriptionManager::GetActiveSubInfoList();
+    Int32 nSubCount;// = (subInfos == NULL) ? 0 : subInfos->Size();
+//    Logd(String("nSubCount = ") + IntegralToString::ToString(nSubCount));
+//    AutoPtr<ITelephonyManager> defaultTelephonyMgr;
+//    sTelephonyManagerHelper->GetDefault((ITelephonyManager**)&defaultTelephonyMgr);
+//    for (Int32 i = 0; i < nSubCount; i++) {
+//        AutoPtr<ISubInfoRecord> temp = subInfos->Get(i);
+//
+//        String msisdn;
+//        defaultTelephonyMgr->GetLine1NumberForSubscriber(temp.subId, &msisdn);
+//
+//        if (msisdn != NULL) {
+//            AutoPtr<IContentValues> value
+//            CContentValues::New(1, (IContentValues**)&value);
+//            value->Put(ISubscriptionManager::NUMBER, msisdn);
+//            contentResolver->Update(ISubscriptionManager::CONTENT_URI, value,
+//                    ISubscriptionManager::_ID + "=" + IntegralToString::ToString(temp.subId), NULL);
+//        }
+//    }
+
+    // TRUE if any slot has no SIM this time, but has SIM last time
+    Boolean hasSimRemoved = FALSE;
+    for (Int32 i=0; i < PROJECT_SIM_NUM; i++) {
+        if ((*sIccId)[i] != NULL && (*sIccId)[i].Equals(ICCID_STRING_FOR_NO_SIM)
+                && !(*oldIccId)[i].Equals("")) {
+            hasSimRemoved = TRUE;
+            break;
+        }
+    }
+
+    if (nNewCardCount == 0) {
+        Int32 i;
+        if (hasSimRemoved) {
+            // no new SIM, at least one SIM is removed, check if any SIM is repositioned first
+            for (i=0; i < PROJECT_SIM_NUM; i++) {
+                if ((*sInsertSimState)[i] == SIM_REPOSITION) {
+                    Logd(String("No new SIM detected and SIM repositioned"));
+                    SetUpdatedData(ISubscriptionManager::EXTRA_VALUE_REPOSITION_SIM,
+                            nSubCount, nNewSimStatus);
+                    break;
+                }
+            }
+            if (i == PROJECT_SIM_NUM) {
+                // no new SIM, no SIM is repositioned => at least one SIM is removed
+                Logd(String("No new SIM detected and SIM removed"));
+                SetUpdatedData(ISubscriptionManager::EXTRA_VALUE_REMOVE_SIM,
+                        nSubCount, nNewSimStatus);
+            }
+        } else {
+            // no SIM is removed, no new SIM, just check if any SIM is repositioned
+            for (i=0; i< PROJECT_SIM_NUM; i++) {
+                if ((*sInsertSimState)[i] == SIM_REPOSITION) {
+                    Logd(String("No new SIM detected and SIM repositioned"));
+                    SetUpdatedData(ISubscriptionManager::EXTRA_VALUE_REPOSITION_SIM,
+                            nSubCount, nNewSimStatus);
+                    break;
+                }
+            }
+            if (i == PROJECT_SIM_NUM) {
+                // all status remain unchanged
+                Logd(String("[updateSimInfoByIccId] All SIM inserted into the same slot"));
+                SetUpdatedData(ISubscriptionManager::EXTRA_VALUE_NOCHANGE,
+                        nSubCount, nNewSimStatus);
+            }
+        }
+    } else {
+        Logd(String("New SIM detected"));
+        SetUpdatedData(ISubscriptionManager::EXTRA_VALUE_NEW_SIM, nSubCount, nNewSimStatus);
+    }
+
+    Logd(String("[updateSimInfoByIccId]- SimInfo update complete"));
+    return NOERROR;
+}
+
+void SubInfoRecordUpdater::SetUpdatedData(
+    /* [in] */ Int32 detectedType,
+    /* [in] */ Int32 subCount,
+    /* [in] */ Int32 newSimStatus)
+{
+    AutoPtr<IIntent> intent;
+    CIntent::New(ITelephonyIntents::ACTION_SUBINFO_RECORD_UPDATED, (IIntent**)&intent);
+
+    Logd(String("[setUpdatedData]+ "));
+
+    if (detectedType == ISubscriptionManager::EXTRA_VALUE_NEW_SIM ) {
+        intent->PutExtra(ISubscriptionManager::INTENT_KEY_DETECT_STATUS,
+                ISubscriptionManager::EXTRA_VALUE_NEW_SIM);
+        intent->PutExtra(ISubscriptionManager::INTENT_KEY_SIM_COUNT, subCount);
+        intent->PutExtra(ISubscriptionManager::INTENT_KEY_NEW_SIM_SLOT, newSimStatus);
+    } else if (detectedType == ISubscriptionManager::EXTRA_VALUE_REPOSITION_SIM) {
+        intent->PutExtra(ISubscriptionManager::INTENT_KEY_DETECT_STATUS,
+                ISubscriptionManager::EXTRA_VALUE_REPOSITION_SIM);
+        intent->PutExtra(ISubscriptionManager::INTENT_KEY_SIM_COUNT, subCount);
+    } else if (detectedType == ISubscriptionManager::EXTRA_VALUE_REMOVE_SIM) {
+        intent->PutExtra(ISubscriptionManager::INTENT_KEY_DETECT_STATUS,
+                ISubscriptionManager::EXTRA_VALUE_REMOVE_SIM);
+        intent->PutExtra(ISubscriptionManager::INTENT_KEY_SIM_COUNT, subCount);
+    } else if (detectedType == ISubscriptionManager::EXTRA_VALUE_NOCHANGE) {
+        intent->PutExtra(ISubscriptionManager::INTENT_KEY_DETECT_STATUS,
+                ISubscriptionManager::EXTRA_VALUE_NOCHANGE);
+    }
+
+    Logd(String("broadcast intent ACTION_SUBINFO_RECORD_UPDATED : [") + IntegralToString::ToString(detectedType) + String(", ")
+            + IntegralToString::ToString(subCount) + String(", ") + IntegralToString::ToString(newSimStatus) + String("]"));
+
+    ActivityManagerNative::BroadcastStickyIntent(intent, Manifest::permission::READ_PHONE_STATE, IUserHandle::USER_ALL);
+    Logd(String("[setUpdatedData]- "));
+}
+
+Boolean SubInfoRecordUpdater::IsNewSim(
+    /* [in] */ const String& iccId,
+    /* [in] */ ArrayOf<String>* oldIccId)
+{
+    Boolean newSim = TRUE;
+    for (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
+        if(iccId.Equals((*oldIccId)[i])) {
+            newSim = FALSE;
+            break;
+        }
+    }
+    Logd(String("newSim = ") + IntegralToString::ToString(newSim));
+
+    return newSim;
+}
+
+CARAPI SubInfoRecordUpdater::Dispose()
+{
+    Logd(String("[dispose]"));
+    return sContext->UnregisterReceiver(sReceiver);
+}
+
+void SubInfoRecordUpdater::Logd(
+    /* [in] */ const String& message)
+{
+//TODO
+//    Rlog->D(LOGTAG, "[SubInfoRecordUpdater]" + message);
+}
+
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos
