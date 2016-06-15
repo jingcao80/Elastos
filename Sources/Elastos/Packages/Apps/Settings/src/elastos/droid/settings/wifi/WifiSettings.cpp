@@ -604,7 +604,7 @@ void WifiSettings::AddOptionsMenuItems(
 
     AutoPtr< ArrayOf<Int32> > args = ArrayOf<Int32>::Alloc(2);
     (*args)[0] = R::attr::ic_menu_add;
-    (*args)[0] = R::attr::ic_wps;
+    (*args)[1] = R::attr::ic_wps;
 
     AutoPtr<ITypedArray> ta;
     theme->ObtainStyledAttributes(args, (ITypedArray**)&ta);
@@ -711,11 +711,11 @@ ECode WifiSettings::OnOptionsItemSelected(
                 GetActivity((IActivity**)&activity);
                 if (ISettingsActivity::Probe(activity) != NULL) {
                     ((SettingsActivity*)ISettingsActivity::Probe(activity))->StartPreferencePanel(
-                            String("Elastos.Droid.Settings.Wifi.SavedAccessPointsWifiSettings"), NULL,
+                            String("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings"), NULL,
                             R::string::wifi_saved_access_points_titlebar, NULL, this, 0);
                 }
                 else {
-                    StartFragment(this, String("Elastos.Droid.Settings.Wifi.SavedAccessPointsWifiSettings"),
+                    StartFragment(this, String("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings"),
                             R::string::wifi_saved_access_points_titlebar,
                             -1 /* Do not request a result */, NULL);
                 }
@@ -727,11 +727,11 @@ ECode WifiSettings::OnOptionsItemSelected(
                 GetActivity((IActivity**)&activity);
                 if (ISettingsActivity::Probe(activity) != NULL) {
                     ((SettingsActivity*)ISettingsActivity::Probe(activity))->StartPreferencePanel(
-                            String("Elastos.Droid.Settings.Wifi.AdvancedWifiSettings"), NULL,
+                            String("Elastos.Droid.Settings.Wifi.CAdvancedWifiSettings"), NULL,
                             R::string::wifi_advanced_titlebar, NULL, this, 0);
                 }
                 else {
-                    StartFragment(this, String("Elastos.Droid.Settings.Wifi.AdvancedWifiSettings"),
+                    StartFragment(this, String("Elastos.Droid.Settings.Wifi.CAdvancedWifiSettings"),
                             R::string::wifi_advanced_titlebar, -1 /* Do not request a results */,
                             NULL);
                 }
@@ -1236,10 +1236,9 @@ AutoPtr<IList> WifiSettings::ConstructAccessPoints(
             configs->Get(i, (IInterface**)&obj);
             AutoPtr<IWifiConfiguration> config = IWifiConfiguration::Probe(obj);
             Boolean selfAdded;
-            config->GetSelfAdded(&selfAdded);
             Int32 numAssociation;
-            config->GetNumAssociation(&numAssociation);
-            if (selfAdded && numAssociation == 0) {
+            if ((config->GetSelfAdded(&selfAdded), selfAdded) &&
+                    (config->GetNumAssociation(&numAssociation), numAssociation) == 0) {
                 continue;
             }
 
@@ -1267,9 +1266,8 @@ AutoPtr<IList> WifiSettings::ConstructAccessPoints(
             String SSID;
             result->GetSSID(&SSID);
             String capabilities;
-            result->GetCapabilities(&capabilities);
             if (SSID.IsNull() || SSID.GetLength() == 0 ||
-                    capabilities.Contains("[IBSS]")) {
+                    (result->GetCapabilities(&capabilities), capabilities).Contains("[IBSS]")) {
                 continue;
             }
 

@@ -35,8 +35,8 @@ Boolean WifiPickerActivity::IsValidFragment(
 {
     if (String("Elastos.Droid.Settings.Wifi.CWifiSettings").Equals(fragmentName)
             || String("Elastos.Droid.Settings.Wifi.P2p.WifiP2pSettings").Equals(fragmentName)
-            || String("Elastos.Droid.Settings.Wifi.SavedAccessPointsWifiSettings").Equals(fragmentName)
-            || String("Elastos.Droid.Settings.Wifi.AdvancedWifiSettings").Equals(fragmentName)) return TRUE;
+            || String("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings").Equals(fragmentName)
+            || String("Elastos.Droid.Settings.Wifi.CAdvancedWifiSettings").Equals(fragmentName)) return TRUE;
     return FALSE;
 }
 

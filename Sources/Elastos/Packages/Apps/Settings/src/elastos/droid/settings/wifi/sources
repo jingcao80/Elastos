@@ -5,6 +5,8 @@ INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
 SOURCES = AccessPoint.cpp
+SOURCES += AdvancedWifiSettings.cpp
+SOURCES += SavedAccessPointsWifiSettings.cpp
 SOURCES += Summary.cpp
 SOURCES += WifiConfigController.cpp
 SOURCES += WifiConfigUiForSetupWizardXL.cpp

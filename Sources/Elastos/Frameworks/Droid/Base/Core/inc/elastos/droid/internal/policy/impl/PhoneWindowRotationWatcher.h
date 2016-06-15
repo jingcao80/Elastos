@@ -1,19 +1,18 @@
 #ifndef __ELASTOS_DROID_INTERNAL_POLICY_IMPL_PHONEWINDOWROTATIONWATCHER_H__
 #define __ELASTOS_DROID_INTERNAL_POLICY_IMPL_PHONEWINDOWROTATIONWATCHER_H__
 
+#include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/core/Object.h>
-//#include "elastos/droid/internal/policy/impl/PhoneWindow.h"
-#include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::View::IRotationWatcher;
 using Elastos::Core::IRunnable;
-using Elastos::Utility::Etl::List;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -44,16 +43,12 @@ private:
         PhoneWindowRotationWatcher* mOwner;
     };
 
-
 public:
     CAR_INTERFACE_DECL()
 
     PhoneWindowRotationWatcher();
 
     CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ IPhoneWindow* owner);
 
     // @Override
     CARAPI OnRotationChanged(
@@ -72,11 +67,14 @@ public:
 private:
     AutoPtr<IHandler> mHandler;
     /*const*/ AutoPtr<IRunnable> mRotationChanged;
-    ///*const*/ AutoPtr< ArrayList< AutoPtr< IWeakReference<PhoneWindow> > > > mWindows;
+
+    // private final ArrayList<WeakReference<PhoneWindow>> mWindows =
+    //         new ArrayList<WeakReference<PhoneWindow>>();
     //store IPhoneWindow
-    List<AutoPtr<IWeakReference> > mWindows;
+    AutoPtr<IArrayList> mWindows;
     Boolean mIsWatching;
     IPhoneWindow* mOwner;
+    Object* mWindowsLock;
 };
 
 } // namespace Impl

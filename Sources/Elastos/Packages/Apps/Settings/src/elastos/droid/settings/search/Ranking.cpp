@@ -58,10 +58,10 @@ static AutoPtr<IHashMap> InitsRankMap()
     // Wi-Fi
     InitPut(map, String("Elastos.Droid.Settings.Wifi.CWifiSettings"),
             Ranking::RANK_WIFI);
-    InitPut(map, String("Elastos.Droid.Settings.Wifi.AdvancedWifiSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Wifi.CAdvancedWifiSettings"),
             Ranking::RANK_WIFI);
     InitPut(map,
-            String("Elastos.Droid.Settings.Wifi.SavedAccessPointsWifiSettings"),
+            String("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings"),
             Ranking::RANK_WIFI);
 
     // BT

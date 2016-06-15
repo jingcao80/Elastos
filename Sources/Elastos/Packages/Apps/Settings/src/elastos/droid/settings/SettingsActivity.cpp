@@ -125,8 +125,8 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     AutoPtr< ArrayOf<String> > args = ArrayOf<String>::Alloc(61);
     (*args)[0] = "Elastos.Droid.Settings.WirelessSettings";
     (*args)[1] = "Elastos.Droid.Settings.Wifi.CWifiSettings";
-    (*args)[2] = "Elastos.Droid.Settings.Wifi.AdvancedWifiSettings";
-    (*args)[3] = "Elastos.Droid.Settings.Wifi.SavedAccessPointsWifiSettings";
+    (*args)[2] = "Elastos.Droid.Settings.Wifi.CAdvancedWifiSettings";
+    (*args)[3] = "Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings";
     (*args)[4] = "Elastos.Droid.Settings.Bluetooth.BluetoothSettings";
     (*args)[5] = "Elastos.Droid.Settings.Sim.SimSettings";
     (*args)[6] = "Elastos.Droid.Settings.TetherSettings";
@@ -531,7 +531,7 @@ ECode SettingsActivity::OnCreateOptionsMenu(
         return NOERROR;
     }
 
-    if (mSearchResultsFragment) {
+    if (mSearchResultsFragment != NULL) {
         ((SearchResultsSummary*)mSearchResultsFragment.Get())->SetSearchView(mSearchView);
     }
 

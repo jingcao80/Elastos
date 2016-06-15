@@ -96,7 +96,7 @@ class PhoneWindow
     , public IMenuBuilderCallback
 {
     friend class ViewRootImpl;
-    friend class CPhoneWindowRotationWatcher;
+    friend class PhoneWindowRotationWatcher;
 
 private:
     class SettingsObserver

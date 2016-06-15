@@ -223,7 +223,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="Elastos.Droid.Settings.Wifi.AdvancedWifiSettings" />
+                android:value="Elastos.Droid.Settings.Wifi.CAdvancedWifiSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wifi_settings" />
         </activity>
@@ -239,7 +239,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="Elastos.Droid.Settings.Wifi.SavedAccessPointsSettings" />
+                android:value="Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wifi_settings" />
         </activity>
@@ -258,7 +258,7 @@
         <activity android:name="Elastos.Droid.Settings.Wifi.WifiConfigInfo"
                 android:theme="@style/Theme.SubSettingsDialogWhenLarge"
                 android:taskAffinity="Elastos.Droid.Settings"
-                android:parentActivityName="Elastos.Droid.SettingsCSettings$WifiSettingsActivity">
+                android:parentActivityName="Elastos.Droid.Settings.CSettings$WifiSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEVELOPMENT_PREFERENCE" />

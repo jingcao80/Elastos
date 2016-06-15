@@ -41,10 +41,10 @@ static AutoPtr<IHashMap> InitsResMap()
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_wireless);
 
-    InitPut(map, String("Elastos.Droid.Settings.Wifi.AdvancedWifiSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Wifi.CAdvancedWifiSettings"),
             R::xml::wifi_advanced_settings, R::drawable::ic_settings_wireless);
 
-    InitPut(map, String("Elastos.Droid.Settings.Wifi.SavedAccessPointsWifiSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings"),
             R::xml::wifi_display_saved_access_points,
             R::drawable::ic_settings_wireless);
 

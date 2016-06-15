@@ -173,7 +173,6 @@ module
         interface IDrawableCallback;
         interface IMenuBuilderItemInvoker;
         interface IMenuView;
-        interface IAdapterViewOnItemClickListener;
     }
 
     [local]

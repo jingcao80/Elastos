@@ -24,7 +24,6 @@ class ExpandedMenuView
     , public IExpandedMenuView
     , public IMenuBuilderItemInvoker
     , public IMenuView
-    , public IAdapterViewOnItemClickListener
 {
 private:
     class OnItemClickListener
@@ -35,9 +34,7 @@ private:
         CAR_INTERFACE_DECL()
 
         OnItemClickListener(
-            /* [in] */ ExpandedMenuView* owner)
-            : mOwner(owner)
-        {}
+            /* [in] */ ExpandedMenuView* owner);
 
         CARAPI OnItemClick(
             /* [in] */ IAdapterView* parent,
@@ -79,17 +76,6 @@ public:
         /* [out] */ Int32* animations);
 
 protected:
-    CARAPI OnLayout(
-        /* [in] */ Boolean changed,
-        /* [in] */ Int32 l,
-        /* [in] */ Int32 t,
-        /* [in] */ Int32 r,
-        /* [in] */ Int32 b)
-    {
-        assert(0 && "TODO:delete");
-        return NOERROR;
-    }
-
     //@override
     CARAPI OnDetachedFromWindow();
 

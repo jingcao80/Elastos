@@ -13,7 +13,16 @@ namespace Internal {
 namespace View {
 namespace Menu {
 
+//===============================================================================
+//                  ExpandedMenuView::OnItemClickListener
+//===============================================================================
+
 CAR_INTERFACE_IMPL(ExpandedMenuView::OnItemClickListener, Object, IAdapterViewOnItemClickListener)
+
+ExpandedMenuView::OnItemClickListener::OnItemClickListener(
+    /* [in] */ ExpandedMenuView* owner)
+    : mOwner(owner)
+{}
 
 ECode ExpandedMenuView::OnItemClickListener::OnItemClick(
     /* [in] */ IAdapterView* parent,
@@ -24,8 +33,11 @@ ECode ExpandedMenuView::OnItemClickListener::OnItemClick(
     return mOwner->OnItemClick(parent, v, position, id);
 }
 
-CAR_INTERFACE_IMPL_4(ExpandedMenuView, ListView, IExpandedMenuView, IMenuBuilderItemInvoker,
-    IMenuView, IAdapterViewOnItemClickListener)
+//===============================================================================
+//                  ExpandedMenuView
+//===============================================================================
+
+CAR_INTERFACE_IMPL_3(ExpandedMenuView, ListView, IExpandedMenuView, IMenuBuilderItemInvoker, IMenuView)
 
 ExpandedMenuView::ExpandedMenuView()
     : mAnimations(0)
