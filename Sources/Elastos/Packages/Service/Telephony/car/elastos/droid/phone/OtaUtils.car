@@ -1,0 +1,97 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+    namespace Phone {
+
+    /**
+     * Handles all OTASP Call related logic and UI functionality.
+     * The InCallScreen interacts with this class to perform an OTASP Call.
+     *
+     * OTASP is a CDMA-specific feature:
+     *   OTA or OTASP == Over The Air service provisioning
+     *   SPC == Service Programming Code
+     *   TODO: Include pointer to more detailed documentation.
+     *
+     * TODO: This is Over The Air Service Provisioning (OTASP)
+     *       A better name would be OtaspUtils.java.
+     */
+    interface IOtaUtils {
+        const Int32 OTA_SHOW_ACTIVATION_SCREEN_OFF = 0;
+        const Int32 OTA_SHOW_ACTIVATION_SCREEN_ON = 1;
+        const Int32 OTA_SHOW_LISTENING_SCREEN_OFF =0;
+        const Int32 OTA_SHOW_LISTENING_SCREEN_ON =1;
+        const Int32 OTA_SHOW_ACTIVATE_FAIL_COUNT_OFF = 0;
+        const Int32 OTA_SHOW_ACTIVATE_FAIL_COUNT_THREE = 3;
+        const Int32 OTA_PLAY_SUCCESS_FAILURE_TONE_OFF = 0;
+        const Int32 OTA_PLAY_SUCCESS_FAILURE_TONE_ON = 1;
+
+        // SPC Timeout is 60 seconds
+        public final int OTA_SPC_TIMEOUT = 60;
+        public final int OTA_FAILURE_DIALOG_TIMEOUT = 2;
+
+        // Constants for OTASP-related Intents and intent extras.
+        // Watch out: these must agree with the corresponding constants in
+        // apps/SetupWizard!
+
+        // Intent action to launch an OTASP call.
+        const String ACTION_PERFORM_CDMA_PROVISIONING =
+               "com.android.phone.PERFORM_CDMA_PROVISIONING";
+
+        // Intent action to launch activation on a non-voice capable device
+        const String ACTION_PERFORM_VOICELESS_CDMA_PROVISIONING =
+                "com.android.phone.PERFORM_VOICELESS_CDMA_PROVISIONING";
+
+        // Intent action to display the InCallScreen in the OTASP "activation" state.
+        const String ACTION_DISPLAY_ACTIVATION_SCREEN =
+                "com.android.phone.DISPLAY_ACTIVATION_SCREEN";
+
+        // boolean voiceless provisioning extra that enables a "don't show this again" checkbox
+        // the user can check to never see the activity upon bootup again
+        const String EXTRA_VOICELESS_PROVISIONING_OFFER_DONTSHOW =
+                "com.android.phone.VOICELESS_PROVISIONING_OFFER_DONTSHOW";
+
+        // Activity result codes for the ACTION_PERFORM_CDMA_PROVISIONING intent
+        // (see the InCallScreenShowActivation activity.)
+        //
+        // Note: currently, our caller won't ever actually receive the
+        // RESULT_INTERACTIVE_OTASP_STARTED result code; see comments in
+        // InCallScreenShowActivation.onCreate() for details.
+
+        const Int32 RESULT_INTERACTIVE_OTASP_STARTED = Activity.RESULT_FIRST_USER;
+        const Int32 RESULT_NONINTERACTIVE_OTASP_STARTED = Activity.RESULT_FIRST_USER + 1;
+        const Int32 RESULT_NONINTERACTIVE_OTASP_FAILED = Activity.RESULT_FIRST_USER + 2;
+
+        // Testing: Extra for the ACTION_PERFORM_CDMA_PROVISIONING intent that
+        // allows the caller to manually enable/disable "interactive mode" for
+        // the OTASP call.   Only available in userdebug or eng builds.
+        const String EXTRA_OVERRIDE_INTERACTIVE_MODE =
+                "ota_override_interactive_mode";
+
+        // Extra for the ACTION_PERFORM_CDMA_PROVISIONING intent, holding a
+        // PendingIntent which the phone app can use to send a result code
+        // back to the caller.
+        const String EXTRA_OTASP_RESULT_CODE_PENDING_INTENT =
+                "otasp_result_code_pending_intent";
+
+        // Extra attached to the above PendingIntent that indicates
+        // success or failure.
+        const String EXTRA_OTASP_RESULT_CODE = "otasp_result_code";
+
+        // Extra attached to the above PendingIntent that contains an error code.
+        const String EXTRA_OTASP_ERROR_CODE = "otasp_error_code";
+
+        const Int32 OTASP_UNKNOWN = 0;
+        const Int32 OTASP_USER_SKIPPED = 1;  // Only meaningful with interactive OTASP
+        const Int32 OTASP_SUCCESS = 2;
+        const Int32 OTASP_FAILURE = 3;
+        // failed due to CDMA_OTA_PROVISION_STATUS_SPC_RETRIES_EXCEEDED
+        const Int32 OTASP_FAILURE_SPC_RETRIES = 4;
+    }
+
+    } // namespace Phone
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

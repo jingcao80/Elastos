@@ -1,0 +1,85 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+    namespace Phone {
+
+    /**
+     * Top level "Call settings" UI; see res/xml/call_feature_setting.xml
+     *
+     * This preference screen is the root of the "Call settings" hierarchy available from the Phone
+     * app; the settings here let you control various features related to phone calls (including
+     * voicemail settings, the "Respond via SMS" feature, and others.)  It's used only on
+     * voice-capable phone devices.
+     *
+     * Note that this activity is part of the package com.android.phone, even
+     * though you reach it from the "Phone" app (i.e. DialtactsActivity) which
+     * is from the package com.android.contacts.
+     *
+     * For the "Mobile network settings" screen under the main Settings app,
+     * See {@link MobileNetworkSettings}.
+     *
+     * TODO: Settings should be split into PreferenceFragments where possible (ie. voicemail).
+     *
+     * @see com.android.phone.MobileNetworkSettings
+     */
+    interface ICallFeaturesSetting {
+        /**
+         * Intent action to bring up Voicemail Provider settings.
+         *
+         * @see #IGNORE_PROVIDER_EXTRA
+         */
+        const String ACTION_ADD_VOICEMAIL =
+                "com.android.phone.CallFeaturesSetting.ADD_VOICEMAIL";
+        // intent action sent by this activity to a voice mail provider
+        // to trigger its configuration UI
+        const String ACTION_CONFIGURE_VOICEMAIL =
+                "com.android.phone.CallFeaturesSetting.CONFIGURE_VOICEMAIL";
+        // Extra put in the return from VM provider config containing voicemail number to set
+        const String VM_NUMBER_EXTRA = "com.android.phone.VoicemailNumber";
+        // Extra put in the return from VM provider config containing call forwarding number to set
+        const String FWD_NUMBER_EXTRA = "com.android.phone.ForwardingNumber";
+        // Extra put in the return from VM provider config containing call forwarding number to set
+        const String FWD_NUMBER_TIME_EXTRA = "com.android.phone.ForwardingNumberTime";
+        // If the VM provider returns non null value in this extra we will force the user to
+        // choose another VM provider
+        const String SIGNOUT_EXTRA = "com.android.phone.Signout";
+
+        // Suffix appended to provider key for storing vm number
+        const String VM_NUMBER_TAG = "#VMNumber";
+        // Suffix appended to provider key for storing forwarding settings
+        const String FWD_SETTINGS_TAG = "#FWDSettings";
+        // Suffix appended to forward settings key for storing length of settings array
+        const String FWD_SETTINGS_LENGTH_TAG = "#Length";
+        // Suffix appended to forward settings key for storing an individual setting
+        const String FWD_SETTING_TAG = "#Setting";
+        // Suffixes appended to forward setting key for storing an individual setting properties
+        const String FWD_SETTING_STATUS = "#Status";
+        const String FWD_SETTING_REASON = "#Reason";
+        const String FWD_SETTING_NUMBER = "#Number";
+        const String FWD_SETTING_TIME = "#Time";
+
+        // Key identifying the default vocie mail provider
+        const String DEFAULT_VM_PROVIDER_KEY = "";
+
+        /**
+         * String Extra put into ACTION_ADD_VOICEMAIL call to indicate which provider should be hidden
+         * in the list of providers presented to the user. This allows a provider which is being
+         * disabled (e.g. GV user logging out) to force the user to pick some other provider.
+         */
+        const String IGNORE_PROVIDER_EXTRA = "com.android.phone.ProviderToIgnore";
+
+        const String HAC_KEY = "HACSetting";
+        const String HAC_VAL_ON = "ON";
+        const String HAC_VAL_OFF = "OFF";
+
+        GetFWD_SETTINGS_DONT_TOUCH(
+            [out] ArrayOf<ICallForwardInfo*>** array);
+    }
+
+    } // namespace Phone
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

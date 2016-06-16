@@ -1,0 +1,70 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+    namespace Phone {
+
+    /**
+     * Allowable values for the wake lock code.
+     *   SLEEP means the device can be put to sleep.
+     *   PARTIAL means wake the processor, but we display can be kept off.
+     *   FULL means wake both the processor and the display.
+     */
+    enum IPhoneGlobalsWakeState {
+        PhoneGlobalsWakeState_SLEEP,
+        PhoneGlobalsWakeState_PARTIAL,
+        PhoneGlobalsWakeState_FULL
+    }
+
+    interface IPhoneGlobals {
+        const String LOG_TAG = "PhoneApp";
+
+        /**
+         * Phone app-wide debug level:
+         *   0 - no debug logging
+         *   1 - normal debug logging if ro.debuggable is set (which is true in
+         *       "eng" and "userdebug" builds but not "user" builds)
+         *   2 - ultra-verbose debug logging
+         *
+         * Most individual classes in the phone app have a local DBG constant,
+         * typically set to
+         *   (PhoneApp.DBG_LEVEL >= 1) && (SystemProperties.getInt("ro.debuggable", 0) == 1)
+         * or else
+         *   (PhoneApp.DBG_LEVEL >= 2)
+         * depending on the desired verbosity.
+         *
+         * ***** DO NOT SUBMIT WITH DBG_LEVEL > 0 *************
+         */
+        const Int32 DBG_LEVEL = 0;
+
+        // The MMI codes are also used by the InCallScreen.
+        const Int32 MMI_INITIATE = 51;
+        const Int32 MMI_COMPLETE = 52;
+        const Int32 MMI_CANCEL = 53;
+
+        /**
+         * Intent Action used for hanging up the current call from Notification bar. This will
+         * choose first ringing call, first active call, or first background call (typically in
+         * HOLDING state).
+         */
+        const String ACTION_HANG_UP_ONGOING_CALL =
+                "com.android.phone.ACTION_HANG_UP_ONGOING_CALL";
+
+        /**
+         * "Call origin" may be used by Contacts app to specify where the phone call comes from.
+         * Currently, the only permitted value for this extra is {@link #ALLOWED_EXTRA_CALL_ORIGIN}.
+         * Any other value will be ignored, to make sure that malicious apps can't trick the in-call
+         * UI into launching some random other app after a call ends.
+         *
+         * TODO: make this more generic. Note that we should let the "origin" specify its package
+         * while we are now assuming it is "com.android.contacts"
+         */
+        const String EXTRA_CALL_ORIGIN = "com.android.phone.CALL_ORIGIN";
+    }
+
+    } // namespace Phone
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

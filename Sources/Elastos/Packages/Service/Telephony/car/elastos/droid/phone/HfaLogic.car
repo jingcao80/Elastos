@@ -1,0 +1,30 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+    namespace Phone {
+
+    interface IHfaLogicHfaLogicCallback {
+        OnSuccess();
+
+        OnError(
+            [in] String errorMsg);
+    }
+
+    interface IHfaLogic {
+        const Int32 NOT_WAITING = 0;
+        const Int32 WAITING_FOR_RADIO_OFF = 1;
+        const Int32 WAITING_FOR_RADIO_ON = 2;
+
+        const Int32 OTASP_UNKNOWN = 0;
+        const Int32 OTASP_USER_SKIPPED = 1;
+        const Int32 OTASP_SUCCESS = 2;
+        const Int32 OTASP_FAILURE = 3;
+    }
+
+    } // namespace Phone
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -12,7 +12,7 @@ namespace Droid {
 namespace Os {
 
 /** @hide */
-class AsyncResult
+class ECO_PUBLIC AsyncResult
     : public Object
 {
 public:

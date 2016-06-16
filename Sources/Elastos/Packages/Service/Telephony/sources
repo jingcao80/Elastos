@@ -1,0 +1,43 @@
+TARGET_NAME= Elastos.Droid.Server.Telephony
+TARGET_TYPE= eco
+
+EXPORT_ALL_SYMBOLS = 1
+
+#VPATH  = $(MAKEDIR)/src/elastos/droid/phone
+#VPATH += $(MAKEDIR)/src/elastos/droid/phone/settings
+
+INCLUDES += $(MAKEDIR)/inc
+INCLUDES += $(MAKEDIR)/src
+INCLUDES += $(MAKEDIR)
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+SOURCES += Elastos.Droid.Server.Telephony.car
+SOURCES += R.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += Elastos.Droid.Core.cpp
+
+ELASTOS_LIBS += src/elastos/droid/services/telephony/common/common.lib
+ELASTOS_LIBS += src/elastos/droid/phone/phone.lib
+ELASTOS_LIBS += src/elastos/droid/phone/settings/settings.lib
+ELASTOS_LIBS += src/elastos/droid/services/telephony/telephony.lib
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += -lm -licuuc -llog -lutils -landroidfw
+
+APP_PACKAGE_NAME = Elastos.Droid.Server.Telephony
+RES_NAMESPACE = Elastos.Droid.Server.Telephony
+EXTRA_RES_DIR = $(MAKEDIR)/../../Apps/PhoneCommon/res
+EXTRA_RES_DIR2 = $(MAKEDIR)/sip/res
+AAPT_FLAGS := \
+    --auto-add-overlay \
+    --extra-packages com.android.phone.common \
+    --extra-packages com.android.services.telephony.sip
+
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;

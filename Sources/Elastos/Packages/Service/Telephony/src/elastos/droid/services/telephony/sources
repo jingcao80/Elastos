@@ -1,0 +1,13 @@
+TARGET_NAME= telephony
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += ../../../../../
+INCLUDES += $(MAKEDIR)/../../../../..
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES = TelephonyGlobals.cpp
+SOURCES += TtyManager.cpp
+SOURCES += DisconnectCauseUtil.cpp
+SOURCES += PstnIncomingCallNotifier.cpp
+SOURCES += telephony.cpp
