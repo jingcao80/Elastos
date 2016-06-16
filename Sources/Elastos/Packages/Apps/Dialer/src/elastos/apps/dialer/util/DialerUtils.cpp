@@ -1,8 +1,8 @@
 
-#include "DialerUtils.h"
+#include "util/DialerUtils.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Util {
 

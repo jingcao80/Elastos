@@ -2,8 +2,10 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CALLTYPEHELPER_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CALLTYPEHELPER_H__
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Core::IInteger32;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 

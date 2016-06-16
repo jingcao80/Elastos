@@ -1,12 +1,12 @@
 
-#include "CSearchFragment .h"
+#include "list/CSearchFragment .h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
-CAR_OBJECT_IMPL(CSearchFragment)
+CAR_OBJECT_IMPL(CSearchFragment);
 
 } // List
 } // Dialer

@@ -1,0 +1,12 @@
+TARGET_NAME= contact
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += ../../../../../
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+SOURCES += ContactUpdateService.cpp
+SOURCES += CContactUpdateService.cpp
+SOURCES += CContactUpdateServiceHelper.cpp

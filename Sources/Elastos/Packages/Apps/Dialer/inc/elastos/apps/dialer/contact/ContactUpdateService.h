@@ -1,10 +1,10 @@
 #ifndef __ELASTOS_APPS_DIALER_CONTACT_CONTACTUPDATESERVICE_H__
 #define __ELASTOS_APPS_DIALER_CONTACT_CONTACTUPDATESERVICE_H__
 
-#include "IntentService.h"
+#include "elastos/droid/app/IntentService.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Contact {
 
@@ -16,7 +16,7 @@ class ContactUpdateService
     , public IContactUpdateService
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     CARAPI constructor();
 

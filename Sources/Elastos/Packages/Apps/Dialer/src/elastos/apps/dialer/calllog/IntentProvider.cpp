@@ -1,8 +1,8 @@
 
-#include "IntentProvider.h"
+#include "elastos/apps/dialer/calllog/IntentProvider.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -11,7 +11,7 @@ const String IntentProvider::TAG("IntentProvider");
 //=================================================================
 // IntentProvider::ReturnCallIntentProvider
 //=================================================================
-CAR_INTERFACE_IMPL(IntentProvider::ReturnCallIntentProvider, Object, IIntentProvider)
+CAR_INTERFACE_IMPL(IntentProvider::ReturnCallIntentProvider, Object, IIntentProvider);
 
 IntentProvider::ReturnCallIntentProvider::ReturnCallIntentProvider(
     /* [in] */ const String& number,
@@ -35,7 +35,7 @@ ECode IntentProvider::ReturnCallIntentProvider::GetIntent(
 //=================================================================
 // IntentProvider::ReturnVideoCallIntentProvider
 //=================================================================
-CAR_INTERFACE_IMPL(IntentProvider::ReturnVideoCallIntentProvider, Object, IIntentProvider)
+CAR_INTERFACE_IMPL(IntentProvider::ReturnVideoCallIntentProvider, Object, IIntentProvider);
 
 IntentProvider::ReturnVideoCallIntentProvider::ReturnVideoCallIntentProvider(
     /* [in] */ const String& number,
@@ -59,7 +59,7 @@ ECode IntentProvider::ReturnVideoCallIntentProvider::GetIntent(
 //=================================================================
 // IntentProvider::PlayVoicemailIntentProvider
 //=================================================================
-CAR_INTERFACE_IMPL(IntentProvider::PlayVoicemailIntentProvider, Object, IIntentProvider)
+CAR_INTERFACE_IMPL(IntentProvider::PlayVoicemailIntentProvider, Object, IIntentProvider);
 
 IntentProvider::PlayVoicemailIntentProvider::PlayVoicemailIntentProvider(
     /* [in] */ Int64 rowId,
@@ -101,7 +101,7 @@ ECode IntentProvider::PlayVoicemailIntentProvider::GetIntent(
 //=================================================================
 // IntentProvider::CallDetailIntentProvider
 //=================================================================
-CAR_INTERFACE_IMPL(IntentProvider::CallDetailIntentProvider, Object, IIntentProvider)
+CAR_INTERFACE_IMPL(IntentProvider::CallDetailIntentProvider, Object, IIntentProvider);
 
 IntentProvider::CallDetailIntentProvider::CallDetailIntentProvider(
     /* [in] */ Int64 id,
@@ -153,7 +153,7 @@ ECode IntentProvider::CallDetailIntentProvider::GetIntent(
 //=================================================================
 // IntentProvider
 //=================================================================
-CAR_INTERFACE_IMPL(IntentProvider, Object, IIntentProvider)
+CAR_INTERFACE_IMPL(IntentProvider, Object, IIntentProvider);
 
 AutoPtr<IIntentProvider> IntentProvider::GetReturnCallIntentProvider(
     /* [in] */ const String& number)

@@ -1,5 +1,5 @@
 
-#include "CCallLogQueryHandler.h"
+#include "elastos/apps/dialer/calllog/CCallLogQueryHandler.h"
 
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
@@ -8,8 +8,8 @@ using Elastos::Core::IStringBuilder;
 using Elastos::Core::CStringBuilder;
 using Elastos::Core::StringUtils;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -71,9 +71,9 @@ ECode CCallLogQueryHandler::CatchingWorkerHandler::HandleMessage(
 //=================================================================
 // CCallLogQueryHandler
 //=================================================================
-CAR_INTERFACE_IMPL(CCallLogQueryHandler, NoNullCursorAsyncQueryHandler, ICallLogQueryHandler)
+CAR_INTERFACE_IMPL(CCallLogQueryHandler, NoNullCursorAsyncQueryHandler, ICallLogQueryHandler);
 
-CAR_OBJECT_IMPL(CCallLogQueryHandler)
+CAR_OBJECT_IMPL(CCallLogQueryHandler);
 
 CCallLogQueryHandler::CallLogQueryHandler()
     : mLogLimit(0)

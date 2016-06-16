@@ -1,9 +1,15 @@
 #ifndef __ELASTOS_APPS_DIALER_PHONECALLDETAILSHELPER_H__
 #define __ELASTOS_APPS_DIALER_PHONECALLDETAILSHELPER_H__
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+#include "Elastos.Droid.App.h"
+
+using Elastos::Apps::Dialer::CallLog::ICallTypeHelper;
+using Elastos::Apps::Dialer::CallLog::IPhoneNumberUtilsWrapper;
+using Elastos::Apps::Dialer::CallLog::IPhoneNumberDisplayHelper;
+
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
 /**
  * Helper class to fill in the views in {@link PhoneCallDetailsViews}.

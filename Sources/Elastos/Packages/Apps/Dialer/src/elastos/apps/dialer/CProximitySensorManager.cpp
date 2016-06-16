@@ -4,8 +4,8 @@
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 
 const Float CProximitySensorManager::ProximitySensorEventListener::FAR_THRESHOLD = 5.0f;
@@ -13,7 +13,7 @@ const Float CProximitySensorManager::ProximitySensorEventListener::FAR_THRESHOLD
 //=================================================================
 // CProximitySensorManager::ProximitySensorEventListener
 //=================================================================
-CAR_INTERFACE_IMPL(CProximitySensorManager::ProximitySensorEventListener, Object, ISensorEventListener)
+CAR_INTERFACE_IMPL(CProximitySensorManager::ProximitySensorEventListener, Object, ISensorEventListener);
 
 CProximitySensorManager::ProximitySensorEventListener::ProximitySensorEventListener(
     /* [in] */ ISensorManager* sensorManager,
@@ -139,7 +139,7 @@ void CProximitySensorManager::ProximitySensorEventListener::UnregisterWithoutNot
 //=================================================================
 // CProximitySensorManager
 //=================================================================
-CAR_INTERFACE_IMPL(CProximitySensorManager, Object, IProximitySensorManager)
+CAR_INTERFACE_IMPL(CProximitySensorManager, Object, IProximitySensorManager);
 
 CAR_OBJECT_IMPL(CProximitySensorManager)
 

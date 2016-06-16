@@ -1,12 +1,12 @@
 
-#include "CVoicemailPlaybackPresenter.h"
+#include "voicemail/CVoicemailPlaybackPresenter.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Voicemail {
 
-CAR_OBJECT_IMPL(CVoicemailPlaybackPresenter)
+CAR_OBJECT_IMPL(CVoicemailPlaybackPresenter);
 
 } // Voicemail
 } // Dialer

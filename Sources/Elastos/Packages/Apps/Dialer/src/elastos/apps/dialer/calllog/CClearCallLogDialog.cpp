@@ -1,8 +1,8 @@
 
-#include "CClearCallLogDialog.h"
+#include "elastos/apps/dialer/calllog/CClearCallLogDialog.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 

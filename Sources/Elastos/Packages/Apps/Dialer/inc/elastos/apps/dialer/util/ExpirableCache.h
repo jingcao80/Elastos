@@ -1,8 +1,12 @@
 #ifndef __ELASTOS_APPS_DIALER_UTIL_EMPTYLOADER_H__
 #define __ELASTOS_APPS_DIALER_UTIL_EMPTYLOADER_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+
+using Elastos::Utility::Concurrent::Atomic::IAtomicInteger32;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Util {
 
@@ -79,7 +83,7 @@ private:
         , public IExpirableCacheCachedValue
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         GenerationalCachedValue(
             /* [in] */ IInterface* value,
@@ -105,7 +109,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     /**
      * Returns the cached value for the given key, or null if no value exists.

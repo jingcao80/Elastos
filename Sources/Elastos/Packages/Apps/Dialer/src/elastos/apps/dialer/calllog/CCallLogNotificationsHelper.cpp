@@ -1,14 +1,14 @@
 
-#include "CCallLogNotificationsHelper.h"
+#include "elastos/apps/dialer/calllog/CCallLogNotificationsHelper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
-CAR_INTERFACE_IMPL(CCallLogNotificationsHelper, Singleton, ICallLogNotificationsHelper)
+CAR_INTERFACE_IMPL(CCallLogNotificationsHelper, Singleton, ICallLogNotificationsHelper);
 
-CAR_SINGLETON_IMPL(CCallLogNotificationsHelper)
+CAR_SINGLETON_IMPL(CCallLogNotificationsHelper);
 
 ECode CCallLogNotificationsHelper::RemoveMissedCallNotifications(
     /* [in] */ IContext* context)

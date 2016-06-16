@@ -1,12 +1,12 @@
 
-#include "CSmartDialMatchPosition.h"
+#include "dialpad/CSmartDialMatchPosition.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
-CAR_OBJECT_IMPL(CSmartDialMatchPosition)
+CAR_OBJECT_IMPL(CSmartDialMatchPosition);
 
 } // Dialpad
 } // Dialer

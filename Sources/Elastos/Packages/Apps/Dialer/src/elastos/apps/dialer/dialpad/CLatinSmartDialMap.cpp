@@ -1,14 +1,14 @@
 
-#include "CLatinSmartDialMap.h"
+#include "dialpad/CLatinSmartDialMap.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
-CAR_INTERFACE_IMPL_2(CLatinSmartDialMap, Object, ILatinSmartDialMap, ISmartDialMap)
+CAR_INTERFACE_IMPL_2(CLatinSmartDialMap, Object, ILatinSmartDialMap, ISmartDialMap);
 
-CAR_OBJECT_IMPL(CLatinSmartDialMap)
+CAR_OBJECT_IMPL(CLatinSmartDialMap);
 
 const Char32 CLatinSmartDialMap::LATIN_LETTERS_TO_DIGITS[] = {
     '2', '2', '2', // A,B,C -> 2

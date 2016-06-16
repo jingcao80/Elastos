@@ -3,9 +3,9 @@ module
 {
     using interface Elastos.Core.ICharSequence;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace CallLog {
 
     interface IPhoneNumberUtilsWrapper {
@@ -55,7 +55,7 @@ module
     }
 
     } //CallLog
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

@@ -1,20 +1,20 @@
 
-#include "ContactInfoHelper.h"
+#include "elastos/apps/dialer/calllog/ContactInfoHelper.h"
 
 using Elastos::Droid::Provider::IContactsContractContacts;
 using Elastos::Droid::Provider::CContactsContractContacts;
 using Org::Json::IJSONObject;
 using Org::Json::CJSONObject;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
 const AutoPtr<ICachedNumberLookupService> ContactInfoHelper::mCachedNumberLookupService
         = ObjectFactory::NewCachedNumberLookupService();
 
-CAR_INTERFACE_IMPL(ContactInfoHelper, Object, IContactInfoHelper)
+CAR_INTERFACE_IMPL(ContactInfoHelper, Object, IContactInfoHelper);
 
 ECode ContactInfoHelper::constructor(
     /* [in] */ IContext* context,

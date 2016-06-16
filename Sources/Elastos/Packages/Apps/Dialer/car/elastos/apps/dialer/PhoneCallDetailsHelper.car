@@ -2,12 +2,12 @@ module
 {
     using interface Elastos.Droid.Widget.ITextView;
     using interface Elastos.Core.ICharSequence;
-    interface Elastos.Apps.Dailer.IPhoneCallDetails;
-    interface Elastos.Apps.Dailer.IPhoneCallDetailsViews;
+    interface Elastos.Apps.Dialer.IPhoneCallDetails;
+    interface Elastos.Apps.Dialer.IPhoneCallDetailsViews;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
 
     [local]
     interface IPhoneCallDetailsHelper {
@@ -48,7 +48,7 @@ module
             [in] Int64 currentTimeMillis);
     }
 
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

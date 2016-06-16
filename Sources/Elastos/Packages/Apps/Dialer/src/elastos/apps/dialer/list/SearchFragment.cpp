@@ -1,15 +1,15 @@
 
-#include "SearchFragment.h"
+#include "list/SearchFragment.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
 //=================================================================
 // SearchFragment::MyOnScrollListener
 //=================================================================
-CAR_INTERFACE_IMPL(SearchFragment::MyOnScrollListener, Object, IListViewOnScrollListener)
+CAR_INTERFACE_IMPL(SearchFragment::MyOnScrollListener, Object, IListViewOnScrollListener);
 
 SearchFragment::MyOnScrollListener::MyOnScrollListener(
     /* [in] */ SearchFragment* host)
@@ -36,7 +36,7 @@ ECode SearchFragment::MyOnScrollListener::OnScroll(
 //=================================================================
 // SearchFragment
 //=================================================================
-CAR_INTERFACE_IMPL(SearchFragment, PhoneNumberPickerFragment, ISearchFragment)
+CAR_INTERFACE_IMPL(SearchFragment, PhoneNumberPickerFragment, ISearchFragment);
 
 ECode SearchFragment::OnAttach(
     /* [in] */ IActivity* activity)

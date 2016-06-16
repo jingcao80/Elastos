@@ -2,12 +2,12 @@
 module
 {
     using interface Elastos.Utility.IArrayList;
-    interface Elastos.Apps.Dailer.Dialpad.ISmartDialMap;
-    interface Elastos.Apps.Dailer.Dialpad.ISmartDialMatchPosition;
+    interface Elastos.Apps.Dialer.Dialpad.ISmartDialMap;
+    interface Elastos.Apps.Dialer.Dialpad.ISmartDialMatchPosition;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace Dialpad {
 
     interface ISmartDialNameMatcher {
@@ -103,7 +103,7 @@ module
     }
 
     } //Dialpad
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

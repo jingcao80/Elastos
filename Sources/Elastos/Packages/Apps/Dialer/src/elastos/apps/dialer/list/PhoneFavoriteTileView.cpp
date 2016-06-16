@@ -1,15 +1,15 @@
 
-#include "PhoneFavoriteTileView.h"
+#include "list/PhoneFavoriteTileView.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
 //=================================================================
 // PhoneFavoriteTileView::MyLongClickListener
 //=================================================================
-CAR_INTERFACE_IMPL(PhoneFavoriteTileView::MyLongClickListener, Object, IViewOnLongClickListener)
+CAR_INTERFACE_IMPL(PhoneFavoriteTileView::MyLongClickListener, Object, IViewOnLongClickListener);
 
 PhoneFavoriteTileView::MyLongClickListener::MyLongClickListener(
     /* [in] */ PhoneFavoriteTileView* host)
@@ -35,7 +35,7 @@ ECode PhoneFavoriteTileView::MyLongClickListener::OnLongClick(
 //=================================================================
 // PhoneFavoriteTileView::MyClickListener
 //=================================================================
-CAR_INTERFACE_IMPL(PhoneFavoriteTileView::MyClickListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(PhoneFavoriteTileView::MyClickListener, Object, IViewOnClickListener);
 
 PhoneFavoriteTileView::MyClickListener::MyClickListener(
     /* [in] */ PhoneFavoriteTileView* host)

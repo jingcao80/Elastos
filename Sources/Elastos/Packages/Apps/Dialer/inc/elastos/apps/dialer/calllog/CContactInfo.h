@@ -4,8 +4,8 @@
 
 #include "_Elastos_Apps_Dialer_CallLog_CContactInfo.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -13,7 +13,7 @@ namespace CallLog {
  * Information for a contact as needed by the Call Log.
  */
 CarClass(CContactInfo)
-    : public Object
+    , public Object
     , public IContactInfo
 {
 public:
@@ -46,7 +46,7 @@ public:
     String mFormattedNumber;
     String mNormalizedNumber;
     /** The photo for the contact, if available. */
-    Int64 photoId;
+    Int64 mPhotoId;
     /** The high-res photo for the contact, if available. */
     AutoPtr<IUri> mPhotoUri;
     Boolean mIsBadData;
@@ -56,7 +56,7 @@ public:
 
     static String GEOCODE_AS_LABEL; // = "";
 
-    Int32 sourceType; // = 0;
+    Int32 mSourceType; // = 0;
 };
 
 } // CallLog

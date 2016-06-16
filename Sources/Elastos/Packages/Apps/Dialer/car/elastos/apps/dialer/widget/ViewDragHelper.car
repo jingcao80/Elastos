@@ -5,9 +5,9 @@ module
     using interface Elastos.Droid.View.IView;
     using interface Elastos.Droid.View.IViewGroup;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace Widget {
 
     [local]
@@ -690,7 +690,7 @@ module
     }
 
     } // Widget
-    } // Dailer
+    } // Dialer
     } // Apps
     } // Elastos
 }

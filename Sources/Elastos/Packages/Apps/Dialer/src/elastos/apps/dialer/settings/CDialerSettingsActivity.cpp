@@ -1,12 +1,12 @@
 
-#include "CDialerSettingsActivity.h"
+#include "settings/CDialerSettingsActivity.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Settings {
 
-CAR_OBJECT_IMPL(CDialerSettingsActivity)
+CAR_OBJECT_IMPL(CDialerSettingsActivity);
 
 } // Settings
 } // Dialer

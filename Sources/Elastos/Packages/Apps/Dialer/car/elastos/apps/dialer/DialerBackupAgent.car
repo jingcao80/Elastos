@@ -1,8 +1,8 @@
 module
 {
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
 
     /**
      * @Involve
@@ -12,7 +12,7 @@ module
     interface IDialerBackupAgent {
     }
 
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

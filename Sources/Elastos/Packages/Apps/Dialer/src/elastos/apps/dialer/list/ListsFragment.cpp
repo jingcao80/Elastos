@@ -1,8 +1,8 @@
 
-#include "ListsFragment.h"
+#include "list/ListsFragment.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 

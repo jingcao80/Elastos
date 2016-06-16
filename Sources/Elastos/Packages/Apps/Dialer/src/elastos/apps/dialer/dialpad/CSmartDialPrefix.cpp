@@ -1,15 +1,15 @@
 
-#include "CSmartDialPrefix.h"
-#include "SmartDialPrefix.h"
+#include "dialpad/CSmartDialPrefix.h"
+#include "dialpad/SmartDialPrefix.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
-CAR_INTERFACE_IMPL(CSmartDialPrefix, Singleton, ISmartDialPrefix)
+CAR_INTERFACE_IMPL(CSmartDialPrefix, Singleton, ISmartDialPrefix);
 
-CAR_SINGLETON_IMPL(CSmartDialPrefix)
+CAR_SINGLETON_IMPL(CSmartDialPrefix);
 
 ECode CSmartDialPrefix::InitializeNanpSettings(
     /* [in] */ IContext* context)

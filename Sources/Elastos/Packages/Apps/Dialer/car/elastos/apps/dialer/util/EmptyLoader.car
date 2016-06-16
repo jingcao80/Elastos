@@ -1,8 +1,8 @@
 module
 {
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace Util {
 
     /**
@@ -20,7 +20,7 @@ module
     }
 
     } // Util
-    } // Dailer
+    } // Dialer
     } // Apps
     } // Elastos
 }

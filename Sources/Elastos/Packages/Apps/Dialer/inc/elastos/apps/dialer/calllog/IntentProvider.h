@@ -2,8 +2,12 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_INTENTPROVIDER_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_INTENTPROVIDER_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+
+using Elastos::Droid::Content::IIntent;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -91,21 +95,21 @@ private:
 
 public:
 
-    static CARPAI_(AutoPtr<IIntentProvider>) GetReturnCallIntentProvider(
+    static CARAPI_(AutoPtr<IIntentProvider>) GetReturnCallIntentProvider(
         /* [in] */ const String& number);
 
-    static CARPAI_(AutoPtr<IIntentProvider>) GetReturnCallIntentProvider(
+    static CARAPI_(AutoPtr<IIntentProvider>) GetReturnCallIntentProvider(
         /* [in] */ const String& number,
         /* [in] */ IPhoneAccountHandle* accountHandle);
 
-    static CARPAI_(AutoPtr<IIntentProvider>) GetReturnVideoCallIntentProvider(
+    static CARAPI_(AutoPtr<IIntentProvider>) GetReturnVideoCallIntentProvider(
         /* [in] */ const String& number);
 
-    static CARPAI_(AutoPtr<IIntentProvider>) GetReturnVideoCallIntentProvider(
+    static CARAPI_(AutoPtr<IIntentProvider>) GetReturnVideoCallIntentProvider(
         /* [in] */ const String& number,
         /* [in] */ IPhoneAccountHandle* accountHandle);
 
-    static CARPAI_(AutoPtr<IIntentProvider>) GetPlayVoicemailIntentProvider(
+    static CARAPI_(AutoPtr<IIntentProvider>) GetPlayVoicemailIntentProvider(
         /* [in] */ Int64 rowId,
         /* [in] */ const String& voicemailUri);
 

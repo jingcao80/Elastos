@@ -1,12 +1,12 @@
 module
 {
     using interface Elastos.Droid.View.IView;
-    interface Elastos.Apps.Dailer.List.IOnDragDropListener;
-    interface Elastos.Apps.Dailer.List.IPhoneFavoriteSquareTileView;
+    interface Elastos.Apps.Dialer.List.IOnDragDropListener;
+    interface Elastos.Apps.Dialer.List.IPhoneFavoriteSquareTileView;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace List {
 
     /**
@@ -41,7 +41,7 @@ module
     }
 
     } //List
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

@@ -1,12 +1,12 @@
 
-#include "VoicemailStatusHelperStatusMessage.h"
+#include "voicemail/VoicemailStatusHelperStatusMessage.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Voicemail {
 
-CAR_INTERFACE_IMPL(VoicemailStatusHelperStatusMessage, Object, IVoicemailStatusHelperStatusMessage)
+CAR_INTERFACE_IMPL(VoicemailStatusHelperStatusMessage, Object, IVoicemailStatusHelperStatusMessage);
 
 ECode VoicemailStatusHelperStatusMessage::constructor(
     /* [in] */ const String& sourcePackage,

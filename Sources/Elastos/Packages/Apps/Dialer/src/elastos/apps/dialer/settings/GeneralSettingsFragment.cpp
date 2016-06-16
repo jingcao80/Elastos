@@ -1,8 +1,8 @@
 
-#include "GeneralSettingsFragment.h"
+#include "settings/GeneralSettingsFragment.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Settings {
 
@@ -63,7 +63,7 @@ const String GeneralSettingsFragment::BUTTON_RESPOND_VIA_SMS_KEY("button_respond
 const Int32 GeneralSettingsFragment::MSG_UPDATE_RINGTONE_SUMMARY = 1;
 
 CAR_INTERFACE_IMPL(GeneralSettingsFragment, PreferenceFragment,
-        IGeneralSettingsFragment, IPreferenceOnPreferenceChangeListener)
+        IGeneralSettingsFragment, IPreferenceOnPreferenceChangeListener);
 
 GeneralSettingsFragment::GeneralSettingsFragment()
 {

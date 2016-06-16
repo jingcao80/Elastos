@@ -1,11 +1,11 @@
 
 #include "DialerApplication.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
-CAR_INTERFACE_IMPL(DialerApplication, Application, IDialerApplication)
+CAR_INTERFACE_IMPL(DialerApplication, Application, IDialerApplication);
 
 ECode DialerApplication::OnCreate()
 {

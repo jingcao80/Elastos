@@ -1,10 +1,10 @@
 
-#include "OverlappingPaneLayout.h"
+#include "widget/OverlappingPaneLayout.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
-namespace Widget{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
+namespace Widget {
 
 //================================================================
 // OverlappingPaneLayout::LayoutParams
@@ -14,7 +14,7 @@ const Int32 OverlappingPaneLayout::LayoutParams::ATTRS = {
 };
 
 CAR_INTERFACE_IMPL(OverlappingPaneLayout::LayoutParams, ViewGroup::MarginLayoutParams,
-        IOverlappingPaneLayoutLayoutParams)
+        IOverlappingPaneLayoutLayoutParams);
 
 OverlappingPaneLayout::LayoutParams::LayoutParams(
     /* [in] */ OverlappingPaneLayout* host)

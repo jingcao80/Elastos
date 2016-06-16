@@ -1,14 +1,14 @@
 
-#include "SmartDialMatchPosition.h"
+#include "dialpad/SmartDialMatchPosition.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
 const String SmartDialMatchPosition::TAG("SmartDialMatchPosition");
 
-CAR_INTERFACE_IMPL(SmartDialMatchPosition, Object, ISmartDialMatchPosition)
+CAR_INTERFACE_IMPL(SmartDialMatchPosition, Object, ISmartDialMatchPosition);
 
 ECode SmartDialMatchPosition::constructor(
     /* [in] */ Int32 start,

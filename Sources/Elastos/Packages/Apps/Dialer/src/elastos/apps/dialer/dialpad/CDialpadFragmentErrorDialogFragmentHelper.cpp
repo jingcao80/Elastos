@@ -1,14 +1,14 @@
-#include "DialpadFragment.h"
-#include "CDialpadFragmentErrorDialogFragmentHelper.h"
+#include "dialpad/DialpadFragment.h"
+#include "dialpad/CDialpadFragmentErrorDialogFragmentHelper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
-CAR_INTERFACE_IMPL(CDialpadFragmentErrorDialogFragmentHelper, Singleton, IDialpadFragmentErrorDialogFragmentHelper)
+CAR_INTERFACE_IMPL(CDialpadFragmentErrorDialogFragmentHelper, Singleton, IDialpadFragmentErrorDialogFragmentHelper);
 
-CAR_SINGLETON_IMPL(CDialpadFragmentErrorDialogFragmentHelper)
+CAR_SINGLETON_IMPL(CDialpadFragmentErrorDialogFragmentHelper);
 
 ECode CDialpadFragmentErrorDialogFragmentHelper::NewInstance(
     /* [in] */ Int32 messageResId,

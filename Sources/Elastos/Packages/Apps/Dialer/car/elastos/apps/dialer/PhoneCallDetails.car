@@ -5,12 +5,11 @@ module
     using interface Elastos.Droid.Net.IUri;
     using interface Elastos.Core.ICharSequence;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
 
-    interface IPhoneCallDetails
-    {
+    interface IPhoneCallDetails {
         GetNumber(
             [out] ICharSequence** number);
 
@@ -69,7 +68,7 @@ module
             [out] String* transcription);
     }
 
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

@@ -1,15 +1,15 @@
 
-#include "ExpirableCache.h"
+#include "util/ExpirableCache.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Util {
 
 //=================================================================
 // ExpirableCache::GenerationalCachedValues
 //=================================================================
-CAR_INTERFACE_IMPL(ExpirableCache::GenerationalCachedValues, Object, IExpirableCacheCachedValue)
+CAR_INTERFACE_IMPL(ExpirableCache::GenerationalCachedValues, Object, IExpirableCacheCachedValue);
 
 ExpirableCache::GenerationalCachedValues::GenerationalCachedValue(
     /* [in] */ IInterface* value,
@@ -43,7 +43,7 @@ ECode ExpirableCache::GenerationalCachedValues::IsExpired(
 //=================================================================
 // ExpirableCache
 //=================================================================
-CAR_INTERFACE_IMPL(ExpirableCache, Object, IExpirableCache)
+CAR_INTERFACE_IMPL(ExpirableCache, Object, IExpirableCache);
 
 ExpirableCache::ExpirableCache(
     /* [in] */ IInterface* cache)

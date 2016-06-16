@@ -6,8 +6,8 @@
 
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -24,7 +24,7 @@ public:
         /* [in] */ IResources* resources);
 
     CARAPI constructor(
-        /* [in] */ IPhoneNumberUtilsWrapper phoneNumberUtils,
+        /* [in] */ IPhoneNumberUtilsWrapper* phoneNumberUtils,
         /* [in] */ IResources* resources);
 
     CARAPI_(AutoPtr<ICharSequence>) GetDisplayName(

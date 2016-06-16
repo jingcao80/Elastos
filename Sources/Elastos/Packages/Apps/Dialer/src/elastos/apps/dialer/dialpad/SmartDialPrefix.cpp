@@ -1,20 +1,20 @@
 
-#include "SmartDialPrefix.h"
+#include "dialpad/SmartDialPrefix.h"
 
 using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::ISharedPreferencesEditor;
 using Elastos::Droid::Preference::IPreferenceManagerHelper;
 using Elastos::Droid::Preference::CPreferenceManagerHelper;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
 //=================================================================
 // SmartDialPrefix::PhoneNumberTokens
 //=================================================================
-CAR_INTERFACE_IMPL(SmartDialPrefix::PhoneNumberTokens, Object, ISmartDialPrefixPhoneNumberTokens)
+CAR_INTERFACE_IMPL(SmartDialPrefix::PhoneNumberTokens, Object, ISmartDialPrefixPhoneNumberTokens);
 
 SmartDialPrefix::PhoneNumberTokens::PhoneNumberTokens(
     /* [in] */ const String& countryCode,

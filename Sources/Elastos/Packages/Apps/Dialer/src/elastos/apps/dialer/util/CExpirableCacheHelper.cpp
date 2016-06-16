@@ -1,15 +1,15 @@
 
-#include "CExpirableCacheHelper.h"
-#include "ExpirableCache.h"
+#include "util/CExpirableCacheHelper.h"
+#include "util/ExpirableCache.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Util {
 
-CAR_INTERFACE_IMPL(CExpirableCacheHelper, Singleton, IExpirableCacheHelper)
+CAR_INTERFACE_IMPL(CExpirableCacheHelper, Singleton, IExpirableCacheHelper);
 
-CAR_SINGLETON_IMPL(CExpirableCacheHelper)
+CAR_SINGLETON_IMPL(CExpirableCacheHelper);
 
 ECode CExpirableCacheHelper::Create(
     /* [in] */ IInterface* cache,

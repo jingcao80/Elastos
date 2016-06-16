@@ -1,14 +1,14 @@
 
-#include "SmartDialSearchFragment.h"
+#include "list/SmartDialSearchFragment.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
 const String SmartDialSearchFragment::TAG("SmartDialSearchFragment");
 
-CAR_INTERFACE_DECL(SmartDialSearchFragment, SearchFragment, ISmartDialSearchFragment)
+CAR_INTERFACE_DECL(SmartDialSearchFragment, SearchFragment, ISmartDialSearchFragment);
 
 ECode SmartDialSearchFragment::CreateListAdapter(
     /* [out] */ IContactEntryListAdapter** listAdapter)

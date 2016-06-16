@@ -3,10 +3,11 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CPHONENUMBERUTILSWRAPPER_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CPHONENUMBERUTILSWRAPPER_H__
 
-#include "_Elastos_Apps_Dialer_CallLog_PhoneNumberUtilsWrapper.h"
+#include "_Elastos_Apps_Dialer_CallLog_CPhoneNumberUtilsWrapper.h"
+#include "elastos/apps/dialer/calllog/PhoneNumberUtilsWrapper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 

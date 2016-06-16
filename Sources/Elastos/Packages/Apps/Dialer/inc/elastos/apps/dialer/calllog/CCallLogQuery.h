@@ -2,6 +2,9 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CALLLOGQUERY_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CALLLOGQUERY_H__
 
+#include "_Elastos_Apps_Dialer_CallLog_CCallLogQuery.h"
+#include <elastos/core/Singleton.h>
+
 namespace Elastos{
 namespace Apps{
 namespace Dialer {

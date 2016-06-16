@@ -3,7 +3,7 @@
 #define __ELASTOS_APPS_DIALER_CALLLOG_CCALLTYPEHELPER_H__
 
 #include "_Elastos_Apps_Dialer_CallLog_CCallTypeHelper.h"
-#include "CallTypeHelper.h"
+#include "elastos/apps/dialer/calllog/CallTypeHelper.h"
 
 namespace Elastos{
 namespace Apps{

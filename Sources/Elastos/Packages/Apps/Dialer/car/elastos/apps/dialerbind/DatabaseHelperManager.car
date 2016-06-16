@@ -1,11 +1,11 @@
 module
 {
     using interface Elastos.Droid.Content.IContext;
-    interface Elastos.Apps.Dailer.Database.IDialerDatabaseHelper;
+    interface Elastos.Apps.Dialer.Database.IDialerDatabaseHelper;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace DailerBind {
+    namespace DialerBind {
 
     [local]
     interface IDatabaseHelperManager {
@@ -14,7 +14,7 @@ module
             [out] IDialerDatabaseHelper** helper);
     }
 
-    } //DailerBind
+    } //DialerBind
     } //Apps
     } //Elastos
 }

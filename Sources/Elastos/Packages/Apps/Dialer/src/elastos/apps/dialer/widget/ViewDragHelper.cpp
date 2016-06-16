@@ -1,15 +1,15 @@
 
-#include "ViewDragHelper.h"
+#include "widget/ViewDragHelper.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
-namespace Widget{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
+namespace Widget {
 
 //================================================================
 // ViewDragHelper::Callback
 //================================================================
-CAR_INTERFACE_IMPL(ViewDragHelper::Callback, Object, IViewDragHelperCallback)
+CAR_INTERFACE_IMPL(ViewDragHelper::Callback, Object, IViewDragHelperCallback);
 
 ECode ViewDragHelper::Callback::OnViewDragStateChanged(
     /* [in] */ Int32 state)
@@ -146,7 +146,7 @@ const Int32 EDGE_SIZE = 20; // dp
 const Int32 BASE_SETTLE_DURATION = 256; // ms
 const Int32 MAX_SETTLE_DURATION = 600; // ms
 
-CAR_INTERFACE_IMPL(ViewDragHelper, Object, IViewDragHelper)
+CAR_INTERFACE_IMPL(ViewDragHelper, Object, IViewDragHelper);
 
 AutoPtr<IViewDragHelper> ViewDragHelper::Create(
     /* [in] */ IViewGroup* forParent,

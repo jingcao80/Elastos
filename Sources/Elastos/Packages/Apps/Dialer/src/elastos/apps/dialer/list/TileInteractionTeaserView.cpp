@@ -1,15 +1,15 @@
 
-#include "TileInteractionTeaserView.h"
+#include "list/TileInteractionTeaserView.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
 //=================================================================
 // TileInteractionTeaserView::DismissClickListener
 //=================================================================
-CAR_INTERFACE_IMPL(TileInteractionTeaserView::DismissClickListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(TileInteractionTeaserView::DismissClickListener, Object, IViewOnClickListener);
 
 TileInteractionTeaserView::DismissClickListener::DismissClickListener(
     /* [in] */ TileInteractionTeaserView* host)
@@ -61,7 +61,7 @@ ECode TileInteractionTeaserView::ArrowRunnable::Run()
 //=================================================================
 // TileInteractionTeaserView::HeightAnimatorUpdateListener
 //=================================================================
-CAR_INTERFACE_IMPL(TileInteractionTeaserView::HeightAnimatorUpdateListener, Object, IAnimatorUpdateListener)
+CAR_INTERFACE_IMPL(TileInteractionTeaserView::HeightAnimatorUpdateListener, Object, IAnimatorUpdateListener);
 
 TileInteractionTeaserView::HeightAnimatorUpdateListener::HeightAnimatorUpdateListener(
     /* [in] */ TileInteractionTeaserView* host)

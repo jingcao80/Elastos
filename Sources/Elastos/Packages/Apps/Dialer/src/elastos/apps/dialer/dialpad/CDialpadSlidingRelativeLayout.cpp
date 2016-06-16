@@ -1,11 +1,11 @@
-#include "CDialpadSlidingRelativeLayout.h"
+#include "dialpad/CDialpadSlidingRelativeLayout.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
-CAR_OBJECT_IMPL(CDialpadSlidingRelativeLayout)
+CAR_OBJECT_IMPL(CDialpadSlidingRelativeLayout);
 
 } // Dialpad
 } // Dialer

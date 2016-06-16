@@ -1,12 +1,12 @@
 
-#include "CDialerPhoneNumberListAdapter.h"
+#include "list/CDialerPhoneNumberListAdapter.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
-CAR_OBJECT_IMPL(CDialerPhoneNumberListAdapter)
+CAR_OBJECT_IMPL(CDialerPhoneNumberListAdapter);
 
 } // List
 } // Dialer

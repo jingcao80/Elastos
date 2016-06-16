@@ -1,21 +1,35 @@
 
-#include "CallDetailHistoryAdapter.h"
 #include "elastos/droid/text/format/DateUtils.h"
 #include "elastos/droid/text/format/Formatter.h"
+#include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.Provider.h"
+#include <elastos/core/CoreUtils.h>
+
+#include "R.h"
+#include "elastos/apps/dialer/calllog/CallDetailHistoryAdapter.h"
+#include "elastos/apps/dialer/calllog/CallTypeHelper.h"
+#include "elastos/apps/dialer/util/DialerUtils.h"
+#include "elastos/apps/dialer/CPhoneCallDetails.h"
+
 
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Provider::ICalls;
 using Elastos::Droid::Text::Format::DateUtils;
+using Elastos::Droid::Text::Format::IDateUtils;
 using Elastos::Droid::Text::Format::Formatter;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Utility::CArrayList;
+using Elastos::Apps::Dialer::Util::DialerUtils;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
-const CallDetailHistoryAdapter::Int32 VIEW_TYPE_HEADER = 0;
-const CallDetailHistoryAdapter::Int32 VIEW_TYPE_HISTORY_ITEM = 1;
+const Int32 CallDetailHistoryAdapter::VIEW_TYPE_HEADER = 0;
+const Int32 CallDetailHistoryAdapter::VIEW_TYPE_HISTORY_ITEM = 1;
 
-CAR_INTERFACE_IMPL(CallDetailHistoryAdapter, BaseAdapter, ICallDetailHistoryAdapter)
+CAR_INTERFACE_IMPL(CallDetailHistoryAdapter, BaseAdapter, ICallDetailHistoryAdapter);
 
 CallDetailHistoryAdapter::CallDetailHistoryAdapter()
 {
@@ -32,7 +46,7 @@ ECode CallDetailHistoryAdapter::constructor(
     mLayoutInflater = layoutInflater;
     mCallTypeHelper = callTypeHelper;
     mPhoneCallDetails = phoneCallDetails;
-    return NOERROR
+    return NOERROR;
 }
 
 ECode CallDetailHistoryAdapter::IsEnabled(
@@ -150,29 +164,33 @@ ECode CallDetailHistoryAdapter::GetView(
     result->FindViewById(R::id::duration, (IView**)&view);
     AutoPtr<ITextView> durationView = ITextView::Probe(view);
 
-    Int32 callType = ((CPhoneCallDetails*)details)->mCallTypes[0];
-    Boolean isVideoCall = (((CPhoneCallDetails*)details)->features & ICalls::FEATURES_VIDEO)
-            == ICalls::FEATURES_VIDEO && CallUtil::IsVideoEnabled(mContext);
+    CPhoneCallDetails* cDetails = (CPhoneCallDetails*)details.Get();
+    Int32 callType = (*cDetails->mCallTypes)[0];
+    Boolean isVideoCall;
+    assert(0 && "TODO");
+    // isVideoCall = (cDetails->mFeatures & ICalls::FEATURES_VIDEO)
+    //         == ICalls::FEATURES_VIDEO && CallUtil::IsVideoEnabled(mContext);
 
     callTypeIconView->Clear();
     callTypeIconView->Add(callType);
     callTypeIconView->SetShowVideo(isVideoCall);
-    callTypeTextView->SetText(mCallTypeHelper->GetCallTypeText(callType, isVideoCall));
+    AutoPtr<ICharSequence> text;
+    mCallTypeHelper->GetCallTypeText(callType, isVideoCall, (ICharSequence**)&text);
+    callTypeTextView->SetText(text);
     // Set the date.
     String dateValue = DateUtils::FormatDateRange(mContext,
-            ((CPhoneCallDetails*)details)->date, ((CPhoneCallDetails*)details)->date,
+            cDetails->mDate, cDetails->mDate,
             IDateUtils::FORMAT_SHOW_TIME | IDateUtils::FORMAT_SHOW_DATE |
             IDateUtils::FORMAT_SHOW_WEEKDAY | IDateUtils::FORMAT_SHOW_YEAR);
-    dateView->SetText(dateValue);
+    dateView->SetText(CoreUtils::Convert(dateValue));
     // Set the duration
     if (ICalls::VOICEMAIL_TYPE == callType || CallTypeHelper::IsMissedCallType(callType)) {
-        durationView->SetVisibility(IView::GONE);
+        IView::Probe(durationView)->SetVisibility(IView::GONE);
     }
     else {
-        durationView->SetVisibility(IView::VISIBLE);
+        IView::Probe(durationView)->SetVisibility(IView::VISIBLE);
         durationView->SetText(FormatDurationAndDataUsage(
-                ((CPhoneCallDetails*)details)->duration,
-                ((CPhoneCallDetails*)details)->dataUsage));
+                cDetails->mDuration, cDetails->mDataUsage));
     }
 
     *bkView = result;
@@ -180,7 +198,7 @@ ECode CallDetailHistoryAdapter::GetView(
     return NOERROR;
 }
 
-String CallDetailHistoryAdapter::FormatDuration(
+AutoPtr<ICharSequence> CallDetailHistoryAdapter::FormatDuration(
     /* [in] */ Int64 elapsedSeconds)
 {
     Int64 minutes = 0;
@@ -192,29 +210,32 @@ String CallDetailHistoryAdapter::FormatDuration(
     }
     seconds = elapsedSeconds;
 
-    ArrayOf<IInterface> args = ArrayOf<IInterface>::Alloc(2);
-    args->Set(0, CoreUtils::Convert(minutes));
-    args->Set(1, CoreUtils::Convert(seconds));
+    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
+    args->Set(0, CoreUtils::Convert(minutes).Get());
+    args->Set(1, CoreUtils::Convert(seconds).Get());
     String str;
     mContext->GetString(R::string::callDetailsDurationFormat, args, &str);
 
-    return str;
+    return CoreUtils::Convert(str);
 }
 
-String CallDetailHistoryAdapter::FormatDurationAndDataUsage(
+AutoPtr<ICharSequence> CallDetailHistoryAdapter::FormatDurationAndDataUsage(
     /* [in] */ Int64 elapsedSeconds,
-    /* [in] */ Int64 dataUsage)
+    /* [in] */ IInteger64* dataUsage)
 {
-    String duration = FormatDuration(elapsedSeconds);
+    AutoPtr<ICharSequence> duration = FormatDuration(elapsedSeconds);
 
-    if (!dataUsage.IsNull()) {
+    if (dataUsage != NULL) {
         mDurationItems->Clear();
         mDurationItems->Add(duration);
-        mDurationItems->Add(Formatter::FormatShortFileSize(mContext, dataUsage));
+        Int64 value;
+        dataUsage->GetValue(&value);
+        mDurationItems->Add(CoreUtils::Convert(
+                Formatter::FormatShortFileSize(mContext, value)));
 
         AutoPtr<IResources> res;
         mContext->GetResources((IResources**)&res);
-        return DialerUtils::Join(, mDurationItems);
+        return DialerUtils::Join(res, IIterable::Probe(mDurationItems));
     }
     else {
         return duration;

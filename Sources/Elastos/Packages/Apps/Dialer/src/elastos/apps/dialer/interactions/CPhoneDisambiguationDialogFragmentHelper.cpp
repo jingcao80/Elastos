@@ -1,15 +1,15 @@
 
-#include "CPhoneDisambiguationDialogFragmentHelper.h"
-#include "PhoneNumberInteraction.h"
+#include "interactions/CPhoneDisambiguationDialogFragmentHelper.h"
+#include "interactions/PhoneNumberInteraction.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Interactions {
 
-CAR_INTERFACE_IMPL(CPhoneDisambiguationDialogFragmentHelper, Singleton, IPhoneDisambiguationDialogFragmentHelper)
+CAR_INTERFACE_IMPL(CPhoneDisambiguationDialogFragmentHelper, Singleton, IPhoneDisambiguationDialogFragmentHelper);
 
-CAR_SINGLETON_IMPL(CPhoneDisambiguationDialogFragmentHelper)
+CAR_SINGLETON_IMPL(CPhoneDisambiguationDialogFragmentHelper);
 
 ECode CPhoneDisambiguationDialogFragmentHelper::Show(
     /* [in] */ IFragmentManager* fragmentManager,

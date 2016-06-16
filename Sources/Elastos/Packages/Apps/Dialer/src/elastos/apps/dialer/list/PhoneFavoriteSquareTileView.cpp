@@ -1,8 +1,8 @@
 
-#include "PhoneFavoriteSquareTileView.h"
+#include "list/PhoneFavoriteSquareTileView.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -10,7 +10,7 @@ namespace List {
 //=================================================================
 // PhoneFavoriteSquareTileView::SecondaryButtonOnClickListener
 //=================================================================
-CAR_INTERFACE_IMPL(PhoneFavoriteSquareTileView::SecondaryButtonOnClickListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(PhoneFavoriteSquareTileView::SecondaryButtonOnClickListener, Object, IViewOnClickListener);
 
 PhoneFavoriteSquareTileView::SecondaryButtonOnClickListener::SecondaryButtonOnClickListener(
     /* [in] */ PhoneFavoriteSquareTileView* host)
@@ -27,7 +27,7 @@ ECode PhoneFavoriteSquareTileView::SecondaryButtonOnClickListener::OnClick(
 //=================================================================
 // PhoneFavoriteSquareTileView
 //=================================================================
-CAR_INTERFACE_IMPL(PhoneFavoriteSquareTileView, PhoneFavoriteTileView, IPhoneFavoriteSquareTileView)
+CAR_INTERFACE_IMPL(PhoneFavoriteSquareTileView, PhoneFavoriteTileView, IPhoneFavoriteSquareTileView);
 
 static const String PhoneFavoriteSquareTileView::TAG("PhoneFavoriteSquareTileView");
 

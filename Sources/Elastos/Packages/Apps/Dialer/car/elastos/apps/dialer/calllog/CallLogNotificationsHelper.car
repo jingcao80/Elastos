@@ -2,9 +2,9 @@ module
 {
     using interface Elastos.Droid.Content.IContext;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace CallLog {
 
     [local]
@@ -19,7 +19,7 @@ module
     }
 
     } //CallLog
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

@@ -3,7 +3,7 @@
 #define __ELASTOS_APPS_DIALER_CALLLOG_CCALLLOGQUERYHANDLER_H__
 
 #include "_Elastos_Apps_Dialer_CallLog_CCallLogQueryHandler.h"
-#include "NoNullCursorAsyncQueryHandler.h"
+#include "elastos/apps/dialer/calllog/NoNullCursorAsyncQueryHandler.h"
 
 using Elastos::Droid:Content:IContentResolver;
 using Elastos::Droid:Database:ICursor;

@@ -6,8 +6,8 @@
 
 using Elastos::Droid::Content::BroadcastReceiver;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 

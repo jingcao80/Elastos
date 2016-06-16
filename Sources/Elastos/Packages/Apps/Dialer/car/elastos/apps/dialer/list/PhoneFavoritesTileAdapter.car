@@ -4,9 +4,9 @@ module
     using interface Elastos.Droid.Database.ICursor;
     // interface Elastos.Apps.Contacts.Common.IContactPhotoManager;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace List {
 
     [deprecated]
@@ -90,7 +90,7 @@ module
     }
 
     } //List
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

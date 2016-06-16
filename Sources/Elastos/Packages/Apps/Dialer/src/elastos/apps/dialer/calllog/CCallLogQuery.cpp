@@ -1,9 +1,9 @@
 
-#include "CCallLogQuery.h"
+#include "elastos/apps/dialer/calllog/CCallLogQuery.h"
 #include <elquintet.h>
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -33,9 +33,9 @@ const String _PROJECTION[] = {
     ICalls::TRANSCRIPTION                 // 22
 }
 
-CAR_INTERFACE_IMPL(CCallLogQuery, Singleton, ICallLogQuery)
+CAR_INTERFACE_IMPL(CCallLogQuery, Singleton, ICallLogQuery);
 
-CAR_SINGLETON_IMPL(CCallLogQuery)
+CAR_SINGLETON_IMPL(CCallLogQuery);
 
 ECode CCallLogQuery::Get_PROJECTION(
     /* [out, callee] */ ArrayOf<String>** result)

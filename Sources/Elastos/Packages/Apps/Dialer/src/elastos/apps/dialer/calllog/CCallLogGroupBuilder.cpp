@@ -1,8 +1,8 @@
 
-#include "CCallLogGroupBuilder.h"
+#include "elastos/apps/dialer/calllog/CCallLogGroupBuilder.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -15,9 +15,9 @@ AutoPtr<ITime> createTime()
 
 AutoPtr<ITime> CCallLogGroupBuilder::TIME = createTime();
 
-CAR_INTERFACE_IMPL(CCallLogGroupBuilder, Object, ICallLogGroupBuilder)
+CAR_INTERFACE_IMPL(CCallLogGroupBuilder, Object, ICallLogGroupBuilder);
 
-CAR_OBJECT_IMPL(CCallLogGroupBuilder)
+CAR_OBJECT_IMPL(CCallLogGroupBuilder);
 
 ECode CCallLogGroupBuilder::constructor(
     /* [in] */ ICallLogGroupBuilderGroupCreator* groupCreator)

@@ -2,11 +2,11 @@
 module
 {
     using interface Elastos.Droid.Content.IContext;
-    interface Elastos.Apps.Dailer.CallLog.IContactInfo;
+    interface Elastos.Apps.Dialer.CallLog.IContactInfo;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace Service {
 
     interface ICachedContactInfo {
@@ -80,7 +80,7 @@ module
     }
 
     } //Service
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

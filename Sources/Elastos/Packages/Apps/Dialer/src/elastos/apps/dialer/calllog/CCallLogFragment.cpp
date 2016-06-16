@@ -1,26 +1,14 @@
 
-#include "CCallLogFragment.h"
+#include "elastos/apps/dialer/calllog/CCallLogFragment.h"
 #include "elastos/core/Math.h"
 
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Core::Math;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
-
-const String TAG("CallLogFragment");
-
-const String REPORT_DIALOG_TAG("report_dialog");
-const Int32 EMPTY_LOADER_ID = 0;
-
-const String KEY_FILTER_TYPE("filter_type");
-const String KEY_LOG_LIMIT("log_limit");
-const String KEY_DATE_LIMIT("date_limit");
-const String KEY_SHOW_FOOTER("show_footer");
-const String KEY_IS_REPORT_DIALOG_SHOWING("is_report_dialog_showing");
-const String KEY_REPORT_DIALOG_NUMBER("report_dialog_number");
 
 //=================================================================
 // CCallLogFragment::CustomContentObserver
@@ -28,8 +16,11 @@ const String KEY_REPORT_DIALOG_NUMBER("report_dialog_number");
 CCallLogFragment::CustomContentObserver::CustomContentObserver(
     /* [in] */ CCallLogFragment* host)
     : mHost(host)
+{}
+
+ECode CCallLogFragment::CustomContentObserver::constructor()
 {
-    ContentObserver();
+    return ContentObserver::constructor();
 }
 
 ECode CCallLogFragment::CustomContentObserver::OnChange(
@@ -74,7 +65,7 @@ CCallLogFragment::ItemExPandedOnPreDrawListener::ItemExPandedOnPreDrawListener(
     , mHost(host)
 {}
 
-ECode CCallLogFragment::OnPreDraw(
+ECode CCallLogFragment::ItemExPandedOnPreDrawListener::OnPreDraw(
     /* [out] */ Boolean* result)
 {
     VALUE_NOT_NULL(result);
@@ -91,12 +82,13 @@ ECode CCallLogFragment::OnPreDraw(
     Int32 baseHeight = Math::Min(endingHeight, startingHeight);
     Boolean isExpand = endingHeight > startingHeight;
 
+    CCallLogListItemViews* viewHolder = (CCallLogListItemViews*)mViewHolder.Get();
     // Set the views back to the start state of the animation
     AutoPtr<IViewGroupLayoutParams> params;
     mView->GetLayoutParams((IViewGroupLayoutParams**)&params);
     params->SetHeight(startingHeight);
     if (!isExpand) {
-        ((CCallLogListItemViews*)mViewHolder)->mActionsView->SetVisibility(IView::VISIBLE);
+        viewHolder->mActionsView->SetVisibility(IView::VISIBLE);
     }
     CallLogAdapter::ExpandVoicemailTranscriptionView(mViewHolder, !isExpand);
 
@@ -104,9 +96,9 @@ ECode CCallLogFragment::OnPreDraw(
     if (isExpand) {
         // Start the fade in after the expansion has partly completed, otherwise it
         // will be mostly over before the expansion completes.
-        ((CCallLogListItemViews*)mViewHolder)->mActionsView->SetAlpha(0f);
+        viewHolder->mActionsView->SetAlpha(0);
         AutoPtr<IViewPropertyAnimator> animator;
-        ((CCallLogListItemViews*)mViewHolder)->mActionsView->Animate(
+        viewHolder->mActionsView->Animate(
                 (IViewPropertyAnimator**)&animator);
         animator->Alpha(1f)
         animator->SetStartDelay(mFadeInStartDelay)
@@ -114,12 +106,12 @@ ECode CCallLogFragment::OnPreDraw(
         animator->Start();
     }
     else {
-        ((CCallLogListItemViews*)mViewHolder)->mActionsView->SetAlpha(1f);
+        viewHolder->mActionsView->SetAlpha(1);
         AutoPtr<IViewPropertyAnimator> animator;
-        ((CCallLogListItemViews*)mViewHolder)->mActionsView->Animate(
+        viewHolder->mActionsView->Animate(
                 (IViewPropertyAnimator**)&animator);
-        animator->Alpha(0f)
-        animator->SetDuration(mFadeOutDuration)
+        animator->Alpha(0);
+        animator->SetDuration(mFadeOutDuration);
         animator->Start();
     }
     view->requestLayout();
@@ -129,10 +121,10 @@ ECode CCallLogFragment::OnPreDraw(
     CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
     AutoPtr<IValueAnimator> animator;
     if (isExpand) {
-        helper->OfFloat(0f, 1f, (IValueAnimator**)&animator);
+        helper->OfFloat(0, 1, (IValueAnimator**)&animator);
     }
     else {
-        helper->OfFloat(1f, 0f, (IValueAnimator**)&animator);
+        helper->OfFloat(1, 0, (IValueAnimator**)&animator);
     }
 
     // Figure out how much scrolling is needed to make the view fully visible.
@@ -311,6 +303,19 @@ ECode CCallLogFragment::StatusMessageActionClickListener::OnClick(
 //=================================================================
 // CCallLogFragment
 //=================================================================
+
+const String CCallLogFragment::TAG("CallLogFragment");
+
+const String CCallLogFragment::REPORT_DIALOG_TAG("report_dialog");
+const Int32 CCallLogFragment::EMPTY_LOADER_ID = 0;
+
+const String CCallLogFragment::KEY_FILTER_TYPE("filter_type");
+const String CCallLogFragment::KEY_LOG_LIMIT("log_limit");
+const String CCallLogFragment::KEY_DATE_LIMIT("date_limit");
+const String CCallLogFragment::KEY_SHOW_FOOTER("show_footer");
+const String CCallLogFragment::KEY_IS_REPORT_DIALOG_SHOWING("is_report_dialog_showing");
+const String CCallLogFragment::KEY_REPORT_DIALOG_NUMBER("report_dialog_number");
+
 CAR_INTERFACE_IMPL_4(CCallLogFragment, AnalyticsListFragment, ICallLogFragment, ICallLogQueryHandlerListener, \
         ICallLogAdapterOnReportButtonClickListener, ICallLogAdapterCallItemExpandedListener)
 
@@ -327,8 +332,11 @@ CCallLogFragment::CCallLogFragment()
 {
     CHandler::New((IHandler**)&mHandler);
     mCallLogObserver = new CustomContentObserver(this);
+    mCallLogObserver->constructor();
     mContactsObserver = new CustomContentObserver(this);
+    mContactsObserver->constructor();
     mVoicemailStatusObserver = new CustomContentObserver(this);
+    mVoicemailStatusObserver->constructor();
 }
 
 ECode CCallLogFragment::constructor()

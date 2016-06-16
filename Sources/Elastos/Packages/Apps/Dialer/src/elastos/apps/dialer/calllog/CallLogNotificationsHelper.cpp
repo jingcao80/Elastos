@@ -1,12 +1,12 @@
 
-#include "CallLogNotificationsHelper.h"
+#include "elastos/apps/dialer/calllog/CallLogNotificationsHelper.h"
 
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 

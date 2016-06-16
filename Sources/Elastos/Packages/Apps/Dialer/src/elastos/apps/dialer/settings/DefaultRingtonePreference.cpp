@@ -1,12 +1,12 @@
 
-#include "DefaultRingtonePreference.h"
+#include "settings/DefaultRingtonePreference.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Settings {
 
-CAR_INTERFACE_IMPL(DefaultRingtonePreference, RingtonePreference, IDefaultRingtonePreference)
+CAR_INTERFACE_IMPL(DefaultRingtonePreference, RingtonePreference, IDefaultRingtonePreference);
 
 ECode DefaultRingtonePreference::constructor(
     /* [in] */ IContext* context,

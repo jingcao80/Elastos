@@ -2,17 +2,30 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CCALLLOGFRAGMENT_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CCALLLOGFRAGMENT_H__
 
-#include "_Elastos_Apps_Dialer_CCallLogFragment.h"
-#include "AnalyticsListFragment.h"
+#include "_Elastos_Apps_Dialer_CallLog_CCallLogFragment.h"
 #include "elastos/droid/database/ContentObserver.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include "Elastos.Droid.Animation.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewTreeObserver;
+using Elastos::Droid::View::IOnPreDrawListener;
+using Elastos::Droid::Widget::IListView;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
 CarClass(CCallLogFragment)
-    , public AnalyticsListFragment
+    // TODO:
+    // , public AnalyticsListFragment
+    , public Object
     , public ICallLogFragment
     , public ICallLogQueryHandlerListener
     , public ICallLogAdapterOnReportButtonClickListener
@@ -25,6 +38,8 @@ private:
     public:
         CustomContentObserver(
             /* [in] */ CCallLogFragment* host);
+
+        CARAPI constructor();
 
         // @Override
         CARAPI OnChange(
@@ -103,8 +118,7 @@ private:
     };
 
     class ItemExPandedAnimatorListenerAdapter
-        : public Object
-        , public IAnimatorListenerAdapter
+        : public AnimatorListenerAdapter
     {
     public:
         CAR_INTERFACE_DECL()

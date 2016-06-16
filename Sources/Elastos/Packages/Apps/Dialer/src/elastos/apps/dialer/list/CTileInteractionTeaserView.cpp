@@ -1,12 +1,12 @@
 
-#include "CTileInteractionTeaserView .h"
+#include "list/CTileInteractionTeaserView.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
-CAR_OBJECT_IMPL(CTileInteractionTeaserView)
+CAR_OBJECT_IMPL(CTileInteractionTeaserView);
 
 } // List
 } // Dialer

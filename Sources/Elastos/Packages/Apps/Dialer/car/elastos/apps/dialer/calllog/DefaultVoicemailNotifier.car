@@ -3,12 +3,12 @@ module
 {
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContentResolver;
-    interface Elastos.Apps.Dailer.CallLog.IDefaultVoicemailNotifierNewCallsQuery;
-    interface Elastos.Apps.Dailer.CallLog.IPhoneNumberDisplayHelper;
+    interface Elastos.Apps.Dialer.CallLog.IDefaultVoicemailNotifierNewCallsQuery;
+    interface Elastos.Apps.Dialer.CallLog.IPhoneNumberDisplayHelper;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace CallLog {
 
     interface IDefaultVoicemailNotifier {
@@ -64,7 +64,7 @@ module
     }
 
     } //CallLog
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

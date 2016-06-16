@@ -2,8 +2,13 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_PHONENUMBERUTILSWRAPPER_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_PHONENUMBERUTILSWRAPPER_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include "elastos/core/Object.h"
+
+using Elastos::Utility::ISet;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 

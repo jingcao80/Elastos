@@ -9,9 +9,9 @@ module
     using interface Elastos.Droid.Widget.ISeekBarOnSeekBarChangeListener;
     using interface Elastos.Core.IRunnable;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace Voicemail {
 
     /** Contract describing the behaviour we need from the ui we are controlling. */
@@ -127,7 +127,7 @@ module
     }
 
     } // Voicemail
-    } // Dailer
+    } // Dialer
     } // Apps
     } // Elastos
 }

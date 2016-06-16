@@ -1,7 +1,7 @@
 
-#include "DefaultVoicemailNotifier.h"
-
+#include "elastos/apps/dialer/calllog/DefaultVoicemailNotifier.h"
 #include <elastos/core/AutoLock.h>
+
 using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::App::IPendingIntentHelper;
@@ -14,8 +14,8 @@ using Elastos::Droid::Provider::CCalls;
 using Elastos::Droid::Provider::IContactsContractPhoneLookup;
 using Elastos::Droid::Provider::CContactsContractPhoneLookup;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -45,7 +45,7 @@ const Int32 DefaultVoicemailNotifier::NOTIFICATION_ID = 1;
 //=================================================================
 // DefaultVoicemailNotifier::NewCall
 //=================================================================
-CAR_INTERFACE_IMPL(DefaultVoicemailNotifier::NewCall, Object, IDefaultVoicemailNotifierNewCall)
+CAR_INTERFACE_IMPL(DefaultVoicemailNotifier::NewCall, Object, IDefaultVoicemailNotifierNewCall);
 
 DefaultVoicemailNotifier::NewCall::NewCall(
     /* [in] */ IUri* callsUri,
@@ -63,7 +63,7 @@ DefaultVoicemailNotifier::NewCall::NewCall(
 //=================================================================
 // DefaultVoicemailNotifier::DefaultNewCallsQuery
 //=================================================================
-CAR_INTERFACE_IMPL(DefaultVoicemailNotifier::DefaultNewCallsQuery, Object, IDefaultVoicemailNotifierNewCallsQuery)
+CAR_INTERFACE_IMPL(DefaultVoicemailNotifier::DefaultNewCallsQuery, Object, IDefaultVoicemailNotifierNewCallsQuery);
 
 DefaultVoicemailNotifier::DefaultNewCallsQuery::DefaultNewCallsQuery(
     /* [in] */ IContentResolver* contentResolver)
@@ -146,7 +146,7 @@ AutoPtr<IDefaultVoicemailNotifierNewCall> DefaultVoicemailNotifier::DefaultNewCa
 //=================================================================
 // DefaultVoicemailNotifier::DefaultNameLookupQuery
 //=================================================================
-CAR_INTERFACE_IMPL(DefaultVoicemailNotifier::DefaultNameLookupQuery, Object, IDefaultVoicemailNotifierNameLookupQuery)
+CAR_INTERFACE_IMPL(DefaultVoicemailNotifier::DefaultNameLookupQuery, Object, IDefaultVoicemailNotifierNameLookupQuery);
 
 DefaultVoicemailNotifier::DefaultNameLookupQuery::DefaultNameLookupQuery(
     /* [in] */ IContentResolver* contentResolver)
@@ -194,7 +194,7 @@ exit:
 //=================================================================
 // DefaultVoicemailNotifier
 //=================================================================
-CAR_INTERFACE_IMPL_2(DefaultVoicemailNotifier, Object, IDefaultVoicemailNotifier, IVoicemailNotifier)
+CAR_INTERFACE_IMPL_2(DefaultVoicemailNotifier, Object, IDefaultVoicemailNotifier, IVoicemailNotifier);
 
 DefaultVoicemailNotifier::DefaultVoicemailNotifier(
     /* [in] */ IContext* context,
@@ -301,12 +301,12 @@ ECode DefaultVoicemailNotifier::UpdateNotification(
 
     if (newCallUri != NULL && callToNotify == NULL) {
         String str;
-        newCallUri.ToString(&str);
+        newCallUri->ToString(&str);
         Logger::E(TAG, "The new call could not be found in the call log: %s", str.string());
     }
 
     // Determine the title of the notification and the icon for it.
-    final String title;
+    String title;
     resources->GetQuantityString(R::plurals::notification_voicemail_title,
              newCalls->GetLength(), newCalls->GetLength(), &the);
     // TODO: Use the photo of contact if all calls are from the same person.
@@ -335,7 +335,7 @@ ECode DefaultVoicemailNotifier::UpdateNotification(
 
         AutoPtr<IIntent> playIntent;
         CIntent::New(mContext, ECLSID_CCallDetailActivity, (IIntent**)&playIntent);
-        playIntent.setData(newCalls[0].callsUri);
+        playIntent.setData((*newCalls)[0]->callsUri);
         playIntent.putExtra(CallDetailActivity.EXTRA_VOICEMAIL_URI,
                 (*newCalls)[0]->mVoicemailUri);
         playIntent->PutBooleanExtra(ICallDetailActivity::EXTRA_VOICEMAIL_START_PLAYBACK, TRUE);
@@ -357,7 +357,7 @@ ECode DefaultVoicemailNotifier::UpdateNotification(
         AutoPtr<IUri> uri;
         calls->GetCONTENT_URI((IUri**)&uri);
         CIntent::New(IIntent::ACTION_VIEW, uri, (IIntent**)&contentIntent);
-        contentIntent->PutExtra(ICalls::EXTRA_CALL_TYPE_FILTER, Intent.ACTION_VIEWVOICEMAIL_TYPE);
+        contentIntent->PutExtra(ICalls::EXTRA_CALL_TYPE_FILTER, IIntent::ACTION_VIEWVOICEMAIL_TYPE);
     }
     AutoPtr<IPendingIntentHelper> helper;
     CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);

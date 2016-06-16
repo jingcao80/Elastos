@@ -1,5 +1,5 @@
 
-#include "CCallTypeIconsView.h"
+#include "elastos/apps/dialer/calllog/CCallTypeIconsView.h"
 
 using Elastos::Droid::Graphics::IBitmapHelper;
 using Elastos::Droid::Graphics::CBitmapHelper;
@@ -7,8 +7,8 @@ using Elastos::Droid::Graphics::IBitmapFactory;
 using Elastos::Droid::Graphics::CBitmapFactory;
 using Elastos::Droid::Graphics::PorterDuffMode;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -74,9 +74,9 @@ CCallTypeIconsView::Resources::Resources(
 //=================================================================
 // CCallTypeIconsView
 //=================================================================
-CAR_INTERFACE_IMPL(CCallTypeIconsView, View, ICallTypeIconsView)
+CAR_INTERFACE_IMPL(CCallTypeIconsView, View, ICallTypeIconsView);
 
-CAR_OBJECT_IMPL(CCallTypeIconsView)
+CAR_OBJECT_IMPL(CCallTypeIconsView);
 
 CCallTypeIconsView::CCallTypeIconsView()
     : mShowVideo(FALSE)

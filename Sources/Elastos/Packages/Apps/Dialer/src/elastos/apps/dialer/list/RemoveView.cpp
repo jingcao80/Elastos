@@ -1,12 +1,12 @@
 
-#include "RemoveView.h"
+#include "list/RemoveView.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
-CAR_INTERFACE_IMPL(RemoveView, FrameLayout, IRemoveView)
+CAR_INTERFACE_IMPL(RemoveView, FrameLayout, IRemoveView);
 
 ECode RemoveView::constructor(
     /* [in] */ IContext* context)

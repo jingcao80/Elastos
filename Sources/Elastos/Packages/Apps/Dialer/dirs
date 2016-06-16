@@ -1,2 +1,2 @@
 
-DIRS += src/elastos/apps/dialer
+DIRS += src/elastos/apps

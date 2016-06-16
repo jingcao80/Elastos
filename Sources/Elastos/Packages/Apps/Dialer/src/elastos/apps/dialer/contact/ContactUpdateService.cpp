@@ -1,11 +1,11 @@
-#include "ContactUpdateService.h"
+#include "contact/ContactUpdateService.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Contact {
 
-CAR_INTERFACE_IMPL(ContactUpdateService, IntentService, IContactUpdateService)
+CAR_INTERFACE_IMPL(ContactUpdateService, IntentService, IContactUpdateService);
 
 ECode ContactUpdateService::constructor()
 {

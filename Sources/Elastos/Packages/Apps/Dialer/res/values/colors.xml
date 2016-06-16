@@ -86,7 +86,7 @@
     <color name="call_log_expanded_background_color">#ffffff</color>
     <!-- Color of actions in expanded call log entries.  This text color represents actions such
          as call back, play voicemail, etc. -->
-    <color name="call_log_action_text">@color/dialer_theme_color</color>
+    <!-- <color name="call_log_action_text">@color/dialer_theme_color</color> -->
 
     <!-- Color for missed call icons. -->
     <color name="missed_call">#ff2e58</color>

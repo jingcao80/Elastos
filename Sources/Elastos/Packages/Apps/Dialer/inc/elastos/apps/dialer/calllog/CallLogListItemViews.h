@@ -1,8 +1,14 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CALLLOGLISTITEMVIEWS_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CALLLOGLISTITEMVIEWS_H__
 
-namespace Elastos{
-namespace Apps{
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.Droid.Telecomm.h"
+
+using Elastos::Droid::Widget::IQuickContactBadge;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -13,10 +19,10 @@ class CallLogListItemViews
 public:
     CAR_INTERFACE_DECL()
 
-    CARAPI_(AutoPtr<ICallLogListItemViews>) FromView(
+    static CARAPI_(AutoPtr<ICallLogListItemViews>) FromView(
         /* [in] */ IView* view);
 
-    CARAPI_(AutoPtr<ICallLogListItemViews>) CreateForTest(
+    static CARAPI_(AutoPtr<ICallLogListItemViews>) CreateForTest(
         /* [in] */ IContext* context);
 
 private:

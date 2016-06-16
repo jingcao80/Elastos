@@ -1,8 +1,8 @@
 
-#include "CPhoneQuery.h"
+#include "elastos/apps/dialer/calllog/CPhoneQuery.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -18,17 +18,18 @@ const String CPhoneQuery::_PROJECTION[] = {
     IContactsContractPhoneLookup::PHOTO_URI
 }
 
-CAR_INTERFACE_IMPL(CPhoneQuery, Singleton, IPhoneQuery)
+CAR_INTERFACE_IMPL(CPhoneQuery, Singleton, IPhoneQuery);
 
-CAR_SINGLETON_IMPL(CPhoneQuery)
+CAR_SINGLETON_IMPL(CPhoneQuery);
 
 ECode CPhoneQuery::Get_PROJECTION(
     /* [out, callee] */ ArrayOf<String>** result)
 {
     VALUE_NOT_NULL(result);
 
+    // TODO:
     AutoPtr<ArrayOf<String> > projection = ArrayOf<String>::Alloc(
-        _PROJECTION, sizeof(_PROJECTION)/sizeof(String));
+        _PROJECTION, 9);
     *result = projection;
     REFCOUNT_ADD(*result);
     return NOERROR;

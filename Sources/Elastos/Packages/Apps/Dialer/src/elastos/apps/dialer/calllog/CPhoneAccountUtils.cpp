@@ -1,16 +1,15 @@
 
+#include "elastos/apps/dialer/calllog/CPhoneAccountUtils.h"
+#include "elastos/apps/dialer/calllog/PhoneAccountUtils.h"
 
-#include "CPhoneAccountUtils.h"
-#include "PhoneAccountUtils.h"
-
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
-CAR_INTERFACE_IMPL(CPhoneAccountUtils, Singleton, IPhoneAccountUtils)
+CAR_INTERFACE_IMPL(CPhoneAccountUtils, Singleton, IPhoneAccountUtils);
 
-CAR_SINGLETON_IMPL(CPhoneAccountUtils)
+CAR_SINGLETON_IMPL(CPhoneAccountUtils);
 
 ECode CPhoneAccountUtils::GetAccount(
     /* [in] */ String componentString,

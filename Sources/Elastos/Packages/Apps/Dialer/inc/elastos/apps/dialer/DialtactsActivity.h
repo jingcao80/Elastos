@@ -1,10 +1,54 @@
 #ifndef __ELASTOS_APPS_DIALER_DIALTACTSACTIVITY_H__
 #define __ELASTOS_APPS_DIALER_DIALTACTSACTIVITY_H__
 
+#include "elastos/apps/dialer/activity/TransactionSafeActivity.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+using Elastos::Droid::App::IFragment;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Text::IEditable;
+using Elastos::Droid::Text::ITextWatcher;
+using Elastos::Droid::View::IDragEvent;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IMenu;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IViewOnDragListener;
+using Elastos::Droid::View::IViewOnKeyListener;
+using Elastos::Droid::View::IViewOnTouchListener;
+using Elastos::Droid::View::IOnGlobalLayoutListener;
+using Elastos::Droid::Widget::IEditText;
+using Elastos::Droid::Widget::IFrameLayout;
+using Elastos::Droid::Widget::IPopupMenu;
+using Elastos::Droid::Widget::IPopupMenuOnMenuItemClickListener;
+using Elastos::Core::IInteger64;
+using Elastos::Apps::Dialer::Activity::TransactionSafeActivity;
+using Elastos::Apps::Dialer::Database::IDialerDatabaseHelper;
+using Elastos::Apps::Dialer::Dialpad::IDialpadFragment;
+using Elastos::Apps::Dialer::Dialpad::IOnDialpadQueryChangedListener;
+using Elastos::Apps::Dialer::List::IListsFragment;
+using Elastos::Apps::Dialer::List::IListsFragmentHostInterface;
+using Elastos::Apps::Dialer::List::ISpeedDialFragmentHostInterface;
+using Elastos::Apps::Dialer::List::ISearchFragmentHostInterface;
+using Elastos::Apps::Dialer::List::IOnDragDropListener;
+using Elastos::Apps::Dialer::List::IPhoneFavoriteSquareTileView;
+using Elastos::Apps::Dialer::List::IDragDropController;
+using Elastos::Apps::Dialer::List::IRegularSearchFragment;
+using Elastos::Apps::Dialer::List::ISmartDialSearchFragment;
+using Elastos::Apps::Dialer::Widget::IActionBarController;
+using Elastos::Apps::Dialer::Widget::IActionBarControllerActivityUi;
+using Elastos::Apps::Dialer::Widget::ISearchEditTextLayoutOnBackButtonClickedListener;
+
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
 /**
  * The dialer tab's title is 'phone', a more common name (see strings.xml).
@@ -18,7 +62,8 @@ class DialtactsActivity
     , public ISpeedDialFragmentHostInterface
     , public ISearchFragmentHostInterface
     , public IOnDragDropListener
-    , public IOnPhoneNumberPickerActionListener
+    //TODO:
+    // , public IOnPhoneNumberPickerActionListener
     , public IPopupMenuOnMenuItemClickListener
     //TODO:
     // , public IViewPagerOnPageChangeListener
@@ -36,7 +81,9 @@ private:
     // };
 
     class OptionsPopupMenu
-        : public PopupMenu
+        : public Object
+        // TODO
+        //: public PopupMenu
     {
     public:
         OptionsPopupMenu(
@@ -79,7 +126,7 @@ private:
 
     class PhoneSearchQueryTextListener
         : public Object
-        : public ITextWatcher
+        , public ITextWatcher
     {
     public:
         CAR_INTERFACE_DECL()
@@ -230,7 +277,7 @@ public:
 
     // @Override
     CARAPI OnMenuItemClick(
-        /* [in] */ IVMenuItem* item,
+        /* [in] */ IMenuItem* item,
         /* [out] */ Boolean* result);
 
     /**
@@ -496,7 +543,7 @@ private:
     CARAPI_(void) UpdateFloatingActionButtonControllerAlignment(
         /* [in] */ Boolean animate);
 public:
-    static const boolean DEBUG; // = Log.isLoggable(TAG, Log.DEBUG);
+    static const Boolean DEBUG; // = Log.isLoggable(TAG, Log.DEBUG);
 
 private:
     static const String TAG; // = "DialtactsActivity";
@@ -604,7 +651,8 @@ private:
     AutoPtr<IDragDropController> mDragDropController;
     AutoPtr<IActionBarController> mActionBarController;
 
-    AutoPtr<IFloatingActionButtonController> mFloatingActionButtonController;
+    // TODO:
+    // AutoPtr<IFloatingActionButtonController> mFloatingActionButtonController;
 
     Int32 mActionBarHeight;
 

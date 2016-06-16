@@ -1,11 +1,11 @@
 module
 {
     using interface Elastos.Droid.Widget.IAbsListView;
-    interface Elastos.Apps.Dailer.List.IDragDropController;
+    interface Elastos.Apps.Dialer.List.IDragDropController;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace List {
 
     /**
@@ -34,7 +34,7 @@ module
     }
 
     } //List
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

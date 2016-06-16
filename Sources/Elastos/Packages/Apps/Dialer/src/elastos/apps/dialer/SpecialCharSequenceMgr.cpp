@@ -1,14 +1,14 @@
 #include "SpecialCharSequenceMgr.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
 
 //================================================================
 // SpecialCharSequenceMgr::SimContactQueryCookie
 //================================================================
-CAR_INTERFACE_IMPL(SpecialCharSequenceMgr::SimContactQueryCookie, Object, IDialogInterfaceOnCancelListener)
+CAR_INTERFACE_IMPL(SpecialCharSequenceMgr::SimContactQueryCookie, Object, IDialogInterfaceOnCancelListener);
 
 SpecialCharSequenceMgr::SimContactQueryCookie::SimContactQueryCookie(
     /* [in] */ Int32 number,

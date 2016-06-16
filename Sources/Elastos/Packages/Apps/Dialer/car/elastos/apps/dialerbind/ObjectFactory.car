@@ -2,17 +2,17 @@ module
 {
     using interface Elastos.Droid.App.IDialogFragment;
     using interface Elastos.Droid.Content.IContext;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogAdapter;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogAdapterCallFetcher;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogAdapterCallItemExpandedListener;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogAdapterOnReportButtonClickListener;
-    interface Elastos.Apps.Dailer.CallLog.IContactInfoHelper;
-    interface Elastos.Apps.Dailer.Service.ICachedNumberLookupService;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogAdapter;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogAdapterCallFetcher;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogAdapterCallItemExpandedListener;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogAdapterOnReportButtonClickListener;
+    interface Elastos.Apps.Dialer.CallLog.IContactInfoHelper;
+    interface Elastos.Apps.Dialer.Service.ICachedNumberLookupService;
 
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace DailerBind {
+    namespace DialerBind {
 
     [deprecated, local]
     interface IObjectFactory {
@@ -41,7 +41,7 @@ module
             [out] IDialogFragment** fragment);
     }
 
-    } // DailerBind
+    } // DialerBind
     } // Apps
     } // Elastos
 }

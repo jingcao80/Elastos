@@ -2,8 +2,9 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CCALLLOGGROUPBUILDER_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CCALLLOGGROUPBUILDER_H__
 
-#include "_Elastos_Apps_Dialer_CCallLogGroupBuilder.h"
+#include "_Elastos_Apps_Dialer_CallLog_CCallLogGroupBuilder.h"
 
+using Elastos::Droid::Text::Format::ITime;
 
 namespace Elastos{
 namespace Apps{

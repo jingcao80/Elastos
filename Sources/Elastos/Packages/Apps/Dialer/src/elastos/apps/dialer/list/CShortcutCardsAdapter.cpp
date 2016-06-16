@@ -1,12 +1,12 @@
 
-#include "CShortcutCardsAdapter .h"
+#include "list/CShortcutCardsAdapter .h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
-CAR_OBJECT_IMPL(CShortcutCardsAdapter)
+CAR_OBJECT_IMPL(CShortcutCardsAdapter);
 
 } // List
 } // Dialer

@@ -1,9 +1,9 @@
 
 #include "CallDetailActivityQueryHandler.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
 const String CallDetailActivityQueryHandler::TAG("CallDetail");
 const Int32 CallDetailActivityQueryHandler::QUERY_VOICEMAIL_CONTENT_TOKEN = 101;
@@ -12,7 +12,7 @@ const Int32 CallDetailActivityQueryHandler::SOURCE_PACKAGE_COLUMN_INDEX = 0;
 const Int32 CallDetailActivityQueryHandler::HAS_CONTENT_COLUMN_INDEX = 1;
 
 CAR_INTERFACE_IMPL(CallDetailActivityQueryHandler,
-        NoNullCursorAsyncQueryHandler, ICallDetailActivityQueryHandler)
+        NoNullCursorAsyncQueryHandler, ICallDetailActivityQueryHandler);
 
 CallDetailActivityQueryHandler::CallDetailActivityQueryHandler()
 {

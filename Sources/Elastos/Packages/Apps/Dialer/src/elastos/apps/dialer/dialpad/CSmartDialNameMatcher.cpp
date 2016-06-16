@@ -1,12 +1,12 @@
 
-#include "CSmartDialNameMatcher.h"
+#include "dialpad/CSmartDialNameMatcher.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
-CAR_OBJECT_IMPL(CSmartDialNameMatcher)
+CAR_OBJECT_IMPL(CSmartDialNameMatcher);
 
 } // Dialpad
 } // Dialer

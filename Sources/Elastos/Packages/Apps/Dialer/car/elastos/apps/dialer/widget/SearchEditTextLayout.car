@@ -2,9 +2,9 @@ module
 {
     using interface Elastos.Droid.View.IViewOnKeyListener;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace Widget {
 
     /**
@@ -58,7 +58,7 @@ module
     }
 
     } // Widget
-    } // Dailer
+    } // Dialer
     } // Apps
     } // Elastos
 }

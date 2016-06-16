@@ -20,8 +20,8 @@ using Elastos::Core::IStringBuilder;
 using Elastos::Core::CStringBuilder;
 using Elastos::Utility::Logger;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 
 const String CCallDetailActivity::TAG("CallDetail");
@@ -87,7 +87,7 @@ Int32 CCallDetailActivity::TRANSCRIPTION_COLUMN_INDEX = 11;
 //=================================================================
 // CCallDetailActivity::ProximitySensorListener::BlankRunnable
 //=================================================================
-CAR_INTERFACE_IMPL(CCallDetailActivity::ProximitySensorListener::BlankRunnable, Object, IRunnable)
+CAR_INTERFACE_IMPL(CCallDetailActivity::ProximitySensorListener::BlankRunnable, Object, IRunnable);
 
 CCallDetailActivity::ProximitySensorListener::BlankRunnable::BlankRunnable()
     /* [in] */ ProximitySensorListener* host)
@@ -109,9 +109,9 @@ ECode CCallDetailActivity::ProximitySensorListener::BlankRunnable::Run()
 //=================================================================
 // CCallDetailActivity::ProximitySensorListener::UnblankRunnable
 //=================================================================
-CAR_INTERFACE_IMPL(CCallDetailActivity::ProximitySensorListener::UnblankRunnable, Object, IRunnable)
+CAR_INTERFACE_IMPL(CCallDetailActivity::ProximitySensorListener::UnblankRunnable, Object, IRunnable);
 
-CCallDetailActivity::ProximitySensorListener::UnblankRunnable::UnblankRunnable()
+CCallDetailActivity::ProximitySensorListener::UnblankRunnable::UnblankRunnable(
     /* [in] */ CCallDetailActivity* host)
     : mHost(host)
 {}
@@ -132,7 +132,7 @@ ECode CCallDetailActivity::ProximitySensorListener::UnblankRunnable::Run()
 // CCallDetailActivity::ProximitySensorListener
 //=================================================================
 
-CAR_INTERFACE_IMPL(CCallDetailActivity::ProximitySensorListener, Object, IProximitySensorManagerListener)
+CAR_INTERFACE_IMPL(CCallDetailActivity::ProximitySensorListener, Object, IProximitySensorManagerListener);
 
 CCallDetailActivity::ProximitySensorListener::ProximitySensorListener(
     /* [in] */ CCallDetailActivity* host)
@@ -486,7 +486,7 @@ ECode CCallDetailActivity::MenuTrashVoicemailTask::OnPostExecute(
 // CCallDetailActivity
 //=================================================================
 
-CAR_INTERFACE_IMPL_2(CCallDetailActivity, AnalyticsActivity, IProximitySensorAware, ICallDetailActivity)
+CAR_INTERFACE_IMPL_2(CCallDetailActivity, AnalyticsActivity, IProximitySensorAware, ICallDetailActivity);
 
 CAR_OBJECT_IMPL(CCallDetailActivity)
 

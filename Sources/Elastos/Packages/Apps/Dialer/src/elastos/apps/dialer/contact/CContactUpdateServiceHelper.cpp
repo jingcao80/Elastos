@@ -1,15 +1,15 @@
 
-#include "ContactUpdateService.h"
-#include "CContactUpdateServiceHelper.h"
+#include "contact/ContactUpdateService.h"
+#include "contact/CContactUpdateServiceHelper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Contact {
 
-CAR_INTERFACE_IMPL(CContactUpdateServiceHelper, Singleton, IContactUpdateServiceHelper)
+CAR_INTERFACE_IMPL(CContactUpdateServiceHelper, Singleton, IContactUpdateServiceHelper);
 
-CAR_SINGLETON_IMPL(CContactUpdateServiceHelper)
+CAR_SINGLETON_IMPL(CContactUpdateServiceHelper);
 
 ECode CContactUpdateServiceHelper::CreateSetSuperPrimaryIntent(
     /* [in] */ IContext* context,

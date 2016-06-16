@@ -2,9 +2,9 @@ module
 {
     using interface Elastos.Droid.Net.IUri;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
 
     /**
      * @Involve
@@ -26,7 +26,7 @@ module
             [in] IUri* voicemailUri);
     }
 
-    } // Dailer
+    } // Dialer
     } // Apps
     } // Elastos
 }

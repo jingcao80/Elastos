@@ -1,13 +1,13 @@
 
 #include "PhoneCallDetailsHelper.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
 const Int32 PhoneCallDetailsHelper::MAX_CALL_TYPE_ICONS = 3;
 
-CAR_INTERFACE_IMPL(PhoneCallDetailsHelper, Object, IPhoneCallDetailsHelper)
+CAR_INTERFACE_IMPL(PhoneCallDetailsHelper, Object, IPhoneCallDetailsHelper);
 
 PhoneCallDetailsHelper::PhoneCallDetailsHelper()
 {

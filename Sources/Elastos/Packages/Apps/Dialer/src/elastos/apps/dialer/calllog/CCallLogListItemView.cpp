@@ -1,14 +1,14 @@
 
-#include "CCallLogListItemView.h"
+#include "elastos/apps/dialer/calllog/CCallLogListItemView.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
-CAR_INTERFACE_IMPL(CCallLogListItemView, LinearLayout, ICallLogListItemView)
+CAR_INTERFACE_IMPL(CCallLogListItemView, LinearLayout, ICallLogListItemView);
 
-CAR_OBJECT_IMPL(CCallLogListItemView)
+CAR_OBJECT_IMPL(CCallLogListItemView);
 
 ECode CCallLogListItemView::constructor(
     /* [in] */ IContext* context)

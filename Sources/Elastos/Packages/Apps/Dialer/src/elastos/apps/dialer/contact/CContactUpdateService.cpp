@@ -1,12 +1,12 @@
 
-#include "CContactUpdateService.h"
+#include "contact/CContactUpdateService.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Contact {
 
-CAR_OBJECT_IMPL(CContactUpdateService)
+CAR_OBJECT_IMPL(CContactUpdateService);
 
 } // Contact
 } // Dialer

@@ -1,14 +1,14 @@
 
-#include "CCallLogAdapterHelper.h"
+#include "elastos/apps/dialer/calllog/CCallLogAdapterHelper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
-CAR_INTERFACE_IMPL(CCallLogAdapterHelper, Singleton, ICallLogAdapterHelper)
+CAR_INTERFACE_IMPL(CCallLogAdapterHelper, Singleton, ICallLogAdapterHelper);
 
-CAR_SINGLETON_IMPL(CCallLogAdapterHelper)
+CAR_SINGLETON_IMPL(CCallLogAdapterHelper);
 
 ECode CCallLogAdapterHelper::ExpandVoicemailTranscriptionView(
     /* [in] */ ICallLogListItemViews* views,

@@ -1,12 +1,12 @@
 
-#include "CallLogListItemViews.h"
+#include "elastos/apps/dialer/calllog/CallLogListItemViews.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
-CAR_INTERFACE_IMPL(CallLogListItemViews, Object, ICallLogListItemViews)
+CAR_INTERFACE_IMPL(CallLogListItemViews, Object, ICallLogListItemViews);
 
 CallLogListItemViews::CallLogListItemViews(
     /* [in] */ IQuickContactBadge* quickContactView,

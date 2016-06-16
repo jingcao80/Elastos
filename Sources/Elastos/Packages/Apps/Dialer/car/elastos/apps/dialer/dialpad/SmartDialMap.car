@@ -2,9 +2,9 @@
 module
 {
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace Dialpad {
 
     /**
@@ -62,7 +62,7 @@ module
     }
 
     } //Dialpad
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

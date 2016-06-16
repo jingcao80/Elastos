@@ -1,15 +1,15 @@
 
-#include "CDialerUtils.h"
-#include "DialerUtils.h"
+#include "util/CDialerUtils.h"
+#include "util/DialerUtils.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Util {
 
-CAR_INTERFACE_IMPL(CDialerUtils, Singleton, IDialerUtils)
+CAR_INTERFACE_IMPL(CDialerUtils, Singleton, IDialerUtils);
 
-CAR_SINGLETON_IMPL(CDialerUtils)
+CAR_SINGLETON_IMPL(CDialerUtils);
 
 ECode CDialerUtils::StartActivityWithErrorToast(
     /* [in] */ IContext* context,

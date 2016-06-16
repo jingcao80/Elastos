@@ -1,14 +1,14 @@
 
-#include "CPhoneNumberDisplayHelper.h"
+#include "elastos/apps/dialer/calllog/CPhoneNumberDisplayHelper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
-CAR_INTERFACE_IMPL(CPhoneNumberDisplayHelper, Object, IPhoneNumberDisplayHelper)
+CAR_INTERFACE_IMPL(CPhoneNumberDisplayHelper, Object, IPhoneNumberDisplayHelper);
 
-CAR_OBJECT_IMPL(CPhoneNumberDisplayHelper)
+CAR_OBJECT_IMPL(CPhoneNumberDisplayHelper);
 
 ECode CPhoneNumberDisplayHelper::constructor(
     /* [in] */ IResources* resources)

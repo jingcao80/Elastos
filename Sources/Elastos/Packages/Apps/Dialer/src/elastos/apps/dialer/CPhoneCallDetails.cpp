@@ -1,12 +1,12 @@
 
 #include "CPhoneCallDetails.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
-CAR_INTERFACE_IMPL(CPhoneCallDetails, Object, IPhoneCallDetails)
+CAR_INTERFACE_IMPL(CPhoneCallDetails, Object, IPhoneCallDetails);
 
-CAR_OBJECT_IMPL(CPhoneCallDetails)
+CAR_OBJECT_IMPL(CPhoneCallDetails);
 
 ECode CPhoneCallDetails::constructor(
     /* [in] */ ICharSequence* number,

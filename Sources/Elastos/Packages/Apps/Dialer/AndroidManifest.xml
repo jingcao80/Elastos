@@ -263,9 +263,16 @@
              from outside the phone app; instead, it's either launched by
              the OutgoingCallBroadcaster (for outgoing calls), or as the
              fullScreenIntent of a notification (for incoming calls.) -->
-        <activity android:name="Elastos.Apps.Incallui.CInCallActivity"
+        <!-- <activity android:name="Elastos.Apps.Incallui.CInCallActivity"
                   android:theme="@style/Theme.InCallScreen"
                   android:label="@string/phoneAppLabel"
+                  android:excludeFromRecents="true"
+                  android:launchMode="singleInstance"
+                  android:configChanges="keyboardHidden"
+                  android:exported="false"
+                  android:process="com.android.incallui"
+                  android:screenOrientation="nosensor" > -->
+        <activity android:name="Elastos.Apps.Incallui.CInCallActivity"
                   android:excludeFromRecents="true"
                   android:launchMode="singleInstance"
                   android:configChanges="keyboardHidden"

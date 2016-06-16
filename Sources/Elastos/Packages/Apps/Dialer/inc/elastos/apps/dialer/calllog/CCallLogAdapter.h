@@ -2,10 +2,10 @@
 #define __ELASTOS_APPS_DIALER_CALLLOG_CCALLLOGADAPTER_H__
 
 #include "_Elastos_Apps_Dialer_CallLog_CCallLogAdapter.h"
-#include "CallLogAdapter.h"
+#include "elastos/apps/dialer/calllog/CallLogAdapter.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 

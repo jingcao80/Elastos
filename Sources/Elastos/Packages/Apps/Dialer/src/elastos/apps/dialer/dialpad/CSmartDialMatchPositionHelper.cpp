@@ -1,14 +1,14 @@
-#include "SmartDialMatchPosition.h"
-#include "CSmartDialMatchPositionHelper.h"
+#include "dialpad/SmartDialMatchPosition.h"
+#include "dialpad/CSmartDialMatchPositionHelper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
-CAR_INTERFACE_IMPL(CSmartDialMatchPositionHelper, Singleton, ISmartDialMatchPositionHelper)
+CAR_INTERFACE_IMPL(CSmartDialMatchPositionHelper, Singleton, ISmartDialMatchPositionHelper);
 
-CAR_SINGLETON_IMPL(CSmartDialMatchPositionHelper)
+CAR_SINGLETON_IMPL(CSmartDialMatchPositionHelper);
 
 ECode CSmartDialMatchPositionHelper::AdvanceMatchPositions(
     /* [in] */ IArrayList* inList,

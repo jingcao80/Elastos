@@ -36,7 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/shadow_length"
             android:background="@drawable/shadow_fade_up" />
-        <include layout="@layout/dialpad_view" />
+        <!-- <include layout="@layout/dialpad_view" /> -->
         <!-- "Dialpad chooser" UI, shown only when the user brings up the
                  Dialer while a call is already in progress.
                  When this UI is visible, the other Dialer elements
@@ -55,9 +55,15 @@
         android:layout_height="@dimen/floating_action_button_margin_bottom"
         android:layout_alignParentBottom="true" />
 
-    <FrameLayout
+    <!-- <FrameLayout
         android:id="@+id/dialpad_floating_action_button_container"
         android:background="@drawable/fab_green"
+        android:layout_width="@dimen/floating_action_button_width"
+        android:layout_height="@dimen/floating_action_button_height"
+        android:layout_above="@id/dialpad_floating_action_button_margin_bottom"
+        android:layout_centerHorizontal="true"> -->
+    <FrameLayout
+        android:id="@+id/dialpad_floating_action_button_container"
         android:layout_width="@dimen/floating_action_button_width"
         android:layout_height="@dimen/floating_action_button_height"
         android:layout_above="@id/dialpad_floating_action_button_margin_bottom"
