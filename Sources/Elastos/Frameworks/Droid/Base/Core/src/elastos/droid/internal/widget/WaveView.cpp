@@ -474,7 +474,7 @@ void WaveView::WaveUpdateFrame(
                     for (UInt32 n = 0; n < mLightWaves.GetSize(); n++) {
                         AutoPtr<IDrawableHolder> wave;
                         wave = mLightWaves[n];
-                        Int64 delay = 1000L*(6 + n - mCurrentWave)/10L;
+                        Int64 delay = 1000LL*(6 + n - mCurrentWave)/10LL;
                         res = NULL;
                         wave->AddAnimTo(FINAL_DURATION, delay, strX, ringX, TRUE, (IObjectAnimator**)&res);
                         res = NULL;

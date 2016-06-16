@@ -38,8 +38,7 @@ ECode AnalogClock::IntentBroadcastReceiver::OnReceive(
 {
     String action;
     intent->GetAction(&action);
-    if(action == IIntent::ACTION_TIMEZONE_CHANGED)
-    {
+    if (action == IIntent::ACTION_TIMEZONE_CHANGED) {
         String tz;
         intent->GetStringExtra(String("time-zone"), &tz);
         AutoPtr<ITimeZoneHelper> helper;
@@ -52,6 +51,10 @@ ECode AnalogClock::IntentBroadcastReceiver::OnReceive(
         mHost->mCalendar = NULL;
         CTime::New(id, (ITime**)&(mHost->mCalendar));
     }
+
+    mHost->OnTimeChanged();
+    mHost->Invalidate();
+
     return NOERROR;
 }
 
@@ -62,129 +65,6 @@ ECode AnalogClock::IntentBroadcastReceiver::ToString(
     *info = String("AnalogClock::IntentBroadcastReceiver: ");
     (*info).AppendFormat("%p", this);
     return NOERROR;
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::GoAsync(
-    /* [out] */ IPendingResult** pendingResult)
-{
-    return BroadcastReceiver::GoAsync(pendingResult);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::PeekService(
-    /* [in] */ IContext* myContext,
-    /* [in] */ IIntent* service,
-    /* [out] */ IBinder** binder)
-{
-    return BroadcastReceiver::PeekService(myContext, service, binder);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::SetResultCode(
-    /* [in] */ Int32 code)
-{
-    return BroadcastReceiver::SetResultCode(code);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::GetResultCode(
-    /* [out] */ Int32* code)
-{
-    return BroadcastReceiver::GetResultCode(code);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::SetResultData(
-    /* [in] */ const String& data)
-{
-    return BroadcastReceiver::SetResultData(data);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::GetResultData(
-    /* [out] */ String* data)
-{
-    return BroadcastReceiver::GetResultData(data);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::SetResultExtras(
-    /* [in] */ IBundle* extras)
-{
-    return BroadcastReceiver::SetResultExtras(extras);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::GetResultExtras(
-    /* [in] */ Boolean makeMap,
-    /* [out] */ IBundle** extras)
-{
-    return BroadcastReceiver::GetResultExtras(makeMap, extras);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::SetResult(
-    /* [in] */ Int32 code,
-    /* [in] */ const String& data,
-    /* [in] */ IBundle* extras)
-{
-    return BroadcastReceiver::SetResult(code, data, extras);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::GetAbortBroadcast(
-    /* [out] */ Boolean* isAborted)
-{
-    return BroadcastReceiver::GetAbortBroadcast(isAborted);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::AbortBroadcast()
-{
-    return BroadcastReceiver::AbortBroadcast();
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::ClearAbortBroadcast()
-{
-    return BroadcastReceiver::ClearAbortBroadcast();
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::IsOrderedBroadcast(
-    /* [out] */ Boolean* isOrdered)
-{
-    return BroadcastReceiver::IsOrderedBroadcast(isOrdered);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::IsInitialStickyBroadcast(
-    /* [out] */ Boolean* isInitial)
-{
-    return BroadcastReceiver::IsInitialStickyBroadcast(isInitial);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::SetOrderedHint(
-    /* [in] */ Boolean isOrdered)
-{
-    return BroadcastReceiver::SetOrderedHint(isOrdered);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::SetPendingResult(
-    /* [in] */ IPendingResult* result)
-{
-    return BroadcastReceiver::SetPendingResult(result);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::GetPendingResult(
-    /* [out] */ IPendingResult** pendingResult)
-{
-    return BroadcastReceiver::GetPendingResult(pendingResult);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::GetSendingUserId(
-    /* [out] */ Int32* userId)
-{
-    return BroadcastReceiver::GetSendingUserId(userId);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::SetDebugUnregister(
-    /* [in] */ Boolean debug)
-{
-    return BroadcastReceiver::SetDebugUnregister(debug);
-}
-
-ECode AnalogClock::IntentBroadcastReceiver::GetDebugUnregister(
-    /* [out] */ Boolean* debugUnregister)
-{
-    return BroadcastReceiver::GetDebugUnregister(debugUnregister);
 }
 
 AnalogClock::AnalogClock()

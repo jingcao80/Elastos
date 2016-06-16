@@ -42,7 +42,7 @@ namespace Policy {
 
 const String MobileDataController::TAG("MobileDataController");
 const Boolean MobileDataController::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
-const Int64 MobileDataController::DEFAULT_WARNING_LEVEL = 2L * 1024ul * 1024ul * 1024ul;
+const Int64 MobileDataController::DEFAULT_WARNING_LEVEL = 2LL * 1024ul * 1024ul * 1024ul;
 const Int32 MobileDataController::FIELDS = INetworkStatsHistory::FIELD_RX_BYTES | INetworkStatsHistory::FIELD_TX_BYTES;
 Boolean MobileDataController::sInit = InitStatic();
 AutoPtr<IStringBuilder> MobileDataController::PERIOD_BUILDER;

@@ -1164,7 +1164,7 @@ Boolean CFormatter::AppendT(
         {
             Int32 calvalue = 0;
             calendar->Get(ICalendar::MILLISECOND, &calvalue);
-            AppendLocalized(result, calvalue * 1000000L, 9);
+            AppendLocalized(result, calvalue * 1000000LL, 9);
             return TRUE;
         }
         case 'Q':

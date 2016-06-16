@@ -68,7 +68,7 @@ ECode CZoneInfoWallTime::Localtime(
 
     // Set fields.
     AutoPtr<ICalendar> cld = ICalendar::Probe(mCalendar);
-    cld->SetTimeInMillis(wallTimeSeconds * 1000L);
+    cld->SetTimeInMillis(wallTimeSeconds * 1000LL);
     CopyFieldsFromCalendar();
     mIsDst = isDst;
     mGmtOffsetSeconds = offsetSeconds;
@@ -358,7 +358,7 @@ ECode CZoneInfoWallTime::TryOffsetAdjustments(
 
             // Modify field state and return the result.
             AutoPtr<ICalendar> calendar = ICalendar::Probe(mCalendar);
-            calendar->SetTimeInMillis(adjustedWallTimeSeconds * 1000L);
+            calendar->SetTimeInMillis(adjustedWallTimeSeconds * 1000LL);
             CopyFieldsFromCalendar();
             targetInterval->GetIsDst(&mIsDst);
             mGmtOffsetSeconds = targetIntervalOffsetSeconds;

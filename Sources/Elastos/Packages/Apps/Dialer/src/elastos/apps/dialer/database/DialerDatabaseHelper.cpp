@@ -129,8 +129,8 @@ const Int32 DialerDatabaseHelper::DeleteContactQuery::DELECTED_TIMESTAMP = 1;
 //=================================================================
 // DialerDatabaseHelper::SmartDialSortingOrder
 //=================================================================
-const Int64 DialerDatabaseHelper::SmartDialSortingOrder::LAST_TIME_USED_CURRENT_MS = 3L * 24 * 60 * 60 * 1000;
-const Int64 DialerDatabaseHelper::SmartDialSortingOrder::LAST_TIME_USED_RECENT_MS = 30L * 24 * 60 * 60 * 1000;
+const Int64 DialerDatabaseHelper::SmartDialSortingOrder::LAST_TIME_USED_CURRENT_MS = 3LL * 24 * 60 * 60 * 1000;
+const Int64 DialerDatabaseHelper::SmartDialSortingOrder::LAST_TIME_USED_RECENT_MS = 30LL * 24 * 60 * 60 * 1000;
 
 const String DialerDatabaseHelper::SmartDialSortingOrder::TIME_SINCE_LAST_USED_MS = String("( ?1 - ") +
         DialerDatabaseHelper::Tables::SMARTDIAL_TABLE + "."

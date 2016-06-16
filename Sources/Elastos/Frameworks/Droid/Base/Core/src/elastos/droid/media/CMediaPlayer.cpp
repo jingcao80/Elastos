@@ -584,7 +584,7 @@ ECode CMediaPlayer::TimeProvider::GetCurrentTimeUs(
             // try {
             Int32 val;
             mPlayer->GetCurrentPosition(&val);
-            mLastTimeUs = val * 1000L;
+            mLastTimeUs = val * 1000LL;
             Boolean b;
             mPlayer->IsPlaying(&b);
             mPaused = !b;

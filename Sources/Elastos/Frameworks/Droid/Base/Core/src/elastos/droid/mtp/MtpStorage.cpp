@@ -37,7 +37,7 @@ ECode MtpStorage::constructor(
     res->GetString(descId, &mDescription);
     Int32 space;
     volume->GetMtpReserveSpace(&space);
-    mReserveSpace = space * 1024L * 1024L;
+    mReserveSpace = space * 1024LL * 1024LL;
     volume->IsRemovable(&mRemovable);
     volume->GetMaxFileSize(&mMaxFileSize);
     return NOERROR;

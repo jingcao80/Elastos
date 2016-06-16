@@ -50,69 +50,6 @@ private:
         CARAPI ToString(
             /* [out] */ String* info);
 
-        CARAPI GoAsync(
-            /* [out] */ IPendingResult** pendingResult);
-
-        CARAPI PeekService(
-            /* [in] */ IContext* myContext,
-            /* [in] */ IIntent* service,
-            /* [out] */ IBinder** binder);
-
-        CARAPI SetResultCode(
-            /* [in] */ Int32 code);
-
-        CARAPI GetResultCode(
-            /* [out] */ Int32* code);
-
-        CARAPI SetResultData(
-            /* [in] */ const String& data);
-
-        CARAPI GetResultData(
-            /* [out] */ String* data);
-
-        CARAPI SetResultExtras(
-            /* [in] */ IBundle* extras);
-
-        CARAPI GetResultExtras(
-            /* [in] */ Boolean makeMap,
-            /* [out] */ IBundle** extras);
-
-        CARAPI SetResult(
-            /* [in] */ Int32 code,
-            /* [in] */ const String& data,
-            /* [in] */ IBundle* extras);
-
-        CARAPI GetAbortBroadcast(
-            /* [out] */ Boolean* isAborted);
-
-        CARAPI AbortBroadcast();
-
-        CARAPI ClearAbortBroadcast();
-
-        CARAPI IsOrderedBroadcast(
-            /* [out] */ Boolean* isOrdered);
-
-        CARAPI IsInitialStickyBroadcast(
-            /* [out] */ Boolean* isInitial);
-
-        CARAPI SetOrderedHint(
-            /* [in] */ Boolean isOrdered);
-
-        CARAPI SetPendingResult(
-            /* [in] */ IPendingResult* result);
-
-        CARAPI GetPendingResult(
-            /* [out] */ IPendingResult** pendingResult);
-
-        CARAPI GetSendingUserId(
-            /* [out] */ Int32* userId);
-
-        CARAPI SetDebugUnregister(
-            /* [in] */ Boolean debug);
-
-        CARAPI GetDebugUnregister(
-            /* [out] */ Boolean* debugUnregister);
-
     private:
         AnalogClock* mHost;
     };

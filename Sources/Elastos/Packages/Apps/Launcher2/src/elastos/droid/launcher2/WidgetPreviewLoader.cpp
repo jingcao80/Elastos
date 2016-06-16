@@ -417,10 +417,11 @@ ECode WidgetPreviewLoader::GetPreview(
                     AutoPtr<IWeakReference> wr = IWeakReference::Probe(outObj);
                     AutoPtr<IInterface> mapObj;
                     wr->Resolve(EIID_IBitmap, (IInterface**)&mapObj);
-                    AutoPtr<IBitmap> _bitmap = IBitmap::Probe(mapObj);
-                    *bitmap = _bitmap;
-                    REFCOUNT_ADD(*bitmap);
-                    return NOERROR;
+                    if (mapObj != NULL) {
+                        *bitmap = IBitmap::Probe(mapObj);
+                        REFCOUNT_ADD(*bitmap);
+                        return NOERROR;
+                    }
                 }
             }
         }
@@ -821,7 +822,6 @@ ECode WidgetPreviewLoader::GenerateWidgetPreview(
     VALIDATE_NOT_NULL(bitmap);
     *bitmap = NULL;
 
-    assert(maxPreviewWidth != 0);
     // Load the preview image if possible
     if (maxPreviewWidth < 0) maxPreviewWidth = Elastos::Core::Math::INT32_MAX_VALUE;
     if (maxPreviewHeight < 0) maxPreviewHeight = Elastos::Core::Math::INT32_MAX_VALUE;

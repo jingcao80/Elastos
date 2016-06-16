@@ -597,7 +597,7 @@ ECode SQLiteConnectionPool::WaitForConnection(
         }
 
         // Wait to be unparked (may already have happened), a timeout, or interruption.
-        // LockSupport::ParkNanos(this, busyTimeoutMillis * 1000000L);
+        // LockSupport::ParkNanos(this, busyTimeoutMillis * 1000000LL);
 
         // Clear the interrupted flag, just in case.
         Thread::Interrupted();

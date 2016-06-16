@@ -627,7 +627,7 @@ Int32 MediaController::SetProgress()
     if (mProgress != NULL) {
         if (duration > 0) {
             // use long to avoid overflow
-            Int64 pos = 1000L * position / duration;
+            Int64 pos = 1000LL * position / duration;
             mProgress->SetProgress((Int32)pos);
         }
         Int32 percent = 0;

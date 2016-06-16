@@ -3877,7 +3877,7 @@ ECode CellLayout::FindCellForSpanThatIntersectsIgnoring(
                 toInner = FALSE;
                 for (Int32 i = 0; i < spanX; i++) {
                     for (Int32 j = 0; j < spanY; j++) {
-                        if (occupied[x + i][y + j]) {
+                        if ((*(*occupied)[x + i])[y + j]) {
                             // small optimization: we can skip to after the column we just found
                             // an occupied cell
                             x += i;

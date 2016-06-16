@@ -1199,7 +1199,6 @@ Boolean CAppsCustomizePagedView::BeginDraggingWidget(
         Int32 maxWidth, maxHeight;
         Int32 width;
         IDrawable::Probe(previewDrawable)->GetIntrinsicWidth(&width);
-        assert(width != 0);
         maxWidth = Elastos::Core::Math::Min((Int32)(width * minScale), (*size)[0]);
         Int32 height;
         IDrawable::Probe(previewDrawable)->GetIntrinsicHeight(&height);
@@ -1423,7 +1422,7 @@ ECode CAppsCustomizePagedView::OnDropCompleted(
     // target layout we were dropping on.
     if (!success) {
         Boolean showOutOfSpaceMessage = FALSE;
-        if (IWorkspace::Probe(target) == NULL) {
+        if (IWorkspace::Probe(target) != NULL) {
             Int32 currentScreen;
             mLauncher->GetCurrentWorkspaceScreen(&currentScreen);
             AutoPtr<IWorkspace> workspace = IWorkspace::Probe(target);

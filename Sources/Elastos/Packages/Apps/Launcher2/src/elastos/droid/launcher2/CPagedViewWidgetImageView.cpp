@@ -27,7 +27,6 @@ ECode CPagedViewWidgetImageView::constructor(
 
 ECode CPagedViewWidgetImageView::RequestLayout()
 {
-Slogger::E("CPagedViewWidgetImageView", "=============RequestLayout");
     if (mAllowRequestLayout) {
         return ImageView::RequestLayout();
     }

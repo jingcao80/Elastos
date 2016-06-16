@@ -23,7 +23,7 @@ const String CountryDetector::TAG("CountryDetector");
 
 AutoPtr<ICountryDetector> CountryDetector::sInstance;
 
-const Int64 CountryDetector::TIME_BETWEEN_UPDATES_MS = 1000L * 60 * 60 * 12;
+const Int64 CountryDetector::TIME_BETWEEN_UPDATES_MS = 1000LL * 60 * 60 * 12;
 
 const Int64 CountryDetector::DISTANCE_BETWEEN_UPDATES_METERS = 5000;
 

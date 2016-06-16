@@ -66,7 +66,7 @@ const String GeofenceManager::TAG("GeofenceManager");
 const Boolean GeofenceManager::D = FALSE;//LocationManagerService.D
 const Int32 GeofenceManager::MSG_UPDATE_FENCES = 1;
 const Int32 GeofenceManager::MAX_SPEED_M_S = 100;
-const Int64 GeofenceManager::MAX_AGE_NANOS = 5L * 60L * 300000000000L;
+const Int64 GeofenceManager::MAX_AGE_NANOS = 5L * 60L * 300000000000LL;
 const Int64 GeofenceManager::MIN_INTERVAL_MS = 1 * 60 * 1000;
 const Int64 GeofenceManager::MAX_INTERVAL_MS = 2 * 60 * 60 * 1000;
 

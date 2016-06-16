@@ -46,7 +46,7 @@ ECode BasicMaxAgeHandler::Parse(
     Int64 current;
     system->GetCurrentTimeMillis(&current);
     AutoPtr<IDate> date;
-    CDate::New(current + age * 1000L, (IDate**)&date);
+    CDate::New(current + age * 1000LL, (IDate**)&date);
     return cookie->SetExpiryDate(date);
 }
 

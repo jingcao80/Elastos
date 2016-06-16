@@ -229,7 +229,7 @@ const String ListsFragment::TAG("ListsFragment");
 
 const Int32 ListsFragment::MAX_RECENTS_ENTRIES = 20;
 // Oldest recents entry to display is 2 weeks old.
-const Int64 ListsFragment::OLDEST_RECENTS_DATE = 1000L * 60 * 60 * 24 * 14;
+const Int64 ListsFragment::OLDEST_RECENTS_DATE = 1000LL * 60 * 60 * 24 * 14;
 
 const String ListsFragment::KEY_LAST_DISMISSED_CALL_SHORTCUT_DATE("key_last_dismissed_call_shortcut_date");
 

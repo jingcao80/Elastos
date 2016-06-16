@@ -166,7 +166,7 @@ ECode TtmlUtils::ParseTimeExpression(
         String unit;
         IMatchResult::Probe(matcher)->Group(2, &unit);
         if (unit.Equals(String("h"))) {
-            value *= 3600L * 1000000L;
+            value *= 3600LL * 1000000LL;
         } else if (unit.Equals(String("m"))) {
             value *= 60 * 1000000;
         } else if (unit.Equals(String("s"))) {

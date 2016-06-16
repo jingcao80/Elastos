@@ -402,7 +402,7 @@ ECode BatteryStatsService::Publish(
     Int32 value;
     resources->GetInteger(
             R::integer::config_radioScanningTimeout, &value);
-    mStats->SetRadioScanningTimeout(value * 1000L);
+    mStats->SetRadioScanningTimeout(value * 1000LL);
 
     if (mNative == NULL) {
         mNative = new NativeBatteryStatsService(this);

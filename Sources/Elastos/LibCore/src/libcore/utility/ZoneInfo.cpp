@@ -269,7 +269,7 @@ AutoPtr<IZoneInfo> ZoneInfo::MakeTimeZone(
         (*gmtOffsets)[i] = iTmp;
         Byte bTmp;
         it->ReadByte(&bTmp);
-        (*isDsts)[i] = iTmp;
+        (*isDsts)[i] = bTmp;
         // We skip the abbreviation index. This would let us provide historically-accurate
         // time zone abbreviations (such as "AHST", "YST", and "AKST" for standard time in
         // America/Anchorage in 1982, 1983, and 1984 respectively). ICU only knows the current

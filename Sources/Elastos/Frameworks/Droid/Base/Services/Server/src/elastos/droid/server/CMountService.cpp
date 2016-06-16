@@ -2447,7 +2447,7 @@ ECode CMountService::ReadStorageListLocked()
             // resource parser does not support longs, so XML value is in megabytes
             Int32 maxFileSize32;
             a->GetInt32(R::styleable::Storage_maxFileSize, 0, &maxFileSize32);
-            Int64 maxFileSize = maxFileSize32 * 1024L * 1024L;
+            Int64 maxFileSize = maxFileSize32 * 1024LL * 1024LL;
 
             String descriptionStr;
             description->ToString(&descriptionStr);

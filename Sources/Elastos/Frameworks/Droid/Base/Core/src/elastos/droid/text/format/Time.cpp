@@ -981,7 +981,7 @@ Int64 Time::TimeCalculator::ToMillis(
     if (r == -1) {
         return -1;
     }
-    return r * 1000L;
+    return r * 1000LL;
 }
 
 ECode Time::TimeCalculator::SetTimeInMillis(

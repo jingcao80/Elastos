@@ -27,7 +27,7 @@ ECode CContactsContractDeletedContacts::GetDAYS_KEPT_MILLISECONDS(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = 1000L * 60L * 60L * 24L * (Int64)DAYS_KEPT;
+    *result = 1000LL * 60LL * 60LL * 24LL * (Int64)DAYS_KEPT;
     return NOERROR;
 }
 

@@ -5,6 +5,7 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
 #include "R.h"
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Widget::ITextView;
@@ -271,7 +272,7 @@ ECode PagedViewWidget::ApplyPreview(
                     right,
                     bottom);
         }
-        IImageView::Probe(image)->SetAlpha(1.0f);
+        IView::Probe(image)->SetAlpha(1.0f);
         image->SetAllowRequestLayout(TRUE);
     }
     return NOERROR;
