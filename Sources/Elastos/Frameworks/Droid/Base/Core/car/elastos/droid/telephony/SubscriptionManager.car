@@ -95,6 +95,24 @@ module
         const Int32 SIM_NOT_INSERTED = -1;
 
         /**
+         * The Network mode of SIM/sub.
+         * <P>Type: INTEGER (int)</P>
+         */
+        const String NETWORK_MODE = "network_mode";
+
+        const Int32 DEFAULT_NW_MODE = -1;
+
+        /**
+         * The activation state of SIM/sub.
+         * <P>Type: INTEGER (int)</P>
+         */
+        const String SUB_STATE = "sub_state";
+
+        const Int32 INACTIVE = 0;
+        const Int32 ACTIVE = 1;
+        const Int32 SUB_CONFIGURATION_IN_PROGRESS = 2;
+
+        /**
          * TelephonyProvider column name for user displayed name.
          * <P>Type: TEXT (String)</P>
          */

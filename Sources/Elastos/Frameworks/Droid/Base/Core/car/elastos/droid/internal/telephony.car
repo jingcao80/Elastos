@@ -397,6 +397,25 @@ module
         //    interface IHandler;
         //}
 
+        class COperatorInfo {
+            constructor();
+
+            constructor(
+                [in] String operatorAlphaLong,
+                [in] String operatorAlphaShort,
+                [in] String operatorNumeric,
+                [in] IOperatorInfoState state);
+
+            constructor(
+                [in] String operatorAlphaLong,
+                [in] String operatorAlphaShort,
+                [in] String operatorNumeric,
+                [in] String stateString);
+
+            interface IOperatorInfo;
+            interface IParcelable;
+        }
+
     } // Telephony
     } // Internal
     } // Droid

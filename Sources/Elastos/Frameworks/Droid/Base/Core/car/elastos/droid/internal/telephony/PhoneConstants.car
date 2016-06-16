@@ -156,6 +156,9 @@ module
 
             const String SUB_SETTING  = "subSettings";
 
+            const Int32 SUCCESS = 0;
+            const Int32 FAILURE = 1;
+
             const Int32 SUB1 = 0;
             const Int32 SUB2 = 1;
             const Int32 SUB3 = 2;
@@ -168,6 +171,10 @@ module
             const Int32 SIM_ID_2 = 1;
             const Int32 SIM_ID_3 = 2;
             const Int32 SIM_ID_4 = 3;
+
+            const Int32 PHONE_ID1 = 0;
+            const Int32 PHONE_ID2 = 1;
+            const Int32 PHONE_ID3 = 2;
 
             // ICC SIM Application Types
             // TODO: Replace the IccCardApplicationStatus.AppType enums with these constants

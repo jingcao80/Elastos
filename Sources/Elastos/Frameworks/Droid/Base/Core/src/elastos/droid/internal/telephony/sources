@@ -54,6 +54,11 @@ SOURCES += InboundSmsTracker.cpp
 SOURCES += InboundSmsHandler.cpp
 SOURCES += RIL.cpp
 SOURCES += PhoneBase.cpp
+SOURCES += MccTable.cpp
+SOURCES += ModemBindingPolicyHandler.cpp
+SOURCES += ModemStackController.cpp
+SOURCES += COperatorInfo.cpp
+SOURCES += Operators.cpp
 
 ELASTOS_LIBS += cat/cat.lib
 ELASTOS_LIBS += cdma/cdma.lib

@@ -188,6 +188,36 @@ module
 
         GetActiveSubIdList(
             [out, callee] ArrayOf<Int64>* array);
+
+        IsSMSPromptEnabled(
+            [out] Boolean* result);
+
+        SetSMSPromptEnabled(
+            [in] Boolean enabled);
+
+        IsVoicePromptEnabled(
+            [out] Boolean* result);
+
+        SetVoicePromptEnabled(
+            [in] Boolean enabled);
+
+        ActivateSubId(
+            [in] Int64 subId);
+
+        DeactivateSubId(
+            [in] Int64 subId);
+
+        SetSubState(
+            [in] Int64 subId,
+            [in] Int32 subStatus,
+            [out] Int32* result);
+
+        GetSubState(
+            [in] Int64 subId,
+            [out] Int32* result);
+
+        GetOnDemandDataSubId(
+            [out] Int64* result);
     }
 
     } // namespace Telephony
