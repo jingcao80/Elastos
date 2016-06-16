@@ -495,7 +495,7 @@ ECode ViewRootImpl::TraversalRunnable::Run()
     AutoPtr<IInterface> obj;
     mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
     if (obj) {
-        AutoPtr<IViewRootImpl> viewRoot = IViewRootImpl::Probe(obj);
+        IViewRootImpl* viewRoot = IViewRootImpl::Probe(obj);
         viewRoot->DoTraversal();
     }
 
@@ -1281,6 +1281,7 @@ ViewRootImpl::ViewRootImpl()
     , mResizeBufferStartTime(0)
     , mResizeBufferDuration(0)
     , mBlockResizeBuffer(FALSE)
+    , mHardwareXOffset(0)
     , mHardwareYOffset(0)
     , mResizeAlpha(0)
     , mConsumeBatchedInputScheduled(FALSE)
@@ -3874,14 +3875,13 @@ void ViewRootImpl::Draw(
                 mHardwareXOffset = xOffset;
                 mAttachInfo->mHardwareRenderer->InvalidateRoot();
             }
-            // mAttachInfo->mHardwareRenderer->InvalidateRoot();
             mResizeAlpha = resizeAlpha;
 
             // sometimes we get the dirty rect as null
             // and also its better to check the surface
             // validity to avoid any crash.
             Boolean valid;
-            if((mSurface->IsValid(&valid), valid) && dirty != NULL) {
+            if ((mSurface->IsValid(&valid), valid) && dirty != NULL) {
                 mSurface->SetDirtyRect(dirty);
             }
 

@@ -59,7 +59,8 @@ namespace Internal {
 namespace Telephony {
 
 const String SubInfoRecordUpdater::LOGTAG("SUB");
-const Int32 SubInfoRecordUpdater::PROJECT_SIM_NUM = InitPhoneCount();
+// TODO:
+const Int32 SubInfoRecordUpdater::PROJECT_SIM_NUM = 0;//InitPhoneCount();
 const Int32 SubInfoRecordUpdater::EVENT_OFFSET = 8;
 const Int32 SubInfoRecordUpdater::EVENT_QUERY_ICCID_DONE = 1;
 const Int32 SubInfoRecordUpdater::EVENT_ICC_CHANGED = 2;

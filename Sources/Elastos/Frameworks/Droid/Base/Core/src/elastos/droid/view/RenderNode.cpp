@@ -91,8 +91,7 @@ ECode RenderNode::End(
 
 ECode RenderNode::DestroyDisplayListData()
 {
-    if (!mValid)
-        return NOERROR;
+    if (!mValid) return NOERROR;
 
     nSetDisplayListData(mNativeRenderNode, 0);
     mValid = FALSE;
