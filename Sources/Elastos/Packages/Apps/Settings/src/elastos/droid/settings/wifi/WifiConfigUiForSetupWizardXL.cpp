@@ -1,3 +1,4 @@
+#include "Elastos.Droid.App.h"
 #include "elastos/droid/settings/wifi/WifiConfigUiForSetupWizardXL.h"
 #include "../R.h"
 #include <elastos/utility/logging/Logger.h>
@@ -52,7 +53,7 @@ CAR_INTERFACE_IMPL_3(WifiConfigUiForSetupWizardXL, Object, IWifiConfigUiForSetup
         IWifiConfigUiBase, IViewOnFocusChangeListener)
 
 WifiConfigUiForSetupWizardXL::WifiConfigUiForSetupWizardXL(
-    /* [in] */ WifiSettingsForSetupWizardXL* activity,
+    /* [in] */ IWifiSettingsForSetupWizardXL* activity,
     /* [in] */ IViewGroup* parent,
     /* [in] */ IAccessPoint* accessPoint,
     /* [in] */ Boolean edit)
@@ -61,23 +62,25 @@ WifiConfigUiForSetupWizardXL::WifiConfigUiForSetupWizardXL(
     CHandler::New((IHandler**)&mHandler);
 
     mActivity = activity;
+    AutoPtr<IActivity> _activity = IActivity::Probe(activity);
     AutoPtr<IView> view;
-    activity->FindViewById(R::id::wifi_setup_connect, (IView**)&view);
+    _activity->FindViewById(R::id::wifi_setup_connect, (IView**)&view);
     mConnectButton = IButton::Probe(view);
     view = NULL;
-    activity->FindViewById(R::id::wifi_setup_cancel, (IView**)&view);
+    _activity->FindViewById(R::id::wifi_setup_cancel, (IView**)&view);
     mCancelButton = IButton::Probe(view);
     mAccessPoint = accessPoint;
     mEdit = edit;
+    AutoPtr<IContext> _activity1 = IContext::Probe(activity);
     AutoPtr<IInterface> obj;
-    activity->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    _activity1->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
     mInflater = ILayoutInflater::Probe(obj);
 
     mInflater->Inflate(R::layout::wifi_config_ui_for_setup_wizard, parent, TRUE, (IView**)&mView);
     mController = new WifiConfigController(this, mView, mAccessPoint, edit);
 
     obj = NULL;
-    activity->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
+    _activity1->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
     mInputMethodManager = IInputMethodManager::Probe(obj);
 
     view = NULL;
@@ -226,8 +229,7 @@ ECode WifiConfigUiForSetupWizardXL::GetContext(
     /* [out] */ IContext** context)
 {
     VALIDATE_NOT_NULL(context)
-    AutoPtr<IActivity> activity = (IActivity*)mActivity.Get();
-    *context = IContext::Probe(activity);
+    *context = IContext::Probe(mActivity);
     REFCOUNT_ADD(*context)
     return NOERROR;
 }

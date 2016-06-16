@@ -123,7 +123,7 @@ Boolean SettingsActivity::sShowNoHomeNotice = FALSE;
 static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
 {
     AutoPtr< ArrayOf<String> > args = ArrayOf<String>::Alloc(61);
-    (*args)[0] = "Elastos.Droid.Settings.WirelessSettings";
+    (*args)[0] = "Elastos.Droid.Settings.CWirelessSettings";
     (*args)[1] = "Elastos.Droid.Settings.Wifi.CWifiSettings";
     (*args)[2] = "Elastos.Droid.Settings.Wifi.CAdvancedWifiSettings";
     (*args)[3] = "Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings";

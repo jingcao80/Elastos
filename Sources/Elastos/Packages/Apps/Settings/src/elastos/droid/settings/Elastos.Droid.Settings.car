@@ -21,6 +21,7 @@ module
     merge("../../../../car/elastos/droid/wifi/WifiConfigController.car");
     merge("../../../../car/elastos/droid/wifi/WifiConfigUiBase.car");
     merge("../../../../car/elastos/droid/wifi/WifiConfigUiForSetupWizardXL.car");
+    merge("../../../../car/elastos/droid/wifi/WifiSettingsForSetupWizardXL.car");
     merge("../../../../car/elastos/droid/wifi/WifiPickerActivity.car");
     merge("../../../../car/elastos/droid/wifi/WpsDialog.car");
 
@@ -317,6 +318,26 @@ module
         interface IDialogInterfaceOnClickListener;
     }
 
+    class CWifiSettingsForSetupWizardXL {
+        constructor();
+
+        interface IWifiSettingsForSetupWizardXL;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IViewOnClickListener;
+    }
+
     singleton class CWpsDialogHelper {
         interface IWpsDialogHelper;
     }
@@ -416,6 +437,21 @@ module
 
         interface ISpinnerAdapter;
         interface IAdapter;
+    }
+
+    class CWirelessSettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IIndexable;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+        interface IPreferenceOnPreferenceChangeListener;
     }
 
     } // namespace Settings

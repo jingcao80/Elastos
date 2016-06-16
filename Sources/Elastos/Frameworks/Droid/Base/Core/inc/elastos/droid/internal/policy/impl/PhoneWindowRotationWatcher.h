@@ -74,7 +74,6 @@ private:
     AutoPtr<IArrayList> mWindows;
     Boolean mIsWatching;
     IPhoneWindow* mOwner;
-    Object* mWindowsLock;
 };
 
 } // namespace Impl

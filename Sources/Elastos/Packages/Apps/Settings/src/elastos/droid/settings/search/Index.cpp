@@ -13,6 +13,7 @@
 #include "elastos/droid/settings/search/SearchIndexableResources.h"
 #include "elastos/droid/settings/search/Ranking.h"
 #include "elastos/droid/settings/search/SearchIndexableRaw.h"
+#include "elastos/droid/settings/CWirelessSettings.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/droid/utility/Xml.h>
 #include "elastos/droid/Manifest.h"
@@ -46,6 +47,7 @@ using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Provider::CSearchIndexablesContract;
 using Elastos::Droid::Provider::ISearchIndexablesContract;
 using Elastos::Droid::Provider::CSearchIndexableResource;
+using Elastos::Droid::Settings::CWirelessSettings;
 using Elastos::Droid::Settings::Wifi::CWifiSettings;
 using Elastos::Droid::Settings::Wifi::CSavedAccessPointsWifiSettings;
 using Elastos::Droid::Text::TextUtils;
@@ -1333,6 +1335,7 @@ Boolean Index::IsIndexableClass(
 {
     if (className.Equals("Elastos.Droid.Settings.Wifi.CWifiSettings")) return TRUE;
     if (className.Equals("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings")) return TRUE;
+    if (className.Equals("Elastos.Droid.Settings.CWirelessSettings")) return TRUE;
     // TODO
     // else if....  other  class implements Indexable
     return FALSE;
@@ -1428,6 +1431,9 @@ AutoPtr<IIndexableSearchIndexProvider> Index::GetSearchIndexProvider(const Strin
     }
     if (className.Equals("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings")) {
         return CSavedAccessPointsWifiSettings::GetSEARCH_INDEX_DATA_PROVIDER();
+    }
+    if (className.Equals("Elastos.Droid.Settings.CWirelessSettings")) {
+        return CWirelessSettings::GetSEARCH_INDEX_DATA_PROVIDER();
     }
     // TODO
     // else if ()....  other  class implements Indexable

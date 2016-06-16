@@ -57,7 +57,7 @@
         <!-- Operator hook -->
         <dashboard-tile
                 android:id="@+id/operator_settings"
-                android:fragment="Elastos.Droid.Settings.WirelessSettings" >
+                android:fragment="Elastos.Droid.Settings.CWirelessSettings" >
             <intent android:action="Elastos.Droid.Settings.OPERATOR_APPLICATION_SETTING" />
         </dashboard-tile>
 
@@ -65,7 +65,7 @@
         <dashboard-tile
                 android:id="@+id/wireless_settings"
                 android:title="@string/radio_controls_title"
-                android:fragment="Elastos.Droid.Settings.WirelessSettings"
+                android:fragment="Elastos.Droid.Settings.CWirelessSettings"
                 android:icon="@drawable/ic_settings_more"
                 />
 
@@ -143,7 +143,7 @@
         <!-- Manufacturer hook -->
         <dashboard-tile
                 android:id="@+id/manufacturer_settings"
-                android:fragment="Elastos.Droid.Settings.WirelessSettings">
+                android:fragment="Elastos.Droid.Settings.CWirelessSettings">
             <intent android:action="Elastos.Droid.Settings.MANUFACTURER_APPLICATION_SETTING" />
         </dashboard-tile>
 

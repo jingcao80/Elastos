@@ -2,12 +2,14 @@
 #define __ELASTOS_DROID_SETTINGS_WIFI_WIFICONFIGUIFORSETUPWIZARDXL_H__
 
 #include "Elastos.Droid.Os.h"
-#include "elastos/droid/settings/wifi/WifiSettingsForSetupWizardXL.h"
+#include "Elastos.Droid.View.h"
 #include "elastos/droid/settings/wifi/WifiConfigController.h"
 
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IViewOnFocusChangeListener;
 using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::InputMethod::IInputMethodManager;
+using Elastos::Droid::Widget::IButton;
 
 namespace Elastos {
 namespace Droid {
@@ -56,7 +58,7 @@ public:
      * @param edit
      */
     WifiConfigUiForSetupWizardXL(
-        /* [in] */ WifiSettingsForSetupWizardXL* activity,
+        /* [in] */ IWifiSettingsForSetupWizardXL* activity,
         /* [in] */ IViewGroup* parent,
         /* [in] */ IAccessPoint* accessPoint,
         /* [in] */ Boolean edit);
@@ -132,7 +134,7 @@ private:
     AutoPtr<IButton> mConnectButton;
     AutoPtr<IButton> mCancelButton;
 
-    AutoPtr<WifiSettingsForSetupWizardXL> mActivity;
+    AutoPtr<IWifiSettingsForSetupWizardXL> mActivity;
     AutoPtr<IView> mView;
     AutoPtr<WifiConfigController> mController;
     AutoPtr<IAccessPoint> mAccessPoint;

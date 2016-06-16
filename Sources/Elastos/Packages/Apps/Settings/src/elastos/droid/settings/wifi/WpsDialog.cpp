@@ -175,6 +175,106 @@ WpsDialog::WpsDialog(
 WpsDialog::~WpsDialog()
 {}
 
+ECode WpsDialog::OnSaveInstanceState(
+    /* [out] */ IBundle** result)
+{
+    assert(0 && "TODO");
+    // Bundle bundle = AlertDialog::OnSaveInstanceState();
+    // bundle->PutString(DIALOG_STATE, mDialogState->ToString());
+    // bundle->PutString(DIALOG_MSG_STRING, mMsgString->ToString());
+    // return bundle;
+    return NOERROR;
+}
+
+ECode WpsDialog::OnRestoreInstanceState(
+    /* [in] */ IBundle* savedInstanceState)
+{
+    assert(0 && "TODO");
+    // if (savedInstanceState != NULL) {
+    //     AlertDialog::OnRestoreInstanceState(savedInstanceState);
+    //     WpsDialogState dialogState = mDialogState->ValueOf(savedInstanceState->GetString(DIALOG_STATE));
+    //     String msg = savedInstanceState->GetString(DIALOG_MSG_STRING);
+    //     UpdateDialog(dialogState, msg);
+    // }
+    return NOERROR;
+}
+
+ECode WpsDialog::OnCreate(
+    /* [in] */ IBundle* savedInstanceState)
+{
+    assert(0 && "TODO");
+    // mView = GetLayoutInflater()->Inflate(R::layout::wifi_wps_dialog, NULL);
+
+    // mTextView = (TextView) mView->FindViewById(R::id::wps_dialog_txt);
+    // mTextView->SetText(R::string::wifi_wps_setup_msg);
+
+    // mTimeoutBar = ((ProgressBar) mView->FindViewById(R::id::wps_timeout_bar));
+    // mTimeoutBar->SetMax(WPS_TIMEOUT_S);
+    // mTimeoutBar->SetProgress(0);
+
+    // mProgressBar = ((ProgressBar) mView->FindViewById(R::id::wps_progress_bar));
+    // mProgressBar->SetVisibility(IView::GONE);
+
+    // mButton = ((Button) mView->FindViewById(R::id::wps_dialog_btn));
+    // mButton->SetText(R::string::wifi_cancel);
+    // mButton->SetOnClickListener(new View->OnClickListener() {
+    //     //@Override
+    //     CARAPI OnClick(View v) {
+    //         Dismiss();
+    //     }
+    // });
+
+    // mWifiManager = (WifiManager) mContext->GetSystemService(IContext::WIFI_SERVICE);
+
+    // SetView(mView);
+    // AlertDialog::OnCreate(savedInstanceState);
+    return NOERROR;
+}
+
+ECode WpsDialog::OnStart()
+{
+    assert(0 && "TODO");
+    // /*
+    //  * increment timeout bar per second.
+    //  */
+    // mTimer = new Timer(FALSE);
+    // mTimer->Schedule(new TimerTask() {
+    //     //@Override
+    //     CARAPI Run() {
+    //         mHandler->Post(new Runnable() {
+
+    //             //@Override
+    //             CARAPI Run() {
+    //                 mTimeoutBar->IncrementProgressBy(1);
+    //             }
+    //         });
+    //     }
+    // }, 1000, 1000);
+
+    // mContext->RegisterReceiver((IBroadcastReceiver*)mReceiver, mFilter);
+
+    // WpsInfo wpsConfig = new WpsInfo();
+    // wpsConfig.setup = mWpsSetup;
+    // mWifiManager->StartWps(wpsConfig, mWpsListener);
+}
+
+ECode WpsDialog::OnStop()
+{
+    assert(0 && "TODO");
+    // if (mDialogState != WpsDialogState_WPS_COMPLETE) {
+    //     mWifiManager->CancelWps(NULL);
+    // }
+
+    // if (mReceiver != NULL) {
+    //     mContext->UnregisterReceiver((IBroadcastReceiver*)mReceiver);
+    //     mReceiver = NULL;
+    // }
+
+    // if (mTimer != NULL) {
+    //     mTimer->Cancel();
+    // }
+}
+
 void WpsDialog::UpdateDialog(
     /* [in] */ WpsDialogState state,
     /* [in] */ const String& msg)

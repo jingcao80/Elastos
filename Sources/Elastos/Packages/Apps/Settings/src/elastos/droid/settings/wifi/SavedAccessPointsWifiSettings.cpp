@@ -87,7 +87,6 @@ ECode SavedAccessPointsWifiSettings::MyBaseSearchIndexProvider::GetRawDataToInde
     Int32 accessPointsSize;
     accessPoints->GetSize(&accessPointsSize);
     for (Int32 i = 0; i < accessPointsSize; ++i){
-        data = NULL;
         data = new SearchIndexableRaw();
         data->constructor(context);
 

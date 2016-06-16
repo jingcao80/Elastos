@@ -141,7 +141,7 @@
                 <category android:name="android.intent.category.VOICE_LAUNCH" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="Elastos.Droid.Settings.WirelessSettings" />
+                android:value="Elastos.Droid.Settings.CWirelessSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wireless_settings" />
             <!-- Note that this doesn't really show any Wireless settings. -->
@@ -204,7 +204,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="Elastos.Droid.Settings.Wifi.WifiSettingsForSetupWizardXL"
+        <activity android:name="Elastos.Droid.Settings.Wifi.CWifiSettingsForSetupWizardXL"
                 android:theme="@android:style/Theme.Material.Light.NoActionBar"
                 android:screenOrientation="behind"
                 android:clearTaskOnLaunch="true"

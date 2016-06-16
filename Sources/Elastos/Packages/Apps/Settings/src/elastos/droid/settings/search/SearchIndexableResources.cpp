@@ -63,7 +63,7 @@ static AutoPtr<IHashMap> InitsResMap()
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_data_usage);
 
-    InitPut(map, String("Elastos.Droid.Settings.WirelessSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CWirelessSettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_more);
 

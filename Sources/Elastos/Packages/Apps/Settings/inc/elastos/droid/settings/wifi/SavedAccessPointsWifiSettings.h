@@ -92,7 +92,7 @@ public:
         /* [in] */ IPreference* preference,
         /* [out] */ Boolean* result);
 
-    static AutoPtr<IIndexableSearchIndexProvider> GetSEARCH_INDEX_DATA_PROVIDER();
+    static CARAPI_(AutoPtr<IIndexableSearchIndexProvider>) GetSEARCH_INDEX_DATA_PROVIDER();
 
 private:
     CARAPI_(void) InitPreferences();

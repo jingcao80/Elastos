@@ -79,7 +79,7 @@ static AutoPtr<IHashMap> InitsRankMap()
             Ranking::RANK_DATA_USAGE);
 
     // Other wireless settinfs
-    InitPut(map, String("Elastos.Droid.Settings.WirelessSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CWirelessSettings"),
             Ranking::RANK_WIRELESS);
 
     // Home

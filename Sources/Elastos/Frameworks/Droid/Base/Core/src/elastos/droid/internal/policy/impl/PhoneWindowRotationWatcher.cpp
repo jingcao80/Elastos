@@ -45,7 +45,6 @@ PhoneWindowRotationWatcher::PhoneWindowRotationWatcher()
 {
     mRotationChanged = new InnerRunnable1(this);
     CArrayList::New((IArrayList**)&mWindows);
-    mWindowsLock = new Object();
 }
 
 ECode PhoneWindowRotationWatcher::constructor()
@@ -71,7 +70,7 @@ ECode PhoneWindowRotationWatcher::AddWindow(
     /* [in] */ IPhoneWindow* phoneWindow)
 {
     {
-        AutoLock lock(mWindowsLock);
+        AutoLock lock(mWindows);
 
         if (!mIsWatching) {
             // try {
@@ -101,7 +100,7 @@ ECode PhoneWindowRotationWatcher::RemoveWindow(
     /* [in] */ IPhoneWindow* phoneWindow)
 {
     {
-        AutoLock lock(mWindowsLock);
+        AutoLock lock(mWindows);
 
         Int32 i = 0, size = 0;
         while (i < (mWindows->GetSize(&size), size)) {
@@ -124,7 +123,7 @@ ECode PhoneWindowRotationWatcher::RemoveWindow(
 ECode PhoneWindowRotationWatcher::DispatchRotationChanged()
 {
     {
-        AutoLock lock(mWindowsLock);
+        AutoLock lock(mWindows);
 
         Int32 i = 0, size = 0;
         while (i < (mWindows->GetSize(&size), size)) {

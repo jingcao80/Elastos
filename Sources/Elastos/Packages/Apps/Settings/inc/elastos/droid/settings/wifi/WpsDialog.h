@@ -109,94 +109,24 @@ public:
 
     ~WpsDialog();
 
-    // //@Override
-    // public Bundle OnSaveInstanceState () {
-    //     Bundle bundle  = super->OnSaveInstanceState();
-    //     bundle->PutString(DIALOG_STATE, mDialogState->ToString());
-    //     bundle->PutString(DIALOG_MSG_STRING, mMsgString->ToString());
-    //     return bundle;
-    // }
+    //@Override
+    CARAPI OnSaveInstanceState(
+        /* [out] */ IBundle** result);
 
-    // //@Override
-    // CARAPI OnRestoreInstanceState(Bundle savedInstanceState) {
-    //     if (savedInstanceState != NULL) {
-    //         super->OnRestoreInstanceState(savedInstanceState);
-    //         WpsDialogState dialogState = mDialogState->ValueOf(savedInstanceState->GetString(DIALOG_STATE));
-    //         String msg = savedInstanceState->GetString(DIALOG_MSG_STRING);
-    //         UpdateDialog(dialogState, msg);
-    //     }
-    // }
+    //@Override
+    CARAPI OnRestoreInstanceState(
+        /* [in] */ IBundle* savedInstanceState);
 
-    // //@Override
-    // protected void OnCreate(Bundle savedInstanceState) {
-    //     mView = GetLayoutInflater()->Inflate(R::layout::wifi_wps_dialog, NULL);
+protected:
+    //@Override
+    CARAPI OnCreate(
+        /* [in] */ IBundle* savedInstanceState);
 
-    //     mTextView = (TextView) mView->FindViewById(R::id::wps_dialog_txt);
-    //     mTextView->SetText(R::string::wifi_wps_setup_msg);
+    //@Override
+    CARAPI OnStart();
 
-    //     mTimeoutBar = ((ProgressBar) mView->FindViewById(R::id::wps_timeout_bar));
-    //     mTimeoutBar->SetMax(WPS_TIMEOUT_S);
-    //     mTimeoutBar->SetProgress(0);
-
-    //     mProgressBar = ((ProgressBar) mView->FindViewById(R::id::wps_progress_bar));
-    //     mProgressBar->SetVisibility(IView::GONE);
-
-    //     mButton = ((Button) mView->FindViewById(R::id::wps_dialog_btn));
-    //     mButton->SetText(R::string::wifi_cancel);
-    //     mButton->SetOnClickListener(new View->OnClickListener() {
-    //         //@Override
-    //         CARAPI OnClick(View v) {
-    //             Dismiss();
-    //         }
-    //     });
-
-    //     mWifiManager = (WifiManager) mContext->GetSystemService(IContext::WIFI_SERVICE);
-
-    //     SetView(mView);
-    //     super->OnCreate(savedInstanceState);
-    // }
-
-    // //@Override
-    // protected void OnStart() {
-    //     /*
-    //      * increment timeout bar per second.
-    //      */
-    //     mTimer = new Timer(FALSE);
-    //     mTimer->Schedule(new TimerTask() {
-    //         //@Override
-    //         CARAPI Run() {
-    //             mHandler->Post(new Runnable() {
-
-    //                 //@Override
-    //                 CARAPI Run() {
-    //                     mTimeoutBar->IncrementProgressBy(1);
-    //                 }
-    //             });
-    //         }
-    //     }, 1000, 1000);
-
-    //     mContext->RegisterReceiver((IBroadcastReceiver*)mReceiver, mFilter);
-
-    //     WpsInfo wpsConfig = new WpsInfo();
-    //     wpsConfig.setup = mWpsSetup;
-    //     mWifiManager->StartWps(wpsConfig, mWpsListener);
-    // }
-
-    // //@Override
-    // protected void OnStop() {
-    //     if (mDialogState != WpsDialogState_WPS_COMPLETE) {
-    //         mWifiManager->CancelWps(NULL);
-    //     }
-
-    //     if (mReceiver != NULL) {
-    //         mContext->UnregisterReceiver((IBroadcastReceiver*)mReceiver);
-    //         mReceiver = NULL;
-    //     }
-
-    //     if (mTimer != NULL) {
-    //         mTimer->Cancel();
-    //     }
-    // }
+    //@Override
+    CARAPI OnStop();
 
 private:
     CARAPI_(void) UpdateDialog(
