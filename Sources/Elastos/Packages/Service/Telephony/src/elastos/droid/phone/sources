@@ -1,0 +1,8 @@
+TARGET_NAME= phone
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += ../../../..
+INCLUDES += $(MAKEDIR)/../../../../inc/
+
+SOURCES = CPhoneApp.cpp

@@ -1,2 +1,3 @@
 
-DIRS += Telecom
+DIRS += Telecomm
+#DIRS += Telephony

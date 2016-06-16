@@ -100,6 +100,7 @@ EXPORT_HEADERS += elastos/droid/net/NetworkUtils.h
 EXPORT_HEADERS += elastos/droid/net/NetworkAgent.h
 EXPORT_HEADERS += elastos/droid/net/NetworkFactory.h
 
+EXPORT_HEADERS += elastos/droid/os/AsyncResult.h
 EXPORT_HEADERS += elastos/droid/os/Build.h
 EXPORT_HEADERS += elastos/droid/os/Environment.h
 EXPORT_HEADERS += elastos/droid/os/TokenWatcher.h

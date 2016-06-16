@@ -1,0 +1,22 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Telephony {
+    namespace Phone {
+
+    interface IInCallScreen {
+        // These are values for the settings of the auto retry mode:
+        // 0 = disabled
+        // 1 = enabled
+        // TODO (Moto):These constants don't really belong here,
+        // they should be moved to Settings where the value is being looked up in the first place
+        const Int32 AUTO_RETRY_OFF = 0;
+        const Int32 AUTO_RETRY_ON = 1;
+    }
+
+    } // namespace Phone
+    } // namespace Telephony
+    } // namespace Droid
+    } // namespace Elastos
+}
