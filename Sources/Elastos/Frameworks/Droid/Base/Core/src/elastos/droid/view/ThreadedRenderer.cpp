@@ -409,11 +409,11 @@ ECode ThreadedRenderer::Draw(
     attachInfo->mDrawingTime = frameTimeNanos / TimeUtils::NANOS_PER_MS;
 
     Int64 recordDuration = 0;
-    AutoPtr<ISystem> system;
-    Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
-    Int64 nanoTime;
 
     if (mProfilingEnabled) {
+        AutoPtr<ISystem> system;
+        Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
+        Int64 nanoTime;
         system->GetNanoTime(&nanoTime);
         recordDuration = nanoTime;
     }
@@ -421,6 +421,9 @@ ECode ThreadedRenderer::Draw(
     UpdateRootDisplayList(view, callbacks);
 
     if (mProfilingEnabled) {
+        AutoPtr<ISystem> system;
+        Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
+        Int64 nanoTime;
         system->GetNanoTime(&nanoTime);
         recordDuration = nanoTime - recordDuration;
     }
