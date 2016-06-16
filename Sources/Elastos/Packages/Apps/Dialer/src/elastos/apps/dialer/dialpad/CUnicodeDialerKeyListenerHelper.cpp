@@ -1,15 +1,15 @@
 
-#include "CUnicodeDialerKeyListenerHelper.h"
-#include "UnicodeDialerKeyListener.h"
+#include "dialpad/CUnicodeDialerKeyListenerHelper.h"
+#include "dialpad/UnicodeDialerKeyListener.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
-CAR_INTERFACE_IMPL(CUnicodeDialerKeyListenerHelper, Singleton, IUnicodeDialerKeyListenerHelper)
+CAR_INTERFACE_IMPL(CUnicodeDialerKeyListenerHelper, Singleton, IUnicodeDialerKeyListenerHelper);
 
-CAR_SINGLETON_IMPL(CUnicodeDialerKeyListenerHelper)
+CAR_SINGLETON_IMPL(CUnicodeDialerKeyListenerHelper);
 
 ECode CUnicodeDialerKeyListenerHelper::GetINSTANCE(
     /* [out] */ IUnicodeDialerKeyListener** instance)

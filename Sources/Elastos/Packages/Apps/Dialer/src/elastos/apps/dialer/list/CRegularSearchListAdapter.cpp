@@ -1,12 +1,12 @@
 
-#include "CRegularSearchListAdapter.h"
+#include "list/CRegularSearchListAdapter.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
-CAR_OBJECT_IMPL(CRegularSearchListAdapter)
+CAR_OBJECT_IMPL(CRegularSearchListAdapter);
 
 } // List
 } // Dialer

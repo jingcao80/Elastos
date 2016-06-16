@@ -1,11 +1,11 @@
 
 #include "PhoneCallDetailsViews.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
-CAR_INTERFACE_IMPL(PhoneCallDetailsViews, Object, IPhoneCallDetailsViews)
+CAR_INTERFACE_IMPL(PhoneCallDetailsViews, Object, IPhoneCallDetailsViews);
 
 PhoneCallDetailsViews::PhoneCallDetailsViews(
     /* [in] */ ITextView* nameView,

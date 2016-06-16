@@ -1,11 +1,11 @@
 module
 {
     using interface Elastos.Droid.View.IView;
-    interface Elastos.Apps.Dailer.Widget.IOverlappingPaneLayoutPanelSlideCallbacks;
+    interface Elastos.Apps.Dialer.Widget.IOverlappingPaneLayoutPanelSlideCallbacks;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace Widget {
 
     /**
@@ -133,7 +133,7 @@ module
     }
 
     } // Widget
-    } // Dailer
+    } // Dialer
     } // Apps
     } // Elastos
 }

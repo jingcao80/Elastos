@@ -1,18 +1,18 @@
 
-#include "DialpadFragment.h"
+#include "dialpad/DialpadFragment.h"
 
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
 //=================================================================
 // DialpadFragment::DialpadSlidingRelativeLayout
 //=================================================================
-CAR_INTERFACE_IMPL(DialpadFragment::DialpadSlidingRelativeLayout, RelativeLayout, IDialpadSlidingRelativeLayout)
+CAR_INTERFACE_IMPL(DialpadFragment::DialpadSlidingRelativeLayout, RelativeLayout, IDialpadSlidingRelativeLayout);
 
 ECode DialpadFragment::DialpadSlidingRelativeLayout::constructor(
     /* [in] */ IContext* context)
@@ -95,7 +95,7 @@ ECode DialpadFragment::DialpadPhoneStateListener::OnCallStateChanged(
 const String DialpadFragment::ErrorDialogFragment::ARG_TITLE_RES_ID("argTitleResId");
 const String DialpadFragment::ErrorDialogFragment::ARG_MESSAGE_RES_ID("argMessageResId");
 
-CAR_INTERFACE_IMPL(DialpadFragment::ErrorDialogFragment, DialogFragment, IDialpadFragmentErrorDialogFragment)
+CAR_INTERFACE_IMPL(DialpadFragment::ErrorDialogFragment, DialogFragment, IDialpadFragmentErrorDialogFragment);
 
 AutoPtr<IDialpadFragmentErrorDialogFragment> DialpadFragment::ErrorDialogFragment::NewInstance(
     /* [in] */ Int32 messageResId)
@@ -154,7 +154,7 @@ ECode DialpadFragment::ErrorDialogFragment::OnCreateDialog(
 //=================================================================
 // DialpadFragment::SpacerOnTouchListener
 //=================================================================
-CAR_INTERFACE_IMPL(DialpadFragment::SpacerOnTouchListener, Object, IViewOnTouchListener)
+CAR_INTERFACE_IMPL(DialpadFragment::SpacerOnTouchListener, Object, IViewOnTouchListener);
 
 DialpadFragment::SpacerOnTouchListener::SpacerOnTouchListener(
     /* [in] */ DialpadFragment* host)
@@ -180,7 +180,7 @@ ECode DialpadFragment::SpacerOnTouchListener::OnTouch(
 //=================================================================
 // DialpadFragment::AlertDialogClickListener
 //=================================================================
-CAR_INTERFACE_IMPL(DialpadFragment::AlertDialogClickListener, Object, IDialogInterfaceOnClickListener)
+CAR_INTERFACE_IMPL(DialpadFragment::AlertDialogClickListener, Object, IDialogInterfaceOnClickListener);
 
 ECode DialpadFragment::AlertDialogClickListener::OnClick(
     /* [in] */ IDialogInterface* dialog,

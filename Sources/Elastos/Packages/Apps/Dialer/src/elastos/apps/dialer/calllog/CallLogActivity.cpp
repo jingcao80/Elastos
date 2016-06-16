@@ -1,8 +1,15 @@
 
-#include "CallLogActivity.h"
+#include "R.h"
+#include "elastos/apps/dialer/calllog/CallLogActivity.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Provider.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::App::IActionBar;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Provider::ICalls;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -85,8 +92,9 @@ CallLogActivity::WaitForVoicemailTimeoutRunnable::WaitForVoicemailTimeoutRunnabl
 
 ECode CallLogActivity::WaitForVoicemailTimeoutRunnable::Run()
 {
-    mHost->mViewPagerTabs->SetViewPager(mHost->mViewPager);
-    mHost->mViewPager->SetCurrentItem(TAB_INDEX_ALL);
+    assert(0 && "TODO");
+    // mHost->mViewPagerTabs->SetViewPager(mHost->mViewPager);
+    // mHost->mViewPager->SetCurrentItem(TAB_INDEX_ALL);
     mHost->mSwitchToVoicemailTab = FALSE;
     return NOERROR;
 }
@@ -94,7 +102,9 @@ ECode CallLogActivity::WaitForVoicemailTimeoutRunnable::Run()
 //=================================================================
 // CallLogActivity
 //=================================================================
-CAR_INTERFACE_IMPL_2(CallLogActivity, AnalyticsActivity, ICallLogActivity, ICallLogQueryHandlerListener)
+// TODO:
+// CAR_INTERFACE_IMPL_2(CallLogActivity, AnalyticsActivity, ICallLogActivity, ICallLogQueryHandlerListener);
+CAR_INTERFACE_IMPL_2(CallLogActivity, Activity, ICallLogActivity, ICallLogQueryHandlerListener);
 
 CallLogActivity::CallLogActivity()
 {
@@ -112,15 +122,19 @@ ECode CallLogActivity::DispatchTouchEvent(
         Float rawX, rawY;
         ev->GetRawX(&rawX);
         ev->GetRawY(&rawY);
-        TouchPointManager::GetInstance()->SetPoint((Int32)rawX, (Int32)rawY);
+    assert(0 && "TODO");
+        // TouchPointManager::GetInstance()->SetPoint((Int32)rawX, (Int32)rawY);
     }
-    return AnalyticsActivity::DispatchTouchEvent(ev, isConsumed);
+    assert(0 && "TODO");
+    // return AnalyticsActivity::DispatchTouchEvent(ev, isConsumed);
+    return NOERROR;
 }
 
 ECode CallLogActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
-    AnalyticsActivity::OnCreate(savedInstanceState);
+    assert(0 && "TODO");
+    // AnalyticsActivity::OnCreate(savedInstanceState);
 
     CHandler::New((IHandler**)&mHandler);
 
@@ -161,18 +175,21 @@ ECode CallLogActivity::OnCreate(
 
     AutoPtr<IView> view;
     FAIL_RETURN(FindViewById(R::id::call_log_pager, (IView**)&view));
-    mViewPager = IViewPager::Probe(view);
+    assert(0 && "TODO");
+    // mViewPager = IViewPager::Probe(view);
 
     AutoPtr<IFragmentManager> manager;
     GetFragmentManager((IFragmentManager**)&manager);
+    assert(0 && "TODO");
     // mViewPagerAdapter = new ViewPagerAdapter(manager);
     // mViewPager->SetAdapter(mViewPagerAdapter);
-    mViewPager->SetOffscreenPageLimit(2);
+    // mViewPager->SetOffscreenPageLimit(2);
 
     view = NULL;
     FAIL_RETURN(FindViewById(R::id::viewpager_header, (IView**)&view));
-    mViewPagerTabs = IViewPagerTabs::Probe(view);
-    mViewPager->SetOnPageChangeListener(mViewPagerTabs);
+    assert(0 && "TODO");
+    // mViewPagerTabs = IViewPagerTabs::Probe(view);
+    // mViewPager->SetOnPageChangeListener(mViewPagerTabs);
 
     if (startingTab == TAB_INDEX_VOICEMAIL) {
         // The addition of the voicemail tab is an asynchronous process, so wait till the tab
@@ -184,8 +201,9 @@ ECode CallLogActivity::OnCreate(
                 WAIT_FOR_VOICEMAIL_PROVIDER_TIMEOUT_MS, &result);
     }
     else {
-        mViewPagerTabs->SetViewPager(mViewPager);
-        mViewPager->SetCurrentItem(startingTab);
+    assert(0 && "TODO");
+        // mViewPagerTabs->SetViewPager(mViewPager);
+        // mViewPager->SetCurrentItem(startingTab);
     }
 
     CVoicemailStatusHelperImpl::New((IVoicemailStatusHelperImpl**)&mVoicemailStatusHelper);
@@ -195,7 +213,8 @@ ECode CallLogActivity::OnCreate(
 // @Override
 ECode CallLogActivity::OnResume()
 {
-    AnalyticsActivity::OnResume();
+    assert(0 && "TODO");
+    // AnalyticsActivity::OnResume();
     AutoPtr<IContentResolver> resolver;
     GetContentResolver((IContentResolver**)&resolver);
     AutoPtr<ICallLogQueryHandler> callLogQueryHandler;
@@ -257,7 +276,9 @@ ECode CallLogActivity::OnOptionsItemSelected(
             *res = TRUE;
             return NOERROR;
     }
-    return AnalyticsActivity::OnOptionsItemSelected(item, res);
+    assert(0 && "TODO");
+    // return AnalyticsActivity::OnOptionsItemSelected(item, res);
+    return NOERROR;
 }
 
 // @Override
@@ -275,16 +296,18 @@ ECode CallLogActivity::OnVoicemailStatusFetched(
     mVoicemailStatusHelper->GetNumberActivityVoicemailSources(statusCursor, &activeSources);
     if (activeSources > 0 != mHasActiveVoicemailProvider) {
         mHasActiveVoicemailProvider = activeSources > 0;
+        assert(0 && "TODO");
         // mViewPagerAdapter->NotifyDataSetChanged();
-        mViewPagerTabs->SetViewPager(mViewPager);
-        if (mSwitchToVoicemailTab) {
-            mViewPager->SetCurrentItem(TAB_INDEX_VOICEMAIL, FALSE);
-        }
+        // mViewPagerTabs->SetViewPager(mViewPager);
+        // if (mSwitchToVoicemailTab) {
+        //     mViewPager->SetCurrentItem(TAB_INDEX_VOICEMAIL, FALSE);
+        // }
     }
     else if (mSwitchToVoicemailTab) {
         // The voicemail tab was requested, but it does not exist because there are no
         // voicemail sources. Just fallback to the first item instead.
-        mViewPagerTabs->SetViewPager(mViewPager);
+        assert(0 && "TODO");
+        // mViewPagerTabs->SetViewPager(mViewPager);
     }
 
     return NOERROR;

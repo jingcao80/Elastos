@@ -1,8 +1,8 @@
 
-#include "SwipeHelper.h"
+#include "list/SwipeHelper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -26,7 +26,7 @@ ECode SwipeHelper::DismissAnimatorListenerAdapter::OnAnimationEnd(
 //=================================================================
 // SwipeHelper::DismissAnimatorUpdateListener
 //=================================================================
-CAR_INTERFACE_DECL(SwipeHelper::DismissAnimatorUpdateListener, Object, IAnimatorUpdateListener)
+CAR_INTERFACE_DECL(SwipeHelper::DismissAnimatorUpdateListener, Object, IAnimatorUpdateListener);
 
 SwipeHelper::DismissAnimatorUpdateListener::DismissAnimatorUpdateListener(
     /* [in] */ SwipeHelper* host)
@@ -64,7 +64,7 @@ ECode SwipeHelper::SnapAnimatorListenerAdapter::OnAnimationEnd(
 //=================================================================
 // SwipeHelper::SnapAnimatorUpdateListener
 //=================================================================
-CAR_INTERFACE_DECL(SwipeHelper::SnapAnimatorUpdateListener, Object, IAnimatorUpdateListener)
+CAR_INTERFACE_DECL(SwipeHelper::SnapAnimatorUpdateListener, Object, IAnimatorUpdateListener);
 
 SwipeHelper::SnapAnimatorUpdateListener::SnapAnimatorUpdateListener(
     /* [in] */ SwipeHelper* host)

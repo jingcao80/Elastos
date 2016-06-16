@@ -1,8 +1,8 @@
 
-#include "VoicemailPlaybackFragment.h"
+#include "voicemail/VoicemailPlaybackFragment.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Voicemail {
 
@@ -24,7 +24,7 @@ AutoPtr<IActivity> VoicemailPlaybackFragment::ActivityReference::Get()
 //=================================================================
 // VoicemailPlaybackFragment::PlaybackViewImpl
 //=================================================================
-CAR_INTERFACE_IMPL(VoicemailPlaybackFragment::PlaybackViewImpl, Object, IVoicemailPlaybackPresenterPlaybackView)
+CAR_INTERFACE_IMPL(VoicemailPlaybackFragment::PlaybackViewImpl, Object, IVoicemailPlaybackPresenterPlaybackView);
 
 VoicemailPlaybackFragment::PlaybackViewImpl::PlaybackViewImpl(
     /* [in] */ VoicemailPlaybackFragment* host,

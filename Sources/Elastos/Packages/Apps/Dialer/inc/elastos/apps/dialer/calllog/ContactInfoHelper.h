@@ -2,8 +2,12 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CONTACTINFOHELPER_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CONTACTINFOHELPER_H__
 
-namespace Elastos{
-namespace Apps{
+#include "Elastos.Droid.App.h"
+
+using Elastos::Apps::Dialer::Service::ICachedNumberLookupService;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 

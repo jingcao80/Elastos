@@ -3,9 +3,9 @@ module
     using interface Elastos.Droid.App.IActionBar;
     using interface Elastos.Droid.Os.IBundle;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace Widget {
 
     [local]
@@ -95,7 +95,7 @@ module
     }
 
     } // Widget
-    } // Dailer
+    } // Dialer
     } // Apps
     } // Elastos
 }

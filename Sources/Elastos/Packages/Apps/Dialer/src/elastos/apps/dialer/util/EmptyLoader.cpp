@@ -1,15 +1,15 @@
 
-#include "EmptyLoader.h"
+#include "util/EmptyLoader.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Util {
 
 //=================================================================
 // EmptyLoader::Callback
 //=================================================================
-CAR_INTERFACE_IMPL(EmptyLoader::Callback, Object, IEmptyLoaderCallback, ILoaderManagerLoaderCallbacks)
+CAR_INTERFACE_IMPL(EmptyLoader::Callback, Object, IEmptyLoaderCallback, ILoaderManagerLoaderCallbacks);
 
 ECode EmptyLoader::Callback::constructor(
     /* [in] */ IContext* context)
@@ -42,7 +42,7 @@ ECode EmptyLoader::Callback::OnLoaderReset(
 //=================================================================
 // EmptyLoader
 //=================================================================
-CAR_INTERFACE_IMPL(EmptyLoader, Loader, IEmptyLoader)
+CAR_INTERFACE_IMPL(EmptyLoader, Loader, IEmptyLoader);
 
 ECode EmptyLoader::constructor(
     /* [in] */ IContext* context)

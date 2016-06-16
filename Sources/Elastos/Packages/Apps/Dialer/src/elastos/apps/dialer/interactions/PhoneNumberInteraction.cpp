@@ -1,15 +1,15 @@
 
-#include "PhoneNumberInteraction.h"
+#include "interactions/PhoneNumberInteraction.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Interactions {
 
 //=================================================================
 // PhoneNumberInteraction::PhoneItem
 //=================================================================
-CAR_INTERFACE_IMPL_2(PhoneNumberInteraction::PhoneItem, Object, IParcelable, ICollapserCollapsible)
+CAR_INTERFACE_IMPL_2(PhoneNumberInteraction::PhoneItem, Object, IParcelable, ICollapserCollapsible);
 
 PhoneNumberInteraction::PhoneItem::PhoneItem()
 {}
@@ -116,7 +116,7 @@ ECode PhoneNumberInteraction::PhoneItemAdapter::GetView(
 // PhoneNumberInteraction::PhoneDisambiguationDialogFragment
 //=================================================================
 CAR_INTERFACE_IMPL_3(PhoneNumberInteraction::PhoneDisambiguationDialogFragment, DialogFragment,
-        IPhoneDisambiguationDialogFragment, IDialogInterfaceOnClickListener, IDialogInterfaceOnDismissListener)
+        IPhoneDisambiguationDialogFragment, IDialogInterfaceOnClickListener, IDialogInterfaceOnDismissListener);
 
 const String PhoneNumberInteraction::PhoneDisambiguationDialogFragment::ARG_PHONE_LIST("phoneList");
 const String PhoneNumberInteraction::PhoneDisambiguationDialogFragment::ARG_INTERACTION_TYPE("interactionType");

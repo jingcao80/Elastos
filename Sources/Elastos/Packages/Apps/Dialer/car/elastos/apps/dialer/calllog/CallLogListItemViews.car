@@ -1,15 +1,15 @@
 module
 {
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace CallLog {
 
     interface ICallLogListItemViews {
     }
 
     } //CallLog
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

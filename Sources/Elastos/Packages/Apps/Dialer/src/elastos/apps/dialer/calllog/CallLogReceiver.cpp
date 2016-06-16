@@ -1,8 +1,8 @@
 
-#include "CallLogReceiver.h"
+#include "elastos/apps/dialer/calllog/CallLogReceiver.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 

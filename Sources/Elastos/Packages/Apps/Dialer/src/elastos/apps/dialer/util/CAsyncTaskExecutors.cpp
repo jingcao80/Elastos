@@ -1,15 +1,15 @@
 
-#include "CAsyncTaskExecutors.h"
-#include "AsyncTaskExecutors.h"
+#include "util/CAsyncTaskExecutors.h"
+#include "util/AsyncTaskExecutors.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Util {
 
-CAR_INTERFACE_IMPL(CAsyncTaskExecutors, Singleton, IAsyncTaskExecutors)
+CAR_INTERFACE_IMPL(CAsyncTaskExecutors, Singleton, IAsyncTaskExecutors);
 
-CAR_SINGLETON_IMPL(CAsyncTaskExecutors)
+CAR_SINGLETON_IMPL(CAsyncTaskExecutors);
 
 ECode CAsyncTaskExecutors::CreateAsyncTaskExecutor(
     /* [out] */ IAsyncTaskExecutor** executor)

@@ -1,8 +1,8 @@
 
-#include "OrientationUtil.h"
+#include "util/OrientationUtil.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Util {
 

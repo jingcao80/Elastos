@@ -1,12 +1,12 @@
 
-#include "CSwipeHelper .h"
+#include "list/CSwipeHelper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
-CAR_OBJECT_IMPL(CSwipeHelper)
+CAR_OBJECT_IMPL(CSwipeHelper);
 
 } // List
 } // Dialer

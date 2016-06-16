@@ -1,12 +1,12 @@
 module
 {
     using interface Elastos.Droid.View.IView;
-    interface Elastos.Apps.Dailer.List.IRemoveView;
-    interface Elastos.Apps.Dailer.List.ISpeedDialFragment;
+    interface Elastos.Apps.Dialer.List.IRemoveView;
+    interface Elastos.Apps.Dialer.List.ISpeedDialFragment;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace List {
 
 
@@ -69,7 +69,7 @@ module
 
 
     } //List
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

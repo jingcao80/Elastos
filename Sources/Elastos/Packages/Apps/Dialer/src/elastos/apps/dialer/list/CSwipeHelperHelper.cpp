@@ -1,15 +1,15 @@
 
-#include "CSwipeHelperHelper.h"
-#include "SwipeHelper.h"
+#include "list/CSwipeHelperHelper.h"
+#include "list/SwipeHelper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
-CAR_INTERFACE_IMPL(CSwipeHelperHelper, Singleton, ISwipeHelperHelper)
+CAR_INTERFACE_IMPL(CSwipeHelperHelper, Singleton, ISwipeHelperHelper);
 
-CAR_SINGLETON_IMPL(CSwipeHelperHelper)
+CAR_SINGLETON_IMPL(CSwipeHelperHelper);
 
 ECode CSwipeHelperHelper::InvalidateGlobalRegion(
     /* [in] */ IView* view)

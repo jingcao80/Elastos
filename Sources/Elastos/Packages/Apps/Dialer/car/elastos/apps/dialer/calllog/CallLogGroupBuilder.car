@@ -3,9 +3,9 @@ module
 {
     using interface Elastos.Droid.Database.ICursor;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace CallLog {
 
     interface ICallLogGroupBuilderGroupCreator {
@@ -74,7 +74,7 @@ module
     }
 
     } //CallLog
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

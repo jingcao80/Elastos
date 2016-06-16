@@ -1,12 +1,12 @@
 
-#include "RegularSearchListAdapter.h"
+#include "list/RegularSearchListAdapter.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
-CAR_INTERFACE_IMPL(RegularSearchListAdapter, DialerPhoneNumberListAdapter, IRegularSearchListAdapter)
+CAR_INTERFACE_IMPL(RegularSearchListAdapter, DialerPhoneNumberListAdapter, IRegularSearchListAdapter);
 
 ECode RegularSearchListAdapter::constructor(
     /* [in] */ IContext* context)

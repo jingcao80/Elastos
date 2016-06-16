@@ -3,13 +3,13 @@ module
     using interface Elastos.Droid.App.IFragmentManager;
     using interface Elastos.Droid.Net.IUri;
     using interface Elastos.Utility.IArrayList;
-    using interface Elastos.Apps.Dailer.IActivity;
+    using interface Elastos.Apps.Dialer.IActivity;
 
-    interface Elastos.Apps.Dailer.Activity.ITransactionSafeActivity;
+    interface Elastos.Apps.Dialer.Activity.ITransactionSafeActivity;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace Interactions {
 
     interface IPhoneDisambiguationDialogFragment{
@@ -91,7 +91,7 @@ module
     }
 
     } //Interactions
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

@@ -3,7 +3,7 @@
 #define __ELASTOS_APPS_DIALER_CALLLOG_CCALLLOGNOTIFICATIONSSERVICE_H__
 
 #include "_Elastos_Apps_Dialer_CallLog_CCallLogNotificationsService.h"
-#include "elastos/droid/app/IntentService"
+#include "elastos/droid/app/IntentService.h"
 
 using Elastos::Droid::App:IntentService;
 

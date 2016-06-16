@@ -1,8 +1,11 @@
 #ifndef __ELASTOS_APPS_DIALER_DATABASE_DIALERDATABASEHELPERHELPER_H__
 #define __ELASTOS_APPS_DIALER_DATABASE_DIALERDATABASEHELPERHELPER_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos_Apps_Dialer_Database_CDialerDatabaseHelperHelper.h"
+#include <elastos/core/Singleton.h>
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Database {
 
@@ -11,9 +14,9 @@ CarClass(CDialerDatabaseHelperHelper)
     , public IDialerDatabaseHelperHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     /**
      * Access function to get the singleton instance of DialerDatabaseHelper.

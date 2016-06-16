@@ -1,15 +1,15 @@
 
-#include "COrientationUtil.h"
-#include "OrientationUtil.h"
+#include "util/COrientationUtil.h"
+#include "util/OrientationUtil.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Util {
 
-CAR_INTERFACE_IMPL(COrientationUtil, Singleton, IOrientationUtil)
+CAR_INTERFACE_IMPL(COrientationUtil, Singleton, IOrientationUtil);
 
-CAR_SINGLETON_IMPL(COrientationUtil)
+CAR_SINGLETON_IMPL(COrientationUtil);
 
 ECode COrientationUtil::IsLandscape(
     /* [in] */ IContext* context,

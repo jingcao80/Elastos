@@ -1,15 +1,15 @@
 
-#include "CSmartDialNameMatcherHelper.h"
-#include "SmartDialNameMatcher.h"
+#include "dialpad/CSmartDialNameMatcherHelper.h"
+#include "dialpad/SmartDialNameMatcher.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
-CAR_INTERFACE_IMPL(CSmartDialNameMatcherHelper, Singleton, ISmartDialNameMatcherHelper)
+CAR_INTERFACE_IMPL(CSmartDialNameMatcherHelper, Singleton, ISmartDialNameMatcherHelper);
 
-CAR_SINGLETON_IMPL(CSmartDialNameMatcherHelper)
+CAR_SINGLETON_IMPL(CSmartDialNameMatcherHelper);
 
 ECode CSmartDialNameMatcherHelper::NormalizeNumber(
     /* [in] */ const String& number,

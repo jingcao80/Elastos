@@ -1,13 +1,13 @@
 
 #include "CObjectFactory.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace DialerBind {
 
-CAR_INTERFACE_IMPL(CObjectFactory, Singleton, IObjectFactory)
+CAR_INTERFACE_IMPL(CObjectFactory, Singleton, IObjectFactory);
 
-CAR_SINGLETON_IMPL(CObjectFactory)
+CAR_SINGLETON_IMPL(CObjectFactory);
 
 ECode CObjectFactory::NewCachedNumberLookupService(
         /* [out] */ ICachedNumberLookupService** service)

@@ -1,14 +1,14 @@
 
-#inlcude "CSmartDialCursorLoader.h"
+#inlcude "dialpad/CSmartDialCursorLoader.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
-CAR_INTERFACE_IMPL(CSmartDialCursorLoader, AsyncTaskLoader, ISmartDialCursorLoader)
+CAR_INTERFACE_IMPL(CSmartDialCursorLoader, AsyncTaskLoader, ISmartDialCursorLoader);
 
-CAR_OBJECT_IMPL(CSmartDialCursorLoader)
+CAR_OBJECT_IMPL(CSmartDialCursorLoader);
 
 CSmartDialCursorLoader::CSmartDialCursorLoader()
     : DEBUG(FALSE)

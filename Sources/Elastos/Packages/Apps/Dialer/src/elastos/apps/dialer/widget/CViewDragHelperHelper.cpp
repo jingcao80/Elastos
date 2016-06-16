@@ -1,15 +1,15 @@
 
-#include "CViewDragHelperHelper.h"
-#include "ViewDragHelper.h"
+#include "widget/CViewDragHelperHelper.h"
+#include "widget/ViewDragHelper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Widget {
 
-CAR_INTERFACE_IMPL(CViewDragHelperHelper, Singleton, IViewDragHelperHelper)
+CAR_INTERFACE_IMPL(CViewDragHelperHelper, Singleton, IViewDragHelperHelper);
 
-CAR_SINGLETON_IMPL(CViewDragHelperHelper)
+CAR_SINGLETON_IMPL(CViewDragHelperHelper);
 
 ECode CViewDragHelperHelper::Create(
     /* [in] */ IViewGroup* forParent,

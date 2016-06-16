@@ -1,11 +1,11 @@
 module
 {
-    interface Elastos.Apps.Dailer.CallLog.ICallLogListItemView;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogListItemViews;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogListItemView;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogListItemViews;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace CallLog {
 
     interface ICallLogAdapterNumberWithCountryIso {
@@ -46,6 +46,7 @@ module
             [in] String number);
     }
 
+    /** The enumeration of {@link android.os.AsyncTask} objects used in this class. */
     enum CallLogAdapterTasks {
         CallLogAdapterTasks_REMOVE_CALL_LOG_ENTRIES = 0
     }
@@ -57,8 +58,6 @@ module
      * interface ICallLogGroupBuilderGroupCreator
      */
     interface ICallLogAdapter {
-        /** The enumeration of {@link android.os.AsyncTask} objects used in this class. */
-
         SetLoading(
             [in] Boolean loading);
 
@@ -95,7 +94,7 @@ module
     }
 
     } //CallLog
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

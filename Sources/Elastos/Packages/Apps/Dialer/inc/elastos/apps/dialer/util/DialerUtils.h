@@ -1,6 +1,12 @@
 #ifndef __ELASTOS_APPS_DIALER_UTIL_DIALERUTILS_H__
 #define __ELASTOS_APPS_DIALER_UTIL_DIALERUTILS_H__
 
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Utility::IIterable;
+
 namespace Elastos{
 namespace Apps{
 namespace Dialer {
@@ -90,7 +96,7 @@ public:
 
     static CARAPI_(void) HideInputMethod(
         /* [in] */ IView* view);
-}
+};
 
 } // Util
 } // Dialer

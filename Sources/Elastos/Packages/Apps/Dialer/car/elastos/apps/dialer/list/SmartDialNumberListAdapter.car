@@ -1,11 +1,11 @@
 module
 {
     using interface Elastos.Droid.Net.IUri;
-    interface Elastos.Apps.Dailer.Dialpad.ISmartDialCursorLoader;
+    interface Elastos.Apps.Dialer.Dialpad.ISmartDialCursorLoader;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace List {
 
     /**
@@ -14,7 +14,7 @@ module
      * interface Elastos.Apps.Contacts.Common.List.IIndexerListAdapter
      * interface Elastos.Apps.Contacts.Common.List.IContactEntryListAdapter
      * interface Elastos.Apps.Contacts.Common.List.IPhoneNumberListAdapter
-     * interface Elastos.Apps.Dailer.List.IDialerPhoneNumberListAdapter
+     * interface Elastos.Apps.Dialer.List.IDialerPhoneNumberListAdapter
      */
     [deprecated, local]
     interface ISmartDialNumberListAdapter {
@@ -36,7 +36,7 @@ module
 
 
     } //List
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

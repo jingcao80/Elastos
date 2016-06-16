@@ -1,15 +1,15 @@
 
-#include "SmartDialNumberListAdapter.h"
+#include "list/SmartDialNumberListAdapter.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
 const String SmartDialNumberListAdapter::TAG("SmartDialNumberListAdapter");
 const Boolean SmartDialNumberListAdapter::DEBUG = FALSE;
 
-CAR_INTERFACE_IMPL(SmartDialNumberListAdapter, DialerPhoneNumberListAdapter, ISmartDialNumberListAdapter)
+CAR_INTERFACE_IMPL(SmartDialNumberListAdapter, DialerPhoneNumberListAdapter, ISmartDialNumberListAdapter);
 
 ECode SmartDialNumberListAdapter::constructor(
     /* [in] */ IContext* context)

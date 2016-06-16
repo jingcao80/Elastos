@@ -2,17 +2,32 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CALLLOGACTIVITY_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CALLLOGACTIVITY_H__
 
-#include <AnalyticsActivity.h>
+#include "_Elastos.Apps.Dialer.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "elastos/droid/app/Activity.h"
 
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::View::IMenu;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Droid::View::IMotionEvent;
 using Elastos::Core::IRunnable;
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Apps::Dialer::Voicemail::IVoicemailStatusHelper;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
 class CallLogActivity
-    : public AnalyticsActivity
+    // TODO:
+    //: public AnalyticsActivity
+    : public Activity
     , public ICallLogActivity
     , public ICallLogQueryHandlerListener
 {
@@ -78,7 +93,7 @@ public:
     // @Override
     CARAPI OnPrepareOptionsMenu(
         /* [in] */ IMenu* menu,
-        /* [out] */ Boolean* res);
+         [out]  Boolean* res);
 
     // @Override
     CARAPI OnOptionsItemSelected(
@@ -112,8 +127,9 @@ private:
     static const Int32 TAB_INDEX_COUNT_WITH_VOICEMAIL; // = 3;
 
     AutoPtr<IHandler> mHandler;
-    AutoPtr<IViewPager> mViewPager;
-    AutoPtr<IViewPagerTabs> mViewPagerTabs;
+    // TODO:
+    // AutoPtr<IViewPager> mViewPager;
+    // AutoPtr<IViewPagerTabs> mViewPagerTabs;
     // AutoPtr<ViewPagerAdapter> mViewPagerAdapter;
     AutoPtr<ICallLogFragment> mAllCallsFragment;
     AutoPtr<ICallLogFragment> mMissedCallsFragment;

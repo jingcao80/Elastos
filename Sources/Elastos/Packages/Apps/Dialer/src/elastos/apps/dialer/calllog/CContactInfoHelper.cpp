@@ -1,12 +1,12 @@
 
-#include "CContactInfoHelper.h"
+#include "elastos/apps/dialer/calllog/CContactInfoHelper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
-CAR_OBJECT_IMPL(CContactInfoHelper)
+CAR_OBJECT_IMPL(CContactInfoHelper);
 
 } // CallLog
 } // Dialer

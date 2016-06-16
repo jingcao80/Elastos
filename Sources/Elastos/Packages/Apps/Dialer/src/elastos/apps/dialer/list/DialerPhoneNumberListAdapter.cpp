@@ -1,8 +1,8 @@
 
-#include "DialerPhoneNumberListAdapter.h"
+#include "list/DialerPhoneNumberListAdapter.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 

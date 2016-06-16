@@ -1,15 +1,15 @@
 
-#include "CDefaultVoicemailNotifierHelper.h"
-#include "DefaultVoicemailNotifier.h"
+#include "elastos/apps/dialer/calllog/CDefaultVoicemailNotifierHelper.h"
+#include "elastos/apps/dialer/calllog/DefaultVoicemailNotifier.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
-CAR_INTERFACE_IMPL(CDefaultVoicemailNotifierHelper, Singleton, IDefaultVoicemailNotifierHelper)
+CAR_INTERFACE_IMPL(CDefaultVoicemailNotifierHelper, Singleton, IDefaultVoicemailNotifierHelper);
 
-CAR_SINGLETON_IMPL(CDefaultVoicemailNotifierHelper)
+CAR_SINGLETON_IMPL(CDefaultVoicemailNotifierHelper);
 
 ECode CDefaultVoicemailNotifierHelper::GetInstance(
     /* [in] */ IContext* context,

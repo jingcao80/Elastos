@@ -1,13 +1,13 @@
 module
 {
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace Voicemail {
 
     /**
      * @Involve
-     * interface Elastos.Apps.Dailer.Voicemail.IVoicemailStatusHelper
+     * interface Elastos.Apps.Dialer.Voicemail.IVoicemailStatusHelper
      */
     interface IVoicemailStatusHelperImpl {
     }
@@ -24,7 +24,7 @@ module
 
 
     } // Voicemail
-    } // Dailer
+    } // Dialer
     } // Apps
     } // Elastos
 }

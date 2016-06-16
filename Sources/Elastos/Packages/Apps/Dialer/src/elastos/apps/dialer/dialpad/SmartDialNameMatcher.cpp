@@ -1,8 +1,8 @@
 
-#include "SmartDialNameMatcher.h"
+#include "dialpad/SmartDialNameMatcher.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
@@ -19,7 +19,7 @@ const Boolean SmartDialNameMatcher::ALLOW_INITIAL_MATCH = TRUE;
 
 const Int32 SmartDialNameMatcher::INITIAL_LENGTH_LIMIT = 1;
 
-CAR_INTERFACE_IMPL(SmartDialNameMatcher, Object, ISmartDialNameMatcher)
+CAR_INTERFACE_IMPL(SmartDialNameMatcher, Object, ISmartDialNameMatcher);
 
 ECode SmartDialNameMatcher::constructor(
     /* [in] */ const String& query)

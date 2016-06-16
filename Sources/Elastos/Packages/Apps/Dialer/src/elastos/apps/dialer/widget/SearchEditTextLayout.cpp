@@ -1,16 +1,16 @@
 
-#include "SearchEditTextLayout.h"
+#include "widget/SearchEditTextLayout.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
-namespace Widget{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
+namespace Widget {
 
 
 //================================================================
 // SearchEditTextLayout::SearchViewFocusChangeListener
 //================================================================
-CAR_INTERFACE_IMPL(SearchEditTextLayout::SearchViewFocusChangeListener, Object, IViewOnFocusChangeListener)
+CAR_INTERFACE_IMPL(SearchEditTextLayout::SearchViewFocusChangeListener, Object, IViewOnFocusChangeListener);
 
 SearchEditTextLayout::SearchViewFocusChangeListener::SearchViewFocusChangeListener(
     /* [in] */ SearchEditTextLayout* host)
@@ -33,7 +33,7 @@ ECode SearchEditTextLayout::SearchViewFocusChangeListener::OnFocusChange(
 //================================================================
 // SearchEditTextLayout::SearchCloseButtonClickListener
 //================================================================
-CAR_INTERFACE_IMPL(SearchEditTextLayout::SearchCloseButtonClickListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(SearchEditTextLayout::SearchCloseButtonClickListener, Object, IViewOnClickListener);
 
 SearchEditTextLayout::SearchCloseButtonClickListener::SearchCloseButtonClickListener(
     /* [in] */ SearchEditTextLayout* host)
@@ -50,7 +50,7 @@ ECode SearchEditTextLayout::SearchCloseButtonClickListener::OnClick(
 //================================================================
 // SearchEditTextLayout::SearchBackButtonClickListener
 //================================================================
-CAR_INTERFACE_IMPL(SearchEditTextLayout::SearchBackButtonClickListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(SearchEditTextLayout::SearchBackButtonClickListener, Object, IViewOnClickListener);
 
 SearchEditTextLayout::SearchBackButtonClickListener::SearchBackButtonClickListener(
     /* [in] */ SearchEditTextLayout* host)
@@ -70,7 +70,7 @@ ECode SearchEditTextLayout::SearchBackButtonClickListener::OnClick(
 //================================================================
 // SearchEditTextLayout::AnimatorUpdateListener
 //================================================================
-CAR_INTERFACE_IMPL(SearchEditTextLayout::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
+CAR_INTERFACE_IMPL(SearchEditTextLayout::AnimatorUpdateListener, Object, IAnimatorUpdateListener);
 
 SearchEditTextLayout::AnimatorUpdateListener::AnimatorUpdateListener(
     /* [in] */ SearchEditTextLayout* host)
@@ -90,7 +90,7 @@ ECode SearchEditTextLayout::AnimatorUpdateListener::OnAnimationUpdate(
 //================================================================
 // SearchEditTextLayout
 //================================================================
-CAR_INTERFACE_IMPL(SearchEditTextLayout, FrameLayout, ISearchEditTextLayout)
+CAR_INTERFACE_IMPL(SearchEditTextLayout, FrameLayout, ISearchEditTextLayout);
 
 SearchEditTextLayout::SearchEditTextLayout()
     : mIsExpanded(FALSE)

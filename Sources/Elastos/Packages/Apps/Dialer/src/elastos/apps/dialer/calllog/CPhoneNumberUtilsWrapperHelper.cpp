@@ -1,15 +1,15 @@
 
-#include "CPhoneNumberUtilsWrapperHelper.h"
-#include "PhoneNumberUtilsWrapper.h"
+#include "elastos/apps/dialer/calllog/CPhoneNumberUtilsWrapperHelper.h"
+#include "elastos/apps/dialer/calllog/PhoneNumberUtilsWrapper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
-CAR_INTERFACE_IMPL(CPhoneNumberUtilsWrapperHelper, Singleton, IPhoneNumberUtilsWrapperHelper)
+CAR_INTERFACE_IMPL(CPhoneNumberUtilsWrapperHelper, Singleton, IPhoneNumberUtilsWrapperHelper);
 
-CAR_SINGLETON_IMPL(CPhoneNumberUtilsWrapperHelper)
+CAR_SINGLETON_IMPL(CPhoneNumberUtilsWrapperHelper);
 
 ECode CPhoneNumberUtilsWrapperHelper::GetINSTANCE(
     /* [out] */ IPhoneNumberUtilsWrapper** wrapper)

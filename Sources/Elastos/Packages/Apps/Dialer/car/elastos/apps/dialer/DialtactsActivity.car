@@ -3,9 +3,9 @@ module
     using interface Elastos.Droid.Content.IIntent;
     using interface Elastos.Core.ICharSequence;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
 
     /**
      * @Involve
@@ -72,7 +72,7 @@ module
             [out] IIntent** intent);
     }
 
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

@@ -1,16 +1,16 @@
 
 
-#include "CIntentProviderHelper.h"
-#include "IntentProvider.h"
+#include "elastos/apps/dialer/calllog/CIntentProviderHelper.h"
+#include "elastos/apps/dialer/calllog/IntentProvider.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
-CAR_INTERFACE_IMPL(CIntentProviderHelper, Singleton, IIntentProviderHelper)
+CAR_INTERFACE_IMPL(CIntentProviderHelper, Singleton, IIntentProviderHelper);
 
-CAR_SINGLETON_IMPL(CIntentProviderHelper)
+CAR_SINGLETON_IMPL(CIntentProviderHelper);
 
 ECode CIntentProviderHelper::GetReturnCallIntentProvider(
     /* [in] */ const String& number,

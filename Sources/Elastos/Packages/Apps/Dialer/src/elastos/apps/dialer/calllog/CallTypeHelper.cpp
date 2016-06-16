@@ -1,12 +1,12 @@
 
-#include "CallTypeHelper.h"
+#include "elastos/apps/dialer/calllog/CallTypeHelper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
-CAR_INTERFACE_IMPL(CallTypeHelper, Object, ICallTypeHelper)
+CAR_INTERFACE_IMPL(CallTypeHelper, Object, ICallTypeHelper);
 
 ECode CallTypeHelper::constructor(
     /* [in] */ IResources* resources)

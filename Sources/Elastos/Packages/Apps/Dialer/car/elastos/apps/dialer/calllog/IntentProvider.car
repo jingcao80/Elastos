@@ -5,9 +5,9 @@ module
     using interface Elastos.Droid.Content.IIntent;
     using interface Elastos.Droid.Telecomm.Telecom.IPhoneAccountHandle;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace CallLog {
 
     /**
@@ -63,7 +63,7 @@ module
     }
 
     } //CallLog
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

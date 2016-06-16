@@ -1,10 +1,10 @@
 #include "CDialtactsActivity.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
-CAR_OBJECT_IMPL(CDialtactsActivity)
+CAR_OBJECT_IMPL(CDialtactsActivity);
 
 } // Dialer
 } // Apps

@@ -2,9 +2,9 @@ module
 {
     using interface Elastos.Droid.View.IMenuItem;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
 
     /** The enumeration of {@link AsyncTask} objects used in this class. */
     enum CallDetailActivityTasks {
@@ -52,7 +52,7 @@ module
             [in] IMenuItem* menuItem);
     }
 
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

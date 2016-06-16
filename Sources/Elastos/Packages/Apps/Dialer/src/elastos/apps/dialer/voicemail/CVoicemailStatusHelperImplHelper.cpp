@@ -1,15 +1,15 @@
 
-#include "CVoicemailStatusHelperImplHelper.h"
-#include "VoicemailStatusHelperImpl.h"
+#include "voicemail/CVoicemailStatusHelperImplHelper.h"
+#include "voicemail/VoicemailStatusHelperImpl.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Voicemail {
 
-CAR_INTERFACE_IMPL(CVoicemailStatusHelperImplHelper, Singleton, IVoicemailStatusHelperImplHelper)
+CAR_INTERFACE_IMPL(CVoicemailStatusHelperImplHelper, Singleton, IVoicemailStatusHelperImplHelper);
 
-CAR_SINGLETON_IMPL(CVoicemailStatusHelperImplHelper)
+CAR_SINGLETON_IMPL(CVoicemailStatusHelperImplHelper);
 
 ECode CVoicemailStatusHelperImplHelper::GetPROJECTION(
     /* [out, callee] */ ArrayOf<String>** protection)

@@ -1,13 +1,13 @@
 
 #include "CDatabaseHelperManager.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace DialerBind {
 
-CAR_INTERFACE_IMPL(CDatabaseHelperManager, Singleton, IDatabaseHelperManager)
+CAR_INTERFACE_IMPL(CDatabaseHelperManager, Singleton, IDatabaseHelperManager);
 
-CAR_SINGLETON_IMPL(CDatabaseHelperManager)
+CAR_SINGLETON_IMPL(CDatabaseHelperManager);
 
 ECode CDatabaseHelperManager::GetDatabaseHelper(
     /* [in] */ IContext* context,

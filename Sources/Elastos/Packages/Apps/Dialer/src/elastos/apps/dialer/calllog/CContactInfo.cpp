@@ -1,14 +1,14 @@
 
-#include "ContactInfo.h"
+#include "elastos/apps/dialer/calllog/ContactInfo.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
-CAR_INTERFACE_IMPL(CContactInfo, Object, IContactInfo)
+CAR_INTERFACE_IMPL(CContactInfo, Object, IContactInfo);
 
-CAR_OBJECT_IMPL(CContactInfo)
+CAR_OBJECT_IMPL(CContactInfo);
 
 AutoPtr<IContactInfo> createEMPTY()
 {
@@ -22,7 +22,7 @@ AutoPtr<IContactInfo> CContactInfo::EMPTY = createEMPTY();
 String CContactInfo::GEOCODE_AS_LABEL("");
 
 CContactInfo::CContactInfo()
-    : sourceType(0)
+    : mSourceType(0)
 {}
 
 ECode CContactInfo::GetHashCode(

@@ -1,9 +1,13 @@
 #ifndef __ELASTOS_APPS_DIALER_PHONECALLDETAILSVIEWS_H__
 #define __ELASTOS_APPS_DIALER_PHONECALLDETAILSVIEWS_H__
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+#include "Elastos.Droid.App.h"
+
+using Elastos::Apps::Dialer::CallLog::ICallTypeIconsView;
+
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
 /**
  * Encapsulates the views that are used to display the details of a phone call in the call log.
@@ -44,7 +48,7 @@ public:
     const AutoPtr<IImageView> mCallAccountIcon;
     const AutoPtr<ITextView> mCallLocationAndDate;
     const AutoPtr<ITextView> mVoicemailTranscriptionView;
-}
+};
 
 } // Dialer
 } // Apps

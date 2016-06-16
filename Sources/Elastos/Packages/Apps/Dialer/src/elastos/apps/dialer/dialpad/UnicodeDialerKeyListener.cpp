@@ -1,12 +1,12 @@
 
-#include "UnicodeDialerKeyListener.h"
+#include "dialpad/UnicodeDialerKeyListener.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
-CAR_INTERFACE_IMPL(UnicodeDialerKeyListener, DialerKeyListener, IUnicodeDialerKeyListener)
+CAR_INTERFACE_IMPL(UnicodeDialerKeyListener, DialerKeyListener, IUnicodeDialerKeyListener);
 
 AutoPtr<IUnicodeDialerKeyListener> CreateInstance()
 {

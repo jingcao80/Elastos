@@ -2,6 +2,11 @@
 #define __ELASTOS_APPS_DIALER_CPHONECALLDETAILS_H__
 
 #include "_Elastos_Apps_Dialer_CPhoneCallDetails.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Net.h"
+
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Net::IUri;
 
 namespace Elastos{
 namespace Apps{
@@ -174,7 +179,7 @@ public:
     /**
      * Total data usage for this call.
      */
-    Int64 mDataUsage;
+    AutoPtr<IInteger64> mDataUsage;
     /**
      * Voicemail transcription
      */

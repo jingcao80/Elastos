@@ -1,8 +1,8 @@
 
-#include "VoicemailPlaybackPresenter.h"
+#include "voicemail/VoicemailPlaybackPresenter.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Voicemail {
 
@@ -43,7 +43,7 @@ ECode VoicemailPlaybackPresenter::FetchResultHandler::FetchResultHandlerAsyncTas
 //=================================================================================
 // VoicemailPlaybackPresenter::FetchResultHandler
 //=================================================================================
-CAR_INTERFACE_IMPL(VoicemailPlaybackPresenter::FetchResultHandler, ContentObserver, IRunnable)
+CAR_INTERFACE_IMPL(VoicemailPlaybackPresenter::FetchResultHandler, ContentObserver, IRunnable);
 
 VoicemailPlaybackPresenter::FetchResultHandler::FetchResultHandler(
     /* [in]  */ VoicemailPlaybackPresenter* host)
@@ -281,7 +281,7 @@ ECode VoicemailPlaybackPresenter::AsyncPrepareTask::OnPostExecute(
 //=========================================================================
 // VoicemailPlaybackPresenter::PlaybackPositionListener
 //=========================================================================
-CAR_INTERFACE_IMPL(VoicemailPlaybackPresenter::PlaybackPositionListener, Object, ISeekBarOnSeekBarChangeListener)
+CAR_INTERFACE_IMPL(VoicemailPlaybackPresenter::PlaybackPositionListener, Object, ISeekBarOnSeekBarChangeListener);
 
 VoicemailPlaybackPresenter::PlaybackPositionListener::PlaybackPositionListener(
     /* [in]  */ VoicemailPlaybackPresenter* host)
@@ -341,7 +341,7 @@ ECode VoicemailPlaybackPresenter::PlaybackPositionListener::OnProgressChanged(
 //=========================================================================
 // VoicemailPlaybackPresenter::SpeakerphoneListener
 //=========================================================================
-CAR_INTERFACE_IMPL(VoicemailPlaybackPresenter::SpeakerphoneListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(VoicemailPlaybackPresenter::SpeakerphoneListener, Object, IViewOnClickListener);
 
 VoicemailPlaybackPresenter::SpeakerphoneListener::SpeakerphoneListener(
     /* [in]  */ VoicemailPlaybackPresenter* host)
@@ -370,7 +370,7 @@ ECode VoicemailPlaybackPresenter::SpeakerphoneListener::OnClick(
 //=========================================================================
 // VoicemailPlaybackPresenter::StartStopButtonListener
 //=========================================================================
-CAR_INTERFACE_IMPL(VoicemailPlaybackPresenter::StartStopButtonListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(VoicemailPlaybackPresenter::StartStopButtonListener, Object, IViewOnClickListener);
 
 VoicemailPlaybackPresenter::StartStopButtonListener::StartStopButtonListener(
     /* [in]  */ VoicemailPlaybackPresenter* host)

@@ -1,0 +1,19 @@
+TARGET_NAME= util
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += ../../../../../
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+SOURCES += AsyncTaskExecutors.cpp
+SOURCES += CAsyncTaskExecutors.cpp
+SOURCES += CDialerUtils.cpp
+SOURCES += CEmptyLoader.cpp
+SOURCES += CExpirableCacheHelper.cpp
+SOURCES += COrientationUtil.cpp
+SOURCES += DialerUtils.cpp
+SOURCES += EmptyLoader.cpp
+SOURCES += ExpirableCache.cpp
+SOURCES += OrientationUtil.cpp

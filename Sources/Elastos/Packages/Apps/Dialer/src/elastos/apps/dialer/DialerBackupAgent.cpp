@@ -1,8 +1,8 @@
 #include "DialerBackupAgent.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
 const String DialerBackupAgent::SHARED_KEY("shared_pref");
 

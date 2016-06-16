@@ -6,8 +6,8 @@
 #include "_Elastos_Apps_Dialer_CallLog_CPhoneNumberUtilsWrapperHelper.h"
 #include <elastos/core/Singleton.h>
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 

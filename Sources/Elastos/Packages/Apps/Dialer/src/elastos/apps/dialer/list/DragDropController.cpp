@@ -1,12 +1,12 @@
 
-#include "DragDropController.h"
+#include "list/DragDropController.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
-CAR_INTERFACE_IMPL(DragDropController, Object, IDragDropController)
+CAR_INTERFACE_IMPL(DragDropController, Object, IDragDropController);
 
 DragDropController::DragDropController()
 {

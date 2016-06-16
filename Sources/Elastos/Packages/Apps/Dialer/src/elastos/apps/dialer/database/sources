@@ -1,0 +1,12 @@
+TARGET_NAME= database
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += ../../../../../
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+SOURCES += DialerDatabaseHelper.cpp
+SOURCES += CDialerDatabaseHelper.cpp
+SOURCES += CDialerDatabaseHelperHelper.cpp

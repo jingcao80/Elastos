@@ -3,11 +3,11 @@ module
 {
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Utility.IArrayList;
-    interface Elastos.Apps.Dailer.Dialpad.ISmartDialMap;
+    interface Elastos.Apps.Dialer.Dialpad.ISmartDialMap;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace Dialpad {
 
     interface ISmartDialPrefixPhoneNumberTokens {
@@ -100,7 +100,7 @@ module
     }
 
     } //Dialpad
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

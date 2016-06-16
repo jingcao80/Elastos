@@ -1,8 +1,8 @@
 
-#include "DialerSettingsActivity.h"
+#include "settings/DialerSettingsActivity.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Settings {
 
@@ -78,7 +78,7 @@ ECode DialerSettingsActivity::HeaderAdapter::GetView(
 //=================================================================
 // DialerSettingsActivity
 //=================================================================
-CAR_INTERFACE_IMPL(DialerSettingsActivity, AnalyticsPreferenceActivity, IDialerSettingsActivity)
+CAR_INTERFACE_IMPL(DialerSettingsActivity, AnalyticsPreferenceActivity, IDialerSettingsActivity);
 
 ECode DialerSettingsActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)

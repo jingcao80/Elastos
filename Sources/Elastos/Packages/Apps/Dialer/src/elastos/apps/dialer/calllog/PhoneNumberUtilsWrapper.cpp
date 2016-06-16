@@ -1,11 +1,11 @@
 
-#include "PhoneNumberUtilsWrapper.h"
+#include "elastos/apps/dialer/calllog/PhoneNumberUtilsWrapper.h"
 
 using Elastos ::Droid:Telephony::IPhoneNumberUtils;
 using Elastos ::Droid:Telephony::CPhoneNumberUtils;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -25,7 +25,7 @@ AutoPtr<IPhoneNumberUtilsWrapper> PhoneNumberUtilsWrapper::INSTANCE = CreateINST
 
 AutoPtr<ISet> PhoneNumberUtilsWrapper::LEGACY_UNKNOWN_NUMBERS = CreateLEGACY_UNKNOWN_NUMBERS();
 
-CAR_INTERFACE_IMPL(PhoneNumberUtilsWrapper, Object, IPhoneNumberUtilsWrapper)
+CAR_INTERFACE_IMPL(PhoneNumberUtilsWrapper, Object, IPhoneNumberUtilsWrapper);
 
 Boolean PhoneNumberUtilsWrapper::CanPlaceCallsTo(
     /* [in] */ ICharSequence* number,

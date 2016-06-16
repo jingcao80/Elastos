@@ -1,12 +1,12 @@
 
-#include "CSpeedDialFragment .h"
+#include "list/CSpeedDialFragment.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
-CAR_OBJECT_IMPL(CSpeedDialFragment)
+CAR_OBJECT_IMPL(CSpeedDialFragment);
 
 } // List
 } // Dialer

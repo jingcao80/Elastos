@@ -1,12 +1,12 @@
 
-#include "CPhoneFavoritesTileAdapter.h"
+#include "list/CPhoneFavoritesTileAdapter.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
-CAR_OBJECT_IMPL(CPhoneFavoritesTileAdapter)
+CAR_OBJECT_IMPL(CPhoneFavoritesTileAdapter);
 
 } // List
 } // Dialer

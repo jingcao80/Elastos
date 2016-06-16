@@ -1,11 +1,11 @@
 
-#include "DialerDatabaseHelper.h"
-
+#include "database/DialerDatabaseHelper.h"
 #include <elastos/core/AutoLock.h>
+
 using Elastos::Core::AutoLock;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Database {
 //=================================================================
@@ -288,7 +288,7 @@ ECode DialerDatabaseHelper::SmartDialUpdateAsyncTask::OnPostExecute(
 //=================================================================
 // DialerDatabaseHelper
 //=================================================================
-CAR_INTERFACE_IMPL(DialerDatabaseHelper, SQLiteOpenHelper, IDialerDatabaseHelper)
+CAR_INTERFACE_IMPL(DialerDatabaseHelper, SQLiteOpenHelper, IDialerDatabaseHelper);
 
 AutoPtr<IAtomicBoolean> CreateInUpdate()
 {

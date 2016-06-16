@@ -1,14 +1,14 @@
-#include "ActionBarController.cpp"
+#include "widget/ActionBarController.cpp"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
-namespace Widget{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
+namespace Widget {
 
 //================================================================
 // ActionBarController::MyAnimatorUpdateListener
 //================================================================
-CAR_INTERFACE_IMPL(ActionBarController::MyAnimatorUpdateListener, Object, IAnimatorUpdateListener)
+CAR_INTERFACE_IMPL(ActionBarController::MyAnimatorUpdateListener, Object, IAnimatorUpdateListener);
 
 ActionBarController::MyAnimatorUpdateListener::MyAnimatorUpdateListener(
     /* [in] */ ActionBarController* host)
@@ -37,7 +37,7 @@ const String ActionBarController::KEY_IS_SLID_UP("key_actionbar_is_slid_up");
 const String ActionBarController::KEY_IS_FADED_OUT("key_actionbar_is_faded_out");
 const String ActionBarController::KEY_IS_EXPANDED("key_actionbar_is_expanded");
 
-CAR_INTERFACE_IMPL(ActionBarController, Object, IActionBarController)
+CAR_INTERFACE_IMPL(ActionBarController, Object, IActionBarController);
 
 ECode ActionBarController::constructor(
     /* [in] */ IActionBarControllerActivityUi* activityUi,

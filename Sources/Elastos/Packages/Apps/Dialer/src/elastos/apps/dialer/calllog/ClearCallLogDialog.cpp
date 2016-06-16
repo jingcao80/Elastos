@@ -1,15 +1,15 @@
 
-#include "ClearCallLogDialog.h"
+#include "elastos/apps/dialer/calllog/ClearCallLogDialog.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
 //=================================================================
 // ClearCallLogDialog::OKClickListener
 //=================================================================
-CAR_INTERFACE_IMPL(ClearCallLogDialog::OKClickListener, Object, IDialogInterfaceOnClickListener)
+CAR_INTERFACE_IMPL(ClearCallLogDialog::OKClickListener, Object, IDialogInterfaceOnClickListener);
 
 ClearCallLogDialog::OKClickListener::OKClickListener(
     /* [in] */ ClearCallLogDialog* host)
@@ -74,7 +74,7 @@ ECode ClearCallLogDialog::MyAsyncTask::OnPostExecute(
 //=================================================================
 // ClearCallLogDialog
 //=================================================================
-CAR_INTERFACE_IMPL(ClearCallLogDialog, DialogFragment, IClearCallLogDialog)
+CAR_INTERFACE_IMPL(ClearCallLogDialog, DialogFragment, IClearCallLogDialog);
 
 AutoPtr<ICachedNumberLookupService> ClearCallLogDialog::mCachedNumberLookupService =
         CObjectFactory::NewCachedNumberLookupService();

@@ -1,8 +1,44 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CALLLOGADAPTER_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CALLLOGADAPTER_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include "elastos/core/Object.h"
+#include "elastos/droid/view/View.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/core/Thread.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+#include "elastos/apps/dialer/calllog/CallLogListItemHelper.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::View::IOnPreDrawListener;
+using Elastos::Droid::View::View;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IViewTreeObserver;
+using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Core::Thread;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::ILinkedList;
+
+using Elastos::Apps::Dialer::Util::IExpirableCache;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -19,7 +55,7 @@ private:
         , public ICallLogAdapterNumberWithCountryIso
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         NumberWithCountryIso(
             /* [in] */ const String& number,
@@ -47,7 +83,7 @@ private:
         , public ICallLogAdapterContactInfoRequest
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         ContactInfoRequest(
             /* [in] */ const String& number,
@@ -81,7 +117,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         ActionListener(
             /* [in] */ CallLogAdapter* host);
@@ -101,7 +137,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         ExpandCollapseListener(
             /* [in] */ CallLogAdapter* host);
@@ -154,6 +190,8 @@ private:
         QueryThread(
             /* [in] */ CallLogAdapter* host);
 
+        CARAPI constructor();
+
         CARAPI_(void) StopProcessing();
 
         // @Override
@@ -169,7 +207,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         ReportButtonClickListener(
             /* [in] */ ICallLogListItemViews* views,
@@ -201,7 +239,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     CallLogAdapter();
 
@@ -210,7 +248,7 @@ public:
         /* [in] */ ICallLogAdapterCallFetcher* callFetcher,
         /* [in] */ IContactInfoHelper* contactInfoHelper,
         /* [in] */ ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
-        /* [in] */ ICallLogAdapterOnReportButtonClickListener onReportButtonClickListener,
+        /* [in] */ ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
         /* [in] */ Boolean isCallLog);
 
     // @Override
@@ -321,8 +359,8 @@ protected:
      * started with a delay. See {@link #START_PROCESSING_REQUESTS_DELAY_MILLIS}.
      */
     CARAPI_(void) EnqueueRequest(
-        /* [in] */ const String* number,
-        /* [in] */ const String* countryIso,
+        /* [in] */ const String& number,
+        /* [in] */ const String& countryIso,
         /* [in] */ IContactInfo* callLogInfo,
         /* [in] */ Boolean immediate);
 
@@ -401,8 +439,8 @@ private:
      * view to update its content.
      */
     CARAPI_(Boolean) QueryContactInfo(
-        /* [in] */ const String* number,
-        /* [in] */ const String* countryIso,
+        /* [in] */ const String& number,
+        /* [in] */ const String& countryIso,
         /* [in] */ IContactInfo* callLogInfo);
 
     CARAPI_(void) FindAndCacheViews(
@@ -654,16 +692,17 @@ private:
     AutoPtr<QueryThread> mCallerIdThread;
 
     /** Instance of helper class for managing views. */
-    AutoPtr<ICallLogListItemHelper> mCallLogViewsHelper;
+    AutoPtr<CallLogListItemHelper> mCallLogViewsHelper;
 
     /** Helper to set up contact photos. */
-    AutoPtr<IContactPhotoManager> mContactPhotoManager;
+    // TODO:
+    // AutoPtr<IContactPhotoManager> mContactPhotoManager;
     /** Helper to parse and process phone numbers. */
     AutoPtr<IPhoneNumberDisplayHelper> mPhoneNumberHelper;
     /** Helper to group call log entries. */
     AutoPtr<ICallLogGroupBuilder> mCallLogGroupBuilder;
 
-    AutoPtr<ICallItemExpandedListener> mCallItemExpandedListener;
+    AutoPtr<ICallLogAdapterCallItemExpandedListener> mCallItemExpandedListener;
 
     /** Can be set to true by tests to disable processing of requests. */
     /*volatile*/ Boolean mRequestProcessingDisabled;
@@ -690,7 +729,7 @@ private:
      */
     AutoPtr<IViewOnClickListener> mExpandCollapseListener;
 
-    AutoPtr<IAccessibilityDelegate> mAccessibilityDelegate;
+    AutoPtr<AccessibilityDelegate> mAccessibilityDelegate;
 
     AutoPtr<IHandler> mHandler;
 };

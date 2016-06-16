@@ -1,8 +1,8 @@
 
-#include "RegularSearchFragment.cpp"
+#include "list/RegularSearchFragment.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -19,7 +19,7 @@ const Int32 RegularSearchFragment::SEARCH_DIRECTORY_RESULT_LIMIT = 5;
 
 const AutoPtr<ICachedNumberLookupService> RegularSearchFragment::mCachedNumberLookupService = CreateLooupService();
 
-CAR_INTERFACE_IMPL(RegularSearchFragment, SearchFragment, IRegularSearchFragment)
+CAR_INTERFACE_IMPL(RegularSearchFragment, SearchFragment, IRegularSearchFragment);
 
 ECode RegularSearchFragment::constructor()
 {

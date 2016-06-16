@@ -1,15 +1,15 @@
 
-#include "PhoneFavoritesTileAdapter.h"
+#include "list/PhoneFavoritesTileAdapter.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
 //=================================================================
 // PhoneFavoritesTileAdapter::ContactEntryComparator
 //=================================================================
-CAR_INTERFACE_IMPL(PhoneFavoritesTileAdapter::ContactEntryComparator, Object, IComparator)
+CAR_INTERFACE_IMPL(PhoneFavoritesTileAdapter::ContactEntryComparator, Object, IComparator);
 
 PhoneFavoritesTileAdapter::ContactEntryComparator::ContactEntryComparator(
     /* [in] */ PhoneFavoritesTileAdapter* host)
@@ -34,7 +34,7 @@ ECode PhoneFavoritesTileAdapter::ContactEntryComparator::Compare(
 //=================================================================
 // PhoneFavoritesTileAdapter
 //=================================================================
-CAR_INTERFACE_IMPL_2(PhoneFavoritesTileAdapter, BaseAdapter, IPhoneFavoritesTileAdapter, IOnDragDropListener)
+CAR_INTERFACE_IMPL_2(PhoneFavoritesTileAdapter, BaseAdapter, IPhoneFavoritesTileAdapter, IOnDragDropListener);
 
 const String PhoneFavoritesTileAdapter::TAG("PhoneFavoritesTileAdapter");
 const Boolean PhoneFavoritesTileAdapter::DEBUG = FALSE;

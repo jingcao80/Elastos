@@ -1,10 +1,60 @@
-#include "CallLogAdapter.h"
-
+#include "elastos/apps/dialer/calllog/CallLogAdapter.h"
+#include "elastos/apps/dialer/calllog/CallLogListItemViews.h"
+#include "elastos/apps/dialer/calllog/CCallLogGroupBuilder.h"
+#include "elastos/apps/dialer/calllog/CCallTypeHelper.h"
+#include "elastos/apps/dialer/calllog/CallLogListItemHelper.h"
+#include "elastos/apps/dialer/calllog/CPhoneNumberDisplayHelper.h"
+#include "elastos/apps/dialer/calllog/CPhoneNumberUtilsWrapper.h"
+#include "elastos/apps/dialer/calllog/CContactInfo.h"
+#include "elastos/apps/dialer/calllog/PhoneAccountUtils.h"
+#include "elastos/apps/dialer/calllog/IntentProvider.h"
+#include "elastos/apps/dialer/calllog/ContactInfoHelper.h"
+#include "elastos/apps/dialer/calllog/CPhoneQuery.h"
+#include "elastos/apps/dialer/util/DialerUtils.h"
+#include "elastos/apps/dialer/util/ExpirableCache.h"
+#include "elastos/apps/dialer/DialtactsActivity.h"
+#include "elastos/apps/dialer/CPhoneCallDetails.h"
+#include "elastos/apps/dialer/CPhoneCallDetailsHelper.h"
+#include "elastos/apps/dialer/PhoneCallDetailsViews.h"
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/droid/view/LayoutInflater.h>
 #include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
+#include <elastos/core/CoreUtils.h>
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "R.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::CContentValues;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Provider::ICalls;
+using Elastos::Droid::Provider::CCalls;
+using Elastos::Droid::Provider::IContactsContractPhoneLookup;
+using Elastos::Droid::Provider::CContactsContractPhoneLookup;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IViewParent;
+using Elastos::Droid::View::IViewStub;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::EIID_IOnPreDrawListener;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Core::AutoLock;
+using Elastos::Core::IThread;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::CLinkedList;
+using Elastos::Apps::Dialer::CPhoneCallDetails;
+using Elastos::Apps::Dialer::Util::DialerUtils;
+using Elastos::Apps::Dialer::Util::ExpirableCache;
+using Elastos::Apps::Dialer::Util::IExpirableCacheCachedValue;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -22,7 +72,7 @@ const Int32 CallLogAdapter::START_THREAD = 2;
 //=================================================================
 // CallLogAdapter::NumberWithCountryIso
 //=================================================================
-CAR_INTERFACE_IMPL(CallLogAdapter::NumberWithCountryIso, Object, ICallLogAdapterNumberWithCountryIso)
+CAR_INTERFACE_IMPL(CallLogAdapter::NumberWithCountryIso, Object, ICallLogAdapterNumberWithCountryIso);
 
 CallLogAdapter::NumberWithCountryIso::NumberWithCountryIso(
     /* [in] */ const String& number,
@@ -49,8 +99,8 @@ ECode CallLogAdapter::NumberWithCountryIso::Equals(
         return NOERROR;
     }
 
-    *result = TextUtils::Equals(number, ((NumberWithCountryIso*)other)->mNumber)
-            && TextUtils::Equals(countryIso, ((NumberWithCountryIso*)other)->countryIso);
+    *result = TextUtils::Equals(mNumber, ((NumberWithCountryIso*)other)->mNumber)
+            && TextUtils::Equals(mCountryIso, ((NumberWithCountryIso*)other)->mCountryIso);
 
     return NOERROR;
 }
@@ -87,7 +137,8 @@ ECode CallLogAdapter::ContactInfoRequest::Equals(
 {
     VALIDATE_NOT_NULL(result);
 
-    if (this == obj) {
+    Boolean equals;
+    if (((IObject*)this)->Equals(obj, &equals), equals) {
         *result = TRUE;
         return NOERROR;
     }
@@ -97,22 +148,22 @@ ECode CallLogAdapter::ContactInfoRequest::Equals(
         return NOERROR;
     }
 
-    ICallLogAdapterContactInfoRequest* other = ICallLogAdapterContactInfoRequest::Probe(o);
+    ICallLogAdapterContactInfoRequest* other = ICallLogAdapterContactInfoRequest::Probe(obj);
     if (other == NULL) {
         *result = FALSE;
         return NOERROR;
     }
 
-    if (!TextUtils::Equals(number, ((ContactInfoRequest*)other)->mNumber)) {
+    if (!TextUtils::Equals(mNumber, ((ContactInfoRequest*)other)->mNumber)) {
         *result = FALSE;
         return NOERROR;
     }
-    if (!TextUtils::Equals(countryIso, ((ContactInfoRequest*)other)->mCountryIso)) {
+    if (!TextUtils::Equals(mCountryIso, ((ContactInfoRequest*)other)->mCountryIso)) {
         *result = FALSE;
         return NOERROR;
     }
-    Boolean equals = FALSE;
-    IObject::Probe(callLogInfo)->Equals(((ContactInfoRequest*)other)->mCallLogInfo, &equals);
+
+    IObject::Probe(mCallLogInfo)->Equals(((ContactInfoRequest*)other)->mCallLogInfo, &equals);
     if (!equals) {
         *result = FALSE;
         return NOERROR;
@@ -131,8 +182,8 @@ ECode CallLogAdapter::ContactInfoRequest::GetHashCode(
     Int32 prime = 31;
     Int32 result = 1;
     Int32 calllogInfoHash;
-    result = prime * result + ((callLogInfo == NULL)
-            ? 0 : callLogInfo->GetHashCode(&calllogInfoHash), calllogInfoHash);
+    result = prime * result + ((mCallLogInfo == NULL)
+            ? 0 : (IObject::Probe(mCallLogInfo))->GetHashCode(&calllogInfoHash), calllogInfoHash);
     result = prime * result + (mCountryIso.IsNull() ? 0 : mCountryIso.GetHashCode());
     result = prime * result + (mCountryIso.IsNull() ? 0 : mNumber.GetHashCode());
     *hashCode = result;
@@ -171,12 +222,12 @@ ECode CallLogAdapter::ExpandCollapseListener::OnClick(
     /* [in] */ IView* view)
 {
     AutoPtr<IViewParent> parent;
-    v->GetParent((IViewParent**)&parent);
+    view->GetParent((IViewParent**)&parent);
     AutoPtr<IViewParent> grandfather;
     parent->GetParent((IViewParent**)&grandfather);
 
     ICallLogListItemView* callLogItem = ICallLogListItemView::Probe(grandfather);
-    HandleRowExpanded(callLogItem, TRUE /* animate */, FALSE /* forceExpand */);
+    mHost->HandleRowExpanded(callLogItem, TRUE /* animate */, FALSE /* forceExpand */);
 
     return NOERROR;
 }
@@ -198,8 +249,8 @@ ECode CallLogAdapter::AccessibilityDelegate::OnRequestSendAccessibilityEvent(
     Int32 type;
     event->GetEventType(&type);
     if (type == IAccessibilityEvent::TYPE_VIEW_ACCESSIBILITY_FOCUSED) {
-        mHost->HandleRowExpanded((CallLogListItemView) host, FALSE /* animate */,
-                TRUE /* forceExpand */);
+        mHost->HandleRowExpanded(ICallLogListItemView::Probe(host),
+                 FALSE /* animate */, TRUE /* forceExpand */);
     }
 
     return View::AccessibilityDelegate::OnRequestSendAccessibilityEvent(host, child, event, res);
@@ -220,7 +271,8 @@ ECode CallLogAdapter::CallLogAdapterHandler::HandleMessage(
     msg->GetWhat(&what);
     switch (what) {
         case REDRAW:
-            mHost->NotifyDataSetChanged();
+            assert(0 && "TODO");
+            // mHost->NotifyDataSetChanged();
             break;
         case START_THREAD:
             mHost->StartRequestProcessing();
@@ -237,8 +289,11 @@ CallLogAdapter::QueryThread::QueryThread(
     /* [in] */ CallLogAdapter* host)
     : mDone(FALSE)
     , mHost(host)
+{}
+
+ECode CallLogAdapter::QueryThread::constructor()
 {
-    Thread(String("CallLogAdapter.QueryThread"));
+    return Thread::constructor(String("CallLogAdapter.QueryThread"));
 }
 
 void CallLogAdapter::QueryThread::StopProcessing()
@@ -270,24 +325,27 @@ ECode CallLogAdapter::QueryThread::Run()
         if (req != NULL) {
             // Process the request. If the lookup succeeds, schedule a
             // redraw.
-            needRedraw |= mHost->QueryContactInfo(((ContactInfoRequest*)req)->mNumber,
-                    ((ContactInfoRequest*)req)->mCountryIso,
-                    ((ContactInfoRequest*)req)->mCallLogInfo);
+            CallLogAdapter::ContactInfoRequest* request = (CallLogAdapter::ContactInfoRequest*)req.Get();
+            needRedraw |= mHost->QueryContactInfo(request->mNumber,
+                    request->mCountryIso, request->mCallLogInfo);
         }
         else {
             // Throttle redraw rate by only sending them when there are
             // more requests.
             if (needRedraw) {
                 needRedraw = FALSE;
-                mHost->mHandler->SendEmptyMessage(REDRAW);
+                Boolean result;
+                mHost->mHandler->SendEmptyMessage(REDRAW, &result);
             }
 
             // Wait until another request is available, or until this
             // thread is no longer needed (as indicated by being
             // interrupted).
             // try {
-            {    AutoLock syncLock(mHost->mRequestsLock);
-                mHost->mRequests->Wait(1000);
+            {
+                AutoLock syncLock(mHost->mRequestsLock);
+                assert(0 && "TODO");
+                // mHost->mRequests->Wait(1000);
             }
             // } catch (InterruptedException ie) {
             //     // Ignore, and attempt to continue processing requests.
@@ -315,7 +373,7 @@ ECode CallLogAdapter::ReportButtonClickListener::OnClick(
 {
     if (mHost->mOnReportButtonClickListener != NULL) {
         mHost->mOnReportButtonClickListener->OnReportButtonClick(
-                ((CallLogListItemViews*)mViews)->mNumber);
+                ((CallLogListItemViews*)mViews.Get())->mNumber);
     }
     return NOERROR;
 }
@@ -336,7 +394,8 @@ ECode CallLogAdapter::BadgeContainerClickListener::OnClick(
     /* [in] */ IView* view)
 {
     AutoPtr<IIntent> intent;
-    DialtactsActivity::GetAddNumberToContactIntent(((CPhoneCallDetails*)mDetails)>mNumber);
+    DialtactsActivity::GetAddNumberToContactIntent(
+            ((CPhoneCallDetails*)mDetails.Get())->mNumber);
     mHost->mContext->StartActivity(intent);
     return NOERROR;
 }
@@ -388,8 +447,9 @@ ECode CallLogAdapter::OnPreDraw(
     // Only schedule a thread-creation message if the thread hasn't been
     // created yet. This is purely an optimization, to queue fewer messages.
     if (mCallerIdThread == NULL) {
+        Boolean res;
         mHandler->SendEmptyMessageDelayed(START_THREAD,
-                START_PROCESSING_REQUESTS_DELAY_MILLIS);
+                START_PROCESSING_REQUESTS_DELAY_MILLIS, &res);
     }
 
     *result = true;
@@ -401,7 +461,7 @@ ECode CallLogAdapter::constructor(
     /* [in] */ ICallLogAdapterCallFetcher* callFetcher,
     /* [in] */ IContactInfoHelper* contactInfoHelper,
     /* [in] */ ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
-    /* [in] */ ICallLogAdapterOnReportButtonClickListener onReportButtonClickListener,
+    /* [in] */ ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
     /* [in] */ Boolean isCallLog)
 {
     // GroupingListAdapter(context);
@@ -413,8 +473,10 @@ ECode CallLogAdapter::constructor(
     mCallItemExpandedListener = callItemExpandedListener;
 
     mOnReportButtonClickListener = onReportButtonClickListener;
-    mReportedToast = Toast::MakeText(mContext,
-            R::string::toast_caller_id_reported, IToast::LENGTH_SHORT);
+    AutoPtr<IToastHelper> helper;
+    CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+    helper->MakeText(mContext, R::string::toast_caller_id_reported,
+             IToast::LENGTH_SHORT, (IToast**)&mReportedToast);
 
     mContactInfoCache = ExpirableCache::Create(CONTACT_INFO_CACHE_SIZE);
     CLinkedList::New((ILinkedList**)&mRequests);
@@ -427,7 +489,8 @@ ECode CallLogAdapter::constructor(
     resources->GetColor(R::color::call_log_expanded_background_color, &mExpandedBackgroundColor);
     resources->GetDimension(R::dimen::call_log_expanded_translation_z, &mExpandedTranslationZ);
 
-    mContactPhotoManager = ContactPhotoManager::GetInstance(mContext);
+    assert(0 && "TODO");
+    // mContactPhotoManager = ContactPhotoManager::GetInstance(mContext);
     CPhoneNumberDisplayHelper::New(resources, (IPhoneNumberDisplayHelper**)&mPhoneNumberHelper);
     AutoPtr<IPhoneNumberUtilsWrapper> wrapper;
     CPhoneNumberUtilsWrapper::New((IPhoneNumberUtilsWrapper**)&wrapper);
@@ -435,9 +498,8 @@ ECode CallLogAdapter::constructor(
     CPhoneCallDetailsHelper::New(resources, callTypeHelper,
             wrapper, (IPhoneCallDetailsHelper**)&phoneCallDetailsHelper);
 
-    mCallLogViewsHelper =
-    CCallLogListItemHelper::New(phoneCallDetailsHelper, mPhoneNumberHelper,
-             resources, (ICallLogListItemHelper**)&mCallLogViewsHelper);
+    mCallLogViewsHelper = new CallLogListItemHelper(
+             phoneCallDetailsHelper, mPhoneNumberHelper, resources);
     CCallLogGroupBuilder::New(this, (ICallLogGroupBuilder**)&mCallLogGroupBuilder);
 
     return NOERROR;
@@ -525,19 +587,20 @@ ECode CallLogAdapter::InvalidateCache()
 }
 
 void CallLogAdapter::EnqueueRequest(
-    /* [in] */ const String* number,
-    /* [in] */ const String* countryIso,
+    /* [in] */ const String& number,
+    /* [in] */ const String& countryIso,
     /* [in] */ IContactInfo* callLogInfo,
     /* [in] */ Boolean immediate)
 {
     AutoPtr<ContactInfoRequest> request = new ContactInfoRequest(
-        number, countryIso, callLogInfo, &request);
+        number, countryIso, callLogInfo);
     {    AutoLock syncLock(mRequestsLock);
         Boolean result;
         mRequests->Contains((ICallLogAdapterContactInfoRequest*)request, &result);
         if (!result) {
             mRequests->Add((ICallLogAdapterContactInfoRequest*)request);
-            mRequests->NotifyAll();
+            assert(0 && "TODO");
+            // mRequests->NotifyAll();
         }
     }
     if (immediate) {
@@ -546,8 +609,8 @@ void CallLogAdapter::EnqueueRequest(
 }
 
 Boolean CallLogAdapter::QueryContactInfo(
-    /* [in] */ const String* number,
-    /* [in] */ const String* countryIso,
+    /* [in] */ const String& number,
+    /* [in] */ const String& countryIso,
     /* [in] */ IContactInfo* callLogInfo)
 {
     AutoPtr<IContactInfo> info;
@@ -561,13 +624,14 @@ Boolean CallLogAdapter::QueryContactInfo(
     // Check the existing entry in the cache: only if it has changed we should update the
     // view.
     AutoPtr<NumberWithCountryIso> numberCountryIso =
-            new NumberWithCountryIso(number, countryIso, this);
-    AutoPtr<IContactInfo> existingInfo;
+            new NumberWithCountryIso(number, countryIso);
+    AutoPtr<IInterface> expired;
     mContactInfoCache->GetPossiblyExpired(
             (ICallLogAdapterNumberWithCountryIso*)numberCountryIso,
-            (IContactInfo**)&existingInfo);
+            (IInterface**)&expired);
+    IContactInfo* existingInfo = IContactInfo::Probe(expired);
 
-    Boolean isRemoteSource = ((CContactInfo*)info)->mSourceType != 0;
+    Boolean isRemoteSource = ((CContactInfo*)info.Get())->mSourceType != 0;
 
     // Don't force redraw if existing info in the cache is equal to {@link ContactInfo#EMPTY}
     // to avoid updating the data set for every new row that is scrolled into view.
@@ -575,9 +639,9 @@ Boolean CallLogAdapter::QueryContactInfo(
 
     // Exception: Photo uris for contacts from remote sources are not cached in the call log
     // cache, so we have to force a redraw for these contacts regardless.
-    Boolean
-    Boolean updated = (existingInfo != IContactInfo::EMPTY || isRemoteSource) &&
-            IObject::Probe(info)->Equals(existingInfo, &equals), !equals;
+    Boolean equals;
+    Boolean updated = (existingInfo != CContactInfo::EMPTY || isRemoteSource) &&
+            (IObject::Probe(info)->Equals(existingInfo, &equals), !equals);
 
     // Store the data in the cache so that the UI thread can use to display it. Store it
     // even if it has not changed so that it is marked as not expired.
@@ -620,21 +684,21 @@ ECode CallLogAdapter::NewChildView(
 {
     VALIDATE_NOT_NULL(result);
 
-    AutoPtr<ILayoutInflater> inflater
+    AutoPtr<ILayoutInflater> inflater;
     LayoutInflater::From(context, (ILayoutInflater**)&inflater);
     AutoPtr<IView> temp;
     inflater->Inflate(R::layout::call_log_list_item, parent, FALSE, (IView**)&temp);
     ICallLogListItemView* view = ICallLogListItemView::Probe(temp);
 
     // Get the views to bind to and cache them.
-    AutoPtr<ICallLogListItemViews> views = CallLogListItemViews::FromView(view);
-    view->SetTag(views);
+    AutoPtr<ICallLogListItemViews> views = CallLogListItemViews::FromView(IView::Probe(view));
+    IView::Probe(view)->SetTag(views);
 
     // Set text height to false on the TextViews so they don't have extra padding.
-    ((CallLogListItemViews*)views)->mPhoneCallDetailsViews
-            ->mNameView->SetElegantTextHeight(FALSE);
-    ((CallLogListItemViews*)views)->mPhoneCallDetailsViews
-            ->mCallLocationAndDate->SetElegantTextHeight(FALSE);
+    CallLogListItemViews* cviews = (CallLogListItemViews*)views.Get();
+    PhoneCallDetailsViews* detailsViews = (PhoneCallDetailsViews*)cviews->mPhoneCallDetailsViews.Get();
+    detailsViews->mNameView->SetElegantTextHeight(FALSE);
+    detailsViews->mCallLocationAndDate->SetElegantTextHeight(FALSE);
 
     *result = temp;
     REFCOUNT_ADD(*result)
@@ -646,7 +710,8 @@ ECode CallLogAdapter::BindStandAloneView(
     /* [in] */ IContext* context,
     /* [in] */ ICursor* cursor)
 {
-    return BindView(view, cursor, 1);
+    BindView(view, cursor, 1);
+    return NOERROR;
 }
 
 ECode CallLogAdapter::BindChildView(
@@ -654,7 +719,8 @@ ECode CallLogAdapter::BindChildView(
     /* [in] */ IContext* context,
     /* [in] */ ICursor* cursor)
 {
-    return BindView(view, cursor, 1);
+    BindView(view, cursor, 1);
+    return NOERROR;
 }
 
 ECode CallLogAdapter::BindGroupView(
@@ -664,7 +730,8 @@ ECode CallLogAdapter::BindGroupView(
     /* [in] */ Int32 groupSize,
     /* [in] */ Boolean expanded)
 {
-    return BindView(view, cursor, groupSize);
+    BindView(view, cursor, groupSize);
+    return NOERROR;
 }
 
 void CallLogAdapter::FindAndCacheViews(
@@ -678,12 +745,12 @@ void CallLogAdapter::BindView(
 {
     view->SetAccessibilityDelegate(mAccessibilityDelegate);
     ICallLogListItemView* callLogItemView = ICallLogListItemView::Probe(view);
-    AutoPtr<IView> temp;
-    view->GetTag((IView**)&temp);
+    AutoPtr<IInterface> temp;
+    view->GetTag((IInterface**)&temp);
     ICallLogListItemViews* views = ICallLogListItemViews::Probe(temp);
 
     // Default case: an item in the call log.
-    ((CCallLogListItemViews*)views)->mPrimaryActionView->SetVisibility(IView::VISIBLE);
+    ((CallLogListItemViews*)views)->mPrimaryActionView->SetVisibility(IView::VISIBLE);
 
     String number;
     c->GetString(ICallLogQuery::NUMBER, &number);
@@ -708,7 +775,7 @@ void CallLogAdapter::BindView(
 
     Int64 rowId;
     c->GetInt64(ICallLogQuery::ID, &rowId);
-    ((CCallLogListItemViews*)views)->mRowId = rowId;
+    ((CallLogListItemViews*)views)->mRowId = rowId;
 
     // For entries in the call log, check if the day group has changed and display a header
     // if necessary.
@@ -716,55 +783,55 @@ void CallLogAdapter::BindView(
         Int32 currentGroup = GetDayGroupForCall(rowId);
         Int32 previousGroup = GetPreviousDayGroup(c);
         if (currentGroup != previousGroup) {
-            ((CCallLogListItemViews*)views)->mDayGroupHeader->SetVisibility(IView::VISIBLE);
-            ((CCallLogListItemViews*)views)->mDayGroupHeader->SetText(
+            IView::Probe(((CallLogListItemViews*)views)->mDayGroupHeader)->SetVisibility(IView::VISIBLE);
+            ((CallLogListItemViews*)views)->mDayGroupHeader->SetText(
                     GetGroupDescription(currentGroup));
         }
         else {
-            ((CCallLogListItemViews*)views)->mDayGroupHeader->SetVisibility(IView::GONE);
+            IView::Probe(((CallLogListItemViews*)views)->mDayGroupHeader)->SetVisibility(IView::GONE);
         }
     }
     else {
-        ((CCallLogListItemViews*)views)->mDayGroupHeader->SetVisibility(IView::GONE);
+        IView::Probe(((CallLogListItemViews*)views)->mDayGroupHeader)->SetVisibility(IView::GONE);
     }
 
     // Store some values used when the actions ViewStub is inflated on expansion of the actions
     // section.
-    ((CCallLogListItemViews*)views)->mNumber = number;
-    ((CCallLogListItemViews*)views)->mNumberPresentation = numberPresentation;
-    ((CCallLogListItemViews*)views)->mCallType = callType;
+    ((CallLogListItemViews*)views)->mNumber = number;
+    ((CallLogListItemViews*)views)->mNumberPresentation = numberPresentation;
+    ((CallLogListItemViews*)views)->mCallType = callType;
     // NOTE: This is currently not being used, but can be used in future versions.
-    ((CCallLogListItemViews*)views)->mAccountHandle = accountHandle;
-    ((CCallLogListItemViews*)views)->mVoicemailUri;
-    c->GetString(ICallLogQuery::VOICEMAIL_URI, &((CCallLogListItemViews*)views)->mVoicemailUri);
+    ((CallLogListItemViews*)views)->mAccountHandle = accountHandle;
+    c->GetString(ICallLogQuery::VOICEMAIL_URI, &((CallLogListItemViews*)views)->mVoicemailUri);
     // Stash away the Ids of the calls so that we can support deleting a row in the call log.
-    ((CCallLogListItemViews*)views)->mCallIds = GetCallIds(c, count);
+    ((CallLogListItemViews*)views)->mCallIds = GetCallIds(c, count);
 
     AutoPtr<IContactInfo> cachedContactInfo = GetContactInfoFromCallLog(c);
 
-    Boolean isVoicemailNumber =
-            PhoneNumberUtilsWrapper::INSTANCE->IsVoicemailNumber(number);
+    Boolean isVoicemailNumber;
+    PhoneNumberUtilsWrapper::INSTANCE->IsVoicemailNumber(
+            CoreUtils::Convert(number), &isVoicemailNumber);
 
     // Where binding and not in the call log, use default behaviour of invoking a call when
     // tapping the primary view.
     if (!mIsCallLog) {
-        ((CCallLogListItemViews*)views)->mPrimaryActionView->SetOnClickListener(mActionListener);
+        ((CallLogListItemViews*)views)->mPrimaryActionView->SetOnClickListener(mActionListener);
 
         // Set return call intent, otherwise null.
-        if (PhoneNumberUtilsWrapper::CanPlaceCallsTo(number, numberPresentation)) {
+        if (PhoneNumberUtilsWrapper::CanPlaceCallsTo(CoreUtils::Convert(number), numberPresentation)) {
             // Sets the primary action to call the number.
-            ((CCallLogListItemViews*)views)->mPrimaryActionView->SetTag(
+            ((CallLogListItemViews*)views)->mPrimaryActionView->SetTag(
                 IntentProvider::GetReturnCallIntentProvider(number));
         }
         else {
             // Number is not callable, so hide button.
-            ((CCallLogListItemViews*)views)->mPrimaryActionView->SetTag(NULL);
+            ((CallLogListItemViews*)views)->mPrimaryActionView->SetTag(NULL);
         }
     }
     else {
         // In the call log, expand/collapse an actions section for the call log entry when
         // the primary view is tapped.
-        ((CCallLogListItemViews*)views)->mPrimaryActionView->SetOnClickListener(
+        ((CallLogListItemViews*)views)->mPrimaryActionView->SetOnClickListener(
                 mExpandCollapseListener);
 
         // Note: Binding of the action buttons is done as required in configureActionViews
@@ -774,21 +841,24 @@ void CallLogAdapter::BindView(
     // Lookup contacts with this number
     AutoPtr<NumberWithCountryIso> numberCountryIso = new NumberWithCountryIso(number, countryIso);
     AutoPtr<IExpirableCacheCachedValue> cachedInfo;
-    mContactInfoCache->GetCachedValue(numberCountryIso, (IExpirableCacheCachedValue**)&cachedInfo);
+    mContactInfoCache->GetCachedValue(
+            (IObject*)numberCountryIso, (IExpirableCacheCachedValue**)&cachedInfo);
 
     AutoPtr<IContactInfo> info;
     if (cachedInfo != NULL) {
-        cachedInfo->GetValue((IContactInfo**)&info);
+        AutoPtr<IInterface> temp;
+        cachedInfo->GetValue((IInterface**)&temp);
+        info = IContactInfo::Probe(temp);
     }
 
-    if (!PhoneNumberUtilsWrapper::CanPlaceCallsTo(number, numberPresentation)
+    if (!PhoneNumberUtilsWrapper::CanPlaceCallsTo(CoreUtils::Convert(number), numberPresentation)
             || isVoicemailNumber) {
         // If this is a number that cannot be dialed, there is no point in looking up a contact
         // for it.
-        info = IContactInfo::EMPTY;
+        info = CContactInfo::EMPTY;
     }
     else if (cachedInfo == NULL) {
-        mContactInfoCache->Put(numberCountryIso, IContactInfo::EMPTY);
+        mContactInfoCache->Put((IObject*)numberCountryIso, CContactInfo::EMPTY);
         // Use the cached contact info from the call log.
         info = cachedContactInfo;
         // The db request should happen on a non-UI thread.
@@ -801,7 +871,7 @@ void CallLogAdapter::BindView(
         if (cachedInfo->IsExpired(&isExpired), isExpired) {
             // The contact info is no longer up to date, we should request it. However, we
             // do not need to request them immediately.
-            EnqueueRequest(number, countryIso, cachedContactInfo, falFALSEse);
+            EnqueueRequest(number, countryIso, cachedContactInfo, FALSE);
         }
         else  if (!CallLogInfoMatches(cachedContactInfo, info)) {
             // The call log information does not match the one we have, look it up again.
@@ -811,23 +881,24 @@ void CallLogAdapter::BindView(
             EnqueueRequest(number, countryIso, cachedContactInfo, FALSE);
         }
 
-        if (info == IContactInfo::EMPTY) {
+        if (info == CContactInfo::EMPTY) {
             // Use the cached contact info from the call log.
             info = cachedContactInfo;
         }
     }
 
-    AutoPtr<IUri> lookupUri = ((CContactInfo*)info)->mLookupUri;
-    String name = ((CContactInfo*)info)->mName;
-    Int32 ntype = ((CContactInfo*)info)->mType;
-    String label = ((CContactInfo*)info)->mLabel;
-    Int64 photoId = ((CContactInfo*)info)->mPhotoId;
-    AutoPtr<IUri> photoUri = ((CContactInfo*)info)->mPhotoUri;
-    AutoPtr<ICharSequence> formattedNumber = ((CContactInfo*)info)->mFormattedNumber;
+    CContactInfo* cInfo = (CContactInfo*)info.Get();
+    AutoPtr<IUri> lookupUri = cInfo->mLookupUri;
+    String name = cInfo->mName;
+    Int32 ntype = cInfo->mType;
+    String label = cInfo->mLabel;
+    Int64 photoId = cInfo->mPhotoId;
+    AutoPtr<IUri> photoUri = cInfo->mPhotoUri;
+    AutoPtr<ICharSequence> formattedNumber = CoreUtils::Convert(cInfo->mFormattedNumber);
     AutoPtr<ArrayOf<Int32> > callTypes = GetCallTypes(c, count);
     String geocode;
     c->GetString(ICallLogQuery::GEOCODED_LOCATION, &geocode);
-    Int32 sourceType = ((CContactInfo*)info)->mSourceType;
+    Int32 sourceType = cInfo->mSourceType;
     Int32 features = GetCallFeatures(c, count);
     String transcription;
     c->GetString(ICallLogQuery::TRANSCRIPTION, &transcription);
@@ -839,54 +910,58 @@ void CallLogAdapter::BindView(
 
     AutoPtr<IPhoneCallDetails> details;
 
-    ((CCallLogListItemViews*)views)->mReported = ((CContactInfo*)info)->mIsBadData;
+    ((CallLogListItemViews*)views)->mReported = cInfo->mIsBadData;
 
     // The entry can only be reported as invalid if it has a valid ID and the source of the
     // entry supports marking entries as invalid.
-    mContactInfoHelper->CanReportAsInvalid(((CContactInfo*)info)->mSourceType,
-            ((CContactInfo*)info)->mObjectId,
-            &((CCallLogListItemViews*)views)->mCanBeReportedAsInvalid);
+    mContactInfoHelper->CanReportAsInvalid(cInfo->mSourceType,
+            cInfo->mObjectId,
+            &((CallLogListItemViews*)views)->mCanBeReportedAsInvalid);
 
     // Restore expansion state of the row on rebind.  Inflate the actions ViewStub if required,
     // and set its visibility state accordingly.
     ExpandOrCollapseActions(callLogItemView, IsExpanded(rowId));
 
     if (TextUtils::IsEmpty(name)) {
-        CPhoneCallDetails::New(number, numberPresentation,
+        CPhoneCallDetails::New(CoreUtils::Convert(number), numberPresentation,
                 formattedNumber, countryIso, geocode, callTypes, date,
-                duration, null, accountIcon, features, dataUsage,
+                duration, String(NULL), accountIcon, features, dataUsage,
                 transcription, (IPhoneCallDetails**)&details);
     }
     else {
-        CPhoneCallDetails::New(number, numberPresentation,
+        CPhoneCallDetails::New(CoreUtils::Convert(number), numberPresentation,
                 formattedNumber, countryIso, geocode, callTypes, date,
-                duration, name, ntype, label, lookupUri, photoUri, sourceType,
-                null, accountIcon, features, dataUsage,
+                duration, CoreUtils::Convert(name), ntype,
+                CoreUtils::Convert(label), lookupUri, photoUri, sourceType,
+                String(NULL), accountIcon, features, dataUsage,
                 transcription, (IPhoneCallDetails**)&details);
     }
 
     mCallLogViewsHelper->SetPhoneCallDetails(mContext, views, details);
 
-    Int32 contactType = IContactPhotoManager::TYPE_DEFAULT;
+    Int32 contactType;
+    assert(0 && "TODO");
+    // contactType = IContactPhotoManager::TYPE_DEFAULT;
 
     Boolean isBusiness = FALSE;
     if (isVoicemailNumber) {
-        contactType = IContactPhotoManager::TYPE_VOICEMAIL;
+        assert(0 && "TODO");
+        // contactType = IContactPhotoManager::TYPE_VOICEMAIL;
     }
-    else if (mContactInfoHelper->IsBusiness(((CContactInfo*)info)->mSourceType),
-            isBusiness) {
-        contactType = IContactPhotoManager::TYPE_BUSINESS;
+    else if (mContactInfoHelper->IsBusiness(cInfo->mSourceType, &isBusiness), isBusiness) {
+        assert(0 && "TODO");
+        // contactType = IContactPhotoManager::TYPE_BUSINESS;
     }
 
     String lookupKey = lookupUri == NULL ? String(NULL)
             : ContactInfoHelper::GetLookupKeyFromUri(lookupUri);
 
     String nameForDefaultImage;
-    if (TextUtils::isEmpty(name)) {
+    if (TextUtils::IsEmpty(name)) {
         AutoPtr<ICharSequence> displayNumber;
-        mPhoneNumberHelper->getDisplayNumber(((CPhoneCallDetails*)details)->mNumber,
-                ((CPhoneCallDetails*)details)->mNumberPresentation,
-                ((CPhoneCallDetails*)details)->mFormattedNumber,
+        mPhoneNumberHelper->GetDisplayNumber(((CPhoneCallDetails*)details.Get())->mNumber,
+                ((CPhoneCallDetails*)details.Get())->mNumberPresentation,
+                ((CPhoneCallDetails*)details.Get())->mFormattedNumber,
                 (ICharSequence**)&displayNumber);
         displayNumber->ToString(&nameForDefaultImage);
     }
@@ -902,7 +977,7 @@ void CallLogAdapter::BindView(
     }
 
     // Listen for the first NULL
-    if (mViewTreeObserver == null) {
+    if (mViewTreeObserver == NULL) {
         view->GetViewTreeObserver((IViewTreeObserver**)&mViewTreeObserver);
         mViewTreeObserver->AddOnPreDrawListener(this);
     }
@@ -920,7 +995,7 @@ Int32 CallLogAdapter::GetPreviousDayGroup(
     Boolean succeeded = FALSE;
     if (cursor->MoveToPrevious(&succeeded), succeeded) {
         Int64 previousRowId;
-        cursor->GetLong(ICallLogQuery::ID, &previousRowId);
+        cursor->GetInt64(ICallLogQuery::ID, &previousRowId);
         dayGroup = GetDayGroupForCall(previousRowId);
     }
     cursor->MoveToPosition(startingPosition, &succeeded);
@@ -934,7 +1009,7 @@ Int32 CallLogAdapter::GetDayGroupForCall(
     if (mDayGroups->ContainsKey(CoreUtils::Convert(callId), &contains), contains) {
         AutoPtr<IInterface> value;
         mDayGroups->Get(CoreUtils::Convert(callId), (IInterface**)&value);
-        return CoreUtils::Unbox(value);
+        return CoreUtils::Unbox(IInteger32::Probe(value));
     }
     return ICallLogGroupBuilder::DAY_GROUP_NONE;
 }
@@ -968,20 +1043,20 @@ void CallLogAdapter::ExpandOrCollapseActions(
     /* [in] */ ICallLogListItemView* callLogItem,
     /* [in] */ Boolean isExpanded)
 {
-    AutoPtr<IView> view;
-    callLogItem->GetTag((IView**)&view);
-    CCallLogListItemViews* views = (CCallLogListItemViews*)ICallLogListItemViews::Probe(view);
+    AutoPtr<IInterface> view;
+    IView::Probe(callLogItem)->GetTag((IInterface**)&view);
+    CallLogListItemViews* views = (CallLogListItemViews*)ICallLogListItemViews::Probe(view);
 
-    ExpandVoicemailTranscriptionView(views, isExpanded);
+    ExpandVoicemailTranscriptionView(ICallLogListItemViews::Probe(view), isExpanded);
     if (isExpanded) {
         // Inflate the view stub if necessary, and wire up the event handlers.
-        InflateActionViewStub(callLogItem);
+        InflateActionViewStub(IView::Probe(callLogItem));
 
         views->mActionsView->SetVisibility(IView::VISIBLE);
         views->mActionsView->SetAlpha(1.0f);
         views->mCallLogEntryView->SetBackgroundColor(mExpandedBackgroundColor);
         views->mCallLogEntryView->SetTranslationZ(mExpandedTranslationZ);
-        callLogItem->SetTranslationZ(mExpandedTranslationZ); // WAR
+        IView::Probe(callLogItem)->SetTranslationZ(mExpandedTranslationZ); // WAR
     }
     else {
         // When recycling a view, it is possible the actionsView ViewStub was previously
@@ -992,7 +1067,7 @@ void CallLogAdapter::ExpandOrCollapseActions(
 
         views->mCallLogEntryView->SetBackgroundColor(mCallLogBackgroundColor);
         views->mCallLogEntryView->SetTranslationZ(0);
-        callLogItem->SetTranslationZ(0); // WAR
+        IView::Probe(callLogItem)->SetTranslationZ(0); // WAR
     }
 }
 
@@ -1000,15 +1075,16 @@ void CallLogAdapter::ExpandVoicemailTranscriptionView(
     /* [in] */ ICallLogListItemViews* views,
     /* [in] */ Boolean isExpanded)
 {
-    if (((CCallLogListItemViews*)views)->mCallType != ICalls::VOICEMAIL_TYPE) {
+    CallLogListItemViews* cviews = (CallLogListItemViews*)views;
+    if (cviews->mCallType != ICalls::VOICEMAIL_TYPE) {
         return;
     }
 
-    AutoPtr<ITextView> view = ((CCallLogListItemViews*)views)
-            ->mPhoneCallDetailsViews->voicemailTranscriptionView;
-    String text;
-    view->GetText(&text);
-    if (TextUtils::isEmpty(text)) {
+    PhoneCallDetailsViews* detailsViews = (PhoneCallDetailsViews*)cviews->mPhoneCallDetailsViews.Get();
+    AutoPtr<ITextView> view = detailsViews->mVoicemailTranscriptionView;
+    AutoPtr<ICharSequence> text;
+    view->GetText((ICharSequence**)&text);
+    if (TextUtils::IsEmpty(text)) {
         return;
     }
     view->SetMaxLines(isExpanded ? VOICEMAIL_TRANSCRIPTION_MAX_LINES : 1);
@@ -1018,15 +1094,16 @@ void CallLogAdapter::ExpandVoicemailTranscriptionView(
 void CallLogAdapter::InflateActionViewStub(
     /* [in] */ IView* callLogItem)
 {
-    AutoPtr<IView> view;
-    callLogItem->GetTag((IView**)&view);
-    CCallLogListItemViews* views = (CCallLogListItemViews*)ICallLogListItemViews::Probe(view);
+    AutoPtr<IInterface> view;
+    callLogItem->GetTag((IInterface**)&view);
+    ICallLogListItemViews* iviews = ICallLogListItemViews::Probe(view);
+    CallLogListItemViews* views = (CallLogListItemViews*)iviews;
 
     AutoPtr<IView> viewStub;
     callLogItem->FindViewById(R::id::call_log_entry_actions_stub, (IView**)&viewStub);
     IViewStub* stub = IViewStub::Probe(viewStub);
     if (stub != NULL) {
-        views->mActionsView = (ViewGroup) stub.inflate();
+        stub->Inflate((IView**)&views->mActionsView);
     }
 
     if (views->mCallBackButtonView == NULL) {
@@ -1062,74 +1139,76 @@ void CallLogAdapter::InflateActionViewStub(
         views->mActionsView->FindViewById(
                 R::id::report_action, (IView**)&temp);
         views->mReportButtonView = ITextView::Probe(temp);
-        AutoPtr<ReportButtonClickListener> listener = new ReportButtonClickListener(this);
-        views->mReportButtonView->SetOnClickListener(
+        AutoPtr<ReportButtonClickListener> listener = new ReportButtonClickListener(
+                iviews, this);
+        IView::Probe(views->mReportButtonView)->SetOnClickListener(
             (IViewOnClickListener*)listener);
     }
 
-    BindActionButtons(views);
+    BindActionButtons(iviews);
 }
 
 void CallLogAdapter::BindActionButtons(
     /* [in] */ ICallLogListItemViews* views)
 {
-    CCallLogListItemViews* cviews = (CCallLogListItemViews*)views;
+    CallLogListItemViews* cviews = (CallLogListItemViews*)views;
     Boolean canPlaceCallToNumber =
             PhoneNumberUtilsWrapper::CanPlaceCallsTo(
-            cviews->mNumber, cviews->mNumberPresentation);
+            CoreUtils::Convert(cviews->mNumber), cviews->mNumberPresentation);
     // Set return call intent, otherwise null.
     if (canPlaceCallToNumber) {
         // Sets the primary action to call the number.
-        cviews->mCallBackButtonView->SetTag(
+        IView::Probe(cviews->mCallBackButtonView)->SetTag(
                 IntentProvider::GetReturnCallIntentProvider(cviews->mNumber));
-        cviews->mCallBackButtonView->SetVisibility(IView::VISIBLE);
-        cviews->mCallBackButtonView->SetOnClickListener(mActionListener);
+        IView::Probe(cviews->mCallBackButtonView)->SetVisibility(IView::VISIBLE);
+        IView::Probe(cviews->mCallBackButtonView)->SetOnClickListener(mActionListener);
     }
     else {
         // Number is not callable, so hide button.
-        cviews->mCallBackButtonView->SetTag(NULL);
-        cviews->mCallBackButtonView->SetVisibility(IView::GONE);
+        IView::Probe(cviews->mCallBackButtonView)->SetTag(NULL);
+        IView::Probe(cviews->mCallBackButtonView)->SetVisibility(IView::GONE);
     }
 
     // If one of the calls had video capabilities, show the video call button.
     Boolean isShown = FALSE;
-    if (CallUtil::IsVideoEnabled(mContext) && canPlaceCallToNumber &&
-            cviews->mPhoneCallDetailsViews->mCallTypeIcons->IsVideoShown(&isShown), isShown) {
-        cviews->mVideoCallButtonView->SetTag(
-                IntentProvider::getReturnVideoCallIntentProvider(
-                cviews->mNumber));
-        cviews->mVideoCallButtonView->SetVisibility(IView::VISIBLE);
-        cviews->mVideoCallButtonView->SetOnClickListener(mActionListener);
-    }
-    else {
-        cviews->mVideoCallButtonView->SetTag(NULL);
-        cviews->mVideoCallButtonView->SetVisibility(IView::GONE);
-    }
+    assert(0 && "TODO");
+    // if (CallUtil::IsVideoEnabled(mContext) && canPlaceCallToNumber &&
+    //         cviews->mPhoneCallDetailsViews->mCallTypeIcons->IsVideoShown(&isShown), isShown) {
+    //     IView::Probe(cviews->mVideoCallButtonView)->SetTag(
+    //             IntentProvider::GetReturnVideoCallIntentProvider(
+    //             cviews->mNumber));
+    //     IView::Probe(cviews->mVideoCallButtonView)->SetVisibility(IView::VISIBLE);
+    //     IView::Probe(cviews->mVideoCallButtonView)->SetOnClickListener(mActionListener);
+    // }
+    // else {
+    //     IView::Probe(cviews->mVideoCallButtonView)->SetTag(NULL);
+    //     IView::Probe(cviews->mVideoCallButtonView)->SetVisibility(IView::GONE);
+    // }
 
     // For voicemail calls, show the "VOICEMAIL" action button; hide otherwise.
     if (cviews->mCallType == ICalls::VOICEMAIL_TYPE) {
-        cviews->mVoicemailButtonView->SetOnClickListener(mActionListener);
-        cviews->mVoicemailButtonView->SetTag(
+        IView::Probe(cviews->mVoicemailButtonView)->SetOnClickListener(mActionListener);
+        IView::Probe(cviews->mVoicemailButtonView)->SetTag(
                 IntentProvider::GetPlayVoicemailIntentProvider(
                 cviews->mRowId, cviews->mVoicemailUri));
-        cviews->mVoicemailButtonView->SetVisibility(IView::VISIBLE);
+        IView::Probe(cviews->mVoicemailButtonView)->SetVisibility(IView::VISIBLE);
 
-        cviews->mDetailsButtonView->setVisibility(IView::GONE);
+        IView::Probe(cviews->mDetailsButtonView)->SetVisibility(IView::GONE);
     }
     else {
-        cviews->mVoicemailButtonView->SetTag(NULL);
-        cviews->mVoicemailButtonView->SetVisibility(IView::GONE);
+        IView::Probe(cviews->mVoicemailButtonView)->SetTag(NULL);
+        IView::Probe(cviews->mVoicemailButtonView)->SetVisibility(IView::GONE);
 
-        cviews->mDetailsButtonView->SetOnClickListener(mActionListener);
-        cviews->mDetailsButtonView->SetTag(
-                IntentProvider::getCallDetailIntentProvider(
-                cviews->mRowId,cviews->mCallIds, NULL));
+        IView::Probe(cviews->mDetailsButtonView)->SetOnClickListener(mActionListener);
+        IView::Probe(cviews->mDetailsButtonView)->SetTag(
+                IntentProvider::GetCallDetailIntentProvider(
+                cviews->mRowId, cviews->mCallIds, String(NULL)));
 
         if (cviews->mCanBeReportedAsInvalid && !cviews->mReported) {
-            cviews->mReportButtonView->SetVisibility(IView::VISIBLE);
+            IView::Probe(cviews->mReportButtonView)->SetVisibility(IView::VISIBLE);
         }
         else {
-            cviews->mReportButtonView->SetVisibility(IView::GONE);
+            IView::Probe(cviews->mReportButtonView)->SetVisibility(IView::GONE);
         }
     }
 
@@ -1146,8 +1225,11 @@ void CallLogAdapter::BindBadge(
     if (!mIsCallLog) {
         AutoPtr<IView> temp;
         view->FindViewById(R::id::link_stub, (IView**)&temp);
-        AutoPtr<IViewStub> stub = IViewStub::Probe(temp)
-        if (UriUtils::IsEncodedContactUri(((CContactInfo*)info)->mLookupUri)) {
+        AutoPtr<IViewStub> stub = IViewStub::Probe(temp);
+        Boolean result;
+        assert(0 && "TODO");
+        // result = UriUtils::IsEncodedContactUri(((CContactInfo*)info)->mLookupUri);
+        if (result) {
             if (stub != NULL) {
                 AutoPtr<IView> inflated;
                 stub->Inflate((IView**)&inflated);
@@ -1155,14 +1237,14 @@ void CallLogAdapter::BindBadge(
                 inflated->FindViewById(R::id::badge_link_container, (IView**)&mBadgeContainer);
                 temp = NULL;
                 inflated->FindViewById(R::id::badge_image, (IView**)&temp);
-                mBadgeImageView = ImageView::Probe(temp);
+                mBadgeImageView = IImageView::Probe(temp);
                 temp = NULL;
                 inflated->FindViewById(R::id::badge_text, (IView**)&temp);
                 mBadgeText = ITextView::Probe(temp);
             }
 
             AutoPtr<BadgeContainerClickListener> listener = new BadgeContainerClickListener(details, this);
-            mBadgeContainer->setOnClickListener((IViewOnClickListener*)listener);
+            mBadgeContainer->SetOnClickListener((IViewOnClickListener*)listener);
             mBadgeImageView->SetImageResource(R::drawable::ic_person_add_24dp);
             mBadgeText->SetText(R::string::recentCalls_addToContact);
         }
@@ -1189,7 +1271,7 @@ Boolean CallLogAdapter::CallLogInfoMatches(
     CContactInfo* cInfo = (CContactInfo*)info;
     return TextUtils::Equals(cCallLogInfo->mName, cInfo->mName)
             && cCallLogInfo->mType == cInfo->mType
-            && TextUtils::Equals(callLogInfo.label, cInfo->mLabel);
+            && TextUtils::Equals(cCallLogInfo->mLabel, cInfo->mLabel);
 }
 
 void CallLogAdapter::UpdateCallLogContactInfoCache(
@@ -1220,10 +1302,11 @@ void CallLogAdapter::UpdateCallLogContactInfoCache(
             values->Put(ICalls::CACHED_NUMBER_LABEL, cupdatedInfo->mLabel);
             needsUpdate = TRUE;
         }
-        if (!UriUtils::AreEqual(cupdatedInfo->mLookupUri, ccallLogInfo->mLookupUri)) {
-            values->Put(ICalls::CACHED_LOOKUP_URI, UriUtils::UriToString(cupdatedInfo->mLookupUri));
-            needsUpdate = TRUE;
-        }
+        assert(0 && "TODO");
+        // if (!UriUtils::AreEqual(cupdatedInfo->mLookupUri, ccallLogInfo->mLookupUri)) {
+        //     values->Put(ICalls::CACHED_LOOKUP_URI, UriUtils::UriToString(cupdatedInfo->mLookupUri));
+        //     needsUpdate = TRUE;
+        // }
         // Only replace the normalized number if the new updated normalized number isn't empty.
         if (!TextUtils::IsEmpty(cupdatedInfo->mNormalizedNumber) &&
                 !TextUtils::Equals(cupdatedInfo->mNormalizedNumber, ccallLogInfo->mNormalizedNumber)) {
@@ -1238,7 +1321,7 @@ void CallLogAdapter::UpdateCallLogContactInfoCache(
             values->Put(ICalls::CACHED_PHOTO_ID, cupdatedInfo->mPhotoId);
             needsUpdate = TRUE;
         }
-        if (!TextUtils.equals(cupdatedInfo->mFormattedNumber, ccallLogInfo->mFormattedNumber)) {
+        if (!TextUtils::Equals(cupdatedInfo->mFormattedNumber, ccallLogInfo->mFormattedNumber)) {
             values->Put(ICalls::CACHED_FORMATTED_NUMBER, cupdatedInfo->mFormattedNumber);
             needsUpdate = TRUE;
         }
@@ -1248,7 +1331,8 @@ void CallLogAdapter::UpdateCallLogContactInfoCache(
         values->Put(ICalls::CACHED_NAME, cupdatedInfo->mName);
         values->Put(ICalls::CACHED_NUMBER_TYPE, cupdatedInfo->mType);
         values->Put(ICalls::CACHED_NUMBER_LABEL, cupdatedInfo->mLabel);
-        values->Put(ICalls::CACHED_LOOKUP_URI, UriUtils::UriToString(cupdatedInfo->mLookupUri));
+        assert(0 && "TODO");
+        // values->Put(ICalls::CACHED_LOOKUP_URI, UriUtils::UriToString(cupdatedInfo->mLookupUri));
         values->Put(ICalls::CACHED_MATCHED_NUMBER, cupdatedInfo->mNumber);
         values->Put(ICalls::CACHED_NORMALIZED_NUMBER, cupdatedInfo->mNormalizedNumber);
         values->Put(ICalls::CACHED_PHOTO_ID, cupdatedInfo->mPhotoId);
@@ -1265,13 +1349,22 @@ void CallLogAdapter::UpdateCallLogContactInfoCache(
     if (countryIso.IsNull()) {
         String str[] = { number };
         selectionArgs = ArrayOf<String>::Alloc(str, 1);
-        resovler->Update(ICalls::CONTENT_URI_WITH_VOICEMAIL, values,
+
+        AutoPtr<ICalls> calls;
+        CCalls::AcquireSingleton((ICalls**)&calls);
+        AutoPtr<IUri> uri;
+        calls->GetCONTENT_URI_WITH_VOICEMAIL((IUri**)&uri);
+        resovler->Update(uri, values,
                 ICalls::NUMBER + " = ? AND " + ICalls::COUNTRY_ISO + " IS NULL",
                 selectionArgs, &rowsAffected);
     } else {
         String str[] = { number, countryIso };
         selectionArgs = ArrayOf<String>::Alloc(str, 2);
-        resovler->Update(ICalls::CONTENT_URI_WITH_VOICEMAIL, values,
+        AutoPtr<ICalls> calls;
+        CCalls::AcquireSingleton((ICalls**)&calls);
+        AutoPtr<IUri> uri;
+        calls->GetCONTENT_URI_WITH_VOICEMAIL((IUri**)&uri);
+        resovler->Update(uri, values,
                 ICalls::NUMBER + " = ? AND " + ICalls::COUNTRY_ISO + " = ?",
                 selectionArgs, &rowsAffected);
     }
@@ -1285,7 +1378,8 @@ AutoPtr<IContactInfo> CallLogAdapter::GetContactInfoFromCallLog(
 
     String uriStr;
     c->GetString(ICallLogQuery::CACHED_LOOKUP_URI, &uriStr);
-    info->mLookupUri = UriUtils::ParseUriOrNull(uriStr);
+    assert(0 && "TODO");
+    // info->mLookupUri = UriUtils::ParseUriOrNull(uriStr);
     c->GetString(ICallLogQuery::CACHED_NAME, &info->mName);
     c->GetInt32(ICallLogQuery::CACHED_NUMBER_TYPE, &info->mType);
     c->GetString(ICallLogQuery::CACHED_NUMBER_LABEL, &info->mLabel);
@@ -1300,8 +1394,8 @@ AutoPtr<IContactInfo> CallLogAdapter::GetContactInfoFromCallLog(
     }
 
     c->GetString(ICallLogQuery::CACHED_NORMALIZED_NUMBER, &info->mNormalizedNumber);
-    c->GetLong(ICallLogQuery::CACHED_PHOTO_ID, &info->mPhotoId);
-    info.photoUri = NULL;  // We do not cache the photo URI.
+    c->GetInt64(ICallLogQuery::CACHED_PHOTO_ID, &info->mPhotoId);
+    info->mPhotoUri = NULL;  // We do not cache the photo URI.
     c->GetString(ICallLogQuery::CACHED_FORMATTED_NUMBER, &info->mFormattedNumber);
     return IContactInfo::Probe(info);
 }
@@ -1315,7 +1409,7 @@ AutoPtr<ArrayOf<Int32> > CallLogAdapter::GetCallTypes(
     AutoPtr<ArrayOf<Int32> > callTypes = ArrayOf<Int32>::Alloc(count);
     Boolean succeeded;
     for (Int32 index = 0; index < count; ++index) {
-        cursor->GetInt32(CallLogQuery.CALL_TYPE, &(*callTypes)[index]);
+        cursor->GetInt32(ICallLogQuery::CALL_TYPE, &(*callTypes)[index]);
         cursor->MoveToNext(&succeeded);
     }
     cursor->MoveToPosition(position, &succeeded);
@@ -1348,14 +1442,15 @@ void CallLogAdapter::SetPhoto(
     /* [in] */ const String& identifier,
     /* [in] */ Int32 contactType)
 {
-    CCallLogListItemViews* cviews = (CCallLogListItemViews*)views;
+    CallLogListItemViews* cviews = (CallLogListItemViews*)views;
     cviews->mQuickContactView->AssignContactUri(contactUri);
     cviews->mQuickContactView->SetOverlay(NULL);
-    AutoPtr<IDefaultImageRequest> request;
-    CDefaultImageRequest::New(displayName, identifier,
-            contactType, TRUE /* isCircular */, (IDefaultImageRequest**)&request);
-    mContactPhotoManager->LoadThumbnail(cviews->mQuickContactView, photoId, FALSE /* darkTheme */,
-                TRUE /* isCircular */, request);
+    assert(0 && "TODO");
+    // AutoPtr<IDefaultImageRequest> request;
+    // CDefaultImageRequest::New(displayName, identifier,
+    //         contactType, TRUE /* isCircular */, (IDefaultImageRequest**)&request);
+    // mContactPhotoManager->LoadThumbnail(cviews->mQuickContactView, photoId, FALSE /* darkTheme */,
+    //             TRUE /* isCircular */, request);
 }
 
 void CallLogAdapter::SetPhoto(
@@ -1366,14 +1461,15 @@ void CallLogAdapter::SetPhoto(
     /* [in] */ const String& identifier,
     /* [in] */ Int32 contactType)
 {
-    CCallLogListItemViews* cviews = (CCallLogListItemViews*)views;
+    CallLogListItemViews* cviews = (CallLogListItemViews*)views;
     cviews->mQuickContactView->AssignContactUri(contactUri);
     cviews->mQuickContactView->SetOverlay(NULL);
-    AutoPtr<IDefaultImageRequest> request;
-    CDefaultImageRequest::New(displayName, identifier,
-            contactType, TRUE /* isCircular */, (IDefaultImageRequest**)&request);
-    mContactPhotoManager->LoadDirectoryPhoto(cviews->mQuickContactView, photoUri,
-            FALSE /* darkTheme */, TRUE /* isCircular */, request);
+    assert(0 && "TODO");
+    // AutoPtr<IDefaultImageRequest> request;
+    // CDefaultImageRequest::New(displayName, identifier,
+    //         contactType, TRUE /* isCircular */, (IDefaultImageRequest**)&request);
+    // mContactPhotoManager->LoadDirectoryPhoto(cviews->mQuickContactView, photoUri,
+    //         FALSE /* darkTheme */, TRUE /* isCircular */, request);
 }
 
 void CallLogAdapter::BindViewForTest(
@@ -1425,6 +1521,7 @@ ECode CallLogAdapter::SetDayGroup(
 ECode CallLogAdapter::ClearDayGroups()
 {
     mDayGroups->Clear();
+    return NOERROR;
 }
 
 ECode CallLogAdapter::GetBetterNumberFromContacts(
@@ -1437,27 +1534,39 @@ ECode CallLogAdapter::GetBetterNumberFromContacts(
     String matchingNumber;
     // Look in the cache first. If it's not found then query the Phones db
     AutoPtr<NumberWithCountryIso> numberCountryIso = new NumberWithCountryIso(number, countryIso);
-    AutoPtr<IContactInfo> ci;
-    mContactInfoCache->GetPossiblyExpired(numberCountryIso, (IContactInfo**)&ci);
-    if (ci != NULL && ci != IContactInfo::EMPTY) {
+    AutoPtr<IInterface> expired;
+    mContactInfoCache->GetPossiblyExpired((IObject*)numberCountryIso, (IInterface**)&expired);
+    IContactInfo* ci = IContactInfo::Probe(expired);
+    if (ci != NULL && ci != CContactInfo::EMPTY) {
         matchingNumber = ((CContactInfo*)ci)->mNumber;
     }
     else {
         // try {
         AutoPtr<IContentResolver> resolver;
         mContext->GetContentResolver((IContentResolver**)&resolver);
+
+        AutoPtr<IContactsContractPhoneLookup> phoneLookup;
+        CContactsContractPhoneLookup::AcquireSingleton(
+                (IContactsContractPhoneLookup**)&phoneLookup);
+        AutoPtr<IUri> contentUri;
+        phoneLookup->GetCONTENT_FILTER_URI((IUri**)&contentUri);
+        AutoPtr<IUriHelper> helper;
+        CUriHelper::AcquireSingleton((IUriHelper**)&helper);
         AutoPtr<IUri> uri;
-        Uri::WithAppendedPath(IPhoneLookup::CONTENT_FILTER_URI, number, (IUri**)&uri);
+        helper->WithAppendedPath(contentUri, number, (IUri**)&uri);
         AutoPtr<ICursor> phonesCursor;
-        resolver->Query(uri, IPhoneQuery::_PROJECTION,
-                NULL, NULL, NULL, (ICursor**)&phonesCursor);
+        //TODO:
+        AutoPtr<ArrayOf<String> > projection = ArrayOf<String>::Alloc(
+                (String*)CPhoneQuery::_PROJECTION, 9);
+        resolver->Query(uri, projection,
+                String(NULL), NULL, String(NULL), (ICursor**)&phonesCursor);
         if (phonesCursor != NULL) {
             // try {
             Boolean succeeded = FALSE;
             if (phonesCursor->MoveToFirst(&succeeded), succeeded) {
-                phonesCursor->GetString(PhoneQuery.MATCHED_NUMBER, &matchingNumber);
+                phonesCursor->GetString(IPhoneQuery::MATCHED_NUMBER, &matchingNumber);
             }
-             phonesCursor->Close();
+            ICloseable::Probe(phonesCursor)->Close();
             // } finally {
             //     phonesCursor.close();
             // }
@@ -1467,9 +1576,10 @@ ECode CallLogAdapter::GetBetterNumberFromContacts(
         // }
     }
     if (!TextUtils::IsEmpty(matchingNumber) &&
-            (matchingNumber.StartsWith("+")
+            (matchingNumber.StartWith("+")
             || matchingNumber.GetLength() > number.GetLength())) {
-        number = matchingNumber;
+        assert(0 && "TODO");
+        // number = matchingNumber;
     }
 
     *result = number;
@@ -1488,7 +1598,7 @@ AutoPtr<ArrayOf<Int64> > CallLogAdapter::GetCallIds(
     // Copy the ids of the rows in the group.
     Boolean succeeded;
     for (Int32 index = 0; index < groupSize; ++index) {
-        cursor->GetInt64(CallLogQuery.ID, &(*ids)[index]);
+        cursor->GetInt64(ICallLogQuery::ID, &(*ids)[index]);
         cursor->MoveToNext(&succeeded);
     }
     cursor->MoveToPosition(startingPosition, &succeeded);
@@ -1504,7 +1614,7 @@ AutoPtr<ICharSequence> CallLogAdapter::GetGroupDescription(
     if (group == ICallLogGroupBuilder::DAY_GROUP_TODAY) {
         resources->GetString(R::string::call_log_header_today, &str);
     }
-    else if (group == CallLogGroupBuilder.DAY_GROUP_YESTERDAY) {
+    else if (group == ICallLogGroupBuilder::DAY_GROUP_YESTERDAY) {
        resources->GetString(R::string::call_log_header_yesterday, &str);
     }
     else {
@@ -1527,16 +1637,16 @@ void CallLogAdapter::HandleRowExpanded(
     /* [in] */ Boolean animate,
     /* [in] */ Boolean forceExpand)
 {
-    AutoPtr<IView> temp;
-    view->GetTag((IView**)&temp);
-    CCallLogListItemViews* views = (CCallLogListItemViews*)ICallLogListItemViews::Probe(temp);
+    AutoPtr<IInterface> temp;
+    IView::Probe(view)->GetTag((IInterface**)&temp);
+    CallLogListItemViews* views = (CallLogListItemViews*)ICallLogListItemViews::Probe(temp);
 
     if (forceExpand && IsExpanded(views->mRowId)) {
         return;
     }
 
     // Hide or show the actions view.
-    Boolean expanded = toggleExpansion(views->mRowId);
+    Boolean expanded = ToggleExpansion(views->mRowId);
 
     // Trigger loading of the viewstub and visual expand or collapse.
     ExpandOrCollapseActions(view, expanded);

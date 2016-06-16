@@ -1,8 +1,8 @@
 
-#include "PhoneFavoriteListView.h"
+#include "list/PhoneFavoriteListView.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -52,7 +52,7 @@ ECode PhoneFavoriteListView::DragShadowOverAnimatorListener::OnAnimationEnd(
 // PhoneFavoriteListView
 //=================================================================
 CAR_INTERFACE_IMPL_3(PhoneFavoriteListView, GridView, IPhoneFavoriteListView,
-        IOnDragDropListener, IDragItemContainer)
+        IOnDragDropListener, IDragItemContainer);
 
 const String PhoneFavoriteListView::LOG_TAG("PhoneFavoriteListView");
 

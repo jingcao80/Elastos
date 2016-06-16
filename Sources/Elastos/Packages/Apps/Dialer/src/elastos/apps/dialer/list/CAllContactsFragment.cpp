@@ -1,12 +1,12 @@
 
-#include "CAllContactsFragment.h"
+#include "list/CAllContactsFragment.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
-CAR_OBJECT_IMPL(CAllContactsFragment)
+CAR_OBJECT_IMPL(CAllContactsFragment);
 
 } // List
 } // Dialer

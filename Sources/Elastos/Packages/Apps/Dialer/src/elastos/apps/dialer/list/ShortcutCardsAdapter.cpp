@@ -1,15 +1,15 @@
 
-#include "ShortcutCardsAdapter.h"
+#include "list/ShortcutCardsAdapter.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
 //=================================================================
 // ShortcutCardsAdapter::SwipeableShortcutCard
 //=================================================================
-CAR_INTERFACE_IMPL(ShortcutCardsAdapter::SwipeableShortcutCard, FrameLayout, ISwipeHelperCallback)
+CAR_INTERFACE_IMPL(ShortcutCardsAdapter::SwipeableShortcutCard, FrameLayout, ISwipeHelperCallback);
 
 ShortcutCardsAdapter::SwipeableShortcutCard::SwipeableShortcutCard(
     /* [in] */ ShortcutCardsAdapter* host)

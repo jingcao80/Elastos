@@ -2,13 +2,13 @@
 #include "CSpecialCharSequenceMgr.h"
 #include "SpecialCharSequenceMgr.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
-CAR_INTERFACE_IMPL(CSpecialCharSequenceMgr, Singleton, ISpecialCharSequenceMgr)
+CAR_INTERFACE_IMPL(CSpecialCharSequenceMgr, Singleton, ISpecialCharSequenceMgr);
 
-CAR_SINGLETON_IMPL(CSpecialCharSequenceMgr)
+CAR_SINGLETON_IMPL(CSpecialCharSequenceMgr);
 
 ECode CSpecialCharSequenceMgr::HandleChars(
     /* [in] */ IContext* context,

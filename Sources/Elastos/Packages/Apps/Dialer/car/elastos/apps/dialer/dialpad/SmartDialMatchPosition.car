@@ -3,9 +3,9 @@ module
 {
     interface Elastos.Utility.IArrayList;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace Dialpad {
 
     interface ISmartDialMatchPosition {
@@ -33,7 +33,7 @@ module
     }
 
     } //Dialpad
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

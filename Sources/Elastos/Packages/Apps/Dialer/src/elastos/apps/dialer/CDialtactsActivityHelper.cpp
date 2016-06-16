@@ -1,13 +1,13 @@
 #include "CDialtactsActivityHelper.h"
 #include "DialtactsActivity.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
-CAR_INTERFACE_IMPL(CDialtactsActivityHelper, Singleton, IDialtactsActivityHelper)
+CAR_INTERFACE_IMPL(CDialtactsActivityHelper, Singleton, IDialtactsActivityHelper);
 
-CAR_SINGLETON_IMPL(CDialtactsActivityHelper)
+CAR_SINGLETON_IMPL(CDialtactsActivityHelper);
 
 ECode CDialtactsActivityHelper::GetCallSettingsIntent(
     /* [out] */ IIntent** intent)

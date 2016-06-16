@@ -1,12 +1,12 @@
 
-#include "CEmptyLoader.h"
+#include "util/CEmptyLoader.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
-CAR_OBJECT_IMPL(CEmptyLoader)
+CAR_OBJECT_IMPL(CEmptyLoader);
 
 } // List
 } // Dialer

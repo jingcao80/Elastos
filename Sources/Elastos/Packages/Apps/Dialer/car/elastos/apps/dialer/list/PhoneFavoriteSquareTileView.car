@@ -4,16 +4,16 @@ module
     // TODO:
     // using interface Elastos.Apps.Contacts.Common.List.IContactEntry;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace List {
 
     /**
      * @Involve
      * extends Elastos.Droid.View.IView
      * extends Elastos.Droid.View.IViewGroup
-     * extends Elastos.Apps.Dailer.List.IPhoneFavoriteTileView
+     * extends Elastos.Apps.Dialer.List.IPhoneFavoriteTileView
      *
      * interface Elastos.Droid.View.IViewParent
      * interface Elastos.Droid.View.IViewManager
@@ -29,7 +29,7 @@ module
     }
 
     } //List
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

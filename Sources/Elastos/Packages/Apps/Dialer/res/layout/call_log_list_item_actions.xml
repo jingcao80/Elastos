@@ -28,7 +28,7 @@
         android:visibility="visible"
         android:importantForAccessibility="1"
         >
-        <TextView
+        <!-- <TextView
             android:id="@+id/call_back_action"
             android:background="@drawable/action_button_background"
             android:gravity="center"
@@ -38,6 +38,21 @@
             android:paddingEnd="@dimen/call_log_action_horizontal_padding"
             android:text="@string/call_log_action_call_back"
             android:textColor="@color/call_log_action_text"
+            android:textSize="@dimen/call_log_list_item_actions_text_size"
+            android:textStyle="bold"
+            android:nextFocusLeft="@+id/primary_action_view"
+            android:nextFocusRight="@+id/video_call_action"
+            android:focusable="true"
+            android:singleLine="true"/> -->
+        <TextView
+            android:id="@+id/call_back_action"
+            android:background="@drawable/action_button_background"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/call_log_action_horizontal_padding"
+            android:paddingEnd="@dimen/call_log_action_horizontal_padding"
+            android:text="@string/call_log_action_call_back"
             android:textSize="@dimen/call_log_list_item_actions_text_size"
             android:textStyle="bold"
             android:nextFocusLeft="@+id/primary_action_view"
@@ -60,7 +75,7 @@
             android:nextFocusRight="@+id/voicemail_action"
             android:focusable="true"
             android:singleLine="true"/>
-        <TextView
+        <!-- <TextView
             android:id="@+id/voicemail_action"
             android:background="@drawable/action_button_background"
             android:gravity="center"
@@ -70,6 +85,21 @@
             android:paddingEnd="@dimen/call_log_action_horizontal_padding"
             android:text="@string/call_log_action_voicemail"
             android:textColor="@color/call_log_action_text"
+            android:textSize="@dimen/call_log_list_item_actions_text_size"
+            android:textStyle="bold"
+            android:nextFocusLeft="@+id/video_call_action"
+            android:nextFocusRight="@+id/details_action"
+            android:focusable="true"
+            android:singleLine="true"/> -->
+        <TextView
+            android:id="@+id/voicemail_action"
+            android:background="@drawable/action_button_background"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/call_log_action_horizontal_padding"
+            android:paddingEnd="@dimen/call_log_action_horizontal_padding"
+            android:text="@string/call_log_action_voicemail"
             android:textSize="@dimen/call_log_list_item_actions_text_size"
             android:textStyle="bold"
             android:nextFocusLeft="@+id/video_call_action"

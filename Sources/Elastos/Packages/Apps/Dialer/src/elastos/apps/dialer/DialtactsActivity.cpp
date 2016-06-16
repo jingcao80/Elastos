@@ -1,8 +1,8 @@
 #include "DialtactsActivity.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
 //================================================================
 // DialtactsActivity::OptionsPopupMenu
@@ -39,7 +39,7 @@ ECode DialtactsActivity::OptionsPopupMenu::Show()
 //================================================================
 // DialtactsActivity::LayoutOnDragListener
 //================================================================
-CAR_INTERFACE_IMPL(DialtactsActivity::LayoutOnDragListener, Object, IViewOnDragListener)
+CAR_INTERFACE_IMPL(DialtactsActivity::LayoutOnDragListener, Object, IViewOnDragListener);
 
 DialtactsActivity::LayoutOnDragListener::LayoutOnDragListener(
     /* [in] */ DialtactsActivity* host)
@@ -67,7 +67,7 @@ ECode DialtactsActivity::LayoutOnDragListener::OnDrag(
 //================================================================
 // DialtactsActivity::PhoneSearchQueryTextListener
 //================================================================
-CAR_INTERFACE_IMPL(DialtactsActivity::PhoneSearchQueryTextListener, Object, ITextWatcher)
+CAR_INTERFACE_IMPL(DialtactsActivity::PhoneSearchQueryTextListener, Object, ITextWatcher);
 
 DialtactsActivity::PhoneSearchQueryTextListener::PhoneSearchQueryTextListener(
     /* [in] */ DialtactsActivity* host)
@@ -136,7 +136,7 @@ ECode DialtactsActivity::PhoneSearchQueryTextListener::AfterTextChanged(
 //================================================================
 // DialtactsActivity::SearchViewOnClickListener
 //================================================================
-CAR_INTERFACE_IMPL(DialtactsActivity::SearchViewOnClickListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(DialtactsActivity::SearchViewOnClickListener, Object, IViewOnClickListener);
 
 DialtactsActivity::SearchViewOnClickListener::SearchViewOnClickListener(
     /* [in] */ DialtactsActivity* host)
@@ -160,7 +160,7 @@ ECode DialtactsActivity::SearchViewOnClickListener::OnClick(
 //================================================================
 // DialtactsActivity::SearchEditTextLayoutListener
 //================================================================
-CAR_INTERFACE_IMPL(DialtactsActivity::SearchEditTextLayoutListener, Object, IViewOnKeyListener)
+CAR_INTERFACE_IMPL(DialtactsActivity::SearchEditTextLayoutListener, Object, IViewOnKeyListener);
 
 DialtactsActivity::SearchEditTextLayoutListener::SearchEditTextLayoutListener(
     /* [in] */ DialtactsActivity* host)
@@ -189,7 +189,7 @@ ECode DialtactsActivity::SearchEditTextLayoutListener::OnKey(
 // DialtactsActivity::MyOnBackButtonClickedListener
 //================================================================
 CAR_INTERFACE_IMPL(DialtactsActivity::MyOnBackButtonClickedListener, Object,
-        ISearchEditTextLayoutOnBackButtonClickedListener)
+        ISearchEditTextLayoutOnBackButtonClickedListener);
 
 DialtactsActivity::MyOnBackButtonClickedListener::MyOnBackButtonClickedListener(
     /* [in] */ DialtactsActivity* host)
@@ -205,7 +205,7 @@ ECode DialtactsActivity::MyOnBackButtonClickedListener::OnBackButtonClicked()
 // DialtactsActivity::MyOnGlobalLayoutListener
 //================================================================
 CAR_INTERFACE_IMPL(DialtactsActivity::MyOnGlobalLayoutListener, Object,
-        IOnGlobalLayoutListener)
+        IOnGlobalLayoutListener);
 
 DialtactsActivity::MyOnGlobalLayoutListener::MyOnGlobalLayoutListener(
     /* [in] */ DialtactsActivity* host,
@@ -231,7 +231,7 @@ ECode DialtactsActivity::MyOnGlobalLayoutListener::OnGlobalLayout()
 //================================================================
 // DialtactsActivity::MyOnTouchListener
 //================================================================
-CAR_INTERFACE_IMPL(DialtactsActivity::MyOnTouchListener, Object, IViewOnTouchListener)
+CAR_INTERFACE_IMPL(DialtactsActivity::MyOnTouchListener, Object, IViewOnTouchListener);
 
 DialtactsActivity::MyOnTouchListener::MyOnTouchListener(
     /* [in] */ DialtactsActivity* host)
@@ -279,7 +279,7 @@ CAR_INTERFACE_IMPL_10(DialtactsActivity, TransactionSafeActivity, IDialtactsActi
         IViewOnClickListener, IOnDialpadQueryChangedListener, IListsFragmentHostInterface,
         ISpeedDialFragmentHostInterface, ISearchFragmentHostInterface, IOnDragDropListener,
         IOnPhoneNumberPickerActionListener, IPopupMenuOnMenuItemClickListener,
-        /*IViewPagerOnPageChangeListener, */ IActionBarControllerActivityUi)
+        /*IViewPagerOnPageChangeListener, */ IActionBarControllerActivityUi);
 
 DialtactsActivity::DialtactsActivity
     : mCurrentTabPosition(0)

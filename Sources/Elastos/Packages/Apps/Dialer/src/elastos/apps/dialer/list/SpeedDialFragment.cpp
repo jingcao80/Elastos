@@ -1,15 +1,15 @@
 
-#include "SpeedDialFragment.h"
+#include "list/SpeedDialFragment.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
 //=================================================================
 // SpeedDialFragment::ContactTileLoaderListener
 //=================================================================
-CAR_INTERFACE_IMPL(SpeedDialFragment::ContactTileLoaderListener, Object, ILoaderManagerLoaderCallbacks)
+CAR_INTERFACE_IMPL(SpeedDialFragment::ContactTileLoaderListener, Object, ILoaderManagerLoaderCallbacks);
 
 SpeedDialFragment::ContactTileLoaderListener::ContactTileLoaderListener(
     /* [in] */ SpeedDialFragment* host)

@@ -2,13 +2,13 @@
 #include "CPhoneCallDetailsViewsHelper.h"
 #include "PhoneCallDetailsViews.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
-CAR_INTERFACE_IMPL(CPhoneCallDetailsViewsHelper, Singleton, IPhoneCallDetailsViewsHelper)
+CAR_INTERFACE_IMPL(CPhoneCallDetailsViewsHelper, Singleton, IPhoneCallDetailsViewsHelper);
 
-CAR_SINGLETON_IMPL(CPhoneCallDetailsViewsHelper)
+CAR_SINGLETON_IMPL(CPhoneCallDetailsViewsHelper);
 
 ECode CPhoneCallDetailsViewsHelper::FromView(
     /* [in] */ IView* view,

@@ -1,12 +1,12 @@
 
-#include "CVoicemailStatusHelperImpl.h"
+#include "voicemail/CVoicemailStatusHelperImpl.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Voicemail {
 
-CAR_OBJECT_IMPL(CVoicemailStatusHelperImpl)
+CAR_OBJECT_IMPL(CVoicemailStatusHelperImpl);
 
 } // Voicemail
 } // Dialer

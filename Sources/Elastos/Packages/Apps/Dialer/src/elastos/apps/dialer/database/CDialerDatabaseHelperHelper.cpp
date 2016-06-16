@@ -1,15 +1,15 @@
 
-#include "CDialerDatabaseHelperHelper.h"
-#include "DialerDatabaseHelper.h"
+#include "database/CDialerDatabaseHelperHelper.h"
+#include "database/DialerDatabaseHelper.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Database {
 
-CAR_INTERFACE_IMPL(CDialerDatabaseHelperHelper, Singleton, IDialerDatabaseHelperHelper)
+CAR_INTERFACE_IMPL(CDialerDatabaseHelperHelper, Singleton, IDialerDatabaseHelperHelper);
 
-CAR_SINGLETON_IMPL(CDialerDatabaseHelperHelper)
+CAR_SINGLETON_IMPL(CDialerDatabaseHelperHelper);
 
 ECode CDialerDatabaseHelperHelper::GetInstance(
     /* [in] */ IContext* context,

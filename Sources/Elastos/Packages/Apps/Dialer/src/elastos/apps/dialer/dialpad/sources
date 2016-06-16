@@ -1,0 +1,26 @@
+TARGET_NAME= dialpad
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += ../../../../../
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+SOURCES += CDialpadFragment.cpp
+SOURCES += CDialpadFragmentErrorDialogFragmentHelper.cpp
+SOURCES += CDialpadSlidingRelativeLayout.cpp
+SOURCES += CLatinSmartDialMap.cpp
+SOURCES += CSmartDialCursorLoader.cpp
+SOURCES += CSmartDialMatchPosition.cpp
+SOURCES += CSmartDialMatchPositionHelper.cpp
+SOURCES += CSmartDialNameMatcher.cpp
+SOURCES += CSmartDialNameMatcherHelper.cpp
+SOURCES += CSmartDialPrefix.cpp
+SOURCES += CUnicodeDialerKeyListener.cpp
+SOURCES += CUnicodeDialerKeyListenerHelper.cpp
+SOURCES += DialpadFragment.cpp
+SOURCES += SmartDialMatchPosition.cpp
+SOURCES += SmartDialNameMatcher.cpp
+SOURCES += SmartDialPrefix.cpp
+SOURCES += UnicodeDialerKeyListener.cpp

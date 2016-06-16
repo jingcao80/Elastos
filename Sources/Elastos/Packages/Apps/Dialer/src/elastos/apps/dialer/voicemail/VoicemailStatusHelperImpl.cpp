@@ -1,8 +1,8 @@
 
-#include "VoicemailStatusHelperImpl.h"
+#include "voicemail/VoicemailStatusHelperImpl.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Voicemail {
 
@@ -13,7 +13,7 @@ Action VoicemailStatusHelperImpl::Action::NONE(-1);
 Action VoicemailStatusHelperImpl::Action::CALL_VOICEMAIL(R::string::voicemail_status_action_call_server);
 Action VoicemailStatusHelperImpl::Action::CONFIGURE_VOICEMAIL(R::string::voicemail_status_action_configure);
 
-CAR_INTERFACE_IMPL(VoicemailStatusHelperImpl::Action, Object, IVoicemailStatusHelperImplAction)
+CAR_INTERFACE_IMPL(VoicemailStatusHelperImpl::Action, Object, IVoicemailStatusHelperImplAction);
 
 VoicemailStatusHelperImpl::Action::Action(
     /* [in] */ Int32 messageId)
@@ -105,7 +105,7 @@ VoicemailStatusHelperImpl::MessageStatusWithPriority::MessageStatusWithPriority(
 //================================================================
 // VoicemailStatusHelperImpl::MyComparator
 //================================================================
-CAR_INTERFACE_IMPL(VoicemailStatusHelperImpl::MyComparator, Object, IComparator)
+CAR_INTERFACE_IMPL(VoicemailStatusHelperImpl::MyComparator, Object, IComparator);
 
 VoicemailStatusHelperImpl::MyComparator::MyComparator(
     /* [in] */ VoicemailStatusHelperImpl* host)
@@ -149,7 +149,7 @@ AutoPtr<ArrayOf<String> > CreatePROJECTION()
 
 const AutoPtr<ArrayOf<String> > VoicemailStatusHelperImpl::PROJECTION = CreatePROJECTION();
 
-CAR_INTERFACE_IMPL(VoicemailStatusHelperImpl, Object, IVoicemailStatusHelperImpl)
+CAR_INTERFACE_IMPL(VoicemailStatusHelperImpl, Object, IVoicemailStatusHelperImpl);
 
 ECode VoicemailStatusHelperImpl::GetStatusMessages(
     /* [in] */ ICursor* cursor,

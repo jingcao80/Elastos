@@ -1,8 +1,8 @@
 module
 {
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
 
     enum ProximitySensorManagerState {
         ProximitySensorManagerState_NEAR,
@@ -56,7 +56,7 @@ module
         OnFar();
     }
 
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
     }

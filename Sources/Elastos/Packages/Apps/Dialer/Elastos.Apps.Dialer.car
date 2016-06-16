@@ -114,6 +114,7 @@ module
     using interface Elastos.Droid.Content.ILoader;
     using interface Elastos.Droid.Content.Res.IResources;
     using interface Elastos.Droid.Database.IContentObserver;
+    using interface Elastos.Droid.Database.Sqlite.ISQLiteOpenHelper;
     using interface Elastos.Droid.Net.IUri;
     using interface Elastos.Droid.Text.IInputFilter;
     using interface Elastos.Droid.Text.ITextWatcher;
@@ -176,110 +177,113 @@ module
     using interface Elastos.Core.ICharSequence;
 
 
-    interface Elastos.Apps.Dailer.Activity.ITransactionSafeActivity;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogActivity;
-    interface Elastos.Apps.Dailer.CallLog.ICallTypeHelper;
-    interface Elastos.Apps.Dailer.CallLog.ICallDetailHistoryAdapter;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogGroupBuilder;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogGroupBuilderGroupCreator;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogAdapterHelper;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogFragment;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogQuery;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogQueryHandler;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogQueryHandlerListener;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogListItemView;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogNotificationsHelper;
-    interface Elastos.Apps.Dailer.CallLog.ICallLogNotificationsService;
-    interface Elastos.Apps.Dailer.CallLog.ICallTypeIconsView;
-    interface Elastos.Apps.Dailer.CallLog.IClearCallLogDialog;
-    interface Elastos.Apps.Dailer.CallLog.IClearCallLogDialogHelper;
-    interface Elastos.Apps.Dailer.CallLog.IContactInfo;
-    interface Elastos.Apps.Dailer.CallLog.IDefaultVoicemailNotifierHelper;
-    interface Elastos.Apps.Dailer.CallLog.IIntentProviderHelper;
-    interface Elastos.Apps.Dailer.CallLog.IPhoneAccountUtils;
-    interface Elastos.Apps.Dailer.CallLog.IPhoneNumberUtilsWrapper;
-    interface Elastos.Apps.Dailer.CallLog.IPhoneNumberUtilsWrapperHelper;
-    interface Elastos.Apps.Dailer.CallLog.IPhoneNumberDisplayHelper;
-    interface Elastos.Apps.Dailer.CallLog.IPhoneQuery;
-    interface Elastos.Apps.Dailer.Contact.IContactUpdateService;
-    interface Elastos.Apps.Dailer.Contact.IContactUpdateServiceHelper;
-    interface Elastos.Apps.Dailer.Database.IDialerDatabaseHelper;
-    interface Elastos.Apps.Dailer.Database.IDialerDatabaseHelperHelper;
-    interface Elastos.Apps.Dailer.Dialpad.IDialpadFragment;
-    interface Elastos.Apps.Dailer.Dialpad.IOnDialpadQueryChangedListener;
-    interface Elastos.Apps.Dailer.Dialpad.IDialpadSlidingRelativeLayout;
-    interface Elastos.Apps.Dailer.Dialpad.ILatinSmartDialMap;
-    interface Elastos.Apps.Dailer.Dialpad.ISmartDialMap;
-    interface Elastos.Apps.Dailer.Dialpad.ISmartDialCursorLoader;
-    interface Elastos.Apps.Dailer.Dialpad.ISmartDialMatchPosition;
-    interface Elastos.Apps.Dailer.Dialpad.ISmartDialPrefix;
-    interface Elastos.Apps.Dailer.Dialpad.ISmartDialNameMatcher;
-    interface Elastos.Apps.Dailer.Dialpad.IUnicodeDialerKeyListener;
-    interface Elastos.Apps.Dailer.Dialpad.IUnicodeDialerKeyListenerHelper;
-    interface Elastos.Apps.Dailer.Interactions.IPhoneNumberInteraction;
-    interface Elastos.Apps.Dailer.Interactions.IUndemoteOutgoingCallReceiver;
-    interface Elastos.Apps.Dailer.List.IAllContactsFragment;
-    interface Elastos.Apps.Dailer.List.IDialerPhoneNumberListAdapter;
-    interface Elastos.Apps.Dailer.List.IDragItemContainer;
-    interface Elastos.Apps.Dailer.List.IDragDropController;
-    interface Elastos.Apps.Dailer.List.IListsFragment;
-    interface Elastos.Apps.Dailer.List.IListsFragmentHostInterface;
-    interface Elastos.Apps.Dailer.List.IOnDragDropListener;
-    interface Elastos.Apps.Dailer.List.IPhoneFavoriteListView;
-    interface Elastos.Apps.Dailer.List.IPhoneFavoriteTileView;
-    interface Elastos.Apps.Dailer.List.IPhoneFavoriteSquareTileView;
-    interface Elastos.Apps.Dailer.List.IPhoneFavoritesTileAdapter;
-    interface Elastos.Apps.Dailer.List.ISearchFragment;
-    interface Elastos.Apps.Dailer.List.ISearchFragmentHostInterface;
-    interface Elastos.Apps.Dailer.List.IRegularSearchFragment;
-    interface Elastos.Apps.Dailer.List.IRegularSearchListAdapter;
-    interface Elastos.Apps.Dailer.List.IRemoveView;
-    interface Elastos.Apps.Dailer.List.IShortcutCardsAdapter;
-    interface Elastos.Apps.Dailer.List.ISmartDialNumberListAdapter;
-    interface Elastos.Apps.Dailer.List.ISmartDialSearchFragment;
-    interface Elastos.Apps.Dailer.List.ISpeedDialFragment;
-    interface Elastos.Apps.Dailer.List.ISpeedDialFragmentHostInterface;
-    interface Elastos.Apps.Dailer.List.ISwipeHelper;
-    interface Elastos.Apps.Dailer.List.ISwipeHelperCallback;
-    interface Elastos.Apps.Dailer.List.ISwipeHelperHelper;
-    interface Elastos.Apps.Dailer.List.IOnDataSetChangedForAnimationListener;
-    interface Elastos.Apps.Dailer.List.ITileInteractionTeaserView;
-    interface Elastos.Apps.Dailer.Settings.IDefaultRingtonePreference;
-    interface Elastos.Apps.Dailer.Settings.IGeneralSettingsFragment;
-    interface Elastos.Apps.Dailer.Util.IAsyncTaskExecutors;
-    interface Elastos.Apps.Dailer.Util.IDialerUtils;
-    interface Elastos.Apps.Dailer.Util.IEmptyLoader;
-    interface Elastos.Apps.Dailer.Util.IExpirableCacheHelper;
-    interface Elastos.Apps.Dailer.Util.IOrientationUtil;
-    interface Elastos.Apps.Dailer.Voicemail.IVoicemailPlaybackFragment;
-    interface Elastos.Apps.Dailer.Voicemail.IVoicemailPlaybackPresenterPlaybackView;
-    interface Elastos.Apps.Dailer.Voicemail.IVoicemailPlaybackPresenter;
-    interface Elastos.Apps.Dailer.Voicemail.IVoicemailStatusHelper;
-    interface Elastos.Apps.Dailer.Voicemail.IVoicemailStatusHelperImpl;
-    interface Elastos.Apps.Dailer.Widget.IActionBarControllerActivityUi;
-    interface Elastos.Apps.Dailer.Widget.IActionBarController;
-    interface Elastos.Apps.Dailer.Widget.ISearchEditTextLayout;
-    interface Elastos.Apps.Dailer.Widget.IOverlappingPaneLayout;
-    interface Elastos.Apps.Dailer.Widget.IViewDragHelperHelper;
-    interface Elastos.Apps.Dailer.IPhoneCallDetails;
-    interface Elastos.Apps.Dailer.IProximitySensorAware;
-    interface Elastos.Apps.Dailer.ICallDetailActivity;
-    interface Elastos.Apps.Dailer.ICallDetailActivityQueryHandler;
-    interface Elastos.Apps.Dailer.IDialerApplication;
-    interface Elastos.Apps.Dailer.IDialerBackupAgent;
-    interface Elastos.Apps.Dailer.IDialtactsActivity;
-    interface Elastos.Apps.Dailer.IDialtactsActivityHelper;
-    interface Elastos.Apps.Dailer.IPhoneCallDetailsHelper;
-    interface Elastos.Apps.Dailer.IPhoneCallDetailsViewsHelper;
-    interface Elastos.Apps.Dailer.IProximitySensorManager;
-    interface Elastos.Apps.Dailer.IProximitySensorManagerListener;
-    interface Elastos.Apps.Dailer.ISpecialCharSequenceMgr;
-    interface Elastos.Apps.DailerBind.IDatabaseHelperManager;
-    interface Elastos.Apps.DailerBind.IObjectFactory;
+    interface Elastos.Apps.Dialer.Activity.ITransactionSafeActivity;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogActivity;
+    interface Elastos.Apps.Dialer.CallLog.ICallTypeHelper;
+    interface Elastos.Apps.Dialer.CallLog.ICallDetailHistoryAdapter;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogGroupBuilder;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogGroupBuilderGroupCreator;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogAdapter;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogAdapterHelper;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogFragment;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogQuery;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogQueryHandler;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogQueryHandlerListener;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogListItemView;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogNotificationsHelper;
+    interface Elastos.Apps.Dialer.CallLog.ICallLogNotificationsService;
+    interface Elastos.Apps.Dialer.CallLog.ICallTypeIconsView;
+    interface Elastos.Apps.Dialer.CallLog.IClearCallLogDialog;
+    interface Elastos.Apps.Dialer.CallLog.IClearCallLogDialogHelper;
+    interface Elastos.Apps.Dialer.CallLog.IContactInfo;
+    interface Elastos.Apps.Dialer.CallLog.IDefaultVoicemailNotifierHelper;
+    interface Elastos.Apps.Dialer.CallLog.IIntentProviderHelper;
+    interface Elastos.Apps.Dialer.CallLog.IPhoneAccountUtils;
+    interface Elastos.Apps.Dialer.CallLog.IPhoneNumberUtilsWrapper;
+    interface Elastos.Apps.Dialer.CallLog.IPhoneNumberUtilsWrapperHelper;
+    interface Elastos.Apps.Dialer.CallLog.IPhoneNumberDisplayHelper;
+    interface Elastos.Apps.Dialer.CallLog.IPhoneQuery;
+    interface Elastos.Apps.Dialer.Contact.IContactUpdateService;
+    interface Elastos.Apps.Dialer.Contact.IContactUpdateServiceHelper;
+    interface Elastos.Apps.Dialer.Database.IDialerDatabaseHelper;
+    interface Elastos.Apps.Dialer.Database.IDialerDatabaseHelperHelper;
+    interface Elastos.Apps.Dialer.Dialpad.IDialpadFragment;
+    interface Elastos.Apps.Dialer.Dialpad.IOnDialpadQueryChangedListener;
+    interface Elastos.Apps.Dialer.Dialpad.IDialpadSlidingRelativeLayout;
+    interface Elastos.Apps.Dialer.Dialpad.ILatinSmartDialMap;
+    interface Elastos.Apps.Dialer.Dialpad.ISmartDialMap;
+    interface Elastos.Apps.Dialer.Dialpad.ISmartDialCursorLoader;
+    interface Elastos.Apps.Dialer.Dialpad.ISmartDialMatchPosition;
+    interface Elastos.Apps.Dialer.Dialpad.ISmartDialPrefix;
+    interface Elastos.Apps.Dialer.Dialpad.ISmartDialNameMatcher;
+    interface Elastos.Apps.Dialer.Dialpad.IUnicodeDialerKeyListener;
+    interface Elastos.Apps.Dialer.Dialpad.IUnicodeDialerKeyListenerHelper;
+    interface Elastos.Apps.Dialer.Interactions.IPhoneDisambiguationDialogFragmentHelper;
+    interface Elastos.Apps.Dialer.Interactions.IPhoneNumberInteraction;
+    interface Elastos.Apps.Dialer.Interactions.IUndemoteOutgoingCallReceiver;
+    interface Elastos.Apps.Dialer.List.IAllContactsFragment;
+    interface Elastos.Apps.Dialer.List.IDialerPhoneNumberListAdapter;
+    interface Elastos.Apps.Dialer.List.IDragItemContainer;
+    interface Elastos.Apps.Dialer.List.IDragDropController;
+    interface Elastos.Apps.Dialer.List.IListsFragment;
+    interface Elastos.Apps.Dialer.List.IListsFragmentHostInterface;
+    interface Elastos.Apps.Dialer.List.IOnDragDropListener;
+    interface Elastos.Apps.Dialer.List.IPhoneFavoriteListView;
+    interface Elastos.Apps.Dialer.List.IPhoneFavoriteTileView;
+    interface Elastos.Apps.Dialer.List.IPhoneFavoriteSquareTileView;
+    interface Elastos.Apps.Dialer.List.IPhoneFavoritesTileAdapter;
+    interface Elastos.Apps.Dialer.List.ISearchFragment;
+    interface Elastos.Apps.Dialer.List.ISearchFragmentHostInterface;
+    interface Elastos.Apps.Dialer.List.IRegularSearchFragment;
+    interface Elastos.Apps.Dialer.List.IRegularSearchListAdapter;
+    interface Elastos.Apps.Dialer.List.IRemoveView;
+    interface Elastos.Apps.Dialer.List.IShortcutCardsAdapter;
+    interface Elastos.Apps.Dialer.List.ISmartDialNumberListAdapter;
+    interface Elastos.Apps.Dialer.List.ISmartDialSearchFragment;
+    interface Elastos.Apps.Dialer.List.ISpeedDialFragment;
+    interface Elastos.Apps.Dialer.List.ISpeedDialFragmentHostInterface;
+    interface Elastos.Apps.Dialer.List.ISwipeHelper;
+    interface Elastos.Apps.Dialer.List.ISwipeHelperCallback;
+    interface Elastos.Apps.Dialer.List.ISwipeHelperHelper;
+    interface Elastos.Apps.Dialer.List.IOnDataSetChangedForAnimationListener;
+    interface Elastos.Apps.Dialer.List.ITileInteractionTeaserView;
+    interface Elastos.Apps.Dialer.Settings.IDefaultRingtonePreference;
+    interface Elastos.Apps.Dialer.Settings.IGeneralSettingsFragment;
+    interface Elastos.Apps.Dialer.Util.IAsyncTaskExecutors;
+    interface Elastos.Apps.Dialer.Util.IDialerUtils;
+    interface Elastos.Apps.Dialer.Util.IEmptyLoader;
+    interface Elastos.Apps.Dialer.Util.IExpirableCacheHelper;
+    interface Elastos.Apps.Dialer.Util.IOrientationUtil;
+    interface Elastos.Apps.Dialer.Voicemail.IVoicemailPlaybackFragment;
+    interface Elastos.Apps.Dialer.Voicemail.IVoicemailPlaybackPresenterPlaybackView;
+    interface Elastos.Apps.Dialer.Voicemail.IVoicemailPlaybackPresenter;
+    interface Elastos.Apps.Dialer.Voicemail.IVoicemailStatusHelper;
+    interface Elastos.Apps.Dialer.Voicemail.IVoicemailStatusHelperImpl;
+    interface Elastos.Apps.Dialer.Widget.IActionBarControllerActivityUi;
+    interface Elastos.Apps.Dialer.Widget.IActionBarController;
+    interface Elastos.Apps.Dialer.Widget.ISearchEditTextLayout;
+    interface Elastos.Apps.Dialer.Widget.IOverlappingPaneLayout;
+    interface Elastos.Apps.Dialer.Widget.IViewDragHelperHelper;
+    interface Elastos.Apps.Dialer.IPhoneCallDetails;
+    interface Elastos.Apps.Dialer.IProximitySensorAware;
+    interface Elastos.Apps.Dialer.ICallDetailActivity;
+    interface Elastos.Apps.Dialer.ICallDetailActivityQueryHandler;
+    interface Elastos.Apps.Dialer.IDialerApplication;
+    interface Elastos.Apps.Dialer.IDialerBackupAgent;
+    interface Elastos.Apps.Dialer.IDialtactsActivity;
+    interface Elastos.Apps.Dialer.IDialtactsActivityHelper;
+    interface Elastos.Apps.Dialer.IPhoneCallDetailsHelper;
+    interface Elastos.Apps.Dialer.IPhoneCallDetailsViewsHelper;
+    interface Elastos.Apps.Dialer.IProximitySensorManager;
+    interface Elastos.Apps.Dialer.IProximitySensorManagerListener;
+    interface Elastos.Apps.Dialer.ISpecialCharSequenceMgr;
+    interface Elastos.Apps.DialerBind.IDatabaseHelperManager;
+    interface Elastos.Apps.DialerBind.IObjectFactory;
 
     namespace Elastos {
     namespace Apps {
     namespace Dialer {
+    namespace Activity {
 
     class CTransactionSafeActivity {
         interface IContext;
@@ -298,6 +302,16 @@ module
         // interface IAnalyticsInterface;
         interface ITransactionSafeActivity;
     }
+
+    } // Activity
+    } // Dialer
+    } // Apps
+    } // Elastos
+
+    namespace Elastos {
+    namespace Apps {
+    namespace Dialer {
+    namespace CallLog {
 
     [deprecated, local]
     class CCallDetailHistoryAdapter {
@@ -529,6 +543,16 @@ module
         interface IPhoneQuery;
     }
 
+    } // CallLog
+    } // Dialer
+    } // Apps
+    } // Elastos
+
+    namespace Elastos {
+    namespace Apps {
+    namespace Dialer {
+    namespace Contact {
+
     class CContactUpdateService {
         constructor();
 
@@ -541,9 +565,36 @@ module
         interface IContactUpdateServiceHelper;
     }
 
+    } // Contact
+    } // Dialer
+    } // Apps
+    } // Elastos
+
+
+    namespace Elastos {
+    namespace Apps {
+    namespace Dialer {
+    namespace Database {
+
+    class CDialerDatabaseHelper {
+        interface ISQLiteOpenHelper;
+        interface IDialerDatabaseHelper;
+    }
+
     singleton class CDialerDatabaseHelperHelper {
         interface IDialerDatabaseHelperHelper;
     }
+
+    } // Database
+    } // Dialer
+    } // Apps
+    } // Elastos
+
+
+    namespace Elastos {
+    namespace Apps {
+    namespace Dialer {
+    namespace Dialpad {
 
     class CDialpadFragment {
         interface IComponentCallbacks;
@@ -640,6 +691,21 @@ module
         interface IUnicodeDialerKeyListenerHelper;
     }
 
+    } // Dialpad
+    } // Dialer
+    } // Apps
+    } // Elastos
+
+
+    namespace Elastos {
+    namespace Apps {
+    namespace Dialer {
+    namespace Interactions {
+
+    class CPhoneDisambiguationDialogFragmentHelper {
+        interface IPhoneDisambiguationDialogFragmentHelper;
+    }
+
     singleton class CPhoneNumberInteraction {
         interface IPhoneNumberInteraction;
     }
@@ -648,6 +714,16 @@ module
         interface IBroadcastReceiver;
         interface IUndemoteOutgoingCallReceiver;
     }
+
+    } // Interactions
+    } // Dialer
+    } // Apps
+    } // Elastos
+
+    namespace Elastos {
+    namespace Apps {
+    namespace Dialer {
+    namespace List {
 
     class CAllContactsFragment {
         // TODO:
@@ -932,6 +1008,17 @@ module
         interface ITileInteractionTeaserView;
     }
 
+    } // List
+    } // Dialer
+    } // Apps
+    } // Elastos
+
+
+    namespace Elastos {
+    namespace Apps {
+    namespace Dialer {
+    namespace Settings {
+
     [local]
     class CDefaultRingtonePreference {
         constructor(
@@ -977,6 +1064,16 @@ module
         interface IGeneralSettingsFragment;
     }
 
+    } // Settings
+    } // Dialer
+    } // Apps
+    } // Elastos
+
+    namespace Elastos {
+    namespace Apps {
+    namespace Dialer {
+    namespace Util {
+
     singleton class CAsyncTaskExecutors {
         interface IAsyncTaskExecutors;
     }
@@ -1001,6 +1098,17 @@ module
     singleton class COrientationUtil {
         interface IOrientationUtil;
     }
+
+    } // Util
+    } // Dialer
+    } // Apps
+    } // Elastos
+
+
+    namespace Elastos {
+    namespace Apps {
+    namespace Dialer {
+    namespace Voicemail {
 
     class CVoicemailPlaybackFragment {
         interface IComponentCallbacks;
@@ -1030,6 +1138,17 @@ module
         interface IVoicemailStatusHelper;
         interface IVoicemailStatusHelperImpl;
     }
+
+    } // Voicemail
+    } // Dialer
+    } // Apps
+    } // Elastos
+
+
+    namespace Elastos {
+    namespace Apps {
+    namespace Dialer {
+    namespace Widget {
 
     [local]
     class CActionBarController {
@@ -1084,6 +1203,16 @@ module
     singleton class CViewDragHelperHelper {
         interface IViewDragHelperHelper;
     }
+
+    } // Widget
+    } // Dialer
+    } // Apps
+    } // Elastos
+
+
+    namespace Elastos {
+    namespace Apps {
+    namespace Dialer {
 
     class CCallDetailActivity {
         interface IContext;
@@ -1240,6 +1369,14 @@ module
         interface ISpecialCharSequenceMgr;
     }
 
+    } // Dialer
+    } // Apps
+    } // Elastos
+
+    namespace Elastos {
+    namespace Apps {
+    namespace DialerBind {
+
     singleton class CDatabaseHelperManager {
         interface IDatabaseHelperManager;
     }
@@ -1247,6 +1384,10 @@ module
     singleton class CObjectFactory {
         interface IObjectFactory;
     }
+
+    } // DialerBind
+    } // Apps
+    } // Elastos
 
     } //namespace Dialer
     } //namespace Droid

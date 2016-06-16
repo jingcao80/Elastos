@@ -1,15 +1,15 @@
-#include "CCallLogNotificationsService.h"
+#include "elastos/apps/dialer/calllog/CCallLogNotificationsService.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
 const String CCallLogNotificationsService::TAG("CallLogNotificationsService");
 
-CAR_INTERFACE_IMPL(CCallLogNotificationsService, IntentService, ICallLogNotificationsService)
+CAR_INTERFACE_IMPL(CCallLogNotificationsService, IntentService, ICallLogNotificationsService);
 
-CAR_OBJECT_IMPL(CCallLogNotificationsService)
+CAR_OBJECT_IMPL(CCallLogNotificationsService);
 
 ECode CCallLogNotificationsService::constructor()
 {

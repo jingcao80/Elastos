@@ -1,11 +1,11 @@
 
-#include "AllContactsFragment.h"
+#include "list/AllContactsFragment.h"
 
 using Elastos::Droid::Provider::IContactsContractQuickContact;
 using Elastos::Droid::Provider::CContactsContractQuickContact;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 

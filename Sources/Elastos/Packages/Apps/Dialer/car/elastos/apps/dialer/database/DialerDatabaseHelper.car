@@ -4,11 +4,11 @@ module
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Database.Sqlite.ISQLiteDatabase;
     using interface Elastos.Utility.IArrayList;
-    interface Elastos.Apps.Dailer.Dialpad.ISmartDialNameMatcher;
+    interface Elastos.Apps.Dialer.Dialpad.ISmartDialNameMatcher;
 
-    namespace Elastos{
+    namespace Elastos {
     namespace Apps {
-    namespace Dailer {
+    namespace Dialer {
     namespace Database {
 
     /**
@@ -112,7 +112,7 @@ module
     }
 
     } //Database
-    } //Dailer
+    } //Dialer
     } //Apps
     } //Elastos
 }

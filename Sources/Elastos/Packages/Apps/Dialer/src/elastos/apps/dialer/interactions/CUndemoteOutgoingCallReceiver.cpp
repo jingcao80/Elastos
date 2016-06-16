@@ -1,11 +1,11 @@
 
-#include "CUndemoteOutgoingCallReceiver.h"
+#include "interactions/CUndemoteOutgoingCallReceiver.h"
 
 using Elastos::Droid::Provider::IContactsContractPhoneLookup;
 using Elastos::Droid::Provider::CContactsContractPhoneLookup;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Interactions {
 
@@ -32,7 +32,7 @@ ECode CUndemoteOutgoingCallReceiver::Run()
 //=================================================================
 const Int64 CUndemoteOutgoingCallReceiver::NO_CONTACT_FOUND = -1;
 
-CAR_INTERFACE_IMPL(CUndemoteOutgoingCallReceiver, BroadcastReceiver, ICUndemoteOutgoingCallReceiver)
+CAR_INTERFACE_IMPL(CUndemoteOutgoingCallReceiver, BroadcastReceiver, ICUndemoteOutgoingCallReceiver);
 
 CAR_OBJECT_IMPL(CUndemoteOutgoingCallReceiver)
 

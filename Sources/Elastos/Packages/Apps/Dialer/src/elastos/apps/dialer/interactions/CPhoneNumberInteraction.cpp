@@ -1,15 +1,15 @@
 
-#include "CPhoneNumberInteraction.h"
-#include "PhoneNumberInteraction.h"
+#include "interactions/CPhoneNumberInteraction.h"
+#include "interactions/PhoneNumberInteraction.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Interactions {
 
-CAR_INTERFACE_IMPL(CPhoneNumberInteraction, Singleton, IPhoneNumberInteraction)
+CAR_INTERFACE_IMPL(CPhoneNumberInteraction, Singleton, IPhoneNumberInteraction);
 
-CAR_SINGLETON_IMPL(CPhoneNumberInteraction)
+CAR_SINGLETON_IMPL(CPhoneNumberInteraction);
 
 ECode CPhoneNumberInteraction::StartInteractionForPhoneCall(
     /* [in] */ ITransactionSafeActivity* activity,
