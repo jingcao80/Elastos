@@ -25,6 +25,8 @@ module {
             [in] ISubscription* sub,
             [out] ISubscription** result);
 
+        GetSubscriptions(
+            [out, callee] ArrayOf<ISubscription*>* result);
     }
 
     }//Telephony

@@ -6,7 +6,19 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    /**
+     * Subscription activation status
+     */
+    enum SubscriptionStatus {
+        SubscriptionStatus_SUB_DEACTIVATE,
+        SubscriptionStatus_SUB_ACTIVATE,
+        SubscriptionStatus_SUB_ACTIVATED,
+        SubscriptionStatus_SUB_DEACTIVATED,
+        SubscriptionStatus_SUB_INVALID
+    }
+
     interface ISubscription {
+
         const Int32 SUBSCRIPTION_INDEX_INVALID = -1;
 
         IsSame(
@@ -22,6 +34,59 @@ module {
         GetAppIndex(
             [out] Int32* result);
 
+        GetSlotId(
+            [out] Int32* result);
+
+        SetSlotId(
+            [in] Int32 slotId);
+
+        Get3gppIndex(
+            [out] Int32* result);
+
+        Set3gppIndex(
+            [in] Int32 index);
+
+        Get3gpp2Index(
+            [out] Int32* result);
+
+        Set3gpp2Index(
+            [in] Int32 index);
+
+        GetSubId(
+            [out] Int32* result);
+
+        SetSubId(
+            [in] Int32 subId);
+
+        GetSubscriptionStatus(
+            [out] SubscriptionStatus* result);
+
+        SetSubscriptionStatus(
+            [in] SubscriptionStatus status);
+
+        GetAppId(
+            [out] String* result);
+
+        SetAppId(
+            [in] String appId);
+
+        GetAppLabel(
+            [out] String* result);
+
+        SetAppLabel(
+            [in] String label);
+
+        GetAppType(
+            [out] String* result);
+
+        SetAppType(
+            [in] String type);
+
+        GetIccId(
+            [out] String* result);
+
+        SetIccId(
+            [in] String iccId);
     }
 
     }//Telephony

@@ -387,6 +387,16 @@ module
             interface ISubInfoRecordUpdaterHelper;
         }
 
+        class CSubscription {
+
+            interface ISubscription;
+        }
+
+        class CSubscriptionData {
+
+            interface ISubscriptionData;
+        }
+
         //class CServiceStateTracker {
         //    constructor(
         //        [in] IPhoneBase* phoneBase,
