@@ -5,6 +5,7 @@ module
     interface Elastos.Droid.Internal.Telephony.Cat.IInput;
     interface Elastos.Droid.Internal.Telephony.Cat.ITextMessage;
     interface Elastos.Droid.Internal.Telephony.Cat.IToneSettings;
+    enum Elastos.Droid.Internal.Telephony.Cat.LaunchBrowserMode;
 
     namespace Elastos {
     namespace Droid {
@@ -16,15 +17,43 @@ module
      * Container for Launch Browser command settings.
      */
     interface IBrowserSettings {
+        SetUrl(
+            [in] String url);
+
+        GetUrl(
+            [out] String* url);
+
+        SetMode(
+            [in] LaunchBrowserMode mode);
+
+        GetMode(
+            [out] LaunchBrowserMode* mode);
     }
 
     /*
      * Container for Call Setup command settings.
      */
     interface ICallSettings {
+        SetConfirmMsg(
+            [in] ITextMessage* confirmMsg);
+
+        GetConfirmMsg(
+            [out] ITextMessage** result);
+
+        SetCallMsg(
+            [in] ITextMessage* callMsg);
+
+        GetCallMsg(
+            [out] ITextMessage** result);
     }
 
+    [deprecated]
     interface ISetupEventListSettings {
+        SetEventList(
+            [in] ArrayOf<Int32>* eventList);
+
+        GetEventList(
+            [out, callee] ArrayOf<Int32>* eventList);
     }
 
     interface ICatCmdMessageSetupEventListConstants {

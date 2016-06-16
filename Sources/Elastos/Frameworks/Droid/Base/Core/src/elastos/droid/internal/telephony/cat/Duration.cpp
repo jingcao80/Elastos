@@ -45,10 +45,16 @@ namespace Cat {
 //                               Duration
 //=====================================================================
 //const AutoPtr<IParcelable> AutoPtr< ::Creator<Duration> > Duration::CREATOR = new InnerParcelableCreator(this);
+CAR_INTERFACE_IMPL_2(Duration, Object, IDuration, IParcelable);
 
 
 Duration::Duration()
 {
+}
+
+CARAPI Duration::constructor()
+{
+    return NOERROR;
 }
 
 CARAPI Duration::constructor(

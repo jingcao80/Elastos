@@ -8,6 +8,100 @@ namespace Internal {
 namespace Telephony {
 namespace Cat {
 
+////=====================================================================
+////                CatCmdMessage::BrowserSettings
+////=====================================================================
+CAR_INTERFACE_IMPL(CatCmdMessage::BrowserSettings, Object, IBrowserSettings);
+
+ECode CatCmdMessage::BrowserSettings::SetUrl(
+    /* [in] */ const String& _url)
+{
+    url = _url;
+    return NOERROR;
+}
+
+ECode CatCmdMessage::BrowserSettings::GetUrl(
+    /* [out] */ String* _url)
+{
+    VALIDATE_NOT_NULL(_url);
+    *_url = url;
+    return NOERROR;
+}
+
+ECode CatCmdMessage::BrowserSettings::SetMode(
+    /* [in] */ LaunchBrowserMode _mode)
+{
+    mode = _mode;
+    return NOERROR;
+}
+
+ECode CatCmdMessage::BrowserSettings::GetMode(
+    /* [out] */ LaunchBrowserMode* _mode)
+{
+    VALIDATE_NOT_NULL(_mode);
+    *_mode = mode;
+    return NOERROR;
+}
+
+////=====================================================================
+////                CatCmdMessage::CallSettings
+////=====================================================================
+CAR_INTERFACE_IMPL(CatCmdMessage::CallSettings, Object, ICallSettings);
+
+ECode CatCmdMessage::CallSettings::SetConfirmMsg(
+    /* [in] */ ITextMessage* _confirmMsg)
+{
+    confirmMsg = _confirmMsg;
+    return NOERROR;
+}
+
+ECode CatCmdMessage::CallSettings::GetConfirmMsg(
+    /* [out] */ ITextMessage** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = confirmMsg;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+ECode CatCmdMessage::CallSettings::SetCallMsg(
+    /* [in] */ ITextMessage* _callMsg)
+{
+    callMsg = _callMsg;
+    return NOERROR;
+}
+
+ECode CatCmdMessage::CallSettings::GetCallMsg(
+    /* [out] */ ITextMessage** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = callMsg;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+////=====================================================================
+////                CatCmdMessage::SetupEventListSettings
+////=====================================================================
+CAR_INTERFACE_IMPL(CatCmdMessage::SetupEventListSettings, Object, ISetupEventListSettings);
+
+ECode CatCmdMessage::SetupEventListSettings::SetEventList(
+    /* [in] */ ArrayOf<Int32>* _eventList)
+{
+    eventList = _eventList;
+    return NOERROR;
+}
+
+ECode CatCmdMessage::SetupEventListSettings::GetEventList(
+    /* [out] */ ArrayOf<Int32>** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = eventList;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+
 //const Int32 CatCmdMessage::SetupEventListConstants::USER_ACTIVITY_EVENT;
 //const Int32 CatCmdMessage::SetupEventListConstants::IDLE_SCREEN_AVAILABLE_EVENT;
 //const Int32 CatCmdMessage::SetupEventListConstants::LANGUAGE_SELECTION_EVENT;
@@ -53,6 +147,8 @@ namespace Cat {
 //=====================================================================
 //                            CatCmdMessage
 //=====================================================================
+CAR_INTERFACE_IMPL_2(CatCmdMessage, Object, ICatCmdMessage, IParcelable);
+
 const Int32 CatCmdMessage::REFRESH_NAA_INIT_AND_FULL_FILE_CHANGE;
 const Int32 CatCmdMessage::REFRESH_NAA_INIT_AND_FILE_CHANGE;
 const Int32 CatCmdMessage::REFRESH_NAA_INIT;
@@ -257,7 +353,7 @@ ECode CatCmdMessage::GeTextMessage(
 }
 
 ECode CatCmdMessage::GetBrowserSettings(
-    /* [out] */ BrowserSettings** result)
+    /* [out] */ IBrowserSettings** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -277,7 +373,7 @@ ECode CatCmdMessage::GetToneSettings(
 }
 
 ECode CatCmdMessage::GetCallSettings(
-    /* [out] */ CallSettings** result)
+    /* [out] */ ICallSettings** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -314,7 +410,7 @@ ECode CatCmdMessage::IsRefreshResetOrInit(
 }
 
 ECode CatCmdMessage::GetSetEventList(
-    /* [out] */ SetupEventListSettings** result)
+    /* [out] */ ISetupEventListSettings** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================

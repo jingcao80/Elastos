@@ -28,9 +28,24 @@ public:
       */
     class BrowserSettings
         : public Object
-        //, public IBrowserSettings
+        , public IBrowserSettings
     {
     public:
+        CAR_INTERFACE_DECL();
+
+        CARAPI SetUrl(
+            /* [in] */ const String& url);
+
+        CARAPI GetUrl(
+            /* [out] */ String* url);
+
+        CARAPI SetMode(
+            /* [in] */ LaunchBrowserMode mode);
+
+        CARAPI GetMode(
+            /* [out] */ LaunchBrowserMode* mode);
+
+    private:
         String url;
         LaunchBrowserMode mode;
     };
@@ -40,18 +55,42 @@ public:
       */
     class CallSettings
         : public Object
-        //, public ICallSettings
+        , public ICallSettings
     {
     public:
+        CAR_INTERFACE_DECL();
+
+        CARAPI SetConfirmMsg(
+            /* [in] */ ITextMessage* confirmMsg);
+
+        CARAPI GetConfirmMsg(
+            /* [out] */ ITextMessage** result);
+
+        CARAPI SetCallMsg(
+            /* [in] */ ITextMessage* callMsg);
+
+        CARAPI GetCallMsg(
+            /* [out] */ ITextMessage** result);
+
+    private:
         AutoPtr<ITextMessage> confirmMsg;
         AutoPtr<ITextMessage> callMsg;
     };
 
     class SetupEventListSettings
         : public Object
-        //, public ISetupEventListSettings
+        , public ISetupEventListSettings
     {
     public:
+        CAR_INTERFACE_DECL();
+
+        CARAPI SetEventList(
+            /* [in] */ ArrayOf<Int32>* eventList);
+
+        CARAPI GetEventList(
+            /* [out] */ ArrayOf<Int32>** eventList);
+
+    private:
         AutoPtr<ArrayOf<Int32> > eventList;
     };
 
@@ -135,13 +174,13 @@ public:
         /* [out] */ ITextMessage** result);
 
     virtual CARAPI GetBrowserSettings(
-        /* [out] */ BrowserSettings** result);
+        /* [out] */ IBrowserSettings** result);
 
     virtual CARAPI GetToneSettings(
         /* [out] */ IToneSettings** result);
 
     virtual CARAPI GetCallSettings(
-        /* [out] */ CallSettings** result);
+        /* [out] */ ICallSettings** result);
 
     /**
       * API to be used by application to check if loading optional icon
@@ -154,7 +193,7 @@ public:
         /* [out] */ Boolean* result);
 
     virtual CARAPI GetSetEventList(
-        /* [out] */ SetupEventListSettings** result);
+        /* [out] */ ISetupEventListSettings** result);
 
 public:
     // members

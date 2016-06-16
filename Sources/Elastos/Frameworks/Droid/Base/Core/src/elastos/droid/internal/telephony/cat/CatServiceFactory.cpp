@@ -11,7 +11,7 @@ namespace Cat {
 //=====================================================================
 //                          CatServiceFactory
 //=====================================================================
-CAR_INTERFACE_IMPL(CatServiceFactory, Object, ICatServiceFactory);
+//CAR_INTERFACE_IMPL(CatServiceFactory, Object, ICatServiceFactory);
 
 static Int32 InitSimCount()
 {
@@ -69,7 +69,7 @@ AutoPtr<ICatService> CatServiceFactory::GetCatService(
     return empty;
 }
 
-ECode CatServiceFactory::DisposeCatService(
+void CatServiceFactory::DisposeCatService(
     /* [in] */ Int32 slotId)
 {
     // ==================before translated======================
@@ -78,7 +78,6 @@ ECode CatServiceFactory::DisposeCatService(
     //     sCatServices[slotId] = null;
     // }
     assert(0);
-    return NOERROR;
 }
 
 } // namespace Cat

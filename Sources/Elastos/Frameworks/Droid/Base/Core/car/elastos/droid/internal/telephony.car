@@ -241,10 +241,12 @@ module
 
     merge("telephony/utility/BlacklistUtils.car");
 
+    interface Elastos.Droid.Internal.Telephony.ICommandsInterface;
     interface Elastos.Droid.Internal.Telephony.IPhone;
     interface Elastos.Droid.Internal.Telephony.IPhoneBase;
     interface Elastos.Droid.Internal.Telephony.IPhoneProxy;
     interface Elastos.Droid.Internal.Telephony.Cdma.ICDMAPhone;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccFileHandler;
     interface Elastos.Droid.Net.INetworkConfig;
     interface Elastos.Droid.Os.IHandler;
     interface Elastos.Droid.Os.ILooper;
@@ -645,6 +647,143 @@ module
         }
 
     } // DataConnection
+    } // Telephony
+    } // Internal
+    } // Droid
+    } // Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Cat {
+
+        class CCatCmdMessageBrowserSettings {
+            interface IBrowserSettings;
+        }
+
+        class CCatCmdMessageCallSettings {
+            interface ICallSettings;
+        }
+
+        class CCatCmdMessageSetupEventListSettings {
+            interface ISetupEventListSettings;
+        }
+
+        class CCatCmdMessage {
+            constructor();
+
+            constructor(
+                [in] IInterface* cmdParams);
+
+            constructor(
+                [in] IParcel* parcel);
+
+            interface ICatCmdMessage;
+            interface IParcelable;
+        }
+
+        class CCatLog {
+            interface ICatLog;
+        }
+
+        class CCatResponseMessage {
+            constructor(
+                [in] ICatCmdMessage* cmdMsg);
+
+            interface ICatResponseMessage;
+        }
+
+        class CCatService {
+            constructor(
+                [in] ICommandsInterface* ci,
+                [in] IContext* context,
+                [in] IIccFileHandler* fh,
+                [in] Int32 slotId);
+
+            //TODO interface IHandler;
+            interface IAppInterface;
+            interface ICatService;
+        }
+
+        singleton class CCatServiceFactory {
+            interface ICatServiceFactory;
+        }
+
+        class CDuration {
+            constructor();
+
+            constructor(
+                [in] Int32 timeInterval,
+                [in] IDurationTimeUnit timeUnit);
+
+            interface IDuration;
+            interface IParcelable;
+        }
+
+        class CInput {
+            constructor();
+
+            interface IInput;
+            interface IParcelable;
+        }
+
+        class CItem {
+            constructor();
+
+            constructor(
+                [in] Int32 id,
+                [in] String text);
+
+            constructor(
+                [in] IParcel* parcel);
+
+            interface IItem;
+            interface IParcelable;
+        }
+
+        class CCatMenu {
+            constructor();
+
+            interface IMenu;
+            interface IParcelable;
+        }
+
+        class CTextAttribute {
+            constructor(
+                [in] Int32 start,
+                [in] Int32 length,
+                [in] TextAlignment align,
+                [in] FontSize size,
+                [in] Boolean bold,
+                [in] Boolean italic,
+                [in] Boolean underlined,
+                [in] Boolean strikeThrough,
+                [in] TextColor color);
+
+            interface ITextAttribute;
+        }
+
+        class CTextMessage {
+            constructor();
+
+            interface ITextMessage;
+            interface IParcelable;
+        }
+
+        class CToneSettings {
+            constructor();
+
+            constructor(
+                [in] IDuration* duration,
+                [in] Tone tone,
+                [in] Boolean vibrate);
+
+            interface IToneSettings;
+            interface IParcelable;
+        }
+
+    } // Cat
     } // Telephony
     } // Internal
     } // Droid

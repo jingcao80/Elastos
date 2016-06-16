@@ -17,6 +17,8 @@ class CatLog
     , public ICatLog
 {
 public:
+    CAR_INTERFACE_DECL();
+
     CARAPI D(
         /* [in] */ IInterface* caller,
         /* [in] */ const String& msg);

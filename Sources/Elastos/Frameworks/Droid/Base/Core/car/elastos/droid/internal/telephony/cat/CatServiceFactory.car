@@ -3,7 +3,7 @@ module
 {
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Internal.Telephony.ICommandsInterface;
-    // interface Elastos.Droid.Internal.Telephony.Uicc.IUiccCard;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUiccCard;
 
     namespace Elastos {
     namespace Droid {
@@ -21,12 +21,12 @@ module
          * @param slotId to know the index of card
          * @return The only Service object in the system
          */
-        // MakeCatService(
-        //     [in] ICommandsInterface* ci,
-        //     [in] IContext* context,
-        //     [in] IUiccCard* ic,
-        //     [in] Int32 slotId,
-        //     [out] ICatService** result);
+        MakeCatService(
+             [in] ICommandsInterface* ci,
+             [in] IContext* context,
+             [in] IUiccCard* ic,
+             [in] Int32 slotId,
+             [out] ICatService** result);
 
         GetCatService(
             [in] Int32 slotId,

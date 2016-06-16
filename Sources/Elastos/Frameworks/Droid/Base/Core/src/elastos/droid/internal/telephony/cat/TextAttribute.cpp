@@ -13,7 +13,11 @@ namespace Cat {
 //=====================================================================
 CAR_INTERFACE_IMPL(TextAttribute, Object, ITextAttribute);
 
-TextAttribute::TextAttribute(
+TextAttribute::TextAttribute()
+{
+}
+
+ECode TextAttribute::constructor(
     /* [in] */ Int32 start,
     /* [in] */ Int32 length,
     /* [in] */ TextAlignment align,
@@ -34,6 +38,7 @@ TextAttribute::TextAttribute(
     // this.underlined = underlined;
     // this.strikeThrough = strikeThrough;
     // this.color = color;
+    return NOERROR;
 }
 
 } // namespace Cat

@@ -71,6 +71,7 @@ namespace Cat {
 class CatService
     : public Handler
     , public IAppInterface
+    , public ICatService
 {
 public:
     CAR_INTERFACE_DECL();

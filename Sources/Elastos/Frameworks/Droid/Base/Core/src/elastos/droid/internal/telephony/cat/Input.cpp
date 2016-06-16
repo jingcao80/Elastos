@@ -65,6 +65,11 @@ Input::Input()
     // duration = null;
 }
 
+ECode Input::constructor()
+{
+    return NOERROR;
+}
+
 //ECode Input::DescribeContents(
 //    /* [out] */ Int32* result)
 //{

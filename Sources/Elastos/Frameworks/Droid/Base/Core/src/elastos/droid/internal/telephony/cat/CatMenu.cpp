@@ -2,7 +2,7 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.CoreLibrary.Utility.h"
-#include "elastos/droid/internal/telephony/cat/Menu.h"
+#include "elastos/droid/internal/telephony/cat/CatMenu.h"
 
 namespace Elastos {
 namespace Droid {
@@ -47,9 +47,9 @@ namespace Cat {
 ////                                 Menu
 ////=====================================================================
 //const AutoPtr<IParcelable> AutoPtr< ::Creator<Menu> > Menu::CREATOR = new InnerParcelableCreator(this);
-CAR_INTERFACE_IMPL_2(Menu, Object, IMenu, IParcelable);
+CAR_INTERFACE_IMPL_2(CatMenu, Object, IMenu, IParcelable);
 
-Menu::Menu()
+CatMenu::CatMenu()
 {
     // ==================before translated======================
     // // Create an empty list.
@@ -66,6 +66,11 @@ Menu::Menu()
     // presentationType = PresentationType.NAVIGATION_OPTIONS;
 }
 
+ECode CatMenu::constructor()
+{
+    return NOERROR;
+}
+
 //ECode Menu::DescribeContents(
 //    /* [out] */ Int32* result)
 //{
@@ -76,7 +81,7 @@ Menu::Menu()
 //    return NOERROR;
 //}
 
-ECode Menu::WriteToParcel(
+ECode CatMenu::WriteToParcel(
     /* [in] */ IParcel* dest)
     ///* [in] */ Int32 flags)
 {
@@ -99,14 +104,14 @@ ECode Menu::WriteToParcel(
     return NOERROR;
 }
 
-ECode Menu::ReadFromParcel(
+ECode CatMenu::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     constructor(source);
     return NOERROR;
 }
 
-ECode Menu::constructor(
+ECode CatMenu::constructor(
     /* [in] */ IParcel* in)
 {
     // ==================before translated======================

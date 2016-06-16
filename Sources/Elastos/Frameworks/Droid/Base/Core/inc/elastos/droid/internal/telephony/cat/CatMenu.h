@@ -18,7 +18,7 @@ namespace Cat {
   * Container class for CAT menu (SET UP MENU, SELECT ITEM) parameters.
   *
   */
-class Menu
+class CatMenu
     : public Object
     , public IMenu
     , public IParcelable
@@ -49,7 +49,7 @@ class Menu
 public:
     CAR_INTERFACE_DECL();
 
-    Menu();
+    CatMenu();
 
     CARAPI constructor();
 

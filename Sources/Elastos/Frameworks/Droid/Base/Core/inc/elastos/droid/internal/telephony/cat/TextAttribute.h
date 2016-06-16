@@ -22,7 +22,9 @@ class TextAttribute
 public:
     CAR_INTERFACE_DECL();
 
-    TextAttribute(
+    TextAttribute();
+
+    CARAPI constructor(
         /* [in] */ Int32 start,
         /* [in] */ Int32 length,
         /* [in] */ TextAlignment align,

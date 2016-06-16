@@ -28,10 +28,10 @@ namespace Cat {
   */
 class CatServiceFactory
     : public Object
-    , public ICatServiceFactory
+    //, public ICatServiceFactory
 {
 public:
-    CAR_INTERFACE_DECL();
+    //CAR_INTERFACE_DECL();
 
     /**
       * Used for instantiating the Service from the Card.
@@ -51,7 +51,7 @@ public:
     static CARAPI_(AutoPtr<ICatService>) GetCatService(
         /* [in] */ Int32 slotId);
 
-    CARAPI DisposeCatService(
+    static CARAPI_(void) DisposeCatService(
         /* [in] */ Int32 slotId);
 
 private:

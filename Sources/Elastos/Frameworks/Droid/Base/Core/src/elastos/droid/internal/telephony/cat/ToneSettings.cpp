@@ -51,6 +51,11 @@ ToneSettings::ToneSettings()
 {
 }
 
+ECode ToneSettings::constructor()
+{
+    return NOERROR;
+}
+
 ECode ToneSettings::constructor(
     /* [in] */ IDuration* duration,
     /* [in] */ Tone tone,

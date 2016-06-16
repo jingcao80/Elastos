@@ -11,6 +11,8 @@ namespace Cat {
 //=====================================================================
 //                                CatLog
 //=====================================================================
+CAR_INTERFACE_IMPL(CatLog, Object, ICatLog);
+
 const Boolean CatLog::DEBUG = TRUE;
 
 ECode CatLog::D(
