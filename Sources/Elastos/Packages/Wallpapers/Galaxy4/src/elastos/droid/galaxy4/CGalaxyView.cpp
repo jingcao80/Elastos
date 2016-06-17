@@ -1,5 +1,9 @@
 
+#include "Elastos.Droid.Content.h"
 #include "CGalaxyView.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::EIID_ISurfaceHolderCallback;
 
 namespace Elastos {
 namespace Droid {
@@ -63,7 +67,11 @@ ECode CGalaxyView::SurfaceChanged(
         }
     }
     if (mRS == NULL) {
-        AutoPtr<>
+        AutoPtr<RenderScript::SurfaceConfig> sc = new RenderScript::SurfaceConfig();
+        FAIL_RETURN(CreateRenderScript(sc, (RenderScript**)&mRS))
+        mRS->SetSurface(holder, width, height);
+
+
     }
     else {
 
@@ -88,11 +96,11 @@ ECode CGalaxyView::SurfaceChanged(
 
 ECode CGalaxyView::OnDetachedFromWindow()
 {
-    // if (mRS != null) {
-    //     mRS.setSurface(null, 0, 0);
-    //     mRS = null;
-    //     destroyRenderScriptGL();
-    // }
+    if (mRS != NULL) {
+        mRS->SetSurface(NULL, 0, 0);
+        mRS = NULL;
+        DestroyRenderScript();
+    }
     return NOERROR;
 }
 
@@ -116,27 +124,45 @@ ECode CGalaxyView::SurfaceCreated(
 ECode CGalaxyView::SurfaceDestroyed(
     /* [in] */ ISurfaceHolder* holder)
 {
-    synchronized (this) {
+    {
+        AutoLock lock(this);
         // Surface will be destroyed when we return
-        if (mRS != null) {
-            mRS.setSurface(null, 0, 0);
+        if (mRS != NULL) {
+            mRS->SetSurface(NULL, 0, 0);
         }
     }
+    return NOERROR;
 }
 
-ECode CGalaxyView::RsSetSurface(
-    /* [in] */ ISurfaceHolder* holder,
-    /* [in] */ Int32 w,
-    /* [in] */ Int32 h)
+ECode CGalaxyView::CreateRenderScript(
+    /* [in] */ RenderScript::SurfaceConfig* sc,
+    /* [out] */ RenderScript** result)
 {
-    validate();
-    Surface s = null;
-    if (sur != null) {
-        s = sur.getSurface();
+    AutoPtr<IContext> ctx;
+    GetContext((IContext**)&ctx);
+    AutoPtr<RenderScript> rs = new RenderScript();
+    FAIL_RETURN(rs->constructor(ctx, sc));
+    SetRenderScript(rs);
+    *result = rs;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+ECode CGalaxyView::DestroyRenderScript()
+{
+    {
+        AutoLock lock(this);
+        mRS->Destroy();
+        mRS = NULL;
     }
-    mWidth = w;
-    mHeight = h;
-    nContextSetSurface(w, h, s);
+    return NOERROR;
+}
+
+ECode CGalaxyView::SetRenderScript(
+    /* [in] */ RenderScript* rs)
+{
+    mRS = rs;
+    return NOERROR;
 }
 
 } // namespace Galaxy4

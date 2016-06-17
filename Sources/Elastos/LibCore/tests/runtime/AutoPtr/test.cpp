@@ -122,6 +122,25 @@ void testArrayOf()
     }
 }
 
+void testPerformance()
+{
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    Int64 beforeTime;
+    system->GetCurrentTimeMillis(&beforeTime);
+
+    AutoPtr<C1> v1 = new C1();
+
+    for (Int32 i = 0; i < 1000000; i++) {
+        AutoPtr<C1> v2 = v1;
+    }
+
+    Int64 afterTime;
+    system->GetCurrentTimeMillis(&afterTime);
+
+    printf("===== time consuming: %lld =====", afterTime - beforeTime);
+}
+
 int main(int argc, char *argv[])
 {
     printf("==== call testAutoPtr ====\n");
@@ -131,6 +150,10 @@ int main(int argc, char *argv[])
     printf("==== call testArrayOf ====\n");
     testArrayOf();
     printf("==== call testArrayOf end ====\n");
+
+    printf("==== call testPerformance ====\n");
+    testPerformance();
+    printf("==== call testPerformance end ====\n");
 
     return 0;
 }

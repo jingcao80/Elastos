@@ -60,6 +60,18 @@ public:
     CARAPI SurfaceDestroyed(
         /* [in] */ ISurfaceHolder* holder);
 
+    /**
+     * @deprecated in API 16
+     **/
+    CARAPI CreateRenderScript(
+        /* [in] */ RenderScript::SurfaceConfig* sc,
+        /* [out] */ RenderScript** result);
+
+    CARAPI DestroyRenderScript();
+
+    CARAPI SetRenderScript(
+        /* [in] */ RenderScript* rs);
+
 protected:
     CARAPI OnDetachedFromWindow();
 
@@ -69,6 +81,7 @@ private:
 private:
     AutoPtr<RenderScript> mRS;
     AutoPtr<SHCallback> mCallback;
+    AutoPtr<ISurfaceHolder> mSurfaceHolder;
 };
 
 } // namespace Galaxy4

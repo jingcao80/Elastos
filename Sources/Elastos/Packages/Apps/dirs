@@ -1,5 +1,5 @@
 
 DIRS += Calculator
 DIRS += Launcher2
-DIRS += PackageInstaller
+#DIRS += PackageInstaller
 DIRS += Settings

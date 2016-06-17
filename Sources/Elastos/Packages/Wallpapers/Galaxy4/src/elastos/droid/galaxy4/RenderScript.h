@@ -2,8 +2,13 @@
 #ifndef __ELASTOS_DROID_GALAXY4_RENDERSCRIPT_H__
 #define __ELASTOS_DROID_GALAXY4_RENDERSCRIPT_H__
 
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::ISurface;
+using Elastos::Droid::View::ISurfaceHolder;
 using Elastos::Core::Object;
 
 namespace Elastos {
@@ -41,6 +46,21 @@ public:
             , mSamplesQ(1.0)
         {}
 
+        SurfaceConfig(
+            /* [in] */ SurfaceConfig* sc)
+            : mDepthMin(sc->mDepthMin)
+            , mDepthPref(sc->mDepthPref)
+            , mStencilMin(sc->mStencilMin)
+            , mStencilPref(sc->mStencilPref)
+            , mColorMin(sc->mColorMin)
+            , mColorPref(sc->mColorPref)
+            , mAlphaMin(sc->mAlphaMin)
+            , mAlphaPref(sc->mAlphaPref)
+            , mSamplesMin(sc->mSamplesMin)
+            , mSamplesPref(sc->mSamplesPref)
+            , mSamplesQ(sc->mSamplesQ)
+        {}
+
     public:
         Int32 mDepthMin;
         Int32 mDepthPref;
@@ -54,6 +74,50 @@ public:
         Int32 mSamplesPref;
         Float mSamplesQ;
     };
+
+public:
+    CARAPI constructor(
+        /* [in] */ IContext* ctx,
+        /* [in] */ SurfaceConfig* sc);
+
+    CARAPI SetSurface(
+        /* [in] */ ISurfaceHolder* sur,
+        /* [in] */ Int32 w,
+        /* [in] */ Int32 h);
+
+    CARAPI Destroy();
+
+    CARAPI_(Int64) nDeviceCreate();
+
+    CARAPI_(Int64) nContextCreateGL(
+        /* [in] */ Int64 dev,
+        /* [in] */ Int32 ver,
+        /* [in] */ Int32 sdkVer,
+        /* [in] */ Int32 colorMin,
+        /* [in] */ Int32 colorPref,
+        /* [in] */ Int32 alphaMin,
+        /* [in] */ Int32 alphaPref,
+        /* [in] */ Int32 depthMin,
+        /* [in] */ Int32 depthPref,
+        /* [in] */ Int32 stencilMin,
+        /* [in] */ Int32 stencilPref,
+        /* [in] */ Int32 samplesMin,
+        /* [in] */ Int32 samplesPref,
+        /* [in] */ Float samplesQ,
+        /* [in] */ Int32 dpi);
+
+    CARAPI_(void) nContextSetSurface(
+        /* [in] */ Int32 w,
+        /* [in] */ Int32 h,
+        /* [in] */ ISurface* sur);
+
+public:
+    Int64 mDev;
+    Int64 mContext;
+
+    Int32 mWidth;
+    Int32 mHeight;
+    AutoPtr<SurfaceConfig> mSurfaceConfig;
 };
 
 } // namespace Galaxy4

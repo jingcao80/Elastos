@@ -782,10 +782,10 @@ ANativeWindow* Surface::GetSurface()
 ECode Surface::GetNativeSurface(
     /* [out] */ Int64* result)
 {
-
     VALIDATE_NOT_NULL(result)
 
-    *result = reinterpret_cast<Int64>(mNativeObject);
+    android::Surface* surface = (android::Surface*)GetSurface();
+    *result = reinterpret_cast<Int64>(surface);
     return NOERROR;
 }
 
