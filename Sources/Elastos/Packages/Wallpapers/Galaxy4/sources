@@ -1,0 +1,28 @@
+
+TARGET_NAME= Elastos.Droid.Galaxy4
+TARGET_TYPE= eco
+
+INCLUDES += $(MAKEDIR)/inc
+INCLUDES += $(MAKEDIR)/src
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+VPATH += $(MAKEDIR)/src/elastos/droid/galaxy4
+
+SOURCES = Elastos.Droid.Galaxy4.car
+SOURCES += R.cpp
+SOURCES += Elastos.Droid.Core.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += CGalaxy4.cpp
+SOURCES += CGalaxyView.cpp
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+
+APP_PACKAGE_NAME = Elastos.Droid.Galaxy4
+RES_NAMESPACE = Elastos.Droid.Galaxy4
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;
