@@ -24,7 +24,7 @@ class ECO_PUBLIC AppWidgetHostView
     , public IAppWidgetHostView
 {
 public:
-    ECO_LOCAL class ParcelableSparseArray
+    class ECO_LOCAL ParcelableSparseArray
         : public SparseArray
         , public IParcelable
     {

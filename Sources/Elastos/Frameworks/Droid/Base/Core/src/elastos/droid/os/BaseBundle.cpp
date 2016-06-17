@@ -94,9 +94,6 @@ ECode BaseBundle::constructor(
     }
 
     mClassLoader = loader;
-    if (mClassLoader == NULL) {
-        mClassLoader = Object::GetClassLoader(TO_IINTERFACE(this));
-    }
 
     return NOERROR;
 }
@@ -201,6 +198,9 @@ ECode BaseBundle::GetClassLoader(
     /* [out] */ IClassLoader** loader)
 {
     VALIDATE_NOT_NULL(loader)
+    if (mClassLoader == NULL) {
+        mClassLoader = Object::GetClassLoader(TO_IINTERFACE(this));
+    }
     *loader = mClassLoader;
     REFCOUNT_ADD(*loader)
     return NOERROR;
