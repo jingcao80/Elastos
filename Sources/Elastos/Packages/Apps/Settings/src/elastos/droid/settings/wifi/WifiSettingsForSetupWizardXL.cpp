@@ -26,7 +26,7 @@ using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Wifi::EIID_IWifiManagerActionListener;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::EIID_IInteger32;
-using Elastos::Utility::CEnumMap;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 
@@ -41,10 +41,10 @@ const Boolean WifiSettingsForSetupWizardXL::DEBUG = TRUE;
 const String WifiSettingsForSetupWizardXL::EXTRA_PREFS_LANDSCAPE_LOCK("extra_prefs_landscape_lock");
 const String WifiSettingsForSetupWizardXL::EXTRA_PREFS_PORTRAIT_LOCK("extra_prefs_portrait_lock");
 
-static const AutoPtr<IEnumMap> InitsNetworkStateMap()
+static const AutoPtr<IMap> InitsNetworkStateMap()
 {
-    AutoPtr<IEnumMap> map;
-    CEnumMap::New(EIID_IInteger32/*NetworkInfoDetailedState.class*/, (IEnumMap**)&map);
+    AutoPtr<IMap> map;
+    CHashMap::New((IMap**)&map);
 
     map->Put(
             CoreUtils::Convert((Int32)NetworkInfoDetailedState_IDLE),
@@ -80,7 +80,7 @@ static const AutoPtr<IEnumMap> InitsNetworkStateMap()
     return map;
 }
 
-const AutoPtr<IEnumMap> WifiSettingsForSetupWizardXL::sNetworkStateMap = InitsNetworkStateMap();
+const AutoPtr<IMap> WifiSettingsForSetupWizardXL::sNetworkStateMap = InitsNetworkStateMap();
 
 const Int32 WifiSettingsForSetupWizardXL::SCREEN_STATE_DISCONNECTED = 0;
 const Int32 WifiSettingsForSetupWizardXL::SCREEN_STATE_EDITING = 1;

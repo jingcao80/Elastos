@@ -18,7 +18,7 @@ using Elastos::Droid::Widget::IProgressBar;
 using Elastos::Droid::Wifi::IWifiManager;
 using Elastos::Droid::Wifi::IWifiManagerActionListener;
 using Elastos::Utility::ICollection;
-using Elastos::Utility::IEnumMap;
+using Elastos::Utility::IMap;
 
 namespace Elastos {
 namespace Droid {
@@ -206,7 +206,7 @@ private:
 
     // private static const EnumMap<NetworkInfoDetailedState, NetworkInfoDetailedState> sNetworkStateMap =
     //         new EnumMap<NetworkInfoDetailedState, NetworkInfoDetailedState>(NetworkInfoDetailedState.class);
-    static const AutoPtr<IEnumMap> sNetworkStateMap;
+    static const AutoPtr<IMap> sNetworkStateMap;
 
     AutoPtr<WifiSettings> mWifiSettings;
     AutoPtr<IWifiManager> mWifiManager;
