@@ -218,6 +218,7 @@ String RILRequest::SerialString()
 
     sn = StringUtils::ToString(adjustedSerial);
 
+    assert(0 && "TODO");
     //sb.append("J[");
     sb.Append('[');
     for (Int32 i = 0, s = sn.GetLength() ; i < 4 - s; i++) {
@@ -251,6 +252,7 @@ void RILRequest::OnError(
     }
 
     if (mParcel != NULL) {
+        assert(0 && "TODO");
         // mParcel->Recycle();
         mParcel = NULL;
     }
@@ -498,6 +500,7 @@ ECode RIL::RILReceiver::Run()
                     break;
                 }
 
+                assert(0 && "TODO");
                 // p = Parcel::Obtain();
                 p->Unmarshall(mBuffer, 0, length);
                 p->SetDataPosition(0);

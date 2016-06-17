@@ -1,200 +1,269 @@
-/*
- * Copyright (C) 2006 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony;
+#include "elastos/droid/internal/telephony/PhoneStateIntentReceiver.h"
+#include "elastos/droid/content/CIntentFilter.h"
+#include "elastos/droid/os/CMessageHelper.h"
+#include "elastos/droid/telephony/CServiceState.h"
+#include "elastos/droid/telephony/CSignalStrength.h"
 
-using Elastos::Droid::Content::IBroadcastReceiver;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::IIntentFilter;
-using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Telephony::IServiceState;
-using Elastos::Droid::Telephony::ISignalStrength;
+using Elastos::Droid::Os::IMessageHelper;
+using Elastos::Droid::Os::CMessageHelper;
 using Elastos::Droid::Telephony::ITelephonyManager;
-using Elastos::Droid::Telephony::IRlog;
+using Elastos::Droid::Telephony::CServiceState;
+using Elastos::Droid::Telephony::CSignalStrength;
+using Elastos::Droid::Telephony::ISignalStrengthHelper;
+using Elastos::Droid::Telephony::IServiceStateHelper;
 
-/**
- *
- *                            DO NOT USE THIS CLASS:
- *
- *      Use android.telephony.TelephonyManager and PhoneStateListener instead.
- *
- *
- */
-@Deprecated
-public class PhoneStateIntentReceiver extends BroadcastReceiver {
-    private static const String LOG_TAG = "PhoneStatIntentReceiver";
-    private static const Boolean DBG = FALSE;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
 
-    private static const Int32 NOTIF_PHONE    = 1 << 0;
-    private static const Int32 NOTIF_SERVICE  = 1 << 1;
-    private static const Int32 NOTIF_SIGNAL   = 1 << 2;
+const String PhoneStateIntentReceiver::LOGTAG("PhoneStatIntentReceiver");
+const Boolean PhoneStateIntentReceiver::DBG = FALSE;
 
-    PhoneConstants.State mPhoneState = PhoneConstants.State.IDLE;
-    ServiceState mServiceState = new ServiceState();
-    SignalStrength mSignalStrength = new SignalStrength();
+const Int32 PhoneStateIntentReceiver::NOTIF_PHONE    = 1 << 0;
+const Int32 PhoneStateIntentReceiver::NOTIF_SERVICE  = 1 << 1;
+const Int32 PhoneStateIntentReceiver::NOTIF_SIGNAL   = 1 << 2;
 
-    private Context mContext;
-    private Handler mTarget;
-    private IntentFilter mFilter;
-    private Int32 mWants;
-    private Int32 mPhoneStateEventWhat;
-    private Int32 mServiceStateEventWhat;
-    private Int32 mAsuEventWhat;
+CAR_INTERFACE_IMPL(PhoneStateIntentReceiver, BroadcastReceiver, IPhoneStateIntentReceiver)
 
-    public PhoneStateIntentReceiver() {
-        Super();
-        mFilter = new IntentFilter();
-    }
-
-    public PhoneStateIntentReceiver(Context context, Handler target) {
-        This();
-        SetContext(context);
-        SetTarget(target);
-    }
-
-    CARAPI SetContext(Context c) {
-        mContext = c;
-    }
-
-    CARAPI SetTarget(Handler h) {
-        mTarget = h;
-    }
-
-    public PhoneConstants.State GetPhoneState() {
-        If ((mWants & NOTIF_PHONE) == 0) {
-            throw new RuntimeException
-                ("client must call NotifyPhoneCallState(Int32)");
-        }
-        return mPhoneState;
-    }
-
-    public ServiceState GetServiceState() {
-        If ((mWants & NOTIF_SERVICE) == 0) {
-            throw new RuntimeException
-                ("client must call NotifyServiceState(Int32)");
-        }
-        return mServiceState;
-    }
-
-    /**
-     * Returns current signal strength in as an asu 0..31
-     *
-     * Throws RuntimeException if client has not called NotifySignalStrength()
-     */
-    public Int32 GetSignalStrengthLevelAsu() {
-        // TODO: use new SignalStrength instead of asu
-        If ((mWants & NOTIF_SIGNAL) == 0) {
-            throw new RuntimeException
-                ("client must call NotifySignalStrength(Int32)");
-        }
-        return mSignalStrength->GetAsuLevel();
-    }
-
-    /**
-     * Return current signal strength in "dBm", ranging from -113 - -51dBm
-     * or -1 if unknown
-     *
-     * @return signal strength in dBm, -1 if not yet updated
-     * Throws RuntimeException if client has not called NotifySignalStrength()
-     */
-    public Int32 GetSignalStrengthDbm() {
-        If ((mWants & NOTIF_SIGNAL) == 0) {
-            throw new RuntimeException
-                ("client must call NotifySignalStrength(Int32)");
-        }
-        return mSignalStrength->GetDbm();
-    }
-
-    CARAPI NotifyPhoneCallState(Int32 eventWhat) {
-        mWants |= NOTIF_PHONE;
-        mPhoneStateEventWhat = eventWhat;
-        mFilter->AddAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-    }
-
-    public Boolean GetNotifyPhoneCallState() {
-        Return ((mWants & NOTIF_PHONE) != 0);
-    }
-
-    CARAPI NotifyServiceState(Int32 eventWhat) {
-        mWants |= NOTIF_SERVICE;
-        mServiceStateEventWhat = eventWhat;
-        mFilter->AddAction(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
-    }
-
-    public Boolean GetNotifyServiceState() {
-        Return ((mWants & NOTIF_SERVICE) != 0);
-    }
-
-    CARAPI NotifySignalStrength (Int32 eventWhat) {
-        mWants |= NOTIF_SIGNAL;
-        mAsuEventWhat = eventWhat;
-        mFilter->AddAction(TelephonyIntents.ACTION_SIGNAL_STRENGTH_CHANGED);
-    }
-
-    public Boolean GetNotifySignalStrength() {
-        Return ((mWants & NOTIF_SIGNAL) != 0);
-    }
-
-    CARAPI RegisterIntent() {
-        mContext->RegisterReceiver(this, mFilter);
-    }
-
-    CARAPI UnregisterIntent() {
-        mContext->UnregisterReceiver(this);
-    }
-
-    //@Override
-    CARAPI OnReceive(Context context, Intent intent) {
-        String action = intent->GetAction();
-
-        try {
-            If (TelephonyIntents.ACTION_SIGNAL_STRENGTH_CHANGED->Equals(action)) {
-                mSignalStrength = SignalStrength->NewFromBundle(intent->GetExtras());
-
-                If (mTarget != NULL && GetNotifySignalStrength()) {
-                    Message message = Message->Obtain(mTarget, mAsuEventWhat);
-                    mTarget->SendMessage(message);
-                }
-            } else If (TelephonyManager.ACTION_PHONE_STATE_CHANGED->Equals(action)) {
-                If (DBG) Rlog->D(LOG_TAG, "onReceiveIntent: ACTION_PHONE_STATE_CHANGED, state="
-                               + intent->GetStringExtra(PhoneConstants.STATE_KEY));
-                String phoneState = intent->GetStringExtra(PhoneConstants.STATE_KEY);
-                mPhoneState = Enum->ValueOf(
-                        PhoneConstants.State.class, phoneState);
-
-                If (mTarget != NULL && GetNotifyPhoneCallState()) {
-                    Message message = Message->Obtain(mTarget,
-                            mPhoneStateEventWhat);
-                    mTarget->SendMessage(message);
-                }
-            } else If (TelephonyIntents.ACTION_SERVICE_STATE_CHANGED->Equals(action)) {
-                mServiceState = ServiceState->NewFromBundle(intent->GetExtras());
-
-                If (mTarget != NULL && GetNotifyServiceState()) {
-                    Message message = Message->Obtain(mTarget,
-                            mServiceStateEventWhat);
-                    mTarget->SendMessage(message);
-                }
-            }
-        } Catch (Exception ex) {
-            Rlog->E(LOG_TAG, "[PhoneStateIntentRecv] caught " + ex);
-            ex->PrintStackTrace();
-        }
-    }
-
+PhoneStateIntentReceiver::PhoneStateIntentReceiver()
+    : mPhoneState(PhoneConstantsState_IDLE)
+    , mWants(0)
+    , mPhoneStateEventWhat(0)
+    , mServiceStateEventWhat(0)
+    , mAsuEventWhat(0)
+{
+    CServiceState::New((IServiceState**)&mServiceState);
+    CSignalStrength::New((ISignalStrength**)&mSignalStrength);
 }
+
+ECode PhoneStateIntentReceiver::constructor()
+{
+    BroadcastReceiver::constructor();
+    CIntentFilter::New((IIntentFilter**)&mFilter);
+    return NOERROR;
+}
+
+ECode PhoneStateIntentReceiver::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IHandler* target)
+{
+    BroadcastReceiver::constructor();
+    SetContext(context);
+    SetTarget(target);
+    return NOERROR;
+}
+
+ECode PhoneStateIntentReceiver::SetContext(
+    /* [in] */ IContext* c)
+{
+    mContext = c;
+    return NOERROR;
+}
+
+ECode PhoneStateIntentReceiver::SetTarget(
+    /* [in] */ IHandler* h)
+{
+    mTarget = h;
+    return NOERROR;
+}
+
+ECode PhoneStateIntentReceiver::GetPhoneState(
+    /* [out] */ PhoneConstantsState* result)
+{
+    VALIDATE_NOT_NULL(result)
+    if ((mWants & NOTIF_PHONE) == 0) {
+        // throw new RuntimeException
+        //     ("client must call NotifyPhoneCallState(Int32)");
+        return E_RUNTIME_EXCEPTION;
+    }
+    *result = mPhoneState;
+    return NOERROR;
+}
+
+ECode PhoneStateIntentReceiver::GetServiceState(
+    /* [out] */ IServiceState** result)
+{
+    VALIDATE_NOT_NULL(result)
+    if ((mWants & NOTIF_SERVICE) == 0) {
+        // throw new RuntimeException
+        //     ("client must call NotifyServiceState(Int32)");
+        return E_RUNTIME_EXCEPTION;
+    }
+    *result = mServiceState;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode PhoneStateIntentReceiver::GetSignalStrengthLevelAsu(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    // TODO: use new SignalStrength instead of asu
+    if ((mWants & NOTIF_SIGNAL) == 0) {
+        // throw new RuntimeException
+        //     ("client must call NotifySignalStrength(Int32)");
+        return E_RUNTIME_EXCEPTION;
+    }
+    return mSignalStrength->GetAsuLevel(result);
+}
+
+ECode PhoneStateIntentReceiver::GetSignalStrengthDbm(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    if ((mWants & NOTIF_SIGNAL) == 0) {
+        // throw new RuntimeException
+        //     ("client must call NotifySignalStrength(Int32)");
+        return E_RUNTIME_EXCEPTION;
+    }
+    return mSignalStrength->GetDbm(result);
+}
+
+ECode PhoneStateIntentReceiver::NotifyPhoneCallState(
+    /* [in] */ Int32 eventWhat)
+{
+    mWants |= NOTIF_PHONE;
+    mPhoneStateEventWhat = eventWhat;
+    mFilter->AddAction(ITelephonyManager::ACTION_PHONE_STATE_CHANGED);
+    return NOERROR;
+}
+
+ECode PhoneStateIntentReceiver::GetNotifyPhoneCallState(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = ((mWants & NOTIF_PHONE) != 0);
+    return NOERROR;
+}
+
+ECode PhoneStateIntentReceiver::NotifyServiceState(
+    /* [in] */ Int32 eventWhat)
+{
+    mWants |= NOTIF_SERVICE;
+    mServiceStateEventWhat = eventWhat;
+    mFilter->AddAction(ITelephonyIntents::ACTION_SERVICE_STATE_CHANGED);
+    return NOERROR;
+}
+
+ECode PhoneStateIntentReceiver::GetNotifyServiceState(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = ((mWants & NOTIF_SERVICE) != 0);
+    return NOERROR;
+}
+
+ECode PhoneStateIntentReceiver::NotifySignalStrength (
+    /* [in] */ Int32 eventWhat)
+{
+    mWants |= NOTIF_SIGNAL;
+    mAsuEventWhat = eventWhat;
+    mFilter->AddAction(ITelephonyIntents::ACTION_SIGNAL_STRENGTH_CHANGED);
+    return NOERROR;
+}
+
+ECode PhoneStateIntentReceiver::GetNotifySignalStrength(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = ((mWants & NOTIF_SIGNAL) != 0);
+    return NOERROR;
+}
+
+ECode PhoneStateIntentReceiver::RegisterIntent()
+{
+    AutoPtr<IIntent> intent;
+    return mContext->RegisterReceiver(this, mFilter, (IIntent**)&intent);
+}
+
+ECode PhoneStateIntentReceiver::UnregisterIntent()
+{
+    return mContext->UnregisterReceiver(this);
+}
+
+ECode PhoneStateIntentReceiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    String action;
+    intent->GetAction(&action);
+
+    // try {
+        if (ITelephonyIntents::ACTION_SIGNAL_STRENGTH_CHANGED.Equals(action)) {
+            AutoPtr<IBundle> bundle;
+            intent->GetExtras((IBundle**)&bundle);
+            AutoPtr<ISignalStrengthHelper> hlp;
+            assert(0 && "TODO");
+            // CSignalStrengthHelper::AcquireSingleton((ISignalStrengthHelper**)&hlp);
+            hlp->NewFromBundle(bundle, (ISignalStrength**)&mSignalStrength);
+
+            Boolean bSignal = FALSE;
+            GetNotifySignalStrength(&bSignal);
+            if (mTarget != NULL && bSignal) {
+                AutoPtr<IMessageHelper> mhlp;
+                CMessageHelper::AcquireSingleton((IMessageHelper**)&mhlp);
+                AutoPtr<IMessage> message;
+                mhlp->Obtain(mTarget, mAsuEventWhat, (IMessage**)&message);
+                Boolean bSend = FALSE;
+                mTarget->SendMessage(message, &bSend);
+            }
+        }
+        else if (ITelephonyManager::ACTION_PHONE_STATE_CHANGED.Equals(action)) {
+            if (DBG) {
+                String str;
+                intent->GetStringExtra(IPhoneConstants::STATE_KEY, &str);
+                // Rlog::D(LOG_TAG, "onReceiveIntent: ACTION_PHONE_STATE_CHANGED, state=%s",
+                //         str);
+            }
+            String phoneState;
+            intent->GetStringExtra(IPhoneConstants::STATE_KEY, &phoneState);
+            assert(0 && "TODO");
+            // mPhoneState = Enum::ValueOf(
+            //         PhoneConstants.State.class, phoneState);
+
+            Boolean bCallState = FALSE;
+            GetNotifyPhoneCallState(&bCallState);
+            if (mTarget != NULL && bCallState) {
+                AutoPtr<IMessageHelper> mhlp;
+                CMessageHelper::AcquireSingleton((IMessageHelper**)&mhlp);
+                AutoPtr<IMessage> message;
+                mhlp->Obtain(mTarget,
+                        mPhoneStateEventWhat, (IMessage**)&message);
+                Boolean bSend = FALSE;
+                mTarget->SendMessage(message, &bSend);
+            }
+        }
+        else if (ITelephonyIntents::ACTION_SERVICE_STATE_CHANGED.Equals(action)) {
+            AutoPtr<IBundle> bundle;
+            intent->GetExtras((IBundle**)&bundle);
+            AutoPtr<IServiceStateHelper> sshlp;
+            assert(0 && "TODO");
+            // CServiceStateHelper::AcquireSingleton((IServiceStateHelper**)&sshlp);
+            sshlp->NewFromBundle(bundle, (IServiceState**)&mServiceState);
+
+            Boolean bServiceState = FALSE;
+            GetNotifyServiceState(&bServiceState);
+            if (mTarget != NULL && bServiceState) {
+                AutoPtr<IMessageHelper> mhlp;
+                CMessageHelper::AcquireSingleton((IMessageHelper**)&mhlp);
+                AutoPtr<IMessage> message;
+                mhlp->Obtain(mTarget, mServiceStateEventWhat, (IMessage**)&message);
+                Boolean bSend = FALSE;
+                mTarget->SendMessage(message, &bSend);
+            }
+        }
+    // } Catch (Exception ex) {
+    //     Rlog->E(LOG_TAG, "[PhoneStateIntentRecv] caught " + ex);
+    //     ex->PrintStackTrace();
+    // }
+    return NOERROR;
+}
+
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

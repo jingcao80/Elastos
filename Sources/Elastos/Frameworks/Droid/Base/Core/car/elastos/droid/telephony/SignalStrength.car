@@ -287,7 +287,8 @@ module
             [out, callee] ArrayOf<String>* names);
 
         NewFromBundle(
-            [in] IBundle* m);
+            [in] IBundle* m,
+            [out] ISignalStrength** result);
 
         /**
          * Make a SignalStrength object from the given parcel as passed up by

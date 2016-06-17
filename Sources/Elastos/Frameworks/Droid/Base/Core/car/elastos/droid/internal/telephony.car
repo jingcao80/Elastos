@@ -59,6 +59,7 @@ module
     merge("telephony/PhoneFactory.car");
     merge("telephony/PhoneNotifier.car");
     merge("telephony/PhoneProxy.car");
+    merge("telephony/PhoneStateIntentReceiver.car");
     merge("telephony/PhoneSubInfoController.car");
     merge("telephony/PhoneSubInfoProxy.car");
     merge("telephony/ProxyController.car");
@@ -242,6 +243,7 @@ module
     merge("telephony/utility/BlacklistUtils.car");
 
     interface Elastos.Droid.Internal.Telephony.ICommandsInterface;
+    interface Elastos.Droid.Content.IBroadcastReceiver;
     interface Elastos.Droid.Internal.Telephony.IPhone;
     interface Elastos.Droid.Internal.Telephony.IPhoneBase;
     interface Elastos.Droid.Internal.Telephony.IPhoneProxy;
@@ -426,6 +428,59 @@ module
 
             interface IOperatorInfo;
             interface IParcelable;
+        }
+
+        singleton class CPhoneFactory {
+            interface IPhoneFactory;
+        }
+
+        [local]
+        class CPhoneProxy {
+            constructor(
+                [in] IPhoneBase* phone);
+
+            interface IPhoneProxy;
+            interface IPhone;
+            // interface IHandler;
+        }
+
+        class CPhoneStateIntentReceiver {
+            constructor();
+
+            constructor(
+                [in] IContext* context,
+                [in] IHandler* target);
+
+            interface IPhoneStateIntentReceiver;
+            // interface IBroadcastReceiver;
+        }
+
+        class CPhoneSubInfo {
+            constructor(
+                [in] IPhone* phone);
+
+            interface IPhoneSubInfo;
+        }
+
+        [deprecated]
+        class CPhoneSubInfoController {
+            constructor(
+                [in] ArrayOf<IPhone*>* phone);
+
+            interface IIPhoneSubInfo;
+            interface IPhoneSubInfoController;
+        }
+
+        class CPhoneSubInfoProxy {
+            constructor(
+                [in] IPhoneSubInfo* phoneSubInfo);
+
+            interface IIPhoneSubInfo;
+            interface IPhoneSubInfoProxy;
+        }
+
+        singleton class CProxyControllerHelper {
+            interface IProxyControllerHelper;
         }
 
     } // Telephony

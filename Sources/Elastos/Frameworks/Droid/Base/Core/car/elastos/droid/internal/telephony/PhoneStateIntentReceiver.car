@@ -1,0 +1,77 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Telephony.IServiceState;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    /**
+     * @Involve
+     * interface IBroadcastReceiver
+     */
+    interface IPhoneStateIntentReceiver {
+
+        SetContext(
+            [in] IContext* c);
+
+        SetTarget(
+            [in] IHandler* h);
+
+        GetPhoneState(
+            [out] PhoneConstantsState* result);
+
+        GetServiceState(
+            [out] IServiceState** result);
+
+        /**
+         * Returns current signal strength in as an asu 0..31
+         *
+         * Throws RuntimeException if client has not called notifySignalStrength()
+         */
+        GetSignalStrengthLevelAsu(
+            [out] Int32* result);
+
+        /**
+         * Return current signal strength in "dBm", ranging from -113 - -51dBm
+         * or -1 if unknown
+         *
+         * @return signal strength in dBm, -1 if not yet updated
+         * Throws RuntimeException if client has not called notifySignalStrength()
+         */
+        GetSignalStrengthDbm(
+            [out] Int32* result);
+
+        NotifyPhoneCallState(
+            [in] Int32 eventWhat);
+
+        GetNotifyPhoneCallState(
+            [out] Boolean* result);
+
+        NotifyServiceState(
+            [in] Int32 eventWhat);
+
+        GetNotifyServiceState(
+            [out] Boolean* result);
+
+        NotifySignalStrength(
+            [in] Int32 eventWhat);
+
+        GetNotifySignalStrength(
+            [out] Boolean* result);
+
+        RegisterIntent();
+
+        UnregisterIntent();
+    }
+
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

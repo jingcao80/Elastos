@@ -6,6 +6,11 @@
 #include "elastos/droid/internal/telephony/CSubInfoRecordUpdater.h"
 #include "elastos/droid/internal/telephony/CSubscription.h"
 #include "elastos/droid/internal/telephony/CSubscriptionData.h"
+#include "elastos/droid/internal/telephony/CPhoneProxy.h"
+#include "elastos/droid/internal/telephony/CPhoneStateIntentReceiver.h"
+#include "elastos/droid/internal/telephony/CPhoneSubInfo.h"
+#include "elastos/droid/internal/telephony/CPhoneSubInfoController.h"
+#include "elastos/droid/internal/telephony/CPhoneSubInfoProxy.h"
 
 namespace Elastos {
 namespace Droid {
@@ -25,6 +30,16 @@ CAR_OBJECT_IMPL(CSubInfoRecordUpdater)
 CAR_OBJECT_IMPL(CSubscription)
 
 CAR_OBJECT_IMPL(CSubscriptionData)
+
+CAR_OBJECT_IMPL(CPhoneProxy)
+
+CAR_OBJECT_IMPL(CPhoneStateIntentReceiver)
+
+CAR_OBJECT_IMPL(CPhoneSubInfo)
+
+CAR_OBJECT_IMPL(CPhoneSubInfoController)
+
+CAR_OBJECT_IMPL(CPhoneSubInfoProxy)
 
 } // namespace Telephony
 } // namespace Internal
