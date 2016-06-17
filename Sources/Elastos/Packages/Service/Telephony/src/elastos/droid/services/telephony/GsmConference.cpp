@@ -1,5 +1,12 @@
 
 #include "elastos/droid/services/telephony/GsmConference.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
+using Elastos::Utility::IList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -35,7 +42,7 @@ ECode GsmConference::OnDisconnect()
             Logger::D("GsmConference", "Found multiparty call to hangup for conference.");
             //try {
             ECode ec = call->Hangup();
-            if (ec != (ECode)CallStateException) {
+            if (ec != (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
                 break;
             }
             //} catch (CallStateException e) {
@@ -51,12 +58,12 @@ ECode GsmConference::OnDisconnect()
 ECode GsmConference::OnSeparate(
     /* [in] */ IConnection* connection)
 {
-    AutoPtr<com.android.internal.telephony.Connection> radioConnection =
+    AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> radioConnection =
             GetOriginalConnection(connection, String("onSeparate"));
     //try {
     ECode ec = radioConnection->Separate();
     //} catch (CallStateException e) {
-    if (ec == (ECode)CallStateException) {
+    if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
         Logger::E("GsmConference", "%d Exception thrown trying to separate a conference call", ec);
     }
     //}
@@ -69,12 +76,13 @@ ECode GsmConference::OnMerge(
     //try {
     ECode ec = NOERROR;
     AutoPtr<IPhone> phone;
-    ITelephonyConnection::Probe(connection)->GetPhone((IPhone**)&phone);
+    assert(0);
+    //ITelephonyConnection::Probe(connection)->GetPhone((IPhone**)&phone);
     if (phone != NULL) {
         ec = phone->Conference();
     }
     //} catch (CallStateException e) {
-    if (ec == (ECode)CallStateException) {
+    if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
         Logger::E("GsmConference", "%d Exception thrown trying to merge call into a conference",ec);
     }
     return NOERROR;
@@ -84,7 +92,8 @@ ECode GsmConference::OnHold()
 {
     AutoPtr<IGsmConnection> connection = GetFirstConnection();
     if (connection != NULL) {
-        connection->PerformHold();
+        assert(0);
+        //IConnection::Probe(connection)->PerformHold();
     }
     return NOERROR;
 }
@@ -93,7 +102,8 @@ ECode GsmConference::OnUnhold()
 {
     AutoPtr<IGsmConnection> connection = GetFirstConnection();
     if (connection != NULL) {
-        connection->PerformUnhold();
+        assert(0);
+        //IConnection::Probe(connection)->PerformUnhold();
     }
     return NOERROR;
 }
@@ -103,7 +113,7 @@ ECode GsmConference::OnPlayDtmfTone(
 {
     AutoPtr<IGsmConnection> connection = GetFirstConnection();
     if (connection != NULL) {
-        connection->OnPlayDtmfTone(c);
+        IConnection::Probe(connection)->OnPlayDtmfTone(c);
     }
     return NOERROR;
 }
@@ -112,7 +122,7 @@ ECode GsmConference::OnStopDtmfTone()
 {
     AutoPtr<IGsmConnection> connection = GetFirstConnection();
     if (connection != NULL) {
-        connection->OnStopDtmfTone();
+        IConnection::Probe(connection)->OnStopDtmfTone();
     }
     return NOERROR;
 }
@@ -121,7 +131,7 @@ AutoPtr<ICall> GsmConference::GetMultipartyCallForConnection(
     /* [in] */ IConnection* connection,
     /* [in] */ const String& tag)
 {
-    AutoPtr<com.android.internal.telephony.Connection> radioConnection =
+    AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> radioConnection =
             GetOriginalConnection(connection, tag);
     if (radioConnection != NULL) {
         AutoPtr<ICall> call;
@@ -134,13 +144,15 @@ AutoPtr<ICall> GsmConference::GetMultipartyCallForConnection(
     return NULL;
 }
 
-AutoPtr<com.android.internal.telephony.Connection> GsmConference::GetOriginalConnection(
+AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> GsmConference::GetOriginalConnection(
     /* [in] */ IConnection* connection,
     /* [in] */ const String& tag)
 {
     if (IGsmConnection::Probe(connection) != NULL) {
-        AutoPtr<com.android.internal.telephony.Connection> tmp;
-        IGsmConnection::Probe(connection)->GetOriginalConnection(----tmp);
+        AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> tmp;
+        assert(0);
+        // IGsmConnection::Probe(connection)->GetOriginalConnection((
+        //         Elastos::Droid::Internal::Telephony::IConnection*)&tmp);
         return tmp;
     }
     else {

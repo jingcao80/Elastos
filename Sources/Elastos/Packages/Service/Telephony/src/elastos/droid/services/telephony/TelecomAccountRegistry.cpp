@@ -1,5 +1,50 @@
 
 #include "elastos/droid/services/telephony/TelecomAccountRegistry.h"
+#include "elastos/droid/services/telephony/PstnIncomingCallNotifier.h"
+#include "elastos/droid/services/telephony/CTelecomAccountRegistryBroadcastReceiver.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Net.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include "Elastos.CoreLibrary.Core.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/utility/Arrays.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Internal::Telephony::IPhoneSubInfo;
+using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Telecomm::Telecom::CPhoneAccountHandle;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecomm::Telecom::CTelecomManagerHelper;
+using Elastos::Droid::Telecomm::Telecom::ITelecomManagerHelper;
+using Elastos::Droid::Telecomm::Telecom::CPhoneAccountBuilder;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccountBuilder;
+using Elastos::Droid::Telephony::ISubInfoRecord;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Telephony::ITelephonyManagerHelper;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
+using Elastos::Droid::Telephony::ISubscriptionManager;
+using Elastos::Droid::Telephony::CSubscriptionManager;
+using Elastos::Core::CSystem;
+using Elastos::Core::ISystem;
+using Elastos::Core::StringUtils;
+using Elastos::Core::AutoLock;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::ICharSequence;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::CLinkedList;
+using Elastos::Utility::ILinkedList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -7,10 +52,12 @@ namespace Services {
 namespace Telephony {
 
 TelecomAccountRegistry::AccountEntry::AccountEntry(
+    /* [in] */ TelecomAccountRegistry* host,
     /* [in] */ IPhone* phone,
     /* [in] */ Boolean isEmergency,
     /* [in] */ Boolean isDummy)
-    : mPhone(phone)
+    : mHost(host)
+    , mPhone(phone)
 {
     mAccount = RegisterPstnPhoneAccount(isEmergency, isDummy);
     AutoPtr<IPhoneAccountHandle> handle;
@@ -22,7 +69,7 @@ TelecomAccountRegistry::AccountEntry::AccountEntry(
 
 ECode TelecomAccountRegistry::AccountEntry::Teardown()
 {
-    mIncomingCallNotifier->Teardown();
+    return mIncomingCallNotifier->Teardown();
 }
 
 ECode TelecomAccountRegistry::AccountEntry::GetPhoneAccountHandle(
@@ -54,7 +101,7 @@ AutoPtr<IPhoneAccount> TelecomAccountRegistry::AccountEntry::RegisterPstnPhoneAc
     mPhone->GetSubId(&subId);
     Int32 slotId = ISubscriptionManager::INVALID_SLOT_ID;
     String line1Number;
-    mTelephonyManager->GetLine1NumberForSubscriber(subId, &line1Number);
+    mHost->mTelephonyManager->GetLine1NumberForSubscriber(subId, &line1Number);
     if (line1Number.IsNull()) {
         line1Number = String("");
     }
@@ -72,42 +119,53 @@ AutoPtr<IPhoneAccount> TelecomAccountRegistry::AccountEntry::RegisterPstnPhoneAc
     Int32 count;
     if (isEmergency) {
         AutoPtr<IResources> resources;
-        mContext->GetResources((IResources**)&resources);
-        resources->GetString(R.string.sim_label_emergency_calls, &label);
+        mHost->mContext->GetResources((IResources**)&resources);
+        resources->GetString(Elastos::Droid::Server::Telephony::R::string::sim_label_emergency_calls, &label);
 
-        resources->GetString(R.string.sim_description_emergency_calls, &description);
+        resources->GetString(Elastos::Droid::Server::Telephony::R::string::sim_description_emergency_calls, &description);
     }
-    else if ((mTelephonyManager->GetPhoneCount(&count), count) == 1) {
+    else if ((mHost->mTelephonyManager->GetPhoneCount(&count), count) == 1) {
         // For single-SIM devices, we show the label and description as whatever the name of
         // the network is.
-        mTelephonyManager->GetNetworkOperatorName(&label);
+        mHost->mTelephonyManager->GetNetworkOperatorName(&label);
         description = label;
-    } else {
+    }
+    else {
         String subDisplayName;
         // We can only get the real slotId from the SubInfoRecord, we can't calculate the
         // slotId from the subId or the phoneId in all instances.
-        AutoPtr<ISubInfoRecord> record = SubscriptionManager::GetSubInfoForSubscriber(subId);
+        AutoPtr<ISubscriptionManager> helper;
+        CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&helper);
+        AutoPtr<ISubInfoRecord> record;
+        helper->GetSubInfoForSubscriber(subId, (ISubInfoRecord**)&record);
         if (record != NULL) {
-            subDisplayName = record.displayName;
-            slotId = record.slotId;
+            assert(0);
+            // subDisplayName = record.displayName;
+            // slotId = record.slotId;
         }
 
         String slotIdString;
-        if (SubscriptionManager::IsValidSlotId(slotId)) {
+        Boolean res;
+        helper->IsValidSlotId(slotId, &res);
+        if (helper->IsValidSlotId(slotId, &res), res) {
             slotIdString = StringUtils::ToString(slotId);
         }
         else {
             AutoPtr<IResources> resources;
-            mContext->GetResources((IResources**)&resources);
-            resources->GetString(R.string.unknown, &slotIdString);
+            mHost->mContext->GetResources((IResources**)&resources);
+            resources->GetString(Elastos::Droid::Server::Telephony::R::string::unknown, &slotIdString);
         }
 
         if (TextUtils::IsEmpty(subDisplayName)) {
             // Either the sub record is not there or it has an empty display name.
             Logger::W("TelecomAccountRegistry", "Could not get a display name for subid: %d", subId);
             AutoPtr<IResources> resources;
-            mContext->GetResources((IResources**)&resources);
-            resources->GetString(R.string.sim_description_default, slotIdString, &subDisplayName);
+            mHost->mContext->GetResources((IResources**)&resources);
+            AutoPtr<ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(1);
+            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(slotIdString);
+            formatArgs->Set(0, TO_IINTERFACE(cchar));
+            resources->GetString(Elastos::Droid::Server::Telephony::R::string::sim_description_default,
+                    formatArgs, &subDisplayName);
         }
 
         // The label is user-visible so let's use the display name that the user may
@@ -115,9 +173,13 @@ AutoPtr<IPhoneAccount> TelecomAccountRegistry::AccountEntry::RegisterPstnPhoneAc
         label = dummyPrefix + subDisplayName;
 
         AutoPtr<IResources> resources;
-        mContext->GetResources((IResources**)&resources);
+        mHost->mContext->GetResources((IResources**)&resources);
+        AutoPtr<ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(1);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(slotIdString);
+        formatArgs->Set(0, TO_IINTERFACE(cchar));
         String tmp;
-        resources->GetString(R.string.sim_description_default, slotIdString, &tmp);
+        resources->GetString(Elastos::Droid::Server::Telephony::R::string::sim_description_default,
+                formatArgs, &tmp);
         description = dummyPrefix + tmp;
     }
 
@@ -126,30 +188,36 @@ AutoPtr<IPhoneAccount> TelecomAccountRegistry::AccountEntry::RegisterPstnPhoneAc
             IPhoneAccount::CAPABILITY_CALL_PROVIDER |
             IPhoneAccount::CAPABILITY_PLACE_EMERGENCY_CALLS;
 
-    AutoPtr<IPhoneAccountbuilder> builder;
-    CPhoneAccountbuilder::New(phoneAccountHandle, label, (IPhoneAccountbuilder**)&builder);
+    AutoPtr<IPhoneAccountBuilder> builder;
+    CPhoneAccountBuilder::New(phoneAccountHandle, CoreUtils::Convert(label),
+            (IPhoneAccountBuilder**)&builder);
 
     AutoPtr<IUriHelper> helper;
     CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     AutoPtr<IUri> address;
-    helper->FromParts(IPhoneAccount::SCHEME_TEL, line1Number, NULL, (IUri**)&address);
+    helper->FromParts(IPhoneAccount::SCHEME_TEL, line1Number, String(NULL), (IUri**)&address);
     builder->SetAddress(address);
 
     AutoPtr<IUri> address2;
-    helper->FromParts(IPhoneAccount::SCHEME_TEL, subNumber, NULL, (IUri**)&address2);
+    helper->FromParts(IPhoneAccount::SCHEME_TEL, subNumber, String(NULL), (IUri**)&address2);
     builder->SetSubscriptionAddress(address2);
 
     builder->SetCapabilities(capabilities);
-    builder->SetIconResId(getPhoneAccountIcon(slotId));
-    builder->SetShortDescription(description);
+    builder->SetIconResId(mHost->GetPhoneAccountIcon(slotId));
+    builder->SetShortDescription(CoreUtils::Convert(description));
 
-    builder->SetSupportedUriSchemes(Arrays.asList(PhoneAccount.SCHEME_TEL, PhoneAccount.SCHEME_VOICEMAIL))
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(2);
+    array->Set(0, IPhoneAccount::SCHEME_TEL);
+    array->Set(1, IPhoneAccount::SCHEME_VOICEMAIL);
+    AutoPtr<IList> list;
+    Arrays::AsList(array, (IList**)&list);
+    builder->SetSupportedUriSchemes(list);
 
     AutoPtr<IPhoneAccount> account;
     builder->Build((IPhoneAccount**)&account);
 
     // Register with Telecom and put into the account entry.
-    mTelecomManager->RegisterPhoneAccount(account);
+    mHost->mTelecomManager->RegisterPhoneAccount(account);
     return account;
 }
 
@@ -158,11 +226,11 @@ ECode TelecomAccountRegistry::MyPhoneStateListener::OnServiceStateChanged(
 {
     Int32 newState;
     serviceState->GetState(&newState);
-    if (newState == IServiceState::STATE_IN_SERVICE && mServiceState != newState) {
-        TearDownAccounts();
-        SetupAccounts();
+    if (newState == IServiceState::STATE_IN_SERVICE && mHost->mServiceState != newState) {
+        mHost->TearDownAccounts();
+        mHost->SetupAccounts();
     }
-    mServiceState = newState;
+    mHost->mServiceState = newState;
     return NOERROR;
 }
 
@@ -182,7 +250,7 @@ ECode TelecomAccountRegistry::MyBroadcastReceiver::OnReceive(
     intent->GetAction(&action);
     if (ITelephonyIntents::ACTION_SUBINFO_RECORD_UPDATED.Equals(action)) {
         Int32 status;
-        intent->GetIntExtra(
+        intent->GetInt32Extra(
                 ISubscriptionManager::INTENT_KEY_DETECT_STATUS,
                 ISubscriptionManager::EXTRA_VALUE_NOCHANGE, &status);
         Logger::I("TelecomAccountRegistry", "SUBINFO_RECORD_UPDATED : %d.", status);
@@ -197,12 +265,12 @@ ECode TelecomAccountRegistry::MyBroadcastReceiver::OnReceive(
         String stringContent;
         intent->GetStringExtra(ITelephonyIntents::EXTRA_STRING_CONTENT, &stringContent);
         Logger::V("TelecomAccountRegistry", "SUBINFO_CONTENT_CHANGE: Column: %s Content: %s",
-                columnName.tostring(), stringContent.tostring());
+                columnName.string(), stringContent.string());
         rebuildAccounts = TRUE;
     }
     if (rebuildAccounts) {
-        TearDownAccounts();
-        SetupAccounts();
+        mHost->TearDownAccounts();
+        mHost->SetupAccounts();
     }
     return NOERROR;
 }
@@ -213,10 +281,10 @@ static AutoPtr<ArrayOf<Int32> > initsPhoneAccountIcons()
 {
     AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(4);
 
-    (*array)[0] = R.drawable.ic_multi_sim1;
-    (*array)[1] = R.drawable.ic_multi_sim2;
-    (*array)[2] = R.drawable.ic_multi_sim3;
-    (*array)[3] = R.drawable.ic_multi_sim4;
+    (*array)[0] = Elastos::Droid::Server::Telephony::R::drawable::ic_multi_sim1;
+    (*array)[1] = Elastos::Droid::Server::Telephony::R::drawable::ic_multi_sim2;
+    (*array)[2] = Elastos::Droid::Server::Telephony::R::drawable::ic_multi_sim3;
+    (*array)[3] = Elastos::Droid::Server::Telephony::R::drawable::ic_multi_sim4;
     return array;
 }
 
@@ -224,18 +292,21 @@ const AutoPtr<ArrayOf<Int32> > TelecomAccountRegistry::sPhoneAccountIcons = init
 
 // This icon is the one that is used when the Slot ID that we have for a particular SIM
 // is not supported, i.e. SubscriptionManager.INVALID_SLOT_ID or the 5th SIM in a phone.
-const Int32 TelecomAccountRegistry::defaultPhoneAccountIcon = R.drawable.ic_multi_sim;
+const Int32 TelecomAccountRegistry::defaultPhoneAccountIcon =
+        Elastos::Droid::Server::Telephony::R::drawable::ic_multi_sim;
 
-AutoPtr<ITelecomAccountRegistry> TelecomAccountRegistry::sInstance;
+AutoPtr<TelecomAccountRegistry> TelecomAccountRegistry::sInstance;
+
+Object TelecomAccountRegistry::sLock;
 
 CAR_INTERFACE_IMPL(TelecomAccountRegistry, Object, ITelecomAccountRegistry)
 
 TelecomAccountRegistry::TelecomAccountRegistry(
     /* [in] */ IContext* context)
     : mContext(context)
-    , mServiceState(IServiceState_STATE_POWER_OFF)
+    , mServiceState(IServiceState::STATE_POWER_OFF)
 {
-    CTelecomAccountRegistryBroadcastReceiver::New((IBroadcastReceiver**)&mReceiver);
+    CTelecomAccountRegistryBroadcastReceiver::New(this, (IBroadcastReceiver**)&mReceiver);
 
     AutoPtr<IPhoneStateListener> mPhoneStateListener = new MyPhoneStateListener(this);
 
@@ -246,15 +317,15 @@ TelecomAccountRegistry::TelecomAccountRegistry(
     helper->From(context, (ITelecomManager**)&mTelecomManager);
 
     AutoPtr<ITelephonyManagerHelper> helper2;
-    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
-    helper->From(context, (ITelephonyManager**)&mTelephonyManager);
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper2);
+    helper2->From(context, (ITelephonyManager**)&mTelephonyManager);
 }
 
 AutoPtr<TelecomAccountRegistry> TelecomAccountRegistry::GetInstance(
     /* [in] */ IContext* context)
 {
     {
-        AutoLock syncLock(this);
+        AutoLock syncLock(sLock);
         if (sInstance == NULL) {
             sInstance = new TelecomAccountRegistry(context);
         }
@@ -270,7 +341,9 @@ ECode TelecomAccountRegistry::SetupOnBoot()
     CIntentFilter::New((IIntentFilter**)&intentFilter);
     intentFilter->AddAction(ITelephonyIntents::ACTION_SUBINFO_RECORD_UPDATED);
     intentFilter->AddAction(ITelephonyIntents::ACTION_SUBINFO_CONTENT_CHANGE);
-    mContext->RegisterReceiver(mReceiver, intentFilter);
+
+    AutoPtr<IIntent> tmp;
+    mContext->RegisterReceiver(mReceiver, intentFilter, (IIntent**)&tmp);
 
     // We also need to listen for changes to the service state (e.g. emergency -> in service)
     // because this could signal a removal or addition of a SIM in a single SIM phone.
@@ -280,7 +353,7 @@ ECode TelecomAccountRegistry::SetupOnBoot()
 AutoPtr<IPhoneAccountHandle> TelecomAccountRegistry::MakePstnPhoneAccountHandle(
     /* [in] */ IPhone* phone)
 {
-    return MakePstnPhoneAccountHandleWithPrefix(phone, Srting(""), FALSE);
+    return MakePstnPhoneAccountHandleWithPrefix(phone, String(""), FALSE);
 }
 
 AutoPtr<IPhoneAccountHandle> TelecomAccountRegistry::MakePstnPhoneAccountHandleWithPrefix(
@@ -291,7 +364,8 @@ AutoPtr<IPhoneAccountHandle> TelecomAccountRegistry::MakePstnPhoneAccountHandleW
     AutoPtr<IComponentName> pstnConnectionServiceName;
     AutoPtr<IContext> context;
     phone->GetContext((IContext**)&context);
-    CComponentName::New(context, TelephonyConnectionService.class);
+    assert(0);
+    //CComponentName::New(context, TelephonyConnectionService.class);
     // TODO: Should use some sort of special hidden flag to decorate this account as
     // an emergency-only account
     String id;
@@ -301,13 +375,14 @@ AutoPtr<IPhoneAccountHandle> TelecomAccountRegistry::MakePstnPhoneAccountHandleW
     else {
         StringBuilder sb;
         sb += prefix;
-        Int32 _id;
+        Int64 _id;
         phone->GetSubId(&_id);
         sb += _id;
         sb.ToString(&id);
     }
 
-    AutoPtr<IPhoneAccountHandle> handle = new PhoneAccountHandle(pstnConnectionServiceName, id);
+    AutoPtr<IPhoneAccountHandle> handle;
+    CPhoneAccountHandle::New(pstnConnectionServiceName, id, (IPhoneAccountHandle**)&handle);
     return handle;
 }
 
@@ -315,16 +390,16 @@ Boolean TelecomAccountRegistry::HasAccountEntryForPhoneAccount(
     /* [in] */ IPhoneAccountHandle* handle)
 {
     Int32 size;
-    mAccounts->GetSise(&size);
+    mAccounts->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mAccounts->Get(i, (IInterface**)&obj);
-        AutoPtr<IAccountEntry> entry = IAccountEntry::Probe(obj);
+        AutoPtr<AccountEntry> entry = (AccountEntry*)IObject::Probe(obj);
 
         AutoPtr<IPhoneAccountHandle> _handle;
         entry->GetPhoneAccountHandle((IPhoneAccountHandle**)&_handle);
         Boolean res;
-        if (IObject::Probe(_handle)>Equals(handle, &res), res) {
+        if (IObject::Probe(_handle)->Equals(handle, &res), res) {
             return TRUE;
         }
     }
@@ -334,12 +409,13 @@ Boolean TelecomAccountRegistry::HasAccountEntryForPhoneAccount(
 void TelecomAccountRegistry::CleanupPhoneAccounts()
 {
     AutoPtr<IComponentName> telephonyComponentName;
-    CComponentName::New(mContext, TelephonyConnectionService.class, (IComponentName**)&telephonyComponentName);
+    assert(0);
+    //CComponentName::New(mContext, TelephonyConnectionService.class, (IComponentName**)&telephonyComponentName);
     AutoPtr<IList> accountHandles;
     mTelecomManager->GetAllPhoneAccountHandles((IList**)&accountHandles);
 
     Int32 size;
-    accountHandles->GetSise(&size);
+    accountHandles->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         accountHandles->Get(i, (IInterface**)&obj);
@@ -360,8 +436,9 @@ void TelecomAccountRegistry::SetupAccounts()
 {
     // Go through SIM-based phones and register ourselves -- registering an existing account
     // will cause the existing entry to be replaced.
-    AutoPtr<ArrayOf<IPhone> > phones;
-    PhoneFactory::GetPhones((ArrayOf<IPhone>**)&phones);
+    AutoPtr<ArrayOf<IPhone*> > phones;
+    assert(0);
+    //PhoneFactory::GetPhones((ArrayOf<IPhone>**)&phones);
     Logger::D("TelecomAccountRegistry", "Found %d phones.  Attempting to register.", phones->GetLength());
 
     for (Int32 i = 0; i < phones->GetLength(); i++) {
@@ -371,7 +448,8 @@ void TelecomAccountRegistry::SetupAccounts()
         phone->GetSubId(&subscriptionId);
         Logger::D("TelecomAccountRegistry", "Phone with subscription id %d", subscriptionId);
         if (subscriptionId >= 0) {
-            AutoPtr<IAccountEntry> entry = new AccountEntry(phone, FALSE /* emergency */, FALSE /* isDummy */)
+            AutoPtr<AccountEntry> entry = new AccountEntry(this, phone, FALSE /* emergency */,
+                    FALSE /* isDummy */);
             mAccounts->Add(TO_IINTERFACE(entry));
         }
 
@@ -383,15 +461,21 @@ void TelecomAccountRegistry::SetupAccounts()
     Boolean res;
     if (mAccounts->IsEmpty(&res), res) {
         AutoPtr<IPhone> phone;
-        PhoneFactory::GetDefaultPhone((IPhone**)&phone);
-        AutoPtr<IAccountEntry> entry = new AccountEntry(phone, TRUE /* emergency */,
-                FALSE /* isDummy */)
+        assert(0);
+        //PhoneFactory::GetDefaultPhone((IPhone**)&phone);
+        AutoPtr<AccountEntry> entry = new AccountEntry(this, phone, TRUE /* emergency */,
+                FALSE /* isDummy */);
         mAccounts->Add(TO_IINTERFACE(entry));
     }
 
     // Add a fake account entry.
-    if (DBG && phones->GetLength() > 0 && String("TRUE").Equals(System.getProperty("dummy_sim"))) {
-        AutoPtr<IAccountEntry> entry = new AccountEntry((*phones)[0], FALSE /* emergency */, TRUE /* isDummy */);
+    AutoPtr<ISystem> helper;
+    CSystem::AcquireSingleton((ISystem**)&helper);
+    String value;
+    helper->GetProperty(String("dummy_sim"), &value);
+    if (DBG && phones->GetLength() > 0 && String("TRUE").Equals(value)) {
+        AutoPtr<AccountEntry> entry = new AccountEntry(this, (*phones)[0], FALSE /* emergency */,
+                TRUE /* isDummy */);
         mAccounts->Add(TO_IINTERFACE(entry));
     }
 
@@ -403,10 +487,12 @@ Int32 TelecomAccountRegistry::GetPhoneAccountIcon(
     /* [in] */ Int32 index)
 {
     // A valid slot id doesn't necessarily mean that we have an icon for it.
+    AutoPtr<ISubscriptionManager> helper;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&helper);
     Boolean res;
-    if (SubscriptionManager::IsValidSlotId(index) &&
-            index < TelecomAccountRegistry.phoneAccountIcons.length) {
-        return TelecomAccountRegistry.phoneAccountIcons[index];
+    if ((helper->IsValidSlotId(index, &res), res) &&
+            index < sPhoneAccountIcons->GetLength()) {
+        return (*sPhoneAccountIcons)[index];
     }
     // Invalid indices get the default icon that has no number associated with it.
     return defaultPhoneAccountIcon;
@@ -415,12 +501,11 @@ Int32 TelecomAccountRegistry::GetPhoneAccountIcon(
 void TelecomAccountRegistry::TearDownAccounts()
 {
     Int32 size;
-    mAccounts->GetSise(&size);
+    mAccounts->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mAccounts->Get(i, (IInterface**)&obj);
-        AutoPtr<IAccountEntry> entry = IAccountEntry::Probe(obj);
-
+        AutoPtr<AccountEntry> entry = (AccountEntry*)IObject::Probe(obj);
         entry->Teardown();
 
     }

@@ -1,5 +1,20 @@
 
 #include "elastos/droid/services/telephony/GsmConferenceController.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Telecomm::Telecom::IConnectionService;
+using Elastos::Droid::Internal::Telephony::ICall;
+using Elastos::Droid::Internal::Telephony::ICallState;
+using Elastos::Droid::Internal::Telephony::ICallState_ACTIVE;
+using Elastos::Droid::Internal::Telephony::ICallState_HOLDING;
+using Elastos::Droid::Internal::Telephony::EIID_IConnectionListener;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::ICollections;
+using Elastos::Utility::CCollections;
+using Elastos::Utility::ISet;
+using Elastos::Utility::CHashSet;
 
 namespace Elastos {
 namespace Droid {
@@ -44,7 +59,7 @@ ECode GsmConferenceController::Add(
     /* [in] */ IGsmConnection* connection)
 {
     mGsmConnections->Add(connection);
-    connection->AddConnectionListener(mConnectionListener);
+    IConnection::Probe(connection)->AddConnectionListener(mConnectionListener);
     Recalculate();
     return NOERROR;
 }
@@ -52,7 +67,7 @@ ECode GsmConferenceController::Add(
 ECode GsmConferenceController::Remove(
     /* [in] */ IGsmConnection* connection)
 {
-    connection->RemoveConnectionListener(mConnectionListener);
+    IConnection::Probe(connection)->RemoveConnectionListener(mConnectionListener);
     mGsmConnections->Remove(connection);
     Recalculate();
     return NOERROR;
@@ -78,7 +93,7 @@ Boolean GsmConferenceController::ParticipatesInFullConference(
     /* [in] */ IConnection* connection)
 {
     AutoPtr<IConference> conference;
-    connection->GetConference((IConference**)&conference);
+    IConnection::Probe(connection)->GetConference((IConference**)&conference);
     return  conference != NULL && IsFullConference(conference);
 }
 
@@ -99,11 +114,12 @@ void GsmConferenceController::RecalculateConferenceable()
         mGsmConnections->Get(i, (IInterface**)&obj);
         AutoPtr<IGsmConnection> connection = IGsmConnection::Probe(obj);
 
-        Logger::D("GsmConferenceController", "recalc - %s %s", connection.getState(), TO_CSTR(connection));
+        Int32 state;
+        IConnection::Probe(connection)->GetState(&state);
+        Logger::D("GsmConferenceController", "recalc - %d %s", state, TO_CSTR(connection));
 
-        if (!ParticipatesInFullConference(connection)) {
-
-            switch (connection.getState()) {
+        if (!ParticipatesInFullConference(IConnection::Probe(connection))) {
+            switch (state) {
                 case IConnection::STATE_ACTIVE:
                     activeConnections->Add(TO_IINTERFACE(connection));
                     continue;
@@ -115,32 +131,34 @@ void GsmConferenceController::RecalculateConferenceable()
             }
         }
 
-        connection->SetConferenceableConnections(Collections.<Connection>emptyList());
+        AutoPtr<ICollections> helper;
+        CCollections::AcquireSingleton((ICollections**)&helper);
+        AutoPtr<IList> list;
+        helper->GetEmptyList((IList**)&list);
+        IConnection::Probe(connection)->SetConferenceableConnections(list);
     }
 
-    Int32 tmp, tmp2;
+    Int32  aSize, bSize;
     Logger::V("GsmConferenceController", "active: %d, holding: %d",
-            (activeConnections->GetSize(&tmp), tmp),
-            (backgroundConnections->GetSize(&tmp2), tmp2));
+            (activeConnections->GetSize(&aSize), aSize),
+            (backgroundConnections->GetSize(&bSize), bSize));
 
     // Go through all the active connections and set the background connections as
     // conferenceable.
-    for (Int32 i = 0; i < tmp; i++) {
+    for (Int32 i = 0; i < aSize; i++) {
         AutoPtr<IInterface> obj;
         activeConnections->Get(i, (IInterface**)&obj);
-        AutoPtr<IConnectionn> connection = IConnectionn::Probe(obj);
+        AutoPtr<IConnection> connection = IConnection::Probe(obj);
 
         connection->SetConferenceableConnections(backgroundConnections);
-
-
     }
 
     // Go through all the background connections and set the active connections as
     // conferenceable.
-    for (Int32 i = 0; i < tmp2; i++) {
+    for (Int32 i = 0; i < bSize; i++) {
         AutoPtr<IInterface> obj;
         backgroundConnections->Get(i, (IInterface**)&obj);
-        AutoPtr<IConnectionn> connection = IConnectionn::Probe(obj);
+        AutoPtr<IConnection> connection = IConnection::Probe(obj);
 
         connection->SetConferenceableConnections(activeConnections);
     }
@@ -158,7 +176,7 @@ void GsmConferenceController::RecalculateConferenceable()
             AutoPtr<IGsmConnection> c = IGsmConnection::Probe(obj);
 
             AutoPtr<IConference> conference;
-            c->GetConference((IConference**)&conference);
+            IConnection::Probe(c)->GetConference((IConference**)&conference);
             if (conference == NULL) {
                 nonConferencedConnections->Add(TO_IINTERFACE(c));
             }
@@ -182,11 +200,14 @@ void GsmConferenceController::RecalculateConference()
         mGsmConnections->Get(i, (IInterface**)&obj);
         AutoPtr<IGsmConnection> connection = IGsmConnection::Probe(obj);
 
-        com.android.internal.telephony.Connection radioConnection =
-            connection.getOriginalConnection();
+        AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> radioConnection;
+        assert(0);
+        // ITelephonyConnection::Probe(connection)->GetOriginalConnection(
+        //         (Elastos::Droid::Internal::Telephony::IConnection**)&radioConnection);
 
         if (radioConnection != NULL) {
-            ICallState state = radioConnection.getState();
+            ICallState state;
+            radioConnection->GetState(&state);
             AutoPtr<ICall> call;
             radioConnection->GetCall((ICall**)&call);
             Boolean res;
@@ -201,66 +222,63 @@ void GsmConferenceController::RecalculateConference()
     Logger::D("GsmConferenceController", "Recalculate conference calls %s %s.",
             TO_CSTR(mGsmConference), TO_CSTR(conferencedConnections));
 
-
     if ((conferencedConnections->GetSize(&size), size) < 2) {
         Logger::D("GsmConferenceController", "less than two conference calls!");
         // No more connections are conferenced, destroy any existing conference.
-        if (mGsmConference != null) {
+        if (mGsmConference != NULL) {
             Logger::D("GsmConferenceController", "with a conference to destroy!");
             mGsmConference->Destroy();
             mGsmConference = NULL;
         }
-    } else {
+    }
+    else {
         if (mGsmConference != NULL) {
             AutoPtr<IList> existingConnections;
             mGsmConference->GetConnections((IList**)&existingConnections);
             // Remove any that no longer exist
 
-            Int32 tmp;
-            existingConnections->GetSize(&tmp);
-            for (Int32 i = 0; i < tmp; i++) {
+            Int32 size;
+            existingConnections->GetSize(&size);
+            for (Int32 i = 0; i < size; i++) {
                 AutoPtr<IInterface> obj;
                 existingConnections->Get(i, (IInterface**)&obj);
-                AutoPtr<IConnectionn> connection = IConnectionn::Probe(obj);
+                AutoPtr<IConnection> connection = IConnection::Probe(obj);
 
                 Boolean res;
                 if (conferencedConnections->Contains(TO_IINTERFACE(connection), &res), !res) {
-                    mGsmConference->RemoveConnection(TO_IINTERFACE(connection));
+                    mGsmConference->RemoveConnection(connection);
                 }
 
             }
 
             // Add any new ones
-            Int32 tmp2;
-            conferencedConnections->GetSize(&tmp2);
-            for (Int32 i = 0; i < tmp2; i++) {
-                AutoPtr<IInterface> obj;
-                conferencedConnections->Get(i, (IInterface**)&obj);
-                AutoPtr<IConnectionn> connection = IConnectionn::Probe(obj);
+            AutoPtr<ArrayOf<IInterface*> > array;
+            conferencedConnections->ToArray((ArrayOf<IInterface*>**)&array);
+            for (Int32 i = 0; i < array->GetLength(); i++) {
+                AutoPtr<IConnection> connection = IConnection::Probe((*array)[i]);
 
                 Boolean res;
                 if (existingConnections->Contains(TO_IINTERFACE(connection), &res), !res) {
-                    mGsmConference->AddConnection(TO_IINTERFACE(connection));
+                    mGsmConference->AddConnection(connection, &res);
                 }
-
-
             }
         }
         else {
-            mGsmConference = new GsmConference(NULL);
-            Int32 size;
-            conferencedConnections->GetSize(&size);
-            for (Int32 i = 0; i < size; i++) {
-                AutoPtr<IInterface> obj;
-                conferencedConnections->Get(i, (IInterface**)&obj);
-                AutoPtr<IConnectionn> connection = IConnectionn::Probe(obj);
+            assert(0);
+            //mGsmConference = new GsmConference(NULL);
+
+            AutoPtr<ArrayOf<IInterface*> > array;
+            conferencedConnections->ToArray((ArrayOf<IInterface*>**)&array);
+            for (Int32 i = 0; i < array->GetLength(); i++) {
+                AutoPtr<IConnection> connection = IConnection::Probe((*array)[i]);
 
                 Logger::D("GsmConferenceController", "Adding a connection to a conference call: %s %s",
                         TO_CSTR(mGsmConference), TO_CSTR(connection));
-                mGsmConference->AddConnection(TO_IINTERFACE(connection));
+                Boolean res;
+                mGsmConference->AddConnection(connection, &res);
 
             }
-            mConnectionService->AddConference(TO_IINTERFACE(mGsmConference));
+            IConnectionService::Probe(mConnectionService)->AddConference(mGsmConference);
         }
 
         // Set the conference state to the same state as its child connections.

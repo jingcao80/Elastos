@@ -1,9 +1,11 @@
 module
 {
+    using interface Elastos.Droid.Internal.Telephony.IPhone;
+
     namespace Elastos {
     namespace Droid {
-    namespace Telephony {
     namespace Services {
+    namespace Telephony {
 
     /**
      * Receives the result of the EmergencyCallHelper's attempt to turn on the radio.
@@ -17,10 +19,29 @@ module
         // Number of times to retry the call, and time between retry attempts.
         const Int32 MAX_NUM_RETRIES = 5;
         const Int64 TIME_BETWEEN_RETRIES_MILLIS = 5000;  // msec
+
+        /**
+         * Starts the "turn on radio" sequence. This is the (single) external API of the
+         * EmergencyCallHelper class.
+         *
+         * This method kicks off the following sequence:
+         * - Power on the radio.
+         * - Listen for the service state change event telling us the radio has come up.
+         * - Retry if we've gone {@link #TIME_BETWEEN_RETRIES_MILLIS} without any response from the
+         *   radio.
+         * - Finally, clean up any leftover state.
+         *
+         * This method is safe to call from any thread, since it simply posts a message to the
+         * EmergencyCallHelper's handler (thus ensuring that the rest of the sequence is entirely
+         * serialized, and runs only on the handler thread.)
+         */
+        StartTurnOnRadioSequence(
+            [in] IPhone* phone,
+            [in] IEmergencyCallHelperCallback* _callback);
     }
 
-    } // namespace Services
     } // namespace Telephony
+    } // namespace Services
     } // namespace Droid
     } // namespace Elastos
 }

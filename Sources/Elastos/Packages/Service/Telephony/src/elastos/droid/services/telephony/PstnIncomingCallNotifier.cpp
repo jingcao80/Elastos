@@ -7,11 +7,6 @@
 #include "Elastos.Droid.Telephony.h"
 #include <elastos/utility/logging/Logger.h>
 
-
-
-
-
-
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Telecomm::Telecom::ITelecomManager;

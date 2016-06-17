@@ -3,6 +3,18 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Media.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Os::IVibrator;
+using Elastos::Droid::Media::IAudioAttributes;
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Media::IToneGenerator;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -16,7 +28,7 @@ class EmergencyTonePlayer
     : public Object
 {
 public:
-    TO_STRING_IMPL("EmergencyTonePlayer")
+    TO_STRING_IMPL("EmergencyTonePlayer");
 
     EmergencyTonePlayer(
         /* [in] */ IContext* context);
@@ -36,6 +48,7 @@ private:
 
     CARAPI_(Int32) GetToneSetting();
 
+    static CARAPI_(AutoPtr<ArrayOf<Int64> >) initVIBRATE_PATTERN();
 
 private:
     static const Int32 EMERGENCY_TONE_OFF;

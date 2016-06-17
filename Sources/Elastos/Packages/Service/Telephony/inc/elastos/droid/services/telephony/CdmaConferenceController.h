@@ -2,7 +2,16 @@
 #define  __ELASTOS_DROID_SERVICES_TELEPHONY_CDMACONFERENCECONTROLLER_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
+#include "elastos/droid/telecomm/telecom/Conference.h"
+#include "elastos/droid/services/telephony/CdmaConnection.h"
+#include "Elastos.Droid.Telecomm.h"
 #include "elastos/droid/ext/frameworkext.h"
+
+using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
+using Elastos::Droid::Telecomm::Telecom::Connection;
+using Elastos::Droid::Telecomm::Telecom::Conference;
+using Elastos::Droid::Telecomm::Telecom::IConnection;
+using Elastos::Droid::Telecomm::Telecom::IConnectionListener;
 
 namespace Elastos {
 namespace Droid {
@@ -35,8 +44,7 @@ class CdmaConferenceController
 {
 private:
     class MyConnectionListener
-        : public Object
-        , public IConnectionListener
+        : public Connection::Listener
     {
     public:
         TO_STRING_IMPL("CdmaConferenceController::MyConnectionListener")
@@ -72,7 +80,7 @@ private:
 
         MyRunnable(
             /* [in] */ CdmaConferenceController* host,
-            /* [in] */ ICdmaConnection* connection,
+            /* [in] */ CdmaConnection* connection,
             /* [in] */ IList* connectionsToReset)
             : mHost(host)
         {}
@@ -81,7 +89,7 @@ private:
 
     private:
         CdmaConferenceController* mHost;
-        AutOpTR<ICdmaConnection> mConnection;
+        AutOpTR<CdmaConnection> mConnection;
         AutOpTR<IList> mConnectionsToReset;
     };
 
@@ -92,14 +100,14 @@ public:
         /* [in] */ ITelephonyConnectionService* connectionService);
 
     CARAPI Add(
-        /* [in] */ ICdmaConnection* connection);
+        /* [in] */ CdmaConnection* connection);
 
 private:
     CARAPI_(void) AddInternal(
-        /* [in] */ ICdmaConnection* connection);
+        /* [in] */ CdmaConnection* connection);
 
     CARAPI_(void) Remove(
-        /* [in] */ ICdmaConnection* connection);
+        /* [in] */ CdmaConnection* connection);
 
     CARAPI_(void) RecalculateConference();
 

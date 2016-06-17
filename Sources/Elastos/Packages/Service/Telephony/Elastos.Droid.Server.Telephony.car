@@ -7,9 +7,12 @@ module
 
     //merge("car/elastos/droid/phone/AccountSelection.car");
 
-
     merge("car/elastos/droid/services/telephony/TtyManager.car");
     merge("car/elastos/droid/services/telephony/PstnIncomingCallNotifier.car");
+    merge("car/elastos/droid/services/telephony/TelecomAccountRegistry.car");
+    merge("car/elastos/droid/services/telephony/EmergencyCallHelper.car");
+    merge("car/elastos/droid/services/telephony/GsmConnection.car");
+    merge("car/elastos/droid/services/telephony/TelephonyConnectionService.car");
 
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IApplication;
@@ -92,6 +95,13 @@ module
     class CPstnIncomingCallNotifierBroadcastReceiver {
         constructor(
             [in] IPstnIncomingCallNotifier* host);
+
+        interface IBroadcastReceiver;
+    }
+
+    class CTelecomAccountRegistryBroadcastReceiver {
+        constructor(
+            [in] ITelecomAccountRegistry* host);
 
         interface IBroadcastReceiver;
     }

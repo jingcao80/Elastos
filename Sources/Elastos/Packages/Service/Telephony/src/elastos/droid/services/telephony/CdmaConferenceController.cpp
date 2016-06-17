@@ -25,7 +25,7 @@ ECode CdmaConferenceController::MyConnectionListener::OnDisconnected(
 ECode CdmaConferenceController::MyConnectionListener::OnDestroyed(
     /* [in] */ IConnection* c)
 {
-    AutoPtr<ICdmaConnection> c = ICdmaConnection::Probe(c);
+    AutoPtr<CdmaConnection> c = (CdmaConnection*)IObject::Probe(c);
     mHost->Remove(TO_IINTERFACE(c));
     return NOERROR;
 }
@@ -40,7 +40,7 @@ ECode MyRunnable::Run()
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mConnectionsToReset->Get(i, (IInterface**)&obj);
-        AutoPtr<ICdmaConnection> current = ICdmaConnection::Probe(obj);
+        AutoPtr<CdmaConnection> current = (CdmaConnection*)IObject::Probe(obj);
 
         current->ResetStateForConference();
     }
@@ -63,7 +63,7 @@ CdmaConferenceController::CdmaConferenceController(
 }
 
 ECode CdmaConferenceController::Add(
-    /* [in] */ ICdmaConnection* connection)
+    /* [in] */ CdmaConnection* connection)
 {
     Boolean res1,res2;
     if ((mCdmaConnections->IsEmpty(&res1), !res1) &&
@@ -83,7 +83,7 @@ ECode CdmaConferenceController::Add(
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             mCdmaConnections->Get(i, (IInterface**)&obj);
-            AutoPtr<ICdmaConnection> current = ICdmaConnection::Probe(obj);
+            AutoPtr<CdmaConnection> current = (CdmaConnection*)IObject::Probe(obj);
 
             Boolean res;
             if (current->SetHoldingForConference(&res), res) {
@@ -102,7 +102,7 @@ ECode CdmaConferenceController::Add(
 }
 
 void CdmaConferenceController::AddInternal(
-    /* [in] */ ICdmaConnection* connection)
+    /* [in] */ CdmaConnection* connection)
 {
     mCdmaConnections->Add(TO_IINTERFACE(connection));
     connection->AddConnectionListener(mConnectionListener);
@@ -110,7 +110,7 @@ void CdmaConferenceController::AddInternal(
 }
 
 void CdmaConferenceController::Remove(
-    /* [in] */ ICdmaConnection* connection)
+    /* [in] */ CdmaConnection* connection)
 {
     connection->removeConnectionListener(mConnectionListener);
     mCdmaConnections->remove(TO_IINTERFACE(connection));
@@ -126,7 +126,7 @@ void CdmaConferenceController::RecalculateConference()
     for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             mCdmaConnections->Get(i, (IInterface**)&obj);
-            AutoPtr<ICdmaConnection> connection = ICdmaConnection::Probe(obj);
+            AutoPtr<CdmaConnection> connection = (CdmaConnection*)IObject::Probe(obj);
 
              // We do not include call-waiting calls in conferences.
             Boolean res;
@@ -150,7 +150,7 @@ void CdmaConferenceController::RecalculateConference()
             AutoPtr<IInterface> obj;
             Int32 _size;
             mCdmaConnections->Get((mCdmaConnections->GetSize(&_size), _size) - 1, (IInterface**)&obj);
-            AutoPtr<ICdmaConnection> newConnection = ICdmaConnection::Probe(obj);
+            AutoPtr<CdmaConnection> newConnection = (CdmaConnection*)IObject::Probe(obj);
 
             Boolean res;
             if (newConnection->IsOutgoing(&res), res) {
@@ -174,7 +174,7 @@ void CdmaConferenceController::RecalculateConference()
         for (Int32 = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             conferenceConnections->Get(i, (IInterface**)&obj);
-            AutoPtr<ICdmaConnection> connection = ICdmaConnection::Probe(obj);
+            AutoPtr<CdmaConnection> connection = (CdmaConnection*)IObject::Probe(obj);
 
             Boolean res;
             if (existingChildConnections->Contains(TO_IINTERFACE(connection), &res), !res) {

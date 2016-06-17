@@ -1,5 +1,24 @@
 
 #include "elastos/droid/services/telephony/EmergencyCallHelper.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Provider.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Internal::Os::ISomeArgs;
+using Elastos::Droid::Internal::Os::CSomeArgsHelper;
+using Elastos::Droid::Internal::Os::ISomeArgsHelper;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState_OFFHOOK;
+using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -25,19 +44,31 @@ ECode EmergencyCallHelper::MyHandler::HandleMessage(
             msg->GetObj((IInterface**)&obj);
             AutoPtr<ISomeArgs> args = ISomeArgs::Probe(obj);
 
-            AutoPtr<IPhone> phone = (Phone) args.arg1;
-            EmergencyCallHelper.Callback callback =
-                    (EmergencyCallHelper.Callback) args.arg2;
+            AutoPtr<IInterface> obj2;
+            args->GetObjectArg(1, (IInterface**)&obj2);
+            AutoPtr<IPhone> phone = IPhone::Probe(obj2);
+
+            AutoPtr<IInterface> obj3;
+            args->GetObjectArg(2, (IInterface**)&obj3);
+            AutoPtr<IEmergencyCallHelperCallback> _callback =
+                    IEmergencyCallHelperCallback::Probe(obj3);
+
             args->Recycle();
 
-            StartSequenceInternal(phone, callback);
+            mHost->StartSequenceInternal(phone, _callback);
             break;
         }
         case MSG_SERVICE_STATE_CHANGED:
-            OnServiceStateChanged((ServiceState) ((AsyncResult) msg.obj).result);
+        {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<AsyncResult> args = (AsyncResult*)IObject::Probe(obj);
+
+            mHost->OnServiceStateChanged(IServiceState::Probe(args->mResult));
             break;
+        }
         case MSG_RETRY_TIMEOUT:
-            OnRetryTimeout();
+            mHost->OnRetryTimeout();
             break;
         default:
             Logger::W("EmergencyCallHelper", "handleMessage: unexpected message: %d.", what);
@@ -45,10 +76,6 @@ ECode EmergencyCallHelper::MyHandler::HandleMessage(
     }
     return NOERROR;
 }
-
-const Int32 EmergencyCallHelper::MSG_START_SEQUENCE = 1;
-const Int32 EmergencyCallHelper::MSG_SERVICE_STATE_CHANGED = 2;
-const Int32 EmergencyCallHelper::MSG_RETRY_TIMEOUT = 3;
 
 CAR_INTERFACE_IMPL(EmergencyCallHelper, Object, IEmergencyCallHelper)
 
@@ -69,12 +96,15 @@ ECode EmergencyCallHelper::StartTurnOnRadioSequence(
 {
     Logger::D("EmergencyCallHelper", "startTurnOnRadioSequence");
 
-    SomeArgs args = SomeArgs.obtain();
-    args.arg1 = phone;
-    args.arg2 = callback;
+    AutoPtr<ISomeArgsHelper> helper;
+    CSomeArgsHelper::AcquireSingleton((ISomeArgsHelper**)&helper);
+    AutoPtr<ISomeArgs> args;
+    helper->Obtain((ISomeArgs**)&args);
+    args->SetObjectArg(1, TO_IINTERFACE(phone));
+    args->SetObjectArg(2, TO_IINTERFACE(_callback));
 
-    AutoPtr<IMessag> m;
-    mHandler->ObtainMessage(MSG_START_SEQUENCE, args, (IMessag**)&m);
+    AutoPtr<IMessage> m;
+    mHandler->ObtainMessage(MSG_START_SEQUENCE, args, (IMessage**)&m);
     return m->SendToTarget();
 }
 
@@ -90,7 +120,7 @@ void EmergencyCallHelper::StartSequenceInternal(
     Cleanup();
 
     mPhone = phone;
-    mCallback = callback;
+    mCallback = _callback;
 
 
     // No need to check the current service state here, since the only reason to invoke this
@@ -118,10 +148,10 @@ void EmergencyCallHelper::OnServiceStateChanged(
     // - STATE_EMERGENCY_ONLY    // Phone is locked; only emergency numbers are allowed
     // - STATE_POWER_OFF         // Radio is explicitly powered off (airplane mode)
 
-    Int32 state, state2;
-    state->GetState(&state);
+    Int32 state1, state2;
+    state->GetState(&state1);
     mPhone->GetState(&state2);
-    if (IsOkToCall(state, state2)) {
+    if (IsOkToCall(state1, state2)) {
         // Woo hoo!  It's OK to actually place the call.
         Logger::D("EmergencyCallHelper", "onServiceStateChanged: ok to call!");
 
@@ -160,10 +190,10 @@ void EmergencyCallHelper::OnRetryTimeout()
     PhoneConstantsState phoneState;
     mPhone->GetState(&phoneState);
 
+    AutoPtr<IServiceState> sState;
+    mPhone->GetServiceState((IServiceState**)&sState);
     Int32 serviceState;
-    mPhone->GetServiceState(&serviceState);
-    Int32 serviceState;
-    serviceState->GetState(&serviceState);
+    sState->GetState(&serviceState);
 
     Logger::D("EmergencyCallHelper", "onRetryTimeout():  phone state = %s, service state = %d, retries = %d.",
            phoneState, serviceState, mNumRetriesSoFar);
@@ -212,7 +242,7 @@ void EmergencyCallHelper::PowerOnRadio()
     // If airplane mode is on, we turn it off the same way that the Settings activity turns it
     // off.
     AutoPtr<IContentResolver> contentResolver;
-    mContext->GetContentResolver((IContentResolver*)&contentResolver);
+    mContext->GetContentResolver((IContentResolver**)&contentResolver);
     AutoPtr<ISettingsGlobal> helper;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
     Int32 tmp;
@@ -221,7 +251,8 @@ void EmergencyCallHelper::PowerOnRadio()
         Logger::D("EmergencyCallHelper", "==> Turning off airplane mode.");
 
         // Change the system setting
-        helper->PutInt32(contentResolver, ISettingsGlobal::AIRPLANE_MODE_ON, 0);
+        Boolean res;
+        helper->PutInt32(contentResolver, ISettingsGlobal::AIRPLANE_MODE_ON, 0, &res);
 
         // Post the broadcast intend for change in airplane mode
         // TODO: We really should not be in charge of sending this broadcast.
@@ -229,8 +260,13 @@ void EmergencyCallHelper::PowerOnRadio()
         //     then that should also trigger the broadcast intent.
         AutoPtr<IIntent> intent;
         CIntent::New(IIntent::ACTION_AIRPLANE_MODE_CHANGED, (IIntent**)&intent);
-        intent->PutExtra(Strings("state"), FALSE);
-        mContext->SendBroadcastAsUser(intent, IUserHandle::ALL);
+        intent->PutExtra(String("state"), FALSE);
+
+        AutoPtr<IUserHandleHelper> helper;
+        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
+        AutoPtr<IUserHandle> handle;
+        helper->GetALL((IUserHandle**)&handle);
+        mContext->SendBroadcastAsUser(intent, handle);
     }
     else {
         // Otherwise, for some strange reason the radio is off (even though the Settings
@@ -260,7 +296,9 @@ void EmergencyCallHelper::Cleanup()
 void EmergencyCallHelper::StartRetryTimer()
 {
     CancelRetryTimer();
-    mHandler->SendEmptyMessageDelayed(MSG_RETRY_TIMEOUT, TIME_BETWEEN_RETRIES_MILLIS);
+    Boolean res;
+    mHandler->SendEmptyMessageDelayed(MSG_RETRY_TIMEOUT, TIME_BETWEEN_RETRIES_MILLIS,
+            &res);
 }
 
 void EmergencyCallHelper::CancelRetryTimer()

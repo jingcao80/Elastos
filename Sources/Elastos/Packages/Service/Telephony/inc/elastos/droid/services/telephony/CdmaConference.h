@@ -2,7 +2,14 @@
 #define  __ELASTOS_DROID_SERVICES_TELEPHONY_CDMACONFERENCE_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
+#include "elastos/droid/telecomm/telecom/Conference.h"
+#include "elastos/droid/services/telephony/CdmaConnection.h"
 #include "elastos/droid/ext/frameworkext.h"
+
+using Elastos::Droid::Internal::Telephony::ICall;
+using Elastos::Droid::Telecomm::Telecom::Connection;
+using Elastos::Droid::Telecomm::Telecom::Conference;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
 
 namespace Elastos {
 namespace Droid {
@@ -64,10 +71,10 @@ private:
 
     CARAPI_(AutoPtr<ICall>) GetOriginalCall();
 
-    CARAPI_(AutoPtr<com.android.internal.telephony.Connection>) GetOriginalConnection(
+    CARAPI_(AutoPtr<Elastos::Droid::Internal::Telephony::IConnection>) GetOriginalConnection(
         /* [in] */ IConnection* connection);
 
-    CARAPI_(AutoPtr<ICdmaConnection>) GetFirstConnection();
+    CARAPI_(AutoPtr<CdmaConnection>) GetFirstConnection();
 
 
 private:

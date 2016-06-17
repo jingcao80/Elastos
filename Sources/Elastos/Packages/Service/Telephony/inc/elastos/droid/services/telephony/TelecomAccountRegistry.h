@@ -3,6 +3,29 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/telephony/PhoneStateListener.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telephony.h"
+#include <elastos/core/Object.h>
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IBroadcastReceiver;
+using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telephony::PhoneStateListener;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::IPhoneStateListener;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Core::Object;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -17,55 +40,7 @@ class TelecomAccountRegistry
     : public Object
     , public ITelecomAccountRegistry
 {
-private:
-    class AccountEntry
-        : public Object
-    {
-    public:
-        TO_STRING_IMPL("TelecomAccountRegistry::AccountEntry")
-
-        AccountEntry(
-            /* [in] */ IPhone* phone,
-            /* [in] */ Boolean isEmergency,
-            /* [in] */ Boolean isDummy);
-
-        CARAPI Teardown();
-
-        CARAPI GetPhoneAccountHandle(
-            /* [out] */ IPhoneAccountHandle** handle);
-
-        /**
-         * Registers the specified account with Telecom as a PhoneAccountHandle.
-         */
-    private:
-        CARAPI_(AutoPtr<IPhoneAccount>) RegisterPstnPhoneAccount(
-            /* [in] */ Boolean isEmergency,
-            /* [in] */ Boolean isDummyAccount);
-
-    private:
-        AutoPtr<IPhone> mPhone;
-        AutoPtr<IPhoneAccount> mAccount;
-        AutoPtr<IPstnIncomingCallNotifier> mIncomingCallNotifier;
-    };
-
-    class MyPhoneStateListener
-        : public PhoneStateListener
-    {
-    public:
-        TO_STRING_IMPL("TelecomAccountRegistry::MyPhoneStateListener")
-
-        MyPhoneStateListener(
-            /* [in] */ TelecomAccountRegistry* host)
-            : mHost(host)
-
-        //@Override
-        CARAPI OnServiceStateChanged(
-            /* [in] */ IServiceState* serviceState);
-
-    private:
-        TelecomAccountRegistry* mHost;
-    };
-
+public:
     class MyBroadcastReceiver
         : public BroadcastReceiver
     {
@@ -84,6 +59,58 @@ private:
         TelecomAccountRegistry* mHost;
     };
 
+private:
+    class AccountEntry
+        : public Object
+    {
+    public:
+        TO_STRING_IMPL("TelecomAccountRegistry::AccountEntry")
+
+        AccountEntry(
+            /* [in] */ TelecomAccountRegistry* host,
+            /* [in] */ IPhone* phone,
+            /* [in] */ Boolean isEmergency,
+            /* [in] */ Boolean isDummy);
+
+        CARAPI Teardown();
+
+        CARAPI GetPhoneAccountHandle(
+            /* [out] */ IPhoneAccountHandle** handle);
+
+        /**
+         * Registers the specified account with Telecom as a PhoneAccountHandle.
+         */
+    private:
+        CARAPI_(AutoPtr<IPhoneAccount>) RegisterPstnPhoneAccount(
+            /* [in] */ Boolean isEmergency,
+            /* [in] */ Boolean isDummyAccount);
+
+    private:
+        TelecomAccountRegistry* mHost;
+        AutoPtr<IPhone> mPhone;
+        AutoPtr<IPhoneAccount> mAccount;
+        AutoPtr<IPstnIncomingCallNotifier> mIncomingCallNotifier;
+    };
+
+    class MyPhoneStateListener
+        : public PhoneStateListener
+    {
+    public:
+        TO_STRING_IMPL("TelecomAccountRegistry::MyPhoneStateListener")
+
+        MyPhoneStateListener(
+            /* [in] */ TelecomAccountRegistry* host)
+            : mHost(host)
+        {}
+
+        //@Override
+        CARAPI OnServiceStateChanged(
+            /* [in] */ IServiceState* serviceState);
+
+    private:
+        TelecomAccountRegistry* mHost;
+    };
+
 public:
     TO_STRING_IMPL("TelecomAccountRegistry")
 
@@ -92,7 +119,7 @@ public:
     TelecomAccountRegistry(
         /* [in] */ IContext* context);
 
-    static synchronized CARAPI_(AutoPtr<TelecomAccountRegistry>) GetInstance(
+    static CARAPI_(AutoPtr<TelecomAccountRegistry>) GetInstance(
         /* [in] */ IContext* context);
 
     /**
@@ -148,12 +175,14 @@ private:
 
     AutoPtr<IPhoneStateListener> mPhoneStateListener;
 
-    static AutoPtr<ITelecomAccountRegistry> sInstance;
+    static AutoPtr<TelecomAccountRegistry> sInstance;
     AutoPtr<IContext> mContext;
     AutoPtr<ITelecomManager> mTelecomManager;
     AutoPtr<ITelephonyManager> mTelephonyManager;
     AutoPtr<IList> mAccounts;
     Int32 mServiceState;
+
+    static Object sLock;
 };
 
 } // namespace Telephony

@@ -2,7 +2,20 @@
 #define  __ELASTOS_DROID_SERVICES_TELEPHONY_GSMCONFERENCECONTROLLER_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
+#include "elastos/droid/telecomm/telecom/Connection.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Telecomm.h"
+#include <elastos/core/Object.h>
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Telecomm::Telecom::Connection;
+using Elastos::Droid::Telecomm::Telecom::IConference;
+using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
+using Elastos::Droid::Telecomm::Telecom::IConnection;
+using Elastos::Droid::Telecomm::Telecom::IConnectionListener;
+using Elastos::Core::Object;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -18,8 +31,7 @@ class GsmConferenceController
 {
 private:
     class MyConnectionListener
-        : public Object
-        , public IConnectionListener
+        : public Connection::Listener
     {
     public:
         TO_STRING_IMPL("GsmConferenceController::MyConnectionListener");

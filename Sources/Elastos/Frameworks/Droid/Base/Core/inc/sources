@@ -156,6 +156,8 @@ EXPORT_HEADERS += elastos/droid/text/TextUtils.h
 //EXPORT_HEADERS += elastos/droid/text/method/MetaKeyKeyListener.h
 EXPORT_HEADERS += elastos/droid/text/format/DateFormat.h
 EXPORT_HEADERS += elastos/droid/text/format/Formatter.h
+EXPORT_HEADERS += elastos/droid/telecomm/telecom/Conference.h
+EXPORT_HEADERS += elastos/droid/telecomm/telecom/Connection.h
 
 EXPORT_HEADERS += elastos/droid/utility/Xml.h
 EXPORT_HEADERS += elastos/droid/utility/MathUtils.h

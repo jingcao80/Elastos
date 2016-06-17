@@ -3,6 +3,19 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/os/Handler.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Telephony.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::Handler;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -121,13 +134,13 @@ private:
 
 private:
     // Handler message codes; see handleMessage()
-    static const Int32 MSG_START_SEQUENCE;
-    static const Int32 MSG_SERVICE_STATE_CHANGED;
-    static const Int32 MSG_RETRY_TIMEOUT;
+    static const Int32 MSG_START_SEQUENCE = 1;
+    static const Int32 MSG_SERVICE_STATE_CHANGED = 2;
+    static const Int32 MSG_RETRY_TIMEOUT = 3;
 
     AutoPtr<IContext> mContext;
 
-    AutoPtr<IHandler> mHandler =
+    AutoPtr<IHandler> mHandler;
 
     AutoPtr<IEmergencyCallHelperCallback> mCallback;  // The callback to notify upon completion.
     AutoPtr<IPhone> mPhone;  // The phone that will attempt to place the call.

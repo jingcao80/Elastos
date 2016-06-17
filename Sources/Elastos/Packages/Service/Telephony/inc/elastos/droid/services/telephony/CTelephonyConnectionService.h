@@ -53,16 +53,19 @@ public:
         /* [in] */ IConnectionRequest* request,
         /* [out] */ IConnection** result);
 
+    //@Override
     CARAPI OnCreateIncomingConnection(
         /* [in] */ IPhoneAccountHandle* connectionManagerPhoneAccount,
         /* [in] */ IConnectionRequest* request,
         /* [out] */ IConnection** result);
 
+    //@Override
     CARAPI OnCreateUnknownConnection(
         /* [in] */ IPhoneAccountHandle* connectionManagerPhoneAccount,
         /* [in] */ IConnectionRequest* request,
         /* [out] */ IConnection** result);
 
+    //@Override
     CARAPI OnConference(
         /* [in] */ IConnection* connection1,
         /* [in] */ IConnection* connection2);

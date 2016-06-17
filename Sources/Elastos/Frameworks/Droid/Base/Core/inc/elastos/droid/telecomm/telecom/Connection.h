@@ -32,7 +32,7 @@ namespace Telecom {
  * longer used and associated resources may be recovered.
  * @hide
  */
-class Connection
+class ECO_PUBLIC Connection
     : public Object
     , public IConnection
 {

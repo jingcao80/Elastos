@@ -18,7 +18,7 @@ namespace Telecom {
  * Represents a conference call which can contain any number of {@link Connection} objects.
  * @hide
  */
-class Conference
+class ECO_PUBLIC Conference
     : public Object
     , public IConference
 {

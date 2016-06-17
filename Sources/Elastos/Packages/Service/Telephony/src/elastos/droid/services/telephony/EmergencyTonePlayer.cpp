@@ -1,5 +1,15 @@
 
 #include "elastos/droid/services/telephony/EmergencyTonePlayer.h"
+#include "Elastos.Droid.Provider.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Os::CSystemVibrator;
+using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Media::CToneGenerator;
+using Elastos::Droid::Media::CAudioAttributesBuilder;
+using Elastos::Droid::Media::IAudioAttributesBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -15,7 +25,7 @@ const Int32 EmergencyTonePlayer::ALERT_RELATIVE_VOLUME_PERCENT = 100;
 const Int32 EmergencyTonePlayer::VIBRATE_LENGTH_MILLIS = 1000;
 const Int32 EmergencyTonePlayer::VIBRATE_PAUSE_MILLIS = 1000;
 
-static AutoPtr<ArrayOf<Int64> > initVIBRATE_PATTERN()
+AutoPtr<ArrayOf<Int64> > EmergencyTonePlayer::initVIBRATE_PATTERN()
 {
     AutoPtr<ArrayOf<Int64> > array = ArrayOf<Int64>::Alloc(2);
 
@@ -49,14 +59,12 @@ EmergencyTonePlayer::EmergencyTonePlayer(
     context->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
     mAudioManager = IAudioManager::Probe(obj);
 
-    CSystemVibrator::New((SystemVibrator**)&mVibrator);
+    CSystemVibrator::New((IVibrator**)&mVibrator);
 }
 
 ECode EmergencyTonePlayer::Start()
 {
-    Int32 set;
-    GetToneSetting(&set);
-    switch (set) {
+    switch (GetToneSetting()) {
         case EMERGENCY_TONE_VIBRATE:
             StartVibrate();
             break;
@@ -101,8 +109,9 @@ void EmergencyTonePlayer::StopVibrate()
 void EmergencyTonePlayer::StartAlert()
 {
     if (mToneGenerator == NULL) {
-        mToneGenerator = new ToneGenerator(
-                IAudioManager::STREAM_VOICE_CALL, ALERT_RELATIVE_VOLUME_PERCENT);
+        CToneGenerator::New(
+                IAudioManager::STREAM_VOICE_CALL, ALERT_RELATIVE_VOLUME_PERCENT,
+                (IToneGenerator**)&mToneGenerator);
 
         // Set the volume to max and save the old volume setting.
         mAudioManager->GetStreamVolume(IAudioManager::STREAM_VOICE_CALL, &mSavedInCallVolume);
@@ -112,7 +121,8 @@ void EmergencyTonePlayer::StartAlert()
                 IAudioManager::STREAM_VOICE_CALL,
                 maxVolume,
                 0);
-        mToneGenerator->StartTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK);
+        Boolean res;
+        mToneGenerator->StartTone(IToneGenerator::TONE_CDMA_EMERGENCY_RINGBACK, &res);
     }
     else {
         Logger::D("EmergencyTonePlayer", "An alert is already running.");
@@ -123,7 +133,7 @@ void EmergencyTonePlayer::StopAlert()
 {
     if (mToneGenerator != NULL) {
         mToneGenerator->StopTone();
-        mToneGenerator->Release();
+        mToneGenerator->ReleaseResources();
         mToneGenerator = NULL;
 
         mAudioManager->SetStreamVolume(IAudioManager::STREAM_VOICE_CALL, mSavedInCallVolume, 0);
