@@ -23,7 +23,7 @@ public:
     virtual CarKlass* getClass() const = 0;
     // args must be an array of length greater than or equal to the number of
     // arguments expected by the method.
-    virtual void invokeMethod(const CarMethod*, CarValue* args, bool& didRaiseUncaughtException) = 0;
+    virtual void invokeMethod(const CarMethod*, CarValue* args, bool* didRaiseUncaughtException) = 0;
     virtual CarValue getField(const CarField*) = 0;
 
     // These functions are called before and after the main entry points into

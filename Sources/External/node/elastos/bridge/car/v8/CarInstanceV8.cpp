@@ -59,9 +59,9 @@ IInterface* CarInstanceV8::carInstance() const
     return mInstance->mInstance;
 }
 
-void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool& didRaiseUncaughtException)
+void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* didRaiseUncaughtException)
 {
-    didRaiseUncaughtException = false;
+    *didRaiseUncaughtException = false;
 
     ASSERT(getClass()->methodsNamed(method->name().utf8().data()).find(method) != notFound);
 
@@ -100,9 +100,10 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool& 
     if (numParams > 0) {
         ec = aMethod->CreateArgumentList((IArgumentList**)&argumentList);
         if (FAILED(ec)) {
-           //LOG_ERROR("CarInstanceV8::invokeMethod unable to create argumentList on method %p", method);
-           ALOGD("CarInstanceV8::invokeMethod unable to create argumentList on method %p", method);
-           return;
+            //LOG_ERROR("CarInstanceV8::invokeMethod unable to create argumentList on method %p", method);
+            ALOGD("CarInstanceV8::invokeMethod unable to create argumentList on method %p", method);
+            *didRaiseUncaughtException = true;
+            return;
         }
         else {
            ALOGD("CarInstanceV8::invokeMethod create argumentList on method %p success!", method);
@@ -183,8 +184,11 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool& 
                             break;
                         }
                         default:
+                        {
                             ALOGD("CarInstanceV8::invokeMethod ParamIOAttribute_In CarDataType_Other:%d",args[i].mType);
+                            *didRaiseUncaughtException = true;
                             break;
+                        }
                     }
                     break;
 
@@ -199,8 +203,11 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool& 
                             ec = argumentList->SetOutputArgumentOfCarArrayPtrPtr(i, &args[i].mCarQuintet);
                             break;
                         default:
+                        {
                             ALOGD("CarInstanceV8::invokeMethod ParamIOAttribute_CalleeAllocOut CarDataType_Other:%d", args[i].mType);
+                            *didRaiseUncaughtException = true;
                             break;
+                        }
                     }
                     break;
 
@@ -270,18 +277,25 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool& 
                             break;
                         }
                         default:
+                        {
                             ALOGD("CarInstanceV8::invokeMethod ParamIOAttribute_CallerAllocOut CarDataType_Other:%d",args[i].mType);
+                            *didRaiseUncaughtException = true;
                             break;
+                        }
                     }
                     break;
 
                 default:
+                {
                     //LOG_ERROR("CarInstanceV8::invokeMethod unknown ParamIOAttribute");
                     ALOGD("CarInstanceV8::invokeMethod unknown ParamIOAttribute");
+                    *didRaiseUncaughtException = true;
                     break;
+                }
             }
 
-            if (FAILED(ec)) {
+            //if (FAILED(ec)) {
+            if ( FAILED(ec) || *didRaiseUncaughtException) {
                 Elastos::String nameBuf;
                 aParameter->GetName(&nameBuf);
                 //LOG_ERROR("CarInstanceV8::invokeMethod SetArgument error %s", (const char*)nameBuf);
@@ -291,23 +305,27 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool& 
 
             //aParameter->Release();
             //aParameter = NULL;
+
+            ALOGD("CarInstanceV8::invokeMethod SetArguments success!");
         }
         ArrayOf<IParamInfo*>::Free(paramInfos);
     }
 
     if(method->isRunOnUiThread()) {
-        //ALOGD("CarInstanceV8::invokeMethod invoke remote!");
+        ALOGD("CarInstanceV8::invokeMethod invoke remote!");
         cbEnqueueUIMessage(object, aMethod, argumentList);
     }
     else {
+        ALOGD("CarInstanceV8::invokeMethod invoke local!");
         ec = aMethod->Invoke(object, argumentList);
         if (FAILED(ec)) {
             //LOG_ERROR("CarInstanceV8::invokeMethod invoke failed!");
             ALOGD("CarInstanceV8::invokeMethod invoke failed! Ecode:%x", ec);
+            *didRaiseUncaughtException = true;
             return;
         }
         else {
-            //ALOGD("CarInstanceV8::invokeMethod invoke success!");
+            ALOGD("CarInstanceV8::invokeMethod invoke success!");
         }
     }
 

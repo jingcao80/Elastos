@@ -342,6 +342,7 @@ bool _compatible(NPVariantType jt, CarDataType ct)
     case CarDataType_Double:
     case CarDataType_ECode:
     case CarDataType_Enum:
+    //case CarDataType_LocalPtr:
         result = (jt == NPVariantType_Double);
         break;
     case CarDataType_Char32:
@@ -411,10 +412,25 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
     CarMethod* carMethod = 0;
     CarMethod* tmpCarMethod = 0;
 
+    ALOGD("CarNPObjectInvoke test========1========numMethods:%d",numMethods);
+
     //TODO: more than one out parameters and with default input parameters
     //bool result_0 = (methodList.size() > 0);
-    if (numMethods > 0) {
+    if (numMethods == 0) {
+        //not found
+        ALOGD("CarNPObjectInvoke ========method name: %s not found!",name);
+        carMethod = 0;
+    }
+    else if (numMethods == 1) {
+        //unique
+        carMethod = methodList[0];
+    }
+    //else if (numMethods > 1) {
+    else {
+        //overload
+        ALOGD("CarNPObjectInvoke test========2========numMethods:%d",numMethods);
         for (size_t methodIndex = 0; methodIndex < numMethods; methodIndex++) {
+            ALOGD("CarNPObjectInvoke test========3========methodIndex:%d",methodIndex);
             tmpCarMethod = methodList[methodIndex];
             //TODO: shuld compare with only input parameters count.
             //NOTE: different from callback output parms.
@@ -431,7 +447,9 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
 
             bool bSameInArg = true;
 
+            ALOGD("CarNPObjectInvoke test========4========numParams:%d",numParams);
             for (Int32 i = 0; i < numParams; i++) {
+                ALOGD("CarNPObjectInvoke test========5========i:%d",i);
 
                 AutoPtr<IParamInfo> paramInfo = (*paramInfos)[i];
                 ParamIOAttribute paramIOAttribute;
@@ -441,37 +459,52 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
                 CarDataType dataType;
                 dataTypeInfo->GetDataType(&dataType);
 
+                ALOGD("CarNPObjectInvoke test========6========paramIOAttribute:%d",paramIOAttribute);
                 if (paramIOAttribute == ParamIOAttribute_In) {
                     numIn++;
+                    ALOGD("CarNPObjectInvoke test========7========argCount:%d==numIn:%d",argCount,numIn);
                     if (static_cast<int>(argCount) < numIn) {
+                        ALOGD("CarNPObjectInvoke test========8========fail");
                         bSameInArg = false;
                         break;
                     }
 
-                    //if (dataType != dataType)
-                    if (_compatible(args[numIn].type, dataType)) {
+                    ALOGD("CarNPObjectInvoke test========9========NPType:%d====dataType:%d",args[numIn - 1].type,dataType);
+                    if (_compatible(args[numIn - 1].type, dataType)) {
                         //
+                        ALOGD("CarNPObjectInvoke test========10========");
                     }
                     else {
+                        ALOGD("CarNPObjectInvoke test========11========fail");
                         bSameInArg = false;
                         break;
                     }
                 }
                 else {
+                    ALOGD("CarNPObjectInvoke test========12========");
                     numOut++;
                 }
+                ALOGD("CarNPObjectInvoke test========13========");
 
             }
+            ALOGD("CarNPObjectInvoke test========14========");
 
             //if (tmpCarMethod->numParameters() == static_cast<int>(argCount)) {
             //if (numIn == static_cast<int>(argCount)) {
             if (bSameInArg) {
+                ALOGD("CarNPObjectInvoke test========15========");
                 //TODO:compare the param type one by one
                 carMethod = tmpCarMethod;
                 break;
             }
+            else {
+                ALOGD("CarNPObjectInvoke test========16========");
+            }
+            ALOGD("CarNPObjectInvoke test========17========");
         }
+        ALOGD("CarNPObjectInvoke test========18========");
     }
+    ALOGD("CarNPObjectInvoke test========19========");
 
     if (!carMethod) {
         ALOGD("CarNPObjectInvoke : can't found carMethod name: %s====",name);
@@ -651,8 +684,8 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
     }
     ArrayOf<IParamInfo*>::Free(paramInfos);
 
-    bool exceptionOccurred;
-    instance->invokeMethod(carMethod, jArgs, exceptionOccurred);
+    bool exceptionOccurred = false;
+    instance->invokeMethod(carMethod, jArgs, &exceptionOccurred);
     instance->end();
 
     if (exceptionOccurred) {
@@ -662,7 +695,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         return false;
     }
 
-    ALOGD("CarNPObjectInvoke method name: %s====invoke Success!",name);
+    //ALOGD("CarNPObjectInvoke method name: %s====invoke Success!",name);
 
     convertCarValuesToNPVariant(carMethod, jArgs, outParamsPosBuf, result);
 
@@ -818,6 +851,11 @@ bool CarNPObjectEnumerate(NPObject *npobj, NPIdentifier **value, uint32_t *count
     Int32 N;
     if (bClass) {
         classInfo->GetMethodCount(&N);
+
+        //test code ,to be delete
+        Elastos::String nameBuf_0;
+        classInfo->GetName(&nameBuf_0);
+        ALOGD("CarNPObjectEnumerate test.GetMethodCount : %d class name: %s============",N,(const char*)nameBuf_0);
     }
     else {
         interfaceInfo->GetMethodCount(&N);

@@ -19,7 +19,7 @@ public:
     CarInstanceV8(CobjectWrapper* objectWrapper, bool requireAnnotation);
 
     virtual CarKlass* getClass() const;
-    virtual void invokeMethod(const CarMethod*, CarValue* args, bool& didRaiseUncaughtException);
+    virtual void invokeMethod(const CarMethod*, CarValue* args, bool* didRaiseUncaughtException);
     virtual CarValue getField(const CarField*);
     virtual void begin();
     virtual void end();

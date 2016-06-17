@@ -5,8 +5,6 @@
 
 #include <elastos/utility/logging/Logger.h>
 
-//#include <cutils/log.h>
-
 using Elastos::Droid::App::EIID_IActivity;
 using Elastos::Droid::App::IAlertDialog;
 using Elastos::Utility::Logging::Logger;
@@ -42,6 +40,7 @@ CAR_OBJECT_IMPL(CActivityOne)
 ECode CActivityOne::constructor()
 {
     Logger::I(TAG, " >> constructor()");
+
     return Activity::constructor();
 }
 

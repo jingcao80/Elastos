@@ -138,8 +138,6 @@ module.exports = function(aoElastos, aoActivity){
 
             //----------------PopupWindowButton begin----------------
             function OnCreatePopupWindow(){
-                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====1====");
-
                 _showInfo("====PopupWindow will be shown!");
 
                 var IGravity__AXIS_X_SHIFT = 0;
@@ -151,33 +149,13 @@ module.exports = function(aoElastos, aoActivity){
 
                 var IContext__LAYOUT_INFLATER_SERVICE = "layout_inflater";
 
-                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====2====");
-
-                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====2.0.0====" + typeof oActivity);
-                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====2.0.1====" + typeof oActivity.GetSystemService);
-
                 var oInflater = oActivity.GetSystemService(IContext__LAYOUT_INFLATER_SERVICE);
-
-                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====2.1====");
                 var oLayout = oInflater.Inflate(R.layout.popupwindow, null);
-
-                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====3====");
-
                 var oPopupWindow = Droid_New("Elastos.Droid.Widget.CPopupWindow", oLayout, 350, 350, true);
-
-                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====4====");
-
                 oPopupWindow.ShowAtLocation(oLayout, IGravity__CENTER, 0, 0);
 
-                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====5====");
-
                 var oTextView = oLayout.FindViewById(R.id.txtView);
-
-                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====6====");
-
-                oTextView.SetText(CString("PopupWindow 测试程序!"));
-
-                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====7====");
+                oTextView.SetText(CString("PopupWindow By Node.JS!!!"));
 
                 var jso_button_DismissButton_cb = (function(ao_PopupWindow){
                     return {
@@ -190,11 +168,8 @@ module.exports = function(aoElastos, aoActivity){
                     }
                 })(oPopupWindow);
 
-                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====8====");
                 var oDismissButton = oLayout.FindViewById(R.id.btn_close_popup);
-                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====9====");
                 oDismissButton.SetOnClickListener(jso_button_DismissButton_cb);
-                elog("========CActivityOne.js====OnCreate====OnCreatePopupWindow====10====");
 
                 return;
             }
