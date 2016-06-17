@@ -33,7 +33,7 @@ LIBRARIES += -lm -licuuc -llog -lutils -landroidfw
 APP_PACKAGE_NAME = Elastos.Droid.Server.Telephony
 RES_NAMESPACE = Elastos.Droid.Server.Telephony
 EXTRA_RES_DIR = $(MAKEDIR)/../../Apps/PhoneCommon/res
-EXTRA_RES_DIR += $(MAKEDIR)/sip/res
+EXTRA_RES_DIR2 = $(MAKEDIR)/sip/res
 AAPT_FLAGS := \
     --auto-add-overlay \
     --extra-packages com.android.phone.common \
