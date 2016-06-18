@@ -1,0 +1,181 @@
+module
+{
+
+    namespace Org {
+    namespace Javia {
+    namespace Arity {
+
+    /**
+        A complex value, composed of the real part (re) and the imaginary part (im).
+
+        All the methods that return a Complex (such as add(), mul(), etc)
+        modify the object on which they are called and return it (this), in order
+        to avoid new object creation.
+     */
+    interface IComplex
+    {
+
+        /** Sets the real and imaginary components. */
+        Set(
+            [in] Double re,
+            [in] Double im);
+
+        /** Sets from other object (copy). */
+        Set(
+            [in] IComplex* o);
+
+        /** Returns the real part if the imaginary part is zero, otherwise returns NaN. */
+        AsReal(
+            [out] Double* result);
+
+        /** Complex conjugate (negates imaginary). */
+        Conjugate();
+
+        /** Negate, i.e. multiply with -1.
+         */
+        Negate();
+
+        /** True if this is an infinite (and not a NaN).
+         */
+        IsInfinite(
+            [out] Boolean* isInfinite);
+
+        /** True if both the real and the imaginary parts
+            are finite (not infinite and not NaN).
+         */
+        IsFinite(
+            [out] Boolean* isFinite);
+
+        /** True if either real or imaginary is NaN. */
+        IsNaN(
+            [out] Boolean* isNan);
+
+        /** The argument (angle) in polar coordinates.
+         */
+        Arg(
+            [out] Double* result);
+
+        /** The absolute value (length in polar coordinates).
+         */
+        Abs(
+            [out] Double* result);
+
+        /** The absolute value squared.
+            re^2 + im^2
+         */
+        Abs2(
+            [out] Double* result);
+
+        /** Addition.
+            Modifies and returns this.
+        */
+        Add(
+            [in] IComplex* o);
+
+        /** Substraction.
+         */
+        Sub(
+            [in] IComplex* o);
+
+        Mul(
+            [in] Double o);
+
+        /** Multiplication.
+         */
+        Mul(
+            [in] IComplex* o);
+
+        /** Division.
+         */
+        Div(
+            [in] IComplex* o);
+
+        /** Complex square root.
+         */
+        Sqrt();
+
+        /** Complex modulo (integer division remainder).
+         */
+        Mod(
+            [in] IComplex* o);
+
+        /** Complex GCD, Greatest Common Denominator.
+         */
+        Gcd(
+            [in] IComplex* o);
+
+        /** Complex natural logarithm.
+         */
+        Log();
+
+        /** Complex exponential.
+         */
+        Exp();
+
+        /** Complex square (x^2).
+         */
+        Square();
+
+        /** Complex power (x^y == exp(y*log(x))).
+        */
+        Pow(
+            [in] IComplex* y);
+
+        /** Complex lgamma (log Gamma).
+         */
+        Lgamma();
+
+        /** Complex factorial, based on lgamma().
+         */
+        Factorial();
+
+        /** sin(a+ib) = sin(a)*cosh(b) + i*cos(a)*sinh(b). */
+        Sin();
+
+        /** sinh(a+ib) = sinh(a)*cos(b) + i*cosh(a)*sin(b). */
+        Sinh();
+
+        /** cos(a+ib) = cos(a)cosh(b) - i*sin(a)sinh(b). */
+        Cos();
+
+        /** cosh(a+ib) = cosh(a)cos(b) + i*sinh(a)sin(b). */
+        Cosh();
+
+        /** tan(a+ib) = sin(2a)/(cos(2a)+cosh(2b) + i*sinh(2b)/(cos(2a)+cosh(2b)). */
+        Tan();
+
+        /** tanh(a+ib) = sinh(2a)/(cosh(2a) + cos(2b)) + i*sin(2b)/(cosh(2a)+cos(2b)). */
+        Tanh();
+
+        /** asin(x) = -i*log(sqrt(1-x^2)+ix). */
+        Asin();
+
+        /** acos(x) = -i*log(x + i*sqrt(1-x^2)). */
+        Acos();
+
+        /** atan(x) = i/2 * log((i+x)/(i-x)). */
+        Atan();
+
+        /** asinh(x) = log(x+sqrt(x^2+1)). */
+        Asinh();
+
+        /** acosh(x) = log(x+sqrt(x^2-1)). */
+        Acosh();
+
+        /** atanh(x) = log((1+x)/(1-x))/2. */
+        Atanh();
+
+        /** Combinations: C(n, k) == exp(lgamma(n) - lgamma(k) - lgamma(n-k)). */
+        Combinations(
+            [in] IComplex* o);
+
+        /** Permutations: P(n, k) == exp(lgamma(n) - lgamma(n-k)). */
+        Permutations(
+            [in] IComplex* o);
+
+    }
+
+    } // namespace Arity
+    } // namespace Javia
+    } // namespace Org
+}

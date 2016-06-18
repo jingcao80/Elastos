@@ -1,0 +1,100 @@
+module
+{
+
+    interface Org.Javia.Arity.IComplex;
+
+    namespace Org {
+    namespace Javia {
+    namespace Arity {
+
+    /**
+     Base class for functions.<p>
+     A function has an arity (the number of arguments), and a way for evaluation
+     given the values of the arguments.<p>
+     To create user-defined functions,
+     derive from this class and override one of the eval() methods.<p>
+
+     If the user subclasses Function, he is responsible for the thread-safety of
+     his user-defined Functions.
+    */
+    interface IFunction
+    {
+
+        /**
+           Gives the arity of this function.
+           @return the arity (the number of arguments). Arity >= 0.
+        */
+        Arity(
+            [out] Int32* arity);
+
+        GetDerivative(
+            [out] IFunction** func);
+
+        /**
+           Evaluates an arity-0 function (a function with no arguments).
+           @return the value of the function
+        */
+        Eval(
+            [out] Double* result);
+
+        /**
+           Evaluates a function with a single argument (arity == 1).
+         */
+        Eval(
+            [in] Double x,
+            [out] Double* result);
+
+        /**
+           Evaluates a function with two arguments (arity == 2).
+        */
+        Eval(
+            [in] Double x,
+            [in] Double y,
+            [out] Double* result);
+
+        /**
+           Evaluates the function given the argument values.
+           @param args array containing the arguments.
+           @return the value of the function
+           @throws ArityException if args.length != arity.
+        */
+        Eval(
+            [in] ArrayOf<Double>* args,
+            [out] Double* result);
+
+
+        /** By default complex forwards to real eval is the arguments are real,
+         *  otherwise returns NaN.
+         *  This allow calling any real functions as a (restricted) complex one.
+         */
+        EvalComplex(
+            [out] IComplex** complex);
+
+        /**
+           Complex evaluates a function with a single argument.
+        */
+        Eval(
+            [in] IComplex* x,
+            [out] IComplex** complex);
+
+        /**
+           Complex evaluates a function with two arguments.
+         */
+        Eval(
+            [in] IComplex* x,
+            [in] IComplex* y,
+            [out] IComplex** complex);
+
+        /**
+           Complex evaluates a function with an arbitrary number of arguments.
+        */
+        Eval(
+            [in] ArrayOf<IComplex*>* args,
+            [out] IComplex** complex);
+
+    }
+
+    } // namespace Arity
+    } // namespace Javia
+    } // namespace Org
+}

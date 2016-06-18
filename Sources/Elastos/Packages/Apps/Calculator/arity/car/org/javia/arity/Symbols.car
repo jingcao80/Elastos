@@ -1,0 +1,181 @@
+module
+{
+
+    interface Org.Javia.Arity.IComplex;
+    interface Org.Javia.Arity.IFunctionAndName;
+    interface Org.Javia.Arity.IFunction;
+    interface Org.Javia.Arity.ISymbol;
+
+    namespace Org {
+    namespace Javia {
+    namespace Arity {
+
+    /**
+       Represents the collection of names (<em>symbols</em>) used for parsing an expression
+       (the context in which the parsing takes place).<p>
+
+       Each symbol maps to either a {@link Function} or a constant.<p>
+
+       A symbol is identified by the pair (name, arity).
+       So a constant and a function with the same name,
+       or two function with the same name but with different arity
+       are distinct symbols.<p>
+
+       Symbols functions as a stack of <em>frames</em>:
+       when you pop the topmost frame, all the symbols added in that frame dissapear
+       (i.e. all the modifications done between the push and the pop are undone).<p>
+
+       Example:
+       <pre>
+       <code>
+       Symbols symbols = new Symbols();
+       symbols.eval("1+1"); //doesn't update symbols
+       symbols.define(symbols.compileWithName("f(x)=x^2")); //updates symbols
+       </code>
+       </pre>
+       <p>
+
+       <h3>Thread safety</h3>
+       The Symbols class is thread-safe
+       (the same Symbols instance can be used by multiple threads without locking).<p>
+
+       The compile() methods are synchronized, so parallel compile() calls on the same Symbols
+       instance are serialized.
+     */
+    interface ISymbols
+    {
+
+        /**
+           Evaluates a simple expression (such as "1+1") and returns its value.
+           @throws SyntaxException in these cases:
+           <ul>
+           <li> the expression is not well-formed
+           <li> the expression is a definition (such as "a=1+1")
+           <li> the expression is an implicit function (such as "x+1")
+           </ul>
+         */
+        Eval(
+            [in] String expression,
+            [out] Double* result);
+
+        EvalComplex(
+            [in] String expression,
+            [out] IComplex** complex);
+
+        /**
+           Compiles an expression in the context of this Symbols.
+           Does not modify the symbols.
+           <p>
+
+           An expression is one of these cases (@see Symbols.isDefinition()):
+           <ul>
+           <li> constant value: 1+1
+           <li> implicit function: x+1
+           <li> constant definition: a=1+1
+           <li> function definition with explicit arguments: f(a)=a+1
+           <li> function definition with implicit arguments: f=x+1
+           </ul>
+           <p>
+
+           @param source the expression; may contain '=' to denote a definition (with a name).
+
+           @return the function together with its eventual name.<p>
+
+           If this is not a definition (e.g. "1+1", "x^2"), the name is null.<p>
+
+           If the expression is a constant (e.g. "1+1", "a=2"),
+           the returned Function is an instance of {@link Constant}.
+
+           @throws SyntaxException if there are errors compiling the expression.
+        */
+        CompileWithName(
+            [in] String source,
+            [out] IFunctionAndName** fan);
+
+        Compile(
+            [in] String source,
+            [out] IFunction** func);
+
+        /**
+           Adds a new function symbol to the top-most frame of this Symbols.
+           @param name the name of the function (e.g. "sin")
+           @param function the function to which the name maps
+        */
+        Define(
+            [in] String name,
+            [in] IFunction* function);
+
+        /**
+           Adds a new function symbol to the top-most frame of this Symbols.
+           @param funAndName structure containing the function and its name
+        */
+        Define(
+            [in] IFunctionAndName* funAndName);
+
+
+        /**
+           Adds a new constant symbol to the top-most frame of this Symbols.
+           @param name the name of the constant (e.g. "pi")
+           @param value the value of the constant
+        */
+        Define(
+            [in] String name,
+            [in] Double value);
+
+        Define(
+            [in] String name,
+            [in] IComplex* value);
+
+        /**
+           Pushes a new top frame.<p>
+
+           All modifications (defining new symbols) happen in the top-most frame.
+           When the frame is pop-ed the modifications that happened in it are reverted.
+        */
+        PushFrame();
+
+        /**
+           Pops the top frame.<p>
+
+           All the modifications done since this frame was pushed are reverted.
+           @throws EmptyStackException if there were fewer <code>pushFrame</code> than <code>popFrame</code>.
+        */
+        PopFrame();
+
+        /**
+         * Returns all the symbols that were added in the top frame.
+         * (i.e. since the most recent pushFrame()).
+         */
+        GetTopFrame(
+            [out, callee] ArrayOf<ISymbol*>* topFrame);
+
+        /**
+         * Return all the defined symbols.
+         */
+        GetAllSymbols(
+            [out, callee] ArrayOf<ISymbol*>* symbols);
+
+        /**
+         * Return all the strings that are defined in this symbols.
+         */
+        GetDictionary(
+            [out, callee] ArrayOf<String>* dic);
+
+    }
+
+    ISymbolsHelper {
+        /**
+           @param source the expression
+           @return true if the expression is a definition (i.e. contains a '=').<p>
+           These are definitions: "a=1+1";  "f(k)=2^k"<p>
+           These are not definitions: "1+1"; "x+1"
+         */
+        IsDefinition(
+            [in] String source,
+            [out] Boolean* isDefinition);
+    }
+
+    } // namespace Arity
+    } // namespace Javia
+    } // namespace Org
+}
