@@ -85,6 +85,7 @@ EXPORT_HEADERS += elastos/droid/internal/os/BaseCommand.h
 EXPORT_HEADERS += elastos/droid/internal/os/BinderInternal.h
 EXPORT_HEADERS += elastos/droid/internal/os/ProcessCpuTracker.h
 EXPORT_HEADERS += elastos/droid/internal/os/SomeArgs.h
+EXPORT_HEADERS += elastos/droid/internal/telephony/Connection.h
 
 //EXPORT_HEADERS += elastos/droid/Manifest.h
 
@@ -158,6 +159,7 @@ EXPORT_HEADERS += elastos/droid/text/format/DateFormat.h
 EXPORT_HEADERS += elastos/droid/text/format/Formatter.h
 EXPORT_HEADERS += elastos/droid/telecomm/telecom/Conference.h
 EXPORT_HEADERS += elastos/droid/telecomm/telecom/Connection.h
+EXPORT_HEADERS += elastos/droid/telecomm/telecom/ConnectionService.h
 
 EXPORT_HEADERS += elastos/droid/utility/Xml.h
 EXPORT_HEADERS += elastos/droid/utility/MathUtils.h

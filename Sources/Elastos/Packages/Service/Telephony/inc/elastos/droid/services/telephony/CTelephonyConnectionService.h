@@ -2,7 +2,22 @@
 #define  __ELASTOS_DROID_SERVICES_TELEPHONY_CTELEPHONYCONNECTIONSERVICE_H__
 
 #include "_Elastos_Droid_Services_Telephony_CTelephonyConnectionService.h"
+#include "elastos/droid/services/telephony/GsmConferenceController.h"
+#include "elastos/droid/services/telephony/CdmaConferenceController.h"
+#include "elastos/droid/services/telephony/EmergencyTonePlayer.h"
+#include "elastos/droid/telecomm/telecom/ConnectionService.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Telecomm.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Internal::Telephony::ICall;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Telecomm::Telecom::ConnectionService;
+using Elastos::Droid::Telecomm::Telecom::IConnectionRequest;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -24,9 +39,17 @@ private:
     public:
         TO_STRING_IMPL("CTelephonyConnectionService::MyEmergencyCallHelperCallback")
 
+        CAR_INTERFACE_DECL();
+
         MyEmergencyCallHelperCallback(
-            /* [in] */ CTelephonyConnectionService* host)
+            /* [in] */ CTelephonyConnectionService* host,
+            /* [in] */ ITelephonyConnection* connection,
+            /* [in] */ IPhone* phone,
+            /* [in] */ IConnectionRequest* request)
             : mHost(host)
+            , mConnection(connection)
+            , mPhone(phone)
+            , mRequest(request)
         {}
 
         //@Override
@@ -35,6 +58,9 @@ private:
 
     private:
         CTelephonyConnectionService* mHost;
+        AutoPtr<ITelephonyConnection> mConnection;
+        AutoPtr<IPhone> mPhone;
+        AutoPtr<IConnectionRequest> mRequest;
     };
 
 public:
@@ -44,31 +70,33 @@ public:
 
     CTelephonyConnectionService();
 
+    CARAPI constructor();
+
     //@Override
     CARAPI OnCreate();
 
     //@Override
     CARAPI OnCreateOutgoingConnection(
-        /* [in] */ IPhoneAccountHandle* connectionManagerPhoneAccount,
+        /* [in] */ Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle* connectionManagerPhoneAccount,
         /* [in] */ IConnectionRequest* request,
-        /* [out] */ IConnection** result);
+        /* [out] */ Elastos::Droid::Telecomm::Telecom::IConnection** result);
 
     //@Override
     CARAPI OnCreateIncomingConnection(
-        /* [in] */ IPhoneAccountHandle* connectionManagerPhoneAccount,
+        /* [in] */ Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle* connectionManagerPhoneAccount,
         /* [in] */ IConnectionRequest* request,
-        /* [out] */ IConnection** result);
+        /* [out] */ Elastos::Droid::Telecomm::Telecom::IConnection** result);
 
     //@Override
     CARAPI OnCreateUnknownConnection(
-        /* [in] */ IPhoneAccountHandle* connectionManagerPhoneAccount,
+        /* [in] */ Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle* connectionManagerPhoneAccount,
         /* [in] */ IConnectionRequest* request,
-        /* [out] */ IConnection** result);
+        /* [out] */ Elastos::Droid::Telecomm::Telecom::IConnection** result);
 
     //@Override
     CARAPI OnConference(
-        /* [in] */ IConnection* connection1,
-        /* [in] */ IConnection* connection2);
+        /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* connection1,
+        /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* connection2);
 
 private:
     CARAPI_(void) PlaceOutgoingConnection(
@@ -78,14 +106,14 @@ private:
 
     CARAPI_(AutoPtr<ITelephonyConnection>) CreateConnectionFor(
         /* [in] */ IPhone* phone,
-        /* [in] */ com.android.internal.telephony.Connection originalConnection,
+        /* [in] */ Elastos::Droid::Internal::Telephony::IConnection* originalConnection,
         /* [in] */ Boolean isOutgoing);
 
     CARAPI_(Boolean) IsOriginalConnectionKnown(
-        /* [in] */ com.android.internal.telephony.Connection originalConnection);
+        /* [in] */ Elastos::Droid::Internal::Telephony::IConnection* originalConnection);
 
     CARAPI_(AutoPtr<IPhone>) GetPhoneForAccount(
-        /* [in] */ IPhoneAccountHandle* accountHandle,
+        /* [in] */ Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle* accountHandle,
         /* [in] */ Boolean isEmergency);
 
     /**
@@ -102,7 +130,7 @@ private:
     AutoPtr<CdmaConferenceController> mCdmaConferenceController;
     AutoPtr<IComponentName> mExpectedComponentName;
     AutoPtr<IEmergencyCallHelper> mEmergencyCallHelper;
-    AutoPtr<IEmergencyTonePlayer> mEmergencyTonePlayer;
+    AutoPtr<EmergencyTonePlayer> mEmergencyTonePlayer;
 };
 
 } // namespace Telephony

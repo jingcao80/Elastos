@@ -2,7 +2,9 @@
 #define  __ELASTOS_DROID_SERVICES_TELEPHONY_GSMCONNECTION_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
+#include "elastos/droid/services/telephony/TelephonyConnection.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Internal.h"
 
 namespace Elastos {
 namespace Droid {
@@ -22,7 +24,7 @@ public:
     CAR_INTERFACE_DECL()
 
     GsmConnection(
-        /* [in] */ IConnection* connection);
+        /* [in] */ Elastos::Droid::Internal::Telephony::IConnection* connection);
 
     /** {@inheritDoc} */
     //@Override

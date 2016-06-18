@@ -1,5 +1,18 @@
 
 #include "elastos/droid/services/telephony/CdmaConferenceController.h"
+#include "Elastos.Droid.Os.h"
+#include <Elastos.CoreLibrary.Utility.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Telecomm::Telecom::IConference;
+using Elastos::Droid::Telecomm::Telecom::IConnectionService;
+using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -7,7 +20,7 @@ namespace Services {
 namespace Telephony {
 
 ECode CdmaConferenceController::MyConnectionListener::OnStateChanged(
-    /* [in] */ IConnection* c,
+    /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* c,
     /* [in] */ Int32 state)
 {
     mHost->RecalculateConference();
@@ -15,7 +28,7 @@ ECode CdmaConferenceController::MyConnectionListener::OnStateChanged(
 }
 
 ECode CdmaConferenceController::MyConnectionListener::OnDisconnected(
-    /* [in] */ IConnection* c,
+    /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* c,
     /* [in] */ IDisconnectCause* disconnectCause)
 {
     mHost->RecalculateConference();
@@ -23,14 +36,14 @@ ECode CdmaConferenceController::MyConnectionListener::OnDisconnected(
 }
 
 ECode CdmaConferenceController::MyConnectionListener::OnDestroyed(
-    /* [in] */ IConnection* c)
+    /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* c)
 {
-    AutoPtr<CdmaConnection> c = (CdmaConnection*)IObject::Probe(c);
-    mHost->Remove(TO_IINTERFACE(c));
+    AutoPtr<ICdmaConnection> _c = ICdmaConnection::Probe(c);
+    mHost->Remove(_c);
     return NOERROR;
 }
 
-ECode MyRunnable::Run()
+ECode CdmaConferenceController::MyRunnable::Run()
 {
     mConnection->ForceAsDialing(FALSE);
     mHost->AddInternal(mConnection);
@@ -59,7 +72,7 @@ CdmaConferenceController::CdmaConferenceController(
 
     CArrayList::New((IArrayList**)&mPendingOutgoingConnections);
 
-    CHandler::New((Handler**)&mHandler);
+    CHandler::New((IHandler**)&mHandler);
 }
 
 ECode CdmaConferenceController::Add(
@@ -92,7 +105,8 @@ ECode CdmaConferenceController::Add(
         }
 
         AutoPtr<IRunnable> r = new MyRunnable(this, connection, connectionsToReset);
-        mHandler->PostDelayed(r, ADD_OUTGOING_CONNECTION_DELAY_MILLIS);
+        Boolean tmp;
+        mHandler->PostDelayed(r, ADD_OUTGOING_CONNECTION_DELAY_MILLIS, &tmp);
     }
     else {
         // This is the first connection, or it is incoming, so let it flow through.
@@ -102,18 +116,18 @@ ECode CdmaConferenceController::Add(
 }
 
 void CdmaConferenceController::AddInternal(
-    /* [in] */ CdmaConnection* connection)
+    /* [in] */ ICdmaConnection* connection)
 {
     mCdmaConnections->Add(TO_IINTERFACE(connection));
-    connection->AddConnectionListener(mConnectionListener);
+    Elastos::Droid::Telecomm::Telecom::IConnection::Probe(connection)->AddConnectionListener(mConnectionListener);
     RecalculateConference();
 }
 
 void CdmaConferenceController::Remove(
-    /* [in] */ CdmaConnection* connection)
+    /* [in] */ ICdmaConnection* connection)
 {
-    connection->removeConnectionListener(mConnectionListener);
-    mCdmaConnections->remove(TO_IINTERFACE(connection));
+    Elastos::Droid::Telecomm::Telecom::IConnection::Probe(connection)->RemoveConnectionListener(mConnectionListener);
+    mCdmaConnections->Remove(TO_IINTERFACE(connection));
     RecalculateConference();
 }
 
@@ -130,9 +144,10 @@ void CdmaConferenceController::RecalculateConference()
 
              // We do not include call-waiting calls in conferences.
             Boolean res;
-            State stete;
+            Int32 state;
             if ((connection->IsCallWaiting(&res), !res) &&
-                    (connection->GetState(&stete), stete) != IConnection::STATE_DISCONNECTED) {
+                    ((Elastos::Droid::Telecomm::Telecom::IConnection::Probe(connection)->GetState(&state), state)
+                    != Elastos::Droid::Telecomm::Telecom::IConnection::STATE_DISCONNECTED)) {
                 conferenceConnections->Add(TO_IINTERFACE(connection));
             }
     }
@@ -166,39 +181,42 @@ void CdmaConferenceController::RecalculateConference()
         }
 
         // 2) Add any new connections to the conference
-        mConference->GetSize(&size);
+        AutoPtr<IList> connections;
+        mConference->GetConnections((IList**)&connections);
         AutoPtr<IList> existingChildConnections;
-        CArrayList::New(size, (IList**)&existingChildConnections);
+        CArrayList::New(ICollection::Probe(connections), (IList**)&existingChildConnections);
 
+        Int32 size;
         conferenceConnections->GetSize(&size);
-        for (Int32 = 0; i < size; i++) {
+        for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             conferenceConnections->Get(i, (IInterface**)&obj);
-            AutoPtr<CdmaConnection> connection = (CdmaConnection*)IObject::Probe(obj);
+            AutoPtr<ICdmaConnection> connection = ICdmaConnection::Probe(obj);
 
             Boolean res;
             if (existingChildConnections->Contains(TO_IINTERFACE(connection), &res), !res) {
                 Logger::I("CdmaConferenceController", "Adding connection to conference call: %s", TO_CSTR(connection));
-                mConference->AddConnection(TO_IINTERFACE(connection));
+                mConference->AddConnection(Elastos::Droid::Telecomm::Telecom::IConnection::Probe(connection), &res);
             }
             existingChildConnections->Remove(TO_IINTERFACE(connection));
         }
 
         // 3) Remove any lingering old/disconnected/destroyed connections
         existingChildConnections->GetSize(&size);
-        for (Int32 = 0; i < size; i++) {
+        for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             existingChildConnections->Get(i, (IInterface**)&obj);
-            AutoPtr<IConnection> oldConnection = IConnection::Probe(obj);
+            AutoPtr<Elastos::Droid::Telecomm::Telecom::IConnection> oldConnection = 
+                    Elastos::Droid::Telecomm::Telecom::IConnection::Probe(obj);
 
-            mConference->RemoveConnection(TO_IINTERFACE(oldConnection));
+            mConference->RemoveConnection(oldConnection);
             Logger::I("CdmaConferenceController", "Removing connection from conference call: %s", TO_CSTR(oldConnection));
         }
 
         // 4) Add the conference to the connection service if it is new.
         if (isNewlyCreated) {
             Logger::D("CdmaConferenceController", "Adding the conference call");
-            mConnectionService->AddConference(mConference);
+            IConnectionService::Probe(mConnectionService)->AddConference(IConference::Probe(mConference));
         }
     }
     else if (conferenceConnections->IsEmpty(&tmp), tmp) {

@@ -2,7 +2,21 @@
 #define  __ELASTOS_DROID_SERVICES_TELEPHONY_TELEPHONECONNECTION_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
+#include "elastos/droid/telecomm/telecom/Connection.h"
+#include "elastos/droid/internal/telephony/Connection.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Telecomm.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::ICall;
+using Elastos::Droid::Internal::Telephony::ICallState;
+using Elastos::Droid::Internal::Telephony::IConnectionPostDialListener;
+using Elastos::Droid::Telecomm::Telecom::IAudioState;
+using Elastos::Droid::Net::IUri;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -13,7 +27,7 @@ namespace Telephony {
  * Base class for CDMA and GSM connections.
  */
 class TelephonyConnection
-    : public Connection
+    : public Elastos::Droid::Telecomm::Telecom::Connection
     , public ITelephonyConnection
 {
 private:
@@ -41,6 +55,8 @@ private:
     public:
         TO_STRING_IMPL("TelephonyConnection::MyHandler")
 
+        CAR_INTERFACE_DECL()
+
         MyConnectionPostDialListener(
             /* [in] */ TelephonyConnection* host)
             : mHost(host)
@@ -54,8 +70,7 @@ private:
     };
 
     class MyConnectionListener
-        : public Object
-        , public IConnectionListener
+        : public Elastos::Droid::Internal::Telephony::Connection::ListenerBase
     {
     public:
         TO_STRING_IMPL("TelephonyConnection::MyHandler")
@@ -82,7 +97,7 @@ private:
 
     private:
         TelephonyConnection* mHost;
-    }
+    };
 
 public:
     TO_STRING_IMPL("TelephonyConnection");
@@ -116,7 +131,7 @@ public:
 
     //@Override
     CARAPI OnAnswer(
-        /* [in] */ Int videoState);
+        /* [in] */ Int32 videoState);
 
     //@Override
     CARAPI OnReject();
@@ -135,10 +150,10 @@ public:
     CARAPI OnRemovedFromCallService();
 
     CARAPI SetOriginalConnection(
-        /* [in] */ com.android.internal.telephony.Connection* originalConnection);
+        /* [in] */ Elastos::Droid::Internal::Telephony::IConnection* originalConnection);
 
     CARAPI GetOriginalConnection(
-        /* [out] */ com.android.internal.telephony.Connection** con);
+        /* [out] */ Elastos::Droid::Internal::Telephony::IConnection** con);
 
     CARAPI GetPhone(
         /* [out] */ IPhone** phone);
@@ -201,7 +216,7 @@ public:
 
 protected:
     CARAPI constructor(
-        /* [in] */ com.android.internal.telephony.Connection originalConnection);
+        /* [in] */ Elastos::Droid::Internal::Telephony::IConnection* originalConnection);
 
     virtual CARAPI BuildCallCapabilities(
         /* [out] */ Int32* result) = 0;
@@ -219,7 +234,7 @@ protected:
 private:
     CARAPI_(Boolean) HasMultipleTopLevelCalls();
 
-    CARAPI_(AutoPtr<com.android.internal.telephony.Connection>) GetForegroundConnection();
+    CARAPI_(AutoPtr<Elastos::Droid::Internal::Telephony::IConnection>) GetForegroundConnection();
 
     /**
      * Checks to see the original connection corresponds to an active incoming call. Returns false
@@ -288,21 +303,21 @@ private:
         /* [in] */ Int32 capability);
 
 private:
-    static const Int32 MSG_PRECISE_CALL_STATE_CHANGED;
-    static const Int32 MSG_RINGBACK_TONE;
-    static const Int32 MSG_HANDOVER_STATE_CHANGED;
-    static const Int32 MSG_DISCONNECT;
+    static const Int32 MSG_PRECISE_CALL_STATE_CHANGED = 1;
+    static const Int32 MSG_RINGBACK_TONE = 2;
+    static const Int32 MSG_HANDOVER_STATE_CHANGED = 3;
+    static const Int32 MSG_DISCONNECT = 4;
 
     AutoPtr<IHandler> mHandler;
 
-    AutoPtr<IPostDialListener> mPostDialListener;
+    AutoPtr<IConnectionPostDialListener> mPostDialListener;
 
     /**
      * Listener for listening to events in the {@link com.android.internal.telephony.Connection}.
      */
-    AutoPtr<com.android.internal.telephony.Connection.Listener> mOriginalConnectionListener;
+    AutoPtr<Elastos::Droid::Internal::Telephony::IConnectionListener> mOriginalConnectionListener;
 
-    AutoPtr<com.android.internal.telephony.Connection> mOriginalConnection;
+    AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> mOriginalConnection;
     ICallState mOriginalConnectionState;
 
     /**

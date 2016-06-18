@@ -3,14 +3,16 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/telecomm/telecom/Conference.h"
+#include "elastos/droid/services/telephony/CdmaConference.h"
 #include "elastos/droid/services/telephony/CdmaConnection.h"
-#include "Elastos.Droid.Telecomm.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Telecomm.h"
 
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
 using Elastos::Droid::Telecomm::Telecom::Connection;
 using Elastos::Droid::Telecomm::Telecom::Conference;
-using Elastos::Droid::Telecomm::Telecom::IConnection;
 using Elastos::Droid::Telecomm::Telecom::IConnectionListener;
 
 namespace Elastos {
@@ -50,23 +52,23 @@ private:
         TO_STRING_IMPL("CdmaConferenceController::MyConnectionListener")
 
         MyConnectionListener(
-            /* [in] */ CdmaConferenceController* mHost)
+            /* [in] */ CdmaConferenceController* host)
             : mHost(host)
         {}
 
         //@Override
         CARAPI OnStateChanged(
-            /* [in] */ IConnection* c,
+            /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* c,
             /* [in] */ Int32 state);
 
         //@Override
         CARAPI OnDisconnected(
-            /* [in] */ IConnection* c,
+            /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* c,
             /* [in] */ IDisconnectCause* disconnectCause);
 
         //@Override
         CARAPI OnDestroyed(
-            /* [in] */ IConnection* c);
+            /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* c);
 
     private:
         CdmaConferenceController* mHost;
@@ -89,8 +91,8 @@ private:
 
     private:
         CdmaConferenceController* mHost;
-        AutOpTR<CdmaConnection> mConnection;
-        AutOpTR<IList> mConnectionsToReset;
+        AutoPtr<ICdmaConnection> mConnection;
+        AutoPtr<IList> mConnectionsToReset;
     };
 
 public:
@@ -104,10 +106,10 @@ public:
 
 private:
     CARAPI_(void) AddInternal(
-        /* [in] */ CdmaConnection* connection);
+        /* [in] */ ICdmaConnection* connection);
 
     CARAPI_(void) Remove(
-        /* [in] */ CdmaConnection* connection);
+        /* [in] */ ICdmaConnection* connection);
 
     CARAPI_(void) RecalculateConference();
 
@@ -132,7 +134,7 @@ private:
     AutoPtr<IHandler> mHandler;
 
     /** The CDMA conference connection object. */
-    AutoPtr<ICdmaConference> mConference;
+    AutoPtr<CdmaConference> mConference;
 };
 
 } // namespace Telephony

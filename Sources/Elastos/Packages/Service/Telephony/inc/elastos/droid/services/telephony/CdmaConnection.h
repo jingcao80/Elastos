@@ -2,7 +2,18 @@
 #define  __ELASTOS_DROID_SERVICES_TELEPHONY_CDMACONNECTION_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
+#include "elastos/droid/services/telephony/TelephonyConnection.h"
+#include "elastos/droid/services/telephony/EmergencyTonePlayer.h"
+#include "elastos/droid/services/telephony/EmergencyTonePlayer.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/os/Handler.h"
+#include "Elastos.Droid.Os.h"
+#include <Elastos.CoreLibrary.Utility.h>
+
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Utility::IQueue;
 
 namespace Elastos {
 namespace Droid {
@@ -14,6 +25,7 @@ namespace Telephony {
  */
 class CdmaConnection
     : public TelephonyConnection
+    , public ICdmaConnection
 {
 private:
     class MyHandler
@@ -35,9 +47,11 @@ private:
 public:
     TO_STRING_IMPL("CdmaConnection")
 
+    CAR_INTERFACE_DECL();
+
     CdmaConnection(
-        /* [in] */ IConnection* connection,
-        /* [in] */ IEmergencyTonePlayer* emergencyTonePlayer,
+        /* [in] */ Elastos::Droid::Internal::Telephony::IConnection* connection,
+        /* [in] */ EmergencyTonePlayer* emergencyTonePlayer,
         /* [in] */ Boolean allowMute,
         /* [in] */ Boolean isOutgoing);
 
@@ -102,8 +116,8 @@ private:
     CARAPI_(Boolean) IsEmergency();
 
 private:
-    static const Int32 MSG_CALL_WAITING_MISSED;
-    static const Int32 MSG_DTMF_SEND_CONFIRMATION;
+    static const Int32 MSG_CALL_WAITING_MISSED = 1;
+    static const Int32 MSG_DTMF_SEND_CONFIRMATION = 2;
     static const Int32 TIMEOUT_CALL_WAITING_MILLIS;
 
     AutoPtr<IHandler> mHandler;
@@ -115,7 +129,7 @@ private:
     Boolean mIsOutgoing;
     // Queue of pending short-DTMF characters.
     AutoPtr<IQueue> mDtmfQueue;
-    AutoPtr<IEmergencyTonePlayer> mEmergencyTonePlayer;
+    AutoPtr<EmergencyTonePlayer> mEmergencyTonePlayer;
 
     // Indicates that the DTMF confirmation from telephony is pending.
     Boolean mDtmfBurstConfirmationPending;

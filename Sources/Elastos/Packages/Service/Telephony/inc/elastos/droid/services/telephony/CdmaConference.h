@@ -37,7 +37,7 @@ public:
 
     //@Override
     CARAPI OnSeparate(
-        /* [in] */ IConnection* connection);
+        /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* connection);
 
     //@Override
     CARAPI OnHold();
@@ -67,18 +67,18 @@ private:
     CARAPI_(void) SendFlash();
 
     CARAPI_(AutoPtr<ICall>) GetMultipartyCallForConnection(
-        /* [in] */ IConnection* connection);
+        /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* connection);
 
     CARAPI_(AutoPtr<ICall>) GetOriginalCall();
 
     CARAPI_(AutoPtr<Elastos::Droid::Internal::Telephony::IConnection>) GetOriginalConnection(
-        /* [in] */ IConnection* connection);
+        /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* connection);
 
     CARAPI_(AutoPtr<CdmaConnection>) GetFirstConnection();
 
 
 private:
-    Int32 mCapabilities = PhoneCapabilities::MUTE;
+    Int32 mCapabilities;
 };
 
 } // namespace Telephony

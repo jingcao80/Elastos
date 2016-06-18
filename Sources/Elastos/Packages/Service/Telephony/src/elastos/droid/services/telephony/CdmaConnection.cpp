@@ -1,5 +1,34 @@
 
 #include "elastos/droid/services/telephony/CdmaConnection.h"
+#include "elastos/droid/services/telephony/DisconnectCauseUtil.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Telecomm.h"
+#include <Elastos.CoreLibrary.Utility.h>
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
+using Elastos::Droid::Telephony::Phone::IConstants;
+using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
+using Elastos::Droid::Internal::Telephony::ICallState;
+using Elastos::Droid::Internal::Telephony::ICallState_WAITING;
+using Elastos::Droid::Internal::Telephony::ICallState_INCOMING;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Provider::CSettingsSystem;
+using Elastos::Core::AutoLock;
+using Elastos::Core::IChar32;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::CLinkedList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -17,10 +46,10 @@ ECode CdmaConnection::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     Int32 what;
-    msg->GwtWhat(&what);
+    msg->GetWhat(&what);
     switch (what) {
         case MSG_CALL_WAITING_MISSED:
-            mHost->HangupCallWaiting(DisconnectCause.INCOMING_MISSED);
+            mHost->HangupCallWaiting(Elastos::Droid::Telephony::IDisconnectCause::INCOMING_MISSED);
             break;
         case MSG_DTMF_SEND_CONFIRMATION:
             mHost->HandleBurstDtmfConfirmation();
@@ -31,23 +60,23 @@ ECode CdmaConnection::MyHandler::HandleMessage(
     return NOERROR;
 }
 
-const Int32 CdmaConnection::MSG_CALL_WAITING_MISSED = 1;
-const Int32 CdmaConnection::MSG_DTMF_SEND_CONFIRMATION = 2;
 const Int32 CdmaConnection::TIMEOUT_CALL_WAITING_MILLIS = 20 * 1000;
 
+CAR_INTERFACE_IMPL(CdmaConnection, TelephonyConnection, ICdmaConnection);
+
 CdmaConnection::CdmaConnection(
-    /* [in] */ IConnection* connection,
-    /* [in] */ IEmergencyTonePlayer* emergencyTonePlayer,
+    /* [in] */ Elastos::Droid::Internal::Telephony::IConnection* connection,
+    /* [in] */ EmergencyTonePlayer* emergencyTonePlayer,
     /* [in] */ Boolean allowMute,
     /* [in] */ Boolean isOutgoing)
     : mAllowMute(allowMute)
     , mIsOutgoing(isOutgoing)
-    , mDtmfBurstConfirmationPending(FALSE)
     , mEmergencyTonePlayer(emergencyTonePlayer)
+    , mDtmfBurstConfirmationPending(FALSE)
 {
     TelephonyConnection::constructor(connection);
-    State state;
-    mIsCallWaiting = (connection != NULL) && ((connection->GetState(&state), state) == Call.State.WAITING);
+    ICallState state;
+    mIsCallWaiting = (connection != NULL) && ((connection->GetState(&state), state) == ICallState_WAITING);
     if (mIsCallWaiting) {
         StartCallWaitingTimer();
     }
@@ -85,18 +114,18 @@ ECode CdmaConnection::OnStopDtmfTone()
 
 ECode CdmaConnection::OnReject()
 {
-    AutoPtr<IConnection> connection;
-    GetOriginalConnection((IConnection**)&connection);
+    AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> connection;
+    GetOriginalConnection((Elastos::Droid::Internal::Telephony::IConnection**)&connection);
     if (connection != NULL) {
-        State state;
+        ICallState state;
         connection->GetState(&state);
         switch (state) {
-            case INCOMING:
+            case ICallState_INCOMING:
                 // Normal ringing calls are handled the generic way.
                 TelephonyConnection::OnReject();
                 break;
-            case WAITING:
-                HangupCallWaiting(IDisconnectCause::INCOMING_REJECTED);
+            case ICallState_WAITING:
+                HangupCallWaiting(Elastos::Droid::Telephony::IDisconnectCause::INCOMING_REJECTED);
                 break;
             default:
                 Logger::E("CdmaConnection",  "Rejecting a non-ringing call");
@@ -111,22 +140,23 @@ ECode CdmaConnection::OnReject()
 ECode CdmaConnection::OnAnswer()
 {
     mHandler->RemoveMessages(MSG_CALL_WAITING_MISSED);
-    return TelephonyConnection::OnAnswer();
+    assert(0);
+    //return TelephonyConnection::OnAnswer();
+    return NOERROR;
 }
 
 ECode CdmaConnection::OnStateChanged(
     /* [in] */ Int32 state)
 {
-    AutoPtr<IConnection> originalConnection;
-    GetOriginalConnection((IConnection**)&originalConnection);
+    AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> originalConnection;
+    GetOriginalConnection((Elastos::Droid::Internal::Telephony::IConnection**)&originalConnection);
 
-    State state;
+    ICallState _state;
     mIsCallWaiting = (originalConnection != NULL) &&
-            ((originalConnection->GetState(&state), state) == Call.State.WAITING);
+            ((originalConnection->GetState(&_state), _state) == ICallState_WAITING);
 
-    if (state == android.telecom.Connection.STATE_DIALING) {
-        Boolean res;
-        if (IsEmergency(&res), res) {
+    if (state == Elastos::Droid::Telecomm::Telecom::IConnection::STATE_DIALING) {
+        if (IsEmergency()) {
             mEmergencyTonePlayer->Start();
         }
     }
@@ -154,7 +184,7 @@ ECode CdmaConnection::BuildCallCapabilities(
 ECode CdmaConnection::ForceAsDialing(
     /* [in] */ Boolean isDialing)
 {
-    if (IsDialing) {
+    if (isDialing) {
         SetDialing();
     }
     else {
@@ -183,19 +213,20 @@ ECode CdmaConnection::IsCallWaiting(
 
 void CdmaConnection::StartCallWaitingTimer()
 {
-    mHandler->SendEmptyMessageDelayed(MSG_CALL_WAITING_MISSED, TIMEOUT_CALL_WAITING_MILLIS);
+    Boolean res;
+    mHandler->SendEmptyMessageDelayed(MSG_CALL_WAITING_MISSED, TIMEOUT_CALL_WAITING_MILLIS, &res);
 }
 
 void CdmaConnection::HangupCallWaiting(
     /* [in] */ Int32 telephonyDisconnectCause)
 {
-    AutoPtr<IConnection> originalConnection;
-    GetOriginalConnection((IConnection**)&originalConnection);
+    AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> originalConnection;
+    GetOriginalConnection((Elastos::Droid::Internal::Telephony::IConnection**)&originalConnection);
     if (originalConnection != NULL) {
         //try {
         ECode ec = originalConnection->Hangup();
         //} catch (CallStateException e) {
-        if (ec == (ECode)CallStateException) {
+        if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
             Logger::E("CdmaConnection", "%d Failed to hangup call waiting call", ec);
         }
         //}
@@ -227,11 +258,11 @@ void CdmaConnection::SendShortDtmfToNetwork(
     {
         AutoLock syncLock(mDtmfQueue);
         if (mDtmfBurstConfirmationPending) {
-            AutoPtr<ICharacter> obj = CoreUtil::Convert(digit);
+            AutoPtr<IChar32> obj = CoreUtils::ConvertChar32(digit);
             mDtmfQueue->Add(TO_IINTERFACE(obj));
         }
         else {
-            String str = StringUtils::ToString(digit);
+            String str = StringUtils::ToString((Int32)digit);
             SendBurstDtmfStringLocked(str);
         }
     }
@@ -261,16 +292,18 @@ void CdmaConnection::HandleBurstDtmfConfirmation()
             StringBuilder builder;
             Boolean tmp;
             while (mDtmfQueue->IsEmpty(&tmp), !tmp) {
-                builder->Append(mDtmfQueue.poll());
+                AutoPtr<IInterface> e;
+                mDtmfQueue->Poll((IInterface**)&e);
+                builder += TO_CSTR(e);
             }
-            builder->ToString(&dtmfDigits);
+            builder.ToString(&dtmfDigits);
 
             // It would be nice to log the digit, but since DTMF digits can be passwords
             // to things, or other secure account numbers, we want to keep it away from
             // the logs.
             Logger::I("CdmaConnection", "%d dtmf character[s] removed from the queue", dtmfDigits.GetLength());
         }
-        if (IdtmfDigits.IsNull()) {
+        if (!dtmfDigits.IsNull()) {
             SendBurstDtmfStringLocked(dtmfDigits);
         }
     }
@@ -280,12 +313,21 @@ Boolean CdmaConnection::IsEmergency()
 {
     AutoPtr<IPhone> phone;
     GetPhone((IPhone**)&phone);
-
     AutoPtr<IContext> context;
     phone->GetContext((IContext**)&context);
-    return phone != NULL &&
-            PhoneNumberUtils::IsLocalEmergencyNumber(
-                context, getAddress().getSchemeSpecificPart());
+
+    if (phone != NULL) {
+        AutoPtr<IPhoneNumberUtils> helper;
+        CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+        AutoPtr<IUri> uri;
+        GetAddress((IUri**)&uri);
+        String part;
+        uri->GetSchemeSpecificPart(&part);
+        Boolean res;
+        helper->IsLocalEmergencyNumber(context, part, &res); 
+        return res;
+    }
+    return FALSE;
 }
 
 } // namespace Telephony

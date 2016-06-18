@@ -1,5 +1,43 @@
 
 #include "elastos/droid/services/telephony/CTelephonyConnectionService.h"
+#include "elastos/droid/services/telephony/DisconnectCauseUtil.h"
+#include "elastos/droid/services/telephony/EmergencyCallHelper.h"
+#include "elastos/droid/services/telephony/GsmConnection.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Telephony.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include <Elastos.CoreLibrary.Utility.h>
+
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Internal::Telephony::IISub;
+using Elastos::Droid::Internal::Telephony::IPhoneBase;
+using Elastos::Droid::Internal::Telephony::CPhoneFactory;
+using Elastos::Droid::Internal::Telephony::IPhoneFactory;
+using Elastos::Droid::Internal::Telephony::Cdma::ICDMAPhone;
+using Elastos::Droid::Internal::Telephony::IPhoneProxy;
+using Elastos::Droid::Internal::Telephony::ICallState;
+using Elastos::Droid::Internal::Telephony::ICallState_WAITING;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::ISubscriptionController;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -13,26 +51,31 @@ ECode CTelephonyConnectionService::MyEmergencyCallHelperCallback::OnComplete(
     /* [in] */ Boolean isRadioReady)
 {
     Int32 state;
-    connection->GetState(&state);
-    if (state == IConnection::STATE_DISCONNECTED) {
+    Elastos::Droid::Telecomm::Telecom::IConnection::Probe(mConnection)->GetState(&state);
+    if (state == Elastos::Droid::Telecomm::Telecom::IConnection::STATE_DISCONNECTED) {
         // If the connection has already been disconnected, do nothing.
     }
     else if (isRadioReady) {
-        connection->SetInitialized();
-        PlaceOutgoingConnection(connection, phone, request);
+        Elastos::Droid::Telecomm::Telecom::IConnection::Probe(mConnection)->SetInitialized();
+        mHost->PlaceOutgoingConnection(mConnection, mPhone, mRequest);
     }
     else {
         Logger::D("CTelephonyConnectionService", "onCreateOutgoingConnection, failed to turn on radio");
-        AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                android.telephony.DisconnectCause.POWER_OFF,
+        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                Elastos::Droid::Telephony::IDisconnectCause::POWER_OFF,
                 String("Failed to turn on radio."));
-        connection->SetDisconnected(cause);
-        connection->Destroy();
+        Elastos::Droid::Telecomm::Telecom::IConnection::Probe(mConnection)->SetDisconnected(cause);
+        Elastos::Droid::Telecomm::Telecom::IConnection::Probe(mConnection)->Destroy();
     }
     return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(CTelephonyConnectionService, ConnectionService, ITelephonyConnectionService)
+
+ECode CTelephonyConnectionService::constructor()
+{
+    return NOERROR;
+}
 
 CTelephonyConnectionService::CTelephonyConnectionService()
 {
@@ -42,16 +85,17 @@ CTelephonyConnectionService::CTelephonyConnectionService()
 
 ECode CTelephonyConnectionService::OnCreate()
 {
-    ConnectionService::OnCreate();
-    CComponentName::New(this, this.getClass(), (IComponentName**)&mExpectedComponentName);
-    mEmergencyTonePlayer = new EmergencyTonePlayer(this);
+    assert(0);
+    //ConnectionService::OnCreate();
+    //CComponentName::New(this, this.getClass(), (IComponentName**)&mExpectedComponentName);
+    mEmergencyTonePlayer = new EmergencyTonePlayer((IContext*)this);
     return NOERROR;
 }
 
 ECode CTelephonyConnectionService::OnCreateOutgoingConnection(
     /* [in] */ IPhoneAccountHandle* connectionManagerPhoneAccount,
     /* [in] */ IConnectionRequest* request,
-    /* [out] */ IConnection** result)
+    /* [out] */ Elastos::Droid::Telecomm::Telecom::IConnection** result)
 {
     Logger::I("CTelephonyConnectionService", "onCreateOutgoingConnection, request: %s", TO_CSTR(request));
 
@@ -59,9 +103,9 @@ ECode CTelephonyConnectionService::OnCreateOutgoingConnection(
     request->GetAddress((IUri**)&handle);
     if (handle == NULL) {
         Logger::D("CTelephonyConnectionService", "onCreateOutgoingConnection, handle is null");
-        AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                android.telephony.DisconnectCause.NO_PHONE_NUMBER_SUPPLIED,
-                Stringf("No phone number supplied"));
+        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                Elastos::Droid::Telephony::IDisconnectCause::NO_PHONE_NUMBER_SUPPLIED,
+                String("No phone number supplied"));
         return Connection::CreateFailedConnection(cause, result);
     }
 
@@ -71,36 +115,36 @@ ECode CTelephonyConnectionService::OnCreateOutgoingConnection(
     if (IPhoneAccount::SCHEME_VOICEMAIL.Equals(scheme)) {
         // TODO: We don't check for SecurityException here (requires
         // CALL_PRIVILEGED permission).
-        utoPtr<IPhoneAccountHandle> handle;
-        request->GetAccountHandle((IPhoneAccountHandle**)&handle);
-        AutoPtr<IPhone> phone = GetPhoneForAccount(handle, FALSE);
+        AutoPtr<Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle> _handle;
+        request->GetAccountHandle((Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle**)&_handle);
+        AutoPtr<IPhone> phone = GetPhoneForAccount(_handle, FALSE);
         if (phone == NULL) {
             Logger::D("CTelephonyConnectionService", "onCreateOutgoingConnection, phone is null");
-            AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil.toTelecomDisconnectCause(
-                    android.telephony.DisconnectCause.OUTGOING_FAILURE,
-                    Srting("Phone is null"));
+            AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                    Elastos::Droid::Telephony::IDisconnectCause::OUTGOING_FAILURE,
+                    String("Phone is null"));
             return Connection::CreateFailedConnection(cause, result);
         }
         phone->GetVoiceMailNumber(&number);
         if (TextUtils::IsEmpty(number)) {
             Logger::D("CTelephonyConnectionService", "onCreateOutgoingConnection, no voicemail number set.");
-            AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                    android.telephony.DisconnectCause.VOICEMAIL_NUMBER_MISSING,
-                    Srting("Voicemail scheme provided but no voicemail number set."))
+            AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                    Elastos::Droid::Telephony::IDisconnectCause::VOICEMAIL_NUMBER_MISSING,
+                    String("Voicemail scheme provided but no voicemail number set."));
             return Connection::CreateFailedConnection(cause, result);
         }
 
         // Convert voicemail: to tel:
         AutoPtr<IUriHelper> helper;
         CUriHelper::AcquireSingleton((IUriHelper**)&helper);
-        helper->FromParts(IPhoneAccount::SCHEME_TEL, number, NULL, (IPhoneAccountHandle**)&handle);
+        helper->FromParts(IPhoneAccount::SCHEME_TEL, number, String(NULL), (IUri**)&handle);
     }
     else {
         if (!IPhoneAccount::SCHEME_TEL.Equals(scheme)) {
             Logger::D("CTelephonyConnectionService", "onCreateOutgoingConnection, Handle %s is not type tel",
                     scheme.string());
-            AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                    android.telephony.DisconnectCause.INVALID_NUMBER,
+            AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                    Elastos::Droid::Telephony::IDisconnectCause::INVALID_NUMBER,
                     String("Handle scheme is not type tel"));
             return Connection::CreateFailedConnection(cause, result);
         }
@@ -108,23 +152,26 @@ ECode CTelephonyConnectionService::OnCreateOutgoingConnection(
         handle->GetSchemeSpecificPart(&number);
         if (TextUtils::IsEmpty(number)) {
             Logger::D("CTelephonyConnectionService", "onCreateOutgoingConnection, unable to parse number");
-            AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                    android.telephony.DisconnectCause.INVALID_NUMBER,
+            AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                    Elastos::Droid::Telephony::IDisconnectCause::INVALID_NUMBER,
                     String("Unable to parse number"));
             return Connection::CreateFailedConnection(cause, result);
         }
     }
 
-    Boolean isEmergencyNumber = PhoneNumberUtils::IsPotentialEmergencyNumber(number);
+    AutoPtr<IPhoneNumberUtils> helper;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+    Boolean isEmergencyNumber;
+    helper->IsPotentialEmergencyNumber(number, &isEmergencyNumber);
 
     // Get the right phone object from the account data passed in.
-    AutoPtr<IPhoneAccountHandle> handle;
-    request->GetAccountHandle((IPhoneAccountHandle**)&handle);
-    AutoPtr<IPhone> phone = GetPhoneForAccount(handle, isEmergencyNumber);
+    AutoPtr<Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle> handle2;
+    request->GetAccountHandle((Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle**)&handle2);
+    AutoPtr<IPhone> phone = GetPhoneForAccount(handle2, isEmergencyNumber);
     if (phone == NULL) {
         Logger::D("CTelephonyConnectionService", "onCreateOutgoingConnection, phone is null");
-        AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                android.telephony.DisconnectCause.OUTGOING_FAILURE, String("Phone is null"));
+        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                Elastos::Droid::Telephony::IDisconnectCause::OUTGOING_FAILURE, String("Phone is null"));
         return Connection::CreateFailedConnection(cause, result);
     }
 
@@ -135,7 +182,7 @@ ECode CTelephonyConnectionService::OnCreateOutgoingConnection(
     Boolean useEmergencyCallHelper = FALSE;
 
     if (isEmergencyNumber) {
-        if (state == iServiceState::STATE_POWER_OFF) {
+        if (state == IServiceState::STATE_POWER_OFF) {
             useEmergencyCallHelper = TRUE;
         }
     }
@@ -146,15 +193,15 @@ ECode CTelephonyConnectionService::OnCreateOutgoingConnection(
                 break;
             case IServiceState::STATE_OUT_OF_SERVICE:
             {
-                AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                        android.telephony.DisconnectCause.OUT_OF_SERVICE,
+                AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                        Elastos::Droid::Telephony::IDisconnectCause::OUT_OF_SERVICE,
                         String("ServiceState.STATE_OUT_OF_SERVICE"));
                 return Connection::CreateFailedConnection(cause, result);
             }
             case IServiceState::STATE_POWER_OFF:
             {
-                AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                        android.telephony.DisconnectCause.POWER_OFF,
+                AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                        Elastos::Droid::Telephony::IDisconnectCause::POWER_OFF,
                         String("ServiceState.STATE_POWER_OFF"));
                 return Connection::CreateFailedConnection(cause, result);
             }
@@ -166,8 +213,8 @@ ECode CTelephonyConnectionService::OnCreateOutgoingConnection(
                 StringBuilder sb;
                 sb += "Unknown service state ";
                 sb += state;
-                AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                        android.telephony.DisconnectCause.OUTGOING_FAILURE,
+                AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                        Elastos::Droid::Telephony::IDisconnectCause::OUTGOING_FAILURE,
                         sb.ToString());
                 return Connection::CreateFailedConnection(cause, result);
             }
@@ -177,29 +224,29 @@ ECode CTelephonyConnectionService::OnCreateOutgoingConnection(
     AutoPtr<ITelephonyConnection> connection =
             CreateConnectionFor(phone, NULL, TRUE /* isOutgoing */);
     if (connection == NULL) {
-        AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                android.telephony.DisconnectCause.OUTGOING_FAILURE,
+        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                Elastos::Droid::Telephony::IDisconnectCause::OUTGOING_FAILURE,
                 String("Invalid phone type"));
         return Connection::CreateFailedConnection(cause, result);
     }
-    connection->SetAddress(handle, IPhoneConstants::PRESENTATION_ALLOWED);
-    connection->SetInitializing();
+    Elastos::Droid::Telecomm::Telecom::IConnection::Probe(connection)->SetAddress(handle, IPhoneConstants::PRESENTATION_ALLOWED);
+    Elastos::Droid::Telecomm::Telecom::IConnection::Probe(connection)->SetInitializing();
     Int32 tmp;
     request->GetVideoState(&tmp);
-    connection->SetVideoState(tmp);
+    Elastos::Droid::Telecomm::Telecom::IConnection::Probe(connection)->SetVideoState(tmp);
 
     if (useEmergencyCallHelper) {
         if (mEmergencyCallHelper == NULL) {
-            mEmergencyCallHelper = new EmergencyCallHelper(this);
+            mEmergencyCallHelper = new EmergencyCallHelper((IContext*)this);
         }
-        AutoPtr<IEmergencyCallHelperCallback>  c = new MyEmergencyCallHelperCallback(this);
+        AutoPtr<IEmergencyCallHelperCallback>  c = new MyEmergencyCallHelperCallback(this, connection, phone, request);
         mEmergencyCallHelper->StartTurnOnRadioSequence(phone, c);
     }
     else {
         PlaceOutgoingConnection(connection, phone, request);
     }
 
-    *result = connection;
+    *result = Elastos::Droid::Telecomm::Telecom::IConnection::Probe(connection);
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -207,7 +254,7 @@ ECode CTelephonyConnectionService::OnCreateOutgoingConnection(
 ECode CTelephonyConnectionService::OnCreateIncomingConnection(
     /* [in] */ IPhoneAccountHandle* connectionManagerPhoneAccount,
     /* [in] */ IConnectionRequest* request,
-    /* [out] */ IConnection** result)
+    /* [out] */ Elastos::Droid::Telecomm::Telecom::IConnection** result)
 {
     Logger::I("CTelephonyConnectionService", "onCreateIncomingConnection, request: %s", TO_CSTR(request));
 
@@ -215,43 +262,45 @@ ECode CTelephonyConnectionService::OnCreateIncomingConnection(
     request->GetAccountHandle((IPhoneAccountHandle**)&handle);
     AutoPtr<IPhone> phone = GetPhoneForAccount(handle, FALSE);
     if (phone == NULL) {
-        AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                android.telephony.DisconnectCause.ERROR_UNSPECIFIED);
+        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                Elastos::Droid::Telephony::IDisconnectCause::ERROR_UNSPECIFIED);
         return Connection::CreateFailedConnection(cause, result);
     }
 
     AutoPtr<ICall> call;
     phone->GetRingingCall((ICall**)&call);
 
-    AutoPtr<ICallState> state;
-    call->GetState((ICallState**)&state);
-    Boolean res;
-    if (state->IsRinging(&res), !res) {
-        Logger::I("CTelephonyConnectionService", "onCreateIncomingConnection, no ringing call");
-        AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                android.telephony.DisconnectCause.INCOMING_MISSED,
-                String("Found no ringing call"));
-        return Connection::CreateFailedConnection(cause, result);
-    }
+    ICallState state;
+    call->GetState(&state);
+    assert(0);
+    //Boolean res;
+    // if (state->IsRinging(&res), !res) {
+    //     Logger::I("CTelephonyConnectionService", "onCreateIncomingConnection, no ringing call");
+    //     AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+    //             Elastos::Droid::Telephony::IDisconnectCause::INCOMING_MISSED,
+    //             String("Found no ringing call"));
+    //     return Connection::CreateFailedConnection(cause, result);
+    // }
 
-    AutoPtr<com.android.internal.telephony.Connection> originalConnection;
+    AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> originalConnection;
     if (state == ICallState_WAITING) {
-        originalConnection = call->GetLatestConnection()
+        call->GetLatestConnection((Elastos::Droid::Internal::Telephony::IConnection**)&originalConnection);
     }
     else {
-        originalConnection = call->GetEarliestConnection();
+        call->GetEarliestConnection((Elastos::Droid::Internal::Telephony::IConnection**)&originalConnection);
     }
 
-    if (IsOriginalConnectionKnown(originalConnection, &res), res) {
+    if (IsOriginalConnectionKnown(originalConnection)) {
         Logger::I("CTelephonyConnectionService",
                 "onCreateIncomingConnection, original connection already registered");
         return Connection::CreateCanceledConnection(result);
     }
 
-    AutoPtr<IConnection> connection =
+    AutoPtr<ITelephonyConnection> tconnection =
             CreateConnectionFor(phone, originalConnection, FALSE /* isOutgoing */);
+    AutoPtr<Elastos::Droid::Telecomm::Telecom::IConnection> connection = Elastos::Droid::Telecomm::Telecom::IConnection::Probe(tconnection);
     if (connection == NULL) {
-        Connection::CreateCanceledConnection((IConnection**)&connection);
+        Connection::CreateCanceledConnection((Elastos::Droid::Telecomm::Telecom::IConnection**)&connection);
     }
     *result = connection;
     REFCOUNT_ADD(*result);
@@ -261,7 +310,7 @@ ECode CTelephonyConnectionService::OnCreateIncomingConnection(
 ECode CTelephonyConnectionService::OnCreateUnknownConnection(
     /* [in] */ IPhoneAccountHandle* connectionManagerPhoneAccount,
     /* [in] */ IConnectionRequest* request,
-    /* [out] */ IConnection** result)
+    /* [out] */ Elastos::Droid::Telecomm::Telecom::IConnection** result)
 {
     Logger::I("CTelephonyConnectionService", "onCreateUnknownConnection, request: %s", TO_CSTR(request));
 
@@ -269,8 +318,8 @@ ECode CTelephonyConnectionService::OnCreateUnknownConnection(
     request->GetAccountHandle((IPhoneAccountHandle**)&handle);
     AutoPtr<IPhone> phone = GetPhoneForAccount(handle, FALSE);
     if (phone == NULL) {
-        AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                android.telephony.DisconnectCause.ERROR_UNSPECIFIED)
+        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                Elastos::Droid::Telephony::IDisconnectCause::ERROR_UNSPECIFIED);
         return Connection::CreateFailedConnection(cause, result);
     }
 
@@ -283,7 +332,7 @@ ECode CTelephonyConnectionService::OnCreateUnknownConnection(
     if (ringingCall->HasConnections(&res), res) {
         AutoPtr<IList> list;
         ringingCall->GetConnections((IList**)&list);
-        allConnections->AddAll(list);
+        allConnections->AddAll(ICollection::Probe(list));
     }
 
     AutoPtr<ICall> foregroundCall;
@@ -291,7 +340,7 @@ ECode CTelephonyConnectionService::OnCreateUnknownConnection(
     if (foregroundCall->HasConnections(&res), res) {
         AutoPtr<IList> list;
         foregroundCall->GetConnections((IList**)&list);
-        allConnections->AddAll(list);
+        allConnections->AddAll(ICollection::Probe(list));
     }
 
     AutoPtr<ICall> backgroundCall;
@@ -299,16 +348,17 @@ ECode CTelephonyConnectionService::OnCreateUnknownConnection(
     if (backgroundCall->HasConnections(&res), res) {
         AutoPtr<IList> list;
         backgroundCall->GetConnections((IList**)&list);
-        allConnections->AddAll(list);
+        allConnections->AddAll(ICollection::Probe(list));
     }
 
-    AutoPtr<com.android.internal.telephony.Connection> unknownConnection;
+    AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> unknownConnection;
     Int32 size;
     allConnections->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         allConnections->Get(i, (IInterface**)&obj);
-        AutoPtr<com.android.internal.telephony.Connection telephonyConnection> telephonyConnection = ::Probe(obj);
+        AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> telephonyConnection = 
+                Elastos::Droid::Internal::Telephony::IConnection::Probe(obj);
 
         if (!IsOriginalConnectionKnown(telephonyConnection)) {
             unknownConnection = telephonyConnection;
@@ -330,7 +380,7 @@ ECode CTelephonyConnectionService::OnCreateUnknownConnection(
     }
     else {
         connection->UpdateState();
-        *result = connection;
+        *result = Elastos::Droid::Telecomm::Telecom::IConnection::Probe(connection);
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -338,8 +388,8 @@ ECode CTelephonyConnectionService::OnCreateUnknownConnection(
 }
 
 ECode CTelephonyConnectionService::OnConference(
-    /* [in] */ IConnection* connection1,
-    /* [in] */ IConnection* connection2)
+    /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* connection1,
+    /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* connection2)
 {
     if (ITelephonyConnection::Probe(connection1) != NULL &&
             ITelephonyConnection::Probe(connection2) != NULL) {
@@ -355,43 +405,45 @@ void CTelephonyConnectionService::PlaceOutgoingConnection(
     /* [in] */ IConnectionRequest* request)
 {
     AutoPtr<IUri> uri;
-    connection->GetAddress(&uri);
+    Elastos::Droid::Telecomm::Telecom::IConnection::Probe(connection)->GetAddress((IUri**)&uri);
     String number;
     uri->GetSchemeSpecificPart(&number);
 
-    com.android.internal.telephony.Connection originalConnection;
+    AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> originalConnection;
     //try {
     Int32 state;
     request->GetVideoState(&state);
-    ECode ec = phone->Dial(number, state, ()&originalConnection);
+    ECode ec = phone->Dial(number, state, (Elastos::Droid::Internal::Telephony::IConnection**)&originalConnection);
     //} catch (CallStateException e) {
-    if (ec == (ECode)CallStateException) {
+    if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
         Logger::E("CTelephonyConnectionService", "placeOutgoingConnection, phone.dial exception: %d",ec);
-        AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                android.telephony.DisconnectCause.OUTGOING_FAILURE /*e.getMessage()*/);
-        connection->SetDisconnected(cause);
+        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                Elastos::Droid::Telephony::IDisconnectCause::OUTGOING_FAILURE /*e.getMessage()*/);
+        Elastos::Droid::Telecomm::Telecom::IConnection::Probe(connection)->SetDisconnected(cause);
         return;
     }
     //}
 
     if (originalConnection == NULL) {
-        Int32 telephonyDisconnectCause = android.telephony.DisconnectCause.OUTGOING_FAILURE;
+        Int32 telephonyDisconnectCause = Elastos::Droid::Telephony::IDisconnectCause::OUTGOING_FAILURE;
         // On GSM phones, null connection means that we dialed an MMI code
         Int32 type;
         phone->GetPhoneType(&type);
         if (type == IPhoneConstants::PHONE_TYPE_GSM) {
             Logger::D("CTelephonyConnectionService", "dialed MMI code");
-            telephonyDisconnectCause = android.telephony.DisconnectCause.DIALED_MMI;
+            telephonyDisconnectCause = Elastos::Droid::Telephony::IDisconnectCause::DIALED_MMI;
             AutoPtr<IIntent> intent;
-            CIntent::New(this, MMIDialogActivity.class, (IIntent**)&intent);
+            assert(0);
+            //CIntent::New(this, MMIDialogActivity.class, (IIntent**)&intent);
             intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK |
                     IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            StartActivity(intent);
+            assert(0);
+            //StartActivity(intent);
         }
         Logger::D("CTelephonyConnectionService", "placeOutgoingConnection, phone.dial returned null");
-        AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
                 telephonyDisconnectCause, String("Connection is null"));
-        connection->SetDisconnected(cause);
+        Elastos::Droid::Telecomm::Telecom::IConnection::Probe(connection)->SetDisconnected(cause);
     }
     else {
         connection->SetOriginalConnection(originalConnection);
@@ -400,21 +452,21 @@ void CTelephonyConnectionService::PlaceOutgoingConnection(
 
 AutoPtr<ITelephonyConnection> CTelephonyConnectionService::CreateConnectionFor(
     /* [in] */ IPhone* phone,
-    /* [in] */ com.android.internal.telephony.Connection originalConnection,
+    /* [in] */ Elastos::Droid::Internal::Telephony::IConnection* originalConnection,
     /* [in] */ Boolean isOutgoing)
 {
     Int32 phoneType;
     phone->GetPhoneType(&phoneType);
     if (phoneType == ITelephonyManager::PHONE_TYPE_GSM) {
-        AutoPtr<IGsmConnection> connection = new GsmConnection(originalConnection);
-        mGsmConferenceController->Add(TO_IINTERFACE(connection));
+        AutoPtr<GsmConnection> connection = new GsmConnection(originalConnection);
+        mGsmConferenceController->Add(connection);
         return ITelephonyConnection::Probe(connection);
     }
     else if (phoneType == ITelephonyManager::PHONE_TYPE_CDMA) {
         Boolean allowMute = AllowMute(phone);
-        AutoPtr<ICdmaConnection> connection = new CdmaConnection(
+        AutoPtr<CdmaConnection> connection = new CdmaConnection(
                 originalConnection, mEmergencyTonePlayer, allowMute, isOutgoing);
-        mCdmaConferenceController->Add(TO_IINTERFACE(connection));
+        mCdmaConferenceController->Add(connection);
         return ITelephonyConnection::Probe(connection);
     } else {
         return NULL;
@@ -422,7 +474,7 @@ AutoPtr<ITelephonyConnection> CTelephonyConnectionService::CreateConnectionFor(
 }
 
 Boolean CTelephonyConnectionService::IsOriginalConnectionKnown(
-    /* [in] */ com.android.internal.telephony.Connection originalConnection)
+    /* [in] */ Elastos::Droid::Internal::Telephony::IConnection* originalConnection)
 {
     AutoPtr<ICollection> con;
     GetAllConnections((ICollection**)&con);
@@ -434,8 +486,9 @@ Boolean CTelephonyConnectionService::IsOriginalConnectionKnown(
 
         AutoPtr<ITelephonyConnection> telephonyConnection = ITelephonyConnection::Probe(connection);
         if (ITelephonyConnection::Probe(connection) != NULL) {
-
-            if (telephonyConnection.getOriginalConnection() == originalConnection) {
+            AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> tmp;
+            telephonyConnection->GetOriginalConnection((Elastos::Droid::Internal::Telephony::IConnection**)&tmp);
+            if (TO_IINTERFACE(tmp) == TO_IINTERFACE(originalConnection)) {
                 return TRUE;
             }
         }
@@ -449,30 +502,38 @@ AutoPtr<IPhone> CTelephonyConnectionService::GetPhoneForAccount(
     /* [in] */ Boolean isEmergency)
 {
     if (isEmergency) {
+        AutoPtr<IPhoneFactory> helper;
+        CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper);
         AutoPtr<IPhone> phone;
-        PhoneFactory::GetDefaultPhone((IPhone**)&phone);
-        return phone
+        helper->GetDefaultPhone((IPhone**)&phone);
+        return phone;
     }
 
     AutoPtr<IComponentName> name;
     accountHandle->GetComponentName((IComponentName**)&name);
     Boolean res;
-    if (IObjects::Probe(mExpectedComponentName)->Equals(name, &res), res) {
+    if (IObject::Probe(mExpectedComponentName)->Equals(name, &res), res) {
         String id;
         accountHandle->GetId(&id);
         if (!id.IsNull()) {
-            //try {
-            AutoPtr<ISubscriptionController> controller;
-            SubscriptionController::GetInstance((ISubscriptionController**)&controller);
-            Int32 phoneId;
-            FAIL_GOTO(controller->GetPhoneId(StringUtils::ParseInt64(id), &phoneId), ERROR)
-            AutoPtr<IPhone> phone;
-            PhoneFactory::GetPhone(phoneId, (IPhone**)&phone);
-            return phone;
-            //} catch (NumberFormatException e) {
+            ECode ec = NOERROR;
+            //try 
+            {
+                AutoPtr<ISubscriptionController> controller;
+                assert(0);
+                //SubscriptionController::GetInstance((ISubscriptionController**)&controller);
+                Int32 phoneId;
+                FAIL_GOTO(ec = IISub::Probe(controller)->GetPhoneId(StringUtils::ParseInt64(id), &phoneId), ERROR)
+                AutoPtr<IPhoneFactory> helper;
+                CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper);
+                AutoPtr<IPhone> phone;
+                helper->GetPhone(phoneId, (IPhone**)&phone);
+                return phone;
+            }
+            // catch (NumberFormatException e) {
         ERROR:
-            if (ec == (ECode)NumberFormatException) {
-                Logger::W("CTelephonyConnectionService", "Could not get subId from account: %s", id.tostring());
+            if (ec == (ECode)E_NUMBER_FORMAT_EXCEPTION) {
+                Logger::W("CTelephonyConnectionService", "Could not get subId from account: %s", id.string());
             }
             //}
         }
@@ -494,7 +555,7 @@ Boolean CTelephonyConnectionService::AllowMute(
         AutoPtr<ICDMAPhone> cdmaPhone = ICDMAPhone::Probe(phone);
         if (cdmaPhone != NULL) {
             Boolean res;
-            cdmaPhone->IsInEcm(&res);
+            IPhoneBase::Probe(cdmaPhone)->IsInEcm(&res);
             if (res) {
                 return FALSE;
             }

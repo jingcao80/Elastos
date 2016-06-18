@@ -1,0 +1,108 @@
+module
+{
+    using interface Elastos.Droid.Internal.Telephony.ICall;
+    using interface Elastos.Droid.Internal.Telephony.IPhone;
+    using interface Elastos.Droid.Internal.Telephony.IConnection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Services {
+    namespace Telephony {
+
+    /**
+     * Base class for CDMA and GSM connections.
+     */
+    interface ITelephonyConnection {
+        PerformHold();
+
+        PerformUnhold();
+
+        PerformConference(
+            [in] ITelephonyConnection* otherConnection);
+
+        OnRemovedFromCallService();
+
+        SetOriginalConnection(
+            [in] IConnection* originalConnection);
+
+        GetOriginalConnection(
+            [out] IConnection** con);
+
+        GetPhone(
+            [out] IPhone** phone);
+
+        UpdateState();
+
+        /**
+         * Returns the local video capability state for the connection.
+         *
+         * @return {@code True} if the connection has local video capabilities.
+         */
+        IsLocalVideoCapable(
+            [out] Boolean* result);
+
+        /**
+         * Returns the remote video capability state for the connection.
+         *
+         * @return {@code True} if the connection has remote video capabilities.
+         */
+        IsRemoteVideoCapable(
+            [out] Boolean* result);
+
+        /**
+         * Sets whether video capability is present locally.  Used during rebuild of the
+         * {@link PhoneCapabilities} to set the video call capabilities.
+         *
+         * @param capable {@code True} if video capable.
+         */
+        SetLocalVideoCapable(
+            [in] Boolean capable);
+
+        /**
+         * Sets whether video capability is present remotely.  Used during rebuild of the
+         * {@link PhoneCapabilities} to set the video call capabilities.
+         *
+         * @param capable {@code True} if video capable.
+         */
+        SetRemoteVideoCapable(
+            [in] Boolean capable);
+
+        /**
+         * Sets the current call audio quality.  Used during rebuild of the
+         * {@link PhoneCapabilities} to set or unset the {@link PhoneCapabilities#VoLTE} capability.
+         *
+         * @param audioQuality The audio quality.
+         */
+        SetAudioQuality(
+            [in] Int32 audioQuality);
+
+        /**
+         * Obtains the current call audio quality.
+         */
+        GetAudioQuality(
+            [out] Int32* result);
+
+        ResetStateForConference();
+
+        SetHoldingForConference(
+            [out] Boolean* result);
+
+        BuildCallCapabilities(
+            [out] Int32* result) ;
+
+        UpdateCallCapabilities();
+
+        UpdateAddress();
+
+        Hangup(
+            [in] Int32 telephonyDisconnectCode);
+
+        GetCall(
+            [out] ICall** call);
+    }
+
+    } // namespace Telephony
+    } // namespace Services
+    } // namespace Droid
+    } // namespace Elastos
+}

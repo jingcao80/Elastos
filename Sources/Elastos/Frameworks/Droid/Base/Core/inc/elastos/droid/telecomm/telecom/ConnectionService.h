@@ -28,7 +28,7 @@ namespace Telecom {
  * @hide
  */
 // Service
-class ConnectionService
+class ECO_PUBLIC ConnectionService
     : public Object
     , public IConnectionService
 {

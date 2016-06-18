@@ -1,15 +1,21 @@
 
 #include "elastos/droid/services/telephony/CdmaConference.h"
+#include "Elastos.Droid.Telecomm.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
+using Elastos::Utility::Logging::Logger;
+
 
 namespace Elastos {
 namespace Droid {
+namespace Services {
 namespace Telephony {
-namespace Phone {
 
 CdmaConference::CdmaConference(
     /* [in] */ IPhoneAccountHandle* phoneAccount,
     /* [in] */ Int32 capabilities)
-    : mCapabilities(PhoneCapabilities::MUTE)
+    : mCapabilities(IPhoneCapabilities::MUTE)
 {
     Conference::constructor(phoneAccount);
     SetCapabilities(mCapabilities | capabilities);
@@ -29,7 +35,7 @@ ECode CdmaConference::OnDisconnect()
         //try {
         ECode ec = call->Hangup();
         //} catch (CallStateException e) {
-        if (ec == (ECode) CallStateException) {
+        if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
             Logger::E("CdmaConference", "%d Exception thrown trying to hangup conference", ec);
         }
         //}
@@ -38,22 +44,28 @@ ECode CdmaConference::OnDisconnect()
 }
 
 ECode CdmaConference::OnSeparate(
-    /* [in] */ IConnection* connection)
+    /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* connection)
 {
     Logger::E("CdmaConference", "Separate not supported for CDMA conference call.");
-    return Exception;
+    assert(0 && "return exception");
+    //return Exception;
+    return NOERROR;
 }
 
 ECode CdmaConference::OnHold()
 {
     Logger::E("CdmaConference", "Hold not supported for CDMA conference call.");
-    return Exception;
+    assert(0 && "return exception");
+    //return Exception;
+    return NOERROR;
 }
 
 ECode CdmaConference::OnUnhold()
 {
     Logger::E("CdmaConference", "Unhold not supported for CDMA conference call.");
-    return Exception;
+    assert(0 && "return exception");
+    //return Exception;
+    return NOERROR;
 }
 
 ECode CdmaConference::OnMerge()
@@ -71,7 +83,7 @@ ECode CdmaConference::OnMerge()
 ECode CdmaConference::OnPlayDtmfTone(
     /* [in] */ Char32 c)
 {
-    AutoPtr<ICdmaConnection> connection = GetFirstConnection();
+    AutoPtr<CdmaConnection> connection = GetFirstConnection();
     if (connection != NULL) {
         connection->OnPlayDtmfTone(c);
     }
@@ -83,7 +95,7 @@ ECode CdmaConference::OnPlayDtmfTone(
 
 ECode CdmaConference::OnStopDtmfTone()
 {
-    AutoPtr<ICdmaConnection> connection = GetFirstConnection();
+    AutoPtr<CdmaConnection> connection = GetFirstConnection();
     if (connection != NULL) {
         connection->OnStopDtmfTone();
     }
@@ -110,7 +122,7 @@ void CdmaConference::SendFlash()
         call->GetPhone((IPhone**)&phone);
         ECode ec = phone->SwitchHoldingAndActive();
         //} catch (CallStateException e) {
-        if (ec == (ECode)CallStateException) {
+        if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
             Logger::E("CdmaConference", "%d Error while trying to send flash command.",ec);
         }
         //}
@@ -118,9 +130,9 @@ void CdmaConference::SendFlash()
 }
 
 AutoPtr<ICall> CdmaConference::GetMultipartyCallForConnection(
-    /* [in] */ IConnection* connection)
+    /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* connection)
 {
-    AutoPtr<com.android.internal.telephony.Connection> radioConnection =
+    AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> radioConnection =
             GetOriginalConnection(connection);
     if (radioConnection != NULL) {
         AutoPtr<ICall> call;
@@ -142,8 +154,8 @@ AutoPtr<ICall> CdmaConference::GetOriginalCall()
     if (connections->IsEmpty(&res), !res) {
         AutoPtr<IInterface> obj;
         connections->Get(0, (IInterface**)&obj);
-        AutoPtr<com.android.internal.telephony.Connection> originalConnection =
-                GetOriginalConnection(obj);
+        AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> originalConnection =
+                GetOriginalConnection(Elastos::Droid::Telecomm::Telecom::IConnection::Probe(obj));
         if (originalConnection != NULL) {
             AutoPtr<ICall> tmp;
             originalConnection->GetCall((ICall**)&tmp);
@@ -153,12 +165,12 @@ AutoPtr<ICall> CdmaConference::GetOriginalCall()
     return NULL;
 }
 
-AutoPtr<com.android.internal.telephony.Connection> CdmaConference::GetOriginalConnection(
-    /* [in] */ IConnection* connection)
+AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> CdmaConference::GetOriginalConnection(
+    /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* connection)
 {
     if (ICdmaConnection::Probe(connection) != NULL) {
-        AutoPtr<com.android.internal.telephony.Connection> con;
-        ICdmaConnection::Probe(connection)->GetOriginalConnection((com.android.internal.telephony.Connection*)con);
+        AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> con;
+        ITelephonyConnection::Probe(connection)->GetOriginalConnection((Elastos::Droid::Internal::Telephony::IConnection**)&con);
         return con;
     }
     else {
@@ -167,7 +179,7 @@ AutoPtr<com.android.internal.telephony.Connection> CdmaConference::GetOriginalCo
     }
 }
 
-AutoPtr<ICdmaConnection> CdmaConference::GetFirstConnection()
+AutoPtr<CdmaConnection> CdmaConference::GetFirstConnection()
 {
     AutoPtr<IList> connections;
     GetConnections((IList**)&connections);
@@ -178,11 +190,11 @@ AutoPtr<ICdmaConnection> CdmaConference::GetFirstConnection()
     }
     AutoPtr<IInterface> obj;
     connections->Get(0, (IInterface**)&obj);
-    AutoPtr<ICdmaConnection> tmp = ICdmaConnection::Probe(obj);
+    AutoPtr<CdmaConnection> tmp = (CdmaConnection*)ICdmaConnection::Probe(obj);
     return tmp;
 }
 
-} // namespace Phone
 } // namespace Telephony
+} // namespace Services
 } // namespace Droid
 } // namespace Elastos

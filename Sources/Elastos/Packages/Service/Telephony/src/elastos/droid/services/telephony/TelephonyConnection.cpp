@@ -1,5 +1,33 @@
 
 #include "elastos/droid/services/telephony/TelephonyConnection.h"
+#include "elastos/droid/services/telephony/DisconnectCauseUtil.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Telephony.h"
+#include <elastos/utility/logging/Logger.h>
+#include <Elastos.CoreLibrary.Core.h>
+#include <Elastos.CoreLibrary.Utility.h>
+
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
+using Elastos::Droid::Telecomm::Telecom::IConnectionService;
+using Elastos::Droid::Internal::Telephony::ICallState_IDLE;
+using Elastos::Droid::Internal::Telephony::ICallState_ACTIVE;
+using Elastos::Droid::Internal::Telephony::ICallState_HOLDING;
+using Elastos::Droid::Internal::Telephony::ICallState_DIALING;
+using Elastos::Droid::Internal::Telephony::ICallState_ALERTING;
+using Elastos::Droid::Internal::Telephony::ICallState_INCOMING;
+using Elastos::Droid::Internal::Telephony::ICallState_WAITING;
+using Elastos::Droid::Internal::Telephony::ICallState_DISCONNECTED;
+using Elastos::Droid::Internal::Telephony::ICallState_DISCONNECTING;
+using Elastos::Droid::Internal::Telephony::EIID_IConnectionPostDialListener;
+using Elastos::Droid::Internal::Telephony::ImsPhone::IImsPhoneConnection;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Core::IBoolean;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -20,44 +48,62 @@ ECode TelephonyConnection::MyHandler::HandleMessage(
     msg->GetWhat(&what);
     switch (what) {
         case MSG_PRECISE_CALL_STATE_CHANGED:
+        {
             Logger::V("TelephonyConnection", "MSG_PRECISE_CALL_STATE_CHANGED");
-            UpdateState();
+            mHost->UpdateState();
             break;
+        }
         case MSG_HANDOVER_STATE_CHANGED:
+        {
             Logger::V("TelephonyConnection", "MSG_HANDOVER_STATE_CHANGED");
-            AsyncResult ar = (AsyncResult) msg.obj;
-            com.android.internal.telephony.Connection connection =
-                 (com.android.internal.telephony.Connection) ar.result;
-            SetOriginalConnection(connection);
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> connection =
+                Elastos::Droid::Internal::Telephony::IConnection::Probe(ar->mResult);
+            mHost->SetOriginalConnection(connection);
             break;
+        }
         case MSG_RINGBACK_TONE:
+        {
             Logger::V("TelephonyConnection", "MSG_RINGBACK_TONE");
             // TODO: This code assumes that there is only one connection in the foreground
             // call, in other words, it punts on network-mediated conference calling.
-            AutoPtr<com.android.internal.telephony.Connection> ocon;
-            getOriginalConnection((om.android.internal.telephony.Connection**)&ocon);
-            AutoPtr<com.android.internal.telephony.Connection> fcon =  GetForegroundConnection();
+            AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> ocon;
+            mHost->GetOriginalConnection((Elastos::Droid::Internal::Telephony::IConnection**)&ocon);
+            AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> fcon = mHost->GetForegroundConnection();
             if (TO_IINTERFACE(ocon) != TO_IINTERFACE(fcon)) {
-                Logger::V("TelephonyConnection", "handleMessage, original connection is " +
+                Logger::V("TelephonyConnection", "handleMessage, original connection is "
                         "not foreground connection, skipping");
                 return NOERROR;
             }
-            SetRingbackRequested((Boolean) ((AsyncResult) msg.obj).result);
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<IBoolean> valueObj = IBoolean::Probe(ar->mResult);
+            Boolean value;
+            valueObj->GetValue(&value);
+            mHost->SetRingbackRequested(value);
             break;
+        }
         case MSG_DISCONNECT:
-            UpdateState();
+        {
+            mHost->UpdateState();
             break;
+        }
     }
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(TelephonyConnection::MyConnectionPostDialListener, Object, IConnectionPostDialListener);
+
 ECode TelephonyConnection::MyConnectionPostDialListener::OnPostDialWait()
 {
     Logger::V("TelephonyConnection", "onPostDialWait");
-    if (mOriginalConnection != NULL) {
+    if (mHost->mOriginalConnection != NULL) {
         String remaining;
-        mOriginalConnection->GetRemainingPostDialString(&remaining);
-        SetPostDialWait(remaining);
+        mHost->mOriginalConnection->GetRemainingPostDialString(&remaining);
+        mHost->SetPostDialWait(remaining);
     }
     return NOERROR;
 }
@@ -92,11 +138,6 @@ ECode TelephonyConnection::MyConnectionListener::OnAudioQualityChanged(
     return mHost->SetAudioQuality(audioQuality);
 }
 
-const Int32 TelephonyConnection::MSG_PRECISE_CALL_STATE_CHANGED = 1;
-const Int32 TelephonyConnection::MSG_RINGBACK_TONE = 2;
-const Int32 TelephonyConnection::MSG_HANDOVER_STATE_CHANGED = 3;
-const Int32 TelephonyConnection::MSG_DISCONNECT = 4;
-
 CAR_INTERFACE_IMPL(TelephonyConnection, Connection, ITelephonyConnection)
 
 TelephonyConnection::TelephonyConnection()
@@ -109,11 +150,11 @@ TelephonyConnection::TelephonyConnection()
 
     mPostDialListener = new MyConnectionPostDialListener(this);
 
-    mOriginalConnectionListener = new MyConnectionPostDialListener(this);
+    mOriginalConnectionListener = new MyConnectionListener(this);
 }
 
 ECode TelephonyConnection::constructor(
-    /* [in] */ com.android.internal.telephony.Connection originalConnection)
+    /* [in] */ Elastos::Droid::Internal::Telephony::IConnection* originalConnection)
 {
     if (originalConnection != NULL) {
         SetOriginalConnection(originalConnection);
@@ -127,7 +168,7 @@ ECode TelephonyConnection::OnAudioStateChanged(
     // TODO: update TTY mode.
     AutoPtr<IPhone> phone;
     GetPhone((IPhone**)&phone);
-    if (phone != null) {
+    if (phone != NULL) {
         phone->SetEchoSuppressionEnabled();
     }
     return NOERROR;
@@ -136,13 +177,16 @@ ECode TelephonyConnection::OnAudioStateChanged(
 ECode TelephonyConnection::OnStateChanged(
     /* [in] */ Int32 state)
 {
-    Logger::V("TelephonyConnection", "onStateChanged, state: " + Connection.stateToString(state));
+    String str;
+    Elastos::Droid::Telecomm::Telecom::Connection::StateToString(state, &str);
+    Logger::V("TelephonyConnection", "onStateChanged, state: %s", str.string());
+    return NOERROR;
 }
 
 ECode TelephonyConnection::OnDisconnect()
 {
     Logger::V("TelephonyConnection", "onDisconnect");
-    Hangup(android.telephony.DisconnectCause.LOCAL);
+    Hangup(Elastos::Droid::Telephony::IDisconnectCause::LOCAL);
     return NOERROR;
 }
 
@@ -153,7 +197,7 @@ ECode TelephonyConnection::OnSeparate()
         //try {
         ECode ec = mOriginalConnection->Separate();
         //} catch (CallStateException e) {
-        if (ec == (ECode)CallStateException) {
+        if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
             Logger::E("TelephonyConnection", "Call to Connection.separate failed with exception %d", ec);
         }
         //}
@@ -164,7 +208,7 @@ ECode TelephonyConnection::OnSeparate()
 ECode TelephonyConnection::OnAbort()
 {
     Logger::V("TelephonyConnection", "onAbort");
-    Hangup(android.telephony.DisconnectCause.LOCAL);
+    Hangup(Elastos::Droid::Telephony::IDisconnectCause::LOCAL);
     return NOERROR;
 }
 
@@ -181,7 +225,7 @@ ECode TelephonyConnection::OnUnhold()
 }
 
 ECode TelephonyConnection::OnAnswer(
-    /* [in] */ Int videoState)
+    /* [in] */ Int32 videoState)
 {
     Logger::V("TelephonyConnection", "onAnswer");
     AutoPtr<IPhone> phone;
@@ -190,7 +234,7 @@ ECode TelephonyConnection::OnAnswer(
         //try {
         ECode ec = phone->AcceptCall(videoState);
         //} catch (CallStateException e) {
-        if (ec == (ECode)CallStateException) {
+        if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
             Logger::E("TelephonyConnection", "Failed to accept call. %d", ec);
         }
         //}
@@ -202,7 +246,7 @@ ECode TelephonyConnection::OnReject()
 {
     Logger::V("TelephonyConnection", "onReject");
     if (IsValidRingingCall()) {
-        Hangup(android.telephony.DisconnectCause.INCOMING_REJECTED);
+        Hangup(Elastos::Droid::Telephony::IDisconnectCause::INCOMING_REJECTED);
     }
     return Connection::OnReject();
 }
@@ -230,13 +274,14 @@ ECode TelephonyConnection::PerformHold()
     if (ICallState_ACTIVE == mOriginalConnectionState) {
         Logger::V("TelephonyConnection", "Holding active call");
         //try
+        ECode ec = NOERROR;
         {
             AutoPtr<ICall> call;
-            FAIL_GOTO(mOriginalConnection->GetCall((ICall**)&call), ERROR)
+            FAIL_GOTO(ec =mOriginalConnection->GetCall((ICall**)&call), ERROR)
             AutoPtr<IPhone> phone;
-            FAIL_GOTO(call->GetPhone((IPhone**)&phone), ERROR)
+            FAIL_GOTO(ec =call->GetPhone((IPhone**)&phone), ERROR)
             AutoPtr<ICall> ringingCall;
-            FAIL_GOTO(phone->GetRingingCall((ICall**)&ringingCall), ERROR)
+            FAIL_GOTO(ec =phone->GetRingingCall((ICall**)&ringingCall), ERROR)
 
             // Although the method says switchHoldingAndActive, it eventually calls a RIL method
             // called switchWaitingOrHoldingAndActive. What this means is that if we try to put
@@ -249,16 +294,16 @@ ECode TelephonyConnection::PerformHold()
             // could "fake" hold by silencing the audio and microphone streams for this call
             // instead of actually putting it on hold.
             Int32 state;
-            FAIL_GOTO(ringingCall->GetState(&state), ERROR)
+            FAIL_GOTO(ec =ringingCall->GetState(&state), ERROR)
             if (state != ICallState_WAITING) {
-                FAIL_GOTO(phone->SwitchHoldingAndActive(), ERROR)
+                FAIL_GOTO(ec =phone->SwitchHoldingAndActive(), ERROR)
             }
 
             // TODO: Cdma calls are slightly different.
         }
         //} catch (CallStateException e) {
     ERROR:
-        if (ec == (ECode)CallStateException) {
+        if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
             Logger::E("TelephonyConnection", "Exception occurred while trying to put call on hold. %d", ec);
         }
         //}
@@ -274,6 +319,7 @@ ECode TelephonyConnection::PerformUnhold()
     Logger::V("TelephonyConnection", "performUnhold");
     if (ICallState_HOLDING == mOriginalConnectionState) {
         //try
+        ECode ec = NOERROR;
         {
             // Here's the deal--Telephony hold/unhold is weird because whenever there exists
             // more than one call, one of them must always be active. In other words, if you
@@ -291,10 +337,10 @@ ECode TelephonyConnection::PerformUnhold()
             // make the Telecom APIs very ugly.
             if (!HasMultipleTopLevelCalls()) {
                 AutoPtr<ICall> call;
-                FAIL_GOTO(mOriginalConnection->GetCall((ICall**)&call), ERROR)
+                FAIL_GOTO(ec = mOriginalConnection->GetCall((ICall**)&call), ERROR)
                 AutoPtr<IPhone> phone;
-                FAIL_GOTO(call->GetPhone((IPhone**)&phone), ERROR)
-                FAIL_GOTO(phone->SwitchHoldingAndActive(), ERROR)
+                FAIL_GOTO(ec = call->GetPhone((IPhone**)&phone), ERROR)
+                FAIL_GOTO(ec = phone->SwitchHoldingAndActive(), ERROR)
             }
             else {
                 Logger::I("TelephonyConnection", "Skipping unhold command for %s", TO_CSTR(this));
@@ -302,7 +348,7 @@ ECode TelephonyConnection::PerformUnhold()
         }
         //} catch (CallStateException e) {
     ERROR:
-        if (ec == (ECode)CallStateException) {
+        if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
             Logger::E("TelephonyConnection", "Exception occurred while trying to release call from hold. %d", ec);
         }
         //}
@@ -310,6 +356,7 @@ ECode TelephonyConnection::PerformUnhold()
     else {
         Logger::W("TelephonyConnection", "Cannot release a call that is not already on hold from hold.");
     }
+    return NOERROR;
 }
 
 ECode TelephonyConnection::PerformConference(
@@ -320,7 +367,8 @@ ECode TelephonyConnection::PerformConference(
 
 ECode TelephonyConnection::UpdateCallCapabilities()
 {
-    Int32 newCallCapabilities = BuildCallCapabilities();
+    Int32 newCallCapabilities;
+    BuildCallCapabilities(&newCallCapabilities);
     newCallCapabilities = ApplyVideoCapabilities(newCallCapabilities);
     newCallCapabilities = ApplyAudioQualityCapabilities(newCallCapabilities);
     newCallCapabilities = ApplyConferenceTerminationCapabilities(newCallCapabilities);
@@ -346,8 +394,9 @@ ECode TelephonyConnection::UpdateAddress()
         AutoPtr<IUri> tmp;
         GetAddress((IUri**)&tmp);
         Boolean res;
-        if ((IObjects::Probe(address)->Equals(tmp, &res), !res) ||
-                presentation != GetAddressPresentation()) {
+        Int32 _presentation;
+        if ((IObject::Probe(address)->Equals(tmp, &res), !res) ||
+                (presentation != (GetAddressPresentation(&_presentation), _presentation))) {
             Logger::V("TelephonyConnection", "updateAddress, address changed");
             SetAddress(address, presentation);
         }
@@ -358,9 +407,10 @@ ECode TelephonyConnection::UpdateAddress()
         mOriginalConnection->GetCnapNamePresentation(&namePresentation);
 
         String str2;
+        Int32 _namePresentation;
         GetCallerDisplayName(&str2);
-        if (!name.Equals(str2) ||
-                namePresentation != GetCallerDisplayNamePresentation()) {
+        if ((!name.Equals(str2)) ||
+                (namePresentation != (GetCallerDisplayNamePresentation(&_namePresentation), _namePresentation))) {
             Logger::V("TelephonyConnection", "updateAddress, caller display name changed");
             SetCallerDisplayName(name, namePresentation);
         }
@@ -374,7 +424,7 @@ ECode TelephonyConnection::OnRemovedFromCallService()
 }
 
 ECode TelephonyConnection::SetOriginalConnection(
-    /* [in] */ com.android.internal.telephony.Connection* originalConnection)
+    /* [in] */ Elastos::Droid::Internal::Telephony::IConnection* originalConnection)
 {
     Logger::V("TelephonyConnection", "new TelephonyConnection, originalConnection: %s", TO_CSTR(originalConnection));
     AutoPtr<IPhone> phone;
@@ -419,6 +469,7 @@ ECode TelephonyConnection::Hangup(
 {
     if (mOriginalConnection != NULL) {
         //try
+        ECode ec = NOERROR;
         {
             // Hanging up a ringing call requires that we invoke call.hangup() as opposed to
             // connection.hangup(). Without this change, the party originating the call will not
@@ -427,7 +478,7 @@ ECode TelephonyConnection::Hangup(
                 AutoPtr<ICall> call;
                 GetCall((ICall**)&call);
                 if (call != NULL) {
-                    FAIL_GOTO(call->Hangup(), ERROR)
+                    FAIL_GOTO(ec = call->Hangup(), ERROR)
                 }
                 else {
                     Logger::W("TelephonyConnection", "Attempting to hangup a connection without backing call.");
@@ -438,12 +489,12 @@ ECode TelephonyConnection::Hangup(
                 // to support hanging-up specific calls within a conference call. If we invoked
                 // call.hangup() while in a conference, we would end up hanging up the entire
                 // conference call instead of the specific connection.
-                FAIL_GOTO(mOriginalConnection->Hangup(), ERROR)
+                FAIL_GOTO(ec = mOriginalConnection->Hangup(), ERROR)
             }
         }
         //} catch (CallStateException e) {
     ERROR:
-        if (ec == (ECode)CallStateException) {
+        if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
             Logger::E("TelephonyConnection", "Call to Connection.hangup failed with exception %d", ec);
         }
         //}
@@ -452,7 +503,7 @@ ECode TelephonyConnection::Hangup(
 }
 
 ECode TelephonyConnection::GetOriginalConnection(
-    /* [out] */ com.android.internal.telephony.Connection** con)
+    /* [out] */ Elastos::Droid::Internal::Telephony::IConnection** con)
 {
     VALIDATE_NOT_NULL(con)
 
@@ -464,25 +515,27 @@ ECode TelephonyConnection::GetOriginalConnection(
 ECode TelephonyConnection::GetCall(
     /* [out] */ ICall** call)
 {
-    VALIDATE_NOT_NULL(con)
+    VALIDATE_NOT_NULL(call)
 
     if (mOriginalConnection != NULL) {
         return mOriginalConnection->GetCall(call);
     }
-    return NULL;
+    *call = NULL;
+    return NOERROR;
 }
 
 ECode TelephonyConnection::GetPhone(
     /* [out] */ IPhone** phone)
 {
-    VALIDATE_NOT_NULL(con)
+    VALIDATE_NOT_NULL(phone)
 
     AutoPtr<ICall> call;
     GetCall((ICall**)&call);
     if (call != NULL) {
         return call->GetPhone(phone);
     }
-    return NULL;
+    *phone = NULL;
+    return NOERROR;
 }
 
 Boolean TelephonyConnection::HasMultipleTopLevelCalls()
@@ -513,15 +566,15 @@ Boolean TelephonyConnection::HasMultipleTopLevelCalls()
     return numCalls > 1;
 }
 
-AutoPtr<com.android.internal.telephony.Connection> TelephonyConnection::GetForegroundConnection()
+AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> TelephonyConnection::GetForegroundConnection()
 {
     AutoPtr<IPhone> phone;
     GetPhone((IPhone**)&phone);
     if (phone != NULL) {
         AutoPtr<ICall> call;
         phone->GetForegroundCall((ICall**)&call);
-        AutoPtr<com.android.internal.telephony.Connection> con;
-        call->GetEarliestConnection((com.android.internal.telephony.Connection**)&con);
+        AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> con;
+        call->GetEarliestConnection((Elastos::Droid::Internal::Telephony::IConnection**)&con);
         return con;
     }
     return NULL;
@@ -538,16 +591,18 @@ Boolean TelephonyConnection::IsValidRingingCall()
 
     AutoPtr<ICall> ringingCall;
     phone->GetRingingCall((ICall**)&ringingCall);
-    AutoPtr<ICallState> state;
-    ringingCall->GetState((ICallState**)&state);
-    Boolean res;
-    if (state->IsRinging(&res), !res) {
-        Logger::V("TelephonyConnection", "isValidRingingCall, ringing call is not in ringing state");
-        return FALSE;
-    }
+    ICallState state;
+    ringingCall->GetState(&state);
 
-    AutoPtr<com.android.internal.telephony.Connection> tmp;
-    ringingCall->GetEarliestConnection((com.android.internal.telephony.Connection**)&tmp);
+    assert(0);
+    //Boolean res;
+    // if (state->IsRinging(&res), !res) {
+    //     Logger::V("TelephonyConnection", "isValidRingingCall, ringing call is not in ringing state");
+    //     return FALSE;
+    // }
+
+    AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> tmp;
+    ringingCall->GetEarliestConnection((Elastos::Droid::Internal::Telephony::IConnection**)&tmp);
     if (TO_IINTERFACE(tmp) != TO_IINTERFACE(mOriginalConnection)) {
         Logger::V("TelephonyConnection", "isValidRingingCall, ringing call connection does not match");
         return FALSE;
@@ -570,33 +625,33 @@ ECode TelephonyConnection::UpdateState()
     if (mOriginalConnectionState != newState) {
         mOriginalConnectionState = newState;
         switch (newState) {
-            case IDLE:
+            case ICallState_IDLE:
                 break;
-            case ACTIVE:
+            case ICallState_ACTIVE:
                 SetActiveInternal();
                 break;
-            case HOLDING:
+            case ICallState_HOLDING:
                 SetOnHold();
                 break;
-            case DIALING:
-            case ALERTING:
+            case ICallState_DIALING:
+            case ICallState_ALERTING:
                 SetDialing();
                 break;
-            case INCOMING:
-            case WAITING:
+            case ICallState_INCOMING:
+            case ICallState_WAITING:
                 SetRinging();
                 break;
-            case DISCONNECTED:
+            case ICallState_DISCONNECTED:
             {
                 Int32 telephonyDisconnectCause;
                 mOriginalConnection->GetDisconnectCause(&telephonyDisconnectCause);
-                AutoPtr<IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
                         telephonyDisconnectCause);
                 SetDisconnected(cause);
                 Close();
                 break;
             }
-            case DISCONNECTING:
+            case ICallState_DISCONNECTING:
                 break;
         }
     }
@@ -621,10 +676,10 @@ void TelephonyConnection::SetActiveInternal()
     // we issue an update for those calls first to make sure we only have one top-level
     // active call.
     AutoPtr<IConnectionService> service;
-    GetConnectionService((IConnectionService**)service);
+    GetConnectionService((IConnectionService**)&service);
     if (service != NULL) {
-        AutoPtr<ICollection> coll;
-        service->GetAllConnections((ICollection**)&coll);
+        AutoPtr<Elastos::Utility::ICollection> coll;
+        service->GetAllConnections((Elastos::Utility::ICollection**)&coll);
         AutoPtr<ArrayOf<IInterface*> > array;
         coll->ToArray((ArrayOf<IInterface*>**)&array);
 
@@ -634,7 +689,7 @@ void TelephonyConnection::SetActiveInternal()
             if (TO_IINTERFACE(current) != TO_IINTERFACE(this) && ITelephonyConnection::Probe(current) != NULL) {
                 AutoPtr<ITelephonyConnection> other = ITelephonyConnection::Probe(current);
                 Int32 _state;
-                other->GetState(&_state);
+                Elastos::Droid::Telecomm::Telecom::IConnection::Probe(other)->GetState(&_state);
                 if (_state == STATE_ACTIVE) {
                     other->UpdateState();
                 }
@@ -688,7 +743,7 @@ Int32 TelephonyConnection::ApplyAudioQualityCapabilities(
     Int32 currentCapabilities = callCapabilities;
 
     if (mAudioQuality ==
-            com.android.internal.telephony.Connection.AUDIO_QUALITY_HIGH_DEFINITION) {
+            Elastos::Droid::Internal::Telephony::IConnection::AUDIO_QUALITY_HIGH_DEFINITION) {
         currentCapabilities = ApplyCapability(currentCapabilities, IPhoneCapabilities::VoLTE);
     }
     else {
@@ -704,8 +759,8 @@ Int32 TelephonyConnection::ApplyConferenceTerminationCapabilities(
     Int32 currentCapabilities = callCapabilities;
 
     // An IMS call cannot be individually disconnected or separated from its parent conference
-    AutoPtr<com.android.internal.telephony.Connection> con;
-    GetOriginalConnection((com.android.internal.telephony.Connection**)&con);
+    AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> con;
+    GetOriginalConnection((Elastos::Droid::Internal::Telephony::IConnection**)&con);
     Boolean isImsCall = IImsPhoneConnection::Probe(con) != NULL;
     if (!isImsCall) {
         currentCapabilities |=
@@ -791,10 +846,10 @@ ECode TelephonyConnection::SetHoldingForConference(
     if (state == IConnection::STATE_ACTIVE) {
         SetOnHold();
         *result = TRUE;
-        return NOERRORl
+        return NOERROR;
     }
     *result = FALSE;
-    return NOERRORl
+    return NOERROR;
 }
 
 AutoPtr<IUri> TelephonyConnection::GetAddressFromNumber(
@@ -802,13 +857,15 @@ AutoPtr<IUri> TelephonyConnection::GetAddressFromNumber(
 {
     // Address can be null for blocked calls.
     if (number.IsNull()) {
-        number = String("");
+        assert(0);
+        //number = String("");
     }
 
     AutoPtr<IUriHelper> helper;
     CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     AutoPtr<IUri> uri;
-    return helper->FromParts(IPhoneAccount::SCHEME_TEL, number, NULL, (IUri**)&uri);
+    helper->FromParts(IPhoneAccount::SCHEME_TEL, number, String(NULL), (IUri**)&uri);
+    return uri;
 }
 
 Int32 TelephonyConnection::ApplyCapability(

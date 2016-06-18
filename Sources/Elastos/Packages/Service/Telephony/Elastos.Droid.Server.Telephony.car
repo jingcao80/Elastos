@@ -5,13 +5,15 @@ module
     importlib("Elastos.Droid.Core.eco");
     importlib("Elastos.Droid.Server.Telecom.eco");
 
-    //merge("car/elastos/droid/phone/AccountSelection.car");
+    merge("car/elastos/droid/phone/Constants.car");
 
+    merge("car/elastos/droid/services/telephony/CdmaConnection.car");
     merge("car/elastos/droid/services/telephony/TtyManager.car");
     merge("car/elastos/droid/services/telephony/PstnIncomingCallNotifier.car");
     merge("car/elastos/droid/services/telephony/TelecomAccountRegistry.car");
     merge("car/elastos/droid/services/telephony/EmergencyCallHelper.car");
     merge("car/elastos/droid/services/telephony/GsmConnection.car");
+    merge("car/elastos/droid/services/telephony/TelephonyConnection.car");
     merge("car/elastos/droid/services/telephony/TelephonyConnectionService.car");
 
     using interface Elastos.Droid.App.IActivity;
@@ -22,6 +24,7 @@ module
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
     using interface Elastos.Droid.Content.IBroadcastReceiver;
+    using interface Elastos.Droid.Telecomm.Telecom.IConnectionService;
     using interface Elastos.Droid.View.IWindowCallback;
     using interface Elastos.Droid.View.IKeyEventCallback;
     using interface Elastos.Droid.View.ILayoutInflaterFactory;
@@ -104,6 +107,13 @@ module
             [in] ITelecomAccountRegistry* host);
 
         interface IBroadcastReceiver;
+    }
+
+    class CTelephonyConnectionService {
+        constructor();
+        
+        interface ITelephonyConnectionService;
+        interface IConnectionService;
     }
 
     } // namespace Telephony

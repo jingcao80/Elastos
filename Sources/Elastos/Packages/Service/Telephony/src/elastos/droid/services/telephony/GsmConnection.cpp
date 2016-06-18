@@ -1,5 +1,10 @@
 
 #include "elastos/droid/services/telephony/GsmConnection.h"
+#include <elastos/utility/logging/Logger.h>
+#include "Elastos.Droid.Telecomm.h"
+
+using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -9,7 +14,7 @@ namespace Telephony {
 CAR_INTERFACE_IMPL(GsmConnection, TelephonyConnection, IGsmConnection)
 
 GsmConnection::GsmConnection(
-    /* [in] */ IConnection* connection)
+    /* [in] */ Elastos::Droid::Internal::Telephony::IConnection* connection)
 {
     TelephonyConnection::constructor(connection);
 }
@@ -22,6 +27,7 @@ ECode GsmConnection::OnPlayDtmfTone(
     if (phone != NULL) {
         phone->StartDtmf(digit);
     }
+    return NOERROR;
 }
 
 ECode GsmConnection::OnStopDtmfTone()
@@ -31,6 +37,7 @@ ECode GsmConnection::OnStopDtmfTone()
     if (phone != NULL) {
         phone->StopDtmf();
     }
+    return NOERROR;
 }
 
 ECode GsmConnection::PerformConference(
@@ -49,7 +56,7 @@ ECode GsmConnection::PerformConference(
         // otherwise.
         ECode ec = phone->Conference();
         //} catch (CallStateException e) {
-        if (ec == (ECode)CallStateException) {
+        if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
             Logger::E("GsmConnection", "%d Failed to conference call.", ec);
         }
         //}
