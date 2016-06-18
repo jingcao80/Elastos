@@ -153,6 +153,9 @@ public:
     CARAPI SetTarget(
         /* [in] */ ICanvas* canvas);
 
+    CARAPI SetTarget(
+        /* [in] */ IInterface* node);
+
     CARAPI SetStartValue(
         /* [in] */ Float startValue);
 

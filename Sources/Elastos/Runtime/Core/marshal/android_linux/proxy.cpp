@@ -1136,7 +1136,7 @@ ECode CObjectProxy::ToString(
     /* [out] */ String* info)
 {
     if (info == NULL) return E_INVALID_ARGUMENT;
-    String str("CObjectProxy{0x");
+    String str("CObjectProxy{");
     str.AppendFormat("0x%08x}", this);
     *info = str;
     return NOERROR;

@@ -52,6 +52,11 @@ namespace Recent {
 
 static const String TAG("RecentTasksLoader");
 
+const Boolean RecentTasksLoader::DEBUG = TRUE;
+const Int32 RecentTasksLoader::DISPLAY_TASKS = 20;
+const Int32 RecentTasksLoader::MAX_TASKS = 21 /*DISPLAY_TASKS + 1*/; // allow extra for non-apps
+AutoPtr<RecentTasksLoader> RecentTasksLoader::sInstance;
+
 //======================================================================
 // RecentTasksLoader::PreloadTasksRunnable
 //======================================================================
@@ -336,11 +341,6 @@ ECode RecentTasksLoader::ThumbnailLoaderAsyncTask::DoInBackground(
 // RecentTasksLoader
 //======================================================================
 
-const Boolean RecentTasksLoader::DEBUG = FALSE;
-const Int32 RecentTasksLoader::DISPLAY_TASKS = 20;
-const Int32 RecentTasksLoader::MAX_TASKS = 21 /*DISPLAY_TASKS + 1*/; // allow extra for non-apps
-AutoPtr<RecentTasksLoader> RecentTasksLoader::sInstance;
-
 CAR_INTERFACE_IMPL_2(RecentTasksLoader, Object, IViewOnTouchListener, IRecentTasksLoader)
 
 RecentTasksLoader::RecentTasksLoader()
@@ -579,11 +579,15 @@ ECode RecentTasksLoader::LoadThumbnailAndIcon(
         // Need to badge the icon
         AutoPtr<IUserHandle> uh;
         CUserHandle::New(td->mUserId, (IUserHandle**)&uh);
-        pm->GetUserBadgedIcon(icon, uh, (IDrawable**)&icon);
+        AutoPtr<IDrawable> temp;
+        pm->GetUserBadgedIcon(icon, uh, (IDrawable**)&temp);
+        icon = temp;
     }
+
     if (DEBUG) {
-        Logger::V(TAG, "Loaded bitmap for task %s: %s", TO_CSTR(td), TO_CSTR(thumbnail));
+        Logger::V(TAG, "Loaded bitmap for task %s: icon:%s, thumbnail:%s", TO_CSTR(td), TO_CSTR(icon), TO_CSTR(thumbnail));
     }
+
     {
         AutoLock syncLock(td);
         if (thumbnail != NULL) {

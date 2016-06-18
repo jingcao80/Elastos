@@ -3291,14 +3291,14 @@ ECode HardwareCamera::native_setup(
 
     // We use a weak reference so the Camera object can be garbage collected.
     // The reference is only used as a proxy for callbacks.
-    android::sp<JNICameraContext> context = new JNICameraContext(this, this, camera);
+    JNICameraContext* context = new JNICameraContext(this, this, camera);
     assert(0 && "TODO: incStrong");
     //context->incStrong((void*)native_setup);
     camera->setListener(context);
 
     // save context in opaque field
     //env->SetIntField(thiz, fields.context, (int)context.get());
-    mNativeContext = (Int64)context.get();
+    mNativeContext = reinterpret_cast<Int64>(context);
     return NOERROR;
 }
 

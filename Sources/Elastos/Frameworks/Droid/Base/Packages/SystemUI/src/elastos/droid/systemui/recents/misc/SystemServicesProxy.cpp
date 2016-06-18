@@ -493,10 +493,12 @@ AutoPtr<IDrawable> SystemServicesProxy::GetBadgedIcon(
     uhh->GetMyUserId(&myUserId);
     AutoPtr<IUserHandle> uh;
     CUserHandle::New(userId, (IUserHandle**)&uh);
+    AutoPtr<IDrawable> result = icon;
     if (userId != myUserId) {
-        mPm->GetUserBadgedIcon(icon, uh, (IDrawable**)&icon);
+        result = NULL;
+        mPm->GetUserBadgedIcon(icon, uh, (IDrawable**)&result);
     }
-    return icon;
+    return result;
 }
 
 String SystemServicesProxy::GetHomeActivityPackageName()

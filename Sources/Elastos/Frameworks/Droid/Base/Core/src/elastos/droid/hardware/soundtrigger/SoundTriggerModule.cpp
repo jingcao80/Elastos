@@ -415,7 +415,7 @@ static android::sp<android::SoundTrigger> setSoundTrigger(SoundTriggerModule* mo
         if (old != 0) {
             old->decStrong((void*)setSoundTrigger);
         }
-        mode->SetNativeContext((Int64)module.get());
+        mode->SetNativeContext(reinterpret_cast<Int64>(module.get()));
 
         return old;
     }

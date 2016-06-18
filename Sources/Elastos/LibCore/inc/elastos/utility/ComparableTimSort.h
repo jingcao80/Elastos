@@ -435,11 +435,10 @@ ECode ComparableTimSort<T>::Sort(
 template <typename T>
 ComparableTimSort<T>::ComparableTimSort(
     /* [in] */ ArrayOf<T *> * a)
+    : mMinGallop(MIN_GALLOP)
+    , mStackSize(0)
 {
     assert(a);
-
-    mStackSize = 0;
-    mMinGallop = MIN_GALLOP;
 
     mA = a->Clone();
 

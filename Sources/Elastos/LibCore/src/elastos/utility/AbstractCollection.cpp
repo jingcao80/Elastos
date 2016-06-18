@@ -303,7 +303,7 @@ ECode AbstractCollection::ToString(
     Boolean flag = FALSE;
     if (IsEmpty(&flag), flag) {
         StringBuilder sb(className);
-        sb.Append("[]");
+        sb.Append("{}");
         *result = sb.ToString();
         return NOERROR;
     }
@@ -312,7 +312,7 @@ ECode AbstractCollection::ToString(
     GetSize(&size);
     StringBuilder buffer(size * 16);
     buffer.Append(className);
-    buffer.AppendChar('[');
+    buffer.AppendChar('{');
     AutoPtr<IIterator> it;
     GetIterator((IIterator**)&it);
     Boolean hasnext = FALSE;
@@ -329,7 +329,7 @@ ECode AbstractCollection::ToString(
             buffer += ", ";
         }
     }
-    buffer.AppendChar(']');
+    buffer.AppendChar('}');
     *result = buffer.ToString();
     return NOERROR;
 }

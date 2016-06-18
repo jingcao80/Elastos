@@ -102,8 +102,12 @@ ECode GraphicBuffer::ToString(
     VALIDATE_NOT_NULL(str)
     StringBuilder sb("CGraphicBuffer{");
     sb += StringUtils::ToHexString((Int32)this);
-    sb += ", nativeObject=";
-    sb += StringUtils::ToHexString(mNativeObject);
+    if (mNativeObject != 0) {
+        sb += ", nativeObject=";
+        GraphicBufferWrapper* wrapper = reinterpret_cast<GraphicBufferWrapper*>(mNativeObject);
+        Int64 handle = reinterpret_cast<Int64>(wrapper->buffer.get());
+        sb += StringUtils::ToHexString(handle);
+    }
     sb += ", width=";
     sb += mWidth;
     sb += ", height=";
@@ -128,6 +132,8 @@ ECode GraphicBuffer::ReadFromParcel(
     source->ReadInt32(&mUsage);
     FAIL_RETURN(nReadGraphicBufferFromParcel(source, &mNativeObject))
     if (mNativeObject == 0) {
+        Slogger::E("GraphicBuffer",
+            "This GraphicBuffer has no nativeObject when read from a parcel.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     mInit = TRUE;
@@ -362,11 +368,16 @@ ECode GraphicBuffer::IsDestroyed(
 }
 
 ECode GraphicBuffer::GetNativeObject(
-    /* [out] */ Handle64* handle)
+    /* [out] */ Int64* handle)
 {
     VALIDATE_NOT_NULL(handle)
-    GraphicBufferWrapper* wrapper = reinterpret_cast<GraphicBufferWrapper*>(mNativeObject);
-    *handle = reinterpret_cast<Handle64>(wrapper->buffer.get());
+    if (mNativeObject != 0) {
+        GraphicBufferWrapper* wrapper = reinterpret_cast<GraphicBufferWrapper*>(mNativeObject);
+        *handle = reinterpret_cast<Int64>(wrapper->buffer.get());
+    }
+    else {
+        *handle = 0;
+    }
     return NOERROR;
 }
 

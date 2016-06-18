@@ -102,7 +102,7 @@ const String CAssetAtlasService::TAG("CAssetAtlasService");
 
 // Turns debug logs on/off. Debug logs are kept to a minimum and should
 // remain on to diagnose issues
-const Boolean CAssetAtlasService::DEBUG_ATLAS = TRUE;
+const Boolean CAssetAtlasService::DEBUG_ATLAS = FALSE;
 
 // When set to TRUE the content of the atlas will be saved to disk
 // in /data/system/atlas.png. The shared GraphicBuffer may be empty
@@ -179,7 +179,7 @@ Boolean CAssetAtlasService::Renderer::RenderAtlas(
     /* [in] */ IAtlas* atlas,
     /* [in] */ Int32 packCount)
 {
-    if (DEBUG_ATLAS) Logger::I(TAG, " RenderAtlas: packCount=%d", packCount);
+    if (DEBUG_ATLAS) Logger::I(TAG, " RenderAtlas: packCount=%d, buffer:%s", packCount, TO_CSTR(buffer));
     // Use a Source blend mode to improve performance, the target bitmap
     // will be zero'd out so there's no need to waste time applying blending
     AutoPtr<IPaint> paint;
@@ -361,16 +361,18 @@ ECode CAssetAtlasService::Configuration::ToString(
 {
     VALIDATE_NOT_NULL(str)
     StringBuilder sb(128);
+    sb += "configuration{type=";
     sb += mType;
-    sb += "(";
+    sb += ", (";
     sb += mWidth;
     sb += "x";
     sb += mHeight;
     sb += ")";
-    sb += ") flags=0x";
+    sb += ", flags=0x";
     sb += StringUtils::ToHexString(mFlags);
-    sb += " count=";
+    sb += ", count=";
     sb += mCount;
+    sb += "}";
     *str = sb.ToString();
     return NOERROR;
 }
@@ -585,23 +587,20 @@ ECode CAssetAtlasService::constructor(
 
     Int32 count, w, h;
     drawables->GetSize(&count);
-    Logger::D(TAG, " >> drawables count is %d.", count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> obj;
         drawables->ValueAt(i, (IInterface**)&obj);
         IDrawableConstantState* dcs = IDrawableConstantState::Probe(obj);
-        if (dcs != NULL) {
-            AutoPtr<IBitmap> bitmap;
-            dcs->GetBitmap((IBitmap**)&bitmap);
-            if (bitmap != NULL) {
-                BitmapConfig config;
-                bitmap->GetConfig(&config);
-                if (config == BitmapConfig_ARGB_8888) {
-                    bitmaps->Add(bitmap.Get());
-                    bitmap->GetWidth(&w);
-                    bitmap->GetHeight(&h);
-                    totalPixelCount += w * h;
-                }
+        AutoPtr<IBitmap> bitmap;
+        dcs->GetBitmap((IBitmap**)&bitmap);
+        if (bitmap != NULL) {
+            BitmapConfig config;
+            bitmap->GetConfig(&config);
+            if (config == BitmapConfig_ARGB_8888) {
+                bitmaps->Add(bitmap.Get());
+                bitmap->GetWidth(&w);
+                bitmap->GetHeight(&h);
+                totalPixelCount += w * h;
             }
         }
     }
@@ -611,8 +610,7 @@ ECode CAssetAtlasService::constructor(
     AutoPtr<ICollections> collections;
     CCollections::AcquireSingleton((ICollections**)&collections);
     AutoPtr<IComparator> cpt = new BitmapComparator();
-    // TODO collections->Sort(IList::Probe(bitmaps), cpt);
-    Logger::E(TAG, " ========== CAssetAtlasService: TODO :collections->Sort");
+    collections->Sort(IList::Probe(bitmaps), cpt);
 
     // Kick off the packing work on a worker thread
     AutoPtr<List<AutoPtr<IBitmap> > > bmps = new List<AutoPtr<IBitmap> >();
@@ -672,6 +670,7 @@ ECode CAssetAtlasService::GetBuffer(
     Boolean ready;
     mAtlasReady->Get(&ready);
     if (ready) {
+        Logger::I(TAG, " >>> GetBuffer:%s", TO_CSTR(mBuffer));
         *gb = mBuffer;
         REFCOUNT_ADD(*gb)
     }
@@ -1007,7 +1006,7 @@ void CAssetAtlasService::NativeReleaseAtlasCanvas(
 static android::sp<android::GraphicBuffer> graphicBufferForJavaObject(IGraphicBuffer* obj)
 {
     if (obj) {
-        Handle64 nativeObject;
+        Int64 nativeObject;
         obj->GetNativeObject(&nativeObject);
         if (nativeObject != 0) {
             android::sp<android::GraphicBuffer> gb = reinterpret_cast<android::GraphicBuffer*>(nativeObject);

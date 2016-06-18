@@ -42,8 +42,7 @@ CAR_OBJECT_IMPL(CCmHardwareManager)
 ECode CCmHardwareManager::constructor(
     /* [in] */ IContext* context)
 {
-    mService = IICmHardwareService::Probe(
-            ServiceManager::GetService(String("cmhw")/*IContext::CMHW_SERVICE*/));
+    mService = IICmHardwareService::Probe(ServiceManager::GetService(IContext::CMHW_SERVICE));
     return NOERROR;
 }
 

@@ -289,7 +289,6 @@ CVolumeUI::CVolumeUI()
 ECode CVolumeUI::Start()
 {
     AutoPtr<IInterface> amObj;
-    Logger::W(TAG, "TODO: GetSystemService Need debug AUDIO_SERVICE.");
     mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&amObj);
     mAudioManager = IAudioManager::Probe(amObj);
 

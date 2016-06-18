@@ -226,6 +226,7 @@ ECode Animator::SetupEndValues()
 ECode Animator::SetTarget(
     /* [in] */ IInterface* target)
 {
+    assert(0 && "error: subclass must implements this method.");
     return NOERROR;
 }
 

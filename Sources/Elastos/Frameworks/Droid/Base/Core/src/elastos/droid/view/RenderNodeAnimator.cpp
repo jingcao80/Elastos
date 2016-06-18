@@ -240,13 +240,12 @@ ECode RenderNodeAnimator::Start()
 {
     if (mTarget == NULL) {
         Slogger::E("RenderNodeAnimator", "Missing target!");
-        // throw new IllegalStateException("Missing target!");
+        assert(0);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     if (mState != STATE_PREPARE) {
         Slogger::E("RenderNodeAnimator", "Already started!");
-        // throw new IllegalStateException("Already started!");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -323,9 +322,34 @@ ECode RenderNodeAnimator::SetTarget(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    GLES20RecordingCanvas* recordingCanvas = (GLES20RecordingCanvas*) canvas;
-    SetTarget(recordingCanvas->mNode);
-    return NOERROR;
+    GLES20RecordingCanvas* recordingCanvas = (GLES20RecordingCanvas*)canvas;
+    return SetTarget(recordingCanvas->mNode);
+}
+
+ECode RenderNodeAnimator::SetTarget(
+    /* [in] */ IInterface* node)
+{
+    if (mTarget != NULL) {
+        Slogger::E("RenderNodeAnimator", "Target already set!");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    if (ICanvas::Probe(node) != NULL) {
+        return SetTarget(ICanvas::Probe(node));
+    }
+    else if (IView::Probe(node) != NULL) {
+        return SetTarget(IView::Probe(node));
+    }
+
+    return SetTarget(IRenderNode::Probe(node));
+}
+
+ECode RenderNodeAnimator::SetTarget(
+    /* [in] */ IRenderNode* node)
+{
+    assert(node != NULL);
+    mTarget = node;
+    return mTarget->AddAnimator(this);
 }
 
 ECode RenderNodeAnimator::SetStartValue(
@@ -564,19 +588,6 @@ AutoPtr<RenderNodeAnimator::DelayedAnimationHelper> RenderNodeAnimator::GetHelpe
     }
 
     return handler;
-}
-
-ECode RenderNodeAnimator::SetTarget(
-    /* [in] */ IRenderNode* node)
-{
-    if (mTarget != NULL) {
-        // throw new IllegalStateException("Target already set!");
-        Slogger::E("RenderNodeAnimator", "Target already set!");
-        return E_ILLEGAL_STATE_EXCEPTION;
-    }
-    mTarget = node;
-    mTarget->AddAnimator(this);
-    return NOERROR;
 }
 
 AutoPtr<IArrayList> RenderNodeAnimator::CloneListeners()

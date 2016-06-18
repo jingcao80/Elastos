@@ -201,15 +201,16 @@ ECode RecentsTaskLoader::TaskResourceLoader::Run()
             if (t != NULL) {
                 AutoPtr<Task> task = (Task*)t.Get();
                 AutoPtr<Task::TaskKey> taskKey = task->mKey;
-                AutoPtr<IDrawable> cachedIcon = mApplicationIconCache->Get((ITaskKey*)taskKey);
-                AutoPtr<IBitmap> cachedThumbnail = mThumbnailCache->Get((ITaskKey*)taskKey);
+                ITaskKey* taskKeyObj = (ITaskKey*)task->mKey.Get();
+                AutoPtr<IDrawable> cachedIcon = mApplicationIconCache->Get(taskKeyObj);
+                AutoPtr<IBitmap> cachedThumbnail = mThumbnailCache->Get(taskKeyObj);
 
                 // Load the application icon if it is stale or we haven't cached one yet
                 if (cachedIcon == NULL) {
                     AutoPtr<IResources> resources;
                     mContext->GetResources((IResources**)&resources);
-                    cachedIcon = GetTaskDescriptionIcon(task->mKey, task->mIcon, task->mIconFilename, ssp,
-                        resources);
+                    cachedIcon = GetTaskDescriptionIcon(
+                        taskKeyObj, task->mIcon, task->mIconFilename, ssp, resources);
 
                     if (cachedIcon == NULL) {
                         AutoPtr<IIntent> baseIntent = taskKey->mBaseIntent;
@@ -221,14 +222,16 @@ ECode RecentsTaskLoader::TaskResourceLoader::Run()
                         }
                     }
 
+                    Logger::I(TAG, " > Load the next item from the queue %s, icon:%s", TO_CSTR(task), TO_CSTR(cachedIcon));
                     if (cachedIcon == NULL) {
                         cachedIcon = IDrawable::Probe(mDefaultApplicationIcon);
                     }
 
                     // At this point, even if we can't load the icon, we will set the default
                     // icon.
-                    mApplicationIconCache->Put(taskKey, cachedIcon);
+                    mApplicationIconCache->Put(taskKeyObj, cachedIcon);
                 }
+
                 // Load the thumbnail if it is stale or we haven't cached one yet
                 if (cachedThumbnail == NULL) {
                     cachedThumbnail = ssp->GetTaskThumbnail(taskKey->mId);
@@ -238,7 +241,7 @@ ECode RecentsTaskLoader::TaskResourceLoader::Run()
                     else {
                         cachedThumbnail = mDefaultThumbnail;
                     }
-                    mThumbnailCache->Put(taskKey, cachedThumbnail);
+                    mThumbnailCache->Put(taskKeyObj, cachedThumbnail);
                 }
                 if (!mCancelled) {
                     // Notify that the task data has changed
@@ -253,7 +256,8 @@ ECode RecentsTaskLoader::TaskResourceLoader::Run()
 
             // If there are no other items in the list, then just wait until something is added
             if (!mCancelled && mLoadQueue->IsEmpty()) {
-                {    AutoLock syncLock(mLoadQueue);
+                {
+                    AutoLock syncLock(mLoadQueue);
                     mWaitingOnLoadQueue = TRUE;
                     ECode ec = mLoadQueue->Wait();
                     if (FAILED(ec)) {
@@ -274,12 +278,14 @@ AutoPtr<IDrawable> RecentsTaskLoader::TaskResourceLoader::GetTaskDescriptionIcon
     /* [in] */ SystemServicesProxy* ssp,
     /* [in] */ IResources* res)
 {
+    Logger::I(TAG, " >>> GetTaskDescriptionIcon: iconFilename:%s", iconFilename.string());
     AutoPtr<IBitmap> tdIcon = iconBitmap;
     if (tdIcon == NULL) {
         AutoPtr<IActivityManagerTaskDescriptionHelper> helper;
         CActivityManagerTaskDescriptionHelper::AcquireSingleton(
             (IActivityManagerTaskDescriptionHelper**)&helper);
         helper->LoadTaskDescriptionIcon(iconFilename, (IBitmap**)&tdIcon);
+        Logger::I(TAG, " >>> GetTaskDescriptionIcon: 1: %s", TO_CSTR(tdIcon));
     }
     if (tdIcon != NULL) {
         AutoPtr<IDrawable> drawable;
@@ -404,7 +410,7 @@ AutoPtr<IDrawable> RecentsTaskLoader::GetAndUpdateActivityIcon(
     if (icon != NULL) {
         return icon;
     }
-
+    Logger::I(TAG, "GetAndUpdateActivityIcon: preloadTask:%d, taskKey:%s", preloadTask, TO_CSTR(taskKey));
     // If we are preloading this task, continue to load the task description icon or the
     // activity icon
     if (preloadTask) {
@@ -437,6 +443,7 @@ AutoPtr<IDrawable> RecentsTaskLoader::GetAndUpdateActivityIcon(
             }
         }
     }
+    Logger::I(TAG, "GetAndUpdateActivityIcon: we couldn't load any icon, return null");
     // If we couldn't load any icon, return null
     return NULL;
 }
@@ -643,14 +650,16 @@ void RecentsTaskLoader::LoadTaskData(
     /* [in] */ ITask* t)
 {
     AutoPtr<Task> _t = (Task*)t;
-    AutoPtr<IDrawable> applicationIcon = mApplicationIconCache->GetAndInvalidateIfModified(_t->mKey);
-    AutoPtr<IBitmap> thumbnail = mThumbnailCache->GetAndInvalidateIfModified(_t->mKey);
+    ITaskKey* taskKey = (ITaskKey*)_t->mKey.Get();
+    AutoPtr<IDrawable> applicationIcon = mApplicationIconCache->GetAndInvalidateIfModified(taskKey);
+    AutoPtr<IBitmap> thumbnail = mThumbnailCache->GetAndInvalidateIfModified(taskKey);
 
     // Grab the thumbnail/icon from the cache, if either don't exist, then trigger a reload and
     // use the default assets in their place until they load
     Boolean requiresLoad = (applicationIcon == NULL) || (thumbnail == NULL);
     applicationIcon = applicationIcon != NULL ? applicationIcon.Get() : IDrawable::Probe(mDefaultApplicationIcon);
     if (requiresLoad) {
+        Logger::I(TAG, " >> icon or thumbnail is null, requiresLoad for %s", TO_CSTR(t));
         mLoadQueue->AddTask(t);
     }
     t->NotifyTaskDataLoaded(thumbnail == mDefaultThumbnail ? NULL : thumbnail, applicationIcon);
@@ -669,8 +678,9 @@ void RecentsTaskLoader::DeleteTaskData(
 {
     mLoadQueue->RemoveTask(t);
     AutoPtr<Task> _t = (Task*)t;
-    mThumbnailCache->Remove(_t->mKey);
-    mApplicationIconCache->Remove(_t->mKey);
+    ITaskKey* taskKey = (ITaskKey*)_t->mKey.Get();
+    mThumbnailCache->Remove(taskKey);
+    mApplicationIconCache->Remove(taskKey);
     if (notifyTaskDataUnloaded) {
         t->NotifyTaskDataUnloaded(NULL, IDrawable::Probe(mDefaultApplicationIcon));
     }

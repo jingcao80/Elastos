@@ -24,7 +24,6 @@ ReferenceCountedTrigger::IncrementRunnable::IncrementRunnable(
 
 ECode ReferenceCountedTrigger::IncrementRunnable::Run()
 {
-    Logger::W("ReferenceCountedTrigger::IncrementRunnable", " Run > Increment");
     mHost->Increment();
     return NOERROR;
 }
@@ -40,7 +39,6 @@ ReferenceCountedTrigger::DecrementRunnable::DecrementRunnable(
 
 ECode ReferenceCountedTrigger::DecrementRunnable::Run()
 {
-    Logger::W("ReferenceCountedTrigger::DecrementRunnable", " Run > Decrement");
     mHost->Decrement();
     return NOERROR;
 }
@@ -80,12 +78,10 @@ ECode ReferenceCountedTrigger::MyAnimatorListenerAdapter::OnAnimationEnd(
 ReferenceCountedTrigger::ReferenceCountedTrigger()
     : mCount(0)
 {
-    Logger::I(TAG, " > create ReferenceCountedTrigger: %p", this);
 }
 
 ReferenceCountedTrigger::~ReferenceCountedTrigger()
 {
-    Logger::I(TAG, " > destroy ReferenceCountedTrigger: %p", this);
 }
 
 ECode ReferenceCountedTrigger::constructor(
@@ -142,7 +138,6 @@ void ReferenceCountedTrigger::AddLastDecrementRunnable(
 
 void ReferenceCountedTrigger::Decrement()
 {
-    Logger::I("ReferenceCountedTrigger", " > %p Decrement %d -> %d", this, mCount, mCount - 1);
     mCount--;
     Boolean isEmpty;
     if (mCount == 0 && (mLastDecRunnables->IsEmpty(&isEmpty), !isEmpty)) {

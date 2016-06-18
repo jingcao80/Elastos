@@ -419,6 +419,7 @@ module
             [in] Int64 nativeObject);
 
         interface IGraphicBuffer;
+        interface IParcelable;
     }
 
     singleton class CGraphicBufferHelper {

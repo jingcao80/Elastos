@@ -142,8 +142,7 @@ ECode ThreadedRenderer::constructor(
     mRootNode->SetClipToBounds(FALSE, &r);
     mNativeProxy = NativeCreateProxy(translucent, rootNodePtr);
 
-    // AtlasInitializer::sInstance->Init(context, mNativeProxy);
-    Logger::I(LOGTAG, " TODO init AtlasInitializer.");
+    AtlasInitializer::sInstance->Init(context, mNativeProxy);
 
     // Setup timing
     AutoPtr<IChoreographerHelper> cghlp;
@@ -599,7 +598,6 @@ void ThreadedRenderer::AtlasInitializer::Init(
     AutoPtr<IIAssetAtlas> atlas = IIAssetAtlas::Probe(binder);
 //     try {
     Int32 ppid = Process::MyPpid();
-    Logger::I(LOG_TAG, " >>> AtlasInitializer: ppid: %d", ppid);
     Boolean compatible;
     if (atlas->IsCompatible(ppid, &compatible), compatible) {
         AutoPtr<IGraphicBuffer> buffer;
@@ -821,6 +819,18 @@ private:
     RootRenderNode* mRootNode;
 };
 
+static android::sp<android::GraphicBuffer> graphicBufferForJavaObject(IGraphicBuffer* obj)
+{
+    if (obj) {
+        Int64 nativeObject;
+        obj->GetNativeObject(&nativeObject);
+        if (nativeObject != 0) {
+            android::sp<android::GraphicBuffer> gb = reinterpret_cast<android::GraphicBuffer*>(nativeObject);
+            return gb;
+        }
+    }
+    return NULL;
+}
 
 ECode ThreadedRenderer::NativeSetupShadersDiskCache(
     /* [in] */ const String& cacheFile)
@@ -834,11 +844,6 @@ void ThreadedRenderer::NativeSetAtlas(
     /* [in] */ IGraphicBuffer* graphicBuffer,
     /* [in] */ ArrayOf<Int64>* atlasMapArray)
 {
-    Logger::I(LOGTAG, " >> Get GraphicBuffer: %s", TO_CSTR(graphicBuffer));
-    Handle64 handler;
-    graphicBuffer->GetNativeObject(&handler);
-    sp<android::GraphicBuffer> buffer = reinterpret_cast<android::GraphicBuffer*>(handler);
-
     Int32 len = atlasMapArray->GetLength();
     if (len <= 0) {
         Logger::W(LOGTAG, "Failed to initialize atlas, invalid map length: %d", len);
@@ -849,6 +854,7 @@ void ThreadedRenderer::NativeSetAtlas(
         map[i] = (*atlasMapArray)[i];
     }
 
+    sp<android::GraphicBuffer> buffer = graphicBufferForJavaObject(graphicBuffer);
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     proxy->setTextureAtlas(buffer, map, len);
 }
@@ -867,7 +873,8 @@ Int64 ThreadedRenderer::NativeCreateProxy(
 {
     RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootRenderNodePtr);
     ContextFactoryImpl factory(rootRenderNode);
-    return (Int64) new RenderProxy(translucent, rootRenderNode, &factory);
+    RenderProxy* rp = new RenderProxy(translucent, rootRenderNode, &factory);
+    return reinterpret_cast<Int64>(rp);
 }
 
 void ThreadedRenderer::NativeDeleteProxy(

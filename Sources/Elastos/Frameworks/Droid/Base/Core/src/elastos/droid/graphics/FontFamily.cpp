@@ -85,7 +85,8 @@ Int64 FontFamily::NativeCreateFamily(
     if (!lang.IsNull()) {
         fontLanguage = android::FontLanguage(lang.string(), lang.GetLength());
     }
-    return (Int64)new android::FontFamily(fontLanguage, variant);
+    android::FontFamily* family = new android::FontFamily(fontLanguage, variant);
+    return reinterpret_cast<Int64>(family);
 }
 
 void FontFamily::NativeUnrefFamily(

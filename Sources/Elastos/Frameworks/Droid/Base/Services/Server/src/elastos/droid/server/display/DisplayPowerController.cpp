@@ -15,8 +15,6 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Server::Lights::Light;
 using Elastos::Droid::Server::Lights::LightsManager;
 using Elastos::Droid::Server::LocalServices;
@@ -41,9 +39,10 @@ using Elastos::Droid::Utility::IProperty;
 using Elastos::Droid::Utility::MathUtils;
 using Elastos::Droid::Utility::TimeUtils;
 
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
-using Elastos::Utility::Logging::Slogger;
 using Elastos::IO::IPrintWriter;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -52,7 +51,7 @@ namespace Display {
 
 const String DisplayPowerController::TAG("DisplayPowerController");
 
-Boolean DisplayPowerController::DEBUG = FALSE;
+Boolean DisplayPowerController::DEBUG = TRUE;
 const Boolean DisplayPowerController::DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT = FALSE;
 
 const String DisplayPowerController::SCREEN_ON_BLOCKED_TRACE_NAME("Screen on blocked");

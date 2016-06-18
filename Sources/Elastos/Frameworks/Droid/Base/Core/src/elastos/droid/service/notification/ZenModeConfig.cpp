@@ -186,19 +186,36 @@ ECode ZenModeConfig::ReadFromParcel(
     source->ReadInt32(&len);
     if (len > 0) {
         mConditionComponents = ArrayOf<IComponentName*>::Alloc(len);
-        assert(0);
-        // source.readTypedArray(conditionComponents, ComponentName.CREATOR);
+        for (Int32 i = 0; i < len; ++len) {
+            AutoPtr<IInterface> obj;
+            source->ReadInterfacePtr((Handle32*)&obj);
+            mConditionComponents->Set(i, IComponentName::Probe(obj));
+        }
     }
+
     source->ReadInt32(&len);
     if (len > 0) {
         mConditionIds = ArrayOf<IUri*>::Alloc(len);
-        assert(0);
-        // source.readTypedArray(conditionIds, Uri.CREATOR);
+        for (Int32 i = 0; i < len; ++len) {
+            AutoPtr<IInterface> obj;
+            source->ReadInterfacePtr((Handle32*)&obj);
+            mConditionIds->Set(i, IUri::Probe(obj));
+        }
     }
+
     source->ReadInt32(&mAllowFrom);
-    Logger::D("ZenModeConfig", "[ReadFromParcel] TODO: Not implement.");
-    // exitCondition = source.readParcelable(null);
-    // exitConditionComponent = source.readParcelable(null);
+
+    if (source->ReadInt32(&i), i != 0) {
+        AutoPtr<IInterface> obj;
+        source->ReadInterfacePtr((Handle32*)&obj);
+        mExitCondition = ICondition::Probe(obj);
+    }
+
+    if (source->ReadInt32(&i), i != 0) {
+        AutoPtr<IInterface> obj;
+        source->ReadInterfacePtr((Handle32*)&obj);
+        mExitConditionComponent = IComponentName::Probe(obj);
+    }
     return NOERROR;
 }
 
@@ -218,24 +235,45 @@ ECode ZenModeConfig::WriteToParcel(
     dest->WriteInt32(mSleepStartMinute);
     dest->WriteInt32(mSleepEndHour);
     dest->WriteInt32(mSleepEndMinute);
+
     if (mConditionComponents != NULL && mConditionComponents->GetLength() > 0) {
-        dest->WriteInt32(mConditionComponents->GetLength());
-        assert(0);
-        // dest.writeTypedArray(conditionComponents, 0);
-    } else {
+        Int32 len = mConditionComponents->GetLength();
+        for (Int32 i = 0; i < len; ++i) {
+            dest->WriteInterfacePtr((*mConditionComponents)[i]);
+        }
+    }
+    else {
         dest->WriteInt32(0);
     }
+
     if (mConditionIds != NULL && mConditionIds->GetLength() > 0) {
-        dest->WriteInt32(mConditionIds->GetLength());
-        assert(0);
-        // dest.writeTypedArray(conditionIds, 0);
-    } else {
+        Int32 len = mConditionIds->GetLength();
+        for (Int32 i = 0; i < len; ++i) {
+            dest->WriteInterfacePtr((*mConditionIds)[i]);
+        }
+    }
+    else {
         dest->WriteInt32(0);
     }
+
     dest->WriteInt32(mAllowFrom);
-    Logger::D("ZenModeConfig", "[WriteToParcel] TODO: Not implement.");
-    // dest.writeParcelable(exitCondition, 0);
-    // dest.writeParcelable(exitConditionComponent, 0);
+
+    if (NULL != mExitCondition) {
+        dest->WriteInt32(1);
+        dest->WriteInterfacePtr(mExitCondition);
+    }
+    else {
+        dest->WriteInt32(0);
+    }
+
+    if (NULL != mExitConditionComponent) {
+        dest->WriteInt32(1);
+        dest->WriteInterfacePtr(mExitConditionComponent);
+    }
+    else {
+        dest->WriteInt32(0);
+    }
+
     return NOERROR;
 }
 
@@ -285,9 +323,9 @@ ECode ZenModeConfig::ToString(
 
     sb += mConditionIds == NULL ? "NULL" : TextUtils::Join(cs.Get(), objs2.Get());
     sb += ",exitCondition=";
-    sb += mExitCondition;
+    sb += TO_CSTR(mExitCondition);
     sb += ",exitConditionComponent=";
-    sb += mExitConditionComponent;
+    sb += TO_CSTR(mExitConditionComponent);
     sb += ']';
     *result = sb.ToString();
     return NOERROR;

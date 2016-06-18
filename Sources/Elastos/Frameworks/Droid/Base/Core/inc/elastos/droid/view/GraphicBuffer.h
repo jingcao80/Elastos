@@ -142,7 +142,7 @@ public:
         /* [out] */ Boolean* isDestroyed);
 
     CARAPI GetNativeObject(
-        /* [out] */ Handle64* handle);
+        /* [out] */ Int64* handle);
 
     CARAPI ToString(
         /* [out] */ String* str);

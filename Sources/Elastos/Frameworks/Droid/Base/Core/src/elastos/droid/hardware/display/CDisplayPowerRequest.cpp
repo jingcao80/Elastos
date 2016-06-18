@@ -4,17 +4,20 @@
 #include "elastos/droid/hardware/display/CDisplayPowerRequest.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
-//#include "elastos/droid/view/Display.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Hardware {
 namespace Display {
+
+static const String TAG("CDisplayPowerRequest");
 
 CAR_INTERFACE_IMPL(CDisplayPowerRequest, Object, IDisplayPowerRequest)
 
@@ -194,6 +197,7 @@ ECode CDisplayPowerRequest::SetUseProximitySensor(
 ECode CDisplayPowerRequest::SetScreenBrightness(
     /* [in] */ Int32 value)
 {
+    Logger::I(TAG, " >> SetScreenBrightness: %d", value);
     mScreenBrightness = value;
     return NOERROR;
 }
@@ -201,6 +205,7 @@ ECode CDisplayPowerRequest::SetScreenBrightness(
 ECode CDisplayPowerRequest::SetScreenAutoBrightnessAdjustment(
     /* [in] */ Float value)
 {
+    Logger::I(TAG, " >> SetScreenAutoBrightnessAdjustment: %d", value);
     mScreenAutoBrightnessAdjustment = value;
     return NOERROR;
 }
@@ -208,6 +213,7 @@ ECode CDisplayPowerRequest::SetScreenAutoBrightnessAdjustment(
 ECode CDisplayPowerRequest::SetUseAutoBrightness(
     /* [in] */ Boolean value)
 {
+    Logger::I(TAG, " >> SetUseAutoBrightness: %d", value);
     mUseAutoBrightness = value;
     return NOERROR;
 }

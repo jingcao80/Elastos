@@ -357,12 +357,14 @@ template <typename T>
 const Int32 TimSort<T>::INITIAL_TMP_STORAGE_LENGTH = 256;
 
 template <typename T>
-const Boolean TimSort<T>::DEBUG = FALSE;
+const Boolean TimSort<T>::DEBUG = TRUE;
 
 template <typename T>
 TimSort<T>::TimSort(
     /* [in] */ ArrayOf<T*>* a,
     /* [in] */ IComparator* c)
+    : mMinGallop(MIN_GALLOP)
+    , mStackSize(0)
 {
     mA = a;
     mC = c;
