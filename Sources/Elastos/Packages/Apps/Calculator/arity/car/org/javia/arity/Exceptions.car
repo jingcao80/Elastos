@@ -1,0 +1,14 @@
+module
+{
+//    const FAMILY_CORE = 0xC0   // Org.Javia.Arity exception codes
+
+
+//    #define FRAMEWORK_ERROR(c)      MAKE_ECODE(SEVERITY_ERROR, FAMILY_FRAMEWORK, c)
+//    #define FRAMEWORK_SUCCESS(c)    MAKE_SUCCESS(FAMILY_FRAMEWORK, c)
+
+    //==========================================================================
+    // Org.Javia.Arity exception codes (Family: 0xC0)
+    const E_ARITY_EXCEPTION                                  = 0xC0010000;
+    const E_SYNTAX_EXCEPTION                                 = 0xC0020000;
+    const E_IS_COMPLEX_EXCEPTION                             = 0xC0030000;
+}

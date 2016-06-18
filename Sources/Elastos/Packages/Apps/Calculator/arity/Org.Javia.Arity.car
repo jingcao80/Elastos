@@ -1,0 +1,63 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+    importlib("Elastos.CoreLibrary.eco");
+
+    merge("car/org/javia/arity/Function.car");
+    merge("car/org/javia/arity/ContextFunction.car");
+    merge("car/org/javia/arity/CompiledFunction.car");
+    merge("car/org/javia/arity/Complex.car");
+
+    interface Org.Javia.Arity.IFunction;
+    interface Org.Javia.Arity.IContextFunction;
+    interface Org.Javia.Arity.ICompiledFunction;
+    interface Org.Javia.Arity.IComplex;
+
+    namespace Org {
+    namespace Javia {
+    namespace Arity {
+
+    class CCompiledFunction
+    {
+        constructor(
+            [in] Int32 arity,
+            [in] ArrayOf<Byte>* code,
+            [in] ArrayOf<Double>* constsRe,
+            [in] ArrayOf<Double>* constsIm,
+            [in] ArrayOf<IFunction*>* funcs);
+
+        interface ICompiledFunction;
+        interface IContextFunction;
+        interface IFunction
+    }
+
+    class CComplex {
+        /** Empty constructor, complex value 0. */
+        constructor();
+
+        /** Constructor taking the real and imaginary components. */
+        constructor(
+            [in] Double re,
+            [in] Double im);
+
+        /** Copy constructor. */
+        constructor(
+            [in] IComplex* o);
+
+        interface IComplex;
+    }
+
+    class CSymbols {
+        /**
+           Constructs a Symbols containing the built-in symbols (such as sin, log).
+        */
+        constructor();
+
+        interface ISymbols;
+    }
+
+    } // namespace Arity
+    } // namespace Javia
+    } // namespace Org
+
+}

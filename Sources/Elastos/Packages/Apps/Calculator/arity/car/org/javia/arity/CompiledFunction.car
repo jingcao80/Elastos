@@ -1,0 +1,19 @@
+module
+{
+
+    namespace Org {
+    namespace Javia {
+    namespace Arity {
+
+    /**
+     * @involve
+     * interface IFunction;
+     * interface IContextFunction;
+     */
+    interface ICompiledFunction
+    {}
+
+    } // namespace Arity
+    } // namespace Javia
+    } // namespace Org
+}

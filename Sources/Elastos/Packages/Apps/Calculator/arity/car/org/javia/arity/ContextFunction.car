@@ -1,0 +1,55 @@
+module
+{
+
+    interface Org.Javia.Arity.IComplex;
+    interface Org.Javia.Arity.IEvalContext;
+
+    namespace Org {
+    namespace Javia {
+    namespace Arity {
+
+    /**
+     * @involve
+     * interface IFunction;
+     */
+    interface IContextFunction
+    {
+
+        Eval(
+            [in] ArrayOf<Double>* args,
+            [in] IEvalContext* context,
+            [out] Double* result);
+
+        Eval(
+            [in] ArrayOf<IComplex*>* args,
+            [in] IEvalContext* context,
+            [out] IComplex** complex);
+
+        Eval(
+            [in] Double x,
+            [in] IEvalContext* context,
+            [out] Double* result);
+
+        Eval(
+            [in] Double x,
+            [in] Double y,
+            [in] IEvalContext* context,
+            [out] Double* result);
+
+        Eval(
+            [in] IComplex* x,
+            [in] IEvalContext* context,
+            [out] IComplex** complex);
+
+        Eval(
+            [in] IComplex* x,
+            [in] IComplex* y,
+            [in] IEvalContext* context,
+            [out] IComplex** complex);
+
+    }
+
+    } // namespace Arity
+    } // namespace Javia
+    } // namespace Org
+}
