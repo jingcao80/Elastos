@@ -1097,12 +1097,10 @@ void ImageView::OnDraw(
         canvas->Save(&saveCount2);
         if (mCropToPadding) {
             Boolean isNonEmpty;
-            const Int32 scrollX = mScrollX;
-            const Int32 scrollY = mScrollY;
-            canvas->ClipRect(scrollX + mPaddingLeft, scrollY + mPaddingTop,
-                    scrollX + mRight - mLeft - mPaddingRight,
-                    scrollY + mBottom - mTop - mPaddingBottom,
-                    &isNonEmpty);
+            canvas->ClipRect(mScrollX + mPaddingLeft, mScrollY + mPaddingTop,
+                mScrollX + mRight - mLeft - mPaddingRight,
+                mScrollY + mBottom - mTop - mPaddingBottom,
+                &isNonEmpty);
         }
 
         canvas->Translate(mPaddingLeft, mPaddingTop);

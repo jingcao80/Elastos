@@ -903,7 +903,7 @@ void ComparableTimSort<T>::MergeLo(
     }
 
     Int32 minGallop = mMinGallop;  // Use local variable for performance
-outer:
+
     while (true) {
         Int32 count1 = 0; // Number of times in a row that first run won
         Int32 count2 = 0; // Number of times in a row that second run won
@@ -982,6 +982,8 @@ outer:
         }
         minGallop += 2;  // Penalize for leaving gallop mode
     }  // End of "outer" loop
+
+outer:
     mMinGallop = minGallop < 1 ? 1 : minGallop;  // Write back to field
 
     if (len1 == 1) {
@@ -1041,7 +1043,7 @@ void ComparableTimSort<T>::MergeHi(
     }
 
     Int32 minGallop = mMinGallop;  // Use local variable for performance
-outer:
+
     while (true) {
         Int32 count1 = 0; // Number of times in a row that first run won
         Int32 count2 = 0; // Number of times in a row that second run won
@@ -1118,6 +1120,8 @@ outer:
         }
         minGallop += 2;  // Penalize for leaving gallop mode
     }  // End of "outer" loop
+
+outer:
     mMinGallop = minGallop < 1 ? 1 : minGallop;  // Write back to field
 
     if (len2 == 1) {

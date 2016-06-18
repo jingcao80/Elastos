@@ -25,6 +25,8 @@ CarClass(CBrightnessDialog)
 public:
     CAR_OBJECT_DECL()
 
+    CARAPI constructor();
+
     // @Override
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);

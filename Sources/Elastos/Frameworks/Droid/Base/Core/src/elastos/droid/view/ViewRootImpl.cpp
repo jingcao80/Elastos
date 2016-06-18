@@ -1530,7 +1530,6 @@ ECode ViewRootImpl::SetView(
         mDisplayAdjustments->SetActivityToken(temp->mToken);
 
         // If the application owns the surface, don't enable hardware acceleration
-        Logger::I(TAG, " >> SetView: mSurfaceHolder:%s, call EnableHardwareAcceleration ?", TO_CSTR(mSurfaceHolder));
         if (mSurfaceHolder == NULL) {
             EnableHardwareAcceleration(attrs);
         }
@@ -1769,8 +1768,11 @@ ECode ViewRootImpl::DestroyHardwareResources()
 ECode ViewRootImpl::DetachFunctor(
     /* [in] */ Int64 functor)
 {
+    // TODO: Make the resize buffer some other way to not need this block
     mBlockResizeBuffer = TRUE;
     if (mAttachInfo->mHardwareRenderer != NULL) {
+        // Fence so that any pending invokeFunctor() messages will be processed
+        // before we return from detachFunctor.
         mAttachInfo->mHardwareRenderer->StopDrawing();
     }
     return NOERROR;
@@ -1801,7 +1803,6 @@ ECode ViewRootImpl::RegisterAnimatingRenderNode(
 void ViewRootImpl::EnableHardwareAcceleration(
     /* [in] */ IWindowManagerLayoutParams* attrs)
 {
-    Logger::D(TAG, " >> EnableHardwareAcceleration, mView:%s", TO_CSTR(mView));
     mAttachInfo->mHardwareAccelerated = FALSE;
     mAttachInfo->mHardwareAccelerationRequested = FALSE;
 
@@ -1813,7 +1814,6 @@ void ViewRootImpl::EnableHardwareAcceleration(
     Int32 flags;
     attrs->GetFlags(&flags);
     Boolean hardwareAccelerated = (flags & IWindowManagerLayoutParams::FLAG_HARDWARE_ACCELERATED) != 0;
-    Logger::D(TAG, " >> EnableHardwareAcceleration, hardwareAccelerated:%d", hardwareAccelerated);
     if (hardwareAccelerated) {
         Boolean available;
         if (HardwareRenderer::IsAvailable(&available), !available) {
@@ -1856,7 +1856,6 @@ void ViewRootImpl::EnableHardwareAcceleration(
                 mAttachInfo->mHardwareRenderer->SetName(name);
                 mAttachInfo->mHardwareAccelerated =
                         mAttachInfo->mHardwareAccelerationRequested = TRUE;
-                Logger::D(TAG, " >> EnableHardwareAcceleration, enable hardwareAccelerated");
             }
         }
     }
@@ -1881,12 +1880,8 @@ ECode ViewRootImpl::SetLayoutParams(
 {
     AutoLock lock(mSyncLock);
     CWindowManagerLayoutParams* obj = (CWindowManagerLayoutParams*)mWindowAttributes.Get();
-    CRect* objRect = (CRect*)obj->mSurfaceInsets.Get();
-    Int32 oldInsetLeft = objRect->mLeft;
-    Int32 oldInsetTop = objRect->mTop;
-    Int32 oldInsetRight = objRect->mRight;
-    Int32 oldInsetBottom = objRect->mBottom;
-
+    Int32 oldInsetLeft, oldInsetTop, oldInsetRight, oldInsetBottom;
+    obj->mSurfaceInsets->Get(&oldInsetLeft, &oldInsetTop, &oldInsetRight, &oldInsetBottom);
     Int32 oldSoftInputMode = obj->mSoftInputMode;
 
     // Keep track of the actual window flags supplied by the client.
@@ -1926,9 +1921,9 @@ ECode ViewRootImpl::SetLayoutParams(
     if ((obj->mSoftInputMode & IWindowManagerLayoutParams::SOFT_INPUT_MASK_ADJUST)
         == IWindowManagerLayoutParams::SOFT_INPUT_ADJUST_UNSPECIFIED) {
         obj->mSoftInputMode = (obj->mSoftInputMode
-            & ~IWindowManagerLayoutParams::SOFT_INPUT_MASK_ADJUST)
+                & ~IWindowManagerLayoutParams::SOFT_INPUT_MASK_ADJUST)
             | (oldSoftInputMode
-            & IWindowManagerLayoutParams::SOFT_INPUT_MASK_ADJUST);
+                & IWindowManagerLayoutParams::SOFT_INPUT_MASK_ADJUST);
     }
 
     mWindowAttributesChanged = TRUE;
@@ -2926,15 +2921,11 @@ void ViewRootImpl::PerformTraversals()
                 mPreviousTransparentRegion->SetEmpty();
 
                 if (mAttachInfo->mHardwareRenderer != NULL) {
-                    //try {
-                        ECode ec = mAttachInfo->mHardwareRenderer->Initialize(mSurface, &hwInitialized);
-                    //} catch (OutOfResourcesException e) {
-                        if (ec == (ECode) E_OUT_OF_RESOURCES_EXCEPTION) {
-                            HandleOutOfResourcesException(ec);
-                        }
-
+                    ECode ec = mAttachInfo->mHardwareRenderer->Initialize(mSurface, &hwInitialized);
+                    if (ec == (ECode)E_OUT_OF_RESOURCES_EXCEPTION) {
+                        HandleOutOfResourcesException(ec);
                         return;
-                    //}
+                    }
                 }
             }
         }
@@ -2957,14 +2948,11 @@ void ViewRootImpl::PerformTraversals()
         else if (surfaceGenerationId != (mSurface->GetGenerationId(&gId), gId)
             && mSurfaceHolder == NULL && mAttachInfo->mHardwareRenderer != NULL) {
             mFullRedrawNeeded = TRUE;
-            // try {
             ECode ec = mAttachInfo->mHardwareRenderer->UpdateSurface(mSurface);
-            // } catch (OutOfResourcesException e) {
-            if (ec == (ECode) E_OUT_OF_RESOURCES_EXCEPTION) {
+            if (ec == (ECode)E_OUT_OF_RESOURCES_EXCEPTION) {
                 HandleOutOfResourcesException(ec);
                 return;
             }
-            // }
         }
 
         if (DEBUG_ORIENTATION) {
@@ -3603,7 +3591,6 @@ Int32 ViewRootImpl::GetRootMeasureSpec(
 ECode ViewRootImpl::OnHardwarePreDraw(
     /* [in] */ IHardwareCanvas* canvas)
 {
-    Logger::I(TAG, " >> OnHardwarePreDraw");
     ICanvas::Probe(canvas)->Translate(-mHardwareXOffset, -mHardwareYOffset);
     return NOERROR;
 }
@@ -3611,7 +3598,6 @@ ECode ViewRootImpl::OnHardwarePreDraw(
 ECode ViewRootImpl::OnHardwarePostDraw(
     /* [in] */ IHardwareCanvas* canvas)
 {
-    Logger::I(TAG, " >> OnHardwarePostDraw: %s", TO_CSTR(mResizeBuffer));
     if (mResizeBuffer != NULL) {
         mResizePaint->SetAlpha(mResizeAlpha);
         canvas->DrawHardwareLayer(mResizeBuffer, mHardwareXOffset, mHardwareYOffset, mResizePaint);
@@ -3838,7 +3824,7 @@ void ViewRootImpl::Draw(
 
     if (DEBUG_ORIENTATION || DEBUG_DRAW) {
         AutoPtr<ICharSequence> csq;
-        mWindowAttributes->GetTitle((ICharSequence**)&csq);
+        if (mWindowAttributes) mWindowAttributes->GetTitle((ICharSequence**)&csq);
         Logger::V(TAG, "Draw %s/%s: fullRedrawNeeded=%d, dirty={%s}, surface=%s, "
             "isValid=%d, appScale=%f, width=%d, height=%d",
             TO_CSTR(mView), TO_CSTR(csq), fullRedrawNeeded, TO_CSTR(dirty), TO_CSTR(surface),
@@ -3866,8 +3852,6 @@ void ViewRootImpl::Draw(
     if (!isEmpty || mIsAnimating) {
         Boolean bval = FALSE;
         if (mAttachInfo->mHardwareRenderer && (mAttachInfo->mHardwareRenderer->IsEnabled(&bval), bval)) {
-            Logger::I(TAG, " >> %s Draw with hardware renderer", TO_CSTR(mView));
-
             // Draw with hardware renderer.
             mIsAnimating = FALSE;
             if (mHardwareYOffset != yOffset || mHardwareXOffset != xOffset) {
@@ -3875,7 +3859,6 @@ void ViewRootImpl::Draw(
                 mHardwareXOffset = xOffset;
                 mAttachInfo->mHardwareRenderer->InvalidateRoot();
             }
-            // mAttachInfo->mHardwareRenderer->InvalidateRoot();
             mResizeAlpha = resizeAlpha;
 
             // sometimes we get the dirty rect as null
@@ -4094,6 +4077,17 @@ ECode ViewRootImpl::SetDrawDuringWindowsAnimating(
     return NOERROR;
 }
 
+AutoPtr<IView> ViewRootImpl::GetLastScrolledFocus()
+{
+    AutoPtr<IView> lastScrolledFocus;
+    if (mLastScrolledFocus != NULL) {
+        AutoPtr<IInterface> obj;
+        mLastScrolledFocus->Resolve(EIID_IInterface, (IInterface**)&obj);
+        lastScrolledFocus = IView::Probe(obj);
+    }
+    return lastScrolledFocus;
+}
+
 ECode ViewRootImpl::ScrollToRectOrFocus(
     /* [in] */ IRect* rectangle,
     /* [in] */ Boolean immediate,
@@ -4129,13 +4123,7 @@ ECode ViewRootImpl::ScrollToRectOrFocus(
             return NOERROR;
         }
 
-        AutoPtr<IView> lastScrolledFocus;
-        if (mLastScrolledFocus != NULL) {
-            AutoPtr<IInterface> obj;
-            mLastScrolledFocus->Resolve(EIID_IInterface, (IInterface**)&obj);
-            lastScrolledFocus = IView::Probe(obj);
-        }
-
+        AutoPtr<IView> lastScrolledFocus = GetLastScrolledFocus();
         if (focus != lastScrolledFocus) {
             // If the focus has changed, then ignore any requests to scroll
             // to a rectangle; first we want to make sure the entire focus

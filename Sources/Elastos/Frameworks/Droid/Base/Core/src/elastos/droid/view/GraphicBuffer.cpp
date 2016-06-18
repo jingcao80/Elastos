@@ -11,6 +11,8 @@
 #include "elastos/droid/graphics/CCanvas.h"
 #include "elastos/droid/view/CGraphicBuffer.h"
 #include <elastos/utility/logging/Slogger.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
 #include <binder/Parcel.h>
 
@@ -41,6 +43,9 @@
 using Elastos::Droid::Graphics::Canvas;
 using Elastos::Droid::Graphics::CCanvas;
 using Elastos::Droid::Graphics::NativeCanvas;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Slogger;
 
 static inline SkColorType convertPixelFormat(int32_t format) {
     switch (format) {
@@ -70,12 +75,47 @@ public:
 CAR_INTERFACE_IMPL_2(GraphicBuffer, Object, IGraphicBuffer, IParcelable)
 
 GraphicBuffer::GraphicBuffer()
+    : mWidth(0)
+    , mHeight(0)
+    , mFormat(0)
+    , mUsage(0)
+    , mNativeObject(0)
+    , mSaveCount(0)
+    , mDestroyed(0)
+    , mInit(FALSE)
 {
-    mInit = FALSE;
+}
+
+GraphicBuffer::~GraphicBuffer()
+{
+    Destroy();
 }
 
 ECode GraphicBuffer::constructor()
 {
+    return NOERROR;
+}
+
+ECode GraphicBuffer::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("CGraphicBuffer{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", nativeObject=";
+    sb += StringUtils::ToHexString(mNativeObject);
+    sb += ", width=";
+    sb += mWidth;
+    sb += ", height=";
+    sb += mHeight;
+    sb += ", format=";
+    sb += mFormat;
+    sb += ", usage=";
+    sb += mUsage;
+    sb += ", destroyed=";
+    sb += mDestroyed;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 
@@ -98,16 +138,14 @@ ECode GraphicBuffer::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     if (mDestroyed) {
-        // throw new IllegalStateException("This GraphicBuffer has been destroyed and cannot be "
-        //         + "written to a parcel.");
-        SLOGGERD("GraphicBuffer", String("This GraphicBuffer has been destroyed and cannot be ")
-                + "written to a parcel.")
+        Slogger::E("GraphicBuffer",
+            "This GraphicBuffer has been destroyed and cannot be written to a parcel.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     if (!mInit) {
-        SLOGGERD("GraphicBuffer", String("This GraphicBuffer has not been initiated and cannot be ")
-                + "written to a parcel.")
+        Slogger::E("GraphicBuffer",
+            "This GraphicBuffer has not been initiated and cannot be written to a parcel.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     dest->WriteInt32(mWidth);
@@ -124,8 +162,10 @@ ECode GraphicBuffer::WriteToParcel(
 ECode GraphicBuffer::GetWidth(
     /* [out] */ Int32* width)
 {
+    VALIDATE_NOT_NULL(width)
+    *width = 0;
     if (!mInit) {
-        SLOGGERD("GraphicBuffer", String("This GraphicBuffer has not been initiated"))
+        Slogger::E("GraphicBuffer", "This GraphicBuffer has not been initiated");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     *width = mWidth;
@@ -138,8 +178,10 @@ ECode GraphicBuffer::GetWidth(
 ECode GraphicBuffer::GetHeight(
     /* [out] */ Int32* height)
 {
+    VALIDATE_NOT_NULL(height)
+    *height = 0;
     if (!mInit) {
-        SLOGGERD("GraphicBuffer", String("This GraphicBuffer has not been initiated"))
+        Slogger::E("GraphicBuffer", "This GraphicBuffer has not been initiated");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     *height = mHeight;
@@ -153,8 +195,10 @@ ECode GraphicBuffer::GetHeight(
 ECode GraphicBuffer::GetFormat(
     /* [out] */ Int32* format)
 {
+    VALIDATE_NOT_NULL(format)
+    *format = 0;
     if (!mInit) {
-        SLOGGERD("GraphicBuffer", String("This GraphicBuffer has not been initiated"))
+        Slogger::E("GraphicBuffer", "This GraphicBuffer has not been initiated");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     *format = mFormat;
@@ -167,8 +211,10 @@ ECode GraphicBuffer::GetFormat(
 ECode GraphicBuffer::GetUsage(
     /* [out] */ Int32* usage)
 {
+    VALIDATE_NOT_NULL(usage)
+    *usage = 0;
     if (!mInit) {
-        SLOGGERD("GraphicBuffer", String("This GraphicBuffer has not been initiated"))
+        Slogger::E("GraphicBuffer", "This GraphicBuffer has not been initiated");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     *usage = mUsage;
@@ -216,12 +262,14 @@ ECode GraphicBuffer::LockCanvas(
     /* [in] */ IRect* dirty,
     /* [out] */ ICanvas** canvas)
 {
+    VALIDATE_NOT_NULL(canvas)
+    *canvas = NULL;
+
     if (!mInit) {
-        SLOGGERD("GraphicBuffer", String("This GraphicBuffer has not been initiated"))
+        Slogger::E("GraphicBuffer", "This GraphicBuffer has not been initiated");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (mDestroyed) {
-        *canvas = NULL;
         return NOERROR;
     }
 
@@ -257,7 +305,7 @@ ECode GraphicBuffer::UnlockCanvasAndPost(
     /* [in] */ ICanvas* canvas)
 {
     if (!mInit) {
-        SLOGGERD("GraphicBuffer", String("This GraphicBuffer has not been initiated"))
+        Slogger::E("GraphicBuffer", "This GraphicBuffer has not been initiated");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (!mDestroyed && mCanvas != NULL && canvas == mCanvas) {
@@ -280,12 +328,13 @@ ECode GraphicBuffer::UnlockCanvasAndPost(
 ECode GraphicBuffer::Destroy()
 {
     if (!mInit) {
-        SLOGGERD("GraphicBuffer", String("This GraphicBuffer has not been initiated"))
+        Slogger::E("GraphicBuffer", "This GraphicBuffer has not been initiated");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (!mDestroyed) {
         mDestroyed = TRUE;
         nDestroyGraphicBuffer(mNativeObject);
+        mNativeObject = 0;
     }
     return NOERROR;
 }
@@ -302,8 +351,10 @@ ECode GraphicBuffer::Destroy()
 ECode GraphicBuffer::IsDestroyed(
     /* [out] */ Boolean* isDestroyed)
 {
+    VALIDATE_NOT_NULL(isDestroyed)
+    *isDestroyed = TRUE;
     if (!mInit) {
-        SLOGGERD("GraphicBuffer", String("This GraphicBuffer has not been initiated"))
+        Slogger::E("GraphicBuffer", "This GraphicBuffer has not been initiated");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     *isDestroyed = mDestroyed;
@@ -314,11 +365,8 @@ ECode GraphicBuffer::GetNativeObject(
     /* [out] */ Handle64* handle)
 {
     VALIDATE_NOT_NULL(handle)
-
-    GraphicBufferWrapper* wrapper =
-        reinterpret_cast<GraphicBufferWrapper*>(mNativeObject);
+    GraphicBufferWrapper* wrapper = reinterpret_cast<GraphicBufferWrapper*>(mNativeObject);
     *handle = reinterpret_cast<Handle64>(wrapper->buffer.get());
-
     return NOERROR;
 }
 
@@ -329,6 +377,7 @@ ECode GraphicBuffer::Create(
     /* [in] */ Int32 usage,
     /* [out] */ IGraphicBuffer** buf)
 {
+    VALIDATE_NOT_NULL(buf)
     Int64 nativeObject = nCreateGraphicBuffer(width, height, format, usage);
     if (nativeObject != 0) {
         CGraphicBuffer::New(width, height, format, usage, nativeObject, buf);
@@ -344,18 +393,17 @@ Int64 GraphicBuffer::nCreateGraphicBuffer(
     /* [in] */ Int32 format,
     /* [in] */ Int32 usage)
 {
-
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
     sp<IGraphicBufferAlloc> alloc(composer->createGraphicBufferAlloc());
     if (alloc == NULL) {
-        SLOGGERD("GraphicBuffer", "createGraphicBufferAlloc() failed in GraphicBuffer.create()")
+        Slogger::E("GraphicBuffer", "createGraphicBufferAlloc() failed in GraphicBuffer.create()");
         return 0;
     }
 
     android::status_t error;
     sp<NativeGraphicBuffer> buffer(alloc->createGraphicBuffer(width, height, format, usage, &error));
     if (buffer == NULL) {
-        SLOGGERD("GraphicBuffer", "createGraphicBuffer() failed in GraphicBuffer.create()")
+        Slogger::E("GraphicBuffer", "createGraphicBuffer() failed in GraphicBuffer.create()");
         return 0;
     }
 
@@ -366,17 +414,17 @@ Int64 GraphicBuffer::nCreateGraphicBuffer(
 void GraphicBuffer::nDestroyGraphicBuffer(
     /* [in] */ Int64 nativeObject)
 {
-    GraphicBufferWrapper* wrapper =
-                reinterpret_cast<GraphicBufferWrapper*>(nativeObject);
-    delete wrapper;
+    if (nativeObject != 0) {
+        GraphicBufferWrapper* wrapper = reinterpret_cast<GraphicBufferWrapper*>(nativeObject);
+        delete wrapper;
+    }
 }
 
 ECode GraphicBuffer::nWriteGraphicBufferToParcel(
     /* [in] */ Int64 nativeObject,
     /* [in] */ IParcel* dest)
 {
-    GraphicBufferWrapper* wrapper =
-                reinterpret_cast<GraphicBufferWrapper*>(nativeObject);
+    GraphicBufferWrapper* wrapper = reinterpret_cast<GraphicBufferWrapper*>(nativeObject);
     android::Parcel* parcel;
     dest->GetElementPayload((Handle32*)&parcel);
     if (parcel) {
@@ -414,8 +462,7 @@ Boolean GraphicBuffer::nLockCanvas(
     /* [in] */ ICanvas* canvas,
     /* [in] */ IRect* dirtyRect)
 {
-    GraphicBufferWrapper* wrapper =
-                reinterpret_cast<GraphicBufferWrapper*>(nativeObject);
+    GraphicBufferWrapper* wrapper = reinterpret_cast<GraphicBufferWrapper*>(nativeObject);
     if (!wrapper) {
         return FALSE;
     }
@@ -474,8 +521,7 @@ Boolean GraphicBuffer::nUnlockCanvasAndPost(
     /* [in] */ Int64 nativeObject,
     /* [in] */ ICanvas* canvas)
 {
-    GraphicBufferWrapper* wrapper =
-                reinterpret_cast<GraphicBufferWrapper*>(nativeObject);
+    GraphicBufferWrapper* wrapper = reinterpret_cast<GraphicBufferWrapper*>(nativeObject);
     Canvas* impl = (Canvas*)canvas;
     impl->SetNativeBitmap((Int64)0);
 

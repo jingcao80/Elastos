@@ -907,7 +907,7 @@ ECode TimSort<T>::MergeLo(
 
     AutoPtr<IComparator> c = mC;  // Use local variable for performance
     Int32 minGallop = mMinGallop;    //  "    "       "     "      "
-outer:
+
     while (TRUE) {
         Int32 count1 = 0; // Number of times in a row that first run won
         Int32 count2 = 0; // Number of times in a row that second run won
@@ -978,6 +978,8 @@ outer:
             minGallop = 0;
         minGallop += 2;  // Penalize for leaving gallop mode
     }  // End of "outer" loop
+
+outer:
     mMinGallop = minGallop < 1 ? 1 : minGallop;  // Write back to field
 
     if (len1 == 1) {
@@ -1040,7 +1042,7 @@ ECode TimSort<T>::MergeHi(
 
     AutoPtr<IComparator> c = mC;  // Use local variable for performance
     Int32 minGallop = mMinGallop;    //  "    "       "     "      "
-outer:
+
     while (TRUE) {
         Int32 count1 = 0; // Number of times in a row that first run won
         Int32 count2 = 0; // Number of times in a row that second run won
@@ -1110,6 +1112,8 @@ outer:
             minGallop = 0;
         minGallop += 2;  // Penalize for leaving gallop mode
     }  // End of "outer" loop
+
+outer:
     mMinGallop = minGallop < 1 ? 1 : minGallop;  // Write back to field
 
     if (len2 == 1) {

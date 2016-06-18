@@ -11,11 +11,17 @@
 #include "CThreadPoolExecutor.h"
 #include "TimeUnit.h"
 #include "CScheduledThreadPoolExecutor.h"
+#include "CLibcore.h"
+#include <elastos/droid/system/OsConstants.h>
 
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Core::CThread;
 using Elastos::Core::Thread;
+using Elastos::Droid::System::OsConstants;
+using Libcore::IO::IOs;
+using Libcore::IO::ILibcore;
+using Libcore::IO::CLibcore;
 using Elastos::Utility::Concurrent::CForkJoinPool;
 using Elastos::Utility::Concurrent::CLinkedBlockingQueue;
 using Elastos::Utility::Concurrent::CThreadPoolExecutor;
@@ -495,13 +501,16 @@ ECode Executors::NewWorkStealingPool(
 {
     VALIDATE_NOT_NULL(result)
 
-    // return new ForkJoinPool
-    //     (Runtime.getRuntime().availableProcessors(),
-    //      ForkJoinPool.defaultForkJoinWorkerThreadFactory,
-    //      null, true);
+    AutoPtr<IOs> os;
+    AutoPtr<ILibcore> libcore;
+    CLibcore::AcquireSingleton((ILibcore**)&libcore);
+    libcore->GetOs((IOs**)&os);
+    Int64 ival = 4;
+    os->Sysconf(OsConstants::__SC_NPROCESSORS_CONF, &ival);
+    Int32 numCpu = ival;
 
     AutoPtr<IForkJoinPool> p;
-    CForkJoinPool::New(4,
+    CForkJoinPool::New(numCpu,
          CForkJoinPool::mDefaultForkJoinWorkerThreadFactory,
          NULL, TRUE, (IForkJoinPool**)&p);
     *result = (IExecutorService*)(p->Probe(EIID_IExecutorService));

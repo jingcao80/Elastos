@@ -7,8 +7,10 @@
 #include "Thread.h"
 #include "CAtomicReference.h"
 #include "CForkJoinPool.h"
-
+#include "CLibcore.h"
+#include <elastos/droid/system/OsConstants.h>
 #include <elastos/core/AutoLock.h>
+
 using Elastos::Core::AutoLock;
 using Elastos::Core::Thread;
 using Elastos::Core::ISystem;
@@ -17,6 +19,10 @@ using Elastos::Core::StringBuilder;
 using Elastos::Utility::Concurrent::CForkJoinPool;
 using Elastos::Utility::Concurrent::Locks::LockSupport;
 using Elastos::Utility::Concurrent::Atomic::CAtomicReference;
+using Elastos::Droid::System::OsConstants;
+using Libcore::IO::IOs;
+using Libcore::IO::ILibcore;
+using Libcore::IO::CLibcore;
 
 namespace Elastos {
 namespace Utility {
@@ -560,7 +566,18 @@ Int32 CPhaser::AbortWait(
     }
 }
 
-Int32 CPhaser::NCPU = 2; //Runtime.getRuntime().availableProcessors();
+static Int32 GetCpuCount()
+{
+    AutoPtr<IOs> os;
+    AutoPtr<ILibcore> libcore;
+    CLibcore::AcquireSingleton((ILibcore**)&libcore);
+    libcore->GetOs((IOs**)&os);
+    Int64 ival = 4;
+    os->Sysconf(OsConstants::__SC_NPROCESSORS_CONF, &ival);
+    return (Int32)ival;
+}
+
+Int32 CPhaser::NCPU = GetCpuCount();
 
 Int32 CPhaser::SPINS_PER_ARRIVAL = (NCPU < 2) ? 1 : 1 << 8;
 

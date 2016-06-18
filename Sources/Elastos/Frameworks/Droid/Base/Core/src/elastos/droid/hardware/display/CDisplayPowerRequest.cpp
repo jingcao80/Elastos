@@ -104,6 +104,25 @@ ECode CDisplayPowerRequest::GetHashCode(
     return NOERROR;
 }
 
+static String StateToString(
+    /* [in] */ Int32 state)
+{
+    switch (state) {
+        case IDisplay::STATE_UNKNOWN:
+            return String("UNKNOWN");
+        case IDisplay::STATE_OFF:
+            return String("OFF");
+        case IDisplay::STATE_ON:
+            return String("ON");
+        case IDisplay::STATE_DOZE:
+            return String("DOZE");
+        case IDisplay::STATE_DOZE_SUSPEND:
+            return String("DOZE_SUSPEND");
+        default:
+            return StringUtils::ToString(state);
+    }
+}
+
 ECode CDisplayPowerRequest::ToString(
     /* [out] */ String* result)
 {
@@ -129,9 +148,7 @@ ECode CDisplayPowerRequest::ToString(
     sb += ", dozeScreenBrightness=";
     sb += StringUtils::ToString(mDozeScreenBrightness);
     sb += ", dozeScreenState=";
-    assert(0 && "TODO Display::StateToString");
-    //Display::StateToString(mDozeScreenState, &tmp);
-    //sb += tmp;
+    sb += StateToString(mDozeScreenState);
 
     return sb.ToString(result);
 }
@@ -140,6 +157,7 @@ ECode CDisplayPowerRequest::PolicyToString(
     /* [in] */ Int32 policy,
     /* [out] */ String* result)
 {
+    VALIDATE_NOT_NULL(result)
     switch (policy) {
         case IDisplayPowerRequest::POLICY_OFF:
             *result = String("OFF");

@@ -11624,8 +11624,7 @@ ECode View::BuildLayer()
         case IView::LAYER_TYPE_HARDWARE:
             UpdateDisplayListIfDirty();
             Boolean isValid;
-            mRenderNode->IsValid(&isValid);
-            if (mAttachInfo->mHardwareRenderer != NULL && isValid) {
+            if (mAttachInfo->mHardwareRenderer != NULL && (mRenderNode->IsValid(&isValid), isValid)) {
                 mAttachInfo->mHardwareRenderer->BuildLayer(mRenderNode);
             }
             break;
@@ -11766,11 +11765,9 @@ ECode View::UpdateDisplayListIfDirty()
         //try {
         AutoPtr<IHardwareLayer> layer = GetHardwareLayer();
         if (layer != NULL && (layer->IsValid(&bval), bval)) {
-            // Logger::I(TAG, "   >> UpdateDisplayListIfDirty: DrawHardwareLayer");
             canvas->DrawHardwareLayer(layer, 0, 0, mLayerPaint);
         }
         else if (layerType == IView::LAYER_TYPE_SOFTWARE) {
-            // Logger::I(TAG, "   >> UpdateDisplayListIfDirty: DrawBitmap");
             BuildDrawingCache(TRUE);
             AutoPtr<IBitmap> cache;
             GetDrawingCache(TRUE, (IBitmap**)&cache);
@@ -11787,7 +11784,6 @@ ECode View::UpdateDisplayListIfDirty()
 
             // Fast path for layouts with no backgrounds
             if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
-                // Logger::I(TAG, "   >> UpdateDisplayListIfDirty: DispatchDraw");
                 DispatchDraw(c);
                 if (mOverlay != NULL && (mOverlay->IsEmpty(&bval), !bval)) {
                     AutoPtr<IViewGroup> group;
@@ -11796,7 +11792,6 @@ ECode View::UpdateDisplayListIfDirty()
                 }
             }
             else {
-                // Logger::I(TAG, "   >> UpdateDisplayListIfDirty: Draw");
                 Draw(c);
             }
             DrawAccessibilityFocus(c);

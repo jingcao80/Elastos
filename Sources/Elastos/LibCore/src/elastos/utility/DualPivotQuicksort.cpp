@@ -124,7 +124,6 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
          *
          * Pointer k is the first index of ?-part
          */
-        outer:
         for (Int32 k = less; k <= great; k++) {
             Int32 ak = (*a)[k];
             if (ak < pivot1) { // Move (*a)[k] to left part
@@ -151,6 +150,8 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
                 }
             }
         }
+
+    outer: { /* nothing */ } { /* nothing */ }
     }
     else { // Pivots are equal
         /*
@@ -256,7 +257,6 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
          * Pointer k is the first index of ?-part
          */
 
-        outer2:
         for (Int32 k = less; k <= great; k++) {
             Int32 ak = (*a)[k];
             if (ak == pivot2) { // Move (*a)[k] to right part
@@ -279,6 +279,8 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
                 (*a)[less++] = pivot1;
             }
         }
+
+    outer2: { /* nothing */ }
     }
 
     // Sort center part recursively, excluding known pivot values
@@ -391,7 +393,6 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
          *
          * Pointer k is the first index of ?-part
          */
-        outer:
         for (Int32 k = less; k <= great; k++) {
             Int64 ak = (*a)[k];
             if (ak < pivot1) { // Move (*a)[k] to left part
@@ -418,6 +419,7 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
                 }
             }
         }
+    outer: { /* nothing */ }
     }
     else { // Pivots are equal
         /*
@@ -522,7 +524,6 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
          *
          * Pointer k is the first index of ?-part
          */
-        outer2:
         for (Int32 k = less; k <= great; k++) {
             Int64 ak = (*a)[k];
             if (ak == pivot2) { // Move (*a)[k] to right part
@@ -545,6 +546,7 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
                 (*a)[less++] = pivot1;
             }
         }
+    outer2: { /* nothing */ }
     }
 
     // Sort center part recursively, excluding known pivot values
@@ -671,7 +673,6 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
          *
          * Pointer k is the first index of ?-part
          */
-        outer:
         for (Int32 k = less; k <= great; k++) {
             Int16 ak = (*a)[k];
             if (ak < pivot1) { // Move (*a)[k] to left part
@@ -698,6 +699,7 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
                 }
             }
         }
+    outer: { /* nothing */ }
     }
     else { // Pivots are equal
         /*
@@ -802,7 +804,6 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
          *
          * Pointer k is the first index of ?-part
          */
-        outer2:
         for (Int32 k = less; k <= great; k++) {
             Int16 ak = (*a)[k];
             if (ak == pivot2) { // Move (*a)[k] to right part
@@ -825,6 +826,7 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
                 (*a)[less++] = pivot1;
             }
         }
+    outer2: { /* nothing */ }
     }
 
     // Sort center part recursively, excluding known pivot values
@@ -950,7 +952,6 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
          *
          * Pointer k is the first index of ?-part
          */
-        outer:
         for (Int32 k = less; k <= great; k++) {
             Char32 ak = (*a)[k];
             if (ak < pivot1) { // Move (*a)[k] to left part
@@ -977,6 +978,7 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
                 }
             }
         }
+    outer: { /* nothing */ }
     }
     else { // Pivots are equal
         /*
@@ -1081,7 +1083,6 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
          *
          * Pointer k is the first index of ?-part
          */
-        outer2:
         for (Int32 k = less; k <= great; k++) {
             Char32 ak = (*a)[k];
             if (ak == pivot2) { // Move (*a)[k] to right part
@@ -1104,6 +1105,7 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
                 (*a)[less++] = pivot1;
             }
         }
+    outer2: { /* nothing */ }
     }
 
     // Sort center part recursively, excluding known pivot values
@@ -1229,7 +1231,6 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
          *
          * Pointer k is the first index of ?-part
          */
-        outer:
         for (Int32 k = less; k <= great; k++) {
             Byte ak = (*a)[k];
             if (ak < pivot1) { // Move (*a)[k] to left part
@@ -1256,6 +1257,7 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
                 }
             }
         }
+    outer: { /* nothing */ }
     }
     else { // Pivots are equal
         /*
@@ -1360,7 +1362,6 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
          *
          * Pointer k is the first index of ?-part
          */
-        outer2:
         for (Int32 k = less; k <= great; k++) {
             Byte ak = (*a)[k];
             if (ak == pivot2) { // Move (*a)[k] to right part
@@ -1383,6 +1384,7 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
                 (*a)[less++] = pivot1;
             }
         }
+    outer2: { /* nothing */ }
     }
 
     // Sort center part recursively, excluding known pivot values
@@ -1566,7 +1568,6 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
          *
          * Pointer k is the first index of ?-part
          */
-        outer2:
         for (Int32 k = less; k <= great; k++) {
             Float ak = (*a)[k];
             if (ak < pivot1) { // Move (*a)[k] to left part
@@ -1593,6 +1594,7 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
                 }
             }
         }
+    outer2: { /* nothing */ }
     }
     else { // Pivots are equal
         /*
@@ -1696,7 +1698,6 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
          *
          * Pointer k is the first index of ?-part
          */
-        outer:
         for (Int32 k = less; k <= great; k++) {
             Float ak = (*a)[k];
             if (ak == pivot2) { // Move (*a)[k] to right part
@@ -1719,6 +1720,7 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
                 (*a)[less++] = pivot1;
             }
         }
+    outer: { /* nothing */ }
     }
 
     // Sort center part recursively, excluding known pivot values
@@ -1902,7 +1904,6 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
          *
          * Pointer k is the first index of ?-part
          */
-        outer:
         for (Int32 k = less; k <= great; k++) {
             Double ak = (*a)[k];
             if (ak < pivot1) { // Move (*a)[k] to left part
@@ -1929,6 +1930,7 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
                 }
             }
         }
+    outer: { /* nothing */ }
     }
     else { // Pivots are equal
         /*
@@ -2033,7 +2035,6 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
          *
          * Pointer k is the first index of ?-part
          */
-        outer2:
         for (Int32 k = less; k <= great; k++) {
             Double ak = (*a)[k];
             if (ak == pivot2) { // Move (*a)[k] to right part
@@ -2056,6 +2057,7 @@ ECode DualPivotQuicksort::_DualPivotQuicksort(
                 (*a)[less++] = pivot1;
             }
         }
+    outer2: { /* nothing */ }
     }
 
     // Sort center part recursively, excluding known pivot values

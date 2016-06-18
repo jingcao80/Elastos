@@ -13,12 +13,12 @@
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <binder/Parcel.h>
 #include <binder/IServiceManager.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
+using Elastos::Droid::R;
 using Elastos::Droid::Animation::IValueAnimatorHelper;
 using Elastos::Droid::Animation::CValueAnimatorHelper;
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
@@ -52,6 +52,7 @@ using Elastos::Droid::Server::Twilight::EIID_ITwilightListener;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::Format::IDateUtils;
 using Elastos::Droid::Utility::MathUtils;
+using Elastos::Core::AutoLock;
 using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
 using Elastos::Core::ICharSequence;
@@ -181,12 +182,8 @@ ECode LiveDisplayController::LiveDisplayHandler::HandleMessage(
     Int32 what;
     msg->GetWhat(&what);
     switch (what) {
-        case MSG_UPDATE_LIVE_DISPLAY:
+        case MSG_UPDATE_LIVE_DISPLAY: {
             AutoPtr<ITwilightState> twilight;
-            if (mHost->mTwilightManager == NULL) {
-                Slogger::E(TAG, "TODO mTwilightManager is NULL");
-                return NOERROR;
-            }
             mHost->mTwilightManager->GetCurrentState((ITwilightState**)&twilight);
 
             mHost->UpdateColorTemperature(twilight);
@@ -205,6 +202,7 @@ ECode LiveDisplayController::LiveDisplayHandler::HandleMessage(
                         IDateUtils::MINUTE_IN_MILLIS, &result);
             }
             break;
+        }
     }
     return NOERROR;
 }
@@ -465,12 +463,7 @@ LiveDisplayController::LiveDisplayController(
     mCmHardwareManager = ICmHardwareManager::Probe(service);
 
     mTwilightManager = ITwilightManager::Probe(LocalServices::GetService(EIID_ITwilightManager));
-    if (mTwilightManager == NULL) {
-        Slogger::E(TAG, "TODO can not get Twilight service, maybe result from location service not ready");
-    }
-    else {
-        mTwilightManager->RegisterListener(mTwilightListener, mHandler);
-    }
+    mTwilightManager->RegisterListener(mTwilightListener, mHandler);
 
     Boolean sunlightEnhancementSupported;
     mCmHardwareManager->IsSupported(ICmHardwareManager::FEATURE_SUNLIGHT_ENHANCEMENT, &sunlightEnhancementSupported);
@@ -491,9 +484,9 @@ LiveDisplayController::LiveDisplayController(
 
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
-    res->GetInteger(Elastos::Droid::R::integer::config_dayColorTemperature, &mDefaultDayTemperature);
-    res->GetInteger(Elastos::Droid::R::integer::config_nightColorTemperature, &mDefaultNightTemperature);
-    res->GetInteger(Elastos::Droid::R::integer::config_outdoorAmbientLux, &mDefaultOutdoorLux);
+    res->GetInteger(R::integer::config_dayColorTemperature, &mDefaultDayTemperature);
+    res->GetInteger(R::integer::config_nightColorTemperature, &mDefaultNightTemperature);
+    res->GetInteger(R::integer::config_outdoorAmbientLux, &mDefaultOutdoorLux);
 
     // Counter used to determine when we should tell the user about this feature.
     // If it's not used after 3 sunsets, we'll show the hint once.
@@ -600,7 +593,8 @@ void LiveDisplayController::UpdateLiveDisplay()
 void LiveDisplayController::UpdateLiveDisplay(
     /* [in] */ Float lux)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mCurrentLux = lux;
         mHandler->RemoveMessages(MSG_UPDATE_LIVE_DISPLAY);
         Boolean result;
@@ -949,16 +943,16 @@ void LiveDisplayController::UpdateUserHint(
         AutoPtr<IResources> res;
         mContext->GetResources((IResources**)&res);
         String title;
-        res->GetString(Elastos::Droid::R::string::live_display_title, &title);
+        res->GetString(R::string::live_display_title, &title);
         AutoPtr<ICharSequence> cs;
         CString::New(title, (ICharSequence**)&cs);
         builder->SetContentTitle(cs);
         String hint;
-        res->GetString(Elastos::Droid::R::string::live_display_hint, &hint);
+        res->GetString(R::string::live_display_hint, &hint);
         cs = NULL;
         CString::New(hint, (ICharSequence**)&cs);
         builder->SetContentText(cs);
-        builder->SetSmallIcon(Elastos::Droid::R::drawable::ic_livedisplay_notif);
+        builder->SetSmallIcon(R::drawable::ic_livedisplay_notif);
         builder->SetContentIntent(result);
 
         AutoPtr<IInterface> service;

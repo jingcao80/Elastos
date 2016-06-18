@@ -44,6 +44,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("TwilightService::TwilightListenerRecord")
+
         TwilightListenerRecord(
             /* [in] */ ITwilightListener* listener,
             /* [in] */ IHandler* handler);
@@ -62,6 +64,8 @@ private:
         , public ITwilightManager
     {
     public:
+        TO_STRING_IMPL("TwilightService::MyTwilightManager")
+
         CAR_INTERFACE_DECL()
 
         MyTwilightManager(
@@ -150,6 +154,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("TwilightService::UpdateLocationReceiver: ")
+
         UpdateLocationReceiver(
             /* [in] */ TwilightService* owner);
 
@@ -157,7 +163,6 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        TO_STRING_IMPL("TwilightService::UpdateLocationReceiver: ")
     private:
         AutoPtr<TwilightService> mHost;
     };
@@ -170,6 +175,8 @@ private:
     {
     public:
         CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("TwilightService::EmptyLocationListener")
 
         EmptyLocationListener();
 
@@ -193,6 +200,8 @@ private:
         , public ILocationListener
     {
     public:
+        TO_STRING_IMPL("TwilightService::MyLocationListener")
+
         CAR_INTERFACE_DECL()
 
         MyLocationListener(

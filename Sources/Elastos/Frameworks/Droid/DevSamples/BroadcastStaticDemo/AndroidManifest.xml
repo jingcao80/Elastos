@@ -8,15 +8,22 @@
         android:minSdkVersion="8"
         android:targetSdkVersion="21" />
 
-    <application android:icon="@drawable/icon" android:label="@string/app_name">
-        <activity android:name=".CActivityOne"
-                  android:label="@string/app_name"
-                  android:theme="@android:style/Theme.NoTitleBar">
+    <application
+        android:icon="@drawable/icon"
+         android:label="@string/app_name"
+         hardwareAccelerated="true">
+
+        <activity
+            android:name=".CActivityOne"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.NoTitleBar">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
         </activity>
 
         <receiver android:name=".CBroadcastReceiverOne">
@@ -32,5 +39,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
+
     </application>
+
 </manifest>

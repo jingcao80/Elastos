@@ -22,18 +22,6 @@ CarClass(CToggleSeekBar), public SeekBar
 public:
     CAR_OBJECT_DECL()
 
-    CARAPI constructor(
-        /* [in] */ IContext* context);
-
-    CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs);
-
-    CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs,
-        /* [in] */ Int32 defStyleAttr);
-
     // @Override
     CARAPI OnTouchEvent(
         /* [in] */ IMotionEvent* event,

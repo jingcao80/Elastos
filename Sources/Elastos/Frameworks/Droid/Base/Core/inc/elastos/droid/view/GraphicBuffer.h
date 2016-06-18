@@ -23,6 +23,8 @@ public:
 
     GraphicBuffer();
 
+    ~GraphicBuffer();
+
     CARAPI constructor();
 
     CARAPI constructor(
@@ -142,6 +144,8 @@ public:
     CARAPI GetNativeObject(
         /* [out] */ Handle64* handle);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
 public:
     static CARAPI Create(
         /* [in] */ Int32 width,

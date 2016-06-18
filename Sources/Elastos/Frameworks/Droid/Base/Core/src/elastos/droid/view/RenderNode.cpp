@@ -13,6 +13,8 @@
 #include "elastos/droid/graphics/Paint.h"
 #include "elastos/droid/graphics/COutline.h"
 #include "elastos/droid/graphics/CPath.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/graphics/NativePaint.h"
 #include "elastos/droid/view/RenderNodeAnimator.h"
@@ -28,6 +30,8 @@ using Elastos::Droid::Graphics::IPath;
 using Elastos::Droid::Graphics::Matrix;
 using Elastos::Droid::Graphics::Paint;
 using Elastos::Droid::Graphics::NativePaint;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;
 
 using android::uirenderer::DisplayListData;
@@ -47,10 +51,26 @@ namespace View {
 
 CAR_INTERFACE_IMPL(RenderNode, Object, IRenderNode)
 
-RenderNode::RenderNode()
+RenderNode::RenderNode(
+    /* [in] */ const String& name,
+    /* [in] */ IView* owningView)
     : mValid(FALSE)
-    , mNativeRenderNode(0)
-{}
+{
+    mNativeRenderNode = nCreate(name);
+    mOwningView = owningView;
+}
+
+RenderNode::RenderNode(
+    /* [in] */ Int64 nativePtr)
+    : mValid(FALSE)
+    , mNativeRenderNode(nativePtr)
+{
+}
+
+RenderNode::~RenderNode()
+{
+    nDestroyRenderNode(mNativeRenderNode);
+}
 
 ECode RenderNode::Start(
     /* [in] */ Int32 width,
@@ -110,8 +130,9 @@ ECode RenderNode::GetNativeDisplayList(
     /* [out] */ Int64* list)
 {
     VALIDATE_NOT_NULL(list)
+    *list = 0;
+
     if (!mValid) {
-        // throw new IllegalStateException("The display list is not valid.");
         Logger::E("RenderNode", "The display list is not valid.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -943,18 +964,23 @@ AutoPtr<IRenderNode> RenderNode::Adopt(
     return new RenderNode(nativePtr);
 }
 
-RenderNode::RenderNode(
-    /* [in] */ const String& name,
-    /* [in] */ IView* owningView)
+ECode RenderNode::ToString(
+    /* [out] */ String* str)
 {
-    mNativeRenderNode = nCreate(name);
-    mOwningView = owningView;
-}
-
-RenderNode::RenderNode(
-    /* [in] */ Int64 nativePtr)
-{
-    mNativeRenderNode = nativePtr;
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("RenderNode{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", nativeRenderNode=";
+    sb += StringUtils::ToHexString(mNativeRenderNode);
+    sb += ", isValid=";
+    sb += mValid;
+    if (mOwningView != NULL) {
+        sb += ", owningView=";
+        sb += TO_CSTR(mOwningView);
+    }
+    sb += "}";
+    *str = sb.ToString();
+    return NOERROR;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -976,8 +1002,10 @@ Int64 RenderNode::nCreate(
 void RenderNode::nDestroyRenderNode(
     /* [in] */ Int64 renderNodePtr)
 {
-    NRenderNode* renderNode = reinterpret_cast<NRenderNode*>(renderNodePtr);
-    renderNode->decStrong(0);
+    if (renderNodePtr != 0) {
+        NRenderNode* renderNode = reinterpret_cast<NRenderNode*>(renderNodePtr);
+        renderNode->decStrong(0);
+    }
 }
 
 void RenderNode::nSetDisplayListData(

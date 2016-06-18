@@ -1100,6 +1100,14 @@ module
             interface IPowerUI;
             interface ISystemUI;
         }
+
+        class CPowerUIReceiver {
+            constructor(
+                [in] IPowerUI* host);
+
+            interface IBroadcastReceiver;
+        }
+
     } // Power
 
     //===========================================================================
@@ -2818,6 +2826,14 @@ module
             interface IComponentCallbacks;
             interface IComponentCallbacks2;
             interface IOnWindowDismissedCallback;
+        }
+
+        class CBrightnessObserver {
+            constructor(
+                [in] IBrightnessController* controller,
+                [in] IHandler* handle);
+
+            interface IContentObserver;
         }
 
         [local]

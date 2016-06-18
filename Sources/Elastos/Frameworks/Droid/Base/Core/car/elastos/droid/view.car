@@ -421,6 +421,10 @@ module
         interface IGraphicBuffer;
     }
 
+    singleton class CGraphicBufferHelper {
+        interface IGraphicBufferHelper;
+    }
+
     singleton class CGLES20CanvasHelper {
         interface IGLES20CanvasHelper;
     }

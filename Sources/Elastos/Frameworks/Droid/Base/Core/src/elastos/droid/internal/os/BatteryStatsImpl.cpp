@@ -27,9 +27,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
-
 #include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
+
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::Bluetooth::IBluetoothDevice;
 using Elastos::Droid::Internal::Net::CNetworkStatsFactory;
@@ -73,6 +72,7 @@ using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::Display;
 using Elastos::Droid::Wifi::CWifiManagerHelper;
 using Elastos::Droid::Wifi::IWifiManagerHelper;
+using Elastos::Core::AutoLock;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
 using Elastos::Core::StringUtils;
@@ -738,7 +738,7 @@ void BatteryStatsImpl::Timer::WriteToParcel(
     /* [in] */ IParcel* out,
     /* [in] */ Int64 elapsedRealtimeUs)
 {
-    if (DEBUG) Logger::I(TAG, "**** WRITING TIMER #%d: mTotalTime=%d", mType,
+    if (DEBUG) Logger::I(TAG, "**** WRITING TIMER #%d: mTotalTime=%lld", mType,
             ComputeRunTimeLocked(mTimeBase->GetRealtime(elapsedRealtimeUs)));
     out->WriteInt32(mCount);
     out->WriteInt32(mLoadedCount);
@@ -754,13 +754,13 @@ ECode BatteryStatsImpl::Timer::OnTimeStarted(
     /* [in] */ Int64 baseRealtime)
 {
     if (DEBUG && mType < 0) {
-        Logger::V(TAG, "unplug #%d: realtime=%d old mUnpluggedTime=%d old mUnpluggedCount=%d",
+        Logger::V(TAG, "unplug #%d: realtime=%lld old mUnpluggedTime=%lld old mUnpluggedCount=%lld",
                 mType, baseRealtime, mUnpluggedTime, mUnpluggedCount);
     }
     mUnpluggedTime = ComputeRunTimeLocked(baseRealtime);
     mUnpluggedCount = mCount;
     if (DEBUG && mType < 0) {
-        Logger::V(TAG, "unplug #%d: new mUnpluggedTime=%d new mUnpluggedCount=%d",
+        Logger::V(TAG, "unplug #%d: new mUnpluggedTime=%lld new mUnpluggedCount=%d",
                 mType, mUnpluggedTime, mUnpluggedCount);
     }
     return NOERROR;
@@ -772,13 +772,13 @@ ECode BatteryStatsImpl::Timer::OnTimeStopped(
     /* [in] */ Int64 baseRealtime)
 {
     if (DEBUG && mType < 0) {
-        Logger::V(TAG, "plug #%d: realtime=%d old mTotalTime=%d",
+        Logger::V(TAG, "plug #%d: realtime=%lld old mTotalTime=%lld",
                 mType, baseRealtime, mTotalTime);
     }
     mTotalTime = ComputeRunTimeLocked(baseRealtime);
     mCount = ComputeCurrentCountLocked();
     if (DEBUG && mType < 0) {
-        Logger::V(TAG, "plug #%d: new mTotalTime=%d", mType, mTotalTime);
+        Logger::V(TAG, "plug #%d: new mTotalTime=%lld", mType, mTotalTime);
     }
     return NOERROR;
 }
@@ -2068,9 +2068,8 @@ ECode BatteryStatsImpl::Uid::Proc::AddSpeedStepTimes(
         if (amt != 0) {
             AutoPtr<SamplingCounter> c = (*mSpeedBins)[i];
             if (c == NULL) {
-                AutoPtr<SamplingCounter> counter = new SamplingCounter(
-                        mHost->mOnBatteryTimeBase);
-                mSpeedBins->Set(i, counter);
+                c = new SamplingCounter(mHost->mOnBatteryTimeBase);
+                mSpeedBins->Set(i, c);
             }
             c->AddCountAtomic((*values)[i]);
         }
@@ -4215,11 +4214,11 @@ ECode BatteryStatsImpl::BatteryStatsWriteRunnable::Run()
 //==============================================================================
 
 const String BatteryStatsImpl::TAG("BatteryStatsImpl");
-const Boolean BatteryStatsImpl::DEBUG;
-const Boolean BatteryStatsImpl::DEBUG_HISTORY;
-const Boolean BatteryStatsImpl::USE_OLD_HISTORY;
-const Int32 BatteryStatsImpl::MAGIC;
-const Int32 BatteryStatsImpl::VERSION;
+const Boolean BatteryStatsImpl::DEBUG = FALSE;
+const Boolean BatteryStatsImpl::DEBUG_HISTORY = FALSE;
+const Boolean BatteryStatsImpl::USE_OLD_HISTORY = FALSE;
+const Int32 BatteryStatsImpl::MAGIC = 0xBA757475; // 'BATSTATS'
+const Int32 BatteryStatsImpl::VERSION = 114 + (USE_OLD_HISTORY ? 1000 : 0);
 const Int32 BatteryStatsImpl::MAX_HISTORY_ITEMS;
 const Int32 BatteryStatsImpl::MAX_MAX_HISTORY_ITEMS;
 const Int32 BatteryStatsImpl::MAX_WAKELOCKS_PER_UID;
@@ -8108,6 +8107,7 @@ void BatteryStatsImpl::ResetAllStatsLocked()
             mUidStats->KeyAt(i, &key);
             mUidStats->Remove(key);
             i--;
+            size--;
         }
     }
     if (mKernelWakelockStats->GetSize(&size), size > 0) {
@@ -8248,14 +8248,14 @@ void BatteryStatsImpl::SetOnBatteryLocked(
         Boolean reset = FALSE;
         Int32 high, eleSize;
         if (!mNoAutoReset && (oldStatus == IBatteryManager::BATTERY_STATUS_FULL
-                || level >= 90
-                || (mDischargeCurrentLevel < 20 && level >= 80)
-                || ((GetHighDischargeAmountSinceCharge(&high), high >= 200)
-                        && (mHistoryBuffer->GetElementSize(&eleSize), eleSize >= MAX_HISTORY_BUFFER)))) {
+            || level >= 90
+            || (mDischargeCurrentLevel < 20 && level >= 80)
+            || ((GetHighDischargeAmountSinceCharge(&high), high >= 200)
+                && (mHistoryBuffer->GetElementSize(&eleSize), eleSize >= MAX_HISTORY_BUFFER)))) {
             Int32 low;
             GetLowDischargeAmountSinceCharge(&low);
             Slogger::I(TAG, "Resetting battery stats: level=%d status=%d dischargeLevel=%d lowAmount=%d highAmount=%d",
-                    level, oldStatus, mDischargeCurrentLevel, low, high);
+                level, oldStatus, mDischargeCurrentLevel, low, high);
             // Before we write, collect a snapshot of the final aggregated
             // stats to be reported in the next checkin.  Only do this if we have
             // a sufficient amount of data to make it interesting.

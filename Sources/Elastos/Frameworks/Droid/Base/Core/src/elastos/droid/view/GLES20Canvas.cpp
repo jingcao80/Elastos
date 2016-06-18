@@ -74,7 +74,6 @@ namespace View {
 
 static Boolean NativeIsAvailable()
 {
-    return FALSE;
 #ifdef USE_OPENGL_RENDERER
     char prop[PROPERTY_VALUE_MAX];
     if (property_get("ro.kernel.qemu", prop, NULL) == 0) {

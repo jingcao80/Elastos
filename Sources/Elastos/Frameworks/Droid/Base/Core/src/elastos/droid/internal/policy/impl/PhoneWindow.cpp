@@ -1652,32 +1652,14 @@ Boolean PhoneWindow::_DecorView::SetFrame(
         if (fg != NULL) {
             Int32 left = 0, top = 0, right = 0, bottom = 0;
             Int32 left1 = 0, top1 = 0, right1 = 0, bottom1 = 0;
-            mFrameOffsets->GetLeft(&left);
-            mFrameOffsets->GetTop(&top);
-            mFrameOffsets->GetRight(&right);
-            mFrameOffsets->GetBottom(&bottom);
+            mFrameOffsets->Get(&left, &top, &right, &bottom);
 
-            drawingBounds->GetLeft(&left1);
-            drawingBounds->GetTop(&top1);
-            drawingBounds->GetRight(&right1);
-            drawingBounds->GetBottom(&bottom1);
-
-            drawingBounds->SetLeft(left + left1);
-            drawingBounds->SetTop(top + top1);
-            drawingBounds->SetRight(right1 - right);
-            drawingBounds->SetBottom(bottom1 - bottom);
+            drawingBounds->Get(&left1, &top1, &right1, &bottom1);
+            drawingBounds->Set(left + left1, top + top1, right1 - right, bottom1 - bottom);
             fg->SetBounds(drawingBounds);
 
-            Int32 left2 = 0, top2 = 0, right2 = 0, bottom2 = 0;
-            mFramePadding->GetLeft(&left2);
-            mFramePadding->GetTop(&top2);
-            mFramePadding->GetRight(&right2);
-            mFramePadding->GetBottom(&bottom2);
-
-            drawingBounds->SetLeft(left1 + left2 - left);
-            drawingBounds->SetTop(top1 + top2 - top);
-            drawingBounds->SetRight(right1 - right2 + right);
-            drawingBounds->SetBottom(bottom1 - bottom2 + bottom);
+            mFramePadding->Get(&left, &top, &right, &bottom);
+            drawingBounds->Set(left + left1, top + top1, right1 - right, bottom1 - bottom);
         }
 
         AutoPtr<IDrawable> bg;
@@ -1702,11 +1684,7 @@ Boolean PhoneWindow::_DecorView::SetFrame(
 
             if (mMenuBackground != NULL) {
                 Int32 left1 = 0, top1 = 0, right1 = 0, bottom1 = 0;
-                drawingBounds->GetLeft(&left1);
-                drawingBounds->GetTop(&top1);
-                drawingBounds->GetRight(&right1);
-                drawingBounds->GetBottom(&bottom1);
-
+                drawingBounds->Get(&left1, &top1, &right1, &bottom1);
                 mMenuBackground->SetBounds(left1, bottom1 - 6, right1, bottom1 + 20);
             }
         }

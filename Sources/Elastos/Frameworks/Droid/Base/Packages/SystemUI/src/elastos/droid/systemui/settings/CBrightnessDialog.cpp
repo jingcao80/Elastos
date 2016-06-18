@@ -2,23 +2,33 @@
 #include "elastos/droid/systemui/settings/CBrightnessDialog.h"
 #include "Elastos.Droid.Widget.h"
 #include "../R.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::Widget::IImageView;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Settings {
 
+static const String TAG("CBrightnessDialog");
+
 CAR_OBJECT_IMPL(CBrightnessDialog)
+
+ECode CBrightnessDialog::constructor()
+{
+    return Activity::constructor();
+}
 
 ECode CBrightnessDialog::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
+    Logger::I(TAG, " >> OnCreate");
     Activity::OnCreate(savedInstanceState);
 
     AutoPtr<IWindow> window;

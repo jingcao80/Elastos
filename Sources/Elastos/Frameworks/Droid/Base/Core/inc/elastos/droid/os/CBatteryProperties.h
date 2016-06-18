@@ -21,6 +21,8 @@ public:
 
     CAR_OBJECT_DECL()
 
+    CARAPI constructor();
+
     CARAPI WriteToParcel(
         /* [in] */ IParcel* dest);
 
@@ -90,8 +92,8 @@ public:
     CARAPI GetBatteryTechnology(
         /* [out] */ String* result);
 
-    CARAPI constructor();
-
+    CARAPI ToString(
+        /* [out] */ String* str);
 public:
     Boolean mChargerAcOnline;
     Boolean mChargerUsbOnline;

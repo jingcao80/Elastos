@@ -17,7 +17,6 @@
 #include "elastos/droid/server/CUiModeManagerService.h"
 #include "elastos/droid/server/CNsdService.h"
 #include "elastos/droid/server/CBatteryService.h"
-
 #include "elastos/droid/server/accessibility/CAccessibilityManagerService.h"
 #include "elastos/droid/server/accounts/CAccountManagerService.h"
 #include "elastos/droid/server/appwidget/CAppWidgetService.h"
@@ -88,6 +87,7 @@ using Elastos::Droid::Content::IIClipboard;
 using Elastos::Droid::Media::CAudioService;
 using Elastos::Droid::Media::IAudioService;
 using Elastos::Droid::View::IIWindowManager;
+using Elastos::Droid::View::IIAssetAtlas;
 using Elastos::Droid::View::Accessibility::IIAccessibilityManager;
 using Elastos::Droid::Accounts::IIAccountManager;
 using Elastos::Droid::Hardware::Input::IIInputManager;
@@ -438,10 +438,10 @@ ECode SystemServer::StartCoreServices()
     mSystemServiceManager->StartService(ligthService.Get());
 
     // Tracks the battery level.  Requires LightService.
-    Slogger::I(TAG, "Battery Service todo");
-    // AutoPtr<ISystemService> service;
-    // CBatteryService::New(mSystemContext, (ISystemService**)&service);
-    // mSystemServiceManager->StartService(service);
+    Slogger::I(TAG, "Battery Service");
+    AutoPtr<ISystemService> service;
+    CBatteryService::New(mSystemContext, (ISystemService**)&service);
+    mSystemServiceManager->StartService(service);
 
     // // Tracks application usage stats.
     Slogger::I(TAG, "Usage Stats Service todo");
@@ -496,7 +496,7 @@ ECode SystemServer::StartOtherServices()
     // AutoPtr<CCountryDetectorService> countryDetector;
     AutoPtr<CTextServicesManagerService> tsms;
     AutoPtr<CLockSettingsService> lockSettings;
-    // AutoPtr<CAssetAtlasService> atlas;
+    AutoPtr<IIAssetAtlas> atlas;
     // AutoPtr<CMediaRouterService> mediaRouter;
 
     AutoPtr<ISystemProperties> systemProperties;
@@ -1020,15 +1020,12 @@ ECode SystemServer::StartOtherServices()
     //         mSystemServiceManager->StartService(DreamManagerService.class);
     //     }
 
-    //     if (!disableNonCoreServices) {
-    //         try {
-    //             Slogger::I(TAG, "Assets Atlas Service");
-    //             atlas = new AssetAtlasService(context);
-    //             ServiceManager::AddService(AssetAtlasService.ASSET_ATLAS_SERVICE, atlas);
-    //         } catch (Throwable e) {
-    //             ReportWtf("starting AssetAtlasService", ec);
-    //         }
-    //     }
+        if (!disableNonCoreServices) {
+            Slogger::I(TAG, "Assets Atlas Service");
+            ec = CAssetAtlasService::New(context, (IIAssetAtlas**)&atlas);
+            if (FAILED(ec)) ReportWtf("making Assets Atlas Service ready", ec);
+            ServiceManager::AddService(CAssetAtlasService::ASSET_ATLAS_SERVICE, atlas);
+        }
 
     //     if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_PRINTING)) {
     //         mSystemServiceManager->StartService(PRINT_MANAGER_SERVICE_CLASS);
@@ -1166,7 +1163,7 @@ ECode SystemServer::StartOtherServices()
     // bundle->mCommonTimeMgmtServiceF = commonTimeMgmtService;
     bundle->mTextServiceManagerServiceF = tsms;
     bundle->mStatusBarF = statusBar;
-    // bundle->mAtlasF = atlas;
+    bundle->mAtlasF = (CAssetAtlasService*)atlas.Get();
     bundle->mInputManagerF = inputManager;
     // bundle->mTelephonyRegistryF = telephonyRegistry;
     // bundle->mMediaRouterF = mediaRouter;
@@ -1312,10 +1309,10 @@ ECode SystemServer::SystemReadyRunnable::Run()
         if (FAILED(ec)) mHost->ReportWtf("Notifying TextServicesManagerService running", ec);
     }
 
-    // if (mServiceBundle->mAtlasF != NULL) {
-    //     ec = mServiceBundle->mAtlasF->SystemRunning();
-    //     if (FAILED(ec)) mHost->ReportWtf("Notifying AssetAtlasService running", ec);
-    // }
+    if (mServiceBundle->mAtlasF != NULL) {
+        ec = mServiceBundle->mAtlasF->SystemRunning();
+        if (FAILED(ec)) mHost->ReportWtf("Notifying AssetAtlasService running", ec);
+    }
 
     if (mServiceBundle->mInputManagerF != NULL) {
         // TODO(BT) Pass parameter to input manager

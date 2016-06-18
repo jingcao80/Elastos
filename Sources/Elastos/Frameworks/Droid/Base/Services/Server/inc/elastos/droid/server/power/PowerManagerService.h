@@ -358,21 +358,14 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("PowerManagerService::BatteryReceiver: ")
+
         BatteryReceiver(
             /* [in] */ PowerManagerService* host);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = "PowerManagerService::BatteryReceiver: ";
-            info->AppendFormat("%p", this);
-            return NOERROR;
-        }
 
     private:
         PowerManagerService* mHost;
@@ -382,21 +375,14 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("PowerManagerService::DreamReceiver: ")
+
         DreamReceiver(
             /* [in] */ PowerManagerService* host);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = "PowerManagerService::DreamReceiver: ";
-            info->AppendFormat("%p", this);
-            return NOERROR;
-        }
 
     private:
         PowerManagerService* mHost;
@@ -406,21 +392,14 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("PowerManagerService::UserSwitchedReceiver: ")
+
         UserSwitchedReceiver(
             /* [in] */ PowerManagerService* host);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = "PowerManagerService::UserSwitchedReceiver: ";
-            info->AppendFormat("%p", this);
-            return NOERROR;
-        }
 
     private:
         PowerManagerService* mHost;
@@ -430,21 +409,14 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("PowerManagerService::DockReceiver: ")
+
         DockReceiver(
             /* [in] */ PowerManagerService* host);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = "PowerManagerService::DockReceiver: ";
-            info->AppendFormat("%p", this);
-            return NOERROR;
-        }
 
     private:
         PowerManagerService* mHost;

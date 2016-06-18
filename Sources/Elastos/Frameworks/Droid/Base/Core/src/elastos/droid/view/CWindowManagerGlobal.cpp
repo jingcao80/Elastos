@@ -275,7 +275,6 @@ ECode CWindowManagerGlobal::AddView(
         }
     }
     else {
-        Logger::I(TAG, " >>> AddView %s", TO_CSTR(view));
         // If there's no parent and we're running on L or above (or in the
         // system context), assume we want hardware acceleration.
         AutoPtr<IContext> context;
@@ -285,9 +284,7 @@ ECode CWindowManagerGlobal::AddView(
             context->GetApplicationInfo((IApplicationInfo**)&info);
             Int32 version;
             info->GetTargetSdkVersion(&version);
-        Logger::I(TAG, " >>> AddView there's no parent: version: %d", version);
             if (version >= Build::VERSION_CODES::LOLLIPOP) {
-        Logger::I(TAG, " >>> AddView we're running on L or above");
                 wparams->mFlags |= IWindowManagerLayoutParams::FLAG_HARDWARE_ACCELERATED;
             }
         }

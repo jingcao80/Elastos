@@ -1,4 +1,5 @@
 #include "elastos/droid/systemui/power/CPowerUI.h"
+#include "elastos/droid/systemui/power/CPowerUIReceiver.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -30,10 +31,12 @@ namespace Power {
 //  CPowerUI::Receiver
 //-----------------------------------------------------------------------------------------------
 
-CPowerUI::Receiver::Receiver(
-    /* [in] */ CPowerUI* host)
-    : mHost(host)
-{}
+ECode CPowerUI::Receiver::constructor(
+    /* [in] */ IPowerUI* host)
+{
+    mHost = (CPowerUI*)host;
+    return BroadcastReceiver::constructor();
+}
 
 ECode CPowerUI::Receiver::Init()
 {
@@ -177,9 +180,12 @@ ECode CPowerUI::MyObs::OnChange(
 //-----------------------------------------------------------------------------------------------
 
 const String CPowerUI::TAG("CPowerUI");
-const Boolean CPowerUI::DEBUG = Logger::IsLoggable(TAG.string(), Logger::___DEBUG);
+const Boolean CPowerUI::DEBUG = TRUE;
+
 CAR_OBJECT_IMPL(CPowerUI)
+
 CAR_INTERFACE_IMPL(CPowerUI, SystemUI, IPowerUI)
+
 CPowerUI::CPowerUI()
     : mBatteryLevel(100)
     , mBatteryStatus(IBatteryManager::BATTERY_STATUS_UNKNOWN)
@@ -188,9 +194,16 @@ CPowerUI::CPowerUI()
     , mLowBatteryAlertCloseLevel(0)
     , mScreenOffTime(-1)
 {
+}
+
+ECode CPowerUI::constructor()
+{
     CHandler::New((IHandler**)&mHandler);
-    mReceiver = new Receiver(this);
+    AutoPtr<IBroadcastReceiver> receiver;
+    CPowerUIReceiver::New(this, (IBroadcastReceiver**)&receiver);
+    mReceiver = (Receiver*)receiver.Get();
     mLowBatteryReminderLevels = ArrayOf<Int32>::Alloc(2);
+    return NOERROR;
 }
 
 ECode CPowerUI::Start()

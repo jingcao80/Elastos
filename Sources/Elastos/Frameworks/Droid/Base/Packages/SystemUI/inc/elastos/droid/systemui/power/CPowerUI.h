@@ -27,15 +27,15 @@ CarClass(CPowerUI)
     , public SystemUI
     , public IPowerUI
 {
-private:
+public:
     class Receiver
         : public BroadcastReceiver
     {
     public:
         TO_STRING_IMPL("CPowerUI.Receiver")
 
-        Receiver(
-            /* [in] */ CPowerUI* host);
+        CARAPI constructor(
+            /* [in] */ IPowerUI* host);
 
         CARAPI Init();
 
@@ -52,6 +52,7 @@ private:
         CPowerUI* mHost;
     };
 
+private:
     class MyObs
         : public ContentObserver
     {
@@ -76,6 +77,8 @@ public:
     CAR_INTERFACE_DECL()
 
     CPowerUI();
+
+    CARAPI constructor();
 
     CARAPI Start();
 

@@ -1824,6 +1824,8 @@ private:
         /* [in] */ IPrintWriter* writer,
         /* [in] */ IView* view);
 
+    CARAPI_(AutoPtr<IView>) GetLastScrolledFocus();
+
 public:
     AutoPtr<IWindowSession> mWindowSession;
     AutoPtr<IDisplay> mDisplay;

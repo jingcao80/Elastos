@@ -32,6 +32,7 @@
 #include <elastos/droid/os/SystemClock.h>
 #include <elastos/droid/os/UserHandle.h>
 #include <elastos/droid/text/TextUtils.h>
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
@@ -39,8 +40,7 @@
 // using Elastos::Droid::App::CPendingIntentHelper;
 // using Elastos::Droid::Os::CEnvironment;
 // using Elastos::Droid::Provider::Settings;
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
+using Elastos::Droid::Server::FgThread;
 using Elastos::Droid::Accounts::CAccount;
 using Elastos::Droid::Accounts::CAccountAndUser;
 using Elastos::Droid::Accounts::CAccountAuthenticatorResponse;
@@ -107,6 +107,7 @@ using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CPair;
 using Elastos::Droid::Utility::IPair;
 using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CInteger64;
@@ -1754,14 +1755,14 @@ ECode CAccountManagerService::constructor(
     mContext = context;
     mPackageManager = packageManager;
 
-    // AutoPtr<ILooper> looper;
-    // mMessageThread->GetLooper((ILooper**)&looper);
-Slogger::E("CAccountManagerService", "=====================================???");
-    mMessageHandler = new MessageHandler(this);
+    AutoPtr<ILooper> looper;
+    FgThread::Get()->GetLooper((ILooper**)&looper);
+    AutoPtr<MessageHandler> h = new MessageHandler(this);
+    h->constructor(looper);
+    mMessageHandler = (IHandler*)h.Get();
 
     mAuthenticatorCache = (IIAccountAuthenticatorCache*)authenticatorCache;
-    mAuthenticatorCache->SetListener(this,
-            NULL /* Handler */);
+    mAuthenticatorCache->SetListener(this, NULL /* Handler */);
 
     sThis->Set(TO_IINTERFACE(this));
 

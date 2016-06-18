@@ -22,7 +22,7 @@ class RenderNode
 public:
     CAR_INTERFACE_DECL()
 
-    RenderNode();
+    ~RenderNode();
 
     CARAPI Start(
         /* [in] */ Int32 width,
@@ -540,6 +540,9 @@ public:
 
     static CARAPI_(AutoPtr<IRenderNode>) Adopt(
         /* [in] */ Int64 nativePtr);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
     ///////////////////////////////////////////////////////////////////////////
     // Native methods

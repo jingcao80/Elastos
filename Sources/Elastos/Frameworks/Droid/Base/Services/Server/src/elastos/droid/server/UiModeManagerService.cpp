@@ -14,8 +14,6 @@
 #include <Elastos.Droid.Provider.h>
 #include <Elastos.Droid.Service.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::Binder;
@@ -50,6 +48,7 @@ using Elastos::Droid::Service::Dreams::ISandman;
 using Elastos::Droid::Service::Dreams::CSandman;
 using Elastos::Droid::Server::Twilight::EIID_ITwilightListener;
 using Elastos::Droid::Server::Twilight::EIID_ITwilightManager;
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;

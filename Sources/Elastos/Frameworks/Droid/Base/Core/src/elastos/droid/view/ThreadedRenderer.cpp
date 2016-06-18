@@ -50,6 +50,7 @@ using Elastos::Droid::Graphics::CBitmap;
 using Elastos::Droid::Graphics::BitmapConfig;
 using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
 using Elastos::Droid::Graphics::Drawable::IDrawableConstantState;
+using Elastos::Droid::Graphics::Drawable::EIID_IDrawableConstantState;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::IBinder;
@@ -141,7 +142,8 @@ ECode ThreadedRenderer::constructor(
     mRootNode->SetClipToBounds(FALSE, &r);
     mNativeProxy = NativeCreateProxy(translucent, rootNodePtr);
 
-    AtlasInitializer::sInstance->Init(context, mNativeProxy);
+    // AtlasInitializer::sInstance->Init(context, mNativeProxy);
+    Logger::I(LOGTAG, " TODO init AtlasInitializer.");
 
     // Setup timing
     AutoPtr<IChoreographerHelper> cghlp;
@@ -182,10 +184,11 @@ ECode ThreadedRenderer::Initialize(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
+    *res = FALSE;
     mInitialized = TRUE;
     UpdateEnabledState(surface);
     Boolean status = NativeInitialize(mNativeProxy, surface);
-    surface->AllocateBuffers();
+    FAIL_RETURN(surface->AllocateBuffers());
     *res = status;
     return NOERROR;
 }
@@ -207,7 +210,7 @@ ECode ThreadedRenderer::PauseSurface(
 }
 
 ECode ThreadedRenderer::DestroyHardwareResources(
-        /* [in] */ IView* view)
+    /* [in] */ IView* view)
 {
     DestroyResources(view);
     NativeDestroyHardwareResources(mNativeProxy);
@@ -219,9 +222,8 @@ void ThreadedRenderer::DestroyResources(
 {
     ((View*)view)->DestroyHardwareResources();
 
-    if (IViewGroup::Probe(view) != NULL) {
-        AutoPtr<IViewGroup> group = IViewGroup::Probe(view);
-
+    IViewGroup* group = IViewGroup::Probe(view);
+    if (group != NULL) {
         Int32 count = 0;
         group->GetChildCount(&count);
         for (Int32 i = 0; i < count; i++) {
@@ -367,7 +369,6 @@ void ThreadedRenderer::UpdateRootDisplayList(
 
     Boolean bval = FALSE;
     if (mRootNodeNeedsUpdate || (mRootNode->IsValid(&bval), !bval)) {
-        Logger::I(LOGTAG, " >> UpdateRootDisplayList RootNodeNeedsUpdate");
         AutoPtr<IHardwareCanvas> canvas;
         mRootNode->Start(mSurfaceWidth, mSurfaceHeight, (IHardwareCanvas**)&canvas);
         Int32 saveCount = 0;
@@ -402,7 +403,6 @@ ECode ThreadedRenderer::Draw(
     /* [in] */ View::AttachInfo* attachInfo,
     /* [in] */ IHardwareDrawCallbacks* callbacks)
 {
-    Logger::I(LOGTAG, " >>>>>>>> ThreadedRenderer::Draw %s", TO_CSTR(view));
     attachInfo->mIgnoreDirtyState = TRUE;
     Int64 frameTimeNanos = 0;
     mChoreographer->GetFrameTimeNanos(&frameTimeNanos);
@@ -457,7 +457,6 @@ ECode ThreadedRenderer::Draw(
     if ((syncResult & SYNC_INVALIDATE_REQUIRED) != 0) {
         attachInfo->mViewRootImpl->Invalidate();
     }
-    Logger::I(LOGTAG, " <<<<<<<< ThreadedRenderer::Draw %s", TO_CSTR(view));
     return NOERROR;
 }
 
@@ -561,8 +560,10 @@ ECode ThreadedRenderer::RegisterAnimatingRenderNode(
 // throws Throwable
 ThreadedRenderer::~ThreadedRenderer()
 {
-    NativeDeleteProxy(mNativeProxy);
-    mNativeProxy = 0;
+    if (mNativeProxy != 0) {
+        NativeDeleteProxy(mNativeProxy);
+        mNativeProxy = 0;
+    }
 }
 
 ECode ThreadedRenderer::TrimMemory(
@@ -590,11 +591,15 @@ void ThreadedRenderer::AtlasInitializer::Init(
     if (mInitialized) return;
     AutoPtr<IInterface> p = ServiceManager::GetService(String("assetatlas"));
     AutoPtr<IBinder> binder = IBinder::Probe(p);
-    if (binder == NULL) return;
+    if (binder == NULL) {
+        Logger::E(LOGTAG, "Failed to get service assetatlas.");
+        return;
+    }
 
     AutoPtr<IIAssetAtlas> atlas = IIAssetAtlas::Probe(binder);
 //     try {
     Int32 ppid = Process::MyPpid();
+    Logger::I(LOG_TAG, " >>> AtlasInitializer: ppid: %d", ppid);
     Boolean compatible;
     if (atlas->IsCompatible(ppid, &compatible), compatible) {
         AutoPtr<IGraphicBuffer> buffer;
@@ -608,16 +613,12 @@ void ThreadedRenderer::AtlasInitializer::Init(
                 NativeSetAtlas(renderProxy, buffer, map);
                 mInitialized = TRUE;
             }
+
             // If IAssetAtlas is not the same class as the IBinder
             // we are using a remote service and we can safely
             // destroy the graphic buffer
-            ClassID clsid1, clsid2;
-            IObject* obj1 = IObject::Probe(atlas);
-            obj1->GetClassID(&clsid1);
-            IObject* obj2 = IObject::Probe(binder);
-            obj2->GetClassID(&clsid2);
-
-            if (*(EMuid *)&clsid1 != *(EMuid *)&clsid2) {
+            AutoPtr< ::IProxy > proxy = (::IProxy*)binder->Probe(::EIID_IProxy);
+            if (proxy != NULL) {
                 buffer->Destroy();
             }
         }
@@ -631,7 +632,7 @@ void ThreadedRenderer::AtlasInitializer::ValidateMap(
     /* [in] */ IContext* context,
     /* [in] */ ArrayOf<Int64>* map)
 {
-//    Log.d("Atlas", "Validating map...");
+    Logger::D("ThreadedRenderer", "Validating map, count: %d", map->GetLength() / 4);
     AutoPtr<IHashSet> preloadedPointers;
     CHashSet::New((IHashSet**)&preloadedPointers);
 
@@ -639,23 +640,25 @@ void ThreadedRenderer::AtlasInitializer::ValidateMap(
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     AutoPtr<IInt64SparseArray> drawables;
-    AutoPtr<CResources> cr = (CResources*)resources.Get();
-//    cr->GetPreloadedDrawables((IInt64SparseArray**)&drawables);
+    resources->GetPreloadedDrawables((IInt64SparseArray**)&drawables);
 
     Int32 count = 0;
     drawables->GetSize(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> v;
         drawables->ValueAt(i, (IInterface**)&v);
-        AutoPtr<IDrawableConstantState> rv = IDrawableConstantState::Probe(v);
-        AutoPtr<IBitmap> bitmap;
-        rv->GetBitmap((IBitmap**)&bitmap);
-        BitmapConfig cf;
-        if (bitmap != NULL && (bitmap->GetConfig(&cf), cf) == BitmapConfig_ARGB_8888) {
-            AutoPtr<CBitmap> cbmp = (CBitmap*)bitmap.Get();
-            AutoPtr<IInteger64> pInt;
-            CInteger64::New(cbmp->mNativeBitmap, (IInteger64**)&pInt);
-            preloadedPointers->Add(pInt);
+        IDrawableConstantState* rv = IDrawableConstantState::Probe(v);
+        if (rv != NULL) {
+            AutoPtr<IBitmap> bitmap;
+            rv->GetBitmap((IBitmap**)&bitmap);
+            BitmapConfig cf;
+            if (bitmap != NULL && (bitmap->GetConfig(&cf), cf) == BitmapConfig_ARGB_8888) {
+                Handle64 nativeBitmap;
+                bitmap->GetNativeBitmap(&nativeBitmap);
+                AutoPtr<IInteger64> pInt;
+                CInteger64::New(nativeBitmap, (IInteger64**)&pInt);
+                preloadedPointers->Add(pInt);
+            }
         }
     }
 
@@ -664,7 +667,8 @@ void ThreadedRenderer::AtlasInitializer::ValidateMap(
         CInteger64::New((*map)[i], (IInteger64**)&m);
         Boolean bCtains = FALSE;
         if (!(preloadedPointers->Contains(m, &bCtains), bCtains)) {
-        //     Log.w("Atlas", String.format("Pointer 0x%X, not in getPreloadedDrawables?", map[i]));
+            Logger::W("ThreadedRenderer", "Pointer at %d 0x%s, not in getPreloadedDrawables?",
+                i/4, StringUtils::ToHexString((*map)[i]).string());
             (*map)[i] = 0;
         }
     }
@@ -830,13 +834,14 @@ void ThreadedRenderer::NativeSetAtlas(
     /* [in] */ IGraphicBuffer* graphicBuffer,
     /* [in] */ ArrayOf<Int64>* atlasMapArray)
 {
+    Logger::I(LOGTAG, " >> Get GraphicBuffer: %s", TO_CSTR(graphicBuffer));
     Handle64 handler;
     graphicBuffer->GetNativeObject(&handler);
     sp<android::GraphicBuffer> buffer = reinterpret_cast<android::GraphicBuffer*>(handler);
 
     Int32 len = atlasMapArray->GetLength();
     if (len <= 0) {
-        ALOGW("Failed to initialize atlas, invalid map length: %d", len);
+        Logger::W(LOGTAG, "Failed to initialize atlas, invalid map length: %d", len);
         return;
     }
     int64_t* map = new int64_t[len];
@@ -868,8 +873,10 @@ Int64 ThreadedRenderer::NativeCreateProxy(
 void ThreadedRenderer::NativeDeleteProxy(
     /* [in] */ Int64 nativeProxy)
 {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
-    delete proxy;
+    if (nativeProxy) {
+        RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
+        delete proxy;
+    }
 }
 
 void ThreadedRenderer::NativeSetFrameInterval(

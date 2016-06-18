@@ -1,9 +1,11 @@
 #include "elastos/droid/systemui/settings/BrightnessController.h"
+#include "elastos/droid/systemui/settings/CBrightnessObserver.h"
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/os/AsyncTask.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/R.h"
 #include "../R.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::IResources;
@@ -18,6 +20,7 @@ using Elastos::Droid::SystemUI::Settings::IBrightnessStateChangeCallback;
 using Elastos::Droid::R;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -28,18 +31,19 @@ namespace Settings {
 // BrightnessController::BrightnessObserver
 //==================================
 
-BrightnessController::BrightnessObserver::BrightnessObserver(
-    /* [in] */ IHandler* handler,
-    /* [in] */ BrightnessController* host)
-    : mHost(host)
+ECode BrightnessController::BrightnessObserver::constructor(
+    /* [in] */ IBrightnessController* host,
+    /* [in] */ IHandler* handler)
 {
-    // TODO zhaohui needs CAR class for BrightnessController
+    mHost = (BrightnessController*)host;
     ContentObserver::constructor(handler);
+
     AutoPtr<ISettingsSystem> ss;
     CSettingsSystem::AcquireSingleton((ISettingsSystem**)&ss);
     ss->GetUriFor(ISettingsSystem::SCREEN_BRIGHTNESS_MODE, (IUri**)&BRIGHTNESS_MODE_URI);
     ss->GetUriFor(ISettingsSystem::SCREEN_BRIGHTNESS, (IUri**)&BRIGHTNESS_URI);
     ss->GetUriFor(ISettingsSystem::SCREEN_AUTO_BRIGHTNESS_ADJ, (IUri**)&BRIGHTNESS_ADJ_URI);
+    return NOERROR;
 }
 
 ECode BrightnessController::BrightnessObserver::OnChange(
@@ -52,7 +56,8 @@ ECode BrightnessController::BrightnessObserver::OnChange(
     /* [in] */ Boolean selfChange,
     /* [in] */ IUri* uri)
 {
-    if (selfChange) return E_NULL_POINTER_EXCEPTION;
+    Logger::I(TAG, "%s OnChange: selfChange:%d, uri: %s", TO_CSTR(this), selfChange, TO_CSTR(uri));
+    if (selfChange) return NOERROR;
 
     mHost->mExternalChange = TRUE;
 
@@ -194,8 +199,11 @@ ECode BrightnessController::ToggleSliderListener::OnChanged(
     /* [in] */ Boolean automatic,
     /* [in] */ Int32 value)
 {
+    Logger::I(TAG, " >>> OnChanged tracking:%d, automatic:%d, value: %d",
+        tracking, automatic, value);
+
     mHost->UpdateIcon(mHost->mAutomatic);
-    if (mHost->mExternalChange) return E_NULL_POINTER_EXCEPTION;
+    if (mHost->mExternalChange) return NOERROR;
 
     if (!mHost->mAutomatic) {
         const Int32 val = value + mHost->mMinimumBacklight;
@@ -254,7 +262,9 @@ ECode BrightnessController::constructor(
     CArrayList::New((IArrayList**)&mChangeCallbacks);
     CHandler::New((IHandler**)&mHandler);
     mUserTracker = new MyCurrentUserTracker(mContext, this);
-    mBrightnessObserver = new BrightnessObserver(mHandler, this);
+    AutoPtr<IContentObserver> observer;
+    CBrightnessObserver::New(this, mHandler, (IContentObserver**)&observer);
+    mBrightnessObserver = (BrightnessObserver*)observer.Get();
     mToggleSliderListener = new ToggleSliderListener(this);
 
     AutoPtr<IInterface> obj;
@@ -288,6 +298,7 @@ ECode BrightnessController::RemoveStateChangedCallback(
 
 ECode BrightnessController::RegisterCallbacks()
 {
+    Logger::I(TAG, " >>> RegisterCallbacks");
     if (mListening) {
         return NOERROR;
     }
@@ -334,6 +345,7 @@ void BrightnessController::SetMode(
 ECode BrightnessController::SetBrightness(
     /* [in] */ Int32 brightness)
 {
+    Logger::I(TAG, " >>> SetBrightnessAdj: %d", brightness);
     ECode ec = mPower->SetTemporaryScreenBrightnessSettingOverride(brightness);
     if (FAILED(ec)) {
         return E_REMOTE_EXCEPTION;
@@ -344,6 +356,7 @@ ECode BrightnessController::SetBrightness(
 ECode BrightnessController::SetBrightnessAdj(
     /* [in] */ Float brightness)
 {
+    Logger::I(TAG, " >>> SetBrightnessAdj: %.2f", brightness);
     ECode ec = mPower->SetTemporaryScreenAutoBrightnessAdjustmentSettingOverride(brightness);
     if (FAILED(ec)) {
         return E_REMOTE_EXCEPTION;
@@ -354,6 +367,7 @@ ECode BrightnessController::SetBrightnessAdj(
 void BrightnessController::UpdateIcon(
     /* [in] */ Boolean automatic)
 {
+    Logger::I(TAG, " >>> UpdateIcon: %d", automatic);
     if (mIcon != NULL) {
         mIcon->SetImageResource(automatic && SHOW_AUTOMATIC_ICON ?
             R::drawable::ic_qs_brightness_auto_on : R::drawable::ic_qs_brightness_auto_off);

@@ -1395,7 +1395,7 @@ private:
 
     static AutoPtr< ArrayOf<IInt64SparseArray*> > sPreloadedDrawables;
     static AutoPtr<IInt64SparseArray> sPreloadedColorDrawables;
-    static ColorStateMap sPreloadedColorStateLists;
+    static AutoPtr<IInt64SparseArray> sPreloadedColorStateLists;
 
     // Pool of TypedArrays targeted to this Resources object.
     AutoPtr<Pools::SynchronizedPool<ITypedArray> > mTypedArrayPool;

@@ -7244,7 +7244,8 @@ ECode CActivityManagerService::ForceStopPackage(
 ECode CActivityManagerService::AddPackageDependency(
     /* [in] */ const String& packageName)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         Int32 callingPid = Binder::GetCallingPid();
         if (callingPid == Process::MyPid()) {
             //  Yeah, um, no.
@@ -7252,7 +7253,8 @@ ECode CActivityManagerService::AddPackageDependency(
             return NOERROR;
         }
         AutoPtr<ProcessRecord> proc;
-        {    AutoLock syncLock(mPidsSelfLockedLock);
+        {
+            AutoLock syncLock(mPidsSelfLockedLock);
             HashMap<Int32, AutoPtr<ProcessRecord> >::Iterator it =
                 mPidsSelfLocked.Find(Binder::GetCallingPid());
             if (it != mPidsSelfLocked.End()) {

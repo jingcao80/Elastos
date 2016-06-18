@@ -1126,8 +1126,29 @@ module
         interface IOutline;
     }
 
-    namespace Drawable {
+    class CAtlasEntry {
+        constructor();
 
+        interface IAtlasEntry;
+    }
+
+    class CAtlas {
+        constructor(
+            [in] AtlasType type,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        constructor(
+            [in] AtlasType type,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 flag);
+
+        interface IAtlas;
+    }
+
+
+    namespace Drawable {
 
     singleton class CDrawableHelper {
         interface IDrawableHelper;

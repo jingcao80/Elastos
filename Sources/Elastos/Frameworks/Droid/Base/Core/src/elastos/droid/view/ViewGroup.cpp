@@ -4503,17 +4503,19 @@ void ViewGroup::DispatchGetDisplayList()
         AutoPtr<IAnimation> animation;
 
         if (((child->mViewFlags & VISIBILITY_MASK) == IView::VISIBLE
-            || (child->GetAnimation((IAnimation**)&animation), animation) != NULL) &&
-                child->HasStaticLayer()) {
+                || (child->GetAnimation((IAnimation**)&animation), animation) != NULL)
+            && child->HasStaticLayer()) {
             RecreateChildDisplayList(child);
         }
     }
+
     if (mOverlay != NULL) {
         AutoPtr<IViewGroup> temp;
         mOverlay->GetOverlayView((IViewGroup**)&temp);
         AutoPtr<IView> overlayView = IView::Probe(temp);
         RecreateChildDisplayList(overlayView);
     }
+
     if (mDisappearingChildren != NULL) {
         AutoPtr<IList> disappearingChildren = mDisappearingChildren;
         Int32 disappearingCount;

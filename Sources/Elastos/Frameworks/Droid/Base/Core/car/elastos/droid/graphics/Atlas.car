@@ -65,35 +65,35 @@ module
          */
         const Int32 FLAG_DEFAULTS = FLAG_ADD_PADDING;
 
-    /**
-     * Packs a rectangle of the specified dimensions in this atlas.
-     *
-     * @param width The width of the rectangle to pack in the atlas
-     * @param height The height of the rectangle to pack in the atlas
-     *
-     * @return An {@link Entry} instance if the rectangle was packed in
-     *         the atlas, or null if the rectangle could not fit
-     *
-     * @see #pack(int, int, Atlas.Entry)
-     */
+        /**
+         * Packs a rectangle of the specified dimensions in this atlas.
+         *
+         * @param width The width of the rectangle to pack in the atlas
+         * @param height The height of the rectangle to pack in the atlas
+         *
+         * @return An {@link Entry} instance if the rectangle was packed in
+         *         the atlas, or null if the rectangle could not fit
+         *
+         * @see #pack(int, int, Atlas.Entry)
+         */
         Pack(
             [in] Int32 width,
             [in] Int32 height,
             [out] IAtlasEntry** entry);
 
-    /**
-     * Packs a rectangle of the specified dimensions in this atlas.
-     *
-     * @param width The width of the rectangle to pack in the atlas
-     * @param height The height of the rectangle to pack in the atlas
-     * @param entry Out parameter that will be filled in with the location
-     *              and attributes of the packed rectangle, can be null
-     *
-     * @return An {@link Entry} instance if the rectangle was packed in
-     *         the atlas, or null if the rectangle could not fit
-     *
-     * @see #pack(int, int)
-     */
+        /**
+         * Packs a rectangle of the specified dimensions in this atlas.
+         *
+         * @param width The width of the rectangle to pack in the atlas
+         * @param height The height of the rectangle to pack in the atlas
+         * @param entry Out parameter that will be filled in with the location
+         *              and attributes of the packed rectangle, can be null
+         *
+         * @return An {@link Entry} instance if the rectangle was packed in
+         *         the atlas, or null if the rectangle could not fit
+         *
+         * @see #pack(int, int)
+         */
         Pack(
             [in] Int32 width,
             [in] Int32 height,

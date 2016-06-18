@@ -5,11 +5,17 @@
 #include <Math.h>
 #include "CSystem.h"
 #include "Thread.h"
+#include "CLibcore.h"
+#include <elastos/droid/system/OsConstants.h>
 
 using Elastos::Core::Thread;
 using Elastos::Core::ISystem;
 using Elastos::Core::Math;
 using Elastos::Utility::Concurrent::Locks::LockSupport;
+using Elastos::Droid::System::OsConstants;
+using Libcore::IO::IOs;
+using Libcore::IO::ILibcore;
+using Libcore::IO::CLibcore;
 
 namespace Elastos {
 namespace Utility {
@@ -95,7 +101,18 @@ Int64 CLinkedTransferQueue::Node::sSerialVersionUID = -3375979862319811754L;
 // CLinkedTransferQueue::
 //====================================================================
 
-Boolean CLinkedTransferQueue::MP = TRUE; //Runtime.getRuntime().availableProcessors() > 1;
+static Int32 GetCpuCount()
+{
+    AutoPtr<IOs> os;
+    AutoPtr<ILibcore> libcore;
+    CLibcore::AcquireSingleton((ILibcore**)&libcore);
+    libcore->GetOs((IOs**)&os);
+    Int64 ival = 4;
+    os->Sysconf(OsConstants::__SC_NPROCESSORS_CONF, &ival);
+    return (Int32)ival;
+}
+
+Boolean CLinkedTransferQueue::MP = GetCpuCount() > 1;
 
 Int32 CLinkedTransferQueue::FRONT_SPINS   = 1 << 7;
 

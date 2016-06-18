@@ -1050,7 +1050,7 @@ PhoneWindowManager::ScreenLockTimeoutRunnable::ScreenLockTimeoutRunnable(
 ECode PhoneWindowManager::ScreenLockTimeoutRunnable::Run()
 {
     AutoLock lock(this);
-    // if (localLOGV) Logger::V(TAG, "mScreenLockTimeout activating keyguard");
+    if (localLOGV) Logger::V(TAG, "PhoneWindowManager::ScreenLockTimeoutRunnable　ScreenLockTimeout activating keyguard");
     if (mHost->mKeyguardDelegate != NULL) {
         mHost->mKeyguardDelegate->DoKeyguardTimeout(mOptions);
     }
@@ -4412,6 +4412,7 @@ ECode PhoneWindowManager::InterceptKeyBeforeDispatching(
     }
     else if (keyCode == IKeyEvent::KEYCODE_BRIGHTNESS_UP
         || keyCode == IKeyEvent::KEYCODE_BRIGHTNESS_DOWN) {
+        Logger::I(TAG, ">>>>>>>>>>>>>>>>>>>>>> KEYCODE_BRIGHTNESS_UP or KEYCODE_BRIGHTNESS_DOWN");
         if (down) {
             Int32 direction = keyCode == IKeyEvent::KEYCODE_BRIGHTNESS_UP ? 1 : -1;
 
@@ -8093,6 +8094,7 @@ ECode PhoneWindowManager::HideBootMessages()
 
 ECode PhoneWindowManager::UserActivity()
 {
+    Logger::I(TAG, " >>>>>>>>>>>> UserActivity");
     // ***************************************
     // NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
     // ***************************************

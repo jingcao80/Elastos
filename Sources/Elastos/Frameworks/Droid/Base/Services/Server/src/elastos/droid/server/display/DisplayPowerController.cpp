@@ -436,7 +436,8 @@ Boolean DisplayPowerController::RequestPowerState(
             TO_CSTR(request), waitForNegativeProximity);
     }
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         Boolean changed = FALSE;
 
         if (waitForNegativeProximity
@@ -577,7 +578,8 @@ void DisplayPowerController::UpdatePowerState()
     Boolean mustInitialize = FALSE;
     Boolean autoBrightnessAdjustmentChanged = FALSE;
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mPendingUpdatePowerStateLocked = FALSE;
         if (mPendingRequestLocked == NULL) {
             return; // wait until first actual power request

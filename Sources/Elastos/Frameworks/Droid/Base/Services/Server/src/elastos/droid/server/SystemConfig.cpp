@@ -40,10 +40,9 @@ AutoPtr<SystemConfig> SystemConfig::sInstance;
 
 AutoPtr<SystemConfig> SystemConfig::GetInstance()
 {
-    {    AutoLock syncLock(sLock);
-        if (sInstance == NULL) {
-            sInstance = new SystemConfig();
-        }
+    AutoLock syncLock(sLock);
+    if (sInstance == NULL) {
+        sInstance = new SystemConfig();
     }
     return sInstance;
 }

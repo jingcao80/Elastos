@@ -331,6 +331,11 @@ public:
         , public ITimeBaseObs
     {
     public:
+
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("BatteryStatsImpl::Timer")
+
         /**
          * Constructs from a parcel.
          * @param type
@@ -347,8 +352,6 @@ public:
             /* [in] */ TimeBase* timeBase);
 
         virtual ~Timer() {}
-
-        CAR_INTERFACE_DECL()
 
         CARAPI_(void) WriteToParcel(
             /* [in] */ IParcel* out,
@@ -456,6 +459,8 @@ public:
     class SamplingTimer : public Timer
     {
     public:
+        TO_STRING_IMPL("BatteryStatsImpl::SamplingTimer")
+
         SamplingTimer(
             /* [in] */ TimeBase* timeBase,
             /* [in] */ IParcel* in);
@@ -569,6 +574,8 @@ public:
     class BatchTimer : public Timer
     {
     public:
+        TO_STRING_IMPL("BatteryStatsImpl::BatchTimer")
+
         BatchTimer(
             /* [in] */ Uid* uid,
             /* [in] */ Int32 type,
@@ -651,6 +658,8 @@ public:
     class StopwatchTimer : public Timer
     {
     public:
+        TO_STRING_IMPL("BatteryStatsImpl::StopwatchTimer")
+
         StopwatchTimer(
             /* [in] */ Uid* uid,
             /* [in] */ Int32 type,
@@ -1384,6 +1393,8 @@ public:
         };
 
     public:
+        TO_STRING_IMPL("BatteryStatsImpl::Uid")
+
         Uid(
             /* [in] */ Int32 uid,
             /* [in] */ BatteryStatsImpl* host);
@@ -2899,17 +2910,17 @@ public:
 
 private:
     static const String TAG;
-    static const Boolean DEBUG = FALSE;
-    static const Boolean DEBUG_HISTORY = FALSE;
-    static const Boolean USE_OLD_HISTORY = FALSE;   // for debugging.
+    static const Boolean DEBUG;
+    static const Boolean DEBUG_HISTORY;
+    static const Boolean USE_OLD_HISTORY;   // for debugging.
 
     // TODO: remove "tcp" from network methods, since we measure total stats.
 
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
-    static const Int32 MAGIC = 0xBA757475; // 'BATSTATS'
+    static const Int32 MAGIC;
 
     // Current on-disk Parcel version
-    static const Int32 VERSION = 114 + (USE_OLD_HISTORY ? 1000 : 0);
+    static const Int32 VERSION;
 
     // Maximum number of items we will record in the history.
     static const Int32 MAX_HISTORY_ITEMS = 2000;

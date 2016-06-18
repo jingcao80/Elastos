@@ -326,9 +326,13 @@ void CBatteryService::BatteryListener::batteryPropertiesChanged(struct android::
 android::status_t CBatteryService::BatteryListener::onTransact(uint32_t code, const android::Parcel& data,
     android::Parcel* reply, uint32_t flags)
 {
-    Slogger::E(TAG, "@@@@@@@@@@@@@@@@@@@@@@@@@@@ ontransact");
     switch(code) {
         case android::TRANSACT_BATTERYPROPERTIESCHANGED: {
+            if (!data.checkInterface(this)) {
+                return android::PERMISSION_DENIED;
+            }
+
+            data.readInt32();
             struct android::BatteryProperties props;
             props.readFromParcel(const_cast<android::Parcel*>(&data));
             batteryPropertiesChanged(props);
@@ -811,7 +815,6 @@ void CBatteryService::ShutdownIfNoPowerLocked()
     }
 }
 
-
 void CBatteryService::ShutdownIfOverTempLocked()
 {
     // shut down gracefully if temperature is too high (> 68.0C by default)
@@ -829,16 +832,14 @@ void CBatteryService::ShutdownIfOverTempLocked()
 void CBatteryService::Update(
     /* [in] */ IBatteryProperties* props)
 {
-    {    AutoLock syncLock(mLock);
-        if (!mUpdatesStopped) {
-            mBatteryProps = props;
-            Slogger::E(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!%p", props);
-            // Process the new values.
-            ProcessValuesLocked(FALSE);
-        }
-        else {
-            mLastBatteryProps->Set(props);
-        }
+    AutoLock syncLock(mLock);
+    if (!mUpdatesStopped) {
+        mBatteryProps = props;
+        // Process the new values.
+        ProcessValuesLocked(FALSE);
+    }
+    else {
+        mLastBatteryProps->Set(props);
     }
 }
 

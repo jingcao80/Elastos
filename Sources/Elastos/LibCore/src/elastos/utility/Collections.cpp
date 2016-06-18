@@ -1496,10 +1496,10 @@ CAR_INTERFACE_IMPL_3(Collections::_SynchronizedCollection, Object, ICollection, 
 
 Collections::_SynchronizedCollection::_SynchronizedCollection(
     /* [in] */ ICollection* collection)
-    : mLock(NULL)
-    , mIsStrongLock(FALSE)
+    : mIsStrongLock(FALSE)
     , mC(collection)
 {
+    mLock = this;
 }
 
 Collections::_SynchronizedCollection::_SynchronizedCollection(
@@ -1526,7 +1526,8 @@ ECode Collections::_SynchronizedCollection::Add(
     /* [out] */ Boolean* modified)
 {
     VALIDATE_NOT_NULL(modified);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mC->Add(object, modified);
     }
     return NOERROR;
@@ -1798,7 +1799,8 @@ ECode Collections::_SynchronizedList::Add(
     /* [in] */ Int32 location,
     /* [in] */ IInterface* object)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mList->Add(location, object);
     }
     return NOERROR;
@@ -1807,8 +1809,8 @@ ECode Collections::_SynchronizedList::Add(
 ECode Collections::_SynchronizedList::Add(
     /* [in] */ IInterface* object)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean bval;
+    return _SynchronizedCollection::Add(object, &bval);
 }
 
 ECode Collections::_SynchronizedList::AddAll(
@@ -1817,7 +1819,8 @@ ECode Collections::_SynchronizedList::AddAll(
     /* [out] */ Boolean* modified)
 {
     VALIDATE_NOT_NULL(modified);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mList->AddAll(location, collection, modified);
     }
     return NOERROR;
@@ -1827,8 +1830,8 @@ ECode Collections::_SynchronizedList::AddAll(
     /* [in] */ Int32 location,
     /* [in] */ ICollection* collection)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Boolean bval;
+    return AddAll(location, collection, &bval);
 }
 
 ECode Collections::_SynchronizedList::Equals(
@@ -2135,10 +2138,10 @@ CAR_INTERFACE_IMPL_2(Collections::_SynchronizedMap, Object, IMap, ISerializable)
 
 Collections::_SynchronizedMap::_SynchronizedMap(
     /* [in] */ IMap* map)
-    : mLock(NULL)
-    , mIsStrongLock(FALSE)
+    : mIsStrongLock(FALSE)
     , mM(map)
 {
+    mLock = this;
 }
 
 Collections::_SynchronizedMap::_SynchronizedMap(
@@ -2220,7 +2223,8 @@ ECode Collections::_SynchronizedMap::Get(
     /* [out] */ PInterface* value)
 {
     VALIDATE_NOT_NULL(value);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mM->Get(key, value);
     }
     return NOERROR;
@@ -2230,7 +2234,8 @@ ECode Collections::_SynchronizedMap::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
     VALIDATE_NOT_NULL(hashCode);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mM->GetHashCode(hashCode);
     }
     return NOERROR;
@@ -2240,7 +2245,8 @@ ECode Collections::_SynchronizedMap::IsEmpty(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mM->IsEmpty(result);
     }
     return NOERROR;
@@ -2250,7 +2256,8 @@ ECode Collections::_SynchronizedMap::GetKeySet(
     /* [out, callee] */ ISet** keySet)
 {
     VALIDATE_NOT_NULL(keySet);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<ISet> key;
         mM->GetKeySet((ISet**)&key);
         *keySet = new _SynchronizedSet(key, mLock);
@@ -2264,7 +2271,8 @@ ECode Collections::_SynchronizedMap::Put(
     /* [in] */ PInterface value,
     /* [out] */ PInterface* oldValue)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mM->Put(key, value, oldValue);
     }
     return NOERROR;
@@ -2281,7 +2289,8 @@ ECode Collections::_SynchronizedMap::Put(
 ECode Collections::_SynchronizedMap::PutAll(
     /* [in] */ IMap* map)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mM->PutAll(map);
     }
     return NOERROR;
@@ -2292,7 +2301,8 @@ ECode Collections::_SynchronizedMap::Remove(
     /* [out] */ PInterface* value)
 {
     VALIDATE_NOT_NULL(value);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mM->Remove(key, value);
     }
     return NOERROR;
@@ -2309,7 +2319,8 @@ ECode Collections::_SynchronizedMap::GetSize(
     /* [out] */ Int32* size)
 {
     VALIDATE_NOT_NULL(size);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mM->GetSize(size);
     }
     return NOERROR;
@@ -2319,7 +2330,8 @@ ECode Collections::_SynchronizedMap::GetValues(
     /* [out] */ ICollection** value)
 {
     VALIDATE_NOT_NULL(value);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<ICollection> v;
         mM->GetValues((ICollection**)&v);
         AutoPtr<ICollection> res = new _SynchronizedCollection(v, mLock);

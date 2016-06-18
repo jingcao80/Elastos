@@ -1,9 +1,18 @@
 
 #include "elastos/droid/os/CBatteryProperties.h"
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
+
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
 namespace Os {
+
+CAR_INTERFACE_IMPL_2(CBatteryProperties, Object, IBatteryProperties, IParcelable)
+
+CAR_OBJECT_IMPL(CBatteryProperties)
 
 CBatteryProperties::CBatteryProperties()
     : mChargerAcOnline(FALSE)
@@ -17,9 +26,34 @@ CBatteryProperties::CBatteryProperties()
     , mBatteryTemperature(0)
 {}
 
-CAR_INTERFACE_IMPL_2(CBatteryProperties, Object, IBatteryProperties, IParcelable)
 
-CAR_OBJECT_IMPL(CBatteryProperties)
+ECode CBatteryProperties::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("CBatteryProperties{0x");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", chargerAcOnline=";
+    sb += mChargerAcOnline;
+    sb += ", chargerUsbOnline=";
+    sb += mChargerUsbOnline;
+    sb += ", chargerWirelessOnline=";
+    sb += mChargerWirelessOnline;
+    sb += ", batteryStatus=";
+    sb += mBatteryStatus;
+    sb += ", batteryHealth=";
+    sb += mBatteryHealth;
+    sb += ", batteryPresent=";
+    sb += mBatteryPresent;
+    sb += ", batteryLevel=";
+    sb += mBatteryLevel;
+    sb += ", batteryVoltage=";
+    sb += mBatteryVoltage;
+    sb += ", batteryTemperature=";
+    sb += mBatteryTemperature;
+    *str = sb.ToString();
+    return NOERROR;
+}
 
 ECode CBatteryProperties::WriteToParcel(
     /* [in] */ IParcel* p)

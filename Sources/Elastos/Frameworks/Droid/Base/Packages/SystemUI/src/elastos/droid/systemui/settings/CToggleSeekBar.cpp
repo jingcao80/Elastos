@@ -11,27 +11,6 @@ namespace Settings {
 
 CAR_OBJECT_IMPL(CToggleSeekBar)
 
-ECode CToggleSeekBar::constructor(
-    /* [in] */ IContext* context)
-{
-    return SeekBar::constructor(context);
-}
-
-ECode CToggleSeekBar::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-{
-    return SeekBar::constructor(context, attrs);
-}
-
-ECode CToggleSeekBar::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs,
-    /* [in] */ Int32 defStyleAttr)
-{
-    return SeekBar::constructor(context, attrs, defStyleAttr);
-}
-
 ECode CToggleSeekBar::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)

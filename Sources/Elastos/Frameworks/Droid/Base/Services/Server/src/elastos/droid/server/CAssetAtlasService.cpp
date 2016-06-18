@@ -7,11 +7,13 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
+#include <elastos/droid/system/OsConstants.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Utility.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.CoreLibrary.Libcore.h>
 
 #include <cutils/log.h>
 #include <utils/StrongPointer.h>
@@ -33,6 +35,8 @@ using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::View::EIID_IIAssetAtlas;
+using Elastos::Droid::View::IGraphicBufferHelper;
+using Elastos::Droid::View::CGraphicBufferHelper;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Graphics::CCanvas;
 using Elastos::Droid::Graphics::CPaint;
@@ -48,10 +52,9 @@ using Elastos::Droid::Graphics::BitmapCompressFormat_PNG;
 using Elastos::Droid::Graphics::AtlasType_SliceMinArea;
 using Elastos::Droid::Graphics::AtlasType_COUNT;
 using Elastos::Droid::Graphics::Drawable::IDrawableConstantState;
-// using Elastos::Droid::Graphics::CAtlas;
-// using Elastos::Droid::Graphics::CAtlasEntry;
-// using Elastos::Droid::Graphics::IGraphicBufferHelper;
-// using Elastos::Droid::Graphics::CGraphicBufferHelper;
+using Elastos::Droid::Graphics::Drawable::EIID_IDrawableConstantState;
+using Elastos::Droid::Graphics::CAtlas;
+using Elastos::Droid::Graphics::CAtlasEntry;
 using Elastos::Core::Thread;
 using Elastos::Core::IThread;
 using Elastos::Core::CThread;
@@ -82,6 +85,10 @@ using Elastos::Utility::Concurrent::ITimeUnitHelper;
 using Elastos::Utility::Concurrent::CTimeUnitHelper;
 using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
 using Elastos::Utility::Logging::Logger;
+using Elastos::Droid::System::OsConstants;
+using Libcore::IO::IOs;
+using Libcore::IO::ILibcore;
+using Libcore::IO::CLibcore;
 
 namespace Elastos {
 namespace Droid {
@@ -91,7 +98,7 @@ namespace Server {
  * Name of the <code>CAssetAtlasService</code>.
  */
 const String CAssetAtlasService::ASSET_ATLAS_SERVICE("assetatlas");
-const String CAssetAtlasService::TAG("Atlas");
+const String CAssetAtlasService::TAG("CAssetAtlasService");
 
 // Turns debug logs on/off. Debug logs are kept to a minimum and should
 // remain on to diagnose issues
@@ -148,22 +155,21 @@ ECode CAssetAtlasService::Renderer::Run()
     if (DEBUG_ATLAS) Logger::D(CAssetAtlasService::TAG, "Loaded configuration: %s", TO_CSTR(config));
 
     if (config != NULL) {
-        assert(0 && "TODO");
-        // AutoPtr<IGraphicBufferHelper> helper;
-        // CGraphicBufferHelper::AcquireSingleton((IGraphicBufferHelper**)&helper);
+        AutoPtr<IGraphicBufferHelper> helper;
+        CGraphicBufferHelper::AcquireSingleton((IGraphicBufferHelper**)&helper);
 
-        // mHost->mBuffer = NULL;
-        // helper->Create(config->mWidth, config->mHeight,
-        //     IPixelFormat::RGBA_8888,
-        //     CAssetAtlasService::GRAPHIC_BUFFER_USAGE, (IGraphicBuffer**)&mHost->mBuffer);
+        mHost->mBuffer = NULL;
+        helper->Create(config->mWidth, config->mHeight,
+            IPixelFormat::RGBA_8888,
+            CAssetAtlasService::GRAPHIC_BUFFER_USAGE, (IGraphicBuffer**)&mHost->mBuffer);
 
-        // if (mHost->mBuffer != NULL) {
-        //     AutoPtr<IAtlas> atlas;
-        //     CAtlas::New(config->mType, config->mWidth, config->mHeight, config->mFlags, (IAtlas**)*atlas);
-        //     if (RenderAtlas(mHost->mBuffer, atlas, config->mCount)) {
-        //         mHost->mAtlasReady->Set(TRUE);
-        //     }
-        // }
+        if (mHost->mBuffer != NULL) {
+            AutoPtr<IAtlas> atlas;
+            CAtlas::New(config->mType, config->mWidth, config->mHeight, config->mFlags, (IAtlas**)&atlas);
+            if (RenderAtlas(mHost->mBuffer, atlas, config->mCount)) {
+                mHost->mAtlasReady->Set(TRUE);
+            }
+        }
     }
     return NOERROR;
 }
@@ -173,6 +179,7 @@ Boolean CAssetAtlasService::Renderer::RenderAtlas(
     /* [in] */ IAtlas* atlas,
     /* [in] */ Int32 packCount)
 {
+    if (DEBUG_ATLAS) Logger::I(TAG, " RenderAtlas: packCount=%d", packCount);
     // Use a Source blend mode to improve performance, the target bitmap
     // will be zero'd out so there's no need to waste time applying blending
     AutoPtr<IPaint> paint;
@@ -190,8 +197,7 @@ Boolean CAssetAtlasService::Renderer::RenderAtlas(
     if (canvas == NULL) return FALSE;
 
     AutoPtr<IAtlasEntry> entry;
-    assert(0 && "TODO");
-    // CAtlasEntry::New((IAtlasEntry**)&entry);
+    CAtlasEntry::New((IAtlasEntry**)&entry);
 
     mHost->mAtlasMap = ArrayOf<Int64>::Alloc(packCount * ATLAS_MAP_ENTRY_FIELD_COUNT);
     AutoPtr< ArrayOf<Int64> > atlasMap = mHost->mAtlasMap;
@@ -208,6 +214,7 @@ Boolean CAssetAtlasService::Renderer::RenderAtlas(
     Handle64 bmp;
     Boolean rotated;
     List<AutoPtr<IBitmap> >::Iterator it;
+    Int32 index = 0;
     for (it = mBitmaps->Begin(); it != mBitmaps->End(); ++it) {
         AutoPtr<IBitmap> bitmap = *it;
         bitmap->GetWidth(&w);
@@ -242,6 +249,11 @@ Boolean CAssetAtlasService::Renderer::RenderAtlas(
             atlasMap->Set(mapIndex++, y);
             atlasMap->Set(mapIndex++, rotated ? 1 : 0);
         }
+        else {
+            if (DEBUG_ATLAS) Logger::W(TAG, " RenderAtlas: pack bitmap at %d failed, bitmap:%s, w:h=(%d, %d)",
+                index, TO_CSTR(bitmap), w, h);
+        }
+        index++;
     }
 
     Int64 endRender;
@@ -349,7 +361,7 @@ ECode CAssetAtlasService::Configuration::ToString(
 {
     VALIDATE_NOT_NULL(str)
     StringBuilder sb(128);
-    sb += (Int32)mType;
+    sb += mType;
     sb += "(";
     sb += mWidth;
     sb += "x";
@@ -385,7 +397,7 @@ ECode CAssetAtlasService::WorkerResult::ToString(
 {
     VALIDATE_NOT_NULL(str)
     StringBuilder sb(128);
-    sb += (Int32)mType;
+    sb += mType;
     sb += "(";
     sb += mWidth;
     sb += "x";
@@ -433,14 +445,12 @@ ECode CAssetAtlasService::ComputeWorker::Run()
     }
 
     AutoPtr<IAtlasEntry> entry;
-    assert( 0 && "TODO");
-    // CAtlasEntry::New((IAtlasEntry**)&entry);
+    CAtlasEntry::New((IAtlasEntry**)&entry);
     for (Int32 type = AtlasType_SliceMinArea; type < AtlasType_COUNT; ++type) {
         for (Int32 width = mStart; width < mEnd; width += mStep) {
             for (Int32 height = MIN_SIZE; height < MAX_SIZE; height += STEP) {
                 // If the atlas is not big enough, skip it
                 if (width * height <= mThreshold) continue;
-
                 Int32 count = PackBitmaps(type, width, height, entry);
                 if (count > 0) {
                     AutoPtr<WorkerResult> wr = new WorkerResult(type, width, height, count);
@@ -469,18 +479,20 @@ Int32 CAssetAtlasService::ComputeWorker::PackBitmaps(
 {
     Int32 total = 0;
     AutoPtr<IAtlas> atlas;
-    // CAtlas::New(type, width, height, (IAtlas**)&atlas);
+    CAtlas::New(type, width, height, (IAtlas**)&atlas);
 
     Int32 w, h;
     List<AutoPtr<IBitmap> >::Iterator it;
     for (it = mBitmaps->Begin(); it != mBitmaps->End(); ++it) {
         AutoPtr<IBitmap> bitmap = *it;
-        bitmap->GetWidth(&w);
-        bitmap->GetHeight(&h);
-        AutoPtr<IAtlasEntry> ae;
-        atlas->Pack(w, h, entry, (IAtlasEntry**)&ae);
-        if (ae != NULL) {
-            total++;
+        if (bitmap) {
+            bitmap->GetWidth(&w);
+            bitmap->GetHeight(&h);
+            AutoPtr<IAtlasEntry> ae;
+            atlas->Pack(w, h, entry, (IAtlasEntry**)&ae);
+            if (ae != NULL) {
+                total++;
+            }
         }
     }
 
@@ -569,25 +581,27 @@ ECode CAssetAtlasService::constructor(
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     AutoPtr<IInt64SparseArray> drawables;
-    assert(0 && "TODO");
-    // resources->GetPreloadedDrawables((IInt64SparseArray**)&drawables);
+    resources->GetPreloadedDrawables((IInt64SparseArray**)&drawables);
 
     Int32 count, w, h;
     drawables->GetSize(&count);
+    Logger::D(TAG, " >> drawables count is %d.", count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> obj;
         drawables->ValueAt(i, (IInterface**)&obj);
         IDrawableConstantState* dcs = IDrawableConstantState::Probe(obj);
-        AutoPtr<IBitmap> bitmap;
-        dcs->GetBitmap((IBitmap**)&bitmap);
-        if (bitmap != NULL) {
-            BitmapConfig config;
-            bitmap->GetConfig(&config);
-            if (config == BitmapConfig_ARGB_8888) {
-                bitmaps->Add(bitmap.Get());
-                bitmap->GetWidth(&w);
-                bitmap->GetHeight(&h);
-                totalPixelCount += w * h;
+        if (dcs != NULL) {
+            AutoPtr<IBitmap> bitmap;
+            dcs->GetBitmap((IBitmap**)&bitmap);
+            if (bitmap != NULL) {
+                BitmapConfig config;
+                bitmap->GetConfig(&config);
+                if (config == BitmapConfig_ARGB_8888) {
+                    bitmaps->Add(bitmap.Get());
+                    bitmap->GetWidth(&w);
+                    bitmap->GetHeight(&h);
+                    totalPixelCount += w * h;
+                }
             }
         }
     }
@@ -597,10 +611,11 @@ ECode CAssetAtlasService::constructor(
     AutoPtr<ICollections> collections;
     CCollections::AcquireSingleton((ICollections**)&collections);
     AutoPtr<IComparator> cpt = new BitmapComparator();
-    collections->Sort(IList::Probe(bitmaps), cpt);
+    // TODO collections->Sort(IList::Probe(bitmaps), cpt);
+    Logger::E(TAG, " ========== CAssetAtlasService: TODO :collections->Sort");
 
     // Kick off the packing work on a worker thread
-    AutoPtr<List<AutoPtr<IBitmap> > > bmps = new List<AutoPtr<IBitmap> >(300);
+    AutoPtr<List<AutoPtr<IBitmap> > > bmps = new List<AutoPtr<IBitmap> >();
     AutoPtr<IIterator> it;
     bitmaps->GetIterator((IIterator**)&it);
     Boolean hasNext;
@@ -681,7 +696,10 @@ AutoPtr<CAssetAtlasService::Configuration> CAssetAtlasService::ComputeBestConfig
     /* [in] */ List<AutoPtr<IBitmap> >* bitmaps,
     /* [in] */ Int32 pixelCount)
 {
-    if (DEBUG_ATLAS) Logger::D(TAG, "Computing best atlas configuration...");
+    if (DEBUG_ATLAS) {
+        Logger::D(TAG, "Computing best atlas configuration...bitmaps:%d, pixelCount:%d",
+            bitmaps ? bitmaps->GetSize() : 0, pixelCount);
+    }
 
     AutoPtr<ISystem> system;
     CSystem::AcquireSingleton((ISystem**)&system);
@@ -697,9 +715,14 @@ AutoPtr<CAssetAtlasService::Configuration> CAssetAtlasService::ComputeBestConfig
     collections->SynchronizedList(wrList, (IList**)&results);
 
     // Don't bother with an extra thread if there's only one processor
-    Int32 cpuCount = 1;
-    //Runtime->GetRuntime()->AvailableProcessors();
-    assert(0 && "TODO");
+    AutoPtr<IOs> os;
+    AutoPtr<ILibcore> libcore;
+    CLibcore::AcquireSingleton((ILibcore**)&libcore);
+    libcore->GetOs((IOs**)&os);
+    Int64 numCpu = 1;
+    os->Sysconf(OsConstants::__SC_NPROCESSORS_CONF, &numCpu);
+    Int32 cpuCount = numCpu;
+    assert(cpuCount > 0);
 
     if (cpuCount == 1) {
         AutoPtr<ComputeWorker> cw = new ComputeWorker(
@@ -740,7 +763,7 @@ AutoPtr<CAssetAtlasService::Configuration> CAssetAtlasService::ComputeBestConfig
     results->GetSize(&rSize);
     if (rSize == 0) {
         if (DEBUG_ATLAS) {
-            Logger::W(LOG_TAG, "No atlas configuration found!");
+            Logger::W(TAG, "No atlas configuration found!");
         }
         return NULL;
     }
@@ -981,24 +1004,14 @@ void CAssetAtlasService::NativeReleaseAtlasCanvas(
 // Types
 // ----------------------------------------------------------------------------
 
-class GraphicBufferWrapper {
-public:
-    GraphicBufferWrapper(const android::sp<android::GraphicBuffer>& buffer): buffer(buffer) {
-    }
-
-    android::sp<android::GraphicBuffer> buffer;
-};
-
-
 static android::sp<android::GraphicBuffer> graphicBufferForJavaObject(IGraphicBuffer* obj)
 {
     if (obj) {
         Handle64 nativeObject;
         obj->GetNativeObject(&nativeObject);
-        GraphicBufferWrapper* wrapper = (GraphicBufferWrapper*) nativeObject;
-        if (wrapper != NULL) {
-            android::sp<android::GraphicBuffer> buffer(wrapper->buffer);
-            return buffer;
+        if (nativeObject != 0) {
+            android::sp<android::GraphicBuffer> gb = reinterpret_cast<android::GraphicBuffer*>(nativeObject);
+            return gb;
         }
     }
     return NULL;
@@ -1020,7 +1033,7 @@ Boolean CAssetAtlasService::NavtiveUploadAtlas(
         EGLint major;
         EGLint minor;
         if (!eglInitialize(display, &major, &minor)) {
-            ALOGW("Could not initialize EGL");
+            Logger::W(TAG, "Could not initialize EGL");
             return FALSE;
         }
 
@@ -1039,13 +1052,13 @@ Boolean CAssetAtlasService::NavtiveUploadAtlas(
         EGLConfig configs[1];
         EGLint configCount;
         if (!eglChooseConfig(display, configAttrs, configs, 1, &configCount)) {
-            ALOGW("Could not select EGL configuration");
+            Logger::W(TAG, "Could not select EGL configuration");
             eglReleaseThread();
             eglTerminate(display);
             return FALSE;
         }
         if (configCount <= 0) {
-            ALOGW("Could not find EGL configuration");
+            Logger::W(TAG, "Could not find EGL configuration");
             eglReleaseThread();
             eglTerminate(display);
             return FALSE;
@@ -1062,7 +1075,7 @@ Boolean CAssetAtlasService::NavtiveUploadAtlas(
         EGLint attrs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
         EGLContext context = eglCreateContext(display, configs[0], EGL_NO_CONTEXT, attrs);
         if (context == EGL_NO_CONTEXT) {
-            ALOGW("Could not create EGL context");
+            Logger::W(TAG, "Could not create EGL context");
             CLEANUP_GL_AND_RETURN(FALSE);
         }
 
@@ -1070,12 +1083,12 @@ Boolean CAssetAtlasService::NavtiveUploadAtlas(
         EGLint surfaceAttrs[] = { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
         surface = eglCreatePbufferSurface(display, configs[0], surfaceAttrs);
         if (surface == EGL_NO_SURFACE) {
-            ALOGW("Could not create EGL surface");
+            Logger::W(TAG, "Could not create EGL surface");
             CLEANUP_GL_AND_RETURN(FALSE);
         }
 
         if (!eglMakeCurrent(display, surface, surface, context)) {
-            ALOGW("Could not change current EGL context");
+            Logger::W(TAG, "Could not change current EGL context");
             CLEANUP_GL_AND_RETURN(FALSE);
         }
 
@@ -1086,7 +1099,7 @@ Boolean CAssetAtlasService::NavtiveUploadAtlas(
         image = eglCreateImageKHR(display, EGL_NO_CONTEXT,
                 EGL_NATIVE_BUFFER_ANDROID, clientBuffer, imageAttrs);
         if (image == EGL_NO_IMAGE_KHR) {
-            ALOGW("Could not create EGL image");
+            Logger::W(TAG, "Could not create EGL image");
             CLEANUP_GL_AND_RETURN(FALSE);
         }
 
@@ -1094,7 +1107,7 @@ Boolean CAssetAtlasService::NavtiveUploadAtlas(
         glBindTexture(GL_TEXTURE_2D, texture);
         glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, image);
         if (glGetError() != GL_NO_ERROR) {
-            ALOGW("Could not create/bind texture");
+            Logger::W(TAG, "Could not create/bind texture");
             CLEANUP_GL_AND_RETURN(FALSE);
         }
 
@@ -1103,7 +1116,7 @@ Boolean CAssetAtlasService::NavtiveUploadAtlas(
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap->width(), bitmap->height(),
                 GL_RGBA, GL_UNSIGNED_BYTE, bitmap->getPixels());
         if (glGetError() != GL_NO_ERROR) {
-            ALOGW("Could not upload to texture");
+            Logger::W(TAG, "Could not upload to texture");
             CLEANUP_GL_AND_RETURN(FALSE);
         }
 
@@ -1112,7 +1125,7 @@ Boolean CAssetAtlasService::NavtiveUploadAtlas(
         // some drivers completely ignore these API calls
         fence = eglCreateSyncKHR(display, EGL_SYNC_FENCE_KHR, NULL);
         if (fence == EGL_NO_SYNC_KHR) {
-            ALOGW("Could not create sync fence %#x", eglGetError());
+            Logger::W(TAG, "Could not create sync fence %#x", eglGetError());
             CLEANUP_GL_AND_RETURN(FALSE);
         }
 
@@ -1121,7 +1134,7 @@ Boolean CAssetAtlasService::NavtiveUploadAtlas(
         EGLint waitStatus = eglClientWaitSyncKHR(display, fence,
                 EGL_SYNC_FLUSH_COMMANDS_BIT_KHR, FENCE_TIMEOUT);
         if (waitStatus != EGL_CONDITION_SATISFIED_KHR) {
-            ALOGW("Failed to wait for the fence %#x", eglGetError());
+            Logger::W(TAG, "Failed to wait for the fence %#x", eglGetError());
             CLEANUP_GL_AND_RETURN(FALSE);
         }
 

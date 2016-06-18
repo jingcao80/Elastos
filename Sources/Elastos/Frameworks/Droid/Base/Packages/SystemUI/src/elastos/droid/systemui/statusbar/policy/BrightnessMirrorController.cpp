@@ -46,12 +46,13 @@ BrightnessMirrorController::BrightnessMirrorController(
     , TRANSITION_DURATION_IN(200)
 {
     mInt2Cache = ArrayOf<Int32>::Alloc(2);
+    IView* statusbar = IView::Probe(statusBarWindow);
     AutoPtr<IView> view;
-    IView::Probe(statusBarWindow)->FindViewById(R::id::scrim_behind, (IView**)&view);
+    statusbar->FindViewById(R::id::scrim_behind, (IView**)&view);
     mScrimBehind = IScrimView::Probe(view);
 
-    IView::Probe(statusBarWindow)->FindViewById(R::id::brightness_mirror, (IView**)&mBrightnessMirror);
-    IView::Probe(statusBarWindow)->FindViewById(R::id::panel_holder, (IView**)&mPanelHolder);
+    statusbar->FindViewById(R::id::brightness_mirror, (IView**)&mBrightnessMirror);
+    statusbar->FindViewById(R::id::panel_holder, (IView**)&mPanelHolder);
 }
 
 ECode BrightnessMirrorController::ShowMirror()

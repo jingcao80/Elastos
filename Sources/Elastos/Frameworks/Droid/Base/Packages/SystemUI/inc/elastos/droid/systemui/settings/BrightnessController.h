@@ -27,6 +27,37 @@ class BrightnessController
     : public Object
     , public IBrightnessController
 {
+public:
+    /** ContentObserver to watch brightness **/
+    class BrightnessObserver
+        : public ContentObserver
+    {
+    public:
+        CARAPI constructor(
+            /* [in] */ IBrightnessController* host,
+            /* [in] */ IHandler* handler);
+
+        // @Override
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+        // @Override
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange,
+            /* [in] */ IUri* uri);
+
+        CARAPI StartObserving();
+
+        CARAPI StopObserving();
+
+    private:
+        AutoPtr<IUri> BRIGHTNESS_MODE_URI;
+        AutoPtr<IUri> BRIGHTNESS_URI;
+        AutoPtr<IUri> BRIGHTNESS_ADJ_URI;
+
+        BrightnessController* mHost;
+    };
+
 private:
     class ToggleSliderListener
         : public Object
@@ -52,38 +83,6 @@ private:
             /* [in] */ Int32 value);
 
     private:
-        BrightnessController* mHost;
-    };
-
-    /** ContentObserver to watch brightness **/
-    class BrightnessObserver
-        : public ContentObserver
-    {
-    public:
-        TO_STRING_IMPL("BrightnessController::BrightnessObserver")
-
-        BrightnessObserver(
-            /* [in] */ IHandler* handler,
-            /* [in] */ BrightnessController* host);
-
-        // @Override
-        CARAPI OnChange(
-            /* [in] */ Boolean selfChange);
-
-        // @Override
-        CARAPI OnChange(
-            /* [in] */ Boolean selfChange,
-            /* [in] */ IUri* uri);
-
-        CARAPI StartObserving();
-
-        CARAPI StopObserving();
-
-    private:
-        AutoPtr<IUri> BRIGHTNESS_MODE_URI;
-        AutoPtr<IUri> BRIGHTNESS_URI;
-        AutoPtr<IUri> BRIGHTNESS_ADJ_URI;
-
         BrightnessController* mHost;
     };
 
@@ -134,6 +133,8 @@ private:
 
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("BrightnessController")
 
     BrightnessController();
 

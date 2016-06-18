@@ -7,12 +7,18 @@
 #include "CSystem.h"
 #include <cutils/atomic.h>
 #include <cutils/atomic-inline.h>
+#include "CLibcore.h"
+#include <elastos/droid/system/OsConstants.h>
 
 using Elastos::IO::EIID_ISerializable;
 using Elastos::Core::ISystem;
 using Elastos::Core::Thread;
 using Elastos::Utility::Concurrent::Locks::LockSupport;
 using Elastos::Utility::Concurrent::Locks::CReentrantLock;
+using Elastos::Droid::System::OsConstants;
+using Libcore::IO::IOs;
+using Libcore::IO::ILibcore;
+using Libcore::IO::CLibcore;
 
 namespace Elastos {
 namespace Utility {
@@ -629,10 +635,21 @@ ECode CSynchronousQueue::EmptyIterator::Remove()
 //===============================================================================
 // CSynchronousQueue::
 //===============================================================================
+static Int32 GetCpuCount()
+{
+    AutoPtr<IOs> os;
+    AutoPtr<ILibcore> libcore;
+    CLibcore::AcquireSingleton((ILibcore**)&libcore);
+    libcore->GetOs((IOs**)&os);
+    Int64 ival = 4;
+    os->Sysconf(OsConstants::__SC_NPROCESSORS_CONF, &ival);
+    assert(ival > 0);
+    return (Int32)ival;
+}
 
 Int64 CSynchronousQueue::mSerialVersionUID = -3223113410248163686L;
 
-Int32 CSynchronousQueue::NCPUS = 4; //Runtime.getRuntime().availableProcessors();
+Int32 CSynchronousQueue::NCPUS = GetCpuCount();
 
 Int32 CSynchronousQueue::mMaxTimedSpins = (NCPUS < 2) ? 0 : 32;
 

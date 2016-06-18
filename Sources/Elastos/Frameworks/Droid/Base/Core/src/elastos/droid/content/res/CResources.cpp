@@ -20,8 +20,6 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IconPackHelper;
 using Elastos::Droid::Content::Pm::IActivityInfoHelper;
 using Elastos::Droid::Content::Pm::IActivityInfo;
@@ -38,6 +36,7 @@ using Elastos::Droid::Utility::CInt64SparseArray;
 using Libcore::ICU::INativePluralRulesHelper;
 using Libcore::ICU::CNativePluralRulesHelper;
 using Libcore::ICU::INativePluralRules;
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Core::IAppendable;
 using Elastos::Core::StringBuilder;
@@ -369,11 +368,12 @@ CResources::StaticInitializer::StaticInitializer()
     sPreloadedDrawables->Set(1, array);
 
     CInt64SparseArray::New((IInt64SparseArray**)&sPreloadedColorDrawables);
+    CInt64SparseArray::New((IInt64SparseArray**)&sPreloadedColorStateLists);
 }
 
 
 const String CResources::TAG("CResources");
-const Boolean CResources::DEBUG_LOAD = TRUE;
+const Boolean CResources::DEBUG_LOAD = FALSE;
 const Boolean CResources::DEBUG_CONFIG = FALSE;
 const Boolean CResources::TRACE_FOR_PRELOAD = FALSE;
 const Boolean CResources::TRACE_FOR_MISS_PRELOAD = FALSE;
@@ -384,7 +384,7 @@ const String CResources::WIDGET_SUFFIX("widget_preview");
 INIT_PROI_4 AutoPtr<IResources> CResources::sSystem;
 INIT_PROI_4 AutoPtr< ArrayOf<IInt64SparseArray*> > CResources::sPreloadedDrawables;
 INIT_PROI_4 AutoPtr<IInt64SparseArray> CResources::sPreloadedColorDrawables;
-INIT_PROI_4 CResources::ColorStateMap CResources::sPreloadedColorStateLists;
+INIT_PROI_4 AutoPtr<IInt64SparseArray> CResources::sPreloadedColorStateLists;
 Boolean CResources::sPreloaded = FALSE;
 Int32 CResources::sPreloadedDensity = 0;
 INIT_PROI_4 Object CResources::sSync;
@@ -674,7 +674,7 @@ ECode CResources::GetQuantityString(
     *str = String(NULL);
 
     AutoPtr<ICharSequence> res;
-    ECode ec = GetQuantityText(id, quantity, (ICharSequence**)&res);
+    GetQuantityText(id, quantity, (ICharSequence**)&res);
     if (res != NULL) {
         return E_NOT_FOUND_EXCEPTION;
     }
@@ -1126,7 +1126,8 @@ ECode CResources::GetColor(
 
     AutoPtr<ITypedValue> value;
 
-    {    AutoLock syncLock(mAccessLock);
+    {
+        AutoLock syncLock(mAccessLock);
         value = (ITypedValue*)mTmpValue.Get();
         if (value == NULL) {
             CTypedValue::New((ITypedValue**)&value);
@@ -1150,7 +1151,8 @@ ECode CResources::GetColor(
 
     AutoPtr<IColorStateList> csl;
     ASSERT_SUCCEEDED(LoadColorStateList(value, id, (IColorStateList**)&csl));
-    {    AutoLock syncLock(mAccessLock);
+    {
+        AutoLock syncLock(mAccessLock);
         if (mTmpValue == NULL) {
             mTmpValue = (CTypedValue*)value.Get();
         }
@@ -1166,7 +1168,8 @@ ECode CResources::GetColorStateList(
 
     AutoPtr<ITypedValue> value;
 
-    {    AutoLock syncLock(mAccessLock);
+    {
+        AutoLock syncLock(mAccessLock);
         value = (ITypedValue*)mTmpValue.Get();
         if (value == NULL) {
             CTypedValue::New((ITypedValue**)&value);
@@ -1180,7 +1183,8 @@ ECode CResources::GetColorStateList(
 
     AutoPtr<IColorStateList> csl;
     ASSERT_SUCCEEDED(LoadColorStateList(value, id, (IColorStateList**)&csl));
-    {    AutoLock syncLock(mAccessLock);
+    {
+        AutoLock syncLock(mAccessLock);
         if (mTmpValue == NULL) {
             mTmpValue = (CTypedValue*)value.Get();
         }
@@ -2183,13 +2187,13 @@ ECode CResources::LoadDrawable(
 
     // Next, check preloaded drawables. These are unthemed but may have
     // themeable attributes.
-    AutoPtr<IWeakReference> wr;
+    AutoPtr<IDrawableConstantState> cs;
     if (isColorDrawable) {
         Boolean hasThemedAssets;
         if (mAssets->HasThemedAssets(&hasThemedAssets), !hasThemedAssets) {
             AutoPtr<IInterface> value;
             sPreloadedColorDrawables->Get(key, (IInterface**)&value);
-            wr = IWeakReference::Probe(value);
+            cs = IDrawableConstantState::Probe(value);
         }
     }
     else {
@@ -2199,13 +2203,8 @@ ECode CResources::LoadDrawable(
             mConfiguration->GetLayoutDirection(&direction);
             AutoPtr<IInterface> value;
             (*sPreloadedDrawables)[direction]->Get(key, (IInterface**)&value);
-            wr = IWeakReference::Probe(value);
+            cs = IDrawableConstantState::Probe(value);
         }
-    }
-
-    AutoPtr<IDrawableConstantState> cs;
-    if (wr != NULL) {
-        wr->Resolve(EIID_IDrawableConstantState, (IInterface**)&cs);
     }
 
     AutoPtr<IDrawable> dr;
@@ -2245,10 +2244,6 @@ ECode CResources::CacheDrawable(
         return NOERROR;
     }
 
-    AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(cs);
-    AutoPtr<IWeakReference> wr;
-    wrs->GetWeakReference((IWeakReference**)&wr);
-
     CTypedValue* value = (CTypedValue*)typedValue;
     if (mPreloading) {
         // Preloaded drawables never have a theme, but may be themeable.
@@ -2257,7 +2252,7 @@ ECode CResources::CacheDrawable(
 
         if (isColorDrawable) {
             if (VerifyPreloadConfig(changingConfigs, 0, value->mResourceId, String("drawable"))) {
-                sPreloadedColorDrawables->Put(key, wr);
+                sPreloadedColorDrawables->Put(key, cs.Get());
             }
         }
         else {
@@ -2266,36 +2261,35 @@ ECode CResources::CacheDrawable(
                 if ((changingConfigs & LAYOUT_DIR_CONFIG) == 0) {
                     // If this resource does not vary based on layout direction,
                     // we can put it in all of the preload maps.
-                    (*sPreloadedDrawables)[0]->Put(key, wr);
-                    (*sPreloadedDrawables)[1]->Put(key, wr);
+                    (*sPreloadedDrawables)[0]->Put(key, cs.Get());
+                    (*sPreloadedDrawables)[1]->Put(key, cs.Get());
                 }
                 else {
                     // Otherwise, only in the layout dir we loaded it for.
                     Int32 direction;
                     mConfiguration->GetLayoutDirection(&direction);
-                    (*sPreloadedDrawables)[direction]->Put(key, wr);
+                    (*sPreloadedDrawables)[direction]->Put(key, cs.Get());
                 }
             }
         }
     }
     else {
-        {    AutoLock syncLock(mAccessLock);
-            String themeKey("");
-            if (theme != NULL) {
-                themeKey = ((CResources::Theme*)theme)->mKey;
-            }
-
-            DrawableMapIterator it = caches.Find(themeKey);
-            AutoPtr<IInt64SparseArray> themedCache;
-            if (it == caches.End()) {
-                CInt64SparseArray::New(1, (IInt64SparseArray**)&themedCache);
-                caches[themeKey] = themedCache;
-            }
-            else {
-                themedCache = it->mSecond;
-            }
-            themedCache->Put(key, wr);
+        AutoLock syncLock(mAccessLock);
+        String themeKey("");
+        if (theme != NULL) {
+            themeKey = ((CResources::Theme*)theme)->mKey;
         }
+
+        DrawableMapIterator it = caches.Find(themeKey);
+        AutoPtr<IInt64SparseArray> themedCache;
+        if (it == caches.End()) {
+            CInt64SparseArray::New(1, (IInt64SparseArray**)&themedCache);
+            caches[themeKey] = themedCache;
+        }
+        else {
+            themedCache = it->mSecond;
+        }
+        themedCache->Put(key, cs.Get());
     }
 
     return NOERROR;
@@ -2378,19 +2372,18 @@ AutoPtr<IDrawable> CResources::GetCachedDrawable(
     /* [in] */ Int64 key,
     /* [in] */ IResourcesTheme* theme)
 {
-    {    AutoLock syncLock(mAccessLock);
-        String themeKey("");
-        if (theme != NULL) {
-            themeKey = ((CResources::Theme*)theme)->mKey;
-        }
+    AutoLock syncLock(mAccessLock);
+    String themeKey("");
+    if (theme != NULL) {
+        themeKey = ((CResources::Theme*)theme)->mKey;
+    }
 
-        DrawableMapIterator it = caches.Find(themeKey);
-        if (it != caches.End()) {
-            AutoPtr<IInt64SparseArray> themedCache = it->mSecond;
-            AutoPtr<IDrawable> themedDrawable = GetCachedDrawableLocked(themedCache, key);
-            if (themedDrawable != NULL) {
-                return themedDrawable;
-            }
+    DrawableMapIterator it = caches.Find(themeKey);
+    if (it != caches.End()) {
+        AutoPtr<IInt64SparseArray> themedCache = it->mSecond;
+        AutoPtr<IDrawable> themedDrawable = GetCachedDrawableLocked(themedCache, key);
+        if (themedDrawable != NULL) {
+            return themedDrawable;
         }
     }
 
@@ -2404,19 +2397,15 @@ AutoPtr<IDrawableConstantState> CResources::GetConstantStateLocked(
 {
     AutoPtr<IInterface> value;
     drawableCache->Get(key, (IInterface**)&value);
-    IWeakReference* wr = IWeakReference::Probe(value);
-    if (wr != NULL) { // we have the key
-        AutoPtr<IDrawableConstantState> entry;
-        wr->Resolve(EIID_IDrawableConstantState, (IInterface**)&entry);
-        if (entry != NULL) {
-            //Log.i(TAG, "Returning cached drawable @ #" +
-            //        Integer.toHexString(((Integer)key).intValue())
-            //        + " in " + this + ": " + entry);
-            return entry;
-        }
-        else {  // our entry has been purged
-            drawableCache->Delete(key);
-        }
+    IDrawableConstantState* entry = IDrawableConstantState::Probe(value);
+    if (entry != NULL) {
+        //Log.i(TAG, "Returning cached drawable @ #" +
+        //        Integer.toHexString(((Integer)key).intValue())
+        //        + " in " + this + ": " + entry);
+        return entry;
+    }
+    else {  // our entry has been purged
+        drawableCache->Delete(key);
     }
     return NULL;
 }
@@ -2456,17 +2445,16 @@ ECode CResources::LoadColorStateList(
     Int64 key = (((Int64)typedValue->mAssetCookie) << 32) | typedValue->mData;
 
     AutoPtr<IColorStateList> csl;
+
     Int32 type;
     value->GetType(&type);
     if (type >= ITypedValue::TYPE_FIRST_COLOR_INT && type <= ITypedValue::TYPE_LAST_COLOR_INT) {
         Boolean hasThemedAssets;
         if (mAssets->HasThemedAssets(&hasThemedAssets), !hasThemedAssets) {
-            ColorStateIterator it = sPreloadedColorStateLists.Find(key);
-            if (it != sPreloadedColorStateLists.End()) {
-                AutoPtr<IWeakReference> wr = it->mSecond;
-                if (wr) {
-                    wr->Resolve(EIID_IColorStateList, (IInterface**)&csl);
-                }
+            AutoPtr<IInterface> value;
+            sPreloadedColorStateLists->Get(key, (IInterface**)&value);
+            if (value) {
+                csl = IColorStateList::Probe(value);
             }
         }
 
@@ -2481,11 +2469,7 @@ ECode CResources::LoadColorStateList(
         if (mPreloading) {
             if (VerifyPreloadConfig(typedValue->mChangingConfigurations, 0,
                 typedValue->mResourceId, String("color"))) {
-                IWeakReferenceSource* wrs = (IWeakReferenceSource*)csl->Probe(EIID_IWeakReferenceSource);
-                assert(wrs != NULL);
-                AutoPtr<IWeakReference> wr;
-                wrs->GetWeakReference((IWeakReference**)&wr);
-                sPreloadedColorStateLists[key] = wr;
+                sPreloadedColorStateLists->Put(key, csl.Get());
             }
         }
 
@@ -2503,14 +2487,13 @@ ECode CResources::LoadColorStateList(
 
     Boolean hasThemedAssets;
     if (mAssets->HasThemedAssets(&hasThemedAssets), !hasThemedAssets) {
-        ColorStateIterator it = sPreloadedColorStateLists.Find(key);
-        if (it != sPreloadedColorStateLists.End()) {
-            AutoPtr<IWeakReference> wr = it->mSecond;
-            if (wr) {
-                wr->Resolve(EIID_IColorStateList, (IInterface**)&csl);
-            }
+        AutoPtr<IInterface> value;
+        sPreloadedColorStateLists->Get(key, (IInterface**)&value);
+        if (value) {
+            csl = IColorStateList::Probe(value);
         }
     }
+
     if (csl != NULL) {
         *stateList = csl;
         REFCOUNT_ADD(*stateList)
@@ -2561,22 +2544,20 @@ ECode CResources::LoadColorStateList(
     }
 
     if (csl != NULL) {
-        IWeakReferenceSource* wrs = (IWeakReferenceSource*)csl->Probe(EIID_IWeakReferenceSource);
-        assert(wrs != NULL);
-        AutoPtr<IWeakReference> wr;
-        wrs->GetWeakReference((IWeakReference**)&wr);
         if (mPreloading) {
             if (VerifyPreloadConfig(typedValue->mChangingConfigurations, 0,
                 typedValue->mResourceId, String("color"))) {
-                sPreloadedColorStateLists[key] = wr;
+                sPreloadedColorStateLists->Put(key, csl.Get());
             }
         }
         else {
-            AutoLock lock(mAccessLock);
-
             // Log.i(TAG, "Saving cached color state list @ #" +
             //         Integer.toHexString(key.intValue())
             //         + " in " + this + ": " + csl);
+            AutoLock lock(mAccessLock);
+            IWeakReferenceSource* wrs = (IWeakReferenceSource*)csl->Probe(EIID_IWeakReferenceSource);
+            AutoPtr<IWeakReference> wr;
+            wrs->GetWeakReference((IWeakReference**)&wr);
             mColorStateListCache[key] = wr;
         }
     }

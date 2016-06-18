@@ -13,8 +13,10 @@
 #include "StringUtils.h"
 #include "CountedCompleter.h"
 #include "CThreadLocalRandom.h"
-
+#include "CLibcore.h"
+#include <elastos/droid/system/OsConstants.h>
 #include <elastos/core/AutoLock.h>
+
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Core::ISystem;
@@ -31,6 +33,10 @@ using Elastos::Utility::Concurrent::AdaptedRunnable;
 using Elastos::Utility::Concurrent::Locks::LockSupport;
 using Elastos::Utility::Concurrent::Locks::CReentrantLock;
 using Elastos::Utility::Concurrent::Locks::ILock;
+using Elastos::Droid::System::OsConstants;
+using Libcore::IO::IOs;
+using Libcore::IO::ILibcore;
+using Libcore::IO::CLibcore;
 
 namespace Elastos {
 namespace Utility {
@@ -1456,8 +1462,14 @@ void CForkJoinPool::CheckPermission()
 
 ECode CForkJoinPool::constructor()
 {
-    Int32 ps = 4; //Runtime.getRuntime().availableProcessors()
-    return constructor(Elastos::Core::Math::Min(MAX_CAP, ps),
+    AutoPtr<IOs> os;
+    AutoPtr<ILibcore> libcore;
+    CLibcore::AcquireSingleton((ILibcore**)&libcore);
+    libcore->GetOs((IOs**)&os);
+    Int64 ival = 4;
+    os->Sysconf(OsConstants::__SC_NPROCESSORS_CONF, &ival);
+    Int32 numCpu = ival;
+    return constructor(Elastos::Core::Math::Min(MAX_CAP, numCpu),
         mDefaultForkJoinWorkerThreadFactory, NULL, FALSE);
 }
 
@@ -2115,8 +2127,16 @@ AutoPtr<IForkJoinPool> CForkJoinPool::MakeCommonPool()
     //     handler = ((IThreadUncaughtExceptionHandler)ClassLoader.
     //                getSystemClassLoader().loadClass(hp).newInstance());
 
+    AutoPtr<IOs> os;
+    AutoPtr<ILibcore> libcore;
+    CLibcore::AcquireSingleton((ILibcore**)&libcore);
+    libcore->GetOs((IOs**)&os);
+    Int64 ival = 4;
+    os->Sysconf(OsConstants::__SC_NPROCESSORS_CONF, &ival);
+    Int32 numCpu = ival;
+
     if (parallelism < 0 && // default 1 less than #cores
-        (parallelism = 4 - 1) < 0)  // (parallelism = Runtime.getRuntime().availableProcessors() - 1) < 0)
+        (parallelism = numCpu - 1) < 0)
         parallelism = 0;
     if (parallelism > MAX_CAP)
         parallelism = MAX_CAP;

@@ -194,25 +194,33 @@ ECode TwilightService::LocationHandler::HandleMessage(
             // Unregister the current location monitor, so we can
             // register a new one for it to get an immediate update.
             mNetworkListenerEnabled = FALSE;
-            mHost->mLocationManager->RemoveUpdates((ILocationListener*)(mHost->mEmptyLocationListener));
+            if (mHost->mLocationManager) {
+                mHost->mLocationManager->RemoveUpdates(mHost->mEmptyLocationListener.Get());
+            }
 
             // Fall through to re-register listener.
-        case MSG_ENABLE_LOCATION_UPDATES:
+        case MSG_ENABLE_LOCATION_UPDATES: {
             // enable network provider to receive at least location updates for a given
             // distance.
-            Boolean networkLocationEnabled;
+            Boolean networkLocationEnabled = FALSE;
 
-            if (FAILED(mHost->mLocationManager->IsProviderEnabled(ILocationManager::NETWORK_PROVIDER, &networkLocationEnabled))) {
-                // we may get IllegalArgumentException if network location provider
-                // does not exist or is not yet installed.
-                networkLocationEnabled = FALSE;
+            if (mHost->mLocationManager) {
+                ECode ec = mHost->mLocationManager->IsProviderEnabled(
+                    ILocationManager::NETWORK_PROVIDER, &networkLocationEnabled);
+                if (FAILED(ec)) {
+                    // we may get IllegalArgumentException if network location provider
+                    // does not exist or is not yet installed.
+                    networkLocationEnabled = FALSE;
+                }
             }
 
             if (!mNetworkListenerEnabled && networkLocationEnabled) {
                 mNetworkListenerEnabled = TRUE;
                 mLastNetworkRegisterTime = SystemClock::GetElapsedRealtime();
-                mHost->mLocationManager->RequestLocationUpdates(ILocationManager::NETWORK_PROVIDER,
-                        LOCATION_UPDATE_MS, 0, (ILocationListener*)(mHost->mEmptyLocationListener));
+                if (mHost->mLocationManager) {
+                    mHost->mLocationManager->RequestLocationUpdates(ILocationManager::NETWORK_PROVIDER,
+                        LOCATION_UPDATE_MS, 0, mHost->mEmptyLocationListener.Get());
+                }
 
                 if (!mDidFirstInit) {
                     mDidFirstInit = TRUE;
@@ -224,18 +232,22 @@ ECode TwilightService::LocationHandler::HandleMessage(
 
             // enable passive provider to receive updates from location fixes (gps
             // and network).
-            Boolean passiveLocationEnabled;
-
-            if (FAILED(mHost->mLocationManager->IsProviderEnabled(ILocationManager::PASSIVE_PROVIDER, &passiveLocationEnabled))) {
-                // we may get IllegalArgumentException if passive location provider
-                // does not exist or is not yet installed.
-                passiveLocationEnabled = FALSE;
+            Boolean passiveLocationEnabled = FALSE;
+            if (mHost->mLocationManager) {
+                if (FAILED(mHost->mLocationManager->IsProviderEnabled(
+                    ILocationManager::PASSIVE_PROVIDER, &passiveLocationEnabled))) {
+                    // we may get IllegalArgumentException if passive location provider
+                    // does not exist or is not yet installed.
+                    passiveLocationEnabled = FALSE;
+                }
             }
 
             if (!mPassiveListenerEnabled && passiveLocationEnabled) {
                 mPassiveListenerEnabled = TRUE;
-                mHost->mLocationManager->RequestLocationUpdates(ILocationManager::PASSIVE_PROVIDER,
-                        0, LOCATION_UPDATE_DISTANCE_METER , (ILocationListener*)(mHost->mLocationListener));
+                if (mHost->mLocationManager) {
+                    mHost->mLocationManager->RequestLocationUpdates(ILocationManager::PASSIVE_PROVIDER,
+                        0, LOCATION_UPDATE_DISTANCE_METER , mHost->mLocationListener.Get());
+                }
             }
 
             if (!(mNetworkListenerEnabled && mPassiveListenerEnabled)) {
@@ -252,6 +264,7 @@ ECode TwilightService::LocationHandler::HandleMessage(
                     mLastUpdateInterval, &result);
             }
             break;
+        }
 
         case MSG_DO_TWILIGHT_UPDATE:
             UpdateTwilightState();
@@ -263,33 +276,36 @@ ECode TwilightService::LocationHandler::HandleMessage(
 
 void TwilightService::LocationHandler::RetrieveLocation()
 {
-    AutoPtr<ILocation> location = NULL;
+    AutoPtr<ILocation> location;
     AutoPtr<ICriteria> criteria;
     CCriteria::New((ICriteria**)&criteria);
 
-    AutoPtr<IList> providers;
-    mHost->mLocationManager->GetProviders(criteria, TRUE, (IList**)&providers);
+    if (mHost->mLocationManager) {
+        AutoPtr<IList> providers;
+        mHost->mLocationManager->GetProviders(criteria, TRUE, (IList**)&providers);
 
-    AutoPtr<IIterator> it;
-    providers->GetIterator((IIterator**)&it);
-    Boolean hasNext;
+        AutoPtr<IIterator> it;
+        providers->GetIterator((IIterator**)&it);
+        Boolean hasNext;
 
-    while(it->HasNext(&hasNext), hasNext) {
-        AutoPtr<IInterface> current;
-        it->GetNext((IInterface**)&current);
-        String currentStr = Object::ToString(current);
+        while(it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> current;
+            it->GetNext((IInterface**)&current);
+            String currentStr = Object::ToString(current);
 
-        AutoPtr<ILocation> lastKnownLocation;
-        mHost->mLocationManager->GetLastKnownLocation(currentStr, (ILocation**)&lastKnownLocation);
-        //pick the most recent location
-        Int64 elapsedRealtimeNanos, lastElapsedRealtimeNanos;
-        location->GetElapsedRealtimeNanos(&elapsedRealtimeNanos);
-        lastKnownLocation->GetElapsedRealtimeNanos(&lastElapsedRealtimeNanos);
-        if (location == NULL || (lastKnownLocation != NULL &&
-               elapsedRealtimeNanos < lastElapsedRealtimeNanos)) {
-            location = lastKnownLocation;
+            AutoPtr<ILocation> lastKnownLocation;
+            mHost->mLocationManager->GetLastKnownLocation(currentStr, (ILocation**)&lastKnownLocation);
+            //pick the most recent location
+            Int64 elapsedRealtimeNanos, lastElapsedRealtimeNanos;
+            location->GetElapsedRealtimeNanos(&elapsedRealtimeNanos);
+            lastKnownLocation->GetElapsedRealtimeNanos(&lastElapsedRealtimeNanos);
+            if (location == NULL || (lastKnownLocation != NULL &&
+                   elapsedRealtimeNanos < lastElapsedRealtimeNanos)) {
+                location = lastKnownLocation;
+            }
         }
     }
+
 
     // In the case there is no location available (e.g. GPS fix or network location
     // is not available yet), the longitude of the location is estimated using the timezone,
@@ -388,8 +404,7 @@ void TwilightService::LocationHandler::UpdateTwilightState()
         else if (now > todaySunrise) {
             nextUpdate += todaySunset;
         }
-        else
-        {
+        else {
             nextUpdate += todaySunrise;
         }
     }
@@ -445,7 +460,6 @@ ECode TwilightService::UpdateLocationReceiver::OnReceive(
 //====================================================================
 CAR_INTERFACE_IMPL(TwilightService::EmptyLocationListener, Object, ILocationListener);
 
-
 TwilightService::EmptyLocationListener::EmptyLocationListener()
 {}
 
@@ -453,19 +467,19 @@ TwilightService::EmptyLocationListener::EmptyLocationListener()
 ECode TwilightService::EmptyLocationListener::OnLocationChanged(
     /* [in] */ ILocation* location)
 {
-    return E_NOT_IMPLEMENTED;
+    return NOERROR;
 }
 
 ECode TwilightService::EmptyLocationListener::OnProviderEnabled(
     /* [in] */ const String& provider)
 {
-    return E_NOT_IMPLEMENTED;
+    return NOERROR;
 }
 
 ECode TwilightService::EmptyLocationListener::OnProviderDisabled(
     /* [in] */ const String& provider)
 {
-    return E_NOT_IMPLEMENTED;
+    return NOERROR;
 }
 
 ECode TwilightService::EmptyLocationListener::OnStatusChanged(
@@ -473,7 +487,7 @@ ECode TwilightService::EmptyLocationListener::OnStatusChanged(
     /* [in] */ Int32 status,
     /* [in] */ IBundle* extras)
 {
-    return E_NOT_IMPLEMENTED;
+    return NOERROR;
 }
 
 
@@ -552,8 +566,9 @@ ECode TwilightService::OnStart()
     filter->AddAction(IIntent::ACTION_TIMEZONE_CHANGED);
     filter->AddAction(ACTION_UPDATE_TWILIGHT_STATE);
     AutoPtr<IIntent> intent;
-    context->RegisterReceiver((IBroadcastReceiver*)mUpdateLocationReceiver, filter, (IIntent**)&intent);
+    context->RegisterReceiver(mUpdateLocationReceiver.Get(), filter, (IIntent**)&intent);
 
+    mService = new MyTwilightManager(this);
     PublishLocalService(EIID_ITwilightManager, mService);
     return NOERROR;
 }

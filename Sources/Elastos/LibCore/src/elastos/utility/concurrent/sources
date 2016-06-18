@@ -14,6 +14,7 @@ INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility;
 INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility/concurrent;
 INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility/concurrent/atomic;
 INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility/concurrent/locks;
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore/io;
 
 SOURCES += AbstractExecutorService.cpp
 SOURCES += CArrayBlockingQueue.cpp

@@ -20,6 +20,7 @@
 #include "elastos/droid/server/net/CNetworkPolicyManagerService.h"
 #include "elastos/droid/server/CConnectivityService.h"
 #include "elastos/droid/server/CNetworkScoreService.h"
+#include "elastos/droid/server/CAssetAtlasService.h"
 #include <elastos/core/Singleton.h>
 #include <elastos/droid/os/Runnable.h>
 
@@ -70,7 +71,7 @@ private:
         // AutoPtr<CCommonTimeManagementService> mCommonTimeMgmtServiceF;
         AutoPtr<CTextServicesManagerService> mTextServiceManagerServiceF;
         AutoPtr<CStatusBarManagerService> mStatusBarF;
-        // AutoPtr<CAssetAtlasService> mAtlasF;
+        AutoPtr<CAssetAtlasService> mAtlasF;
         AutoPtr<CInputManagerService> mInputManagerF;
         // AutoPtr<CTelephonyRegistry> mTelephonyRegistryF;
         // AutoPtr<CMediaRouterService> mMediaRouterF;

@@ -8,6 +8,7 @@ INCLUDES += $(MAKEDIR)/../../../../../inc/
 
 SOURCES = CToggleSlider.cpp
 SOURCES += BrightnessController.cpp
+SOURCES += CBrightnessObserver.cpp
 SOURCES += CToggleSeekBar.cpp
 SOURCES += CurrentUserTracker.cpp
 SOURCES += CBrightnessDialog.cpp

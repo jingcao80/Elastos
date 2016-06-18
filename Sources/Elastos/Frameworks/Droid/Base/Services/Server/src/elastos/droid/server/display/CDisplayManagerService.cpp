@@ -565,8 +565,8 @@ ECode CDisplayManagerService::LocalService::InitPowerManagement(
     /* [in] */ IHandler* handler,
     /* [in] */ ISensorManager* sensorManager)
 {
-    Object* obj = mHost->mSyncRoot;
-    {    AutoLock syncLock(obj);
+    {
+        AutoLock syncLock(mHost->mSyncRoot);
         AutoPtr<IDisplayBlanker> blanker = new DisplayBlanker(mHost, callbacks);
         mHost->mDisplayPowerController = new DisplayPowerController(
             mHost->mContext, callbacks, handler, sensorManager, blanker);
