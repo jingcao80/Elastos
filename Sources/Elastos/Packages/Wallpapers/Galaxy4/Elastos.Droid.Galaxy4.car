@@ -4,10 +4,13 @@ module
     importlib("Elastos.Droid.Core.eco");
 
     using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IService;
     using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    using interface Elastos.Droid.Service.Wallpaper.IWallpaperService;
     using interface Elastos.Droid.View.IContextThemeWrapper;
     using interface Elastos.Droid.View.ILayoutInflaterFactory;
     using interface Elastos.Droid.View.ILayoutInflaterFactory2;
@@ -49,6 +52,17 @@ module
         interface IView;
         interface IAccessibilityEventSource;
         interface IDrawableCallback;
+    }
+
+    class CGalaxy4Wallpaper {
+        constructor();
+
+        interface IWallpaperService;
+        interface IContext;
+        interface IContextWrapper;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IService;
     }
 
     } // namespace Galaxy4

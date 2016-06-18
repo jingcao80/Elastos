@@ -448,9 +448,11 @@ ECode NativeActivity::HideIme(
 /*
  * Native state for interacting with the NativeActivity class.
  */
-class NativeCode : public ANativeActivity {
+class NativeCode : public ANativeActivity
+{
 public:
-    NativeCode(void* _dlhandle, ANativeActivity_createFunc* _createFunc) {
+    NativeCode(void* _dlhandle, ANativeActivity_createFunc* _createFunc)
+    {
         memset((ANativeActivity*)this, 0, sizeof(ANativeActivity));
         memset(&callbacks, 0, sizeof(callbacks));
         dlhandle = _dlhandle;
@@ -459,7 +461,8 @@ public:
         mainWorkRead = mainWorkWrite = -1;
     }
 
-    ~NativeCode() {
+    ~NativeCode()
+    {
         if (callbacks.onDestroy != NULL) {
             callbacks.onDestroy(this);
         }
@@ -478,13 +481,17 @@ public:
         }
     }
 
-    void setSurface(ISurface* _surface) {
+    void setSurface(ISurface* _surface)
+    {
         if (_surface != NULL) {
-            nativeWindow = ((Surface*)_surface)->GetSurface();;
+            Int64 nativeSurf;
+            _surface->GetNativeSurface(&nativeSurf);
+            nativeWindow = (ANativeWindow*)reinterpret_cast<android::Surface*>(nativeSurf);
         } else {
             nativeWindow = NULL;
         }
     }
+
 public:
     ANativeActivityCallbacks callbacks;
 

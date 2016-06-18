@@ -3,6 +3,7 @@
 #include "RenderScript.h"
 #include <elastos/core/AutoLock.h>
 #include <rs/rs.h>
+#include <gui/Surface.h>
 
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Res::IResources;
@@ -52,12 +53,29 @@ ECode RenderScript::constructor(
     return NOERROR;
 }
 
+ECode RenderScript::Validate()
+{
+    if (mContext == 0) {
+        // throw new RSInvalidStateException("Calling RS with no Context active.");
+        return E_RUNTIME_EXCEPTION;
+    }
+    return NOERROR;
+}
+
+ECode RenderScript::SetPriority(
+    /* [in] */ Priority p)
+{
+    FAIL_RETURN(Validate());
+    nContextSetPriority(p);
+    return NOERROR;
+}
+
 ECode RenderScript::SetSurface(
     /* [in] */ ISurfaceHolder* sur,
     /* [in] */ Int32 w,
     /* [in] */ Int32 h)
 {
-    // validate();
+    FAIL_RETURN(Validate());
     AutoPtr<ISurface> s;
     if (sur != NULL) {
         sur->GetSurface((ISurface**)&s);
@@ -70,12 +88,33 @@ ECode RenderScript::SetSurface(
 
 ECode RenderScript::Destroy()
 {
+    FAIL_RETURN(Validate());
+    nContextFinish();
+
+    nContextDeinitToClient(mContext);
+    // mMessageThread.mRun = false;
+    // try {
+    //     mMessageThread.join();
+    // } catch(InterruptedException e) {
+    // }
+
+    FAIL_RETURN(nContextDestroy());
+
+    nDeviceDestroy(mDev);
+    mDev = 0;
+
     return NOERROR;
 }
 
 Int64 RenderScript::nDeviceCreate()
 {
     return (Int64)(uintptr_t)rsDeviceCreate();
+}
+
+void RenderScript::nDeviceDestroy(
+    /* [in] */ Int64 dev)
+{
+    return rsDeviceDestroy((RsDevice)dev);
 }
 
 Int64 RenderScript::nContextCreateGL(
@@ -119,13 +158,51 @@ void RenderScript::nContextSetSurface(
     AutoLock lock(this);
 
     ANativeWindow* window = NULL;
-    if (wnd != NULL) {
-        Surface* sur = ((Surface*)sur);
-        sp<ANativeWindow> nWindow = sur->GetSurface();
-        window = android_view_Surface_getNativeWindow(_env, wnd).get();
+    if (sur != NULL) {
+        Int64 nativeSurf;
+        sur->GetNativeSurface(&nativeSurf);
+        window = (ANativeWindow*)reinterpret_cast<android::Surface*>(nativeSurf);
     }
 
-    rsContextSetSurface((RsContext)mContext, width, height, window);
+    rsContextSetSurface((RsContext)mContext, w, h, window);
+}
+
+void RenderScript::nContextFinish()
+{
+    AutoLock lock(this);
+
+    rsContextFinish((RsContext)mContext);
+}
+
+void RenderScript::nContextDeinitToClient(
+    /* [in] */ Int64 con)
+{
+    rsContextDeinitToClient((RsContext)con);
+}
+
+ECode RenderScript::nContextDestroy()
+{
+    FAIL_RETURN(Validate());
+
+    // take teardown lock
+    // teardown lock can only be taken when no objects are being destroyed
+    Int64 curCon = 0;
+    {
+        AutoLock lock(mRWLock);
+        curCon = mContext;
+        // context is considered dead as of this point
+        mContext = 0;
+    }
+
+    rsContextDestroy((RsContext)curCon);
+    return NOERROR;
+}
+
+void RenderScript::nContextSetPriority(
+    /* [in] */ Int32 p)
+{
+    AutoLock lock(this);
+    rsContextSetPriority((RsContext)mContext, p);
 }
 
 } // namespace Galaxy4

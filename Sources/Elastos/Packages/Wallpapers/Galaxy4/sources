@@ -16,6 +16,8 @@ SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += CGalaxy4.cpp
 SOURCES += CGalaxyView.cpp
+SOURCES += CGalaxy4Wallpaper.cpp
+SOURCES += GalaxyRS.cpp
 SOURCES += RenderScript.cpp
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib

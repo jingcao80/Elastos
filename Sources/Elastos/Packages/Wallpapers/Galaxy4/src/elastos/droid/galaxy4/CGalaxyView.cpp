@@ -1,8 +1,14 @@
 
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
 #include "CGalaxyView.h"
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::Utility::CDisplayMetrics;
+using Elastos::Droid::View::IDisplay;
+using Elastos::Droid::View::IWindowManager;
 using Elastos::Droid::View::EIID_ISurfaceHolderCallback;
 
 namespace Elastos {
@@ -44,6 +50,8 @@ ECode CGalaxyView::SHCallback::SurfaceDestroyed(
 //===================================================================
 // CGalaxyView
 //===================================================================
+CAR_OBJECT_IMPL(CGalaxyView)
+
 ECode CGalaxyView::constructor(
     /* [in] */ IContext* context)
 {
@@ -71,26 +79,27 @@ ECode CGalaxyView::SurfaceChanged(
         FAIL_RETURN(CreateRenderScript(sc, (RenderScript**)&mRS))
         mRS->SetSurface(holder, width, height);
 
+        AutoPtr<IDisplayMetrics> metrics;
+        CDisplayMetrics::New((IDisplayMetrics**)&metrics);
 
+        AutoPtr<IContext> ctx;
+        GetContext((IContext**)&ctx);
+        AutoPtr<IInterface> service;
+        ctx->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&service);
+        AutoPtr<IDisplay> display;
+        IWindowManager::Probe(service)->GetDefaultDisplay((IDisplay**)&display);
+        display->GetMetrics(metrics);
+
+        mRender = new GalaxyRS();
+        Int32 dpi;
+        metrics->GetDensityDpi(&dpi);
+        AutoPtr<IResources> res;
+        GetResources((IResources**)&res);
+        mRender->Init(dpi, mRS, res, width, height);
     }
     else {
-
+        mRender->CreateProgramVertex();
     }
-    // if (mRS == null) {
-    //     RenderScriptGL.SurfaceConfig sc = new RenderScriptGL.SurfaceConfig();
-    //     mRS = createRenderScriptGL(sc);
-    //     mRS.setSurface(holder, w, h);
-
-    //     DisplayMetrics metrics = new DisplayMetrics();
-    //     ((WindowManager) getContext()
-    //             .getSystemService(Service.WINDOW_SERVICE))
-    //             .getDefaultDisplay().getMetrics(metrics);
-
-    //     mRender = new GalaxyRS();
-    //     mRender.init(metrics.densityDpi, mRS, getResources(), w, h);
-    // } else {
-    //     mRender.createProgramVertex();
-    // }
     return NOERROR;
 }
 

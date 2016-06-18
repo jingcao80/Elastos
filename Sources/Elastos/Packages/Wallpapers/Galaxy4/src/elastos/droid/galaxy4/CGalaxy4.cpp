@@ -5,6 +5,8 @@ namespace Elastos {
 namespace Droid {
 namespace Galaxy4 {
 
+CAR_OBJECT_IMPL(CGalaxy4)
+
 ECode CGalaxy4::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {

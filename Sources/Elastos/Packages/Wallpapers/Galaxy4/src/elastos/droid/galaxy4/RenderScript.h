@@ -3,10 +3,12 @@
 #define __ELASTOS_DROID_GALAXY4_RENDERSCRIPT_H__
 
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::View::ISurface;
 using Elastos::Droid::View::ISurfaceHolder;
 using Elastos::Core::Object;
@@ -19,6 +21,11 @@ class RenderScript
     : public Object
 {
 public:
+    enum Priority {
+        LOW = IProcess::THREAD_PRIORITY_BACKGROUND + (5 * IProcess::THREAD_PRIORITY_LESS_FAVORABLE),
+        NORMAL = IProcess::THREAD_PRIORITY_DISPLAY,
+    };
+
     /**
      * @deprecated in API 16
      * Class which is used to describe a pixel format for a graphical buffer.
@@ -80,6 +87,11 @@ public:
         /* [in] */ IContext* ctx,
         /* [in] */ SurfaceConfig* sc);
 
+    CARAPI Validate();
+
+    CARAPI SetPriority(
+        /* [in] */ Priority p);
+
     CARAPI SetSurface(
         /* [in] */ ISurfaceHolder* sur,
         /* [in] */ Int32 w,
@@ -88,6 +100,9 @@ public:
     CARAPI Destroy();
 
     CARAPI_(Int64) nDeviceCreate();
+
+    CARAPI_(void) nDeviceDestroy(
+        /* [in] */ Int64 dev);
 
     CARAPI_(Int64) nContextCreateGL(
         /* [in] */ Int64 dev,
@@ -111,9 +126,20 @@ public:
         /* [in] */ Int32 h,
         /* [in] */ ISurface* sur);
 
+    CARAPI_(void) nContextFinish();
+
+    CARAPI_(void) nContextDeinitToClient(
+        /* [in] */ Int64 con);
+
+    CARAPI nContextDestroy();
+
+    CARAPI_(void) nContextSetPriority(
+        /* [in] */ Int32 p);
+
 public:
     Int64 mDev;
     Int64 mContext;
+    Object mRWLock;
 
     Int32 mWidth;
     Int32 mHeight;

@@ -155,7 +155,6 @@ Int64 Surface::NativeCreateFromSurfaceControl(
      * a Surface and is necessary for returning the Surface reference to
      * the caller. At this point, we should only have a SurfaceControl.
      */
-
     sp<android::SurfaceControl> ctrl(reinterpret_cast<android::SurfaceControl *>(surfaceControlNativeObj));
     sp<android::Surface> surface(ctrl->getSurface());
     if (surface != NULL) {
@@ -765,27 +764,18 @@ ECode Surface::WriteToParcel(
     return NOERROR;
 }
 
-ANativeWindow* Surface::GetSurface()
-{
-    sp<android::Surface> surface;
-    {
-        AutoLock lock(this);
-        if (mNativeObject != 0)
-            surface = reinterpret_cast<android::Surface*>(mNativeObject);
-    }
-    if (surface != NULL) {
-        surface->incStrong(&sRefBaseOwner);
-    }
-    return surface.get();
-}
-
 ECode Surface::GetNativeSurface(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
 
-    android::Surface* surface = (android::Surface*)GetSurface();
-    *result = reinterpret_cast<Int64>(surface);
+    {
+        AutoLock lock(this);
+        if (mNativeObject != 0) {
+            *result = mNativeObject;
+        }
+    }
     return NOERROR;
 }
 

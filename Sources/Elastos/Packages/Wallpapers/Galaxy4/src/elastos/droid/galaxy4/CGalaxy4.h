@@ -18,6 +18,8 @@ CarClass(CGalaxy4)
     , public Activity
 {
 public:
+    CAR_OBJECT_DECL()
+
     // @Override
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);

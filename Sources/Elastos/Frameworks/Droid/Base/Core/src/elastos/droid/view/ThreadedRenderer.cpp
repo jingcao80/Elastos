@@ -40,6 +40,7 @@
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
 #include <renderthread/RenderThread.h>
+#include <gui/Surface.h>
 #include <elastos/utility/etl/Vector.h>
 
 using Elastos::Droid::Content::Res::ITypedArray;
@@ -589,7 +590,7 @@ void ThreadedRenderer::AtlasInitializer::Init(
 {
     if (mInitialized) return;
     AutoPtr<IInterface> p = ServiceManager::GetService(String("assetatlas"));
-    AutoPtr<IBinder> binder = IBinder::Probe(p);
+    AutoPtr<Elastos::Droid::Os::IBinder> binder = Elastos::Droid::Os::IBinder::Probe(p);
     if (binder == NULL) {
         Logger::E(LOGTAG, "Failed to get service assetatlas.");
         return;
@@ -906,8 +907,9 @@ Boolean ThreadedRenderer::NativeInitialize(
     /* [in] */ ISurface* window)
 {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
-    Surface* sur = (Surface*)window;
-    sp<ANativeWindow> nWindow = sur->GetSurface();
+    Int64 nativeSurf;
+    window->GetNativeSurface(&nativeSurf);
+    sp<ANativeWindow> nWindow = (ANativeWindow*)reinterpret_cast<android::Surface*>(nativeSurf);
     return proxy->initialize(nWindow);
 }
 
@@ -918,8 +920,9 @@ void ThreadedRenderer::NativeUpdateSurface(
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
     sp<ANativeWindow> nWindow;
     if (window) {
-        Surface* sur = (Surface*)window;
-        nWindow = sur->GetSurface();
+        Int64 nativeSurf;
+        window->GetNativeSurface(&nativeSurf);
+        nWindow = (ANativeWindow*)reinterpret_cast<android::Surface*>(nativeSurf);
     }
     proxy->updateSurface(nWindow);
 }
@@ -931,8 +934,9 @@ void ThreadedRenderer::NativePauseSurface(
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
     sp<ANativeWindow> nWindow;
     if (window) {
-        Surface* sur = (Surface*)window;
-        nWindow = sur->GetSurface();
+        Int64 nativeSurf;
+        window->GetNativeSurface(&nativeSurf);
+        nWindow = (ANativeWindow*)reinterpret_cast<android::Surface*>(nativeSurf);
     }
     proxy->pauseSurface(nWindow);
 }

@@ -4,6 +4,7 @@
 
 #include "_Elastos_Droid_Galaxy4_CGalaxyView.h"
 #include <elastos/droid/view/SurfaceView.h>
+#include "GalaxyRS.h"
 #include "RenderScript.h"
 
 using Elastos::Droid::View::ISurfaceHolder;
@@ -45,6 +46,8 @@ private:
     };
 
 public:
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 
@@ -80,6 +83,7 @@ private:
 
 private:
     AutoPtr<RenderScript> mRS;
+    AutoPtr<GalaxyRS> mRender;
     AutoPtr<SHCallback> mCallback;
     AutoPtr<ISurfaceHolder> mSurfaceHolder;
 };
