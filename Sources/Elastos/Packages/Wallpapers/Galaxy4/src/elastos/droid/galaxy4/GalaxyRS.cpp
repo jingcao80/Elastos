@@ -1,5 +1,6 @@
 
 #include "GalaxyRS.h"
+#include "R.h"
 
 namespace Elastos {
 namespace Droid {
@@ -12,20 +13,20 @@ ECode GalaxyRS::Init(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
-    // if (!mInited) {
-    //     mDensityDPI = dpi;
+    if (!mInited) {
+        mDensityDPI = dpi;
 
-    //     mRS = rs;
-    //     mRes = res;
+        mRS = rs;
+        mRes = res;
 
-    //     mWidth = width;
-    //     mHeight = height;
+        mWidth = width;
+        mHeight = height;
 
     //     mOptionsARGB.inScaled = false;
     //     mOptionsARGB.inPreferredConfig = Bitmap.Config.ARGB_8888;
 
     //     mSpaceClouds = new ScriptField_Particle(mRS, SPACE_CLOUDSTAR_COUNT);
-    //     Mesh.AllocationBuilder smb = new Mesh.AllocationBuilder(mRS);
+        AutoPtr<Mesh::AllocationBuilder> smb = new Mesh::AllocationBuilder(mRS);
     //     smb.addVertexAllocation(mSpaceClouds.getAllocation());
     //     smb.addIndexSetType(Mesh.Primitive.POINT);
     //     mSpaceCloudsMesh = smb.create();
@@ -42,8 +43,9 @@ ECode GalaxyRS::Init(
     //     smb3.addIndexSetType(Mesh.Primitive.POINT);
     //     mStaticStarsMesh = smb3.create();
 
-    //     mScript = new ScriptC_galaxy(mRS, mRes, R.raw.galaxy);
-    //     mScript.set_spaceCloudsMesh(mSpaceCloudsMesh);
+        mScript = new ScriptC_galaxy();
+        FAIL_RETURN(mScript->constructor(mRS, mRes, R::raw::galaxy))
+        mScript->Set_spaceCloudsMesh(mSpaceCloudsMesh);
     //     mScript.bind_spaceClouds(mSpaceClouds);
     //     mScript.set_bgStarsMesh(mBgStarsMesh);
     //     mScript.bind_bgStars(mBgStars);
@@ -63,7 +65,7 @@ ECode GalaxyRS::Init(
     //     mRS.bindRootScript(mScript);
     //     mScript.invoke_positionParticles();
     //     mInited = true;
-    // }
+    }
     return NOERROR;
 }
 
@@ -74,11 +76,13 @@ ECode GalaxyRS::CreateProgramVertex()
 
 ECode GalaxyRS::Start()
 {
+    mRS->BindRootScript(mScript);
     return NOERROR;
 }
 
 ECode GalaxyRS::Stop()
 {
+    mRS->BindRootScript(NULL);
     return NOERROR;
 }
 

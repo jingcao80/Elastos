@@ -31,10 +31,11 @@ class ECO_PUBLIC R {
     public: class raw {
         public: static const int bgstar_fs = 0x7f060000;
         public: static const int bgstar_vs = 0x7f060001;
-        public: static const int spacecloud_fs = 0x7f060002;
-        public: static const int spacecloud_vs = 0x7f060003;
-        public: static const int staticstar_fs = 0x7f060004;
-        public: static const int staticstar_vs = 0x7f060005;
+        public: static const int galaxy = 0x7f060002;
+        public: static const int spacecloud_fs = 0x7f060003;
+        public: static const int spacecloud_vs = 0x7f060004;
+        public: static const int staticstar_fs = 0x7f060005;
+        public: static const int staticstar_vs = 0x7f060006;
     };
     public: class string {
         public: static const int wallpaper_author = 0x7f070001;
