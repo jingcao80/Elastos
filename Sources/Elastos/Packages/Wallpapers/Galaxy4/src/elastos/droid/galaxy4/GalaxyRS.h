@@ -3,7 +3,9 @@
 #define __ELASTOS_DROID_GALAXY4_GALAXYRS_H__
 
 #include "Elastos.Droid.Content.h"
+#include "Mesh.h"
 #include "RenderScript.h"
+#include "ScriptC_galaxy.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::Res::IResources;
@@ -33,6 +35,19 @@ public:
     CARAPI Resize(
         /* [in] */ Int32 width,
         /* [in] */ Int32 height);
+
+private:
+    AutoPtr<IResources> mRes;
+
+    AutoPtr<RenderScript> mRS;
+    AutoPtr<ScriptC_galaxy> mScript;
+
+    AutoPtr<Mesh> mSpaceCloudsMesh;
+
+    Int32 mHeight;
+    Int32 mWidth;
+    Boolean mInited;
+    Int32 mDensityDPI;
 };
 
 } // namespace Galaxy4

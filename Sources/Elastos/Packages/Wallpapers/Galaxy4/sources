@@ -19,6 +19,11 @@ SOURCES += CGalaxyView.cpp
 SOURCES += CGalaxy4Wallpaper.cpp
 SOURCES += GalaxyRS.cpp
 SOURCES += RenderScript.cpp
+SOURCES += BaseObj.cpp
+SOURCES += Mesh.cpp
+SOURCES += Script.cpp
+SOURCES += ScriptC.cpp
+SOURCES += ScriptC_galaxy.cpp
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

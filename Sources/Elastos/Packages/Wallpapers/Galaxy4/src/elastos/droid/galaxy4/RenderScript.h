@@ -5,6 +5,8 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Script.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
@@ -12,6 +14,7 @@ using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::View::ISurface;
 using Elastos::Droid::View::ISurfaceHolder;
 using Elastos::Core::Object;
+using Elastos::IO::IFile;
 
 namespace Elastos {
 namespace Droid {
@@ -87,6 +90,12 @@ public:
         /* [in] */ IContext* ctx,
         /* [in] */ SurfaceConfig* sc);
 
+    CARAPI BindRootScript(
+        /* [in] */ Script* s);
+
+    CARAPI ValidateObject(
+        /* [in] */ BaseObj* o);
+
     CARAPI Validate();
 
     CARAPI SetPriority(
@@ -136,10 +145,31 @@ public:
     CARAPI_(void) nContextSetPriority(
         /* [in] */ Int32 p);
 
+    CARAPI_(void) nContextBindRootScript(
+        /* [in] */ Int64 script);
+
+    CARAPI nScriptCCreate(
+        /* [in] */ const String& resName,
+        /* [in] */ const String& cacheDir,
+        /* [in] */ ArrayOf<Byte>* script,
+        /* [in] */ Int32 length,
+        /* [out] */ Int64* id);
+
+    CARAPI nScriptSetVarObj(
+        /* [in] */ Int64 id,
+        /* [in] */ Int32 slot,
+        /* [in] */ Int64 val);
+
+    CARAPI SafeID(
+        /* [in] */ BaseObj* o,
+        /* [out] */ Int64* id);
+
 public:
     Int64 mDev;
     Int64 mContext;
     Object mRWLock;
+
+    static AutoPtr<IFile> sCacheDir;
 
     Int32 mWidth;
     Int32 mHeight;

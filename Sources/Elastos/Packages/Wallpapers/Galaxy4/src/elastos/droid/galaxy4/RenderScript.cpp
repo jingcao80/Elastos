@@ -15,6 +15,8 @@ namespace Elastos {
 namespace Droid {
 namespace Galaxy4 {
 
+AutoPtr<IFile> RenderScript::sCacheDir;
+
 ECode RenderScript::constructor(
     /* [in] */ IContext* ctx,
     /* [in] */ SurfaceConfig* sc)
@@ -50,6 +52,28 @@ ECode RenderScript::constructor(
     // mMessageThread = new MessageThread(this);
     // mMessageThread.start();
 
+    return NOERROR;
+}
+
+ECode RenderScript::BindRootScript(
+    /* [in] */ Script* s)
+{
+    FAIL_RETURN(Validate());
+    Int64 id;
+    FAIL_RETURN(SafeID(s, &id));
+    nContextBindRootScript(id);
+    return NOERROR;
+}
+
+ECode RenderScript::ValidateObject(
+    /* [in] */ BaseObj* o)
+{
+    if (o != NULL) {
+        if (o->mRS != this) {
+            // throw new RSIllegalArgumentException("Attempting to use an object across contexts.");
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
     return NOERROR;
 }
 
@@ -203,6 +227,80 @@ void RenderScript::nContextSetPriority(
 {
     AutoLock lock(this);
     rsContextSetPriority((RsContext)mContext, p);
+}
+
+void RenderScript::nContextBindRootScript(
+    /* [in] */ Int64 script)
+{
+    AutoLock lock(this);
+    rsContextBindRootScript((RsContext)mContext, (RsScript)script);
+}
+
+ECode RenderScript::nScriptCCreate(
+    /* [in] */ const String& resName,
+    /* [in] */ const String& cacheDir,
+    /* [in] */ ArrayOf<Byte>* script,
+    /* [in] */ Int32 length,
+    /* [out] */ Int64* id)
+{
+    VALIDATE_NOT_NULL(id);
+    *id = 0;
+
+    AutoLock lock(this);
+    FAIL_RETURN(Validate());
+
+    Int64 ret = 0;
+    Byte* script_ptr = NULL;
+    Int32 remaining;
+    if (!script) {
+        //jniThrowException(_env, "java/lang/IllegalArgumentException", "script == null");
+        goto exit;
+    }
+    if (length < 0) {
+        //jniThrowException(_env, "java/lang/IllegalArgumentException", "length < 0");
+        goto exit;
+    }
+    remaining = script->GetLength();
+    if (remaining < length) {
+        //jniThrowException(_env, "java/lang/IllegalArgumentException",
+        //        "length > script.length - offset");
+        goto exit;
+    }
+    script_ptr = script->GetPayload();
+
+    //rsScriptCSetText((RsContext)con, (const char *)script_ptr, length);
+
+    ret = (Int64)(uintptr_t)rsScriptCCreate((RsContext)mContext,
+                                resName.string(), resName.GetByteLength(),
+                                cacheDir.string(), cacheDir.GetByteLength(),
+                                (const char *)script_ptr, length);
+
+exit:
+    *id = ret;
+    return NOERROR;
+}
+
+ECode RenderScript::nScriptSetVarObj(
+    /* [in] */ Int64 id,
+    /* [in] */ Int32 slot,
+    /* [in] */ Int64 val)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate());
+    rsScriptSetVarObj((RsContext)mContext, (RsScript)id, slot, (RsObjectBase)val);
+    return NOERROR;
+}
+
+ECode RenderScript::SafeID(
+    /* [in] */ BaseObj* o,
+    /* [out] */ Int64* id)
+{
+    VALIDATE_NOT_NULL(id)
+    *id = 0;
+    if (o != NULL) {
+        return o->GetID(this, id);
+    }
+    return NOERROR;
 }
 
 } // namespace Galaxy4
