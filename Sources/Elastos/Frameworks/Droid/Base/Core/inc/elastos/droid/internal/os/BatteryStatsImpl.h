@@ -1122,10 +1122,12 @@ public:
                 , public ITimeBaseObs
             {
             public:
-                Serv(
-                    /* [in] */ BatteryStatsImpl* host);
-
                 CAR_INTERFACE_DECL()
+
+                Serv();
+
+                CARAPI constructor(
+                    /* [in] */ BatteryStatsImpl* host);
 
                 CARAPI OnTimeStarted(
                     /* [in] */ Int64 elapsedRealtime,

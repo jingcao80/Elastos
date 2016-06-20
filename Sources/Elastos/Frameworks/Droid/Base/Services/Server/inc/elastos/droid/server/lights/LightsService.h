@@ -191,7 +191,6 @@ private:
         /* [in] */ Int32 brightnessMode);
 
 protected:
-    static const String TAG;
     static const Boolean DEBUG;
 
 private:

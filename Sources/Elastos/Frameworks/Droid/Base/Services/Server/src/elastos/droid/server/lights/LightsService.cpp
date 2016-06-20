@@ -33,7 +33,7 @@ namespace Droid {
 namespace Server {
 namespace Lights {
 
-const String LightsService::TAG("LightsService");
+static String TAG("LightsService");
 const Boolean LightsService::DEBUG = FALSE;
 const String LightsService::LegacyFlashlightHack::FLASHLIGHT_FILE("/sys/class/leds/spotlight/brightness");
 
@@ -68,19 +68,17 @@ void LightImpl::SetBrightness(
     /* [in] */ Int32 brightness,
     /* [in] */ Int32 brightnessMode)
 {
-    {    AutoLock syncLock(this);
-        Int32 color = brightness & 0x000000ff;
-        color = 0xff000000 | (color << 16) | (color << 8) | color;
-        SetLightLocked(color, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
-    }
+    AutoLock syncLock(this);
+    Int32 color = brightness & 0x000000ff;
+    color = 0xff000000 | (color << 16) | (color << 8) | color;
+    SetLightLocked(color, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
 }
 
 void LightImpl::SetColor(
     /* [in] */ Int32 color)
 {
-    {    AutoLock syncLock(this);
-        SetLightLocked(color, LIGHT_FLASH_NONE, 0, 0, 0);
-    }
+    AutoLock syncLock(this);
+    SetLightLocked(color, LIGHT_FLASH_NONE, 0, 0, 0);
 }
 
 void LightImpl::SetFlashing(
@@ -89,9 +87,8 @@ void LightImpl::SetFlashing(
     /* [in] */ Int32 onMS,
     /* [in] */ Int32 offMS)
 {
-    {    AutoLock syncLock(this);
-        SetLightLocked(color, mode, onMS, offMS, BRIGHTNESS_MODE_USER);
-    }
+    AutoLock syncLock(this);
+    SetLightLocked(color, mode, onMS, offMS, BRIGHTNESS_MODE_USER);
 }
 
 void LightImpl::Pulse()
@@ -103,32 +100,29 @@ void LightImpl::Pulse(
     /* [in] */ Int32 color,
     /* [in] */ Int32 onMS)
 {
-    {    AutoLock syncLock(this);
-        if (mColor == 0 && !mFlashing) {
-            SetLightLocked(color, LIGHT_FLASH_HARDWARE, onMS, 1000, BRIGHTNESS_MODE_USER);
+    AutoLock syncLock(this);
+    if (mColor == 0 && !mFlashing) {
+        SetLightLocked(color, LIGHT_FLASH_HARDWARE, onMS, 1000, BRIGHTNESS_MODE_USER);
 
-            mColor = 0;
+        mColor = 0;
 
-            AutoPtr<IMessage> msg;
-            mHost->mH->ObtainMessage(1, TO_IINTERFACE(this), (IMessage**)&msg);
-            Boolean result;
-            mHost->mH->SendMessageDelayed(msg, onMS, &result);
-        }
+        AutoPtr<IMessage> msg;
+        mHost->mH->ObtainMessage(1, TO_IINTERFACE(this), (IMessage**)&msg);
+        Boolean result;
+        mHost->mH->SendMessageDelayed(msg, onMS, &result);
     }
 }
 
 void LightImpl::TurnOff()
 {
-    {    AutoLock syncLock(this);
-        SetLightLocked(0, LIGHT_FLASH_NONE, 0, 0, 0);
-    }
+    AutoLock syncLock(this);
+    SetLightLocked(0, LIGHT_FLASH_NONE, 0, 0, 0);
 }
 
 void LightImpl::StopFlashing()
 {
-    {    AutoLock syncLock(this);
-        SetLightLocked(mColor, LIGHT_FLASH_NONE, 0, 0, BRIGHTNESS_MODE_USER);
-    }
+    AutoLock syncLock(this);
+    SetLightLocked(mColor, LIGHT_FLASH_NONE, 0, 0, BRIGHTNESS_MODE_USER);
 }
 
 void LightImpl::SetLightLocked(
@@ -139,20 +133,15 @@ void LightImpl::SetLightLocked(
     /* [in] */ Int32 brightnessMode)
 {
     if (color != mColor || mode != mMode || onMS != mOnMS || offMS != mOffMS) {
-        if (mHost->DEBUG) {
-            Logger::V(mHost->TAG, "setLight # %d: color=#0x%x", mId, color);
+        if (LightsService::DEBUG) {
+            Logger::V(TAG, "setLight # %d: color=#0x%x", mId, color);
         }
 
         mColor = color;
         mMode = mode;
         mOnMS = onMS;
         mOffMS = offMS;
-        //Trace.traceBegin(Trace.TRACE_TAG_POWER, "setLight(" + mId + ", " + color + ")");
-        // try {
         mHost->SetLight_native(mId, color, mode, onMS, offMS, brightnessMode);
-        // } finally {
-        //Trace.traceEnd(Trace.TRACE_TAG_POWER);
-        // }
     }
 }
 
@@ -282,6 +271,7 @@ ECode LightsService::MyHandler::HandleMessage(
 //==============================================================================
 
 LightsService::LightsService()
+    : mNativePointer(0)
 {}
 
 LightsService::~LightsService()
@@ -377,17 +367,15 @@ void LightsService::Init_native()
         memset(devices, 0, sizeof(Devices));
     }
 
-    mNativePointer = (Int64)devices;
+    mNativePointer = reinterpret_cast<Int64>(devices);
 }
 
 void LightsService::Finalize_native()
 {
-    Devices* devices = (Devices*)mNativePointer;
-    if (devices == NULL) {
-        return;
+    Devices* devices = reinterpret_cast<Devices*>(mNativePointer);
+    if (devices != NULL) {
+        free(devices);
     }
-
-    free(devices);
 }
 
 void LightsService::SetLight_native(
@@ -398,7 +386,7 @@ void LightsService::SetLight_native(
     /* [in] */ Int32 offMS,
     /* [in] */ Int32 brightnessMode)
 {
-    Devices* devices = (Devices*)mNativePointer;
+    Devices* devices = reinterpret_cast<Devices*>(mNativePointer);
     light_state_t state;
 
     if (light < 0 || light >= LIGHT_COUNT || devices->lights[light] == NULL) {

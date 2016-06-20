@@ -565,12 +565,11 @@ ECode CDisplayManagerService::LocalService::InitPowerManagement(
     /* [in] */ IHandler* handler,
     /* [in] */ ISensorManager* sensorManager)
 {
-    {
-        AutoLock syncLock(mHost->mSyncRoot);
-        AutoPtr<IDisplayBlanker> blanker = new DisplayBlanker(mHost, callbacks);
-        mHost->mDisplayPowerController = new DisplayPowerController(
-            mHost->mContext, callbacks, handler, sensorManager, blanker);
-    }
+    AutoLock syncLock(mHost->mSyncRoot);
+    AutoPtr<IDisplayBlanker> blanker = new DisplayBlanker(mHost, callbacks);
+    AutoPtr<DisplayPowerController> dpc = new DisplayPowerController();
+    dpc->constructor(mHost->mContext, callbacks, handler, sensorManager, blanker);
+     mHost->mDisplayPowerController = dpc.Get();
     return NOERROR;
 }
 

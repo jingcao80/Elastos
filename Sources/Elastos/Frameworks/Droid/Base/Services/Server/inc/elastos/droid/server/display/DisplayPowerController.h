@@ -222,10 +222,12 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
+    DisplayPowerController();
+
     /**
      * Creates the display power controller.
      */
-    DisplayPowerController(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IDisplayPowerCallbacks* callbacks,
         /* [in] */ IHandler* handler,

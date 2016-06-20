@@ -23,6 +23,8 @@ namespace Droid {
 namespace Server {
 namespace Display {
 
+Boolean DisplayPowerState::DEBUG = FALSE;
+
 //=====================================================================
 //  DisplayPowerState::DisplayPowerStateFloatProperty
 //=====================================================================
@@ -71,7 +73,7 @@ ECode DisplayPowerState::DisplayPowerStateInt32Property::Get(
     /* [out] */ IInterface** rst)
 {
     AutoPtr<DisplayPowerState> dps = (DisplayPowerState*)IObject::Probe(obj);
-    Float level = dps->GetScreenBrightness();
+    Int32 level = dps->GetScreenBrightness();
     AutoPtr<IInteger32> rstTmp;
     CInteger32::New(level, (IInteger32**)&rstTmp);
     *rst = rstTmp;
@@ -85,63 +87,6 @@ ECode DisplayPowerState::DisplayPowerStateInt32Property::SetValue(
 {
     AutoPtr<DisplayPowerState> dps = (DisplayPowerState*)IObject::Probe(obj);
     dps->SetScreenBrightness(value);
-    return NOERROR;
-}
-
-//=====================================================================
-//  DisplayPowerState::PhotonicModulator::TaskRunnable
-//=====================================================================
-DisplayPowerState::PhotonicModulator::TaskRunnable::TaskRunnable(
-    /* [in] */ PhotonicModulator* host)
-    : mHost(host)
-{}
-
-ECode DisplayPowerState::PhotonicModulator::TaskRunnable::Run()
-{
-    Int32 state;
-    Boolean stateChanged;
-    Int32 backlight;
-    Boolean backlightChanged;
-    for (;;) {
-        // Get pending change.
-        {
-            Object& obj = mHost->mLock;
-            AutoLock lock(obj);
-            state = mHost->mPendingState;
-            stateChanged = (state != mHost->mActualState);
-            backlight = mHost->mPendingBacklight;
-            backlightChanged = (backlight != mHost->mActualBacklight);
-            if (!stateChanged && !backlightChanged) {
-                // All changed applied, notify outer class and wait for more.
-                mHost->mChangeInProgress = false;
-                mHost->mHost->PostScreenUpdateThreadSafe();
-                // try {
-                    mHost->mLock.Wait();
-                // } catch (InterruptedException ex) { }
-                continue;
-            }
-            mHost->mActualState = state;
-            mHost->mActualBacklight = backlight;
-        }
-
-        // Apply pending change.
-        if (DEBUG) {
-            Slogger::D(TAG, "Updating screen state: state=%d, backlight=%d", state, backlight);
-        }
-
-        Boolean suspending = (state == IDisplay::STATE_OFF
-            || state == IDisplay::STATE_DOZE_SUSPEND);
-        if (stateChanged && !suspending) {
-            mHost->RequestDisplayState(state);
-        }
-        if (backlightChanged) {
-            mHost->SetBrightness(backlight);
-        }
-        if (stateChanged && suspending) {
-            mHost->RequestDisplayState(state);
-        }
-    }
-
     return NOERROR;
 }
 
@@ -160,8 +105,53 @@ DisplayPowerState::PhotonicModulator::PhotonicModulator(
     , mChangeInProgress(FALSE)
     , mHost(host)
 {
-    mTask = (IRunnable*)new TaskRunnable(this);
     Thread::constructor(String("PhotonicModulator"));
+}
+
+ECode DisplayPowerState::PhotonicModulator::Run()
+{
+    Int32 state;
+    Boolean stateChanged;
+    Int32 backlight;
+    Boolean backlightChanged;
+    for (;;) {
+        // Get pending change.
+        {
+            AutoLock lock(mLock);
+            state = mPendingState;
+            stateChanged = (state != mActualState);
+            backlight = mPendingBacklight;
+            backlightChanged = (backlight != mActualBacklight);
+            if (!stateChanged && !backlightChanged) {
+                // All changed applied, notify outer class and wait for more.
+                mChangeInProgress = false;
+                mHost->PostScreenUpdateThreadSafe();
+                mLock.Wait();
+                continue;
+            }
+            mActualState = state;
+            mActualBacklight = backlight;
+        }
+
+        // Apply pending change.
+        if (DEBUG) {
+            Slogger::D(TAG, "Updating screen state: state=%d, backlight=%d", state, backlight);
+        }
+
+        Boolean suspending = (state == IDisplay::STATE_OFF
+            || state == IDisplay::STATE_DOZE_SUSPEND);
+        if (stateChanged && !suspending) {
+            RequestDisplayState(state);
+        }
+        if (backlightChanged) {
+            SetBrightness(backlight);
+        }
+        if (stateChanged && suspending) {
+            RequestDisplayState(state);
+        }
+    }
+
+    return NOERROR;
 }
 
 Boolean DisplayPowerState::PhotonicModulator::SetState(
@@ -191,15 +181,18 @@ Boolean DisplayPowerState::PhotonicModulator::SetState(
 void DisplayPowerState::PhotonicModulator::RequestDisplayState(
     /* [in] */ Int32 state)
 {
-    //Trace.traceBegin(Trace.TRACE_TAG_POWER, "requestDisplayState("
-            // + Display.stateToString(state) + ")");
+    if (DEBUG) {
+        Slogger::D(TAG, "RequestDisplayState: %d", state);
+    }
     mHost->mBlanker->RequestDisplayState(state);
 }
 
 void DisplayPowerState::PhotonicModulator::SetBrightness(
     /* [in] */ Int32 backlight)
 {
-    //Trace.traceBegin(Trace.TRACE_TAG_POWER, "setBrightness(" + backlight + ")");
+    if (DEBUG) {
+        Slogger::D(TAG, "SetBrightness: %d", backlight);
+    }
     mHost->mBacklight->SetBrightness(backlight);
 }
 
@@ -266,12 +259,20 @@ static AutoPtr<IInt32Property> InitInt32Property(
     return ip;
 }
 
-CAR_INTERFACE_IMPL(DisplayPowerState, Object, IDisplayPowerState);
-Boolean DisplayPowerState::DEBUG = FALSE;
 AutoPtr<IFloatProperty> DisplayPowerState::COLOR_FADE_LEVEL = InitFloatProperty(fName);
 AutoPtr<IInt32Property> DisplayPowerState::SCREEN_BRIGHTNESS = InitInt32Property(iName);
 
+CAR_INTERFACE_IMPL(DisplayPowerState, Object, IDisplayPowerState);
+
 DisplayPowerState::DisplayPowerState()
+    : mScreenState(0)
+    , mScreenBrightness(0)
+    , mScreenReady(FALSE)
+    , mScreenUpdatePending(FALSE)
+    , mColorFadePrepared(FALSE)
+    , mColorFadeLevel(0.0f)
+    , mColorFadeReady(FALSE)
+    , mColorFadeDrawPending(FALSE)
 {
 }
 

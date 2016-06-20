@@ -1221,7 +1221,8 @@ AutoPtr<ActiveServices::ServiceLookupResult> ActiveServices::RetrieveServiceLock
             AutoPtr<ServiceRestarter> res = new ServiceRestarter(this);
             AutoPtr<IBatteryStatsImplUidPkgServ> ss;
             AutoPtr<IBatteryStatsImpl> stats = mAm->mBatteryStatsService->GetActiveStatistics();
-            {    AutoLock syncLock(stats);
+            {
+                AutoLock syncLock(stats);
                 AutoPtr<IApplicationInfo> appInfo;
                 comInfo->GetApplicationInfo((IApplicationInfo**)&appInfo);
                 Int32 sInfoUid;

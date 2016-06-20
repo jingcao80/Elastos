@@ -93,20 +93,6 @@ private:
     class PhotonicModulator
         : public Thread
     {
-    private:
-        class TaskRunnable
-            : public Runnable
-        {
-        public:
-            TaskRunnable(
-                /* [in] */ PhotonicModulator* host);
-
-            ECode Run();
-
-        private:
-            PhotonicModulator* mHost;
-        };
-
     public:
         PhotonicModulator(
             /* [in] */ DisplayPowerState* host);
@@ -124,6 +110,8 @@ private:
         void SetBrightness(
             /* [in] */ Int32 backlight);
 
+        CARAPI Run();
+
     private:
         friend class TaskRunnable;
 
@@ -137,7 +125,6 @@ private:
         Int32 mActualState;
         Int32 mActualBacklight;
         Boolean mChangeInProgress;
-        AutoPtr<IRunnable> mTask;
         DisplayPowerState* mHost;
     };
 
