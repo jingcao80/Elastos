@@ -1,5 +1,25 @@
 
 #include "elastos/droid/phone/TimeConsumingPreferenceActivity.h"
+#include <elastos/utility/logging/Logger.h>
+#include "Elastos.Droid.View.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
+
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CProgressDialog;
+using Elastos::Droid::App::IProgressDialog;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
+using Elastos::Droid::View::IWindow;
+using Elastos::Droid::Server::Telephony::R;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -26,7 +46,7 @@ ECode TimeConsumingPreferenceActivity::DismissAndFinishOnClickListener::OnClick(
     return mHost->Finish();
 }
 
-const String TimeConsumingPreferenceActivity::LOG_TAG("TimeConsumingPreferenceActivity");
+const String TimeConsumingPreferenceActivity::TAG("TimeConsumingPreferenceActivity");
 
 const Int32 TimeConsumingPreferenceActivity::BUSY_READING_DIALOG = 100;
 const Int32 TimeConsumingPreferenceActivity::BUSY_SAVING_DIALOG = 200;
@@ -41,12 +61,12 @@ CAR_INTERFACE_IMPL_2(TimeConsumingPreferenceActivity, PreferenceActivity,
 
 TimeConsumingPreferenceActivity::TimeConsumingPreferenceActivity()
     : mIsForeground(FALSE)
-    , DBG(PhoneGlobals::DBG_LEVEL >= 2)
+    , DBG(IPhoneGlobals::DBG_LEVEL >= 2)
 {
     mDismiss = new DismissOnClickListener();
-    mDismissAndFinish = new DismissAndFinishOnClickListener();
+    mDismissAndFinish = new DismissAndFinishOnClickListener(this);
 
-    CArrayList::New<String>((IArrayList**)&mBusyList);
+    CArrayList::New((IArrayList**)&mBusyList);
 }
 
 ECode TimeConsumingPreferenceActivity::OnCreateDialog(
@@ -59,29 +79,29 @@ ECode TimeConsumingPreferenceActivity::OnCreateDialog(
         AutoPtr<IProgressDialog> dialog;
         CProgressDialog::New(this, (IProgressDialog**)&dialog);
         AutoPtr<ICharSequence> title;
-        GetText(R.string.updating_title, (ICharSequence**)&title);
-        dialog->SetTitle(title);
+        GetText(R::string::updating_title, (ICharSequence**)&title);
+        IDialog::Probe(dialog)->SetTitle(title);
         dialog->SetIndeterminate(TRUE);
 
         switch(id) {
             case BUSY_READING_DIALOG:
             {
-                dialog->SetCancelable(true);
-                dialog->SetOnCancelListener(this);
+                IDialog::Probe(dialog)->SetCancelable(true);
+                IDialog::Probe(dialog)->SetOnCancelListener(this);
                 AutoPtr<ICharSequence> title;
-                GetText(R.string.reading_settings, (ICharSequence**)&title);
-                dialog->SetMessage(title);
-                *outdialog = dialog;
+                GetText(R::string::reading_settings, (ICharSequence**)&title);
+                IAlertDialog::Probe(dialog)->SetMessage(title);
+                *outdialog = IDialog::Probe(dialog);
                 REFCOUNT_ADD(*outdialog)
                 return NOERROR;
             }
             case BUSY_SAVING_DIALOG:
             {
-                dialog->SetCancelable(FALSE);
+                IDialog::Probe(dialog)->SetCancelable(FALSE);
                 AutoPtr<ICharSequence> title;
-                GetText(R.string.updating_settings, (ICharSequence**)&title);
-                dialog->SetMessage(title);
-                *outdialog = dialog;
+                GetText(R::string::updating_settings, (ICharSequence**)&title);
+                IAlertDialog::Probe(dialog)->SetMessage(title);
+                *outdialog = IDialog::Probe(dialog);
                 REFCOUNT_ADD(*outdialog)
                 return NOERROR;
             }
@@ -96,34 +116,34 @@ ECode TimeConsumingPreferenceActivity::OnCreateDialog(
         CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
 
         Int32 msgId;
-        Int32 titleId = R.string.error_updating_title;
+        Int32 titleId = R::string::error_updating_title;
 
         switch (id) {
             case RESPONSE_ERROR:
-                msgId = R.string.response_error;
-                builder->SetPositiveButton(R.string.close_dialog, mDismiss);
+                msgId = R::string::response_error;
+                builder->SetPositiveButton(R::string::close_dialog, mDismiss);
                 break;
             case RADIO_OFF_ERROR:
-                msgId = R.string.radio_off_error;
+                msgId = R::string::radio_off_error;
                 // The error is not recoverable on dialog exit.
-                builder->SetPositiveButton(R.string.close_dialog, mDismissAndFinish);
+                builder->SetPositiveButton(R::string::close_dialog, mDismissAndFinish);
                 break;
             case FDN_CHECK_FAILURE:
-                msgId = R.string.fdn_check_failure;
-                builder->SetPositiveButton(R.string.close_dialog, mDismiss);
+                msgId = R::string::fdn_check_failure;
+                builder->SetPositiveButton(R::string::close_dialog, mDismiss);
                 break;
             case EXCEPTION_ERROR:
             default:
-                msgId = R.string.exception_error;
+                msgId = R::string::exception_error;
                 // The error is not recoverable on dialog exit.
-                builder->SetPositiveButton(R.string.close_dialog, mDismissAndFinish);
+                builder->SetPositiveButton(R::string::close_dialog, mDismissAndFinish);
                 break;
         }
 
         AutoPtr<ICharSequence> text;
         GetText(titleId, (ICharSequence**)&text);
         builder->SetTitle(text);
-        AutoPtr<ICharSequence> text2
+        AutoPtr<ICharSequence> text2;
         GetText(msgId, (ICharSequence**)&text2);
         builder->SetMessage(text2);
         builder->SetCancelable(FALSE);
@@ -132,10 +152,10 @@ ECode TimeConsumingPreferenceActivity::OnCreateDialog(
 
         // make the dialog more obvious by blurring the background.
         AutoPtr<IWindow> window;
-        dialog->GetWindow((IWindow**)&window);
+        IDialog::Probe(dialog)->GetWindow((IWindow**)&window);
         window->AddFlags(IWindowManagerLayoutParams::FLAG_BLUR_BEHIND);
 
-        *outdialog = dialog;
+        *outdialog = IDialog::Probe(dialog);
         REFCOUNT_ADD(*outdialog)
         return NOERROR;
     }
@@ -165,20 +185,26 @@ ECode TimeConsumingPreferenceActivity::OnStarted(
     if (DBG) {
         StringBuilder sb;
         sb += "onStarted, preference=";
-        String
-        sb +=
-        Logger::D(LOG_TAG, "onStarted, preference=" + preference.getKey()
-            + ", reading=" + reading);
+        String key;
+        preference->GetKey(&key);
+        sb += key;
+        sb += ", reading=";
+        sb += reading;
+        Logger::D(TAG, sb.ToString());
     }
-    mBusyList->Add(preference.getKey());
+
+    String key;
+    preference->GetKey(&key);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(key);
+    mBusyList->Add(TO_IINTERFACE(cchar));
 
     if (mIsForeground) {
-          if (reading) {
-              ShowDialog(BUSY_READING_DIALOG);
-          }
-          else {
-              ShowDialog(BUSY_SAVING_DIALOG);
-          }
+        if (reading) {
+            ShowDialog(BUSY_READING_DIALOG);
+        }
+        else {
+            ShowDialog(BUSY_SAVING_DIALOG);
+        }
     }
     return NOERROR;
 }
@@ -191,12 +217,18 @@ ECode TimeConsumingPreferenceActivity::OnFinished(
     if (DBG) {
         StringBuilder sb;
         sb += "onFinished, preference=";
-        sb += preference.getKey();
+        String key;
+        preference->GetKey(&key);
+        sb += key;
         sb += ", reading=";
         sb += reading;
-        Logger::D(LOG_TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
-    mBusyList->Remove(preference.getKey());
+
+    String key;
+    preference->GetKey(&key);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(key);
+    mBusyList->Remove(TO_IINTERFACE(cchar));
 
     Boolean res;
     if (mBusyList->IsEmpty(&res), res) {
@@ -218,10 +250,12 @@ ECode TimeConsumingPreferenceActivity::OnError(
     if (DBG) {
         StringBuilder sb;
         sb += "onError, preference=";
-        sb += preference.getKey();
+        String key;
+        preference->GetKey(&key);
+        sb += key;
         sb += ", error=";
         sb += error;
-        Logger::D(LOG_TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
 
     if (mIsForeground) {
@@ -234,14 +268,15 @@ ECode TimeConsumingPreferenceActivity::OnException(
     /* [in] */ IPreference* preference,
     /* [in] */ ICommandException* exception)
 {
-    Int32 error;
-    if (（exception->GetCommandError(&error)， error） == ICommandExceptionError::FDN_CHECK_FAILURE) {
-        OnError(preference, FDN_CHECK_FAILURE);
-    }
-    else {
-        preference->SetEnabled(FALSE);
-        OnError(preference, EXCEPTION_ERROR);
-    }
+    assert(0);
+    // Int32 error;
+    // if ((exception->GetCommandError(&error), error) == ICommandExceptionError::FDN_CHECK_FAILURE) {
+    //     OnError(preference, FDN_CHECK_FAILURE);
+    // }
+    // else {
+    //     preference->SetEnabled(FALSE);
+    //     OnError(preference, EXCEPTION_ERROR);
+    // }
     return NOERROR;
 }
 
@@ -254,21 +289,21 @@ ECode TimeConsumingPreferenceActivity::OnCancel(
 
 ECode TimeConsumingPreferenceActivity::DumpState()
 {
-    Logger::D(LOG_TAG, "dumpState begin");
+    Logger::D(TAG, "dumpState begin");
 
     Int32 size;
     mBusyList->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
-        mBusyList->Get(i, (IInterface**)obj);
+        mBusyList->Get(i, (IInterface**)&obj);
         AutoPtr<ICharSequence> value = ICharSequence::Probe(obj);
         String key;
         value->ToString(&key);
 
-        Logger::D(LOG_TAG, "mBusyList: key= %s", key.tostring());
+        Logger::D(TAG, "mBusyList: key= %s", key.string());
     }
 
-    Logger::D(LOG_TAG, "dumpState end");
+    Logger::D(TAG, "dumpState end");
     return NOERROR;
 }
 

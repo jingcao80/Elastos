@@ -7,8 +7,6 @@ namespace Droid {
 namespace Phone {
 
 
-
-
 CCellBroadcastSms::MyHandler::MyHandler(
     /* [in] */ CCellBroadcastSms* host)
 {

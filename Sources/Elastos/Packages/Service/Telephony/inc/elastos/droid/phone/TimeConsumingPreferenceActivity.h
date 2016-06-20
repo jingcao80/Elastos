@@ -2,7 +2,24 @@
 #define  __ELASTOS_DROID_PHONE_CARRIERLOGO_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
+#include "elastos/droid/preference/PreferenceActivity.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Preference.h"
+#include "Elastos.Droid.Internal.h"
+#include <elastos/core/Object.h>
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::Preference::PreferenceActivity;
+using Elastos::Droid::Internal::Telephony::ICommandException;
+using Elastos::Core::Object;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -102,13 +119,13 @@ protected:
 
 private:
     CARAPI_(void) DismissDialogSafely(
-        /* [in] */ Int32 id)
+        /* [in] */ Int32 id);
 
 protected:
     Boolean mIsForeground;
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     const Boolean DBG;
 
     AutoPtr<IDialogInterfaceOnClickListener> mDismiss;

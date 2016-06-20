@@ -470,7 +470,7 @@ void CallNotifier::CreateSignalInfoToneGenerator()
         //try
         {
             ECode ec = CToneGenerator::New(IAudioManager::STREAM_VOICE_CALL,
-                    TONE_RELATIVE_VOLUME_SIGNALINFO，(IToneGenerator**)&mSignalInfoToneGenerator);
+                    TONE_RELATIVE_VOLUME_SIGNALINFO, (IToneGenerator**)&mSignalInfoToneGenerator);
             Logger::D(LOG_TAG, "CallNotifier: mSignalInfoToneGenerator created when toneplay");
         }
         // catch (RuntimeException e) {

@@ -22,6 +22,7 @@ using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Server::Telephony::R;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Telecomm::Telecom::CPhoneAccountHandle;
 using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
@@ -120,9 +121,9 @@ AutoPtr<IPhoneAccount> TelecomAccountRegistry::AccountEntry::RegisterPstnPhoneAc
     if (isEmergency) {
         AutoPtr<IResources> resources;
         mHost->mContext->GetResources((IResources**)&resources);
-        resources->GetString(Elastos::Droid::Server::Telephony::R::string::sim_label_emergency_calls, &label);
+        resources->GetString(R::string::sim_label_emergency_calls, &label);
 
-        resources->GetString(Elastos::Droid::Server::Telephony::R::string::sim_description_emergency_calls, &description);
+        resources->GetString(R::string::sim_description_emergency_calls, &description);
     }
     else if ((mHost->mTelephonyManager->GetPhoneCount(&count), count) == 1) {
         // For single-SIM devices, we show the label and description as whatever the name of
@@ -153,7 +154,7 @@ AutoPtr<IPhoneAccount> TelecomAccountRegistry::AccountEntry::RegisterPstnPhoneAc
         else {
             AutoPtr<IResources> resources;
             mHost->mContext->GetResources((IResources**)&resources);
-            resources->GetString(Elastos::Droid::Server::Telephony::R::string::unknown, &slotIdString);
+            resources->GetString(R::string::unknown, &slotIdString);
         }
 
         if (TextUtils::IsEmpty(subDisplayName)) {
@@ -164,7 +165,7 @@ AutoPtr<IPhoneAccount> TelecomAccountRegistry::AccountEntry::RegisterPstnPhoneAc
             AutoPtr<ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(1);
             AutoPtr<ICharSequence> cchar = CoreUtils::Convert(slotIdString);
             formatArgs->Set(0, TO_IINTERFACE(cchar));
-            resources->GetString(Elastos::Droid::Server::Telephony::R::string::sim_description_default,
+            resources->GetString(R::string::sim_description_default,
                     formatArgs, &subDisplayName);
         }
 
@@ -178,7 +179,7 @@ AutoPtr<IPhoneAccount> TelecomAccountRegistry::AccountEntry::RegisterPstnPhoneAc
         AutoPtr<ICharSequence> cchar = CoreUtils::Convert(slotIdString);
         formatArgs->Set(0, TO_IINTERFACE(cchar));
         String tmp;
-        resources->GetString(Elastos::Droid::Server::Telephony::R::string::sim_description_default,
+        resources->GetString(R::string::sim_description_default,
                 formatArgs, &tmp);
         description = dummyPrefix + tmp;
     }
@@ -281,10 +282,10 @@ static AutoPtr<ArrayOf<Int32> > initsPhoneAccountIcons()
 {
     AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(4);
 
-    (*array)[0] = Elastos::Droid::Server::Telephony::R::drawable::ic_multi_sim1;
-    (*array)[1] = Elastos::Droid::Server::Telephony::R::drawable::ic_multi_sim2;
-    (*array)[2] = Elastos::Droid::Server::Telephony::R::drawable::ic_multi_sim3;
-    (*array)[3] = Elastos::Droid::Server::Telephony::R::drawable::ic_multi_sim4;
+    (*array)[0] = R::drawable::ic_multi_sim1;
+    (*array)[1] = R::drawable::ic_multi_sim2;
+    (*array)[2] = R::drawable::ic_multi_sim3;
+    (*array)[3] = R::drawable::ic_multi_sim4;
     return array;
 }
 
@@ -293,7 +294,7 @@ const AutoPtr<ArrayOf<Int32> > TelecomAccountRegistry::sPhoneAccountIcons = init
 // This icon is the one that is used when the Slot ID that we have for a particular SIM
 // is not supported, i.e. SubscriptionManager.INVALID_SLOT_ID or the 5th SIM in a phone.
 const Int32 TelecomAccountRegistry::defaultPhoneAccountIcon =
-        Elastos::Droid::Server::Telephony::R::drawable::ic_multi_sim;
+        R::drawable::ic_multi_sim;
 
 AutoPtr<TelecomAccountRegistry> TelecomAccountRegistry::sInstance;
 

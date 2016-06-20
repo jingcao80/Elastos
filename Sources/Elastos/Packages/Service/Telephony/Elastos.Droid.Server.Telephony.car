@@ -6,6 +6,8 @@ module
     importlib("Elastos.Droid.Server.Telecom.eco");
 
     merge("car/elastos/droid/phone/Constants.car");
+    merge("car/elastos/droid/phone/TimeConsumingPreferenceActivity.car");
+    merge("car/elastos/droid/phone/PhoneGlobals.car");
 
     merge("car/elastos/droid/services/telephony/CdmaConnection.car");
     merge("car/elastos/droid/services/telephony/TtyManager.car");
@@ -111,7 +113,7 @@ module
 
     class CTelephonyConnectionService {
         constructor();
-        
+
         interface ITelephonyConnectionService;
         interface IConnectionService;
     }

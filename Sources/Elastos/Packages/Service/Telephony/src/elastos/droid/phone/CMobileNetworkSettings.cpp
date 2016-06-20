@@ -242,7 +242,7 @@ ECode CMobileNetworkSettings::OnPreferenceTreeClick(
         return NOERROR;
     }
     else if (mGsmUmtsOptions != NULL &&
-            (mGsmUmtsOptions->PreferenceTreeClick(preference, &res)， res)) {
+            (mGsmUmtsOptions->PreferenceTreeClick(preference, &res), res)) {
         *result = TRUE;
         return NOERROR;
     }
@@ -251,7 +251,7 @@ ECode CMobileNetworkSettings::OnPreferenceTreeClick(
         AutoPtr<ISystemProperties> helper;
         CSystemProperties::AcquireSingleton((ISystemProperties**)&helper);
         AutoPtr<IInterface> obj;
-        helper->Get(ITelephonyProperties::PROPERTY_INECM_MODE，(IInterface**)&obj);
+        helper->Get(ITelephonyProperties::PROPERTY_INECM_MODE, (IInterface**)&obj);
         AutoPtr<IBoolean> value = IBoolean::Probe(obj);
         Boolean res;
         value->ToValue(&res);
@@ -260,9 +260,9 @@ ECode CMobileNetworkSettings::OnPreferenceTreeClick(
 
             // In ECM mode launch ECM app dialog
             AutoPtr<IIntent> intent;
-            CIntent::New(TelephonyIntents.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS, null),
-                REQUEST_CODE_EXIT_ECM, (IIntent**)&intent);
-            StartActivityForResult(intent);
+            CIntent::New(ITelephonyIntents::ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS, NULL,
+                    (IIntent**)&intent);
+            StartActivityForResult(intent, REQUEST_CODE_EXIT_ECM);
         }
         *result = TRUE;
         return NOERROR;

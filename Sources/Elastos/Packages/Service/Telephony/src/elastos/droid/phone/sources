@@ -3,6 +3,8 @@ TARGET_TYPE= lib
 
 INCLUDES += ../
 INCLUDES += ../../../..
+INCLUDES += $(MAKEDIR)/../../../..
 INCLUDES += $(MAKEDIR)/../../../../inc/
 
 SOURCES = CPhoneApp.cpp
+SOURCES += TimeConsumingPreferenceActivity.cpp

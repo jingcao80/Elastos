@@ -8,6 +8,7 @@
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Media::IToneGenerator;
+using Elastos::Droid::Server::Telephony::R;
 using Elastos::Droid::Telecomm::Telecom::CDisconnectCause;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
@@ -130,61 +131,61 @@ AutoPtr<ICharSequence> DisconnectCauseUtil::ToTelecomDisconnectCauseLabel(
     AutoPtr<IInteger32> resourceId;
     switch (telephonyDisconnectCause) {
         case Elastos::Droid::Telephony::IDisconnectCause::BUSY:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_userBusy);
+            resourceId = CoreUtils::Convert(R::string::callFailed_userBusy);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::CONGESTION:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_congestion);
+            resourceId = CoreUtils::Convert(R::string::callFailed_congestion);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::TIMED_OUT:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_timedOut);
+            resourceId = CoreUtils::Convert(R::string::callFailed_timedOut);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::SERVER_UNREACHABLE:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_server_unreachable);
+            resourceId = CoreUtils::Convert(R::string::callFailed_server_unreachable);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::NUMBER_UNREACHABLE:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_number_unreachable);
+            resourceId = CoreUtils::Convert(R::string::callFailed_number_unreachable);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::INVALID_CREDENTIALS:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_invalid_credentials);
+            resourceId = CoreUtils::Convert(R::string::callFailed_invalid_credentials);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::SERVER_ERROR:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_server_error);
+            resourceId = CoreUtils::Convert(R::string::callFailed_server_error);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::OUT_OF_NETWORK:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_out_of_network);
+            resourceId = CoreUtils::Convert(R::string::callFailed_out_of_network);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::LOST_SIGNAL:
         case Elastos::Droid::Telephony::IDisconnectCause::CDMA_DROP:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_noSignal);
+            resourceId = CoreUtils::Convert(R::string::callFailed_noSignal);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::LIMIT_EXCEEDED:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_limitExceeded);
+            resourceId = CoreUtils::Convert(R::string::callFailed_limitExceeded);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::POWER_OFF:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_powerOff);
+            resourceId = CoreUtils::Convert(R::string::callFailed_powerOff);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::ICC_ERROR:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_simError);
+            resourceId = CoreUtils::Convert(R::string::callFailed_simError);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::OUT_OF_SERVICE:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_outOfService);
+            resourceId = CoreUtils::Convert(R::string::callFailed_outOfService);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::INVALID_NUMBER:
         case Elastos::Droid::Telephony::IDisconnectCause::UNOBTAINABLE_NUMBER:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_unobtainable_number);
+            resourceId = CoreUtils::Convert(R::string::callFailed_unobtainable_number);
             break;
 
         default:
@@ -219,23 +220,23 @@ AutoPtr<ICharSequence> DisconnectCauseUtil::ToTelecomDisconnectCauseDescription(
     AutoPtr<IInteger32> resourceId;
     switch (telephonyDisconnectCause) {
         case Elastos::Droid::Telephony::IDisconnectCause::CALL_BARRED:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_cb_enabled);
+            resourceId = CoreUtils::Convert(R::string::callFailed_cb_enabled);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::FDN_BLOCKED:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_fdn_only);
+            resourceId = CoreUtils::Convert(R::string::callFailed_fdn_only);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::CS_RESTRICTED:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_dsac_restricted);
+            resourceId = CoreUtils::Convert(R::string::callFailed_dsac_restricted);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::CS_RESTRICTED_EMERGENCY:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_dsac_restricted_emergency);
+            resourceId = CoreUtils::Convert(R::string::callFailed_dsac_restricted_emergency);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::CS_RESTRICTED_NORMAL:
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::callFailed_dsac_restricted_normal);
+            resourceId = CoreUtils::Convert(R::string::callFailed_dsac_restricted_normal);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::OUTGOING_FAILURE:
@@ -243,7 +244,7 @@ AutoPtr<ICharSequence> DisconnectCauseUtil::ToTelecomDisconnectCauseDescription(
             // failure in the telephony layer.
             // TODO: Need UI spec for this failure case; for now just
             // show a generic error.
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::incall_error_call_failed);
+            resourceId = CoreUtils::Convert(R::string::incall_error_call_failed);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::POWER_OFF:
@@ -255,31 +256,31 @@ AutoPtr<ICharSequence> DisconnectCauseUtil::ToTelecomDisconnectCauseDescription(
             // But it might be nicer for the dialog to offer the option
             // to turn the radio on right there (and automatically retry
             // the call once network registration is complete.)
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::incall_error_power_off);
+            resourceId = CoreUtils::Convert(R::string::incall_error_power_off);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::EMERGENCY_ONLY:
             // Only emergency numbers are allowed, but we tried to dial
             // a non-emergency number.
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::incall_error_emergency_only);
+            resourceId = CoreUtils::Convert(R::string::incall_error_emergency_only);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::OUT_OF_SERVICE:
             // No network connection.
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::incall_error_out_of_service);
+            resourceId = CoreUtils::Convert(R::string::incall_error_out_of_service);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::NO_PHONE_NUMBER_SUPPLIED:
             // The supplied Intent didn't contain a valid phone number.
             // (This is rare and should only ever happen with broken
             // 3rd-party apps.) For now just show a generic error.
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::incall_error_no_phone_number_supplied);
+            resourceId = CoreUtils::Convert(R::string::incall_error_no_phone_number_supplied);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::VOICEMAIL_NUMBER_MISSING:
             // TODO: Need to bring up the "Missing Voicemail Number" dialog, which
             // will ultimately take us to the Call Settings.
-            resourceId = CoreUtils::Convert(Elastos::Droid::Server::Telephony::R::string::incall_error_missing_voicemail_number);
+            resourceId = CoreUtils::Convert(R::string::incall_error_missing_voicemail_number);
             break;
 
         case Elastos::Droid::Telephony::IDisconnectCause::OUTGOING_CANCELED:

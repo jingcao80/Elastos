@@ -72,6 +72,8 @@ ECode CTelephonyConnectionService::MyEmergencyCallHelperCallback::OnComplete(
 
 CAR_INTERFACE_IMPL(CTelephonyConnectionService, ConnectionService, ITelephonyConnectionService)
 
+CAR_OBJECT_IMPL(CTelephonyConnectionService)
+
 ECode CTelephonyConnectionService::constructor()
 {
     return NOERROR;
@@ -357,7 +359,7 @@ ECode CTelephonyConnectionService::OnCreateUnknownConnection(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         allConnections->Get(i, (IInterface**)&obj);
-        AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> telephonyConnection = 
+        AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> telephonyConnection =
                 Elastos::Droid::Internal::Telephony::IConnection::Probe(obj);
 
         if (!IsOriginalConnectionKnown(telephonyConnection)) {
@@ -517,7 +519,7 @@ AutoPtr<IPhone> CTelephonyConnectionService::GetPhoneForAccount(
         accountHandle->GetId(&id);
         if (!id.IsNull()) {
             ECode ec = NOERROR;
-            //try 
+            //try
             {
                 AutoPtr<ISubscriptionController> controller;
                 assert(0);

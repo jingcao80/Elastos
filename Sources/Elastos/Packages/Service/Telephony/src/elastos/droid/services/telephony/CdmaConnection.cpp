@@ -15,7 +15,7 @@
 
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
-using Elastos::Droid::Telephony::Phone::IConstants;
+using Elastos::Droid::Phone::IConstants;
 using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
 using Elastos::Droid::Internal::Telephony::ICallState;
 using Elastos::Droid::Internal::Telephony::ICallState_WAITING;
@@ -324,7 +324,7 @@ Boolean CdmaConnection::IsEmergency()
         String part;
         uri->GetSchemeSpecificPart(&part);
         Boolean res;
-        helper->IsLocalEmergencyNumber(context, part, &res); 
+        helper->IsLocalEmergencyNumber(context, part, &res);
         return res;
     }
     return FALSE;

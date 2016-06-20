@@ -8,7 +8,7 @@ module
     /**
      * Maintains a list of all the known GSM connections and implements GSM-specific conference
      * call functionality.
-     * 
+     *
      * @invoke
      * interface IConnectionService;
      */

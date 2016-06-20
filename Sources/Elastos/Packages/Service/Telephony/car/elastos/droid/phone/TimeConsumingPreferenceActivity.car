@@ -1,11 +1,14 @@
 module
 {
+    using interface Elastos.Droid.Preference.IPreference;
+    using interface Elastos.Droid.Internal.Telephony.ICommandException;
+
     namespace Elastos {
     namespace Droid {
-    namespace Telephony {
     namespace Phone {
 
-    interface ITimeConsumingPreferenceListener {
+    [local]
+    interface ITimeConsumingPreferenceListener{
         OnStarted(
             [in] IPreference* preference,
             [in] Boolean reading);
@@ -21,7 +24,6 @@ module
     }
 
     } // namespace Phone
-    } // namespace Telephony
     } // namespace Droid
     } // namespace Elastos
 }

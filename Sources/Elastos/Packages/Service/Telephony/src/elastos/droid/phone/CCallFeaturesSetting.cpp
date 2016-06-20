@@ -1310,7 +1310,7 @@ void CCallFeaturesSetting::HandleVMAndFwdSetSuccess(
 void CCallFeaturesSetting::UpdateVoiceNumberField()
 {
     if (DBG) {
-        Log(S（"updateVoiceNumberField(). mSubMenuVoicemailSettings="） + mSubMenuVoicemailSettings);
+        Log(String("updateVoiceNumberField(). mSubMenuVoicemailSettings=") + mSubMenuVoicemailSettings);
     }
     if (mSubMenuVoicemailSettings == NULL) {
         return;
@@ -1523,7 +1523,7 @@ ECode CCallFeaturesSetting::OnCreate(
     }
     mPhone = PhoneGlobals::GetPhone();
     AutoPtr<IInterface> obj;
-    GetSystemService(IContext::AUDIO_SERVICE，(IInterface**)&obj);
+    GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
     mAudioManager = IAudioManager::Probe(obj);
 
     // create intent to bring up contact list
