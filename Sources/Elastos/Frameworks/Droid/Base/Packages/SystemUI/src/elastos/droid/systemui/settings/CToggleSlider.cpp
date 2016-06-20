@@ -4,7 +4,6 @@
 #include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/view/View.h"
 #include "../R.h"
-#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::ITypedArray;
@@ -17,7 +16,6 @@ using Elastos::Droid::Widget::ICheckable;
 using Elastos::Droid::Widget::IProgressBar;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
-using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -40,9 +38,6 @@ ECode CToggleSlider::MyCheckListener::OnCheckedChanged(
     /* [in] */ ICompoundButton* buttonView,
     /* [in] */ Boolean isChecked)
 {
-    Logger::I(TAG, " >> OnCheckedChanged: %d", isChecked);
-    IView::Probe(mHost->mSlider)->SetEnabled(!isChecked);
-
     if (mHost->mListener != NULL) {
         Int32 progress;
         IProgressBar::Probe(mHost->mSlider)->GetProgress(&progress);
@@ -70,8 +65,6 @@ ECode CToggleSlider::MySeekListener::OnProgressChanged(
     /* [in] */ Int32 progress,
     /* [in] */ Boolean fromUser)
 {
-    Logger::I(TAG, " >>  OnProgressChanged: %d, mListener:%s, mMirror:%s",
-        progress, TO_CSTR(mHost->mListener), TO_CSTR(mHost->mMirror));
     if (mHost->mListener != NULL) {
         Boolean isChecked;
         ICheckable::Probe(mHost->mToggle)->IsChecked(&isChecked);

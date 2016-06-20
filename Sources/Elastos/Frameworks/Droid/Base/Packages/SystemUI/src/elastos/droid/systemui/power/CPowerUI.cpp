@@ -180,7 +180,7 @@ ECode CPowerUI::MyObs::OnChange(
 //-----------------------------------------------------------------------------------------------
 
 const String CPowerUI::TAG("CPowerUI");
-const Boolean CPowerUI::DEBUG = TRUE;
+const Boolean CPowerUI::DEBUG = FALSE;
 
 CAR_OBJECT_IMPL(CPowerUI)
 

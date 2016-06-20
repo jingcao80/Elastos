@@ -56,9 +56,6 @@ ECode BrightnessController::BrightnessObserver::OnChange(
     /* [in] */ Boolean selfChange,
     /* [in] */ IUri* uri)
 {
-    Logger::I(TAG, "%s OnChange: selfChange:%d, uri: %s", TO_CSTR(this), selfChange, TO_CSTR(uri));
-    if (selfChange) return NOERROR;
-
     mHost->mExternalChange = TRUE;
 
     if (Object::Equals(BRIGHTNESS_MODE_URI, uri)) {
@@ -199,9 +196,6 @@ ECode BrightnessController::ToggleSliderListener::OnChanged(
     /* [in] */ Boolean automatic,
     /* [in] */ Int32 value)
 {
-    Logger::I(TAG, " >>> OnChanged tracking:%d, automatic:%d, value: %d",
-        tracking, automatic, value);
-
     mHost->UpdateIcon(mHost->mAutomatic);
     if (mHost->mExternalChange) return NOERROR;
 
@@ -237,7 +231,7 @@ ECode BrightnessController::ToggleSliderListener::OnChanged(
 //==================================
 // BrightnessController
 //==================================
-const String BrightnessController::TAG("StatusBar.BrightnessController");
+const String BrightnessController::TAG("BrightnessController");
 const Boolean BrightnessController::SHOW_AUTOMATIC_ICON = FALSE;
 const Float BrightnessController::BRIGHTNESS_ADJ_RESOLUTION = 100.0f;
 
@@ -298,7 +292,6 @@ ECode BrightnessController::RemoveStateChangedCallback(
 
 ECode BrightnessController::RegisterCallbacks()
 {
-    Logger::I(TAG, " >>> RegisterCallbacks");
     if (mListening) {
         return NOERROR;
     }
@@ -345,7 +338,6 @@ void BrightnessController::SetMode(
 ECode BrightnessController::SetBrightness(
     /* [in] */ Int32 brightness)
 {
-    Logger::I(TAG, " >>> SetBrightnessAdj: %d", brightness);
     ECode ec = mPower->SetTemporaryScreenBrightnessSettingOverride(brightness);
     if (FAILED(ec)) {
         return E_REMOTE_EXCEPTION;
@@ -356,7 +348,6 @@ ECode BrightnessController::SetBrightness(
 ECode BrightnessController::SetBrightnessAdj(
     /* [in] */ Float brightness)
 {
-    Logger::I(TAG, " >>> SetBrightnessAdj: %.2f", brightness);
     ECode ec = mPower->SetTemporaryScreenAutoBrightnessAdjustmentSettingOverride(brightness);
     if (FAILED(ec)) {
         return E_REMOTE_EXCEPTION;
@@ -367,7 +358,6 @@ ECode BrightnessController::SetBrightnessAdj(
 void BrightnessController::UpdateIcon(
     /* [in] */ Boolean automatic)
 {
-    Logger::I(TAG, " >>> UpdateIcon: %d", automatic);
     if (mIcon != NULL) {
         mIcon->SetImageResource(automatic && SHOW_AUTOMATIC_ICON ?
             R::drawable::ic_qs_brightness_auto_on : R::drawable::ic_qs_brightness_auto_off);

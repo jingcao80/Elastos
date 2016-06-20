@@ -2097,8 +2097,7 @@ ECode BatteryStatsImpl::Uid::Proc::GetTimeAtCpuSpeedStep(
 // BatteryStatsImpl::Uid::Pkg::Serv
 //==============================================================================
 
-BatteryStatsImpl::Uid::Pkg::Serv::Serv(
-    /* [in] */ BatteryStatsImpl* host)
+BatteryStatsImpl::Uid::Pkg::Serv::Serv()
     : mStartTime(0)
     , mRunningSince(0)
     , mRunning(FALSE)
@@ -2116,9 +2115,14 @@ BatteryStatsImpl::Uid::Pkg::Serv::Serv(
     , mUnpluggedStartTime(0)
     , mUnpluggedStarts(0)
     , mUnpluggedLaunches(0)
-    , mHost(host)
+{}
+
+ECode BatteryStatsImpl::Uid::Pkg::Serv::constructor(
+    /* [in] */ BatteryStatsImpl* host)
 {
-   mHost->mOnBatteryTimeBase->Add(this);
+    mHost = host;
+    mHost->mOnBatteryTimeBase->Add(this);
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL_3(BatteryStatsImpl::Uid::Pkg::Serv, Object, IBatteryStatsUidPkgServ, IBatteryStatsImplUidPkgServ, ITimeBaseObs)
@@ -2368,7 +2372,8 @@ void BatteryStatsImpl::Uid::Pkg::ReadFromParcelLocked(
         in->ReadString(&serviceName);
         AutoPtr<ICharSequence> cs;
         CString::New(serviceName, (ICharSequence**)&cs);
-        AutoPtr<Serv> serv = new Serv(mHost);
+        AutoPtr<Serv> serv = new Serv();
+        serv->constructor(mHost);
         mServiceStats->Put(cs, (IObject*)serv.Get());
 
         serv->ReadFromParcelLocked(in);
@@ -2448,7 +2453,9 @@ void BatteryStatsImpl::Uid::Pkg::IncWakeupsLocked()
 
 AutoPtr<BatteryStatsImpl::Uid::Pkg::Serv> BatteryStatsImpl::Uid::Pkg::NewServiceStatsLocked()
 {
-    return new Serv(mHost);
+    AutoPtr<Serv> obj = new Serv();
+    obj->constructor(mHost);
+    return obj;
 }
 
 

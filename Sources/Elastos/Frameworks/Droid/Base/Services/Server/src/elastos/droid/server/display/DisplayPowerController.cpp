@@ -97,7 +97,6 @@ ECode DisplayPowerController::DisplayControllerHandler::HandleMessage(
     msg->GetWhat(&what);
     switch (what) {
         case DisplayPowerController::MSG_UPDATE_POWER_STATE:
-            //leliang the screen lock event
             mHost->UpdatePowerState();
             break;
 
@@ -293,12 +292,7 @@ ECode DisplayPowerController::OnProximityNegativeRunnable::Run()
 
 CAR_INTERFACE_IMPL(DisplayPowerController, Object, IAutomaticBrightnessControllerCallbacks)
 
-DisplayPowerController::DisplayPowerController(
-    /* [in] */ IContext* context,
-    /* [in] */ IDisplayPowerCallbacks* callbacks,
-    /* [in] */ IHandler* handler,
-    /* [in] */ ISensorManager* sensorManager,
-    /* [in] */ IDisplayBlanker* blanker)
+DisplayPowerController::DisplayPowerController()
     : mScreenBrightnessDozeConfig(0)
     , mScreenBrightnessDimConfig(0)
     , mScreenBrightnessDarkConfig(0)
@@ -324,7 +318,23 @@ DisplayPowerController::DisplayPowerController(
     , mAppliedDimming(FALSE)
     , mAppliedLowPower(FALSE)
 {
+}
+
+ECode DisplayPowerController::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IDisplayPowerCallbacks* callbacks,
+    /* [in] */ IHandler* handler,
+    /* [in] */ ISensorManager* sensorManager,
+    /* [in] */ IDisplayBlanker* blanker)
+{
     mAnimatorListener = new AnimatorListener(this);
+    mRampAnimatorListener = new RampAnimatorListener(this);
+    mCleanListener = new CleanListener(this);
+    mOnStateChangedRunnable = new OnStateChangedRunnable(this);
+    mOnProximityPositiveRunnable = new OnProximityPositiveRunnable(this);
+    mOnProximityNegativeRunnable = new OnProximityNegativeRunnable(this);
+    mProximitySensorListener = new SensorEventListener(this);
+
     AutoPtr<ILooper> looper;
     handler->GetLooper((ILooper**)&looper);
     mHandler = new DisplayControllerHandler(looper, this);
@@ -419,6 +429,7 @@ DisplayPowerController::DisplayPowerController(
             mProximityThreshold = Math::Min(fval, TYPICAL_PROXIMITY_THRESHOLD);
         }
     }
+    return NOERROR;
 }
 
 Boolean DisplayPowerController::IsProximitySensorAvailable()
@@ -507,10 +518,8 @@ void DisplayPowerController::Dump(
 
 ECode DisplayPowerController::SendUpdatePowerState()
 {
-    {    AutoLock syncLock(mLock);
-        return SendUpdatePowerStateLocked();
-    }
-    return NOERROR;
+    AutoLock syncLock(mLock);
+    return SendUpdatePowerStateLocked();
 }
 
 ECode DisplayPowerController::SendUpdatePowerStateLocked()
@@ -703,7 +712,9 @@ void DisplayPowerController::UpdatePowerState()
     Boolean autoBrightnessEnabled = FALSE;
     if (mAutomaticBrightnessController != NULL) {
         mPowerRequest->GetUseAutoBrightness(&autoBrightnessEnabled);
-        autoBrightnessEnabled |= state == IDisplay::STATE_ON && brightness < 0;
+        if (autoBrightnessEnabled) {
+            autoBrightnessEnabled = (state == IDisplay::STATE_ON && brightness < 0);
+        }
         Float adjustment;
         mPowerRequest->GetScreenAutoBrightnessAdjustment(&adjustment);
         mAutomaticBrightnessController->Configure(autoBrightnessEnabled, adjustment);
@@ -745,8 +756,7 @@ void DisplayPowerController::UpdatePowerState()
 
     // Apply dimming by at least some minimum amount when user activity
     // timeout is about to expire.
-    mPowerRequest->GetPolicy(&ival);
-    if (ival == IDisplayPowerRequest::POLICY_DIM) {
+    if (policy == IDisplayPowerRequest::POLICY_DIM) {
         if (brightness > mScreenBrightnessRangeMinimum) {
             brightness = Math::Max(Math::Min(brightness - SCREEN_DIM_MINIMUM_REDUCTION,
                     mScreenBrightnessDimConfig), mScreenBrightnessRangeMinimum);
@@ -776,7 +786,7 @@ void DisplayPowerController::UpdatePowerState()
     if (!mPendingScreenOff) {
         if (state == IDisplay::STATE_ON || state == IDisplay::STATE_DOZE) {
             AnimateScreenBrightness(brightness,
-                    slowChange ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
+                slowChange ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
         }
         else {
             AnimateScreenBrightness(brightness, 0);
@@ -812,7 +822,8 @@ void DisplayPowerController::UpdatePowerState()
     // Notify the power manager when ready.
     if (ready && mustNotify) {
         // Send state change.
-        {    AutoLock syncLock(mLock);
+        {
+            AutoLock syncLock(mLock);
             if (!mPendingRequestChangedLocked) {
                 mDisplayReadyLocked = TRUE;
 
