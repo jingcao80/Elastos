@@ -297,7 +297,6 @@ void TaskStack::SetTasks(
     AutoPtr<IArrayList> taskList = mTaskList->GetTasks();
     Int32 taskCount;
     taskList->GetSize(&taskCount);
-    Logger::I("TaskStack", " >> prev: %d, %s", taskCount, TO_CSTR(taskList));
     for (Int32 i = 0; i < taskCount; i++) {
         AutoPtr<IInterface> item;
         taskList->Get(i, (IInterface**)&item);
@@ -472,7 +471,6 @@ void TaskStack::CreateAffiliatedGroupings(
             t->mKey->mBaseIntent->GetComponent((IComponentName**)&comp);
             String packageName;
             comp->GetPackageName(&packageName);
-            Logger::I("TaskStack", " task: %s, packageName:%s", TO_CSTR(comp), packageName.string());
             packageName = "pkg"; // Is bug??
             AutoPtr<TaskGrouping> group;
             if (packageName.Equals(prevPackage) && groupCountDown > 0) {
@@ -548,7 +546,6 @@ void TaskStack::CreateAffiliatedGroupings(
         for (Int32 i = 0; i < groupCount; i++) {
             AutoPtr<IInterface> item;
             mGroups->Get(i, (IInterface**)&item);
-            // Logger::I("TaskStack", " > %d : %s", i, TO_CSTR(item));
             TaskGrouping* group = (TaskGrouping*)ITaskGrouping::Probe(item);
             taskCount = group->GetTaskCount();
             // Ignore the groups that only have one task

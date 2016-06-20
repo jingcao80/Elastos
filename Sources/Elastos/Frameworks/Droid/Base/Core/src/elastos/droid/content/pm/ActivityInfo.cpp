@@ -177,7 +177,9 @@ ECode ActivityInfo::ToString(
     VALIDATE_NOT_NULL(str)
     Int32 hashCode;
     GetHashCode(&hashCode);
-    str->AppendFormat("ActivityInfo{%s %s}", StringUtils::ToHexString(hashCode).string(), mName.string());
+    String pii;
+    PackageItemInfo::ToString(&pii);
+    str->AppendFormat("ActivityInfo{0x%08x %s}", hashCode, pii.string());
     return NOERROR;
 }
 

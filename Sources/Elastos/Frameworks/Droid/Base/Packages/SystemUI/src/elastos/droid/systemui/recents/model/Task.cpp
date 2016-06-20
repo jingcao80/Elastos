@@ -288,6 +288,26 @@ ECode Task::ToString(
     component->GetPackageName(&pkgName);
     sb += ", pkgName:";
     sb += pkgName;
+    if (mIcon != NULL) {
+        sb += ", icon=";
+        sb += TO_STR(mIcon);
+    }
+    if (mIconFilename != NULL) {
+        sb += ", iconFilename=";
+        sb += mIconFilename;
+    }
+    if (mApplicationIcon != NULL) {
+        sb += ", applicationIcon=";
+        sb += TO_STR(mApplicationIcon);
+    }
+    if (mActivityIcon != NULL) {
+        sb += ", activityIcon=";
+        sb += TO_STR(mActivityIcon);
+    }
+    if (mActivityLabel != NULL) {
+        sb += ", activityLabel=";
+        sb += mActivityLabel;
+    }
     sb += "}";
     return sb.ToString(str);
 }

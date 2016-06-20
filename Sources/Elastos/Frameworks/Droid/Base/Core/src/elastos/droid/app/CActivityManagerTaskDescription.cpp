@@ -18,8 +18,9 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
-const String CActivityManagerTaskDescription::ATTR_TASKDESCRIPTION_PREFIX("task_description_");
+static String TAG("CActivityManagerTaskDescription");
 
+const String CActivityManagerTaskDescription::ATTR_TASKDESCRIPTION_PREFIX("task_description_");
 const String CActivityManagerTaskDescription::ATTR_TASKDESCRIPTIONLABEL("task_description_label");
 const String CActivityManagerTaskDescription::ATTR_TASKDESCRIPTIONCOLOR("task_description_color");
 const String CActivityManagerTaskDescription::ATTR_TASKDESCRIPTIONICONFILENAME("task_description_icon_filename");
@@ -49,7 +50,7 @@ ECode CActivityManagerTaskDescription::constructor(
     CColor::AcquireSingleton((IColor**)&color);
     color->Alpha(colorPrimary, &alpha);
     if ((colorPrimary != 0) && (alpha != 255)) {
-        Logger::E("CActivityManagerTaskDescription", "A TaskDescription's primary color should be opaque");
+        Logger::E(TAG, "A TaskDescription's primary color should be opaque");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -107,7 +108,7 @@ ECode CActivityManagerTaskDescription::SetPrimaryColor(
     Int32 alpha;
     color->Alpha(primaryColor, &alpha);
     if ((primaryColor != 0) && (alpha != 255)) {
-        Logger::E("CActivityManagerTaskDescription", "A TaskDescription's primary color should be opaque");
+        Logger::E(TAG, "A TaskDescription's primary color should be opaque");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -141,6 +142,8 @@ ECode CActivityManagerTaskDescription::GetLabel(
 ECode CActivityManagerTaskDescription::GetIcon(
     /* [out] */ IBitmap** bm)
 {
+    VALIDATE_NOT_NULL(bm)
+
     if (mIcon != NULL) {
         *bm = mIcon;
         REFCOUNT_ADD(*bm)
@@ -177,10 +180,10 @@ ECode CActivityManagerTaskDescription::LoadTaskDescriptionIcon(
     ECode ec = NOERROR;
     if (!iconFilename.IsNull()) {
         // try {
-    ec = ActivityManagerNative::GetDefault()->GetTaskDescriptionIcon(iconFilename, bm);
-    if (ec == (ECode)E_RUNTIME_EXCEPTION) {
-        ec = NOERROR;
-    }
+        ec = ActivityManagerNative::GetDefault()->GetTaskDescriptionIcon(iconFilename, bm);
+        if (ec == (ECode)E_RUNTIME_EXCEPTION) {
+            ec = NOERROR;
+        }
         // } catch (RemoteException e) {
         // }
     }

@@ -1604,21 +1604,22 @@ void ApplicationPackageManager::PutCachedIcon(
     /* [in] */ ResourceName* name,
     /* [in] */ IDrawable* dr)
 {
-    assert(dr != NULL);
-    AutoLock lock(sSync);
-    AutoPtr<IDrawableConstantState> state;
-    dr->GetConstantState((IDrawableConstantState**)&state);
+    if (dr != NULL) {
+        AutoLock lock(sSync);
+        AutoPtr<IDrawableConstantState> state;
+        dr->GetConstantState((IDrawableConstantState**)&state);
 
-    IWeakReferenceSource* source = IWeakReferenceSource::Probe(state);
-    if (source != NULL) {
-        AutoPtr<IWeakReference> wr;
-        source->GetWeakReference((IWeakReference**)&wr);
-        sIconCache[name] = wr;
-        if (DEBUG_ICONS) {
-            String info;
-            name->ToString(&info);
-            Logger::V(TAG, "Added cached drawable state for %s : %s",
-                info.string(), TO_CSTR(state));
+        IWeakReferenceSource* source = IWeakReferenceSource::Probe(state);
+        if (source != NULL) {
+            AutoPtr<IWeakReference> wr;
+            source->GetWeakReference((IWeakReference**)&wr);
+            sIconCache[name] = wr;
+            if (DEBUG_ICONS) {
+                String info;
+                name->ToString(&info);
+                Logger::V(TAG, "Added cached drawable state for %s : %s",
+                    info.string(), TO_CSTR(state));
+            }
         }
     }
 }
@@ -2413,9 +2414,8 @@ AutoPtr<IDrawable> ApplicationPackageManager::GetBadgedDrawable(
     /* [in] */ IRect* badgeLocation,
     /* [in] */ Boolean tryBadgeInPlace)
 {
-    Int32 badgedWidth;
+    Int32 badgedWidth, badgedHeight;
     drawable->GetIntrinsicWidth(&badgedWidth);
-    Int32 badgedHeight;
     drawable->GetIntrinsicHeight(&badgedHeight);
     Boolean canBadgeInPlace = tryBadgeInPlace;
     IBitmapDrawable* bd = IBitmapDrawable::Probe(drawable);
@@ -2446,12 +2446,9 @@ AutoPtr<IDrawable> ApplicationPackageManager::GetBadgedDrawable(
         badgeLocation->GetTop(&t);
         badgeLocation->GetWidth(&w);
         badgeLocation->GetHeight(&h);
-        if (l < 0 || t < 0
-                || w > badgedWidth || h > badgedHeight) {
-            // throw new IllegalArgumentException("Badge location " + badgeLocation
-            //         + " not in badged drawable bounds "
-            //         + new Rect(0, 0, badgedWidth, badgedHeight));
-            // return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        if (l < 0 || t < 0 || w > badgedWidth || h > badgedHeight) {
+            Logger::E(TAG, "Badge location %s not in badaged drawable bounds (%d, %d, %d, %d)",
+                TO_CSTR(badgeLocation), 0, 0, badgedWidth, badgedHeight);
             return NULL;
         }
         badgeDrawable->SetBounds(0, 0, w, h);

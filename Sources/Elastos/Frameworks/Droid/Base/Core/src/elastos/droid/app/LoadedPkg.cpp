@@ -132,13 +132,14 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
     }
     // Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "broadcastReceiveReg");
     // try {
-    AutoPtr<IClassLoader> cl = Object::GetClassLoader(receiver.Get());
-    if (cl == NULL) {
-        Slogger::W(TAG, "LoadedPkg::ReceiverDispatcher::Args::Run(): %s is not a CAR class.",
-            TO_CSTR(receiver));
-    }
-    intent->SetExtrasClassLoader(cl);
-    SetExtrasClassLoader(cl);
+    // TODO
+    // AutoPtr<IClassLoader> cl = Object::GetClassLoader(receiver.Get());
+    // if (cl == NULL) {
+    //     Slogger::W(TAG, "LoadedPkg::ReceiverDispatcher::Args::Run(): %s is not a CAR class.",
+    //         TO_CSTR(receiver));
+    // }
+    // intent->SetExtrasClassLoader(cl);
+    // SetExtrasClassLoader(cl);
     receiver->SetPendingResult(this);
     ECode ec = receiver->OnReceive(mHost->mContext, intent);
     if (FAILED(ec)) {

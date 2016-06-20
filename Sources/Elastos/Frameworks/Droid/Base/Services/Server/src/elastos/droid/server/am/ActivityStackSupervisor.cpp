@@ -2934,9 +2934,11 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
         // Check whether we should actually launch the new activity in to the task,
         // or just reuse the current activity on top.
         AutoPtr<ActivityRecord> top = inTask->GetTopActivity();
-        Int32 compareResult;
-        IComparable::Probe(top->mRealActivity)->CompareTo(
-                     TO_IINTERFACE(r->mRealActivity), &compareResult);
+        Int32 compareResult = -1;
+        if (top != NULL) {
+            IComparable::Probe(top->mRealActivity)->CompareTo(
+                TO_IINTERFACE(r->mRealActivity), &compareResult);
+        }
         if (top != NULL && compareResult == 0 && top->mUserId == r->mUserId) {
             if ((launchFlags & IIntent::FLAG_ACTIVITY_SINGLE_TOP) != 0
                     || launchSingleTop || launchSingleTask) {

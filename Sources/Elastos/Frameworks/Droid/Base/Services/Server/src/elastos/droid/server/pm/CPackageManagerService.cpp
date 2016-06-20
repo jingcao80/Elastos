@@ -5772,7 +5772,8 @@ ECode CPackageManagerService::GetActivityInfo(
     FAIL_RETURN(EnforceCrossUserPermission(Binder::GetCallingUid(), userId,
             FALSE, FALSE, String("get activity info")))
 
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         AutoPtr<PackageParser::Activity> a;
         HashMap<AutoPtr<IComponentName>, AutoPtr<PackageParser::Activity> >::Iterator it =
                 mActivities->mActivities.Find(component);
@@ -5787,16 +5788,16 @@ ECode CPackageManagerService::GetActivityInfo(
             String pkgName;
             component->GetPackageName(&pkgName);
             AutoPtr<PackageSetting> ps;
-            HashMap<String, AutoPtr<PackageSetting> >::Iterator it =
-                mSettings->mPackages.Find(pkgName);
+            HashMap<String, AutoPtr<PackageSetting> >::Iterator it = mSettings->mPackages.Find(pkgName);
             if (it != mSettings->mPackages.End()) {
                 ps = it->mSecond;
             }
             if (ps == NULL) {
                 return NOERROR;
             }
-            AutoPtr<IActivityInfo> ai = PackageParser::GenerateActivityInfo(a, flags,
-                    ps->ReadUserState(userId), userId);
+
+            AutoPtr<IActivityInfo> ai = PackageParser::GenerateActivityInfo(
+                a, flags, ps->ReadUserState(userId), userId);
             *info = ai;
             REFCOUNT_ADD(*info)
             return NOERROR;
@@ -7889,7 +7890,8 @@ AutoPtr<IResolveInfo> CPackageManagerService::CreateForwardingResolveInfo(
     AutoPtr<IComponentName> forwardingActivityComponentName;
     CComponentName::New(pkgName, className, (IComponentName**)&forwardingActivityComponentName);
     AutoPtr<IActivityInfo> forwardingActivityInfo;
-    GetActivityInfo(forwardingActivityComponentName, 0, sourceUserId, (IActivityInfo**)&forwardingActivityInfo);
+    GetActivityInfo(forwardingActivityComponentName,
+        0, sourceUserId, (IActivityInfo**)&forwardingActivityInfo);
     if (targetUserId == IUserHandle::USER_OWNER) {
         IPackageItemInfo::Probe(forwardingActivityInfo)->SetShowUserIcon(IUserHandle::USER_OWNER);
         forwardingResolveInfo->SetNoResourceId(TRUE);

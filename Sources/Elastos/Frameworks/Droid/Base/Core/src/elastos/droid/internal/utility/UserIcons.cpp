@@ -20,14 +20,14 @@ namespace Internal {
 namespace Utility {
 
 const Int32 UserIcons::USER_ICON_COLORS[8] = {
-    // R::color::user_icon_1,
-    // R::color::user_icon_2,
-    // R::color::user_icon_3,
-    // R::color::user_icon_4,
-    // R::color::user_icon_5,
-    // R::color::user_icon_6,
-    // R::color::user_icon_7,
-    // R::color::user_icon_8
+    R::color::user_icon_1,
+    R::color::user_icon_2,
+    R::color::user_icon_3,
+    R::color::user_icon_4,
+    R::color::user_icon_5,
+    R::color::user_icon_6,
+    R::color::user_icon_7,
+    R::color::user_icon_8
 };
 
 ECode UserIcons::ConvertToBitmap(
@@ -35,8 +35,9 @@ ECode UserIcons::ConvertToBitmap(
     /* [out] */ IBitmap** bitmap)
 {
     VALIDATE_NOT_NULL(bitmap)
+    *bitmap = NULL;
+
     if (icon == NULL) {
-        *bitmap = NULL;
         return NOERROR;
     }
     Int32 width, height;

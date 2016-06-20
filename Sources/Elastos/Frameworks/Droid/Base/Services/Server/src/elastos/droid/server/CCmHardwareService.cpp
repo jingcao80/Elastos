@@ -19,6 +19,98 @@ namespace Server {
 Boolean CCmHardwareService::DEBUG = TRUE;
 String CCmHardwareService::TAG("CCmHardwareService");
 
+// From /opt/hardware/src/org/cyanogenmod/hardare
+/**
+ * Adaptive backlight support (this refers to technologies like NVIDIA SmartDimmer,
+ * QCOM CABL or Samsung CABC).
+ */
+class AdaptiveBacklight
+{
+public:
+
+    /**
+     * Whether device supports an adaptive backlight technology.
+     *
+     * @return boolean Supported devices must return always true
+     */
+    static Boolean IsSupported() { return FALSE; }
+
+    /**
+     * This method return the current activation status of the adaptive backlight technology.
+     *
+     * @return boolean Must be false when adaptive backlight is not supported or not activated, or
+     * the operation failed while reading the status; true in any other case.
+     */
+    static Boolean IsEnabled() { return FALSE; }
+
+    /**
+     * This method allows to setup adaptive backlight technology status.
+     *
+     * @param status The new adaptive backlight status
+     * @return boolean Must be false if adaptive backlight is not supported or the operation
+     * failed; true in any other case.
+     */
+    static Boolean SetEnabled(Boolean status) { return FALSE; }
+};
+
+class DisplayColorCalibration
+{
+public:
+
+    /*
+     * All HAF classes should export this boolean.
+     * Real implementations must, of course, return true
+     */
+
+    static Boolean isSupported() { return FALSE; }
+
+    /*
+     * Set the RGB values to the given input triplet. Input is
+     * expected to consist of 3 values, space-separated, each to
+     * be a value between the boundaries set by get(Max|Min)Value
+     * (see below), and it's meant to be locally interpreted/used.
+     */
+
+    static Boolean SetColors(const String& colors) {
+        // throw new UnsupportedOperationException();
+        return FALSE;
+    }
+
+    /*
+     * What's the maximum integer value we take for a color
+     */
+
+    static Int32 GetMaxValue() {
+        return -1;
+    }
+
+    /*
+     * What's the minimum integer value we take for a color
+     */
+
+    static Int32 GetMinValue() {
+        return -1;
+    }
+
+    /*
+     * What's the default integer value we take for a color
+     */
+
+    static Int32 GetDefValue() {
+        return -1;
+    }
+
+    /*
+     * What's the current RGB triplet?
+     * This should return a space-separated set of integers in
+     * a string, same format as the input to setColors()
+     */
+
+    static String GetCurColors() {
+        return String("0 0 0");
+    }
+};
+
 //=======================================================================
 // CCmHardwareService::LegacyCmHardware::
 //=======================================================================
@@ -27,31 +119,31 @@ CAR_INTERFACE_IMPL(CCmHardwareService::LegacyCmHardware, Object, ICmHardwareInte
 CCmHardwareService::LegacyCmHardware::LegacyCmHardware()
     : mSupportedFeatures(0)
 {
-    assert(0 && "TODO");
-    // if (AdaptiveBacklight.isSupported())
-    //     mSupportedFeatures |= CmHardwareManager.FEATURE_ADAPTIVE_BACKLIGHT;
+    if (AdaptiveBacklight::IsSupported())
+        mSupportedFeatures |= ICmHardwareManager::FEATURE_ADAPTIVE_BACKLIGHT;
+    // TODO
     // if (ColorEnhancement.isSupported())
-    //     mSupportedFeatures |= CmHardwareManager.FEATURE_COLOR_ENHANCEMENT;
+    //     mSupportedFeatures |= ICmHardwareManager::FEATURE_COLOR_ENHANCEMENT;
     // if (DisplayColorCalibration.isSupported())
-    //     mSupportedFeatures |= CmHardwareManager.FEATURE_DISPLAY_COLOR_CALIBRATION;
+    //     mSupportedFeatures |= ICmHardwareManager::FEATURE_DISPLAY_COLOR_CALIBRATION;
     // if (DisplayGammaCalibration.isSupported())
-    //     mSupportedFeatures |= CmHardwareManager.FEATURE_DISPLAY_GAMMA_CALIBRATION;
+    //     mSupportedFeatures |= ICmHardwareManager::FEATURE_DISPLAY_GAMMA_CALIBRATION;
     // if (HighTouchSensitivity.isSupported())
-    //     mSupportedFeatures |= CmHardwareManager.FEATURE_HIGH_TOUCH_SENSITIVITY;
+    //     mSupportedFeatures |= ICmHardwareManager::FEATURE_HIGH_TOUCH_SENSITIVITY;
     // if (KeyDisabler.isSupported())
-    //     mSupportedFeatures |= CmHardwareManager.FEATURE_KEY_DISABLE;
+    //     mSupportedFeatures |= ICmHardwareManager::FEATURE_KEY_DISABLE;
     // if (LongTermOrbits.isSupported())
-    //     mSupportedFeatures |= CmHardwareManager.FEATURE_LONG_TERM_ORBITS;
+    //     mSupportedFeatures |= ICmHardwareManager::FEATURE_LONG_TERM_ORBITS;
     // if (SerialNumber.isSupported())
-    //     mSupportedFeatures |= CmHardwareManager.FEATURE_SERIAL_NUMBER;
+    //     mSupportedFeatures |= ICmHardwareManager::FEATURE_SERIAL_NUMBER;
     // if (SunlightEnhancement.isSupported())
-    //     mSupportedFeatures |= CmHardwareManager.FEATURE_SUNLIGHT_ENHANCEMENT;
+    //     mSupportedFeatures |= ICmHardwareManager::FEATURE_SUNLIGHT_ENHANCEMENT;
     // if (TapToWake.isSupported())
-    //     mSupportedFeatures |= CmHardwareManager.FEATURE_TAP_TO_WAKE;
+    //     mSupportedFeatures |= ICmHardwareManager::FEATURE_TAP_TO_WAKE;
     // if (VibratorHW.isSupported())
-    //     mSupportedFeatures |= CmHardwareManager.FEATURE_VIBRATOR;
+    //     mSupportedFeatures |= ICmHardwareManager::FEATURE_VIBRATOR;
     // if (TouchscreenHovering.isSupported())
-    //     mSupportedFeatures |= CmHardwareManager.FEATURE_TOUCH_HOVERING;
+    //     mSupportedFeatures |= ICmHardwareManager::FEATURE_TOUCH_HOVERING;
 }
 
 ECode CCmHardwareService::LegacyCmHardware::GetSupportedFeatures(
@@ -69,19 +161,19 @@ ECode CCmHardwareService::LegacyCmHardware::Get(
     VALIDATE_NOT_NULL(result)
     assert(0 && "TODO");
     // switch(feature) {
-    //     case CmHardwareManager.FEATURE_ADAPTIVE_BACKLIGHT:
+    //     case ICmHardwareManager::FEATURE_ADAPTIVE_BACKLIGHT:
     //         return AdaptiveBacklight.isEnabled();
-    //     case CmHardwareManager.FEATURE_COLOR_ENHANCEMENT:
+    //     case ICmHardwareManager::FEATURE_COLOR_ENHANCEMENT:
     //         return ColorEnhancement.isEnabled();
-    //     case CmHardwareManager.FEATURE_HIGH_TOUCH_SENSITIVITY:
+    //     case ICmHardwareManager::FEATURE_HIGH_TOUCH_SENSITIVITY:
     //         return HighTouchSensitivity.isEnabled();
-    //     case CmHardwareManager.FEATURE_KEY_DISABLE:
+    //     case ICmHardwareManager::FEATURE_KEY_DISABLE:
     //         return KeyDisabler.isActive();
-    //     case CmHardwareManager.FEATURE_SUNLIGHT_ENHANCEMENT:
+    //     case ICmHardwareManager::FEATURE_SUNLIGHT_ENHANCEMENT:
     //         return SunlightEnhancement.isEnabled();
-    //     case CmHardwareManager.FEATURE_TAP_TO_WAKE:
+    //     case ICmHardwareManager::FEATURE_TAP_TO_WAKE:
     //         return TapToWake.isEnabled();
-    //     case CmHardwareManager.FEATURE_TOUCH_HOVERING:
+    //     case ICmHardwareManager::FEATURE_TOUCH_HOVERING:
     //         return TouchscreenHovering.isEnabled();
     //     default:
     //         Log.e(TAG, "feature " + feature + " is not a boolean feature");
@@ -98,19 +190,19 @@ ECode CCmHardwareService::LegacyCmHardware::Set(
     VALIDATE_NOT_NULL(result)
     assert(0 && "TODO");
     // switch(feature) {
-    //     case CmHardwareManager.FEATURE_ADAPTIVE_BACKLIGHT:
+    //     case ICmHardwareManager::FEATURE_ADAPTIVE_BACKLIGHT:
     //         return AdaptiveBacklight.setEnabled(enable);
-    //     case CmHardwareManager.FEATURE_COLOR_ENHANCEMENT:
+    //     case ICmHardwareManager::FEATURE_COLOR_ENHANCEMENT:
     //         return ColorEnhancement.setEnabled(enable);
-    //     case CmHardwareManager.FEATURE_HIGH_TOUCH_SENSITIVITY:
+    //     case ICmHardwareManager::FEATURE_HIGH_TOUCH_SENSITIVITY:
     //         return HighTouchSensitivity.setEnabled(enable);
-    //     case CmHardwareManager.FEATURE_KEY_DISABLE:
+    //     case ICmHardwareManager::FEATURE_KEY_DISABLE:
     //         return KeyDisabler.setActive(enable);
-    //     case CmHardwareManager.FEATURE_SUNLIGHT_ENHANCEMENT:
+    //     case ICmHardwareManager::FEATURE_SUNLIGHT_ENHANCEMENT:
     //         return SunlightEnhancement.setEnabled(enable);
-    //     case CmHardwareManager.FEATURE_TAP_TO_WAKE:
+    //     case ICmHardwareManager::FEATURE_TAP_TO_WAKE:
     //         return TapToWake.setEnabled(enable);
-    //     case CmHardwareManager.FEATURE_TOUCH_HOVERING:
+    //     case ICmHardwareManager::FEATURE_TOUCH_HOVERING:
     //         return TouchscreenHovering.setEnabled(enable);
     //     default:
     //         Log.e(TAG, "feature " + feature + " is not a boolean feature");
@@ -210,12 +302,12 @@ ECode CCmHardwareService::LegacyCmHardware::GetDisplayGammaCalibration(
     //     return null;
     // }
     // int[] currentCalibration = new int[5];
-    // currentCalibration[CmHardwareManager.GAMMA_CALIBRATION_RED_INDEX] = rgb[0];
-    // currentCalibration[CmHardwareManager.GAMMA_CALIBRATION_GREEN_INDEX] = rgb[1];
-    // currentCalibration[CmHardwareManager.GAMMA_CALIBRATION_BLUE_INDEX] = rgb[2];
-    // currentCalibration[CmHardwareManager.GAMMA_CALIBRATION_MIN_INDEX] =
+    // currentCalibration[ICmHardwareManager::GAMMA_CALIBRATION_RED_INDEX] = rgb[0];
+    // currentCalibration[ICmHardwareManager::GAMMA_CALIBRATION_GREEN_INDEX] = rgb[1];
+    // currentCalibration[ICmHardwareManager::GAMMA_CALIBRATION_BLUE_INDEX] = rgb[2];
+    // currentCalibration[ICmHardwareManager::GAMMA_CALIBRATION_MIN_INDEX] =
     //     DisplayGammaCalibration.getMinValue(idx);
-    // currentCalibration[CmHardwareManager.GAMMA_CALIBRATION_MAX_INDEX] =
+    // currentCalibration[ICmHardwareManager::GAMMA_CALIBRATION_MAX_INDEX] =
     //     DisplayGammaCalibration.getMaxValue(idx);
     // return currentCalibration;
     return NOERROR;
@@ -236,11 +328,11 @@ ECode CCmHardwareService::LegacyCmHardware::GetVibratorIntensity(
 {
     VALIDATE_NOT_NULL(result)
     // int[] vibrator = new int[5];
-    // vibrator[CmHardwareManager.VIBRATOR_INTENSITY_INDEX] = VibratorHW.getCurIntensity();
-    // vibrator[CmHardwareManager.VIBRATOR_DEFAULT_INDEX] = VibratorHW.getDefaultIntensity();
-    // vibrator[CmHardwareManager.VIBRATOR_MIN_INDEX] = VibratorHW.getMinIntensity();
-    // vibrator[CmHardwareManager.VIBRATOR_MAX_INDEX] = VibratorHW.getMaxIntensity();
-    // vibrator[CmHardwareManager.VIBRATOR_WARNING_INDEX] = VibratorHW.getWarningThreshold();
+    // vibrator[ICmHardwareManager::VIBRATOR_INTENSITY_INDEX] = VibratorHW.getCurIntensity();
+    // vibrator[ICmHardwareManager::VIBRATOR_DEFAULT_INDEX] = VibratorHW.getDefaultIntensity();
+    // vibrator[ICmHardwareManager::VIBRATOR_MIN_INDEX] = VibratorHW.getMinIntensity();
+    // vibrator[ICmHardwareManager::VIBRATOR_MAX_INDEX] = VibratorHW.getMaxIntensity();
+    // vibrator[ICmHardwareManager::VIBRATOR_WARNING_INDEX] = VibratorHW.getWarningThreshold();
     // return vibrator;
     return NOERROR;
 }

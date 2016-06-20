@@ -470,7 +470,8 @@ ECode CUserManagerService::GetProfileParent(
     *info = NULL;
 
     FAIL_RETURN(CheckManageUsersPermission(String("get the profile parent")))
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> profile = GetUserInfoLocked(userHandle);
         Int32 parentUserId;
         profile->GetProfileGroupId(&parentUserId);
@@ -506,7 +507,8 @@ ECode CUserManagerService::SetUserEnabled(
     /* [in] */ Int32 userHandle)
 {
     FAIL_RETURN(CheckManageUsersPermission(String("enable user")))
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> info = GetUserInfoLocked(userHandle);
         Boolean isEnabled;
         if (info != NULL && (info->IsEnabled(&isEnabled), !isEnabled)) {
@@ -528,7 +530,8 @@ ECode CUserManagerService::GetUserInfo(
     *userInfo = NULL;
 
     FAIL_RETURN(CheckManageUsersPermission(String("query user")))
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         AutoPtr<IUserInfo> user = GetUserInfoLocked(userId);
         *userInfo = user;
         REFCOUNT_ADD(*userInfo)
@@ -566,7 +569,8 @@ AutoPtr<IUserInfo> CUserManagerService::GetUserInfoLocked(
 Boolean CUserManagerService::Exists(
     /* [in] */ Int32 userId)
 {
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         for (Int32 i = 0; i < mUserIds->GetLength(); ++i) {
             if ((*mUserIds)[i] == userId) return TRUE;
         }

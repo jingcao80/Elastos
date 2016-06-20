@@ -5,8 +5,13 @@
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/content/pm/PackageItemInfo.h"
 #include "elastos/droid/content/pm/PackageManager.h"
+#include "elastos/core/StringBuilder.h"
+#include "elastos/core/StringUtils.h"
 
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::CString;
+using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Text::TextUtils;
 
 namespace Elastos {
@@ -22,7 +27,7 @@ PackageItemInfo::PackageItemInfo()
     , mThemedIcon(0)
     , mBanner(0)
     , mLogo(0)
-    , mShowUserIcon(0)
+    , mShowUserIcon(IUserHandle::USER_NULL)
 {}
 
 PackageItemInfo::~PackageItemInfo()
@@ -56,6 +61,41 @@ ECode PackageItemInfo::constructor(
     mShowUserIcon = orig->mShowUserIcon;
     mThemedIcon = orig->mThemedIcon;
 
+    return NOERROR;
+}
+
+ECode PackageItemInfo::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("PackageItemInfo{0x");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", name=";
+    sb += mName;
+    sb += ", packageName=";
+    sb += mPackageName;
+    sb += ", labelRes=";
+    sb += StringUtils::ToHexString(mLabelRes);
+    if (mNonLocalizedLabel != NULL) {
+        sb += ", nonLocalizedLabel=";
+        sb += TO_STR(mNonLocalizedLabel);
+    }
+    sb += ", icon=";
+    sb += mIcon;
+    sb += ", themedIcon=";
+    sb += mThemedIcon;
+    sb += ", banner=";
+    sb += mBanner;
+    sb += ", logo=";
+    sb += mLogo;
+    if (mMetaData != NULL) {
+        sb += ", metaData=";
+        sb += TO_STR(mMetaData);
+    }
+    sb += ", showUserIcon=";
+    sb += mShowUserIcon;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

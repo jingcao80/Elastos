@@ -472,8 +472,6 @@ ECode RecentsVerticalScrollView::GetChildAtPosition(
     x = x1 + x2;
     y = y1 + y2;
 
-    Logger::I(TAG, "GetChildAtPosition: (%.2f, %.2f)", x, y);
-
     Int32 count;
     IViewGroup::Probe(mLinearLayout)->GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {

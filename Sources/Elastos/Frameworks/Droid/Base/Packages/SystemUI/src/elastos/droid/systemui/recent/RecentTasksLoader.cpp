@@ -139,7 +139,6 @@ ECode RecentTasksLoader::TaskLoaderAsyncTask::DoInBackground(
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** result)
 {
-    Logger::I("RecentTasksLoader::TaskLoaderAsyncTask", " >>>> TaskLoaderAsyncTask::DoInBackground");
     VALIDATE_NOT_NULL(result)
     // We load in two stages: first, we update progress with just the first screenful
     // of items. Then, we update with the rest of the items
@@ -269,7 +268,6 @@ ECode RecentTasksLoader::TaskLoaderAsyncTask::DoInBackground(
 
     Process::SetThreadPriority(origPri);
     *result = NULL;
-    Logger::I("RecentTasksLoader::TaskLoaderAsyncTask", " <<<< TaskLoaderAsyncTask::DoInBackground");
     return NOERROR;
 }
 
