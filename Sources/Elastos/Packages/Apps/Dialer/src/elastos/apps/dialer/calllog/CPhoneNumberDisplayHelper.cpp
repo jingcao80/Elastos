@@ -69,7 +69,7 @@ ECode CPhoneNumberDisplayHelper::GetDisplayNumber(
     /* [in] */ ICharSequence* formattedNumber,
     /* [out] */ ICharSequence** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     AutoPtr<ICharSequence> displayName = getDisplayName(number, presentation);
     if (!TextUtils::IsEmpty(displayName)) {
         *result = displayName;

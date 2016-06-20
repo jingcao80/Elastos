@@ -28,7 +28,7 @@ CContactInfo::CContactInfo()
 ECode CContactInfo::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
-    VALUE_NOT_NULL(hashCode);
+    VALIDATE_NOT_NULL(hashCode);
 
     // Uses only name and contactUri to determine hashcode.
     // This should be sufficient to have a reasonable distribution of hash codes.
@@ -47,7 +47,7 @@ ECode CContactInfo::Equals(
     /* [in] */ IInterface* obj,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     if (this == obj){
         *result = TRUE;
@@ -110,7 +110,7 @@ ECode CContactInfo::Equals(
 ECode CContactInfo::ToString(
     /* [out] */ String* info)
 {
-    VALUE_NOT_NULL(info);
+    VALIDATE_NOT_NULL(info);
 
     // TODO: simple implement
     *info = "Elastos::Apps::Dialer::CallLog::CContactInfo";

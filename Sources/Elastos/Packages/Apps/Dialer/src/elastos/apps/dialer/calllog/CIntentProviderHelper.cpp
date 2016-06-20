@@ -16,7 +16,7 @@ ECode CIntentProviderHelper::GetReturnCallIntentProvider(
     /* [in] */ const String& number,
     /* [out] */ IIntentProvider** provider)
 {
-    VALUE_NOT_NULL(provider);
+    VALIDATE_NOT_NULL(provider);
     AutoPtr<IIntentProvider> result = IntentProvider::GetReturnCallIntentProvider(number);
     *provider = result;
     REFCOUNT_ADD(*provider);
@@ -28,7 +28,7 @@ ECode CIntentProviderHelper::GetReturnCallIntentProvider(
     /* [in] */ IPhoneAccountHandle* accountHandle,
     /* [out] */ IIntentProvider** provider)
 {
-    VALUE_NOT_NULL(provider);
+    VALIDATE_NOT_NULL(provider);
     AutoPtr<IIntentProvider> result = IntentProvider::GetReturnCallIntentProvider(
             number, accountHandle);
     *provider = result;
@@ -40,7 +40,7 @@ ECode CIntentProviderHelper::GetReturnVideoCallIntentProvider(
     /* [in] */ const String& number,
     /* [out] */ IIntentProvider** provider)
 {
-    VALUE_NOT_NULL(provider);
+    VALIDATE_NOT_NULL(provider);
     AutoPtr<IIntentProvider> result = IntentProvider::GetReturnVideoCallIntentProvider(number);
     *provider = result;
     REFCOUNT_ADD(*provider);
@@ -52,7 +52,7 @@ ECode CIntentProviderHelper::GetReturnVideoCallIntentProvider(
     /* [in] */ IPhoneAccountHandle* accountHandle,
     /* [out] */ IIntentProvider** provider)
 {
-    VALUE_NOT_NULL(provider);
+    VALIDATE_NOT_NULL(provider);
     AutoPtr<IIntentProvider> result = IntentProvider::GetReturnVideoCallIntentProvider(
             number, accountHandle);
     *provider = result;
@@ -65,7 +65,7 @@ ECode CIntentProviderHelper::GetPlayVoicemailIntentProvider(
     /* [in] */ const String& voicemailUri,
     /* [out] */ IIntentProvider** provider)
 {
-    VALUE_NOT_NULL(provider);
+    VALIDATE_NOT_NULL(provider);
     AutoPtr<IIntentProvider> result = IntentProvider::GetPlayVoicemailIntentProvider(
             rowId, voicemailUri);
     *provider = result;
@@ -79,7 +79,7 @@ ECode CIntentProviderHelper::GetCallDetailIntentProvider(
     /* [in] */ const String& voicemailUri,
     /* [out] */ IIntentProvider** provider)
 {
-    VALUE_NOT_NULL(provider);
+    VALIDATE_NOT_NULL(provider);
     AutoPtr<IIntentProvider> result = IntentProvider::GetCallDetailIntentProvider(
             id, extraIds, voicemailUri);
     *provider = result;

@@ -16,7 +16,7 @@ ECode CPhoneAccountUtils::GetAccount(
     /* [in] */ String accountId,
     /* [out] */ IPhoneAccountHandle* handle)
 {
-    VALUE_NOT_NULL(handle);
+    VALIDATE_NOT_NULL(handle);
     AutoPtr<IPhoneAccountHandle> result = PhoneAccountUtils::GetAccount(
             componentString, accountId);
     *handle = result;
@@ -30,7 +30,7 @@ ECode CPhoneAccountUtils::GetAccountIcon(
     /* [in] */ IPhoneAccountHandle* phoneAccount,
     /* [out] */ IDrawable** drawable)
 {
-    VALUE_NOT_NULL(drawable);
+    VALIDATE_NOT_NULL(drawable);
     AutoPtr<IPhoneAccountHandle> result = PhoneAccountUtils::GetAccountIcon(
             context, phoneAccount);
     *drawable = result;
@@ -44,7 +44,7 @@ ECode CPhoneAccountUtils::GetAccountLabel(
     /* [in] */ IPhoneAccountHandle* phoneAccount,
     /* [out] */ String* lable)
 {
-    VALUE_NOT_NULL(lable);
+    VALIDATE_NOT_NULL(lable);
     AutoPtr<IPhoneAccountHandle> result = PhoneAccountUtils::GetAccountLabel(
             context, phoneAccount);
     *lable = result;
