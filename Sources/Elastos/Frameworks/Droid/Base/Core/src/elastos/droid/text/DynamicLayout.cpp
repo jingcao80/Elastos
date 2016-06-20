@@ -764,6 +764,7 @@ ECode DynamicLayout::GetBlockEndLines(
 {
     VALIDATE_NOT_NULL(result)
     *result = mBlockEndLines;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -775,6 +776,7 @@ ECode DynamicLayout::GetBlockIndices(
 {
     VALIDATE_NOT_NULL(result)
     *result = mBlockIndices;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
