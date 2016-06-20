@@ -19,6 +19,9 @@ public:
         AllocationBuilder(
             /* [in] */ RenderScript* rs);
 
+        CARAPI Create(
+            /* [out] */ Mesh** mesh);
+
     public:
         RenderScript* mRS;
     };

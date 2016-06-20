@@ -291,6 +291,43 @@ ECode RenderScript::nScriptSetVarObj(
     return NOERROR;
 }
 
+ECode RenderScript::nMeshCreate(
+    /* [in] */ ArrayOf<Int64>* vtx,
+    /* [in] */ ArrayOf<Int64>* idx,
+    /* [in] */ ArrayOf<Int32>* prim,
+    /* [out] */ Int64* mesh)
+{
+    AutoLock lock(this);
+    FAIL_RETURN(Validate());
+
+    Int32 vtxLen = vtx->GetLength();
+    Int64* jVtxPtr = vtx->GetPayload();
+    RsAllocation* vtxPtr = (RsAllocation*) malloc(sizeof(RsAllocation) * vtxLen);
+    for(Int32 i = 0; i < vtxLen; ++i) {
+        vtxPtr[i] = (RsAllocation)(uintptr_t)jVtxPtr[i];
+    }
+
+    Int32 idxLen = idx->GetLength();
+    Int64* jIdxPtr = idx->GetPayload();
+    RsAllocation* idxPtr = (RsAllocation*) malloc(sizeof(RsAllocation) * idxLen);
+    for(Int32 i = 0; i < idxLen; ++i) {
+        idxPtr[i] = (RsAllocation)(uintptr_t)jIdxPtr[i];
+    }
+
+    Int32 primLen = prim->GetLength();
+    Int32* primPtr = prim->GetPayload();
+
+    Int64 id = (Int64)(uintptr_t)rsMeshCreate((RsContext)mContext,
+                               (RsAllocation *)vtxPtr, vtxLen,
+                               (RsAllocation *)idxPtr, idxLen,
+                               (uint32_t *)primPtr, primLen);
+
+    free(vtxPtr);
+    free(idxPtr);
+    *mesh = id;
+    return NOERROR;
+}
+
 ECode RenderScript::SafeID(
     /* [in] */ BaseObj* o,
     /* [out] */ Int64* id)

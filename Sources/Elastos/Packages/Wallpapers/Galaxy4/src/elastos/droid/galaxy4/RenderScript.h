@@ -160,6 +160,12 @@ public:
         /* [in] */ Int32 slot,
         /* [in] */ Int64 val);
 
+    CARAPI nMeshCreate(
+        /* [in] */ ArrayOf<Int64>* vtx,
+        /* [in] */ ArrayOf<Int64>* idx,
+        /* [in] */ ArrayOf<Int32>* prim,
+        /* [out] */ Int64* mesh);
+
     CARAPI SafeID(
         /* [in] */ BaseObj* o,
         /* [out] */ Int64* id);

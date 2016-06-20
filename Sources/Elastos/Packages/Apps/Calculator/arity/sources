@@ -10,6 +10,7 @@ INCLUDES += $(MAKEDIR)/src
 
 VPATH += $(MAKEDIR)/src/org/javia/arity
 
+SOURCES += Org.Javia.Arity.car
 SOURCES += Function.cpp
 SOURCES += ContextFunction.cpp
 SOURCES += CompiledFunction.cpp
