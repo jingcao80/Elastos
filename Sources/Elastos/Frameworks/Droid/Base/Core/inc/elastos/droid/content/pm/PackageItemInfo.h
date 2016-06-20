@@ -202,6 +202,8 @@ public:
         /* [in] */ IPackageManager* pm,
         /* [out] */ IDrawable** icon);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
 protected:
     /**
      * Retrieve the default graphical banner associated with this item.

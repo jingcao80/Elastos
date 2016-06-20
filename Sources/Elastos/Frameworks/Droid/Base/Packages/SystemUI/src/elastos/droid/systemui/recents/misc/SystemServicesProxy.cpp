@@ -7,6 +7,7 @@
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.IO.h"
+#include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include <elastos/droid/R.h>
@@ -53,12 +54,11 @@ using Elastos::Droid::Graphics::IXfermode;
 using Elastos::Droid::Graphics::PorterDuffMode_DST_ATOP;
 using Elastos::Droid::Graphics::Drawable::CColorDrawable;
 using Elastos::Droid::Os::CBundle;
-using Elastos::Droid::Os::CUserHandle;
-using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::IParcelFileDescriptor;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Droid::Provider::CSettingsSystem;
 using Elastos::Droid::Provider::ISettingsGlobal;
@@ -487,15 +487,11 @@ AutoPtr<IDrawable> SystemServicesProxy::GetBadgedIcon(
     /* [in] */ IDrawable* icon,
     /* [in] */ Int32 userId)
 {
-    AutoPtr<IUserHandleHelper> uhh;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-    Int32 myUserId;
-    uhh->GetMyUserId(&myUserId);
-    AutoPtr<IUserHandle> uh;
-    CUserHandle::New(userId, (IUserHandle**)&uh);
     AutoPtr<IDrawable> result = icon;
-    if (userId != myUserId) {
+    if (userId != UserHandle::GetMyUserId()) {
         result = NULL;
+        AutoPtr<IUserHandle> uh;
+        CUserHandle::New(userId, (IUserHandle**)&uh);
         mPm->GetUserBadgedIcon(icon, uh, (IDrawable**)&result);
     }
     return result;

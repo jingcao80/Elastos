@@ -17,6 +17,7 @@
 #include "elastos/droid/server/CUiModeManagerService.h"
 #include "elastos/droid/server/CNsdService.h"
 #include "elastos/droid/server/CBatteryService.h"
+#include "elastos/droid/server/CCmHardwareService.h"
 #include "elastos/droid/server/accessibility/CAccessibilityManagerService.h"
 #include "elastos/droid/server/accounts/CAccountManagerService.h"
 #include "elastos/droid/server/appwidget/CAppWidgetService.h"
@@ -91,6 +92,7 @@ using Elastos::Droid::View::IIAssetAtlas;
 using Elastos::Droid::View::Accessibility::IIAccessibilityManager;
 using Elastos::Droid::Accounts::IIAccountManager;
 using Elastos::Droid::Hardware::Input::IIInputManager;
+using Elastos::Droid::Hardware::IICmHardwareService;
 using Elastos::Droid::Webkit::IWebViewFactory;
 using Elastos::Droid::Webkit::CWebViewFactory;
 using Elastos::Droid::Utility::CDisplayMetrics;
@@ -1064,6 +1066,14 @@ ECode SystemServer::StartOtherServices()
     //         }
 
     //     }
+
+        if (!disableNonCoreServices) {
+            Slogger::I(TAG, "Launcher CmHardwareService");
+            AutoPtr<IICmHardwareService> cmhs;
+            ec = CCmHardwareService::New(context, (IICmHardwareService**)&cmhs);
+            if (FAILED(ec)) ReportWtf("starting CMHW Service", ec);
+            ServiceManager::AddService(IContext::CMHW_SERVICE, cmhs);
+        }
 
         Slogger::I(TAG, "Launcher Apps Service");
         systemService = NULL;

@@ -924,12 +924,16 @@ ECode CResources::GetDrawable(
 
     AutoPtr<IDrawable> d;
     GetDrawable(id, NULL, (IDrawable**)&d);
-    Boolean can;
-    d->CanApplyTheme(&can);
-    if (can) {
-        // Log.w(TAG, "Drawable " + getResourceName(id) + " has unresolved theme "
-        //         + "attributes! Consider using Resources.getDrawable(Int32, Theme) or "
-        //         + "Context.getDrawable(Int32).", new RuntimeException());
+    if (d) {
+        Boolean can;
+        d->CanApplyTheme(&can);
+        if (can) {
+            String name;
+            GetResourceName(id, &name);
+            Logger::W(TAG, "Drawable %s has unresolved theme attributes!"
+                " Consider using Resources::GetDrawable(Int32, IResourcesTheme*)"
+                " or Context::GetDrawable(Int32).", name.string());
+        }
     }
 
     *drawable = d;
@@ -968,7 +972,8 @@ ECode CResources::GetDrawable(
     }
 
     AutoPtr<ITypedValue> value;
-    {    AutoLock syncLock(mAccessLock);
+    {
+        AutoLock syncLock(mAccessLock);
         value = (ITypedValue*)mTmpValue.Get();
         if (value == NULL) {
             CTypedValue::New((ITypedValue**)&value);
@@ -1010,7 +1015,8 @@ ECode CResources::GetDrawable(
     //     }
     // }
 
-    {    AutoLock syncLock(mAccessLock);
+    {
+        AutoLock syncLock(mAccessLock);
         if (mTmpValue == NULL) {
             mTmpValue = (CTypedValue*)value.Get();
         }
@@ -1425,7 +1431,7 @@ ECode CResources::GetValue(
         }
         return NOERROR;
     }
-    Logger::E(TAG, "Resource ID #0x%08x", id);
+    Logger::W(TAG, "E_NOT_FOUND_EXCEPTION: Resource ID #0x%08x", id);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -1490,7 +1496,7 @@ ECode CResources::GetValueForDensity(
         }
         return NOERROR;
     }
-    Logger::E(TAG, "Resource ID #0x%08x", id);
+    Logger::W(TAG, "E_NOT_FOUND_EXCEPTION: Resource ID #0x%08x", id);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -1506,7 +1512,7 @@ ECode CResources::GetValue(
     if (id != 0) {
         return GetValue(id, outValue, resolveRefs);
     }
-    Logger::E(TAG, "String resource name %s", (const char*)name);
+    Logger::W(TAG, "E_NOT_FOUND_EXCEPTION: String resource name %s", name.string());
     return E_NOT_FOUND_EXCEPTION;
 }
 

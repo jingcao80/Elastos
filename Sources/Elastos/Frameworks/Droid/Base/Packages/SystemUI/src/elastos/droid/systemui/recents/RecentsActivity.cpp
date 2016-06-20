@@ -125,9 +125,6 @@ ECode RecentsActivity::ServiceBroadcastReceiver::OnReceive(
 {
     String action;
     intent->GetAction(&action);
-    Logger::I(TAG, " >> ServiceBroadcastReceiver OnReceive: action:%s, context: %s",
-        action.string(), TO_CSTR(context));
-
     if (action.Equals(IAlternateRecentsComponent::ACTION_HIDE_RECENTS_ACTIVITY)) {
         // Mark Recents as no longer visible
         AlternateRecentsComponent::NotifyVisibilityChanged(FALSE);
@@ -181,7 +178,6 @@ ECode RecentsActivity::SystemBroadcastReceiver::OnReceive(
 {
     String action;
     intent->GetAction(&action);
-    Logger::I(TAG, " >> SystemBroadcastReceiver OnReceive: %s", action.string());
     if (action.Equals(IIntent::ACTION_SCREEN_OFF)) {
         // When the screen turns off, dismiss Recents to Home
         Boolean b;
@@ -246,12 +242,10 @@ RecentsActivity::RecentsActivity()
 
 RecentsActivity::~RecentsActivity()
 {
-    Logger::I(TAG, " ===========> destory RecentsActivity: %p", this);
 }
 
 ECode RecentsActivity::constructor()
 {
-    Logger::I(TAG, " >>> RecentsActivity::constructor()");
     CRecentsActivityServiceBroadcastReceiver::New(this, (IBroadcastReceiver**)&mServiceBroadcastReceiver);
     CRecentsActivitySystemBroadcastReceiver::New(this, (IBroadcastReceiver**)&mSystemBroadcastReceiver);
 
@@ -263,7 +257,6 @@ ECode RecentsActivity::constructor()
 ECode RecentsActivity::UpdateRecentsTasks(
     /* [in] */ IIntent* launchIntent)
 {
-    Logger::I(TAG, " >>> RecentsActivity::UpdateRecentsTasks()");
     // Update the configuration based on the launch intent
     Boolean fromSearchHome;
     launchIntent->GetBooleanExtra(
@@ -442,7 +435,6 @@ ECode RecentsActivity::DismissRecentsToFocusedTaskOrHome(
     /* [in] */ Boolean checkFilteredStackState,
     /* [out] */ Boolean* result)
 {
-    Logger::I(TAG, " >>> RecentsActivity::DismissRecentsToFocusedTaskOrHome()");
     VALIDATE_NOT_NULL(result)
     if (mVisible) {
         // If we currently have filtered stacks, then unfilter those first
@@ -479,7 +471,6 @@ ECode RecentsActivity::DismissRecentsToFocusedTaskOrHome(
 ECode RecentsActivity::DismissRecentsToHomeRaw(
     /* [in] */ Boolean animated)
 {
-    Logger::I(TAG, " >>> RecentsActivity::DismissRecentsToHomeRaw()");
     if (animated) {
         AutoPtr<ReferenceCountedTrigger> exitTrigger = new ReferenceCountedTrigger();
         exitTrigger->constructor(this, NULL, mFinishLaunchHomeRunnable, NULL);
@@ -490,7 +481,6 @@ ECode RecentsActivity::DismissRecentsToHomeRaw(
     else {
         mFinishLaunchHomeRunnable->Run();
     }
-    Logger::I(TAG, " <<< RecentsActivity::DismissRecentsToHomeRaw()");
     return NOERROR;
 }
 
@@ -498,7 +488,6 @@ ECode RecentsActivity::DismissRecentsToHome(
     /* [in] */ Boolean animated,
     /* [out] */ Boolean* result)
 {
-    Logger::I(TAG, " >>> RecentsActivity::DismissRecentsToHome()");
     VALIDATE_NOT_NULL(result)
     if (mVisible) {
         // Return to Home
@@ -513,7 +502,6 @@ ECode RecentsActivity::DismissRecentsToHome(
 ECode RecentsActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
-    Logger::I(TAG, " >> OnCreate");
     Activity::OnCreate(savedInstanceState);
     // For the non-primary user, ensure that the SystemSericesProxy is initialized
     RecentsTaskLoader::Initialize(this);
@@ -628,7 +616,6 @@ ECode RecentsActivity::OnConfigurationChange()
 ECode RecentsActivity::OnNewIntent(
     /* [in] */ IIntent* intent)
 {
-    Logger::I(TAG, " >> OnNewIntent");
     Activity::OnNewIntent(intent);
     Activity::SetIntent(intent);
 
@@ -651,10 +638,8 @@ ECode RecentsActivity::OnNewIntent(
 
 ECode RecentsActivity::OnStart()
 {
-    Logger::I(TAG, " >> OnStart");
     Activity::OnStart();
 
-    Logger::I(TAG, "Register the broadcast receiver to handle messages from our service");
     // Register the broadcast receiver to handle messages from our service
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
@@ -672,7 +657,6 @@ ECode RecentsActivity::OnStart()
 
 ECode RecentsActivity::OnResume()
 {
-    Logger::I(TAG, " >> OnResume");
     Activity::OnResume();
 
     // Mark Recents as visible
@@ -682,7 +666,6 @@ ECode RecentsActivity::OnResume()
 
 ECode RecentsActivity::OnStop()
 {
-    Logger::I(TAG, " >> OnStop");
     Activity::OnStop();
 
     // Remove all the views
@@ -699,7 +682,6 @@ ECode RecentsActivity::OnStop()
 
 ECode RecentsActivity::OnDestroy()
 {
-    Logger::I(TAG, " >> OnDestroy");
     Activity::OnDestroy();
 
     // Unregister the system broadcast receivers

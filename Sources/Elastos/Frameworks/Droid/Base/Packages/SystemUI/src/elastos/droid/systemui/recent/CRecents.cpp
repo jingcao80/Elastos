@@ -102,7 +102,6 @@ ECode CRecents::ShowRecents(
     /* [in] */ Boolean triggeredFromAltTab,
     /* [in] */ IView* statusBarView)
 {
-    Logger::I(TAG, " >> ShowRecents");
     if (mUseAlternateRecents) {
         if (mAlternateRecents != NULL) {
             mAlternateRecents->OnShowRecents(triggeredFromAltTab, statusBarView);
@@ -115,7 +114,6 @@ ECode CRecents::HideRecents(
     /* [in] */ Boolean triggeredFromAltTab,
     /* [in] */ Boolean triggeredFromHomeKey)
 {
-    Logger::I(TAG, " >> HideRecents");
     if (mUseAlternateRecents) {
         if (mAlternateRecents != NULL) {
             mAlternateRecents->OnHideRecents(triggeredFromAltTab, triggeredFromHomeKey);
@@ -139,7 +137,6 @@ ECode CRecents::ToggleRecents(
     /* [in] */ Int32 layoutDirection,
     /* [in] */ IView* statusBarView)
 {
-    Logger::I(TAG, " >> ToggleRecents");
     if (mUseAlternateRecents) {
         // Launch the alternate recents if required
         if (mAlternateRecents != NULL) {

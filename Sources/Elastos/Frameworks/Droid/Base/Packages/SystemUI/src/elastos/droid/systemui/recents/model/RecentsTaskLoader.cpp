@@ -57,6 +57,9 @@ namespace SystemUI {
 namespace Recents {
 namespace Model {
 
+const String RecentsTaskLoader::TAG("RecentsTaskLoader");
+AutoPtr<RecentsTaskLoader> RecentsTaskLoader::sInstance;
+
 //=============================
 // RecentsTaskLoader::TaskResourceLoadQueue
 //=============================
@@ -222,7 +225,6 @@ ECode RecentsTaskLoader::TaskResourceLoader::Run()
                         }
                     }
 
-                    Logger::I(TAG, " > Load the next item from the queue %s, icon:%s", TO_CSTR(task), TO_CSTR(cachedIcon));
                     if (cachedIcon == NULL) {
                         cachedIcon = IDrawable::Probe(mDefaultApplicationIcon);
                     }
@@ -278,14 +280,12 @@ AutoPtr<IDrawable> RecentsTaskLoader::TaskResourceLoader::GetTaskDescriptionIcon
     /* [in] */ SystemServicesProxy* ssp,
     /* [in] */ IResources* res)
 {
-    Logger::I(TAG, " >>> GetTaskDescriptionIcon: iconFilename:%s", iconFilename.string());
     AutoPtr<IBitmap> tdIcon = iconBitmap;
     if (tdIcon == NULL) {
         AutoPtr<IActivityManagerTaskDescriptionHelper> helper;
         CActivityManagerTaskDescriptionHelper::AcquireSingleton(
             (IActivityManagerTaskDescriptionHelper**)&helper);
         helper->LoadTaskDescriptionIcon(iconFilename, (IBitmap**)&tdIcon);
-        Logger::I(TAG, " >>> GetTaskDescriptionIcon: 1: %s", TO_CSTR(tdIcon));
     }
     if (tdIcon != NULL) {
         AutoPtr<IDrawable> drawable;
@@ -317,9 +317,6 @@ ECode RecentsTaskLoader::MyRunnable::Run()
 //=============================
 // RecentsTaskLoader
 //=============================
-
-const String RecentsTaskLoader::TAG("RecentsTaskLoader");
-AutoPtr<RecentsTaskLoader> RecentsTaskLoader::sInstance;
 
 RecentsTaskLoader::RecentsTaskLoader(
     /* [in] */ IContext* context)
@@ -410,7 +407,7 @@ AutoPtr<IDrawable> RecentsTaskLoader::GetAndUpdateActivityIcon(
     if (icon != NULL) {
         return icon;
     }
-    Logger::I(TAG, "GetAndUpdateActivityIcon: preloadTask:%d, taskKey:%s", preloadTask, TO_CSTR(taskKey));
+
     // If we are preloading this task, continue to load the task description icon or the
     // activity icon
     if (preloadTask) {
@@ -443,7 +440,6 @@ AutoPtr<IDrawable> RecentsTaskLoader::GetAndUpdateActivityIcon(
             }
         }
     }
-    Logger::I(TAG, "GetAndUpdateActivityIcon: we couldn't load any icon, return null");
     // If we couldn't load any icon, return null
     return NULL;
 }
@@ -659,7 +655,6 @@ void RecentsTaskLoader::LoadTaskData(
     Boolean requiresLoad = (applicationIcon == NULL) || (thumbnail == NULL);
     applicationIcon = applicationIcon != NULL ? applicationIcon.Get() : IDrawable::Probe(mDefaultApplicationIcon);
     if (requiresLoad) {
-        Logger::I(TAG, " >> icon or thumbnail is null, requiresLoad for %s", TO_CSTR(t));
         mLoadQueue->AddTask(t);
     }
     t->NotifyTaskDataLoaded(thumbnail == mDefaultThumbnail ? NULL : thumbnail, applicationIcon);

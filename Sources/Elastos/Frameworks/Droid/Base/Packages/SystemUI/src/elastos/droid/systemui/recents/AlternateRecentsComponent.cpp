@@ -238,7 +238,6 @@ ECode AlternateRecentsComponent::OnHideRecents(
 ECode AlternateRecentsComponent::OnToggleRecents(
     /* [in] */ IView* statusBarView)
 {
-    Logger::I(TAG, " >> OnToggleRecents");
     mStatusBarView = statusBarView;
     mTriggeredFromAltTab = FALSE;
 
@@ -487,7 +486,6 @@ ECode AlternateRecentsComponent::ToggleRecentsActivity()
     CAtomicBoolean::New((IAtomicBoolean**)&isTopTaskHome);
     Boolean isRecentsTopMost;
     IsRecentsTopMost(topTask, isTopTaskHome, &isRecentsTopMost);
-    Logger::I(TAG, " >> ToggleRecentsActivity : %d", isRecentsTopMost);
     if (isRecentsTopMost) {
         // Notify recents to toggle itself
         AutoPtr<IIntent> intent;
@@ -497,7 +495,6 @@ ECode AlternateRecentsComponent::ToggleRecentsActivity()
         intent->SetPackage(pn);
         intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
             | IIntent::FLAG_RECEIVER_FOREGROUND);
-        Logger::I(TAG, " >> ToggleRecentsActivity send broadcast: %s", TO_CSTR(intent));
         mContext->SendBroadcastAsUser(intent, UserHandle::CURRENT);
         sys->GetCurrentTimeMillis(&mLastToggleTime);
         return NOERROR;
@@ -520,7 +517,6 @@ ECode AlternateRecentsComponent::StartRecentsActivity()
     CAtomicBoolean::New((IAtomicBoolean**)&isTopTaskHome);
     Boolean isRecentsTopMost;
     IsRecentsTopMost(topTask, isTopTaskHome, &isRecentsTopMost);
-    Logger::I(TAG, " >> StartRecentsActivity: isRecentsTopMost: %d", isRecentsTopMost);
     if (!isRecentsTopMost) {
         Boolean b;
         isTopTaskHome->Get(&b);
@@ -795,7 +791,6 @@ ECode AlternateRecentsComponent::StartAlternateRecentsActivity(
     Int32 id;
     topTask->GetId(&id);
     intent->PutExtra(IAlternateRecentsComponent::EXTRA_FROM_TASK_ID, (topTask != NULL) ? id : -1);
-    Logger::I(TAG, " >> StartAlternateRecentsActivity: %s", TO_CSTR(intent));
     if (opts != NULL) {
         AutoPtr<IBundle> bundle;
         opts->ToBundle((IBundle**)&bundle);

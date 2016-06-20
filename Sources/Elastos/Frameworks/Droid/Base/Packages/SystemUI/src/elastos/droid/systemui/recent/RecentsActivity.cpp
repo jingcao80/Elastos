@@ -43,7 +43,6 @@ ECode RecentsActivity::IntentReceiver::OnReceive(
 {
     String action;
     intent->GetAction(&action);
-    Logger::I(TAG, " >> IntentReceiver: %s", action.string());
     if (IRecentsActivity::CLOSE_RECENTS_INTENT.Equals(action)) {
         Boolean isShowing;
         mHost->mRecentsPanel->IsShowing(&isShowing);
@@ -169,8 +168,6 @@ ECode RecentsActivity::ForceOpaqueBackground(
 
 ECode RecentsActivity::OnStart()
 {
-    Logger::I(TAG, " >> OnStart");
-
     // Hide wallpaper if it's not a static image
     Boolean b;
     ForceOpaqueBackground(this, &b);
@@ -255,8 +252,6 @@ ECode RecentsActivity::DismissAndGoBack()
 ECode RecentsActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
-    Logger::I(TAG, " >> OnCreate: %s", TO_CSTR(savedInstanceState));
-
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);
     window->AddPrivateFlags(IWindowManagerLayoutParams::PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR);
@@ -301,7 +296,6 @@ ECode RecentsActivity::OnSaveInstanceState(
     Boolean isShowing;
     mRecentsPanel->IsShowing(&isShowing);
     outState->PutBoolean(WAS_SHOWING, isShowing);
-    Logger::I(TAG, " >> OnSaveInstanceState: %s, value:%d", WAS_SHOWING.string(), isShowing);
     return NOERROR;
 }
 
@@ -316,7 +310,6 @@ ECode RecentsActivity::OnDestroy()
 ECode RecentsActivity::OnNewIntent(
     /* [in] */ IIntent* intent)
 {
-    Logger::I(TAG, " >> OnNewIntent: %s", TO_CSTR(intent));
     HandleIntent(intent, TRUE);
     return NOERROR;
 }
@@ -325,7 +318,6 @@ void RecentsActivity::HandleIntent(
     /* [in] */ IIntent* intent,
     /* [in] */ Boolean checkWaitingForAnimationParam)
 {
-    Logger::I(TAG, " >>> HandleIntent:: %s", TO_CSTR(intent));
     Activity::OnNewIntent(intent);
 
     String action;
