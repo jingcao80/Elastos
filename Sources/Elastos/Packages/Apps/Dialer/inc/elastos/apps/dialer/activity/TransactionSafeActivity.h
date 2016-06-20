@@ -2,7 +2,7 @@
 #define __ELASTOS_APPS_DIALER_ACTIVITY_TRANSACTIONAILACTIVITY_H__
 
 #include "_Elastos.Apps.Dialer.h"
-#include <elastos/core/Object.h>
+#include "elastos/droid/app/Activity.h"
 
 using Elastos::Droid::Os::IBundle;
 
@@ -18,11 +18,13 @@ namespace Activity {
 class TransactionSafeActivity
     // TODO:
     //: public AnalyticsActivity
-    : public Object
+    : public Elastos::Droid::App::Activity
     , public ITransactionSafeActivity
 {
 public:
     CAR_INTERFACE_DECL();
+
+    ~TransactionSafeActivity();
 
     /**
      * Returns true if it is safe to commit {@link FragmentTransaction}s at this time, based on

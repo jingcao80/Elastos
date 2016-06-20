@@ -119,7 +119,7 @@ ECode PhoneFavoriteListView::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Int32 action;
     ev->GetAction(&action);
@@ -135,7 +135,7 @@ ECode PhoneFavoriteListView::OnDragEvent(
     /* [in] */ IDragEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Int32 action = event.getAction();
     event->GetAction(&action);
@@ -243,7 +243,7 @@ void PhoneFavoriteListView::EnsureScrollHandler()
 ECode PhoneFavoriteListView::GetDragDropController(
     /* [out] */ IDragDropController** controller)
 {
-    VALUE_NOT_NULL(controller);
+    VALIDATE_NOT_NULL(controller);
     *controller = mDragDropController;
     REFCOUNT_ADD(*controller);
     return NOERROR;

@@ -1,4 +1,13 @@
 #include "elastos/apps/dialer/calllog/CCallLogNotificationsService.h"
+#include "elastos/apps/dialer/calllog/CCallLogQueryHandler.h"
+#include "elastos/apps/dialer/calllog/DefaultVoicemailNotifier.h"
+#include "elastos/utility/logging/Logger.h"
+#include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Net.h"
+
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Net::IUri;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Apps {
@@ -21,7 +30,7 @@ ECode CCallLogNotificationsService::OnCreate()
     IntentService::OnCreate();
 
     AutoPtr<IContentResolver> resolver;
-    GetContentResolver((IContentResolver**)&resolver)
+    GetContentResolver((IContentResolver**)&resolver);
     return CCallLogQueryHandler::New(resolver, NULL /*listener*/,
             (ICallLogQueryHandler**)&mCallLogQueryHandler);
 }
@@ -40,11 +49,11 @@ ECode CCallLogNotificationsService::OnHandleIntent(
         mCallLogQueryHandler->MarkNewVoicemailsAsOld();
     }
     else if (ICallLogNotificationsService::ACTION_UPDATE_NOTIFICATIONS.Equals(action)) {
-        AutoPtr<IParcelabe> parcelable;
+        AutoPtr<IParcelable> parcelable;
         intent->GetParcelableExtra(
-                ICallLogNotificationsService::EXTRA_NEW_VOICEMAIL_URI, &parcelable);
+                ICallLogNotificationsService::EXTRA_NEW_VOICEMAIL_URI, (IParcelable**)&parcelable);
         IUri* voicemailUri = IUri::Probe(parcelable);
-        DefaultVoicemailNotifier::GetInstance(this)->UpdateNotification(voicemailUri);
+        IVoicemailNotifier::Probe(DefaultVoicemailNotifier::GetInstance(this))->UpdateNotification(voicemailUri);
     }
     else {
         String str;

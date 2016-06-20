@@ -38,7 +38,7 @@ ECode DialpadFragment::DialpadSlidingRelativeLayout::constructor(
 ECode DialpadFragment::DialpadSlidingRelativeLayout::GetYFraction(
     /* [out] */ Float* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Int32 height;
     GetHeight(&height);
@@ -132,7 +132,7 @@ ECode DialpadFragment::ErrorDialogFragment::OnCreateDialog(
     /* [in] */ IBundle* savedInstanceState,
     /* [out] */ IDialog** dialog)
 {
-    VALUE_NOT_NULL(dialog);
+    VALIDATE_NOT_NULL(dialog);
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
@@ -166,7 +166,7 @@ ECode DialpadFragment::SpacerOnTouchListener::OnTouch(
     /* [in] */ IMotionEvent* event,
     /* [in] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     if (mHost->IsDigitsEmpty()) {
         mHost->HideAndClearDialpad(TRUE);
@@ -284,7 +284,7 @@ DialpadFragment::DialpadChooserAdapter::DialpadChooserAdapter(
 ECode DialpadFragment::DialpadChooserAdapter::GetCount(
     /* [out] */ Int32* count)
 {
-    VALUE_NOT_NULL(count);
+    VALIDATE_NOT_NULL(count);
     *count = NUM_ITEMS;
     return NOERROR;
 }
@@ -293,7 +293,7 @@ ECode DialpadFragment::DialpadChooserAdapter::GetItem(
     /* [in] */ Int32 position,
     /* [out] */ IInterface** item)
 {
-    VALUE_NOT_NULL(item);
+    VALIDATE_NOT_NULL(item);
 
     *item = (IInterface*)mChoiceItems[position];
     REFCOUNT_ADD(*item);
@@ -304,7 +304,7 @@ ECode DialpadFragment::DialpadChooserAdapter::GetItemId(
     /* [in] */ Int32 position,
     /* [out] */ Int64* itemId)
 {
-    VALUE_NOT_NULL(itemId);
+    VALIDATE_NOT_NULL(itemId);
     *itemId = position;
     return NOERROR;
 }
@@ -315,7 +315,7 @@ ECode DialpadFragment::DialpadChooserAdapter::GetView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
-    VALUE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view);
 
     // When convertView is non-null, we can reuse it (there's no need
     // to reinflate it.)
@@ -516,7 +516,7 @@ ECode DialpadFragment::OnCreateView(
     /* [in] */ IBundle* savedState,
     /* [out] */ IView** view)
 {
-    VALUE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view);
 
     AutoPtr<IView> fragmentView;
     inflater->Inflate(R::layout::dialpad_fragment,
@@ -592,7 +592,7 @@ Boolean DialpadFragment::IsLayoutReady()
 ECode DialpadFragment::GetDigitsWidget(
     /* [out] */ IEditText** text)
 {
-    VALUE_NOT_NULL(text);
+    VALIDATE_NOT_NULL(text);
 
     *text = mDigits;
     REFCOUNT_ADD(*text);
@@ -1035,7 +1035,7 @@ ECode DialpadFragment::OnKey(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Int32 id;
     view->GetId(&id);
@@ -1186,7 +1186,7 @@ ECode DialpadFragment::OnLongClick(
     /* [in] */ IView* view,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     AutoPtr<IEditable> digits;
     mDigits->GetText((IEditable**)&digits);
@@ -1558,7 +1558,7 @@ void DialpadFragment::ReturnToInCallScreen(
 ECode DialpadFragment::IsPhoneInUse(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     GetTelecomManager()->IsInCall(&result);
 
@@ -1576,7 +1576,7 @@ ECode DialpadFragment::OnMenuItemClick(
     /* [in] */ IMenuItem* item,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Int32 id;
     item->GetItemId(&id);
@@ -1838,7 +1838,7 @@ ECode DialpadFragment::SetAnimate(
 ECode DialpadFragment::GetAnimate(
     /* [out] */ Boolean* value)
 {
-    VALUE_NOT_NULL(value);
+    VALIDATE_NOT_NULL(value);
 
     *value = mAnimate;
     return NOERROR;

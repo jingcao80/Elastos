@@ -142,7 +142,7 @@ ECode SearchFragment::SetAddToContactNumber(
 ECode SearchFragment::CreateListAdapter(
     /* [out] */ IContactEntryListAdapter** listAdapter)
 {
-    VALUE_NOT_NULL(listAdapter);
+    VALIDATE_NOT_NULL(listAdapter);
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);

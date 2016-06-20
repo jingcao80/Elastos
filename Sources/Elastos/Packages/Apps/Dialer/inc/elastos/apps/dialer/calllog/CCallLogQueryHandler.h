@@ -3,12 +3,15 @@
 #define __ELASTOS_APPS_DIALER_CALLLOG_CCALLLOGQUERYHANDLER_H__
 
 #include "_Elastos_Apps_Dialer_CallLog_CCallLogQueryHandler.h"
-#include "elastos/apps/dialer/calllog/NoNullCursorAsyncQueryHandler.h"
+#include "elastos/droid/content/AsyncQueryHandler.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
 
-using Elastos::Droid:Content:IContentResolver;
-using Elastos::Droid:Database:ICursor;
-using Elastos::Droid:Os:ILooper;
-using Elastos::Droid:Os:IMessage;
+using Elastos::Droid::Content::AsyncQueryHandler;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::IMessage;
 
 namespace Elastos{
 namespace Apps{
@@ -16,7 +19,9 @@ namespace Dialer {
 namespace CallLog {
 
 CarClass(CCallLogQueryHandler)
-    , public NoNullCursorAsyncQueryHandler
+    // TODO:
+    // , public NoNullCursorAsyncQueryHandler
+    , public AsyncQueryHandler
     , public ICallLogQueryHandler
 {
 protected:
@@ -41,7 +46,7 @@ public:
 
     CAR_OBJECT_DECL();
 
-    CallLogQueryHandler();
+    CCallLogQueryHandler();
 
     CARAPI constructor(
         /* [in] */ IContentResolver* contentResolver,
@@ -97,7 +102,7 @@ private:
         /* [in] */ Int64 newerThan);
 
     /** Cancel any pending fetch request. */
-    CARAPI_(void) cancelFetch();
+    CARAPI_(void) CancelFetch();
 
     /**
      * Updates the adapter in the call log fragment to show the new cursor data.
@@ -128,7 +133,7 @@ private:
 
     Int32 mLogLimit;
 
-    Autoptr<IWeakReference> mListener;
+    AutoPtr<IWeakReference> mListener;
 };
 
 } // CallLog

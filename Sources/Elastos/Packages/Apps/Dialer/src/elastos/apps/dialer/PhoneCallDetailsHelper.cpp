@@ -128,7 +128,7 @@ ECode PhoneCallDetailsHelper::GetCallTypeOrLocation(
     /* [in] */ IPhoneCallDetails* details,
     /* [out] */ ICharSequence* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     CPhoneCallDetails* cpcDetails = (CPhoneCallDetails*)details;
     AutoPtr<ICharSequence> numberFormattedLabel;
@@ -168,7 +168,7 @@ ECode PhoneCallDetailsHelper::GetCallDate(
     /* [in] */ IPhoneCallDetails* details,
     /* [out] */ ICharSequence** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     AutoPtr<IDateUtils> utils;
     CDateUtils::AcquireSingleton((IDateUtils**)&utils);

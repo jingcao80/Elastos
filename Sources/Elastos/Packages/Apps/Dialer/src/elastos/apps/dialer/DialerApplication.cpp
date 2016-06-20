@@ -21,7 +21,7 @@ ECode DialerApplication::GetSystemService(
     /* [in] */ const String& name,
     /* [out] */ IInterface** object)
 {
-    VALUE_NOT_NULL(object);
+    VALIDATE_NOT_NULL(object);
     if (IContactPhotoManager::CONTACT_PHOTO_SERVICE.Equals(name)) {
         if (mContactPhotoManager == NULL) {
             assert(0 && "TODO");

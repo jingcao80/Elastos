@@ -11,7 +11,7 @@ class VoicemailStatusHelperStatusMessage
     , public IVoicemailStatusHelperStatusMessage
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     CARAPI constructor(
         /* [in] */ const String& sourcePackage,
@@ -45,7 +45,7 @@ public:
     Int32 mActionMessageId;
     /** URI for the corrective action, where applicable. Null if no action URI is available. */
     AutoPtr<IUri> mActionUri;
-}
+};
 
 } // Voicemail
 } // Dialer

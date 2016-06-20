@@ -10,8 +10,8 @@ LUBE_FLAGS += -n -u
 
 SOURCES += CallDetailHistoryAdapter.cpp
 SOURCES += CCallDetailHistoryAdapter.cpp
-#SOURCES += CallLogActivity.cpp
-#SOURCES += CCallLogActivity.cpp
+SOURCES += CallLogActivity.cpp
+SOURCES += CCallLogActivity.cpp
 SOURCES += CallLogAdapter.cpp
 SOURCES += CCallLogAdapter.cpp
 SOURCES += CCallLogAdapterHelper.cpp

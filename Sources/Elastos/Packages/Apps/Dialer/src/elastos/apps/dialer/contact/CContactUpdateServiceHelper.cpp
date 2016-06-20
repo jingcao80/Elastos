@@ -16,7 +16,7 @@ ECode CContactUpdateServiceHelper::CreateSetSuperPrimaryIntent(
     /* [in] */ Int64 dataId,
     /* [out] */ IIntent** intent)
 {
-    VALUE_NOT_NULL(intent);
+    VALIDATE_NOT_NULL(intent);
 
     AutoPtr<IIntent> result = ContactUpdateService::CreateSetSuperPrimaryIntent(
             context, dataId);

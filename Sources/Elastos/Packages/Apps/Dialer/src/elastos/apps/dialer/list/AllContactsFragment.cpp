@@ -58,7 +58,7 @@ ECode AllContactsFragment::OnViewCreated(
 ECode AllContactsFragment::CreateListAdapter(
     /* [out] */ IContactEntryListAdapter** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     AutoPtr<MyDefaultContactListAdapter> adapter = new MyDefaultContactListAdapter(this);
     AutoPtr<IActivity> activity;
@@ -79,7 +79,7 @@ ECode AllContactsFragment::InflateView(
     /* [in] */ IViewGroup* container,
     /* [out] */ IView** view)
 {
-    VALUE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view);
      return inflater->Inflate(R::layout::show_all_contacts_fragment, NULL, view);
 }
 

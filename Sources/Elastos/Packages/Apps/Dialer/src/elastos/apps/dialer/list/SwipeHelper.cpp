@@ -328,7 +328,7 @@ ECode SwipeHelper::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Int32 action;
     ev->GetAction(&action);
@@ -473,7 +473,7 @@ ECode SwipeHelper::OnTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(reuslt);
+    VALIDATE_NOT_NULL(reuslt);
 
     if (!mDragging || mProtected) {
         *result = FALSE;

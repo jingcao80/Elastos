@@ -1,5 +1,11 @@
 
 #include "elastos/apps/dialer/calllog/CallLogListItemViews.h"
+#include "elastos/apps/dialer/PhoneCallDetailsViews.h"
+#include "R.h"
+
+using Elastos::Droid::View::CView;
+using Elastos::Droid::Widget::CQuickContactBadge;
+using Elastos::Droid::Widget::CTextView;
 
 namespace Elastos {
 namespace Apps {

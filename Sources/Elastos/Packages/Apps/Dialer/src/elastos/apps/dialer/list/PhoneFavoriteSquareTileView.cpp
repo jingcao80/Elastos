@@ -65,7 +65,7 @@ ECode PhoneFavoriteSquareTileView::OnFinishInflate()
 ECode PhoneFavoriteSquareTileView::GetApproximateImageSize(
     /* [out] */ Int32* size)
 {
-    VALUE_NOT_NULL(size);
+    VALIDATE_NOT_NULL(size);
 
     // The picture is the full size of the tile (minus some padding, but we can be generous)
     return GetWidth(size);
@@ -122,7 +122,7 @@ ECode PhoneFavoriteSquareTileView::OnMeasure(
 // ECode PhoneFavoriteSquareTileView::GetContactEntry(
 //     /* [out] */ IContactEntry** entry)
 // {
-//     VALUE_NOT_NULL(entry);
+//     VALIDATE_NOT_NULL(entry);
 //     *entry = mContactEntry;
 //     REFCOUNT_ADD(*entry);
 //     return NOERROR;

@@ -1,5 +1,14 @@
 
 #include "elastos/apps/dialer/calllog/ClearCallLogDialog.h"
+#include "elastos/apps/dialerbind/CObjectFactory.h"
+#include "Elastos.Droid.App.h"
+
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::IProgressDialogHelper;
+using Elastos::Droid::App::CProgressDialogHelper;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Provider::ICalls;
 
 namespace Elastos {
 namespace Apps {
@@ -55,12 +64,12 @@ ECode ClearCallLogDialog::MyAsyncTask::DoInBackground(
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** obj)
 {
-    VALUE_NOT_NULL(obj);
+    VALIDATE_NOT_NULL(obj);
     mResolver->Delete(ICalls::CONTENT_URI, NULL, NULL);
     if (mHost->mCachedNumberLookupService != NULL) {
         mHost->mCachedNumberLookupService->ClearAllCacheEntries(context);
     }
-    *obj = null;
+    *obj = NULL;
     return NOERROR;
 }
 
@@ -94,14 +103,14 @@ ECode ClearCallLogDialog::OnCreateDialog(
     /* [in] */ IBundle* savedInstanceState,
     /* [out] */ IDialog** dialog)
 {
-    VALUE_NOT_NULL(dialog);
+    VALIDATE_NOT_NULL(dialog);
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     AutoPtr<IContentResolver> resolver;
-    activity->GetContentResolver((IContentResolver**)&resolver);
+    IContext::Probe(activity)->GetContentResolver((IContentResolver**)&resolver);
     AutoPtr<IContext> context;
-    activity->GetApplicationContext((IContext**)&context);
+    IContext::Probe(activity)->GetApplicationContext((IContext**)&context);
 
     AutoPtr<OKClickListener> okListener = new OKClickListener(resolver, this);
 

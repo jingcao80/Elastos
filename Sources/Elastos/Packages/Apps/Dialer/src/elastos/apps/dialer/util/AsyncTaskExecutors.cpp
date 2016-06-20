@@ -22,7 +22,7 @@ ECode AsyncTaskExecutors::SimpleAsyncTaskExecutor::Submit(
     /* [in] */ ArrayOf<IInteface*>* params,
     /* [out] */ IObject** resultTask)
 {
-    VALUE_NOT_NULL(resultTask);
+    VALIDATE_NOT_NULL(resultTask);
 
     AsyncTaskExecutors::CheckCalledFromUiThread();
     return ((AsyncTask*)task)->ExecuteOnExecutor(mExecutor, params);

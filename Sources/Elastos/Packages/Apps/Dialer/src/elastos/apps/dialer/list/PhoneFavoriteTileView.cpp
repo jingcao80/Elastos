@@ -20,7 +20,7 @@ ECode PhoneFavoriteTileView::MyLongClickListener::OnLongClick(
     /* [in] */ IView* v,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     AutoPtr<IPhoneFavoriteTileView> view = IPhoneFavoriteTileView::Probe(v);
     // NOTE The drag shadow is handled in the ListView.
@@ -137,7 +137,7 @@ ECode PhoneFavoriteTileView::LoadFromContact(
 ECode PhoneFavoriteTileView::IsDarkTheme(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = FALSE;
     return NOERROR;
 }
@@ -145,7 +145,7 @@ ECode PhoneFavoriteTileView::IsDarkTheme(
 ECode PhoneFavoriteTileView::CreateClickListener(
     /* [out] */ IViewOnClickListener** listener)
 {
-    VALUE_NOT_NULL(listener);
+    VALIDATE_NOT_NULL(listener);
     AutoPtr<MyClickListener> clickListener = new MyClickListener(this);
     *listener = (IViewOnClickListener*)clickListener;
     REFCOUNT_ADD(listener);
@@ -158,7 +158,7 @@ ECode PhoneFavoriteTileView:: GetDefaultImageRequest(
     /* [in] */ const String& lookupKey,
     /* [out] */ IDefaultImageRequest** request)
 {
-    VALUE_NOT_NULL(request);
+    VALIDATE_NOT_NULL(request);
     return CDefaultImageRequest::New(displayName, lookupKey,
                 IContactPhotoManager::TYPE_DEFAULT, DEFAULT_IMAGE_LETTER_SCALE,
                 DEFAULT_IMAGE_LETTER_OFFSET, FALSE, request);
@@ -178,7 +178,7 @@ ECode PhoneFavoriteTileView::ConfigureViewForImage(
 ECode PhoneFavoriteTileView::IsContactPhotoCircular(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     // Unlike Contacts' tiles, the Dialer's favorites tiles are square.
     *result = FALSE;
     return NOERROR;

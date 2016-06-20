@@ -51,7 +51,7 @@ ECode DialtactsActivity::LayoutOnDragListener::OnDrag(
     /* [in] */ IDragEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     Int32 action;
     event->GetAction(&action);
     if (action == IDragEvent::ACTION_DRAG_LOCATION) {
@@ -173,7 +173,7 @@ ECode DialtactsActivity::SearchEditTextLayoutListener::OnKey(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     Int32 action;
     String text;
     if (keyCode == IKeyEvent::KEYCODE_BACK &&
@@ -243,7 +243,7 @@ ECode DialtactsActivity::MyOnTouchListener::OnTouch(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     if (!mHost->mIsDialpadShown) {
         mHost->MaybeExitSearchUi();
     }
@@ -293,7 +293,7 @@ ECode DialtactsActivity::DispatchTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* isConsumed)
 {
-    VALUE_NOT_NULL(isConsumed);
+    VALIDATE_NOT_NULL(isConsumed);
 
     Int32 action;
     ev->GetAction(&action);
@@ -580,7 +580,7 @@ ECode DialtactsActivity::OnMenuItemClick(
     /* [in] */ IVMenuItem* item,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Int32 id;
     item->GetItemId(&id);
@@ -784,7 +784,7 @@ void DialtactsActivity::UpdateSearchFragmentPosition()
 ECode DialtactsActivity::IsInSearchUi(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = mInDialpadSearch || mInRegularSearch;
     return NOERROR;
 }
@@ -792,7 +792,7 @@ ECode DialtactsActivity::IsInSearchUi(
 ECode DialtactsActivity::HasSearchQuery(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = !TextUtils::IsEmpty(mSearchQuery);
     return NOERROR;
 }
@@ -800,7 +800,7 @@ ECode DialtactsActivity::HasSearchQuery(
 ECode DialtactsActivity::ShouldShowActionBar(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     return mListsFragment->ShouldShowActionBar(result);
 }
 
@@ -849,7 +849,7 @@ ECode DialtactsActivity::OnCreateOptionsMenu(
     /* [in] */ IMenu* menu,
     /* [out] */ Boolean* allowToShow)
 {
-    VALUE_NOT_NULL(allowToShow);
+    VALIDATE_NOT_NULL(allowToShow);
     if (mPendingSearchViewQuery != NULL) {
         mSearchView->SetText(mPendingSearchViewQuery);
         mPendingSearchViewQuery = NULL;
@@ -932,7 +932,7 @@ Boolean DialtactsActivity::IsDialIntent(
 ECode DialtactsActivity::GetCallOrigin(
     /* [out] */ String* origin)
 {
-    VALUE_NOT_NULL(origin);
+    VALIDATE_NOT_NULL(origin);
     AutoPtr<IIntent> intent;
     GetIntent((IIntent**)&intent);
     *origin = !IsDialIntent(intent) ? CALL_ORIGIN_DIALTACTS : NULL;
@@ -1320,7 +1320,7 @@ AutoPtr<ITelecomManager> DialtactsActivity::GetTelecomManager()
 ECode DialtactsActivity::IsActionBarShowing(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     mActionBarController->IsActionBarShowing(result);
     return NOERROR;
 }
@@ -1328,7 +1328,7 @@ ECode DialtactsActivity::IsActionBarShowing(
 ECode DialtactsActivity::IsDialpadShown(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = mIsDialpadShown;
     return NOERROR;
 }
@@ -1336,7 +1336,7 @@ ECode DialtactsActivity::IsDialpadShown(
 ECode DialtactsActivity::GetActionBarHideOffset(
     /* [out] */ Int32* offset)
 {
-    VALUE_NOT_NULL(offset);
+    VALIDATE_NOT_NULL(offset);
     AutoPtr<IActionBar> actionBar;
     GetActionBar((IActionBar**)&actionBar);
     actionBar->GetHideOffset(offset);
@@ -1346,7 +1346,7 @@ ECode DialtactsActivity::GetActionBarHideOffset(
 ECode DialtactsActivity::GetActionBarHeight(
     /* [out] */ Int32* height)
 {
-    VALUE_NOT_NULL(offset);
+    VALIDATE_NOT_NULL(offset);
     *height = mActionBarHeight;
     return NOERROR;
 }

@@ -15,7 +15,7 @@ ECode CDialerDatabaseHelperHelper::GetInstance(
     /* [in] */ IContext* context,
     /* [out] */ IDialerDatabaseHelper** helper)
 {
-    VALUE_NOT_NULL(helper);
+    VALIDATE_NOT_NULL(helper);
 
     AutoPtr<IDialerDatabaseHelper> result = DialerDatabaseHelper::GetInstance(context);
     *helper = result;

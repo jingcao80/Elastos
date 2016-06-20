@@ -44,7 +44,7 @@ ECode DefaultRingtonePreference::OnSaveRingtone(
 ECode DefaultRingtonePreference::OnRestoreRingtone(
     /* [out] */ IUri** uri)
 {
-    VALUE_NOT_NULL(uri);
+    VALIDATE_NOT_NULL(uri);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     Int32 type;

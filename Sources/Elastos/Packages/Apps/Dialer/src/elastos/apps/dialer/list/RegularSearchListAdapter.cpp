@@ -19,7 +19,7 @@ ECode RegularSearchListAdapter::GetContactInfo(
     /* [in] */ Int32 position,
     /* [out] */ ICachedContactInfo** info)
 {
-    VALUE_NOT_NULL(info);
+    VALIDATE_NOT_NULL(info);
 
     AutoPtr<CContactInfo> contatctInfo;
     CContactInfo::NewByFriend((CContactInfo**)&contatctInfo);

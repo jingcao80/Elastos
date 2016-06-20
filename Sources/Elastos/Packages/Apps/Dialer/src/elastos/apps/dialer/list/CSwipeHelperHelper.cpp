@@ -38,7 +38,7 @@ ECode CSwipeHelperHelper::IsSwipeable(
     /* [in] */ IView* view,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     * result = SwipeHelper::IsSwipeable(view);
     return NOERROR;
 }
@@ -46,7 +46,7 @@ ECode CSwipeHelperHelper::IsSwipeable(
 ECode CSwipeHelperHelper::GetIS_SWIPEABLE(
     /* [out] */ IInterface** obj)
 {
-    VALUE_NOT_NULL(obj);
+    VALIDATE_NOT_NULL(obj);
     *obj = SwipeHelper::IS_SWIPEABLE;
     REFCOUNT_ADD(*obj);
     return NOERROR;

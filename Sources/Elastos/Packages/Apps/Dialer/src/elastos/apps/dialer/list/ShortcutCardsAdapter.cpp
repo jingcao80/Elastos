@@ -107,7 +107,7 @@ ECode ShortcutCardsAdapter::SwipeableShortcutCard::GetChildAtPosition(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ IView** child)
 {
-    VALUE_NOT_NULL(child);
+    VALIDATE_NOT_NULL(child);
     Int32 count;
     GetChildCount(&count), count > 0 ? GetChildAt(0, &child) : *child = NULL;
     return NOERROR;
@@ -117,7 +117,7 @@ ECode ShortcutCardsAdapter::SwipeableShortcutCard::GetChildContentView(
     /* [in] */ IView* v,
     /* [out] */ IView** child)
 {
-    VALUE_NOT_NULL(child);
+    VALIDATE_NOT_NULL(child);
     return v->FindViewById(R::id::call_log_list_item, child);
 }
 
@@ -130,7 +130,7 @@ ECode ShortcutCardsAdapter::SwipeableShortcutCard::CanChildBeDismissed(
     /* [in] */ IView* v,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = TRUE;
     return NOERROR;
 }
@@ -163,7 +163,7 @@ ECode ShortcutCardsAdapter::SwipeableShortcutCard::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent ev,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     if (mSwipeHelper != NULL) {
         Boolean helperRes, superRes;
         *result = mSwipeHelper->OnInterceptTouchEvent(ev, &helperRes), helperRes
@@ -179,7 +179,7 @@ ECode ShortcutCardsAdapter::SwipeableShortcutCard::OnTouchEvent(
     /* [in] */ IMotionEvent ev,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     if (mSwipeHelper != NULL) {
         Boolean helperRes, superRes;
         *result = mSwipeHelper->OnTouchEvent(ev, &helperRes), helperRes
@@ -298,7 +298,7 @@ ECode ShortcutCardsAdapter::CallLogOnItemSwipeListener::OnTouch()
 ECode ShortcutCardsAdapter::CallLogOnItemSwipeListener::IsSwipeEnabled(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = TRUE;
     return NOERROR;
 }
@@ -324,7 +324,7 @@ ECode ShortcutCardsAdapter::CallLogQueryHandlerListener::OnCallsFetched(
     /* [in] */ ICursor* combinedCursor,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     mHost->mCallLogAdapter->InvalidateCache();
     mHost->mCallLogAdapter->ChangeCursor(combinedCursor);
     mHost->mCallLogAdapter->NotifyDataSetChanged();
@@ -394,7 +394,7 @@ ECode ShortcutCardsAdapter::constructor(
 ECode ShortcutCardsAdapter::GetCount(
     /* [out] */ Int32* count)
 {
-    VALUE_NOT_NULL(count);
+    VALIDATE_NOT_NULL(count);
     return mCallLogAdapter->GetCount(count);
 }
 
@@ -402,7 +402,7 @@ ECode ShortcutCardsAdapter::GetItem(
     /* [in] */ Int32 position,
     /* [out] */ IInterface** item)
 {
-    VALUE_NOT_NULL(item);
+    VALIDATE_NOT_NULL(item);
     return mCallLogAdapter->GetItem(position, item);
 }
 
@@ -410,7 +410,7 @@ ECode ShortcutCardsAdapter::GetItemId(
     /* [in] */ Int32 position,
     /* [out] */ Int64** id)
 {
-    VALUE_NOT_NULL(id);
+    VALIDATE_NOT_NULL(id);
     *id = position;
     return NOERROR;
 }
@@ -418,7 +418,7 @@ ECode ShortcutCardsAdapter::GetItemId(
 ECode ShortcutCardsAdapter::HasStableIds(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = TRUE;
     return NOERROR;
 }
@@ -426,7 +426,7 @@ ECode ShortcutCardsAdapter::HasStableIds(
 ECode ShortcutCardsAdapter::GetViewTypeCount(
     /* [out] */ Int32* count)
 {
-    VALUE_NOT_NULL(count);
+    VALIDATE_NOT_NULL(count);
     return mCallLogAdapter->GetViewTypeCount(count);
 }
 
@@ -434,7 +434,7 @@ ECode ShortcutCardsAdapter::GetItemViewType(
     /* [in] */ Int32 position,
     /* [out] */ Int32* type)
 {
-    VALUE_NOT_NULL(type);
+    VALIDATE_NOT_NULL(type);
     return mCallLogAdapter->GetItemViewType(position, type);
 }
 
@@ -444,7 +444,7 @@ ECode ShortcutCardsAdapter::GetView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
-    VALUE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view);
     AutoPtr<SwipeableShortcutCard> wrapper;
     if (convertView == NULL) {
         wrapper = new SwipeableShortcutCard(this);
@@ -478,7 +478,7 @@ ECode ShortcutCardsAdapter::GetView(
 ECode ShortcutCardsAdapter::AreAllItemsEnabled(
     /* [out] */ Boolean* enabled)
 {
-    VALUE_NOT_NULL(enabled);
+    VALIDATE_NOT_NULL(enabled);
     return mCallLogAdapter->AreAllItemsEnabled(enabled);
 }
 
@@ -486,7 +486,7 @@ ECode ShortcutCardsAdapter::IsEnabled(
     /* [in] */ Int32 position,
     /* [out] */ Boolean* enabled)
 {
-    VALUE_NOT_NULL(enabled);
+    VALIDATE_NOT_NULL(enabled);
     return mCallLogAdapter->IsEnabled(position, enabled);
 }
 

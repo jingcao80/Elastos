@@ -177,7 +177,7 @@ ECode TileInteractionTeaserView::OnLayout(
 ECode TileInteractionTeaserView::GetShouldDisplayInList(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     AutoPtr<ISharedPreferences> prefs;

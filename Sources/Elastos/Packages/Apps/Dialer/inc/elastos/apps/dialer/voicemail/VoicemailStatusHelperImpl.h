@@ -1,8 +1,15 @@
 #ifndef __ELASTOS_APPS_DIALER_VOICEMAIL_VOICEMAILSTATUSHELPERIMPL_H__
 #define __ELASTOS_APPS_DIALER_VOICEMAIL_VOICEMAILSTATUSHELPERIMPL_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Core::IComparator;
+using Elastos::Utility::IList;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Voicemail {
 
@@ -15,10 +22,10 @@ public:
     /** Possible user actions. */
     class Action
         : public Object
-        : public IVoicemailStatusHelperImplAction
+        , public IVoicemailStatusHelperImplAction
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         CARAPI GetMessageId(
             /* [out] */ Int32* id);
@@ -117,7 +124,7 @@ private:
         , public IComparator
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         MyComparator(
             /* [in] */ VoicemailStatusHelperImpl* host);

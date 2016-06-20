@@ -61,7 +61,7 @@ ECode ViewDragHelper::Callback::OnEdgeLock(
     /* [in] */ Int32 edgeFlags,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = FALSE;
     return NOERROR;
 }
@@ -77,7 +77,7 @@ ECode ViewDragHelper::Callback::GetOrderedChildIndex(
     /* [in] */ Int32 index,
     /* [out] */ Int32* childIndex)
 {
-    VALUE_NOT_NULL(childIndex);
+    VALIDATE_NOT_NULL(childIndex);
     *childIndex = index;
     return NOERROR;
 }
@@ -86,7 +86,7 @@ ECode ViewDragHelper::Callback::GetViewHorizontalDragRange(
     /* [in] */ IView* child,
     /* [out] */ Int32* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = 0;
     return NOERROR;
 }
@@ -95,7 +95,7 @@ ECode ViewDragHelper::Callback::GetViewVerticalDragRange(
     /* [in] */ IView* child,
     /* [out] */ Int32* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = 0;
     return NOERROR;
 }
@@ -106,7 +106,7 @@ ECode ViewDragHelper::Callback::ClampViewPositionHorizontal(
     /* [in] */ Int32 dx,
     /* [out] */ Int32* position)
 {
-    VALUE_NOT_NULL(position);
+    VALIDATE_NOT_NULL(position);
     *position = 0;
     return NOERROR;
 }
@@ -117,7 +117,7 @@ ECode ViewDragHelper::Callback::ClampViewPositionVertical(
     /* [in] */ Int32 dy,
     /* [out] */ Int32* position)
 {
-    VALUE_NOT_NULL(position);
+    VALIDATE_NOT_NULL(position);
     *position = 0;
     return NOERROR;
 }
@@ -216,7 +216,7 @@ ECode ViewDragHelper::SetMinVelocity(
 ECode ViewDragHelper::GetMinVelocity(
     /* [out] */ Float* minVel)
 {
-    VALUE_NOT_NULL(minVel);
+    VALIDATE_NOT_NULL(minVel);
     *minVel = mMinVelocity;
     return NOERROR;
 }
@@ -224,7 +224,7 @@ ECode ViewDragHelper::GetMinVelocity(
 ECode ViewDragHelper::GetViewDragState(
     /* [out] */ Int32* state)
 {
-    VALUE_NOT_NULL(state);
+    VALIDATE_NOT_NULL(state);
     *state = mDragState;
     return NOERROR;
 }
@@ -239,7 +239,7 @@ ECode ViewDragHelper::SetEdgeTrackingEnabled(
 ECode ViewDragHelper::GetEdgeSize(
     /* [out] */ Int32* size)
 {
-    VALUE_NOT_NULL(size);
+    VALIDATE_NOT_NULL(size);
     *size = mEdgeSize;
     return NOERROR;
 }
@@ -270,7 +270,7 @@ ECode ViewDragHelper::CaptureChildView(
 ECode ViewDragHelper::GetCapturedView(
     /* [out] */ IView** view)
 {
-    VALUE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view);
     *view = mCapturedView;
     REFCOUNT_ADD(*view);
     return NOERROR;
@@ -279,7 +279,7 @@ ECode ViewDragHelper::GetCapturedView(
 ECode ViewDragHelper::GetActivePointerId(
     /* [out] */ Int32* id)
 {
-    VALUE_NOT_NULL(id);
+    VALIDATE_NOT_NULL(id);
     *id = mActivePointerId;
     return NOERROR;
 }
@@ -287,7 +287,7 @@ ECode ViewDragHelper::GetActivePointerId(
 ECode ViewDragHelper::GetTouchSlop(
     /* [out] */ Int32* touchSlop)
 {
-    VALUE_NOT_NULL(touchSlop);
+    VALIDATE_NOT_NULL(touchSlop);
     *touchSlop = mTouchSlop;
     return NOERROR;
 }
@@ -329,7 +329,7 @@ ECode ViewDragHelper::SmoothSlideViewTo(
     /* [in] */ Int32 constTop,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     mCapturedView = child;
     mActivePointerId = IViewDragHelper::INVALID_POINTER;
 
@@ -342,7 +342,7 @@ ECode ViewDragHelper::SettleCapturedViewAt(
     /* [in] */ Int32 constTop,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     if (!mReleaseInProgress) {
         Logger::E(TAG, "Cannot settleCapturedViewAt outside of a call to "
                  "Callback#onViewReleased");
@@ -534,7 +534,7 @@ ECode ViewDragHelper::PredictFlingYOffset(
     /* [in] */ Int32 yvel,
     /* [out] */ Int32* yOffset)
 {
-    VALUE_NOT_NULL(yOffset);
+    VALIDATE_NOT_NULL(yOffset);
     mScroller->AbortAnimation();
     mScroller->Fling(0, 0, 0, yvel, 0x80000000, 0x7FFFFFFF, 0x80000000,
             0x7FFFFFFF);
@@ -549,7 +549,7 @@ ECode ViewDragHelper::ContinueSettling(
     /* [in] */ Boolean deferCallbacks,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     if (mDragState == IViewDragHelper::STATE_SETTLING) {
         Boolean keepGoing;
@@ -607,7 +607,7 @@ ECode ViewDragHelper::ProcessNestedFling(
 ECode ViewDragHelper::GetVelocityMagnitude(
     /* [out] */ Int32* magnitude)
 {
-    VALUE_NOT_NULL(magnitude);
+    VALIDATE_NOT_NULL(magnitude);
     // Use Math.abs() to ensure this always returns an absolute value, even if the
     // ScrollerCompat implementation changes.
     Float velocity;
@@ -737,7 +737,7 @@ ECode ViewDragHelper::IsPointerDown(
     /* [in] */ Int32 pointerId,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = (mPointersDown & 1 << pointerId) != 0;
     return NOERROR;
 }
@@ -818,7 +818,7 @@ ECode ViewDragHelper::ShouldInterceptTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     Int32 action;
     Int32 actionIndex;
     assert(0 && "TODO");
@@ -1203,7 +1203,7 @@ ECode ViewDragHelper::CheckTouchSlop(
     /* [in] */ Int32 directions,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     Int32 count = mInitialMotionX->GetLength();
     for (Int32 i = 0; i < count; i++) {
         Boolean checkRes;
@@ -1221,7 +1221,7 @@ ECode ViewDragHelper::CheckTouchSlop(
     /* [in] */ Int32 pointerId,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Boolean isPointerDown;
     if (IsPointerDown(pointerId, &isPointerDown), !isPointerDown) {
@@ -1257,7 +1257,7 @@ ECode ViewDragHelper::IsEdgeTouched(
     /* [in] */ Int32 edges,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     Int32 count = mInitialEdgesTouched->GetLength();
     for (Int32 i = 0; i < count; i++) {
         Boolean isEdgeTouched;
@@ -1275,7 +1275,7 @@ ECode ViewDragHelper::IsEdgeTouched(
     /* [in] */ Int32 pointerId,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     Boolean isPointerDown;
     IsPointerDown(pointerId, &isPointerDown);
     *result = isPointerDown && (mInitialEdgesTouched[pointerId] & edges) != 0;
@@ -1329,7 +1329,7 @@ ECode ViewDragHelper::IsCapturedViewUnder(
     /* [in] */ Int32 y,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     return IsViewUnder(mCapturedView, x, y, result);
 }
@@ -1340,7 +1340,7 @@ ECode ViewDragHelper::IsViewUnder(
     /* [in] */ Int32 y,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     if (view == NULL) {
         *result = FALSE;
     }
@@ -1359,7 +1359,7 @@ ECode ViewDragHelper::FindTopChildUnder(
     /* [in] */ Int32 y
     /* [out] */ IView** view)
 {
-    VALUE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view);
     Int32 childCount;
     mParentView->GetChildCount(&childCount);
     for (Int32 i = childCount - 1; i >= 0; i--) {

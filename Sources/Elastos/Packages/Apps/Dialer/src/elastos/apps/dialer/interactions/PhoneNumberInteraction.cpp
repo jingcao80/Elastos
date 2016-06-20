@@ -53,7 +53,7 @@ ECode PhoneNumberInteraction::PhoneItem::ShouldCollapseWith(
     /* [in] */ IContext* context,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = MoreContactUtils::ShouldCollapse(
             IContactsContractCommonDataKindsPhone::CONTENT_ITEM_TYPE, mPhoneNumber,
             IContactsContractCommonDataKindsPhone::CONTENT_ITEM_TYPE,
@@ -64,7 +64,7 @@ ECode PhoneNumberInteraction::PhoneItem::ShouldCollapseWith(
 ECode PhoneNumberInteraction::PhoneItem::ToString(
     /* [out] */ String* str)
 {
-    VALUE_NOT_NULL(str);
+    VALIDATE_NOT_NULL(str);
     *str = mPhoneNumber;
     return NOERROR;
 }
@@ -89,7 +89,7 @@ ECode PhoneNumberInteraction::PhoneItemAdapter::GetView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IView> view;
     ArrayAdapter::GetView(position, convertView, parent, (IView**)&view);
 

@@ -1,5 +1,6 @@
 
 #include "elastos/apps/dialer/calllog/CCallLogNotificationsHelper.h"
+#include "elastos/apps/dialer/calllog/CallLogNotificationsHelper.h"
 
 namespace Elastos {
 namespace Apps {

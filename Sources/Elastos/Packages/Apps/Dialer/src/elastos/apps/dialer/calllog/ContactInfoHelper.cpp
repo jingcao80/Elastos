@@ -30,7 +30,7 @@ ECode ContactInfoHelper::LookupNumber(
     /* [in] */ const String& countryIso,
     /* [out] */ IContactInfo** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     AutoPtr<IContactInfo> info;
 
@@ -325,7 +325,7 @@ ECode ContactInfoHelper::IsBusiness(
     /* [in] */ Int32 sourceType,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Boolean isBusiness = FALSE;
     *result = mCachedNumberLookupService != NULL
@@ -339,7 +339,7 @@ ECode ContactInfoHelper::ContactInfoHelper::CanReportAsInvalid(
     /* [in] */ const String& objectId,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Boolean canReport = FALSE;
     *result = mCachedNumberLookupService != NULL

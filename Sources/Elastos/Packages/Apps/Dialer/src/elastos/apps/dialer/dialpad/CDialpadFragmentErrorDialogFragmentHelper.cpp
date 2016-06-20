@@ -14,7 +14,7 @@ ECode CDialpadFragmentErrorDialogFragmentHelper::NewInstance(
     /* [in] */ Int32 messageResId,
     /* [out] */ IDialpadFragmentErrorDialogFragment** fragment)
 {
-    VALUE_NOT_NULL(fragment);
+    VALIDATE_NOT_NULL(fragment);
     AutoPtr<IDialpadFragmentErrorDialogFragment> result =
             DialogFragment::ErrorDialogFragment::NewInstance(messageResId);
     *fragment = result;
@@ -28,7 +28,7 @@ ECode CDialpadFragmentErrorDialogFragmentHelper::NewInstance(
     /* [in] */ Int32 messageResId,
     /* [out] */ IDialpadFragmentErrorDialogFragment** fragment)
 {
-    VALUE_NOT_NULL(fragment);
+    VALIDATE_NOT_NULL(fragment);
     AutoPtr<IDialpadFragmentErrorDialogFragment> result =
             DialogFragment::ErrorDialogFragment::NewInstance(titleResId, messageResId);
     *fragment = result;

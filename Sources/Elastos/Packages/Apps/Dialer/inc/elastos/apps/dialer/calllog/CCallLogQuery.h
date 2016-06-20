@@ -5,8 +5,8 @@
 #include "_Elastos_Apps_Dialer_CallLog_CCallLogQuery.h"
 #include <elastos/core/Singleton.h>
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -18,9 +18,9 @@ CarClass(CCallLogQuery)
     , public ICallLogQuery
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     CARAPI Get_PROJECTION(
         /* [out, callee] */ ArrayOf<String>** result);

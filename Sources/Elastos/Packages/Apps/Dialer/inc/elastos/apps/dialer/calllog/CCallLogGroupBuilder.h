@@ -3,7 +3,11 @@
 #define __ELASTOS_APPS_DIALER_CALLLOG_CCALLLOGGROUPBUILDER_H__
 
 #include "_Elastos_Apps_Dialer_CallLog_CCallLogGroupBuilder.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Text.h"
+#include "elastos/core/Object.h"
 
+using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Text::Format::ITime;
 
 namespace Elastos{

@@ -27,7 +27,7 @@ ECode DialerSettingsActivity::HeaderAdapter::GetView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     AutoPtr<HeaderViewHolder> holder;
     AutoPtr<IView> view;
 
@@ -118,7 +118,7 @@ ECode DialerSettingsActivity::OnOptionsItemSelected(
     /* [in] */ IMenuItem* item,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     Int32 id;
     if (item->GetItemId(&id), id == Elastos::R::id::home) {
         OnBackPressed();
@@ -133,7 +133,7 @@ ECode DialerSettingsActivity::IsValidFragment(
     /* [in] */ const String& fragmentName,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = TRUE;
     return NOERROR;
 }

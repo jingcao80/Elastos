@@ -25,7 +25,7 @@ CAR_SINGLETON_IMPL(CPhoneQuery);
 ECode CPhoneQuery::Get_PROJECTION(
     /* [out, callee] */ ArrayOf<String>** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     // TODO:
     AutoPtr<ArrayOf<String> > projection = ArrayOf<String>::Alloc(

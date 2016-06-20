@@ -73,7 +73,7 @@ DefaultVoicemailNotifier::DefaultNewCallsQuery::DefaultNewCallsQuery(
 ECode DefaultVoicemailNotifier::DefaultNewCallsQuery::Query(
     /* [out, callee] */ ArrayOf<IDefaultVoicemailNotifierNewCall*>** newCalls)
 {
-    VALUE_NOT_NULL(newCalls);
+    VALIDATE_NOT_NULL(newCalls);
     String selection = ICalls::NEW + " = 1 AND " + ICalls::TYPE + " = ?";
     String selectionArgs[] = {
         StringUtils::ParseInt32(ICalls::VOICEMAIL_TYPE)
@@ -156,7 +156,7 @@ DefaultVoicemailNotifier::DefaultNameLookupQuery::DefaultNameLookupQuery(
 ECode DefaultVoicemailNotifier::DefaultNameLookupQuery::Query(
     /* [out, callee] */ String* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     AutoPtr<ICursor> cursor;
     // try {
     AutoPtr<IContactsContractPhoneLookup> phoneLookup;

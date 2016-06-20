@@ -85,7 +85,7 @@ ECode SmartDialNameMatcher::MatchesNumber(
     /* [in] */ Boolean useNanp,
     /* [out] */ ISmartDialMatchPosition** position)
 {
-    VALUE_NOT_NULL(position);
+    VALIDATE_NOT_NULL(position);
 
     AutoPtr<StringBuilder> builder = new StringBuilder();
     ConstructEmptyMask(builder, phoneNumber.GetLength());
@@ -126,7 +126,7 @@ ECode SmartDialNameMatcher::MatchesNumber(
     /* [in] */ String phoneNumber,
     /* [out] */ ISmartDialMatchPosition** position)
 {
-    VALUE_NOT_NULL(position);
+    VALIDATE_NOT_NULL(position);
 
     return MatchesNumber(phoneNumber, mQuery, TRUE, position);
 }
@@ -136,7 +136,7 @@ ECode SmartDialNameMatcher::MatchesNumber(
     /* [in] */ String query,
     /* [out] */ ISmartDialMatchPosition** position)
 {
-    VALUE_NOT_NULL(position);
+    VALIDATE_NOT_NULL(position);
 
     return MatchesNumber(phoneNumber, query, TRUE, position);
 }
@@ -371,7 +371,7 @@ ECode SmartDialNameMatcher::Matches(
     /* [in] */ const String& displayName,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     mMatchPositions->Clear();
     *result = MatchesCombination(displayName, mQuery, mMatchPositions);
@@ -382,7 +382,7 @@ ECode SmartDialNameMatcher::Matches(
 ECode SmartDialNameMatcher::GetMatchPositions(
     /* [out] */ IArrayList** positions)
 {
-    VALUE_NOT_NULL(positions);
+    VALIDATE_NOT_NULL(positions);
 
     return CArrayList::New(mMatchPositions, positions);
 }
@@ -397,7 +397,7 @@ ECode SmartDialNameMatcher::SetQuery(
 ECode SmartDialNameMatcher::GetNameMatchPositionsInString(
     /* [out] */ String* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = mNameMatchMask
     return NOERROR;
 }
@@ -405,7 +405,7 @@ ECode SmartDialNameMatcher::GetNameMatchPositionsInString(
 ECode SmartDialNameMatcher::GetNumberMatchPositionsInString(
     /* [out] */ String* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = mPhoneNumberMatchMask
     return NOERROR;
 }
@@ -413,7 +413,7 @@ ECode SmartDialNameMatcher::GetNumberMatchPositionsInString(
 ECode SmartDialNameMatcher::GetQuery(
     /* [out] */ String* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = mQuery
     return NOERROR;
 }

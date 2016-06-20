@@ -2,6 +2,11 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CALLTYPEHELPER_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CALLTYPEHELPER_H__
 
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Core::IInteger32;
 
 namespace Elastos {
@@ -17,7 +22,7 @@ class CallTypeHelper
     , public ICallTypeHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     CARAPI constructor(
         /* [in] */ IResources* resources);

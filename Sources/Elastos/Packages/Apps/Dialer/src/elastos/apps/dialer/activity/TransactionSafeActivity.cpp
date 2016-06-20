@@ -10,6 +10,9 @@ namespace Activity {
 // CAR_INTERFACE_IMPL(TransactionSafeActivity, AnalyticsActivity, ITransactionSafeActivity)
 CAR_INTERFACE_IMPL(TransactionSafeActivity, Object, ITransactionSafeActivity);
 
+TransactionSafeActivity::~TransactionSafeActivity()
+{}
+
 ECode TransactionSafeActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {

@@ -2,6 +2,13 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_DEFAULTVOICEMAILNOTIFIER_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_DEFAULTVOICEMAILNOTIFIER_H__
 
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::App::INotificationManager;
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::Content::IContext;
+
 namespace Elastos {
 namespace Apps {
 namespace Dialer {
@@ -92,7 +99,7 @@ private:
 
 public:
     /** Returns the singleton instance of the {@link DefaultVoicemailNotifier}. */
-    static CARPAI_(AutoPtr<IDefaultVoicemailNotifier>) GetInstance(
+    static CARAPI_(AutoPtr<IDefaultVoicemailNotifier>) GetInstance(
         /* [in] */ IContext* context);
 
     /** Updates the notification and notifies of the call with the given URI. */
@@ -104,11 +111,11 @@ public:
     CARAPI ClearNotification();
 
     /** Create a new instance of {@link NewCallsQuery}. */
-    static CARPAI_(AutoPtr<IDefaultVoicemailNotifierNewCallsQuery>) CreateNewCallsQuery(
+    static CARAPI_(AutoPtr<IDefaultVoicemailNotifierNewCallsQuery>) CreateNewCallsQuery(
         /* [in] */ IContentResolver* contentResolver);
 
     /** Create a new instance of {@link NameLookupQuery}. */
-    static CARPAI_(AutoPtr<IDefaultVoicemailNotifierNameLookupQuery>) CreateNameLookupQuery(
+    static CARAPI_(AutoPtr<IDefaultVoicemailNotifierNameLookupQuery>) CreateNameLookupQuery(
         /* [in] */ IContentResolver* contentResolver);
 
     /**
@@ -117,7 +124,7 @@ public:
      * This will cause some Disk I/O, at least the first time it is created, so it should not be
      * called from the main thread.
      */
-    static CARPAI_(AutoPtr<IPhoneNumberDisplayHelper>) CreatePhoneNumberHelper(
+    static CARAPI_(AutoPtr<IPhoneNumberDisplayHelper>) CreatePhoneNumberHelper(
         /* [in] */ IContext* context);
 
 private:

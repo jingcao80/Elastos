@@ -161,7 +161,7 @@ ECode SearchEditTextLayout::DispatchKeyEventPreIme(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* res)
 {
-    VALUE_NOT_NULL(res);
+    VALIDATE_NOT_NULL(res);
     if (mPreImeKeyListener != NULL) {
         Int32 keyCode;
         event->GetKeyCode(&keyCode);
@@ -316,7 +316,7 @@ void SearchEditTextLayout::PrepareAnimator(
 ECode SearchEditTextLayout::IsExpanded(
     /* [out] */ Boolean* isExpanded)
 {
-    VALUE_NOT_NULL(isExpanded);
+    VALIDATE_NOT_NULL(isExpanded);
     *isExpanded = mIsExpanded;
     return NOERROR;
 }
@@ -324,7 +324,7 @@ ECode SearchEditTextLayout::IsExpanded(
 ECode SearchEditTextLayout::IsFadedOut(
     /* [out] */ Boolean* isFadedOut)
 {
-    VALUE_NOT_NULL(isFadedOut);
+    VALIDATE_NOT_NULL(isFadedOut);
     *isFadedOut = mIsFadedOut;
     return NOERROR;
 }

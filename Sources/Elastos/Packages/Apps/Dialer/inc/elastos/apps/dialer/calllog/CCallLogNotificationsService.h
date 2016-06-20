@@ -5,7 +5,7 @@
 #include "_Elastos_Apps_Dialer_CallLog_CCallLogNotificationsService.h"
 #include "elastos/droid/app/IntentService.h"
 
-using Elastos::Droid::App:IntentService;
+using Elastos::Droid::App::IntentService;
 
 namespace Elastos{
 namespace Apps{

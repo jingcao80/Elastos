@@ -2,7 +2,9 @@
 #define __ELASTOS_APPS_DIALER_PHONECALLDETAILSVIEWS_H__
 
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Widget.h"
 
+using Elastos::Droid::Widget::IImageView;
 using Elastos::Apps::Dialer::CallLog::ICallTypeIconsView;
 
 namespace Elastos {

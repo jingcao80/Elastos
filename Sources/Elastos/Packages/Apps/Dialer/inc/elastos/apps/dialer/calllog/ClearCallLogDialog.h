@@ -2,6 +2,21 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CLEARCALLLOGDIALOG_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CLEARCALLLOGDIALOG_H__
 
+#include "_Elastos.Apps.Dialer.h"
+#include "elastos/droid/app/DialogFragment.h"
+#include "elastos/droid/os/AsyncTask.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::App::DialogFragment;
+using Elastos::Droid::App::IFragmentManager;
+using Elastos::Droid::App::IProgressDialog;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Os::AsyncTask;
+using Elastos::Apps::Dialer::Service::ICachedNumberLookupService;
+
 namespace Elastos {
 namespace Apps {
 namespace Dialer {
@@ -66,7 +81,7 @@ public:
 
     /** Preferred way to show this dialog */
     static CARAPI_(void) Show(
-        /* [in] */ IFragmentManager fragmentManager);
+        /* [in] */ IFragmentManager* fragmentManager);
 
     // @Override
     CARAPI OnCreateDialog(

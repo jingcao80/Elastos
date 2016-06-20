@@ -40,7 +40,7 @@ ECode PhoneNumberUtilsWrapper::CanSendSmsTo(
     /* [in] */ Int32 presentation,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Boolean isVoicemailNumber;
     Boolean isSipNumber;
@@ -54,7 +54,7 @@ ECode PhoneNumberUtilsWrapper::IsVoicemailNumber(
     /* [in] */ ICharSequence* number,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     if (number == NULL) {
         *result = FALSE;
@@ -73,7 +73,7 @@ ECode PhoneNumberUtilsWrapper::IsSipNumber(
     /* [in] */ ICharSequence* number,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     if (number == NULL) {
         *result = FALSE;

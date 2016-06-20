@@ -18,7 +18,7 @@ ECode VoicemailPlaybackPresenter::FetchResultHandler::FetchResultHandlerAsyncTas
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** result)
 {
-    VALUE_NOT_NULL(*result);
+    VALIDATE_NOT_NULL(*result);
     Boolean hasContent;
     mHost->mHost->mView->QueryHasContent(mVoicemailUri, &hasContent);
     *result = CoreUtils::Convert(hasContent);
@@ -123,7 +123,7 @@ ECode VoicemailPlaybackPresenter::MediaPlayerErrorListener::OnError(
     /* [in]  */ Int32 extra,
     /* [out]  */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     mHost->mHost->mView->RunOnUiThread(new MediaPlayerErrorListenerRunnable(this));
     *result = TRUE;
     return NOERROR;
@@ -159,7 +159,7 @@ VoicemailPlaybackPresenter::MediaPlayerCompletionListener::MediaPlayerCompletion
 ECode VoicemailPlaybackPresenter::MediaPlayerCompletionListener::OnCompletion(
     /* [in]  */ IMediaPlayer* mp)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     mHost->mHost->mView->RunOnUiThread(
             new MediaPlayerCompletionListenerRunnable(this, mp));
     return NOERROR;
@@ -204,7 +204,7 @@ ECode VoicemailPlaybackPresenter::AsyncPrepareTask::DoInBackground(
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     // try {
     ECode ec = NOERROR;
     Boolean isReadyToPlay;
@@ -476,7 +476,7 @@ ECode VoicemailPlaybackPresenter::CheckThatWeHaveContentAsyncTask::DoInBackgroun
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     Boolean hasContent;
     mHost->mView->QueryHasContent(mVoicemailUri, &hasContent);
     *result = CoreUtils::Convert(hasContent);
@@ -508,7 +508,7 @@ ECode VoicemailPlaybackPresenter::SuccessfullyFetchedContentAsyncTask::DoInBackg
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     // try {
     ECode ec = NOERROR;
     ec = mHost->mPlayer->Reset();
@@ -711,7 +711,7 @@ ECode VoicemailPlaybackPresenter::OnDestroy()
 ECode VoicemailPlaybackPresenter::CreateRateDecreaseListener(
     /* [out] */ IViewOnClickListener** listener)
 {
-    VALUE_NOT_NULL(listener);
+    VALIDATE_NOT_NULL(listener);
     AutoPtr<RateChangeListener> result = new RateChangeListener(this, FALSE);
     *listener = (IViewOnClickListener*)result;
     REFCOUNT_ADD(*listener);
@@ -721,7 +721,7 @@ ECode VoicemailPlaybackPresenter::CreateRateDecreaseListener(
 ECode VoicemailPlaybackPresenter::CreateRateIncreaseListener(
     /* [out] */ IViewOnClickListener** listener)
 {
-    VALUE_NOT_NULL(listener);
+    VALIDATE_NOT_NULL(listener);
     AutoPtr<RateChangeListener> result = new RateChangeListener(this, TRUE);
     *listener = (IViewOnClickListener*)result;
     REFCOUNT_ADD(*listener);

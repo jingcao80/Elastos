@@ -26,7 +26,7 @@ ECode VoicemailStatusHelperStatusMessage::constructor(
 ECode VoicemailStatusHelperStatusMessage::ShowInCallLog(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = mCallLogMessageId != -1;
     return NOERROR;
 }
@@ -35,7 +35,7 @@ ECode VoicemailStatusHelperStatusMessage::ShowInCallLog(
 ECode VoicemailStatusHelperStatusMessage::ShowInCallDetails(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = mCallDetailsMessageId != -1;
     return NOERROR;
 }

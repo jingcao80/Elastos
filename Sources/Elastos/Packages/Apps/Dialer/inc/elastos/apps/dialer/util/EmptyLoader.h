@@ -1,6 +1,13 @@
 #ifndef __ELASTOS_APPS_DIALER_UTIL_EMPTYLOADER_H__
 #define __ELASTOS_APPS_DIALER_UTIL_EMPTYLOADER_H__
 
+#include "_Elastos.Apps.Dialer.h"
+#include "elastos/droid/content/Loader.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::App::ILoaderManagerLoaderCallbacks;
+using Elastos::Droid::Content::ILoader;
 using Elastos::Droid::Content::Loader;
 
 namespace Elastos{

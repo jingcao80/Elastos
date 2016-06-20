@@ -6,16 +6,27 @@
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
 #include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
 
+using Elastos::Droid::App::IKeyguardManager;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IAnimatorUpdateListener;
 using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IViewTreeObserver;
+using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IOnPreDrawListener;
 using Elastos::Droid::Widget::IListView;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Apps::Dialer::Voicemail::IVoicemailStatusHelper;
 
 namespace Elastos {
 namespace Apps {
@@ -75,6 +86,7 @@ private:
             /* [in] */ ICallLogListItemView* view,
             /* [in] */ ICallLogListItemViews* viewHolder,
             /* [in] */ IViewTreeObserver* observer,
+            /* [in] */ Int32 startingHeight,
             /* [in] */ CCallLogFragment* host);
 
         CARAPI OnPreDraw(
@@ -83,6 +95,7 @@ private:
         AutoPtr<ICallLogListItemView> mView;
         AutoPtr<ICallLogListItemViews> mViewHolder;
         AutoPtr<IViewTreeObserver> mObserver;
+        Int32 mStartingHeight;
         CCallLogFragment* mHost;
     };
 
@@ -121,8 +134,6 @@ private:
         : public AnimatorListenerAdapter
     {
     public:
-        CAR_INTERFACE_DECL()
-
         ItemExPandedAnimatorListenerAdapter(
             /* [in] */ Boolean isExpand,
             /* [in] */ ICallLogListItemView* view,
@@ -144,7 +155,7 @@ private:
         CAR_INTERFACE_DECL();
 
         CallsFetchedRunnable(
-            /* [in] */ IListView listView,
+            /* [in] */ IListView* listView,
             /* [in] */ CCallLogFragment* host);
 
         CARAPI Run();
@@ -271,7 +282,7 @@ public:
     // @Override
     CARAPI StartCallsQuery();
 
-    CARAPI_(AutpPtr<ICallLogAdapter>) GetAdapter();
+    CARAPI_(AutoPtr<ICallLogAdapter>) GetAdapter();
 
     // @Override
     CARAPI SetMenuVisibility(

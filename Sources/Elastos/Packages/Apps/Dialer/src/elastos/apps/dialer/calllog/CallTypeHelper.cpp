@@ -1,5 +1,11 @@
 
 #include "elastos/apps/dialer/calllog/CallTypeHelper.h"
+#include "R.h"
+#include "Elastos.Droid.Provider.h"
+#include "elastos/core/CoreUtils.h"
+
+using Elastos::Droid::Provider::ICalls;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Apps {
@@ -30,7 +36,7 @@ ECode CallTypeHelper::GetCallTypeText(
     /* [in] */ Boolean isVideoCall,
     /* [out] */ ICharSequence** text)
 {
-    VALUE_NOT_NULL(text);
+    VALIDATE_NOT_NULL(text);
 
     String result;
     switch (callType) {
@@ -79,7 +85,7 @@ ECode CallTypeHelper::GetHighlightedColor(
     /* [in] */ Int32 callType,
     /* [out] */ IInteger32** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     switch (callType) {
         case ICalls::INCOMING_TYPE:

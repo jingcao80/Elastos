@@ -14,7 +14,7 @@ CAR_SINGLETON_IMPL(CAsyncTaskExecutors);
 ECode CAsyncTaskExecutors::CreateAsyncTaskExecutor(
     /* [out] */ IAsyncTaskExecutor** executor)
 {
-    VALUE_NOT_NULL(executor);
+    VALIDATE_NOT_NULL(executor);
     AutoPtr<IAsyncTaskExecutor> result = AsyncTaskExecutors::CreateAsyncTaskExecutor();
     *executor = result;
     REFCOUNT_ADD(*executor);
@@ -24,7 +24,7 @@ ECode CAsyncTaskExecutors::CreateAsyncTaskExecutor(
 ECode CAsyncTaskExecutors::CreateThreadPoolExecutor(
     /* [out] */ IAsyncTaskExecutor** executor)
 {
-    VALUE_NOT_NULL(executor);
+    VALIDATE_NOT_NULL(executor);
     AutoPtr<IAsyncTaskExecutor> result = AsyncTaskExecutors::CreateThreadPoolExecutor();
     *executor = result;
     REFCOUNT_ADD(*executor);

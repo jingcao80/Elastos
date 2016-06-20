@@ -14,7 +14,7 @@ CAR_SINGLETON_IMPL(CVoicemailStatusHelperImplHelper);
 ECode CVoicemailStatusHelperImplHelper::GetPROJECTION(
     /* [out, callee] */ ArrayOf<String>** protection)
 {
-    VALUE_NOT_NULL(protection);
+    VALIDATE_NOT_NULL(protection);
     *protection = VoicemailStatusHelperImpl::PROJECTION;
     REFCOUNT_ADD(*protection);
     return NOERROR;

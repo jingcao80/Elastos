@@ -2,7 +2,7 @@
 #define __ELASTOS_APPS_DIALER_CCALLTYPEICONSVIEW_H__
 
 #include "_Elastos_Apps_Dialer_CallLog_CCallTypeIconsView.h"
-#include "elastos/droid/View/View.h"
+#include "elastos/droid/view/View.h"
 
 using Elastos::Droid::View::View;
 

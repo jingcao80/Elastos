@@ -14,7 +14,7 @@ CAR_SINGLETON_IMPL(CUnicodeDialerKeyListenerHelper);
 ECode CUnicodeDialerKeyListenerHelper::GetINSTANCE(
     /* [out] */ IUnicodeDialerKeyListener** instance)
 {
-    VALUE_NOT_NULL(instance);
+    VALIDATE_NOT_NULL(instance);
     *instance = UnicodeDialerKeyListener::INSTANCE;
     REFCOUNT_ADD(*instance);
     return NOERROR;

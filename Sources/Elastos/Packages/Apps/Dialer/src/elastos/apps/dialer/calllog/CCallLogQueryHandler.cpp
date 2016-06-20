@@ -1,12 +1,36 @@
 
 #include "elastos/apps/dialer/calllog/CCallLogQueryHandler.h"
-
+#include "elastos/apps/dialer/calllog/CCallLogQuery.h"
+#include "elastos/apps/dialer/voicemail/VoicemailStatusHelperImpl.h"
+#include "elastos/utility/logging/Logger.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/CoreUtils.h>
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.CoreLibrary.IO.h"
+
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::CContentValues;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Provider::ICalls;
+using Elastos::Droid::Provider::CCalls;
+using Elastos::Droid::Provider::IVoicemailContractStatus;
+using Elastos::Droid::Provider::CVoicemailContractStatus;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::IUriBuilder;
+using Elastos::Droid::Net::CUriBuilder;
 using Elastos::Core::AutoLock;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::ICharSequence;
-using Elastos::Core::IStringBuilder;
-using Elastos::Core::CStringBuilder;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Apps::Dialer::Voicemail::VoicemailStatusHelperImpl;
 
 namespace Elastos {
 namespace Apps {
@@ -34,9 +58,8 @@ const Int32 CCallLogQueryHandler::QUERY_VOICEMAIL_STATUS_TOKEN = 58;
 //=================================================================
 CCallLogQueryHandler::CatchingWorkerHandler::CatchingWorkerHandler(
     /* [in] */ ILooper* looper)
-{
-    AsyncQueryHandler::WorkerHandler(looper);
-}
+    : AsyncQueryHandler::WorkerHandler(IWeakReference::Probe(looper))
+{}
 
 ECode CCallLogQueryHandler::CatchingWorkerHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -71,11 +94,11 @@ ECode CCallLogQueryHandler::CatchingWorkerHandler::HandleMessage(
 //=================================================================
 // CCallLogQueryHandler
 //=================================================================
-CAR_INTERFACE_IMPL(CCallLogQueryHandler, NoNullCursorAsyncQueryHandler, ICallLogQueryHandler);
+CAR_INTERFACE_IMPL(CCallLogQueryHandler, AsyncQueryHandler, ICallLogQueryHandler);
 
 CAR_OBJECT_IMPL(CCallLogQueryHandler);
 
-CCallLogQueryHandler::CallLogQueryHandler()
+CCallLogQueryHandler::CCallLogQueryHandler()
     : mLogLimit(0)
 {}
 
@@ -85,9 +108,10 @@ ECode CCallLogQueryHandler::CreateHandler(
 {
     VALIDATE_NOT_NULL(handler);
     // Provide our special handler that catches exceptions
-    AutoPtr<CatchingWorkerHandler> cwHandler = new CatchingWorkerHandler(looper);
-    *handler = (IHandler*)cwHandler;
-    REFCOUNT_ADD(*handler);
+    assert(0 && "TODO");
+    // AutoPtr<CatchingWorkerHandler> cwHandler = new CatchingWorkerHandler(looper);
+    // *handler = (IHandler*)cwHandler;
+    // REFCOUNT_ADD(*handler);
     return NOERROR;
 }
 
@@ -103,7 +127,8 @@ ECode CCallLogQueryHandler::constructor(
     /* [in] */ ICallLogQueryHandlerListener* listener,
     /* [in] */ Int32 limit)
 {
-    NoNullCursorAsyncQueryHandler(contentResolver);
+    // TODO:
+    // NoNullCursorAsyncQueryHandler::constructor(contentResolver);
     AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(listener);
     wrs->GetWeakReference((IWeakReference**)&mListener);
     mLogLimit = limit;
@@ -128,8 +153,12 @@ ECode CCallLogQueryHandler::FetchCalls(
 
 ECode CCallLogQueryHandler::FetchVoicemailStatus()
 {
-    StartQuery(QUERY_VOICEMAIL_STATUS_TOKEN, NULL, IVoicemailContractStatus::CONTENT_URI,
-                VoicemailStatusHelperImpl::PROJECTION, NULL, NULL, NULL);
+    AutoPtr<IVoicemailContractStatus> vcs;
+    CVoicemailContractStatus::AcquireSingleton((IVoicemailContractStatus**)&vcs);
+    AutoPtr<IUri> uri;
+    vcs->GetCONTENT_URI((IUri**)&uri);
+    StartQuery(QUERY_VOICEMAIL_STATUS_TOKEN, NULL, uri,
+                VoicemailStatusHelperImpl::PROJECTION, String(NULL), NULL, String(NULL));
     return NOERROR;
 }
 
@@ -142,8 +171,7 @@ void CCallLogQueryHandler::FetchCalls(
     // We need to check for NULL explicitly otherwise entries with where READ is NULL
     // may not match either the query or its negation.
     // We consider the calls that are not yet consumed (i.e. IS_READ = 0) as "new".
-    AutoPtr<IStringBuilder> where;
-    CStringBuilder::New((IStringBuilder**)&where);
+    AutoPtr<StringBuilder> where = new StringBuilder();
 
     AutoPtr<IArrayList> selectionArgs;
     CArrayList::New((IArrayList**)&selectionArgs);
@@ -165,7 +193,7 @@ void CCallLogQueryHandler::FetchCalls(
         where->Append(ICalls::TYPE);
         where->Append(" = ?)");
         // Add a clause to fetch only items newer than the requested date
-        selectionArgs->Add(StringUtils::ToString(callType));
+        selectionArgs->Add(CoreUtils::Convert(StringUtils::ToString(callType)));
     }
 
     if (newerThan > 0) {
@@ -176,14 +204,14 @@ void CCallLogQueryHandler::FetchCalls(
         where->Append("(");
         where->Append(ICalls::DATE);
         where->Append(" = ?)");
-        selectionArgs->add(StringUtils::ToString(newerThan));
+        selectionArgs->Add(CoreUtils::Convert(StringUtils::ToString(newerThan)));
     }
 
     Int32 limit = (mLogLimit == -1) ? NUM_LOGS_TO_DISPLAY : mLogLimit;
     ICharSequence::Probe(where)->GetLength(&length);
     String str;
     String selection = length > 0
-            ? ICharSequence::Probe(where)->ToString(&str), str : NULL;
+            ? (ICharSequence::Probe(where)->ToString(&str), str) : String(NULL);
 
     AutoPtr<ICalls> calls;
     CCalls::AcquireSingleton((ICalls**)&calls);
@@ -195,11 +223,22 @@ void CCallLogQueryHandler::FetchCalls(
     AutoPtr<IUri> uri;
     builder->Build((IUri**)&uri);
 
-    AutoPtr<ArrayOf<IInterface*> > array;
-    selectionArgs->ToArray(EMPTY_STRING_ARRAY, (ArrayOf<IInterface*>**)&array);
-    StartQuery(token, NULL, uri, ICallLogQuery::_PROJECTION,
+    Int32 size;
+    selectionArgs->GetSize(&size);
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(size);
+    AutoPtr<IIterator> it;
+    selectionArgs->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    Int32 index = 0;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> item;
+        it->GetNext((IInterface**)&item);
+        array->Set(index, CoreUtils::Unbox(ICharSequence::Probe(item)));
+    }
+    AutoPtr<ArrayOf<String> > projection = ArrayOf<String>::Alloc(
+            (String*)CCallLogQuery::_PROJECTION, 9);
+    StartQuery(token, NULL, uri, projection,
              selection, array, ICalls::DEFAULT_SORT_ORDER);
-    return NOERROR;
 }
 
 void CCallLogQueryHandler::CancelFetch()
@@ -210,14 +249,13 @@ void CCallLogQueryHandler::CancelFetch()
 ECode CCallLogQueryHandler::MarkNewCallsAsOld()
 {
     // Mark all "new" calls as not new anymore.
-    AutoPtr<IStringBuilder> where;
-    CStringBuilder::New((IStringBuilder**)&where);
+    AutoPtr<StringBuilder> where = new StringBuilder();
 
     where->Append(ICalls::NEW);
     where->Append(" = 1");
 
     AutoPtr<IContentValues> values;
-    CContentValues::New(1, (IContentValues)&values);
+    CContentValues::New(1, (IContentValues**)&values);
     values->Put(ICalls::NEW, String("0"));
 
     AutoPtr<ICalls> calls;
@@ -235,15 +273,14 @@ ECode CCallLogQueryHandler::MarkNewCallsAsOld()
 ECode CCallLogQueryHandler::MarkNewVoicemailsAsOld()
 {
     // Mark all "new" voicemails as not new anymore.
-    AutoPtr<IStringBuilder> where;
-    CStringBuilder::New((IStringBuilder**)&where);
+    AutoPtr<StringBuilder> where = new StringBuilder();
     where->Append(ICalls::NEW);
     where->Append(" = 1 AND ");
     where->Append(ICalls::TYPE);
     where->Append(" = ?");
 
     AutoPtr<IContentValues> values;
-    CContentValues::New(1, (IContentValues)&values);
+    CContentValues::New(1, (IContentValues**)&values);
     values->Put(ICalls::NEW, String("0"));
 
     AutoPtr<ICalls> calls;
@@ -264,8 +301,7 @@ ECode CCallLogQueryHandler::MarkNewVoicemailsAsOld()
 ECode CCallLogQueryHandler::MarkMissedCallsAsRead()
 {
     // Mark all "new" calls as not new anymore.
-    AutoPtr<IStringBuilder> where;
-    CStringBuilder::New((IStringBuilder**)&where);
+    AutoPtr<StringBuilder> where = new StringBuilder();
     where->Append(ICalls::IS_READ);
     where->Append(" = 0");
     where->Append(" AND ");
@@ -274,7 +310,7 @@ ECode CCallLogQueryHandler::MarkMissedCallsAsRead()
     where->Append(ICalls::MISSED_TYPE);
 
     AutoPtr<IContentValues> values;
-    CContentValues::New(1, (IContentValues)&values);
+    CContentValues::New(1, (IContentValues**)&values);
     values->Put(ICalls::IS_READ, String("1"));
 
     AutoPtr<ICalls> calls;
@@ -283,8 +319,8 @@ ECode CCallLogQueryHandler::MarkMissedCallsAsRead()
     calls->GetCONTENT_URI((IUri**)&contentUri);
     String str;
     ICharSequence::Probe(where)->ToString(&str);
-    startUpdate(UPDATE_MARK_MISSED_CALL_AS_READ_TOKEN,
-            NULL, contentUri, values,str, NULL);
+    StartUpdate(UPDATE_MARK_MISSED_CALL_AS_READ_TOKEN,
+            NULL, contentUri, values, str, NULL);
 
     return NOERROR;
 }
@@ -294,7 +330,8 @@ ECode CCallLogQueryHandler::OnNotNullableQueryComplete(
     /* [in] */ IInterface* cookie,
     /* [in] */ ICursor* cursor)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (cursor == NULL) {
             return NOERROR;
         }
@@ -308,11 +345,11 @@ ECode CCallLogQueryHandler::OnNotNullableQueryComplete(
             UpdateVoicemailStatus(cursor);
         }
         else {
-            Log::W(TAG, "Unknown query completed: ignoring: %d", token);
+            Logger::W(TAG, "Unknown query completed: ignoring: %d", token);
         }
 
         if (cursor != NULL) {
-            cursor->Close();
+            ICloseable::Probe((IObject*)cursor)->Close();
         }
         // } finally {
         //     if (cursor != null) {
@@ -326,12 +363,12 @@ ECode CCallLogQueryHandler::OnNotNullableQueryComplete(
 Boolean CCallLogQueryHandler::UpdateAdapterData(
     /* [in] */ ICursor* cursor)
 {
-    AutoPtr<ICallLogQueryHandlerListener> listener;
+    AutoPtr<IInterface> listener;
     mListener->Resolve(EIID_ICallLogQueryHandlerListener,
-            (ICallLogQueryHandlerListener**)&listener);
+            (IInterface**)&listener);
     if (listener != NULL) {
         Boolean result;
-        listener->OnCallsFetched(cursor, &result);
+        ICallLogQueryHandlerListener::Probe(listener)->OnCallsFetched(cursor, &result);
         return result;
     }
     return FALSE;
@@ -340,11 +377,11 @@ Boolean CCallLogQueryHandler::UpdateAdapterData(
 void CCallLogQueryHandler::UpdateVoicemailStatus(
     /* [in] */ ICursor* statusCursor)
 {
-    AutoPtr<ICallLogQueryHandlerListener> listener;
+    AutoPtr<IInterface> listener;
     mListener->Resolve(EIID_ICallLogQueryHandlerListener,
-            (ICallLogQueryHandlerListener**)&listener);
+            (IInterface**)&listener);
     if (listener != NULL) {
-        listener->OnVoicemailStatusFetched(statusCursor);
+        ICallLogQueryHandlerListener::Probe(listener)->OnVoicemailStatusFetched(statusCursor);
     }
 }
 

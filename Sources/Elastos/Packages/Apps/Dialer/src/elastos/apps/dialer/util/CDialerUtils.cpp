@@ -32,7 +32,7 @@ ECode CDialerUtils::GetSmsComponent(
     /* [in] */ IContext* context,
     /* [out] */ IComponentName** component)
 {
-    VALUE_NOT_NULL(component);
+    VALIDATE_NOT_NULL(component);
     AutoPtr<IComponentName> result = DialerUtils::GetSmsComponent(context);
     *component = result;
     REFCOUNT_ADD(*component);
@@ -62,7 +62,7 @@ ECode CDialerUtils::Join(
     /* [in] */ IIterable* list,
     /* [out] */ ICharSequence** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     AutoPtr<ICharSequence> cs = DialerUtils::Join(resources, list);
     *result = cs;
     REFCOUNT_ADD(*result);
@@ -72,7 +72,7 @@ ECode CDialerUtils::Join(
 ECode CDialerUtils::IsRtl(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     result = DialerUtils::IsRtl();
     return NOERROR;
 }

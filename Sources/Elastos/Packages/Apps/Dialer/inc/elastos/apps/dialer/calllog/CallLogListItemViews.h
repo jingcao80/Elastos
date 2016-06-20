@@ -1,10 +1,18 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CALLLOGLISTITEMVIEWS_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CALLLOGLISTITEMVIEWS_H__
 
-#include "Elastos.Droid.Widget.h"
+#include "_Elastos.Apps.Dialer.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Widget.h"
+#include "elastos/core/Object.h"
 
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::IQuickContactBadge;
+using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
 
 namespace Elastos {
@@ -13,8 +21,8 @@ namespace Dialer {
 namespace CallLog {
 
 class CallLogListItemViews
-    : Object
-    , ICallLogListItemViews
+    : public Object
+    , public ICallLogListItemViews
 {
 public:
     CAR_INTERFACE_DECL()

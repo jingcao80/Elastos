@@ -90,7 +90,7 @@ ECode SmartDialNumberListAdapter::GetDataUri(
     /* [in] */ Int32 position,
     /* [out] */ IUri** uri)
 {
-    VALUE_NOT_NULL(uri);
+    VALIDATE_NOT_NULL(uri);
 
     AutoPtr<IInterface> cursor;
     GetItem(position, (IInterface**)&cursor)

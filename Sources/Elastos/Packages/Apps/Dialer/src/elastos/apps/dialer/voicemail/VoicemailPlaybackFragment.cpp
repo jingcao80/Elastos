@@ -89,7 +89,7 @@ ECode VoicemailPlaybackFragment::PlaybackViewImpl::RunOnUiThread(
 ECode VoicemailPlaybackFragment::PlaybackViewImpl::GetDataSourceContext(
     /* [out] */ IContext** context)
 {
-    VALUE_NOT_NULL(context);
+    VALIDATE_NOT_NULL(context);
     *context = mApplicationContext;
     REFCOUNT_ADD(*context);
     return NOERROR;
@@ -236,7 +236,7 @@ ECode VoicemailPlaybackFragment::PlaybackViewImpl::SetFetchContentTimeout()
 ECode VoicemailPlaybackFragment::PlaybackViewImpl::GetDesiredClipPosition(
     /* [out] */ Int32* position)
 {
-    VALUE_NOT_NULL(position);
+    VALIDATE_NOT_NULL(position);
     mPlaybackSeek->GetProgress(position);
     return NOERROR;
 }
@@ -285,7 +285,7 @@ ECode VoicemailPlaybackFragment::PlaybackViewImpl::QueryHasContent(
     /* [in] */ IUri* voicemailUri,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IContentResolver> contentResolver;
     mApplicationContext->GetContentResolver((IContentResolver**)&contentResolver);
     AutoPtr<ICursor> cursor;
@@ -326,7 +326,7 @@ AutoPtr<IAudioManager> VoicemailPlaybackFragment::PlaybackViewImpl::GetAudioMana
 ECode VoicemailPlaybackFragment::PlaybackViewImpl::IsSpeakerPhoneOn(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IAudioManager> manager = GetAudioManager();
     manager->IsSpeakerphoneOn(result);
     return NOERROR;
@@ -335,7 +335,7 @@ ECode VoicemailPlaybackFragment::PlaybackViewImpl::IsSpeakerPhoneOn(
 ECode VoicemailPlaybackFragment::PlaybackViewImpl::SetSpeakerPhoneOn(
     /* [in] */ Boolean on)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IAudioManager> manager = GetAudioManager();
     manager->SetSpeakerphoneOn(on);
     if (on) {
@@ -464,7 +464,7 @@ ECode VoicemailPlaybackFragment::OnCreateView(
     /* [in] */ IBundle* savedInstanceState,
     /* [out] */ IView** view)
 {
-    VALUE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view);
     inflater->inflate(R::layout::playback_layout, NULL, (IView**)&mPlaybackLayout);
     *view = mPlaybackLayout;
     REFCOUNT_ADD(*view);

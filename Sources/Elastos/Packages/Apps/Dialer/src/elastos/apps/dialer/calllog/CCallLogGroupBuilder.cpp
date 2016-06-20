@@ -1,6 +1,13 @@
 
 #include "elastos/apps/dialer/calllog/CCallLogGroupBuilder.h"
 
+#include "Elastos.Droid.Provider.h"
+
+using Elastos::Droid::Text::Format::CTime;
+using Elastos::Droid::Provider::ICalls;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+
 namespace Elastos {
 namespace Apps {
 namespace Dialer {
@@ -45,7 +52,8 @@ ECode CCallLogGroupBuilder::AddGroups(
     sys->GetCurrentTimeMillis(&currentTime);
 
     Int32 currentGroupSize = 1;
-    cursor->MoveToFirst();
+    Boolean succeeded;
+    cursor->MoveToFirst(&succeeded);
     // The number of the first entry in the group.
     String firstNumber;
     cursor->GetString(ICallLogQuery::NUMBER, &firstNumber);
@@ -67,7 +75,6 @@ ECode CCallLogGroupBuilder::AddGroups(
     Int32 currentGroupDayGroup = GetDayGroup(firstDate, currentTime);
     mGroupCreator->SetDayGroup(firstRowId, currentGroupDayGroup);
 
-    Boolean succeeded = FALSE;
     while (cursor->MoveToNext(&succeeded), succeeded) {
         // The number of the current row in the cursor.
         String currentNumber;
@@ -78,7 +85,7 @@ ECode CCallLogGroupBuilder::AddGroups(
         cursor->GetString(
                 ICallLogQuery::ACCOUNT_COMPONENT_NAME, &currentAccountComponentName);
         String currentAccountId;
-        cursor->GetString(ICallLogQuery::ACCOUNT_ID. &currentAccountId);
+        cursor->GetString(ICallLogQuery::ACCOUNT_ID, &currentAccountId);
 
         Boolean sameNumber = EqualNumbers(firstNumber, currentNumber);
         Boolean sameAccountComponentName = firstAccountComponentName.IsNull()
@@ -156,11 +163,14 @@ Boolean CCallLogGroupBuilder::EqualNumbers(
     /* [in] */ const String& number1,
     /* [in] */ const String& number2)
 {
-    if (PhoneNumberHelper::IsUriNumber(number1) || PhoneNumberHelper::IsUriNumber(number2)) {
-        return CompareSipAddresses(number1, number2);
-    } else {
-        return PhoneNumberUtils::Compare(number1, number2);
-    }
+    assert(0 && "TODO");
+    // if (PhoneNumberHelper::IsUriNumber(number1) || PhoneNumberHelper::IsUriNumber(number2)) {
+    //     return CompareSipAddresses(number1, number2);
+    // }
+    // else {
+    //     return PhoneNumberUtils::Compare(number1, number2);
+    // }
+    return FALSE;
 }
 
 Boolean CCallLogGroupBuilder::CompareSipAddresses(
@@ -202,7 +212,9 @@ Int32 CCallLogGroupBuilder::GetDayGroup(
     /* [in] */ Int64 date,
     /* [in] */ Int64 now)
 {
-    Int32 days = DateUtils::GetDayDifference(TIME, date, now);
+    Int32 days;
+    assert(0 && "TODO");
+    // days = DateUtils::GetDayDifference(TIME, date, now);
 
     if (days == 0) {
         return DAY_GROUP_TODAY;

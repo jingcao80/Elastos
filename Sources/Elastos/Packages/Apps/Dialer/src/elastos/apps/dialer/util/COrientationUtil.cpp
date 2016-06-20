@@ -15,7 +15,7 @@ ECode COrientationUtil::IsLandscape(
     /* [in] */ IContext* context,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = OrientationUtil::IsLandscape(context);
     return NOERROR;
 }

@@ -175,7 +175,7 @@ DialerDatabaseHelper::ContactNumber::ContactNumber(
 ECode DialerDatabaseHelper::ContactNumber::HashCode(
     /* [out] */ Int32* hashCode)
 {
-    VALUE_NOT_NULL(hashCode);
+    VALIDATE_NOT_NULL(hashCode);
 
     assert(0 && "TODO");
     // Objects.hashCode(id, dataId, displayName, phoneNumber, lookupKey, photoId);
@@ -186,7 +186,7 @@ ECode DialerDatabaseHelper::ContactNumber::Equals(
     /* [in] */ IInterface* other,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     if (this == other) {
         *result = TRUE;
@@ -220,7 +220,7 @@ DialerDatabaseHelper::ContactMatch::ContactMatch(
 ECode DialerDatabaseHelper::ContactMatch::HashCode(
     /* [out] */ Int32* hashCode)
 {
-    VALUE_NOT_NULL(hashCode);
+    VALIDATE_NOT_NULL(hashCode);
 
     assert(0 && "TODO");
     // Objects.hashCode(lookupKey, id);
@@ -231,7 +231,7 @@ ECode DialerDatabaseHelper::ContactMatch::Equals(
     /* [in] */ IInterface* other,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     if (this == other) {
         *result = TRUE;
@@ -259,7 +259,7 @@ ECode DialerDatabaseHelper::SmartDialUpdateAsyncTask::DoInBackground(
     /* [in] */ ArrayOf<IInterface*>* params,
     /* [out] */ IInterface** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     if (DialerDatabaseHelper::DEBUG) {
         Logger::V(TAG, "Updating database");
     }
@@ -463,7 +463,7 @@ ECode DialerDatabaseHelper::GetProperty(
     /* [in] */ const String& defaultValue,
     /* [out] */ String* property)
 {
-    VALUE_NOT_NULL(property);
+    VALIDATE_NOT_NULL(property);
 
     AutoPtr<ISQLiteDatabase> db;
     GetReadableDatabase((ISQLiteDatabase**)&db);
@@ -476,7 +476,7 @@ ECode DialerDatabaseHelper::GetProperty(
     /* [in] */ const String& defaultValue,
     /* [out] */ String* property)
 {
-    VALUE_NOT_NULL(property);
+    VALIDATE_NOT_NULL(property);
     // try {
     String value;
     AutoPtr<ICursor> cursor;
@@ -998,7 +998,7 @@ ECode DialerDatabaseHelper::GetLooseMatches(
     /* [in] */ ISmartDialNameMatcher* nameMatcher,
     /* [out] */ IArrayList** matches)
 {
-    VALUE_NOT_NULL(matches);
+    VALIDATE_NOT_NULL(matches);
 
     Boolean inUpdate;
     sInUpdate->Get(&inUpdate);

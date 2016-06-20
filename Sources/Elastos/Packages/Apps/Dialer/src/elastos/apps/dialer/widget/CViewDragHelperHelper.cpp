@@ -16,7 +16,7 @@ ECode CViewDragHelperHelper::Create(
     /* [in] */ IViewDragHelperCallback* cb,
     /* [out] */ IViewDragHelper** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     if (forParent == NULL) {
         Logger::E(String("CViewDragHelperHelper"), "Parent view may not be null");
@@ -41,7 +41,7 @@ ECode CViewDragHelperHelper::Create(
     /* [in] */ IViewDragHelperCallback* cb,
     /* [out] */ IViewDragHelper** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     if (forParent == NULL) {
         Logger::E(String("CViewDragHelperHelper"), "Parent view may not be null");

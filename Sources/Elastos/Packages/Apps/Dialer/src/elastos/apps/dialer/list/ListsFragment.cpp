@@ -26,7 +26,7 @@ ECode ListsFragment::ViewPagerAdapter::GetItemId(
     /* [in] */ Int32 position,
     /* [out] */ Int64* id)
 {
-    VALUE_NOT_NULL(id);
+    VALIDATE_NOT_NULL(id);
     return mHost->GetRtlPosition(position, id);
 }
 
@@ -34,7 +34,7 @@ ECode ListsFragment::ViewPagerAdapter::GetItem(
     /* [in] */ Int32 position,
     /* [out] */ IFragment** item)
 {
-    VALUE_NOT_NULL(item);
+    VALIDATE_NOT_NULL(item);
 
     Int32 rtl;
     mHost->GetRtlPosition(position, &rtl);
@@ -71,7 +71,7 @@ ECode ListsFragment::ViewPagerAdapter::InstantiateItem(
     /* [in] */ Int32 position,
     /* [out] */ IInterface** item)
 {
-    VALUE_NOT_NULL(item);
+    VALIDATE_NOT_NULL(item);
 
     // On rotation the FragmentManager handles rotation. Therefore getItem() isn't called.
     // Copy the fragments that the FragmentManager finds so that we can store them in
@@ -96,7 +96,7 @@ ECode ListsFragment::ViewPagerAdapter::InstantiateItem(
 ECode ListsFragment::ViewPagerAdapter::GetCount(
     /* [out] */ Int32* count)
 {
-    VALUE_NOT_NULL(count);
+    VALIDATE_NOT_NULL(count);
     *count = TAB_INDEX_COUNT;
     return NOERROR;
 }
@@ -105,7 +105,7 @@ ECode ListsFragment::ViewPagerAdapter::GetPageTitle(
     /* [in] */ Int32 position,
     /* [out] */ ICharSequence** title)
 {
-    VALUE_NOT_NULL(title);
+    VALIDATE_NOT_NULL(title);
 
     *title = CoreUtils::Convert(mHost->mTabTitles[position]);
     REFCOUNT_ADD(*title);
@@ -196,7 +196,7 @@ ECode ListsFragment::PanelSlideCallbacks::OnPanelFlingReachesEdge(
 ECode ListsFragment::PanelSlideCallbacks::IsScrollableChildUnscrolled(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IAbsListView> listView;
     GetCurrentListView((IAbsListView**)&listView);
     if (listView != NULL) {
@@ -334,7 +334,7 @@ ECode ListsFragment::OnCreateView(
     /* [in] */ IBundle* savedInstanceState,
     /* [out] */ IView** view)
 {
-    VALUE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view);
 
     AutoPtr<IView> parentView;
     inflater->Inflate(R::layout::lists_fragment,
@@ -398,7 +398,7 @@ ECode ListsFragment::OnCallsFetched(
     /* [in] */ ICursor* cursor,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     mCallLogAdapter->SetLoading(FALSE);
 
     // Save the date of the most recent call log item
@@ -529,7 +529,7 @@ ECode ListsFragment::ShowRemoveView(
 ECode ListsFragment::ShouldShowActionBar(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = mIsPanelOpen && mActionBar != NULL;
     return NOERROR;
 }
@@ -537,7 +537,7 @@ ECode ListsFragment::ShouldShowActionBar(
 ECode ListsFragment::IsPaneOpen(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = mIsPanelOpen;
     return NOERROR;
 }
@@ -567,7 +567,7 @@ void ListsFragment::SetupPaneLayout(
 ECode ListsFragment::GetSpeedDialFragment(
     /* [out] */ ISpeedDialFragment** fragment)
 {
-    VALUE_NOT_NULL(fragment);
+    VALIDATE_NOT_NULL(fragment);
     *fragment = mSpeedDialFragment;
     REFCOUNT_ADD(*fragment);
     return NOERROR;
@@ -576,7 +576,7 @@ ECode ListsFragment::GetSpeedDialFragment(
 ECode ListsFragment::GetRemoveView(
     /* [out] */ IRemoveView** removeView)
 {
-    VALUE_NOT_NULL(removeView);
+    VALIDATE_NOT_NULL(removeView);
     *removeView = mRemoveView;
     REFCOUNT_ADD(*removeView);
     return NOERROR;
@@ -586,7 +586,7 @@ ECode ListsFragment::GetRtlPosition(
     /* [in] */ Int32 position,
     /* [out] */ Int32* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     if (DialerUtils::IsRtl()) {
         *result = TAB_INDEX_COUNT - 1 - position;
         return NOERROR;

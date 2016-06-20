@@ -27,7 +27,7 @@ ECode DialerPhoneNumberListAdapter::constructor(
 ECode DialerPhoneNumberListAdapter::GetCount(
     /* [out] */ Int32* count)
 {
-    VALUE_NOT_NULL(count);
+    VALIDATE_NOT_NULL(count);
 
     Int32 superCount, shortcutCount;
     PhoneNumberListAdapter::GetCount(&superCount);
@@ -39,7 +39,7 @@ ECode DialerPhoneNumberListAdapter::GetCount(
 ECode DialerPhoneNumberListAdapter::GetShortcutCount(
     /* [out] */ Int32* shortcutCount)
 {
-    VALUE_NOT_NULL(shortcutCount);
+    VALIDATE_NOT_NULL(shortcutCount);
 
     Int32 count = 0;
     for (Int32 i = 0; i < mShortcutEnabled->GetLength; i++) {
@@ -53,7 +53,7 @@ ECode DialerPhoneNumberListAdapter::GetItemViewType(
     /* [in] */ Int32 position,
     /* [out] */ Int32* type)
 {
-    VALUE_NOT_NULL(type);
+    VALIDATE_NOT_NULL(type);
 
     Int32 shortcut;
     GetShortcutTypeFromPosition(position, &shortcut);
@@ -72,7 +72,7 @@ ECode DialerPhoneNumberListAdapter::GetItemViewType(
 ECode DialerPhoneNumberListAdapter::GetViewTypeCount(
     /* [in] */ Int32* count)
 {
-    VALUE_NOT_NULL(count);
+    VALIDATE_NOT_NULL(count);
 
     // Number of item view types in the super implementation + 2 for the 2 new shortcuts
     Int32 viewTypeCount;
@@ -87,7 +87,7 @@ ECode DialerPhoneNumberListAdapter::GetView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
-    VALUE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view);
 
     Int32 shortcutType;
     GetShortcutTypeFromPosition(position, &shortcutType);
@@ -118,7 +118,7 @@ ECode DialerPhoneNumberListAdapter::GetShortcutTypeFromPosition(
     /* [in] */ Int32 position,
     /* [out] */ Int32* type)
 {
-    VALUE_NOT_NULL(type);
+    VALIDATE_NOT_NULL(type);
 
     Int32 count;
     PhoneNumberListAdapter::GetCount(&count);
@@ -148,7 +148,7 @@ ECode DialerPhoneNumberListAdapter::GetShortcutTypeFromPosition(
 ECode DialerPhoneNumberListAdapter::IsEmpty(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Int32 count;
     GetShortcutCount(&count);
@@ -161,7 +161,7 @@ ECode DialerPhoneNumberListAdapter::IsEnabled(
     /* [in] */ Int32 position,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Int32 shortcutType;
     GetShortcutTypeFromPosition(position, &shortcutType);
@@ -221,7 +221,7 @@ ECode DialerPhoneNumberListAdapter::SetShortcutEnabled(
     /* [in] */ Boolean visible,
     /* [out] */ Boolean* enabled)
 {
-    VALUE_NOT_NULL(enabled);
+    VALIDATE_NOT_NULL(enabled);
 
     Boolean changed = (*mShortcutEnabled)[shortcutType] != visible;
     (*mShortcutEnabled)[shortcutType] = visible;
@@ -233,7 +233,7 @@ ECode DialerPhoneNumberListAdapter::SetShortcutEnabled(
 ECode DialerPhoneNumberListAdapter::GetFormattedQueryString(
     /* [out] */ String* str)
 {
-    VALUE_NOT_NULL(str);
+    VALIDATE_NOT_NULL(str);
     *str = mFormattedQueryString;
     return NOERROR;
 }

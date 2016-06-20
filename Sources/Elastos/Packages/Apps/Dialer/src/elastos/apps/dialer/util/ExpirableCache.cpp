@@ -24,7 +24,7 @@ ExpirableCache::GenerationalCachedValues::GenerationalCachedValue(
 ECode ExpirableCache::GenerationalCachedValues::GetValue(
     /* [out] */ IInterface** value)
 {
-    VALUE_NOT_NULL(value);
+    VALIDATE_NOT_NULL(value);
     *value = mValue;
     REFCOUNT_ADD(*value);
     return NOERROR;
@@ -33,7 +33,7 @@ ECode ExpirableCache::GenerationalCachedValues::GetValue(
 ECode ExpirableCache::GenerationalCachedValues::IsExpired(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     Int32 generation;
     mCacheGeneration->Get(&generation);
     *result = mGeneration != generation;
@@ -56,7 +56,7 @@ ECode ExpirableCache::GetCachedValue(
     /* [in] */ IInterface* key,
     /* [out] */ IExpirableCacheCachedValue** value)
 {
-    VALUE_NOT_NULL(value);
+    VALIDATE_NOT_NULL(value);
     return mCache->Get(key, value);
 }
 
@@ -64,7 +64,7 @@ ECode ExpirableCache::GetPossiblyExpired(
     /* [in] */ IInterface* key,
     /* [out] */ IInterface** value)
 {
-    VALUE_NOT_NULL(value);
+    VALIDATE_NOT_NULL(value);
     AutoPtr<IExpirableCacheCachedValue> cachedValue;
     GetCachedValue(key, (IExpirableCacheCachedValue**)&cachedValue);
     if (cachedValue == NULL) {
@@ -114,7 +114,7 @@ ECode ExpirableCache::NewCachedValue(
     /* [in] */ IInterface* value,
     /* [out] */ IExpirableCacheCachedValue** cached)
 {
-    VALUE_NOT_NULL(cached);
+    VALIDATE_NOT_NULL(cached);
 
     AutoPtr<GenerationalCachedValue> gcv = new GenerationalCachedValue(value, mGeneration);
     *cached = (IExpirableCacheCachedValue*)gcv;

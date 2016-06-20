@@ -3,21 +3,30 @@
 
 #include "_Elastos_Apps_DialerBind_CObjectFactory.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
 
+using Elastos::Droid::App::IDialogFragment;
 using Elastos::Droid::Content::IContext;
+using Elastos::Apps::Dialer::CallLog::ICallLogAdapter;
+using Elastos::Apps::Dialer::CallLog::ICallLogAdapterCallFetcher;
+using Elastos::Apps::Dialer::CallLog::ICallLogAdapterCallItemExpandedListener;
+using Elastos::Apps::Dialer::CallLog::ICallLogAdapterOnReportButtonClickListener;
+using Elastos::Apps::Dialer::CallLog::IContactInfoHelper;
+using Elastos::Apps::Dialer::Service::ICachedNumberLookupService;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace DialerBind {
 
 CarClass(CObjectFactory)
-    , public singleton
+    , public Singleton
     , public IObjectFactory
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     CARAPI NewCachedNumberLookupService(
         /* [out] */ ICachedNumberLookupService** service);

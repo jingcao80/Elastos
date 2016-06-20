@@ -16,7 +16,7 @@ ECode CSmartDialNameMatcherHelper::NormalizeNumber(
     /* [in] */ ISmartDialMap* map,
     /* [out] */ String* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = SmartDialNameMatcher::NormalizeNumber(number, map);
     return NOERROR;
 }
@@ -27,7 +27,7 @@ ECode CSmartDialNameMatcherHelper::NormalizeNumber(
     /* [in] */ ISmartDialMap* map,
     /* [out] */ String* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = SmartDialNameMatcher::NormalizeNumber(number, offset, map);
     return NOERROR;
 }
@@ -35,7 +35,7 @@ ECode CSmartDialNameMatcherHelper::NormalizeNumber(
 ECode CSmartDialNameMatcherHelper::GetLATIN_SMART_DIAL_MAP(
     /* [out] */ ISmartDialMap** map)
 {
-    VALUE_NOT_NULL(map);
+    VALIDATE_NOT_NULL(map);
     *map = SmartDialNameMatcher::LATIN_SMART_DIAL_MAP;
     REFCOUNT_ADD(*map);
     return NOERROR;

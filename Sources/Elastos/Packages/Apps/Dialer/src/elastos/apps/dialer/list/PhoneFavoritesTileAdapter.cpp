@@ -21,7 +21,7 @@ ECode PhoneFavoritesTileAdapter::ContactEntryComparator::Compare(
     /* [in] */ IContactEntry* rhs,
     /* [out] */ Int32* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     assert(0 && "TODO");
     // ComparisonChain.start()
@@ -87,7 +87,7 @@ ECode PhoneFavoritesTileAdapter::SetInDragging(
 ECode PhoneFavoritesTileAdapter::GetInDragging(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = mInDragging;
     return NOERROR;
 }
@@ -277,7 +277,7 @@ Int32 PhoneFavoritesTileAdapter::GetNumStarredContacts(
 ECode PhoneFavoritesTileAdapter::GetNumFrequents(
     /* [out] */ Int32* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = mNumFrequents;
     return NOERROR;
 }
@@ -285,7 +285,7 @@ ECode PhoneFavoritesTileAdapter::GetNumFrequents(
 ECode PhoneFavoritesTileAdapter::GetCount(
     /* [out] */ Int32* count)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     if (mContactEntries == NULL) {
         *count = 0;
         return NOERROR;
@@ -299,7 +299,7 @@ ECode PhoneFavoritesTileAdapter::GetItem(
     /* [in] */ Int32 position,
     /* [out] */ IContactEntry** item)
 {
-    VALUE_NOT_NULL(item);
+    VALIDATE_NOT_NULL(item);
     AutoPtr<IInterface> obj;
     mContactEntries->Get(position, &obj);
     *item = IContactEntry::Probe(obj);
@@ -311,7 +311,7 @@ ECode PhoneFavoritesTileAdapter::GetItemId(
     /* [in] */ Int32 position,
     /* [out] */ Int64* id)
 {
-    VALUE_NOT_NULL(id);
+    VALIDATE_NOT_NULL(id);
     AutoPtr<IContactEntry> item;
     GetItem(position, (IContactEntry**)&item);
     *id = ((CContactEntry*)item)->mId;
@@ -321,7 +321,7 @@ ECode PhoneFavoritesTileAdapter::GetItemId(
 ECode PhoneFavoritesTileAdapter::HasStableIds(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = TRUE;
     return NOERROR;
 }
@@ -329,7 +329,7 @@ ECode PhoneFavoritesTileAdapter::HasStableIds(
 ECode PhoneFavoritesTileAdapter::AreAllItemsEnabled(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = TRUE;
     return NOERROR;
 }
@@ -338,7 +338,7 @@ ECode PhoneFavoritesTileAdapter::IsEnabled(
     /* [in] */ Int32 position,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     Int32 count;
     GetCount(&count);
     *result = count > 0;
@@ -359,7 +359,7 @@ ECode PhoneFavoritesTileAdapter::GetView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
-    VALUE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view);
     if (DEBUG) {
         Logger::V(TAG, "get view for %d", position);
     }
@@ -394,7 +394,7 @@ ECode PhoneFavoritesTileAdapter::GetView(
 ECode PhoneFavoritesTileAdapter::GetViewTypeCount(
     /* [out] */ Int32* count)
 {
-    VALUE_NOT_NULL(count);
+    VALIDATE_NOT_NULL(count);
     *count = ViewTypes::COUNT;
     return NOERROR;
 }
@@ -403,7 +403,7 @@ ECode PhoneFavoritesTileAdapter::GetItemViewType(
     /* [in] */ Int32 position,
     /* [out] */ Int32* type)
 {
-    VALUE_NOT_NULL(type);
+    VALIDATE_NOT_NULL(type);
     *type = ViewTypes::TILE;
     return NOERROR;
 }

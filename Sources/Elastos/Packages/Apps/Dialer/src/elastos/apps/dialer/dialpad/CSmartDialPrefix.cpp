@@ -29,7 +29,7 @@ ECode CSmartDialPrefix::ParseToIndexTokens(
     /* [in] */ const String& contactName,
     /* [out] */ IArrayList** tokens)
 {
-    VALUE_NOT_NULL(tokens);
+    VALIDATE_NOT_NULL(tokens);
 
     AutoPtr<IArrayList> result = SmartDialPrefix::ParseToIndexTokens(contactName);
     *tokens = result;
@@ -41,7 +41,7 @@ ECode CSmartDialPrefix::GenerateNamePrefixes(
     /* [in] */ const String& index,
     /* [out] */ IArrayList** prefixes)
 {
-    VALUE_NOT_NULL(prefixes);
+    VALIDATE_NOT_NULL(prefixes);
 
     AutoPtr<IArrayList> result = SmartDialPrefix::GenerateNamePrefixes(index);
     *prefixes = result;
@@ -53,7 +53,7 @@ ECode CSmartDialPrefix::ParseToNumberTokens(
     /* [in] */ const String& number,
     /* [out] */ IArrayList** tokens)
 {
-    VALUE_NOT_NULL(tokens);
+    VALIDATE_NOT_NULL(tokens);
 
     AutoPtr<IArrayList> result = SmartDialPrefix::ParseToNumberTokens(number);
     *tokens = result;
@@ -65,7 +65,7 @@ ECode CSmartDialPrefix::ParsePhoneNumber(
     /* [in] */ const String& number,
     /* [out] */ ISmartDialPrefixPhoneNumberTokens** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     AutoPtr<ISmartDialPrefixPhoneNumberTokens> tokens = SmartDialPrefix::ParsePhoneNumber(number);
     *result = tokens;
@@ -76,7 +76,7 @@ ECode CSmartDialPrefix::ParsePhoneNumber(
 ECode CSmartDialPrefix::GetMap(
     /* [out] */ ISmartDialMap** map)
 {
-    VALUE_NOT_NULL(map);
+    VALIDATE_NOT_NULL(map);
 
     AutoPtr<ISmartDialMap> result = SmartDialPrefix::GetMap();
     *map = result;
@@ -88,7 +88,7 @@ ECode CSmartDialPrefix::IsCountryNanp(
     /* [in] */ const String& country,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     *result = SmartDialPrefix::IsCountryNanp(country);
     return NOERROR;
@@ -97,7 +97,7 @@ ECode CSmartDialPrefix::IsCountryNanp(
 ECode CSmartDialPrefix::GetUserInNanpRegion(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     *result = SmartDialPrefix::GetUserInNanpRegion();
     return NOERROR;

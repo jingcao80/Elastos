@@ -25,7 +25,7 @@ ECode IntentProvider::ReturnCallIntentProvider::GetIntent(
     /* [in] */ IContext* context,
     /* [out] */ IIntent** intent)
 {
-    VALUE_NOT_NULL(intent);
+    VALIDATE_NOT_NULL(intent);
     AutoPtr<IIntent> result = CallUtil::GetCallIntent(mNumber, mAccountHandle);
     *intent = result;
     REFCOUNT_ADD(*intent);
@@ -49,7 +49,7 @@ ECode IntentProvider::ReturnVideoCallIntentProvider::GetIntent(
     /* [in] */ IContext* context,
     /* [out] */ IIntent** intent)
 {
-    VALUE_NOT_NULL(intent);
+    VALIDATE_NOT_NULL(intent);
     AutoPtr<IIntent> result = CallUtil::GetVideoCallIntent(mNumber, mAccountHandle);
     *intent = result;
     REFCOUNT_ADD(*intent);
@@ -73,7 +73,7 @@ ECode IntentProvider::PlayVoicemailIntentProvider::GetIntent(
     /* [in] */ IContext* context,
     /* [out] */ IIntent** intent)
 {
-    VALUE_NOT_NULL(intent);
+    VALIDATE_NOT_NULL(intent);
 
     AutoPtr<IIntent> result;
     CIntent::New(context, ECLSID_CCallDetailActivity, (IIntent**)&result);
@@ -117,7 +117,7 @@ ECode IntentProvider::CallDetailIntentProvider::GetIntent(
     /* [in] */ IContext* context,
     /* [out] */ IIntent** intent)
 {
-    VALUE_NOT_NULL(intent);
+    VALIDATE_NOT_NULL(intent);
 
     AutoPtr<IIntent> result;
     CIntent::New(context, ECLSID_CCallDetailActivity, (IIntent**)&result);

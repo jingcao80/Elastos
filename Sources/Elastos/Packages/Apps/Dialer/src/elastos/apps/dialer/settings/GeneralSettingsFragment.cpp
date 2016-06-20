@@ -129,7 +129,7 @@ ECode GeneralSettingsFragment::OnPreferenceChange(
     /* [in] */ IInterface* objValue,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     Boolean equals;
     if (IObject::Probe(preference)->Equals(mVibrateWhenRinging, &equals), equals) {
         Boolean doVibrate = CoreUtils::Unbox(objValue);
@@ -149,7 +149,7 @@ ECode GeneralSettingsFragment::OnPreferenceTreeClick(
     /*[in]*/ IPreference* preference,
     /*[out]*/ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     if (preference == mPlayDtmfTone) {
         AutoPtr<IContentResolver> resolver;
         mContext->GetContentResolver((IContentResolver**)&resolver);

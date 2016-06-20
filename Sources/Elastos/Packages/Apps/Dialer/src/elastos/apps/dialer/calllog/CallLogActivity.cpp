@@ -1,12 +1,25 @@
 
 #include "R.h"
 #include "elastos/apps/dialer/calllog/CallLogActivity.h"
+#include "elastos/apps/dialer/calllog/CCallLogFragment.h"
+#include "elastos/apps/dialer/calllog/ClearCallLogDialog.h"
+#include "elastos/apps/dialer/calllog/CCallLogQueryHandler.h"
+#include "elastos/apps/dialer/voicemail/CVoicemailStatusHelperImpl.h"
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/droid/R.h>
 
 using Elastos::Droid::App::IActionBar;
+using Elastos::Droid::App::IFragmentManager;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Provider::ICalls;
+using Elastos::Droid::Widget::IAdapter;
+using Elastos::Apps::Dialer::Voicemail::IVoicemailStatusHelperImpl;
+using Elastos::Apps::Dialer::Voicemail::CVoicemailStatusHelperImpl;
 
 namespace Elastos {
 namespace Apps {
@@ -164,7 +177,7 @@ ECode CallLogActivity::OnCreate(
 
     mTabTitles = ArrayOf<String>::Alloc(TAB_INDEX_COUNT_WITH_VOICEMAIL);
     String alltitle;
-    GetString(R::string::call_log_all_title, &title);
+    GetString(R::string::call_log_all_title, &alltitle);
     mTabTitles->Set(0, alltitle);
     String missedtitle;
     GetString(R::string::call_log_missed_title, &missedtitle);
@@ -210,7 +223,6 @@ ECode CallLogActivity::OnCreate(
     return NOERROR;
 }
 
-// @Override
 ECode CallLogActivity::OnResume()
 {
     assert(0 && "TODO");
@@ -218,38 +230,39 @@ ECode CallLogActivity::OnResume()
     AutoPtr<IContentResolver> resolver;
     GetContentResolver((IContentResolver**)&resolver);
     AutoPtr<ICallLogQueryHandler> callLogQueryHandler;
-    CCallLogQueryHandler::New(resolver, ICallLogQueryHandlerListener::Probe(this));
+    CCallLogQueryHandler::New(resolver,
+            (ICallLogQueryHandlerListener*)this, (ICallLogQueryHandler**)&callLogQueryHandler);
     callLogQueryHandler->FetchVoicemailStatus();
 
     return NOERROR;
 }
 
-// @Override
 ECode CallLogActivity::OnCreateOptionsMenu(
     /* [in] */ IMenu* menu,
     /* [out] */ Boolean* allowToShow)
 {
     AutoPtr<IMenuInflater> inflater;
     GetMenuInflater((IMenuInflater**)&inflater);
-    inflater->Inflate(R::menu.call_log_options, menu);
+    inflater->Inflate(R::menu::call_log_options, menu);
     *allowToShow = TRUE;
 
     return NOERROR;
 }
 
-// @Override
 ECode CallLogActivity::OnPrepareOptionsMenu(
     /* [in] */ IMenu* menu,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res);
     AutoPtr<IMenuItem> itemDeleteAll;
-    menu->FindItem(R::id::delete_all, (IMenuItem**)&itemDeleteAll)
+    menu->FindItem(R::id::delete_all, (IMenuItem**)&itemDeleteAll);
 
     // If onPrepareOptionsMenu is called before fragments loaded. Don't do anything.
     if (mAllCallsFragment != NULL && itemDeleteAll != NULL) {
-        AutoPtr<ICallLogAdapter> adapter = mAllCallsFragment->GetAdapter();
+        AutoPtr<ICallLogAdapter> adapter = ((CCallLogFragment*)mAllCallsFragment.Get())->GetAdapter();
         Boolean isEmpty = FALSE;
-        itemDeleteAll->SetVisible(adapter != NULL && adapter->IsEmpty(&isEmpty), !isEmpty);
+        itemDeleteAll->SetVisible(adapter != NULL
+                && (IAdapter::Probe(adapter)->IsEmpty(&isEmpty), !isEmpty));
     }
     *res = TRUE;
 
@@ -261,9 +274,12 @@ ECode CallLogActivity::OnOptionsItemSelected(
     /* [in] */ IMenuItem* item,
     /* [out] */ Boolean* res)
 {
-    switch (item.getItemId()) {
-        case Elasots::R::id::home:
-            AutoPtr<IIntent> intent;
+    VALIDATE_NOT_NULL(res);
+    Int32 id;
+    item->GetItemId(&id);
+    AutoPtr<IIntent> intent;
+    switch (id) {
+        case Elastos::Droid::R::id::home:
             CIntent::New(this, ECLSID_CDialtactsActivity, (IIntent**)&intent);
             intent->AddFlags(IIntent::FLAG_ACTIVITY_CLEAR_TOP);
             StartActivity(intent);
@@ -271,7 +287,7 @@ ECode CallLogActivity::OnOptionsItemSelected(
             return NOERROR;
         case R::id::delete_all:
             AutoPtr<IFragmentManager> manager;
-            GetFragmentManager((IFragmentManager**)&manager)
+            GetFragmentManager((IFragmentManager**)&manager);
             ClearCallLogDialog::Show(manager);
             *res = TRUE;
             return NOERROR;
@@ -281,7 +297,6 @@ ECode CallLogActivity::OnOptionsItemSelected(
     return NOERROR;
 }
 
-// @Override
 ECode CallLogActivity::OnVoicemailStatusFetched(
     /* [in] */ ICursor* statusCursor)
 {
@@ -294,7 +309,7 @@ ECode CallLogActivity::OnVoicemailStatusFetched(
     // Update mHasActiveVoicemailProvider, which controls the number of tabs displayed.
     Int32 activeSources;
     mVoicemailStatusHelper->GetNumberActivityVoicemailSources(statusCursor, &activeSources);
-    if (activeSources > 0 != mHasActiveVoicemailProvider) {
+    if ((activeSources > 0) != mHasActiveVoicemailProvider) {
         mHasActiveVoicemailProvider = activeSources > 0;
         assert(0 && "TODO");
         // mViewPagerAdapter->NotifyDataSetChanged();
@@ -313,11 +328,11 @@ ECode CallLogActivity::OnVoicemailStatusFetched(
     return NOERROR;
 }
 
-// @Override
 ECode CallLogActivity::OnCallsFetched(
     /* [in] */ ICursor* statusCursor,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     // Return false; did not take ownership of cursor
     *result = FALSE;
     return NOERROR;

@@ -23,7 +23,7 @@ VoicemailStatusHelperImpl::Action::Action(
 ECode VoicemailStatusHelperImpl::Action::GetMessageId(
     /* [out] */ Int32* id)
 {
-    VALUE_NOT_NULL(id);
+    VALIDATE_NOT_NULL(id);
     *id = mMessageId;
     return NOERROR;
 }
@@ -117,7 +117,7 @@ ECode VoicemailStatusHelperImpl::MyComparator::Compare(
     /* [in] */ IInterface* msg2,
     /* [out] */ Int32* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     *result = ((MessageStatusWithPriority*)msg1)->mPriority
             - ((MessageStatusWithPriority*)msg2)->mPriority;
@@ -155,7 +155,7 @@ ECode VoicemailStatusHelperImpl::GetStatusMessages(
     /* [in] */ ICursor* cursor,
     /* [out] */ IList** result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     AutoPtr<IList> messages;
     CArrayList::New((IList**)&messages);
@@ -178,7 +178,7 @@ ECode VoicemailStatusHelperImpl::GetNumberActivityVoicemailSources(
     /* [in] */ ICursor* cursor,
     /* [out] */ Int32* number)
 {
-    VALUE_NOT_NULL(number);
+    VALIDATE_NOT_NULL(number);
     Int32 count = 0;
     cursor->MoveToPosition(-1);
     Boolean succeeded;

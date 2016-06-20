@@ -16,7 +16,7 @@ ECode CSpecialCharSequenceMgr::HandleChars(
     /* [in] */ IEditText* textField,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = SpecialCharSequenceMgr::HandleChars(context, input, textField);
     return NOERROR;
 }

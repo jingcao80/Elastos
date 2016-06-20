@@ -8,7 +8,6 @@
 #include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/app/Activity.h"
 
-using Elastos::Droid::App::Activity;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
@@ -27,7 +26,7 @@ namespace CallLog {
 class CallLogActivity
     // TODO:
     //: public AnalyticsActivity
-    : public Activity
+    : public Elastos::Droid::App::Activity
     , public ICallLogActivity
     , public ICallLogQueryHandlerListener
 {
@@ -93,7 +92,7 @@ public:
     // @Override
     CARAPI OnPrepareOptionsMenu(
         /* [in] */ IMenu* menu,
-         [out]  Boolean* res);
+        /* [out] */  Boolean* res);
 
     // @Override
     CARAPI OnOptionsItemSelected(
@@ -107,7 +106,7 @@ public:
     // @Override
     CARAPI OnCallsFetched(
         /* [in] */ ICursor* statusCursor,
-        /* [out] */ Boolean result);
+        /* [out] */ Boolean* result);
 
 protected:
     // @Override

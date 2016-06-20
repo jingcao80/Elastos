@@ -12,7 +12,7 @@ CAR_SINGLETON_IMPL(CDialtactsActivityHelper);
 ECode CDialtactsActivityHelper::GetCallSettingsIntent(
     /* [out] */ IIntent** intent)
 {
-    VALUE_NOT_NULL(intent);
+    VALIDATE_NOT_NULL(intent);
     AutoPtr<IIntent> obj = DialtactsActivity::GetCallSettingsIntent();
     *intent = obj;
     REFCOUNT_ADD(*intent);
@@ -23,7 +23,7 @@ ECode CDialtactsActivityHelper::GetAddNumberToContactIntent(
     /* [in] */ICharSequence* text,
     /* [out] */ IIntent** intent)
 {
-    VALUE_NOT_NULL(intent);
+    VALIDATE_NOT_NULL(intent);
     AutoPtr<IIntent> obj = DialtactsActivity::GetAddNumberToContactIntent(text);
     *intent = obj;
     REFCOUNT_ADD(*intent);

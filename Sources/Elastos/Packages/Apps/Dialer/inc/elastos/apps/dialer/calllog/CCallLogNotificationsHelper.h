@@ -2,11 +2,14 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CCALLLOGNOTIFICATIONSHELPER_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CCALLLOGNOTIFICATIONSHELPER_H__
 
-#include "_Elastos_Apps_Dialer_CallLog_CCallLogAdapterHelper.h"
+#include "_Elastos_Apps_Dialer_CallLog_CCallLogNotificationsHelper.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Content.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Content::IContext;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace CallLog {
 
@@ -18,9 +21,9 @@ CarClass(CCallLogNotificationsHelper)
     , public ICallLogNotificationsHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     /** Removes the missed call notifications. */
     CARAPI RemoveMissedCallNotifications(

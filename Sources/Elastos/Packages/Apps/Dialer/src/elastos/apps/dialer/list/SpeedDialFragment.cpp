@@ -21,7 +21,7 @@ ECode SpeedDialFragment::ContactTileLoaderListener::OnCreateLoader(
     /* [in] */ IBundle* args,
     /* [out] */ ICursorLoader** loader)
 {
-    VALUE_NOT_NULL(loader);
+    VALIDATE_NOT_NULL(loader);
     if (DEBUG) {
         Logger::D(TAG, "ContactTileLoaderListener#onCreateLoader.");
     }
@@ -92,7 +92,7 @@ ECode SpeedDialFragment::ContactTileAdapterListener::OnCallNumberDirectly(
 ECode SpeedDialFragment::ContactTileAdapterListener::GetApproximateTileWidth(
     /* [out] */ Int32* width)
 {
-    VALUE_NOT_NULL(width);
+    VALIDATE_NOT_NULL(width);
     AutoPtr<IView> view;
     mHost->GetView((IView**)&view);
     return view->GetWidth(width);
@@ -306,7 +306,7 @@ ECode SpeedDialFragment::OnCreateView(
     /* [in] */ IBundle* savedInstanceState,
     /* [out] */ IView** view)
 {
-    VALUE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view);
 
     inflater->Inflate(R::layout::speed_dial_fragment,
             container, FALSE, (IView**)&mParentView);
@@ -365,7 +365,7 @@ ECode SpeedDialFragment::OnCreateView(
 ECode SpeedDialFragment::HasFrequents(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     if (mContactTileAdapter == NULL) {
         *result = FALSE;
         return NOERROR;
@@ -554,7 +554,7 @@ ECode SpeedDialFragment::CacheOffsetsForDatasetChange()
 ECode SpeedDialFragment::GetListView(
     /* [out] */ IAbsListView** listView)
 {
-    VALUE_NOT_NULL(listview);
+    VALIDATE_NOT_NULL(listview);
     *listView = mListView;
     REFCOUNT_ADD(*listView);
     return NOERROR;

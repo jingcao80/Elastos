@@ -13,7 +13,7 @@ CAR_INTERFACE_DECL(SmartDialSearchFragment, SearchFragment, ISmartDialSearchFrag
 ECode SmartDialSearchFragment::CreateListAdapter(
     /* [out] */ IContactEntryListAdapter** listAdapter)
 {
-    VALUE_NOT_NULL(listAdapter);
+    VALIDATE_NOT_NULL(listAdapter);
     AutoPtr<IActivity> activity;
     GetActivity(&activity);
     AutoPtr<ISmartDialNumberListAdapter> adapter;
@@ -38,7 +38,7 @@ ECode SmartDialSearchFragment::OnCreateLoader(
     /* [in] */ IBundle* args,
     /* [out] */ ILoader** loader)
 {
-    VALUE_NOT_NULL(loader);
+    VALIDATE_NOT_NULL(loader);
 
     // Smart dialing does not support Directory Load, falls back to normal search instead.
     Int32 loaderId;
@@ -63,7 +63,7 @@ ECode SmartDialSearchFragment::GetPhoneUri(
     /* [in] */ Int32 position,
     /* [out] */ IUri** uri)
 {
-    VALUE_NOT_NULL(uri);
+    VALIDATE_NOT_NULL(uri);
 
     AutoPtr<IInterface> adpater;
     GetAdapter((IInterface**)&adpater);

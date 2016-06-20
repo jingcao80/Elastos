@@ -51,7 +51,7 @@ ECode ActionBarController::constructor(
 ECode ActionBarController::IsActionBarShowing(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Boolean isFadedOut;
     mSearchBox->IsFadedOut(&isFadedOut);
@@ -209,7 +209,7 @@ ECode ActionBarController::SetHideOffset(
 ECode ActionBarController::GetHideOffset(
     /* [out] */ Int32* offset)
 {
-    VALUE_NOT_NULL(offset);
+    VALIDATE_NOT_NULL(offset);
 
     AutoPtr<IActionBar> actionBar;
     mActivityUi->GetActionBar((IActionBar**)&actionBar);
@@ -270,7 +270,7 @@ ECode ActionBarController::RestoreActionBarOffset()
 ECode ActionBarController::GetIsActionBarSlidUp(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = mIsActionBarSlidUp;
     return NOERROR;
 }

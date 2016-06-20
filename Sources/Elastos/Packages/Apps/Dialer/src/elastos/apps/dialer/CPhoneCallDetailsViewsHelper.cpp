@@ -14,7 +14,7 @@ ECode CPhoneCallDetailsViewsHelper::FromView(
     /* [in] */ IView* view,
     /* [out] */  IPhoneCallDetailsViews** detailsViews)
 {
-    VALUE_NOT_NULL(detailsViews);
+    VALIDATE_NOT_NULL(detailsViews);
     AutoPtr<IPhoneCallDetailsViews> views = PhoneCallDetailsViews::FromView(view);
     *detailsViews = views;
     REFCOUNT_ADD(*detailsViews);
@@ -25,7 +25,7 @@ ECode CPhoneCallDetailsViewsHelper::CreateForTest(
     /* [in] */ IContext* context,
     /* [out] */  IPhoneCallDetailsViews** detailsViews)
 {
-    VALUE_NOT_NULL(detailsViews);
+    VALIDATE_NOT_NULL(detailsViews);
     AutoPtr<IPhoneCallDetailsViews> views = PhoneCallDetailsViews::CreateForTest(context);
     *detailsViews = views;
     REFCOUNT_ADD(*detailsViews);

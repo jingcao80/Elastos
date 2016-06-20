@@ -25,7 +25,7 @@ ECode CLatinSmartDialMap::IsValidDialpadAlphabeticChar(
     /* [in] */ Char32 ch,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     *result = (ch >= 'a' && ch <= 'z');
     return NOERROR;
@@ -35,7 +35,7 @@ ECode CLatinSmartDialMap::IsValidDialpadNumericChar(
     /* [in] */ Char32 ch,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     *result = (ch >= '0' && ch <= '9');
     return NOERROR;
@@ -45,7 +45,7 @@ ECode CLatinSmartDialMap::IsValidDialpadCharacter(
     /* [in] */ Char32 ch,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Boolean isAlpha, isNumberic;
     *result = (IsValidDialpadAlphabeticChar(ch, &isAlpha), isAlpha
@@ -57,7 +57,7 @@ ECode CLatinSmartDialMap::NormalizeCharacter(
     /* [in] */ Char32 ch,
     /* [out] */ Char32* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     switch (ch) {
         case 'À':
@@ -1086,7 +1086,7 @@ ECode CLatinSmartDialMap::GetDialpadIndex(
     /* [in] */ Char32 ch,
     /* [out] */ Byte* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     if (ch >= '0' && ch <= '9') {
         *result = (Byte) (ch - '0');
@@ -1105,7 +1105,7 @@ ECode CLatinSmartDialMap::GetDialpadNumericCharacter(
     /* [in] */ Char32 ch,
     /* [out] */ Char32* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     if (ch >= 'a' && ch <= 'z') {
         *result = LATIN_LETTERS_TO_DIGITS[ch - 'a'];

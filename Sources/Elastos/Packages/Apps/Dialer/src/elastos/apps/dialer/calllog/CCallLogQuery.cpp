@@ -1,6 +1,10 @@
 
 #include "elastos/apps/dialer/calllog/CCallLogQuery.h"
 #include <elquintet.h>
+#include "Elastos.Droid.Provider.h"
+
+using Elastos::Droid::Provider::IBaseColumns;
+using Elastos::Droid::Provider::ICalls;
 
 namespace Elastos {
 namespace Apps {
@@ -8,7 +12,7 @@ namespace Dialer {
 namespace CallLog {
 
 const String _PROJECTION[] = {
-    ICalls::_ID,                          // 0
+    IBaseColumns::ID,                          // 0
     ICalls::NUMBER,                       // 1
     ICalls::DATE,                         // 2
     ICalls::DURATION,                     // 3
@@ -31,7 +35,7 @@ const String _PROJECTION[] = {
     ICalls::FEATURES,                     // 20
     ICalls::DATA_USAGE,                   // 21
     ICalls::TRANSCRIPTION                 // 22
-}
+};
 
 CAR_INTERFACE_IMPL(CCallLogQuery, Singleton, ICallLogQuery);
 
@@ -40,10 +44,10 @@ CAR_SINGLETON_IMPL(CCallLogQuery);
 ECode CCallLogQuery::Get_PROJECTION(
     /* [out, callee] */ ArrayOf<String>** result)
 {
-    VALUE_NOT_NULL(projection)
+    VALIDATE_NOT_NULL(result);
 
     AutoPtr<ArrayOf<String> > projection = ArrayOf<String>::Alloc(
-            _PROJECTION, sizeof(_PROJECTION)/sizeof(String));
+            (String*)_PROJECTION, 9);
     *result = projection;
 
     return NOERROR;

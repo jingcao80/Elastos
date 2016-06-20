@@ -167,7 +167,7 @@ ECode OverlappingPaneLayout::DragHelperCallback::TryCaptureView(
     /* [in] */ Int32 pointerId,
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     if (mHost->mIsUnableToDrag) {
         *result = FALSE;
         return NOERROR;
@@ -302,7 +302,7 @@ ECode OverlappingPaneLayout::DragHelperCallback::GetViewVerticalDragRange(
     /* [in] */ IView* child,
     /* [out] */ Int32* range)
 {
-    VALUE_NOT_NULL(range);
+    VALIDATE_NOT_NULL(range);
     *range = mSlideRange;
     return NOERROR;
 }
@@ -313,7 +313,7 @@ ECode OverlappingPaneLayout::DragHelperCallback::ClampViewPositionHorizontal(
     /* [in] */ Int32 dx,
     /* [out] */ Int32* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     // Make sure we never move views horizontally.
     child->GetLeft(result);
     return NOERROR;
@@ -325,7 +325,7 @@ ECode OverlappingPaneLayout::DragHelperCallback::ClampViewPositionVertical(
     /* [in] */ Int32 dy,
     /* [out] */ Int32* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IViewGroupLayoutParams> lp;
     mHost->mSlideableView->GetLayoutParams((IViewGroupLayoutParams**)&lp);
 
@@ -968,7 +968,7 @@ ECode OverlappingPaneLayouts::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* res)
 {
-    VALUE_NOT_NULL(res);
+    VALIDATE_NOT_NULL(res);
     Int32 action;
     assert(0 && "TODO");
     // MotionEventCompat.getActionMasked(ev);
@@ -1050,7 +1050,7 @@ ECode OverlappingPaneLayouts::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* res)
 {
-    VALUE_NOT_NULL(res);
+    VALIDATE_NOT_NULL(res);
     if (!mCanSlide) {
         return ViewGroup::OnTouchEvent(ev);
     }
@@ -1110,7 +1110,7 @@ void OverlappingPaneLayouts::UpdateSlideOffset(
 ECode OverlappingPaneLayouts::OpenPane(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = OpenPane(mSlideableView, 0);
     return NOERROR;
 }
@@ -1118,7 +1118,7 @@ ECode OverlappingPaneLayouts::OpenPane(
 ECode OverlappingPaneLayouts::ClosePane(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = ClosePane(mSlideableView, 0);
     return NOERROR;
 }
@@ -1126,7 +1126,7 @@ ECode OverlappingPaneLayouts::ClosePane(
 ECode OverlappingPaneLayouts::IsOpen(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = !mCanSlide || mSlideOffset > 0;
     return NOERROR;
 }
@@ -1134,7 +1134,7 @@ ECode OverlappingPaneLayouts::IsOpen(
 ECode OverlappingPaneLayouts::IsSlideable(
     /* [out] */ Boolean* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = mCanSlide;
     return NOERROR;
 }
@@ -1277,7 +1277,7 @@ Boolean OverlappingPaneLayouts::IsCapturableViewUnder(
 ECode OverlappingPaneLayouts::GenerateDefaultLayoutParams(
     /* [out] */ IViewGroupLayoutParams** params)
 {
-    VALUE_NOT_NULL(params);
+    VALIDATE_NOT_NULL(params);
     AutoPtr<LayoutParams> lp = new LayoutParams(this);
     lp->constructor();
     *params = (IViewGroupLayoutParams*)lp;
@@ -1313,7 +1313,7 @@ ECode OverlappingPaneLayouts::GenerateLayoutParams(
     /* [in] */ IAttributeSet* attrs,
     /* [out] */ IViewGroupLayoutParams** params)
 {
-    VALUE_NOT_NULL(params);
+    VALIDATE_NOT_NULL(params);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     AutoPtr<LayoutParams> lp = new LayoutParams(this);
@@ -1360,7 +1360,7 @@ ECode OverlappingPaneLayouts::OnStartNestedScroll(
     /* [in] */ Int32 nestedScrollAxes,
     /* [out] */ Boolean* res)
 {
-    VALUE_NOT_NULL(res);
+    VALIDATE_NOT_NULL(res);
     Boolean startNestedScroll = (nestedScrollAxes & SCROLL_AXIS_VERTICAL) != 0;
     if (startNestedScroll) {
         mIsInNestedScroll = TRUE;
@@ -1400,7 +1400,7 @@ ECode OverlappingPaneLayouts::OnNestedPreFling(
     /* [in] */ Float velocityY,
     /* [out] */ Boolean* res)
 {
-    VALUE_NOT_NULL(res);
+    VALIDATE_NOT_NULL(res);
     Boolean result;
     if (!(velocityY > 0 && mSlideOffsetPx != 0
             || velocityY < 0 && mSlideOffsetPx < mIntermediateOffset
