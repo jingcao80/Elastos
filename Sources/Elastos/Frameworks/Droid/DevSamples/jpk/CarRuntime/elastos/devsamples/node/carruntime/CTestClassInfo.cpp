@@ -36,7 +36,7 @@ ECode CTestClassInfo::GetId(
 ECode CTestClassInfo::GetModuleInfo(
     /* [out] */ ITestModuleInfo ** ppModuleInfo)
 {
-    ECode ec;
+    ECode ec = NOERROR;
 
     AutoPtr<IModuleInfo> moduleInfo;
     ec = mClassInfo->GetModuleInfo((IModuleInfo**)&moduleInfo);
@@ -55,8 +55,6 @@ ECode CTestClassInfo::GetModuleInfo(
 
     moduleInfo->AddRef();
     testModuleInfo->AddRef();
-
-    ec = NOERROR;
 
     return ec;
 }
@@ -343,6 +341,8 @@ ECode CTestClassInfo::CreateObject(
 ECode CTestClassInfo::LocalCreateObject(
     /* [out] */ PInterface * ppObject)
 {
+    ALOGD("========CTestClassInfo::LocalCreateObject========begin========");
+
     //ECode ec =  mClassInfo->CreateObject((IInterface**)&ppObject);
     ECode ec =  mClassInfo->CreateObject(ppObject);
 
@@ -359,6 +359,8 @@ ECode CTestClassInfo::LocalCreateObject(
 ECode CTestClassInfo::RemoteCreateObject(
     /* [out] */ PInterface * ppObject)
 {
+    ALOGD("========CTestClassInfo::RemoteCreateObject========begin========");
+
     //ECode ec =  mClassInfo->CreateObject((IInterface**)&ppObject);
     ECode ec =  mClassInfo->CreateObject(ppObject);
 

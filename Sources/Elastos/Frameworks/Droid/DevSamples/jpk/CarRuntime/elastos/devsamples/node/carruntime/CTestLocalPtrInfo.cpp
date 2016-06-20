@@ -1,6 +1,8 @@
 
 #include "CTestLocalPtrInfo.h"
 
+#include "CTestDataTypeInfo.h"
+
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
@@ -19,29 +21,45 @@ ECode CTestLocalPtrInfo::GetName(
 ECode CTestLocalPtrInfo::GetSize(
     /* [out] */ MemorySize * pSize)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mLocalPtrInfo->GetSize(pSize);
 }
 
 ECode CTestLocalPtrInfo::GetDataType(
     /* [out] */ CarDataType * pDataType)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mLocalPtrInfo->GetDataType(pDataType);
 }
 
 ECode CTestLocalPtrInfo::GetTargetTypeInfo(
-    /* [out] */ ITestDataTypeInfo ** ppDateTypeInfo)
+    /* [out] */ ITestDataTypeInfo ** ppDataTypeInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IDataTypeInfo> dataTypeInfo;
+    ec = mLocalPtrInfo->GetTargetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestLocalPtrInfo::GetTargetTypeInfo error: GetTargetTypeInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestDataTypeInfo> testDatatypeInfo;
+    ec = CTestDataTypeInfo::New(dataTypeInfo,(ITestDataTypeInfo**)&testDatatypeInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestLocalPtrInfo::GetTargetTypeInfo error: CTestDataTypeInfo::New fail!");
+        return ec;
+    }
+    *ppDataTypeInfo = testDatatypeInfo;
+
+    dataTypeInfo->AddRef();
+    testDatatypeInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestLocalPtrInfo::GetPtrLevel(
     /* [out] */ Int32 * pLevel)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mLocalPtrInfo->GetPtrLevel(pLevel);
 }
 
 ECode CTestLocalPtrInfo::constructor()

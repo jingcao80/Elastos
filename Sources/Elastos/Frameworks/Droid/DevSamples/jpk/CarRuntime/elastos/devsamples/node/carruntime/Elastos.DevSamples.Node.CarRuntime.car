@@ -373,7 +373,7 @@ module
     [deprecated]
     interface ITestLocalPtrInfo extends ITestDataTypeInfo {
         GetTargetTypeInfo(
-            [out] ITestDataTypeInfo** dateTypeInfo);
+            [out] ITestDataTypeInfo** dataTypeInfo);
 
         GetPtrLevel(
             [out] Int32* level);

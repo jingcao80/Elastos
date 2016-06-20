@@ -121,12 +121,17 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
     var sClassName = "null";
     if(typeof(oClassInfo)=='string') {
         sClassName = oClassInfo;
+        elog('====classinfo__createObject====begin==0.0==ClassName:'+sClassName);
         oClassInfo = oModuleInfo.GetClassInfo(oClassInfo);
+        elog('====classinfo__createObject====begin==0.1==ClassName:'+sClassName);
+        sClassName = oClassInfo.GetName();
+        elog('====classinfo__createObject====begin==0.2==ClassName:'+sClassName);
     }
     else {
         sClassName = oClassInfo.GetName();
+        elog('====classinfo__createObject====begin==0.3==ClassName:'+sClassName);
     }
-    elog('====classinfo__createObject====begin====ClassName:'+sClassName);
+
     if (sClassName == "Elastos.Droid.Widget.CPopupWindow") {
         bCreateOnUIThread = true;
     }
@@ -135,9 +140,11 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
     if(length==2){
         //newObject = oClassInfo.CreateObject();
         if (bCreateOnUIThread) {
+            elog('====classinfo__createObject========oClassInfo.RemoteCreateObject');
             newObject = oClassInfo.RemoteCreateObject();
         }
         else {
+            elog('====classinfo__createObject========oClassInfo.LocalCreateObject');
             newObject = oClassInfo.LocalCreateObject();
         }
     }
@@ -284,12 +291,18 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
 
         //newObject = oConstructorInfo.CreateObject(oArgumentList);
         if (bCreateOnUIThread) {
+            elog('====classinfo__createObject====begin====1.1====RemoteCreateObject');
             newObject = oConstructorInfo.RemoteCreateObject(oArgumentList);
         }
         else {
+            elog('====classinfo__createObject====begin====1.1====LocalCreateObject');
             newObject = oConstructorInfo.LocalCreateObject(oArgumentList);
         }
+
+        elog('====classinfo__createObject====begin====2====');
     }
+
+    elog('====classinfo__createObject====begin====3====');
 
     return newObject;
 }   //classinfo__createObject

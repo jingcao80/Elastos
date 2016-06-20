@@ -45,8 +45,8 @@ TimeComparator : function (lhs, rhs) {
 
     strL = this.sCurrentPath + lhs;
     strR = this.sCurrentPath + rhs;
-    var file1 = Core_New('CFile', strL);
-    var file2 = Core_New('CFile', strR);
+    var file1 = Core_New('Elastos.IO.CFile', strL);
+    var file2 = Core_New('Elastos.IO.CFile', strR);
     var last1 = file1.LastModified();
     var last2 = file2.LastModified();
     elog('=============DataSourceHelper::TimeComparator.begin======1=========');
@@ -103,8 +103,9 @@ Init : function () {
     elog('=============DataSourceHelper::Init.begin===============');
     if (this.sInited) return;
 
-    elog('=============DataSourceHelper::Init.begin=====1=========='+this.sRootPath+'=='+Core_New);
-    var dir = Core_New('CFile', this.sRootPath);
+    elog('=============DataSourceHelper::Init.begin=====0=========='+this.sRootPath+'=='+Core_New);
+    var dir = Core_New('Elastos.IO.CFile', this.sRootPath);
+
     elog('=============DataSourceHelper::Init.begin=====1==========');
     var ret = dir.IsDirectory();
     elog('=============DataSourceHelper::Init.begin=====2==========');
@@ -121,7 +122,7 @@ Init : function () {
 },
 _GetImageFileMap : function (rootPath) {
     elog('=============DataSourceHelper::_GetImageFileMap.begin===============');
-    var dir = Core_New('CFile', rootPath);
+    var dir = Core_New('Elastos.IO.CFile', rootPath);
     var files = dir.ListFiles();
     if (!files || !files.length) return;
 

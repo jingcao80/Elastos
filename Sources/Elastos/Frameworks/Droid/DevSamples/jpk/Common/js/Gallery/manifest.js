@@ -3,7 +3,7 @@ module.exports = {
         xmlns : {
             android : "http://schemas.android.com/apk/res/android",
         },
-        package_name : "Gallery",
+        package_name : "JSGallery",
         android : {
             versionCode : "1",
             versionName : "1.0",
@@ -37,7 +37,7 @@ module.exports = {
             },
         },
 
-        r : "/data/temp/node/Gallery/R.js",
+        r : "/data/temp/node/JSGallery/R.js",
 
         activities : [
             {
@@ -65,7 +65,7 @@ module.exports = {
                         },
                     ],
                 },
-                js : "/data/temp/node/Gallery/CAlbumActivity.js",
+                js : "/data/temp/node/JSGallery/CAlbumActivity.js",
             },
         ],
     },

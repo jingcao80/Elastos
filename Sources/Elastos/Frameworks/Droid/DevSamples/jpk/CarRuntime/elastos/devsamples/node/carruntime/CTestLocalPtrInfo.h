@@ -31,7 +31,7 @@ public:
         /* [out] */ CarDataType * pDataType);
 
     CARAPI GetTargetTypeInfo(
-        /* [out] */ ITestDataTypeInfo ** ppDateTypeInfo);
+        /* [out] */ ITestDataTypeInfo ** ppDataTypeInfo);
 
     CARAPI GetPtrLevel(
         /* [out] */ Int32 * pLevel);

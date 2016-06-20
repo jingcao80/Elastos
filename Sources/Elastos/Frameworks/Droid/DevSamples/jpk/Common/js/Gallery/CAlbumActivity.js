@@ -38,10 +38,10 @@ module.exports = function(aoElastos, aoActivity){
     var mMyHandler;
 
     //public class
-    var sFileName = '/data/temp/node/Gallery/data/DataSourceHelper.js';
+    var sFileName = '/data/temp/node/JSGallery/data/DataSourceHelper.js';
     var DataSourceHelper = require(sFileName)(aoElastos);
 
-    sFileName = '/data/temp/node/Gallery/data/AsyncImageLoader.js';
+    sFileName = '/data/temp/node/JSGallery/data/AsyncImageLoader.js';
     var AsyncImageLoader = require(sFileName)(aoElastos);
 
     var _SetFolerLayoutListener = function (folderLayout) {
@@ -73,7 +73,7 @@ module.exports = function(aoElastos, aoActivity){
                         var folderPath = sourcePath.substring(0,lastIndex);
 
                         var intent = Droid_New("CIntent");
-                        intent.SetClassNameEx("Gallery", "Gallery.CBrowserActivity");
+                        intent.SetClassNameEx("JSGallery", "JSGallery.CBrowserActivity");
                         intent.PutStringExtra(DataSourceHelper.SOURCE_PATH, folderPath);
                         intent.PutStringExtra(DataSourceHelper.SOURCE_DESC, entry.desc);
 
@@ -104,6 +104,7 @@ module.exports = function(aoElastos, aoActivity){
 
         elog('==================_GetSimpleAdapter.begin.0.1============='+typeof(simpleAdapter));
 
+
 //     if (!mAlbumEntryList.IsEmpty()) {
         if (mAlbumEntryList.length > 0) {
 
@@ -112,7 +113,29 @@ module.exports = function(aoElastos, aoActivity){
 //         Logger::D(TAG, "GetSimpleAdapter()---AlbumEntry count: %d", mAlbumEntryList.GetSize());
 //         AutoPtr<IObjectContainer> dataList;
 //         CParcelableObjectContainer::New((IObjectContainer**)&dataList);
-            var dataList = Droid_New('CParcelableObjectContainer');
+//            var dataList = Droid_New('Elastos.Droid.Utility.CParcelableObjectContainer');
+
+
+    // class CArrayList {
+    //     constructor();
+
+    //     constructor(
+    //         [in] Int32 capacity);
+
+    //     constructor(
+    //         [in] ICollection* c);
+
+    //     interface IArrayList;
+    //     interface IList;
+    //     interface ICollection;
+    //     interface IIterable;
+    //     interface ICloneable;
+    //     interface ISerializable;
+    //     interface IRandomAccess;
+    // }
+
+
+            var dataList = Core_New("Elastos.Utility.CArrayList");
 
             elog('==================_GetSimpleAdapter.begin=====1========');
 
@@ -132,44 +155,57 @@ module.exports = function(aoElastos, aoActivity){
             var key4 = "name";
             var key5 = "folderlayout";
 
+            elog('==================_GetSimpleAdapter.begin=====1.1========len:'+mAlbumEntryList.length);
+
 //         List< AutoPtr<AlbumEntry> >::Iterator it = mAlbumEntryList.Begin();
 //         for (Int32 i = 0; it != mAlbumEntryList.End(); ++it, ++i) {
             for (var i=0, im=mAlbumEntryList.length; i<im; i++) {
+
+                elog('==================_GetSimpleAdapter.begin=====1.1.0========i:'+i);
+
 //             entry = *it;
 //             map = NULL;
 //             CObjectStringMap::New((IObjectStringMap**)&map);
                 var entry = mAlbumEntryList[i];
-                var map = Core_New('CObjectStringMap');
+                elog('==================_GetSimpleAdapter.begin=====1.1.1========');
+                //var map = Core_New('Elastos.Utility.CObjectStringMap');
+                var map = Core_New('Elastos.Utility.CHashMap');
+                elog('==================_GetSimpleAdapter.begin=====1.1.2========');
 
 //             cs = NULL;
 //             CStringWrapper::New(entry->sourcePath, (ICharSequence**)&cs);
 //             map->Put(key1, cs);
                 map.Put( key1, CString(entry.sourcePath) );
+                elog('==================_GetSimpleAdapter.begin=====1.1.3========');
 
 //             cs = NULL;
 //             CStringWrapper::New(entry->num, (ICharSequence**)&cs);
 //             map->Put(key2, cs);
                 map.Put( key2, CString(entry.num+'') );
+                elog('==================_GetSimpleAdapter.begin=====1.1.4========');
 
 //             boolValue = NULL;
 //             CBoolean::New(FALSE, (IBoolean**)&boolValue);
 //             map->Put(key3, boolValue);
-                map.Put( key3, Core_New('CBoolean', false) );
+                map.Put( key3, Core_New('Elastos.Core.CBoolean', false) );
+                elog('==================_GetSimpleAdapter.begin=====1.1.5========');
 
 //             cs = NULL;
 //             CStringWrapper::New(entry->desc, (ICharSequence**)&cs);
 //             map->Put(key4, cs);
                 map.Put( key4, CString(entry.desc) );
+                elog('==================_GetSimpleAdapter.begin=====1.1.6========');
 
 //             dataList->Add(map);
                 dataList.Add(map);
+                elog('==================_GetSimpleAdapter.begin=====1.1.7========');
 
 //             // Logger::D(TAG, " > album %d, path:%s, num:%s, desc:%s",
 //             //     i, entry->sourcePath.string(), entry->num.string(), entry->desc.string());
 //         }
             }
 
-            return dataList;
+            //return dataList;
 
             elog('==================_GetSimpleAdapter.begin=====2========');
 
@@ -217,7 +253,25 @@ module.exports = function(aoElastos, aoActivity){
 
             elog('==================ssssssssssssssssssssssssssssssssss========');
 
-            simpleAdapter = Droid_New('CSimpleAdapter', oActivity, dataList, R.layout.album_item, from, to);
+    // [local, deprecated]
+    // class CSimpleAdapter {
+    //     constructor(
+    //         [in] IContext* ctx,
+    //         [in] IList* data,
+    //         [in] Int32 resource,
+    //         [in] ArrayOf<String>* from,
+    //         [in] ArrayOf<Int32>* to);
+
+    //     interface ISimpleAdapter;
+    //     interface IBaseAdapter;
+    //     interface IListAdapter;
+    //     interface ISpinnerAdapter;
+    //     interface IAdapter;
+    //     interface IFilterable;
+    // }
+
+
+            simpleAdapter = Droid_New('Elastos.Droid.Widget.CSimpleAdapter', oActivity, dataList, R.layout.album_item, from, to);
 
             elog('==================tttttttttttttttttttttttttttttttttt========');
 
@@ -235,7 +289,6 @@ module.exports = function(aoElastos, aoActivity){
 
             elog('==================_GetSimpleAdapter.begin=====3.1========'+typeof(simpleAdapter));
 
-if (0==2) {
             simpleAdapter.SetViewBinder({
 
                 SetViewValue : function (aoView, aoData, asTextRepresentation, out_abResult) {
@@ -248,7 +301,8 @@ if (0==2) {
                     if (typeof(aoView.SetImageResource) == 'function') viewType += " ImageView";
                     elog('==================SetViewValue.viewtype=============' + viewType);
 
-                    if(typeof(aoView.SetImageResource) == 'function') {
+                    //if(typeof(aoView.SetImageResource) == 'function') {
+                    if (false) {
                         elog('==================SetViewValue.ImageView.begin=============');
 
                         //var myLoadImage = new MyLoadImageCallback(oActivity);
@@ -312,9 +366,6 @@ if (0==2) {
                     elog('==================SetViewValue.end=============');
                 },
             });
-
-}   //if (0==2)
-
         }
 
         elog('==================_GetSimpleAdapter.end=============');
@@ -331,21 +382,32 @@ if (0==2) {
         var IView_INVISIBLE = 0x00000004;
         var IView_GONE = 0x00000008;
 
+        elog("========_LoadAlbumView====0====")
+
         mProgressBar.SetVisibility(IView_GONE);
 
-        // mSimpleAdapter = _GetSimpleAdapter();
+        elog("========_LoadAlbumView====1====")
 
-        // if (mSimpleAdapter) {
-        //     mGridView.SetVisibility(IView_VISIBLE);
-        //     //mGridView.SetAdapter(IAdapter::Probe(mSimpleAdapter));
-        //     mGridView.SetAdapter(mSimpleAdapter);
-        //     // mSimpleAdapter->NotifyDataSetChanged();
-        // }
-        // else {
-        //     elog("LoadAlbumView()----mSimpleAdapter is empty");
-        //     mEmptyView.SetVisibility(IView_VISIBLE);
-        //     mGridView.SetVisibility(IView_GONE);
-        // }
+        mSimpleAdapter = _GetSimpleAdapter();
+
+        elog("========_LoadAlbumView====2====")
+
+        if (mSimpleAdapter) {
+            elog("========_LoadAlbumView====2.1====")
+            mGridView.SetVisibility(IView_VISIBLE);
+            //mGridView.SetAdapter(IAdapter::Probe(mSimpleAdapter));
+            mGridView.SetAdapter(mSimpleAdapter);
+            // mSimpleAdapter->NotifyDataSetChanged();
+        }
+        else {
+            elog("========_LoadAlbumView====2.2====")
+
+            elog("LoadAlbumView()----mSimpleAdapter is empty");
+            mEmptyView.SetVisibility(IView_VISIBLE);
+            mGridView.SetVisibility(IView_GONE);
+        }
+
+        elog("========_LoadAlbumView====3====")
 
         // case R::id::album_btn_delete: {
         //     Logger::D(TAG, "OnClick()---album_btn_delete");
@@ -445,7 +507,7 @@ if (0==2) {
                 elog('================mAboutButton.OnClick.begin=======1==========');
 
                 var intent = Droid_New('CIntent');
-                intent.SetClassNameEx("Gallery", "Gallery.CAboutActivity");
+                intent.SetClassNameEx("JSGallery", "JSGallery.CAboutActivity");
                 var status = oActivity.StartActivity(intent);
             }
         });
@@ -456,6 +518,8 @@ if (0==2) {
         elog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====');
 
         var pathMap = DataSourceHelper.GetImageFileMap();
+
+        elog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====0====');
 
         var pathList = DataSourceHelper.GetImagePathList();
 
@@ -485,6 +549,11 @@ if (0==2) {
             mAlbumEntryList.push(entry);
             elog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====5====');
         }
+
+elog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====6==== typeof oHandler:' + typeof oHandler);
+var aa = [];
+for (var pp in oHandler) aa.push(pp);
+elog('====oHandler methods:[' + aa.join('][') + ']');
 
         var result = oHandler.SendEmptyMessage(MSG_LOAD_ALBUM_VIEW);
 
@@ -532,12 +601,16 @@ if (0==2) {
 
     return {
         OnCreate:function(aoContext){
-            elog('====jso_activity_cb====OnCreate.begin====0');
+            elog('====jso_activity_cb====OnCreate.begin====0====');
 
             oActivity.SetContentView(R.layout.activity_album);
 
+            elog('====jso_activity_cb====OnCreate.begin====1====');
+
             // Init image file map.
             DataSourceHelper.SetRootPath(DataSourceHelper.ROOT_PATH);
+
+            elog('====jso_activity_cb====OnCreate.begin====2====');
 
             mPopupButton = oActivity.FindViewById(R.id.album_btn_popup);
             mGridView = oActivity.FindViewById(R.id.album_gridview);
@@ -548,7 +621,11 @@ if (0==2) {
             mDeleteButton = oActivity.FindViewById(R.id.album_btn_delete);
             mProgressBar = oActivity.FindViewById(R.id.album_progress_bar);
 
+            elog('====jso_activity_cb====OnCreate.begin====3====');
+
             _LoadImageInfos();
+
+            elog('====jso_activity_cb====OnCreate.begin====4====');
 
         },  //OnCreate
         OnStart:function(aoContext){
