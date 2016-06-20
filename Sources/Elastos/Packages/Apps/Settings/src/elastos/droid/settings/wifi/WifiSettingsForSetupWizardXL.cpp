@@ -151,7 +151,7 @@ ECode WifiSettingsForSetupWizardXL::OnCreate(
     GetFragmentManager((IFragmentManager**)&fmanager);
     AutoPtr<IFragment> fragment;
     fmanager->FindFragmentById(R::id::wifi_setup_fragment, (IFragment**)&fragment);
-    mWifiSettings = (WifiSettings*)fragment.Get();
+    mWifiSettings = (CWifiSettings*)fragment.Get();
     obj = NULL;
     GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
     mInputMethodManager = IInputMethodManager::Probe(obj);

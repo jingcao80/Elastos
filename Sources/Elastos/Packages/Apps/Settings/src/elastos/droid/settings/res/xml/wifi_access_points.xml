@@ -14,17 +14,17 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/wifi_settings_category">
 
-    <Elastos.Droid.Settings.bluetooth.BluetoothProgressCategory
+    <Elastos.Droid.Settings.Bluetooth.CBluetoothProgressCategory
             android:key="access_points"
             android:title="@string/wifi_access_points"
             android:persistent="false" />
 
-    <Preference
+    <Elastos.Droid.Preference.CPreference
             android:key="add_network"
             android:title="@string/wifi_add_network"
             android:persistent="false" />
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

@@ -1,14 +1,14 @@
 #ifndef __ELASTOS_DROID_PROVIDER_SEARCHINDEXABLESPROVIDER_H__
 #define __ELASTOS_DROID_PROVIDER_SEARCHINDEXABLESPROVIDER_H__
 
-#include "Elastos.Droid.Content.h"
+// #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include <elastos/core/Object.h>
+#include "elastos/droid/content/ContentProvider.h"
 
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IContentProvider;
+using Elastos::Droid::Content::ContentProvider;
 using Elastos::Droid::Content::IUriMatcher;
 using Elastos::Droid::Content::Pm::IProviderInfo;
 using Elastos::Droid::Database::ICursor;
@@ -18,9 +18,8 @@ namespace Elastos {
 namespace Droid {
 namespace Provider {
 
-class SearchIndexablesProvider
-    : public Object
-    , public IContentProvider
+class ECO_PUBLIC SearchIndexablesProvider
+    : public ContentProvider
     , public ISearchIndexablesProvider
 {
 public:
@@ -95,12 +94,12 @@ public:
         /* [out] */ Int32* rowsAffected);
 
 private:
-    const static String TAG;
+    ECO_LOCAL const static String TAG;
     String mAuthority;
     AutoPtr<IUriMatcher> mMatcher;
-    static const Int32 MATCH_RES_CODE;
-    static const Int32 MATCH_RAW_CODE;
-    static const Int32 MATCH_NON_INDEXABLE_KEYS_CODE;
+    ECO_LOCAL static const Int32 MATCH_RES_CODE;
+    ECO_LOCAL static const Int32 MATCH_RAW_CODE;
+    ECO_LOCAL static const Int32 MATCH_NON_INDEXABLE_KEYS_CODE;
 };
 
 } // namespace Provider

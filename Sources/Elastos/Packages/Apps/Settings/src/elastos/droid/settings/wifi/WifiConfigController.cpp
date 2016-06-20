@@ -8,7 +8,7 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/settings/wifi/WifiConfigController.h"
 #include "elastos/droid/settings/wifi/AccessPoint.h"
-#include "elastos/droid/settings/wifi/WifiSettingsForSetupWizardXL.h"
+#include "elastos/droid/settings/wifi/CWifiSettingsForSetupWizardXL.h"
 #include "elastos/droid/settings/wifi/Summary.h"
 #include "elastos/droid/settings/ProxySelector.h"
 #include "elastos/droid/net/NetworkUtils.h"
@@ -855,7 +855,7 @@ void WifiConfigController::ShowSecurityFields()
         // Note: XL SetupWizard won't hide "EAP" settings here.
         AutoPtr<IContext> context;
         mConfigUi->GetContext((IContext**)&context);
-        if (!((WifiSettingsForSetupWizardXL*)context.Get())->InitSecurityFields(mView,
+        if (!((CWifiSettingsForSetupWizardXL*)context.Get())->InitSecurityFields(mView,
                     mAccessPointSecurity)) {
             return;
         }

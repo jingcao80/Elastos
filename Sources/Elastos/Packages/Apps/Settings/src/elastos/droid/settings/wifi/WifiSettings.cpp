@@ -142,20 +142,20 @@ ECode WifiSettings::MyBaseSearchIndexProvider::GetRawDataToIndex(
     // Add available Wi-Fi access points
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
-    AutoPtr<IWifiManager> wifiManager = IWifiManager::Probe(obj);
+    IWifiManager* wifiManager = IWifiManager::Probe(obj);
     AutoPtr<IList> ap = ConstructAccessPoints(context, wifiManager,
             NULL, NetworkInfoDetailedState_NONE);
-    AutoPtr<ICollection> accessPoints = ICollection::Probe(ap);
+    ICollection* accessPoints = ICollection::Probe(ap);
     AutoPtr<IIterator> iter;
     accessPoints->GetIterator((IIterator**)&iter);
     Boolean hasNext;
     while (iter->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> object;
         iter->GetNext((IInterface**)&object);
-        AutoPtr<IAccessPoint> accessPoint = IAccessPoint::Probe(object);
+        IAccessPoint* accessPoint = IAccessPoint::Probe(object);
 
         // We are indexing only the saved Wi-Fi networks.
-        if (((AccessPoint*)accessPoint.Get())->GetConfig() == NULL) continue;
+        if (((AccessPoint*)accessPoint)->GetConfig() == NULL) continue;
         data = NULL;
         data = new SearchIndexableRaw();
         data->constructor(context);
@@ -188,7 +188,7 @@ AutoPtr<IList> WifiSettings::Multimap::GetAll(
 {
     AutoPtr<IInterface> obj;
     mStore->Get(CoreUtils::Convert(key), (IInterface**)&obj);
-    AutoPtr<IList> values = IList::Probe(obj);
+    IList* values = IList::Probe(obj);
     if (values != NULL) {
         return values;
     }
@@ -205,7 +205,7 @@ void WifiSettings::Multimap::Put(
 {
     AutoPtr<IInterface> obj;
     mStore->Get(CoreUtils::Convert(key), (IInterface**)&obj);
-    AutoPtr<IList> curVals = IList::Probe(obj);
+    IList* curVals = IList::Probe(obj);
     if (curVals == NULL) {
         CArrayList::New(3, (IList**)&curVals);
         mStore->Put(CoreUtils::Convert(key), curVals);
@@ -476,7 +476,7 @@ ECode WifiSettings::OnActivityCreated(
             AutoPtr<IInterface> object;
             IContext::Probe(activity)->GetSystemService(IContext::CONNECTIVITY_SERVICE,
                     (IInterface**)&object);
-            AutoPtr<IConnectivityManager> connectivity = IConnectivityManager::Probe(object);
+            IConnectivityManager* connectivity = IConnectivityManager::Probe(object);
             if (connectivity != NULL) {
                 AutoPtr<INetworkInfo> info;
                 connectivity->GetNetworkInfo(IConnectivityManager::TYPE_WIFI,
@@ -595,6 +595,7 @@ ECode WifiSettings::OnCreateOptionsMenu(
 void WifiSettings::AddOptionsMenuItems(
     /* [in] */ IMenu* menu)
 {
+    Logger::D("WifiSettings", " >> enter AddOptionsMenuItems ");
     Boolean wifiIsEnabled;
     mWifiManager->IsWifiEnabled(&wifiIsEnabled);
     AutoPtr<IActivity> activity;
@@ -635,6 +636,7 @@ void WifiSettings::AddOptionsMenuItems(
     item->SetShowAsAction(IMenuItem::SHOW_AS_ACTION_NEVER);
 
     ta->Recycle();
+    Logger::D("WifiSettings", " << leave AddOptionsMenuItems ");
 }
 
 ECode WifiSettings::OnSaveInstanceState(
@@ -754,7 +756,7 @@ ECode WifiSettings::OnCreateContextMenu(
         IAdapterContextMenuInfo::Probe(info)->GetPosition(&position);
         AutoPtr<IInterface> obj;
         IAdapterView::Probe(listView)->GetItemAtPosition(position, (IInterface**)&obj);
-        AutoPtr<IPreference> preference = IPreference::Probe(obj);
+        IPreference* preference = IPreference::Probe(obj);
 
         if (IAccessPoint::Probe(preference) != NULL) {
             mSelectedAccessPoint = IAccessPoint::Probe(preference);
@@ -981,7 +983,7 @@ void WifiSettings::UpdateAccessPoints()
             // AccessPoints are automatically sorted with TreeSet.
             AutoPtr<IList> ap = ConstructAccessPoints(IContext::Probe(activity),
                     mWifiManager, mLastInfo, mLastState);
-            AutoPtr<ICollection> accessPoints = ICollection::Probe(ap);
+            ICollection* accessPoints = ICollection::Probe(ap);
             AutoPtr<IPreferenceScreen> screen;
             GetPreferenceScreen((IPreferenceScreen**)&screen);
             IPreferenceGroup::Probe(screen)->RemoveAll();
@@ -1004,9 +1006,9 @@ void WifiSettings::UpdateAccessPoints()
             while (iter->HasNext(&hasNext), hasNext) {
                 AutoPtr<IInterface> obj;
                 iter->GetNext((IInterface**)&obj);
-                AutoPtr<IAccessPoint> accessPoint = IAccessPoint::Probe(obj);
+                IAccessPoint* accessPoint = IAccessPoint::Probe(obj);
                 // Ignore access points that are out of range.
-                if (((AccessPoint*)accessPoint.Get())->GetLevel() != -1) {
+                if (((AccessPoint*)accessPoint)->GetLevel() != -1) {
                     Boolean res;
                     IPreferenceGroup::Probe(screen)->AddPreference(IPreference::Probe(accessPoint), &res);
                 }
@@ -1050,7 +1052,7 @@ AutoPtr<INetworkScorerAppData> WifiSettings::GetWifiAssistantApp(
     scorers->GetIterator((IIterator**)&iter);
     AutoPtr<IInterface> obj;
     iter->GetNext((IInterface**)&obj);
-    AutoPtr<INetworkScorerAppData> appData = INetworkScorerAppData::Probe(obj);
+    INetworkScorerAppData* appData = INetworkScorerAppData::Probe(obj);
     return appData;
 }
 
@@ -1109,13 +1111,13 @@ void WifiSettings::PrepareWifiAssistantCard()
                 IViewGroup::Probe(listView), FALSE, (IView**)&mWifiAssistantCard);
         AutoPtr<IView> view;
         mWifiAssistantCard->FindViewById(R::id::setup, (IView**)&view);
-        AutoPtr<IButton> setup = IButton::Probe(view);
+        IButton* setup = IButton::Probe(view);
         view = NULL;
         mWifiAssistantCard->FindViewById(R::id::no_thanks_button, (IView**)&view);
-        AutoPtr<IButton> noThanks = IButton::Probe(view);
+        IButton* noThanks = IButton::Probe(view);
         view = NULL;
         mWifiAssistantCard->FindViewById(R::id::wifi_assistant_text, (IView**)&view);
-        AutoPtr<ITextView> assistantText = ITextView::Probe(view);
+        ITextView* assistantText = ITextView::Probe(view);
         AutoPtr<ICharSequence> scorerName;
         mWifiAssistantApp->GetScorerName((ICharSequence**)&scorerName);
         AutoPtr<IResources> resources;
@@ -1154,7 +1156,7 @@ AutoPtr<ITextView> WifiSettings::InitEmptyView()
     GetActivity((IActivity**)&activity);
     AutoPtr<IView> view;
     activity->FindViewById(Elastos::Droid::R::id::empty, (IView**)&view);
-    AutoPtr<ITextView> emptyView = ITextView::Probe(view);
+    ITextView* emptyView = ITextView::Probe(view);
     AutoPtr<IListView> listView;
     GetListView((IListView**)&listView);
     IAdapterView::Probe(listView)->SetEmptyView(view);
@@ -1234,7 +1236,7 @@ AutoPtr<IList> WifiSettings::ConstructAccessPoints(
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             configs->Get(i, (IInterface**)&obj);
-            AutoPtr<IWifiConfiguration> config = IWifiConfiguration::Probe(obj);
+            IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
             Boolean selfAdded;
             Int32 numAssociation;
             if ((config->GetSelfAdded(&selfAdded), selfAdded) &&
@@ -1260,7 +1262,7 @@ AutoPtr<IList> WifiSettings::ConstructAccessPoints(
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             results->Get(i, (IInterface**)&obj);
-            AutoPtr<IScanResult> result = IScanResult::Probe(obj);
+            IScanResult* result = IScanResult::Probe(obj);
 
             // Ignore hidden and ad-hoc networks.
             String SSID;
@@ -1320,7 +1322,7 @@ void WifiSettings::HandleEvent(
         AutoPtr<IParcelable> parcel;
         intent->GetParcelableExtra(
                 IWifiManager::EXTRA_NETWORK_INFO, (IParcelable**)&parcel);
-        AutoPtr<INetworkInfo> info = INetworkInfo::Probe(parcel);
+        INetworkInfo* info = INetworkInfo::Probe(parcel);
         Boolean res;
         info->IsConnected(&res);
         mConnected->Set(res);

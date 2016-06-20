@@ -11,3 +11,4 @@ SOURCES += IndexDatabaseHelper.cpp
 SOURCES += Ranking.cpp
 SOURCES += SearchIndexableRaw.cpp
 SOURCES += SearchIndexableResources.cpp
+SOURCES += CSettingsSearchIndexablesProvider.cpp

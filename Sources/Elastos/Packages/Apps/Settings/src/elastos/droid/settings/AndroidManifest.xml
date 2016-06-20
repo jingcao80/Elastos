@@ -1988,8 +1988,8 @@
                 android:resource="@id/sim_settings" />
         </activity>
 
-<!--         <provider
-            android:name="Elastos.Droid.Settings.Search.SettingsSearchIndexablesProvider"
+        <provider
+            android:name="Elastos.Droid.Settings.Search.CSettingsSearchIndexablesProvider"
             android:authorities="Elastos.Droid.Settings"
             android:multiprocess="false"
             android:grantUriPermissions="true"
@@ -1998,7 +1998,7 @@
             <intent-filter>
                 <action android:name="android.content.action.SEARCH_INDEXABLES_PROVIDER" />
             </intent-filter>
-        </provider> -->
+        </provider>
 
     </application>
 </manifest>

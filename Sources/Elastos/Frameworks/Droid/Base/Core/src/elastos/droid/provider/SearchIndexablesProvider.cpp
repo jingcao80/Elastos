@@ -31,7 +31,7 @@ SearchIndexablesProvider::SearchIndexablesProvider()
 SearchIndexablesProvider::~SearchIndexablesProvider()
 {}
 
-CAR_INTERFACE_IMPL_4(SearchIndexablesProvider, Object, ISearchIndexablesProvider, IContentProvider, IComponentCallbacks2, IComponentCallbacks)
+CAR_INTERFACE_IMPL(SearchIndexablesProvider, ContentProvider, ISearchIndexablesProvider)
 
 //@Override
 ECode SearchIndexablesProvider::AttachInfo(

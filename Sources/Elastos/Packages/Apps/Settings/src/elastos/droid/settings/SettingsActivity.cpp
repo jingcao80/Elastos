@@ -509,6 +509,7 @@ ECode SettingsActivity::OnCreateOptionsMenu(
 {
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
+    Slogger::D("SettingsActivity", " >> enter OnCreateOptionsMenu ");
 
     if (!mDisplaySearch) {
         return NOERROR;
@@ -546,6 +547,7 @@ ECode SettingsActivity::OnCreateOptionsMenu(
     mSearchView->SetQuery(CoreUtils::Convert(query), TRUE /* submit */);
 
     *result = TRUE;
+    Slogger::D("SettingsActivity", " << leave OnCreateOptionsMenu ");
     return NOERROR;
 }
 

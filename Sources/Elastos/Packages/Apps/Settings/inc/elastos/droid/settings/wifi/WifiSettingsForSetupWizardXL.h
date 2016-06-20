@@ -3,7 +3,7 @@
 
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
-#include "elastos/droid/settings/wifi/WifiSettings.h"
+#include "elastos/droid/settings/wifi/CWifiSettings.h"
 #include "elastos/droid/app/Activity.h"
 #include "_Elastos.Droid.Settings.h"
 
@@ -208,7 +208,7 @@ private:
     //         new EnumMap<NetworkInfoDetailedState, NetworkInfoDetailedState>(NetworkInfoDetailedState.class);
     static const AutoPtr<IMap> sNetworkStateMap;
 
-    AutoPtr<WifiSettings> mWifiSettings;
+    AutoPtr<CWifiSettings> mWifiSettings;
     AutoPtr<IWifiManager> mWifiManager;
 
     /** Used for resizing a padding above title. Hiden when software keyboard is shown. */
