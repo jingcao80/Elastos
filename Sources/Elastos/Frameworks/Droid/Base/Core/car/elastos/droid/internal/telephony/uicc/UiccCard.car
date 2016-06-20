@@ -4,6 +4,7 @@ module
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Content.IIntent;
     interface Elastos.Droid.Content.Pm.IPackageManager;
+    interface Elastos.Droid.Content.Pm.ISignature;
     interface Elastos.Droid.Internal.Telephony.ICommandsInterface;
     interface Elastos.Droid.Internal.Telephony.Cat.ICatService;
     interface Elastos.Droid.Internal.Telephony.Uicc.IUiccCardApplication;
@@ -13,7 +14,6 @@ module
     interface Elastos.Droid.Os.IHandler;
     interface Elastos.Droid.Os.IMessage;
 
-    using interface Elastos.Security.ISignature;
     using interface Elastos.Utility.IList;
 
     namespace Elastos {

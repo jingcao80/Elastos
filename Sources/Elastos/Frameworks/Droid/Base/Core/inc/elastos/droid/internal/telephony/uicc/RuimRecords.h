@@ -52,6 +52,7 @@ namespace Uicc {
   */
 class RuimRecords
     : public IccRecords
+    , public IRuimRecords
 {
 private:
     // Refer to ETSI TS 102.221

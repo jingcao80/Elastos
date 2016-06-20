@@ -11,7 +11,7 @@ namespace Uicc {
 //=====================================================================
 //                            AdnRecordCache
 //=====================================================================
-CAR_INTERFACE_IMPL(AdnRecordCache, Handler, IIccConstants);
+CAR_INTERFACE_IMPL_2(AdnRecordCache, Handler, IAdnRecordCache, IIccConstants);
 
 const Int32 AdnRecordCache::EVENT_LOAD_ALL_ADN_LIKE_DONE;
 const Int32 AdnRecordCache::EVENT_UPDATE_ADN_DONE;

@@ -11,6 +11,8 @@ namespace Uicc {
 //=====================================================================
 //                           IsimFileHandler
 //=====================================================================
+CAR_INTERFACE_IMPL(IsimFileHandler, IccFileHandler, IIsimFileHandler);
+
 const String IsimFileHandler::LOGTAG("IsimFH");
 
 IsimFileHandler::IsimFileHandler()
@@ -27,11 +29,9 @@ ECode IsimFileHandler::constructor(
     return NOERROR;
 }
 
-ECode IsimFileHandler::GetEFPath(
-    /* [in] */ Int32 efid,
-    /* [out] */ String* result)
+String IsimFileHandler::GetEFPath(
+    /* [in] */ Int32 efid)
 {
-    VALIDATE_NOT_NULL(result);
     // ==================before translated======================
     // switch(efid) {
     // case EF_IMPI:
@@ -44,7 +44,7 @@ ECode IsimFileHandler::GetEFPath(
     // String path = getCommonIccEFPath(efid);
     // return path;
     assert(0);
-    return NOERROR;
+    return String(NULL);
 }
 
 ECode IsimFileHandler::Logd(

@@ -11,6 +11,8 @@ namespace Uicc {
 //=====================================================================
 //                            SIMFileHandler
 //=====================================================================
+CAR_INTERFACE_IMPL(SIMFileHandler, IccFileHandler, ISIMFileHandler);
+
 const String SIMFileHandler::LOGTAG("SIMFileHandler");
 
 SIMFileHandler::SIMFileHandler()
@@ -27,11 +29,9 @@ ECode SIMFileHandler::constructor(
     return NOERROR;
 }
 
-ECode SIMFileHandler::GetEFPath(
-    /* [in] */ Int32 efid,
-    /* [out] */ String* result)
+String SIMFileHandler::GetEFPath(
+    /* [in] */ Int32 efid)
 {
-    VALIDATE_NOT_NULL(result);
     // ==================before translated======================
     // // TODO(): DF_GSM can be 7F20 or 7F21 to handle backward compatibility.
     // // Implement this after discussion with OEMs.
@@ -68,7 +68,7 @@ ECode SIMFileHandler::GetEFPath(
     // }
     // return path;
     assert(0);
-    return NOERROR;
+    return String(NULL);
 }
 
 ECode SIMFileHandler::Logd(

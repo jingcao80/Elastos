@@ -1,6 +1,6 @@
+#include "Elastos.Droid.Internal.h"
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
 #include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/RuimRecords.h"
 
 namespace Elastos {
@@ -413,6 +413,7 @@ ECode RuimRecords::EfRuimIdLoaded::OnRecordLoaded(
 //=====================================================================
 //                             RuimRecords
 //=====================================================================
+CAR_INTERFACE_IMPL(RuimRecords, IccRecords, IRuimRecords);
 
 const String RuimRecords::LOGTAG("RuimRecords");
 const Int32 RuimRecords::EF_MODEL_FILE_SIZE;

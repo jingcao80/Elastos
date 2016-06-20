@@ -27,6 +27,7 @@ namespace Uicc {
   */
 class AdnRecordCache
     : public Handler
+    , public IAdnRecordCache
     , public IIccConstants
 {
 public:

@@ -53,11 +53,9 @@ ECode RuimFileHandler::LoadEFImgTransparent(
     return NOERROR;
 }
 
-ECode RuimFileHandler::GetEFPath(
-    /* [in] */ Int32 efid,
-    /* [out] */ String* result)
+String RuimFileHandler::GetEFPath(
+    /* [in] */ Int32 efid)
 {
-    VALIDATE_NOT_NULL(result);
     // ==================before translated======================
     // switch(efid) {
     // case EF_SMS:
@@ -79,7 +77,7 @@ ECode RuimFileHandler::GetEFPath(
     // }
     // return getCommonIccEFPath(efid);
     assert(0);
-    return NOERROR;
+    return String(NULL);
 }
 
 ECode RuimFileHandler::Logd(

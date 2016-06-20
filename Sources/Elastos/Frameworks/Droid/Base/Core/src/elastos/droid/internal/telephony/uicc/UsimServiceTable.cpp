@@ -11,6 +11,8 @@ namespace Uicc {
 //=====================================================================
 //                           UsimServiceTable
 //=====================================================================
+CAR_INTERFACE_IMPL(UsimServiceTable, IccServiceTable, IUsimServiceTable);
+
 UsimServiceTable::UsimServiceTable()
 {
 }
@@ -34,24 +36,17 @@ ECode UsimServiceTable::IsAvailable(
     return NOERROR;
 }
 
-ECode UsimServiceTable::GetTag(
-    /* [out] */ String* result)
+String UsimServiceTable::GetTag()
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "UsimServiceTable";
-    assert(0);
-    return NOERROR;
+    return String("UsimServiceTable");
 }
 
-ECode UsimServiceTable::GetValues(
-    /* [out] */ ArrayOf<IInterface*>** result)
+AutoPtr<ArrayOf<IInterface*> > UsimServiceTable::GetValues()
 {
-    VALIDATE_NOT_NULL(result);
     // ==================before translated======================
     // return UsimService.values();
     assert(0);
-    return NOERROR;
+    return NULL;
 }
 
 } // namespace Uicc

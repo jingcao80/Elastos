@@ -11,6 +11,8 @@ namespace Uicc {
 //=====================================================================
 //                            IccCardStatus
 //=====================================================================
+CAR_INTERFACE_IMPL(IccCardStatus, Object, IIccCardStatus);
+
 const Int32 IccCardStatus::CARD_MAX_APPS;
 
 ECode IccCardStatus::SetCardState(

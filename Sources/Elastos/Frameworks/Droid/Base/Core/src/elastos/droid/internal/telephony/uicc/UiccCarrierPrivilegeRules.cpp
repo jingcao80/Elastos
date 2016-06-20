@@ -95,6 +95,8 @@ ECode UiccCarrierPrivilegeRules::TLV::Parse(
 //=====================================================================
 //                      UiccCarrierPrivilegeRules
 //=====================================================================
+CAR_INTERFACE_IMPL(UiccCarrierPrivilegeRules, Handler, IUiccCarrierPrivilegeRules);
+
 const String UiccCarrierPrivilegeRules::LOGTAG("UiccCarrierPrivilegeRules");
 const String UiccCarrierPrivilegeRules::AID("A00000015141434C00");
 const Int32 UiccCarrierPrivilegeRules::CLA;

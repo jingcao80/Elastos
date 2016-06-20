@@ -21,6 +21,8 @@ class UsimServiceTable
     , public IUsimServiceTable
 {
 public:
+    CAR_INTERFACE_DECL();
+
     UsimServiceTable();
 
     CARAPI constructor(
@@ -32,12 +34,10 @@ public:
 
 protected:
     // @Override
-    CARAPI GetTag(
-        /* [out] */ String* result);
+    CARAPI_(String) GetTag();
 
     // @Override
-    CARAPI GetValues(
-        /* [out] */ ArrayOf<IInterface*>** result);
+    CARAPI_(AutoPtr<ArrayOf<IInterface*> >) GetValues();
 };
 
 } // namespace Uicc

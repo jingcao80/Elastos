@@ -63,6 +63,7 @@ namespace Uicc {
   */
 class UiccCarrierPrivilegeRules
     : public Handler
+    , public IUiccCarrierPrivilegeRules
 {
 private:
     // Describes a single rule.
@@ -111,6 +112,8 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
     UiccCarrierPrivilegeRules();
 
     CARAPI constructor(

@@ -64,6 +64,8 @@ ECode SIMRecords::EfUsimLiLoaded::OnRecordLoaded(
 //=====================================================================
 //                              SIMRecords
 //=====================================================================
+CAR_INTERFACE_IMPL(SIMRecords, IccRecords, ISIMRecords);
+
 const Int32 SIMRecords::TAG_SPDI;
 const Int32 SIMRecords::TAG_SPDI_PLMN_LIST;
 const Int32 SIMRecords::TAG_FULL_NETWORK_NAME;

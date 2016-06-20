@@ -20,8 +20,11 @@ namespace Uicc {
   */
 class SIMFileHandler
     : public IccFileHandler
+    , public ISIMFileHandler
 {
 public:
+    CAR_INTERFACE_DECL();
+
     SIMFileHandler();
 
     //***** Instance Variables
@@ -34,9 +37,8 @@ public:
 protected:
     //***** Overridden from IccFileHandler
     // @Override
-    CARAPI GetEFPath(
-        /* [in] */ Int32 efid,
-        /* [out] */ String* result);
+    CARAPI_(String) GetEFPath(
+        /* [in] */ Int32 efid);
 
     // @Override
     CARAPI Logd(

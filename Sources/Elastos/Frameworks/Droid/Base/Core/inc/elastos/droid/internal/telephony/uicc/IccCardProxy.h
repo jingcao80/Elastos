@@ -81,6 +81,7 @@ namespace Uicc {
 class IccCardProxy
     : public Handler
     , public IIccCard
+    , public IIccCardProxy
 {
 public:
     CAR_INTERFACE_DECL();

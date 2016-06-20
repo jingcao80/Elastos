@@ -12,7 +12,7 @@ namespace Uicc {
 //=====================================================================
 //                              IccRecords
 //=====================================================================
-CAR_INTERFACE_IMPL(IccRecords, Handler, IIccConstants);
+CAR_INTERFACE_IMPL_2(IccRecords, Handler, IIccConstants, IIccRecords);
 
 const Boolean IccRecords::DBG = TRUE;
 const Int32 IccRecords::UNINITIALIZED;

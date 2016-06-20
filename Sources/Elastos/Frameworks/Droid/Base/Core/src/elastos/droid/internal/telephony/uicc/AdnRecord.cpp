@@ -78,6 +78,11 @@ AdnRecord::AdnRecord()
 {
 }
 
+ECode AdnRecord::constructor()
+{
+    return NOERROR;
+}
+
 ECode AdnRecord::constructor(
     /* [in] */ ArrayOf<Byte>* record)
 {
@@ -375,7 +380,7 @@ ECode AdnRecord::WriteToParcel(
     return NOERROR;
 }
 
-CARAPI ReadFromParcel(
+ECode AdnRecord::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     // ==================before translated======================

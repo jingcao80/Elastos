@@ -51,6 +51,7 @@ namespace Uicc {
   */
 class SIMRecords
     : public IccRecords
+    , public ISIMRecords
 {
 private:
     class EfPlLoaded

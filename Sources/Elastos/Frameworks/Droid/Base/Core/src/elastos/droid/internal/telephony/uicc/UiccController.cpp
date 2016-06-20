@@ -12,7 +12,7 @@ namespace Uicc {
 //=====================================================================
 //                            UiccController
 //=====================================================================
-CAR_INTERFACE_IMPL(UiccController, IHandler, IUiccController);
+CAR_INTERFACE_IMPL(UiccController, Handler, IUiccController);
 
 const Boolean UiccController::DBG = TRUE;
 const String UiccController::LOGTAG("UiccController");

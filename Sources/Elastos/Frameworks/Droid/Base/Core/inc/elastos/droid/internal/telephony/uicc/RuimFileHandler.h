@@ -45,9 +45,8 @@ public:
 
 protected:
     // @Override
-    CARAPI GetEFPath(
-        /* [in] */ Int32 efid,
-        /* [out] */ String* result);
+    CARAPI_(String) GetEFPath(
+        /* [in] */ Int32 efid);
 
     // @Override
     CARAPI Logd(

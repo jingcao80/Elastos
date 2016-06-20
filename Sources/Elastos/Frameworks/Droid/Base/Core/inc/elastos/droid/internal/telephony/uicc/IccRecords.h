@@ -45,6 +45,7 @@ namespace Uicc {
 class IccRecords
     : public Handler
     , public IIccConstants
+    , public IIccRecords
 {
 public:
     /**

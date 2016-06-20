@@ -105,6 +105,8 @@ void IccFileHandler::LoadLinearFixedContext::InitLCResults(
 //=====================================================================
 //                            IccFileHandler
 //=====================================================================
+CAR_INTERFACE_IMPL(IccFileHandler, Handler, IIccConstants);
+
 const Int32 IccFileHandler::COMMAND_READ_BINARY;
 const Int32 IccFileHandler::COMMAND_UPDATE_BINARY;
 const Int32 IccFileHandler::COMMAND_READ_RECORD;

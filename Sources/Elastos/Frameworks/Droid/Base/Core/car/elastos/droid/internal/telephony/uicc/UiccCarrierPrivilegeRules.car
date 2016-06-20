@@ -3,8 +3,8 @@ module
 {
     interface Elastos.Droid.Content.IIntent;
     interface Elastos.Droid.Content.Pm.IPackageManager;
+    interface Elastos.Droid.Content.Pm.ISignature;
 
-    using interface Elastos.Security.ISignature;
     using interface Elastos.Utility.IList;
 
     namespace Elastos {

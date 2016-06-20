@@ -247,10 +247,42 @@ module
     interface Elastos.Droid.Internal.Telephony.IPhone;
     interface Elastos.Droid.Internal.Telephony.IPhoneBase;
     interface Elastos.Droid.Internal.Telephony.IPhoneProxy;
+    interface Elastos.Droid.Internal.Telephony.IIccCard;
     interface Elastos.Droid.Internal.Telephony.Cdma.ICDMAPhone;
     interface Elastos.Droid.Internal.Telephony.Uicc.IIccFileHandler;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IAdnRecord;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IAdnRecordCache;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccConstants;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IAdnRecordLoader;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUiccCardApplication;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccCardApplicationStatus;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccCardProxy;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccCardStatus;
+    interface Elastos.Droid.Internal.Telephony.Uicc.ICsimFileHandler;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccIoResult;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccRecords;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccRefreshResponse;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccServiceTable;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIccUtils;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIsimFileHandler;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IIsimRecords;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IRuimFileHandler;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IRuimRecords;
+    interface Elastos.Droid.Internal.Telephony.Uicc.ISIMFileHandler;
+    interface Elastos.Droid.Internal.Telephony.Uicc.ISIMRecords;
+    interface Elastos.Droid.Internal.Telephony.Uicc.ISpnOverride;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUICCConfig;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUiccCard;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUiccController;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUiccControllerHelper;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUiccTlvData;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUiccTlvDataHelper;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUsimFileHandler;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUiccCarrierPrivilegeRules;
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUsimServiceTable;
     interface Elastos.Droid.Net.INetworkConfig;
     interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IMessage;
     interface Elastos.Droid.Os.ILooper;
     interface Elastos.Droid.Telephony.ICellInfo;
 
@@ -839,6 +871,318 @@ module
         }
 
     } // Cat
+    } // Telephony
+    } // Internal
+    } // Droid
+    } // Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Uicc {
+
+        [deprecated]
+        class CAdnRecord {
+
+            constructor();
+
+            constructor(
+                [in] ArrayOf<Byte>* record);
+
+            constructor(
+                [in] Int32 efid,
+                [in] Int32 recordNumber,
+                [in] ArrayOf<Byte>* record);
+
+            constructor(
+                [in] String alphaTag,
+                [in] String number);
+
+            constructor(
+                [in] String alphaTag,
+                [in] String number,
+                [in] ArrayOf<String>* emails);
+
+            constructor(
+                [in] String alphaTag,
+                [in] String number,
+                [in] ArrayOf<String>* emails,
+                [in] ArrayOf<String>* additionalNumbers);
+
+            constructor(
+                [in] Int32 efid,
+                [in] Int32 recordNumber,
+                [in] String alphaTag,
+                [in] String number,
+                [in] ArrayOf<String>* emails);
+
+            constructor(
+                [in] Int32 efid,
+                [in] Int32 recordNumber,
+                [in] String alphaTag,
+                [in] String number,
+                [in] ArrayOf<String>* emails,
+                [in] ArrayOf<String>* additionalNumbers);
+
+            constructor(
+                [in] Int32 efid,
+                [in] Int32 recordNumber,
+                [in] String alphaTag,
+                [in] String number);
+
+
+            interface IAdnRecord;
+            interface IParcelable;
+        }
+
+        class CAdnRecordCache {
+
+            constructor(
+                [in] IIccFileHandler* fh);
+
+            //interface IHandler;
+            interface IAdnRecordCache;
+            interface IIccConstants;
+        }
+
+        class CAdnRecordLoader {
+            constructor(
+                [in] IIccFileHandler* fh);
+
+            //interface IHandler;
+            interface IAdnRecordLoader;
+        }
+
+        class CCsimFileHandler {
+
+            constructor(
+                [in] IUiccCardApplication* app,
+                [in] String aid,
+                [in] ICommandsInterface* ci);
+
+            interface IIccFileHandler;
+            interface IIccConstants;
+            interface ICsimFileHandler;
+        }
+
+        class CIccCardApplicationStatus {
+            interface IIccCardApplicationStatus;
+        }
+
+        class CIccCardProxy {
+            constructor(
+                [in] IContext* context,
+                [in] ICommandsInterface* ci);
+
+            constructor(
+                [in] IContext* context,
+                [in] ICommandsInterface* ci,
+                [in] Int32 cardIndex);
+
+            //interface IHandler;
+            interface IIccCard;
+            interface IIccCardProxy;
+        }
+
+        class CIccCardStatus {
+            interface IIccCardStatus;
+        }
+
+        //class CIccFileHandler {
+        //    //interface IHandler;
+        //    interface IIccConstants;
+        //}
+
+        [deprecated]
+        class CIccIoResult {
+            constructor(
+                [in] Int32 sw1,
+                [in] Int32 sw2,
+                [in] ArrayOf<Byte>* payload);
+
+            constructor(
+                [in] Int32 sw1,
+                [in] Int32 sw2,
+                [in] String hexString);
+
+            interface IIccIoResult;
+        }
+
+        //class CIccRecords {
+        //    constructor(
+        //        [in] IUiccCardApplication* app,
+        //        [in] IContext* c,
+        //        [in] ICommandsInterface* ci);
+
+        //    //interface IHandler;
+        //    interface IIccConstants;
+        //    interface IIccRecords;
+        //}
+
+        class CIccRefreshResponse {
+            interface IIccRefreshResponse;
+        }
+
+        //[deprecated]
+        //class CIccServiceTable {
+        //    constructor(
+        //        [in] ArrayOf<Byte>* table);
+
+        //    interface IIccServiceTable;
+        //}
+
+        singleton class CIccUtils {
+            interface IIccUtils;
+        }
+
+        class CIsimFileHandler {
+            constructor(
+                [in] IUiccCardApplication* app,
+                [in] String aid,
+                [in] ICommandsInterface* ci);
+
+            interface IIccFileHandler;
+            interface IIccConstants;
+            interface IIsimFileHandler;
+
+        }
+
+        class CIsimUiccRecords {
+            constructor(
+                [in] IUiccCardApplication* app,
+                [in] IContext* c,
+                [in] ICommandsInterface* ci);
+
+            //interface IHandler;
+            interface IIccConstants;
+            interface IIccRecords;
+            interface IIsimRecords;
+        }
+
+        class CRuimFileHandler {
+            constructor(
+                [in] IUiccCardApplication* app,
+                [in] String aid,
+                [in] ICommandsInterface* ci);
+
+            interface IIccFileHandler;
+            interface IRuimFileHandler;
+        }
+
+        class CRuimRecords {
+            constructor(
+                [in] IUiccCardApplication* app,
+                [in] IContext* c,
+                [in] ICommandsInterface* ci);
+
+            interface IIccRecords;
+            interface IRuimRecords;
+        }
+
+        class CSIMFileHandler {
+            constructor(
+                [in] IUiccCardApplication* app,
+                [in] String aid,
+                [in] ICommandsInterface* ci);
+
+            interface IIccFileHandler;
+            interface IIccConstants;
+            interface ISIMFileHandler;
+        }
+
+        class CSIMRecords {
+            constructor(
+                [in] IUiccCardApplication* app,
+                [in] IContext* c,
+                [in] ICommandsInterface* ci);
+
+            interface IIccRecords;
+            interface ISIMRecords;
+        }
+
+        class CSpnOverride {
+            interface ISpnOverride;
+        }
+
+        class CUICCConfig {
+            interface IUICCConfig;
+        }
+
+        class CUiccCard {
+            constructor(
+                [in] IContext* c,
+                [in] ICommandsInterface* ci,
+                [in] IIccCardStatus* ics,
+                [in] Int32 slotId);
+
+            interface IUiccCard;
+        }
+
+        class CUiccCardApplication {
+            constructor(
+                [in] IUiccCard* uiccCard,
+                [in] IIccCardApplicationStatus* as,
+                [in] IContext* c,
+                [in] ICommandsInterface* ci);
+
+            interface IUiccCardApplication;
+        }
+
+        class CUiccCarrierPrivilegeRules {
+            constructor(
+                [in] IUiccCard* uiccCard,
+                [in] IMessage* loadedCallback);
+
+            //interface IHandler;
+            interface IUiccCarrierPrivilegeRules;
+        }
+
+        [deprecated]
+        class CUiccController {
+            constructor(
+                [in] IContext* c,
+                [in] ArrayOf<ICommandsInterface*>* ci);
+
+            //interface IHandler;
+            interface IUiccController;
+        }
+
+        singleton class CUiccControllerHelper {
+            interface IUiccControllerHelper;
+        }
+
+        class CUiccTlvData {
+            constructor();
+
+            interface IUiccTlvData;
+        }
+
+        singleton class CUiccTlvDataHelper {
+            interface IUiccTlvDataHelper;
+        }
+
+        class CUsimFileHandler {
+            constructor(
+                [in] IUiccCardApplication* app,
+                [in] String aid,
+                [in] ICommandsInterface* ci);
+
+            interface IIccFileHandler;
+            interface IIccConstants;
+            interface IUsimFileHandler;
+        }
+
+        [deprecated]
+        class CUsimServiceTable {
+            constructor(
+                [in] ArrayOf<Byte>* table);
+
+            interface IIccServiceTable;
+            interface IUsimServiceTable;
+        }
+
+    } // Uicc
     } // Telephony
     } // Internal
     } // Droid

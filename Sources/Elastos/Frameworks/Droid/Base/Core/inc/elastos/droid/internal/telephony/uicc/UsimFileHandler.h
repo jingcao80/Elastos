@@ -20,8 +20,11 @@ namespace Uicc {
   */
 class UsimFileHandler
     : public IccFileHandler
+    , public IUsimFileHandler
 {
 public:
+    CAR_INTERFACE_DECL();
+
     UsimFileHandler();
 
     CARAPI constructor(
@@ -31,9 +34,8 @@ public:
 
 protected:
     // @Override
-    CARAPI GetEFPath(
-        /* [in] */ Int32 efid,
-        /* [out] */ String* result);
+    CARAPI_(String) GetEFPath(
+        /* [in] */ Int32 efid);
 
     // @Override
     CARAPI Logd(
