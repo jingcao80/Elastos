@@ -426,6 +426,10 @@ endif
 
 EXPORT_HEADERS := $(subst \, ,$(EXPORT_HEADERS))
 
+ifdef EXTRA_RES_DIR
+EXTRA_RES_DIR:= $(patsubst %,-S %,$(EXTRA_RES_DIR))
+endif
+
 ##########################################################################
 #
 # Create OBJECTS from SOURCES; modify INCLUDES to comply with compiler
