@@ -1,5 +1,21 @@
 
 #include "elastos/droid/phone/CallGatewayManager.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.CoreLibrary.Utility.Concurrent.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telephony.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Utility::Concurrent::CConcurrentHashMap;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -7,28 +23,29 @@ namespace Phone {
 
 String CallGatewayManager::RawGatewayInfo::GetFormattedGatewayNumber()
 {
-    return CallGatewayManager::FormatProviderUri(gatewayUri);
+    return CallGatewayManager::FormatProviderUri(mGatewayUri);
 }
 
 Boolean CallGatewayManager::RawGatewayInfo::IsEmpty()
 {
-    return TextUtils::IsEmpty(packageName) || gatewayUri == NULL;
+    return TextUtils::IsEmpty(mPackageName) || mGatewayUri == NULL;
 }
 
 const String CallGatewayManager::EXTRA_GATEWAY_PROVIDER_PACKAGE("com.android.phone.extra.GATEWAY_PROVIDER_PACKAGE");
 
 const String CallGatewayManager::EXTRA_GATEWAY_URI("com.android.phone.extra.GATEWAY_URI");
 
-AutoPtr<RawGatewayInfo> CallGatewayManager::EMPTY_INFO = new RawGatewayInfo(NULL, NULL, NULL);
+AutoPtr<CallGatewayManager::RawGatewayInfo> CallGatewayManager::EMPTY_INFO = new RawGatewayInfo(String(NULL), NULL, String(NULL));
 
-const String CallGatewayManager::LOG_TAG("CallGatewayManager");// = CallGatewayManager.class.getSimpleName();
+const String CallGatewayManager::TAG("CallGatewayManager");// = CallGatewayManager.class.getSimpleName();
 
 AutoPtr<CallGatewayManager> CallGatewayManager::sSingleton;
+Object CallGatewayManager::THIS;
 
 AutoPtr<CallGatewayManager> CallGatewayManager::GetInstance()
 {
     {
-        AutoLock syncLock(this);
+        AutoLock syncLock(THIS);
         if (sSingleton == NULL) {
             sSingleton = new CallGatewayManager();
         }
@@ -41,7 +58,7 @@ CallGatewayManager::CallGatewayManager()
     CConcurrentHashMap::New(4, 0.9f, 1, (IConcurrentHashMap**)&mMap);
 }
 
-AutoPtr<RawGatewayInfo> CallGatewayManager::GetRawGatewayInfo(
+AutoPtr<CallGatewayManager::RawGatewayInfo> CallGatewayManager::GetRawGatewayInfo(
     /* [in] */ IIntent* intent,
     /* [in] */ const String& number)
 {
@@ -72,9 +89,10 @@ ECode CallGatewayManager::ClearGatewayData(
     /* [in] */ IConnection* connection)
 {
     SetGatewayInfoForConnection(connection, EMPTY_INFO);
+    return NOERROR;
 }
 
-CARAPI_(AutoPtr<RawGatewayInfo>) CallGatewayManager::GetGatewayInfo(
+AutoPtr<CallGatewayManager::RawGatewayInfo> CallGatewayManager::GetGatewayInfo(
     /* [in] */ IConnection* connection)
 {
     AutoPtr<IInterface> obj;
@@ -106,7 +124,7 @@ ECode CallGatewayManager::CheckAndCopyPhoneProviderExtras(
     /* [in] */ IIntent* dst)
 {
     if (!HasPhoneProviderExtras(src)) {
-        Logger::D(LOG_TAG, "checkAndCopyPhoneProviderExtras: some or all extras are missing.");
+        Logger::D(TAG, "checkAndCopyPhoneProviderExtras: some or all extras are missing.");
         return NOERROR;
     }
 
@@ -144,14 +162,18 @@ String CallGatewayManager::FormatProviderUri(
     if (uri != NULL) {
         String schem;
         uri->GetScheme(&schem);
-        if (PhoneAccount::SCHEME_TEL.Equals(schem)) {
+        if (IPhoneAccount::SCHEME_TEL.Equals(schem)) {
             String schemeSpecific;
             uri->GetSchemeSpecificPart(&schemeSpecific);
-            return PhoneNumberUtils::FormatNumber(schemeSpecific);
+            AutoPtr<IPhoneNumberUtils> helper;
+            CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+            String v;
+            helper->FormatNumber(schemeSpecific, &v);
+            return v;
         }
         else {
             String str;
-            uri->ToString(&str);
+            IObject::Probe(uri)->ToString(&str);
             return str;
         }
     }

@@ -211,7 +211,7 @@ public:
 
     /**
      * Trivial wrapper around Call.hangup(), except that we return a
-     * boolean success code rather than throwing CallStateException on
+     * Boolean success code rather than throwing CallStateException on
      * failure.
      *
      * @return true if the call was successfully hung up, or false

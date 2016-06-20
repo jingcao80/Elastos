@@ -22,7 +22,7 @@ module
         const Double VERTICAL_ANGLE = 50.0;
 
         Enable(
-            [in] Boolean enable);
+            [in] Boolean value);
     }
 
     } // namespace Phone

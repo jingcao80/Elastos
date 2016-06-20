@@ -4,6 +4,8 @@ module
     namespace Droid {
     namespace Phone {
 
+    interface IBluetoothManager;
+
     interface IBluetoothManagerBluetoothIndicatorListener {
         OnBluetoothIndicationChange(
             [in] Boolean isConnected,

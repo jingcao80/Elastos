@@ -1,6 +1,5 @@
 
 #include "elastos/droid/phone/BluetoothManager.h"
-#include "Elastos.Droid.Service.h"
 
 namespace Elastos {
 namespace Droid {

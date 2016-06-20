@@ -2,11 +2,20 @@
 #define  __ELASTOS_DROID_PHONE_EMERGENCYCALLHELPER_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/os/Handler.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+
+using Elastos::Droid::Internal::Telephony::ICallManager;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
+
+class CallController;
 
 /**
  * Helper class for the {@link CallController} that implements special
@@ -28,11 +37,11 @@ public:
 
     EmergencyCallHelper();
 
-    CARPAI constructor(
-        /* [in] */ ICallController* callController);
+    CARAPI constructor(
+        /* [in] */ CallController* callController);
 
     //@Override
-    CARPAI HandleMessage(
+    CARAPI HandleMessage(
         /* [in] */ IMessage* msg);
 
     /**
@@ -60,7 +69,7 @@ public:
      * is responsible for doing that (presumably by calling
      * PhoneApp.displayCallScreen().)
      */
-    CARPAI StartEmergencyCallFromAirplaneModeSequence(
+    CARAPI StartEmergencyCallFromAirplaneModeSequence(
         /* [in] */ const String& number);
 
 private:
@@ -69,7 +78,7 @@ private:
      * guaranteed to run on the handler thread.
      * @see #startEmergencyCallFromAirplaneModeSequence
      */
-    CARPAI_(void) StartSequenceInternal(
+    CARAPI_(void) StartSequenceInternal(
         /* [in] */ IMessage* msg);
 
     /**
@@ -79,7 +88,7 @@ private:
      * up.  In that case, it's now safe to actually place the
      * emergency call.)
      */
-    CARPAI_(void) OnServiceStateChanged(
+    CARAPI_(void) OnServiceStateChanged(
         /* [in] */ IMessage* msg);
 
     /**
@@ -89,13 +98,13 @@ private:
      * on the radio), it's still possible for the call to fail with the
      * disconnect cause OUT_OF_SERVICE.  If so, schedule a retry.
      */
-    CARPAI_(void) OnDisconnect(
+    CARAPI_(void) OnDisconnect(
         /* [in] */ IMessage* msg);
 
     /**
      * Handles the retry timer expiring.
      */
-    CARPAI_(void) OnRetryTimeout();
+    CARAPI_(void) OnRetryTimeout();
 
     /**
      * Attempt to power on the radio (i.e. take the device out
@@ -105,7 +114,7 @@ private:
      * we'll eventually get an onServiceStateChanged() callback
      * when the radio successfully comes up.
      */
-    CARPAI_(void) PowerOnRadio();
+    CARAPI_(void) PowerOnRadio();
 
     /**
      * Actually initiate the outgoing emergency call.
@@ -114,7 +123,7 @@ private:
      * If the call succeeds, we're done.
      * If the call fails, schedule a retry of the whole sequence.
      */
-    CARPAI_(void) PlaceEmergencyCall();
+    CARAPI_(void) PlaceEmergencyCall();
 
     /**
      * Schedules a retry in response to some failure (either the radio
@@ -122,7 +131,7 @@ private:
      * Or, if we've hit the retry limit, bail out of this whole sequence
      * and display a failure message to the user.
      */
-    CARPAI_(void) ScheduleRetryOrBailOut();
+    CARAPI_(void) ScheduleRetryOrBailOut();
 
     /**
      * Clean up when done with the whole sequence: either after
@@ -145,24 +154,24 @@ private:
      * placeCall(), since it's still possible the call will disconnect
      * very quickly with an OUT_OF_SERVICE error.
      */
-    CARPAI_(void) Cleanup();
+    CARAPI_(void) Cleanup();
 
-    CARPAI_(void) StartRetryTimer();
+    CARAPI_(void) StartRetryTimer();
 
-    CARPAI_(void) CancelRetryTimer();
+    CARAPI_(void) CancelRetryTimer();
 
-    CARPAI_(void) RegisterForServiceStateChanged();
+    CARAPI_(void) RegisterForServiceStateChanged();
 
-    CARPAI_(void) UnregisterForServiceStateChanged();
+    CARAPI_(void) UnregisterForServiceStateChanged();
 
-    CARPAI_(void) RegisterForDisconnect();
+    CARAPI_(void) RegisterForDisconnect();
 
-    CARPAI_(void) UnregisterForDisconnect();
+    CARAPI_(void) UnregisterForDisconnect();
 
     //
     // Debugging
     //
-    static CARPAI_(void) Log(
+    static CARAPI_(void) Log(
         /* [in] */ const String& msg);
 
 public:
@@ -184,7 +193,7 @@ private:
     static const Int32 DISCONNECT;
     static const Int32 RETRY_TIMEOUT;
 
-    AutoPtr<ICallController> mCallController;
+    AutoPtr<CallController> mCallController;
     AutoPtr<IPhoneGlobals> mApp;
     AutoPtr<ICallManager> mCM;
     String mNumber;  // The emergency number we're trying to dial

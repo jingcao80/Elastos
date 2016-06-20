@@ -1,5 +1,29 @@
 
 #include "elastos/droid/phone/CallLogger.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
+#include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::Telephony::ICall;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Provider::ICalls;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
+using Elastos::Droid::Telephony::IDisconnectCause;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -11,20 +35,20 @@ static Boolean initDBG()
     CSystemProperties::AcquireSingleton((ISystemProperties**)&helper);
     Int32 value;
     helper->GetInt32(String("ro.debuggable"), 0, &value);
-    Boolean result = (PhoneGlobals::DBG_LEVEL >= 1) && (value == 1);
+    Boolean result = (IPhoneGlobals::DBG_LEVEL >= 1) && (value == 1);
     return result;
 }
 
-const CallLogger::String LOG_TAG("CallLogger");// = CallLogger.class.getSimpleName();
+const String CallLogger::TAG("CallLogger");// = CallLogger.class.getSimpleName();
 Boolean CallLogger::DBG = initDBG();
-Boolean CallLogger::VDBG = (PhoneGlobals::DBG_LEVEL >= 2);
+Boolean CallLogger::VDBG = (IPhoneGlobals::DBG_LEVEL >= 2);
 
 CallLogger::CallLogger(
     /* [in] */ IPhoneGlobals* application,
-    /* [in] */ CallLogAsync* callLogAsync)
+    /* [in] */ Object* callLogAsync)
     : mApplication(application)
-    , mCallLog(callLogAsync)
 {
+    // mCallLog = callLogAsync;
 }
 
 ECode CallLogger::LogCall(
@@ -45,14 +69,15 @@ ECode CallLogger::LogCall(
     AutoPtr<ICallerInfo> ci = GetCallerInfoFromConnection(c);  // May be null.
     const String logNumber = GetLogNumber(c, ci);
 
-    if (DBG) {
-        StringBuilder sb;
-        sb += "- onDisconnect(): logNumber set to:";
-        sb += PhoneUtils::ToLogSafePhoneNumber(logNumber);
-        sb += ", number set to: "l;
-        sb += PhoneUtils::ToLogSafePhoneNumber(number);
-        Log(sb.ToString());
-    }
+    assert(0 && "TODO: Need PhoneUtils");
+    // if (DBG) {
+    //     StringBuilder sb;
+    //     sb += "- onDisconnect(): logNumber set to:";
+    //     sb += PhoneUtils::ToLogSafePhoneNumber(logNumber);
+    //     sb += ", number set to: "l;
+    //     sb += PhoneUtils::ToLogSafePhoneNumber(number);
+    //     Log(sb.ToString());
+    // }
 
     // TODO: In getLogNumber we use the presentation from
     // the connection for the CNAP. Should we use the one
@@ -61,8 +86,10 @@ ECode CallLogger::LogCall(
     // For international calls, 011 needs to be logged as +
     const Int32 presentation = GetPresentation(c, ci);
 
-    const Boolean isOtaspNumber = TelephonyCapabilities::SupportsOtasp(phone)
-            && phone::IsOtaSpNumber(number);
+    Boolean isOtaspNumber = FALSE, tmp = FALSE;
+    assert(0 && "TODO: Need TelephonyCapabilities");
+    // isOtaspNumber = TelephonyCapabilities::SupportsOtasp(phone)
+    //         && (phone->IsOtaSpNumber(number, &tmp), tmp);
 
     // Don't log OTASP calls.
     if (!isOtaspNumber) {
@@ -126,15 +153,18 @@ AutoPtr<ICallerInfo> CallLogger::GetCallerInfoFromConnection(
     }
     else if (IUri::Probe(o) != NULL) {
         AutoPtr<IContext> context;
-        mApplication->GetApplicationContext((IContext**)&context);
-        CallerInfo->GetCallerInfo(context, IUri::Probe(o), (ICallerInfo**)&ci);
+        IContext::Probe(mApplication)->GetApplicationContext((IContext**)&context);
+        assert(0 && "TODO CCallerInfoHelper");
+        // AutoPtr<ICallerInfoHelper> helper;
+        // CCallerInfoHelper::AcquireSingleton((ICallerInfoHelper**)&helper);
+        // helper->GetCallerInfo(context, IUri::Probe(o), (ICallerInfo**)&ci);
     }
     else {
-        ci = ((PhoneUtils::CallerInfoToken)IObject::Probe(o))->mCurrentInfo;
+        assert(0 && "TODO: Need PhoneUtils");
+        // ci = ((PhoneUtils::CallerInfoToken)IObject::Probe(o))->mCurrentInfo;
     }
     return ci;
 }
-
 
 String CallLogger::GetLogNumber(
     /* [in] */ IConnection* conn,
@@ -159,7 +189,7 @@ String CallLogger::GetLogNumber(
         Boolean res1,res2;
         if (NULL == callerInfo || TextUtils::IsEmpty(pnumber) ||
                 (callerInfo->IsEmergencyNumber(&res1), res1) ||
-                (callerInfo->IsVoiceMailNumber(&res2), res2) {
+                (callerInfo->IsVoiceMailNumber(&res2), res2)) {
             AutoPtr<ICall> call;
             conn->GetCall((ICall**)&call);
             AutoPtr<IPhone> phone;
@@ -187,12 +217,15 @@ String CallLogger::GetLogNumber(
         conn->GetNumberPresentation(&presentation);
 
         // Do final CNAP modifications.
-        String newNumber = PhoneUtils::ModifyForSpecialCnapCases(mApplication, callerInfo,
-                                                      number, presentation);
+        String newNumber;
+        assert(0 && "TODO: Need PhoneUtils");
+        // newNumber = PhoneUtils::ModifyForSpecialCnapCases(mApplication, callerInfo, number, presentation);
 
-        Boolean res;
-        if (PhoneNumberUtils->IsUriNumber(number, &res), !res) {
-            number = PhoneNumberUtils::StripSeparators(number);
+        AutoPtr<IPhoneNumberUtils> helper;
+        CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+        Boolean res = FALSE;
+        if (helper->IsUriNumber(number, &res), !res) {
+            helper->StripSeparators(number, &number);
         }
         if (VDBG) {
             StringBuilder sb;
@@ -237,7 +270,7 @@ Int32 CallLogger::GetPresentation(
 void CallLogger::Log(
         /* [in] */ const String& msg)
 {
-    Logger::D(LOG_TAG, msg);
+    Logger::D(TAG, msg);
 }
 
 } // namespace Phone

@@ -6,5 +6,12 @@ INCLUDES += ../../../..
 INCLUDES += $(MAKEDIR)/../../../..
 INCLUDES += $(MAKEDIR)/../../../../inc/
 
-SOURCES = CPhoneApp.cpp
+SOURCES += AccelerometerListener.cpp
+SOURCES += ADNList.cpp
+SOURCES += BluetoothManager.cpp
+SOURCES += CallController.cpp
+SOURCES += CallLogger.cpp
+SOURCES += CallGatewayManager.cpp
+SOURCES += CPhoneApp.cpp
 SOURCES += TimeConsumingPreferenceActivity.cpp
+SOURCES += phone.cpp

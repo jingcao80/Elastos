@@ -5,8 +5,15 @@ module
     importlib("Elastos.Droid.Core.eco");
     importlib("Elastos.Droid.Server.Telecom.eco");
 
+    merge("car/elastos/droid/phone/AccelerometerListener.car");
+    merge("car/elastos/droid/phone/BluetoothManager.car");
+    merge("car/elastos/droid/phone/CallFeaturesSetting.car");
+    merge("car/elastos/droid/phone/CallTime.car");
     merge("car/elastos/droid/phone/Constants.car");
+    merge("car/elastos/droid/phone/ErrorDialogActivity.car");
+    merge("car/elastos/droid/phone/EditPhoneNumberPreference.car");
     merge("car/elastos/droid/phone/TimeConsumingPreferenceActivity.car");
+    merge("car/elastos/droid/phone/OutgoingCallBroadcaster.car");
     merge("car/elastos/droid/phone/PhoneGlobals.car");
 
     merge("car/elastos/droid/services/telephony/CdmaConnection.car");
@@ -26,12 +33,15 @@ module
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
     using interface Elastos.Droid.Content.IBroadcastReceiver;
+    using interface Elastos.Droid.Internal.Telephony.ICallForwardInfo;
     using interface Elastos.Droid.Telecomm.Telecom.IConnectionService;
-    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
     using interface Elastos.Droid.View.IKeyEventCallback;
     using interface Elastos.Droid.View.ILayoutInflaterFactory;
     using interface Elastos.Droid.View.ILayoutInflaterFactory2;
-    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.IWindowCallback;
     using interface Elastos.Droid.Preference.IPreferenceActivity;
     using interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
     using interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener;
@@ -48,6 +58,21 @@ module
         interface IComponentCallbacks2;
         interface IComponentCallbacks;
         interface IApplication;
+    }
+
+    class CADNList {
+        interface IListActivity;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
     }
 
     } // namespace Phone

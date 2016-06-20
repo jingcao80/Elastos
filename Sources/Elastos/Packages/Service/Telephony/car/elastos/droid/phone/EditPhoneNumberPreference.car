@@ -4,6 +4,9 @@ module
     namespace Droid {
     namespace Phone {
 
+    interface IEditPhoneNumberPreference {
+    }
+
     /**
      * Interface for the dialog closed listener, related to
      * DialogPreference.onDialogClosed(), except we also pass in a buttonClicked
@@ -29,9 +32,6 @@ module
         OnGetDefaultNumber(
             [in] IEditPhoneNumberPreference* preference,
             [out] String* number);
-    }
-
-    interface IEditPhoneNumberPreference {
     }
 
     } // namespace Phone

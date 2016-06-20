@@ -2,7 +2,11 @@
 #define  __ELASTOS_DROID_PHONE_CALLCONTROLLER_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/phone/CallLogger.h"
+#include "elastos/droid/phone/CallGatewayManager.h"
+#include "elastos/droid/phone/EmergencyCallHelper.h"
+
+using Elastos::Droid::Internal::Telephony::ICallManager;
 
 namespace Elastos {
 namespace Droid {
@@ -33,12 +37,9 @@ namespace Phone {
  */
 class CallController
     : public Handler
-    , public ICallController
 {
 public:
     TO_STRING_IMPL("CallController")
-
-    CAR_INTERFACE_DECL()
 
     /**
      * Initialize the singleton CallController instance.
@@ -50,9 +51,9 @@ public:
      */
     static CARAPI Init(
         /* [in] */ IPhoneGlobals* app,
-        /* [in] */ ICallLogger* callLogger,
-        /* [in] */ ICallGatewayManager* callGatewayManager,
-        /* [out] */ ICallController** controller);
+        /* [in] */ CallLogger* callLogger,
+        /* [in] */ CallGatewayManager* callGatewayManager,
+        /* [out] */ CallController** controller);
 
     //@Override
     CARAPI HandleMessage(
@@ -104,8 +105,8 @@ private:
      */
     CallController(
         /* [in] */ IPhoneGlobals* app,
-        /* [in] */ ICallLogger* callLogger,
-        /* [in] */ ICallGatewayManager* callGatewayManager);
+        /* [in] */ CallLogger* callLogger,
+        /* [in] */ CallGatewayManager* callGatewayManager);
 
     /**
      * Actually make a call to whomever the intent tells us to.
@@ -132,8 +133,9 @@ private:
      *    signal, return one of the other CallStatusCode codes indicating what
      *    the problem is.
      */
-    CARAPI_(ConstantsCallStatusCode) CheckIfOkToInitiateOutgoingCall(
-        /* [in] */ Int32 state);
+    CARAPI CheckIfOkToInitiateOutgoingCall(
+        /* [in] */ Int32 state,
+        /* [out] */ ConstantsCallStatusCode* result);
 
     /**
      * Handles the various error conditions that can occur when initiating
@@ -158,7 +160,6 @@ private:
     //
     // Debugging
     //
-
     static CARAPI_(void) Log(
         /* [in] */ const String& msg);
 
@@ -169,12 +170,12 @@ private:
     static const Boolean VDBG;
 
     /** The singleton CallController instance. */
-    static AutoPtr<ICallController> sInstance;
+    static AutoPtr<CallController> sInstance;
 
-    AutoPtr<PhoneGlobals> mApp;
+    AutoPtr<IPhoneGlobals> mApp;
     AutoPtr<ICallManager> mCM;
-    AutoPtr<ICallLogger> mCallLogger;
-    AutoPtr<ICallGatewayManager> mCallGatewayManager;
+    AutoPtr<CallLogger> mCallLogger;
+    AutoPtr<CallGatewayManager> mCallGatewayManager;
 
     /** Helper object for emergency calls in some rare use cases.  Created lazily. */
     AutoPtr<EmergencyCallHelper> mEmergencyCallHelper;
@@ -194,6 +195,7 @@ private:
     // 3way call.  (See comments on the THRWAY_ACTIVE case in
     // placeCallInternal() for more info.)
     static const Int32 THREEWAY_CALLERINFO_DISPLAY_TIME; // msec
+    static Object THIS;
 };
 
 } // namespace Phone

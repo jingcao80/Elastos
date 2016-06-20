@@ -3,7 +3,14 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/content/AsyncQueryHandler.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/ListActivity.h"
+#include "Elastos.Droid.Widget.h"
+
+using Elastos::Droid::App::ListActivity;
+using Elastos::Droid::Content::AsyncQueryHandler;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Widget::ICursorAdapter;
+using Elastos::Droid::Widget::ITextView;
 
 namespace Elastos {
 namespace Droid {
@@ -20,7 +27,6 @@ namespace Phone {
  */
 class ADNList
     : public ListActivity
-    , public IADNList
 {
 private:
     class QueryHandler
@@ -28,6 +34,7 @@ private:
     {
     public:
         QueryHandler(
+            /* [in] */ ADNList* host,
             /* [in] */ IContentResolver* cr);
 
     protected:
@@ -54,13 +61,12 @@ private:
             /* [in] */ Int32 token,
             /* [in] */ IInterface* cookie,
             /* [in] */ Int32 result);
+
     private:
         ADNList* mHost;
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     ADNList()
         : mInitialSelection(-1)
     {}
@@ -99,7 +105,6 @@ private:
 
     static CARAPI_(Boolean) IsAirplaneModeOn(
         /* [in] */ IContext* context);
-
 
 protected:
     static const String TAG;

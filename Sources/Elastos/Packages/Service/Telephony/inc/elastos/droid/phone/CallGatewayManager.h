@@ -2,7 +2,15 @@
 #define  __ELASTOS_DROID_PHONE_CALLGATEWAYMANAGER_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Net.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Internal::Telephony::IConnection;
+using Elastos::Droid::Net::IUri;
+using Elastos::Core::Object;
+using Elastos::Utility::Concurrent::IConcurrentHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -23,7 +31,7 @@ namespace Phone {
 class CallGatewayManager
     : public Object
 {
-private:
+public:
     class RawGatewayInfo
         : public Object
     {
@@ -154,11 +162,12 @@ public:
     static AutoPtr<RawGatewayInfo> EMPTY_INFO;
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
 
     AutoPtr<IConcurrentHashMap> mMap;
 
     static AutoPtr<CallGatewayManager> sSingleton;
+    static Object THIS;
 };
 
 } // namespace Phone

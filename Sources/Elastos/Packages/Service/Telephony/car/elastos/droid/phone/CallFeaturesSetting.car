@@ -1,5 +1,7 @@
 module
 {
+    using interface Elastos.Droid.Internal.Telephony.ICallForwardInfo;
+
     namespace Elastos {
     namespace Droid {
     namespace Phone {
@@ -23,6 +25,7 @@ module
      *
      * @see com.android.phone.MobileNetworkSettings
      */
+    [local]
     interface ICallFeaturesSetting {
         /**
          * Intent action to bring up Voicemail Provider settings.
@@ -74,7 +77,7 @@ module
         const String HAC_VAL_OFF = "OFF";
 
         GetFWD_SETTINGS_DONT_TOUCH(
-            [out] ArrayOf<ICallForwardInfo*>** array);
+            [out, callee] ArrayOf<ICallForwardInfo*>* array);
     }
 
     } // namespace Phone

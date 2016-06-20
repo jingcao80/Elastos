@@ -25,7 +25,7 @@ EmergencyCallHelper::EmergencyCallHelper()
 }
 
 ECode EmergencyCallHelper::constructor(
-    /* [in] */ ICallController* callController)
+    /* [in] */ CallController* callController)
 {
     Handler::constructor();
 

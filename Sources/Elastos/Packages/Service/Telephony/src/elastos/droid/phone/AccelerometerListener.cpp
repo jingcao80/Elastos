@@ -2,8 +2,14 @@
 #include "elastos/droid/phone/AccelerometerListener.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Hardware::EIID_ISensorEventListener;
 using Elastos::Core::AutoLock;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -14,7 +20,7 @@ CAR_INTERFACE_IMPL(AccelerometerListener::MySensorEventListener, Object, ISensor
 ECode AccelerometerListener::MySensorEventListener::OnSensorChanged(
     /* [in] */ ISensorEvent* event)
 {
-    AutoPtr<ArrayOf<Float> > array;
+    AutoPtr<ArrayOf<Float> > values;
     event->GetValues((ArrayOf<Float>**)&values);
     mHost->OnSensorEvent((*values)[0], (*values)[1], (*values)[2]);
     return NOERROR;
@@ -48,8 +54,8 @@ ECode AccelerometerListener::MyHandler::HandleMessage(
                 if (DEBUG) {
                     StringBuilder sb;
                     sb += "orientation: ";
-                    sb += mOrientation == ORIENTATION_HORIZONTAL ? "horizontal"
-                            : (mOrientation == ORIENTATION_VERTICAL ? "vertical"
+                    sb += mHost->mOrientation == ORIENTATION_HORIZONTAL ? "horizontal"
+                            : (mHost->mOrientation == ORIENTATION_VERTICAL ? "vertical"
                             : "unknown");
                     Logger::D(TAG, sb.ToString());
                 }
@@ -98,8 +104,9 @@ ECode AccelerometerListener::Enable(
         if (enable) {
             mOrientation = ORIENTATION_UNKNOWN;
             mPendingOrientation = ORIENTATION_UNKNOWN;
+            Boolean tmp = FALSE;
             mSensorManager->RegisterListener(mSensorListener, mSensor,
-                    ISensorManager::SENSOR_DELAY_NORMAL);
+                    ISensorManager::SENSOR_DELAY_NORMAL, &tmp);
         }
         else {
             mSensorManager->UnregisterListener(mSensorListener);
@@ -131,9 +138,9 @@ void AccelerometerListener::SetOrientation(
             AutoPtr<IMessage> m;
             mHandler->ObtainMessage(ORIENTATION_CHANGED, (IMessage**)&m);
             // set delay to our debounce timeout
-            Int32 delay = (orientation == ORIENTATION_VERTICAL ? VERTICAL_DEBOUNCE
-                                                             : HORIZONTAL_DEBOUNCE);
-            mHandler->SendMessageDelayed(m, delay);
+            Int32 delay = (orientation == ORIENTATION_VERTICAL ? VERTICAL_DEBOUNCE : HORIZONTAL_DEBOUNCE);
+            Boolean tmp = FALSE;
+            mHandler->SendMessageDelayed(m, delay, &tmp);
         }
         else {
             // no message is pending
@@ -165,11 +172,11 @@ void AccelerometerListener::OnSensorEvent(
     if (x == 0.0 || y == 0.0 || z == 0.0) return;
 
     // magnitude of the acceleration vector projected onto XY plane
-    Double xy = Math::Sqrt(x*x + y*y);
+    Double xy = Elastos::Core::Math::Sqrt(x*x + y*y);
     // compute the vertical angle
-    Double angle = Math::Atan2(xy, z);
+    Double angle = Elastos::Core::Math::Atan2(xy, z);
     // convert to degrees
-    angle = angle * 180.0 / Math::PI;
+    angle = angle * 180.0 / Elastos::Core::Math::PI;
     Int32 orientation = (angle >  VERTICAL_ANGLE ? ORIENTATION_VERTICAL : ORIENTATION_HORIZONTAL);
     if (VDEBUG) {
         StringBuilder sb;
@@ -177,7 +184,7 @@ void AccelerometerListener::OnSensorEvent(
         sb += angle;
         sb += " orientation: ";
         sb += orientation;
-        Logger::D(TAG, "angle: " + angle + " orientation: " + orientation);
+        Logger::D(TAG, "angle: %f orientation: %d", angle, orientation);
     }
     SetOrientation(orientation);
     return;

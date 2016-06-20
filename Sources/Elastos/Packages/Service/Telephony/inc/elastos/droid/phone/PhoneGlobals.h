@@ -342,7 +342,7 @@ private:
     // Broadcast receiver for various intent broadcasts (see onCreate())
     AutoPtr<IBroadcastReceiver> mReceiver;
 
-    /** boolean indicating restoring mute state on InCallScreen.onResume() */
+    /** Boolean indicating restoring mute state on InCallScreen.onResume() */
     Boolean mShouldRestoreMuteOnInCallResume;
 
     AutoPtr<IHandler> mHandler;

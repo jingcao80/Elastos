@@ -3,7 +3,16 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/content/AsyncQueryHandler.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/os/Handler.h"
+#include "Elastos.Droid.Hardware.h"
+
+using Elastos::Droid::Content::AsyncQueryHandler;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Hardware::ISensor;
+using Elastos::Droid::Hardware::ISensorEvent;
+using Elastos::Droid::Hardware::ISensorEventListener;
+using Elastos::Droid::Hardware::ISensorManager;
+using Elastos::Droid::Os::Handler;
 
 namespace Elastos {
 namespace Droid {
@@ -83,8 +92,8 @@ private:
 
 private:
     static const String TAG;
-    static const boolean DEBUG;
-    static const boolean VDEBUG;
+    static const Boolean DEBUG;
+    static const Boolean VDEBUG;
 
     AutoPtr<ISensorManager> mSensorManager;
     AutoPtr<ISensor> mSensor;
@@ -106,6 +115,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_ACCELEROMETERLISRENER_H__

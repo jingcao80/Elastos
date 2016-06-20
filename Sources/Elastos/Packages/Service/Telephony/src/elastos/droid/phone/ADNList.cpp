@@ -1,13 +1,29 @@
 
 #include "elastos/droid/phone/ADNList.h"
+#include "R.h"
 #include "elastos/droid/app/Application.h"
-#include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Service.h"
+#include "elastos/droid/R.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::Application;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Provider::CSettingsSystem;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Widget::IAdapter;
+using Elastos::Droid::Widget::CSimpleCursorAdapter;
+using Elastos::Droid::Widget::ICursorFilterClient;
+using Elastos::Droid::Widget::ISimpleCursorAdapter;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -28,18 +44,18 @@ ECode ADNList::QueryHandler::OnQueryComplete(
 {
     if (DBG) {
         Int32 count;
-        c->GetCount(&count);
+        cursor->GetCount(&count);
         StringBuilder sb;
         sb += "onQueryComplete: cursor.count=";
         sb += count;
         mHost->Log(sb.ToString());
     }
     mHost->mCursor = cursor;
-    SetAdapter();
-    DisplayProgress(FALSE);
+    mHost->SetAdapter();
+    mHost->DisplayProgress(FALSE);
 
     // Cursor is refreshed and inherited classes may have menu items depending on it.
-    return InvalidateOptionsMenu();
+    return mHost->InvalidateOptionsMenu();
 }
 
 ECode ADNList::QueryHandler::OnInsertComplete(
@@ -48,7 +64,8 @@ ECode ADNList::QueryHandler::OnInsertComplete(
     /* [in] */ IUri* uri)
 {
     if (DBG) mHost->Log(String("onInsertComplete: requery"));
-    return ReQuery();
+    mHost->ReQuery();
+    return NOERROR;
 }
 
 ECode ADNList::QueryHandler::OnUpdateComplete(
@@ -57,7 +74,8 @@ ECode ADNList::QueryHandler::OnUpdateComplete(
     /* [in] */ Int32 result)
 {
     if (DBG) mHost->Log(String("onUpdateComplete: requery"));
-    return ReQuery();
+    mHost->ReQuery();
+    return NOERROR;
 }
 
 ECode ADNList::QueryHandler::OnDeleteComplete(
@@ -66,7 +84,8 @@ ECode ADNList::QueryHandler::OnDeleteComplete(
     /* [in] */ Int32 result)
 {
     if (DBG) mHost->Log(String("onDeleteComplete: requery"));
-    return ReQuery();
+    mHost->ReQuery();
+    return NOERROR;
 }
 
 const String ADNList::TAG("ADNList");
@@ -87,22 +106,22 @@ static AutoPtr<ArrayOf<String> > InitCOLUMN_NAMES()
     (*array)[0] = String("name");
     (*array)[1] = String("number");
     (*array)[2] = String("emails");
+    return array;
 }
-const AutoPtr<ArrayOf<String> > COLUMN_NAMES = InitCOLUMN_NAMES();
+const AutoPtr<ArrayOf<String> > ADNList::COLUMN_NAMES = InitCOLUMN_NAMES();
 
 static AutoPtr<ArrayOf<Int32> > InitVIEW_NAMES()
 {
     AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(2);
-    (*array)[0] = android.R.id.text1;
-    (*array)[1] = android.R.id.text2;
+    (*array)[0] = Elastos::Droid::R::id::text1;
+    (*array)[1] = Elastos::Droid::R::id::text2;
+    return array;
 }
-const AutoPtr<ArrayOf<Int32> > VIEW_NAMES = InitVIEW_NAMES();
-
-CAR_INTERFACE_IMPL(ADNList, ListActivity, IADNList)
+const AutoPtr<ArrayOf<Int32> > ADNList::VIEW_NAMES = InitVIEW_NAMES();
 
 ECode ADNList::constructor()
 {
-    return ListActivity::constructor()
+    return ListActivity::constructor();
 }
 
 ECode ADNList::OnCreate(
@@ -112,8 +131,8 @@ ECode ADNList::OnCreate(
     AutoPtr<IWindow> window = GetWindow();
     Boolean res;
     window->RequestFeature(IWindow::FEATURE_INDETERMINATE_PROGRESS, &res);
-    SetContentView(R::layout::adn_list);
-    AutoPtr<IView> view = FindViewById(android::R::id::empty);
+    SetContentView(Elastos::Droid::Server::Telephony::R::layout::adn_list);
+    AutoPtr<IView> view = FindViewById(R::id::empty);
     mEmptyText = ITextView::Probe(view);
     AutoPtr<IContentResolver> resolver;
     GetContentResolver((IContentResolver**)&resolver);
@@ -201,21 +220,21 @@ void ADNList::SetAdapter()
     if (mCursorAdapter == NULL) {
         NewAdapter((ICursorAdapter**)&mCursorAdapter);
 
-        SetListAdapter(mCursorAdapter);
+        SetListAdapter(IListAdapter::Probe(mCursorAdapter));
     }
     else {
-        mCursorAdapter->ChangeCursor(mCursor);
+        ICursorFilterClient::Probe(mCursorAdapter)->ChangeCursor(mCursor);
     }
 
     Int32 count = 0;
     if (mInitialSelection >= 0 && mInitialSelection <
-            (mCursorAdapter->GetCount(&count),count)) {
+            (IAdapter::Probe(mCursorAdapter)->GetCount(&count),count)) {
         SetSelection(mInitialSelection);
         AutoPtr<IListView> listView;
         GetListView((IListView**)&listView);
-        listView->SetFocusableInTouchMode(TRUE);
+        IView::Probe(listView)->SetFocusableInTouchMode(TRUE);
         Boolean gotfocus;
-        listView->RequestFocus(&gotfocus);
+        IView::Probe(listView)->RequestFocus(&gotfocus);
     }
 }
 
@@ -225,11 +244,11 @@ ECode ADNList::NewAdapter(
     VALIDATE_NOT_NULL(adapter);
     *adapter = NULL;
 
-    AutoPtr<SimpleCursorAdapter> _adapter;
+    AutoPtr<ISimpleCursorAdapter> _adapter;
     CSimpleCursorAdapter::New(this,
-            android.R.layout.simple_list_item_2,
+            R::layout::simple_list_item_2,
             mCursor, COLUMN_NAMES, VIEW_NAMES, (ISimpleCursorAdapter**)&_adapter);
-    *adapter = _adapter;
+    *adapter = ICursorAdapter::Probe(_adapter);
     REFCOUNT_ADD(*adapter);
     return NOERROR;
 }
@@ -244,13 +263,13 @@ void ADNList::DisplayProgress(
         Log(sb.ToString());
     }
 
-    mEmptyText->SetText(loading ? R.string.simContacts_emptyLoading:
-        (IsAirplaneModeOn(this) ? R.string.simContacts_airplaneMode :
-            R.string.simContacts_empty));
+    mEmptyText->SetText(loading ? Elastos::Droid::Server::Telephony::R::string::simContacts_emptyLoading:
+        (IsAirplaneModeOn(this) ? Elastos::Droid::Server::Telephony::R::string::simContacts_airplaneMode :
+            Elastos::Droid::Server::Telephony::R::string::simContacts_empty));
     AutoPtr<IWindow> window = GetWindow();
     window->SetFeatureInt(
             IWindow::FEATURE_INDETERMINATE_PROGRESS,
-            loading ? PROGRESS_VISIBILITY_ON : PROGRESS_VISIBILITY_OFF);
+            loading ? IWindow::PROGRESS_VISIBILITY_ON : IWindow::PROGRESS_VISIBILITY_OFF);
 }
 
 Boolean ADNList::IsAirplaneModeOn(

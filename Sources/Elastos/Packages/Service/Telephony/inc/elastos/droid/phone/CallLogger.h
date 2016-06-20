@@ -2,7 +2,12 @@
 #define  __ELASTOS_DROID_PHONE_CALLLOGGER_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Internal.h"
+
+using Elastos::Droid::Internal::Telephony::ICallerInfo;
+using Elastos::Droid::Internal::Telephony::IConnection;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -19,7 +24,7 @@ public:
 
     CallLogger(
         /* [in] */ IPhoneGlobals* application,
-        /* [in] */ CallLogAsync* callLogAsync);
+        /* [in] */ Object* callLogAsync = NULL);
 
     /**
      * Logs a call to the call log based on the connection object passed in.
@@ -92,12 +97,12 @@ private:
         /* [in] */ const String& msg);
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     static Boolean DBG;
     static Boolean VDBG;
 
     AutoPtr<IPhoneGlobals> mApplication;
-    AutoPtr<CallLogAsync> mCallLog;
+    // AutoPtr<CallLogAsync> mCallLog;
 };
 
 } // namespace Phone
