@@ -2,7 +2,14 @@
 #define  __ELASTOS_DROID_PHONE_CALLERINFOCACHE_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/os/AsyncTask.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.Os.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::AsyncTask;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
+using Elastos::Utility::IHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -24,8 +31,6 @@ public:
         : public Object
     {
     public:
-        TO_STRING_IMPL("CallerInfoCache::CacheEntry")
-
         CacheEntry(
             /* [in] */ const String& customRingtone,
             /* [in] */ Boolean shouldSendToVoicemail)
@@ -47,6 +52,9 @@ private:
         : public AsyncTask
     {
     public:
+        CacheAsyncTask(
+            /* [in] */ CallerInfoCache* host);
+
         TO_STRING_IMPL("CallerInfoCache::CacheAsyncTask")
 
         /**
@@ -74,6 +82,7 @@ private:
 
     private:
         AutoPtr<IPowerManagerWakeLock> mWakeLock;
+        CallerInfoCache* mHost;
     };
 
 public:
@@ -114,7 +123,7 @@ public:
     static const Int32 MESSAGE_UPDATE_CACHE;
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     static const Boolean DBG;
 
     /** This must not be set to true when submitting changes. */

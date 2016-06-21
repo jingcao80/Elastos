@@ -1,27 +1,37 @@
 
-#include "elastos/droid/phone/CallLogger.h"
+#include "elastos/droid/phone/CallStateMonitor.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.Os.h"
+#include "elastos/core/StringBuilder.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-const Int32 CallStateMonitor::PHONE_STATE_CHANGED = 1;
-const Int32 CallStateMonitor::PHONE_NEW_RINGING_CONNECTION = 2;
-const Int32 CallStateMonitor::PHONE_DISCONNECT = 3;
-const Int32 CallStateMonitor::PHONE_UNKNOWN_CONNECTION_APPEARED = 4;
-const Int32 CallStateMonitor::PHONE_STATE_DISPLAYINFO = 6;
-const Int32 CallStateMonitor::PHONE_STATE_SIGNALINFO = 7;
-const Int32 CallStateMonitor::PHONE_CDMA_CALL_WAITING = 8;
-const Int32 CallStateMonitor::PHONE_ENHANCED_VP_ON = 9;
-const Int32 CallStateMonitor::PHONE_ENHANCED_VP_OFF = 10;
-const Int32 CallStateMonitor::PHONE_RINGBACK_TONE = 11;
-const Int32 CallStateMonitor::PHONE_RESEND_MUTE = 12;
-const Int32 CallStateMonitor::PHONE_ON_DIAL_CHARS = 13;
+const Int32 CallStateMonitor::PHONE_STATE_CHANGED;
+const Int32 CallStateMonitor::PHONE_NEW_RINGING_CONNECTION;
+const Int32 CallStateMonitor::PHONE_DISCONNECT;
+const Int32 CallStateMonitor::PHONE_UNKNOWN_CONNECTION_APPEARED;
+const Int32 CallStateMonitor::PHONE_STATE_DISPLAYINFO;
+const Int32 CallStateMonitor::PHONE_STATE_SIGNALINFO;
+const Int32 CallStateMonitor::PHONE_CDMA_CALL_WAITING;
+const Int32 CallStateMonitor::PHONE_ENHANCED_VP_ON;
+const Int32 CallStateMonitor::PHONE_ENHANCED_VP_OFF;
+const Int32 CallStateMonitor::PHONE_RINGBACK_TONE;
+const Int32 CallStateMonitor::PHONE_RESEND_MUTE;
+const Int32 CallStateMonitor::PHONE_ON_DIAL_CHARS;
 
 // Other events from call manager
-const Int32 CallStateMonitor::EVENT_OTA_PROVISION_CHANGE = 20;
+const Int32 CallStateMonitor::EVENT_OTA_PROVISION_CHANGE;
 
-const String CallStateMonitor::LOG_TAG("CallStateMonitor");// = CallStateMonitor.class.getSimpleName();
+const String CallStateMonitor::TAG("CallStateMonitor");// = CallStateMonitor.class.getSimpleName();
 
 static Boolean initDBG()
 {
@@ -29,7 +39,7 @@ static Boolean initDBG()
     CSystemProperties::AcquireSingleton((ISystemProperties**)&helper);
     Int32 value;
     helper->GetInt32(String("ro.debuggable"), 0, &value);
-    Boolean result = (PhoneGlobals::DBG_LEVEL >= 1) && (value == 1);
+    Boolean result = (IPhoneGlobals::DBG_LEVEL >= 1) && (value == 1);
     return result;
 }
 
@@ -75,7 +85,7 @@ ECode CallStateMonitor::AddListener(
             StringBuilder sb;
             sb += "Adding Handler: ";
             sb += TO_CSTR(handler);
-            Logger::D(LOG_TAG, sb.ToString());
+            Logger::D(TAG, sb.ToString());
         }
 
         mRegisteredHandlers->Add(TO_IINTERFACE(handler));
@@ -93,7 +103,7 @@ ECode CallStateMonitor::HandleMessage(
         msg->GetWhat(&what);
         sb += what;
         sb += ")";
-        Logger::D(LOG_TAG, sb.ToString());
+        Logger::D(TAG, sb.ToString());
     }
 
     Int32 size;
@@ -110,7 +120,7 @@ ECode CallStateMonitor::HandleMessage(
 ECode CallStateMonitor::UpdateAfterRadioTechnologyChange()
 {
     if (DBG) {
-        Logger::D(LOG_TAG, String("updateCallNotifierRegistrationsAfterRadioTechnologyChange..."));
+        Logger::D(TAG, String("updateCallNotifierRegistrationsAfterRadioTechnologyChange..."));
     }
 
     // Unregister all events from the old obsolete phone

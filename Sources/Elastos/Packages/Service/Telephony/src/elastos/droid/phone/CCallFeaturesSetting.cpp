@@ -17,7 +17,7 @@ CCallFeaturesSetting::VoiceMailProviderSettings::VoiceMailProviderSettings(
     else {
         mForwardingSettings = ArrayOf<ICallForwardInfo*>::Alloc(FORWARDING_SETTINGS_REASONS->GetLength());
         for (Int32 i = 0; i < mForwardingSettings->GetLength(); i++) {
-            AutoPtr<ICallForwardInfo> fi；
+            AutoPtr<ICallForwardInfo> fi;
             CCallForwardInfo::New((ICallForwardInfo**)&fi);
             mForwardingSettings->Set(i, fi);
             fi.reason = FORWARDING_SETTINGS_REASONS[i];
@@ -1201,7 +1201,7 @@ Boolean CCallFeaturesSetting::CheckForwardingCompleted()
             vaule->GetValue(&reason);
 
             AutoPtr<IInterface> obj2;
-            mForwardingChangeResults->Get(reason, (IInterface**)&obj2)；
+            mForwardingChangeResults->Get(reason, (IInterface**)&obj2);
             if (obj2 == NULL) {
                 result = FALSE;
                 break;
@@ -1419,7 +1419,7 @@ ECode CCallFeaturesSetting::OnCreateDialog(
     }
     else if (id == VOICEMAIL_FWD_SAVING_DIALOG || id == VOICEMAIL_FWD_READING_DIALOG ||
             id == VOICEMAIL_REVERTING_DIALOG) {
-        AutoPtr<IProgressDialog> dialog；
+        AutoPtr<IProgressDialog> dialog;
         CProgressDialog::New(this, (IProgressDialog**)&dialog);
         AutoPtr<ICharSequence> title;
         GetText(R.string.updating_title, (ICharSequence**)&title);
@@ -1564,7 +1564,7 @@ void CCallFeaturesSetting::InitPhoneAccountPreferences()
 Boolean CCallFeaturesSetting::CanLaunchIntent(
     /* [in] */ IIntent* intent)
 {
-    AutoPtr<IPackageManager> pm；
+    AutoPtr<IPackageManager> pm;
     GetPackageManager((IPackageManager**)&pm);
     return pm->ResolveActivity(intent, IPackageManager::GET_ACTIVITIES) != NULL;
 }
@@ -1698,7 +1698,7 @@ ECode CCallFeaturesSetting::OnResume()
         if (options != NULL) {
             prefSet->RemovePreference(options);
         }
-        options = NULL；
+        options = NULL;
         prefSet->FindPreference(BUTTON_GSM_UMTS_OPTIONS, (IPreference**)&options);
         if (options != NULL) {
             prefSet->SemovePreference(options);
@@ -2013,7 +2013,7 @@ void CCallFeaturesSetting::InitVoiceMailProviders()
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
     intent->SetAction(ACTION_CONFIGURE_VOICEMAIL);
-    AutoPtr<IList> resolveInfos；
+    AutoPtr<IList> resolveInfos;
     pm->QueryIntentActivities(intent, 0, (IList**)&resolveInfos);
     Int32 size;
     resolveInfos->GetSize(&size);
@@ -2148,7 +2148,7 @@ void CCallFeaturesSetting::MaybeSaveSettingsForVoicemailProvider(
         sb += str;
         Log(sb.ToString());
     }
-    AutoPtr<IEditor> editor；
+    AutoPtr<IEditor> editor;
     mPerProviderSavedVMNumbers->Edit((IEditor**)&editor);
     editor->PutString(key + VM_NUMBER_TAG, newSettings->mVoicemailNumber);
     String fwdKey = key + FWD_SETTINGS_TAG;
@@ -2223,7 +2223,7 @@ void CCallFeaturesSetting::DeleteSettingsForVoicemailProvider(
     if (mVoicemailProviders == NULL) {
         return;
     }
-    AutoPtr<IEditor> editor；
+    AutoPtr<IEditor> editor;
     mPerProviderSavedVMNumbers->Edit((IEditor**)&editor);
     editor->PutString(key + VM_NUMBER_TAG, String(NULL));
     editor->PutInt32(key + FWD_SETTINGS_TAG + FWD_SETTINGS_LENGTH_TAG, 0)

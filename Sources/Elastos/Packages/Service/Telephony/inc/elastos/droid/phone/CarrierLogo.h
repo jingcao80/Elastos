@@ -2,7 +2,11 @@
 #define  __ELASTOS_DROID_PHONE_CARRIERLOGO_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
+using Elastos::Utility::IMap;
 
 namespace Elastos {
 namespace Droid {

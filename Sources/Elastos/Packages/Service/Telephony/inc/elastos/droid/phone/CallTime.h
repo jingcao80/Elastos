@@ -2,7 +2,13 @@
 #define  __ELASTOS_DROID_PHONE_CALLTIME_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/os/Runnable.h"
+
+using Elastos::Droid::Internal::Telephony::ICall;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::Runnable;
 
 namespace Elastos {
 namespace Droid {
@@ -31,7 +37,7 @@ private:
 
     private:
         CallTime* mHost;
-    }
+    };
 
 public:
     TO_STRING_IMPL("CallTime")
@@ -81,7 +87,7 @@ private:
         /* [in] */ const String& msg);
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     static const Boolean DBG;
     static const Boolean PROFILE;
 

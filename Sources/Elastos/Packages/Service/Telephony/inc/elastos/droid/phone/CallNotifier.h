@@ -2,7 +2,27 @@
 #define  __ELASTOS_DROID_PHONE_CARRIERLOGO_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/phone/CallLogger.h"
+#include "elastos/droid/phone/CallStateMonitor.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Telephony.h"
+#include "elastos/droid/telephony/PhoneStateListener.h"
+#include <elastos/core/Thread.h>
+
+using Elastos::Droid::Bluetooth::IBluetoothHeadset;
+using Elastos::Droid::Bluetooth::IBluetoothProfile;
+using Elastos::Droid::Bluetooth::IBluetoothProfileServiceListener;
+using Elastos::Droid::Internal::Telephony::ICallState;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Media::IAudioAttributes;
+using Elastos::Droid::Media::IToneGenerator;
+using Elastos::Droid::Os::IAsyncResult;
+using Elastos::Droid::Telephony::IPhoneStateListener;
+using Elastos::Droid::Telephony::PhoneStateListener;
+using Elastos::Core::Thread;
 
 namespace Elastos {
 namespace Droid {
@@ -19,8 +39,7 @@ class CallNotifier
 {
 private:
     class MyPhoneStateListener
-        : public Object
-        , public IPhoneStateListener
+        : public PhoneStateListener
     {
     public:
         TO_STRING_IMPL("CallNotifier::MyPhoneStateListener")
@@ -76,7 +95,7 @@ private:
 
         CARAPI StopTone();
 
-    public：
+    public:
         // The possible tones we can play.
         static const Int32 TONE_NONE;
         static const Int32 TONE_CALL_WAITING;
@@ -174,10 +193,10 @@ public:
      * This is only done once, at startup, from PhoneApp.onCreate().
      */
     static CARAPI_(AutoPtr<CallNotifier>) Init(
-        /* [in] */ PhoneGlobals* app,
+        /* [in] */ IPhoneGlobals* app,
         /* [in] */ IPhone* phone,
-        /* [in] */ ICallLogger* callLogger,
-        /* [in] */ ICallStateMonitor* callStateMonitor,
+        /* [in] */ CallLogger* callLogger,
+        /* [in] */ CallStateMonitor* callStateMonitor,
         /* [in] */ IBluetoothManager* bluetoothManager);
 
     // @Override
@@ -222,10 +241,10 @@ public:
 private:
     /** Private constructor; @see init() */
     CallNotifier(
-        /* [in] */ PhoneGlobals* app,
+        /* [in] */ IPhoneGlobals* app,
         /* [in] */ IPhone* phone,
-        /* [in] */ ICallLogger* callLogger,
-        /* [in] */ ICallStateMonitor* callStateMonitor,
+        /* [in] */ CallLogger* callLogger,
+        /* [in] */ CallStateMonitor* callStateMonitor,
         /* [in] */ IBluetoothManager* bluetoothManager);
 
     CARAPI_(void) CreateSignalInfoToneGenerator();
@@ -299,7 +318,7 @@ private:
         /* [in] */ const String& msg);
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     static const Boolean DBG;
     static const Boolean VDBG;
 
@@ -326,10 +345,10 @@ private:
     static const Int32 DISPLAYINFO_NOTIFICATION_DONE;
     static const Int32 UPDATE_IN_CALL_NOTIFICATION;
 
-    AutoPtr<PhoneGlobals> mApplication;
+    AutoPtr<IPhoneGlobals> mApplication;
     AutoPtr<ICallManager> mCM;
     AutoPtr<IBluetoothHeadset> mBluetoothHeadset;
-    AutoPtr<ICallLogger> mCallLogger;
+    AutoPtr<CallLogger> mCallLogger;
 
     // ToneGenerator instance for playing SignalInfo tones
     AutoPtr<IToneGenerator> mSignalInfoToneGenerator;
@@ -349,6 +368,7 @@ private:
     AutoPtr<IPhoneStateListener> mPhoneStateListener;
 
     AutoPtr<IBluetoothProfileServiceListener> mBluetoothProfileServiceListener;
+    static Object THIS;
 };
 
 } // namespace Phone

@@ -12,6 +12,7 @@ module
     merge("car/elastos/droid/phone/Constants.car");
     merge("car/elastos/droid/phone/ErrorDialogActivity.car");
     merge("car/elastos/droid/phone/EditPhoneNumberPreference.car");
+    merge("car/elastos/droid/phone/InCallScreen.car");
     merge("car/elastos/droid/phone/TimeConsumingPreferenceActivity.car");
     merge("car/elastos/droid/phone/OutgoingCallBroadcaster.car");
     merge("car/elastos/droid/phone/PhoneGlobals.car");

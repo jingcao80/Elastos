@@ -1,5 +1,24 @@
 
 #include "elastos/droid/phone/CallTime.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.Content.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::Telephony::ICallState;
+using Elastos::Droid::Internal::Telephony::ICallState_ACTIVE;
+using Elastos::Droid::Internal::Telephony::IConnection;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Core::StringBuilder;
+using Elastos::IO::CFile;
+using Elastos::IO::CFileHelper;
+using Elastos::IO::IFile;
+using Elastos::IO::IFileHelper;
+using Elastos::Utility::IList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -15,7 +34,7 @@ ECode CallTime::PeriodicTimerCallback::Run()
     return mHost->PeriodicUpdateTimer();
 }
 
-const String CallTime::LOG_TAG("PHONE/CallTime");
+const String CallTime::TAG("PHONE/CallTime");
 const Boolean CallTime::DBG = FALSE;
 const Boolean CallTime::PROFILE = TRUE;
 
@@ -33,7 +52,7 @@ CallTime::CallTime(
 {
     Handler::constructor();
 
-    mTimerCallback = new PeriodicTimerCallback();
+    mTimerCallback = new PeriodicTimerCallback(this);
 }
 
 ECode CallTime::SetActiveCallMode(
@@ -78,17 +97,18 @@ ECode CallTime::PeriodicUpdateTimer()
         if (DBG) {
             StringBuilder sb;
             sb += "periodicUpdateTimer() @ ";
-            sb += nextReport
+            sb += nextReport;
             Log(sb.ToString());
         }
-        PostAtTime(mTimerCallback, nextReport);
+        Boolean tmp = FALSE;
+        PostAtTime(mTimerCallback, nextReport, &tmp);
         mLastReportedTime = nextReport;
 
         if (mCall != NULL) {
-            Call.State state;
+            ICallState state;
             mCall->GetState(&state);
 
-            if (state == Call.State.ACTIVE) {
+            if (state == ICallState_ACTIVE) {
                 UpdateElapsedTime(mCall);
             }
         }
@@ -171,7 +191,7 @@ void CallTime::Log(
     StringBuilder sb;
     sb += "[CallTime] ";
     sb += msg;
-    Logger::D(LOG_TAG, sb.ToString());
+    Logger::D(TAG, sb.ToString());
     return;
 }
 
@@ -202,21 +222,27 @@ Boolean CallTime::IsTraceRunning()
 
 void CallTime::StartTrace()
 {
-    if (PROFILE & sProfileState == PROFILE_STATE_READY) {
+    if ((PROFILE & sProfileState) == PROFILE_STATE_READY) {
         // For now, we move away from temp directory in favor of
         // the application's data directory to store the trace
         // information (/data/data/com.android.phone).
-        AutoPtr<IPhoneGlobals> phoneGlobals = PhoneGlobals::GetInstance();
+        AutoPtr<IPhoneGlobals> phoneGlobals;
+        assert(0 && "TODO : need PhoneGlobals");
+        // phoneGlobals = PhoneGlobals::GetInstance();
         AutoPtr<IFile> file;
-        phoneGlobals->GetDir(String("phoneTrace"), IContext::MODE_PRIVATE, (IFile**)&file);
+        IContext::Probe(phoneGlobals)->GetDir(String("phoneTrace"), IContext::MODE_PRIVATE, (IFile**)&file);
 
-        Boolean result;
+        Boolean result = FALSE;
         if ((file->Exists(&result), result) == FALSE) {
-            file->Mkdirs();
+            file->Mkdirs(&result);
         }
         String path;
         file->GetPath(&path);
-        String baseName = path + IFile::separator + String("callstate");
+        AutoPtr<IFileHelper> helper;
+        CFileHelper::AcquireSingleton((IFileHelper**)&helper);
+        String separator;
+        helper->GetSeparator(&separator);
+        String baseName = path + separator + String("callstate");
         String dataFile = baseName + String(".data");
         String keyFile = baseName + String(".key");
 
@@ -232,7 +258,8 @@ void CallTime::StartTrace()
 
         sProfileState = PROFILE_STATE_RUNNING;
         Log(String("startTrace"));
-        Debug::StartMethodTracing(baseName, 8 * 1024 * 1024);
+        assert(0 && "TODO Need Debug");
+        // Debug::StartMethodTracing(baseName, 8 * 1024 * 1024);
     }
     return;
 }
@@ -243,7 +270,8 @@ void CallTime::StopTrace()
         if (sProfileState == PROFILE_STATE_RUNNING) {
             sProfileState = PROFILE_STATE_NONE;
             Log(String("stopTrace"));
-            Debug::StopMethodTracing();
+            assert(0 && "TODO Need Debug");
+            // Debug::StopMethodTracing();
         }
     }
     return;

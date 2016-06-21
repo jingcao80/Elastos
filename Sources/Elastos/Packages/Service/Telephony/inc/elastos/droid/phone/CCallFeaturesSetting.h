@@ -1,8 +1,10 @@
 #ifndef  __ELASTOS_DROID_PHONE_CPHONEAPP_H__
 #define  __ELASTOS_DROID_PHONE_CPHONEAPP_H__
 
-#include "_Elastos_Droid_Phone_CPhoneApp.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "_Elastos_Droid_Phone_CCallFeaturesSetting.h"
+#include <elastos/droid/preference/PreferenceActivity.h>
+
+using Elastos::Droid::Preference::PreferenceActivity;
 
 namespace Elastos {
 namespace Droid {

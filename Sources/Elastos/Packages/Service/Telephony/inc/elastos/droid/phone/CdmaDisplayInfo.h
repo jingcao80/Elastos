@@ -2,7 +2,12 @@
 #define  __ELASTOS_DROID_PHONE_CDMADISPLAYINFO_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.App.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::Content::IContext;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -38,8 +43,8 @@ private:
         /* [in] */ const String& msg);
 
 private:
-    static const String LOG_TAG = "CdmaDisplayInfo";
-    static Boolean DBG = (SystemProperties.getInt("ro.debuggable", 0) == 1);
+    static const String TAG;
+    static Boolean DBG;
 
     /** CDMA DisplayInfo dialog */
     static AutoPtr<IAlertDialog> sDisplayInfoDialog;

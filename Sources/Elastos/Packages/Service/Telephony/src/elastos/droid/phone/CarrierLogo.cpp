@@ -1,5 +1,10 @@
 
 #include "elastos/droid/phone/CarrierLogo.h"
+#include <elastos/core/CoreUtils.h>
+
+using Elastos::Utility::CHashMap;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IInteger32;
 
 namespace Elastos {
 namespace Droid {
@@ -11,7 +16,7 @@ Int32 CarrierLogo::GetLogo(
     /* [in] */ const String& name)
 {
     AutoPtr<IMap> map = GetLogoMap();
-    AutoPtr<ICharSequence> cs = CoreUtil::Convert(name);
+    AutoPtr<ICharSequence> cs = CoreUtils::Convert(name);
     AutoPtr<IInterface> obj;
     map->Get(TO_IINTERFACE(cs), (IInterface**)&obj);
     AutoPtr<IInteger32> intObj = IInteger32::Probe(obj);

@@ -1,5 +1,31 @@
 
 #include "elastos/droid/phone/CallerInfoCache.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Provider::CContactsContractCommonDataKindsCallable;
+using Elastos::Droid::Provider::IContactsContractCommonDataKindsCallable;
+using Elastos::Droid::Provider::IContactsContractCommonDataKindsPhone;
+using Elastos::Droid::Provider::IContactsContractDataColumns;
+using Elastos::Droid::Provider::IContactsContractContactOptionsColumns;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -20,16 +46,21 @@ ECode CallerInfoCache::CacheEntry::ToString(
     return NOERROR;
 }
 
+CallerInfoCache::CacheAsyncTask::CacheAsyncTask(
+    /* [in] */ CallerInfoCache* host)
+    : mHost(host)
+{}
+
 ECode CallerInfoCache::CacheAsyncTask::AcquireWakeLockAndExecute()
 {
     // Prepare a separate partial WakeLock than what PhoneApp has so to avoid
     // unnecessary conflict.
     AutoPtr<IInterface> obj;
-    mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+    mHost->mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
     AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj);
-    pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, LOG_TAG, (IPowerManagerWakeLock**)&mWakeLock);
-    mWakeLock->Acquire();
-    return Execute();
+    pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, mHost->TAG, (IPowerManagerWakeLock**)&mWakeLock);
+    mWakeLock->AcquireLock();
+    return Execute((ArrayOf<IInterface*>*)NULL);
 }
 
 ECode CallerInfoCache::CacheAsyncTask::DoInBackground(
@@ -39,7 +70,7 @@ ECode CallerInfoCache::CacheAsyncTask::DoInBackground(
     VALIDATE_NOT_NULL(result)
 
     if (DBG) Log(String("Start refreshing cache."));
-    RefreshCacheEntry();
+    mHost->RefreshCacheEntry();
     *result = NULL;
     return NOERROR;
 }
@@ -71,7 +102,7 @@ ECode CallerInfoCache::CacheAsyncTask::ReleaseWakeLock()
 
 const Int32 CallerInfoCache::MESSAGE_UPDATE_CACHE = 0;
 
-const String CallerInfoCache::LOG_TAG("CallerInfoCache");// = CallerInfoCache.class.getSimpleName();
+const String CallerInfoCache::TAG("CallerInfoCache");// = CallerInfoCache.class.getSimpleName();
 
 static Boolean initDBG()
 {
@@ -79,7 +110,7 @@ static Boolean initDBG()
     CSystemProperties::AcquireSingleton((ISystemProperties**)&helper);
     Int32 value;
     helper->GetInt32(String("ro.debuggable"), 0, &value);
-    Boolean result = (PhoneGlobals::DBG_LEVEL >= 1) && (value == 1);
+    Boolean result = (IPhoneGlobals::DBG_LEVEL >= 1) && (value == 1);
     return result;
 }
 
@@ -89,10 +120,11 @@ const Boolean CallerInfoCache::VDBG = FALSE;
 static AutoPtr<ArrayOf<String> > initPROJECTION()
 {
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(4);
-    array->Set(0, IData::DATA1);              // 0
-    array->Set(1, IPhone::NORMALIZED_NUMBER); // 1
-    array->Set(2, IData::CUSTOM_RINGTONE);    // 2
-    array->Set(3, IData::SEND_TO_VOICEMAIL);  // 3
+    array->Set(0, IContactsContractDataColumns::DATA1);              // 0
+    array->Set(1, IContactsContractCommonDataKindsPhone::NORMALIZED_NUMBER); // 1
+    array->Set(2, IContactsContractContactOptionsColumns::CUSTOM_RINGTONE);    // 2
+    array->Set(3, IContactsContractContactOptionsColumns::SEND_TO_VOICEMAIL);  // 3
+    return array;
 }
 
 const AutoPtr<ArrayOf<String> > CallerInfoCache::PROJECTION = initPROJECTION();
@@ -107,12 +139,12 @@ static String initSELECTION()
     StringBuilder sb;
     sb += "(";
     sb += "(";
-    sb += IData::CUSTOM_RINGTONE;
+    sb += IContactsContractContactOptionsColumns::CUSTOM_RINGTONE;
     sb += " IS NOT NULL OR ";
-    sb += IData::SEND_TO_VOICEMAIL;
+    sb += IContactsContractContactOptionsColumns::SEND_TO_VOICEMAIL;
     sb += "=1)";
     sb += " AND ";
-    sb += IData::DATA1;
+    sb += IContactsContractDataColumns::DATA1;
     sb += " IS NOT NULL)";
     return sb.ToString();
 }
@@ -141,10 +173,10 @@ ECode CallerInfoCache::StartAsyncCache()
     if (DBG) Log(String("startAsyncCache"));
 
     if (mCacheAsyncTask != NULL) {
-        Logger::W(LOG_TAG, "Previous cache task is remaining.");
+        Logger::W(TAG, "Previous cache task is remaining.");
         mCacheAsyncTask->Cancel(TRUE);
     }
-    mCacheAsyncTask = new CacheAsyncTask();
+    mCacheAsyncTask = new CacheAsyncTask(this);
     return mCacheAsyncTask->AcquireWakeLockAndExecute();
 }
 
@@ -163,9 +195,13 @@ void CallerInfoCache::RefreshCacheEntry()
     //try
     {
         AutoPtr<IContentResolver> resolver;
+        AutoPtr<IContactsContractCommonDataKindsCallable> helper;
+        CContactsContractCommonDataKindsCallable::AcquireSingleton((IContactsContractCommonDataKindsCallable**)&helper);
+        AutoPtr<IUri> uri;
+        helper->GetCONTENT_URI((IUri**)&uri);
         FAIL_GOTO(mContext->GetContentResolver((IContentResolver**)&resolver), FINALLY)
-        FAIL_GOTO(resolver->Query(ICallable::CONTENT_URI,
-                PROJECTION, SELECTION, NULL, NULL, (ICursor**)&cursor), FINALLY)
+        FAIL_GOTO(resolver->Query(uri,
+                PROJECTION, SELECTION, NULL, String(NULL), (ICursor**)&cursor), FINALLY)
         if (cursor != NULL) {
             // We don't want to block real in-coming call, so prepare a completely fresh
             // cache here again, and replace it with older one.
@@ -183,7 +219,8 @@ void CallerInfoCache::RefreshCacheEntry()
                 if (normalizedNumber.IsNull()) {
                     // There's no guarantee normalized numbers are available every time and
                     // it may become null sometimes. Try formatting the original number.
-                    normalizedNumber = PhoneNumberUtils::NormalizeNumber(number);
+                    assert(0 && "TODO: Need PhoneNumberUtils");
+                    // normalizedNumber = PhoneNumberUtils::NormalizeNumber(number);
                 }
                 String customRingtone;
                 FAIL_GOTO(cursor->GetString(INDEX_CUSTOM_RINGTONE, &customRingtone), FINALLY)
@@ -191,35 +228,36 @@ void CallerInfoCache::RefreshCacheEntry()
                 FAIL_GOTO(cursor->GetInt32(INDEX_SEND_TO_VOICEMAIL, &num), FINALLY)
                 Boolean sendToVoicemail = num == 1;
 
-                if (PhoneNumberUtils::IsUriNumber(number)) {
-                    // SIP address case
-                    PutNewEntryWhenAppropriate(
-                            newNumberToEntry, number, customRingtone, sendToVoicemail);
-                }
-                else {
-                    // PSTN number case
-                    // Each normalized number may or may not have full content of the number.
-                    // Contacts database may contain +15001234567 while a dialed number may be
-                    // just 5001234567. Also we may have inappropriate country
-                    // code in some cases (e.g. when the location of the device is inconsistent
-                    // with the device's place). So to avoid confusion we just rely on the last
-                    // 7 digits here. It may cause some kind of wrong behavior, which is
-                    // unavoidable anyway in very rare cases..
-                    Int32 length = normalizedNumber->GetLength();
-                    String key = length > 7
-                            ? normalizedNumber.Substring(length - 7, length)
-                                    : normalizedNumber;
-                    PutNewEntryWhenAppropriate(
-                            newNumberToEntry, key, customRingtone, sendToVoicemail);
-                }
+                assert(0 && "TODO: Need PhoneNumberUtils");
+                // if (PhoneNumberUtils::IsUriNumber(number)) {
+                //     // SIP address case
+                //     PutNewEntryWhenAppropriate(
+                //             newNumberToEntry, number, customRingtone, sendToVoicemail);
+                // }
+                // else {
+                //     // PSTN number case
+                //     // Each normalized number may or may not have full content of the number.
+                //     // Contacts database may contain +15001234567 while a dialed number may be
+                //     // just 5001234567. Also we may have inappropriate country
+                //     // code in some cases (e.g. when the location of the device is inconsistent
+                //     // with the device's place). So to avoid confusion we just rely on the last
+                //     // 7 digits here. It may cause some kind of wrong behavior, which is
+                //     // unavoidable anyway in very rare cases..
+                //     Int32 length = normalizedNumber->GetLength();
+                //     String key = length > 7
+                //             ? normalizedNumber.Substring(length - 7, length)
+                //                     : normalizedNumber;
+                //     PutNewEntryWhenAppropriate(
+                //             newNumberToEntry, key, customRingtone, sendToVoicemail);
+                // }
             }
 
             if (VDBG) {
                 Int32 size;
                 newNumberToEntry->GetSize(&size);
-                Logger::D(LOG_TAG, "New cache size: %d",size);
+                Logger::D(TAG, "New cache size: %d",size);
                 // for (Entry<String, CacheEntry> entry : newNumberToEntry.entrySet()) {
-                //     Log.d(LOG_TAG, "Number: " + entry.getKey() + " -> " + entry.getValue());
+                //     Log.d(TAG, "Number: " + entry.getKey() + " -> " + entry.getValue());
                 // }
             }
 
@@ -240,12 +278,12 @@ void CallerInfoCache::RefreshCacheEntry()
             // If the cursor became null at that exact moment, probably we don't want to
             // drop old cache. Also the case is fairly rare in usual cases unless acore being
             // killed, so we don't take care much of this case.
-            Logger::W(LOG_TAG, "cursor is null");
+            Logger::W(TAG, "cursor is null");
         }
     } //finally {
 FINALLY:
     if (cursor != NULL) {
-        cursor->Close();
+        ICloseable::Probe(cursor)->Close();
     }
     //}
 
@@ -258,7 +296,7 @@ void CallerInfoCache::PutNewEntryWhenAppropriate(
     /* [in] */ const String& customRingtone,
     /* [in] */ Boolean sendToVoicemail)
 {
-    AutoPtr<ICharSequence> cs = CoreUtil::Convert(numberOrSipAddress);
+    AutoPtr<ICharSequence> cs = CoreUtils::Convert(numberOrSipAddress);
     Boolean res;
     if (newNumberToEntry->ContainsKey(TO_IINTERFACE(cs), &res), res) {
         // There may be duplicate entries here and we should prioritize
@@ -273,52 +311,53 @@ void CallerInfoCache::PutNewEntryWhenAppropriate(
     }
     else {
         AutoPtr<CacheEntry> entry = new CacheEntry(customRingtone, sendToVoicemail);
-        newNumberToEntry.put(TO_IINTERFACE(cs), TO_IINTERFACE(entry));
+        newNumberToEntry->Put(TO_IINTERFACE(cs), TO_IINTERFACE(entry));
     }
     return;
 }
 
-AutoPtr<CacheEntry> CallerInfoCache::GetCacheEntry(
+AutoPtr<CallerInfoCache::CacheEntry> CallerInfoCache::GetCacheEntry(
     /* [in] */ const String& number)
 {
     if (mNumberToEntry == NULL) {
         // Very unusual state. This implies the cache isn't ready during the request, while
         // it should be prepared on the boot time (i.e. a way before even the first request).
-        Logger::W(LOG_TAG, "Fallback cache isn't ready.");
+        Logger::W(TAG, "Fallback cache isn't ready.");
         return NULL;
     }
 
     AutoPtr<CacheEntry> entry;
-    if (PhoneNumberUtils::IsUriNumber(number)) {
-        if (VDBG) {
-            StringBuilder sb;
-            sb += "Trying to lookup ";
-            sb += number;
-            Log(sb.ToString());
-        }
+    assert(0 && "TODO: Need PhoneNumberUtils");
+    // if (PhoneNumberUtils::IsUriNumber(number)) {
+    //     if (VDBG) {
+    //         StringBuilder sb;
+    //         sb += "Trying to lookup ";
+    //         sb += number;
+    //         Log(sb.ToString());
+    //     }
 
-        AutoPtr<ICharSequence> cs = CoreUtil::Convert(number);
-        AutoPtr<IInterface> obj;
-        mNumberToEntry->Get(TO_IINTERFACE(cs), (IInterface**)&obj);
-        entry = (CacheEntry*)IObject::Probe(obj);
-    }
-    else {
-        String normalizedNumber = PhoneNumberUtils::NormalizeNumber(number);
-        Int32 length = normalizedNumber.GetLength();
-        String key = (length > 7 ? normalizedNumber.Substring(length - 7, length)
-                        : normalizedNumber);
-        if (VDBG) {
-            StringBuilder sb;
-            sb += "Trying to lookup ";
-            sb += key;
-            Log(sb.ToString());
-        }
+    //     AutoPtr<ICharSequence> cs = CoreUtils::Convert(number);
+    //     AutoPtr<IInterface> obj;
+    //     mNumberToEntry->Get(TO_IINTERFACE(cs), (IInterface**)&obj);
+    //     entry = (CacheEntry*)IObject::Probe(obj);
+    // }
+    // else {
+    //     String normalizedNumber = PhoneNumberUtils::NormalizeNumber(number);
+    //     Int32 length = normalizedNumber.GetLength();
+    //     String key = (length > 7 ? normalizedNumber.Substring(length - 7, length)
+    //                     : normalizedNumber);
+    //     if (VDBG) {
+    //         StringBuilder sb;
+    //         sb += "Trying to lookup ";
+    //         sb += key;
+    //         Log(sb.ToString());
+    //     }
 
-        AutoPtr<ICharSequence> cs = CoreUtil::Convert(key);
-        AutoPtr<IInterface> obj;
-        mNumberToEntry->Get(TO_IINTERFACE(cs), (IInterface**)&obj);
-        entry = (CacheEntry*)IObject::Probe(obj);
-    }
+    //     AutoPtr<ICharSequence> cs = CoreUtils::Convert(key);
+    //     AutoPtr<IInterface> obj;
+    //     mNumberToEntry->Get(TO_IINTERFACE(cs), (IInterface**)&obj);
+    //     entry = (CacheEntry*)IObject::Probe(obj);
+    // }
     if (VDBG) {
         StringBuilder sb;
         sb += "Obtained ";
@@ -331,7 +370,7 @@ AutoPtr<CacheEntry> CallerInfoCache::GetCacheEntry(
 void CallerInfoCache::Log(
     /* [in] */ const String& msg)
 {
-    Logger::D(LOG_TAG, msg);
+    Logger::D(TAG, msg);
 }
 
 } // namespace Phone

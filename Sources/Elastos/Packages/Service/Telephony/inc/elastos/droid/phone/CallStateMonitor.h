@@ -2,7 +2,12 @@
 #define  __ELASTOS_DROID_PHONE_CALLSTATEMONITOR_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/os/Handler.h"
+#include "Elastos.Droid.Internal.h"
+
+using Elastos::Droid::Internal::Telephony::ICallManager;
+using Elastos::Droid::Os::Handler;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -48,24 +53,24 @@ private:
 
 public:
     // Events from the Phone object:
-    static const Int32 PHONE_STATE_CHANGED;
-    static const Int32 PHONE_NEW_RINGING_CONNECTION;
-    static const Int32 PHONE_DISCONNECT;
-    static const Int32 PHONE_UNKNOWN_CONNECTION_APPEARED;
-    static const Int32 PHONE_STATE_DISPLAYINFO;
-    static const Int32 PHONE_STATE_SIGNALINFO;
-    static const Int32 PHONE_CDMA_CALL_WAITING;
-    static const Int32 PHONE_ENHANCED_VP_ON;
-    static const Int32 PHONE_ENHANCED_VP_OFF;
-    static const Int32 PHONE_RINGBACK_TONE;
-    static const Int32 PHONE_RESEND_MUTE;
-    static const Int32 PHONE_ON_DIAL_CHARS;
+    static const Int32 PHONE_STATE_CHANGED = 1;
+    static const Int32 PHONE_NEW_RINGING_CONNECTION = 2;
+    static const Int32 PHONE_DISCONNECT = 3;
+    static const Int32 PHONE_UNKNOWN_CONNECTION_APPEARED = 4;
+    static const Int32 PHONE_STATE_DISPLAYINFO = 6;
+    static const Int32 PHONE_STATE_SIGNALINFO = 7;
+    static const Int32 PHONE_CDMA_CALL_WAITING = 8;
+    static const Int32 PHONE_ENHANCED_VP_ON = 9;
+    static const Int32 PHONE_ENHANCED_VP_OFF = 10;
+    static const Int32 PHONE_RINGBACK_TONE = 11;
+    static const Int32 PHONE_RESEND_MUTE = 12;
+    static const Int32 PHONE_ON_DIAL_CHARS = 13;
 
     // Other events from call manager
-    static const Int32 EVENT_OTA_PROVISION_CHANGE;
+    static const Int32 EVENT_OTA_PROVISION_CHANGE = 20;
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     static const Boolean DBG;
 
     AutoPtr<ICallManager> mCallManager;

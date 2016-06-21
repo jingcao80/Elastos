@@ -1137,7 +1137,7 @@ ECode CPhoneInterfaceManager::IsIdleForSubscriber(
     GetPhone(subId, (IPhone**)&phone);
     Int32 state;
     phone->GetState(&state);
-    *result = (state == IPhoneConstantsState_IDLE);
+    *result = (state == PhoneConstantsState_IDLE);
     return NOERROR;
 }
 

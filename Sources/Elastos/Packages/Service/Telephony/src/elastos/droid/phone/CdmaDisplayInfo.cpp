@@ -1,11 +1,32 @@
 
 #include "elastos/droid/phone/CdmaDisplayInfo.h"
+#include "R.h"
+#include <elastos/droid/R.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/CoreUtils.h>
+#include "elastos/core/StringBuilder.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::View::IWindow;
+using Elastos::Droid::View::IWindowManagerLayoutParams;
+using Elastos::Core::CString;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-const String CdmaDisplayInfo::LOG_TAG("CdmaDisplayInfo");
+const String CdmaDisplayInfo::TAG("CdmaDisplayInfo");
 
 static Boolean initDBG()
 {
@@ -21,7 +42,7 @@ Boolean CdmaDisplayInfo::DBG = initDBG();
 
 AutoPtr<IAlertDialog> CdmaDisplayInfo::sDisplayInfoDialog;
 
-ECode CdmaDisplayInfo::DisplayInfoRecord(
+void CdmaDisplayInfo::DisplayInfoRecord(
     /* [in] */ IContext* context,
     /* [in] */ const String& infoMsg)
 {
@@ -33,7 +54,7 @@ ECode CdmaDisplayInfo::DisplayInfoRecord(
     }
 
     if (sDisplayInfoDialog != NULL) {
-        sDisplayInfoDialog->Dismiss();
+        IDialogInterface::Probe(sDisplayInfoDialog)->Dismiss();
     }
 
     // displaying system alert dialog on the screen instead of
@@ -41,23 +62,27 @@ ECode CdmaDisplayInfo::DisplayInfoRecord(
     // places the message at the forefront of the UI.
     AutoPtr<IAlertDialogBuilder> builder;
     CAlertDialogBuilder::New(context, (IAlertDialogBuilder**)&builder);
-    builder->SetIcon(android.R.drawable.ic_dialog_info);
+    builder->SetIcon(Elastos::Droid::R::drawable::ic_dialog_info);
     String text;
-    context->GetText(R.string.network_message, &text);
-    AutoPtr<ICharSequence> obj = CoreUtil::Convert(text);
+    AutoPtr<ICharSequence> obj;
+    context->GetText(Elastos::Droid::Server::Telephony::R::string::network_message
+        , (ICharSequence**)&obj);
     builder->SetTitle(obj);
-    builder->SetMessage(infoMsg);
+    AutoPtr<ICharSequence> cs;
+    CString::New(infoMsg, (ICharSequence**)&cs);
+    builder->SetMessage(cs);
     builder->SetCancelable(TRUE);
     builder->Create((IAlertDialog**)&sDisplayInfoDialog);
 
     AutoPtr<IWindow> window;
-    sDisplayInfoDialog->GetWindow((IWindow**)&window);
+    IDialog::Probe(sDisplayInfoDialog)->GetWindow((IWindow**)&window);
     window->SetType(IWindowManagerLayoutParams::TYPE_SYSTEM_DIALOG);
     window->AddFlags(IWindowManagerLayoutParams::FLAG_DIM_BEHIND);
 
-    sDisplayInfoDialog->Show();
-    AutoPtr<IPhoneGlobals> phoneGlobals = PhoneGlobals::GetInstance();
-    return phoneGlobals->WakeUpScreen();
+    IDialog::Probe(sDisplayInfoDialog)->Show();
+    assert(0 && "TODO : Need PhoneGlobals");
+    // AutoPtr<IPhoneGlobals> phoneGlobals = PhoneGlobals::GetInstance();
+    // phoneGlobals->WakeUpScreen();
 }
 
 void CdmaDisplayInfo::DismissDisplayInfoRecord()
@@ -65,7 +90,7 @@ void CdmaDisplayInfo::DismissDisplayInfoRecord()
     if (DBG) Log(String("Dissmissing Display Info Record..."));
 
     if (sDisplayInfoDialog != NULL) {
-        sDisplayInfoDialog->Dismiss();
+        IDialogInterface::Probe(sDisplayInfoDialog)->Dismiss();
         sDisplayInfoDialog = NULL;
     }
     return;
@@ -77,7 +102,7 @@ void CdmaDisplayInfo::Log(
     StringBuilder sb;
     sb += "[CdmaDisplayInfo] ";
     sb += msg;
-    Logger::D(LOG_TAG, sb.ToString());
+    Logger::D(TAG, sb.ToString());
     return;
 }
 
