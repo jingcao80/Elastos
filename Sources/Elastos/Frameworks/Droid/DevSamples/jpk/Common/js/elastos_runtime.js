@@ -157,6 +157,7 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         var oConstructorInfo;
         //var paramCount = length - 2;
         var paramCount = length - 1;
+        var bSameArgs = false;
         for(var i=0, im=aConstructorInfos.length; i<im; i++){
             oConstructorInfo = aConstructorInfos[i];
 
@@ -166,9 +167,9 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
 
             elog('====classinfo__createObject===='+i+' _paramCount:'+_paramCount+'===paramCount:'+paramCount+'===========');
 
-            //if (_paramCount == paramCount) {
+            bSameArgs = false;
             if (_paramCount == paramCount) {
-                var bSameArgs = true;
+                bSameArgs = true;
                 var aParamInfos = oConstructorInfo.GetAllParamInfos();
                 //for(var j = 0, jm = paramCount; j<jm; j++) {
                 for(var j = 0, jm = paramCount -1; j<jm; j++) {
@@ -186,7 +187,7 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                     if (sJsDataType == type_in) {
                         if (iDataType == CarDataType.Interface) {
                             //TODO:compare the interface name
-                            continue;
+                            //continue;
                         }
                         else if (iDataType == CarDataType.LocalPtr) {
                             //TODO:compare the localptr element type
@@ -200,9 +201,12 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
 
                             switch (iElementDataType) {
                                 case CarDataType.Interface:
+                                    //TODO:
                                     break;
                                 case CarDataType.CarArray:
-                                    if (typeof arg_in.GetClassId == 'function') bSameArgs = false;
+                                    //TODO:
+                                    bSameArgs = false;
+                                    //if (typeof arg_in.GetClassId == 'function') bSameArgs = false;
                                     //elog("=========insatanceof=====1==========="+bSameArgs);
                                     //bSameArgs = (arg_in instanceOf Array);
                                     //elog("=========insatanceof=====2==========="+bSameArgs);
@@ -211,17 +215,17 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                                     //TODO
                                     break;
                             }
-
-                            if (bSameArgs) continue;
-                            //continue;
                         }
                         else {
-                            continue;
+                            //continue;
                         }
-                    }
 
-                    bSameArgs = false
-                    break;
+                        //if (bSameArgs) continue;
+                    }
+                    else {
+                        bSameArgs = false
+                    }
+                    if (!bSameArgs) break;
                 }
                 if (bSameArgs) break;
             }
@@ -305,18 +309,18 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
 
                     switch (iElementDataType) {
                         case CarDataType.CarArray:
-                            //oArgumentList.SetInputArgumentOfObjectPtr(i,arg);
+                            oArgumentList.SetInputArgumentOfObjectPtr(i,arg);
 
-                            //oArgumentList.SetInputArgumentOfLocalPtr(i,arguments[i+2]);
-                            var tmp = [1,2,3];
-                            oArgumentList.SetInputArgumentOfLocalPtr(tmp,i,arguments[i+2]);
+                            ////oArgumentList.SetInputArgumentOfLocalPtr(i,arguments[i+2]);
+                            //var tmp = [1,2,3];
+                            //oArgumentList.SetInputArgumentOfLocalPtr(tmp,i,arguments[i+2]);
                             break;
                         default:
-                            //oArgumentList.SetInputArgumentOfObjectPtr(i,arg);
+                            oArgumentList.SetInputArgumentOfObjectPtr(i,arg);
 
-                            //oArgumentList.SetInputArgumentOfLocalPtr(i,arguments[i+2]);
-                            var tmp = [1,2,3];
-                            oArgumentList.SetInputArgumentOfLocalPtr(tmp,i,arguments[i+2]);
+                            ////oArgumentList.SetInputArgumentOfLocalPtr(i,arguments[i+2]);
+                            //var tmp = [1,2,3];
+                            //oArgumentList.SetInputArgumentOfLocalPtr(tmp,i,arguments[i+2]);
                             break;
                     }
                     elog('==============classinfo__createObject ===========LocalPtr====end====');
