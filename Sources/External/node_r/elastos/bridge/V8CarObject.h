@@ -30,6 +30,11 @@ private:
 
     ~V8CarObject();
 
+    static v8::Handle<v8::Value> V8CarObjectGetProperty(
+        /* [in] */ v8::Local<v8::Object> self,
+        /* [in] */ const String& identifier,
+        /* [in] */ v8::Local<v8::Value> key);
+
     static void V8CarObjectNamedPropertyGetter(
         /* [in] */ v8::Local<v8::String> property,
         /* [in] */ const v8::PropertyCallbackInfo<v8::Value>& info);
