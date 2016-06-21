@@ -239,7 +239,8 @@ protected:
      *
      * @return the format of the message PDU
      */
-    virtual String GetFormat() = 0;
+    virtual ECode GetFormat(
+        /* [out] */ String* result) = 0;
 
     void HandleStatusReport(
         /* [in] */ IInterface* o);
@@ -281,8 +282,8 @@ protected:
      *  broadcast when the message is delivered to the recipient.  The
      *  raw pdu of the status report is in the extended Data ("pdu").
      */
-    virtual void SendData(const String& destAddr, const String& scAddr, Int32 destPort, Int32 origPort,
-            ArrayOf<Byte> data, IPendingIntent* sentIntent, IPendingIntent* deliveryIntent) = 0;
+    virtual CARAPI SendData(const String& destAddr, const String& scAddr, Int32 destPort, Int32 origPort,
+            ArrayOf<Byte>* data, IPendingIntent* sentIntent, IPendingIntent* deliveryIntent) = 0;
 
     /**
      * Send a text based SMS.
@@ -326,7 +327,7 @@ protected:
      *  Validity Period(Maximum) -> 635040 Mins(i.e.63 weeks).
      *  Any Other values included Negative considered as Invalid Validity Period of the message.
      */
-    virtual void SendText(const String& destAddr, const String& scAddr, const String& text,
+    virtual CARAPI SendText(const String& destAddr, const String& scAddr, const String& text,
             IPendingIntent* sentIntent, IPendingIntent* deliveryIntent, IUri* messageUri,
             const String& callingPkg, Int32 priority, Boolean isExpectMore, Int32 validityPeriod) = 0;
 
@@ -340,7 +341,7 @@ protected:
      *  android telephony layer. This intent is broadcasted at
      *  the same time an SMS received from radio is responded back.
      */
-    virtual void InjectSmsPdu(ArrayOf<Byte> pdu, const String& format, IPendingIntent* receivedIntent) = 0;
+    virtual CARAPI InjectSmsPdu(ArrayOf<Byte>* pdu, const String& format, IPendingIntent* receivedIntent) = 0;
 
     /**
      * Calculate the number of septets needed to encode the message.
@@ -378,7 +379,7 @@ protected:
     /**
      * Create a new SubmitPdu and send it.
      */
-    virtual void SendNewSubmitPdu(const String& destinationAddress, const String& scAddress,
+    virtual CARAPI SendNewSubmitPdu(const String& destinationAddress, const String& scAddress,
             const String& message, ISmsHeader* smsHeader, Int32 encoding,
             IPendingIntent* sentIntent, IPendingIntent* deliveryIntent, Boolean lastPart, Int32 priority,
             Boolean isExpectMore, Int32 validityPeriod, IAtomicInteger32* unsentPartCount,

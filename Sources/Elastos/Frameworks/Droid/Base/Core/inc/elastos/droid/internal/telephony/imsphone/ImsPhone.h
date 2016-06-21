@@ -154,8 +154,9 @@ private:
 public:
     CAR_INTERFACE_DECL();
 
+    ImsPhone();
     // Constructors
-    ImsPhone(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IPhoneNotifier* notifier,
         /* [in] */ IPhone* defaultPhone);
@@ -221,15 +222,15 @@ public:
 
     // @Override
     CARAPI GetForegroundCall(
-        /* [out] */ IImsPhoneCall** result);
+        /* [out] */ ICall** result);
 
     // @Override
     CARAPI GetBackgroundCall(
-        /* [out] */ IImsPhoneCall** result);
+        /* [out] */ ICall** result);
 
     // @Override
     CARAPI GetRingingCall(
-        /* [out] */ IImsPhoneCall** result);
+        /* [out] */ ICall** result);
 
     virtual CARAPI NotifySuppSvcNotification(
         /* [in] */ ISuppServiceNotification* suppSvc);
@@ -267,11 +268,11 @@ public:
 
     // @Override
     CARAPI SendDtmf(
-        /* [in] */ Char16 c);
+        /* [in] */ Char32 c);
 
     // @Override
     CARAPI StartDtmf(
-        /* [in] */ Char16 c);
+        /* [in] */ Char32 c);
 
     // @Override
     CARAPI StopDtmf();

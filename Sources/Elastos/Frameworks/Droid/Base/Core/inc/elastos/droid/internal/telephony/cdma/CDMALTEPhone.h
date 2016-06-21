@@ -86,14 +86,15 @@ class CDMALTEPhone
 public:
     CAR_INTERFACE_DECL();
 
+    CDMALTEPhone();
     // Constructors
-    CDMALTEPhone(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ ICommandsInterface* ci,
         /* [in] */ IPhoneNotifier* notifier,
         /* [in] */ Int32 phoneId);
 
-    CDMALTEPhone(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ ICommandsInterface* ci,
         /* [in] */ IPhoneNotifier* notifier,
@@ -101,7 +102,7 @@ public:
         /* [in] */ Int32 phoneId);
 
     // Constructors
-    CDMALTEPhone(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ ICommandsInterface* ci,
         /* [in] */ IPhoneNotifier* notifier);
@@ -226,7 +227,7 @@ protected:
     CARAPI_(void) InitSstIcc();
 
     // @Override
-    CARAPI_(void) OnUpdateIccAvailability();
+    CARAPI OnUpdateIccAvailability();
 
     // @Override
     CARAPI_(void) Init(

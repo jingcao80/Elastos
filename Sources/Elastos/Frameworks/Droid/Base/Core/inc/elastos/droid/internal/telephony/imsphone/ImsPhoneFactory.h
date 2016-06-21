@@ -20,8 +20,7 @@ namespace ImsPhone {
   * {@hide}
   */
 class ImsPhoneFactory
-    : public Object//maybe single
-    , public IImsPhoneFactory
+    : public Object
 {
 public:
     CAR_INTERFACE_DECL();

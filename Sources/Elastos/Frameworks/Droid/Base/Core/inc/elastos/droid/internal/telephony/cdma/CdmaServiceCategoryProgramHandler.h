@@ -3,7 +3,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-//TODO #include "elastos/droid/internal/telephony/WakeLockStateMachine.h"
+#include "elastos/droid/internal/telephony/WakeLockStateMachine.h"
 
 // package com.android.internal.telephony.cdma;
 // import android.Manifest;
@@ -28,7 +28,7 @@ using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Os::IMessage;
-//TODO using Elastos::Droid::Internal::Telephony::WakeLockStateMachine;
+using Elastos::Droid::Internal::Telephony::WakeLockStateMachine;
 using Elastos::Droid::Internal::Telephony::ICommandsInterface;
 
 namespace Elastos {
@@ -41,7 +41,7 @@ namespace Cdma {
   * Handle CDMA Service Category Program Data requests and responses.
   */
 class CdmaServiceCategoryProgramHandler
-    : public Object //TODO WakeLockStateMachine
+    : public WakeLockStateMachine
     , public ICdmaServiceCategoryProgramHandler
 {
 private:
@@ -67,10 +67,11 @@ private:
 public:
     CAR_INTERFACE_DECL();
 
+    CdmaServiceCategoryProgramHandler();
     /**
       * Create a new CDMA inbound SMS handler.
       */
-    CdmaServiceCategoryProgramHandler(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ ICommandsInterface* commandsInterface);
 

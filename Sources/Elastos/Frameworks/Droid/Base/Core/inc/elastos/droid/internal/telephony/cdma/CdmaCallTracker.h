@@ -4,7 +4,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/os/AsyncResult.h"
-//TODO #include "elastos/droid/internal/telephony/CallTracker.h"
+#include "elastos/droid/internal/telephony/CallTracker.h"
 
 // import android.telephony.DisconnectCause;
 // import android.telephony.PhoneNumberUtils;
@@ -42,7 +42,7 @@ namespace Cdma {
   * {@hide}
   */
 class CdmaCallTracker
-    : public Object //TODO CallTracker
+    : public CallTracker
     , public ICdmaCallTracker
 {
 public:
@@ -51,7 +51,9 @@ public:
     //    boolean needsPoll;
     //***** Events
     //***** Constructors
-    CdmaCallTracker(
+    CdmaCallTracker();
+
+    CARAPI constructor(
         /* [in] */ ICDMAPhone* phone);
 
     virtual CARAPI Dispose();

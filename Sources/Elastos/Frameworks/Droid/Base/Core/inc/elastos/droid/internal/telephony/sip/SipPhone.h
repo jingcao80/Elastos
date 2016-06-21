@@ -46,6 +46,7 @@ namespace Sip {
   */
 class SipPhone
     : public SipPhoneBase
+    , public ISipPhone
 {
 private:
     class SipConnection;
@@ -303,7 +304,11 @@ private:
     };
 
 public:
-    SipPhone(
+    CAR_INTERFACE_DECL();
+
+    SipPhone();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IPhoneNotifier* notifier,
         /* [in] */ /*TODO ISipProfile*/IInterface* profile);
@@ -317,7 +322,7 @@ public:
         /* [out] */ String* result);
 
     virtual CARAPI Equals(
-        /* [in] */ SipPhone* phone,
+        /* [in] */ ISipPhone* phone,
         /* [out] */ Boolean* result);
 
     virtual CARAPI TakeIncomingCall(
@@ -362,11 +367,11 @@ public:
 
     // @Override
     CARAPI SendDtmf(
-        /* [in] */ Char16 c);
+        /* [in] */ Char32 c);
 
     // @Override
     CARAPI StartDtmf(
-        /* [in] */ Char16 c);
+        /* [in] */ Char32 c);
 
     // @Override
     CARAPI StopDtmf();

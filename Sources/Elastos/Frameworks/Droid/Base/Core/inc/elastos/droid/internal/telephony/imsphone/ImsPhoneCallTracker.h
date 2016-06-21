@@ -251,7 +251,7 @@ public:
 
     //***** Events
     //***** Constructors
-    ImsPhoneCallTracker(
+    CARAPI constructor(
         /* [in] */ IImsPhone* phone);
 
     virtual CARAPI Dispose();

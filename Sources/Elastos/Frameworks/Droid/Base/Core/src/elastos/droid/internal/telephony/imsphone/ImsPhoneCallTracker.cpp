@@ -567,7 +567,7 @@ const Int32 ImsPhoneCallTracker::EVENT_RESUME_BACKGROUND;
 const Int32 ImsPhoneCallTracker::EVENT_DIAL_PENDINGMO;
 const Int32 ImsPhoneCallTracker::TIMEOUT_HANGUP_PENDINGMO;
 
-ImsPhoneCallTracker::ImsPhoneCallTracker(
+ECode ImsPhoneCallTracker::constructor(
     /* [in] */ IImsPhone* phone)
 {
     // ==================before translated======================
@@ -583,6 +583,7 @@ ImsPhoneCallTracker::ImsPhoneCallTracker(
     //     }
     // };
     // t.start();
+    return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::Dispose()

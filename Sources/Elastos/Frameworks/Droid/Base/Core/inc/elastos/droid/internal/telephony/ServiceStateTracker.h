@@ -4,8 +4,10 @@
 
 #include "_Elastos.Droid.Internal.h"
 #include <elastos/core/Object.h>
-
+#include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
 #include "elastos/droid/os/Handler.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/os/RegistrantList.h"
 
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
@@ -16,8 +18,12 @@ using Elastos::Droid::Os::Handler;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntentFilter;
-using Elastos::Droid::Internal::Telephony::Dataconnection::IDcTrackerBase;
-using Elastos::Droid::Os::IAsyncResult;
+using Elastos::Droid::Internal::Telephony::DataConnection::IDcTrackerBase;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
+using Elastos::Droid::Internal::Telephony::Uicc::IIccRecords;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::RegistrantList;
 using Elastos::Droid::Telephony::ICellInfo;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::ISignalStrength;
@@ -45,10 +51,15 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
+    ServiceStateTracker();
+
     CARAPI constructor(
         /* [in] */ IPhoneBase* phoneBase,
         /* [in] */ ICommandsInterface* ci,
         /* [in] */ ICellInfo* cellInfo);
+
+    CARAPI HandleMessage(
+        /* [in] */ IMessage* msg);
 
     CARAPI Dispose();
 
@@ -109,15 +120,15 @@ public:
     CARAPI DisableLocationUpdates();
 
     virtual CARAPI GetCurrentDataConnectionState(
-        /* [out] */ Int32* result);
+        /* [out] */ Int32* result) = 0;
 
     virtual CARAPI IsConcurrentVoiceAndDataAllowed(
-        /* [out] */ Boolean* result);
+        /* [out] */ Boolean* result) = 0;
 
     virtual CARAPI SetImsRegistrationState(
-        /* [in] */ Boolean registered);
+        /* [in] */ Boolean registered) = 0;
 
-    virtual CARAPI PollState();
+    virtual CARAPI PollState() = 0;
 
     CARAPI RegisterForDataConnectionAttached(
         /* [in] */ IHandler* h,
@@ -174,8 +185,8 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI GetSystemProperty(
-        /* [in] */ String property,
-        /* [in] */ String defValue,
+        /* [in] */ const String& property,
+        /* [in] */ const String& defValue,
         /* [out] */ String* result);
 
     CARAPI GetAllCellInfo(
@@ -190,7 +201,7 @@ public:
         /* [in] */ ArrayOf<String>* args);
 
 protected:
-    ECO_LOCAL void RequestShutdown();
+    ECO_LOCAL CARAPI RequestShutdown();
     ECO_LOCAL CARAPI NotifySignalStrength(Boolean * result);
     ECO_LOCAL void NotifyDataRegStateRilRadioTechnologyChanged();
     /**
@@ -200,20 +211,20 @@ protected:
     ECO_LOCAL void UseDataRegStateForDataOnlyDevices();
     ECO_LOCAL void UpdatePhoneObject();
     ECO_LOCAL void DisableSingleLocationUpdate();
-    ECO_LOCAL Boolean OnSignalStrengthResult(AsyncResult ar, Boolean isGsm);
+    ECO_LOCAL Boolean OnSignalStrengthResult(AsyncResult* ar, Boolean isGsm);
 
     /**
      * Hang up all voice call and turn off radio. Implemented by derived class.
      */
-    virtual CARAPI_(void) HangupAndPowerOff() = 0;
+    virtual CARAPI HangupAndPowerOff() = 0;
 
-    virtual CARAPI GetPhone(IPhone* phone) = 0;
-    virtual CARAPI_(void) HandlePollStateResult(Int32 what, IAsyncResult* ar) = 0;
-    virtual CARAPI_(void) UpdateSpnDisplay() = 0;
-    virtual CARAPI_(void) SetPowerStateToDesired() = 0;
-    virtual CARAPI_(void) OnUpdateIccAvailability() = 0;
-    virtual CARAPI_(void) Log(String s) = 0;
-    virtual CARAPI_(void) Loge(String s) = 0;
+    virtual CARAPI GetPhone(IPhone** phone) = 0;
+    virtual CARAPI HandlePollStateResult(Int32 what, AsyncResult* ar) = 0;
+    virtual CARAPI UpdateSpnDisplay() = 0;
+    virtual CARAPI SetPowerStateToDesired() = 0;
+    virtual CARAPI OnUpdateIccAvailability() = 0;
+    virtual CARAPI Log(const String& s) = 0;
+    virtual CARAPI Loge(const String& s) = 0;
 
     /** Cancel a Pending (if any) PollState() operation */
     ECO_LOCAL void CancelPollState();
@@ -227,8 +238,8 @@ protected:
      * @param needToFixTimeZone
      * @return TRUE if time zone needs to be fixed
      */
-    ECO_LOCAL Boolean ShouldFixTimeZoneNow(IPhoneBase* phoneBase, String operatorNumeric,
-        String prevOperatorNumeric, Boolean needToFixTimeZone);
+    ECO_LOCAL Boolean ShouldFixTimeZoneNow(IPhoneBase* phoneBase, const String& operatorNumeric,
+        const String& prevOperatorNumeric, Boolean needToFixTimeZone);
 
     /**
      * Verifies the current thread is the same as the thread originally
@@ -240,7 +251,7 @@ protected:
      */
     ECO_LOCAL ECode CheckCorrectThread();
     ECO_LOCAL Boolean IsCallerOnDifferentThread();
-    ECO_LOCAL void UpdateCarrierMccMncConfiguration(String newOp, String oldOp, IContext* context);
+    ECO_LOCAL void UpdateCarrierMccMncConfiguration(const String& newOp, const String& oldOp, IContext* context);
     ECO_LOCAL Boolean IsIwlanFeatureAvailable();
     ECO_LOCAL void ProcessIwlanToWwanTransition(IServiceState* ss);
 
@@ -324,7 +335,7 @@ protected:
     AutoPtr<ICommandsInterface> mCi;
     AutoPtr<IUiccController> mUiccController;
     AutoPtr<IUiccCardApplication> mUiccApplcation;
-    AutoPtr<IccRecords> mIccRecords;
+    AutoPtr<IIccRecords> mIccRecords;
     AutoPtr<IPhoneBase> mPhoneBase;
     AutoPtr<IServiceState> mNewSS;
     AutoPtr<IList> mLastCellInfoList;
@@ -336,14 +347,14 @@ protected:
     AutoPtr<IIntentFilter> mIntentFilter;
     AutoPtr<IPendingIntent> mRadioOffIntent;
 
-    AutoPtr<IRegistrantList> mRoamingOnRegistrants;
-    AutoPtr<IRegistrantList> mRoamingOffRegistrants;
-    AutoPtr<IRegistrantList> mAttachedRegistrants;
-    AutoPtr<IRegistrantList> mDetachedRegistrants;
-    AutoPtr<IRegistrantList> mDataRegStateOrRatChangedRegistrants;
-    AutoPtr<IRegistrantList> mNetworkAttachedRegistrants;
-    AutoPtr<IRegistrantList> mPsRestrictEnabledRegistrants;
-    AutoPtr<IRegistrantList> mPsRestrictDisabledRegistrants;
+    AutoPtr<RegistrantList> mRoamingOnRegistrants;
+    AutoPtr<RegistrantList> mRoamingOffRegistrants;
+    AutoPtr<RegistrantList> mAttachedRegistrants;
+    AutoPtr<RegistrantList> mDetachedRegistrants;
+    AutoPtr<RegistrantList> mDataRegStateOrRatChangedRegistrants;
+    AutoPtr<RegistrantList> mNetworkAttachedRegistrants;
+    AutoPtr<RegistrantList> mPsRestrictEnabledRegistrants;
+    AutoPtr<RegistrantList> mPsRestrictDisabledRegistrants;
 
     /**
      * A unique identifier to track requests associated with a poll

@@ -5,7 +5,7 @@
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/os/Registrant.h"
 #include "elastos/droid/os/RegistrantList.h"
-//TODO #include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/PhoneBase.h"
 
 // import android.app.ActivityManagerNative;
 // import android.content.ContentValues;
@@ -55,7 +55,7 @@
 // import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
 
 using Elastos::Droid::Content::IContext;
-//TODO using Elastos::Droid::Internal::Telephony::PhoneBase;
+using Elastos::Droid::Internal::Telephony::PhoneBase;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsState;
 using Elastos::Droid::Internal::Telephony::IPhoneDataActivityState;
 using Elastos::Droid::Internal::Telephony::ICommandsInterface;
@@ -95,7 +95,7 @@ namespace Cdma {
   * {@hide}
   */
 class CDMAPhone
-    : public Object//TODO PhoneBase
+    : public PhoneBase
     , public ICDMAPhone
 {
 private:
@@ -119,18 +119,20 @@ public:
     CDMAPhone();
 
     // Constructors
-    CDMAPhone(
+    CARAPI constructor();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ ICommandsInterface* ci,
         /* [in] */ IPhoneNotifier* notifier);
 
-    CDMAPhone(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ ICommandsInterface* ci,
         /* [in] */ IPhoneNotifier* notifier,
         /* [in] */ Int32 phoneId);
 
-    CDMAPhone(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ ICommandsInterface* ci,
         /* [in] */ IPhoneNotifier* notifier,
@@ -241,7 +243,7 @@ public:
 
     // @Override
     CARAPI GetBackgroundCall(
-        /* [out] */ ICdmaCall** result);
+        /* [out] */ ICall** result);
 
     // @Override
     CARAPI HandleInCallMmiCommands(
@@ -340,7 +342,7 @@ public:
 
     // @Override
     CARAPI GetForegroundCall(
-        /* [out] */ ICdmaCall** result);
+        /* [out] */ ICall** result);
 
     // @Override
     CARAPI SelectNetworkManually(
@@ -440,11 +442,11 @@ public:
 
     // @Override
     CARAPI SendDtmf(
-        /* [in] */ Byte c);
+        /* [in] */ Char32 c);
 
     // @Override
     CARAPI StartDtmf(
-        /* [in] */ Byte c);
+        /* [in] */ Char32 c);
 
     // @Override
     CARAPI StopDtmf();
@@ -597,7 +599,7 @@ public:
         /* [in] */ Int32 action);
 
     virtual CARAPI NotifyEcbmTimerReset(
-        /* [in] */ Boolean* flag);
+        /* [in] */ Boolean flag);
 
     /**
       * Registration point for Ecm timer reset
@@ -800,7 +802,7 @@ protected:
     CARAPI_(void) SetCardInPhoneBook();
 
     // @Override
-    CARAPI_(void) OnUpdateIccAvailability();
+    CARAPI OnUpdateIccAvailability();
 
     /**
       * Sets PROPERTY_ICC_OPERATOR_ISO_COUNTRY property

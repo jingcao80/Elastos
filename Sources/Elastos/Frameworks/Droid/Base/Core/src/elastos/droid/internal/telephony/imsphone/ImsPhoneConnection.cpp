@@ -52,7 +52,7 @@ const Int32 ImsPhoneConnection::EVENT_WAKE_LOCK_TIMEOUT;
 const Int32 ImsPhoneConnection::PAUSE_DELAY_MILLIS;
 const Int32 ImsPhoneConnection::WAKE_LOCK_TIMEOUT_MILLIS;
 
-ImsPhoneConnection::ImsPhoneConnection(
+ECode ImsPhoneConnection::constructor(
     /* [in] */ IContext* context,
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall,
     /* [in] */ IImsPhoneCallTracker* ct,
@@ -116,9 +116,10 @@ ImsPhoneConnection::ImsPhoneConnection(
     //
     // mParent = parent;
     // mParent.attach(this, ImsPhoneCall.State.INCOMING);
+    return NOERROR;
 }
 
-ImsPhoneConnection::ImsPhoneConnection(
+ECode ImsPhoneConnection::constructor(
     /* [in] */ IContext* context,
     /* [in] */ const String& dialString,
     /* [in] */ IImsPhoneCallTracker* ct,
@@ -164,6 +165,7 @@ ImsPhoneConnection::ImsPhoneConnection(
     //
     // mParent = parent;
     // parent.attachFake(this, ImsPhoneCall.State.DIALING);
+    return NOERROR;
 }
 
 ECode ImsPhoneConnection::Dispose()
@@ -193,7 +195,7 @@ ECode ImsPhoneConnection::GetOrigDialString(
 }
 
 ECode ImsPhoneConnection::GetCall(
-    /* [out] */ IImsPhoneCall** result)
+    /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================

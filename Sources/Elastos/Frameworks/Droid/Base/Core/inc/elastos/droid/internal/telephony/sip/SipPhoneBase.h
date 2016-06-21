@@ -4,7 +4,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 #include "elastos/droid/os/RegistrantList.h"
-//TODO #include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/PhoneBase.h"
 
 // import android.os.AsyncResult;
 // import android.os.Registrant;
@@ -15,12 +15,12 @@
 // import com.android.internal.telephony.dataconnection.DataConnection;
 // import com.android.internal.telephony.IccSmsInterfaceManager;
 // import com.android.internal.telephony.MmiCode;
-// import com.android.internal.telephony.PhoneBase;
 // import com.android.internal.telephony.TelephonyProperties;
 // import com.android.internal.telephony.UUSInfo;
 // import java.util.ArrayList;
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::Telephony::PhoneBase;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsDataState;
 using Elastos::Droid::Internal::Telephony::IPhoneDataActivityState;
 using Elastos::Droid::Internal::Telephony::IPhoneSuppService;
@@ -50,13 +50,15 @@ namespace Telephony {
 namespace Sip {
 
 class SipPhoneBase
-    : public Object//TODO PhoneBase
+    : public PhoneBase
     , public ISipPhoneBase
 {
 public:
     CAR_INTERFACE_DECL();
 
-    SipPhoneBase(
+    SipPhoneBase();
+
+    CARAPI constructor(
         /* [in] */ const String& name,
         /* [in] */ IContext* context,
         /* [in] */ IPhoneNotifier* notifier);
@@ -103,7 +105,7 @@ public:
 
     // @Override
     CARAPI GetState(
-        /* [out] */ PhoneConstantsState** result);
+        /* [out] */ PhoneConstantsState* result);
 
     // @Override
     CARAPI GetPhoneType(

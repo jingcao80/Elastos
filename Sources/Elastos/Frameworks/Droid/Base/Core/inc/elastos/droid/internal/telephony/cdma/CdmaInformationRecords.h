@@ -167,7 +167,9 @@ public:
 public:
     CAR_INTERFACE_DECL();
 
-    CdmaInformationRecords(
+    CdmaInformationRecords();
+
+    CARAPI constructor(
         /* [in] */ IParcel* p);
 
     static CARAPI_(String) IdToString(

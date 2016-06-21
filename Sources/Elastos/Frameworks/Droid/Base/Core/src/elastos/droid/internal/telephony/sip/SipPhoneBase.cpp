@@ -11,17 +11,22 @@ namespace Sip {
 //=====================================================================
 //                             SipPhoneBase
 //=====================================================================
-CAR_INTERFACE_IMPL(SipPhoneBase, /*TODO PhoneBase*/Object, ISipPhoneBase);
+CAR_INTERFACE_IMPL(SipPhoneBase, PhoneBase, ISipPhoneBase);
 
 const String SipPhoneBase::LOGTAG("SipPhoneBase");
 
-SipPhoneBase::SipPhoneBase(
+SipPhoneBase::SipPhoneBase()
+{
+}
+
+ECode SipPhoneBase::constructor(
     /* [in] */ const String& name,
     /* [in] */ IContext* context,
     /* [in] */ IPhoneNotifier* notifier)
 {
     // ==================before translated======================
     // super(name, notifier, context, new SipCommandInterface(context), false);
+    return NOERROR;
 }
 
 ECode SipPhoneBase::Dial(
@@ -93,7 +98,7 @@ ECode SipPhoneBase::GetCellLocation(
 }
 
 ECode SipPhoneBase::GetState(
-    /* [out] */ PhoneConstantsState** result)
+    /* [out] */ PhoneConstantsState* result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================

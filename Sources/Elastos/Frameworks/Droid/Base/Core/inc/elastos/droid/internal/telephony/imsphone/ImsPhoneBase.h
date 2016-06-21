@@ -4,7 +4,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 #include "elastos/droid/os/RegistrantList.h"
-//TODO #include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/PhoneBase.h"
 
 // import android.os.AsyncResult;
 // import android.os.Registrant;
@@ -28,7 +28,7 @@ using Elastos::Droid::Internal::Telephony::IPhoneNotifier;
 using Elastos::Droid::Internal::Telephony::IUUSInfo;
 using Elastos::Droid::Internal::Telephony::IConnection;
 using Elastos::Droid::Internal::Telephony::IPhoneBase;
-//TODO using Elastos::Droid::Internal::Telephony::PhoneBase;
+using Elastos::Droid::Internal::Telephony::PhoneBase;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Internal::Telephony::IIccCard;
 using Elastos::Droid::Internal::Telephony::IOperatorInfo;
@@ -53,11 +53,13 @@ namespace Telephony {
 namespace ImsPhone {
 
 class ImsPhoneBase
-    : public Object //TODO PhoneBase
+    : public PhoneBase
 {
 public:
 
-    ImsPhoneBase(
+    ImsPhoneBase();
+
+    CARAPI constructor(
         /* [in] */ const String& name,
         /* [in] */ IContext* context,
         /* [in] */ IPhoneNotifier* notifier);

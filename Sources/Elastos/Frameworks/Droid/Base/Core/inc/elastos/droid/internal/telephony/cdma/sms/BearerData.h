@@ -55,9 +55,12 @@ public:
       */
     class TimeStamp
         : public Time
+        , public IBearerDataTimeStamp
     {
     public:
         TimeStamp();
+
+        CAR_INTERFACE_DECL();
 
         static CARAPI_(AutoPtr<TimeStamp>) FromByteArray(
             /* [in] */ ArrayOf<Byte>* data);

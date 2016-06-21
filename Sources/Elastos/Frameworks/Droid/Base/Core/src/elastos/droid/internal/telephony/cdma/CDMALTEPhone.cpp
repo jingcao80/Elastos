@@ -17,7 +17,11 @@ CAR_INTERFACE_IMPL(CDMALTEPhone, CDMAPhone, ICDMALTEPhone);
 const String CDMALTEPhone::LOG_LTE_TAG("CDMALTEPhone");
 const Boolean CDMALTEPhone::DBG = true;
 
-CDMALTEPhone::CDMALTEPhone(
+CDMALTEPhone::CDMALTEPhone()
+{
+}
+
+ECode CDMALTEPhone::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ICommandsInterface* ci,
     /* [in] */ IPhoneNotifier* notifier,
@@ -25,9 +29,10 @@ CDMALTEPhone::CDMALTEPhone(
 {
     // ==================before translated======================
     // this(context, ci, notifier, false, phoneId);
+    return NOERROR;
 }
 
-CDMALTEPhone::CDMALTEPhone(
+ECode CDMALTEPhone::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ICommandsInterface* ci,
     /* [in] */ IPhoneNotifier* notifier,
@@ -40,15 +45,17 @@ CDMALTEPhone::CDMALTEPhone(
     // Rlog.d(LOG_TAG, "CDMALTEPhone: constructor: sub = " + mPhoneId);
     //
     // mDcTracker = new DcTracker(this);
+    return NOERROR;
 }
 
-CDMALTEPhone::CDMALTEPhone(
+ECode CDMALTEPhone::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ICommandsInterface* ci,
     /* [in] */ IPhoneNotifier* notifier)
 {
     // ==================before translated======================
     // super(context, ci, notifier, false);
+    return NOERROR;
 }
 
 ECode CDMALTEPhone::Dispose()
@@ -474,7 +481,7 @@ void CDMALTEPhone::InitSstIcc()
     assert(0);
 }
 
-void CDMALTEPhone::OnUpdateIccAvailability()
+ECode CDMALTEPhone::OnUpdateIccAvailability()
 {
     // ==================before translated======================
     // if (mSimRecords != null) {
@@ -509,6 +516,7 @@ void CDMALTEPhone::OnUpdateIccAvailability()
     //
     // super.onUpdateIccAvailability();
     assert(0);
+    return NOERROR;
 }
 
 void CDMALTEPhone::Init(

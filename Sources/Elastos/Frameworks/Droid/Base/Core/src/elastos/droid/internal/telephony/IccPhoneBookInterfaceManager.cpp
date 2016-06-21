@@ -112,13 +112,18 @@ void IccPhoneBookInterfaceManager::BaseHandler::NotifyPending(
 }
 
 CAR_INTERFACE_IMPL(IccPhoneBookInterfaceManager, Object, IIccPhoneBookInterfaceManager)
-IccPhoneBookInterfaceManager::IccPhoneBookInterfaceManager(
-    /* [in] */ IPhoneBase* phone)
-    : mPhone(phone)
-    , mSuccess(FALSE)
-    , mIs3gCard(FALSE)
+IccPhoneBookInterfaceManager::IccPhoneBookInterfaceManager()
 {
+}
+
+ECode IccPhoneBookInterfaceManager::constructor(
+    /* [in] */ IPhoneBase* phone)
+{
+    mPhone = phone;
+    mSuccess = FALSE;
+    mIs3gCard = FALSE;
     mBaseHandler = new BaseHandler(this);
+    return NOERROR;
 }
 
 void IccPhoneBookInterfaceManager::CleanUp()

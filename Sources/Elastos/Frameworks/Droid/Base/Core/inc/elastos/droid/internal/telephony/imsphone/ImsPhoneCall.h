@@ -42,8 +42,9 @@ public:
     /*package*/
     ImsPhoneCall();
 
+    CARAPI constructor();
     /*package*/
-    ImsPhoneCall(
+    CARAPI constructor(
         /* [in] */ IImsPhoneCallTracker* owner);
 
     virtual CARAPI Dispose();
@@ -143,7 +144,8 @@ public:
       * @return The {@link ImsCall}.
       */
     // @VisibleForTesting
-    virtual CARAPI_(AutoPtr</*TODO IImsCall*/IInterface>) GetImsCall();
+    virtual CARAPI GetImsCall(
+            /* [out] */ /*TODO IImsCall*/IInterface** result);
 
     /*package*/
     static CARAPI_(Boolean) IsLocalTone(

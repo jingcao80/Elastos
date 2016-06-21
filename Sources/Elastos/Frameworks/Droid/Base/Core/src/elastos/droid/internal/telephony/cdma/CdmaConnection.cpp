@@ -41,7 +41,7 @@ ECode CdmaConnection::MyHandler::HandleMessage(
 //=====================================================================
 //                            CdmaConnection
 //=====================================================================
-CAR_INTERFACE_IMPL(CdmaConnection, /*TODO Connection*/ Object, ICdmaConnection);
+CAR_INTERFACE_IMPL(CdmaConnection, Connection, ICdmaConnection);
 const String CdmaConnection::LOGTAG("CdmaConnection");
 const Int32 CdmaConnection::EVENT_DTMF_DONE;
 const Int32 CdmaConnection::EVENT_PAUSE_DONE;
@@ -51,7 +51,11 @@ const Int32 CdmaConnection::WAKE_LOCK_TIMEOUT_MILLIS;
 const Int32 CdmaConnection::PAUSE_DELAY_MILLIS;
 const Boolean CdmaConnection::VDBG = FALSE;
 
-CdmaConnection::CdmaConnection(
+CdmaConnection::CdmaConnection()
+{
+}
+
+ECode CdmaConnection::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IDriverCall* dc,
     /* [in] */ ICdmaCallTracker* ct,
@@ -76,9 +80,10 @@ CdmaConnection::CdmaConnection(
     //
     // mParent = parentFromDCState (dc.state);
     // mParent.attach(this, dc);
+    return NOERROR;
 }
 
-CdmaConnection::CdmaConnection(
+ECode CdmaConnection::constructor(
     /* [in] */ IContext* context,
     /* [in] */ const String& dialString,
     /* [in] */ ICdmaCallTracker* ct,
@@ -117,9 +122,10 @@ CdmaConnection::CdmaConnection(
     //         parent.attachFake(this, CdmaCall.State.DIALING);
     //     }
     // }
+    return NOERROR;
 }
 
-CdmaConnection::CdmaConnection(
+ECode CdmaConnection::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ICdmaCallWaitingNotification* cw,
     /* [in] */ ICdmaCallTracker* ct,
@@ -141,6 +147,7 @@ CdmaConnection::CdmaConnection(
     // mConnectTime = 0;
     // mParent = parent;
     // parent.attachFake(this, CdmaCall.State.WAITING);
+    return NOERROR;
 }
 
 ECode CdmaConnection::Dispose()
@@ -193,7 +200,7 @@ ECode CdmaConnection::GetOrigDialString(
 }
 
 ECode CdmaConnection::GetCall(
-    /* [out] */ ICdmaCall** result)
+    /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;

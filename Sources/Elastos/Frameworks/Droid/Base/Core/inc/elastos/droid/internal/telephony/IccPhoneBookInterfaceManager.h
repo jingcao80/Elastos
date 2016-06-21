@@ -52,7 +52,9 @@ protected:
 public:
     CAR_INTERFACE_DECL()
 
-    IccPhoneBookInterfaceManager(
+    IccPhoneBookInterfaceManager();
+
+    CARAPI constructor(
         /* [in] */ IPhoneBase* phone);
 
     CARAPI Dispose();
@@ -149,10 +151,10 @@ public:
         /* [out] */ Int32* result);
 
 protected:
-    virtual CARAPI_(void) Logd(
+    virtual CARAPI Logd(
         /* [in] */ const String& msg) = 0;
 
-    virtual CARAPI_(void) Loge(
+    virtual CARAPI Loge(
         /* [in] */ const String& msg) = 0;
 
     virtual CARAPI CheckThread();

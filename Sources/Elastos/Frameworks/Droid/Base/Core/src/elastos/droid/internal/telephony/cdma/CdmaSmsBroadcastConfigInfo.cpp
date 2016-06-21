@@ -13,7 +13,11 @@ namespace Cdma {
 //=====================================================================
 CAR_INTERFACE_IMPL(CdmaSmsBroadcastConfigInfo, Object, ICdmaSmsBroadcastConfigInfo);
 
-CdmaSmsBroadcastConfigInfo::CdmaSmsBroadcastConfigInfo(
+CdmaSmsBroadcastConfigInfo::CdmaSmsBroadcastConfigInfo()
+{
+}
+
+ECode CdmaSmsBroadcastConfigInfo::constructor(
     /* [in] */ Int32 fromServiceCategory,
     /* [in] */ Int32 toServiceCategory,
     /* [in] */ Int32 language,
@@ -24,6 +28,7 @@ CdmaSmsBroadcastConfigInfo::CdmaSmsBroadcastConfigInfo(
     // mToServiceCategory = toServiceCategory;
     // mLanguage = language;
     // mSelected = selected;
+    return NOERROR;
 }
 
 ECode CdmaSmsBroadcastConfigInfo::GetFromServiceCategory(

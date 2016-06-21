@@ -11,6 +11,8 @@ namespace Sms {
 //=====================================================================
 //                        BearerData::TimeStamp
 //=====================================================================
+CAR_INTERFACE_IMPL(BearerData::TimeStamp, Time, IBearerDataTimeStamp);
+
 BearerData::TimeStamp::TimeStamp()
 {
     // ==================before translated======================

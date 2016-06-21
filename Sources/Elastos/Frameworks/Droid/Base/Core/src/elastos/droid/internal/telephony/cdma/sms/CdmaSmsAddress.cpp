@@ -14,7 +14,7 @@ namespace Sms {
 //=====================================================================
 //                            CdmaSmsAddress
 //=====================================================================
-CAR_INTERFACE_IMPL(CdmaSmsAddress, Object, ISmsAddress);
+CAR_INTERFACE_IMPL(CdmaSmsAddress, SmsAddress, ICdmaSmsAddress);
 
 // AutoPtr<ArrayOf<Byte> > CdmaSmsAddress::numericCharsDialable = CdmaSmsAddress::MiddleInitNumericcharsdialable();
 // AutoPtr<ArrayOf<Byte> > CdmaSmsAddress::numericCharsSugar = CdmaSmsAddress::MiddleInitNumericcharssugar();
@@ -189,5 +189,3 @@ String CdmaSmsAddress::FilterWhitespace(
 } // namespace Internal
 } // namespace Droid
 } // namespace Elastos
-
-

@@ -1,11 +1,13 @@
 #ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CDMASERVICESTATETRACKER_H__
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CDMASERVICESTATETRACKER_H__
 
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/database/ContentObserver.h"
-//TODO #include "elastos/droid/internal/telephony/ServiceStateTracke.h"
+#include "elastos/droid/internal/telephony/ServiceStateTracker.h"
 
 // import android.app.AlarmManager;
 // import android.content.Intent;
@@ -52,7 +54,7 @@ using Elastos::Droid::Os::RegistrantList;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
-//TODO using Elastos::Droid::Telephony::ServiceStateTracker;
+using Elastos::Droid::Internal::Telephony::ServiceStateTracker;
 using Elastos::Droid::Telephony::Cdma::ICdmaCellLocation;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::ICellInfo;
@@ -73,7 +75,7 @@ namespace Cdma {
   * {@hide}
   */
 class CdmaServiceStateTracker
-    : public Object //TODO ServiceStateTracker
+    : public ServiceStateTracker
     , public ICdmaServiceStateTracker
 {
 private:
@@ -112,7 +114,9 @@ public:
 
     CdmaServiceStateTracker();
 
-    CdmaServiceStateTracker(
+    CARAPI constructor();
+
+    CARAPI constructor(
         /* [in] */ ICDMAPhone* phone);
 
     // @Override
@@ -200,7 +204,7 @@ public:
         /* [in] */ Boolean registered);
 
 protected:
-    CdmaServiceStateTracker(
+    CARAPI constructor(
         /* [in] */ ICDMAPhone* phone,
         /* [in] */ ICellInfo* cellInfo);
 

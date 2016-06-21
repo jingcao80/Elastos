@@ -174,7 +174,8 @@ void IccSmsInterfaceManager::CdmaBroadcastRangeManager::AddRange(
     /* [in] */ Int32 endId,
     /* [in] */ Boolean selected)
 {
-    AutoPtr<CdmaSmsBroadcastConfigInfo> info = new CdmaSmsBroadcastConfigInfo(startId, endId, 1, selected);
+    AutoPtr<CdmaSmsBroadcastConfigInfo> info = new CdmaSmsBroadcastConfigInfo();
+    info->constructor(startId, endId, 1, selected);
     mConfigList->Add(info->Probe(EIID_IInterface));
 }
 

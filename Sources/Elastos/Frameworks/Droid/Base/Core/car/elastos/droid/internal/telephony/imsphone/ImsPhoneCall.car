@@ -14,8 +14,8 @@ module {
     interface IImsPhoneCall {
         Dispose();
 
-        // GetImsCall(
-        //     [out] IImsCall** result);
+        GetImsCall(
+            [out] /*TODO IImsCall*/IInterface** result);
 
     }
 

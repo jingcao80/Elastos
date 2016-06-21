@@ -14,3 +14,5 @@ SOURCES += SipConnectionBase.cpp
 SOURCES += SipPhone.cpp
 SOURCES += SipPhoneBase.cpp
 SOURCES += SipPhoneFactory.cpp
+SOURCES += CSipPhone.cpp
+SOURCES += CSipPhoneFactory.cpp

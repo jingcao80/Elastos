@@ -56,6 +56,9 @@ module {
         const Int32 ASCII_MAP_BASE_INDEX = 0x20;
         const Int32 ASCII_MAP_MAX_INDEX = 0x7E; // ASCII_MAP_BASE_INDEX + ASCII_MAP.length - 1;
 
+    }
+
+    interface IUserDataHelper {
         StringToAscii(
             [in] String str,
             [out, callee] ArrayOf<Byte>* result);

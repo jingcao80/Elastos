@@ -29,9 +29,10 @@ class CdmaCall
 public:
     CAR_INTERFACE_DECL();
 
+    CdmaCall();
     /****************************** Constructors *****************************/
     /*package*/
-    CdmaCall(
+    CARAPI constructor(
         /* [in] */ ICdmaCallTracker* owner);
 
     virtual CARAPI Dispose();

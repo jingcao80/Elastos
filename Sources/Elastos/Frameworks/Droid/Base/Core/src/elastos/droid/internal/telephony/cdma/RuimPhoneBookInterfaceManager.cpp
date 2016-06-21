@@ -11,15 +11,16 @@ namespace Cdma {
 //=====================================================================
 //                    RuimPhoneBookInterfaceManager
 //=====================================================================
-CAR_INTERFACE_IMPL(RuimPhoneBookInterfaceManager, /*TODO IccPhoneBookInterfaceManager*/Object, IRuimPhoneBookInterfaceManager);
+CAR_INTERFACE_IMPL(RuimPhoneBookInterfaceManager, IccPhoneBookInterfaceManager, IRuimPhoneBookInterfaceManager);
 const String RuimPhoneBookInterfaceManager::LOGTAG("RuimPhoneBookIM");
 
-RuimPhoneBookInterfaceManager::RuimPhoneBookInterfaceManager(
+ECode RuimPhoneBookInterfaceManager::constructor(
     /* [in] */ ICDMAPhone* phone)
 {
     // ==================before translated======================
     // super(phone);
     // //NOTE service "simphonebook" added by IccSmsInterfaceManagerProxy
+    return NOERROR;
 }
 
 ECode RuimPhoneBookInterfaceManager::Dispose()

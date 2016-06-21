@@ -100,8 +100,13 @@ void CdmaServiceCategoryProgramHandler::InnerBroadcastReceiver::SendScpResults()
 //=====================================================================
 //                  CdmaServiceCategoryProgramHandler
 //=====================================================================
-CAR_INTERFACE_IMPL(CdmaServiceCategoryProgramHandler, /*TODO WakeLockStateMachine*/ Object, ICdmaServiceCategoryProgramHandler);
-CdmaServiceCategoryProgramHandler::CdmaServiceCategoryProgramHandler(
+CAR_INTERFACE_IMPL(CdmaServiceCategoryProgramHandler, WakeLockStateMachine, ICdmaServiceCategoryProgramHandler);
+
+CdmaServiceCategoryProgramHandler::CdmaServiceCategoryProgramHandler()
+{
+}
+
+ECode CdmaServiceCategoryProgramHandler::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ICommandsInterface* commandsInterface)
 {
@@ -109,6 +114,7 @@ CdmaServiceCategoryProgramHandler::CdmaServiceCategoryProgramHandler(
     // super("CdmaServiceCategoryProgramHandler", context, null);
     // mContext = context;
     // mCi = commandsInterface;
+    return NOERROR;
 }
 
 AutoPtr<ICdmaServiceCategoryProgramHandler> CdmaServiceCategoryProgramHandler::MakeScpHandler(

@@ -14,6 +14,7 @@ namespace Sms {
 //=====================================================================
 //                               UserData
 //=====================================================================
+CAR_INTERFACE_IMPL(UserData, Object, IUserData);
 // AutoPtr<ArrayOf<Byte> > UserData::ASCII_MAP = UserData::MiddleInitAsciiMap();
 const Byte UserData::UNENCODABLE_7_BIT_CHAR = 0x20;
 static AutoPtr<ISparseInt32Array> InitSparseInt32Array()

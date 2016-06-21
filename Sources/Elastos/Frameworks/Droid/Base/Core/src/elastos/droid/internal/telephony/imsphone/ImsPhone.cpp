@@ -91,14 +91,17 @@ const Boolean ImsPhone::DBG = TRUE;
 const Boolean ImsPhone::VDBG = FALSE;
 const Int32 ImsPhone::DEFAULT_ECM_EXIT_TIMER_VALUE;
 
-ImsPhone::ImsPhone(
+ImsPhone::ImsPhone()
+{
+}
+
+ECode ImsPhone::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IPhoneNotifier* notifier,
     /* [in] */ IPhone* defaultPhone)
-    :ImsPhoneBase(String("ImsPhone"), context, notifier)
 {
+    ImsPhoneBase::constructor(String("ImsPhone"), context, notifier);
     // ==================before translated======================
-    // super("ImsPhone", context, notifier);
     //
     // mDefaultPhone = (PhoneBase) defaultPhone;
     // mCT = new ImsPhoneCallTracker(this);
@@ -114,6 +117,7 @@ ImsPhone::ImsPhone(
     // PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
     // mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOGTAG);
     // mWakeLock.setReferenceCounted(false);
+    return NOERROR;
 }
 
 ECode ImsPhone::UpdateParentPhone(
@@ -286,7 +290,7 @@ ECode ImsPhone::ExplicitCallTransfer()
 }
 
 ECode ImsPhone::GetForegroundCall(
-    /* [out] */ IImsPhoneCall** result)
+    /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -296,7 +300,7 @@ ECode ImsPhone::GetForegroundCall(
 }
 
 ECode ImsPhone::GetBackgroundCall(
-    /* [out] */ IImsPhoneCall** result)
+    /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -306,7 +310,7 @@ ECode ImsPhone::GetBackgroundCall(
 }
 
 ECode ImsPhone::GetRingingCall(
-    /* [out] */ IImsPhoneCall** result)
+    /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -443,7 +447,7 @@ ECode ImsPhone::AddParticipant(
 }
 
 ECode ImsPhone::SendDtmf(
-    /* [in] */ Char16 c)
+    /* [in] */ Char32 c)
 {
     // ==================before translated======================
     // if (!PhoneNumberUtils.is12Key(c)) {
@@ -459,7 +463,7 @@ ECode ImsPhone::SendDtmf(
 }
 
 ECode ImsPhone::StartDtmf(
-    /* [in] */ Char16 c)
+    /* [in] */ Char32 c)
 {
     // ==================before translated======================
     // if (!(PhoneNumberUtils.is12Key(c) || (c >= 'A' && c <= 'D'))) {

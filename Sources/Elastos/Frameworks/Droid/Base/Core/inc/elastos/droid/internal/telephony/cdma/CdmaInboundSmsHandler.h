@@ -3,7 +3,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
-//TODO #include "elastos/droid/internal/telephony/InboundSmsHandler.h"
+#include "elastos/droid/internal/telephony/InboundSmsHandler.h"
 
 // import android.app.Activity;
 // import android.content.res.Resources;
@@ -20,7 +20,7 @@
 // import java.util.Arrays;
 
 using Elastos::Droid::Content::IContext;
-//TODO using Elastos::Droid::Internal::Telephony::InboundSmsHandler;
+using Elastos::Droid::Internal::Telephony::InboundSmsHandler;
 using Elastos::Droid::Internal::Telephony::ISmsStorageMonitor;
 using Elastos::Droid::Internal::Telephony::IPhoneBase;
 using Elastos::Droid::Internal::Telephony::ISmsMessageBase;
@@ -36,7 +36,7 @@ namespace Cdma {
   * Subclass of {@link InboundSmsHandler} for 3GPP2 type messages.
   */
 class CdmaInboundSmsHandler
-    : public Object //TODO InboundSmsHandler
+    : public InboundSmsHandler
     , public ICdmaInboundSmsHandler
 {
 public:

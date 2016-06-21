@@ -6,10 +6,30 @@ module {
     namespace Internal {
     namespace Telephony {
     namespace Cdma {
+    namespace Sms {
 
+    [deprecated]
     interface ICdmaSmsSubaddress {
+        SetType(
+            [in] Int32 type);
+
+        GetType(
+            [out] Int32* result);
+
+        SetOdd(
+            [in] Byte odd);
+
+        GetOdd(
+            [out] Byte* result);
+
+        SetOrigBytes(
+            [in] ArrayOf<Byte>* origBytes);
+
+        GetOrigBytes(
+            [out, callee] ArrayOf<Byte>* result);
     }
 
+    }//Sms
     }//Cdma
     }//Telephony
     }//Internal

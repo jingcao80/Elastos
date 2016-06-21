@@ -1,7 +1,5 @@
-#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Telephony.h"
 
 #include "elastos/droid/internal/telephony/cdma/CdmaLteServiceStateTracker.h"
 
@@ -17,7 +15,11 @@ namespace Cdma {
 CAR_INTERFACE_IMPL(CdmaLteServiceStateTracker, CdmaServiceStateTracker, ICdmaLteServiceStateTracker);
 const Int32 CdmaLteServiceStateTracker::EVENT_ALL_DATA_DISCONNECTED;
 
-CdmaLteServiceStateTracker::CdmaLteServiceStateTracker(
+CdmaLteServiceStateTracker::CdmaLteServiceStateTracker()
+{
+}
+
+ECode CdmaLteServiceStateTracker::constructor(
     /* [in] */ ICDMALTEPhone* phone)
 {
     // ==================before translated======================
@@ -30,6 +32,7 @@ CdmaLteServiceStateTracker::CdmaLteServiceStateTracker(
     // ((CellInfoLte)mCellInfo).setCellIdentity(new CellIdentityLte());
     //
     // if (DBG) log("CdmaLteServiceStateTracker Constructors");
+    return NOERROR;
 }
 
 ECode CdmaLteServiceStateTracker::Dispose()

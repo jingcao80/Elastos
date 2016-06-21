@@ -3,7 +3,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
-//TODO #include "elastos/droid/internal/telephony/SmsMessageBase.h"
+#include "elastos/droid/internal/telephony/SmsMessageBase.h"
 
 // import android.content.res.Resources;
 // import android.os.Parcel;
@@ -31,7 +31,7 @@
 // import java.io.DataOutputStream;
 // import java.io.IOException;
 
-//TODO using Elastos::Droid::Internal::Telephony::SmsMessageBase;
+using Elastos::Droid::Internal::Telephony::SmsMessageBase;
 using Elastos::Droid::Telephony::ISmsCbMessage;
 using Elastos::Droid::Internal::Telephony::ISmsHeader;
 using Elastos::Droid::Internal::Telephony::MessageClass;
@@ -67,13 +67,16 @@ namespace Cdma {
   *
   */
 class SmsMessage
-    : public Object //TODO SmsMessageBase
+    : public SmsMessageBase
     , public ISmsMessage
 {
 public:
     class SubmitPdu
-        : public Object // TODO SmsMessageBase::SubmitPduBase
+        : public Object //TOOD SmsMessageBase::SubmitPduBase
+        , public ISmsMessageSubmitPdu
     {
+    public:
+        CAR_INTERFACE_DECL();
     };
 
 public:
@@ -385,6 +388,11 @@ public:
       */
     virtual CARAPI GetSmsCbProgramData(
         /* [out] */ IArrayList** result);// ICdmaSmsCbProgramData
+
+    //TODO should remove
+    virtual CARAPI GetSmsCbProgramData() {
+        return NOERROR;
+    }
 
 protected:
     /**

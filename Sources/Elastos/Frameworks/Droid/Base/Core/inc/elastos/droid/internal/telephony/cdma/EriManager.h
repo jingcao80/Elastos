@@ -1,6 +1,7 @@
 #ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_ERIMANAGER_H__
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_ERIMANAGER_H__
 
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 #include "elastos/droid/internal/telephony/cdma/EriInfo.h"
@@ -84,7 +85,7 @@ public:
 public:
     CAR_INTERFACE_DECL();
 
-    EriManager(
+    CARAPI constructor(
         /* [in] */ IPhoneBase* phone,
         /* [in] */ IContext* context,
         /* [in] */ Int32 eriFileSource);

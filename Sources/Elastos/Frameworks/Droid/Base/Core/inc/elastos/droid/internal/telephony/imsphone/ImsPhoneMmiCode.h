@@ -64,8 +64,9 @@ class ImsPhoneMmiCode
 public:
     CAR_INTERFACE_DECL();
 
+    ImsPhoneMmiCode();
     //***** Constructor
-    ImsPhoneMmiCode(
+    CARAPI constructor(
         /* [in] */ IImsPhone* phone);
 
     //***** Public Class methods

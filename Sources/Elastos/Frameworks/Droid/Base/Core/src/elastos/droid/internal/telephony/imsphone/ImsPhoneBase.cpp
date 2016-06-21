@@ -13,13 +13,18 @@ namespace ImsPhone {
 //=====================================================================
 const String ImsPhoneBase::LOGTAG("ImsPhoneBase");
 
-ImsPhoneBase::ImsPhoneBase(
+ImsPhoneBase::ImsPhoneBase()
+{
+}
+
+ECode ImsPhoneBase::constructor(
     /* [in] */ const String& name,
     /* [in] */ IContext* context,
     /* [in] */ IPhoneNotifier* notifier)
 {
     // ==================before translated======================
     // super(name, notifier, context, new ImsPhoneCommandInterface(context), false);
+    return NOERROR;
 }
 
 ECode ImsPhoneBase::Dial(

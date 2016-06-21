@@ -13,11 +13,16 @@ namespace Cdma {
 //=====================================================================
 CAR_INTERFACE_IMPL(CdmaCall, Call, ICdmaCall);
 
-CdmaCall::CdmaCall(
+CdmaCall::CdmaCall()
+{
+}
+
+ECode CdmaCall::constructor(
     /* [in] */ ICdmaCallTracker* owner)
 {
     // ==================before translated======================
     // mOwner = owner;
+    return NOERROR;
 }
 
 ECode CdmaCall::Dispose()

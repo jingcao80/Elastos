@@ -6,6 +6,7 @@ module {
     namespace Internal {
     namespace Telephony {
     namespace Cdma {
+    namespace Sms {
 
     /**
      * @Involve
@@ -57,11 +58,15 @@ module {
         const Int32 NUMBERING_PLAN_UNKNOWN           = 0x0;
         const Int32 NUMBERING_PLAN_ISDN_TELEPHONY    = 0x1;
 
+    }
+
+    interface ICdmaSmsAddressHelper {
         Parse(
             [in] String address,
             [out] ICdmaSmsAddress** result);
     }
 
+    }//Sms
     }//Cdma
     }//Telephony
     }//Internal

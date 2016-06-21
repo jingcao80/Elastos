@@ -11,7 +11,6 @@ namespace Sip {
 //=====================================================================
 //                           SipPhoneFactory
 //=====================================================================
-CAR_INTERFACE_IMPL(SipPhoneFactory, Object, ISipPhoneFactory);
 
 AutoPtr<SipPhone> SipPhoneFactory::MakePhone(
     /* [in] */ const String& sipUri,

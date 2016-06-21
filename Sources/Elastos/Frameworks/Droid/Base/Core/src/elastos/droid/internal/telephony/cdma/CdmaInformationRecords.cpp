@@ -231,7 +231,11 @@ ECode CdmaInformationRecords::CdmaT53AudioControlInfoRec::ToString(
 //=====================================================================
 CAR_INTERFACE_IMPL(CdmaInformationRecords, Object, ICdmaInformationRecords);
 
-CdmaInformationRecords::CdmaInformationRecords(
+CdmaInformationRecords::CdmaInformationRecords()
+{
+}
+
+ECode CdmaInformationRecords::constructor(
     /* [in] */ IParcel* p)
 {
     // ==================before translated======================
@@ -278,6 +282,7 @@ CdmaInformationRecords::CdmaInformationRecords(
     //                                     + CdmaInformationRecords.idToString(id) + " ");
     //
     // }
+    return NOERROR;
 }
 
 String CdmaInformationRecords::IdToString(
