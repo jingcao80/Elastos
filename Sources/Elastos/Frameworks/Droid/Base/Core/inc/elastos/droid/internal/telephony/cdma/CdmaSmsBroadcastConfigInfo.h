@@ -33,10 +33,11 @@ class CdmaSmsBroadcastConfigInfo
 public:
     CAR_INTERFACE_DECL();
 
+    CdmaSmsBroadcastConfigInfo();
     /**
       * Initialize the object from rssi and cid.
       */
-    CdmaSmsBroadcastConfigInfo(
+    CARAPI constructor(
         /* [in] */ Int32 fromServiceCategory,
         /* [in] */ Int32 toServiceCategory,
         /* [in] */ Int32 language,

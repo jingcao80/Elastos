@@ -161,7 +161,7 @@ module
         NotifyDataConnection(
             [in] String reason,
             [in] String apnType,
-            [in] PhoneConstantsDataState* state);
+            [in] PhoneConstantsDataState state);
 
         NotifyDataConnection(
             [in] String reason,
@@ -220,7 +220,7 @@ module
             [in] Boolean isVideoCallCapable);
 
         IsManualNetSelAllowed(
-            [in] Boolean isVideoCallCapable);
+            [out] Boolean* isVideoCallCapable);
 
         // Called by SimRecords which is constructed with a PhoneBase instead of a GSMPhone.
         NotifyCallForwardingIndicator();

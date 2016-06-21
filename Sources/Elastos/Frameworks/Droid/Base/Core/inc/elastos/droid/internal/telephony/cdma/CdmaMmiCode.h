@@ -1,6 +1,7 @@
 #ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CDMAMMICODE_H__
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CDMAMMICODE_H__
 
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/Handler.h"
@@ -35,12 +36,14 @@ namespace Cdma {
 class CdmaMmiCode
     : public Handler
     , public IMmiCode
+    , public ICdmaMmiCode
 {
 public:
     CAR_INTERFACE_DECL();
 
+    CdmaMmiCode();
     // Constructor
-    CdmaMmiCode(
+    CARAPI constructor(
         /* [in] */ ICDMAPhone* phone,
         /* [in] */ IUiccCardApplication* app);
 

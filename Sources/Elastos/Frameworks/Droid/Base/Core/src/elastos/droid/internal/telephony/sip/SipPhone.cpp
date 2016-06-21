@@ -11,6 +11,7 @@ namespace Sip {
 //=====================================================================
 //                          SipPhone::SipCall
 //=====================================================================
+
 const String SipPhone::SipCall::SC_TAG("SipCall");
 const Boolean SipPhone::SipCall::SC_DBG = TRUE;
 const Boolean SipPhone::SipCall::SC_VDBG = FALSE;
@@ -902,6 +903,8 @@ void SipPhone::SipAudioCallAdapter::Log(
 //=====================================================================
 //                               SipPhone
 //=====================================================================
+CAR_INTERFACE_IMPL(SipPhone, SipPhoneBase, ISipPhone);
+
 const String SipPhone::LOGTAG("SipPhone");
 const Boolean SipPhone::DBG = TRUE;
 const Boolean SipPhone::VDBG = FALSE;
@@ -909,12 +912,16 @@ const Int32 SipPhone::TIMEOUT_MAKE_CALL;
 const Int32 SipPhone::TIMEOUT_ANSWER_CALL;
 const Int32 SipPhone::TIMEOUT_HOLD_CALL;
 
-SipPhone::SipPhone(
+SipPhone::SipPhone()
+{
+}
+
+ECode SipPhone::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IPhoneNotifier* notifier,
     /* [in] */ /*TODO ISipProfile*/IInterface* profile)
-    : SipPhoneBase(String(""), context, notifier)//TODO the string value is not correct
 {
+    //: SipPhoneBase(String(""), context, notifier)//TODO the string value is not correct
     // ==================before translated======================
     // super("SIP:" + profile.getUriString(), context, notifier);
 
@@ -925,6 +932,7 @@ SipPhone::SipPhone(
     // mBackgroundCall = new SipCall();
     // mProfile = profile;
     // mSipManager = SipManager.newInstance(context);
+    return NOERROR;
 }
 
 ECode SipPhone::Equals(
@@ -952,7 +960,7 @@ ECode SipPhone::GetSipUri(
 }
 
 ECode SipPhone::Equals(
-    /* [in] */ SipPhone* phone,
+    /* [in] */ ISipPhone* phone,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -1168,7 +1176,7 @@ ECode SipPhone::ClearDisconnected()
 }
 
 ECode SipPhone::SendDtmf(
-    /* [in] */ Char16 c)
+    /* [in] */ Char32 c)
 {
     // ==================before translated======================
     // if (!PhoneNumberUtils.is12Key(c)) {
@@ -1183,7 +1191,7 @@ ECode SipPhone::SendDtmf(
 }
 
 ECode SipPhone::StartDtmf(
-    /* [in] */ Char16 c)
+    /* [in] */ Char32 c)
 {
     // ==================before translated======================
     // if (!PhoneNumberUtils.is12Key(c)) {

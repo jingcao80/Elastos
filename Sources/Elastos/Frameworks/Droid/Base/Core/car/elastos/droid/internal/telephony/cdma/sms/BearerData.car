@@ -17,9 +17,13 @@ module
      * interface ITime
      */
     interface IBearerDataTimeStamp {
-        // FromByteArray(
-        //     [in] ArrayOf<Byte>* data,
-        //     [out] ITimeStamp** result);
+    }
+
+    [deprecated]
+    interface IBearerDataTimeStampHelper {
+        FromByteArray(
+            [in] ArrayOf<Byte>* data,
+            [out] IBearerDataTimeStamp** result);
     }
 
     interface IBearerData {

@@ -1,5 +1,4 @@
 #include "Elastos.CoreLibrary.Utility.h"
-#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 
 #include "elastos/droid/internal/telephony/cdma/CdmaMmiCode.h"
@@ -16,6 +15,8 @@ namespace Cdma {
 //=====================================================================
 //                             CdmaMmiCode
 //=====================================================================
+CAR_INTERFACE_IMPL_2(CdmaMmiCode, Handler, IMmiCode, ICdmaMmiCode);
+
 const String CdmaMmiCode::LOGTAG("CdmaMmiCode");
 const String CdmaMmiCode::ACTION_REGISTER("**");
 const String CdmaMmiCode::SC_PIN("04");
@@ -44,7 +45,11 @@ const Int32 CdmaMmiCode::MATCH_GROUP_SIC;
 const Int32 CdmaMmiCode::MATCH_GROUP_PWD_CONFIRM;
 const Int32 CdmaMmiCode::MATCH_GROUP_DIALING_NUMBER;
 
-CdmaMmiCode::CdmaMmiCode(
+CdmaMmiCode::CdmaMmiCode()
+{
+}
+
+ECode CdmaMmiCode::constructor(
     /* [in] */ ICDMAPhone* phone,
     /* [in] */ IUiccCardApplication* app)
 {
@@ -53,6 +58,7 @@ CdmaMmiCode::CdmaMmiCode(
     // mPhone = phone;
     // mContext = phone.getContext();
     // mUiccApplication = app;
+    return NOERROR;
 }
 
 AutoPtr<ICdmaMmiCode> CdmaMmiCode::NewFromDialString(

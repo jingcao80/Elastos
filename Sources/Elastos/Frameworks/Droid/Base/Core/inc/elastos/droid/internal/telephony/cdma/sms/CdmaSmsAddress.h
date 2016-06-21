@@ -3,13 +3,14 @@
 
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/core/Object.h"
+#include "elastos/droid/internal/telephony/SmsAddress.h"
 
 // package com.android.internal.telephony.cdma.sms;
 using Elastos::Droid::Utility::ISparseBooleanArray;
 // import com.android.internal.telephony.cdma.sms.UserData;
 // import com.android.internal.util.HexDump;
 using Elastos::Droid::Internal::Telephony::ISmsAddress;
+using Elastos::Droid::Internal::Telephony::SmsAddress;
 
 namespace Elastos {
 namespace Droid {
@@ -19,8 +20,8 @@ namespace Cdma {
 namespace Sms {
 
 class CdmaSmsAddress
-    : public Object
-    , public ISmsAddress
+    : public SmsAddress
+    , public ICdmaSmsAddress
 {
 public:
     CAR_INTERFACE_DECL();

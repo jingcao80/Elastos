@@ -1,0 +1,26 @@
+#ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CCDMASMSBROADCASTCONFIGINFO_H__
+#define __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CCDMASMSBROADCASTCONFIGINFO_H__
+
+#include "_Elastos_Droid_Internal_Telephony_Cdma_CCdmaSmsBroadcastConfigInfo.h"
+#include "elastos/droid/internal/telephony/cdma/CdmaSmsBroadcastConfigInfo.h"
+
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Cdma {
+
+CarClass(CCdmaSmsBroadcastConfigInfo)
+    , public CdmaSmsBroadcastConfigInfo
+{
+public:
+    CAR_OBJECT_DECL()
+};
+
+} // namespace Cdma
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos
+
+#endif // __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CCDMASMSBROADCASTCONFIGINFO_H__

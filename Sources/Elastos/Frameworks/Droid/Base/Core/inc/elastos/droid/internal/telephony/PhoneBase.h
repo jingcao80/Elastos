@@ -1168,7 +1168,7 @@ protected:
     virtual CARAPI_(void) SetCardInPhoneBook();
 
     // Will be called when icc changed
-    virtual CARAPI_(void) OnUpdateIccAvailability() = 0;
+    virtual CARAPI OnUpdateIccAvailability() = 0;
 
     /**
      * Subclasses of Phone probably want to replace this with a

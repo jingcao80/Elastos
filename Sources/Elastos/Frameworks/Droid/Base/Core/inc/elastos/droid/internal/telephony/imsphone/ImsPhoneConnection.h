@@ -1,6 +1,7 @@
 #ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_IMSPHONE_IMSPHONECONNECTION_H__
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_IMSPHONE_IMSPHONECONNECTION_H__
 
+#include "Elastos.Droid.Internal.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 #include "elastos/droid/os/Handler.h"
@@ -72,7 +73,7 @@ public:
     //***** Constructors
     /** This is probably an MT call */
     /*package*/
-    ImsPhoneConnection(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ /*TODO IImsCall*/IInterface* imsCall,
         /* [in] */ IImsPhoneCallTracker* ct,
@@ -80,7 +81,7 @@ public:
 
     /** This is an MO call, created when dialing */
     /*package*/
-    ImsPhoneConnection(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ const String& dialString,
         /* [in] */ IImsPhoneCallTracker* ct,
@@ -99,7 +100,7 @@ public:
 
     // @Override
     CARAPI GetCall(
-        /* [out] */ IImsPhoneCall** result);
+        /* [out] */ ICall** result);
 
     // @Override
     CARAPI GetDisconnectTime(

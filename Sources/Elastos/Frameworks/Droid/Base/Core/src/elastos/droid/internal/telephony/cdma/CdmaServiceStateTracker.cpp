@@ -1,7 +1,5 @@
-#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Telephony.h"
 
 #include "elastos/droid/internal/telephony/cdma/CdmaServiceStateTracker.h"
 
@@ -56,7 +54,7 @@ ECode CdmaServiceStateTracker::InnerContentObserver1::OnChange(
 //=====================================================================
 //                       CdmaServiceStateTracker
 //=====================================================================
-CAR_INTERFACE_IMPL(CdmaServiceStateTracker, /*TODO ServiceStateTracker*/ Object, ICdmaServiceStateTracker);
+CAR_INTERFACE_IMPL(CdmaServiceStateTracker, ServiceStateTracker, ICdmaServiceStateTracker);
 
 const String CdmaServiceStateTracker::LOGTAG("CdmaSST");
 const String CdmaServiceStateTracker::INVALID_MCC("000");
@@ -72,11 +70,17 @@ CdmaServiceStateTracker::CdmaServiceStateTracker()
 {
 }
 
-CdmaServiceStateTracker::CdmaServiceStateTracker(
+ECode CdmaServiceStateTracker::constructor()
+{
+    return NOERROR;
+}
+
+ECode CdmaServiceStateTracker::constructor(
     /* [in] */ ICDMAPhone* phone)
 {
     // ==================before translated======================
     // this(phone, new CellInfoCdma());
+    return NOERROR;
 }
 
 ECode CdmaServiceStateTracker::Dispose()
@@ -642,7 +646,7 @@ ECode CdmaServiceStateTracker::SetImsRegistrationState(
     return NOERROR;
 }
 
-CdmaServiceStateTracker::CdmaServiceStateTracker(
+ECode CdmaServiceStateTracker::constructor(
     /* [in] */ ICDMAPhone* phone,
     /* [in] */ ICellInfo* cellInfo)
 {
@@ -688,6 +692,7 @@ CdmaServiceStateTracker::CdmaServiceStateTracker(
     //
     // // Reset OTASP state in case previously set by another service
     // phone.notifyOtaspChanged(OTASP_UNINITIALIZED);
+    return NOERROR;
 }
 
 void CdmaServiceStateTracker::Finalize()

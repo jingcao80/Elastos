@@ -1,4 +1,3 @@
-#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.CoreLibrary.Utility.h"
 
@@ -52,6 +51,8 @@ ECode EriManager::EriDisplayInformation::ToString(
 //=====================================================================
 //                              EriManager
 //=====================================================================
+CAR_INTERFACE_IMPL(EriManager, Object, IEriManager);
+
 const Int32 EriManager::ERI_FROM_XML;
 const Int32 EriManager::ERI_FROM_FILE_SYSTEM;
 const Int32 EriManager::ERI_FROM_MODEM;
@@ -59,7 +60,7 @@ const String EriManager::LOGTAG("CDMA");
 const Boolean EriManager::DBG = TRUE;
 const Boolean EriManager::VDBG = FALSE;
 
-EriManager::EriManager(
+ECode EriManager::constructor(
     /* [in] */ IPhoneBase* phone,
     /* [in] */ IContext* context,
     /* [in] */ Int32 eriFileSource)
@@ -68,6 +69,7 @@ EriManager::EriManager(
     // mContext = context;
     // mEriFileSource = eriFileSource;
     // mEriFile = new EriFile();
+    return NOERROR;
 }
 
 ECode EriManager::Dispose()

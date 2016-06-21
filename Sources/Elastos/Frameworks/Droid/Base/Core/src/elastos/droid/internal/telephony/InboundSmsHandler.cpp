@@ -1372,6 +1372,12 @@ void InboundSmsHandler::Loge(
     Logger::E(GetName(), "%s %s", s.string(), TO_CSTR(e));
 }
 
+String InboundSmsHandler::GetName()
+{
+    String result;
+    StateMachine::GetName(&result);
+    return result;
+}
 /**
  * Store a received SMS into Telephony provider
  *

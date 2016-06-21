@@ -12,7 +12,7 @@ namespace Cdma {
 //=====================================================================
 //                           CdmaCallTracker
 //=====================================================================
-CAR_INTERFACE_IMPL(CdmaCallTracker, /*TODO CallTracker*/ Object, ICdmaCallTracker);
+CAR_INTERFACE_IMPL(CdmaCallTracker, CallTracker, ICdmaCallTracker);
 
 const String CdmaCallTracker::LOGTAG("CdmaCallTracker");
 const Int32 CdmaCallTracker::MAX_CONNECTIONS;
@@ -20,7 +20,11 @@ const Int32 CdmaCallTracker::MAX_CONNECTIONS_PER_CALL;
 const Boolean CdmaCallTracker::REPEAT_POLLING = FALSE;
 const Boolean CdmaCallTracker::DBG_POLL = FALSE;
 
-CdmaCallTracker::CdmaCallTracker(
+CdmaCallTracker::CdmaCallTracker()
+{
+}
+
+ECode CdmaCallTracker::constructor(
     /* [in] */ ICDMAPhone* phone)
 {
     // ==================before translated======================
@@ -31,6 +35,7 @@ CdmaCallTracker::CdmaCallTracker(
     // mCi.registerForNotAvailable(this, EVENT_RADIO_NOT_AVAILABLE, null);
     // mCi.registerForCallWaitingInfo(this, EVENT_CALL_WAITING_INFO_CDMA, null);
     // mForegroundCall.setGeneric(false);
+    return NOERROR;
 }
 
 ECode CdmaCallTracker::Dispose()

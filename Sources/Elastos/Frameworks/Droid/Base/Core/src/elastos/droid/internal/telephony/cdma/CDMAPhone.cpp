@@ -34,7 +34,7 @@ ECode CDMAPhone::InnerRunnable::Run()
 //=====================================================================
 //                              CDMAPhone
 //=====================================================================
-CAR_INTERFACE_IMPL(CDMAPhone, /*TODO PhoneBase*/Object, ICDMAPhone);
+CAR_INTERFACE_IMPL(CDMAPhone, PhoneBase, ICDMAPhone);
 
 const String CDMAPhone::LOGTAG("CDMAPhone");
 const Int32 CDMAPhone::RESTART_ECM_TIMER;
@@ -73,7 +73,12 @@ CDMAPhone::CDMAPhone()
 {
 }
 
-CDMAPhone::CDMAPhone(
+ECode CDMAPhone::constructor()
+{
+    return NOERROR;
+}
+
+ECode CDMAPhone::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ICommandsInterface* ci,
     /* [in] */ IPhoneNotifier* notifier)
@@ -82,9 +87,10 @@ CDMAPhone::CDMAPhone(
     // super("CDMA", notifier, context, ci, false);
     // initSstIcc();
     // init(context, notifier);
+    return NOERROR;
 }
 
-CDMAPhone::CDMAPhone(
+ECode CDMAPhone::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ICommandsInterface* ci,
     /* [in] */ IPhoneNotifier* notifier,
@@ -94,9 +100,10 @@ CDMAPhone::CDMAPhone(
     // super("CDMA", notifier, context, ci, false, phoneId);
     // initSstIcc();
     // init(context, notifier);
+    return NOERROR;
 }
 
-CDMAPhone::CDMAPhone(
+ECode CDMAPhone::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ICommandsInterface* ci,
     /* [in] */ IPhoneNotifier* notifier,
@@ -106,6 +113,7 @@ CDMAPhone::CDMAPhone(
     // super("CDMA", notifier, context, ci, unitTestMode);
     // initSstIcc();
     // init(context, notifier);
+    return NOERROR;
 }
 
 ECode CDMAPhone::Dispose()
@@ -473,7 +481,7 @@ ECode CDMAPhone::RegisterForSuppServiceNotification(
 }
 
 ECode CDMAPhone::GetBackgroundCall(
-    /* [out] */ ICdmaCall** result)
+    /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
@@ -787,7 +795,7 @@ ECode CDMAPhone::GetCellLocation(
 }
 
 ECode CDMAPhone::GetForegroundCall(
-    /* [out] */ ICdmaCall** result)
+    /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
@@ -1066,7 +1074,7 @@ ECode CDMAPhone::SendUssdResponse(
 }
 
 ECode CDMAPhone::SendDtmf(
-    /* [in] */ Byte c)
+    /* [in] */ Char32 c)
 {
     // ==================before translated======================
     // if (!PhoneNumberUtils.is12Key(c)) {
@@ -1082,7 +1090,7 @@ ECode CDMAPhone::SendDtmf(
 }
 
 ECode CDMAPhone::StartDtmf(
-    /* [in] */ Byte c)
+    /* [in] */ Char32 c)
 {
     // ==================before translated======================
     // if (!PhoneNumberUtils.is12Key(c)) {
@@ -1537,7 +1545,7 @@ ECode CDMAPhone::HandleTimerInEmergencyCallbackMode(
 }
 
 ECode CDMAPhone::NotifyEcbmTimerReset(
-    /* [in] */ Boolean* flag)
+    /* [in] */ Boolean flag)
 {
     // ==================before translated======================
     // mEcmTimerResetRegistrants.notifyResult(flag);
@@ -2124,7 +2132,7 @@ void CDMAPhone::SetCardInPhoneBook()
     assert(0);
 }
 
-void CDMAPhone::OnUpdateIccAvailability()
+ECode CDMAPhone::OnUpdateIccAvailability()
 {
     // ==================before translated======================
     // if (mUiccController == null ) {
@@ -2161,6 +2169,7 @@ void CDMAPhone::OnUpdateIccAvailability()
     //     }
     // }
     assert(0);
+    return NOERROR;
 }
 
 void CDMAPhone::SetIsoCountryProperty(

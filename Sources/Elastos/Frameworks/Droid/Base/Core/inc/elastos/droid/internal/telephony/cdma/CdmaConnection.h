@@ -3,7 +3,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
-//TODO #include "elastos/droid/internal/telephony/Connection.h"
+#include "elastos/droid/internal/telephony/Connection.h"
 
 // import com.android.internal.telephony.*;
 // import android.os.AsyncResult;
@@ -20,6 +20,7 @@
 // import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppState;
 
 using Elastos::Droid::Internal::Telephony::ICallState;
+using Elastos::Droid::Internal::Telephony::Connection;
 using Elastos::Droid::Internal::Telephony::IDriverCallState;
 using Elastos::Droid::Internal::Telephony::IConnectionPostDialState;
 using Elastos::Droid::Internal::Telephony::IUUSInfo;
@@ -39,7 +40,7 @@ namespace Cdma {
   * {@hide}
   */
 class CdmaConnection
-    : public Object //TODO Connection
+    : public Connection
     , public ICdmaConnection
 {
 public:
@@ -59,10 +60,11 @@ public:
 public:
     CAR_INTERFACE_DECL();
 
+    CdmaConnection();
     //***** Constructors
     /** This is probably an MT call that we first saw in a CLCC response */
     /*package*/
-    CdmaConnection(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IDriverCall* dc,
         /* [in] */ ICdmaCallTracker* ct,
@@ -70,14 +72,14 @@ public:
 
     /** This is an MO call/three way call, created when dialing */
     /*package*/
-    CdmaConnection(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ const String& dialString,
         /* [in] */ ICdmaCallTracker* ct,
         /* [in] */ ICdmaCall* parent);
 
     /** This is a Call waiting call*/
-    CdmaConnection(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ ICdmaCallWaitingNotification* cw,
         /* [in] */ ICdmaCallTracker* ct,
@@ -100,7 +102,7 @@ public:
 
     // @Override
     CARAPI GetCall(
-        /* [out] */ ICdmaCall** result);
+        /* [out] */ ICall** result);
 
     // @Override
     CARAPI GetDisconnectTime(

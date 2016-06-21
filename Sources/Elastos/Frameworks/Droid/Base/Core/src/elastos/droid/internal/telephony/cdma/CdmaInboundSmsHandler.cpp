@@ -1,5 +1,5 @@
 #include "Elastos.Droid.Internal.h"
-
+#include "elastos/droid/internal/telephony/CellBroadcastHandler.h"
 #include "elastos/droid/internal/telephony/cdma/CdmaInboundSmsHandler.h"
 
 namespace Elastos {
@@ -11,7 +11,7 @@ namespace Cdma {
 //=====================================================================
 //                        CdmaInboundSmsHandler
 //=====================================================================
-CAR_INTERFACE_IMPL(CdmaInboundSmsHandler, /*TODO InboundSmsHandler*/ Object, ICdmaInboundSmsHandler);
+CAR_INTERFACE_IMPL(CdmaInboundSmsHandler, InboundSmsHandler, ICdmaInboundSmsHandler);
 
 AutoPtr<ICdmaInboundSmsHandler> CdmaInboundSmsHandler::MakeInboundSmsHandler(
     /* [in] */ IContext* context,
@@ -174,10 +174,9 @@ CdmaInboundSmsHandler::CdmaInboundSmsHandler(
     /* [in] */ ISmsStorageMonitor* storageMonitor,
     /* [in] */ IPhoneBase* phone,
     /* [in] */ ICdmaSMSDispatcher* smsDispatcher)
+    : InboundSmsHandler(String("CdmaInboundSmsHandler"), context, storageMonitor, phone, CellBroadcastHandler::MakeCellBroadcastHandler(context, phone))
 {
     // ==================before translated======================
-    // super("CdmaInboundSmsHandler", context, storageMonitor, phone,
-    //         CellBroadcastHandler.makeCellBroadcastHandler(context, phone));
     // mSmsDispatcher = smsDispatcher;
     // mServiceCategoryProgramHandler = CdmaServiceCategoryProgramHandler.makeScpHandler(context,
     //         phone.mCi);

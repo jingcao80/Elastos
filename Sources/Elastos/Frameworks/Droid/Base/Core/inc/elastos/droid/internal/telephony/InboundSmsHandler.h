@@ -430,7 +430,7 @@ protected:
         /* [in] */ const String& s,
         /* [in] */ IThrowable* e);
 
-    virtual CARAPI_(String) GetName() = 0;
+    virtual CARAPI_(String) GetName();
 
 private:
     CARAPI_(Int32) CheckIfBlacklisted(

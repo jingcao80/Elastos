@@ -13,7 +13,7 @@ namespace Cdma {
 //=====================================================================
 CAR_INTERFACE_IMPL(EriInfo, Object, IEriInfo);
 
-EriInfo::EriInfo(
+ECode EriInfo::constructor(
     /* [in] */ Int32 roamingIndicator,
     /* [in] */ Int32 iconIndex,
     /* [in] */ Int32 iconMode,
@@ -29,6 +29,7 @@ EriInfo::EriInfo(
     // this.eriText = eriText;
     // this.callPromptId = callPromptId;
     // this.alertId = alertId;
+    return NOERROR;
 }
 
 } // namespace Cdma

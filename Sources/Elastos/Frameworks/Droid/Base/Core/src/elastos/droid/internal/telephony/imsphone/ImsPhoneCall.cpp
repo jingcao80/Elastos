@@ -20,11 +20,17 @@ ImsPhoneCall::ImsPhoneCall()
 {
 }
 
-ImsPhoneCall::ImsPhoneCall(
+ECode ImsPhoneCall::constructor()
+{
+    return NOERROR;
+}
+
+ECode ImsPhoneCall::constructor(
     /* [in] */ IImsPhoneCallTracker* owner)
 {
     // ==================before translated======================
     // mOwner = owner;
+    return NOERROR;
 }
 
 ECode ImsPhoneCall::Dispose()
@@ -281,13 +287,13 @@ ECode ImsPhoneCall::Merge(
     return NOERROR;
 }
 
-AutoPtr</*TODO IImsCall*/IInterface> ImsPhoneCall::GetImsCall()
+ECode ImsPhoneCall::GetImsCall(
+    /* [out] */ /*TODO IImsCall*/IInterface** result)
 {
+    VALIDATE_NOT_NULL(result);
     // ==================before translated======================
     // return (getFirstConnection() == null) ? null : getFirstConnection().getImsCall();
-    assert(0);
-    AutoPtr<IInterface> empty;
-    return empty;
+    return NOERROR;
 }
 
 Boolean ImsPhoneCall::IsLocalTone(

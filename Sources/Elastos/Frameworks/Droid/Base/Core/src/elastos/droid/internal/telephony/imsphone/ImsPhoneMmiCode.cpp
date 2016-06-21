@@ -101,7 +101,11 @@ const Int32 ImsPhoneMmiCode::MATCH_GROUP_PWD_CONFIRM;
 const Int32 ImsPhoneMmiCode::MATCH_GROUP_DIALING_NUMBER;
 AutoPtr< ArrayOf<String> > ImsPhoneMmiCode::sTwoDigitNumberPattern;
 
-ImsPhoneMmiCode::ImsPhoneMmiCode(
+ImsPhoneMmiCode::ImsPhoneMmiCode()
+{
+}
+
+ECode ImsPhoneMmiCode::constructor(
     /* [in] */ IImsPhone* phone)
 {
     // ==================before translated======================
@@ -111,6 +115,7 @@ ImsPhoneMmiCode::ImsPhoneMmiCode(
     // mPhone = phone;
     // mContext = phone.getContext();
     // mIccRecords = mPhone.mDefaultPhone.mIccRecords.get();
+    return NOERROR;
 }
 
 AutoPtr<IImsPhoneMmiCode> ImsPhoneMmiCode::NewFromDialString(

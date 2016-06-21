@@ -23,10 +23,8 @@ namespace Sip {
   */
 class SipPhoneFactory
     : public Object
-    , public ISipPhoneFactory
 {
 public:
-    CAR_INTERFACE_DECL();
 
     /**
       * Makes a {@link SipPhone} object.

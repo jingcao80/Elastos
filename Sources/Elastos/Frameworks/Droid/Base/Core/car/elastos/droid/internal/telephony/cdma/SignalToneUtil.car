@@ -64,12 +64,14 @@ module {
         const Int32 IS95_CONST_IR_SIG_IS54B_PBX_S_X4 = 11;
         const Int32 IS95_CONST_IR_SIG_TONE_ABBR_ALRT = 0;
 
+    }
+
+    interface ISignalToneUtilHelper {
         GetAudioToneFromSignalInfo(
             [in] Int32 signalType,
             [in] Int32 alertPitch,
             [in] Int32 signal,
             [out] Int32* result);
-
     }
 
     }//Cdma

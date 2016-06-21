@@ -1,9 +1,10 @@
 #ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CDMASMSDISPATCHER_H__
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CDMASMSDISPATCHER_H__
 
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
-//TODO #include "elastos/droid/internal/telephony/SMSDispatcher.h"
+#include "elastos/droid/internal/telephony/SMSDispatcher.h"
 
 // import android.app.Activity;
 // import android.app.AppOpsManager;
@@ -30,7 +31,7 @@ using Elastos::Droid::Internal::Telephony::ISmsUsageMonitor;
 using Elastos::Droid::Internal::Telephony::IImsSMSDispatcher;
 using Elastos::Droid::Internal::Telephony::IGsmAlphabetTextEncodingDetails;
 using Elastos::Droid::Internal::Telephony::IPhoneBase;
-//TODO using Elastos::Droid::Internal::Telephony::SMSDispatcher;
+using Elastos::Droid::Internal::Telephony::SMSDispatcher;
 using Elastos::Droid::Internal::Telephony::IGsmAlphabet;
 using Elastos::Droid::Internal::Telephony::ISmsHeader;
 using Elastos::Droid::Net::IUri;
@@ -44,13 +45,15 @@ namespace Telephony {
 namespace Cdma {
 
 class CdmaSMSDispatcher
-    : public Object //TODO SMSDispatcher
+    : public SMSDispatcher
     , public ICdmaSMSDispatcher
 {
 public:
     CAR_INTERFACE_DECL();
 
-    CdmaSMSDispatcher(
+    CdmaSMSDispatcher();
+
+    CARAPI constructor(
         /* [in] */ IPhoneBase* phone,
         /* [in] */ ISmsUsageMonitor* usageMonitor,
         /* [in] */ IImsSMSDispatcher* imsSMSDispatcher);
@@ -136,23 +139,23 @@ protected:
         /* [in] */ IUri* messageUri);
 
     virtual CARAPI_(void) SendSubmitPdu(
-        /* [in] */ /*TODO SMSDispatcher::SmsTracker*/IInterface* tracker);
+        /* [in] */ SMSDispatcher::SmsTracker* tracker);
 
     /** {@inheritDoc} */
     // @Override
-    CARAPI SendSms(
-        /* [in] */ /*TODO SMSDispatcher::SmsTracker*/IInterface* tracker);
+    CARAPI_(void) SendSms(
+        /* [in] */ SMSDispatcher::SmsTracker* tracker);
 
     /** {@inheritDoc} */
     // @Override
-    CARAPI UpdateSmsSendStatus(
+    CARAPI_(void) UpdateSmsSendStatus(
         /* [in] */ Int32 messageRef,
         /* [in] */ Boolean success);
 
     /** {@inheritDoc} */
     // @Override
-    CARAPI SendSmsByPstn(
-        /* [in] */ /*TODO SMSDispatcher::SmsTracker*/IInterface* tracker);
+    CARAPI_(void) SendSmsByPstn(
+        /* [in] */ SMSDispatcher::SmsTracker* tracker);
 
 private:
     static const String TAG;

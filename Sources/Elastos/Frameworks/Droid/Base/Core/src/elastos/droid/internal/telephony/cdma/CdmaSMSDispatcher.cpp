@@ -1,5 +1,4 @@
 #include "Elastos.Droid.Internal.h"
-
 #include "elastos/droid/internal/telephony/cdma/CdmaSMSDispatcher.h"
 
 namespace Elastos {
@@ -11,12 +10,16 @@ namespace Cdma {
 //=====================================================================
 //                          CdmaSMSDispatcher
 //=====================================================================
-CAR_INTERFACE_IMPL(CdmaSMSDispatcher, /*TODO SMSDispatcher*/ Object, ICdmaSMSDispatcher);
+CAR_INTERFACE_IMPL(CdmaSMSDispatcher, SMSDispatcher, ICdmaSMSDispatcher);
 
 const String CdmaSMSDispatcher::TAG("CdmaSMSDispatcher");
 const Boolean CdmaSMSDispatcher::VDBG = FALSE;
 
-CdmaSMSDispatcher::CdmaSMSDispatcher(
+CdmaSMSDispatcher::CdmaSMSDispatcher()
+{
+}
+
+ECode CdmaSMSDispatcher::constructor(
     /* [in] */ IPhoneBase* phone,
     /* [in] */ ISmsUsageMonitor* usageMonitor,
     /* [in] */ IImsSMSDispatcher* imsSMSDispatcher)
@@ -24,6 +27,7 @@ CdmaSMSDispatcher::CdmaSMSDispatcher(
     // ==================before translated======================
     // super(phone, usageMonitor, imsSMSDispatcher);
     // Rlog.d(TAG, "CdmaSMSDispatcher created");
+    return NOERROR;
 }
 
 ECode CdmaSMSDispatcher::SendStatusReportMessage(
@@ -224,7 +228,7 @@ ECode CdmaSMSDispatcher::SendNewSubmitPdu(
 }
 
 void CdmaSMSDispatcher::SendSubmitPdu(
-    /* [in] */ /*TODO SMSDispatcher::SmsTracker*/IInterface* tracker)
+    /* [in] */ SMSDispatcher::SmsTracker* tracker)
 {
     // ==================before translated======================
     // if (SystemProperties.getBoolean(TelephonyProperties.PROPERTY_INECM_MODE, false)) {
@@ -238,8 +242,8 @@ void CdmaSMSDispatcher::SendSubmitPdu(
     assert(0);
 }
 
-ECode CdmaSMSDispatcher::SendSms(
-    /* [in] */ /*TODO SMSDispatcher::SmsTracker*/IInterface* tracker)
+void CdmaSMSDispatcher::SendSms(
+    /* [in] */ SMSDispatcher::SmsTracker* tracker)
 {
     // ==================before translated======================
     // HashMap<String, Object> map = tracker.mData;
@@ -279,10 +283,9 @@ ECode CdmaSMSDispatcher::SendSms(
     //     sendSmsByPstn(tracker);
     // }
     assert(0);
-    return NOERROR;
 }
 
-ECode CdmaSMSDispatcher::UpdateSmsSendStatus(
+void CdmaSMSDispatcher::UpdateSmsSendStatus(
     /* [in] */ Int32 messageRef,
     /* [in] */ Boolean success)
 {
@@ -290,11 +293,10 @@ ECode CdmaSMSDispatcher::UpdateSmsSendStatus(
     // // This function should be defined in ImsDispatcher.
     // Rlog.e(TAG, "updateSmsSendStatus should never be called from here!");
     assert(0);
-    return NOERROR;
 }
 
-ECode CdmaSMSDispatcher::SendSmsByPstn(
-    /* [in] */ /*TODO SMSDispatcher::SmsTracker*/IInterface* tracker)
+void CdmaSMSDispatcher::SendSmsByPstn(
+    /* [in] */ SMSDispatcher::SmsTracker* tracker)
 {
     // ==================before translated======================
     // int ss = mPhone.getServiceState().getState();
@@ -330,7 +332,6 @@ ECode CdmaSMSDispatcher::SendSmsByPstn(
     //     tracker.mImsRetry++;
     // }
     assert(0);
-    return NOERROR;
 }
 
 } // namespace Cdma

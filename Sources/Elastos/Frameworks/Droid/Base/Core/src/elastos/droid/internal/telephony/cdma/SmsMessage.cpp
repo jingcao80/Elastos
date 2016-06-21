@@ -10,13 +10,18 @@ namespace Telephony {
 namespace Cdma {
 
 //=====================================================================
+//                              SmsMessage::SubmitPdu
+//=====================================================================
+CAR_INTERFACE_IMPL(SmsMessage::SubmitPdu, /*TODO SmsMessageBase::SubmitPduBase*/Object, ISmsMessageSubmitPdu);
+
+//=====================================================================
 //                              SmsMessage
 //=====================================================================
-CAR_INTERFACE_IMPL(SmsMessage, /*TODO SmsMessageBase*/Object, ISmsMessage);
+CAR_INTERFACE_IMPL(SmsMessage, SmsMessageBase, ISmsMessage);
 
 const String SmsMessage::LOGTAG("SmsMessage");
 const String SmsMessage::LOGGABLE_TAG("CDMA:SMS");
-const Boolean SmsMessage::VDBG = false;
+const Boolean SmsMessage::VDBG = FALSE;
 const Byte SmsMessage::TELESERVICE_IDENTIFIER = 0x00;
 const Byte SmsMessage::SERVICE_CATEGORY = 0x01;
 const Byte SmsMessage::ORIGINATING_ADDRESS = 0x02;

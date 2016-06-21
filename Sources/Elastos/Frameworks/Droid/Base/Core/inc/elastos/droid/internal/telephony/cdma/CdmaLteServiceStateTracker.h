@@ -1,6 +1,8 @@
 #ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CDMALTESERVICESTATETRACKER_H__
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CDMALTESERVICESTATETRACKER_H__
 
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/internal/telephony/cdma/CdmaServiceStateTracker.h"
@@ -58,7 +60,9 @@ class CdmaLteServiceStateTracker
 public:
     CAR_INTERFACE_DECL();
 
-    CdmaLteServiceStateTracker(
+    CdmaLteServiceStateTracker();
+
+    CARAPI constructor(
         /* [in] */ ICDMALTEPhone* phone);
 
     // @Override
