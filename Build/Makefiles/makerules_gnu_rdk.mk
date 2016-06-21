@@ -41,22 +41,8 @@ DEPEND_LIST := $(shell find $(MAKEDIR)/res -name "*")
 $(MAKEDIR)/R.cpp: $(MAKEDIR)/AndroidManifest.xml $(MAKEDIR)/res $(DEPEND_LIST) $(MAKEDIR)/$(TARGET_NAME).car
 	if [ -d $(MAKEDIR)/gen ]; then rm -rf $(MAKEDIR)/gen; fi
 	if [ ! -d $(MAKEDIR)/gen ]; then mkdir $(MAKEDIR)/gen; fi
-ifndef RES_NAMESPACE
 	@cd $(MAKEDIR); \
-	sed -n 's/    namespace \(.*\) [\{]/\1/p' $(MAKEDIR)/$(TARGET_NAME).car | tr -s "\n" "\." | tr -d "\/\/ " | sed -n 's/\(.*\)\./\1/p' >$(MAKEDIR)/temp; \
-	if [ ! -z "$(EXTRA_RES_DIR)" ]; then \
-		aapt package $(AAPT_FLAGS) -f -m -J $(MAKEDIR)/gen $(EXTRA_RES_DIR) -S $(MAKEDIR)/res --cpp $(RES_NAMESPACE) -I $(EMULATOR_PATH)/platforms/android-23/package-export.apk -M $(MAKEDIR)/AndroidManifest.xml; \
-	else \
-		aapt package $(AAPT_FLAGS) -f -m -J $(MAKEDIR)/gen -S $(MAKEDIR)/res --cpp $(RES_NAMESPACE) -I $(EMULATOR_PATH)/platforms/android-23/package-export.apk -M $(MAKEDIR)/AndroidManifest.xml; \
-	fi
-else
-	@cd $(MAKEDIR); \
-	if [ ! -z "$(EXTRA_RES_DIR)" ]; then \
-		aapt package $(AAPT_FLAGS) -f -m -J $(MAKEDIR)/gen $(EXTRA_RES_DIR) -S $(MAKEDIR)/res --cpp $(RES_NAMESPACE) -I $(EMULATOR_PATH)/platforms/android-23/package-export.apk -M $(MAKEDIR)/AndroidManifest.xml; \
-	else \
-		aapt package $(AAPT_FLAGS) -f -m -J $(MAKEDIR)/gen -S $(MAKEDIR)/res --cpp $(RES_NAMESPACE) -I $(EMULATOR_PATH)/platforms/android-23/package-export.apk -M $(MAKEDIR)/AndroidManifest.xml; \
-	fi
-endif
+	aapt package $(AAPT_FLAGS) -f -m -J $(MAKEDIR)/gen $(addprefix -S ,$(EXTRA_RES_DIR)) -S $(MAKEDIR)/res --cpp $(RES_NAMESPACE) -I $(EMULATOR_PATH)/platforms/android-23/package-export.apk -M $(MAKEDIR)/AndroidManifest.xml
 	if [ ! -z $(APP_PACKAGE_NAME) ]; then \
 		mv -f $(MAKEDIR)/gen/$(subst .,\/,$(APP_PACKAGE_NAME))/R.cpp $(MAKEDIR)/gen/$(subst .,\/,$(APP_PACKAGE_NAME))/R.h $(MAKEDIR); \
 	else \
@@ -397,11 +383,7 @@ endif
 		fi \
 	else \
 	    if [ -d $(XDK_TARGETS)/$(TARGET_NAME)/res ]; then \
-	    	if [ ! -z "$(EXTRA_RES_DIR)" ]; then \
-				aapt package -u $(AAPT_FLAGS) $(EXTRA_RES_DIR) -S $(XDK_TARGETS)/$(TARGET_NAME)/res -I $(EMULATOR_PATH)/platforms/android-23/package-export.apk -M $(MAKEDIR)/AndroidManifest.xml --min-sdk-version 21 --target-sdk-version 21 -F $(XDK_TARGETS)/$(TARGET_NAME).epk; \
-	    	else \
-				aapt package -u $(AAPT_FLAGS) -S $(XDK_TARGETS)/$(TARGET_NAME)/res -I $(EMULATOR_PATH)/platforms/android-23/package-export.apk -M $(MAKEDIR)/AndroidManifest.xml --min-sdk-version 21 --target-sdk-version 21 -F $(XDK_TARGETS)/$(TARGET_NAME).epk; \
-	    	fi \
+				aapt package -u $(AAPT_FLAGS) $(addprefix -S ,$(EXTRA_RES_DIR)) -S $(XDK_TARGETS)/$(TARGET_NAME)/res -I $(EMULATOR_PATH)/platforms/android-23/package-export.apk -M $(MAKEDIR)/AndroidManifest.xml --min-sdk-version 21 --target-sdk-version 21 -F $(XDK_TARGETS)/$(TARGET_NAME).epk; \
 		else \
 			aapt package -f $(AAPT_FLAGS) -I $(EMULATOR_PATH)/platforms/android-23/android.jar -M $(MAKEDIR)/AndroidManifest.xml --min-sdk-version 21 --target-sdk-version 21 -F $(XDK_TARGETS)/$(TARGET_NAME).epk; \
 		fi \
