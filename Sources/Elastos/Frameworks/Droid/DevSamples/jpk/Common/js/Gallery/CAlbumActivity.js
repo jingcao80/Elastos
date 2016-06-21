@@ -115,7 +115,6 @@ module.exports = function(aoElastos, aoActivity){
 //         CParcelableObjectContainer::New((IObjectContainer**)&dataList);
 //            var dataList = Droid_New('Elastos.Droid.Utility.CParcelableObjectContainer');
 
-
     // class CArrayList {
     //     constructor();
 
@@ -133,7 +132,6 @@ module.exports = function(aoElastos, aoActivity){
     //     interface ISerializable;
     //     interface IRandomAccess;
     // }
-
 
             var dataList = Core_New("Elastos.Utility.CArrayList");
 
@@ -161,11 +159,12 @@ module.exports = function(aoElastos, aoActivity){
 //         for (Int32 i = 0; it != mAlbumEntryList.End(); ++it, ++i) {
             for (var i=0, im=mAlbumEntryList.length; i<im; i++) {
 
-                elog('==================_GetSimpleAdapter.begin=====1.1.0========i:'+i);
+                elog('==================_GetSimpleAdapter.begin=====1.1.0========i:'+i+'==url:'+JSON.stringify(mAlbumEntryList[i]));
 
 //             entry = *it;
 //             map = NULL;
 //             CObjectStringMap::New((IObjectStringMap**)&map);
+                //var entry = mAlbumEntryList[i];
                 var entry = mAlbumEntryList[i];
                 elog('==================_GetSimpleAdapter.begin=====1.1.1========');
                 //var map = Core_New('Elastos.Utility.CObjectStringMap');
@@ -175,25 +174,29 @@ module.exports = function(aoElastos, aoActivity){
 //             cs = NULL;
 //             CStringWrapper::New(entry->sourcePath, (ICharSequence**)&cs);
 //             map->Put(key1, cs);
-                map.Put( key1, CString(entry.sourcePath) );
+                //map.Put( key1, CString(entry.sourcePath) );
+                map.Put( CString(key1), CString(entry.sourcePath) );
                 elog('==================_GetSimpleAdapter.begin=====1.1.3========');
 
 //             cs = NULL;
 //             CStringWrapper::New(entry->num, (ICharSequence**)&cs);
 //             map->Put(key2, cs);
-                map.Put( key2, CString(entry.num+'') );
+                //map.Put( key2, CString(entry.num+'') );
+                map.Put( CString(key2), CString(entry.num+'') );
                 elog('==================_GetSimpleAdapter.begin=====1.1.4========');
 
 //             boolValue = NULL;
 //             CBoolean::New(FALSE, (IBoolean**)&boolValue);
 //             map->Put(key3, boolValue);
-                map.Put( key3, Core_New('Elastos.Core.CBoolean', false) );
+                //map.Put( key3, Core_New('Elastos.Core.CBoolean', false) );
+                map.Put( CString(key3), Core_New('Elastos.Core.CBoolean', false) );
                 elog('==================_GetSimpleAdapter.begin=====1.1.5========');
 
 //             cs = NULL;
 //             CStringWrapper::New(entry->desc, (ICharSequence**)&cs);
 //             map->Put(key4, cs);
-                map.Put( key4, CString(entry.desc) );
+                //map.Put( key4, CString(entry.desc) );
+                map.Put( CString(key4), CString(entry.desc) );
                 elog('==================_GetSimpleAdapter.begin=====1.1.6========');
 
 //             dataList->Add(map);
@@ -270,7 +273,6 @@ module.exports = function(aoElastos, aoActivity){
     //     interface IFilterable;
     // }
 
-
             simpleAdapter = Droid_New('Elastos.Droid.Widget.CSimpleAdapter', oActivity, dataList, R.layout.album_item, from, to);
 
             elog('==================tttttttttttttttttttttttttttttttttt========');
@@ -283,7 +285,6 @@ module.exports = function(aoElastos, aoActivity){
 
             //return simpleAdapter;
 
-
             //var myViewBinder = Droid_new('MyViewBinder', oActivity);
             //simpleAdapter.SetViewBinder(myViewBinder);
 
@@ -292,7 +293,7 @@ module.exports = function(aoElastos, aoActivity){
             simpleAdapter.SetViewBinder({
 
                 SetViewValue : function (aoView, aoData, asTextRepresentation, out_abResult) {
-                    elog('==================SetViewValue.begin=============');
+                    elog('==================SetViewValue.begin=============asTextRepresentation:'+asTextRepresentation);
 
                     out_abResult.data = false;
 
@@ -302,7 +303,8 @@ module.exports = function(aoElastos, aoActivity){
                     elog('==================SetViewValue.viewtype=============' + viewType);
 
                     //if(typeof(aoView.SetImageResource) == 'function') {
-                    if (false) {
+                    //if (false) {
+                    if (viewType.indexOf("ImageView")>-1) {
                         elog('==================SetViewValue.ImageView.begin=============');
 
                         //var myLoadImage = new MyLoadImageCallback(oActivity);
@@ -313,10 +315,8 @@ module.exports = function(aoElastos, aoActivity){
                             ImageLoaded : function(aoImageDrawable, aoImageView){
                                 elog('==================ImageLoaded.begin=============');
 
-
                                 //MyImageLoaded(aoImageDrawable, aoImageView);
                                 aoImageView.SetImageDrawable(aoImageDrawable);
-
 
     // AutoPtr<SomeArgs> args = SomeArgs::Obtain();
     // args->mArg1 = imageDrawable;
@@ -328,10 +328,8 @@ module.exports = function(aoElastos, aoActivity){
     // return mHost->mMyHandler->SendMessage(msg, &result);
 
                                 elog('==================ImageLoaded.end=============');
-
                             },
                         };
-
 
                         elog('==================SetViewValue.ImageView.begin======1=======');
 
@@ -342,7 +340,6 @@ module.exports = function(aoElastos, aoActivity){
                         }
                         else {
                             aoImageView.SetImageResource(R.color.divide_line_bg);
-
                         }
 
                         out_abResult.data = true;
@@ -370,11 +367,8 @@ module.exports = function(aoElastos, aoActivity){
 
         elog('==================_GetSimpleAdapter.end=============');
 
-        //return simpleAdapter;
-// }
-
+        return simpleAdapter;
     };
-
 
     var _LoadAlbumView = function () {
 

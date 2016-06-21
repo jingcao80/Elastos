@@ -22,11 +22,11 @@ var sImgHeight = null;
 
 var sCacheService = null;
 
-var sImageCache = null;
-var sImageSampleStatus = null;
-var sHighImageCache = null;
-var sHighImageWH = null;
-var sImageLoaderParamCache = null;
+var sImageCache = [];
+var sImageSampleStatus = [];
+var sHighImageCache = [];
+var sHighImageWH = [];
+var sImageLoaderParamCache = [];
 
 var sLock = null;
 var sStatusLock = null;
@@ -166,49 +166,61 @@ var ImageLoaderThread = (function(){
 //public static
 function LoadDrawable (imageUrl, isHigh, imageView, imageCallback) {
 
-    elog('================AsyncImageLoader.LoadDrawable.begin==========================');
+    elog('====AsyncImageLoader.LoadDrawable.begin======1==='+imageUrl);
 
-return null;
-        //Mutex::Autolock lock(sLock);
+    var drawble;
 
-        // var drawable;
+    //Mutex::Autolock lock(sLock);
 
-        // if (isHigh) {
-        //     drawable = this.sHighImageCache[imageUrl];
-        // }
-        // else {
-        //     drawable = this.sImageCache[imageUrl];
-        // }
-        // if (drawable) return drawable;
+    if (isHigh) {
+        drawable = sHighImageCache[imageUrl];
+    }
+    else {
+        drawable = sImageCache[imageUrl];
+    }
+    if (drawable) return drawable;
 
-        // var key = this.MakeImageParamKey(imageUrl, isHigh);
-        // var list = this.sImageLoaderParamCache[key];
-        // if (list) {
-        //     var needAdd = true;
-        //     for (var i=0, im=list.length; i<im; i++) {
-        //         if (list[i] == imageView) {
-        //             needAdd = false;
-        //             break;
-        //         }
-        //     }
-        //     if (needAdd) {
-        //         list.push({
-        //             mImageView : imageView,
-        //             mCallback : imageCallback,
-        //         });
-        //     }
-        // }
-        // else {
-        //     this.sImageLoaderParamCache[key] = [
-        //         {
-        //             mImageView : imageView,
-        //             mCallback : imageCallback,
-        //         }
-        //     ];
-        // }
+    elog('====AsyncImageLoader.LoadDrawable.begin========2========');
 
-        // var loadRunnable = new ImageLoaderThread(isHigh, imageUrl);
-        // loadRunnable.start();
+    var key = this.MakeImageParamKey(imageUrl, isHigh);
+    elog('====AsyncImageLoader.LoadDrawable.begin========3========');
+    var list = this.sImageLoaderParamCache[key];
+    elog('====AsyncImageLoader.LoadDrawable.begin========4========');
+    if (list) {
+        elog('====AsyncImageLoader.LoadDrawable.begin========5========');
+        var needAdd = true;
+        for (var i=0, im=list.length; i<im; i++) {
+            if (list[i] == imageView) {
+                needAdd = false;
+                break;
+            }
+        }
+        if (needAdd) {
+            list.push({
+                mImageView : imageView,
+                mCallback : imageCallback,
+            });
+        }
+    }
+    else {
+        elog('====AsyncImageLoader.LoadDrawable.begin========6========');
+        this.sImageLoaderParamCache[key] = [
+            {
+                mImageView : imageView,
+                mCallback : imageCallback,
+            }
+        ];
+    }
+
+    elog('====AsyncImageLoader.LoadDrawable.begin=========7====url:'+imageUrl);
+
+    var loadRunnable = new ImageLoaderThread(isHigh, imageUrl);
+
+    elog('====AsyncImageLoader.LoadDrawable.begin=========8====');
+    loadRunnable.start();
+    elog('====AsyncImageLoader.LoadDrawable.begin=========9====');
+
+    return drawble;
 }
 
 function DrawableLoaded () {

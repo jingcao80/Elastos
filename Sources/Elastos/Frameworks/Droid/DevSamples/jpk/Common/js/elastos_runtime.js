@@ -24,7 +24,7 @@ var CarDataType = {
     LocalPtr    : 13,
     LocalType   : 14,
     Enum        : 15,
-    ArrayOf     : 16,
+    CarArray    : 16,
     CppVector   : 17,
     Struct      : 18,
     Interface   : 19
@@ -53,7 +53,7 @@ var CarToJsDataTypeMap = {
         //CarDataType.StringBuf,
     ],
     array:[
-        CarDataType.ArrayOf,
+        CarDataType.CarArray,
         //CarDataType.BufferOf,
         //CarDataType.MemoryBuf,
         CarDataType.CppVector,
@@ -65,7 +65,11 @@ var CarToJsDataTypeMap = {
         CarDataType.LocalType,
         CarDataType.Struct,
         CarDataType.Interface,
-    ]
+    ],
+    //other:[
+    //    CarDataType.LocalPtr,
+    //    CarDataType.LocalType,
+    //],
 };
 
 var ParamIOAttribute = {
@@ -184,8 +188,32 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                             //TODO:compare the interface name
                             continue;
                         }
-                        else if (iDataType == CarDataType.Interface) {
+                        else if (iDataType == CarDataType.LocalPtr) {
+                            //TODO:compare the localptr element type
+                            //continue;
 
+                            var oElementTypeInfo = oTypeInfo.GetTargetTypeInfo();
+                            var iElementDataType = oElementTypeInfo.GetDataType();
+
+                            //elog('==============classinfo__createObject ======find method====LocalPtr====element type:'+iElementDataType+'====' + ([1,2] instanceof Array) );
+                            elog('==============classinfo__createObject ======find method====LocalPtr====element type:'+iElementDataType);
+
+                            switch (iElementDataType) {
+                                case CarDataType.Interface:
+                                    break;
+                                case CarDataType.CarArray:
+                                    if (typeof arg_in.GetClassId == 'function') bSameArgs = false;
+                                    //elog("=========insatanceof=====1==========="+bSameArgs);
+                                    //bSameArgs = (arg_in instanceOf Array);
+                                    //elog("=========insatanceof=====2==========="+bSameArgs);
+                                    break;
+                                default:
+                                    //TODO
+                                    break;
+                            }
+
+                            if (bSameArgs) continue;
+                            //continue;
                         }
                         else {
                             continue;
@@ -270,9 +298,27 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                 case CarDataType.LocalPtr:
                     //to be finished
                     elog('==============classinfo__createObject ===========LocalPtr====begin====');
-                    //oArgumentList.SetInputArgumentOfLocalPtr(i,arguments[i+2]);
-                    var tmp = [1,2,3];
-                    oArgumentList.SetInputArgumentOfLocalPtr(tmp,i,arguments[i+2]);
+
+                    var oElementTypeInfo = oTypeInfo.GetTargetTypeInfo();
+                    var iElementDataType = oElementTypeInfo.GetDataType();
+                    elog('==============classinfo__createObject ===========LocalPtr====element type:'+iElementDataType);
+
+                    switch (iElementDataType) {
+                        case CarDataType.CarArray:
+                            //oArgumentList.SetInputArgumentOfObjectPtr(i,arg);
+
+                            //oArgumentList.SetInputArgumentOfLocalPtr(i,arguments[i+2]);
+                            var tmp = [1,2,3];
+                            oArgumentList.SetInputArgumentOfLocalPtr(tmp,i,arguments[i+2]);
+                            break;
+                        default:
+                            //oArgumentList.SetInputArgumentOfObjectPtr(i,arg);
+
+                            //oArgumentList.SetInputArgumentOfLocalPtr(i,arguments[i+2]);
+                            var tmp = [1,2,3];
+                            oArgumentList.SetInputArgumentOfLocalPtr(tmp,i,arguments[i+2]);
+                            break;
+                    }
                     elog('==============classinfo__createObject ===========LocalPtr====end====');
                     break;
                 default:

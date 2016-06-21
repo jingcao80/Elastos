@@ -101,27 +101,25 @@ IsImageFile : function (asFileName) {
 //private:
 Init : function () {
     elog('=============DataSourceHelper::Init.begin===============');
+
     if (this.sInited) return;
 
-    elog('=============DataSourceHelper::Init.begin=====0=========='+this.sRootPath+'=='+Core_New);
     var dir = Core_New('Elastos.IO.CFile', this.sRootPath);
 
-    elog('=============DataSourceHelper::Init.begin=====1==========');
     var ret = dir.IsDirectory();
-    elog('=============DataSourceHelper::Init.begin=====2==========');
     if (!ret) {
         elog("sRootPath:" + this.sRootPath + " is not a valid directory!");
     }
-    elog('=============DataSourceHelper::Init.begin=====3==========');
 
     this._GetImageFileMap(this.sRootPath);
-    elog('=============DataSourceHelper::Init.begin=====4==========');
 
     this.sInited = true;
+
     elog('=============DataSourceHelper::Init.end===============');
 },
 _GetImageFileMap : function (rootPath) {
     elog('=============DataSourceHelper::_GetImageFileMap.begin===============');
+
     var dir = Core_New('Elastos.IO.CFile', rootPath);
     var files = dir.ListFiles();
     if (!files || !files.length) return;
@@ -156,9 +154,8 @@ _GetImageFileMap : function (rootPath) {
         this.sPath.push(rootPath);
 
     }
-    elog('=============DataSourceHelper::_GetImageFileMap.end========1======='+this.sImageSourcePathMap);
-    elog('=============DataSourceHelper::_GetImageFileMap.end========2======='+JSON.stringify(this.sImageSourcePathMap));
-    //aa = bb;
+
+    elog('=============DataSourceHelper::_GetImageFileMap.end========'+this.sImageSourcePathMap);
 },
 ClearAll : function () {  //~DataSourceHelper()
     elog('=============DataSourceHelper::ClearAll.begin===============');
