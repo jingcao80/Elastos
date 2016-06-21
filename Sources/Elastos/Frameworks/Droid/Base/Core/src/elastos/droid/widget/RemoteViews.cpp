@@ -3098,6 +3098,8 @@ ECode RemoteViews::GetApplicationInfo(
         // } catch (NameNotFoundException nnfe) {
         // }
     }
+    *info = applicationInfo;
+    REFCOUNT_ADD(*info)
     return NOERROR;
 }
 

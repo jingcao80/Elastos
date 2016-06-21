@@ -651,22 +651,20 @@ ECode AppWidgetServiceImpl::ProviderId::Equals(
     //    return false;
     //}
 
-    IObject* objTmp = IObject::Probe(obj);
-    ProviderId* other = (ProviderId*)objTmp;
+    ProviderId* other = (ProviderId*)IObject::Probe(obj);
     if (this->mUid != other->mUid)  {
         *result = FALSE;
         return NOERROR;
     }
 
-    Int32 compareTmp = 0;
-    IComparable::Probe(mComponentName)->CompareTo(other->mComponentName, &compareTmp);
+    Boolean equals = 0;
     if (mComponentName == NULL) {
         if (other->mComponentName != NULL) {
             *result = FALSE;
             return NOERROR;
         }
     }
-    else if (!compareTmp) {
+    else if (IObject::Probe(mComponentName)->Equals(other->mComponentName, &equals), !equals) {
         *result = FALSE;
         return NOERROR;
     }
@@ -5643,9 +5641,9 @@ Boolean AppWidgetServiceImpl::UpdateProvidersForPackageLocked(
     AutoPtr<IList> broadcastReceivers = QueryIntentReceivers(intent, userId);
 
     // add the missing ones and collect which ones to keep
-    Int32 size = 0;
-    broadcastReceivers->GetSize(&size);
-    Int32 N = broadcastReceivers == NULL ? 0 : size;
+    Int32 N = 0;
+    if (broadcastReceivers != NULL)
+        broadcastReceivers->GetSize(&N);;
     for (int i = 0; i < N; ++i) {
         AutoPtr<IInterface> interfaceTmp;
         broadcastReceivers->Get(i, (IInterface**)&interfaceTmp);

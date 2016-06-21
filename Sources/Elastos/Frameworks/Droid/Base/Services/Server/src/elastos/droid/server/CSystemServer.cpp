@@ -454,7 +454,7 @@ ECode SystemServer::StartCoreServices()
     // mActivityManagerService->SetUsageStatsManager(IUsageStatsManagerInternal::Probe(usm));
 
     // Tracks whether the updatable WebView is in a ready state and watches for update installs.
-    Slogger::I(TAG, "WebView Update Service todo");
+    Slogger::I(TAG, "WebView Update Service");
     AutoPtr<WebViewUpdateService> wvus = new WebViewUpdateService();
     wvus->constructor(mSystemContext);
     mSystemServiceManager->StartService(wvus.Get());

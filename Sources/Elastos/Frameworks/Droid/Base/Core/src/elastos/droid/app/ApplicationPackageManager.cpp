@@ -1429,7 +1429,7 @@ ECode ApplicationPackageManager::GetResourcesForApplication(
     VALIDATE_NOT_NULL(res);
 
     AutoPtr<IApplicationInfo> info;
-    GetApplicationInfo(appPackageName, sDefaultFlags, (IApplicationInfo**)&info);
+    FAIL_RETURN(GetApplicationInfo(appPackageName, sDefaultFlags, (IApplicationInfo**)&info))
     return GetResourcesForApplication(info, res);
 }
 

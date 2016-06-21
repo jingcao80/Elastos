@@ -444,8 +444,9 @@ AutoPtr<IDrawable> AppWidgetProviderInfo::LoadDrawable(
     IComponentInfo::Probe(mProviderInfo)->GetApplicationInfo((IApplicationInfo**)&applicationInfo);
     AutoPtr<IResources> resources;
     packageManager->GetResourcesForApplication(applicationInfo, (IResources**)&resources);
+
     AutoPtr<IDrawable> drawable;
-    if (resourceId > 0) {
+    if (resources != NULL && resourceId > 0) {
         if (density <= 0) {
             AutoPtr<IResources> res;
             context->GetResources((IResources**)&res);
