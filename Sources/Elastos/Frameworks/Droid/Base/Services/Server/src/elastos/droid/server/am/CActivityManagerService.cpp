@@ -14723,7 +14723,8 @@ ECode CActivityManagerService::SystemReady(
     RetrieveSettings();
     LoadResourcesOnSystemReady();
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         ReadGrantedUriPermissionsLocked();
     }
 

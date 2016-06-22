@@ -746,6 +746,13 @@ module
         interface IBinder;
     }
 
+    class CThemeServiceSettingsObserver {
+        constructor(
+            [in] IIThemeService* host);
+
+        interface IContentObserver;
+    }
+
 // //    namespace Updates {
 // //
 // //    class CCertPinInstallReceiver {

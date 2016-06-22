@@ -180,6 +180,7 @@ public:
         static CARAPI GetUriFor(
             /* [in] */ const String& name,
             /* [out] */ IUri** uri);
+        using NameValueTable::GetUriFor;
 
         /**
          * Convenience function for retrieving a single system settings value
@@ -506,6 +507,14 @@ public:
          */
         static const AutoPtr<IUri> CONTENT_URI;
 
+    private:
+        ECO_LOCAL static const AutoPtr<NameValueCache> sNameValueCache;
+        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_SECURE;
+        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_GLOBAL;
+        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_SECURE_THEN_GLOBAL;
+
+    public:
+
         /**
          * A {@link Uri} that will point to the current default ringtone at any
          * given time.
@@ -564,12 +573,6 @@ public:
         static const AutoPtr<ArrayOf<String> > SETTINGS_TO_BACKUP;
 
         static const AutoPtr<ArrayOf<String> > CLONE_TO_MANAGED_PROFILE;
-
-    private:
-        ECO_LOCAL static const AutoPtr<NameValueCache> sNameValueCache;
-        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_SECURE;
-        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_GLOBAL;
-        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_SECURE_THEN_GLOBAL;
     };
 
     class Secure : public NameValueTable
@@ -654,6 +657,7 @@ public:
         static CARAPI GetUriFor(
             /* [in] */ const String& name,
             /* [out] */ IUri** uri);
+        using NameValueTable::GetUriFor;
 
         /**
          * Convenience function for retrieving a single secure settings value
@@ -967,6 +971,13 @@ public:
     public:
         static const AutoPtr<IUri> CONTENT_URI;
 
+    private:
+        // Populated lazily, guarded by class object:
+        ECO_LOCAL static const AutoPtr<NameValueCache> sNameValueCache;
+        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_LOCK_SETTINGS;
+        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_GLOBAL;
+
+    public:
         /**
          * This are the settings to be backed up.
          *
@@ -983,14 +994,8 @@ public:
         static const AutoPtr<ArrayOf<String> > NAVIGATION_RING_TARGETS;
 
     private:
-        // Populated lazily, guarded by class object:
-        ECO_LOCAL static const AutoPtr<NameValueCache> sNameValueCache;
-        //assert(0 && "TODO");
         ECO_LOCAL static AutoPtr<IILockSettings> sLockSettings;
-
         ECO_LOCAL static Boolean sIsSystemProcess;
-        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_LOCK_SETTINGS;
-        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_GLOBAL;
         ECO_LOCAL static Object sSecureLock;
     };
 
@@ -1109,6 +1114,7 @@ public:
         static CARAPI GetUriFor(
             /* [in] */ const String& name,
             /* [out] */ IUri** uri);
+        using NameValueTable::GetUriFor;
 
         /**
          * Convenience function for retrieving a single secure settings value
@@ -1297,7 +1303,12 @@ public:
 
     public:
         static const AutoPtr<IUri> CONTENT_URI;
+    private:
+        // Populated lazily, guarded by class object:
+        ECO_LOCAL static const AutoPtr<NameValueCache> sNameValueCache;
+        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_SECURE;
 
+    public:
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
@@ -1316,11 +1327,6 @@ public:
          */
         static const AutoPtr<ArrayOf<String> > SETTINGS_TO_BACKUP;
         static const AutoPtr<ArrayOf<String> > MULTI_SIM_USER_PREFERRED_SUBS;
-
-    private:
-        // Populated lazily, guarded by class object:
-        ECO_LOCAL static const AutoPtr<NameValueCache> sNameValueCache;
-        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_SECURE;
     };
 
     class Bookmarks

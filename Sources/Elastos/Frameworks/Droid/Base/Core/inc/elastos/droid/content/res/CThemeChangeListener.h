@@ -59,7 +59,7 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle64 host);
+        /* [in] */ IThemeManager* host);
 
     CARAPI OnProgress(
         /* [in] */ Int32 progress);

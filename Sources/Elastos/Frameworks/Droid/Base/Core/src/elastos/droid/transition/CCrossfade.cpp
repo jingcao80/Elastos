@@ -7,8 +7,8 @@
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/graphics/CCanvas.h"
+#include "elastos/droid/graphics/drawable/CBitmapDrawable.h"
 #include "elastos/droid/view/View.h"
-
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::RectEvaluator;
@@ -25,6 +25,7 @@ using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::CCanvas;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Graphics::Drawable::CBitmapDrawable;
 using Elastos::Droid::View::IViewOverlay;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::ITextureView;
@@ -294,9 +295,10 @@ ECode CCrossfade::CaptureValues(
     CString::New(PROPNAME_BITMAP, (ICharSequence**)&pro_bmp);
     ctv->mValues->Put(pro_bmp, bitmap);
     // TODO: I don't have resources, can't call the non-deprecated method?
-    AutoPtr<IBitmapDrawable> drawable;// = new BitmapDrawable(bitmap);
+    AutoPtr<IDrawable> drawable;
+    CBitmapDrawable::New(bitmap, (IDrawable**)&drawable);
     // TODO: lrtb will be wrong if the view has transXY set
-    IDrawable::Probe(drawable)->SetBounds(bounds);
+    drawable->SetBounds(bounds);
     AutoPtr<ICharSequence> pro_drawable;
     CString::New(PROPNAME_DRAWABLE, (ICharSequence**)&pro_drawable);
     ctv->mValues->Put(pro_drawable, drawable);

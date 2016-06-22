@@ -6,6 +6,7 @@
 #include "elastos/droid/app/CAlertDialogBuilder.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/content/CIntentFilter.h"
+#include "elastos/droid/content/pm/ThemeUtils.h"
 #include "elastos/droid/graphics/drawable/Drawable.h"
 #include "elastos/droid/internal/app/CAlertController.h"
 #include "elastos/droid/internal/app/CAlertControllerAlertParams.h"
@@ -43,6 +44,7 @@ using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Content::Pm::ThemeUtils;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IResourcesTheme;
 using Elastos::Droid::Internal::App::CAlertController;
@@ -275,12 +277,13 @@ ECode GlobalActions::MyAdapter::GetView(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view);
-    AutoPtr<IInterface> action;
-    GetItem(position, (IInterface**)&action);
+    AutoPtr<IInterface> obj;
+    GetItem(position, (IInterface**)&obj);
+    Action* action = ((Action*)IObject::Probe(obj));
     AutoPtr<IInterface> service;
     mHost->mContext->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&service);
     AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(service);
-    AutoPtr<IView> viewTemp = ((Action*)IObject::Probe(action))->Create(mHost->mContext, convertView, parent, inflater);
+    AutoPtr<IView> viewTemp = action->Create(mHost->GetUiContext(), convertView, parent, inflater);
     *view = viewTemp;
     REFCOUNT_ADD(*view);
     return NOERROR;
@@ -1030,6 +1033,20 @@ ECode GlobalActions::MyBroadcastReceiver::OnReceive(
 }
 
 
+GlobalActions::ThemeChangeReceiver::ThemeChangeReceiver(
+    /* [in] */ GlobalActions* host)
+    : mHost(host)
+{
+}
+
+ECode GlobalActions::ThemeChangeReceiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    mHost->mUiContext = NULL;
+    return NOERROR;
+}
+
 GlobalActions::RingerModeReceiver::RingerModeReceiver(
     /* [in] */ GlobalActions* host)
     : mHost(host)
@@ -1409,6 +1426,7 @@ GlobalActions::GlobalActions(
 {
     // Init global variable of inner class.
     mBroadcastReceiver = new MyBroadcastReceiver(this);
+    mThemeChangeReceiver = new ThemeChangeReceiver(this);
     // TODO: PhoneStateListener is not implement.
     // PhoneStateListener mPhoneStateListener;
     mRingerModeReceiver = new RingerModeReceiver(this);
@@ -1416,7 +1434,6 @@ GlobalActions::GlobalActions(
     mHandler->constructor();
 
     mAirplaneModeObserver = new AirplaneModeObserver(mHandler, this);
-
 
     mContext = context;
     mWindowManagerFuncs = windowManagerFuncs;
@@ -1435,10 +1452,13 @@ GlobalActions::GlobalActions(
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IIntent::ACTION_CLOSE_SYSTEM_DIALOGS);
     filter->AddAction(IIntent::ACTION_SCREEN_OFF);
+    filter->AddAction(IIntent::UPDATE_POWER_MENU);
     // TODO: Telephone is not implement.
     filter->AddAction(ITelephonyIntents::ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
     AutoPtr<IIntent> intent;
     context->RegisterReceiver(mBroadcastReceiver, filter, (IIntent**)&intent);
+
+    ThemeUtils::RegisterThemeChangeReceiver(context, mThemeChangeReceiver);
 
     obj = NULL;
     mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
@@ -1480,7 +1500,7 @@ void GlobalActions::ShowDialog(
 {
     mKeyguardShowing = keyguardShowing;
     mDeviceProvisioned = isDeviceProvisioned;
-    if (mDialog != NULL) {
+    if (mDialog != NULL && mUiContext == NULL) {
         mDialog->Dismiss();
         mDialog = NULL;
         // Show delayed, so that the dismiss of the previous dialog completes
@@ -1489,6 +1509,7 @@ void GlobalActions::ShowDialog(
         Boolean isSuccess = FALSE;
         mHandler->SendMessage(message, &isSuccess);
     } else {
+        mDialog = CreateDialog();
         HandleShow();
     }
 }
@@ -1510,24 +1531,20 @@ void GlobalActions::AwakenIfNecessary()
 void GlobalActions::HandleShow()
 {
     AwakenIfNecessary();
-    mDialog = CreateDialog();
     PrepareDialog();
 
     // If we only have 1 item and it's a simple press action, just do this action.
     Int32 count;
     mAdapter->GetCount(&count);
-    if (count == 1)
-    {
+    if (count == 1) {
         AutoPtr<IInterface> item;
         mAdapter->GetItem(0, (IInterface**)&item);
         //mAdapter.getItem(0) instanceof SinglePressAction
         IGlobalActionsSinglePressAction* ispAction = IGlobalActionsSinglePressAction::Probe(item);
-        if(ispAction != NULL)
-        {
+        if (ispAction != NULL) {
             //&& !(mAdapter.getItem(0) instanceof LongPressAction))
             IGlobalActionsLongPressAction* ilpAction = IGlobalActionsLongPressAction::Probe(item);
-            if (ilpAction != NULL)
-            {
+            if (ilpAction != NULL) {
                 //((SinglePressAction) mAdapter.getItem(0)).onPress();
                 SinglePressAction* spAction = (SinglePressAction*)ispAction;
                 spAction->OnPress();
@@ -1535,7 +1552,7 @@ void GlobalActions::HandleShow()
             }
         }
     }
-    //else
+
     {
         AutoPtr<IWindow> window;
         mDialog->GetWindow((IWindow**)&window);
@@ -1550,6 +1567,15 @@ void GlobalActions::HandleShow()
         window->GetDecorView((IView**)&decorView);
         decorView->SetSystemUiVisibility(IView::STATUS_BAR_DISABLE_EXPAND);
     }
+}
+
+AutoPtr<IContext> GlobalActions::GetUiContext()
+{
+    if (mUiContext == NULL) {
+        mUiContext = ThemeUtils::CreateUiContext(mContext);
+        mUiContext->SetTheme(R::style::Theme_DeviceDefault_Light_DarkActionBar);
+    }
+    return mUiContext != NULL ? mUiContext : mContext;
 }
 
 AutoPtr<GlobalActions::GlobalActionsDialog> GlobalActions::CreateDialog()
@@ -1647,49 +1673,16 @@ AutoPtr<GlobalActions::GlobalActionsDialog> GlobalActions::CreateDialog()
         //addedKeys.add(actionKey);
         addedKeys.Insert(actionKey);
     }
-    /*
-    // first: power off
-    AutoPtr<PowerSinglePressAction> powerSinglePressAction = new PowerSinglePressAction(this);
-    mItems->PushBack(powerSinglePressAction);
-
-    // next: airplane mode
-    mItems->PushBack(mAirplaneModeOn);
-
-    // next: bug report, if enabled
-    AutoPtr<IContentResolver> contentResolver;
-    mContext->GetContentResolver((IContentResolver**)&contentResolver);
-    AutoPtr<ISettingsSecure> settingsSecure;
-    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
-    Int32 value = 0;
-    settingsSecure->GetInt32(contentResolver,
-            ISettingsSecure::BUGREPORT_IN_POWER_MENU, 0, &value);
-    if (value != 0) {
-        AutoPtr<BugSinglePressAction> bugSinglePressAction = new BugSinglePressAction(this);
-        mItems->PushBack(bugSinglePressAction);
-    }
-
-    // last: silent mode
-    if (SHOW_SILENT_TOGGLE) {
-        mItems->PushBack(mSilentModeAction);
-    }
-
-    // one more thing: optionally add a list of users to switch to
-    Boolean proRes;
-    SystemProperties::GetBoolean(String("fw.power_user_switcher"), FALSE, &proRes);
-    if (proRes) {
-        AddUsersToMenu(mItems);
-    }
-    */
 
     mAdapter = new MyAdapter(this);
 
     AutoPtr<IAlertControllerAlertParams> params;
-    CAlertControllerAlertParams::New(mContext, (IAlertControllerAlertParams**)&params);
+    CAlertControllerAlertParams::New(GetUiContext(), (IAlertControllerAlertParams**)&params);
     params->SetAdapter(mAdapter.Get());
     params->SetOnClickListener(this);
     params->SetForceInverseBackground(TRUE);
 
-    AutoPtr<GlobalActionsDialog> dialog = new GlobalActionsDialog(mContext, params);
+    AutoPtr<GlobalActionsDialog> dialog = new GlobalActionsDialog(GetUiContext(), params);
     dialog->SetCanceledOnTouchOutside(FALSE); // Handled by the custom class.
 
     dialog->GetListView()->SetItemsCanFocus(TRUE);
@@ -1705,6 +1698,43 @@ AutoPtr<GlobalActions::GlobalActionsDialog> GlobalActions::CreateDialog()
     dialog->SetOnDismissListener(this);
 
     return dialog;
+}
+
+void GlobalActions::CreateProfileDialog()
+{
+    assert(0 && "TODO");
+    // final ProfileManager profileManager = (ProfileManager) mContext
+    //         .getSystemService(Context.PROFILE_SERVICE);
+
+    // final Profile[] profiles = profileManager.getProfiles();
+    // UUID activeProfile = profileManager.getActiveProfile().getUuid();
+    // final CharSequence[] names = new CharSequence[profiles.length];
+
+    // int i = 0;
+    // int checkedItem = 0;
+
+    // for (Profile profile : profiles) {
+    //     if (profile.getUuid().equals(activeProfile)) {
+    //         checkedItem = i;
+    //         mChosenProfile = profile;
+    //     }
+    //     names[i++] = profile.getName();
+    // }
+
+    // final AlertDialog.Builder ab = new AlertDialog.Builder(getUiContext());
+
+    // AlertDialog dialog = ab.setSingleChoiceItems(names, checkedItem,
+    //         new DialogInterface.OnClickListener() {
+    //             public void onClick(DialogInterface dialog, int which) {
+    //                if (which < 0)
+    //                     return;
+    //                 mChosenProfile = profiles[which];
+    //                 profileManager.setActiveProfile(mChosenProfile.getUuid());
+    //                 dialog.cancel();
+    //             }
+    //         }).create();
+    // dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
+    // dialog.show();
 }
 
 AutoPtr<GlobalActions::Action> GlobalActions::GetBugReportAction()

@@ -89,7 +89,7 @@ CAR_INTERFACE_IMPL(CThemeChangeListener, Object, IIThemeChangeListener)
 CAR_OBJECT_IMPL(CThemeChangeListener)
 
 ECode CThemeChangeListener::constructor(
-    /* [in] */ Handle64 host)
+    /* [in] */ IThemeManager* host)
 {
     mHost = (CThemeManager*)host;
     return NOERROR;

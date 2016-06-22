@@ -85,6 +85,9 @@ using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIClipboard;
+using Elastos::Droid::Content::Res::IThemeConfig;
+using Elastos::Droid::Content::Res::IThemeConfigHelper;
+using Elastos::Droid::Content::Res::CThemeConfigHelper;
 using Elastos::Droid::Media::CAudioService;
 using Elastos::Droid::Media::IAudioService;
 using Elastos::Droid::View::IIWindowManager;
@@ -489,6 +492,7 @@ ECode SystemServer::StartOtherServices()
     AutoPtr<CConsumerIrService> consumerIr;
     AutoPtr<IAudioService> audioService;
     // AutoPtr<CMmsServiceBroker> mmsService;
+    // ProfileManagerService profile = null;
 
     AutoPtr<CStatusBarManagerService> statusBar;
     AutoPtr<IINotificationManager> notification;
@@ -500,6 +504,10 @@ ECode SystemServer::StartOtherServices()
     AutoPtr<CLockSettingsService> lockSettings;
     AutoPtr<IIAssetAtlas> atlas;
     // AutoPtr<CMediaRouterService> mediaRouter;
+    // EdgeGestureService edgeGestureService = null;
+    // GestureService gestureService = null;
+    AutoPtr<IIThemeService> themeService;
+    // KillSwitchService killSwitchService = null;
 
     AutoPtr<ISystemProperties> systemProperties;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&systemProperties);
@@ -507,7 +515,7 @@ ECode SystemServer::StartOtherServices()
     AutoPtr<ISystemService> systemService;
 
     Boolean disableStorage, disableMedia, disableBluetooth, disableTelephony;
-    Boolean disableLocation, disableSystemUI, disableNonCoreServices, disableNetwork;
+    Boolean disableLocation, disableSystemUI, disableNonCoreServices, disableNetwork, disableAtlas;
     systemProperties->GetBoolean(String("config.disable_storage"), FALSE, &disableStorage);
     systemProperties->GetBoolean(String("config.disable_media"), FALSE, &disableMedia);
     systemProperties->GetBoolean(String("config.disable_bluetooth"), FALSE, &disableBluetooth);
@@ -516,6 +524,7 @@ ECode SystemServer::StartOtherServices()
     systemProperties->GetBoolean(String("config.disable_systemui"), FALSE, &disableSystemUI);
     systemProperties->GetBoolean(String("config.disable_noncore"), FALSE, &disableNonCoreServices);
     systemProperties->GetBoolean(String("config.disable_network"), FALSE, &disableNetwork);
+    systemProperties->GetBoolean(String("config.disable_atlas"), FALSE, &disableAtlas);
     String str;
     systemProperties->Get(String("ro.kernel.qemu"), &str);
     // Boolean isEmulator = str.Equals("1");
@@ -545,7 +554,7 @@ ECode SystemServer::StartOtherServices()
 
     // The AccountManager must come before the ContentService
     // TODO: seems like this should be disable-able, but req'd by ContentService
-    Slogger::I(TAG, "Account Service");
+    Slogger::I(TAG, "Account Manager");
     AutoPtr<IIAccountManager> am;
     ec = CAccountManagerService::New(context, (IIAccountManager**)&am);
     if (FAILED(ec)) ReportWtf("starting Account Manager service", ec);
@@ -655,15 +664,6 @@ ECode SystemServer::StartOtherServices()
         ReportWtf("making display ready", ec);
     }
 
-    // ec = mPackageManagerService->PerformBootDexOpt();
-    // if (FAILED(ec)) ReportWtf("making display ready", ec);
-
-    AutoPtr<IResources> res;
-    context->GetResources((IResources**)&res);
-    AutoPtr<ICharSequence> bootMsg;
-    res->GetText(R::string::android_upgrading_starting_apps, (ICharSequence**)&bootMsg);
-    ActivityManagerNative::GetDefault()->ShowBootMessage(bootMsg, FALSE);
-
     if (mFactoryTestMode != FactoryTest::FACTORY_TEST_LOW_LEVEL) {
         if (!disableStorage &&
             (systemProperties->Get(String("system_init.startmountservice"), &str), !str.Equals("0"))) {
@@ -676,7 +676,18 @@ ECode SystemServer::StartOtherServices()
                 if (FAILED(ec)) ReportWtf("starting Mount service", ec);
                 ServiceManager::AddService(String("mount"), IIMountService::Probe(mountService));
         }
+    }
 
+    ec = mPackageManagerService->PerformBootDexOpt();
+    if (FAILED(ec)) ReportWtf("performing boot dexopt", ec);
+
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
+    AutoPtr<ICharSequence> bootMsg;
+    res->GetText(R::string::android_upgrading_starting_apps, (ICharSequence**)&bootMsg);
+    ActivityManagerNative::GetDefault()->ShowBootMessage(bootMsg, FALSE);
+
+    if (mFactoryTestMode != FactoryTest::FACTORY_TEST_LOW_LEVEL) {
         if (!disableNonCoreServices) {
             Slogger::I(TAG,  "Lock Settings Service");
             ec = CLockSettingsService::NewByFriend(context, (CLockSettingsService**)&lockSettings);
@@ -716,6 +727,15 @@ ECode SystemServer::StartOtherServices()
             if (FAILED(ec)) ReportWtf("starting Clipboard Service", ec);
             ServiceManager::AddService(IContext::CLIPBOARD_SERVICE, cb.Get());
         }
+
+        // if (!disableNonCoreServices) {
+        //     try {
+        //         Slogger::I(TAG, "TorchService");
+        //         ServiceManager.addService(Context.TORCH_SERVICE, new TorchService(context));
+        //     } catch (Throwable e) {
+        //         reportWtf("starting Torch Service", e);
+        //     }
+        // }
 
         if (!disableNetwork) {
             Slogger::I(TAG, "Network manager Service");
@@ -769,12 +789,14 @@ ECode SystemServer::StartOtherServices()
             if (FAILED(ec)) Slogger::I(TAG, "WifiService start fail");
             Slogger::I(TAG, "wifiScanningService");
             AutoPtr<ISystemService> wifiScanningService;
-            ec = mSystemServiceManager->StartService(String("Elastos.Droid.Server.Wifi.CWifiScanningService"), (ISystemService**)&wifiScanningService);
+            ec = mSystemServiceManager->StartService(
+                String("Elastos.Droid.Server.Wifi.CWifiScanningService"), (ISystemService**)&wifiScanningService);
             if (FAILED(ec)) Slogger::I(TAG, "WifiScanningService start fail");
 
             Slogger::I(TAG, "RttService");
             AutoPtr<ISystemService> rttService;
-            ec = mSystemServiceManager->StartService(String("Elastos.Droid.Server.Wifi.CRttService"), (ISystemService**)&rttService);
+            ec = mSystemServiceManager->StartService(
+                String("Elastos.Droid.Server.Wifi.CRttService"), (ISystemService**)&rttService);
             if (FAILED(ec)) Slogger::I(TAG, "RttService start fail");
 
             bval = FALSE;
@@ -792,11 +814,18 @@ ECode SystemServer::StartOtherServices()
             networkStats->BindConnectivityManager(connectivity);
             networkPolicy->BindConnectivityManager(connectivity);
 
-            Slogger::I(TAG, "Nsd Service");
+            Slogger::I(TAG, "Network Service Discovery Service");
             ec = CNsdService::Create(context, (CNsdService**)&serviceDiscovery);
-            if (FAILED(ec)) ReportWtf("starting NsdService Service,", ec);
+            if (FAILED(ec)) ReportWtf("starting Service Discovery Service", ec);
             ec = ServiceManager::AddService(IContext::NSD_SERVICE, TO_IINTERFACE(serviceDiscovery));
-            if (FAILED(ec)) ReportWtf("Add Network Service Discovery Service", ec);
+            if (FAILED(ec)) ReportWtf("Add Service Discovery Service", ec);
+
+            // try {
+            //     Slogger::I(TAG, "DPM Service");
+            //     startDpmService(context);
+            // } catch (Throwable e) {
+            //     reportWtf("starting DpmService", e);
+            // }
         }
 
         if (!disableNonCoreServices) {
@@ -884,6 +913,16 @@ ECode SystemServer::StartOtherServices()
             if (FAILED(ec)) ReportWtf("starting Wallpaper Service", ec);
             ServiceManager::AddService(IContext::WALLPAPER_SERVICE, TO_IINTERFACE(wallpaper));
         }
+
+        // if (!disableNonCoreServices) {
+        //     try {
+        //         Slogger::I(TAG, "Profile Manager");
+        //         profile = new ProfileManagerService(context);
+        //         ServiceManager.addService(Context.PROFILE_SERVICE, profile);
+        //     } catch (Throwable e) {
+        //         reportWtf("Failure starting Profile Manager", e);
+        //     }
+        // }
 
         if (!disableMedia &&
             (systemProperties->Get(String("system_init.startaudioservice"), &str), !str.Equals("0"))) {
@@ -1022,12 +1061,22 @@ ECode SystemServer::StartOtherServices()
     //         mSystemServiceManager->StartService(DreamManagerService.class);
     //     }
 
-        if (!disableNonCoreServices) {
+        if (!disableNonCoreServices && !disableAtlas) {
             Slogger::I(TAG, "Assets Atlas Service");
             ec = CAssetAtlasService::New(context, (IIAssetAtlas**)&atlas);
             if (FAILED(ec)) ReportWtf("making Assets Atlas Service ready", ec);
             ServiceManager::AddService(CAssetAtlasService::ASSET_ATLAS_SERVICE, atlas);
         }
+
+        // if (res->GetBoolean(R::bool_::config_enableGestureService, &bval), bval) {
+        //     try {
+        //         Slogger::I(TAG, "Gesture Sensor Service");
+        //         gestureService = new GestureService(context, inputManager);
+        //         ServiceManager.addService("gesture", gestureService);
+        //     } catch (Throwable e) {
+        //         Slog.e(TAG, "Failure starting Gesture Sensor Service", e);
+        //     }
+        // }
 
     //     if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_PRINTING)) {
     //         mSystemServiceManager->StartService(PRINT_MANAGER_SERVICE_CLASS);
@@ -1044,6 +1093,21 @@ ECode SystemServer::StartOtherServices()
     //     if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_LIVE_TV)) {
     //         mSystemServiceManager->StartService(TvInputManagerService.class);
     //     }
+
+        if (!disableNonCoreServices && !mOnlyCore) {
+            Slogger::I(TAG, "Theme Service");
+            ec = CThemeService::New(context, (IIThemeService**)&themeService);
+            if (FAILED(ec)) ReportWtf("starting Theme Service", ec);
+            ServiceManager::AddService(IContext::THEME_SERVICE, themeService);
+        }
+
+    // try {
+    //     Slogger::I(TAG, "KillSwitch Service");
+    //     killSwitchService = new KillSwitchService(context);
+    //     ServiceManager.addService(Context.KILLSWITCH_SERVICE, killSwitchService);
+    // } catch (Throwable e) {
+    //     reportWtf("starting KillSwitch Service", e);
+    // }
 
     //     if (!disableNonCoreServices) {
     //         try {
@@ -1080,11 +1144,50 @@ ECode SystemServer::StartOtherServices()
         ec = CLauncherAppsService::New(context, (ISystemService**)&systemService);
         if (FAILED(ec)) ReportWtf("making Launcher Apps Service ready", ec);
         mSystemServiceManager->StartService(systemService.Get());
+
+        // boolean isWipowerEnabled = SystemProperties.getBoolean("ro.bluetooth.wipower", false);
+
+        // if (isWipowerEnabled) {
+        //     try {
+        //         final String WBC_SERVICE_NAME = "wbc_service";
+        //         Slogger::I(TAG, "WipowerBatteryControl Service");
+
+        //         PathClassLoader wbcClassLoader =
+        //             new PathClassLoader("/system/framework/com.quicinc.wbc.jar:/system/framework/com.quicinc.wbcservice.jar",
+        //                                 ClassLoader.getSystemClassLoader());
+        //         Class wbcClass = wbcClassLoader.loadClass("com.quicinc.wbcservice.WbcService");
+        //         Constructor<Class> ctor = wbcClass.getConstructor(Context.class);
+        //         Object wbcObject = ctor.newInstance(context);
+        //         Slog.d(TAG, "Successfully loaded WbcService class");
+        //         ServiceManager.addService(WBC_SERVICE_NAME, (IBinder) wbcObject);
+        //     } catch (Throwable e) {
+        //         reportWtf("starting WipowerBatteryControl Service", e);
+        //     }
+        // } else {
+        //     Slog.d(TAG, "Wipower not supported");
+        // }
+
+        // try {
+        //     Slogger::I(TAG, "EdgeGesture service");
+        //     edgeGestureService = new EdgeGestureService(context, inputManager);
+        //     ServiceManager.addService("edgegestureservice", edgeGestureService);
+        // } catch (Throwable e) {
+        //     Slog.e(TAG, "Failure starting EdgeGesture service", e);
+        // }
     }
 
     // if (!disableNonCoreServices) {
     //     mSystemServiceManager->StartService(MediaProjectionManagerService.class);
     // }
+
+    // // make sure the ADB_ENABLED setting value matches the secure property value
+    // Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_PORT,
+    //         Integer.parseInt(SystemProperties.get("service.adb.tcp.port", "-1")));
+
+    // // register observer to listen for settings changes
+    // mContentResolver.registerContentObserver(
+    //     Settings.Secure.getUriFor(Settings.Secure.ADB_PORT),
+    //     false, new AdbPortObserver());
 
     // Before things start rolling, be sure we have decided whether
     // we are in safe mode.
@@ -1155,7 +1258,33 @@ ECode SystemServer::StartOtherServices()
     if (FAILED(ec)) ReportWtf("making Display Manager Service ready", ec);
 
 
+    // if (edgeGestureService != null) {
+    //     try {
+    //         edgeGestureService.systemReady();
+    //     } catch (Throwable e) {
+    //         reportWtf("making EdgeGesture service ready", e);
+    //     }
+    // }
+
+    // if (gestureService != null) {
+    //     try {
+    //         gestureService.systemReady();
+    //     } catch (Throwable e) {
+    //         reportWtf("making Gesture Sensor Service ready", e);
+    //     }
+    // }
+
     Slogger::I(TAG, "other services ready...");
+
+    // IntentFilter filter = new IntentFilter();
+    // filter.addAction(Intent.ACTION_APP_FAILURE);
+    // filter.addAction(Intent.ACTION_APP_FAILURE_RESET);
+    // filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+    // filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+    // filter.addAction(ThemeUtils.ACTION_THEME_CHANGED);
+    // filter.addCategory(Intent.CATEGORY_THEME_PACKAGE_INSTALLED_STATE_CHANGE);
+    // filter.addDataScheme("package");
+    // context.registerReceiver(new AppsFailureReceiver(), filter);
 
     // These are needed to propagate to the runnable below.
     AutoPtr<ServiceBundle> bundle = new ServiceBundle();
@@ -1179,6 +1308,7 @@ ECode SystemServer::StartOtherServices()
     // bundle->mMediaRouterF = mediaRouter;
     bundle->mAudioServiceF = audioService;
     // bundle->mMmsServiceF = mmsService;
+    bundle->mThemeServiceF = (CThemeService*)themeService.Get();
 
     // We now tell the activity manager it is okay to run third party
     // code.  It will call back into us once it has gotten to the state
@@ -1345,6 +1475,23 @@ ECode SystemServer::SystemReadyRunnable::Run()
     //     ec = mServiceBundle->mMmsServiceF->SystemRunning();
     //     if (FAILED(ec)) mHost->ReportWtf("Notifying MmsService running", ec);
     // }
+
+    // now that the system is up, apply default theme if applicable
+    if (mServiceBundle->mThemeServiceF != NULL){
+        ec = mServiceBundle->mThemeServiceF->SystemRunning();
+        if (FAILED(ec)) mHost->ReportWtf("Notifying Theme running", ec);
+    }
+
+    AutoPtr<IThemeConfigHelper> tcHelper;
+    CThemeConfigHelper::AcquireSingleton((IThemeConfigHelper**)&tcHelper);
+    AutoPtr<IContentResolver> cr;
+    mHost->mSystemContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<IThemeConfig> themeConfig;
+    tcHelper->GetBootTheme(cr, (IThemeConfig**)&themeConfig);
+    String iconPkg;
+    themeConfig->GetIconPackPkgName(&iconPkg);
+    ec = mHost->mPackageManagerService->UpdateIconMapping(iconPkg);
+    if (FAILED(ec)) mHost->ReportWtf("Icon Mapping failed", ec);
 
     return NOERROR;
 }

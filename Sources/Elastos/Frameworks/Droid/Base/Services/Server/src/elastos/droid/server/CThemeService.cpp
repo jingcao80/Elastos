@@ -1,6 +1,7 @@
 #include <elastos/droid/app/ActivityManagerNative.h>
 #include <elastos/droid/Manifest.h>
 #include "elastos/droid/server/CThemeService.h"
+#include "elastos/droid/server/CThemeServiceSettingsObserver.h"
 #include "Elastos.CoreLibrary.Utility.Zip.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Internal.h"
@@ -20,9 +21,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::CWallpaperManager;
 using Elastos::Droid::App::CWallpaperManagerHelper;
@@ -69,6 +69,7 @@ using Elastos::Droid::Manifest;
 using Elastos::Droid::Media::IRingtoneManager;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::Build;
+using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::Environment;
@@ -76,8 +77,8 @@ using Elastos::Droid::Os::FileUtils;
 using Elastos::Droid::Os::HandlerThread;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IProcess;
-using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::CRemoteCallbackList;
 using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::Provider::CSettingsSystem;
 using Elastos::Droid::Provider::CThemesContractMixnMatchColumns;
@@ -112,6 +113,7 @@ using Elastos::Core::EIID_IComparator;
 using Elastos::Core::ISystem;
 using Elastos::Core::IThread;
 using Elastos::Core::StringUtils;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -194,15 +196,16 @@ ECode CThemeService::ResourceProcessingHandler::HandleMessage(
                 AutoPtr<IInterface> pkgName;
                 msg->GetObj((IInterface**)&pkgName);
                 Boolean flag = FALSE;
-                {    AutoLock syncLock(mThemesToProcessQueue);
-                    if (mThemesToProcessQueue->Contains(pkgName, &flag), !flag) {
+                {
+                    AutoLock syncLock(mHost->mThemesToProcessQueue);
+                    if (mHost->mThemesToProcessQueue->Contains(pkgName, &flag), !flag) {
                         String str;
                         ICharSequence* cs = ICharSequence::Probe(pkgName);
                         cs->ToString(&str);
                         if (DEBUG) Logger::D(TAG, "Adding %s for processing", str.string());
-                        mThemesToProcessQueue->Add(pkgName);
+                        mHost->mThemesToProcessQueue->Add(pkgName);
                         Int32 size;
-                        if (mThemesToProcessQueue->GetSize(&size), size == 1) {
+                        if (mHost->mThemesToProcessQueue->GetSize(&size), size == 1) {
                             SendEmptyMessage(MESSAGE_DEQUEUE_AND_PROCESS_THEME, &flag);
                         }
                     }
@@ -213,39 +216,34 @@ ECode CThemeService::ResourceProcessingHandler::HandleMessage(
         case MESSAGE_DEQUEUE_AND_PROCESS_THEME:
             {
                 AutoPtr<IInterface> pkgName;
-                {    AutoLock syncLock(mThemesToProcessQueue);
-                    mThemesToProcessQueue->Get(0, (IInterface**)&pkgName);
+                {
+                    AutoLock syncLock(mHost->mThemesToProcessQueue);
+                    mHost->mThemesToProcessQueue->Get(0, (IInterface**)&pkgName);
                 }
                 if (pkgName != NULL) {
-                    String str;
-                    ICharSequence::Probe(pkgName)->ToString(&str);
+                    String str = TO_STR(pkgName);
                     if (DEBUG) Logger::D(TAG, "Processing %s", str.string());
                     String name;
-                    // try {
-                        ECode ec = NOERROR;
-                        AutoPtr<IPackageInfo> pi;
-                        ec = mPM->GetPackageInfo(str, 0, (IPackageInfo**)&pi);
-                        if (ec == (ECode)E_PACKAGEMANAGER_NAME_NOT_FOUND_EXCEPTION) {
-                            name = String(NULL);
-                            return E_PACKAGEMANAGER_NAME_NOT_FOUND_EXCEPTION;
-                        }
+                    ECode ec = NOERROR;
+                    AutoPtr<IPackageInfo> pi;
+                    ec = mHost->mPM->GetPackageInfo(str, 0, (IPackageInfo**)&pi);
+                    if (pi != NULL) {
                         name = mHost->GetThemeName(pi.Get());
-                    // } catch (PackageManager.NameNotFoundException e) {
-                        // name = null;
-                    // }
+                    }
 
                     Int32 result;
-                    mPM->ProcessThemeResources(str, &result);
+                    mHost->mPM->ProcessThemeResources(str, &result);
                     if (result < 0) {
                         mHost->PostFailedThemeInstallNotification(name.IsNull() ? name : str);
                     }
                     mHost->SendThemeResourcesCachedBroadcast(str, result);
 
-                    {    AutoLock syncLock(mThemesToProcessQueue);
-                        mThemesToProcessQueue->Remove(0);
+                    {
+                        AutoLock syncLock(mHost->mThemesToProcessQueue);
+                        mHost->mThemesToProcessQueue->Remove(0);
                         Int32 size;
                         Boolean flag = FALSE;
-                        if ((mThemesToProcessQueue->GetSize(&size), size > 0) &&
+                        if ((mHost->mThemesToProcessQueue->GetSize(&size), size > 0) &&
                            (HasMessages(MESSAGE_DEQUEUE_AND_PROCESS_THEME, &flag), !flag)) {
                             SendEmptyMessage(MESSAGE_DEQUEUE_AND_PROCESS_THEME, &flag);
                         }
@@ -267,24 +265,29 @@ ECode CThemeService::ResourceProcessingHandler::HandleMessage(
 //-----------------------------------------------------------------------------------
 //                          CThemeService::SettingsObserver
 //-----------------------------------------------------------------------------------
-CThemeService::SettingsObserver::SettingsObserver(
-    /* [in] */ CThemeService* host)
-    : mHost(host)
+CThemeService::SettingsObserver::constructor(
+    /* [in] */ IIThemeService* host)
 {
+    mHost = (CThemeService*)host;
     AutoPtr<ISettingsSystem> settings;
     CSettingsSystem::AcquireSingleton((ISettingsSystem**)&settings);
     settings->GetDEFAULT_ALARM_ALERT_URI((IUri**)&ALARM_ALERT_URI);
     settings->GetDEFAULT_NOTIFICATION_URI((IUri**)&NOTIFICATION_URI);
     settings->GetDEFAULT_RINGTONE_URI((IUri**)&RINGTONE_URI);
-    ContentObserver::constructor(NULL);
+    assert(ALARM_ALERT_URI != NULL);
+    assert(NOTIFICATION_URI != NULL);
+    assert(RINGTONE_URI != NULL);
+    Logger::I(TAG, ">> create SettingsObserver: \nALARM_ALERT_URI:%s\nNOTIFICATION_URI:%s\nRINGTONE_URI:%s",
+        TO_CSTR(ALARM_ALERT_URI), TO_CSTR(NOTIFICATION_URI), TO_CSTR(RINGTONE_URI));
+    return ContentObserver::constructor(NULL);
 }
 
 ECode CThemeService::SettingsObserver::Register(
-    /* [in] */ Boolean bregister)
+    /* [in] */ Boolean bval)
 {
     AutoPtr<IContentResolver> cr;
-    mContext->GetContentResolver((IContentResolver**)&cr);
-    if (bregister) {
+    mHost->mContext->GetContentResolver((IContentResolver**)&cr);
+    if (bval) {
         cr->RegisterContentObserver(ALARM_ALERT_URI.Get(), FALSE, this);
         cr->RegisterContentObserver(NOTIFICATION_URI.Get(), FALSE, this);
         return cr->RegisterContentObserver(RINGTONE_URI.Get(), FALSE, this);
@@ -340,18 +343,18 @@ ECode CThemeService::SettingsObserver::OnChange(
 }
 
 //-----------------------------------------------------------------------------------
-//                          CThemeService::MyWallpaperChangeReceiver
+//                          CThemeService::WallpaperChangeReceiver
 //-----------------------------------------------------------------------------------
-CThemeService::MyWallpaperChangeReceiver::MyWallpaperChangeReceiver(
+CThemeService::WallpaperChangeReceiver::WallpaperChangeReceiver(
     /* [in] */ CThemeService* host)
     : mHost(host)
 {}
 
-ECode CThemeService::MyWallpaperChangeReceiver::OnReceive(
+ECode CThemeService::WallpaperChangeReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    if (!mWallpaperChangedByUs) {
+    if (!mHost->mWallpaperChangedByUs) {
         // In case the mixnmatch table has a mods_launcher entry, we'll clear it
         AutoPtr<IThemeChangeRequestBuilder> builder;
         CThemeChangeRequestBuilder::New((IThemeChangeRequestBuilder**)&builder);
@@ -368,22 +371,20 @@ ECode CThemeService::MyWallpaperChangeReceiver::OnReceive(
         mHost->UpdateProvider(request, millis);
     }
     else {
-        mWallpaperChangedByUs = FALSE;
+        mHost->mWallpaperChangedByUs = FALSE;
     }
     return NOERROR;
 }
 
 //-----------------------------------------------------------------------------------
-//                          CThemeService::MyUserChangeReceiver
+//                          CThemeService::UserChangeReceiver
 //-----------------------------------------------------------------------------------
-CThemeService::MyUserChangeReceiver::MyUserChangeReceiver(
+CThemeService::UserChangeReceiver::UserChangeReceiver(
     /* [in] */ CThemeService* host)
     : mHost(host)
 {}
 
-CAR_INTERFACE_IMPL(CThemeService::MyUserChangeReceiver, BroadcastReceiver, IBroadcastReceiver)
-
-ECode CThemeService::MyUserChangeReceiver::OnReceive(
+ECode CThemeService::UserChangeReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
@@ -391,11 +392,11 @@ ECode CThemeService::MyUserChangeReceiver::OnReceive(
     intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, -1, &userHandle);
     if (userHandle >= 0) {
         AutoPtr<IContentResolver> cr;
-        mContext->GetContentResolver((IContentResolver**)&cr);
+        mHost->mContext->GetContentResolver((IContentResolver**)&cr);
         AutoPtr<IThemeConfigHelper> tch;
         CThemeConfigHelper::AcquireSingleton((IThemeConfigHelper**)&tch);
         AutoPtr<IThemeConfig> config;
-        tch->GetBootThemeForUser(cr.Get(), userHandle, (IThemeConfig**)&config);
+        tch->GetBootThemeForUser(cr, userHandle, (IThemeConfig**)&config);
         if (DEBUG) {
             String str = Object::ToString(config.Get());
             Logger::D(TAG, "Changing theme for user %d to %s", userHandle, str.string());
@@ -418,10 +419,10 @@ ECode CThemeService::MyUserChangeReceiver::OnReceive(
 //-----------------------------------------------------------------------------------
 //                          CThemeService::MyComparator
 //-----------------------------------------------------------------------------------
+CAR_INTERFACE_IMPL(CThemeService::MyComparator, Object, IComparator)
+
 CThemeService::MyComparator::MyComparator()
 {}
-
-CAR_INTERFACE_IMPL(CThemeService::MyComparator, Object, IComparator)
 
 ECode CThemeService::MyComparator::Compare(
     /* [in] */ IInterface* lhs,
@@ -443,8 +444,7 @@ ECode CThemeService::MyComparator::Compare(
 //                          CThemeService
 //-----------------------------------------------------------------------------------
 const String CThemeService::TAG("CThemeService");
-
-const Boolean CThemeService::DEBUG = false;
+const Boolean CThemeService::DEBUG = TRUE;
 
 const String CThemeService::GOOGLE_SETUPWIZARD_PACKAGE("com.google.android.setupwizard");
 const String CThemeService::CM_SETUPWIZARD_PACKAGE("com.cyanogenmod.setupwizard");
@@ -455,22 +455,19 @@ const Int64 CThemeService::PURGED_ICON_CACHE_SIZE = 25165824; // 24 MB
 // Defines a min and max compatible api level for themes on this system.
 const Int32 CThemeService::MIN_COMPATIBLE_VERSION = 21;
 
-AutoPtr<IContext> CThemeService::mContext;
-AutoPtr<IPackageManager> CThemeService::mPM;
-Boolean CThemeService::mWallpaperChangedByUs = FALSE;
-AutoPtr<IArrayList> CThemeService::mThemesToProcessQueue;
+CAR_INTERFACE_IMPL_2(CThemeService, Object, IIThemeService, IBinder)
+
+CAR_OBJECT_IMPL(CThemeService)
 
 CThemeService::CThemeService()
-    : mIconCacheSize(0)
+    : mProgress(0)
+    , mWallpaperChangedByUs(FALSE)
+    , mIconCacheSize(0)
     , mIsThemeApplying(FALSE)
 {}
 
 CThemeService::~CThemeService()
 {}
-
-CAR_INTERFACE_IMPL_2(CThemeService, Object, IIThemeService, IBinder)
-
-CAR_OBJECT_IMPL(CThemeService)
 
 ECode CThemeService::constructor(
     /* [in] */ IContext* context)
@@ -481,7 +478,6 @@ ECode CThemeService::constructor(
     AutoPtr<ILooper> looper;
     mWorker->GetLooper((ILooper**)&looper);
     mHandler = new ThemeWorkerHandler(this, looper);
-    Logger::I(TAG, "Spawned worker thread");
 
     AutoPtr<IHandlerThread> processingThread = new HandlerThread(String("ResourceProcessingThread"),
             IProcess::THREAD_PRIORITY_BACKGROUND);
@@ -497,28 +493,33 @@ ECode CThemeService::constructor(
     ThemeUtils::CreateNotificationDirIfNotExists();
     ThemeUtils::CreateRingtoneDirIfNotExists();
     ThemeUtils::CreateIconCacheDirIfNotExists();
-    mSettingsObserver = new SettingsObserver(this);
-    mWallpaperChangeReceiver = new MyWallpaperChangeReceiver(this);
-    mUserChangeReceiver = new MyUserChangeReceiver(this);
+
+    CThemeServiceSettingsObserver::New(this, (IContentObserver**)&mSettingsObserver);
+    mWallpaperChangeReceiver = new WallpaperChangeReceiver(this);
+    mUserChangeReceiver = new UserChangeReceiver(this);
     mOldestFilesFirstComparator = new MyComparator();
+
+    CRemoteCallbackList::New((IRemoteCallbackList**)&mClients);
+    CRemoteCallbackList::New((IRemoteCallbackList**)&mProcessingListeners);
+    CArrayList::New((IArrayList**)&mThemesToProcessQueue);
     return NOERROR;
 }
 
-void CThemeService::SystemRunning()
+ECode CThemeService::SystemRunning()
 {
     // listen for wallpaper changes
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(IIntent::ACTION_WALLPAPER_CHANGED, (IIntentFilter**)&filter);
     AutoPtr<IIntent> intent;
-    mContext->RegisterReceiver(((IBroadcastReceiver*)mWallpaperChangeReceiver.Get()), filter.Get(), (IIntent**)&intent);
+    mContext->RegisterReceiver(mWallpaperChangeReceiver, filter, (IIntent**)&intent);
 
     filter = NULL;
-    CIntentFilter::New(IIntent::ACTION_USER_SWITCHED, (IIntentFilter**)&filter);
     intent = NULL;
-    mContext->RegisterReceiver(((IBroadcastReceiver*)mUserChangeReceiver.Get()), filter, (IIntent**)&intent);
+    CIntentFilter::New(IIntent::ACTION_USER_SWITCHED, (IIntentFilter**)&filter);
+    mContext->RegisterReceiver(mUserChangeReceiver, filter, (IIntent**)&intent);
 
     // listen for alarm/notifications/ringtone changes
-    mSettingsObserver->Register(TRUE);
+    ((SettingsObserver*)mSettingsObserver.Get())->Register(TRUE);
 
     mPM = NULL;
     mContext->GetPackageManager((IPackageManager**)&mPM);
@@ -530,6 +531,7 @@ void CThemeService::SystemRunning()
         RemoveObsoleteThemeOverlayIfExists();
         UpdateThemeApi();
     }
+    return NOERROR;
 }
 
 void CThemeService::RemoveObsoleteThemeOverlayIfExists()
@@ -702,7 +704,7 @@ void CThemeService::DoApplyTheme(
     isystem->GetCurrentTimeMillis(&updateTime);
 
     // Stop listening for settings changes while applying theme
-    mSettingsObserver->Register(FALSE);
+    ((SettingsObserver*)mSettingsObserver.Get())->Register(FALSE);
 
     IncrementProgress(5);
 
@@ -773,7 +775,7 @@ void CThemeService::DoApplyTheme(
     mIsThemeApplying = FALSE;
 
     // Start listening for settings changes while applying theme
-    mSettingsObserver->Register(TRUE);
+    ((SettingsObserver*)mSettingsObserver.Get())->Register(TRUE);
 }
 
 void CThemeService::DoApplyDefaultTheme()
@@ -785,25 +787,24 @@ void CThemeService::DoApplyDefaultTheme()
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
     String defaultThemePkg;
     settingsSecure->GetString(resolver, ISettingsSecure::DEFAULT_THEME_PACKAGE, &defaultThemePkg);
-    if (!TextUtils::IsEmpty(StringUtils::ParseCharSequence(defaultThemePkg))) {
+    Logger::I(TAG, " >>> DoApplyDefaultTheme: %s", defaultThemePkg.string());
+    if (!TextUtils::IsEmpty(CoreUtils::Convert(defaultThemePkg))) {
         String defaultThemeComponents;
         settingsSecure->GetString(resolver, ISettingsSecure::DEFAULT_THEME_COMPONENTS, &defaultThemeComponents);
         AutoPtr<List<String> > components;
-        if (TextUtils::IsEmpty(StringUtils::ParseCharSequence(defaultThemeComponents))) {
+        if (TextUtils::IsEmpty(CoreUtils::Convert(defaultThemeComponents))) {
             components = ThemeUtils::GetAllComponents();
         }
         else {
+            components = new List<String>();
             AutoPtr<ArrayOf<String> > strings;
             StringUtils::Split(defaultThemeComponents, String("\\|"), (ArrayOf<String>**)&strings);
             for (Int32 i = 0; i < strings->GetLength(); ++i) {
                 components->PushBack((*strings)[i]);
             }
-            // components = new ArrayList<String>(
-            //         Arrays.asList(defaultThemeComponents.split("\\|")));
         }
         AutoPtr<IThemeChangeRequestBuilder> builder;
         CThemeChangeRequestBuilder::New((IThemeChangeRequestBuilder**)&builder);
-               // ThemeChangeRequest.Builder builder = new ThemeChangeRequest.Builder();
         List<String>::Iterator it = components->Begin();
         for (; it != components->End(); ++it) {
             AutoPtr<IThemeChangeRequestBuilder> builder;
@@ -1132,7 +1133,7 @@ Boolean CThemeService::SetCustomLockScreenWallpaper(
     wmh->GetInstance(mContext, (IWallpaperManager**)&wm);
     ECode ec = NOERROR;
     // try {
-        if (IThemeConfig::SYSTEM_DEFAULT.Equals(pkgName) || TextUtils::IsEmpty(StringUtils::ParseCharSequence(pkgName))) {
+        if (IThemeConfig::SYSTEM_DEFAULT.Equals(pkgName) || TextUtils::IsEmpty(CoreUtils::Convert(pkgName))) {
             ec = wm->ClearKeyguardWallpaper();
             if (FAILED(ec)) {
                 Logger::E(TAG, "There was an error setting lockscreen wp for pkg %s", pkgName.string());
@@ -1195,7 +1196,7 @@ Boolean CThemeService::UpdateWallpaper(
             ICloseable::Probe(c)->Close();
         // }
     }
-    else if (TextUtils::IsEmpty(StringUtils::ParseCharSequence(pkgName))) {
+    else if (TextUtils::IsEmpty(CoreUtils::Convert(pkgName))) {
         // try {
             ec = wm->Clear(FALSE);
         // } catch (IOException e) {
@@ -1579,7 +1580,8 @@ void CThemeService::BroadcastThemeChange(
 void CThemeService::IncrementProgress(
     /* [in] */ Int32 increment)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mProgress += increment;
         if (mProgress > 100) mProgress = 100;
     }
@@ -1620,7 +1622,8 @@ ECode CThemeService::RequestThemeChange(
      * TODO: create a callback that can be sent to any ThemeChangeListeners to notify them that
      * the theme will be applied once the processing is done.
      */
-    {    AutoLock syncLock(mThemesToProcessQueue);
+    {
+        AutoLock syncLock(mThemesToProcessQueue);
         AutoPtr<IMap> componentMap;
         request->GetThemeComponentsMap((IMap**)&componentMap);
         AutoPtr<ISet> keySet;
@@ -1764,7 +1767,8 @@ ECode CThemeService::ProcessThemeResources(
     // Obtain a message and send it to the handler to process this theme
     AutoPtr<IMessage> msg;
     mResourceProcessingHandler->ObtainMessage(
-            ResourceProcessingHandler::MESSAGE_QUEUE_THEME_FOR_PROCESSING, 0, 0, StringUtils::ParseCharSequence(themePkgName), (IMessage**)&msg);
+            ResourceProcessingHandler::MESSAGE_QUEUE_THEME_FOR_PROCESSING, 0, 0,
+            CoreUtils::Convert(themePkgName).Get(), (IMessage**)&msg);
     Boolean flag = FALSE;
     mResourceProcessingHandler->SendMessage(msg, &flag);
     *result = TRUE;
@@ -1778,9 +1782,10 @@ ECode CThemeService::IsThemeBeingProcessed(
     VALIDATE_NOT_NULL(result);
     mContext->EnforceCallingOrSelfPermission(
             Manifest::permission::ACCESS_THEME_MANAGER, String(NULL));
-    {    AutoLock syncLock(mThemesToProcessQueue);
+    {
+        AutoLock syncLock(mThemesToProcessQueue);
         Boolean flag = FALSE;
-        mThemesToProcessQueue->Contains(StringUtils::ParseCharSequence(themePkgName), &flag);
+        mThemesToProcessQueue->Contains(CoreUtils::Convert(themePkgName).Get(), &flag);
         *result = flag;
         return NOERROR;
     }
@@ -1816,9 +1821,7 @@ ECode CThemeService::RebuildResourceCache()
 ECode CThemeService::ToString(
     /* [out] */ String* result)
 {
-    VALIDATE_NOT_NULL(result);
-    *result = String("CThemeService");
-    return NOERROR;
+    return Object::ToString(result);
 }
 
 void CThemeService::PurgeIconCache()
@@ -1839,7 +1842,8 @@ void CThemeService::PurgeIconCache()
             if (f->Delete(&flag), flag)
                 mIconCacheSize -= size;
         }
-        if (mIconCacheSize <= PURGED_ICON_CACHE_SIZE) break;
+        if (mIconCacheSize <= PURGED_ICON_CACHE_SIZE)
+            break;
     }
 }
 
@@ -1901,7 +1905,7 @@ void CThemeService::ProcessInstalledThemes()
     if (!IThemeConfig::SYSTEM_DEFAULT.Equals(defaultTheme)) {
         mHandler->ObtainMessage(
                 ResourceProcessingHandler::MESSAGE_QUEUE_THEME_FOR_PROCESSING,
-                0, 0, StringUtils::ParseCharSequence(defaultTheme), (IMessage**)&msg);
+                0, 0, CoreUtils::Convert(defaultTheme), (IMessage**)&msg);
         Boolean flag = FALSE;
         mResourceProcessingHandler->SendMessage(msg, &flag);
     }
@@ -1925,7 +1929,7 @@ void CThemeService::ProcessInstalledThemes()
 
             mHandler->ObtainMessage(
                     ResourceProcessingHandler::MESSAGE_QUEUE_THEME_FOR_PROCESSING,
-                    0, 0, StringUtils::ParseCharSequence(packageName), (IMessage**)&msg);
+                    0, 0, CoreUtils::Convert(packageName), (IMessage**)&msg);
             Boolean flag = FALSE;
             mResourceProcessingHandler->SendMessage(msg, &flag);
         }
@@ -1955,11 +1959,11 @@ void CThemeService::PostFailedThemeInstallNotification(
     nbr->SetOngoing(FALSE);
     String str;
     mContext->GetString(R::string::theme_install_error_title, &str);
-    nbr->SetContentTitle(StringUtils::ParseCharSequence(str));
+    nbr->SetContentTitle(CoreUtils::Convert(str));
     mContext->GetString(R::string::theme_install_error_message, &str);
     String ft("");
     ft.AppendFormat("%s%s", str.string(), name.string());
-    nbr->SetContentText(StringUtils::ParseCharSequence(ft));
+    nbr->SetContentText(CoreUtils::Convert(ft));
     nbr->SetSmallIcon(R::drawable::stat_notify_error);
     AutoPtr<ISystem> isystem;
     CSystem::AcquireSingleton((ISystem**)&isystem);

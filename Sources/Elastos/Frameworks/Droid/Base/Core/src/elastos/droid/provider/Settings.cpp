@@ -24,8 +24,6 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/regex/Pattern.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CContentValues;
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::ContentResolver;
@@ -49,6 +47,7 @@ using Elastos::Droid::Privacy::IIPrivacySettingsManager;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::IKeyEvent;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::CString;
@@ -217,12 +216,14 @@ ECode Settings::NameValueCache::GetStringForUser(
         SystemProperties::GetInt64(mVersionSystemProperty, 0, &newValuesVersion);
 
         // Our own user's settings data uses a client-side cache
-        {    AutoLock syncLock(this);
+        {
+            AutoLock syncLock(this);
             if (mValuesVersion != newValuesVersion) {
                 if (LOCAL_LOGV || FALSE) {
                     String segment;
                     mUri->GetLastPathSegment(&segment);
-                    Slogger::V(TAG, "invalidate [%s]: current %d != cached %d", segment.string(), newValuesVersion, mValuesVersion);
+                    Slogger::V(TAG, "invalidate [%s]: current %d != cached %d",
+                        segment.string(), newValuesVersion, mValuesVersion);
                 }
 
                 mValues->Clear();
@@ -239,8 +240,10 @@ ECode Settings::NameValueCache::GetStringForUser(
             }
         }
     } else {
-        if (LOCAL_LOGV)
-            Slogger::V(TAG, "get setting for user %d by user %d so skipping cache", userHandle, UserHandle::GetMyUserId());
+        if (LOCAL_LOGV) {
+            Slogger::V(TAG, "get setting for user %d by user %d so skipping cache",
+                userHandle, UserHandle::GetMyUserId());
+        }
     }
 
     AutoPtr<IIContentProvider> cp;
@@ -368,9 +371,10 @@ static AutoPtr<IUri> InitSystemCONTENTURI()
 }
 INIT_PROI_3 const AutoPtr<IUri> Settings::System::CONTENT_URI = InitSystemCONTENTURI();
 
-INIT_PROI_3 const AutoPtr<Settings::NameValueCache> Settings::System::sNameValueCache = new Settings::NameValueCache(
-    ISettingsSystem::SYS_PROP_SETTING_VERSION, InitSystemCONTENTURI(),
-    ISettings::CALL_METHOD_GET_SYSTEM, ISettings::CALL_METHOD_PUT_SYSTEM);
+INIT_PROI_3 const AutoPtr<Settings::NameValueCache> Settings::System::sNameValueCache
+    = new Settings::NameValueCache(
+        ISettingsSystem::SYS_PROP_SETTING_VERSION, InitSystemCONTENTURI(),
+        ISettings::CALL_METHOD_GET_SYSTEM, ISettings::CALL_METHOD_PUT_SYSTEM);
 
 static AutoPtr<IHashSet> InitSystemMOVED_TO_SECURE()
 {
@@ -434,7 +438,7 @@ static AutoPtr<IHashSet> InitSystemMOVED_TO_SECURE()
 
 INIT_PROI_3 const AutoPtr<IHashSet> Settings::System::MOVED_TO_SECURE = InitSystemMOVED_TO_SECURE();
 
-static AutoPtr<IHashSet> initSystemMOVED_TO_SECURE_THEN_GLOBAL()
+static AutoPtr<IHashSet> InitSystemMOVED_TO_SECURE_THEN_GLOBAL()
 {
     AutoPtr<IHashSet> hs;
     CHashSet::New((IHashSet**)&hs);
@@ -451,7 +455,7 @@ static AutoPtr<IHashSet> initSystemMOVED_TO_SECURE_THEN_GLOBAL()
 }
 
 INIT_PROI_3 const AutoPtr<IHashSet> Settings::System::MOVED_TO_SECURE_THEN_GLOBAL =
-    initSystemMOVED_TO_SECURE_THEN_GLOBAL();
+    InitSystemMOVED_TO_SECURE_THEN_GLOBAL();
 
 static AutoPtr<IHashSet> InitSystemMOVED_TO_GLOBAL()
 {
@@ -505,14 +509,20 @@ static AutoPtr<IUri> InitSystemDefaultUri(
 {
     AutoPtr<IUri> uri;
     Settings::System::GetUriFor(type, (IUri**)&uri);
+    assert(uri != NULL);
     return uri;
 }
 
-INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_RINGTONE_URI = InitSystemDefaultUri(ISettingsSystem::RINGTONE);
-INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_RINGTONE_URI_2 = InitSystemDefaultUri(ISettingsSystem::RINGTONE_2);
-INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_RINGTONE_URI_3 = InitSystemDefaultUri(ISettingsSystem::RINGTONE_3);
-INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_NOTIFICATION_URI = InitSystemDefaultUri(ISettingsSystem::NOTIFICATION_SOUND);
-INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_ALARM_ALERT_URI = InitSystemDefaultUri(ISettingsSystem::ALARM_ALERT);
+INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_RINGTONE_URI
+    = InitSystemDefaultUri(ISettingsSystem::RINGTONE);
+INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_RINGTONE_URI_2
+    = InitSystemDefaultUri(ISettingsSystem::RINGTONE_2);
+INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_RINGTONE_URI_3
+    = InitSystemDefaultUri(ISettingsSystem::RINGTONE_3);
+INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_NOTIFICATION_URI
+    = InitSystemDefaultUri(ISettingsSystem::NOTIFICATION_SOUND);
+INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_ALARM_ALERT_URI
+    = InitSystemDefaultUri(ISettingsSystem::ALARM_ALERT);
 
 static String sSystemSettingsToBackup[] = {
     ISettingsSystem::STAY_ON_WHILE_PLUGGED_IN,   // moved to global
@@ -596,7 +606,8 @@ static AutoPtr<ArrayOf<String> > InitSystemSettingsToBackup()
     return array;
 }
 
-INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::System::SETTINGS_TO_BACKUP = InitSystemSettingsToBackup();
+INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::System::SETTINGS_TO_BACKUP
+    = InitSystemSettingsToBackup();
 
 static String sSystemCLONE_TO_MANAGED_PROFILE[] = {
     ISettingsSystem::DATE_FORMAT,
@@ -613,7 +624,8 @@ static AutoPtr<ArrayOf<String> > initSystemCLONE_TO_MANAGED_PROFILE()
     return array;
 }
 
-INIT_PROI_3 const AutoPtr<ArrayOf<String> > Settings::System::CLONE_TO_MANAGED_PROFILE = initSystemCLONE_TO_MANAGED_PROFILE();
+INIT_PROI_3 const AutoPtr<ArrayOf<String> > Settings::System::CLONE_TO_MANAGED_PROFILE
+    = initSystemCLONE_TO_MANAGED_PROFILE();
 
 ECode Settings::System::PutListAsDelimitedString(
     /* [in] */ IContentResolver* resolver,
@@ -664,14 +676,14 @@ ECode Settings::System::GetMovedKeys(
     /* [in] */ IHashSet* outKeySet)
 {
     VALIDATE_NOT_NULL(outKeySet);
-    return outKeySet->AddAll(ICollection::Probe(Settings::System::MOVED_TO_GLOBAL));
+    return outKeySet->AddAll(ICollection::Probe(MOVED_TO_GLOBAL));
 }
 
 ECode Settings::System::GetNonLegacyMovedKeys(
     /* [in] */ IHashSet* outKeySet)
 {
     VALIDATE_NOT_NULL(outKeySet);
-    return outKeySet->AddAll(ICollection::Probe(Settings::System::MOVED_TO_GLOBAL));
+    return outKeySet->AddAll(ICollection::Probe(MOVED_TO_GLOBAL));
 }
 
 ECode Settings::System::GetString(
@@ -690,21 +702,24 @@ ECode Settings::System::GetStringForUser(
     /* [out] */ String* value)
 {
     VALIDATE_NOT_NULL(value);
+    AutoPtr<ICharSequence> csq = CoreUtils::Convert(name);
     Boolean flag = FALSE;
-    Settings::System::MOVED_TO_SECURE->Contains(CoreUtils::Convert(name), &flag);
+    MOVED_TO_SECURE->Contains(csq, &flag);
     if (flag) {
-        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.System to android.provider.Settings.Secure, returning read-only value.", name.string());
-        return Settings::Secure::GetStringForUser(resolver, name, userHandle, value);
+        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.System to"
+            " android.provider.Settings.Secure, returning read-only value.", name.string());
+        return Secure::GetStringForUser(resolver, name, userHandle, value);
     }
 
-    Boolean _flag = FALSE;
-    Settings::System::MOVED_TO_GLOBAL->Contains(CoreUtils::Convert(name), &flag);
-    Settings::System::MOVED_TO_SECURE_THEN_GLOBAL->Contains(CoreUtils::Convert(name), &_flag);
-
-    if (flag || _flag) {
-        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.System to android.provider.Settings.Global, returning read-only value.", name.string());
+    MOVED_TO_GLOBAL->Contains(csq, &flag);
+    if (!flag) {
+        MOVED_TO_SECURE_THEN_GLOBAL->Contains(csq, &flag);
+    }
+    if (flag) {
+        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.System to"
+            " android.provider.Settings.Global, returning read-only value.", name.string());
         String str;
-        FAIL_RETURN(Settings::Global::GetStringForUser(resolver, name, userHandle, &str))
+        FAIL_RETURN(Global::GetStringForUser(resolver, name, userHandle, &str))
         *value = str;
         return NOERROR;
     }
@@ -717,7 +732,6 @@ ECode Settings::System::PutString(
     /* [in] */ const String& value,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutStringForUser(resolver, name, value, UserHandle::GetMyUserId(), result);
 }
 
@@ -729,18 +743,24 @@ ECode Settings::System::PutStringForUser(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+
+    AutoPtr<ICharSequence> csq = CoreUtils::Convert(name);
     Boolean flag = FALSE;
-    Settings::System::MOVED_TO_SECURE->Contains(CoreUtils::Convert(name), &flag);
+    MOVED_TO_SECURE->Contains(csq, &flag);
     if (flag) {
-        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.System to android.provider.Settings.Secure, value is unchanged.", name.string());
+        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.System to"
+            " android.provider.Settings.Secure, value is unchanged.", name.string());
         *result = FALSE;
         return NOERROR;
     }
 
-    Boolean _flag = FALSE;
-    Settings::System::MOVED_TO_SECURE_THEN_GLOBAL->Contains(CoreUtils::Convert(name), &_flag);
-    if (flag || _flag) {
-        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.System to android.provider.Settings.Global, value is unchanged.", name.string());
+    MOVED_TO_GLOBAL->Contains(csq, &flag);
+    if (!flag) {
+        MOVED_TO_SECURE_THEN_GLOBAL->Contains(csq, &flag);
+    }
+    if (flag) {
+        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.System to"
+            " android.provider.Settings.Global, value is unchanged.", name.string());
         *result = FALSE;
         return NOERROR;
     }
@@ -752,20 +772,26 @@ ECode Settings::System::GetUriFor(
     /* [out] */ IUri** uri)
 {
     VALIDATE_NOT_NULL(uri)
+    *uri = NULL;
+
+    AutoPtr<ICharSequence> csq = CoreUtils::Convert(name);
     Boolean flag = FALSE;
-    Settings::System::MOVED_TO_SECURE->Contains(CoreUtils::Convert(name), &flag);
+    MOVED_TO_SECURE->Contains(csq, &flag);
     if (flag) {
-        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.System to android.provider.Settings.Secure, returning Secure URI.", name.string());
-        return Settings::NameValueTable::GetUriFor(Settings::Secure::CONTENT_URI, name, uri);
+        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.System to"
+            " android.provider.Settings.Secure, returning Secure URI.", name.string());
+        return Secure::GetUriFor(Settings::Secure::CONTENT_URI, name, uri);
     }
-    Settings::System::MOVED_TO_GLOBAL->Contains(CoreUtils::Convert(name), &flag);
-    Boolean _flag = FALSE;
-    Settings::System::MOVED_TO_SECURE_THEN_GLOBAL->Contains(CoreUtils::Convert(name), &_flag);
-    if (flag || _flag) {
-        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.System to android.provider.Settings.Global, returning read-only global URI.", name.string());
-        return Settings::NameValueTable::GetUriFor(Settings::Global::CONTENT_URI, name, uri);
+    MOVED_TO_GLOBAL->Contains(csq, &flag);
+    if (!flag) {
+        MOVED_TO_SECURE_THEN_GLOBAL->Contains(csq, &flag);
     }
-    return NameValueTable::GetUriFor(CONTENT_URI, name, uri);
+    if (flag) {
+        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.System to"
+            " android.provider.Settings.Global, returning read-only global URI.", name.string());
+        return Global::GetUriFor(Settings::Global::CONTENT_URI, name, uri);
+    }
+    return GetUriFor(CONTENT_URI, name, uri);
 }
 
 ECode Settings::System::GetInt32(
@@ -774,7 +800,6 @@ ECode Settings::System::GetInt32(
     /* [in] */ Int32 def,
     /* [out] */ Int32* value)
 {
-    VALIDATE_NOT_NULL(value)
     return GetInt32ForUser(cr, name, def, UserHandle::GetMyUserId(), value);
 }
 
@@ -786,6 +811,7 @@ ECode Settings::System::GetInt32ForUser(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value)
+    *value = def;
     String v;
     FAIL_RETURN(GetStringForUser(cr, name, userHandle, &v))
     // try {
@@ -821,6 +847,7 @@ ECode Settings::System::GetInt32ForUser(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value)
+    *value = 0;
     String v;
     FAIL_RETURN(GetStringForUser(cr, name, userHandle, &v))
     // try {
@@ -842,7 +869,6 @@ ECode Settings::System::PutInt32(
     /* [in] */ Int32 value,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutInt32ForUser(cr, name, value, UserHandle::GetMyUserId(), result);
 }
 
@@ -853,7 +879,6 @@ ECode Settings::System::PutInt32ForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutStringForUser(cr, name, StringUtils::ToString(value), userHandle, result);
 }
 
@@ -863,7 +888,6 @@ ECode Settings::System::GetInt64(
     /* [in] */ Int64 def,
     /* [out] */ Int64* value)
 {
-    VALIDATE_NOT_NULL(value)
     return GetInt64ForUser(cr, name, def, UserHandle::GetMyUserId(), value);
 }
 
@@ -875,6 +899,7 @@ ECode Settings::System::GetInt64ForUser(
     /* [out] */ Int64* value)
 {
     VALIDATE_NOT_NULL(value)
+    *value = def;
     String valString;
     FAIL_RETURN(GetStringForUser(cr, name, userHandle, &valString))
     Int64 _value;
@@ -932,7 +957,6 @@ ECode Settings::System::PutInt64(
     /* [in] */ Int64 value,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutInt64ForUser(cr, name, value, UserHandle::GetMyUserId(), result);
 }
 
@@ -943,7 +967,6 @@ ECode Settings::System::PutInt64ForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutStringForUser(cr, name, StringUtils::ToString(value), userHandle, result);
 }
 
@@ -963,6 +986,9 @@ ECode Settings::System::GetFloatForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Float* value)
 {
+    VALIDATE_NOT_NULL(value)
+    *value = def;
+
     String v;
     FAIL_RETURN(GetStringForUser(cr, name, userHandle, &v))
     // try {
@@ -1023,7 +1049,6 @@ ECode Settings::System::PutFloat(
     /* [in] */ Float value,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutFloatForUser(cr, name, value, UserHandle::GetMyUserId(), result);
 }
 
@@ -1034,7 +1059,6 @@ ECode Settings::System::PutFloatForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutStringForUser(cr, name, StringUtils::ToString(value), userHandle, result);
 }
 
@@ -1072,7 +1096,6 @@ ECode Settings::System::PutConfiguration(
     /* [in] */ IConfiguration* config,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutConfigurationForUser(cr, config, UserHandle::GetMyUserId(), result);
 }
 
@@ -1098,7 +1121,6 @@ ECode Settings::System::GetShowGTalkServiceStatus(
     /* [in] */ IContentResolver* cr,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
      return GetShowGTalkServiceStatusForUser(cr, UserHandle::GetMyUserId(), result);
 }
 
@@ -1108,6 +1130,7 @@ ECode Settings::System::GetShowGTalkServiceStatusForUser(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = FALSE;
     Int32 value;
     FAIL_RETURN(GetInt32ForUser(cr, ISettingsSystem::SHOW_GTALK_SERVICE_STATUS, 0, userHandle, &value))
     *result = value != 0;
@@ -1202,7 +1225,8 @@ static AutoPtr<ArrayOf<String> > InitSecureSettingsToBackup()
 }
 INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::Secure::SETTINGS_TO_BACKUP = InitSecureSettingsToBackup();
 
-INIT_PROI_3 const AutoPtr<Settings::NameValueCache> Settings::Secure::sNameValueCache = new Settings::NameValueCache(
+INIT_PROI_3 const AutoPtr<Settings::NameValueCache> Settings::Secure::sNameValueCache
+    = new Settings::NameValueCache(
         ISettingsSecure::SYS_PROP_SETTING_VERSION, InitSecureCONTENTURI(),
         ISettings::CALL_METHOD_GET_SECURE, ISettings::CALL_METHOD_PUT_SECURE);
 
@@ -1371,7 +1395,8 @@ static AutoPtr<ArrayOf<String> > initSecureCLONE_TO_MANAGED_PROFILE()
     return args;
 }
 
-INIT_PROI_3 const AutoPtr<ArrayOf<String> > Settings::Secure::CLONE_TO_MANAGED_PROFILE = initSecureCLONE_TO_MANAGED_PROFILE();
+INIT_PROI_3 const AutoPtr<ArrayOf<String> > Settings::Secure::CLONE_TO_MANAGED_PROFILE
+    = initSecureCLONE_TO_MANAGED_PROFILE();
 
 static String sNavigationRingTargets[] = {
     String("navigation_ring_targets_0"),
@@ -1386,7 +1411,8 @@ static AutoPtr<ArrayOf<String> > initNAVIGATION_RING_TARGETS()
     return array;
 }
 
-INIT_PROI_3 const AutoPtr<ArrayOf<String> > Settings::Secure::NAVIGATION_RING_TARGETS = initNAVIGATION_RING_TARGETS();
+INIT_PROI_3 const AutoPtr<ArrayOf<String> > Settings::Secure::NAVIGATION_RING_TARGETS
+    = initNAVIGATION_RING_TARGETS();
 
 INIT_PROI_3 Object Settings::Secure::sSecureLock;
 
@@ -1459,27 +1485,31 @@ ECode Settings::Secure::GetStringForUser(
     VALIDATE_NOT_NULL(value)
     *value = NULL;
 
+    AutoPtr<ICharSequence> csq = CoreUtils::Convert(name);
     Boolean flag = FALSE;
-    Settings::Secure::MOVED_TO_GLOBAL->Contains(CoreUtils::Convert(name), &flag);
+    Settings::Secure::MOVED_TO_GLOBAL->Contains(csq, &flag);
     if (flag) {
-        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.Secure to android.provider.Settings.Global.", name.string());
-        return Settings::Global::GetStringForUser(resolver, name, userHandle, value);
+        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.Secure"
+            " to android.provider.Settings.Global.", name.string());
+        return Global::GetStringForUser(resolver, name, userHandle, value);
     }
 
-    Settings::Secure::MOVED_TO_LOCK_SETTINGS->Contains(CoreUtils::Convert(name), &flag);
+    Settings::Secure::MOVED_TO_LOCK_SETTINGS->Contains(csq, &flag);
     if (flag) {
-        {    AutoLock syncLock(sSecureLock);
+        {
+            AutoLock syncLock(sSecureLock);
             if (sLockSettings == NULL) {
                 sLockSettings = IILockSettings::Probe(ServiceManager::GetService(String("lock_settings")));
                 sIsSystemProcess = Process::MyUid() == IProcess::SYSTEM_UID;
             }
         }
         if (sLockSettings != NULL && !sIsSystemProcess) {
-            // try {
-            return sLockSettings->GetString(name, String("0"), userHandle, value);
-            // } catch (RemoteException re) {
-            //     // Fall through
-            // }
+            String str;
+            ECode ec = sLockSettings->GetString(name, String("0"), userHandle, &str);
+            if (SUCCEEDED(ec)) {
+                *value = str;
+                return NOERROR;
+            }
         }
     }
 
@@ -1512,10 +1542,11 @@ ECode Settings::Secure::PutStringForUser(
     }
 
     Boolean flag = FALSE;
-    Settings::Secure::MOVED_TO_GLOBAL->Contains(CoreUtils::Convert(name), &flag);
+    MOVED_TO_GLOBAL->Contains(CoreUtils::Convert(name), &flag);
     if (flag) {
-        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.System to android.provider.Settings.Global", name.string());
-        return Settings::Global::PutStringForUser(resolver, name, value, userHandle, result);
+        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.System"
+            " to android.provider.Settings.Global", name.string());
+        return Global::PutStringForUser(resolver, name, value, userHandle, result);
     }
     return sNameValueCache->PutStringForUser(resolver, name, value, userHandle, result);
 }
@@ -1526,13 +1557,14 @@ ECode Settings::Secure::GetUriFor(
 {
     VALIDATE_NOT_NULL(uri);
     Boolean flag = FALSE;
-    Settings::Secure::MOVED_TO_GLOBAL->Contains(CoreUtils::Convert(name).Get(), &flag);
+    MOVED_TO_GLOBAL->Contains(CoreUtils::Convert(name).Get(), &flag);
     if (flag) {
-        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.Secure to android.provider.Settings.Global, returning global URI.", name.string());
-        return NameValueTable::GetUriFor(Settings::Global::CONTENT_URI, name, uri);
+        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.Secure"
+            " to android.provider.Settings.Global, returning global URI.", name.string());
+        return Global::GetUriFor(Settings::Global::CONTENT_URI, name, uri);
     }
 
-    return NameValueTable::GetUriFor(CONTENT_URI, name, uri);
+    return GetUriFor(CONTENT_URI, name, uri);
 }
 
 ECode Settings::Secure::GetInt32(
@@ -1541,7 +1573,6 @@ ECode Settings::Secure::GetInt32(
     /* [in] */ Int32 def,
     /* [out] */ Int32* value)
 {
-    VALIDATE_NOT_NULL(value)
     return GetInt32ForUser(cr, name, def, UserHandle::GetMyUserId(), value);
 }
 
@@ -1622,7 +1653,6 @@ ECode Settings::Secure::PutInt32(
     /* [in] */ Int32 value,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutInt32ForUser(cr, name, value, UserHandle::GetMyUserId(), result);
 }
 
@@ -1633,7 +1663,6 @@ ECode Settings::Secure::PutInt32ForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutStringForUser(cr, name, StringUtils::ToString(value), userHandle, result);
 }
 
@@ -1643,7 +1672,6 @@ ECode Settings::Secure::GetInt64(
     /* [in] */ Int64 def,
     /* [out] */ Int64* value)
 {
-    VALIDATE_NOT_NULL(value)
     return GetInt64ForUser(cr, name, def, UserHandle::GetMyUserId(), value);
 }
 
@@ -1655,6 +1683,7 @@ ECode Settings::Secure::GetInt64ForUser(
     /* [out] */ Int64* value)
 {
     VALIDATE_NOT_NULL(value)
+    *value = def;
     String valString;
     FAIL_RETURN(GetStringForUser(cr, name, userHandle, &valString))
     Int64 _value;
@@ -1712,7 +1741,6 @@ ECode Settings::Secure::PutInt64(
     /* [in] */ Int64 value,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutInt64ForUser(cr, name, value, UserHandle::GetMyUserId(), result);
 }
 
@@ -1723,7 +1751,6 @@ ECode Settings::Secure::PutInt64ForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutStringForUser(cr, name, StringUtils::ToString(value), userHandle, result);
 }
 
@@ -1744,6 +1771,7 @@ ECode Settings::Secure::GetFloatForUser(
     /* [out] */ Float* value)
 {
     VALIDATE_NOT_NULL(value)
+    *value = def;
     String v;
     FAIL_RETURN(GetStringForUser(cr, name, userHandle, &v))
     // try {
@@ -1769,7 +1797,6 @@ ECode Settings::Secure::GetFloat(
     /* [in] */ const String& name,
     /* [out] */ Float* value)
 {
-    VALIDATE_NOT_NULL(value)
     return GetFloatForUser(cr, name, UserHandle::GetMyUserId(), value);
 }
 
@@ -1804,7 +1831,6 @@ ECode Settings::Secure::PutFloat(
     /* [in] */ Float value,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutFloatForUser(cr, name, value, UserHandle::GetMyUserId(), result);
 }
 
@@ -1815,7 +1841,6 @@ ECode Settings::Secure::PutFloatForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutStringForUser(cr, name, StringUtils::ToString(value), userHandle, result);
 }
 
@@ -1824,7 +1849,6 @@ ECode Settings::Secure::IsLocationProviderEnabled(
     /* [in] */ const String& provider,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return IsLocationProviderEnabledForUser(cr, provider, UserHandle::GetMyUserId(), result);
 }
 
@@ -1862,7 +1886,8 @@ ECode Settings::Secure::SetLocationProviderEnabledForUser(
     // and let the SettingsProvider handle it rather than reading and modifying
     // the list of enabled providers.
     String provider;
-    {    AutoLock syncLock(sLocationSettingsLock);
+    {
+        AutoLock syncLock(sLocationSettingsLock);
         if (enabled) {
             provider = String("+") + _provider;
         } else {
@@ -1984,7 +2009,7 @@ INIT_PROI_3 const AutoPtr<Settings::NameValueCache> Settings::Global::sNameValue
         ISettingsGlobal::SYS_PROP_SETTING_VERSION, InitGlobalCONTENTURI(),
         ISettings::CALL_METHOD_GET_GLOBAL, ISettings::CALL_METHOD_PUT_GLOBAL);
 
-static AutoPtr<IHashSet> initGlobalMOVED_TO_SECURE()
+static AutoPtr<IHashSet> InitGlobalMOVED_TO_SECURE()
 {
     AutoPtr<IHashSet> hs;
     CHashSet::New(2, (IHashSet**)&hs);
@@ -1993,9 +2018,9 @@ static AutoPtr<IHashSet> initGlobalMOVED_TO_SECURE()
     return hs;
 }
 
-INIT_PROI_3 const AutoPtr<IHashSet> Settings::Global::MOVED_TO_SECURE = initGlobalMOVED_TO_SECURE();
+INIT_PROI_3 const AutoPtr<IHashSet> Settings::Global::MOVED_TO_SECURE = InitGlobalMOVED_TO_SECURE();
 
-static AutoPtr<ArrayOf<String> > initGloabalMULTI_SIM_USER_PREFERRED_SUBS()
+static AutoPtr<ArrayOf<String> > InitGloabalMULTI_SIM_USER_PREFERRED_SUBS()
 {
     AutoPtr<ArrayOf<String> > str = ArrayOf<String>::Alloc(3);
     (*str)[0] = String("user_preferred_sub1");
@@ -2005,7 +2030,7 @@ static AutoPtr<ArrayOf<String> > initGloabalMULTI_SIM_USER_PREFERRED_SUBS()
 }
 
 INIT_PROI_3 const AutoPtr<ArrayOf<String> > Settings::Global::MULTI_SIM_USER_PREFERRED_SUBS =
-    initGloabalMULTI_SIM_USER_PREFERRED_SUBS();
+    InitGloabalMULTI_SIM_USER_PREFERRED_SUBS();
 
 ECode Settings::Global::ZenModeToString(
     /* [in] */ Int32 mode,
@@ -2124,7 +2149,8 @@ ECode Settings::Global::GetStringForUser(
     Boolean flag = FALSE;
     MOVED_TO_SECURE->Contains(CoreUtils::Convert(name).Get(), &flag);
     if (flag) {
-        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.Global to android.provider.Settings.Secure, returning read-only value.", name.string());
+        Slogger::W(TAG, "Setting %s has moved from android.provider.Settings.Global"
+            " to android.provider.Settings.Secure, returning read-only value.", name.string());
         return Settings::Secure::GetStringForUser(resolver, name, userHandle, value);
     }
     return sNameValueCache->GetStringForUser(resolver, name, userHandle, value);
@@ -2161,10 +2187,11 @@ ECode Settings::Global::GetUriFor(
     VALIDATE_NOT_NULL(uri);
     Boolean flag = FALSE;
     if (MOVED_TO_SECURE->Contains(CoreUtils::Convert(name).Get(), &flag), flag) {
-        Slogger::V(TAG, "Setting %s has moved from android.provider.Settings.Global to android.provider.Settings.Secure, returning Secure URI.", name.string());
-        return Settings::Secure::NameValueTable::GetUriFor(Settings::Secure::CONTENT_URI, name, uri);
+        Slogger::V(TAG, "Setting %s has moved from android.provider.Settings.Global"
+            " to android.provider.Settings.Secure, returning Secure URI.", name.string());
+        return Secure::GetUriFor(Settings::Secure::CONTENT_URI, name, uri);
     }
-    return NameValueTable::GetUriFor(CONTENT_URI, name, uri);
+    return GetUriFor(CONTENT_URI, name, uri);
 }
 
 ECode Settings::Global::GetInt32(

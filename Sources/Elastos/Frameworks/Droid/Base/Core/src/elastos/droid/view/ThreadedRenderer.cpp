@@ -631,7 +631,6 @@ void ThreadedRenderer::AtlasInitializer::ValidateMap(
     /* [in] */ IContext* context,
     /* [in] */ ArrayOf<Int64>* map)
 {
-    Logger::D("ThreadedRenderer", "Validating map, count: %d", map->GetLength() / 4);
     AutoPtr<IHashSet> preloadedPointers;
     CHashSet::New((IHashSet**)&preloadedPointers);
 

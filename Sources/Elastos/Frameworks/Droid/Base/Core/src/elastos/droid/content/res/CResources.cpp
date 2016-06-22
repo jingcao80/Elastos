@@ -2475,7 +2475,7 @@ ECode CResources::LoadColorStateList(
         if (mPreloading) {
             if (VerifyPreloadConfig(typedValue->mChangingConfigurations, 0,
                 typedValue->mResourceId, String("color"))) {
-                sPreloadedColorStateLists->Put(key, csl.Get());
+                //TODO luo.zhaohui sPreloadedColorStateLists->Put(key, csl.Get());
             }
         }
 
@@ -2553,7 +2553,7 @@ ECode CResources::LoadColorStateList(
         if (mPreloading) {
             if (VerifyPreloadConfig(typedValue->mChangingConfigurations, 0,
                 typedValue->mResourceId, String("color"))) {
-                sPreloadedColorStateLists->Put(key, csl.Get());
+                //TODO luo.zhaohui sPreloadedColorStateLists->Put(key, csl.Get());
             }
         }
         else {

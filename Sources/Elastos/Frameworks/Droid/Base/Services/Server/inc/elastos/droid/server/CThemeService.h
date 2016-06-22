@@ -54,6 +54,28 @@ CarClass(CThemeService)
     , public IIThemeService
     , public IBinder
 {
+public:
+    class SettingsObserver
+        : public ContentObserver
+    {
+    public:
+        CARAPI constructor(
+            /* [in] */ IIThemeService* host);
+
+        CARAPI Register(
+            /* [in] */ Boolean bregister);
+
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange,
+            /* [in] */ IUri* uri);
+
+    private:
+        AutoPtr<IUri> ALARM_ALERT_URI;
+        AutoPtr<IUri> NOTIFICATION_URI;
+        AutoPtr<IUri> RINGTONE_URI;
+        CThemeService* mHost;
+    };
+
 private:
     class ThemeWorkerHandler
         : public Handler
@@ -98,11 +120,13 @@ private:
         CThemeService* mHost;
     };
 
-    class MyWallpaperChangeReceiver
+    class WallpaperChangeReceiver
         : public BroadcastReceiver
     {
     public:
-        MyWallpaperChangeReceiver(
+        TO_STRING_IMPL("CThemeService::WallpaperChangeReceiver")
+
+        WallpaperChangeReceiver(
             /* [in] */ CThemeService* host);
 
         CARAPI OnReceive(
@@ -113,14 +137,14 @@ private:
         CThemeService* mHost;
     };
 
-    class MyUserChangeReceiver
+    class UserChangeReceiver
         : public BroadcastReceiver
     {
     public:
-        MyUserChangeReceiver(
-            /* [in] */ CThemeService* host);
+        TO_STRING_IMPL("CThemeService::UserChangeReceiver")
 
-        CAR_INTERFACE_DECL()
+        UserChangeReceiver(
+            /* [in] */ CThemeService* host);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
@@ -145,29 +169,6 @@ private:
             /* [out] */ Int32* result);
     };
 
-    class SettingsObserver
-        : public ContentObserver
-    {
-    public:
-        TO_STRING_IMPL("CThemeService::SettingsObserver")
-
-        SettingsObserver(
-            /* [in] */ CThemeService* host);
-
-        CARAPI Register(
-            /* [in] */ Boolean bregister);
-
-        CARAPI OnChange(
-            /* [in] */ Boolean selfChange,
-            /* [in] */ IUri* uri);
-
-    private:
-        AutoPtr<IUri> ALARM_ALERT_URI;
-        AutoPtr<IUri> NOTIFICATION_URI;
-        AutoPtr<IUri> RINGTONE_URI;
-        CThemeService* mHost;
-    };
-
 public:
     CThemeService();
 
@@ -180,7 +181,7 @@ public:
     CARAPI constructor(
         /* [in] */ IContext* context);
 
-    CARAPI_(void) SystemRunning();
+    CARAPI SystemRunning();
 
     // @Override
     CARAPI RequestThemeChangeUpdates(
@@ -364,8 +365,10 @@ private:
         /* [in] */ IPackageInfo* pi);
 
 private:
-    static const String TAG;
+    friend class SettingsObserver;
+    friend class ResourceProcessingHandler;
 
+    static const String TAG;
     static const Boolean DEBUG;
 
     static const String GOOGLE_SETUPWIZARD_PACKAGE;
@@ -380,10 +383,10 @@ private:
     AutoPtr<IHandlerThread> mWorker;
     AutoPtr<ThemeWorkerHandler> mHandler;
     AutoPtr<ResourceProcessingHandler> mResourceProcessingHandler;
-    static AutoPtr<IContext> mContext;
-    static AutoPtr<IPackageManager> mPM;
+    AutoPtr<IContext> mContext;
+    AutoPtr<IPackageManager> mPM;
     Int32 mProgress;
-    static Boolean mWallpaperChangedByUs;
+    Boolean mWallpaperChangedByUs;
     Int64 mIconCacheSize;
 
     Boolean mIsThemeApplying;
@@ -391,13 +394,13 @@ private:
 
     AutoPtr<IRemoteCallbackList> mProcessingListeners;
 
-    static AutoPtr<IArrayList> mThemesToProcessQueue;
+    AutoPtr<IArrayList> mThemesToProcessQueue;
 
-    AutoPtr<SettingsObserver> mSettingsObserver;
+    AutoPtr<IContentObserver> mSettingsObserver;
 
-    AutoPtr<MyWallpaperChangeReceiver> mWallpaperChangeReceiver;
+    AutoPtr<IBroadcastReceiver> mWallpaperChangeReceiver;
 
-    AutoPtr<MyUserChangeReceiver> mUserChangeReceiver;
+    AutoPtr<IBroadcastReceiver> mUserChangeReceiver;
 
     AutoPtr<MyComparator> mOldestFilesFirstComparator;
 };

@@ -1776,14 +1776,14 @@ module
 
     class CThemeChangeListener {
         constructor(
-            [in] Handle64 host);
+            [in] IThemeManager* host);
 
         interface IIThemeChangeListener;
     }
 
     class CThemeProcessingListener {
         constructor(
-            [in] Handle64 host);
+            [in] IThemeManager* host);
 
         interface IIThemeProcessingListener;
     }

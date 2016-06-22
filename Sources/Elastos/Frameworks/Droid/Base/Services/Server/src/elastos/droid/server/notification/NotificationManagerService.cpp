@@ -241,7 +241,7 @@ static AutoPtr<IUri> InitFilterUri()
     return res;
 }
 
-AutoPtr<IUri> NotificationManagerService::FILTER_MSG_URI = InitFilterUri();
+INIT_PROI_3 AutoPtr<IUri> NotificationManagerService::FILTER_MSG_URI = InitFilterUri();
 
 static AutoPtr<IUri> InitUpdateUri()
 {
@@ -253,7 +253,7 @@ static AutoPtr<IUri> InitUpdateUri()
     return res;
 }
 
-AutoPtr<IUri> NotificationManagerService::UPDATE_MSG_URI = InitUpdateUri();
+INIT_PROI_3 AutoPtr<IUri> NotificationManagerService::UPDATE_MSG_URI = InitUpdateUri();
 
 //===============================================================================
 //                  NotificationManagerService::SpamExecutorRunnable

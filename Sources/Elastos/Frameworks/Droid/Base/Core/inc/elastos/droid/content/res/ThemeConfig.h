@@ -230,6 +230,8 @@ private:
 
     CARAPI_(AutoPtr<IAppTheme>) GetDefaultTheme();
 
+    static AutoPtr<IAppTheme> GetSystemAppTheme();
+
 public:
     static const String TAG;
 
@@ -240,8 +242,8 @@ protected:
 private:
     // Key for any app which does not have a specific theme applied
     static const String KEY_DEFAULT_PKG;
-    static const AutoPtr<IThemeConfig> sSystemConfig;
-    static const AutoPtr<IAppTheme> sSystemAppTheme;
+    static AutoPtr<IThemeConfig> sSystemConfig;
+    static AutoPtr<IAppTheme> sSystemAppTheme;
 
     RequestType mLastThemeChangeRequestType;
 

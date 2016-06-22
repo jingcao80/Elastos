@@ -472,7 +472,8 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
     /* [in] */ BroadcastFilter* filter,
     /* [in] */ Boolean ordered)
 {
-    if (DEBUG_BROADCAST) {
+    if (DEBUG_BROADCAST)
+    {
         Slogger::W(TAG, "DeliverToRegisteredReceiverLocked: \n >>> record:[%s]\n >>> filter:[%s] >>> ordered:%d",
             TO_CSTR(r), TO_CSTR(filter), ordered);
     }

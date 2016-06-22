@@ -30,7 +30,7 @@ namespace StatusBar {
 namespace Policy {
 
 const String CHeadsUpNotificationView::TAG("HeadsUpNotificationView");
-const Boolean CHeadsUpNotificationView::DEBUG = TRUE;
+const Boolean CHeadsUpNotificationView::DEBUG = FALSE;
 const Boolean CHeadsUpNotificationView::SPEW = DEBUG;
 AutoPtr<IViewOutlineProvider> CHeadsUpNotificationView::CONTENT_HOLDER_OUTLINE_PROVIDER = new _ViewOutlineProvider();
 

@@ -1,5 +1,6 @@
-
+#ifndef THROW_ON_BAD_ID
 #define THROW_ON_BAD_ID 0
+#endif
 
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/ext/frameworkext.h"
@@ -27,8 +28,6 @@
 extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
 extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Os::ParcelFileDescriptor;
@@ -37,6 +36,7 @@ using Elastos::Core::CInteger32;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::AutoLock;
 using Elastos::IO::ICloseable;
 using Elastos::IO::EIID_ICloseable;
 using Elastos::IO::EIID_IInputStream;
@@ -1040,12 +1040,12 @@ ECode CAssetManager::AddOverlayPath(
         android::String8 resApkPath8(resApkPath.string());
         android::String8 targetPkgPath8(targetPkgPath.string());
         android::String8 prefixPath8(prefixPath.string());
-        // TODO:
-        // int32_t cookie;
-        // bool res = am->addOverlayPath(idmapPath8, themeApkPath8, resApkPath8, targetPkgPath8, prefixPath8, &cookie);
-        // if (res)
-        //     *result = cookie;
-        // }
+        int32_t cookie;
+        bool res = am->addOverlayPath(
+            idmapPath8, themeApkPath8, &cookie, resApkPath8, targetPkgPath8, prefixPath8);
+        if (res) {
+            *result = cookie;
+        }
     }
     return NOERROR;
 }
@@ -2644,7 +2644,10 @@ ECode CAssetManager::OpenXmlAssetNative(
         return NOERROR;
     }
 
-    if (LocalLOGV) Logger::V(TAG, "openXmlAsset in native object %p", am);
+    if (LocalLOGV) {
+        Logger::V(TAG, " >> openXmlAsset %s in %s, native object %p",
+            fileName.string(), TO_CSTR(this), am);
+    }
 
     if (fileName.IsNull()) {
 //        jniThrowException(env, "java/lang/NullPointerException", "fileName");

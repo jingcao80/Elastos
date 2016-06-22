@@ -18,6 +18,7 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Content::Res::IAssetManager;
 using Elastos::Droid::Content::Res::CTypedArray;
 using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::CColorStateList;
@@ -273,7 +274,9 @@ const Int32 GradientDrawable::RADIUS_TYPE_FRACTION = 1;
 const Int32 GradientDrawable::RADIUS_TYPE_FRACTION_PARENT = 2;
 const Float GradientDrawable::DEFAULT_INNER_RADIUS_RATIO = 3.0f;
 const Float GradientDrawable::DEFAULT_THICKNESS_RATIO = 9.0f;
+
 CAR_INTERFACE_IMPL(GradientDrawable, Drawable, IGradientDrawable)
+
 GradientDrawable::GradientDrawable()
     : mAlpha(0xFF)
     , mGradientIsDirty(FALSE)
@@ -760,11 +763,13 @@ ECode GradientDrawable::SetColor(
     Int32 color;
     if (colorStateList == NULL) {
         color = IColor::TRANSPARENT;
-    } else {
+    }
+    else {
         AutoPtr<ArrayOf<Int32> > stateSet;
         GetState((ArrayOf<Int32>**)&stateSet);
         colorStateList->GetColorForState(stateSet, 0, &color);
     }
+
     mFillPaint->SetColor(color);
     return InvalidateSelf();
 }
@@ -1064,10 +1069,9 @@ ECode GradientDrawable::Inflate(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ IResourcesTheme* theme)
 {
-    Int32 size = ArraySize(R::styleable::GradientDrawable);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::GradientDrawable, size);
-
+    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
+        const_cast<Int32 *>(R::styleable::GradientDrawable),
+        ArraySize(R::styleable::GradientDrawable));
     AutoPtr<ITypedArray> a;
     ECode ec = ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a);
     FAIL_GOTO(ec, error);
@@ -1258,9 +1262,9 @@ ECode GradientDrawable::InflateChildElements(
         parser->GetName(&name);
 
         if (name.Equals("size")) {
-            Int32 size = ArraySize(R::styleable::GradientDrawableSize);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::GradientDrawableSize, size);
+            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
+                const_cast<Int32 *>(R::styleable::GradientDrawableSize),
+                ArraySize(R::styleable::GradientDrawableSize));
             ECode ec = ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a);
             if (FAILED(ec)) {
                 a->Recycle();
@@ -1272,9 +1276,9 @@ ECode GradientDrawable::InflateChildElements(
                 return ec;
             }
         } else if (name.Equals("gradient")) {
-            Int32 size = ArraySize(R::styleable::GradientDrawableGradient);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::GradientDrawableGradient, size);
+            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
+                const_cast<Int32 *>(R::styleable::GradientDrawableGradient),
+                ArraySize(R::styleable::GradientDrawableGradient));
             ECode ec = ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a);
             if (FAILED(ec)) {
                 a->Recycle();
@@ -1286,23 +1290,24 @@ ECode GradientDrawable::InflateChildElements(
                 return ec;
             }
         } else if (name.Equals("solid")) {
-            Int32 size = ArraySize(R::styleable::GradientDrawableSolid);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::GradientDrawableSolid, size);
+            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
+                const_cast<Int32 *>(R::styleable::GradientDrawableSolid),
+                ArraySize(R::styleable::GradientDrawableSolid));
             ECode ec = ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a);
             if (FAILED(ec)) {
                 a->Recycle();
                 return ec;
             }
+
             ec = UpdateGradientDrawableSolid(a);
             a->Recycle();
             if (FAILED(ec)) {
                 return ec;
             }
         } else if (name.Equals("stroke")) {
-            Int32 size = ArraySize(R::styleable::GradientDrawableStroke);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::GradientDrawableStroke, size);
+            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
+                const_cast<Int32 *>(R::styleable::GradientDrawableStroke),
+                ArraySize(R::styleable::GradientDrawableStroke));
             ECode ec = ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a);
             if (FAILED(ec)) {
                 a->Recycle();
@@ -1314,9 +1319,9 @@ ECode GradientDrawable::InflateChildElements(
                 return ec;
             }
         } else if (name.Equals("corners")) {
-            Int32 size = ArraySize(R::styleable::DrawableCorners);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::DrawableCorners, size);
+            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
+                const_cast<Int32 *>(R::styleable::DrawableCorners),
+                ArraySize(R::styleable::DrawableCorners));
             ECode ec = ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a);
             if (FAILED(ec)) {
                 a->Recycle();
@@ -1328,9 +1333,9 @@ ECode GradientDrawable::InflateChildElements(
                 return ec;
             }
         } else if (name.Equals("padding")) {
-            Int32 size = ArraySize(R::styleable::GradientDrawablePadding);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::GradientDrawablePadding, size);
+            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
+                const_cast<Int32 *>(R::styleable::GradientDrawablePadding),
+                ArraySize(R::styleable::GradientDrawablePadding));
             ECode ec = ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a);
             if (FAILED(ec)) {
                 a->Recycle();

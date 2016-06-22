@@ -62,7 +62,8 @@ ECode ContentObserver::GetContentObserver(
 {
     VALIDATE_NOT_NULL(contentObserver)
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         if (mTransport == NULL) {
             CContentObserverTransport::New(this, (IContentObserverTransport**)&mTransport);
         }
@@ -77,7 +78,8 @@ ECode ContentObserver::ReleaseContentObserver(
 {
     VALIDATE_NOT_NULL(contentObserver)
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IContentObserverTransport> oldTransport = mTransport;
         if (oldTransport != NULL) {
             oldTransport->ReleaseContentObserver();

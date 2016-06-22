@@ -8,6 +8,7 @@
 #include "elastos/droid/provider/CSettingsSecure.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Os::IUserHandle;
@@ -21,6 +22,7 @@ using Elastos::Core::EIID_IComparable;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::IO::IStringReader;
 using Elastos::IO::CStringReader;
 using Elastos::IO::CStringWriter;
@@ -372,29 +374,16 @@ void ThemeConfig::JsonSerializer::CloseQuietly(
 const String ThemeConfig::TAG("ThemeConfig");
 const String ThemeConfig::KEY_DEFAULT_PKG("default");
 
-static AutoPtr<IThemeConfig> InitSystemConfig()
-{
-   AutoPtr<IThemeConfig> sysConfig;
-   CSystemThemeConfig::New((IThemeConfig**)&sysConfig);
-   return sysConfig;
-}
-const AutoPtr<IThemeConfig> ThemeConfig::sSystemConfig = InitSystemConfig();
+AutoPtr<IThemeConfig> ThemeConfig::sSystemConfig;
+AutoPtr<IAppTheme> ThemeConfig::sSystemAppTheme;
 
-static AutoPtr<IAppTheme> InitSystemAppConfig()
-{
-   AutoPtr<IAppTheme> sysAppConfig;
-   CSystemAppTheme::New((IAppTheme**)&sysAppConfig);
-   return sysAppConfig;
-}
-const AutoPtr<IAppTheme> ThemeConfig::sSystemAppTheme = InitSystemAppConfig();
+CAR_INTERFACE_IMPL_4(ThemeConfig, Object, IThemeConfig, ICloneable, IParcelable, IComparable)
 
 ThemeConfig::ThemeConfig()
     : mLastThemeChangeRequestType(RequestType_USER_REQUEST)
 {
     CHashMap::New((IMap**)&mThemes);
 }
-
-CAR_INTERFACE_IMPL_4(ThemeConfig, Object, IThemeConfig, ICloneable, IParcelable, IComparable)
 
 ECode ThemeConfig::constructor()
 {
@@ -411,21 +400,18 @@ ECode ThemeConfig::constructor(
 ECode ThemeConfig::GetOverlayPkgName(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
     return GetDefaultTheme()->GetOverlayPkgName(str);
 }
 
 ECode ThemeConfig::GetOverlayForStatusBar(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
     return GetOverlayPkgNameForApp(SYSTEMUI_STATUS_BAR_PKG, str);
 }
 
 ECode ThemeConfig::GetOverlayForNavBar(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
     return GetOverlayPkgNameForApp(SYSTEMUI_NAVBAR_PKG, str);
 }
 
@@ -433,14 +419,12 @@ ECode ThemeConfig::GetOverlayPkgNameForApp(
     /* [in] */ const String& appPkgName,
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
     return GetThemeFor(appPkgName)->GetOverlayPkgName(str);
 }
 
 ECode ThemeConfig::GetIconPackPkgName(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
     return GetDefaultTheme()->GetIconPackPkgName(str);
 }
 
@@ -448,14 +432,12 @@ ECode ThemeConfig::GetIconPackPkgNameForApp(
     /* [in] */ const String& appPkgName,
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
     return GetThemeFor(appPkgName)->GetIconPackPkgName(str);
 }
 
 ECode ThemeConfig::GetFontPkgName(
     /* [out] */ String* pkgName)
 {
-    VALIDATE_NOT_NULL(pkgName)
     return GetDefaultTheme()->GetFontPackPkgName(pkgName);
 }
 
@@ -463,7 +445,6 @@ ECode ThemeConfig::GetFontPkgNameForApp(
     /* [in] */ const String& appPkgName,
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
     return GetThemeFor(appPkgName)->GetFontPackPkgName(str);
 }
 
@@ -503,7 +484,7 @@ AutoPtr<IAppTheme> ThemeConfig::GetDefaultTheme()
     AutoPtr<IInterface> value;
     mThemes->Get(cs, (IInterface**)&value);
     AutoPtr<IAppTheme> theme = IAppTheme::Probe(value);
-    if (theme == NULL) theme = sSystemAppTheme;
+    if (theme == NULL) theme = GetSystemAppTheme();
     return theme;
 }
 
@@ -537,8 +518,7 @@ ECode ThemeConfig::Equals(
 
         Int32 oRequestType;
         o->GetLastThemeChangeRequestType(&oRequestType);
-        Boolean equals;
-        IObject::Probe(currThemes)->Equals(newThemes, &equals);
+        Boolean equals = Object::Equals(currThemes, newThemes);
         if (equals) {
             Int32 oRequestType;
             o->GetLastThemeChangeRequestType(&oRequestType);
@@ -554,14 +534,15 @@ ECode ThemeConfig::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    String result;
+    StringBuilder sb("ThemeConfig{0x");
+    sb += StringUtils::ToHexString((Int32)this);
     if (mThemes != NULL) {
-        result += "themes:";
+        sb += ", themes:";
         String themesStr;
-        IObject::Probe(mThemes)->ToString(&themesStr);
-        result += themesStr;
+        sb += Object::ToString(mThemes);
     }
-    *str = result;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 
@@ -606,7 +587,7 @@ ECode ThemeConfig::GetBootThemeForUser(
     VALIDATE_NOT_NULL(theme);
     *theme = NULL;
 
-    AutoPtr<IThemeConfig> bootTheme = sSystemConfig;
+    AutoPtr<IThemeConfig> bootTheme = GetSystemTheme();
     // try {
     AutoPtr<ISettingsSecure> settingSecure;
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingSecure);
@@ -614,45 +595,60 @@ ECode ThemeConfig::GetBootThemeForUser(
     ECode ec = settingSecure->GetStringForUser(resolver,
             IConfiguration::THEME_PKG_CONFIGURATION_PERSISTENCE_PROPERTY,
             userHandle, &json);
-    FAIL_RETURN(ec);
-    bootTheme = ThemeConfig::FromJson(json);
+    if (SUCCEEDED(ec)) {
+        bootTheme = ThemeConfig::FromJson(json);
 
-    // Handle upgrade Case: Previously the theme configuration was in separate fields
-    if (bootTheme == NULL) {
-        String overlayPkgName;
-        ec = settingSecure->GetStringForUser(resolver,
-                IConfiguration::THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY,
-                userHandle, &overlayPkgName);
-        FAIL_RETURN(ec);
-        String iconPackPkgName;
-        ec = settingSecure->GetStringForUser(resolver,
-                IConfiguration::THEME_ICONPACK_PACKAGE_NAME_PERSISTENCE_PROPERTY,
-                userHandle, &iconPackPkgName);
-        FAIL_RETURN(ec);
-        String fontPkgName;
-        ec = settingSecure->GetStringForUser(resolver,
-                IConfiguration::THEME_FONT_PACKAGE_NAME_PERSISTENCE_PROPERTY,
-                userHandle, &fontPkgName);
-        FAIL_RETURN(ec);
+        // Handle upgrade Case: Previously the theme configuration was in separate fields
+        if (bootTheme == NULL) {
+            AutoPtr<IThemeConfigBuilder> builder;
+            CThemeConfigBuilder::New((IThemeConfigBuilder**)&builder);
+            String overlayPkgName, iconPackPkgName, fontPkgName;
+            ec = settingSecure->GetStringForUser(resolver,
+                    IConfiguration::THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY,
+                    userHandle, &overlayPkgName);
+            FAIL_GOTO(ec, _EXIT_)
+            ec = settingSecure->GetStringForUser(resolver,
+                    IConfiguration::THEME_ICONPACK_PACKAGE_NAME_PERSISTENCE_PROPERTY,
+                    userHandle, &iconPackPkgName);
+            FAIL_GOTO(ec, _EXIT_)
+            ec = settingSecure->GetStringForUser(resolver,
+                    IConfiguration::THEME_FONT_PACKAGE_NAME_PERSISTENCE_PROPERTY,
+                    userHandle, &fontPkgName);
+            FAIL_GOTO(ec, _EXIT_)
 
-        AutoPtr<IThemeConfigBuilder> builder;
-        CThemeConfigBuilder::New((IThemeConfigBuilder**)&builder);
-        builder->DefaultOverlay(overlayPkgName);
-        builder->DefaultIcon(iconPackPkgName);
-        builder->DefaultFont(fontPkgName);
-        builder->Build((IThemeConfig**)&bootTheme);
+            builder->DefaultOverlay(overlayPkgName);
+            builder->DefaultIcon(iconPackPkgName);
+            builder->DefaultFont(fontPkgName);
+            builder->Build((IThemeConfig**)&bootTheme);
+            Slogger::I(TAG, "GetBootThemeForUser:%d, overlayPkgName:%s, iconPkgName:%s, fontPkgName:%s",
+                userHandle, overlayPkgName.string(), iconPackPkgName.string(), fontPkgName.string());
+        }
     }
-    // } catch (SecurityException e) {
-    //     Log.e(TAG, "Could not get boot theme", e);
-    // }
+    else {
+        Slogger::E(TAG, "Could not get boot theme, ec=%08x", ec);
+    }
+
+_EXIT_:
     *theme = bootTheme;
     REFCOUNT_ADD(*theme);
     return NOERROR;
 }
 
+
 AutoPtr<IThemeConfig> ThemeConfig::GetSystemTheme()
 {
+    if (sSystemConfig == NULL) {
+        CSystemThemeConfig::New((IThemeConfig**)&sSystemConfig);
+    }
     return sSystemConfig;
+}
+
+AutoPtr<IAppTheme> ThemeConfig::GetSystemAppTheme()
+{
+    if (sSystemAppTheme == NULL) {
+        CSystemAppTheme::New((IAppTheme**)&sSystemAppTheme);
+    }
+   return sSystemAppTheme;
 }
 
 ECode ThemeConfig::WriteToParcel(

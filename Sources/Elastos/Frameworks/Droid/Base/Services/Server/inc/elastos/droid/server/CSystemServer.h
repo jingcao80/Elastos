@@ -21,6 +21,7 @@
 #include "elastos/droid/server/CConnectivityService.h"
 #include "elastos/droid/server/CNetworkScoreService.h"
 #include "elastos/droid/server/CAssetAtlasService.h"
+#include "elastos/droid/server/CThemeService.h"
 #include <elastos/core/Singleton.h>
 #include <elastos/droid/os/Runnable.h>
 
@@ -77,6 +78,7 @@ private:
         // AutoPtr<CMediaRouterService> mMediaRouterF;
         AutoPtr<IAudioService> mAudioServiceF;
         // AutoPtr<CMmsServiceBroker> mMmsServiceF;
+        AutoPtr<CThemeService> mThemeServiceF;
     };
 
     class SystemReadyRunnable

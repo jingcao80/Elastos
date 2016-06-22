@@ -25,15 +25,13 @@ namespace Res {
 
 const String CThemeManager::TAG("ThemeManager");
 
-CThemeManager::CThemeManager()
-{
-    CThemeChangeListener::New((Handle64)this, (IIThemeChangeListener**)&mThemeChangeListener);
-    CThemeProcessingListener::New((Handle64)this, (IIThemeProcessingListener**)&mThemeProcessingListener);
-}
-
 CAR_INTERFACE_IMPL(CThemeManager, Object, IThemeManager)
 
 CAR_OBJECT_IMPL(CThemeManager)
+
+CThemeManager::CThemeManager()
+{
+}
 
 ECode CThemeManager::constructor(
     /* [in] */ IContext* context,
@@ -41,48 +39,47 @@ ECode CThemeManager::constructor(
 {
     mContext = context;
     mService = service;
-    AutoPtr<ILooper> looper;
 
     CHandler::New(Looper::GetMainLooper(), (IHandler**)&mHandler);
+    CThemeChangeListener::New(this, (IIThemeChangeListener**)&mThemeChangeListener);
+    CThemeProcessingListener::New(this, (IIThemeProcessingListener**)&mThemeProcessingListener);
     return NOERROR;
 }
 
 ECode CThemeManager::AddClient(
     /* [in] */ IThemeChangeListener* listener)
 {
-    {    AutoLock syncLock(mChangeListenersLock);
-        if (mChangeListeners.Find(listener) != mChangeListeners.End()) {
-            Logger::E(TAG, "Client was already added ");
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        }
-        if (mChangeListeners.IsEmpty()) {
-            // try {
-            if (FAILED(mService->RequestThemeChangeUpdates(mThemeChangeListener))) {
-                Logger::W(TAG, "Unable to register listener");
-            }
-            // } catch (RemoteException e) {
-            //     Log.w(TAG, "Unable to register listener", e);
-            // }
-        }
-        mChangeListeners.Insert(listener);
+    AutoLock syncLock(mChangeListenersLock);
+    if (mChangeListeners.Find(listener) != mChangeListeners.End()) {
+        Logger::E(TAG, "Client was already added ");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
+    if (mChangeListeners.IsEmpty()) {
+        // try {
+        if (FAILED(mService->RequestThemeChangeUpdates(mThemeChangeListener))) {
+            Logger::W(TAG, "Unable to register listener");
+        }
+        // } catch (RemoteException e) {
+        //     Log.w(TAG, "Unable to register listener", e);
+        // }
+    }
+    mChangeListeners.Insert(listener);
     return NOERROR;
 }
 
 ECode CThemeManager::RemoveClient(
     /* [in] */ IThemeChangeListener* listener)
 {
-    {    AutoLock syncLock(mChangeListenersLock);
-        mChangeListeners.Erase(listener);
-        if (mChangeListeners.IsEmpty()) {
-            // try {
-            if (FAILED(mService->RemoveUpdates(mThemeChangeListener))) {
-                Logger::W(TAG, "Unable to remove listener");
-            }
-            // } catch (RemoteException e) {
-            //     Log.w(TAG, "Unable to remove listener", e);
-            // }
+    AutoLock syncLock(mChangeListenersLock);
+    mChangeListeners.Erase(listener);
+    if (mChangeListeners.IsEmpty()) {
+        // try {
+        if (FAILED(mService->RemoveUpdates(mThemeChangeListener))) {
+            Logger::W(TAG, "Unable to remove listener");
         }
+        // } catch (RemoteException e) {
+        //     Log.w(TAG, "Unable to remove listener", e);
+        // }
     }
     return NOERROR;
 }
@@ -108,39 +105,37 @@ ECode CThemeManager::OnClientDestroyed(
 ECode CThemeManager::RegisterProcessingListener(
     /* [in] */ IThemeProcessingListener* listener)
 {
-    {    AutoLock syncLock(mProcessingListenersLock);
-        if (mProcessingListeners.Find(listener) != mProcessingListeners.End()) {
-            Logger::E(TAG, "Listener was already added ");
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        }
-        if (mProcessingListeners.IsEmpty()) {
-            // try {
-            if (FAILED(mService->RegisterThemeProcessingListener(mThemeProcessingListener))) {
-                Logger::W(TAG, "Unable to register listener");
-            }
-            // } catch (RemoteException e) {
-            //     Log.w(TAG, "Unable to register listener", e);
-            // }
-        }
-        mProcessingListeners.Insert(listener);
+    AutoLock syncLock(mProcessingListenersLock);
+    if (mProcessingListeners.Find(listener) != mProcessingListeners.End()) {
+        Logger::E(TAG, "Listener was already added ");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
+    if (mProcessingListeners.IsEmpty()) {
+        // try {
+        if (FAILED(mService->RegisterThemeProcessingListener(mThemeProcessingListener))) {
+            Logger::W(TAG, "Unable to register listener");
+        }
+        // } catch (RemoteException e) {
+        //     Log.w(TAG, "Unable to register listener", e);
+        // }
+    }
+    mProcessingListeners.Insert(listener);
     return NOERROR;
 }
 
 ECode CThemeManager::UnregisterProcessingListener(
     /* [in] */ IThemeProcessingListener* listener)
 {
-    {    AutoLock syncLock(mProcessingListenersLock);
-        mProcessingListeners.Erase(listener);
-        if (mProcessingListeners.IsEmpty()) {
-            // try {
-            if (FAILED(mService->UnregisterThemeProcessingListener(mThemeProcessingListener))) {
-                Logger::W(TAG, "Unable to remove listener");
-            }
-            // } catch (RemoteException e) {
-            //     Log.w(TAG, "Unable to remove listener", e);
-            // }
+    AutoLock syncLock(mProcessingListenersLock);
+    mProcessingListeners.Erase(listener);
+    if (mProcessingListeners.IsEmpty()) {
+        // try {
+        if (FAILED(mService->UnregisterThemeProcessingListener(mThemeProcessingListener))) {
+            Logger::W(TAG, "Unable to remove listener");
         }
+        // } catch (RemoteException e) {
+        //     Log.w(TAG, "Unable to remove listener", e);
+        // }
     }
     return NOERROR;
 }
@@ -165,6 +160,7 @@ ECode CThemeManager::RequestThemeChange(
     /* [in] */ IList* components,
     /* [in] */ Boolean removePerAppThemes)
 {
+    Logger::I(TAG, " >> RequestThemeChange: %s", pkgName.string());
     Int32 size;
     components->GetSize(&size);
     AutoPtr<IMap> componentMap;

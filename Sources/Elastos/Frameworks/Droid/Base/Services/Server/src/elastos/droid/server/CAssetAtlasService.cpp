@@ -670,7 +670,6 @@ ECode CAssetAtlasService::GetBuffer(
     Boolean ready;
     mAtlasReady->Get(&ready);
     if (ready) {
-        Logger::I(TAG, " >>> GetBuffer:%s", TO_CSTR(mBuffer));
         *gb = mBuffer;
         REFCOUNT_ADD(*gb)
     }

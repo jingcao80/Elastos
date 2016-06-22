@@ -51,7 +51,7 @@ namespace Display {
 
 const String DisplayPowerController::TAG("DisplayPowerController");
 
-Boolean DisplayPowerController::DEBUG = TRUE;
+Boolean DisplayPowerController::DEBUG = FALSE;
 const Boolean DisplayPowerController::DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT = FALSE;
 
 const String DisplayPowerController::SCREEN_ON_BLOCKED_TRACE_NAME("Screen on blocked");

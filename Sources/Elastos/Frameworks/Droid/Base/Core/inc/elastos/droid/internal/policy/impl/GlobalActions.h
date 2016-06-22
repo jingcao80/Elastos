@@ -358,7 +358,6 @@ private:
         Int32 mEnabledStatusMessageResId;
         Int32 mDisabledStatusMessageResId;
         GlobalActions* mOwner;
-
     };
 
     class SilentModeToggleAction
@@ -383,24 +382,12 @@ private:
         , public IGlobalActionsSilentModeTriStateAction
     {
     public:
-
         CAR_INTERFACE_DECL()
 
         SilentModeTriStateAction(
             /* [in] */ IContext* context,
             /* [in] */ IAudioManager* audioManager,
             /* [in] */ IHandler* handler);
-
-        //CARAPI_(UInt32) AddRef();
-
-        //CARAPI_(UInt32) Release();
-
-        //CARAPI GetInterfaceID(
-        //    /* [in] */ IInterface *pObject,
-        //    /* [out] */ InterfaceID *pIID);
-
-        //CARAPI_(PInterface) Probe(
-        //    /* [in]  */ REIID riid);
 
         CARAPI_(AutoPtr<IView>) Create(
             /* [in] */ IContext* context,
@@ -526,7 +513,23 @@ private:
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
 
-        TO_STRING_IMPL("GlobalActions::MyBroadcastReceiver: ")
+        TO_STRING_IMPL("GlobalActions::MyBroadcastReceiver")
+    private:
+        GlobalActions* mHost;
+    };
+
+    class ThemeChangeReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        ThemeChangeReceiver(
+            /* [in] */ GlobalActions* host);
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+        TO_STRING_IMPL("GlobalActions::ThemeChangeReceiver")
     private:
         GlobalActions* mHost;
     };
@@ -788,11 +791,15 @@ private:
 
     CARAPI_(void) HandleShow();
 
+    CARAPI_(AutoPtr<IContext>) GetUiContext();
+
     /**
      * Create the global actions dialog.
      * @return A new dialog.
      */
     CARAPI_(AutoPtr<GlobalActionsDialog>) CreateDialog();
+
+    CARAPI_(void) CreateProfileDialog();
 
     CARAPI_(AutoPtr<Action>) GetBugReportAction();
 
@@ -841,6 +848,7 @@ private:
 private:
     AutoPtr<IContext> mContext;
     AutoPtr<IWindowManagerPolicyWindowManagerFuncs> mWindowManagerFuncs;
+    AutoPtr<IContext> mUiContext;
     AutoPtr<IAudioManager> mAudioManager;
     AutoPtr<IIDreamManager> mDreamManager;
 
@@ -862,6 +870,7 @@ private:
 
 private:
     AutoPtr<MyBroadcastReceiver> mBroadcastReceiver;
+    AutoPtr<IBroadcastReceiver> mThemeChangeReceiver;
     // TODO: PhoneStateListener is not implement.
     //AutoPtr<IPhoneStateListener> mPhoneStateListener;
     AutoPtr<RingerModeReceiver> mRingerModeReceiver;

@@ -22,6 +22,246 @@ namespace Droid {
 namespace Net {
 
 /**
+ * Wrapper for path segment array.
+ */
+class PathSegments
+    : public AbstractList
+    , public IRandomAccess
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    PathSegments(
+        /* [in] */ ArrayOf<String>* segments,
+        /* [in] */ Int32 size);
+
+    CARAPI Get(
+        /* [in] */ Int32 index,
+        /* [out] */ IInterface** value);
+
+    CARAPI GetSize(
+        /* [out] */ Int32* result);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
+
+protected:
+    CARAPI_(String) GetClassName() { return String("PathSegments"); }
+
+public:
+    /* const */ static AutoPtr<PathSegments> sEMPTY;
+
+    /* const */ AutoPtr<ArrayOf<String> > mSegments;
+    /* const */ Int32 mSize;
+};
+
+/**
+ * Support for part implementations.
+ */
+class AbstractPart
+    : public Object
+    , public IAbstractPart
+{
+public:
+    /**
+     * Enum which indicates which representation of a given part we have.
+     */
+    class Representation
+    {
+    public:
+        static const Int32 BOTH = 0;
+        static const Int32 ENCODED = 1;
+        static const Int32 DECODED = 2;
+    };
+
+public:
+    CAR_INTERFACE_DECL()
+
+    AbstractPart(
+        /* [in] */ const String& encoded,
+        /* [in] */ const String& decoded);
+
+    virtual CARAPI_(String) GetEncoded() = 0;
+
+    CARAPI_(String) GetDecoded();
+
+    CARAPI WriteTo(
+        /* [in] */ IParcel* parcel);
+
+public:
+    /* volatile */ String mEncoded;
+    /* volatile */ String mDecoded;
+
+    /**
+     * NOTE: EMPTY accesses this field during its own initialization, so this
+     * field *must* be initialized first, or else EMPTY will see a null value!
+     *
+     * Placeholder for strings which haven't been cached. This enables us
+     * to cache null. We intentionally create a new String instance so we can
+     * compare its identity and there is no chance we will confuse it with
+     * user data.
+     */
+    // @SuppressWarnings("RedundantStringConstructorCall")
+    static const String NOT_CACHED;
+};
+
+/**
+ * Immutable wrapper of encoded and decoded versions of a URI part. Lazily
+ * creates the encoded or decoded version from the other.
+ */
+class Part
+    : public AbstractPart
+{
+public:
+    virtual CARAPI_(Boolean) IsEmpty();
+
+    virtual CARAPI_(String) GetEncoded();
+
+    static CARAPI ReadFrom(
+        /* [in] */ IParcel* parcel,
+        /* [out] */ Part** part);
+
+    /**
+     * Returns given part or {@link #NULL} if the given part is null.
+     */
+    static CARAPI_(AutoPtr<Part>) NonNull(
+        /* [in] */ Part* part);
+
+    /**
+     * Creates a part from the encoded string.
+     *
+     * @param encoded part string
+     */
+    static CARAPI_(AutoPtr<Part>) FromEncoded(
+        /* [in] */ const String& encoded);
+
+    /**
+     * Creates a part from the decoded string.
+     *
+     * @param decoded part string
+     */
+    static CARAPI_(AutoPtr<Part>) FromDecoded(
+        /* [in] */ const String& decoded);
+
+    /**
+     * Creates a part from the encoded and decoded strings.
+     *
+     * @param encoded part string
+     * @param decoded part string
+     */
+    static CARAPI_(AutoPtr<Part>) From(
+        /* [in] */ const String& encoded,
+        /* [in] */ const String& decoded);
+
+protected:
+    Part(
+        /* [in] */ const String& encoded,
+        /* [in] */ const String& decoded);
+
+public:
+
+    /** A part with null values. */
+    static const AutoPtr<Part> sNULL;
+
+    /** A part with empty strings for values. */
+    static const AutoPtr<Part> sEMPTY;
+};
+
+class EmptyPart
+    : public Part
+{
+public:
+    EmptyPart(
+        /* [in] */ const String& value);
+
+    // @Override
+    CARAPI IsEmpty(
+        /* [out] */ Boolean* result);
+};
+
+/**
+ * Immutable wrapper of encoded and decoded versions of a path part. Lazily
+ * creates the encoded or decoded version from the other.
+ */
+class PathPart
+    : public AbstractPart
+{
+public:
+    virtual CARAPI_(String) GetEncoded();
+
+    /**
+     * Gets the individual path segments. Parses them if necessary.
+     *
+     * @return parsed path segments or null if this isn't a hierarchical
+     *  URI
+     */
+    virtual CARAPI_(AutoPtr<PathSegments>) GetPathSegments();
+
+    static CARAPI_(AutoPtr<PathPart>) AppendEncodedSegment(
+        /* [in] */ PathPart* oldPart,
+        /* [in] */ const String& newSegment);
+
+    static CARAPI_(AutoPtr<PathPart>) AppendDecodedSegment(
+        /* [in] */ PathPart* oldPart,
+        /* [in] */ const String& decoded);
+
+    static CARAPI ReadFrom(
+        /* [in] */ IParcel* parcel,
+        /* [out] */ PathPart** result);
+
+    /**
+     * Creates a path from the encoded string.
+     *
+     * @param encoded part string
+     */
+    static CARAPI_(AutoPtr<PathPart>) FromEncoded(
+        /* [in] */ const String& encoded);
+
+    /**
+     * Creates a path from the decoded string.
+     *
+     * @param decoded part string
+     */
+    static CARAPI_(AutoPtr<PathPart>) FromDecoded(
+        /* [in] */ const String& decoded);
+
+    /**
+     * Creates a path from the encoded and decoded strings.
+     *
+     * @param encoded part string
+     * @param decoded part string
+     */
+    static CARAPI_(AutoPtr<PathPart>) From(
+        /* [in] */ const String& encoded,
+        /* [in] */ const String& decoded);
+
+    /**
+     * Prepends path values with "/" if they're present, not empty, and
+     * they don't already start with "/".
+     */
+    static CARAPI_(AutoPtr<PathPart>) MakeAbsolute(
+        /* [in] */ PathPart* oldPart);
+
+protected:
+    PathPart(
+        /* [in] */ const String& encoded,
+        /* [in] */ const String& decoded);
+
+public:
+    /** A part with null values. */
+    static const AutoPtr<PathPart> sNULL;
+
+    /** A part with empty strings for values. */
+    static const AutoPtr<PathPart> sEMPTY;
+
+private:
+    /**
+     * Cached path segments. This doesn't need to be volatile--we don't
+     * care if other threads see the result.
+     */
+    AutoPtr<PathSegments> mPathSegments;
+};
+/**
  * Immutable URI reference. A URI reference includes a URI and a fragment, the
  * component of the URI following a '#'. Builds and parses URI references
  * which conform to
@@ -96,39 +336,6 @@ class ECO_PUBLIC Uri
     */
 
 public:
-    /**
-     * Wrapper for path segment array.
-     */
-    class PathSegments
-        : public AbstractList
-        , public IRandomAccess
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        PathSegments(
-            /* [in] */ ArrayOf<String>* segments,
-            /* [in] */ Int32 size);
-
-        CARAPI Get(
-            /* [in] */ Int32 index,
-            /* [out] */ IInterface** value);
-
-        CARAPI GetSize(
-            /* [out] */ Int32* result);
-
-        CARAPI ToString(
-            /* [out] */ String* str);
-
-    protected:
-        CARAPI_(String) GetClassName() { return String("Uri::PathSegments"); }
-
-    public:
-        /* const */ static AutoPtr<PathSegments> sEMPTY;
-
-        /* const */ AutoPtr<ArrayOf<String> > mSegments;
-        /* const */ Int32 mSize;
-    };
 
     /**
      * Builds PathSegments.
@@ -148,199 +355,6 @@ public:
         Int32 mSize;
     };
 
-    /**
-     * Support for part implementations.
-     */
-    class AbstractPart
-        : public Object
-        , public IAbstractPart
-    {
-    public:
-        /**
-         * Enum which indicates which representation of a given part we have.
-         */
-        class Representation
-        {
-        public:
-            static const Int32 BOTH = 0;
-            static const Int32 ENCODED = 1;
-            static const Int32 DECODED = 2;
-        };
-
-    public:
-        CAR_INTERFACE_DECL()
-
-        AbstractPart(
-            /* [in] */ const String& encoded,
-            /* [in] */ const String& decoded);
-
-        virtual CARAPI_(String) GetEncoded() = 0;
-
-        CARAPI_(String) GetDecoded();
-
-        CARAPI WriteTo(
-            /* [in] */ IParcel* parcel);
-
-    public:
-        /* volatile */ String mEncoded;
-        /* volatile */ String mDecoded;
-    };
-
-    /**
-     * Immutable wrapper of encoded and decoded versions of a URI part. Lazily
-     * creates the encoded or decoded version from the other.
-     */
-    class Part
-        : public AbstractPart
-    {
-    public:
-        virtual CARAPI_(Boolean) IsEmpty();
-
-        virtual CARAPI_(String) GetEncoded();
-
-        static CARAPI ReadFrom(
-            /* [in] */ IParcel* parcel,
-            /* [out] */ Part** part);
-
-        /**
-         * Returns given part or {@link #NULL} if the given part is null.
-         */
-        static CARAPI_(AutoPtr<Part>) NonNull(
-            /* [in] */ Part* part);
-
-        /**
-         * Creates a part from the encoded string.
-         *
-         * @param encoded part string
-         */
-        static CARAPI_(AutoPtr<Part>) FromEncoded(
-            /* [in] */ const String& encoded);
-
-        /**
-         * Creates a part from the decoded string.
-         *
-         * @param decoded part string
-         */
-        static CARAPI_(AutoPtr<Part>) FromDecoded(
-            /* [in] */ const String& decoded);
-
-        /**
-         * Creates a part from the encoded and decoded strings.
-         *
-         * @param encoded part string
-         * @param decoded part string
-         */
-        static CARAPI_(AutoPtr<Part>) From(
-            /* [in] */ const String& encoded,
-            /* [in] */ const String& decoded);
-
-    protected:
-        Part(
-            /* [in] */ const String& encoded,
-            /* [in] */ const String& decoded);
-
-    public:
-        /** A part with null values. */
-        static const AutoPtr<Part> sNULL;
-
-        /** A part with empty strings for values. */
-        static const AutoPtr<Part> sEMPTY;
-    };
-
-    class EmptyPart
-        : public Part
-    {
-    public:
-        EmptyPart(
-            /* [in] */ const String& value);
-
-        // @Override
-        CARAPI IsEmpty(
-            /* [out] */ Boolean* result);
-    };
-
-    /**
-     * Immutable wrapper of encoded and decoded versions of a path part. Lazily
-     * creates the encoded or decoded version from the other.
-     */
-    class PathPart
-        : public AbstractPart
-    {
-    public:
-        virtual CARAPI_(String) GetEncoded();
-
-        /**
-         * Gets the individual path segments. Parses them if necessary.
-         *
-         * @return parsed path segments or null if this isn't a hierarchical
-         *  URI
-         */
-        virtual CARAPI_(AutoPtr<PathSegments>) GetPathSegments();
-
-        static CARAPI_(AutoPtr<PathPart>) AppendEncodedSegment(
-            /* [in] */ PathPart* oldPart,
-            /* [in] */ const String& newSegment);
-
-        static CARAPI_(AutoPtr<PathPart>) AppendDecodedSegment(
-            /* [in] */ PathPart* oldPart,
-            /* [in] */ const String& decoded);
-
-        static CARAPI ReadFrom(
-            /* [in] */ IParcel* parcel,
-            /* [out] */ PathPart** result);
-
-        /**
-         * Creates a path from the encoded string.
-         *
-         * @param encoded part string
-         */
-        static CARAPI_(AutoPtr<PathPart>) FromEncoded(
-            /* [in] */ const String& encoded);
-
-        /**
-         * Creates a path from the decoded string.
-         *
-         * @param decoded part string
-         */
-        static CARAPI_(AutoPtr<PathPart>) FromDecoded(
-            /* [in] */ const String& decoded);
-
-        /**
-         * Creates a path from the encoded and decoded strings.
-         *
-         * @param encoded part string
-         * @param decoded part string
-         */
-        static CARAPI_(AutoPtr<PathPart>) From(
-            /* [in] */ const String& encoded,
-            /* [in] */ const String& decoded);
-
-        /**
-         * Prepends path values with "/" if they're present, not empty, and
-         * they don't already start with "/".
-         */
-        static CARAPI_(AutoPtr<PathPart>) MakeAbsolute(
-            /* [in] */ PathPart* oldPart);
-
-    protected:
-        PathPart(
-            /* [in] */ const String& encoded,
-            /* [in] */ const String& decoded);
-
-    public:
-        /** A part with null values. */
-        static const AutoPtr<PathPart> sNULL;
-
-        /** A part with empty strings for values. */
-        static const AutoPtr<PathPart> sEMPTY;
-
-    private:
-        /**
-         * Cached path segments. This doesn't need to be volatile--we don't
-         * care if other threads see the result.
-         */
-        AutoPtr<PathSegments> mPathSegments;
-    };
 
 public:
     CAR_INTERFACE_DECL()
@@ -635,7 +649,7 @@ public:
     static CARAPI GetEMPTY(
             /* [out] */ IUri** result);
 
-private:
+protected:
     static CARAPI_(AutoPtr<IUri>) CreateEmpty();
 
     /**
@@ -643,7 +657,6 @@ private:
      */
     Uri(){}
 
-private:
     /**
      * Returns true if the given character is allowed.
      *
@@ -656,23 +669,15 @@ private:
         /* [in] */ Char32 c,
         /* [in] */ const String& allow);
 
-private:
+protected:
+    friend class Part;
+    friend class PathPart;
+    friend class AbstractPart;
+
     /** Log tag. */
     static const String LOG;
 
     static const Char32 HEX_DIGITS[];
-
-    /**
-     * NOTE: EMPTY accesses this field during its own initialization, so this
-     * field *must* be initialized first, or else EMPTY will see a null value!
-     *
-     * Placeholder for strings which haven't been cached. This enables us
-     * to cache null. We intentionally create a new String instance so we can
-     * compare its identity and there is no chance we will confuse it with
-     * user data.
-     */
-    // @SuppressWarnings("RedundantStringConstructorCall")
-    static const String NOT_CACHED;
 
     /**
      * The empty URI, equivalent to "".
@@ -693,11 +698,6 @@ private:
 
     /** Default encoding. */
     static const String DEFAULT_ENCODING;
-
-    friend class StringUri;
-    friend class AbstractHierarchicalUri;
-    friend class OpaqueUri;
-    friend class HierarchicalUri;
 };
 
 /**
@@ -724,7 +724,7 @@ public:
         /* [out] */ Int32* port);
 
 private:
-    CARAPI_(AutoPtr<Uri::Part>) GetUserInfoPart();
+    CARAPI_(AutoPtr<Part>) GetUserInfoPart();
 
     CARAPI_(String) ParseUserInfo();
 
@@ -733,7 +733,7 @@ private:
     CARAPI_(Int32) ParsePort();
 
 private:
-    AutoPtr<Uri::Part> mUserInfo;
+    AutoPtr<Part> mUserInfo;
     String mHost;
     Int32 mPort;
 };
@@ -848,21 +848,21 @@ private:
 
     CARAPI_(String) ParseScheme();
 
-    CARAPI_(AutoPtr<Uri::Part>) GetSsp();
+    CARAPI_(AutoPtr<Part>) GetSsp();
 
     CARAPI_(String) ParseSsp();
 
-    CARAPI_(AutoPtr<Uri::Part>) GetAuthorityPart();
+    CARAPI_(AutoPtr<Part>) GetAuthorityPart();
 
-    CARAPI_(AutoPtr<Uri::PathPart>) GetPathPart();
+    CARAPI_(AutoPtr<PathPart>) GetPathPart();
 
     CARAPI_(String) ParsePath();
 
-    CARAPI_(AutoPtr<Uri::Part>) GetQueryPart();
+    CARAPI_(AutoPtr<Part>) GetQueryPart();
 
     CARAPI_(String) ParseQuery();
 
-    CARAPI_(AutoPtr<Uri::Part>) GetFragmentPart();
+    CARAPI_(AutoPtr<Part>) GetFragmentPart();
 
     CARAPI_(String) ParseFragment();
 
@@ -877,11 +877,11 @@ protected:
     /* volatile */ Int32 mCachedFsi;// = NOT_CALCULATED;
 
     /* volatile */ String mScheme;
-    AutoPtr<Uri::Part> mSsp;
-    AutoPtr<Uri::Part> mAuthority;
-    AutoPtr<Uri::PathPart> mPath;
-    AutoPtr<Uri::Part> mQuery;
-    AutoPtr<Uri::Part> mFragment;
+    AutoPtr<Part> mSsp;
+    AutoPtr<Part> mAuthority;
+    AutoPtr<PathPart> mPath;
+    AutoPtr<Part> mQuery;
+    AutoPtr<Part> mFragment;
 
     friend class Uri;
 };
@@ -975,8 +975,8 @@ public:
 
 private:
     String mScheme;
-    AutoPtr<Uri::Part> mSsp;
-    AutoPtr<Uri::Part> mFragment;
+    AutoPtr<Part> mSsp;
+    AutoPtr<Part> mFragment;
     String mCachedString;
 
     friend class UriBuilder;
@@ -1077,12 +1077,12 @@ private:
 
 private:
     String mScheme; // can be null
-    AutoPtr<Uri::Part> mAuthority;
-    AutoPtr<Uri::PathPart> mPath;
-    AutoPtr<Uri::Part> mQuery;
-    AutoPtr<Uri::Part> mFragment;
+    AutoPtr<Part> mAuthority;
+    AutoPtr<PathPart> mPath;
+    AutoPtr<Part> mQuery;
+    AutoPtr<Part> mFragment;
 
-    AutoPtr<Uri::Part> mSsp;
+    AutoPtr<Part> mSsp;
     String mUriString;// = NOT_CACHED;;
 };
 
@@ -1123,7 +1123,7 @@ public:
         /* [in] */ const String& scheme);
 
     CARAPI OpaquePart(
-        /* [in] */ Uri::Part* opaquePart);
+        /* [in] */ Part* opaquePart);
 
     /**
      * Encodes and sets the given opaque scheme-specific-part.
@@ -1142,7 +1142,7 @@ public:
         /* [in] */ const String& opaquePart);
 
     CARAPI Authority(
-        /* [in] */ Uri::Part* authority);
+        /* [in] */ Part* authority);
 
     /**
      * Encodes and sets the authority.
@@ -1157,7 +1157,7 @@ public:
         /* [in] */ const String& authority);
 
     CARAPI Path(
-        /* [in] */ Uri::PathPart* path);
+        /* [in] */ PathPart* path);
 
     /**
      * Sets the path. Leaves '/' characters intact but encodes others as
@@ -1193,7 +1193,7 @@ public:
         /* [in] */ const String& newSegment);
 
     CARAPI Query(
-        /* [in] */ Uri::Part* query);
+        /* [in] */ Part* query);
 
     /**
      * Encodes and sets the query.
@@ -1208,7 +1208,7 @@ public:
         /* [in] */ const String& query);
 
     CARAPI Fragment(
-        /* [in] */ Uri::Part* fragment);
+        /* [in] */ Part* fragment);
 
     /**
      * Encodes and sets the fragment.
@@ -1257,11 +1257,11 @@ private:
 
 private:
     String mScheme;
-    AutoPtr<Uri::Part> mOpaquePart;
-    AutoPtr<Uri::Part> mAuthority;
-    AutoPtr<Uri::PathPart> mPath;
-    AutoPtr<Uri::Part> mQuery;
-    AutoPtr<Uri::Part> mFragment;
+    AutoPtr<Part> mOpaquePart;
+    AutoPtr<Part> mAuthority;
+    AutoPtr<PathPart> mPath;
+    AutoPtr<Part> mQuery;
+    AutoPtr<Part> mFragment;
 };
 
 } // namespace Net

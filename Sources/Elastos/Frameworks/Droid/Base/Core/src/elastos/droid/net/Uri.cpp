@@ -73,7 +73,7 @@ CAR_INTERFACE_IMPL(StringUri, AbstractHierarchicalUri, IStringUri)
 StringUri::StringUri()
     : mCachedSsi(Uri::NOT_CALCULATED)
     , mCachedFsi(Uri::NOT_CALCULATED)
-    , mScheme(Uri::NOT_CACHED)
+    , mScheme(AbstractPart::NOT_CACHED)
 {}
 
 ECode StringUri::constructor()
@@ -175,7 +175,7 @@ ECode StringUri::GetScheme(
 {
     VALIDATE_NOT_NULL(scheme);
 
-    Boolean cached = (!mScheme.Equals(NOT_CACHED));
+    Boolean cached = (!mScheme.Equals(AbstractPart::NOT_CACHED));
     *scheme = cached ? mScheme : (mScheme = ParseScheme());
     return NOERROR;
 }
@@ -186,7 +186,7 @@ String StringUri::ParseScheme()
     return ssi == NOT_FOUND ? String(NULL) : mUriString.Substring(0, ssi);
 }
 
-AutoPtr<Uri::Part> StringUri::GetSsp()
+AutoPtr<Part> StringUri::GetSsp()
 {
     if (mSsp == NULL) {
         mSsp = Part::FromEncoded(ParseSsp());
@@ -200,7 +200,7 @@ ECode StringUri::GetEncodedSchemeSpecificPart(
     VALIDATE_NOT_NULL(essp);
     *essp = NULL;
 
-    AutoPtr<Uri::Part> part = GetSsp();
+    AutoPtr<Part> part = GetSsp();
     if (part) {
         *essp = part->GetEncoded();
     }
@@ -213,7 +213,7 @@ ECode StringUri::GetSchemeSpecificPart(
     VALIDATE_NOT_NULL(ssp);
     *ssp = NULL;
 
-    AutoPtr<Uri::Part> part = GetSsp();
+    AutoPtr<Part> part = GetSsp();
     if (part) {
         *ssp = part->GetDecoded();
     }
@@ -231,7 +231,7 @@ String StringUri::ParseSsp()
             : mUriString.Substring(ssi + 1, fsi);
 }
 
-AutoPtr<Uri::Part> StringUri::GetAuthorityPart()
+AutoPtr<Part> StringUri::GetAuthorityPart()
 {
     if (mAuthority == NULL) {
         String encodedAuthority = ParseAuthority(mUriString, FindSchemeSeparator());
@@ -247,7 +247,7 @@ ECode StringUri::GetEncodedAuthority(
     VALIDATE_NOT_NULL(authority);
     *authority = NULL;
 
-    AutoPtr<Uri::Part> part = GetAuthorityPart();
+    AutoPtr<Part> part = GetAuthorityPart();
     if (part) {
         *authority = part->GetEncoded();
     }
@@ -259,13 +259,13 @@ ECode StringUri::GetAuthority(
 {
     VALIDATE_NOT_NULL(authority);
 
-    AutoPtr<Uri::Part> part = GetAuthorityPart();
+    AutoPtr<Part> part = GetAuthorityPart();
     assert(part != NULL);
     *authority = part->GetDecoded();
     return NOERROR;
 }
 
-AutoPtr<Uri::PathPart> StringUri::GetPathPart()
+AutoPtr<PathPart> StringUri::GetPathPart()
 {
     if (mPath == NULL) {
         mPath = PathPart::FromEncoded(ParsePath());
@@ -279,7 +279,7 @@ ECode StringUri::GetPath(
     VALIDATE_NOT_NULL(path);
     *path = NULL;
 
-    AutoPtr<Uri::PathPart> part = GetPathPart();
+    AutoPtr<PathPart> part = GetPathPart();
     if (part) {
         *path = part->GetDecoded();
     }
@@ -292,7 +292,7 @@ ECode StringUri::GetEncodedPath(
     VALIDATE_NOT_NULL(path);
     *path = NULL;
 
-    AutoPtr<Uri::PathPart> part = GetPathPart();
+    AutoPtr<PathPart> part = GetPathPart();
     if (part) {
         *path = part->GetEncoded();
     }
@@ -304,7 +304,7 @@ ECode StringUri::GetPathSegments(
 {
     VALIDATE_NOT_NULL(result);
 
-    AutoPtr<Uri::PathPart> part = GetPathPart();
+    AutoPtr<PathPart> part = GetPathPart();
     AutoPtr<PathSegments> segments = part->GetPathSegments();
 
     FUNC_RETURN(IList::Probe(segments))
@@ -334,11 +334,10 @@ String StringUri::ParsePath()
     else {
         // All relative URIs are hierarchical.
     }
-
     return ParsePath(uriString, ssi);
 }
 
-AutoPtr<Uri::Part> StringUri::GetQueryPart()
+AutoPtr<Part> StringUri::GetQueryPart()
 {
     if (mQuery == NULL) {
         mQuery = Part::FromEncoded(ParseQuery());
@@ -352,7 +351,7 @@ ECode StringUri::GetEncodedQuery(
     VALIDATE_NOT_NULL(query);
     *query = NULL;
 
-    AutoPtr<Uri::Part> part = GetQueryPart();
+    AutoPtr<Part> part = GetQueryPart();
     if (part) {
         *query = part->GetEncoded();
     }
@@ -387,14 +386,14 @@ ECode StringUri::GetQuery(
     VALIDATE_NOT_NULL(query);
     *query = NULL;
 
-    AutoPtr<Uri::Part> part = GetQueryPart();
+    AutoPtr<Part> part = GetQueryPart();
     if (part) {
         *query = part->GetDecoded();
     }
     return NOERROR;
 }
 
-AutoPtr<Uri::Part> StringUri::GetFragmentPart()
+AutoPtr<Part> StringUri::GetFragmentPart()
 {
     if (mFragment == NULL) {
         mFragment = Part::FromEncoded(ParseFragment());
@@ -408,7 +407,7 @@ ECode StringUri::GetEncodedFragment(
     VALIDATE_NOT_NULL(fragment);
     *fragment = NULL;
 
-    AutoPtr<Uri::Part> part = GetFragmentPart();
+    AutoPtr<Part> part = GetFragmentPart();
     if (part) {
         *fragment = part->GetEncoded();
     }
@@ -428,7 +427,7 @@ ECode StringUri::GetFragment(
     VALIDATE_NOT_NULL(fragment);
     *fragment = NULL;
 
-    AutoPtr<Uri::Part> part = GetFragmentPart();
+    AutoPtr<Part> part = GetFragmentPart();
     if (part) {
         *fragment = part->GetDecoded();
     }
@@ -540,9 +539,9 @@ ECode StringUri::BuildUpon(
     IsHierarchical(&isHierarchical);
 
     if (isHierarchical) {
-        AutoPtr<Uri::Part> p = GetAuthorityPart();
+        AutoPtr<Part> p = GetAuthorityPart();
         builder->Authority(p.Get());
-        AutoPtr<Uri::PathPart> pp = GetPathPart();
+        AutoPtr<PathPart> pp = GetPathPart();
         builder->Path(pp.Get());
         p = GetQueryPart();
         builder->Query(p.Get());
@@ -550,7 +549,7 @@ ECode StringUri::BuildUpon(
         builder->Fragment(p.Get());
     }
     else {
-        AutoPtr<Uri::Part> p = GetSsp();
+        AutoPtr<Part> p = GetSsp();
         builder->OpaquePart(p.Get());
         p = GetFragmentPart();
         builder->Fragment(p.Get());
@@ -597,9 +596,9 @@ ECode OpaqueUri::ReadFrom(
     String str;
     parcel->ReadString(&str);
 
-    AutoPtr<Uri::Part> p1, p2;
-    Uri::Part::ReadFrom(parcel, (Uri::Part**)&p1);
-    Uri::Part::ReadFrom(parcel, (Uri::Part**)&p2);
+    AutoPtr<Part> p1, p2;
+    Part::ReadFrom(parcel, (Part**)&p1);
+    Part::ReadFrom(parcel, (Part**)&p2);
 
     return COpaqueUri::New(str, (Handle32)p1.Get(), (Handle32)p2.Get(), result);
 }
@@ -627,9 +626,9 @@ ECode OpaqueUri::ReadFromParcel(
     parcel->ReadString(&mScheme);
 
     mSsp = NULL;
-    Uri::Part::ReadFrom(parcel, (Uri::Part**)&mSsp);
+    Part::ReadFrom(parcel, (Part**)&mSsp);
     mFragment = NULL;
-    Uri::Part::ReadFrom(parcel, (Uri::Part**)&mFragment);
+    Part::ReadFrom(parcel, (Part**)&mFragment);
     return NOERROR;
 }
 
@@ -811,7 +810,7 @@ ECode OpaqueUri::ToString(
     *result = NULL;
 
     // @SuppressWarnings("StringEquality")
-    Boolean cached = (!mCachedString.IsNull() && !mCachedString.Equals(Uri::NOT_CACHED));
+    Boolean cached = (!mCachedString.IsNull() && !mCachedString.Equals(AbstractPart::NOT_CACHED));
     if (!cached) {
         StringBuilder sb(mScheme);
         sb += (":");
@@ -852,20 +851,20 @@ ECode OpaqueUri::BuildUpon(
 }
 
 //====================================================================================
-//              Uri::PathSegments
+//              PathSegments
 //====================================================================================
-AutoPtr<Uri::PathSegments> Uri::PathSegments::sEMPTY = new Uri::PathSegments(ArrayOf<String>::Alloc(0), 0);
+AutoPtr<PathSegments> PathSegments::sEMPTY = new PathSegments(ArrayOf<String>::Alloc(0), 0);
 
-CAR_INTERFACE_IMPL(Uri::PathSegments, AbstractList, IRandomAccess)
+CAR_INTERFACE_IMPL(PathSegments, AbstractList, IRandomAccess)
 
-Uri::PathSegments::PathSegments(
+PathSegments::PathSegments(
     /* [in] */ ArrayOf<String>* segments,
     /* [in] */ Int32 size)
     : mSegments(segments)
     , mSize(size)
 {}
 
-ECode Uri::PathSegments::Get(
+ECode PathSegments::Get(
     /* [in] */ Int32 index,
     /* [out] */ IInterface** result)
 {
@@ -883,7 +882,7 @@ ECode Uri::PathSegments::Get(
     return NOERROR;
 }
 
-ECode Uri::PathSegments::GetSize(
+ECode PathSegments::GetSize(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -891,18 +890,20 @@ ECode Uri::PathSegments::GetSize(
     return NOERROR;
 }
 
-ECode Uri::PathSegments::ToString(
+ECode PathSegments::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    StringBuilder sb("Uri::PathSegments{");
+    StringBuilder sb("PathSegments{");
     sb += "size:";
     sb += mSize;
     if (mSegments) {
+        sb += ", [";
         for (Int32 i = 0; i < mSegments->GetLength(); ++i) {
-            sb += ",";
+            sb += ", ";
             sb += (*mSegments)[i];
         }
+        sb += "]";
     }
     sb += "}";
     *str = sb.ToString();
@@ -927,16 +928,16 @@ ECode Uri::PathSegmentsBuilder::Add(
     return NOERROR;
 }
 
-AutoPtr<Uri::PathSegments> Uri::PathSegmentsBuilder::Build()
+AutoPtr<PathSegments> Uri::PathSegmentsBuilder::Build()
 {
     if (mSegments.IsEmpty()) {
-        return Uri::PathSegments::sEMPTY;
+        return PathSegments::sEMPTY;
     }
 
     // try {
     AutoPtr<ArrayOf<String> > segments = ArrayOf<String>::Alloc(mSegments.GetSize());
     if (!segments) {
-        return Uri::PathSegments::sEMPTY;
+        return PathSegments::sEMPTY;
     }
 
     List<String>::Iterator itor;
@@ -945,7 +946,7 @@ AutoPtr<Uri::PathSegments> Uri::PathSegmentsBuilder::Build()
         (*segments)[i] = *itor;
     }
 
-    AutoPtr<Uri::PathSegments> pathSegments = new Uri::PathSegments(segments, mSize);
+    AutoPtr<PathSegments> pathSegments = new PathSegments(segments, mSize);
 
     // } finally {
     // Makes sure this doesn't get reused.
@@ -960,7 +961,7 @@ AutoPtr<Uri::PathSegments> Uri::PathSegmentsBuilder::Build()
 //                    AbstractHierarchicalUri
 //====================================================================
 AbstractHierarchicalUri::AbstractHierarchicalUri()
-    : mHost(NOT_CACHED)
+    : mHost(AbstractPart::NOT_CACHED)
     , mPort(NOT_CALCULATED)
 {
 }
@@ -988,11 +989,11 @@ ECode AbstractHierarchicalUri::GetLastPathSegment(
     return NOERROR;
 }
 
-AutoPtr<Uri::Part> AbstractHierarchicalUri::GetUserInfoPart()
+AutoPtr<Part> AbstractHierarchicalUri::GetUserInfoPart()
 {
     if (mUserInfo == NULL) {
         String result = ParseUserInfo();
-        mUserInfo = Uri::Part::FromEncoded(result);
+        mUserInfo = Part::FromEncoded(result);
     }
 
     return mUserInfo;
@@ -1038,7 +1039,7 @@ ECode AbstractHierarchicalUri::GetHost(
 {
     VALIDATE_NOT_NULL(host);
 
-    Boolean cached = !mHost.Equals(Uri::NOT_CACHED);
+    Boolean cached = !mHost.Equals(AbstractPart::NOT_CACHED);
 
     if (!cached) {
         mHost = ParseHost();
@@ -1114,7 +1115,7 @@ CAR_INTERFACE_IMPL(HierarchicalUri, AbstractHierarchicalUri, IHierarchicalUri)
 
 HierarchicalUri::HierarchicalUri()
 {
-    mUriString = Uri::NOT_CACHED;
+    mUriString = AbstractPart::NOT_CACHED;
 }
 
 ECode HierarchicalUri::constructor()
@@ -1147,12 +1148,12 @@ ECode HierarchicalUri::ReadFrom(
     String str;
     parcel->ReadString(&str);
 
-    AutoPtr<Uri::Part> p1, p3, p4;
-    AutoPtr<Uri::PathPart> p2;
-    Uri::Part::ReadFrom(parcel, (Uri::Part**)&p1);
-    Uri::PathPart::ReadFrom(parcel, (Uri::PathPart**)&p2);
-    Uri::Part::ReadFrom(parcel, (Uri::Part**)&p3);
-    Uri::Part::ReadFrom(parcel, (Uri::Part**)&p4);
+    AutoPtr<Part> p1, p3, p4;
+    AutoPtr<PathPart> p2;
+    Part::ReadFrom(parcel, (Part**)&p1);
+    PathPart::ReadFrom(parcel, (PathPart**)&p2);
+    Part::ReadFrom(parcel, (Part**)&p3);
+    Part::ReadFrom(parcel, (Part**)&p4);
 
     return CHierarchicalUri::New(str, (Handle32)p1.Get(), (Handle32)p2.Get(),
         (Handle32)p3.Get(), (Handle32)p4.Get(), result);
@@ -1166,16 +1167,16 @@ ECode HierarchicalUri::ReadFromParcel(
     parcel->ReadString(&mScheme);
 
     mAuthority = NULL;
-    Uri::Part::ReadFrom(parcel, (Uri::Part**)&mAuthority);
+    Part::ReadFrom(parcel, (Part**)&mAuthority);
 
     mPath = NULL;
-    Uri::PathPart::ReadFrom(parcel, (Uri::PathPart**)&mPath);
+    PathPart::ReadFrom(parcel, (PathPart**)&mPath);
 
     mQuery = NULL;
-    Uri::Part::ReadFrom(parcel, (Uri::Part**)&mQuery);
+    Part::ReadFrom(parcel, (Part**)&mQuery);
 
     mFragment = NULL;
-    Uri::Part::ReadFrom(parcel, (Uri::Part**)&mFragment);
+    Part::ReadFrom(parcel, (Part**)&mFragment);
     return NOERROR;
 }
 
@@ -1218,10 +1219,10 @@ ECode HierarchicalUri::GetScheme(
     return NOERROR;
 }
 
-AutoPtr<Uri::Part> HierarchicalUri::GetSsp()
+AutoPtr<Part> HierarchicalUri::GetSsp()
 {
     if (mSsp == NULL) {
-        mSsp = Uri::Part::FromEncoded(MakeSchemeSpecificPart());
+        mSsp = Part::FromEncoded(MakeSchemeSpecificPart());
     }
     return mSsp;
 }
@@ -1355,7 +1356,7 @@ ECode HierarchicalUri::GetPathSegments(
     VALIDATE_NOT_NULL(segments);
     *segments = NULL;
 
-    AutoPtr<Uri::PathSegments> pathSegments = mPath->GetPathSegments();
+    AutoPtr<PathSegments> pathSegments = mPath->GetPathSegments();
     if (pathSegments != NULL) {
         *segments = IList::Probe(pathSegments);
         REFCOUNT_ADD(*segments);
@@ -1368,7 +1369,7 @@ ECode HierarchicalUri::ToString(
 {
     VALIDATE_NOT_NULL(info);
 
-    Boolean cached = !mUriString.Equals(Uri::NOT_CACHED);
+    Boolean cached = !mUriString.Equals(AbstractPart::NOT_CACHED);
     *info = cached ? mUriString
             : (mUriString = MakeUriString());
     return NOERROR;
@@ -1430,30 +1431,26 @@ ECode UriBuilder::Scheme(
 }
 
 ECode UriBuilder::OpaquePart(
-    /* [in] */ Uri::Part* opaquePart)
+    /* [in] */ Part* opaquePart)
 {
-    mOpaquePart = (Uri::Part*)opaquePart;
+    mOpaquePart = (Part*)opaquePart;
     return NOERROR;
 }
 
 ECode UriBuilder::OpaquePart(
     /* [in] */ const String& opaquePart)
 {
-    AutoPtr<Uri::Part> part = Uri::Part::FromDecoded(opaquePart);
-    mOpaquePart = part;
-    return NOERROR;
+    return OpaquePart(Part::FromDecoded(opaquePart));
 }
 
 ECode UriBuilder::EncodedOpaquePart(
     /* [in] */ const String& opaquePart)
 {
-    AutoPtr<Uri::Part> part = Uri::Part::FromDecoded(opaquePart);
-    mOpaquePart = part;
-    return NOERROR;
+    return OpaquePart(Part::FromEncoded(opaquePart));
 }
 
 ECode UriBuilder::Authority(
-    /* [in] */ Uri::Part* authority)
+    /* [in] */ Part* authority)
 {
     // This URI will be hierarchical.
     mOpaquePart = NULL;
@@ -1464,25 +1461,17 @@ ECode UriBuilder::Authority(
 ECode UriBuilder::Authority(
     /* [in] */ const String& authority)
 {
-    // This URI will be hierarchical.
-    mOpaquePart = NULL;
-    AutoPtr<Uri::Part> part = Uri::Part::FromDecoded(authority);
-    mAuthority = part;
-    return NOERROR;
+    return Authority(Part::FromDecoded(authority));
 }
 
 ECode UriBuilder::EncodedAuthority(
     /* [in] */ const String& authority)
 {
-    // This URI will be hierarchical.
-    mOpaquePart = NULL;
-    AutoPtr<Uri::Part> part = Uri::Part::FromDecoded(authority);
-    mAuthority = part;
-    return NOERROR;
+    return Authority(Part::FromEncoded(authority));
 }
 
 ECode UriBuilder::Path(
-    /* [in] */ Uri::PathPart* path)
+    /* [in] */ PathPart* path)
 {
     // This URI will be hierarchical.
     mOpaquePart = NULL;
@@ -1493,45 +1482,29 @@ ECode UriBuilder::Path(
 ECode UriBuilder::Path(
     /* [in] */ const String& path)
 {
-    // This URI will be hierarchical.
-    mOpaquePart = NULL;
-    AutoPtr<Uri::PathPart> part = Uri::PathPart::FromDecoded(path);
-    mPath = part;
-    return NOERROR;
+    return Path(PathPart::FromDecoded(path));
 }
 
 ECode UriBuilder::EncodedPath(
     /* [in] */ const String& path)
 {
-    // This URI will be hierarchical.
-    mOpaquePart = NULL;
-    AutoPtr<Uri::PathPart> part = Uri::PathPart::FromDecoded(path);
-    mPath = part;
-    return NOERROR;
+    return Path(PathPart::FromEncoded(path));
 }
 
 ECode UriBuilder::AppendPath(
     /* [in] */ const String& newSegment)
 {
-    // This URI will be hierarchical.
-    mOpaquePart = NULL;
-    AutoPtr<Uri::PathPart> part = Uri::PathPart::AppendDecodedSegment(mPath, newSegment);
-    mPath = part;
-    return NOERROR;
+    return Path(PathPart::AppendDecodedSegment(mPath, newSegment));
 }
 
 ECode UriBuilder::AppendEncodedPath(
     /* [in] */ const String& newSegment)
 {
-    // This URI will be hierarchical.
-    mOpaquePart = NULL;
-    AutoPtr<Uri::PathPart> part = Uri::PathPart::AppendEncodedSegment(mPath, newSegment);
-    mPath = part;
-    return NOERROR;
+    return Path(PathPart::AppendEncodedSegment(mPath, newSegment));
 }
 
 ECode UriBuilder::Query(
-    /* [in] */ Uri::Part* query)
+    /* [in] */ Part* query)
 {
     // This URI will be hierarchical.
     mOpaquePart = NULL;
@@ -1542,25 +1515,17 @@ ECode UriBuilder::Query(
 ECode UriBuilder::Query(
     /* [in] */ const String& query)
 {
-    // This URI will be hierarchical.
-    mOpaquePart = NULL;
-    AutoPtr<Uri::Part> part = Uri::Part::FromDecoded(query);
-    mQuery = part;
-    return NOERROR;
+    return Query(Part::FromDecoded(query));
 }
 
 ECode UriBuilder::EncodedQuery(
     /* [in] */ const String& query)
 {
-    // This URI will be hierarchical.
-    mOpaquePart = NULL;
-    AutoPtr<Uri::Part> part = Uri::Part::FromDecoded(query);
-    mQuery = part;
-    return NOERROR;
+    return Query(Part::FromEncoded(query));
 }
 
 ECode UriBuilder::Fragment(
-    /* [in] */ Uri::Part* fragment)
+    /* [in] */ Part* fragment)
 {
     mFragment = fragment;
     return NOERROR;
@@ -1569,17 +1534,13 @@ ECode UriBuilder::Fragment(
 ECode UriBuilder::Fragment(
     /* [in] */ const String& fragment)
 {
-    AutoPtr<Uri::Part> part = Uri::Part::FromDecoded(fragment);
-    mFragment = part;
-    return NOERROR;
+    return Fragment(Part::FromDecoded(fragment));
 }
 
 ECode UriBuilder::EncodedFragment(
     /* [in] */ const String& fragment)
 {
-    AutoPtr<Uri::Part> part = Uri::Part::FromDecoded(fragment);
-    mFragment = part;
-    return NOERROR;
+    return Fragment(Part::FromEncoded(fragment));
 }
 
 ECode UriBuilder::AppendQueryParameter(
@@ -1600,19 +1561,19 @@ ECode UriBuilder::AppendQueryParameter(
     String encodedParameter = sb.ToString();
 
     if (mQuery == NULL) {
-        mQuery = Uri::Part::FromEncoded(encodedParameter);
+        mQuery = Part::FromEncoded(encodedParameter);
         return NOERROR;
     }
 
     String oldQuery = mQuery->GetEncoded();
     if (oldQuery.IsNullOrEmpty()) {
-        mQuery = Uri::Part::FromEncoded(encodedParameter);
+        mQuery = Part::FromEncoded(encodedParameter);
     } else {
         sb.Reset();
         sb += oldQuery;
         sb += "&";
         sb += encodedParameter;
-        mQuery = Uri::Part::FromEncoded(sb.ToString());
+        mQuery = Part::FromEncoded(sb.ToString());
     }
 
     return NOERROR;
@@ -1639,16 +1600,19 @@ ECode UriBuilder::Build(
             (Handle32)mFragment.Get(), result);
     }
     else {
+
         // Hierarchical URIs should not return null for getPath().
-        AutoPtr<Uri::PathPart> path = mPath;
-        if (path == NULL || path == Uri::PathPart::sNULL) {
-            path = Uri::PathPart::sEMPTY;
+        AutoPtr<PathPart> path = mPath;
+        if (path == NULL || path == PathPart::sNULL) {
+            path = PathPart::sEMPTY;
         }
         else {
             // If we have a scheme and/or authority, the path must
             // be absolute. Prepend it with a '/' if necessary.
-            if (Ptr(this)->Func(this->HasSchemeOrAuthority)) {
-                path = Uri::PathPart::MakeAbsolute(path);
+            Boolean bval;
+            HasSchemeOrAuthority(&bval);
+            if (bval) {
+                path = PathPart::MakeAbsolute(mPath);
             }
         }
 
@@ -1665,7 +1629,7 @@ ECode UriBuilder::HasSchemeOrAuthority(
     VALIDATE_NOT_NULL(result);
 
     *result = !mScheme.IsNull()
-            || (mAuthority != NULL && mAuthority != Uri::Part::sNULL);
+            || (mAuthority != NULL && mAuthority != Part::sNULL);
     return NOERROR;
 }
 
@@ -1684,34 +1648,39 @@ ECode UriBuilder::ToString(
 }
 
 //====================================================================================
-//              Uri::AbstractPart
+//              AbstractPart
 //====================================================================================
-CAR_INTERFACE_IMPL(Uri::AbstractPart, Object, IAbstractPart)
 
-Uri::AbstractPart::AbstractPart(
+INIT_PROI_1 const String AbstractPart::NOT_CACHED("NOT CACHED");
+INIT_PROI_1 const AutoPtr<Part> Part::sNULL = new EmptyPart(String(NULL));
+INIT_PROI_1 const AutoPtr<Part> Part::sEMPTY = new EmptyPart(String(""));
+
+CAR_INTERFACE_IMPL(AbstractPart, Object, IAbstractPart)
+
+AbstractPart::AbstractPart(
     /* [in] */ const String& encoded,
     /* [in] */ const String& decoded)
     : mEncoded(encoded)
     , mDecoded(decoded)
 {}
 
-String Uri::AbstractPart::GetDecoded()
+String AbstractPart::GetDecoded()
 {
     // @SuppressWarnings("StringEquality")
-    if (Uri::NOT_CACHED.Equals(mDecoded)) {
+    if (NOT_CACHED.Equals(mDecoded)) {
         Uri::Decode(mEncoded, &mDecoded);
     }
     return mDecoded;
 }
 
-ECode Uri::AbstractPart::WriteTo(
+ECode AbstractPart::WriteTo(
     /* [in] */ IParcel* parcel)
 {
     // @SuppressWarnings("StringEquality")
-    Boolean hasEncoded = !Uri::NOT_CACHED.Equals(mEncoded);
+    Boolean hasEncoded = !NOT_CACHED.Equals(mEncoded);
 
     // @SuppressWarnings("StringEquality")
-    Boolean hasDecoded = !Uri::NOT_CACHED.Equals(mDecoded);
+    Boolean hasDecoded = !NOT_CACHED.Equals(mDecoded);
 
     if (hasEncoded && hasDecoded) {
         parcel->WriteInt32(Representation::BOTH);
@@ -1727,21 +1696,21 @@ ECode Uri::AbstractPart::WriteTo(
         parcel->WriteString(mDecoded);
     }
     else {
-        Logger::E("Uri::AbstractPart", "Neither encoded nor decoded");
+        Logger::E("AbstractPart", "Neither encoded nor decoded");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
 }
 
 //====================================================================================
-//              Uri::EmptyPart
+//              EmptyPart
 //====================================================================================
-Uri::EmptyPart::EmptyPart(
+EmptyPart::EmptyPart(
     /* [in] */ const String& value)
     : Part(value, value)
 {}
 
-ECode Uri::EmptyPart::IsEmpty(
+ECode EmptyPart::IsEmpty(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -1751,32 +1720,30 @@ ECode Uri::EmptyPart::IsEmpty(
 }
 
 //====================================================================================
-//              Uri::Part
+//              Part
 //====================================================================================
-const AutoPtr<Uri::Part> Uri::Part::sNULL = new EmptyPart(String(NULL));
-const AutoPtr<Uri::Part> Uri::Part::sEMPTY = new EmptyPart(String(""));
 
-Uri::Part::Part(
+Part::Part(
     /* [in] */ const String& encoded,
     /* [in] */ const String& decoded)
     : AbstractPart(encoded, decoded)
 {}
 
-Boolean Uri::Part::IsEmpty()
+Boolean Part::IsEmpty()
 {
     return FALSE;
 }
 
-String Uri::Part::GetEncoded()
+String Part::GetEncoded()
 {
     // @SuppressWarnings("StringEquality")
-    if (Uri::NOT_CACHED.Equals(mEncoded)) {
+    if (NOT_CACHED.Equals(mEncoded)) {
         Uri::Encode(mDecoded, &mEncoded);
     }
     return mEncoded;
 }
 
-ECode Uri::Part::ReadFrom(
+ECode Part::ReadFrom(
     /* [in] */ IParcel* parcel,
     /* [out] */ Part** part)
 {
@@ -1814,7 +1781,7 @@ ECode Uri::Part::ReadFrom(
     return NOERROR;
 }
 
-AutoPtr<Uri::Part> Uri::Part::NonNull(
+AutoPtr<Part> Part::NonNull(
     /* [in] */ Part* part)
 {
     return part == NULL ? sNULL.Get() : part;
@@ -1825,7 +1792,7 @@ AutoPtr<Uri::Part> Uri::Part::NonNull(
  *
  * @param encoded part string
  */
-AutoPtr<Uri::Part> Uri::Part::FromEncoded(
+AutoPtr<Part> Part::FromEncoded(
     /* [in] */ const String& encoded)
 {
     return From(encoded, NOT_CACHED);
@@ -1836,13 +1803,13 @@ AutoPtr<Uri::Part> Uri::Part::FromEncoded(
  *
  * @param decoded part string
  */
-AutoPtr<Uri::Part> Uri::Part::FromDecoded(
+AutoPtr<Part> Part::FromDecoded(
     /* [in] */ const String& decoded)
 {
     return From(NOT_CACHED, decoded);
 }
 
-AutoPtr<Uri::Part> Uri::Part::From(
+AutoPtr<Part> Part::From(
     /* [in] */ const String& encoded,
     /* [in] */ const String& decoded)
 {
@@ -1868,29 +1835,29 @@ AutoPtr<Uri::Part> Uri::Part::From(
 }
 
 //====================================================================================
-//              Uri::PathPart
+//              PathPart
 //====================================================================================
-const AutoPtr<Uri::PathPart> Uri::PathPart::sNULL = new PathPart(String(NULL), String(NULL));
-const AutoPtr<Uri::PathPart> Uri::PathPart::sEMPTY = new PathPart(String(""), String(""));
+INIT_PROI_1 const AutoPtr<PathPart> PathPart::sNULL = new PathPart(String(NULL), String(NULL));
+INIT_PROI_1 const AutoPtr<PathPart> PathPart::sEMPTY = new PathPart(String(""), String(""));
 
-Uri::PathPart::PathPart(
+PathPart::PathPart(
     /* [in] */ const String& encoded,
     /* [in] */ const String& decoded)
     : AbstractPart(encoded, decoded)
 {}
 
-String Uri::PathPart::GetEncoded()
+String PathPart::GetEncoded()
 {
     // @SuppressWarnings("StringEquality")
-    if (Uri::NOT_CACHED.Equals(mEncoded)) {
+    if (NOT_CACHED.Equals(mEncoded)) {
         // Uri::Encode(mDecoded, &mEncoded);
-        Encode(mDecoded, String("/"), &mEncoded);
+        Uri::Encode(mDecoded, String("/"), &mEncoded);
     }
 
     return mEncoded;
 }
 
-AutoPtr<Uri::PathSegments> Uri::PathPart::GetPathSegments()
+AutoPtr<PathSegments> PathPart::GetPathSegments()
 {
     if (mPathSegments != NULL) {
         return mPathSegments;
@@ -1929,10 +1896,13 @@ AutoPtr<Uri::PathSegments> Uri::PathPart::GetPathSegments()
     return mPathSegments;
 }
 
-AutoPtr<Uri::PathPart> Uri::PathPart::AppendEncodedSegment(
-    /* [in] */ Uri::PathPart* oldPart,
+AutoPtr<PathPart> PathPart::AppendEncodedSegment(
+    /* [in] */ PathPart* oldPart,
     /* [in] */ const String& newSegment)
 {
+    // If there is no old path, should we make the new path relative
+    // or absolute? I pick absolute.
+
     if (oldPart == NULL) {
         // No old path.
         return FromEncoded(String("/") + newSegment);
@@ -1957,8 +1927,8 @@ AutoPtr<Uri::PathPart> Uri::PathPart::AppendEncodedSegment(
     return FromEncoded(newPath);
 }
 
-AutoPtr<Uri::PathPart> Uri::PathPart::AppendDecodedSegment(
-    /* [in] */ Uri::PathPart* oldPart,
+AutoPtr<PathPart> PathPart::AppendDecodedSegment(
+    /* [in] */ PathPart* oldPart,
     /* [in] */ const String& decoded)
 {
     String encoded;
@@ -1968,9 +1938,9 @@ AutoPtr<Uri::PathPart> Uri::PathPart::AppendDecodedSegment(
     return AppendEncodedSegment(oldPart, encoded);
 }
 
-ECode Uri::PathPart::ReadFrom(
+ECode PathPart::ReadFrom(
     /* [in] */ IParcel* parcel,
-    /* [out] */ Uri::PathPart** result)
+    /* [out] */ PathPart** result)
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
@@ -2007,19 +1977,19 @@ ECode Uri::PathPart::ReadFrom(
     return NOERROR;
 }
 
-AutoPtr<Uri::PathPart> Uri::PathPart::FromEncoded(
+AutoPtr<PathPart> PathPart::FromEncoded(
     /* [in] */ const String& encoded)
 {
     return From(encoded, NOT_CACHED);
 }
 
-AutoPtr<Uri::PathPart> Uri::PathPart::FromDecoded(
+AutoPtr<PathPart> PathPart::FromDecoded(
     /* [in] */ const String& decoded)
 {
     return From(NOT_CACHED, decoded);
 }
 
-AutoPtr<Uri::PathPart> Uri::PathPart::From(
+AutoPtr<PathPart> PathPart::From(
     /* [in] */ const String& encoded,
     /* [in] */ const String& decoded)
 {
@@ -2038,11 +2008,11 @@ AutoPtr<Uri::PathPart> Uri::PathPart::From(
  * Prepends path values with "/" if they're present, not empty, and
  * they don't already start with "/".
  */
-AutoPtr<Uri::PathPart> Uri::PathPart::MakeAbsolute(
-    /* [in] */ Uri::PathPart* oldPart)
+AutoPtr<PathPart> PathPart::MakeAbsolute(
+    /* [in] */ PathPart* oldPart)
 {
     // @SuppressWarnings("StringEquality")
-    Boolean encodedCached = !oldPart->mEncoded.Equals(Uri::NOT_CACHED);
+    Boolean encodedCached = !oldPart->mEncoded.Equals(NOT_CACHED);
 
     // We don't care which version we use, and we don't want to force
     // unneccessary encoding/decoding.
@@ -2052,13 +2022,13 @@ AutoPtr<Uri::PathPart> Uri::PathPart::MakeAbsolute(
     }
 
     // Prepend encoded string if present.
-    String newEncoded = encodedCached ? String("/") + oldPart->mEncoded : Uri::NOT_CACHED;
+    String newEncoded = encodedCached ? String("/") + oldPart->mEncoded : NOT_CACHED;
 
     // Prepend decoded string if present.
     // @SuppressWarnings("StringEquality")
     Boolean decodedCached = !oldPart->mDecoded.Equals(
-        Uri::NOT_CACHED);
-    String newDecoded = decodedCached ? String("/") + oldPart->mDecoded : Uri::NOT_CACHED;
+        NOT_CACHED);
+    String newDecoded = decodedCached ? String("/") + oldPart->mDecoded : NOT_CACHED;
 
     return new PathPart(newEncoded, newDecoded);
 }
@@ -2069,7 +2039,6 @@ AutoPtr<Uri::PathPart> Uri::PathPart::MakeAbsolute(
 CAR_INTERFACE_IMPL_3(Uri, Object, IParcelable, IComparable, IUri)
 
 const String Uri::LOG("Uri");
-const String Uri::NOT_CACHED("NOT CACHED");
 const Char32 Uri::HEX_DIGITS[] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 const Int32 Uri::NOT_FOUND = -1;
 const Int32 Uri::NOT_CALCULATED = -2;
@@ -2078,13 +2047,15 @@ const String Uri::DEFAULT_ENCODING("UTF-8");
 
 AutoPtr<IUri> Uri::CreateEmpty()
 {
+    assert(Part::sNULL != NULL);
+    assert(PathPart::sEMPTY != NULL);
     AutoPtr<IUri> rev;
     CHierarchicalUri::New(String(NULL), (Handle32)Part::sNULL.Get(),
         (Handle32)PathPart::sEMPTY.Get(), (Handle32)Part::sNULL.Get(),
         (Handle32)Part::sNULL.Get(), (IUri**)&rev);
     return rev;
 }
-const AutoPtr<IUri> Uri::EMPTY = CreateEmpty();
+INIT_PROI_2 const AutoPtr<IUri> Uri::EMPTY = CreateEmpty();
 
 ECode Uri::GetEMPTY(
     /* [out] */ IUri** result)
@@ -2095,7 +2066,6 @@ ECode Uri::GetEMPTY(
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
-
 
 ECode Uri::IsOpaque(
     /* [out] */ Boolean* result)
@@ -2759,10 +2729,12 @@ ECode Uri::IsPathPrefixMatch(
         AutoPtr<IInterface> iPrefixSeg;
         prefixSeg->Get(i, (IInterface**)&iPrefixSeg);
         if (!Objects::Equals(iSeg, iPrefixSeg)) {
-            FUNC_RETURN(FALSE)
+            *result = FALSE;
+             return NOERROR;
         }
     }
-    FUNC_RETURN(TRUE)
+    *result = TRUE;
+     return NOERROR;
 }
 
 } // namespace Net

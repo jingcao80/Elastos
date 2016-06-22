@@ -1,10 +1,12 @@
 #include "elastos/droid/internal/widget/CAbsActionBarView.h"
 #include "elastos/droid/internal/widget/CActionBarOverlayLayoutLayoutParams.h"
 #include "elastos/droid/internal/widget/CAbsListViewAutoScroller.h"
+#include "elastos/droid/internal/widget/CActionBarBackgroundDrawable.h"
 #include "elastos/droid/internal/widget/CActionBarContainer.h"
 #include "elastos/droid/internal/widget/CActionBarContextView.h"
 #include "elastos/droid/internal/widget/CActionBarOverlayLayout.h"
 #include "elastos/droid/internal/widget/CActionBarView.h"
+#include "elastos/droid/internal/widget/CActionBarViewHomeView.h"
 #include "elastos/droid/internal/widget/CActionBarViewSavedState.h"
 #include "elastos/droid/internal/widget/CBackgroundFallback.h"
 #include "elastos/droid/internal/widget/CDialogTitle.h"
@@ -37,7 +39,7 @@
 #include "elastos/droid/internal/widget/CToolbarWidgetWrapper.h"
 #include "elastos/droid/internal/widget/CWaveView.h"
 #include "elastos/droid/internal/widget/CWeightedLinearLayout.h"
-#include "elastos/droid/internal/widget/CActionBarViewHomeView.h"
+
 
 namespace Elastos {
 namespace Droid {
@@ -47,6 +49,7 @@ namespace Widget {
 CAR_OBJECT_IMPL(CAbsActionBarView)
 CAR_OBJECT_IMPL(CActionBarOverlayLayoutLayoutParams)
 CAR_OBJECT_IMPL(CAbsListViewAutoScroller)
+CAR_OBJECT_IMPL(CActionBarBackgroundDrawable)
 CAR_OBJECT_IMPL(CActionBarContainer)
 CAR_OBJECT_IMPL(CActionBarContextView)
 CAR_OBJECT_IMPL(CActionBarOverlayLayout)

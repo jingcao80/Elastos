@@ -90,6 +90,7 @@ EXPORT_HEADERS += elastos/utility/HashTable.h
 EXPORT_HEADERS += elastos/utility/Objects.h
 EXPORT_HEADERS += elastos/utility/Observable.h
 EXPORT_HEADERS += elastos/utility/Properties.h
+EXPORT_HEADERS += elastos/utility/StringPool.h
 EXPORT_HEADERS += elastos/utility/TimSort.h
 EXPORT_HEADERS += elastos/utility/TimerTask.h
 EXPORT_HEADERS += elastos/utility/TimeZoneGetter.h

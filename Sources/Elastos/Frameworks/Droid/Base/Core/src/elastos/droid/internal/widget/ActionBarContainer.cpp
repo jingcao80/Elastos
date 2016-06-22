@@ -1,5 +1,6 @@
 
 #include "elastos/droid/internal/widget/ActionBarContainer.h"
+#include "elastos/droid/internal/widget/CActionBarBackgroundDrawable.h"
 #include "elastos/droid/R.h"
 #include "elastos/core/Math.h"
 
@@ -18,10 +19,12 @@ namespace Widget {
 //=====================================================================
 //           ActionBarContainer::ActionBarBackgroundDrawable
 //=====================================================================
-ActionBarContainer::ActionBarBackgroundDrawable::ActionBarBackgroundDrawable(
-    /* [in] */ ActionBarContainer* owner)
-    : mOwner(owner)
-{}
+ECode ActionBarContainer::ActionBarBackgroundDrawable::constructor(
+    /* [in] */ IActionBarContainer* owner)
+{
+    mOwner = (ActionBarContainer*)owner;
+    return NOERROR;
+}
 
 ECode ActionBarContainer::ActionBarBackgroundDrawable::Draw(
     /* [in] */ ICanvas* canvas)
@@ -127,7 +130,8 @@ ECode ActionBarContainer::constructor(
 {
     FAIL_RETURN(FrameLayout::constructor(context, attrs));
 
-    AutoPtr<IDrawable> drawable = new ActionBarBackgroundDrawable(this);
+    AutoPtr<IDrawable> drawable;
+    CActionBarBackgroundDrawable::New(this, (IDrawable**)&drawable);
     SetBackgroundDrawable(drawable);
 
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(

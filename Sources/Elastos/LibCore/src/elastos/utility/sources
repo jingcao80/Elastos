@@ -78,6 +78,7 @@ SOURCES += CScanner.cpp
 SOURCES += ServiceLoader.cpp
 SOURCES += CSimpleTimeZone.cpp
 SOURCES += CStack.cpp
+SOURCES += StringPool.cpp
 SOURCES += CStringTokenizer.cpp
 SOURCES += TimeZone.cpp
 SOURCES += Timer.cpp

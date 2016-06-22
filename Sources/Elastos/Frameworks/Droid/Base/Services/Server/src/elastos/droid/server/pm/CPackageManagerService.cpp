@@ -5300,12 +5300,14 @@ ECode CPackageManagerService::GetPackageInfo(
     *pkgInfo = NULL;
 
     if (!sUserManager->Exists(userId)) {
+        Slogger::E(TAG, "GetPackageInfo %s, userId %d not exists.", packageName.string(), userId);
         return NOERROR;
     }
     FAIL_RETURN(EnforceCrossUserPermission(Binder::GetCallingUid(), userId,
             FALSE, FALSE, String("get package info")))
     // reader
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         AutoPtr<PackageParser::Package> p;
         if (!packageName.IsNullOrEmpty()) {
             HashMap<String, AutoPtr<PackageParser::Package> >::Iterator it = mPackages.Find(packageName);
@@ -5314,7 +5316,7 @@ ECode CPackageManagerService::GetPackageInfo(
             }
         }
         if (DEBUG_PACKAGE_INFO)
-            Logger::V(TAG, "getPackageInfo %s: %p", packageName.string(), p.Get());
+            Logger::V(TAG, "getPackageInfo 0 %s: %s", packageName.string(), TO_CSTR(p));
         if (p != NULL) {
             AutoPtr<IPackageInfo> pi = GeneratePackageInfo(p, flags, userId);
             *pkgInfo = pi;
@@ -5669,7 +5671,7 @@ ECode CPackageManagerService::GetApplicationInfo(
     *appInfo = NULL;
 
     if (!sUserManager->Exists(userId)) {
-        Slogger::E(TAG, "GetApplicationInfo %d, userId %d not exists.", __LINE__, userId);
+        Slogger::E(TAG, "GetApplicationInfo %s, userId %d not exists.", packageName.string(), userId);
         return NOERROR;
     }
 
@@ -5687,7 +5689,6 @@ ECode CPackageManagerService::GetApplicationInfo(
         }
         if (DEBUG_PACKAGE_INFO)
             Slogger::V(TAG, "getApplicationInfo [%s]: %s", packageName.string(), TO_CSTR(p));
-
         if (p != NULL) {
             AutoPtr<PackageSetting> ps;
             HashMap<String, AutoPtr<PackageSetting> >::Iterator pit =
@@ -9535,7 +9536,8 @@ ECode CPackageManagerService::PerformBootDexOpt()
     // }
 
     AutoPtr< HashSet<AutoPtr<PackageParser::Package> > > pkgs;
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         pkgs = mDeferredDexOpt;
         mDeferredDexOpt = NULL;
     }
@@ -9550,7 +9552,7 @@ ECode CPackageManagerService::PerformBootDexOpt()
             AutoPtr<PackageParser::Package> pkg = *pkgIt;
             if (pkg->mCoreApp) {
                 if (DEBUG_DEXOPT) {
-                    Logger::I(TAG, "Adding core app : %d "/* + sortedPkgs.size()*/, pkg->mPackageName.string());
+                    Logger::I(TAG, "Adding core app : %d ", pkg->mPackageName.string());
                 }
                 sortedPkgs.PushBack(pkg);
                 HashSet<AutoPtr<PackageParser::Package> >::Iterator temp = pkgIt;
@@ -9792,7 +9794,8 @@ void CPackageManagerService::PerformBootDexOpt(
     // }
 
     AutoPtr<PackageParser::Package> p = pkg;
-    {    AutoLock syncLock(mInstallLock);
+    {
+        AutoLock syncLock(mInstallLock);
         PerformDexOptLI(p, NULL /* instruction sets */, FALSE /* force dex */,
                 FALSE /* defer */, TRUE /* include dependencies */);
     }
@@ -17714,7 +17717,8 @@ ECode CPackageManagerService::SystemReady()
         Logger::D(TAG, "compatibility mode:%d", compatibilityModeEnabled);
     }
 
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         // Verify that all of the preferred activity components actually
         // exist.  It is possible for applications to be updated and at
         // that point remove a previously declared activity component that
@@ -18984,6 +18988,7 @@ ECode CPackageManagerService::ProcessThemeResources(
 void CPackageManagerService::ProcessThemeResourcesInThemeService(
     /* [in] */ const String& pkgName)
 {
+    Logger::I(TAG, " >> ProcessThemeResourcesInThemeService: %s", pkgName.string());
     AutoPtr<IInterface> service;
     mContext->GetSystemService(IContext::THEME_SERVICE, (IInterface**)&service);
     AutoPtr<IThemeManager> tm = IThemeManager::Probe(service);

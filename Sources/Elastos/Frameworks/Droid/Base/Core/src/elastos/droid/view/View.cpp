@@ -13382,6 +13382,7 @@ AutoPtr<IRenderNode> View::GetDrawableRenderNode(
     AutoPtr<IRenderNode> renderNode = inRenderNode;
     if (renderNode == NULL) {
         String name = Object::GetFullClassName(drawable);
+        assert(name != NULL);
         renderNode = RenderNode::Create(name, this);
     }
 

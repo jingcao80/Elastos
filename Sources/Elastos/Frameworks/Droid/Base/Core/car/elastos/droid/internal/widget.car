@@ -792,6 +792,13 @@ module
         interface IAccessibilityEventSource;
     }
 
+    [local]
+    class CActionBarBackgroundDrawable {
+        constructor(
+            [in] IActionBarContainer* host);
+
+        interface IDrawable;
+    }
 
     [local]
     class CSizeAdaptiveLayoutLayoutParams {

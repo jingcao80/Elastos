@@ -659,7 +659,10 @@ void CKeyguardBottomAreaView::UpdateLockIcon()
         Int32 h = 0, w = 0;
         icon->GetIntrinsicHeight(&h);
         if (h != iconHeight || (icon->GetIntrinsicWidth(&w), w) != iconWidth) {
-            icon = new IntrinsicSizeDrawable(icon, iconWidth, iconHeight);
+            assert(0);
+            AutoPtr<IDrawable> newIcon;
+            // CIntrinsicSizeDrawable::New(icon, iconWidth, iconHeight, (IDrawable**)&newIcon);
+            icon = newIcon;
         }
         IImageView::Probe(mLockIcon)->SetImageDrawable(icon);
     }

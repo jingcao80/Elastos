@@ -34,7 +34,7 @@ class ActionBarContainer
     : public FrameLayout
     , public IActionBarContainer
 {
-private:
+public:
     /**
       * Dummy drawable so that we don't break background display lists and
       * projection surfaces.
@@ -43,8 +43,8 @@ private:
         : public Drawable
     {
     public:
-        ActionBarBackgroundDrawable(
-            /* [in] */ ActionBarContainer* owner);
+        CARAPI constructor(
+            /* [in] */ IActionBarContainer* owner);
 
         // @Override
         CARAPI Draw(

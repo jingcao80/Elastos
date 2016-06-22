@@ -1065,7 +1065,7 @@ ECode IconPackHelper::CreateIconResource(
     AutoPtr<IPackageManager> pm;
     context->GetPackageManager((IPackageManager**)&pm);
     AutoPtr<IPackageInfo> info;
-    pm->GetPackageInfo(packageName, 0, (IPackageInfo**)&info);
+    FAIL_RETURN(pm->GetPackageInfo(packageName, 0, (IPackageInfo**)&info))
     AutoPtr<IApplicationInfo> appInfo;
     info->GetApplicationInfo((IApplicationInfo**)&appInfo);
     String themeApk;
