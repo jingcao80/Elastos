@@ -130,7 +130,7 @@ CAR_INTERFACE_IMPL_2(TelecomServiceImpl, Object, IITelecomService, IBinder)
 
 const String TelecomServiceImpl::REGISTER_PROVIDER_OR_SUBSCRIPTION("com.android.server.telecom.permission.REGISTER_PROVIDER_OR_SUBSCRIPTION");
 const String TelecomServiceImpl::REGISTER_CONNECTION_MANAGER("com.android.server.telecom.permission.REGISTER_CONNECTION_MANAGER");
-static const String TAG("TelecomServiceImpl");
+const String TelecomServiceImpl::TAG("TelecomServiceImpl");
 const String TelecomServiceImpl::SERVICE_NAME("telecom");
 const Int32 TelecomServiceImpl::MSG_SILENCE_RINGER = 1;
 const Int32 TelecomServiceImpl::MSG_SHOW_CALL_SCREEN = 2;

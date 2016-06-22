@@ -64,7 +64,7 @@
          can check for incompatible APIs. -->
     <uses-sdk android:minSdkVersion="19" />
 
-    <application android:name="TelecomApp"
+    <application android:name="Elastos.Droid.Server.Telecom.CTelecomApp"
             android:persistent="true"
             android:label="@string/telecommAppLabel"
             android:icon="@mipmap/ic_launcher_phone"

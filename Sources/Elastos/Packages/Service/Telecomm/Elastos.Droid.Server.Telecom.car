@@ -27,6 +27,7 @@ module
     merge("car/elastos/droid/server/telecom/WiredHeadsetManager.car");
 
     using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IApplication;
     using interface Elastos.Droid.App.IListActivity;
     using interface Elastos.Droid.App.IService;
     using interface Elastos.Droid.Bluetooth.IIBluetoothHeadsetPhone;
@@ -54,6 +55,12 @@ module
     namespace Droid {
     namespace Server {
     namespace Telecom {
+
+    class CTelecomApp {
+        constructor();
+
+        interface IApplication;
+    }
 
     class CAccountSelection {
         constructor();

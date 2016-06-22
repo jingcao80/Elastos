@@ -66,8 +66,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CallsManager();
 
     /** Singleton accessor. */

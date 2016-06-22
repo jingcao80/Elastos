@@ -182,6 +182,7 @@ ECode MissedCallNotifier::SubCallListenerBase::OnCallerInfoChanged(
 //=============================================================================
 // MissedCallNotifier
 //=============================================================================
+AutoPtr<ArrayOf<String> > MissedCallNotifier::CALL_LOG_PROJECTION = InitCALL_LOG_PROJECTION();
 const Int32 MissedCallNotifier::DEFAULT_COLOR = 0xFFFFFF; //White
 const Int32 MissedCallNotifier::DEFAULT_TIME = 1000; // 1 second
 const Int32 MissedCallNotifier::CALL_LOG_COLUMN_ID = 0;

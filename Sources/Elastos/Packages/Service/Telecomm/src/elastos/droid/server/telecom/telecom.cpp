@@ -9,6 +9,7 @@
 #include "elastos/droid/server/telecom/CNewOutgoingCallIntentBroadcasterNewOutgoingCallBroadcastIntentReceiver.h"
 #include "elastos/droid/server/telecom/CPhoneAccountBroadcastReceiver.h"
 #include "elastos/droid/server/telecom/CRespondViaSmsSettingsSettings.h"
+#include "elastos/droid/server/telecom/CTelecomApp.h"
 #include "elastos/droid/server/telecom/CTelecomBroadcastReceiver.h"
 #include "elastos/droid/server/telecom/CTtyManagerTtyBroadcastReceiver.h"
 #include "elastos/droid/server/telecom/CWiredHeadsetManagerWiredHeadsetBroadcastReceiver.h"
@@ -37,6 +38,8 @@ CAR_OBJECT_IMPL(CNewOutgoingCallIntentBroadcasterNewOutgoingCallBroadcastIntentR
 CAR_OBJECT_IMPL(CPhoneAccountBroadcastReceiver)
 
 CAR_OBJECT_IMPL(CRespondViaSmsSettingsSettings)
+
+CAR_OBJECT_IMPL(CTelecomApp)
 
 CAR_OBJECT_IMPL(CTelecomBroadcastReceiver)
 
