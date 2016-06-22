@@ -46,7 +46,7 @@ public:
         /* [out] */ Boolean * pHasBase);
 
     CARAPI GetBaseInfo(
-        /* [out] */ IInterfaceInfo ** ppBaseInfo);
+        /* [out] */ ITestInterfaceInfo ** ppBaseInfo);
 
     CARAPI GetMethodCount(
         /* [out] */ Int32 * pCount);

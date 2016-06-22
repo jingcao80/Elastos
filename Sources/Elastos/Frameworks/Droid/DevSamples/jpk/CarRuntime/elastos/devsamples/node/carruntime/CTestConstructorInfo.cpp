@@ -5,8 +5,8 @@
 #include "CTestParamInfo.h"
 #include "CTestArgumentList.h"
 #include "CTestClassInfo.h"
+#include "CTestModuleInfo.h"
 
-//#include "ext/frameworkdef.h"
 #include <elastos/droid/ext/frameworkdef.h>
 
 #include <cutils/log.h>
@@ -29,8 +29,7 @@ ECode CTestConstructorInfo::GetName(
 ECode CTestConstructorInfo::GetAnnotation(
     /* [out] */ String * pName)
 {
-    mConstructorInfo->GetAnnotation(pName);
-    return NOERROR;
+    return mConstructorInfo->GetAnnotation(pName);
 }
 
 ECode CTestConstructorInfo::GetParamCount(
@@ -47,7 +46,7 @@ ECode CTestConstructorInfo::GetParamCount(
 ECode CTestConstructorInfo::GetAllParamInfos(
     /* [out] */ ArrayOf<ITestParamInfo *> ** ppParamInfos)
 {
-    ECode ec;
+    ECode ec = NOERROR;
 
     Int32 paramCount;
     ec = this->GetParamCount(&paramCount);
@@ -74,8 +73,6 @@ ECode CTestConstructorInfo::GetAllParamInfos(
         testParamInfo->AddRef();
     }   //for
 
-    ec = NOERROR;
-
     return ec;
 }
 
@@ -85,23 +82,23 @@ ECode CTestConstructorInfo::GetParamInfoByIndex(
 {
     ECode ec = NOERROR;
 
-    AutoPtr<IParamInfo> paramInfo;
-    ec = mConstructorInfo->GetParamInfoByIndex(index,(IParamInfo**)&paramInfo);
+    AutoPtr<IParamInfo> info;
+    ec = mConstructorInfo->GetParamInfoByIndex(index,(IParamInfo**)&info);
     if (FAILED(ec)) {
         ALOGD("CConstructorInfo::GetParamInfoByIndex error: GetParamInfoByIndex fail!");
         return ec;
     }
 
-    AutoPtr<ITestParamInfo> testParamInfo;
-    ec = CTestParamInfo::New(paramInfo,(ITestParamInfo**)&testParamInfo);
+    AutoPtr<ITestParamInfo> testInfo;
+    ec = CTestParamInfo::New(info,(ITestParamInfo**)&testInfo);
     if (FAILED(ec)) {
         ALOGD("CConstructorInfo::GetParamInfoByIndex error: CTestParamInfo::New fail!");
         return ec;
     }
-    *ppParamInfo = testParamInfo;
+    *ppParamInfo = testInfo;
 
-    paramInfo->AddRef();
-    testParamInfo->AddRef();
+    info->AddRef();
+    testInfo->AddRef();
 
     return ec;
 }
@@ -110,14 +107,33 @@ ECode CTestConstructorInfo::GetParamInfoByName(
     /* [in] */ const String& name,
     /* [out] */ ITestParamInfo ** ppParamInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IParamInfo> info;
+    ec = mConstructorInfo->GetParamInfoByName(name, (IParamInfo**)&info);
+    if (FAILED(ec)) {
+        ALOGD("CTestConstructorInfo::GetParamInfoByName error: GetParamInfoByName fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestParamInfo> testInfo;
+    ec = CTestParamInfo::New(info,(ITestParamInfo**)&testInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestConstructorInfo::GetParamInfoByName error: CTestParamInfo::New fail!");
+        return ec;
+    }
+    *ppParamInfo = testInfo;
+
+    info->AddRef();
+    testInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestConstructorInfo::CreateArgumentList(
     /* [out] */ ITestArgumentList ** ppArgumentList)
 {
-    ECode ec;
+    ECode ec = NOERROR;
 
     AutoPtr<IArgumentList> argumentList;
     ec = mConstructorInfo->CreateArgumentList((IArgumentList**)&argumentList);
@@ -137,8 +153,6 @@ ECode CTestConstructorInfo::CreateArgumentList(
     argumentList->AddRef();
     testArgumentList->AddRef();
 
-    ec = NOERROR;
-
     return ec;
 }
 
@@ -146,9 +160,6 @@ ECode CTestConstructorInfo::CreateObject(
     /* [in] */ ITestArgumentList * pArgumentList,
     /* [out] */ PInterface * ppObject)
 {
-    // TODO: Add your code here
-    //return E_NOT_IMPLEMENTED;
-
     ECode ec = NOERROR;
 
     IArgumentList* argumentList;
@@ -179,9 +190,6 @@ ECode CTestConstructorInfo::LocalCreateObject(
     /* [in] */ ITestArgumentList * pArgumentList,
     /* [out] */ PInterface * ppObject)
 {
-    // TODO: Add your code here
-    //return E_NOT_IMPLEMENTED;
-
     ECode ec = NOERROR;
 
     IArgumentList* argumentList;
@@ -212,9 +220,6 @@ ECode CTestConstructorInfo::RemoteCreateObject(
     /* [in] */ ITestArgumentList * pArgumentList,
     /* [out] */ PInterface * ppObject)
 {
-    // TODO: Add your code here
-    //return E_NOT_IMPLEMENTED;
-
     ECode ec = NOERROR;
 
     IArgumentList* argumentList;
@@ -246,6 +251,9 @@ ECode CTestConstructorInfo::CreateObjectInRegime(
     /* [in] */ ITestArgumentList * pArgumentList,
     /* [out] */ PInterface * ppObject)
 {
+    //ERROR: PRegime
+    //return mConstructorInfo->CreateObjectInRegime(pRgm, pArgumentList, ppObject);
+
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }

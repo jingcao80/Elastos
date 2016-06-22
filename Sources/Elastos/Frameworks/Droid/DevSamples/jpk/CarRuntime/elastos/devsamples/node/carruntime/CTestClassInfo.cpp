@@ -4,6 +4,10 @@
 #include "CTestModuleInfo.h"
 #include "CTestConstructorInfo.h"
 
+#include "CTestCallbackMethodInfo.h"
+#include "CTestMethodInfo.h"
+#include "CTestInterfaceInfo.h"
+
 #include <cutils/log.h>
 
 namespace Elastos {
@@ -98,8 +102,27 @@ ECode CTestClassInfo::HasBaseClass(
 ECode CTestClassInfo::GetBaseClassInfo(
     /* [out] */ ITestClassInfo ** ppBaseClassInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IClassInfo> classInfo;
+    ec = mClassInfo->GetBaseClassInfo((IClassInfo**)&classInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetBaseClassInfo error: GetBaseClassInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestClassInfo> testClassInfo;
+    ec = CTestClassInfo::New(classInfo,(ITestClassInfo**)&testClassInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetBaseClassInfo error: CTestClassInfo::New fail!");
+        return ec;
+    }
+    *ppBaseClassInfo = testClassInfo;
+
+    classInfo->AddRef();
+    testClassInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestClassInfo::IsGeneric(
@@ -117,8 +140,27 @@ ECode CTestClassInfo::HasGeneric(
 ECode CTestClassInfo::GetGenericInfo(
     /* [out] */ ITestClassInfo ** ppGenericInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IClassInfo> classInfo;
+    ec = mClassInfo->GetGenericInfo((IClassInfo**)&classInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetBaseClassInfo error: GetBaseClassInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestClassInfo> testClassInfo;
+    ec = CTestClassInfo::New(classInfo,(ITestClassInfo**)&testClassInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetBaseClassInfo error: CTestClassInfo::New fail!");
+        return ec;
+    }
+    *ppGenericInfo = testClassInfo;
+
+    classInfo->AddRef();
+    testClassInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestClassInfo::IsRegime(
@@ -136,16 +178,61 @@ ECode CTestClassInfo::GetAspectCount(
 ECode CTestClassInfo::GetAllAspectInfos(
     /* [out] */ ArrayOf<ITestClassInfo *> ** ppAspectInfos)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    Int32 count;
+    ec = this->GetAspectCount(&count);
+
+    ArrayOf<IClassInfo *> * infos;
+    infos = ArrayOf<IClassInfo *>::Alloc(count);
+    ec = mClassInfo->GetAllAspectInfos(infos);
+
+    //Int32 used = infos->GetUsed();
+    Int32 used = count;
+
+    *ppAspectInfos = ArrayOf<ITestClassInfo *>::Alloc(used);
+
+    for(Int32 i = 0; i < used; i++){
+        AutoPtr<ITestClassInfo> info;
+        ec = CTestClassInfo::New((*infos)[i],(ITestClassInfo**)&info);
+        if (FAILED(ec)) {
+            ALOGD("Create \"%s\" instance failed!\n", "CTestClassInfo");
+            return ec;
+        }
+        (*ppAspectInfos)->Set(i,info);
+
+        (*infos)[i]->AddRef();
+        info->AddRef();
+    }   //for
+
+    return ec;
 }
 
 ECode CTestClassInfo::GetAspectInfo(
     /* [in] */ const String& name,
     /* [out] */ ITestClassInfo ** ppAspectInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IClassInfo> classInfo;
+    ec = mClassInfo->GetAspectInfo(name, (IClassInfo**)&classInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetBaseClassInfo error: GetBaseClassInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestClassInfo> testClassInfo;
+    ec = CTestClassInfo::New(classInfo,(ITestClassInfo**)&testClassInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetBaseClassInfo error: CTestClassInfo::New fail!");
+        return ec;
+    }
+    *ppAspectInfo = testClassInfo;
+
+    classInfo->AddRef();
+    testClassInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestClassInfo::IsAspect(
@@ -163,16 +250,61 @@ ECode CTestClassInfo::GetAggregateeCount(
 ECode CTestClassInfo::GetAllAggregateeInfos(
     /* [out] */ ArrayOf<ITestClassInfo *> ** ppAggregateeInfos)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    Int32 count;
+    ec = this->GetAggregateeCount(&count);
+
+    ArrayOf<IClassInfo *> * infos;
+    infos = ArrayOf<IClassInfo *>::Alloc(count);
+    ec = mClassInfo->GetAllAggregateeInfos(infos);
+
+    //Int32 used = infos->GetUsed();
+    Int32 used = count;
+
+    *ppAggregateeInfos = ArrayOf<ITestClassInfo *>::Alloc(used);
+
+    for(Int32 i = 0; i < used; i++){
+        AutoPtr<ITestClassInfo> info;
+        ec = CTestClassInfo::New((*infos)[i],(ITestClassInfo**)&info);
+        if (FAILED(ec)) {
+            ALOGD("Create \"%s\" instance failed!\n", "CTestClassInfo");
+            return ec;
+        }
+        (*ppAggregateeInfos)->Set(i,info);
+
+        (*infos)[i]->AddRef();
+        info->AddRef();
+    }   //for
+
+    return ec;
 }
 
 ECode CTestClassInfo::GetAggregateeInfo(
     /* [in] */ const String& name,
     /* [out] */ ITestClassInfo ** ppAggregateeInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IClassInfo> classInfo;
+    ec = mClassInfo->GetAggregateeInfo(name, (IClassInfo**)&classInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetBaseClassInfo error: GetBaseClassInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestClassInfo> testClassInfo;
+    ec = CTestClassInfo::New(classInfo,(ITestClassInfo**)&testClassInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetBaseClassInfo error: CTestClassInfo::New fail!");
+        return ec;
+    }
+    *ppAggregateeInfo = testClassInfo;
+
+    classInfo->AddRef();
+    testClassInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestClassInfo::GetConstructorCount(
@@ -218,16 +350,54 @@ ECode CTestClassInfo::GetConstructorInfoByParamNames(
     /* [in] */ const String& name,
     /* [out] */ ITestConstructorInfo ** ppConstructorInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IConstructorInfo> constructorInfo;
+    ec = mClassInfo->GetConstructorInfoByParamNames(name, (IConstructorInfo**)&constructorInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestConstructorInfo::GetConstructorInfoByParamNames error: GetConstructorInfoByParamNames fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestConstructorInfo> testConstructorInfo;
+    ec = CTestConstructorInfo::New(constructorInfo,(ITestConstructorInfo**)&testConstructorInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestConstructorInfo::GetConstructorInfoByParamNames error: CTestClassInfo::New fail!");
+        return ec;
+    }
+    *ppConstructorInfo = testConstructorInfo;
+
+    constructorInfo->AddRef();
+    testConstructorInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestClassInfo::GetConstructorInfoByParamCount(
     /* [in] */ Int32 count,
     /* [out] */ ITestConstructorInfo ** ppConstructorInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IConstructorInfo> constructorInfo;
+    ec = mClassInfo->GetConstructorInfoByParamCount(count, (IConstructorInfo**)&constructorInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestConstructorInfo::GetConstructorInfoByParamCount error: GetConstructorInfoByParamCount fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestConstructorInfo> testConstructorInfo;
+    ec = CTestConstructorInfo::New(constructorInfo,(ITestConstructorInfo**)&testConstructorInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestConstructorInfo::GetConstructorInfoByParamCount error: CTestClassInfo::New fail!");
+        return ec;
+    }
+    *ppConstructorInfo = testConstructorInfo;
+
+    constructorInfo->AddRef();
+    testConstructorInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestClassInfo::GetInterfaceCount(
@@ -239,16 +409,61 @@ ECode CTestClassInfo::GetInterfaceCount(
 ECode CTestClassInfo::GetAllInterfaceInfos(
     /* [out] */ ArrayOf<ITestInterfaceInfo *> ** ppInterfaceInfos)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    Int32 count;
+    ec = this->GetInterfaceCount(&count);
+
+    ArrayOf<IInterfaceInfo *> * infos;
+    infos = ArrayOf<IInterfaceInfo *>::Alloc(count);
+    ec = mClassInfo->GetAllInterfaceInfos(infos);
+
+    //Int32 used = infos->GetUsed();
+    Int32 used = count;
+
+    *ppInterfaceInfos = ArrayOf<ITestInterfaceInfo *>::Alloc(used);
+
+    for(Int32 i = 0; i < used; i++){
+        AutoPtr<ITestInterfaceInfo> info;
+        ec = CTestInterfaceInfo::New((*infos)[i],(ITestInterfaceInfo**)&info);
+        if (FAILED(ec)) {
+            ALOGD("Create \"%s\" instance failed!\n", "CTestInterfaceInfo");
+            return ec;
+        }
+        (*ppInterfaceInfos)->Set(i,info);
+
+        (*infos)[i]->AddRef();
+        info->AddRef();
+    }   //for
+
+    return ec;
 }
 
 ECode CTestClassInfo::GetInterfaceInfo(
     /* [in] */ const String& fullName,
     /* [out] */ ITestInterfaceInfo ** ppInterfaceInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IInterfaceInfo> interfaceInfo;
+    ec = mClassInfo->GetInterfaceInfo(fullName, (IInterfaceInfo**)&interfaceInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetInterfaceInfo error: GetInterfaceInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestInterfaceInfo> testInterfaceInfo;
+    ec = CTestInterfaceInfo::New(interfaceInfo,(ITestInterfaceInfo**)&testInterfaceInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetInterfaceInfo error: CTestClassInfo::New fail!");
+        return ec;
+    }
+    *ppInterfaceInfo = testInterfaceInfo;
+
+    interfaceInfo->AddRef();
+    testInterfaceInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestClassInfo::GetCallbackInterfaceCount(
@@ -260,16 +475,61 @@ ECode CTestClassInfo::GetCallbackInterfaceCount(
 ECode CTestClassInfo::GetAllCallbackInterfaceInfos(
     /* [out] */ ArrayOf<ITestInterfaceInfo *> ** ppCallbackInterfaceInfos)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    Int32 count;
+    ec = this->GetCallbackInterfaceCount(&count);
+
+    ArrayOf<IInterfaceInfo *> * infos;
+    infos = ArrayOf<IInterfaceInfo *>::Alloc(count);
+    ec = mClassInfo->GetAllInterfaceInfos(infos);
+
+    //Int32 used = infos->GetUsed();
+    Int32 used = count;
+
+    *ppCallbackInterfaceInfos = ArrayOf<ITestInterfaceInfo *>::Alloc(used);
+
+    for(Int32 i = 0; i < used; i++){
+        AutoPtr<ITestInterfaceInfo> info;
+        ec = CTestInterfaceInfo::New((*infos)[i],(ITestInterfaceInfo**)&info);
+        if (FAILED(ec)) {
+            ALOGD("Create \"%s\" instance failed!\n", "CTestInterfaceInfo");
+            return ec;
+        }
+        (*ppCallbackInterfaceInfos)->Set(i,info);
+
+        (*infos)[i]->AddRef();
+        info->AddRef();
+    }   //for
+
+    return ec;
 }
 
 ECode CTestClassInfo::GetCallbackInterfaceInfo(
     /* [in] */ const String& name,
     /* [out] */ ITestInterfaceInfo ** ppCallbackInterfaceInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IInterfaceInfo> interfaceInfo;
+    ec = mClassInfo->GetCallbackInterfaceInfo(name, (IInterfaceInfo**)&interfaceInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetInterfaceInfo error: GetInterfaceInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestInterfaceInfo> testInterfaceInfo;
+    ec = CTestInterfaceInfo::New(interfaceInfo,(ITestInterfaceInfo**)&testInterfaceInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetInterfaceInfo error: CTestClassInfo::New fail!");
+        return ec;
+    }
+    *ppCallbackInterfaceInfo = testInterfaceInfo;
+
+    interfaceInfo->AddRef();
+    testInterfaceInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestClassInfo::GetMethodCount(
@@ -281,8 +541,34 @@ ECode CTestClassInfo::GetMethodCount(
 ECode CTestClassInfo::GetAllMethodInfos(
     /* [out] */ ArrayOf<ITestMethodInfo *> ** ppMethodInfos)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    Int32 count;
+    ec = this->GetMethodCount(&count);
+
+    ArrayOf<IMethodInfo *> * infos;
+    infos = ArrayOf<IMethodInfo *>::Alloc(count);
+    ec = mClassInfo->GetAllMethodInfos(infos);
+
+    //Int32 used = infos->GetUsed();
+    Int32 used = count;
+
+    *ppMethodInfos = ArrayOf<ITestMethodInfo *>::Alloc(used);
+
+    for(Int32 i = 0; i < used; i++){
+        AutoPtr<ITestMethodInfo> info;
+        ec = CTestMethodInfo::New((*infos)[i],(ITestMethodInfo**)&info);
+        if (FAILED(ec)) {
+            ALOGD("Create \"%s\" instance failed!\n", "CTestMethodInfo");
+            return ec;
+        }
+        (*ppMethodInfos)->Set(i,info);
+
+        (*infos)[i]->AddRef();
+        info->AddRef();
+    }   //for
+
+    return ec;
 }
 
 ECode CTestClassInfo::GetMethodInfo(
@@ -290,8 +576,27 @@ ECode CTestClassInfo::GetMethodInfo(
     /* [in] */ const String& signature,
     /* [out] */ ITestMethodInfo ** ppMethodInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IMethodInfo> methodInfo;
+    ec = mClassInfo->GetMethodInfo(name, signature, (IMethodInfo**)&methodInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetMethodInfo error: GetMethodInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestMethodInfo> testMethodInfo;
+    ec = CTestMethodInfo::New(methodInfo,(ITestMethodInfo**)&testMethodInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetMethodInfo error: CTestClassInfo::New fail!");
+        return ec;
+    }
+    *ppMethodInfo = testMethodInfo;
+
+    methodInfo->AddRef();
+    testMethodInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestClassInfo::GetCallbackMethodCount(
@@ -303,23 +608,67 @@ ECode CTestClassInfo::GetCallbackMethodCount(
 ECode CTestClassInfo::GetAllCallbackMethodInfos(
     /* [out] */ ArrayOf<ITestCallbackMethodInfo *> ** ppCallbackMethodInfos)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    Int32 count;
+    ec = this->GetCallbackMethodCount(&count);
+
+    ArrayOf<ICallbackMethodInfo *> * infos;
+    infos = ArrayOf<ICallbackMethodInfo *>::Alloc(count);
+    ec = mClassInfo->GetAllCallbackMethodInfos(infos);
+
+    //Int32 used = infos->GetUsed();
+    Int32 used = count;
+
+    *ppCallbackMethodInfos = ArrayOf<ITestCallbackMethodInfo *>::Alloc(used);
+
+    for(Int32 i = 0; i < used; i++){
+        AutoPtr<ITestCallbackMethodInfo> info;
+        ec = CTestCallbackMethodInfo::New((*infos)[i],(ITestCallbackMethodInfo**)&info);
+        if (FAILED(ec)) {
+            ALOGD("Create \"%s\" instance failed!\n", "CTestCallbackMethodInfo");
+            return ec;
+        }
+        (*ppCallbackMethodInfos)->Set(i,info);
+
+        (*infos)[i]->AddRef();
+        info->AddRef();
+    }   //for
+
+    return ec;
 }
 
 ECode CTestClassInfo::GetCallbackMethodInfo(
     /* [in] */ const String& name,
     /* [out] */ ITestCallbackMethodInfo ** ppCallbackMethodInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<ICallbackMethodInfo> callbackMethodInfo;
+    ec = mClassInfo->GetCallbackMethodInfo(name, (ICallbackMethodInfo**)&callbackMethodInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetCallbackMethodInfo error: GetCallbackMethodInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestCallbackMethodInfo> testCallbackMethodInfo;
+    ec = CTestCallbackMethodInfo::New(callbackMethodInfo,(ITestCallbackMethodInfo**)&testCallbackMethodInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetCallbackMethodInfo error: CTestClassInfo::New fail!");
+        return ec;
+    }
+    *ppCallbackMethodInfo = testCallbackMethodInfo;
+
+    callbackMethodInfo->AddRef();
+    testCallbackMethodInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestClassInfo::RemoveAllCallbackHandlers(
     /* [in] */ PInterface pServer)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mClassInfo->RemoveAllCallbackHandlers(pServer);
 }
 
 ECode CTestClassInfo::CreateObject(
@@ -378,8 +727,7 @@ ECode CTestClassInfo::CreateObjectInRegime(
     /* [in] */ PRegime pRgm,
     /* [out] */ PInterface * ppObject)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mClassInfo->CreateObjectInRegime(pRgm, ppObject);
 }
 
 ECode CTestClassInfo::constructor()

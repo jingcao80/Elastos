@@ -485,7 +485,7 @@ module
             [out] Boolean* hasBase);
 
         GetBaseInfo(
-            [out] IInterfaceInfo** baseInfo);
+            [out] ITestInterfaceInfo** baseInfo);
 
         GetMethodCount(
             [out] Int32* count);

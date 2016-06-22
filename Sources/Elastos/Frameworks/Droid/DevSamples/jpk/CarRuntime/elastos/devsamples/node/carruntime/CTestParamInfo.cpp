@@ -1,4 +1,3 @@
-
 #include "CTestParamInfo.h"
 
 #include "CTestDataTypeInfo.h"
@@ -8,6 +7,9 @@
 #include "CTestStructInfo.h"
 #include "CTestInterfaceInfo.h"
 #include "CTestLocalPtrInfo.h"
+
+#include "CTestTypeAliasInfo.h"
+#include "CTestMethodInfo.h"
 
 #include <cutils/log.h>
 
@@ -23,8 +25,27 @@ CAR_OBJECT_IMPL(CTestParamInfo)
 ECode CTestParamInfo::GetMethodInfo(
     /* [out] */ ITestMethodInfo ** ppMethodInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IMethodInfo> info;
+    ec = mParamInfo->GetMethodInfo((IMethodInfo**)&info);
+    if (FAILED(ec)) {
+        ALOGD("CTestParamInfo::GetMethodInfo error: GetMethodInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestMethodInfo> testInfo;
+    ec = CTestMethodInfo::New(info,(ITestMethodInfo**)&testInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestParamInfo::GetMethodInfo error: CTestMethodInfo::New fail!");
+        return ec;
+    }
+    *ppMethodInfo = testInfo;
+
+    info->AddRef();
+    testInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestParamInfo::GetName(
@@ -36,22 +57,19 @@ ECode CTestParamInfo::GetName(
 ECode CTestParamInfo::GetIndex(
     /* [out] */ Int32 * pIndex)
 {
-    mParamInfo->GetIndex(pIndex);
-    return NOERROR;
+    return mParamInfo->GetIndex(pIndex);
 }
 
 ECode CTestParamInfo::GetIOAttribute(
     /* [out] */ ParamIOAttribute * pIoAttrib)
 {
-    mParamInfo->GetIOAttribute(pIoAttrib);
-    return NOERROR;
+    return mParamInfo->GetIOAttribute(pIoAttrib);
 }
 
 ECode CTestParamInfo::IsReturnValue(
     /* [out] */ Boolean * pReturnValue)
 {
-    mParamInfo->IsReturnValue(pReturnValue);
-    return NOERROR;
+    return mParamInfo->IsReturnValue(pReturnValue);
 }
 
 ECode CTestParamInfo::GetTypeInfo(
@@ -72,17 +90,21 @@ ECode CTestParamInfo::GetTypeInfo(
     AutoPtr<ITestDataTypeInfo> testDataTypeInfo;
 
     switch (dataType) {
-        //TODO:
         // case CarDataType_Enum:
         //     ec = CTestEnumInfo::New(*(IEnumInfo**)&dataTypeInfo,(ITestEnumInfo**)&testDataTypeInfo);
-        // case CarDataType_ArrayOf:
-        //     ec = CTestCarArrayInfo::New(*(ICarArrayInfo**)&dataTypeInfo,(ITestCarArrayInfo**)&testDataTypeInfo);
+        //     break;
+        case CarDataType_ArrayOf:
+            ec = CTestCarArrayInfo::New(*(ICarArrayInfo**)&dataTypeInfo,(ITestCarArrayInfo**)&testDataTypeInfo);
+            break;
         // case CarDataType_CppVector:
         //     ec = CTestCppVectorInfo::New(*(ICppVectorInfo**)&dataTypeInfo,(ITestCppVectorInfo**)&testDataTypeInfo);
+        //     break;
         // case CarDataType_Struct:
         //     ec = CTestStructInfo::New(*(IStructInfo**)&dataTypeInfo,(ITestStructInfo**)&testDataTypeInfo);
+        //     break;
         // case CarDataType_Interface:
         //     ec = CTestInterfaceInfo::New(*(IInterfaceInfo**)&dataTypeInfo,(ITestInterfaceInfo**)&testDataTypeInfo);
+        //     break;
         case CarDataType_LocalPtr:
             ec = CTestLocalPtrInfo::New(*(ILocalPtrInfo**)&dataTypeInfo,(ITestLocalPtrInfo**)&testDataTypeInfo);
             break;
@@ -107,22 +129,39 @@ ECode CTestParamInfo::GetTypeInfo(
 ECode CTestParamInfo::GetAdvisedCapacity(
     /* [out] */ Int32 * pAdvisedCapacity)
 {
-    mParamInfo->GetAdvisedCapacity(pAdvisedCapacity);
-    return NOERROR;
+    return mParamInfo->GetAdvisedCapacity(pAdvisedCapacity);
 }
 
 ECode CTestParamInfo::IsUsingTypeAlias(
     /* [out] */ Boolean * pUsingTypeAlias)
 {
-    mParamInfo->IsUsingTypeAlias(pUsingTypeAlias);
-    return NOERROR;
+    return mParamInfo->IsUsingTypeAlias(pUsingTypeAlias);
 }
 
 ECode CTestParamInfo::GetUsedTypeAliasInfo(
     /* [out] */ ITestTypeAliasInfo ** ppUsedTypeAliasInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<ITypeAliasInfo> info;
+    ec = mParamInfo->GetUsedTypeAliasInfo((ITypeAliasInfo**)&info);
+    if (FAILED(ec)) {
+        ALOGD("CTestParamInfo::GetUsedTypeAliasInfo error: GetUsedTypeAliasInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestTypeAliasInfo> testInfo;
+    ec = CTestTypeAliasInfo::New(info,(ITestTypeAliasInfo**)&testInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestParamInfo::GetUsedTypeAliasInfo error: CTestTypeAliasInfo::New fail!");
+        return ec;
+    }
+    *ppUsedTypeAliasInfo = testInfo;
+
+    info->AddRef();
+    testInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestParamInfo::constructor()
@@ -135,9 +174,6 @@ ECode CTestParamInfo::constructor(
     /* [in] */ IParamInfo * pParamInfo)
 {
     mParamInfo = pParamInfo;
-
-    //mParamInfo->AddRef();
-
     return NOERROR;
 }
 

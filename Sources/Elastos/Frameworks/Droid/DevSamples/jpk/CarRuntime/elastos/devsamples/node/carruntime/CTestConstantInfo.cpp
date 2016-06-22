@@ -1,5 +1,6 @@
-
 #include "CTestConstantInfo.h"
+
+#include "CTestModuleInfo.h"
 
 namespace Elastos {
 namespace DevSamples {
@@ -19,15 +20,33 @@ ECode CTestConstantInfo::GetName(
 ECode CTestConstantInfo::GetValue(
     /* [out] */ Int32 * pValue)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mConstantInfo->GetValue(pValue);
 }
 
 ECode CTestConstantInfo::GetModuleInfo(
     /* [out] */ ITestModuleInfo ** ppModuleInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IModuleInfo> info;
+    ec = mConstantInfo->GetModuleInfo((IModuleInfo**)&info);
+    if (FAILED(ec)) {
+        ALOGD("CTestClassInfo::GetModuleInfo error: GetModuleInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestModuleInfo> testInfo;
+    ec = CTestModuleInfo::New(info,(ITestModuleInfo**)&testInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestEnumInfo::GetModuleInfo error: CTestModlueInfo::New fail!");
+        return ec;
+    }
+    *ppModuleInfo = testInfo;
+
+    info->AddRef();
+    testInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestConstantInfo::constructor()

@@ -1,6 +1,9 @@
 
 #include "CTestInterfaceInfo.h"
 
+#include "CTestModuleInfo.h"
+#include "CTestMethodInfo.h"
+
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
@@ -28,15 +31,13 @@ ECode CTestInterfaceInfo::GetName(
 ECode CTestInterfaceInfo::GetSize(
     /* [out] */ MemorySize * pSize)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mInterfaceInfo->GetSize(pSize);
 }
 
 ECode CTestInterfaceInfo::GetDataType(
     /* [out] */ CarDataType * pDataType)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mInterfaceInfo->GetDataType(pDataType);
 }
 
 ECode CTestInterfaceInfo::GetNamespace(
@@ -48,50 +49,110 @@ ECode CTestInterfaceInfo::GetNamespace(
 ECode CTestInterfaceInfo::GetId(
     /* [out] */ InterfaceID * pIid)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mInterfaceInfo->GetId(pIid);
 }
 
 ECode CTestInterfaceInfo::GetModuleInfo(
     /* [out] */ ITestModuleInfo ** ppModuleInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IModuleInfo> info;
+    ec = mInterfaceInfo->GetModuleInfo((IModuleInfo**)&info);
+    if (FAILED(ec)) {
+        ALOGD("CTestInterfaceInfo::GetModuleInfo error: GetModuleInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestModuleInfo> testInfo;
+    ec = CTestModuleInfo::New(info,(ITestModuleInfo**)&testInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestInterfaceInfo::GetModuleInfo error: CTestModlueInfo::New fail!");
+        return ec;
+    }
+    *ppModuleInfo = testInfo;
+
+    info->AddRef();
+    testInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestInterfaceInfo::IsLocal(
     /* [out] */ Boolean * pIsLocal)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mInterfaceInfo->IsLocal(pIsLocal);
 }
 
 ECode CTestInterfaceInfo::HasBase(
     /* [out] */ Boolean * pHasBase)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mInterfaceInfo->HasBase(pHasBase);
 }
 
 ECode CTestInterfaceInfo::GetBaseInfo(
-    /* [out] */ IInterfaceInfo ** ppBaseInfo)
+    /* [out] */ ITestInterfaceInfo ** ppBaseInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IInterfaceInfo> info;
+    ec = mInterfaceInfo->GetBaseInfo((IInterfaceInfo**)&info);
+    if (FAILED(ec)) {
+        ALOGD("CTestInterfaceInfo::GetBaseInfo error: GetBaseInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestInterfaceInfo> testInfo;
+    ec = CTestInterfaceInfo::New(info,(ITestInterfaceInfo**)&testInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestInterfaceInfo::GetBaseInfo error: CTestInterfaceInfo::New fail!");
+        return ec;
+    }
+    *ppBaseInfo = testInfo;
+
+    info->AddRef();
+    testInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestInterfaceInfo::GetMethodCount(
     /* [out] */ Int32 * pCount)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mInterfaceInfo->GetMethodCount(pCount);
 }
 
 ECode CTestInterfaceInfo::GetAllMethodInfos(
     /* [out] */ ArrayOf<ITestMethodInfo *> ** ppMethodInfos)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    Int32 count;
+    ec = this->GetMethodCount(&count);
+
+    ArrayOf<IMethodInfo *> * infos;
+    infos = ArrayOf<IMethodInfo *>::Alloc(count);
+    ec = mInterfaceInfo->GetAllMethodInfos(infos);
+
+    //Int32 used = infos->GetUsed();
+    Int32 used = count;
+
+    *ppMethodInfos = ArrayOf<ITestMethodInfo *>::Alloc(used);
+
+    for(Int32 i = 0; i < used; i++){
+        AutoPtr<ITestMethodInfo> info;
+        ec = CTestMethodInfo::New((*infos)[i],(ITestMethodInfo**)&info);
+        if (FAILED(ec)) {
+            ALOGD("Create \"%s\" instance failed!\n", "CTestMethodInfo");
+            return ec;
+        }
+        (*ppMethodInfos)->Set(i,info);
+
+        (*infos)[i]->AddRef();
+        info->AddRef();
+    }   //for
+
+    return ec;
 }
 
 ECode CTestInterfaceInfo::GetMethodInfo(
@@ -99,8 +160,27 @@ ECode CTestInterfaceInfo::GetMethodInfo(
     /* [in] */ const String& signature,
     /* [out] */ ITestMethodInfo ** ppMethodInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IMethodInfo> info;
+    ec = mInterfaceInfo->GetMethodInfo(name, signature, (IMethodInfo**)&info);
+    if (FAILED(ec)) {
+        ALOGD("CTestInterfaceInfo::GetMethodInfo error: GetMethodInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestMethodInfo> testInfo;
+    ec = CTestMethodInfo::New(info,(ITestMethodInfo**)&testInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestInterfaceInfo::GetMethodInfo error: CTestMethodInfo::New fail!");
+        return ec;
+    }
+    *ppMethodInfo = testInfo;
+
+    info->AddRef();
+    testInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestInterfaceInfo::constructor()

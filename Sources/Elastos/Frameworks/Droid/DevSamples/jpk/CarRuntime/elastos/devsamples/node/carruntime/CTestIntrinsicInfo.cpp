@@ -19,21 +19,18 @@ ECode CTestIntrinsicInfo::GetName(
 ECode CTestIntrinsicInfo::GetSize(
     /* [out] */ MemorySize * pSize)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mIntrinsicInfo->GetSize(pSize);
 }
 
 ECode CTestIntrinsicInfo::GetDataType(
     /* [out] */ CarDataType * pDataType)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mIntrinsicInfo->GetDataType(pDataType);
 }
 
 ECode CTestIntrinsicInfo::DoNothing()
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mIntrinsicInfo->DoNothing();
 }
 
 ECode CTestIntrinsicInfo::constructor()

@@ -19,21 +19,18 @@ ECode CTestLocalTypeInfo::GetName(
 ECode CTestLocalTypeInfo::GetSize(
     /* [out] */ MemorySize * pSize)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mLocalTypeInfo->GetSize(pSize);
 }
 
 ECode CTestLocalTypeInfo::GetDataType(
     /* [out] */ CarDataType * pDataType)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mLocalTypeInfo->GetDataType(pDataType);
 }
 
 ECode CTestLocalTypeInfo::DoNothing()
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mLocalTypeInfo->DoNothing();
 }
 
 ECode CTestLocalTypeInfo::constructor()

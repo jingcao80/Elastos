@@ -121,8 +121,12 @@ _GetImageFileMap : function (rootPath) {
     elog('=============DataSourceHelper::_GetImageFileMap.begin===============');
 
     var dir = Core_New('Elastos.IO.CFile', rootPath);
+    elog('=============DataSourceHelper::_GetImageFileMap.begin=======0.1========');
     var files = dir.ListFiles();
+    elog('=============DataSourceHelper::_GetImageFileMap.begin=======0.2========');
     if (!files || !files.length) return;
+
+    elog('=============DataSourceHelper::_GetImageFileMap.begin=======0.3========');
 
     var itemList = [];
     for (var i=0, im=files.length; i<im; i++) {

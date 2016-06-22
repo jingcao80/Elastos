@@ -1,5 +1,12 @@
-
 #include "CTestCppVectorInfo.h"
+
+#include "CTestDataTypeInfo.h"
+#include "CTestEnumInfo.h"
+#include "CTestCarArrayInfo.h"
+#include "CTestCppVectorInfo.h"
+#include "CTestStructInfo.h"
+#include "CTestInterfaceInfo.h"
+#include "CTestLocalPtrInfo.h"
 
 namespace Elastos {
 namespace DevSamples {
@@ -19,29 +26,73 @@ ECode CTestCppVectorInfo::GetName(
 ECode CTestCppVectorInfo::GetSize(
     /* [out] */ MemorySize * pSize)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mCppVectorInfo->GetSize(pSize);
 }
 
 ECode CTestCppVectorInfo::GetDataType(
     /* [out] */ CarDataType * pDataType)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mCppVectorInfo->GetDataType(pDataType);
 }
 
 ECode CTestCppVectorInfo::GetElementTypeInfo(
     /* [out] */ ITestDataTypeInfo ** ppElementTypeInfo)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    ECode ec = NOERROR;
+
+    AutoPtr<IDataTypeInfo> dataTypeInfo;
+    ec = mCppVectorInfo->GetElementTypeInfo((IDataTypeInfo**)&dataTypeInfo);
+    if (FAILED(ec)) {
+        ALOGD("CTestCppVectorInfo::GetTypeInfo error: GetTypeInfo fail!");
+        return ec;
+    }
+
+    CarDataType dataType;
+    dataTypeInfo->GetDataType(&dataType);
+
+    AutoPtr<ITestDataTypeInfo> testDataTypeInfo;
+
+    switch (dataType) {
+        case CarDataType_Enum:
+            ec = CTestEnumInfo::New(*(IEnumInfo**)&dataTypeInfo,(ITestEnumInfo**)&testDataTypeInfo);
+            break;
+        case CarDataType_ArrayOf:
+            ec = CTestCarArrayInfo::New(*(ICarArrayInfo**)&dataTypeInfo,(ITestCarArrayInfo**)&testDataTypeInfo);
+            break;
+        case CarDataType_CppVector:
+            ec = CTestCppVectorInfo::New(*(ICppVectorInfo**)&dataTypeInfo,(ITestCppVectorInfo**)&testDataTypeInfo);
+            break;
+        case CarDataType_Struct:
+            ec = CTestStructInfo::New(*(IStructInfo**)&dataTypeInfo,(ITestStructInfo**)&testDataTypeInfo);
+            break;
+        case CarDataType_Interface:
+            ec = CTestInterfaceInfo::New(*(IInterfaceInfo**)&dataTypeInfo,(ITestInterfaceInfo**)&testDataTypeInfo);
+            break;
+        case CarDataType_LocalPtr:
+            ec = CTestLocalPtrInfo::New(*(ILocalPtrInfo**)&dataTypeInfo,(ITestLocalPtrInfo**)&testDataTypeInfo);
+            break;
+        default:
+            ec = CTestDataTypeInfo::New(dataTypeInfo,(ITestDataTypeInfo**)&testDataTypeInfo);
+            break;
+    }
+
+    if (FAILED(ec)) {
+        ALOGD("CTestCppVectorInfo::GetTypeInfo error: CTestDataTypeInfo::New fail!");
+        return ec;
+    }
+
+    *ppElementTypeInfo = testDataTypeInfo;
+
+    dataTypeInfo->AddRef();
+    testDataTypeInfo->AddRef();
+
+    return ec;
 }
 
 ECode CTestCppVectorInfo::GetLength(
     /* [out] */ Int32 * pLength)
 {
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
+    return mCppVectorInfo->GetLength(pLength);
 }
 
 ECode CTestCppVectorInfo::constructor()

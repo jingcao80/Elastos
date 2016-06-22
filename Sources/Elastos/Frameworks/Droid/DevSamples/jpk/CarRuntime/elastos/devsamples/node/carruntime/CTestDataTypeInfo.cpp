@@ -39,8 +39,6 @@ ECode CTestDataTypeInfo::constructor(
 {
     mDataTypeInfo = pDataTypeInfo;
 
-    //moduleInfo->AddRef();
-
     return NOERROR;
 }
 

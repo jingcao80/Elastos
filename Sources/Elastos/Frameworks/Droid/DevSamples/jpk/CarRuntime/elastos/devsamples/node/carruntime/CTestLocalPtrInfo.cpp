@@ -1,7 +1,12 @@
-
 #include "CTestLocalPtrInfo.h"
 
 #include "CTestDataTypeInfo.h"
+#include "CTestEnumInfo.h"
+#include "CTestCarArrayInfo.h"
+#include "CTestCppVectorInfo.h"
+#include "CTestStructInfo.h"
+#include "CTestInterfaceInfo.h"
+#include "CTestLocalPtrInfo.h"
 
 namespace Elastos {
 namespace DevSamples {
@@ -42,16 +47,43 @@ ECode CTestLocalPtrInfo::GetTargetTypeInfo(
         return ec;
     }
 
-    AutoPtr<ITestDataTypeInfo> testDatatypeInfo;
-    ec = CTestDataTypeInfo::New(dataTypeInfo,(ITestDataTypeInfo**)&testDatatypeInfo);
+    AutoPtr<ITestDataTypeInfo> testDataTypeInfo;
+
+    CarDataType dataType;
+    dataTypeInfo->GetDataType(&dataType);
+    switch (dataType) {
+        // case CarDataType_Enum:
+        //     ec = CTestEnumInfo::New(*(IEnumInfo**)&dataTypeInfo,(ITestEnumInfo**)&testDataTypeInfo);
+        //     break;
+         case CarDataType_ArrayOf:
+            ec = CTestCarArrayInfo::New(*(ICarArrayInfo**)&dataTypeInfo,(ITestCarArrayInfo**)&testDataTypeInfo);
+            break;
+        // case CarDataType_CppVector:
+        //     ec = CTestCppVectorInfo::New(*(ICppVectorInfo**)&dataTypeInfo,(ITestCppVectorInfo**)&testDataTypeInfo);
+        //     break;
+        // case CarDataType_Struct:
+        //     ec = CTestStructInfo::New(*(IStructInfo**)&dataTypeInfo,(ITestStructInfo**)&testDataTypeInfo);
+        //     break;
+        // case CarDataType_Interface:
+        //     ec = CTestInterfaceInfo::New(*(IInterfaceInfo**)&dataTypeInfo,(ITestInterfaceInfo**)&testDataTypeInfo);
+        //     break;
+        case CarDataType_LocalPtr:
+            ec = CTestLocalPtrInfo::New(*(ILocalPtrInfo**)&dataTypeInfo,(ITestLocalPtrInfo**)&testDataTypeInfo);
+            break;
+        default:
+            ec = CTestDataTypeInfo::New(dataTypeInfo,(ITestDataTypeInfo**)&testDataTypeInfo);
+            break;
+    }
+
     if (FAILED(ec)) {
-        ALOGD("CTestLocalPtrInfo::GetTargetTypeInfo error: CTestDataTypeInfo::New fail!");
+        ALOGD("CTestParamInfo::GetTypeInfo error: CTestDataTypeInfo::New fail!");
         return ec;
     }
-    *ppDataTypeInfo = testDatatypeInfo;
+
+    *ppDataTypeInfo = testDataTypeInfo;
 
     dataTypeInfo->AddRef();
-    testDatatypeInfo->AddRef();
+    testDataTypeInfo->AddRef();
 
     return ec;
 }

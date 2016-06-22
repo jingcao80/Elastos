@@ -24,10 +24,10 @@ var CarDataType = {
     LocalPtr    : 13,
     LocalType   : 14,
     Enum        : 15,
-    CarArray    : 16,
+    ArrayOf    : 16,
     CppVector   : 17,
     Struct      : 18,
-    Interface   : 19
+    IInterface   : 19
 };
 
 var CarToJsDataTypeMap = {
@@ -53,7 +53,7 @@ var CarToJsDataTypeMap = {
         //CarDataType.StringBuf,
     ],
     array:[
-        CarDataType.CarArray,
+        CarDataType.ArrayOf,
         //CarDataType.BufferOf,
         //CarDataType.MemoryBuf,
         CarDataType.CppVector,
@@ -64,7 +64,7 @@ var CarToJsDataTypeMap = {
         CarDataType.LocalPtr,
         CarDataType.LocalType,
         CarDataType.Struct,
-        CarDataType.Interface,
+        CarDataType.IInterface,
     ],
     //other:[
     //    CarDataType.LocalPtr,
@@ -79,7 +79,7 @@ var ParamIOAttribute = {
 }
 
 function getDataTypeCarString(ai_datatype){
-    var sRet = 'Not Defined DataType';
+    var sRet = 'Not Defined DataType=='+ai_datatype+'==';
 
     for(var p in CarDataType) {
         if (CarDataType[p] == ai_datatype) {
@@ -104,21 +104,156 @@ function getDataTypeJavascriptString(ai_datatype){
                 break;
             }
         }
-        if (bFound) {
-            break;
-        }
+        if (bFound) break;
     }
 
     return sRet;
 }
 
+function getCreateOnUIThread(as_ClassName) {
+    var bRet = false;
+
+    if (as_ClassName == "Elastos.Droid.Widget.CPopupWindow") {
+        bRet = true;
+    }
+
+    return bRet;
+}
+
+function getRunOnUIThread(as_MethodName) {
+    var bRet = false;
+
+    //TODO:
+    if (as_MethodName == "???") {
+        bRet = true;
+    }
+
+    return bRet;
+}
+
+//--------proto info begin--------
+function getSubDataTypeCarString(ao_TypeInfo){
+    var a = [],s;
+
+    var iDataType = ao_TypeInfo.GetDataType();
+    switch (iDataType) {
+        //case CarDataType.IInterface:
+        //    //
+        //    break;
+        case CarDataType.LocalPtr:
+            var oElementTypeInfo = ao_TypeInfo.GetTargetTypeInfo();
+            var iElementDataType = oElementTypeInfo.GetDataType();
+            s = getDataTypeCarString(iElementDataType);
+            a.push(s);
+            s = "<"+oElementTypeInfo.GetName()+">";
+            a.push(s);
+            s = getSubDataTypeCarString(oElementTypeInfo);
+            a.push(s);
+
+            break;
+        case CarDataType.ArrayOf:
+            var oElementTypeInfo = ao_TypeInfo.GetElementTypeInfo();
+            var iElementDataType = oElementTypeInfo.GetDataType();
+            s = getDataTypeCarString(iElementDataType);
+            a.push(s);
+            s = "<"+oElementTypeInfo.GetName()+">";
+            a.push(s);
+            s = getSubDataTypeCarString(oElementTypeInfo);
+            a.push(s);
+
+            break;
+        default:
+            break;
+    }
+
+    s = a.join("");
+    if(s.length)s = "<" + s + ">";
+
+    return s;
+}
+function __getCarDataTypeString(ao_TypeInfo){
+    var a = [];
+
+    var iDataType = ao_TypeInfo.GetDataType();
+    var s;
+    s = getDataTypeCarString(iDataType);
+    a.push(s);
+    s = "<"+ao_TypeInfo.GetName()+">";
+    a.push(s);
+    s = getSubDataTypeCarString(ao_TypeInfo);
+    a.push(s);
+
+    return a.join("");
+}
+
+//return: ParamProto=ParamName[]
+function getParamProto(ao_ParamInfo){
+    var aProto = [];
+
+    aProto.push(ao_ParamInfo.GetName());
+    aProto.push("[");
+
+    var oTypeInfo = ao_ParamInfo.GetTypeInfo();
+    var s = __getCarDataTypeString(oTypeInfo);
+    aProto.push(s);
+
+    aProto.push("]");
+
+    return aProto.join("");
+}
+
+//return: ConstructorProto=Constructor(ParamProtos);
+function getConstructorProto(ao_ConstructorInfo){
+    var aProto = [];
+
+    aProto.push(ao_ConstructorInfo.GetName());
+    aProto.push("(");
+
+    var bProto = [];
+    var aParamInfos = ao_ConstructorInfo.GetAllParamInfos();
+    for (var i=0,im=aParamInfos.length;i<im;i++) {
+        var sParamProto = getParamProto(aParamInfos[i]);
+        bProto.push(sParamProto);
+    }
+    aProto.push(bProto.join(","));
+
+    aProto.push(")");
+
+    return aProto.join("");
+}
+
+//return: ClassName{ConstructorProtos};
+function getConstructorProtos(ao_ClassInfo){
+    var aProto = [];
+
+    aProto.push(ao_ClassInfo.GetName());
+    aProto.push("{");
+
+    var aConstructorInfos = ao_ClassInfo.GetAllConstructorInfos();
+    for (var i=0,im=aConstructorInfos.length;i<im;i++) {
+        aProto.push("=="+i+"==");
+        var sConstructorProto = getConstructorProto(aConstructorInfos[i]);
+        aProto.push(sConstructorProto);
+    }
+
+    aProto.push("}");
+
+    return aProto.join("");
+}
+
+function showMethods(ao) {
+    var a = [];
+    for (var p in ao) a.push(p);
+    var s = "====methods====[" + a.join("][") + "]";
+    elog(s);
+}
+
+//--------proto info end--------
+
 function classinfo__createObject(oModuleInfo,oClassInfo){
     var newObject;
 
-    var bCreateOnUIThread = false;
-
     if(typeof(oModuleInfo)=='string') {
-        //oModuleInfo = Elastos.Runtime.getModuleInfo(oModuleInfo);
         oModuleInfo = _getModuleInfo(oModuleInfo);
     }
 
@@ -136,13 +271,13 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         elog('====classinfo__createObject====begin==0.3==ClassName:'+sClassName);
     }
 
-    if (sClassName == "Elastos.Droid.Widget.CPopupWindow") {
-        bCreateOnUIThread = true;
-    }
+    var sConstructorProtos = getConstructorProtos(oClassInfo);
+    elog("====sConstructorProtos====" + sConstructorProtos);
+
+    var bCreateOnUIThread = getCreateOnUIThread(sClassName);
 
     var length = arguments.length;
     if(length==2){
-        //newObject = oClassInfo.CreateObject();
         if (bCreateOnUIThread) {
             elog('====classinfo__createObject========oClassInfo.RemoteCreateObject');
             newObject = oClassInfo.RemoteCreateObject();
@@ -155,15 +290,13 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
     else {
         var aConstructorInfos = oClassInfo.GetAllConstructorInfos();
         var oConstructorInfo;
-        //var paramCount = length - 2;
+        //var paramCount = length - 2;  //RDK4.2.2
         var paramCount = length - 1;
         var bSameArgs = false;
         for(var i=0, im=aConstructorInfos.length; i<im; i++){
             oConstructorInfo = aConstructorInfos[i];
 
             var _paramCount = oConstructorInfo.GetParamCount();
-            //var _paramInfos = oConstructorInfo.GetAllParamInfos();
-            //var _paramCount = _paramInfos.length;
 
             elog('====classinfo__createObject===='+i+' _paramCount:'+_paramCount+'===paramCount:'+paramCount+'===========');
 
@@ -171,7 +304,7 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
             if (_paramCount == paramCount) {
                 bSameArgs = true;
                 var aParamInfos = oConstructorInfo.GetAllParamInfos();
-                //for(var j = 0, jm = paramCount; j<jm; j++) {
+                //for(var j = 0, jm = paramCount; j<jm; j++) {  //RDK4.2.2
                 for(var j = 0, jm = paramCount -1; j<jm; j++) {
                     var paramInfo = aParamInfos[j];
                     var oTypeInfo = paramInfo.GetTypeInfo();
@@ -185,7 +318,7 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                     elog("====classinfo__createObject====param:"+j+" js type:"+sJsDataType+" carType:"+type_in+" carDataType:"+iDataType);
 
                     if (sJsDataType == type_in) {
-                        if (iDataType == CarDataType.Interface) {
+                        if (iDataType == CarDataType.IInterface) {
                             //TODO:compare the interface name
                             //continue;
                         }
@@ -196,20 +329,16 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                             var oElementTypeInfo = oTypeInfo.GetTargetTypeInfo();
                             var iElementDataType = oElementTypeInfo.GetDataType();
 
-                            //elog('==============classinfo__createObject ======find method====LocalPtr====element type:'+iElementDataType+'====' + ([1,2] instanceof Array) );
                             elog('==============classinfo__createObject ======find method====LocalPtr====element type:'+iElementDataType);
 
                             switch (iElementDataType) {
-                                case CarDataType.Interface:
+                                case CarDataType.IInterface:
                                     //TODO:
                                     break;
-                                case CarDataType.CarArray:
+                                case CarDataType.ArrayOf:
                                     //TODO:
-                                    bSameArgs = false;
-                                    //if (typeof arg_in.GetClassId == 'function') bSameArgs = false;
-                                    //elog("=========insatanceof=====1==========="+bSameArgs);
-                                    //bSameArgs = (arg_in instanceOf Array);
-                                    //elog("=========insatanceof=====2==========="+bSameArgs);
+                                    //showMethods(arg_in);
+                                    if (typeof arg_in.GetClassID == 'function') bSameArgs = false;
                                     break;
                                 default:
                                     //TODO
@@ -219,8 +348,6 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                         else {
                             //continue;
                         }
-
-                        //if (bSameArgs) continue;
                     }
                     else {
                         bSameArgs = false
@@ -231,8 +358,7 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
             }
         }
 
-        var bFoundConstructor = (i < im);
-        if (!bFoundConstructor) {
+        if (!bSameArgs) {
             elog("====classinfo__createObject====can not find constructor : " + sClassName);
             return null;
         }
@@ -243,7 +369,7 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         var aParamInfos = oConstructorInfo.GetAllParamInfos();
         var oArgumentList = oConstructorInfo.CreateArgumentList();
 
-        //for(var i = 0, im = paramCount; i<im; i++) {
+        //for(var i = 0, im = paramCount; i<im; i++) {  //RDK4.2.2
         for(var i = 0, im = paramCount - 1; i<im; i++) {
             var paramInfo = aParamInfos[i];
             var oTypeInfo = paramInfo.GetTypeInfo();
@@ -293,37 +419,30 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                 case CarDataType.Enum:
                     oArgumentList.SetInputArgumentOfEnum(i,arg);
                     break;
-                //case CarDataType.CarArray:
+                //case CarDataType.ArrayOf:
                 //case CarDataType.StructPtr:
-                case CarDataType.Interface:
+                case CarDataType.IInterface:
                     //oArgumentList.SetInputArgumentOfObjectPtr(i,arguments[i+2]);
                     oArgumentList.SetInputArgumentOfObjectPtr(i,arg);
                     break;
                 case CarDataType.LocalPtr:
-                    //to be finished
-                    elog('==============classinfo__createObject ===========LocalPtr====begin====');
-
                     var oElementTypeInfo = oTypeInfo.GetTargetTypeInfo();
                     var iElementDataType = oElementTypeInfo.GetDataType();
-                    elog('==============classinfo__createObject ===========LocalPtr====element type:'+iElementDataType);
 
+                    //TODO:
                     switch (iElementDataType) {
-                        case CarDataType.CarArray:
-                            oArgumentList.SetInputArgumentOfObjectPtr(i,arg);
-
+                        case CarDataType.ArrayOf:
                             ////oArgumentList.SetInputArgumentOfLocalPtr(i,arguments[i+2]);
-                            //var tmp = [1,2,3];
-                            //oArgumentList.SetInputArgumentOfLocalPtr(tmp,i,arguments[i+2]);
+                            var tmp = [1,2,3];
+                            oArgumentList.SetInputArgumentOfLocalPtr(tmp,i,arguments[i+2]);
                             break;
                         default:
-                            oArgumentList.SetInputArgumentOfObjectPtr(i,arg);
-
                             ////oArgumentList.SetInputArgumentOfLocalPtr(i,arguments[i+2]);
-                            //var tmp = [1,2,3];
-                            //oArgumentList.SetInputArgumentOfLocalPtr(tmp,i,arguments[i+2]);
+                            var tmp = [1,2,3];
+                            oArgumentList.SetInputArgumentOfLocalPtr(tmp,i,arguments[i+2]);
                             break;
                     }
-                    elog('==============classinfo__createObject ===========LocalPtr====end====');
+
                     break;
                 default:
                     var sCarDataType = getDataTypeCarString(iDataType);
@@ -332,27 +451,16 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
             }
         }
 
-        //var paramInfo = aParamInfos[i];
-        //oArgumentList.SetOutputArgumentOfObjectPtr(i,arg);
-
-        //var aa=[];
-        //for (var p in oConstructorInfo)aa.push(p);
         //var sAnnotation = oConstructorInfo.GetAnnotation();
 
         //newObject = oConstructorInfo.CreateObject(oArgumentList);
         if (bCreateOnUIThread) {
-            elog('====classinfo__createObject====begin====1.1====RemoteCreateObject');
             newObject = oConstructorInfo.RemoteCreateObject(oArgumentList);
         }
         else {
-            elog('====classinfo__createObject====begin====1.1====LocalCreateObject');
             newObject = oConstructorInfo.LocalCreateObject(oArgumentList);
         }
-
-        elog('====classinfo__createObject====begin====2====');
     }
-
-    elog('====classinfo__createObject====begin====3====');
 
     return newObject;
 }   //classinfo__createObject
