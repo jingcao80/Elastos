@@ -1,10 +1,109 @@
 module
 {
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.View.IViewOnFocusChangeListener;
+    using interface Elastos.Core.ICharSequence;
+
     namespace Elastos {
     namespace Droid {
     namespace Phone {
 
+    interface IEditPhoneNumberPreferenceOnDialogClosedListener;
+    interface IEditPhoneNumberPreferenceGetDefaultNumberListener;
+
+    [local]
     interface IEditPhoneNumberPreference {
+        /*
+         * Listeners and other state setting methods
+         */
+        //set the on focus change listener to be assigned to the Dialog's edittext field.
+        SetDialogOnFocusChangeListener(
+            [in] IViewOnFocusChangeListener* l);
+
+        //set the listener to be called wht the dialog is closed.
+        SetDialogOnClosedListener(
+            [in] IEditPhoneNumberPreferenceOnDialogClosedListener* l);
+
+        //set the link back to the parent activity, so that we may run the contact picker.
+        SetParentActivity(
+            [in] IActivity* parent,
+            [in] Int32 identifier);
+
+        //set the link back to the parent activity, so that we may run the contact picker.
+        //also set the default number listener.
+        SetParentActivity(
+            [in] IActivity* parent,
+            [in] Int32 identifier,
+            [in] IEditPhoneNumberPreferenceGetDefaultNumberListener* l);
+
+        /*
+         * Notification handlers
+         */
+        //Notify the preference that the pick activity is complete.
+        OnPickActivityResult(
+            [in] String pickedValue);
+
+        /*
+         * Toggle handling code.
+         */
+        //return the toggle value.
+        IsToggled(
+            [out] Boolean* result);
+
+        //set the toggle value.
+        // return the current preference to allow for chaining preferences.
+        SetToggled(
+            [in] Boolean checked);
+
+        /**
+         * Phone number handling code
+         */
+        GetPhoneNumber(
+            [out] String* result);
+
+        //set the phone number value.
+        // return the current preference to allow for chaining preferences.
+        SetPhoneNumber(
+            [in] String number);
+
+        /*
+         * Summary On handling code
+         */
+        //set the Summary for the on state (relevant only in CM_ACTIVATION mode)
+        SetSummaryOn(
+            [in] ICharSequence* summary);
+
+        //set the Summary for the on state, given a string resource id
+        // (relevant only in CM_ACTIVATION mode)
+        SetSummaryOn(
+            [in] Int32 summaryResId);
+
+        //get the summary string for the on state
+        GetSummaryOn(
+            [out] ICharSequence** result);
+
+        /*
+         * Summary Off handling code
+         */
+        //set the Summary for the off state (relevant only in CM_ACTIVATION mode)
+        SetSummaryOff(
+            [in] ICharSequence* summary);
+
+        //set the Summary for the off state, given a string resource id
+        // (relevant only in CM_ACTIVATION mode)
+        SetSummaryOff(
+            [in] Int32 summaryResId);
+
+        //get the summary string for the off state
+        GetSummaryOff(
+            [out] ICharSequence** result);
+
+        /**
+         * Externally visible method to bring up the dialog.
+         *
+         * Generally used when we are navigating the user to this preference.
+         */
+        ShowPhoneNumberDialog();
     }
 
     /**
@@ -12,6 +111,7 @@ module
      * DialogPreference.onDialogClosed(), except we also pass in a buttonClicked
      * value indicating which of the three possible buttons were pressed.
      */
+    [local]
     interface IEditPhoneNumberPreferenceOnDialogClosedListener {
         OnDialogClosed(
             [in] IEditPhoneNumberPreference* preference,
@@ -22,6 +122,7 @@ module
      * Interface for the default number setting listener.  Handles requests for
      * the default display number for the dialog.
      */
+    [local]
     interface IEditPhoneNumberPreferenceGetDefaultNumberListener {
         /**
          * Notify that we are looking for a default display value.

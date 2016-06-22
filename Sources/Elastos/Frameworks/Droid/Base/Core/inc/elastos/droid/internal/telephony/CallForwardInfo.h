@@ -5,6 +5,7 @@
 #include "_Elastos.Droid.Internal.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::Internal::Telephony::ICallForwardInfo;
 using Elastos::Core::Object;
 
 namespace Elastos {
@@ -17,7 +18,7 @@ namespace Telephony {
  *
  * {@hide}
  */
-class CallForwardInfo
+class ECO_PUBLIC CallForwardInfo
     : public Object
     , public ICallForwardInfo
 {

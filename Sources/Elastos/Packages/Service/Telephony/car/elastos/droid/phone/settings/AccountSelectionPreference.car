@@ -1,0 +1,58 @@
+module
+{
+    using interface Elastos.Droid.Telecomm.Telecom.IPhoneAccountHandle;
+    using interface Elastos.Droid.Telecomm.Telecom.ITelecomManager;
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Phone {
+    namespace Settings {
+
+    interface IAccountSelectionPreference;
+
+    interface IAccountSelectionListener {
+        OnAccountSelected(
+            [in] IAccountSelectionPreference* pref,
+            [in] IPhoneAccountHandle* account,
+            [out] Boolean* result);
+
+        OnAccountSelectionDialogShow(
+            [in] IAccountSelectionPreference* pref);
+
+        OnAccountChanged(
+            [in] IAccountSelectionPreference* pref);
+    }
+
+    /**
+     * @Involve
+     * interface IListPreference
+     * interface IPreferenceOnPreferenceChangeListener
+     * interface IDialogPreference
+     * interface IPreference
+     * interface IComparable
+     * interface IPreferenceManagerOnActivityDestroyListener
+     * interface IDialogInterfaceOnDismissListener
+     * interface IDialogInterfaceOnClickListener
+     */
+    [deprecated]
+    interface IAccountSelectionPreference {
+        SetListener(
+            [in] IAccountSelectionListener* listener);
+
+        SetShowSelectionInSummary(
+            [in] Boolean value);
+
+        SetModel(
+                [in] ITelecomManager* telecomManager,
+                [in] IList* accountsList,
+                [in] IPhoneAccountHandle* currentSelection,
+                [in] ICharSequence* nullSelectionString);
+    }
+
+    } // namespace Settings
+    } // namespace Phone
+    } // namespace Droid
+    } // namespace Elastos
+}

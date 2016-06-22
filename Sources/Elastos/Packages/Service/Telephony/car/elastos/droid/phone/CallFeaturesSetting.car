@@ -75,10 +75,9 @@ module
         const String HAC_KEY = "HACSetting";
         const String HAC_VAL_ON = "ON";
         const String HAC_VAL_OFF = "OFF";
-
-        GetFWD_SETTINGS_DONT_TOUCH(
-            [out, callee] ArrayOf<ICallForwardInfo*>* array);
     }
+
+    interface IVoiceMailProviderSettings {}
 
     } // namespace Phone
     } // namespace Droid

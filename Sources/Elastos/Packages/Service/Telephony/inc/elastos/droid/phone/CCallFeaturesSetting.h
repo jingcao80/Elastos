@@ -2,9 +2,34 @@
 #define  __ELASTOS_DROID_PHONE_CPHONEAPP_H__
 
 #include "_Elastos_Droid_Phone_CCallFeaturesSetting.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Preference.h"
+#include <elastos/droid/os/AsyncResult.h>
 #include <elastos/droid/preference/PreferenceActivity.h>
+#include <elastos/utility/etl/HashMap.h>
+#include <elastos/utility/etl/HashSet.h>
 
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Internal::Telephony::ICallForwardInfo;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Phone::Settings::IAccountSelectionPreference;
+using Elastos::Droid::Preference::ICheckBoxPreference;
+using Elastos::Droid::Preference::IListPreference;
+using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::Preference::IPreferenceScreen;
+using Elastos::Droid::Preference::IPreferenceOnPreferenceChangeListener;
 using Elastos::Droid::Preference::PreferenceActivity;
+using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::Etl::HashSet;
 
 namespace Elastos {
 namespace Droid {
@@ -33,8 +58,8 @@ CarClass(CCallFeaturesSetting)
     , public PreferenceActivity
     , public ICallFeaturesSetting
     , public IDialogInterfaceOnClickListener
-    , public IPreferenceOnPreferenceChangeListener,
-    , public IEditPhoneNumberPreferenceOnDialogClosedListener,
+    , public IPreferenceOnPreferenceChangeListener
+    , public IEditPhoneNumberPreferenceOnDialogClosedListener
     , public IEditPhoneNumberPreferenceGetDefaultNumberListener
 {
 private:
@@ -49,6 +74,7 @@ private:
             /* [in] */ IIntent* intent)
             : mName(name)
             , mIntent(intent)
+        {}
 
     public:
         String mName;
@@ -57,9 +83,10 @@ private:
 
     class VoiceMailProviderSettings
         : public Object
+        , public IVoiceMailProviderSettings
     {
     public:
-        TO_STRING_IMPL("CCallFeaturesSetting::VoiceMailProviderSettings")
+        CAR_INTERFACE_DECL()
 
         /**
          * Constructs settings object, setting all conditional forwarding to the specified number
@@ -173,6 +200,25 @@ private:
         CCallFeaturesSetting* mHost;
     };
 
+    class PreferenceOnPreferenceChangeListener
+        : public Object
+        , public IPreferenceOnPreferenceChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        PreferenceOnPreferenceChangeListener(
+            /* [in] */ CCallFeaturesSetting* host);
+
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* preference,
+            /* [in] */ IInterface* objValue,
+            /* [out] */ Boolean* result);
+
+    private:
+        CCallFeaturesSetting* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -181,9 +227,6 @@ public:
     CCallFeaturesSetting();
 
     CARAPI constructor();
-
-    CARAPI GetFWD_SETTINGS_DONT_TOUCH(
-        /* [out] */ ArrayOf<ICallForwardInfo*>** array);
 
     //@Override
     CARAPI OnPause();
@@ -273,15 +316,14 @@ protected:
      * data that is relevant.
      */
     //@Override
-    CARAPI OnPrepareDialog(
+    CARAPI_(void) OnPrepareDialog(
         /* [in] */ Int32 id,
         /* [in] */ IDialog* dialog);
 
     // dialog creation method, called by showDialog()
     //@Override
-    CARAPI OnCreateDialog(
-        /* [in] */ Int32 id,
-        /* [out] */ IDialog** dialog);
+    CARAPI_(AutoPtr<IDialog>) OnCreateDialog(
+        /* [in] */ Int32 id);
 
     /*
      * Activity class methods
@@ -337,7 +379,7 @@ private:
         /* [in] */ VoiceMailProviderSettings* newSettings);
 
     CARAPI_(void) HandleForwardingSettingsReadResult(
-        /* [in] */ IAsyncResult* ar,
+        /* [in] */ AsyncResult* ar,
         /* [in] */ Int32 idx);
 
     CARAPI_(AutoPtr<ICallForwardInfo>) InfoForReason(
@@ -479,7 +521,7 @@ public:
     static AutoPtr<ArrayOf<ICallForwardInfo*> > FWD_SETTINGS_DONT_TOUCH;
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     static const Boolean DBG;
 
     //Information about logical "up" Activity
@@ -487,7 +529,7 @@ private:
     static const String UP_ACTIVITY_CLASS;
 
     // string constants
-    static const String AutoPtr<ArrayOf<String> > NUM_PROJECTION;
+    static const AutoPtr<ArrayOf<String> > NUM_PROJECTION;
 
     // String keys for preference lookup
     // TODO: Naming these "BUTTON_*" is confusing since they're not actually buttons(!)
@@ -504,7 +546,7 @@ private:
     static const String BUTTON_FDN_KEY;
 
     static const String BUTTON_DTMF_KEY;
-    static const String BUTTON_RETRY
+    static const String BUTTON_RETRY_KEY;
     static const String BUTTON_TTY_KEY;
     static const String BUTTON_HAC_KEY;
 
@@ -593,19 +635,19 @@ private:
      * Result of forwarding number change.
      * Keys are reasons (eg. unconditional forwarding).
      */
-    AutoPtr<IMap> mForwardingChangeResults;
+    AutoPtr<HashMap<Int32, AutoPtr<AsyncResult> > > mForwardingChangeResults;
 
     /**
      * Expected CF read result types.
      * This set keeps track of the CF types for which we've issued change
      * commands so we can tell when we've received all of the responses.
      */
-    AutoPtr<ICollection> mExpectedChangeResultReasons;
+    AutoPtr<HashSet<Int32> > mExpectedChangeResultReasons;
 
     /**
      * Result of vm number change
      */
-    AutoPtr<IAsyncResult> mVoicemailChangeResult;
+    AutoPtr<AsyncResult> mVoicemailChangeResult;
 
     /**
      * Previous VM provider setting so we can return to it in case of failure.
@@ -655,7 +697,7 @@ private:
      * string and intent value of null.
      * @see #initVoiceMailProviders()
      */
-    AutoPtr<IMap> mVMProvidersData;
+    HashMap<String, AutoPtr<VoiceMailProvider> > mVMProvidersData;
 
     /** string to hold old voicemail number as it is being updated. */
     String mOldVmNumber;
@@ -686,7 +728,7 @@ private:
     /**
      * Callback to handle option update completions
      */
-    AutoPtr<IHandler> mSetOptionComplet;
+    AutoPtr<IHandler> mSetOptionComplete;
 
     /**
      * Callback to handle option revert completions

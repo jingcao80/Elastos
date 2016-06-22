@@ -1,9 +1,94 @@
 
 #include "elastos/droid/phone/CCallFeaturesSetting.h"
+#include "elastos/droid/internal/telephony/CallForwardInfo.h"
+#include "R.h"
+#include <elastos/droid/R.h>
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telephony.h"
+#include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::CProgressDialog;
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::IActionBar;
+using Elastos::Droid::App::IProgressDialog;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::ISharedPreferencesEditor;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Internal::Telephony::CallForwardInfo;
+using Elastos::Droid::Internal::Telephony::ICommandsInterface;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Os::CMessageHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::IMessageHelper;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Preference::CPreferenceManagerHelper;
+using Elastos::Droid::Preference::EIID_IPreferenceOnPreferenceChangeListener;
+using Elastos::Droid::Preference::IDialogPreference;
+using Elastos::Droid::Preference::IPreferenceGroup;
+using Elastos::Droid::Preference::IPreferenceManagerHelper;
+using Elastos::Droid::Preference::ITwoStatePreference;
+using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::Provider::CSettingsSystem;
+using Elastos::Droid::Provider::IContactsPhones;
+using Elastos::Droid::Provider::IContactsContractCommonDataKindsPhone;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Telecomm::Telecom::CTelecomManagerHelper;
+using Elastos::Droid::Telecomm::Telecom::ITelecomManagerHelper;
+using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Widget::IAdapter;
+using Elastos::Droid::Widget::IAdapterView;
+using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
+using Elastos::Core::CString;
+using Elastos::Core::CThread;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
+
+const Int32 CCallFeaturesSetting::EVENT_VOICEMAIL_CHANGED        = 500;
+const Int32 CCallFeaturesSetting::EVENT_FORWARDING_CHANGED       = 501;
+const Int32 CCallFeaturesSetting::EVENT_FORWARDING_GET_COMPLETED = 502;
+const Int32 CCallFeaturesSetting::MSG_UPDATE_VOICEMAIL_RINGTONE_SUMMARY = 1;
+const Int32 CCallFeaturesSetting::VOICEMAIL_PREF_ID = 1;
+const Int32 CCallFeaturesSetting::VOICEMAIL_PROVIDER_CFG_ID = 2;
+const Int32 CCallFeaturesSetting::VM_NOCHANGE_ERROR = 400;
+const Int32 CCallFeaturesSetting::VM_RESPONSE_ERROR = 500;
+const Int32 CCallFeaturesSetting::FW_SET_RESPONSE_ERROR = 501;
+const Int32 CCallFeaturesSetting::FW_GET_RESPONSE_ERROR = 502;
+const Int32 CCallFeaturesSetting::VOICEMAIL_DIALOG_CONFIRM = 600;
+const Int32 CCallFeaturesSetting::VOICEMAIL_FWD_SAVING_DIALOG = 601;
+const Int32 CCallFeaturesSetting::VOICEMAIL_FWD_READING_DIALOG = 602;
+const Int32 CCallFeaturesSetting::VOICEMAIL_REVERTING_DIALOG = 603;
+const Int32 CCallFeaturesSetting::MSG_OK = 100;
+const Int32 CCallFeaturesSetting::MSG_VM_EXCEPTION = 400;
+const Int32 CCallFeaturesSetting::MSG_FW_SET_EXCEPTION = 401;
+const Int32 CCallFeaturesSetting::MSG_FW_GET_EXCEPTION = 402;
+const Int32 CCallFeaturesSetting::MSG_VM_OK = 600;
+const Int32 CCallFeaturesSetting::MSG_VM_NOCHANGE = 700;
 
 CCallFeaturesSetting::VoiceMailProviderSettings::VoiceMailProviderSettings(
     /* [in] */ const String& voicemailNumber,
@@ -17,24 +102,24 @@ CCallFeaturesSetting::VoiceMailProviderSettings::VoiceMailProviderSettings(
     else {
         mForwardingSettings = ArrayOf<ICallForwardInfo*>::Alloc(FORWARDING_SETTINGS_REASONS->GetLength());
         for (Int32 i = 0; i < mForwardingSettings->GetLength(); i++) {
-            AutoPtr<ICallForwardInfo> fi;
-            CCallForwardInfo::New((ICallForwardInfo**)&fi);
+            AutoPtr<CallForwardInfo> fi = new CallForwardInfo();
             mForwardingSettings->Set(i, fi);
-            fi.reason = FORWARDING_SETTINGS_REASONS[i];
-            fi.status = (fi.reason == CommandsInterface.CF_REASON_UNCONDITIONAL) ? 0 : 1;
-            fi.serviceClass = CommandsInterface.SERVICE_CLASS_VOICE;
-            fi.toa = PhoneNumberUtils.TOA_International;
-            fi.number = forwardingNumber;
-            fi.timeSeconds = timeSeconds;
+            fi->mReason = (*FORWARDING_SETTINGS_REASONS)[i];
+            fi->mStatus = (fi->mReason == ICommandsInterface::CF_REASON_UNCONDITIONAL) ? 0 : 1;
+            fi->mServiceClass = ICommandsInterface::SERVICE_CLASS_VOICE;
+            fi->mToa = IPhoneNumberUtils::TOA_International;
+            fi->mNumber = forwardingNumber;
+            fi->mTimeSeconds = timeSeconds;
         }
     }
 }
 
+CAR_INTERFACE_IMPL(CCallFeaturesSetting::VoiceMailProviderSettings, Object, IVoiceMailProviderSettings)
 CCallFeaturesSetting::VoiceMailProviderSettings::VoiceMailProviderSettings(
     /* [in] */ const String& voicemailNumber,
     /* [in] */ ArrayOf<ICallForwardInfo*>* infos)
-    mVoicemailNumber(voicemailNumber)
-    mForwardingSettings(infos)
+    : mVoicemailNumber(voicemailNumber)
+    , mForwardingSettings(infos)
 {
 }
 
@@ -52,15 +137,11 @@ ECode CCallFeaturesSetting::VoiceMailProviderSettings::Equals(
         *result = FALSE;
         return NOERROR;
     }
-    AutoPtr<VoiceMailProviderSettings> v = (VoiceMailProviderSettings)IVoiceMailProviderSettings::Probe(o);
+    VoiceMailProviderSettings* v = (VoiceMailProviderSettings*)IVoiceMailProviderSettings::Probe(o);
 
-    return ((mVoicemailNumber.IsNull() &&
-                v->mVoicemailNumber.IsNull()) ||
-            !mVvoicemailNumber.IsNull() &&
-                mVoicemailNumber.Equals(v->mVoicemailNumber))
-            &&
-            ForwardingSettingsEqual(mForwardingSettings,
-                    v->mForwardingSettings);
+    return ((mVoicemailNumber.IsNull() && v->mVoicemailNumber.IsNull()) ||
+            (!mVoicemailNumber.IsNull() && mVoicemailNumber.Equals(v->mVoicemailNumber)))
+            && ForwardingSettingsEqual(mForwardingSettings, v->mForwardingSettings);
 }
 
 Boolean CCallFeaturesSetting::VoiceMailProviderSettings::ForwardingSettingsEqual(
@@ -71,14 +152,14 @@ Boolean CCallFeaturesSetting::VoiceMailProviderSettings::ForwardingSettingsEqual
     if (infos1 == NULL || infos2 == NULL) return FALSE;
     if (infos1->GetLength() != infos2->GetLength()) return FALSE;
     for (Int32 i = 0; i < infos1->GetLength(); i++) {
-        AutoPtr<ICallForwardInfo> i1 = (*infos1)[i];
-        AutoPtr<ICallForwardInfo> i2 = (*infos2)[i];
-        if (i1.status != i2.status ||
-            i1.reason != i2.reason ||
-            i1.serviceClass != i2.serviceClass ||
-            i1.toa != i2.toa ||
-            i1.number != i2.number ||
-            i1.timeSeconds != i2.timeSeconds) {
+        CallForwardInfo* i1 = (CallForwardInfo*)(*infos1)[i];
+        CallForwardInfo* i2 = (CallForwardInfo*)(*infos2)[i];
+        if (i1->mStatus != i2->mStatus ||
+            i1->mReason != i2->mReason ||
+            i1->mServiceClass != i2->mServiceClass ||
+            i1->mToa != i2->mToa ||
+            i1->mNumber != i2->mNumber ||
+            i1->mTimeSeconds != i2->mTimeSeconds) {
             return FALSE;
         }
     }
@@ -91,10 +172,10 @@ ECode CCallFeaturesSetting::VoiceMailProviderSettings::ToString(
     VALIDATE_NOT_NULL(str)
 
     StringBuilder sb;
-    sb += voicemailNumber;
+    sb += mVoicemailNumber;
 
     assert(0);
-    // return voicemailNumber + ((forwardingSettings != null ) ? (", " +
+    // return voicemailNumber + ((forwardingSettings != NULL ) ? (", " +
     //         forwardingSettings.toString()) : "");
     return NOERROR;
 }
@@ -132,14 +213,19 @@ CCallFeaturesSetting::MyHandler2::MyHandler2(
 ECode CCallFeaturesSetting::MyHandler2::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    AsyncResult result = (AsyncResult) msg.obj;
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    AsyncResult* result = (AsyncResult*)IObject::Probe(obj);
 
     Int32 what;
     msg->GetWhat(&what);
     switch (what) {
-        case EVENT_FORWARDING_GET_COMPLETED:
-            HandleForwardingSettingsReadResult(result, msg.arg1);
+        case EVENT_FORWARDING_GET_COMPLETED: {
+            Int32 arg1 = 0;
+            msg->GetArg1(&arg1);
+            mHost->HandleForwardingSettingsReadResult(result, arg1);
             break;
+        }
     }
     return NOERROR;
 }
@@ -154,66 +240,71 @@ CCallFeaturesSetting::MyHandler3::MyHandler3(
 ECode CCallFeaturesSetting::MyHandler3::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    AsyncResult result = (AsyncResult) msg.obj;
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    AsyncResult* result = (AsyncResult*)IObject::Probe(obj);
     Boolean done = FALSE;
 
     Int32 what;
     msg->GetWhat(&what);
     switch (what) {
         case EVENT_VOICEMAIL_CHANGED:
-            mVoicemailChangeResult = result;
-            mVMChangeCompletedSuccessfully = CheckVMChangeSuccess() == NULL;
+            mHost->mVoicemailChangeResult = result;
+            mHost->mVMChangeCompletedSuccessfully = mHost->CheckVMChangeSuccess() == NULL;
             if (DBG) {
                 Log(String("VM change complete msg, VM change done = ") +
-                    StringUtils::ToString(mVMChangeCompletedSuccessfully));
+                    StringUtils::ToString(mHost->mVMChangeCompletedSuccessfully));
+            }
             done = TRUE;
             break;
-        case EVENT_FORWARDING_CHANGED:
-            mForwardingChangeResults->Put(msg.arg1, result);
-            if (result.exception != NULL) {
-                Logger::W(LOG_TAG, "Error in setting fwd# " + msg.arg1 + ": " +
-                        result.exception.getMessage());
+        case EVENT_FORWARDING_CHANGED: {
+            Int32 arg1 = 0;
+            msg->GetArg1(&arg1);
+            (*mHost->mForwardingChangeResults)[arg1] = result;
+            if (result->mException != NULL) {
+                Logger::W(TAG, "Error in setting fwd# %d: ", arg1 /*result->mException.getMessage()*/);
             }
             else {
-                if (DBG) Log(String("Success in setting fwd# ") + msg.arg1);
+                if (DBG) Log(String("Success in setting fwd# ") + StringUtils::ToString(arg1));
             }
-            const Boolean completed = CheckForwardingCompleted();
+            const Boolean completed = mHost->CheckForwardingCompleted();
             if (completed) {
-                if (CheckFwdChangeSuccess() == NULL) {
+                if (mHost->CheckFwdChangeSuccess() == NULL) {
                     if (DBG) Log(String("Overall fwd changes completed ok, starting vm change"));
-                    SetVMNumberWithCarrier();
+                    mHost->SetVMNumberWithCarrier();
                 }
                 else {
-                    Logger::W(LOG_TAG, "Overall fwd changes completed in failure. "
+                    Logger::W(TAG, "Overall fwd changes completed in failure. "
                             "Check if we need to try rollback for some settings.");
-                    mFwdChangesRequireRollback = FALSE;
-                    Iterator<Map.Entry<Integer,AsyncResult>> it =
-                        mForwardingChangeResults.entrySet().iterator();
-                    while (it.hasNext()) {
-                        Map.Entry<Integer,AsyncResult> entry = it.next();
-                        if (entry.getValue().exception == null) {
+                    mHost->mFwdChangesRequireRollback = FALSE;
+                    HashMap<Int32, AutoPtr<AsyncResult> >::Iterator ator = mHost->mForwardingChangeResults->Begin();
+                    for (; ator != mHost->mForwardingChangeResults->End(); ++ator) {
+                        AsyncResult* v = ator->mSecond;
+                        if (v->mException == NULL) {
                             // If at least one succeeded we have to revert
-                            Log.i(LOG_TAG, "Rollback will be required");
-                            mFwdChangesRequireRollback = true;
+                            Logger::I(TAG, "Rollback will be required");
+                            mHost->mFwdChangesRequireRollback = TRUE;
                             break;
                         }
                     }
-                    if (!mFwdChangesRequireRollback) {
-                        Logger::I(LOG_TAG, "No rollback needed.");
+                    if (!mHost->mFwdChangesRequireRollback) {
+                        Logger::I(TAG, "No rollback needed.");
                     }
                     done = TRUE;
                 }
             }
             break;
-        default:
+        }
+        default: {
             // TODO: should never reach this, may want to throw exception
+        }
     }
     if (done) {
         if (DBG) Log(String("All VM provider related changes done"));
-        if (mForwardingChangeResults != NULL) {
-            DismissDialogSafely(VOICEMAIL_FWD_SAVING_DIALOG);
+        if (mHost->mForwardingChangeResults != NULL) {
+            mHost->DismissDialogSafely(VOICEMAIL_FWD_SAVING_DIALOG);
         }
-        HandleSetVMOrFwdMessage();
+        mHost->HandleSetVMOrFwdMessage();
     }
     return NOERROR;
 }
@@ -228,61 +319,81 @@ CCallFeaturesSetting::MyHandler4::MyHandler4(
 ECode CCallFeaturesSetting::MyHandler4::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    AsyncResult result = (AsyncResult) msg.obj;
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    AsyncResult* result = (AsyncResult*)IObject::Probe(obj);
 
     Int32 what;
     msg->GetWhat(&what);
     switch (what) {
         case EVENT_VOICEMAIL_CHANGED:
-            mVoicemailChangeResult = result;
+            mHost->mVoicemailChangeResult = result;
             if (DBG) Log(String("VM revert complete msg"));
             break;
-        case EVENT_FORWARDING_CHANGED:
-            mForwardingChangeResults->Put(msg.arg1, result);
-            if (result.exception != NULL) {
+        case EVENT_FORWARDING_CHANGED: {
+            Int32 arg1 = 0;
+            msg->GetArg1(&arg1);
+            (*mHost->mForwardingChangeResults)[arg1] = result;
+            if (result->mException != NULL) {
                 if (DBG) {
-                    Log(String("Error in reverting fwd# ") + msg.arg1 + ": " +
-                        result.exception.getMessage());
+                    Log(String("Error in reverting fwd# ") + StringUtils::ToString(arg1)
+                        /*,result.exception.getMessage()*/);
                 }
             }
             else {
-                if (DBG) Log(String("Success in reverting fwd# ") + msg.arg1);
+                if (DBG) Log(String("Success in reverting fwd# ") + StringUtils::ToString(arg1));
             }
-            if (DBG) log(String("FWD revert complete msg "));
+            if (DBG) Log(String("FWD revert complete msg "));
             break;
-        default:
+        }
+        default: {
             // TODO: should never reach this, may want to throw exception
+        }
     }
     const Boolean done =
-        (!mVMChangeCompletedSuccessfully || mVoicemailChangeResult != NULL) &&
-        (!mFwdChangesRequireRollback || CheckForwardingCompleted());
+        (!mHost->mVMChangeCompletedSuccessfully || mHost->mVoicemailChangeResult != NULL) &&
+        (!mHost->mFwdChangesRequireRollback || mHost->CheckForwardingCompleted());
     if (done) {
-        if (DBG) Log(String("All VM reverts done"));
-        DismissDialogSafely(VOICEMAIL_REVERTING_DIALOG);
-        OnRevertDone();
+        if (DBG) mHost->Log(String("All VM reverts done"));
+        mHost->DismissDialogSafely(VOICEMAIL_REVERTING_DIALOG);
+        mHost->OnRevertDone();
     }
     return NOERROR;
 }
 
 ECode CCallFeaturesSetting::MyRunnable::Run()
 {
-    if (mVoicemailNotificationRingtone != NULL) {
+    if (mHost->mVoicemailNotificationRingtone != NULL) {
         AutoPtr<IContext> context;
-        mPhone->GetContext((IContext**)&context);
-        SettingsUtil::UpdateRingtoneName(
-                context,
-                mVoicemailRingtoneLookupComplete,
-                RingtoneManager.TYPE_NOTIFICATION,
-                mVoicemailNotificationRingtone,
-                MSG_UPDATE_VOICEMAIL_RINGTONE_SUMMARY);
-        }
+        mHost->mPhone->GetContext((IContext**)&context);
+        assert(0 && "TODO Need SettingsUtil");
+        // SettingsUtil::UpdateRingtoneName(context,
+        //         mVoicemailRingtoneLookupComplete,
+        //         RingtoneManager.TYPE_NOTIFICATION,
+        //         mHost->mVoicemailNotificationRingtone,
+        //         MSG_UPDATE_VOICEMAIL_RINGTONE_SUMMARY);
     }
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(CCallFeaturesSetting::PreferenceOnPreferenceChangeListener, Object, \
+        IPreferenceOnPreferenceChangeListener)
+CCallFeaturesSetting::PreferenceOnPreferenceChangeListener::PreferenceOnPreferenceChangeListener(
+    /* [in] */ CCallFeaturesSetting* host)
+    : mHost(host)
+{}
+
+ECode CCallFeaturesSetting::PreferenceOnPreferenceChangeListener::OnPreferenceChange(
+    /* [in] */ IPreference* preference,
+    /* [in] */ IInterface* objValue,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnPreferenceChange(preference, objValue, result);
+}
+
 AutoPtr<ArrayOf<ICallForwardInfo*> > CCallFeaturesSetting::FWD_SETTINGS_DONT_TOUCH;
 
-const String CCallFeaturesSetting::LOG_TAG("CallFeaturesSetting");
+const String CCallFeaturesSetting::TAG("CallFeaturesSetting");
 const Boolean CCallFeaturesSetting::DBG = IPhoneGlobals::DBG_LEVEL >= 2;
 
 const String CCallFeaturesSetting::UP_ACTIVITY_PACKAGE("com.android.dialer");
@@ -292,7 +403,7 @@ static AutoPtr<ArrayOf<String> > initNUM_PROJECTION()
 {
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
 
-    array->Set(0, CommonDataKinds.Phone.NUMBER);
+    array->Set(0, IContactsContractCommonDataKindsPhone::NUMBER);
     return array;
 }
 
@@ -321,36 +432,8 @@ const String CCallFeaturesSetting::VM_NUMBERS_SHARED_PREFERENCES_NAME("vm_number
 
 const String CCallFeaturesSetting::DEFAULT_OUTGOING_ACCOUNT_KEY("default_outgoing_account");
 const String CCallFeaturesSetting::PHONE_ACCOUNT_SETTINGS_KEY("phone_account_settings_preference_screen");
-
-const Int32 CCallFeaturesSetting::EVENT_VOICEMAIL_CHANGED        = 500;
-const Int32 CCallFeaturesSetting::EVENT_FORWARDING_CHANGED       = 501;
-const Int32 CCallFeaturesSetting::EVENT_FORWARDING_GET_COMPLETED = 502;
-
-const Int32 CCallFeaturesSetting::MSG_UPDATE_VOICEMAIL_RINGTONE_SUMMARY = 1;
-
-const Int32 CCallFeaturesSetting::VOICEMAIL_PREF_ID = 1;
-const Int32 CCallFeaturesSetting::VOICEMAIL_PROVIDER_CFG_ID = 2;
-
-const Int32 CCallFeaturesSetting::VM_NOCHANGE_ERROR = 400;
-const Int32 CCallFeaturesSetting::VM_RESPONSE_ERROR = 500;
-const Int32 CCallFeaturesSetting::FW_SET_RESPONSE_ERROR = 501;
-const Int32 CCallFeaturesSetting::FW_GET_RESPONSE_ERROR = 502;
-
-const Int32 CCallFeaturesSetting::VOICEMAIL_DIALOG_CONFIRM = 600;
-const Int32 CCallFeaturesSetting::VOICEMAIL_FWD_SAVING_DIALOG = 601;
-const Int32 CCallFeaturesSetting::VOICEMAIL_FWD_READING_DIALOG = 602;
-const Int32 CCallFeaturesSetting::VOICEMAIL_REVERTING_DIALOG = 603;
-
-const Int32 CCallFeaturesSetting::MSG_OK = 100;
-
-const Int32 CCallFeaturesSetting::MSG_VM_EXCEPTION = 400;
-const Int32 CCallFeaturesSetting::MSG_FW_SET_EXCEPTION = 401;
-const Int32 CCallFeaturesSetting::MSG_FW_GET_EXCEPTION = 402;
-const Int32 CCallFeaturesSetting::MSG_VM_OK = 600;
-const Int32 CCallFeaturesSetting::MSG_VM_NOCHANGE = 700;
-
-const String VOICEMAIL_VIBRATION_ALWAYS("always");
-const String VOICEMAIL_VIBRATION_NEVER("never");
+const String CCallFeaturesSetting::VOICEMAIL_VIBRATION_ALWAYS("always");
+const String CCallFeaturesSetting::VOICEMAIL_VIBRATION_NEVER("never");
 
 static AutoPtr<ArrayOf<Int32> > initFORWARDING_SETTINGS_REASONS()
 {
@@ -389,11 +472,9 @@ CCallFeaturesSetting::CCallFeaturesSetting()
 {
     mVoicemailRingtoneLookupComplete = new MyHandler(this);
 
-    CHashMap::New((IHashMap**)&mVMProvidersData);
-
     mGetOptionComplete = new MyHandler2(this);
 
-    mSetOptionComplet = new MyHandler3(this);
+    mSetOptionComplete = new MyHandler3(this);
 
     mRevertOptionComplete = new MyHandler4(this);
 }
@@ -437,15 +518,15 @@ ECode CCallFeaturesSetting::OnPreferenceTreeClick(
         AutoPtr<ISettingsGlobal> helper;
         CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
         Boolean res;
-        mButtonAutoRetry->IsChecked(&res);
-        helper->PutInt32(cr, ISettingsGlobal::CALL_AUTO_RETRY, res ?  1 : 0);
+        ITwoStatePreference::Probe(mButtonAutoRetry)->IsChecked(&res);
+        helper->PutInt32(cr, ISettingsGlobal::CALL_AUTO_RETRY, res ?  1 : 0, &res);
 
         *result = TRUE;
         return NOERROR;
     }
     else if (TO_IINTERFACE(preference) == TO_IINTERFACE(mButtonHAC)) {
         Boolean res;
-        Int32 hac = (mButtonHAC->IsChecked(&res), res) ? 1 : 0;
+        Int32 hac = (ITwoStatePreference::Probe(mButtonHAC)->IsChecked(&res), res) ? 1 : 0;
 
         // Update HAC value in Settings database
         AutoPtr<IContext> context;
@@ -454,9 +535,8 @@ ECode CCallFeaturesSetting::OnPreferenceTreeClick(
         context->GetContentResolver((IContentResolver**)&cr);
         AutoPtr<ISettingsGlobal> helper;
         CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
-        Boolean res;
-        mButtonAutoRetry->IsChecked(&res);
-        helper->PutInt32(cr, ISettingsGlobal::HEARING_AID, hac);
+        ITwoStatePreference::Probe(mButtonAutoRetry)->IsChecked(&res);
+        helper->PutInt32(cr, ISettingsSystem::HEARING_AID, hac, &res);
 
         // Update HAC Value in AudioManager
         mAudioManager->SetParameter(HAC_KEY, hac != 0 ? HAC_VAL_ON : HAC_VAL_OFF);
@@ -548,10 +628,13 @@ ECode CCallFeaturesSetting::OnPreferenceChange(
         context->GetContentResolver((IContentResolver**)&cr);
         AutoPtr<ISettingsGlobal> helper;
         CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
-        helper->PutInt32(cr, ISettingsGlobal::DTMF_TONE_TYPE_WHEN_DIALING, index);
-    } else if (TO_IINTERFACE(preference) == TO_IINTERFACE(mButtonTTY)) {
+        Boolean tmp = FALSE;
+        helper->PutInt32(cr, ISettingsSystem::DTMF_TONE_TYPE_WHEN_DIALING, index, &tmp);
+    }
+    else if (TO_IINTERFACE(preference) == TO_IINTERFACE(mButtonTTY)) {
         HandleTTYChange(preference, objValue);
-    } else if (TO_IINTERFACE(preference) == TO_IINTERFACE(mVoicemailProviders)) {
+    }
+    else if (TO_IINTERFACE(preference) == TO_IINTERFACE(mVoicemailProviders)) {
         AutoPtr<ICharSequence> cchar = ICharSequence::Probe(objValue);
         String newProviderKey;
         cchar->ToString(&newProviderKey);
@@ -583,9 +666,9 @@ ECode CCallFeaturesSetting::OnPreferenceChange(
 
         if (newProviderSettings == NULL) {
             // Force the user into a configuration of the chosen provider
-            Logger::W(LOG_TAG, "Saved preferences not found - invoking config");
+            Logger::W(TAG, "Saved preferences not found - invoking config");
             mVMProviderSettingsForced = TRUE;
-            SimulatePreferenceClick(mVoicemailSettings);
+            SimulatePreferenceClick(IPreference::Probe(mVoicemailSettings));
         }
         else {
             if (DBG) Log(String("Saved preferences found - switching to them"));
@@ -623,7 +706,7 @@ ECode CCallFeaturesSetting::OnGetDefaultNumber(
 
     if (TO_IINTERFACE(preference) == TO_IINTERFACE(mSubMenuVoicemailSettings)) {
         // update the voicemail number field, which takes care of the
-        // mSubMenuVoicemailSettings itself, so we should return null.
+        // mSubMenuVoicemailSettings itself, so we should return NULL.
         if (DBG) Log(String("updating default for voicemail dialog"));
         UpdateVoiceNumberField();
         *str = String(NULL);
@@ -633,7 +716,7 @@ ECode CCallFeaturesSetting::OnGetDefaultNumber(
     String vmDisplay;
     mPhone->GetVoiceMailNumber(&vmDisplay);
     if (TextUtils::IsEmpty(vmDisplay)) {
-        // if there is no voicemail number, we just return null to
+        // if there is no voicemail number, we just return NULL to
         // indicate no contribution.
         *str = String(NULL);
         return NOERROR;
@@ -643,7 +726,7 @@ ECode CCallFeaturesSetting::OnGetDefaultNumber(
     if (DBG) Log(String("updating default for call forwarding dialogs"));
 
     String tmp;
-    GetString(R.string.voicemail_abbreviated, &tmp);
+    GetString(Elastos::Droid::Server::Telephony::R::string::voicemail_abbreviated, &tmp);
     StringBuilder sb;
     sb += tmp;
     sb += " ";
@@ -684,35 +767,36 @@ void CCallFeaturesSetting::SwitchToPreviousVoicemailProvider()
             AutoPtr<VoiceMailProviderSettings> prevSettings =
                     LoadSettingsForVoiceMailProvider(mPreviousVMProviderKey);
             if (prevSettings == NULL) {
-                // prevSettings never becomes null since it should be already loaded!
-                Logger::E(LOG_TAG, "VoiceMailProviderSettings for the key \"%d\" becomes null, which is unexpected.",
+                // prevSettings never becomes NULL since it should be already loaded!
+                Logger::E(TAG, "VoiceMailProviderSettings for the key \"%d\" becomes NULL, which is unexpected.",
                         mPreviousVMProviderKey.string());
                 if (DBG) {
-                    Logger::E(LOG_TAG,
+                    Logger::E(TAG,
                             "mVMChangeCompletedSuccessfully: %d, mFwdChangesRequireRollback: %d",
                             mVMChangeCompletedSuccessfully, mFwdChangesRequireRollback);
                 }
             }
             if (mVMChangeCompletedSuccessfully) {
                 mNewVMNumber = prevSettings->mVoicemailNumber;
-                Logger::I(LOG_TAG, "VM change is already completed successfully.Have to revert VM back to"
+                Logger::I(TAG, "VM change is already completed successfully.Have to revert VM back to"
                         "%s again.", mNewVMNumber.string());
 
+                AutoPtr<IMessageHelper> helper;
+                CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
                 AutoPtr<IMessage> m;
-                Message::Obtain(mRevertOptionComplete, EVENT_VOICEMAIL_CHANGED, (IMessage**)&m);
-                mPhone->SetVoiceMailNumber(
-                        mPhone.getVoiceMailAlphaTag().toString(),
-                        mNewVMNumber,
-                        m);
+                helper->Obtain(mRevertOptionComplete, EVENT_VOICEMAIL_CHANGED, (IMessage**)&m);
+                String ss;
+                mPhone->GetVoiceMailAlphaTag(&ss);
+                mPhone->SetVoiceMailNumber(ss, mNewVMNumber, m);
             }
             if (mFwdChangesRequireRollback) {
-                Logger::I(LOG_TAG, "Requested to rollback Fwd changes.");
+                Logger::I(TAG, "Requested to rollback Fwd changes.");
                 AutoPtr<ArrayOf<ICallForwardInfo*> > prevFwdSettings = prevSettings->mForwardingSettings;
                 if (prevFwdSettings != NULL) {
-                    AutoPtr<IMap> results = mForwardingChangeResults;
+                    AutoPtr<HashMap<Int32, AutoPtr<AsyncResult> > > results = mForwardingChangeResults;
                     ResetForwardingChangeState();
                     for (Int32 i = 0; i < prevFwdSettings->GetLength(); i++) {
-                        AutoPtr<ICallForwardInfo> fi = (*prevFwdSettings)[i];
+                        CallForwardInfo* fi = (CallForwardInfo*)(*prevFwdSettings)[i];
                         if (DBG) {
                             StringBuilder sb;
                             sb += "Reverting fwd #: ";
@@ -723,20 +807,24 @@ void CCallFeaturesSetting::SwitchToPreviousVoicemailProvider()
                         }
                         // Only revert the settings for which the update
                         // succeeded
-                        AsyncResult result = results.get(fi.reason);
-                        if (result != NULL && result.exception == NULL) {
-                            mExpectedChangeResultReasons->Add(fi.reason);
+                        HashMap<Int32, AutoPtr<AsyncResult> >::Iterator ator = results->Find(fi->mReason);
+                        AsyncResult* result = NULL;
+                        if (ator != results->End()) {
+                            result = ator->mSecond;
+                        }
+                        if (result != NULL && result->mException == NULL) {
+                            mExpectedChangeResultReasons->Insert(fi->mReason);
 
                             AutoPtr<IMessage> m;
                             mRevertOptionComplete->ObtainMessage(
                                             EVENT_FORWARDING_CHANGED, i, 0, (IMessage**)&m);
                             mPhone->SetCallForwardingOption(
-                                    (fi.status == 1 ?
-                                            CommandsInterface.CF_ACTION_REGISTRATION :
-                                            CommandsInterface.CF_ACTION_DISABLE),
-                                    fi.reason,
-                                    fi.number,
-                                    fi.timeSeconds,
+                                    (fi->mStatus == 1 ?
+                                            ICommandsInterface::CF_ACTION_REGISTRATION :
+                                            ICommandsInterface::CF_ACTION_DISABLE),
+                                    fi->mReason,
+                                    fi->mNumber,
+                                    fi->mTimeSeconds,
                                     m);
                         }
                     }
@@ -783,7 +871,7 @@ ECode CCallFeaturesSetting::OnActivityResult(
         Boolean failure = FALSE;
 
         // No matter how the processing of result goes lets clear the flag
-        if (DBG) Log("mVMProviderSettingsForced: %d", mVMProviderSettingsForced);
+        if (DBG) Log(String("mVMProviderSettingsForced: ") + StringUtils::ToString(mVMProviderSettingsForced));
         const Boolean isVMProviderSettingsForced = mVMProviderSettingsForced;
         mVMProviderSettingsForced = FALSE;
 
@@ -806,8 +894,7 @@ ECode CCallFeaturesSetting::OnActivityResult(
                         SwitchToPreviousVoicemailProvider();
                     }
                     else {
-                        String victim;
-                        GetCurrentVoicemailProviderKey(&victim);
+                        String victim = GetCurrentVoicemailProviderKey();
                         if (DBG) Log(String("Relaunching activity and ignoring ") + victim);
                         AutoPtr<IIntent> i;
                         CIntent::New(ACTION_ADD_VOICEMAIL, (IIntent**)&i);
@@ -825,12 +912,12 @@ ECode CCallFeaturesSetting::OnActivityResult(
             }
         }
         if (failure) {
-            if (DBG) log(String("Failure in return from voicemail provider"));
+            if (DBG) Log(String("Failure in return from voicemail provider"));
             if (isVMProviderSettingsForced) {
                 SwitchToPreviousVoicemailProvider();
             }
             else {
-                if (DBG) log(String("Not switching back the provider since this is not forced config"));
+                if (DBG) Log(String("Not switching back the provider since this is not forced config"));
             }
             return NOERROR;
         }
@@ -841,7 +928,7 @@ ECode CCallFeaturesSetting::OnActivityResult(
         // TODO: It would be nice to load the current network setting for this and
         // send it to the provider when it's config is invoked so it can use this as default
         Int32 fwdNumTime;
-        data->GetIntExtra(FWD_NUMBER_TIME_EXTRA, 20, &fwdNumTime);
+        data->GetInt32Extra(FWD_NUMBER_TIME_EXTRA, 20, &fwdNumTime);
 
         if (DBG) {
             StringBuilder sb;
@@ -851,7 +938,7 @@ ECode CCallFeaturesSetting::OnActivityResult(
             Log(sb.ToString());
         }
         AutoPtr<VoiceMailProviderSettings> setting = new VoiceMailProviderSettings(vmNum, fwdNum, fwdNumTime);
-        SaveVoiceMailAndForwardingNumber(getCurrentVoicemailProviderKey(), setting);
+        SaveVoiceMailAndForwardingNumber(GetCurrentVoicemailProviderKey(), setting);
         return NOERROR;
     }
 
@@ -866,11 +953,13 @@ ECode CCallFeaturesSetting::OnActivityResult(
         {
             AutoPtr<IContentResolver> contentResolver;
             GetContentResolver((IContentResolver**)&contentResolver);
-            ECode ec = contentResolver->Query(data.getData(),
-                NUM_PROJECTION, NULL, NULL, NULL, (ICursor**)&cursor);
+            AutoPtr<IUri> uri;
+            data->GetData((IUri**)&uri);
+            ECode ec = contentResolver->Query(uri,
+                NUM_PROJECTION, String(NULL), NULL, String(NULL), (ICursor**)&cursor);
             if (FAILED(ec)) {
                 if (cursor != NULL) {
-                    cursor->Close();
+                    ICloseable::Probe(cursor)->Close();
                 }
             }
 
@@ -883,13 +972,14 @@ ECode CCallFeaturesSetting::OnActivityResult(
             ec = cursor->GetString(0, &str);
             if (FAILED(ec)) {
                 if (cursor != NULL) {
-                    cursor->Close();
+                    ICloseable::Probe(cursor)->Close();
                 }
             }
-            ec = mSubMenuVoicemailSettings->OnPickActivityResult(str);
+            assert(0 && "TODO Need CEditPhoneNumberPreference");
+            // ec = ((CEditPhoneNumberPreference*)mSubMenuVoicemailSettings.Get())->OnPickActivityResult(str);
             if (FAILED(ec)) {
                 if (cursor != NULL) {
-                    cursor->Close();
+                    ICloseable::Probe(cursor)->Close();
                 }
             }
             return NOERROR;
@@ -912,7 +1002,8 @@ void CCallFeaturesSetting::HandleVMBtnClickRequest()
     // call now, we won't need to do so here anymore.
 
     String number;
-    mSubMenuVoicemailSettings->GetPhoneNumber(&number);
+    assert(0 && "TODO CEditPhoneNumberPreference");
+    // ((CEditPhoneNumberPreference*)mSubMenuVoicemailSettings.Get())->GetPhoneNumber(&number);
     AutoPtr<VoiceMailProviderSettings> setting = new VoiceMailProviderSettings(number, FWD_SETTINGS_DONT_TOUCH);
     SaveVoiceMailAndForwardingNumber(GetCurrentVoicemailProviderKey(), setting);
 }
@@ -954,7 +1045,7 @@ void CCallFeaturesSetting::SaveVoiceMailAndForwardingNumber(
     if (DBG) {
         StringBuilder sb;
         sb += "newFwdNumber ";
-        sb += mNewFwdSettings != NULL ? mNewFwdSettings.GetLength() : 0;
+        sb += mNewFwdSettings != NULL ? mNewFwdSettings->GetLength() : 0;
         sb += " settings";
         Log(sb.ToString());
     }
@@ -981,8 +1072,8 @@ void CCallFeaturesSetting::SaveVoiceMailAndForwardingNumber(
         mReadingSettingsForDefaultProvider =
                 mPreviousVMProviderKey.Equals(DEFAULT_VM_PROVIDER_KEY);
         if (DBG) Log(String("Reading current forwarding settings"));
-        mForwardingReadResults = ArrayOf<ICallForwardInfo*>::Alloc(FORWARDING_SETTINGS_REASONS.GetLength());
-        for (Int32 i = 0; i < FORWARDING_SETTINGS_REASONS.GetLength(); i++) {
+        mForwardingReadResults = ArrayOf<ICallForwardInfo*>::Alloc(FORWARDING_SETTINGS_REASONS->GetLength());
+        for (Int32 i = 0; i < FORWARDING_SETTINGS_REASONS->GetLength(); i++) {
             mForwardingReadResults->Set(i, NULL);
             AutoPtr<IMessage> message;
             mGetOptionComplete->ObtainMessage(EVENT_FORWARDING_GET_COMPLETED, i, 0, (IMessage**)&message);
@@ -996,31 +1087,31 @@ void CCallFeaturesSetting::SaveVoiceMailAndForwardingNumber(
 }
 
 void CCallFeaturesSetting::HandleForwardingSettingsReadResult(
-    /* [in] */ IAsyncResult* ar,
+    /* [in] */ AsyncResult* ar,
     /* [in] */ Int32 idx)
 {
-    if (DBG) Logger::D(LOG_TAG, "handleForwardingSettingsReadResult: %d", idx);
+    if (DBG) Logger::D(TAG, "handleForwardingSettingsReadResult: %d", idx);
     AutoPtr<IThrowable> error;
-    if (ar.exception != NULL) {
-        if (DBG) Logger::D(LOG_TAG, "FwdRead: ar.exception=" +
-                ar.exception.getMessage());
-        error = ar.exception;
+    if (ar->mException != NULL) {
+        if (DBG) Logger::D(TAG, "FwdRead: ar.exception="
+                /*ar->mException.getMessage()*/);
+        error = ar->mException;
     }
-    if (ar.userObj instanceof Throwable) {
-        if (DBG) Logger::D(LOG_TAG, "FwdRead: userObj=" +
-                ((Throwable)ar.userObj).getMessage());
-        error = (Throwable)ar.userObj;
+    if (IThrowable::Probe(ar->mUserObj)) {
+        if (DBG) Logger::D(TAG, "FwdRead: userObj=%s", TO_CSTR(IThrowable::Probe(ar->mUserObj))
+                /*((Throwable)ar.userObj).getMessage()*/);
+        error = IThrowable::Probe(ar->mUserObj);
     }
 
     // We may have already gotten an error and decided to ignore the other results.
     if (mForwardingReadResults == NULL) {
-        if (DBG) Logger::D(LOG_TAG, "ignoring fwd reading result: %d", idx);
+        if (DBG) Logger::D(TAG, "ignoring fwd reading result: %d", idx);
         return;
     }
 
     // In case of error ignore other results, show an error dialog
     if (error != NULL) {
-        if (DBG) Logger::D(LOG_TAG, "Error discovered for fwd read : %d", idx);
+        if (DBG) Logger::D(TAG, "Error discovered for fwd read : %d", idx);
         mForwardingReadResults = NULL;
         DismissDialogSafely(VOICEMAIL_FWD_READING_DIALOG);
         ShowVMDialog(MSG_FW_GET_EXCEPTION);
@@ -1028,34 +1119,35 @@ void CCallFeaturesSetting::HandleForwardingSettingsReadResult(
     }
 
     // Get the forwarding info
-    AutoPtr<ArrayOf<ICallForwardInfo*> > cfInfoArray = (CallForwardInfo[]) ar.result;
-    AutoPtr<ICallForwardInfo> fi;
+    AutoPtr<ArrayOf<ICallForwardInfo*> > cfInfoArray;
+    assert(0 && "TODO");
+    // cfInfoArray = (CallForwardInfo[]) ar.result;
+    CallForwardInfo* fi = NULL;
     for (Int32 i = 0 ; i < cfInfoArray->GetLength(); i++) {
-        if ((cfInfoArray[i].serviceClass & ICommandsInterface::SERVICE_CLASS_VOICE) != 0) {
-            fi = (*cfInfoArray)[i];
+        if ((((CallForwardInfo*)(*cfInfoArray)[i])->mServiceClass & ICommandsInterface::SERVICE_CLASS_VOICE) != 0) {
+            fi = (CallForwardInfo*)(*cfInfoArray)[i];
             break;
         }
     }
     if (fi == NULL) {
-
         // In case we go nothing it means we need this reason disabled
         // so create a CallForwardInfo for capturing this
-        if (DBG) Logger::D(LOG_TAG, "Creating default info for %d", idx);
-        CCallForwardInfo::New((ICallForwardInfo**)&fi);
-        fi.status = 0;
-        fi.reason = FORWARDING_SETTINGS_REASONS[idx];
-        fi.serviceClass = CommandsInterface.SERVICE_CLASS_VOICE;
+        if (DBG) Logger::D(TAG, "Creating default info for %d", idx);
+        fi = new CallForwardInfo();
+        ((CallForwardInfo*)fi)->mStatus = 0;
+        ((CallForwardInfo*)fi)->mReason = (*FORWARDING_SETTINGS_REASONS)[idx];
+        ((CallForwardInfo*)fi)->mServiceClass = ICommandsInterface::SERVICE_CLASS_VOICE;
     }
     else {
         // if there is not a forwarding number, ensure the entry is set to "not active."
-        if (fi.number.IsNull() || fi.number.GetLength() == 0) {
-            fi.status = 0;
+        if (fi->mNumber.IsNull() || fi->mNumber.GetLength() == 0) {
+            fi->mStatus = 0;
         }
 
         if (DBG) {
             String str;
             fi->ToString(&str);
-            Logger::D(LOG_TAG, "Got  %s for %d", str.string(), idx);
+            Logger::D(TAG, "Got  %s for %d", str.string(), idx);
         }
     }
     mForwardingReadResults->Set(idx, fi);
@@ -1069,18 +1161,18 @@ void CCallFeaturesSetting::HandleForwardingSettingsReadResult(
         }
     }
     if (done) {
-        if (DBG) Logger::D(LOG_TAG, "Done receiving fwd info");
+        if (DBG) Logger::D(TAG, "Done receiving fwd info");
         DismissDialogSafely(VOICEMAIL_FWD_READING_DIALOG);
         if (mReadingSettingsForDefaultProvider) {
             AutoPtr<VoiceMailProviderSettings> setting = new VoiceMailProviderSettings(mOldVmNumber,
-                    mForwardingReadResults)
+                    mForwardingReadResults);
             MaybeSaveSettingsForVoicemailProvider(DEFAULT_VM_PROVIDER_KEY, setting);
             mReadingSettingsForDefaultProvider = FALSE;
         }
         SaveVoiceMailAndForwardingNumberStage2();
     }
     else {
-        if (DBG) Logger::D(LOG_TAG, "Not done receiving fwd info");
+        if (DBG) Logger::D(TAG, "Not done receiving fwd info");
     }
 }
 
@@ -1093,7 +1185,7 @@ AutoPtr<ICallForwardInfo> CCallFeaturesSetting::InfoForReason(
         for (Int32 i = 0; i < infos->GetLength(); i++) {
             AutoPtr<ICallForwardInfo> info = (*infos)[i];
 
-            if (info.reason == reason) {
+            if (((CallForwardInfo*)info.Get())->mReason == reason) {
                 result = info;
                 break;
             }
@@ -1107,10 +1199,10 @@ Boolean CCallFeaturesSetting::IsUpdateRequired(
     /* [in] */ ICallForwardInfo* newInfo)
 {
     Boolean result = TRUE;
-    if (0 == newInfo.status) {
+    if (0 == ((CallForwardInfo*)newInfo)->mStatus) {
         // If we're disabling a type of forwarding, and it's already
         // disabled for the account, don't make any change
-        if (oldInfo != NULL && oldInfo.status == 0) {
+        if (oldInfo != NULL && ((CallForwardInfo*)oldInfo)->mStatus == 0) {
             result = FALSE;
         }
     }
@@ -1119,8 +1211,8 @@ Boolean CCallFeaturesSetting::IsUpdateRequired(
 
 void CCallFeaturesSetting::ResetForwardingChangeState()
 {
-    CHashMap::New((IMap**)&mForwardingChangeResults);
-    CHashSet::New((ICollection**)&mExpectedChangeResultReasons);
+    mForwardingChangeResults = new HashMap<Int32, AutoPtr<AsyncResult> >();
+    mExpectedChangeResultReasons = new HashSet<Int32>();
 }
 
 void CCallFeaturesSetting::SaveVoiceMailAndForwardingNumberStage2()
@@ -1130,10 +1222,10 @@ void CCallFeaturesSetting::SaveVoiceMailAndForwardingNumberStage2()
     if (mNewFwdSettings != FWD_SETTINGS_DONT_TOUCH) {
         ResetForwardingChangeState();
         for (Int32 i = 0; i < mNewFwdSettings->GetLength(); i++) {
-            AutoPtr<ICallForwardInfo> fi = (*mNewFwdSettings)[i];
+            CallForwardInfo* fi = (CallForwardInfo*)(*mNewFwdSettings)[i];
 
             Boolean doUpdate = IsUpdateRequired(InfoForReason(
-                        mForwardingReadResults, fi.reason), fi);
+                        mForwardingReadResults, fi->mReason), fi);
 
             if (doUpdate) {
                 if (DBG) {
@@ -1145,18 +1237,18 @@ void CCallFeaturesSetting::SaveVoiceMailAndForwardingNumberStage2()
                     sb += str;
                     Log(sb.ToString());
                 }
-                mExpectedChangeResultReasons->Add(i);
+                mExpectedChangeResultReasons->Insert(i);
 
                 AutoPtr<IMessage> message;
                 mSetOptionComplete->ObtainMessage(
-                                EVENT_FORWARDING_CHANGED, fi.reason, 0, (IMessage**)&message);
+                                EVENT_FORWARDING_CHANGED, fi->mReason, 0, (IMessage**)&message);
                 mPhone->SetCallForwardingOption(
-                        fi.status == 1 ?
+                        fi->mStatus == 1 ?
                                 ICommandsInterface::CF_ACTION_REGISTRATION :
                                 ICommandsInterface::CF_ACTION_DISABLE,
-                        fi.reason,
-                        fi.number,
-                        fi.timeSeconds,
+                        fi->mReason,
+                        fi->mNumber,
+                        fi->mTimeSeconds,
                         message);
             }
         }
@@ -1172,12 +1264,14 @@ void CCallFeaturesSetting::SetVMNumberWithCarrier()
 {
     if (DBG) Log(String("save voicemail #: ") + mNewVMNumber);
 
+    AutoPtr<IMessageHelper> helper;
+    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
     AutoPtr<IMessage> message;
-    Message::Obtain(mSetOptionComplete, EVENT_VOICEMAIL_CHANGED, (IMessage**)&message);
-    mPhone->SetVoiceMailNumber(
-            mPhone.getVoiceMailAlphaTag().toString(),
-            mNewVMNumber,
-            message);
+    helper->Obtain(mSetOptionComplete, EVENT_VOICEMAIL_CHANGED, (IMessage**)&message);
+
+    String ss;
+    mPhone->GetVoiceMailAlphaTag(&ss);
+    mPhone->SetVoiceMailNumber(ss, mNewVMNumber, message);
 }
 
 Boolean CCallFeaturesSetting::CheckForwardingCompleted()
@@ -1187,27 +1281,19 @@ Boolean CCallFeaturesSetting::CheckForwardingCompleted()
         result = TRUE;
     }
     else {
-        // return true iff there is a change result for every reason for
+        // return TRUE iff there is a change result for every reason for
         // which we expected a result
         result = TRUE;
+        HashSet<Int32>::Iterator ator = mExpectedChangeResultReasons->Begin();
+        for (; ator != mExpectedChangeResultReasons->End(); ++ator) {
+            Int32 reason = *ator;
 
-        Int32 size;
-        mExpectedChangeResultReasons->GetSize(&size);
-        for (Int32 i = 0; i < size; i++) {
-            AutoPtr<IInterface> obj;
-            mExpectedChangeResultReasons->Get(i, (IInterface**)&obj);
-            AutoPtr<IInteger32> vaule = IInteger32::Probe(obj);
-            Int32 reason;
-            vaule->GetValue(&reason);
-
-            AutoPtr<IInterface> obj2;
-            mForwardingChangeResults->Get(reason, (IInterface**)&obj2);
-            if (obj2 == NULL) {
+            HashMap<Int32, AutoPtr<AsyncResult> >::Iterator it = mForwardingChangeResults->Find(reason);
+            if (it == mForwardingChangeResults->End()) {
                 result = FALSE;
                 break;
             }
         }
-
     }
     return result;
 }
@@ -1215,26 +1301,26 @@ Boolean CCallFeaturesSetting::CheckForwardingCompleted()
 String CCallFeaturesSetting::CheckFwdChangeSuccess()
 {
     String result;
-    Iterator<Map.Entry<Integer,AsyncResult>> it =
-        mForwardingChangeResults.entrySet().iterator();
-    while (it.hasNext()) {
-        Map.Entry<Integer,AsyncResult> entry = it.next();
-        Throwable exception = entry.getValue().exception;
-        if (exception != null) {
-            result = exception.getMessage();
-            if (result == null) {
+    HashMap<Int32, AutoPtr<AsyncResult> >::Iterator it = mForwardingChangeResults->Begin();
+    for (; it != mForwardingChangeResults->End(); ++it) {
+        AutoPtr<IThrowable> exception = it->mSecond->mException;
+        if (exception != NULL) {
+            exception->GetMessage(&result);
+            if (result == NULL) {
                 result = "";
             }
             break;
         }
     }
+
     return result;
 }
 
 String CCallFeaturesSetting::CheckVMChangeSuccess()
 {
-    if (mVoicemailChangeResult.exception != null) {
-        String msg = mVoicemailChangeResult.exception.getMessage();
+    if (mVoicemailChangeResult->mException != NULL) {
+        String msg;
+        mVoicemailChangeResult->mException->GetMessage(&msg);
         if (msg.IsNull()) {
             return String("");
         }
@@ -1270,11 +1356,11 @@ void CCallFeaturesSetting::HandleSetVMOrFwdMessage()
     }
     else {
         if (fwdFailure) {
-            Logger::W(LOG_TAG, "Failed to change fowarding setting. Reason: %s", exceptionMessage.string());
+            Logger::W(TAG, "Failed to change fowarding setting. Reason: %s", exceptionMessage.string());
             HandleVMOrFwdSetError(MSG_FW_SET_EXCEPTION);
         }
         else {
-            Logger::W(LOG_TAG, "Failed to change voicemail. Reason: %s", exceptionMessage.string());
+            Logger::W(TAG, "Failed to change voicemail. Reason: %s", exceptionMessage.string());
             HandleVMOrFwdSetError(MSG_VM_EXCEPTION);
         }
     }
@@ -1310,7 +1396,7 @@ void CCallFeaturesSetting::HandleVMAndFwdSetSuccess(
 void CCallFeaturesSetting::UpdateVoiceNumberField()
 {
     if (DBG) {
-        Log(String("updateVoiceNumberField(). mSubMenuVoicemailSettings=") + mSubMenuVoicemailSettings);
+        Log(String("updateVoiceNumberField(). mSubMenuVoicemailSettings=") + TO_CSTR(mSubMenuVoicemailSettings));
     }
     if (mSubMenuVoicemailSettings == NULL) {
         return;
@@ -1323,30 +1409,28 @@ void CCallFeaturesSetting::UpdateVoiceNumberField()
     mSubMenuVoicemailSettings->SetPhoneNumber(mOldVmNumber);
     String summary;
     if (mOldVmNumber.GetLength() > 0) {
-        summary = mOldVmNumber
+        summary = mOldVmNumber;
     }
     else {
-        GetString(R.string.voicemail_number_not_set, &summary);
+        GetString(Elastos::Droid::Server::Telephony::R::string::voicemail_number_not_set, &summary);
     }
 
-    mSubMenuVoicemailSettings->SetSummary(summary);
+    AutoPtr<ICharSequence> cs;
+    CString::New(summary, (ICharSequence**)&cs);
+    IPreference::Probe(mSubMenuVoicemailSettings)->SetSummary(cs);
 }
 
-ECode CCallFeaturesSetting::OnPrepareDialog(
+void CCallFeaturesSetting::OnPrepareDialog(
     /* [in] */ Int32 id,
     /* [in] */ IDialog* dialog)
 {
     PreferenceActivity::OnPrepareDialog(id, dialog);
     mCurrentDialogId = id;
-    return NOERROR;
 }
 
-ECode CCallFeaturesSetting::OnCreateDialog(
-    /* [in] */ Int32 id,
-    /* [out] */ IDialog** outdialog)
+AutoPtr<IDialog> CCallFeaturesSetting::OnCreateDialog(
+    /* [in] */ Int32 id)
 {
-    VALIDATE_NOT_NULL(outdialog)
-
     if ((id == VM_RESPONSE_ERROR) || (id == VM_NOCHANGE_ERROR) ||
         (id == FW_SET_RESPONSE_ERROR) || (id == FW_GET_RESPONSE_ERROR) ||
             (id == VOICEMAIL_DIALOG_CONFIRM)) {
@@ -1355,47 +1439,47 @@ ECode CCallFeaturesSetting::OnCreateDialog(
         CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&b);
 
         Int32 msgId;
-        Int32 titleId = R.string.error_updating_title;
+        Int32 titleId = Elastos::Droid::Server::Telephony::R::string::error_updating_title;
         switch (id) {
             case VOICEMAIL_DIALOG_CONFIRM:
-                msgId = R.string.vm_changed;
-                titleId = R.string.voicemail;
+                msgId = Elastos::Droid::Server::Telephony::R::string::vm_changed;
+                titleId = Elastos::Droid::Server::Telephony::R::string::voicemail;
                 // Set Button 2
-                b->SetNegativeButton(R.string.close_dialog, this);
+                b->SetNegativeButton(Elastos::Droid::Server::Telephony::R::string::close_dialog, this);
                 break;
             case VM_NOCHANGE_ERROR:
                 // even though this is technically an error,
                 // keep the title friendly.
-                msgId = R.string.no_change;
-                titleId = R.string.voicemail;
+                msgId = Elastos::Droid::Server::Telephony::R::string::no_change;
+                titleId = Elastos::Droid::Server::Telephony::R::string::voicemail;
                 // Set Button 2
-                b->SetNegativeButton(R.string.close_dialog, this);
+                b->SetNegativeButton(Elastos::Droid::Server::Telephony::R::string::close_dialog, this);
                 break;
             case VM_RESPONSE_ERROR:
-                msgId = R.string.vm_change_failed;
+                msgId = Elastos::Droid::Server::Telephony::R::string::vm_change_failed;
                 // Set Button 1
-                b->SetPositiveButton(R.string.close_dialog, this);
+                b->SetPositiveButton(Elastos::Droid::Server::Telephony::R::string::close_dialog, this);
                 break;
             case FW_SET_RESPONSE_ERROR:
-                msgId = R.string.fw_change_failed;
+                msgId = Elastos::Droid::Server::Telephony::R::string::fw_change_failed;
                 // Set Button 1
-                b->SetPositiveButton(R.string.close_dialog, this);
+                b->SetPositiveButton(Elastos::Droid::Server::Telephony::R::string::close_dialog, this);
                 break;
             case FW_GET_RESPONSE_ERROR:
-                msgId = R.string.fw_get_in_vm_failed;
-                b->SetPositiveButton(R.string.alert_dialog_yes, this);
-                b->SetNegativeButton(R.string.alert_dialog_no, this);
+                msgId = Elastos::Droid::Server::Telephony::R::string::fw_get_in_vm_failed;
+                b->SetPositiveButton(Elastos::Droid::Server::Telephony::R::string::alert_dialog_yes, this);
+                b->SetNegativeButton(Elastos::Droid::Server::Telephony::R::string::alert_dialog_no, this);
                 break;
             default:
-                msgId = R.string.exception_error;
+                msgId = Elastos::Droid::Server::Telephony::R::string::exception_error;
                 // Set Button 3, tells the activity that the error is
                 // not recoverable on dialog exit.
-                b->etNeutralButton(R.string.close_dialog, this);
+                b->SetNeutralButton(Elastos::Droid::Server::Telephony::R::string::close_dialog, this);
                 break;
         }
 
         AutoPtr<ICharSequence> title;
-        getText(titleId, (ICharSequence**)&title);
+        GetText(titleId, (ICharSequence**)&title);
         b->SetTitle(title);
 
         AutoPtr<ICharSequence> text;
@@ -1403,42 +1487,39 @@ ECode CCallFeaturesSetting::OnCreateDialog(
         String message;
         text->ToString(&message);
 
-        b->SetMessage(message);
+        text = NULL;
+        CString::New(message, (ICharSequence**)&text);
+        b->SetMessage(text);
         b->SetCancelable(FALSE);
         AutoPtr<IAlertDialog> dialog;
         b->Create((IAlertDialog**)&dialog);
 
         // make the dialog more obvious by bluring the background.
         AutoPtr<IWindow> window;
-        dialog->GetWindow((IWindow**)&window);
+        IDialog::Probe(dialog)->GetWindow((IWindow**)&window);
         window->AddFlags(IWindowManagerLayoutParams::FLAG_BLUR_BEHIND);
 
-        *outdialog = dialog;
-        REFCOUNT_ADD(*outdialog)
-        return NOERROR;
+        return IDialog::Probe(dialog);
     }
     else if (id == VOICEMAIL_FWD_SAVING_DIALOG || id == VOICEMAIL_FWD_READING_DIALOG ||
             id == VOICEMAIL_REVERTING_DIALOG) {
         AutoPtr<IProgressDialog> dialog;
         CProgressDialog::New(this, (IProgressDialog**)&dialog);
         AutoPtr<ICharSequence> title;
-        GetText(R.string.updating_title, (ICharSequence**)&title);
-        dialog->SetTitle(title);
+        GetText(Elastos::Droid::Server::Telephony::R::string::updating_title, (ICharSequence**)&title);
+        IDialog::Probe(dialog)->SetTitle(title);
         dialog->SetIndeterminate(TRUE);
-        dialog->SetCancelable(FALSE);
+        IDialog::Probe(dialog)->SetCancelable(FALSE);
 
         AutoPtr<ICharSequence> message;
-        GetText(id == VOICEMAIL_FWD_SAVING_DIALOG ? R.string.updating_settings :
-                (id == VOICEMAIL_REVERTING_DIALOG ? R.string.reverting_settings :
-                R.string.reading_settings), (ICharSequence**)&message);
-        dialog->SetMessage(message);
-        *outdialog = dialog;
-        REFCOUNT_ADD(*outdialog)
-        return NOERROR;
+        GetText(id == VOICEMAIL_FWD_SAVING_DIALOG ? Elastos::Droid::Server::Telephony::R::string::updating_settings :
+                (id == VOICEMAIL_REVERTING_DIALOG ? Elastos::Droid::Server::Telephony::R::string::reverting_settings :
+                Elastos::Droid::Server::Telephony::R::string::reading_settings), (ICharSequence**)&message);
+        IAlertDialog::Probe(dialog)->SetMessage(message);
+        return IDialog::Probe(dialog);
     }
 
-    *outdialog = NULL;
-    return NOERROR;
+    return NULL;
 }
 
 ECode CCallFeaturesSetting::OnClick(
@@ -1468,9 +1549,10 @@ ECode CCallFeaturesSetting::OnClick(
             else {
                 Finish();
             }
-            return;
-        default:
+            return NOERROR;
+        default: {
             // just let the dialog close and go back to the input
+        }
     }
     // In all dialogs, all buttons except BUTTON_POSITIVE lead to the end of user interaction
     // with settings UI. If we were called to explicitly configure voice mail then
@@ -1507,8 +1589,9 @@ void CCallFeaturesSetting::ShowVMDialog(
             ShowDialogIfForeground(VOICEMAIL_DIALOG_CONFIRM);
             break;
         case MSG_OK:
-        default:
+        default: {
             // This should never happen.
+        }
     }
 }
 
@@ -1521,14 +1604,16 @@ ECode CCallFeaturesSetting::OnCreate(
         GetIntent((IIntent**)&intent);
         Log(String("onCreate(). Intent: ") + TO_CSTR(intent));
     }
-    mPhone = PhoneGlobals::GetPhone();
+
+    assert(0 && "TODO :need PhoneGlobals");
+    // mPhone = PhoneGlobals::GetPhone();
     AutoPtr<IInterface> obj;
     GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
     mAudioManager = IAudioManager::Probe(obj);
 
     // create intent to bring up contact list
-    CIntent::New(IIntent::ACTION_GET_CONTENT, (Intent**)&mContactListIntent);
-    mContactListIntent->SetType(android.provider.Contacts.Phones.CONTENT_ITEM_TYPE);
+    CIntent::New(IIntent::ACTION_GET_CONTENT, (IIntent**)&mContactListIntent);
+    mContactListIntent->SetType(IContactsPhones::CONTENT_ITEM_TYPE);
 
     mVoicemailRingtoneLookupRunnable = new MyRunnable(this);
 
@@ -1547,17 +1632,23 @@ void CCallFeaturesSetting::InitPhoneAccountPreferences()
 {
     FindPreference(PHONE_ACCOUNT_SETTINGS_KEY, (IPreference**)&mPhoneAccountSettingsPreference);
 
+    AutoPtr<ITelecomManagerHelper> helper;
+    CTelecomManagerHelper::AcquireSingleton((ITelecomManagerHelper**)&helper);
     AutoPtr<ITelecomManager> telecomManager;
-    TelecomManager::From(this, (ITelecomManager**)&telecomManager);
+    helper->From(this, (ITelecomManager**)&telecomManager);
 
     Int32 count;
     telecomManager->GetAllPhoneAccountsCount(&count);
-    if (count <= 1
-            && telecomManager.getSimCallManagers().isEmpty()
-            && !SipUtil::IsVoipSupported(this)) {
+    AutoPtr<IList> l;
+    telecomManager->GetSimCallManagers((IList**)&l);
+    Boolean b = FALSE;
+    l->IsEmpty(&b);
+    assert(0 && "TODO Need SipUtil");
+    if (count <= 1 && b /*&& !SipUtil::IsVoipSupported(this)*/) {
         AutoPtr<IPreferenceScreen> screen;
         GetPreferenceScreen((IPreferenceScreen**)&screen);
-        scree->RemovePreference(mPhoneAccountSettingsPreference);
+        Boolean tmp = FALSE;
+        IPreferenceGroup::Probe(screen)->RemovePreference(mPhoneAccountSettingsPreference, &tmp);
     }
 }
 
@@ -1566,7 +1657,9 @@ Boolean CCallFeaturesSetting::CanLaunchIntent(
 {
     AutoPtr<IPackageManager> pm;
     GetPackageManager((IPackageManager**)&pm);
-    return pm->ResolveActivity(intent, IPackageManager::GET_ACTIVITIES) != NULL;
+    AutoPtr<IResolveInfo> ri;
+    pm->ResolveActivity(intent, IPackageManager::GET_ACTIVITIES, (IResolveInfo**)&ri);
+    return ri.Get() != NULL;
 }
 
 ECode CCallFeaturesSetting::OnResume()
@@ -1577,10 +1670,10 @@ ECode CCallFeaturesSetting::OnResume()
     AutoPtr<IPreferenceScreen> preferenceScreen;
     GetPreferenceScreen((IPreferenceScreen**)&preferenceScreen);
     if (preferenceScreen != NULL) {
-        preferenceScreen->RemoveAll();
+        IPreferenceGroup::Probe(preferenceScreen)->RemoveAll();
     }
 
-    AddPreferencesFromResource(R.xml.call_feature_setting);
+    AddPreferencesFromResource(Elastos::Droid::Server::Telephony::R::xml::call_feature_setting);
     InitPhoneAccountPreferences();
 
     // get buttons
@@ -1593,7 +1686,7 @@ ECode CCallFeaturesSetting::OnResume()
     if (mSubMenuVoicemailSettings != NULL) {
         mSubMenuVoicemailSettings->SetParentActivity(this, VOICEMAIL_PREF_ID, this);
         mSubMenuVoicemailSettings->SetDialogOnClosedListener(this);
-        mSubMenuVoicemailSettings->SetDialogTitle(R.string.voicemail_settings_number_label);
+        IDialogPreference::Probe(mSubMenuVoicemailSettings)->SetDialogTitle(Elastos::Droid::Server::Telephony::R::string::voicemail_settings_number_label);
     }
 
     AutoPtr<IPreference> preference2;
@@ -1617,7 +1710,8 @@ ECode CCallFeaturesSetting::OnResume()
     mVoicemailProviders = IListPreference::Probe(preference6);
 
     if (mVoicemailProviders != NULL) {
-        mVoicemailProviders->SetOnPreferenceChangeListener(this);
+        AutoPtr<PreferenceOnPreferenceChangeListener> l = new PreferenceOnPreferenceChangeListener(this);
+        IPreference::Probe(mVoicemailProviders)->SetOnPreferenceChangeListener(l);
 
         AutoPtr<IPreference> preference7;
         FindPreference(VOICEMAIL_SETTING_SCREEN_PREF_KEY, (IPreference**)&preference7);
@@ -1636,16 +1730,16 @@ ECode CCallFeaturesSetting::OnResume()
         InitVoiceMailProviders();
     }
 
-
+    Boolean res = FALSE;
     if (mButtonDTMF != NULL) {
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
-        Boolean res;
-        if (resources->GetBoolean(R.bool.dtmf_type_enabled, &res), res) {
-            mButtonDTMF->SetOnPreferenceChangeListener(this);
+        if (resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::dtmf_type_enabled, &res), res) {
+            AutoPtr<PreferenceOnPreferenceChangeListener> l = new PreferenceOnPreferenceChangeListener(this);
+            IPreference::Probe(mButtonDTMF)->SetOnPreferenceChangeListener(l);
         }
         else {
-            prefSet->RemovePreference(mButtonDTMF);
+            IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mButtonDTMF), &res);
             mButtonDTMF = NULL;
         }
     }
@@ -1653,12 +1747,12 @@ ECode CCallFeaturesSetting::OnResume()
     if (mButtonAutoRetry != NULL) {
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
-        Boolean res;
-        if (resources->SetBoolean(R.bool.auto_retry_enabled, &res), res) {
-            mButtonAutoRetry->SetOnPreferenceChangeListener(this);
+        if (resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::auto_retry_enabled, &res), res) {
+            AutoPtr<PreferenceOnPreferenceChangeListener> l = new PreferenceOnPreferenceChangeListener(this);
+            IPreference::Probe(mButtonAutoRetry)->SetOnPreferenceChangeListener(l);
         }
         else {
-            prefSet->RemovePreference(mButtonAutoRetry);
+            IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mButtonAutoRetry), &res);
             mButtonAutoRetry = NULL;
         }
     }
@@ -1666,71 +1760,76 @@ ECode CCallFeaturesSetting::OnResume()
     if (mButtonHAC != NULL) {
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
-        Boolean res;
-        if (resources->GetBoolean(R.bool.hac_enabled, &res), res) {
-            mButtonHAC->SetOnPreferenceChangeListener(this);
+        if (resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::hac_enabled, &res), res) {
+            AutoPtr<PreferenceOnPreferenceChangeListener> l = new PreferenceOnPreferenceChangeListener(this);
+            IPreference::Probe(mButtonHAC)->SetOnPreferenceChangeListener(l);
         }
         else {
-            prefSet->RemovePreference(mButtonHAC);
+            IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mButtonHAC), &res);
             mButtonHAC = NULL;
         }
     }
 
     if (mButtonTTY != NULL) {
+        AutoPtr<ITelecomManagerHelper> helper;
+        CTelecomManagerHelper::AcquireSingleton((ITelecomManagerHelper**)&helper);
         AutoPtr<ITelecomManager> telecomManager;
-        TelecomManager::From(this, (ITelecomManager**)&telecomManager);
-        Boolean res;
+        helper->From(this, (ITelecomManager**)&telecomManager);
         if (telecomManager != NULL && (telecomManager->IsTtySupported(&res), res)) {
-            mButtonTTY->SetOnPreferenceChangeListener(this);
+            AutoPtr<PreferenceOnPreferenceChangeListener> l = new PreferenceOnPreferenceChangeListener(this);
+            IPreference::Probe(mButtonTTY)->SetOnPreferenceChangeListener(l);
         }
         else {
-            prefSet->RemovePreference(mButtonTTY);
+            IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mButtonTTY), &res);
             mButtonTTY = NULL;
         }
     }
 
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
-    Boolean res;
-    if (resources->GetBoolean(R.bool.world_phone, &res), !res) {
+    if (resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::world_phone, &res), !res) {
         AutoPtr<IPreference> options;
-        prefSet->FindPreference(BUTTON_CDMA_OPTIONS, (IPreference**)&options);
+        AutoPtr<ICharSequence> cs;
+        CString::New(BUTTON_CDMA_OPTIONS, (ICharSequence**)&cs);
+        IPreferenceGroup::Probe(prefSet)->FindPreference(cs, (IPreference**)&options);
         if (options != NULL) {
-            prefSet->RemovePreference(options);
+            IPreferenceGroup::Probe(prefSet)->RemovePreference(options, &res);
         }
         options = NULL;
-        prefSet->FindPreference(BUTTON_GSM_UMTS_OPTIONS, (IPreference**)&options);
+        cs = NULL;
+        CString::New(BUTTON_GSM_UMTS_OPTIONS, (ICharSequence**)&cs);
+        IPreferenceGroup::Probe(prefSet)->FindPreference(cs, (IPreference**)&options);
         if (options != NULL) {
-            prefSet->SemovePreference(options);
+            IPreferenceGroup::Probe(prefSet)->RemovePreference(options, &res);
         }
 
         Int32 phoneType;
         mPhone->GetPhoneType(&phoneType);
         if (phoneType == IPhoneConstants::PHONE_TYPE_CDMA) {
             AutoPtr<IPreference> fdnButton;
-            prefSet->FindPreference(BUTTON_FDN_KEY, (IPreference**)&fdnButton);
+            cs = NULL;
+            CString::New(BUTTON_FDN_KEY, (ICharSequence**)&cs);
+            IPreferenceGroup::Probe(prefSet)->FindPreference(cs, (IPreference**)&fdnButton);
             if (fdnButton != NULL) {
-                prefSet->RemovePreference(fdnButton);
+                IPreferenceGroup::Probe(prefSet)->RemovePreference(fdnButton, &res);
             }
             AutoPtr<IResources> resources;
             GetResources((IResources**)&resources);
-            Boolean res;
-            if (resources->GetBoolean(R.bool.config_voice_privacy_disable, &res), !res) {
-                AddPreferencesFromResource(R.xml.cdma_call_privacy);
+            if (resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::config_voice_privacy_disable, &res), !res) {
+                AddPreferencesFromResource(Elastos::Droid::Server::Telephony::R::xml::cdma_call_privacy);
             }
         }
         else if (phoneType == IPhoneConstants::PHONE_TYPE_GSM) {
             AutoPtr<IResources> resources;
             GetResources((IResources**)&resources);
-            Boolean res;
-            if (resources->GetBoolean(R.bool.config_additional_call_setting, &res), res) {
-                AddPreferencesFromResource(R.xml.gsm_umts_call_options);
+            if (resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::config_additional_call_setting, &res), res) {
+                AddPreferencesFromResource(Elastos::Droid::Server::Telephony::R::xml::gsm_umts_call_options);
             }
         }
         else {
             //throw new IllegalStateException("Unexpected phone type: " + phoneType);
             Logger::E("CCallFeaturesSetting", "Unexpected phone type: %d", phoneType);
-            return IllegalStateException;
+            return E_ILLEGAL_STATE_EXCEPTION;
         }
     }
 
@@ -1740,17 +1839,19 @@ ECode CCallFeaturesSetting::OnResume()
     // the selection for the VM provider, otherwise bring up a VM number dialog.
     // We only bring up the dialog the first time we are called (not after orientation change)
     if (mShowVoicemailPreference && mVoicemailProviders != NULL) {
-        Int32 size;
-        mVMProvidersData->GetSize(&size);
+        Int32 size = mVMProvidersData.GetSize();
         if (DBG) {
-            Log("ACTION_ADD_VOICEMAIL Intent is thrown. current VM data size: "
+            Log(String("ACTION_ADD_VOICEMAIL Intent is thrown. current VM data size: ")
                     + StringUtils::ToString(size));
         }
-        if (size> 1) {
-            SimulatePreferenceClick(mVoicemailProviders);
+        if (size > 1) {
+            SimulatePreferenceClick(IPreference::Probe(mVoicemailProviders));
         }
         else {
-            OnPreferenceChange(mVoicemailProviders, DEFAULT_VM_PROVIDER_KEY);
+            Boolean tmp = FALSE;
+            AutoPtr<ICharSequence> cs;
+            CString::New(DEFAULT_VM_PROVIDER_KEY, (ICharSequence**)&cs);
+            OnPreferenceChange(IPreference::Probe(mVoicemailProviders), cs, &tmp);
             mVoicemailProviders->SetValue(DEFAULT_VM_PROVIDER_KEY);
         }
         mShowVoicemailPreference = FALSE;
@@ -1777,10 +1878,10 @@ ECode CCallFeaturesSetting::OnResume()
         CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
         Int32 autoretry;
         helper->GetInt32(contentResolver, ISettingsGlobal::CALL_AUTO_RETRY, 0, &autoretry);
-        mButtonAutoRetry->SetChecked(autoretry != 0);
+        ITwoStatePreference::Probe(mButtonAutoRetry)->SetChecked(autoretry != 0);
     }
 
-    if (mButtonHAC != null) {
+    if (mButtonHAC != NULL) {
         AutoPtr<IContentResolver> contentResolver;
         GetContentResolver((IContentResolver**)&contentResolver);
         AutoPtr<ISettingsSystem> helper;
@@ -1788,14 +1889,14 @@ ECode CCallFeaturesSetting::OnResume()
         Int32 hac;
         helper->GetInt32(contentResolver, ISettingsSystem::HEARING_AID,
                 0, &hac);
-        mButtonHAC->SetChecked(hac != 0);
+        ITwoStatePreference::Probe(mButtonHAC)->SetChecked(hac != 0);
     }
 
-    if (mButtonTTY != null) {
+    if (mButtonTTY != NULL) {
         AutoPtr<IContentResolver> contentResolver;
         GetContentResolver((IContentResolver**)&contentResolver);
-        AutoPtr<ISettingsSecur> helper;
-        CSettingsSecure::AcquireSingleton((ISettingsSecur**)&helper);
+        AutoPtr<ISettingsSecure> helper;
+        CSettingsSecure::AcquireSingleton((ISettingsSecure**)&helper);
         Int32 settingsTtyMode;
         helper->GetInt32(contentResolver, ISettingsSecure::PREFERRED_TTY_MODE,
                 ITelecomManager::TTY_MODE_OFF, &settingsTtyMode);
@@ -1806,13 +1907,14 @@ ECode CCallFeaturesSetting::OnResume()
 
     AutoPtr<IContext> context;
     mPhone->GetContext((IContext**)&context);
+    AutoPtr<IPreferenceManagerHelper> pmHelper;
+    CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&pmHelper);
     AutoPtr<ISharedPreferences> prefs;
-    PreferenceManager::GetDefaultSharedPreferences(context, (ISharedPreferences**)&prefs);
-    if (MigrateVoicemailVibrationSettingsIfNeeded(prefs)) {
-        Boolean res;
+    pmHelper->GetDefaultSharedPreferences(context, (ISharedPreferences**)&prefs);
+    if (MigrateVoicemailVibrationSettingsIfNeeded(prefs, &res), res) {
         prefs->GetBoolean(
                 BUTTON_VOICEMAIL_NOTIFICATION_VIBRATE_KEY, FALSE, &res);
-        mVoicemailNotificationVibrate->SetChecked(res);
+        ITwoStatePreference::Probe(mVoicemailNotificationVibrate)->SetChecked(res);
     }
 
     // Look up the voicemail ringtone name asynchronously and update its preference.
@@ -1839,7 +1941,7 @@ ECode CCallFeaturesSetting::MigrateVoicemailVibrationSettingsIfNeeded(
         AutoPtr<ISharedPreferencesEditor> editor;
         prefs->Edit((ISharedPreferencesEditor**)&editor);
         editor->PutBoolean(BUTTON_VOICEMAIL_NOTIFICATION_VIBRATE_KEY, voicemailVibrate);
-        editor->Commit();
+        editor->Commit(&res);
         *result = TRUE;
         return NOERROR;
     }
@@ -1867,12 +1969,13 @@ void CCallFeaturesSetting::HandleTTYChange(
     AutoPtr<ICharSequence> cchar = ICharSequence::Probe(objValue);
     String str;
     cchar->ToString(&str);
-    Int32 buttonTtyMode = Integer.valueOf(str).intValue();
+    Int32 buttonTtyMode = 0;
+    StringUtils::Parse(str, &buttonTtyMode);
 
     AutoPtr<IContentResolver> contentResolver;
     GetContentResolver((IContentResolver**)&contentResolver);
-    AutoPtr<ISettingsSecur> helper;
-    CSettingsSecure::AcquireSingleton((ISettingsSecur**)&helper);
+    AutoPtr<ISettingsSecure> helper;
+    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&helper);
     Int32 settingsTtyMode;
     helper->GetInt32(contentResolver, ISettingsSecure::PREFERRED_TTY_MODE,
             ITelecomManager::TTY_MODE_OFF, &settingsTtyMode);
@@ -1882,15 +1985,18 @@ void CCallFeaturesSetting::HandleTTYChange(
 
     if (buttonTtyMode != settingsTtyMode) {
         switch(buttonTtyMode) {
-        case ITelecomManager::TTY_MODE_OFF:
-        case ITelecomManager::TTY_MODE_FULL:
-        case ITelecomManager::TTY_MODE_HCO:
-        case ITelecomManager::TTY_MODE_VCO:
-            helper->PutInt32(contentResolver, ISettingsSecure::PREFERRED_TTY_MODE,
-                buttonTtyMode);
-            break;
-        default:
-            buttonTtyMode = ITelecomManager::TTY_MODE_OFF;
+            case ITelecomManager::TTY_MODE_OFF:
+            case ITelecomManager::TTY_MODE_FULL:
+            case ITelecomManager::TTY_MODE_HCO:
+            case ITelecomManager::TTY_MODE_VCO: {
+                Boolean tmp = FALSE;
+                helper->PutInt32(contentResolver, ISettingsSecure::PREFERRED_TTY_MODE,
+                    buttonTtyMode, &tmp);
+                break;
+            }
+            default: {
+                buttonTtyMode = ITelecomManager::TTY_MODE_OFF;
+            }
         }
 
         mButtonTTY->SetValue(StringUtils::ToString(buttonTtyMode));
@@ -1898,7 +2004,11 @@ void CCallFeaturesSetting::HandleTTYChange(
         AutoPtr<IIntent> ttyModeChanged;
         CIntent::New(ITelecomManager::ACTION_TTY_PREFERRED_MODE_CHANGED, (IIntent**)&ttyModeChanged);
         ttyModeChanged->PutExtra(ITelecomManager::EXTRA_TTY_PREFERRED_MODE, buttonTtyMode);
-        SendBroadcastAsUser(ttyModeChanged, UserHandle.ALL);
+        AutoPtr<IUserHandleHelper> uHelper;
+        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uHelper);
+        AutoPtr<IUserHandle> ALL;
+        uHelper->GetALL((IUserHandle**)&ALL);
+        SendBroadcastAsUser(ttyModeChanged, ALL);
     }
 }
 
@@ -1908,35 +2018,42 @@ void CCallFeaturesSetting::UpdatePreferredTtyModeSummary(
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     AutoPtr<ArrayOf<String> > txts;
-    resources->GetStringArray(R.array.tty_mode_entries, (ArrayOf<String>**)&txts);
+    resources->GetStringArray(Elastos::Droid::Server::Telephony::R::array::tty_mode_entries, (ArrayOf<String>**)&txts);
     switch(TtyMode) {
         case ITelecomManager::TTY_MODE_OFF:
         case ITelecomManager::TTY_MODE_HCO:
         case ITelecomManager::TTY_MODE_VCO:
-        case ITelecomManager::TTY_MODE_FULL:
-            mButtonTTY->SetSummary((*txts)[TtyMode]);
+        case ITelecomManager::TTY_MODE_FULL: {
+            AutoPtr<ICharSequence> cs;
+            CString::New((*txts)[TtyMode], (ICharSequence**)&cs);
+            IPreference::Probe(mButtonTTY)->SetSummary(cs);
             break;
-        default:
-            mButtonTTY->SetEnabled(FALSE);
-            mButtonTTY->SetSummary((*txts)[ITelecomManager::TTY_MODE_OFF]);
+        }
+        default: {
+            IPreference::Probe(mButtonTTY)->SetEnabled(FALSE);
+            AutoPtr<ICharSequence> cs;
+            CString::New((*txts)[ITelecomManager::TTY_MODE_OFF], (ICharSequence**)&cs);
+            IPreference::Probe(mButtonTTY)->SetSummary(cs);
             break;
+        }
     }
 }
 
 void CCallFeaturesSetting::Log(
     /* [in] */ const String& msg)
 {
-    Logger::D(LOG_TAG, msg);
+    Logger::D(TAG, msg);
 }
 
 void CCallFeaturesSetting::UpdateVMPreferenceWidgets(
     /* [in] */ const String& currentProviderSetting)
 {
     const String key = currentProviderSetting;
-
-    AutoPtr<IInterface> obj;
-    mVMProvidersData->Get(key, (IInterface**)&obj);
-    AutoPtr<IVoiceMailProvider> provider = IVoiceMailProvider::Probe(obj);
+    VoiceMailProvider* provider = NULL;
+    HashMap<String, AutoPtr<VoiceMailProvider> >::Iterator ator = mVMProvidersData.Find(key);
+    if (ator != mVMProvidersData.End()) {
+        provider = ator->mSecond;
+    }
 
     /* This is the case when we are coming up on a freshly wiped phone and there is no
      persisted value for the list preference mVoicemailProviders.
@@ -1947,29 +2064,33 @@ void CCallFeaturesSetting::UpdateVMPreferenceWidgets(
             StringBuilder sb;
             sb += "updateVMPreferenceWidget: provider for the key \"";
             sb += key;
-            sb += "\" is null.";
+            sb += "\" is NULL.";
             Log(sb.ToString());
         }
         String str;
-        GetString(R.string.sum_voicemail_choose_provider, &str);
-        mVoicemailProviders->SetSummary(str);
-        mVoicemailSettings->SetEnabled(FALSE);
-        mVoicemailSettings->SetIntent(NULL);
+        GetString(Elastos::Droid::Server::Telephony::R::string::sum_voicemail_choose_provider, &str);
+        AutoPtr<ICharSequence> cs;
+        CString::New(str, (ICharSequence**)&cs);
+        IPreference::Probe(mVoicemailProviders)->SetSummary(cs);
+        IPreference::Probe(mVoicemailSettings)->SetEnabled(FALSE);
+        IPreference::Probe(mVoicemailSettings)->SetIntent(NULL);
 
-        mVoicemailNotificationVibrate->SetEnabled(FALSE);
+        IPreference::Probe(mVoicemailNotificationVibrate)->SetEnabled(FALSE);
     }
     else {
         if (DBG) {
-            Log("updateVMPreferenceWidget: provider for the key \"" + key + "\".."
-                    + "name: " + provider.name
-                    + ", intent: " + provider.intent);
+            Log(String("updateVMPreferenceWidget: provider for the key \"") + key + "\".."
+                    + "name: " + provider->mName
+                    + ", intent: " + TO_CSTR(provider->mIntent));
         }
-        String providerName = provider.name;
-        mVoicemailProviders->SetSummary(providerName);
-        mVoicemailSettings->SetEnabled(TRUE);
-        mVoicemailSettings->SetIntent(provider.intent);
+        String providerName = provider->mName;
+        AutoPtr<ICharSequence> cs;
+        CString::New(providerName, (ICharSequence**)&cs);
+        IPreference::Probe(mVoicemailProviders)->SetSummary(cs);
+        IPreference::Probe(mVoicemailSettings)->SetEnabled(TRUE);
+        IPreference::Probe(mVoicemailSettings)->SetIntent(provider->mIntent);
 
-        mVoicemailNotificationVibrate.setEnabled(TRUE);
+        IPreference::Probe(mVoicemailNotificationVibrate)->SetEnabled(TRUE);
     }
 }
 
@@ -1984,8 +2105,8 @@ void CCallFeaturesSetting::InitVoiceMailProviders()
 
     String providerToIgnore;
     AutoPtr<IIntent> intent;
-    GetIntent((IIntent**)&intent)
-    Int32 action;
+    GetIntent((IIntent**)&intent);
+    String action;
     intent->GetAction(&action);
     if (action.Equals(ACTION_ADD_VOICEMAIL)) {
         Boolean res;
@@ -1999,18 +2120,18 @@ void CCallFeaturesSetting::InitVoiceMailProviders()
         }
     }
 
-    mVMProvidersData->Clear();
+    mVMProvidersData.Clear();
 
     // Stick the default element which is always there
     String myCarrier;
-    GetString(R.string.voicemail_default, &myCarrier);
+    GetString(Elastos::Droid::Server::Telephony::R::string::voicemail_default, &myCarrier);
     AutoPtr<VoiceMailProvider> pro = new VoiceMailProvider(myCarrier, NULL);
-    mVMProvidersData->Put(DEFAULT_VM_PROVIDER_KEY, pro);
+    mVMProvidersData[DEFAULT_VM_PROVIDER_KEY] = pro;
 
     // Enumerate providers
     AutoPtr<IPackageManager> pm;
     GetPackageManager((IPackageManager**)&pm);
-    AutoPtr<IIntent> intent;
+    intent = NULL;
     CIntent::New((IIntent**)&intent);
     intent->SetAction(ACTION_CONFIGURE_VOICEMAIL);
     AutoPtr<IList> resolveInfos;
@@ -2026,7 +2147,8 @@ void CCallFeaturesSetting::InitVoiceMailProviders()
         resolveInfos->Get(i, (IInterface**)&obj);
         AutoPtr<IResolveInfo> ri= IResolveInfo::Probe(obj);
 
-        AutoPtr<IActivityInfo> currentActivityInfo = ri.activityInfo;
+        AutoPtr<IActivityInfo> currentActivityInfo;
+        ri->GetActivityInfo((IActivityInfo**)&currentActivityInfo);
         String key = MakeKeyForActivity(currentActivityInfo);
         if (key.Equals(providerToIgnore)) {
             if (DBG) Log(String("Ignoring key: ") + key);
@@ -2041,8 +2163,10 @@ void CCallFeaturesSetting::InitVoiceMailProviders()
         AutoPtr<IIntent> providerIntent;
         CIntent::New((IIntent**)&providerIntent);
         providerIntent->SetAction(ACTION_CONFIGURE_VOICEMAIL);
-        providerIntent->SetClassName(currentActivityInfo.packageName,
-                currentActivityInfo.name);
+        String packageName, name;
+        IPackageItemInfo::Probe(currentActivityInfo)->GetPackageName(&packageName);
+        IPackageItemInfo::Probe(currentActivityInfo)->GetName(&name);
+        providerIntent->SetClassName(packageName, name);
         if (DBG) {
             StringBuilder sb;
             sb += "Store loaded VoiceMailProvider. key: ";
@@ -2050,31 +2174,47 @@ void CCallFeaturesSetting::InitVoiceMailProviders()
             sb += " -> name: ";
             sb += nameForDisplay;
             sb += ", intent: ";
-            sb += TO_CSTE(providerIntent);
+            sb += TO_CSTR(providerIntent);
             Log(sb.ToString());
         }
         AutoPtr<VoiceMailProvider> pro = new VoiceMailProvider(nameForDisplay, providerIntent);
-        mVMProvidersData->Put(key, pro);
-
+        mVMProvidersData[key] = pro;
     }
 
     // Now we know which providers to display - create entries and values array for
     // the list preference
-    AutoPtr<ArrayOf<String> > entries = ArrayOf<String>::Alloc(len);
-    AutoPtr<ArrayOf<String> > values = ArrayOf<String>::Alloc(len);
-    entries->Set(0, myCarrier);
-    values->Set(0, DEFAULT_VM_PROVIDER_KEY);
+    AutoPtr<ArrayOf<ICharSequence*> > entries = ArrayOf<ICharSequence*>::Alloc(len);
+    AutoPtr<ArrayOf<ICharSequence*> > values = ArrayOf<ICharSequence*>::Alloc(len);
+    AutoPtr<ICharSequence> cs;
+    CString::New(myCarrier, (ICharSequence**)&cs);
+    entries->Set(0, cs);
+
+    cs = NULL;
+    CString::New(DEFAULT_VM_PROVIDER_KEY, (ICharSequence**)&cs);
+    values->Set(0, cs);
     Int32 entryIdx = 1;
     Int32 tmp;
     resolveInfos->GetSize(&tmp);
+    HashMap<String, AutoPtr<VoiceMailProvider> >::Iterator ator;
     for (Int32 i = 0; i < tmp; i++) {
-        String key = MakeKeyForActivity(resolveInfos.get(i).activityInfo);
-        Boolean res;
-        if (mVMProvidersData->ContainsKey(key, &res), !res) {
+        AutoPtr<IInterface> obj;
+        resolveInfos->Get(i, (IInterface**)&obj);
+        AutoPtr<IActivityInfo> activityInfo;
+        IResolveInfo::Probe(obj)->GetActivityInfo((IActivityInfo**)&activityInfo);
+
+        String key = MakeKeyForActivity(activityInfo);
+        ator = mVMProvidersData.Find(key);
+        if (ator == mVMProvidersData.End()) {
             continue;
         }
-        entries->Set(entryIdx, mVMProvidersData.get(key).name);
-        values->Set(entryIdx, key);
+
+        cs = NULL;
+        CString::New(ator->mSecond->mName, (ICharSequence**)&cs);
+        entries->Set(entryIdx, cs);
+
+        cs = NULL;
+        CString::New(key, (ICharSequence**)&cs);
+        values->Set(entryIdx, cs);
         entryIdx++;
     }
 
@@ -2095,7 +2235,9 @@ void CCallFeaturesSetting::InitVoiceMailProviders()
 String CCallFeaturesSetting::MakeKeyForActivity(
     /* [in] */ IActivityInfo* ai)
 {
-    return ai.name;
+    String name;
+    IPackageItemInfo::Probe(ai)->GetName(&name);
+    return name;
 }
 
 void CCallFeaturesSetting::SimulatePreferenceClick(
@@ -2109,11 +2251,16 @@ void CCallFeaturesSetting::SimulatePreferenceClick(
     preferenceScreen->GetRootAdapter((IListAdapter**)&adapter);
 
     Int32 count;
-    adapter->GetCount(&count);
+    IAdapter::Probe(adapter)->GetCount(&count);
     for (Int32 idx = 0; idx < count; idx++) {
-        if (adapter.getItem(idx) == preference) {
-            preferenceScreen->OnItemClick(this.getListView(),
-                    NULL, idx, adapter.getItemId(idx));
+        AutoPtr<IInterface> obj;
+        IAdapter::Probe(adapter)->GetItem(idx, (IInterface**)&obj);
+        if (obj.Get() == TO_IINTERFACE(preference)) {
+            AutoPtr<IListView> lv;
+            GetListView((IListView**)&lv);
+            Int64 id = 0;
+            IAdapter::Probe(adapter)->GetItemId(idx, &id);
+            IAdapterViewOnItemClickListener::Probe(preferenceScreen)->OnItemClick(IAdapterView::Probe(lv), NULL, idx, id);
             break;
         }
     }
@@ -2127,7 +2274,8 @@ void CCallFeaturesSetting::MaybeSaveSettingsForVoicemailProvider(
         return;
     }
     AutoPtr<VoiceMailProviderSettings> curSettings = LoadSettingsForVoiceMailProvider(key);
-    if (newSettings.Equals(curSettings)) {
+    Boolean tmp = FALSE;
+    if (newSettings->Equals(curSettings->Probe(EIID_IInterface), &tmp), tmp) {
         if (DBG) {
             StringBuilder sb;
             sb += "maybeSaveSettingsForVoicemailProvider:";
@@ -2148,8 +2296,8 @@ void CCallFeaturesSetting::MaybeSaveSettingsForVoicemailProvider(
         sb += str;
         Log(sb.ToString());
     }
-    AutoPtr<IEditor> editor;
-    mPerProviderSavedVMNumbers->Edit((IEditor**)&editor);
+    AutoPtr<ISharedPreferencesEditor> editor;
+    mPerProviderSavedVMNumbers->Edit((ISharedPreferencesEditor**)&editor);
     editor->PutString(key + VM_NUMBER_TAG, newSettings->mVoicemailNumber);
     String fwdKey = key + FWD_SETTINGS_TAG;
     AutoPtr<ArrayOf<ICallForwardInfo*> > s = newSettings->mForwardingSettings;
@@ -2157,11 +2305,11 @@ void CCallFeaturesSetting::MaybeSaveSettingsForVoicemailProvider(
         editor->PutInt32(fwdKey + FWD_SETTINGS_LENGTH_TAG, s->GetLength());
         for (Int32 i = 0; i < s->GetLength(); i++) {
             String settingKey = fwdKey + FWD_SETTING_TAG + StringUtils::ToString(i);
-            AutoPtr<ICallForwardInfo> fi = (*s)[i];
-            editor->PutInt32(settingKey + FWD_SETTING_STATUS, fi.status);
-            editor->PutInt32(settingKey + FWD_SETTING_REASON, fi.reason);
-            editor->PutString(settingKey + FWD_SETTING_NUMBER, fi.number);
-            editor->PutInt32(settingKey + FWD_SETTING_TIME, fi.timeSeconds);
+            CallForwardInfo* fi = (CallForwardInfo*)(*s)[i];
+            editor->PutInt32(settingKey + FWD_SETTING_STATUS, fi->mStatus);
+            editor->PutInt32(settingKey + FWD_SETTING_REASON, fi->mReason);
+            editor->PutString(settingKey + FWD_SETTING_NUMBER, fi->mNumber);
+            editor->PutInt32(settingKey + FWD_SETTING_TIME, fi->mTimeSeconds);
         }
     }
     else {
@@ -2170,15 +2318,14 @@ void CCallFeaturesSetting::MaybeSaveSettingsForVoicemailProvider(
     editor->Apply();
 }
 
-AutoPtr<VoiceMailProviderSettings> CCallFeaturesSetting::LoadSettingsForVoiceMailProvider(
+AutoPtr<CCallFeaturesSetting::VoiceMailProviderSettings> CCallFeaturesSetting::LoadSettingsForVoiceMailProvider(
     /* [in] */ const String& key)
 {
     String vmNumberSetting;
-    mPerProviderSavedVMNumbers->GetString(key + VM_NUMBER_TAG,
-            NULL, &vmNumberSetting);
+    mPerProviderSavedVMNumbers->GetString(key + VM_NUMBER_TAG, String(NULL), &vmNumberSetting);
     if (vmNumberSetting.IsNull()) {
-        Logger::W(LOG_TAG, "VoiceMailProvider settings for the key \"%s\""
-                " was not found. Returning null.", key.string());
+        Logger::W(TAG, "VoiceMailProvider settings for the key \"%s\""
+                " was not found. Returning NULL.", key.string());
         return NULL;
     }
 
@@ -2190,20 +2337,17 @@ AutoPtr<VoiceMailProviderSettings> CCallFeaturesSetting::LoadSettingsForVoiceMai
         cfi = ArrayOf<ICallForwardInfo*>::Alloc(fwdLen);
         for (Int32 i = 0; i < cfi->GetLength(); i++) {
             String settingKey = fwdKey + FWD_SETTING_TAG + StringUtils::ToString(i);
-            AutoPtr<ICallForwardInfo> info;
-            CCallForwardInfo::New((ICallForwardInfo**)&info);
+            AutoPtr<CallForwardInfo> info = new CallForwardInfo();
             cfi->Set(i, info);
-            (*cfi)[i].status = mPerProviderSavedVMNumbers->GetInt32(
-                    settingKey + FWD_SETTING_STATUS, 0);
-            (*cfi)[i].reason = mPerProviderSavedVMNumbers->GetInt32(
-                    settingKey + FWD_SETTING_REASON,
-                    CommandsInterface.CF_REASON_ALL_CONDITIONAL);
-            (*cfi)[i].serviceClass = ICommandsInterface::SERVICE_CLASS_VOICE;
-            (*cfi)[i].toa = PhoneNumberUtils.TOA_International;
-            (*cfi)[i].number = mPerProviderSavedVMNumbers->GetString(
-                    settingKey + FWD_SETTING_NUMBER, "");
-            (*cfi)[i].timeSeconds = mPerProviderSavedVMNumbers->GetInt32(
-                    settingKey + FWD_SETTING_TIME, 20);
+            CallForwardInfo* item = (CallForwardInfo*)(*cfi)[i];
+            mPerProviderSavedVMNumbers->GetInt32(settingKey + FWD_SETTING_STATUS, 0, &item->mStatus);
+            mPerProviderSavedVMNumbers->GetInt32(settingKey + FWD_SETTING_REASON,
+                    ICommandsInterface::CF_REASON_ALL_CONDITIONAL, &item->mReason);
+            item->mServiceClass = ICommandsInterface::SERVICE_CLASS_VOICE;
+            item->mToa = IPhoneNumberUtils::TOA_International;
+            mPerProviderSavedVMNumbers->GetString(
+                    settingKey + FWD_SETTING_NUMBER, String(""), &item->mNumber);
+            mPerProviderSavedVMNumbers->GetInt32(settingKey + FWD_SETTING_TIME, 20, &item->mTimeSeconds);
         }
     }
 
@@ -2223,11 +2367,12 @@ void CCallFeaturesSetting::DeleteSettingsForVoicemailProvider(
     if (mVoicemailProviders == NULL) {
         return;
     }
-    AutoPtr<IEditor> editor;
-    mPerProviderSavedVMNumbers->Edit((IEditor**)&editor);
+    AutoPtr<ISharedPreferencesEditor> editor;
+    mPerProviderSavedVMNumbers->Edit((ISharedPreferencesEditor**)&editor);
     editor->PutString(key + VM_NUMBER_TAG, String(NULL));
-    editor->PutInt32(key + FWD_SETTINGS_TAG + FWD_SETTINGS_LENGTH_TAG, 0)
-    editor->Commit();
+    editor->PutInt32(key + FWD_SETTINGS_TAG + FWD_SETTINGS_LENGTH_TAG, 0);
+    Boolean tmp = FALSE;
+    editor->Commit(&tmp);
 }
 
 String CCallFeaturesSetting::GetCurrentVoicemailProviderKey()
@@ -2237,7 +2382,7 @@ String CCallFeaturesSetting::GetCurrentVoicemailProviderKey()
     return (!key.IsNull()) ? key : DEFAULT_VM_PROVIDER_KEY;
 }
 
-Ecode CCallFeaturesSetting::OnOptionsItemSelected(
+ECode CCallFeaturesSetting::OnOptionsItemSelected(
     /* [in] */ IMenuItem* item,
     /* [out] */ Boolean* result)
 {
@@ -2245,7 +2390,7 @@ Ecode CCallFeaturesSetting::OnOptionsItemSelected(
 
     Int32 itemId;
     item->GetItemId(&itemId);
-    if (itemId == android.R.id.home) {  // See ActionBar#setDisplayHomeAsUpEnabled()
+    if (itemId == Elastos::Droid::R::id::home) {  // See ActionBar#setDisplayHomeAsUpEnabled()
         OnBackPressed();
         *result = TRUE;
         return NOERROR;
@@ -2257,10 +2402,10 @@ ECode CCallFeaturesSetting::GoUpToTopLevelSetting(
     /* [in] */ IActivity* activity)
 {
     AutoPtr<IIntent> intent;
-    CIntent::New(activity, CallFeaturesSetting.class, (IIntent**)&intent);
+    CIntent::New(IContext::Probe(activity), ECLSID_CCallFeaturesSetting, (IIntent**)&intent);
     intent->SetAction(IIntent::ACTION_MAIN);
     intent->AddFlags(IIntent::FLAG_ACTIVITY_CLEAR_TOP);
-    activity->StartActivity(intent);
+    IContext::Probe(activity)->StartActivity(intent);
     return activity->Finish();
 }
 
