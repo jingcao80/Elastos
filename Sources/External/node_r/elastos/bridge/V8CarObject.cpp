@@ -1,5 +1,6 @@
 
 #include "V8CarObject.h"
+#include "CarUtility.h"
 
 namespace Elastos {
 namespace Node {
@@ -74,6 +75,35 @@ v8::Handle<v8::Value> V8CarObject::V8CarObjectGetProperty(
 {
     AutoPtr<V8CarObject> carObject = AsV8CarObject(self);
 
+    AutoPtr<IClassInfo> klazz;
+    CObject::ReflectClassInfo(carObject->mCarObject, (IClassInfo**)&klazz);
+
+    Int32 methodCount;
+    klazz->GetMethodCount(&methodCount);
+    AutoPtr< ArrayOf<IMethodInfo*> > methods = ArrayOf<IMethodInfo*>::Alloc(methodCount);
+    klazz->GetAllMethodInfos(methods);
+    for (Int32 i = 0; i < methodCount; i++) {
+        IMethodInfo* method = (*methods)[i];
+        String name;
+        method->GetName(&name);
+        if (name.Equals(identifier)) {
+            v8::Isolate* isolate = v8::Isolate::GetCurrent();
+            v8::Local<v8::FunctionTemplate> functionTemplate = v8::FunctionTemplate::New(isolate);
+            functionTemplate->SetCallHandler(V8CarObjectMethodHandler, key);
+
+            // FunctionTemplate caches function for each context.
+            v8::Local<v8::Function> v8Function = functionTemplate->GetFunction();
+            v8Function->SetName(v8::Handle<v8::String>::Cast(key));
+            return v8Function;
+        }
+        else if (name.Equals(String("Get") + identifier)) {
+            CarValue value = GetProperty(carObject->mCarObject, method);
+            v8::Handle<v8::Value> returnValue = CarUtility::ConvertCarValueToV8Object(value);
+            return returnValue;
+        }
+    }
+
+    return v8::Handle<v8::Value>();
 }
 
 void V8CarObject::V8CarObjectNamedPropertyGetter(

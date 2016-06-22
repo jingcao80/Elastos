@@ -16,6 +16,9 @@ public:
         /* [in] */ CarDataType carType,
         /* [in] */ CarValue& result);
 
+    static CARAPI_(v8::Local<v8::Value>) ConvertCarValueToV8Object(
+        /* [in] */ CarValue& carValue);
+
     static CARAPI FillingV8ObjectToArgumentList(
         /* [in] */ v8::Local<v8::Value> object,
         /* [in] */ IParamInfo* paramInfo,

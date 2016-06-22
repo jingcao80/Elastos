@@ -84,6 +84,79 @@ ECode CarUtility::ConvertV8ObjectToCarValue(
     return NOERROR;
 }
 
+v8::Local<v8::Value> CarUtility::ConvertCarValueToV8Object(
+    /* [in] */ CarValue& carValue)
+{
+    CarDataType carType = carValue.mType;
+    switch (carType) {
+        case CarDataType_Int16:
+            if (!object->IsNumber()) return E_INVALID_ARGUMENT;
+            result.mInt16Value = (Int16)object->NumberValue();
+            break;
+        case CarDataType_Int32:
+            if (!object->IsNumber()) return E_INVALID_ARGUMENT;
+            result.mInt32Value = (Int32)object->NumberValue();
+            break;
+        case CarDataType_Int64:
+            if (!object->IsNumber()) return E_INVALID_ARGUMENT;
+            result.mInt64Value = (Int64)object->NumberValue();
+            break;
+        case CarDataType_Byte:
+            if (!object->IsNumber()) return E_INVALID_ARGUMENT;
+            result.mByteValue = (Byte)object->NumberValue();
+            break;
+        case CarDataType_Float:
+            if (!object->IsNumber()) return E_INVALID_ARGUMENT;
+            result.mFloatValue = (Float)object->NumberValue();
+            break;
+        case CarDataType_Double:
+            if (!object->IsNumber()) return E_INVALID_ARGUMENT;
+            result.mDoubleValue = (Double)object->NumberValue();
+            break;
+        case CarDataType_Char32:
+            if (!object->IsNumber()) return E_INVALID_ARGUMENT;
+            result.mCharValue = (Char32)object->NumberValue();
+            break;
+        case CarDataType_String: {
+            if (!object->IsString()) return E_INVALID_ARGUMENT;
+            v8::String::Utf8Value u8String(object);
+            result.mStringValue = *u8String;
+            break;
+        }
+        case CarDataType_Boolean:
+            if (!object->IsBoolean()) return E_INVALID_ARGUMENT;
+            result.mBooleanValue = object->BooleanValue() == true ? TRUE : FALSE;
+            break;
+        case CarDataType_Enum:
+            if (!object->IsNumber()) return E_INVALID_ARGUMENT;
+            result.mEnumValue = (Int32)object->NumberValue();
+            break;
+        case CarDataType_Interface: {
+            if (!object->IsObject()) return E_INVALID_ARGUMENT;
+            v8::Local<v8::Object> v8Object = object->ToObject();
+            if (V8CarObject::IsInstance(v8Object)) {
+                result.mObjectValue = V8CarObject::AsV8CarObject(v8Object)->GetCarObject();
+            }
+            else {
+
+            }
+            break;
+        }
+        // CarDataType_EMuid       = 10,
+        // CarDataType_EGuid       = 11,
+        // CarDataType_ECode       = 12,
+        // CarDataType_LocalPtr    = 13,
+        // CarDataType_LocalType   = 14,
+        // CarDataType_ArrayOf     = 16,
+        // CarDataType_CppVector   = 17,
+        // CarDataType_Struct      = 18,
+        default:
+            Logger::E("CarUtility", "Unsupported CarDataType[%d] !", carType);
+            break;
+    }
+    return v8::Handle<v8::Value>();
+}
+
 ECode CarUtility::FillingV8ObjectToArgumentList(
     /* [in] */ v8::Local<v8::Value> object,
     /* [in] */ IParamInfo* paramInfo,

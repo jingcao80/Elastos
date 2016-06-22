@@ -30,6 +30,13 @@ private:
 
     ~V8CarObject();
 
+    static CarValue GetProperty(
+        /* [in] */ IInterface* target,
+        /* [in] */ IMethodInfo* method);
+
+    static void V8CarObjectMethodHandler(
+        /* [in] */ const v8::FunctionCallbackInfo<v8::Value>& info);
+
     static v8::Handle<v8::Value> V8CarObjectGetProperty(
         /* [in] */ v8::Local<v8::Object> self,
         /* [in] */ const String& identifier,
