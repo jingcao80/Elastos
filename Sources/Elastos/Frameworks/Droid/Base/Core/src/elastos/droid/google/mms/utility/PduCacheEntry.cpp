@@ -12,7 +12,11 @@ namespace Utility {
 //=====================================================================
 CAR_INTERFACE_IMPL(PduCacheEntry, Object, IPduCacheEntry);
 
-PduCacheEntry::PduCacheEntry(
+PduCacheEntry::PduCacheEntry()
+{
+}
+
+ECode PduCacheEntry::constructor(
     /* [in] */ IGenericPdu* pdu,
     /* [in] */ Int32 msgBox,
     /* [in] */ Int64 threadId)
@@ -21,6 +25,7 @@ PduCacheEntry::PduCacheEntry(
     // mPdu = pdu;
     // mMessageBox = msgBox;
     // mThreadId = threadId;
+    return NOERROR;
 }
 
 ECode PduCacheEntry::GetPdu(

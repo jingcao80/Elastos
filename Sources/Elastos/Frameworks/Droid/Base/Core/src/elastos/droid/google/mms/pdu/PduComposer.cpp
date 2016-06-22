@@ -1,6 +1,4 @@
-#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Google.h"
-#include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/pdu/PduComposer.h"
 
@@ -137,7 +135,11 @@ const Int32 PduComposer::LONG_INTEGER_LENGTH_MAX;
 const Int32 PduComposer::PDU_COMPOSER_BLOCK_SIZE;
 AutoPtr<IHashMap> PduComposer::mContentTypeMap = NULL;
 
-PduComposer::PduComposer(
+PduComposer::PduComposer()
+{
+}
+
+ECode PduComposer::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IGenericPdu* pdu)
 {
@@ -148,6 +150,7 @@ PduComposer::PduComposer(
     // mStack = new BufferStack();
     // mMessage = new ByteArrayOutputStream();
     // mPosition = 0;
+    return NOERROR;
 }
 
 ECode PduComposer::Make(

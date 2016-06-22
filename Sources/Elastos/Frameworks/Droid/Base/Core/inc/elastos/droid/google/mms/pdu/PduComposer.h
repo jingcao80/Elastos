@@ -1,6 +1,8 @@
 #ifndef __ELASTOS_DROID_GOOGLE_MMS_PDU_PDUCOMPOSER_H__
 #define __ELASTOS_DROID_GOOGLE_MMS_PDU_PDUCOMPOSER_H__
 
+#include "Elastos.Droid.Content.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
@@ -99,13 +101,14 @@ private:
 public:
     CAR_INTERFACE_DECL();
 
+    PduComposer();
     /**
       * Constructor.
       *
       * @param context the context
       * @param pdu the pdu to be composed
       */
-    PduComposer(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IGenericPdu* pdu);
 

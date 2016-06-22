@@ -14,24 +14,32 @@ CAR_INTERFACE_IMPL(MultimediaMessagePdu, GenericPdu, IMultimediaMessagePdu);
 
 MultimediaMessagePdu::MultimediaMessagePdu()
 {
-    // ==================before translated======================
-    // super();
+    constructor();
 }
 
-MultimediaMessagePdu::MultimediaMessagePdu(
+ECode MultimediaMessagePdu::constructor()
+{
+    // ==================before translated======================
+    // super();
+    return NOERROR;
+}
+
+ECode MultimediaMessagePdu::constructor(
     /* [in] */ IPduHeaders* header,
     /* [in] */ IPduBody* body)
 {
     // ==================before translated======================
     // super(header);
     // mMessageBody = body;
+    return NOERROR;
 }
 
-MultimediaMessagePdu::MultimediaMessagePdu(
+ECode MultimediaMessagePdu::constructor(
     /* [in] */ IPduHeaders* headers)
 {
     // ==================before translated======================
     // super(headers);
+    return NOERROR;
 }
 
 ECode MultimediaMessagePdu::GetBody(

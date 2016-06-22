@@ -15,16 +15,22 @@ CAR_INTERFACE_IMPL(SendConf, GenericPdu, ISendConf);
 
 SendConf::SendConf()
 {
+}
+
+ECode SendConf::constructor()
+{
     // ==================before translated======================
     // super();
     // setMessageType(PduHeaders.MESSAGE_TYPE_SEND_CONF);
+    return NOERROR;
 }
 
-SendConf::SendConf(
+ECode SendConf::constructor(
     /* [in] */ IPduHeaders* headers)
 {
     // ==================before translated======================
     // super(headers);
+    return NOERROR;
 }
 
 ECode SendConf::GetMessageId(

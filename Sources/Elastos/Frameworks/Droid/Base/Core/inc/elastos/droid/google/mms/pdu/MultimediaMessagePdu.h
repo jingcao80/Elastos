@@ -23,10 +23,11 @@ class MultimediaMessagePdu
 public:
     CAR_INTERFACE_DECL();
 
+    MultimediaMessagePdu();
     /**
       * Constructor.
       */
-    MultimediaMessagePdu();
+    CARAPI constructor();
 
     /**
       * Constructor.
@@ -34,7 +35,7 @@ public:
       * @param header the header of this PDU
       * @param body the body of this PDU
       */
-    MultimediaMessagePdu(
+    CARAPI constructor(
         /* [in] */ IPduHeaders* header,
         /* [in] */ IPduBody* body);
 
@@ -43,7 +44,7 @@ public:
       *
       * @param headers Headers for this PDU.
       */
-    MultimediaMessagePdu(
+    CARAPI constructor(
         /* [in] */ IPduHeaders* headers);
 
     /**

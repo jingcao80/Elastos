@@ -20,6 +20,7 @@ class ReadOrigInd
 public:
     CAR_INTERFACE_DECL();
 
+    ReadOrigInd();
     /**
       * Empty constructor.
       * Since the Pdu corresponding to this class is constructed
@@ -28,14 +29,14 @@ public:
       *
       * @throws InvalidHeaderValueException if error occurs.
       */
-    ReadOrigInd();
+    CARAPI constructor();
 
     /**
       * Constructor with given headers.
       *
       * @param headers Headers for this PDU.
       */
-    ReadOrigInd(
+    CARAPI constructor(
         /* [in] */ IPduHeaders* headers);
 
     /**

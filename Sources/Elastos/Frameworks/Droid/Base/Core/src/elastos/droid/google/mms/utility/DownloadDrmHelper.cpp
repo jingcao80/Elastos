@@ -10,9 +10,9 @@ namespace Utility {
 //=====================================================================
 //                          DownloadDrmHelper
 //=====================================================================
-const String DownloadDrmHelper::MIMETYPE_DRM_MESSAGE("application/vnd.oma.drm.message");
-const String DownloadDrmHelper::EXTENSION_DRM_MESSAGE(".dm");
-const String DownloadDrmHelper::EXTENSION_INTERNAL_FWDL(".fl");
+//const String DownloadDrmHelper::MIMETYPE_DRM_MESSAGE("application/vnd.oma.drm.message");
+//const String DownloadDrmHelper::EXTENSION_DRM_MESSAGE(".dm");
+//const String DownloadDrmHelper::EXTENSION_INTERNAL_FWDL(".fl");
 const String DownloadDrmHelper::TAG("DownloadDrmHelper");
 
 Boolean DownloadDrmHelper::IsDrmMimeType(

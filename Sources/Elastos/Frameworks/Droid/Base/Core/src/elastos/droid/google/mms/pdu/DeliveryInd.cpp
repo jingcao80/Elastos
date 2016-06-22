@@ -14,16 +14,22 @@ CAR_INTERFACE_IMPL(DeliveryInd, GenericPdu, IDeliveryInd);
 
 DeliveryInd::DeliveryInd()
 {
+}
+
+ECode DeliveryInd::constructor()
+{
     // ==================before translated======================
     // super();
     // setMessageType(PduHeaders.MESSAGE_TYPE_DELIVERY_IND);
+    return NOERROR;
 }
 
-DeliveryInd::DeliveryInd(
+ECode DeliveryInd::constructor(
     /* [in] */ IPduHeaders* headers)
 {
     // ==================before translated======================
     // super(headers);
+    return NOERROR;
 }
 
 ECode DeliveryInd::GetDate(
@@ -85,7 +91,7 @@ ECode DeliveryInd::SetStatus(
 }
 
 ECode DeliveryInd::GetTo(
-    /* [out] */ ArrayOf<EncodedStringValue*>** result)
+    /* [out] */ ArrayOf<IEncodedStringValue*>** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -95,7 +101,7 @@ ECode DeliveryInd::GetTo(
 }
 
 ECode DeliveryInd::SetTo(
-    /* [in] */ ArrayOf<EncodedStringValue*>* value)
+    /* [in] */ ArrayOf<IEncodedStringValue*>* value)
 {
     VALIDATE_NOT_NULL(value);
     // ==================before translated======================

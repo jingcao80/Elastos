@@ -12,7 +12,11 @@ namespace Pdu {
 //=====================================================================
 CAR_INTERFACE_IMPL(AcknowledgeInd, GenericPdu, IAcknowledgeInd);
 
-AcknowledgeInd::AcknowledgeInd(
+AcknowledgeInd::AcknowledgeInd()
+{
+}
+
+ECode AcknowledgeInd::constructor(
     /* [in] */ Int32 mmsVersion,
     /* [in] */ ArrayOf<Byte>* transactionId)
 {
@@ -22,13 +26,15 @@ AcknowledgeInd::AcknowledgeInd(
     // setMessageType(PduHeaders.MESSAGE_TYPE_ACKNOWLEDGE_IND);
     // setMmsVersion(mmsVersion);
     // setTransactionId(transactionId);
+    return NOERROR;
 }
 
-AcknowledgeInd::AcknowledgeInd(
+ECode AcknowledgeInd::constructor(
     /* [in] */ IPduHeaders* headers)
 {
     // ==================before translated======================
     // super(headers);
+    return NOERROR;
 }
 
 ECode AcknowledgeInd::GetReportAllowed(

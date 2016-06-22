@@ -11,6 +11,7 @@ C_DEFINES += -DDROID_CORE
 SOURCES = ContentType.cpp
 SOURCES += InvalidHeaderValueException.cpp
 SOURCES += MmsException.cpp
+SOURCES += CContentTypeHelper.cpp
 
 
 ELASTOS_LIBS += pdu/pdu.lib

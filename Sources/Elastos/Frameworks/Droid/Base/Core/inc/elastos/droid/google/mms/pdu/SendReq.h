@@ -23,6 +23,8 @@ public:
 
     SendReq();
 
+    CARAPI constructor();
+
     /**
       * Constructor, used when composing a M-Send.req pdu.
       *
@@ -33,7 +35,7 @@ public:
       * @throws InvalidHeaderValueException if parameters are invalid.
       *         NullPointerException if contentType, form or transactionId is null.
       */
-    SendReq(
+    CARAPI constructor(
         /* [in] */ ArrayOf<Byte>* contentType,
         /* [in] */ IEncodedStringValue* from,
         /* [in] */ Int32 mmsVersion,
@@ -44,7 +46,7 @@ public:
       *
       * @param headers Headers for this PDU.
       */
-    SendReq(
+    CARAPI constructor(
         /* [in] */ IPduHeaders* headers);
 
     /**
@@ -53,7 +55,7 @@ public:
       * @param headers Headers for this PDU.
       * @param body Body of this PDu.
       */
-    SendReq(
+    CARAPI constructor(
         /* [in] */ IPduHeaders* headers,
         /* [in] */ IPduBody* body);
 

@@ -33,4 +33,278 @@ module
     merge("google/mms/ContentType.car");
     merge("google/mms/InvalidHeaderValueException.car");
     merge("google/mms/MmsException.car");
+
+    interface Elastos.Droid.Google.Mms.Pdu.IGenericPdu;
+    interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Core.ICloneable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Google {
+    namespace Mms {
+    namespace Pdu {
+
+        [deprecated]
+        class CAcknowledgeInd {
+
+            constructor(
+                [in] Int32 mmsVersion,
+                [in] ArrayOf<Byte>* transactionId);
+
+            constructor(
+                [in] IPduHeaders* headers);
+
+            interface IGenericPdu;
+            interface IAcknowledgeInd;
+        }
+
+        singleton class CBase64Helper {
+            interface IBase64Helper;
+        }
+
+        singleton class CCharacterSetsHelper {
+            interface ICharacterSetsHelper;
+        }
+
+        class CDeliveryInd {
+            constructor();
+
+            constructor(
+                [in] IPduHeaders* headers);
+
+            interface IGenericPdu;
+            interface IDeliveryInd;
+        }
+
+        [deprecated]
+        class CEncodedStringValue {
+            constructor(
+                [in] Int32 charset,
+                [in] ArrayOf<Byte>* data);
+
+            constructor(
+                [in] ArrayOf<Byte>* adata);
+
+            constructor(
+                [in] String sdata);
+
+            interface IEncodedStringValue;
+            interface ICloneable;
+        }
+
+        singleton class CEncodedStringValueHelper {
+            interface IEncodedStringValueHelper;
+        }
+
+        class CGenericPdu {
+            constructor();
+
+            constructor(
+                [in] IPduHeaders* headers);
+
+            interface IGenericPdu;
+        }
+
+        class CMultimediaMessagePdu {
+            constructor();
+
+            constructor(
+                [in] IPduHeaders* header,
+                [in] IPduBody* body);
+
+            constructor(
+                [in] IPduHeaders* headers);
+
+            interface IGenericPdu;
+            interface IMultimediaMessagePdu;
+        }
+
+        class CNotificationInd {
+            constructor();
+
+            constructor(
+                [in] IPduHeaders* headers);
+
+            interface IGenericPdu;
+            interface INotificationInd;
+        }
+
+        [deprecated]
+        class CNotifyRespInd {
+            constructor(
+                [in] Int32 mmsVersion,
+                [in] ArrayOf<Byte>* transactionId,
+                [in] Int32 status);
+
+            constructor(
+                [in] IPduHeaders* headers);
+
+            interface IGenericPdu;
+            interface INotifyRespInd;
+        }
+
+        class CPduBody {
+            interface IPduBody;
+        }
+
+        [local]
+        class CPduComposer {
+            constructor(
+                [in] IContext* context,
+                [in] IGenericPdu* pdu);
+
+            interface IPduComposer;
+        }
+
+        [deprecated]
+        class CPduParser {
+            constructor(
+                [in] ArrayOf<Byte>* pduDataStream);
+
+            interface IPduParser;
+        }
+
+        class CPduPart {
+            interface IPduPart;
+        }
+
+        singleton class CPduPersisterHelper {
+            interface IPduPersisterHelper;
+        }
+
+        singleton class CQuotedPrintable {
+            interface IQuotedPrintable;
+        }
+
+        class CReadOrigInd {
+            constructor();
+
+            constructor(
+                [in] IPduHeaders* headers);
+
+            interface IGenericPdu;
+            interface IReadOrigInd;
+        }
+
+        [deprecated]
+        class CReadRecInd {
+            constructor(
+                [in] IEncodedStringValue* from,
+                [in] ArrayOf<Byte>* messageId,
+                [in] Int32 mmsVersion,
+                [in] Int32 readStatus,
+                [in] ArrayOf<IEncodedStringValue*>* to);
+
+            constructor(
+                [in] IPduHeaders* headers);
+
+            interface IGenericPdu;
+            interface IReadRecInd;
+        }
+
+        class CRetrieveConf {
+            constructor();
+
+            constructor(
+                [in] IPduHeaders* headers);
+
+            constructor(
+                [in] IPduHeaders* headers,
+                [in] IPduBody* body);
+
+            interface IGenericPdu;
+            interface IMultimediaMessagePdu;
+            interface IRetrieveConf;
+        }
+
+        class CSendConf {
+            constructor();
+
+            constructor(
+                [in] IPduHeaders* headers);
+
+            interface IGenericPdu;
+            interface ISendConf;
+        }
+
+        [deprecated]
+        class CSendReq {
+            constructor();
+
+            constructor(
+                [in] ArrayOf<Byte>* contentType,
+                [in] IEncodedStringValue* from,
+                [in] Int32 mmsVersion,
+                [in] ArrayOf<Byte>* transactionId);
+
+            constructor(
+                [in] IPduHeaders* headers);
+
+            constructor(
+                [in] IPduHeaders* headers,
+                [in] IPduBody* body);
+
+            interface IGenericPdu;
+            interface IMultimediaMessagePdu;
+            interface ISendReq;
+        }
+
+    }//Pdu
+    }//Mms
+    }//Google
+    }//Droid
+    }//Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Google {
+    namespace Mms {
+    namespace Utility {
+        //class CAbstractCache {
+
+        //}
+
+        singleton class CDownloadDrmHelper {
+            interface IDownloadDrmHelper;
+        }
+
+        singleton class CDrmConvertSessionHelper {
+            interface IDrmConvertSessionHelper;
+        }
+
+        singleton class CPduCacheHelper {
+            interface IPduCacheHelper;
+        }
+
+        class CPduCacheEntry {
+            constructor(
+                [in] IGenericPdu* pdu,
+                [in] Int32 msgBox,
+                [in] Int64 threadId);
+
+            interface IPduCacheEntry;
+        }
+
+        singleton class CSqliteWrapper {
+            interface ISqliteWrapper;
+        }
+
+    }//Utility
+    }//Mms
+    }//Google
+    }//Droid
+    }//Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Google {
+    namespace Mms {
+        singleton class CContentTypeHelper {
+            interface IContentTypeHelper;
+        }
+    }//Mms
+    }//Google
+    }//Droid
+    }//Elastos
+
 }

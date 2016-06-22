@@ -15,6 +15,10 @@ const String SendReq::TAG("SendReq");
 
 SendReq::SendReq()
 {
+}
+
+ECode SendReq::constructor()
+{
     // ==================before translated======================
     // super();
     //
@@ -31,9 +35,10 @@ SendReq::SendReq()
     //     Log.e(TAG, "Unexpected InvalidHeaderValueException.", e);
     //     throw new RuntimeException(e);
     // }
+    return NOERROR;
 }
 
-SendReq::SendReq(
+ECode SendReq::constructor(
     /* [in] */ ArrayOf<Byte>* contentType,
     /* [in] */ IEncodedStringValue* from,
     /* [in] */ Int32 mmsVersion,
@@ -46,21 +51,24 @@ SendReq::SendReq(
     // setFrom(from);
     // setMmsVersion(mmsVersion);
     // setTransactionId(transactionId);
+    return NOERROR;
 }
 
-SendReq::SendReq(
+ECode SendReq::constructor(
     /* [in] */ IPduHeaders* headers)
 {
     // ==================before translated======================
     // super(headers);
+    return NOERROR;
 }
 
-SendReq::SendReq(
+ECode SendReq::constructor(
     /* [in] */ IPduHeaders* headers,
     /* [in] */ IPduBody* body)
 {
     // ==================before translated======================
     // super(headers, body);
+    return NOERROR;
 }
 
 ECode SendReq::GetBcc(

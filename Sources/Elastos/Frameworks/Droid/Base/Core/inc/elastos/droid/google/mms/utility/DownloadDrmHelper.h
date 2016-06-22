@@ -60,12 +60,12 @@ public:
         /* [in] */ const String& path,
         /* [in] */ const String& containingMime);
 
-public:
-    /** The MIME type of special DRM files */
-    static const String MIMETYPE_DRM_MESSAGE;
-    /** The extensions of special DRM files */
-    static const String EXTENSION_DRM_MESSAGE;
-    static const String EXTENSION_INTERNAL_FWDL;
+//public:
+//    /** The MIME type of special DRM files */
+//    static const String MIMETYPE_DRM_MESSAGE;
+//    /** The extensions of special DRM files */
+//    static const String EXTENSION_DRM_MESSAGE;
+//    static const String EXTENSION_INTERNAL_FWDL;
 
 private:
     static const String TAG;

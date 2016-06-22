@@ -1,5 +1,4 @@
 #include "Elastos.Droid.Google.h"
-#include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/pdu/PduParser.h"
 
@@ -34,11 +33,16 @@ const String PduParser::LOGTAG("PduParser");
 const Boolean PduParser::DEBUG = false;
 const Boolean PduParser::LOCAL_LOGV = false;
 
-PduParser::PduParser(
+PduParser::PduParser()
+{
+}
+
+ECode PduParser::constructor(
     /* [in] */ ArrayOf<Byte>* pduDataStream)
 {
     // ==================before translated======================
     // mPduDataStream = new ByteArrayInputStream(pduDataStream);
+    return NOERROR;
 }
 
 ECode PduParser::Parse(

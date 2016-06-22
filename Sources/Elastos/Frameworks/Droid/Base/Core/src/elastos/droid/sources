@@ -32,6 +32,7 @@ ELASTOS_LIBS += content/content.lib
 ELASTOS_LIBS += codeaurora/ims/csvt/csvt.lib
 ELASTOS_LIBS += database/database.lib
 ELASTOS_LIBS += emoji/emoji.lib
+ELASTOS_LIBS += google/mms/mms.lib
 ELASTOS_LIBS += gesture/gesture.lib
 ELASTOS_LIBS += graphics/graphics.lib
 ELASTOS_LIBS += hardware/hardware.lib

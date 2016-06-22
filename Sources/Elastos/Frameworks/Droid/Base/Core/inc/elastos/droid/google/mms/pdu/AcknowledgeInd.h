@@ -23,6 +23,7 @@ class AcknowledgeInd
 public:
     CAR_INTERFACE_DECL();
 
+    AcknowledgeInd();
     /**
       * Constructor, used when composing a M-Acknowledge.ind pdu.
       *
@@ -31,7 +32,7 @@ public:
       * @throws InvalidHeaderValueException if parameters are invalid.
       *         NullPointerException if transactionId is null.
       */
-    AcknowledgeInd(
+    CARAPI constructor(
         /* [in] */ Int32 mmsVersion,
         /* [in] */ ArrayOf<Byte>* transactionId);
 
@@ -40,7 +41,7 @@ public:
       *
       * @param headers Headers for this PDU.
       */
-    AcknowledgeInd(
+    CARAPI constructor(
         /* [in] */ IPduHeaders* headers);
 
     /**

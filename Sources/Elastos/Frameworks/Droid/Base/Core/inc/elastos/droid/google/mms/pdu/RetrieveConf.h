@@ -23,6 +23,7 @@ class RetrieveConf
 public:
     CAR_INTERFACE_DECL();
 
+    RetrieveConf();
     /**
       * Empty constructor.
       * Since the Pdu corresponding to this class is constructed
@@ -31,14 +32,14 @@ public:
       *
       * @throws InvalidHeaderValueException if error occurs.
       */
-    RetrieveConf();
+    CARAPI constructor();
 
     /**
       * Constructor with given headers.
       *
       * @param headers Headers for this PDU.
       */
-    RetrieveConf(
+    CARAPI constructor(
         /* [in] */ IPduHeaders* headers);
 
     /**
@@ -47,7 +48,7 @@ public:
       * @param headers Headers for this PDU.
       * @param body Body of this PDu.
       */
-    RetrieveConf(
+    CARAPI constructor(
         /* [in] */ IPduHeaders* headers,
         /* [in] */ IPduBody* body);
 
@@ -85,6 +86,12 @@ public:
     virtual CARAPI SetContentType(
         /* [in] */ ArrayOf<Byte>* value);
 
+    //TODO remove
+    virtual CARAPI SetContentType(
+        /* [in] */ ArrayOf<Byte>** value)
+    {
+        return NOERROR;
+    }
     /**
       * Get X-Mms-Delivery-Report value.
       *
@@ -157,6 +164,12 @@ public:
     virtual CARAPI SetMessageId(
         /* [in] */ ArrayOf<Byte>* value);
 
+    //TODO remove
+    virtual CARAPI SetMessageId(
+        /* [in] */ ArrayOf<Byte>** value)
+    {
+        return NOERROR;
+    }
     /**
       * Get X-Mms-Read-Report value.
       *

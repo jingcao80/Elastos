@@ -14,3 +14,9 @@ SOURCES += DrmConvertSession.cpp
 SOURCES += PduCache.cpp
 SOURCES += PduCacheEntry.cpp
 SOURCES += SqliteWrapper.cpp
+SOURCES += CDownloadDrmHelper.cpp
+SOURCES += CDrmConvertSessionHelper.cpp
+SOURCES += CPduCacheEntry.cpp
+SOURCES += CPduCacheHelper.cpp
+SOURCES += CSqliteWrapper.cpp
+

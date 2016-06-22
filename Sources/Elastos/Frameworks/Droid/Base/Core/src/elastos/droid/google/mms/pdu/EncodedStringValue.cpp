@@ -18,7 +18,11 @@ const String EncodedStringValue::TAG("EncodedStringValue");
 const Boolean EncodedStringValue::DEBUG = FALSE;
 const Boolean EncodedStringValue::LOCAL_LOGV = FALSE;
 
-EncodedStringValue::EncodedStringValue(
+EncodedStringValue::EncodedStringValue()
+{
+}
+
+ECode EncodedStringValue::constructor(
     /* [in] */ Int32 charset,
     /* [in] */ ArrayOf<Byte>* data)
 {
@@ -31,16 +35,18 @@ EncodedStringValue::EncodedStringValue(
     // mCharacterSet = charset;
     // mData = new byte[data.length];
     // System.arraycopy(data, 0, mData, 0, data.length);
+    return NOERROR;
 }
 
-EncodedStringValue::EncodedStringValue(
+ECode EncodedStringValue::constructor(
     /* [in] */ ArrayOf<Byte>* data)
 {
     // ==================before translated======================
     // this(CharacterSets.DEFAULT_CHARSET, data);
+    return NOERROR;
 }
 
-EncodedStringValue::EncodedStringValue(
+ECode EncodedStringValue::constructor(
     /* [in] */ const String& data)
 {
     // ==================before translated======================
@@ -50,6 +56,7 @@ EncodedStringValue::EncodedStringValue(
     // } catch (UnsupportedEncodingException e) {
     //     Log.e(TAG, "Default encoding must be supported.", e);
     // }
+    return NOERROR;
 }
 
 ECode EncodedStringValue::GetCharacterSet(
@@ -155,8 +162,10 @@ ECode EncodedStringValue::AppendTextString(
     return NOERROR;
 }
 
-AutoPtr<Object> EncodedStringValue::Clone()
+ECode EncodedStringValue::Clone(
+    /* [out] */ IInterface** result)
 {
+    VALIDATE_NOT_NULL(result);
     // ==================before translated======================
     // super.clone();
     // int len = mData.length;
@@ -171,13 +180,12 @@ AutoPtr<Object> EncodedStringValue::Clone()
     //     throw new CloneNotSupportedException(e.getMessage());
     // }
     assert(0);
-    AutoPtr<Object> empty;
-    return empty;
+    return NOERROR;
 }
 
 ECode EncodedStringValue::Split(
     /* [in] */ const String& pattern,
-    /* [out] */ ArrayOf<EncodedStringValue*>** result)
+    /* [out] */ ArrayOf<IEncodedStringValue*>** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -197,7 +205,7 @@ ECode EncodedStringValue::Split(
     return NOERROR;
 }
 
-AutoPtr<ArrayOf<EncodedStringValue*> > EncodedStringValue::Extract(
+AutoPtr<ArrayOf<IEncodedStringValue*> > EncodedStringValue::Extract(
     /* [in] */ const String& src)
 {
     // ==================before translated======================
@@ -217,12 +225,12 @@ AutoPtr<ArrayOf<EncodedStringValue*> > EncodedStringValue::Extract(
     //     return null;
     // }
     assert(0);
-    AutoPtr< ArrayOf<EncodedStringValue*> > empty;
+    AutoPtr< ArrayOf<IEncodedStringValue*> > empty;
     return empty;
 }
 
 String EncodedStringValue::Concat(
-    /* [in] */ ArrayOf<EncodedStringValue*>* addr)
+    /* [in] */ ArrayOf<IEncodedStringValue*>* addr)
 {
     // ==================before translated======================
     // StringBuilder sb = new StringBuilder();
@@ -239,8 +247,8 @@ String EncodedStringValue::Concat(
     return String("");
 }
 
-AutoPtr<EncodedStringValue> EncodedStringValue::Copy(
-    /* [in] */ EncodedStringValue* value)
+AutoPtr<IEncodedStringValue> EncodedStringValue::Copy(
+    /* [in] */ IEncodedStringValue* value)
 {
     // ==================before translated======================
     // if (value == null) {
@@ -249,11 +257,11 @@ AutoPtr<EncodedStringValue> EncodedStringValue::Copy(
     //
     // return new EncodedStringValue(value.mCharacterSet, value.mData);
     assert(0);
-    AutoPtr<EncodedStringValue> empty;
+    AutoPtr<IEncodedStringValue> empty;
     return empty;
 }
 
-AutoPtr<ArrayOf<EncodedStringValue*> > EncodedStringValue::EncodeStrings(
+AutoPtr<ArrayOf<IEncodedStringValue*> > EncodedStringValue::EncodeStrings(
     /* [in] */ ArrayOf<String>* array)
 {
     // ==================before translated======================
@@ -267,7 +275,7 @@ AutoPtr<ArrayOf<EncodedStringValue*> > EncodedStringValue::EncodeStrings(
     // }
     // return null;
     assert(0);
-    AutoPtr< ArrayOf<EncodedStringValue*> > empty;
+    AutoPtr< ArrayOf<IEncodedStringValue*> > empty;
     return empty;
 }
 

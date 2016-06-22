@@ -21,17 +21,18 @@ class GenericPdu
 public:
     CAR_INTERFACE_DECL();
 
+    GenericPdu();
     /**
       * Constructor.
       */
-    GenericPdu();
+    CARAPI constructor();
 
     /**
       * Constructor.
       *
       * @param headers Headers for this PDU.
       */
-    GenericPdu(
+    CARAPI constructor(
         /* [in] */ IPduHeaders* headers);
 
     /**
@@ -86,7 +87,7 @@ public:
       * @return the value
       */
     virtual CARAPI GetFrom(
-        /* [out] */ EncodedStringValue** result);
+        /* [out] */ IEncodedStringValue** result);
 
     /**
       * Set From value.
@@ -95,7 +96,7 @@ public:
       * @throws NullPointerException if the value is null.
       */
     virtual CARAPI SetFrom(
-        /* [in] */ EncodedStringValue* value);
+        /* [in] */ IEncodedStringValue* value);
 
 public:
     /**

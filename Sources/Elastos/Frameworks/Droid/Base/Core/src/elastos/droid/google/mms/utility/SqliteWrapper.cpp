@@ -1,6 +1,4 @@
-#include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Google.h"
-#include "Elastos.Droid.Net.h"
 #include "elastos/droid/google/mms/utility/SqliteWrapper.h"
 
 namespace Elastos {

@@ -29,6 +29,7 @@ class EncodedStringValue
 public:
     CAR_INTERFACE_DECL();
 
+    EncodedStringValue();
     /**
       * Constructor.
       *
@@ -36,7 +37,7 @@ public:
       * @param data the Text-string value
       * @throws NullPointerException if Text-string value is null.
       */
-    EncodedStringValue(
+    CARAPI constructor(
         /* [in] */ Int32 charset,
         /* [in] */ ArrayOf<Byte>* data);
 
@@ -46,10 +47,10 @@ public:
       * @param data the Text-string value
       * @throws NullPointerException if Text-string value is null.
       */
-    EncodedStringValue(
+    CARAPI constructor(
         /* [in] */ ArrayOf<Byte>* data);
 
-    EncodedStringValue(
+    CARAPI constructor(
         /* [in] */ const String& data);
 
     /**
@@ -110,7 +111,9 @@ public:
       * @see java.lang.Object#clone()
       */
     // @Override
-    CARAPI_(AutoPtr<Object>) Clone();
+    //CARAPI_(AutoPtr<Object>) Clone();
+    CARAPI Clone(
+        /* [out] */ IInterface** result);
 
     /**
       * Split this encoded string around matches of the given pattern.
@@ -121,24 +124,24 @@ public:
       */
     virtual CARAPI Split(
         /* [in] */ const String& pattern,
-        /* [out] */ ArrayOf<EncodedStringValue*>** result);
+        /* [out] */ ArrayOf<IEncodedStringValue*>** result);
 
     /**
       * Extract an EncodedStringValue[] from a given String.
       */
-    static CARAPI_(AutoPtr<ArrayOf<EncodedStringValue*> >) Extract(
+    static CARAPI_(AutoPtr<ArrayOf<IEncodedStringValue*> >) Extract(
         /* [in] */ const String& src);
 
     /**
       * Concatenate an EncodedStringValue[] into a single String.
       */
     static CARAPI_(String) Concat(
-        /* [in] */ ArrayOf<EncodedStringValue*>* addr);
+        /* [in] */ ArrayOf<IEncodedStringValue*>* addr);
 
-    static CARAPI_(AutoPtr<EncodedStringValue>) Copy(
-        /* [in] */ EncodedStringValue* value);
+    static CARAPI_(AutoPtr<IEncodedStringValue>) Copy(
+        /* [in] */ IEncodedStringValue* value);
 
-    static CARAPI_(AutoPtr<ArrayOf<EncodedStringValue*> >) EncodeStrings(
+    static CARAPI_(AutoPtr<ArrayOf<IEncodedStringValue*> >) EncodeStrings(
         /* [in] */ ArrayOf<String>* array);
 
 private:

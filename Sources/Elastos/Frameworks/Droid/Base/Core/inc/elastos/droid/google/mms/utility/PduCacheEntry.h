@@ -22,7 +22,9 @@ class PduCacheEntry
 public:
     CAR_INTERFACE_DECL();
 
-    PduCacheEntry(
+    PduCacheEntry();
+
+    CARAPI constructor(
         /* [in] */ IGenericPdu* pdu,
         /* [in] */ Int32 msgBox,
         /* [in] */ Int64 threadId);

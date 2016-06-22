@@ -24,6 +24,10 @@ module {
          */
         const Int32 BASELENGTH = 255;
 
+    }
+
+    [deprecated]
+    interface IBase64Helper {
         /**
          * Decodes Base64 data into octects
          *

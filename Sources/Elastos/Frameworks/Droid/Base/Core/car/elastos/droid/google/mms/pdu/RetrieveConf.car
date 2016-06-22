@@ -29,7 +29,7 @@ module {
          * @throws NullPointerException if the value is null.
          */
         SetContentType(
-            [out, callee] ArrayOf<Byte>* value);
+            [in] ArrayOf<Byte>* value);
 
         GetDeliveryReport(
             [out] Int32* result);
@@ -71,7 +71,7 @@ module {
          * @throws NullPointerException if the value is null.
          */
         SetMessageId(
-            [out, callee] ArrayOf<Byte>* value);
+            [in] ArrayOf<Byte>* value);
 
         GetReadReport(
             [out] Int32* result);

@@ -59,6 +59,9 @@ module {
 
         const String DEFAULT_CHARSET_NAME = "utf-8";
 
+    }
+
+    interface ICharacterSetsHelper {
         /**
          * Map an MIBEnum number to the name of the charset which this number
          * is assigned to by IANA.

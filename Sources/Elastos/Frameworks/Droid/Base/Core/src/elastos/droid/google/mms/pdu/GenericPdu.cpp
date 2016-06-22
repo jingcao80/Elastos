@@ -14,15 +14,22 @@ CAR_INTERFACE_IMPL(GenericPdu, Object, IGenericPdu);
 
 GenericPdu::GenericPdu()
 {
-    // ==================before translated======================
-    // mPduHeaders = new PduHeaders();
+    constructor();
 }
 
-GenericPdu::GenericPdu(
+ECode GenericPdu::constructor()
+{
+    // ==================before translated======================
+    // mPduHeaders = new PduHeaders();
+    return NOERROR;
+}
+
+ECode GenericPdu::constructor(
     /* [in] */ IPduHeaders* headers)
 {
     // ==================before translated======================
     // mPduHeaders = headers;
+    return NOERROR;
 }
 
 ECode GenericPdu::GetPduHeaders(
@@ -74,7 +81,7 @@ ECode GenericPdu::SetMmsVersion(
 }
 
 ECode GenericPdu::GetFrom(
-    /* [out] */ EncodedStringValue** result)
+    /* [out] */ IEncodedStringValue** result)
 {
     VALIDATE_NOT_NULL(result);
     // ==================before translated======================
@@ -84,7 +91,7 @@ ECode GenericPdu::GetFrom(
 }
 
 ECode GenericPdu::SetFrom(
-    /* [in] */ EncodedStringValue* value)
+    /* [in] */ IEncodedStringValue* value)
 {
     VALIDATE_NOT_NULL(value);
     // ==================before translated======================

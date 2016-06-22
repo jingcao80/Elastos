@@ -12,7 +12,11 @@ namespace Pdu {
 //=====================================================================
 CAR_INTERFACE_IMPL(NotifyRespInd, GenericPdu, INotifyRespInd);
 
-NotifyRespInd::NotifyRespInd(
+NotifyRespInd::NotifyRespInd()
+{
+}
+
+ECode NotifyRespInd::constructor(
     /* [in] */ Int32 mmsVersion,
     /* [in] */ ArrayOf<Byte>* transactionId,
     /* [in] */ Int32 status)
@@ -23,13 +27,15 @@ NotifyRespInd::NotifyRespInd(
     // setMmsVersion(mmsVersion);
     // setTransactionId(transactionId);
     // setStatus(status);
+    return NOERROR;
 }
 
-NotifyRespInd::NotifyRespInd(
+ECode NotifyRespInd::constructor(
     /* [in] */ IPduHeaders* headers)
 {
     // ==================before translated======================
     // super(headers);
+    return NOERROR;
 }
 
 ECode NotifyRespInd::GetReportAllowed(

@@ -24,6 +24,7 @@ class DeliveryInd
 public:
     CAR_INTERFACE_DECL();
 
+    DeliveryInd();
     /**
       * Empty constructor.
       * Since the Pdu corresponding to this class is constructed
@@ -32,14 +33,14 @@ public:
       *
       * @throws InvalidHeaderValueException if error occurs.
       */
-    DeliveryInd();
+    CARAPI constructor();
 
     /**
       * Constructor with given headers.
       *
       * @param headers Headers for this PDU.
       */
-    DeliveryInd(
+    CARAPI constructor(
         /* [in] */ IPduHeaders* headers);
 
     /**
@@ -98,7 +99,7 @@ public:
       * @return the value
       */
     virtual CARAPI GetTo(
-        /* [out] */ ArrayOf<EncodedStringValue*>** result);
+        /* [out] */ ArrayOf<IEncodedStringValue*>** result);
 
     /**
       * set To value.
@@ -107,7 +108,7 @@ public:
       * @throws NullPointerException if the value is null.
       */
     virtual CARAPI SetTo(
-        /* [in] */ ArrayOf<EncodedStringValue*>* value);
+        /* [in] */ ArrayOf<IEncodedStringValue*>* value);
 };
 
 } // namespace Pdu

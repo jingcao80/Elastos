@@ -14,27 +14,34 @@ CAR_INTERFACE_IMPL(RetrieveConf, MultimediaMessagePdu, IRetrieveConf);
 
 RetrieveConf::RetrieveConf()
 {
+}
+
+ECode RetrieveConf::constructor()
+{
     // ==================before translated======================
     // super();
     // setMessageType(PduHeaders.MESSAGE_TYPE_RETRIEVE_CONF);
     // setTransactionId(generateTransactionId());
+    return NOERROR;
 }
 
-RetrieveConf::RetrieveConf(
+ECode RetrieveConf::constructor(
     /* [in] */ IPduHeaders* headers)
 {
     // ==================before translated======================
     // super(headers);
     // setTransactionId(generateTransactionId());
+    return NOERROR;
 }
 
-RetrieveConf::RetrieveConf(
+ECode RetrieveConf::constructor(
     /* [in] */ IPduHeaders* headers,
     /* [in] */ IPduBody* body)
 {
     // ==================before translated======================
     // super(headers, body);
     // setTransactionId(generateTransactionId());
+    return NOERROR;
 }
 
 ECode RetrieveConf::GetCc(

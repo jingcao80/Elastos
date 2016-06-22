@@ -20,6 +20,7 @@ class SendConf
 public:
     CAR_INTERFACE_DECL();
 
+    SendConf();
     /**
       * Empty constructor.
       * Since the Pdu corresponding to this class is constructed
@@ -28,14 +29,14 @@ public:
       *
       * @throws InvalidHeaderValueException if error occurs.
       */
-    SendConf();
+    CARAPI constructor();
 
     /**
       * Constructor with given headers.
       *
       * @param headers Headers for this PDU.
       */
-    SendConf(
+    CARAPI constructor(
         /* [in] */ IPduHeaders* headers);
 
     /**

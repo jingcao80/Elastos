@@ -23,6 +23,7 @@ class NotifyRespInd
 public:
     CAR_INTERFACE_DECL();
 
+    NotifyRespInd();
     /**
       * Constructor, used when composing a M-NotifyResp.ind pdu.
       *
@@ -33,7 +34,7 @@ public:
       *         NullPointerException if transactionId is null.
       *         RuntimeException if an undeclared error occurs.
       */
-    NotifyRespInd(
+    CARAPI constructor(
         /* [in] */ Int32 mmsVersion,
         /* [in] */ ArrayOf<Byte>* transactionId,
         /* [in] */ Int32 status);
@@ -43,7 +44,7 @@ public:
       *
       * @param headers Headers for this PDU.
       */
-    NotifyRespInd(
+    CARAPI constructor(
         /* [in] */ IPduHeaders* headers);
 
     /**

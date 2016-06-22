@@ -14,16 +14,23 @@ CAR_INTERFACE_IMPL(ReadOrigInd, GenericPdu, IReadOrigInd);
 
 ReadOrigInd::ReadOrigInd()
 {
+    constructor();
+}
+
+ECode ReadOrigInd::constructor()
+{
     // ==================before translated======================
     // super();
     // setMessageType(PduHeaders.MESSAGE_TYPE_READ_ORIG_IND);
+    return NOERROR;
 }
 
-ReadOrigInd::ReadOrigInd(
+ECode ReadOrigInd::constructor(
     /* [in] */ IPduHeaders* headers)
 {
     // ==================before translated======================
     // super(headers);
+    return NOERROR;
 }
 
 ECode ReadOrigInd::GetDate(

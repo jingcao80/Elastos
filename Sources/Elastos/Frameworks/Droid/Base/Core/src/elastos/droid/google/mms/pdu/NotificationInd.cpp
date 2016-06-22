@@ -14,16 +14,23 @@ CAR_INTERFACE_IMPL(NotificationInd, GenericPdu, INotificationInd);
 
 NotificationInd::NotificationInd()
 {
+    constructor();
+}
+
+ECode NotificationInd::constructor()
+{
     // ==================before translated======================
     // super();
     // setMessageType(PduHeaders.MESSAGE_TYPE_NOTIFICATION_IND);
+    return NOERROR;
 }
 
-NotificationInd::NotificationInd(
+ECode NotificationInd::constructor(
     /* [in] */ IPduHeaders* headers)
 {
     // ==================before translated======================
     // super(headers);
+    return NOERROR;
 }
 
 ECode NotificationInd::GetContentClass(

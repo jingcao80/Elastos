@@ -20,6 +20,7 @@ class ReadRecInd
 public:
     CAR_INTERFACE_DECL();
 
+    ReadRecInd();
     /**
       * Constructor, used when composing a M-ReadRec.ind pdu.
       *
@@ -31,7 +32,7 @@ public:
       * @throws InvalidHeaderValueException if parameters are invalid.
       *         NullPointerException if messageId or to is null.
       */
-    ReadRecInd(
+    CARAPI constructor(
         /* [in] */ IEncodedStringValue* from,
         /* [in] */ ArrayOf<Byte>* messageId,
         /* [in] */ Int32 mmsVersion,
@@ -43,7 +44,7 @@ public:
       *
       * @param headers Headers for this PDU.
       */
-    ReadRecInd(
+    CARAPI constructor(
         /* [in] */ IPduHeaders* headers);
 
     /**

@@ -1,6 +1,8 @@
 #ifndef __ELASTOS_DROID_GOOGLE_MMS_UTILITY_SQLITEWRAPPER_H__
 #define __ELASTOS_DROID_GOOGLE_MMS_UTILITY_SQLITEWRAPPER_H__
 
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Net.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 

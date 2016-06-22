@@ -1,6 +1,4 @@
 #include "Elastos.Droid.Google.h"
-#include "Elastos.Droid.Net.h"
-#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/google/mms/pdu/PduPart.h"
 
 namespace Elastos {
@@ -14,53 +12,53 @@ namespace Pdu {
 //=====================================================================
 CAR_INTERFACE_IMPL(PduPart, Object, IPduPart);
 
-const Int32 PduPart::P_Q;
-const Int32 PduPart::P_CHARSET;
-const Int32 PduPart::P_LEVEL;
-const Int32 PduPart::P_TYPE;
-const Int32 PduPart::P_DEP_NAME;
-const Int32 PduPart::P_DEP_FILENAME;
-const Int32 PduPart::P_DIFFERENCES;
-const Int32 PduPart::P_PADDING;
-const Int32 PduPart::P_CT_MR_TYPE;
-const Int32 PduPart::P_DEP_START;
-const Int32 PduPart::P_DEP_START_INFO;
-const Int32 PduPart::P_DEP_COMMENT;
-const Int32 PduPart::P_DEP_DOMAIN;
-const Int32 PduPart::P_MAX_AGE;
-const Int32 PduPart::P_DEP_PATH;
-const Int32 PduPart::P_SECURE;
-const Int32 PduPart::P_SEC;
-const Int32 PduPart::P_MAC;
-const Int32 PduPart::P_CREATION_DATE;
-const Int32 PduPart::P_MODIFICATION_DATE;
-const Int32 PduPart::P_READ_DATE;
-const Int32 PduPart::P_SIZE;
-const Int32 PduPart::P_NAME;
-const Int32 PduPart::P_FILENAME;
-const Int32 PduPart::P_START;
-const Int32 PduPart::P_START_INFO;
-const Int32 PduPart::P_COMMENT;
-const Int32 PduPart::P_DOMAIN;
-const Int32 PduPart::P_PATH;
-const Int32 PduPart::P_CONTENT_TYPE;
-const Int32 PduPart::P_CONTENT_LOCATION;
-const Int32 PduPart::P_CONTENT_ID;
-const Int32 PduPart::P_DEP_CONTENT_DISPOSITION;
-const Int32 PduPart::P_CONTENT_DISPOSITION;
-const Int32 PduPart::P_CONTENT_TRANSFER_ENCODING;
-const String PduPart::CONTENT_TRANSFER_ENCODING("Content-Transfer-Encoding");
-const String PduPart::P_BINARY("binary");
-const String PduPart::P_7BIT("7bit");
-const String PduPart::P_8BIT("8bit");
-const String PduPart::P_BASE64("base64");
-const String PduPart::P_QUOTED_PRINTABLE("quoted-printable");
-const AutoPtr<ArrayOf<Byte> > PduPart::DISPOSITION_FROM_DATA = String("from-data").GetBytes();
-const AutoPtr<ArrayOf<Byte> > PduPart::DISPOSITION_ATTACHMENT = String("attachment").GetBytes();
-const AutoPtr<ArrayOf<Byte> > PduPart::DISPOSITION_INLINE = String("inline").GetBytes();
-const Int32 PduPart::P_DISPOSITION_FROM_DATA;
-const Int32 PduPart::P_DISPOSITION_ATTACHMENT;
-const Int32 PduPart::P_DISPOSITION_INLINE;
+//const Int32 PduPart::P_Q;
+//const Int32 PduPart::P_CHARSET;
+//const Int32 PduPart::P_LEVEL;
+//const Int32 PduPart::P_TYPE;
+//const Int32 PduPart::P_DEP_NAME;
+//const Int32 PduPart::P_DEP_FILENAME;
+//const Int32 PduPart::P_DIFFERENCES;
+//const Int32 PduPart::P_PADDING;
+//const Int32 PduPart::P_CT_MR_TYPE;
+//const Int32 PduPart::P_DEP_START;
+//const Int32 PduPart::P_DEP_START_INFO;
+//const Int32 PduPart::P_DEP_COMMENT;
+//const Int32 PduPart::P_DEP_DOMAIN;
+//const Int32 PduPart::P_MAX_AGE;
+//const Int32 PduPart::P_DEP_PATH;
+//const Int32 PduPart::P_SECURE;
+//const Int32 PduPart::P_SEC;
+//const Int32 PduPart::P_MAC;
+//const Int32 PduPart::P_CREATION_DATE;
+//const Int32 PduPart::P_MODIFICATION_DATE;
+//const Int32 PduPart::P_READ_DATE;
+//const Int32 PduPart::P_SIZE;
+//const Int32 PduPart::P_NAME;
+//const Int32 PduPart::P_FILENAME;
+//const Int32 PduPart::P_START;
+//const Int32 PduPart::P_START_INFO;
+//const Int32 PduPart::P_COMMENT;
+//const Int32 PduPart::P_DOMAIN;
+//const Int32 PduPart::P_PATH;
+//const Int32 PduPart::P_CONTENT_TYPE;
+//const Int32 PduPart::P_CONTENT_LOCATION;
+//const Int32 PduPart::P_CONTENT_ID;
+//const Int32 PduPart::P_DEP_CONTENT_DISPOSITION;
+//const Int32 PduPart::P_CONTENT_DISPOSITION;
+//const Int32 PduPart::P_CONTENT_TRANSFER_ENCODING;
+//const String PduPart::CONTENT_TRANSFER_ENCODING("Content-Transfer-Encoding");
+//const String PduPart::P_BINARY("binary");
+//const String PduPart::P_7BIT("7bit");
+//const String PduPart::P_8BIT("8bit");
+//const String PduPart::P_BASE64("base64");
+//const String PduPart::P_QUOTED_PRINTABLE("quoted-printable");
+//const AutoPtr<ArrayOf<Byte> > PduPart::DISPOSITION_FROM_DATA = String("from-data").GetBytes();
+//const AutoPtr<ArrayOf<Byte> > PduPart::DISPOSITION_ATTACHMENT = String("attachment").GetBytes();
+//const AutoPtr<ArrayOf<Byte> > PduPart::DISPOSITION_INLINE = String("inline").GetBytes();
+//const Int32 PduPart::P_DISPOSITION_FROM_DATA;
+//const Int32 PduPart::P_DISPOSITION_ATTACHMENT;
+//const Int32 PduPart::P_DISPOSITION_INLINE;
 const String PduPart::TAG("PduPart");
 
 PduPart::PduPart()

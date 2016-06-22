@@ -13,7 +13,11 @@ namespace Pdu {
 //=====================================================================
 CAR_INTERFACE_IMPL(ReadRecInd, GenericPdu, IReadRecInd);
 
-ReadRecInd::ReadRecInd(
+ReadRecInd::ReadRecInd()
+{
+}
+
+ECode ReadRecInd::constructor(
     /* [in] */ IEncodedStringValue* from,
     /* [in] */ ArrayOf<Byte>* messageId,
     /* [in] */ Int32 mmsVersion,
@@ -28,13 +32,15 @@ ReadRecInd::ReadRecInd(
     // setMmsVersion(mmsVersion);
     // setTo(to);
     // setReadStatus(readStatus);
+    return NOERROR;
 }
 
-ReadRecInd::ReadRecInd(
+ECode ReadRecInd::constructor(
     /* [in] */ IPduHeaders* headers)
 {
     // ==================before translated======================
     // super(headers);
+    return NOERROR;
 }
 
 ECode ReadRecInd::GetDate(

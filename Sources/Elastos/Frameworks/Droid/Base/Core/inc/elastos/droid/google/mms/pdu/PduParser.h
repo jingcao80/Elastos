@@ -1,6 +1,7 @@
 #ifndef __ELASTOS_DROID_GOOGLE_MMS_PDU_PDUPARSER_H__
 #define __ELASTOS_DROID_GOOGLE_MMS_PDU_PDUPARSER_H__
 
+#include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
@@ -31,12 +32,13 @@ class PduParser
 public:
     CAR_INTERFACE_DECL();
 
+    PduParser();
     /**
       * Constructor.
       *
       * @param pduDataStream pdu data to be parsed
       */
-    PduParser(
+    CARAPI constructor(
         /* [in] */ ArrayOf<Byte>* pduDataStream);
 
     /**

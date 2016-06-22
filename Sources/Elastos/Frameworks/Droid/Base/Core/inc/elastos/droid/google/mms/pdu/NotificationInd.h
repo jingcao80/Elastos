@@ -23,6 +23,7 @@ class NotificationInd
 public:
     CAR_INTERFACE_DECL();
 
+    NotificationInd();
     /**
       * Empty constructor.
       * Since the Pdu corresponding to this class is constructed
@@ -32,14 +33,14 @@ public:
       * @throws InvalidHeaderValueException if error occurs.
       *         RuntimeException if an undeclared error occurs.
       */
-    NotificationInd();
+    CARAPI constructor();
 
     /**
       * Constructor with given headers.
       *
       * @param headers Headers for this PDU.
       */
-    NotificationInd(
+    CARAPI constructor(
         /* [in] */ IPduHeaders* headers);
 
     /**

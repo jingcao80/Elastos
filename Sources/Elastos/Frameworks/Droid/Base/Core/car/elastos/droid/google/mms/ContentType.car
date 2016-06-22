@@ -66,6 +66,9 @@ module {
         const String APP_DRM_CONTENT   = "application/vnd.oma.drm.content";
         const String APP_DRM_MESSAGE   = "application/vnd.oma.drm.message";
 
+    }
+
+    interface IContentTypeHelper {
         IsSupportedType(
             [in] String contentType,
             [out] Boolean* result);
