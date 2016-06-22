@@ -10,7 +10,7 @@ namespace Pdu {
 //=====================================================================
 //                           PduContentTypes
 //=====================================================================
-AutoPtr< ArrayOf<String> > PduContentTypes::contentTypes = PduContentTypes::MiddleInitContenttypes();
+// AutoPtr< ArrayOf<String> > PduContentTypes::contentTypes = PduContentTypes::MiddleInitContenttypes();
 
 AutoPtr< ArrayOf<String> > PduContentTypes::MiddleInitContenttypes()
 {

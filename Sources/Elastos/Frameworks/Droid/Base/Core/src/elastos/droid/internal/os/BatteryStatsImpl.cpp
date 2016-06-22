@@ -56,6 +56,7 @@ using Elastos::Droid::Os::EIID_IBatteryStatsUidSensor;
 using Elastos::Droid::Os::EIID_IBatteryStatsUidPkgServ;
 using Elastos::Droid::Os::EIID_IBatteryStatsUidPkg;
 using Elastos::Droid::Os::EIID_IBatteryStats;
+using Elastos::Droid::Os::EIID_IBatteryStatsUidProc;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::IBatteryManager;
 using Elastos::Droid::Telephony::IDataConnectionRealTimeInfo;
@@ -1743,7 +1744,7 @@ BatteryStatsImpl::Uid::Proc::Proc(
     mSpeedBins = ArrayOf<SamplingCounter*>::Alloc(steps);
 }
 
-CAR_INTERFACE_IMPL_2(BatteryStatsImpl::Uid::Proc, Object, IBatteryStatsImplUidProc, ITimeBaseObs)
+CAR_INTERFACE_IMPL_3(BatteryStatsImpl::Uid::Proc, Object, IBatteryStatsImplUidProc, IBatteryStatsUidProc, ITimeBaseObs)
 
 ECode BatteryStatsImpl::Uid::Proc::OnTimeStarted(
     /* [in] */ Int64 elapsedRealtime,
@@ -1797,9 +1798,12 @@ void BatteryStatsImpl::Uid::Proc::Detach()
     }
 }
 
-Int32 BatteryStatsImpl::Uid::Proc::CountExcessivePowers()
+ECode BatteryStatsImpl::Uid::Proc::CountExcessivePowers(
+    /* [out] */ Int32* power)
 {
-    return mExcessivePower != NULL ? mExcessivePower->GetSize() : 0;
+    VALIDATE_NOT_NULL(power)
+    *power = mExcessivePower != NULL ? mExcessivePower->GetSize() : 0;
+    return NOERROR;
 }
 
 ECode BatteryStatsImpl::Uid::Proc::GetExcessivePower(

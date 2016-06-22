@@ -44,8 +44,8 @@ const String CharacterSets::MIMENAME_BIG5("big5");
 const String CharacterSets::MIMENAME_UCS2("iso-10646-ucs-2");
 const String CharacterSets::MIMENAME_UTF_16("utf-16");
 const String CharacterSets::DEFAULT_CHARSET_NAME(MIMENAME_UTF_8);
-AutoPtr<ArrayOf<Int32> > CharacterSets::MIBENUM_NUMBERS = CharacterSets::MiddleInitMibenumNumbers();
-AutoPtr<ArrayOf<String> > CharacterSets::MIME_NAMES = CharacterSets::MiddleInitMimeNames();
+// AutoPtr<ArrayOf<Int32> > CharacterSets::MIBENUM_NUMBERS = CharacterSets::MiddleInitMibenumNumbers();
+// AutoPtr<ArrayOf<String> > CharacterSets::MIME_NAMES = CharacterSets::MiddleInitMimeNames();
 AutoPtr<IHashMap> CharacterSets::MIBENUM_TO_NAME_MAP;
 AutoPtr<IHashMap> CharacterSets::NAME_TO_MIBENUM_MAP;
 

@@ -13,7 +13,8 @@ namespace Pdu {
 const Int32 Base64::FOURBYTE;
 const Byte Base64::PAD = (byte)'=';
 const Int32 Base64::BASELENGTH;
-AutoPtr<ArrayOf<Byte> > Base64::base64Alphabet = Base64::MiddleInitBase64alphabet();
+// TODO
+// AutoPtr<ArrayOf<Byte> > Base64::base64Alphabet = Base64::MiddleInitBase64alphabet();
 
 AutoPtr<ArrayOf<Byte> > Base64::DecodeBase64(
     /* [in] */ ArrayOf<Byte>* base64Data)

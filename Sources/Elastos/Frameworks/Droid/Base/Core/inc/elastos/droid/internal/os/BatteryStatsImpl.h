@@ -30,6 +30,7 @@ using Elastos::Droid::Os::IBatteryStatsUidSensor;
 using Elastos::Droid::Os::IBatteryStatsUidPkgServ;
 using Elastos::Droid::Os::IBatteryStatsTimer;
 using Elastos::Droid::Os::IBatteryStatsUidPkg;
+using Elastos::Droid::Os::IBatteryStatsUidProc;
 using Elastos::Droid::Os::IBatteryStatsUidProcExcessivePower;
 using Elastos::Droid::Net::INetworkStats;
 using Elastos::Droid::Net::INetworkStatsEntry;
@@ -912,6 +913,7 @@ public:
         class Proc
             : public Object
             , public IBatteryStatsImplUidProc
+            , public IBatteryStatsUidProc
             , public ITimeBaseObs
         {
         public:
@@ -931,7 +933,8 @@ public:
                 /* [in] */ Int64 baseUptime,
                 /* [in] */ Int64 baseRealtime);
 
-            CARAPI_(Int32) CountExcessivePowers();
+            CARAPI CountExcessivePowers(
+                /* [out] */ Int32* powers);
 
             CARAPI GetExcessivePower(
                 /* [in] */ Int32 i,
