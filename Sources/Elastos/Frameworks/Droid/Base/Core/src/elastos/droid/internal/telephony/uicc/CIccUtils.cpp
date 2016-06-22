@@ -1,5 +1,5 @@
 #include "elastos/droid/internal/telephony/uicc/CIccUtils.h"
-#include "elastos/droid/internal/telephony/uicc/IccUtils.h"
+#include "elastos/droid/internal/telephony/uicc/UiccIccUtils.h"
 #include "Elastos.Droid.Graphics.h"
 
 namespace Elastos {
@@ -18,7 +18,7 @@ ECode CIccUtils::BcdToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = IccUtils::BcdToString(data, offset, length);
+    *result = UiccIccUtils::BcdToString(data, offset, length);
     return NOERROR;
 }
 
@@ -29,7 +29,7 @@ ECode CIccUtils::CdmaBcdToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = IccUtils::CdmaBcdToString(data, offset, length);
+    *result = UiccIccUtils::CdmaBcdToString(data, offset, length);
     return NOERROR;
 }
 
@@ -38,7 +38,7 @@ ECode CIccUtils::GsmBcdByteToInt(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = IccUtils::GsmBcdByteToInt(b);
+    *result = UiccIccUtils::GsmBcdByteToInt(b);
     return NOERROR;
 }
 
@@ -47,7 +47,7 @@ ECode CIccUtils::CdmaBcdByteToInt(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = IccUtils::CdmaBcdByteToInt(b);
+    *result = UiccIccUtils::CdmaBcdByteToInt(b);
     return NOERROR;
 }
 
@@ -58,7 +58,7 @@ ECode CIccUtils::AdnStringFieldToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = IccUtils::AdnStringFieldToString(data, offset, length);
+    *result = UiccIccUtils::AdnStringFieldToString(data, offset, length);
     return NOERROR;
 }
 
@@ -67,7 +67,7 @@ ECode CIccUtils::HexCharToInt(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = IccUtils::HexCharToInt(c);
+    *result = UiccIccUtils::HexCharToInt(c);
     return NOERROR;
 }
 
@@ -76,7 +76,7 @@ ECode CIccUtils::HexStringToBytes(
     /* [out, callee] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<ArrayOf<Byte> > bytes = IccUtils::HexStringToBytes(s);
+    AutoPtr<ArrayOf<Byte> > bytes = UiccIccUtils::HexStringToBytes(s);
     *result = bytes;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -87,7 +87,7 @@ ECode CIccUtils::BytesToHexString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = IccUtils::BytesToHexString(bytes);
+    *result = UiccIccUtils::BytesToHexString(bytes);
     return NOERROR;
 }
 
@@ -98,7 +98,7 @@ ECode CIccUtils::NetworkNameToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = IccUtils::NetworkNameToString(data, offset, length);
+    *result = UiccIccUtils::NetworkNameToString(data, offset, length);
     return NOERROR;
 }
 
@@ -108,7 +108,7 @@ ECode CIccUtils::ParseToBnW(
     /* [out] */ IBitmap** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<IBitmap> bm = IccUtils::ParseToBnW(data, length);
+    AutoPtr<IBitmap> bm = UiccIccUtils::ParseToBnW(data, length);
     *result = bm;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -121,7 +121,7 @@ ECode CIccUtils::ParseToRGB(
     /* [out] */ IBitmap** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<IBitmap> bm = IccUtils::ParseToRGB(data, length, transparency);
+    AutoPtr<IBitmap> bm = UiccIccUtils::ParseToRGB(data, length, transparency);
     *result = bm;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -132,7 +132,7 @@ ECode CIccUtils::StringToAdnStringField(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<ArrayOf<Byte> > array = IccUtils::StringToAdnStringField(alphaTag);
+    AutoPtr<ArrayOf<Byte> > array = UiccIccUtils::StringToAdnStringField(alphaTag);
     *result = array;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -144,7 +144,7 @@ ECode CIccUtils::StringToAdnStringField(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<ArrayOf<Byte> > array = IccUtils::StringToAdnStringField(alphaTag, isUcs2);
+    AutoPtr<ArrayOf<Byte> > array = UiccIccUtils::StringToAdnStringField(alphaTag, isUcs2);
     *result = array;
     REFCOUNT_ADD(*result);
     return NOERROR;

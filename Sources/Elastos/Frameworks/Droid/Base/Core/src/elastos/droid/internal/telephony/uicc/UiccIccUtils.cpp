@@ -1,7 +1,7 @@
 
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Internal.h"
-#include "elastos/droid/internal/telephony/uicc/IccUtils.h"
+#include "elastos/droid/internal/telephony/uicc/UiccIccUtils.h"
 
 namespace Elastos {
 namespace Droid {
@@ -10,13 +10,13 @@ namespace Telephony {
 namespace Uicc {
 
 //=====================================================================
-//                               IccUtils
+//                               UiccIccUtils
 //=====================================================================
-CAR_INTERFACE_IMPL(IccUtils, Object, IIccUtils);
+CAR_INTERFACE_IMPL(UiccIccUtils, Object, IIccUtils);
 
-const String IccUtils::LOGTAG("IccUtils");
+const String UiccIccUtils::LOGTAG("UiccIccUtils");
 
-String IccUtils::BcdToString(
+String UiccIccUtils::BcdToString(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 length)
@@ -44,7 +44,7 @@ String IccUtils::BcdToString(
     return String("");
 }
 
-String IccUtils::CdmaBcdToString(
+String UiccIccUtils::CdmaBcdToString(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 length)
@@ -71,7 +71,7 @@ String IccUtils::CdmaBcdToString(
     return String("");
 }
 
-Int32 IccUtils::GsmBcdByteToInt(
+Int32 UiccIccUtils::GsmBcdByteToInt(
     /* [in] */ Byte b)
 {
     // ==================before translated======================
@@ -91,7 +91,7 @@ Int32 IccUtils::GsmBcdByteToInt(
     return 0;
 }
 
-Int32 IccUtils::CdmaBcdByteToInt(
+Int32 UiccIccUtils::CdmaBcdByteToInt(
     /* [in] */ Byte b)
 {
     // ==================before translated======================
@@ -111,7 +111,7 @@ Int32 IccUtils::CdmaBcdByteToInt(
     return 0;
 }
 
-String IccUtils::AdnStringFieldToString(
+String UiccIccUtils::AdnStringFieldToString(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 length)
@@ -208,7 +208,7 @@ String IccUtils::AdnStringFieldToString(
     return String("");
 }
 
-Int32 IccUtils::HexCharToInt(
+Int32 UiccIccUtils::HexCharToInt(
     /* [in] */ Char16 c)
 {
     // ==================before translated======================
@@ -221,7 +221,7 @@ Int32 IccUtils::HexCharToInt(
     return 0;
 }
 
-AutoPtr< ArrayOf<Byte> > IccUtils::HexStringToBytes(
+AutoPtr< ArrayOf<Byte> > UiccIccUtils::HexStringToBytes(
     /* [in] */ const String& s)
 {
     // ==================before translated======================
@@ -244,7 +244,7 @@ AutoPtr< ArrayOf<Byte> > IccUtils::HexStringToBytes(
     return empty;
 }
 
-String IccUtils::BytesToHexString(
+String UiccIccUtils::BytesToHexString(
     /* [in] */ ArrayOf<Byte>* bytes)
 {
     // ==================before translated======================
@@ -269,7 +269,7 @@ String IccUtils::BytesToHexString(
     return String("");
 }
 
-String IccUtils::NetworkNameToString(
+String UiccIccUtils::NetworkNameToString(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 length)
@@ -320,7 +320,7 @@ String IccUtils::NetworkNameToString(
     return String("");
 }
 
-AutoPtr<IBitmap> IccUtils::ParseToBnW(
+AutoPtr<IBitmap> UiccIccUtils::ParseToBnW(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 length)
 {
@@ -353,7 +353,7 @@ AutoPtr<IBitmap> IccUtils::ParseToBnW(
     return empty;
 }
 
-AutoPtr<IBitmap> IccUtils::ParseToRGB(
+AutoPtr<IBitmap> UiccIccUtils::ParseToRGB(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 length,
     /* [in] */ Boolean transparency)
@@ -388,7 +388,7 @@ AutoPtr<IBitmap> IccUtils::ParseToRGB(
     return empty;
 }
 
-AutoPtr< ArrayOf<Byte> > IccUtils::StringToAdnStringField(
+AutoPtr< ArrayOf<Byte> > UiccIccUtils::StringToAdnStringField(
     /* [in] */ const String& alphaTag)
 {
     // ==================before translated======================
@@ -406,7 +406,7 @@ AutoPtr< ArrayOf<Byte> > IccUtils::StringToAdnStringField(
     return empty;
 }
 
-AutoPtr< ArrayOf<Byte> > IccUtils::StringToAdnStringField(
+AutoPtr< ArrayOf<Byte> > UiccIccUtils::StringToAdnStringField(
     /* [in] */ const String& alphaTag,
     /* [in] */ Boolean isUcs2)
 {
@@ -425,7 +425,7 @@ AutoPtr< ArrayOf<Byte> > IccUtils::StringToAdnStringField(
     return empty;
 }
 
-Int32 IccUtils::BitToRGB(
+Int32 UiccIccUtils::BitToRGB(
     /* [in] */ Int32 bit)
 {
     // ==================before translated======================
@@ -438,7 +438,7 @@ Int32 IccUtils::BitToRGB(
     return 0;
 }
 
-AutoPtr< ArrayOf<Int32> > IccUtils::MapTo2OrderBitColor(
+AutoPtr< ArrayOf<Int32> > UiccIccUtils::MapTo2OrderBitColor(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 valueIndex,
     /* [in] */ Int32 length,
@@ -485,7 +485,7 @@ AutoPtr< ArrayOf<Int32> > IccUtils::MapTo2OrderBitColor(
     return empty;
 }
 
-AutoPtr< ArrayOf<Int32> > IccUtils::MapToNon2OrderBitColor(
+AutoPtr< ArrayOf<Int32> > UiccIccUtils::MapToNon2OrderBitColor(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 valueIndex,
     /* [in] */ Int32 length,
@@ -507,7 +507,7 @@ AutoPtr< ArrayOf<Int32> > IccUtils::MapToNon2OrderBitColor(
     return empty;
 }
 
-AutoPtr< ArrayOf<Int32> > IccUtils::GetCLUT(
+AutoPtr< ArrayOf<Int32> > UiccIccUtils::GetCLUT(
     /* [in] */ ArrayOf<Byte>* rawData,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 number)

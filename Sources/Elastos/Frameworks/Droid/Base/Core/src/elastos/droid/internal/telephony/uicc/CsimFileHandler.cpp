@@ -62,6 +62,7 @@ String CsimFileHandler::GetEFPath(
     // }
     // return path;
     assert(0);
+    return String(NULL);
 }
 
 ECode CsimFileHandler::Logd(

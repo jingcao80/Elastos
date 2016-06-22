@@ -1,5 +1,5 @@
-#ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_UICC_ICCUTILS_H__
-#define __ELASTOS_DROID_INTERNAL_TELEPHONY_UICC_ICCUTILS_H__
+#ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_UICC_UICCICCUTILS_H__
+#define __ELASTOS_DROID_INTERNAL_TELEPHONY_UICC_UICCICCUTILS_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
@@ -25,7 +25,7 @@ namespace Uicc {
 /**
   * Various methods, useful for dealing with SIM data.
   */
-class IccUtils
+class UiccIccUtils
     : public Object
     , public IIccUtils
 {
@@ -218,5 +218,5 @@ public:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_INTERNAL_TELEPHONY_UICC_ICCUTILS_H__
+#endif // __ELASTOS_DROID_INTERNAL_TELEPHONY_UICC_UICCICCUTILS_H__
 
