@@ -92,6 +92,9 @@ module
             [in] ArrayOf<IComplex*>* args,
             [out] IComplex** complex);
 
+        CheckArity(
+            [in] Int32 nArgs);
+
     }
 
     } // namespace Arity

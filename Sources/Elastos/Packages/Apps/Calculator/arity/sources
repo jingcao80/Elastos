@@ -11,6 +11,9 @@ INCLUDES += $(MAKEDIR)/src
 VPATH += $(MAKEDIR)/src/org/javia/arity
 
 SOURCES += Org.Javia.Arity.car
+SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += Elastos.Droid.Core.cpp
+
 SOURCES += Function.cpp
 SOURCES += ContextFunction.cpp
 SOURCES += CompiledFunction.cpp
@@ -19,10 +22,26 @@ SOURCES += arity.cpp
 SOURCES += CComplex.cpp
 SOURCES += MoreMath.cpp
 SOURCES += CSymbols.cpp
+SOURCES += Symbol.cpp
+SOURCES += Util.cpp
+SOURCES += VM.cpp
+SOURCES += Lexer.cpp
+SOURCES += Token.cpp
+SOURCES += SimpleCodeGen.cpp
+SOURCES += OptCodeGen.cpp
+SOURCES += FunctionStack.cpp
+SOURCES += ByteStack.cpp
+SOURCES += DoubleStack.cpp
+SOURCES += RPN.cpp
+SOURCES += Compiler.cpp
+SOURCES += CFunctionAndName.cpp
+SOURCES += CConstant.cpp
+SOURCES += DeclarationParser.cpp
+SOURCES += Declaration.cpp
+SOURCES += CDerivative.cpp
 
 LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
-LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
 LIBRARIES += -lm -lcutils -licuuc -llog -lutils -landroidfw
 

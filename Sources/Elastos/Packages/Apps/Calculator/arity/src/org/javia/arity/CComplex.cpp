@@ -696,6 +696,6 @@ void CComplex::Sqrt1z()
     Sqrt();
 }
 
-} // namespace Calculator2
-} // namespace Droid
-} // namespace Elastos
+} // namespace Arity
+} // namespace Javia
+} // namespace Org

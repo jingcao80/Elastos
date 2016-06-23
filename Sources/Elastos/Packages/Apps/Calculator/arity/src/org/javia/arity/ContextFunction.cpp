@@ -183,6 +183,6 @@ ECode ContextFunction::Eval(
     return Eval(args, context, complex);
 }
 
-} // namespace Calculator2
-} // namespace Droid
-} // namespace Elastos
+} // namespace Arity
+} // namespace Javia
+} // namespace Org

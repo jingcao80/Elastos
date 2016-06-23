@@ -7,18 +7,29 @@ module
     merge("car/org/javia/arity/ContextFunction.car");
     merge("car/org/javia/arity/CompiledFunction.car");
     merge("car/org/javia/arity/Complex.car");
+    merge("car/org/javia/arity/Symbols.car")
+    merge("car/org/javia/arity/Symbol.car");
+    merge("car/org/javia/arity/FunctionAndName.car");
+    merge("car/org/javia/arity/Constant.car");
+    merge("car/org/javia/arity/EvalContext.car");
+    merge("car/org/javia/arity/Derivative.car");
 
     interface Org.Javia.Arity.IFunction;
     interface Org.Javia.Arity.IContextFunction;
     interface Org.Javia.Arity.ICompiledFunction;
     interface Org.Javia.Arity.IComplex;
+    interface Org.Javia.Arity.ISymbols;
+    interface Org.Javia.Arity.ISymbol;
+    interface Org.Javia.Arity.IFunctionAndName;
+    interface Org.Javia.Arity.IConstant;
+    interface Org.Javia.Arity.IEvalContext;
+    interface Org.Javia.Arity.IDerivative;
 
     namespace Org {
     namespace Javia {
     namespace Arity {
 
-    class CCompiledFunction
-    {
+    class CCompiledFunction {
         constructor(
             [in] Int32 arity,
             [in] ArrayOf<Byte>* code,
@@ -54,6 +65,36 @@ module
         constructor();
 
         interface ISymbols;
+    }
+
+    class CFunctionAndName {
+        constructor(
+            [in] IFunction* fun,
+            [in] String name);
+
+        interface IFunctionAndName;
+    }
+
+    class CConstant {
+        constructor(
+            [in] IComplex* o);
+
+        interface IConstant;
+        interface IFunction
+    }
+
+    class CEvalContext {
+        constructor();
+
+        interface IEvalContext;
+    }
+
+    class CDerivative {
+        constructor(
+            [in] IFunction* f);
+
+        interface IDerivative;
+        interface IFunction
     }
 
     } // namespace Arity

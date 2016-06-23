@@ -1,0 +1,20 @@
+module
+{
+
+    namespace Org {
+    namespace Javia {
+    namespace Arity {
+
+    /**
+        Encapsulates together a function and its name.
+        Is used to return both the function and its name
+        from Compiler.compileWithName().
+     */
+    interface IFunctionAndName
+    {
+    }
+
+    } // namespace Arity
+    } // namespace Javia
+    } // namespace Org
+}

@@ -161,6 +161,6 @@ ECode Function::CheckArity(
     return NOERROR;
 }
 
-} // namespace Calculator2
-} // namespace Droid
-} // namespace Elastos
+} // namespace Arity
+} // namespace Javia
+} // namespace Org

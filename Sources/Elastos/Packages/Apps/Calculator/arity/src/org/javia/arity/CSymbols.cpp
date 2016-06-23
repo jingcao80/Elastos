@@ -1,7 +1,6 @@
 
 #include "org/javia/arity/CSymbols.h"
 #include "org/javia/arity/CCompiler.h"
-#include "org/javia/arity/CSymbol.h"
 #include "org/javia/arity/VM.h"
 #include "org/javia/arity/CFunctionAndName.h"
 #include <elastos/core/Math.h>
@@ -10,6 +9,11 @@
 
 using Org::Javia::Arity::EIID_ISymbols;
 using Elastos::Core::Autolock;
+using Elastos::Utility::CHashTable;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::CStack;
+using Elastos::Utility::ISet;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Etl::Vector;
 
 namespace Org {
@@ -26,7 +30,7 @@ CSymbols::StaticInitializer::StaticInitializer()
     Int32 arity;
     for (Int32 i = 0; i < VM::BUILTINS->GetLength(); ++i) {
         Byte b = (*VM::BUILTINS)[i];
-        vect.PushBack(CSymbol::MakeVmOp((*VM::OPCODENAME)[b], b));
+        vect.PushBack(Symbol::MakeVmOp((*VM::OPCODENAME)[b], b));
     }
 
     AutoPtr<ArrayOf<String> > IMPLICIT_ARGS = ArrayOf<String>::Alloc(3);
@@ -34,36 +38,36 @@ CSymbols::StaticInitializer::StaticInitializer()
     (*IMPLICIT_ARGS)[0] = String("y");
     (*IMPLICIT_ARGS)[0] = String("z");
     for (Int32 i = 0; i < IMPLICIT_ARGS->GetLength(); ++i) {
-        vect.PushBack(CSymbol::MakeArg((*IMPLICIT_ARGS)[i], (Byte)i));
+        vect.PushBack(Symbol::MakeArg((*IMPLICIT_ARGS)[i], (Byte)i));
     }
 
     AutoPtr<ISymbol> s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12;
-    CSymbol::New(String("pi"), Elastos::Core::Math::PI, TRUE, (ISymbol**)&s1);
+    s1 = new Symbol(String("pi"), Elastos::Core::Math::PI, TRUE);
     vect.PushBack(s1);
-    CSymbol::New(String("\u03c0"), Elastos::Core::Math::PI, TRUE, (ISymbol**)&s2);
+    s2 = new Symbol(String("\u03c0"), Elastos::Core::Math::PI, TRUE);
     vect.PushBack(s2);
-    CSymbol::New(String("e"), Elastos::Core::Math::E, TRUE, (ISymbol**)&s3);
+    s3 = new Symbol(String("e"), Elastos::Core::Math::E, TRUE);
     vect.PushBack(s3);
 
     Double infinity = Elastos::Core::Math::DOUBLE_POSITIVE_INFINITY;
-    CSymbol::New(String("Infinity"), infinity, TRUE, (ISymbol**)&s4);
+    s4 = new Symbol(String("Infinity"), infinity, TRUE);
     vect.PushBack(s4);
-    CSymbol::New(String("infinity"), infinity, TRUE, (ISymbol**)&s5);
+    s5 = new Symbol(String("infinity"), infinity, TRUE);
     vect.PushBack(s5);
-    CSymbol::New(String("Inf"), infinity, TRUE, (ISymbol**)&s6);
+    s6 = new Symbol(String("Inf"), infinity, TRUE);
     vect.PushBack(s6);
-    CSymbol::New(String("inf"), infinity, TRUE, (ISymbol**)&s7);
+    s7 = new Symbol(String("inf"), infinity, TRUE);
     vect.PushBack(s7);
-    CSymbol::New(String("\u221e"), infinity, TRUE, (ISymbol**)&s8);
+    s8 = new Symbol(String("\u221e"), infinity, TRUE);
     vect.PushBack(s8);
-    CSymbol::New(String("NaN"), Elastos::Core::Math::DOUBLE_NAN, TRUE, (ISymbol**)&s9);
+    s9 = new Symbol(String("NaN"), Elastos::Core::Math::DOUBLE_NAN, TRUE);
     vect.PushBack(s9);
-    CSymbol::New(String("nan"), Elastos::Core::Math::DOUBLE_NAN, TRUE, (ISymbol**)&s10);
+    s10 = new Symbol(String("nan"), Elastos::Core::Math::DOUBLE_NAN, TRUE);
     vect.PushBack(s10);
 
-    CSymbol::New(String("i"), 0, 1, TRUE, (ISymbol**)&s11);
+    s11 = new Symbol(String("i"), 0, 1, TRUE);
     vect.PushBack(s11);
-    CSymbol::New(String("j"), 0, 1, FALSE, (ISymbol**)&s12);
+    s12 = new Symbol(String("j"), 0, 1, FALSE);
     vect.PushBack(s12);
 
     Int32 size = vect->GetSize();
@@ -81,13 +85,11 @@ CSymbols::StaticInitializer::StaticInitializer()
 
 AutoPtr<ArrayOf<ISymbol*> > CSymbols::sBuiltin;
 
-static AutoPtr<ISymbol> InitShell()
+static AutoPtr<Symbol> InitShell()
 {
-    AutoPtr<ISymbol> symbol;
-    CSymbol::New(NULL, 0, FALSE, (ISymbol**)&symbol);
-    return symbol;
+    return new Symbol(NULL, 0, FALSE);
 }
-const AutoPtr<ISymbol> CSymbols::SHELL = InitShell();
+const AutoPtr<Symbol> CSymbols::SHELL = InitShell();
 
 AutoPtr<ArrayOf<String> > InitDefines()
 {
@@ -119,6 +121,8 @@ CSymbols::StaticInitializer CSymbols::sInitializer;
 
 CSymbols::CSymbols()
 {
+    CHashTable::New((IHashTable**)&mSymbols);
+    CStack::New((IStack**)&mFrames);
     mCompiler = new Compiler();
 }
 
@@ -161,7 +165,7 @@ ECode CSymbols::Eval(
     *result = 0;
     Autolock Lock(this);
     AutoPtr<IFunction> func;
-    FAIL_RETURN(mCompiler->CompileSimple((ISymbols*)this, expression, (IFunction**)&func))
+    FAIL_RETURN(mCompiler->CompileSimple(this, expression, (IFunction**)&func))
     return func->Eval(result);
 }
 
@@ -172,7 +176,7 @@ ECode CSymbols::EvalComplex(
     VALIDATE_NOT_NULL(complex)
     Autolock Lock(this);
     *complex = NULL;
-    FAIL_RETURN(mCompiler->CompileSimple((ISymbols*)this, expression, (IFunction**)&func))
+    FAIL_RETURN(mCompiler->CompileSimple(this, expression, (IFunction**)&func))
     return func->EvalComplex(complex);
 }
 
@@ -182,7 +186,7 @@ ECode CSymbols::CompileWithName(
 {
     VALIDATE_NOT_NULL(fan)
     Autolock Lock(this);
-    return mCompiler->CompileWithName((ISymbols)this, source, fan);
+    return mCompiler->CompileWithName(this, source, fan);
 }
 
 ECode CSymbols::Compile(
@@ -191,7 +195,7 @@ ECode CSymbols::Compile(
 {
     VALIDATE_NOT_NULL(func)
     Autolock Lock(this);
-    return mCompiler->Compile((ISymbols)this, source, func);
+    return mCompiler->Compile(this, source, func);
 }
 
 ECode CSymbols::Define(
@@ -206,7 +210,7 @@ ECode CSymbols::Define(
     }
     else {
         AutoPtr<ISymbol> s;
-        CSymbol::New(name, function, (ISymbol**)&s);
+        s1 = new Symbol(name, function, (ISymbol**)&s);
         Add(s);
     }
     return NOERROR;
@@ -229,7 +233,7 @@ ECode CSymbols::Define(
 {
     Autolock Lock(this);
     AutoPtr<ISymbol> s;
-    CSymbol::New(name, value, 0, FALSE, (ISymbol**)&s);
+    s1 = new Symbol(name, value, 0, FALSE, (ISymbol**)&s);
     Add(s);
     return NOERROR;
 }
@@ -241,7 +245,7 @@ ECode CSymbols::Define(
     Autolock Lock(this);
     AutoPtr<CComplex> obj = (CComplex*)value;
     AutoPtr<ISymbol> s;
-    CSymbol::New(name, obj->mRe, obj->mIm, FALSE, (ISymbol**)&s);
+    s1 = new Symbol(name, obj->mRe, obj->mIm, FALSE, (ISymbol**)&s);
     Add(s);
     return NOERROR;
 }
@@ -249,7 +253,7 @@ ECode CSymbols::Define(
 ECode CSymbols::PushFrame()
 {
     Autolock Lock(this);
-    mFrames.Push(mDelta);
+    mFrames->Push(mDelta);
     mDelta = NULL;
     return NOERROR;
 }
@@ -258,35 +262,41 @@ ECode CSymbols::PopFrame()
 {
     Autolock Lock(this);
     if (mDelta != NULL) {
-        HashSet<AutoPtr<ISymbol> >::Iterator it = mDelta->Begin();
-        for (; it != mDelta->End(); ++it) {
-            AutoPtr<ISymbol> previous = *it;
-            Boolean isEmpty;
-            if (previous->IsEmpty(&isEmpty), isEmpty) {
-                mSymbols.Erase(previous);
+        AutoPtr<IIterator> it;
+        mDelta->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> next;
+            it->GetNext((IInterface**)&next);
+            AutoPtr<ISymbol> previous = ISymbol::Probe(next);
+            if (((Symbol*)previous)->IsEmpty()) {
+                mSymbols->Remove(previous);
             }
             else {
-                mSymbols[previous] = previous;
+                mSymbols->Put(previous, previous);
             }
         }
     }
-    mDelta = mFrames.GetTop();
-    mFrames.Pop();
+    AutoPtr<IInterface> pop;
+    mFrames->Pop((IInterface**)&pop);
+    mDelta = IHashSet::Probe(pop);
+    return NOERROR;
 }
 
 ECode CSymbols::GetTopFrame(
     /* [out, callee] */ ArrayOf<ISymbol*>** topFrame)
 {
     VALIDATE_NOT_NULL(topFrame)
-    AutoPtr<ArrayOf<ISymbol*> > frames = ArrayOf<ISymbol*>::Alloc(0);
+    *topFrame = ArrayOf<ISymbol*>::Alloc(0);
     if (mDelta != NULL) {
-        frames = ArrayOf<ISymbol*>::Alloc(mDelta->GetSize());
-        HashSet<AutoPtr<ISymbol> >::Iterator it = mDelta->Begin();
-        for (Int32 i = 0; it != mDelta->End(); ++it, ++i) {
-            frames->Set(i, *it);
+        AutoPtr<ArrayOf<IInterface*> > temp = ArrayOf<IInterface*>::Alloc(0);
+        AutoPtr<ArrayOf<IInterface*> > out;
+        ISet::Probe(mDelta)->ToArray(temp, (ArrayOf<IInterface*>**)&out);
+        *topFrame = ArrayOf<ISymbol*>::Alloc(out->GetLength());
+        for (Int32 i = 0; i < out->GetLength(); ++i) {
+            (*topFrame)->Set(i, ISymbol::Probe((*out)[i]));
         }
     }
-    *topFrame= frames;
     REFCOUNT_ADD(*topFrame)
     return NOERROR;
 }
@@ -295,11 +305,16 @@ ECode CSymbols::GetAllSymbols(
     /* [out, callee] */ ArrayOf<ISymbol*>** symbols)
 {
     VALIDATE_NOT_NULL(symbols)
-    Int32 size = mSymbols.GetSize();
+    Int32 size;
+    mSymbols->GetSize(&size);
+    AutoPtr<ArrayOf<IInterface*> > ret = ArrayOf<IInterface*>::Alloc(size);
     *symbols = ArrayOf<ISymbol*>::Alloc(size);
-    Hashtable<AutoPtr<ISymbol>, AutoPtr<ISymbol> >::Iterator it = mSymbols.Begin();
-    for (Int32 i = 0; it != mSymbols.End(); ++it, ++i) {
-        (*symbols)->Set(i, it->mFirst);
+    AutoPtr<ISet> set;
+    mSymbols->GetKeySet((ISet**)&set);
+    AutoPtr<ArrayOf<IInterface*> > out;
+    set->ToArray(ret, (ArrayOf<IInterface*>**)&out);
+    for (Int32 i = 0; i < out->GetLength(); ++i) {
+        (*symbols)->Set(i, ISymbol::Probe((*out)[i]));
     }
     REFCOUNT_ADD(*symbols)
     return NOERROR;
@@ -325,23 +340,47 @@ void CSymbols::AddArguments(
     /* [in] */ ArrayOf<String>* args)
 {
     for (Int32 i = 0; i < args->GetLength(); ++i) {
-        Add(CSymbol::MakeArg((*args)[i], (Byte)i));
+        Add(Symbol::MakeArg((*args)[i], (Byte)i));
     }
 }
 
 void CSymbols::Add(
-    /* [in] */ ISymbol* s);
+    /* [in] */ ISymbol* s)
+{
+    AutoPtr<IInterface> temp;
+    mSymbols->Put(s, s, (IInterface**)&temp);
+    AutoPtr<ISymbol> previous = ISymbol::Probe(temp);
+    AutoPtr<Symbol> obj = (Symbol*)previous.Get();
+    if (previous != NULL && obj->mIsConst) {
+        mSymbols->Put(previous, previous);
+        return NOERROR;
+    }
+    if (mDelta == NULL) {
+        CHashSet::New((IHashSet**)&mDelta);
+    }
+    Boolean contains;
+    if (mDelta->Contains(s, &contains), !contains) {
+        mDelta->Add(previous != NULL ? previous : Symbol::NewEmpty(s));
+    }
+}
 
 AutoPtr<ISymbol> CSymbols::Lookup(
     /* [in] */ const String& name,
     /* [in] */ Int32 arity)
 {
     Autolock Lock(this);
+    SHELL->SetKey(name, arity);
+    AutoPtr<IInterface> value;
+    mSymbols->Get((ISymbol*)SHELL.Get(), (IInterface**)&value);
+    return ISymbol::Probe(value);
 }
 
 AutoPtr<ISymbol> CSymbols::LookupConst(
-    /* [in] */ const String& name);
+    /* [in] */ const String& name)
+{
+    return Lookup(name, Symbol::CONST_ARITY);
+}
 
-} // namespace Calculator2
-} // namespace Droid
-} // namespace Elastos
+} // namespace Arity
+} // namespace Javia
+} // namespace Org

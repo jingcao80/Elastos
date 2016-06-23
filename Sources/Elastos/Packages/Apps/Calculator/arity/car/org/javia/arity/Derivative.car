@@ -1,0 +1,20 @@
+module
+{
+
+    namespace Org {
+    namespace Javia {
+    namespace Arity {
+
+    // f'(x)=Im(f(x+i*h)/h)
+    /**
+     * @involve
+     * interface IFunction;
+     */
+    interface IDerivative
+    {
+    }
+
+    } // namespace Arity
+    } // namespace Javia
+    } // namespace Org
+}

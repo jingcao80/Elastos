@@ -1,0 +1,22 @@
+module
+{
+
+    namespace Org {
+    namespace Javia {
+    namespace Arity {
+
+    interface ISymbol
+    {
+
+        GetName(
+            [out] String* name);
+
+        GetArity(
+            [out] Int32* arity);
+
+    }
+
+    } // namespace Arity
+    } // namespace Javia
+    } // namespace Org
+}

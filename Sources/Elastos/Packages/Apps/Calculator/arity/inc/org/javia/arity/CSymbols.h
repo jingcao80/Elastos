@@ -3,14 +3,13 @@
 #define _ORG_JAVIA_ARITY_CSYMBOLS_H__
 
 #include "_Org_Javia_Arity_CSymbols.h"
+#include "org/javia/arity/Symbol.h"
 #include "org/javia/arity/Compiler.h"
-#include <elastos/utility/etl/HashTable.h>
-#include <elastos/utility/etl/HashSet.h>
-#include <elastos/utility/etl/Stack.h>
+#include "Elastos.CoreLibrary.Utility.h"
 
-using Elastos::Utility::Etl::HashTable;
-using Elastos::Utility::Etl::HashSet;
-using Elastos::Utility::Etl::Stack;
+using Elastos::Utility::IHashTable;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::IStack;
 
 namespace Org {
 namespace Javia {
@@ -176,13 +175,13 @@ public:
 
 private:
     static AutoPtr<ArrayOf<ISymbol*> > sBuiltin;
-    static const AutoPtr<ISymbol> SHELL;
+    static const AutoPtr<Symbol> SHELL;
     static const AutoPtr<ArrayOf<String> > DEFINES;
 
     AutoPtr<Compiler> mCompiler;
-    Hashtable<AutoPtr<ISymbol>, AutoPtr<ISymbol> > mSymbols; //Hashtable<Symbol, Symbol>
-    AutoPtr<HashSet<AutoPtr<ISymbol> > > mDelta;
-    Stack<AutoPtr<HashSet<AutoPtr<ISymbol> > > > mFrames;
+    AutoPtr<IHashTable> mSymbols; //Hashtable<Symbol, Symbol>
+    AutoPtr<IHashSet> mDelta;
+    AutoPtr<IStack> mFrames;
 
     static StaticInitializer sInitializer;
 };

@@ -91,7 +91,7 @@ protected:
     CARAPI_(void) SetDerivative(
         /* [in] */ IFunction* deriv);
 
-protected:
+public:
     String mComment;
 
 private:

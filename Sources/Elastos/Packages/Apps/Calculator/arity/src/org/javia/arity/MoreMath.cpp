@@ -11,9 +11,9 @@ namespace Org {
 namespace Javia {
 namespace Arity {
 
-static const Double LOG2E;
+static const Double MoreMath::LOG2E;
 
-AutoPtr<ArrayOf<Double> > InitGamma()
+static AutoPtr<ArrayOf<Double> > InitGamma()
 {
     AutoPtr<ArrayOf<Double> > doubles = ArrayOf<Double>::Alloc(14);
     (*doubles)[0] = 57.156235665862923517;
@@ -32,9 +32,9 @@ AutoPtr<ArrayOf<Double> > InitGamma()
     (*doubles)[13] = .36899182659531622704e-5;
     return doubles;
 }
-static const AutoPtr<ArrayOf<Double> > GAMMA = InitGamma();
+const AutoPtr<ArrayOf<Double> > MoreMath::GAMMA = InitGamma();
 
-AutoPtr<ArrayOf<Double> > InitFact()
+static AutoPtr<ArrayOf<Double> > InitFact()
 {
     AutoPtr<ArrayOf<Double> > doubles = ArrayOf<Double>::Alloc(22);
     (*doubles)[0] = 1.0;
@@ -61,7 +61,7 @@ AutoPtr<ArrayOf<Double> > InitFact()
     (*doubles)[21] = 2.5260757449731984E302;
     return doubles;
 }
-static const AutoPtr<ArrayOf<Double> > FACT = InitFact()
+const AutoPtr<ArrayOf<Double> > MoreMath::FACT = InitFact()
 
 Double MoreMath::Asinh(
     /* [in] */ Double x)
@@ -249,6 +249,6 @@ Double MoreMath::IntExp10(
     return StringUtils::ParseDouble(sb.ToString());
 }
 
-} // namespace Calculator2
-} // namespace Droid
-} // namespace Elastos
+} // namespace Arity
+} // namespace Javia
+} // namespace Org

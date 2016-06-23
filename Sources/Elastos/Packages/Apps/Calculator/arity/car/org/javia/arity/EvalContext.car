@@ -1,0 +1,20 @@
+module
+{
+
+    namespace Org {
+    namespace Javia {
+    namespace Arity {
+
+    /**
+       To evaluate CompiledFunctions from multiple threads in parallel,
+       you need to create one EvalContext instance per thread,
+       and pass it to the eval() methods of CompiledFunction.
+     */
+    interface IConstant
+    {
+    }
+
+    } // namespace Arity
+    } // namespace Javia
+    } // namespace Org
+}

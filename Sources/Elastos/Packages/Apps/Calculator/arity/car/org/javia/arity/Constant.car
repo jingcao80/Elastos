@@ -1,0 +1,22 @@
+module
+{
+
+    namespace Org {
+    namespace Javia {
+    namespace Arity {
+
+    /**
+       A constant presented as a function, always evaluates to the same value.
+     */
+    /**
+     * @involve
+     * interface IFunction;
+     */
+    interface IConstant
+    {
+    }
+
+    } // namespace Arity
+    } // namespace Javia
+    } // namespace Org
+}
