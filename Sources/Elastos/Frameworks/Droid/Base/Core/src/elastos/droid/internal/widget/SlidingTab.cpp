@@ -493,9 +493,7 @@ ECode SlidingTab::constructor(
     // Allocate a temporary once that can be used everywhere.
     CRect::New((IRect**)&mTmpRect);
 
-    Int32 size = ArraySize(R::styleable::AbsListView);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::SlidingTab, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AbsListView);
 
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, layout, (ITypedArray**)&a);

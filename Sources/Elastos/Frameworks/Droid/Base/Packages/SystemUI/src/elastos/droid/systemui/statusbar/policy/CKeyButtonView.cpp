@@ -102,9 +102,7 @@ ECode CKeyButtonView::constructor(
     CObjectAnimator::New((IAnimator**)&mAnimateToQuiescent);
     mCheckLongPress = new CheckLongPressRunnable(this);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::KeyButtonView),
-            ArraySize(R::styleable::KeyButtonView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::KeyButtonView);
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(context->ObtainStyledAttributes(attrs, attrIds, defStyle, 0, (ITypedArray**)&a));
 

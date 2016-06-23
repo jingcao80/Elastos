@@ -30,9 +30,7 @@ ECode PreferenceFrameLayout::PreferenceFrameLayoutLayoutParams::constructor(
 {
     FAIL_RETURN(FrameLayout::FrameLayoutLayoutParams::constructor(c, attrs));
     AutoPtr<ITypedArray> a;
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::PreferenceFrameLayout_Layout),
-            ArraySize(R::styleable::PreferenceFrameLayout_Layout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::PreferenceFrameLayout_Layout);
     c->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
     a->GetBoolean(R::styleable::PreferenceFrameLayout_Layout_layout_removeBorders,
             FALSE, &mRemoveBorders);
@@ -125,9 +123,7 @@ ECode PreferenceFrameLayout::constructor(
     FAIL_RETURN(FrameLayout::constructor(context, attrs, defStyleAttr, defStyleRes));
 
     AutoPtr<ITypedArray> a;
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::PreferenceFrameLayout),
-            ArraySize(R::styleable::PreferenceFrameLayout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::PreferenceFrameLayout);
     context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);
 
     AutoPtr<IResources> res;

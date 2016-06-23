@@ -179,9 +179,7 @@ ECode TableLayout::InitFromAttributes(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::TableLayout),
-            ArraySize(R::styleable::TableLayout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::TableLayout);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
 

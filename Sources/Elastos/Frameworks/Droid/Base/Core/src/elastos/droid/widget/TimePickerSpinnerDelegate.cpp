@@ -424,9 +424,8 @@ ECode TimePickerSpinnerDelegate::constructor(
     TimePicker::AbstractTimePickerDelegate::constructor(delegator, context);
 
     // process style attributes
-    AutoPtr< ArrayOf<Int32> > styleAttrs = ArrayOf<Int32>::Alloc(const_cast<Int32*>(R::styleable::TimePicker),
-            ArraySize(R::styleable::TimePicker));
     AutoPtr<ITypedArray> a;
+    AutoPtr< ArrayOf<Int32> > styleAttrs = TO_ATTRS_ARRAYOF(R::styleable::TimePicker);
     mContext->ObtainStyledAttributes(attrs, styleAttrs, defStyleAttr, defStyleRes, (ITypedArray**)&a);
 
     AutoPtr<IInterface> interfaceTmp;

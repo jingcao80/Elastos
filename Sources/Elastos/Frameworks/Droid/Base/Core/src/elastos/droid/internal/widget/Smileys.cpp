@@ -47,7 +47,7 @@ AutoPtr< ArrayOf<Int32> > Smileys::InnerInitIconds()
         R::drawable::emo_im_wtf
     };
 
-    AutoPtr< ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(const_cast<Int32*>(iconIds), ArraySize(iconIds));
+    AutoPtr< ArrayOf<Int32> > result = TO_ATTRS_ARRAYOF(iconIds);
     return result;
 }
 

@@ -1033,9 +1033,7 @@ void GridLayout::GridLayoutLayoutParams::ReInitSuper(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::ViewGroup_MarginLayout),
-            ArraySize(R::styleable::ViewGroup_MarginLayout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ViewGroup_MarginLayout);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
     //try {
@@ -1055,9 +1053,7 @@ void GridLayout::GridLayoutLayoutParams::Init(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::GridLayout_Layout),
-            ArraySize(R::styleable::GridLayout_Layout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::GridLayout_Layout);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
 
@@ -1967,9 +1963,7 @@ ECode GridLayout::constructor(
     context->GetResources((IResources**)&res);
     res->GetDimensionPixelOffset(R::dimen::default_gap, &mDefaultGap);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::GridLayout),
-            ArraySize(R::styleable::GridLayout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::GridLayout);
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
 

@@ -43,9 +43,7 @@ ECode LinearLayout::LinearLayoutLayoutParams::constructor(
 {
     FAIL_RETURN(MarginLayoutParams::constructor(context, attrs));
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::LinearLayout_Layout),
-            ArraySize(R::styleable::LinearLayout_Layout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::LinearLayout_Layout);
     AutoPtr<ITypedArray> a;
     ASSERT_SUCCEEDED(context->ObtainStyledAttributes(
             attrs, attrIds, (ITypedArray**)&a));
@@ -192,9 +190,7 @@ ECode LinearLayout::InitFromAttributes(
 {
     VALIDATE_NOT_NULL(context);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::LinearLayout),
-            ArraySize(R::styleable::LinearLayout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::LinearLayout);
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(context->ObtainStyledAttributes(
             attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));

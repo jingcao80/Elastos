@@ -915,9 +915,7 @@ ECode Drawable::Inflate(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ IResourcesTheme* theme)
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::Drawable),
-            ArraySize(R::styleable::Drawable));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Drawable);
 
     AutoPtr<ITypedArray> a;
     if (theme != NULL) {

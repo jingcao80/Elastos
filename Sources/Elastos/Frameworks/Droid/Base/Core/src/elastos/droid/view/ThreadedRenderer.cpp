@@ -121,9 +121,7 @@ ECode ThreadedRenderer::constructor(
     /* [in] */ Boolean translucent)
 {
     AutoPtr<ITypedArray> a;
-    AutoPtr<ArrayOf<Int32> > lightings = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::Lighting),
-        ArraySize(R::styleable::Lighting));
+    AutoPtr<ArrayOf<Int32> > lightings = TO_ATTRS_ARRAYOF(R::styleable::Lighting);
     context->ObtainStyledAttributes(NULL, lightings, 0, 0, (ITypedArray**)&a);
     a->GetDimension(R::styleable::Lighting_lightY, 0, &mLightY);
     a->GetDimension(R::styleable::Lighting_lightZ, 0, &mLightZ);

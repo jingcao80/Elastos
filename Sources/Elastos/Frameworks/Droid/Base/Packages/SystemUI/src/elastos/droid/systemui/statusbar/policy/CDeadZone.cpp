@@ -75,9 +75,7 @@ ECode CDeadZone::constructor(
 {
     View::constructor(context, attrs, defStyle);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::DeadZone),
-            ArraySize(R::styleable::DeadZone));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::DeadZone);
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(context->ObtainStyledAttributes(attrs, attrIds, defStyle, 0, (ITypedArray**)&a));
 

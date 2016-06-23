@@ -53,9 +53,7 @@ ECode ResolverDrawerLayout::ResolverDrawerLayoutParams::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     ViewGroup::MarginLayoutParams::constructor(c, attrs);
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::ResolverDrawerLayout_LayoutParams),
-        ArraySize(R::styleable::ResolverDrawerLayout_LayoutParams));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ResolverDrawerLayout_LayoutParams);
     AutoPtr<ITypedArray> a;
     c->ObtainStyledAttributes(attrs,
             attrIds, (ITypedArray**)&a);
@@ -235,9 +233,7 @@ ECode ResolverDrawerLayout::constructor(
 {
     ViewGroup::constructor(context, attrs, defStyleAttr);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::ResolverDrawerLayout),
-        ArraySize(R::styleable::ResolverDrawerLayout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ResolverDrawerLayout);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds,
             defStyleAttr, 0, (ITypedArray**)&a);

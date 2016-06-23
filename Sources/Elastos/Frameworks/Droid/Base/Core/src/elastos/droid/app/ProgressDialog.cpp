@@ -169,9 +169,7 @@ ECode ProgressDialog::OnCreate(
     AutoPtr<ILayoutInflater> inflater;
     LayoutInflater::From(mContext, (ILayoutInflater**)&inflater);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::AlertDialog),
-            ArraySize(R::styleable::AlertDialog));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::AlertDialog);
     AutoPtr<ITypedArray> a;
     mContext->ObtainStyledAttributes(NULL,
             attrIds, R::attr::alertDialogStyle, 0, (ITypedArray**)&a);

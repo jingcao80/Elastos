@@ -388,9 +388,7 @@ ECode RippleDrawable::Inflate(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ IResourcesTheme* theme) /*throws XmlPullParserException, IOException*/
 {
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::RippleDrawable),
-            ArraySize(R::styleable::RippleDrawable));
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::RippleDrawable);
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a));
     ECode ec = UpdateStateFromTypedArray(a);
@@ -494,9 +492,7 @@ ECode RippleDrawable::ApplyTheme(
     }
 
     AutoPtr<ITypedArray> a;
-    Int32 size = ArraySize(R::styleable::RippleDrawable);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::RippleDrawable, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::RippleDrawable);
     ((CResources::Theme*)t)->ResolveAttribute(state->mTouchThemeAttrs, layout, (ITypedArray**)&a);
 
     // try {

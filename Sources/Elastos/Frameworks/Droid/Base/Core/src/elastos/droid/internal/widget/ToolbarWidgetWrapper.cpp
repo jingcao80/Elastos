@@ -143,9 +143,7 @@ ECode ToolbarWidgetWrapper::constructor(
     mTitleSet = mTitle != NULL;
     AutoPtr<IContext> context;
     IView::Probe(toolbar)->GetContext((IContext**)&context);
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::ActionBar),
-            ArraySize(R::styleable::ActionBar));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ActionBar);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(NULL, attrIds, R::attr::actionBarStyle, 0, (ITypedArray**)&a);
     a->GetDrawable(R::styleable::ActionBar_homeAsUpIndicator, (IDrawable**)&mDefaultNavigationIcon);

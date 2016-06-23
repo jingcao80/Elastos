@@ -307,8 +307,7 @@ AutoPtr<Entry> AppTransition::GetCachedAnimations(
             packageName = "android";
         }
         if (DEBUG_ANIM) Slogger::V(TAG, "Loading animations: picked package=%s", packageName.string());
-        AutoPtr<ArrayOf<Int32> > attrs = ArrayOf<Int32>::Alloc(const_cast<Int32 *>(R::styleable::WindowAnimation),
-                ArraySize(R::styleable::WindowAnimation));
+        AutoPtr<ArrayOf<Int32> > attrs = TO_ATTRS_ARRAYOF(R::styleable::WindowAnimation);
         return AttributeCache::GetInstance()->Get(packageName, resId, attrs, mCurrentUserId);
     }
     return NULL;
@@ -328,8 +327,7 @@ AutoPtr<Entry> AppTransition::GetCachedAnimations(
             packageName = String("android");
         }
         if (DEBUG_ANIM) Slogger::V(TAG, "Loading animations: picked package=%s", packageName.string());
-        AutoPtr<ArrayOf<Int32> > attrs = ArrayOf<Int32>::Alloc(const_cast<Int32 *>(R::styleable::WindowAnimation),
-                ArraySize(R::styleable::WindowAnimation));
+        AutoPtr<ArrayOf<Int32> > attrs = TO_ATTRS_ARRAYOF(R::styleable::WindowAnimation);
         return AttributeCache::GetInstance()->Get(packageName, resId, attrs, mCurrentUserId);
     }
     return NULL;

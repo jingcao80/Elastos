@@ -83,9 +83,7 @@ ECode AccountAuthenticatorCache::ParseServiceAttributes(
     VALIDATE_NOT_NULL(attributes);
     *attributes = NULL;
 
-    Int32 size = ArraySize(R::styleable::AccountAuthenticator);
-    AutoPtr< ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AccountAuthenticator, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AccountAuthenticator);
     AutoPtr<ITypedArray> sa;
     ASSERT_SUCCEEDED(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
     // try {

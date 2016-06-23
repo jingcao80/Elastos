@@ -7,6 +7,10 @@
 
 #include "Elastos.Droid.Core.h"
 
+#ifndef TO_ATTRS_ARRAYOF(attrs)
+#define TO_ATTRS_ARRAYOF (ArrayOf<Int32>::Alloc(const_cast<Int32 *>(attrs), ArraySize(attrs)))
+#endif
+
 // #define MAX_PATH    256
 
 // #define XML_NAMESPACE   "http://schemas.elastos.com/capsule/res/elastos"

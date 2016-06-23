@@ -418,9 +418,7 @@ void AbsActionBarView::OnConfigurationChanged(
 
     // Action bar can change size on configuration changes.
     // Reread the desired height from the theme-specified style.
-    AutoPtr<ArrayOf<Int32> > values = ArrayOf<Int32>::Alloc(
-        const_cast<Int32*>(R::styleable::ActionBar),
-        ArraySize(R::styleable::ActionBar));
+    AutoPtr<ArrayOf<Int32> > values = TO_ATTRS_ARRAYOF(R::styleable::ActionBar);
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);

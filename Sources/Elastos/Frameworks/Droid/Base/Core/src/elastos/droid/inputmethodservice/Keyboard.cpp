@@ -63,9 +63,7 @@ Keyboard::Row::Row(
     , mMode(0)
     , mParent(parent)
 {
-    Int32 size = ArraySize(R::styleable::Keyboard);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::Keyboard, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::Keyboard);
 
     AutoPtr<ITypedArray> a;
     res->ObtainAttributes(Xml::AsAttributeSet(IXmlPullParser::Probe(parser)), layout, (ITypedArray**)&a);
@@ -84,9 +82,7 @@ Keyboard::Row::Row(
     a->Recycle();
     a = NULL;
 
-    size = ArraySize(R::styleable::Keyboard_Row);
-    layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::Keyboard_Row, size);
+    layout = TO_ATTRS_ARRAYOF(R::styleable::Keyboard_Row);
 
     res->ObtainAttributes(Xml::AsAttributeSet(IXmlPullParser::Probe(parser)), layout, (ITypedArray**)&a);
     a->GetInt32(R::styleable::Keyboard_Row_rowEdgeFlags,
@@ -252,9 +248,7 @@ Keyboard::Key::Key(
     , mRepeatable(FALSE)
     , mKeyboard(parent->mParent)
 {
-    Int32 size = ArraySize(R::styleable::Keyboard);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::Keyboard, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::Keyboard);
 
     AutoPtr<ITypedArray> a;
     res->ObtainAttributes(Xml::AsAttributeSet(IXmlPullParser::Probe(parser)), layout, (ITypedArray**)&a);
@@ -270,9 +264,7 @@ Keyboard::Key::Key(
             mKeyboard->mDisplayWidth, parent->mDefaultHorizontalGap);
     a->Recycle();
     a = NULL;
-    size = ArraySize(R::styleable::Keyboard_Key);
-    layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::Keyboard_Key, size);
+    layout = TO_ATTRS_ARRAYOF(R::styleable::Keyboard_Key);
 
     res->ObtainAttributes(Xml::AsAttributeSet(IXmlPullParser::Probe(parser)), layout, (ITypedArray**)&a);
     mX += mGap;
@@ -1293,9 +1285,7 @@ void Keyboard::ParseKeyboardAttributes(
     /* [in] */ IResources* res,
     /* [in] */ IXmlResourceParser* parser)
 {
-    Int32 size = ArraySize(R::styleable::Keyboard);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::Keyboard, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::Keyboard);
 
     AutoPtr<ITypedArray> a;
     res->ObtainAttributes(Xml::AsAttributeSet(IXmlPullParser::Probe(parser)), layout, (ITypedArray**)&a);

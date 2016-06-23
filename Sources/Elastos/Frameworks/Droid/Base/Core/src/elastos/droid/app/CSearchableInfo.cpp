@@ -81,9 +81,7 @@ ECode CSearchableInfo::constructor(
     /* [in] */ IComponentName* cName)
 {
     mSearchActivity = cName;
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::Searchable),
-        ArraySize(R::styleable::Searchable));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Searchable);
     AutoPtr<ITypedArray> a;
     activityContext->ObtainStyledAttributes(attr, attrIds, (ITypedArray**)&a);
     a->GetResourceId(R::styleable::Searchable_label, 0, &mLabelId);

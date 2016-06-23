@@ -119,9 +119,7 @@ ECode GridLayoutAnimationController::constructor(
 {
     FAIL_RETURN(LayoutAnimationController::constructor(context, attrs));
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::GridLayoutAnimation),
-            ArraySize(R::styleable::GridLayoutAnimation));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::GridLayoutAnimation);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
 

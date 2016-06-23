@@ -177,9 +177,7 @@ ECode CBatteryMeterView::constructor(
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::BatteryMeterView),
-        ArraySize(R::styleable::BatteryMeterView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::BatteryMeterView);
     AutoPtr<ITypedArray> atts;
     context->ObtainStyledAttributes(attrs, attrIds, defStyle, 0, (ITypedArray**)&atts);
     Int32 clr = 0;

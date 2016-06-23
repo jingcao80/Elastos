@@ -62,9 +62,7 @@ ECode CAnticipateInterpolator::constructor(
     /* [in] */ IResourcesTheme* theme,
     /* [in] */ IAttributeSet* attrs)
 {
-    Int32 size = ArraySize(R::styleable::AnticipateInterpolator);
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(size);
-    attrIds->Copy(R::styleable::AnticipateInterpolator, size);
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::AnticipateInterpolator);
     AutoPtr<ITypedArray> sa;
 
     if (theme != NULL) {

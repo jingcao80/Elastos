@@ -65,9 +65,7 @@ ECode CChangeTransform::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     Transition::constructor(context, attrs);
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32*>(R::styleable::ChangeTransform),
-        ArraySize(R::styleable::ChangeTransform));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ChangeTransform);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
     a->GetBoolean(R::styleable::ChangeTransform_reparentWithOverlay, TRUE, &mUseOverlay);

@@ -39,9 +39,7 @@ ECode TableRow::TableRowLayoutParams::constructor(
 {
     FAIL_RETURN(LinearLayout::LinearLayoutLayoutParams::constructor(c, attrs));
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::TableRow_Cell),
-            ArraySize(R::styleable::TableRow_Cell));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::TableRow_Cell);
     AutoPtr<ITypedArray> a;
     c->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
 

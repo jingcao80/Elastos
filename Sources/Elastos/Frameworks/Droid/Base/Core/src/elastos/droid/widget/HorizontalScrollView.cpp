@@ -155,9 +155,7 @@ ECode HorizontalScrollView::constructor(
     InitScrollView();
 
     AutoPtr<ITypedArray> a;
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::HorizontalScrollView),
-            ArraySize(R::styleable::HorizontalScrollView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::HorizontalScrollView);
     FAIL_RETURN(context->ObtainStyledAttributes(attrs,
             attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
 

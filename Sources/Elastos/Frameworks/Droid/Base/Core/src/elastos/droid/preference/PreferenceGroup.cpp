@@ -40,9 +40,7 @@ ECode PreferenceGroup::constructor(
 
     CArrayList::New((IList**)&mPreferenceList);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::PreferenceGroup),
-            ArraySize(R::styleable::PreferenceGroup));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::PreferenceGroup);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);
     a->GetBoolean(R::styleable::PreferenceGroup_orderingFromXml,

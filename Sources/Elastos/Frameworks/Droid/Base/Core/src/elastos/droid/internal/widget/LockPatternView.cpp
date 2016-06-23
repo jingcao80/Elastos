@@ -529,9 +529,7 @@ ECode LockPatternView::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     View::constructor(context, attrs);
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::LockPatternView),
-            ArraySize(R::styleable::LockPatternView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::LockPatternView);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
     String aspect;

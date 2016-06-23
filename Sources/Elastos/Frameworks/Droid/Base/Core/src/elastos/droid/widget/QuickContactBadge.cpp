@@ -208,9 +208,7 @@ ECode QuickContactBadge::constructor(
     ImageView::constructor(context, attrs, defStyleAttr, defStyleRes);
 
     AutoPtr<ITypedArray> styledAttributes;
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::Theme),
-            ArraySize(R::styleable::Theme));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Theme);
     mContext->ObtainStyledAttributes(attrIds, (ITypedArray**)&styledAttributes);
     styledAttributes->GetDrawable(R::styleable::Theme_quickContactBadgeOverlay, (IDrawable**)&mOverlay);
     styledAttributes->Recycle();

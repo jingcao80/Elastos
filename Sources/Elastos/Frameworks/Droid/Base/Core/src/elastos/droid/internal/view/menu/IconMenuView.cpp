@@ -227,9 +227,7 @@ ECode IconMenuView::constructor(
 {
     FAIL_RETURN(ViewGroup::constructor(context, attrs));
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::IconMenuView),
-        ArraySize(R::styleable::IconMenuView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::IconMenuView);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, 0, 0, (ITypedArray**)&a);
 
@@ -241,9 +239,7 @@ ECode IconMenuView::constructor(
     a->Recycle();
 
     a = NULL;
-    attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::MenuView),
-            ArraySize(R::styleable::MenuView));
+    attrIds = TO_ATTRS_ARRAYOF(R::styleable::MenuView);
     context->ObtainStyledAttributes(attrs, attrIds, 0, 0, (ITypedArray**)&a);
 
     a->GetDrawable(R::styleable::MenuView_itemBackground, (IDrawable**)&mItemBackground);

@@ -101,9 +101,7 @@ ECode CPointerIcon::GetSystemIcon(
         styleIndex = GetSystemIconStyleIndex(STYLE_DEFAULT);
     }
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::Pointer),
-        ArraySize(R::styleable::Pointer));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Pointer);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(
         NULL, attrIds, R::attr::pointerStyle, 0, (ITypedArray**)&a);
@@ -327,9 +325,7 @@ ECode CPointerIcon::LoadResource(
         if (FAILED(ec))
             break;
 
-        Int32 size = ArraySize(R::styleable::PointerIcon);
-        AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-        layout->Copy(R::styleable::PointerIcon, size);
+        AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::PointerIcon);
 
         AutoPtr<ITypedArray> a;
         ec = resources->ObtainAttributes(IAttributeSet::Probe(parser), layout, (ITypedArray**)&a);

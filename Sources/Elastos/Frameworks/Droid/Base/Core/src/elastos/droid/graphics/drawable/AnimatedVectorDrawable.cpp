@@ -306,9 +306,7 @@ ECode AnimatedVectorDrawable::Inflate(
             String tagName;
             parser->GetName(&tagName);
             if (ANIMATED_VECTOR.Equals(tagName)) {
-                Int32 size = ArraySize(R::styleable::AnimatedVectorDrawable);
-                AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-                layout->Copy(R::styleable::AnimatedVectorDrawable, size);
+                AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AnimatedVectorDrawable);
 
                 AutoPtr<ITypedArray> a;
                 FAIL_RETURN(ObtainAttributes(res, theme, attrs, layout, (ITypedArray**)&a));
@@ -326,9 +324,7 @@ ECode AnimatedVectorDrawable::Inflate(
                 }
                 a->Recycle();
             } else if (TARGET.Equals(tagName)) {
-                Int32 size = ArraySize(R::styleable::AnimatedVectorDrawableTarget);
-                AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-                layout->Copy(R::styleable::AnimatedVectorDrawableTarget, size);
+                AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AnimatedVectorDrawableTarget);
 
                 AutoPtr<ITypedArray> a;
                 FAIL_RETURN(ObtainAttributes(res, theme, attrs, layout, (ITypedArray**)&a));

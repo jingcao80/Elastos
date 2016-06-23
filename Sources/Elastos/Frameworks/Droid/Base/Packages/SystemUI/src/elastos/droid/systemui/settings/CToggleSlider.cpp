@@ -129,9 +129,7 @@ ECode CToggleSlider::constructor(
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::ToggleSlider),
-        ArraySize(R::styleable::ToggleSlider));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ToggleSlider);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(
         attrs, attrIds, defStyle, 0, (ITypedArray**)&a);

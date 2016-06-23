@@ -170,9 +170,7 @@ ECode ViewGroup::LayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::ViewGroup_Layout),
-        ArraySize(R::styleable::ViewGroup_Layout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ViewGroup_Layout);
     AutoPtr<ITypedArray> a;
     ASSERT_SUCCEEDED(c->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a));
 
@@ -607,9 +605,7 @@ ECode ViewGroup::MarginLayoutParams::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     LayoutParams::constructor();
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::ViewGroup_MarginLayout),
-        ArraySize(R::styleable::ViewGroup_MarginLayout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ViewGroup_MarginLayout);
     AutoPtr<ITypedArray> a;
     ASSERT_SUCCEEDED(c->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a));
 
@@ -1205,9 +1201,7 @@ void ViewGroup::InitFromAttributes(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::ViewGroup),
-        ArraySize(R::styleable::ViewGroup));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ViewGroup);
     AutoPtr<ITypedArray> a;
     ASSERT_SUCCEEDED(context->ObtainStyledAttributes(
         attrs, attrIds, (ITypedArray**)&a));

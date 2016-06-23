@@ -103,11 +103,8 @@ ECode SizeAdaptiveLayout::SizeAdaptiveLayoutLayoutParams::constructor(
         }
     }
 
-    Int32 size = ArraySize(R::styleable::SizeAdaptiveLayout_Layout);
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(size);
-    attrIds->Copy(R::styleable::SizeAdaptiveLayout_Layout, size);
-
     AutoPtr<ITypedArray> a;
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::SizeAdaptiveLayout_Layout);
     FAIL_RETURN(c->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a));
     a->GetDimensionPixelSize(SizeAdaptiveLayout::MIN_VALID_HEIGHT, 0, &mMinHeight);
     if (DEBUG) Slogger::D(TAG, String("got minHeight of: ") + StringUtils::ToString(mMinHeight));

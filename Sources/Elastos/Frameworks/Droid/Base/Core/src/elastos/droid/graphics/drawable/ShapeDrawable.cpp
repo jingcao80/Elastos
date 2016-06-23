@@ -427,9 +427,7 @@ Boolean ShapeDrawable::InflateTag(
     /* [in] */ IAttributeSet* attrs)
 {
     if (name.Equals("padding")) {
-        Int32 size = ArraySize(R::styleable::ShapeDrawablePadding);
-        AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-        layout->Copy(R::styleable::ShapeDrawablePadding, size);
+        AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::ShapeDrawablePadding);
 
         AutoPtr<ITypedArray> a;
         r->ObtainAttributes(attrs, layout, (ITypedArray**)&a);
@@ -458,9 +456,7 @@ ECode ShapeDrawable::Inflate(
 {
     FAIL_RETURN(Drawable::Inflate(r, parser, attrs, theme));
 
-    Int32 size = ArraySize(R::styleable::ShapeDrawable);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::ShapeDrawable, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::ShapeDrawable);
 
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a));
@@ -500,9 +496,7 @@ ECode ShapeDrawable::ApplyTheme(
         return NOERROR;
     }
 
-    Int32 size = ArraySize(R::styleable::ShapeDrawable);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::ShapeDrawable, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::ShapeDrawable);
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(((CResources::Theme*)t)->ResolveAttribute(state->mThemeAttrs, layout, (ITypedArray**)&a));
     ECode ec = UpdateStateFromTypedArray(a);

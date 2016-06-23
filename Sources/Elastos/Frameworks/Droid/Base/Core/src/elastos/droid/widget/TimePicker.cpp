@@ -109,9 +109,7 @@ ECode TimePicker::constructor(
     /* [in] */ Int32 defStyleRes)
 {
     FrameLayout::constructor(context, attrs, defStyleAttr, defStyleRes);
-    AutoPtr< ArrayOf<Int32> > styleAttrs = ArrayOf<Int32>::Alloc(
-            const_cast<Int32*>(R::styleable::TimePicker),
-            ArraySize(R::styleable::TimePicker));
+    AutoPtr< ArrayOf<Int32> > styleAttrs = TO_ATTRS_ARRAYOF(R::styleable::TimePicker);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, styleAttrs, defStyleAttr, defStyleRes,
             (ITypedArray**)&a);

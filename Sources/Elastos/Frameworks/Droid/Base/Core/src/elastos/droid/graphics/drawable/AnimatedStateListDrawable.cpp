@@ -529,9 +529,7 @@ ECode AnimatedStateListDrawable::Inflate(
     /* [in] */ /*@NonNull*/ IAttributeSet* attrs,
     /* [in] */ /*@Nullable*/ IResourcesTheme* theme) /*throws XmlPullParserException, IOException*/
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::AnimatedStateListDrawable),
-            ArraySize(R::styleable::AnimatedStateListDrawable));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::AnimatedStateListDrawable);
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(ObtainAttributes(r, theme, attrs, attrIds, (ITypedArray**)&a));
 

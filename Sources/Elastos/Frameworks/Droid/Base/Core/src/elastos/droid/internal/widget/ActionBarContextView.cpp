@@ -158,8 +158,7 @@ ECode ActionBarContextView::constructor(
 
     AbsActionBarView::constructor(context, attrs, defStyleAttr, defStyleRes);
     AutoPtr<ITypedArray> a;
-    AutoPtr< ArrayOf<Int32> > values = ArrayOf<Int32>::Alloc(const_cast<Int32*>(R::styleable::ActionMode),
-        ArraySize(R::styleable::ActionMode));
+    AutoPtr< ArrayOf<Int32> > values = TO_ATTRS_ARRAYOF(R::styleable::ActionMode);
     context->ObtainStyledAttributes(attrs, values, defStyleAttr, defStyleRes, (ITypedArray**)&a);
 
     AutoPtr<IDrawable> dr;

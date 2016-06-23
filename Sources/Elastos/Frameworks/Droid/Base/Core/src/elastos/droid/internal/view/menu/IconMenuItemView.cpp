@@ -53,9 +53,7 @@ ECode IconMenuItemView::constructor(
         res->GetString(R::string::prepend_shortcut_label, &sPrependShortcutLabel);
     }
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::MenuView),
-        ArraySize(R::styleable::MenuView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::MenuView);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);
 

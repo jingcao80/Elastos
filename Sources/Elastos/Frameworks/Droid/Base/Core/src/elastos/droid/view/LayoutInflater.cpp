@@ -1043,9 +1043,7 @@ ECode LayoutInflater::ParseViewTag(
     Int32 type, depth;
 
     AutoPtr<ITypedArray> ta;
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::ViewTag),
-        ArraySize(R::styleable::ViewTag));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ViewTag);
     mContext->ObtainStyledAttributes(
             attrs, attrIds, (ITypedArray**)&ta);
     Int32 key;
@@ -1151,9 +1149,7 @@ ECode LayoutInflater::ParseInclude(
 
                 // Attempt to override the included layout's android:id with the
                 // one set on the <include /> tag itself.
-                AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-                    const_cast<Int32 *>(R::styleable::View),
-                    ArraySize(R::styleable::View));
+                AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::View);
                 AutoPtr<ITypedArray> a;
                 mContext->ObtainStyledAttributes(attrs, attrIds, 0, 0, (ITypedArray**)&a);
                 Int32 id;

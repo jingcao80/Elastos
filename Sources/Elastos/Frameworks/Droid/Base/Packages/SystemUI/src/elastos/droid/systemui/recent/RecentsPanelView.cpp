@@ -553,9 +553,7 @@ ECode RecentsPanelView::constructor(
     FrameLayout::constructor(ctx, attrs, defStyle);
     UpdateValuesFromResources();
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::RecentsPanelView),
-        ArraySize(R::styleable::RecentsPanelView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::RecentsPanelView);
     AutoPtr<ITypedArray> a;
     ctx->ObtainStyledAttributes(attrs, attrIds, defStyle, 0, (ITypedArray**)&a);
 

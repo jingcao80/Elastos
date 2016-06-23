@@ -81,9 +81,7 @@ ECode VolumePreference::constructor(
     /* [in] */ Int32 defStyleRes)
 {
     FAIL_RETURN(SeekBarDialogPreference::constructor(context, attrs, defStyleAttr, defStyleRes));
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::VolumePreference),
-            ArraySize(R::styleable::VolumePreference));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::VolumePreference);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);
     a->GetInt32(R::styleable::VolumePreference_streamType, 0, &mStreamType);

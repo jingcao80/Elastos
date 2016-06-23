@@ -45,9 +45,7 @@ ECode TextAppearanceSpan::constructor(
 {
     AutoPtr<IColorStateList> textColor;
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::TextAppearance),
-            ArraySize(R::styleable::TextAppearance));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::TextAppearance);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(appearance, attrIds, (ITypedArray**)&a);
 
@@ -88,9 +86,7 @@ ECode TextAppearanceSpan::constructor(
 
     if (colorList >= 0) {
         a = NULL;
-        attrIds = ArrayOf<Int32>::Alloc(
-                const_cast<Int32 *>(R::styleable::Theme),
-                ArraySize(R::styleable::Theme));
+        attrIds = TO_ATTRS_ARRAYOF(R::styleable::Theme);
         context->ObtainStyledAttributes(R::style::Theme, attrIds, (ITypedArray**)&a);
 
         textColor = NULL;

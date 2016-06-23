@@ -30,9 +30,7 @@ ECode SeekBarPreference::constructor(
 {
     FAIL_RETURN(Preference::constructor(context, attrs, defStyleAttr, defStyleRes));
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::ProgressBar),
-            ArraySize(R::styleable::ProgressBar));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ProgressBar);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);
     Int32 max;
@@ -41,9 +39,7 @@ ECode SeekBarPreference::constructor(
     a->Recycle();
 
     a = NULL;
-    attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::SeekBarPreference),
-            ArraySize(R::styleable::SeekBarPreference));
+    attrIds = TO_ATTRS_ARRAYOF(R::styleable::SeekBarPreference);
     context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);
     Int32 layoutResId;
     a->GetResourceId(

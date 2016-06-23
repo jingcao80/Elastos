@@ -222,9 +222,7 @@ ECode DatePickerCalendarDelegate::constructor(
 
     AutoPtr<IResources> res;
     IView::Probe(mDelegator)->GetResources((IResources**)&res);
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::DatePicker),
-            ArraySize(R::styleable::DatePicker));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::DatePicker);
     AutoPtr<ITypedArray> a;
     mContext->ObtainStyledAttributes(attrs,
             attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);

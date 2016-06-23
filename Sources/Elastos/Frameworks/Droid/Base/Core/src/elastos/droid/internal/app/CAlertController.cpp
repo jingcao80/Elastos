@@ -283,9 +283,7 @@ ECode CAlertController::constructor(
     GetWeakReference((IWeakReference**)&wr);
     mButtonHandler = new ButtonViewOnClickListener(wr);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::AlertDialog),
-        ArraySize(R::styleable::AlertDialog));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::AlertDialog);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(
         NULL, attrIds, R::attr::alertDialogStyle, 0, (ITypedArray**)&a);
@@ -613,9 +611,7 @@ void CAlertController::SetupView()
     AutoPtr<IView> topPanel;
     mWindow->FindViewById(R::id::topPanel, (IView**)&topPanel);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::AlertDialog),
-        ArraySize(R::styleable::AlertDialog));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::AlertDialog);
     AutoPtr<ITypedArray> a;
     mContext->ObtainStyledAttributes(
         NULL, attrIds, R::attr::alertDialogStyle, 0, (ITypedArray**)&a);

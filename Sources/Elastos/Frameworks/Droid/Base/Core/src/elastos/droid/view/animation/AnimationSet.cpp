@@ -67,8 +67,7 @@ ECode AnimationSet::constructor(
     mLastEnd = 0;
     mStoredOffsets = NULL;
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::AnimationSet), ArraySize(R::styleable::AnimationSet));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::AnimationSet);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
 
