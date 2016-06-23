@@ -1286,50 +1286,43 @@ public:
 
 protected:
     /* Event Constants */
-    static const Int32 EVENT_RADIO_AVAILABLE;
-    /** Supplementary Service Notification received. */
-    static const Int32 EVENT_SSN;
-    static const Int32 EVENT_SIM_RECORDS_LOADED;
-    static const Int32 EVENT_MMI_DONE;
-    static const Int32 EVENT_RADIO_ON;
-    static const Int32 EVENT_GET_BASEBAND_VERSION_DONE;
-    static const Int32 EVENT_USSD;
-    static const Int32 EVENT_RADIO_OFF_OR_NOT_AVAILABLE;
-    static const Int32 EVENT_GET_IMEI_DONE;
-    static const Int32 EVENT_GET_IMEISV_DONE;
-    static const Int32 EVENT_GET_SIM_STATUS_DONE;
-    static const Int32 EVENT_SET_CALL_FORWARD_DONE;
-    static const Int32 EVENT_GET_CALL_FORWARD_DONE;
-    static const Int32 EVENT_CALL_RING;
-    static const Int32 EVENT_CALL_RING_CONTINUE;
-
-    // Used to intercept the carrier selection calls so that
-    // we can save the values.
-    static const Int32 EVENT_SET_NETWORK_MANUAL_COMPLETE;
-    static const Int32 EVENT_SET_NETWORK_AUTOMATIC_COMPLETE;
-    static const Int32 EVENT_SET_CLIR_COMPLETE;
-    static const Int32 EVENT_REGISTERED_TO_NETWORK;
-    static const Int32 EVENT_SET_VM_NUMBER_DONE;
-    // Events for CDMA support
-    static const Int32 EVENT_GET_DEVICE_IDENTITY_DONE;
-    static const Int32 EVENT_RUIM_RECORDS_LOADED;
-    static const Int32 EVENT_NV_READY;
-    static const Int32 EVENT_SET_ENHANCED_VP;
-    static const Int32 EVENT_EMERGENCY_CALLBACK_MODE_ENTER;
-    static const Int32 EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE;
-    static const Int32 EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED;
-    // other
-    static const Int32 EVENT_SET_NETWORK_AUTOMATIC;
-    static const Int32 EVENT_ICC_RECORD_EVENTS;
-    static const Int32 EVENT_ICC_CHANGED;
-    // Single Radio Voice Call Continuity
-    static const Int32 EVENT_SRVCC_STATE_CHANGED;
-    static const Int32 EVENT_INITIATE_SILENT_REDIAL;
-    static const Int32 EVENT_UNSOL_OEM_HOOK_RAW;
-    static const Int32 EVENT_SS;
-    static const Int32 EVENT_SET_CALL_FORWARD_TIMER_DONE;
-    static const Int32 EVENT_GET_CALL_FORWARD_TIMER_DONE;
-    static const Int32 EVENT_LAST;
+    static const Int32 EVENT_RADIO_AVAILABLE             = 1;
+    static const Int32 EVENT_SSN                         = 2;
+    static const Int32 EVENT_SIM_RECORDS_LOADED          = 3;
+    static const Int32 EVENT_MMI_DONE                    = 4;
+    static const Int32 EVENT_RADIO_ON                    = 5;
+    static const Int32 EVENT_GET_BASEBAND_VERSION_DONE   = 6;
+    static const Int32 EVENT_USSD                        = 7;
+    static const Int32 EVENT_RADIO_OFF_OR_NOT_AVAILABLE  = 8;
+    static const Int32 EVENT_GET_IMEI_DONE               = 9;
+    static const Int32 EVENT_GET_IMEISV_DONE             = 10;
+    static const Int32 EVENT_GET_SIM_STATUS_DONE         = 11;
+    static const Int32 EVENT_SET_CALL_FORWARD_DONE       = 12;
+    static const Int32 EVENT_GET_CALL_FORWARD_DONE       = 13;
+    static const Int32 EVENT_CALL_RING                   = 14;
+    static const Int32 EVENT_CALL_RING_CONTINUE          = 15;
+    static const Int32 EVENT_SET_NETWORK_MANUAL_COMPLETE    = 16;
+    static const Int32 EVENT_SET_NETWORK_AUTOMATIC_COMPLETE = 17;
+    static const Int32 EVENT_SET_CLIR_COMPLETE              = 18;
+    static const Int32 EVENT_REGISTERED_TO_NETWORK          = 19;
+    static const Int32 EVENT_SET_VM_NUMBER_DONE             = 20;
+    static const Int32 EVENT_GET_DEVICE_IDENTITY_DONE       = 21;
+    static const Int32 EVENT_RUIM_RECORDS_LOADED            = 22;
+    static const Int32 EVENT_NV_READY                       = 23;
+    static const Int32 EVENT_SET_ENHANCED_VP                = 24;
+    static const Int32 EVENT_EMERGENCY_CALLBACK_MODE_ENTER  = 25;
+    static const Int32 EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE = 26;
+    static const Int32 EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED = 27;
+    static const Int32 EVENT_SET_NETWORK_AUTOMATIC          = 28;
+    static const Int32 EVENT_ICC_RECORD_EVENTS              = 29;
+    static const Int32 EVENT_ICC_CHANGED                    = 30;
+    static const Int32 EVENT_SRVCC_STATE_CHANGED            = 31;
+    static const Int32 EVENT_INITIATE_SILENT_REDIAL         = 32;
+    static const Int32 EVENT_UNSOL_OEM_HOOK_RAW             = 33;
+    static const Int32 EVENT_SS                             = 34;
+    static const Int32 EVENT_SET_CALL_FORWARD_TIMER_DONE    = 35;
+    static const Int32 EVENT_GET_CALL_FORWARD_TIMER_DONE    = 36;
+    static const Int32 EVENT_LAST                   = EVENT_GET_CALL_FORWARD_TIMER_DONE;
 
     Boolean mDnsCheckDisabled;
 

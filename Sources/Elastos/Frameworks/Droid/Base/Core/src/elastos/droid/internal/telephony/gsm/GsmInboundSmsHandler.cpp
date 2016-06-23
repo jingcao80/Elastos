@@ -1,202 +1,194 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.android.internal.telephony.gsm;
+#include "elastos/droid/internal/telephony/gsm/CGsmCellBroadcastHandler.h"
+#include "elastos/droid/internal/telephony/gsm/GsmInboundSmsHandler.h"
+#include "elastos/droid/internal/telephony/gsm/CSmsMessage.h"
+#include "elastos/droid/internal/telephony/gsm/CUsimDataDownloadHandler.h"
+#include "elastos/droid/internal/telephony/CellBroadcastHandler.h"
+#include "elastos/droid/internal/telephony/uicc/UiccController.h"
+#include "elastos/droid/internal/telephony/PhoneBase.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IActivity;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Provider::Telephony::Sms::IIntents;
-
-using Elastos::Droid::Internal::Telephony::ICommandsInterface;
-using Elastos::Droid::Internal::Telephony::IInboundSmsHandler;
-using Elastos::Droid::Internal::Telephony::IPhoneBase;
-using Elastos::Droid::Internal::Telephony::ISmsConstants;
+using Elastos::Droid::Internal::Telephony::IPhone;
 using Elastos::Droid::Internal::Telephony::ISmsMessageBase;
-using Elastos::Droid::Internal::Telephony::ISmsStorageMonitor;
+using Elastos::Droid::Internal::Telephony::PhoneBase;
+// TODO:
+// using Elastos::Droid::Provider::Telephony::Sms::IIntents;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccRecords;
-using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
 using Elastos::Droid::Internal::Telephony::Uicc::IUsimServiceTable;
+using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
+using Elastos::Droid::Internal::Utility::IStateMachine;
+using Elastos::Utility::Logging::Logger;
 
-/**
- * This class broadcasts incoming SMS messages to interested apps after storing them in
- * the SmsProvider "raw" table and ACKing them to the SMSC. After each message has been
- */
-public class GsmInboundSmsHandler extends InboundSmsHandler {
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+namespace Gsm {
 
-    /** Handler for SMS-PP data download messages to UICC. */
-    private final UsimDataDownloadHandler mDataDownloadHandler;
+CAR_INTERFACE_IMPL(GsmInboundSmsHandler, InboundSmsHandler, IGsmInboundSmsHandler)
 
-    /**
-     * Create a new GSM inbound SMS handler.
-     */
-    private GsmInboundSmsHandler(Context context, SmsStorageMonitor storageMonitor,
-            PhoneBase phone) {
-        Super("GsmInboundSmsHandler", context, storageMonitor, phone,
-                GsmCellBroadcastHandler->MakeGsmCellBroadcastHandler(context, phone));
-        phone.mCi->SetOnNewGsmSms(GetHandler(), EVENT_NEW_SMS, NULL);
-        mDataDownloadHandler = new UsimDataDownloadHandler(phone.mCi);
+GsmInboundSmsHandler::GsmInboundSmsHandler(
+    /* [in] */ IContext* context,
+    /* [in] */ ISmsStorageMonitor* storageMonitor,
+    /* [in] */ IPhoneBase* phone)
+    : InboundSmsHandler(String("GsmInboundSmsHandler"), context, storageMonitor, phone, CellBroadcastHandler::MakeCellBroadcastHandler(context, phone))
+{
+    // AutoPtr<IGsmCellBroadcastHandler> gcbh;
+    // CGsmCellBroadcastHandler::MakeGsmCellBroadcastHandler(context, phone, (IGsmCellBroadcastHandler**)&gcbh);
+    // InboundSmsHandler(String("GsmInboundSmsHandler"), context, storageMonitor, phone, gcbh);
+    AutoPtr<IHandler> handler;
+    GetHandler((IHandler**)&handler);
+    ((PhoneBase*)phone)->mCi->SetOnNewGsmSms(handler, EVENT_NEW_SMS, NULL);
+    CUsimDataDownloadHandler::New(((PhoneBase*)phone)->mCi, (IUsimDataDownloadHandler**)&mDataDownloadHandler);
+}
+
+ECode GsmInboundSmsHandler::MakeInboundSmsHandler(
+    /* [in] */ IContext* context,
+    /* [in] */ ISmsStorageMonitor* storageMonitor,
+    /* [in] */ IPhoneBase* phone,
+    /* [out] */ IGsmInboundSmsHandler** result)
+{
+    AutoPtr<GsmInboundSmsHandler> handler = new GsmInboundSmsHandler(context, storageMonitor, phone);
+    IStateMachine::Probe(handler)->Start();
+    *result = IGsmInboundSmsHandler::Probe(handler);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode GsmInboundSmsHandler::UpdateMessageWaitingIndicator(
+    /* [in] */ Int32 voicemailCount)
+{
+    // range check
+    if (voicemailCount < 0) {
+        voicemailCount = -1;
+    }
+    else if (voicemailCount > 0xff) {
+        // TS 23.040 9.2.3.24.2
+        // "The value 255 shall be taken to mean 255 or greater"
+        voicemailCount = 0xff;
+    }
+    // update voice mail count in GsmPhone
+    mPhone->SetVoiceMessageCount(voicemailCount);
+    // store voice mail count in SIM & shared preferences
+    AutoPtr<IUiccController> uicc = UiccController::GetInstance();
+    Int32 id;
+    mPhone->GetPhoneId(&id);
+    AutoPtr<IIccRecords> records;
+    uicc->GetIccRecords(id, IUiccController::APP_FAM_3GPP, (IIccRecords**)&records);
+    if (records != NULL) {
+        Log(String("updateMessageWaitingIndicator: updating SIM Records"));
+        records->SetVoiceMessageWaiting(1, voicemailCount);
+    }
+    else {
+        Log(String("updateMessageWaitingIndicator: SIM Records not found"));
+    }
+    StoreVoiceMailCount();
+    return NOERROR;
+}
+
+void GsmInboundSmsHandler::OnQuitting()
+{
+    AutoPtr<IHandler> handler;
+    GetHandler((IHandler**)&handler);
+    ((PhoneBase*)mPhone.Get())->mCi->UnSetOnNewGsmSms(handler);
+    mCellBroadcastHandler->Dispose();
+
+    if (DBG) Log(String("unregistered for 3GPP SMS"));
+    InboundSmsHandler::OnQuitting();     // release wakelock
+}
+
+Boolean GsmInboundSmsHandler::Is3gpp2()
+{
+    return FALSE;
+}
+
+Int32 GsmInboundSmsHandler::DispatchMessageRadioSpecific(
+    /* [in] */ ISmsMessageBase* smsb)
+{
+    AutoPtr<ISmsMessage> sms = ISmsMessage::Probe(smsb);
+
+    Boolean b;
+    if (sms->IsTypeZero(&b), b) {
+        // As per 3GPP TS 23.040 9.2.3.9, Type Zero messages should not be
+        // Displayed/Stored/Notified. They should only be acknowledged.
+        Log(String("Received short message type 0, Don't display or store it. Send Ack"));
+        return 1; //IIntents::RESULT_SMS_HANDLED;
     }
 
-    /**
-     * Unregister for GSM SMS.
-     */
-    //@Override
-    protected void OnQuitting() {
-        mPhone.mCi->UnSetOnNewGsmSms(GetHandler());
-        mCellBroadcastHandler->Dispose();
-
-        If (DBG) Log("unregistered for 3GPP SMS");
-        super->OnQuitting();     // release wakelock
+    // Send SMS-PP data download messages to UICC. See 3GPP TS 31.111 section 7.1.1.
+    if (((CSmsMessage*)sms.Get())->IsUsimDataDownload(&b), b) {
+        AutoPtr<IUsimServiceTable> ust;
+        IPhone::Probe(mPhone)->GetUsimServiceTable((IUsimServiceTable**)&ust);
+        Int32 result;
+        mDataDownloadHandler->HandleUsimDataDownload(ust, sms, &result);
+        return result;
     }
 
-    /**
-     * Wait for state machine to enter startup state. We can't send any messages until then.
-     */
-    public static GsmInboundSmsHandler MakeInboundSmsHandler(Context context,
-            SmsStorageMonitor storageMonitor, PhoneBase phone) {
-        GsmInboundSmsHandler handler = new GsmInboundSmsHandler(context, storageMonitor, phone);
-        handler->Start();
-        return handler;
+    Boolean handled = FALSE;
+    if (ISmsMessageBase::Probe(sms)->IsMWISetMessage(&b), b) {
+        Int32 val;
+        sms->GetNumOfVoicemails(&val);
+        UpdateMessageWaitingIndicator(val);
+        ISmsMessageBase::Probe(sms)->IsMwiDontStore(&handled);
+        if (DBG) Log(String("Received voice mail indicator set SMS shouldStore=") + !handled);
+    }
+    else if (ISmsMessageBase::Probe(sms)->IsMWIClearMessage(&b), b) {
+        UpdateMessageWaitingIndicator(0);
+        ISmsMessageBase::Probe(sms)->IsMwiDontStore(&handled);
+        if (DBG) Log(String("Received voice mail indicator clear SMS shouldStore=") + !handled);
+    }
+    if (handled) {
+        return 1; //IIntents::RESULT_SMS_HANDLED;
     }
 
-    /**
-     * Return TRUE if this handler is for 3GPP2 messages; FALSE for 3GPP format.
-     * @return FALSE (3GPP)
-     */
-    //@Override
-    protected Boolean Is3gpp2() {
-        return FALSE;
+    MessageClass cls;
+// TODO: Need ISmsMessage::GetMessageClass
+    // sms->GetMessageClass(&cls);
+    if ((mStorageMonitor->IsStorageAvailable(&b), b) &&
+            cls != MessageClass_CLASS_0) {
+        // It's a storable message and there's no storage available.  Bail.
+        // (See TS 23.038 for a description of class 0 messages.)
+        return 3; //IIntents::RESULT_SMS_OUT_OF_MEMORY;
     }
 
-    /**
-     * Handle type zero, SMS-PP data download, and 3GPP/CPHS MWI type SMS. Normal SMS messages
-     * are handled by {@link #dispatchNormalMessage} in parent class.
-     *
-     * @param smsb the SmsMessageBase object from the RIL
-     * @return a result code from {@link android.provider.Telephony.Sms.Intents},
-     *  or {@link Activity#RESULT_OK} for delayed acknowledgment to SMSC
-     */
-    //@Override
-    protected Int32 DispatchMessageRadioSpecific(SmsMessageBase smsb) {
-        SmsMessage sms = (SmsMessage) smsb;
+    return DispatchNormalMessage(smsb);
+}
 
-        If (sms->IsTypeZero()) {
-            // As per 3GPP TS 23.040 9.2.3.9, Type Zero messages should not be
-            // Displayed/Stored/Notified. They should only be acknowledged.
-            Log("Received short message type 0, Don't display or store it. Send Ack");
-            return Intents.RESULT_SMS_HANDLED;
-        }
+void GsmInboundSmsHandler::AcknowledgeLastIncomingSms(
+    /* [in] */ Boolean success,
+    /* [in] */ Int32 result,
+    /* [in] */ IMessage* response)
+{
+    ((PhoneBase*)mPhone.Get())->mCi->AcknowledgeLastIncomingGsmSms(success, ResultToCause(result), response);
+}
 
-        // Send SMS-PP data download messages to UICC. See 3GPP TS 31.111 section 7.1.1.
-        If (sms->IsUsimDataDownload()) {
-            UsimServiceTable ust = mPhone->GetUsimServiceTable();
-            return mDataDownloadHandler->HandleUsimDataDownload(ust, sms);
-        }
+void GsmInboundSmsHandler::OnUpdatePhoneObject(
+    /* [in] */ IPhoneBase* phone)
+{
+    InboundSmsHandler::OnUpdatePhoneObject(phone);
+    Log(String("onUpdatePhoneObject: dispose of old CellBroadcastHandler and make a new one"));
+    mCellBroadcastHandler->Dispose();
+    mCellBroadcastHandler = (CellBroadcastHandler*)(CGsmCellBroadcastHandler::MakeGsmCellBroadcastHandler(mContext, phone)).Get();
+}
 
-        Boolean handled = FALSE;
-        If (sms->IsMWISetMessage()) {
-            UpdateMessageWaitingIndicator(sms->GetNumOfVoicemails());
-            handled = sms->IsMwiDontStore();
-            If (DBG) Log("Received voice mail indicator set SMS shouldStore=" + !handled);
-        } else If (sms->IsMWIClearMessage()) {
-            UpdateMessageWaitingIndicator(0);
-            handled = sms->IsMwiDontStore();
-            If (DBG) Log("Received voice mail indicator clear SMS shouldStore=" + !handled);
-        }
-        If (handled) {
-            return Intents.RESULT_SMS_HANDLED;
-        }
-
-        If (!mStorageMonitor->IsStorageAvailable() &&
-                sms->GetMessageClass() != SmsConstants.MessageClass.CLASS_0) {
-            // It's a storable message and there's no storage available.  Bail.
-            // (See TS 23.038 for a description of class 0 messages.)
-            return Intents.RESULT_SMS_OUT_OF_MEMORY;
-        }
-
-        return DispatchNormalMessage(smsb);
-    }
-
-    /* package */ void UpdateMessageWaitingIndicator(Int32 voicemailCount) {
-        // range check
-        If (voicemailCount < 0) {
-            voicemailCount = -1;
-        } else If (voicemailCount > 0xff) {
-            // TS 23.040 9.2.3.24.2
-            // "The value 255 shall be taken to mean 255 or greater"
-            voicemailCount = 0xff;
-        }
-        // update voice mail count in GsmPhone
-        mPhone->SetVoiceMessageCount(voicemailCount);
-        // store voice mail count in SIM & shared preferences
-        IccRecords records = UiccController->GetInstance()->GetIccRecords(
-                mPhone->GetPhoneId(), UiccController.APP_FAM_3GPP);
-        If (records != NULL) {
-            Log("updateMessageWaitingIndicator: updating SIM Records");
-            records->SetVoiceMessageWaiting(1, voicemailCount);
-        } else {
-            Log("updateMessageWaitingIndicator: SIM Records not found");
-        }
-        StoreVoiceMailCount();
-    }
-
-    /**
-     * Send an acknowledge message.
-     * @param success indicates that last message was successfully received.
-     * @param result result code indicating any error
-     * @param response callback message sent when operation completes.
-     */
-    //@Override
-    protected void AcknowledgeLastIncomingSms(Boolean success, Int32 result, Message response) {
-        mPhone.mCi->AcknowledgeLastIncomingGsmSms(success, ResultToCause(result), response);
-    }
-
-    /**
-     * Called when the phone changes the default method updates mPhone
-     * mStorageMonitor and mCellBroadcastHandler.updatePhoneObject.
-     * Override if different or other behavior is desired.
-     *
-     * @param phone
-     */
-    //@Override
-    protected void OnUpdatePhoneObject(PhoneBase phone) {
-        super->OnUpdatePhoneObject(phone);
-        Log("onUpdatePhoneObject: dispose of old CellBroadcastHandler and make a new one");
-        mCellBroadcastHandler->Dispose();
-        mCellBroadcastHandler = GsmCellBroadcastHandler
-                .MakeGsmCellBroadcastHandler(mContext, phone);
-    }
-
-    /**
-     * Convert Android result code to 3GPP SMS failure cause.
-     * @param rc the Android SMS intent result value
-     * @return 0 for success, or a 3GPP SMS failure cause value
-     */
-    private static Int32 ResultToCause(Int32 rc) {
-        Switch (rc) {
-            case Activity.RESULT_OK:
-            case Intents.RESULT_SMS_HANDLED:
-                // Cause code is ignored on success.
-                return 0;
-            case Intents.RESULT_SMS_OUT_OF_MEMORY:
-                return CommandsInterface.GSM_SMS_FAIL_CAUSE_MEMORY_CAPACITY_EXCEEDED;
-            case Intents.RESULT_SMS_GENERIC_ERROR:
-            default:
-                return CommandsInterface.GSM_SMS_FAIL_CAUSE_UNSPECIFIED_ERROR;
-        }
+Int32 GsmInboundSmsHandler::ResultToCause(
+    /* [in] */ Int32 rc)
+{
+    switch (rc) {
+        case IActivity::RESULT_OK:
+        case 1: //IIntents::RESULT_SMS_HANDLED:
+            // Cause code is ignored on success.
+            return 0;
+        case 3: //IIntents::RESULT_SMS_OUT_OF_MEMORY:
+            return ICommandsInterface::GSM_SMS_FAIL_CAUSE_MEMORY_CAPACITY_EXCEEDED;
+        case 2: //IIntents::RESULT_SMS_GENERIC_ERROR:
+        default:
+            return ICommandsInterface::GSM_SMS_FAIL_CAUSE_UNSPECIFIED_ERROR;
     }
 }
+
+} // namespace Gsm
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

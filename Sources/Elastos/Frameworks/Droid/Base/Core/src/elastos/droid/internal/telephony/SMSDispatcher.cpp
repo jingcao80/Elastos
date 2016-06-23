@@ -485,11 +485,11 @@ const Int32 SMSDispatcher::EVENT_IMS_STATE_CHANGED = 12;
 const Int32 SMSDispatcher::EVENT_IMS_STATE_DONE = 13;
 
 // other
-const Int32 SMSDispatcher::EVENT_NEW_ICC_SMS = 14;
-const Int32 SMSDispatcher::EVENT_ICC_CHANGED = 15;
+const Int32 SMSDispatcher::EVENT_NEW_ICC_SMS; // = 14;
+const Int32 SMSDispatcher::EVENT_ICC_CHANGED; // = 15;
 
 /** Class2 SMS  */
-const Int32 SMSDispatcher::EVENT_SMS_ON_ICC = 16;
+const Int32 SMSDispatcher::EVENT_SMS_ON_ICC; // = 16;
 
 /** Maximum number of times to retry sending a failed SMS. */
 const Int32 SMSDispatcher::MAX_SEND_RETRIES = 3;

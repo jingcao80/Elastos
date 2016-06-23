@@ -202,6 +202,7 @@
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/telephony/utility
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/telephony/cdma
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/telephony/dataconnection
+- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/telephony/gsm
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/telephony/imsphone
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/telephony/utility
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/telephony

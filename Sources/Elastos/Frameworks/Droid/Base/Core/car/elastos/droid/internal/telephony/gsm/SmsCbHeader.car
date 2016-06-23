@@ -1,0 +1,76 @@
+
+module {
+
+    interface Elastos.Droid.Telephony.ISmsCbCmasInfo;
+    interface Elastos.Droid.Telephony.ISmsCbEtwsInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Gsm {
+
+    /**
+     * Parses a 3GPP TS 23.041 cell broadcast message header. This class is public for use by
+     * CellBroadcastReceiver test cases, but should not be used by applications.
+     *
+     * All relevant header information is now sent as a Parcelable
+     * {@link android.telephony.SmsCbMessage} object in the "message" extra of the
+     * {@link android.provider.Telephony.Sms.Intents#SMS_CB_RECEIVED_ACTION} or
+     * {@link android.provider.Telephony.Sms.Intents#SMS_EMERGENCY_CB_RECEIVED_ACTION} intent.
+     * The raw PDU is no longer sent to SMS CB applications.
+     */
+    interface ISmsCbHeader {
+        GetGeographicalScope(
+            [out] Int32* result);
+
+        GetSerialNumber(
+            [out] Int32* result);
+
+        GetServiceCategory(
+            [out] Int32* result);
+
+        GetDataCodingScheme(
+            [out] Int32* result);
+
+        GetPageIndex(
+            [out] Int32* result);
+
+        GetNumberOfPages(
+            [out] Int32* result);
+
+        GetEtwsInfo(
+            [out] ISmsCbEtwsInfo** result);
+
+        GetCmasInfo(
+            [out] ISmsCbCmasInfo** result);
+
+        /**
+         * Return whether this broadcast is an emergency (PWS) message type.
+         * @return true if this message is emergency type; false otherwise
+         */
+        IsEmergencyMessage(
+            [out] Boolean* result);
+
+        /**
+         * Return whether this broadcast is an ETWS primary notification.
+         * @return true if this message is an ETWS primary notification; false otherwise
+         */
+        IsEtwsPrimaryNotification(
+            [out] Boolean* result);
+
+        /**
+         * Return whether this broadcast is in UMTS format.
+         * @return true if this message is in UMTS format; false otherwise
+         */
+        IsUmtsFormat(
+            [out] Boolean* result);
+    }
+
+    }//Gsm
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

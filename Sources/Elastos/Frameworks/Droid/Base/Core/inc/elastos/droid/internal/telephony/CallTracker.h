@@ -148,22 +148,22 @@ protected:
     Boolean mNumberConverted;
 
     //***** Events
-    static const Int32 EVENT_POLL_CALLS_RESULT;
-    static const Int32 EVENT_CALL_STATE_CHANGE;
-    static const Int32 EVENT_REPOLL_AFTER_DELAY;
-    static const Int32 EVENT_OPERATION_COMPLETE;
-    static const Int32 EVENT_GET_LAST_CALL_FAIL_CAUSE;
+    static const Int32 EVENT_POLL_CALLS_RESULT             = 1;
+    static const Int32 EVENT_CALL_STATE_CHANGE             = 2;
+    static const Int32 EVENT_REPOLL_AFTER_DELAY            = 3;
+    static const Int32 EVENT_OPERATION_COMPLETE            = 4;
+    static const Int32 EVENT_GET_LAST_CALL_FAIL_CAUSE      = 5;
 
-    static const Int32 EVENT_SWITCH_RESULT;
-    static const Int32 EVENT_RADIO_AVAILABLE;
-    static const Int32 EVENT_RADIO_NOT_AVAILABLE;
-    static const Int32 EVENT_CONFERENCE_RESULT;
-    static const Int32 EVENT_SEPARATE_RESULT;
-    static const Int32 EVENT_ECT_RESULT;
-    static const Int32 EVENT_EXIT_ECM_RESPONSE_CDMA;
-    static const Int32 EVENT_CALL_WAITING_INFO_CDMA;
-    static const Int32 EVENT_THREE_WAY_DIAL_L2_RESULT_CDMA;
-    static const Int32 EVENT_THREE_WAY_DIAL_BLANK_FLASH;
+    static const Int32 EVENT_SWITCH_RESULT                 = 8;
+    static const Int32 EVENT_RADIO_AVAILABLE               = 9;
+    static const Int32 EVENT_RADIO_NOT_AVAILABLE           = 10;
+    static const Int32 EVENT_CONFERENCE_RESULT             = 11;
+    static const Int32 EVENT_SEPARATE_RESULT               = 12;
+    static const Int32 EVENT_ECT_RESULT                    = 13;
+    static const Int32 EVENT_EXIT_ECM_RESPONSE_CDMA        = 14;
+    static const Int32 EVENT_CALL_WAITING_INFO_CDMA        = 15;
+    static const Int32 EVENT_THREE_WAY_DIAL_L2_RESULT_CDMA = 16;
+    static const Int32 EVENT_THREE_WAY_DIAL_BLANK_FLASH    = 20;
 
 private:
     static const Boolean DBG_POLL;

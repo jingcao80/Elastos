@@ -13,6 +13,12 @@ module {
      */
     interface IGsmSmsAddress {
 
+        const Int32 OFFSET_ADDRESS_LENGTH = 0;
+
+        const Int32 OFFSET_TOA = 1;
+
+        const Int32 OFFSET_ADDRESS_VALUE = 2;
+
         IsCphsVoiceMessageIndicatorAddress(
             [out] Boolean* result);
 

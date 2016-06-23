@@ -175,18 +175,21 @@ module
 
     merge("telephony/gsm/CallFailCause.car");
     merge("telephony/gsm/GSMPhone.car");
+    merge("telephony/gsm/GsmCall.car");
     merge("telephony/gsm/GsmCallTracker.car");
     merge("telephony/gsm/GsmCellBroadcastHandler.car");
     merge("telephony/gsm/GsmConnection.car");
     merge("telephony/gsm/GsmInboundSmsHandler.car");
     merge("telephony/gsm/GsmMmiCode.car");
     merge("telephony/gsm/GsmSMSDispatcher.car");
+    merge("telephony/gsm/GsmServiceStateTracker.car");
     merge("telephony/gsm/GsmSmsAddress.car");
     merge("telephony/gsm/GsmSmsCbMessage.car");
     merge("telephony/gsm/SimPhoneBookInterfaceManager.car");
     merge("telephony/gsm/SimTlv.car");
     merge("telephony/gsm/SmsBroadcastConfigInfo.car");
     merge("telephony/gsm/SmsCbConstants.car");
+    merge("telephony/gsm/SmsCbHeader.car");
     merge("telephony/gsm/SmsMessage.car");
     merge("telephony/gsm/SsData.car");
     merge("telephony/gsm/SuppServiceNotification.car");
@@ -248,6 +251,7 @@ module
     interface Elastos.Droid.Internal.Telephony.ISmsAddress;
     interface Elastos.Droid.Internal.Telephony.IDriverCall;
     interface Elastos.Droid.Internal.Telephony.ICall;
+    interface Elastos.Droid.Internal.Telephony.ICellBroadcastHandler;
     interface Elastos.Droid.Internal.Telephony.ISmsMessageBase;
     interface Elastos.Droid.Internal.Telephony.ISMSDispatcher;
     interface Elastos.Droid.Internal.Telephony.IIccPhoneBookInterfaceManager;
@@ -263,6 +267,7 @@ module
     interface Elastos.Droid.Internal.Telephony.IPhoneBase;
     interface Elastos.Droid.Internal.Telephony.IPhoneProxy;
     interface Elastos.Droid.Internal.Telephony.IIccCard;
+    interface Elastos.Droid.Internal.Telephony.ISmsStorageMonitor;
     interface Elastos.Droid.Internal.Telephony.Cdma.ICDMAPhone;
     //interface Elastos.Droid.Internal.Telephony.Cdma.ICdmaSmsAddress;
     //interface Elastos.Droid.Internal.Telephony.Cdma.ICdmaSmsAddressHelper;
@@ -1614,4 +1619,277 @@ module
     } // Internal
     } // Droid
     } // Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Gsm {
+
+        class CGSMPhone {
+            constructor();
+
+            constructor(
+                [in] IContext* context,
+                [in] ICommandsInterface* ci,
+                [in] IPhoneNotifier* notifier);
+
+            constructor(
+                [in] IContext* context,
+                [in] ICommandsInterface* ci,
+                [in] IPhoneNotifier* notifier,
+                [in] Boolean unitTestMode);
+
+            constructor(
+                [in] IContext* context,
+                [in] ICommandsInterface* ci,
+                [in] IPhoneNotifier* notifier,
+                [in] Int32 phoneId);
+
+            constructor(
+                [in] IContext* context,
+                [in] ICommandsInterface* ci,
+                [in] IPhoneNotifier* notifier,
+                [in] Boolean unitTestMode,
+                [in] Int32 phoneId);
+
+            interface IGSMPhone;
+            interface IPhoneBase;
+            interface IPhone;
+            //interface IHandler;
+        }
+
+        class CGsmCall {
+            constructor();
+
+            constructor(
+                [in] IGsmCallTracker* owner);
+
+            interface IGsmCall;
+            interface ICall;
+        }
+
+        class CGsmCallTracker {
+            constructor();
+
+            constructor(
+                [in] IGSMPhone* phone);
+
+            interface IGsmCallTracker;
+            interface ICallTracker;
+            //interface IHandler;
+        }
+
+        [local]
+        class CGsmCellBroadcastHandler {
+            constructor();
+
+            constructor(
+                [in] IContext* context,
+                [in] IPhoneBase* phone);
+
+            interface IGsmCellBroadcastHandler;
+            interface ICellBroadcastHandler;
+            interface IWakeLockStateMachine;
+            //interface IStateMachine;
+        }
+
+        singleton class CGsmCellBroadcastHandlerHelper {
+            interface IGsmCellBroadcastHandlerHelper;
+        }
+
+        class CGsmConnection {
+            constructor();
+
+            constructor(
+                [in] IContext* context,
+                [in] IDriverCall* dc,
+                [in] IGsmCallTracker* ct,
+                [in] Int32 index);
+
+            constructor(
+                [in] IContext* context,
+                [in] String dialString,
+                [in] IGsmCallTracker* ct,
+                [in] IGsmCall* parent);
+
+            interface IGsmConnection;
+            interface IConnection;
+        }
+
+//        [local]
+//        class CGsmInboundSmsHandler {
+//            constructor();
+//
+//            constructor(
+//                [in] IContext* context,
+//                [in] ISmsStorageMonitor* storageMonitor,
+//                [in] IPhoneBase* phone);
+//
+//            interface IGsmInboundSmsHandler;
+//            interface IInboundSmsHandler;
+//            //interface IStateMachine;
+//        }
+
+        singleton class CGsmInboundSmsHandlerHelper {
+            interface IGsmInboundSmsHandlerHelper;
+        }
+
+        class CGsmMmiCode {
+            constructor();
+
+            constructor(
+                [in] IGSMPhone* phone,
+                [in] IUiccCardApplication* app);
+
+            interface IGsmMmiCode;
+            interface IMmiCode;
+            //interface IHandler;
+        }
+
+        [local]
+        class CGsmSMSDispatcher {
+            constructor();
+
+            constructor(
+                [in] IPhoneBase* phone,
+                [in] ISmsUsageMonitor* usageMonitor,
+                [in] IImsSMSDispatcher* imsSMSDispatcher,
+                [in] IGsmInboundSmsHandler* gsmInboundSmsHandler);
+
+            interface IGsmSMSDispatcher;
+            interface ISMSDispatcher;
+            //interface IHandler;
+        }
+
+        class CGsmServiceStateTracker {
+            constructor();
+
+            constructor(
+                [in] IGSMPhone* phone);
+
+            interface IGsmServiceStateTracker;
+            interface IServiceStateTracker;
+            //interface IHandler;
+        }
+
+        [deprecated]
+        class CGsmSmsAddress {
+            constructor();
+
+            constructor(
+                [in] ArrayOf<Byte>* data,
+                [in] Int32 offset,
+                [in] Int32 length);
+
+            interface IGsmSmsAddress;
+            interface ISmsAddress;
+        }
+
+        class CGsmSmsCbMessage {
+            constructor();
+
+            interface IGsmSmsCbMessage;
+        }
+
+        singleton class CGsmSmsCbMessageHelper {
+            interface IGsmSmsCbMessageHelper;
+        }
+
+        class CSimPhoneBookInterfaceManager {
+            constructor();
+
+            constructor(
+                [in] IGSMPhone* phone);
+
+            interface ISimPhoneBookInterfaceManager;
+            interface IIccPhoneBookInterfaceManager;
+        }
+
+        [deprecated]
+        class CSimTlv {
+            constructor();
+
+            constructor(
+                [in] ArrayOf<Byte>* record,
+                [in] Int32 offset,
+                [in] Int32 length);
+
+            interface ISimTlv;
+        }
+
+        class CSmsBroadcastConfigInfo {
+            constructor();
+
+            constructor(
+                [in] Int32 fromId,
+                [in] Int32 toId,
+                [in] Int32 fromScheme,
+                [in] Int32 toScheme,
+                [in] Boolean selected);
+
+            interface ISmsBroadcastConfigInfo;
+        }
+
+        [deprecated]
+        class CSmsCbHeader {
+            constructor();
+
+            constructor(
+                [in] ArrayOf<Byte>* pdu);
+
+            interface ISmsCbHeader;
+        }
+
+        class CSmsMessage {
+            constructor();
+
+            interface ISmsMessage;
+            interface ISmsMessageBase;
+        }
+
+        singleton class CSmsMessageHelper {
+            interface ISmsMessageHelper;
+        }
+
+        class CSsData {
+            constructor();
+
+            interface ISsData;
+        }
+
+        class CSuppServiceNotification {
+            constructor();
+
+            interface ISuppServiceNotification;
+        }
+
+        class CUsimDataDownloadHandler {
+            constructor();
+
+            constructor(
+                [in] ICommandsInterface* commandsInterface);
+
+            interface IUsimDataDownloadHandler;
+            //interface IHandler;
+        }
+
+        class CUsimPhoneBookManager {
+            constructor();
+
+            constructor(
+                [in] IIccFileHandler* fh,
+                [in] IAdnRecordCache* cache);
+
+            interface IUsimPhoneBookManager;
+            interface IIccConstants;
+            //interface IHandler;
+        }
+
+    } // Gsm
+    } // Telephony
+    } // Internal
+    } // Droid
+    } // Elastos
+
 }

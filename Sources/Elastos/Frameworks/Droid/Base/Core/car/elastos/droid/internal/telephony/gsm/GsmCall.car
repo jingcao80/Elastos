@@ -1,0 +1,71 @@
+
+module {
+
+    interface Elastos.Droid.Internal.Telephony.IConnection;
+    interface Elastos.Droid.Internal.Telephony.IDriverCall;
+    interface Elastos.Droid.Internal.Telephony.Gsm.IGsmConnection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Gsm {
+
+    /**
+     * @Involve
+     * interface ICall
+     */
+    interface IGsmCall {
+
+        Dispose();
+
+        Attach(
+            [in] IConnection* conn,
+            [in] IDriverCall* dc);
+
+        AttachFake(
+            [in] IConnection* conn,
+            [in] Elastos.Droid.Internal.Telephony.ICallState state);
+
+        /**
+         * Called by GsmConnection when it has disconnected
+         */
+        ConnectionDisconnected(
+            [in] IGsmConnection* conn,
+            [out] Boolean* result);
+
+        Detach(
+            [in] IGsmConnection* conn);
+
+        Update (
+            [in] IGsmConnection* conn,
+            [in] IDriverCall* dc,
+            [out] Boolean* result);
+
+        /**
+         * @return true if there's no space in this call for additional
+         * connections to be added via "conference"
+         */
+        IsFull(
+            [out] Boolean* result);
+
+        /**
+         * Called when this Call is being hung up locally (eg, user pressed "end")
+         * Note that at this point, the hangup request has been dispatched to the radio
+         * but no response has yet been received so update() has not yet been called
+         */
+        OnHangupLocal();
+
+        /**
+         * Called when it's time to clean up disconnected Connection objects
+         */
+        ClearDisconnected();
+    }
+
+    }//Gsm
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

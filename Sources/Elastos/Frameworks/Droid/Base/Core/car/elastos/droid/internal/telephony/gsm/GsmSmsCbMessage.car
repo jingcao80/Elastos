@@ -1,6 +1,11 @@
 
 module {
 
+    interface Elastos.Droid.Internal.Telephony.Gsm.ISmsCbHeader;
+    interface Elastos.Droid.Telephony.ISmsCbLocation;
+    interface Elastos.Droid.Telephony.ISmsCbMessage;
+    using interface Elastos.Core.IArrayOf;
+
     namespace Elastos {
     namespace Droid {
     namespace Internal {
@@ -12,16 +17,27 @@ module {
 
     interface IGsmSmsCbMessageHelper {
         /**
+         * Create a new SmsCbMessage object from a header object plus one or more received PDUs.
+         *
+         * @param pdus PDU bytes
+         */
+        CreateSmsCbMessage(
+            [in] ISmsCbHeader* header,
+            [in] ISmsCbLocation* location,
+            [in] IArrayOf* pdus,
+            [out] ISmsCbMessage** result);
+
+        /**
          * Create a new SmsCbMessage object from one or more received PDUs. This is used by some
          * CellBroadcastReceiver test cases, because SmsCbHeader is now package local.
          *
          * @param location the location (geographical scope) for the message
          * @param pdus PDU bytes
          */
-        // CreateSmsCbMessage(
-        //     [in] ISmsCbLocation* location,
-        //     [in] byte[][] pdus,
-        //     [out] ISmsCbMessage** result);
+        CreateSmsCbMessage(
+            [in] ISmsCbLocation* location,
+            [in] IArrayOf* pdus,
+            [out] ISmsCbMessage** result);
     }
 
     }//Gsm
