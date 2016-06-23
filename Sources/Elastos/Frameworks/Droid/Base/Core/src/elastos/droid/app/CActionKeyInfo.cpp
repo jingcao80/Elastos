@@ -2,6 +2,7 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/app/CActionKeyInfo.h"
 #include "elastos/droid/R.h"
+#include "elastos/droid/ext/frameworkext.h"
 
 using Elastos::Droid::R;
 using Elastos::Droid::Content::Res::ITypedArray;

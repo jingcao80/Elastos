@@ -7,8 +7,8 @@
 
 #include "Elastos.Droid.Core.h"
 
-#ifndef TO_ATTRS_ARRAYOF(attrs)
-#define TO_ATTRS_ARRAYOF (ArrayOf<Int32>::Alloc(const_cast<Int32 *>(attrs), ArraySize(attrs)))
+#ifndef TO_ATTRS_ARRAYOF
+#define TO_ATTRS_ARRAYOF(attrs) (ArrayOf<Int32>::Alloc(const_cast<Int32 *>(attrs), ArraySize(attrs)))
 #endif
 
 // #define MAX_PATH    256
