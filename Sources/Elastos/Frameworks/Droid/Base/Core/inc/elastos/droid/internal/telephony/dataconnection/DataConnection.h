@@ -558,7 +558,7 @@ private:
      * @param o is the object returned in the AsyncResult.obj.
      */
     CARAPI TearDownData(
-        /* [in] */ IObject* o);
+        /* [in] */ IInterface* o);
 
     CARAPI NotifyAllWithEvent(
         /* [in] */ IApnContext* alreadySent,

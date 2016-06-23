@@ -50,7 +50,7 @@ ECode DcSwitchAsyncChannel::CmdToString(
         *result = (*sCmdToString)[cmd];
         return NOERROR;
     } else {
-        assert(0 && "AsyncChannel");
+        assert(0 && "TODO: AsyncChannel");
         // return AsyncChannel::CmdToString(cmd + BASE, result);
     }
     return NOERROR;

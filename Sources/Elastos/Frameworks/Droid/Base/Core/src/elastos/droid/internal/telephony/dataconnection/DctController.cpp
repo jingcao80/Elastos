@@ -15,6 +15,8 @@
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/os/CHandlerThread.h"
 #include "elastos/droid/os/CMessage.h"
+#include "elastos/droid/os/CRegistrant.h"
+#include "elastos/droid/os/CRegistrantList.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/provider/Telephony.h"
@@ -41,6 +43,8 @@ using Elastos::Droid::Internal::Utility::IStateMachine;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::CHandlerThread;
 using Elastos::Droid::Os::CMessage;
+using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::CRegistrantList;
 using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandlerThread;
@@ -606,14 +610,13 @@ ECode DctController::constructor(
     mDdsSwitchSerializer= new DdsSwitchSerializerHandler(this);
     mDdsSwitchSerializer->constructor(tLooper);
 
-    assert(0 && "TODO CRegistrantList");
-    // CRegistrantList::New((IRegistrantList**)&mNotifyDefaultDataSwitchInfo);
-    // CRegistrantList::New((IRegistrantList**)&mNotifyOnDemandDataSwitchInfo);
-    // CRegistrantList::New((IRegistrantList**)&mNotifyOnDemandPsAttach);
+    CRegistrantList::New((IRegistrantList**)&mNotifyDefaultDataSwitchInfo);
+    CRegistrantList::New((IRegistrantList**)&mNotifyOnDemandDataSwitchInfo);
+    CRegistrantList::New((IRegistrantList**)&mNotifyOnDemandPsAttach);
     CHashSet::New((IHashSet**)&mApnTypes);
     mRspHander = new SubHandler(this);
     mDataStateChangedCallback = new SubIDataStateChangedCallback(this);
-    assert(0 && "SubscriptionController");
+    assert(0 && "TODO: SubscriptionController");
     // AutoPtr<ISubscriptionController> mSubController = SubscriptionController::GetInstance();
     return NOERROR;
 }
@@ -986,8 +989,7 @@ ECode DctController::RegisterForDefaultDataSwitchInfo(
     /* [in] */ IInterface* obj)
 {
     AutoPtr<IRegistrant> r;
-    assert(0 && "TODO CRegistrant");
-    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     {
         AutoLock lock(mNotifyDefaultDataSwitchInfo);
         ((RegistrantList*) mNotifyDefaultDataSwitchInfo.Get())->Add(r);
@@ -1001,8 +1003,7 @@ ECode DctController::RegisterForOnDemandDataSwitchInfo(
     /* [in] */ IInterface* obj)
 {
     AutoPtr<IRegistrant> r;
-    assert(0 && "TODO CRegistrant");
-    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     {
         AutoLock lock(mNotifyOnDemandDataSwitchInfo);
         ((RegistrantList*) mNotifyOnDemandDataSwitchInfo.Get())->Add(r);
@@ -1016,8 +1017,7 @@ ECode DctController::RegisterForOnDemandPsAttach(
     /* [in] */ IInterface* obj)
 {
     AutoPtr<IRegistrant> r;
-    assert(0 && "TODO CRegistrant");
-    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     {
         AutoLock lock(mNotifyOnDemandPsAttach);
         ((RegistrantList*) mNotifyOnDemandPsAttach.Get())->Add(r);

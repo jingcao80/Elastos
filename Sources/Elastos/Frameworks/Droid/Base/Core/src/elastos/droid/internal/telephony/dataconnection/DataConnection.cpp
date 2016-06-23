@@ -812,7 +812,7 @@ ECode DataConnection::DcActivatingState::ProcessMessage(
                 break;
             case DataCallResponse_ERR_UnacceptableParameter:
                 // The addresses given from the RIL are bad
-                mHost->TearDownData(cp);
+                mHost->TearDownData(TO_IINTERFACE(cp));
                 mHost->TransitionTo(mHost->mDisconnectingErrorCreatingConnection);
                 break;
             case DataCallResponse_ERR_GetLastErrorFromRil: {
@@ -1070,7 +1070,7 @@ ECode DataConnection::DcActiveState::ProcessMessage(
                 mHost->mDisconnectParams = dp;
                 mHost->mConnectionParams = NULL;
                 dp->mTag = mHost->mTag;
-                mHost->TearDownData(dp);
+                mHost->TearDownData(TO_IINTERFACE(dp));
                 mHost->TransitionTo(mHost->mDisconnectingState);
             } else {
                 mHost->mApnContexts->Remove(dp->mApnContext);
@@ -1092,7 +1092,7 @@ ECode DataConnection::DcActiveState::ProcessMessage(
         mHost->mDisconnectParams = dp;
         mHost->mConnectionParams = NULL;
         dp->mTag = mHost->mTag;
-        mHost->TearDownData(dp);
+        mHost->TearDownData(TO_IINTERFACE(dp));
         mHost->TransitionTo(mHost->mDisconnectingState);
         retVal = HANDLED;
     }
@@ -1392,9 +1392,11 @@ ECode DataConnection::MakeDataConnection(
     mInstanceNumber->IncrementAndGet(&instNumber);
     AutoPtr<IDataConnection> dc = new DataConnection();
     ((DataConnection*)dc.Get())->constructor(phone, String("DC-") + StringUtils::ToString(instNumber), id, dct, failBringUpAll, dcc);
-    assert(0 && "IStateMachine");
+    assert(0 && "TODO: IStateMachine");
     // IStateMachine::Probe(dc)->Start();
-    // if (DBG) IStateMachine::Probe(dc)->Log("Made %s", dc->GetName());
+    String name;
+    ((DataConnection*)dc.Get())->GetName(&name);
+    if (DBG) ((DataConnection*)dc.Get())->Log("Made %s", name.string());
     *result = dc;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -1611,7 +1613,7 @@ DataConnection::DataConnection()
     , mDataRegState(Elastos::Core::Math::INT32_MAX_VALUE)
     , mId(0)
 {
-    assert(0 && "CRetryManager");
+    assert(0 && "TODO: CRetryManager");
     // CRetryManager::New((IRetryManager**)&mRetryManager);
     CLinkProperties::New((ILinkProperties**)&mLinkProperties);
     mDefaultState = new DcDefaultState(this);
@@ -1870,7 +1872,7 @@ ECode DataConnection::GetDataTechnology(
 }
 
 ECode DataConnection::TearDownData(
-    /* [in] */ IObject* o)
+    /* [in] */ IInterface* o)
 {
     Int32 discReason = IRILConstants::DEACTIVATE_REASON_NONE;
     if ((o != NULL) && ((DisconnectParams*) IObject::Probe(o) != NULL)) {
@@ -1888,21 +1890,19 @@ ECode DataConnection::TearDownData(
     IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
     Int32 rilDataRadioTechnology;
     serviceState->GetRilDataRadioTechnology(&rilDataRadioTechnology);
-    assert(0 && "IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN");
-    // if (isOn || (rilDataRadioTechnology
-    //                 == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN )) {
-    //     if (DBG) Log("tearDownData radio is on, call deactivateDataCall");
-    //     AutoPtr<IMessage> msg;
-    //     ObtainMessage(EVENT_DEACTIVATE_DONE, mTag, 0, o, (IMessage**)&msg);
-    //     ((PhoneBase*) mPhone.Get())->mCi->DeactivateDataCall(mCid, discReason, msg);
-    // } else {
-    //     if (DBG) Log("tearDownData radio is off sendMessage EVENT_DEACTIVATE_DONE immediately");
-    //     AutoPtr<IAsyncResult> ar;
-    //     CAsyncResult::New((IAsyncResult**)&ar);
-    //     AutoPtr<IMessage> msg;
-    //     ObtainMessage(EVENT_DEACTIVATE_DONE, mTag, 0, ar, (IMessage**)&msg);
-    //     SendMessage(msg);
-    // }
+    if (isOn || (rilDataRadioTechnology
+                    == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN )) {
+        if (DBG) Log("tearDownData radio is on, call deactivateDataCall");
+        AutoPtr<IMessage> msg;
+        ObtainMessage(EVENT_DEACTIVATE_DONE, mTag, 0, o, (IMessage**)&msg);
+        ((PhoneBase*) mPhone.Get())->mCi->DeactivateDataCall(mCid, discReason, msg);
+    } else {
+        if (DBG) Log("tearDownData radio is off sendMessage EVENT_DEACTIVATE_DONE immediately");
+        AutoPtr<IAsyncResult> ar = new AsyncResult(o, NULL, NULL);
+        AutoPtr<IMessage> msg;
+        ObtainMessage(EVENT_DEACTIVATE_DONE, mTag, 0, ar, (IMessage**)&msg);
+        SendMessage(msg);
+    }
     return NOERROR;
 }
 
@@ -2080,9 +2080,9 @@ ECode DataConnection::OnSetupConnectionCompleted(
             Log("onSetupConnectionCompleted failed, ar.exception=%s response=%s",
                     TO_CSTR(((AsyncResult*) ar)->mException), TO_CSTR(response));
         }
-        assert(0 && "CommandException");
-        // if (ICommandException::Probe(((AsyncResult*) ar.Get())->mException) != NULL
-        //         && ((CommandException) (((AsyncResult*) ar.Get())->mException))->GetCommandError()
+        assert(0 && "TODO: CommandException");
+        // if (IThrowable::Probe(((AsyncResult*) ar)->mException) != NULL
+        //         && ((CommandException) (((AsyncResult*) ar)->mException))->GetCommandError()
         //         == CommandException.Error.RADIO_NOT_AVAILABLE) {
         //     result = DataCallResponse::SetupResult(DataCallResponse_ERR_BadCommand);
         //     result->mFailCause = DcFailCause::FromInt32((DcFailCause_RADIO_NOT_AVAILABLE);

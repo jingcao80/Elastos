@@ -20,7 +20,7 @@ class Registrant
 public:
     CAR_INTERFACE_DECL()
 
-    Registrant(
+    CARAPI constructor(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);

@@ -803,7 +803,7 @@ ECode DdsScheduler::NotifyRequestAccepted(
     if (!isAlreadyAccepted) {
         MarkAccepted(nr);
         Logger::D(TAG, "Accepted req = %s", TO_CSTR(nr));
-        assert(0 && "SubscriptionController");
+        assert(0 && "TODO: SubscriptionController");
         // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
         // subController->NotifyOnDemandDataSubIdChanged(nr);
     } else {
@@ -839,7 +839,7 @@ ECode DdsScheduler::GetCurrentDds(
 {
     VALIDATE_NOT_NULL(result)
 
-    assert(0 && "SubscriptionController");
+    assert(0 && "TODO: SubscriptionController");
     // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
     // if (mCurrentDds == ISubscriptionManager::INVALID_SUB_ID) {
     //     subController->GetDefaultDataSubId(&mCurrentDds);
@@ -863,7 +863,7 @@ ECode DdsScheduler::GetSubIdFromNetworkRequest(
 {
     VALIDATE_NOT_NULL(result)
 
-    assert(0 && "SubscriptionController");
+    assert(0 && "TODO: SubscriptionController");
     // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
     // return subController->GetSubIdFromNetworkRequest(n);
     return NOERROR;
@@ -899,7 +899,7 @@ ECode DdsScheduler::GetMaxDataAllowed(
 {
     VALIDATE_NOT_NULL(result)
 
-    assert(0 && "ModemStackController");
+    assert(0 && "TODO: ModemStackController");
     // AutoPtr<IModemStackController> modemStackController = ModemStackController::GetInstance();
     // Logger::D(TAG, "ModemStackController = %s", TO_CSTR(modemStackController));
     // Int32 maxData;

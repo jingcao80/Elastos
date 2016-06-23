@@ -10,7 +10,7 @@ namespace Os {
 
 CAR_INTERFACE_IMPL(Registrant, Object, IRegistrant)
 
-Registrant::Registrant(
+ECode Registrant::constructor(
     /* [in] */ IHandler* h,
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
@@ -20,6 +20,7 @@ Registrant::Registrant(
     wrs->GetWeakReference((IWeakReference**)&mRefH);
     mWhat = what;
     mUserObj = obj;
+    return NOERROR;
 }
 
 ECode Registrant::Clear()

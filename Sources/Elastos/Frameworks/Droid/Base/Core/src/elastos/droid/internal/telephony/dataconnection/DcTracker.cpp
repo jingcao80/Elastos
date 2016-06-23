@@ -39,6 +39,7 @@
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/CMessenger.h"
+#include "elastos/droid/os/CRegistrantList.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/SystemProperties.h"
@@ -109,6 +110,7 @@ using Elastos::Droid::Net::NetworkUtils;
 using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::CMessenger;
+using Elastos::Droid::Os::CRegistrantList;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::ServiceManager;
@@ -181,7 +183,7 @@ ECode DcTracker::SubBroadcastReceiverDefaultDds::OnReceive(
     mHost->Log("got ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED, new DDS = %ld", i64);
     mHost->UpdateSubIdAndCapability();
     Int64 defaultDataSubId;
-    assert(0 && "SubscriptionController");
+    assert(0 && "TODO: SubscriptionController");
     // SubscriptionController::GetInstance()->GetDefaultDataSubId(&defaultDataSubId);
     if (mHost->mSubId == defaultDataSubId) {
         mHost->Log("Dct is default-DDS now, process any pending MMS requests");
@@ -279,7 +281,7 @@ ECode DcTracker::TelephonyNetworkFactory::ProcessPendingNetworkRequests(
 
 ECode DcTracker::TelephonyNetworkFactory::RegisterOnDemandDdsCallback()
 {
-    assert(0 && "SubscriptionController");
+    assert(0 && "TODO: SubscriptionController");
     // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
     // Int64 subId;
     // mPhone->GetSubId(&subId);
@@ -298,7 +300,7 @@ ECode DcTracker::TelephonyNetworkFactory::UpdateNetworkCapability(
 {
     Log("update networkCapabilites for subId = %ld", subId);
     mNetworkCapabilities->SetNetworkSpecifier(String("") + StringUtils::ToString(subId));
-    assert(0 && "SubscriptionController");
+    assert(0 && "TODO: SubscriptionController");
     // Int64 defaultDataSubId;
     // SubscriptionController::GetInstance()->GetDefaultDataSubId(&defaultDataSubId);
     // if ((subId > 0 && SubscriptionController::GetInstance().
@@ -323,7 +325,7 @@ ECode DcTracker::TelephonyNetworkFactory::NeedNetworkFor(
 {
     // figure out the apn type and enable it
     if (mHost->DBG) Log("Cellular needs Network for %s", TO_CSTR(networkRequest));
-    assert(0 && "SubscriptionController");
+    assert(0 && "TODO: SubscriptionController");
     // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
     // Log("subController = %s", TO_CSTR(subController));
     // Int64 currentDds;
@@ -419,7 +421,7 @@ ECode DcTracker::TelephonyNetworkFactory::RequestOnDemandDataSubscriptionLock(
     IsNetworkRequestForInternet(n, &isNetworkRequestForInternet);
     if (!isNetworkRequestForInternet) {
         //Request tempDDS lock only for non-default PDP requests
-        assert(0 && "SubscriptionController");
+        assert(0 && "TODO: SubscriptionController");
         // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
         // Log("requestOnDemandDataSubscriptionLock for request = %s", TO_CSTR(n));
         // subController->StartOnDemandDataSubscriptionRequest(n);
@@ -457,7 +459,7 @@ ECode DcTracker::TelephonyNetworkFactory::RemoveRequestIfFound(
     Boolean isNetworkRequestForInternet;
     IsNetworkRequestForInternet(n, &isNetworkRequestForInternet);
     if (!isNetworkRequestForInternet) {
-        assert(0 && "SubscriptionController");
+        assert(0 && "TODO: SubscriptionController");
         // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
         // subController->StopOnDemandDataSubscriptionRequest(n);
     } else {
@@ -483,7 +485,7 @@ ECode DcTracker::TelephonyNetworkFactory::ReleaseNetworkFor(
 ECode DcTracker::TelephonyNetworkFactory::ReleaseAllNetworkRequests()
 {
     Log("releaseAllNetworkRequests");
-    assert(0 && "SubscriptionController");
+    assert(0 && "TODO: SubscriptionController");
     // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
     Int32 size;
     mDdsRequests->GetSize(&size);
@@ -493,7 +495,7 @@ ECode DcTracker::TelephonyNetworkFactory::ReleaseAllNetworkRequests()
         AutoPtr<INetworkRequest> nr = INetworkRequest::Probe(obj);
         if (nr != NULL) {
             Log("Removing request = %s", TO_CSTR(nr));
-            assert(0 && "SubscriptionController");
+            assert(0 && "TODO: SubscriptionController");
             // subController->StopOnDemandDataSubscriptionRequest(nr);
             Int32 requestId;
             nr->GetRequestId(&requestId);
@@ -617,8 +619,7 @@ DcTracker::DcTracker()
     Boolean mOosIsDisconnect;
     SystemProperties::GetBoolean(IPhoneBase::PROPERTY_OOS_IS_DISCONNECT, TRUE, &mOosIsDisconnect);
     CArrayList::New((IArrayList**)&mDisconnectAllCompleteMsgList);
-    assert(0 && "TODO CRegistrantList");
-    // CRegistrantList::New((IRegistrantList**)&mAllDataDisconnectedRegistrants);
+    CRegistrantList::New((IRegistrantList**)&mAllDataDisconnectedRegistrants);
     CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&mAttached);
 }
 
@@ -647,9 +648,8 @@ ECode DcTracker::constructor(
         Log(LOG__TAG + " fetchApnFromOmhCard: %d", fetchApnFromOmhCard);
         if (fetchApnFromOmhCard) {
             CCdmaApnProfileTracker::New(ICDMAPhone::Probe(p), (ICdmaApnProfileTracker**)&mOmhApt);
-            assert(0 && "IDctConstants::EVENT_MODEM_DATA_PROFILE_READY");
-            // mOmhApt->RegisterForModemProfileReady(this,
-            //         IDctConstants::EVENT_MODEM_DATA_PROFILE_READY, NULL);
+            mOmhApt->RegisterForModemProfileReady(this,
+                    IDctConstants::EVENT_MODEM_DATA_PROFILE_READY, NULL);
         }
     }
     mDataConnectionTracker = this;
@@ -755,9 +755,8 @@ ECode DcTracker::RegisterForAllEvents()
     ((PhoneBase*) mPhone.Get())->mCi->RegisterForAvailable(this, IDctConstants::EVENT_RADIO_AVAILABLE, NULL);
     ((PhoneBase*) mPhone.Get())->mCi->RegisterForOffOrNotAvailable(this,
             IDctConstants::EVENT_RADIO_OFF_OR_NOT_AVAILABLE, NULL);
-    assert(0 && "TODO: IDctConstants::EVENT_GET_WWAN_IWLAN_COEXISTENCE_DONE");
-    // ((PhoneBase*) mPhone.Get())->mCi->RegisterForWwanIwlanCoexistence(this,
-    //         IDctConstants::EVENT_GET_WWAN_IWLAN_COEXISTENCE_DONE, NULL);
+    ((PhoneBase*) mPhone.Get())->mCi->RegisterForWwanIwlanCoexistence(this,
+            IDctConstants::EVENT_GET_WWAN_IWLAN_COEXISTENCE_DONE, NULL);
     ((PhoneBase*) mPhone.Get())->mCi->RegisterForDataNetworkStateChanged(this,
             IDctConstants::EVENT_DATA_STATE_CHANGED, NULL);
     AutoPtr<ICallTracker> ct;
@@ -1085,14 +1084,13 @@ ECode DcTracker::IsDataPossible(
     IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
     Int32 rilDataRadioTechnology;
     serviceState->GetRilDataRadioTechnology(&rilDataRadioTechnology);
-    assert(0 && "TODO: IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN");
-    // if ((apnType.Equals(IPhoneConstants::APN_TYPE_DEFAULT)
-    //             || apnType.Equals(IPhoneConstants::APN_TYPE_IA))
-    //         && (rilDataRadioTechnology == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN)
-    //         && (!mWwanIwlanCoexistFlag)) {
-    //     Log("Default data call activation not possible in iwlan.");
-    //     possible = FALSE;
-    // }
+    if ((apnType.Equals(IPhoneConstants::APN_TYPE_DEFAULT)
+                || apnType.Equals(IPhoneConstants::APN_TYPE_IA))
+            && (rilDataRadioTechnology == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN)
+            && (!mWwanIwlanCoexistFlag)) {
+        Log("Default data call activation not possible in iwlan.");
+        possible = FALSE;
+    }
     if (VDBG) {
         Log("isDataPossible(%s): possible=%d isDataAllowed=%d "
                 "apnTypePossible=%d apnContextisEnabled=%d apnContextState()=%d",
@@ -1568,23 +1566,22 @@ ECode DcTracker::IsDataAllowed(
     IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
     Int32 rilDataRadioTechnology;
     serviceState->GetRilDataRadioTechnology(&rilDataRadioTechnology);
-    assert(0 && "IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN");
-    // if ((apnType.Equals(IPhoneConstants::APN_TYPE_DEFAULT)
-    //             || apnType.Equals(IPhoneConstants::APN_TYPE_IA))
-    //         && (rilDataRadioTechnology
-    //             == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN)
-    //         && (!mWwanIwlanCoexistFlag)) {
-    //     Log("Default data call activation not allowed in iwlan.");
-    //     *result = FALSE;
-    //     return NOERROR;
-    // } else {
-    //     Boolean isReady;
-    //     apnContext->IsReady(&isReady);
-    //     Boolean isDataAllowed;
-    //     IsDataAllowed(&isDataAllowed);
-    //     *result = isReady && isDataAllowed;
-    //     return NOERROR;
-    // }
+    if ((apnType.Equals(IPhoneConstants::APN_TYPE_DEFAULT)
+                || apnType.Equals(IPhoneConstants::APN_TYPE_IA))
+            && (rilDataRadioTechnology
+                == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN)
+            && (!mWwanIwlanCoexistFlag)) {
+        Log("Default data call activation not allowed in iwlan.");
+        *result = FALSE;
+        return NOERROR;
+    } else {
+        Boolean isReady;
+        apnContext->IsReady(&isReady);
+        Boolean isDataAllowed;
+        IsDataAllowed(&isDataAllowed);
+        *result = isReady && isDataAllowed;
+        return NOERROR;
+    }
     return NOERROR;
 }
 
@@ -1644,12 +1641,11 @@ ECode DcTracker::IsDataAllowed(
     IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
     Int32 radioTech;
     serviceState->GetRilDataRadioTechnology(&radioTech);
-    assert(0 && "IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN");
-    // if (radioTech == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN
-    //         && desiredPowerState == FALSE) {
-    //     desiredPowerState = TRUE;
-    //     attachedState = TRUE;
-    // }
+    if (radioTech == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN
+            && desiredPowerState == FALSE) {
+        desiredPowerState = TRUE;
+        attachedState = TRUE;
+    }
     AutoPtr<IInterface> obj;
     mIccRecords->Get((IInterface**)&obj);
     AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
@@ -1754,7 +1750,7 @@ ECode DcTracker::TrySetupData(
         Log("trySetupData for type:%s due to %s apnContext=%s", apnType.string(), reason.string(), TO_CSTR(apnContext));
         Log("trySetupData with mIsPsRestricted=%d", mIsPsRestricted);
     }
-    assert(0 && "ISimulatedRadioControl");
+    assert(0 && "TODO: ISimulatedRadioControl");
     // AutoPtr<ISimulatedRadioControl> control;
     // mPhone->GetSimulatedRadioControl((ISimulatedRadioControl**)&control);
     // if (control != NULL) {
@@ -2706,12 +2702,11 @@ ECode DcTracker::OnWwanIwlanCoexistenceDone(
         IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
         Int32 rilDataRadioTechnology;
         serviceState->GetRilDataRadioTechnology(&rilDataRadioTechnology);
-        assert(0 && "IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN");
-        // if (rilDataRadioTechnology
-        //         == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN) {
-        //     Log("notifyDataConnection IWLAN_AVAILABLE");
-        //     NotifyDataConnection(IPhone::REASON_IWLAN_AVAILABLE);
-        // }
+        if (rilDataRadioTechnology
+                == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN) {
+            Log("notifyDataConnection IWLAN_AVAILABLE");
+            NotifyDataConnection(IPhone::REASON_IWLAN_AVAILABLE);
+        }
     }
     return NOERROR;
 }
@@ -3297,7 +3292,7 @@ ECode DcTracker::OnRoamingOn()
 ECode DcTracker::OnRadioAvailable()
 {
     if (DBG) Log("onRadioAvailable");
-    assert(0 && "ISimulatedRadioControl");
+    assert(0 && "TODO: ISimulatedRadioControl");
     // AutoPtr<ISimulatedRadioControl> control;
     // mPhone->GetSimulatedRadioControl((ISimulatedRadioControl**)&control);
     // if (control != NULL) {
@@ -3328,7 +3323,7 @@ ECode DcTracker::OnRadioOffOrNotAvailable()
     // Make sure our reconnect delay starts at the initial value
     // next time the radio comes on
     mReregisterOnReconnectFailure = FALSE;
-    assert(0 && "ISimulatedRadioControl");
+    assert(0 && "TODO: ISimulatedRadioControl");
     // AutoPtr<ISimulatedRadioControl> control;
     // mPhone->GetSimulatedRadioControl((ISimulatedRadioControl**)&control);
     // if (control != NULL) {
@@ -4769,142 +4764,141 @@ ECode DcTracker::HandleMessage(
     msg->GetObj((IInterface**)&msgObj);
     Int32 msgArg1;
     msg->GetArg1(&msgArg1);
-    assert(0 && "TODO: IDctConstants::EVENT_GET_WWAN_IWLAN_COEXISTENCE_DONE IDctConstants::EVENT_MODEM_DATA_PROFILE_READY");
-    // switch (msgWhat) {
-    //     case IDctConstants::EVENT_RECORDS_LOADED:
-    //         OnRecordsLoaded();
-    //         break;
-    //     case IDctConstants::EVENT_DATA_CONNECTION_DETACHED:
-    //         OnDataConnectionDetached();
-    //         break;
-    //     case IDctConstants::EVENT_DATA_CONNECTION_ATTACHED:
-    //         OnDataConnectionAttached();
-    //         break;
-    //     case IDctConstants::EVENT_DO_RECOVERY:
-    //         DoRecovery();
-    //         break;
-    //     case IDctConstants::EVENT_APN_CHANGED:
-    //         OnApnChanged();
-    //         break;
-    //     case IDctConstants::EVENT_PS_RESTRICT_ENABLED:
-    //         /**
-    //          * We don't need to explicitly to tear down the PDP context
-    //          * when PS restricted is enabled. The base band will deactive
-    //          * PDP context and notify us with PDP_CONTEXT_CHANGED.
-    //          * But we should stop the network polling and prevent reset PDP.
-    //          */
-    //         if (DBG) Log("EVENT_PS_RESTRICT_ENABLED %d", mIsPsRestricted);
-    //         StopNetStatPoll();
-    //         StopDataStallAlarm();
-    //         mIsPsRestricted = TRUE;
-    //         break;
-    //     case IDctConstants::EVENT_PS_RESTRICT_DISABLED:
-    //         /**
-    //          * When PS restrict is removed, we need setup PDP connection if
-    //          * PDP connection is down.
-    //          */
-    //         if (DBG) Log("EVENT_PS_RESTRICT_DISABLED %d", mIsPsRestricted);
-    //         mIsPsRestricted  = FALSE;
-    //         Boolean isConnected;
-    //         IsConnected(&isConnected);
-    //         if (isConnected) {
-    //             StartNetStatPoll();
-    //             StartDataStallAlarm(DATA_STALL_NOT_SUSPECTED);
-    //         } else {
-    //             // TODO: Should all PDN states be checked to fail?
-    //             if (mState == DctConstantsState_FAILED) {
-    //                 Boolean b;
-    //                 CleanUpAllConnections(FALSE, IPhone::REASON_PS_RESTRICT_ENABLED, &b);
-    //                 mReregisterOnReconnectFailure = FALSE;
-    //             }
-    //             AutoPtr<IInterface> obj;
-    //             mApnContexts->Get(StringUtils::ParseCharSequence(IPhoneConstants::APN_TYPE_DEFAULT), (IInterface**)&obj);
-    //             AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
-    //             if (apnContext != NULL) {
-    //                 apnContext->SetReason(IPhone::REASON_PS_RESTRICT_ENABLED);
-    //                 Boolean b;
-    //                 TrySetupData(apnContext, &b);
-    //             } else {
-    //                 Loge("**** Default ApnContext not found ****");
-    //                 if (Build::IS_DEBUGGABLE) {
-    //                     Logger::E(LOG__TAG, "Default ApnContext not found");
-    //                     return E_RUNTIME_EXCEPTION;
-    //                 }
-    //             }
-    //         }
-    //         break;
-    //     case IDctConstants::EVENT_TRY_SETUP_DATA:
-    //         if (IApnContext::Probe(msgObj) != NULL) {
-    //             Boolean b;
-    //             OnTrySetupData(IApnContext::Probe(msgObj), &b);
-    //         } else if (ICharSequence::Probe(msgObj) != NULL) {
-    //             Boolean b;
-    //             OnTrySetupData(TO_STR(msgObj), &b);
-    //         } else {
-    //             Loge("EVENT_TRY_SETUP request w/o apnContext or String");
-    //         }
-    //         break;
-    //     case IDctConstants::EVENT_CLEAN_UP_CONNECTION: {
-    //         Boolean tearDown = (msgArg1 == 0) ? FALSE : TRUE;
-    //         if (DBG) Log("EVENT_CLEAN_UP_CONNECTION tearDown=%d", tearDown);
-    //         if (IApnContext::Probe(msgObj) != NULL) {
-    //             CleanUpConnection(tearDown, IApnContext::Probe(msgObj));
-    //         } else {
-    //             Loge("EVENT_CLEAN_UP_CONNECTION request w/o apn context, call super");
-    //             DcTrackerBase::HandleMessage(msg);
-    //         }
-    //         break;
-    //     }
-    //     case IDctConstants::EVENT_SET_INTERNAL_DATA_ENABLE: {
-    //         Boolean enabled = (msgArg1 == IDctConstants::ENABLED) ? TRUE : FALSE;
-    //         OnSetInternalDataEnabled(enabled, IMessage::Probe(msgObj));
-    //         break;
-    //     }
-    //     case IDctConstants::EVENT_CLEAN_UP_ALL_CONNECTIONS: {
-    //         AutoPtr<IMessage> mCause;
-    //         ObtainMessage(IDctConstants::EVENT_CLEAN_UP_ALL_CONNECTIONS, NULL, (IMessage**)&mCause);
-    //         if ((msgObj != NULL) && (ICharSequence::Probe(msgObj) != NULL)) {
-    //             mCause->SetObj(msgObj);
-    //         }
-    //         DcTrackerBase::HandleMessage(mCause);
-    //         break;
-    //     }
-    //     case IDctConstants::EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED: // fall thru
-    //     case IDctConstants::EVENT_DATA_RAT_CHANGED: {
-    //         // When data rat changes we might need to load different
-    //         // set of apns (example, LTE->1x)
-    //         Boolean isNvSubscription;
-    //         IsNvSubscription(&isNvSubscription);
-    //         Boolean b;
-    //         OnUpdateIcc(&b);
-    //         if (b) {
-    //             Log("onUpdateIcc: tryRestartDataConnections %s", IPhone::REASON_NW_TYPE_CHANGED.string());
-    //             TryRestartDataConnections(TRUE, IPhone::REASON_NW_TYPE_CHANGED);
-    //         } else if (isNvSubscription){
-    //             // If cdma subscription source changed to NV or data rat changed to cdma
-    //             // (while subscription source was NV) - we need to trigger NV ready
-    //             OnNvReady();
-    //         }
-    //         break;
-    //     }
-    //     case IDctConstants::CMD_CLEAR_PROVISIONING_SPINNER:
-    //         // Check message sender intended to clear the current spinner.
-    //         if (mProvisioningSpinner == msgObj) {
-    //             IDialogInterface::Probe(mProvisioningSpinner)->Dismiss();
-    //             mProvisioningSpinner = NULL;
-    //         }
-    //         break;
-    //     case IDctConstants::EVENT_GET_WWAN_IWLAN_COEXISTENCE_DONE:
-    //         OnWwanIwlanCoexistenceDone(IAsyncResult::Probe(msgObj));
-    //         break;
-    //     case IDctConstants::EVENT_MODEM_DATA_PROFILE_READY:
-    //         OnModemApnProfileReady();
-    //         break;
-    //     default:
-    //         // handle the message in the super class DataConnectionTracker
-    //         DcTrackerBase::HandleMessage(msg);
-    //         break;
-    // }
+    switch (msgWhat) {
+        case IDctConstants::EVENT_RECORDS_LOADED:
+            OnRecordsLoaded();
+            break;
+        case IDctConstants::EVENT_DATA_CONNECTION_DETACHED:
+            OnDataConnectionDetached();
+            break;
+        case IDctConstants::EVENT_DATA_CONNECTION_ATTACHED:
+            OnDataConnectionAttached();
+            break;
+        case IDctConstants::EVENT_DO_RECOVERY:
+            DoRecovery();
+            break;
+        case IDctConstants::EVENT_APN_CHANGED:
+            OnApnChanged();
+            break;
+        case IDctConstants::EVENT_PS_RESTRICT_ENABLED:
+            /**
+             * We don't need to explicitly to tear down the PDP context
+             * when PS restricted is enabled. The base band will deactive
+             * PDP context and notify us with PDP_CONTEXT_CHANGED.
+             * But we should stop the network polling and prevent reset PDP.
+             */
+            if (DBG) Log("EVENT_PS_RESTRICT_ENABLED %d", mIsPsRestricted);
+            StopNetStatPoll();
+            StopDataStallAlarm();
+            mIsPsRestricted = TRUE;
+            break;
+        case IDctConstants::EVENT_PS_RESTRICT_DISABLED:
+            /**
+             * When PS restrict is removed, we need setup PDP connection if
+             * PDP connection is down.
+             */
+            if (DBG) Log("EVENT_PS_RESTRICT_DISABLED %d", mIsPsRestricted);
+            mIsPsRestricted  = FALSE;
+            Boolean isConnected;
+            IsConnected(&isConnected);
+            if (isConnected) {
+                StartNetStatPoll();
+                StartDataStallAlarm(DATA_STALL_NOT_SUSPECTED);
+            } else {
+                // TODO: Should all PDN states be checked to fail?
+                if (mState == DctConstantsState_FAILED) {
+                    Boolean b;
+                    CleanUpAllConnections(FALSE, IPhone::REASON_PS_RESTRICT_ENABLED, &b);
+                    mReregisterOnReconnectFailure = FALSE;
+                }
+                AutoPtr<IInterface> obj;
+                mApnContexts->Get(StringUtils::ParseCharSequence(IPhoneConstants::APN_TYPE_DEFAULT), (IInterface**)&obj);
+                AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+                if (apnContext != NULL) {
+                    apnContext->SetReason(IPhone::REASON_PS_RESTRICT_ENABLED);
+                    Boolean b;
+                    TrySetupData(apnContext, &b);
+                } else {
+                    Loge("**** Default ApnContext not found ****");
+                    if (Build::IS_DEBUGGABLE) {
+                        Logger::E(LOG__TAG, "Default ApnContext not found");
+                        return E_RUNTIME_EXCEPTION;
+                    }
+                }
+            }
+            break;
+        case IDctConstants::EVENT_TRY_SETUP_DATA:
+            if (IApnContext::Probe(msgObj) != NULL) {
+                Boolean b;
+                OnTrySetupData(IApnContext::Probe(msgObj), &b);
+            } else if (ICharSequence::Probe(msgObj) != NULL) {
+                Boolean b;
+                OnTrySetupData(TO_STR(msgObj), &b);
+            } else {
+                Loge("EVENT_TRY_SETUP request w/o apnContext or String");
+            }
+            break;
+        case IDctConstants::EVENT_CLEAN_UP_CONNECTION: {
+            Boolean tearDown = (msgArg1 == 0) ? FALSE : TRUE;
+            if (DBG) Log("EVENT_CLEAN_UP_CONNECTION tearDown=%d", tearDown);
+            if (IApnContext::Probe(msgObj) != NULL) {
+                CleanUpConnection(tearDown, IApnContext::Probe(msgObj));
+            } else {
+                Loge("EVENT_CLEAN_UP_CONNECTION request w/o apn context, call super");
+                DcTrackerBase::HandleMessage(msg);
+            }
+            break;
+        }
+        case IDctConstants::EVENT_SET_INTERNAL_DATA_ENABLE: {
+            Boolean enabled = (msgArg1 == IDctConstants::ENABLED) ? TRUE : FALSE;
+            OnSetInternalDataEnabled(enabled, IMessage::Probe(msgObj));
+            break;
+        }
+        case IDctConstants::EVENT_CLEAN_UP_ALL_CONNECTIONS: {
+            AutoPtr<IMessage> mCause;
+            ObtainMessage(IDctConstants::EVENT_CLEAN_UP_ALL_CONNECTIONS, NULL, (IMessage**)&mCause);
+            if ((msgObj != NULL) && (ICharSequence::Probe(msgObj) != NULL)) {
+                mCause->SetObj(msgObj);
+            }
+            DcTrackerBase::HandleMessage(mCause);
+            break;
+        }
+        case IDctConstants::EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED: // fall thru
+        case IDctConstants::EVENT_DATA_RAT_CHANGED: {
+            // When data rat changes we might need to load different
+            // set of apns (example, LTE->1x)
+            Boolean isNvSubscription;
+            IsNvSubscription(&isNvSubscription);
+            Boolean b;
+            OnUpdateIcc(&b);
+            if (b) {
+                Log("onUpdateIcc: tryRestartDataConnections %s", IPhone::REASON_NW_TYPE_CHANGED.string());
+                TryRestartDataConnections(TRUE, IPhone::REASON_NW_TYPE_CHANGED);
+            } else if (isNvSubscription){
+                // If cdma subscription source changed to NV or data rat changed to cdma
+                // (while subscription source was NV) - we need to trigger NV ready
+                OnNvReady();
+            }
+            break;
+        }
+        case IDctConstants::CMD_CLEAR_PROVISIONING_SPINNER:
+            // Check message sender intended to clear the current spinner.
+            if (mProvisioningSpinner == msgObj) {
+                IDialogInterface::Probe(mProvisioningSpinner)->Dismiss();
+                mProvisioningSpinner = NULL;
+            }
+            break;
+        case IDctConstants::EVENT_GET_WWAN_IWLAN_COEXISTENCE_DONE:
+            OnWwanIwlanCoexistenceDone(IAsyncResult::Probe(msgObj));
+            break;
+        case IDctConstants::EVENT_MODEM_DATA_PROFILE_READY:
+            OnModemApnProfileReady();
+            break;
+        default:
+            // handle the message in the super class DataConnectionTracker
+            DcTrackerBase::HandleMessage(msg);
+            break;
+    }
     return NOERROR;
 }
 

@@ -6,6 +6,7 @@
 #include "elastos/droid/telephony/CTelephonyManager.h"
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/os/CMessage.h"
+#include "elastos/droid/os/CRegistrant.h"
 #include "elastos/droid/os/Registrant.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Provider.h"
@@ -17,6 +18,8 @@ using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Os::CMessage;
+using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Os::Registrant;
 using Elastos::Droid::Provider::IBaseColumns;
 using Elastos::Droid::Provider::ISettingsGlobal;
@@ -931,7 +934,8 @@ void ModemStackController::RegisterForStackReady(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant (h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     if (mIsStackReady) {
         r->NotifyRegistrant();
     }
@@ -959,7 +963,8 @@ void ModemStackController::RegisterForModemRatCapsAvailable(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     if (mModemRatCapabilitiesAvailable) {
         r->NotifyRegistrant();
     }
@@ -974,7 +979,8 @@ void ModemStackController::RegisterForModemDataCapsUpdate(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
 
     {
         AutoLock lock(mModemDataCapsAvailableRegistrants);

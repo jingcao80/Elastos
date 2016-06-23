@@ -89,6 +89,8 @@ module
         const Int32 CMD_NET_STAT_POLL = 0x00042028;/*BASE + 40;*/
         const Int32 EVENT_DATA_RAT_CHANGED = 0x00042029;/*BASE + 41;*/
         const Int32 CMD_CLEAR_PROVISIONING_SPINNER = 0x0004202A;/*BASE + 42;*/
+        const Int32 EVENT_MODEM_DATA_PROFILE_READY = BASE + 43;
+        const Int32 EVENT_GET_WWAN_IWLAN_COEXISTENCE_DONE = BASE + 44;
 
         /***** Constants *****/
 

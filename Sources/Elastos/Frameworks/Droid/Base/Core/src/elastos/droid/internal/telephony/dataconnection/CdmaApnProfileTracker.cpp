@@ -4,6 +4,8 @@
 #include "elastos/droid/internal/telephony/PhoneBase.h"
 #include "elastos/droid/internal/telephony/cdma/CdmaSubscriptionSourceManager.h"
 #include "elastos/droid/internal/telephony/dataconnection/ApnProfileOmh.h"
+#include "elastos/droid/os/CRegistrant.h"
+#include "elastos/droid/os/CRegistrantList.h"
 #include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <Elastos.CoreLibrary.h>
@@ -16,6 +18,8 @@ using Elastos::Droid::App::Service;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Internal::Telephony::Cdma::CdmaSubscriptionSourceManager;
+using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::CRegistrantList;
 using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::CInteger32;
@@ -49,8 +53,7 @@ CdmaApnProfileTracker::CdmaApnProfileTracker()
 {
     CArrayList::New((IArrayList**)&mTempOmhApnProfilesList);
     CArrayList::New((IArrayList**)&mApnProfilesList);
-    assert(0 && "TODO CRegistrantList");
-    // CRegistrantList::New((IRegistrantList**)&mModemApnProfileRegistrants);
+    CRegistrantList::New((IRegistrantList**)&mModemApnProfileRegistrants);
 }
 
 ECode CdmaApnProfileTracker::constructor(
@@ -109,8 +112,7 @@ ECode CdmaApnProfileTracker::RegisterForModemProfileReady(
     /* [in] */ IInterface* obj)
 {
     AutoPtr<IRegistrant> r;
-    assert(0 && "CRegistrant");
-    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     ((RegistrantList*) mModemApnProfileRegistrants.Get())->Add(r);
     return NOERROR;
 }

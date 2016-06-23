@@ -301,6 +301,21 @@ module
         interface IMessageHelper;
     }
 
+    class CRegistrant {
+        constructor(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
+
+        interface IRegistrant;
+    }
+
+    class CRegistrantList {
+        constructor();
+
+        interface IRegistrantList;
+    }
+
     singleton class CServiceManager {
         interface IServiceManager;
      }

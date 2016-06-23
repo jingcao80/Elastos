@@ -452,7 +452,7 @@ ECode DcController::MakeDcc(
     VALIDATE_NOT_NULL(result)
 
     AutoPtr<IDcController> dcc = new DcController();
-    assert(0 && "IStateMachine");
+    assert(0 && "TODO: IStateMachine");
     // IStateMachine::Probe(dcc)->Start();
     *result = dcc;
     REFCOUNT_ADD(*result)

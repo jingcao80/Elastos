@@ -1,5 +1,6 @@
 
 #include "elastos/droid/os/RegistrantList.h"
+#include "elastos/droid/os/CRegistrant.h"
 #include "_Elastos.Droid.Os.h"
 #include <elastos/core/AutoLock.h>
 
@@ -23,7 +24,9 @@ void RegistrantList::Add(
     /* [in] */ IInterface* obj)
 {
     AutoLock lock(mLock);
-    Add(new Registrant(h, what, obj));
+    AutoPtr<IRegistrant> registrant;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&registrant);
+    Add(registrant);
 }
 
 void RegistrantList::AddUnique(
@@ -34,7 +37,9 @@ void RegistrantList::AddUnique(
     AutoLock lock(mLock);
     // if the handler is already in the registrant list, remove it
     Remove(h);
-    Add(new Registrant(h, what, obj));
+    AutoPtr<IRegistrant> registrant;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&registrant);
+    Add(registrant);
 }
 
 void RegistrantList::Add(

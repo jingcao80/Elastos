@@ -13,8 +13,6 @@ module
      * interface IParcelable
      */
     interface IServiceState {
-
-
         /**
          * Normal operation condition, the phone is registered
          * with an operator either in home network or in roaming.
@@ -125,6 +123,11 @@ module
         const Int32 RIL_RADIO_TECHNOLOGY_GSM = 16;
         /** @hide */
         const Int32 RIL_RADIO_TECHNOLOGY_TD_SCDMA = 17;
+        /**
+         * IWLAN
+         * @hide
+         */
+        const Int32 RIL_RADIO_TECHNOLOGY_IWLAN = 18;
 
         /**
          * Available registration states for GSM, UMTS and CDMA.

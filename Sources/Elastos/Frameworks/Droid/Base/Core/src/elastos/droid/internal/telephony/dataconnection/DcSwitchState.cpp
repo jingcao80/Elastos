@@ -5,6 +5,9 @@
 #include "elastos/droid/internal/telephony/dataconnection/DcSwitchAsyncChannel.h"
 #include "elastos/droid/internal/utility/CAsyncChannel.h"
 #include "elastos/droid/internal/utility/StateMachine.h"
+#include "elastos/droid/os/CRegistrant.h"
+#include "elastos/droid/os/CRegistrantList.h"
+#include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/StringUtils.h>
@@ -18,9 +21,12 @@ using Elastos::Droid::Internal::Telephony::ISubscriptionController;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsDataState_CONNECTED;
 using Elastos::Droid::Internal::Utility::CAsyncChannel;
 using Elastos::Droid::Internal::Utility::IProtocol;
+using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::CRegistrantList;
 using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Os::IRegistrant;
+using Elastos::Droid::Os::RegistrantList;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::StringUtils;
@@ -44,7 +50,7 @@ DcSwitchState::IdleState::IdleState(
 
 ECode DcSwitchState::IdleState::Enter()
 {
-    assert(0 && "IRegistrantList");
+    assert(0 && "TODO: IRegistrantList");
     // return mHost->mIdleRegistrants->NotifyRegistrants();
     return NOERROR;
 }
@@ -80,7 +86,7 @@ ECode DcSwitchState::IdleState::ProcessMessage(
         // When isPrimarySubFeatureEnable is enabled apps will take care
         // of sending DDS request during device power-up.
         if (!isPrimarySubFeatureEnable) {
-            assert(0 && "SubscriptionController");
+            assert(0 && "TODO: SubscriptionController");
             // AutoPtr<ISubscriptionController> subscriptionController
             //         = SubscriptionController::GetInstance();
             // subscriptionController->SetDefaultDataSubId(subId);
@@ -468,8 +474,7 @@ const Int32 DcSwitchState::EVENT_TO_ACTING_DIRECTLY = BASE + 6;
 
 DcSwitchState::DcSwitchState()
 {
-    assert(0 && "TODO CRegistrantList");
-    // CRegistrantList::New((IRegistrantList**)&mIdleRegistrants);
+    CRegistrantList::New((IRegistrantList**)&mIdleRegistrants);
     CHashSet::New((IHashSet**)&mApnTypes);
     mIdleState = new IdleState(this);
     mActingState = new ActingState(this);
@@ -582,17 +587,15 @@ ECode DcSwitchState::RegisterForIdle(
     /* [in] */ IInterface* obj)
 {
     AutoPtr<IRegistrant> r;
-    assert(0 && "TODO CRegistrant IRegistrant");
-    // CRegistrant::New((IRegistrant**)&r);
-    // mIdleRegistrants->Add(r);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    ((RegistrantList*) mIdleRegistrants.Get())->Add(r);
     return NOERROR;
 }
 
 ECode DcSwitchState::UnregisterForIdle(
     /* [in] */ IHandler* h)
 {
-    assert(0 && "TODO CRegistrant IRegistrant");
-    // return mIdleRegistrants->Remove(h);
+    ((RegistrantList*) mIdleRegistrants.Get())->Remove(h);
     return NOERROR;
 }
 

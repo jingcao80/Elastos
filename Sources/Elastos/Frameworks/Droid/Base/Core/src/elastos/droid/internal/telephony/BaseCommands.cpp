@@ -1,10 +1,13 @@
 
 #include "elastos/droid/internal/telephony/BaseCommands.h"
 #include "elastos/droid/telephony/CTelephonyManager.h"
+#include "elastos/droid/os/CRegistrant.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include <elastos/core/AutoLock.h>
 
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Telephony::CTelephonyManager;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
@@ -81,7 +84,8 @@ ECode BaseCommands::RegisterForRadioStateChanged(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
 
     {
         AutoLock lock(mStateMonitor);
@@ -106,7 +110,8 @@ ECode BaseCommands::RegisterForImsNetworkStateChanged(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mImsNetworkStateChangedRegistrants->Add(r);
     return NOERROR;
 }
@@ -123,7 +128,8 @@ ECode BaseCommands::RegisterForOn(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
 
     {
         AutoLock lock(mStateMonitor);
@@ -152,7 +158,8 @@ ECode BaseCommands::RegisterForAvailable(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
 
     {
         AutoLock lock(mStateMonitor);
@@ -181,7 +188,8 @@ ECode BaseCommands::RegisterForNotAvailable(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
 
     {
         AutoLock lock(mStateMonitor);
@@ -210,7 +218,8 @@ ECode BaseCommands::RegisterForOffOrNotAvailable(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
 
     {
         AutoLock lock(mStateMonitor);
@@ -239,7 +248,8 @@ ECode BaseCommands::RegisterForCallStateChanged(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
 
     mCallStateRegistrants->Add(r);
     return NOERROR;
@@ -257,7 +267,8 @@ ECode BaseCommands::RegisterForVoiceNetworkStateChanged(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
 
     mVoiceNetworkStateRegistrants->Add(r);
     return NOERROR;
@@ -275,7 +286,8 @@ ECode BaseCommands::RegisterForDataNetworkStateChanged(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
 
     mDataNetworkStateRegistrants->Add(r);
     return NOERROR;
@@ -293,7 +305,8 @@ ECode BaseCommands::RegisterForVoiceRadioTechChanged(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mVoiceRadioTechChangedRegistrants->Add(r);
     return NOERROR;
 }
@@ -310,7 +323,8 @@ ECode BaseCommands::RegisterForIccStatusChanged(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mIccStatusChangedRegistrants->Add(r);
     return NOERROR;
 }
@@ -327,7 +341,7 @@ ECode BaseCommands::SetOnNewGsmSms(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mGsmSmsRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mGsmSmsRegistrant);
     return NOERROR;
 }
 
@@ -348,7 +362,7 @@ ECode BaseCommands::SetOnNewCdmaSms(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mCdmaSmsRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mCdmaSmsRegistrant);
     return NOERROR;
 }
 
@@ -369,7 +383,7 @@ ECode BaseCommands::SetOnNewGsmBroadcastSms(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mGsmBroadcastSmsRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mGsmBroadcastSmsRegistrant);
     return NOERROR;
 }
 
@@ -390,7 +404,7 @@ ECode BaseCommands::SetOnSmsOnSim(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mSmsOnSimRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mSmsOnSimRegistrant);
     return NOERROR;
 }
 
@@ -411,7 +425,7 @@ ECode BaseCommands::SetOnSmsStatus(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mSmsStatusRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mSmsStatusRegistrant);
     return NOERROR;
 }
 
@@ -432,7 +446,7 @@ ECode BaseCommands::SetOnSignalStrengthUpdate(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mSignalStrengthRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mSignalStrengthRegistrant);
     return NOERROR;
 }
 
@@ -453,7 +467,7 @@ ECode BaseCommands::SetOnNITZTime(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mNITZTimeRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mNITZTimeRegistrant);
     return NOERROR;
 }
 
@@ -474,7 +488,7 @@ ECode BaseCommands::SetOnUSSD(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mUSSDRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mUSSDRegistrant);
     return NOERROR;
 }
 
@@ -495,7 +509,7 @@ ECode BaseCommands::SetOnSuppServiceNotification(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mSsnRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mSsnRegistrant);
     return NOERROR;
 }
 
@@ -516,7 +530,7 @@ ECode BaseCommands::SetOnCatSessionEnd(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mCatSessionEndRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mCatSessionEndRegistrant);
     return NOERROR;
 }
 
@@ -537,7 +551,7 @@ ECode BaseCommands::SetOnCatProactiveCmd(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mCatProCmdRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mCatProCmdRegistrant);
     return NOERROR;
 }
 
@@ -558,7 +572,7 @@ ECode BaseCommands::SetOnCatEvent(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mCatEventRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mCatEventRegistrant);
     return NOERROR;
 }
 
@@ -579,7 +593,7 @@ ECode BaseCommands::SetOnCatCallSetUp(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mCatCallSetUpRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mCatCallSetUpRegistrant);
     return NOERROR;
 }
 
@@ -601,7 +615,7 @@ ECode BaseCommands::SetOnCatSendSmsResult(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mCatSendSmsResultRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mCatSendSmsResultRegistrant);
     return NOERROR;
 }
 
@@ -617,7 +631,7 @@ ECode BaseCommands::SetOnIccSmsFull(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mIccSmsFullRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mIccSmsFullRegistrant);
     return NOERROR;
 }
 
@@ -638,7 +652,8 @@ ECode BaseCommands::RegisterForIccRefresh(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mIccRefreshRegistrants->Add(r);
     return NOERROR;
 }
@@ -657,7 +672,7 @@ ECode BaseCommands::SetEmergencyCallbackMode(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mEmergencyCallbackModeRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mEmergencyCallbackModeRegistrant);
     return NOERROR;
 }
 
@@ -680,7 +695,7 @@ ECode BaseCommands::SetOnCallRing(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mRingRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mRingRegistrant);
     return NOERROR;
 }
 
@@ -701,7 +716,7 @@ ECode BaseCommands::SetOnSs(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mSsRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mSsRegistrant);
     return NOERROR;
 }
 
@@ -717,7 +732,7 @@ ECode BaseCommands::SetOnCatCcAlphaNotify(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mCatCcAlphaRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mCatCcAlphaRegistrant);
     return NOERROR;
 }
 
@@ -733,7 +748,8 @@ ECode BaseCommands::RegisterForInCallVoicePrivacyOn(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mVoicePrivacyOnRegistrants->Add(r);
     return NOERROR;
 }
@@ -750,7 +766,8 @@ ECode BaseCommands::RegisterForInCallVoicePrivacyOff(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mVoicePrivacyOffRegistrants->Add(r);
     return NOERROR;
 }
@@ -767,7 +784,7 @@ ECode BaseCommands::SetOnRestrictedStateChanged(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mRestrictedStateRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mRestrictedStateRegistrant);
     return NOERROR;
 }
 
@@ -788,7 +805,8 @@ ECode BaseCommands::RegisterForDisplayInfo(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mDisplayInfoRegistrants->Add(r);
     return NOERROR;
 }
@@ -805,7 +823,8 @@ ECode BaseCommands::RegisterForCallWaitingInfo(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mCallWaitingInfoRegistrants->Add(r);
     return NOERROR;
 }
@@ -822,7 +841,8 @@ ECode BaseCommands::RegisterForSignalInfo(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mSignalInfoRegistrants->Add(r);
     return NOERROR;
 }
@@ -832,7 +852,7 @@ ECode BaseCommands::SetOnUnsolOemHookRaw(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    mUnsolOemHookRawRegistrant = new Registrant(h, what, obj);
+    CRegistrant::New(h, what, obj, (IRegistrant**)&mUnsolOemHookRawRegistrant);
     return NOERROR;
 }
 
@@ -860,7 +880,8 @@ ECode BaseCommands::RegisterForCdmaOtaProvision(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mOtaProvisionRegistrants->Add(r);
     return NOERROR;
 }
@@ -877,7 +898,8 @@ ECode BaseCommands::RegisterForNumberInfo(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mNumberInfoRegistrants->Add(r);
     return NOERROR;
 }
@@ -894,7 +916,8 @@ ECode BaseCommands::RegisterForRedirectedNumberInfo(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mRedirNumInfoRegistrants->Add(r);
     return NOERROR;
 }
@@ -911,7 +934,8 @@ ECode BaseCommands::RegisterForLineControlInfo(
     /* [in] */  Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mLineControlInfoRegistrants->Add(r);
     return NOERROR;
 }
@@ -928,7 +952,8 @@ ECode BaseCommands::RegisterFoT53ClirlInfo(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mT53ClirInfoRegistrants->Add(r);
     return NOERROR;
 }
@@ -945,7 +970,8 @@ ECode BaseCommands::RegisterForT53AudioControlInfo(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mT53AudCntrlInfoRegistrants->Add(r);
     return NOERROR;
 }
@@ -962,7 +988,8 @@ ECode BaseCommands::RegisterForRingbackTone(
     /* [in] */  Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mRingbackToneRegistrants->Add(r);
     return NOERROR;
 }
@@ -979,7 +1006,8 @@ ECode BaseCommands::RegisterForResendIncallMute(
     /* [in] */  Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mResendIncallMuteRegistrants->Add(r);
     return NOERROR;
 }
@@ -996,7 +1024,8 @@ ECode BaseCommands::RegisterForCdmaSubscriptionChanged(
     /* [in] */  Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mCdmaSubscriptionChangedRegistrants->Add(r);
     return NOERROR;
 }
@@ -1013,7 +1042,8 @@ ECode BaseCommands::RegisterForCdmaPrlChanged(
     /* [in] */  Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mCdmaPrlChangedRegistrants->Add(r);
     return NOERROR;
 }
@@ -1030,7 +1060,8 @@ ECode BaseCommands::RegisterForExitEmergencyCallbackMode(
     /* [in] */  Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mExitEmergencyCallbackModeRegistrants->Add(r);
     return NOERROR;
 }
@@ -1047,7 +1078,8 @@ ECode BaseCommands::RegisterForHardwareConfigChanged(
     /* [in] */  Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mHardwareConfigChangeRegistrants->Add(r);
     return NOERROR;
 }
@@ -1067,7 +1099,8 @@ ECode BaseCommands::RegisterForRilConnected(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mRilConnectedRegistrants->Add(r);
     if (mRilVersion != -1) {
         AutoPtr<IInteger32> value;
@@ -1090,7 +1123,8 @@ ECode BaseCommands::RegisterForSubscriptionStatusChanged(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mSubscriptionStatusRegistrants->Add(r);
     return NOERROR;
 }
@@ -1251,7 +1285,8 @@ ECode BaseCommands::RegisterForCellInfoList(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mRilCellInfoListRegistrants->Add(r);
     return NOERROR;
 }
@@ -1268,7 +1303,8 @@ ECode BaseCommands::RegisterForSrvccStateChanged(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
 
     mSrvccStateRegistrants->Add(r);
     return NOERROR;

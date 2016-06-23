@@ -60,7 +60,7 @@ ECode DcFailCause::IsPermanentFail(
 {
     VALIDATE_NOT_NULL(result)
 
-    assert(0 && "PhoneFactory");
+    assert(0 && "TODO: PhoneFactory");
     // AutoPtr<IContext> context = PhoneFactory::GetContext();
     // if (mErrorCode == ACTIVATION_REJECT_GGSN) {
     //     AutoPtr<IResources> res;

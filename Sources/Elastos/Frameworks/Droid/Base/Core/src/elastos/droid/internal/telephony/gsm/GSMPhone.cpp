@@ -1356,7 +1356,7 @@ public class GSMPhone extends PhoneBase {
 
     //@Override
     CARAPI SetOnPostDialCharacter(Handler h, Int32 what, Object obj) {
-        mPostDialHandler = new Registrant(h, what, obj);
+        CRegistrant::New(h, what, obj, (IRegistrant**)&mPostDialHandler);
     }
 
     //@Override

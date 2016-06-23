@@ -72,7 +72,7 @@ ECode DcRetryAlarmController::SubBroadcastReceiver::OnReceive(
         intent->GetInt32Extra(INTENT_RETRY_ALARM_TAG, Elastos::Core::Math::INT32_MAX_VALUE, &tag);
         if (DBG) {
             String whatToString;
-            assert(0 && "IStateMachine");
+            assert(0 && "TODO: IStateMachine");
             // IStateMachine::Probe(mHost->mDc)->GetWhatToString(what, &whatToString);
             mHost->Log("onReceive: action=%s sendMessage(what:%s, tag:%d)",
                     action.string(), whatToString.string(), tag);
