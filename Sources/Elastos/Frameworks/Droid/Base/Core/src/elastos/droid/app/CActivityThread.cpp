@@ -43,6 +43,7 @@
 #include "elastos/droid/database/sqlite/CSQLiteDatabaseHelper.h"
 #include "elastos/droid/hardware/display/DisplayManagerGlobal.h"
 #include "elastos/droid/R.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/ClassLoader.h>
 #include <elastos/core/Thread.h>
 #include <elastos/core/StringBuilder.h>
@@ -50,9 +51,6 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <unistd.h>
 
-
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::App::Backup::EIID_IBackupAgent;
 using Elastos::Droid::App::CInstrumentation;
@@ -116,6 +114,7 @@ using Elastos::Droid::Internal::Os::IRuntimeInit;
 using Elastos::Droid::Internal::Os::CRuntimeInit;
 using Elastos::Droid::Internal::Utility::CParcelableString;
 
+using Elastos::Core::AutoLock;
 using Elastos::Core::ISystem;
 using Elastos::Core::IClassLoader;
 using Elastos::Core::StringBuilder;
@@ -146,15 +145,15 @@ namespace Droid {
 namespace App {
 
 const String CActivityThread::TAG("CActivityThread");
-const Boolean CActivityThread::localLOGV = TRUE;
-const Boolean CActivityThread::DEBUG_MESSAGES = TRUE;
+const Boolean CActivityThread::localLOGV = FALSE;
+const Boolean CActivityThread::DEBUG_MESSAGES = FALSE;
 const Boolean CActivityThread::DEBUG_BROADCAST = FALSE;
-const Boolean CActivityThread::DEBUG_RESULTS = TRUE;
+const Boolean CActivityThread::DEBUG_RESULTS = FALSE;
 const Boolean CActivityThread::DEBUG_BACKUP = FALSE;
 const Boolean CActivityThread::DEBUG_CONFIGURATION = FALSE;
-const Boolean CActivityThread::DEBUG_SERVICE = TRUE;
+const Boolean CActivityThread::DEBUG_SERVICE = FALSE;
 const Boolean CActivityThread::DEBUG_MEMORY_TRIM = TRUE;
-const Boolean CActivityThread::DEBUG_PROVIDER = TRUE;
+const Boolean CActivityThread::DEBUG_PROVIDER = FALSE;
 
 const Int64 CActivityThread::MIN_TIME_BETWEEN_GCS;
 const Int32 CActivityThread::SQLITE_MEM_RELEASED_EVENT_LOG_TAG;

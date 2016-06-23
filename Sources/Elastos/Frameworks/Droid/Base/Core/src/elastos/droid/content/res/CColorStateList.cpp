@@ -103,7 +103,6 @@ ECode CColorStateList::CreateFromXml(
     }
 
     if (type != IXmlPullParser::START_TAG) {
-        // throw new XmlPullParserException("No start tag found");
         Slogger::E(TAG, "CColorStateList No start tag found");
         return E_XML_PULL_PARSER_EXCEPTION;
     }
@@ -117,16 +116,12 @@ ECode CColorStateList::CreateFromXmlInner(
     /* [in] */ IAttributeSet* attrs,
     /* [out] */ IColorStateList** csl)
 {
-    String name;
-    FAIL_RETURN(parser->GetName((String*)&name));
+    VALIDATE_NOT_NULL(csl)
+    *csl = NULL;
 
-    if (name.Equals("selector")) {
-        AutoPtr<CColorStateList> ccsl;
-        FAIL_RETURN(CColorStateList::NewByFriend((CColorStateList**)&ccsl));
-        *csl = ccsl;
-        REFCOUNT_ADD(*csl);
-    }
-    else {
+    String name;
+    FAIL_RETURN(parser->GetName(&name));
+    if (!name.Equals("selector")) {
         String pos;
         parser->GetPositionDescription(&pos);
         Slogger::E(TAG, "CColorStateList%s : invalid drawable tag %s",
@@ -134,7 +129,11 @@ ECode CColorStateList::CreateFromXmlInner(
         return E_XML_PULL_PARSER_EXCEPTION;
     }
 
-    return ((CColorStateList*)(*csl))->Inflate(r, parser, attrs);
+    AutoPtr<CColorStateList> ccsl;
+    FAIL_RETURN(CColorStateList::NewByFriend((CColorStateList**)&ccsl));
+    *csl = (IColorStateList*)ccsl.Get();
+    REFCOUNT_ADD(*csl);
+    return ccsl->Inflate(r, parser, attrs);
 }
 
 ECode CColorStateList::WithAlpha(
@@ -174,7 +173,7 @@ ECode CColorStateList::Inflate(
     Int32 listSize = 0;
     AutoPtr< ArrayOf<Int32> > colorList = ArrayOf<Int32>::Alloc(listAllocated);
     AutoPtr< ArrayOf<Int32Array > > stateSpecList = ArrayOf<Int32Array >::Alloc(listAllocated);
-
+    String name;
     while ((parser->Next(&type), type) != IXmlPullParser::END_DOCUMENT
             && ((parser->GetDepth(&depth), depth) >= innerDepth
                     || type != IXmlPullParser::END_TAG)) {
@@ -182,9 +181,7 @@ ECode CColorStateList::Inflate(
             continue;
         }
 
-        String name;
-        parser->GetName(&name);
-        if (depth > innerDepth || !name.Equals("item")) {
+        if (depth > innerDepth || (parser->GetName(&name), !name.Equals("item"))) {
             continue;
         }
 
@@ -213,7 +210,6 @@ ECode CColorStateList::Inflate(
             }
             else if (stateResId == R::attr::color) {
                 attrs->GetAttributeResourceValue(i, 0, &colorRes);
-
                 if (colorRes == 0) {
                     attrs->GetAttributeIntValue(i, color, &color);
                     haveColor = TRUE;
@@ -234,13 +230,12 @@ ECode CColorStateList::Inflate(
         else if (!haveColor) {
             String pos;
             parser->GetPositionDescription(&pos);
-            Slogger::E(TAG, "CColorStateList %s: <item> tag requires a 'android:color' attribute.",
-                    (const char*)pos);
+            Slogger::E(TAG, "CColorStateList %s: <item> tag requires a 'android:color' attribute.", pos.string());
             return E_XML_PULL_PARSER_EXCEPTION;
         }
 
        if (alphaRes != 0) {
-            //r->GetFloat(alphaRes, &alpha);
+            r->GetFloat(alphaRes, &alpha);
         }
 
         // Apply alpha modulation.

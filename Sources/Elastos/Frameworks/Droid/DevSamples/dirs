@@ -1,3 +1,4 @@
 
 DIRS += ImageDemo
 DIRS += TabHostDemo
+DIRS += TextViewDemo

@@ -131,32 +131,37 @@ ECode CResources::Theme::ObtainStyledAttributes(
     Boolean result;
     FAIL_RETURN(CAssetManager::ApplyStyle(mTheme, 0, resid, 0, *attrs,
             array->mData, array->mIndices, &result));
-    // if (false) {
-    //     Int32[] data = array.mData;
+    if (FALSE) {
+        AutoPtr<ArrayOf<Int32> > data = array->mData;
 
-    //     System.out.println("**********************************************************");
-    //     System.out.println("**********************************************************");
-    //     System.out.println("**********************************************************");
-    //     System.out.println("Attributes:");
-    //     String s = "  Attrs:";
-    //     Int32 i;
-    //     for (i=0; i<attrs.length; i++) {
-    //         s = s + " 0x" + Integer.toHexString(attrs[i]);
-    //     }
-    //     System.out.println(s);
-    //     s = "  Found:";
-    //     TypedValue value = new TypedValue();
-    //     for (i=0; i<attrs.length; i++) {
-    //         Int32 d = i*AssetManager.STYLE_NUM_ENTRIES;
-    //         value.type = data[d+AssetManager.STYLE_TYPE];
-    //         value.data = data[d+AssetManager.STYLE_DATA];
-    //         value.assetCookie = data[d+AssetManager.STYLE_ASSET_COOKIE];
-    //         value.resourceId = data[d+AssetManager.STYLE_RESOURCE_ID];
-    //         s = s + " 0x" + Integer.toHexString(attrs[i])
-    //             + "=" + value;
-    //     }
-    //     System.out.println(s);
-    // }
+        Logger::I(TAG, "**********************************************************");
+        Logger::I(TAG, "**********************************************************");
+        Logger::I(TAG, "**********************************************************");
+        Logger::I(TAG, "Attributes:");
+        StringBuilder sb("  Attrs:");
+        Int32 i;
+        for (i = 0; i < attrs->GetLength(); i++) {
+            sb += " 0x";
+            sb += StringUtils::ToHexString((*attrs)[i]);
+        }
+        Logger::I("CResources::Theme", sb.ToString().string());
+        sb.Reset();
+        sb += "  Found:";
+        AutoPtr<CTypedValue> value;
+        CTypedValue::NewByFriend((CTypedValue**)&value);
+        for (i = 0; i < attrs->GetLength(); i++) {
+            Int32 d = i*CAssetManager::STYLE_NUM_ENTRIES;
+            value->mType = (*data)[d+CAssetManager::STYLE_TYPE];
+            value->mData = (*data)[d+CAssetManager::STYLE_DATA];
+            value->mAssetCookie = (*data)[d+CAssetManager::STYLE_ASSET_COOKIE];
+            value->mResourceId = (*data)[d+CAssetManager::STYLE_RESOURCE_ID];
+            sb += " 0x";
+            sb += StringUtils::ToHexString((*attrs)[i]);
+            sb += "=";
+            sb += TO_CSTR(value);
+        }
+        Logger::I("CResources::Theme", sb.ToString().string());
+    }
     *styles = (ITypedArray*)array;
     REFCOUNT_ADD(*styles);
     return NOERROR;
@@ -193,34 +198,54 @@ ECode CResources::Theme::ObtainStyledAttributes(
     array->mTheme = this;
     array->mXml = parser;
 
-    // if (false) {
-    //     Int32[] data = array.mData;
+    if (FALSE) {
+        AutoPtr<ArrayOf<Int32> > data = array->mData;
 
-    //     System.out.println("Attributes:");
-    //     String s = "  Attrs:";
-    //     Int32 i;
-    //     for (i=0; i<set.getAttributeCount(); i++) {
-    //         s = s + " " + set.getAttributeName(i);
-    //         Int32 id = set.getAttributeNameResource(i);
-    //         if (id != 0) {
-    //             s = s + "(0x" + Integer.toHexString(id) + ")";
-    //         }
-    //         s = s + "=" + set.getAttributeValue(i);
-    //     }
-    //     System.out.println(s);
-    //     s = "  Found:";
-    //     TypedValue value = new TypedValue();
-    //     for (i=0; i<attrs.length; i++) {
-    //         Int32 d = i*AssetManager.STYLE_NUM_ENTRIES;
-    //         value.type = data[d+AssetManager.STYLE_TYPE];
-    //         value.data = data[d+AssetManager.STYLE_DATA];
-    //         value.assetCookie = data[d+AssetManager.STYLE_ASSET_COOKIE];
-    //         value.resourceId = data[d+AssetManager.STYLE_RESOURCE_ID];
-    //         s = s + " 0x" + Integer.toHexString(attrs[i])
-    //             + "=" + value;
-    //     }
-    //     System.out.println(s);
-    // }
+        Logger::I(TAG, "**********************************************************");
+        Logger::I(TAG, "**********************************************************");
+        Logger::I(TAG, "**********************************************************");
+        Logger::I(TAG, "Attributes:");
+        StringBuilder sb("  Attrs:");
+        Int32 i, len;
+        if (set) {
+            String str;
+            set->GetAttributeCount(&len);
+            for (i = 0; i < len; i++) {
+                set->GetAttributeName(i, &str);
+                sb += " ";
+                sb += str;
+                Int32 id;
+                set->GetAttributeNameResource(i, &id);
+                if (id != 0) {
+                    sb += "(0x";
+                    sb += StringUtils::ToHexString(id);
+                    sb += ")";
+                }
+                set->GetAttributeValue(i, &str);
+                sb += "=";
+                sb += str;
+            }
+            Logger::I("CResources::Theme", sb.ToString().string());
+        }
+
+        sb.Reset();
+        sb += "  Found:";
+        AutoPtr<CTypedValue> value;
+        CTypedValue::NewByFriend((CTypedValue**)&value);
+        for (i = 0; i < attrs->GetLength(); i++) {
+            Int32 d = i*CAssetManager::STYLE_NUM_ENTRIES;
+            value->mType = (*data)[d+CAssetManager::STYLE_TYPE];
+            value->mData = (*data)[d+CAssetManager::STYLE_DATA];
+            value->mAssetCookie = (*data)[d+CAssetManager::STYLE_ASSET_COOKIE];
+            value->mResourceId = (*data)[d+CAssetManager::STYLE_RESOURCE_ID];
+            sb += " 0x";
+            sb += StringUtils::ToHexString((*attrs)[i]);
+            sb += "=";
+            sb += TO_CSTR(value);
+        }
+        Logger::I("CResources::Theme", sb.ToString().string());
+    }
+
     *styles = (ITypedArray*)array;
     REFCOUNT_ADD(*styles);
     return NOERROR;
@@ -240,7 +265,6 @@ ECode CResources::Theme::ResolveAttribute(
         //         "Base attribute values must be null or the same length as attrs");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-
 
     AutoPtr<ITypedArray> ta = CTypedArray::Obtain(IResources::Probe(mHost), len);
     CTypedArray* array = (CTypedArray*)ta.Get();
@@ -264,12 +288,15 @@ ECode CResources::Theme::ResolveAttribute(
     VALIDATE_NOT_NULL(isFounded);
 
     *isFounded = mAssets->GetThemeValue(mTheme, resid, outValue, resolveRefs);
-    // if (false) {
-    //     System.out.println(
-    //         "resolveAttribute #" + Integer.toHexString(resid)
-    //         + " got=" + got + ", type=0x" + Integer.toHexString(outValue.type)
-    //         + ", data=0x" + Integer.toHexString(outValue.data));
-    // }
+    if (FALSE) {
+        StringBuilder sb(" >> ResolveAttribute #");
+        sb += StringUtils::ToHexString(resid);
+        sb += " got=";
+        sb += *isFounded ? "True" : "False";
+        sb += " typedValue=";
+        sb += TO_CSTR(outValue);
+        Logger::I("CResources::Theme", sb.ToString().string());
+    }
     return NOERROR;
 }
 
@@ -554,8 +581,8 @@ ECode CResources::GetQuantityText(
         return NOERROR;
     }
 
-    Logger::E(TAG, "Plural resource ID #0x%08x quantity=%d item=%s", id, quantity,
-             StringForQuantityCode(value).string());
+    Logger::E(TAG, "Plural resource ID #0x%08x quantity=%d item=%s",
+        id, quantity, StringForQuantityCode(value).string());
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -2129,8 +2156,7 @@ Boolean CResources::VerifyPreloadConfig(
         if (ec == (ECode)E_NOT_FOUND_EXCEPTION) {
             resName = "?";
         }
-
-        Logger::W(TAG, "Preloaded %s resource #0x%08x (%s) that varies with configuration!!",
+        Logger::W(TAG, "Preloaded %s resource #0x%08x (%s).",
             name.string(), resourceId, resName.string());
     }
     return TRUE;
@@ -2440,11 +2466,10 @@ ECode CResources::LoadColorStateList(
 
     if (TRACE_FOR_PRELOAD) {
         // Log only framework resources
-       if (((unsigned Int32)id >> 24) == 0x1) {
+        if (((unsigned Int32)id >> 24) == 0x1) {
             String name;
             GetResourceName(id, &name);
-            if (!name.IsNull())
-                Logger::D(NULL, "PreloadColorStateList %s", (const char*)name);
+            Logger::D("CResources", "PreloadColorStateList %s", name.string());
         }
     }
 
@@ -2475,7 +2500,7 @@ ECode CResources::LoadColorStateList(
         if (mPreloading) {
             if (VerifyPreloadConfig(typedValue->mChangingConfigurations, 0,
                 typedValue->mResourceId, String("color"))) {
-                //TODO luo.zhaohui sPreloadedColorStateLists->Put(key, csl.Get());
+                sPreloadedColorStateLists->Put(key, csl.Get());
             }
         }
 
@@ -2553,7 +2578,7 @@ ECode CResources::LoadColorStateList(
         if (mPreloading) {
             if (VerifyPreloadConfig(typedValue->mChangingConfigurations, 0,
                 typedValue->mResourceId, String("color"))) {
-                //TODO luo.zhaohui sPreloadedColorStateLists->Put(key, csl.Get());
+                sPreloadedColorStateLists->Put(key, csl.Get());
             }
         }
         else {
@@ -2640,9 +2665,8 @@ ECode CResources::LoadXmlResourceParser(
 
     if (id != 0) {
         if (DEBUG_LOAD) {
-            if (file.Contains("/layout/")) {
-                Logger::I(TAG, " == load xml resource %s", file.string());
-            }
+            Logger::I(TAG, " == load xml resource id:%08x, asserCookie:%d, type:%s from %s",
+                id, assetCookie, type.string(), file.string());
         }
 
         // try {

@@ -376,6 +376,37 @@ ECode CTypedValue::SetDensity(
     return NOERROR;
 }
 
+ECode CTypedValue::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb;
+    sb.Append("TypedValue{type=0x");
+    sb.Append(StringUtils::ToHexString(mType));
+    sb.Append("/data=0x");
+    sb.Append(StringUtils::ToHexString(mData));
+    if (mType == TYPE_STRING) {
+        sb.Append(" \"");
+        sb.Append(mString != NULL ? TO_CSTR(mString) : "<null>");
+        sb.Append("\"");
+    }
+    if (mAssetCookie != 0) {
+        sb.Append(" assetCookie=");
+        sb.Append(mAssetCookie);
+    }
+    if (mResourceId != 0) {
+        sb.Append(" resourceId=0x");
+        sb.Append(StringUtils::ToHexString(mResourceId));
+    }
+    if (mDensity != 0) {
+        sb.Append(" density=");
+        sb.Append(mDensity);
+    }
+    sb.Append("}");
+    *str = sb.ToString();
+    return NOERROR;
+}
+
 } // namespace Utility
 } // namespace Droid
 } // namespace Elastos

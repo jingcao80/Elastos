@@ -5,10 +5,11 @@
 ;          SrcFile/Folder [DestFolder]
 ;
 ;
-Elastos.DevSamples.ImageDemo.epk            /system/app
-Elastos.DevSamples.TabHostDemo.epk          /system/app
 Elastos.Droid.InputMethod.Pinyin.epk        /system/priv-app
 Elastos.Droid.Launcher2.epk                 /system/priv-app
 Elastos.Droid.SettingsProvider.epk          /system/priv-app
 Elastos.Droid.SystemUI.epk                  /system/priv-app
 Elastos.Droid.DefContainer.epk              /system/priv-app
+Elastos.DevSamples.ImageDemo.epk            /system/app
+Elastos.DevSamples.TabHostDemo.epk          /system/app
+Elastos.DevSamples.TextViewDemo.epk         /system/app

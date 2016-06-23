@@ -16,15 +16,14 @@ CarClass(CTypedValue)
     , public ITypedValue
 {
 public:
-    CTypedValue();
-
-    virtual ~CTypedValue();
-
     CAR_INTERFACE_DECL()
 
     CAR_OBJECT_DECL()
 
-public:
+    CTypedValue();
+
+    virtual ~CTypedValue();
+
     CARAPI GetFloat(
         /* [out] */ Float* f);
 
@@ -129,6 +128,8 @@ public: /*package*/
         /* [in] */ Int32 type,
         /* [in] */ Int32 data);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
 public:
     /** The type held by this value, as defined by the constants here.
      *  This tells you how to interpret the other fields in the object. */

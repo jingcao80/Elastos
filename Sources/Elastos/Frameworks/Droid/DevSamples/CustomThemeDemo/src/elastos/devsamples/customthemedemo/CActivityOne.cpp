@@ -22,35 +22,6 @@ namespace DevSamples {
 namespace CustomThemeDemo {
 
 static const String TAG("CustomThemeDemo::CActivityOne");
-const String RECEIVER_KEY("Elastos.DevSamples.BroadcastDemo.TEST_RECEIVER");
-const Boolean CActivityOne::TEST_ORDERED_BROADCAST = TRUE;
-
-//=======================================================================
-// MyListener
-//=======================================================================
-
-CAR_INTERFACE_IMPL(CActivityOne::MyListener, Object, IViewOnClickListener)
-
-CActivityOne::MyListener::MyListener(
-    /* [in] */ CActivityOne* host)
-    : mHost(host)
-{
-}
-
-ECode CActivityOne::MyListener::OnClick(
-    /* [in] */ IView* v)
-{
-    Int32 id;
-    v->GetId(&id);
-    switch(id) {
-    case R::id::SendBroadcast:
-        Logger::I(TAG, "MyListener::OnClick Send");
-        mHost->Send();
-        break;
-    }
-
-    return NOERROR;
-}
 
 //=======================================================================
 // CActivityOne
@@ -70,10 +41,6 @@ ECode CActivityOne::OnCreate(
     Logger::I(TAG, " >> OnCreate()");
     Activity::OnCreate(savedInstanceState);
     SetContentView(R::layout::main);
-
-    AutoPtr<MyListener> l = new MyListener(this);
-    AutoPtr<IView> view = FindViewById(R::id::SendBroadcast);
-    view->SetOnClickListener(l.Get());
 
     return NOERROR;
 }
@@ -115,20 +82,6 @@ ECode CActivityOne::OnActivityResult(
 {
     Logger::I(TAG, " >> OnActivityResult()");
     return Activity::OnActivityResult(requestCode, resultCode, data);
-}
-
-ECode CActivityOne::Send()
-{
-    AutoPtr<IIntent> intent;
-    CIntent::New(RECEIVER_KEY, (IIntent**)&intent);
-    intent->PutExtra(String("msg"), String("Hello Broadcast!"));
-
-    if (TEST_ORDERED_BROADCAST) {
-        return SendOrderedBroadcast(intent, String(NULL));
-    }
-    else {
-        return SendBroadcast(intent);
-    }
 }
 
 } // namespace CustomThemeDemo

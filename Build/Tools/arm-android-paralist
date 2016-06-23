@@ -400,12 +400,6 @@
   Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService/ Elastos.Droid.DefContainer.car
 > Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService/
 
-# ==== build DevSamples ====
- Elastos/Frameworks/Droid/DevSamples/ImageDemo Elastos.DevSamples.ImageDemo.car
-> Elastos/Frameworks/Droid/DevSamples/ImageDemo
- Elastos/Frameworks/Droid/DevSamples/TabHostDemo Elastos.DevSamples.TabHostDemo.car
-> Elastos/Frameworks/Droid/DevSamples/TabHostDemo
-
 # ==== build Commands ====
 #> Elastos/Frameworks/Droid/Commands/Monkey Elastos.Droid.Core.eco
 #- Elastos/Frameworks/Droid/Commands/Monkey Elastos.Droid.Commands.Monkey.car
@@ -445,6 +439,19 @@
 #> Elastos/Frameworks/Droid/Base/Test-runner/lib
 > Elastos/Frameworks/Droid/Base/Test-runner
 
+# ==== Elastos/Packages/InputMethods ====
+> Elastos/Packages/InputMethods/PinyinIME Elastos.Droid.InputMethod.Pinyin.car
+> Elastos/Packages/InputMethods/PinyinIME/src/elastos/droid/inputmethod/pinyin/share
+> Elastos/Packages/InputMethods/PinyinIME
+
+# ==== build Packages/Providers/MediaProvider ====
+> Elastos/Packages/Providers/MediaProvider Elastos.Droid.Providers.Media.car
+> Elastos/Packages/Providers/MediaProvider
+
+# ==== build Packages/Service/Telecomm ====
+> Elastos/Packages/Service/Telecomm Elastos.Droid.Server.Telecom.car
+> Elastos/Packages/Service/Telecomm
+
 # ==== buid Packages/Apps/Calculator ====
 > Elastos/Packages/Apps/Calculator Elastos.Droid.Calculator2.car
 > Elastos/Packages/Apps/Calculator
@@ -464,17 +471,12 @@
 > Elastos/Packages/Apps/Launcher2 Elastos.Droid.Launcher2.car
 > Elastos/Packages/Apps/Launcher2
 
-# ==== Elastos/Packages/InputMethods ====
-> Elastos/Packages/InputMethods/PinyinIME Elastos.Droid.InputMethod.Pinyin.car
-> Elastos/Packages/InputMethods/PinyinIME/src/elastos/droid/inputmethod/pinyin/share
-> Elastos/Packages/InputMethods/PinyinIME
-
-# ==== build Packages/Providers/MediaProvider ====
-> Elastos/Packages/Providers/MediaProvider Elastos.Droid.Providers.Media.car
-> Elastos/Packages/Providers/MediaProvider
-
-# ==== build Packages/Service/Telecomm ====
-> Elastos/Packages/Service/Telecomm Elastos.Droid.Server.Telecom.car
-> Elastos/Packages/Service/Telecomm
+# ==== build DevSamples ====
+ Elastos/Frameworks/Droid/DevSamples/ImageDemo Elastos.DevSamples.ImageDemo.car
+> Elastos/Frameworks/Droid/DevSamples/ImageDemo
+ Elastos/Frameworks/Droid/DevSamples/TabHostDemo Elastos.DevSamples.TabHostDemo.car
+> Elastos/Frameworks/Droid/DevSamples/TabHostDemo
+ Elastos/Frameworks/Droid/DevSamples/TextViewDemo Elastos.DevSamples.TextViewDemo.car
+> Elastos/Frameworks/Droid/DevSamples/TextViewDemo
 
 > Elastos

@@ -1,12 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="fill_parent"
+    android:layout_width="fill_parent"
+    android:orientation="vertical">
 
-    <Button android:id="@+id/SendBroadcast"
-        android:layout_width="wrap_content"
+    <TextView
         android:layout_height="wrap_content"
-        android:text="Send Broadcast" />
+        android:layout_width="fill_parent"
+        android:text="张信哲的热搜歌曲"
+        style="@style/BigTextStyle">
+    </TextView>
+
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="爱如潮水 "
+        android:id="@+id/Button01"
+        style="@style/BasicButtonStyle">
+    </Button>
+
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="过火 "
+        android:id="@+id/Button02"
+        style="@style/BasicButtonStyle">
+    </Button>
+
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="别怕我伤心 "
+        android:id="@+id/Button03"
+        style="@style/BasicButtonStyle">
+    </Button>
+
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="从开始到现在 "
+        android:id="@+id/Button04"
+        style="@style/BasicButtonStyle">
+    </Button>
+
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="信仰 "
+        android:id="@+id/Button05">
+    </Button>
+
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="说谎 "
+        android:id="@+id/Button06">
+    </Button>
 
 </LinearLayout>

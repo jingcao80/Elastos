@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="BasicButtonStyle" parent="@android:style/Widget.Button">
+        <item name="android:gravity">center_vertical|center_horizontal</item>
+        <item name="android:textColor">#ffffffff</item>
+        <item name="android:shadowColor">#ff000000</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">-1</item>
+        <item name="android:shadowRadius">0.2</item>
+        <item name="android:textSize">16dip</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:background">@drawable/btn_custom_material</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
+    </style>
+
+    <style name="BigTextStyle">
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:textColor">#ff9900</item>
+        <item name="android:textSize">25sp</item>
+    </style>
+
+    <style name="BasicButtonStyle.BigTextStyle">
+        <item name="android:textSize">25sp</item>
+    </style>
+
+</resources>

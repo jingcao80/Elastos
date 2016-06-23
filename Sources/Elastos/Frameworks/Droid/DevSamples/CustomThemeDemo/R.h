@@ -15,19 +15,31 @@ class ECO_PUBLIC R {
     public: class attr {
     };
     public: class drawable {
-        public: static const int earth = 0x7f020000;
-        public: static const int icon = 0x7f020001;
-        public: static const int transformer = 0x7f020002;
-        public: static const int wunderland = 0x7f020003;
+        public: static const int btn_black = 0x7f020000;
+        public: static const int btn_custom_material = 0x7f020001;
+        public: static const int btn_orange = 0x7f020002;
+        public: static const int btn_red = 0x7f020003;
+        public: static const int icon = 0x7f020004;
     };
     public: class id {
-        public: static const int SendBroadcast = 0x7f050000;
+        public: static const int Button01 = 0x7f060000;
+        public: static const int Button02 = 0x7f060001;
+        public: static const int Button03 = 0x7f060002;
+        public: static const int Button04 = 0x7f060003;
+        public: static const int Button05 = 0x7f060004;
+        public: static const int Button06 = 0x7f060005;
     };
     public: class layout {
         public: static const int main = 0x7f030000;
     };
     public: class string {
         public: static const int app_name = 0x7f040000;
+    };
+    public: class style {
+        public: static const int BasicButtonStyle = 0x7f050000;
+        public: static const int BasicButtonStyle_BigTextStyle = 0x7f050002;
+        public: static const int BasicButtonTheme = 0x7f050003;
+        public: static const int BigTextStyle = 0x7f050001;
     };
 };
 };
