@@ -1,8 +1,11 @@
 #ifndef  __ELASTOS_DROID_PHONE_CPHONEGLOBALSNOTIFICATIONBROADCASTRECEIVER_H__
 #define  __ELASTOS_DROID_PHONE_CPHONEGLOBALSNOTIFICATIONBROADCASTRECEIVER_H__
 
-#include "elastos/droid/telephony/phone/PhoneGlobals.h"
+#include "_Elastos_Droid_Phone_CPhoneGlobalsNotificationBroadcastReceiver.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
 #include "elastos/droid/ext/frameworkext.h"
+
+using Elastos::Droid::Phone::PhoneGlobals;
 
 namespace Elastos {
 namespace Droid {

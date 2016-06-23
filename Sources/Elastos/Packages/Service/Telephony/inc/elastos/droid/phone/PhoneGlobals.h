@@ -3,6 +3,39 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/phone/CallerInfoCache.h"
+#include "elastos/droid/phone/NotificationMgr.h"
+#include "elastos/droid/phone/CallGatewayManager.h"
+#include "elastos/droid/phone/CdmaPhoneCallState.h"
+#include "elastos/droid/phone/OtaUtils.h"
+#include "elastos/droid/phone/CallStateMonitor.h"
+#include "elastos/droid/content/ContextWrapper.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::App::IProgressDialog;
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::App::IKeyguardManager;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::ContextWrapper;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IBroadcastReceiver;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Os::IIPowerManager;
+using Elastos::Droid::Os::IUpdateLock;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::ICallManager;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState;
 
 namespace Elastos {
 namespace Droid {
@@ -14,6 +47,7 @@ namespace Phone {
  */
 class PhoneGlobals
     : public ContextWrapper
+    , public IPhoneGlobals
 {
 public:
     /**
@@ -41,7 +75,6 @@ public:
         PhoneGlobals* mHost;
     };
 
-private:
     /**
      * Receiver for misc intent broadcasts the Phone app cares about.
      */
@@ -63,6 +96,7 @@ private:
         PhoneGlobals* mHost;
     };
 
+private:
     class MyHandler
         : public Handler
     {
@@ -81,6 +115,8 @@ private:
 
 public:
     TO_STRING_IMPL("PhoneGlobals")
+
+    CAR_INTERFACE_DECL()
 
     /**
      * Set the restore mute state flag. Used when we are setting the mute state
@@ -192,7 +228,7 @@ public:
      * @param ws tells the device to how to wake.
      */
     CARAPI RequestWakeState(
-        /* [in] */ WakeState ws);
+        /* [in] */ IPhoneGlobalsWakeState ws);
 
     /**
      * If we are not currently keeping the screen on, then poke the power
@@ -228,10 +264,10 @@ public:
      * This method will updates various states inside Phone app (e.g. update-lock state, etc.)
      */
     CARAPI UpdatePhoneState(
-        /* [in] */ IPhoneConstantsState state);
+        /* [in] */ PhoneConstantsState state);
 
     CARAPI GetPhoneState(
-        /* [out] */ IPhoneConstantsState* state);
+        /* [out] */ PhoneConstantsState* state);
 
     CARAPI GetKeyguardManager(
         /* [out] */ IKeyguardManager** manager);
@@ -250,7 +286,7 @@ public:
 
 private:
     CARAPI OnMMIComplete(
-        /* [in] */ IAsyncResult* r);
+        /* [in] */ AsyncResult* r);
 
     CARAPI_(void) InitForNewRadioTechnology();
 
@@ -279,39 +315,44 @@ public:
     AutoPtr<OtaUtils::CdmaOtaInCallScreenUiState> mCdmaOtaInCallScreenUiState;
 
 private:
+    friend class SpecialCharSequenceMgr;
+    friend class OtaUtils;
+    friend class PhoneUtils;
+    friend class CallController;
+
     static const Boolean DBG;
     static const Boolean VDBG;
 
     // Message codes; see mHandler below.
-    static const Int32 EVENT_SIM_NETWORK_LOCKED;
-    static const Int32 EVENT_SIM_STATE_CHANGED;
-    static const Int32 EVENT_DATA_ROAMING_DISCONNECTED;
-    static const Int32 EVENT_DATA_ROAMING_OK;
-    static const Int32 EVENT_UNSOL_CDMA_INFO_RECORD;
-    static const Int32 EVENT_DOCK_STATE_CHANGED;
-    static const Int32 EVENT_START_SIP_SERVICE;
+    static const Int32 EVENT_SIM_NETWORK_LOCKED = 3;
+    static const Int32 EVENT_SIM_STATE_CHANGED = 8;
+    static const Int32 EVENT_DATA_ROAMING_DISCONNECTED = 10;
+    static const Int32 EVENT_DATA_ROAMING_OK = 11;
+    static const Int32 EVENT_UNSOL_CDMA_INFO_RECORD = 12;
+    static const Int32 EVENT_DOCK_STATE_CHANGED = 13;
+    static const Int32 EVENT_START_SIP_SERVICE = 14;
 
     static AutoPtr<PhoneGlobals> sMe;
 
     // A few important fields we expose to the rest of the package
     // directly (rather than thru set/get methods) for efficiency.
-    AutoPtr<ICallController> mCallController;
+    //AutoPtr<CallController> mCallController;
     AutoPtr<ICallManager> mCM;
-    AutoPtr<ICallNotifier> mNotifier;
-    AutoPtr<ICallerInfoCache> mCallerInfoCache;
-    AutoPtr<INotificationMgr> mNotificationMgr;
-    AutoPtr<IPhone> mHhone;
-    AutoPtr<IPhoneInterfaceManager> mPhoneMgr;
+    //AutoPtr<CallNotifier> mNotifier;
+    AutoPtr<CallerInfoCache> mCallerInfoCache;
+    AutoPtr<NotificationMgr> mNotificationMgr;
+    AutoPtr<IPhone> mPhone;
+    //AutoPtr<IPhoneInterfaceManager> mPhoneMgr;
 
     AutoPtr<IBluetoothManager> mBluetoothManager;
-    AutoPtr<ICallGatewayManager> mCallGatewayManager;
-    AutoPtr<ICallStateMonitor> mCallStateMonitor;
+    AutoPtr<CallGatewayManager> mCallGatewayManager;
+    AutoPtr<CallStateMonitor> mCallStateMonitor;
 
     static Int32 mDockState;
     static Boolean sVoiceCapable;
 
     // Internal PhoneApp Call state tracker
-    CdmaPhoneCallState mCdmaPhoneCallState;
+    AutoPtr<CdmaPhoneCallState> mCdmaPhoneCallState;
 
     // The currently-active PUK entry activity and progress dialog.
     // Normally, these are the Emergency Dialer and the subsequent
@@ -329,7 +370,7 @@ private:
     // Last phone state seen by updatePhoneState()
     PhoneConstantsState mLastPhoneState;
 
-    PhoneGlobalsWakeState mWakeState;
+    IPhoneGlobalsWakeState mWakeState;
 
     AutoPtr<IPowerManager> mPowerManager;
     AutoPtr<IIPowerManager> mPowerManagerService;

@@ -3,6 +3,13 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IViewOnTouchListener;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -27,6 +34,10 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    SmallerHitTargetTouchListener()
+        : mDownEventHit(FALSE)
+    {}
+
     /**
      * Called when a touch event is dispatched to a view. This allows listeners to
      * get a chance to respond before the target view.
@@ -43,15 +54,15 @@ public:
         /* [out] */ Boolean* result);
 
 private:
-    static const String TAG = "SmallerHitTargetTouchListener";
+    static const String TAG;
 
     /**
      * Edge dimensions where a touch does not register an action (in DIP).
      */
-    static const Int32 HIT_TARGET_EDGE_IGNORE_DP_X = 30;
-    static const Int32 HIT_TARGET_EDGE_IGNORE_DP_Y = 10;
-    static const Int32 HIT_TARGET_MIN_SIZE_DP_X = HIT_TARGET_EDGE_IGNORE_DP_X * 3;
-    static const Int32 HIT_TARGET_MIN_SIZE_DP_Y = HIT_TARGET_EDGE_IGNORE_DP_Y * 3;
+    static const Int32 HIT_TARGET_EDGE_IGNORE_DP_X;
+    static const Int32 HIT_TARGET_EDGE_IGNORE_DP_Y;
+    static const Int32 HIT_TARGET_MIN_SIZE_DP_X;
+    static const Int32 HIT_TARGET_MIN_SIZE_DP_Y;
 
     // True if the most recent DOWN event was a "hit".
     Boolean mDownEventHit;

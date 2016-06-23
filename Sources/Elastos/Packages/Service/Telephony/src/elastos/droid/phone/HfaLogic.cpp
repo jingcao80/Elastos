@@ -1,5 +1,21 @@
 
 #include "elastos/droid/phone/HfaLogic.h"
+#include "elastos/droid/phone/CHfaLogicBroadcastReceiver.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include <elastos/utility/logging/Logger.h>
+#include "elastos/droid/os/AsyncResult.h"
+#include "Elastos.Droid.Internal.h"
+#include <elastos/core/StringBuilder.h>
+
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Internal::Utility::IPreconditions;
+using Elastos::Droid::Internal::Utility::CPreconditions;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -19,9 +35,14 @@ ECode HfaLogic::MyHandler::HandleMessage(
     msg->GetWhat(&what);
     switch (what) {
         case SERVICE_STATE_CHANGED:
-            AutoPtr<IServiceState> state = (ServiceState) ((AsyncResult) msg.obj).result;
+        {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<AsyncResult> result = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<IServiceState> state = IServiceState::Probe(result->mResult);
             mHost->OnServiceStateChange(state);
             break;
+        }
         default:
             break;
     }
@@ -60,9 +81,9 @@ const String HfaLogic::ACTION_ERROR("com.android.action.ERROR_HFA");
 const String HfaLogic::ACTION_CANCEL("com.android.action.CANCEL_HFA");
 const String HfaLogic::ACTION_COMPLETE("com.android.action.COMPLETE_HFA");
 
-const Int32 HfaLogic::SERVICE_STATE_CHANGED = 1;
-
 const Int32 HfaLogic::DEFAULT_RETRY_COUNT = 0;
+
+CAR_INTERFACE_IMPL(HfaLogic, Object, IHfaLogic)
 
 HfaLogic::HfaLogic(
     /* [in] */ IContext* context,
@@ -144,16 +165,15 @@ void HfaLogic::OnHfaSuccess()
 void HfaLogic::OnTotalSuccess()
 {
     Logger::I(TAG, "onTotalSuccess: call mCallBack.onSuccess");
-    SendFinalResponse(OTASP_SUCCESS, null);
+    SendFinalResponse(OTASP_SUCCESS, String(NULL));
     mCallback->OnSuccess();
 }
 
 void HfaLogic::BounceRadio()
 {
-    AutoPtr<IPhoneGlobals> globals;
-    PhoneGlobals::GetInstance((IPhoneGlobals**)&globals);
-    AutoPtr<IPhone> phone;
-    globals->GetPhone((IPhone**)&phone);
+    AutoPtr<PhoneGlobals> globals;
+    PhoneGlobals::GetInstance((PhoneGlobals**)&globals);
+    AutoPtr<IPhone> phone = globals->GetPhone();
     phone->RegisterForServiceStateChanged(mHandler, SERVICE_STATE_CHANGED, NULL);
 
     mPhoneMonitorState = WAITING_FOR_RADIO_OFF;
@@ -168,12 +188,11 @@ void HfaLogic::OnServiceStateChange(
 {
     Int32 _state;
     state->GetVoiceRegState(&_state);
-    Boolean radioIsOff = _state == ServiceState.STATE_POWER_OFF;
+    Boolean radioIsOff = _state == IServiceState::STATE_POWER_OFF;
 
-    AutoPtr<IPhoneGlobals> globals;
-    PhoneGlobals::GetInstance((IPhoneGlobals**)&globals);
-    AutoPtr<IPhone> phone;
-    globals->GetPhone((IPhone**)&phone);
+    AutoPtr<PhoneGlobals> globals;
+    PhoneGlobals::GetInstance((PhoneGlobals**)&globals);
+    AutoPtr<IPhone> phone = globals->GetPhone();
 
     StringBuilder sb;
     sb += "Radio is on: ";
@@ -202,8 +221,9 @@ void HfaLogic::StartHfaIntentReceiver()
     CIntentFilter::New(ACTION_COMPLETE, (IIntentFilter**)&filter);
     filter->AddAction(ACTION_ERROR);
 
-    CHfaLogicBroadcastReceiver::New(this, (BroadcastReceiver**)&mReceiver);
-    mContext->RegisterReceiver(mReceiver, filter);
+    CHfaLogicBroadcastReceiver::New(this, (IBroadcastReceiver**)&mReceiver);
+    AutoPtr<IIntent> tmp;
+    mContext->RegisterReceiver(mReceiver, filter, (IIntent**)&tmp);
 }
 
 void HfaLogic::StopHfaIntentReceiver()

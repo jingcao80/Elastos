@@ -1,11 +1,46 @@
 
 #include "elastos/droid/phone/SpecialCharSequenceMgr.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::App::IKeyguardManager;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Provider::ISettings;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
+using Elastos::Droid::Server::Telephony::R;
+using Elastos::Droid::View::IWindow;
+using Elastos::Droid::View::IWindowManagerLayoutParams;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-const String SpecialCharSequenceMgr::TAG = PhoneGlobals::LOG_TAG;
+const String SpecialCharSequenceMgr::TAG = IPhoneGlobals::TAG;
 const Boolean SpecialCharSequenceMgr::DBG = FALSE;
 
 const String SpecialCharSequenceMgr::MMI_IMEI_DISPLAY("*#06#");
@@ -24,7 +59,10 @@ Boolean SpecialCharSequenceMgr::HandleChars(
     /* [in] */ IActivity* pukInputActivity)
 {
     //get rid of the separators so that the string gets parsed correctly
-    String dialString = PhoneNumberUtils::StripSeparators(input);
+    AutoPtr<IPhoneNumberUtils> helper;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+    String dialString;
+    helper->StripSeparators(input, &dialString);
 
     if (HandleIMEIDisplay(context, dialString)
         || HandleRegulatoryInfoDisplay(context, dialString)
@@ -43,7 +81,10 @@ Boolean SpecialCharSequenceMgr::HandleCharsForLockedDevice(
     /* [in] */ IActivity* pukInputActivity)
 {
     // Get rid of the separators so that the string gets parsed correctly
-    String dialString = PhoneNumberUtils::StripSeparators(input);
+    AutoPtr<IPhoneNumberUtils> helper;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+    String dialString;
+    helper->StripSeparators(input, &dialString);
 
     // The only sequences available on a locked device are the "**04"
     // or "**05" sequences that allow you to enter PIN or PUK-related
@@ -64,12 +105,12 @@ Boolean SpecialCharSequenceMgr::HandleSecretCode(
 {
     // Secret codes are in the form *#*#<code>#*#*
     Int32 len = input.GetLength();
-    if (len > 8 && input.StartsWith(String("*#*#")) && input.EndsWith(String("#*#*"))) {
+    if (len > 8 && input.StartWith(String("*#*#")) && input.EndWith(String("#*#*"))) {
         AutoPtr<IUriHelper> helper;
         CUriHelper::AcquireSingleton((IUriHelper**)&helper);
         StringBuilder sb;
         sb += "android_secret_code://";
-        sb += input.substring(4, len - 4);
+        sb += input.Substring(4, len - 4);
         AutoPtr<IUri> uri;
         helper->Parse(sb.ToString(), (IUri**)&uri);
 
@@ -93,7 +134,8 @@ Boolean SpecialCharSequenceMgr::HandleAdnEntry(
     // input.  We want to make sure that sim card contacts are NOT
     // exposed unless the phone is unlocked, and this code can be
     // accessed from the emergency dialer.
-    AutoPtr<IPhoneGlobals> instance = PhoneGlobals::GetInstance();
+    AutoPtr<PhoneGlobals> instance;
+    PhoneGlobals::GetInstance((PhoneGlobals**)&instance);
     AutoPtr<IKeyguardManager> manager;
     instance->GetKeyguardManager((IKeyguardManager**)&manager);
     Boolean res;
@@ -102,10 +144,10 @@ Boolean SpecialCharSequenceMgr::HandleAdnEntry(
     }
 
     Int32 len = input.GetLength();
-    if ((len > 1) && (len < 5) && (input.EndsWith(String("#")))) {
+    if ((len > 1) && (len < 5) && (input.EndWith(String("#")))) {
         //try {
         String subs = input.Substring(0, len - 1);
-        Int32 index = Integer.parseInt(subs);
+        Int32 index = StringUtils::ParseInt32(subs);
         AutoPtr<IIntent> intent;
         CIntent::New(IIntent::ACTION_PICK, (IIntent**)&intent);
 
@@ -129,17 +171,19 @@ Boolean SpecialCharSequenceMgr::HandlePinEntry(
     // TODO: The string constants here should be removed in favor
     // of some call to a static the MmiCode class that determines
     // if a dialstring is an MMI code.
-    if ((input.startsWith("**04") || input.startsWith("**05"))
-            && input.endsWith("#")) {
-        AutoPtr<IPhoneGlobals> app = PhoneGlobals::GetInstance();
-        Boolean isMMIHandled = app.phone->HandlePinMmi(input);
+    if ((input.StartWith("**04") || input.StartWith("**05"))
+            && input.EndWith("#")) {
+        AutoPtr<PhoneGlobals> app;
+        PhoneGlobals::GetInstance((PhoneGlobals**)&app);
+        Boolean isMMIHandled;
+        app->mPhone->HandlePinMmi(input, &isMMIHandled);
 
         // if the PUK code is recognized then indicate to the
         // phone app that an attempt to unPUK the device was
         // made with this activity.  The PUK code may still
         // fail though, but we won't know until the MMI code
         // returns a result.
-        if (isMMIHandled && input.StartsWith("**05")) {
+        if (isMMIHandled && input.StartWith("**05")) {
             app->SetPukEntryActivity(pukInputActivity);
         }
         return isMMIHandled;
@@ -165,24 +209,25 @@ void SpecialCharSequenceMgr::ShowDeviceIdPanel(
     if (DBG) Log(String("showDeviceIdPanel()..."));
 
     AutoPtr<IPhone> phone = PhoneGlobals::GetPhone();
-    Int32 labelId = TelephonyCapabilities::GetDeviceIdLabel(phone);
+    assert(0);
+    Int32 labelId;// = TelephonyCapabilities::GetDeviceIdLabel(phone);
     String deviceId;
     phone->GetDeviceId(&deviceId);
 
     AutoPtr<IAlertDialogBuilder> builder;
-    CAlertDialogBuilder::New((IAlertDialogBuilder**)&builder);
+    CAlertDialogBuilder::New(context, (IAlertDialogBuilder**)&builder);
     builder->SetTitle(labelId);
-    builder->SetMessage(deviceId);
-    builder->SetPositiveButton(R.string.ok, NULL);
+    builder->SetMessage(CoreUtils::Convert(deviceId));
+    builder->SetPositiveButton(R::string::ok, NULL);
     builder->SetCancelable(FALSE);
 
     AutoPtr<IAlertDialog> alert;
     builder->Create((IAlertDialog**)&alert);
 
     AutoPtr<IWindow> window;
-    alert->GetWindow((IWindow**)&window);
+    IDialog::Probe(alert)->GetWindow((IWindow**)&window);
     window->SetType(IWindowManagerLayoutParams::TYPE_PRIORITY_PHONE);
-    alert->Show();
+    IDialog::Probe(alert)->Show();
 }
 
 Boolean SpecialCharSequenceMgr::HandleRegulatoryInfoDisplay(
@@ -196,7 +241,7 @@ Boolean SpecialCharSequenceMgr::HandleRegulatoryInfoDisplay(
         //try {
         ECode ec = context->StartActivity(showRegInfoIntent);
         //} catch (ActivityNotFoundException e) {
-        if (ec == (ECode)ActivityNotFoundException) {
+        if (ec == (ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION) {
             Logger::E(TAG, "startActivity() failed: %d", ec);
         }
         //}

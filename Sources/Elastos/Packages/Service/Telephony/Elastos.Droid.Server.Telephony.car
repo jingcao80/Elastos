@@ -13,9 +13,13 @@ module
     merge("car/elastos/droid/phone/ErrorDialogActivity.car");
     merge("car/elastos/droid/phone/EditPhoneNumberPreference.car");
     merge("car/elastos/droid/phone/InCallScreen.car");
+    merge("car/elastos/droid/phone/EmergencyCallHelper.car");
     merge("car/elastos/droid/phone/TimeConsumingPreferenceActivity.car");
     merge("car/elastos/droid/phone/OutgoingCallBroadcaster.car");
     merge("car/elastos/droid/phone/PhoneGlobals.car");
+    merge("car/elastos/droid/phone/OtaUtils.car");
+    merge("car/elastos/droid/phone/HfaLogic.car");
+    merge("car/elastos/droid/phone/PhoneUtils.car");
 
     merge("car/elastos/droid/phone/settings/AccountSelectionPreference.car");
 
@@ -103,6 +107,27 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
+    }
+
+    class CPhoneGlobalsNotificationBroadcastReceiver {
+        constructor(
+            [in] IPhoneGlobals* host);
+
+        interface IBroadcastReceiver;
+    }
+
+    class CPhoneGlobalsPhoneAppBroadcastReceiver {
+        constructor(
+            [in] IPhoneGlobals* host);
+
+        interface IBroadcastReceiver;
+    }
+
+    class CHfaLogicBroadcastReceiver {
+        constructor(
+            [in] IHfaLogic* host);
+
+        interface IBroadcastReceiver;
     }
 
     } // namespace Phone

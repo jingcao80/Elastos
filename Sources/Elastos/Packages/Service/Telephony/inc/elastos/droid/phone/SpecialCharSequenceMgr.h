@@ -3,6 +3,13 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::Content::IContext;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -29,6 +36,7 @@ namespace Phone {
  * unify these two classes (in the framework? in a common shared library?)
  */
 class SpecialCharSequenceMgr
+    : public Object
 {
 public:
     TO_STRING_IMPL("SpecialCharSequenceMgr");
@@ -135,6 +143,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_SPECIALCHARSEQUENCEMGR_H__

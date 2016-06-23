@@ -3,6 +3,28 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/os/Runnable.h"
+#include "elastos/droid/os/Handler.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Internal.h"
+#include <elastos/core/Object.h>
+#include <elastos/core/Thread.h>
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Media::IRingtone;
+using Elastos::Droid::Media::IAudioAttributes;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::IIPowerManager;
+using Elastos::Droid::Os::IVibrator;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::Handler;
+using Elastos::Core::Object;
+using Elastos::Core::Thread;
 
 namespace Elastos {
 namespace Droid {
@@ -153,11 +175,11 @@ private:
         /* [in] */ const String& msg);
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     static const Boolean DBG;
 
-    static const Int32 PLAY_RING_ONCE;
-    static const Int32 STOP_RING;
+    static const Int32 PLAY_RING_ONCE = 1;
+    static const Int32 STOP_RING = 3;
 
     static const Int32 VIBRATE_LENGTH; // ms
     static const Int32 PAUSE_LENGTH; // ms
@@ -168,24 +190,25 @@ private:
     static AutoPtr<Ringer> sInstance;
 
     // Uri for the ringtone.
-    AutoPtr<IUri> mCustomRingtoneUri = Settings.System.DEFAULT_RINGTONE_URI;
+    AutoPtr<IUri> mCustomRingtoneUri;
 
     AutoPtr<IBluetoothManager> mBluetoothManager;
     AutoPtr<IRingtone> mRingtone;
     AutoPtr<IVibrator> mVibrator;
     AutoPtr<IIPowerManager> mPowerManager;
     /*volatile*/ Boolean mContinueVibrating;
-    AutoPtr<IVibratorThread> mVibratorThread;
+    AutoPtr<VibratorThread> mVibratorThread;
     AutoPtr<IContext> mContext;
-    AutoPtr<IWorker> mRingThread;
+    AutoPtr<Worker> mRingThread;
     AutoPtr<IHandler> mRingHandler;
-    Int64 mFirstRingEventTime = -1;
-    Int64 mFirstRingStartTime = -1;
+    Int64 mFirstRingEventTime;
+    Int64 mFirstRingStartTime;
+
+    static Object mClassLock;
 };
 
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_RINGER_H__

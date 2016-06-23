@@ -1,5 +1,54 @@
 
 #include "elastos/droid/phone/OtaUtils.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/R.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/utility/logging/Logger.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <Elastos.CoreLibrary.Core.h>
+#include "R.h"
+
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::IActivityManagerHelper;
+using Elastos::Droid::App::CActivityManagerHelper;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnKeyListener;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Server::Telephony::R;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IWindow;
+using Elastos::Droid::View::IWindowManagerLayoutParams;
+using Elastos::Droid::Widget::ICheckable;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IInteger32;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -38,16 +87,17 @@ ECode OtaUtils::MyDialogInterfaceOnKeyListener2::OnKey(
 }
 
 CAR_INTERFACE_IMPL(OtaUtils::MyAlertDialogOnClickListener, Object,
-        IAlertDialogOnClickListener)
+        IDialogInterfaceOnClickListener)
 
-OtaUtils::MyAlertDialogOnClickListener::OnClick(
+ECode OtaUtils::MyAlertDialogOnClickListener::OnClick(
     /* [in] */ IDialogInterface* dialog,
     /* [in] */ Int32 which)
 {
-    return OtaSkipActivation();
+    mHost->OtaSkipActivation();
+    return NOERROR;
 }
 
-const String OtaUtils::LOG_TAG("OtaUtils");
+const String OtaUtils::TAG("OtaUtils");
 const Boolean OtaUtils::DBG = FALSE;
 
 const String OtaUtils::OTASP_NUMBER("*228");
@@ -58,6 +108,8 @@ Boolean OtaUtils::sIsWizardMode = TRUE;
 const Int32 OtaUtils::OTA_CALL_LTE_RETRIES_MAX = 5;
 const Int32 OtaUtils::OTA_CALL_LTE_RETRY_PERIOD = 3000;
 Int32 OtaUtils::sOtaCallLteRetries = 0;
+
+CAR_INTERFACE_IMPL(OtaUtils, Object, IOtaUtils)
 
 OtaUtils::OtaUtils()
     : OTA_SPC_TIMEOUT(60)
@@ -72,7 +124,10 @@ ECode OtaUtils::constructor(
     /* [in] */ IBluetoothManager* bluetoothManager)
 {
     if (DBG) Log(String("OtaUtils constructor..."));
-    PhoneGlobals::GetInstance((PhoneGlobals**)&mApplication);
+
+    AutoPtr<PhoneGlobals> globals;
+    PhoneGlobals::GetInstance((PhoneGlobals**)&globals);
+    mApplication = (IPhoneGlobals*)globals;
     mContext = context;
     mInteractive = interactive;
     mBluetoothManager = bluetoothManager;
@@ -92,20 +147,25 @@ ECode OtaUtils::MaybeDoOtaCall(
     PhoneGlobals::GetInstance((PhoneGlobals**)&app);
     AutoPtr<IPhone> phone = app->mPhone;
 
-    if (ActivityManager::IsRunningInTestHarness()) {
-        Logger::I(LOG_TAG, "Don't run provisioning when in test harness");
+    AutoPtr<IActivityManagerHelper> helper;
+    CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
+    Boolean res;
+    helper->IsRunningInTestHarness(&res);
+    if (res) {
+        Logger::I(TAG, "Don't run provisioning when in test harness");
         *result = TRUE;
         return NOERROR;
     }
 
-    if (!TelephonyCapabilities::SupportsOtasp(phone)) {
+    assert(0);
+    //TelephonyCapabilities::SupportsOtasp(phone, &res);
+    if (!res) {
         // Presumably not a CDMA phone.
-        if (DBG) log(String("maybeDoOtaCall: OTASP not supported on this device"));
+        if (DBG) Log(String("maybeDoOtaCall: OTASP not supported on this device"));
         *result = TRUE;  // Nothing to do here.
         return NOERROR;
     }
 
-    Boolean res;
     if (phone->IsMinInfoReady(&res), !res) {
         if (DBG) Log(String("MIN is not ready. Registering to receive notification."));
         phone->RegisterForSubscriptionInfoReady(handler, request, NULL);
@@ -114,18 +174,17 @@ ECode OtaUtils::MaybeDoOtaCall(
     }
     phone->UnregisterForSubscriptionInfoReady(handler);
 
-    Int32 mode;
-    GetLteOnCdmaMode(context, &mode);
-    if (mode == IPhoneConstants::LTE_ON_CDMA_UNKNOWN) {
+    if (GetLteOnCdmaMode(context) == IPhoneConstants::LTE_ON_CDMA_UNKNOWN) {
         if (sOtaCallLteRetries < OTA_CALL_LTE_RETRIES_MAX) {
             if (DBG) Log(String("maybeDoOtaCall: LTE state still unknown: retrying"));
-            handler->SendEmptyMessageDelayed(request, OTA_CALL_LTE_RETRY_PERIOD);
+            Boolean res;
+            handler->SendEmptyMessageDelayed(request, OTA_CALL_LTE_RETRY_PERIOD, &res);
             sOtaCallLteRetries++;
             *result = FALSE;
             return NOERROR;
         }
         else {
-            Logger::W(LOG_TAG, "maybeDoOtaCall: LTE state still unknown: giving up");
+            Logger::W(TAG, "maybeDoOtaCall: LTE state still unknown: giving up");
             *result = TRUE;
             return NOERROR;
         }
@@ -138,18 +197,18 @@ ECode OtaUtils::MaybeDoOtaCall(
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     Int32 otaShowActivationScreen;
-    resources->GetInteger(R.integer.OtaShowActivationScreen, &otaShowActivationScreen);
+    resources->GetInteger(Elastos::Droid::Server::Telephony::R::integer::OtaShowActivationScreen, &otaShowActivationScreen);
     if (DBG) Log(String("otaShowActivationScreen: ") + StringUtils::ToString(otaShowActivationScreen));
 
     // Run the OTASP call in "interactive" mode only if
     // this is a non-LTE "voice capable" device.
-    if (IPhoneGlobals::sVoiceCapable && mode == IPhoneConstants::LTE_ON_CDMA_FALSE) {
+    if (PhoneGlobals::sVoiceCapable && GetLteOnCdmaMode(context) == IPhoneConstants::LTE_ON_CDMA_FALSE) {
         if (phoneNeedsActivation
                 && (otaShowActivationScreen == OTA_SHOW_ACTIVATION_SCREEN_ON)) {
             app->mCdmaOtaProvisionData->mIsOtaCallIntentProcessed = FALSE;
             sIsWizardMode = FALSE;
 
-            if (DBG) Logger::D(LOG_TAG, "==> Starting interactive CDMA provisioning...");
+            if (DBG) Logger::D(TAG, "==> Starting interactive CDMA provisioning...");
             OtaUtils::StartInteractiveOtasp(context);
 
             if (DBG) Log(String("maybeDoOtaCall: voice capable; activation started."));
@@ -168,7 +227,7 @@ ECode OtaUtils::MaybeDoOtaCall(
             //try {
             ECode ec = context->StartActivity(newIntent);
             //} catch (ActivityNotFoundException e) {
-            if (ec == (ECode)ActivityNotFoundException) {
+            if (ec == (ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION) {
                 Loge(String("No activity Handling PERFORM_VOICELESS_CDMA_PROVISIONING!"));
                 *result = FALSE;
                 return NOERROR;
@@ -223,7 +282,8 @@ ECode OtaUtils::StartInteractiveOtasp(
 
     AutoPtr<IIntent> activationScreenIntent;
     CIntent::New((IIntent**)&activationScreenIntent);
-    activationScreenIntent->SetClass(context, InCallScreen.class)
+    assert(0);
+    //activationScreenIntent->SetClass(context, InCallScreen.class)
     activationScreenIntent->SetAction(ACTION_DISPLAY_ACTIVATION_SCREEN);
 
     // Watch out: in the scenario where OTASP gets triggered from the
@@ -238,8 +298,8 @@ ECode OtaUtils::StartInteractiveOtasp(
     OtaUtils::SetupOtaspCall(activationScreenIntent);
 
     // And bring up the InCallScreen...
-    Logger::I(LOG_TAG, "startInteractiveOtasp: launching InCallScreen in 'activate' state: %s"
-          + TO_CSTR(activationScreenIntent));
+    Logger::I(TAG, "startInteractiveOtasp: launching InCallScreen in 'activate' state: %s"
+            , TO_CSTR(activationScreenIntent));
     return context->StartActivity(activationScreenIntent);
 }
 
@@ -255,14 +315,15 @@ ECode OtaUtils::StartNonInteractiveOtasp(
 
     if (app->mOtaUtils != NULL) {
         // An OtaUtils instance already exists, presumably from a previous OTASP call.
-        Logger::I(LOG_TAG, "startNonInteractiveOtasp: "
+        Logger::I(TAG, "startNonInteractiveOtasp: "
                 "OtaUtils already exists; nuking the old one and starting again...");
     }
 
     // Create the OtaUtils instance.
     AutoPtr<IBluetoothManager> manager;
     app->GetBluetoothManager((IBluetoothManager**)&manager);
-    app->mOtaUtils = new OtaUtils(context, FALSE /* non-interactive mode */, manager);
+    app->mOtaUtils = new OtaUtils();
+    app->mOtaUtils->constructor(context, FALSE /* non-interactive mode */, manager);
     if (DBG) Log(String("- created OtaUtils: ") + TO_CSTR(app->mOtaUtils));
 
     // ... and kick off the OTASP call.
@@ -271,23 +332,25 @@ ECode OtaUtils::StartNonInteractiveOtasp(
     // PhoneUtils.placeCall().
     AutoPtr<IPhone> phone = PhoneGlobals::GetPhone();
     String number = OTASP_NUMBER_NON_INTERACTIVE;
-    Logger::I(LOG_TAG, String("startNonInteractiveOtasp: placing call to '") + number + String("'..."));
-    Int32 callStatus = PhoneUtils::PlaceCall(context,
+    Logger::I(TAG, String("startNonInteractiveOtasp: placing call to '") + number + String("'..."));
+    assert(0);
+    Int32 callStatus;/* = PhoneUtils::PlaceCall(context,
             phone,
             number,
             null,   // contactRef
-            FALSE); //isEmergencyCall
+            FALSE);*/ //isEmergencyCall
 
-    if (callStatus == IPhoneUtils::CALL_STATUS_DIALED) {
-        if (DBG) Log(String("  ==> successful return from placeCall(): callStatus = ")
-                + StringUtils::ToString(callStatus));
-    }
-    else {
-        Logger::W(LOG_TAG, "Failure from placeCall() for OTA number '%s': code %d",
-                number.string(), callStatus);
-        *result = callStatus;
-        return NOERROR;
-    }
+    assert(0);
+    // if (callStatus == IPhoneUtils::CALL_STATUS_DIALED) {
+    //     if (DBG) Log(String("  ==> successful return from placeCall(): callStatus = ")
+    //             + StringUtils::ToString(callStatus));
+    // }
+    // else {
+    //     Logger::W(TAG, "Failure from placeCall() for OTA number '%s': code %d",
+    //             number.string(), callStatus);
+    //     *result = callStatus;
+    //     return NOERROR;
+    // }
 
     // TODO: Any other special work to do here?
     // Such as:
@@ -327,7 +390,11 @@ ECode OtaUtils::IsOtaspCallIntent(
         *result = FALSE;
         return NOERROR;
     }
-    if (!TelephonyCapabilities::SupportsOtasp(phone)) {
+
+    Boolean res;
+    assert(0);
+    //TelephonyCapabilities::SupportsOtasp(phone, &res);
+    if (!res) {
         *result = FALSE;
         return NOERROR;
     }
@@ -352,24 +419,25 @@ ECode OtaUtils::IsOtaspCallIntent(
         // throw new IllegalStateException("isOtaspCallIntent: "
         //                                 + "app.cdmaOta* objects(s) not initialized");
         Logger::E("OtaUtils", "isOtaspCallIntent: app.cdmaOta* objects(s) not initialized");
-        return IllegalStateException;
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     // This is an OTASP call iff the number we're trying to dial is one of
     // the magic OTASP numbers.
     String number;
     //try {
-    ECode ec = PhoneUtils::GetInitialNumber(intent, &number);
+    assert(0);
+    //ECode ec = PhoneUtils::GetInitialNumber(intent, &number);
     //} catch (PhoneUtils.VoiceMailNumberMissingException ex) {
-    if (ec == (ECode)PhoneUtils.VoiceMailNumberMissingException) {
-        // This was presumably a "voicemail:" intent, so it's
-        // obviously not an OTASP number.
-        if (DBG) Log(String("isOtaspCallIntent: VoiceMailNumberMissingException => not OTASP"));
-        *result = FALSE;
-        return NOERROR;
-    }
+    assert(0);
+    // if (ec == (ECode)PhoneUtils.VoiceMailNumberMissingException) {
+    //     // This was presumably a "voicemail:" intent, so it's
+    //     // obviously not an OTASP number.
+    //     if (DBG) Log(String("isOtaspCallIntent: VoiceMailNumberMissingException => not OTASP"));
+    //     *result = FALSE;
+    //     return NOERROR;
+    // }
     //}
-    Boolean res;
     phone->IsOtaSpNumber(number, &res);
     if (res) {
         if (DBG) Log(String("isOtaSpNumber: ACTION_CALL to '")
@@ -391,7 +459,7 @@ ECode OtaUtils::SetupOtaspCall(
     if (app->mOtaUtils != NULL) {
         // An OtaUtils instance already exists, presumably from a prior OTASP call.
         // Nuke the old one and start this call with a fresh instance.
-        Logger::I(LOG_TAG, "setupOtaspCall: "
+        Logger::I(TAG, "setupOtaspCall: "
                 "OtaUtils already exists; replacing with new instance...");
     }
 
@@ -400,7 +468,8 @@ ECode OtaUtils::SetupOtaspCall(
     app->GetApplicationContext((IContext**)&context);
     AutoPtr<IBluetoothManager> manager;
     app->GetBluetoothManager((IBluetoothManager**)&manager);
-    app->mOtaUtils = new OtaUtils(context, TRUE /* interactive */, manager);
+    app->mOtaUtils = new OtaUtils();
+    app->mOtaUtils->constructor(context, TRUE /* interactive */, manager);
     if (DBG) Log(String("- created OtaUtils: ") + TO_CSTR(app->mOtaUtils));
 
     // NOTE we still need to call OtaUtils.updateUiWidgets() once the
@@ -417,7 +486,7 @@ ECode OtaUtils::SetupOtaspCall(
     // comes up) to realize that an OTA call is active.
 
     app->mOtaUtils->SetCdmaOtaInCallScreenUiState(
-        OtaUtils.CdmaOtaInCallScreenUiState.State.NORMAL);
+        OtaUtils::CdmaOtaInCallScreenUiState::NORMAL);
 
     // TODO(OTASP): note app.inCallUiState.inCallScreenMode and
     // app.cdmaOtaInCallScreenUiState.state are mostly redundant.  Combine them.
@@ -456,37 +525,51 @@ void OtaUtils::SetSpeaker(
         return;
     }
 
-    if (state == PhoneUtils::IsSpeakerOn(mContext)) {
-        if (DBG) Log(String("no change. returning"));
-        return;
-    }
+    assert(0);
+    // if (state == PhoneUtils::IsSpeakerOn(mContext)) {
+    //     if (DBG) Log(String("no change. returning"));
+    //     return;
+    // }
 
     Boolean res1, res2;
     if (state && (mBluetoothManager->IsBluetoothAvailable(&res1), res1)
             && (mBluetoothManager->IsBluetoothAudioConnected(&res2), res2)) {
         mBluetoothManager->DisconnectBluetoothAudio();
     }
-    PhoneUtils::TurnOnSpeaker(mContext, state, TRUE);
+    assert(0);
+    //PhoneUtils::TurnOnSpeaker(mContext, state, TRUE);
 }
 
 ECode OtaUtils::OnOtaProvisionStatusChanged(
-    /* [in] */ IAsyncResult* r)
+    /* [in] */ AsyncResult* r)
 {
-    AutoPtr<ArrayOf<Int32> > OtaStatus[] = (int[]) r.result;
+    AutoPtr<IArrayOf> OtaStatus = IArrayOf::Probe(r->mResult);
+    AutoPtr<IInterface> obj;
+    OtaStatus->Get(0, (IInterface**)&obj);
+    AutoPtr<IInteger32> value =  IInteger32::Probe(obj);
+    Int32 num;
+    value->GetValue(&num);
+
     if (DBG) Log(String("Provision status event!"));
-    if (DBG) Log("onOtaProvisionStatusChanged(): status = "
-                 + OtaStatus[0] + " ==> " + otaProvisionStatusToString(OtaStatus[0]));
+    if (DBG) {
+        StringBuilder sb;
+        sb += "onOtaProvisionStatusChanged(): status = ";
+        sb += num;
+        sb += OtaProvisionStatusToString(num);
+        Log(sb.ToString());
+    }
 
     // In practice, in a normal successful OTASP call, events come in as follows:
     //   - SPL_UNLOCKED within a couple of seconds after the call starts
     //   - then a delay of around 45 seconds
     //   - then PRL_DOWNLOADED and MDN_DOWNLOADED and COMMITTED within a span of 2 seconds
-
-    switch((*OtaStatus)[0]) {
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    switch(num) {
         case IPhone::CDMA_OTA_PROVISION_STATUS_SPC_RETRIES_EXCEEDED:
             if (DBG) Log(String("onOtaProvisionStatusChanged(): RETRIES EXCEEDED"));
             UpdateOtaspProgress();
-            mApplication.cdmaOtaProvisionData.otaSpcUptime = SystemClock.elapsedRealtime();
+            application->mCdmaOtaProvisionData->mOtaSpcUptime =
+                    SystemClock::GetElapsedRealtime();
             if (mInteractive) {
                 OtaShowSpcErrorNotice(OTA_SPC_TIMEOUT);
             }
@@ -500,9 +583,9 @@ ECode OtaUtils::OnOtaProvisionStatusChanged(
             if (DBG) {
                 Log(String("onOtaProvisionStatusChanged(): DONE, isOtaCallCommitted set to true"));
             }
-            mApplication->mCdmaOtaProvisionData.isOtaCallCommitted = TRUE;
-            if (mApplication->mCdmaOtaScreenState.otaScreenState !=
-                ICdmaOtaScreenStateOtaScreenState_OTA_STATUS_UNDEFINED) {
+            application->mCdmaOtaProvisionData->mIsOtaCallCommitted = TRUE;
+            if (application->mCdmaOtaScreenState->mOtaScreenState !=
+                CdmaOtaScreenState::OTA_STATUS_UNDEFINED) {
                 UpdateOtaspProgress();
             }
 
@@ -519,9 +602,9 @@ ECode OtaUtils::OnOtaProvisionStatusChanged(
         case IPhone::CDMA_OTA_PROVISION_STATUS_OTAPA_STOPPED:
         case IPhone::CDMA_OTA_PROVISION_STATUS_OTAPA_ABORTED:
             // Only update progress when OTA call is in normal state
-            Int32 stae;
+            CdmaOtaInCallScreenUiState::State stae;
             GetCdmaOtaInCallScreenUiState(&stae);
-            if (stae == ICdmaOtaInCallScreenUiStateState_NORMAL) {
+            if (stae == CdmaOtaInCallScreenUiState::NORMAL) {
                 if (DBG) Log(String("onOtaProvisionStatusChanged(): change to ProgressScreen"));
                 UpdateOtaspProgress();
             }
@@ -529,7 +612,7 @@ ECode OtaUtils::OnOtaProvisionStatusChanged(
 
         default:
             if (DBG) Log(String("onOtaProvisionStatusChanged(): Ignoring OtaStatus ")
-                     + StringUtils::ToString((*OtaStatus)[0]));
+                     + StringUtils::ToString(num));
             break;
     }
     return NOERROR;
@@ -550,16 +633,22 @@ ECode OtaUtils::OnOtaspDisconnect()
 
 void OtaUtils::OtaShowHome()
 {
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+
     if (DBG) Log(String("otaShowHome()..."));
-    mApplication->mCdmaOtaScreenState.otaScreenState =
-            CdmaOtaScreenState.OtaScreenState.OTA_STATUS_UNDEFINED;
+    application->mCdmaOtaScreenState->mOtaScreenState =
+            CdmaOtaScreenState::OTA_STATUS_UNDEFINED;
     // mInCallScreen.endInCallScreenSession();
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&intent);
     intent->AddCategory(IIntent::CATEGORY_HOME);
     intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
-    mContext->StartActivityAsUser(intent, IUserHandle::CURRENT);
-    return;
+
+    AutoPtr<IUserHandleHelper> helper;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
+    AutoPtr<IUserHandle> handle;
+    helper->GetCURRENT((IUserHandle**)&handle);
+    mContext->StartActivityAsUser(intent, handle);
 }
 
 void OtaUtils::OtaSkipActivation()
@@ -574,25 +663,27 @@ void OtaUtils::OtaSkipActivation()
 
 void OtaUtils::OtaPerformActivation()
 {
-    if (DBG) Log(Strung("otaPerformActivation()..."));
+    if (DBG) Log(String("otaPerformActivation()..."));
     if (!mInteractive) {
         // We shouldn't ever get here in non-interactive mode!
-        Logger::W(LOG_TAG, "otaPerformActivation: not interactive!");
+        Logger::W(TAG, "otaPerformActivation: not interactive!");
         return;
     }
 
-    if (!mApplication->CdmaOtaProvisionData->mInOtaSpcState) {
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    if (!application->mCdmaOtaProvisionData->mInOtaSpcState) {
         // Place an outgoing call to the special OTASP number:
-        AutoPre<IIntent> newIntent;
+        AutoPtr<IIntent> newIntent;
         CIntent::New(IIntent::ACTION_CALL, (IIntent**)&newIntent);
         AutoPtr<IUriHelper> helper;
         CUriHelper::AcquireSingleton((IUriHelper**)&helper);
         AutoPtr<IUri> uri;
-        helper->FromParts(IPhoneAccount::SCHEME_TEL, OTASP_NUMBER, NULL, (IUri**)&uri);
+        helper->FromParts(IPhoneAccount::SCHEME_TEL, OTASP_NUMBER, String(NULL), (IUri**)&uri);
         newIntent->SetData(uri);
 
         // Initiate the outgoing call:
-        mApplication->mCallController->PlaceCall(newIntent);
+        assert(0);
+        //application->mCallController->PlaceCall(newIntent);
 
         // ...and get the OTASP-specific UI into the right state.
         OtaShowListeningScreen();
@@ -604,18 +695,23 @@ void OtaUtils::OtaPerformActivation()
 ECode OtaUtils::OtaShowActivateScreen()
 {
     if (DBG) Log(String("otaShowActivateScreen()..."));
-    if (mApplication->mCdmaOtaConfigData.otaShowActivationScreen
-            == OTA_SHOW_ACTIVATION_SCREEN_ON) {
+
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    if (application->mCdmaOtaConfigData->mOtaShowActivationScreen
+            == IOtaUtils::OTA_SHOW_ACTIVATION_SCREEN_ON) {
         if (DBG) Log(String("otaShowActivateScreen(): show activation screen"));
-        if (!IsDialerOpened()) {
+
+        Boolean res;
+        IsDialerOpened(&res);
+        if (!res) {
             OtaScreenInitialize();
-            mOtaWidgetData->mOtaSkipButton->SetVisibility(sIsWizardMode ?
+            IView::Probe(mOtaWidgetData->mOtaSkipButton)->SetVisibility(sIsWizardMode ?
                     IView::VISIBLE : IView::INVISIBLE);
-            mOtaWidgetData->mOtaTextActivate->SetVisibility(IView::VISIBLE);
-            mOtaWidgetData->mCallCardOtaButtonsActivate->SetVisibility(IView::VISIBLE);
+            IView::Probe(mOtaWidgetData->mOtaTextActivate)->SetVisibility(IView::VISIBLE);
+            IView::Probe(mOtaWidgetData->mCallCardOtaButtonsActivate)->SetVisibility(IView::VISIBLE);
         }
-        mApplication->mCdmaOtaScreenState.otaScreenState =
-                ICdmaOtaScreenStateOtaScreenState_OTA_STATUS_ACTIVATION;
+        application->mCdmaOtaScreenState->mOtaScreenState =
+                CdmaOtaScreenState::OTA_STATUS_ACTIVATION;
     }
     else {
         if (DBG) Log(String("otaShowActivateScreen(): show home screen"));
@@ -629,28 +725,33 @@ void OtaUtils::OtaShowListeningScreen()
     if (DBG) Log(String("otaShowListeningScreen()..."));
     if (!mInteractive) {
         // We shouldn't ever get here in non-interactive mode!
-        Logger::W(LOG_TAG, "otaShowListeningScreen: not interactive!");
+        Logger::W(TAG, "otaShowListeningScreen: not interactive!");
         return;
     }
 
-    if (mApplication->mCdmaOtaConfigData.otaShowListeningScreen
-            == OTA_SHOW_LISTENING_SCREEN_ON) {
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    if (application->mCdmaOtaConfigData->mOtaShowListeningScreen
+            == IOtaUtils::OTA_SHOW_LISTENING_SCREEN_ON) {
         if (DBG) Log(String("otaShowListeningScreen(): show listening screen"));
-        if (!IsDialerOpened()) {
+
+        Boolean res;
+        IsDialerOpened(&res);
+        if (!res) {
             OtaScreenInitialize();
-            mOtaWidgetData->mOtaTextListenProgress->SetVisibility(IView::VISIBLE);
-            mOtaWidgetData->mOtaTextListenProgress->SetText(R.string.ota_listen);
+            IView::Probe(mOtaWidgetData->mOtaTextListenProgress)->SetVisibility(IView::VISIBLE);
+            mOtaWidgetData->mOtaTextListenProgress->SetText(Elastos::Droid::Server::Telephony::R::string::ota_listen);
             // mOtaWidgetData.otaDtmfDialerView.setVisibility(View.VISIBLE);
-            mOtaWidgetData->mCallCardOtaButtonsListenProgress->SetVisibility(IView::VISIBLE);
-            mOtaWidgetData->mOtaSpeakerButton->SetVisibility(IView::VISIBLE);
-            Boolean speakerOn = PhoneUtils::IsSpeakerOn(mContext);
-            mOtaWidgetData->mOtaSpeakerButton->SetChecked(speakerOn);
+            IView::Probe(mOtaWidgetData->mCallCardOtaButtonsListenProgress)->SetVisibility(IView::VISIBLE);
+            IView::Probe(mOtaWidgetData->mOtaSpeakerButton)->SetVisibility(IView::VISIBLE);
+            assert(0);
+            Boolean speakerOn;// = PhoneUtils::IsSpeakerOn(mContext);
+            ICheckable::Probe(mOtaWidgetData->mOtaSpeakerButton)->SetChecked(speakerOn);
         }
-        mApplication->mCdmaOtaScreenState.otaScreenState =
-                CdmaOtaScreenState.OtaScreenState.OTA_STATUS_LISTENING;
+        application->mCdmaOtaScreenState->mOtaScreenState =
+                CdmaOtaScreenState::OTA_STATUS_LISTENING;
     }
     else {
-        if (DBG) Log("otaShowListeningScreen(): show progress screen");
+        if (DBG) Log(String("otaShowListeningScreen(): show progress screen"));
         OtaShowInProgressScreen();
     }
 }
@@ -684,11 +785,11 @@ void OtaUtils::UpdateNonInteractiveOtaSuccessFailure()
     // This is basically the same logic as otaShowSuccessFailure(): we
     // check the isOtaCallCommitted bit, and if that's true it means
     // that activation was successful.
-
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
     if (DBG) Log(String("updateNonInteractiveOtaSuccessFailure(): isOtaCallCommitted = ")
-                 + mApplication.cdmaOtaProvisionData.isOtaCallCommitted);
+                 + StringUtils::ToString(application->mCdmaOtaProvisionData->mIsOtaCallCommitted));
     Int32 resultCode =
-            mApplication->mCdmaOtaProvisionData->mIsOtaCallCommitted
+            application->mCdmaOtaProvisionData->mIsOtaCallCommitted
             ? OTASP_SUCCESS : OTASP_FAILURE;
     SendOtaspResult(resultCode);
 }
@@ -713,27 +814,28 @@ void OtaUtils::SendOtaspResult(
     // intent will get merged with any extras already present in
     // cdmaOtaScreenState.otaspResultCodePendingIntent.
 
-    if (mApplication->mCdmaOtaScreenState == NULL) {
-        Logger::E(LOG_TAG, "updateNonInteractiveOtaSuccessFailure: no cdmaOtaScreenState object!");
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    if (application->mCdmaOtaScreenState == NULL) {
+        Logger::E(TAG, "updateNonInteractiveOtaSuccessFailure: no cdmaOtaScreenState object!");
         return;
     }
-    if (mApplication->mCdmaOtaScreenState.otaspResultCodePendingIntent == null) {
-        Logger::w(LOG_TAG, "updateNonInteractiveOtaSuccessFailure: "
-              + "null otaspResultCodePendingIntent!");
+    if (application->mCdmaOtaScreenState->mOtaspResultCodePendingIntent == NULL) {
+        Logger::W(TAG, "updateNonInteractiveOtaSuccessFailure: "
+                "null otaspResultCodePendingIntent!");
         return;
     }
 
     //try {
     if (DBG) Log(String("- sendOtaspResult:  SENDING PENDING INTENT: ") +
-                 mApplication->mCdmaOtaScreenState.otaspResultCodePendingIntent);
-    ECode ec = mApplication->mCdmaOtaScreenState.otaspResultCodePendingIntent->Send(
+            TO_CSTR(application->mCdmaOtaScreenState->mOtaspResultCodePendingIntent));
+    ECode ec = application->mCdmaOtaScreenState->mOtaspResultCodePendingIntent->Send(
             mContext,
             0, /* resultCode (unused) */
             extraStuff);
     //} catch (CanceledException e) {
-    if (ec == (ECode)CanceledException) {
+    if (ec == (ECode)E_CANCELED_EXCEPTION) {
         // should never happen because no code cancels the pending intent right now,
-        Logger::E(LOG_TAG, "PendingIntent send() failed: %d", ec);
+        Logger::E(TAG, "PendingIntent send() failed: %d", ec);
     }
     //}
 }
@@ -743,15 +845,15 @@ void OtaUtils::OtaShowInProgressScreen()
     if (DBG) Log(String("otaShowInProgressScreen()..."));
     if (!mInteractive) {
         // We shouldn't ever get here in non-interactive mode!
-        Logger::W(LOG_TAG, "otaShowInProgressScreen: not interactive!");
+        Logger::W(TAG, "otaShowInProgressScreen: not interactive!");
         return;
     }
 
-    mApplication->mCdmaOtaScreenState.otaScreenState =
-        CdmaOtaScreenState.OtaScreenState.OTA_STATUS_PROGRESS;
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    application->mCdmaOtaScreenState->mOtaScreenState = CdmaOtaScreenState::OTA_STATUS_PROGRESS;
 
     if ((mOtaWidgetData == NULL) /* || (mInCallScreen == null) */) {
-        Logger::W(LOG_TAG, "otaShowInProgressScreen: UI widgets not set up yet!");
+        Logger::W(TAG, "otaShowInProgressScreen: UI widgets not set up yet!");
 
         // TODO(OTASP): our CdmaOtaScreenState is now correct; we just set
         // it to OTA_STATUS_PROGRESS.  But we still need to make sure that
@@ -760,15 +862,18 @@ void OtaUtils::OtaShowInProgressScreen()
         return;
     }
 
-    if (!IsDialerOpened()) {
+    Boolean res;
+    IsDialerOpened(&res);
+    if (!res) {
         OtaScreenInitialize();
-        mOtaWidgetData->mOtaTextListenProgress->SetVisibility(IView::VISIBLE);
-        mOtaWidgetData->mOtaTextListenProgress->SetText(R.string.ota_progress);
-        mOtaWidgetData->mOtaTextProgressBar->SetVisibility(IView::VISIBLE);
-        mOtaWidgetData->mCallCardOtaButtonsListenProgress->SetVisibility(IView::VISIBLE);
-        mOtaWidgetData->mOtaSpeakerButton->SetVisibility(IView::VISIBLE);
-        Boolean speakerOn = PhoneUtils::IsSpeakerOn(mContext);
-        mOtaWidgetData->mOtaSpeakerButton->SetChecked(speakerOn);
+        IView::Probe(mOtaWidgetData->mOtaTextListenProgress)->SetVisibility(IView::VISIBLE);
+        mOtaWidgetData->mOtaTextListenProgress->SetText(Elastos::Droid::Server::Telephony::R::string::ota_progress);
+        IView::Probe(mOtaWidgetData->mOtaTextProgressBar)->SetVisibility(IView::VISIBLE);
+        IView::Probe(mOtaWidgetData->mCallCardOtaButtonsListenProgress)->SetVisibility(IView::VISIBLE);
+        IView::Probe(mOtaWidgetData->mOtaSpeakerButton)->SetVisibility(IView::VISIBLE);
+        assert(0);
+        Boolean speakerOn;// = PhoneUtils::IsSpeakerOn(mContext);
+        ICheckable::Probe(mOtaWidgetData->mOtaSpeakerButton)->SetChecked(speakerOn);
     }
 }
 
@@ -776,13 +881,15 @@ void OtaUtils::OtaShowProgramFailure(
         /* [in] */ Int32 length)
 {
     if (DBG) Log(String("otaShowProgramFailure()..."));
-    mApplication->mCdmaOtaProvisionData.activationCount++;
-    if ((mApplication->mCdmaOtaProvisionData.activationCount <
-            mApplication->mCdmaOtaConfigData.otaShowActivateFailTimes)
-            && (mApplication->mCdmaOtaConfigData.otaShowActivationScreen ==
-            OTA_SHOW_ACTIVATION_SCREEN_ON)) {
+
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    application->mCdmaOtaProvisionData->mActivationCount++;
+    if ((application->mCdmaOtaProvisionData->mActivationCount <
+            application->mCdmaOtaConfigData->mOtaShowActivateFailTimes)
+            && (application->mCdmaOtaConfigData->mOtaShowActivationScreen ==
+            IOtaUtils::OTA_SHOW_ACTIVATION_SCREEN_ON)) {
         if (DBG) Log(String("otaShowProgramFailure(): activationCount")
-                + mApplication.cdmaOtaProvisionData.activationCount);
+                + StringUtils::ToString(application->mCdmaOtaProvisionData->mActivationCount));
         if (DBG) Log(String("otaShowProgramFailure(): show failure notice"));
         OtaShowProgramFailureNotice(length);
     }
@@ -797,14 +904,15 @@ ECode OtaUtils::OtaShowSuccessFailure()
     if (DBG) Log(String("otaShowSuccessFailure()..."));
     if (!mInteractive) {
         // We shouldn't ever get here in non-interactive mode!
-        Logger::W(LOG_TAG, "otaShowSuccessFailure: not interactive!");
+        Logger::W(TAG, "otaShowSuccessFailure: not interactive!");
         return NOERROR;
     }
 
     OtaScreenInitialize();
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
     if (DBG) Log(String("otaShowSuccessFailure(): isOtaCallCommitted")
-            + mApplication.cdmaOtaProvisionData.isOtaCallCommitted);
-    if (mApplication.cdmaOtaProvisionData.isOtaCallCommitted) {
+            + StringUtils::ToString(application->mCdmaOtaProvisionData->mIsOtaCallCommitted));
+    if (application->mCdmaOtaProvisionData->mIsOtaCallCommitted) {
         if (DBG) Log(String("otaShowSuccessFailure(), show success dialog"));
         OtaShowProgramSuccessDialog();
     }
@@ -818,13 +926,15 @@ ECode OtaUtils::OtaShowSuccessFailure()
 void OtaUtils::OtaShowProgramFailureDialog()
 {
     if (DBG) Log(String("otaShowProgramFailureDialog()..."));
-    mApplication->mCdmaOtaScreenState->mOtaScreenState =
-            ICdmaOtaScreenStateOtaScreenState_OTA_STATUS_SUCCESS_FAILURE_DLG;
-    mOtaWidgetData->mOtaTitle->SetText(R.string.ota_title_problem_with_activation);
-    mOtaWidgetData->mOtaTextSuccessFail->SetVisibility(IView::VISIBLE);
-    mOtaWidgetData->mOtaTextSuccessFail->SetText(R.string.ota_unsuccessful);
-    mOtaWidgetData->mCallCardOtaButtonsFailSuccess->SetVisibility(IView::VISIBLE);
-    mOtaWidgetData->mOtaTryAgainButton->SetVisibility(IView::VISIBLE);
+
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    application->mCdmaOtaScreenState->mOtaScreenState =
+            CdmaOtaScreenState::OTA_STATUS_SUCCESS_FAILURE_DLG;
+    mOtaWidgetData->mOtaTitle->SetText(Elastos::Droid::Server::Telephony::R::string::ota_title_problem_with_activation);
+    IView::Probe(mOtaWidgetData->mOtaTextSuccessFail)->SetVisibility(IView::VISIBLE);
+    mOtaWidgetData->mOtaTextSuccessFail->SetText(Elastos::Droid::Server::Telephony::R::string::ota_unsuccessful);
+    IView::Probe(mOtaWidgetData->mCallCardOtaButtonsFailSuccess)->SetVisibility(IView::VISIBLE);
+    IView::Probe(mOtaWidgetData->mOtaTryAgainButton)->SetVisibility(IView::VISIBLE);
     //close the dialer if open
     // if (isDialerOpened()) {
     //     mOtaCallCardDtmfDialer.closeDialer(false);
@@ -835,13 +945,15 @@ void OtaUtils::OtaShowProgramFailureDialog()
 void OtaUtils::OtaShowProgramSuccessDialog()
 {
     if (DBG) Log(String("otaShowProgramSuccessDialog()..."));
-    mApplication->mCdmaOtaScreenState->mOtaScreenState =
-            ICdmaOtaScreenStateOtaScreenState_OTA_STATUS_SUCCESS_FAILURE_DLG;
-    mOtaWidgetData->mOtaTitle->SetText(R.string.ota_title_activate_success);
-    mOtaWidgetData->mOtaTextSuccessFail->SetVisibility(IView::VISIBLE);
-    mOtaWidgetData->mOtaTextSuccessFail->SetText(R.string.ota_successful);
-    mOtaWidgetData->mCallCardOtaButtonsFailSuccess->SetVisibility(IView::VISIBLE);
-    mOtaWidgetData->mOtaNextButton->SetVisibility(IView::VISIBLE);
+
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    application->mCdmaOtaScreenState->mOtaScreenState =
+            CdmaOtaScreenState::OTA_STATUS_SUCCESS_FAILURE_DLG;
+    mOtaWidgetData->mOtaTitle->SetText(Elastos::Droid::Server::Telephony::R::string::ota_title_activate_success);
+    IView::Probe(mOtaWidgetData->mOtaTextSuccessFail)->SetVisibility(IView::VISIBLE);
+    mOtaWidgetData->mOtaTextSuccessFail->SetText(Elastos::Droid::Server::Telephony::R::string::ota_successful);
+    IView::Probe(mOtaWidgetData->mCallCardOtaButtonsFailSuccess)->SetVisibility(IView::VISIBLE);
+    IView::Probe(mOtaWidgetData->mOtaNextButton)->SetVisibility(IView::VISIBLE);
     //close the dialer if open
     // if (isDialerOpened()) {
     //     mOtaCallCardDtmfDialer.closeDialer(false);
@@ -853,20 +965,21 @@ void OtaUtils::OtaShowSpcErrorNotice(
 {
     if (DBG) Log(String("otaShowSpcErrorNotice()..."));
     if (mOtaWidgetData->mSpcErrorDialog == NULL) {
-        mApplication->mCdmaOtaProvisionData->mInOtaSpcState = TRUE;
-        AutoPtr<IDialogInterfaceOnKeyListener> keyListener = MyDialogInterfaceOnKeyListener();
+        AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+        application->mCdmaOtaProvisionData->mInOtaSpcState = TRUE;
+        AutoPtr<IDialogInterfaceOnKeyListener> keyListener = new MyDialogInterfaceOnKeyListener();
 
         AutoPtr<IAlertDialogBuilder> builder;
         CAlertDialogBuilder::New(NULL /* mInCallScreen */, (IAlertDialogBuilder**)&builder);
-        builder->SetMessage(R.string.ota_spc_failure);
+        builder->SetMessage(Elastos::Droid::Server::Telephony::R::string::ota_spc_failure);
         builder->SetOnKeyListener(keyListener);
         builder->Create((IAlertDialog**)&(mOtaWidgetData->mSpcErrorDialog));
         AutoPtr<IWindow> window;
-        mOtaWidgetData->mSpcErrorDialog->GetWindow((IWindow**)&window);
+        IDialog::Probe(mOtaWidgetData->mSpcErrorDialog)->GetWindow((IWindow**)&window);
         window->AddFlags(
                 IWindowManagerLayoutParams::FLAG_NOT_TOUCHABLE
                 | IWindowManagerLayoutParams::FLAG_KEEP_SCREEN_ON);
-        mOtaWidgetData->mSpcErrorDialog->Show();
+        IDialog::Probe(mOtaWidgetData->mSpcErrorDialog)->Show();
         //close the dialer if open
         // if (isDialerOpened()) {
         //     mOtaCallCardDtmfDialer.closeDialer(false);
@@ -896,17 +1009,17 @@ void OtaUtils::OtaShowProgramFailureNotice(
 
         AutoPtr<IAlertDialogBuilder> builder;
         CAlertDialogBuilder::New(NULL /* mInCallScreen */, (IAlertDialogBuilder**)&builder);
-        builder->SetMessage(R.string.ota_failure)
+        builder->SetMessage(Elastos::Droid::Server::Telephony::R::string::ota_failure);
         builder->Create((IAlertDialog**)&(mOtaWidgetData->mOtaFailureDialog));
 
         AutoPtr<IWindow> window;
-        mOtaWidgetData->mOtaFailureDialog->GetWindow((IWindow**)*window);
+        IDialog::Probe(mOtaWidgetData->mOtaFailureDialog)->GetWindow((IWindow**)&window);
         window->AddFlags(
                 IWindowManagerLayoutParams::FLAG_NOT_TOUCHABLE
                 | IWindowManagerLayoutParams::FLAG_KEEP_SCREEN_ON);
-        mOtaWidgetData->mOtaFailureDialog->Show();
+        IDialog::Probe(mOtaWidgetData->mOtaFailureDialog)->Show();
 
-        Int64 noticeTime = length * 1000;
+        //Int64 noticeTime = length * 1000;
         // mInCallScreen.requestCloseOtaFailureNotice(noticeTime);
     }
 }
@@ -915,7 +1028,7 @@ ECode OtaUtils::OnOtaCloseFailureNotice()
 {
     if (DBG) Log(String("onOtaCloseFailureNotice()..."));
     if (mOtaWidgetData->mOtaFailureDialog != NULL) {
-        mOtaWidgetData->mOtaFailureDialog->Dismiss();
+        IDialogInterface::Probe(mOtaWidgetData->mOtaFailureDialog)->Dismiss();
         mOtaWidgetData->mOtaFailureDialog = NULL;
     }
     OtaShowActivateScreen();
@@ -929,7 +1042,7 @@ void OtaUtils::OtaScreenInitialize()
     if (!mInteractive) {
         // We should never be doing anything with UI elements in
         // non-interactive mode.
-        Logger::W(LOG_TAG, "otaScreenInitialize: not interactive!");
+        Logger::W(TAG, "otaScreenInitialize: not interactive!");
         return;
     }
 
@@ -940,30 +1053,30 @@ void OtaUtils::OtaScreenInitialize()
     //     mCallCard.hideCallCardElements();
     // }
 
-    mOtaWidgetData->mOtaTitle->SetText(R.string.ota_title_activate);
-    mOtaWidgetData->mOtaTextActivate->SetVisibility(IView::GONE);
-    mOtaWidgetData->mOtaTextListenProgress->SetVisibility(IView::GONE);
-    mOtaWidgetData->mOtaTextProgressBar->SetVisibility(IView::GONE);
-    mOtaWidgetData->mOtaTextSuccessFail->SetVisibility(IView::GONE);
-    mOtaWidgetData->mCallCardOtaButtonsActivate->SetVisibility(IView::GONE);
-    mOtaWidgetData->mCallCardOtaButtonsListenProgress->SetVisibility(IView::GONE);
-    mOtaWidgetData->mCallCardOtaButtonsFailSuccess->SetVisibility(IView::GONE);
+    mOtaWidgetData->mOtaTitle->SetText(Elastos::Droid::Server::Telephony::R::string::ota_title_activate);
+    IView::Probe(mOtaWidgetData->mOtaTextActivate)->SetVisibility(IView::GONE);
+    IView::Probe(mOtaWidgetData->mOtaTextListenProgress)->SetVisibility(IView::GONE);
+    IView::Probe(mOtaWidgetData->mOtaTextProgressBar)->SetVisibility(IView::GONE);
+    IView::Probe(mOtaWidgetData->mOtaTextSuccessFail)->SetVisibility(IView::GONE);
+    IView::Probe(mOtaWidgetData->mCallCardOtaButtonsActivate)->SetVisibility(IView::GONE);
+    IView::Probe(mOtaWidgetData->mCallCardOtaButtonsListenProgress)->SetVisibility(IView::GONE);
+    IView::Probe(mOtaWidgetData->mCallCardOtaButtonsFailSuccess)->SetVisibility(IView::GONE);
     // mOtaWidgetData.otaDtmfDialerView.setVisibility(View.GONE);
-    mOtaWidgetData->mOtaSpeakerButton->SetVisibility(IView::GONE);
-    mOtaWidgetData->mOtaTryAgainButton->SetVisibility(IView::GONE);
-    mOtaWidgetData->mOtaNextButton->SetVisibility(IView::GONE);
-    mOtaWidgetData->mOtaUpperWidgets->SetVisibility(IView::VISIBLE);
-    mOtaWidgetData->mOtaSkipButton->SetVisibility(IView::VISIBLE);
+    IView::Probe(mOtaWidgetData->mOtaSpeakerButton)->SetVisibility(IView::GONE);
+    IView::Probe(mOtaWidgetData->mOtaTryAgainButton)->SetVisibility(IView::GONE);
+    IView::Probe(mOtaWidgetData->mOtaNextButton)->SetVisibility(IView::GONE);
+    IView::Probe(mOtaWidgetData->mOtaUpperWidgets)->SetVisibility(IView::VISIBLE);
+    IView::Probe(mOtaWidgetData->mOtaSkipButton)->SetVisibility(IView::VISIBLE);
 }
 
 ECode OtaUtils::HideOtaScreen()
 {
     if (DBG) Log(String("hideOtaScreen()..."));
 
-    mOtaWidgetData->mCallCardOtaButtonsActivate->SetVisibility(IView::GONE);
-    mOtaWidgetData->mCallCardOtaButtonsListenProgress->SetVisibility(IView::GONE);
-    mOtaWidgetData->mCallCardOtaButtonsFailSuccess->SetVisibility(IView::GONE);
-    return mOtaWidgetData->mOtaUpperWidgets->SetVisibility(IView::GONE);
+    IView::Probe(mOtaWidgetData->mCallCardOtaButtonsActivate)->SetVisibility(IView::GONE);
+    IView::Probe(mOtaWidgetData->mCallCardOtaButtonsListenProgress)->SetVisibility(IView::GONE);
+    IView::Probe(mOtaWidgetData->mCallCardOtaButtonsFailSuccess)->SetVisibility(IView::GONE);
+    return IView::Probe(mOtaWidgetData->mOtaUpperWidgets)->SetVisibility(IView::GONE);
 }
 
 ECode OtaUtils::IsDialerOpened(
@@ -983,7 +1096,7 @@ ECode OtaUtils::OtaShowProperScreen()
     if (DBG) Log(String("otaShowProperScreen()..."));
     if (!mInteractive) {
         // We shouldn't ever get here in non-interactive mode!
-        Logger::W(LOG_TAG, "otaShowProperScreen: not interactive!");
+        Logger::W(TAG, "otaShowProperScreen: not interactive!");
         return NOERROR;
     }
 
@@ -1016,66 +1129,68 @@ ECode OtaUtils::OtaShowProperScreen()
 
 void OtaUtils::ReadXmlSettings()
 {
-    if (DBG) log("readXmlSettings()...");
-    if (mApplication->mCdmaOtaConfigData->mConfigComplete) {
+    if (DBG) Log(String("readXmlSettings()..."));
+
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    if (application->mCdmaOtaConfigData->mConfigComplete) {
         return;
     }
 
-    mApplication->mCdmaOtaConfigData->mConfigComplete = TRUE;
+    application->mCdmaOtaConfigData->mConfigComplete = TRUE;
 
     AutoPtr<IResources> resources;
     mContext->GetResources((IResources**)&resources);
 
     Int32 tmpOtaShowActivationScreen;
-    resources->GetInteger(R.integer.OtaShowActivationScreen, &tmpOtaShowActivationScreen);
-    mApplication->mCdmaOtaConfigData->mOtaShowActivationScreen = tmpOtaShowActivationScreen;
+    resources->GetInteger(Elastos::Droid::Server::Telephony::R::integer::OtaShowActivationScreen, &tmpOtaShowActivationScreen);
+    application->mCdmaOtaConfigData->mOtaShowActivationScreen = tmpOtaShowActivationScreen;
     if (DBG) Log(String("readXmlSettings(), otaShowActivationScreen = ")
-            + mApplication->mCdmaOtaConfigData->mOtaShowActivationScreen);
+            + StringUtils::ToString(application->mCdmaOtaConfigData->mOtaShowActivationScreen));
 
     Int32 tmpOtaShowListeningScreen;
-    resources->GetInteger(R.integer.OtaShowListeningScreen, &tmpOtaShowListeningScreen);
-    mApplication->mCdmaOtaConfigData->mOtaShowListeningScreen = tmpOtaShowListeningScreen;
+    resources->GetInteger(Elastos::Droid::Server::Telephony::R::integer::OtaShowListeningScreen, &tmpOtaShowListeningScreen);
+    application->mCdmaOtaConfigData->mOtaShowListeningScreen = tmpOtaShowListeningScreen;
     if (DBG) Log(String("readXmlSettings(), otaShowListeningScreen = ")
-            + mApplication->mCdmaOtaConfigData->mOtaShowListeningScreen);
+            + StringUtils::ToString(application->mCdmaOtaConfigData->mOtaShowListeningScreen));
 
     Int32 tmpOtaShowActivateFailTimes;
-    resources->GetInteger(R.integer.OtaShowActivateFailTimes, &tmpOtaShowActivateFailTimes);
-    mApplication->mCdmaOtaConfigData->mOtaShowActivateFailTimes = tmpOtaShowActivateFailTimes;
+    resources->GetInteger(Elastos::Droid::Server::Telephony::R::integer::OtaShowActivateFailTimes, &tmpOtaShowActivateFailTimes);
+    application->mCdmaOtaConfigData->mOtaShowActivateFailTimes = tmpOtaShowActivateFailTimes;
     if (DBG) Log(String("readXmlSettings(), otaShowActivateFailTimes = ")
-            + mApplication->mCdmaOtaConfigData->mOtaShowActivateFailTimes);
+            + StringUtils::ToString(application->mCdmaOtaConfigData->mOtaShowActivateFailTimes));
 
     Int32 tmpOtaPlaySuccessFailureTone;
-    resources->GetInteger(R.integer.OtaPlaySuccessFailureTone, &tmpOtaPlaySuccessFailureTone);
-    mApplication->mCdmaOtaConfigData->mOtaPlaySuccessFailureTone = tmpOtaPlaySuccessFailureTone;
+    resources->GetInteger(Elastos::Droid::Server::Telephony::R::integer::OtaPlaySuccessFailureTone, &tmpOtaPlaySuccessFailureTone);
+    application->mCdmaOtaConfigData->mOtaPlaySuccessFailureTone = tmpOtaPlaySuccessFailureTone;
     if (DBG) Log(String("readXmlSettings(), otaPlaySuccessFailureTone = ")
-            + mApplication->mCdmaOtaConfigData->mOtaPlaySuccessFailureTone);
+            + StringUtils::ToString(application->mCdmaOtaConfigData->mOtaPlaySuccessFailureTone));
 }
 
 ECode OtaUtils::OnClickHandler(
     /* [in] */ Int32 id)
 {
     switch (id) {
-        case R.id.otaEndButton:
+        case Elastos::Droid::Server::Telephony::R::id::otaEndButton:
             OnClickOtaEndButton();
             break;
 
-        case R.id.otaSpeakerButton:
+        case Elastos::Droid::Server::Telephony::R::id::otaSpeakerButton:
             OnClickOtaSpeakerButton();
             break;
 
-        case R.id.otaActivateButton:
+        case Elastos::Droid::Server::Telephony::R::id::otaActivateButton:
             OnClickOtaActivateButton();
             break;
 
-        case R.id.otaSkipButton:
+        case Elastos::Droid::Server::Telephony::R::id::otaSkipButton:
             OnClickOtaActivateSkipButton();
             break;
 
-        case R.id.otaNextButton:
+        case Elastos::Droid::Server::Telephony::R::id::otaNextButton:
             OnClickOtaActivateNextButton();
             break;
 
-        case R.id.otaTryAgainButton:
+        case Elastos::Droid::Server::Telephony::R::id::otaTryAgainButton:
             OnClickOtaTryAgainButton();
             break;
 
@@ -1089,7 +1204,9 @@ ECode OtaUtils::OnClickHandler(
 void OtaUtils::OnClickOtaTryAgainButton()
 {
     if (DBG) Log(String("Activation Try Again Clicked!"));
-    if (!mApplication->mCdmaOtaProvisionData->mInOtaSpcState) {
+
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    if (!application->mCdmaOtaProvisionData->mInOtaSpcState) {
         OtaShowActivateScreen();
     }
 }
@@ -1097,22 +1214,28 @@ void OtaUtils::OnClickOtaTryAgainButton()
 void OtaUtils::OnClickOtaEndButton()
 {
     if (DBG) Log(String("Activation End Call Button Clicked!"));
-    if (!mApplication->mCdmaOtaProvisionData->mInOtaSpcState) {
-        if (PhoneUtils::Hangup(mApplication->mCM) == FALSE) {
-            // If something went wrong when placing the OTA call,
-            // the screen is not updated by the call disconnect
-            // handler and we have to do it here
-            SetSpeaker(FALSE);
-            // mInCallScreen.handleOtaCallEnd();
-        }
+
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    if (!application->mCdmaOtaProvisionData->mInOtaSpcState) {
+        assert(0);
+        // if (PhoneUtils::Hangup(mApplication->mCM) == FALSE) {
+        //     // If something went wrong when placing the OTA call,
+        //     // the screen is not updated by the call disconnect
+        //     // handler and we have to do it here
+        //     SetSpeaker(FALSE);
+        //     // mInCallScreen.handleOtaCallEnd();
+        // }
     }
 }
 
 void OtaUtils::OnClickOtaSpeakerButton()
 {
-    if (DBG) log(String("OTA Speaker button Clicked!"));
-    if (!mApplication->mCdmaOtaProvisionData->mInOtaSpcState) {
-        Boolean isChecked = !PhoneUtils::IsSpeakerOn(mContext);
+    if (DBG) Log(String("OTA Speaker button Clicked!"));
+
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    if (!application->mCdmaOtaProvisionData->mInOtaSpcState) {
+        assert(0);
+        Boolean isChecked;// = !PhoneUtils::IsSpeakerOn(mContext);
         SetSpeaker(isChecked);
     }
 }
@@ -1126,34 +1249,36 @@ void OtaUtils::OnClickOtaActivateButton()
 void OtaUtils::OnClickOtaActivateSkipButton()
 {
     if (DBG) Log(String("Activation Skip Clicked!"));
-    AutoPtr<IDialogInterfaceOnKeyListener> keyListener = MyDialogInterfaceOnKeyListener2();
+    AutoPtr<IDialogInterfaceOnKeyListener> keyListener = new MyDialogInterfaceOnKeyListener2();
 
     AutoPtr<IAlertDialogBuilder> builder;
     CAlertDialogBuilder::New(NULL /* mInCallScreen */, (IAlertDialogBuilder**)&builder);
-    builder->SetTitle(R.string.ota_skip_activation_dialog_title);
-    builder->SetMessage(R.string.ota_skip_activation_dialog_message);
+    builder->SetTitle(Elastos::Droid::Server::Telephony::R::string::ota_skip_activation_dialog_title);
+    builder->SetMessage(Elastos::Droid::Server::Telephony::R::string::ota_skip_activation_dialog_message);
 
-    AutoPtr<IAlertDialogOnClickListener> listener = new MyAlertDialogOnClickListener();
+    AutoPtr<IDialogInterfaceOnClickListener> listener = new MyAlertDialogOnClickListener(this);
     builder->SetPositiveButton(
-            android.R.string.ok,
+            Elastos::Droid::R::string::ok,
             // "OK" means "skip activation".
             listener);
     builder->SetNegativeButton(
-                android.R.string.cancel,
+                Elastos::Droid::R::string::cancel,
                 // "Cancel" means just dismiss the dialog.
                 // Don't actually start an activation call.
-                NULL)
+                NULL);
     builder->SetOnKeyListener(keyListener);
     builder->Create((IAlertDialog**)&(mOtaWidgetData->mOtaSkipConfirmationDialog));
-    mOtaWidgetData->mOtaSkipConfirmationDialog->Show();
+    IDialog::Probe(mOtaWidgetData->mOtaSkipConfirmationDialog)->Show();
 }
 
 void OtaUtils::OnClickOtaActivateNextButton()
 {
     if (DBG) Log(String("Dialog Next Clicked!"));
-    if (!mApplication->mCdmaOtaProvisionData->mInOtaSpcState) {
-        mApplication->mCdmaOtaScreenState->mOtaScreenState =
-                ICdmaOtaScreenStateOtaScreenState_OTA_STATUS_UNDEFINED;
+
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    if (!application->mCdmaOtaProvisionData->mInOtaSpcState) {
+        application->mCdmaOtaScreenState->mOtaScreenState =
+                CdmaOtaScreenState::OTA_STATUS_UNDEFINED;
         OtaShowHome();
     }
 }
@@ -1163,12 +1288,12 @@ ECode OtaUtils::DismissAllOtaDialogs()
     if (mOtaWidgetData != NULL) {
         if (mOtaWidgetData->mSpcErrorDialog != NULL) {
             if (DBG) Log(String("- DISMISSING mSpcErrorDialog."));
-            mOtaWidgetData->mSpcErrorDialog->Dismiss();
+            IDialogInterface::Probe(mOtaWidgetData->mSpcErrorDialog)->Dismiss();
             mOtaWidgetData->mSpcErrorDialog = NULL;
         }
         if (mOtaWidgetData->mOtaFailureDialog != NULL) {
             if (DBG) Log(String("- DISMISSING mOtaFailureDialog."));
-            mOtaWidgetData->mOtaFailureDialog->Dismiss();
+            IDialogInterface::Probe(mOtaWidgetData->mOtaFailureDialog)->Dismiss();
             mOtaWidgetData->mOtaFailureDialog = NULL;
         }
     }
@@ -1179,12 +1304,13 @@ Int32 OtaUtils::GetOtaSpcDisplayTime()
 {
     if (DBG) Log(String("getOtaSpcDisplayTime()..."));
     Int32 tmpSpcTime = 1;
-    if (mApplication->mCdmaOtaProvisionData->mInOtaSpcState) {
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    if (application->mCdmaOtaProvisionData->mInOtaSpcState) {
         Int64 tmpOtaSpcRunningTime = 0;
         Int64 tmpOtaSpcLeftTime = 0;
         tmpOtaSpcRunningTime = SystemClock::GetElapsedRealtime();
         tmpOtaSpcLeftTime =
-            tmpOtaSpcRunningTime - mApplication->mCdmaOtaProvisionData->mOtaSpcUptime;
+            tmpOtaSpcRunningTime - application->mCdmaOtaProvisionData->mOtaSpcUptime;
         if (tmpOtaSpcLeftTime >= OTA_SPC_TIMEOUT * 1000) {
             tmpSpcTime = 1;
         }
@@ -1202,12 +1328,12 @@ void OtaUtils::InitOtaInCallScreen()
     if (DBG) Log(String("initOtaInCallScreen()..."));
     // mOtaWidgetData.otaTitle = (TextView) mInCallScreen.findViewById(R.id.otaTitle);
     // mOtaWidgetData.otaTextActivate = (TextView) mInCallScreen.findViewById(R.id.otaActivate);
-    mOtaWidgetData.otaTextActivate->SetVisibility(IView::GONE);
+    IView::Probe(mOtaWidgetData->mOtaTextActivate)->SetVisibility(IView::GONE);
     // mOtaWidgetData.otaTextListenProgress =
     //         (TextView) mInCallScreen.findViewById(R.id.otaListenProgress);
     // mOtaWidgetData.otaTextProgressBar =
     //         (ProgressBar) mInCallScreen.findViewById(R.id.progress_large);
-    mOtaWidgetData.otaTextProgressBar->SetIndeterminate(TRUE);
+    mOtaWidgetData->mOtaTextProgressBar->SetIndeterminate(TRUE);
     // mOtaWidgetData.otaTextSuccessFail =
     //         (TextView) mInCallScreen.findViewById(R.id.otaSuccessFailStatus);
 
@@ -1261,14 +1387,15 @@ ECode OtaUtils::CleanOtaScreen(
 {
     if (DBG) Log(String("OTA ends, cleanOtaScreen!"));
 
-    mApplication->mCdmaOtaScreenState->mOtaScreenState =
-            ICdmaOtaScreenStateOtaScreenState_OTA_STATUS_UNDEFINED;
-    mApplication->mCdmaOtaProvisionData->mIsOtaCallCommitted = FALSE;
-    mApplication->mCdmaOtaProvisionData->mIsOtaCallIntentProcessed = FALSE;
-    mApplication->mCdmaOtaProvisionData->mInOtaSpcState = FALSE;
-    mApplication->mCdmaOtaProvisionData->mActivationCount = 0;
-    mApplication->mCdmaOtaProvisionData->mOtaSpcUptime = 0;
-    mApplication->mCdmaOtaInCallScreenUiState->mState = State.UNDEFINED;
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    application->mCdmaOtaScreenState->mOtaScreenState =
+            CdmaOtaScreenState::OTA_STATUS_UNDEFINED;
+    application->mCdmaOtaProvisionData->mIsOtaCallCommitted = FALSE;
+    application->mCdmaOtaProvisionData->mIsOtaCallIntentProcessed = FALSE;
+    application->mCdmaOtaProvisionData->mInOtaSpcState = FALSE;
+    application->mCdmaOtaProvisionData->mActivationCount = 0;
+    application->mCdmaOtaProvisionData->mOtaSpcUptime = 0;
+    application->mCdmaOtaInCallScreenUiState->mState = CdmaOtaInCallScreenUiState::UNDEFINED;
 
     if (mInteractive && (mOtaWidgetData != NULL)) {
         // if (mInCallTouchUi != null) mInCallTouchUi.setVisibility(View.VISIBLE);
@@ -1283,17 +1410,17 @@ ECode OtaUtils::CleanOtaScreen(
         //     mOtaCallCardDtmfDialer.stopDialerSession();
         // }
 
-        mOtaWidgetData->mOtaTextActivate->SetVisibility(IView::GONE);
-        mOtaWidgetData->mOtaTextListenProgress->SetVisibility(IView::GONE);
-        mOtaWidgetData->mOtaTextProgressBar->SetVisibility(IView::GONE);
-        mOtaWidgetData->mOtaTextSuccessFail->SetVisibility(IView::GONE);
-        mOtaWidgetData->mCallCardOtaButtonsActivate->SetVisibility(IView::GONE);
-        mOtaWidgetData->mCallCardOtaButtonsListenProgress->SetVisibility(IView::GONE);
-        mOtaWidgetData->mCallCardOtaButtonsFailSuccess->SetVisibility(IView::GONE);
-        mOtaWidgetData->mOtaUpperWidgets->SetVisibility(IView::GONE);
+        IView::Probe(mOtaWidgetData->mOtaTextActivate)->SetVisibility(IView::GONE);
+        IView::Probe(mOtaWidgetData->mOtaTextListenProgress)->SetVisibility(IView::GONE);
+        IView::Probe(mOtaWidgetData->mOtaTextProgressBar)->SetVisibility(IView::GONE);
+        IView::Probe(mOtaWidgetData->mOtaTextSuccessFail)->SetVisibility(IView::GONE);
+        IView::Probe(mOtaWidgetData->mCallCardOtaButtonsActivate)->SetVisibility(IView::GONE);
+        IView::Probe(mOtaWidgetData->mCallCardOtaButtonsListenProgress)->SetVisibility(IView::GONE);
+        IView::Probe(mOtaWidgetData->mCallCardOtaButtonsFailSuccess)->SetVisibility(IView::GONE);
+        IView::Probe(mOtaWidgetData->mOtaUpperWidgets)->SetVisibility(IView::GONE);
         // mOtaWidgetData.otaDtmfDialerView.setVisibility(View.GONE);
-        mOtaWidgetData->mOtaNextButton->SetVisibility(IView::GONE);
-        mOtaWidgetData->mOtaTryAgainButton->SetVisibility(IView::GONE);
+        IView::Probe(mOtaWidgetData->mOtaNextButton)->SetVisibility(IView::GONE);
+        IView::Probe(mOtaWidgetData->mOtaTryAgainButton)->SetVisibility(IView::GONE);
     }
 
     // turn off the speaker in case it was turned on
@@ -1305,21 +1432,23 @@ ECode OtaUtils::CleanOtaScreen(
 }
 
 ECode OtaUtils::SetCdmaOtaInCallScreenUiState(
-    /* [in] */ ICdmaOtaInCallScreenUiStateState state)
+    /* [in] */ CdmaOtaInCallScreenUiState::State state)
 {
     if (DBG) Log(String("setCdmaOtaInCallScreenState: ") + StringUtils::ToString(state));
-    mApplication->mCdmaOtaInCallScreenUiState->mState = state;
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
+    application->mCdmaOtaInCallScreenUiState->mState = state;
     return NOERROR;
 }
 
 ECode OtaUtils::GetCdmaOtaInCallScreenUiState(
-        /* [out] */ ICdmaOtaInCallScreenUiStateState* state)
+        /* [out] */ CdmaOtaInCallScreenUiState::State* state)
 {
     VALIDATE_NOT_NULL(state)
 
+    AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
     if (DBG) Log(String("getCdmaOtaInCallScreenState: ")
-            + StringUtils::ToString(mApplication->mCdmaOtaInCallScreenUiState->mState));
-    *state = mApplication->mCdmaOtaInCallScreenUiState->mState;
+            + StringUtils::ToString(application->mCdmaOtaInCallScreenUiState->mState));
+    *state = application->mCdmaOtaInCallScreenUiState->mState;
     return NOERROR;
 }
 
@@ -1388,13 +1517,13 @@ Int32 OtaUtils::GetLteOnCdmaMode(
 void OtaUtils::Log(
     /* [in] */ const String& msg)
 {
-    Logger::D(LOG_TAG, msg);
+    Logger::D(TAG, msg);
 }
 
 void OtaUtils::Loge(
     /* [in] */ const String& msg)
 {
-    Logger::E(LOG_TAG, msg);
+    Logger::E(TAG, msg);
 }
 
 } // namespace Phone

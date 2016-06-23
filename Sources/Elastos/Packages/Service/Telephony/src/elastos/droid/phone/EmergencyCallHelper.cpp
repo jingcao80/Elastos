@@ -1,22 +1,46 @@
 
 #include "elastos/droid/phone/EmergencyCallHelper.h"
+#include "elastos/droid/phone/CallController.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState_OFFHOOK;
+using Elastos::Droid::Telephony::CDisconnectCause;
+using Elastos::Droid::Telephony::IDisconnectCause;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
+
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-static const Int32 EmergencyCallHelper::MAX_NUM_RETRIES = 6;
-static const Int64 EmergencyCallHelper::TIME_BETWEEN_RETRIES = 5000;
+const String EmergencyCallHelper::TAG("EmergencyCallHelper");
+const Boolean EmergencyCallHelper::DBG = FALSE;
 
-static const Int64 EmergencyCallHelper::WAKE_LOCK_TIMEOUT = 5 * 60 * 1000;
+const Int32 EmergencyCallHelper::START_SEQUENCE = 1;
+const Int32 EmergencyCallHelper::SERVICE_STATE_CHANGED = 2;
+const Int32 EmergencyCallHelper::DISCONNECT = 3;
+const Int32 EmergencyCallHelper::RETRY_TIMEOUT = 4;
 
-static const String EmergencyCallHelper::TAG("EmergencyCallHelper");
-static const Boolean EmergencyCallHelper::DBG = FALSE;
-
-static const Int32 EmergencyCallHelper::START_SEQUENCE = 1;
-static const Int32 EmergencyCallHelper::SERVICE_STATE_CHANGED = 2;
-static const Int32 EmergencyCallHelper::DISCONNECT = 3;
-static const Int32 EmergencyCallHelper::RETRY_TIMEOUT = 4;
+CAR_INTERFACE_IMPL(EmergencyCallHelper, Handler, IEmergencyCallHelper)
 
 EmergencyCallHelper::EmergencyCallHelper()
     : mNumber(NULL)
@@ -29,11 +53,13 @@ ECode EmergencyCallHelper::constructor(
 {
     Handler::constructor();
 
-    if (DBG) Log(String("EmergencyCallHelper constructor..."));
-    mCallController = callController;
-    PhoneGlobals::GetInstance((IPhoneGlobals**)&mApp);
-    mCM = mApp->mCM;
-    return NOERROR;
+    assert(0);
+
+//     if (DBG) Log(String("EmergencyCallHelper constructor..."));
+//     mCallController = callController;
+//     PhoneGlobals::GetInstance((IPhoneGlobals**)&mApp);
+//     mCM = mApp->mCM;
+//     return NOERROR;
 }
 
 ECode EmergencyCallHelper::HandleMessage(
@@ -74,9 +100,11 @@ ECode EmergencyCallHelper::StartEmergencyCallFromAirplaneModeSequence(
         sb += "')...";
         Log(sb.ToString());
     }
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(number);
     AutoPtr<IMessage> msg;
-    ObtainMessage(START_SEQUENCE, number, (IMessage**)&msg);
-    SendMessage(msg);
+    ObtainMessage(START_SEQUENCE, TO_IINTERFACE(cchar), (IMessage**)&msg);
+    Boolean res;
+    return SendMessage(msg, &res);
 }
 
 void EmergencyCallHelper::StartSequenceInternal(
@@ -96,7 +124,8 @@ void EmergencyCallHelper::StartSequenceInternal(
     // we're already in the middle of the sequence.
     Cleanup();
 
-    AutoPtr<IInterface> obj = msg->GetObj((IInterface**)&obj);
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
     AutoPtr<ICharSequence> cchar = ICharSequence::Probe(obj);
     cchar->ToString(&mNumber);
     if (DBG) {
@@ -112,14 +141,15 @@ void EmergencyCallHelper::StartSequenceInternal(
     // Wake lock to make sure the processor doesn't go to sleep midway
     // through the emergency call sequence.
     AutoPtr<IInterface> obj2;
-    mApp->GetSystemService(Context.POWER_SERVICE, (IInterface**)&obj2);
+    assert(0);
+    //mApp->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj2);
     AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj2);
     pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, TAG, (IPowerManagerWakeLock**)&mPartialWakeLock);
     // Acquire with a timeout, just to be sure we won't hold the wake
     // lock forever even if a logic bug (in this class) causes us to
     // somehow never call cleanup().
     if (DBG) Log(String("- startSequenceInternal: acquiring wake lock"));
-    mPartialWakeLock->Acquire(WAKE_LOCK_TIMEOUT);
+    mPartialWakeLock->AcquireLock(IEmergencyCallHelper::WAKE_LOCK_TIMEOUT);
 
     // No need to check the current service state here, since the only
     // reason the CallController would call this method in the first
@@ -143,7 +173,10 @@ void EmergencyCallHelper::StartSequenceInternal(
 void EmergencyCallHelper::OnServiceStateChanged(
     /* [in] */ IMessage* msg)
 {
-    AutoPtr<IServiceState> state = (ServiceState) ((AsyncResult) msg.obj).result;
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    AutoPtr<AsyncResult> aResult = (AsyncResult*)IObject::Probe(obj);
+    AutoPtr<IServiceState> state = IServiceState::Probe(aResult->mResult);
     if (DBG) {
         StringBuilder sb;
         sb += "onServiceStateChanged()...  new state = ";
@@ -191,7 +224,11 @@ void EmergencyCallHelper::OnServiceStateChanged(
 void EmergencyCallHelper::OnDisconnect(
     /* [in] */ IMessage* msg)
 {
-    AutoPtr<IConnection> conn = (Connection) ((AsyncResult) msg.obj).result;
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    AutoPtr<AsyncResult> aResult = (AsyncResult*)IObject::Probe(obj);
+    AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> conn =
+            Elastos::Droid::Internal::Telephony::IConnection::Probe(aResult->mResult);
     Int32 cause;
     conn->GetDisconnectCause(&cause);
     if (DBG) {
@@ -199,9 +236,15 @@ void EmergencyCallHelper::OnDisconnect(
         sb += "onDisconnect: connection '";
         sb += TO_CSTR(conn);
         sb += "', addr '";
-        sb += conn.getAddress();
+        String address;
+        conn->GetAddress(&address);
+        sb += address;
         sb += "', cause = ";
-        sb += DisconnectCause.toString(cause);
+        AutoPtr<IDisconnectCause> helper;
+        CDisconnectCause::AcquireSingleton((IDisconnectCause**)&helper);
+        String str;
+        helper->ToString(cause, &str);
+        sb += str;
         Log(sb.ToString());
     }
 
@@ -263,7 +306,7 @@ void EmergencyCallHelper::OnRetryTimeout()
         return;
     }
 
-    if (serviceState != ServiceState.STATE_POWER_OFF) {
+    if (serviceState != IServiceState::STATE_POWER_OFF) {
         // Woo hoo -- we successfully got out of airplane mode.
 
         // Deregister for the service state change events; we don't need
@@ -298,7 +341,8 @@ void EmergencyCallHelper::PowerOnRadio()
     // If airplane mode is on, we turn it off the same way that the
     // Settings activity turns it off.
     AutoPtr<IContentResolver> contentResolver;
-    mApp->GetContentResolver((IContentResolver**)&contentResolver);
+    assert(0);
+    //mApp->GetContentResolver((IContentResolver**)&contentResolver);
     AutoPtr<ISettingsGlobal> helper;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
     Int32 value;
@@ -307,13 +351,15 @@ void EmergencyCallHelper::PowerOnRadio()
         if (DBG) Log(String("==> Turning off airplane mode..."));
 
         // Change the system setting
-        helper->PutInt32(contentResolver, ISettingsGlobal::AIRPLANE_MODE_ON, 0);
+        Boolean res;
+        helper->PutInt32(contentResolver, ISettingsGlobal::AIRPLANE_MODE_ON, 0, &res);
 
         // Post the intent
         AutoPtr<IIntent> intent;
         CIntent::New(IIntent::ACTION_AIRPLANE_MODE_CHANGED, (IIntent**)&intent);
         intent->PutExtra(String("state"), FALSE);
-        mApp->SendBroadcastAsUser(intent, IUserHandle::ALL);
+        assert(0);
+        //mApp->SendBroadcastAsUser(intent, IUserHandle::ALL);
     }
     else {
         // Otherwise, for some strange reason the radio is off
@@ -343,40 +389,42 @@ void EmergencyCallHelper::PlaceEmergencyCall()
         StringBuilder sb;
         sb += "- placing call to '";
         sb += mNumber;
-        sb += "'..."
+        sb += "'...";
         Log(sb.ToString());
     }
 
     AutoPtr<IPhone> phone;
     mCM->GetDefaultPhone((IPhone**)&phone);
     Int32 callStatus;
-    PhoneUtils::PlaceCall(mApp, phone, mNumber,
-                NULL,  // contactUri
-                RUE,   // isEmergencyCall
-                &callStatus);
+    assert(0);
+    // PhoneUtils::PlaceCall(mApp, phone, mNumber,
+    //             NULL,  // contactUri
+    //             RUE,   // isEmergencyCall
+    //             &callStatus);
     if (DBG) {
         StringBuilder sb;
         sb += "- PhoneUtils.placeCall() returned status = ";
-        sb += callStatus
+        sb += callStatus;
         Log(sb.ToString());
     }
 
     Boolean success;
     // Note PhoneUtils.placeCall() returns one of the CALL_STATUS_*
     // constants, not a CallStatusCode enum value.
-    switch (callStatus) {
-        case IPhoneUtils::CALL_STATUS_DIALED:
-            success = TRUE;
-            break;
+    assert(0);
+    // switch (callStatus) {
+    //     case PhoneUtils::CALL_STATUS_DIALED:
+    //         success = TRUE;
+    //         break;
 
-        case IPhoneUtils::CALL_STATUS_DIALED_MMI:
-        case IPhoneUtils::CALL_STATUS_FAILED:
-        default:
-            // Anything else is a failure, and we'll need to retry.
-            Logger::W(TAG, "placeEmergencyCall(): placeCall() failed: callStatus = %d" + callStatus);
-            success = FALSE;
-            break;
-    }
+    //     case PhoneUtils::CALL_STATUS_DIALED_MMI:
+    //     case PhoneUtils::CALL_STATUS_FAILED:
+    //     default:
+    //         // Anything else is a failure, and we'll need to retry.
+    //         Logger::W(TAG, "placeEmergencyCall(): placeCall() failed: callStatus = %d" + callStatus);
+    //         success = FALSE;
+    //         break;
+    // }
 
     if (success) {
         if (DBG) Log(String("==> Success from PhoneUtils.placeCall()!"));
@@ -386,7 +434,8 @@ void EmergencyCallHelper::PlaceEmergencyCall()
         // (It's still possible that this call will fail, and disconnect
         // with cause==OUT_OF_SERVICE.  If so, that will trigger a retry
         // from the onDisconnect() method.)
-    } else {
+    }
+    else {
         if (DBG) Log(String("==> Failure."));
         // Wait a bit more and try again (or just bail out totally if
         // we've had too many failures.)
@@ -404,7 +453,7 @@ void EmergencyCallHelper::ScheduleRetryOrBailOut()
         Log(sb.ToString());
     }
 
-    if (mNumRetriesSoFar > MAX_NUM_RETRIES) {
+    if (mNumRetriesSoFar > IEmergencyCallHelper::MAX_NUM_RETRIES) {
         Logger::W(TAG, "scheduleRetryOrBailOut: hit MAX_NUM_RETRIES; giving up...");
         Cleanup();
     }
@@ -416,7 +465,7 @@ void EmergencyCallHelper::ScheduleRetryOrBailOut()
 
 void EmergencyCallHelper::Cleanup()
 {
-    if (DBG) log("cleanup()...");
+    if (DBG) Log(String("cleanup()..."));
 
     UnregisterForServiceStateChanged();
     UnregisterForDisconnect();
@@ -424,7 +473,8 @@ void EmergencyCallHelper::Cleanup()
 
     // Release / clean up the wake lock
     if (mPartialWakeLock != NULL) {
-        if (mPartialWakeLock->IsHeld()) {
+        Boolean res;
+        if (mPartialWakeLock->IsHeld(&res), res) {
             if (DBG) Log(String("- releasing wake lock"));
             mPartialWakeLock->ReleaseLock();
         }
@@ -435,7 +485,8 @@ void EmergencyCallHelper::Cleanup()
 void EmergencyCallHelper::StartRetryTimer()
 {
     RemoveMessages(RETRY_TIMEOUT);
-    SendEmptyMessageDelayed(RETRY_TIMEOUT, TIME_BETWEEN_RETRIES);
+    Boolean res;
+    SendEmptyMessageDelayed(RETRY_TIMEOUT, IEmergencyCallHelper::TIME_BETWEEN_RETRIES, &res);
 }
 
 void EmergencyCallHelper::CancelRetryTimer()

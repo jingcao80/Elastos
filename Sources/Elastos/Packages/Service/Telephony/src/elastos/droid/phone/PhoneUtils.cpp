@@ -1,13 +1,86 @@
 
 #include "elastos/droid/phone/PhoneUtils.h"
+#include <elastos/utility/logging/Logger.h>
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <Elastos.CoreLibrary.Core.h>
+#include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/utility/Arrays.h>
+#include "R.h"
+
+
+
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::IProgressDialog;
+using Elastos::Droid::App::CProgressDialog;
+using Elastos::Droid::Bluetooth::IIBluetoothHeadsetPhone;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::View::EIID_IViewOnKeyListener;
+using Elastos::Droid::Internal::Telephony::CCallerInfo;
+using Elastos::Droid::Internal::Telephony::ICallerInfoAsyncQueryHelper;
+using Elastos::Droid::Internal::Telephony::CCallerInfoAsyncQueryHelper;
+using Elastos::Droid::Internal::Telephony::IMmiCodeState_PENDING;
+using Elastos::Droid::Internal::Telephony::IMmiCodeState_CANCELLED;
+using Elastos::Droid::Internal::Telephony::IMmiCodeState_COMPLETE;
+using Elastos::Droid::Internal::Telephony::IMmiCodeState_FAILED;
+using Elastos::Droid::Internal::Telephony::IMmiCodeState;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState_IDLE;
+using Elastos::Droid::Internal::Telephony::ICallState_DISCONNECTED;
+using Elastos::Droid::Internal::Telephony::ICallState_HOLDING;
+using Elastos::Droid::Internal::Telephony::ICallState_IDLE;
+using Elastos::Droid::Internal::Telephony::ICallState_ACTIVE;
+using Elastos::Droid::Internal::Telephony::ICallState_INCOMING;
+using Elastos::Droid::Internal::Telephony::ICallState_WAITING;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::EIID_ICallerInfoAsyncQueryOnQueryCompleteListener;
+using Elastos::Droid::Internal::Telephony::ICallerInfoHelper;
+using Elastos::Droid::Internal::Telephony::CCallerInfoHelper;
+using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
+using Elastos::Droid::Internal::Telephony::ICallManagerHelper;
+//using Elastos::Droid::Internal::Telephony::CCallManagerHelper;
+using Elastos::Droid::Internal::Telephony::Sip::ISipPhone;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoState;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::View::IWindow;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IWindowManagerLayoutParams;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Droid::Internal::Telephony::ICallState_DISCONNECTING;
+using Elastos::Core::IInteger32;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::IList;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-PhoneUtils::ConnectionHandler::ConnectionHandler(
-    /* [in] */ PhoneUtils* host)
-    : mHost(host)
+PhoneUtils::ConnectionHandler::ConnectionHandler()
 {
     Handler::constructor();
 }
@@ -22,7 +95,7 @@ ECode PhoneUtils::ConnectionHandler::HandleMessage(
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<FgRingCalls> frC = (FgRingCalls*)IObject(obj);
+            AutoPtr<FgRingCalls> frC = (FgRingCalls*)IObject::Probe(obj);
             Int32 arg1;
             Int32 state;
             Boolean res;
@@ -36,17 +109,18 @@ ECode PhoneUtils::ConnectionHandler::HandleMessage(
                         (IMessage**)&retryMsg);
                 retryMsg->SetArg1(1 + arg1);
                 retryMsg->SetObj(TO_IINTERFACE(obj));
+                Boolean tmp;
                 mConnectionHandler->SendMessageDelayed(retryMsg,
-                    DISCONNECTING_POLLING_INTERVAL_MS);
+                    DISCONNECTING_POLLING_INTERVAL_MS, &tmp);
             // since hangupActiveCall() also accepts the ringing call
             // check if the ringing call was already answered or not
             // only answer it when the call still is ringing
             }
             else if (frC->mRinging->IsRinging(&res), res) {
                 if ((msg->GetArg1(&arg1), arg1) == DISCONNECTING_POLLING_TIMES_LIMIT) {
-                    Logger::E(LOG_TAG, "DISCONNECTING time out");
+                    Logger::E(TAG, "DISCONNECTING time out");
                 }
-                AnswerCall(frC->mFinging);
+                AnswerCall(frC->mRinging);
             }
             break;
         }
@@ -72,43 +146,54 @@ ECode PhoneUtils::MyDialogInterfaceOnClickListener::OnClick(
 {
     switch (whichButton) {
         case IDialogInterface::BUTTON_POSITIVE:
+        {
             // As per spec 24.080, valid length of ussd string
             // is 1 - 160. If length is out of the range then
             // display toast message & Cancel MMI operation.
-            if (mInputText->GetLength() < MIN_USSD_LEN
-                    || mInputText->GetLength() > MAX_USSD_LEN) {
+            Int32 length;
+            ITextView::Probe(mInputText)->GetLength(&length);
+            if (length < MIN_USSD_LEN || length > MAX_USSD_LEN) {
 
                 AutoPtr<IResources> resources;
-                app->GetResources((IResources**)&resources);
+                mApp->GetResources((IResources**)&resources);
+                AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(2);
+                AutoPtr<IInteger32> num1 = CoreUtils::Convert(MIN_USSD_LEN);
+                AutoPtr<IInteger32> num2 = CoreUtils::Convert(MAX_USSD_LEN);
+                array->Set(0, TO_IINTERFACE(num1));
+                array->Set(1, TO_IINTERFACE(num2));
                 String str;
-                resources->GetString(R.string.enter_input,
-                        MIN_USSD_LEN, MAX_USSD_LEN, &str);
+                resources->GetString(Elastos::Droid::Server::Telephony::R::string::enter_input,
+                        array, &str);
+                AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
 
                 AutoPtr<IToastHelper> helper;
                 CToastHelper::AcquireSingleton((IToastHelper**)&helper);
                 AutoPtr<IToast> toast;
-                helper->MakeText(app, str, IToast::LENGTH_LONG, (IToast**)&toast);
+                helper->MakeText(mApp, cchar, IToast::LENGTH_LONG, (IToast**)&toast);
                 toast->Show();
 
                 Boolean res;
-                if (mmiCode->IsCancelable(&res), res) {
-                    mmiCode->Cancel();
+                if (mMiCode->IsCancelable(&res), res) {
+                    mMiCode->Cancel();
                 }
             }
             else {
                 AutoPtr<ICharSequence> cchar;
-                mInputText->GetText((ICharSequence**)&cchar);
+                ITextView::Probe(mInputText)->GetText((ICharSequence**)&cchar);
                 String str;
                 cchar->ToString(&str);
-                phone->SendUssdResponse(str);
+                mPhone->SendUssdResponse(str);
             }
             break;
+        }
         case IDialogInterface::BUTTON_NEGATIVE:
+        {
             Boolean res;
-            if (mmiCode->IsCancelable(&res), res) {
-                mmiCode->Cancel();
+            if (mMiCode->IsCancelable(&res), res) {
+                mMiCode->Cancel();
             }
             break;
+        }
     }
     return NOERROR;
 }
@@ -127,15 +212,15 @@ ECode PhoneUtils::MyViewOnKeyListener::OnKey(
         case IKeyEvent::KEYCODE_CALL:
         case IKeyEvent::KEYCODE_ENTER:
         {
-            String action;
+            Int32 action;
             event->GetAction(&action);
             if(action == IKeyEvent::ACTION_DOWN) {
                 AutoPtr<ICharSequence> cchar;
-                inputText->GetText((ICharSequence**)&cchar);
+                ITextView::Probe(mInputText)->GetText((ICharSequence**)&cchar);
                 String str;
                 cchar->ToString(&str);
-                phone->SendUssdResponse(str);
-                newDialog->Dismiss();
+                mPhone->SendUssdResponse(str);
+                IDialogInterface::Probe(mNewDialog)->Dismiss();
             }
             *result = TRUE;
             return NOERROR;
@@ -144,6 +229,8 @@ ECode PhoneUtils::MyViewOnKeyListener::OnKey(
     *result = FALSE;
     return NOERROR;
 }
+
+CAR_INTERFACE_IMPL(PhoneUtils::CallerInfoToken, Object, IPhoneUtilsCallerInfoToken)
 
 CAR_INTERFACE_IMPL(PhoneUtils::MyCallerInfoAsyncQueryOnQueryCompleteListener, Object,
         ICallerInfoAsyncQueryOnQueryCompleteListener)
@@ -161,7 +248,10 @@ ECode PhoneUtils::MyCallerInfoAsyncQueryOnQueryCompleteListener::OnQueryComplete
     if (DBG) Log(String("- onQueryComplete: CallerInfo:") + TO_CSTR(ci));
 
     Boolean res1, res2;
-    if (ci->mContactExists || (ci->IsEmergencyNumber(&res1), res1) || (ci->IsVoiceMailNumber(&res2), res2)) {
+
+    Boolean contactExists;
+    ci->GetContactExists(&contactExists);
+    if (contactExists || (ci->IsEmergencyNumber(&res1), res1) || (ci->IsVoiceMailNumber(&res2), res2)) {
         // If the number presentation has not been set by
         // the ContactInfo, use the one from the
         // connection.
@@ -178,8 +268,12 @@ ECode PhoneUtils::MyCallerInfoAsyncQueryOnQueryCompleteListener::OnQueryComplete
         // userData, then we could use this instance to
         // fill 'ci' in. The same routine could be used in
         // PhoneUtils.
-        if (0 == ci->mNumberPresentation) {
-            ci->mNumberPresentation = conn->GetNumberPresentation();
+        Int32 numberPresentation;
+        ci->GetNumberPresentation(&numberPresentation);
+        if (0 == numberPresentation) {
+            Int32 result;
+            conn->GetNumberPresentation(&result);
+            ci->SetNumberPresentation(result);
         }
     }
     else {
@@ -187,14 +281,19 @@ ECode PhoneUtils::MyCallerInfoAsyncQueryOnQueryCompleteListener::OnQueryComplete
         // Return a new CallerInfo based solely on the CNAP
         // information from the network.
 
-        AutoPtr<ICallerInfo> newCi;
-        GetCallerInfo(NULL, conn, (ICallerInfo**)&newCi);
+        AutoPtr<ICallerInfo> newCi = GetCallerInfo(NULL, conn);
 
         // ...but copy over the (few) things we care about
         // from the original CallerInfo object:
         if (newCi != NULL) {
-            newCi.phoneNumber = ci.phoneNumber; // To get formatted phone number
-            newCi.geoDescription = ci.geoDescription; // To get geo description string
+            String phoneNumber;
+            ci->GetPhoneNumber(&phoneNumber);
+            newCi->SetPhoneNumber(phoneNumber); // To get formatted phone number
+
+            String geoDescription;
+            ci->GetGeoDescription(&geoDescription);
+            newCi->SetGeoDescription(geoDescription); // To get geo description string
+
             ci = newCi;
         }
     }
@@ -209,7 +308,7 @@ ECode PhoneUtils::MyCallerInfoAsyncQueryOnQueryCompleteListener::OnQueryComplete
     return conn->SetUserData(ci);
 }
 
-const String PhoneUtils::LOG_TAG("PhoneUtils");
+const String PhoneUtils::TAG("PhoneUtils");
 const Boolean PhoneUtils::DBG = (IPhoneGlobals::DBG_LEVEL >= 2);
 
 const Boolean PhoneUtils::VDBG = FALSE;
@@ -217,10 +316,6 @@ const Boolean PhoneUtils::VDBG = FALSE;
 const Boolean PhoneUtils::DBG_SETAUDIOMODE_STACK = FALSE;
 
 const String PhoneUtils::ADD_CALL_MODE_KEY("add_call_mode");
-
-const Int32 PhoneUtils::CALL_STATUS_DIALED = 0;  // The number was successfully dialed
-const Int32 PhoneUtils::CALL_STATUS_DIALED_MMI = 1;  // The specified number was an MMI code
-const Int32 PhoneUtils::CALL_STATUS_FAILED = 2;  // The call failed
 
 const Int32 PhoneUtils::AUDIO_IDLE = 0;  /** audio behaviour at phone idle */
 const Int32 PhoneUtils::AUDIO_RINGING = 1;  /** audio behaviour while ringing */
@@ -231,11 +326,9 @@ const Int32 PhoneUtils::MAX_USSD_LEN = 160;
 
 Boolean PhoneUtils::sIsSpeakerEnabled = FALSE;
 
-AutoPtr<IConnectionHandler> PhoneUtils::mConnectionHandler;
+AutoPtr<PhoneUtils::ConnectionHandler> PhoneUtils::mConnectionHandler;
 
 const Int32 PhoneUtils::PHONE_STATE_CHANGED = -1;
-
-const Int32 PhoneUtils::MSG_CHECK_STATUS_ANSWERCALL = 100;
 
 const Int32 PhoneUtils::DISCONNECTING_POLLING_INTERVAL_MS = 200;
 
@@ -251,13 +344,13 @@ StringBuilder PhoneUtils::sUssdMsg;
 const Int32 PhoneUtils::QUERY_TOKEN = -1;
 
 AutoPtr<ICallerInfoAsyncQueryOnQueryCompleteListener> sCallerInfoQueryListener =
-    new MyCallerInfoAsyncQueryOnQueryCompleteListener();
+    new PhoneUtils::MyCallerInfoAsyncQueryOnQueryCompleteListener();
 
 ECode PhoneUtils::InitializeConnectionHandler(
     /* [in] */ ICallManager* cm)
 {
     if (mConnectionHandler == NULL) {
-        mConnectionHandler = new ConnectionHandler(this);
+        mConnectionHandler = new PhoneUtils::ConnectionHandler();
     }
 
     // pass over cm as user.obj
@@ -270,11 +363,12 @@ Boolean PhoneUtils::AnswerCall(
     StringBuilder sb;
     sb += "answerCall(";
     sb += ringingCall;
-    sb += ")..."
+    sb += ")...";
     Log(sb.ToString());
     AutoPtr<PhoneGlobals> app;
     PhoneGlobals::GetInstance((PhoneGlobals**)&app);
-    AutoPtr<ICallNotifier> notifier = app->mNotifier;
+    assert(0);
+    //AutoPtr<CallNotifier> notifier = app->mNotifier;
 
     AutoPtr<IPhone> phone;
     ringingCall->GetPhone((IPhone**)&phone);
@@ -289,7 +383,8 @@ Boolean PhoneUtils::AnswerCall(
         Int32 state;
         ringingCall->GetState(&state);
         if (state == ICallState_WAITING) {
-            notifier->StopSignalInfoTone();
+            assert(0);
+            //notifier->StopSignalInfoTone();
         }
     }
 
@@ -304,19 +399,19 @@ Boolean PhoneUtils::AnswerCall(
         ECode ec = NOERROR;
         {
             if (phoneIsCdma) {
-                Int32 state;
+                CdmaPhoneCallState::PhoneCallState state;
                 if ((app->mCdmaPhoneCallState->GetCurrentCallState(&state), state)
-                        == ICdmaPhoneCallStatePhoneCallState_IDLE) {
+                        == CdmaPhoneCallState::IDLE) {
                     // This is the FIRST incoming call being answered.
                     // Set the Phone Call State to SINGLE_ACTIVE
                     FAIL_GOTO(ec = app->mCdmaPhoneCallState->SetCurrentCallState(
-                            ICdmaPhoneCallStatePhoneCallState_SINGLE_ACTIVE), ERROR)
+                            CdmaPhoneCallState::SINGLE_ACTIVE), ERROR)
                 }
                 else {
                     // This is the CALL WAITING call being answered.
                     // Set the Phone Call State to CONF_CALL
                     FAIL_GOTO(ec = app->mCdmaPhoneCallState->SetCurrentCallState(
-                            ICdmaPhoneCallStatePhoneCallState_CONF_CALL), ERROR)
+                            CdmaPhoneCallState::CONF_CALL), ERROR)
                     // Enable "Add Call" option after answering a Call Waiting as the user
                     // should be allowed to add another call in case one of the parties
                     // drops off
@@ -353,26 +448,26 @@ Boolean PhoneUtils::AnswerCall(
             if (isRealIncomingCall && !speakerActivated && IsSpeakerOn(app)
                     && (btManager->IsBluetoothHeadsetAudioOn(&res), !res)) {
                 // This is not an error but might cause users' confusion. Add log just in case.
-                Logger::I(LOG_TAG, "Forcing speaker off due to new incoming call...");
+                Logger::I(TAG, "Forcing speaker off due to new incoming call...");
                 TurnOnSpeaker(app, FALSE, TRUE);
             }
         }
         //catch (CallStateException ex) {
     ERROR:
-        if (ec == (ECode)CallStateException) {
-            Logger::W(LOG_TAG, "answerCall: caught %d", ec);
+        if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
+            Logger::W(TAG, "answerCall: caught %d", ec);
 
             if (phoneIsCdma) {
                 // restore the cdmaPhoneCallState and btPhone.cdmaSetSecondCallState:
-                Int32 state;
+                CdmaPhoneCallState::PhoneCallState state;
                 app->mCdmaPhoneCallState->GetPreviousCallState(&state);
                 app->mCdmaPhoneCallState->SetCurrentCallState(state);
                 if (btPhone != NULL) {
                     //try {
                     ec = btPhone->CdmaSetSecondCallState(FALSE);
                     //} catch (RemoteException e) {
-                    if (ec == (ECode)RemoteException) {
-                        Logger::E(LOG_TAG, "RemoteException, %d", ec);
+                    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+                        Logger::E(TAG, "RemoteException, %d", ec);
                     }
                     //}
                 }
@@ -423,15 +518,15 @@ Boolean PhoneUtils::Hangup(
     Boolean res;
     if (ringing->IsIdle(&res), !res) {
         Log(String("hangup(): hanging up ringing call"));
-        hungup = hangupRingingCall(ringing);
+        hungup = HangupRingingCall(ringing);
     }
     else if (fg->IsIdle(&res), !res) {
         Log(String("hangup(): hanging up foreground call"));
-        hungup = hangup(fg);
+        hungup = Hangup(fg);
     }
     else if (bg->IsIdle(&res), !res) {
         Log(String("hangup(): hanging up background call"));
-        hungup = hangup(bg);
+        hungup = Hangup(bg);
     }
     else {
         // No call to hang up!  This is unlikely in normal usage,
@@ -469,7 +564,7 @@ Boolean PhoneUtils::HangupRingingCall(
         // hangupRingingCall() in the first place.
         // (Presumably the incoming call went away at the exact moment
         // we got here, so just do nothing.)
-        Logger::W(LOG_TAG, "hangupRingingCall: no INCOMING or WAITING call");
+        Logger::W(TAG, "hangupRingingCall: no INCOMING or WAITING call");
         return FALSE;
     }
 }
@@ -542,8 +637,8 @@ Boolean PhoneUtils::Hangup(
     }
     // catch (CallStateException ex) {
 ERROR:
-    if (ec == (ECode)CallStateException) {
-        Logger::E(LOG_TAG, "Call hangup: caught ", ex);
+    if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
+        Logger::E(TAG, "Call hangup: caught ", ec);
     }
     //}
 
@@ -556,12 +651,12 @@ ECode PhoneUtils::Hangup(
     //try{
     if (c != NULL) {
         ECode ec = c->Hangup();
-        if (ec == (ECode)CallStateException) {
-            Logger::W(LOG_TAG, "Connection hangup: caught ", ec);
+        if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
+            Logger::W(TAG, "Connection hangup: caught ", ec);
         }
     }
     // catch (CallStateException ex) {
-        //Log.w(LOG_TAG, "Connection hangup: caught " + ex, ex);
+        //Log.w(TAG, "Connection hangup: caught " + ex, ex);
     //}
     return NOERROR;
 }
@@ -574,7 +669,7 @@ Boolean PhoneUtils::AnswerAndEndHolding(
     AutoPtr<ICall> call;
     cm->GetFirstActiveBgCall((ICall**)&call);
     if (!HangupHoldingCall(call)) {
-        Logger::E(LOG_TAG, "end holding failed!");
+        Logger::E(TAG, "end holding failed!");
         return FALSE;
     }
 
@@ -600,7 +695,7 @@ Boolean PhoneUtils::AnswerAndEndActive(
     AutoPtr<ICall> fgCall;
     cm->GetActiveFgCall((ICall**)&fgCall);
     if (!HangupActiveCall(fgCall)) {
-        Logger::W(LOG_TAG, "end active call failed!");
+        Logger::W(TAG, "end active call failed!");
         return FALSE;
     }
 
@@ -610,7 +705,8 @@ Boolean PhoneUtils::AnswerAndEndActive(
     msg->SetArg1(1);
     AutoPtr<FgRingCalls> tmp = new FgRingCalls(fgCall, ringing);
     msg->SetObj(TO_IINTERFACE(tmp));
-    mConnectionHandler->SendMessage(msg);
+    Boolean res;
+    mConnectionHandler->SendMessage(msg, &res);
 
     return TRUE;
 }
@@ -619,17 +715,17 @@ void PhoneUtils::UpdateCdmaCallStateOnNewOutgoingCall(
     /* [in] */ PhoneGlobals* app,
     /* [in] */ IConnection* connection)
 {
-    Int32 state;
+    CdmaPhoneCallState::PhoneCallState state;
     if ((app->mCdmaPhoneCallState->GetCurrentCallState(&state), state) ==
-        ICdmaPhoneCallStatePhoneCallState_IDLE) {
+        CdmaPhoneCallState::IDLE) {
         // This is the first outgoing call. Set the Phone Call State to ACTIVE
         app->mCdmaPhoneCallState->SetCurrentCallState(
-            ICdmaPhoneCallStatePhoneCallState_SINGLE_ACTIVE);
+            CdmaPhoneCallState::SINGLE_ACTIVE);
     }
     else {
         // This is the second outgoing call. Set the Phone Call State to 3WAY
         app->mCdmaPhoneCallState->SetCurrentCallState(
-            ICdmaPhoneCallStatePhoneCallState_THRWAY_ACTIVE);
+            CdmaPhoneCallState::THRWAY_ACTIVE);
 
         // TODO: Remove this code.
         //app.getCallModeler().setCdmaOutgoing3WayCall(connection);
@@ -637,14 +733,14 @@ void PhoneUtils::UpdateCdmaCallStateOnNewOutgoingCall(
 }
 
 Int32 PhoneUtils::PlaceCall(
-    /* [in] */ I IContext** context,
+    /* [in] */ IContext* context,
     /* [in] */ IPhone* phone,
     /* [in] */ const String& number,
     /* [in] */ IUri* contactRef,
     /* [in] */ Boolean isEmergencyCall)
 {
     return PlaceCall(context, phone, number, contactRef, isEmergencyCall,
-            ICallGatewayManager::EMPTY_INFO, NULL);
+            CallGatewayManager::EMPTY_INFO, NULL);
 }
 
 Int32 PhoneUtils::PlaceCall(
@@ -653,10 +749,10 @@ Int32 PhoneUtils::PlaceCall(
     /* [in] */ const String& number,
     /* [in] */ IUri* contactRef,
     /* [in] */ Boolean isEmergencyCall,
-    /* [in] */ IRawGatewayInfo* gatewayInfo,
-    /* [in] */ ICallGatewayManager* callGateway)
+    /* [in] */ CallGatewayManager::RawGatewayInfo* gatewayInfo,
+    /* [in] */ CallGatewayManager* callGateway)
 {
-    AutoPtr<IUri> gatewayUri = gatewayInfo.gatewayUri;
+    AutoPtr<IUri> gatewayUri = gatewayInfo->mGatewayUri;
 
     if (VDBG) {
         StringBuilder sb;
@@ -677,13 +773,13 @@ Int32 PhoneUtils::PlaceCall(
         sb += "placeCall()... number: ";
         sb += ToLogSafePhoneNumber(number);
         sb += ", GW: ";
-        sb += gatewayUri != null ? "non-null" : "null";
+        sb += gatewayUri != NULL ? "non-null" : "null";
         sb += ", emergency? ";
-        sb += isEmergencyCall
+        sb += isEmergencyCall;
         Log(sb.ToString());
     }
     AutoPtr<PhoneGlobals> app;
-    PhoneGlobals::GetInstance((PhoneGlobals**)*app);
+    PhoneGlobals::GetInstance((PhoneGlobals**)&app);
 
     Boolean useGateway = FALSE;
     if (NULL != gatewayUri &&
@@ -699,11 +795,11 @@ Int32 PhoneUtils::PlaceCall(
         // TODO: 'tel' should be a constant defined in framework base
         // somewhere (it is in webkit.)
         String scheme;
-        if (NULL != gatewayUr) {
+        if (NULL != gatewayUri) {
             gatewayUri->GetScheme(&scheme);
         }
         if (NULL == gatewayUri || !IPhoneAccount::SCHEME_TEL.Equals(scheme)) {
-            Logger::E(LOG_TAG, "Unsupported URL: %s", TO_CSTR(gatewayUri));
+            Logger::E(TAG, "Unsupported URL: %s", TO_CSTR(gatewayUri));
             return CALL_STATUS_FAILED;
         }
 
@@ -722,17 +818,17 @@ Int32 PhoneUtils::PlaceCall(
     // After calling CallManager#dial(), getState() will return different state.
     Int32 state;
     app->mCM->GetState(&state);
-    Boolean initiallyIdle = state == IPhoneConstantsState_IDLE;
+    Boolean initiallyIdle = state == PhoneConstantsState_IDLE;
 
     //try {
-    ECode ec  = app->mCM->Dial(phone, numberToDial, IVideoProfileVideoState_AUDIO_ONLY,
+    ECode ec  = app->mCM->Dial(phone, numberToDial, IVideoProfileVideoState::AUDIO_ONLY,
             (IConnection**)&connection);
     //} catch (CallStateException ex) {
-    if (ec == (ECode)CallStateException) {
+    if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
         // CallStateException means a new outgoing call is not currently
         // possible: either no more call slots exist, or there's another
         // call already in the process of dialing or ringing.
-        Logger::W(LOG_TAG, "Exception from app.mCM.dial() %d", ec);
+        Logger::W(TAG, "Exception from app.mCM.dial() %d", ec);
         return CALL_STATUS_FAILED;
 
         // Note that it's possible for CallManager.dial() to return
@@ -782,11 +878,11 @@ Int32 PhoneUtils::PlaceCall(
                     // just created the connection which has
                     // no user data (null) by default.
                     if (ICallerInfo::Probe(userDataObject) != NULL) {
-                        ICallerInfo::Probe(userDataObject)->contactRefUri = contactRef;
+                        ICallerInfo::Probe(userDataObject)->SetContactRefUri(contactRef);
                     }
                     else {
-                        ICallerInfoToken::Probe(userDataObject)->currentInfo->contactRefUri =
-                                contactRef;
+                        ((CallerInfoToken*)IObject::Probe(userDataObject))->mCurrentInfo
+                                ->SetContactRefUri(contactRef);
                     }
                 }
             }
@@ -800,7 +896,7 @@ Int32 PhoneUtils::PlaceCall(
         // Check is phone in any dock, and turn on speaker accordingly
         Boolean speakerActivated = ActivateSpeakerIfDocked(phone);
 
-        AtoPtr<IBluetoothManager> btManager;
+        AutoPtr<IBluetoothManager> btManager;
         app->GetBluetoothManager((IBluetoothManager**)&btManager);
 
         // See also similar logic in answerCall().
@@ -808,7 +904,7 @@ Int32 PhoneUtils::PlaceCall(
         if (initiallyIdle && !speakerActivated && IsSpeakerOn(app)
                 && (btManager->IsBluetoothHeadsetAudioOn(&res), !res)) {
             // This is not an error but might cause users' confusion. Add log just in case.
-            Logger::I(LOG_TAG, "Forcing speaker off when initiating a new outgoing call...");
+            Logger::I(TAG, "Forcing speaker off when initiating a new outgoing call...");
             PhoneUtils::TurnOnSpeaker(app, FALSE, TRUE);
         }
     }
@@ -833,8 +929,7 @@ String PhoneUtils::ToLogSafePhoneNumber(
     // sanitized phone numbers.
     StringBuilder builder;
     for (Int32 i = 0; i < number.GetLength(); i++) {
-        Char32 c;
-        number->GetCharAt(i, &c);
+        Char32 c = number.GetChar(i);
         if (c == '-' || c == '@' || c == '.') {
             builder += c;
         }
@@ -857,7 +952,7 @@ ECode PhoneUtils::SendEmptyFlash(
         fgCall->GetState(&state);
         if (state == ICallState_ACTIVE) {
             // Send the empty flash
-            if (DBG) Logger::D(LOG_TAG, "onReceive: (CDMA) sending empty flash to network");
+            if (DBG) Logger::D(TAG, "onReceive: (CDMA) sending empty flash to network");
             AutoPtr<ICall> call;
             phone->GetBackgroundCall((ICall**)&call);
             SwitchHoldingAndActive(call);
@@ -870,7 +965,8 @@ ECode PhoneUtils::Swap()
 {
     AutoPtr<PhoneGlobals> mApp;
     PhoneGlobals::GetInstance((PhoneGlobals**)&mApp);
-    if (!OkToSwapCalls(mApp->mCM)) {
+    Boolean res;
+    if (OkToSwapCalls(mApp->mCM, &res), !res) {
         // TODO: throw an error instead?
         return NOERROR;
     }
@@ -888,7 +984,7 @@ ECode PhoneUtils::SwitchHoldingAndActive(
 {
     Log(String("switchHoldingAndActive()..."));
 
-    ECode ec = NULL;
+    ECode ec = NOERROR;
     //try
     {
         AutoPtr<PhoneGlobals> globals;
@@ -912,8 +1008,8 @@ ECode PhoneUtils::SwitchHoldingAndActive(
     }
     // catch (CallStateException ex) {
 ERROR:
-    if (ec == (ECode)CallStateException) {
-        Logger::W(LOG_TAG, "switchHoldingAndActive: caught %d", ec);
+    if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
+        Logger::W(TAG, "switchHoldingAndActive: caught %d", ec);
     }
     //}
     return NOERROR;
@@ -939,12 +1035,12 @@ ECode PhoneUtils::MergeCalls(
 
         AutoPtr<PhoneGlobals> app;
         PhoneGlobals::GetInstance((PhoneGlobals**)&app);
-        Int32 state;
+        CdmaPhoneCallState::PhoneCallState state;
         if ((app->mCdmaPhoneCallState->GetCurrentCallState(&state), state)
-                    == ICdmaPhoneCallStatePhoneCallState_THRWAY_ACTIVE) {
+                    == CdmaPhoneCallState::THRWAY_ACTIVE) {
             // Set the Phone Call State to conference
             app->mCdmaPhoneCallState->SetCurrentCallState(
-                    ICdmaPhoneCallStatePhoneCallState_CONF_CALL);
+                    CdmaPhoneCallState::CONF_CALL);
 
             // Send flash cmd
             // TODO: Need to change the call from switchHoldingAndActive to
@@ -965,11 +1061,12 @@ ECode PhoneUtils::MergeCalls(
         FAIL_GOTO(ec = cm->Conference(call), ERROR)
         //} catch (CallStateException ex) {
 ERROR:
-        if (ec == (ECode)CallStateException) {
-            Logger::W(LOG_TAG, "mergeCalls: caught %d", ex);
+        if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
+            Logger::W(TAG, "mergeCalls: caught %d", ec);
         }
         //}
     }
+    return NOERROR;
 }
 
 ECode PhoneUtils::SeparateCall(
@@ -987,9 +1084,10 @@ ECode PhoneUtils::SeparateCall(
     }
     // catch (CallStateException ex) {
 ERROR:
-    if (ec == (ECode)CallStateException) {
-        Logger::W(LOG_TAG, "separateCall: caught %d", ec);
+    if (ec == (ECode)E_TELEPHONEY_CALL_STATE_EXCEPTION) {
+        Logger::W(TAG, "separateCall: caught %d", ec);
     }
+    return NOERROR;
 }
 
 AutoPtr<IDialog> PhoneUtils::DisplayMMIInitiate(
@@ -1000,7 +1098,7 @@ AutoPtr<IDialog> PhoneUtils::DisplayMMIInitiate(
 {
     if (DBG) Log(String("displayMMIInitiate: ") + TO_CSTR(mmiCode));
     if (previousAlert != NULL) {
-        previousAlert->Dismiss();
+        IDialogInterface::Probe(previousAlert)->Dismiss();
     }
 
     // The UI paradigm we are using now requests that all dialogs have
@@ -1037,7 +1135,7 @@ AutoPtr<IDialog> PhoneUtils::DisplayMMIInitiate(
     if (!isCancelable) {
         if (DBG) Log(String("not a USSD code, displaying status toast."));
         AutoPtr<ICharSequence> text;
-        context->GetText(R.string.mmiStarted, (ICharSequence**)&text);
+        context->GetText(Elastos::Droid::Server::Telephony::R::string::mmiStarted, (ICharSequence**)&text);
 
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
@@ -1048,22 +1146,22 @@ AutoPtr<IDialog> PhoneUtils::DisplayMMIInitiate(
         return NULL;
     }
     else {
-        if (DBG) log(Srting("running USSD code, displaying indeterminate progress."));
+        if (DBG) Log(String("running USSD code, displaying indeterminate progress."));
 
         // create the indeterminate progress dialog and display it.
         AutoPtr<IProgressDialog> pd;
         CProgressDialog::New(context, (IProgressDialog**)&pd);
 
         AutoPtr<ICharSequence> text;
-        context->GetText(R.string.ussdRunning, (ICharSequence**)&text);
-        pd->SetMessage(text);
-        pd->SetCancelable(FALSE);
-        pd.setIndeterminate(TRUE);
+        context->GetText(Elastos::Droid::Server::Telephony::R::string::ussdRunning, (ICharSequence**)&text);
+        IAlertDialog::Probe(pd)->SetMessage(text);
+        IDialog::Probe(pd)->SetCancelable(FALSE);
+        pd->SetIndeterminate(TRUE);
         AutoPtr<IWindow> window;
-        pd->GetWindow((IWindow**)&window);
+        IDialog::Probe(pd)->GetWindow((IWindow**)&window);
         window->AddFlags(IWindowManagerLayoutParams::FLAG_DIM_BEHIND);
 
-        pd->Show();
+        IDialog::Probe(pd)->Show();
 
         return IDialog::Probe(pd);
     }
@@ -1086,7 +1184,7 @@ ECode PhoneUtils::DisplayMMIComplete(
     if (DBG) Log(String("displayMMIComplete: state=") + StringUtils::ToString(state));
 
     switch (state) {
-        case PENDING:
+        case IMmiCodeState_PENDING:
             // USSD code asking for feedback from user.
             mmiCode->GetMessage((ICharSequence**)&text);
             if (DBG) {
@@ -1097,24 +1195,27 @@ ECode PhoneUtils::DisplayMMIComplete(
                 Log(sb.ToString());
             }
             break;
-        case CANCELLED:
+        case IMmiCodeState_CANCELLED:
             text = NULL;
             break;
-        case COMPLETE:
+        case IMmiCodeState_COMPLETE:
+        {
             AutoPtr<IActivity> activity;
             app->GetPUKEntryActivity((IActivity**)&activity);
             if (activity != NULL) {
                 // if an attempt to unPUK the device was made, we specify
                 // the title and the message here.
-                title = com.android.internal.R.string.PinMmi;
-                context->GetText(R.string.puk_unlocked, (ICharSequence**)&text);
+                assert(0);
+                //title = com.android.internal.R.string.PinMmi;
+                context->GetText(Elastos::Droid::Server::Telephony::R::string::puk_unlocked, (ICharSequence**)&text);
                 break;
             }
             // All other conditions for the COMPLETE mmi state will cause
             // the case to fall through to message logic in common with
             // the FAILED case.
-
-        case FAILED:
+        }
+        case IMmiCodeState_FAILED:
+        {
             mmiCode->GetMessage((ICharSequence**)&text);
             if (DBG) {
                 StringBuilder sb;
@@ -1124,14 +1225,15 @@ ECode PhoneUtils::DisplayMMIComplete(
                 Log(sb.ToString());
             }
             break;
+        }
         default:
             //throw new IllegalStateException("Unexpected MmiCode state: " + state);
             Logger::E("PhoneUtils", "Unexpected MmiCode state: %d", state);
-            return IllegalStateException;
+            return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     if (previousAlert != NULL) {
-        previousAlert->Dismiss();
+        IDialogInterface::Probe(previousAlert)->Dismiss();
     }
 
     // Check to see if a UI exists for the PUK activation.  If it does
@@ -1145,18 +1247,18 @@ ECode PhoneUtils::DisplayMMIComplete(
         // set correctly.
         AutoPtr<IProgressDialog> pd;
         CProgressDialog::New(app, (IProgressDialog**)&pd);
-        pd->SetTitle(title);
-        pd->SetMessage(text);
-        pd->SetCancelable(FALSE);
+        IDialog::Probe(pd)->SetTitle(title);
+        IAlertDialog::Probe(pd)->SetMessage(text);
+        IDialog::Probe(pd)->SetCancelable(FALSE);
         pd->SetIndeterminate(TRUE);
 
         AutoPtr<IWindow> window;
-        pd->GetWindow((IWindow**)&window);
+        IDialog::Probe(pd)->GetWindow((IWindow**)&window);
         window->SetType(IWindowManagerLayoutParams::TYPE_SYSTEM_DIALOG);
         window->AddFlags(IWindowManagerLayoutParams::FLAG_DIM_BEHIND);
 
         // display the dialog
-        pd->Show();
+        IDialog::Probe(pd)->Show();
 
         // indicate to the Phone app that the progress dialog has
         // been assigned for the PUK unlock / SIM READY process.
@@ -1168,8 +1270,8 @@ ECode PhoneUtils::DisplayMMIComplete(
         // PUK unlock activity, so that the user may try again.
         AutoPtr<IActivity> activity;
         app->GetPUKEntryActivity((IActivity**)&activity);
-        if (activity != null) {
-            app->SetPukEntryActivity(null);
+        if (activity != NULL) {
+            app->SetPukEntryActivity(NULL);
         }
 
         // A USSD in a pending state means that it is still
@@ -1184,7 +1286,8 @@ ECode PhoneUtils::DisplayMMIComplete(
                 sb += "'";
                 Log(sb.ToString());
             }
-            if (text == NULL || text->GetLength() == 0)
+            Int32 length = 0;
+            if (text == NULL || (text->GetLength(&length), length) == 0)
                 return NOERROR;
 
             // displaying system alert dialog on the screen instead of
@@ -1194,32 +1297,33 @@ ECode PhoneUtils::DisplayMMIComplete(
             if (sUssdDialog == NULL) {
                 AutoPtr<IAlertDialogBuilder> builder;
                 CAlertDialogBuilder::New(context, (IAlertDialogBuilder**)&builder);
-                builder->SetPositiveButton(R.string.ok, NULL)
-                builder->SetCancelable(TRUE)
+                builder->SetPositiveButton(Elastos::Droid::Server::Telephony::R::string::ok, NULL);
+                builder->SetCancelable(TRUE);
                 AutoPtr<IDialogInterfaceOnDismissListener> listener =
                         new MyDialogInterfaceOnDismissListener();
                 builder->SetOnDismissListener(listener);
                 builder->Create((IAlertDialog**)&sUssdDialog);
 
                 AutoPtr<IWindow> window;
-                sUssdDialog->GetWindow((IWindow**)&window);
+                IDialog::Probe(sUssdDialog)->GetWindow((IWindow**)&window);
                 window->SetType(
                         IWindowManagerLayoutParams::TYPE_SYSTEM_DIALOG);
                 window->AddFlags(
                         IWindowManagerLayoutParams::FLAG_DIM_BEHIND);
             }
             if (sUssdMsg.GetLength() != 0) {
-                sUssdMsg.Insert(0, "\n");
+                sUssdMsg.Insert(0, String("\n"));
                 AutoPtr<IResources> resources;
                 app->GetResources((IResources**)&resources);
                 String str;
-                resources->GetString(R.string.ussd_dialog_sep, &str);
-                sUssdMsg.Insert(0, str)
-                sUssdMsg.Insert(0, "\n");
+                resources->GetString(Elastos::Droid::Server::Telephony::R::string::ussd_dialog_sep, &str);
+                sUssdMsg.Insert(0, str);
+                sUssdMsg.Insert(0, String("\n"));
             }
             sUssdMsg.Insert(0, text);
-            sUssdDialog->SetMessage(sUssdMsg.ToString());
-            sUssdDialog->Show();
+            AutoPtr<ICharSequence> m = CoreUtils::Convert(sUssdMsg.ToString());
+            sUssdDialog->SetMessage(m);
+            IDialog::Probe(sUssdDialog)->Show();
         }
         else {
             if (DBG) Log(String("USSD code has requested user input. Constructing input dialog."));
@@ -1252,44 +1356,50 @@ ECode PhoneUtils::DisplayMMIComplete(
                     IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
             AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
             AutoPtr<IView> dialogView;
-            inflater->Inflate(R.layout.dialog_ussd_response, NULL, (IView**)&dialogView);
+            inflater->Inflate(Elastos::Droid::Server::Telephony::R::layout::dialog_ussd_response,
+                    NULL, (IView**)&dialogView);
 
             // get the input field.
             AutoPtr<IView> view;
-            dialogView->FindViewById(R.id.input_field, (IView**)&view);
+            dialogView->FindViewById(Elastos::Droid::Server::Telephony::R::id::input_field,
+                    (IView**)&view);
             AutoPtr<IEditText> inputText = IEditText::Probe(view);
 
             // specify the dialog's click listener, with SEND and CANCEL logic.
             AutoPtr<IDialogInterfaceOnClickListener> mUSSDDialogListener =
-                    new MyDialogInterfaceOnClickListener(inputText);
+                    new MyDialogInterfaceOnClickListener(inputText, app, mmiCode, phone);
 
             // build the dialog
             AutoPtr<IAlertDialogBuilder> builder;
             CAlertDialogBuilder::New(context, (IAlertDialogBuilder**)&builder);
             builder->SetMessage(text);
             builder->SetView(dialogView);
-            builder->SetPositiveButton(R.string.send_button, mUSSDDialogListener);
-            builder->SetNegativeButton(R.string.cancel, mUSSDDialogListener);
+            builder->SetPositiveButton(Elastos::Droid::Server::Telephony::R::string::send_button,
+                    mUSSDDialogListener);
+            builder->SetNegativeButton(Elastos::Droid::Server::Telephony::R::string::cancel,
+                    mUSSDDialogListener);
             builder->SetCancelable(FALSE);
             AutoPtr<IAlertDialog> newDialog;
             builder->Create((IAlertDialog**)&newDialog);
 
             // attach the key listener to the dialog's input field and make
             // sure focus is set.
-            AutoPtr<IViewOnKeyListener> mUSSDDialogInputListener = new MyViewOnKeyListener();
-            inputText->SetOnKeyListener(mUSSDDialogInputListener);
-            inputText->RequestFocus();
+            AutoPtr<IViewOnKeyListener> mUSSDDialogInputListener =
+                    new MyViewOnKeyListener(phone, inputText, newDialog);
+            IView::Probe(inputText)->SetOnKeyListener(mUSSDDialogInputListener);
+            Boolean res;
+            IView::Probe(inputText)->RequestFocus(&res);
 
             // set the window properties of the dialog
             AutoPtr<IWindow> window;
-            newDialog.getWindow((IWindow**)&window);
+            IDialog::Probe(newDialog)->GetWindow((IWindow**)&window);
             window->SetType(
                     IWindowManagerLayoutParams::TYPE_SYSTEM_DIALOG);
             window->AddFlags(
                     IWindowManagerLayoutParams::FLAG_DIM_BEHIND);
 
             // now show the dialog!
-            newDialog->Show();
+            IDialog::Probe(newDialog)->Show();
         }
     }
     return NOERROR;
@@ -1312,7 +1422,7 @@ Boolean PhoneUtils::CancelMmiCode(
         // is displayed, which prevents more MMI code from being entered.
         AutoPtr<IInterface> obj;
         pendingMmis->Get(0, (IInterface**)&obj);
-        AutoPtr<MmiCode> mmiCode = (MmiCode*)IObject::Probe(obj);
+        AutoPtr<IMmiCode> mmiCode = IMmiCode::Probe(obj);
         Boolean res;
         if (mmiCode->IsCancelable(&res), res) {
             mmiCode->Cancel();
@@ -1369,7 +1479,8 @@ ECode PhoneUtils::GetNumberFromIntent(
 {
     VALIDATE_NOT_NULL(str)
 
-    Uri uri = intent.getData();
+    AutoPtr<IUri> uri;
+    intent->GetData((IUri**)&uri);
     String scheme;
     uri->GetScheme(&scheme);
 
@@ -1382,8 +1493,10 @@ ECode PhoneUtils::GetNumberFromIntent(
     // Otherwise, let PhoneNumberUtils.getNumberFromIntent() handle
     // the other cases (i.e. tel: and voicemail: and contact: URIs.)
 
+    AutoPtr<IPhoneNumberUtils> helper;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
     String number;
-    PhoneNumberUtils::GetNumberFromIntent(intent, context, &number);
+    helper->GetNumberFromIntent(intent, context, &number);
 
     // Check for a voicemail-dialing request.  If the voicemail number is
     // empty, throw a VoiceMailNumberMissingException.
@@ -1391,7 +1504,8 @@ ECode PhoneUtils::GetNumberFromIntent(
             (number.IsNull() || TextUtils::IsEmpty(number))) {
         //throw new VoiceMailNumberMissingException();
         Logger::E("PhoneUtils", "VoiceMailNumberMissingException");
-        return VoiceMailNumberMissingException;
+        assert(0);
+        //return VoiceMailNumberMissingException;
     }
 
     *str = number;
@@ -1411,15 +1525,18 @@ AutoPtr<ICallerInfo> PhoneUtils::GetCallerInfo(
         AutoPtr<IInterface> userDataObject;
         c->GetUserData((IInterface**)&userDataObject);
         if (IUri::Probe(userDataObject) != NULL) {
-            CallerInfo::GetCallerInfo(context, IUri::Probe(userDataObject), (ICallerInfo**)&info);
+            AutoPtr<ICallerInfoHelper> helper;
+            CCallerInfoHelper::AcquireSingleton((ICallerInfoHelper**)&helper);
+            helper->GetCallerInfo(context, IUri::Probe(userDataObject), (ICallerInfo**)&info);
             if (info != NULL) {
                 c->SetUserData(info);
             }
         }
         else {
-            if (ICallerInfoToken::Probe(userDataObject) != NULL) {
+            if (IPhoneUtilsCallerInfoToken::Probe(userDataObject) != NULL) {
                 //temporary result, while query is running
-                info = ICallerInfoToken::Probe(userDataObject)->currentInfo;
+                AutoPtr<IPhoneUtilsCallerInfoToken> tmp = IPhoneUtilsCallerInfoToken::Probe(userDataObject);
+                info = ((CallerInfoToken*)tmp.Get())->mCurrentInfo;
             }
             else {
                 //final query result
@@ -1434,7 +1551,9 @@ AutoPtr<ICallerInfo> PhoneUtils::GetCallerInfo(
                 if (DBG) Log(String("getCallerInfo: number = ") + ToLogSafePhoneNumber(number));
 
                 if (!TextUtils::IsEmpty(number)) {
-                    CallerInfo::GetCallerInfo(context, number, (ICallerInfo**)&info);
+                    AutoPtr<ICallerInfoHelper> helper;
+                    CCallerInfoHelper::AcquireSingleton((ICallerInfoHelper**)&helper);
+                    helper->GetCallerInfo(context, number, (ICallerInfo**)&info);
                     if (info != NULL) {
                         c->SetUserData(info);
                     }
@@ -1471,7 +1590,7 @@ ECode PhoneUtils::StartGetCallerInfo(
     else {
         //throw new IllegalStateException("Unexpected phone type: " + phoneType);
         Logger::E("PhoneUtils", "Unexpected phone type: %d", phoneType);
-        return IllegalStateException;
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     AutoPtr<CallerInfoToken> t = StartGetCallerInfo(context, conn, listener, cookie);
@@ -1480,7 +1599,7 @@ ECode PhoneUtils::StartGetCallerInfo(
     return NOERROR;
 }
 
-AutoPtr<CallerInfoToken> PhoneUtils::StartGetCallerInfo(
+AutoPtr<PhoneUtils::CallerInfoToken> PhoneUtils::StartGetCallerInfo(
     /* [in] */ IContext* context,
     /* [in] */ IConnection* c,
     /* [in] */ ICallerInfoAsyncQueryOnQueryCompleteListener* listener,
@@ -1489,12 +1608,12 @@ AutoPtr<CallerInfoToken> PhoneUtils::StartGetCallerInfo(
     return StartGetCallerInfo(context, c, listener, cookie, NULL);
 }
 
-AutoPtr<CallerInfoToken> PhoneUtils::StartGetCallerInfo(
+AutoPtr<PhoneUtils::CallerInfoToken> PhoneUtils::StartGetCallerInfo(
     /* [in] */ IContext* context,
     /* [in] */ IConnection* c,
     /* [in] */ ICallerInfoAsyncQueryOnQueryCompleteListener* listener,
     /* [in] */ IInterface* cookie,
-    /* [in] */ IRawGatewayInfo* info)
+    /* [in] */ CallGatewayManager::RawGatewayInfo* info)
 {
     AutoPtr<CallerInfoToken> cit;
 
@@ -1547,15 +1666,21 @@ AutoPtr<CallerInfoToken> PhoneUtils::StartGetCallerInfo(
 
         //create a dummy callerinfo, populate with what we know from URI.
         cit = new CallerInfoToken();
-        cit->mCurrentInfo = new CallerInfo();
-        cit->mAsyncQuery = CallerInfoAsyncQuery::StartQuery(QUERY_TOKEN, context,
-                IUri::Probe(userDataObject), sCallerInfoQueryListener, c);
+        CCallerInfo::New((ICallerInfo**)&(cit->mCurrentInfo));
+
+        AutoPtr<ICallerInfoAsyncQueryHelper> helper;
+        CCallerInfoAsyncQueryHelper::AcquireSingleton((ICallerInfoAsyncQueryHelper**)&helper);
+
+        helper->StartQuery(QUERY_TOKEN, context,
+                IUri::Probe(userDataObject), sCallerInfoQueryListener, c,
+                (ICallerInfoAsyncQuery**)&(cit->mAsyncQuery));
+
         cit->mAsyncQuery->AddQueryListener(QUERY_TOKEN, listener, cookie);
         cit->mIsFinal = FALSE;
 
-        c->SetUserData(cit);
+        c->SetUserData(TO_IINTERFACE(cit));
 
-        if (DBG) Log(String("startGetCallerInfo: query based on Uri: ") + TIO_CSTR(userDataObject));
+        if (DBG) Log(String("startGetCallerInfo: query based on Uri: ") + TO_CSTR(userDataObject));
 
     }
     else if (userDataObject == NULL) {
@@ -1564,7 +1689,7 @@ AutoPtr<CallerInfoToken> PhoneUtils::StartGetCallerInfo(
         String number;
         c->GetAddress(&number);
 
-        if (info != NULL && info != ICallGatewayManager::EMPTY_INFO) {
+        if (info != NULL && info != CallGatewayManager::EMPTY_INFO) {
             // Gateway number, the connection number is actually the gateway number.
             // need to lookup via dialed number.
             number = info->mTrueNumber;
@@ -1596,42 +1721,66 @@ AutoPtr<CallerInfoToken> PhoneUtils::StartGetCallerInfo(
         }
 
         cit = new CallerInfoToken();
-        cit->mCurrentInfo = new CallerInfo();
+        CCallerInfo::New((ICallerInfo**)&(cit->mCurrentInfo));
 
         // Store CNAP information retrieved from the Connection (we want to do this
         // here regardless of whether the number is empty or not).
-        cit->mCurrentInfo.cnapName =  c.getCnapName();
-        cit->mCurrentInfo.name = cit.currentInfo.cnapName; // This can still get overwritten
+        String name;
+        c->GetCnapName(&name);
+        cit->mCurrentInfo->SetCnapName(name);
+
+        cit->mCurrentInfo->SetName(name); // This can still get overwritten
                                                          // by ContactInfo later
-        cit->mCurrentInfo.numberPresentation = c.getNumberPresentation();
-        cit->mCurrentInfo.namePresentation = c.getCnapNamePresentation();
+
+        Int32 presentation;
+        c->GetNumberPresentation(&presentation);
+        cit->mCurrentInfo->SetNumberPresentation(presentation);
+
+        Int32 presentation2;
+        c->GetCnapNamePresentation(&presentation2);
+        cit->mCurrentInfo->SetNamePresentation(presentation2);
 
         if (VDBG) {
             Log(String("startGetCallerInfo: number = ") + number);
-            Log("startGetCallerInfo: CNAP Info from FW(1): name="
-                + cit.currentInfo.cnapName
-                + ", Name/Number Pres=" + cit.currentInfo.numberPresentation);
+
+            StringBuilder sb;
+            sb += "startGetCallerInfo: CNAP Info from FW(1): name=";
+            String name;
+            cit->mCurrentInfo->GetCnapName(&name);
+            sb += name;
+            sb += ", Name/Number Pres=";
+            Int32 presentation;
+            cit->mCurrentInfo->GetNumberPresentation(&presentation);
+            sb +=  presentation;
+            Log(sb.ToString());
         }
 
         // handling case where number is null (caller id hidden) as well.
         if (!TextUtils::IsEmpty(number)) {
             // Check for special CNAP cases and modify the CallerInfo accordingly
             // to be sure we keep the right information to display/log later
-            number = ModifyForSpecialCnapCases(context, cit->mCurrentInfo, number,
-                    cit->mCurrentInfo.numberPresentation);
+            Int32 presentation;
+            cit->mCurrentInfo->GetNumberPresentation(&presentation);
 
-            cit->mCurrentInfo.phoneNumber = number;
+            number = ModifyForSpecialCnapCases(context, cit->mCurrentInfo, number,
+                    presentation);
+
+            cit->mCurrentInfo->SetPhoneNumber(number);
             // For scenarios where we may receive a valid number from the network but a
             // restricted/unavailable presentation, we do not want to perform a contact query
             // (see note on isFinal above). So we set isFinal to true here as well.
-            if (cit.currentInfo.numberPresentation != IPhoneConstants::PRESENTATION_ALLOWED) {
+            if (presentation != IPhoneConstants::PRESENTATION_ALLOWED) {
                 cit->mIsFinal = TRUE;
             }
             else {
-                if (DBG) log("==> Actually starting CallerInfoAsyncQuery.startQuery()...");
-                cit->mAsyncQuery = CallerInfoAsyncQuery.startQuery(QUERY_TOKEN, context,
-                        number, sCallerInfoQueryListener, c);
-                cit->mAsyncQuery.addQueryListener(QUERY_TOKEN, listener, cookie);
+                if (DBG) Log(String("==> Actually starting CallerInfoAsyncQuery.startQuery()..."));
+
+                AutoPtr<ICallerInfoAsyncQueryHelper> helper;
+                CCallerInfoAsyncQueryHelper::AcquireSingleton((ICallerInfoAsyncQueryHelper**)&helper);
+
+                helper->StartQuery(QUERY_TOKEN, context,
+                        number, sCallerInfoQueryListener, c, (ICallerInfoAsyncQuery**)&(cit->mAsyncQuery));
+                cit->mAsyncQuery->AddQueryListener(QUERY_TOKEN, listener, cookie);
                 cit->mIsFinal = FALSE;
             }
         }
@@ -1645,25 +1794,26 @@ AutoPtr<CallerInfoToken> PhoneUtils::StartGetCallerInfo(
             cit->mIsFinal = TRUE; // please see note on isFinal, above.
         }
 
-        c->SetUserData(cit);
+        c->SetUserData(TO_IINTERFACE(cit));
 
         if (DBG) {
-            Log(Srting("startGetCallerInfo: query based on number: ") + ToLogSafePhoneNumber(number));
+            Log(String("startGetCallerInfo: query based on number: ") + ToLogSafePhoneNumber(number));
         }
 
     }
-    else if (ICallerInfoToken::Probe(userDataObject) != NULL) {
+    else if (IPhoneUtilsCallerInfoToken::Probe(userDataObject) != NULL) {
         // State (2): query is executing, but has not completed.
 
         // just tack on this listener to the queue.
-        cit = ICallerInfoToken::Probe(userDataObject);
+        AutoPtr<IPhoneUtilsCallerInfoToken> tmp = IPhoneUtilsCallerInfoToken::Probe(userDataObject);
+        cit = (CallerInfoToken*)tmp.Get();
 
         // handling case where number is null (caller id hidden) as well.
         if (cit->mAsyncQuery != NULL) {
             cit->mAsyncQuery->AddQueryListener(QUERY_TOKEN, listener, cookie);
 
-            if (DBG) Log(String("startGetCallerInfo: query already running, adding listener: ") +
-                    listener.getClass().toString());
+            // if (DBG) Log(String("startGetCallerInfo: query already running, adding listener: ") +
+            //         listener.getClass().toString());
         }
         else {
             // handling case where number/name gets updated later on by the network
@@ -1673,33 +1823,45 @@ AutoPtr<CallerInfoToken> PhoneUtils::StartGetCallerInfo(
             if (info != NULL) {
                 // Gateway number, the connection number is actually the gateway number.
                 // need to lookup via dialed number.
-                updatedNumber = info.trueNumber;
+                updatedNumber = info->mTrueNumber;
             }
 
             if (DBG) {
-                Log(Srting("startGetCallerInfo: updatedNumber initially = ")
+                Log(String("startGetCallerInfo: updatedNumber initially = ")
                         + ToLogSafePhoneNumber(updatedNumber));
             }
             if (!TextUtils::IsEmpty(updatedNumber)) {
                 // Store CNAP information retrieved from the Connection
-                cit->mCurrentInfo.cnapName =  c.getCnapName();
+                String name;
+                c->GetCnapName(&name);
+                cit->mCurrentInfo->SetCnapName(name);
+
                 // This can still get overwritten by ContactInfo
-                cit->mCurrentInfo.name = cit.currentInfo.cnapName;
-                cit->mCurrentInfo.numberPresentation = c.getNumberPresentation();
-                cit->mCurrentInfo.namePresentation = c.getCnapNamePresentation();
+                cit->mCurrentInfo->SetName(name);
+
+                Int32 npresentation;
+                c->GetNumberPresentation(&npresentation);
+                cit->mCurrentInfo->SetNumberPresentation(npresentation);
+
+                Int32 cpresentation;
+                c->GetCnapNamePresentation(&cpresentation);
+                cit->mCurrentInfo->SetNamePresentation(cpresentation);
 
                 updatedNumber = ModifyForSpecialCnapCases(context, cit->mCurrentInfo,
-                        updatedNumber, cit->mCurrentInfo.numberPresentation);
+                        updatedNumber, npresentation);
 
-                cit->mCurrentInfo.phoneNumber = updatedNumber;
+                cit->mCurrentInfo->SetPhoneNumber(updatedNumber);
                 if (DBG) {
                     Log(String("startGetCallerInfo: updatedNumber=")
                             + ToLogSafePhoneNumber(updatedNumber));
                 }
                 if (VDBG) {
-                    Log("startGetCallerInfo: CNAP Info from FW(2): name="
-                            + cit.currentInfo.cnapName
-                            + ", Name/Number Pres=" + cit.currentInfo.numberPresentation);
+                    StringBuilder sb;
+                    sb += "startGetCallerInfo: CNAP Info from FW(2): name=";
+                    sb += name;
+                    sb += ", Name/Number Pres=";
+                    sb += npresentation;
+                    Log(sb.ToString());
                 }
                 else if (DBG) {
                     Log(String("startGetCallerInfo: CNAP Info from FW(2)"));
@@ -1707,32 +1869,47 @@ AutoPtr<CallerInfoToken> PhoneUtils::StartGetCallerInfo(
                 // For scenarios where we may receive a valid number from the network but a
                 // restricted/unavailable presentation, we do not want to perform a contact query
                 // (see note on isFinal above). So we set isFinal to true here as well.
-                if (cit.currentInfo.numberPresentation != IPhoneConstants::PRESENTATION_ALLOWED) {
+                if (npresentation != IPhoneConstants::PRESENTATION_ALLOWED) {
                     cit->mIsFinal = TRUE;
                 }
                 else {
-                    cit->mAsyncQuery = CallerInfoAsyncQuery.startQuery(QUERY_TOKEN, context,
-                            updatedNumber, sCallerInfoQueryListener, c);
-                    cit->mAsyncQuery.addQueryListener(QUERY_TOKEN, listener, cookie);
+                    AutoPtr<ICallerInfoAsyncQueryHelper> helper;
+                    CCallerInfoAsyncQueryHelper::AcquireSingleton((ICallerInfoAsyncQueryHelper**)&helper);
+
+                    helper->StartQuery(QUERY_TOKEN, context,
+                            updatedNumber, sCallerInfoQueryListener, c,
+                            (ICallerInfoAsyncQuery**)&(cit->mAsyncQuery));
+                    cit->mAsyncQuery->AddQueryListener(QUERY_TOKEN, listener, cookie);
                     cit->mIsFinal = FALSE;
                 }
             }
             else {
                 if (DBG) Log(String("startGetCallerInfo: No query to attach to, send trivial reply."));
                 if (cit->mCurrentInfo == NULL) {
-                    cit->mCurrentInfo = new CallerInfo();
+                    CCallerInfo::New((ICallerInfo**)&(cit->mCurrentInfo));
                 }
                 // Store CNAP information retrieved from the Connection
-                cit->mCurrentInfo.cnapName = c.getCnapName();  // This can still get
+                String name;
+                c->GetCnapName(&name);
+                cit->mCurrentInfo->SetCnapName(name);  // This can still get
                                                              // overwritten by ContactInfo
-                cit->mCurrentInfo.name = cit.currentInfo.cnapName;
-                cit->mCurrentInfo.numberPresentation = c.getNumberPresentation();
-                cit->mCurrentInfo.namePresentation = c.getCnapNamePresentation();
+                cit->mCurrentInfo->SetName(name);
+
+                Int32 npresentation;
+                c->GetNumberPresentation(&npresentation);
+                cit->mCurrentInfo->SetNumberPresentation(npresentation);
+
+                Int32 cpresentation;
+                c->GetCnapNamePresentation(&cpresentation);
+                cit->mCurrentInfo->SetNamePresentation(cpresentation);
 
                 if (VDBG) {
-                    Log("startGetCallerInfo: CNAP Info from FW(3): name="
-                            + cit.currentInfo.cnapName
-                            + ", Name/Number Pres=" + cit.currentInfo.numberPresentation);
+                    StringBuilder sb;
+                    sb += "startGetCallerInfo: CNAP Info from FW(3): name=";
+                    sb += name;
+                    sb += ", Name/Number Pres=";
+                    sb += npresentation;
+                    Log(sb.ToString());
                 }
                 else if (DBG) {
                     Log(String("startGetCallerInfo: CNAP Info from FW(3)"));
@@ -1754,7 +1931,7 @@ AutoPtr<CallerInfoToken> PhoneUtils::StartGetCallerInfo(
         cit->mIsFinal = TRUE;
         // since the query is already done, call the listener.
         if (DBG) Log(String("startGetCallerInfo: query already done, returning CallerInfo"));
-        if (DBG) Log(String("==> cit.currentInfo = ") + cit.currentInfo);
+        if (DBG) Log(String("==> cit.currentInfo = ") + TO_CSTR(cit->mCurrentInfo));
     }
     return cit;
 }
@@ -1766,16 +1943,22 @@ String PhoneUtils::GetCompactNameFromCallerInfo(
     if (DBG) Log(String("getCompactNameFromCallerInfo: info = ") + TO_CSTR(ci));
 
     String compactName;
+    Int32 npresentation;
+    ci->GetNumberPresentation(&npresentation);
     if (ci != NULL) {
-        if (TextUtils::IsEmpty(ci->mName)) {
+        String name;
+        ci->GetName(&name);
+        if (TextUtils::IsEmpty(name)) {
             // Perform any modifications for special CNAP cases to
             // the phone number being displayed, if applicable.
-            compactName = ModifyForSpecialCnapCases(context, ci, ci.phoneNumber,
-                                                    ci.numberPresentation);
+            String number;
+            ci->GetPhoneNumber(&number);
+
+            compactName = ModifyForSpecialCnapCases(context, ci, number, npresentation);
         }
         else {
             // Don't call modifyForSpecialCnapCases on regular name. See b/2160795.
-            compactName = ci.name;
+            compactName = name;
         }
     }
 
@@ -1783,14 +1966,14 @@ String PhoneUtils::GetCompactNameFromCallerInfo(
         // If we're still null/empty here, then check if we have a presentation
         // string that takes precedence that we could return, otherwise display
         // "unknown" string.
-        if (ci != NULL && ci.numberPresentation == IPhoneConstants::PRESENTATION_RESTRICTED) {
-            context->GetString(R.string.private_num, &compactName);
+        if (ci != NULL && npresentation == IPhoneConstants::PRESENTATION_RESTRICTED) {
+            context->GetString(Elastos::Droid::Server::Telephony::R::string::private_num, &compactName);
         }
-        else if (ci != NULL && ci.numberPresentation == IPhoneConstants::PRESENTATION_PAYPHONE) {
-            context->GetString(R.string.payphone, &compactName);
+        else if (ci != NULL && npresentation == IPhoneConstants::PRESENTATION_PAYPHONE) {
+            context->GetString(Elastos::Droid::Server::Telephony::R::string::payphone, &compactName);
         }
         else {
-            context->GetString(R.string.unknown, &compactName);
+            context->GetString(Elastos::Droid::Server::Telephony::R::string::unknown, &compactName);
         }
     }
     if (VDBG) Log(String("getCompactNameFromCallerInfo: compactName=") + compactName);
@@ -1806,7 +1989,7 @@ Boolean PhoneUtils::IsConferenceCall(
     // you're in a 3-way call, all we can do is display the "generic"
     // state of the UI.)  So as far as the in-call UI is concerned,
     // Conference corresponds to generic display.
-    AUtoPtr<PhoneGlobals> app;
+    AutoPtr<PhoneGlobals> app;
     PhoneGlobals::GetInstance((PhoneGlobals**)&app);
 
     AutoPtr<IPhone> phone;
@@ -1814,11 +1997,11 @@ Boolean PhoneUtils::IsConferenceCall(
     Int32 phoneType;
     phone->GetPhoneType(&phoneType);
     if (phoneType == IPhoneConstants::PHONE_TYPE_CDMA) {
-        ICdmaPhoneCallStatePhoneCallState state;
-        app->mCcdmaPhoneCallState->GetCurrentCallState(&state);
+        CdmaPhoneCallState::PhoneCallState state;
+        app->mCdmaPhoneCallState->GetCurrentCallState(&state);
         Boolean res;
-        if ((state == ICdmaPhoneCallStatePhoneCallState_CONF_CALL)
-                || ((state == ICdmaPhoneCallStatePhoneCallState_THRWAY_ACTIVE)
+        if ((state == CdmaPhoneCallState::CONF_CALL)
+                || ((state == CdmaPhoneCallState::THRWAY_ACTIVE)
                 && (app->mCdmaPhoneCallState->IsThreeWayCallOrigStateDialing(&res), !res))) {
             return TRUE;
         }
@@ -1860,8 +2043,9 @@ Boolean PhoneUtils::StartNewCall(
     PhoneGlobals::GetInstance((PhoneGlobals**)&app);
 
     // Sanity-check that this is OK given the current state of the phone.
-    if (!OkToAddCall(cm)) {
-        Logger::W(LOG_TAG, "startNewCall: can't add a new call in the current state");
+    Boolean res;
+    if (OkToAddCall(cm, &res), !res) {
+        Logger::W(TAG, "startNewCall: can't add a new call in the current state");
         DumpCallManager();
         return FALSE;
     }
@@ -1877,11 +2061,11 @@ Boolean PhoneUtils::StartNewCall(
     //try {
     ECode ec = app->StartActivity(intent);
     //} catch (ActivityNotFoundException e) {
-    if (ec == (ECode)ActivityNotFoundException) {
+    if (ec == (ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION) {
         // This is rather rare but possible.
         // Note: this method is used even when the phone is encrypted. At that moment
         // the system may not find any Activity which can accept this Intent.
-        Logger:E(LOG_TAG, "Activity for adding calls isn't found.");
+        Logger::E(TAG, "Activity for adding calls isn't found.");
         return FALSE;
     }
 
@@ -1962,7 +2146,7 @@ ECode PhoneUtils::TurnOnNoiseSuppression(
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     Boolean res;
-    if (resources->GetBoolean(R.bool.has_in_call_noise_suppression, &res), !res) {
+    if (resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::has_in_call_noise_suppression, &res), !res) {
         return NOERROR;
     }
 
@@ -1991,7 +2175,7 @@ ECode PhoneUtils::RestoreNoiseSuppression(
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     Boolean res;
-    if (resources->GetBoolean(R.bool.has_in_call_noise_suppression, &res), !res) {
+    if (resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::has_in_call_noise_suppression, &res), !res) {
         return NOERROR;
     }
 
@@ -2008,7 +2192,7 @@ Boolean PhoneUtils::IsNoiseSuppressionOn(
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     Boolean res;
-    if (resources->GetBoolean(R.bool.has_in_call_noise_suppression, &res), !res) {
+    if (resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::has_in_call_noise_suppression, &res), !res) {
         return FALSE;
     }
 
@@ -2019,7 +2203,7 @@ Boolean PhoneUtils::IsNoiseSuppressionOn(
     String noiseSuppression;
     audioManager->GetParameters(String("noise_suppression"), &noiseSuppression);
     if (DBG) Log(String("isNoiseSuppressionOn: ") + noiseSuppression);
-    if (noiseSuppression->Contains(String("off"), &res), res) {
+    if (noiseSuppression.Contains("off")) {
         return FALSE;
     }
     else {
@@ -2046,7 +2230,11 @@ Boolean PhoneUtils::IsInEmergencyCall(
         PhoneGlobals::GetInstance((PhoneGlobals**)&app);
         String address;
         cn->GetAddress(&address);
-        if (PhoneNumberUtils::IsLocalEmergencyNumber(app, address)) {
+
+        AutoPtr<IPhoneNumberUtils> helper;
+        CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+        Boolean res;
+        if (helper->IsLocalEmergencyNumber(app, address, &res), res) {
             return TRUE;
         }
     }
@@ -2081,7 +2269,7 @@ Boolean PhoneUtils::HasDisconnectedConnections(
 
     return HasDisconnectedConnections(fcall) ||
             HasDisconnectedConnections(bcall) ||
-            HsDisconnectedConnections(rcall);
+            HasDisconnectedConnections(rcall);
 }
 
 Boolean PhoneUtils::HasDisconnectedConnections(
@@ -2098,7 +2286,7 @@ Boolean PhoneUtils::HasDisconnectedConnections(
         AutoPtr<IConnection> cn = IConnection::Probe(obj);
 
         Boolean res;
-        if (c->IsAlive(&res), !res) {
+        if (cn->IsAlive(&res), !res) {
             return TRUE;
         }
 
@@ -2140,23 +2328,24 @@ Boolean PhoneUtils::OkToSupportHold(
 
     AutoPtr<IPhone> phone;
     fgCall->GetPhone((IPhone**)&phone);
-    if (TelephonyCapabilities::SupportsHoldAndUnhold(phone)) {
-        // This phone has the concept of explicit "Hold" and "Unhold" actions.
-        supportsHold = TRUE;
-    }
-    else if (hasHoldingCall && (fgCallState == ICallState_IDLE)) {
-        // Even when foreground phone device doesn't support hold/unhold, phone devices
-        // for background holding calls may do.
-        AutoPtr<ICall> bgCall;
-        cm->GetFirstActiveBgCall((ICall**)&bgCall);
-        if (bgCall != NULL) {
-            AutoPtr<IPhone> phone;
-            bgCall->GetPhone((IPhone**)&phone);
-            if (TelephonyCapabilities::SupportsHoldAndUnhold(phone)) {
-                supportsHold = TRUE;
-            }
-        }
-    }
+    assert(0);
+    // if (TelephonyCapabilities::SupportsHoldAndUnhold(phone)) {
+    //     // This phone has the concept of explicit "Hold" and "Unhold" actions.
+    //     supportsHold = TRUE;
+    // }
+    // else if (hasHoldingCall && (fgCallState == ICallState_IDLE)) {
+    //     // Even when foreground phone device doesn't support hold/unhold, phone devices
+    //     // for background holding calls may do.
+    //     AutoPtr<ICall> bgCall;
+    //     cm->GetFirstActiveBgCall((ICall**)&bgCall);
+    //     if (bgCall != NULL) {
+    //         AutoPtr<IPhone> phone;
+    //         bgCall->GetPhone((IPhone**)&phone);
+    //         if (TelephonyCapabilities::SupportsHoldAndUnhold(phone)) {
+    //             supportsHold = TRUE;
+    //         }
+    //     }
+    // }
     return supportsHold;
 }
 
@@ -2176,9 +2365,9 @@ ECode PhoneUtils::OkToSwapCalls(
         // state by either accepting a Call Waiting or by merging two calls
         AutoPtr<PhoneGlobals> app;
         PhoneGlobals::GetInstance((PhoneGlobals**)&app);
-        Int32 state;
+        CdmaPhoneCallState::PhoneCallState state;
         app->mCdmaPhoneCallState->GetCurrentCallState(&state);
-        *result = (state == CdmaPhoneCallState.PhoneCallState.CONF_CALL);
+        *result = (state == CdmaPhoneCallState::CONF_CALL);
         return NOERROR;
     }
     else if ((phoneType == IPhoneConstants::PHONE_TYPE_GSM)
@@ -2214,7 +2403,7 @@ ECode PhoneUtils::OkToSwapCalls(
     else {
         //throw new IllegalStateException("Unexpected phone type: " + phoneType);
         Logger::E("PhoneUtils", "Unexpected phone type: %d", phoneType);
-        return IllegalStateException;
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;
 }
@@ -2230,10 +2419,10 @@ Boolean PhoneUtils::OkToMergeCalls(
         // CDMA: "Merge" is enabled only when the user is in a 3Way call.
         AutoPtr<PhoneGlobals> app;
         PhoneGlobals::GetInstance((PhoneGlobals**)&app);
-        Int32 state;
+        CdmaPhoneCallState::PhoneCallState state;
         app->mCdmaPhoneCallState->GetCurrentCallState(&state);
         Boolean res;
-        return ((state == ICdmaPhoneCallStatePhoneCallState_THRWAY_ACTIVE)
+        return ((state == CdmaPhoneCallState::THRWAY_ACTIVE)
                 && (app->mCdmaPhoneCallState->IsThreeWayCallOrigStateDialing(&res), !res));
     }
     else {
@@ -2270,8 +2459,6 @@ ECode PhoneUtils::OkToAddCall(
 
     Int32 phoneType;
     phone->GetPhoneType(&phoneType);
-    AutoPtr<ICall> call;
-    cm->GetActiveFgCall((ICall**)&call);
     ICallState fgCallState;
     call->GetState(&fgCallState);
     if (phoneType == IPhoneConstants::PHONE_TYPE_CDMA) {
@@ -2312,7 +2499,7 @@ ECode PhoneUtils::OkToAddCall(
     else {
         //throw new IllegalStateException("Unexpected phone type: " + phoneType);
         Logger::E("PhoneUtils", "Unexpected phone type: %d", phoneType);
-        return IllegalStateException;
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;
 }
@@ -2342,9 +2529,10 @@ Int32 PhoneUtils::CheckCnapSpecialCases(
 String PhoneUtils::ModifyForSpecialCnapCases(
     /* [in] */ IContext* context,
     /* [in] */ ICallerInfo* ci,
-    /* [in] */ const String& number,
+    /* [in] */ const String& _number,
     /* [in] */ Int32 presentation)
 {
+    String number = _number;
     // Obviously we return number if ci == null, but still return number if
     // number == null, because in these cases the correct string will still be
     // displayed/logged after this function returns based on the presentation value.
@@ -2367,12 +2555,17 @@ String PhoneUtils::ModifyForSpecialCnapCases(
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     AutoPtr<ArrayOf<String> > absentNumberValues;
-    resources->GetStringArray(R.array.absent_num, (ArrayOf<String>**)&absentNumberValues);
+    resources->GetStringArray(Elastos::Droid::Server::Telephony::R::array::absent_num,
+            (ArrayOf<String>**)&absentNumberValues);
 
-    if (Arrays.asList(absentNumberValues).contains(number)
-            && presentation == IPhoneConstants::PRESENTATION_ALLOWED) {
-        context->GetString(R.string.unknown, &number);
-        ci.numberPresentation = IPhoneConstants::PRESENTATION_UNKNOWN;
+    AutoPtr<IList> outList;
+    Arrays::AsList(absentNumberValues, (IList**)&outList);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(number);
+    Boolean res;
+    outList->Contains(TO_IINTERFACE(cchar), &res);
+    if (res && presentation == IPhoneConstants::PRESENTATION_ALLOWED) {
+        context->GetString(Elastos::Droid::Server::Telephony::R::string::unknown, &number);
+        ci->SetNumberPresentation(IPhoneConstants::PRESENTATION_UNKNOWN);
     }
 
     // Check for other special "corner cases" for CNAP and fix them similarly. Corner
@@ -2380,17 +2573,19 @@ String PhoneUtils::ModifyForSpecialCnapCases(
     // if we think we have an allowed presentation, or if the CallerInfo presentation doesn't
     // match the presentation passed in for verification (meaning we changed it previously
     // because it's a corner case and we're being called from a different entry point).
-    if (ci.numberPresentation == IPhoneConstants::PRESENTATION_ALLOWED
-            || (ci.numberPresentation != presentation
+    Int32 npresentation;
+    ci->GetNumberPresentation(&npresentation);
+    if (npresentation == IPhoneConstants::PRESENTATION_ALLOWED
+            || (npresentation != presentation
                     && presentation == IPhoneConstants::PRESENTATION_ALLOWED)) {
         Int32 cnapSpecialCase = CheckCnapSpecialCases(number);
         if (cnapSpecialCase != CNAP_SPECIAL_CASE_NO) {
             // For all special strings, change number & numberPresentation.
             if (cnapSpecialCase == IPhoneConstants::PRESENTATION_RESTRICTED) {
-                context->GetString(R.string.private_num, &number);
+                context->GetString(Elastos::Droid::Server::Telephony::R::string::private_num, &number);
             }
-            else if (cnapSpecialCase == PhoneConstants.PRESENTATION_UNKNOWN) {
-                context->GetString(R.string.unknown, &number);
+            else if (cnapSpecialCase == IPhoneConstants::PRESENTATION_UNKNOWN) {
+                context->GetString(Elastos::Droid::Server::Telephony::R::string::unknown, &number);
             }
             if (DBG) {
                 StringBuilder sb;
@@ -2400,7 +2595,7 @@ String PhoneUtils::ModifyForSpecialCnapCases(
                 sb += cnapSpecialCase;
                 Log(sb.ToString());
             }
-            ci.numberPresentation = cnapSpecialCase;
+            ci->SetNumberPresentation(cnapSpecialCase);
         }
     }
     if (DBG) {
@@ -2411,17 +2606,26 @@ String PhoneUtils::ModifyForSpecialCnapCases(
 }
 
 Boolean PhoneUtils::IsRoutableViaGateway(
-    /* [in] */ const String& number)
+    /* [in] */ const String& _number)
 {
+    String number = _number;
     if (TextUtils::IsEmpty(number)) {
         return FALSE;
     }
-    number = PhoneNumberUtils::StripSeparators(number);
-    if (!number.Equals(PhoneNumberUtils::ConvertKeypadLettersToDigits(number))) {
+
+    AutoPtr<IPhoneNumberUtils> helper;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+    helper->StripSeparators(number, &number);
+
+    String tmp;
+    helper->ConvertKeypadLettersToDigits(number, &tmp);
+    if (!number.Equals(tmp)) {
         return FALSE;
     }
-    number = PhoneNumberUtils::ExtractNetworkPortion(number);
-    return PhoneNumberUtils::IsGlobalPhoneNumber(number);
+    helper->ExtractNetworkPortion(number, &number);
+    Boolean res;
+    helper->IsGlobalPhoneNumber(number, &res);
+    return res;
 }
 
 Boolean PhoneUtils::ActivateSpeakerIfDocked(
@@ -2430,10 +2634,10 @@ Boolean PhoneUtils::ActivateSpeakerIfDocked(
     if (DBG) Log(String("activateSpeakerIfDocked()..."));
 
     Boolean activated = FALSE;
-    if (iPhoneGlobals::mDockState != IIntent::EXTRA_DOCK_STATE_UNDOCKED) {
+    if (PhoneGlobals::mDockState != IIntent::EXTRA_DOCK_STATE_UNDOCKED) {
         if (DBG) Log(String("activateSpeakerIfDocked(): In a dock -> may need to turn on speaker."));
         AutoPtr<PhoneGlobals> app;
-        PhoneGlobals::GetInstance((PhoneGlobals**)app);
+        PhoneGlobals::GetInstance((PhoneGlobals**)&app);
 
         // TODO: This function should move to AudioRouter
         AutoPtr<IBluetoothManager> btManager;
@@ -2452,21 +2656,22 @@ Boolean PhoneUtils::ActivateSpeakerIfDocked(
 Boolean PhoneUtils::IsPhoneInEcm(
     /* [in] */ IPhone* phone)
 {
-    if ((phone != NULL) && TelephonyCapabilities::SupportsEcm(phone)) {
-        // For phones that support ECM, return true iff PROPERTY_INECM_MODE == "true".
-        // TODO: There ought to be a better API for this than just
-        // exposing a system property all the way up to the app layer,
-        // probably a method like "inEcm()" provided by the telephony
-        // layer.
-        AutoPtr<ISystemProperties> helper;
-        CSystemProperties::AcquireSingleton((ISystemProperties**)&helper);
-        String ecmMode;
-        helper->Get(ITelephonyProperties::PROPERTY_INECM_MODE, &ecmMode);
-        if (!ecmMode.IsNull()) {
-            assert(0 && "Equals with true or TRUE or 1 ???")
-            return ecmMode.Equals(String("true"));
-        }
-    }
+    assert(0);
+    // if ((phone != NULL) && TelephonyCapabilities::SupportsEcm(phone)) {
+    //     // For phones that support ECM, return true iff PROPERTY_INECM_MODE == "true".
+    //     // TODO: There ought to be a better API for this than just
+    //     // exposing a system property all the way up to the app layer,
+    //     // probably a method like "inEcm()" provided by the telephony
+    //     // layer.
+    //     AutoPtr<ISystemProperties> helper;
+    //     CSystemProperties::AcquireSingleton((ISystemProperties**)&helper);
+    //     String ecmMode;
+    //     helper->Get(ITelephonyProperties::PROPERTY_INECM_MODE, &ecmMode);
+    //     if (!ecmMode.IsNull()) {
+    //         assert(0 && "Equals with true or TRUE or 1 ???")
+    //         return ecmMode.Equals(String("true"));
+    //     }
+    // }
     return FALSE;
 }
 
@@ -2484,15 +2689,25 @@ AutoPtr<IPhone> PhoneUtils::PickPhoneBasedOnNumber(
         sb += ", number ";
         sb += ToLogSafePhoneNumber(number);
         sb += ", sipUri ";
-        sb += primarySipUri != null ? Uri.parse(primarySipUri).toSafeString() : "null";
+        String tmp;
+        if (!primarySipUri.IsNull()) {
+            AutoPtr<IUriHelper> helper;
+            CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+            AutoPtr<IUri> uri;
+            helper->Parse(primarySipUri, (IUri**)&uri);
+            uri->ToSafeString(&tmp);
+        }
+        else {
+            tmp = String("null");
+        }
+        sb += tmp;
         sb += ", thirdPartyCallComponent: ";
         sb += thirdPartyCallComponent;
         Log(sb.ToString());
     }
 
     if (!primarySipUri.IsNull()) {
-        AutoPtr<IPhone> phone;
-        GetSipPhoneFromUri(cm, primarySipUri, (IPhone**)&phone);
+        AutoPtr<IPhone> phone = GetSipPhoneFromUri(cm, primarySipUri);
         if (phone != NULL) return phone;
     }
 
@@ -2513,7 +2728,7 @@ AutoPtr<IPhone> PhoneUtils::GetSipPhoneFromUri(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         list->Get(i, (IInterface**)&obj);
-        AutoPtr<IPhone> phone = IConnection::Probe(obj);
+        AutoPtr<IPhone> phone = IPhone::Probe(obj);
 
         Int32 type;
         phone->GetPhoneType(&type);
@@ -2527,7 +2742,8 @@ AutoPtr<IPhone> PhoneUtils::GetSipPhoneFromUri(
                     sb += "found SipPhone! obj = ";
                     sb += phone;
                     sb += ", ";
-                    sb += phone.getClass();
+                    assert(0);
+                    //sb += phone.getClass();
                     Log(sb.ToString());
                 }
                 return phone;
@@ -2545,7 +2761,7 @@ Boolean PhoneUtils::IsRealIncomingCall(
     AutoPtr<PhoneGlobals> globals;
     PhoneGlobals::GetInstance((PhoneGlobals**)&globals);
     Boolean res;
-    return (state == ICallState_INCOMING && globals->mCM->HasActiveFgCall(&res), !res));
+    return (state == ICallState_INCOMING && (globals->mCM->HasActiveFgCall(&res), !res));
 }
 
 String PhoneUtils::GetPresentationString(
@@ -2553,12 +2769,12 @@ String PhoneUtils::GetPresentationString(
     /* [in] */ Int32 presentation)
 {
     String name;
-    context->GetString(R.string.unknown, &name);
+    context->GetString(Elastos::Droid::Server::Telephony::R::string::unknown, &name);
     if (presentation == IPhoneConstants::PRESENTATION_RESTRICTED) {
-        context->GetString(R.string.private_num, &name);
+        context->GetString(Elastos::Droid::Server::Telephony::R::string::private_num, &name);
     }
     else if (presentation == IPhoneConstants::PRESENTATION_PAYPHONE) {
-        context->GetString(R.string.payphone, &name);
+        context->GetString(Elastos::Droid::Server::Telephony::R::string::payphone, &name);
     }
     return name;
 }
@@ -2567,12 +2783,13 @@ void PhoneUtils::SendViewNotificationAsync(
     /* [in] */ IContext* context,
     /* [in] */ IUri* contactUri)
 {
-    if (DBG) Logger::D(LOG_TAG, "Send view notification to Contacts (uri: %d)", TO_CSTR(contactUri));
+    if (DBG) Logger::D(TAG, "Send view notification to Contacts (uri: %d)", TO_CSTR(contactUri));
     AutoPtr<IIntent> intent;
     CIntent::New(String("com.android.contacts.VIEW_NOTIFICATION"), contactUri, (IIntent**)&intent);
     intent->SetClassName(String("com.android.contacts"),
             String("com.android.contacts.ViewNotificationService"));
-    context->StartService(intent);
+    AutoPtr<IComponentName> name;
+    context->StartService(intent, (IComponentName**)&name);
 }
 
 void PhoneUtils::DumpCallState(
@@ -2580,12 +2797,12 @@ void PhoneUtils::DumpCallState(
 {
     AutoPtr<PhoneGlobals> app;
     PhoneGlobals::GetInstance((PhoneGlobals**)&app);
-    Logger::D(LOG_TAG,"dumpCallState():");
+    Logger::D(TAG,"dumpCallState():");
     String name;
     phone->GetPhoneName(&name);
     Int32 state;
     phone->GetState(&state);
-    Logger::D(LOG_TAG, "- Phone: %s, name = %s, state = %d",
+    Logger::D(TAG, "- Phone: %s, name = %s, state = %d",
             TO_CSTR(phone), name.string(), state);
 
     StringBuilder b;
@@ -2595,7 +2812,7 @@ void PhoneUtils::DumpCallState(
     b += "  - FG call: ";
     ICallState cstate;
     call->GetState(&cstate);
-    b += TO_CSTR(state);
+    b += cstate;
     // b.append(" isAlive ").append(call.getState().isAlive());
     // b.append(" isRinging ").append(call.getState().isRinging());
     // b.append(" isDialing ").append(call.getState().isDialing());
@@ -2607,14 +2824,14 @@ void PhoneUtils::DumpCallState(
     b += " hasConnections ";
     call->HasConnections(&res);
     b += res;
-    Logger::D(LOG_TAG, b.toString());
+    Logger::D(TAG, b.ToString());
 
     call = NULL;
     phone->GetBackgroundCall((ICall**)&call);
-    b.setLength(0);
+    b.SetLength(0);
     b += "  - BG call: ";
     call->GetState(&cstate);
-    b += TO_CSTR(cstate);
+    b += cstate;
     // b.append(" isAlive ").append(call.getState().isAlive());
     // b.append(" isRinging ").append(call.getState().isRinging());
     // b.append(" isDialing ").append(call.getState().isDialing());
@@ -2625,7 +2842,7 @@ void PhoneUtils::DumpCallState(
     b += " hasConnections ";
     call->HasConnections(&res);
     b += res;
-    Logger::D(LOG_TAG, b.toString());
+    Logger::D(TAG, b.ToString());
 
 
     call = NULL;
@@ -2633,7 +2850,7 @@ void PhoneUtils::DumpCallState(
     b.SetLength(0);
     b += "  - RINGING call: ";
     call->GetState(&cstate);
-    b += TO_CSTR(cstate);
+    b += cstate;
     // b.append(" isAlive ").append(call.getState().isAlive());
     // b.append(" isRinging ").append(call.getState().isRinging());
     // b.append(" isDialing ").append(call.getState().isDialing());
@@ -2644,7 +2861,7 @@ void PhoneUtils::DumpCallState(
     b += " hasConnections ";
     call->HasConnections(&res);
     b += res;
-    Logger::D(LOG_TAG, b.toString());
+    Logger::D(TAG, b.ToString());
 
     Boolean allLinesTaken = hasActiveCall && hasHoldingCall;
 
@@ -2657,19 +2874,19 @@ void PhoneUtils::DumpCallState(
     b += hasHoldingCall;
     b += " allLinesTaken ";
     b += allLinesTaken;
-    Logger::D(LOG_TAG, b.toString());
+    Logger::D(TAG, b.ToString());
 
     // On CDMA phones, dump out the CdmaPhoneCallState too:
     Int32 type;
     phone->GetPhoneType(&type);
     if (type == IPhoneConstants::PHONE_TYPE_CDMA) {
         if (app->mCdmaPhoneCallState != NULL) {
-            Int32 state;
-            Logger::D(LOG_TAG, "  - CDMA call state: %d"
+            CdmaPhoneCallState::PhoneCallState state;
+            Logger::D(TAG, "  - CDMA call state: %d"
                     , (app->mCdmaPhoneCallState->GetCurrentCallState(&state), state));
         }
         else {
-            Logger::D(LOG_TAG, "  - CDMA device, but null cdmaPhoneCallState!");
+            Logger::D(TAG, "  - CDMA device, but null cdmaPhoneCallState!");
         }
     }
 }
@@ -2677,27 +2894,27 @@ void PhoneUtils::DumpCallState(
 void PhoneUtils::Log(
     /* [in] */ const String& msg)
 {
-    Logger::D(LOG_TAG, msg);
+    Logger::D(TAG, msg);
 }
 
 void PhoneUtils::DumpCallManager()
 {
     AutoPtr<ICall> call;
-    AUtoPtr<PhoneGlobals> globals;
+    AutoPtr<PhoneGlobals> globals;
     PhoneGlobals::GetInstance((PhoneGlobals**)&globals);
     AutoPtr<ICallManager> cm = globals->mCM;
     StringBuilder b;
 
-    Logger::D(LOG_TAG, "############### dumpCallManager() ##############");
+    Logger::D(TAG, "############### dumpCallManager() ##############");
     // TODO: Don't log "cm" itself, since CallManager.toString()
     // already spews out almost all this same information.
     // We should fix CallManager.toString() to be more minimal, and
     // use an explicit dumpState() method for the verbose dump.
-    // Log.d(LOG_TAG, "CallManager: " + cm
+    // Log.d(TAG, "CallManager: " + cm
     //         + ", state = " + cm.getState());
     Int32 state;
     cm->GetState(&state);
-    Logger::D(LOG_TAG, "CallManager: state = %d", state);
+    Logger::D(TAG, "CallManager: state = %d", state);
     b.SetLength(0);
     cm->GetActiveFgCall((ICall**)&call);
     b += " - FG call: ";
@@ -2711,22 +2928,22 @@ void PhoneUtils::DumpCallManager()
     AutoPtr<IList> list;
     cm->GetFgCallConnections((IList**)&list);
     b += TO_CSTR(list);
-    Logger::D(LOG_TAG, b.ToString());
+    Logger::D(TAG, b.ToString());
 
     b.SetLength(0);
     call = NULL;
     cm->GetFirstActiveBgCall((ICall**)&call);
     b += " - BG call: ";
-    b += (cm.hasActiveBgCall(&res), res)? "YES ": "NO ";
+    b += (cm->HasActiveBgCall(&res), res)? "YES ": "NO ";
     b += TO_CSTR(call);
     b += "  State: ";
-    call->GetState(&state)
+    call->GetState(&state);
     b += state;
     b += "  Conn: ";
     list = NULL;
     cm->GetBgCallConnections((IList**)&list);
     b += TO_CSTR(list);
-    Logger::D(LOG_TAG, b.ToString());
+    Logger::D(TAG, b.ToString());
 
 
     b.SetLength(0);
@@ -2736,23 +2953,24 @@ void PhoneUtils::DumpCallManager()
     b += (cm->HasActiveRingingCall(&res), res)? "YES ": "NO ";
     b += TO_CSTR(call);
     b += "  State: ";
-    call->GetState(&state)
+    call->GetState(&state);
     b += state;
-    Logger::D(LOG_TAG, b.ToString());
+    Logger::D(TAG, b.ToString());
 
 
     AutoPtr<ICallManagerHelper> helper;
-    CCallManagerHelper::AcquireSingleton((ICallManagerHelper**)&helper);
+    assert(0);
+    //CCallManagerHelper::AcquireSingleton((ICallManagerHelper**)&helper);
     AutoPtr<ICallManager> manager;
     helper->GetInstance((ICallManager**)&manager);
-    AutoPtr<IList> list;
-    manager->GetAllPhones((IList**)&list);
+    AutoPtr<IList> plist;
+    manager->GetAllPhones((IList**)&plist);
 
     Int32 size;
-    list->GetSize(&size);
+    plist->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
-        list->Get(i, (IInterface**)&obj);
+        plist->Get(i, (IInterface**)&obj);
         AutoPtr<IPhone> phone = IPhone::Probe(obj);
 
         if (phone != NULL) {
@@ -2760,7 +2978,7 @@ void PhoneUtils::DumpCallManager()
             phone->GetPhoneName(&name);
             Int32 state;
             phone->GetState(&state);
-            Logger::D(LOG_TAG, "Phone: %s, name = %s, state = %d", TO_CSTR(phone), name.string(), state);
+            Logger::D(TAG, "Phone: %s, name = %s, state = %d", TO_CSTR(phone), name.string(), state);
             b.SetLength(0);
             call = NULL;
             phone->GetForegroundCall((ICall**)&call);
@@ -2773,7 +2991,7 @@ void PhoneUtils::DumpCallManager()
             Boolean res;
             call->HasConnections(&res);
             b += res;
-            Logger::D(LOG_TAG, b.ToString());
+            Logger::D(TAG, b.ToString());
 
             b.SetLength(0);
             call = NULL;
@@ -2785,8 +3003,8 @@ void PhoneUtils::DumpCallManager()
             b += state;
             b +=  "  Conn: ";
             call->HasConnections(&res);
-            b += res);
-            Logger::D(LOG_TAG, b.ToString());
+            b += res;
+            Logger::D(TAG, b.ToString());
 
             b.SetLength(0);
             call = NULL;
@@ -2799,11 +3017,11 @@ void PhoneUtils::DumpCallManager()
             b += "  Conn: ";
             call->HasConnections(&res);
             b += res;
-            Logger::D(LOG_TAG, b.ToString());
+            Logger::D(TAG, b.ToString());
         }
     }
 
-    Logger::D(LOG_TAG, "############## END dumpCallManager() ###############");
+    Logger::D(TAG, "############## END dumpCallManager() ###############");
 }
 
 Boolean PhoneUtils::IsLandscape(

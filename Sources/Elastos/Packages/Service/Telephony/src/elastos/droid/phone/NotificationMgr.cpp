@@ -1,14 +1,82 @@
 
 #include "elastos/droid/phone/NotificationMgr.h"
+#include <elastos/utility/logging/Logger.h>
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Preference.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Telecomm.h"
+#include "elastos/droid/R.h"
+#include "R.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::App::INotification;
+using Elastos::Droid::App::INotificationBuilder;
+using Elastos::Droid::App::CNotificationBuilder;
+using Elastos::Droid::App::IPendingIntentHelper;
+using Elastos::Droid::App::CPendingIntentHelper;
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::App::IPendingIntentHelper;
+using Elastos::Droid::App::CPendingIntentHelper;
+using Elastos::Droid::App::INotificationStyle;
+using Elastos::Droid::App::INotificationBigTextStyle;
+using Elastos::Droid::App::CNotificationBigTextStyle;
+using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::ISharedPreferences;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Graphics::IColor;
+using Elastos::Droid::Internal::Telephony::IPhoneBase;
+using Elastos::Droid::Internal::Telephony::ITelephonyCapabilities;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Provider::IBaseColumns;
+using Elastos::Droid::Preference::IPreferenceManagerHelper;
+using Elastos::Droid::Preference::CPreferenceManagerHelper;
+using Elastos::Droid::Provider::IContactsContractPhoneLookupColumns;
+using Elastos::Droid::Provider::IContactsContractPhoneLookup;
+using Elastos::Droid::Provider::IContactsContractContactsColumns;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Provider::CSettingsSystem;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Core::CSystem;
+using Elastos::Core::ISystem;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::IList;
+using Elastos::Utility::Logging::Logger;
+
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-NotificationMgr::StatusBarHelper::StatusBarHelper()
+NotificationMgr::StatusBarHelper::StatusBarHelper(
+    /* [in] */ NotificationMgr* host)
     : mIsNotificationEnabled(TRUE)
     , mIsExpandedViewEnabled(TRUE)
     , mIsSystemBarNavigationEnabled(TRUE)
+    , mHost(host)
 {
 }
 
@@ -64,12 +132,12 @@ void NotificationMgr::StatusBarHelper::UpdateStatusBar()
         StringBuilder sb;
         sb += "updateStatusBar: state = 0x";
         sb += StringUtils::ToHexString(state);
-        Log(sb.ToString());
+        mHost->Log(sb.ToString());
     }
-    mStatusBarManager->Disable(state);
+    mHost->mStatusBarManager->Disable(state);
 }
 
-const String NotificationMgr::LOG_TAG("NotificationMgr");
+const String NotificationMgr::TAG("NotificationMgr");
 
 static Boolean initDBG()
 {
@@ -78,7 +146,7 @@ static Boolean initDBG()
     Int32 tmp;
     helper->GetInt32(String("ro.debuggable"), 0, &tmp);
 
-    return (PhoneGlobals.DBG_LEVEL >= 1) && (tmp == 1);
+    return (IPhoneGlobals::DBG_LEVEL >= 1) && (tmp == 1);
 }
 
 const Boolean NotificationMgr::DBG = initDBG();
@@ -103,68 +171,71 @@ static AutoPtr<ArrayOf<String> > initPHONES_PROJECTION()
 {
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(3);
 
-    array->Set(0, IPhoneLookup::NUMBER);
-    array->Set(1, IPhoneLookup::DISPLAY_NAME);
-    array->Set(2, IPhoneLookup::_ID);
+    array->Set(0, IContactsContractPhoneLookupColumns::NUMBER);
+    array->Set(1, IContactsContractContactsColumns::DISPLAY_NAME);
+    array->Set(2, IBaseColumns::ID);
     return array;
 }
 
 const AutoPtr<ArrayOf<String> > PHONES_PROJECTION = initPHONES_PROJECTION();
 
-NotificationMgr::NotificationMgr(
-    /* [in] */ IPhoneGlobals* app)
-    : mSelectedUnavailableNotify(FALSE)
-    , mVmNumberRetriesRemaining(MAX_VM_NUMBER_RETRIES)
-    , mApp(app)
-    , mContext(app)
-{
-    AutoPtr<IInterface> obj;
-    app->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj);
-    mNotificationManager = INotificationManager::Probe(obj);
+// NotificationMgr::NotificationMgr(
+//     /* [in] */ PhoneGlobals* app)
+//     : mSelectedUnavailableNotify(FALSE)
+//     , mVmNumberRetriesRemaining(MAX_VM_NUMBER_RETRIES)
+//     , mApp(app)
+//     , mContext(app)
+// {
+//     AutoPtr<IInterface> obj;
+//     app->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj);
+//     mNotificationManager = INotificationManager::Probe(obj);
 
-    AutoPtr<IInterface> obj2;
-    app->GetSystemService(IContext::STATUS_BAR_SERVICE, (IInterface**)&obj2);
-    mStatusBarManager = IStatusBarManager::Probe(obj2);
+//     AutoPtr<IInterface> obj2;
+//     app->GetSystemService(IContext::STATUS_BAR_SERVICE, (IInterface**)&obj2);
+//     mStatusBarManager = IStatusBarManager::Probe(obj2);
 
-    AutoPtr<IInterface> obj3;
-    app->GetSystemService(Context.USER_SERVICE, (IInterface**)&obj3);
-    mUserManager = IUserManager::Probe(obj3);
+//     AutoPtr<IInterface> obj3;
+//     app->GetSystemService(Context.USER_SERVICE, (IInterface**)&obj3);
+//     mUserManager = IUserManager::Probe(obj3);
 
-    mPhone = app->mPhone;  // TODO: better style to use mCM.getDefaultPhone() everywhere instead
-    statusBarHelper = new StatusBarHelper();
-}
+//     mPhone = app->mPhone;  // TODO: better style to use mCM.getDefaultPhone() everywhere instead
+//     statusBarHelper = new StatusBarHelper();
+// }
 
-AutoPtr<NotificationMgr> NotificationMgr::Init(
-    /* [in] */ IPhoneGlobals* app)
-{
-    {
-        assert(0 && "synchronized (NotificationMgr.class)");
-        AutoLock syncLock(this);
-        if (sInstance == NULL) {
-            sInstance = new NotificationMgr(app);
-        }
-        else {
-            StringBuilder sb;
-            sb += "init() called multiple times!  sInstance = ";
-            sb += TO_CSTR(sInstance);
-            Logger::Wtf(LOG_TAG, sb.ToString());
-        }
-        return sInstance;
-    }
-}
+// AutoPtr<NotificationMgr> NotificationMgr::Init(
+//     /* [in] */ IPhoneGlobals* app)
+// {
+//     {
+//         assert(0 && "synchronized (NotificationMgr.class)");
+//         AutoLock syncLock(this);
+//         if (sInstance == NULL) {
+//             sInstance = new NotificationMgr(app);
+//         }
+//         else {
+//             StringBuilder sb;
+//             sb += "init() called multiple times!  sInstance = ";
+//             sb += TO_CSTR(sInstance);
+//             Logger::Wtf(TAG, sb.ToString());
+//         }
+//         return sInstance;
+//     }
+// }
 
 ECode NotificationMgr::UpdateMwi(
     /* [in] */ Boolean visible)
 {
+    assert(0 && "NotificationMgr::Init()  &&  NotificationMgr::NotificationMgr()");
+
+
     if (DBG) {
         StringBuilder sb;
         sb += "updateMwi(): ";
         sb += visible;
-        log(sb.ToString());
+        Log(sb.ToString());
     }
 
     if (visible) {
-        Int32 resId = android.R.drawable.stat_notify_voicemail;
+        Int32 resId = Elastos::Droid::R::drawable::stat_notify_voicemail;
 
         // This Notification can get a lot fancier once we have more
         // information about the current voicemail messages.
@@ -177,14 +248,15 @@ ECode NotificationMgr::UpdateMwi(
         // notification.
 
         String notificationTitle;
-        mContext->GetString(R.string.notification_voicemail_title, &notificationTitle);
+        mContext->GetString(Elastos::Droid::Server::Telephony::R::string::notification_voicemail_title,
+                &notificationTitle);
         String vmNumber;
         mPhone->GetVoiceMailNumber(&vmNumber);
         if (DBG) {
             StringBuilder sb;
             sb += "- got vm number: '";
             sb += vmNumber;
-            sb += "'")
+            sb += "'";
             Log(sb.ToString());
         }
 
@@ -226,37 +298,41 @@ ECode NotificationMgr::UpdateMwi(
                     sb += " msec...";
                     Log(sb.ToString());
                 }
-                mApp->mNotifier->SendMwiChangedDelayed(VM_NUMBER_RETRY_DELAY_MILLIS);
-                return;
+                assert(0);
+                //mApp->mNotifier->SendMwiChangedDelayed(VM_NUMBER_RETRY_DELAY_MILLIS);
+                return NOERROR;
             }
             else {
                 StringBuilder sb;
                 sb += "NotificationMgr.updateMwi: getVoiceMailNumber() failed after ";
                 sb += MAX_VM_NUMBER_RETRIES;
                 sb += " retries; giving up.";
-                Logger::W(LOG_TAG, sb.ToString());
+                Logger::W(TAG, sb.ToString());
                 // ...and continue with vmNumber==null, just as if the
                 // phone had no VM number set up in the first place.
             }
         }
 
-        if (TelephonyCapabilities::SupportsVoiceMessageCount(mPhone)) {
-            Int32 vmCount;
-            mPhone->GetVoiceMessageCount(&vmCount);
-            String titleFormat;
-            mContext->GetString(R.string.notification_voicemail_title_count, &titleFormat);
-            notificationTitle = String.format(titleFormat, vmCount);
-        }
+        assert(0);
+        // if (TelephonyCapabilities::SupportsVoiceMessageCount(mPhone)) {
+        //     Int32 vmCount;
+        //     mPhone->GetVoiceMessageCount(&vmCount);
+        //     String titleFormat;
+        //     mContext->GetString(Elastos::Droid::Server::Telephony::R::string::notification_voicemail_title_count, &titleFormat);
+        //     notificationTitle = String.format(titleFormat, vmCount);
+        // }
 
         String notificationText;
         if (TextUtils::IsEmpty(vmNumber)) {
             mContext->GetString(
-                    R.string.notification_voicemail_no_vm_number, &notificationText);
+                    Elastos::Droid::Server::Telephony::R::string::notification_voicemail_no_vm_number, &notificationText);
         }
         else {
             String tmp;
-            mContext->GetString(R.string.notification_voicemail_text_format, &tmp);
-            notificationText = String.format(tmp, PhoneNumberUtils.formatNumber(vmNumber));
+            mContext->GetString(Elastos::Droid::Server::Telephony::R::string::notification_voicemail_text_format,
+                    &tmp);
+            assert(0);
+            //notificationText = String.format(tmp, PhoneNumberUtils.formatNumber(vmNumber));
         }
 
         AutoPtr<IUriHelper> helper;
@@ -266,39 +342,56 @@ ECode NotificationMgr::UpdateMwi(
         AutoPtr<IIntent> intent;
         CIntent::New(IIntent::ACTION_CALL, uri, (IIntent**)&intent);
 
+        AutoPtr<IPendingIntentHelper> intentH;
+        CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&intentH);
         AutoPtr<IPendingIntent> pendingIntent;
-        PendingIntent::GetActivity(mContext, 0, intent, 0, (IPendingIntent**)&pendingIntent);
+        intentH->GetActivity(mContext, 0, intent, 0, (IPendingIntent**)&pendingIntent);
 
+        AutoPtr<IPreferenceManagerHelper> managerH;
+        CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&managerH);
         AutoPtr<ISharedPreferences> prefs;
-        PreferenceManager::GetDefaultSharedPreferences(mContext, (ISharedPreferences**)&prefs);
+        managerH->GetDefaultSharedPreferences(mContext, (ISharedPreferences**)&prefs);
+
         AutoPtr<IUri> ringtoneUri;
         String uriString;
-        prefs->GetString(ICallFeaturesSetting::BUTTON_VOICEMAIL_NOTIFICATION_RINGTONE_KEY, NULL, &uriString);
+        assert(0);
+        //prefs->GetString(ICallFeaturesSetting::BUTTON_VOICEMAIL_NOTIFICATION_RINGTONE_KEY, NULL, &uriString);
         if (!TextUtils::IsEmpty(uriString)) {
             helper->Parse(uriString, (IUri**)&ringtoneUri);
         }
         else {
-            ringtoneUri = Settings.System.DEFAULT_NOTIFICATION_URI;
+            AutoPtr<ISettingsSystem> systemH;
+            CSettingsSystem::AcquireSingleton((ISettingsSystem**)&systemH);
+            systemH->GetDEFAULT_NOTIFICATION_URI((IUri**)&ringtoneUri);
         }
 
         AutoPtr<INotificationBuilder> builder;
         CNotificationBuilder::New(mContext, (INotificationBuilder**)&builder);
-        builder->SetSmallIcon(resId)
-        builder->SetWhen(System::GetCurrentTimeMillis());
-        builder->SetContentTitle(notificationTitle)
-        builder->SetContentText(notificationText)
-        builder->SetContentIntent(pendingIntent)
-        builder->SetSound(ringtoneUri)
+        builder->SetSmallIcon(resId);
+
+        AutoPtr<ISystem> systemH;
+        CSystem::AcquireSingleton((ISystem**)&systemH);
+        Int64 value;
+        systemH->GetCurrentTimeMillis(&value);
+        builder->SetWhen(value);
+        AutoPtr<ICharSequence> title = CoreUtils::Convert(notificationTitle);
+        builder->SetContentTitle(title);
+        AutoPtr<ICharSequence> text = CoreUtils::Convert(notificationText);
+        builder->SetContentText(text);
+        builder->SetContentIntent(pendingIntent);
+        builder->SetSound(ringtoneUri);
         AutoPtr<IResources> resources;
         mContext->GetResources((IResources**)&resources);
-        AutoPtr<IColor> color;
-        resources->GetColor(R.color.dialer_theme_color, (IColor**)&color);
-        builder->SetColor(color)
+        Int32 color;
+        resources->GetColor(Elastos::Droid::Server::Telephony::R::color::dialer_theme_color, &color);
+        builder->SetColor(color);
         builder->SetOngoing(TRUE);
 
-        CallFeaturesSetting::MigrateVoicemailVibrationSettingsIfNeeded(prefs);
+        assert(0);
+        //CallFeaturesSetting::MigrateVoicemailVibrationSettingsIfNeeded(prefs);
         Boolean vibrate;
-        prefs->GetBoolean(ICallFeaturesSetting::BUTTON_VOICEMAIL_NOTIFICATION_VIBRATE_KEY, FALSE, &vibrate);
+        assert(0);
+        //prefs->GetBoolean(ICallFeaturesSetting::BUTTON_VOICEMAIL_NOTIFICATION_VIBRATE_KEY, FALSE, &vibrate);
         if (vibrate) {
             builder->SetDefaults(INotification::DEFAULT_VIBRATE);
         }
@@ -320,14 +413,17 @@ ECode NotificationMgr::UpdateMwi(
                     IUserManager::DISALLOW_OUTGOING_CALLS, userHandle, &res), !res) {
                 if (user->IsManagedProfile(&res), !res) {
                     mNotificationManager->NotifyAsUser(
-                            NULL /* tag */, VOICEMAIL_NOTIFICATION, notification, userHandle);
+                            String(NULL) /* tag */, VOICEMAIL_NOTIFICATION, notification, userHandle);
                 }
             }
         }
     }
     else {
-        mNotificationManager->CancelAsUser(
-                NULL /* tag */, VOICEMAIL_NOTIFICATION, IUserHandle::ALL);
+        AutoPtr<IUserHandleHelper> helper;
+        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
+        AutoPtr<IUserHandle> handle;
+        helper->GetALL((IUserHandle**)&handle);
+        mNotificationManager->CancelAsUser(String(NULL) /* tag */, VOICEMAIL_NOTIFICATION, handle);
     }
     return NOERROR;
 }
@@ -355,13 +451,15 @@ ECode NotificationMgr::UpdateCfi(
 
         AutoPtr<INotificationBuilder> builder;
         CNotificationBuilder::New(mContext, (INotificationBuilder**)&builder);
-        builder->SetSmallIcon(R.drawable.stat_sys_phone_call_forward)
+        builder->SetSmallIcon(Elastos::Droid::Server::Telephony::R::drawable::stat_sys_phone_call_forward);
         String title;
-        mContext->GetString(R.string.labelCF, &title);
-        builder->SetContentTitle(title);
+        mContext->GetString(Elastos::Droid::Server::Telephony::R::string::labelCF, &title);
+        AutoPtr<ICharSequence> titleObj = CoreUtils::Convert(title);
+        builder->SetContentTitle(titleObj);
         String text;
-        mContext->GetString(R.string.sum_cfu_enabled_indicator, &text);
-        builder->SetContentText(&text);
+        mContext->GetString(Elastos::Droid::Server::Telephony::R::string::sum_cfu_enabled_indicator, &text);
+        AutoPtr<ICharSequence> textObj = CoreUtils::Convert(text);
+        builder->SetContentText(textObj);
         builder->SetShowWhen(FALSE);
         builder->SetOngoing(TRUE);
 
@@ -369,8 +467,10 @@ ECode NotificationMgr::UpdateCfi(
         CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&intent);
         intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
         intent->SetClassName(String("com.android.phone"), String("com.android.phone.CallFeaturesSetting"));
+        AutoPtr<IPendingIntentHelper> helper;
+        CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
         AutoPtr<IPendingIntent> contentIntent;
-        PendingIntent::GetActivity(mContext, 0, intent, 0, (IPendingIntent**)&contentIntent);
+        helper->GetActivity(mContext, 0, intent, 0, (IPendingIntent**)&contentIntent);
 
         AutoPtr<IList> users;
         mUserManager->GetUsers(TRUE, (IList**)&users);
@@ -382,17 +482,21 @@ ECode NotificationMgr::UpdateCfi(
             AutoPtr<IUserHandle> userHandle;
             info->GetUserHandle((IUserHandle**)&userHandle);
 
-            Boolean res;
-            builder->SetContentIntent((userHandle->IsOwner(&res), res) ? contentIntent : NULL);
+            assert(0);
+            //Boolean res;
+            //builder->SetContentIntent((userHandle->IsOwner(&res), res) ? contentIntent : NULL);
             AutoPtr<INotification> notification;
             builder->Build((INotification**)&notification);
             mNotificationManager->NotifyAsUser(
-                    NULL /* tag */, CALL_FORWARD_NOTIFICATION, notification, userHandle);
+                    String(NULL) /* tag */, CALL_FORWARD_NOTIFICATION, notification, userHandle);
         }
     }
     else {
-        mNotificationManager->CancelAsUser(
-                NULL /* tag */, CALL_FORWARD_NOTIFICATION, IUserHandle::ALL);
+        AutoPtr<IUserHandleHelper> helper;
+        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
+        AutoPtr<IUserHandle> handle;
+        helper->GetALL((IUserHandle**)&handle);
+        mNotificationManager->CancelAsUser(String(NULL) /* tag */, CALL_FORWARD_NOTIFICATION, handle);
     }
     return NOERROR;
 }
@@ -403,23 +507,26 @@ ECode NotificationMgr::ShowDataDisconnectedRoaming()
 
     // "Mobile network settings" screen / dialog
     AutoPtr<IIntent> intent;
-    CIntent::New(mContext, com.android.phone.MobileNetworkSettings.class, (IIntent**)&intent);
+    assert(0);
+    //CIntent::New(mContext, EIID_IMobileNetworkSettings, (IIntent**)&intent);
+    AutoPtr<IPendingIntentHelper> helper;
+    CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
     AutoPtr<IPendingIntent> contentIntent;
-    PendingIntent::GetActivity(mContext, 0, intent, 0, (IPendingIntent**)&contentIntent);
+    helper->GetActivity(mContext, 0, intent, 0, (IPendingIntent**)&contentIntent);
 
     AutoPtr<ICharSequence> contentText;
-    mContext->GetText(R.string.roaming_reenable_message, (ICharSequence**)&contentText);
+    mContext->GetText(Elastos::Droid::Server::Telephony::R::string::roaming_reenable_message, (ICharSequence**)&contentText);
 
     AutoPtr<INotificationBuilder> builder;
     CNotificationBuilder::New(mContext, (INotificationBuilder**)&builder);
-    builder->SetSmallIcon(android.R.drawable.stat_sys_warning);
-    String title;
-    mContext->GetText(R.string.roaming, &title);
+    builder->SetSmallIcon(Elastos::Droid::R::drawable::stat_sys_warning);
+    AutoPtr<ICharSequence> title;
+    mContext->GetText(Elastos::Droid::Server::Telephony::R::string::roaming, (ICharSequence**)&title);
     builder->SetContentTitle(title);
     AutoPtr<IResources> resources;
     mContext->GetResources((IResources**)&resources);
-    AutoPtr<IColor> color;
-    resources->GetColor(R.color.dialer_theme_color, (IColor**)&color);
+    Int32 color;
+    resources->GetColor(Elastos::Droid::Server::Telephony::R::color::dialer_theme_color, &color);
     builder->SetColor(color);
     builder->SetContentText(contentText);
 
@@ -433,16 +540,16 @@ ECode NotificationMgr::ShowDataDisconnectedRoaming()
         AutoPtr<IUserHandle> userHandle;
         info->GetUserHandle((IUserHandle**)&userHandle);
 
-        Boolean res;
-        builder->SetContentIntent((userHandle->IsOwner(&res), res) ? contentIntent : NULL);
+        assert(0);
+        //Boolean res;
+        //builder->SetContentIntent((userHandle->IsOwner(&res), res) ? contentIntent : NULL);
         AutoPtr<INotificationBigTextStyle> style;
         CNotificationBigTextStyle::New(builder, (INotificationBigTextStyle**)&style);
         style->BigText(contentText);
         AutoPtr<INotification> notif;
         INotificationStyle::Probe(style)->Build((INotification**)&notif);
-
         mNotificationManager->NotifyAsUser(
-                NULL /* tag */, DATA_DISCONNECTED_ROAMING_NOTIFICATION, notif, userHandle);
+                String(NULL) /* tag */, DATA_DISCONNECTED_ROAMING_NOTIFICATION, notif, userHandle);
     }
     return NOERROR;
 }
@@ -466,14 +573,20 @@ void NotificationMgr::ShowNetworkSelection(
 
     AutoPtr<INotificationBuilder> builder;
     CNotificationBuilder::New(mContext, (INotificationBuilder**)&builder);
-    builder->SetSmallIcon(android.R.drawable.stat_sys_warning)
+    builder->SetSmallIcon(Elastos::Droid::R::drawable::stat_sys_warning);
     String title;
-    mContext->GetString(R.string.notification_network_selection_title, &title);
-    builder->SetContentTitle(title);
+    mContext->GetString(Elastos::Droid::Server::Telephony::R::string::notification_network_selection_title, &title);
+    AutoPtr<ICharSequence> titleObj = CoreUtils::Convert(title);
+    builder->SetContentTitle(titleObj);
+
+    AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+    AutoPtr<ICharSequence> operatorObj = CoreUtils::Convert(_operator);
+    array->Set(0, TO_IINTERFACE(operatorObj));
     String text;
-    mContext->GetString(R.string.notification_network_selection_text, _operator, &text);
-    builder->SetContentText(text);
-    builder->SetShowWhen(FALSE)
+    mContext->GetString(Elastos::Droid::Server::Telephony::R::string::notification_network_selection_text, array, &text);
+    AutoPtr<ICharSequence> textObj = CoreUtils::Convert(text);
+    builder->SetContentText(textObj);
+    builder->SetShowWhen(FALSE);
     builder->SetOngoing(TRUE);
 
     // create the target network operators settings intent
@@ -486,8 +599,11 @@ void NotificationMgr::ShowNetworkSelection(
     CComponentName::New(String("com.android.phone"), String("com.android.phone.NetworkSetting"),
             (IComponentName**)&name);
     intent->SetComponent(name);
+
+    AutoPtr<IPendingIntentHelper> helper;
+    CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
     AutoPtr<IPendingIntent> contentIntent;
-    PendingIntent::GetActivity(mContext, 0, intent, 0, (IPendingIntent**)&contentIntent);
+    helper->GetActivity(mContext, 0, intent, 0, (IPendingIntent**)&contentIntent);
 
     AutoPtr<IList> users;
     mUserManager->GetUsers(TRUE, (IList**)&users);
@@ -499,12 +615,13 @@ void NotificationMgr::ShowNetworkSelection(
         AutoPtr<IUserHandle> userHandle;
         info->GetUserHandle((IUserHandle**)&userHandle);
 
-        Boolean res;
-        builder->SetContentIntent((userHandle->IsOwner(&res), res) ? contentIntent : NULL);
+        assert(0);
+        // Boolean res;
+        // builder->SetContentIntent((userHandle->IsOwner(&res), res) ? contentIntent : NULL);
         AutoPtr<INotification> notification;
         builder->Build((INotification**)&notification);
         mNotificationManager->NotifyAsUser(
-                NULL /* tag */,
+                String(NULL) /* tag */,
                 SELECTED_OPERATOR_FAIL_NOTIFICATION,
                 notification,
                 userHandle);
@@ -514,24 +631,34 @@ void NotificationMgr::ShowNetworkSelection(
 void NotificationMgr::CancelNetworkSelection()
 {
     if (DBG) Log(String("cancelNetworkSelection()..."));
+
+    AutoPtr<IUserHandleHelper> helper;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
+    AutoPtr<IUserHandle> handle;
+    helper->GetALL((IUserHandle**)&handle);
     mNotificationManager->CancelAsUser(
-            BULL /* tag */, SELECTED_OPERATOR_FAIL_NOTIFICATION, IUserHandle::ALL);
+            String(NULL) /* tag */, SELECTED_OPERATOR_FAIL_NOTIFICATION, handle);
 }
 
 ECode NotificationMgr::UpdateNetworkSelection(
     /* [in] */ Int32 serviceState)
 {
     Boolean res;
-    if (TelephonyCapabilities::SupportsNetworkSelection(mPhone, &res), res) {
+    assert(0);
+    //TelephonyCapabilities::SupportsNetworkSelection(mPhone, &res),
+    if (res) {
         // get the shared preference of network_selection.
         // empty is auto mode, otherwise it is the operator alpha name
         // in case there is no operator name, check the operator numeric
+        AutoPtr<IPreferenceManagerHelper> managerH;
+        CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&managerH);
         AutoPtr<ISharedPreferences> sp;
-        PreferenceManager::GetDefaultSharedPreferences(mContext, (ISharedPreferences**)&sp);
+        managerH->GetDefaultSharedPreferences(mContext, (ISharedPreferences**)&sp);
+
         String networkSelection;
         sp->GetString(IPhoneBase::NETWORK_SELECTION_NAME_KEY, String(""), &networkSelection);
         if (TextUtils::IsEmpty(networkSelection)) {
-            sp->GetString(PhoneBase.NETWORK_SELECTION_KEY, String(""), &networkSelection);
+            sp->GetString(IPhoneBase::NETWORK_SELECTION_KEY, String(""), &networkSelection);
         }
 
         if (DBG) {
@@ -579,7 +706,7 @@ ECode NotificationMgr::PostTransientNotification(
 void NotificationMgr::Log(
     /* [in] */ const String& msg)
 {
-    Logger::D(LOG_TAG, msg);
+    Logger::D(TAG, msg);
 }
 
 } // namespace Phone

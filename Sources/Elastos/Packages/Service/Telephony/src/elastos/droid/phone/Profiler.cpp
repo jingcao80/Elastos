@@ -1,21 +1,28 @@
 
 #include "elastos/droid/phone/Profiler.h"
+#include "elastos/droid/os/SystemClock.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-static const String Profiler::LOG_TAG = PhoneGlobals::LOG_TAG;
+const String Profiler::TAG = IPhoneGlobals::TAG;
 
-static const Boolean Profiler::PROFILE = FALSE;
+const Boolean Profiler::PROFILE = FALSE;
 
-static Int64 Profiler::sTimeCallScreenRequested;
-static Int64 Profiler::sTimeCallScreenOnCreate;
-static Int64 Profiler::sTimeCallScreenCreated;
+Int64 Profiler::sTimeCallScreenRequested;
+Int64 Profiler::sTimeCallScreenOnCreate;
+Int64 Profiler::sTimeCallScreenCreated;
 
-static Int64 Profiler::sTimeIncomingCallPanelRequested;
-static Int64 Profiler::sTimeIncomingCallPanelOnCreate;
-static Int64 Profiler::sTimeIncomingCallPanelCreated;
+Int64 Profiler::sTimeIncomingCallPanelRequested;
+Int64 Profiler::sTimeIncomingCallPanelOnCreate;
+Int64 Profiler::sTimeIncomingCallPanelCreated;
 
 ECode Profiler::ProfileViewCreate(
     /* [in] */ IWindow* win,
@@ -95,7 +102,7 @@ ECode Profiler::IncomingCallPanelCreated()
 {
     if (PROFILE) {
         sTimeIncomingCallPanelCreated = SystemClock::GetUptimeMillis();
-        dumpIncomingCallPanelStat();
+        DumpIncomingCallPanelStat();
     }
     return NOERROR;
 }
@@ -105,8 +112,8 @@ void Profiler::Log(
 {
     StringBuilder sb;
     sb += "[Profiler] ";
-    sb += msg
-    Logger::D(LOG_TAG, sb.ToString());
+    sb += msg;
+    Logger::D(TAG, sb.ToString());
 }
 
 } // namespace Phone

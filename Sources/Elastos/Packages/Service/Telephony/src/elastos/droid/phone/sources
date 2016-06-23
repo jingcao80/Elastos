@@ -21,4 +21,17 @@ SOURCES += CarrierLogo.cpp
 SOURCES += CCallFeaturesSetting.cpp
 SOURCES += CPhoneApp.cpp
 SOURCES += TimeConsumingPreferenceActivity.cpp
+SOURCES += CdmaPhoneCallState.cpp
+SOURCES += EmergencyCallHelper.cpp
+SOURCES += HfaLogic.cpp
+SOURCES += ImsUtil.cpp
+SOURCES += NotificationMgr.cpp
+SOURCES += PhoneGlobals.cpp
+SOURCES += OtaUtils.cpp
+SOURCES += PhoneUtils.cpp
+SOURCES += Profiler.cpp
+SOURCES += Ringer.cpp
+SOURCES += SmallerHitTargetTouchListener.cpp
+SOURCES += SpecialCharSequenceMgr.cpp
+
 SOURCES += phone.cpp

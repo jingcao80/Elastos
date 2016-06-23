@@ -3,6 +3,9 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::View::IWindow;
 
 namespace Elastos {
 namespace Droid {
@@ -14,8 +17,6 @@ namespace Phone {
 class Profiler
 {
 public:
-    TO_STRING_IMPL("CarrierLogo")
-
     static CARAPI ProfileViewCreate(
         /* [in] */ IWindow* win,
         /* [in] */ const String& tag);
@@ -44,7 +45,7 @@ private:
         /* [in] */ const String& msg);
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
 
     // Let the compiler optimize all this code out unless we're actively
     // doing profiling runs.
@@ -69,6 +70,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_PROFILER_H__

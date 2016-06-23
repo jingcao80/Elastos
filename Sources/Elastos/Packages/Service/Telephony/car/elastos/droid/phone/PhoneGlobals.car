@@ -17,7 +17,7 @@ module
     }
 
     interface IPhoneGlobals {
-        const String LOG_TAG = "PhoneApp";
+        const String TAG = "PhoneApp";
 
         /**
          * Phone app-wide debug level:

@@ -1,8 +1,48 @@
-#ifndef  __ELASTOS_DROID_PHONE_CARRIERLOGO_H__
-#define  __ELASTOS_DROID_PHONE_CARRIERLOGO_H__
+#ifndef  __ELASTOS_DROID_PHONE_PHONEUTILS_H__
+#define  __ELASTOS_DROID_PHONE_PHONEUTILS_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "elastos/droid/phone/CallGatewayManager.h"
+#include "elastos/droid/os/Handler.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/Object.h>
+#include <elastos/core/StringBuilder.h>
+
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnDismissListener;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::ICall;
+using Elastos::Droid::Internal::Telephony::ICallState;
+using Elastos::Droid::Internal::Telephony::IMmiCode;
+using Elastos::Droid::Internal::Telephony::ICallerInfo;
+using Elastos::Droid::Internal::Telephony::ICallManager;
+using Elastos::Droid::Internal::Telephony::IConnection;
+using Elastos::Droid::Internal::Telephony::ICallerInfoAsyncQuery;
+using Elastos::Droid::Internal::Telephony::ICallerInfoAsyncQueryOnQueryCompleteListener;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IViewOnKeyListener;
+using Elastos::Droid::Widget::IEditText;
+using Elastos::Core::Object;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -31,17 +71,42 @@ public:
      */
     class CallerInfoToken
         : public Object
+        , public IPhoneUtilsCallerInfoToken
     {
     public:
+        TO_STRING_IMPL("PhoneUtils::CallerInfoToken")
+
+        CAR_INTERFACE_DECL()
+
         /**indicates that there will no longer be updates to this request.*/
         Boolean mIsFinal;
 
         AutoPtr<ICallerInfo> mCurrentInfo;
         AutoPtr<ICallerInfoAsyncQuery> mAsyncQuery;
-    }
+    };
+
+    class MyCallerInfoAsyncQueryOnQueryCompleteListener
+        : public Object
+        , public ICallerInfoAsyncQueryOnQueryCompleteListener
+    {
+    public:
+        TO_STRING_IMPL("PhoneUtils::MyCallerInfoAsyncQueryOnQueryCompleteListener")
+
+        CAR_INTERFACE_DECL()
+
+        /**
+         * When the query completes, we stash the resulting CallerInfo
+         * object away in the Connection's "userData" (where it will
+         * later be retrieved by the in-call UI.)
+         */
+        CARAPI OnQueryComplete(
+            /* [in] */ Int32 token,
+            /* [in] */ IInterface* cookie,
+            /* [in] */ ICallerInfo* ci);
+    };
 
 private:
-    class FgRingCalls:
+    class FgRingCalls
         : public Object
     {
     public:
@@ -54,7 +119,7 @@ private:
             , mRinging(ring)
         {}
 
-    private:
+    public:
         AutoPtr<ICall> mFgCall;
         AutoPtr<ICall> mRinging;
     };
@@ -69,14 +134,10 @@ private:
     public:
         TO_STRING_IMPL("PhoneUtils::ConnectionHandler")
 
-        ConnectionHandler(
-            /* [in] */ PhoneUtils* host);
+        ConnectionHandler();
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
-
-    private:
-        PhoneUtils* mHost;
     };
 
     class MyDialogInterfaceOnDismissListener
@@ -103,15 +164,25 @@ private:
         CAR_INTERFACE_DECL()
 
         MyDialogInterfaceOnClickListener(
-            /* [in] */ IEditText* inputText)
+            /* [in] */ IEditText* inputText,
+            /* [in] */ PhoneGlobals* app,
+            /* [in] */ IMmiCode* mmiCode,
+            /* [in] */ IPhone* phone)
             : mInputText(inputText)
+            , mApp(app)
+            , mMiCode(mmiCode)
+            , mPhone(phone)
+        {}
 
         CARAPI OnClick(
             /* [in] */ IDialogInterface* dialog,
             /* [in] */ Int32 whichButton);
 
     private:
-        AutpPtr<IEditText> mInputText;
+        AutoPtr<IEditText> mInputText;
+        AutoPtr<PhoneGlobals> mApp;
+        AutoPtr<IMmiCode> mMiCode;
+        AutoPtr<IPhone> mPhone;
     };
 
     class MyViewOnKeyListener
@@ -121,6 +192,15 @@ private:
     public:
         TO_STRING_IMPL("PhoneUtils::MyViewOnKeyListener")
 
+        MyViewOnKeyListener(
+            /* [in] */ IPhone* phone,
+            /* [in] */ IEditText* inputText,
+            /* [in] */ IAlertDialog* newDialog)
+            : mPhone(phone)
+            , mInputText(inputText)
+            , mNewDialog(newDialog)
+        {}
+
         CAR_INTERFACE_DECL()
 
         CARAPI OnKey(
@@ -128,26 +208,11 @@ private:
             /* [in] */ Int32 keyCode,
             /* [in] */ IKeyEvent* event,
             /* [out] */ Boolean* result);
-    };
 
-    class MyCallerInfoAsyncQueryOnQueryCompleteListener
-        : public Object
-        , public ICallerInfoAsyncQueryOnQueryCompleteListener
-    {
-    public:
-        TO_STRING_IMPL("PhoneUtils::MyCallerInfoAsyncQueryOnQueryCompleteListener")
-
-        CAR_INTERFACE_DECL()
-
-        /**
-         * When the query completes, we stash the resulting CallerInfo
-         * object away in the Connection's "userData" (where it will
-         * later be retrieved by the in-call UI.)
-         */
-        CARAPI OnQueryComplete(
-            /* [in] */ Int32 token,
-            /* [in] */ IInterface* cookie,
-            /* [in] */ ICallerInfo* ci);
+    private:
+        AutoPtr<IPhone> mPhone;
+        AutoPtr<IEditText> mInputText;
+        AutoPtr<IAlertDialog> mNewDialog;
     };
 
 public:
@@ -253,7 +318,7 @@ public:
      * @see placeCall below
      */
     static CARAPI_(Int32) PlaceCall(
-        /* [in] */ I IContext** context,
+        /* [in] */ IContext* context,
         /* [in] */ IPhone* phone,
         /* [in] */ const String& number,
         /* [in] */ IUri* contactRef,
@@ -287,8 +352,8 @@ public:
         /* [in] */ const String& number,
         /* [in] */ IUri* contactRef,
         /* [in] */ Boolean isEmergencyCall,
-        /* [in] */ IRawGatewayInfo* gatewayInfo,
-        /* [in] */ ICallGatewayManager* callGateway);
+        /* [in] */ CallGatewayManager::RawGatewayInfo* gatewayInfo,
+        /* [in] */ CallGatewayManager* callGateway);
 
     static CARAPI_(String) ToLogSafePhoneNumber(
         /* [in] */ const String& number);
@@ -431,7 +496,7 @@ public:
         /* [in] */ IConnection* c,
         /* [in] */ ICallerInfoAsyncQueryOnQueryCompleteListener* listener,
         /* [in] */ IInterface* cookie,
-        /* [in] */ IRawGatewayInfo* info);
+        /* [in] */ CallGatewayManager::RawGatewayInfo* info);
 
     /**
      * Returns a single "name" for the specified given a CallerInfo object.
@@ -495,7 +560,7 @@ public:
         /* [in] */ Boolean flag,
         /* [in] */ Boolean store);
 
-    static CARAPI restoreNoiseSuppression(
+    static CARAPI RestoreNoiseSuppression(
         /* [in] */ IContext* context);
 
     static CARAPI_(Boolean) IsNoiseSuppressionOn(
@@ -510,12 +575,12 @@ public:
      */
     static CARAPI_(Boolean) GetMute();
 
-    static void SetAudioMode();
+    static CARAPI SetAudioMode();
 
     /**
      * Sets the audio mode per current phone state.
      */
-    static void SetAudioMode(
+    static CARAPI SetAudioMode(
         /* [in] */ ICallManager* cm);
 
     /**
@@ -736,7 +801,9 @@ private:
         /* [in] */ const String& msg);
 
 private:
-    static const String LOG_TAG;
+    friend class CallController;
+
+    static const String TAG;
     static const Boolean DBG;
 
     // Do not check in with VDBG = true, since that may write PII to the system log.
@@ -749,9 +816,9 @@ private:
     static const String ADD_CALL_MODE_KEY;
 
     // Return codes from placeCall()
-    static const Int32 CALL_STATUS_DIALED;  // The number was successfully dialed
-    static const Int32 CALL_STATUS_DIALED_MMI;  // The specified number was an MMI code
-    static const Int32 CALL_STATUS_FAILED;  // The call failed
+    static const Int32 CALL_STATUS_DIALED = 0;  // The number was successfully dialed
+    static const Int32 CALL_STATUS_DIALED_MMI = 1;  // The specified number was an MMI code
+    static const Int32 CALL_STATUS_FAILED = 2;  // The call failed
 
     // State of the Phone's audio modes
     // Each state can move to the other states, but within the state only certain
@@ -768,13 +835,13 @@ private:
     static Boolean sIsSpeakerEnabled;
 
     /** Static handler for the connection/mute tracking */
-    static AutoPtr<IConnectionHandler> mConnectionHandler;
+    static AutoPtr<ConnectionHandler> mConnectionHandler;
 
     /** Phone state changed event*/
     static const Int32 PHONE_STATE_CHANGED;
 
     /** check status then decide whether answerCall */
-    static const Int32 MSG_CHECK_STATUS_ANSWERCALL;
+    static const Int32 MSG_CHECK_STATUS_ANSWERCALL = 100;
 
     /** poll phone DISCONNECTING status interval */
     static const Int32 DISCONNECTING_POLLING_INTERVAL_MS;
@@ -805,5 +872,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-
-#endif // __ELASTOS_DROID_PHONE_CARRIERLOGO_H__
+#endif // __ELASTOS_DROID_PHONE_PHONEUTILS_H__

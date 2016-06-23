@@ -3,6 +3,24 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Telephony.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IBroadcastReceiver;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -27,23 +45,7 @@ class HfaLogic
     : public Object
     , public IHfaLogic
 {
-private:
-    class MyHandler
-        : public Handler
-    {
-    public:
-        TO_STRING_IMPL("HfaLogic::MyHandler")
-
-        MyHandler(
-            /* [in] */ HfaLogic* host);
-
-        CARAPI HandleMessage(
-            /* [in] */ IMessage* msg);
-
-    private:
-        HfaLogic* mHost;
-    };
-
+public:
     class MyBroadcastReceiver
         : public BroadcastReceiver
     {
@@ -62,8 +64,27 @@ private:
         HfaLogic* mHost;
     };
 
+private:
+    class MyHandler
+        : public Handler
+    {
+    public:
+        TO_STRING_IMPL("HfaLogic::MyHandler")
+
+        MyHandler(
+            /* [in] */ HfaLogic* host);
+
+        CARAPI HandleMessage(
+            /* [in] */ IMessage* msg);
+
+    private:
+        HfaLogic* mHost;
+    };
+
 public:
     TO_STRING_IMPL("HfaLogic")
+
+    CAR_INTERFACE_DECL()
 
     HfaLogic(
         /* [in] */ IContext* context,
@@ -106,11 +127,11 @@ private:
     static const String ACTION_CANCEL;
     static const String ACTION_COMPLETE;
 
-    static const Int32 SERVICE_STATE_CHANGED;
+    static const Int32 SERVICE_STATE_CHANGED = 1;
 
     Int32 mPhoneMonitorState;
     AutoPtr<IBroadcastReceiver> mReceiver;
-    AutoPtr<IHfaLogicCallback> mCallback;
+    AutoPtr<IHfaLogicHfaLogicCallback> mCallback;
     AutoPtr<IPendingIntent> mResponseIntent;
     AutoPtr<IContext> mContext;
 
@@ -124,6 +145,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_HFALOGIC_H__

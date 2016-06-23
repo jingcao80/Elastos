@@ -3,6 +3,32 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnKeyListener;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IProgressBar;
+using Elastos::Droid::Widget::IButton;
+using Elastos::Droid::Widget::IToggleButton;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -22,6 +48,7 @@ namespace Phone {
  */
 class OtaUtils
     : public Object
+    , public IOtaUtils
 {
 public:
     /**
@@ -29,6 +56,7 @@ public:
      * an OTA call when display orientation changes.
      */
     class CdmaOtaProvisionData
+        : public Object
     {
     public:
         TO_STRING_IMPL("OtaUtils::CdmaOtaProvisionData")
@@ -46,6 +74,7 @@ public:
      * and used to control OTA display.
      */
     class CdmaOtaConfigData
+        : public Object
     {
     public:
         TO_STRING_IMPL("OtaUtils::CdmaOtaConfigData")
@@ -62,23 +91,24 @@ public:
         }
 
     public:
-        public Int32 mOtaShowActivationScreen;
-        public Int32 mOtaShowListeningScreen;
-        public Int32 mOtaShowActivateFailTimes;
-        public Int32 mOtaPlaySuccessFailureTone;
-        public Boolean mConfigComplete;
+        Int32 mOtaShowActivationScreen;
+        Int32 mOtaShowListeningScreen;
+        Int32 mOtaShowActivateFailTimes;
+        Int32 mOtaPlaySuccessFailureTone;
+        Boolean mConfigComplete;
     };
 
     /**
      * The state of the OTA InCallScreen UI.
      */
     class CdmaOtaInCallScreenUiState
+        : public Object
     {
     public:
         TO_STRING_IMPL("OtaUtils::CdmaOtaInCallScreenUiState")
 
         CdmaOtaInCallScreenUiState()
-            : mState(ICdmaOtaInCallScreenUiStateState_UNDEFINED)
+            : mState(UNDEFINED)
         {
             if (DBG) Log(String("CdmaOtaInCallScreenState: constructor init to UNDEFINED"));
         }
@@ -97,6 +127,7 @@ public:
      * The OTA screen state machine.
      */
     class CdmaOtaScreenState
+        : public Object
     {
     public:
         TO_STRING_IMPL("OtaUtils::CdmaOtaScreenState")
@@ -145,6 +176,7 @@ private:
      *     that higher-level abstraction into actual onscreen views and widgets.
      */
     class OtaWidgetData
+        : public Object
     {
     public:
         TO_STRING_IMPL("OtaUtils::OtaWidgetData")
@@ -204,20 +236,30 @@ private:
 
     class MyAlertDialogOnClickListener
         : public Object
-        , public IAlertDialogOnClickListener
+        , public IDialogInterfaceOnClickListener
     {
     public:
         TO_STRING_IMPL("OtaUtils::MyAlertDialogOnClickListener")
 
         CAR_INTERFACE_DECL()
 
+        MyAlertDialogOnClickListener(
+            /* [in] */ OtaUtils* host)
+            : mHost(host)
+        {}
+
         CARAPI OnClick(
             /* [in] */ IDialogInterface* dialog,
             /* [in] */ Int32 which);
+
+    private:
+        OtaUtils* mHost;
     };
 
 public:
     TO_STRING_IMPL("OtaUtils")
+
+    CAR_INTERFACE_DECL()
 
     OtaUtils();
 
@@ -313,7 +355,7 @@ public:
      *    power down.
      */
     CARAPI OnOtaProvisionStatusChanged(
-        /* [in] */ IAsyncResult* r);
+        /* [in] */ AsyncResult* r);
 
     /**
      * Handle a disconnect event from the OTASP call.
@@ -383,13 +425,13 @@ public:
      * Save the Ota InCallScreen UI state
      */
     CARAPI SetCdmaOtaInCallScreenUiState(
-        /* [in] */ ICdmaOtaInCallScreenUiStateState state);
+        /* [in] */ CdmaOtaInCallScreenUiState::State state);
 
     /**
      * Get the Ota InCallScreen UI state
      */
     CARAPI GetCdmaOtaInCallScreenUiState(
-        /* [out] */ ICdmaOtaInCallScreenUiStateState* state);
+        /* [out] */ CdmaOtaInCallScreenUiState::State* state);
 
 private:
     CARAPI_(void) SetSpeaker(
@@ -528,7 +570,7 @@ public:
     const Int32 OTA_FAILURE_DIALOG_TIMEOUT;
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     static const Boolean DBG;
 
     // TODO: Distinguish between interactive and non-interactive success
@@ -540,7 +582,7 @@ private:
     static const String OTASP_NUMBER_NON_INTERACTIVE;
 
     AutoPtr<IContext> mContext;
-    AutoPtr<PhoneGlobals> mApplication;
+    AutoPtr<IPhoneGlobals> mApplication;
     AutoPtr<OtaWidgetData> mOtaWidgetData;
 
     static Boolean sIsWizardMode;
@@ -565,6 +607,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_OTAUTILS_H__

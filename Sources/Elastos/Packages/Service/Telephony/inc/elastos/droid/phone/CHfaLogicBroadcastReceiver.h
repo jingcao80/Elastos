@@ -1,7 +1,8 @@
 #ifndef  __ELASTOS_DROID_PHONE_CHFALOGICBROADCASTRECEIVER_H__
 #define  __ELASTOS_DROID_PHONE_CHFALOGICBROADCASTRECEIVER_H__
 
-#include "elastos/droid/telephony/phone/CHfaLogicBroadcastReceiver.h"
+#include "_Elastos_Droid_Phone_CHfaLogicBroadcastReceiver.h"
+#include "elastos/droid/phone/HfaLogic.h"
 #include "elastos/droid/ext/frameworkext.h"
 
 namespace Elastos {

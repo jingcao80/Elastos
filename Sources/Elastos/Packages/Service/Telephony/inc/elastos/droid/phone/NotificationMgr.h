@@ -3,6 +3,22 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/Object.h>
+#include <Elastos.CoreLibrary.Core.h>
+
+using Elastos::Droid::App::INotificationManager;
+using Elastos::Droid::App::IStatusBarManager;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Core::Object;
+using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
@@ -75,7 +91,8 @@ public:
             /* [in] */ Boolean enable);
 
     private:
-        StatusBarHelper();
+        StatusBarHelper(
+            /* [in] */ NotificationMgr* host);
 
         /**
          * Updates the status bar to reflect the current desired state.
@@ -84,9 +101,11 @@ public:
 
     private:
         // Current desired state of status bar / system bar behavior
-        Boolean mIsNotificationEnabled = true;
-        Boolean mIsExpandedViewEnabled = true;
-        Boolean mIsSystemBarNavigationEnabled = true;
+        Boolean mIsNotificationEnabled;
+        Boolean mIsExpandedViewEnabled;
+        Boolean mIsSystemBarNavigationEnabled;
+
+        NotificationMgr* mHost;
     };
 
 public:
@@ -100,8 +119,8 @@ public:
      * PhoneApp's public "notificationMgr" field, which is why there's no
      * getInstance() method here.
      */
-    static CARAPI_(AutoPtr<NotificationMgr>) Init(
-        /* [in] */ IPhoneGlobals* app);
+    // static CARAPI_(AutoPtr<NotificationMgr>) Init(
+    //     /* [in] */ PhoneGlobals* app);
 
     /**
      * Updates the message waiting indicator (voicemail) notification.
@@ -144,8 +163,8 @@ public:
         /* [in] */ ICharSequence* msg);
 
 private:
-    NotificationMgr(
-        /* [in] */ IPhoneGlobals* app);
+    //NotificationMgr(
+    //    /* [in] */ PhoneGlobals* app);
 
     /**
      * Display the network selection "no service" notification
@@ -163,10 +182,10 @@ private:
         /* [in] */ const String& msg);
 
 public:
-    AutoPtr<IStatusBarHelper> statusBarHelper;
+    AutoPtr<StatusBarHelper> mStatusBarHelper;
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     static const Boolean DBG;
     // Do not check in with VDBG = true, since that may write PII to the system log.
     static const Boolean VDBG;
@@ -182,7 +201,7 @@ private:
     /** The singleton NotificationMgr instance. */
     static AutoPtr<NotificationMgr> sInstance;
 
-    AutoPtr<IPhoneGlobals> mApp;
+    //AutoPtr<PhoneGlobals> mApp;
     AutoPtr<IPhone> mPhone;
 
     AutoPtr<IContext> mContext;

@@ -1,16 +1,24 @@
 
 #include "elastos/droid/phone/SmallerHitTargetTouchListener.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Utility.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::View::EIID_IViewOnTouchListener;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-static const String SmallerHitTargetTouchListener::TAG("SmallerHitTargetTouchListener");
+const String SmallerHitTargetTouchListener::TAG("SmallerHitTargetTouchListener");
 
-static const Int32 SmallerHitTargetTouchListener::HIT_TARGET_EDGE_IGNORE_DP_X = 30;
-static const Int32 SmallerHitTargetTouchListener::HIT_TARGET_EDGE_IGNORE_DP_Y = 10;
-static const Int32 SmallerHitTargetTouchListener::HIT_TARGET_MIN_SIZE_DP_X = HIT_TARGET_EDGE_IGNORE_DP_X * 3;
-static const Int32 SmallerHitTargetTouchListener::HIT_TARGET_MIN_SIZE_DP_Y = HIT_TARGET_EDGE_IGNORE_DP_Y * 3;
+const Int32 SmallerHitTargetTouchListener::HIT_TARGET_EDGE_IGNORE_DP_X = 30;
+const Int32 SmallerHitTargetTouchListener::HIT_TARGET_EDGE_IGNORE_DP_Y = 10;
+const Int32 SmallerHitTargetTouchListener::HIT_TARGET_MIN_SIZE_DP_X = HIT_TARGET_EDGE_IGNORE_DP_X * 3;
+const Int32 SmallerHitTargetTouchListener::HIT_TARGET_MIN_SIZE_DP_Y = HIT_TARGET_EDGE_IGNORE_DP_Y * 3;
 
 CAR_INTERFACE_IMPL(SmallerHitTargetTouchListener, Object, IViewOnTouchListener)
 
@@ -23,7 +31,7 @@ ECode SmallerHitTargetTouchListener::OnTouch(
     *result = FALSE;
 
     // if (DBG) log("SmallerHitTargetTouchListener: " + v + ", event " + event);
-    String action;
+    Int32 action;
     event->GetAction(&action);
     if (action == IMotionEvent::ACTION_DOWN) {
         // Note that event.getX() and event.getY() are already

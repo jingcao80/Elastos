@@ -1,5 +1,33 @@
 
 #include "elastos/droid/phone/Ringer.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/os/Looper.h"
+#include "Elastos.Droid.Provider.h"
+#include <Elastos.CoreLibrary.Core.h>
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Media::IAudioAttributesBuilder;
+using Elastos::Droid::Media::CAudioAttributesBuilder;
+using Elastos::Droid::Media::IRingtoneManagerHelper;
+using Elastos::Droid::Media::CRingtoneManagerHelper;
+using Elastos::Droid::Os::CSystemVibrator;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::CServiceManager;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Provider::CSettingsSystem;
+using Elastos::Core::IThread;
+using Elastos::Core::CThread;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
+
+
 
 namespace Elastos {
 namespace Droid {
@@ -34,7 +62,8 @@ Ringer::Worker::Worker(
         AutoLock syncLock(mLock);
         while (mLooper == NULL) {
             //try {
-                mLock->Wait();
+            assert(0);
+            //mLock->Wait();
             //} catch (InterruptedException ex) {
             //}
         }
@@ -47,7 +76,7 @@ ECode Ringer::Worker::GetLooper(
     VALIDATE_NOT_NULL(looper);
 
     *looper = mLooper;
-    REFCOUNT_ADD(looper);
+    REFCOUNT_ADD(*looper);
     return NOERROR;
 }
 
@@ -57,7 +86,7 @@ ECode Ringer::Worker::Run()
         AutoLock syncLock(mLock);
         Looper::Prepare();
         mLooper = Looper::GetMyLooper();
-        mLock->NotifyAll();
+        mLock.NotifyAll();
     }
     return Looper::Loop();
 }
@@ -85,31 +114,37 @@ ECode Ringer::MyHandler::HandleMessage(
         case PLAY_RING_ONCE:
         {
             if (DBG) Log(String("mRingHandler: PLAY_RING_ONCE..."));
-            if (mRingtone == NULL && !HasMessages(STOP_RING)) {
+            Boolean res;
+            if (mHost->mRingtone == NULL && (HasMessages(STOP_RING, &res), !res)) {
                 // create the ringtone with the uri
                 if (DBG) {
                     StringBuilder sb;
                     sb += "creating ringtone: ";
-                    sb += mCustomRingtoneUri;
+                    sb += TO_CSTR(mHost->mCustomRingtoneUri);
                     Log(sb.ToString());
                 }
-                RingtoneManager::GetRingtone(mContext, mCustomRingtoneUri, (IRingtone**)&r);
+
+                AutoPtr<IRingtoneManagerHelper> helper;
+                CRingtoneManagerHelper::AcquireSingleton((IRingtoneManagerHelper**)&helper);
+                helper->GetRingtone(mHost->mContext, mHost->mCustomRingtoneUri, (IRingtone**)&r);
                 {
                     AutoLock syncLock(mHost);
-                    if (!HasMessages(STOP_RING)) {
-                        mRingtone = r;
+                    Boolean res;
+                    if (HasMessages(STOP_RING, &res), !res) {
+                        mHost->mRingtone = r;
                     }
                 }
             }
-            r = mRingtone;
-            Boolean res;
-            if (r != NULL && !HasMessages(STOP_RING) && (r->IsPlaying(&res), !res)) {
-                PhoneUtils::SetAudioMode();
+            r = mHost->mRingtone;
+            Boolean tmp;
+            if (r != NULL && (HasMessages(STOP_RING, &tmp), !tmp) && (r->IsPlaying(&res), !res)) {
+                assert(0);
+                //PhoneUtils::SetAudioMode();
                 r->Play();
                 {
                     AutoLock syncLock(mHost);
-                    if (mFirstRingStartTime < 0) {
-                        mFirstRingStartTime = SystemClock::ElapsedRealtime();
+                    if (mHost->mFirstRingStartTime < 0) {
+                        mHost->mFirstRingStartTime = SystemClock::GetElapsedRealtime();
                     }
                 }
             }
@@ -141,7 +176,7 @@ ECode Ringer::MyHandler::HandleMessage(
     return NOERROR;
 }
 
-const String Ringer::LOG_TAG("Ringer");
+const String Ringer::TAG("Ringer");
 
 static Boolean initDBG()
 {
@@ -150,13 +185,10 @@ static Boolean initDBG()
     Int32 tmp;
     helper->GetInt32(String("ro.debuggable"), 0, &tmp);
 
-    return (PhoneGlobals::DBG_LEVEL >= 1) && (tmp == 1);
+    return (IPhoneGlobals::DBG_LEVEL >= 1) && (tmp == 1);
 }
 
 const Boolean Ringer::DBG = initDBG();
-
-const Int32 Ringer::PLAY_RING_ONCE = 1;
-const Int32 Ringer::STOP_RING = 3;
 
 const Int32 Ringer::VIBRATE_LENGTH = 1000; // ms
 const Int32 Ringer::PAUSE_LENGTH = 1000; // ms
@@ -168,7 +200,7 @@ static AutoPtr<IAudioAttributes> initVIBRATION_ATTRIBUTES()
     builder->SetContentType(IAudioAttributes::CONTENT_TYPE_SONIFICATION);
     builder->SetUsage(IAudioAttributes::USAGE_NOTIFICATION_RINGTONE);
     AutoPtr<IAudioAttributes> tmp;
-    builder>Build((IAudioAttributes**)&tmp);
+    builder->Build((IAudioAttributes**)&tmp);
     return tmp;
 }
 
@@ -176,18 +208,19 @@ AutoPtr<IAudioAttributes> Ringer::VIBRATION_ATTRIBUTES = initVIBRATION_ATTRIBUTE
 
 AutoPtr<Ringer> Ringer::sInstance;
 
+Object Ringer::mClassLock;
+
 AutoPtr<Ringer> Ringer::Init(
     /* [in] */ IContext* context,
     /* [in] */ IBluetoothManager* bluetoothManager)
 {
     {
-        AutoLock syncLock(this);
-        assert(0 && "synchronized (Ringer.class)");
+        AutoLock syncLock(mClassLock);
         if (sInstance == NULL) {
             sInstance = new Ringer(context, bluetoothManager);
         }
         else {
-            Logger::W(LOG_TAG, "init() called multiple times!  sInstance = %s", TO_CSTR(sInstance));
+            Logger::W(TAG, "init() called multiple times!  sInstance = %s", TO_CSTR(sInstance));
         }
         return sInstance;
     }
@@ -196,11 +229,11 @@ AutoPtr<Ringer> Ringer::Init(
 Ringer::Ringer(
     /* [in] */ IContext* context,
     /* [in] */ IBluetoothManager* bluetoothManager)
-    : mContinueVibrating(FALSE)
+    : mBluetoothManager(bluetoothManager)
+    , mContinueVibrating(FALSE)
+    , mContext(context)
     , mFirstRingEventTime(-1)
     , mFirstRingStartTime(-1)
-    , mContext(context)
-    , mBluetoothManager(bluetoothManager)
 {
     AutoPtr<ISettingsSystem> helper;
     CSettingsSystem::AcquireSingleton((ISettingsSystem**)&helper);
@@ -213,13 +246,13 @@ Ringer::Ringer(
     mPowerManager = IIPowerManager::Probe(obj);
     // We don't rely on getSystemService(Context.VIBRATOR_SERVICE) to make sure this
     // vibrator object will be isolated from others.
-    CSystemVibrator::New(context, (SystemVibrator**)&mVibrator);
+    CSystemVibrator::New(context, (IVibrator**)&mVibrator);
 }
 
 ECode Ringer::UpdateRingerContextAfterRadioTechnologyChange(
     /* [in] */ IPhone* phone)
 {
-    if(DBG) Logger::D(LOG_TAG, "updateRingerContextAfterRadioTechnologyChange...");
+    if(DBG) Logger::D(TAG, "updateRingerContextAfterRadioTechnologyChange...");
     return phone->GetContext((IContext**)&mContext);
 }
 
@@ -273,7 +306,7 @@ ECode Ringer::Ring()
 
         if ((ShouldVibrate(&res), res) && mVibratorThread == NULL) {
             mContinueVibrating = TRUE;
-            mVibratorThread = new VibratorThread();
+            mVibratorThread = new VibratorThread(this);
             if (DBG) Log(String("- starting vibrator..."));
             mVibratorThread->Start();
         }
@@ -289,8 +322,9 @@ ECode Ringer::Ring()
 
         MakeLooper();
         if (mFirstRingEventTime < 0) {
-            mFirstRingEventTime = SystemClock::ElapsedRealtime();
-            mRingHandler->SendEmptyMessage(PLAY_RING_ONCE);
+            mFirstRingEventTime = SystemClock::GetElapsedRealtime();
+            Boolean res;
+            mRingHandler->SendEmptyMessage(PLAY_RING_ONCE, &res);
         }
         else {
             // For repeat rings, figure out by how much to delay
@@ -305,14 +339,15 @@ ECode Ringer::Ring()
                     sb += mFirstRingStartTime - mFirstRingEventTime;
                     Log(sb.ToString());
                 }
+                Boolean res;
                 mRingHandler->SendEmptyMessageDelayed(PLAY_RING_ONCE,
-                        mFirstRingStartTime - mFirstRingEventTime);
+                        mFirstRingStartTime - mFirstRingEventTime, &res);
             }
             else {
                 // We've gotten two ring events so far, but the ring
                 // still hasn't started. Reset the event time to the
                 // time of this event to maintain correct spacing.
-                mFirstRingEventTime = SystemClock::ElapsedRealtime();
+                mFirstRingEventTime = SystemClock::GetElapsedRealtime();
             }
         }
     }
@@ -330,14 +365,15 @@ ECode Ringer::ShouldVibrate(
 
     Int32 ringerMode;
     audioManager->GetRingerMode(&ringerMode);
-    if (SettingsUtil::GetVibrateWhenRingingSetting(mContext)) {
-        *result = ringerMode != IAudioManager::RINGER_MODE_SILENT;
-        return NOERROR;
-    }
-    else {
-        *result = ringerMode == IAudioManager::RINGER_MODE_VIBRATE;
-        return NOERROR;
-    }
+    assert(0);
+    // if (SettingsUtil::GetVibrateWhenRingingSetting(mContext)) {
+    //     *result = ringerMode != IAudioManager::RINGER_MODE_SILENT;
+    //     return NOERROR;
+    // }
+    // else {
+    //     *result = ringerMode == IAudioManager::RINGER_MODE_VIBRATE;
+    //     return NOERROR;
+    // }
 }
 
 ECode Ringer::StopRing()
@@ -353,12 +389,14 @@ ECode Ringer::StopRing()
         //}
 
         if (mRingHandler != NULL) {
-            mRingHandler->RemoveCallbacksAndMessages(null);
+            mRingHandler->RemoveCallbacksAndMessages(NULL);
             AutoPtr<IMessage> msg;
             mRingHandler->ObtainMessage(STOP_RING, (IMessage**)&msg);
             msg->SetObj(TO_IINTERFACE(mRingtone));
-            mRingHandler->SendMessage(msg);
-            PhoneUtils->SetAudioMode();
+            Boolean res;
+            mRingHandler->SendMessage(msg, &res);
+            assert(0);
+            //PhoneUtils::SetAudioMode();
             mRingThread = NULL;
             mRingHandler = NULL;
             mRingtone = NULL;
@@ -402,7 +440,7 @@ void Ringer::MakeLooper()
 void Ringer::Log(
     /* [in] */ const String& msg)
 {
-    Logger::D(LOG_TAG, msg);
+    Logger::D(TAG, msg);
 }
 
 } // namespace Phone

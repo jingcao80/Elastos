@@ -7,21 +7,21 @@ namespace Phone {
 
 Boolean ImsUtil::sImsPhoneSupported = FALSE;
 
-static AutoPtr<IPhoneGlobals> GetApp()
+AutoPtr<PhoneGlobals> ImsUtil::GetApp()
 {
     if (mApp != NULL) {
         sImsPhoneSupported = TRUE;
         return mApp;
     }
     else {
-        AutoPtr<IPhoneGlobals> app;
-        PhoneGlobals::GetInstance((IPhoneGlobals**)&app);
+        AutoPtr<PhoneGlobals> app;
+        PhoneGlobals::GetInstance((PhoneGlobals**)&app);
         sImsPhoneSupported = TRUE;
         return app;
     }
 }
 
-AutoPtr<IPhoneGlobals> ImsUtil::mApp = GetApp();
+AutoPtr<PhoneGlobals> ImsUtil::mApp = GetApp();
 
 Boolean ImsUtil::IsImsPhoneSupported()
 {

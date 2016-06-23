@@ -3,6 +3,9 @@
 
 #include "_Elastos.Droid.Server.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -60,6 +63,7 @@ public:
         , mCurrentCallState(IDLE)
         , mThreeWayCallOrigStateDialing(FALSE)
         , mAddCallMenuStateAfterCW(TRUE)
+    {}
 
     /**
      * Initialize PhoneCallState related members - constructor
@@ -129,6 +133,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CARRIERLOGO_H__

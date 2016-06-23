@@ -27,8 +27,8 @@ module
         const Int32 OTA_PLAY_SUCCESS_FAILURE_TONE_ON = 1;
 
         // SPC Timeout is 60 seconds
-        public final int OTA_SPC_TIMEOUT = 60;
-        public final int OTA_FAILURE_DIALOG_TIMEOUT = 2;
+        const Int32 OTA_SPC_TIMEOUT = 60;
+        const Int32 OTA_FAILURE_DIALOG_TIMEOUT = 2;
 
         // Constants for OTASP-related Intents and intent extras.
         // Watch out: these must agree with the corresponding constants in
@@ -58,9 +58,9 @@ module
         // RESULT_INTERACTIVE_OTASP_STARTED result code; see comments in
         // InCallScreenShowActivation.onCreate() for details.
 
-        const Int32 RESULT_INTERACTIVE_OTASP_STARTED = Activity.RESULT_FIRST_USER;
-        const Int32 RESULT_NONINTERACTIVE_OTASP_STARTED = Activity.RESULT_FIRST_USER + 1;
-        const Int32 RESULT_NONINTERACTIVE_OTASP_FAILED = Activity.RESULT_FIRST_USER + 2;
+        const Int32 RESULT_INTERACTIVE_OTASP_STARTED = 1; //IActivity::RESULT_FIRST_USER;
+        const Int32 RESULT_NONINTERACTIVE_OTASP_STARTED = 1 + 1;
+        const Int32 RESULT_NONINTERACTIVE_OTASP_FAILED = 1 + 2;
 
         // Testing: Extra for the ACTION_PERFORM_CDMA_PROVISIONING intent that
         // allows the caller to manually enable/disable "interactive mode" for

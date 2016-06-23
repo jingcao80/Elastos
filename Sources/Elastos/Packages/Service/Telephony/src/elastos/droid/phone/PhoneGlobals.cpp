@@ -1,5 +1,61 @@
 
 #include "elastos/droid/phone/PhoneGlobals.h"
+#include "elastos/droid/phone/CPhoneGlobalsPhoneAppBroadcastReceiver.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/os/ServiceManager.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Preference.h"
+#include "Elastos.Droid.Telephony.h"
+#include <Elastos.CoreLibrary.Core.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
+#include "elastos/droid/R.h"
+#include "R.h"
+
+using Elastos::Droid::App::IPendingIntentHelper;
+using Elastos::Droid::App::CPendingIntentHelper;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::IUpdateLock;
+using Elastos::Droid::Os::CUpdateLock;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Provider::CSettingsSystem;
+using Elastos::Droid::Preference::IPreferenceManagerHelper;
+using Elastos::Droid::Preference::CPreferenceManagerHelper;
+using Elastos::Droid::Internal::Telephony::ICall;
+using Elastos::Droid::Internal::Telephony::ICallState;
+using Elastos::Droid::Internal::Telephony::ICallState_DIALING;
+using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::IIccCardConstants;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState_IDLE;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState_OFFHOOK;
+using Elastos::Droid::Internal::Telephony::IPhoneFactory;
+using Elastos::Droid::Internal::Telephony::CPhoneFactory;
+using Elastos::Droid::Internal::Telephony::IIccCard;
+using Elastos::Droid::Internal::Telephony::IMmiCode;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState_RINGING;
+using Elastos::Droid::Telephony::IServiceStateHelper;
+using Elastos::Droid::Telephony::CServiceStateHelper;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
+
 
 namespace Elastos {
 namespace Droid {
@@ -16,18 +72,19 @@ ECode PhoneGlobals::NotificationBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    String action；
-    intent-GetAction(&action);
+    String action;
+    intent->GetAction(&action);
     // TODO: use "if (VDBG)" here.
-    Logger::D(LOG_TAG, "Broadcast from Notification: %s" ,action.string());
+    Logger::D(IPhoneGlobals::TAG, "Broadcast from Notification: %s" ,action.string());
 
-    if (action.Equals(ACTION_HANG_UP_ONGOING_CALL)) {
+    if (action.Equals(IPhoneGlobals::ACTION_HANG_UP_ONGOING_CALL)) {
         AutoPtr<PhoneGlobals> globals;
         PhoneGlobals::GetInstance((PhoneGlobals**)&globals);
-        PhoneUtils::Hangup(globals->mCM);
+        assert(0);
+        //PhoneUtils::Hangup(globals->mCM);
     }
     else {
-        Logger::W(LOG_TAG, "Received hang-up request from notification,"
+        Logger::W(IPhoneGlobals::TAG, "Received hang-up request from notification,"
                 " but there's no call the system can hang up.");
     }
     return NOERROR;
@@ -44,29 +101,29 @@ ECode PhoneGlobals::PhoneAppBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    String action；
-    intent->GetAction(&action；);
+    String action;
+    intent->GetAction(&action);
     if (action.Equals(IIntent::ACTION_AIRPLANE_MODE_CHANGED)) {
         AutoPtr<IContentResolver> contentResolver;
-        GetContentResolver((IContentResolver**)&contentResolver);
-        AutoPtr<ISystem> system;
-        CSystem::AcquireSingleton((ISystem**)&system);
+        mHost->GetContentResolver((IContentResolver**)&contentResolver);
+        AutoPtr<ISettingsSystem> system;
+        CSettingsSystem::AcquireSingleton((ISettingsSystem**)&system);
         Int32 value;
-        system->GetInt(contentResolver, ISystem::AIRPLANE_MODE_ON, 0, &value);
+        system->GetInt32(contentResolver, ISettingsSystem::AIRPLANE_MODE_ON, 0, &value);
         Boolean enabled = (value == 0);
-        phone->SetRadioPower(enabled);
+        mHost->mPhone->SetRadioPower(enabled);
     }
-    else if (action.equals(ITelephonyIntents::ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
-        if (VDBG) Logger::D(LOG_TAG, "mReceiver: ACTION_ANY_DATA_CONNECTION_STATE_CHANGED");
+    else if (action.Equals(ITelephonyIntents::ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
+        if (VDBG) Logger::D(IPhoneGlobals::TAG, "mReceiver: ACTION_ANY_DATA_CONNECTION_STATE_CHANGED");
         if (VDBG) {
             String str;
             intent->GetStringExtra(IPhoneConstants::STATE_KEY, &str);
-            Logger::D(LOG_TAG, "- state: %s", str.string());
+            Logger::D(IPhoneGlobals::TAG, "- state: %s", str.string());
         }
         if (VDBG) {
             String str;
             intent->GetStringExtra(IPhoneConstants::STATE_CHANGE_REASON_KEY, &str);
-            Logger::D(LOG_TAG, "- reason: %s", str.string());
+            Logger::D(IPhoneGlobals::TAG, "- reason: %s", str.string());
         }
 
         // The "data disconnected due to roaming" notification is shown
@@ -78,61 +135,69 @@ ECode PhoneGlobals::PhoneAppBroadcastReceiver::OnReceive(
         intent->GetStringExtra(IPhoneConstants::STATE_CHANGE_REASON_KEY, &str2);
         Boolean res;
         Boolean disconnectedDueToRoaming =
-                (phone->GetDataRoamingEnabled(&res), !res)
+                (mHost->mPhone->GetDataRoamingEnabled(&res), !res)
                 && String("DISCONNECTED").Equals(str)
                 && IPhone::REASON_ROAMING_ON.Equals(str2);
-        mHandler->SendEmptyMessage(disconnectedDueToRoaming
+        mHost->mHandler->SendEmptyMessage(disconnectedDueToRoaming
                                   ? EVENT_DATA_ROAMING_DISCONNECTED
-                                  : EVENT_DATA_ROAMING_OK);
+                                  : EVENT_DATA_ROAMING_OK, &res);
     }
     else if ((action.Equals(ITelephonyIntents::ACTION_SIM_STATE_CHANGED)) &&
-            (mPUKEntryActivity != NULL)) {
+            (mHost->mPUKEntryActivity != NULL)) {
         // if an attempt to un-PUK-lock the device was made, while we're
         // receiving this state change notification, notify the handler.
         // NOTE: This is ONLY triggered if an attempt to un-PUK-lock has
         // been attempted.
         String str;
-        intent->GetStringExtra(IIccCardConstants::INTENT_KEY_ICC_STATE, &str)；
+        intent->GetStringExtra(IIccCardConstants::INTENT_KEY_ICC_STATE, &str);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
         AutoPtr<IMessage> m;
-        mHandler->ObtainMessage(EVENT_SIM_STATE_CHANGED, str, (IMessage**)&m);
-        mHandler->SendMessage(m);
+        mHost->mHandler->ObtainMessage(EVENT_SIM_STATE_CHANGED, TO_IINTERFACE(cchar), (IMessage**)&m);
+        Boolean res;
+        mHost->mHandler->SendMessage(m, &res);
     }
     else if (action.Equals(ITelephonyIntents::ACTION_RADIO_TECHNOLOGY_CHANGED)) {
         String newPhone;
         intent->GetStringExtra(IPhoneConstants::PHONE_NAME_KEY, &newPhone);
-        Logger::D(LOG_TAG, "Radio technology switched. Now %s is active.", newPhone.string());
-        InitForNewRadioTechnology();
+        Logger::D(IPhoneGlobals::TAG, "Radio technology switched. Now %s is active.", newPhone.string());
+        mHost->InitForNewRadioTechnology();
     }
     else if (action.Equals(ITelephonyIntents::ACTION_SERVICE_STATE_CHANGED)) {
-        HandleServiceStateChanged(intent);
+        mHost->HandleServiceStateChanged(intent);
     }
     else if (action.Equals(ITelephonyIntents::ACTION_EMERGENCY_CALLBACK_MODE_CHANGED)) {
-        if (TelephonyCapabilities::SupportsEcm(phone)) {
-            Logger::D(LOG_TAG, "Emergency Callback Mode arrived in PhoneApp.");
+        Boolean res;
+        assert(0);
+        //TelephonyCapabilities::SupportsEcm(mHost->mPhone, &res);
+        if (res) {
+            Logger::D(IPhoneGlobals::TAG, "Emergency Callback Mode arrived in PhoneApp.");
             // Start Emergency Callback Mode service
             Boolean res;
             if (intent->GetBooleanExtra(String("phoneinECMState"), FALSE, &res), res) {
                 AutoPtr<IIntent> intent;
-                CIntent::New(context, EmergencyCallbackModeService.class, (IIntent**)&intent);
-                context->StartService(intent);
+                assert(0);
+                //CIntent::New(context, EmergencyCallbackModeService.class, (IIntent**)&intent);
+                AutoPtr<IComponentName> name;
+                context->StartService(intent, (IComponentName**)&name);
             }
         }
         else {
             // It doesn't make sense to get ACTION_EMERGENCY_CALLBACK_MODE_CHANGED
             // on a device that doesn't support ECM in the first place.
             String name;
-            phone->GetPhoneName(&name);
-            Logger::E(LOG_TAG, "Got ACTION_EMERGENCY_CALLBACK_MODE_CHANGED, "
+            mHost->mPhone->GetPhoneName(&name);
+            Logger::E(IPhoneGlobals::TAG, "Got ACTION_EMERGENCY_CALLBACK_MODE_CHANGED, "
                     "but ECM isn't supported for phone: %s", name.string());
         }
     }
     else if (action.Equals(IIntent::ACTION_DOCK_EVENT)) {
-        intent->GetInt32Extra(Intent.EXTRA_DOCK_STATE,
+        intent->GetInt32Extra(IIntent::EXTRA_DOCK_STATE,
                 IIntent::EXTRA_DOCK_STATE_UNDOCKED, &mDockState);
-        if (VDBG) Logger::D(LOG_TAG, "ACTION_DOCK_EVENT -> mDockState = %d", mDockState);
+        if (VDBG) Logger::D(IPhoneGlobals::TAG, "ACTION_DOCK_EVENT -> mDockState = %d", mDockState);
         AutoPtr<IMessage> message;
-        mHandler->ObtainMessage(EVENT_DOCK_STATE_CHANGED, 0, (IMessage**)&message);
-        mHandler->SendMessage(message);
+        mHost->mHandler->ObtainMessage(EVENT_DOCK_STATE_CHANGED, 0, (IMessage**)&message);
+        Boolean res;
+        mHost->mHandler->SendMessage(message, &res);
     }
     return NOERROR;
 }
@@ -158,49 +223,57 @@ ECode PhoneGlobals::MyHandler::HandleMessage(
         // temporary. Will move it to a persistent communication process
         // later.
         case EVENT_START_SIP_SERVICE:
+        {
             AutoPtr<IContext> ctx;
-            GetApplicationContext((IContext**)&ctx);
-            SipService::Start(ctx);
+            mHost->GetApplicationContext((IContext**)&ctx);
+            assert(0);
+            //SipService::Start(ctx);
             break;
-
+        }
         // TODO: This event should be handled by the lock screen, just
         // like the "SIM missing" and "Sim locked" cases (bug 1804111).
         case EVENT_SIM_NETWORK_LOCKED:
         {
             AutoPtr<IResources> resources;
-            GetResources((IResources**)&resources);
+            mHost->GetResources((IResources**)&resources);
             Boolean res;
-            if (resources->GetBoolean(R.bool.ignore_sim_network_locked_events, &res), res) {
+            if (resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::ignore_sim_network_locked_events, &res), res) {
                 // Some products don't have the concept of a "SIM network lock"
-                Logger::I(LOG_TAG, "Ignoring EVENT_SIM_NETWORK_LOCKED event; "
+                Logger::I(IPhoneGlobals::TAG, "Ignoring EVENT_SIM_NETWORK_LOCKED event; "
                         "not showing 'SIM network unlock' PIN entry screen");
             }
             else {
                 // Normal case: show the "SIM network unlock" PIN entry screen.
                 // The user won't be able to do anything else until
                 // they enter a valid SIM network PIN.
-                Logger::I(LOG_TAG, "show sim depersonal panel");
-                AutoPtr<PhoneGlobals> globals = PhoneGlobals::GetInstance();
-                AutoPtr<IIccNetworkDepersonalizationPanel> ndpPanel;
-                CIccNetworkDepersonalizationPanel::New(globals, (IIccNetworkDepersonalizationPanel**)&&ndpPanel);
-                ndpPanel->Show();
+                Logger::I(IPhoneGlobals::TAG, "show sim depersonal panel");
+                AutoPtr<PhoneGlobals> globals;
+                PhoneGlobals::GetInstance((PhoneGlobals**)&globals);
+                assert(0);
+                // AutoPtr<IIccNetworkDepersonalizationPanel> ndpPanel;
+                // CIccNetworkDepersonalizationPanel::New(globals, (IIccNetworkDepersonalizationPanel**)&&ndpPanel);
+                // ndpPanel->Show();
             }
             break;
         }
         case EVENT_DATA_ROAMING_DISCONNECTED:
-            notificationMgr->ShowDataDisconnectedRoaming();
+            mHost->mNotificationMgr->ShowDataDisconnectedRoaming();
             break;
-
         case EVENT_DATA_ROAMING_OK:
-            notificationMgr->HideDataDisconnectedRoaming();
+            mHost->mNotificationMgr->HideDataDisconnectedRoaming();
             break;
 
-        case MMI_COMPLETE:
-            OnMMIComplete((AsyncResult) msg.obj);
+        case IPhoneGlobals::MMI_COMPLETE:
+        {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<AsyncResult> result = (AsyncResult*)IObject::Probe(obj);
+            mHost->OnMMIComplete(result);
             break;
-
-        case MMI_CANCEL:
-            PhoneUtils::CancelMmiCode(phone);
+        }
+        case IPhoneGlobals::MMI_CANCEL:
+            assert(0);
+            //PhoneUtils::CancelMmiCode(phone);
             break;
 
         case EVENT_SIM_STATE_CHANGED:
@@ -217,13 +290,13 @@ ECode PhoneGlobals::MyHandler::HandleMessage(
                 // when the right event is triggered and there
                 // are UI objects in the foreground, we close
                 // them to display the lock panel.
-                if (mPUKEntryActivity != NULL) {
-                    mPUKEntryActivity->Finish();
-                    mPUKEntryActivity = NULL;
+                if (mHost->mPUKEntryActivity != NULL) {
+                    mHost->mPUKEntryActivity->Finish();
+                    mHost->mPUKEntryActivity = NULL;
                 }
-                if (mPUKEntryProgressDialog != NULL) {
-                    mPUKEntryProgressDialog->Dismiss();
-                    mPUKEntryProgressDialog = NULL;
+                if (mHost->mPUKEntryProgressDialog != NULL) {
+                    IDialogInterface::Probe(mHost->mPUKEntryProgressDialog)->Dismiss();
+                    mHost->mPUKEntryProgressDialog = NULL;
                 }
             }
             break;
@@ -233,24 +306,27 @@ ECode PhoneGlobals::MyHandler::HandleMessage(
             break;
 
         case EVENT_DOCK_STATE_CHANGED:
+        {
             // If the phone is docked/undocked during a call, and no wired or BT headset
             // is connected: turn on/off the speaker accordingly.
             Boolean inDockMode = FALSE;
-            if (mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+            if (mDockState != IIntent::EXTRA_DOCK_STATE_UNDOCKED) {
                 inDockMode = TRUE;
             }
-            if (VDBG) Logger::D(LOG_TAG, "received EVENT_DOCK_STATE_CHANGED. Phone inDock = %d"
+            if (VDBG) Logger::D(IPhoneGlobals::TAG, "received EVENT_DOCK_STATE_CHANGED. Phone inDock = %d"
                     , inDockMode);
 
-            mCM->GetState(&phoneState);
+            mHost->mCM->GetState(&phoneState);
             Boolean res;
             if (phoneState == PhoneConstantsState_OFFHOOK &&
-                    (bluetoothManager->IsBluetoothHeadsetAudioOn(&res), !res)) {
+                    (mHost->mBluetoothManager->IsBluetoothHeadsetAudioOn(&res), !res)) {
                 AutoPtr<IContext> context;
-                GetApplicationContext((IContext**)&context);
-                PhoneUtils::TurnOnSpeaker(context, inDockMode, TRUE);
+                mHost->GetApplicationContext((IContext**)&context);
+                assert(0);
+                //PhoneUtils::TurnOnSpeaker(context, inDockMode, TRUE);
             }
             break;
+        }
     }
     return NOERROR;
 }
@@ -267,15 +343,7 @@ static Boolean initDBG()
 
 const Boolean PhoneGlobals::DBG = initDBG();
 
-const Boolean PhoneGlobals::VDBG = (IPhoneGlobals:::DBG_LEVEL >= 2);
-
-const Int32 PhoneGlobals::EVENT_SIM_NETWORK_LOCKED = 3;
-const Int32 PhoneGlobals::EVENT_SIM_STATE_CHANGED = 8;
-const Int32 PhoneGlobals::EVENT_DATA_ROAMING_DISCONNECTED = 10;
-const Int32 PhoneGlobals::EVENT_DATA_ROAMING_OK = 11;
-const Int32 PhoneGlobals::EVENT_UNSOL_CDMA_INFO_RECORD = 12;
-const Int32 PhoneGlobals::EVENT_DOCK_STATE_CHANGED = 13;
-const Int32 PhoneGlobals::EVENT_START_SIP_SERVICE = 14;
+const Boolean PhoneGlobals::VDBG = (IPhoneGlobals::DBG_LEVEL >= 2);
 
 AutoPtr<PhoneGlobals> PhoneGlobals::sMe;
 
@@ -286,6 +354,8 @@ const String PhoneGlobals::DEFAULT_CALL_ORIGIN_PACKAGE("com.android.dialer");
 const String PhoneGlobals::ALLOWED_EXTRA_CALL_ORIGIN("com.android.dialer.DialtactsActivity");
 
 const Int64 PhoneGlobals::CALL_ORIGIN_EXPIRATION_MILLIS = 30 * 1000;
+
+CAR_INTERFACE_IMPL(PhoneGlobals, ContextWrapper, IPhoneGlobals)
 
 ECode PhoneGlobals::SetRestoreMuteOnInCallResume(
     /* [in] */ Boolean mode)
@@ -303,7 +373,7 @@ PhoneGlobals::PhoneGlobals(
     , mWakeState(PhoneGlobalsWakeState_SLEEP)
     , mShouldRestoreMuteOnInCallResume(FALSE)
 {
-    CPhoneGlobalsPhoneAppBroadcastReceiver::New((IBroadcastReceiver)&mReceiver);
+    CPhoneGlobalsPhoneAppBroadcastReceiver::New((IPhoneGlobals*)this, (IBroadcastReceiver**)&mReceiver);
 
     mHandler = new MyHandler(this);
 
@@ -313,7 +383,7 @@ PhoneGlobals::PhoneGlobals(
 
 ECode PhoneGlobals::OnCreate()
 {
-    if (VDBG) Logger::V(LOG_TAG, "onCreate()...");
+    if (VDBG) Logger::V(IPhoneGlobals::TAG, "onCreate()...");
 
     AutoPtr<IContentResolver> resolver;
     GetContentResolver((IContentResolver**)&resolver);
@@ -323,51 +393,61 @@ ECode PhoneGlobals::OnCreate()
     // overrideable on a per-product basis):
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
-    resources->GetBoolean(com.android.internal.R.bool.config_voice_capable, &sVoiceCapable);
+    assert(0);
+    //resources->GetBoolean(com.android.internal.R.bool.config_voice_capable, &sVoiceCapable);
+
+
     // ...but this might eventually become a PackageManager "system
     // feature" instead, in which case we'd do something like:
     // sVoiceCapable =
     //   getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY_VOICE_CALLS);
 
-    if (phone == NULL) {
+    if (mPhone == NULL) {
         // Initialize the telephony framework
-        PhoneFactory::MakeDefaultPhones(this);
+        AutoPtr<IPhoneFactory> helper;
+        CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper);
+        helper->MakeDefaultPhones((IContext*)this);
 
         // Get the default phone
-        phone = PhoneFactory::GetDefaultPhone();
+        helper->GetDefaultPhone((IPhone**)&mPhone);
 
         // Start TelephonyDebugService After the default phone is created.
         AutoPtr<IIntent> intent;
-        CIntent::New(this, TelephonyDebugService.class, (IIntent**)&intent);
-        StartService(intent);
+        assert(0);
+        //CIntent::New(this, TelephonyDebugService.class, (IIntent**)&intent);
+        AutoPtr<IComponentName> name;
+        StartService(intent, (IComponentName**)&name);
 
-        mCM = CallManager::GetInstance();
-        mCM->RegisterPhone(phone);
+        assert(0);
+        //mCM = CallManager::GetInstance();
+        Boolean res;
+        mCM->RegisterPhone(mPhone, &res);
 
         // Create the NotificationMgr singleton, which is used to display
         // status bar icons and control other status bar behavior.
-        notificationMgr = NotificationMgr::Init(this);
+        assert(0);
+        //notificationMgr = NotificationMgr::Init(this);
 
-        mHandler->SendEmptyMessage(EVENT_START_SIP_SERVICE);
+        mHandler->SendEmptyMessage(EVENT_START_SIP_SERVICE, &res);
 
         Int32 phoneType;
-        phone->GetPhoneType(&phoneType);
+        mPhone->GetPhoneType(&phoneType);
 
         if (phoneType == IPhoneConstants::PHONE_TYPE_CDMA) {
             // Create an instance of CdmaPhoneCallState and initialize it to IDLE
-            cdmaPhoneCallState = new CdmaPhoneCallState();
-            cdmaPhoneCallState->CdmaPhoneCallStateInit();
+            mCdmaPhoneCallState = new CdmaPhoneCallState();
+            mCdmaPhoneCallState->CdmaPhoneCallStateInit();
         }
 
         // before registering for phone state changes
         AutoPtr<IInterface> obj;
         GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
         mPowerManager = IPowerManager::Probe(obj);
-        mPowerManager->NewWakeLock(IPowerManager::FULL_WAKE_LOCK, LOG_TAG,
+        mPowerManager->NewWakeLock(IPowerManager::FULL_WAKE_LOCK, IPhoneGlobals::TAG,
                 (IPowerManagerWakeLock**)&mWakeLock);
         // lock used to keep the processor awake, when we don't care for the display.
         mPowerManager->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK
-                | IPowerManager::ON_AFTER_RELEASE, LOG_TAG, (IPowerManagerWakeLock**)&mPartialWakeLock);
+                | IPowerManager::ON_AFTER_RELEASE, IPhoneGlobals::TAG, (IPowerManagerWakeLock**)&mPartialWakeLock);
 
         AutoPtr<IInterface> obj2;
         GetSystemService(IContext::KEYGUARD_SERVICE, (IInterface**)&obj2);
@@ -375,61 +455,67 @@ ECode PhoneGlobals::OnCreate()
 
         // get a handle to the service so that we can use it later when we
         // want to set the poke lock.
-        AutoPtr<IInterface> obj3;
-        ServiceManager->GetService(String("power"), (IInterface**)&obj3);
+        AutoPtr<IInterface> obj3 = ServiceManager::GetService(String("power"));
         mPowerManagerService = IIPowerManager::Probe(obj3);
 
         // Get UpdateLock to suppress system-update related events (e.g. dialog show-up)
         // during phone calls.
         CUpdateLock::New(String("phone"), (IUpdateLock**)&mUpdateLock);
 
-        if (DBG) Logger::D(LOG_TAG, "onCreate: mUpdateLock: %s", TO_CSTR(mUpdateLock));
+        if (DBG) Logger::D(IPhoneGlobals::TAG, "onCreate: mUpdateLock: %s", TO_CSTR(mUpdateLock));
 
-        AutoPtr<ICallLogAsync> callLogAsync;
-        CCallLogAsync::New((ICallLogAsync**)&callLogAsync);
-        AutoPtr<CallLogger> callLogger = new CallLogger(this, callLogAsync);
+        assert(0);
+        // AutoPtr<ICallLogAsync> callLogAsync;
+        // CCallLogAsync::New((ICallLogAsync**)&callLogAsync);
+        // AutoPtr<CallLogger> callLogger = new CallLogger(this, callLogAsync);
 
-        callGatewayManager = CallGatewayManager::GetInstance();
+        mCallGatewayManager = CallGatewayManager::GetInstance();
 
         // Create the CallController singleton, which is the interface
         // to the telephony layer for user-initiated telephony functionality
         // (like making outgoing calls.)
-        callController = CallController::Init(this, callLogger, callGatewayManager);
+        assert(0);
+        //mCallController = CallController::Init(this, callLogger, callGatewayManager);
 
         // Create the CallerInfoCache singleton, which remembers custom ring tone and
         // send-to-voicemail settings.
         //
         // The asynchronous caching will start just after this call.
-        callerInfoCache = CallerInfoCache::Init(this);
+        mCallerInfoCache = CallerInfoCache::Init(this);
 
         // Monitors call activity from the telephony layer
-        callStateMonitor = new CallStateMonitor(mCM);
+        mCallStateMonitor = new CallStateMonitor(mCM);
 
         // Bluetooth manager
-        bluetoothManager = new BluetoothManager();
+        assert(0);
+        //mBluetoothManager = new BluetoothManager();
 
-        phoneMgr = PhoneInterfaceManager::Init(this, phone);
+        assert(0);
+        //phoneMgr = PhoneInterfaceManager::Init(this, phone);
 
         // Create the CallNotifer singleton, which handles
         // asynchronous events from the telephony layer (like
         // launching the incoming-call UI when an incoming call comes
         // in.)
-        notifier = CallNotifier::Init(this, phone, callLogger, callStateMonitor,
-                bluetoothManager);
+        assert(0);
+        // notifier = CallNotifier::Init(this, phone, callLogger, callStateMonitor,
+        //         bluetoothManager);
 
         // register for ICC status
         AutoPtr<IIccCard> sim;
-        phone->GetIccCard((IIccCard**)&sim);
+        mPhone->GetIccCard((IIccCard**)&sim);
         if (sim != NULL) {
-            if (VDBG) Logger::V(LOG_TAG, "register for ICC status");
-            sim->RegisterForNetworkLocked(mHandler, EVENT_SIM_NETWORK_LOCKED, NULL);
+            if (VDBG) Logger::V(IPhoneGlobals::TAG, "register for ICC status");
+            assert(0);
+            //sim->RegisterForNetworkLocked(mHandler, EVENT_SIM_NETWORK_LOCKED, NULL);
         }
 
         // register for MMI/USSD
         mCM->RegisterForMmiComplete(mHandler, MMI_COMPLETE, NULL);
 
         // register connection tracking to PhoneUtils
-        PhoneUtils::InitializeConnectionHandler(mCM);
+        assert(0);
+        //PhoneUtils::InitializeConnectionHandler(mCM);
 
         // Register for misc other intent broadcasts.
         AutoPtr<IIntentFilter> intentFilter;
@@ -440,30 +526,37 @@ ECode PhoneGlobals::OnCreate()
         intentFilter->AddAction(ITelephonyIntents::ACTION_RADIO_TECHNOLOGY_CHANGED);
         intentFilter->AddAction(ITelephonyIntents::ACTION_SERVICE_STATE_CHANGED);
         intentFilter->AddAction(ITelephonyIntents::ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
-        RegisterReceiver(mReceiver, intentFilter);
+        AutoPtr<IIntent> tmp;
+        RegisterReceiver(mReceiver, intentFilter, (IIntent**)&tmp);
 
         //set the default values for the preferences in the phone.
-        PreferenceManager::SetDefaultValues(this, R.xml.network_setting, FALSE);
+        AutoPtr<IPreferenceManagerHelper> managerHelper;
+        CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&managerHelper);
+        managerHelper->SetDefaultValues(this,
+                Elastos::Droid::Server::Telephony::R::xml::network_setting, FALSE);
 
-        PreferenceManager::SetDefaultValues(this, R.xml.call_feature_setting, FALSE);
+        managerHelper->SetDefaultValues(this,
+                Elastos::Droid::Server::Telephony::R::xml::call_feature_setting, FALSE);
 
         // Make sure the audio mode (along with some
         // audio-mode-related state of our own) is initialized
         // correctly, given the current state of the phone.
-        PhoneUtils::SetAudioMode(mCM);
+        assert(0);
+        //PhoneUtils::SetAudioMode(mCM);
     }
 
-    cdmaOtaProvisionData = new OtaUtils::CdmaOtaProvisionData();
-    cdmaOtaConfigData = new OtaUtils::CdmaOtaConfigData();
-    cdmaOtaScreenState = new OtaUtils::CdmaOtaScreenState();
-    cdmaOtaInCallScreenUiState = new OtaUtils::CdmaOtaInCallScreenUiState();
+    mCdmaOtaProvisionData = new OtaUtils::CdmaOtaProvisionData();
+    mCdmaOtaConfigData = new OtaUtils::CdmaOtaConfigData();
+    mCdmaOtaScreenState = new OtaUtils::CdmaOtaScreenState();
+    mCdmaOtaInCallScreenUiState = new OtaUtils::CdmaOtaInCallScreenUiState();
 
     // XXX pre-load the SimProvider so that it's ready
     AutoPtr<IUriHelper> helper;
     CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     AutoPtr<IUri> _data;
     helper->Parse(String("content://icc/adn"), (IUri**)&_data);
-    resolver->GetType(_data);
+    String tmp;
+    resolver->GetType(_data, &tmp);
 
     // start with the default value to set the mute state.
     mShouldRestoreMuteOnInCallResume = FALSE;
@@ -473,10 +566,10 @@ ECode PhoneGlobals::OnCreate()
 
     // Read HAC settings and configure audio hardware
     Boolean res;
-    resources->GetBoolean(R.bool.hac_enabled, &res);
+    resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::hac_enabled, &res);
     if (res) {
         AutoPtr<IContext> context;
-        phone->GetContext((IContext**)&context);
+        mPhone->GetContext((IContext**)&context);
         AutoPtr<IContentResolver> contentResolver;
         context->GetContentResolver((IContentResolver**)&contentResolver);
 
@@ -502,8 +595,8 @@ ECode PhoneGlobals::GetInstance(
     VALIDATE_NOT_NULL(global)
     if (sMe == NULL) {
         //throw new IllegalStateException("No PhoneGlobals here!");
-        Logger::E(iPhoneGlobals::LOG_TAG, "No PhoneGlobals here!");
-        return IllegalStateException;
+        Logger::E(IPhoneGlobals::TAG, "No PhoneGlobals here!");
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
     *global = sMe;
     REFCOUNT_ADD(*global);
@@ -527,7 +620,7 @@ ECode PhoneGlobals::GetBluetoothManager(
 {
     VALIDATE_NOT_NULL(manager)
 
-    *manager = bluetoothManager;
+    *manager = mBluetoothManager;
     REFCOUNT_ADD(*manager)
     return NOERROR;
 }
@@ -546,11 +639,14 @@ AutoPtr<IPendingIntent> PhoneGlobals::CreateHangUpOngoingCallPendingIntent(
     /* [in] */ IContext* context)
 {
     AutoPtr<IIntent> intent;
-    CIntent::New(IPhoneGlobals::ACTION_HANG_UP_ONGOING_CALL, NULL,
-            context, NotificationBroadcastReceiver.class, (IIntent**)&intent); //CPhoneGlobalsNotificationBroadcastReceiver
+    assert(0);
+    // CIntent::New(IPhoneGlobals::ACTION_HANG_UP_ONGOING_CALL, NULL,
+    //         context, EIID_IPhoneGlobalsNotificationBroadcastReceiver, (IIntent**)&intent); //CPhoneGlobalsNotificationBroadcastReceiver
 
+    AutoPtr<IPendingIntentHelper> helper;
+    CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
     AutoPtr<IPendingIntent> pendingIntent;
-    PendingIntent::GetBroadcast(context, 0, intent, 0, (IPendingIntent**)&pendingIntent);
+    helper->GetBroadcast(context, 0, intent, 0, (IPendingIntent**)&pendingIntent);
     return pendingIntent;
 }
 
@@ -583,33 +679,33 @@ ECode PhoneGlobals::SetCachedSimPin(
 ECode PhoneGlobals::HandleOtaspEvent(
     /* [in] */ IMessage* msg)
 {
-    if (DBG) Logger::D(LOG_TAG, "handleOtaspEvent(message %s)...", TO_CSTR(msg));
+    if (DBG) Logger::D(IPhoneGlobals::TAG, "handleOtaspEvent(message %s)...", TO_CSTR(msg));
 
-    if (otaUtils == NULL) {
+    if (mOtaUtils == NULL) {
         // We shouldn't be getting OTASP events without ever
         // having started the OTASP call in the first place!
-        Logger::W(LOG_TAG, "handleOtaEvents: got an event but otaUtils is null! "
+        Logger::W(IPhoneGlobals::TAG, "handleOtaEvents: got an event but otaUtils is null! "
                 "message = %s", TO_CSTR(msg));
         return NOERROR;
     }
 
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    return otaUtils->OnOtaProvisionStatusChanged(IAsyncResult::Probe(obj));
+    return mOtaUtils->OnOtaProvisionStatusChanged((AsyncResult*)IObject::Probe(obj));
 }
 
 ECode PhoneGlobals::HandleOtaspDisconnect()
 {
-    if (DBG) Logger::D(LOG_TAG, "handleOtaspDisconnect()...");
+    if (DBG) Logger::D(IPhoneGlobals::TAG, "handleOtaspDisconnect()...");
 
-    if (otaUtils == NULL) {
+    if (mOtaUtils == NULL) {
         // We shouldn't be getting OTASP events without ever
         // having started the OTASP call in the first place!
-        Logger::W(LOG_TAG, "handleOtaspDisconnect: otaUtils is null!");
+        Logger::W(IPhoneGlobals::TAG, "handleOtaspDisconnect: otaUtils is null!");
         return NOERROR;
     }
 
-    return otaUtils->OnOtaspDisconnect();
+    return mOtaUtils->OnOtaspDisconnect();
 }
 
 ECode PhoneGlobals::SetPukEntryActivity(
@@ -647,43 +743,49 @@ ECode PhoneGlobals::GetPUKEntryProgressDialog(
 }
 
 ECode PhoneGlobals::RequestWakeState(
-    /* [in] */ WakeState ws)
+    /* [in] */ IPhoneGlobalsWakeState ws)
 {
-    if (VDBG) Logger::D(LOG_TAG, "requestWakeState(%d)...", ws);
+    if (VDBG) Logger::D(IPhoneGlobals::TAG, "requestWakeState(%d)...", ws);
 
     {
         AutoLock syncLock(this);
         if (mWakeState != ws) {
             switch (ws) {
-                case PARTIAL:
+                case PhoneGlobalsWakeState_PARTIAL:
+                {
                     // acquire the processor wake lock, and release the FULL
                     // lock if it is being held.
-                    mPartialWakeLock->Acquire();
+                    mPartialWakeLock->AcquireLock();
                     Boolean res;
                     if (mWakeLock->IsHeld(&res), res) {
-                        mWakeLock->ReleaseResource();
+                        mWakeLock->ReleaseLock();
                     }
                     break;
-                case FULL:
+                }
+                case PhoneGlobalsWakeState_FULL:
+                {
                     // acquire the full wake lock, and release the PARTIAL
                     // lock if it is being held.
-                    mWakeLock->Acquire();
+                    mWakeLock->AcquireLock();
                     Boolean res;
                     if (mPartialWakeLock->IsHeld(&res), res) {
-                        mPartialWakeLock->ReleaseResource();
+                        mPartialWakeLock->ReleaseLock();
                     }
                     break;
-                case SLEEP:
+                }
+                case PhoneGlobalsWakeState_SLEEP:
                 default:
+                {
                     // release both the PARTIAL and FULL locks.
                     Boolean res;
-                    if (mWakeLock->IsHeld(&res) res) {
-                        mWakeLock->ReleaseResource();
+                    if (mWakeLock->IsHeld(&res), res) {
+                        mWakeLock->ReleaseLock();
                     }
                     if (mPartialWakeLock->IsHeld(&res), res) {
-                        mPartialWakeLock->ReleaseResource();
+                        mPartialWakeLock->ReleaseLock();
                     }
                     break;
+                }
             }
             mWakeState = ws;
         }
@@ -695,8 +797,8 @@ ECode PhoneGlobals::WakeUpScreen()
 {
     {
         AutoLock syncLock(this);
-        if (mWakeState == WakeState.SLEEP) {
-            if (DBG) Logger::D(LOG_TAG, "pulse screen lock");
+        if (mWakeState == PhoneGlobalsWakeState_SLEEP) {
+            if (DBG) Logger::D(IPhoneGlobals::TAG, "pulse screen lock");
             mPowerManager->WakeUp(SystemClock::GetUptimeMillis());
         }
     }
@@ -716,7 +818,8 @@ ECode PhoneGlobals::UpdateWakeState()
     // Note that we need to make a fresh call to this method any
     // time the speaker state changes.  (That happens in
     // PhoneUtils.turnOnSpeaker().)
-    Boolean isSpeakerInUse = (state == PhoneConstantsState_OFFHOOK) && PhoneUtils::IsSpeakerOn(this);
+    assert(0);
+    //Boolean isSpeakerInUse = (state == PhoneConstantsState_OFFHOOK) && PhoneUtils::IsSpeakerOn(this);
 
     // TODO (bug 1440854): The screen timeout *might* also need to
     // depend on the bluetooth state, but this isn't as clear-cut as
@@ -735,24 +838,24 @@ ECode PhoneGlobals::UpdateWakeState()
     //
     Boolean isRinging = (state == PhoneConstantsState_RINGING);
     AutoPtr<ICall> call;
-    phone->GetForegroundCall(&call);
-    ICallState state;
-    call->GetState(&state);
-    Boolean isDialing = (state == ICallState_DIALING);
+    mPhone->GetForegroundCall((ICall**)&call);
+    ICallState _state;
+    call->GetState(&_state);
+    Boolean isDialing = (_state == ICallState_DIALING);
     Boolean keepScreenOn = isRinging || isDialing;
     // keepScreenOn == true means we'll hold a full wake lock:
-    RequestWakeState(keepScreenOn ? IPhoneGlobalsWakeState_FULL : IPhoneGlobalsWakeState_SLEEP);
+    RequestWakeState(keepScreenOn ? PhoneGlobalsWakeState_FULL : PhoneGlobalsWakeState_SLEEP);
     return NOERROR;
 }
 
 ECode PhoneGlobals::PokeUserActivity()
 {
-    if (VDBG) Logger::D(LOG_TAG, "pokeUserActivity()...");
+    if (VDBG) Logger::D(IPhoneGlobals::TAG, "pokeUserActivity()...");
     return mPowerManager->UserActivity(SystemClock::GetUptimeMillis(), FALSE);
 }
 
 ECode PhoneGlobals::UpdatePhoneState(
-    /* [in] */ IPhoneConstantsState state)
+    /* [in] */ PhoneConstantsState state)
 {
     if (state != mLastPhoneState) {
         mLastPhoneState = state;
@@ -761,20 +864,20 @@ ECode PhoneGlobals::UpdatePhoneState(
         //
         // Watch out: we don't release the lock here when the screen is still in foreground.
         // At that time InCallScreen will release it on onPause().
-        if (state != IPhoneConstantsState_IDLE) {
+        if (state != PhoneConstantsState_IDLE) {
             // UpdateLock is a recursive lock, while we may get "acquire" request twice and
             // "release" request once for a single call (RINGING + OFFHOOK and IDLE).
             // We need to manually ensure the lock is just acquired once for each (and this
             // will prevent other possible buggy situations too).
             Boolean res;
             if (mUpdateLock->IsHeld(&res), !res) {
-                mUpdateLock->Acquire();
+                mUpdateLock->AcquireLock();
             }
         }
         else {
             Boolean res;
             if (mUpdateLock->IsHeld(&res), res) {
-                mUpdateLock->ReleaseResource();
+                mUpdateLock->ReleaseLock();
             }
         }
     }
@@ -782,7 +885,7 @@ ECode PhoneGlobals::UpdatePhoneState(
 }
 
 ECode PhoneGlobals::GetPhoneState(
-    /* [out] */ IPhoneConstantsState* state)
+    /* [out] */ PhoneConstantsState* state)
 {
     VALIDATE_NOT_NULL(state)
 
@@ -801,43 +904,51 @@ ECode PhoneGlobals::GetKeyguardManager(
 }
 
 ECode PhoneGlobals::OnMMIComplete(
-    /* [in] */ IAsyncResult* r)
+    /* [in] */ AsyncResult* r)
 {
-    if (VDBG) Logger::D(LOG_TAG, "onMMIComplete()...");
-    AutoPtr<IMmiCode> mmiCode = IMmiCode::Probe(r.result);
+    if (VDBG) Logger::D(IPhoneGlobals::TAG, "onMMIComplete()...");
+    AutoPtr<IMmiCode> mmiCode = IMmiCode::Probe(r->mResult);
 
     AutoPtr<PhoneGlobals> global;
     FAIL_RETURN(GetInstance((PhoneGlobals**)&global))
-    return PhoneUtils::DisplayMMIComplete(phone, global, mmiCode, NULL, NULL);
+    assert(0);
+    //return PhoneUtils::DisplayMMIComplete(phone, global, mmiCode, NULL, NULL);
+    return NOERROR;
 }
 
 void PhoneGlobals::InitForNewRadioTechnology()
 {
-    if (DBG) Logger::D(LOG_TAG, "initForNewRadioTechnology...");
+    if (DBG) Logger::D(IPhoneGlobals::TAG, "initForNewRadioTechnology...");
 
     Int32 type;
-    phone->GetPhoneType(&type);
+    mPhone->GetPhoneType(&type);
     if (type == IPhoneConstants::PHONE_TYPE_CDMA) {
         // Create an instance of CdmaPhoneCallState and initialize it to IDLE
-        cdmaPhoneCallState = new CdmaPhoneCallState();
-        cdmaPhoneCallState->CdmaPhoneCallStateInit();
+        mCdmaPhoneCallState = new CdmaPhoneCallState();
+        mCdmaPhoneCallState->CdmaPhoneCallStateInit();
     }
-    if (!TelephonyCapabilities::SupportsOtasp(phone)) {
+
+    assert(0);
+    Boolean res;
+    // TelephonyCapabilities::SupportsOtasp(mPhone, &res);
+    if (!res) {
         //Clean up OTA data in GSM/UMTS. It is valid only for CDMA
         ClearOtaState();
     }
 
-    notifier->UpdateCallNotifierRegistrationsAfterRadioTechnologyChange();
-    callStateMonitor->UpdateAfterRadioTechnologyChange();
+    assert(0);
+    //mNotifier->UpdateCallNotifierRegistrationsAfterRadioTechnologyChange();
+    mCallStateMonitor->UpdateAfterRadioTechnologyChange();
 
     // Update registration for ICC status after radio technology change
     AutoPtr<IIccCard> sim;
-    phone->GetIccCard((IIccCard**)&sim);
+    mPhone->GetIccCard((IIccCard**)&sim);
     if (sim != NULL) {
-        if (DBG) Logger::D(LOG_TAG, "Update registration for ICC status...");
+        if (DBG) Logger::D(IPhoneGlobals::TAG, "Update registration for ICC status...");
 
         //Register all events new to the new active phone
-        sim->RegisterForNetworkLocked(mHandler, EVENT_SIM_NETWORK_LOCKED, NULL);
+        assert(0);
+        //sim->RegisterForNetworkLocked(mHandler, EVENT_SIM_NETWORK_LOCKED, NULL);
     }
 }
 
@@ -855,7 +966,7 @@ void PhoneGlobals::HandleServiceStateChanged(
     AutoPtr<IBundle> obj;
     intent->GetExtras((IBundle**)&obj);
     AutoPtr<IServiceStateHelper> helper;
-    CServiceStateHelper::New((IServiceStateHelper**)&helper);
+    CServiceStateHelper::AcquireSingleton((IServiceStateHelper**)&helper);
 
     AutoPtr<IServiceState> ss;
     helper->NewFromBundle(obj, (IServiceState**)&ss);
@@ -863,7 +974,7 @@ void PhoneGlobals::HandleServiceStateChanged(
     if (ss != NULL) {
         Int32 state;
         ss->GetState(&state);
-        notificationMgr->UpdateNetworkSelection(state);
+        mNotificationMgr->UpdateNetworkSelection(state);
     }
 }
 
@@ -873,7 +984,7 @@ ECode PhoneGlobals::IsOtaCallInActiveState(
     VALIDATE_NOT_NULL(result)
 
     Boolean otaCallActive = FALSE;
-    if (VDBG) Logger::D(LOG_TAG, "- isOtaCallInActiveState %s", otaCallActive);
+    if (VDBG) Logger::D(IPhoneGlobals::TAG, "- isOtaCallInActiveState %s", otaCallActive);
     *result = otaCallActive;
     return NOERROR;
 }
@@ -884,27 +995,27 @@ ECode PhoneGlobals::IsOtaCallInEndState(
     VALIDATE_NOT_NULL(result)
 
     Boolean otaCallEnded = FALSE;
-    if (VDBG) Logger::D(LOG_TAG, "- isOtaCallInEndState %d", otaCallEnded);
+    if (VDBG) Logger::D(IPhoneGlobals::TAG, "- isOtaCallInEndState %d", otaCallEnded);
     *result = otaCallEnded;
     return NOERROR;
 }
 
 ECode PhoneGlobals::ClearOtaState()
 {
-    if (DBG) Logger::D(LOG_TAG, "- clearOtaState ...");
-    if (otaUtils != NULL) {
-        otaUtils->CleanOtaScreen(TRUE);
-        if (DBG) Logger::D(LOG_TAG, "  - clearOtaState clears OTA screen");
+    if (DBG) Logger::D(IPhoneGlobals::TAG, "- clearOtaState ...");
+    if (mOtaUtils != NULL) {
+        mOtaUtils->CleanOtaScreen(TRUE);
+        if (DBG) Logger::D(IPhoneGlobals::TAG, "  - clearOtaState clears OTA screen");
     }
     return NOERROR;
 }
 
 ECode PhoneGlobals::DismissOtaDialogs()
 {
-    if (DBG) Logger::D(LOG_TAG, "- dismissOtaDialogs ...");
-    if (otaUtils != NULL) {
-        otaUtils->DismissAllOtaDialogs();
-        if (DBG) Logger::D(LOG_TAG, "  - dismissOtaDialogs clears OTA dialogs");
+    if (DBG) Logger::D(IPhoneGlobals::TAG, "- dismissOtaDialogs ...");
+    if (mOtaUtils != NULL) {
+        mOtaUtils->DismissAllOtaDialogs();
+        if (DBG) Logger::D(IPhoneGlobals::TAG, "  - dismissOtaDialogs clears OTA dialogs");
     }
     return NOERROR;
 }

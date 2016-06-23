@@ -2,6 +2,7 @@
 #define  __ELASTOS_DROID_PHONE_EMERGENCYCALLHELPER_H__
 
 #include "_Elastos.Droid.Server.Telephony.h"
+#include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
@@ -31,9 +32,12 @@ class CallController;
  */
 class EmergencyCallHelper
     : public Handler
+    , public IEmergencyCallHelper
 {
 public:
     TO_STRING_IMPL("EmergencyCallHelper")
+
+    CAR_INTERFACE_DECL()
 
     EmergencyCallHelper();
 
@@ -174,15 +178,6 @@ private:
     static CARAPI_(void) Log(
         /* [in] */ const String& msg);
 
-public:
-    // Number of times to retry the call, and time between retry attempts.
-    static const Int32 MAX_NUM_RETRIES;
-    static const Int64 TIME_BETWEEN_RETRIES;  // msec
-
-    // Timeout used with our wake lock (just as a safety valve to make
-    // sure we don't hold it forever).
-    static const Int64 WAKE_LOCK_TIMEOUT;  // 5 minutes in msec
-
 private:
     static const String TAG;
     static const Boolean DBG;
@@ -195,6 +190,7 @@ private:
 
     AutoPtr<CallController> mCallController;
     AutoPtr<IPhoneGlobals> mApp;
+
     AutoPtr<ICallManager> mCM;
     String mNumber;  // The emergency number we're trying to dial
     Int32 mNumRetriesSoFar;
@@ -206,6 +202,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_EMERGENCYCALLHELPER_H__
