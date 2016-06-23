@@ -159,9 +159,7 @@ ECode LevelListDrawable::Inflate(
             continue;
         }
 
-        Int32 size = ArraySize(R::styleable::LevelListDrawableItem);
-        AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-        layout->Copy(R::styleable::LevelListDrawableItem, size);
+        AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::LevelListDrawableItem);
 
         AutoPtr<ITypedArray> a;
         FAIL_RETURN(ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a));

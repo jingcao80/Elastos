@@ -68,9 +68,7 @@ ECode MultiSelectListPreference::constructor(
     /* [in] */ Int32 defStyleRes)
 {
     FAIL_RETURN(DialogPreference::constructor(context, attrs, defStyleAttr, defStyleRes));
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::MultiSelectListPreference),
-            ArraySize(R::styleable::MultiSelectListPreference));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::MultiSelectListPreference);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);
     a->GetTextArray(R::styleable::MultiSelectListPreference_entries, (ArrayOf<ICharSequence*>**)&mEntries);

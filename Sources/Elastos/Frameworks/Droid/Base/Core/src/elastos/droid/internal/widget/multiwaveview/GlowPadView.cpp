@@ -334,9 +334,7 @@ ECode GlowPadView::constructor(
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32*>(R::styleable::GlowPadView),
-        ArraySize(R::styleable::GlowPadView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::GlowPadView);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
     a->GetDimension(R::styleable::GlowPadView_innerRadius, mInnerRadius, &mInnerRadius);

@@ -2759,9 +2759,7 @@ ECode Intent::ParseIntent(
 {
     VALIDATE_NOT_NULL(_intent);
 
-    Int32 size = ArraySize(R::styleable::Intent);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::Intent, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::Intent);
 
     AutoPtr<CIntent> intent;
     CIntent::NewByFriend((CIntent**)&intent);
@@ -2803,9 +2801,7 @@ ECode Intent::ParseIntent(
         String nodeName;
         parser->GetName(&nodeName);
         if (nodeName.Equals(TAG_CATEGORIES)) {
-            size = ArraySize(R::styleable::IntentCategory);
-            layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::IntentCategory, size);
+            layout = TO_ATTRS_ARRAYOF(R::styleable::IntentCategory);
 
             ASSERT_SUCCEEDED(resources->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
             String cat;

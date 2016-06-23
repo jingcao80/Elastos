@@ -36,9 +36,7 @@ ECode FrameLayout::FrameLayoutLayoutParams::constructor(
 {
     FAIL_RETURN(ViewGroup::MarginLayoutParams::constructor(c, attrs));
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::FrameLayout_Layout),
-            ArraySize(R::styleable::FrameLayout_Layout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::FrameLayout_Layout);
     AutoPtr<ITypedArray> a;
     ASSERT_SUCCEEDED(c->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a));
     a->GetInt32(R::styleable::FrameLayout_Layout_layout_gravity, -1, &mGravity);
@@ -153,9 +151,7 @@ ECode FrameLayout::constructor(
 {
     ASSERT_SUCCEEDED(ViewGroup::constructor(context, attrs, defStyleAttr, defStyleRes));
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::FrameLayout),
-            ArraySize(R::styleable::FrameLayout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::FrameLayout);
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(context->ObtainStyledAttributes(
             attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));

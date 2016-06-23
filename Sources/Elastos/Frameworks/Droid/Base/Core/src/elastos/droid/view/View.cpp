@@ -1373,9 +1373,7 @@ View::~View()
 void View::InitializeFadingEdge(
     /* [in] */ ITypedArray* a)
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::View),
-        ArraySize(R::styleable::View));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::View);
     AutoPtr<ITypedArray> array;
     ASSERT_SUCCEEDED(mContext->ObtainStyledAttributes(attrIds, (ITypedArray**)&array));
 
@@ -1550,9 +1548,7 @@ void View::InitializeScrollbars(
     // using the View filter array which is not available to the SDK. As such, internal
     // framework usage now uses initializeScrollbarsInternal and we grab a default
     // TypedArray with the right filter instead here.
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::View),
-        ArraySize(R::styleable::View));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::View);
     AutoPtr<ITypedArray> array;
     ASSERT_SUCCEEDED(mContext->ObtainStyledAttributes(attrIds, (ITypedArray**)&array));
 
@@ -17893,9 +17889,7 @@ ECode View::constructor(
 {
     FAIL_RETURN(constructor(context))
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::View),
-            ArraySize(R::styleable::View));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::View);
     AutoPtr<ITypedArray> a;
     ASSERT_SUCCEEDED(context->ObtainStyledAttributes(
             attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));

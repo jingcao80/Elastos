@@ -1998,9 +1998,7 @@ ECode CResources::ParseBundleExtra(
 
     assert(attrs != NULL);
 
-    Int32 size = ArraySize(R::styleable::Extra);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::Extra, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::Extra);
 
     AutoPtr<ITypedArray> sa;
     ObtainAttributes(attrs, layout, (ITypedArray**)&sa);

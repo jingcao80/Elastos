@@ -201,9 +201,7 @@ RadioGroup::constructor(
 
     // retrieve selected radio button as requested by the user in the
     // XML layout file
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::RadioGroup),
-            ArraySize(R::styleable::RadioGroup));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::RadioGroup);
     AutoPtr<ITypedArray> attributes;
     context->ObtainStyledAttributes(attrs, attrIds,
             R::attr::radioButtonStyle, 0, (ITypedArray**)&attributes);

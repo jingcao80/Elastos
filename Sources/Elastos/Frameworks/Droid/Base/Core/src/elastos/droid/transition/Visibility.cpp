@@ -52,9 +52,7 @@ ECode Visibility::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     Transition::constructor(context, attrs);
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32*>(R::styleable::VisibilityTransition),
-        ArraySize(R::styleable::VisibilityTransition));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::VisibilityTransition);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
     Int32 mode = 0;

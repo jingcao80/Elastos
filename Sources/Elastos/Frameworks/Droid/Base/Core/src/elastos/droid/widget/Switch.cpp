@@ -150,9 +150,7 @@ ECode Switch::constructor(
     info->GetApplicationScale(&applicationScale);
     IPaint::Probe(mTextPaint)->SetCompatibilityScaling(applicationScale);
 
-    AutoPtr< ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::Switch),
-        ArraySize(R::styleable::Switch));
+    AutoPtr< ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Switch);
 
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
@@ -198,9 +196,7 @@ ECode Switch::SetSwitchTextAppearance(
     /* [in] */ IContext* context,
     /* [in] */ Int32 resid)
 {
-    AutoPtr< ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::TextAppearance),
-            ArraySize(R::styleable::TextAppearance));
+    AutoPtr< ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::TextAppearance);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(resid, attrIds, (ITypedArray**)&a);
 

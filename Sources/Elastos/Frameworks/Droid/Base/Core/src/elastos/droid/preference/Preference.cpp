@@ -55,9 +55,7 @@ ECode Preference::constructor(
 {
     mContext = context;
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::Preference),
-            ArraySize(R::styleable::Preference));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Preference);
     const AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);
 

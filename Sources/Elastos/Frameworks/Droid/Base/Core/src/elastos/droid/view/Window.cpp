@@ -107,9 +107,7 @@ ECode Window::GetWindowStyle(
 {
     {    AutoLock syncLock(this);
         if (mWindowStyle == NULL) {
-            AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-                const_cast<Int32 *>(R::styleable::Window),
-                ArraySize(R::styleable::Window));
+            AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Window);
             FAIL_RETURN(mContext->ObtainStyledAttributes(attrIds, (ITypedArray**)&mWindowStyle));
         }
         *attrs = mWindowStyle;

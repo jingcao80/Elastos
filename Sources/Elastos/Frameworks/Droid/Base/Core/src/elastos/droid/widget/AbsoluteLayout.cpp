@@ -51,9 +51,7 @@ ECode AbsoluteLayout::AbsoluteLayoutLayoutParams::InitFromAttributes(
 {
     VALIDATE_NOT_NULL(c);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::AbsoluteLayout_Layout),
-            ArraySize(R::styleable::AbsoluteLayout_Layout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::AbsoluteLayout_Layout);
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(c->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a));
     FAIL_RETURN(a->GetDimensionPixelOffset(

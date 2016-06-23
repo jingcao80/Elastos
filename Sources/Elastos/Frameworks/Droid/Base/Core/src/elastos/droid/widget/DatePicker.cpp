@@ -202,9 +202,7 @@ ECode DatePicker::DatePickerSpinnerDelegate::constructor(
     hlp->GetDefault((ILocale**)&loc);
     SetCurrentLocale(loc);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::DatePicker),
-            ArraySize(R::styleable::DatePicker));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::DatePicker);
     AutoPtr<ITypedArray> attributesArray;
     context->ObtainStyledAttributes(attrs,
             attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&attributesArray);
@@ -1079,9 +1077,7 @@ ECode DatePicker::constructor(
 {
     FrameLayout::constructor(context, attrs, defStyleAttr, defStyleRes);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::DatePicker),
-            ArraySize(R::styleable::DatePicker));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::DatePicker);
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
 

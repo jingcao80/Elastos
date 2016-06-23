@@ -2393,9 +2393,7 @@ ECode PhoneWindow::PanelFeatureState::SetStyle(
 {
     assert(context != NULL);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::Theme),
-            ArraySize(R::styleable::Theme));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Theme);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrIds, (ITypedArray**)&a);
 
@@ -3541,9 +3539,7 @@ Boolean PhoneWindow::InitializePanelDecor(
     st->mGravity = IGravity::CENTER | IGravity::BOTTOM;
     st->SetStyle(context);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::Window),
-        ArraySize(R::styleable::Window));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Window);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(NULL, attrIds, 0, st->mListPresenterTheme, (ITypedArray**)&a);
 

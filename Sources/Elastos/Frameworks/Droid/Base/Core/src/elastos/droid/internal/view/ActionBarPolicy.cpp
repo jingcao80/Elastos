@@ -83,9 +83,7 @@ ECode ActionBarPolicy::GetTabContainerHeight(
         /* [out] */ Int32* rst)
 {
     VALIDATE_NOT_NULL(rst)
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::ActionBar),
-            ArraySize(R::styleable::ActionBar));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ActionBar);
     AutoPtr<ITypedArray> a;
     mContext->ObtainStyledAttributes(NULL, attrIds, R::attr::actionBarStyle, 0, (ITypedArray**)&a);
 

@@ -26,9 +26,7 @@ ECode ActionBarLayoutParams::constructor(
 {
     MarginLayoutParams::constructor(ctx, attrs);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::ActionBar_LayoutParams),
-        ArraySize(R::styleable::ActionBar_LayoutParams));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ActionBar_LayoutParams);
 
     AutoPtr<ITypedArray> a;
     ctx->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);

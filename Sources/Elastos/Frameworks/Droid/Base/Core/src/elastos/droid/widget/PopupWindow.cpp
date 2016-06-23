@@ -326,9 +326,7 @@ ECode PopupWindow::constructor(
     ctx->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&obj);
     mWindowManager = IWindowManager::Probe(obj);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::PopupWindow),
-            ArraySize(R::styleable::PopupWindow));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::PopupWindow);
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(ctx->ObtainStyledAttributes(
             attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));

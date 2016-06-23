@@ -118,9 +118,7 @@ ECode Transition::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32*>(R::styleable::Transition),
-        ArraySize(R::styleable::Transition));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Transition);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
     Int32 duration = 0;

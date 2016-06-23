@@ -31,9 +31,7 @@ ECode WeightedLinearLayout::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     LinearLayout::constructor(context, attrs);
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::WeightedLinearLayout),
-            ArraySize(R::styleable::WeightedLinearLayout));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::WeightedLinearLayout);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
 

@@ -52,9 +52,7 @@ FadedEdgeDrawHelper::FadedEdgeDrawHelper(
     , mIsVertical(isVertical)
     , mSoftwareRendered(FALSE)
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(Elastos::Droid::R::styleable::View),
-        ArraySize(Elastos::Droid::R::styleable::View));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(Elastos::Droid::R::styleable::View);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
     AutoPtr<IViewConfigurationHelper> vch;

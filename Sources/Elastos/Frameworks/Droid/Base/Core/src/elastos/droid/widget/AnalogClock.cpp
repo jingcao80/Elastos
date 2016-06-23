@@ -110,8 +110,7 @@ ECode AnalogClock::constructor(
     AutoPtr<IResources> r;
     context->GetResources((IResources**)&r);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(const_cast<Int32 *>(R::styleable::AnalogClock),
-        ArraySize(R::styleable::AnalogClock));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::AnalogClock);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, defStyle, defStyleRes, (ITypedArray**)&a);
     a->GetDrawable(R::styleable::AnalogClock_dial, (IDrawable**)&mDial);

@@ -151,9 +151,7 @@ ECode InsetDrawable::Inflate(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ IResourcesTheme* theme) /*throws XmlPullParserException, IOException*/
 {
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::InsetDrawable),
-            ArraySize(R::styleable::InsetDrawable));
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::InsetDrawable);
     AutoPtr<ITypedArray> a;
     ECode ec = ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a);
     FAIL_GOTO(ec, error);
@@ -269,9 +267,7 @@ ECode InsetDrawable::ApplyTheme(
     }
 
     AutoPtr<ITypedArray> a;
-    Int32 size = ArraySize(R::styleable::InsetDrawable);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::InsetDrawable, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::InsetDrawable);
     ((CResources::Theme*)t)->ResolveAttribute(state->mThemeAttrs, layout, (ITypedArray**)&a);
     // try {
     if (FAILED(UpdateStateFromTypedArray(a))) {

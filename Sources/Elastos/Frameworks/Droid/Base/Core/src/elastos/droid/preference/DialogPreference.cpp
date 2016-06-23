@@ -49,9 +49,8 @@ ECode DialogPreference::constructor(
 {
     FAIL_RETURN(Preference::constructor(context, attrs, defStyleAttr, defStyleRes));
 
-    AutoPtr< ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(const_cast<Int32 *>(R::styleable::DialogPreference),
-            ArraySize(R::styleable::DialogPreference));
     AutoPtr<ITypedArray> a;
+    AutoPtr< ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::DialogPreference);
     context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);
     String tmpString;
     a->GetString(R::styleable::DialogPreference_dialogTitle, &tmpString);

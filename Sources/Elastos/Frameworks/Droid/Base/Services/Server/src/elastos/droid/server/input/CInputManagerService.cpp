@@ -2158,9 +2158,7 @@ void CInputManagerService::VisitKeyboardLayoutsInPackage(
             break;
         }
         if (element.Equals("keyboard-layout")) {
-            Int32 size = ArraySize(R::styleable::KeyboardLayout);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::KeyboardLayout, size);
+            AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::KeyboardLayout);
             AutoPtr<ITypedArray> a;
             resources->ObtainAttributes(
                     IAttributeSet::Probe(parser), layout, (ITypedArray**)&a);

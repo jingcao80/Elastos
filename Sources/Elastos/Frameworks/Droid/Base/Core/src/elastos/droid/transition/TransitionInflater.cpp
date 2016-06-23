@@ -285,9 +285,7 @@ void TransitionInflater::GetTargetIds(
         String name;
         parser->GetName(&name);
         if (name.Equals(String("target"))) {
-            AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-                const_cast<Int32*>(R::styleable::TransitionTarget),
-                ArraySize(R::styleable::TransitionTarget));
+            AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::TransitionTarget);
             AutoPtr<ITypedArray> a;
             mContext->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
             Int32 id = 0;
@@ -367,9 +365,7 @@ void TransitionInflater::LoadTransition(
     /* [in] */ IViewGroup* sceneRoot,
     /* [in] */ ITransitionManager* transitionManager)
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-                const_cast<Int32*>(R::styleable::TransitionManager),
-                ArraySize(R::styleable::TransitionManager));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::TransitionManager);
     AutoPtr<ITypedArray> a;
     mContext->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
     Int32 transitionId = 0;

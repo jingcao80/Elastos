@@ -99,9 +99,7 @@ ECode ViewFlipper::constructor(
 {
     FAIL_RETURN(ViewAnimator::constructor(ctx, attrs));
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::ViewFlipper),
-            ArraySize(R::styleable::ViewFlipper));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ViewFlipper);
     AutoPtr<ITypedArray> a;
     ctx->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
     a->GetInt32(R::styleable::ViewFlipper_flipInterval, DEFAULT_INTERVAL, &mFlipInterval);

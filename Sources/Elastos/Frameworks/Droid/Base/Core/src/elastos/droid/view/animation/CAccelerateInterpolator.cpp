@@ -68,9 +68,7 @@ ECode CAccelerateInterpolator::constructor(
     /* [in] */ IResourcesTheme* theme,
     /* [in] */ IAttributeSet* attrs)
 {
-    Int32 size = ArraySize(R::styleable::AccelerateInterpolator);
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(size);
-    attrIds->Copy(R::styleable::AccelerateInterpolator, size);
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::AccelerateInterpolator);
     AutoPtr<ITypedArray> sa;
 
     if (theme != NULL) {

@@ -772,9 +772,7 @@ ECode BitmapDrawable::Inflate(
 {
     FAIL_RETURN(Drawable::Inflate(r, parser, attrs, theme));
 
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::BitmapDrawable),
-            ArraySize(R::styleable::BitmapDrawable));
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::BitmapDrawable);
 
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a));
@@ -897,9 +895,7 @@ ECode BitmapDrawable::ApplyTheme(
         return NOERROR;
     }
 
-    Int32 size = ArraySize(R::styleable::BitmapDrawable);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::BitmapDrawable, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::BitmapDrawable);
 
     AutoPtr<ITypedArray> a;
     ((CResources::Theme*)t)->ResolveAttribute(state->mThemeAttrs, layout, (ITypedArray**)&a);

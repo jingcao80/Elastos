@@ -199,9 +199,7 @@ CalendarView::LegacyCalendarViewDelegate::LegacyCalendarViewDelegate(
     hlp->GetDefault((ILocale**)&loc);
     SetCurrentLocale(loc);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32*>(R::styleable::CalendarView),
-            ArraySize(R::styleable::CalendarView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::CalendarView);
     AutoPtr<ITypedArray> attributesArray;
     context->ObtainStyledAttributes(attrs,
             attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&attributesArray);
@@ -730,9 +728,7 @@ void CalendarView::LegacyCalendarViewDelegate::UpdateDateTextSize()
 {
     AutoPtr<IContext> cxt;
     IView::Probe(mDelegator)->GetContext((IContext**)&cxt);
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32*>(R::styleable::TextAppearance),
-            ArraySize(R::styleable::TextAppearance));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::TextAppearance);
     AutoPtr<ITypedArray> dateTextAppearance;
     cxt->ObtainStyledAttributes(
             mDateTextAppearanceResId, attrIds, (ITypedArray**)&dateTextAppearance);

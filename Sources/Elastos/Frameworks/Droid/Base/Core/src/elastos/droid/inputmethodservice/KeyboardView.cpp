@@ -529,9 +529,7 @@ ECode KeyboardView::constructor(
     mCoordinates = ArrayOf<Int32>::Alloc(2);
 
     AutoPtr<ITypedArray> a;
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::KeyboardView),
-            ArraySize(R::styleable::KeyboardView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::KeyboardView);
     context->ObtainStyledAttributes(attrs, attrIds,
             defStyleAttr, defStyleRes, (ITypedArray**)&a);
 

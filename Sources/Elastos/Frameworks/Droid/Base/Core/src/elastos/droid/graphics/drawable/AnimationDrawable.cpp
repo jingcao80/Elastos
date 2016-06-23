@@ -262,9 +262,7 @@ ECode AnimationDrawable::Inflate(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ IResourcesTheme* theme)
 {
-    Int32 size = ArraySize(R::styleable::AnimationDrawable);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AnimationDrawable, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AnimationDrawable);
 
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a));
@@ -299,9 +297,7 @@ ECode AnimationDrawable::Inflate(
         }
 
         a = NULL;
-        size = ArraySize(R::styleable::AnimationDrawableItem);
-        layout = ArrayOf<Int32>::Alloc(size);
-        layout->Copy(R::styleable::AnimationDrawableItem, size);
+        layout = TO_ATTRS_ARRAYOF(R::styleable::AnimationDrawableItem);
 
         FAIL_RETURN(ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a));
         Int32 duration;

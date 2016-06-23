@@ -242,9 +242,7 @@ ECode ListView::constructor(
 {
     AbsListView::constructor(context, attrs, defStyleAttr, defStyleRes);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::ListView),
-        ArraySize(R::styleable::ListView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ListView);
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
 

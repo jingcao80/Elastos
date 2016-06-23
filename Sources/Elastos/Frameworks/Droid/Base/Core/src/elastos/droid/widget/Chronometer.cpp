@@ -94,9 +94,7 @@ ECode Chronometer::constructor(
     VALIDATE_NOT_NULL(attrs);
 
     TextView::constructor(context, attrs, defStyle, defStyleRes);
-    AutoPtr< ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::Chronometer),
-        ArraySize(R::styleable::Chronometer));
+    AutoPtr< ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Chronometer);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, defStyle, defStyleRes, (ITypedArray**)&a);
 

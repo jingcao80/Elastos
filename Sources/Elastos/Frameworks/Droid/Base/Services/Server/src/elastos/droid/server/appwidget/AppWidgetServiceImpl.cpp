@@ -4752,8 +4752,7 @@ AutoPtr<AppWidgetServiceImpl::Provider> AppWidgetServiceImpl::ParseProviderInfoX
             Binder::RestoreCallingIdentity(identity);
         //}
 
-        AutoPtr< ArrayOf<Int32> > styleAttrsTmp = ArrayOf<Int32>::Alloc(const_cast<Int32*>(R::styleable::AppWidgetProviderInfo),
-            ArraySize(R::styleable::AppWidgetProviderInfo));
+        AutoPtr< ArrayOf<Int32> > styleAttrsTmp = TO_ATTRS_ARRAYOF(R::styleable::AppWidgetProviderInfo);
         AutoPtr<ITypedArray> sa;
         resources->ObtainAttributes(attrs, styleAttrsTmp, (ITypedArray**)&sa);
 

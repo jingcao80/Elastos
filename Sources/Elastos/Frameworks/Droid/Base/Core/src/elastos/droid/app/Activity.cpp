@@ -2403,9 +2403,7 @@ ECode Activity::OnApplyThemeResource(
 
     // Get the primary color and update the TaskDescription for this activity
     if (theme != NULL) {
-        AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::Theme),
-            ArraySize(R::styleable::Theme));
+        AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Theme);
         AutoPtr<ITypedArray> a;
         theme->ObtainStyledAttributes(attrIds, (ITypedArray**)&a);
 

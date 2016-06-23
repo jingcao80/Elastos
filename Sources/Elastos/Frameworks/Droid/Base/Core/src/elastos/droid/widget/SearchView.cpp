@@ -422,9 +422,7 @@ ECode SearchView::constructor(
 {
     LinearLayout::constructor(context, attrs, defStyleAttr, defStyleRes);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::SearchView),
-            ArraySize(R::styleable::SearchView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::SearchView);
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
 

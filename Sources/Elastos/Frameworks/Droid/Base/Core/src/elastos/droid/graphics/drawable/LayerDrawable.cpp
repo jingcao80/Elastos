@@ -302,9 +302,7 @@ ECode LayerDrawable::Inflate(
 {
     FAIL_RETURN(Drawable::Inflate(r, parser, attrs, theme));
 
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::LayerDrawable),
-            ArraySize(R::styleable::LayerDrawable));
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::LayerDrawable);
     AutoPtr<ITypedArray> a;
     ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a);
     UpdateStateFromTypedArray(a);
@@ -366,9 +364,7 @@ ECode LayerDrawable::InflateLayers(
         }
 
         AutoPtr<ChildDrawable> layer = new ChildDrawable();
-        AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::LayerDrawableItem),
-            ArraySize(R::styleable::LayerDrawableItem));
+        AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::LayerDrawableItem);
         AutoPtr<ITypedArray> a;
         FAIL_RETURN(ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a));
         UpdateLayerFromTypedArray(layer, a);
@@ -441,9 +437,7 @@ ECode LayerDrawable::ApplyTheme(
     }
 
     if (state->mThemeAttrs != NULL) {
-        AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::LayerDrawable),
-            ArraySize(R::styleable::LayerDrawable));
+        AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::LayerDrawable);
         AutoPtr<ITypedArray> a;
         ((CResources::Theme*)t)->ResolveAttribute(state->mThemeAttrs, layout, (ITypedArray**)&a);
         UpdateStateFromTypedArray(a);
@@ -455,9 +449,7 @@ ECode LayerDrawable::ApplyTheme(
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<ChildDrawable> layer = (*array)[i];
         if (layer->mThemeAttrs != NULL) {
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
-                const_cast<Int32 *>(R::styleable::LayerDrawableItem),
-                ArraySize(R::styleable::LayerDrawableItem));
+            AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::LayerDrawableItem);
             AutoPtr<ITypedArray> a;
             ((CResources::Theme*)t)->ResolveAttribute(layer->mThemeAttrs, layout, (ITypedArray**)&a);
             UpdateLayerFromTypedArray(layer, a);

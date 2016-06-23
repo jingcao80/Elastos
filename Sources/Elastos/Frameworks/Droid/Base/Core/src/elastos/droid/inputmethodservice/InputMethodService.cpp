@@ -575,9 +575,7 @@ void InputMethodService::InitViews()
     mShowInputRequested = FALSE;
     mShowInputForced = FALSE;
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::InputMethodService),
-            ArraySize(R::styleable::InputMethodService));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::InputMethodService);
     // AbstractInputMethodService::ObtainStyledAttributes(attrIds, (ITypedArray**)&mThemeAttrs);
     mInflater->Inflate(R::layout::input_method, NULL, (IView**)&mRootView);
     mRootView->SetSystemUiVisibility(

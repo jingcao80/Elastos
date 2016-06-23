@@ -69,9 +69,7 @@ void DialogTitle::OnMeasure(
                 SetSingleLine(FALSE);
                 SetMaxLines(2);
 
-                AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-                    const_cast<Int32 *>(R::styleable::TextAppearance),
-                    ArraySize(R::styleable::TextAppearance));
+                AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::TextAppearance);
                 AutoPtr<ITypedArray> a;
                 ASSERT_SUCCEEDED(mContext->ObtainStyledAttributes(
                         NULL, attrIds, R::attr::textAppearanceMedium,

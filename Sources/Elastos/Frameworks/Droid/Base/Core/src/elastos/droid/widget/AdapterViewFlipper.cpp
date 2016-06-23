@@ -177,8 +177,7 @@ ECode AdapterViewFlipper::constructor(
 
     AdapterViewAnimator::constructor(context, attrs, defStyleAttr, defStyleRes);
 
-    AutoPtr< ArrayOf<Int32> > styleFlipper = ArrayOf<Int32>::Alloc(const_cast<Int32*>(R::styleable::AdapterViewFlipper),
-        ArraySize(R::styleable::AdapterViewFlipper));
+    AutoPtr< ArrayOf<Int32> > styleFlipper = TO_ATTRS_ARRAYOF(R::styleable::AdapterViewFlipper);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, styleFlipper, defStyleAttr, defStyleRes, (ITypedArray**)&a);
     a->GetInt32(R::styleable::AdapterViewFlipper_flipInterval, DEFAULT_INTERVAL, &mFlipInterval);

@@ -138,9 +138,7 @@ ECode PseudoGridView::constructor(
 
     AutoPtr<ITypedArray> a;
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::PseudoGridView),
-            ArraySize(R::styleable::PseudoGridView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::PseudoGridView);
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
 
     Int32 N = 0;

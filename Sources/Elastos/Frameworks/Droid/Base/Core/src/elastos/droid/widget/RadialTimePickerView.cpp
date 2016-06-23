@@ -342,9 +342,7 @@ ECode RadialTimePickerView::constructor(
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
     AutoPtr<ITypedArray> a;
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::TimePicker),
-            ArraySize(R::styleable::TimePicker));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::TimePicker);
     mContext->ObtainStyledAttributes(attrs, attrIds, defStyle, 0, (ITypedArray**)&a);
 
     AutoPtr<IColorStateList> amPmBackgroundColor;

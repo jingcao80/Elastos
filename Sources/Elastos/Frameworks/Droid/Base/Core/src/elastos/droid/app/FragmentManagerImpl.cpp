@@ -608,9 +608,7 @@ ECode FragmentManagerImpl::LoadAnimator(
     if (transitionStyle == 0) {
         return NOERROR;
     }
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::FragmentAnimation),
-            ArraySize(R::styleable::FragmentAnimation));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::FragmentAnimation);
     AutoPtr<ITypedArray> attrs;
     activityCtx->ObtainStyledAttributes(transitionStyle, attrIds, (ITypedArray**)&attrs);
     Int32 anim;
@@ -2504,9 +2502,7 @@ ECode FragmentManagerImpl::OnCreateView(
 
     String fname;
     attrs->GetAttributeValue(String(NULL), String("class"), &fname);
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::Fragment),
-        ArraySize(R::styleable::Fragment));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Fragment);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrIds, (ITypedArray**)&a);
 

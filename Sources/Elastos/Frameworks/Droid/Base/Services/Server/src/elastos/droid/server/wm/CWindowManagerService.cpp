@@ -5340,9 +5340,7 @@ ECode CWindowManagerService::SetAppStartingWindow(
         Slogger::V(TAG, "Checking theme of starting window: 0x%d", theme);
     }
     if (theme != 0) {
-        AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::Window),
-            ArraySize(R::styleable::Window));
+        AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Window);
 
         AutoPtr<Entry> ent = AttributeCache::GetInstance()->Get(pkg, theme, attrIds, mCurrentUserId);
         if (ent == NULL) {

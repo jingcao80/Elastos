@@ -27,9 +27,7 @@ ECode CActionKeyInfo::constructor(
     /* [in] */ IContext* activityContext,
     /* [in] */ IAttributeSet* attr)
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::SearchableActionKey),
-        ArraySize(R::styleable::SearchableActionKey));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::SearchableActionKey);
     AutoPtr<ITypedArray>  a;
     activityContext->ObtainStyledAttributes(attr, attrIds, (ITypedArray**)&a);
 

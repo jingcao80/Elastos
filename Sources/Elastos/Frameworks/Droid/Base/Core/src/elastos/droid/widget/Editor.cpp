@@ -1310,9 +1310,7 @@ ECode SelectionActionModeCallback::OnCreateActionMode(
     }
 
     AutoPtr<ITypedArray> styledAttributes;
-    AutoPtr<ArrayOf<Int32> > values = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::SelectionModeDrawables),
-        ArraySize(R::styleable::SelectionModeDrawables));
+    AutoPtr<ArrayOf<Int32> > values = TO_ATTRS_ARRAYOF(R::styleable::SelectionModeDrawables);
 
     ctx->ObtainStyledAttributes(
             values, (ITypedArray**)&styledAttributes);
@@ -2976,9 +2974,7 @@ Int32 ErrorPopup::GetResourceId(
     if (currentId == 0) {
         AutoPtr<IContext> context;
         mView->GetContext((IContext**)&context);
-        AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-                const_cast<Int32 *>(R::styleable::Theme),
-                ArraySize(R::styleable::Theme));
+        AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Theme);
         AutoPtr<ITypedArray> styledAttributes;
         context->ObtainStyledAttributes(attrIds, (ITypedArray**)&styledAttributes);
 

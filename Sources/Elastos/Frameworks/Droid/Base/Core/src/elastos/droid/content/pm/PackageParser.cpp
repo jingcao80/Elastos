@@ -2623,9 +2623,7 @@ ECode PackageParser::ParseBaseApk(
     Boolean foundApp = FALSE;
 
     AutoPtr<ITypedArray> a;
-    Int32 size = ArraySize(R::styleable::AndroidManifest);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifest, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifest);
 
     AutoPtr<ITypedArray> sa;
     ASSERT_SUCCEEDED(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
@@ -2722,9 +2720,7 @@ ECode PackageParser::ParseBaseApk(
             pkg->mTrustedOverlay = trustedOverlay;
 
             sa = NULL;
-            size = ArraySize(R::styleable::AndroidManifestResourceOverlay);
-            layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestResourceOverlay, size);
+            layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestResourceOverlay);
             ASSERT_SUCCEEDED(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
 
             sa->GetString(
@@ -2785,9 +2781,7 @@ ECode PackageParser::ParseBaseApk(
             ASSERT_SUCCEEDED(CConfigurationInfo::New((IConfigurationInfo**)&cPref));
             sa = NULL;
 
-            size = ArraySize(R::styleable::AndroidManifestUsesConfiguration);
-            layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestUsesConfiguration, size);
+            layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestUsesConfiguration);
 
             ASSERT_SUCCEEDED(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
             Int32 ivalue;
@@ -2910,9 +2904,7 @@ ECode PackageParser::ParseBaseApk(
             if (GetSDK_VERSION() > 0) {
                 sa = NULL;
 
-                size = ArraySize(R::styleable::AndroidManifestUsesSdk);
-                layout = ArrayOf<Int32>::Alloc(size);
-                layout->Copy(R::styleable::AndroidManifestUsesSdk, size);
+                layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestUsesSdk);
 
                 ASSERT_SUCCEEDED(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
 
@@ -3044,9 +3036,7 @@ ECode PackageParser::ParseBaseApk(
         }
         else if (tagName.Equals("supports-screens")) {
             sa = NULL;
-            size = ArraySize(R::styleable::AndroidManifestSupportsScreens);
-            layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestSupportsScreens, size);
+            layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestSupportsScreens);
 
             ASSERT_SUCCEEDED(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
 
@@ -3088,9 +3078,7 @@ ECode PackageParser::ParseBaseApk(
         }
         else if (tagName.Equals("protected-broadcast")) {
             sa = NULL;
-            size = ArraySize(R::styleable::AndroidManifestProtectedBroadcast);
-            layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestProtectedBroadcast, size);
+            layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestProtectedBroadcast);
 
             ASSERT_SUCCEEDED(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
 
@@ -3121,9 +3109,7 @@ ECode PackageParser::ParseBaseApk(
         }
         else if (tagName.Equals("original-package")) {
             sa = NULL;
-            size = ArraySize(R::styleable::AndroidManifestOriginalPackage);
-            layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestOriginalPackage, size);
+            layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestOriginalPackage);
 
             ASSERT_SUCCEEDED(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
 
@@ -3144,9 +3130,7 @@ ECode PackageParser::ParseBaseApk(
         }
         else if (tagName.Equals("adopt-permissions")) {
             sa = NULL;
-            size = ArraySize(R::styleable::AndroidManifestOriginalPackage);
-            layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestOriginalPackage, size);
+            layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestOriginalPackage);
 
             ASSERT_SUCCEEDED(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
 
@@ -3340,11 +3324,8 @@ ECode PackageParser::ParseUsesFeature(
     AutoPtr<IFeatureInfo> fi;
     CFeatureInfo::New((IFeatureInfo**)&fi);
 
-    Int32 size = ArraySize(R::styleable::AndroidManifestUsesFeature);
-    AutoPtr< ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestUsesFeature, size);
-
     AutoPtr<ITypedArray> sa;
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestUsesFeature);
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
     // Note: don't allow this value to be a reference to a resource
     // that may change.
@@ -3386,9 +3367,7 @@ ECode PackageParser::ParseUsesPermission(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    Int32 size = ArraySize(R::styleable::AndroidManifestUsesPermission);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestUsesPermission, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestUsesPermission);
 
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
@@ -3629,9 +3608,7 @@ ECode PackageParser::ParseKeySets(
                 return NOERROR;
             }
 
-            Int32 size = ArraySize(R::styleable::AndroidManifestKeySet);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestKeySet, size);
+            AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestKeySet);
 
             AutoPtr<ITypedArray> sa;
             res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
@@ -3652,9 +3629,7 @@ ECode PackageParser::ParseKeySets(
                 return NOERROR;
             }
 
-            Int32 size = ArraySize(R::styleable::AndroidManifestPublicKey);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestPublicKey, size);
+            AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestPublicKey);
             AutoPtr<ITypedArray> sa;
             res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
 
@@ -3712,9 +3687,7 @@ ECode PackageParser::ParseKeySets(
             XmlUtils::SkipCurrentTag(parser);
         }
         else if (tagName.Equals("upgrade-key-set")) {
-            Int32 size = ArraySize(R::styleable::AndroidManifestUpgradeKeySet);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestUpgradeKeySet, size);
+            AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestUpgradeKeySet);
             AutoPtr<ITypedArray> sa;
             res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
 
@@ -3836,9 +3809,7 @@ ECode PackageParser::ParsePermissionGroup(
 
     AutoPtr<PermissionGroup> perm = new PermissionGroup(owner);
 
-    Int32 size = ArraySize(R::styleable::AndroidManifestPermissionGroup);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestPermissionGroup, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestPermissionGroup);
 
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
@@ -3904,9 +3875,7 @@ ECode PackageParser::ParsePermission(
 
     AutoPtr<Permission> perm = new Permission(owner);
 
-    Int32 size = ArraySize(R::styleable::AndroidManifestPermission);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestPermission, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestPermission);
 
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
@@ -4000,9 +3969,7 @@ ECode PackageParser::ParsePermissionTree(
 
     AutoPtr<Permission> perm = new Permission(owner);
 
-    Int32 size = ArraySize(R::styleable::AndroidManifestPermissionTree);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestPermissionTree, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestPermissionTree);
 
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
@@ -4058,9 +4025,7 @@ AutoPtr<PackageParser::Instrumentation> PackageParser::ParseInstrumentation(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ ArrayOf<String>* outError)
 {
-    Int32 size = ArraySize(R::styleable::AndroidManifestInstrumentation);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestInstrumentation, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestInstrumentation);
 
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
@@ -4141,9 +4106,7 @@ Boolean PackageParser::ParseBaseApplication(
     // assume that this package is themeable unless explicitly set to false.
     ai->SetIsThemeable(TRUE);
 
-    Int32 size = ArraySize(R::styleable::AndroidManifestApplication);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestApplication, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestApplication);
 
     AutoPtr<ITypedArray> sa;
     FAIL_RETURN(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
@@ -4532,9 +4495,7 @@ Boolean PackageParser::ParseBaseApplication(
             }
 
         } else if (tagName.Equals("library")) {
-            Int32 size = ArraySize(R::styleable::AndroidManifestLibrary);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestLibrary, size);
+            AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestLibrary);
 
             AutoPtr<ITypedArray> sa;
             FAIL_RETURN(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
@@ -4563,9 +4524,7 @@ Boolean PackageParser::ParseBaseApplication(
             XmlUtils::SkipCurrentTag(parser);
 
         } else if (tagName.Equals("uses-library")) {
-            Int32 size = ArraySize(R::styleable::AndroidManifestUsesLibrary);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestUsesLibrary, size);
+            AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestUsesLibrary);
 
             AutoPtr<ITypedArray> sa;
             FAIL_RETURN(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
@@ -4634,9 +4593,7 @@ ECode PackageParser::ParseSplitApplication(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    Int32 size = ArraySize(R::styleable::AndroidManifestApplication);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestApplication, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestApplication);
 
     AutoPtr<ITypedArray> sa;
     FAIL_RETURN(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
@@ -4726,9 +4683,7 @@ ECode PackageParser::ParseSplitApplication(
         }
         else if (tagName.Equals("uses-library")) {
             sa = NULL;
-            size = ArraySize(R::styleable::AndroidManifestUsesLibrary);
-            layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestUsesLibrary, size);
+            layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestUsesLibrary);
 
             res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
 
@@ -4876,9 +4831,7 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivity(
     assert(res);
     assert(attrs);
 
-    Int32 size = ArraySize(R::styleable::AndroidManifestActivity);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestActivity, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestActivity);
 
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
@@ -5316,9 +5269,7 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivityAlias(
     /* [in] */ Int32 flags,
     /* [in] */ ArrayOf<String>* outError)
 {
-    Int32 size = ArraySize(R::styleable::AndroidManifestActivityAlias);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestActivityAlias, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestActivityAlias);
 
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
@@ -5519,9 +5470,7 @@ AutoPtr<PackageParser::Provider> PackageParser::ParseProvider(
     /* [in] */ Int32 flags,
     /* [in] */ ArrayOf<String>* outError)
 {
-    Int32 size = ArraySize(R::styleable::AndroidManifestProvider);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestProvider, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestProvider);
 
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
@@ -5717,9 +5666,7 @@ Boolean PackageParser::ParseProviderTags(
         }
 
         else if (name.Equals("grant-uri-permission")) {
-            Int32 size = ArraySize(R::styleable::AndroidManifestGrantUriPermission);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestGrantUriPermission, size);
+            AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestGrantUriPermission);
 
             AutoPtr<ITypedArray> sa;
             res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
@@ -5789,9 +5736,7 @@ Boolean PackageParser::ParseProviderTags(
 
         }
         else if (name.Equals("path-permission")) {
-            Int32 size = ArraySize(R::styleable::AndroidManifestPathPermission);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestPathPermission, size);
+            AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestPathPermission);
 
             AutoPtr<ITypedArray> sa;
             res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
@@ -5931,9 +5876,7 @@ AutoPtr<PackageParser::Service> PackageParser::ParseService(
     /* [in] */ Int32 flags,
     /* [in] */ ArrayOf<String>* outError)
 {
-    Int32 size = ArraySize(R::styleable::AndroidManifestService);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestService, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestService);
 
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
@@ -6139,9 +6082,7 @@ AutoPtr<IBundle> PackageParser::ParseMetaData(
     /* [in] */ IBundle* _data,
     /* [in] */ ArrayOf<String>* outError)
 {
-    Int32 size = ArraySize(R::styleable::AndroidManifestMetaData);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestMetaData, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestMetaData);
 
     AutoPtr<IBundle> data = _data;
     AutoPtr<ITypedArray> sa;
@@ -6237,9 +6178,7 @@ AutoPtr<IVerifierInfo> PackageParser::ParseVerifier(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 flags)
 {
-    Int32 size = ArraySize(R::styleable::AndroidManifestPackageVerifier);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestPackageVerifier, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestPackageVerifier);
 
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
@@ -6342,9 +6281,7 @@ Boolean PackageParser::ParseIntent(
     /* [in] */ IntentInfo* outInfo,
     /* [in] */ ArrayOf<String>* outError)
 {
-    Int32 size = ArraySize(R::styleable::AndroidManifestIntentFilter);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::AndroidManifestIntentFilter, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestIntentFilter);
 
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
@@ -6416,9 +6353,7 @@ Boolean PackageParser::ParseIntent(
             outInfo->AddCategory(value);
         }
         else if (nodeName.Equals("data")) {
-            Int32 size = ArraySize(R::styleable::AndroidManifestData);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::AndroidManifestData, size);
+            AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::AndroidManifestData);
 
             sa = NULL;
             res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);

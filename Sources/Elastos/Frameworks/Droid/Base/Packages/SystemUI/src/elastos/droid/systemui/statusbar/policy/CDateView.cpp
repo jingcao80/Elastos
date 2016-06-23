@@ -69,9 +69,7 @@ ECode CDateView::constructor(
     AutoPtr<IResourcesTheme> rt;
     context->GetTheme((IResourcesTheme**)&rt);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::DateView),
-        ArraySize(R::styleable::DateView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::DateView);
     AutoPtr<ITypedArray> a;
 
     rt->ObtainStyledAttributes(attrs, attrIds,

@@ -650,9 +650,7 @@ ECode PreferenceActivity::OnCreate(
     mHandler->constructor();
 
     // Theming for the PreferenceActivity layout and for the Preference Header(s) layout
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::PreferenceActivity),
-            ArraySize(R::styleable::PreferenceActivity));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::PreferenceActivity);
     AutoPtr<ITypedArray> sa;
     Activity::ObtainStyledAttributes(NULL, attrIds,
         R::attr::preferenceActivityStyle, 0, (ITypedArray**)&sa);
@@ -999,9 +997,7 @@ ECode PreferenceActivity::LoadHeadersFromResource(
             AutoPtr<IPreferenceActivityHeader> header;
             CPreferenceActivityHeader::New((IPreferenceActivityHeader**)&header);
 
-            Int32 size = ArraySize(R::styleable::PreferenceHeader);
-            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            layout->Copy(R::styleable::PreferenceHeader, size);
+            AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::PreferenceHeader);
             AutoPtr<ITypedArray> sa;
             ObtainStyledAttributes(attrs, layout, (ITypedArray**)&sa);
             Int32 id;

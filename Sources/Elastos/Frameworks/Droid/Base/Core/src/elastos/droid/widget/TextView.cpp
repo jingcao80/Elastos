@@ -1363,9 +1363,7 @@ ECode TextView::constructor(
      * to be able to parse the appearance first and then let specific tags
      * for this View override it.
      */
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::TextViewAppearance),
-            ArraySize(R::styleable::TextViewAppearance));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::TextViewAppearance);
     AutoPtr<ITypedArray> a;
     theme->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);
     AutoPtr<ITypedArray> appearance;
@@ -1373,9 +1371,7 @@ ECode TextView::constructor(
     a->GetResourceId(R::styleable::TextViewAppearance_textAppearance, -1, &ap);
     a->Recycle();
     if (ap != -1) {
-        attrIds = ArrayOf<Int32>::Alloc(
-                const_cast<Int32 *>(R::styleable::TextAppearance),
-                ArraySize(R::styleable::TextAppearance));
+        attrIds = TO_ATTRS_ARRAYOF(R::styleable::TextAppearance);
         theme->ObtainStyledAttributes(ap, attrIds, (ITypedArray**)&appearance);
     }
 
@@ -1476,9 +1472,7 @@ ECode TextView::constructor(
     Boolean password = FALSE;
     Int32 inputType = IInputType::TYPE_NULL;
 
-    attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::TextView),
-            ArraySize(R::styleable::TextView));
+    attrIds = TO_ATTRS_ARRAYOF(R::styleable::TextView);
     a = NULL;
     theme->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);
 
@@ -2124,8 +2118,7 @@ ECode TextView::constructor(
      * However, TextViews that have input or movement methods *are*
      * focusable by default.
      */
-    attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::View), ArraySize(R::styleable::View));
+    attrIds = TO_ATTRS_ARRAYOF(R::styleable::View);
     a = NULL;
     ASSERT_SUCCEEDED(context->ObtainStyledAttributes(
             attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));
@@ -3352,9 +3345,7 @@ ECode TextView::SetTextAppearance(
     /* [in] */ IContext* context,
     /* [in] */ Int32 resid)
 {
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::TextAppearance),
-        ArraySize(R::styleable::TextAppearance));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::TextAppearance);
     AutoPtr<ITypedArray> appearance;
     ASSERT_SUCCEEDED(context->ObtainStyledAttributes(resid, attrIds, (ITypedArray**)&appearance));
 
@@ -9651,9 +9642,7 @@ ECode TextView::GetTextColors(
         return E_NULL_POINTER_EXCEPTION;
     }
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::TextView),
-            ArraySize(R::styleable::TextView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::TextView);
     AutoPtr<ITypedArray> a;
     ASSERT_SUCCEEDED(context->ObtainStyledAttributes(attrIds, (ITypedArray**)&a));
     AutoPtr<IColorStateList> colors;
@@ -9663,9 +9652,7 @@ ECode TextView::GetTextColors(
         Int32 ap;
         a->GetResourceId(R::styleable::TextView_textAppearance, 0, &ap);
         if (ap != 0) {
-            AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-                    const_cast<Int32 *>(R::styleable::TextAppearance),
-                    ArraySize(R::styleable::TextAppearance));
+            AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::TextAppearance);
             AutoPtr<ITypedArray> appearance;
             ASSERT_SUCCEEDED(context->ObtainStyledAttributes(
                     ap, attrIds, (ITypedArray**)&appearance));

@@ -469,9 +469,7 @@ ECode Toolbar::constructor(
 {
     ViewGroup::constructor(context, attrs, defStyleAttr, defStyleRes);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::Toolbar),
-        ArraySize(R::styleable::Toolbar));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Toolbar);
     AutoPtr<ITypedArray> a;
     ASSERT_SUCCEEDED(context->ObtainStyledAttributes(
             attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a));

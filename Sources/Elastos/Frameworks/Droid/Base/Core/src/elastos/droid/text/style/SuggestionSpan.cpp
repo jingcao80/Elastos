@@ -121,9 +121,7 @@ void SuggestionSpan::InitStyle(
         return;
     }
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::SuggestionSpan),
-            ArraySize(R::styleable::SuggestionSpan));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::SuggestionSpan);
 
     Int32 defStyle = R::attr::textAppearanceMisspelledSuggestion;
     AutoPtr<ITypedArray> typedArray;

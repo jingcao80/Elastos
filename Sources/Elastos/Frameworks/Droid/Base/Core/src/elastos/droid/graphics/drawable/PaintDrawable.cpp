@@ -72,9 +72,7 @@ Boolean PaintDrawable::InflateTag(
     /* [in] */ IAttributeSet* attrs)
 {
     if (name.Equals("corners")) {
-        Int32 size = ArraySize(R::styleable::DrawableCorners);
-        AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-        layout->Copy(R::styleable::DrawableCorners, size);
+        AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::DrawableCorners);
 
         AutoPtr<ITypedArray> a;
         r->ObtainAttributes(attrs, layout, (ITypedArray**)&a);

@@ -72,9 +72,7 @@ ECode CPathInterpolator::constructor(
     /* [in] */ IResourcesTheme* theme,
     /* [in] */ IAttributeSet* attrs)
 {
-    Int32 size = ArraySize(R::styleable::PathInterpolator);
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(size);
-    attrIds->Copy(R::styleable::PathInterpolator, size);
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::PathInterpolator);
     AutoPtr<ITypedArray> a;
 
     if (theme != NULL) {

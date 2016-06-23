@@ -157,9 +157,7 @@ ECode ScaleDrawable::Inflate(
 
     Int32 type;
 
-    Int32 size = ArraySize(R::styleable::ScaleDrawable);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::ScaleDrawable, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::ScaleDrawable);
 
     AutoPtr<ITypedArray> a;
     ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a);

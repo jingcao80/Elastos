@@ -77,9 +77,7 @@ ECode EdgeEffect::constructor(
 {
     mPaint->SetAntiAlias(TRUE);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::EdgeEffect),
-            ArraySize(R::styleable::EdgeEffect));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::EdgeEffect);
 
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrIds, (ITypedArray**)&a);

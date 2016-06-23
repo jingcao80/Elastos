@@ -51,9 +51,7 @@ ECode ScaleAnimation::constructor(
 
     context->GetResources((IResources**)&mResources);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::ScaleAnimation),
-            ArraySize(R::styleable::ScaleAnimation));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ScaleAnimation);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
 

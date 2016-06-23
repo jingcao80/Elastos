@@ -138,9 +138,7 @@ ECode ActionMenuItemView::constructor(
     context->GetResources((IResources**)&res);
     res->GetBoolean(R::bool_::config_allowActionMenuItemTextWithIcon, &mAllowTextWithIcon);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::ActionMenuItemView),
-        ArraySize(R::styleable::ActionMenuItemView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::ActionMenuItemView);
 
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes, (ITypedArray**)&a);

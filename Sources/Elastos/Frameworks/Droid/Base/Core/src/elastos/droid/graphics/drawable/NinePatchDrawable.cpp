@@ -611,9 +611,7 @@ ECode NinePatchDrawable::Inflate(
 {
     Drawable::Inflate(r, parser, attrs, theme);
 
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::NinePatchDrawable),
-            ArraySize(R::styleable::NinePatchDrawable));
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::NinePatchDrawable);
 
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(ObtainAttributes(r, theme, attrs, layout, (ITypedArray**)&a));
@@ -723,9 +721,7 @@ ECode NinePatchDrawable::ApplyTheme(
     }
 
     AutoPtr<ITypedArray> a;
-    Int32 size = ArraySize(R::styleable::NinePatchDrawable);
-    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    layout->Copy(R::styleable::NinePatchDrawable, size);
+    AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::NinePatchDrawable);
     ((CResources::Theme*)t)->ResolveAttribute(state->mThemeAttrs, layout, (ITypedArray**)&a);
     // try {
     if (FAILED(UpdateStateFromTypedArray(a))) {

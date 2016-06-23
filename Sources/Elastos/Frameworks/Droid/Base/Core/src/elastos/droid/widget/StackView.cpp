@@ -154,9 +154,7 @@ ECode StackView::Init(
 {
     AdapterViewAnimator::Init(context, attrs, defStyle);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::StackView),
-            ArraySize(R::styleable::StackView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::StackView);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, defStyle, 0, (ITypedArray**)&a);
 

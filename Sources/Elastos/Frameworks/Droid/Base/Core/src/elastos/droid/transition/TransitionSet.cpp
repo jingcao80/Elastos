@@ -36,9 +36,7 @@ ECode TransitionSet::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     Transition::constructor(context, attrs);
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-                const_cast<Int32*>(R::styleable::TransitionSet),
-                ArraySize(R::styleable::TransitionSet));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::TransitionSet);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
     Int32 ordering = 0;
