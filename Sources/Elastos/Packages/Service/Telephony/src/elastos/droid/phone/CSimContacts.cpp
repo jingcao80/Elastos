@@ -1,5 +1,66 @@
 
 #include "elastos/droid/phone/CSimContacts.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Widget.h"
+#include "elastos/core/Character.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <Elastos.CoreLibrary.Utility.h>
+#include <elastos/utility/logging/Logger.h>
+#include "elastos/droid/R.h"
+#include "R.h"
+
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::IActionBar;
+using Elastos::Droid::App::CProgressDialog;
+using Elastos::Droid::App::IProgressDialog;
+using Elastos::Droid::Accounts::CAccount;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IContentProviderResult;
+using Elastos::Droid::Content::IContentProviderOperation;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::CContentValues;
+using Elastos::Droid::Content::IContentProviderOperationHelper;
+using Elastos::Droid::Content::CContentProviderOperationHelper;
+using Elastos::Droid::Content::IContentProviderOperationBuilder;
+using Elastos::Droid::Content::CContentProviderOperationBuilder;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Provider::IContactsContractCommonDataKindsPhone;
+using Elastos::Droid::Provider::IContactsContractRawContacts;
+using Elastos::Droid::Provider::CContactsContractRawContacts;
+using Elastos::Droid::Provider::IContactsContractSyncColumns;
+using Elastos::Droid::Provider::IContactsContractDataColumns;
+using Elastos::Droid::Provider::IBaseColumns;
+using Elastos::Droid::Provider::IContactsContract;
+using Elastos::Droid::Provider::IContactsContractDataColumns;
+using Elastos::Droid::Provider::IContactsContractData;
+using Elastos::Droid::Provider::CContactsContractData;
+using Elastos::Droid::Provider::IContactsContractCommonDataKindsStructuredName;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IContextMenuInfo;
+using Elastos::Droid::Widget::ISimpleCursorAdapter;
+using Elastos::Droid::Widget::CSimpleCursorAdapter;
+using Elastos::Droid::Widget::IAdapterContextMenuInfo;
+using Elastos::Core::Character;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -13,27 +74,32 @@ CSimContacts::NamePhoneTypePair::NamePhoneTypePair(
     if (nameLen - 2 >= 0 && nameWithPhoneType.GetChar(nameLen - 2) == '/') {
         Char32 c = Character::ToUpperCase(nameWithPhoneType.GetChar(nameLen - 1));
         if (c == 'W') {
-            phoneType = IPhone::TYPE_WORK;
+            mPhoneType = IContactsContractCommonDataKindsPhone::TYPE_WORK;
         }
         else if (c == 'M' || c == 'O') {
-            phoneType = IPhone::TYPE_MOBILE;
+            mPhoneType = IContactsContractCommonDataKindsPhone::TYPE_MOBILE;
         }
         else if (c == 'H') {
-            phoneType = IPhone::TYPE_HOME;
+            mPhoneType = IContactsContractCommonDataKindsPhone::TYPE_HOME;
         }
         else {
-            phoneType = IPhone::TYPE_OTHER;
+            mPhoneType = IContactsContractCommonDataKindsPhone::TYPE_OTHER;
         }
-        name = nameWithPhoneType.substring(0, nameLen - 2);
+        mName = nameWithPhoneType.Substring(0, nameLen - 2);
     }
     else {
-        phoneType = IPhone::TYPE_OTHER;
-        name = nameWithPhoneType;
+        mPhoneType = IContactsContractCommonDataKindsPhone::TYPE_OTHER;
+        mName = nameWithPhoneType;
     }
 }
 
-CSimContacts::ImportAllSimContactsThread::ImportAllSimContactsThread()
-    : mCanceled(FALSE)
+CAR_INTERFACE_IMPL_2(CSimContacts::ImportAllSimContactsThread, Thread,
+        IDialogInterfaceOnCancelListener, IDialogInterfaceOnClickListener)
+
+CSimContacts::ImportAllSimContactsThread::ImportAllSimContactsThread(
+    /* [in] */ CSimContacts* host)
+    : mHost(host)
+    , mCanceled(FALSE)
 {
     Thread::constructor(String("ImportAllSimContactsThread"));
 }
@@ -43,17 +109,17 @@ ECode CSimContacts::ImportAllSimContactsThread::Run()
     AutoPtr<IContentValues> emptyContentValues;
     CContentValues::New((IContentValues**)&emptyContentValues);
     AutoPtr<IContentResolver> resolver;
-    GetContentResolver((IContentResolver**)&resolver);
+    mHost->GetContentResolver((IContentResolver**)&resolver);
 
-    mCursor->MoveToPosition(-1);
     Boolean res;
-    while (!mCanceled && (mCursor->MoveToNext(&res), res)) {
-        ActuallyImportOneSimContact(mCursor, resolver, mAccount);
-        mProgressDialog->IncrementProgressBy(1);
+    mHost->mCursor->MoveToPosition(-1, &res);
+    while (!mCanceled && (mHost->mCursor->MoveToNext(&res), res)) {
+        ActuallyImportOneSimContact(mHost->mCursor, resolver, mHost->mAccount);
+        mHost->mProgressDialog->IncrementProgressBy(1);
     }
 
-    mProgressDialog->Dismiss();
-    return Finish();
+    IDialogInterface::Probe(mHost->mProgressDialog)->Dismiss();
+    return mHost->Finish();
 }
 
 ECode CSimContacts::ImportAllSimContactsThread::OnCancel(
@@ -69,17 +135,15 @@ ECode CSimContacts::ImportAllSimContactsThread::OnClick(
 {
     if (which == IDialogInterface::BUTTON_NEGATIVE) {
         mCanceled = TRUE;
-        mProgressDialog->Dismiss();
+        IDialogInterface::Probe(mHost->mProgressDialog)->Dismiss();
     }
     else {
-        String str;
-        dialog->ToString(&str);
-        Logger::E(LOG_TAG, "Unknown button event has come: %s", str.string());
+        Logger::E(TAG, "Unknown button event has come: %s", TO_CSTR(dialog));
     }
     return NOERROR;
 }
 
-static const String CSimContacts::LOG_TAG("SimContacts");
+const String CSimContacts::TAG("SimContacts");
 
 static AutoPtr<IContentValues> initEmptyContentValues()
 {
@@ -88,12 +152,10 @@ static AutoPtr<IContentValues> initEmptyContentValues()
     return value;
 }
 
-static const AutoPtr<IContentValues> CSimContacts::sEmptyContentValues = initEmptyContentValues();
+const AutoPtr<IContentValues> CSimContacts::sEmptyContentValues = initEmptyContentValues();
 
-static const Int32 CSimContacts::MENU_IMPORT_ONE = 1;
-static const Int32 CSimContacts::MENU_IMPORT_ALL = 2;
-
-CAR_INTERFACE_IMPL(CSimContacts, ADNList, ISimContacts)
+const Int32 CSimContacts::MENU_IMPORT_ONE = 1;
+const Int32 CSimContacts::MENU_IMPORT_ALL = 2;
 
 CAR_OBJECT_IMPL(CSimContacts)
 
@@ -109,20 +171,17 @@ void CSimContacts::ActuallyImportOneSimContact(
 {
     String column;
     cursor->GetString(NAME_COLUMN, &column);
-    AutoPtr<INamePhoneTypePair> namePhoneTypePair;
-    CNamePhoneTypePair::New(column, (INamePhoneTypePair**)&namePhoneTypePair);
-    String name;
-    namePhoneTypePair->GetName(&name);
-    Int32 phoneType;
-    namePhoneTypePair->GetPhoneType(&phoneType);
+    AutoPtr<NamePhoneTypePair> namePhoneTypePair = new NamePhoneTypePair(column);
+    String name = namePhoneTypePair->mName;
+    Int32 phoneType = namePhoneTypePair->mPhoneType;
 
     String phoneNumber;
     cursor->GetString(NUMBER_COLUMN, &phoneNumber);
     String emailAddresses;
-    cursor->GetString(EMAILS_COLUMN);
+    cursor->GetString(EMAILS_COLUMN, &emailAddresses);
     AutoPtr<ArrayOf<String> > emailAddressArray;
     if (!TextUtils::IsEmpty(emailAddresses)) {
-        emailAddressArray = emailAddresses.split(",");
+        StringUtils::Split(emailAddresses, String(","), (ArrayOf<String>**)&emailAddressArray);
     }
     else {
         emailAddressArray = NULL;
@@ -131,15 +190,25 @@ void CSimContacts::ActuallyImportOneSimContact(
     AutoPtr<IArrayList> operationList;
     CArrayList::New((IArrayList**)&operationList);
 
+    AutoPtr<IContactsContractRawContacts> contacts;
+    CContactsContractRawContacts::AcquireSingleton((IContactsContractRawContacts**)&contacts);
+    AutoPtr<IUri> uri;
+    contacts->GetCONTENT_URI((IUri**)&uri);
+
     AutoPtr<IContentProviderOperationHelper> helper;
-    CContentProviderOperationHelper::New((IContentProviderOperationHelper**)&helper);
+    CContentProviderOperationHelper::AcquireSingleton((IContentProviderOperationHelper**)&helper);
     AutoPtr<IContentProviderOperationBuilder> builder;
-    helper->NewInsert(IRawContacts::CONTENT_URI, (IContentProviderOperationBuilder**)&builder);
+    helper->NewInsert(uri, (IContentProviderOperationBuilder**)&builder);
 
     String myGroupsId;
     if (account != NULL) {
-        builder->WithValue(IRawContacts::ACCOUNT_NAME, account.name);
-        builder->WithValue(IRawContacts::ACCOUNT_TYPE, account.type);
+        String name;
+        account->GetName(&name);
+        builder->WithValue(IContactsContractSyncColumns::ACCOUNT_NAME, name);
+
+        String type;
+        account->GetType(&type);
+        builder->WithValue(IContactsContractSyncColumns::ACCOUNT_TYPE, type);
     }
     else {
         builder->WithValues(sEmptyContentValues);
@@ -149,61 +218,70 @@ void CSimContacts::ActuallyImportOneSimContact(
     operationList->Add(TO_IINTERFACE(operation));
 
     builder = NULL;
-    helper->NewInsert(IData::CONTENT_URI, (IContentProviderOperationBuilder**)&builder);
-    builder->WithValueBackReference(IStructuredName::RAW_CONTACT_ID, 0);
-    builder->WithValue(IData::MIMETYPE, IStructuredName::CONTENT_ITEM_TYPE);
-    builder->WithValue(IStructuredName::DISPLAY_NAME, name);
+    AutoPtr<IContactsContractData> data;
+    CContactsContractData::AcquireSingleton((IContactsContractData**)&data);
+    AutoPtr<IUri> uri2;
+    data->GetCONTENT_URI((IUri**)&uri2);
+    helper->NewInsert(uri2, (IContentProviderOperationBuilder**)&builder);
+    builder->WithValueBackReference(IContactsContractDataColumns::RAW_CONTACT_ID, 0);
+    builder->WithValue(IContactsContractDataColumns::MIMETYPE, IContactsContractCommonDataKindsStructuredName::CONTENT_ITEM_TYPE);
+    builder->WithValue(IContactsContractCommonDataKindsStructuredName::DISPLAY_NAME, name);
     AutoPtr<IContentProviderOperation> operation2;
     builder->Build((IContentProviderOperation**)&operation2);
     operationList->Add(TO_IINTERFACE(operation2));
 
-    builder = NULL;
-    helper->NewInsert(IData::CONTENT_URI, (IContentProviderOperationBuilder**)&builder);
-    builder->WithValueBackReference(IPhone::RAW_CONTACT_ID, 0);
-    builder->WithValue(IData::MIMETYPE, IPhone::CONTENT_ITEM_TYPE);
-    builder->WithValue(IPhone::TYPE, phoneType);
-    builder->WithValue(IPhone::NUMBER, phoneNumber);
-    builder->WithValue(IData::IS_PRIMARY, 1);
-    AutoPtr<IContentProviderOperation> operation3;
-    builder->Build((IContentProviderOperation**)&operation3);
-    operationList->Add(TO_IINTERFACE(operation3));
+    assert(0);
+    // builder = NULL;
+    // helper->NewInsert(uri2, (IContentProviderOperationBuilder**)&builder);
+    // builder->WithValueBackReference(IContactsContractDataColumns::RAW_CONTACT_ID, 0);
+    // builder->WithValue(IContactsContractCommonDataKindsPhone::MIMETYPE, IContactsContractCommonDataKindsPhone::CONTENT_ITEM_TYPE);
+    // builder->WithValue(IContactsContractCommonDataKindsPhone::TYPE, phoneType);
+    // builder->WithValue(IContactsContractCommonDataKindsPhone::NUMBER, phoneNumber);
+    // builder->WithValue(IContactsContractDataColumns::IS_PRIMARY, 1);
+    // AutoPtr<IContentProviderOperation> operation3;
+    // builder->Build((IContentProviderOperation**)&operation3);
+    // operationList->Add(TO_IINTERFACE(operation3));
 
-    if (emailAddresses != NULL) {
-        for (Int32 i = 0; i < emailAddressArray->GetLength(), i++) {
-            String emailAddress = (*emailAddressArray)[i];
+    // if (emailAddresses != NULL) {
+    //     for (Int32 i = 0; i < emailAddressArray->GetLength(), i++) {
+    //         String emailAddress = (*emailAddressArray)[i];
 
-            builder = NULL;
-            helper->NewInsert(IData::CONTENT_URI, (IContentProviderOperationBuilder**)&builder);
-            builder->WithValueBackReference(IEmail::RAW_CONTACT_ID, 0);
-            builder->WithValue(IData::MIMETYPE, IEmail::CONTENT_ITEM_TYPE);
-            builder->WithValue(IEmail::TYPE, IEmail::TYPE_MOBILE);
-            builder->WithValue(IEmail::DATA, emailAddress);
-            AutoPtr<IContentProviderOperation> operation4;
-            builder->Build((IContentProviderOperation**)&operation4);
-            operationList->Add(TO_IINTERFACE(operation4));
-        }
-    }
+    //         builder = NULL;
+    //         helper->NewInsert(uri2, (IContentProviderOperationBuilder**)&builder);
+    //         builder->WithValueBackReference(IEmail::RAW_CONTACT_ID, 0);
+    //         builder->WithValue(IContactsContractDataColumns::MIMETYPE, IEmail::CONTENT_ITEM_TYPE);
+    //         builder->WithValue(IEmail::TYPE, IEmail::TYPE_MOBILE);
+    //         builder->WithValue(IEmail::DATA, emailAddress);
+    //         AutoPtr<IContentProviderOperation> operation4;
+    //         builder->Build((IContentProviderOperation**)&operation4);
+    //         operationList->Add(TO_IINTERFACE(operation4));
+    //     }
+    // }
 
-    if (myGroupsId != NULL) {
-        builder = NULL;
-        helper->NewInsert(IData::CONTENT_URI, (IContentProviderOperationBuilder**)&builder);
-        builder->WithValueBackReference(IGroupMembership::RAW_CONTACT_ID, 0);
-        builder->WithValue(IData::MIMETYPE, IGroupMembership::CONTENT_ITEM_TYPE);
-        builder->WithValue(IGroupMembership::GROUP_SOURCE_ID, myGroupsId);
-        AutoPtr<IContentProviderOperation> operation5;
-        builder->Build((IContentProviderOperation**)&operation5);
-        operationList->Add(TO_IINTERFACE(operation5));
-    }
+    // if (myGroupsId != NULL) {
+    //     builder = NULL;
+    //     helper->NewInsert(uri2, (IContentProviderOperationBuilder**)&builder);
+    //     builder->WithValueBackReference(IGroupMembership::RAW_CONTACT_ID, 0);
+    //     builder->WithValue(IContactsContractDataColumns::MIMETYPE, IGroupMembership::CONTENT_ITEM_TYPE);
+    //     builder->WithValue(IGroupMembership::GROUP_SOURCE_ID, myGroupsId);
+    //     AutoPtr<IContentProviderOperation> operation5;
+    //     builder->Build((IContentProviderOperation**)&operation5);
+    //     operationList->Add(TO_IINTERFACE(operation5));
+    // }
 
     //try {
-    ECode ec = resolver->ApplyBatch(IContactsContract::AUTHORITY, operationList);
+    AutoPtr<ArrayOf<IContentProviderResult*> > tmp;
+    ECode ec = resolver->ApplyBatch(IContactsContract::AUTHORITY, operationList,
+            (ArrayOf<IContentProviderResult*>**)&tmp);
     //} catch (RemoteException e) {
-    if (ec == (ECode)RemoteException) {
-        Logger::E(LOG_TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        assert(0);
+        //Logger::E(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
     }
     //} catch (OperationApplicationException e) {
-    if (ec == (ECode)OperationApplicationException) {
-        Logger::E(LOG_TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+    if (ec == (ECode)E_OPERATION_APPLICATION_EXCEPTION) {
+        assert(0);
+        //Logger::E(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
     }
     //}
 }
@@ -223,7 +301,7 @@ void CSimContacts::ImportOneSimContact(
         sb += "Failed to move the cursor to the position \"";
         sb += position;
         sb += "\"";
-        Logger::E(LOG_TAG, sb.ToString());
+        Logger::E(TAG, sb.ToString());
     }
 }
 
@@ -240,13 +318,13 @@ ECode CSimContacts::OnCreate(
         String accountType;
         intent->GetStringExtra(String("account_type"), &accountType);
         if (!TextUtils::IsEmpty(accountName) && !TextUtils::IsEmpty(accountType)) {
-            CAccount::New(accountName, accountType, (Account**)&mAccount);
+            CAccount::New(accountName, accountType, (IAccount**)&mAccount);
         }
     }
 
     AutoPtr<IListView> listView;
     GetListView((IListView**)&listView);
-    RegisterForContextMenu(listView);
+    RegisterForContextMenu(IView::Probe(listView));
 
     AutoPtr<IActionBar> actionBar;
     GetActionBar((IActionBar**)&actionBar);
@@ -266,10 +344,10 @@ ECode CSimContacts::NewAdapter(
     array->Set(0, String("name"));
 
     AutoPtr<ArrayOf<Int32> > array2 = ArrayOf<Int32>::Alloc(1);
-    (*array)[0] = android.R.id.text1;
+    (*array2)[0] = Elastos::Droid::R::id::text1;
 
     AutoPtr<ISimpleCursorAdapter> adapter;
-    CSimpleCursorAdapter::New(this, R.layout.sim_import_list_entry, mCursor,
+    CSimpleCursorAdapter::New(this, Elastos::Droid::Server::Telephony::R::layout::sim_import_list_entry, mCursor,
                 array, array2, (ISimpleCursorAdapter**)&adapter);
 
     *adaptor = ICursorAdapter::Probe(adapter);
@@ -296,7 +374,7 @@ ECode CSimContacts::ResolveIntent(
     if (IIntent::ACTION_PICK.Equals(action)) {
         // "index" is 1-based
         Int32 tmp;
-        intent->GetIntExtra(String("index"), 0, &tmp);
+        intent->GetInt32Extra(String("index"), 0, &tmp);
         mInitialSelection = tmp - 1;
     }
     return intent->GetData(uri);
@@ -308,8 +386,11 @@ ECode CSimContacts::OnCreateOptionsMenu(
 {
     VALIDATE_NOT_NULL(result)
 
-    ADNList::OnCreateOptionsMenu(menu);
-    menu->Add(0, MENU_IMPORT_ALL, 0, R.string.importAllSimEntries);
+    Boolean res;
+    ADNList::OnCreateOptionsMenu(menu, &res);
+    AutoPtr<IMenuItem> tmp;
+    menu->Add(0, MENU_IMPORT_ALL, 0, Elastos::Droid::Server::Telephony::R::string::importAllSimEntries,
+            (IMenuItem**)&tmp);
     *result = TRUE;
     return NOERROR;
 }
@@ -338,37 +419,40 @@ ECode CSimContacts::OnOptionsItemSelected(
     Int32 id;
     item->GetItemId(&id);
     switch (id) {
-        case android.R.id.home:
+        case Elastos::Droid::R::id::home:
             OnBackPressed();
             *result = TRUE;
             return NOERROR;
         case MENU_IMPORT_ALL:
         {
-            AutoPtr<ICharSequence> title;
-            GetString(R.string.importAllSimEntries, (ICharSequence**)&title);
-            AutoPtr<ICharSequence> message;
-            GetString(R.string.importingSimContacts, (ICharSequence**)&message);
+            String title;
+            GetString(Elastos::Droid::Server::Telephony::R::string::importAllSimEntries, &title);
+            String message;
+            GetString(Elastos::Droid::Server::Telephony::R::string::importingSimContacts, &message);
 
-            AutoPtr<IThread> thread = new ImportAllSimContactsThread();
+            AutoPtr<IThread> thread = new ImportAllSimContactsThread(this);
 
             // TODO: need to show some error dialog.
             if (mCursor == NULL) {
-                Logger::E(LOG_TAG, "cursor is null. Ignore silently.");
+                Logger::E(TAG, "cursor is null. Ignore silently.");
                 break;
             }
             CProgressDialog::New(this, (IProgressDialog**)&mProgressDialog);
-            mProgressDialog->SetTitle(title);
-            mProgressDialog->SetMessage(message);
+            AutoPtr<ICharSequence> obj = CoreUtils::Convert(title);
+            IDialog::Probe(mProgressDialog)->SetTitle(obj);
+            AutoPtr<ICharSequence> obj2 = CoreUtils::Convert(message);
+            IAlertDialog::Probe(mProgressDialog)->SetMessage(obj2);
             mProgressDialog->SetProgressStyle(IProgressDialog::STYLE_HORIZONTAL);
-            AutoPtr<ICharSequence> cancel;
-            getString(R.string.cancel, (ICharSequence**)&cancel);
-            mProgressDialog->SetButton(IDialogInterface::BUTTON_NEGATIVE,
-                    cancel, thread);
+            String cancel;
+            GetString(Elastos::Droid::Server::Telephony::R::string::cancel, &cancel);
+            AutoPtr<ICharSequence> obj3 = CoreUtils::Convert(cancel);
+            IAlertDialog::Probe(mProgressDialog)->SetButton(IDialogInterface::BUTTON_NEGATIVE, obj3,
+                    IDialogInterfaceOnClickListener::Probe(thread));
             mProgressDialog->SetProgress(0);
             Int32 count;
             mCursor->GetCount(&count);
             mProgressDialog->SetMax(count);
-            mProgressDialog->Show();
+            IDialog::Probe(mProgressDialog)->Show();
 
             thread->Start();
 
@@ -389,9 +473,9 @@ ECode CSimContacts::OnContextItemSelected(
     item->GetItemId(&id);
     switch (id) {
         case MENU_IMPORT_ONE:
-            AutoPtr<IContextMenuInfo** menuInfo> menuInfo;
+            AutoPtr<IContextMenuInfo> menuInfo;
             item->GetMenuInfo((IContextMenuInfo**)&menuInfo);
-            if (IAdapterContextMenuInfo::Probe(menuInfo) ! = NULL) {
+            if (IAdapterContextMenuInfo::Probe(menuInfo) != NULL) {
                 Int32 position;
                 IAdapterContextMenuInfo::Probe(menuInfo)->GetPosition(&position);
                 ImportOneSimContact(position);
@@ -405,7 +489,7 @@ ECode CSimContacts::OnContextItemSelected(
 ECode CSimContacts::OnCreateContextMenu(
     /* [in] */ IContextMenu* menu,
     /* [in] */ IView* v,
-    /* [in] */ IContextMenuContextMenuInfo* menuInfo)
+    /* [in] */ IContextMenuInfo* menuInfo)
 {
     if (IAdapterContextMenuInfo::Probe(menuInfo) != NULL) {
         AutoPtr<IAdapterContextMenuInfo> itemInfo = IAdapterContextMenuInfo::Probe(menuInfo);
@@ -413,14 +497,16 @@ ECode CSimContacts::OnCreateContextMenu(
         AutoPtr<IView> targetView;
         itemInfo->GetTargetView((IView**)&targetView);
         AutoPtr<IView> view;
-        targetView->FindViewById(android.R.id.text1, (IView**)&view);
+        targetView->FindViewById(Elastos::Droid::R::id::text1, (IView**)&view);
         AutoPtr<ITextView> textView = ITextView::Probe(view);
         if (textView != NULL) {
             AutoPtr<ICharSequence> title;
             textView->GetText((ICharSequence**)&title);
             menu->SetHeaderTitle(title);
         }
-        menu->Add(0, MENU_IMPORT_ONE, 0, R.string.importSimEntry);
+        AutoPtr<IMenuItem> tmp;
+        IMenu::Probe(menu)->Add(0, MENU_IMPORT_ONE, 0, Elastos::Droid::Server::Telephony::R::string::importSimEntry,
+                (IMenuItem**)&tmp);
     }
     return NOERROR;
 }
@@ -431,7 +517,8 @@ ECode CSimContacts::OnListItemClick(
     /* [in] */ Int32 position,
     /* [in] */ Int64 id)
 {
-    return ImportOneSimContact(position);
+    ImportOneSimContact(position);
+    return NOERROR;
 }
 
 ECode CSimContacts::OnKeyDown(
@@ -450,7 +537,8 @@ ECode CSimContacts::OnKeyDown(
             if (mCursor != NULL && (mCursor->MoveToPosition(position, &res), res)) {
                 String phoneNumber;
                 mCursor->GetString(NUMBER_COLUMN, &phoneNumber);
-                if (phoneNumber == NULL || !TextUtils::IsGraphic(phoneNumber)) {
+                AutoPtr<ICharSequence> obj = CoreUtils::Convert(phoneNumber);
+                if (phoneNumber.IsNull() || !TextUtils::IsGraphic(obj)) {
                     // There is no number entered.
                     //TODO play error sound or something...
                     *result = TRUE;

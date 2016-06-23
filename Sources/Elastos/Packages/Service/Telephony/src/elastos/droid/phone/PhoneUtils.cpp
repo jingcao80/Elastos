@@ -15,8 +15,6 @@
 #include <elastos/utility/Arrays.h>
 #include "R.h"
 
-
-
 using Elastos::Droid::App::CAlertDialogBuilder;
 using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::App::IProgressDialog;

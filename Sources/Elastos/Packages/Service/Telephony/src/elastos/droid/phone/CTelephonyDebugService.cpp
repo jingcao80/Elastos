@@ -1,5 +1,8 @@
 
 #include "elastos/droid/phone/CTelephonyDebugService.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -7,13 +10,14 @@ namespace Phone {
 
 String CTelephonyDebugService::TAG("TelephonyDebugService");
 
-CAR_INTERFACE_IMPL(CTelephonyDebugService, Service, ITelephonyDebugService)
-
 CAR_OBJECT_IMPL(CTelephonyDebugService)
 
 CTelephonyDebugService::CTelephonyDebugService()
 {
     Logger::D(TAG, "TelephonyDebugService()");
+
+    assert(0);
+    //mDebugService = new DebugService();
 }
 
 ECode CTelephonyDebugService::constructor()
@@ -33,10 +37,12 @@ ECode CTelephonyDebugService::OnBind(
 
 ECode CTelephonyDebugService::Dump(
     /* [in] */ IFileDescriptor* fd,
-    /* [in] */ IPrintWriter* writer,
+    /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    return mDebugService->Dump(fd, pw, args);
+    assert(0);
+    //mDebugService->Dump(fd, pw, args);
+    return NOERROR;
 }
 
 } // namespace Phone

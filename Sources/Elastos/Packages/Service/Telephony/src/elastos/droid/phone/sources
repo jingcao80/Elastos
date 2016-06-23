@@ -6,6 +6,9 @@ INCLUDES += ../../../..
 INCLUDES += $(MAKEDIR)/../../../..
 INCLUDES += $(MAKEDIR)/../../../../inc/
 
+SOURCES += CPhoneSearchIndexablesProvider.cpp
+SOURCES += CProcessOutgoingCallTest.cpp
+SOURCES += CSimContacts.cpp
 SOURCES += AccelerometerListener.cpp
 SOURCES += ADNList.cpp
 SOURCES += BluetoothManager.cpp
@@ -33,5 +36,6 @@ SOURCES += Profiler.cpp
 SOURCES += Ringer.cpp
 SOURCES += SmallerHitTargetTouchListener.cpp
 SOURCES += SpecialCharSequenceMgr.cpp
+SOURCES += CTelephonyDebugService.cpp
 
 SOURCES += phone.cpp

@@ -32,16 +32,19 @@ module
     merge("car/elastos/droid/services/telephony/TelephonyConnection.car");
     merge("car/elastos/droid/services/telephony/TelephonyConnectionService.car");
 
+    using interface Elastos.Droid.App.IService;
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IApplication;
     using interface Elastos.Droid.App.IListActivity;
     using interface Elastos.Droid.Content.IBroadcastReceiver;
     using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContentProvider;
     using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
     using interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
     using interface Elastos.Droid.Internal.Telephony.ICallForwardInfo;
+    using interface Elastos.Droid.Provider.ISearchIndexablesProvider;
     using interface Elastos.Droid.Telecomm.Telecom.IConnectionService;
     using interface Elastos.Droid.View.IContextThemeWrapper;
     using interface Elastos.Droid.View.IKeyEventCallback;
@@ -128,6 +131,46 @@ module
             [in] IHfaLogic* host);
 
         interface IBroadcastReceiver;
+    }
+
+    class CTelephonyDebugService {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IService;
+    }
+
+    class CSimContacts {
+        constructor();
+
+        interface IListActivity;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CProcessOutgoingCallTest {
+        constructor();
+
+        interface IBroadcastReceiver;
+    }
+
+    class CPhoneSearchIndexablesProvider {
+        interface IContentProvider;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface ISearchIndexablesProvider;
     }
 
     } // namespace Phone

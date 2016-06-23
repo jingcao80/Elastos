@@ -3,6 +3,12 @@
 
 #include "_Elastos_Droid_Phone_CProcessOutgoingCallTest.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::BroadcastReceiver;
 
 namespace Elastos {
 namespace Droid {
@@ -15,11 +21,8 @@ namespace Phone {
  */
 CarClass(CProcessOutgoingCallTest)
     , public BroadcastReceiver
-    , public IProcessOutgoingCallTest
 {
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CARAPI constructor();
@@ -44,6 +47,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CPROCESSOUTGOINGCALLTEST_H__

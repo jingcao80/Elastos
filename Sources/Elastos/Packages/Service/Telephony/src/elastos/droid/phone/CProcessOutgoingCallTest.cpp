@@ -1,5 +1,14 @@
 
 #include "elastos/droid/phone/CProcessOutgoingCallTest.h"
+#include "Elastos.Droid.App.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+
+
+using Elastos::Droid::App::ISearchManager;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -14,8 +23,6 @@ const Boolean CProcessOutgoingCallTest::REDIRECT_411_TO_GOOG411 = TRUE;
 const Boolean CProcessOutgoingCallTest::SEVEN_DIGIT_DIALING = TRUE;
 const Boolean CProcessOutgoingCallTest::POUND_POUND_SEARCH = TRUE;
 const Boolean CProcessOutgoingCallTest::BLOCK_555 = TRUE;
-
-CAR_INTERFACE_IMPL(CProcessOutgoingCallTest, BroadcastReceiver, IProcessOutgoingCallTest)
 
 CAR_OBJECT_IMPL(CProcessOutgoingCallTest)
 
@@ -41,11 +48,11 @@ ECode CProcessOutgoingCallTest::OnReceive(
             sb += " (number = ";
             sb += number;
             sb += ".";
-            Logger::V(TAG, "Received intent " + intent + " (number = " + number + ".");
+            Logger::V(TAG, "Received intent %s (number = %s.", TO_CSTR(intent), number.string());
         }
         /* Example of how to redirect calls from one number to another. */
         if (REDIRECT_411_TO_GOOG411 && number.Equals(String("411"))) {
-            SetResultData(Strings("18004664411"));
+            SetResultData(String("18004664411"));
         }
 
         /* Example of how to modify the phone number in flight. */
@@ -54,13 +61,13 @@ ECode CProcessOutgoingCallTest::OnReceive(
         }
 
         /* Example of how to route a call to another Application. */
-        if (POUND_POUND_SEARCH && number.StartsWith(String("##"))) {
+        if (POUND_POUND_SEARCH && number.StartWith("##")) {
             AutoPtr<IIntent> newIntent;
             CIntent::New(IIntent::ACTION_SEARCH, (IIntent**)&newIntent);
             newIntent->PutExtra(ISearchManager::QUERY, number.Substring(2));
             newIntent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
             context->StartActivity(newIntent);
-            SetResultData(NULL);
+            SetResultData(String(NULL));
         }
 
         /* Example of how to deny calls to a particular number.
@@ -73,7 +80,7 @@ ECode CProcessOutgoingCallTest::OnReceive(
             number.Substring(length - 7, length - 4);
             Logger::V(TAG, "exchange = %s", exchange.string());
             if (exchange.Equals(String("555"))) {
-                SetResultData(NULL);
+                SetResultData(String(NULL));
             }
         }
     }

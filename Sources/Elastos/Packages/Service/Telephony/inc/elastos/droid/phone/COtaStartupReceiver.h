@@ -102,5 +102,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-
 #endif // __ELASTOS_DROID_PHONE_COTASTARTUPRECEIVER_H__

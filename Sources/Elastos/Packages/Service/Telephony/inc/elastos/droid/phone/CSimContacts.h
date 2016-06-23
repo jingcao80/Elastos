@@ -3,6 +3,29 @@
 
 #include "_Elastos_Droid_Phone_CSimContacts.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/phone/ADNList.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Accounts.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
+#include <elastos/core/Thread.h>
+
+using Elastos::Droid::App::IProgressDialog;
+using Elastos::Droid::Accounts::IAccount;
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::View::IContextMenu;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IMenu;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IContextMenuInfo;
+
+using Elastos::Core::Thread;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -13,7 +36,6 @@ namespace Phone {
  */
 CarClass(CSimContacts)
     , public ADNList
-    , public ISimContacts
 {
 private:
     class NamePhoneTypePair
@@ -26,21 +48,24 @@ private:
             /* [in] */ const String& nameWithPhoneType);
 
     private:
-        String name;
-        Int32 phoneType;
+        friend class CSimContacts;
+
+        String mName;
+        Int32 mPhoneType;
     };
 
     class ImportAllSimContactsThread
         : public Thread
-        , public IOnCancelListener
-        , public IOnClickListener
+        , public IDialogInterfaceOnCancelListener
+        , public IDialogInterfaceOnClickListener
     {
     public:
         TO_STRING_IMPL("CSimContacts::ImportAllSimContactsThread")
 
         CAR_INTERFACE_DECL()
 
-        ImportAllSimContactsThread();
+        ImportAllSimContactsThread(
+            /* [in] */ CSimContacts* host);
 
         //@Override
         CARAPI Run();
@@ -53,12 +78,11 @@ private:
             /* [in] */ Int32 which);
 
     private:
+        CSimContacts* mHost;
         Boolean mCanceled;
-    }
+    };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CARAPI constructor();
@@ -87,7 +111,7 @@ public:
     CARAPI OnCreateContextMenu(
         /* [in] */ IContextMenu* menu,
         /* [in] */ IView* v,
-        /* [in] */ IContextMenuContextMenuInfo* menuInfo);
+        /* [in] */ IContextMenuInfo* menuInfo);
 
     //@Override
     CARAPI OnListItemClick(
@@ -126,7 +150,7 @@ private:
         /* [in] */ Int32 position);
 
 public:
-    static const String LOG_TAG;
+    static const String TAG;
 
     static const AutoPtr<IContentValues> sEmptyContentValues;
 

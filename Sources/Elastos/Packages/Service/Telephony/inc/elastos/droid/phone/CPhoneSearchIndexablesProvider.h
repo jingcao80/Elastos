@@ -3,6 +3,13 @@
 
 #include "_Elastos_Droid_Phone_CPhoneSearchIndexablesProvider.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/provider/SearchIndexablesProvider.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Provider.h"
+
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Provider::ISearchIndexableResource;
+using Elastos::Droid::Provider::SearchIndexablesProvider;
 
 namespace Elastos {
 namespace Droid {
@@ -10,11 +17,8 @@ namespace Phone {
 
 CarClass(CPhoneSearchIndexablesProvider)
     , public SearchIndexablesProvider
-    , public IPhoneSearchIndexablesProvider
 {
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     //@Override
@@ -45,6 +49,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CPHONESEARCHINDEXABLESPROVIDER_H__
