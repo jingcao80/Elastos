@@ -4,7 +4,6 @@
 
 #include "_Elastos.Droid.Internal.h"
 #include <Elastos.CoreLibrary.Utility.h>
-#include <_Elastos.Droid.Core.h>
 #include <elastos/core/Object.h>
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/ext/frameworkext.h>
@@ -96,6 +95,8 @@ private:
     class SwitchInfo
         : public Object
     {
+        friend class DctController;
+
     public:
         SwitchInfo(
             /* [in] */ DctController* host);
@@ -306,16 +307,16 @@ private:
         /* [out] */ Int32* result);
 
     static CARAPI Logv(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     static CARAPI Logd(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     static CARAPI Logw(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     static CARAPI Loge(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     CARAPI DoDetach(
         /* [in] */ Int32 phoneId);

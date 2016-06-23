@@ -1,7 +1,160 @@
 
 #include "elastos/droid/internal/telephony/dataconnection/DcTracker.h"
+#include "elastos/droid/R.h"
+#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/app/CPendingIntent.h"
+#include "elastos/droid/app/CProgressDialog.h"
+#include "elastos/droid/app/Service.h"
+#include "elastos/droid/content/CContentValues.h"
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/content/CIntentFilter.h"
+#include "elastos/droid/content/Intent.h"
+#include "elastos/droid/database/ContentObserver.h"
+#include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/IccUtils.h"
+#include "elastos/droid/internal/telephony/cdma/CdmaSubscriptionSourceManager.h"
+#include "elastos/droid/internal/telephony/dataconnection/ApnContext.h"
+#include "elastos/droid/internal/telephony/dataconnection/ApnSetting.h"
+#include "elastos/droid/internal/telephony/dataconnection/CApnContext.h"
+#include "elastos/droid/internal/telephony/dataconnection/CApnSetting.h"
+#include "elastos/droid/internal/telephony/dataconnection/CCdmaApnProfileTracker.h"
+#include "elastos/droid/internal/telephony/dataconnection/CDcAsyncChannel.h"
+#include "elastos/droid/internal/telephony/dataconnection/CDcFailCause.h"
+#include "elastos/droid/internal/telephony/dataconnection/CdmaApnProfileTracker.h"
+#include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
+#include "elastos/droid/internal/telephony/dataconnection/DcFailCause.h"
+#include "elastos/droid/internal/telephony/dataconnection/DcTracker.h"
+#include "elastos/droid/internal/utility/ArrayUtils.h"
+#include "elastos/droid/internal/utility/State.h"
+#include "elastos/droid/net/CConnectivityManager.h"
+#include "elastos/droid/net/CLinkProperties.h"
+#include "elastos/droid/net/CNetworkCapabilities.h"
+#include "elastos/droid/net/CNetworkConfig.h"
+#include "elastos/droid/net/CProxyInfo.h"
+#include "elastos/droid/net/NetworkFactory.h"
+#include "elastos/droid/net/NetworkRequest.h"
+#include "elastos/droid/net/NetworkUtils.h"
+#include "elastos/droid/net/ProxyInfo.h"
+#include "elastos/droid/net/Uri.h"
+#include "elastos/droid/os/Build.h"
+#include "elastos/droid/os/CBundle.h"
+#include "elastos/droid/os/CMessenger.h"
+#include "elastos/droid/os/ServiceManager.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/provider/Telephony.h"
+#include "elastos/droid/telephony/CServiceState.h"
+#include "elastos/droid/telephony/CTelephonyManager.h"
+#include "elastos/droid/telephony/SubscriptionManager.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/utility/CSparseArray.h"
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
-#include <_Elastos.Droid.Core.h>
+#include <Elastos.Droid.Provider.h>
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/droid/R.h>
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/utility/Arrays.h>
+#include <elastos/utility/Objects.h>
+#include <elastos/utility/logging/Logger.h>
+
+// using Elastos::Droid::Telephony::CTelephonyManager;
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::App::CPendingIntent;
+using Elastos::Droid::App::CProgressDialog;
+using Elastos::Droid::App::IAlarmManager;
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::Service;
+using Elastos::Droid::Content::CContentValues;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::Intent;
+using Elastos::Droid::Content::Res::IResources;
+// using Elastos::Droid::Internal::Telephony::IEventLogTags;
+using Elastos::Droid::Internal::Telephony::IITelephony;
+using Elastos::Droid::Internal::Telephony::IccUtils;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::IRILConstants;
+using Elastos::Droid::Internal::Telephony::IServiceStateTracker;
+using Elastos::Droid::Internal::Telephony::ISubscriptionController;
+using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsDataState_DISCONNECTED;
+using Elastos::Droid::Internal::Telephony::Cdma::CdmaSubscriptionSourceManager;
+using Elastos::Droid::Internal::Telephony::Cdma::ICDMALTEPhone;
+using Elastos::Droid::Internal::Telephony::Cdma::ICDMAPhone;
+using Elastos::Droid::Internal::Telephony::Gsm::IGSMPhone;
+using Elastos::Droid::Internal::Telephony::Uicc::IRuimRecords;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
+using Elastos::Droid::Internal::Utility::ArrayUtils;
+using Elastos::Droid::Internal::Utility::IAsyncChannel;
+using Elastos::Droid::Internal::Utility::IStateMachine;
+using Elastos::Droid::Net::CConnectivityManager;
+using Elastos::Droid::Net::CLinkProperties;
+using Elastos::Droid::Net::CNetworkCapabilities;
+using Elastos::Droid::Net::CNetworkConfig;
+using Elastos::Droid::Net::CProxyInfo;
+using Elastos::Droid::Net::IConnectivityManager;
+using Elastos::Droid::Net::IProxyInfo;
+using Elastos::Droid::Net::NetworkUtils;
+using Elastos::Droid::Net::Uri;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::CMessenger;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Provider::IBaseColumns;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::ITelephony;
+using Elastos::Droid::Provider::ITelephonyCarriers;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::Telephony;
+using Elastos::Droid::R;
+using Elastos::Droid::Telephony::CServiceState;
+using Elastos::Droid::Telephony::CTelephonyManager;
+using Elastos::Droid::Telephony::Cdma::ICdmaCellLocation;
+using Elastos::Droid::Telephony::Gsm::IGsmCellLocation;
+using Elastos::Droid::Telephony::ICellLocation;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Telephony::ISubscriptionManager;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::SubscriptionManager;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Core::AutoLock;
+using Elastos::Core::CInteger32;
+using Elastos::Core::CObject;
+using Elastos::Core::IInteger32;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::IO::CByteBufferHelper;
+using Elastos::IO::CByteOrderHelper;
+using Elastos::IO::IByteBuffer;
+using Elastos::IO::IByteBufferHelper;
+using Elastos::IO::IByteOrderHelper;
+using Elastos::IO::ICloseable;
+using Elastos::IO::ByteOrder;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IList;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Objects;
 
 namespace Elastos {
 namespace Droid {
@@ -21,18 +174,19 @@ ECode DcTracker::SubBroadcastReceiverDefaultDds::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-            mSubId = mPhone.getSubId();
-            log("got ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED, new DDS = "
-                    + intent.getLongExtra(PhoneConstants.SUBSCRIPTION_KEY,
-                            SubscriptionManager.INVALID_SUB_ID));
-            updateSubIdAndCapability();
-            if (mSubId == SubscriptionController.getInstance().getDefaultDataSubId()) {
-                log("Dct is default-DDS now, process any pending MMS requests");
-            }
-
-#endif
+    mHost->mPhone->GetSubId(&mHost->mSubId);
+    Int64 i64;
+    intent->GetInt64Extra(IPhoneConstants::SUBSCRIPTION_KEY,
+            ISubscriptionManager::INVALID_SUB_ID, &i64);
+    mHost->Log("got ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED, new DDS = %ld", i64);
+    mHost->UpdateSubIdAndCapability();
+    Int64 defaultDataSubId;
+    assert(0 && "SubscriptionController");
+    // SubscriptionController::GetInstance()->GetDefaultDataSubId(&defaultDataSubId);
+    if (mHost->mSubId == defaultDataSubId) {
+        mHost->Log("Dct is default-DDS now, process any pending MMS requests");
+    }
+    return NOERROR;
 }
 
 //=============================================================================
@@ -47,13 +201,10 @@ ECode DcTracker::SubBroadcastReceiverSubInfo::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-            mSubId = mPhone.getSubId();
-            log("got ACTION_SUBINFO_RECORD_UPDATED, mySubId = " + mSubId);
-            updateSubIdAndCapability();
-
-#endif
+    mHost->mPhone->GetSubId(&mHost->mSubId);
+    mHost->Log("got ACTION_SUBINFO_RECORD_UPDATED, mySubId = %ld", mHost->mSubId);
+    mHost->UpdateSubIdAndCapability();
+    return NOERROR;
 }
 
 //=============================================================================
@@ -66,21 +217,17 @@ DcTracker::ApnChangeObserver::ApnChangeObserver(
 
 ECode DcTracker::ApnChangeObserver::constructor()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                super(mDataConnectionTracker);
-
-#endif
+    return ContentObserver::constructor(mHost->mDataConnectionTracker);
 }
 
 ECode DcTracker::ApnChangeObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                sendMessage(obtainMessage(DctConstants.EVENT_APN_CHANGED));
-
-#endif
+    AutoPtr<IMessage> msg;
+    mHost->ObtainMessage(IDctConstants::EVENT_APN_CHANGED, (IMessage**)&msg);
+    Boolean b;
+    mHost->SendMessage(msg, &b);
+    return NOERROR;
 }
 
 //=============================================================================
@@ -90,9 +237,7 @@ DcTracker::TelephonyNetworkFactory::TelephonyNetworkFactory(
     /* [in] */ DcTracker* host)
     : mHost(host)
 {
-#if 0 // TODO: Translate codes below
     CSparseArray::New((ISparseArray**)&mDdsRequests);
-#endif
 }
 
 ECode DcTracker::TelephonyNetworkFactory::constructor(
@@ -102,253 +247,277 @@ ECode DcTracker::TelephonyNetworkFactory::constructor(
     /* [in] */ INetworkCapabilities* nc,
     /* [in] */ IPhoneBase* phone)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                super(l, c, TAG, nc);
-                mPhone = phone;
-                mNetworkCapabilities = nc;
-
-#endif
+    NetworkFactory::constructor(l, c, TAG, nc);
+    mPhone = phone;
+    mNetworkCapabilities = nc;
+    return NOERROR;
 }
 
 ECode DcTracker::TelephonyNetworkFactory::ProcessPendingNetworkRequests(
     /* [in] */ INetworkRequest* n)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                for (int i = 0; i < mDdsRequests.size(); i++) {
-                    NetworkRequest nr = mDdsRequests.valueAt(i);
-                    if (nr.equals(n)) {
-                        log("Found pending request in ddsRequest list = " + nr);
-                        ApnContext apnContext = apnContextForNetworkRequest(nr);
-                        if (apnContext != null) {
-                            log("Activating APN=" + apnContext);
-                            apnContext.incRefCount();
-                        }
-                    }
-                }
-
-#endif
+    Int32 size;
+    mDdsRequests->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        mDdsRequests->ValueAt(i, (IInterface**)&obj);
+        AutoPtr<INetworkRequest> nr = INetworkRequest::Probe(obj);
+        Boolean isEquals;
+        IObject::Probe(nr)->Equals(n, &isEquals);
+        if (isEquals) {
+            Log("Found pending request in ddsRequest list = %s", TO_CSTR(nr));
+            AutoPtr<IApnContext> apnContext;
+            mHost->ApnContextForNetworkRequest(nr, (IApnContext**)&apnContext);
+            if (apnContext != NULL) {
+                Log("Activating APN=%s", TO_CSTR(apnContext));
+                apnContext->IncRefCount();
+            }
+        }
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::TelephonyNetworkFactory::RegisterOnDemandDdsCallback()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                SubscriptionController subController = SubscriptionController.getInstance();
-                subController.registerForOnDemandDdsLockNotification(mPhone.getSubId(),
-                        new SubscriptionController.OnDemandDdsLockNotifier() {
-                            public void notifyOnDemandDdsLockGranted(NetworkRequest n) {
-                                log("Got the tempDds lock for the request = " + n);
-                                processPendingNetworkRequests(n);
-                            }
-                        });
-
-#endif
+    assert(0 && "SubscriptionController");
+    // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+    // Int64 subId;
+    // mPhone->GetSubId(&subId);
+    // subController->RegisterForOnDemandDdsLockNotification(subId,
+    //         new SubscriptionController::OnDemandDdsLockNotifier() {
+    //             public void notifyOnDemandDdsLockGranted(NetworkRequest n) {
+    //                 Log("Got the tempDds lock for the request = %s", TO_CSTR(n));
+    //                 ProcessPendingNetworkRequests(n);
+    //             }
+    //         });
+    return NOERROR;
 }
 
 ECode DcTracker::TelephonyNetworkFactory::UpdateNetworkCapability(
     /* [in] */ Int64 subId)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                log("update networkCapabilites for subId = " + subId);
-                mNetworkCapabilities.setNetworkSpecifier(""+subId);
-                if ((subId > 0 && SubscriptionController.getInstance().
-                        getSubState(subId) == SubscriptionManager.ACTIVE) &&
-                        (subId == SubscriptionController.getInstance().getDefaultDataSubId())) {
-                    log("INTERNET capability is with subId = " + subId);
-                    //Only defaultDataSub provides INTERNET.
-                    mNetworkCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-                } else {
-                    log("INTERNET capability is removed from subId = " + subId);
-                    mNetworkCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-                }
-                setScoreFilter(50);
-                registerOnDemandDdsCallback();
-                log("Ready to handle network requests");
-
-#endif
+    Log("update networkCapabilites for subId = %ld", subId);
+    mNetworkCapabilities->SetNetworkSpecifier(String("") + StringUtils::ToString(subId));
+    assert(0 && "SubscriptionController");
+    // Int64 defaultDataSubId;
+    // SubscriptionController::GetInstance()->GetDefaultDataSubId(&defaultDataSubId);
+    // if ((subId > 0 && SubscriptionController::GetInstance().
+    //         GetSubState(subId) == ISubscriptionManager::ACTIVE) &&
+    //         (subId == defaultDataSubId)) {
+    //     Log("INTERNET capability is with subId = %ld", subId);
+    //     //Only defaultDataSub provides INTERNET.
+    //     mNetworkCapabilities->AddCapability(INetworkCapabilities::NET_CAPABILITY_INTERNET);
+    // } else {
+    //     Log("INTERNET capability is removed from subId = %ld", subId);
+    //     mNetworkCapabilities->RemoveCapability(INetworkCapabilities::NET_CAPABILITY_INTERNET);
+    // }
+    SetScoreFilter(50);
+    RegisterOnDemandDdsCallback();
+    Log("Ready to handle network requests");
+    return NOERROR;
 }
 
 ECode DcTracker::TelephonyNetworkFactory::NeedNetworkFor(
     /* [in] */ INetworkRequest* networkRequest,
     /* [in] */ Int32 score)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                // figure out the apn type and enable it
-                if (DBG) log("Cellular needs Network for " + networkRequest);
-                SubscriptionController subController = SubscriptionController.getInstance();
-                log("subController = " + subController);
-                long currentDds = subController.getDefaultDataSubId();
-                long subId = mPhone.getSubId();
-                long requestedSpecifier = subController.getSubIdFromNetworkRequest(networkRequest);
-                log("CurrentDds = " + currentDds);
-                log("mySubId = " + subId);
-                log("Requested networkSpecifier = " + requestedSpecifier);
-                log("my networkSpecifier = " + mNetworkCapabilities.getNetworkSpecifier());
-                if (subId < 0) {
-                    log("Can't handle any network request now, subId not ready.");
-                    return;
-                }
-                // For clients that do not send subId in NetworkCapabilities,
-                // Connectivity will send to all network factories. Accept only
-                // when requestedSpecifier is same as current factory's subId
-                if (requestedSpecifier != subId) {
-                    log("requestedSpecifier is not same as mysubId. Bail out.");
-                    return;
-                }
-                if (currentDds != requestedSpecifier) {
-                    log("This request would result in DDS switch");
-                    log("Requested DDS switch to subId = " + requestedSpecifier);
-                    //Queue this request and initiate temp DDS switch.
-                    //Once the DDS switch is done we will revist the pending requests.
-                    mDdsRequests.put(networkRequest.requestId, networkRequest);
-                    requestOnDemandDataSubscriptionLock(networkRequest);
-                    return;
-                } else {
-                    if(isNetworkRequestForInternet(networkRequest)) {
-                        log("Activating internet request on subId = " + subId);
-                        ApnContext apnContext = apnContextForNetworkRequest(networkRequest);
-                        if (apnContext != null) {
-                            log("Activating APN=" + apnContext);
-                            apnContext.incRefCount();
-                        }
-                    } else {
-                        if(isValidRequest(networkRequest)) {
-                            //non-default APN requests for this subscription.
-                            mDdsRequests.put(networkRequest.requestId, networkRequest);
-                            requestOnDemandDataSubscriptionLock(networkRequest);
-                        } else {
-                            log("Bogus request req = " + networkRequest);
-                        }
-                    }
-                }
-
-#endif
+    // figure out the apn type and enable it
+    if (mHost->DBG) Log("Cellular needs Network for %s", TO_CSTR(networkRequest));
+    assert(0 && "SubscriptionController");
+    // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+    // Log("subController = %s", TO_CSTR(subController));
+    // Int64 currentDds;
+    // subController->GetDefaultDataSubId(&currentDds);
+    // Int64 subId;
+    // mPhone->GetSubId(&subId);
+    // Int64 requestedSpecifier;
+    // subController->GetSubIdFromNetworkRequest(networkRequest, &requestedSpecifier);
+    // Log("CurrentDds = %ld", currentDds);
+    // Log("mySubId = %ld", subId);
+    // Log("Requested networkSpecifier = %ld", requestedSpecifier);
+    // String networkSpecifier;
+    // mNetworkCapabilities->GetNetworkSpecifier(&networkSpecifier);
+    // Log("my networkSpecifier = %s", networkSpecifier.string());
+    // if (subId < 0) {
+    //     Log("Can't handle any network request now, subId not ready.");
+    //     return NOERROR;
+    // }
+    // // For clients that do not send subId in NetworkCapabilities,
+    // // Connectivity will send to all network factories. Accept only
+    // // when requestedSpecifier is same as current factory's subId
+    // if (requestedSpecifier != subId) {
+    //     Log("requestedSpecifier is not same as mysubId. Bail out.");
+    //     return NOERROR;
+    // }
+    // if (currentDds != requestedSpecifier) {
+    //     Log("This request would result in DDS switch");
+    //     Log("Requested DDS switch to subId = %ld", requestedSpecifier);
+    //     //Queue this request and initiate temp DDS switch.
+    //     //Once the DDS switch is done we will revist the pending requests.
+    //     mDdsRequests->Put(networkRequest->mRequestId, networkRequest);
+    //     RequestOnDemandDataSubscriptionLock(networkRequest);
+    //     return NOERROR;
+    // } else {
+    //     Boolean isNetworkRequestForInternet;
+    //     IsNetworkRequestForInternet(networkRequest, &isNetworkRequestForInternet);
+    //     if (isNetworkRequestForInternet) {
+    //         Log("Activating internet request on subId = %ld", subId);
+    //         AutoPtr<IApnContext> apnContext;
+    //         mHost->ApnContextForNetworkRequest(networkRequest, (IApnContext**)&apnContext);
+    //         if (apnContext != NULL) {
+    //             mHost->Log("Activating APN=%s", TO_CSTR(apnContext));
+    //             apnContext->IncRefCount();
+    //         }
+    //     } else {
+    //         Boolean isValidRequest;
+    //         IsValidRequest(networkRequest, &isValidRequest);
+    //         if (isValidRequest) {
+    //             //non-default APN requests for this subscription.
+    //             mDdsRequests->Put(networkRequest->mRequestId, networkRequest);
+    //             RequestOnDemandDataSubscriptionLock(networkRequest);
+    //         } else {
+    //             Log("Bogus request req = %s", TO_CSTR(networkRequest));
+    //         }
+    //     }
+    // }
+    return NOERROR;
 }
 
 ECode DcTracker::TelephonyNetworkFactory::IsValidRequest(
     /* [in] */ INetworkRequest* n,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                int[] types = n.networkCapabilities.getCapabilities();
-                return (types.length > 0);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<INetworkCapabilities> nc;
+    n->GetNetworkCapabilities((INetworkCapabilities**)&nc);
+    AutoPtr<ArrayOf<Int32> > types;
+    nc->GetCapabilities((ArrayOf<Int32>**)&types);
+    *result = (types->GetLength() > 0);
+    return NOERROR;
 }
 
 ECode DcTracker::TelephonyNetworkFactory::IsNetworkRequestForInternet(
     /* [in] */ INetworkRequest* n,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                boolean flag = n.networkCapabilities.hasCapability
-                    (NetworkCapabilities.NET_CAPABILITY_INTERNET);
-                log("Is the request for Internet = " + flag);
-                return flag;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<INetworkCapabilities> nc;
+    n->GetNetworkCapabilities((INetworkCapabilities**)&nc);
+    Boolean flag;
+    nc->HasCapability(INetworkCapabilities::NET_CAPABILITY_INTERNET, &flag);
+    Log("Is the request for Internet = %d", flag);
+    *result = flag;
+    return NOERROR;
 }
 
 ECode DcTracker::TelephonyNetworkFactory::RequestOnDemandDataSubscriptionLock(
     /* [in] */ INetworkRequest* n)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                if(!isNetworkRequestForInternet(n)) {
-                    //Request tempDDS lock only for non-default PDP requests
-                    SubscriptionController subController = SubscriptionController.getInstance();
-                    log("requestOnDemandDataSubscriptionLock for request = " + n);
-                    subController.startOnDemandDataSubscriptionRequest(n);
-                }
-
-#endif
+    Boolean isNetworkRequestForInternet;
+    IsNetworkRequestForInternet(n, &isNetworkRequestForInternet);
+    if (!isNetworkRequestForInternet) {
+        //Request tempDDS lock only for non-default PDP requests
+        assert(0 && "SubscriptionController");
+        // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+        // Log("requestOnDemandDataSubscriptionLock for request = %s", TO_CSTR(n));
+        // subController->StartOnDemandDataSubscriptionRequest(n);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::TelephonyNetworkFactory::RemoveRequestFromList(
     /* [in] */ ISparseArray* list,
     /* [in] */ INetworkRequest* n)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                NetworkRequest nr = list.get(n.requestId);
-                if (nr != null) {
-                    log("Removing request = " + nr);
-                    list.remove(n.requestId);
-                    ApnContext apnContext = apnContextForNetworkRequest(n);
-                    if (apnContext != null) {
-                        log("Deactivating APN=" + apnContext);
-                        apnContext.decRefCount();
-                    }
-                }
-
-#endif
+    Int32 requestId;
+    n->GetRequestId(&requestId);
+    AutoPtr<IInterface> obj;
+    list->Get(requestId, (IInterface**)&obj);
+    AutoPtr<INetworkRequest> nr = INetworkRequest::Probe(obj);
+    if (nr != NULL) {
+        mHost->Log("Removing request = %s", TO_CSTR(nr));
+        list->Remove(requestId);
+        AutoPtr<IApnContext> apnContext;
+        mHost->ApnContextForNetworkRequest(n, (IApnContext**)&apnContext);
+        if (apnContext != NULL) {
+            mHost->Log("Deactivating APN=%s", TO_CSTR(apnContext));
+            apnContext->DecRefCount();
+        }
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::TelephonyNetworkFactory::RemoveRequestIfFound(
     /* [in] */ INetworkRequest* n)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                log("Release the request from dds queue, if found");
-                removeRequestFromList(mDdsRequests, n);
-                if(!isNetworkRequestForInternet(n)) {
-                    SubscriptionController subController = SubscriptionController.getInstance();
-                    subController.stopOnDemandDataSubscriptionRequest(n);
-                } else {
-                    // Internet requests are not queued in DDS list. So deactivate here explicitly.
-                    ApnContext apnContext = apnContextForNetworkRequest(n);
-                    if (apnContext != null) {
-                        log("Deactivating APN=" + apnContext);
-                        apnContext.decRefCount();
-                    }
-                }
-
-#endif
+    mHost->Log("Release the request from dds queue, if found");
+    RemoveRequestFromList(mDdsRequests, n);
+    Boolean isNetworkRequestForInternet;
+    IsNetworkRequestForInternet(n, &isNetworkRequestForInternet);
+    if (!isNetworkRequestForInternet) {
+        assert(0 && "SubscriptionController");
+        // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+        // subController->StopOnDemandDataSubscriptionRequest(n);
+    } else {
+        // Internet requests are not queued in DDS list. So deactivate here explicitly.
+        AutoPtr<IApnContext> apnContext;
+        mHost->ApnContextForNetworkRequest(n, (IApnContext**)&apnContext);
+        if (apnContext != NULL) {
+            mHost->Log("Deactivating APN=%s", TO_CSTR(apnContext));
+            apnContext->DecRefCount();
+        }
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::TelephonyNetworkFactory::ReleaseNetworkFor(
     /* [in] */ INetworkRequest* networkRequest)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                if (DBG) log("Cellular releasing Network for " + networkRequest);
-                removeRequestIfFound(networkRequest);
-
-#endif
+    if (mHost->DBG) Log("Cellular releasing Network for %s", TO_CSTR(networkRequest));
+    RemoveRequestIfFound(networkRequest);
+    return NOERROR;
 }
 
 ECode DcTracker::TelephonyNetworkFactory::ReleaseAllNetworkRequests()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                log("releaseAllNetworkRequests");
-                SubscriptionController subController = SubscriptionController.getInstance();
-                for (int i = 0; i < mDdsRequests.size(); i++) {
-                    NetworkRequest nr = mDdsRequests.valueAt(i);
-                    if (nr != null) {
-                        log("Removing request = " + nr);
-                        subController.stopOnDemandDataSubscriptionRequest(nr);
-                        mDdsRequests.remove(nr.requestId);
-                    }
-                }
-
-#endif
+    Log("releaseAllNetworkRequests");
+    assert(0 && "SubscriptionController");
+    // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+    Int32 size;
+    mDdsRequests->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        mDdsRequests->ValueAt(i, (IInterface**)&obj);
+        AutoPtr<INetworkRequest> nr = INetworkRequest::Probe(obj);
+        if (nr != NULL) {
+            Log("Removing request = %s", TO_CSTR(nr));
+            assert(0 && "SubscriptionController");
+            // subController->StopOnDemandDataSubscriptionRequest(nr);
+            Int32 requestId;
+            nr->GetRequestId(&requestId);
+            mDdsRequests->Remove(requestId);
+        }
+    }
+    return NOERROR;
 }
 
+#define MSG_BUF_SIZE    1024
 ECode DcTracker::TelephonyNetworkFactory::Log(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                Log.d("TelephonyNetworkFactory" + mPhone.getSubId(), s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    Int64 subId;
+    mPhone->GetSubId(&subId);
+    String tag;
+    tag.AppendFormat("TelephonyNetworkFactory %ld", subId);
+    return Logger::D(tag, msgBuf);
 }
 
 //=============================================================================
@@ -363,65 +532,63 @@ ECode DcTracker::ProvisionNotificationBroadcastReceiver::constructor(
     /* [in] */ const String& provisionUrl,
     /* [in] */ const String& networkOperator)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                mNetworkOperator = networkOperator;
-                mProvisionUrl = provisionUrl;
-
-#endif
+    mNetworkOperator = networkOperator;
+    mProvisionUrl = provisionUrl;
+    return NOERROR;
 }
 
 ECode DcTracker::ProvisionNotificationBroadcastReceiver::SetEnableFailFastMobileData(
     /* [in] */ Int32 enabled)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                sendMessage(obtainMessage(DctConstants.CMD_SET_ENABLE_FAIL_FAST_MOBILE_DATA, enabled, 0));
-
-#endif
+    AutoPtr<IMessage> msg;
+    mHost->ObtainMessage(IDctConstants::CMD_SET_ENABLE_FAIL_FAST_MOBILE_DATA, enabled, 0, (IMessage**)&msg);
+    Boolean b;
+    mHost->SendMessage(msg, &b);
+    return NOERROR;
 }
 
 ECode DcTracker::ProvisionNotificationBroadcastReceiver::EnableMobileProvisioning()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                final Message msg = obtainMessage(DctConstants.CMD_ENABLE_MOBILE_PROVISIONING);
-                msg.setData(Bundle.forPair(DctConstants.PROVISIONING_URL_KEY, mProvisionUrl));
-                sendMessage(msg);
-
-#endif
+    AutoPtr<IMessage> msg;
+    mHost->ObtainMessage(IDctConstants::CMD_ENABLE_MOBILE_PROVISIONING, (IMessage**)&msg);
+    AutoPtr<IBundle> bundle = CBundle::ForPair(IDctConstants::PROVISIONING_URL_KEY, mProvisionUrl);
+    msg->SetData(bundle);
+    Boolean b;
+    mHost->SendMessage(msg, &b);
+    return NOERROR;
 }
 
 ECode DcTracker::ProvisionNotificationBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                // Turning back on the radio can take time on the order of a minute, so show user a
-                // spinner so they know something is going on.
-                mProvisioningSpinner = new ProgressDialog(context);
-                mProvisioningSpinner.setTitle(mNetworkOperator);
-                mProvisioningSpinner.setMessage(
-                        // TODO: Don't borrow "Connecting..." i18n string; give Telephony a version.
-                        context.getText(com.android.internal.R.string.media_route_status_connecting));
-                mProvisioningSpinner.setIndeterminate(true);
-                mProvisioningSpinner.setCancelable(true);
-                // Allow non-Activity Service Context to create a View.
-                mProvisioningSpinner.getWindow().setType(
-                        WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-                mProvisioningSpinner.show();
-                // After timeout, hide spinner so user can at least use their device.
-                // TODO: Indicate to user that it is taking an unusually long time to connect?
-                sendMessageDelayed(obtainMessage(DctConstants.CMD_CLEAR_PROVISIONING_SPINNER,
-                        mProvisioningSpinner), PROVISIONING_SPINNER_TIMEOUT_MILLIS);
-                // This code is almost identical to the old
-                // ConnectivityService.handleMobileProvisioningAction code.
-                setRadio(true);
-                setEnableFailFastMobileData(DctConstants.ENABLED);
-                enableMobileProvisioning();
-
-#endif
+    // Turning back on the radio can take time on the order of a minute, so show user a
+    // spinner so they know something is going on.
+    CProgressDialog::New(context, (IProgressDialog**)&mHost->mProvisioningSpinner);
+    IDialog::Probe(mHost->mProvisioningSpinner)->SetTitle(StringUtils::ParseInt32(mNetworkOperator));
+    // TODO: Don't borrow "Connecting..." i18n string; give Telephony a version.
+    AutoPtr<ICharSequence> cs;
+    context->GetText(R::string::media_route_status_connecting, (ICharSequence**)&cs);
+    IAlertDialog::Probe(mHost->mProvisioningSpinner)->SetMessage(cs);
+    mHost->mProvisioningSpinner->SetIndeterminate(TRUE);
+    IDialog::Probe(mHost->mProvisioningSpinner)->SetCancelable(TRUE);
+    // Allow non-Activity Service Context to create a View.
+    AutoPtr<IWindow> w;
+    IDialog::Probe(mHost->mProvisioningSpinner)->GetWindow((IWindow**)&w);
+    w->SetType(IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG);
+    IDialog::Probe(mHost->mProvisioningSpinner)->Show();
+    // After timeout, hide spinner so user can at least use their device.
+    // TODO: Indicate to user that it is taking an unusually long time to connect?
+    AutoPtr<IMessage> msg;
+    mHost->ObtainMessage(IDctConstants::CMD_CLEAR_PROVISIONING_SPINNER, mHost->mProvisioningSpinner, (IMessage**)&msg);
+    Boolean b;
+    mHost->SendMessageDelayed(msg, PROVISIONING_SPINNER_TIMEOUT_MILLIS, &b);
+    // This code is almost identical to the old
+    // ConnectivityService.handleMobileProvisioningAction code.
+    mHost->SetRadio(TRUE);
+    SetEnableFailFastMobileData(IDctConstants::ENABLED);
+    EnableMobileProvisioning();
+    return NOERROR;
 }
 
 //=============================================================================
@@ -439,447 +606,551 @@ const String DcTracker::PROPERTY_CDMA_ROAMING_IPPROTOCOL = InitPROPERTY_CDMA_ROA
 
 DcTracker::DcTracker()
     : mDisconnectPendingCount(0)
-    , mReregisterOnReconnectFailure(false)
-    , mCanSetPreferApn(false)
-    , mImsRegistrationState(false)
+    , mReregisterOnReconnectFailure(FALSE)
+    , mCanSetPreferApn(FALSE)
+    , mImsRegistrationState(FALSE)
     , mWaitCleanUpApnContext(NULL)
-    , mDeregistrationAlarmState(false)
+    , mDeregistrationAlarmState(FALSE)
     , mImsDeregistrationDelayIntent(NULL)
-    , mWwanIwlanCoexistFlag(false)
+    , mWwanIwlanCoexistFlag(FALSE)
 {
-#if 0 // TODO: Translate codes below
-        Boolean mOosIsDisconnect = SystemProperties.getBoolean(
-            PhoneBase.PROPERTY_OOS_IS_DISCONNECT, true);
+    Boolean mOosIsDisconnect;
+    SystemProperties::GetBoolean(IPhoneBase::PROPERTY_OOS_IS_DISCONNECT, TRUE, &mOosIsDisconnect);
     CArrayList::New((IArrayList**)&mDisconnectAllCompleteMsgList);
-
-    CRegistrantList::New((IRegistrantList**)&mAllDataDisconnectedRegistrants);
-
-    CAtomicBoolean::New(false, (IAtomicBoolean**)&mAttached);
-#endif
+    assert(0 && "TODO CRegistrantList");
+    // CRegistrantList::New((IRegistrantList**)&mAllDataDisconnectedRegistrants);
+    CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&mAttached);
 }
 
 ECode DcTracker::constructor(
     /* [in] */ IPhoneBase* p)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        super(p);
-        if (p.getPhoneType() == PhoneConstants.PHONE_TYPE_GSM) {
-            LOG__TAG = "GsmDCT";
-        } else if (p.getPhoneType() == PhoneConstants.PHONE_TYPE_CDMA) {
-            LOG__TAG = "CdmaDCT";
-        } else {
-            LOG__TAG = "DCT";
-            loge("unexpected phone type [" + p.getPhoneType() + "]");
+    DcTrackerBase::constructor(p);
+    Int32 phoneType;
+    IPhone::Probe(p)->GetPhoneType(&phoneType);
+    if (phoneType == IPhoneConstants::PHONE_TYPE_GSM) {
+        LOG__TAG = "GsmDCT";
+    } else if (phoneType == IPhoneConstants::PHONE_TYPE_CDMA) {
+        LOG__TAG = "CdmaDCT";
+    } else {
+        LOG__TAG = "DCT";
+        Loge("unexpected phone type [%d]", phoneType);
+    }
+    if (DBG) Log(LOG__TAG + ".constructor");
+    if (phoneType == IPhoneConstants::PHONE_TYPE_CDMA) {
+        AutoPtr<IResources> res;
+        AutoPtr<IContext> context;
+        IPhone::Probe(p)->GetContext((IContext**)&context);
+        context->GetResources((IResources**)&res);
+        Boolean fetchApnFromOmhCard;
+        res->GetBoolean(R::bool_::config_fetch_apn_from_omh_card, &fetchApnFromOmhCard);
+        Log(LOG__TAG + " fetchApnFromOmhCard: %d", fetchApnFromOmhCard);
+        if (fetchApnFromOmhCard) {
+            CCdmaApnProfileTracker::New(ICDMAPhone::Probe(p), (ICdmaApnProfileTracker**)&mOmhApt);
+            assert(0 && "IDctConstants::EVENT_MODEM_DATA_PROFILE_READY");
+            // mOmhApt->RegisterForModemProfileReady(this,
+            //         IDctConstants::EVENT_MODEM_DATA_PROFILE_READY, NULL);
         }
-        if (DBG) log(LOG__TAG + ".constructor");
-        if (p.getPhoneType() == PhoneConstants.PHONE_TYPE_CDMA) {
-            final boolean fetchApnFromOmhCard = p.getContext().getResources().
-                    getBoolean(com.android.internal.R.bool.config_fetch_apn_from_omh_card);
-            log(LOG__TAG + " fetchApnFromOmhCard: " + fetchApnFromOmhCard);
-            if (fetchApnFromOmhCard) {
-                mOmhApt = new CdmaApnProfileTracker((CDMAPhone)p);
-                mOmhApt.registerForModemProfileReady(this,
-                        DctConstants.EVENT_MODEM_DATA_PROFILE_READY, null);
-            }
-        }
-        mDataConnectionTracker = this;
-        update();
-        mApnObserver = new ApnChangeObserver();
-        p.getContext().getContentResolver().registerContentObserver(
-                Telephony.Carriers.CONTENT_URI, true, mApnObserver);
-        initApnContexts();
-        for (ApnContext apnContext : mApnContexts.values()) {
-            // Register the reconnect and restart actions.
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(INTENT_RECONNECT_ALARM + '.' + apnContext.getApnType());
-            filter.addAction(INTENT_RESTART_TRYSETUP_ALARM + '.' + apnContext.getApnType());
-            mPhone.getContext().registerReceiver(mIntentReceiver, filter, null, mPhone);
-        }
-        ConnectivityManager cm = (ConnectivityManager)p.getContext().getSystemService(
-                Context.CONNECTIVITY_SERVICE);
-        mNetworkFilter = new NetworkCapabilities();
-        mNetworkFilter.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-        mNetworkFilter.addCapability(NetworkCapabilities.NET_CAPABILITY_MMS);
-        mNetworkFilter.addCapability(NetworkCapabilities.NET_CAPABILITY_SUPL);
-        mNetworkFilter.addCapability(NetworkCapabilities.NET_CAPABILITY_DUN);
-        mNetworkFilter.addCapability(NetworkCapabilities.NET_CAPABILITY_FOTA);
-        mNetworkFilter.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS);
-        mNetworkFilter.addCapability(NetworkCapabilities.NET_CAPABILITY_CBS);
-        mNetworkFilter.addCapability(NetworkCapabilities.NET_CAPABILITY_IA);
-        mNetworkFilter.addCapability(NetworkCapabilities.NET_CAPABILITY_RCS);
-        mNetworkFilter.addCapability(NetworkCapabilities.NET_CAPABILITY_XCAP);
-        mNetworkFilter.addCapability(NetworkCapabilities.NET_CAPABILITY_EIMS);
-        mNetworkFilter.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
-        //Dont add INTERNET capability, only defaultDataSubscription provides INTERNET.
-        mNetworkFactory = new TelephonyNetworkFactory(this.getLooper(), p.getContext(),
-                "TelephonyNetworkFactory", mNetworkFilter, mPhone);
-        mNetworkFactory.setScoreFilter(-1);
-        mNetworkFactoryMessenger = new Messenger(mNetworkFactory);
-        cm.registerNetworkFactory(mNetworkFactoryMessenger, "Telephony");
-        // Add Emergency APN to APN setting list by default to support EPDN in sim absent cases
-        initEmergencyApnSetting();
-        addEmergencyApnSetting();
-        mProvisionActionName = "com.android.internal.telephony.PROVISION" + p.getPhoneId();
-        mPhone.getContext().registerReceiver(subInfoBroadcastReceiver,
-                new IntentFilter(TelephonyIntents.ACTION_SUBINFO_RECORD_UPDATED));
-        mPhone.getContext().registerReceiver(defaultDdsBroadcastReceiver,
-                new IntentFilter(TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED));
-
-#endif
+    }
+    mDataConnectionTracker = this;
+    Update();
+    mApnObserver = new ApnChangeObserver(this);
+    mApnObserver->constructor();
+    AutoPtr<IContext> context;
+    IPhone::Probe(p)->GetContext((IContext**)&context);
+    AutoPtr<IContentResolver> contentResolver;
+    context->GetContentResolver((IContentResolver**)&contentResolver);
+    contentResolver->RegisterContentObserver(
+            Elastos::Droid::Provider::Telephony::Carriers::CONTENT_URI, TRUE, mApnObserver);
+    InitApnContexts();
+    AutoPtr<ICollection> values;
+    mApnContexts->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> it;
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+        // Register the reconnect and restart actions.
+        AutoPtr<IIntentFilter> filter;
+        CIntentFilter::New((IIntentFilter**)&filter);
+        String apnType;
+        apnContext->GetApnType(&apnType);
+        String s = INTENT_RECONNECT_ALARM;
+        s += '.';
+        s += apnType;
+        filter->AddAction(s);
+        s = INTENT_RESTART_TRYSETUP_ALARM;
+        s += '.';
+        s += apnType;
+        filter->AddAction(s);
+        AutoPtr<IContext> context;
+        IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+        AutoPtr<IIntent> intent;
+        context->RegisterReceiver(mIntentReceiver, filter, String(NULL), IHandler::Probe(mPhone), (IIntent**)&intent);
+    }
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+    AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(obj);
+    CNetworkCapabilities::New((INetworkCapabilities**)&mNetworkFilter);
+    mNetworkFilter->AddTransportType(INetworkCapabilities::TRANSPORT_CELLULAR);
+    mNetworkFilter->AddCapability(INetworkCapabilities::NET_CAPABILITY_MMS);
+    mNetworkFilter->AddCapability(INetworkCapabilities::NET_CAPABILITY_SUPL);
+    mNetworkFilter->AddCapability(INetworkCapabilities::NET_CAPABILITY_DUN);
+    mNetworkFilter->AddCapability(INetworkCapabilities::NET_CAPABILITY_FOTA);
+    mNetworkFilter->AddCapability(INetworkCapabilities::NET_CAPABILITY_IMS);
+    mNetworkFilter->AddCapability(INetworkCapabilities::NET_CAPABILITY_CBS);
+    mNetworkFilter->AddCapability(INetworkCapabilities::NET_CAPABILITY_IA);
+    mNetworkFilter->AddCapability(INetworkCapabilities::NET_CAPABILITY_RCS);
+    mNetworkFilter->AddCapability(INetworkCapabilities::NET_CAPABILITY_XCAP);
+    mNetworkFilter->AddCapability(INetworkCapabilities::NET_CAPABILITY_EIMS);
+    mNetworkFilter->AddCapability(INetworkCapabilities::NET_CAPABILITY_NOT_RESTRICTED);
+    //Dont add INTERNET capability, only defaultDataSubscription provides INTERNET.
+    AutoPtr<ILooper> looper;
+    GetLooper((ILooper**)&looper);
+    mNetworkFactory = new TelephonyNetworkFactory(this);
+    ((TelephonyNetworkFactory*) mNetworkFactory.Get())->constructor(looper, context,
+            String("TelephonyNetworkFactory"), mNetworkFilter, mPhone);
+    mNetworkFactory->SetScoreFilter(-1);
+    CMessenger::New(IHandler::Probe(mNetworkFactory), (IMessenger**)&mNetworkFactoryMessenger);
+    cm->RegisterNetworkFactory(mNetworkFactoryMessenger, String("Telephony"));
+    // Add Emergency APN to APN setting list by default to support EPDN in sim absent cases
+    InitEmergencyApnSetting();
+    AddEmergencyApnSetting();
+    Int32 phoneId;
+    p->GetPhoneId(&phoneId);
+    mProvisionActionName = String("com.android.internal.telephony.PROVISION") + StringUtils::ToString(phoneId);
+    context = NULL;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IIntentFilter> filter;
+    CIntentFilter::New(ITelephonyIntents::ACTION_SUBINFO_RECORD_UPDATED, (IIntentFilter**)&filter);
+    AutoPtr<IIntent> intent;
+    context->RegisterReceiver(mSubInfoBroadcastReceiver, filter, (IIntent**)&intent);
+    filter = NULL;
+    CIntentFilter::New(ITelephonyIntents::ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED, (IIntentFilter**)&filter);
+    intent = NULL;
+    context->RegisterReceiver(mDefaultDdsBroadcastReceiver, filter, (IIntent**)&intent);
+    return NOERROR;
 }
 
 ECode DcTracker::ProcessPendingNetworkRequests(
     /* [in] */ INetworkRequest* n)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ((TelephonyNetworkFactory)mNetworkFactory).processPendingNetworkRequests(n);
-
-#endif
+    return ((TelephonyNetworkFactory*) mNetworkFactory.Get())->ProcessPendingNetworkRequests(n);
 }
 
 ECode DcTracker::UpdateSubIdAndCapability()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ((TelephonyNetworkFactory)mNetworkFactory).updateNetworkCapability(mSubId);
-
-#endif
+    return ((TelephonyNetworkFactory*) mNetworkFactory.Get())->UpdateNetworkCapability(mSubId);
 }
 
 ECode DcTracker::ReleaseAllNetworkRequests()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ((TelephonyNetworkFactory)mNetworkFactory).releaseAllNetworkRequests();
-
-#endif
+    return ((TelephonyNetworkFactory*) mNetworkFactory.Get())->ReleaseAllNetworkRequests();
 }
 
 ECode DcTracker::RegisterForAllEvents()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mPhone.mCi.registerForAvailable(this, DctConstants.EVENT_RADIO_AVAILABLE, null);
-        mPhone.mCi.registerForOffOrNotAvailable(this,
-               DctConstants.EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
-        mPhone.mCi.registerForWwanIwlanCoexistence(this,
-                DctConstants.EVENT_GET_WWAN_IWLAN_COEXISTENCE_DONE, null);
-        mPhone.mCi.registerForDataNetworkStateChanged(this,
-               DctConstants.EVENT_DATA_STATE_CHANGED, null);
-        mPhone.getCallTracker().registerForVoiceCallEnded (this,
-               DctConstants.EVENT_VOICE_CALL_ENDED, null);
-        mPhone.getCallTracker().registerForVoiceCallStarted (this,
-               DctConstants.EVENT_VOICE_CALL_STARTED, null);
-        mPhone.getServiceStateTracker().registerForDataConnectionAttached(this,
-               DctConstants.EVENT_DATA_CONNECTION_ATTACHED, null);
-        mPhone.getServiceStateTracker().registerForDataConnectionDetached(this,
-               DctConstants.EVENT_DATA_CONNECTION_DETACHED, null);
-        mPhone.getServiceStateTracker().registerForRoamingOn(this,
-               DctConstants.EVENT_ROAMING_ON, null);
-        mPhone.getServiceStateTracker().registerForRoamingOff(this,
-               DctConstants.EVENT_ROAMING_OFF, null);
-        mPhone.getServiceStateTracker().registerForPsRestrictedEnabled(this,
-                DctConstants.EVENT_PS_RESTRICT_ENABLED, null);
-        mPhone.getServiceStateTracker().registerForPsRestrictedDisabled(this,
-                DctConstants.EVENT_PS_RESTRICT_DISABLED, null);
-     //   SubscriptionManager.registerForDdsSwitch(this,
-     //          DctConstants.EVENT_CLEAN_UP_ALL_CONNECTIONS, null);
-        mPhone.getServiceStateTracker().registerForDataRegStateOrRatChanged(this,
-                DctConstants.EVENT_DATA_RAT_CHANGED, null);
-        if (mPhone.getPhoneType() == PhoneConstants.PHONE_TYPE_CDMA) {
-            mCdmaSsm = CdmaSubscriptionSourceManager.getInstance(
-                    mPhone.getContext(), mPhone.mCi, this,
-                    DctConstants.EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, null);
-            // CdmaSsm doesn't send this event whenever you register - fake it ourselves
-            sendMessage(obtainMessage(DctConstants.EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED));
-        }
-
-#endif
+    ((PhoneBase*) mPhone.Get())->mCi->RegisterForAvailable(this, IDctConstants::EVENT_RADIO_AVAILABLE, NULL);
+    ((PhoneBase*) mPhone.Get())->mCi->RegisterForOffOrNotAvailable(this,
+            IDctConstants::EVENT_RADIO_OFF_OR_NOT_AVAILABLE, NULL);
+    assert(0 && "TODO: IDctConstants::EVENT_GET_WWAN_IWLAN_COEXISTENCE_DONE");
+    // ((PhoneBase*) mPhone.Get())->mCi->RegisterForWwanIwlanCoexistence(this,
+    //         IDctConstants::EVENT_GET_WWAN_IWLAN_COEXISTENCE_DONE, NULL);
+    ((PhoneBase*) mPhone.Get())->mCi->RegisterForDataNetworkStateChanged(this,
+            IDctConstants::EVENT_DATA_STATE_CHANGED, NULL);
+    AutoPtr<ICallTracker> ct;
+    mPhone->GetCallTracker((ICallTracker**)&ct);
+    assert(0 && "TODO: ICallTracker");
+    // ct->RegisterForVoiceCallEnded(this,
+    //         IDctConstants::EVENT_VOICE_CALL_ENDED, NULL);
+    // ct->RegisterForVoiceCallStarted (this,
+    //         IDctConstants::EVENT_VOICE_CALL_STARTED, NULL);
+    AutoPtr<IServiceStateTracker> serviceStateTracker;
+    mPhone->GetServiceStateTracker((IServiceStateTracker**)&serviceStateTracker);
+    serviceStateTracker->RegisterForDataConnectionAttached(this,
+            IDctConstants::EVENT_DATA_CONNECTION_ATTACHED, NULL);
+    serviceStateTracker->RegisterForDataConnectionDetached(this,
+            IDctConstants::EVENT_DATA_CONNECTION_DETACHED, NULL);
+    serviceStateTracker->RegisterForRoamingOn(this,
+            IDctConstants::EVENT_ROAMING_ON, NULL);
+    serviceStateTracker->RegisterForRoamingOff(this,
+            IDctConstants::EVENT_ROAMING_OFF, NULL);
+    serviceStateTracker->RegisterForPsRestrictedEnabled(this,
+            IDctConstants::EVENT_PS_RESTRICT_ENABLED, NULL);
+    serviceStateTracker->RegisterForPsRestrictedDisabled(this,
+            IDctConstants::EVENT_PS_RESTRICT_DISABLED, NULL);
+ //   SubscriptionManager.registerForDdsSwitch(this,
+ //          DctConstants.EVENT_CLEAN_UP_ALL_CONNECTIONS, null);
+    serviceStateTracker->RegisterForDataRegStateOrRatChanged(this,
+            IDctConstants::EVENT_DATA_RAT_CHANGED, NULL);
+    Int32 phoneType;
+    IPhone::Probe(mPhone)->GetPhoneType(&phoneType);
+    if (phoneType == IPhoneConstants::PHONE_TYPE_CDMA) {
+        AutoPtr<IContext> context;
+        IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+        mCdmaSsm = CdmaSubscriptionSourceManager::GetInstance(context, ((PhoneBase*) mPhone.Get())->mCi, this,
+                IDctConstants::EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, NULL);
+        // CdmaSsm doesn't send this event whenever you register - fake it ourselves
+        AutoPtr<IMessage> msg;
+        ObtainMessage(IDctConstants::EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, (IMessage**)&msg);
+        Boolean b;
+        SendMessage(msg, &b);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::Dispose()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("GsmDCT.dispose");
-        releaseAllNetworkRequests();
-        if (mProvisionBroadcastReceiver != null) {
-            mPhone.getContext().unregisterReceiver(mProvisionBroadcastReceiver);
-            mProvisionBroadcastReceiver = null;
-        }
-        if (mProvisioningSpinner != null) {
-            mProvisioningSpinner.dismiss();
-            mProvisioningSpinner = null;
-        }
-        ConnectivityManager cm = (ConnectivityManager)mPhone.getContext().getSystemService(
-                Context.CONNECTIVITY_SERVICE);
-        cm.unregisterNetworkFactory(mNetworkFactoryMessenger);
-        mPhone.getContext().unregisterReceiver(defaultDdsBroadcastReceiver);
-        mPhone.getContext().unregisterReceiver(subInfoBroadcastReceiver);
-        mNetworkFactoryMessenger = null;
-        cleanUpAllConnections(true, null);
-        super.dispose();
-        mPhone.getContext().getContentResolver().unregisterContentObserver(mApnObserver);
-        mApnContexts.clear();
-        mPrioritySortedApnContexts.clear();
-        if (mCdmaSsm != null) {
-            mCdmaSsm.dispose(this);
-        }
-        if (mOmhApt != null) {
-            mOmhApt.unregisterForModemProfileReady(this);
-        }
-        destroyDataConnections();
-
-#endif
+    if (DBG) Log("GsmDCT.dispose");
+    ReleaseAllNetworkRequests();
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    if (mProvisionBroadcastReceiver != NULL) {
+        context->UnregisterReceiver(mProvisionBroadcastReceiver);
+        mProvisionBroadcastReceiver = NULL;
+    }
+    if (mProvisioningSpinner != NULL) {
+        IDialogInterface::Probe(mProvisioningSpinner)->Dismiss();
+        mProvisioningSpinner = NULL;
+    }
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+    AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(obj);
+    cm->UnregisterNetworkFactory(mNetworkFactoryMessenger);
+    context->UnregisterReceiver(mDefaultDdsBroadcastReceiver);
+    context->UnregisterReceiver(mSubInfoBroadcastReceiver);
+    mNetworkFactoryMessenger = NULL;
+    Boolean b;
+    CleanUpAllConnections(TRUE, String(NULL), &b);
+    DcTrackerBase::Dispose();
+    AutoPtr<IContentResolver> contentResolver;
+    context->GetContentResolver((IContentResolver**)&contentResolver);
+    contentResolver->UnregisterContentObserver(mApnObserver);
+    mApnContexts->Clear();
+    mPrioritySortedApnContexts->Clear();
+    if (mCdmaSsm != NULL) {
+        mCdmaSsm->Dispose(this);
+    }
+    if (mOmhApt != NULL) {
+        mOmhApt->UnregisterForModemProfileReady(this);
+    }
+    DestroyDataConnections();
+    return NOERROR;
 }
 
 ECode DcTracker::UnregisterForAllEvents()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-         //Unregister for all events
-        mPhone.mCi.unregisterForAvailable(this);
-        mPhone.mCi.unregisterForOffOrNotAvailable(this);
-        IccRecords r = mIccRecords.get();
-        if (r != null) {
-            r.unregisterForRecordsLoaded(this);
-            mIccRecords.set(null);
-        }
-        mPhone.mCi.unregisterForDataNetworkStateChanged(this);
-        mPhone.getCallTracker().unregisterForVoiceCallEnded(this);
-        mPhone.getCallTracker().unregisterForVoiceCallStarted(this);
-        mPhone.getServiceStateTracker().unregisterForDataConnectionAttached(this);
-        mPhone.getServiceStateTracker().unregisterForDataConnectionDetached(this);
-        mPhone.getServiceStateTracker().unregisterForRoamingOn(this);
-        mPhone.getServiceStateTracker().unregisterForRoamingOff(this);
-        mPhone.getServiceStateTracker().unregisterForPsRestrictedEnabled(this);
-        mPhone.getServiceStateTracker().unregisterForPsRestrictedDisabled(this);
-        //SubscriptionManager.unregisterForDdsSwitch(this);
-
-#endif
+     //Unregister for all events
+    ((PhoneBase*) mPhone.Get())->mCi->UnregisterForAvailable(this);
+    ((PhoneBase*) mPhone.Get())->mCi->UnregisterForOffOrNotAvailable(this);
+    AutoPtr<IInterface> obj;
+    mIccRecords->Get((IInterface**)&obj);
+    AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
+    if (r != NULL) {
+        r->UnregisterForRecordsLoaded(this);
+        mIccRecords->Set(NULL);
+    }
+    ((PhoneBase*) mPhone.Get())->mCi->UnregisterForDataNetworkStateChanged(this);
+    AutoPtr<ICallTracker> ct;
+    mPhone->GetCallTracker((ICallTracker**)&ct);
+    assert(0 && "TODO: ICallTracker");
+    // ct->UnregisterForVoiceCallEnded(this);
+    // ct->UnregisterForVoiceCallStarted(this);
+    AutoPtr<IServiceStateTracker> serviceStateTracker;
+    mPhone->GetServiceStateTracker((IServiceStateTracker**)&serviceStateTracker);
+    serviceStateTracker->UnregisterForDataConnectionAttached(this);
+    serviceStateTracker->UnregisterForDataConnectionDetached(this);
+    serviceStateTracker->UnregisterForRoamingOn(this);
+    serviceStateTracker->UnregisterForRoamingOff(this);
+    serviceStateTracker->UnregisterForPsRestrictedEnabled(this);
+    serviceStateTracker->UnregisterForPsRestrictedDisabled(this);
+    //SubscriptionManager.unregisterForDdsSwitch(this);
+    return NOERROR;
 }
 
 ECode DcTracker::ApnContextForNetworkRequest(
     /* [in] */ INetworkRequest* nr,
     /* [out] */ IApnContext** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        NetworkCapabilities nc = nr.networkCapabilities;
-        // for now, ignore the bandwidth stuff
-        if (nc.getTransportTypes().length > 0 &&
-                nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == false) {
-            return null;
-        }
-        // in the near term just do 1-1 matches.
-        // TODO - actually try to match the set of capabilities
-        int type = -1;
-        String name = null;
-        boolean error = false;
-        if (nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
-            if (name != null) error = true;
-            name = PhoneConstants.APN_TYPE_DEFAULT;
-            type = ConnectivityManager.TYPE_MOBILE;
-        }
-        if (nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_MMS)) {
-            if (name != null) error = true;
-            name = PhoneConstants.APN_TYPE_MMS;
-            type = ConnectivityManager.TYPE_MOBILE_MMS;
-        }
-        if (nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_SUPL)) {
-            if (name != null) error = true;
-            name = PhoneConstants.APN_TYPE_SUPL;
-            type = ConnectivityManager.TYPE_MOBILE_SUPL;
-        }
-        if (nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_DUN)) {
-            if (name != null) error = true;
-            name = PhoneConstants.APN_TYPE_DUN;
-            type = ConnectivityManager.TYPE_MOBILE_DUN;
-        }
-        if (nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_FOTA)) {
-            if (name != null) error = true;
-            name = PhoneConstants.APN_TYPE_FOTA;
-            type = ConnectivityManager.TYPE_MOBILE_FOTA;
-        }
-        if (nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_IMS)) {
-            if (name != null) error = true;
-            name = PhoneConstants.APN_TYPE_IMS;
-            type = ConnectivityManager.TYPE_MOBILE_IMS;
-        }
-        if (nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_CBS)) {
-            if (name != null) error = true;
-            name = PhoneConstants.APN_TYPE_CBS;
-            type = ConnectivityManager.TYPE_MOBILE_CBS;
-        }
-        if (nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_IA)) {
-            if (name != null) error = true;
-            name = PhoneConstants.APN_TYPE_IA;
-            type = ConnectivityManager.TYPE_MOBILE_IA;
-        }
-        if (nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_RCS)) {
-            if (name != null) error = true;
-            name = null;
-            loge("RCS APN type not yet supported");
-        }
-        if (nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_XCAP)) {
-            if (name != null) error = true;
-            name = null;
-            loge("XCAP APN type not yet supported");
-        }
-        if (nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_EIMS)) {
-            if (name != null) error = true;
-            name = null;
-            loge("EIMS APN type not yet supported");
-        }
-        if (error) {
-            loge("Multiple apn types specified in request - result is unspecified!");
-        }
-        if (type == -1 || name == null) {
-            loge("Unsupported NetworkRequest in Telephony: " + nr);
-            return null;
-        }
-        ApnContext apnContext = mApnContexts.get(name);
-        if (apnContext == null) {
-            loge("Request for unsupported mobile type: " + type);
-        }
-        return apnContext;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<INetworkCapabilities> nc;
+    nr->GetNetworkCapabilities((INetworkCapabilities**)&nc);
+    // for now, ignore the bandwidth stuff
+    AutoPtr<ArrayOf<Int32> > types;
+    nc->GetTransportTypes((ArrayOf<Int32>**)&types);
+    Boolean hasTransport;
+    nc->HasTransport(INetworkCapabilities::TRANSPORT_CELLULAR, &hasTransport);
+    if (types->GetLength() > 0 && hasTransport == FALSE) {
+        *result = NULL;
+        return NOERROR;
+    }
+    // in the near term just do 1-1 matches.
+    // TODO - actually try to match the set of capabilities
+    Int32 type = -1;
+    String name(NULL);
+    Boolean error = FALSE;
+    Boolean hasCapability;
+    nc->HasCapability(INetworkCapabilities::NET_CAPABILITY_INTERNET, &hasCapability);
+    if (hasCapability) {
+        if (name != NULL) error = TRUE;
+        name = IPhoneConstants::APN_TYPE_DEFAULT;
+        type = IConnectivityManager::TYPE_MOBILE;
+    }
+    nc->HasCapability(INetworkCapabilities::NET_CAPABILITY_MMS, &hasCapability);
+    if (hasCapability) {
+        if (name != NULL) error = TRUE;
+        name = IPhoneConstants::APN_TYPE_MMS;
+        type = IConnectivityManager::TYPE_MOBILE_MMS;
+    }
+    nc->HasCapability(INetworkCapabilities::NET_CAPABILITY_SUPL, &hasCapability);
+    if (hasCapability) {
+        if (name != NULL) error = TRUE;
+        name = IPhoneConstants::APN_TYPE_SUPL;
+        type = IConnectivityManager::TYPE_MOBILE_SUPL;
+    }
+    nc->HasCapability(INetworkCapabilities::NET_CAPABILITY_DUN, &hasCapability);
+    if (hasCapability) {
+        if (name != NULL) error = TRUE;
+        name = IPhoneConstants::APN_TYPE_DUN;
+        type = IConnectivityManager::TYPE_MOBILE_DUN;
+    }
+    nc->HasCapability(INetworkCapabilities::NET_CAPABILITY_FOTA, &hasCapability);
+    if (hasCapability) {
+        if (name != NULL) error = TRUE;
+        name = IPhoneConstants::APN_TYPE_FOTA;
+        type = IConnectivityManager::TYPE_MOBILE_FOTA;
+    }
+    nc->HasCapability(INetworkCapabilities::NET_CAPABILITY_IMS, &hasCapability);
+    if (hasCapability) {
+        if (name != NULL) error = TRUE;
+        name = IPhoneConstants::APN_TYPE_IMS;
+        type = IConnectivityManager::TYPE_MOBILE_IMS;
+    }
+    nc->HasCapability(INetworkCapabilities::NET_CAPABILITY_CBS, &hasCapability);
+    if (hasCapability) {
+        if (name != NULL) error = TRUE;
+        name = IPhoneConstants::APN_TYPE_CBS;
+        type = IConnectivityManager::TYPE_MOBILE_CBS;
+    }
+    nc->HasCapability(INetworkCapabilities::NET_CAPABILITY_IA, &hasCapability);
+    if (hasCapability) {
+        if (name != NULL) error = TRUE;
+        name = IPhoneConstants::APN_TYPE_IA;
+        type = IConnectivityManager::TYPE_MOBILE_IA;
+    }
+    nc->HasCapability(INetworkCapabilities::NET_CAPABILITY_RCS, &hasCapability);
+    if (hasCapability) {
+        if (name != NULL) error = TRUE;
+        name = NULL;
+        Loge("RCS APN type not yet supported");
+    }
+    nc->HasCapability(INetworkCapabilities::NET_CAPABILITY_XCAP, &hasCapability);
+    if (hasCapability) {
+        if (name != NULL) error = TRUE;
+        name = NULL;
+        Loge("XCAP APN type not yet supported");
+    }
+    nc->HasCapability(INetworkCapabilities::NET_CAPABILITY_EIMS, &hasCapability);
+    if (hasCapability) {
+        if (name != NULL) error = TRUE;
+        name = NULL;
+        Loge("EIMS APN type not yet supported");
+    }
+    if (error) {
+        Loge("Multiple apn types specified in request - result is unspecified!");
+    }
+    if (type == -1 || name == NULL) {
+        Loge("Unsupported NetworkRequest in Telephony: %s", TO_CSTR(nr));
+        *result = NULL;
+        return NOERROR;
+    }
+    AutoPtr<IInterface> obj;
+    mApnContexts->Get(StringUtils::ParseCharSequence(name), (IInterface**)&obj);
+    AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+    if (apnContext == NULL) {
+        Loge("Request for unsupported mobile type: %d", type);
+    }
+    *result = apnContext;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode DcTracker::SetRadio(
     /* [in] */ Boolean on)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        final ITelephony phone = ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
-        try {
-            phone.setRadio(on);
-        } catch (Exception e) {
-            // Ignore.
-        }
-
-#endif
+    AutoPtr<IInterface> service = ServiceManager::CheckService(String("phone"));
+    AutoPtr<IITelephony> phone = IITelephony::Probe(service);
+    // try {
+    Boolean b;
+    phone->SetRadio(on, &b);
+    // } catch (Exception e) {
+        // Ignore.
+    // }
+    return NOERROR;
 }
 
 ECode DcTracker::IsApnTypeActive(
     /* [in] */ const String& type,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ApnContext apnContext = mApnContexts.get(type);
-        if (apnContext == null) return false;
-        return (apnContext.getDcAc() != null);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IInterface> obj;
+    mApnContexts->Get(StringUtils::ParseCharSequence(type), (IInterface**)&obj);
+    AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+    if (apnContext == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    AutoPtr<IDcAsyncChannel> dcAsyncChannel;
+    apnContext->GetDcAc((IDcAsyncChannel**)&dcAsyncChannel);
+    *result = (dcAsyncChannel != NULL);
+    return NOERROR;
 }
 
 ECode DcTracker::IsOnDemandDataPossible(
     /* [in] */ const String& apnType,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        /*
-         * Check if APN enabled
-         * Check if MobileData is ON
-         * Check if MobileData UI override present
-         */
-        boolean flag = false;
-        ApnContext apnContext = mApnContexts.get(apnType);
-        if (apnContext == null) {
-            return false;
-        }
-        boolean apnContextIsEnabled = apnContext.isEnabled();
-        DctConstants.State apnContextState = apnContext.getState();
-        boolean apnTypePossible = !(apnContextIsEnabled &&
-                (apnContextState == DctConstants.State.FAILED));
-        boolean userDataEnabled = mUserDataEnabled;
-        if (PhoneConstants.APN_TYPE_MMS.equals(apnType)) {
-            boolean mobileDataOffOveride = mPhone.getContext().getResources().
-                getBoolean(com.android.internal.R.bool.config_enable_mms_with_mobile_data_off);
-            log("isOnDemandDataPossible MobileDataEnabled override = " + mobileDataOffOveride);
-            userDataEnabled = (mUserDataEnabled || mobileDataOffOveride);
-        }
-        flag = apnTypePossible && userDataEnabled;
-        log("isOnDemandDataPossible, possible =" + flag + ", apnContext = " + apnContext);
-        return flag;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    /*
+     * Check if APN enabled
+     * Check if MobileData is ON
+     * Check if MobileData UI override present
+     */
+    Boolean flag = FALSE;
+    AutoPtr<IInterface> obj;
+    mApnContexts->Get(StringUtils::ParseCharSequence(apnType), (IInterface**)&obj);
+    AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+    if (apnContext == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    Boolean apnContextIsEnabled;
+    apnContext->IsEnabled(&apnContextIsEnabled);
+    DctConstantsState apnContextState;
+    apnContext->GetState(&apnContextState);
+    Boolean apnTypePossible = !(apnContextIsEnabled &&
+            (apnContextState == DctConstantsState_FAILED));
+    Boolean userDataEnabled = mUserDataEnabled;
+    if (IPhoneConstants::APN_TYPE_MMS.Equals(apnType)) {
+        AutoPtr<IResources> res;
+        AutoPtr<IContext> context;
+        IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+        context->GetResources((IResources**)&res);
+        Boolean mobileDataOffOveride;
+        res->GetBoolean(R::bool_::config_enable_mms_with_mobile_data_off, &mobileDataOffOveride);
+        Log("isOnDemandDataPossible MobileDataEnabled override = %d", mobileDataOffOveride);
+        userDataEnabled = (mUserDataEnabled || mobileDataOffOveride);
+    }
+    flag = apnTypePossible && userDataEnabled;
+    Log("isOnDemandDataPossible, possible =%d, apnContext = %s", flag, TO_CSTR(apnContext));
+    *result = flag;
+    return NOERROR;
 }
 
 ECode DcTracker::IsDataPossible(
     /* [in] */ const String& apnType,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ApnContext apnContext = mApnContexts.get(apnType);
-        if (apnContext == null) {
-            return false;
-        }
-        boolean apnContextIsEnabled = apnContext.isEnabled();
-        DctConstants.State apnContextState = apnContext.getState();
-        boolean apnTypePossible = !(apnContextIsEnabled &&
-                (apnContextState == DctConstants.State.FAILED));
-        boolean isEmergencyApn = apnContext.getApnType().equals(PhoneConstants.APN_TYPE_EMERGENCY);
-        // Set the emergency APN availability status as TRUE irrespective of conditions checked in
-        // isDataAllowed() like IN_SERVICE, MOBILE DATA status etc.
-        boolean dataAllowed = isEmergencyApn || isDataAllowed();
-        boolean possible = dataAllowed && apnTypePossible;
-        if ((apnContext.getApnType().equals(PhoneConstants.APN_TYPE_DEFAULT)
-                    || apnContext.getApnType().equals(PhoneConstants.APN_TYPE_IA))
-                && (mPhone.getServiceState().getRilDataRadioTechnology()
-                == ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN)
-                && (!mWwanIwlanCoexistFlag)) {
-            log("Default data call activation not possible in iwlan.");
-            possible = false;
-        }
-        if (VDBG) {
-            log(String.format("isDataPossible(%s): possible=%b isDataAllowed=%b " +
-                    "apnTypePossible=%b apnContextisEnabled=%b apnContextState()=%s",
-                    apnType, possible, dataAllowed, apnTypePossible,
-                    apnContextIsEnabled, apnContextState));
-        }
-        return possible;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IInterface> obj;
+    mApnContexts->Get(StringUtils::ParseCharSequence(apnType), (IInterface**)&obj);
+    AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+    if (apnContext == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    Boolean apnContextIsEnabled;
+    apnContext->IsEnabled(&apnContextIsEnabled);
+    DctConstantsState apnContextState;
+    apnContext->GetState(&apnContextState);
+    Boolean apnTypePossible = !(apnContextIsEnabled &&
+            (apnContextState == DctConstantsState_FAILED));
+    String apnContextType;
+    apnContext->GetApnType(&apnContextType);
+    Boolean isEmergencyApn = apnContextType.Equals(IPhoneConstants::APN_TYPE_EMERGENCY);
+    // Set the emergency APN availability status as TRUE irrespective of conditions checked in
+    // isDataAllowed() like IN_SERVICE, MOBILE DATA status etc.
+    Boolean isDataAllowed;
+    IsDataAllowed(&isDataAllowed);
+    Boolean dataAllowed = isEmergencyApn || isDataAllowed;
+    Boolean possible = dataAllowed && apnTypePossible;
+    AutoPtr<IServiceState> serviceState;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    Int32 rilDataRadioTechnology;
+    serviceState->GetRilDataRadioTechnology(&rilDataRadioTechnology);
+    assert(0 && "TODO: IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN");
+    // if ((apnType.Equals(IPhoneConstants::APN_TYPE_DEFAULT)
+    //             || apnType.Equals(IPhoneConstants::APN_TYPE_IA))
+    //         && (rilDataRadioTechnology == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN)
+    //         && (!mWwanIwlanCoexistFlag)) {
+    //     Log("Default data call activation not possible in iwlan.");
+    //     possible = FALSE;
+    // }
+    if (VDBG) {
+        Log("isDataPossible(%s): possible=%d isDataAllowed=%d "
+                "apnTypePossible=%d apnContextisEnabled=%d apnContextState()=%d",
+                apnType.string(), possible, dataAllowed, apnTypePossible,
+                apnContextIsEnabled, apnContextState);
+    }
+    *result = possible;
+    return NOERROR;
 }
 
 ECode DcTracker::Finalize()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if(DBG) log("finalize");
-
-#endif
+    if (DBG) Log("finalize");
+    return NOERROR;
 }
 
 ECode DcTracker::SupplyMessenger()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-       // Supply the data connection tracker messenger only if
-       // this is corresponding to the current DDS.
-       if (!isActiveDataSubscription()) {
-           return;
-       }
-        ConnectivityManager cm = (ConnectivityManager)mPhone.getContext().getSystemService(
-                Context.CONNECTIVITY_SERVICE);
-        cm.supplyMessenger(ConnectivityManager.TYPE_MOBILE, new Messenger(this));
-        cm.supplyMessenger(ConnectivityManager.TYPE_MOBILE_MMS, new Messenger(this));
-        cm.supplyMessenger(ConnectivityManager.TYPE_MOBILE_SUPL, new Messenger(this));
-        cm.supplyMessenger(ConnectivityManager.TYPE_MOBILE_DUN, new Messenger(this));
-        cm.supplyMessenger(ConnectivityManager.TYPE_MOBILE_HIPRI, new Messenger(this));
-        cm.supplyMessenger(ConnectivityManager.TYPE_MOBILE_FOTA, new Messenger(this));
-        cm.supplyMessenger(ConnectivityManager.TYPE_MOBILE_IMS, new Messenger(this));
-        cm.supplyMessenger(ConnectivityManager.TYPE_MOBILE_CBS, new Messenger(this));
-        cm.supplyMessenger(ConnectivityManager.TYPE_MOBILE_EMERGENCY, new Messenger(this));
-
-#endif
+    // Supply the data connection tracker messenger only if
+    // this is corresponding to the current DDS.
+    Boolean isActiveDataSubscription;
+    IsActiveDataSubscription(&isActiveDataSubscription);
+    if (!isActiveDataSubscription) {
+        return NOERROR;
+    }
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+    AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(obj);
+    AutoPtr<IMessenger> msg;
+    CMessenger::New(this, (IMessenger**)&msg);
+    cm->SupplyMessenger(IConnectivityManager::TYPE_MOBILE, msg);
+    msg = NULL;
+    CMessenger::New(this, (IMessenger**)&msg);
+    cm->SupplyMessenger(IConnectivityManager::TYPE_MOBILE_MMS, msg);
+    msg = NULL;
+    CMessenger::New(this, (IMessenger**)&msg);
+    cm->SupplyMessenger(IConnectivityManager::TYPE_MOBILE_SUPL, msg);
+    msg = NULL;
+    CMessenger::New(this, (IMessenger**)&msg);
+    cm->SupplyMessenger(IConnectivityManager::TYPE_MOBILE_DUN, msg);
+    msg = NULL;
+    CMessenger::New(this, (IMessenger**)&msg);
+    cm->SupplyMessenger(IConnectivityManager::TYPE_MOBILE_HIPRI, msg);
+    msg = NULL;
+    CMessenger::New(this, (IMessenger**)&msg);
+    cm->SupplyMessenger(IConnectivityManager::TYPE_MOBILE_FOTA, msg);
+    msg = NULL;
+    CMessenger::New(this, (IMessenger**)&msg);
+    cm->SupplyMessenger(IConnectivityManager::TYPE_MOBILE_IMS, msg);
+    msg = NULL;
+    CMessenger::New(this, (IMessenger**)&msg);
+    cm->SupplyMessenger(IConnectivityManager::TYPE_MOBILE_CBS, msg);
+    msg = NULL;
+    CMessenger::New(this, (IMessenger**)&msg);
+    cm->SupplyMessenger(IConnectivityManager::TYPE_MOBILE_EMERGENCY, msg);
+    return NOERROR;
 }
 
 ECode DcTracker::AddApnContext(
@@ -887,554 +1158,759 @@ ECode DcTracker::AddApnContext(
     /* [in] */ INetworkConfig* networkConfig,
     /* [out] */ IApnContext** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ApnContext apnContext = new ApnContext(mPhone.getContext(), type, LOG__TAG, networkConfig,
-                this);
-        mApnContexts.put(type, apnContext);
-        mPrioritySortedApnContexts.add(apnContext);
-        return apnContext;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IApnContext> apnContext;
+    CApnContext::New(context, type, LOG__TAG, networkConfig,
+            this, (IApnContext**)&apnContext);
+    mApnContexts->Put(StringUtils::ParseCharSequence(type), apnContext);
+    mPrioritySortedApnContexts->Add(apnContext);
+    *result = apnContext;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode DcTracker::InitApnContexts()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        log("initApnContexts: E");
-        // Load device network attributes from resources
-        String[] networkConfigStrings = mPhone.getContext().getResources().getStringArray(
-                com.android.internal.R.array.networkAttributes);
-        for (String networkConfigString : networkConfigStrings) {
-            NetworkConfig networkConfig = new NetworkConfig(networkConfigString);
-            ApnContext apnContext = null;
-            switch (networkConfig.type) {
-            case ConnectivityManager.TYPE_MOBILE:
-                apnContext = addApnContext(PhoneConstants.APN_TYPE_DEFAULT, networkConfig);
-                break;
-            case ConnectivityManager.TYPE_MOBILE_MMS:
-                apnContext = addApnContext(PhoneConstants.APN_TYPE_MMS, networkConfig);
-                break;
-            case ConnectivityManager.TYPE_MOBILE_SUPL:
-                apnContext = addApnContext(PhoneConstants.APN_TYPE_SUPL, networkConfig);
-                break;
-            case ConnectivityManager.TYPE_MOBILE_DUN:
-                apnContext = addApnContext(PhoneConstants.APN_TYPE_DUN, networkConfig);
-                break;
-            case ConnectivityManager.TYPE_MOBILE_HIPRI:
-                apnContext = addApnContext(PhoneConstants.APN_TYPE_HIPRI, networkConfig);
-                break;
-            case ConnectivityManager.TYPE_MOBILE_FOTA:
-                apnContext = addApnContext(PhoneConstants.APN_TYPE_FOTA, networkConfig);
-                break;
-            case ConnectivityManager.TYPE_MOBILE_IMS:
-                apnContext = addApnContext(PhoneConstants.APN_TYPE_IMS, networkConfig);
-                break;
-            case ConnectivityManager.TYPE_MOBILE_CBS:
-                apnContext = addApnContext(PhoneConstants.APN_TYPE_CBS, networkConfig);
-                break;
-            case ConnectivityManager.TYPE_MOBILE_IA:
-                apnContext = addApnContext(PhoneConstants.APN_TYPE_IA, networkConfig);
-                break;
-            case ConnectivityManager.TYPE_MOBILE_EMERGENCY:
-                apnContext = addApnContext(PhoneConstants.APN_TYPE_EMERGENCY, networkConfig);
-                break;
-            default:
-                log("initApnContexts: skipping unknown type=" + networkConfig.type);
-                continue;
-            }
-            log("initApnContexts: apnContext=" + apnContext);
+    Log("initApnContexts: E");
+    // Load device network attributes from resources
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
+    AutoPtr<ArrayOf<String> > networkConfigStrings;
+    res->GetStringArray(R::array::networkAttributes, (ArrayOf<String>**)&networkConfigStrings);
+    for (Int32 i = 0; i < networkConfigStrings->GetLength(); ++i) {
+        String networkConfigString = (*networkConfigStrings)[i];
+        AutoPtr<INetworkConfig> networkConfig;
+        CNetworkConfig::New((INetworkConfig**)&networkConfig);
+        AutoPtr<IApnContext> apnContext;
+        Int32 type;
+        networkConfig->GetType(&type);
+        switch (type) {
+        case IConnectivityManager::TYPE_MOBILE:
+            AddApnContext(IPhoneConstants::APN_TYPE_DEFAULT, networkConfig, (IApnContext**)&apnContext);
+            break;
+        case IConnectivityManager::TYPE_MOBILE_MMS:
+            AddApnContext(IPhoneConstants::APN_TYPE_MMS, networkConfig, (IApnContext**)&apnContext);
+            break;
+        case IConnectivityManager::TYPE_MOBILE_SUPL:
+            AddApnContext(IPhoneConstants::APN_TYPE_SUPL, networkConfig, (IApnContext**)&apnContext);
+            break;
+        case IConnectivityManager::TYPE_MOBILE_DUN:
+            AddApnContext(IPhoneConstants::APN_TYPE_DUN, networkConfig, (IApnContext**)&apnContext);
+            break;
+        case IConnectivityManager::TYPE_MOBILE_HIPRI:
+            AddApnContext(IPhoneConstants::APN_TYPE_HIPRI, networkConfig, (IApnContext**)&apnContext);
+            break;
+        case IConnectivityManager::TYPE_MOBILE_FOTA:
+            AddApnContext(IPhoneConstants::APN_TYPE_FOTA, networkConfig, (IApnContext**)&apnContext);
+            break;
+        case IConnectivityManager::TYPE_MOBILE_IMS:
+            AddApnContext(IPhoneConstants::APN_TYPE_IMS, networkConfig, (IApnContext**)&apnContext);
+            break;
+        case IConnectivityManager::TYPE_MOBILE_CBS:
+            AddApnContext(IPhoneConstants::APN_TYPE_CBS, networkConfig, (IApnContext**)&apnContext);
+            break;
+        case IConnectivityManager::TYPE_MOBILE_IA:
+            AddApnContext(IPhoneConstants::APN_TYPE_IA, networkConfig, (IApnContext**)&apnContext);
+            break;
+        case IConnectivityManager::TYPE_MOBILE_EMERGENCY:
+            AddApnContext(IPhoneConstants::APN_TYPE_EMERGENCY, networkConfig, (IApnContext**)&apnContext);
+            break;
+        default:
+            Log("initApnContexts: skipping unknown type=%d", type);
+            continue;
         }
-        log("initApnContexts: X mApnContexts=" + mApnContexts);
-
-#endif
+        Log("initApnContexts: apnContext=%s", TO_CSTR(apnContext));
+    }
+    Log("initApnContexts: X mApnContexts=%s", TO_CSTR(mApnContexts));
+    return NOERROR;
 }
 
 ECode DcTracker::GetLinkProperties(
     /* [in] */ const String& apnType,
     /* [out] */ ILinkProperties** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ApnContext apnContext = mApnContexts.get(apnType);
-        if (apnContext != null) {
-            DcAsyncChannel dcac = apnContext.getDcAc();
-            if (dcac != null) {
-                if (DBG) log("return link properites for " + apnType);
-                return dcac.getLinkPropertiesSync();
-            }
-        }
-        if (DBG) log("return new LinkProperties");
-        return new LinkProperties();
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IInterface> obj;
+    mApnContexts->Get(StringUtils::ParseCharSequence(apnType), (IInterface**)&obj);
+    AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+    if (apnContext != NULL) {
+        AutoPtr<IDcAsyncChannel> dcac;
+        apnContext->GetDcAc((IDcAsyncChannel**)&dcac);
+        if (dcac != NULL) {
+            if (DBG) Log("return link properites for %s", apnType.string());
+            return dcac->GetLinkPropertiesSync(result);
+        }
+    }
+    if (DBG) Log("return new LinkProperties");
+    return CLinkProperties::New(result);
 }
 
 ECode DcTracker::GetNetworkCapabilities(
     /* [in] */ const String& apnType,
     /* [out] */ INetworkCapabilities** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ApnContext apnContext = mApnContexts.get(apnType);
-        if (apnContext!=null) {
-            DcAsyncChannel dataConnectionAc = apnContext.getDcAc();
-            if (dataConnectionAc != null) {
-                if (DBG) {
-                    log("get active pdp is not null, return NetworkCapabilities for " + apnType);
-                }
-                return dataConnectionAc.getNetworkCapabilitiesSync();
-            }
-        }
-        if (DBG) log("return new NetworkCapabilities");
-        return new NetworkCapabilities();
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IInterface> obj;
+    mApnContexts->Get(StringUtils::ParseCharSequence(apnType), (IInterface**)&obj);
+    AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+    if (apnContext!=NULL) {
+        AutoPtr<IDcAsyncChannel> dataConnectionAc;
+        apnContext->GetDcAc((IDcAsyncChannel**)&dataConnectionAc);
+        if (dataConnectionAc != NULL) {
+            if (DBG) {
+                Log("get active pdp is not null, return NetworkCapabilities for %s", apnType.string());
+            }
+            return dataConnectionAc->GetNetworkCapabilitiesSync(result);
+        }
+    }
+    if (DBG) Log("return new NetworkCapabilities");
+    return CNetworkCapabilities::New(result);
 }
 
 ECode DcTracker::GetActiveApnTypes(
-    /* [out, callee] */ ArrayOf<String>** result)
+    /* [out, callee] */ ArrayOf<String>** _result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("get all active apn types");
-        ArrayList<String> result = new ArrayList<String>();
-        for (ApnContext apnContext : mApnContexts.values()) {
-            if (mAttached.get() && apnContext.isReady()) {
-                result.add(apnContext.getApnType());
-            }
-        }
-        return result.toArray(new String[0]);
+    VALIDATE_NOT_NULL(_result)
 
-#endif
+    if (DBG) Log("get all active apn types");
+    AutoPtr<IArrayList> result;
+    CArrayList::New((IArrayList**)&result);
+    AutoPtr<ICollection> values;
+    mApnContexts->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> it;
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+        Boolean isReady;
+        apnContext->IsReady(&isReady);
+        Boolean b;
+        mAttached->Get(&b);
+        if (b && isReady) {
+            String apnType;
+            apnContext->GetApnType(&apnType);
+            result->Add(StringUtils::ParseCharSequence(apnType));
+        }
+    }
+    AutoPtr<ArrayOf<IInterface*> > array;
+    result->ToArray(ArrayOf<IInterface*>::Alloc(0), (ArrayOf<IInterface*>**)&array);
+    Int32 size = array->GetLength();
+    *_result = ArrayOf<String>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        (*_result)->Set(i, TO_STR((*array)[i]));
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::GetActiveApnString(
     /* [in] */ const String& apnType,
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (VDBG) log( "get active apn string for type:" + apnType);
-        ApnContext apnContext = mApnContexts.get(apnType);
-        if (apnContext != null) {
-            ApnSetting apnSetting = apnContext.getApnSetting();
-            if (apnSetting != null) {
-                return apnSetting.apn;
-            }
-        }
-        return null;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (VDBG) Log( "get active apn string for type:%s", apnType.string());
+    AutoPtr<IInterface> obj;
+    mApnContexts->Get(StringUtils::ParseCharSequence(apnType), (IInterface**)&obj);
+    AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+    if (apnContext != NULL) {
+        AutoPtr<IApnSetting> apnSetting;
+        apnContext->GetApnSetting((IApnSetting**)&apnSetting);
+        if (apnSetting != NULL) {
+            return apnSetting->GetApn(result);
+        }
+    }
+    *result = NULL;
+    return NOERROR;
 }
 
 ECode DcTracker::IsApnTypeEnabled(
     /* [in] */ const String& apnType,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ApnContext apnContext = mApnContexts.get(apnType);
-        if (apnContext == null) {
-            return false;
-        }
-        return apnContext.isEnabled();
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IInterface> obj;
+    mApnContexts->Get(StringUtils::ParseCharSequence(apnType), (IInterface**)&obj);
+    AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+    if (apnContext == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    Boolean isEnabled;
+    apnContext->IsEnabled(&isEnabled);
+    *result = isEnabled;
+    return NOERROR;
 }
 
 ECode DcTracker::SetState(
     /* [in] */ DctConstantsState s)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("setState should not be used in GSM" + s);
-
-#endif
+    if (DBG) Log("setState should not be used in GSM %d", s);
+    return NOERROR;
 }
 
 ECode DcTracker::GetState(
     /* [in] */ const String& apnType,
     /* [out] */ DctConstantsState* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ApnContext apnContext = mApnContexts.get(apnType);
-        if (apnContext != null) {
-            return apnContext.getState();
-        }
-        return DctConstants.State.FAILED;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IInterface> obj;
+    mApnContexts->Get(StringUtils::ParseCharSequence(apnType), (IInterface**)&obj);
+    AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+    if (apnContext != NULL) {
+        return apnContext->GetState(result);
+    }
+    *result = DctConstantsState_FAILED;
+    return NOERROR;
 }
 
 ECode DcTracker::IsProvisioningApn(
     /* [in] */ const String& apnType,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ApnContext apnContext = mApnContexts.get(apnType);
-        if (apnContext != null) {
-            return apnContext.isProvisioningApn();
-        }
-        return false;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IInterface> obj;
+    mApnContexts->Get(StringUtils::ParseCharSequence(apnType), (IInterface**)&obj);
+    AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+    if (apnContext != NULL) {
+        Boolean isProvisioningApn;
+        apnContext->IsProvisioningApn(&isProvisioningApn);
+        *result = isProvisioningApn;
+        return NOERROR;
+    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode DcTracker::GetOverallState(
     /* [out] */ DctConstantsState* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean isConnecting = false;
-        boolean isFailed = true; // All enabled Apns should be FAILED.
-        boolean isAnyEnabled = false;
-        for (ApnContext apnContext : mApnContexts.values()) {
-            if (apnContext.isEnabled()) {
-                isAnyEnabled = true;
-                switch (apnContext.getState()) {
-                case CONNECTED:
-                case DISCONNECTING:
-                    if (DBG) log("overall state is CONNECTED");
-                    return DctConstants.State.CONNECTED;
-                case RETRYING:
-                case CONNECTING:
-                    isConnecting = true;
-                    isFailed = false;
-                    break;
-                case IDLE:
-                case SCANNING:
-                    isFailed = false;
-                    break;
-                default:
-                    isAnyEnabled = true;
-                    break;
-                }
+    VALIDATE_NOT_NULL(result)
+
+    Boolean isConnecting = FALSE;
+    Boolean isFailed = TRUE; // All enabled Apns should be FAILED.
+    Boolean isAnyEnabled = FALSE;
+    AutoPtr<IIterator> it;
+    AutoPtr<ICollection> values;
+    mApnContexts->GetValues((ICollection**)&values);
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+        Boolean isEnabled;
+        apnContext->IsEnabled(&isEnabled);
+        if (isEnabled) {
+            isAnyEnabled = TRUE;
+            DctConstantsState state;
+            apnContext->GetState(&state);
+            switch (state) {
+            case DctConstantsState_CONNECTED:
+            case DctConstantsState_DISCONNECTING:
+                if (DBG) Log("overall state is CONNECTED");
+                *result = DctConstantsState_CONNECTED;
+                return NOERROR;
+            case DctConstantsState_RETRYING:
+            case DctConstantsState_CONNECTING:
+                isConnecting = TRUE;
+                isFailed = FALSE;
+                break;
+            case DctConstantsState_IDLE:
+            case DctConstantsState_SCANNING:
+                isFailed = FALSE;
+                break;
+            default:
+                isAnyEnabled = TRUE;
+                break;
             }
         }
-        if (!isAnyEnabled) { // Nothing enabled. return IDLE.
-            if (DBG) log( "overall state is IDLE");
-            return DctConstants.State.IDLE;
-        }
-        if (isConnecting) {
-            if (DBG) log( "overall state is CONNECTING");
-            return DctConstants.State.CONNECTING;
-        } else if (!isFailed) {
-            if (DBG) log( "overall state is IDLE");
-            return DctConstants.State.IDLE;
-        } else {
-            if (DBG) log( "overall state is FAILED");
-            return DctConstants.State.FAILED;
-        }
-
-#endif
+    }
+    if (!isAnyEnabled) { // Nothing enabled. return IDLE.
+        if (DBG) Log( "overall state is IDLE");
+        *result = DctConstantsState_IDLE;
+        return NOERROR;
+    }
+    if (isConnecting) {
+        if (DBG) Log( "overall state is CONNECTING");
+        return DctConstantsState_CONNECTING;
+    } else if (!isFailed) {
+        if (DBG) Log( "overall state is IDLE");
+        *result = DctConstantsState_IDLE;
+        return NOERROR;
+    } else {
+        if (DBG) Log( "overall state is FAILED");
+        *result = DctConstantsState_FAILED;
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::IsApnTypeAvailable(
     /* [in] */ const String& type,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (type.equals(PhoneConstants.APN_TYPE_DUN) && fetchDunApn() != null) {
-            return true;
-        }
-        if (mAllApnSettings != null) {
-            for (ApnSetting apn : mAllApnSettings) {
-                if (apn.canHandleType(type)) {
-                    return true;
-                }
+    VALIDATE_NOT_NULL(result)
+
+    AutoPtr<IApnSetting> dunApn;
+    FetchDunApn((IApnSetting**)&dunApn);
+    if (type.Equals(IPhoneConstants::APN_TYPE_DUN) && dunApn != NULL) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    if (mAllApnSettings != NULL) {
+        AutoPtr<IIterator> it;
+        mAllApnSettings->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IApnSetting> apn = IApnSetting::Probe(obj);
+            Boolean canHandleType;
+            apn->CanHandleType(type, &canHandleType);
+            if (canHandleType) {
+                *result = TRUE;
+                return NOERROR;
             }
         }
-        return false;
-
-#endif
+    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode DcTracker::GetAnyDataEnabled(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        synchronized (mDataEnabledLock) {
-            if (!(mInternalDataEnabled && mUserDataEnabled && sPolicyDataEnabled)) return false;
-            for (ApnContext apnContext : mApnContexts.values()) {
-                // Make sure we don't have a context that is going down
-                // and is explicitly disabled.
-                if (isDataAllowed(apnContext)) {
-                    return true;
-                }
-            }
-            return false;
-        }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoLock lock(mDataEnabledLock);
+    if (!(mInternalDataEnabled && mUserDataEnabled && sPolicyDataEnabled)) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    AutoPtr<ICollection> values;
+    mApnContexts->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> it;
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+        // Make sure we don't have a context that is going down
+        // and is explicitly disabled.
+        Boolean isDataAllowed;
+        IsDataAllowed(apnContext, &isDataAllowed);
+        if (isDataAllowed) {
+            *result = TRUE;
+            return NOERROR;
+        }
+    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode DcTracker::GetAnyDataEnabled(
     /* [in] */ Boolean checkUserDataEnabled,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        synchronized (mDataEnabledLock) {
-            if (!(mInternalDataEnabled && (!checkUserDataEnabled || mUserDataEnabled)
-                        && (!checkUserDataEnabled || sPolicyDataEnabled)))
-                return false;
-            for (ApnContext apnContext : mApnContexts.values()) {
-                // Make sure we dont have a context that going down
-                // and is explicitly disabled.
-                if (isDataAllowed(apnContext)) {
-                    return true;
-                }
-            }
-            return false;
-        }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoLock lock(mDataEnabledLock);
+    if (!(mInternalDataEnabled && (!checkUserDataEnabled || mUserDataEnabled)
+                && (!checkUserDataEnabled || sPolicyDataEnabled)))
+        *result = FALSE;
+        return NOERROR;
+    AutoPtr<ICollection> values;
+    mApnContexts->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> it;
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+        // Make sure we dont have a context that going down
+        // and is explicitly disabled.
+        Boolean isDataAllowed;
+        IsDataAllowed(apnContext, &isDataAllowed);
+        if (isDataAllowed) {
+            *result = TRUE;
+            return NOERROR;
+        }
+    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode DcTracker::IsDataAllowed(
     /* [in] */ IApnContext* apnContext,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        //If RAT is iwlan then dont allow default/IA PDP at all.
-        //Rest of APN types can be evaluated for remaining conditions.
-        if ((apnContext.getApnType().equals(PhoneConstants.APN_TYPE_DEFAULT)
-                    || apnContext.getApnType().equals(PhoneConstants.APN_TYPE_IA))
-                && (mPhone.getServiceState().getRilDataRadioTechnology()
-                    == ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN)
-                && (!mWwanIwlanCoexistFlag)) {
-            log("Default data call activation not allowed in iwlan.");
-            return false;
-        } else {
-            return apnContext.isReady() && isDataAllowed();
-        }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    //If RAT is iwlan then dont allow default/IA PDP at all.
+    //Rest of APN types can be evaluated for remaining conditions.
+    String apnType;
+    apnContext->GetApnType(&apnType);
+    AutoPtr<IServiceState> serviceState;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    Int32 rilDataRadioTechnology;
+    serviceState->GetRilDataRadioTechnology(&rilDataRadioTechnology);
+    assert(0 && "IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN");
+    // if ((apnType.Equals(IPhoneConstants::APN_TYPE_DEFAULT)
+    //             || apnType.Equals(IPhoneConstants::APN_TYPE_IA))
+    //         && (rilDataRadioTechnology
+    //             == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN)
+    //         && (!mWwanIwlanCoexistFlag)) {
+    //     Log("Default data call activation not allowed in iwlan.");
+    //     *result = FALSE;
+    //     return NOERROR;
+    // } else {
+    //     Boolean isReady;
+    //     apnContext->IsReady(&isReady);
+    //     Boolean isDataAllowed;
+    //     IsDataAllowed(&isDataAllowed);
+    //     *result = isReady && isDataAllowed;
+    //     return NOERROR;
+    // }
+    return NOERROR;
 }
 
 ECode DcTracker::OnDataConnectionDetached()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        /*
-         * We presently believe it is unnecessary to tear down the PDP context
-         * when GPRS detaches, but we should stop the network polling.
-         */
-        if (DBG) log ("onDataConnectionDetached: stop polling and notify detached");
-        stopNetStatPoll();
-        stopDataStallAlarm();
-        notifyDataConnection(Phone.REASON_DATA_DETACHED);
-        mAttached.set(false);
-
-#endif
+    /*
+     * We presently believe it is unnecessary to tear down the PDP context
+     * when GPRS detaches, but we should stop the network polling.
+     */
+    if (DBG) Log ("onDataConnectionDetached: stop polling and notify detached");
+    StopNetStatPoll();
+    StopDataStallAlarm();
+    NotifyDataConnection(IPhone::REASON_DATA_DETACHED);
+    mAttached->Set(FALSE);
+    return NOERROR;
 }
 
 ECode DcTracker::OnDataConnectionAttached()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("onDataConnectionAttached");
-        mAttached.set(true);
-        if (getOverallState() == DctConstants.State.CONNECTED) {
-            if (DBG) log("onDataConnectionAttached: start polling notify attached");
-            startNetStatPoll();
-            startDataStallAlarm(DATA_STALL_NOT_SUSPECTED);
-            notifyDataConnection(Phone.REASON_DATA_ATTACHED);
-        } else {
-            // update APN availability so that APN can be enabled.
-            notifyOffApnsOfAvailability(Phone.REASON_DATA_ATTACHED);
-        }
-        if (mAutoAttachOnCreationConfig) {
-            mAutoAttachOnCreation = true;
-        }
-        setupDataOnConnectableApns(Phone.REASON_DATA_ATTACHED);
-
-#endif
+    if (DBG) Log("onDataConnectionAttached");
+    mAttached->Set(TRUE);
+    DctConstantsState overallState;
+    GetOverallState(&overallState);
+    if (overallState == DctConstantsState_CONNECTED) {
+        if (DBG) Log("onDataConnectionAttached: start polling notify attached");
+        StartNetStatPoll();
+        StartDataStallAlarm(DATA_STALL_NOT_SUSPECTED);
+        NotifyDataConnection(IPhone::REASON_DATA_ATTACHED);
+    } else {
+        // update APN availability so that APN can be enabled.
+        NotifyOffApnsOfAvailability(IPhone::REASON_DATA_ATTACHED);
+    }
+    if (mAutoAttachOnCreationConfig) {
+        mAutoAttachOnCreation = TRUE;
+    }
+    SetupDataOnConnectableApns(IPhone::REASON_DATA_ATTACHED);
+    return NOERROR;
 }
 
 ECode DcTracker::IsDataAllowed(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        final boolean internalDataEnabled;
-        synchronized (mDataEnabledLock) {
-            internalDataEnabled = mInternalDataEnabled;
-        }
-        boolean attachedState = mAttached.get();
-        boolean desiredPowerState = mPhone.getServiceStateTracker().getDesiredPowerState();
-        int radioTech = mPhone.getServiceState().getRilDataRadioTechnology();
-        if (radioTech == ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN
-                && desiredPowerState == false) {
-            desiredPowerState = true;
-            attachedState = true;
-        }
-        IccRecords r = mIccRecords.get();
-        boolean recordsLoaded = (r != null) ? r.getRecordsLoaded() : false;
-        boolean subscriptionFromNv = isNvSubscription();
-        boolean allowed =
-                    (attachedState || mAutoAttachOnCreation) &&
-                    (subscriptionFromNv || recordsLoaded) &&
-                    (mPhone.getState() == PhoneConstants.State.IDLE ||
-                     mPhone.getServiceStateTracker().isConcurrentVoiceAndDataAllowed()) &&
-                    internalDataEnabled &&
-                    (!mPhone.getServiceState().getRoaming() || getDataOnRoamingEnabled()) &&
-                    !mIsPsRestricted &&
-                    desiredPowerState;
-        if (!allowed && DBG) {
-            String reason = "";
-            if (!(attachedState || mAutoAttachOnCreation)) {
-                reason += " - Attached= " + attachedState;
-            }
-            if (!(subscriptionFromNv || recordsLoaded)) {
-                reason += " - SIM not loaded and not NV subscription";
-            }
-            if (mPhone.getState() != PhoneConstants.State.IDLE &&
-                    !mPhone.getServiceStateTracker().isConcurrentVoiceAndDataAllowed()) {
-                reason += " - PhoneState= " + mPhone.getState();
-                reason += " - Concurrent voice and data not allowed";
-            }
-            if (!internalDataEnabled) reason += " - mInternalDataEnabled= false";
-            if (mPhone.getServiceState().getRoaming() && !getDataOnRoamingEnabled()) {
-                reason += " - Roaming and data roaming not enabled";
-            }
-            if (mIsPsRestricted) reason += " - mIsPsRestricted= true";
-            if (!desiredPowerState) reason += " - desiredPowerState= false";
-            if (DBG) log("isDataAllowed: not allowed due to" + reason);
-        }
-        return allowed;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Boolean internalDataEnabled;
+    {
+        AutoLock lock(mDataEnabledLock);
+        internalDataEnabled = mInternalDataEnabled;
+    }
+    Boolean attachedState;
+    mAttached->Get(&attachedState);
+    AutoPtr<IServiceStateTracker> serviceStateTracker;
+    mPhone->GetServiceStateTracker((IServiceStateTracker**)&serviceStateTracker);
+    Boolean desiredPowerState;
+    serviceStateTracker->GetDesiredPowerState(&desiredPowerState);
+    AutoPtr<IServiceState> serviceState;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    Int32 radioTech;
+    serviceState->GetRilDataRadioTechnology(&radioTech);
+    assert(0 && "IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN");
+    // if (radioTech == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN
+    //         && desiredPowerState == FALSE) {
+    //     desiredPowerState = TRUE;
+    //     attachedState = TRUE;
+    // }
+    AutoPtr<IInterface> obj;
+    mIccRecords->Get((IInterface**)&obj);
+    AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
+    Boolean recordsLoaded;
+    if (r != NULL) {
+        r->GetRecordsLoaded(&recordsLoaded);
+    }
+    else {
+        recordsLoaded = FALSE;
+    }
+    Boolean subscriptionFromNv;
+    IsNvSubscription(&subscriptionFromNv);
+    Boolean isConcurrentVoiceAndDataAllowed;
+    serviceStateTracker->IsConcurrentVoiceAndDataAllowed(&isConcurrentVoiceAndDataAllowed);
+    serviceState = NULL;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    Boolean roaming;
+    serviceState->GetRoaming(&roaming);
+    PhoneConstantsState state;
+    IPhone::Probe(mPhone)->GetState(&state);
+    Boolean isDataOnRoamingEnabled;
+    GetDataOnRoamingEnabled(&isDataOnRoamingEnabled);
+    Boolean allowed =
+                (attachedState || mAutoAttachOnCreation) &&
+                (subscriptionFromNv || recordsLoaded) &&
+                (state == PhoneConstantsState_IDLE ||
+                isConcurrentVoiceAndDataAllowed) &&
+                internalDataEnabled &&
+                (!roaming || isDataOnRoamingEnabled) &&
+                !mIsPsRestricted &&
+                desiredPowerState;
+    if (!allowed && DBG) {
+        String reason("");
+        if (!(attachedState || mAutoAttachOnCreation)) {
+            reason.AppendFormat(" - Attached= %d", attachedState);
+        }
+        if (!(subscriptionFromNv || recordsLoaded)) {
+            reason += " - SIM not loaded and not NV subscription";
+        }
+        Boolean isConcurrentVoiceAndDataAllowed;
+        serviceStateTracker->IsConcurrentVoiceAndDataAllowed(&isConcurrentVoiceAndDataAllowed);
+        if (state != PhoneConstantsState_IDLE && !isConcurrentVoiceAndDataAllowed) {
+            reason.AppendFormat(" - PhoneState= %d", state);
+            reason += " - Concurrent voice and data not allowed";
+        }
+        if (!internalDataEnabled) reason += " - mInternalDataEnabled= false";
+        AutoPtr<IServiceState> serviceState;
+        IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+        Boolean roaming;
+        serviceState->GetRoaming(&roaming);
+        if (roaming && !isDataOnRoamingEnabled) {
+            reason += " - Roaming and data roaming not enabled";
+        }
+        if (mIsPsRestricted) reason += " - mIsPsRestricted= true";
+        if (!desiredPowerState) reason += " - desiredPowerState= false";
+        if (DBG) Log("isDataAllowed: not allowed due to %s", reason.string());
+    }
+    *result = allowed;
+    return NOERROR;
 }
 
 ECode DcTracker::SetupDataOnConnectableApns(
     /* [in] */ const String& reason)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("setupDataOnConnectableApns: " + reason);
-        for (ApnContext apnContext : mPrioritySortedApnContexts) {
-            if (DBG) log("setupDataOnConnectableApns: apnContext " + apnContext);
-            if (apnContext.getState() == DctConstants.State.FAILED) {
-                apnContext.setState(DctConstants.State.IDLE);
-            }
-            if (apnContext.isConnectable()) {
-                log("setupDataOnConnectableApns: isConnectable() call trySetupData");
-                apnContext.setReason(reason);
-                trySetupData(apnContext);
-            }
+    if (DBG) Log("setupDataOnConnectableApns: %s", reason.string());
+    AutoPtr<IIterator> it;
+    mPrioritySortedApnContexts->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+        if (DBG) Log("setupDataOnConnectableApns: apnContext %s", TO_CSTR(apnContext));
+        DctConstantsState state;
+        apnContext->GetState(&state);
+        if (state == DctConstantsState_FAILED) {
+            apnContext->SetState(DctConstantsState_IDLE);
         }
-
-#endif
+        Boolean isConnectable;
+        apnContext->IsConnectable(&isConnectable);
+        if (isConnectable) {
+            Log("setupDataOnConnectableApns: isConnectable() call trySetupData");
+            apnContext->SetReason(reason);
+            Boolean b;
+            TrySetupData(apnContext, &b);
+        }
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::TrySetupData(
     /* [in] */ IApnContext* apnContext,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) {
-            log("trySetupData for type:" + apnContext.getApnType() +
-                    " due to " + apnContext.getReason() + " apnContext=" + apnContext);
-            log("trySetupData with mIsPsRestricted=" + mIsPsRestricted);
-        }
-        if (mPhone.getSimulatedRadioControl() != null) {
-            // Assume data is connected on the simulator
-            // FIXME  this can be improved
-            apnContext.setState(DctConstants.State.CONNECTED);
-            mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
-            log("trySetupData: X We're on the simulator; assuming connected retValue=true");
-            return true;
-        }
-        // Allow SETUP_DATA request for E-APN to be completed during emergency call
-        // and MOBILE DATA On/Off cases as well.
-        boolean isEmergencyApn = apnContext.getApnType().equals(PhoneConstants.APN_TYPE_EMERGENCY);
-        boolean desiredPowerState = mPhone.getServiceStateTracker().getDesiredPowerState();
-        boolean checkUserDataEnabled =
-                    !(apnContext.getApnType().equals(PhoneConstants.APN_TYPE_IMS));
-        // If set the special property, enable mms data even if mobile data is turned off.
-        if (apnContext.getApnType().equals(PhoneConstants.APN_TYPE_MMS)) {
-            checkUserDataEnabled = checkUserDataEnabled && !(mPhone.getContext().getResources().
-                    getBoolean(com.android.internal.R.bool.config_enable_mms_with_mobile_data_off));
-        }
-        if (apnContext.isConnectable() && (isEmergencyApn ||
-                (isDataAllowed(apnContext) &&
-                getAnyDataEnabled(checkUserDataEnabled) && !isEmergency()))) {
-            if (apnContext.getState() == DctConstants.State.FAILED) {
-                if (DBG) log("trySetupData: make a FAILED ApnContext IDLE so its reusable");
-                apnContext.setState(DctConstants.State.IDLE);
-            }
-            int radioTech = mPhone.getServiceState().getRilDataRadioTechnology();
-            if (apnContext.getState() == DctConstants.State.IDLE) {
-                ArrayList<ApnSetting> waitingApns = buildWaitingApns(apnContext.getApnType(),
-                        radioTech);
-                if (waitingApns.isEmpty()) {
-                    notifyNoData(DcFailCause.MISSING_UNKNOWN_APN, apnContext);
-                    notifyOffApnsOfAvailability(apnContext.getReason());
-                    if (DBG) log("trySetupData: X No APN found retValue=false");
-                    return false;
-                } else {
-                    apnContext.setWaitingApns(waitingApns);
-                    if (DBG) {
-                        log ("trySetupData: Create from mAllApnSettings : "
-                                    + apnListToString(mAllApnSettings));
-                    }
-                }
-            }
-            if (DBG) {
-                if (apnContext.getWaitingApns() == null) {
-                    log("trySetupData: call setupData, waitingApns : null");
-                }
-                else {
-                    log("trySetupData: call setupData, waitingApns : "
-                            + apnListToString(apnContext.getWaitingApns()));
-                }
-            }
-            boolean retValue = setupData(apnContext, radioTech);
-            notifyOffApnsOfAvailability(apnContext.getReason());
-            if (DBG) log("trySetupData: X retValue=" + retValue);
-            return retValue;
-        } else {
-            if (!apnContext.getApnType().equals(PhoneConstants.APN_TYPE_DEFAULT)
-                    && apnContext.isConnectable()) {
-                mPhone.notifyDataConnectionFailed(apnContext.getReason(), apnContext.getApnType());
-            }
-            notifyOffApnsOfAvailability(apnContext.getReason());
-            if (DBG) log ("trySetupData: X apnContext not 'ready' retValue=false");
-            return false;
-        }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (DBG) {
+        String apnType;
+        apnContext->GetApnType(&apnType);
+        String reason;
+        apnContext->GetReason(&reason);
+        Log("trySetupData for type:%s due to %s apnContext=%s", apnType.string(), reason.string(), TO_CSTR(apnContext));
+        Log("trySetupData with mIsPsRestricted=%d", mIsPsRestricted);
+    }
+    assert(0 && "ISimulatedRadioControl");
+    // AutoPtr<ISimulatedRadioControl> control;
+    // mPhone->GetSimulatedRadioControl((ISimulatedRadioControl**)&control);
+    // if (control != NULL) {
+    //     // Assume data is connected on the simulator
+    //     // FIXME  this can be improved
+    //     apnContext->SetState(DctConstantsState_CONNECTED);
+    //     String apnType;
+    //     apnContext->GetApnType(&apnType);
+    //     String reason;
+    //     apnContext->GetReason(&reason);
+    //     mPhone->NotifyDataConnection(reason, apnType);
+    //     Log("trySetupData: X We're on the simulator; assuming connected retValue=true");
+    //     *result = TRUE;
+    //     return NOERROR;
+    // }
+    // Allow SETUP_DATA request for E-APN to be completed during emergency call
+    // and MOBILE DATA On/Off cases as well.
+    String apnType;
+    apnContext->GetApnType(&apnType);
+    Boolean isEmergencyApn = apnType.Equals(IPhoneConstants::APN_TYPE_EMERGENCY);
+    AutoPtr<IServiceStateTracker> serviceStateTracker;
+    mPhone->GetServiceStateTracker((IServiceStateTracker**)&serviceStateTracker);
+    Boolean desiredPowerState;
+    serviceStateTracker->GetDesiredPowerState(&desiredPowerState);
+    Boolean checkUserDataEnabled =
+                !(apnType.Equals(IPhoneConstants::APN_TYPE_IMS));
+    // If set the special property, enable mms data even if mobile data is turned off.
+    if (apnType.Equals(IPhoneConstants::APN_TYPE_MMS)) {
+        AutoPtr<IResources> res;
+        AutoPtr<IContext> context;
+        IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+        context->GetResources((IResources**)&res);
+        Boolean b;
+        res->GetBoolean(R::bool_::config_enable_mms_with_mobile_data_off, &b);
+        checkUserDataEnabled = checkUserDataEnabled && !b;
+    }
+    Boolean isConnectable;
+    apnContext->IsConnectable(&isConnectable);
+    Boolean isEmergency;
+    IsEmergency(&isEmergency);
+    Boolean isDataAllowed;
+    IsDataAllowed(apnContext, &isDataAllowed);
+    Boolean isAnyDataEnabled;
+    GetAnyDataEnabled(checkUserDataEnabled, &isAnyDataEnabled);
+    if (isConnectable && (isEmergencyApn ||
+            (isDataAllowed &&
+            isAnyDataEnabled && !isEmergency))) {
+        DctConstantsState apnContextState;
+        apnContext->GetState(&apnContextState);
+        if (apnContextState == DctConstantsState_FAILED) {
+            if (DBG) Log("trySetupData: make a FAILED ApnContext IDLE so its reusable");
+            apnContext->SetState(DctConstantsState_IDLE);
+        }
+        AutoPtr<IServiceState> serviceState;
+        IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+        Int32 radioTech;
+        serviceState->GetRilDataRadioTechnology(&radioTech);
+        if (apnContextState == DctConstantsState_IDLE) {
+            String apnType;
+            apnContext->GetApnType(&apnType);
+            AutoPtr<IArrayList> waitingApns;
+            BuildWaitingApns(apnType, radioTech, (IArrayList**)&waitingApns);
+            Boolean isEmpty;
+            waitingApns->IsEmpty(&isEmpty);
+            if (isEmpty) {
+                AutoPtr<IDcFailCause> dfc;
+                CDcFailCause::New(DcFailCause_MISSING_UNKNOWN_APN, (IDcFailCause**)&dfc);
+                NotifyNoData(dfc, apnContext);
+                String reason;
+                apnContext->GetReason(&reason);
+                NotifyOffApnsOfAvailability(reason);
+                if (DBG) Log("trySetupData: X No APN found retValue=false");
+                *result = FALSE;
+                return NOERROR;
+            } else {
+                apnContext->SetWaitingApns(waitingApns);
+                if (DBG) {
+                    String s;
+                    ApnListToString(mAllApnSettings, &s);
+                    Log("trySetupData: Create from mAllApnSettings : ", s.string());
+                }
+            }
+        }
+        if (DBG) {
+            AutoPtr<IArrayList> waitingApns;
+            apnContext->GetWaitingApns((IArrayList**)&waitingApns);
+            if (waitingApns == NULL) {
+                Log("trySetupData: call setupData, waitingApns : null");
+            }
+            else {
+                String s;
+                ApnListToString(waitingApns, &s);
+                Log("trySetupData: call setupData, waitingApns : ", s.string());
+            }
+        }
+        Boolean retValue;
+        SetupData(apnContext, radioTech, &retValue);
+        String reason;
+        apnContext->GetReason(&reason);
+        NotifyOffApnsOfAvailability(reason);
+        if (DBG) Log("trySetupData: X retValue=%d", retValue);
+        *result = retValue;
+        return NOERROR;
+    } else {
+        Boolean isConnectable;
+        apnContext->IsConnectable(&isConnectable);
+        String apnType;
+        apnContext->GetApnType(&apnType);
+        if (!apnType.Equals(IPhoneConstants::APN_TYPE_DEFAULT) && isConnectable) {
+            String reason;
+            apnContext->GetReason(&reason);
+            mPhone->NotifyDataConnectionFailed(reason, apnType);
+        }
+        String reason;
+        apnContext->GetReason(&reason);
+        NotifyOffApnsOfAvailability(reason);
+        if (DBG) Log("trySetupData: X apnContext not 'ready' retValue=false");
+        *result = FALSE;
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::NotifyOffApnsOfAvailability(
     /* [in] */ const String& reason)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        for (ApnContext apnContext : mApnContexts.values()) {
-            if ((!mAttached.get() && mOosIsDisconnect) || !apnContext.isReady()) {
-                if (VDBG) log("notifyOffApnOfAvailability type:" + apnContext.getApnType());
-                mPhone.notifyDataConnection(reason != null ? reason : apnContext.getReason(),
-                                            apnContext.getApnType(),
-                                            PhoneConstants.DataState.DISCONNECTED);
-            } else {
-                if (VDBG) {
-                    log("notifyOffApnsOfAvailability skipped apn due to attached && isReady " +
-                            apnContext.toString());
-                }
+    AutoPtr<ICollection> values;
+    mApnContexts->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> it;
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+        Boolean isReady;
+        apnContext->IsReady(&isReady);
+        Boolean b;
+        mAttached->Get(&b);
+        if ((!b && mOosIsDisconnect) || !isReady) {
+            String apnType;
+            apnContext->GetApnType(&apnType);
+            if (VDBG) Log("notifyOffApnOfAvailability type:%s", apnType.string());
+            String apnContextReason;
+            apnContext->GetReason(&apnContextReason);
+            mPhone->NotifyDataConnection(!reason.IsNull() ? reason : apnContextReason,
+                                        apnType,
+                                        PhoneConstantsDataState_DISCONNECTED);
+        } else {
+            if (VDBG) {
+                Log("notifyOffApnsOfAvailability skipped apn due to attached && isReady %s",
+                        TO_CSTR(apnContext));
             }
         }
-
-#endif
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::CleanUpAllConnections(
@@ -1442,208 +1918,259 @@ ECode DcTracker::CleanUpAllConnections(
     /* [in] */ const String& reason,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("cleanUpAllConnections: tearDown=" + tearDown + " reason=" + reason);
-        boolean didDisconnect = false;
-        boolean specificdisable = false;
-        if (!TextUtils.isEmpty(reason)) {
-            specificdisable = reason.equals(Phone.REASON_DATA_SPECIFIC_DISABLED);
-        }
-        for (ApnContext apnContext : mApnContexts.values()) {
-            if (apnContext.isDisconnected() == false) didDisconnect = true;
-            if (specificdisable) {
-                if (!apnContext.getApnType().equals(PhoneConstants.APN_TYPE_IMS)) {
-                    if (DBG) log("ApnConextType: " + apnContext.getApnType());
-                    apnContext.setReason(reason);
-                    cleanUpConnection(tearDown, apnContext);
-                }
-            } else {
-                // TODO - only do cleanup if not disconnected
-                apnContext.setReason(reason);
-                cleanUpConnection(tearDown, apnContext);
-            }
-        }
-        stopNetStatPoll();
-        stopDataStallAlarm();
-        // TODO: Do we need mRequestedApnType?
-        mRequestedApnType = PhoneConstants.APN_TYPE_DEFAULT;
-        log("cleanUpConnection: mDisconnectPendingCount = " + mDisconnectPendingCount);
-        if (tearDown && mDisconnectPendingCount == 0) {
-            notifyDataDisconnectComplete();
-            notifyAllDataDisconnected();
-        }
-        return didDisconnect;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (DBG) Log("cleanUpAllConnections: tearDown=%d reason=%s", tearDown, reason.string());
+    Boolean didDisconnect = FALSE;
+    Boolean specificdisable = FALSE;
+    if (!TextUtils::IsEmpty(reason)) {
+        specificdisable = reason.Equals(IPhone::REASON_DATA_SPECIFIC_DISABLED);
+    }
+    AutoPtr<ICollection> values;
+    mApnContexts->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> it;
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+        Boolean isDisconnected;
+        apnContext->IsDisconnected(&isDisconnected);
+        if (isDisconnected == FALSE) didDisconnect = TRUE;
+        if (specificdisable) {
+            String apnType;
+            apnContext->GetApnType(&apnType);
+            if (!apnType.Equals(IPhoneConstants::APN_TYPE_IMS)) {
+                if (DBG) Log("ApnConextType: %s", apnType.string());
+                apnContext->SetReason(reason);
+                CleanUpConnection(tearDown, apnContext);
+            }
+        } else {
+            // TODO - only do cleanup if not disconnected
+            apnContext->SetReason(reason);
+            CleanUpConnection(tearDown, apnContext);
+        }
+    }
+    StopNetStatPoll();
+    StopDataStallAlarm();
+    // TODO: Do we need mRequestedApnType?
+    mRequestedApnType = IPhoneConstants::APN_TYPE_DEFAULT;
+    Log("cleanUpConnection: mDisconnectPendingCount = %d", mDisconnectPendingCount);
+    if (tearDown && mDisconnectPendingCount == 0) {
+        NotifyDataDisconnectComplete();
+        NotifyAllDataDisconnected();
+    }
+    *result = didDisconnect;
+    return NOERROR;
 }
 
 ECode DcTracker::OnCleanUpAllConnections(
     /* [in] */ const String& cause)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        cleanUpAllConnections(true, cause);
-
-#endif
+    Boolean b;
+    CleanUpAllConnections(TRUE, cause, &b);
+    return NOERROR;
 }
 
 ECode DcTracker::CleanUpConnection(
     /* [in] */ Boolean tearDown,
     /* [in] */ IApnContext* apnContext)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (apnContext == null) {
-            if (DBG) log("cleanUpConnection: apn context is null");
-            return;
-        }
-        DcAsyncChannel dcac = apnContext.getDcAc();
-        if (DBG) {
-            log("cleanUpConnection: E tearDown=" + tearDown + " reason=" + apnContext.getReason() +
-                    " apnContext=" + apnContext);
-        }
-        if (tearDown) {
-            if (apnContext.isDisconnected()) {
-                // The request is tearDown and but ApnContext is not connected.
-                // If apnContext is not enabled anymore, break the linkage to the DCAC/DC.
-                apnContext.setState(DctConstants.State.IDLE);
-                if (!apnContext.isReady()) {
-                    if (dcac != null) {
-                        dcac.tearDown(apnContext, "", null);
-                    }
-                    apnContext.setDataConnectionAc(null);
+    if (apnContext == NULL) {
+        if (DBG) Log("cleanUpConnection: apn context is null");
+        return NOERROR;
+    }
+    AutoPtr<IDcAsyncChannel> dcac;
+    apnContext->GetDcAc((IDcAsyncChannel**)&dcac);
+    if (DBG) {
+        String reason;
+        apnContext->GetReason(&reason);
+        Log("cleanUpConnection: E tearDown=%d reason=%s apnContext=%s", tearDown, reason.string(), TO_CSTR(apnContext));
+    }
+    if (tearDown) {
+        Boolean isDisconnected;
+        apnContext->IsDisconnected(&isDisconnected);
+        if (isDisconnected) {
+            // The request is tearDown and but ApnContext is not connected.
+            // If apnContext is not enabled anymore, break the linkage to the DCAC/DC.
+            apnContext->SetState(DctConstantsState_IDLE);
+            Boolean isReady;
+            apnContext->IsReady(&isReady);
+            if (!isReady) {
+                if (dcac != NULL) {
+                    dcac->TearDown(apnContext, String(""), NULL);
                 }
-            } else {
-                // Connection is still there. Try to clean up.
-                if (dcac != null) {
-                    if (apnContext.getState() != DctConstants.State.DISCONNECTING) {
-                        boolean disconnectAll = false;
-                        if (PhoneConstants.APN_TYPE_DUN.equals(apnContext.getApnType())) {
-                            // CAF_MSIM is this below condition required.
-                            // if (PhoneConstants.APN_TYPE_DUN.equals(PhoneConstants.APN_TYPE_DEFAULT)) {
-                            if (teardownForDun()) {
-                                if (DBG) log("tearing down dedicated DUN connection");
-                                // we need to tear it down - we brought it up just for dun and
-                                // other people are camped on it and now dun is done.  We need
-                                // to stop using it and let the normal apn list get used to find
-                                // connections for the remaining desired connections
-                                disconnectAll = true;
-                            }
-                        }
-                        if (DBG) {
-                            log("cleanUpConnection: tearing down" + (disconnectAll ? " all" :""));
-                        }
-                        Message msg = obtainMessage(DctConstants.EVENT_DISCONNECT_DONE, apnContext);
-                        if (disconnectAll) {
-                            apnContext.getDcAc().tearDownAll(apnContext.getReason(), msg);
-                        } else {
-                            apnContext.getDcAc()
-                                .tearDown(apnContext, apnContext.getReason(), msg);
-                        }
-                        apnContext.setState(DctConstants.State.DISCONNECTING);
-                        mDisconnectPendingCount++;
-                    }
-                } else {
-                    // apn is connected but no reference to dcac.
-                    // Should not be happen, but reset the state in case.
-                    apnContext.setState(DctConstants.State.IDLE);
-                    mPhone.notifyDataConnection(apnContext.getReason(),
-                                                apnContext.getApnType());
-                }
+                apnContext->SetDataConnectionAc(NULL);
             }
         } else {
-            // force clean up the data connection.
-            if (dcac != null) dcac.reqReset();
-            apnContext.setState(DctConstants.State.IDLE);
-            mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
-            apnContext.setDataConnectionAc(null);
+            // Connection is still there. Try to clean up.
+            if (dcac != NULL) {
+                DctConstantsState state;
+                apnContext->GetState(&state);
+                if (state != DctConstantsState_DISCONNECTING) {
+                    Boolean disconnectAll = FALSE;
+                    String apnType;
+                    apnContext->GetApnType(&apnType);
+                    if (IPhoneConstants::APN_TYPE_DUN.Equals(apnType)) {
+                        // CAF_MSIM is this below condition required.
+                        // if (PhoneConstants.APN_TYPE_DUN.equals(PhoneConstants.APN_TYPE_DEFAULT)) {
+                        Boolean isTeardownForDun;
+                        TeardownForDun(&isTeardownForDun);
+                        if (isTeardownForDun) {
+                            if (DBG) Log("tearing down dedicated DUN connection");
+                            // we need to tear it down - we brought it up just for dun and
+                            // other people are camped on it and now dun is done.  We need
+                            // to stop using it and let the normal apn list get used to find
+                            // connections for the remaining desired connections
+                            disconnectAll = TRUE;
+                        }
+                    }
+                    if (DBG) {
+                        Log("cleanUpConnection: tearing down%s", (disconnectAll ? " all" :""));
+                    }
+                    AutoPtr<IMessage> msg;
+                    ObtainMessage(IDctConstants::EVENT_DISCONNECT_DONE, apnContext, (IMessage**)&msg);
+                    if (disconnectAll) {
+                        String reason;
+                        apnContext->GetReason(&reason);
+                        AutoPtr<IDcAsyncChannel> dcAsyncChannel;
+                        apnContext->GetDcAc((IDcAsyncChannel**)&dcAsyncChannel);
+                        dcAsyncChannel->TearDownAll(reason, msg);
+                    } else {
+                        String reason;
+                        apnContext->GetReason(&reason);
+                        AutoPtr<IDcAsyncChannel> dcAsyncChannel;
+                        apnContext->GetDcAc((IDcAsyncChannel**)&dcAsyncChannel);
+                        dcAsyncChannel->TearDown(apnContext, reason, msg);
+                    }
+                    apnContext->SetState(DctConstantsState_DISCONNECTING);
+                    mDisconnectPendingCount++;
+                }
+            } else {
+                // apn is connected but no reference to dcac.
+                // Should not be happen, but reset the state in case.
+                apnContext->SetState(DctConstantsState_IDLE);
+                String apnType;
+                apnContext->GetApnType(&apnType);
+                String reason;
+                apnContext->GetReason(&reason);
+                mPhone->NotifyDataConnection(reason, apnType);
+            }
         }
-        if (mOmhApt != null) {
-            mOmhApt.clearActiveApnProfile();
-        }
-        // Make sure reconnection alarm is cleaned up if there is no ApnContext
-        // associated to the connection.
-        if (dcac != null) {
-            cancelReconnectAlarm(apnContext);
-        }
-        setupDataForSinglePdnArbitration(apnContext.getReason());
-        if (DBG) {
-            log("cleanUpConnection: X tearDown=" + tearDown + " reason=" + apnContext.getReason() +
-                    " apnContext=" + apnContext + " dcac=" + apnContext.getDcAc());
-        }
-
-#endif
+    } else {
+        // force clean up the data connection.
+        if (dcac != NULL) dcac->ReqReset();
+        apnContext->SetState(DctConstantsState_IDLE);
+        String apnType;
+        apnContext->GetApnType(&apnType);
+        String reason;
+        apnContext->GetReason(&reason);
+        mPhone->NotifyDataConnection(reason, apnType);
+        apnContext->SetDataConnectionAc(NULL);
+    }
+    if (mOmhApt != NULL) {
+        mOmhApt->ClearActiveApnProfile();
+    }
+    // Make sure reconnection alarm is cleaned up if there is no ApnContext
+    // associated to the connection.
+    if (dcac != NULL) {
+        CancelReconnectAlarm(apnContext);
+    }
+    String reason;
+    apnContext->GetReason(&reason);
+    SetupDataForSinglePdnArbitration(reason);
+    if (DBG) {
+        AutoPtr<IDcAsyncChannel> dcAsyncChannel;
+        apnContext->GetDcAc((IDcAsyncChannel**)&dcAsyncChannel);
+        Log("cleanUpConnection: X tearDown=%d reason=%s apnContext=%s dcac=%s", tearDown, reason.string(), TO_CSTR(apnContext), TO_CSTR(dcAsyncChannel));
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::SetupDataForSinglePdnArbitration(
     /* [in] */ const String& reason)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // In single pdn case, if a higher priority call which was scheduled for retry gets
-        // cleaned up due to say apn disabled, we need to try setup data on connectable apns
-        // as there won't be any EVENT_DISCONNECT_DONE call back.
-        if(DBG) {
-            log("setupDataForSinglePdn: reason = " + reason
-                    + " isDisconnected = " + isDisconnected());
-        }
-        if (isOnlySingleDcAllowed(mPhone.getServiceState().getRilDataRadioTechnology())
-                && isDisconnected()
-                && !Phone.REASON_SINGLE_PDN_ARBITRATION.equals(reason)) {
-            setupDataOnConnectableApns(Phone.REASON_SINGLE_PDN_ARBITRATION);
-        }
-
-#endif
+    // In single pdn case, if a higher priority call which was scheduled for retry gets
+    // cleaned up due to say apn disabled, we need to try setup data on connectable apns
+    // as there won't be any EVENT_DISCONNECT_DONE call back.
+    if (DBG) {
+        Boolean isDisconnected;
+        IsDisconnected(&isDisconnected);
+        Log("setupDataForSinglePdn: reason = %s isDisconnected = %d", reason.string(), isDisconnected);
+    }
+    Boolean isDisconnected;
+    IsDisconnected(&isDisconnected);
+    Boolean isOnlySingleDcAllowed;
+    AutoPtr<IServiceState> serviceState;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    Int32 rilDataRadioTechnology;
+    serviceState->GetRilDataRadioTechnology(&rilDataRadioTechnology);
+    IsOnlySingleDcAllowed(rilDataRadioTechnology, &isOnlySingleDcAllowed);
+    if (isOnlySingleDcAllowed && isDisconnected
+            && !IPhone::REASON_SINGLE_PDN_ARBITRATION.Equals(reason)) {
+        SetupDataOnConnectableApns(IPhone::REASON_SINGLE_PDN_ARBITRATION);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::TeardownForDun(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // CDMA always needs to do this the profile id is correct
-        final int rilRat = mPhone.getServiceState().getRilDataRadioTechnology();
-        if (ServiceState.isCdma(rilRat)) return true;
-        return (fetchDunApn() != null);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    // CDMA always needs to do this the profile id is correct
+    AutoPtr<IServiceState> serviceState;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    Int32 rilRat;
+    serviceState->GetRilDataRadioTechnology(&rilRat);
+    Boolean isCdma;
+    CServiceState::IsCdma(rilRat, &isCdma);
+    if (isCdma) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    AutoPtr<IApnSetting> dunApn;
+    FetchDunApn((IApnSetting**)&dunApn);
+    *result = (dunApn != NULL);
+    return NOERROR;
 }
 
 ECode DcTracker::CancelReconnectAlarm(
     /* [in] */ IApnContext* apnContext)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (apnContext == null) return;
-        PendingIntent intent = apnContext.getReconnectIntent();
-        if (intent != null) {
-                AlarmManager am =
-                    (AlarmManager) mPhone.getContext().getSystemService(Context.ALARM_SERVICE);
-                am.cancel(intent);
-                apnContext.setReconnectIntent(null);
-        }
-
-#endif
+    if (apnContext == NULL) return NOERROR;
+    AutoPtr<IPendingIntent> intent;
+    apnContext->GetReconnectIntent((IPendingIntent**)&intent);
+    if (intent != NULL) {
+            AutoPtr<IContext> context;
+            IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+            AutoPtr<IInterface> obj;
+            context->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);
+            AutoPtr<IAlarmManager> am = IAlarmManager::Probe(obj);
+            am->Cancel(intent);
+            apnContext->SetReconnectIntent(NULL);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::ParseTypes(
     /* [in] */ const String& types,
-    /* [out, callee] */ ArrayOf<String>** result)
+    /* [out, callee] */ ArrayOf<String>** _result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        String[] result;
-        // If unset, set to DEFAULT.
-        if (types == null || types.equals("")) {
-            result = new String[1];
-            result[0] = PhoneConstants.APN_TYPE_ALL;
-        } else {
-            result = types.split(",");
-        }
-        return result;
+    VALIDATE_NOT_NULL(_result)
 
-#endif
+    AutoPtr<ArrayOf<String> > result;
+    // If unset, set to DEFAULT.
+    if (types == NULL || types.Equals("")) {
+        result = ArrayOf<String>::Alloc(1);
+        (*result)[0] = IPhoneConstants::APN_TYPE_ALL;
+    } else {
+        StringUtils::Split(types, ",", (ArrayOf<String>**)&result);
+    }
+    *_result = result;
+    REFCOUNT_ADD(*_result)
+    return NOERROR;
 }
 
 ECode DcTracker::ImsiMatches(
@@ -1651,29 +2178,35 @@ ECode DcTracker::ImsiMatches(
     /* [in] */ const String& imsiSIM,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // Note: imsiDB value has digit number or 'x' character for seperating USIM information
-        // for MVNO operator. And then digit number is matched at same order and 'x' character
-        // could replace by any digit number.
-        // ex) if imsiDB inserted '310260x10xxxxxx' for GG Operator,
-        //     that means first 6 digits, 8th and 9th digit
-        //     should be set in USIM for GG Operator.
-        int len = imsiDB.length();
-        int idxCompare = 0;
-        if (len <= 0) return false;
-        if (len > imsiSIM.length()) return false;
-        for (int idx=0; idx<len; idx++) {
-            char c = imsiDB.charAt(idx);
-            if ((c == 'x') || (c == 'X') || (c == imsiSIM.charAt(idx))) {
-                continue;
-            } else {
-                return false;
-            }
-        }
-        return true;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    // Note: imsiDB value has digit number or 'x' character for seperating USIM information
+    // for MVNO operator. And then digit number is matched at same order and 'x' character
+    // could replace by any digit number.
+    // ex) if imsiDB inserted '310260x10xxxxxx' for GG Operator,
+    //     that means first 6 digits, 8th and 9th digit
+    //     should be set in USIM for GG Operator.
+    Int32 len = imsiDB.GetLength();
+    // Int32 idxCompare = 0;
+    if (len <= 0) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    if (len > imsiSIM.GetLength()) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    for (Int32 idx=0; idx<len; idx++) {
+        Char32 c = imsiDB.GetChar(idx);
+        if ((c == 'x') || (c == 'X') || (c == imsiSIM.GetChar(idx))) {
+            continue;
+        } else {
+            *result = FALSE;
+            return NOERROR;
+        }
+    }
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode DcTracker::MvnoMatches(
@@ -1682,165 +2215,316 @@ ECode DcTracker::MvnoMatches(
     /* [in] */ const String& mvnoMatchData,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mvnoType.equalsIgnoreCase("spn")) {
-            if ((r.getServiceProviderName() != null) &&
-                    r.getServiceProviderName().equalsIgnoreCase(mvnoMatchData)) {
-                return true;
-            }
-        } else if (mvnoType.equalsIgnoreCase("imsi")) {
-            String imsiSIM = r.getIMSI();
-            if ((imsiSIM != null) && imsiMatches(mvnoMatchData, imsiSIM)) {
-                return true;
-            }
-        } else if (mvnoType.equalsIgnoreCase("gid")) {
-            String gid1 = r.getGid1();
-            int mvno_match_data_length = mvnoMatchData.length();
-            if ((gid1 != null) && (gid1.length() >= mvno_match_data_length) &&
-                    gid1.substring(0, mvno_match_data_length).equalsIgnoreCase(mvnoMatchData)) {
-                return true;
-            }
-        }
-        return false;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (mvnoType.EqualsIgnoreCase("spn")) {
+        String serviceProviderName;
+        r->GetServiceProviderName(&serviceProviderName);
+        if ((!serviceProviderName.IsNull()) &&
+                serviceProviderName.EqualsIgnoreCase(mvnoMatchData)) {
+            *result = TRUE;
+            return NOERROR;
+        }
+    } else if (mvnoType.EqualsIgnoreCase("imsi")) {
+        String imsiSIM;
+        r->GetIMSI(&imsiSIM);
+        Boolean isImsiMatches;
+        ImsiMatches(mvnoMatchData, imsiSIM, &isImsiMatches);
+        if ((imsiSIM != NULL) && isImsiMatches) {
+            *result = TRUE;
+            return NOERROR;
+        }
+    } else if (mvnoType.EqualsIgnoreCase("gid")) {
+        String gid1;
+        r->GetGid1(&gid1);
+        Int32 mvno_match_data_length = mvnoMatchData.GetLength();
+        if ((gid1 != NULL) && (gid1.GetLength() >= mvno_match_data_length) &&
+                gid1.Substring(0, mvno_match_data_length).EqualsIgnoreCase(mvnoMatchData)) {
+            *result = TRUE;
+            return NOERROR;
+        }
+    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode DcTracker::IsPermanentFail(
     /* [in] */ IDcFailCause* dcFailCause,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return (dcFailCause.isPermanentFail() &&
-                (mAttached.get() == false || dcFailCause != DcFailCause.SIGNAL_LOST));
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Boolean isPermanentFail;
+    dcFailCause->IsPermanentFail(&isPermanentFail);
+    Boolean b;
+    mAttached->Get(&b);
+    Int32 errCode;
+    dcFailCause->GetErrorCode(&errCode);
+    *result = (isPermanentFail && (b == FALSE || errCode != DcFailCause_SIGNAL_LOST));
+    return NOERROR;
 }
 
 ECode DcTracker::MakeApnSetting(
     /* [in] */ ICursor* cursor,
     /* [out] */ IApnSetting** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        String[] types = parseTypes(
-                cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.TYPE)));
-        ApnSetting apn = new ApnSetting(
-                cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers._ID)),
-                cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.NUMERIC)),
-                cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.NAME)),
-                cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.APN)),
-                NetworkUtils.trimV4AddrZeros(
-                        cursor.getString(
-                        cursor.getColumnIndexOrThrow(Telephony.Carriers.PROXY))),
-                cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.PORT)),
-                NetworkUtils.trimV4AddrZeros(
-                        cursor.getString(
-                        cursor.getColumnIndexOrThrow(Telephony.Carriers.MMSC))),
-                NetworkUtils.trimV4AddrZeros(
-                        cursor.getString(
-                        cursor.getColumnIndexOrThrow(Telephony.Carriers.MMSPROXY))),
-                cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.MMSPORT)),
-                cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.USER)),
-                cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.PASSWORD)),
-                cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.AUTH_TYPE)),
-                types,
-                cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.PROTOCOL)),
-                cursor.getString(cursor.getColumnIndexOrThrow(
-                        Telephony.Carriers.ROAMING_PROTOCOL)),
-                cursor.getInt(cursor.getColumnIndexOrThrow(
-                        Telephony.Carriers.CARRIER_ENABLED)) == 1,
-                cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.BEARER)),
-                cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.PROFILE_ID)),
-                cursor.getInt(cursor.getColumnIndexOrThrow(
-                        Telephony.Carriers.MODEM_COGNITIVE)) == 1,
-                cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.MAX_CONNS)),
-                cursor.getInt(cursor.getColumnIndexOrThrow(
-                        Telephony.Carriers.WAIT_TIME)),
-                cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.MAX_CONNS_TIME)),
-                cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.MTU)),
-                cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.MVNO_TYPE)),
-                cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.MVNO_MATCH_DATA)));
-        return apn;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 columnIndexOrThrowTYPE;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::TYPE, &columnIndexOrThrowTYPE);
+    String strColumnIndexOrThrowTYPE;
+    cursor->GetString(columnIndexOrThrowTYPE, &strColumnIndexOrThrowTYPE);
+    AutoPtr<ArrayOf<String> > types;
+    ParseTypes(strColumnIndexOrThrowTYPE, (ArrayOf<String>**)&types);
+    Int32 columnIndexOrThrow_ID;
+    cursor->GetColumnIndexOrThrow(IBaseColumns::ID, &columnIndexOrThrow_ID);
+    Int32 columnIndexOrThrowNUMERIC;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::NUMERIC, &columnIndexOrThrowNUMERIC);
+    Int32 columnIndexOrThrowNAME;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::NAME, &columnIndexOrThrowNAME);
+    Int32 columnIndexOrThrowAPN;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::APN, &columnIndexOrThrowAPN);
+    Int32 columnIndexOrThrowPROXY;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::PROXY, &columnIndexOrThrowPROXY);
+    Int32 columnIndexOrThrowPORT;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::PORT, &columnIndexOrThrowPORT);
+    Int32 columnIndexOrThrowMMSC;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::MMSC, &columnIndexOrThrowMMSC);
+    Int32 columnIndexOrThrowMMSPROXY;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::MMSPROXY, &columnIndexOrThrowMMSPROXY);
+    Int32 columnIndexOrThrowMMSPORT;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::MMSPORT, &columnIndexOrThrowMMSPORT);
+    Int32 columnIndexOrThrowUSER;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::USER, &columnIndexOrThrowUSER);
+    Int32 columnIndexOrThrowPASSWORD;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::PASSWORD, &columnIndexOrThrowPASSWORD);
+    Int32 columnIndexOrThrowAUTH_TYPE;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::AUTH_TYPE, &columnIndexOrThrowAUTH_TYPE);
+    Int32 columnIndexOrThrowPROTOCOL;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::PROTOCOL, &columnIndexOrThrowPROTOCOL);
+    Int32 columnIndexOrThrowBEARER;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::BEARER, &columnIndexOrThrowBEARER);
+    Int32 columnIndexOrThrowPROFILE_ID;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::PROFILE_ID, &columnIndexOrThrowPROFILE_ID);
+    Int32 columnIndexOrThrowMAX_CONNS;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::MAX_CONNS, &columnIndexOrThrowMAX_CONNS);
+    Int32 columnIndexOrThrowMAX_CONNS_TIME;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::MAX_CONNS_TIME, &columnIndexOrThrowMAX_CONNS_TIME);
+    Int32 columnIndexOrThrowMTU;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::MTU, &columnIndexOrThrowMTU);
+    Int32 columnIndexOrThrowMVNO_TYPE;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::MVNO_TYPE, &columnIndexOrThrowMVNO_TYPE);
+    Int32 columnIndexOrThrowMVNO_MATCH_DATA;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::MVNO_MATCH_DATA, &columnIndexOrThrowMVNO_MATCH_DATA);
+    Int32 iColumnIndexOrThrow_ID;
+    cursor->GetInt32(columnIndexOrThrow_ID, &iColumnIndexOrThrow_ID);
+    String strColumnIndexOrThrowNUMERIC;
+    cursor->GetString(columnIndexOrThrowNUMERIC, &strColumnIndexOrThrowNUMERIC);
+    String strColumnIndexOrThrowNAME;
+    cursor->GetString(columnIndexOrThrowNAME, &strColumnIndexOrThrowNAME);
+    String strColumnIndexOrThrowAPN;
+    cursor->GetString(columnIndexOrThrowAPN, &strColumnIndexOrThrowAPN);
+    String strColumnIndexOrThrowPORT;
+    cursor->GetString(columnIndexOrThrowPORT, &strColumnIndexOrThrowPORT);
+    String strColumnIndexOrThrowMMSPORT;
+    cursor->GetString(columnIndexOrThrowMMSPORT, &strColumnIndexOrThrowMMSPORT);
+    String strColumnIndexOrThrowUSER;
+    cursor->GetString(columnIndexOrThrowUSER, &strColumnIndexOrThrowUSER);
+    String strColumnIndexOrThrowPASSWORD;
+    cursor->GetString(columnIndexOrThrowPASSWORD, &strColumnIndexOrThrowPASSWORD);
+    Int32 iColumnIndexOrThrowAUTH_TYPE;
+    cursor->GetInt32(columnIndexOrThrowAUTH_TYPE, &iColumnIndexOrThrowAUTH_TYPE);
+    String strColumnIndexOrThrowPROTOCOL;
+    cursor->GetString(columnIndexOrThrowPROTOCOL, &strColumnIndexOrThrowPROTOCOL);
+    Int32 iColumnIndexOrThrowBEARER;
+    cursor->GetInt32(columnIndexOrThrowBEARER, &iColumnIndexOrThrowBEARER);
+    Int32 iColumnIndexOrThrowPROFILE_ID;
+    cursor->GetInt32(columnIndexOrThrowPROFILE_ID, &iColumnIndexOrThrowPROFILE_ID);
+    Int32 iColumnIndexOrThrowMAX_CONNS;
+    cursor->GetInt32(columnIndexOrThrowMAX_CONNS, &iColumnIndexOrThrowMAX_CONNS);
+    Int32 iColumnIndexOrThrowMAX_CONNS_TIME;
+    cursor->GetInt32(columnIndexOrThrowMAX_CONNS_TIME, &iColumnIndexOrThrowMAX_CONNS_TIME);
+    Int32 iColumnIndexOrThrowMTU;
+    cursor->GetInt32(columnIndexOrThrowMTU, &iColumnIndexOrThrowMTU);
+    String strColumnIndexOrThrowMVNO_TYPE;
+    cursor->GetString(columnIndexOrThrowMVNO_TYPE, &strColumnIndexOrThrowMVNO_TYPE);
+    String strColumnIndexOrThrowMVNO_MATCH_DATA;
+    cursor->GetString(columnIndexOrThrowMVNO_MATCH_DATA, &strColumnIndexOrThrowMVNO_MATCH_DATA);
+    String strColumnIndexOrThrowPROXY;
+    cursor->GetString(columnIndexOrThrowPROXY, &strColumnIndexOrThrowPROXY);
+    String strColumnIndexOrThrowMMSC;
+    cursor->GetString(columnIndexOrThrowMMSC, &strColumnIndexOrThrowMMSC);
+    String strColumnIndexOrThrowMMSPROXY;
+    cursor->GetString(columnIndexOrThrowMMSPROXY, &strColumnIndexOrThrowMMSPROXY);
+    Int32 columnIndexOrThrowROAMING_PROTOCOL;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::ROAMING_PROTOCOL, &columnIndexOrThrowROAMING_PROTOCOL);
+    Int32 columnIndexOrThrowCARRIER_ENABLED;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::CARRIER_ENABLED, &columnIndexOrThrowCARRIER_ENABLED);
+    Int32 columnIndexOrThrowMODEM_COGNITIVE;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::MODEM_COGNITIVE, &columnIndexOrThrowMODEM_COGNITIVE);
+    Int32 columnIndexOrThrowWAIT_TIME;
+    cursor->GetColumnIndexOrThrow(ITelephonyCarriers::WAIT_TIME, &columnIndexOrThrowWAIT_TIME);
+    String strColumnIndexOrThrowROAMING_PROTOCOL;
+    cursor->GetString(columnIndexOrThrowROAMING_PROTOCOL, &strColumnIndexOrThrowROAMING_PROTOCOL);
+    Int32 iColumnIndexOrThrowCARRIER_ENABLED;
+    cursor->GetInt32(columnIndexOrThrowCARRIER_ENABLED, &iColumnIndexOrThrowCARRIER_ENABLED);
+    Int32 iColumnIndexOrThrowMODEM_COGNITIVE;
+    cursor->GetInt32(columnIndexOrThrowMODEM_COGNITIVE, &iColumnIndexOrThrowMODEM_COGNITIVE);
+    Int32 iColumnIndexOrThrowWAIT_TIME;
+    cursor->GetInt32(columnIndexOrThrowWAIT_TIME, &iColumnIndexOrThrowWAIT_TIME);
+    String strTrimColumnIndexOrThrowPROXY;
+    NetworkUtils::TrimV4AddrZeros(strColumnIndexOrThrowPROXY, &strTrimColumnIndexOrThrowPROXY);
+    String strTrimColumnIndexOrThrowMMSC;
+    NetworkUtils::TrimV4AddrZeros(strColumnIndexOrThrowMMSC, &strTrimColumnIndexOrThrowMMSC);
+    String strTrimColumnIndexOrThrowMMSPROXY;
+    NetworkUtils::TrimV4AddrZeros(strColumnIndexOrThrowMMSPROXY, &strTrimColumnIndexOrThrowMMSPROXY);
+    AutoPtr<IApnSetting> apn;
+    CApnSetting::New(
+            iColumnIndexOrThrow_ID,
+            strColumnIndexOrThrowNUMERIC,
+            strColumnIndexOrThrowNAME,
+            strColumnIndexOrThrowAPN,
+            strTrimColumnIndexOrThrowPROXY,
+            strColumnIndexOrThrowPORT,
+            strTrimColumnIndexOrThrowMMSC,
+            strTrimColumnIndexOrThrowMMSPROXY,
+            strColumnIndexOrThrowMMSPORT,
+            strColumnIndexOrThrowUSER,
+            strColumnIndexOrThrowPASSWORD,
+            iColumnIndexOrThrowAUTH_TYPE,
+            types,
+            strColumnIndexOrThrowPROTOCOL,
+            strColumnIndexOrThrowROAMING_PROTOCOL,
+            iColumnIndexOrThrowCARRIER_ENABLED == 1,
+            iColumnIndexOrThrowBEARER,
+            iColumnIndexOrThrowPROFILE_ID,
+            iColumnIndexOrThrowMODEM_COGNITIVE == 1,
+            iColumnIndexOrThrowMAX_CONNS,
+            iColumnIndexOrThrowWAIT_TIME,
+            iColumnIndexOrThrowMAX_CONNS_TIME,
+            iColumnIndexOrThrowMTU,
+            strColumnIndexOrThrowMVNO_TYPE,
+            strColumnIndexOrThrowMVNO_MATCH_DATA,
+            (IApnSetting**)&apn);
+    *result = apn;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode DcTracker::CreateApnList(
     /* [in] */ ICursor* cursor,
-    /* [out] */ IArrayList** result)
+    /* [out] */ IArrayList** _result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ArrayList<ApnSetting> mnoApns = new ArrayList<ApnSetting>();
-        ArrayList<ApnSetting> mvnoApns = new ArrayList<ApnSetting>();
-        IccRecords r = mIccRecords.get();
-        if (cursor.moveToFirst()) {
-            do {
-                ApnSetting apn = makeApnSetting(cursor);
-                if (apn == null) {
-                    continue;
-                }
-                if (apn.hasMvnoParams()) {
-                    if (r != null && mvnoMatches(r, apn.mvnoType, apn.mvnoMatchData)) {
-                        mvnoApns.add(apn);
-                    }
-                } else {
-                    mnoApns.add(apn);
-                }
-            } while (cursor.moveToNext());
-        }
-        ArrayList<ApnSetting> result = mvnoApns.isEmpty() ? mnoApns : mvnoApns;
-        if (DBG) log("createApnList: X result=" + result);
-        return result;
+    VALIDATE_NOT_NULL(_result)
 
-#endif
+    AutoPtr<IArrayList> mnoApns;
+    CArrayList::New((IArrayList**)&mnoApns);
+    AutoPtr<IArrayList> mvnoApns;
+    CArrayList::New((IArrayList**)&mvnoApns);
+    AutoPtr<IInterface> obj;
+    mIccRecords->Get((IInterface**)&obj);
+    AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
+    Boolean isMoveToFirst;
+    cursor->MoveToFirst(&isMoveToFirst);
+    if (isMoveToFirst) {
+        Boolean isMoveToNextOk;
+        do {
+            AutoPtr<IApnSetting> apn;
+            MakeApnSetting(cursor, (IApnSetting**)&apn);
+            if (apn == NULL) {
+                continue;
+            }
+            Boolean hasMvnoParams;
+            apn->HasMvnoParams(&hasMvnoParams);
+            if (hasMvnoParams) {
+                Boolean isMvnoMatches;
+                String mvnoType;
+                apn->GetMvnoType(&mvnoType);
+                String mvnoMatchData;
+                apn->GetMvnoMatchData(&mvnoMatchData);
+                MvnoMatches(r, mvnoType, mvnoMatchData, &isMvnoMatches);
+                if (r != NULL && isMvnoMatches) {
+                    mvnoApns->Add(apn);
+                }
+            } else {
+                mnoApns->Add(apn);
+            }
+        } while (cursor->MoveToNext(&isMoveToNextOk), isMoveToNextOk);
+    }
+    Boolean isEmpty;
+    mvnoApns->IsEmpty(&isEmpty);
+    AutoPtr<IArrayList> result = isEmpty ? mnoApns : mvnoApns;
+    if (DBG) Log("createApnList: X result=%s", TO_CSTR(result));
+    *_result = result;
+    REFCOUNT_ADD(*_result)
+    return NOERROR;
 }
 
 ECode DcTracker::DataConnectionNotInUse(
     /* [in] */ IDcAsyncChannel* dcac,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("dataConnectionNotInUse: check if dcac is inuse dcac=" + dcac);
-        for (ApnContext apnContext : mApnContexts.values()) {
-            if (apnContext.getDcAc() == dcac) {
-                if (DBG) log("dataConnectionNotInUse: in use by apnContext=" + apnContext);
-                return false;
-            }
-        }
-        // TODO: Fix retry handling so free DataConnections have empty apnlists.
-        // Probably move retry handling into DataConnections and reduce complexity
-        // of DCT.
-        if (DBG) log("dataConnectionNotInUse: tearDownAll");
-        dcac.tearDownAll("No connection", null);
-        if (DBG) log("dataConnectionNotInUse: not in use return true");
-        return true;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (DBG) Log("dataConnectionNotInUse: check if dcac is inuse dcac=%s", TO_CSTR(dcac));
+    AutoPtr<IIterator> it;
+    AutoPtr<ICollection> values;
+    mApnContexts->GetValues((ICollection**)&values);
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+        AutoPtr<IDcAsyncChannel> dcAsyncChannel;
+        apnContext->GetDcAc((IDcAsyncChannel**)&dcAsyncChannel);
+        if (dcAsyncChannel.Get() == dcac) {
+            if (DBG) Log("dataConnectionNotInUse: in use by apnContext=%s", TO_CSTR(apnContext));
+            *result = FALSE;
+            return NOERROR;
+        }
+    }
+    // TODO: Fix retry handling so free DataConnections have empty apnlists.
+    // Probably move retry handling into DataConnections and reduce complexity
+    // of DCT.
+    if (DBG) Log("dataConnectionNotInUse: tearDownAll");
+    dcac->TearDownAll(String("No connection"), NULL);
+    if (DBG) Log("dataConnectionNotInUse: not in use return true");
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode DcTracker::FindFreeDataConnection(
     /* [out] */ IDcAsyncChannel** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        for (DcAsyncChannel dcac : mDataConnectionAcHashMap.values()) {
-            if (dcac.isInactiveSync() && dataConnectionNotInUse(dcac)) {
-                if (DBG) {
-                    log("findFreeDataConnection: found free DataConnection=" +
-                        " dcac=" + dcac);
-                }
-                return dcac;
-            }
-        }
-        log("findFreeDataConnection: NO free DataConnection");
-        return null;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<ICollection> values;
+    mDataConnectionAcHashMap->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> it;
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IDcAsyncChannel> dcac = IDcAsyncChannel::Probe(obj);
+        Boolean isInactiveSync;
+        dcac->IsInactiveSync(&isInactiveSync);
+        Boolean isDataConnectionNotInUse;
+        DataConnectionNotInUse(dcac, &isDataConnectionNotInUse);
+        if (isInactiveSync && isDataConnectionNotInUse) {
+            if (DBG) {
+                Log("findFreeDataConnection: found free DataConnection="
+                    " dcac=%s", TO_CSTR(dcac));
+            }
+            *result = dcac;
+            REFCOUNT_ADD(*result)
+            return NOERROR;
+        }
+    }
+    Log("findFreeDataConnection: NO free DataConnection");
+    *result = NULL;
+    return NOERROR;
 }
 
 ECode DcTracker::SetupData(
@@ -1848,392 +2532,483 @@ ECode DcTracker::SetupData(
     /* [in] */ Int32 radioTech,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("setupData: apnContext=" + apnContext);
-        ApnSetting apnSetting;
-        DcAsyncChannel dcac = null;
-        apnSetting = apnContext.getNextWaitingApn();
-        if (apnSetting == null) {
-            if (DBG) log("setupData: return for no apn found!");
-            return false;
-        }
-        int profileId = apnSetting.profileId;
-        if (profileId == 0) {
-            profileId = getApnProfileID(apnContext.getApnType());
-        }
-        // On CDMA, if we're explicitly asking for DUN, we need have
-        // a dun-profiled connection so we can't share an existing one
-        // On GSM/LTE we can share existing apn connections provided they support
-        // this type.
-        if (apnContext.getApnType() != PhoneConstants.APN_TYPE_DUN ||
-                teardownForDun() == false) {
-            dcac = checkForCompatibleConnectedApnContext(apnContext);
-            if (dcac != null) {
-                // Get the dcacApnSetting for the connection we want to share.
-                ApnSetting dcacApnSetting = dcac.getApnSettingSync();
-                if (dcacApnSetting != null) {
-                    // Setting is good, so use it.
-                    apnSetting = dcacApnSetting;
-                }
-            }
-        }
-        if (dcac == null) {
-            if (isOnlySingleDcAllowed(radioTech)) {
-                if (isHigherPriorityApnContextActive(apnContext)) {
-                    if (DBG) {
-                        log("setupData: Higher priority ApnContext active.  Ignoring call");
-                    }
-                    return false;
-                }
-                // Only lower priority calls left.  Disconnect them all in this single PDP case
-                // so that we can bring up the requested higher priority call (once we receive
-                // repsonse for deactivate request for the calls we are about to disconnect
-                if (cleanUpAllConnections(true, Phone.REASON_SINGLE_PDN_ARBITRATION)) {
-                    // If any call actually requested to be disconnected, means we can't
-                    // bring up this connection yet as we need to wait for those data calls
-                    // to be disconnected.
-                    if (DBG) log("setupData: Some calls are disconnecting first.  Wait and retry");
-                    return false;
-                }
-                // No other calls are active, so proceed
-                if (DBG) log("setupData: Single pdp. Continue setting up data call.");
-            }
-            dcac = findFreeDataConnection();
-            if (dcac == null) {
-                dcac = createDataConnection();
-            }
-            if (dcac == null) {
-                if (DBG) log("setupData: No free DataConnection and couldn't create one, WEIRD");
-                return false;
-            }
-        }
-        if (DBG) log("setupData: dcac=" + dcac + " apnSetting=" + apnSetting);
-        apnContext.setDataConnectionAc(dcac);
-        apnContext.setApnSetting(apnSetting);
-        apnContext.setState(DctConstants.State.CONNECTING);
-        mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
-        Message msg = obtainMessage();
-        msg.what = DctConstants.EVENT_DATA_SETUP_COMPLETE;
-        msg.obj = apnContext;
-        dcac.bringUp(apnContext, getInitialMaxRetry(), profileId, radioTech, mAutoAttachOnCreation,
-                msg);
-        if (DBG) log("setupData: initing!");
-        return true;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (DBG) Log("setupData: apnContext=%s", TO_CSTR(apnContext));
+    AutoPtr<IApnSetting> apnSetting;
+    AutoPtr<IDcAsyncChannel> dcac;
+    apnContext->GetNextWaitingApn((IApnSetting**)&apnSetting);
+    if (apnSetting == NULL) {
+        if (DBG) Log("setupData: return for no apn found!");
+        *result = FALSE;
+        return NOERROR;
+    }
+    Int32 profileId;
+    apnSetting->GetProfileId(&profileId);
+    if (profileId == 0) {
+        String apnType;
+        apnContext->GetApnType(&apnType);
+        GetApnProfileID(apnType, &profileId);
+    }
+    // On CDMA, if we're explicitly asking for DUN, we need have
+    // a dun-profiled connection so we can't share an existing one
+    // On GSM/LTE we can share existing apn connections provided they support
+    // this type.
+    String apnType;
+    apnContext->GetApnType(&apnType);
+    Boolean isTeardownForDun;
+    TeardownForDun(&isTeardownForDun);
+    if (apnType != IPhoneConstants::APN_TYPE_DUN ||
+            isTeardownForDun == FALSE) {
+        CheckForCompatibleConnectedApnContext(apnContext, (IDcAsyncChannel**)&dcac);
+        if (dcac != NULL) {
+            // Get the dcacApnSetting for the connection we want to share.
+            AutoPtr<IApnSetting> dcacApnSetting;
+            dcac->GetApnSettingSync((IApnSetting**)&dcacApnSetting);
+            if (dcacApnSetting != NULL) {
+                // Setting is good, so use it.
+                apnSetting = dcacApnSetting;
+            }
+        }
+    }
+    if (dcac == NULL) {
+        Boolean isOnlySingleDcAllowed;
+        IsOnlySingleDcAllowed(radioTech, &isOnlySingleDcAllowed);
+        if (isOnlySingleDcAllowed) {
+            Boolean isHigherPriorityApnContextActive;
+            IsHigherPriorityApnContextActive(apnContext, &isHigherPriorityApnContextActive);
+            if (isHigherPriorityApnContextActive) {
+                if (DBG) {
+                    Log("setupData: Higher priority ApnContext active.  Ignoring call");
+                }
+                *result = FALSE;
+                return NOERROR;
+            }
+            // Only lower priority calls left.  Disconnect them all in this single PDP case
+            // so that we can bring up the requested higher priority call (once we receive
+            // repsonse for deactivate request for the calls we are about to disconnect
+            Boolean isCleanUpAllConnectionsOk;
+            CleanUpAllConnections(TRUE, IPhone::REASON_SINGLE_PDN_ARBITRATION, &isCleanUpAllConnectionsOk);
+            if (isCleanUpAllConnectionsOk) {
+                // If any call actually requested to be disconnected, means we can't
+                // bring up this connection yet as we need to wait for those data calls
+                // to be disconnected.
+                if (DBG) Log("setupData: Some calls are disconnecting first.  Wait and retry");
+                *result = FALSE;
+                return NOERROR;
+            }
+            // No other calls are active, so proceed
+            if (DBG) Log("setupData: Single pdp. Continue setting up data call.");
+        }
+        FindFreeDataConnection((IDcAsyncChannel**)&dcac);
+        if (dcac == NULL) {
+            CreateDataConnection((IDcAsyncChannel**)&dcac);
+        }
+        if (dcac == NULL) {
+            if (DBG) Log("setupData: No free DataConnection and couldn't create one, WEIRD");
+            *result = FALSE;
+            return NOERROR;
+        }
+    }
+    if (DBG) Log("setupData: dcac=%s apnSetting=%s", TO_CSTR(dcac), TO_CSTR(apnSetting));
+    apnContext->SetDataConnectionAc(dcac);
+    apnContext->SetApnSetting(apnSetting);
+    apnContext->SetState(DctConstantsState_CONNECTING);
+    String reason;
+    apnContext->GetReason(&reason);
+    mPhone->NotifyDataConnection(reason, apnType);
+    AutoPtr<IMessage> msg;
+    ObtainMessage((IMessage**)&msg);
+    msg->SetWhat(IDctConstants::EVENT_DATA_SETUP_COMPLETE);
+    msg->SetObj(apnContext);
+    Int32 initialMaxRetry;
+    GetInitialMaxRetry(&initialMaxRetry);
+    dcac->BringUp(apnContext, initialMaxRetry, profileId, radioTech, mAutoAttachOnCreation, msg);
+    if (DBG) Log("setupData: initing!");
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode DcTracker::OnApnChanged()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("onApnChanged: tryRestartDataConnections");
-        tryRestartDataConnections(true, Phone.REASON_APN_CHANGED);
-
-#endif
+    if (DBG) Log("onApnChanged: tryRestartDataConnections");
+    TryRestartDataConnections(TRUE, IPhone::REASON_APN_CHANGED);
+    return NOERROR;
 }
 
 ECode DcTracker::TryRestartDataConnections(
     /* [in] */ Boolean isCleanupNeeded,
     /* [in] */ const String& reason)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        DctConstants.State overallState = getOverallState();
-        boolean isDisconnected = (overallState == DctConstants.State.IDLE ||
-                overallState == DctConstants.State.FAILED);
-        if (mPhone instanceof GSMPhone) {
-            // The "current" may no longer be valid.  MMS depends on this to send properly. TBD
-            ((GSMPhone)mPhone).updateCurrentCarrierInProvider();
-        }
-        // TODO: It'd be nice to only do this if the changed entrie(s)
-        // match the current operator.
-        if (DBG) log("tryRestartDataConnections: createAllApnList and cleanUpAllConnections");
-        createAllApnList();
-        setInitialAttachApn();
-        if (isCleanupNeeded) {
-            cleanUpAllConnections(!isDisconnected, reason);
-        }
-        // If the state is already connected don't setup data now.
-        if (isDisconnected) {
-            setupDataOnConnectableApns(reason);
-        }
-
-#endif
+    DctConstantsState overallState;
+    GetOverallState(&overallState);
+    Boolean isDisconnected = (overallState == DctConstantsState_IDLE ||
+            overallState == DctConstantsState_FAILED);
+    if (IGSMPhone::Probe(mPhone) != NULL) {
+        // The "current" may no longer be valid.  MMS depends on this to send properly. TBD
+        Boolean b;
+        IGSMPhone::Probe(mPhone)->UpdateCurrentCarrierInProvider(&b);
+    }
+    // TODO: It'd be nice to only do this if the changed entrie(s)
+    // match the current operator.
+    if (DBG) Log("tryRestartDataConnections: createAllApnList and cleanUpAllConnections");
+    CreateAllApnList();
+    SetInitialAttachApn();
+    if (isCleanupNeeded) {
+        Boolean b;
+        CleanUpAllConnections(!isDisconnected, reason, &b);
+    }
+    // If the state is already connected don't setup data now.
+    if (isDisconnected) {
+        SetupDataOnConnectableApns(reason);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::OnWwanIwlanCoexistenceDone(
     /* [in] */ IAsyncResult* ar)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (ar.exception != null) {
-            log("onWwanIwlanCoexistenceDone: error = " + ar.exception);
-        } else {
-            byte[] array = (byte[])ar.result;
-            log("onWwanIwlanCoexistenceDone, payload hexdump = "
-                    + IccUtils.bytesToHexString (array));
-            ByteBuffer oemHookResponse = ByteBuffer.wrap(array);
-            oemHookResponse.order(ByteOrder.nativeOrder());
-            int resp = oemHookResponse.get();
-            log("onWwanIwlanCoexistenceDone: resp = " + resp);
-            boolean tempStatus = (resp > 0)? true : false;
-            if (mWwanIwlanCoexistFlag == tempStatus) {
-                log("onWwanIwlanCoexistenceDone: no change in status, ignore.");
-                return;
-            }
-            mWwanIwlanCoexistFlag = tempStatus;
-            if (mPhone.getServiceState().getRilDataRadioTechnology()
-                    == ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN) {
-                log("notifyDataConnection IWLAN_AVAILABLE");
-                notifyDataConnection(Phone.REASON_IWLAN_AVAILABLE);
-            }
+    if (((AsyncResult*) ar)->mException != NULL) {
+        Log("onWwanIwlanCoexistenceDone: error = %s", TO_CSTR(((AsyncResult*) ar)->mException));
+    } else {
+        AutoPtr<IArrayOf> iArray = IArrayOf::Probe(((AsyncResult*) ar)->mResult);
+        Int32 size;
+        iArray->GetLength(&size);
+        AutoPtr<ArrayOf<Byte> > array = ArrayOf<Byte>::Alloc(size);
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> obj;
+            iArray->Get(i, (IInterface**)&obj);
+            Byte b;
+            IByte::Probe(obj)->GetValue(&b);
+            (*array)[i] = b;
         }
-
-#endif
+        Log("onWwanIwlanCoexistenceDone, payload hexdump = "
+                , IccUtils::BytesToHexString(array).string());
+        AutoPtr<IByteBufferHelper> helper;
+        CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
+        AutoPtr<IByteBuffer> oemHookResponse;
+        helper->Wrap(array, (IByteBuffer**)&oemHookResponse);
+        AutoPtr<IByteOrderHelper> byteOrderHelper;
+        CByteOrderHelper::AcquireSingleton((IByteOrderHelper**)&byteOrderHelper);
+        ByteOrder order;
+        byteOrderHelper->GetNativeOrder(&order);
+        oemHookResponse->SetOrder(order);
+        Byte resp;
+        oemHookResponse->Get(&resp);
+        Log("onWwanIwlanCoexistenceDone: resp = %d", resp);
+        Boolean tempStatus = (resp > 0)? TRUE : FALSE;
+        if (mWwanIwlanCoexistFlag == tempStatus) {
+            Log("onWwanIwlanCoexistenceDone: no change in status, ignore.");
+            return NOERROR;
+        }
+        mWwanIwlanCoexistFlag = tempStatus;
+        AutoPtr<IServiceState> serviceState;
+        IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+        Int32 rilDataRadioTechnology;
+        serviceState->GetRilDataRadioTechnology(&rilDataRadioTechnology);
+        assert(0 && "IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN");
+        // if (rilDataRadioTechnology
+        //         == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN) {
+        //     Log("notifyDataConnection IWLAN_AVAILABLE");
+        //     NotifyDataConnection(IPhone::REASON_IWLAN_AVAILABLE);
+        // }
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::OnModemApnProfileReady()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mState == DctConstants.State.FAILED) {
-            cleanUpAllConnections(false, Phone.REASON_PS_RESTRICT_ENABLED);
-        }
-        if (DBG) log("OMH: onModemApnProfileReady(): Setting up data call");
-        tryRestartDataConnections(false, Phone.REASON_SIM_LOADED);
-
-#endif
+    if (mState == DctConstantsState_FAILED) {
+        Boolean b;
+        CleanUpAllConnections(FALSE, IPhone::REASON_PS_RESTRICT_ENABLED, &b);
+    }
+    if (DBG) Log("OMH: onModemApnProfileReady(): Setting up data call");
+    TryRestartDataConnections(FALSE, IPhone::REASON_SIM_LOADED);
+    return NOERROR;
 }
 
 ECode DcTracker::FindDataConnectionAcByCid(
     /* [in] */ Int32 cid,
     /* [out] */ IDcAsyncChannel** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        for (DcAsyncChannel dcac : mDataConnectionAcHashMap.values()) {
-            if (dcac.getCidSync() == cid) {
-                return dcac;
-            }
-        }
-        return null;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<ICollection> values;
+    mDataConnectionAcHashMap->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> it;
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IDcAsyncChannel> dcac = IDcAsyncChannel::Probe(obj);
+        Int32 cidSync;
+        dcac->GetCidSync(&cidSync);
+        if (cidSync == cid) {
+            *result = dcac;
+            REFCOUNT_ADD(*result)
+            return NOERROR;
+        }
+    }
+    *result = NULL;
+    return NOERROR;
 }
 
 ECode DcTracker::GotoIdleAndNotifyDataConnection(
     /* [in] */ const String& reason)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("gotoIdleAndNotifyDataConnection: reason=" + reason);
-        notifyDataConnection(reason);
-        mActiveApn = null;
-
-#endif
+    if (DBG) Log("gotoIdleAndNotifyDataConnection: reason=%s", reason.string());
+    NotifyDataConnection(reason);
+    mActiveApn = NULL;
+    return NOERROR;
 }
 
 ECode DcTracker::IsHigherPriorityApnContextActive(
     /* [in] */ IApnContext* apnContext,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        for (ApnContext otherContext : mPrioritySortedApnContexts) {
-            if (apnContext.getApnType().equalsIgnoreCase(otherContext.getApnType())) return false;
-            if (otherContext.isEnabled() && otherContext.getState() != DctConstants.State.FAILED) {
-                return true;
-            }
-        }
-        return false;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IIterator> it;
+    mPrioritySortedApnContexts->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> otherContext = IApnContext::Probe(obj);
+        String otherContextApnType;
+        otherContext->GetApnType(&otherContextApnType);
+        String apnContextApnType;
+        apnContext->GetApnType(&apnContextApnType);
+        if (apnContextApnType.EqualsIgnoreCase(otherContextApnType)) {
+            *result = FALSE;
+            return NOERROR;
+        }
+        Boolean isEnabled;
+        otherContext->IsEnabled(&isEnabled);
+        DctConstantsState state;
+        otherContext->GetState(&state);
+        if (isEnabled && state != DctConstantsState_FAILED) {
+            *result = TRUE;
+            return NOERROR;
+        }
+    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode DcTracker::IsOnlySingleDcAllowed(
     /* [in] */ Int32 rilRadioTech,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        int[] singleDcRats = mPhone.getContext().getResources().getIntArray(
-                com.android.internal.R.array.config_onlySingleDcAllowed);
-        boolean onlySingleDcAllowed = false;
-        if (Build.IS_DEBUGGABLE &&
-                SystemProperties.getBoolean("persist.telephony.test.singleDc", false)) {
-            onlySingleDcAllowed = true;
-        }
-        if (singleDcRats != null) {
-            for (int i=0; i < singleDcRats.length && onlySingleDcAllowed == false; i++) {
-                if (rilRadioTech == singleDcRats[i]) onlySingleDcAllowed = true;
-            }
-        }
-        if (DBG) log("isOnlySingleDcAllowed(" + rilRadioTech + "): " + onlySingleDcAllowed);
-        return onlySingleDcAllowed;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
+    AutoPtr<ArrayOf<Int32> > singleDcRats;
+    res->GetInt32Array(
+            R::array::config_onlySingleDcAllowed, (ArrayOf<Int32>**)&singleDcRats);
+    Boolean onlySingleDcAllowed = FALSE;
+    Boolean b;
+    SystemProperties::GetBoolean(String("persist.telephony.test.singleDc"), FALSE, &b);
+    if (Build::IS_DEBUGGABLE && b) {
+        onlySingleDcAllowed = TRUE;
+    }
+    if (singleDcRats != NULL) {
+        for (Int32 i=0; i < singleDcRats->GetLength() && onlySingleDcAllowed == FALSE; i++) {
+            if (rilRadioTech == (*singleDcRats)[i]) onlySingleDcAllowed = TRUE;
+        }
+    }
+    if (DBG) Log("isOnlySingleDcAllowed(%d): %d", rilRadioTech, onlySingleDcAllowed);
+    *result = onlySingleDcAllowed;
+    return NOERROR;
 }
 
 ECode DcTracker::RestartRadio()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("restartRadio: ************TURN OFF RADIO**************");
-        cleanUpAllConnections(true, Phone.REASON_RADIO_TURNED_OFF);
-        mPhone.getServiceStateTracker().powerOffRadioSafely(this);
-        /* Note: no need to call setRadioPower(true).  Assuming the desired
-         * radio power state is still ON (as tracked by ServiceStateTracker),
-         * ServiceStateTracker will call setRadioPower when it receives the
-         * RADIO_STATE_CHANGED notification for the power off.  And if the
-         * desired power state has changed in the interim, we don't want to
-         * override it with an unconditional power on.
-         */
-        int reset = Integer.parseInt(SystemProperties.get("net.ppp.reset-by-timeout", "0"));
-        SystemProperties.set("net.ppp.reset-by-timeout", String.valueOf(reset+1));
-
-#endif
+    if (DBG) Log("restartRadio: ************TURN OFF RADIO**************");
+    Boolean b;
+    CleanUpAllConnections(TRUE, IPhone::REASON_RADIO_TURNED_OFF, &b);
+    AutoPtr<IServiceStateTracker> serviceStateTracker;
+    mPhone->GetServiceStateTracker((IServiceStateTracker**)&serviceStateTracker);
+    serviceStateTracker->PowerOffRadioSafely(this);
+    /* Note: no need to call setRadioPower(true).  Assuming the desired
+     * radio power state is still ON (as tracked by ServiceStateTracker),
+     * ServiceStateTracker will call setRadioPower when it receives the
+     * RADIO_STATE_CHANGED notification for the power off.  And if the
+     * desired power state has changed in the interim, we don't want to
+     * override it with an unconditional power on.
+     */
+    String s;
+    SystemProperties::Get(String("net.ppp.reset-by-timeout"), String("0"), &s);
+    Int32 reset = StringUtils::ParseInt32(s);
+    SystemProperties::Set(String("net.ppp.reset-by-timeout"), StringUtils::ToString(reset+1));
+    return NOERROR;
 }
 
 ECode DcTracker::RetryAfterDisconnected(
     /* [in] */ IApnContext* apnContext,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean retry = true;
-        String reason = apnContext.getReason();
-        if ( Phone.REASON_RADIO_TURNED_OFF.equals(reason) ||
-                (isOnlySingleDcAllowed(mPhone.getServiceState().getRilDataRadioTechnology())
-                 && isHigherPriorityApnContextActive(apnContext))) {
-            retry = false;
-        }
-        return retry;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Boolean retry = TRUE;
+    String reason;
+    apnContext->GetReason(&reason);
+    Boolean isOnlySingleDcAllowed;
+    AutoPtr<IServiceState> serviceState;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    Int32 rilDataRadioTechnology;
+    serviceState->GetRilDataRadioTechnology(&rilDataRadioTechnology);
+    IsOnlySingleDcAllowed(rilDataRadioTechnology, &isOnlySingleDcAllowed);
+    Boolean isHigherPriorityApnContextActive;
+    IsHigherPriorityApnContextActive(apnContext, &isHigherPriorityApnContextActive);
+    if (IPhone::REASON_RADIO_TURNED_OFF.Equals(reason) ||
+            (isOnlySingleDcAllowed && isHigherPriorityApnContextActive)) {
+        retry = FALSE;
+    }
+    *result = retry;
+    return NOERROR;
 }
 
 ECode DcTracker::StartAlarmForReconnect(
     /* [in] */ Int32 delay,
     /* [in] */ IApnContext* apnContext)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        String apnType = apnContext.getApnType();
-        Intent intent = new Intent(INTENT_RECONNECT_ALARM + "." + apnType);
-        intent.putExtra(INTENT_RECONNECT_ALARM_EXTRA_REASON, apnContext.getReason());
-        intent.putExtra(INTENT_RECONNECT_ALARM_EXTRA_TYPE, apnType);
-        // Get current sub id.
-        long subId = SubscriptionManager.getDefaultDataSubId();
-        intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
-        if (DBG) {
-            log("startAlarmForReconnect: delay=" + delay + " action=" + intent.getAction()
-                    + " apn=" + apnContext);
-        }
-        PendingIntent alarmIntent = PendingIntent.getBroadcast (mPhone.getContext(), 0,
-                                        intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        apnContext.setReconnectIntent(alarmIntent);
-        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + delay, alarmIntent);
-
-#endif
+    String apnType;
+    apnContext->GetApnType(&apnType);
+    AutoPtr<IIntent> intent;
+    CIntent::New((IIntent**)&intent);
+    String reason;
+    apnContext->GetReason(&reason);
+    intent->PutExtra(INTENT_RECONNECT_ALARM_EXTRA_REASON, reason);
+    intent->PutExtra(INTENT_RECONNECT_ALARM_EXTRA_TYPE, apnType);
+    // Get current sub id.
+    Int64 subId;
+    SubscriptionManager::GetDefaultDataSubId(&subId);
+    intent->PutExtra(IPhoneConstants::SUBSCRIPTION_KEY, subId);
+    if (DBG) {
+        String action;
+        intent->GetAction(&action);
+        Log("startAlarmForReconnect: delay=%d action=%s apn=%s", delay, action.string(), TO_CSTR(apnContext));
+    }
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IPendingIntent> alarmIntent;
+    CPendingIntent::GetBroadcast(context, 0,
+            intent, IPendingIntent::FLAG_UPDATE_CURRENT, (IPendingIntent**)&alarmIntent);
+    apnContext->SetReconnectIntent(alarmIntent);
+    mAlarmManager->Set(IAlarmManager::ELAPSED_REALTIME_WAKEUP,
+            SystemClock::GetElapsedRealtime() + delay, alarmIntent);
+    return NOERROR;
 }
 
 ECode DcTracker::StartAlarmForRestartTrySetup(
     /* [in] */ Int32 delay,
     /* [in] */ IApnContext* apnContext)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        String apnType = apnContext.getApnType();
-        Intent intent = new Intent(INTENT_RESTART_TRYSETUP_ALARM + "." + apnType);
-        intent.putExtra(INTENT_RESTART_TRYSETUP_ALARM_EXTRA_TYPE, apnType);
-        if (DBG) {
-            log("startAlarmForRestartTrySetup: delay=" + delay + " action=" + intent.getAction()
-                    + " apn=" + apnContext);
-        }
-        PendingIntent alarmIntent = PendingIntent.getBroadcast (mPhone.getContext(), 0,
-                                        intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        apnContext.setReconnectIntent(alarmIntent);
-        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + delay, alarmIntent);
-
-#endif
+    String apnType;
+    apnContext->GetApnType(&apnType);
+    AutoPtr<IIntent> intent;
+    CIntent::New((IIntent**)&intent);
+    intent->PutExtra(INTENT_RESTART_TRYSETUP_ALARM_EXTRA_TYPE, apnType);
+    if (DBG) {
+        String action;
+        intent->GetAction(&action);
+        Log("startAlarmForRestartTrySetup: delay=%d action=%s apn=%s", delay, action.string(), TO_CSTR(apnContext));
+    }
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IPendingIntent> alarmIntent;
+    CPendingIntent::GetBroadcast(context, 0,
+            intent, IPendingIntent::FLAG_UPDATE_CURRENT, (IPendingIntent**)&alarmIntent);
+    apnContext->SetReconnectIntent(alarmIntent);
+    mAlarmManager->Set(IAlarmManager::ELAPSED_REALTIME_WAKEUP,
+            SystemClock::GetElapsedRealtime() + delay, alarmIntent);
+    return NOERROR;
 }
 
 ECode DcTracker::NotifyNoData(
     /* [in] */ IDcFailCause* lastFailCauseCode,
     /* [in] */ IApnContext* apnContext)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log( "notifyNoData: type=" + apnContext.getApnType());
-        if (isPermanentFail(lastFailCauseCode)
-            && (!apnContext.getApnType().equals(PhoneConstants.APN_TYPE_DEFAULT))) {
-            mPhone.notifyDataConnectionFailed(apnContext.getReason(), apnContext.getApnType());
-        }
-
-#endif
+    String apnContextApnType;
+    apnContext->GetApnType(&apnContextApnType);
+    if (DBG) Log( "notifyNoData: type=%s", apnContextApnType.string());
+    Boolean isPermanentFail;
+    IsPermanentFail(lastFailCauseCode, &isPermanentFail);
+    if (isPermanentFail
+        && (!apnContextApnType.Equals(IPhoneConstants::APN_TYPE_DEFAULT))) {
+        String reason;
+        apnContext->GetReason(&reason);
+        mPhone->NotifyDataConnectionFailed(reason, apnContextApnType);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::OnRecordsLoaded()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mOmhApt != null) {
-            log("OMH: onRecordsLoaded(): calling loadProfiles()");
-            /* query for data profiles stored in the modem */
-            mOmhApt.loadProfiles();
-            if (mPhone.mCi.getRadioState().isOn()) {
-                if (DBG) log("onRecordsLoaded: notifying data availability");
-                notifyOffApnsOfAvailability(Phone.REASON_SIM_LOADED);
-            }
-        } else {
-            if (DBG) log("onRecordsLoaded: createAllApnList");
-            if (mPhone.mCi.getRadioState().isOn()) {
-                if (DBG) log("onRecordsLoaded: notifying data availability");
-                notifyOffApnsOfAvailability(Phone.REASON_SIM_LOADED);
-            }
-            tryRestartDataConnections(false, Phone.REASON_SIM_LOADED);
-       }
-
-#endif
+    if (mOmhApt != NULL) {
+        Log("OMH: onRecordsLoaded(): calling loadProfiles()");
+        /* query for data profiles stored in the modem */
+        ((CdmaApnProfileTracker*) mOmhApt.Get())->LoadProfiles();
+        ICommandsInterfaceRadioState commandsInterfaceRadioState;
+        ((PhoneBase*) mPhone.Get())->mCi->GetRadioState(&commandsInterfaceRadioState);
+        Boolean isOn = commandsInterfaceRadioState == Elastos::Droid::Internal::Telephony::RADIO_ON;
+        if (isOn) {
+            if (DBG) Log("onRecordsLoaded: notifying data availability");
+            NotifyOffApnsOfAvailability(IPhone::REASON_SIM_LOADED);
+        }
+    } else {
+        if (DBG) Log("onRecordsLoaded: createAllApnList");
+        ICommandsInterfaceRadioState commandsInterfaceRadioState;
+        ((PhoneBase*) mPhone.Get())->mCi->GetRadioState(&commandsInterfaceRadioState);
+        Boolean isOn = commandsInterfaceRadioState == Elastos::Droid::Internal::Telephony::RADIO_ON;
+        if (isOn) {
+            if (DBG) Log("onRecordsLoaded: notifying data availability");
+            NotifyOffApnsOfAvailability(IPhone::REASON_SIM_LOADED);
+        }
+        TryRestartDataConnections(FALSE, IPhone::REASON_SIM_LOADED);
+   }
+    return NOERROR;
 }
 
 ECode DcTracker::OnNvReady()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("onNvReady");
-        createAllApnList();
-        setupDataOnConnectableApns(Phone.REASON_NV_READY);
-
-#endif
+    if (DBG) Log("onNvReady");
+    CreateAllApnList();
+    SetupDataOnConnectableApns(IPhone::REASON_NV_READY);
+    return NOERROR;
 }
 
 ECode DcTracker::OnSetDependencyMet(
     /* [in] */ const String& apnType,
     /* [in] */ Boolean met)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // don't allow users to tweak hipri to work around default dependency not met
-        if (PhoneConstants.APN_TYPE_HIPRI.equals(apnType)) return;
-        ApnContext apnContext = mApnContexts.get(apnType);
-        if (apnContext == null) {
-            loge("onSetDependencyMet: ApnContext not found in onSetDependencyMet(" +
-                    apnType + ", " + met + ")");
-            return;
-        }
-        applyNewState(apnContext, apnContext.isEnabled(), met);
-        if (PhoneConstants.APN_TYPE_DEFAULT.equals(apnType)) {
-            // tie actions on default to similar actions on HIPRI regarding dependencyMet
-            apnContext = mApnContexts.get(PhoneConstants.APN_TYPE_HIPRI);
-            if (apnContext != null) applyNewState(apnContext, apnContext.isEnabled(), met);
-        }
-
-#endif
+    // don't allow users to tweak hipri to work around default dependency not met
+    if (IPhoneConstants::APN_TYPE_HIPRI.Equals(apnType)) return NOERROR;
+    AutoPtr<IInterface> obj;
+    mApnContexts->Get(StringUtils::ParseCharSequence(apnType), (IInterface**)&obj);
+    AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+    if (apnContext == NULL) {
+        Loge("onSetDependencyMet: ApnContext not found in onSetDependencyMet(%s, %d)", apnType.string(), met);
+        return NOERROR;
+    }
+    Boolean isEnabled;
+    apnContext->IsEnabled(&isEnabled);
+    ApplyNewState(apnContext, isEnabled, met);
+    if (IPhoneConstants::APN_TYPE_DEFAULT.Equals(apnType)) {
+        // tie actions on default to similar actions on HIPRI regarding dependencyMet
+        AutoPtr<IInterface> obj;
+        mApnContexts->Get(StringUtils::ParseCharSequence(IPhoneConstants::APN_TYPE_HIPRI), (IInterface**)&obj);
+        apnContext = IApnContext::Probe(obj);
+        Boolean isEnabled;
+        apnContext->IsEnabled(&isEnabled);
+        if (apnContext != NULL) ApplyNewState(apnContext, isEnabled, met);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::ApplyNewState(
@@ -2241,144 +3016,151 @@ ECode DcTracker::ApplyNewState(
     /* [in] */ Boolean enabled,
     /* [in] */ Boolean met)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean cleanup = false;
-        boolean trySetup = false;
-        if (DBG) {
-            log("applyNewState(" + apnContext.getApnType() + ", " + enabled +
-                    "(" + apnContext.isEnabled() + "), " + met + "(" +
-                    apnContext.getDependencyMet() +"))");
-        }
-        if (apnContext.isReady()) {
-            cleanup = true;
-            if (enabled && met) {
-                DctConstants.State state = apnContext.getState();
-                switch(state) {
-                    case CONNECTING:
-                    case SCANNING:
-                    case CONNECTED:
-                    case DISCONNECTING:
-                        // We're "READY" and active so just return
-                        if (DBG) log("applyNewState: 'ready' so return");
-                        return;
-                    case IDLE:
-                        // fall through: this is unexpected but if it happens cleanup and try setup
-                    case FAILED:
-                    case RETRYING: {
-                        // We're "READY" but not active so disconnect (cleanup = true) and
-                        // connect (trySetup = true) to be sure we retry the connection.
-                        trySetup = true;
-                        apnContext.setReason(Phone.REASON_DATA_ENABLED);
-                        break;
-                    }
+    Boolean cleanup = FALSE;
+    Boolean trySetup = FALSE;
+    if (DBG) {
+        Boolean isEnabled;
+        apnContext->IsEnabled(&isEnabled);
+        String apnContextApnType;
+        apnContext->GetApnType(&apnContextApnType);
+        Boolean dependencyMet;
+        apnContext->GetDependencyMet(&dependencyMet);
+        Log("applyNewState(%s, %d(%d), %d(%d))", apnContextApnType.string(), enabled, isEnabled, met, dependencyMet);
+    }
+    Boolean isReady;
+    apnContext->IsReady(&isReady);
+    if (isReady) {
+        cleanup = TRUE;
+        if (enabled && met) {
+            DctConstantsState state;
+            apnContext->GetState(&state);
+            switch(state) {
+                case DctConstantsState_CONNECTING:
+                case DctConstantsState_SCANNING:
+                case DctConstantsState_CONNECTED:
+                case DctConstantsState_DISCONNECTING:
+                    // We're "READY" and active so just return
+                    if (DBG) Log("applyNewState: 'ready' so return");
+                    return NOERROR;
+                case DctConstantsState_IDLE:
+                    // fall through: this is unexpected but if it happens cleanup and try setup
+                case DctConstantsState_FAILED:
+                case DctConstantsState_RETRYING: {
+                    // We're "READY" but not active so disconnect (cleanup = true) and
+                    // connect (trySetup = true) to be sure we retry the connection.
+                    trySetup = TRUE;
+                    apnContext->SetReason(IPhone::REASON_DATA_ENABLED);
+                    break;
                 }
-            } else if (met) {
-                apnContext.setReason(Phone.REASON_DATA_DISABLED);
-                // If ConnectivityService has disabled this network, stop trying to bring
-                // it up, but do not tear it down - ConnectivityService will do that
-                // directly by talking with the DataConnection.
-                //
-                // This doesn't apply to DUN, however.  Those connections have special
-                // requirements from carriers and we need stop using them when the dun
-                // request goes away.  This applies to both CDMA and GSM because they both
-                // can declare the DUN APN sharable by default traffic, thus still satisfying
-                // those requests and not torn down organically.
-                if ((apnContext.getApnType() == PhoneConstants.APN_TYPE_DUN && teardownForDun()) ||
-                        (apnContext.getApnType() == PhoneConstants.APN_TYPE_MMS)) {
-                    cleanup = true;
-                } else {
-                    cleanup = false;
-                }
+            }
+        } else if (met) {
+            apnContext->SetReason(IPhone::REASON_DATA_DISABLED);
+            // If ConnectivityService has disabled this network, stop trying to bring
+            // it up, but do not tear it down - ConnectivityService will do that
+            // directly by talking with the DataConnection.
+            //
+            // This doesn't apply to DUN, however.  Those connections have special
+            // requirements from carriers and we need stop using them when the dun
+            // request goes away.  This applies to both CDMA and GSM because they both
+            // can declare the DUN APN sharable by default traffic, thus still satisfying
+            // those requests and not torn down organically.
+            String apnContextApnType;
+            apnContext->GetApnType(&apnContextApnType);
+            Boolean isTeardownForDun;
+            TeardownForDun(&isTeardownForDun);
+            if ((apnContextApnType == IPhoneConstants::APN_TYPE_DUN && isTeardownForDun) ||
+                    (apnContextApnType == IPhoneConstants::APN_TYPE_MMS)) {
+                cleanup = TRUE;
             } else {
-                apnContext.setReason(Phone.REASON_DATA_DEPENDENCY_UNMET);
+                cleanup = FALSE;
             }
         } else {
-            if (enabled && met) {
-                if (apnContext.isEnabled()) {
-                    apnContext.setReason(Phone.REASON_DATA_DEPENDENCY_MET);
-                } else {
-                    apnContext.setReason(Phone.REASON_DATA_ENABLED);
-                }
-                if (apnContext.getState() == DctConstants.State.FAILED) {
-                    apnContext.setState(DctConstants.State.IDLE);
-                }
-                trySetup = true;
-            }
+            apnContext->SetReason(IPhone::REASON_DATA_DEPENDENCY_UNMET);
         }
-        apnContext.setEnabled(enabled);
-        apnContext.setDependencyMet(met);
-        if (cleanup) cleanUpConnection(true, apnContext);
-        if (trySetup) trySetupData(apnContext);
-
-#endif
+    } else {
+        if (enabled && met) {
+            Boolean isEnabled;
+            apnContext->IsEnabled(&isEnabled);
+            if (isEnabled) {
+                apnContext->SetReason(IPhone::REASON_DATA_DEPENDENCY_MET);
+            } else {
+                apnContext->SetReason(IPhone::REASON_DATA_ENABLED);
+            }
+            DctConstantsState state;
+            apnContext->GetState(&state);
+            if (state == DctConstantsState_FAILED) {
+                apnContext->SetState(DctConstantsState_IDLE);
+            }
+            trySetup = TRUE;
+        }
+    }
+    apnContext->SetEnabled(enabled);
+    apnContext->SetDependencyMet(met);
+    if (cleanup) CleanUpConnection(TRUE, apnContext);
+    Boolean b;
+    if (trySetup) TrySetupData(apnContext, &b);
+    return NOERROR;
 }
 
 ECode DcTracker::CheckForCompatibleConnectedApnContext(
     /* [in] */ IApnContext* apnContext,
     /* [out] */ IDcAsyncChannel** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        String apnType = apnContext.getApnType();
-        ApnSetting dunSetting = null;
-        if (PhoneConstants.APN_TYPE_DUN.equals(apnType)) {
-            dunSetting = fetchDunApn();
-        }
-        if (DBG) {
-            log("checkForCompatibleConnectedApnContext: apnContext=" + apnContext );
-        }
-        DcAsyncChannel potentialDcac = null;
-        ApnContext potentialApnCtx = null;
-        for (ApnContext curApnCtx : mApnContexts.values()) {
-            DcAsyncChannel curDcac = curApnCtx.getDcAc();
-            log("curDcac: " + curDcac);
-            if (curDcac != null) {
-                ApnSetting apnSetting = curApnCtx.getApnSetting();
-                log("apnSetting: " + apnSetting);
-                if (dunSetting != null) {
-                    if (dunSetting.equals(apnSetting)) {
-                        switch (curApnCtx.getState()) {
-                            case CONNECTED:
-                                if (DBG) {
-                                    log("checkForCompatibleConnectedApnContext:"
-                                            + " found dun conn=" + curDcac
-                                            + " curApnCtx=" + curApnCtx);
-                                }
-                                return curDcac;
-                            case RETRYING:
-                            case CONNECTING:
-                                potentialDcac = curDcac;
-                                potentialApnCtx = curApnCtx;
-                                break;
-                            case DISCONNECTING:
-                                //Update for DISCONNECTING only if there is no other potential match
-                                if (potentialDcac == null) {
-                                    potentialDcac = curDcac;
-                                    potentialApnCtx = curApnCtx;
-                                }
-                            default:
-                                // Not connected, potential unchanged
-                                break;
-                        }
-                    }
-                } else if (apnSetting != null && apnSetting.canHandleType(apnType)) {
-                    switch (curApnCtx.getState()) {
-                        case CONNECTED:
+    VALIDATE_NOT_NULL(result)
+
+    String apnType;
+    apnContext->GetApnType(&apnType);
+    AutoPtr<IApnSetting> dunSetting;
+    if (IPhoneConstants::APN_TYPE_DUN.Equals(apnType)) {
+        FetchDunApn((IApnSetting**)&dunSetting);
+    }
+    if (DBG) {
+        Log("checkForCompatibleConnectedApnContext: apnContext=%s", TO_CSTR(apnContext) );
+    }
+    AutoPtr<IDcAsyncChannel> potentialDcac;
+    AutoPtr<IApnContext> potentialApnCtx;
+    AutoPtr<IIterator> it;
+    AutoPtr<ICollection> values;
+    mApnContexts->GetValues((ICollection**)&values);
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> curApnCtx = IApnContext::Probe(obj);
+        AutoPtr<IDcAsyncChannel> curDcac;
+        curApnCtx->GetDcAc((IDcAsyncChannel**)&curDcac);
+        Log("curDcac: %s", TO_CSTR(curDcac));
+        if (curDcac != NULL) {
+            AutoPtr<IApnSetting> apnSetting;
+            curApnCtx->GetApnSetting((IApnSetting**)&apnSetting);
+            Log("apnSetting: %s", TO_CSTR(apnSetting));
+            Boolean canHandleType;
+            apnSetting->CanHandleType(apnType, &canHandleType);
+            if (dunSetting != NULL) {
+                Boolean isEquals;
+                IObject::Probe(dunSetting)->Equals(apnSetting, &isEquals);
+                if (isEquals) {
+                    DctConstantsState state;
+                    curApnCtx->GetState(&state);
+                    switch (state) {
+                        case DctConstantsState_CONNECTED:
                             if (DBG) {
-                                log("checkForCompatibleConnectedApnContext:"
-                                        + " found canHandle conn=" + curDcac
-                                        + " curApnCtx=" + curApnCtx);
+                                Log("checkForCompatibleConnectedApnContext:"
+                                        " found dun conn=%s"
+                                        " curApnCtx=%s", TO_CSTR(curDcac), TO_CSTR(curApnCtx));
                             }
-                            return curDcac;
-                        case RETRYING:
-                        case CONNECTING:
+                            *result = curDcac;
+                            REFCOUNT_ADD(*result)
+                            return NOERROR;
+                        case DctConstantsState_RETRYING:
+                        case DctConstantsState_CONNECTING:
                             potentialDcac = curDcac;
                             potentialApnCtx = curApnCtx;
                             break;
-                        case DISCONNECTING:
-                            // Update for DISCONNECTING only if there is no other potential match
-                            if (potentialDcac == null) {
+                        case DctConstantsState_DISCONNECTING:
+                            //Update for DISCONNECTING only if there is no other potential match
+                            if (potentialDcac == NULL) {
                                 potentialDcac = curDcac;
                                 potentialApnCtx = curApnCtx;
                             }
@@ -2387,546 +3169,719 @@ ECode DcTracker::CheckForCompatibleConnectedApnContext(
                             break;
                     }
                 }
-            } else {
-                if (VDBG) {
-                    log("checkForCompatibleConnectedApnContext: not conn curApnCtx=" + curApnCtx);
+            } else if (apnSetting != NULL && canHandleType) {
+                DctConstantsState state;
+                curApnCtx->GetState(&state);
+                switch (state) {
+                    case DctConstantsState_CONNECTED:
+                        if (DBG) {
+                            Log("checkForCompatibleConnectedApnContext:"
+                                    " found canHandle conn=%s"
+                                    " curApnCtx=%s", TO_CSTR(curDcac), TO_CSTR(curApnCtx));
+                        }
+                        *result = curDcac;
+                        REFCOUNT_ADD(*result)
+                        return NOERROR;
+                    case DctConstantsState_RETRYING:
+                    case DctConstantsState_CONNECTING:
+                        potentialDcac = curDcac;
+                        potentialApnCtx = curApnCtx;
+                        break;
+                    case DctConstantsState_DISCONNECTING:
+                        // Update for DISCONNECTING only if there is no other potential match
+                        if (potentialDcac == NULL) {
+                            potentialDcac = curDcac;
+                            potentialApnCtx = curApnCtx;
+                        }
+                    default:
+                        // Not connected, potential unchanged
+                        break;
                 }
             }
-        }
-        if (potentialDcac != null) {
-            if (DBG) {
-                log("checkForCompatibleConnectedApnContext: found potential conn=" + potentialDcac
-                        + " curApnCtx=" + potentialApnCtx);
+        } else {
+            if (VDBG) {
+                Log("checkForCompatibleConnectedApnContext: not conn curApnCtx=%s", TO_CSTR(curApnCtx));
             }
-            return potentialDcac;
         }
-        if (DBG) log("checkForCompatibleConnectedApnContext: NO conn apnContext=" + apnContext);
-        return null;
-
-#endif
+    }
+    if (potentialDcac != NULL) {
+        if (DBG) {
+            Log("checkForCompatibleConnectedApnContext: found potential conn=%s"
+                    " curApnCtx=%s", TO_CSTR(potentialDcac), TO_CSTR(potentialApnCtx));
+        }
+        *result = potentialDcac;
+        REFCOUNT_ADD(*result)
+        return NOERROR;
+    }
+    if (DBG) Log("checkForCompatibleConnectedApnContext: NO conn apnContext=%s", TO_CSTR(apnContext));
+    *result = NULL;
+    return NOERROR;
 }
 
 ECode DcTracker::OnEnableApn(
     /* [in] */ Int32 apnId,
     /* [in] */ Int32 enabled)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ApnContext apnContext = mApnContexts.get(apnIdToType(apnId));
-        if (apnContext == null) {
-            loge("onEnableApn(" + apnId + ", " + enabled + "): NO ApnContext");
-            return;
-        }
-        // TODO change our retry manager to use the appropriate numbers for the new APN
-        if (DBG) log("onEnableApn: apnContext=" + apnContext + " call applyNewState");
-        applyNewState(apnContext, enabled == DctConstants.ENABLED, apnContext.getDependencyMet());
-
-#endif
+    String type;
+    ApnIdToType(apnId, &type);
+    AutoPtr<IInterface> obj;
+    mApnContexts->Get(StringUtils::ParseCharSequence(type), (IInterface**)&obj);
+    AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+    if (apnContext == NULL) {
+        Loge("onEnableApn(%d, %d): NO ApnContext", apnId, enabled);
+        return NOERROR;
+    }
+    // TODO change our retry manager to use the appropriate numbers for the new APN
+    if (DBG) Log("onEnableApn: apnContext=%s call applyNewState", TO_CSTR(apnContext));
+    Boolean dependencyMet;
+    apnContext->GetDependencyMet(&dependencyMet);
+    ApplyNewState(apnContext, enabled == IDctConstants::ENABLED, dependencyMet);
+    return NOERROR;
 }
 
 ECode DcTracker::OnTrySetupData(
     /* [in] */ const String& reason,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("onTrySetupData: reason=" + reason);
-        setupDataOnConnectableApns(reason);
-        return true;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (DBG) Log("onTrySetupData: reason=%s", reason.string());
+    SetupDataOnConnectableApns(reason);
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode DcTracker::OnTrySetupData(
     /* [in] */ IApnContext* apnContext,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("onTrySetupData: apnContext=" + apnContext);
-        return trySetupData(apnContext);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (DBG) Log("onTrySetupData: apnContext=%s", TO_CSTR(apnContext));
+    return TrySetupData(apnContext, result);
 }
 
 ECode DcTracker::OnRoamingOff()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("onRoamingOff");
-        if (mUserDataEnabled == false) return;
-        if (getDataOnRoamingEnabled() == false) {
-            notifyOffApnsOfAvailability(Phone.REASON_ROAMING_OFF);
-            setupDataOnConnectableApns(Phone.REASON_ROAMING_OFF);
-        } else {
-            notifyDataConnection(Phone.REASON_ROAMING_OFF);
-        }
-
-#endif
+    if (DBG) Log("onRoamingOff");
+    if (mUserDataEnabled == FALSE) return NOERROR;
+    Boolean isDataOnRoamingEnabled;
+    GetDataOnRoamingEnabled(&isDataOnRoamingEnabled);
+    if (isDataOnRoamingEnabled == FALSE) {
+        NotifyOffApnsOfAvailability(IPhone::REASON_ROAMING_OFF);
+        SetupDataOnConnectableApns(IPhone::REASON_ROAMING_OFF);
+    } else {
+        NotifyDataConnection(IPhone::REASON_ROAMING_OFF);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::OnRoamingOn()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mUserDataEnabled == false) return;
-        if (getDataOnRoamingEnabled()) {
-            if (DBG) log("onRoamingOn: setup data on roaming");
-            setupDataOnConnectableApns(Phone.REASON_ROAMING_ON);
-            notifyDataConnection(Phone.REASON_ROAMING_ON);
-        } else {
-            if (DBG) log("onRoamingOn: Tear down data connection on roaming.");
-            cleanUpAllConnections(true, Phone.REASON_ROAMING_ON);
-            notifyOffApnsOfAvailability(Phone.REASON_ROAMING_ON);
-        }
-
-#endif
+    if (mUserDataEnabled == FALSE) return NOERROR;
+    Boolean isDataOnRoamingEnabled;
+    GetDataOnRoamingEnabled(&isDataOnRoamingEnabled);
+    if (isDataOnRoamingEnabled) {
+        if (DBG) Log("onRoamingOn: setup data on roaming");
+        SetupDataOnConnectableApns(IPhone::REASON_ROAMING_ON);
+        NotifyDataConnection(IPhone::REASON_ROAMING_ON);
+    } else {
+        if (DBG) Log("onRoamingOn: Tear down data connection on roaming.");
+        Boolean b;
+        CleanUpAllConnections(TRUE, IPhone::REASON_ROAMING_ON, &b);
+        NotifyOffApnsOfAvailability(IPhone::REASON_ROAMING_ON);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::OnRadioAvailable()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("onRadioAvailable");
-        if (mPhone.getSimulatedRadioControl() != null) {
-            // Assume data is connected on the simulator
-            // FIXME  this can be improved
-            // setState(DctConstants.State.CONNECTED);
-            notifyDataConnection(null);
-            log("onRadioAvailable: We're on the simulator; assuming data is connected");
-        }
-        IccRecords r = mIccRecords.get();
-        if (r != null && r.getRecordsLoaded()) {
-            notifyOffApnsOfAvailability(null);
-        }
-        if (getOverallState() != DctConstants.State.IDLE) {
-            cleanUpConnection(true, null);
-        }
-
-#endif
+    if (DBG) Log("onRadioAvailable");
+    assert(0 && "ISimulatedRadioControl");
+    // AutoPtr<ISimulatedRadioControl> control;
+    // mPhone->GetSimulatedRadioControl((ISimulatedRadioControl**)&control);
+    // if (control != NULL) {
+    //     // Assume data is connected on the simulator
+    //     // FIXME  this can be improved
+    //     // SetState(DctConstants.State.CONNECTED);
+    //     NotifyDataConnection(NULL);
+    //     Log("onRadioAvailable: We're on the simulator; assuming data is connected");
+    // }
+    AutoPtr<IInterface> obj;
+    mIccRecords->Get((IInterface**)&obj);
+    AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
+    Boolean isRecordsLoaded;
+    r->GetRecordsLoaded(&isRecordsLoaded);
+    if (r != NULL && isRecordsLoaded) {
+        NotifyOffApnsOfAvailability(String(NULL));
+    }
+    DctConstantsState overallState;
+    GetOverallState(&overallState);
+    if (overallState != DctConstantsState_IDLE) {
+        CleanUpConnection(TRUE, NULL);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::OnRadioOffOrNotAvailable()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // Make sure our reconnect delay starts at the initial value
-        // next time the radio comes on
-        mReregisterOnReconnectFailure = false;
-        if (mPhone.getSimulatedRadioControl() != null) {
-            // Assume data is connected on the simulator
-            // FIXME  this can be improved
-            log("We're on the simulator; assuming radio off is meaningless");
-        } else {
-            if (DBG) log("onRadioOffOrNotAvailable: is off and clean up all connections");
-            cleanUpAllConnections(false, Phone.REASON_RADIO_TURNED_OFF);
-        }
-        notifyOffApnsOfAvailability(null);
-
-#endif
+    // Make sure our reconnect delay starts at the initial value
+    // next time the radio comes on
+    mReregisterOnReconnectFailure = FALSE;
+    assert(0 && "ISimulatedRadioControl");
+    // AutoPtr<ISimulatedRadioControl> control;
+    // mPhone->GetSimulatedRadioControl((ISimulatedRadioControl**)&control);
+    // if (control != NULL) {
+    //     // Assume data is connected on the simulator
+    //     // FIXME  this can be improved
+    //     Log("We're on the simulator; assuming radio off is meaningless");
+    // } else {
+    //     if (DBG) Log("onRadioOffOrNotAvailable: is off and clean up all connections");
+    //     Boolean b;
+    //     CleanUpAllConnections(FALSE, IPhone::REASON_RADIO_TURNED_OFF, &b);
+    // }
+    NotifyOffApnsOfAvailability(String(NULL));
+    return NOERROR;
 }
 
 ECode DcTracker::CompleteConnection(
     /* [in] */ IApnContext* apnContext)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean isProvApn = apnContext.isProvisioningApn();
-        if (DBG) log("completeConnection: successful, notify the world apnContext=" + apnContext);
-        if (mIsProvisioning && !TextUtils.isEmpty(mProvisioningUrl)) {
-            if (DBG) {
-                log("completeConnection: MOBILE_PROVISIONING_ACTION url="
-                        + mProvisioningUrl);
-            }
-            Intent newIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
-                    Intent.CATEGORY_APP_BROWSER);
-            newIntent.setData(Uri.parse(mProvisioningUrl));
-            newIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
-                    Intent.FLAG_ACTIVITY_NEW_TASK);
-            try {
-                mPhone.getContext().startActivity(newIntent);
-            } catch (ActivityNotFoundException e) {
-                loge("completeConnection: startActivityAsUser failed" + e);
-            }
+    Boolean isProvApn;
+    apnContext->IsProvisioningApn(&isProvApn);
+    if (DBG) Log("completeConnection: successful, notify the world apnContext=%s", TO_CSTR(apnContext));
+    if (mIsProvisioning && !TextUtils::IsEmpty(mProvisioningUrl)) {
+        if (DBG) {
+            Log("completeConnection: MOBILE_PROVISIONING_ACTION url=%s", mProvisioningUrl.string());
         }
-        mIsProvisioning = false;
-        mProvisioningUrl = null;
-        if (mProvisioningSpinner != null) {
-            sendMessage(obtainMessage(DctConstants.CMD_CLEAR_PROVISIONING_SPINNER,
-                    mProvisioningSpinner));
+        AutoPtr<IIntent> newIntent = Intent::MakeMainSelectorActivity(IIntent::ACTION_MAIN,
+                IIntent::CATEGORY_APP_BROWSER);
+        AutoPtr<IUri> uri;
+        Uri::Parse(mProvisioningUrl, (IUri**)&uri);
+        newIntent->SetData(uri);
+        newIntent->SetFlags(IIntent::FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+                IIntent::FLAG_ACTIVITY_NEW_TASK);
+        // try {
+        AutoPtr<IContext> context;
+        IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+        ECode ec = context->StartActivity(newIntent);
+        // } catch (ActivityNotFoundException e) {
+        if ((ECode) E_ACTIVITY_NOT_FOUND_EXCEPTION == ec) {
+            Loge("completeConnection: startActivityAsUser failed %d", ec);
         }
-        mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
-        startNetStatPoll();
-        startDataStallAlarm(DATA_STALL_NOT_SUSPECTED);
-
-#endif
+        // }
+    }
+    mIsProvisioning = FALSE;
+    mProvisioningUrl = NULL;
+    if (mProvisioningSpinner != NULL) {
+        AutoPtr<IMessage> msg;
+        ObtainMessage(IDctConstants::CMD_CLEAR_PROVISIONING_SPINNER,
+                mProvisioningSpinner, (IMessage**)&msg);
+        Boolean b;
+        SendMessage(msg, &b);
+    }
+    String apnContextApnType;
+    apnContext->GetApnType(&apnContextApnType);
+    String reason;
+    apnContext->GetReason(&reason);
+    mPhone->NotifyDataConnection(reason, apnContextApnType);
+    StartNetStatPoll();
+    StartDataStallAlarm(DATA_STALL_NOT_SUSPECTED);
+    return NOERROR;
 }
 
 ECode DcTracker::OnDataSetupComplete(
     /* [in] */ IAsyncResult* ar)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        DcFailCause cause = DcFailCause.UNKNOWN;
-        boolean handleError = false;
-        ApnContext apnContext = null;
-        if(ar.userObj instanceof ApnContext){
-            apnContext = (ApnContext)ar.userObj;
-        } else {
-            throw new RuntimeException("onDataSetupComplete: No apnContext");
-        }
-        if (ar.exception == null) {
-            DcAsyncChannel dcac = apnContext.getDcAc();
-            if (RADIO_TESTS) {
-                // Note: To change radio.test.onDSC.null.dcac from command line you need to
-                // adb root and adb remount and from the command line you can only change the
-                // value to 1 once. To change it a second time you can reboot or execute
-                // adb shell stop and then adb shell start. The command line to set the value is:
-                // adb shell sqlite3 /data/data/com.android.providers.settings/databases/settings.db "insert into system (name,value) values ('radio.test.onDSC.null.dcac', '1');"
-                ContentResolver cr = mPhone.getContext().getContentResolver();
-                String radioTestProperty = "radio.test.onDSC.null.dcac";
-                if (Settings.System.getInt(cr, radioTestProperty, 0) == 1) {
-                    log("onDataSetupComplete: " + radioTestProperty +
-                            " is true, set dcac to null and reset property to false");
-                    dcac = null;
-                    Settings.System.putInt(cr, radioTestProperty, 0);
-                    log("onDataSetupComplete: " + radioTestProperty + "=" +
-                            Settings.System.getInt(mPhone.getContext().getContentResolver(),
-                                    radioTestProperty, -1));
-                }
+    AutoPtr<IDcFailCause> cause;
+    CDcFailCause::New(DcFailCause_UNKNOWN, (IDcFailCause**)&cause);
+    Boolean handleError = FALSE;
+    AutoPtr<IApnContext> apnContext;
+    if (IApnContext::Probe(((AsyncResult*) ar)->mUserObj) != NULL){
+        apnContext = IApnContext::Probe(((AsyncResult*) ar)->mUserObj);
+    } else {
+        Logger::E(LOG__TAG, "onDataSetupComplete: No apnContext");
+        return E_RUNTIME_EXCEPTION;
+    }
+    if (((AsyncResult*) ar)->mException == NULL) {
+        AutoPtr<IDcAsyncChannel> dcac;
+        apnContext->GetDcAc((IDcAsyncChannel**)&dcac);
+        if (RADIO_TESTS) {
+            // Note: To change radio.test.onDSC.null.dcac from command line you need to
+            // adb root and adb remount and from the command line you can only change the
+            // value to 1 once. To change it a second time you can reboot or execute
+            // adb shell stop and then adb shell start. The command line to set the value is:
+            // adb shell sqlite3 /data/data/com.android.providers.settings/databases/settings.db "insert into system (name,value) values ('radio.test.onDSC.null.dcac', '1');"
+            AutoPtr<IContext> context;
+            IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+            AutoPtr<IContentResolver> cr;
+            context->GetContentResolver((IContentResolver**)&cr);
+            String radioTestProperty("radio.test.onDSC.null.dcac");
+            Int32 i32;
+            Settings::System::GetInt32(cr, radioTestProperty, 0, &i32);
+            if (i32 == 1) {
+                Log("onDataSetupComplete: %s is true, set dcac to null and reset property to false", radioTestProperty.string());
+                dcac = NULL;
+                Boolean b;
+                Settings::System::PutInt32(cr, radioTestProperty, 0, &b);
+                AutoPtr<IContext> context;
+                IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+                AutoPtr<IContentResolver> contentResolver;
+                context->GetContentResolver((IContentResolver**)&contentResolver);
+                Settings::System::GetInt32(contentResolver, radioTestProperty, -1, &i32);
+                Log("onDataSetupComplete: %s=%d", radioTestProperty.string(), i32);
             }
-            if (dcac == null) {
-                log("onDataSetupComplete: no connection to DC, handle as error");
-                cause = DcFailCause.CONNECTION_TO_DATACONNECTIONAC_BROKEN;
-                handleError = true;
+        }
+        if (dcac == NULL) {
+            Log("onDataSetupComplete: no connection to DC, handle as error");
+            cause = NULL;
+            CDcFailCause::New(DcFailCause_CONNECTION_TO_DATACONNECTIONAC_BROKEN, (IDcFailCause**)&cause);
+            handleError = TRUE;
+        } else {
+            AutoPtr<IApnSetting> apn;
+            apnContext->GetApnSetting((IApnSetting**)&apn);
+            if (DBG) {
+                String apnApn;
+                apn->GetApn(&apnApn);
+                Log("onDataSetupComplete: success apn=%s", (apn == NULL ? "unknown" : apnApn.string()));
+            }
+            String apnProxy;
+            apn->GetProxy(&apnProxy);
+            if (apn != NULL && apnProxy != NULL && apnProxy.GetLength() != 0) {
+                // try {
+                ECode ec;
+                do {
+                    String port;
+                    apn->GetPort(&port);
+                    if (TextUtils::IsEmpty(port)) port = "8080";
+                    String apnProxy;
+                    ec = apn->GetProxy(&apnProxy);
+                    if (FAILED(ec)) break;
+                    AutoPtr<IProxyInfo> proxy;
+                    ec = CProxyInfo::New(apnProxy,
+                            StringUtils::ParseInt32(port), String(NULL), (IProxyInfo**)&proxy);
+                    if (FAILED(ec)) break;
+                    ec = dcac->SetLinkPropertiesHttpProxySync(proxy);
+                } while(FALSE);
+                // } catch (NumberFormatException e) {
+                if ((ECode) E_NUMBER_FORMAT_EXCEPTION == ec) {
+                    String apnPort;
+                    apn->GetPort(&apnPort);
+                    Loge("onDataSetupComplete: NumberFormatException making ProxyProperties (%s" "): %d", apnPort.string(), ec);
+                }
+                // }
+            }
+            // everything is setup
+            String apnContextApnType;
+            apnContext->GetApnType(&apnContextApnType);
+            if (TextUtils::Equals(apnContextApnType,IPhoneConstants::APN_TYPE_DEFAULT)) {
+                SystemProperties::Set(PUPPET_MASTER_RADIO_STRESS_TEST, String("true"));
+                if (mCanSetPreferApn && mPreferredApn == NULL) {
+                    if (DBG) Log("onDataSetupComplete: PREFERED APN is null");
+                    mPreferredApn = apn;
+                    if (mPreferredApn != NULL) {
+                        Int32 mPreferredApnId;
+                        mPreferredApn->GetId(&mPreferredApnId);
+                        SetPreferredApn(mPreferredApnId);
+                    }
+                }
             } else {
-                ApnSetting apn = apnContext.getApnSetting();
+                SystemProperties::Set(PUPPET_MASTER_RADIO_STRESS_TEST, String("false"));
+            }
+            // A connection is setup
+            apnContext->SetState(DctConstantsState_CONNECTED);
+            Boolean isProvApn;
+            apnContext->IsProvisioningApn(&isProvApn);
+            AutoPtr<IContext> context;
+            IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+            AutoPtr<IConnectivityManager> cm;
+            CConnectivityManager::From(context, (IConnectivityManager**)&cm);
+            if (mProvisionBroadcastReceiver != NULL) {
+                context->UnregisterReceiver(mProvisionBroadcastReceiver);
+                mProvisionBroadcastReceiver = NULL;
+            }
+            if ((!isProvApn) || mIsProvisioning) {
+                // Hide any provisioning notification.
+                cm->SetProvisioningNotificationVisible(FALSE, IConnectivityManager::TYPE_MOBILE,
+                        mProvisionActionName);
+                // Complete the connection normally notifying the world we're connected.
+                // We do this if this isn't a special provisioning apn or if we've been
+                // told its time to provision.
+                CompleteConnection(apnContext);
+            } else {
+                // This is a provisioning APN that we're reporting as connected. Later
+                // when the user desires to upgrade this to a "default" connection,
+                // mIsProvisioning == true, we'll go through the code path above.
+                // mIsProvisioning becomes true when CMD_ENABLE_MOBILE_PROVISIONING
+                // is sent to the DCT.
                 if (DBG) {
-                    log("onDataSetupComplete: success apn=" + (apn == null ? "unknown" : apn.apn));
+                    Log("onDataSetupComplete: successful, BUT send connected to prov apn as"
+                            " mIsProvisioning:%d == false"
+                            " && (isProvisioningApn:%d == true", mIsProvisioning, isProvApn);
                 }
-                if (apn != null && apn.proxy != null && apn.proxy.length() != 0) {
-                    try {
-                        String port = apn.port;
-                        if (TextUtils.isEmpty(port)) port = "8080";
-                        ProxyInfo proxy = new ProxyInfo(apn.proxy,
-                                Integer.parseInt(port), null);
-                        dcac.setLinkPropertiesHttpProxySync(proxy);
-                    } catch (NumberFormatException e) {
-                        loge("onDataSetupComplete: NumberFormatException making ProxyProperties (" +
-                                apn.port + "): " + e);
+                // While radio is up, grab provisioning URL.  The URL contains ICCID which
+                // disappears when radio is off.
+                String mobileProvisioningUrl;
+                cm->GetMobileProvisioningUrl(&mobileProvisioningUrl);
+                AutoPtr<ITelephonyManager> tm;
+                CTelephonyManager::GetDefault((ITelephonyManager**)&tm);
+                String networkOperatorName;
+                tm->GetNetworkOperatorName(&networkOperatorName);
+                mProvisionBroadcastReceiver = new ProvisionNotificationBroadcastReceiver(this);
+                ((ProvisionNotificationBroadcastReceiver*) mProvisionBroadcastReceiver.Get())->constructor(mobileProvisioningUrl, networkOperatorName);
+                AutoPtr<IIntentFilter> intentFilter;
+                CIntentFilter::New(mProvisionActionName, (IIntentFilter**)&intentFilter);
+                AutoPtr<IIntent> intent;
+                context->RegisterReceiver(mProvisionBroadcastReceiver, intentFilter, (IIntent**)&intent);
+                // Put up user notification that sign-in is required.
+                cm->SetProvisioningNotificationVisible(TRUE, IConnectivityManager::TYPE_MOBILE,
+                        mProvisionActionName);
+                // Turn off radio to save battery and avoid wasting carrier resources.
+                // The network isn't usable and network validation will just fail anyhow.
+                SetRadio(FALSE);
+                intent = NULL;
+                CIntent::New(ITelephonyIntents::ACTION_DATA_CONNECTION_CONNECTED_TO_PROVISIONING_APN, (IIntent**)&intent);
+                AutoPtr<IApnSetting> apnSetting;
+                apnContext->GetApnSetting((IApnSetting**)&apnSetting);
+                String apn;
+                apnSetting->GetApn(&apn);
+                intent->PutExtra(IPhoneConstants::DATA_APN_KEY, apn);
+                String apnContextApnType;
+                apnContext->GetApnType(&apnContextApnType);
+                intent->PutExtra(IPhoneConstants::DATA_APN_TYPE_KEY, apnContextApnType);
+                String apnType;
+                apnContext->GetApnType(&apnType);
+                AutoPtr<ILinkProperties> linkProperties;
+                GetLinkProperties(apnType, (ILinkProperties**)&linkProperties);
+                if (linkProperties != NULL) {
+                    intent->PutExtra(IPhoneConstants::DATA_LINK_PROPERTIES_KEY, IParcelable::Probe(linkProperties));
+                    String iface;
+                    linkProperties->GetInterfaceName(&iface);
+                    if (iface != NULL) {
+                        intent->PutExtra(IPhoneConstants::DATA_IFACE_NAME_KEY, iface);
                     }
                 }
-                // everything is setup
-                if(TextUtils.equals(apnContext.getApnType(),PhoneConstants.APN_TYPE_DEFAULT)) {
-                    SystemProperties.set(PUPPET_MASTER_RADIO_STRESS_TEST, "true");
-                    if (mCanSetPreferApn && mPreferredApn == null) {
-                        if (DBG) log("onDataSetupComplete: PREFERED APN is null");
-                        mPreferredApn = apn;
-                        if (mPreferredApn != null) {
-                            setPreferredApn(mPreferredApn.id);
-                        }
-                    }
-                } else {
-                    SystemProperties.set(PUPPET_MASTER_RADIO_STRESS_TEST, "false");
+                AutoPtr<INetworkCapabilities> networkCapabilities;
+                GetNetworkCapabilities(apnType, (INetworkCapabilities**)&networkCapabilities);
+                if (networkCapabilities != NULL) {
+                    intent->PutExtra(IPhoneConstants::DATA_NETWORK_CAPABILITIES_KEY,
+                            IParcelable::Probe(networkCapabilities));
                 }
-                // A connection is setup
-                apnContext.setState(DctConstants.State.CONNECTED);
-                boolean isProvApn = apnContext.isProvisioningApn();
-                final ConnectivityManager cm = ConnectivityManager.from(mPhone.getContext());
-                if (mProvisionBroadcastReceiver != null) {
-                    mPhone.getContext().unregisterReceiver(mProvisionBroadcastReceiver);
-                    mProvisionBroadcastReceiver = null;
-                }
-                if ((!isProvApn) || mIsProvisioning) {
-                    // Hide any provisioning notification.
-                    cm.setProvisioningNotificationVisible(false, ConnectivityManager.TYPE_MOBILE,
-                            mProvisionActionName);
-                    // Complete the connection normally notifying the world we're connected.
-                    // We do this if this isn't a special provisioning apn or if we've been
-                    // told its time to provision.
-                    completeConnection(apnContext);
-                } else {
-                    // This is a provisioning APN that we're reporting as connected. Later
-                    // when the user desires to upgrade this to a "default" connection,
-                    // mIsProvisioning == true, we'll go through the code path above.
-                    // mIsProvisioning becomes true when CMD_ENABLE_MOBILE_PROVISIONING
-                    // is sent to the DCT.
-                    if (DBG) {
-                        log("onDataSetupComplete: successful, BUT send connected to prov apn as"
-                                + " mIsProvisioning:" + mIsProvisioning + " == false"
-                                + " && (isProvisioningApn:" + isProvApn + " == true");
-                    }
-                    // While radio is up, grab provisioning URL.  The URL contains ICCID which
-                    // disappears when radio is off.
-                    mProvisionBroadcastReceiver = new ProvisionNotificationBroadcastReceiver(
-                            cm.getMobileProvisioningUrl(),
-                            TelephonyManager.getDefault().getNetworkOperatorName());
-                    mPhone.getContext().registerReceiver(mProvisionBroadcastReceiver,
-                            new IntentFilter(mProvisionActionName));
-                    // Put up user notification that sign-in is required.
-                    cm.setProvisioningNotificationVisible(true, ConnectivityManager.TYPE_MOBILE,
-                            mProvisionActionName);
-                    // Turn off radio to save battery and avoid wasting carrier resources.
-                    // The network isn't usable and network validation will just fail anyhow.
-                    setRadio(false);
-                    Intent intent = new Intent(
-                            TelephonyIntents.ACTION_DATA_CONNECTION_CONNECTED_TO_PROVISIONING_APN);
-                    intent.putExtra(PhoneConstants.DATA_APN_KEY, apnContext.getApnSetting().apn);
-                    intent.putExtra(PhoneConstants.DATA_APN_TYPE_KEY, apnContext.getApnType());
-                    String apnType = apnContext.getApnType();
-                    LinkProperties linkProperties = getLinkProperties(apnType);
-                    if (linkProperties != null) {
-                        intent.putExtra(PhoneConstants.DATA_LINK_PROPERTIES_KEY, linkProperties);
-                        String iface = linkProperties.getInterfaceName();
-                        if (iface != null) {
-                            intent.putExtra(PhoneConstants.DATA_IFACE_NAME_KEY, iface);
-                        }
-                    }
-                    NetworkCapabilities networkCapabilities = getNetworkCapabilities(apnType);
-                    if (networkCapabilities != null) {
-                        intent.putExtra(PhoneConstants.DATA_NETWORK_CAPABILITIES_KEY,
-                                networkCapabilities);
-                    }
-                    mPhone.getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
-                }
-                if (DBG) {
-                    log("onDataSetupComplete: SETUP complete type=" + apnContext.getApnType()
-                        + ", reason:" + apnContext.getReason());
-                }
+                context->SendBroadcastAsUser(intent, UserHandle::ALL);
             }
-        } else {
-            cause = (DcFailCause) (ar.result);
             if (DBG) {
-                ApnSetting apn = apnContext.getApnSetting();
-                log(String.format("onDataSetupComplete: error apn=%s cause=%s",
-                        (apn == null ? "unknown" : apn.apn), cause));
+                String apnContextApnType;
+                apnContext->GetApnType(&apnContextApnType);
+                String reason;
+                apnContext->GetReason(&reason);
+                Log("onDataSetupComplete: SETUP complete type=%s, reason:%s", apnContextApnType.string(), reason.string());
             }
-            if (cause == null) {
-                cause = DcFailCause.UNKNOWN;
-            }
-            if (cause.isEventLoggable()) {
-                // Log this failure to the Event Logs.
-                int cid = getCellLocationId();
-                EventLog.writeEvent(EventLogTags.PDP_SETUP_FAIL,
-                        cause.ordinal(), cid, TelephonyManager.getDefault().getNetworkType());
-            }
-            ApnSetting apn = apnContext.getApnSetting();
-            mPhone.notifyPreciseDataConnectionFailed(apnContext.getReason(),
-                    apnContext.getApnType(), apn != null ? apn.apn : "unknown", cause.toString());
-            // Count permanent failures and remove the APN we just tried
-            if (isPermanentFail(cause)) apnContext.decWaitingApnsPermFailCount();
-            apnContext.removeWaitingApn(apnContext.getApnSetting());
-            if (DBG) {
-                if (apnContext.getWaitingApns() == null){
-                    log(String.format("onDataSetupComplete: WaitingApns.size = null" +
-                            " WaitingApnsPermFailureCountDown=%d",
-                            apnContext.getWaitingApnsPermFailCount()));
-                }
-                else {
-                    log(String.format("onDataSetupComplete: WaitingApns.size=%d" +
-                            " WaitingApnsPermFailureCountDown=%d",
-                            apnContext.getWaitingApns().size(),
-                            apnContext.getWaitingApnsPermFailCount()));
-                }
-            }
-            handleError = true;
         }
-        if (handleError) {
-            onDataSetupCompleteError(ar);
+    } else {
+        cause = IDcFailCause::Probe(((AsyncResult*) ar)->mResult);
+        if (DBG) {
+            AutoPtr<IApnSetting> apn;
+            apnContext->GetApnSetting((IApnSetting**)&apn);
+            String apnApn;
+            apn->GetApn(&apnApn);
+            Log("onDataSetupComplete: error apn=%s cause=%s", (apn == NULL ? "unknown" : apnApn.string()), TO_CSTR(cause));
         }
-        /* If flag is set to false after SETUP_DATA_CALL is invoked, we need
-         * to clean data connections.
-         */
-        if (!mInternalDataEnabled) {
-            cleanUpAllConnections(null);
+        if (cause == NULL) {
+            CDcFailCause::New(DcFailCause_UNKNOWN, (IDcFailCause**)&cause);
         }
-
-#endif
+        Boolean isEventLoggable;
+        cause->IsEventLoggable(&isEventLoggable);
+        if (isEventLoggable) {
+            // Log this failure to the Event Logs.
+            Int32 cid;
+            GetCellLocationId(&cid);
+            Int32 networkType;
+            AutoPtr<ITelephonyManager> tm;
+            CTelephonyManager::GetDefault((ITelephonyManager**)&tm);
+            tm->GetNetworkType(&networkType);
+            Logger::D(LOG__TAG, "TODO EventLog");
+            // EventLog::WriteEvent(IEventLogTags::PDP_SETUP_FAIL,
+            //         cause, cid, networkType);
+        }
+        AutoPtr<IApnSetting> apn;
+        apnContext->GetApnSetting((IApnSetting**)&apn);
+        String apnContextApnType;
+        apnContext->GetApnType(&apnContextApnType);
+        String reason;
+        apnContext->GetReason(&reason);
+        String apnApn;
+        apn->GetApn(&apnApn);
+        mPhone->NotifyPreciseDataConnectionFailed(reason, apnContextApnType, apn != NULL ? apnApn : String("unknown"), TO_STR(cause));
+        // Count permanent failures and remove the APN we just tried
+        Boolean isPermanentFail;
+        IsPermanentFail(cause, &isPermanentFail);
+        if (isPermanentFail) {
+            apnContext->DecWaitingApnsPermFailCount();
+        }
+        AutoPtr<IApnSetting> apnSetting;
+        apnContext->GetApnSetting((IApnSetting**)&apnSetting);
+        apnContext->RemoveWaitingApn(apnSetting);
+        if (DBG) {
+            AutoPtr<IArrayList> waitingApns;
+            apnContext->GetWaitingApns((IArrayList**)&waitingApns);
+            if (waitingApns == NULL){
+                Int32 waitingApnsPermFailCount;
+                apnContext->GetWaitingApnsPermFailCount(&waitingApnsPermFailCount);
+                Log("onDataSetupComplete: WaitingApns.size = null"
+                        " WaitingApnsPermFailureCountDown=%d",
+                        waitingApnsPermFailCount);
+            }
+            else {
+                Int32 size;
+                waitingApns->GetSize(&size);
+                Int32 waitingApnsPermFailCount;
+                apnContext->GetWaitingApnsPermFailCount(&waitingApnsPermFailCount);
+                Log("onDataSetupComplete: WaitingApns.size=%d"
+                        " WaitingApnsPermFailureCountDown=%d",
+                        size,
+                        waitingApnsPermFailCount);
+            }
+        }
+        handleError = TRUE;
+    }
+    if (handleError) {
+        OnDataSetupCompleteError(ar);
+    }
+    /* If flag is set to false after SETUP_DATA_CALL is invoked, we need
+     * to clean data connections.
+     */
+    if (!mInternalDataEnabled) {
+        CleanUpAllConnections(String(NULL));
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::GetApnDelay(
     /* [in] */ const String& reason,
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mFailFast || Phone.REASON_NW_TYPE_CHANGED.equals(reason) ||
-                Phone.REASON_APN_CHANGED.equals(reason)) {
-            return SystemProperties.getInt("persist.radio.apn_ff_delay",
-                    APN_FAIL_FAST_DELAY_DEFAULT_MILLIS);
-        } else {
-            return SystemProperties.getInt("persist.radio.apn_delay", APN_DELAY_DEFAULT_MILLIS);
-        }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (mFailFast || IPhone::REASON_NW_TYPE_CHANGED.Equals(reason) ||
+            IPhone::REASON_APN_CHANGED.Equals(reason)) {
+        return SystemProperties::GetInt32(String("persist.radio.apn_ff_delay"),
+                APN_FAIL_FAST_DELAY_DEFAULT_MILLIS, result);
+    } else {
+        return SystemProperties::GetInt32(String("persist.radio.apn_delay"), APN_DELAY_DEFAULT_MILLIS, result);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::OnDataSetupCompleteError(
     /* [in] */ IAsyncResult* ar)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        String reason = "";
-        ApnContext apnContext = null;
-        if(ar.userObj instanceof ApnContext){
-            apnContext = (ApnContext)ar.userObj;
-        } else {
-            throw new RuntimeException("onDataSetupCompleteError: No apnContext");
-        }
-        // See if there are more APN's to try
-        if (apnContext.getWaitingApns() == null || apnContext.getWaitingApns().isEmpty()) {
-            apnContext.setState(DctConstants.State.FAILED);
-            mPhone.notifyDataConnection(Phone.REASON_APN_FAILED, apnContext.getApnType());
-            apnContext.setDataConnectionAc(null);
-            if (apnContext.getWaitingApnsPermFailCount() == 0) {
-                if (DBG) {
-                    log("onDataSetupCompleteError: All APN's had permanent failures, stop retrying");
-                }
-            } else {
-                int delay = getApnDelay(Phone.REASON_APN_FAILED);
-                if (DBG) {
-                    log("onDataSetupCompleteError: Not all APN's had permanent failures delay="
-                            + delay);
-                }
-                startAlarmForRestartTrySetup(delay, apnContext);
+    String reason("");
+    AutoPtr<IApnContext> apnContext;
+    if (IApnContext::Probe(((AsyncResult*) ar)->mUserObj) != NULL){
+        apnContext = IApnContext::Probe(((AsyncResult*) ar)->mUserObj);
+    } else {
+        Logger::E(LOG__TAG, "onDataSetupCompleteError: No apnContext");
+        return E_RUNTIME_EXCEPTION;
+    }
+    // See if there are more APN's to try
+    AutoPtr<IArrayList> waitingApns;
+    apnContext->GetWaitingApns((IArrayList**)&waitingApns);
+    Boolean isEmpty;
+    waitingApns->IsEmpty(&isEmpty);
+    if (waitingApns == NULL || isEmpty) {
+        apnContext->SetState(DctConstantsState_FAILED);
+        String apnContextApnType;
+        apnContext->GetApnType(&apnContextApnType);
+        mPhone->NotifyDataConnection(IPhone::REASON_APN_FAILED, apnContextApnType);
+        apnContext->SetDataConnectionAc(NULL);
+        Int32 waitingApnsPermFailCount;
+        apnContext->GetWaitingApnsPermFailCount(&waitingApnsPermFailCount);
+        if (waitingApnsPermFailCount == 0) {
+            if (DBG) {
+                Log("onDataSetupCompleteError: All APN's had permanent failures, stop retrying");
             }
         } else {
-            if (DBG) log("onDataSetupCompleteError: Try next APN");
-            apnContext.setState(DctConstants.State.SCANNING);
-            // Wait a bit before trying the next APN, so that
-            // we're not tying up the RIL command channel
-            startAlarmForReconnect(getApnDelay(Phone.REASON_APN_FAILED), apnContext);
+            Int32 delay;
+            GetApnDelay(IPhone::REASON_APN_FAILED, &delay);
+            if (DBG) {
+                Log("onDataSetupCompleteError: Not all APN's had permanent failures delay=%d", delay);
+            }
+            StartAlarmForRestartTrySetup(delay, apnContext);
         }
-
-#endif
+    } else {
+        if (DBG) Log("onDataSetupCompleteError: Try next APN");
+        apnContext->SetState(DctConstantsState_SCANNING);
+        // Wait a bit before trying the next APN, so that
+        // we're not tying up the RIL command channel
+        Int32 delay;
+        GetApnDelay(IPhone::REASON_APN_FAILED, &delay);
+        StartAlarmForReconnect(delay, apnContext);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::OnDisconnectDone(
     /* [in] */ Int32 connId,
     /* [in] */ IAsyncResult* ar)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ApnContext apnContext = null;
-        if (ar.userObj instanceof ApnContext) {
-            apnContext = (ApnContext) ar.userObj;
+    AutoPtr<IApnContext> apnContext;
+    if (IApnContext::Probe(((AsyncResult*) ar)->mUserObj) != NULL) {
+        apnContext = IApnContext::Probe(((AsyncResult*) ar)->mUserObj);
+    } else {
+        Loge("onDisconnectDone: Invalid ar in onDisconnectDone, ignore");
+        return NOERROR;
+    }
+    if (DBG) Log("onDisconnectDone: EVENT_DISCONNECT_DONE apnContext=%s", TO_CSTR(apnContext));
+    apnContext->SetState(DctConstantsState_IDLE);
+    String apnContextApnType;
+    apnContext->GetApnType(&apnContextApnType);
+    String reason;
+    apnContext->GetReason(&reason);
+    mPhone->NotifyDataConnection(reason, apnContextApnType);
+    // if all data connection are gone, check whether Airplane mode request was
+    // pending.
+    Boolean isDisconnected;
+    IsDisconnected(&isDisconnected);
+    if (isDisconnected) {
+        AutoPtr<IServiceStateTracker> serviceStateTracker;
+        mPhone->GetServiceStateTracker((IServiceStateTracker**)&serviceStateTracker);
+        Boolean isProcessPendingRadioPowerOffAfterDataOff;
+        serviceStateTracker->ProcessPendingRadioPowerOffAfterDataOff(&isProcessPendingRadioPowerOffAfterDataOff);
+        if (isProcessPendingRadioPowerOffAfterDataOff) {
+            if (DBG) Log("onDisconnectDone: radio will be turned off, no retries");
+            // Radio will be turned off. No need to retry data setup
+            apnContext->SetApnSetting(NULL);
+            apnContext->SetDataConnectionAc(NULL);
+            // Need to notify disconnect as well, in the case of switching Airplane mode.
+            // Otherwise, it would cause 30s delayed to turn on Airplane mode.
+            if (mDisconnectPendingCount > 0)
+                mDisconnectPendingCount--;
+            if (mDisconnectPendingCount == 0) {
+                NotifyDataDisconnectComplete();
+                NotifyAllDataDisconnected();
+            }
+            return NOERROR;
+        }
+    }
+    // If APN is still enabled, try to bring it back up automatically
+    Boolean isReady;
+    apnContext->IsReady(&isReady);
+    Boolean isRetryAfterDisconnected;
+    RetryAfterDisconnected(apnContext, &isRetryAfterDisconnected);
+    Boolean b;
+    mAttached->Get(&b);
+    if (b && isReady && isRetryAfterDisconnected) {
+        SystemProperties::Set(PUPPET_MASTER_RADIO_STRESS_TEST, String("false"));
+        // Wait a bit before trying the next APN, so that
+        // we're not tying up the RIL command channel.
+        // This also helps in any external dependency to turn off the context.
+        if (DBG) Log("onDisconnectDone: attached, ready and retry after disconnect");
+        String reason;
+        apnContext->GetReason(&reason);
+        Int32 apnDelay;
+        GetApnDelay(reason, &apnDelay);
+        StartAlarmForReconnect(apnDelay, apnContext);
+    } else {
+        AutoPtr<IContext> context;
+        IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+        AutoPtr<IResources> res;
+        context->GetResources((IResources**)&res);
+        Boolean restartRadioAfterProvisioning;
+        res->GetBoolean(R::bool_::config_restartRadioAfterProvisioning, &restartRadioAfterProvisioning);
+        Boolean isProvisioningApn;
+        apnContext->IsProvisioningApn(&isProvisioningApn);
+        if (isProvisioningApn && restartRadioAfterProvisioning) {
+            Log("onDisconnectDone: restartRadio after provisioning");
+            RestartRadio();
+        }
+        apnContext->SetApnSetting(NULL);
+        apnContext->SetDataConnectionAc(NULL);
+        Boolean isOnlySingleDcAllowed;
+        AutoPtr<IServiceState> serviceState;
+        IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+        Int32 rilDataRadioTechnology;
+        serviceState->GetRilDataRadioTechnology(&rilDataRadioTechnology);
+        IsOnlySingleDcAllowed(rilDataRadioTechnology, &isOnlySingleDcAllowed);
+        if (isOnlySingleDcAllowed) {
+            if (DBG) Log("onDisconnectDone: isOnlySigneDcAllowed true so setup single apn");
+            SetupDataOnConnectableApns(IPhone::REASON_SINGLE_PDN_ARBITRATION);
         } else {
-            loge("onDisconnectDone: Invalid ar in onDisconnectDone, ignore");
-            return;
+            if (DBG) Log("onDisconnectDone: not retrying");
         }
-        if(DBG) log("onDisconnectDone: EVENT_DISCONNECT_DONE apnContext=" + apnContext);
-        apnContext.setState(DctConstants.State.IDLE);
-        mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
-        // if all data connection are gone, check whether Airplane mode request was
-        // pending.
-        if (isDisconnected()) {
-            if (mPhone.getServiceStateTracker().processPendingRadioPowerOffAfterDataOff()) {
-                if(DBG) log("onDisconnectDone: radio will be turned off, no retries");
-                // Radio will be turned off. No need to retry data setup
-                apnContext.setApnSetting(null);
-                apnContext.setDataConnectionAc(null);
-                // Need to notify disconnect as well, in the case of switching Airplane mode.
-                // Otherwise, it would cause 30s delayed to turn on Airplane mode.
-                if (mDisconnectPendingCount > 0)
-                    mDisconnectPendingCount--;
-                if (mDisconnectPendingCount == 0) {
-                    notifyDataDisconnectComplete();
-                    notifyAllDataDisconnected();
-                }
-                return;
-            }
-        }
-        // If APN is still enabled, try to bring it back up automatically
-        if (mAttached.get() && apnContext.isReady() && retryAfterDisconnected(apnContext)) {
-            SystemProperties.set(PUPPET_MASTER_RADIO_STRESS_TEST, "false");
-            // Wait a bit before trying the next APN, so that
-            // we're not tying up the RIL command channel.
-            // This also helps in any external dependency to turn off the context.
-            if(DBG) log("onDisconnectDone: attached, ready and retry after disconnect");
-            startAlarmForReconnect(getApnDelay(apnContext.getReason()), apnContext);
-        } else {
-            boolean restartRadioAfterProvisioning = mPhone.getContext().getResources().getBoolean(
-                    com.android.internal.R.bool.config_restartRadioAfterProvisioning);
-            if (apnContext.isProvisioningApn() && restartRadioAfterProvisioning) {
-                log("onDisconnectDone: restartRadio after provisioning");
-                restartRadio();
-            }
-            apnContext.setApnSetting(null);
-            apnContext.setDataConnectionAc(null);
-            if (isOnlySingleDcAllowed(mPhone.getServiceState().getRilDataRadioTechnology())) {
-                if(DBG) log("onDisconnectDone: isOnlySigneDcAllowed true so setup single apn");
-                setupDataOnConnectableApns(Phone.REASON_SINGLE_PDN_ARBITRATION);
-            } else {
-                if(DBG) log("onDisconnectDone: not retrying");
-            }
-        }
-        if (mDisconnectPendingCount > 0)
-            mDisconnectPendingCount--;
-        if (mDisconnectPendingCount == 0) {
-            notifyDataDisconnectComplete();
-            notifyAllDataDisconnected();
-        }
-
-#endif
+    }
+    if (mDisconnectPendingCount > 0)
+        mDisconnectPendingCount--;
+    if (mDisconnectPendingCount == 0) {
+        NotifyDataDisconnectComplete();
+        NotifyAllDataDisconnected();
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::OnDisconnectDcRetrying(
     /* [in] */ Int32 connId,
     /* [in] */ IAsyncResult* ar)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // We could just do this in DC!!!
-        ApnContext apnContext = null;
-        if (ar.userObj instanceof ApnContext) {
-            apnContext = (ApnContext) ar.userObj;
-        } else {
-            loge("onDisconnectDcRetrying: Invalid ar in onDisconnectDone, ignore");
-            return;
-        }
-        apnContext.setState(DctConstants.State.RETRYING);
-        if(DBG) log("onDisconnectDcRetrying: apnContext=" + apnContext);
-        mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
-
-#endif
+    // We could just do this in DC!!!
+    AutoPtr<IApnContext> apnContext;
+    if (IApnContext::Probe(((AsyncResult*) ar)->mUserObj) != NULL) {
+        apnContext = IApnContext::Probe(((AsyncResult*) ar)->mUserObj);
+    } else {
+        Loge("onDisconnectDcRetrying: Invalid ar in onDisconnectDone, ignore");
+        return NOERROR;
+    }
+    apnContext->SetState(DctConstantsState_RETRYING);
+    if (DBG) Log("onDisconnectDcRetrying: apnContext=%s", TO_CSTR(apnContext));
+    String apnContextApnType;
+    apnContext->GetApnType(&apnContextApnType);
+    String reason;
+    apnContext->GetReason(&reason);
+    mPhone->NotifyDataConnection(reason, apnContextApnType);
+    return NOERROR;
 }
 
 ECode DcTracker::OnVoiceCallStarted()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("onVoiceCallStarted");
-        mInVoiceCall = true;
-        if (isConnected() && ! mPhone.getServiceStateTracker().isConcurrentVoiceAndDataAllowed()) {
-            if (DBG) log("onVoiceCallStarted stop polling");
-            stopNetStatPoll();
-            stopDataStallAlarm();
-            notifyDataConnection(Phone.REASON_VOICE_CALL_STARTED);
-        }
-
-#endif
+    if (DBG) Log("onVoiceCallStarted");
+    mInVoiceCall = TRUE;
+    Boolean isConcurrentVoiceAndDataAllowed;
+    AutoPtr<IServiceStateTracker> serviceStateTracker;
+    mPhone->GetServiceStateTracker((IServiceStateTracker**)&serviceStateTracker);
+    serviceStateTracker->IsConcurrentVoiceAndDataAllowed(&isConcurrentVoiceAndDataAllowed);
+    Boolean isConnected;
+    IsConnected(&isConnected);
+    if (isConnected && ! isConcurrentVoiceAndDataAllowed) {
+        if (DBG) Log("onVoiceCallStarted stop polling");
+        StopNetStatPoll();
+        StopDataStallAlarm();
+        NotifyDataConnection(IPhone::REASON_VOICE_CALL_STARTED);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::OnVoiceCallEnded()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("onVoiceCallEnded");
-        mInVoiceCall = false;
-        if (isConnected()) {
-            if (!mPhone.getServiceStateTracker().isConcurrentVoiceAndDataAllowed()) {
-                startNetStatPoll();
-                startDataStallAlarm(DATA_STALL_NOT_SUSPECTED);
-                notifyDataConnection(Phone.REASON_VOICE_CALL_ENDED);
-            } else {
-                // clean slate after call end.
-                resetPollStats();
-            }
+    if (DBG) Log("onVoiceCallEnded");
+    mInVoiceCall = FALSE;
+    Boolean isConnected;
+    IsConnected(&isConnected);
+    if (isConnected) {
+        AutoPtr<IServiceStateTracker> serviceStateTracker;
+        mPhone->GetServiceStateTracker((IServiceStateTracker**)&serviceStateTracker);
+        Boolean isConcurrentVoiceAndDataAllowed;
+        serviceStateTracker->IsConcurrentVoiceAndDataAllowed(&isConcurrentVoiceAndDataAllowed);
+        if (!isConcurrentVoiceAndDataAllowed) {
+            StartNetStatPoll();
+            StartDataStallAlarm(DATA_STALL_NOT_SUSPECTED);
+            NotifyDataConnection(IPhone::REASON_VOICE_CALL_ENDED);
+        } else {
+            // clean slate after call end.
+            ResetPollStats();
         }
-        // reset reconnect timer
-        setupDataOnConnectableApns(Phone.REASON_VOICE_CALL_ENDED);
-
-#endif
+    }
+    // reset reconnect timer
+    SetupDataOnConnectableApns(IPhone::REASON_VOICE_CALL_ENDED);
+    return NOERROR;
 }
 
 ECode DcTracker::OnCleanUpConnection(
@@ -2934,193 +3889,269 @@ ECode DcTracker::OnCleanUpConnection(
     /* [in] */ Int32 apnId,
     /* [in] */ const String& reason)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("onCleanUpConnection");
-        ApnContext apnContext = mApnContexts.get(apnIdToType(apnId));
-        if (apnContext != null) {
-            apnContext.setReason(reason);
-            cleanUpConnection(tearDown, apnContext);
-        }
-
-#endif
+    if (DBG) Log("onCleanUpConnection");
+    String apnType;
+    ApnIdToType(apnId, &apnType);
+    AutoPtr<IInterface> obj;
+    mApnContexts->Get(StringUtils::ParseCharSequence(apnType), (IInterface**)&obj);
+    AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+    if (apnContext != NULL) {
+        apnContext->SetReason(reason);
+        CleanUpConnection(tearDown, apnContext);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::IsConnected(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        for (ApnContext apnContext : mApnContexts.values()) {
-            if (apnContext.getState() == DctConstants.State.CONNECTED) {
-                // At least one context is connected, return true
-                return true;
-            }
-        }
-        // There are not any contexts connected, return false
-        return false;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IIterator> it;
+    AutoPtr<ICollection> values;
+    mApnContexts->GetValues((ICollection**)&values);
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+        DctConstantsState state;
+        apnContext->GetState(&state);
+        if (state == DctConstantsState_CONNECTED) {
+            // At least one context is connected, return true
+            *result = TRUE;
+            return NOERROR;
+        }
+    }
+    // There are not any contexts connected, return false
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode DcTracker::IsDisconnected(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        for (ApnContext apnContext : mApnContexts.values()) {
-            if (!apnContext.isDisconnected()) {
-                // At least one context was not disconnected return false
-                return false;
-            }
-        }
-        // All contexts were disconnected so return true
-        return true;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IIterator> it;
+    AutoPtr<ICollection> values;
+    mApnContexts->GetValues((ICollection**)&values);
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+        Boolean isDisconnected;
+        apnContext->IsDisconnected(&isDisconnected);
+        if (!isDisconnected) {
+            // At least one context was not disconnected return false
+            *result = FALSE;
+            return NOERROR;
+        }
+    }
+    // All contexts were disconnected so return true
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode DcTracker::NotifyDataConnection(
     /* [in] */ const String& reason)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("notifyDataConnection: reason=" + reason);
-        for (ApnContext apnContext : mApnContexts.values()) {
-            if ((mAttached.get() || !mOosIsDisconnect) && apnContext.isReady()) {
-                if (DBG) log("notifyDataConnection: type:" + apnContext.getApnType());
-                mPhone.notifyDataConnection(reason != null ? reason : apnContext.getReason(),
-                        apnContext.getApnType());
-            }
+    if (DBG) Log("notifyDataConnection: reason=%s", reason.string());
+    AutoPtr<IIterator> it;
+    AutoPtr<ICollection> values;
+    mApnContexts->GetValues((ICollection**)&values);
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+        Boolean isReady;
+        apnContext->IsReady(&isReady);
+        Boolean b;
+        mAttached->Get(&b);
+        if ((b || !mOosIsDisconnect) && isReady) {
+            String apnContextApnType;
+            apnContext->GetApnType(&apnContextApnType);
+            if (DBG) Log("notifyDataConnection: type:%s", apnContextApnType.string());
+            String apnContextReason;
+            apnContext->GetReason(&apnContextReason);
+            mPhone->NotifyDataConnection(reason != NULL ? reason : apnContextReason,
+                    apnContextApnType);
         }
-        notifyOffApnsOfAvailability(reason);
-
-#endif
+    }
+    NotifyOffApnsOfAvailability(reason);
+    return NOERROR;
 }
 
 ECode DcTracker::IsNvSubscription(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        int radioTech = mPhone.getServiceState().getRilVoiceRadioTechnology();
-        if (mCdmaSsm == null) {
-            return false;
-        }
-        if (UiccController.getFamilyFromRadioTechnology(radioTech) == UiccController.APP_FAM_3GPP2
-                && mCdmaSsm.getCdmaSubscriptionSource() ==
-                        CdmaSubscriptionSourceManager.SUBSCRIPTION_FROM_NV) {
-            return true;
-        }
-        return false;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IServiceState> serviceState;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    Int32 radioTech;
+    serviceState->GetRilVoiceRadioTechnology(&radioTech);
+    if (mCdmaSsm == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    Int32 cdmaSubscriptionSource;
+    mCdmaSsm->GetCdmaSubscriptionSource(&cdmaSubscriptionSource);
+    assert(0 && "TODO: UiccController");
+    // if (UiccController::GetFamilyFromRadioTechnology(radioTech) == IUiccController::APP_FAM_3GPP2
+    //         && cdmaSubscriptionSource ==
+    //                 ICdmaSubscriptionSourceManager::SUBSCRIPTION_FROM_NV) {
+    //     *result = TRUE;
+    //     return NOERROR;
+    // }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode DcTracker::GetOperatorNumeric(
-    /* [out] */ String* result)
+    /* [out] */ String* _result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        String result;
-        if (isNvSubscription()) {
-            result = SystemProperties.get(CDMAPhone.PROPERTY_CDMA_HOME_OPERATOR_NUMERIC);
-            log("getOperatorNumberic - returning from NV: " + result);
-        } else {
-            IccRecords r = mIccRecords.get();
-            result = (r != null) ? r.getOperatorNumeric() : "";
-            log("getOperatorNumberic - returning from card: " + result);
-        }
-        if (result == null) result = "";
-        return result;
+    VALIDATE_NOT_NULL(_result)
 
-#endif
+    String result;
+    Boolean isNvSubscription;
+    IsNvSubscription(&isNvSubscription);
+    if (isNvSubscription) {
+        SystemProperties::Get(ICDMAPhone::PROPERTY_CDMA_HOME_OPERATOR_NUMERIC, &result);
+        Log("getOperatorNumberic - returning from NV: %s", result.string());
+    } else {
+        AutoPtr<IInterface> obj;
+        mIccRecords->Get((IInterface**)&obj);
+        AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
+        if (r != NULL) {
+            r->GetOperatorNumeric(&result);
+        }
+        else {
+            result = "";
+        }
+        Log("getOperatorNumberic - returning from card: %s", result.string());
+    }
+    if (result == NULL) result = "";
+    *_result = result;
+    return NOERROR;
 }
 
 ECode DcTracker::CreateAllApnList()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mAllApnSettings.clear();
-        String _operator = getOperatorNumeric();
-        int radioTech = mPhone.getServiceState().getRilDataRadioTechnology();
-        if (mOmhApt != null && (ServiceState.isCdma(radioTech) &&
-                ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD != radioTech)) {
-            ArrayList<ApnSetting> mOmhApnsList = new ArrayList<ApnSetting>();
-            mOmhApnsList = mOmhApt.getOmhApnProfilesList();
-            if (!mOmhApnsList.isEmpty()) {
-                if (DBG) log("createAllApnList: Copy Omh profiles");
-                mAllApnSettings.addAll(mOmhApnsList);
-            }
+    mAllApnSettings->Clear();
+    String _operator;
+    GetOperatorNumeric(&_operator);
+    AutoPtr<IServiceState> serviceState;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    Int32 radioTech;
+    serviceState->GetRilDataRadioTechnology(&radioTech);
+    Boolean isCdma;
+    CServiceState::IsCdma(radioTech, &isCdma);
+    if (mOmhApt != NULL && (isCdma &&
+            IServiceState::RIL_RADIO_TECHNOLOGY_EHRPD != radioTech)) {
+        AutoPtr<IArrayList> mOmhApnsList;
+        CArrayList::New((IArrayList**)&mOmhApnsList);
+        mOmhApt->GetOmhApnProfilesList((IArrayList**)&mOmhApnsList);
+        Boolean isEmpty;
+        mOmhApnsList->IsEmpty(&isEmpty);
+        if (!isEmpty) {
+            if (DBG) Log("createAllApnList: Copy Omh profiles");
+            mAllApnSettings->AddAll(ICollection::Probe(mOmhApnsList));
         }
-        if (mAllApnSettings.isEmpty()) {
-            if (_operator != null && !_operator.isEmpty()) {
-                String selection = "numeric = '" + _operator + "'";
-                // query only enabled apn.
-                // carrier_enabled : 1 means enabled apn, 0 disabled apn.
-                selection += " and carrier_enabled = 1";
-                if (DBG) log("createAllApnList: selection=" + selection);
-                Cursor cursor = mPhone.getContext().getContentResolver().query(
-                        Telephony.Carriers.CONTENT_URI, null, selection, null, null);
-                if (cursor != null) {
-                    if (cursor.getCount() > 0) {
-                        mAllApnSettings = createApnList(cursor);
-                    }
-                    cursor.close();
+    }
+    Boolean isEmpty;
+    mAllApnSettings->IsEmpty(&isEmpty);
+    if (isEmpty) {
+        Boolean _operatorIsEmpty = _operator.IsEmpty();
+        if (!_operator.IsNull() && !_operatorIsEmpty) {
+            String selection = String("numeric = '") + _operator + "'";
+            // query only enabled apn.
+            // carrier_enabled : 1 means enabled apn, 0 disabled apn.
+            selection += " and carrier_enabled = 1";
+            if (DBG) Log("createAllApnList: selection=%s", selection.string());
+            AutoPtr<IContext> context;
+            IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+            AutoPtr<IContentResolver> contentResolver;
+            context->GetContentResolver((IContentResolver**)&contentResolver);
+            AutoPtr<ICursor> cursor;
+            contentResolver->Query(
+                    Elastos::Droid::Provider::Telephony::Carriers::CONTENT_URI, NULL, selection, NULL, String(NULL), (ICursor**)&cursor);
+            if (cursor != NULL) {
+                Int32 count;
+                cursor->GetCount(&count);
+                if (count > 0) {
+                    CreateApnList(cursor, (IArrayList**)&mAllApnSettings);
                 }
+                ICloseable::Probe(cursor)->Close();
             }
         }
-        dedupeApnSettings();
-        if (mAllApnSettings.isEmpty() && isDummyProfileNeeded()) {
-            addDummyApnSettings(_operator);
+    }
+    DedupeApnSettings();
+    Boolean isDummyProfileNeeded;
+    IsDummyProfileNeeded(&isDummyProfileNeeded);
+    if (isEmpty && isDummyProfileNeeded) {
+        AddDummyApnSettings(_operator);
+    }
+    AddEmergencyApnSetting();
+    if (isEmpty) {
+        if (DBG) Log("createAllApnList: No APN found for carrier: %s", _operator.string());
+        mPreferredApn = NULL;
+        // TODO: What is the right behavior?
+        //notifyNoData(DataConnection.FailCause.MISSING_UNKNOWN_APN);
+    } else {
+        GetPreferredApn((IApnSetting**)&mPreferredApn);
+        String numeric;
+        mPreferredApn->GetNumeric(&numeric);
+        if (mPreferredApn != NULL && !numeric.Equals(_operator)) {
+            mPreferredApn = NULL;
+            SetPreferredApn(-1);
         }
-        addEmergencyApnSetting();
-        if (mAllApnSettings.isEmpty()) {
-            if (DBG) log("createAllApnList: No APN found for carrier: " + _operator);
-            mPreferredApn = null;
-            // TODO: What is the right behavior?
-            //notifyNoData(DataConnection.FailCause.MISSING_UNKNOWN_APN);
-        } else {
-            mPreferredApn = getPreferredApn();
-            if (mPreferredApn != null && !mPreferredApn.numeric.equals(_operator)) {
-                mPreferredApn = null;
-                setPreferredApn(-1);
-            }
-            if (DBG) log("createAllApnList: mPreferredApn=" + mPreferredApn);
-        }
-        if (DBG) log("createAllApnList: X mAllApnSettings=" + mAllApnSettings);
-        setDataProfilesAsNeeded();
-
-#endif
+        if (DBG) Log("createAllApnList: mPreferredApn=%s", TO_CSTR(mPreferredApn));
+    }
+    if (DBG) Log("createAllApnList: X mAllApnSettings=%s", TO_CSTR(mAllApnSettings));
+    SetDataProfilesAsNeeded();
+    return NOERROR;
 }
 
 ECode DcTracker::DedupeApnSettings()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ArrayList<ApnSetting> resultApns = new ArrayList<ApnSetting>();
-        // coalesce APNs if they are similar enough to prevent
-        // us from bringing up two data calls with the same interface
-        int i = 0;
-        while (i < mAllApnSettings.size() - 1) {
-            ApnSetting first = mAllApnSettings.get(i);
-            ApnSetting second = null;
-            int j = i + 1;
-            while (j < mAllApnSettings.size()) {
-                second = mAllApnSettings.get(j);
-                if (apnsSimilar(first, second)) {
-                    ApnSetting newApn = mergeApns(first, second);
-                    mAllApnSettings.set(i, newApn);
-                    first = newApn;
-                    mAllApnSettings.remove(j);
-                } else {
-                    j++;
-                }
+    AutoPtr<IArrayList> resultApns;
+    CArrayList::New((IArrayList**)&resultApns);
+    // coalesce APNs if they are similar enough to prevent
+    // us from bringing up two data calls with the same interface
+    Int32 i = 0;
+    Int32 size;
+    mAllApnSettings->GetSize(&size);
+    while (i < size - 1) {
+        AutoPtr<IInterface> obj;
+        mAllApnSettings->Get(i, (IInterface**)&obj);
+        AutoPtr<IApnSetting> first = IApnSetting::Probe(obj);
+        AutoPtr<IApnSetting> second;
+        Int32 j = i + 1;
+        while (j < size) {
+            AutoPtr<IInterface> obj;
+            mAllApnSettings->Get(j, (IInterface**)&obj);
+            second = IApnSetting::Probe(obj);
+            Boolean isApnsSimilar;
+            ApnsSimilar(first, second, &isApnsSimilar);
+            if (isApnsSimilar) {
+                AutoPtr<IApnSetting> newApn;
+                MergeApns(first, second, (IApnSetting**)&newApn);
+                mAllApnSettings->Set(i, newApn);
+                first = newApn;
+                mAllApnSettings->Remove(j);
+            } else {
+                j++;
             }
-            i++;
         }
-
-#endif
+        i++;
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::ApnTypeSameAny(
@@ -3128,36 +4159,44 @@ ECode DcTracker::ApnTypeSameAny(
     /* [in] */ IApnSetting* second,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if(VDBG) {
-            StringBuilder apnType1 = new StringBuilder(first.apn + ": ");
-            for(int index1 = 0; index1 < first.types.length; index1++) {
-                apnType1.append(first.types[index1]);
-                apnType1.append(",");
-            }
-            StringBuilder apnType2 = new StringBuilder(second.apn + ": ");
-            for(int index1 = 0; index1 < second.types.length; index1++) {
-                apnType2.append(second.types[index1]);
-                apnType2.append(",");
-            }
-            log("APN1: is " + apnType1);
-            log("APN2: is " + apnType2);
-        }
-        for(int index1 = 0; index1 < first.types.length; index1++) {
-            for(int index2 = 0; index2 < second.types.length; index2++) {
-                if(first.types[index1].equals(PhoneConstants.APN_TYPE_ALL) ||
-                        second.types[index2].equals(PhoneConstants.APN_TYPE_ALL) ||
-                        first.types[index1].equals(second.types[index2])) {
-                    if(VDBG)log("apnTypeSameAny: return true");
-                    return true;
-                }
-            }
-        }
-        if(VDBG)log("apnTypeSameAny: return false");
-        return false;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<ArrayOf<String> > types;
+    first->GetTypes((ArrayOf<String>**)&types);
+    AutoPtr<ArrayOf<String> > secondTypes;
+    second->GetTypes((ArrayOf<String>**)&secondTypes);
+    if (VDBG) {
+        String apn;
+        first->GetApn(&apn);
+        StringBuilder apnType1(apn + ": ");
+        for (Int32 index1 = 0; index1 < types->GetLength(); index1++) {
+            apnType1.Append((*(types))[index1]);
+            apnType1.Append(",");
+        }
+        String secondApn;
+        second->GetApn(&secondApn);
+        StringBuilder apnType2(secondApn + ": ");
+        for (Int32 index1 = 0; index1 < secondTypes->GetLength(); index1++) {
+            apnType2.Append((*(secondTypes))[index1]);
+            apnType2.Append(",");
+        }
+        Log("APN1: is %s", apnType1.ToString().string());
+        Log("APN2: is %s", apnType2.ToString().string());
+    }
+    for (Int32 index1 = 0; index1 < types->GetLength(); index1++) {
+        for (Int32 index2 = 0; index2 < secondTypes->GetLength(); index2++) {
+            if ((*(types))[index1].Equals(IPhoneConstants::APN_TYPE_ALL) ||
+                    (*(secondTypes))[index2].Equals(IPhoneConstants::APN_TYPE_ALL) ||
+                    (*(types))[index1].Equals((*(secondTypes))[index2])) {
+                if (VDBG) Log("apnTypeSameAny: return true");
+                *result = TRUE;
+                return NOERROR;
+            }
+        }
+    }
+    if (VDBG) Log("apnTypeSameAny: return false");
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode DcTracker::ApnsSimilar(
@@ -3165,24 +4204,83 @@ ECode DcTracker::ApnsSimilar(
     /* [in] */ IApnSetting* second,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return (first.canHandleType(PhoneConstants.APN_TYPE_DUN) == false &&
-                second.canHandleType(PhoneConstants.APN_TYPE_DUN) == false &&
-                Objects.equals(first.apn, second.apn) &&
-                !apnTypeSameAny(first, second) &&
-                xorEquals(first.proxy, second.proxy) &&
-                xorEquals(first.port, second.port) &&
-                first.carrierEnabled == second.carrierEnabled &&
-                first.bearer == second.bearer &&
-                first.profileId == second.profileId &&
-                Objects.equals(first.mvnoType, second.mvnoType) &&
-                Objects.equals(first.mvnoMatchData, second.mvnoMatchData) &&
-                xorEquals(first.mmsc, second.mmsc) &&
-                xorEquals(first.mmsProxy, second.mmsProxy) &&
-                xorEquals(first.mmsPort, second.mmsPort));
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Boolean canHandleTypeFirst;
+    first->CanHandleType(IPhoneConstants::APN_TYPE_DUN, &canHandleTypeFirst);
+    Boolean canHandleTypeSecond;
+    second->CanHandleType(IPhoneConstants::APN_TYPE_DUN, &canHandleTypeSecond);
+    Boolean isApnTypeSameAny;
+    ApnTypeSameAny(first, second, &isApnTypeSameAny);
+    Boolean isXorEqualsMmsc;
+    String firstMmsc;
+    first->GetMmsc(&firstMmsc);
+    String secondMmsc;
+    second->GetMmsc(&secondMmsc);
+    XorEquals(firstMmsc, secondMmsc, &isXorEqualsMmsc);
+    Boolean isXorEqualsProxy;
+    String secondMmsProxy;
+    second->GetMmsProxy(&secondMmsProxy);
+    String firstMmsProxy;
+    first->GetMmsProxy(&firstMmsProxy);
+    XorEquals(firstMmsProxy, secondMmsProxy, &isXorEqualsProxy);
+    Boolean isXorEqualsPort;
+    String secondMmsPort;
+    second->GetMmsPort(&secondMmsPort);
+    String firstMmsPort;
+    first->GetMmsPort(&firstMmsPort);
+    XorEquals(firstMmsPort, secondMmsPort, &isXorEqualsPort);
+    String fMvnoType;
+    first->GetMvnoType(&fMvnoType);
+    String sMvnoType;
+    second->GetMvnoType(&sMvnoType);
+    String fMvnoMatchData;
+    first->GetMvnoMatchData(&fMvnoMatchData);
+    String sMvnoMatchData;
+    second->GetMvnoMatchData(&sMvnoMatchData);
+    String secondApn;
+    second->GetApn(&secondApn);
+    String firstApn;
+    first->GetApn(&firstApn);
+    String firstProxy;
+    first->GetProxy(&firstProxy);
+    String secondProxy;
+    second->GetProxy(&secondProxy);
+    String firstPort;
+    first->GetPort(&firstPort);
+    String secondPort;
+    second->GetPort(&secondPort);
+    Boolean firstCarrierEnabled;
+    first->GetCarrierEnabled(&firstCarrierEnabled);
+    Boolean secondCarrierEnabled;
+    second->GetCarrierEnabled(&secondCarrierEnabled);
+    Int32 secondBearer;
+    second->GetBearer(&secondBearer);
+    Int32 firstBearer;
+    first->GetBearer(&firstBearer);
+    Int32 secondProfileId;
+    second->GetProfileId(&secondProfileId);
+    Int32 firstProfileId;
+    first->GetProfileId(&firstProfileId);
+    Boolean isProxyEquals;
+    XorEquals(firstProxy, secondProxy, &isProxyEquals);
+    Boolean isPortEquals;
+    XorEquals(firstPort, secondPort, &isPortEquals);
+    *result = (canHandleTypeFirst == FALSE &&
+            canHandleTypeSecond == FALSE &&
+            firstApn.Equals(secondApn) &&
+            !isApnTypeSameAny &&
+            isProxyEquals &&
+            isPortEquals &&
+            firstCarrierEnabled == secondCarrierEnabled &&
+            firstBearer == secondBearer &&
+            firstProfileId == secondProfileId &&
+            fMvnoType.Equals(sMvnoType) &&
+            fMvnoMatchData.Equals(sMvnoMatchData) &&
+            isXorEqualsMmsc &&
+            isXorEqualsProxy &&
+            isXorEqualsPort);
+    return NOERROR;
 }
 
 ECode DcTracker::XorEquals(
@@ -3190,13 +4288,12 @@ ECode DcTracker::XorEquals(
     /* [in] */ const String& second,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return (Objects.equals(first, second) ||
-                TextUtils.isEmpty(first) ||
-                TextUtils.isEmpty(second));
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    *result = (first.Equals(second) ||
+            TextUtils::IsEmpty(first) ||
+            TextUtils::IsEmpty(second));
+    return NOERROR;
 }
 
 ECode DcTracker::MergeApns(
@@ -3204,117 +4301,209 @@ ECode DcTracker::MergeApns(
     /* [in] */ IApnSetting* src,
     /* [out] */ IApnSetting** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ArrayList<String> resultTypes = new ArrayList<String>();
-        resultTypes.addAll(Arrays.asList(dest.types));
-        for (String srcType : src.types) {
-            if (resultTypes.contains(srcType) == false) resultTypes.add(srcType);
-        }
-        String mmsc = (TextUtils.isEmpty(dest.mmsc) ? src.mmsc : dest.mmsc);
-        String mmsProxy = (TextUtils.isEmpty(dest.mmsProxy) ? src.mmsProxy : dest.mmsProxy);
-        String mmsPort = (TextUtils.isEmpty(dest.mmsPort) ? src.mmsPort : dest.mmsPort);
-        String proxy = (TextUtils.isEmpty(dest.proxy) ? src.proxy : dest.proxy);
-        String port = (TextUtils.isEmpty(dest.port) ? src.port : dest.port);
-        String protocol = src.protocol.equals("IPV4V6") ? src.protocol : dest.protocol;
-        String roamingProtocol = src.roamingProtocol.equals("IPV4V6") ? src.roamingProtocol :
-                dest.roamingProtocol;
-        return new ApnSetting(dest.id, dest.numeric, dest.carrier, dest.apn,
-                proxy, port, mmsc, mmsProxy, mmsPort, dest.user, dest.password,
-                dest.authType, resultTypes.toArray(new String[0]), protocol,
-                roamingProtocol, dest.carrierEnabled, dest.bearer, dest.profileId,
-                (dest.modemCognitive || src.modemCognitive), dest.maxConns, dest.waitTime,
-                dest.maxConnsTime, dest.mtu, dest.mvnoType, dest.mvnoMatchData);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IArrayList> resultTypes;
+    CArrayList::New((IArrayList**)&resultTypes);
+    AutoPtr<ArrayOf<String> > destTypes;
+    dest->GetTypes((ArrayOf<String>**)&destTypes);
+    AutoPtr<IList> outList;
+    Arrays::AsList(destTypes, (IList**)&outList);
+    resultTypes->AddAll(ICollection::Probe(outList));
+    AutoPtr<ArrayOf<String> > srcTypes;
+    src->GetTypes((ArrayOf<String>**)&srcTypes);
+    for (Int32 i = 0; i < srcTypes->GetLength(); ++i) {
+        String srcType = (*srcTypes)[i];
+        Boolean isContains;
+        resultTypes->Contains(StringUtils::ParseCharSequence(srcType), &isContains);
+        if (isContains == FALSE) resultTypes->Add(StringUtils::ParseCharSequence(srcType));
+    }
+    String destMmsc;
+    dest->GetMmsc(&destMmsc);
+    String srcMmsc;
+    src->GetMmsc(&srcMmsc);
+    String mmsc = (TextUtils::IsEmpty(destMmsc) ? srcMmsc : destMmsc);
+    String destMmsProxy;
+    dest->GetMmsProxy(&destMmsProxy);
+    String srcMmsProxy;
+    src->GetMmsProxy(&srcMmsProxy);
+    String mmsProxy = (TextUtils::IsEmpty(destMmsProxy) ? srcMmsProxy : destMmsProxy);
+    String destMmsPort;
+    dest->GetMmsPort(&destMmsPort);
+    String srcMmsPort;
+    src->GetMmsPort(&srcMmsPort);
+    String mmsPort = (TextUtils::IsEmpty(destMmsPort) ? srcMmsPort : destMmsPort);
+    String destProxy;
+    dest->GetProxy(&destProxy);
+    String srcProxy;
+    src->GetProxy(&srcProxy);
+    String proxy = (TextUtils::IsEmpty(destProxy) ? srcProxy : destProxy);
+    String destPort;
+    dest->GetPort(&destPort);
+    String srcPort;
+    src->GetPort(&srcPort);
+    String port = (TextUtils::IsEmpty(destPort) ? srcPort : destPort);
+    String srcProtocol;
+    src->GetProtocol(&srcProtocol);
+    String destProtocol;
+    dest->GetProtocol(&destProtocol);
+    String protocol = srcProtocol.Equals("IPV4V6") ? srcProtocol : destProtocol;
+    String srcRoamingProtocol;
+    src->GetRoamingProtocol(&srcRoamingProtocol);
+    String destRoamingProtocol;
+    dest->GetRoamingProtocol(&destRoamingProtocol);
+    String roamingProtocol = srcRoamingProtocol.Equals("IPV4V6") ? srcRoamingProtocol : destRoamingProtocol;
+    String destNumeric;
+    dest->GetNumeric(&destNumeric);
+    String destCarrier;
+    dest->GetCarrier(&destCarrier);
+    String destApn;
+    dest->GetApn(&destApn);
+    String destMvnoMatchData;
+    dest->GetMvnoMatchData(&destMvnoMatchData);
+    String destMvnoType;
+    dest->GetMvnoType(&destMvnoType);
+    Int32 destId;
+    dest->GetId(&destId);
+    Int32 destAuthType;
+    dest->GetAuthType(&destAuthType);
+    Int32 destProfileId;
+    dest->GetProfileId(&destProfileId);
+    Int32 destBearer;
+    dest->GetBearer(&destBearer);
+    Int32 destWaitTime;
+    dest->GetWaitTime(&destWaitTime);
+    Int32 destMaxConns;
+    dest->GetMaxConns(&destMaxConns);
+    Int32 destMtu;
+    dest->GetMtu(&destMtu);
+    String destUser;
+    dest->GetUser(&destUser);
+    String destPassword;
+    dest->GetPassword(&destPassword);
+    AutoPtr<ArrayOf<IInterface*> > array;
+    resultTypes->ToArray(ArrayOf<IInterface*>::Alloc(0), (ArrayOf<IInterface*>**)&array);
+    AutoPtr<ArrayOf<String> > resultTypesArray = ArrayOf<String>::Alloc(array->GetLength());
+    for (Int32 i = 0; i < array->GetLength(); ++i) {
+        resultTypesArray->Set(i, TO_STR((*array)[i]));
+    }
+    Boolean isDestCarrierEnabled;
+    dest->GetCarrierEnabled(&isDestCarrierEnabled);
+    Boolean isDestModemCognitive;
+    dest->GetModemCognitive(&isDestModemCognitive);
+    Boolean isSrcModemCognitive;
+    src->GetModemCognitive(&isSrcModemCognitive);
+    Int32 maxConnsTime;
+    dest->GetMaxConnsTime(&maxConnsTime);
+    return CApnSetting::New(destId, destNumeric, destCarrier, destApn,
+            proxy, port, mmsc, mmsProxy, mmsPort, destUser, destPassword,
+            destAuthType, resultTypesArray, protocol,
+            roamingProtocol, isDestCarrierEnabled, destBearer, destProfileId,
+            (isDestModemCognitive || isSrcModemCognitive), destMaxConns, destWaitTime,
+            maxConnsTime, destMtu, destMvnoType, destMvnoMatchData, result);
 }
 
 ECode DcTracker::IsDummyProfileNeeded(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        int radioTech = mPhone.getServiceState().getRilDataRadioTechnology();
-        int radioTechFam = UiccController.getFamilyFromRadioTechnology(radioTech);
-        IccRecords r = mIccRecords.get();
-        if (DBG) log("isDummyProfileNeeded: radioTechFam = " + radioTechFam);
-        // If uicc app family based on data rat is unknown,
-        // check if records selected is RuimRecords.
-        return (radioTechFam == UiccController.APP_FAM_3GPP2 ||
-                ((radioTechFam == UiccController.APP_FAM_UNKNOWN) &&
-                (r != null) && (r instanceof RuimRecords)));
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IServiceState> serviceState;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    Int32 radioTech;
+    serviceState->GetRilDataRadioTechnology(&radioTech);
+    assert(0 && "TODO: UiccController");
+    // Int32 radioTechFam = UiccController::GetFamilyFromRadioTechnology(radioTech);
+    // AutoPtr<IInterface> obj;
+    // mIccRecords->Get((IInterface**)&obj);
+    // AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
+    // if (DBG) Log("isDummyProfileNeeded: radioTechFam = %d", radioTechFam);
+    // // If uicc app family based on data rat is unknown,
+    // // check if records selected is RuimRecords.
+    // *result = (radioTechFam == IUiccController::APP_FAM_3GPP2 ||
+    //         ((radioTechFam == IUiccController::APP_FAM_UNKNOWN) &&
+    //         (r != NULL) && (IRuimRecords::Probe(r) != NULL)));
+    return NOERROR;
 }
 
 ECode DcTracker::AddDummyApnSettings(
     /* [in] */ const String& _operator)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // Create dummy data profiles.
-        if (DBG) log("createAllApnList: Creating dummy apn for cdma operator:" + _operator);
-        String[] defaultApnTypes = {
-                PhoneConstants.APN_TYPE_DEFAULT,
-                PhoneConstants.APN_TYPE_MMS,
-                PhoneConstants.APN_TYPE_SUPL,
-                PhoneConstants.APN_TYPE_HIPRI,
-                PhoneConstants.APN_TYPE_FOTA,
-                PhoneConstants.APN_TYPE_IMS,
-                PhoneConstants.APN_TYPE_CBS};
-        String[] dunApnTypes = {
-                PhoneConstants.APN_TYPE_DUN};
-        ApnSetting apn = new ApnSetting(DctConstants.APN_DEFAULT_ID, _operator, null, null,
-                null, null, null, null, null, null, null,
-                RILConstants.SETUP_DATA_AUTH_PAP_CHAP, defaultApnTypes,
-                PROPERTY_CDMA_IPPROTOCOL, PROPERTY_CDMA_ROAMING_IPPROTOCOL, true, 0,
-                0, false, 0, 0, 0, PhoneConstants.UNSET_MTU, "", "");
-        mAllApnSettings.add(apn);
-        apn = new ApnSetting(DctConstants.APN_DUN_ID, _operator, null, null,
-                null, null, null, null, null, null, null,
-                RILConstants.SETUP_DATA_AUTH_PAP_CHAP, dunApnTypes,
-                PROPERTY_CDMA_IPPROTOCOL, PROPERTY_CDMA_ROAMING_IPPROTOCOL, true, 0,
-                0, false, 0, 0, 0, PhoneConstants.UNSET_MTU, "", "");
-        mAllApnSettings.add(apn);
-
-#endif
+    // Create dummy data profiles.
+    if (DBG) Log("createAllApnList: Creating dummy apn for cdma operator:%s", _operator.string());
+    AutoPtr<ArrayOf<String> > defaultApnTypes = ArrayOf<String>::Alloc(7);
+    (*defaultApnTypes)[0] = IPhoneConstants::APN_TYPE_DEFAULT;
+    (*defaultApnTypes)[1] = IPhoneConstants::APN_TYPE_MMS;
+    (*defaultApnTypes)[2] = IPhoneConstants::APN_TYPE_SUPL;
+    (*defaultApnTypes)[3] = IPhoneConstants::APN_TYPE_HIPRI;
+    (*defaultApnTypes)[4] = IPhoneConstants::APN_TYPE_FOTA;
+    (*defaultApnTypes)[5] = IPhoneConstants::APN_TYPE_IMS;
+    (*defaultApnTypes)[6] = IPhoneConstants::APN_TYPE_CBS;
+    AutoPtr<ArrayOf<String> > dunApnTypes = ArrayOf<String>::Alloc(1);
+    (*dunApnTypes)[0] = IPhoneConstants::APN_TYPE_DUN;
+    AutoPtr<IApnSetting> apn;
+    CApnSetting::New(IDctConstants::APN_DEFAULT_ID, _operator, String(NULL), String(NULL),
+            String(NULL), String(NULL), String(NULL), String(NULL), String(NULL), String(NULL), String(NULL),
+            IRILConstants::SETUP_DATA_AUTH_PAP_CHAP, defaultApnTypes,
+            PROPERTY_CDMA_IPPROTOCOL, PROPERTY_CDMA_ROAMING_IPPROTOCOL, TRUE, 0,
+            0, FALSE, 0, 0, 0, IPhoneConstants::UNSET_MTU, String(""), String(""), (IApnSetting**)&apn);
+    mAllApnSettings->Add(apn);
+    apn = NULL;
+    CApnSetting::New(IDctConstants::APN_DUN_ID, _operator, String(NULL), String(NULL),
+            String(NULL), String(NULL), String(NULL), String(NULL), String(NULL), String(NULL), String(NULL),
+            IRILConstants::SETUP_DATA_AUTH_PAP_CHAP, dunApnTypes,
+            PROPERTY_CDMA_IPPROTOCOL, PROPERTY_CDMA_ROAMING_IPPROTOCOL, TRUE, 0,
+            0, FALSE, 0, 0, 0, IPhoneConstants::UNSET_MTU, String(""), String(""), (IApnSetting**)&apn);
+    mAllApnSettings->Add(apn);
+    return NOERROR;
 }
 
 ECode DcTracker::CreateDataConnection(
     /* [out] */ IDcAsyncChannel** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("createDataConnection E");
-        int id = mUniqueIdGenerator.getAndIncrement();
-        DataConnection conn = DataConnection.makeDataConnection(mPhone, id,
-                                                this, mDcTesterFailBringUpAll, mDcc);
-        mDataConnections.put(id, conn);
-        DcAsyncChannel dcac = new DcAsyncChannel(conn, LOG__TAG);
-        int status = dcac.fullyConnectSync(mPhone.getContext(), this, conn.getHandler());
-        if (status == AsyncChannel.STATUS_SUCCESSFUL) {
-            mDataConnectionAcHashMap.put(dcac.getDataConnectionIdSync(), dcac);
-        } else {
-            loge("createDataConnection: Could not connect to dcac=" + dcac + " status=" + status);
-        }
-        if (DBG) log("createDataConnection() X id=" + id + " dc=" + conn);
-        return dcac;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (DBG) Log("createDataConnection E");
+    Int32 id;
+    mUniqueIdGenerator->GetAndIncrement(&id);
+    AutoPtr<IDataConnection> conn;
+    DataConnection::MakeDataConnection(mPhone, id,
+            this, mDcTesterFailBringUpAll, mDcc, (IDataConnection**)&conn);
+    AutoPtr<IInteger32> iId;
+    CInteger32::New(id, (IInteger32**)&iId);
+    mDataConnections->Put(iId, conn);
+    AutoPtr<IDcAsyncChannel> dcac;
+    CDcAsyncChannel::New(conn, LOG__TAG, (IDcAsyncChannel**)&dcac);
+    AutoPtr<IHandler> handler;
+    IStateMachine::Probe(conn)->GetHandler((IHandler**)&handler);
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    Int32 status;
+    IAsyncChannel::Probe(dcac)->FullyConnectSync(context, this, handler, &status);
+    if (status == IAsyncChannel::STATUS_SUCCESSFUL) {
+        Int32 dataConnectionIdSync;
+        dcac->GetDataConnectionIdSync(&dataConnectionIdSync);
+        AutoPtr<IInteger32> iDataConnectionIdSync;
+        CInteger32::New(dataConnectionIdSync, (IInteger32**)&iDataConnectionIdSync);
+        mDataConnectionAcHashMap->Put(iDataConnectionIdSync, dcac);
+    } else {
+        Loge("createDataConnection: Could not connect to dcac=%s status=%d", TO_CSTR(dcac), status);
+    }
+    if (DBG) Log("createDataConnection() X id=%d dc=%s", id, TO_CSTR(conn));
+    *result = dcac;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode DcTracker::DestroyDataConnections()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if(mDataConnections != null) {
-            if (DBG) log("destroyDataConnections: clear mDataConnectionList");
-            mDataConnections.clear();
-        } else {
-            if (DBG) log("destroyDataConnections: mDataConnecitonList is empty, ignore");
-        }
-
-#endif
+    if (mDataConnections != NULL) {
+        if (DBG) Log("destroyDataConnections: clear mDataConnectionList");
+        mDataConnections->Clear();
+    } else {
+        if (DBG) Log("destroyDataConnections: mDataConnecitonList is empty, ignore");
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::BuildWaitingApns(
@@ -3322,488 +4511,608 @@ ECode DcTracker::BuildWaitingApns(
     /* [in] */ Int32 radioTech,
     /* [out] */ IArrayList** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("buildWaitingApns: E requestedApnType=" + requestedApnType);
-        ArrayList<ApnSetting> apnList = new ArrayList<ApnSetting>();
-        if (requestedApnType.equals(PhoneConstants.APN_TYPE_DUN)) {
-            ApnSetting dun = fetchDunApn();
-            if (dun != null) {
-                apnList.add(dun);
-                if (DBG) log("buildWaitingApns: X added APN_TYPE_DUN apnList=" + apnList);
-                return apnList;
-            }
+    VALIDATE_NOT_NULL(result)
+
+    if (DBG) Log("buildWaitingApns: E requestedApnType=%s", requestedApnType.string());
+    AutoPtr<IArrayList> apnList;
+    CArrayList::New((IArrayList**)&apnList);
+    if (requestedApnType.Equals(IPhoneConstants::APN_TYPE_DUN)) {
+        AutoPtr<IApnSetting> dun;
+        FetchDunApn((IApnSetting**)&dun);
+        if (dun != NULL) {
+            apnList->Add(dun);
+            if (DBG) Log("buildWaitingApns: X added APN_TYPE_DUN apnList=%s", TO_CSTR(apnList));
+            *result = apnList;
+            REFCOUNT_ADD(*result)
+            return NOERROR;
         }
-        String _operator = getOperatorNumeric();
-        // This is a workaround for a bug (7305641) where we don't failover to other
-        // suitable APNs if our preferred APN fails.  On prepaid ATT sims we need to
-        // failover to a provisioning APN, but once we've used their default data
-        // connection we are locked to it for life.  This change allows ATT devices
-        // to say they don't want to use preferred at all.
-        boolean usePreferred = true;
-        try {
-            usePreferred = ! mPhone.getContext().getResources().getBoolean(com.android.
-                    internal.R.bool.config_dontPreferApn);
-        } catch (Resources.NotFoundException e) {
-            if (DBG) log("buildWaitingApns: usePreferred NotFoundException set to true");
-            usePreferred = true;
-        }
-        if (usePreferred) {
-            mPreferredApn = getPreferredApn();
-        }
+    }
+    String _operator;
+    GetOperatorNumeric(&_operator);
+    // This is a workaround for a bug (7305641) where we don't failover to other
+    // suitable APNs if our preferred APN fails.  On prepaid ATT sims we need to
+    // failover to a provisioning APN, but once we've used their default data
+    // connection we are locked to it for life.  This change allows ATT devices
+    // to say they don't want to use preferred at all.
+    Boolean usePreferred = TRUE;
+    // try {
+    ECode ec;
+    do {
+        AutoPtr<IContext> context;
+        ec = IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+        if (FAILED(ec)) break;
+        AutoPtr<IResources> res;
+        ec = context->GetResources((IResources**)&res);
+        if (FAILED(ec)) break;
+        ec = res->GetBoolean(R::bool_::config_dontPreferApn, &usePreferred);
+        if (FAILED(ec)) break;
+        usePreferred = ! usePreferred;
+    } while(FALSE);
+    // } catch (Resources.NotFoundException e) {
+    if ((ECode) E_RESOURCES_NOT_FOUND_EXCEPTION == ec) {
+        if (DBG) Log("buildWaitingApns: usePreferred NotFoundException set to true");
+        usePreferred = TRUE;
+    }
+    // }
+    if (usePreferred) {
+        GetPreferredApn((IApnSetting**)&mPreferredApn);
+    }
+    if (DBG) {
+        Log("buildWaitingApns: usePreferred=%d canSetPreferApn=%d mPreferredApn=%s operator=%s radioTech=%d",
+                usePreferred, mCanSetPreferApn, TO_CSTR(mPreferredApn), _operator.string(), radioTech);
+    }
+    Boolean canHandleType;
+    mPreferredApn->CanHandleType(requestedApnType, &canHandleType);
+    if (usePreferred && mCanSetPreferApn && mPreferredApn != NULL && canHandleType) {
+        String preferredApnNumeric;
+        mPreferredApn->GetNumeric(&preferredApnNumeric);
         if (DBG) {
-            log("buildWaitingApns: usePreferred=" + usePreferred
-                    + " canSetPreferApn=" + mCanSetPreferApn
-                    + " mPreferredApn=" + mPreferredApn
-                    + " operator=" + _operator + " radioTech=" + radioTech);
+            Log("buildWaitingApns: Preferred APN:%s:%s:%s", _operator.string(),
+                    preferredApnNumeric.string(), TO_CSTR(mPreferredApn));
         }
-        if (usePreferred && mCanSetPreferApn && mPreferredApn != null &&
-                mPreferredApn.canHandleType(requestedApnType)) {
-            if (DBG) {
-                log("buildWaitingApns: Preferred APN:" + _operator + ":"
-                        + mPreferredApn.numeric + ":" + mPreferredApn);
-            }
-            if (mPreferredApn.numeric != null && mPreferredApn.numeric.equals(_operator)) {
-                if (mPreferredApn.bearer == 0 || mPreferredApn.bearer == radioTech) {
-                    apnList.add(mPreferredApn);
-                    if (DBG) log("buildWaitingApns: X added preferred apnList=" + apnList);
-                    return apnList;
-                } else {
-                    if (DBG) log("buildWaitingApns: no preferred APN");
-                    setPreferredApn(-1);
-                    mPreferredApn = null;
-                }
+        if (preferredApnNumeric != NULL && preferredApnNumeric.Equals(_operator)) {
+            Int32 preferredApnBearer;
+            mPreferredApn->GetBearer(&preferredApnBearer);
+            if (preferredApnBearer == 0 || preferredApnBearer == radioTech) {
+                apnList->Add(mPreferredApn);
+                if (DBG) Log("buildWaitingApns: X added preferred apnList=%s", TO_CSTR(apnList));
+                *result = apnList;
+                REFCOUNT_ADD(*result)
+                return NOERROR;
             } else {
-                if (DBG) log("buildWaitingApns: no preferred APN");
-                setPreferredApn(-1);
-                mPreferredApn = null;
-            }
-        }
-        if (mAllApnSettings != null && !mAllApnSettings.isEmpty()) {
-            if (DBG) log("buildWaitingApns: mAllApnSettings=" + mAllApnSettings);
-            for (ApnSetting apn : mAllApnSettings) {
-                if (DBG) log("buildWaitingApns: apn=" + apn);
-                if (apn.canHandleType(requestedApnType)) {
-                    if (apn.bearer == 0 || apn.bearer == radioTech) {
-                        if (DBG) log("buildWaitingApns: adding apn=" + apn.toString());
-                        apnList.add(apn);
-                    } else {
-                        if (DBG) {
-                            log("buildWaitingApns: bearer:" + apn.bearer + " != "
-                                    + "radioTech:" + radioTech);
-                        }
-                    }
-                } else {
-                    if (DBG) {
-                        log("buildWaitingApns: couldn't handle requesedApnType="
-                                + requestedApnType);
-                    }
-                }
+                if (DBG) Log("buildWaitingApns: no preferred APN");
+                SetPreferredApn(-1);
+                mPreferredApn = NULL;
             }
         } else {
-            loge("mAllApnSettings is null!");
+            if (DBG) Log("buildWaitingApns: no preferred APN");
+            SetPreferredApn(-1);
+            mPreferredApn = NULL;
         }
-        if (DBG) log("buildWaitingApns: X apnList=" + apnList);
-        return apnList;
-
-#endif
+    }
+    Boolean isEmpty;
+    mAllApnSettings->IsEmpty(&isEmpty);
+    if (mAllApnSettings != NULL && !isEmpty) {
+        if (DBG) Log("buildWaitingApns: mAllApnSettings=%s", TO_CSTR(mAllApnSettings));
+        AutoPtr<IIterator> it;
+        mAllApnSettings->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IApnSetting> apn = IApnSetting::Probe(obj);
+            if (DBG) Log("buildWaitingApns: apn=%s", TO_CSTR(apn));
+            Boolean canHandleType;
+            apn->CanHandleType(requestedApnType, &canHandleType);
+            if (canHandleType) {
+                Int32 apnBearer;
+                apn->GetBearer(&apnBearer);
+                if (apnBearer == 0 || apnBearer == radioTech) {
+                    if (DBG) Log("buildWaitingApns: adding apn=%s", TO_CSTR(apn));
+                    apnList->Add(apn);
+                } else {
+                    if (DBG) {
+                        Log("buildWaitingApns: bearer:%d != radioTech:%d", apnBearer, radioTech);
+                    }
+                }
+            } else {
+                if (DBG) {
+                    Log("buildWaitingApns: couldn't handle requesedApnType=%s", requestedApnType.string());
+                }
+            }
+        }
+    } else {
+        Loge("mAllApnSettings is null!");
+    }
+    if (DBG) Log("buildWaitingApns: X apnList=%s", TO_CSTR(apnList));
+    *result = apnList;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode DcTracker::ApnListToString(
     /* [in] */ IArrayList* apns,
-    /* [out] */ String* result)
+    /* [out] */ String* _result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (apns == null) {
-            log("apnListToString: apns = null.");
-            return "";
-        }
-        else {
-            StringBuilder result = new StringBuilder();
-            for (int i = 0, size = apns.size(); i < size; i++) {
-                result.append('[')
-                      .append(apns.get(i).toString())
-                      .append(']');
-            }
-            return result.toString();
-        }
+    VALIDATE_NOT_NULL(_result)
 
-#endif
+    if (apns == NULL) {
+        Log("apnListToString: apns = null.");
+        *_result = "";
+        return NOERROR;
+    }
+    else {
+        StringBuilder result;
+        Int32 size;
+        apns->GetSize(&size);
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> obj;
+            apns->Get(i, (IInterface**)&obj);
+            result.Append('[');
+            result.Append(TO_STR(obj));
+            result.Append(']');
+        }
+        return result.ToString(_result);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::SetPreferredApn(
     /* [in] */ Int32 pos)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (!mCanSetPreferApn) {
-            log("setPreferredApn: X !canSEtPreferApn");
-            return;
-        }
-        log("setPreferredApn: delete");
-        ContentResolver resolver = mPhone.getContext().getContentResolver();
-        resolver.delete(getUri(PREFERAPN_NO_UPDATE_URI), null, null);
-        if (pos >= 0) {
-            log("setPreferredApn: insert");
-            ContentValues values = new ContentValues();
-            values.put(APN_ID, pos);
-            resolver.insert(getUri(PREFERAPN_NO_UPDATE_URI), values);
-        }
-
-#endif
+    if (!mCanSetPreferApn) {
+        Log("setPreferredApn: X !canSEtPreferApn");
+        return NOERROR;
+    }
+    Log("setPreferredApn: delete");
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IContentResolver> resolver;
+    context->GetContentResolver((IContentResolver**)&resolver);
+    AutoPtr<IUri> uri;
+    GetUri(PREFERAPN_NO_UPDATE_URI, (IUri**)&uri);
+    Int32 i32;
+    resolver->Delete(uri, String(NULL), NULL, &i32);
+    if (pos >= 0) {
+        Log("setPreferredApn: insert");
+        AutoPtr<IContentValues> values;
+        CContentValues::New((IContentValues**)&values);
+        values->Put(APN_ID, pos);
+        AutoPtr<IUri> iNoUse;
+        resolver->Insert(uri, values, (IUri**)&iNoUse);
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::GetPreferredApn(
     /* [out] */ IApnSetting** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mAllApnSettings == null || mAllApnSettings.isEmpty()) {
-            log("getPreferredApn: mAllApnSettings is " + ((mAllApnSettings == null)?"null":"empty"));
-            return null;
-        }
-        Cursor cursor = mPhone.getContext().getContentResolver().query(
-                getUri(PREFERAPN_NO_UPDATE_URI), new String[] { "_id", "name", "apn" },
-                null, null, Telephony.Carriers.DEFAULT_SORT_ORDER);
-        if (cursor != null) {
-            mCanSetPreferApn = true;
-        } else {
-            mCanSetPreferApn = false;
-        }
-        log("getPreferredApn: mRequestedApnType=" + mRequestedApnType + " cursor=" + cursor
-                + " cursor.count=" + ((cursor != null) ? cursor.getCount() : 0));
-        if (mCanSetPreferApn && cursor.getCount() > 0) {
-            int pos;
-            cursor.moveToFirst();
-            pos = cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers._ID));
-            for(ApnSetting p : mAllApnSettings) {
-                log("getPreferredApn: apnSetting=" + p);
-                if (p.id == pos && p.canHandleType(mRequestedApnType)) {
-                    log("getPreferredApn: X found apnSetting" + p);
-                    cursor.close();
-                    return p;
-                }
+    VALIDATE_NOT_NULL(result)
+
+    Boolean isEmpty;
+    mAllApnSettings->IsEmpty(&isEmpty);
+    if (mAllApnSettings == NULL || isEmpty) {
+        Log("getPreferredApn: mAllApnSettings is %s", ((mAllApnSettings == NULL) ? "null" : "empty"));
+        *result = NULL;
+        return NOERROR;
+    }
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IContentResolver> contentResolver;
+    context->GetContentResolver((IContentResolver**)&contentResolver);
+    AutoPtr<ArrayOf<String> > strs = ArrayOf<String>::Alloc(3);
+    (*strs)[0] = String("_id");
+    (*strs)[1] = String("name");
+    (*strs)[2] = String("apn");
+    AutoPtr<ICursor> cursor;
+    AutoPtr<IUri> uri;
+    GetUri(PREFERAPN_NO_UPDATE_URI, (IUri**)&uri);
+    contentResolver->Query(
+            uri, strs,
+            String(NULL), NULL, ITelephonyCarriers::DEFAULT_SORT_ORDER, (ICursor**)&cursor);
+    if (cursor != NULL) {
+        mCanSetPreferApn = TRUE;
+    } else {
+        mCanSetPreferApn = FALSE;
+    }
+    Int32 count;
+    cursor->GetCount(&count);
+    Log("getPreferredApn: mRequestedApnType=%s cursor=%s cursor.count=%d",
+            mRequestedApnType.string(), TO_CSTR(cursor),  ((cursor != NULL) ? count : 0));
+    if (mCanSetPreferApn && count > 0) {
+        Int32 pos;
+        Boolean isMoveToFirst;
+        cursor->MoveToFirst(&isMoveToFirst);
+        Int32 columnIndexOrThrow_ID;
+        cursor->GetColumnIndexOrThrow(IBaseColumns::ID, &columnIndexOrThrow_ID);
+        cursor->GetInt32(columnIndexOrThrow_ID, &pos);
+        AutoPtr<IIterator> it;
+        mAllApnSettings->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IApnSetting> p = IApnSetting::Probe(obj);
+            Log("getPreferredApn: apnSetting=%s", TO_CSTR(p));
+            Boolean canHandleType;
+            p->CanHandleType(mRequestedApnType, &canHandleType);
+            Int32 pId;
+            p->GetId(&pId);
+            if (pId == pos && canHandleType) {
+                Log("getPreferredApn: X found apnSetting%s", TO_CSTR(p));
+                ICloseable::Probe(cursor)->Close();
+                *result = p;
+                REFCOUNT_ADD(*result)
+                return NOERROR;
             }
         }
-        if (cursor != null) {
-            cursor.close();
-        }
-        log("getPreferredApn: X not found");
-        return null;
-
-#endif
+    }
+    if (cursor != NULL) {
+        ICloseable::Probe(cursor)->Close();
+    }
+    Log("getPreferredApn: X not found");
+    *result = NULL;
+    return NOERROR;
 }
 
 ECode DcTracker::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("handleMessage msg=" + msg);
-        if (!mPhone.mIsTheCurrentActivePhone || mIsDisposed) {
-            loge("handleMessage: Ignore GSM msgs since GSM phone is inactive");
-            return;
-        }
-        switch (msg.what) {
-            case DctConstants.EVENT_RECORDS_LOADED:
-                onRecordsLoaded();
-                break;
-            case DctConstants.EVENT_DATA_CONNECTION_DETACHED:
-                onDataConnectionDetached();
-                break;
-            case DctConstants.EVENT_DATA_CONNECTION_ATTACHED:
-                onDataConnectionAttached();
-                break;
-            case DctConstants.EVENT_DO_RECOVERY:
-                doRecovery();
-                break;
-            case DctConstants.EVENT_APN_CHANGED:
-                onApnChanged();
-                break;
-            case DctConstants.EVENT_PS_RESTRICT_ENABLED:
-                /**
-                 * We don't need to explicitly to tear down the PDP context
-                 * when PS restricted is enabled. The base band will deactive
-                 * PDP context and notify us with PDP_CONTEXT_CHANGED.
-                 * But we should stop the network polling and prevent reset PDP.
-                 */
-                if (DBG) log("EVENT_PS_RESTRICT_ENABLED " + mIsPsRestricted);
-                stopNetStatPoll();
-                stopDataStallAlarm();
-                mIsPsRestricted = true;
-                break;
-            case DctConstants.EVENT_PS_RESTRICT_DISABLED:
-                /**
-                 * When PS restrict is removed, we need setup PDP connection if
-                 * PDP connection is down.
-                 */
-                if (DBG) log("EVENT_PS_RESTRICT_DISABLED " + mIsPsRestricted);
-                mIsPsRestricted  = false;
-                if (isConnected()) {
-                    startNetStatPoll();
-                    startDataStallAlarm(DATA_STALL_NOT_SUSPECTED);
-                } else {
-                    // TODO: Should all PDN states be checked to fail?
-                    if (mState == DctConstants.State.FAILED) {
-                        cleanUpAllConnections(false, Phone.REASON_PS_RESTRICT_ENABLED);
-                        mReregisterOnReconnectFailure = false;
-                    }
-                    ApnContext apnContext = mApnContexts.get(PhoneConstants.APN_TYPE_DEFAULT);
-                    if (apnContext != null) {
-                        apnContext.setReason(Phone.REASON_PS_RESTRICT_ENABLED);
-                        trySetupData(apnContext);
-                    } else {
-                        loge("**** Default ApnContext not found ****");
-                        if (Build.IS_DEBUGGABLE) {
-                            throw new RuntimeException("Default ApnContext not found");
-                        }
-                    }
-                }
-                break;
-            case DctConstants.EVENT_TRY_SETUP_DATA:
-                if (msg.obj instanceof ApnContext) {
-                    onTrySetupData((ApnContext)msg.obj);
-                } else if (msg.obj instanceof String) {
-                    onTrySetupData((String)msg.obj);
-                } else {
-                    loge("EVENT_TRY_SETUP request w/o apnContext or String");
-                }
-                break;
-            case DctConstants.EVENT_CLEAN_UP_CONNECTION:
-                boolean tearDown = (msg.arg1 == 0) ? false : true;
-                if (DBG) log("EVENT_CLEAN_UP_CONNECTION tearDown=" + tearDown);
-                if (msg.obj instanceof ApnContext) {
-                    cleanUpConnection(tearDown, (ApnContext)msg.obj);
-                } else {
-                    loge("EVENT_CLEAN_UP_CONNECTION request w/o apn context, call super");
-                    super.handleMessage(msg);
-                }
-                break;
-            case DctConstants.EVENT_SET_INTERNAL_DATA_ENABLE:
-                boolean enabled = (msg.arg1 == DctConstants.ENABLED) ? true : false;
-                onSetInternalDataEnabled(enabled, (Message) msg.obj);
-                break;
-            case DctConstants.EVENT_CLEAN_UP_ALL_CONNECTIONS:
-                Message mCause = obtainMessage(DctConstants.EVENT_CLEAN_UP_ALL_CONNECTIONS, null);
-                if ((msg.obj != null) && (msg.obj instanceof String)) {
-                    mCause.obj = msg.obj;
-                }
-                super.handleMessage(mCause);
-                break;
-            case DctConstants.EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED: // fall thru
-            case DctConstants.EVENT_DATA_RAT_CHANGED:
-                // When data rat changes we might need to load different
-                // set of apns (example, LTE->1x)
-                if (onUpdateIcc()) {
-                    log("onUpdateIcc: tryRestartDataConnections " + Phone.REASON_NW_TYPE_CHANGED);
-                    tryRestartDataConnections(true, Phone.REASON_NW_TYPE_CHANGED);
-                } else if (isNvSubscription()){
-                    // If cdma subscription source changed to NV or data rat changed to cdma
-                    // (while subscription source was NV) - we need to trigger NV ready
-                    onNvReady();
-                }
-                break;
-            case DctConstants.CMD_CLEAR_PROVISIONING_SPINNER:
-                // Check message sender intended to clear the current spinner.
-                if (mProvisioningSpinner == msg.obj) {
-                    mProvisioningSpinner.dismiss();
-                    mProvisioningSpinner = null;
-                }
-                break;
-            case DctConstants.EVENT_GET_WWAN_IWLAN_COEXISTENCE_DONE:
-                onWwanIwlanCoexistenceDone((AsyncResult)msg.obj);
-                break;
-            case DctConstants.EVENT_MODEM_DATA_PROFILE_READY:
-                onModemApnProfileReady();
-                break;
-            default:
-                // handle the message in the super class DataConnectionTracker
-                super.handleMessage(msg);
-                break;
-        }
-
-#endif
+    if (DBG) Log("handleMessage msg=%s", TO_CSTR(msg));
+    if (!((PhoneBase*) mPhone.Get())->mIsTheCurrentActivePhone || mIsDisposed) {
+        Loge("handleMessage: Ignore GSM msgs since GSM phone is inactive");
+        return NOERROR;
+    }
+    Int32 msgWhat;
+    msg->GetWhat(&msgWhat);
+    AutoPtr<IInterface> msgObj;
+    msg->GetObj((IInterface**)&msgObj);
+    Int32 msgArg1;
+    msg->GetArg1(&msgArg1);
+    assert(0 && "TODO: IDctConstants::EVENT_GET_WWAN_IWLAN_COEXISTENCE_DONE IDctConstants::EVENT_MODEM_DATA_PROFILE_READY");
+    // switch (msgWhat) {
+    //     case IDctConstants::EVENT_RECORDS_LOADED:
+    //         OnRecordsLoaded();
+    //         break;
+    //     case IDctConstants::EVENT_DATA_CONNECTION_DETACHED:
+    //         OnDataConnectionDetached();
+    //         break;
+    //     case IDctConstants::EVENT_DATA_CONNECTION_ATTACHED:
+    //         OnDataConnectionAttached();
+    //         break;
+    //     case IDctConstants::EVENT_DO_RECOVERY:
+    //         DoRecovery();
+    //         break;
+    //     case IDctConstants::EVENT_APN_CHANGED:
+    //         OnApnChanged();
+    //         break;
+    //     case IDctConstants::EVENT_PS_RESTRICT_ENABLED:
+    //         /**
+    //          * We don't need to explicitly to tear down the PDP context
+    //          * when PS restricted is enabled. The base band will deactive
+    //          * PDP context and notify us with PDP_CONTEXT_CHANGED.
+    //          * But we should stop the network polling and prevent reset PDP.
+    //          */
+    //         if (DBG) Log("EVENT_PS_RESTRICT_ENABLED %d", mIsPsRestricted);
+    //         StopNetStatPoll();
+    //         StopDataStallAlarm();
+    //         mIsPsRestricted = TRUE;
+    //         break;
+    //     case IDctConstants::EVENT_PS_RESTRICT_DISABLED:
+    //         /**
+    //          * When PS restrict is removed, we need setup PDP connection if
+    //          * PDP connection is down.
+    //          */
+    //         if (DBG) Log("EVENT_PS_RESTRICT_DISABLED %d", mIsPsRestricted);
+    //         mIsPsRestricted  = FALSE;
+    //         Boolean isConnected;
+    //         IsConnected(&isConnected);
+    //         if (isConnected) {
+    //             StartNetStatPoll();
+    //             StartDataStallAlarm(DATA_STALL_NOT_SUSPECTED);
+    //         } else {
+    //             // TODO: Should all PDN states be checked to fail?
+    //             if (mState == DctConstantsState_FAILED) {
+    //                 Boolean b;
+    //                 CleanUpAllConnections(FALSE, IPhone::REASON_PS_RESTRICT_ENABLED, &b);
+    //                 mReregisterOnReconnectFailure = FALSE;
+    //             }
+    //             AutoPtr<IInterface> obj;
+    //             mApnContexts->Get(StringUtils::ParseCharSequence(IPhoneConstants::APN_TYPE_DEFAULT), (IInterface**)&obj);
+    //             AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+    //             if (apnContext != NULL) {
+    //                 apnContext->SetReason(IPhone::REASON_PS_RESTRICT_ENABLED);
+    //                 Boolean b;
+    //                 TrySetupData(apnContext, &b);
+    //             } else {
+    //                 Loge("**** Default ApnContext not found ****");
+    //                 if (Build::IS_DEBUGGABLE) {
+    //                     Logger::E(LOG__TAG, "Default ApnContext not found");
+    //                     return E_RUNTIME_EXCEPTION;
+    //                 }
+    //             }
+    //         }
+    //         break;
+    //     case IDctConstants::EVENT_TRY_SETUP_DATA:
+    //         if (IApnContext::Probe(msgObj) != NULL) {
+    //             Boolean b;
+    //             OnTrySetupData(IApnContext::Probe(msgObj), &b);
+    //         } else if (ICharSequence::Probe(msgObj) != NULL) {
+    //             Boolean b;
+    //             OnTrySetupData(TO_STR(msgObj), &b);
+    //         } else {
+    //             Loge("EVENT_TRY_SETUP request w/o apnContext or String");
+    //         }
+    //         break;
+    //     case IDctConstants::EVENT_CLEAN_UP_CONNECTION: {
+    //         Boolean tearDown = (msgArg1 == 0) ? FALSE : TRUE;
+    //         if (DBG) Log("EVENT_CLEAN_UP_CONNECTION tearDown=%d", tearDown);
+    //         if (IApnContext::Probe(msgObj) != NULL) {
+    //             CleanUpConnection(tearDown, IApnContext::Probe(msgObj));
+    //         } else {
+    //             Loge("EVENT_CLEAN_UP_CONNECTION request w/o apn context, call super");
+    //             DcTrackerBase::HandleMessage(msg);
+    //         }
+    //         break;
+    //     }
+    //     case IDctConstants::EVENT_SET_INTERNAL_DATA_ENABLE: {
+    //         Boolean enabled = (msgArg1 == IDctConstants::ENABLED) ? TRUE : FALSE;
+    //         OnSetInternalDataEnabled(enabled, IMessage::Probe(msgObj));
+    //         break;
+    //     }
+    //     case IDctConstants::EVENT_CLEAN_UP_ALL_CONNECTIONS: {
+    //         AutoPtr<IMessage> mCause;
+    //         ObtainMessage(IDctConstants::EVENT_CLEAN_UP_ALL_CONNECTIONS, NULL, (IMessage**)&mCause);
+    //         if ((msgObj != NULL) && (ICharSequence::Probe(msgObj) != NULL)) {
+    //             mCause->SetObj(msgObj);
+    //         }
+    //         DcTrackerBase::HandleMessage(mCause);
+    //         break;
+    //     }
+    //     case IDctConstants::EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED: // fall thru
+    //     case IDctConstants::EVENT_DATA_RAT_CHANGED: {
+    //         // When data rat changes we might need to load different
+    //         // set of apns (example, LTE->1x)
+    //         Boolean isNvSubscription;
+    //         IsNvSubscription(&isNvSubscription);
+    //         Boolean b;
+    //         OnUpdateIcc(&b);
+    //         if (b) {
+    //             Log("onUpdateIcc: tryRestartDataConnections %s", IPhone::REASON_NW_TYPE_CHANGED.string());
+    //             TryRestartDataConnections(TRUE, IPhone::REASON_NW_TYPE_CHANGED);
+    //         } else if (isNvSubscription){
+    //             // If cdma subscription source changed to NV or data rat changed to cdma
+    //             // (while subscription source was NV) - we need to trigger NV ready
+    //             OnNvReady();
+    //         }
+    //         break;
+    //     }
+    //     case IDctConstants::CMD_CLEAR_PROVISIONING_SPINNER:
+    //         // Check message sender intended to clear the current spinner.
+    //         if (mProvisioningSpinner == msgObj) {
+    //             IDialogInterface::Probe(mProvisioningSpinner)->Dismiss();
+    //             mProvisioningSpinner = NULL;
+    //         }
+    //         break;
+    //     case IDctConstants::EVENT_GET_WWAN_IWLAN_COEXISTENCE_DONE:
+    //         OnWwanIwlanCoexistenceDone(IAsyncResult::Probe(msgObj));
+    //         break;
+    //     case IDctConstants::EVENT_MODEM_DATA_PROFILE_READY:
+    //         OnModemApnProfileReady();
+    //         break;
+    //     default:
+    //         // handle the message in the super class DataConnectionTracker
+    //         DcTrackerBase::HandleMessage(msg);
+    //         break;
+    // }
+    return NOERROR;
 }
 
 ECode DcTracker::GetApnProfileID(
     /* [in] */ const String& apnType,
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (TextUtils.equals(apnType, PhoneConstants.APN_TYPE_IMS)) {
-            return RILConstants.DATA_PROFILE_IMS;
-        } else if (TextUtils.equals(apnType, PhoneConstants.APN_TYPE_FOTA)) {
-            return RILConstants.DATA_PROFILE_FOTA;
-        } else if (TextUtils.equals(apnType, PhoneConstants.APN_TYPE_CBS)) {
-            return RILConstants.DATA_PROFILE_CBS;
-        } else if (TextUtils.equals(apnType, PhoneConstants.APN_TYPE_IA)) {
-            return RILConstants.DATA_PROFILE_DEFAULT; // DEFAULT for now
-        } else if (TextUtils.equals(apnType, PhoneConstants.APN_TYPE_DUN)) {
-            return RILConstants.DATA_PROFILE_TETHERED;
-        } else {
-            return RILConstants.DATA_PROFILE_DEFAULT;
-        }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (TextUtils::Equals(apnType, IPhoneConstants::APN_TYPE_IMS)) {
+        *result = IRILConstants::DATA_PROFILE_IMS;
+        return NOERROR;
+    } else if (TextUtils::Equals(apnType, IPhoneConstants::APN_TYPE_FOTA)) {
+        *result = IRILConstants::DATA_PROFILE_FOTA;
+        return NOERROR;
+    } else if (TextUtils::Equals(apnType, IPhoneConstants::APN_TYPE_CBS)) {
+        *result = IRILConstants::DATA_PROFILE_CBS;
+        return NOERROR;
+    } else if (TextUtils::Equals(apnType, IPhoneConstants::APN_TYPE_IA)) {
+        *result = IRILConstants::DATA_PROFILE_DEFAULT;
+        return NOERROR; // DEFAULT for now
+    } else if (TextUtils::Equals(apnType, IPhoneConstants::APN_TYPE_DUN)) {
+        *result = IRILConstants::DATA_PROFILE_TETHERED;
+        return NOERROR;
+    } else {
+        *result = IRILConstants::DATA_PROFILE_DEFAULT;
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::GetCellLocationId(
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        int cid = -1;
-        CellLocation loc = mPhone.getCellLocation();
-        if (loc != null) {
-            if (loc instanceof GsmCellLocation) {
-                cid = ((GsmCellLocation)loc).getCid();
-            } else if (loc instanceof CdmaCellLocation) {
-                cid = ((CdmaCellLocation)loc).getBaseStationId();
-            }
-        }
-        return cid;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 cid = -1;
+    AutoPtr<ICellLocation> loc;
+    IPhone::Probe(mPhone)->GetCellLocation((ICellLocation**)&loc);
+    if (loc != NULL) {
+        if (IGsmCellLocation::Probe(loc) != NULL) {
+            IGsmCellLocation::Probe(loc)->GetCid(&cid);
+        } else if (ICdmaCellLocation::Probe(loc) != NULL) {
+            ICdmaCellLocation::Probe(loc)->GetBaseStationId(&cid);
+        }
+    }
+    *result = cid;
+    return NOERROR;
 }
 
 ECode DcTracker::GetUiccRecords(
     /* [in] */ Int32 appFamily,
     /* [out] */ IIccRecords** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mUiccController.getIccRecords(mPhone.getPhoneId(), appFamily);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 phoneId;
+    mPhone->GetPhoneId(&phoneId);
+    return mUiccController->GetIccRecords(phoneId, appFamily, result);
 }
 
 ECode DcTracker::OnUpdateIcc(
-    /* [out] */ Boolean* result)
+    /* [out] */ Boolean* _result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean result = false;
-        if (mUiccController == null ) {
-            loge("onUpdateIcc: mUiccController is null. Error!");
-            return false;
-        }
-        int dataRat = mPhone.getServiceState().getRilDataRadioTechnology();
-        int appFamily = UiccController.getFamilyFromRadioTechnology(dataRat);
-        IccRecords newIccRecords = getUiccRecords(appFamily);
-        log("onUpdateIcc: newIccRecords " + ((newIccRecords != null) ?
-                newIccRecords.getClass().getName() : null));
-        if (dataRat == ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN) {
-            // Ignore this. This could be due to data not registered
-            // We want to ignore RADIO_TECHNOLOGY_UNKNOWN so that we do not tear down data
-            // call in case we are out of service.
-            return false;
-        }
-        IccRecords r = mIccRecords.get();
-        if (r != newIccRecords) {
-            if (r != null) {
-                log("Removing stale icc objects. " + ((r != null) ?
-                        r.getClass().getName() : null));
-                r.unregisterForRecordsLoaded(this);
-                mIccRecords.set(null);
-            }
-            if (newIccRecords != null) {
-                log("New records found " + ((newIccRecords != null) ?
-                        newIccRecords.getClass().getName() : null));
-                mIccRecords.set(newIccRecords);
-                newIccRecords.registerForRecordsLoaded(
-                        this, DctConstants.EVENT_RECORDS_LOADED, null);
-            }
-            // Records changed -> return true
-            result = true;
-        }
-        return result;
+    VALIDATE_NOT_NULL(_result)
 
-#endif
+    Boolean result = FALSE;
+    if (mUiccController == NULL ) {
+        Loge("onUpdateIcc: mUiccController is null. Error!");
+        *_result = FALSE;
+        return NOERROR;
+    }
+    AutoPtr<IServiceState> serviceState;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    Int32 dataRat;
+    serviceState->GetRilDataRadioTechnology(&dataRat);
+    assert(0 && "TODO: UiccController");
+    // Int32 appFamily = UiccController::GetFamilyFromRadioTechnology(dataRat);
+    // AutoPtr<IIccRecords> newIccRecords;
+    // GetUiccRecords(appFamily, (IIccRecords**)&newIccRecords);
+    // AutoPtr<IClassInfo> clsInfo;
+    // CObject::ReflectClassInfo(newIccRecords, (IClassInfo**)&clsInfo);
+    // String name;
+    // clsInfo->GetName(&name);
+    // Log("onUpdateIcc: newIccRecords %s", ((newIccRecords != NULL) ?
+    //         name.string() : String(NULL).string()));
+    // if (dataRat == IServiceState::RIL_RADIO_TECHNOLOGY_UNKNOWN) {
+    //     // Ignore this. This could be due to data not registered
+    //     // We want to ignore RADIO_TECHNOLOGY_UNKNOWN so that we do not tear down data
+    //     // call in case we are out of service.
+    //     *_result = FALSE;
+    //     return NOERROR;
+    // }
+    // AutoPtr<IInterface> obj;
+    // mIccRecords->Get((IInterface**)&obj);
+    // AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
+    // if (r != newIccRecords) {
+    //     if (r != NULL) {
+    //         AutoPtr<IClassInfo> clsInfo;
+    //         CObject::ReflectClassInfo(r, (IClassInfo**)&clsInfo);
+    //         String name;
+    //         clsInfo->GetName(&name);
+    //         Log("Removing stale icc objects. %s", ((r != NULL) ?
+    //                 name.string() : String(NULL).string()));
+    //         r->UnregisterForRecordsLoaded(this);
+    //         mIccRecords->Set(NULL);
+    //     }
+    //     if (newIccRecords != NULL) {
+    //         AutoPtr<IClassInfo> clsInfo;
+    //         CObject::ReflectClassInfo(newIccRecords, (IClassInfo**)&clsInfo);
+    //         String name;
+    //         clsInfo->GetName(&name);
+    //         Log("New records found %s", ((newIccRecords != NULL) ?
+    //                 name.string() : String(NULL).string()));
+    //         mIccRecords->Set(newIccRecords);
+    //         newIccRecords->RegisterForRecordsLoaded(
+    //                 this, IDctConstants::EVENT_RECORDS_LOADED, NULL);
+    //     }
+    //     // Records changed -> return true
+    //     result = TRUE;
+    // }
+    // *_result = result;
+    return NOERROR;
 }
 
 ECode DcTracker::Update()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        log("update sub = " + mPhone.getSubId());
-        log("update(): Active DDS, register for all events now!");
-        registerForAllEvents();
-        onUpdateIcc();
-        mUserDataEnabled = Settings.Global.getInt(mPhone.getContext().getContentResolver(),
-                Settings.Global.MOBILE_DATA + mPhone.getPhoneId(), 1) == 1;
-        if (mPhone instanceof CDMALTEPhone) {
-            ((CDMALTEPhone)mPhone).updateCurrentCarrierInProvider();
-            supplyMessenger();
-        } else if (mPhone instanceof GSMPhone) {
-            ((GSMPhone)mPhone).updateCurrentCarrierInProvider();
-            supplyMessenger();
-        } else {
-            log("Phone object is not MultiSim. This should not hit!!!!");
-        }
-
-#endif
+    Int64 subId;
+    mPhone->GetSubId(&subId);
+    Log("update sub = %ld", subId);
+    Log("update(): Active DDS, register for all events now!");
+    RegisterForAllEvents();
+    Boolean b;
+    OnUpdateIcc(&b);
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IContentResolver> contentResolver;
+    context->GetContentResolver((IContentResolver**)&contentResolver);
+    Int32 phoneId;
+    mPhone->GetPhoneId(&phoneId);
+    Int32 i32;
+    Settings::Global::GetInt32(contentResolver,
+            ISettingsGlobal::MOBILE_DATA + StringUtils::ToString(phoneId), 1, &i32);
+    mUserDataEnabled = i32 == 1;
+    if (ICDMALTEPhone::Probe(mPhone) != NULL) {
+        assert(0 && "TODO: ICDMAPhone");
+        // ICDMAPhone::Probe(mPhone)->UpdateCurrentCarrierInProvider();
+        SupplyMessenger();
+    } else if (IGSMPhone::Probe(mPhone) != NULL) {
+        Boolean b;
+        IGSMPhone::Probe(mPhone)->UpdateCurrentCarrierInProvider(&b);
+        SupplyMessenger();
+    } else {
+        Log("Phone object is not MultiSim. This should not hit!!!!");
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::CleanUpAllConnections(
     /* [in] */ const String& cause)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        cleanUpAllConnections(cause, null);
-
-#endif
+    return CleanUpAllConnections(cause, NULL);
 }
 
 ECode DcTracker::UpdateRecords()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        onUpdateIcc();
-
-#endif
+    Boolean b;
+    return OnUpdateIcc(&b);
 }
 
 ECode DcTracker::CleanUpAllConnections(
     /* [in] */ const String& cause,
     /* [in] */ IMessage* disconnectAllCompleteMsg)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        log("cleanUpAllConnections");
-        if (disconnectAllCompleteMsg != null) {
-            mDisconnectAllCompleteMsgList.add(disconnectAllCompleteMsg);
-        }
-        Message msg = obtainMessage(DctConstants.EVENT_CLEAN_UP_ALL_CONNECTIONS);
-        msg.obj = cause;
-        sendMessage(msg);
-
-#endif
+    Log("cleanUpAllConnections");
+    if (disconnectAllCompleteMsg != NULL) {
+        mDisconnectAllCompleteMsgList->Add(disconnectAllCompleteMsg);
+    }
+    AutoPtr<IMessage> msg;
+    ObtainMessage(IDctConstants::EVENT_CLEAN_UP_ALL_CONNECTIONS, (IMessage**)&msg);
+    msg->SetObj(StringUtils::ParseCharSequence(cause));
+    Boolean b;
+    SendMessage(msg, &b);
+    return NOERROR;
 }
 
 ECode DcTracker::NotifyDataDisconnectComplete()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        log("notifyDataDisconnectComplete");
-        for (Message m: mDisconnectAllCompleteMsgList) {
-            m.sendToTarget();
-        }
-        mDisconnectAllCompleteMsgList.clear();
-
-#endif
+    Log("notifyDataDisconnectComplete");
+    AutoPtr<IIterator> it;
+    mDisconnectAllCompleteMsgList->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMessage> m = IMessage::Probe(obj);
+        m->SendToTarget();
+    }
+    mDisconnectAllCompleteMsgList->Clear();
+    return NOERROR;
 }
 
 ECode DcTracker::NotifyAllDataDisconnected()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        sEnableFailFastRefCounter = 0;
-        mFailFast = false;
-        mAllDataDisconnectedRegistrants.notifyRegistrants();
-
-#endif
+    sEnableFailFastRefCounter = 0;
+    mFailFast = FALSE;
+    ((RegistrantList*) mAllDataDisconnectedRegistrants.Get())->NotifyRegistrants();
+    return NOERROR;
 }
 
 ECode DcTracker::RegisterForAllDataDisconnected(
@@ -3811,89 +5120,75 @@ ECode DcTracker::RegisterForAllDataDisconnected(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mAllDataDisconnectedRegistrants.addUnique(h, what, obj);
-        if (isDisconnected()) {
-            log("notify All Data Disconnected");
-            notifyAllDataDisconnected();
-        }
-
-#endif
+    ((RegistrantList*) mAllDataDisconnectedRegistrants.Get())->AddUnique(h, what, obj);
+    Boolean isDisconnected;
+    IsDisconnected(&isDisconnected);
+    if (isDisconnected) {
+        Log("notify All Data Disconnected");
+        NotifyAllDataDisconnected();
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::UnregisterForAllDataDisconnected(
     /* [in] */ IHandler* h)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mAllDataDisconnectedRegistrants.remove(h);
-
-#endif
+    ((RegistrantList*) mAllDataDisconnectedRegistrants.Get())->Remove(h);
+    return NOERROR;
 }
 
 ECode DcTracker::OnSetInternalDataEnabled(
     /* [in] */ Boolean enable)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        onSetInternalDataEnabled(enable, null);
-
-#endif
+    return OnSetInternalDataEnabled(enable, NULL);
 }
 
 ECode DcTracker::OnSetInternalDataEnabled(
     /* [in] */ Boolean enabled,
     /* [in] */ IMessage* onCompleteMsg)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean sendOnComplete = true;
-        synchronized (mDataEnabledLock) {
-            mInternalDataEnabled = enabled;
-            if (enabled) {
-                log("onSetInternalDataEnabled: changed to enabled, try to setup data call");
-                onTrySetupData(Phone.REASON_DATA_ENABLED);
-            } else {
-                sendOnComplete = false;
-                log("onSetInternalDataEnabled: changed to disabled, cleanUpAllConnections");
-                cleanUpAllConnections(null, onCompleteMsg);
-            }
+    Boolean sendOnComplete = TRUE;
+    {
+        AutoLock lock(mDataEnabledLock);
+        mInternalDataEnabled = enabled;
+        if (enabled) {
+            Log("onSetInternalDataEnabled: changed to enabled, try to setup data call");
+            Boolean b;
+            OnTrySetupData(IPhone::REASON_DATA_ENABLED, &b);
+        } else {
+            sendOnComplete = FALSE;
+            Log("onSetInternalDataEnabled: changed to disabled, cleanUpAllConnections");
+            CleanUpAllConnections(String(NULL), onCompleteMsg);
         }
-        if (sendOnComplete) {
-            if (onCompleteMsg != null) {
-                onCompleteMsg.sendToTarget();
-            }
+    }
+    if (sendOnComplete) {
+        if (onCompleteMsg != NULL) {
+            onCompleteMsg->SendToTarget();
         }
-
-#endif
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::SetInternalDataEnabledFlag(
     /* [in] */ Boolean enable,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG)
-            log("setInternalDataEnabledFlag(" + enable + ")");
-        if (mInternalDataEnabled != enable) {
-            mInternalDataEnabled = enable;
-        }
-        return true;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (DBG)
+        Log("setInternalDataEnabledFlag(%d)", enable);
+    if (mInternalDataEnabled != enable) {
+        mInternalDataEnabled = enable;
+    }
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode DcTracker::SetInternalDataEnabled(
     /* [in] */ Boolean enable,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return setInternalDataEnabled(enable, null);
-
-#endif
+    return SetInternalDataEnabled(enable, NULL, result);
 }
 
 ECode DcTracker::SetInternalDataEnabled(
@@ -3901,61 +5196,66 @@ ECode DcTracker::SetInternalDataEnabled(
     /* [in] */ IMessage* onCompleteMsg,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG)
-            log("setInternalDataEnabled(" + enable + ")");
-        Message msg = obtainMessage(DctConstants.EVENT_SET_INTERNAL_DATA_ENABLE, onCompleteMsg);
-        msg.arg1 = (enable ? DctConstants.ENABLED : DctConstants.DISABLED);
-        sendMessage(msg);
-        return true;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (DBG)
+        Log("setInternalDataEnabled(%d)", enable);
+    AutoPtr<IMessage> msg;
+    ObtainMessage(IDctConstants::EVENT_SET_INTERNAL_DATA_ENABLE, onCompleteMsg, (IMessage**)&msg);
+    msg->SetArg1(enable ? IDctConstants::ENABLED : IDctConstants::DISABLED);
+    Boolean b;
+    SendMessage(msg, &b);
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode DcTracker::IsActiveDataSubscription(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // FIXME This should have code like
-        // return (mPhone.getSubId() == SubscriptionManager.getDefaultDataSubId());
-        return true;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    // FIXME This should have code like
+    // return (mPhone.getSubId() == SubscriptionManager.getDefaultDataSubId());
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode DcTracker::SetDataAllowed(
     /* [in] */ Boolean enable,
     /* [in] */ IMessage* response)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-         mIsCleanupRequired = !enable;
-         mPhone.mCi.setDataAllowed(enable, response);
-         mInternalDataEnabled = enable;
-
-#endif
+    mIsCleanupRequired = !enable;
+    ((PhoneBase*) mPhone.Get())->mCi->SetDataAllowed(enable, response);
+    mInternalDataEnabled = enable;
+    return NOERROR;
 }
 
 ECode DcTracker::Log(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Rlog.d(LOG__TAG, "[" + mPhone.getPhoneId() + "]" + s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    Int32 phoneId;
+    mPhone->GetPhoneId(&phoneId);
+    return Logger::D(LOG__TAG, "[%d]%s", phoneId, msgBuf);
 }
 
 ECode DcTracker::Loge(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Rlog.e(LOG__TAG, "[" + mPhone.getPhoneId() + "]" + s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    Int32 phoneId;
+    mPhone->GetPhoneId(&phoneId);
+    return Logger::E(LOG__TAG, "[%d]%s", phoneId, msgBuf);
 }
 
 ECode DcTracker::Dump(
@@ -3963,131 +5263,145 @@ ECode DcTracker::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        pw.println("DataConnectionTracker extends:");
-        super.dump(fd, pw, args);
-        pw.println(" mReregisterOnReconnectFailure=" + mReregisterOnReconnectFailure);
-        pw.println(" canSetPreferApn=" + mCanSetPreferApn);
-        pw.println(" mApnObserver=" + mApnObserver);
-        pw.println(" getOverallState=" + getOverallState());
-        pw.println(" mDataConnectionAsyncChannels=%s\n" + mDataConnectionAcHashMap);
-        pw.println(" mAttached=" + mAttached.get());
-
-#endif
+    pw->Println(String("DataConnectionTracker extends:"));
+    DcTrackerBase::Dump(fd, pw, args);
+    pw->Println(String(" mReregisterOnReconnectFailure=") + StringUtils::ToString(mReregisterOnReconnectFailure));
+    pw->Println(String(" canSetPreferApn=") + StringUtils::ToString(mCanSetPreferApn));
+    pw->Println(String(" mApnObserver=") + TO_STR(TO_IINTERFACE(mApnObserver)));
+    DctConstantsState overallState;
+    GetOverallState(&overallState);
+    pw->Println(String(" getOverallState=") + StringUtils::ToString(overallState));
+    pw->Println(String(" mDataConnectionAsyncChannels=%s\n") + TO_STR(mDataConnectionAcHashMap));
+    Boolean b;
+    mAttached->Get(&b);
+    pw->Println(String(" mAttached=") + StringUtils::ToString(b));
+    return NOERROR;
 }
 
 ECode DcTracker::GetPcscfAddress(
     /* [in] */ const String& apnType,
-    /* [out, callee] */ ArrayOf<String>** result)
+    /* [out, callee] */ ArrayOf<String>** _result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        log("getPcscfAddress()");
-        ApnContext apnContext = null;
-        if(apnType == null){
-            log("apnType is null, return null");
-            return null;
-        }
-        if (TextUtils.equals(apnType, PhoneConstants.APN_TYPE_EMERGENCY)) {
-            apnContext = mApnContexts.get(PhoneConstants.APN_TYPE_EMERGENCY);
-        } else if (TextUtils.equals(apnType, PhoneConstants.APN_TYPE_IMS)) {
-            apnContext = mApnContexts.get(PhoneConstants.APN_TYPE_IMS);
-        } else {
-            log("apnType is invalid, return null");
-            return null;
-        }
-        if (apnContext == null) {
-            log("apnContext is null, return null");
-            return null;
-        }
-        DcAsyncChannel dcac = apnContext.getDcAc();
-        String[] result = null;
-        if (dcac != null) {
-            result = dcac.getPcscfAddr();
-            for (int i = 0; i < result.length; i++) {
-                log("Pcscf[" + i + "]: " + result[i]);
-            }
-            return result;
-        }
-        return null;
+    VALIDATE_NOT_NULL(_result)
 
-#endif
+    Log("getPcscfAddress()");
+    AutoPtr<IApnContext> apnContext;
+    if (apnType == NULL){
+        Log("apnType is null, return null");
+        *_result = NULL;
+        return NOERROR;
+    }
+    if (TextUtils::Equals(apnType, IPhoneConstants::APN_TYPE_EMERGENCY)) {
+        AutoPtr<IInterface> obj;
+        mApnContexts->Get(StringUtils::ParseCharSequence(IPhoneConstants::APN_TYPE_EMERGENCY), (IInterface**)&obj);
+        apnContext = IApnContext::Probe(obj);
+    } else if (TextUtils::Equals(apnType, IPhoneConstants::APN_TYPE_IMS)) {
+        AutoPtr<IInterface> obj;
+        mApnContexts->Get(StringUtils::ParseCharSequence(IPhoneConstants::APN_TYPE_IMS), (IInterface**)&obj);
+        apnContext = IApnContext::Probe(obj);
+    } else {
+        Log("apnType is invalid, return null");
+        *_result = NULL;
+        return NOERROR;
+    }
+    if (apnContext == NULL) {
+        Log("apnContext is null, return null");
+        *_result = NULL;
+        return NOERROR;
+    }
+    AutoPtr<IDcAsyncChannel> dcac;
+    apnContext->GetDcAc((IDcAsyncChannel**)&dcac);
+    AutoPtr<ArrayOf<String> > result;
+    if (dcac != NULL) {
+        dcac->GetPcscfAddr((ArrayOf<String>**)&result);
+        for (Int32 i = 0; i < result->GetLength(); i++) {
+            Log("Pcscf[%d]: %s", i, (*result)[i].string());
+        }
+        *_result = result;
+        REFCOUNT_ADD(*_result)
+        return NOERROR;
+    }
+    *_result = NULL;
+    return NOERROR;
 }
 
 ECode DcTracker::SetImsRegistrationState(
     /* [in] */ Boolean registered)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        log("setImsRegistrationState - mImsRegistrationState(before): "+ mImsRegistrationState
-                + ", registered(current) : " + registered);
-        if (mPhone == null) return;
-        ServiceStateTracker sst = mPhone.getServiceStateTracker();
-        if (sst == null) return;
-        sst.setImsRegistrationState(registered);
-
-#endif
+    Log("setImsRegistrationState - mImsRegistrationState(before): %d"
+            ", registered(current) : %d", mImsRegistrationState, registered);
+    if (mPhone == NULL) return NOERROR;
+    AutoPtr<IServiceStateTracker> sst;
+    mPhone->GetServiceStateTracker((IServiceStateTracker**)&sst);
+    if (sst == NULL) return NOERROR;
+    sst->SetImsRegistrationState(registered);
+    return NOERROR;
 }
 
 ECode DcTracker::InitEmergencyApnSetting()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // Operator Numeric is not available when sim records are not loaded.
-        // Query Telephony.db with APN type as EPDN request does not
-        // require APN name, plmn and all operators support same APN config.
-        // DB will contain only one entry for Emergency APN
-        String selection = "type=\"emergency\"";
-        Cursor cursor = mPhone.getContext().getContentResolver().query(
-                Telephony.Carriers.CONTENT_URI, null, selection, null, null);
-        if (cursor != null) {
-            if (cursor.getCount() > 0) {
-                if (cursor.moveToFirst()) {
-                    mEmergencyApn = makeApnSetting(cursor);
-                }
+    // Operator Numeric is not available when sim records are not loaded.
+    // Query Telephony.db with APN type as EPDN request does not
+    // require APN name, plmn and all operators support same APN config.
+    // DB will contain only one entry for Emergency APN
+    String selection("type=\"emergency\"");
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IContentResolver> contentResolver;
+    context->GetContentResolver((IContentResolver**)&contentResolver);
+    AutoPtr<ICursor> cursor;
+    contentResolver->Query(
+            Elastos::Droid::Provider::Telephony::Carriers::CONTENT_URI, NULL, selection, NULL, String(NULL), (ICursor**)&cursor);
+    if (cursor != NULL) {
+        Int32 count;
+        cursor->GetCount(&count);
+        if (count > 0) {
+            Boolean isMoveToFirst;
+            if (cursor->MoveToFirst(&isMoveToFirst)) {
+                MakeApnSetting(cursor, (IApnSetting**)&mEmergencyApn);
             }
-            cursor.close();
         }
-
-#endif
+        ICloseable::Probe(cursor)->Close();
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::AddEmergencyApnSetting()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if(mEmergencyApn != null) {
-            if(mAllApnSettings == null) {
-                mAllApnSettings = new ArrayList<ApnSetting>();
-            } else {
-                boolean hasEmergencyApn = false;
-                for (ApnSetting apn : mAllApnSettings) {
-                    if (ArrayUtils.contains(apn.types, PhoneConstants.APN_TYPE_EMERGENCY)) {
-                        hasEmergencyApn = true;
-                        break;
-                    }
-                }
-                if(hasEmergencyApn == false) {
-                    mAllApnSettings.add(mEmergencyApn);
-                } else {
-                    log("addEmergencyApnSetting - E-APN setting is already present");
+    if (mEmergencyApn != NULL) {
+        if (mAllApnSettings == NULL) {
+            CArrayList::New((IArrayList**)&mAllApnSettings);
+        } else {
+            Boolean hasEmergencyApn = FALSE;
+            AutoPtr<IIterator> it;
+            mAllApnSettings->GetIterator((IIterator**)&it);
+            Boolean hasNext;
+            while (it->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> obj;
+                it->GetNext((IInterface**)&obj);
+                AutoPtr<IApnSetting> apn = IApnSetting::Probe(obj);
+                AutoPtr<ArrayOf<String> > types;
+                apn->GetTypes((ArrayOf<String>**)&types);
+                if (ArrayUtils::Contains(types.Get(), IPhoneConstants::APN_TYPE_EMERGENCY)) {
+                    hasEmergencyApn = TRUE;
+                    break;
                 }
             }
+            if (hasEmergencyApn == FALSE) {
+                mAllApnSettings->Add(mEmergencyApn);
+            } else {
+                Log("addEmergencyApnSetting - E-APN setting is already present");
+            }
         }
-
-#endif
+    }
+    return NOERROR;
 }
 
 ECode DcTracker::GetUri(
     /* [in] */ IUri* uri,
     /* [out] */ IUri** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return Uri.withAppendedPath(uri, "/subId/" + mSubId);
-
-#endif
+    return Uri::WithAppendedPath(uri, String("/subId/") + StringUtils::ToString(mSubId), result);
 }
 
 ECode DcTracker::GetImsRegistrationState(
@@ -4101,29 +5415,23 @@ ECode DcTracker::GetImsRegistrationState(
 AutoPtr<IUri> DcTracker::InitPREFERAPN_NO_UPDATE_URI()
 {
     AutoPtr<IUri> rev;
-#if 0 // TODO: Translate codes below
     Uri::Parse(String("content://telephony/carriers/preferapn_no_update"), (IUri**)&rev);
-#endif
     return rev;
 }
 
 String DcTracker::InitPROPERTY_CDMA_IPPROTOCOL()
 {
     String rev;
-#if 0 // TODO: Translate codes below
-    SystemProperties.get(
-            "persist.telephony.cdma.protocol", "IP");
-#endif
+    SystemProperties::Get(
+            String("persist.telephony.cdma.protocol"), String("IP"), &rev);
     return rev;
 }
 
 String DcTracker::InitPROPERTY_CDMA_ROAMING_IPPROTOCOL()
 {
     String rev;
-#if 0 // TODO: Translate codes below
-    SystemProperties.get(
-            "persist.telephony.cdma.rproto", "IP");
-#endif
+    SystemProperties::Get(
+            String("persist.telephony.cdma.rproto"), String("IP"), &rev);
     return rev;
 }
 

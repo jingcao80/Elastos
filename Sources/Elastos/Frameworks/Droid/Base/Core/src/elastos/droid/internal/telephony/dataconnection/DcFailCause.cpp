@@ -1,6 +1,19 @@
 
 #include "elastos/droid/internal/telephony/dataconnection/DcFailCause.h"
+#include "elastos/droid/R.h"
+#include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
+#include "elastos/droid/content/res/CResources.h"
 #include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.CoreLibrary.h>
+#include <elastos/droid/R.h>
+
+using Elastos::Core::CInteger32;
+using Elastos::Core::IInteger32;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Res::CResources;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::R;
+using Elastos::Utility::CHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -14,105 +27,102 @@ AutoPtr<IHashMap> DcFailCause::sErrorCodeToFailCauseMap = InitErrorCodeToFailCau
 
 DcFailCause::DcFailCause()
 {
-#if 0 // TODO: Translate codes below
-    Boolean mRestartRadioOnRegularDeactivation = Resources.getSystem().getBoolean(
-            com.android.internal.R.bool.config_restart_radio_on_pdp_fail_regular_deactivation);
-#endif
+    CResources::GetSystem()->GetBoolean(
+            R::bool_::config_restart_radio_on_pdp_fail_regular_deactivation, &mRestartRadioOnRegularDeactivation);
 }
 
 ECode DcFailCause::constructor(
     /* [in] */ Int32 errorCode)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mErrorCode = errorCode;
-
-#endif
+    mErrorCode = errorCode;
+    return NOERROR;
 }
 
 ECode DcFailCause::GetErrorCode(
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mErrorCode;
-
-#endif
+    VALIDATE_NOT_NULL(result)
+    *result = mErrorCode;
+    return NOERROR;
 }
 
 ECode DcFailCause::IsRestartRadioFail(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return (this == REGULAR_DEACTIVATION && mRestartRadioOnRegularDeactivation);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    *result = (mErrorCode == DcFailCause_REGULAR_DEACTIVATION && mRestartRadioOnRegularDeactivation);
+    return NOERROR;
 }
 
 ECode DcFailCause::IsPermanentFail(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Context context = PhoneFactory.getContext();
-        if (this == ACTIVATION_REJECT_GGSN) {
-            return (context.getResources().
-                    getBoolean(com.android.internal.R.bool.config_reject_ggsn_perm_failure));
-        } else if (this == PROTOCOL_ERRORS) {
-            return (context.getResources().
-                    getBoolean(com.android.internal.R.bool.config_protocol_errors_perm_failure));
-        } else {
-            return (this == OPERATOR_BARRED) || (this == MISSING_UNKNOWN_APN) ||
-                    (this == UNKNOWN_PDP_ADDRESS_TYPE) || (this == USER_AUTHENTICATION) ||
-                    (this == SERVICE_OPTION_NOT_SUPPORTED) ||
-                    (this == SERVICE_OPTION_NOT_SUBSCRIBED) || (this == NSAPI_IN_USE) ||
-                    (this == ONLY_IPV4_ALLOWED) || (this == ONLY_IPV6_ALLOWED) ||
-                    (this == RADIO_POWER_OFF) || (this == TETHERED_CALL_ACTIVE) ||
-                    (this == RADIO_NOT_AVAILABLE) || (this == UNACCEPTABLE_NETWORK_PARAMETER);
-        }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    assert(0 && "PhoneFactory");
+    // AutoPtr<IContext> context = PhoneFactory::GetContext();
+    // if (mErrorCode == ACTIVATION_REJECT_GGSN) {
+    //     AutoPtr<IResources> res;
+    //     context->GetResources((IResources**)&res);
+    //     return (res->GetBoolean(R::bool_::config_reject_ggsn_perm_failure, result));
+    // } else if (mErrorCode == PROTOCOL_ERRORS) {
+    //     AutoPtr<IResources> res;
+    //     context->GetResources((IResources**)&res);
+    //     return (res->GetBoolean(R::bool_::config_protocol_errors_perm_failure, result));
+    // } else {
+    //     *result = (mErrorCode == OPERATOR_BARRED) || (mErrorCode == MISSING_UNKNOWN_APN) ||
+    //             (mErrorCode == UNKNOWN_PDP_ADDRESS_TYPE) || (mErrorCode == USER_AUTHENTICATION) ||
+    //             (mErrorCode == SERVICE_OPTION_NOT_SUPPORTED) ||
+    //             (mErrorCode == SERVICE_OPTION_NOT_SUBSCRIBED) || (mErrorCode == NSAPI_IN_USE) ||
+    //             (mErrorCode == ONLY_IPV4_ALLOWED) || (mErrorCode == ONLY_IPV6_ALLOWED) ||
+    //             (mErrorCode == RADIO_POWER_OFF) || (mErrorCode == TETHERED_CALL_ACTIVE) ||
+    //             (mErrorCode == RADIO_NOT_AVAILABLE) || (mErrorCode == UNACCEPTABLE_NETWORK_PARAMETER);
+    //     return NOERROR;
+    // }
+    return NOERROR;
 }
 
 ECode DcFailCause::IsEventLoggable(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return (this == OPERATOR_BARRED) || (this == INSUFFICIENT_RESOURCES) ||
-                (this == UNKNOWN_PDP_ADDRESS_TYPE) || (this == USER_AUTHENTICATION) ||
-                (this == ACTIVATION_REJECT_GGSN) || (this == ACTIVATION_REJECT_UNSPECIFIED) ||
-                (this == SERVICE_OPTION_NOT_SUBSCRIBED) ||
-                (this == SERVICE_OPTION_NOT_SUPPORTED) ||
-                (this == SERVICE_OPTION_OUT_OF_ORDER) || (this == NSAPI_IN_USE) ||
-                (this == ONLY_IPV4_ALLOWED) || (this == ONLY_IPV6_ALLOWED) ||
-                (this == PROTOCOL_ERRORS) || (this == SIGNAL_LOST) ||
-                (this == RADIO_POWER_OFF) || (this == TETHERED_CALL_ACTIVE) ||
-                (this == UNACCEPTABLE_NETWORK_PARAMETER);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    *result = (mErrorCode == DcFailCause_OPERATOR_BARRED) || (mErrorCode == DcFailCause_INSUFFICIENT_RESOURCES) ||
+            (mErrorCode == DcFailCause_UNKNOWN_PDP_ADDRESS_TYPE) || (mErrorCode == DcFailCause_USER_AUTHENTICATION) ||
+            (mErrorCode == DcFailCause_ACTIVATION_REJECT_GGSN) || (mErrorCode == DcFailCause_ACTIVATION_REJECT_UNSPECIFIED) ||
+            (mErrorCode == DcFailCause_SERVICE_OPTION_NOT_SUBSCRIBED) ||
+            (mErrorCode == DcFailCause_SERVICE_OPTION_NOT_SUPPORTED) ||
+            (mErrorCode == DcFailCause_SERVICE_OPTION_OUT_OF_ORDER) || (mErrorCode == DcFailCause_NSAPI_IN_USE) ||
+            (mErrorCode == DcFailCause_ONLY_IPV4_ALLOWED) || (mErrorCode == DcFailCause_ONLY_IPV6_ALLOWED) ||
+            (mErrorCode == DcFailCause_PROTOCOL_ERRORS) || (mErrorCode == DcFailCause_SIGNAL_LOST) ||
+            (mErrorCode == DcFailCause_RADIO_POWER_OFF) || (mErrorCode == DcFailCause_TETHERED_CALL_ACTIVE) ||
+            (mErrorCode == DcFailCause_UNACCEPTABLE_NETWORK_PARAMETER);
+    return NOERROR;
 }
 
 ECode DcFailCause::FromInt32(
     /* [in] */ Int32 errorCode,
     /* [out] */ IDcFailCause** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        DcFailCause fc = sErrorCodeToFailCauseMap.get(errorCode);
-        if (fc == null) {
-            fc = UNKNOWN;
-        }
-        return fc;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IInteger32> i32;
+    CInteger32::New(errorCode, (IInteger32**)&i32);
+    AutoPtr<IInterface> obj;
+    sErrorCodeToFailCauseMap->Get(i32, (IInterface**)&obj);
+    AutoPtr<IDcFailCause> fc = IDcFailCause::Probe(obj);
+    if (fc == NULL) {
+        FromInt32(DcFailCause_UNKNOWN, (IDcFailCause**)&fc);
+    }
+    *result = fc;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 AutoPtr<IHashMap> DcFailCause::InitErrorCodeToFailCauseMap()
 {
     AutoPtr<IHashMap> rev;
-#if 0 // TODO: Translate codes below
     CHashMap::New((IHashMap**)&rev);
     Int32 values[] = {
             DcFailCause_NONE,
@@ -157,7 +167,6 @@ AutoPtr<IHashMap> DcFailCause::InitErrorCodeToFailCauseMap()
         CInteger32::New(values[i], (IInteger32**)&i32);
         rev->Put(i32, i32);
     }
-#endif
     return rev;
 }
 

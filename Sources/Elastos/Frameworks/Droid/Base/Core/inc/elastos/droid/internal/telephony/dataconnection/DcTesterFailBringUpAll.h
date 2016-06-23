@@ -69,7 +69,7 @@ public:
 
 private:
     CARAPI Log(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
 private:
     static const String LOG__TAG;

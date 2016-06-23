@@ -1,5 +1,11 @@
 
 #include "elastos/droid/internal/telephony/dataconnection/DcFailBringUp.h"
+#include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
+#include "elastos/droid/internal/telephony/dataconnection/DcFailCause.h"
+#include <Elastos.Droid.Content.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -9,7 +15,7 @@ namespace DataConnection {
 
 const String DcFailBringUp::INTENT_BASE("Elastos.Droid.Internal.Telephony.DataConnection");
 const String DcFailBringUp::LOG__TAG("DcFailBringUp");
-const Boolean DcFailBringUp::DBG = true;
+const Boolean DcFailBringUp::DBG = TRUE;
 const String DcFailBringUp::ACTION_FAIL_BRINGUP("action_fail_bringup");
 const String DcFailBringUp::COUNTER("counter");
 const Int32 DcFailBringUp::DEFAULT_COUNTER = 1;
@@ -22,19 +28,18 @@ ECode DcFailBringUp::SaveParameters(
     /* [in] */ IIntent* intent,
     /* [in] */ const String& s)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log(s + ".saveParameters: action=" + intent.getAction());
-        mCounter = intent.getIntExtra(COUNTER, DEFAULT_COUNTER);
-        mFailCause = DcFailCause.fromInt(
-                intent.getIntExtra(FAIL_CAUSE, DEFAULT_FAIL_CAUSE.getErrorCode()));
-        mSuggestedRetryTime =
-                intent.getIntExtra(SUGGESTED_RETRY_TIME, DEFAULT_SUGGESTED_RETRY_TIME);
-        if (DBG) {
-            log(s + ".saveParameters: " + this);
-        }
-
-#endif
+    String action;
+    intent->GetAction(&action);
+    if (DBG) Log("%s.saveParameters: action=%s", s.string(), action.string());
+    intent->GetInt32Extra(COUNTER, DEFAULT_COUNTER, &mCounter);
+    Int32 enumValue;
+    intent->GetInt32Extra(FAIL_CAUSE, DEFAULT_FAIL_CAUSE, &enumValue);
+    DcFailCause::FromInt32(enumValue, (IDcFailCause**)&mFailCause);
+    intent->GetInt32Extra(SUGGESTED_RETRY_TIME, DEFAULT_SUGGESTED_RETRY_TIME, &mSuggestedRetryTime);
+    if (DBG) {
+        Log("%s.saveParameters: %s", s.string(), TO_CSTR(TO_IINTERFACE(this)));
+    }
+    return NOERROR;
 }
 
 ECode DcFailBringUp::SaveParameters(
@@ -42,35 +47,35 @@ ECode DcFailBringUp::SaveParameters(
     /* [in] */ Int32 failCause,
     /* [in] */ Int32 suggestedRetryTime)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mCounter = counter;
-        mFailCause = DcFailCause.fromInt(failCause);
-        mSuggestedRetryTime = suggestedRetryTime;
-
-#endif
+    mCounter = counter;
+    DcFailCause::FromInt32(failCause, (IDcFailCause**)&mFailCause);
+    mSuggestedRetryTime = suggestedRetryTime;
+    return NOERROR;
 }
 
 ECode DcFailBringUp::ToString(
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return "{mCounter=" + mCounter +
-                " mFailCause=" + mFailCause +
-                " mSuggestedRetryTime=" + mSuggestedRetryTime + "}";
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    String rev;
+    rev.AppendFormat("{mCounter=%d mFailCause=%s mSuggestedRetryTime=%d}",
+            mCounter, TO_CSTR(mFailCause), mSuggestedRetryTime);
+    *result = rev;
+    return NOERROR;
 }
 
+#define MSG_BUF_SIZE    1024
 ECode DcFailBringUp::Log(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Rlog.d(LOG__TAG, s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    return Logger::D(LOG__TAG, msgBuf);
 }
 
 } // namespace DataConnection

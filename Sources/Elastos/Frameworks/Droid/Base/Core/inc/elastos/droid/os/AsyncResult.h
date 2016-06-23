@@ -3,6 +3,7 @@
 #define __ELASTOS_DROID_OS_ASYNCRESULT_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include <Elastos.Droid.Os.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Core::IThrowable;
@@ -14,8 +15,10 @@ namespace Os {
 /** @hide */
 class ECO_PUBLIC AsyncResult
     : public Object
+    , public IAsyncResult
 {
 public:
+    CAR_INTERFACE_DECL()
 
     /*************************** Instance Variables **************************/
 

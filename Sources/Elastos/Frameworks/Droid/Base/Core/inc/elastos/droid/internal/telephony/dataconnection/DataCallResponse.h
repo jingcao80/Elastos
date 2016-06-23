@@ -22,6 +22,22 @@ class DataCallResponse
     , public IDataCallResponse
 {
 public:
+    class SetupResult
+        : public Object
+        , public IDataCallResponseSetupResult
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        SetupResult();
+
+        CARAPI ToString(
+            /* [out] */ String* result);
+    public:
+        AutoPtr<IDcFailCause> mFailCause;
+        EnumDataCallResponseSetupResult mEnumValue;
+    };
+public:
     CAR_INTERFACE_DECL()
 
     DataCallResponse();
@@ -33,7 +49,7 @@ public:
     CARAPI SetLinkProperties(
         /* [in] */ ILinkProperties* linkProperties,
         /* [in] */ Boolean okToUseSystemPropertyDns,
-        /* [out] */ DataCallResponseSetupResult* result);
+        /* [out] */ IDataCallResponseSetupResult** result);
 
     CARAPI GetVersion(
         /* [out] */ Int32* result);
@@ -63,13 +79,13 @@ public:
         /* [out] */ String* result);
 
     CARAPI SetType(
-        /* [in] */ String type);
+        /* [in] */ const String& type);
 
     CARAPI GetIfname(
         /* [out] */ String* result);
 
     CARAPI SetIfname(
-        /* [in] */ String ifname);
+        /* [in] */ const String& ifname);
 
     CARAPI GetAddresses(
         /* [out, callee] */ ArrayOf<String>** result);
@@ -84,7 +100,7 @@ public:
         /* [in] */ ArrayOf<String>* dnses);
 
     CARAPI GetGateways(
-        /* [out] */ ArrayOf<String>** result);
+        /* [out, callee] */ ArrayOf<String>** result);
 
     CARAPI SetGateways(
         /* [in] */ ArrayOf<String>* gateways);

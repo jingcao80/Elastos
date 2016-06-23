@@ -22,6 +22,8 @@ module
      */
     /**
      * @Involve
+     * interface IDialog
+     * interface IDialogInterface
      * interface IAlertDialog
      */
     interface IProgressDialog {

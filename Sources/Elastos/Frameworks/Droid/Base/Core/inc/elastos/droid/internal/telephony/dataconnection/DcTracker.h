@@ -5,7 +5,6 @@
 #include "_Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/dataconnection/DcTrackerBase.h"
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
-#include <_Elastos.Droid.Core.h>
 #include <elastos/core/Object.h>
 #include <elastos/core/Thread.h>
 #include <elastos/droid/content/BroadcastReceiver.h>
@@ -149,7 +148,7 @@ private:
 
         // @Override
         CARAPI Log(
-            /* [in] */ const String& s);
+            /* [in] */ const char *fmt, ...);
 
     private:
         CARAPI RegisterOnDemandDdsCallback();
@@ -208,12 +207,12 @@ private:
         CARAPI EnableMobileProvisioning();
 
     private:
-        const String mNetworkOperator;
+        String mNetworkOperator;
 
         // Mobile provisioning URL.  Valid while provisioning notification is up.
         // Set prior to notification being posted as URL contains ICCID which
         // disappears when radio is off (which is the case when notification is up).
-        const String mProvisionUrl;
+        String mProvisionUrl;
 
         DcTracker* mHost;
     };
@@ -556,11 +555,11 @@ public:
 
     // @Override
     CARAPI Log(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     // @Override
     CARAPI Loge(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     // @Override
     CARAPI Dump(
@@ -850,7 +849,7 @@ private:
     static CARAPI_(String) InitPROPERTY_CDMA_ROAMING_IPPROTOCOL();
 
 public:
-    const String LOG__TAG;
+    String LOG__TAG;
 
     Int32 mDisconnectPendingCount;
 
@@ -891,7 +890,7 @@ private:
     /** Watches for changes to the APN db. */
     AutoPtr<ApnChangeObserver> mApnObserver;
 
-    const String mProvisionActionName;
+    String mProvisionActionName;
 
     AutoPtr<IBroadcastReceiver> mProvisionBroadcastReceiver;
 

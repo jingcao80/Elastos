@@ -1,5 +1,17 @@
 
 #include "elastos/droid/internal/telephony/dataconnection/DcTesterFailBringUpAll.h"
+#include "elastos/droid/content/CIntentFilter.h"
+#include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
+#include "elastos/droid/os/Build.h"
+#include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Os::Build;
+using Elastos::Core::Math;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -19,28 +31,30 @@ ECode DcTesterFailBringUpAll::SubBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                String action = intent.getAction();
-                if (DBG) log("sIntentReceiver.onReceive: action=" + action);
-                if (action.equals(mActionFailBringUp)) {
-                    mFailBringUp.saveParameters(intent, "sFailBringUp");
-                } else if (action.equals(mPhone.getActionDetached())) {
-                    // Counter is MAX, bringUp/retry will always fail
-                    log("simulate detaching");
-                    mFailBringUp.saveParameters(Integer.MAX_VALUE,
-                            DcFailCause.LOST_CONNECTION.getErrorCode(),
-                            DcFailBringUp.DEFAULT_SUGGESTED_RETRY_TIME);
-                } else if (action.equals(mPhone.getActionAttached())) {
-                    // Counter is 0 next bringUp/retry will succeed
-                    log("simulate attaching");
-                    mFailBringUp.saveParameters(0, DcFailCause.NONE.getErrorCode(),
-                            DcFailBringUp.DEFAULT_SUGGESTED_RETRY_TIME);
-                } else {
-                    if (DBG) log("onReceive: unknown action=" + action);
-                }
-
-#endif
+    String action;
+    intent->GetAction(&action);
+    if (DBG) mHost->Log("sIntentReceiver.onReceive: action=%s", action.string());
+    String actionDetached;
+    mHost->mPhone->GetActionDetached(&actionDetached);
+    String actionAttached;
+    mHost->mPhone->GetActionAttached(&actionAttached);
+    if (action.Equals(mHost->mActionFailBringUp)) {
+        mHost->mFailBringUp->SaveParameters(intent, String("sFailBringUp"));
+    } else if (action.Equals(actionDetached)) {
+        // Counter is MAX, bringUp/retry will always fail
+        mHost->Log("simulate detaching");
+        mHost->mFailBringUp->SaveParameters(Elastos::Core::Math::INT32_MAX_VALUE,
+                DcFailCause_LOST_CONNECTION,
+                DcFailBringUp::DEFAULT_SUGGESTED_RETRY_TIME);
+    } else if (action.Equals(actionAttached)) {
+        // Counter is 0 next bringUp/retry will succeed
+        mHost->Log("simulate attaching");
+        mHost->mFailBringUp->SaveParameters(0, DcFailCause_NONE,
+                DcFailBringUp::DEFAULT_SUGGESTED_RETRY_TIME);
+    } else {
+        if (DBG) mHost->Log("onReceive: unknown action=%s", action.string());
+    }
+    return NOERROR;
 }
 
 //=============================================================================
@@ -49,7 +63,7 @@ ECode DcTesterFailBringUpAll::SubBroadcastReceiver::OnReceive(
 CAR_INTERFACE_IMPL(DcTesterFailBringUpAll, Object, IDcTesterFailBringUpAll)
 
 const String DcTesterFailBringUpAll::LOG__TAG("DcTesterFailBrinupAll");
-const Boolean DcTesterFailBringUpAll::DBG = true;
+const Boolean DcTesterFailBringUpAll::DBG = TRUE;
 
 DcTesterFailBringUpAll::DcTesterFailBringUpAll()
 {
@@ -62,52 +76,57 @@ ECode DcTesterFailBringUpAll::constructor(
     /* [in] */ IPhoneBase* phone,
     /* [in] */ IHandler* handler)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mPhone = phone;
-        if (Build.IS_DEBUGGABLE) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(mActionFailBringUp);
-            log("register for intent action=" + mActionFailBringUp);
-            filter.addAction(mPhone.getActionDetached());
-            log("register for intent action=" + mPhone.getActionDetached());
-            filter.addAction(mPhone.getActionAttached());
-            log("register for intent action=" + mPhone.getActionAttached());
-            phone.getContext().registerReceiver(mIntentReceiver, filter, null, handler);
-        }
-
-#endif
+    mPhone = phone;
+    if (Build::IS_DEBUGGABLE) {
+        AutoPtr<IIntentFilter> filter;
+        CIntentFilter::New((IIntentFilter**)&filter);
+        filter->AddAction(mActionFailBringUp);
+        Log("register for intent action=%s", mActionFailBringUp.string());
+        String actionDetached;
+        mPhone->GetActionDetached(&actionDetached);
+        filter->AddAction(actionDetached);
+        Log("register for intent action=%s", actionDetached.string());
+        String actionAttached;
+        mPhone->GetActionAttached(&actionAttached);
+        filter->AddAction(actionAttached);
+        Log("register for intent action=%s", actionAttached.string());
+        AutoPtr<IContext> context;
+        IPhone::Probe(phone)->GetContext((IContext**)&context);
+        AutoPtr<IIntent> intent;
+        context->RegisterReceiver(mIntentReceiver, filter, String(NULL), handler, (IIntent**)&intent);
+    }
+    return NOERROR;
 }
 
 ECode DcTesterFailBringUpAll::Dispose()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (Build.IS_DEBUGGABLE) {
-            mPhone.getContext().unregisterReceiver(mIntentReceiver);
-        }
-
-#endif
+    if (Build::IS_DEBUGGABLE) {
+        AutoPtr<IContext> context;
+        IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+        context->UnregisterReceiver(mIntentReceiver);
+    }
+    return NOERROR;
 }
 
 ECode DcTesterFailBringUpAll::GetDcFailBringUp(
     /* [out] */ DcFailBringUp** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mFailBringUp;
-
-#endif
+    VALIDATE_NOT_NULL(result)
+    *result = mFailBringUp;
+    return NOERROR;
 }
 
+#define MSG_BUF_SIZE    1024
 ECode DcTesterFailBringUpAll::Log(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Rlog.d(LOG__TAG, s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    return Logger::D(LOG__TAG, msgBuf);
 }
 
 } // namespace DataConnection

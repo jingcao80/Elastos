@@ -1,0 +1,46 @@
+
+module
+{
+    using interface Elastos.Core.IThrowable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Os {
+
+    /** @hide */
+    /**
+     * @Involved
+     * no super interface
+     */
+    [deprecated]
+    interface IRegistrant {
+        Clear();
+
+        NotifyRegistrant();
+
+        NotifyResult(
+            [in] IInterface* result);
+
+        NotifyException(
+            [in] IThrowable* exception);
+
+        /**
+         * This makes a copy of @param ar
+         */
+        NotifyRegistrant(
+            [in] IAsyncResult* ar);
+
+        /**
+         * NOTE: May return null if weak reference has been collected
+         */
+        MessageForRegistrant(
+            [out] IMessage** result);
+
+        GetHandler(
+            [out] IHandler** result);
+    }
+
+    } // namespace Os
+    } // namespace Droid
+    } // namespace Elastos
+}

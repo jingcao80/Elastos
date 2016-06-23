@@ -1,12 +1,92 @@
 
 #include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
+#include "elastos/droid/R.h"
+#include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/dataconnection/CDcRetryAlarmController.h"
+#include "elastos/droid/internal/telephony/dataconnection/CDataCallResponse.h"
+#include "elastos/droid/internal/telephony/dataconnection/DataCallResponse.h"
+#include "elastos/droid/internal/telephony/dataconnection/DcAsyncChannel.h"
+#include "elastos/droid/internal/telephony/dataconnection/DcController.h"
+#include "elastos/droid/internal/telephony/dataconnection/DcFailBringUp.h"
+#include "elastos/droid/internal/telephony/dataconnection/DcFailCause.h"
+#include "elastos/droid/internal/telephony/dataconnection/DcRetryAlarmController.h"
+#include "elastos/droid/internal/telephony/dataconnection/DcTesterFailBringUpAll.h"
+#include "elastos/droid/internal/telephony/dataconnection/DcTrackerBase.h"
+#include "elastos/droid/internal/utility/CAsyncChannel.h"
+#include "elastos/droid/internal/utility/State.h"
+#include "elastos/droid/internal/utility/StateMachine.h"
+#include "elastos/droid/net/CConnectivityManager.h"
 #include "elastos/droid/net/CLinkProperties.h"
+#include "elastos/droid/net/CNetworkInfo.h"
+#include "elastos/droid/net/CNetworkCapabilities.h"
+#include "elastos/droid/net/NetworkAgent.h"
+#include "elastos/droid/net/Proxy.h"
+#include "elastos/droid/os/Build.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/telephony/CServiceState.h"
+#include "elastos/droid/telephony/CTelephonyManager.h"
+#include "elastos/droid/telephony/SubscriptionManager.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/utility/Patterns.h"
+#include "elastos/droid/utility/TimeUtils.h"
+#include <Elastos.CoreLibrary.h>
+#include <Elastos.CoreLibrary.Net.h>
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
-#include <Elastos.Droid.App.h>
 #include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Internal::Telephony::IDctConstants;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::IRILConstants;
+using Elastos::Droid::Internal::Telephony::IServiceStateTracker;
+using Elastos::Droid::Internal::Utility::CAsyncChannel;
 using Elastos::Droid::Internal::Utility::IProtocol;
+using Elastos::Droid::Internal::Utility::IState;
+using Elastos::Droid::Net::CConnectivityManager;
 using Elastos::Droid::Net::CLinkProperties;
+using Elastos::Droid::Net::CNetworkCapabilities;
+using Elastos::Droid::Net::CNetworkInfo;
+using Elastos::Droid::Net::IConnectivityManager;
+using Elastos::Droid::Net::NetworkInfoDetailedState;
+using Elastos::Droid::Os::Build;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::R;
+using Elastos::Droid::Telephony::CServiceState;
+using Elastos::Droid::Telephony::CTelephonyManager;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::SubscriptionManager;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Utility::IPair;
+using Elastos::Droid::Utility::Patterns;
+using Elastos::Droid::Utility::TimeUtils;
+using Elastos::Core::CSystem;
+using Elastos::Core::CThrowable;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::IInteger32;
+using Elastos::Core::ISystem;
+using Elastos::Core::IThrowable;
+using Elastos::Core::Math;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::IO::IFlushable;
+using Elastos::Net::IInet4Address;
+using Elastos::Net::IInet6Address;
+using Elastos::Net::IInetAddress;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Regex::IMatcher;
 
 namespace Elastos {
 namespace Droid {
@@ -25,29 +105,27 @@ ECode DataConnection::ConnectionParams::constructor(
     /* [in] */ Boolean retryWhenSSChange,
     /* [in] */ IMessage* onCompletedMsg)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                mApnContext = apnContext;
-                mInitialMaxRetry = initialMaxRetry;
-                mProfileId = profileId;
-                mRilRat = rilRadioTechnology;
-                mRetryWhenSSChange = retryWhenSSChange;
-                mOnCompletedMsg = onCompletedMsg;
-
-#endif
+    mApnContext = apnContext;
+    mInitialMaxRetry = initialMaxRetry;
+    mProfileId = profileId;
+    mRilRat = rilRadioTechnology;
+    mRetryWhenSSChange = retryWhenSSChange;
+    mOnCompletedMsg = onCompletedMsg;
+    return NOERROR;
 }
 
 ECode DataConnection::ConnectionParams::ToString(
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                return "{mTag=" + mTag + " mApnContext=" + mApnContext
-                        + " mInitialMaxRetry=" + mInitialMaxRetry + " mProfileId=" + mProfileId
-                        + " mRat=" + mRilRat
-                        + " mOnCompletedMsg=" + msgToString(mOnCompletedMsg) + "}";
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    String rev;
+    String msg;
+    DataConnection::MsgToString(mOnCompletedMsg, &msg);
+    rev.AppendFormat("{mTag=%d mApnContext=%s mInitialMaxRetry=%d mProfileId=%d mRat=%d mOnCompletedMsg=%s}",
+            mTag, TO_CSTR(mApnContext), mInitialMaxRetry, mProfileId, mRilRat, msg.string());
+    *result = rev;
+    return NOERROR;
 }
 
 //=============================================================================
@@ -58,25 +136,24 @@ ECode DataConnection::DisconnectParams::constructor(
     /* [in] */ const String& reason,
     /* [in] */ IMessage* onCompletedMsg)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                mApnContext = apnContext;
-                mReason = reason;
-                mOnCompletedMsg = onCompletedMsg;
-
-#endif
+    mApnContext = apnContext;
+    mReason = reason;
+    mOnCompletedMsg = onCompletedMsg;
+    return NOERROR;
 }
 
 ECode DataConnection::DisconnectParams::ToString(
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                return "{mTag=" + mTag + " mApnContext=" + mApnContext
-                        + " mReason=" + mReason
-                        + " mOnCompletedMsg=" + msgToString(mOnCompletedMsg) + "}";
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    String rev;
+    String msg;
+    DataConnection::MsgToString(mOnCompletedMsg, &msg);
+    rev.AppendFormat("{mTag=%d" " mApnContext=%s" " mReason=%s" " mOnCompletedMsg=%s" "}",
+            mTag, TO_CSTR(mApnContext), mReason.string(), msg.string());
+    *result = rev;
+    return NOERROR;
 }
 
 //=============================================================================
@@ -84,13 +161,11 @@ ECode DataConnection::DisconnectParams::ToString(
 //=============================================================================
 DataConnection::UpdateLinkPropertyResult::UpdateLinkPropertyResult(
     /* [in] */ ILinkProperties* curLp)
-    : mSetupResult(DataCallResponse_SUCCESS)
+    : mSetupResult(new DataCallResponse::SetupResult())
 {
-#if 0 // TODO: Translate codes below
-                oldLp = curLp;
-                newLp = curLp;
-
-#endif
+    ((DataCallResponse::SetupResult*) mSetupResult.Get())->mEnumValue = DataCallResponse_SUCCESS;
+    mOldLp = curLp;
+    mNewLp = curLp;
 }
 
 //=============================================================================
@@ -103,201 +178,233 @@ DataConnection::DcDefaultState::DcDefaultState(
 
 ECode DataConnection::DcDefaultState::Enter()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                if (DBG) log("DcDefaultState: enter");
-                // Register for DRS or RAT change
-                mPhone.getServiceStateTracker().registerForDataRegStateOrRatChanged(getHandler(),
-                        DataConnection.EVENT_DATA_CONNECTION_DRS_OR_RAT_CHANGED, null);
-                mPhone.getServiceStateTracker().registerForRoamingOn(getHandler(),
-                        DataConnection.EVENT_DATA_CONNECTION_ROAM_ON, null);
-                mPhone.getServiceStateTracker().registerForRoamingOff(getHandler(),
-                        DataConnection.EVENT_DATA_CONNECTION_ROAM_OFF, null);
-                // Add ourselves to the list of data connections
-                mDcController.addDc(DataConnection.this);
+    if (DBG) mHost->Log("DcDefaultState: enter");
+    // Register for DRS or RAT change
+    AutoPtr<IServiceStateTracker> serviceStateTracker;
+    mHost->mPhone->GetServiceStateTracker((IServiceStateTracker**)&serviceStateTracker);
 
-#endif
+    AutoPtr<IHandler> handler;
+    mHost->GetHandler((IHandler**)&handler);
+    serviceStateTracker->RegisterForDataRegStateOrRatChanged(handler,
+            DataConnection::EVENT_DATA_CONNECTION_DRS_OR_RAT_CHANGED, NULL);
+    serviceStateTracker->RegisterForRoamingOn(handler,
+            DataConnection::EVENT_DATA_CONNECTION_ROAM_ON, NULL);
+    serviceStateTracker->RegisterForRoamingOff(handler,
+            DataConnection::EVENT_DATA_CONNECTION_ROAM_OFF, NULL);
+    // Add ourselves to the list of data connections
+    ((DcController*) (mHost->mDcController.Get()))->AddDc(mHost);
+    return NOERROR;
 }
 
 ECode DataConnection::DcDefaultState::Exit()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                if (DBG) log("DcDefaultState: exit");
-                // Unregister for DRS or RAT change.
-                mPhone.getServiceStateTracker().unregisterForDataRegStateOrRatChanged(getHandler());
-                mPhone.getServiceStateTracker().unregisterForRoamingOn(getHandler());
-                mPhone.getServiceStateTracker().unregisterForRoamingOff(getHandler());
-                // Remove ourselves from the DC lists
-                mDcController.removeDc(DataConnection.this);
-                if (mAc != null) {
-                    mAc.disconnected();
-                    mAc = null;
-                }
-                mDcRetryAlarmController.dispose();
-                mDcRetryAlarmController = null;
-                mApnContexts = null;
-                mReconnectIntent = null;
-                mDct = null;
-                mApnSetting = null;
-                mPhone = null;
-                mLinkProperties = null;
-                mLastFailCause = null;
-                mUserData = null;
-                mDcController = null;
-                mDcTesterFailBringUpAll = null;
-
-#endif
+    if (DBG) mHost->Log("DcDefaultState: exit");
+    // Unregister for DRS or RAT change.
+    AutoPtr<IServiceStateTracker> serviceStateTracker;
+    mHost->mPhone->GetServiceStateTracker((IServiceStateTracker**)&serviceStateTracker);
+    AutoPtr<IHandler> handler;
+    mHost->GetHandler((IHandler**)&handler);
+    serviceStateTracker->UnregisterForDataRegStateOrRatChanged(handler);
+    serviceStateTracker->UnregisterForRoamingOn(handler);
+    serviceStateTracker->UnregisterForRoamingOff(handler);
+    // Remove ourselves from the DC lists
+    ((DcController*) (mHost->mDcController.Get()))->RemoveDc(mHost);
+    if (mHost->mAc != NULL) {
+        mHost->mAc->Disconnected();
+        mHost->mAc = NULL;
+    }
+    ((DcRetryAlarmController*) (mHost->mDcRetryAlarmController.Get()))->Dispose();
+    mHost->mDcRetryAlarmController = NULL;
+    mHost->mApnContexts = NULL;
+    mHost->mReconnectIntent = NULL;
+    mHost->mDct = NULL;
+    mHost->mApnSetting = NULL;
+    mHost->mPhone = NULL;
+    mHost->mLinkProperties = NULL;
+    mHost->mLastFailCause = NULL;
+    mHost->mUserData = NULL;
+    mHost->mDcController = NULL;
+    mHost->mDcTesterFailBringUpAll = NULL;
+    return NOERROR;
 }
 
 ECode DataConnection::DcDefaultState::ProcessMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                boolean retVal = HANDLED;
-                if (VDBG) {
-                    log("DcDefault msg=" + getWhatToString(msg.what)
-                            + " RefCount=" + mApnContexts.size());
-                }
-                switch (msg.what) {
-                    case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION: {
-                        if (mAc != null) {
-                            if (VDBG) log("Disconnecting to previous connection mAc=" + mAc);
-                            mAc.replyToMessage(msg, AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED,
-                                    AsyncChannel.STATUS_FULL_CONNECTION_REFUSED_ALREADY_CONNECTED);
-                        } else {
-                            mAc = new AsyncChannel();
-                            mAc.connected(null, getHandler(), msg.replyTo);
-                            if (VDBG) log("DcDefaultState: FULL_CONNECTION reply connected");
-                            mAc.replyToMessage(msg, AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED,
-                                    AsyncChannel.STATUS_SUCCESSFUL, mId, "hi");
-                        }
-                        break;
-                    }
-                    case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
-                        if (VDBG) log("CMD_CHANNEL_DISCONNECTED");
-                        quit();
-                        break;
-                    }
-                    case DcAsyncChannel.REQ_IS_INACTIVE: {
-                        boolean val = getIsInactive();
-                        if (VDBG) log("REQ_IS_INACTIVE  isInactive=" + val);
-                        mAc.replyToMessage(msg, DcAsyncChannel.RSP_IS_INACTIVE, val ? 1 : 0);
-                        break;
-                    }
-                    case DcAsyncChannel.REQ_GET_CID: {
-                        int cid = getCid();
-                        if (VDBG) log("REQ_GET_CID  cid=" + cid);
-                        mAc.replyToMessage(msg, DcAsyncChannel.RSP_GET_CID, cid);
-                        break;
-                    }
-                    case DcAsyncChannel.REQ_GET_APNSETTING: {
-                        ApnSetting apnSetting = getApnSetting();
-                        if (VDBG) log("REQ_GET_APNSETTING  mApnSetting=" + apnSetting);
-                        mAc.replyToMessage(msg, DcAsyncChannel.RSP_GET_APNSETTING, apnSetting);
-                        break;
-                    }
-                    case DcAsyncChannel.REQ_GET_LINK_PROPERTIES: {
-                        LinkProperties lp = getCopyLinkProperties();
-                        if (VDBG) log("REQ_GET_LINK_PROPERTIES linkProperties" + lp);
-                        mAc.replyToMessage(msg, DcAsyncChannel.RSP_GET_LINK_PROPERTIES, lp);
-                        break;
-                    }
-                    case DcAsyncChannel.REQ_SET_LINK_PROPERTIES_HTTP_PROXY: {
-                        ProxyInfo proxy = (ProxyInfo) msg.obj;
-                        if (VDBG) log("REQ_SET_LINK_PROPERTIES_HTTP_PROXY proxy=" + proxy);
-                        setLinkPropertiesHttpProxy(proxy);
-                        mAc.replyToMessage(msg, DcAsyncChannel.RSP_SET_LINK_PROPERTIES_HTTP_PROXY);
-                        break;
-                    }
-                    case DcAsyncChannel.REQ_GET_NETWORK_CAPABILITIES: {
-                        NetworkCapabilities nc = getCopyNetworkCapabilities();
-                        if (VDBG) log("REQ_GET_NETWORK_CAPABILITIES networkCapabilities" + nc);
-                        mAc.replyToMessage(msg, DcAsyncChannel.RSP_GET_NETWORK_CAPABILITIES, nc);
-                        break;
-                    }
-                    case DcAsyncChannel.REQ_RESET:
-                        if (VDBG) log("DcDefaultState: msg.what=REQ_RESET");
-                        transitionTo(mInactiveState);
-                        break;
-                    case EVENT_CONNECT:
-                        if (DBG) log("DcDefaultState: msg.what=EVENT_CONNECT, fail not expected");
-                        ConnectionParams cp = (ConnectionParams) msg.obj;
-                        notifyConnectCompleted(cp, DcFailCause.UNKNOWN, false);
-                        break;
-                    case EVENT_DISCONNECT:
-                        if (DBG) {
-                            log("DcDefaultState deferring msg.what=EVENT_DISCONNECT RefCount="
-                                    + mApnContexts.size());
-                        }
-                        deferMessage(msg);
-                        break;
-                    case EVENT_DISCONNECT_ALL:
-                        if (DBG) {
-                            log("DcDefaultState deferring msg.what=EVENT_DISCONNECT_ALL RefCount="
-                                    + mApnContexts.size());
-                        }
-                        deferMessage(msg);
-                        break;
-                    case EVENT_TEAR_DOWN_NOW:
-                        if (DBG) log("DcDefaultState EVENT_TEAR_DOWN_NOW");
-                        mPhone.mCi.deactivateDataCall(mCid, 0,  null);
-                        break;
-                    case EVENT_LOST_CONNECTION:
-                        if (DBG) {
-                            String s = "DcDefaultState ignore EVENT_LOST_CONNECTION"
-                                + " tag=" + msg.arg1 + ":mTag=" + mTag;
-                            logAndAddLogRec(s);
-                        }
-                        break;
-                    case EVENT_RETRY_CONNECTION:
-                        if (DBG) {
-                            String s = "DcDefaultState ignore EVENT_RETRY_CONNECTION"
-                                    + " tag=" + msg.arg1 + ":mTag=" + mTag;
-                            logAndAddLogRec(s);
-                        }
-                        break;
-                    case EVENT_DATA_CONNECTION_DRS_OR_RAT_CHANGED:
-                        AsyncResult ar = (AsyncResult)msg.obj;
-                        Pair<Integer, Integer> drsRatPair = (Pair<Integer, Integer>)ar.result;
-                        mDataRegState = drsRatPair.first;
-                        if (mRilRat != drsRatPair.second) {
-                            updateTcpBufferSizes(drsRatPair.second);
-                        }
-                        mRilRat = drsRatPair.second;
-                        if (DBG) {
-                            log("DcDefaultState: EVENT_DATA_CONNECTION_DRS_OR_RAT_CHANGED"
-                                    + " drs=" + mDataRegState
-                                    + " mRilRat=" + mRilRat);
-                        }
-                        ServiceState ss = mPhone.getServiceState();
-                        int networkType = ss.getDataNetworkType();
-                        mNetworkInfo.setSubtype(networkType,
-                                TelephonyManager.getNetworkTypeName(networkType));
-                        if (mNetworkAgent != null) {
-                            mNetworkAgent.sendNetworkCapabilities(makeNetworkCapabilities());
-                            mNetworkAgent.sendNetworkInfo(mNetworkInfo);
-                            mNetworkAgent.sendLinkProperties(mLinkProperties);
-                        }
-                        break;
-                    case EVENT_DATA_CONNECTION_ROAM_ON:
-                        mNetworkInfo.setRoaming(true);
-                        break;
-                    case EVENT_DATA_CONNECTION_ROAM_OFF:
-                        mNetworkInfo.setRoaming(false);
-                        break;
-                    default:
-                        if (DBG) {
-                            log("DcDefaultState: shouldn't happen but ignore msg.what="
-                                    + getWhatToString(msg.what));
-                        }
-                        break;
-                }
-                return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 msgWhat;
+    msg->GetWhat(&msgWhat);
+    AutoPtr<IInterface> msgObj;
+    msg->GetObj((IInterface**)&msgObj);
+    Int32 msgArg1;
+    msg->GetArg1(&msgArg1);
+    Boolean retVal = HANDLED;
+    if (VDBG) {
+        Int32 size;
+        mHost->mApnContexts->GetSize(&size);
+        String s;
+        mHost->GetWhatToString(msgWhat, &s);
+        mHost->Log("DcDefault msg= %s RefCount=%d", s.string(), size);
+    }
+    if (msgWhat == IAsyncChannel::CMD_CHANNEL_FULL_CONNECTION) {
+        if (mHost->mAc != NULL) {
+            if (VDBG) mHost->Log("Disconnecting to previous connection mHost->mAc=%s", TO_CSTR(mHost->mAc));
+            mHost->mAc->ReplyToMessage(msg, IAsyncChannel::CMD_CHANNEL_FULLY_CONNECTED,
+                    IAsyncChannel::STATUS_FULL_CONNECTION_REFUSED_ALREADY_CONNECTED);
+        } else {
+            CAsyncChannel::New((IAsyncChannel**)&mHost->mAc);
+            AutoPtr<IHandler> handler;
+            mHost->GetHandler((IHandler**)&handler);
+            AutoPtr<IMessenger> messenger;
+            msg->GetReplyTo((IMessenger**)&messenger);
+            mHost->mAc->Connected(NULL, handler, messenger);
+            if (VDBG) mHost->Log("DcDefaultState: FULL_CONNECTION reply connected");
+            mHost->mAc->ReplyToMessage(msg, IAsyncChannel::CMD_CHANNEL_FULLY_CONNECTED,
+                    IAsyncChannel::STATUS_SUCCESSFUL, mHost->mId, StringUtils::ParseCharSequence(String("hi")));
+        }
+    }
+    else if (msgWhat == IAsyncChannel::CMD_CHANNEL_DISCONNECTED) {
+        if (VDBG) mHost->Log("CMD_CHANNEL_DISCONNECTED");
+        mHost->Quit();
+    }
+    else if (msgWhat == IDcAsyncChannel::REQ_IS_INACTIVE) {
+        Boolean val;
+        mHost->GetIsInactive(&val);
+        if (VDBG) mHost->Log("REQ_IS_INACTIVE  isInactive=%d", val);
+        mHost->mAc->ReplyToMessage(msg, IDcAsyncChannel::RSP_IS_INACTIVE, val ? 1 : 0);
+    }
+    else if (msgWhat == IDcAsyncChannel::REQ_GET_CID) {
+        Int32 cid;
+        mHost->GetCid(&cid);
+        if (VDBG) mHost->Log("REQ_GET_CID  cid=%d", cid);
+        mHost->mAc->ReplyToMessage(msg, IDcAsyncChannel::RSP_GET_CID, cid);
+    }
+    else if (msgWhat == IDcAsyncChannel::REQ_GET_APNSETTING) {
+        AutoPtr<IApnSetting> apnSetting;
+        mHost->GetApnSetting((IApnSetting**)&apnSetting);
+        if (VDBG) mHost->Log("REQ_GET_APNSETTING  mApnSetting=%s", TO_CSTR(apnSetting));
+        mHost->mAc->ReplyToMessage(msg, IDcAsyncChannel::RSP_GET_APNSETTING, apnSetting);
+    }
+    else if (msgWhat == IDcAsyncChannel::REQ_GET_LINK_PROPERTIES) {
+        AutoPtr<ILinkProperties> lp;
+        mHost->GetCopyLinkProperties((ILinkProperties**)&lp);
+        if (VDBG) mHost->Log("REQ_GET_LINK_PROPERTIES linkProperties %s", TO_CSTR(lp));
+        mHost->mAc->ReplyToMessage(msg, IDcAsyncChannel::RSP_GET_LINK_PROPERTIES, lp);
+    }
+    else if (msgWhat == IDcAsyncChannel::REQ_SET_LINK_PROPERTIES_HTTP_PROXY) {
+        AutoPtr<IProxyInfo> proxy = IProxyInfo::Probe(msgObj);
+        if (VDBG) mHost->Log("REQ_SET_LINK_PROPERTIES_HTTP_PROXY proxy=%s", TO_CSTR(proxy));
+        mHost->SetLinkPropertiesHttpProxy(proxy);
+        mHost->mAc->ReplyToMessage(msg, IDcAsyncChannel::RSP_SET_LINK_PROPERTIES_HTTP_PROXY);
+    }
+    else if (msgWhat == IDcAsyncChannel::REQ_GET_NETWORK_CAPABILITIES) {
+        AutoPtr<INetworkCapabilities> nc;
+        mHost->GetCopyNetworkCapabilities((INetworkCapabilities**)&nc);
+        if (VDBG) mHost->Log("REQ_GET_NETWORK_CAPABILITIES networkCapabilities%s", TO_CSTR(nc));
+        mHost->mAc->ReplyToMessage(msg, IDcAsyncChannel::RSP_GET_NETWORK_CAPABILITIES, nc);
+    }
+    else if (msgWhat == IDcAsyncChannel::REQ_RESET) {
+        if (VDBG) mHost->Log("DcDefaultState: msg.what=REQ_RESET");
+        mHost->TransitionTo(mHost->mInactiveState);
+    }
+    else if (msgWhat == EVENT_CONNECT) {
+        if (DBG) mHost->Log("DcDefaultState: msg.what=EVENT_CONNECT, fail not expected");
+        AutoPtr<ConnectionParams> cp = (ConnectionParams*) IObject::Probe(msgObj);
+        AutoPtr<IDcFailCause> dfc;
+        DcFailCause::FromInt32(DcFailCause_UNKNOWN, (IDcFailCause**)&dfc);
+        mHost->NotifyConnectCompleted(cp, dfc, FALSE);
+    }
+    else if (msgWhat == EVENT_DISCONNECT) {
+        if (DBG) {
+            Int32 size;
+            mHost->mApnContexts->GetSize(&size);
+            mHost->Log("DcDefaultState deferring msg.what=EVENT_DISCONNECT RefCount=%d", size);
+        }
+        mHost->DeferMessage(msg);
+    }
+    else if (msgWhat == EVENT_DISCONNECT_ALL) {
+        if (DBG) {
+            Int32 size;
+            mHost->mApnContexts->GetSize(&size);
+            mHost->Log("DcDefaultState deferring msg.what=EVENT_DISCONNECT_ALL RefCount=%d",
+                    size);
+        }
+        mHost->DeferMessage(msg);
+    }
+    else if (msgWhat == EVENT_TEAR_DOWN_NOW) {
+        if (DBG) mHost->Log("DcDefaultState EVENT_TEAR_DOWN_NOW");
+        ((PhoneBase*) mHost->mPhone.Get())->mCi->DeactivateDataCall(mHost->mCid, 0,  NULL);
+    }
+    else if (msgWhat == EVENT_LOST_CONNECTION) {
+        if (DBG) {
+            String s;
+            s.AppendFormat("DcDefaultState ignore EVENT_LOST_CONNECTION"
+                    " tag=%d:mTag=%d", msgArg1, mHost->mTag);
+            mHost->LogAndAddLogRec(s);
+        }
+    }
+    else if (msgWhat == EVENT_RETRY_CONNECTION) {
+        if (DBG) {
+            String s;
+            s.AppendFormat("DcDefaultState ignore EVENT_RETRY_CONNECTION"
+                    " tag=%d:mTag=%d", msgArg1, mHost->mTag);
+            mHost->LogAndAddLogRec(s);
+        }
+    }
+    else if (msgWhat == EVENT_DATA_CONNECTION_DRS_OR_RAT_CHANGED) {
+        AutoPtr<IAsyncResult> ar = IAsyncResult::Probe(msgObj);
+        AutoPtr<IPair> drsRatPair = IPair::Probe(((AsyncResult*) ar.Get())->mResult);
+        AutoPtr<IInterface> obj;
+        drsRatPair->GetFirst((IInterface**)&obj);
+        IInteger32::Probe(obj)->GetValue(&mHost->mDataRegState);
+        AutoPtr<IInterface > second;
+        drsRatPair->GetSecond((IInterface**)&second);
+        Int32 iSecond;
+        IInteger32::Probe(second)->GetValue(&iSecond);
+        if (mHost->mRilRat != iSecond) {
+            AutoPtr<IInterface> obj;
+            drsRatPair->GetSecond((IInterface**)&obj);
+            Int32 i32;
+            IInteger32::Probe(obj)->GetValue(&i32);
+            mHost->UpdateTcpBufferSizes(i32);
+        }
+        mHost->mRilRat = iSecond;
+        if (DBG) {
+            mHost->Log("DcDefaultState: EVENT_DATA_CONNECTION_DRS_OR_RAT_CHANGED"
+                    " drs=%d mRilRat=%d", mHost->mDataRegState, mHost->mRilRat);
+        }
+        AutoPtr<IServiceState> ss;
+        IPhone::Probe(mHost->mPhone)->GetServiceState((IServiceState**)&ss);
+        Int32 networkType;
+        ss->GetDataNetworkType(&networkType);
+        String name;
+        CTelephonyManager::GetNetworkTypeName(networkType, &name);
+        mHost->mNetworkInfo->SetSubtype(networkType, name);
+        if (mHost->mNetworkAgent != NULL) {
+            AutoPtr<INetworkCapabilities> networkCapabilities;
+            mHost->MakeNetworkCapabilities((INetworkCapabilities**)&networkCapabilities);
+            mHost->mNetworkAgent->SendNetworkCapabilities(networkCapabilities);
+            mHost->mNetworkAgent->SendNetworkInfo(mHost->mNetworkInfo);
+            mHost->mNetworkAgent->SendLinkProperties(mHost->mLinkProperties);
+        }
+    }
+    else if (msgWhat == EVENT_DATA_CONNECTION_ROAM_ON) {
+        mHost->mNetworkInfo->SetRoaming(TRUE);
+    }
+    else if (msgWhat == EVENT_DATA_CONNECTION_ROAM_OFF) {
+        mHost->mNetworkInfo->SetRoaming(FALSE);
+    }
+    else {
+        if (DBG) {
+            String s;
+            mHost->GetWhatToString(msgWhat, &s);
+            mHost->Log("DcDefaultState: shouldn't happen but ignore msg.what=", s.string());
+        }
+    }
+    *result = retVal;
+    return NOERROR;
 }
 
 String DataConnection::DcDefaultState::GetName()
@@ -317,132 +424,126 @@ ECode DataConnection::DcInactiveState::SetEnterNotificationParams(
     /* [in] */ ConnectionParams* cp,
     /* [in] */ IDcFailCause* cause)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                if (VDBG) log("DcInactiveState: setEnterNoticationParams cp,cause");
-                mConnectionParams = cp;
-                mDisconnectParams = null;
-                mDcFailCause = cause;
-
-#endif
+    if (VDBG) mHost->Log("DcInactiveState: setEnterNoticationParams cp,cause");
+    mHost->mConnectionParams = cp;
+    mHost->mDisconnectParams = NULL;
+    mHost->mDcFailCause = cause;
+    return NOERROR;
 }
 
 ECode DataConnection::DcInactiveState::SetEnterNotificationParams(
     /* [in] */ DisconnectParams* dp)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                if (VDBG) log("DcInactiveState: setEnterNoticationParams dp");
-                mConnectionParams = null;
-                mDisconnectParams = dp;
-                mDcFailCause = DcFailCause.NONE;
-
-#endif
+    if (VDBG) mHost->Log("DcInactiveState: setEnterNoticationParams dp");
+    mHost->mConnectionParams = NULL;
+    mHost->mDisconnectParams = dp;
+    DcFailCause::FromInt32(DcFailCause_NONE, (IDcFailCause**)&mHost->mDcFailCause);
+    return NOERROR;
 }
 
 ECode DataConnection::DcInactiveState::SetEnterNotificationParams(
     /* [in] */ IDcFailCause* cause)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                mConnectionParams = null;
-                mDisconnectParams = null;
-                mDcFailCause = cause;
-
-#endif
+    mHost->mConnectionParams = NULL;
+    mHost->mDisconnectParams = NULL;
+    mHost->mDcFailCause = cause;
+    return NOERROR;
 }
 
 ECode DataConnection::DcInactiveState::Enter()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                mTag += 1;
-                if (DBG) log("DcInactiveState: enter() mTag=" + mTag);
-                if (mConnectionParams != null) {
-                    if (DBG) {
-                        log("DcInactiveState: enter notifyConnectCompleted +ALL failCause="
-                                + mDcFailCause);
-                    }
-                    notifyConnectCompleted(mConnectionParams, mDcFailCause, true);
-                }
-                if (mDisconnectParams != null) {
-                    if (DBG) {
-                        log("DcInactiveState: enter notifyDisconnectCompleted +ALL failCause="
-                                + mDcFailCause);
-                    }
-                    notifyDisconnectCompleted(mDisconnectParams, true);
-                }
-                if (mDisconnectParams == null && mConnectionParams == null && mDcFailCause != null) {
-                    if (DBG) {
-                        log("DcInactiveState: enter notifyAllDisconnectCompleted failCause="
-                                + mDcFailCause);
-                    }
-                    notifyAllDisconnectCompleted(mDcFailCause);
-                }
-                // Remove ourselves from cid mapping, before clearSettings
-                mDcController.removeActiveDcByCid(DataConnection.this);
-                clearSettings();
-
-#endif
+    mHost->mTag += 1;
+    if (DBG) mHost->Log("DcInactiveState: enter() mTag=%d", mHost->mTag);
+    if (mHost->mConnectionParams != NULL) {
+        if (DBG) {
+            mHost->Log("DcInactiveState: enter notifyConnectCompleted +ALL failCause=%s", TO_CSTR(mHost->mDcFailCause));
+        }
+        mHost->NotifyConnectCompleted(mHost->mConnectionParams, mHost->mDcFailCause, TRUE);
+    }
+    if (mHost->mDisconnectParams != NULL) {
+        if (DBG) {
+            mHost->Log("DcInactiveState: enter notifyDisconnectCompleted +ALL failCause=%d"
+                    , TO_CSTR(mHost->mDcFailCause));
+        }
+        mHost->NotifyDisconnectCompleted(mHost->mDisconnectParams, TRUE);
+    }
+    if (mHost->mDisconnectParams == NULL && mHost->mConnectionParams == NULL && mHost->mDcFailCause != NULL) {
+        if (DBG) {
+            mHost->Log("DcInactiveState: enter notifyAllDisconnectCompleted failCause=%s"
+                    , TO_CSTR(mHost->mDcFailCause));
+        }
+        mHost->NotifyAllDisconnectCompleted(mHost->mDcFailCause);
+    }
+    // Remove ourselves from cid mapping, before clearSettings
+    ((DcController*) (mHost->mDcController.Get()))->RemoveActiveDcByCid(mHost);
+    mHost->ClearSettings();
+    return NOERROR;
 }
 
 ECode DataConnection::DcInactiveState::Exit()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-
-#endif
+    return NOERROR;
 }
 
 ECode DataConnection::DcInactiveState::ProcessMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                boolean retVal;
-                switch (msg.what) {
-                    case DcAsyncChannel.REQ_RESET:
-                        if (DBG) {
-                            log("DcInactiveState: msg.what=RSP_RESET, ignore we're already reset");
-                        }
-                        retVal = HANDLED;
-                        break;
-                    case EVENT_CONNECT:
-                        if (DBG) log("DcInactiveState: mag.what=EVENT_CONNECT");
-                        ConnectionParams cp = (ConnectionParams) msg.obj;
-                        if (initConnection(cp)) {
-                            onConnect(mConnectionParams);
-                            transitionTo(mActivatingState);
-                        } else {
-                            if (DBG) {
-                                log("DcInactiveState: msg.what=EVENT_CONNECT initConnection failed");
-                            }
-                            notifyConnectCompleted(cp, DcFailCause.UNACCEPTABLE_NETWORK_PARAMETER,
-                                    false);
-                        }
-                        retVal = HANDLED;
-                        break;
-                    case EVENT_DISCONNECT:
-                        if (DBG) log("DcInactiveState: msg.what=EVENT_DISCONNECT");
-                        notifyDisconnectCompleted((DisconnectParams)msg.obj, false);
-                        retVal = HANDLED;
-                        break;
-                    case EVENT_DISCONNECT_ALL:
-                        if (DBG) log("DcInactiveState: msg.what=EVENT_DISCONNECT_ALL");
-                        notifyDisconnectCompleted((DisconnectParams)msg.obj, false);
-                        retVal = HANDLED;
-                        break;
-                    default:
-                        if (VDBG) {
-                            log("DcInactiveState nothandled msg.what=" + getWhatToString(msg.what));
-                        }
-                        retVal = NOT_HANDLED;
-                        break;
-                }
-                return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 msgWhat;
+    msg->GetWhat(&msgWhat);
+    AutoPtr<IInterface> msgObj;
+    msg->GetObj((IInterface**)&msgObj);
+    Boolean retVal;
+    if (msgWhat == IDcAsyncChannel::REQ_RESET) {
+        if (DBG) {
+            mHost->Log("DcInactiveState: msg.what=RSP_RESET, ignore we're already reset");
+        }
+        retVal = HANDLED;
+    }
+    else if (msgWhat == EVENT_CONNECT) {
+        if (DBG) mHost->Log("DcInactiveState: mag.what=EVENT_CONNECT");
+        AutoPtr<ConnectionParams> cp = (ConnectionParams*) IObject::Probe(msgObj);
+        Boolean isInitConnectionOk;
+        mHost->InitConnection(cp, &isInitConnectionOk);
+        if (isInitConnectionOk) {
+            mHost->OnConnect(mHost->mConnectionParams);
+            mHost->TransitionTo(mHost->mActivatingState);
+        } else {
+            if (DBG) {
+                mHost->Log("DcInactiveState: msg.what=EVENT_CONNECT initConnection failed");
+            }
+            AutoPtr<IDcFailCause> dfc;
+            DcFailCause::FromInt32(DcFailCause_UNACCEPTABLE_NETWORK_PARAMETER, (IDcFailCause**)&dfc);
+            mHost->NotifyConnectCompleted(cp, dfc, FALSE);
+        }
+        retVal = HANDLED;
+    }
+    else if (msgWhat == EVENT_DISCONNECT) {
+        if (DBG) mHost->Log("DcInactiveState: msg.what=EVENT_DISCONNECT");
+        mHost->NotifyDisconnectCompleted((DisconnectParams*) IObject::Probe(msgObj), FALSE);
+        retVal = HANDLED;
+    }
+    else if (msgWhat == EVENT_DISCONNECT_ALL) {
+        if (DBG) mHost->Log("DcInactiveState: msg.what=EVENT_DISCONNECT_ALL");
+        mHost->NotifyDisconnectCompleted((DisconnectParams*) IObject::Probe(msgObj), FALSE);
+        retVal = HANDLED;
+    } else {
+        if (VDBG) {
+            String whatToString;
+            mHost->GetWhatToString(msgWhat, &whatToString);
+            mHost->Log("DcInactiveState nothandled msg.what=%s", whatToString.string());
+        }
+        retVal = NOT_HANDLED;
+    }
+    *result = retVal;
+    return NOERROR;
+}
+
+String DataConnection::DcInactiveState::GetName()
+{
+    return String("DataConnection::DcInactiveState");
 }
 
 //=============================================================================
@@ -455,170 +556,201 @@ DataConnection::DcRetryingState::DcRetryingState(
 
 ECode DataConnection::DcRetryingState::Enter()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                if ((mConnectionParams.mRilRat != mRilRat)
-                        || (mDataRegState != ServiceState.STATE_IN_SERVICE)){
-                    // RAT has changed or we're not in service so don't even begin retrying.
-                    if (DBG) {
-                        String s = "DcRetryingState: enter() not retrying rat changed"
-                            + ", mConnectionParams.mRilRat=" + mConnectionParams.mRilRat
-                            + " != mRilRat:" + mRilRat
-                            + " transitionTo(mInactiveState)";
-                        logAndAddLogRec(s);
-                    }
-                    mInactiveState.setEnterNotificationParams(DcFailCause.LOST_CONNECTION);
-                    transitionTo(mInactiveState);
-                } else {
-                    if (DBG) {
-                        log("DcRetryingState: enter() mTag=" + mTag
-                            + ", call notifyAllOfDisconnectDcRetrying lostConnection");
-                    }
-                    notifyAllOfDisconnectDcRetrying(Phone.REASON_LOST_DATA_CONNECTION);
-                    // Remove ourselves from cid mapping
-                    mDcController.removeActiveDcByCid(DataConnection.this);
-                    mCid = -1;
-                }
-
-#endif
+    if ((mHost->mConnectionParams->mRilRat != mHost->mRilRat)
+            || (mHost->mDataRegState != IServiceState::STATE_IN_SERVICE)){
+        // RAT has changed or we're not in service so don't even begin retrying.
+        if (DBG) {
+            String s;
+            s.AppendFormat("DcRetryingState: enter() not retrying rat changed"
+                    ", mConnectionParams.mRilRat=%d != mRilRat:%d transitionTo(mInactiveState)",
+                    mHost->mConnectionParams->mRilRat, mHost->mRilRat);
+            mHost->LogAndAddLogRec(s);
+        }
+        AutoPtr<IDcFailCause> dfc;
+        DcFailCause::FromInt32(DcFailCause_LOST_CONNECTION, (IDcFailCause**)&dfc);
+        mHost->mInactiveState->SetEnterNotificationParams(dfc);
+        mHost->TransitionTo(mHost->mInactiveState);
+    } else {
+        if (DBG) {
+            mHost->Log("DcRetryingState: enter() mTag=%d"
+                ", call notifyAllOfDisconnectDcRetrying lostConnection", mHost->mTag);
+        }
+        mHost->NotifyAllOfDisconnectDcRetrying(IPhone::REASON_LOST_DATA_CONNECTION);
+        // Remove ourselves from cid mapping
+        ((DcController*) (mHost->mDcController.Get()))->RemoveActiveDcByCid(mHost);
+        mHost->mCid = -1;
+    }
+    return NOERROR;
 }
 
 ECode DataConnection::DcRetryingState::ProcessMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                boolean retVal;
-                switch (msg.what) {
-                    case EVENT_DATA_CONNECTION_DRS_OR_RAT_CHANGED:
-                        AsyncResult ar = (AsyncResult)msg.obj;
-                        Pair<Integer, Integer> drsRatPair = (Pair<Integer, Integer>)ar.result;
-                        int drs = drsRatPair.first;
-                        int rat = drsRatPair.second;
-                        if ((rat == mRilRat) && (drs == mDataRegState)) {
-                            if (DBG) {
-                                log("DcRetryingState: EVENT_DATA_CONNECTION_DRS_OR_RAT_CHANGED"
-                                        + " strange no change in drs=" + drs
-                                        + " rat=" + rat + " ignoring");
-                            }
-                        } else {
-                            // have to retry connecting since no attach event will come
-                            if (mConnectionParams.mRetryWhenSSChange) {
-                                retVal = NOT_HANDLED;
-                                break;
-                            }
-                            if (drs != ServiceState.STATE_IN_SERVICE) {
-                                // We've lost the connection and we're retrying but DRS or RAT changed
-                                // so we may never succeed, might as well give up.
-                                mInactiveState.setEnterNotificationParams(DcFailCause.LOST_CONNECTION);
-                                deferMessage(msg);
-                                transitionTo(mInactiveState);
-                                if (DBG) {
-                                    String s = "DcRetryingState: "
-                                            + "EVENT_DATA_CONNECTION_DRS_OR_RAT_CHANGED"
-                                            + " giving up changed from " + mRilRat
-                                            + " to rat=" + rat
-                                            + " or drs changed from " + mDataRegState + " to drs=" + drs;
-                                    logAndAddLogRec(s);
-                                }
-                            }
-                            mDataRegState = drs;
-                            mRilRat = rat;
-                            // TODO - pass the other type here too?
-                            ServiceState ss = mPhone.getServiceState();
-                            int networkType = ss.getDataNetworkType();
-                            mNetworkInfo.setSubtype(networkType,
-                                    TelephonyManager.getNetworkTypeName(networkType));
-                        }
-                        retVal = HANDLED;
-                        break;
-                    case EVENT_RETRY_CONNECTION: {
-                        if (msg.arg1 == mTag) {
-                            mRetryManager.increaseRetryCount();
-                            if (DBG) {
-                                log("DcRetryingState EVENT_RETRY_CONNECTION"
-                                        + " RetryCount=" +  mRetryManager.getRetryCount()
-                                        + " mConnectionParams=" + mConnectionParams);
-                            }
-                            onConnect(mConnectionParams);
-                            transitionTo(mActivatingState);
-                        } else {
-                            if (DBG) {
-                                log("DcRetryingState stale EVENT_RETRY_CONNECTION"
-                                        + " tag:" + msg.arg1 + " != mTag:" + mTag);
-                            }
-                        }
-                        retVal = HANDLED;
-                        break;
-                    }
-                    case DcAsyncChannel.REQ_RESET: {
-                        if (DBG) {
-                            log("DcRetryingState: msg.what=RSP_RESET, ignore we're already reset");
-                        }
-                        mInactiveState.setEnterNotificationParams(mConnectionParams,
-                                DcFailCause.RESET_BY_FRAMEWORK);
-                        transitionTo(mInactiveState);
-                        retVal = HANDLED;
-                        break;
-                    }
-                    case EVENT_CONNECT: {
-                        ConnectionParams cp = (ConnectionParams) msg.obj;
-                        if (DBG) {
-                            log("DcRetryingState: msg.what=EVENT_CONNECT"
-                                    + " RefCount=" + mApnContexts.size() + " cp=" + cp
-                                    + " mConnectionParams=" + mConnectionParams);
-                        }
-                        if (initConnection(cp)) {
-                            onConnect(mConnectionParams);
-                            transitionTo(mActivatingState);
-                        } else {
-                            if (DBG) {
-                                log("DcRetryingState: msg.what=EVENT_CONNECT initConnection failed");
-                            }
-                            notifyConnectCompleted(cp, DcFailCause.UNACCEPTABLE_NETWORK_PARAMETER,
-                                    false);
-                        }
-                        retVal = HANDLED;
-                        break;
-                    }
-                    case EVENT_DISCONNECT: {
-                        DisconnectParams dp = (DisconnectParams) msg.obj;
-                        if (mApnContexts.remove(dp.mApnContext) && mApnContexts.size() == 0) {
-                            if (DBG) {
-                                log("DcRetryingState msg.what=EVENT_DISCONNECT " + " RefCount="
-                                        + mApnContexts.size() + " dp=" + dp);
-                            }
-                            mInactiveState.setEnterNotificationParams(dp);
-                            transitionTo(mInactiveState);
-                        } else {
-                            if (DBG) log("DcRetryingState: msg.what=EVENT_DISCONNECT");
-                            notifyDisconnectCompleted(dp, false);
-                        }
-                        retVal = HANDLED;
-                        break;
-                    }
-                    case EVENT_DISCONNECT_ALL: {
-                        if (DBG) {
-                            log("DcRetryingState msg.what=EVENT_DISCONNECT/DISCONNECT_ALL "
-                                    + "RefCount=" + mApnContexts.size());
-                        }
-                        mInactiveState.setEnterNotificationParams(DcFailCause.LOST_CONNECTION);
-                        transitionTo(mInactiveState);
-                        retVal = HANDLED;
-                        break;
-                    }
-                    default: {
-                        if (VDBG) {
-                            log("DcRetryingState nothandled msg.what=" + getWhatToString(msg.what));
-                        }
-                        retVal = NOT_HANDLED;
-                        break;
+    VALIDATE_NOT_NULL(result)
+
+    Int32 msgWhat;
+    msg->GetWhat(&msgWhat);
+    AutoPtr<IInterface> msgObj;
+    msg->GetObj((IInterface**)&msgObj);
+    Int32 msgArg1;
+    msg->GetArg1(&msgArg1);
+    Boolean retVal;
+    do {
+        if (msgWhat == EVENT_DATA_CONNECTION_DRS_OR_RAT_CHANGED) {
+            AutoPtr<IAsyncResult> ar = IAsyncResult::Probe(msgObj);
+            AutoPtr<IPair> drsRatPair = IPair::Probe(((AsyncResult*) ar.Get())->mResult);
+            AutoPtr<IInterface > obj;
+            drsRatPair->GetFirst((IInterface**)&obj);
+            Int32 drs;
+            IInteger32::Probe(obj)->GetValue(&drs);
+            obj = NULL;
+            drsRatPair->GetSecond((IInterface**)&obj);
+            Int32 rat;
+            IInteger32::Probe(obj)->GetValue(&rat);
+            if ((rat == mHost->mRilRat) && (drs == mHost->mDataRegState)) {
+                if (DBG) {
+                    mHost->Log("DcRetryingState: EVENT_DATA_CONNECTION_DRS_OR_RAT_CHANGED"
+                            " strange no change in drs=%d"
+                            " rat=%d" " ignoring",
+                            drs, rat);
+                }
+            } else {
+                // have to retry connecting since no attach event will come
+                if (mHost->mConnectionParams->mRetryWhenSSChange) {
+                    retVal = NOT_HANDLED;
+                    break;
+                }
+                if (drs != IServiceState::STATE_IN_SERVICE) {
+                    // We've lost the connection and we're retrying but DRS or RAT changed
+                    // so we may never succeed, might as well give up.
+                    AutoPtr<IDcFailCause> dfc;
+                    DcFailCause::FromInt32(DcFailCause_LOST_CONNECTION, (IDcFailCause**)&dfc);
+                    mHost->mInactiveState->SetEnterNotificationParams(dfc);
+                    mHost->DeferMessage(msg);
+                    mHost->TransitionTo(mHost->mInactiveState);
+                    if (DBG) {
+                        String s;
+                        s.AppendFormat("DcRetryingState: "
+                                "EVENT_DATA_CONNECTION_DRS_OR_RAT_CHANGED"
+                                " giving up changed from %d"
+                                " to rat=%d"
+                                " or drs changed from %d" " to drs=%d", mHost->mRilRat, rat, mHost->mDataRegState, drs);
+                        mHost->LogAndAddLogRec(s);
                     }
                 }
-                return retVal;
+                mHost->mDataRegState = drs;
+                mHost->mRilRat = rat;
+                // TODO - pass the other type here too?
+                AutoPtr<IServiceState> ss;
+                IPhone::Probe(mHost->mPhone)->GetServiceState((IServiceState**)&ss);
+                Int32 networkType;
+                ss->GetDataNetworkType(&networkType);
+                String name;
+                CTelephonyManager::GetNetworkTypeName(networkType, &name);
+                mHost->mNetworkInfo->SetSubtype(networkType, name);
+            }
+            retVal = HANDLED;
+        }
+        else if (msgWhat == EVENT_RETRY_CONNECTION) {
+            if (msgArg1 == mHost->mTag) {
+                mHost->mRetryManager->IncreaseRetryCount();
+                if (DBG) {
+                    Int32 retryCount;
+                    mHost->mRetryManager->GetRetryCount(&retryCount);
+                    mHost->Log("DcRetryingState EVENT_RETRY_CONNECTION"
+                            " RetryCount=%d"
+                            " mConnectionParams=%s", retryCount, TO_CSTR(TO_IINTERFACE(mHost->mConnectionParams)));
+                }
+                mHost->OnConnect(mHost->mConnectionParams);
+                mHost->TransitionTo(mHost->mActivatingState);
+            } else {
+                if (DBG) {
+                    mHost->Log("DcRetryingState stale EVENT_RETRY_CONNECTION"
+                            " tag:%d" " != mTag:%d", msgArg1, mHost->mTag);
+                }
+            }
+            retVal = HANDLED;
+        }
+        else if (msgWhat == IDcAsyncChannel::REQ_RESET) {
+            if (DBG) {
+                mHost->Log("DcRetryingState: msg.what=RSP_RESET, ignore we're already reset");
+            }
+            AutoPtr<IDcFailCause> dfc;
+            DcFailCause::FromInt32(DcFailCause_RESET_BY_FRAMEWORK, (IDcFailCause**)&dfc);
+            mHost->mInactiveState->SetEnterNotificationParams(mHost->mConnectionParams, dfc);
+            mHost->TransitionTo(mHost->mInactiveState);
+            retVal = HANDLED;
+        }
+        else if (msgWhat == EVENT_CONNECT) {
+            AutoPtr<ConnectionParams> cp = (ConnectionParams*) IObject::Probe(msgObj);
+            if (DBG) {
+                Int32 size;
+                mHost->mApnContexts->GetSize(&size);
+                mHost->Log("DcRetryingState: msg.what=EVENT_CONNECT RefCount=%d cp=%s"
+                        " mConnectionParams=%s", size, TO_CSTR(cp), TO_CSTR(mHost->mConnectionParams));
+            }
+            Boolean isInitConnectionOk;
+            mHost->InitConnection(cp, &isInitConnectionOk);
+            if (isInitConnectionOk) {
+                mHost->OnConnect(mHost->mConnectionParams);
+                mHost->TransitionTo(mHost->mActivatingState);
+            } else {
+                if (DBG) {
+                    mHost->Log("DcRetryingState: msg.what=EVENT_CONNECT initConnection failed");
+                }
+                AutoPtr<IDcFailCause> dfc;
+                DcFailCause::FromInt32(DcFailCause_UNACCEPTABLE_NETWORK_PARAMETER, (IDcFailCause**)&dfc);
+                mHost->NotifyConnectCompleted(cp, dfc, FALSE);
+            }
+            retVal = HANDLED;
+        }
+        else if (msgWhat == EVENT_DISCONNECT) {
+            AutoPtr<DisconnectParams> dp = (DisconnectParams*) IObject::Probe(msgObj);
+            Int32 size;
+            mHost->mApnContexts->GetSize(&size);
+            if (mHost->mApnContexts->Remove(dp->mApnContext) && size == 0) {
+                if (DBG) {
+                    mHost->Log("DcRetryingState msg.what=EVENT_DISCONNECT  RefCount=%d"
+                            " dp=%s", size, TO_CSTR(dp));
+                }
+                mHost->mInactiveState->SetEnterNotificationParams(dp);
+                mHost->TransitionTo(mHost->mInactiveState);
+            } else {
+                if (DBG) mHost->Log("DcRetryingState: msg.what=EVENT_DISCONNECT");
+                mHost->NotifyDisconnectCompleted(dp, FALSE);
+            }
+            retVal = HANDLED;
+        }
+        else if (msgWhat == EVENT_DISCONNECT_ALL) {
+            if (DBG) {
+                Int32 size;
+                mHost->mApnContexts->GetSize(&size);
+                mHost->Log("DcRetryingState msg.what=EVENT_DISCONNECT/DISCONNECT_ALL "
+                        "RefCount=%d", size);
+            }
+            AutoPtr<IDcFailCause> dfc;
+            DcFailCause::FromInt32(DcFailCause_LOST_CONNECTION, (IDcFailCause**)&dfc);
+            mHost->mInactiveState->SetEnterNotificationParams(dfc);
+            mHost->TransitionTo(mHost->mInactiveState);
+            retVal = HANDLED;
+        }
+        else {
+            if (VDBG) {
+                String whatToString;
+                mHost->GetWhatToString(msgWhat, &whatToString);
+                mHost->Log("DcRetryingState nothandled msg.what=%s", whatToString.string());
+            }
+            retVal = NOT_HANDLED;
+        }
+    } while(FALSE);
+    *result = retVal;
+    return NOERROR;
+}
 
-#endif
+String DataConnection::DcRetryingState::GetName()
+{
+    return String("DataConnection::DcRetryingState");
 }
 
 //=============================================================================
@@ -631,168 +763,201 @@ DataConnection::DcActivatingState::DcActivatingState(
 
 ECode DataConnection::DcActivatingState::ProcessMessage(
     /* [in] */ IMessage* msg,
-    /* [out] */ Boolean* result)
+    /* [out] */ Boolean* _result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                boolean retVal;
-                AsyncResult ar;
-                ConnectionParams cp;
-                if (DBG) log("DcActivatingState: msg=" + msgToString(msg));
-                switch (msg.what) {
-                    case EVENT_DATA_CONNECTION_DRS_OR_RAT_CHANGED:
-                    case EVENT_CONNECT:
-                        // Activating can't process until we're done.
-                        deferMessage(msg);
-                        retVal = HANDLED;
-                        break;
-                    case EVENT_SETUP_DATA_CONNECTION_DONE:
-                        ar = (AsyncResult) msg.obj;
-                        cp = (ConnectionParams) ar.userObj;
-                        DataCallResponse.SetupResult result = onSetupConnectionCompleted(ar);
-                        if (result != DataCallResponse.SetupResult.ERR_Stale) {
-                            if (mConnectionParams != cp) {
-                                loge("DcActivatingState: WEIRD mConnectionsParams:"+ mConnectionParams
-                                        + " != cp:" + cp);
-                            }
-                        }
-                        if (DBG) {
-                            log("DcActivatingState onSetupConnectionCompleted result=" + result
-                                    + " dc=" + DataConnection.this);
-                        }
-                        switch (result) {
-                            case SUCCESS:
-                                // All is well
-                                mDcFailCause = DcFailCause.NONE;
-                                transitionTo(mActiveState);
-                                break;
-                            case ERR_BadCommand:
-                                // Vendor ril rejected the command and didn't connect.
-                                // Transition to inactive but send notifications after
-                                // we've entered the mInactive state.
-                                mInactiveState.setEnterNotificationParams(cp, result.mFailCause);
-                                transitionTo(mInactiveState);
-                                break;
-                            case ERR_UnacceptableParameter:
-                                // The addresses given from the RIL are bad
-                                tearDownData(cp);
-                                transitionTo(mDisconnectingErrorCreatingConnection);
-                                break;
-                            case ERR_GetLastErrorFromRil:
-                                // Request failed and this is an old RIL
-                                mPhone.mCi.getLastDataCallFailCause(
-                                        obtainMessage(EVENT_GET_LAST_FAIL_DONE, cp));
-                                break;
-                            case ERR_RilError:
-                                int delay = mDcRetryAlarmController.getSuggestedRetryTime(
-                                                                        DataConnection.this, ar);
-                                if (DBG) {
-                                    log("DcActivatingState: ERR_RilError "
-                                            + " delay=" + delay
-                                            + " isRetryNeeded=" + mRetryManager.isRetryNeeded()
-                                            + " result=" + result
-                                            + " result.isRestartRadioFail=" +
-                                            result.mFailCause.isRestartRadioFail()
-                                            + " result.isPermanentFail=" +
-                                            mDct.isPermanentFail(result.mFailCause));
-                                }
-                                if (result.mFailCause.isRestartRadioFail()) {
-                                    if (DBG) log("DcActivatingState: ERR_RilError restart radio");
-                                    mDct.sendRestartRadio();
-                                    mInactiveState.setEnterNotificationParams(cp, result.mFailCause);
-                                    transitionTo(mInactiveState);
-                                } else if (mDct.isPermanentFail(result.mFailCause)) {
-                                    if (DBG) log("DcActivatingState: ERR_RilError perm error");
-                                    mInactiveState.setEnterNotificationParams(cp, result.mFailCause);
-                                    transitionTo(mInactiveState);
-                                } else if (delay >= 0) {
-                                    if (DBG) log("DcActivatingState: ERR_RilError retry");
-                                    mDcRetryAlarmController.startRetryAlarm(EVENT_RETRY_CONNECTION,
-                                                                mTag, delay);
-                                    transitionTo(mRetryingState);
-                                } else {
-                                    if (DBG) log("DcActivatingState: ERR_RilError no retry");
-                                    mInactiveState.setEnterNotificationParams(cp, result.mFailCause);
-                                    transitionTo(mInactiveState);
-                                }
-                                break;
-                            case ERR_Stale:
-                                loge("DcActivatingState: stale EVENT_SETUP_DATA_CONNECTION_DONE"
-                                        + " tag:" + cp.mTag + " != mTag:" + mTag);
-                                break;
-                            default:
-                                throw new RuntimeException("Unknown SetupResult, should not happen");
-                        }
-                        retVal = HANDLED;
-                        break;
-                    case EVENT_GET_LAST_FAIL_DONE:
-                        ar = (AsyncResult) msg.obj;
-                        cp = (ConnectionParams) ar.userObj;
-                        if (cp.mTag == mTag) {
-                            if (mConnectionParams != cp) {
-                                loge("DcActivatingState: WEIRD mConnectionsParams:" + mConnectionParams
-                                        + " != cp:" + cp);
-                            }
-                            DcFailCause cause = DcFailCause.UNKNOWN;
-                            if (ar.exception == null) {
-                                int rilFailCause = ((int[]) (ar.result))[0];
-                                cause = DcFailCause.fromInt(rilFailCause);
-                                if (cause == DcFailCause.NONE) {
-                                    if (DBG) {
-                                        log("DcActivatingState msg.what=EVENT_GET_LAST_FAIL_DONE"
-                                                + " BAD: error was NONE, change to UNKNOWN");
-                                    }
-                                    cause = DcFailCause.UNKNOWN;
-                                }
-                            }
-                            mDcFailCause = cause;
-                            int retryDelay = mRetryManager.getRetryTimer();
-                            if (DBG) {
-                                log("DcActivatingState msg.what=EVENT_GET_LAST_FAIL_DONE"
-                                        + " cause=" + cause
-                                        + " retryDelay=" + retryDelay
-                                        + " isRetryNeeded=" + mRetryManager.isRetryNeeded()
-                                        + " dc=" + DataConnection.this);
-                            }
-                            if (cause.isRestartRadioFail()) {
-                                if (DBG) {
-                                    log("DcActivatingState: EVENT_GET_LAST_FAIL_DONE"
-                                            + " restart radio");
-                                }
-                                mDct.sendRestartRadio();
-                                mInactiveState.setEnterNotificationParams(cp, cause);
-                                transitionTo(mInactiveState);
-                            } else if (mDct.isPermanentFail(cause)) {
-                                if (DBG) log("DcActivatingState: EVENT_GET_LAST_FAIL_DONE perm er");
-                                mInactiveState.setEnterNotificationParams(cp, cause);
-                                transitionTo(mInactiveState);
-                            } else if ((retryDelay >= 0) && (mRetryManager.isRetryNeeded())) {
-                                if (DBG) log("DcActivatingState: EVENT_GET_LAST_FAIL_DONE retry");
-                                mDcRetryAlarmController.startRetryAlarm(EVENT_RETRY_CONNECTION, mTag,
-                                                                retryDelay);
-                                transitionTo(mRetryingState);
-                            } else {
-                                if (DBG) log("DcActivatingState: EVENT_GET_LAST_FAIL_DONE no retry");
-                                mInactiveState.setEnterNotificationParams(cp, cause);
-                                transitionTo(mInactiveState);
-                            }
-                        } else {
-                            loge("DcActivatingState: stale EVENT_GET_LAST_FAIL_DONE"
-                                    + " tag:" + cp.mTag + " != mTag:" + mTag);
-                        }
-                        retVal = HANDLED;
-                        break;
-                    default:
-                        if (VDBG) {
-                            log("DcActivatingState not handled msg.what=" +
-                                    getWhatToString(msg.what) + " RefCount=" + mApnContexts.size());
-                        }
-                        retVal = NOT_HANDLED;
-                        break;
-                }
-                return retVal;
+    VALIDATE_NOT_NULL(_result)
 
-#endif
+    Boolean retVal;
+    AutoPtr<IAsyncResult> ar;
+    AutoPtr<ConnectionParams> cp;
+    String s;
+    MsgToString(msg, &s);
+    if (DBG) mHost->Log("DcActivatingState: msg=%s", s.string());
+    Int32 msgWhat;
+    msg->GetWhat(&msgWhat);
+    AutoPtr<IInterface> msgObj;
+    msg->GetObj((IInterface**)&msgObj);
+    if (msgWhat == EVENT_DATA_CONNECTION_DRS_OR_RAT_CHANGED || msgWhat == EVENT_CONNECT) {
+        // Activating can't process until we're done.
+        mHost->DeferMessage(msg);
+        retVal = HANDLED;
+    }
+    else if (msgWhat == EVENT_SETUP_DATA_CONNECTION_DONE) {
+        ar = IAsyncResult::Probe(msgObj);
+        cp = (ConnectionParams*) IObject::Probe(((AsyncResult*) ar.Get())->mUserObj);
+        AutoPtr<IDataCallResponseSetupResult> result;
+        mHost->OnSetupConnectionCompleted(ar, (IDataCallResponseSetupResult**)&result);
+        if (((DataCallResponse::SetupResult*) result.Get())->mEnumValue != DataCallResponse_ERR_Stale) {
+            if (mHost->mConnectionParams != cp) {
+                mHost->Loge("DcActivatingState: WEIRD mConnectionsParams:%s != cp:%s",
+                        TO_CSTR(mHost->mConnectionParams), TO_CSTR(cp));
+            }
+        }
+        if (DBG) {
+            mHost->Log("DcActivatingState onSetupConnectionCompleted result=%s dc=%s",
+                    TO_CSTR(result), TO_CSTR(mHost));
+        }
+        switch (((DataCallResponse::SetupResult*) result.Get())->mEnumValue) {
+            case DataCallResponse_SUCCESS:
+                // All is well
+                DcFailCause::FromInt32(DcFailCause_NONE, (IDcFailCause**)&mHost->mDcFailCause);
+                mHost->TransitionTo(mHost->mActiveState);
+                break;
+            case DataCallResponse_ERR_BadCommand:
+                // Vendor ril rejected the command and didn't connect.
+                // Transition to inactive but send notifications after
+                // we've entered the mInactive state.
+                mHost->mInactiveState->SetEnterNotificationParams(cp, ((DataCallResponse::SetupResult*) result.Get())->mFailCause);
+                mHost->TransitionTo(mHost->mInactiveState);
+                break;
+            case DataCallResponse_ERR_UnacceptableParameter:
+                // The addresses given from the RIL are bad
+                mHost->TearDownData(cp);
+                mHost->TransitionTo(mHost->mDisconnectingErrorCreatingConnection);
+                break;
+            case DataCallResponse_ERR_GetLastErrorFromRil: {
+                // Request failed and this is an old RIL
+                AutoPtr<IMessage> msg;
+                mHost->ObtainMessage(EVENT_GET_LAST_FAIL_DONE, TO_IINTERFACE(cp), (IMessage**)&msg);
+                ((PhoneBase*) mHost->mPhone.Get())->mCi->GetLastDataCallFailCause(msg);
+                break;
+            }
+            case DataCallResponse_ERR_RilError: {
+                Int32 delay;
+                ((DcRetryAlarmController*) (mHost->mDcRetryAlarmController.Get()))->GetSuggestedRetryTime(mHost, ar, &delay);
+                Boolean isRestartRadioFail;
+                ((DataCallResponse::SetupResult*) result.Get())->mFailCause->IsRestartRadioFail(&isRestartRadioFail);
+                if (DBG) {
+                    Boolean isRetryNeeded;
+                    mHost->mRetryManager->IsRetryNeeded(&isRetryNeeded);
+                    Boolean isPermanentFail;
+                    mHost->mDct->IsPermanentFail(((DataCallResponse::SetupResult*) result.Get())->mFailCause, &isPermanentFail);
+                    mHost->Log("DcActivatingState: ERR_RilError  delay=%d isRetryNeeded=%d result=%s result.isRestartRadioFail=%d result.isPermanentFail=%d",
+                            delay, isRetryNeeded, TO_CSTR(result), isRestartRadioFail, isPermanentFail);
+                }
+                Boolean isPermanentFail;
+                mHost->mDct->IsPermanentFail(((DataCallResponse::SetupResult*) result.Get())->mFailCause, &isPermanentFail);
+                if (isRestartRadioFail) {
+                    if (DBG) mHost->Log("DcActivatingState: ERR_RilError restart radio");
+                    ((DcTrackerBase*) mHost->mDct.Get())->SendRestartRadio();
+                    mHost->mInactiveState->SetEnterNotificationParams(cp, ((DataCallResponse::SetupResult*) result.Get())->mFailCause);
+                    mHost->TransitionTo(mHost->mInactiveState);
+                } else if (isPermanentFail) {
+                    if (DBG) mHost->Log("DcActivatingState: ERR_RilError perm error");
+                    mHost->mInactiveState->SetEnterNotificationParams(cp, ((DataCallResponse::SetupResult*) result.Get())->mFailCause);
+                    mHost->TransitionTo(mHost->mInactiveState);
+                } else if (delay >= 0) {
+                    if (DBG) mHost->Log("DcActivatingState: ERR_RilError retry");
+                    mHost->mDcRetryAlarmController->StartRetryAlarm(EVENT_RETRY_CONNECTION, mHost->mTag, delay);
+                    mHost->TransitionTo(mHost->mRetryingState);
+                } else {
+                    if (DBG) mHost->Log("DcActivatingState: ERR_RilError no retry");
+                    mHost->mInactiveState->SetEnterNotificationParams(cp, ((DataCallResponse::SetupResult*) result.Get())->mFailCause);
+                    mHost->TransitionTo(mHost->mInactiveState);
+                }
+                break;
+            }
+            case DataCallResponse_ERR_Stale:
+                mHost->Loge("DcActivatingState: stale EVENT_SETUP_DATA_CONNECTION_DONE"
+                        " tag:%d != mTag:%d", cp->mTag, mHost->mTag);
+                break;
+            default:
+                Logger::E("DataConnection::DcActivatingState", "Unknown SetupResult, should not happen");
+                return E_RUNTIME_EXCEPTION;
+        }
+        retVal = HANDLED;
+    }
+    else if (msgWhat == EVENT_GET_LAST_FAIL_DONE) {
+        ar = IAsyncResult::Probe(msgObj);
+        cp = (ConnectionParams*) IObject::Probe(((AsyncResult*) ar.Get())->mUserObj);
+        if (cp->mTag == mHost->mTag) {
+            if (mHost->mConnectionParams != cp) {
+                mHost->Loge("DcActivatingState: WEIRD mConnectionsParams:%s"
+                        " != cp:%s", TO_CSTR(mHost->mConnectionParams), TO_CSTR(cp));
+            }
+            AutoPtr<IDcFailCause> cause;
+            DcFailCause::FromInt32(DcFailCause_UNKNOWN, (IDcFailCause**)&cause);
+            if (((AsyncResult*) ar.Get())->mException == NULL) {
+                AutoPtr<IInterface> obj;
+                IArrayOf::Probe(((AsyncResult*) ar.Get())->mResult)->Get(0, (IInterface**)&obj);
+                Int32 rilFailCause;
+                IInteger32::Probe(obj)->GetValue(&rilFailCause);
+                DcFailCause::FromInt32(rilFailCause, (IDcFailCause**)&cause);
+                Int32 errCode;
+                cause->GetErrorCode(&errCode);
+                if (errCode == DcFailCause_NONE) {
+                    if (DBG) {
+                        mHost->Log("DcActivatingState msg.what=EVENT_GET_LAST_FAIL_DONE"
+                                " BAD: error was NONE, change to UNKNOWN");
+                    }
+                    cause = NULL;
+                    DcFailCause::FromInt32(DcFailCause_UNKNOWN, (IDcFailCause**)&cause);
+                }
+            }
+            mHost->mDcFailCause = cause;
+            Int32 retryDelay;
+            mHost->mRetryManager->GetRetryTimer(&retryDelay);
+            if (DBG) {
+                Boolean isRetryNeeded;
+                mHost->mRetryManager->IsRetryNeeded(&isRetryNeeded);
+                mHost->Log("DcActivatingState msg.what=EVENT_GET_LAST_FAIL_DONE"
+                        " cause=%s"
+                        " retryDelay=%d"
+                        " isRetryNeeded=%d"
+                        " dc=%s",
+                        TO_CSTR(cause), retryDelay, isRetryNeeded, TO_CSTR(mHost));
+            }
+            Boolean isRestartRadioFail;
+            cause->IsRestartRadioFail(&isRestartRadioFail);
+            Boolean isRetryNeeded;
+            mHost->mRetryManager->IsRetryNeeded(&isRetryNeeded);
+            Boolean isPermanentFail;
+            mHost->mDct->IsPermanentFail(cause, &isPermanentFail);
+            if (isRestartRadioFail) {
+                if (DBG) {
+                    mHost->Log("DcActivatingState: EVENT_GET_LAST_FAIL_DONE"
+                            " restart radio");
+                }
+                ((DcTrackerBase*) mHost->mDct.Get())->SendRestartRadio();
+                mHost->mInactiveState->SetEnterNotificationParams(cp, cause);
+                mHost->TransitionTo(mHost->mInactiveState);
+            } else if (isPermanentFail) {
+                if (DBG) mHost->Log("DcActivatingState: EVENT_GET_LAST_FAIL_DONE perm er");
+                mHost->mInactiveState->SetEnterNotificationParams(cp, cause);
+                mHost->TransitionTo(mHost->mInactiveState);
+            } else if ((retryDelay >= 0) && (isRetryNeeded)) {
+                if (DBG) mHost->Log("DcActivatingState: EVENT_GET_LAST_FAIL_DONE retry");
+                mHost->mDcRetryAlarmController->StartRetryAlarm(EVENT_RETRY_CONNECTION, mHost->mTag,
+                                                retryDelay);
+                mHost->TransitionTo(mHost->mRetryingState);
+            } else {
+                if (DBG) mHost->Log("DcActivatingState: EVENT_GET_LAST_FAIL_DONE no retry");
+                mHost->mInactiveState->SetEnterNotificationParams(cp, cause);
+                mHost->TransitionTo(mHost->mInactiveState);
+            }
+        } else {
+            mHost->Loge("DcActivatingState: stale EVENT_GET_LAST_FAIL_DONE"
+                    " tag:%d != mTag:%d", cp->mTag, mHost->mTag);
+        }
+        retVal = HANDLED;
+    }
+    else {
+        if (VDBG) {
+            Int32 size;
+            mHost->mApnContexts->GetSize(&size);
+            String whatToString;
+            mHost->GetWhatToString(msgWhat, &whatToString);
+            mHost->Log("DcActivatingState not handled msg.what=%s RefCount=%d", whatToString.string(), size);
+        }
+        retVal = NOT_HANDLED;
+    }
+    *_result = retVal;
+    return NOERROR;
+}
+
+String DataConnection::DcActivatingState::GetName()
+{
+    return String("DataConnection::DcActivatingState");
 }
 
 //=============================================================================
@@ -805,157 +970,182 @@ DataConnection::DcActiveState::DcActiveState(
 
 ECode DataConnection::DcActiveState::Enter()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                if (DBG) log("DcActiveState: enter dc=" + DataConnection.this);
-                if (mRetryManager.getRetryCount() != 0) {
-                    log("DcActiveState: connected after retrying call notifyAllOfConnected");
-                    mRetryManager.setRetryCount(0);
-                }
-                // If we were retrying there maybe more than one, otherwise they'll only be one.
-                notifyAllOfConnected(Phone.REASON_CONNECTED);
-                // If the EVENT_CONNECT set the current max retry restore it here
-                // if it didn't then this is effectively a NOP.
-                mRetryManager.restoreCurMaxRetryCount();
-                mDcController.addActiveDcByCid(DataConnection.this);
-                mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED,
-                        mNetworkInfo.getReason(), null);
-                mNetworkInfo.setExtraInfo(mApnSetting.apn);
-                updateTcpBufferSizes(mRilRat);
-                mNetworkAgent = new DcNetworkAgent(getHandler().getLooper(),
-                        mPhone.getContext(),
-                        "DcNetworkAgent" + mPhone.getSubId(), mNetworkInfo,
-                        makeNetworkCapabilities(), mLinkProperties, 50);
-
-#endif
+    if (DBG) mHost->Log("DcActiveState: enter dc=%s", TO_CSTR(mHost));
+    Int32 retryCount;
+    mHost->mRetryManager->GetRetryCount(&retryCount);
+    if (retryCount != 0) {
+        mHost->Log("DcActiveState: connected after retrying call notifyAllOfConnected");
+        mHost->mRetryManager->SetRetryCount(0);
+    }
+    // If we were retrying there maybe more than one, otherwise they'll only be one.
+    mHost->NotifyAllOfConnected(IPhone::REASON_CONNECTED);
+    // If the EVENT_CONNECT set the current max retry restore it here
+    // if it didn't then this is effectively a NOP.
+    mHost->mRetryManager->RestoreCurMaxRetryCount();
+    ((DcController*) (mHost->mDcController.Get()))->AddActiveDcByCid(mHost);
+    String networkInfoReason;
+    mHost->mNetworkInfo->GetReason(&networkInfoReason);
+    mHost->mNetworkInfo->SetDetailedState(Elastos::Droid::Net::NetworkInfoDetailedState_CONNECTED, networkInfoReason, String(NULL));
+    String apn;
+    mHost->mApnSetting->GetApn(&apn);
+    mHost->mNetworkInfo->SetExtraInfo(apn);
+    mHost->UpdateTcpBufferSizes(mHost->mRilRat);
+    AutoPtr<IHandler> handler;
+    mHost->GetHandler((IHandler**)&handler);
+    AutoPtr<INetworkCapabilities> networkCapabilities;
+    mHost->MakeNetworkCapabilities((INetworkCapabilities**)&networkCapabilities);
+    AutoPtr<IContext> context;
+    IPhone::Probe(mHost->mPhone)->GetContext((IContext**)&context);
+    Int64 subId;
+    mHost->mPhone->GetSubId(&subId);
+    AutoPtr<ILooper> looper;
+    handler->GetLooper((ILooper**)&looper);
+    mHost->mNetworkAgent = new DcNetworkAgent(mHost);
+    ((DcNetworkAgent*) mHost->mNetworkAgent.Get())->constructor(looper, context, String("DcNetworkAgent") + subId, mHost->mNetworkInfo, networkCapabilities, mHost->mLinkProperties, 50);
+    return NOERROR;
 }
 
 ECode DataConnection::DcActiveState::Exit()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                if (DBG) log("DcActiveState: exit dc=" + this);
-                mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED,
-                        mNetworkInfo.getReason(), mNetworkInfo.getExtraInfo());
-                mNetworkAgent.sendNetworkInfo(mNetworkInfo);
-                mNetworkAgent = null;
-
-#endif
+    if (DBG) mHost->Log("DcActiveState: exit dc=%s", TO_CSTR(TO_IINTERFACE(this)));
+    String reason;
+    mHost->mNetworkInfo->GetReason(&reason);
+    String extraInfo;
+    mHost->mNetworkInfo->GetExtraInfo(&extraInfo);
+    mHost->mNetworkInfo->SetDetailedState(Elastos::Droid::Net::NetworkInfoDetailedState_DISCONNECTED, reason, extraInfo);
+    mHost->mNetworkAgent->SendNetworkInfo(mHost->mNetworkInfo);
+    mHost->mNetworkAgent = NULL;
+    return NOERROR;
 }
 
 ECode DataConnection::DcActiveState::ProcessMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                boolean retVal;
-                switch (msg.what) {
-                    case EVENT_CONNECT: {
-                        ConnectionParams cp = (ConnectionParams) msg.obj;
-                        if (DBG) {
-                            log("DcActiveState: EVENT_CONNECT cp=" + cp + " dc=" + DataConnection.this);
-                        }
-                        if (mApnContexts.contains(cp.mApnContext)) {
-                            log("DcActiveState ERROR already added apnContext=" + cp.mApnContext);
-                        } else {
-                            mApnContexts.add(cp.mApnContext);
-                            if (DBG) {
-                                log("DcActiveState msg.what=EVENT_CONNECT RefCount="
-                                        + mApnContexts.size());
-                            }
-                        }
-                        notifyConnectCompleted(cp, DcFailCause.NONE, false);
-                        retVal = HANDLED;
-                        break;
-                    }
-                    case EVENT_DISCONNECT: {
-                        DisconnectParams dp = (DisconnectParams) msg.obj;
-                        if (DBG) {
-                            log("DcActiveState: EVENT_DISCONNECT dp=" + dp
-                                    + " dc=" + DataConnection.this);
-                        }
-                        if (mApnContexts.contains(dp.mApnContext)) {
-                            if (DBG) {
-                                log("DcActiveState msg.what=EVENT_DISCONNECT RefCount="
-                                        + mApnContexts.size());
-                            }
-                            if (mApnContexts.size() == 1) {
-                                mApnContexts.clear();
-                                mDisconnectParams = dp;
-                                mConnectionParams = null;
-                                dp.mTag = mTag;
-                                tearDownData(dp);
-                                transitionTo(mDisconnectingState);
-                            } else {
-                                mApnContexts.remove(dp.mApnContext);
-                                notifyDisconnectCompleted(dp, false);
-                            }
-                        } else {
-                            log("DcActiveState ERROR no such apnContext=" + dp.mApnContext
-                                    + " in this dc=" + DataConnection.this);
-                            notifyDisconnectCompleted(dp, false);
-                        }
-                        retVal = HANDLED;
-                        break;
-                    }
-                    case EVENT_DISCONNECT_ALL: {
-                        if (DBG) {
-                            log("DcActiveState EVENT_DISCONNECT clearing apn contexts,"
-                                    + " dc=" + DataConnection.this);
-                        }
-                        DisconnectParams dp = (DisconnectParams) msg.obj;
-                        mDisconnectParams = dp;
-                        mConnectionParams = null;
-                        dp.mTag = mTag;
-                        tearDownData(dp);
-                        transitionTo(mDisconnectingState);
-                        retVal = HANDLED;
-                        break;
-                    }
-                    case EVENT_LOST_CONNECTION: {
-                        if (DBG) {
-                            log("DcActiveState EVENT_LOST_CONNECTION dc=" + DataConnection.this);
-                        }
-                        if (mRetryManager.isRetryNeeded()) {
-                            // We're going to retry
-                            int delayMillis = mRetryManager.getRetryTimer();
-                            if (DBG) {
-                                log("DcActiveState EVENT_LOST_CONNECTION startRetryAlarm"
-                                        + " mTag=" + mTag + " delay=" + delayMillis + "ms");
-                            }
-                            mDcRetryAlarmController.startRetryAlarm(EVENT_RETRY_CONNECTION, mTag,
-                                    delayMillis);
-                            transitionTo(mRetryingState);
-                        } else {
-                            mInactiveState.setEnterNotificationParams(DcFailCause.LOST_CONNECTION);
-                            transitionTo(mInactiveState);
-                        }
-                        retVal = HANDLED;
-                        break;
-                    }
-                    case EVENT_DATA_CONNECTION_ROAM_ON: {
-                        mNetworkInfo.setRoaming(true);
-                        mNetworkAgent.sendNetworkInfo(mNetworkInfo);
-                        retVal = HANDLED;
-                        break;
-                    }
-                    case EVENT_DATA_CONNECTION_ROAM_OFF: {
-                        mNetworkInfo.setRoaming(false);
-                        mNetworkAgent.sendNetworkInfo(mNetworkInfo);
-                        retVal = HANDLED;
-                        break;
-                    }
-                    default:
-                        if (VDBG) {
-                            log("DcActiveState not handled msg.what=" + getWhatToString(msg.what));
-                        }
-                        retVal = NOT_HANDLED;
-                        break;
-                }
-                return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Boolean retVal;
+    Int32 msgWhat;
+    msg->GetWhat(&msgWhat);
+    AutoPtr<IInterface> msgObj;
+    msg->GetObj((IInterface**)&msgObj);
+    if (msgWhat == EVENT_CONNECT) {
+        AutoPtr<ConnectionParams> cp = (ConnectionParams*) IObject::Probe(msgObj);
+        if (DBG) {
+            mHost->Log("DcActiveState: EVENT_CONNECT cp=%s dc=%s", TO_CSTR(TO_IINTERFACE(cp)), TO_CSTR(mHost));
+        }
+        Boolean isContains;
+        mHost->mApnContexts->Contains(cp->mApnContext, &isContains);
+        if (isContains) {
+            mHost->Log("DcActiveState ERROR already added apnContext=%s", TO_CSTR(cp->mApnContext));
+        } else {
+            mHost->mApnContexts->Add(cp->mApnContext);
+            if (DBG) {
+                Int32 size;
+                mHost->mApnContexts->GetSize(&size);
+                mHost->Log("DcActiveState msg.what=EVENT_CONNECT RefCount=%d", size);
+            }
+        }
+        AutoPtr<IDcFailCause> dfc;
+        DcFailCause::FromInt32(DcFailCause_NONE, (IDcFailCause**)&dfc);
+        mHost->NotifyConnectCompleted(cp, dfc, FALSE);
+        retVal = HANDLED;
+    }
+    else if (msgWhat == EVENT_DISCONNECT) {
+        AutoPtr<DisconnectParams> dp = (DisconnectParams*) IObject::Probe(msgObj);
+        if (DBG) {
+            mHost->Log("DcActiveState: EVENT_DISCONNECT dp=%s dc=%s",
+                    TO_CSTR(dp), TO_CSTR(mHost));
+        }
+        Boolean isContains;
+        mHost->mApnContexts->Contains(dp->mApnContext, &isContains);
+        if (isContains) {
+            Int32 size;
+            mHost->mApnContexts->GetSize(&size);
+            if (DBG) {
+                mHost->Log("DcActiveState msg.what=EVENT_DISCONNECT RefCount=%d", size);
+            }
+            if (size == 1) {
+                mHost->mApnContexts->Clear();
+                mHost->mDisconnectParams = dp;
+                mHost->mConnectionParams = NULL;
+                dp->mTag = mHost->mTag;
+                mHost->TearDownData(dp);
+                mHost->TransitionTo(mHost->mDisconnectingState);
+            } else {
+                mHost->mApnContexts->Remove(dp->mApnContext);
+                mHost->NotifyDisconnectCompleted(dp, FALSE);
+            }
+        } else {
+            mHost->Log("DcActiveState ERROR no such apnContext=%s in this dc=%s",
+                    TO_CSTR(dp->mApnContext), TO_CSTR(mHost));
+            mHost->NotifyDisconnectCompleted(dp, FALSE);
+        }
+        retVal = HANDLED;
+    }
+    else if (msgWhat == EVENT_DISCONNECT_ALL) {
+        if (DBG) {
+            mHost->Log("DcActiveState EVENT_DISCONNECT clearing apn contexts,"
+                    " dc=%s", TO_CSTR(mHost));
+        }
+        AutoPtr<DisconnectParams> dp = (DisconnectParams*) IObject::Probe(msgObj);
+        mHost->mDisconnectParams = dp;
+        mHost->mConnectionParams = NULL;
+        dp->mTag = mHost->mTag;
+        mHost->TearDownData(dp);
+        mHost->TransitionTo(mHost->mDisconnectingState);
+        retVal = HANDLED;
+    }
+    else if (msgWhat == EVENT_LOST_CONNECTION) {
+        if (DBG) {
+            mHost->Log("DcActiveState EVENT_LOST_CONNECTION dc=%s", TO_CSTR(mHost));
+        }
+        Boolean isRetryNeeded;
+        mHost->mRetryManager->IsRetryNeeded(&isRetryNeeded);
+        if (isRetryNeeded) {
+            // We're going to retry
+            Int32 delayMillis;
+            mHost->mRetryManager->GetRetryTimer(&delayMillis);
+            if (DBG) {
+                mHost->Log("DcActiveState EVENT_LOST_CONNECTION startRetryAlarm"
+                        " mTag=%d delay=%ldms", mHost->mTag, delayMillis);
+            }
+            mHost->mDcRetryAlarmController->StartRetryAlarm(EVENT_RETRY_CONNECTION, mHost->mTag,
+                    delayMillis);
+            mHost->TransitionTo(mHost->mRetryingState);
+        } else {
+            AutoPtr<IDcFailCause> dfc;
+            DcFailCause::FromInt32(DcFailCause_LOST_CONNECTION, (IDcFailCause**)&dfc);
+            mHost->mInactiveState->SetEnterNotificationParams(dfc);
+            mHost->TransitionTo(mHost->mInactiveState);
+        }
+        retVal = HANDLED;
+    }
+    else if (msgWhat == EVENT_DATA_CONNECTION_ROAM_ON) {
+        mHost->mNetworkInfo->SetRoaming(TRUE);
+        mHost->mNetworkAgent->SendNetworkInfo(mHost->mNetworkInfo);
+        retVal = HANDLED;
+    }
+    else if (msgWhat == EVENT_DATA_CONNECTION_ROAM_OFF) {
+        mHost->mNetworkInfo->SetRoaming(FALSE);
+        mHost->mNetworkAgent->SendNetworkInfo(mHost->mNetworkInfo);
+        retVal = HANDLED;
+    }
+    else {
+        if (VDBG) {
+            String whatToString;
+            mHost->GetWhatToString(msgWhat, &whatToString);
+            mHost->Log("DcActiveState not handled msg.what=%s", whatToString.string());
+        }
+        retVal = NOT_HANDLED;
+    }
+    *result = retVal;
+    return NOERROR;
+}
+
+String DataConnection::DcActiveState::GetName()
+{
+    return String("DataConnection::DcActiveState");
 }
 
 //=============================================================================
@@ -970,43 +1160,54 @@ ECode DataConnection::DcDisconnectingState::ProcessMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                boolean retVal;
-                switch (msg.what) {
-                    case EVENT_CONNECT:
-                        if (DBG) log("DcDisconnectingState msg.what=EVENT_CONNECT. Defer. RefCount = "
-                                + mApnContexts.size());
-                        deferMessage(msg);
-                        retVal = HANDLED;
-                        break;
-                    case EVENT_DEACTIVATE_DONE:
-                        if (DBG) log("DcDisconnectingState msg.what=EVENT_DEACTIVATE_DONE RefCount="
-                                + mApnContexts.size());
-                        AsyncResult ar = (AsyncResult) msg.obj;
-                        DisconnectParams dp = (DisconnectParams) ar.userObj;
-                        if (dp.mTag == mTag) {
-                            // Transition to inactive but send notifications after
-                            // we've entered the mInactive state.
-                            mInactiveState.setEnterNotificationParams((DisconnectParams) ar.userObj);
-                            transitionTo(mInactiveState);
-                        } else {
-                            if (DBG) log("DcDisconnectState stale EVENT_DEACTIVATE_DONE"
-                                    + " dp.tag=" + dp.mTag + " mTag=" + mTag);
-                        }
-                        retVal = HANDLED;
-                        break;
-                    default:
-                        if (VDBG) {
-                            log("DcDisconnectingState not handled msg.what="
-                                    + getWhatToString(msg.what));
-                        }
-                        retVal = NOT_HANDLED;
-                        break;
-                }
-                return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Boolean retVal;
+    Int32 msgWhat;
+    msg->GetWhat(&msgWhat);
+    AutoPtr<IInterface> msgObj;
+    msg->GetObj((IInterface**)&msgObj);
+    if (msgWhat == EVENT_CONNECT) {
+        Int32 size;
+        mHost->mApnContexts->GetSize(&size);
+        if (DBG) mHost->Log("DcDisconnectingState msg.what=EVENT_CONNECT. Defer. RefCount = %d",
+                size);
+        mHost->DeferMessage(msg);
+        retVal = HANDLED;
+    }
+    else if (msgWhat == EVENT_DEACTIVATE_DONE) {
+        Int32 size;
+        mHost->mApnContexts->GetSize(&size);
+        if (DBG) mHost->Log("DcDisconnectingState msg.what=EVENT_DEACTIVATE_DONE RefCount=%d",
+                size);
+        AutoPtr<IAsyncResult> ar = IAsyncResult::Probe(msgObj);
+        AutoPtr<DisconnectParams> dp = (DisconnectParams*) IObject::Probe(((AsyncResult*) ar.Get())->mUserObj);
+        if (dp->mTag == mHost->mTag) {
+            // Transition to inactive but send notifications after
+            // we've entered the mInactive state.
+            mHost->mInactiveState->SetEnterNotificationParams((DisconnectParams*) IObject::Probe(((AsyncResult*) ar.Get())->mUserObj));
+            mHost->TransitionTo(mHost->mInactiveState);
+        } else {
+            if (DBG) mHost->Log("DcDisconnectState stale EVENT_DEACTIVATE_DONE"
+                    " dp.tag=%d mTag=%d", dp->mTag, mHost->mTag);
+        }
+        retVal = HANDLED;
+    }
+    else {
+        if (VDBG) {
+            String whatToString;
+            mHost->GetWhatToString(msgWhat, &whatToString);
+            mHost->Log("DcDisconnectingState not handled msg.what=%s", whatToString.string());
+        }
+        retVal = NOT_HANDLED;
+    }
+    *result = retVal;
+    return NOERROR;
+}
+
+String DataConnection::DcDisconnectingState::GetName()
+{
+    return String("DataConnection::DcDisconnectingState");
 }
 
 //=============================================================================
@@ -1021,42 +1222,50 @@ ECode DataConnection::DcDisconnectionErrorCreatingConnection::ProcessMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                boolean retVal;
-                switch (msg.what) {
-                    case EVENT_DEACTIVATE_DONE:
-                        AsyncResult ar = (AsyncResult) msg.obj;
-                        ConnectionParams cp = (ConnectionParams) ar.userObj;
-                        if (cp.mTag == mTag) {
-                            if (DBG) {
-                                log("DcDisconnectionErrorCreatingConnection" +
-                                    " msg.what=EVENT_DEACTIVATE_DONE");
-                            }
-                            // Transition to inactive but send notifications after
-                            // we've entered the mInactive state.
-                            mInactiveState.setEnterNotificationParams(cp,
-                                    DcFailCause.UNACCEPTABLE_NETWORK_PARAMETER);
-                            transitionTo(mInactiveState);
-                        } else {
-                            if (DBG) {
-                                log("DcDisconnectionErrorCreatingConnection stale EVENT_DEACTIVATE_DONE"
-                                        + " dp.tag=" + cp.mTag + ", mTag=" + mTag);
-                            }
-                        }
-                        retVal = HANDLED;
-                        break;
-                    default:
-                        if (VDBG) {
-                            log("DcDisconnectionErrorCreatingConnection not handled msg.what="
-                                    + getWhatToString(msg.what));
-                        }
-                        retVal = NOT_HANDLED;
-                        break;
-                }
-                return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Boolean retVal;
+    Int32 msgWhat;
+    msg->GetWhat(&msgWhat);
+    AutoPtr<IInterface> msgObj;
+    msg->GetObj((IInterface**)&msgObj);
+    if (msgWhat == EVENT_DEACTIVATE_DONE) {
+        AutoPtr<IAsyncResult> ar = IAsyncResult::Probe(msgObj);
+        AutoPtr<ConnectionParams> cp = (ConnectionParams*) IObject::Probe(((AsyncResult*) ar.Get())->mUserObj);
+        if (cp->mTag == mHost->mTag) {
+            if (DBG) {
+                mHost->Log("DcDisconnectionErrorCreatingConnection"
+                    " msg.what=EVENT_DEACTIVATE_DONE");
+            }
+            // Transition to inactive but send notifications after
+            // we've entered the mInactive state.
+            AutoPtr<IDcFailCause> dfc;
+            DcFailCause::FromInt32(DcFailCause_UNACCEPTABLE_NETWORK_PARAMETER, (IDcFailCause**)&dfc);
+            mHost->mInactiveState->SetEnterNotificationParams(cp, dfc);
+            mHost->TransitionTo(mHost->mInactiveState);
+        } else {
+            if (DBG) {
+                mHost->Log("DcDisconnectionErrorCreatingConnection stale EVENT_DEACTIVATE_DONE"
+                        " dp.tag=%d, mTag=%d", cp->mTag, mHost->mTag);
+            }
+        }
+        retVal = HANDLED;
+    }
+    else {
+        if (VDBG) {
+            String whatToString;
+            mHost->GetWhatToString(msgWhat, &whatToString);
+            mHost->Log("DcDisconnectionErrorCreatingConnection not handled msg.what=%s", whatToString.string());
+        }
+        retVal = NOT_HANDLED;
+    }
+    *result = retVal;
+    return NOERROR;
+}
+
+String DataConnection::DcDisconnectionErrorCreatingConnection::GetName()
+{
+    return String("DataConnection::DcDisconnectionErrorCreatingConnection");
 }
 
 //=============================================================================
@@ -1076,32 +1285,36 @@ ECode DataConnection::DcNetworkAgent::constructor(
     /* [in] */ ILinkProperties* lp,
     /* [in] */ Int32 score)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                super(l, c, TAG, ni, nc, lp, score);
-
-#endif
+    return NetworkAgent::constructor(l, c, TAG, ni, nc, lp, score);
 }
 
 ECode DataConnection::DcNetworkAgent::Unwanted()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                if (mNetworkAgent != this) {
-                    log("unwanted found mNetworkAgent=" + mNetworkAgent +
-                            ", which isn't me.  Aborting unwanted");
-                    return;
-                }
-                // this can only happen if our exit has been called - we're already disconnected
-                if (mApnContexts == null) return;
-                for (ApnContext apnContext : mApnContexts) {
-                    Message msg = mDct.obtainMessage(DctConstants.EVENT_DISCONNECT_DONE, apnContext);
-                    DisconnectParams dp = new DisconnectParams(apnContext, apnContext.getReason(), msg);
-                    DataConnection.this.sendMessage(DataConnection.this.
-                            obtainMessage(EVENT_DISCONNECT, dp));
-                }
-
-#endif
+    if (mHost->mNetworkAgent != this) {
+        mHost->Log("unwanted found mNetworkAgent=%s"
+                ", which isn't me.  Aborting unwanted", TO_CSTR(mHost->mNetworkAgent));
+        return NOERROR;
+    }
+    // this can only happen if our exit has been called - we're already disconnected
+    if (mHost->mApnContexts == NULL) return NOERROR;
+    AutoPtr<IIterator> it;
+    mHost->mApnContexts->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+        AutoPtr<IMessage> msg;
+        IHandler::Probe(mHost->mDct)->ObtainMessage(IDctConstants::EVENT_DISCONNECT_DONE, apnContext, (IMessage**)&msg);
+        AutoPtr<DisconnectParams> dp = new DisconnectParams();
+        String reason;
+        apnContext->GetReason(&reason);
+        dp->constructor(apnContext, reason, msg);
+        msg = NULL;
+        mHost->ObtainMessage(EVENT_DISCONNECT, TO_IINTERFACE(dp), (IMessage**)&msg);
+        mHost->SendMessage(msg);
+    }
+    return NOERROR;
 }
 
 //=============================================================================
@@ -1109,8 +1322,8 @@ ECode DataConnection::DcNetworkAgent::Unwanted()
 //=============================================================================
 CAR_INTERFACE_IMPL(DataConnection, StateMachine, IDataConnection)
 
-const Boolean DataConnection::DBG = true;
-const Boolean DataConnection::VDBG = true;
+const Boolean DataConnection::DBG = TRUE;
+const Boolean DataConnection::VDBG = TRUE;
 const String DataConnection::DEFAULT_DATA_RETRY_CONFIG("default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,320000:5000,640000:5000,1280000:5000,1800000:5000");
 const String DataConnection::SECONDARY_DATA_RETRY_CONFIG("max_retries=3, 5000, 5000, 5000");
 const String DataConnection::NETWORK_TYPE("MOBILE");
@@ -1144,6 +1357,251 @@ const String DataConnection::TCP_BUFFER_SIZES_HSPA("40778,244668,734003,16777,10
 const String DataConnection::TCP_BUFFER_SIZES_LTE("524288,1048576,2097152,262144,524288,1048576");
 const String DataConnection::TCP_BUFFER_SIZES_HSPAP("122334,734003,2202010,32040,192239,576717");
 
+ECode DataConnection::CmdToString(
+    /* [in] */ Int32 _cmd,
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+
+    String value;
+    Int32 cmd = _cmd;
+    cmd -= BASE;
+    if ((cmd >= 0) && (cmd < sCmdToString->GetLength())) {
+        value = (*sCmdToString)[cmd];
+    } else {
+        DcAsyncChannel::CmdToString(cmd + BASE, &value);
+    }
+    if (value == NULL) {
+        value = String("0x") + StringUtils::ToHexString(cmd + BASE);
+    }
+    *result = value;
+    return NOERROR;
+}
+
+ECode DataConnection::MakeDataConnection(
+    /* [in] */ IPhoneBase* phone,
+    /* [in] */ Int32 id,
+    /* [in] */ IDcTrackerBase* dct,
+    /* [in] */ IDcTesterFailBringUpAll* failBringUpAll,
+    /* [in] */ IDcController* dcc,
+    /* [out] */ IDataConnection** result)
+{
+    VALIDATE_NOT_NULL(result)
+
+    Int32 instNumber;
+    mInstanceNumber->IncrementAndGet(&instNumber);
+    AutoPtr<IDataConnection> dc = new DataConnection();
+    ((DataConnection*)dc.Get())->constructor(phone, String("DC-") + StringUtils::ToString(instNumber), id, dct, failBringUpAll, dcc);
+    assert(0 && "IStateMachine");
+    // IStateMachine::Probe(dc)->Start();
+    // if (DBG) IStateMachine::Probe(dc)->Log("Made %s", dc->GetName());
+    *result = dc;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode DataConnection::Dispose()
+{
+    Log("dispose: call quiteNow()");
+    QuitNow();
+    return NOERROR;
+}
+
+ECode DataConnection::GetCopyNetworkCapabilities(
+    /* [out] */ INetworkCapabilities** result)
+{
+    return MakeNetworkCapabilities(result);
+}
+
+ECode DataConnection::GetCopyLinkProperties(
+    /* [out] */ ILinkProperties** result)
+{
+    return CLinkProperties::New(mLinkProperties, result);
+}
+
+ECode DataConnection::GetIsInactive(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+
+
+    *result = (GetCurrentState().Get() == IState::Probe(TO_IINTERFACE(mInactiveState)));
+    return NOERROR;
+}
+
+ECode DataConnection::GetCid(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mCid;
+    return NOERROR;
+}
+
+ECode DataConnection::GetApnSetting(
+    /* [out] */ IApnSetting** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mApnSetting;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode DataConnection::SetLinkPropertiesHttpProxy(
+    /* [in] */ IProxyInfo* proxy)
+{
+    mLinkProperties->SetHttpProxy(proxy);
+    return NOERROR;
+}
+
+ECode DataConnection::IsIpv4Connected(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+
+    Boolean ret = FALSE;
+    AutoPtr<IList> list;
+    mLinkProperties->GetAddresses((IList**)&list);
+    AutoPtr<ICollection> addresses = ICollection::Probe(list);
+    AutoPtr<IIterator> it;
+    addresses->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IInetAddress> addr = IInetAddress::Probe(obj);
+        if (Elastos::Net::IInet4Address::Probe(addr) != NULL) {
+            AutoPtr<Elastos::Net::IInet4Address> i4addr = Elastos::Net::IInet4Address::Probe(addr);
+            Boolean isLinkLocalAddress;
+            IInetAddress::Probe(i4addr)->IsLinkLocalAddress(&isLinkLocalAddress);
+            Boolean isAnyLocalAddress;
+            IInetAddress::Probe(i4addr)->IsAnyLocalAddress(&isAnyLocalAddress);
+            Boolean isMulticastAddress;
+            IInetAddress::Probe(i4addr)->IsMulticastAddress(&isMulticastAddress);
+            Boolean isLoopbackAddress;
+            IInetAddress::Probe(i4addr)->IsLoopbackAddress(&isLoopbackAddress);
+            if (!isAnyLocalAddress && !isLinkLocalAddress && !isLoopbackAddress && !isMulticastAddress) {
+                ret = TRUE;
+                break;
+            }
+        }
+    }
+    *result = ret;
+    return NOERROR;
+}
+
+ECode DataConnection::IsIpv6Connected(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+
+    Boolean ret = FALSE;
+    AutoPtr<IList> list;
+    mLinkProperties->GetAddresses((IList**)&list);
+    AutoPtr<ICollection> addresses = ICollection::Probe(list);
+    AutoPtr<IIterator> it;
+    addresses->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IInetAddress> addr = IInetAddress::Probe(obj);
+        if (Elastos::Net::IInet6Address::Probe(addr) != NULL) {
+            AutoPtr<Elastos::Net::IInet6Address> i6addr = Elastos::Net::IInet6Address::Probe(addr);
+            Boolean isMulticastAddress;
+            IInetAddress::Probe(i6addr)->IsMulticastAddress(&isMulticastAddress);
+            Boolean isLoopbackAddress;
+            IInetAddress::Probe(i6addr)->IsLoopbackAddress(&isLoopbackAddress);
+            Boolean isLinkLocalAddress;
+            IInetAddress::Probe(i6addr)->IsLinkLocalAddress(&isLinkLocalAddress);
+            Boolean isAnyLocalAddress;
+            IInetAddress::Probe(i6addr)->IsAnyLocalAddress(&isAnyLocalAddress);
+            if (!isAnyLocalAddress && !isLinkLocalAddress && !isLoopbackAddress && !isMulticastAddress) {
+                ret = TRUE;
+                break;
+            }
+        }
+    }
+    *result = ret;
+    return NOERROR;
+}
+
+ECode DataConnection::UpdateLinkProperty(
+    /* [in] */ IDataCallResponse* newState,
+    /* [out] */ UpdateLinkPropertyResult** _result)
+{
+    VALIDATE_NOT_NULL(_result)
+
+    AutoPtr<UpdateLinkPropertyResult> result = new UpdateLinkPropertyResult(mLinkProperties);
+    if (newState == NULL) {
+        *_result = result;
+        REFCOUNT_ADD(*_result)
+        return NOERROR;
+    }
+    AutoPtr<IDataCallResponseSetupResult> setupResult;
+    CLinkProperties::New((ILinkProperties**)&(result->mNewLp));
+    // set link properties based on data call response
+    SetLinkProperties(newState, result->mNewLp, (IDataCallResponseSetupResult**)&(result->mSetupResult));
+    if (((DataCallResponse::SetupResult*) result->mSetupResult.Get())->mEnumValue != DataCallResponse_SUCCESS) {
+        if (DBG) Log("updateLinkProperty failed : %s", TO_CSTR(result->mSetupResult));
+        *_result = result;
+        REFCOUNT_ADD(*_result)
+        return NOERROR;
+    }
+    // copy HTTP proxy as it is not part DataCallResponse.
+    AutoPtr<IProxyInfo> proxyInfo;
+    mLinkProperties->GetHttpProxy((IProxyInfo**)&proxyInfo);
+    result->mNewLp->SetHttpProxy(proxyInfo);
+    CheckSetMtu(mApnSetting, result->mNewLp);
+    mLinkProperties = result->mNewLp;
+    UpdateTcpBufferSizes(mRilRat);
+    Boolean isEquals;
+    IObject::Probe(result->mOldLp)->Equals(result->mNewLp, &isEquals);
+    if (DBG && (! isEquals)) {
+        Log("updateLinkProperty old LP=%s", TO_CSTR(result->mOldLp));
+        Log("updateLinkProperty new LP=%s", TO_CSTR(result->mNewLp));
+    }
+    IObject::Probe(result->mNewLp)->Equals(result->mOldLp, &isEquals);
+    if (isEquals == FALSE &&
+            mNetworkAgent != NULL) {
+        mNetworkAgent->SendLinkProperties(mLinkProperties);
+    }
+    *_result = result;
+    REFCOUNT_ADD(*_result)
+    return NOERROR;
+}
+
+ECode DataConnection::CheckSetMtu(
+    /* [in] */ IApnSetting* apn,
+    /* [in] */ ILinkProperties* lp)
+{
+    if (lp == NULL) return NOERROR;
+    if (apn == NULL || lp == NULL) return NOERROR;
+    Int32 lpMtu;
+    lp->GetMtu(&lpMtu);
+    if (lpMtu != IPhoneConstants::UNSET_MTU) {
+        if (DBG) Log("MTU set by call response to: %d", lpMtu);
+        return NOERROR;
+    }
+    Int32 apnMtu;
+    apn->GetMtu(&apnMtu);
+    if (apn != NULL && apnMtu != IPhoneConstants::UNSET_MTU) {
+        lp->SetMtu(apnMtu);
+        if (DBG) Log("MTU set by APN to: %d", apnMtu);
+        return NOERROR;
+    }
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
+    Int32 mtu;
+    res->GetInteger(R::integer::config_mobile_mtu, &mtu);
+    if (mtu != IPhoneConstants::UNSET_MTU) {
+        lp->SetMtu(mtu);
+        if (DBG) Log("MTU set by config resource to: %d", mtu);
+    }
+    return NOERROR;
+}
+
 DataConnection::DataConnection()
     : mTag(0)
     , mCid(0)
@@ -1157,237 +1615,15 @@ DataConnection::DataConnection()
     // CRetryManager::New((IRetryManager**)&mRetryManager);
     CLinkProperties::New((ILinkProperties**)&mLinkProperties);
     mDefaultState = new DcDefaultState(this);
-#if 0 // TODO: Translate codes below
-    CDcInactiveState::New((IDcInactiveState**)&mInactiveState);
+    mInactiveState = new DcInactiveState(this);
     mRetryingState = new DcRetryingState(this);
     mActivatingState = new DcActivatingState(this);
     mActiveState = new DcActiveState(this);
     mDisconnectingState = new DcDisconnectingState(this);
     mDisconnectingErrorCreatingConnection = new DcDisconnectionErrorCreatingConnection(this);
-#endif
 }
 
-ECode DataConnection::constructor()
-{
-    return NOERROR;
-}
-
-ECode DataConnection::CmdToString(
-    /* [in] */ Int32 cmd,
-    /* [out] */ String* result)
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        String value;
-        cmd -= BASE;
-        if ((cmd >= 0) && (cmd < sCmdToString.length)) {
-            value = sCmdToString[cmd];
-        } else {
-            value = DcAsyncChannel.cmdToString(cmd + BASE);
-        }
-        if (value == null) {
-            value = "0x" + Integer.toHexString(cmd + BASE);
-        }
-        return value;
-
-#endif
-}
-
-ECode DataConnection::MakeDataConnection(
-    /* [in] */ IPhoneBase* phone,
-    /* [in] */ Int32 id,
-    /* [in] */ IDcTrackerBase* dct,
-    /* [in] */ IDcTesterFailBringUpAll* failBringUpAll,
-    /* [in] */ IDcController* dcc,
-    /* [out] */ IDataConnection** result)
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        DataConnection dc = new DataConnection(phone,
-                "DC-" + mInstanceNumber.incrementAndGet(), id, dct, failBringUpAll, dcc);
-        dc.start();
-        if (DBG) dc.log("Made " + dc.getName());
-        return dc;
-
-#endif
-}
-
-ECode DataConnection::Dispose()
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        log("dispose: call quiteNow()");
-        quitNow();
-
-#endif
-}
-
-ECode DataConnection::GetCopyNetworkCapabilities(
-    /* [out] */ INetworkCapabilities** result)
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return makeNetworkCapabilities();
-
-#endif
-}
-
-ECode DataConnection::GetCopyLinkProperties(
-    /* [out] */ ILinkProperties** result)
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return new LinkProperties(mLinkProperties);
-
-#endif
-}
-
-ECode DataConnection::GetIsInactive(
-    /* [out] */ Boolean* result)
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return getCurrentState() == mInactiveState;
-
-#endif
-}
-
-ECode DataConnection::GetCid(
-    /* [out] */ Int32* result)
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mCid;
-
-#endif
-}
-
-ECode DataConnection::GetApnSetting(
-    /* [out] */ IApnSetting** result)
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mApnSetting;
-
-#endif
-}
-
-ECode DataConnection::SetLinkPropertiesHttpProxy(
-    /* [in] */ IProxyInfo* proxy)
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mLinkProperties.setHttpProxy(proxy);
-
-#endif
-}
-
-ECode DataConnection::IsIpv4Connected(
-    /* [out] */ Boolean* result)
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean ret = false;
-        Collection <InetAddress> addresses = mLinkProperties.getAddresses();
-        for (InetAddress addr: addresses) {
-            if (addr instanceof java.net.Inet4Address) {
-                java.net.Inet4Address i4addr = (java.net.Inet4Address) addr;
-                if (!i4addr.isAnyLocalAddress() && !i4addr.isLinkLocalAddress() &&
-                        !i4addr.isLoopbackAddress() && !i4addr.isMulticastAddress()) {
-                    ret = true;
-                    break;
-                }
-            }
-        }
-        return ret;
-
-#endif
-}
-
-ECode DataConnection::IsIpv6Connected(
-    /* [out] */ Boolean* result)
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean ret = false;
-        Collection <InetAddress> addresses = mLinkProperties.getAddresses();
-        for (InetAddress addr: addresses) {
-            if (addr instanceof java.net.Inet6Address) {
-                java.net.Inet6Address i6addr = (java.net.Inet6Address) addr;
-                if (!i6addr.isAnyLocalAddress() && !i6addr.isLinkLocalAddress() &&
-                        !i6addr.isLoopbackAddress() && !i6addr.isMulticastAddress()) {
-                    ret = true;
-                    break;
-                }
-            }
-        }
-        return ret;
-
-#endif
-}
-
-ECode DataConnection::UpdateLinkProperty(
-    /* [in] */ IDataCallResponse* newState,
-    /* [out] */ UpdateLinkPropertyResult** result)
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        UpdateLinkPropertyResult result = new UpdateLinkPropertyResult(mLinkProperties);
-        if (newState == null) return result;
-        DataCallResponse.SetupResult setupResult;
-        result.newLp = new LinkProperties();
-        // set link properties based on data call response
-        result.setupResult = setLinkProperties(newState, result.newLp);
-        if (result.setupResult != DataCallResponse.SetupResult.SUCCESS) {
-            if (DBG) log("updateLinkProperty failed : " + result.setupResult);
-            return result;
-        }
-        // copy HTTP proxy as it is not part DataCallResponse.
-        result.newLp.setHttpProxy(mLinkProperties.getHttpProxy());
-        checkSetMtu(mApnSetting, result.newLp);
-        mLinkProperties = result.newLp;
-        updateTcpBufferSizes(mRilRat);
-        if (DBG && (! result.oldLp.equals(result.newLp))) {
-            log("updateLinkProperty old LP=" + result.oldLp);
-            log("updateLinkProperty new LP=" + result.newLp);
-        }
-        if (result.newLp.equals(result.oldLp) == false &&
-                mNetworkAgent != null) {
-            mNetworkAgent.sendLinkProperties(mLinkProperties);
-        }
-        return result;
-
-#endif
-}
-
-ECode DataConnection::CheckSetMtu(
-    /* [in] */ IApnSetting* apn,
-    /* [in] */ ILinkProperties* lp)
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (lp == null) return;
-        if (apn == null || lp == null) return;
-        if (lp.getMtu() != PhoneConstants.UNSET_MTU) {
-            if (DBG) log("MTU set by call response to: " + lp.getMtu());
-            return;
-        }
-        if (apn != null && apn.mtu != PhoneConstants.UNSET_MTU) {
-            lp.setMtu(apn.mtu);
-            if (DBG) log("MTU set by APN to: " + apn.mtu);
-            return;
-        }
-        int mtu = mPhone.getContext().getResources().getInteger(
-                com.android.internal.R.integer.config_mobile_mtu);
-        if (mtu != PhoneConstants.UNSET_MTU) {
-            lp.setMtu(mtu);
-            if (DBG) log("MTU set by config resource to: " + mtu);
-        }
-
-#endif
-}
-
-DataConnection::DataConnection(
+ECode DataConnection::constructor(
     /* [in] */ IPhoneBase* phone,
     /* [in] */ const String& name,
     /* [in] */ Int32 id,
@@ -1395,218 +1631,279 @@ DataConnection::DataConnection(
     /* [in] */ IDcTesterFailBringUpAll* failBringUpAll,
     /* [in] */ IDcController* dcc)
 {
-#if 0 // TODO: Translate codes below
-        super(name, dcc.getHandler());
-        setLogRecSize(300);
-        setLogOnlyTransitions(true);
-        if (DBG) log("DataConnection constructor E");
-        mPhone = phone;
-        mDct = dct;
-        mDcTesterFailBringUpAll = failBringUpAll;
-        mDcController = dcc;
-        mId = id;
-        mCid = -1;
-        mDcRetryAlarmController = new DcRetryAlarmController(mPhone, this);
-        ServiceState ss = mPhone.getServiceState();
-        mRilRat = ss.getRilDataRadioTechnology();
-        mDataRegState = mPhone.getServiceState().getDataRegState();
-        int networkType = ss.getDataNetworkType();
-        mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_MOBILE,
-                networkType, NETWORK_TYPE, TelephonyManager.getNetworkTypeName(networkType));
-        mNetworkInfo.setRoaming(ss.getRoaming());
-        mNetworkInfo.setIsAvailable(true);
-        addState(mDefaultState);
-            addState(mInactiveState, mDefaultState);
-            addState(mActivatingState, mDefaultState);
-            addState(mRetryingState, mDefaultState);
-            addState(mActiveState, mDefaultState);
-            addState(mDisconnectingState, mDefaultState);
-            addState(mDisconnectingErrorCreatingConnection, mDefaultState);
-        setInitialState(mInactiveState);
-        mApnContexts = new ArrayList<ApnContext>();
-        if (DBG) log("DataConnection constructor X");
-
-#endif
+    AutoPtr<IHandler> handler;
+    IStateMachine::Probe(dcc)->GetHandler((IHandler**)&handler);
+    StateMachine::constructor(name, handler);
+    SetLogRecSize(300);
+    SetLogOnlyTransitions(TRUE);
+    if (DBG) Log("DataConnection constructor E");
+    mPhone = phone;
+    mDct = dct;
+    mDcTesterFailBringUpAll = failBringUpAll;
+    mDcController = dcc;
+    mId = id;
+    mCid = -1;
+    CDcRetryAlarmController::New(mPhone, this, (IDcRetryAlarmController**)&mDcRetryAlarmController);
+    AutoPtr<IServiceState> ss;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&ss);
+    Int32 rilDataRadioTechnology;
+    ss->GetRilDataRadioTechnology(&rilDataRadioTechnology);
+    mRilRat = rilDataRadioTechnology;
+    AutoPtr<IServiceState> serviceState;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    serviceState->GetDataRegState(&mDataRegState);
+    Int32 networkType;
+    ss->GetDataNetworkType(&networkType);
+    String networkTypeName;
+    CTelephonyManager::GetNetworkTypeName(networkType, &networkTypeName);
+    CNetworkInfo::New(IConnectivityManager::TYPE_MOBILE,
+            networkType, NETWORK_TYPE, networkTypeName, (INetworkInfo**)&mNetworkInfo);
+    Boolean roaming;
+    ss->GetRoaming(&roaming);
+    mNetworkInfo->SetRoaming(roaming);
+    mNetworkInfo->SetIsAvailable(TRUE);
+    AddState(mDefaultState);
+    AddState(mInactiveState, mDefaultState);
+    AddState(mActivatingState, mDefaultState);
+    AddState(mRetryingState, mDefaultState);
+    AddState(mActiveState, mDefaultState);
+    AddState(mDisconnectingState, mDefaultState);
+    AddState(mDisconnectingErrorCreatingConnection, mDefaultState);
+    SetInitialState(mInactiveState);
+    CArrayList::New((IArrayList**)&mApnContexts);
+    if (DBG) Log("DataConnection constructor X");
+    return NOERROR;
 }
 
 ECode DataConnection::GetRetryConfig(
     /* [in] */ Boolean forDefault,
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        int nt = mPhone.getServiceState().getNetworkType();
-        if (Build.IS_DEBUGGABLE) {
-            String config = SystemProperties.get("test.data_retry_config");
-            if (! TextUtils.isEmpty(config)) {
-                return config;
-            }
-        }
-        if ((nt == TelephonyManager.NETWORK_TYPE_CDMA) ||
-            (nt == TelephonyManager.NETWORK_TYPE_1xRTT) ||
-            (nt == TelephonyManager.NETWORK_TYPE_EVDO_0) ||
-            (nt == TelephonyManager.NETWORK_TYPE_EVDO_A) ||
-            (nt == TelephonyManager.NETWORK_TYPE_EVDO_B) ||
-            (nt == TelephonyManager.NETWORK_TYPE_EHRPD)) {
-            // CDMA variant
-            return SystemProperties.get("ro.cdma.data_retry_config");
-        } else {
-            // Use GSM variant for all others.
-            if (forDefault) {
-                return SystemProperties.get("ro.gsm.data_retry_config");
-            } else {
-                return SystemProperties.get("ro.gsm.2nd_data_retry_config");
-            }
-        }
+    VALIDATE_NOT_NULL(result)
+    *result = String(NULL);
 
-#endif
+    AutoPtr<IServiceState> serviceState;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    Int32 nt;
+    serviceState->GetNetworkType(&nt);
+    if (Build::IS_DEBUGGABLE) {
+        String config;
+        SystemProperties::Get(String("test.data_retry_config"), &config);
+        if (! TextUtils::IsEmpty(config)) {
+            *result = config;
+            return NOERROR;
+        }
+    }
+    if ((nt == ITelephonyManager::NETWORK_TYPE_CDMA) ||
+        (nt == ITelephonyManager::NETWORK_TYPE_1xRTT) ||
+        (nt == ITelephonyManager::NETWORK_TYPE_EVDO_0) ||
+        (nt == ITelephonyManager::NETWORK_TYPE_EVDO_A) ||
+        (nt == ITelephonyManager::NETWORK_TYPE_EVDO_B) ||
+        (nt == ITelephonyManager::NETWORK_TYPE_EHRPD)) {
+        // CDMA variant
+        return SystemProperties::Get(String("ro.cdma.data_retry_config"), result);
+    } else {
+        // Use GSM variant for all others.
+        if (forDefault) {
+            return SystemProperties::Get(String("ro.gsm.data_retry_config"), result);
+        } else {
+            return SystemProperties::Get(String("ro.gsm.2nd_data_retry_config"), result);
+        }
+    }
+    return NOERROR;
 }
 
 ECode DataConnection::ConfigureRetry(
     /* [in] */ Boolean forDefault)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        String retryConfig = getRetryConfig(forDefault);
-        if (!mRetryManager.configure(retryConfig)) {
-            if (forDefault) {
-                if (!mRetryManager.configure(DEFAULT_DATA_RETRY_CONFIG)) {
-                    // Should never happen, log an error and default to a simple linear sequence.
-                    loge("configureRetry: Could not configure using " +
-                            "DEFAULT_DATA_RETRY_CONFIG=" + DEFAULT_DATA_RETRY_CONFIG);
-                    mRetryManager.configure(5, 2000, 1000);
-                }
-            } else {
-                if (!mRetryManager.configure(SECONDARY_DATA_RETRY_CONFIG)) {
-                    // Should never happen, log an error and default to a simple sequence.
-                    loge("configureRetry: Could note configure using " +
-                            "SECONDARY_DATA_RETRY_CONFIG=" + SECONDARY_DATA_RETRY_CONFIG);
-                    mRetryManager.configure(5, 2000, 1000);
-                }
+    String retryConfig;
+    GetRetryConfig(forDefault, &retryConfig);
+    Boolean isConfigure;
+    mRetryManager->Configure(retryConfig, &isConfigure);
+    if (!isConfigure) {
+        if (forDefault) {
+            mRetryManager->Configure(DEFAULT_DATA_RETRY_CONFIG, &isConfigure);
+            if (!isConfigure) {
+                // Should never happen, log an error and default to a simple linear sequence.
+                Loge("configureRetry: Could not configure using "
+                        "DEFAULT_DATA_RETRY_CONFIG=%s", DEFAULT_DATA_RETRY_CONFIG.string());
+                Boolean b;
+                mRetryManager->Configure(5, 2000, 1000, &b);
+            }
+        } else {
+            mRetryManager->Configure(SECONDARY_DATA_RETRY_CONFIG, &isConfigure);
+            if (!isConfigure) {
+                // Should never happen, log an error and default to a simple sequence.
+                Loge("configureRetry: Could note configure using "
+                        "SECONDARY_DATA_RETRY_CONFIG=%s", SECONDARY_DATA_RETRY_CONFIG.string());
+                Boolean b;
+                mRetryManager->Configure(5, 2000, 1000, &b);
             }
         }
-        if (DBG) {
-            log("configureRetry: forDefault=" + forDefault + " mRetryManager=" + mRetryManager);
-        }
-
-#endif
+    }
+    if (DBG) {
+        Log("configureRetry: forDefault=%d mRetryManager=%s", forDefault, TO_CSTR(mRetryManager));
+    }
+    return NOERROR;
 }
 
 ECode DataConnection::OnConnect(
     /* [in] */ ConnectionParams* cp)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("onConnect: carrier='" + mApnSetting.carrier
-                + "' APN='" + mApnSetting.apn
-                + "' proxy='" + mApnSetting.proxy + "' port='" + mApnSetting.port + "'");
-        // Check if we should fake an error.
-        if (mDcTesterFailBringUpAll.getDcFailBringUp().mCounter  > 0) {
-            DataCallResponse response = new DataCallResponse();
-            response.version = mPhone.mCi.getRilVersion();
-            response.status = mDcTesterFailBringUpAll.getDcFailBringUp().mFailCause.getErrorCode();
-            response.cid = 0;
-            response.active = 0;
-            response.type = "";
-            response.ifname = "";
-            response.addresses = new String[0];
-            response.dnses = new String[0];
-            response.gateways = new String[0];
-            response.suggestedRetryTime =
-                    mDcTesterFailBringUpAll.getDcFailBringUp().mSuggestedRetryTime;
-            response.pcscf = new String[0];
-            response.mtu = PhoneConstants.UNSET_MTU;
-            Message msg = obtainMessage(EVENT_SETUP_DATA_CONNECTION_DONE, cp);
-            AsyncResult.forMessage(msg, response, null);
-            sendMessage(msg);
-            if (DBG) {
-                log("onConnect: FailBringUpAll=" + mDcTesterFailBringUpAll.getDcFailBringUp()
-                        + " send error response=" + response);
-            }
-            mDcTesterFailBringUpAll.getDcFailBringUp().mCounter -= 1;
-            return;
+    String apn;
+    mApnSetting->GetApn(&apn);
+    String carrier;
+    mApnSetting->GetCarrier(&carrier);
+    String proxy;
+    mApnSetting->GetProxy(&proxy);
+    String port;
+    mApnSetting->GetPort(&port);
+    if (DBG) Log("onConnect: carrier='%s' APN='%s' proxy='%s' port='%s'",
+            carrier.string(), apn.string(),
+            proxy.string(), port.string());
+    // Check if we should fake an error.
+    AutoPtr<DcFailBringUp> dcFailBringUp;
+    ((DcTesterFailBringUpAll*) mDcTesterFailBringUpAll.Get())->GetDcFailBringUp((DcFailBringUp**)&dcFailBringUp);
+    if (dcFailBringUp->mCounter  > 0) {
+        AutoPtr<IDataCallResponse> response;
+        CDataCallResponse::New((IDataCallResponse**)&response);
+        Int32 version;
+        response->GetVersion(&version);
+        ((PhoneBase*) mPhone.Get())->mCi->GetRilVersion(&version);
+        Int32 status;
+        response->GetStatus(&status);
+        dcFailBringUp->mFailCause->GetErrorCode(&(status));
+        response->SetCid(0);
+        response->SetActive(0);
+        response->SetType(String(""));
+        response->SetIfname(String(""));
+        response->SetAddresses(ArrayOf<String>::Alloc(0));
+        response->SetDnses(ArrayOf<String>::Alloc(0));
+        response->SetGateways(ArrayOf<String>::Alloc(0));
+        response->SetSuggestedRetryTime(dcFailBringUp->mSuggestedRetryTime);
+        response->SetPcscf(ArrayOf<String>::Alloc(0));
+        response->SetMtu(IPhoneConstants::UNSET_MTU);
+        AutoPtr<IMessage> msg;
+        ObtainMessage(EVENT_SETUP_DATA_CONNECTION_DONE, TO_IINTERFACE(cp), (IMessage**)&msg);
+        AsyncResult::ForMessage(msg, response, NULL);
+        SendMessage(msg);
+        if (DBG) {
+            Log("onConnect: FailBringUpAll=%s send error response=%s",
+                    TO_CSTR(dcFailBringUp),
+                    TO_CSTR(response));
         }
-        mCreateTime = -1;
-        mLastFailTime = -1;
-        mLastFailCause = DcFailCause.NONE;
-        // The data profile's profile ID must be set when it is created.
-        int dataProfileId;
-        if (mApnSetting.getApnProfileType() == ApnProfileType.PROFILE_TYPE_OMH) {
-            dataProfileId = mApnSetting.getProfileId() + RILConstants.DATA_PROFILE_OEM_BASE;
-            log("OMH profile, dataProfile id = " + dataProfileId);
-        } else {
-            dataProfileId = cp.mProfileId;
-        }
-        // msg.obj will be returned in AsyncResult.userObj;
-        Message msg = obtainMessage(EVENT_SETUP_DATA_CONNECTION_DONE, cp);
-        msg.obj = cp;
-        int authType = mApnSetting.authType;
-        if (authType == -1) {
-            authType = TextUtils.isEmpty(mApnSetting.user) ? RILConstants.SETUP_DATA_AUTH_NONE
-                    : RILConstants.SETUP_DATA_AUTH_PAP_CHAP;
-        }
-        String protocol;
-        if (mPhone.getServiceState().getRoaming()) {
-            protocol = mApnSetting.roamingProtocol;
-        } else {
-            protocol = mApnSetting.protocol;
-        }
-        mPhone.mCi.setupDataCall(
-                getDataTechnology(cp.mRilRat),
-                Integer.toString(dataProfileId),
-                mApnSetting.apn, mApnSetting.user, mApnSetting.password,
-                Integer.toString(authType),
-                protocol, msg);
-
-#endif
+        dcFailBringUp->mCounter -= 1;
+        return NOERROR;
+    }
+    mCreateTime = -1;
+    mLastFailTime = -1;
+    DcFailCause::FromInt32(DcFailCause_NONE, (IDcFailCause**)&mLastFailCause);
+    // The data profile's profile ID must be set when it is created.
+    Int32 dataProfileId;
+    ApnProfileType apnProfiletype;
+    mApnSetting->GetApnProfileType(&apnProfiletype);
+    Int32 profileId;
+    mApnSetting->GetProfileId(&profileId);
+    if (apnProfiletype == PROFILE_TYPE_OMH) {
+        dataProfileId = profileId + IRILConstants::DATA_PROFILE_OEM_BASE;
+        Log("OMH profile, dataProfile id = %d", dataProfileId);
+    } else {
+        dataProfileId = cp->mProfileId;
+    }
+    // msg.obj will be returned in AsyncResult.userObj;
+    AutoPtr<IMessage> msg;
+    ObtainMessage(EVENT_SETUP_DATA_CONNECTION_DONE, TO_IINTERFACE(cp), (IMessage**)&msg);
+    msg->SetObj(TO_IINTERFACE(cp));
+    Int32 authType;
+    mApnSetting->GetAuthType(&authType);
+    String user;
+    mApnSetting->GetUser(&user);
+    if (authType == -1) {
+        authType = TextUtils::IsEmpty(user) ? IRILConstants::SETUP_DATA_AUTH_NONE
+                : IRILConstants::SETUP_DATA_AUTH_PAP_CHAP;
+    }
+    String protocol;
+    AutoPtr<IServiceState> serviceState;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    Boolean roaming;
+    serviceState->GetRoaming(&roaming);
+    if (roaming) {
+        mApnSetting->GetRoamingProtocol(&protocol);
+    } else {
+        mApnSetting->GetProtocol(&protocol);
+    }
+    String dataTechnology;
+    GetDataTechnology(cp->mRilRat, &dataTechnology);
+    String password;
+    mApnSetting->GetPassword(&password);
+    ((PhoneBase*) mPhone.Get())->mCi->SetupDataCall(
+            dataTechnology,
+            StringUtils::ToString(dataProfileId),
+            apn, user, password,
+            StringUtils::ToString(authType),
+            protocol, msg);
+    return NOERROR;
 }
 
 ECode DataConnection::GetDataTechnology(
     /* [in] */ Int32 radioTechnology,
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        int dataTechnology = radioTechnology + 2;
-        if (mPhone.mCi.getRilVersion() < 5) {
-            if (ServiceState.isGsm(radioTechnology)) {
-                dataTechnology = RILConstants.SETUP_DATA_TECH_GSM;
-            } else if (ServiceState.isCdma(radioTechnology)) {
-                dataTechnology = RILConstants.SETUP_DATA_TECH_CDMA;
-            }
-        }
-        return Integer.toString(dataTechnology);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 dataTechnology = radioTechnology + 2;
+    Int32 rilVersion;
+    ((PhoneBase*) mPhone.Get())->mCi->GetRilVersion(&rilVersion);
+    if (rilVersion < 5) {
+        Boolean isGsm;
+        CServiceState::IsGsm(radioTechnology, &isGsm);
+        Boolean isCdma;
+        CServiceState::IsCdma(radioTechnology, &isCdma);
+        if (isGsm) {
+            dataTechnology = IRILConstants::SETUP_DATA_TECH_GSM;
+        } else if (isCdma) {
+            dataTechnology = IRILConstants::SETUP_DATA_TECH_CDMA;
+        }
+    }
+    *result = StringUtils::ToString(dataTechnology);
+    return NOERROR;
 }
 
 ECode DataConnection::TearDownData(
     /* [in] */ IObject* o)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        int discReason = RILConstants.DEACTIVATE_REASON_NONE;
-        if ((o != null) && (o instanceof DisconnectParams)) {
-            DisconnectParams dp = (DisconnectParams)o;
-            if (TextUtils.equals(dp.mReason, Phone.REASON_RADIO_TURNED_OFF)) {
-                discReason = RILConstants.DEACTIVATE_REASON_RADIO_OFF;
-            } else if (TextUtils.equals(dp.mReason, Phone.REASON_PDP_RESET)) {
-                discReason = RILConstants.DEACTIVATE_REASON_PDP_RESET;
-            }
+    Int32 discReason = IRILConstants::DEACTIVATE_REASON_NONE;
+    if ((o != NULL) && ((DisconnectParams*) IObject::Probe(o) != NULL)) {
+        AutoPtr<DisconnectParams> dp = (DisconnectParams*) IObject::Probe(o);
+        if (TextUtils::Equals(dp->mReason, IPhone::REASON_RADIO_TURNED_OFF)) {
+            discReason = IRILConstants::DEACTIVATE_REASON_RADIO_OFF;
+        } else if (TextUtils::Equals(dp->mReason, IPhone::REASON_PDP_RESET)) {
+            discReason = IRILConstants::DEACTIVATE_REASON_PDP_RESET;
         }
-        if (mPhone.mCi.getRadioState().isOn()
-                || (mPhone.getServiceState().getRilDataRadioTechnology()
-                        == ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN )) {
-            if (DBG) log("tearDownData radio is on, call deactivateDataCall");
-            mPhone.mCi.deactivateDataCall(mCid, discReason,
-                    obtainMessage(EVENT_DEACTIVATE_DONE, mTag, 0, o));
-        } else {
-            if (DBG) log("tearDownData radio is off sendMessage EVENT_DEACTIVATE_DONE immediately");
-            AsyncResult ar = new AsyncResult(o, null, null);
-            sendMessage(obtainMessage(EVENT_DEACTIVATE_DONE, mTag, 0, ar));
-        }
-
-#endif
+    }
+    ICommandsInterfaceRadioState commandsInterfaceRadioState;
+    ((PhoneBase*) mPhone.Get())->mCi->GetRadioState(&commandsInterfaceRadioState);
+    Boolean isOn = commandsInterfaceRadioState == Elastos::Droid::Internal::Telephony::RADIO_ON;
+    AutoPtr<IServiceState> serviceState;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
+    Int32 rilDataRadioTechnology;
+    serviceState->GetRilDataRadioTechnology(&rilDataRadioTechnology);
+    assert(0 && "IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN");
+    // if (isOn || (rilDataRadioTechnology
+    //                 == IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN )) {
+    //     if (DBG) Log("tearDownData radio is on, call deactivateDataCall");
+    //     AutoPtr<IMessage> msg;
+    //     ObtainMessage(EVENT_DEACTIVATE_DONE, mTag, 0, o, (IMessage**)&msg);
+    //     ((PhoneBase*) mPhone.Get())->mCi->DeactivateDataCall(mCid, discReason, msg);
+    // } else {
+    //     if (DBG) Log("tearDownData radio is off sendMessage EVENT_DEACTIVATE_DONE immediately");
+    //     AutoPtr<IAsyncResult> ar;
+    //     CAsyncResult::New((IAsyncResult**)&ar);
+    //     AutoPtr<IMessage> msg;
+    //     ObtainMessage(EVENT_DEACTIVATE_DONE, mTag, 0, ar, (IMessage**)&msg);
+    //     SendMessage(msg);
+    // }
+    return NOERROR;
 }
 
 ECode DataConnection::NotifyAllWithEvent(
@@ -1614,49 +1911,45 @@ ECode DataConnection::NotifyAllWithEvent(
     /* [in] */ Int32 event,
     /* [in] */ const String& reason)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mNetworkInfo.setDetailedState(mNetworkInfo.getDetailedState(), reason,
-                mNetworkInfo.getExtraInfo());
-        for (ApnContext apnContext : mApnContexts) {
-            if (apnContext == alreadySent) continue;
-            if (reason != null) apnContext.setReason(reason);
-            Message msg = mDct.obtainMessage(event, apnContext);
-            AsyncResult.forMessage(msg);
-            msg.sendToTarget();
-        }
-
-#endif
+    String extraInfo;
+    mNetworkInfo->GetExtraInfo(&extraInfo);
+    NetworkInfoDetailedState state;
+    mNetworkInfo->GetDetailedState(&state);
+    mNetworkInfo->SetDetailedState(state, reason,
+            extraInfo);
+    AutoPtr<IIterator> it;
+    mApnContexts->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IApnContext> apnContext = IApnContext::Probe(obj);
+        if (apnContext.Get() == alreadySent) continue;
+        if (reason != NULL) apnContext->SetReason(reason);
+        AutoPtr<IMessage> msg;
+        IHandler::Probe(mDct)->ObtainMessage(event, apnContext, (IMessage**)&msg);
+        AsyncResult::ForMessage(msg);
+        msg->SendToTarget();
+    }
+    return NOERROR;
 }
 
 ECode DataConnection::NotifyAllOfConnected(
     /* [in] */ const String& reason)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        notifyAllWithEvent(null, DctConstants.EVENT_DATA_SETUP_COMPLETE, reason);
-
-#endif
+    return NotifyAllWithEvent(NULL, IDctConstants::EVENT_DATA_SETUP_COMPLETE, reason);
 }
 
 ECode DataConnection::NotifyAllOfDisconnectDcRetrying(
     /* [in] */ const String& reason)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        notifyAllWithEvent(null, DctConstants.EVENT_DISCONNECT_DC_RETRYING, reason);
-
-#endif
+    return NotifyAllWithEvent(NULL, IDctConstants::EVENT_DISCONNECT_DC_RETRYING, reason);
 }
 
 ECode DataConnection::NotifyAllDisconnectCompleted(
     /* [in] */ IDcFailCause* cause)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        notifyAllWithEvent(null, DctConstants.EVENT_DISCONNECT_DONE, cause.toString());
-
-#endif
+    return NotifyAllWithEvent(NULL, IDctConstants::EVENT_DISCONNECT_DONE, TO_STR(cause));
 }
 
 ECode DataConnection::NotifyConnectCompleted(
@@ -1664,570 +1957,688 @@ ECode DataConnection::NotifyConnectCompleted(
     /* [in] */ IDcFailCause* cause,
     /* [in] */ Boolean sendAll)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ApnContext alreadySent = null;
-        if (cp != null && cp.mOnCompletedMsg != null) {
-            // Get the completed message but only use it once
-            Message connectionCompletedMsg = cp.mOnCompletedMsg;
-            cp.mOnCompletedMsg = null;
-            if (connectionCompletedMsg.obj instanceof ApnContext) {
-                alreadySent = (ApnContext)connectionCompletedMsg.obj;
-            }
-            long timeStamp = System.currentTimeMillis();
-            connectionCompletedMsg.arg1 = mCid;
-            if (cause == DcFailCause.NONE) {
-                mCreateTime = timeStamp;
-                AsyncResult.forMessage(connectionCompletedMsg);
-            } else {
-                mLastFailCause = cause;
-                mLastFailTime = timeStamp;
-                // Return message with a Throwable exception to signify an error.
-                if (cause == null) cause = DcFailCause.UNKNOWN;
-                AsyncResult.forMessage(connectionCompletedMsg, cause,
-                        new Throwable(cause.toString()));
-            }
-            if (DBG) {
-                log("notifyConnectCompleted at " + timeStamp + " cause=" + cause
-                        + " connectionCompletedMsg=" + msgToString(connectionCompletedMsg));
-            }
-            connectionCompletedMsg.sendToTarget();
+    AutoPtr<IApnContext> alreadySent;
+    if (cp != NULL && cp->mOnCompletedMsg != NULL) {
+        // Get the completed message but only use it once
+        AutoPtr<IMessage> connectionCompletedMsg = cp->mOnCompletedMsg;
+        cp->mOnCompletedMsg = NULL;
+        AutoPtr<IInterface> obj;
+        connectionCompletedMsg->GetObj((IInterface**)&obj);
+        if (IApnContext::Probe(obj) != NULL) {
+            alreadySent = IApnContext::Probe(obj);
         }
-        if (sendAll) {
-            notifyAllWithEvent(alreadySent, DctConstants.EVENT_DATA_SETUP_COMPLETE_ERROR,
-                    cause.toString());
+        AutoPtr<ISystem> systemHelper;
+        CSystem::AcquireSingleton((ISystem**)&systemHelper);
+        Int64 timeStamp;
+        systemHelper->GetCurrentTimeMillis(&timeStamp);
+        connectionCompletedMsg->SetArg1(mCid);
+        Int32 errCode;
+        cause->GetErrorCode(&errCode);
+        if (errCode == DcFailCause_NONE) {
+            mCreateTime = timeStamp;
+            AsyncResult::ForMessage(connectionCompletedMsg);
+        } else {
+            mLastFailCause = cause;
+            mLastFailTime = timeStamp;
+            // Return message with a Throwable exception to signify an error.
+            if (cause == NULL) DcFailCause::FromInt32(DcFailCause_UNKNOWN, (IDcFailCause**)&cause);
+            AutoPtr<IThrowable> t;
+            CThrowable::New(TO_STR(cause), (IThrowable**)&t);
+            AsyncResult::ForMessage(connectionCompletedMsg, cause, t);
         }
-
-#endif
+        if (DBG) {
+            String msg;
+            MsgToString(connectionCompletedMsg, &msg);
+            Log("notifyConnectCompleted at %ld cause=%s connectionCompletedMsg=%s",
+                    timeStamp, TO_CSTR(cause), msg.string());
+        }
+        connectionCompletedMsg->SendToTarget();
+    }
+    if (sendAll) {
+        NotifyAllWithEvent(alreadySent, IDctConstants::EVENT_DATA_SETUP_COMPLETE_ERROR,
+                TO_STR(cause));
+    }
+    return NOERROR;
 }
 
 ECode DataConnection::NotifyDisconnectCompleted(
     /* [in] */ DisconnectParams* dp,
     /* [in] */ Boolean sendAll)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (VDBG) log("NotifyDisconnectCompleted");
-        ApnContext alreadySent = null;
-        String reason = null;
-        if (dp != null && dp.mOnCompletedMsg != null) {
-            // Get the completed message but only use it once
-            Message msg = dp.mOnCompletedMsg;
-            dp.mOnCompletedMsg = null;
-            if (msg.obj instanceof ApnContext) {
-                alreadySent = (ApnContext)msg.obj;
-            }
-            reason = dp.mReason;
-            if (VDBG) {
-                log(String.format("msg=%s msg.obj=%s", msg.toString(),
-                    ((msg.obj instanceof String) ? (String) msg.obj : "<no-reason>")));
-            }
-            AsyncResult.forMessage(msg);
-            msg.sendToTarget();
+    if (VDBG) Log("NotifyDisconnectCompleted");
+    AutoPtr<IApnContext> alreadySent;
+    String reason(NULL);
+    if (dp != NULL && dp->mOnCompletedMsg != NULL) {
+        // Get the completed message but only use it once
+        AutoPtr<IMessage> msg = dp->mOnCompletedMsg;
+        dp->mOnCompletedMsg = NULL;
+        AutoPtr<IInterface> msgObj;
+        msg->GetObj((IInterface**)&msgObj);
+        if (IApnContext::Probe(msgObj) != NULL) {
+            alreadySent = IApnContext::Probe(msgObj);
         }
-        if (sendAll) {
-            if (reason == null) {
-                reason = DcFailCause.UNKNOWN.toString();
-            }
-            notifyAllWithEvent(alreadySent, DctConstants.EVENT_DISCONNECT_DONE, reason);
+        reason = dp->mReason;
+        if (VDBG) {
+            Log("msg=%s msg.obj=%s", TO_CSTR(msg),
+                ((ICharSequence::Probe(msgObj) != NULL) ? TO_CSTR(msgObj) : "<no-reason>"));
         }
-        if (DBG) log("NotifyDisconnectCompleted DisconnectParams=" + dp);
-
-#endif
+        AsyncResult::ForMessage(msg);
+        msg->SendToTarget();
+    }
+    if (sendAll) {
+        if (reason == NULL) {
+            reason = "DcFailCause_UNKNOWN";
+        }
+        NotifyAllWithEvent(alreadySent, IDctConstants::EVENT_DISCONNECT_DONE, reason);
+    }
+    if (DBG) Log("NotifyDisconnectCompleted DisconnectParams=%s", TO_CSTR(dp));
+    return NOERROR;
 }
 
 ECode DataConnection::GetDataConnectionId(
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mId;
-
-#endif
+    VALIDATE_NOT_NULL(result)
+    *result = mId;
+    return NOERROR;
 }
 
 ECode DataConnection::ClearSettings()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("clearSettings");
-        mCreateTime = -1;
-        mLastFailTime = -1;
-        mLastFailCause = DcFailCause.NONE;
-        mCid = -1;
-        mPcscfAddr = new String[5];
-        mLinkProperties = new LinkProperties();
-        mApnContexts.clear();
-        mApnSetting = null;
-        mDcFailCause = null;
-
-#endif
+    if (DBG) Log("clearSettings");
+    mCreateTime = -1;
+    mLastFailTime = -1;
+    DcFailCause::FromInt32(DcFailCause_NONE, (IDcFailCause**)&mLastFailCause);
+    mCid = -1;
+    mPcscfAddr = ArrayOf<String>::Alloc(5);
+    CLinkProperties::New((ILinkProperties**)&mLinkProperties);
+    mApnContexts->Clear();
+    mApnSetting = NULL;
+    mDcFailCause = NULL;
+    return NOERROR;
 }
 
 ECode DataConnection::OnSetupConnectionCompleted(
     /* [in] */ IAsyncResult* ar,
-    /* [out] */ DataCallResponseSetupResult* result)
+    /* [out] */ IDataCallResponseSetupResult** _result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        DataCallResponse response = (DataCallResponse) ar.result;
-        ConnectionParams cp = (ConnectionParams) ar.userObj;
-        DataCallResponse.SetupResult result;
-        if (cp.mTag != mTag) {
-            if (DBG) {
-                log("onSetupConnectionCompleted stale cp.tag=" + cp.mTag + ", mtag=" + mTag);
-            }
-            result = DataCallResponse.SetupResult.ERR_Stale;
-        } else if (ar.exception != null) {
-            if (DBG) {
-                log("onSetupConnectionCompleted failed, ar.exception=" + ar.exception +
-                    " response=" + response);
-            }
-            if (ar.exception instanceof CommandException
-                    && ((CommandException) (ar.exception)).getCommandError()
-                    == CommandException.Error.RADIO_NOT_AVAILABLE) {
-                result = DataCallResponse.SetupResult.ERR_BadCommand;
-                result.mFailCause = DcFailCause.RADIO_NOT_AVAILABLE;
-            } else if ((response == null) || (response.version < 4)) {
-                result = DataCallResponse.SetupResult.ERR_GetLastErrorFromRil;
-            } else {
-                result = DataCallResponse.SetupResult.ERR_RilError;
-                result.mFailCause = DcFailCause.fromInt(response.status);
-            }
-        } else if (response.status != 0) {
-            result = DataCallResponse.SetupResult.ERR_RilError;
-            result.mFailCause = DcFailCause.fromInt(response.status);
-        } else {
-            if (DBG) log("onSetupConnectionCompleted received DataCallResponse: " + response);
-            mCid = response.cid;
-            mPcscfAddr = response.pcscf;
-            result = updateLinkProperty(response).setupResult;
-        }
-        return result;
+    VALIDATE_NOT_NULL(_result)
 
-#endif
+    AutoPtr<IDataCallResponse> response = IDataCallResponse::Probe(((AsyncResult*) ar)->mResult);
+    AutoPtr<ConnectionParams> cp = (ConnectionParams*) IObject::Probe(((AsyncResult*) ar)->mUserObj);
+    AutoPtr<DataCallResponse::SetupResult> result;
+    Int32 status;
+    response->GetStatus(&status);
+    if (cp->mTag != mTag) {
+        if (DBG) {
+            Log("onSetupConnectionCompleted stale cp.tag=%d, mtag=%d", cp->mTag, mTag);
+        }
+        result = new DataCallResponse::SetupResult();
+        result->mEnumValue = DataCallResponse_ERR_Stale;
+    } else if (((AsyncResult*) ar)->mException != NULL) {
+        if (DBG) {
+            Log("onSetupConnectionCompleted failed, ar.exception=%s response=%s",
+                    TO_CSTR(((AsyncResult*) ar)->mException), TO_CSTR(response));
+        }
+        assert(0 && "CommandException");
+        // if (ICommandException::Probe(((AsyncResult*) ar.Get())->mException) != NULL
+        //         && ((CommandException) (((AsyncResult*) ar.Get())->mException))->GetCommandError()
+        //         == CommandException.Error.RADIO_NOT_AVAILABLE) {
+        //     result = DataCallResponse::SetupResult(DataCallResponse_ERR_BadCommand);
+        //     result->mFailCause = DcFailCause::FromInt32((DcFailCause_RADIO_NOT_AVAILABLE);
+        // } else if ((response == NULL) || (response->mVersion < 4)) {
+        //     result = DataCallResponse::SetupResult(DataCallResponse_ERR_GetLastErrorFromRil);
+        // } else {
+        //     result = DataCallResponse::SetupResult(DataCallResponse_ERR_RilError);
+        //     result->mFailCause = DcFailCause::FromInt32(response->mStatus);
+        // }
+    } else if (status != 0) {
+        ((DataCallResponse::SetupResult*) result.Get())->mEnumValue = DataCallResponse_ERR_RilError;
+        DcFailCause::FromInt32(status, (IDcFailCause**)&(((DataCallResponse::SetupResult*) result.Get())->mFailCause));
+    } else {
+        if (DBG) Log("onSetupConnectionCompleted received DataCallResponse: %s", TO_CSTR(response));
+        response->GetCid(&mCid);
+        response->GetPcscf((ArrayOf<Elastos::String>**)&mPcscfAddr);
+        AutoPtr<UpdateLinkPropertyResult> updateLinkPropertyResult;
+        UpdateLinkProperty(response, (UpdateLinkPropertyResult**)&updateLinkPropertyResult);
+        result = (DataCallResponse::SetupResult*) updateLinkPropertyResult->mSetupResult.Get();
+    }
+    *_result = result;
+    REFCOUNT_ADD(*_result)
+    return NOERROR;
 }
 
 ECode DataConnection::IsDnsOk(
     /* [in] */ ArrayOf<String>* domainNameServers,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (NULL_IP.equals(domainNameServers[0]) && NULL_IP.equals(domainNameServers[1])
-                && !mPhone.isDnsCheckDisabled()) {
-            // Work around a race condition where QMI does not fill in DNS:
-            // Deactivate PDP and let DataConnectionTracker retry.
-            // Do not apply the race condition workaround for MMS APN
-            // if Proxy is an IP-address.
-            // Otherwise, the default APN will not be restored anymore.
-            if (!mApnSetting.types[0].equals(PhoneConstants.APN_TYPE_MMS)
-                || !isIpAddress(mApnSetting.mmsProxy)) {
-                log(String.format(
-                        "isDnsOk: return false apn.types[0]=%s APN_TYPE_MMS=%s isIpAddress(%s)=%s",
-                        mApnSetting.types[0], PhoneConstants.APN_TYPE_MMS, mApnSetting.mmsProxy,
-                        isIpAddress(mApnSetting.mmsProxy)));
-                return false;
-            }
-        }
-        return true;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Boolean isDnsCheckDisabled;
+    IPhone::Probe(mPhone)->IsDnsCheckDisabled(&isDnsCheckDisabled);
+    if (NULL_IP.Equals((*domainNameServers)[0]) && NULL_IP.Equals((*domainNameServers)[1]) && !isDnsCheckDisabled) {
+        // Work around a race condition where QMI does not fill in DNS:
+        // Deactivate PDP and let DataConnectionTracker retry.
+        // Do not apply the race condition workaround for MMS APN
+        // if Proxy is an IP-address.
+        // Otherwise, the default APN will not be restored anymore.
+        String mmsProxy;
+        mApnSetting->GetMmsProxy(&mmsProxy);
+        Boolean isIpAddress;
+        IsIpAddress(mmsProxy, &isIpAddress);
+        AutoPtr<ArrayOf<String> > types;
+        mApnSetting->GetTypes((ArrayOf<String>**)&types);
+        if (!(*types)[0].Equals(IPhoneConstants::APN_TYPE_MMS)
+            || !isIpAddress) {
+            Log("isDnsOk: return false apn.types[0]=%s APN_TYPE_MMS=%s isIpAddress(%s)=%d",
+                    (*types)[0].string(), IPhoneConstants::APN_TYPE_MMS.string(), mmsProxy.string(),
+                    isIpAddress);
+            *result = FALSE;
+            return NOERROR;
+        }
+    }
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode DataConnection::UpdateTcpBufferSizes(
     /* [in] */ Int32 rilRat)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        String sizes = null;
-        String ratName = ServiceState.rilRadioTechnologyToString(rilRat).toLowerCase(Locale.ROOT);
-        // ServiceState gives slightly different names for EVDO tech ("evdo-rev.0" for ex)
-        // - patch it up:
-        if (rilRat == ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0 ||
-                rilRat == ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A ||
-                rilRat == ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B) {
-            ratName = "evdo";
+    String sizes(NULL);
+    String s;
+    CServiceState::RilRadioTechnologyToString(rilRat, &s);
+    String ratName = s.ToLowerCase();
+    // ServiceState gives slightly different names for EVDO tech ("evdo-rev.0" for ex)
+    // - patch it up:
+    if (rilRat == IServiceState::RIL_RADIO_TECHNOLOGY_EVDO_0 ||
+            rilRat == IServiceState::RIL_RADIO_TECHNOLOGY_EVDO_A ||
+            rilRat == IServiceState::RIL_RADIO_TECHNOLOGY_EVDO_B) {
+        ratName = "evdo";
+    }
+    // in the form: "ratname:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max"
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
+    AutoPtr<ArrayOf<String> > configOverride;
+    res->GetStringArray(
+            R::array::config_mobile_tcp_buffers, (ArrayOf<String>**)&configOverride);
+    for (Int32 i = 0; i < configOverride->GetLength(); i++) {
+        AutoPtr<ArrayOf<String> > split;
+        StringUtils::Split((*configOverride)[i], ":", (ArrayOf<String>**)&split);
+        if (ratName.Equals((*split)[0]) && split->GetLength() == 2) {
+            sizes = (*split)[1];
+            break;
         }
-        // in the form: "ratname:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max"
-        String[] configOverride = mPhone.getContext().getResources().getStringArray(
-                com.android.internal.R.array.config_mobile_tcp_buffers);
-        for (int i = 0; i < configOverride.length; i++) {
-            String[] split = configOverride[i].split(":");
-            if (ratName.equals(split[0]) && split.length == 2) {
-                sizes = split[1];
+    }
+    if (sizes == NULL) {
+        // no override - use telephony defaults
+        // doing it this way allows device or carrier to just override the types they
+        // care about and inherit the defaults for the others.
+        switch (rilRat) {
+            case IServiceState::RIL_RADIO_TECHNOLOGY_GPRS:
+                sizes = TCP_BUFFER_SIZES_GPRS;
                 break;
-            }
+            case IServiceState::RIL_RADIO_TECHNOLOGY_EDGE:
+                sizes = TCP_BUFFER_SIZES_EDGE;
+                break;
+            case IServiceState::RIL_RADIO_TECHNOLOGY_UMTS:
+                sizes = TCP_BUFFER_SIZES_UMTS;
+                break;
+            case IServiceState::RIL_RADIO_TECHNOLOGY_1xRTT:
+                sizes = TCP_BUFFER_SIZES_1XRTT;
+                break;
+            case IServiceState::RIL_RADIO_TECHNOLOGY_EVDO_0:
+            case IServiceState::RIL_RADIO_TECHNOLOGY_EVDO_A:
+            case IServiceState::RIL_RADIO_TECHNOLOGY_EVDO_B:
+                sizes = TCP_BUFFER_SIZES_EVDO;
+                break;
+            case IServiceState::RIL_RADIO_TECHNOLOGY_EHRPD:
+                sizes = TCP_BUFFER_SIZES_EHRPD;
+                break;
+            case IServiceState::RIL_RADIO_TECHNOLOGY_HSDPA:
+                sizes = TCP_BUFFER_SIZES_HSDPA;
+                break;
+            case IServiceState::RIL_RADIO_TECHNOLOGY_HSPA:
+            case IServiceState::RIL_RADIO_TECHNOLOGY_HSUPA:
+                sizes = TCP_BUFFER_SIZES_HSPA;
+                break;
+            case IServiceState::RIL_RADIO_TECHNOLOGY_LTE:
+                sizes = TCP_BUFFER_SIZES_LTE;
+                break;
+            case IServiceState::RIL_RADIO_TECHNOLOGY_HSPAP:
+                sizes = TCP_BUFFER_SIZES_HSPAP;
+                break;
+            default:
+                // Leave empty - this will let ConnectivityService use the system default.
+                break;
         }
-        if (sizes == null) {
-            // no override - use telephony defaults
-            // doing it this way allows device or carrier to just override the types they
-            // care about and inherit the defaults for the others.
-            switch (rilRat) {
-                case ServiceState.RIL_RADIO_TECHNOLOGY_GPRS:
-                    sizes = TCP_BUFFER_SIZES_GPRS;
-                    break;
-                case ServiceState.RIL_RADIO_TECHNOLOGY_EDGE:
-                    sizes = TCP_BUFFER_SIZES_EDGE;
-                    break;
-                case ServiceState.RIL_RADIO_TECHNOLOGY_UMTS:
-                    sizes = TCP_BUFFER_SIZES_UMTS;
-                    break;
-                case ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT:
-                    sizes = TCP_BUFFER_SIZES_1XRTT;
-                    break;
-                case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0:
-                case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A:
-                case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B:
-                    sizes = TCP_BUFFER_SIZES_EVDO;
-                    break;
-                case ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD:
-                    sizes = TCP_BUFFER_SIZES_EHRPD;
-                    break;
-                case ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA:
-                    sizes = TCP_BUFFER_SIZES_HSDPA;
-                    break;
-                case ServiceState.RIL_RADIO_TECHNOLOGY_HSPA:
-                case ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA:
-                    sizes = TCP_BUFFER_SIZES_HSPA;
-                    break;
-                case ServiceState.RIL_RADIO_TECHNOLOGY_LTE:
-                    sizes = TCP_BUFFER_SIZES_LTE;
-                    break;
-                case ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP:
-                    sizes = TCP_BUFFER_SIZES_HSPAP;
-                    break;
-                default:
-                    // Leave empty - this will let ConnectivityService use the system default.
-                    break;
-            }
-        }
-        mLinkProperties.setTcpBufferSizes(sizes);
-
-#endif
+    }
+    mLinkProperties->SetTcpBufferSizes(sizes);
+    return NOERROR;
 }
 
 ECode DataConnection::MakeNetworkCapabilities(
-    /* [out] */ INetworkCapabilities** result)
+    /* [out] */ INetworkCapabilities** _result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        NetworkCapabilities result = new NetworkCapabilities();
-        result.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-        if (mApnSetting != null) {
-            for (String type : mApnSetting.types) {
-                switch (type) {
-                    case PhoneConstants.APN_TYPE_ALL: {
-                        result.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-                        result.addCapability(NetworkCapabilities.NET_CAPABILITY_MMS);
-                        result.addCapability(NetworkCapabilities.NET_CAPABILITY_SUPL);
-                        result.addCapability(NetworkCapabilities.NET_CAPABILITY_FOTA);
-                        result.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS);
-                        result.addCapability(NetworkCapabilities.NET_CAPABILITY_CBS);
-                        result.addCapability(NetworkCapabilities.NET_CAPABILITY_IA);
-                        break;
-                    }
-                    case PhoneConstants.APN_TYPE_DEFAULT: {
-                        result.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-                        break;
-                    }
-                    case PhoneConstants.APN_TYPE_MMS: {
-                        result.addCapability(NetworkCapabilities.NET_CAPABILITY_MMS);
-                        break;
-                    }
-                    case PhoneConstants.APN_TYPE_SUPL: {
-                        result.addCapability(NetworkCapabilities.NET_CAPABILITY_SUPL);
-                        break;
-                    }
-                    case PhoneConstants.APN_TYPE_DUN: {
-                        ApnSetting securedDunApn = mDct.fetchDunApn();
-                        if (securedDunApn == null || securedDunApn.equals(mApnSetting)) {
-                            result.addCapability(NetworkCapabilities.NET_CAPABILITY_DUN);
-                        }
-                        break;
-                    }
-                    case PhoneConstants.APN_TYPE_FOTA: {
-                        result.addCapability(NetworkCapabilities.NET_CAPABILITY_FOTA);
-                        break;
-                    }
-                    case PhoneConstants.APN_TYPE_IMS: {
-                        result.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS);
-                        break;
-                    }
-                    case PhoneConstants.APN_TYPE_CBS: {
-                        result.addCapability(NetworkCapabilities.NET_CAPABILITY_CBS);
-                        break;
-                    }
-                    case PhoneConstants.APN_TYPE_IA: {
-                        result.addCapability(NetworkCapabilities.NET_CAPABILITY_IA);
-                        break;
-                    }
-                    default:
-                }
-                if (mPhone.getSubId() != SubscriptionManager.getDefaultDataSubId()) {
-                    log("DataConnection on non-dds does not have INTERNET capability.");
-                    result.removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+    VALIDATE_NOT_NULL(_result)
+
+    AutoPtr<INetworkCapabilities> result;
+    CNetworkCapabilities::New((INetworkCapabilities**)&result);
+    result->AddTransportType(INetworkCapabilities::TRANSPORT_CELLULAR);
+    if (mApnSetting != NULL) {
+        AutoPtr<ArrayOf<String> > types;
+        mApnSetting->GetTypes((ArrayOf<String>**)&types);
+        for (Int32 i = 0; i < types->GetLength(); ++i) {
+            String type = (*types)[i];
+            if (type == IPhoneConstants::APN_TYPE_ALL) {
+                result->AddCapability(INetworkCapabilities::NET_CAPABILITY_INTERNET);
+                result->AddCapability(INetworkCapabilities::NET_CAPABILITY_MMS);
+                result->AddCapability(INetworkCapabilities::NET_CAPABILITY_SUPL);
+                result->AddCapability(INetworkCapabilities::NET_CAPABILITY_FOTA);
+                result->AddCapability(INetworkCapabilities::NET_CAPABILITY_IMS);
+                result->AddCapability(INetworkCapabilities::NET_CAPABILITY_CBS);
+                result->AddCapability(INetworkCapabilities::NET_CAPABILITY_IA);
+            }
+            else if (type == IPhoneConstants::APN_TYPE_DEFAULT) {
+                result->AddCapability(INetworkCapabilities::NET_CAPABILITY_INTERNET);
+            }
+            else if (type == IPhoneConstants::APN_TYPE_MMS) {
+                result->AddCapability(INetworkCapabilities::NET_CAPABILITY_MMS);
+            }
+            else if (type == IPhoneConstants::APN_TYPE_SUPL) {
+                result->AddCapability(INetworkCapabilities::NET_CAPABILITY_SUPL);
+            }
+            else if (type == IPhoneConstants::APN_TYPE_DUN) {
+                AutoPtr<IApnSetting> securedDunApn;
+                mDct->FetchDunApn((IApnSetting**)&securedDunApn);
+                Boolean isEquals;
+                IObject::Probe(securedDunApn)->Equals(mApnSetting, &isEquals);
+                if (securedDunApn == NULL || isEquals) {
+                    result->AddCapability(INetworkCapabilities::NET_CAPABILITY_DUN);
                 }
             }
-            ConnectivityManager.maybeMarkCapabilitiesRestricted(result);
+            else if (type == IPhoneConstants::APN_TYPE_FOTA) {
+                result->AddCapability(INetworkCapabilities::NET_CAPABILITY_FOTA);
+            }
+            else if (type == IPhoneConstants::APN_TYPE_IMS) {
+                result->AddCapability(INetworkCapabilities::NET_CAPABILITY_IMS);
+            }
+            else if (type == IPhoneConstants::APN_TYPE_CBS) {
+                result->AddCapability(INetworkCapabilities::NET_CAPABILITY_CBS);
+            }
+            else if (type == IPhoneConstants::APN_TYPE_IA) {
+                result->AddCapability(INetworkCapabilities::NET_CAPABILITY_IA);
+            }
+            Int64 subId;
+            mPhone->GetSubId(&subId);
+            Int64 defaultDataSubId;
+            SubscriptionManager::GetDefaultDataSubId(&defaultDataSubId);
+            if (subId != defaultDataSubId) {
+                Log("DataConnection on non-dds does not have INTERNET capability.");
+                result->RemoveCapability(INetworkCapabilities::NET_CAPABILITY_INTERNET);
+            }
         }
-        int up = 14;
-        int down = 14;
-        switch (mRilRat) {
-            case ServiceState.RIL_RADIO_TECHNOLOGY_GPRS: up = 80; down = 80; break;
-            case ServiceState.RIL_RADIO_TECHNOLOGY_EDGE: up = 59; down = 236; break;
-            case ServiceState.RIL_RADIO_TECHNOLOGY_UMTS: up = 384; down = 384; break;
-            case ServiceState.RIL_RADIO_TECHNOLOGY_IS95A: // fall through
-            case ServiceState.RIL_RADIO_TECHNOLOGY_IS95B: up = 14; down = 14; break;
-            case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0: up = 153; down = 2457; break;
-            case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A: up = 1843; down = 3174; break;
-            case ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT: up = 100; down = 100; break;
-            case ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA: up = 2048; down = 14336; break;
-            case ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA: up = 5898; down = 14336; break;
-            case ServiceState.RIL_RADIO_TECHNOLOGY_HSPA: up = 5898; down = 14336; break;
-            case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B: up = 1843; down = 5017; break;
-            case ServiceState.RIL_RADIO_TECHNOLOGY_LTE: up = 51200; down = 102400; break;
-            case ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD: up = 153; down = 2516; break;
-            case ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP: up = 11264; down = 43008; break;
-            default:
-        }
-        result.setLinkUpstreamBandwidthKbps(up);
-        result.setLinkDownstreamBandwidthKbps(down);
-        result.setNetworkSpecifier("" + mPhone.getSubId());
-        return result;
-
-#endif
+        CConnectivityManager::MaybeMarkCapabilitiesRestricted(result);
+    }
+    Int32 up = 14;
+    Int32 down = 14;
+    switch (mRilRat) {
+        case IServiceState::RIL_RADIO_TECHNOLOGY_GPRS:
+            up = 80;
+            down = 80;
+            break;
+        case IServiceState::RIL_RADIO_TECHNOLOGY_EDGE:
+            up = 59;
+            down = 236;
+            break;
+        case IServiceState::RIL_RADIO_TECHNOLOGY_UMTS:
+            up = 384;
+            down = 384;
+            break;
+        case IServiceState::RIL_RADIO_TECHNOLOGY_IS95A: // fall through
+        case IServiceState::RIL_RADIO_TECHNOLOGY_IS95B:
+            up = 14;
+            down = 14;
+            break;
+        case IServiceState::RIL_RADIO_TECHNOLOGY_EVDO_0:
+            up = 153;
+            down = 2457;
+            break;
+        case IServiceState::RIL_RADIO_TECHNOLOGY_EVDO_A:
+            up = 1843;
+            down = 3174;
+            break;
+        case IServiceState::RIL_RADIO_TECHNOLOGY_1xRTT:
+            up = 100;
+            down = 100;
+            break;
+        case IServiceState::RIL_RADIO_TECHNOLOGY_HSDPA:
+            up = 2048;
+            down = 14336;
+            break;
+        case IServiceState::RIL_RADIO_TECHNOLOGY_HSUPA:
+            up = 5898;
+            down = 14336;
+            break;
+        case IServiceState::RIL_RADIO_TECHNOLOGY_HSPA:
+            up = 5898;
+            down = 14336;
+            break;
+        case IServiceState::RIL_RADIO_TECHNOLOGY_EVDO_B:
+            up = 1843;
+            down = 5017;
+            break;
+        case IServiceState::RIL_RADIO_TECHNOLOGY_LTE:
+            up = 51200;
+            down = 102400;
+            break;
+        case IServiceState::RIL_RADIO_TECHNOLOGY_EHRPD:
+            up = 153;
+            down = 2516;
+            break;
+        case IServiceState::RIL_RADIO_TECHNOLOGY_HSPAP:
+            up = 11264;
+            down = 43008;
+            break;
+        default:
+            break;
+    }
+    result->SetLinkUpstreamBandwidthKbps(up);
+    result->SetLinkDownstreamBandwidthKbps(down);
+    Int64 subId;
+    mPhone->GetSubId(&subId);
+    result->SetNetworkSpecifier(String("") + subId);
+    *_result = result;
+    REFCOUNT_ADD(*_result)
+    return NOERROR;
 }
 
 ECode DataConnection::IsIpAddress(
     /* [in] */ const String& address,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (address == null) return false;
-        return Patterns.IP_ADDRESS.matcher(address).matches();
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (address == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    AutoPtr<IMatcher> matcher;
+    Patterns::IP_ADDRESS->Matcher(address, (IMatcher**)&matcher);
+    return matcher->Matches(result);
 }
 
 ECode DataConnection::SetLinkProperties(
     /* [in] */ IDataCallResponse* response,
     /* [in] */ ILinkProperties* lp,
-    /* [out] */ DataCallResponseSetupResult* result)
+    /* [out] */ IDataCallResponseSetupResult** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // Check if system property dns usable
-        boolean okToUseSystemPropertyDns = false;
-        String propertyPrefix = "net." + response.ifname + ".";
-        String dnsServers[] = new String[2];
-        dnsServers[0] = SystemProperties.get(propertyPrefix + "dns1");
-        dnsServers[1] = SystemProperties.get(propertyPrefix + "dns2");
-        okToUseSystemPropertyDns = isDnsOk(dnsServers);
-        // set link properties based on data call response
-        return response.setLinkProperties(lp, okToUseSystemPropertyDns);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    // Check if system property dns usable
+    Boolean okToUseSystemPropertyDns = FALSE;
+    String ifname;
+    response->GetIfname(&ifname);
+    String propertyPrefix = String("net.") + ifname + ".";
+    AutoPtr<ArrayOf<String> > dnsServers = ArrayOf<String>::Alloc(2);
+    SystemProperties::Get(propertyPrefix + "dns1", &(*dnsServers)[0]);
+    SystemProperties::Get(propertyPrefix + "dns2", &(*dnsServers)[1]);
+    IsDnsOk(dnsServers, &okToUseSystemPropertyDns);
+    // set link properties based on data call response
+    return response->SetLinkProperties(lp, okToUseSystemPropertyDns, result);
 }
 
 ECode DataConnection::InitConnection(
     /* [in] */ ConnectionParams* cp,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ApnContext apnContext = cp.mApnContext;
-        if (mApnSetting == null) {
-            // Only change apn setting if it isn't set, it will
-            // only NOT be set only if we're in DcInactiveState.
-            mApnSetting = apnContext.getApnSetting();
-        } else if (mApnSetting.canHandleType(apnContext.getApnType())) {
-            // All is good.
-        } else {
-            if (DBG) {
-                log("initConnection: incompatible apnSetting in ConnectionParams cp=" + cp
-                        + " dc=" + DataConnection.this);
-            }
-            return false;
-        }
-        mTag += 1;
-        mConnectionParams = cp;
-        mConnectionParams.mTag = mTag;
-        if (!mApnContexts.contains(apnContext)) {
-            mApnContexts.add(apnContext);
-        }
-        configureRetry(mApnSetting.canHandleType(PhoneConstants.APN_TYPE_DEFAULT));
-        mRetryManager.setRetryCount(0);
-        mRetryManager.setCurMaxRetryCount(mConnectionParams.mInitialMaxRetry);
-        mRetryManager.setRetryForever(false);
-        if (DBG) {
-            log("initConnection: "
-                    + " RefCount=" + mApnContexts.size()
-                    + " mApnList=" + mApnContexts
-                    + " mConnectionParams=" + mConnectionParams);
-        }
-        return true;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IApnContext> apnContext = cp->mApnContext;
+    String apnType;
+    apnContext->GetApnType(&apnType);
+    Boolean canHandleType;
+    mApnSetting->CanHandleType(apnType, &canHandleType);
+    if (mApnSetting == NULL) {
+        // Only change apn setting if it isn't set, it will
+        // only NOT be set only if we're in DcInactiveState.
+        apnContext->GetApnSetting((IApnSetting**)&mApnSetting);
+    } else if (canHandleType) {
+        // All is good.
+    } else {
+        if (DBG) {
+            Log("initConnection: incompatible apnSetting in ConnectionParams cp=%s" " dc=%s", TO_CSTR(cp),
+                    TO_CSTR(TO_IINTERFACE(this)));
+        }
+        *result = FALSE;
+        return NOERROR;
+    }
+    mTag += 1;
+    mConnectionParams = cp;
+    mConnectionParams->mTag = mTag;
+    Boolean isCantains;
+    mApnContexts->Contains(apnContext, &isCantains);
+    if (!isCantains) {
+        mApnContexts->Add(apnContext);
+    }
+    mApnSetting->CanHandleType(IPhoneConstants::APN_TYPE_DEFAULT, &canHandleType);
+    ConfigureRetry(canHandleType);
+    mRetryManager->SetRetryCount(0);
+    mRetryManager->SetCurMaxRetryCount(mConnectionParams->mInitialMaxRetry);
+    mRetryManager->SetRetryForever(FALSE);
+    if (DBG) {
+        Int32 size;
+        mApnContexts->GetSize(&size);
+        Log("initConnection:  RefCount=%d" " mApnList=%s" " mConnectionParams=%s",
+                size, TO_CSTR(mApnContexts), TO_CSTR(mConnectionParams));
+    }
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode DataConnection::TearDownNow()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("tearDownNow()");
-        sendMessage(obtainMessage(EVENT_TEAR_DOWN_NOW));
-
-#endif
+    if (DBG) Log("tearDownNow()");
+    AutoPtr<IMessage> msg;
+    ObtainMessage(EVENT_TEAR_DOWN_NOW, (IMessage**)&msg);
+    SendMessage(msg);
+    return NOERROR;
 }
 
 ECode DataConnection::GetWhatToString(
     /* [in] */ Int32 what,
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return cmdToString(what);
-
-#endif
+    return CmdToString(what, result);
 }
 
 ECode DataConnection::MsgToString(
     /* [in] */ IMessage* msg,
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        String retVal;
-        if (msg == null) {
-            retVal = "null";
-        } else {
-            StringBuilder   b = new StringBuilder();
-            b.append("{what=");
-            b.append(cmdToString(msg.what));
-            b.append(" when=");
-            TimeUtils.formatDuration(msg.getWhen() - SystemClock.uptimeMillis(), b);
-            if (msg.arg1 != 0) {
-                b.append(" arg1=");
-                b.append(msg.arg1);
-            }
-            if (msg.arg2 != 0) {
-                b.append(" arg2=");
-                b.append(msg.arg2);
-            }
-            if (msg.obj != null) {
-                b.append(" obj=");
-                b.append(msg.obj);
-            }
-            b.append(" target=");
-            b.append(msg.getTarget());
-            b.append(" replyTo=");
-            b.append(msg.replyTo);
-            b.append("}");
-            retVal = b.toString();
-        }
-        return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    String retVal;
+    if (msg == NULL) {
+        retVal = "null";
+    } else {
+        StringBuilder b;
+        b.Append("{what=");
+        Int32 msgWhat;
+        msg->GetWhat(&msgWhat);
+        String cmd;
+        CmdToString(msgWhat, &cmd);
+        b.Append(cmd);
+        b.Append(" when=");
+        Int64 msgWhen;
+        msg->GetWhen(&msgWhen);
+        TimeUtils::FormatDuration(msgWhen - SystemClock::GetUptimeMillis(), b);
+        Int32 msgArg1;
+        msg->GetArg1(&msgArg1);
+        if (msgArg1 != 0) {
+            b.Append(" arg1=");
+            b.Append(msgArg1);
+        }
+        Int32 msgArg2;
+        msg->GetArg2(&msgArg2);
+        if (msgArg2 != 0) {
+            b.Append(" arg2=");
+            b.Append(msgArg2);
+        }
+        AutoPtr<IInterface> msgObj;
+        msg->GetObj((IInterface**)&msgObj);
+        if (msgObj != NULL) {
+            b.Append(" obj=");
+            b.Append(msgObj);
+        }
+        b.Append(" target=");
+        AutoPtr<IHandler> msgTarget;
+        msg->GetTarget((IHandler**)&msgTarget);
+        b.Append(msgTarget);
+        b.Append(" replyTo=");
+        AutoPtr<IMessenger> messenger;
+        msg->GetReplyTo((IMessenger**)&messenger);
+        b.Append(messenger);
+        b.Append("}");
+        retVal = b.ToString();
+    }
+    *result = retVal;
+    return NOERROR;
 }
 
+#define MSG_BUF_SIZE    1024
 ECode DataConnection::Slog(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Rlog.d("DC", s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    return Logger::D("DC", msgBuf);
 }
 
 ECode DataConnection::Log(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Rlog.d(getName(), s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    String name;
+    GetName(&name);
+    return Logger::D(name, msgBuf);
 }
 
 ECode DataConnection::Logd(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Rlog.d(getName(), s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    String name;
+    GetName(&name);
+    return Logger::D(name, msgBuf);
 }
 
 ECode DataConnection::Logv(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Rlog.v(getName(), s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    String name;
+    GetName(&name);
+    return Logger::V(name, msgBuf);
 }
 
 ECode DataConnection::Logi(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Rlog.i(getName(), s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    String name;
+    GetName(&name);
+    return Logger::I(name, msgBuf);
 }
 
 ECode DataConnection::Logw(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Rlog.w(getName(), s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    String name;
+    GetName(&name);
+    return Logger::W(name, msgBuf);
 }
 
 ECode DataConnection::Loge(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Rlog.e(getName(), s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    String name;
+    GetName(&name);
+    return Logger::E(name, msgBuf);
 }
 
 ECode DataConnection::ToStringSimple(
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return getName() + ": State=" + getCurrentState().getName()
-                + " mApnSetting=" + mApnSetting + " RefCount=" + mApnContexts.size()
-                + " mCid=" + mCid + " mCreateTime=" + mCreateTime
-                + " mLastastFailTime=" + mLastFailTime
-                + " mLastFailCause=" + mLastFailCause
-                + " mTag=" + mTag
-                + " mRetryManager=" + mRetryManager
-                + " mLinkProperties=" + mLinkProperties
-                + " linkCapabilities=" + makeNetworkCapabilities();
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 size;
+    mApnContexts->GetSize(&size);
+    AutoPtr<INetworkCapabilities> networkCapabilities;
+    MakeNetworkCapabilities((INetworkCapabilities**)&networkCapabilities);
+    String name;
+    GetName(&name);
+    String stateName;
+    GetCurrentState()->GetName(&stateName);
+    String rev;
+    rev.AppendFormat("%s: State=%s mApnSetting=%s RefCount=%d mCid=%d"
+            " mCreateTime=%ld mLastastFailTime=%ld mLastFailCause=%s"
+            " mTag=%d mRetryManager=%s mLinkProperties=%s linkCapabilities=",
+            name.string(), stateName.string(), TO_CSTR(mApnSetting), size,
+            mCid, mCreateTime, mLastFailTime, TO_CSTR(mLastFailCause), mTag, TO_CSTR(mRetryManager),
+            TO_CSTR(mLinkProperties), TO_CSTR(networkCapabilities));
+    *result = rev;
+    return NOERROR;
 }
 
 ECode DataConnection::ToString(
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return "{" + toStringSimple() + " mApnContexts=" + mApnContexts + "}";
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    String simple;
+    ToStringSimple(&simple);
+    String rev;
+    rev.AppendFormat("{%s mApnContexts=%s}", simple.string(), TO_CSTR(mApnContexts));
+    *result = rev;
+    return NOERROR;
 }
 
 ECode DataConnection::Dump(
@@ -2235,48 +2646,47 @@ ECode DataConnection::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        pw.print("DataConnection ");
-        super.dump(fd, pw, args);
-        pw.println(" mApnContexts.size=" + mApnContexts.size());
-        pw.println(" mApnContexts=" + mApnContexts);
-        pw.flush();
-        pw.println(" mDataConnectionTracker=" + mDct);
-        pw.println(" mApnSetting=" + mApnSetting);
-        pw.println(" mTag=" + mTag);
-        pw.println(" mCid=" + mCid);
-        pw.println(" mRetryManager=" + mRetryManager);
-        pw.println(" mConnectionParams=" + mConnectionParams);
-        pw.println(" mDisconnectParams=" + mDisconnectParams);
-        pw.println(" mDcFailCause=" + mDcFailCause);
-        pw.flush();
-        pw.println(" mPhone=" + mPhone);
-        pw.flush();
-        pw.println(" mLinkProperties=" + mLinkProperties);
-        pw.flush();
-        pw.println(" mDataRegState=" + mDataRegState);
-        pw.println(" mRilRat=" + mRilRat);
-        pw.println(" mNetworkCapabilities=" + makeNetworkCapabilities());
-        pw.println(" mCreateTime=" + TimeUtils.logTimeOfDay(mCreateTime));
-        pw.println(" mLastFailTime=" + TimeUtils.logTimeOfDay(mLastFailTime));
-        pw.println(" mLastFailCause=" + mLastFailCause);
-        pw.flush();
-        pw.println(" mUserData=" + mUserData);
-        pw.println(" mInstanceNumber=" + mInstanceNumber);
-        pw.println(" mAc=" + mAc);
-        pw.println(" mDcRetryAlarmController=" + mDcRetryAlarmController);
-        pw.flush();
-
-#endif
+    pw->Print(String("DataConnection "));
+    StateMachine::Dump(fd, pw, args);
+    Int32 size;
+    mApnContexts->GetSize(&size);
+    pw->Println(String(" mApnContexts.size=") + StringUtils::ToString(size));
+    pw->Println(String(" mApnContexts=") + TO_STR(mApnContexts));
+    IFlushable::Probe(pw)->Flush();
+    pw->Println(String(" mDataConnectionTracker=") + TO_STR(mDct));
+    pw->Println(String(" mApnSetting=") + TO_STR(mApnSetting));
+    pw->Println(String(" mTag=") + StringUtils::ToString(mTag));
+    pw->Println(String(" mCid=") + StringUtils::ToString(mCid));
+    pw->Println(String(" mRetryManager=") + TO_STR(mRetryManager));
+    pw->Println(String(" mConnectionParams=") + TO_STR(mConnectionParams));
+    pw->Println(String(" mDisconnectParams=") + TO_STR(mDisconnectParams));
+    pw->Println(String(" mDcFailCause=") + TO_STR(mDcFailCause));
+    IFlushable::Probe(pw)->Flush();
+    pw->Println(String(" mPhone=") + TO_STR(mPhone));
+    IFlushable::Probe(pw)->Flush();
+    pw->Println(String(" mLinkProperties=") + TO_STR(mLinkProperties));
+    IFlushable::Probe(pw)->Flush();
+    pw->Println(String(" mDataRegState=") + StringUtils::ToString(mDataRegState));
+    pw->Println(String(" mRilRat=") + StringUtils::ToString(mRilRat));
+    AutoPtr<INetworkCapabilities> networkCapabilities;
+    MakeNetworkCapabilities((INetworkCapabilities**)&networkCapabilities);
+    pw->Println(String(" mNetworkCapabilities=") + TO_STR(networkCapabilities));
+    pw->Println(String(" mCreateTime=") + TimeUtils::LogTimeOfDay(mCreateTime));
+    pw->Println(String(" mLastFailTime=") + TimeUtils::LogTimeOfDay(mLastFailTime));
+    pw->Println(String(" mLastFailCause=") + TO_STR(mLastFailCause));
+    IFlushable::Probe(pw)->Flush();
+    pw->Println(String(" mUserData=") + TO_STR(mUserData));
+    pw->Println(String(" mInstanceNumber=") + TO_STR(mInstanceNumber));
+    pw->Println(String(" mAc=") + TO_STR(mAc));
+    pw->Println(String(" mDcRetryAlarmController=") + TO_STR(mDcRetryAlarmController));
+    IFlushable::Probe(pw)->Flush();
+    return NOERROR;
 }
 
 AutoPtr<IAtomicInteger32> DataConnection::InitInstanceNumber()
 {
     AutoPtr<IAtomicInteger32> rev;
-#if 0 // TODO: Translate codes below
     CAtomicInteger32::New(0, (IAtomicInteger32**)&rev);
-#endif
     return rev;
 }
 

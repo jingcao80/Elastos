@@ -8,8 +8,7 @@ INCLUDES += $(MAKEDIR)/../../../../../../inc/
 
 C_DEFINES += -DDROID_CORE
 
-SOURCES = dataconnection.cpp
-SOURCES += ApnContext.cpp
+SOURCES = ApnContext.cpp
 SOURCES += ApnProfileOmh.cpp
 SOURCES += ApnSetting.cpp
 SOURCES += CApnSettingHelper.cpp
@@ -35,3 +34,4 @@ SOURCES += DcTrackerBase.cpp
 SOURCES += DctController.cpp
 SOURCES += DdsScheduler.cpp
 SOURCES += DdsSchedulerAc.cpp
+SOURCES += dataconnection.cpp

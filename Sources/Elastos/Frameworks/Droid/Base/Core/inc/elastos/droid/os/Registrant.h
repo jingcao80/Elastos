@@ -15,25 +15,28 @@ class RegistrantList;
 /** @hide */
 class Registrant
     : public Object
+    , public IRegistrant
 {
 public:
+    CAR_INTERFACE_DECL()
+
     Registrant(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
-    void Clear();
+    CARAPI Clear();
 
-    void NotifyRegistrant();
+    CARAPI NotifyRegistrant();
 
-    void NotifyResult(
+    CARAPI NotifyResult(
         /* [in] */ IInterface* result);
 
-    void NotifyException(
+    CARAPI NotifyException(
         /* [in] */ IThrowable* exception);
 
-    void NotifyRegistrant(
-        /* [in] */ AsyncResult* ar);
+    CARAPI NotifyRegistrant(
+        /* [in] */ IAsyncResult* ar);
 
     /*package*/
     void InternalNotifyRegistrant(
@@ -43,9 +46,11 @@ public:
     /**
      * NOTE: May return null if weak reference has been collected
      */
-    AutoPtr<IMessage> MessageForRegistrant();
+    CARAPI MessageForRegistrant(
+        /* [out] */ IMessage** result);
 
-    AutoPtr<IHandler> GetHandler();
+    CARAPI GetHandler(
+        /* [out] */ IHandler** result);
 
 private:
     AutoPtr<IWeakReference>     mRefH;

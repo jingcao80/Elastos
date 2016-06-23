@@ -33,12 +33,16 @@ namespace DataConnection {
  */
 class DcController
     : public StateMachine
+    , public IDcController
 {
 private:
     class DccDefaultState
         : public State
     {
     public:
+        DccDefaultState(
+            /* [in] */ DcController* host);
+
         // @Override
         CARAPI Enter();
 
@@ -50,6 +54,8 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
+
     private:
         /**
          * Process the new list of "known" Data Calls
@@ -57,10 +63,17 @@ private:
          */
         CARAPI OnDataStateChanged(
             /* [in] */ IArrayList* dcsList);
+
+    private:
+        DcController* mHost;
     };
 
 
 public:
+    CAR_INTERFACE_DECL()
+
+    DcController();
+
     static CARAPI MakeDcc(
         /* [in] */ IPhoneBase* phone,
         /* [in] */ IDcTrackerBase* dct,
@@ -83,11 +96,11 @@ public:
 
     // @Override
     CARAPI Log(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     // @Override
     CARAPI Loge(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     /**
      * @return the string for msg.what as our info.
@@ -116,7 +129,7 @@ private:
      * @param dct the DataConnectionTracker associated with Dcc
      * @param handler defines the thread/looper to be used with Dcc
      */
-    DcController(
+    CARAPI constructor(
         /* [in] */ const String& name,
         /* [in] */ IPhoneBase* phone,
         /* [in] */ IDcTrackerBase* dct,
@@ -127,7 +140,7 @@ private:
      * @param s
      */
     CARAPI Lr(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
 public:
     // package as its used by Testing code

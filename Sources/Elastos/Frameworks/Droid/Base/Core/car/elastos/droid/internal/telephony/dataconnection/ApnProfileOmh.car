@@ -41,7 +41,6 @@ module {
      */
     [deprecated]
     interface IApnProfileOmh {
-
         SetApnProfileTypeModem(
             [in] IApnProfileTypeModem* modemProfile);
 
@@ -62,15 +61,11 @@ module {
         IsValidPriority(
             [out] Boolean* result);
 
-        GetProfileId(
-            [out] Int32* result);
-
         GetPriority(
             [out] Int32* result);
 
         AddServiceType(
             [in] IApnProfileTypeModem* modemProfile);
-
     }
 
     }//DataConnection

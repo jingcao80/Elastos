@@ -39,7 +39,7 @@ public:
 
 private:
     static CARAPI Log(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
 public:
     static const String INTENT_BASE;

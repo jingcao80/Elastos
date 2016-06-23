@@ -8,6 +8,8 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
+CAR_INTERFACE_IMPL(AsyncResult, Object, IAsyncResult)
+
 /** please note, this sets m.obj to be this */
 AsyncResult::AsyncResult(
     /* [in] */ IInterface* uo,

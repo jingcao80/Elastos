@@ -96,6 +96,8 @@ module
 
         DecRefCount();
 
+        GetPriority(
+            [out] Int32* result);
     }
 
     }//DataConnection

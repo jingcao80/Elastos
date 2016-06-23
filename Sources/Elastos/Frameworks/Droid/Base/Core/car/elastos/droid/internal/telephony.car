@@ -629,8 +629,6 @@ module
         }
 
         class CDataConnection {
-            constructor();
-
             interface IDataConnection;
         }
 

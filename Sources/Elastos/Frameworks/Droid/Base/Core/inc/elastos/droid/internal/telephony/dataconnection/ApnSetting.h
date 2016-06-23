@@ -160,7 +160,7 @@ public:
         /* [out] */ Int32* result);
 
     CARAPI GetTypes(
-        /* [out] */ ArrayOf<String>** result);
+        /* [out, callee] */ ArrayOf<String>** result);
 
     CARAPI SetTypes(
         /* [in] */ ArrayOf<String>* types);

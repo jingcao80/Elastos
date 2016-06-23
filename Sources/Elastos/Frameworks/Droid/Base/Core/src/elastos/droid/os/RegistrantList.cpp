@@ -38,11 +38,11 @@ void RegistrantList::AddUnique(
 }
 
 void RegistrantList::Add(
-    /* [in] */ Registrant* r)
+    /* [in] */ IRegistrant* r)
 {
     AutoLock lock(mLock);
     RemoveCleared();
-    mRegistrants->Add(r->Probe(EIID_IInterface));
+    mRegistrants->Add(r);
 }
 
 void RegistrantList::RemoveCleared()
@@ -130,7 +130,7 @@ void RegistrantList::Remove(
         Registrant* r = (Registrant*)IObject::Probe(obj);
         AutoPtr<IHandler> rh;
 
-        rh = r->GetHandler();
+        r->GetHandler((IHandler**)&rh);
 
         /* Clean up both the requested registrant and
          * any now-collected registrants

@@ -232,7 +232,7 @@ private:
         /* [out] */ Boolean* result);
 
     CARAPI Log(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     static CARAPI_(AutoPtr<ArrayOf<String> >) InitCmdToString();
 

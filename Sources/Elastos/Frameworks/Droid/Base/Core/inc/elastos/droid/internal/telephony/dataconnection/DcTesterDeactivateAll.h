@@ -68,7 +68,7 @@ public:
 
 private:
     static CARAPI Log(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     static const String LOG__TAG;
 
@@ -77,7 +77,6 @@ private:
     AutoPtr<IPhoneBase> mPhone;
 
     AutoPtr<IDcController> mDcc;
-
 };
 
 } // namespace DataConnection

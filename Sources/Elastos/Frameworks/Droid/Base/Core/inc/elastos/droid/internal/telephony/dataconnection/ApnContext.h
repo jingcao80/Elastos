@@ -131,7 +131,7 @@ public:
         /* [out] */ String* result);
 
     CARAPI Log(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     CARAPI Dump(
         /* [in] */ IFileDescriptor* fd,

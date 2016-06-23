@@ -26,6 +26,17 @@ module
 
         UpdateTxRxSum();
 
+        GetTxPkts(
+            [out] Int64* result);
+
+        SetTxPkts(
+            [in] Int64 txPkts);
+
+        GetRxPkts(
+            [out] Int64* result);
+
+        SetRxPkts(
+            [in] Int64 rxPkts);
     }
 
     /**
@@ -79,12 +90,6 @@ module
 
         // abstract methods
         RestartRadio();
-
-        Log(
-            [in] String s);
-
-        Loge(
-            [in] String s);
 
         IsDataAllowed(
             [out] Boolean* result);

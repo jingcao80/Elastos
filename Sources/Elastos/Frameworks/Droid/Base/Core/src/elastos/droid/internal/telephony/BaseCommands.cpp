@@ -334,7 +334,9 @@ ECode BaseCommands::SetOnNewGsmSms(
 ECode BaseCommands::UnSetOnNewGsmSms(
     /* [in] */ IHandler* h)
 {
-    if (mGsmSmsRegistrant != NULL && mGsmSmsRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mGsmSmsRegistrant->GetHandler((IHandler**)&handler);
+    if (mGsmSmsRegistrant != NULL && handler.Get() == h) {
         mGsmSmsRegistrant->Clear();
         mGsmSmsRegistrant = NULL;
     }
@@ -353,7 +355,9 @@ ECode BaseCommands::SetOnNewCdmaSms(
 ECode BaseCommands::UnSetOnNewCdmaSms(
     /* [in] */ IHandler* h)
 {
-    if (mCdmaSmsRegistrant != NULL && mCdmaSmsRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mCdmaSmsRegistrant->GetHandler((IHandler**)&handler);
+    if (mCdmaSmsRegistrant != NULL && handler.Get() == h) {
         mCdmaSmsRegistrant->Clear();
         mCdmaSmsRegistrant = NULL;
     }
@@ -372,7 +376,9 @@ ECode BaseCommands::SetOnNewGsmBroadcastSms(
 ECode BaseCommands::UnSetOnNewGsmBroadcastSms(
     /* [in] */ IHandler* h)
 {
-    if (mGsmBroadcastSmsRegistrant != NULL && mGsmBroadcastSmsRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mGsmBroadcastSmsRegistrant->GetHandler((IHandler**)&handler);
+    if (mGsmBroadcastSmsRegistrant != NULL && handler.Get() == h) {
         mGsmBroadcastSmsRegistrant->Clear();
         mGsmBroadcastSmsRegistrant = NULL;
     }
@@ -391,7 +397,9 @@ ECode BaseCommands::SetOnSmsOnSim(
 ECode BaseCommands::UnSetOnSmsOnSim(
     /* [in] */ IHandler* h)
 {
-    if (mSmsOnSimRegistrant != NULL && mSmsOnSimRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mSmsOnSimRegistrant->GetHandler((IHandler**)&handler);
+    if (mSmsOnSimRegistrant != NULL && handler.Get() == h) {
         mSmsOnSimRegistrant->Clear();
         mSmsOnSimRegistrant = NULL;
     }
@@ -410,7 +418,9 @@ ECode BaseCommands::SetOnSmsStatus(
 ECode BaseCommands::UnSetOnSmsStatus(
     /* [in] */ IHandler* h)
 {
-    if (mSmsStatusRegistrant != NULL && mSmsStatusRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mSmsStatusRegistrant->GetHandler((IHandler**)&handler);
+    if (mSmsStatusRegistrant != NULL && handler.Get() == h) {
         mSmsStatusRegistrant->Clear();
         mSmsStatusRegistrant = NULL;
     }
@@ -429,7 +439,9 @@ ECode BaseCommands::SetOnSignalStrengthUpdate(
 ECode BaseCommands::UnSetOnSignalStrengthUpdate(
     /* [in] */ IHandler* h)
 {
-    if (mSignalStrengthRegistrant != NULL && mSignalStrengthRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mSignalStrengthRegistrant->GetHandler((IHandler**)&handler);
+    if (mSignalStrengthRegistrant != NULL && handler.Get() == h) {
         mSignalStrengthRegistrant->Clear();
         mSignalStrengthRegistrant = NULL;
     }
@@ -448,7 +460,9 @@ ECode BaseCommands::SetOnNITZTime(
 ECode BaseCommands::UnSetOnNITZTime(
     /* [in] */ IHandler* h)
 {
-    if (mNITZTimeRegistrant != NULL && mNITZTimeRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mNITZTimeRegistrant->GetHandler((IHandler**)&handler);
+    if (mNITZTimeRegistrant != NULL && handler.Get() == h) {
         mNITZTimeRegistrant->Clear();
         mNITZTimeRegistrant = NULL;
     }
@@ -467,7 +481,9 @@ ECode BaseCommands::SetOnUSSD(
 ECode BaseCommands::UnSetOnUSSD(
     /* [in] */ IHandler* h)
 {
-    if (mUSSDRegistrant != NULL && mUSSDRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mUSSDRegistrant->GetHandler((IHandler**)&handler);
+    if (mUSSDRegistrant != NULL && handler.Get() == h) {
         mUSSDRegistrant->Clear();
         mUSSDRegistrant = NULL;
     }
@@ -486,7 +502,9 @@ ECode BaseCommands::SetOnSuppServiceNotification(
 ECode BaseCommands::UnSetOnSuppServiceNotification(
     /* [in] */ IHandler* h)
 {
-    if (mSsnRegistrant != NULL && mSsnRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mSsnRegistrant->GetHandler((IHandler**)&handler);
+    if (mSsnRegistrant != NULL && handler.Get() == h) {
         mSsnRegistrant->Clear();
         mSsnRegistrant = NULL;
     }
@@ -505,7 +523,9 @@ ECode BaseCommands::SetOnCatSessionEnd(
 ECode BaseCommands::UnSetOnCatSessionEnd(
     /* [in] */ IHandler* h)
 {
-    if (mCatSessionEndRegistrant != NULL && mCatSessionEndRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mCatSessionEndRegistrant->GetHandler((IHandler**)&handler);
+    if (mCatSessionEndRegistrant != NULL && handler.Get() == h) {
         mCatSessionEndRegistrant->Clear();
         mCatSessionEndRegistrant = NULL;
     }
@@ -524,7 +544,9 @@ ECode BaseCommands::SetOnCatProactiveCmd(
 ECode BaseCommands::UnSetOnCatProactiveCmd(
     /* [in] */ IHandler* h)
 {
-    if (mCatProCmdRegistrant != NULL && mCatProCmdRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mCatProCmdRegistrant->GetHandler((IHandler**)&handler);
+    if (mCatProCmdRegistrant != NULL && handler.Get() == h) {
         mCatProCmdRegistrant->Clear();
         mCatProCmdRegistrant = NULL;
     }
@@ -543,7 +565,9 @@ ECode BaseCommands::SetOnCatEvent(
 ECode BaseCommands::UnSetOnCatEvent(
     /* [in] */ IHandler* h)
 {
-    if (mCatEventRegistrant != NULL && mCatEventRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mCatEventRegistrant->GetHandler((IHandler**)&handler);
+    if (mCatEventRegistrant != NULL && handler.Get() == h) {
         mCatEventRegistrant->Clear();
         mCatEventRegistrant = NULL;
     }
@@ -562,7 +586,9 @@ ECode BaseCommands::SetOnCatCallSetUp(
 ECode BaseCommands::UnSetOnCatCallSetUp(
     /* [in] */ IHandler* h)
 {
-    if (mCatCallSetUpRegistrant != NULL && mCatCallSetUpRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mCatCallSetUpRegistrant->GetHandler((IHandler**)&handler);
+    if (mCatCallSetUpRegistrant != NULL && handler.Get() == h) {
         mCatCallSetUpRegistrant->Clear();
         mCatCallSetUpRegistrant = NULL;
     }
@@ -598,7 +624,9 @@ ECode BaseCommands::SetOnIccSmsFull(
 ECode BaseCommands::UnSetOnIccSmsFull(
     /* [in] */ IHandler* h)
 {
-    if (mIccSmsFullRegistrant != NULL && mIccSmsFullRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mIccSmsFullRegistrant->GetHandler((IHandler**)&handler);
+    if (mIccSmsFullRegistrant != NULL && handler.Get() == h) {
         mIccSmsFullRegistrant->Clear();
         mIccSmsFullRegistrant = NULL;
     }
@@ -659,7 +687,9 @@ ECode BaseCommands::SetOnCallRing(
 ECode BaseCommands::UnSetOnCallRing(
     /* [in] */ IHandler* h)
 {
-    if (mRingRegistrant != NULL && mRingRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mRingRegistrant->GetHandler((IHandler**)&handler);
+    if (mRingRegistrant != NULL && handler.Get() == h) {
         mRingRegistrant->Clear();
         mRingRegistrant = NULL;
     }
@@ -744,7 +774,9 @@ ECode BaseCommands::SetOnRestrictedStateChanged(
 ECode BaseCommands::UnSetOnRestrictedStateChanged(
     /* [in] */ IHandler* h)
 {
-    if (mRestrictedStateRegistrant != NULL && mRestrictedStateRegistrant->GetHandler().Get() != h) {
+    AutoPtr<IHandler> handler;
+    mRestrictedStateRegistrant->GetHandler((IHandler**)&handler);
+    if (mRestrictedStateRegistrant != NULL && handler.Get() != h) {
         mRestrictedStateRegistrant->Clear();
         mRestrictedStateRegistrant = NULL;
     }
@@ -807,7 +839,9 @@ ECode BaseCommands::SetOnUnsolOemHookRaw(
 ECode BaseCommands::UnSetOnUnsolOemHookRaw(
     /* [in] */ IHandler* h)
 {
-    if (mUnsolOemHookRawRegistrant != NULL && mUnsolOemHookRawRegistrant->GetHandler().Get() == h) {
+    AutoPtr<IHandler> handler;
+    mUnsolOemHookRawRegistrant->GetHandler((IHandler**)&handler);
+    if (mUnsolOemHookRawRegistrant != NULL && handler.Get() == h) {
         mUnsolOemHookRawRegistrant->Clear();
         mUnsolOemHookRawRegistrant = NULL;
     }

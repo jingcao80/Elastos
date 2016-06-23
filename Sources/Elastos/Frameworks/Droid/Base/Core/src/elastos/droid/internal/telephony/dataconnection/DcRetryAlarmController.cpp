@@ -1,6 +1,33 @@
 
 #include "elastos/droid/internal/telephony/dataconnection/DcRetryAlarmController.h"
+#include "elastos/droid/app/CPendingIntent.h"
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/content/CIntentFilter.h"
+#include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/text/TextUtils.h"
 #include <Elastos.Droid.App.h>
+#include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::App::CPendingIntent;
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::IRILConstants;
+using Elastos::Droid::Internal::Utility::IStateMachine;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::Math;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -20,34 +47,43 @@ ECode DcRetryAlarmController::SubBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                String action = intent.getAction();
-                if (TextUtils.isEmpty(action)) {
-                    // Our mActionXxxx's could be null when disposed this could match an empty action.
-                    log("onReceive: ignore empty action='" + action + "'");
-                    return;
-                }
-                if (TextUtils.equals(action, mActionRetry)) {
-                    if (!intent.hasExtra(INTENT_RETRY_ALARM_WHAT)) {
-                        throw new RuntimeException(mActionRetry + " has no INTENT_RETRY_ALRAM_WHAT");
-                    }
-                    if (!intent.hasExtra(INTENT_RETRY_ALARM_TAG)) {
-                        throw new RuntimeException(mActionRetry + " has no INTENT_RETRY_ALRAM_TAG");
-                    }
-                    int what = intent.getIntExtra(INTENT_RETRY_ALARM_WHAT, Integer.MAX_VALUE);
-                    int tag = intent.getIntExtra(INTENT_RETRY_ALARM_TAG, Integer.MAX_VALUE);
-                    if (DBG) {
-                        log("onReceive: action=" + action
-                                + " sendMessage(what:" + mDc.getWhatToString(what)
-                                + ", tag:" + tag + ")");
-                    }
-                    mDc.sendMessage(mDc.obtainMessage(what, tag, 0));
-                } else {
-                    if (DBG) log("onReceive: unknown action=" + action);
-                }
-
-#endif
+    String action;
+    intent->GetAction(&action);
+    if (TextUtils::IsEmpty(action)) {
+        // Our mActionXxxx's could be null when disposed this could match an empty action.
+        mHost->Log("onReceive: ignore empty action='%s'", action.string());
+        return NOERROR;
+    }
+    if (TextUtils::Equals(action, mHost->mActionRetry)) {
+        Boolean hasExtra;
+        intent->HasExtra(INTENT_RETRY_ALARM_WHAT, &hasExtra);
+        if (!hasExtra) {
+            Logger::E("DcRetryAlarmController::SubBroadcastReceiver", mHost->mActionRetry + " has no INTENT_RETRY_ALRAM_WHAT");
+            return E_RUNTIME_EXCEPTION;
+        }
+        intent->HasExtra(INTENT_RETRY_ALARM_TAG, &hasExtra);
+        if (!hasExtra) {
+            Logger::E("DcRetryAlarmController::SubBroadcastReceiver", "%s has no INTENT_RETRY_ALRAM_TAG", mHost->mActionRetry.string());
+            return E_RUNTIME_EXCEPTION;
+        }
+        Int32 what;
+        intent->GetInt32Extra(INTENT_RETRY_ALARM_WHAT, Elastos::Core::Math::INT32_MAX_VALUE, &what);
+        Int32 tag;
+        intent->GetInt32Extra(INTENT_RETRY_ALARM_TAG, Elastos::Core::Math::INT32_MAX_VALUE, &tag);
+        if (DBG) {
+            String whatToString;
+            assert(0 && "IStateMachine");
+            // IStateMachine::Probe(mHost->mDc)->GetWhatToString(what, &whatToString);
+            mHost->Log("onReceive: action=%s sendMessage(what:%s, tag:%d)",
+                    action.string(), whatToString.string(), tag);
+        }
+        AutoPtr<IMessage> msg;
+        IStateMachine::Probe(mHost->mDc)->ObtainMessage(what, tag, 0, (IMessage**)&msg);
+        IStateMachine::Probe(mHost->mDc)->SendMessage(msg);
+    } else {
+        if (DBG) mHost->Log("onReceive: unknown action=%s", action.string());
+    }
+    return NOERROR;
 }
 
 //=============================================================================
@@ -55,7 +91,7 @@ ECode DcRetryAlarmController::SubBroadcastReceiver::OnReceive(
 //=============================================================================
 CAR_INTERFACE_IMPL(DcRetryAlarmController, Object, IDcRetryAlarmController)
 
-const Boolean DcRetryAlarmController::DBG = true;
+const Boolean DcRetryAlarmController::DBG = TRUE;
 const String DcRetryAlarmController::INTENT_RETRY_ALARM_WHAT("what");
 const String DcRetryAlarmController::INTENT_RETRY_ALARM_TAG("tag");
 
@@ -69,33 +105,40 @@ ECode DcRetryAlarmController::constructor(
     /* [in] */ IPhoneBase* phone,
     /* [in] */ IDataConnection* dc)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mLogTag = dc.getName();
-        mPhone = phone;
-        mDc = dc;
-        mAlarmManager = (AlarmManager) mPhone.getContext().getSystemService(Context.ALARM_SERVICE);
-        mActionRetry = mDc.getClass().getCanonicalName() + "." + mDc.getName() + ".action_retry";
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(mActionRetry);
-        log("DcRetryAlarmController: register for intent action=" + mActionRetry);
-        mPhone.getContext().registerReceiver(mIntentReceiver, filter, null, mDc.getHandler());
-
-#endif
+    IStateMachine::Probe(dc)->GetName(&mLogTag);
+    mPhone = phone;
+    mDc = dc;
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);
+    mAlarmManager = IAlarmManager::Probe(obj);
+    String canonicalName("CDataConnection"); // = mDc->GetClass()->GetCanonicalName();
+    String name;
+    IStateMachine::Probe(mDc)->GetName(&name);
+    mActionRetry = canonicalName + "." + name + ".action_retry";
+    AutoPtr<IIntentFilter> filter;
+    CIntentFilter::New((IIntentFilter**)&filter);
+    filter->AddAction(mActionRetry);
+    Log("DcRetryAlarmController: register for intent action=%s", mActionRetry.string());
+    AutoPtr<IHandler> handler;
+    IStateMachine::Probe(mDc)->GetHandler((IHandler**)&handler);
+    AutoPtr<IIntent> intent;
+    context->RegisterReceiver(mIntentReceiver, filter, String(NULL), handler, (IIntent**)&intent);
+    return NOERROR;
 }
 
 ECode DcRetryAlarmController::Dispose()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("dispose");
-        mPhone.getContext().unregisterReceiver(mIntentReceiver);
-        mPhone = null;
-        mDc = null;
-        mAlarmManager = null;
-        mActionRetry = null;
-
-#endif
+    if (DBG) Log("dispose");
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    context->UnregisterReceiver(mIntentReceiver);
+    mPhone = NULL;
+    mDc = NULL;
+    mAlarmManager = NULL;
+    mActionRetry = NULL;
+    return NOERROR;
 }
 
 ECode DcRetryAlarmController::GetSuggestedRetryTime(
@@ -103,32 +146,33 @@ ECode DcRetryAlarmController::GetSuggestedRetryTime(
     /* [in] */ IAsyncResult* ar,
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        int retryDelay;
-        DataCallResponse response = (DataCallResponse) ar.result;
-        retryDelay = response.suggestedRetryTime;
-        if (retryDelay == RILConstants.MAX_INT) {
-            if (DBG) log("getSuggestedRetryTime: suggestedRetryTime is MAX_INT, retry NOT needed");
-            retryDelay = -1;
-        } else if (retryDelay >= 0) {
-            if (DBG) log("getSuggestedRetryTime: suggestedRetryTime is >= 0 use it");
-        } else if (dc.mRetryManager.isRetryNeeded()) {
-            retryDelay = dc.mRetryManager.getRetryTimer();
-            if (retryDelay < 0) {
-                retryDelay = 0;
-            }
-            if (DBG) log("getSuggestedRetryTime: retry is needed");
-        } else {
-            if (DBG) log("getSuggestedRetryTime: retry is NOT needed");
-            retryDelay = -1;
-        }
-        if (DBG) {
-            log("getSuggestedRetryTime: " + retryDelay + " response=" + response + " dc=" + dc);
-        }
-        return retryDelay;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 retryDelay;
+    AutoPtr<IDataCallResponse> response = IDataCallResponse::Probe(((AsyncResult*) ar)->mResult);
+    response->GetSuggestedRetryTime(&retryDelay);
+    Boolean isRetryNeeded;
+    ((DataConnection*) dc)->mRetryManager->IsRetryNeeded(&isRetryNeeded);
+    if (retryDelay == IRILConstants::MAX_INT) {
+        if (DBG) Log("getSuggestedRetryTime: suggestedRetryTime is MAX_INT, retry NOT needed");
+        retryDelay = -1;
+    } else if (retryDelay >= 0) {
+        if (DBG) Log("getSuggestedRetryTime: suggestedRetryTime is >= 0 use it");
+    } else if (isRetryNeeded) {
+        ((DataConnection*) dc)->mRetryManager->GetRetryTimer(&retryDelay);
+        if (retryDelay < 0) {
+            retryDelay = 0;
+        }
+        if (DBG) Log("getSuggestedRetryTime: retry is needed");
+    } else {
+        if (DBG) Log("getSuggestedRetryTime: retry is NOT needed");
+        retryDelay = -1;
+    }
+    if (DBG) {
+        Log("getSuggestedRetryTime: %d response=%s dc=%s", retryDelay, TO_CSTR(response), TO_CSTR(dc));
+    }
+    *result = retryDelay;
+    return NOERROR;
 }
 
 ECode DcRetryAlarmController::StartRetryAlarm(
@@ -136,47 +180,55 @@ ECode DcRetryAlarmController::StartRetryAlarm(
     /* [in] */ Int32 tag,
     /* [in] */ Int32 delay)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Intent intent = new Intent(mActionRetry);
-        intent.putExtra(INTENT_RETRY_ALARM_WHAT, what);
-        intent.putExtra(INTENT_RETRY_ALARM_TAG, tag);
-        if (DBG) {
-            log("startRetryAlarm: next attempt in " + (delay / 1000) + "s" +
-                    " what=" + what + " tag=" + tag);
-        }
-        PendingIntent retryIntent = PendingIntent.getBroadcast (mPhone.getContext(), 0,
-                                        intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + delay, retryIntent);
-
-#endif
+    AutoPtr<IIntent> intent;
+    CIntent::New((IIntent**)&intent);
+    intent->PutExtra(INTENT_RETRY_ALARM_WHAT, what);
+    intent->PutExtra(INTENT_RETRY_ALARM_TAG, tag);
+    if (DBG) {
+        Log("startRetryAlarm: next attempt in %ds what=%d tag=%d",
+                (delay / 1000), what, tag);
+    }
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+    AutoPtr<IPendingIntent> retryIntent;
+    CPendingIntent::GetBroadcast(context, 0,
+            intent, IPendingIntent::FLAG_UPDATE_CURRENT, (IPendingIntent**)&retryIntent);
+    mAlarmManager->Set(IAlarmManager::ELAPSED_REALTIME_WAKEUP,
+            SystemClock::GetElapsedRealtime() + delay, retryIntent);
+    return NOERROR;
 }
 
 ECode DcRetryAlarmController::ToString(
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        StringBuilder sb = new StringBuilder();
-        sb.append(mLogTag).append(" [dcRac] ");
-        sb.append(" mPhone=").append(mPhone);
-        sb.append(" mDc=").append(mDc);
-        sb.append(" mAlaramManager=").append(mAlarmManager);
-        sb.append(" mActionRetry=").append(mActionRetry);
-        return sb.toString();
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    StringBuilder sb;
+    sb.Append(mLogTag);
+    sb.Append(" [dcRac] ");
+    sb.Append(" mPhone=");
+    sb.Append(mPhone);
+    sb.Append(" mDc=");
+    sb.Append(mDc);
+    sb.Append(" mAlaramManager=");
+    sb.Append(mAlarmManager);
+    sb.Append(" mActionRetry=");
+    sb.Append(mActionRetry);
+    *result = sb.ToString();
+    return NOERROR;
 }
 
+#define MSG_BUF_SIZE    1024
 ECode DcRetryAlarmController::Log(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Rlog.d(mLogTag, "[dcRac] " + s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    return Logger::D(mLogTag, "[dcRac] %s", msgBuf);
 }
 
 } // namespace DataConnection

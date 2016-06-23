@@ -132,7 +132,7 @@ public:
             /* [in] */ ILinkProperties* curLp);
 
     public:
-        DataCallResponseSetupResult mSetupResult;
+        AutoPtr<IDataCallResponseSetupResult> mSetupResult;
 
         AutoPtr<ILinkProperties> mOldLp;
 
@@ -201,6 +201,8 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
+
     private:
         DataConnection* mHost;
     };
@@ -223,6 +225,8 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
+
     private:
         DataConnection* mHost;
     };
@@ -241,6 +245,8 @@ private:
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
 
     private:
         DataConnection* mHost;
@@ -267,6 +273,8 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
+
     private:
         DataConnection* mHost;
     };
@@ -286,6 +294,8 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
+
     private:
         DataConnection* mHost;
     };
@@ -304,6 +314,8 @@ private:
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
 
     private:
         DataConnection* mHost;
@@ -334,9 +346,8 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
+    //***** Constructor (NOTE: uses dcc.getHandler() as its Handler)
     DataConnection();
-
-    CARAPI constructor();
 
     // Convert cmd to string or null if unknown
     static CARAPI CmdToString(
@@ -407,7 +418,7 @@ public:
         /* [out] */ String* result);
 
     static CARAPI Slog(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     /**
      * Log with debug
@@ -416,7 +427,7 @@ public:
      */
     // @Override
     CARAPI Log(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     /**
      * Log with debug attribute
@@ -425,7 +436,7 @@ public:
      */
     // @Override
     CARAPI Logd(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     /**
      * Log with verbose attribute
@@ -434,7 +445,7 @@ public:
      */
     // @Override
     CARAPI Logv(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     /**
      * Log with info attribute
@@ -443,7 +454,7 @@ public:
      */
     // @Override
     CARAPI Logi(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     /**
      * Log with warning attribute
@@ -452,7 +463,7 @@ public:
      */
     // @Override
     CARAPI Logw(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     /**
      * Log with error attribute
@@ -461,7 +472,7 @@ public:
      */
     // @Override
     CARAPI Loge(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     /**
      * Log with error attribute
@@ -505,8 +516,7 @@ private:
         /* [in] */ IApnSetting* apn,
         /* [in] */ ILinkProperties* lp);
 
-    //***** Constructor (NOTE: uses dcc.getHandler() as its Handler)
-    DataConnection(
+    CARAPI constructor(
         /* [in] */ IPhoneBase* phone,
         /* [in] */ const String& name,
         /* [in] */ Int32 id,
@@ -598,7 +608,7 @@ private:
      */
     CARAPI OnSetupConnectionCompleted(
         /* [in] */ IAsyncResult* ar,
-        /* [out] */ DataCallResponseSetupResult* result);
+        /* [out] */ IDataCallResponseSetupResult** result);
 
     CARAPI IsDnsOk(
         /* [in] */ ArrayOf<String>* domainNameServers,
@@ -617,7 +627,7 @@ private:
     CARAPI SetLinkProperties(
         /* [in] */ IDataCallResponse* response,
         /* [in] */ ILinkProperties* lp,
-        /* [out] */ DataCallResponseSetupResult* result);
+        /* [out] */ IDataCallResponseSetupResult** result);
 
     /**
      * Initialize connection, this will fail if the

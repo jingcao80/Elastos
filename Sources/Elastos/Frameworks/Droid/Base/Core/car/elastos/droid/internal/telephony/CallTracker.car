@@ -15,7 +15,6 @@ module
      */
     [deprecated]
     interface ICallTracker {
-
         Dump(
             [in] IFileDescriptor* fd,
             [in] IPrintWriter* pw,

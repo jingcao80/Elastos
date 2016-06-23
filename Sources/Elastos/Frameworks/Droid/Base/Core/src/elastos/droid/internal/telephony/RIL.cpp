@@ -41,6 +41,7 @@ using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecordsCdmaLine
 using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecordsCdmaT53ClirInfoRec;
 using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecordsCdmaT53AudioControlInfoRec;
 using Elastos::Droid::Internal::Telephony::DataConnection::IApnProfileOmh;
+using Elastos::Droid::Internal::Telephony::DataConnection::IApnSetting;
 using Elastos::Droid::Internal::Telephony::Gsm::ISsData;
 using Elastos::Droid::Internal::Telephony::Gsm::ISuppServiceNotification;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccIoResult;
@@ -5702,7 +5703,7 @@ AutoPtr<IArrayList> RIL::ResponseGetDataCallProfile(
         if (RILJ_LOGD) {
             String str("responseGetDataCallProfile()");
             Int32 profileIdget = 0, priorityget = 0;
-            profile->GetProfileId(&profileIdget);
+            IApnSetting::Probe(profile)->GetProfileId(&profileIdget);
             profile->GetPriority(&priorityget);
             str += profileIdget;
             str += ":";

@@ -25,7 +25,108 @@ module
         // }
     }
 
+    [deprecated]
     interface IApnSetting {
+        GetCarrier(
+            [out] String* result);
+
+        GetApn(
+            [out] String* result);
+
+        GetProxy(
+            [out] String* result);
+
+        GetPort(
+            [out] String* result);
+
+        GetMmsc(
+            [out] String* result);
+
+        GetMmsProxy(
+            [out] String* result);
+
+        GetMmsPort(
+            [out] String* result);
+
+        GetUser(
+            [out] String* result);
+
+        GetPassword(
+            [out] String* result);
+
+        GetAuthType(
+            [out] Int32* result);
+
+        GetTypes(
+            [out, callee] ArrayOf<String>* result);
+
+        SetTypes(
+            [in] ArrayOf<String>* types);
+
+        GetId(
+            [out] Int32* result);
+
+        GetNumeric(
+            [out] String* result);
+
+        GetProtocol(
+            [out] String* result);
+
+        GetRoamingProtocol(
+            [out] String* result);
+
+        GetMtu(
+            [out] Int32* result);
+
+        /**
+          * Current status of APN
+          * true : enabled APN, false : disabled APN.
+          */
+        GetCarrierEnabled(
+            [out] Boolean* result);
+
+        /**
+          * Radio Access Technology info
+          * To check what values can hold, refer to ServiceState.java.
+          * This should be spread to other technologies,
+          * but currently only used for LTE(14) and EHRPD(13).
+          */
+        GetBearer(
+            [out] Int32* result);
+
+        /* ID of the profile in the modem */
+        SetProfileId(
+            [in] Int32 profileId);
+
+        GetModemCognitive(
+            [out] Boolean* result);
+
+        GetMaxConns(
+            [out] Int32* result);
+
+        GetWaitTime(
+            [out] Int32* result);
+
+        GetMaxConnsTime(
+            [out] Int32* result);
+
+        /**
+          * MVNO match type. Possible values:
+          *   "spn": Service provider name.
+          *   "imsi": IMSI.
+          *   "gid": Group identifier level 1.
+          */
+        GetMvnoType(
+            [out] String* result);
+
+        /**
+          * MVNO data. Examples:
+          *   "spn": A MOBILE, BEN NL
+          *   "imsi": 302720x94, 2060188
+          *   "gid": 4E, 33
+          */
+        GetMvnoMatchData(
+            [out] String* result);
 
         HasMvnoParams(
             [out] Boolean* result);
@@ -45,7 +146,6 @@ module
 
         ToHash(
             [out] String* result);
-
     }
 
     interface IApnSettingHelper {

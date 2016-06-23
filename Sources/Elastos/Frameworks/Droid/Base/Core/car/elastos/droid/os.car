@@ -1,5 +1,6 @@
 module
 {
+    merge("os/AsyncResult.car");
     merge("os/BaseBundle.car");
     merge("os/BatteryProperties.car");
     merge("os/BatteryManager.car");
@@ -45,6 +46,7 @@ module
     merge("os/PowerManagerInternal.car");
     merge("os/Process.car");
     merge("os/RecoverySystem.car");
+    merge("os/Registrant.car");
     merge("os/RegistrantList.car");
     merge("os/RemoteCallback.car");
     merge("os/RemoteCallbackList.car");

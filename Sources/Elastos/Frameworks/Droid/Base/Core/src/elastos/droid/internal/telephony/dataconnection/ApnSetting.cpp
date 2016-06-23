@@ -1,5 +1,17 @@
 
 #include "elastos/droid/internal/telephony/dataconnection/ApnSetting.h"
+#include "elastos/droid/internal/telephony/dataconnection/CApnSetting.h"
+#include <Elastos.CoreLibrary.Utility.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/droid/text/TextUtils.h>
+
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::IRILConstants;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -52,271 +64,313 @@ ECode ApnSetting::constructor(
     /* [in] */ const String& mvnoType,
     /* [in] */ const String& mvnoMatchData)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        this.id = id;
-        this.numeric = numeric;
-        this.carrier = carrier;
-        this.apn = apn;
-        this.proxy = proxy;
-        this.port = port;
-        this.mmsc = mmsc;
-        this.mmsProxy = mmsProxy;
-        this.mmsPort = mmsPort;
-        this.user = user;
-        this.password = password;
-        this.authType = authType;
-        this.types = new String[types.length];
-        for (int i = 0; i < types.length; i++) {
-            this.types[i] = types[i].toLowerCase(Locale.ROOT);
-        }
-        this.protocol = protocol;
-        this.roamingProtocol = roamingProtocol;
-        this.carrierEnabled = carrierEnabled;
-        this.bearer = bearer;
-        this.profileId = profileId;
-        this.modemCognitive = modemCognitive;
-        this.maxConns = maxConns;
-        this.waitTime = waitTime;
-        this.maxConnsTime = maxConnsTime;
-        this.mtu = mtu;
-        this.mvnoType = mvnoType;
-        this.mvnoMatchData = mvnoMatchData;
-
-#endif
+    mId = id;
+    mNumeric = numeric;
+    mCarrier = carrier;
+    mApn = apn;
+    mProxy = proxy;
+    mPort = port;
+    mMmsc = mmsc;
+    mMmsProxy = mmsProxy;
+    mMmsPort = mmsPort;
+    mUser = user;
+    mPassword = password;
+    mAuthType = authType;
+    mTypes = ArrayOf<String>::Alloc(types->GetLength());
+    for (Int32 i = 0; i < types->GetLength(); i++) {
+        (*mTypes)[i] = (*types)[i].ToLowerCase();
+    }
+    mProtocol = protocol;
+    mRoamingProtocol = roamingProtocol;
+    mCarrierEnabled = carrierEnabled;
+    mBearer = bearer;
+    mProfileId = profileId;
+    mModemCognitive = modemCognitive;
+    mMaxConns = maxConns;
+    mWaitTime = waitTime;
+    mMaxConnsTime = maxConnsTime;
+    mMtu = mtu;
+    mMvnoType = mvnoType;
+    mMvnoMatchData = mvnoMatchData;
+    return NOERROR;
 }
 
 ECode ApnSetting::FromString(
-    /* [in] */ const String& data,
+    /* [in] */ const String& _data,
     /* [out] */ IApnSetting** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (data == null) return null;
-        int version;
-        // matches() operates on the whole string, so append .* to the regex.
-        if (data.matches(V3_FORMAT_REGEX + ".*")) {
-            version = 3;
-            data = data.replaceFirst(V3_FORMAT_REGEX, "");
-        } else if (data.matches(V2_FORMAT_REGEX + ".*")) {
-            version = 2;
-            data = data.replaceFirst(V2_FORMAT_REGEX, "");
-        } else {
-            version = 1;
-        }
-        String[] a = data.split("\\s*,\\s*");
-        if (a.length < 14) {
-            return null;
-        }
-        int authType;
-        try {
-            authType = Integer.parseInt(a[12]);
-        } catch (NumberFormatException e) {
-            authType = 0;
-        }
-        String[] typeArray;
-        String protocol, roamingProtocol;
-        boolean carrierEnabled;
-        int bearer = 0;
-        int profileId = 0;
-        boolean modemCognitive = false;
-        int maxConns = 0;
-        int waitTime = 0;
-        int maxConnsTime = 0;
-        int mtu = PhoneConstants.UNSET_MTU;
-        String mvnoType = "";
-        String mvnoMatchData = "";
-        if (version == 1) {
-            typeArray = new String[a.length - 13];
-            System.arraycopy(a, 13, typeArray, 0, a.length - 13);
-            protocol = RILConstants.SETUP_DATA_PROTOCOL_IP;
-            roamingProtocol = RILConstants.SETUP_DATA_PROTOCOL_IP;
-            carrierEnabled = true;
-            bearer = 0;
-        } else {
-            if (a.length < 18) {
-                return null;
-            }
-            typeArray = a[13].split("\\s*\\|\\s*");
-            protocol = a[14];
-            roamingProtocol = a[15];
-            carrierEnabled = Boolean.parseBoolean(a[16]);
-            try {
-                bearer = Integer.parseInt(a[17]);
-            } catch (NumberFormatException ex) {
-            }
-            if (a.length > 22) {
-                modemCognitive = Boolean.parseBoolean(a[19]);
-                try {
-                    profileId = Integer.parseInt(a[18]);
-                    maxConns = Integer.parseInt(a[20]);
-                    waitTime = Integer.parseInt(a[21]);
-                    maxConnsTime = Integer.parseInt(a[22]);
-                } catch (NumberFormatException e) {
-                }
-            }
-            if (a.length > 23) {
-                try {
-                    mtu = Integer.parseInt(a[23]);
-                } catch (NumberFormatException e) {
-                }
-            }
-            if (a.length > 25) {
-                mvnoType = a[24];
-                mvnoMatchData = a[25];
-            }
-        }
-        return new ApnSetting(-1,a[10]+a[11],a[0],a[1],a[2],a[3],a[7],a[8],
-                a[9],a[4],a[5],authType,typeArray,protocol,roamingProtocol,carrierEnabled,bearer,
-                profileId, modemCognitive, maxConns, waitTime, maxConnsTime, mtu,
-                mvnoType, mvnoMatchData);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    String data = _data;
+    if (data.IsNull()) {
+        *result = NULL;
+        return NOERROR;
+    }
+    Int32 version;
+    // matches() operates on the whole string, so append .* to the regex.
+    Boolean isMatchesV3;
+    StringUtils::Matches(data, V3_FORMAT_REGEX + ".*", &isMatchesV3);
+    Boolean isMatchesV2;
+    StringUtils::Matches(data, V2_FORMAT_REGEX + ".*", &isMatchesV2);
+    if (isMatchesV3) {
+        version = 3;
+        String s;
+        StringUtils::ReplaceFirst(data, V3_FORMAT_REGEX, "", &s);
+        data = s;
+    } else if (isMatchesV2) {
+        version = 2;
+        String s;
+        StringUtils::ReplaceFirst(data, V2_FORMAT_REGEX, "", &s);
+        data = s;
+    } else {
+        version = 1;
+    }
+    AutoPtr<ArrayOf<String> > a;
+    StringUtils::Split(data, "\\s*,\\s*", (ArrayOf<String>**)&a);
+    if (a->GetLength() < 14) {
+        *result = NULL;
+        return NOERROR;
+    }
+    Int32 authType;
+    // try {
+    ECode ec = StringUtils::Parse((*a)[12], &authType);
+    // } catch (NumberFormatException e) {
+    if ((ECode) E_NUMBER_FORMAT_EXCEPTION == ec) {
+        authType = 0;
+    }
+    // }
+    AutoPtr<ArrayOf<String> > typeArray;
+    String protocol, roamingProtocol;
+    Boolean carrierEnabled;
+    Int32 bearer = 0;
+    Int32 profileId = 0;
+    Boolean modemCognitive = FALSE;
+    Int32 maxConns = 0;
+    Int32 waitTime = 0;
+    Int32 maxConnsTime = 0;
+    Int32 mtu = IPhoneConstants::UNSET_MTU;
+    String mvnoType("");
+    String mvnoMatchData("");
+    if (version == 1) {
+        typeArray = ArrayOf<String>::Alloc(a->GetLength() - 13);
+        typeArray->Copy(0, a, 13, a->GetLength() - 13);
+        protocol = IRILConstants::SETUP_DATA_PROTOCOL_IP;
+        roamingProtocol = IRILConstants::SETUP_DATA_PROTOCOL_IP;
+        carrierEnabled = TRUE;
+        bearer = 0;
+    } else {
+        if (a->GetLength() < 18) {
+            *result = NULL;
+            return NOERROR;
+        }
+        StringUtils::Split((*a)[13], "\\s*\\|\\s*", (ArrayOf<String>**)&typeArray);
+        protocol = (*a)[14];
+        roamingProtocol = (*a)[15];
+        carrierEnabled = StringUtils::ParseBoolean((*a)[16]);
+        // try {
+        StringUtils::Parse((*a)[17], &bearer);
+        // } catch (NumberFormatException ex) {
+        // }
+        if (a->GetLength() > 22) {
+            modemCognitive = StringUtils::ParseBoolean((*a)[19]);
+            // try {
+            StringUtils::Parse((*a)[18], &profileId);
+            StringUtils::Parse((*a)[20], &maxConns);
+            StringUtils::Parse((*a)[21], &waitTime);
+            StringUtils::Parse((*a)[22], &maxConnsTime);
+            // } catch (NumberFormatException e) {
+            // }
+        }
+        if (a->GetLength() > 23) {
+            // try {
+            StringUtils::Parse((*a)[23], &mtu);
+            // } catch (NumberFormatException e) {
+            // }
+        }
+        if (a->GetLength() > 25) {
+            mvnoType = (*a)[24];
+            mvnoMatchData = (*a)[25];
+        }
+    }
+    return CApnSetting::New(-1,(*a)[10]+(*a)[11],(*a)[0],(*a)[1],(*a)[2],(*a)[3],(*a)[7],(*a)[8],
+            (*a)[9],(*a)[4],(*a)[5],authType,typeArray,protocol,roamingProtocol,carrierEnabled,bearer,
+            profileId, modemCognitive, maxConns, waitTime, maxConnsTime, mtu,
+            mvnoType, mvnoMatchData, result);
 }
 
 ECode ApnSetting::ArrayFromString(
     /* [in] */ const String& data,
     /* [out] */ IList** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        List<ApnSetting> retVal = new ArrayList<ApnSetting>();
-        if (TextUtils.isEmpty(data)) {
-            return retVal;
-        }
-        String[] apnStrings = data.split("\\s*;\\s*");
-        for (String apnString : apnStrings) {
-            ApnSetting apn = fromString(apnString);
-            if (apn != null) {
-                retVal.add(apn);
-            }
-        }
-        return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IList> retVal;
+    CArrayList::New((IList**)&retVal);
+    if (TextUtils::IsEmpty(data)) {
+        *result = retVal;
+        REFCOUNT_ADD(*result)
+        return NOERROR;
+    }
+    AutoPtr<ArrayOf<String> > apnStrings;
+    StringUtils::Split(data, "\\s*;\\s*", (ArrayOf<String>**)&apnStrings);
+    for (Int32 i = 0; i < apnStrings->GetLength(); ++i) {
+        String apnString = (*apnStrings)[i];
+        AutoPtr<IApnSetting> apn;
+        FromString(apnString, (IApnSetting**)&apn);
+        if (apn != NULL) {
+            retVal->Add(apn);
+        }
+    }
+    *result = retVal;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode ApnSetting::ToString(
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        StringBuilder sb = new StringBuilder();
-        sb.append("[ApnSettingV3] ")
-        .append(carrier)
-        .append(", ").append(id)
-        .append(", ").append(numeric)
-        .append(", ").append(apn)
-        .append(", ").append(proxy)
-        .append(", ").append(mmsc)
-        .append(", ").append(mmsProxy)
-        .append(", ").append(mmsPort)
-        .append(", ").append(port)
-        .append(", ").append(authType).append(", ");
-        for (int i = 0; i < types.length; i++) {
-            sb.append(types[i]);
-            if (i < types.length - 1) {
-                sb.append(" | ");
-            }
-        }
-        sb.append(", ").append(protocol);
-        sb.append(", ").append(roamingProtocol);
-        sb.append(", ").append(carrierEnabled);
-        sb.append(", ").append(bearer);
-        sb.append(", ").append(profileId);
-        sb.append(", ").append(modemCognitive);
-        sb.append(", ").append(maxConns);
-        sb.append(", ").append(waitTime);
-        sb.append(", ").append(maxConnsTime);
-        sb.append(", ").append(mtu);
-        sb.append(", ").append(mvnoType);
-        sb.append(", ").append(mvnoMatchData);
-        return sb.toString();
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    StringBuilder sb;
+    sb.Append("[ApnSettingV3] ");
+    sb.Append(mCarrier);
+    sb.Append(", ");
+    sb.Append(mId);
+    sb.Append(", ");
+    sb.Append(mNumeric);
+    sb.Append(", ");
+    sb.Append(mApn);
+    sb.Append(", ");
+    sb.Append(mProxy);
+    sb.Append(", ");
+    sb.Append(mMmsc);
+    sb.Append(", ");
+    sb.Append(mMmsProxy);
+    sb.Append(", ");
+    sb.Append(mMmsPort);
+    sb.Append(", ");
+    sb.Append(mPort);
+    sb.Append(", ");
+    sb.Append(mAuthType);
+    sb.Append(", ");
+    for (Int32 i = 0; i < mTypes->GetLength(); i++) {
+        sb.Append((*mTypes)[i]);
+        if (i < mTypes->GetLength() - 1) {
+            sb.Append(" | ");
+        }
+    }
+    sb.Append(", ");
+    sb.Append(mProtocol);
+    sb.Append(", ");
+    sb.Append(mRoamingProtocol);
+    sb.Append(", ");
+    sb.Append(mCarrierEnabled);
+    sb.Append(", ");
+    sb.Append(mBearer);
+    sb.Append(", ");
+    sb.Append(mProfileId);
+    sb.Append(", ");
+    sb.Append(mModemCognitive);
+    sb.Append(", ");
+    sb.Append(mMaxConns);
+    sb.Append(", ");
+    sb.Append(mWaitTime);
+    sb.Append(", ");
+    sb.Append(mMaxConnsTime);
+    sb.Append(", ");
+    sb.Append(mMtu);
+    sb.Append(", ");
+    sb.Append(mMvnoType);
+    sb.Append(", ");
+    sb.Append(mMvnoMatchData);
+    return sb.ToString(result);
 }
 
 ECode ApnSetting::HasMvnoParams(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return !TextUtils.isEmpty(mvnoType) && !TextUtils.isEmpty(mvnoMatchData);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    *result = !TextUtils::IsEmpty(mMvnoType) && !TextUtils::IsEmpty(mMvnoMatchData);
+    return NOERROR;
 }
 
 ECode ApnSetting::CanHandleType(
     /* [in] */ const String& type,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (!carrierEnabled) return false;
-        for (String t : types) {
-            // DEFAULT handles all, and HIPRI is handled by DEFAULT
-            if (t.equalsIgnoreCase(type) ||
-                    t.equalsIgnoreCase(PhoneConstants.APN_TYPE_ALL) ||
-                    (t.equalsIgnoreCase(PhoneConstants.APN_TYPE_DEFAULT) &&
-                    type.equalsIgnoreCase(PhoneConstants.APN_TYPE_HIPRI))) {
-                return true;
-            }
-        }
-        return false;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (!mCarrierEnabled) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    for (Int32 i = 0; i < mTypes->GetLength(); ++i) {
+        String t = (*mTypes)[i];
+        // DEFAULT handles all, and HIPRI is handled by DEFAULT
+        if (t.EqualsIgnoreCase(type) ||
+                t.EqualsIgnoreCase(IPhoneConstants::APN_TYPE_ALL) ||
+                (t.EqualsIgnoreCase(IPhoneConstants::APN_TYPE_DEFAULT) &&
+                type.EqualsIgnoreCase(IPhoneConstants::APN_TYPE_HIPRI))) {
+            *result = TRUE;
+            return NOERROR;
+        }
+    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode ApnSetting::Equals(
     /* [in] */ IInterface* o,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (o instanceof ApnSetting == false) return false;
-        return (toString().equals(o.toString()));
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    if (IApnSetting::Probe(o) == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    String thisStr;
+    ToString(&thisStr);
+    *result = (thisStr.Equals(TO_STR(o)));
+    return NOERROR;
 }
 
 ECode ApnSetting::GetApnProfileType(
     /* [out] */ ApnProfileType* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return ApnProfileType.PROFILE_TYPE_APN;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    *result = PROFILE_TYPE_APN;
+    return NOERROR;
 }
 
 ECode ApnSetting::GetProfileId(
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return profileId;
-
-#endif
+    VALIDATE_NOT_NULL(result)
+    *result = mProfileId;
+    return NOERROR;
 }
 
 ECode ApnSetting::ToShortString(
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return "ApnSetting";
-
-#endif
+    VALIDATE_NOT_NULL(result)
+    *result = String("ApnSetting");
+    return NOERROR;
 }
 
 ECode ApnSetting::ToHash(
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return this.toString();
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    return ToString(result);
 }
 
 ECode ApnSetting::GetCarrier(
@@ -400,7 +454,7 @@ ECode ApnSetting::GetAuthType(
 }
 
 ECode ApnSetting::GetTypes(
-    /* [out] */ ArrayOf<String>** result)
+    /* [out, callee] */ ArrayOf<String>** result)
 {
     VALIDATE_NOT_NULL(result)
     *result = mTypes;

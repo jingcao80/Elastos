@@ -4,7 +4,6 @@
 
 #include "_Elastos.Droid.Internal.h"
 #include <Elastos.CoreLibrary.Utility.h>
-#include <_Elastos.Droid.Core.h>
 #include <Elastos.Droid.Os.h>
 #include <elastos/core/Object.h>
 #include <elastos/droid/ext/frameworkext.h>
@@ -80,10 +79,10 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI Log(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
     CARAPI Loge(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
 private:
     /**

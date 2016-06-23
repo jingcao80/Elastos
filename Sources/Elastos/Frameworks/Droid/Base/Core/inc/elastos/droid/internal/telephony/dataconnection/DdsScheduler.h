@@ -30,6 +30,7 @@ private:
     class NetworkRequestInfo
         : public Object
     {
+        friend class DdsScheduler;
     public:
         NetworkRequestInfo(
             /* [in] */ DdsScheduler* host);
@@ -50,7 +51,7 @@ private:
             /* [in] */ Boolean mAccepted);
 
     private:
-        const AutoPtr<INetworkRequest> mRequest;
+        AutoPtr<INetworkRequest> mRequest;
 
         Boolean mAccepted;
 
@@ -74,6 +75,8 @@ private:
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
 
     public:
         static const String TAG;
@@ -107,6 +110,8 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
+
     public:
         static const String TAG;
 
@@ -131,6 +136,8 @@ private:
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
 
     private:
         CARAPI HandleOtherSubRequests();
@@ -160,6 +167,8 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
+
     private:
         CARAPI HandleOtherSubRequests();
 
@@ -188,6 +197,8 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
+
     public:
         static const String TAG;
 
@@ -212,6 +223,8 @@ private:
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
 
     public:
         static const String TAG;

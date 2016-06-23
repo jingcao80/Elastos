@@ -8,6 +8,49 @@ module {
     namespace DataConnection {
 
     interface IDataProfile {
+        //id of the data profile
+        GetProfileId(
+            [out] Int32* result);
+
+        //the APN to connect to
+        GetApn(
+            [out] String* result);
+
+        //For example, "IP", "IPV6", "IPV4V6", or "PPP".
+        GetProtocol(
+            [out] String* result);
+
+        //(None: 0, PAP: 1, CHAP: 2, PAP&CHAP: 3)
+        GetAuthType(
+            [out] Int32* result);
+
+        //the username for APN, or NULL
+        GetUser(
+            [out] String* result);
+
+        //the password for APN, or NULL
+        GetPassword(
+            [out] String* result);
+
+        //the profile type, TYPE_COMMON, TYPE_3GPP, TYPE_3GPP2
+        GetType(
+            [out] Int32* result);
+
+        //the period in seconds to limit the maximum connections
+        GetMaxConnsTime(
+            [out] Int32* result);
+
+        //the maximum connections during maxConnsTime
+        GetMaxConns(
+            [out] Int32* result);
+
+        //a new PDN connection request for that given PDN
+        GetWaitTime(
+            [out] Int32* result);
+
+        //true to enable the profile, false to disable
+        GetEnabled(
+            [out] Boolean* result);
     }
 
     [deprecated]

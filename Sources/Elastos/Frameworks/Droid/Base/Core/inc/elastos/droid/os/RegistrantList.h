@@ -38,7 +38,7 @@ public:
 
     //synchronized
     CARAPI_(void) Add(
-        /* [in] */ Registrant* r);
+        /* [in] */ IRegistrant* r);
 
     //synchronized
     CARAPI_(void) RemoveCleared();

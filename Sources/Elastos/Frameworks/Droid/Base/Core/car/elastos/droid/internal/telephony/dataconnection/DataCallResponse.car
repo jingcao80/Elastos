@@ -12,7 +12,7 @@ module
     /**
      * Class returned by onSetupConnectionCompleted.
      */
-    enum DataCallResponseSetupResult {
+    enum EnumDataCallResponseSetupResult {
         DataCallResponse_SUCCESS,
         DataCallResponse_ERR_BadCommand,
         DataCallResponse_ERR_UnacceptableParameter,
@@ -32,13 +32,87 @@ module
         // }
     }
 
-    interface IDataCallResponse {
+    interface IDataCallResponseSetupResult {
+    }
 
+    [deprecated]
+    interface IDataCallResponse {
         SetLinkProperties(
             [in] ILinkProperties* linkProperties,
             [in] Boolean okToUseSystemPropertyDns,
-            [out] DataCallResponseSetupResult* result);
+            [out] IDataCallResponseSetupResult** result);
 
+        GetVersion(
+            [out] Int32* result);
+
+        SetVersion(
+            [in] Int32 ver);
+
+        GetStatus(
+            [out] Int32* result);
+
+        SetStatus(
+            [in] Int32 status);
+
+        GetCid(
+            [out] Int32* result);
+
+        SetCid(
+            [in] Int32 cid);
+
+        GetActive(
+            [out] Int32* result);
+
+        SetActive(
+            [in] Int32 active);
+
+        GetType(
+            [out] String* result);
+
+        SetType(
+            [in] String type);
+
+        GetIfname(
+            [out] String* result);
+
+        SetIfname(
+            [in] String ifname);
+
+        GetAddresses(
+            [out, callee] ArrayOf<String>* result);
+
+        SetAddresses(
+            [in] ArrayOf<String>* addresses);
+
+        GetDnses(
+            [out, callee] ArrayOf<String>* result);
+
+        SetDnses(
+            [in] ArrayOf<String>* dnses);
+
+        GetGateways(
+            [out, callee] ArrayOf<String>* result);
+
+        SetGateways(
+            [in] ArrayOf<String>* gateways);
+
+        GetSuggestedRetryTime(
+            [out] Int32* result);
+
+        SetSuggestedRetryTime(
+            [in] Int32 suggestedRetryTime);
+
+        GetPcscf(
+            [out, callee] ArrayOf<String>* result);
+
+        SetPcscf(
+            [in] ArrayOf<String>* pcscf);
+
+        GetMtu(
+            [out] Int32* result);
+
+        SetMtu(
+            [in] Int32 mtu);
     }
 
     }//DataConnection

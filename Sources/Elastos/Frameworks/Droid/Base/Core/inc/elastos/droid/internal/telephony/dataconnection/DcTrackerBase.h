@@ -36,6 +36,7 @@ using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Provider::Settings;
+using Elastos::Core::IComparator;
 using Elastos::Core::IRunnable;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
@@ -112,10 +113,19 @@ public:
     class RecoveryAction
         : public Object
     {
+        friend class DcTrackerBase;
+
     private:
         static CARAPI IsAggressiveRecovery(
             /* [in] */ Int32 value,
             /* [out] */ Boolean* result);
+
+    public:
+        static const Int32 GET_DATA_CALL_LIST;
+        static const Int32 CLEANUP;
+        static const Int32 REREGISTER;
+        static const Int32 RADIO_RESTART;
+        static const Int32 RADIO_RESTART_WITH_PROP;
     };
 
 private:
@@ -173,6 +183,19 @@ private:
 
     private:
         DcTrackerBase* mHost;
+    };
+
+    class SubComparator
+        : public Object
+        , public IComparator
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI Compare(
+            /* [in] */ IInterface* c1,
+            /* [in] */ IInterface* c2,
+            /* [out] */ Int32* result);
     };
 
 public:
@@ -248,11 +271,11 @@ public:
     // abstract methods
     CARAPI RestartRadio() = 0;
 
-    CARAPI Log(
-        /* [in] */ const String& s) = 0;
+    virtual CARAPI Log(
+        /* [in] */ const char *fmt, ...) = 0;
 
-    CARAPI Loge(
-        /* [in] */ const String& s) = 0;
+    virtual CARAPI Loge(
+        /* [in] */ const char *fmt, ...) = 0;
 
     CARAPI IsDataAllowed(
         /* [out] */ Boolean* result) = 0;
@@ -442,7 +465,7 @@ public:
         /* [in] */ const String& cause);
 
     CARAPI IsDisconnected(
-        /* [out] */ Boolean* result);
+        /* [out] */ Boolean* result) = 0;
 
     CARAPI OnSetUserDataEnabled(
         /* [in] */ Boolean enabled);
@@ -461,7 +484,7 @@ public:
     CARAPI ResetPollStats();
 
     CARAPI GetOverallState(
-        /* [out] */ DctConstantsState* result);
+        /* [out] */ DctConstantsState* result) = 0;
 
     CARAPI StartNetStatPoll();
 

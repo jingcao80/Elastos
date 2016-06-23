@@ -51,6 +51,8 @@ public:
         static CARAPI_(AutoPtr<IApnProfileTypeModem>) GetApnProfileTypeModem(
             /* [in] */ const String& serviceType);
 
+        static CARAPI_(AutoPtr<ArrayOf<IApnProfileTypeModem*> >) GetValues();
+
     private:
         ApnProfileTypeModem(
             /* [in] */ Int32 i,
@@ -119,9 +121,6 @@ public:
 
     CARAPI IsValidPriority(
         /* [out] */ Boolean* result);
-
-    CARAPI GetProfileId(
-        /* [out] */ Int32* result);
 
     CARAPI GetPriority(
         /* [out] */ Int32* result);

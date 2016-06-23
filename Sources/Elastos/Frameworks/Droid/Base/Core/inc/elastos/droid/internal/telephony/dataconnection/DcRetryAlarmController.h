@@ -84,7 +84,7 @@ public:
 
 private:
     CARAPI Log(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
 private:
     String mLogTag;

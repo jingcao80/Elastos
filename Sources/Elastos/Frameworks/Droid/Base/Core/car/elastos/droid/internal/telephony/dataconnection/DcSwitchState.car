@@ -14,7 +14,6 @@ module
      * interface IStateMachine
      */
     interface IDcSwitchState {
-
         NotifyDataConnection(
             [in] Int32 phoneId,
             [in] String state,
@@ -36,7 +35,6 @@ module
         TransitToIdleState();
 
         TransitToActingState();
-
     }
 
     }//DataConnection

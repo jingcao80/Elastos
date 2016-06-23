@@ -1,5 +1,17 @@
 
 #include "elastos/droid/internal/telephony/dataconnection/DcTesterDeactivateAll.h"
+#include "elastos/droid/content/CIntentFilter.h"
+#include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
+#include "elastos/droid/internal/telephony/dataconnection/DcController.h"
+#include "elastos/droid/os/Build.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Os::Build;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -19,25 +31,31 @@ ECode DcTesterDeactivateAll::SubBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                String action = intent.getAction();
-                if (DBG) log("sIntentReceiver.onReceive: action=" + action);
-                if (action.equals(sActionDcTesterDeactivateAll)
-                        || action.equals(mPhone.getActionDetached())) {
-                    log("Send DEACTIVATE to all Dcc's");
-                    if (mDcc != null) {
-                        for (DataConnection dc : mDcc.mDcListAll) {
-                            dc.tearDownNow();
-                        }
-                    } else {
-                        if (DBG) log("onReceive: mDcc is null, ignoring");
-                    }
-                } else {
-                    if (DBG) log("onReceive: unknown action=" + action);
-                }
-
-#endif
+    String action;
+    intent->GetAction(&action);
+    if (DBG) Log("sIntentReceiver.onReceive: action=%s", action.string());
+    String actionDetached;
+    mHost->mPhone->GetActionDetached(&actionDetached);
+    if (action.Equals(sActionDcTesterDeactivateAll)
+            || action.Equals(actionDetached)) {
+        mHost->Log("Send DEACTIVATE to all Dcc's");
+        if (mHost->mDcc != NULL) {
+            AutoPtr<IIterator> it;
+            ((DcController*) mHost->mDcc.Get())->mDcListAll->GetIterator((IIterator**)&it);
+            Boolean hasNext;
+            while (it->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> obj;
+                it->GetNext((IInterface**)&obj);
+                AutoPtr<IDataConnection> dc = IDataConnection::Probe(obj);
+                ((DataConnection*) dc.Get())->TearDownNow();
+            }
+        } else {
+            if (DBG) Log("onReceive: mDcc is null, ignoring");
+        }
+    } else {
+        if (DBG) Log("onReceive: unknown action=%s", action.string());
+    }
+    return NOERROR;
 }
 
 //=============================================================================
@@ -46,7 +64,7 @@ ECode DcTesterDeactivateAll::SubBroadcastReceiver::OnReceive(
 CAR_INTERFACE_IMPL(DcTesterDeactivateAll, Object, IDcTesterDeactivateAll)
 
 const String DcTesterDeactivateAll::LOG__TAG("DcTesterDeacativeAll");
-const Boolean DcTesterDeactivateAll::DBG = true;
+const Boolean DcTesterDeactivateAll::DBG = TRUE;
 String DcTesterDeactivateAll::sActionDcTesterDeactivateAll("com.android.internal.telephony.dataconnection.action_deactivate_all");
 
 DcTesterDeactivateAll::DcTesterDeactivateAll()
@@ -59,41 +77,46 @@ ECode DcTesterDeactivateAll::constructor(
     /* [in] */ IDcController* dcc,
     /* [in] */ IHandler* handler)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mPhone = phone;
-        mDcc = dcc;
-        if (Build.IS_DEBUGGABLE) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(sActionDcTesterDeactivateAll);
-            log("register for intent action=" + sActionDcTesterDeactivateAll);
-            filter.addAction(mPhone.getActionDetached());
-            log("register for intent action=" + mPhone.getActionDetached());
-            phone.getContext().registerReceiver(sIntentReceiver, filter, null, handler);
-        }
-
-#endif
+    mPhone = phone;
+    mDcc = dcc;
+    if (Build::IS_DEBUGGABLE) {
+        AutoPtr<IIntentFilter> filter;
+        CIntentFilter::New((IIntentFilter**)&filter);
+        filter->AddAction(sActionDcTesterDeactivateAll);
+        Log("register for intent action=%s", sActionDcTesterDeactivateAll.string());
+        String actionDetached;
+        mPhone->GetActionDetached(&actionDetached);
+        filter->AddAction(actionDetached);
+        Log("register for intent action=%s", actionDetached.string());
+        AutoPtr<IContext> context;
+        IPhone::Probe(phone)->GetContext((IContext**)&context);
+        AutoPtr<IIntent> intent;
+        context->RegisterReceiver(sIntentReceiver, filter, String(NULL), handler, (IIntent**)&intent);
+    }
+    return NOERROR;
 }
 
 ECode DcTesterDeactivateAll::Dispose()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (Build.IS_DEBUGGABLE) {
-            mPhone.getContext().unregisterReceiver(sIntentReceiver);
-        }
-
-#endif
+    if (Build::IS_DEBUGGABLE) {
+        AutoPtr<IContext> context;
+        IPhone::Probe(mPhone)->GetContext((IContext**)&context);
+        context->UnregisterReceiver(sIntentReceiver);
+    }
+    return NOERROR;
 }
 
+#define MSG_BUF_SIZE    1024
 ECode DcTesterDeactivateAll::Log(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Rlog.d(LOG__TAG, s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    return Logger::D(LOG__TAG, msgBuf);
 }
 
 } // namespace DataConnection

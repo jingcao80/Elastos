@@ -8,6 +8,8 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
+CAR_INTERFACE_IMPL(Registrant, Object, IRegistrant)
+
 Registrant::Registrant(
     /* [in] */ IHandler* h,
     /* [in] */ Int32 what,
@@ -20,36 +22,41 @@ Registrant::Registrant(
     mUserObj = obj;
 }
 
-void Registrant::Clear()
+ECode Registrant::Clear()
 {
     mRefH = NULL;
     mUserObj = NULL;
+    return NOERROR;
 }
 
-void Registrant::NotifyRegistrant()
+ECode Registrant::NotifyRegistrant()
 {
     InternalNotifyRegistrant (NULL, NULL);
+    return NOERROR;
 }
 
-void Registrant::NotifyResult(
+ECode Registrant::NotifyResult(
     /* [in] */ IInterface* result)
 {
     InternalNotifyRegistrant (result, NULL);
+    return NOERROR;
 }
 
-void Registrant::NotifyException(
+ECode Registrant::NotifyException(
     /* [in] */ IThrowable* exception)
 {
     InternalNotifyRegistrant (NULL, exception);
+    return NOERROR;
 }
 
 /**
  * This makes a copy of @param ar
  */
-void Registrant::NotifyRegistrant(
-    /* [in] */ AsyncResult* ar)
+ECode Registrant::NotifyRegistrant(
+    /* [in] */ IAsyncResult* ar)
 {
-    InternalNotifyRegistrant (ar->mResult, ar->mException);
+    InternalNotifyRegistrant (((AsyncResult*) ar)->mResult, ((AsyncResult*) ar)->mException);
+    return NOERROR;
 }
 
 /*package*/
@@ -57,7 +64,8 @@ void Registrant::InternalNotifyRegistrant(
     /* [in] */ IInterface* result,
     /* [in] */ IThrowable* exception)
 {
-    AutoPtr<IHandler> h = GetHandler();
+    AutoPtr<IHandler> h;
+    GetHandler((IHandler**)&h);
 
     if (h == NULL) {
         Clear();
@@ -78,14 +86,19 @@ void Registrant::InternalNotifyRegistrant(
 /**
  * NOTE: May return NULL if weak reference has been collected
  */
-AutoPtr<IMessage> Registrant::MessageForRegistrant()
+ECode Registrant::MessageForRegistrant(
+    /* [out] */ IMessage** result)
 {
-    AutoPtr<IHandler> h = GetHandler();
+    VALIDATE_NOT_NULL(result)
+
+    AutoPtr<IHandler> h;
+    GetHandler((IHandler**)&h);
 
     if (h == NULL) {
         Clear();
 
-        return NULL;
+        *result = NULL;
+        return NOERROR;
     }
     else {
         AutoPtr<IMessage> msg;
@@ -94,18 +107,28 @@ AutoPtr<IMessage> Registrant::MessageForRegistrant()
         msg->SetWhat(mWhat);
         msg->SetObj(mUserObj);
 
-        return msg;
+        *result = msg;
+        REFCOUNT_ADD(*result)
+        return NOERROR;
     }
+    return NOERROR;
 }
 
-AutoPtr<IHandler> Registrant::GetHandler()
+ECode Registrant::GetHandler(
+    /* [out] */ IHandler** result)
 {
-    if (mRefH == NULL)
-        return NULL;
+    VALIDATE_NOT_NULL(result)
+
+    if (mRefH == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
 
     AutoPtr<IHandler> handler;
     mRefH->Resolve(EIID_IHandler, (IInterface**)&handler);
-    return handler;
+    *result = handler;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 } // namespace Os

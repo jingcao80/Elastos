@@ -1,5 +1,16 @@
 
 #include "elastos/droid/internal/telephony/dataconnection/DcAsyncChannel.h"
+#include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
+#include "elastos/droid/internal/utility/AsyncChannel.h"
+#include <elastos/core/Thread.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Internal::Utility::IStateMachine;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Core::IThread;
+using Elastos::Core::Thread;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -9,302 +20,319 @@ namespace DataConnection {
 
 CAR_INTERFACE_IMPL(DcAsyncChannel, AsyncChannel, IDcAsyncChannel)
 
-const Boolean DcAsyncChannel::DBG = false;
+const Boolean DcAsyncChannel::DBG = FALSE;
 const Int32 DcAsyncChannel::CMD_TO_STRING_COUNT = RSP_RESET - BASE + 1;
 AutoPtr<ArrayOf<String> > DcAsyncChannel::sCmdToString = InitCmdToString();
 
 ECode DcAsyncChannel::CmdToString(
-    /* [in] */ Int32 cmd,
+    /* [in] */ Int32 _cmd,
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        cmd -= BASE;
-        if ((cmd >= 0) && (cmd < sCmdToString.length)) {
-            return sCmdToString[cmd];
-        } else {
-            return AsyncChannel.cmdToString(cmd + BASE);
-        }
+    VALIDATE_NOT_NULL(result)
+    *result = String(NULL);
 
-#endif
+    Int32 cmd = _cmd;
+    cmd -= BASE;
+    if ((cmd >= 0) && (cmd < sCmdToString->GetLength())) {
+        *result = (*sCmdToString)[cmd];
+        return NOERROR;
+    } else {
+        assert(0 && "AsyncChannel");
+        // return AsyncChannel::CmdToString(cmd + BASE, result);
+    }
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::constructor(
     /* [in] */ IDataConnection* dc,
     /* [in] */ const String& logTag)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mDc = dc;
-        mDcThreadId = mDc.getHandler().getLooper().getThread().getId();
-        mLogTag = logTag;
-
-#endif
+    mDc = dc;
+    AutoPtr<IHandler> handler;
+    IStateMachine::Probe(mDc)->GetHandler((IHandler**)&handler);
+    AutoPtr<ILooper> looper;
+    handler->GetLooper((ILooper**)&looper);
+    AutoPtr<IThread> thread;
+    looper->GetThread((IThread**)&thread);
+    thread->GetId(&mDcThreadId);
+    mLogTag = logTag;
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::ReqIsInactive()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        sendMessage(REQ_IS_INACTIVE);
-        if (DBG) log("reqIsInactive");
-
-#endif
+    SendMessage(REQ_IS_INACTIVE);
+    if (DBG) Log("reqIsInactive");
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::RspIsInactive(
     /* [in] */ IMessage* response,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean retVal = response.arg1 == 1;
-        if (DBG) log("rspIsInactive=" + retVal);
-        return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 arg1;
+    response->GetArg1(&arg1);
+    Boolean retVal = arg1 == 1;
+    if (DBG) Log("rspIsInactive=%d", retVal);
+    *result = retVal;
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::IsInactiveSync(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean value;
-        if (isCallerOnDifferentThread()) {
-            Message response = sendMessageSynchronously(REQ_IS_INACTIVE);
-            if ((response != null) && (response.what == RSP_IS_INACTIVE)) {
-                value = rspIsInactive(response);
-            } else {
-                log("rspIsInactive error response=" + response);
-                value = false;
-            }
-        } else {
-            value = mDc.getIsInactive();
-        }
-        return value;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Boolean value;
+    Boolean isCallerOnDifferentThread;
+    IsCallerOnDifferentThread(&isCallerOnDifferentThread);
+    if (isCallerOnDifferentThread) {
+        AutoPtr<IMessage> response;
+        SendMessageSynchronously(REQ_IS_INACTIVE, (IMessage**)&response);
+        Int32 what;
+        response->GetWhat(&what);
+        if ((response != NULL) && (what == RSP_IS_INACTIVE)) {
+            RspIsInactive(response, &value);
+        } else {
+            Log("rspIsInactive error response=%s", TO_CSTR(response));
+            value = FALSE;
+        }
+    } else {
+        ((DataConnection*) mDc.Get())->GetIsInactive(&value);
+    }
+    *result = value;
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::ReqCid()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        sendMessage(REQ_GET_CID);
-        if (DBG) log("reqCid");
-
-#endif
+    SendMessage(REQ_GET_CID);
+    if (DBG) Log("reqCid");
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::RspCid(
     /* [in] */ IMessage* response,
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        int retVal = response.arg1;
-        if (DBG) log("rspCid=" + retVal);
-        return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 retVal;
+    response->GetArg1(&retVal);
+    if (DBG) Log("rspCid=%d", retVal);
+    *result = retVal;
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::GetCidSync(
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        int value;
-        if (isCallerOnDifferentThread()) {
-            Message response = sendMessageSynchronously(REQ_GET_CID);
-            if ((response != null) && (response.what == RSP_GET_CID)) {
-                value = rspCid(response);
-            } else {
-                log("rspCid error response=" + response);
-                value = -1;
-            }
-        } else {
-            value = mDc.getCid();
-        }
-        return value;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 value;
+    Boolean isCallerOnDifferentThread;
+    IsCallerOnDifferentThread(&isCallerOnDifferentThread);
+    if (isCallerOnDifferentThread) {
+        AutoPtr<IMessage> response;
+        SendMessageSynchronously(REQ_GET_CID, (IMessage**)&response);
+        Int32 what;
+        response->GetWhat(&what);
+        if ((response != NULL) && (what == RSP_GET_CID)) {
+            RspCid(response, &value);
+        } else {
+            Log("rspCid error response=%s", TO_CSTR(response));
+            value = -1;
+        }
+    } else {
+        ((DataConnection*) mDc.Get())->GetCid(&value);
+    }
+    *result = value;
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::ReqApnSetting()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        sendMessage(REQ_GET_APNSETTING);
-        if (DBG) log("reqApnSetting");
-
-#endif
+    SendMessage(REQ_GET_APNSETTING);
+    if (DBG) Log("reqApnSetting");
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::RspApnSetting(
     /* [in] */ IMessage* response,
     /* [out] */ IApnSetting** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ApnSetting retVal = (ApnSetting) response.obj;
-        if (DBG) log("rspApnSetting=" + retVal);
-        return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IInterface> obj;
+    response->GetObj((IInterface**)&obj);
+    AutoPtr<IApnSetting> retVal = IApnSetting::Probe(obj);
+    if (DBG) Log("rspApnSetting=%s", TO_CSTR(retVal));
+    *result = retVal;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::GetApnSettingSync(
     /* [out] */ IApnSetting** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ApnSetting value;
-        if (isCallerOnDifferentThread()) {
-            Message response = sendMessageSynchronously(REQ_GET_APNSETTING);
-            if ((response != null) && (response.what == RSP_GET_APNSETTING)) {
-                value = rspApnSetting(response);
-            } else {
-                log("getApnSetting error response=" + response);
-                value = null;
-            }
-        } else {
-            value = mDc.getApnSetting();
-        }
-        return value;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IApnSetting> value;
+    Boolean isCallerOnDifferentThread;
+    IsCallerOnDifferentThread(&isCallerOnDifferentThread);
+    if (isCallerOnDifferentThread) {
+        AutoPtr<IMessage> response;
+        SendMessageSynchronously(REQ_GET_APNSETTING, (IMessage**)&response);
+        Int32 what;
+        response->GetWhat(&what);
+        if ((response != NULL) && (what == RSP_GET_APNSETTING)) {
+            RspApnSetting(response, (IApnSetting**)&value);
+        } else {
+            Log("getApnSetting error response=%s", TO_CSTR(response));
+            value = NULL;
+        }
+    } else {
+        ((DataConnection*) mDc.Get())->GetApnSetting((IApnSetting**)&value);
+    }
+    *result = value;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::ReqLinkProperties()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        sendMessage(REQ_GET_LINK_PROPERTIES);
-        if (DBG) log("reqLinkProperties");
-
-#endif
+    SendMessage(REQ_GET_LINK_PROPERTIES);
+    if (DBG) Log("reqLinkProperties");
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::RspLinkProperties(
     /* [in] */ IMessage* response,
     /* [out] */ ILinkProperties** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        LinkProperties retVal = (LinkProperties) response.obj;
-        if (DBG) log("rspLinkProperties=" + retVal);
-        return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IInterface> obj;
+    response->GetObj((IInterface**)&obj);
+    AutoPtr<ILinkProperties> retVal = ILinkProperties::Probe(obj);
+    if (DBG) Log("rspLinkProperties=%s", TO_CSTR(retVal));
+    *result = retVal;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::GetLinkPropertiesSync(
     /* [out] */ ILinkProperties** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        LinkProperties value;
-        if (isCallerOnDifferentThread()) {
-            Message response = sendMessageSynchronously(REQ_GET_LINK_PROPERTIES);
-            if ((response != null) && (response.what == RSP_GET_LINK_PROPERTIES)) {
-                value = rspLinkProperties(response);
-            } else {
-                log("getLinkProperties error response=" + response);
-                value = null;
-            }
-        } else {
-            value = mDc.getCopyLinkProperties();
-        }
-        return value;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<ILinkProperties> value;
+    Boolean isCallerOnDifferentThread;
+    IsCallerOnDifferentThread(&isCallerOnDifferentThread);
+    if (isCallerOnDifferentThread) {
+        AutoPtr<IMessage> response;
+        SendMessageSynchronously(REQ_GET_LINK_PROPERTIES, (IMessage**)&response);
+        Int32 what;
+        response->GetWhat(&what);
+        if ((response != NULL) && (what == RSP_GET_LINK_PROPERTIES)) {
+            RspLinkProperties(response, (ILinkProperties**)&value);
+        } else {
+            Log("getLinkProperties error response=%s", TO_CSTR(response));
+            value = NULL;
+        }
+    } else {
+        ((DataConnection*) mDc.Get())->GetCopyLinkProperties((ILinkProperties**)&value);
+    }
+    *result = value;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::ReqSetLinkPropertiesHttpProxy(
     /* [in] */ IProxyInfo* proxy)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        sendMessage(REQ_SET_LINK_PROPERTIES_HTTP_PROXY, proxy);
-        if (DBG) log("reqSetLinkPropertiesHttpProxy proxy=" + proxy);
-
-#endif
+    SendMessage(REQ_SET_LINK_PROPERTIES_HTTP_PROXY, proxy);
+    if (DBG) Log("reqSetLinkPropertiesHttpProxy proxy=%s", TO_CSTR(proxy));
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::SetLinkPropertiesHttpProxySync(
     /* [in] */ IProxyInfo* proxy)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (isCallerOnDifferentThread()) {
-            Message response =
-                sendMessageSynchronously(REQ_SET_LINK_PROPERTIES_HTTP_PROXY, proxy);
-            if ((response != null) && (response.what == RSP_SET_LINK_PROPERTIES_HTTP_PROXY)) {
-                if (DBG) log("setLinkPropertiesHttpPoxy ok");
-            } else {
-                log("setLinkPropertiesHttpPoxy error response=" + response);
-            }
+    Boolean isCallerOnDifferentThread;
+    IsCallerOnDifferentThread(&isCallerOnDifferentThread);
+    if (isCallerOnDifferentThread) {
+        AutoPtr<IMessage> response;
+        SendMessageSynchronously(REQ_SET_LINK_PROPERTIES_HTTP_PROXY, proxy,
+                (IMessage**)&response);
+        Int32 what;
+        response->GetWhat(&what);
+        if ((response != NULL) && (what == RSP_SET_LINK_PROPERTIES_HTTP_PROXY)) {
+            if (DBG) Log("setLinkPropertiesHttpPoxy ok");
         } else {
-            mDc.setLinkPropertiesHttpProxy(proxy);
+            Log("setLinkPropertiesHttpPoxy error response=%s", TO_CSTR(response));
         }
-
-#endif
+    } else {
+        ((DataConnection*) mDc.Get())->SetLinkPropertiesHttpProxy(proxy);
+    }
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::ReqNetworkCapabilities()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        sendMessage(REQ_GET_NETWORK_CAPABILITIES);
-        if (DBG) log("reqNetworkCapabilities");
-
-#endif
+    SendMessage(REQ_GET_NETWORK_CAPABILITIES);
+    if (DBG) Log("reqNetworkCapabilities");
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::RspNetworkCapabilities(
     /* [in] */ IMessage* response,
     /* [out] */ INetworkCapabilities** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        NetworkCapabilities retVal = (NetworkCapabilities) response.obj;
-        if (DBG) log("rspNetworkCapabilities=" + retVal);
-        return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IInterface> obj;
+    response->GetObj((IInterface**)&obj);
+    AutoPtr<INetworkCapabilities> retVal = INetworkCapabilities::Probe(obj);
+    if (DBG) Log("rspNetworkCapabilities=%s", TO_CSTR(retVal));
+    *result = retVal;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::GetNetworkCapabilitiesSync(
     /* [out] */ INetworkCapabilities** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        NetworkCapabilities value;
-        if (isCallerOnDifferentThread()) {
-            Message response = sendMessageSynchronously(REQ_GET_NETWORK_CAPABILITIES);
-            if ((response != null) && (response.what == RSP_GET_NETWORK_CAPABILITIES)) {
-                value = rspNetworkCapabilities(response);
-            } else {
-                value = null;
-            }
-        } else {
-            value = mDc.getCopyNetworkCapabilities();
-        }
-        return value;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<INetworkCapabilities> value;
+    Boolean isCallerOnDifferentThread;
+    IsCallerOnDifferentThread(&isCallerOnDifferentThread);
+    if (isCallerOnDifferentThread) {
+        AutoPtr<IMessage> response;
+        SendMessageSynchronously(REQ_GET_NETWORK_CAPABILITIES, (IMessage**)&response);
+        Int32 what;
+        response->GetWhat(&what);
+        if ((response != NULL) && (what == RSP_GET_NETWORK_CAPABILITIES)) {
+            RspNetworkCapabilities(response, (INetworkCapabilities**)&value);
+        } else {
+            value = NULL;
+        }
+    } else {
+        ((DataConnection*) mDc.Get())->GetCopyNetworkCapabilities((INetworkCapabilities**)&value);
+    }
+    *result = value;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::ReqReset()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        sendMessage(REQ_RESET);
-        if (DBG) log("reqReset");
-
-#endif
+    SendMessage(REQ_RESET);
+    if (DBG) Log("reqReset");
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::BringUp(
@@ -315,17 +343,15 @@ ECode DcAsyncChannel::BringUp(
     /* [in] */ Boolean retryWhenSSChange,
     /* [in] */ IMessage* onCompletedMsg)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) {
-            log("bringUp: apnContext=" + apnContext + " initialMaxRetry=" + initialMaxRetry
-                + " onCompletedMsg=" + onCompletedMsg);
-        }
-        sendMessage(DataConnection.EVENT_CONNECT,
-                    new ConnectionParams(apnContext, initialMaxRetry, profileId,
-                            rilRadioTechnology, retryWhenSSChange, onCompletedMsg));
-
-#endif
+    if (DBG) {
+        Log("bringUp: apnContext=%s initialMaxRetry=%d onCompletedMsg=%s",
+                TO_CSTR(apnContext), initialMaxRetry, TO_CSTR(onCompletedMsg));
+    }
+    AutoPtr<DataConnection::ConnectionParams> params = new DataConnection::ConnectionParams();
+    params->constructor(apnContext, initialMaxRetry, profileId,
+            rilRadioTechnology, retryWhenSSChange, onCompletedMsg);
+    SendMessage(DataConnection::EVENT_CONNECT, TO_IINTERFACE(params));
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::TearDown(
@@ -333,83 +359,75 @@ ECode DcAsyncChannel::TearDown(
     /* [in] */ const String& reason,
     /* [in] */ IMessage* onCompletedMsg)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) {
-            log("tearDown: apnContext=" + apnContext
-                    + " reason=" + reason + " onCompletedMsg=" + onCompletedMsg);
-        }
-        sendMessage(DataConnection.EVENT_DISCONNECT,
-                        new DisconnectParams(apnContext, reason, onCompletedMsg));
-
-#endif
+    if (DBG) {
+        Log("tearDown: apnContext=%s reason=%s onCompletedMsg=%s",
+                TO_CSTR(apnContext), reason.string(), TO_CSTR(onCompletedMsg));
+    }
+    AutoPtr<DataConnection::DisconnectParams> params = new DataConnection::DisconnectParams();
+    params->constructor(apnContext, reason, onCompletedMsg);
+    SendMessage(DataConnection::EVENT_DISCONNECT, TO_IINTERFACE(params));
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::TearDownAll(
     /* [in] */ const String& reason,
     /* [in] */ IMessage* onCompletedMsg)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (DBG) log("tearDownAll: reason=" + reason + " onCompletedMsg=" + onCompletedMsg);
-        sendMessage(DataConnection.EVENT_DISCONNECT_ALL,
-                new DisconnectParams(null, reason, onCompletedMsg));
-
-#endif
+    if (DBG) Log("tearDownAll: reason=%s onCompletedMsg=%s",
+            reason.string(), TO_CSTR(onCompletedMsg));
+    AutoPtr<DataConnection::DisconnectParams> params = new DataConnection::DisconnectParams();
+    params->constructor(NULL, reason, onCompletedMsg);
+    SendMessage(DataConnection::EVENT_DISCONNECT_ALL, TO_IINTERFACE(params));
+    return NOERROR;
 }
 
 ECode DcAsyncChannel::GetDataConnectionIdSync(
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // Safe because this is owned by the caller.
-        return mDc.getDataConnectionId();
-
-#endif
+    // Safe because this is owned by the caller.
+    return mDc->GetDataConnectionId(result);
 }
 
 ECode DcAsyncChannel::ToString(
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mDc.getName();
-
-#endif
+    return ((DataConnection*) mDc.Get())->GetName(result);
 }
 
 ECode DcAsyncChannel::IsCallerOnDifferentThread(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        long curThreadId = Thread.currentThread().getId();
-        boolean value = mDcThreadId != curThreadId;
-        if (DBG) log("isCallerOnDifferentThread: " + value);
-        return value;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int64 curThreadId;
+    Thread::GetCurrentThread()->GetId(&curThreadId);
+    Boolean value = mDcThreadId != curThreadId;
+    if (DBG) Log("isCallerOnDifferentThread: %d", value);
+    *result = value;
+    return NOERROR;
 }
 
+#define MSG_BUF_SIZE    1024
 ECode DcAsyncChannel::Log(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        android.telephony.Rlog.d(mLogTag, "DataConnectionAc " + s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    return Logger::D(mLogTag, "DataConnectionAc %s", msgBuf);
 }
 
 ECode DcAsyncChannel::GetPcscfAddr(
     /* [out, callee] */ ArrayOf<String>** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mDc.mPcscfAddr;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    *result = ((DataConnection*) mDc.Get())->mPcscfAddr;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 AutoPtr<ArrayOf<String> > DcAsyncChannel::InitCmdToString()

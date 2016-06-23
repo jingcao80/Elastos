@@ -15,7 +15,6 @@ module
      * interface IDcTrackerBase
      */
     interface IDcTracker {
-
         GetAnyDataEnabled(
             [in] Boolean checkUserDataEnabled,
             [out] Boolean* result);
@@ -48,7 +47,6 @@ module
         SetDataAllowed(
             [in] Boolean enbl,
             [in] IMessage* response);
-
     }
 
     }//DataConnection

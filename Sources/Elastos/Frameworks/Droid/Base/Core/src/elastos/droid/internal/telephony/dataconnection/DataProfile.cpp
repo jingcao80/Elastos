@@ -1,5 +1,9 @@
 
 #include "elastos/droid/internal/telephony/dataconnection/DataProfile.h"
+#include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
+#include "elastos/droid/telephony/CServiceState.h"
+
+using Elastos::Droid::Telephony::CServiceState;
 
 namespace Elastos {
 namespace Droid {
@@ -26,35 +30,54 @@ ECode DataProfile::constructor(
     /* [in] */ Int32 waitTime,
     /* [in] */ Boolean enabled)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        this.profileId = profileId;
-        this.apn = apn;
-        this.protocol = protocol;
-        this.authType = authType;
-        this.user = user;
-        this.password = password;
-        this.type = type;
-        this.maxConnsTime = maxConnsTime;
-        this.maxConns = maxConns;
-        this.waitTime = waitTime;
-        this.enabled = enabled;
-
-#endif
+    mProfileId = profileId;
+    mApn = apn;
+    mProtocol = protocol;
+    mAuthType = authType;
+    mUser = user;
+    mPassword = password;
+    mType = type;
+    mMaxConnsTime = maxConnsTime;
+    mMaxConns = maxConns;
+    mWaitTime = waitTime;
+    mEnabled = enabled;
+    return NOERROR;
 }
 
 ECode DataProfile::constructor(
     /* [in] */ IApnSetting* apn,
     /* [in] */ Boolean isRoaming)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        this(apn.profileId, apn.apn, isRoaming? apn.protocol : apn.roamingProtocol,
-                apn.authType, apn.user, apn.password, apn.bearer == 0 ? TYPE_COMMON :
-                (ServiceState.isCdma(apn.bearer) ? TYPE_3GPP2 : TYPE_3GPP), apn.maxConnsTime,
-                apn.maxConns, apn.waitTime, apn.carrierEnabled);
-
-#endif
+    Int32 bearer;
+    apn->GetBearer(&bearer);
+    Boolean isCdma;
+    CServiceState::IsCdma(bearer, &isCdma);
+    Int32 profileId;
+    apn->GetProfileId(&profileId);
+    String apnName;
+    apn->GetApn(&apnName);
+    String protocol;
+    apn->GetProtocol(&protocol);
+    String roamingProtocol;
+    apn->GetRoamingProtocol(&roamingProtocol);
+    Int32 authType;
+    apn->GetAuthType(&authType);
+    String user;
+    apn->GetUser(&user);
+    String password;
+    apn->GetPassword(&password);
+    Int32 maxConnsTime;
+    apn->GetMaxConnsTime(&maxConnsTime);
+    Int32 maxConns;
+    apn->GetMaxConns(&maxConns);
+    Int32 waitTime;
+    apn->GetWaitTime(&waitTime);
+    Boolean carrierEnabled;
+    apn->GetCarrierEnabled(&carrierEnabled);
+    return constructor(profileId, apnName, isRoaming? protocol : roamingProtocol,
+            authType, user, password, bearer == 0 ? TYPE_COMMON :
+            (isCdma ? TYPE_3GPP2 : TYPE_3GPP), maxConnsTime,
+            maxConns, waitTime, carrierEnabled);
 }
 
 ECode DataProfile::ToParcel(
@@ -62,52 +85,61 @@ ECode DataProfile::ToParcel(
     /* [in] */ ArrayOf<IDataProfile*>* dps,
     /* [out] */ IParcel** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if(pc == null) {
-            return null;
-        }
-        pc.writeInt(dps.length);
-        for(int i = 0; i < dps.length; i++) {
-            pc.writeInt(dps[i].profileId);
-            pc.writeString(dps[i].apn);
-            pc.writeString(dps[i].protocol);
-            pc.writeInt(dps[i].authType);
-            pc.writeString(dps[i].user);
-            pc.writeString(dps[i].password);
-            pc.writeInt(dps[i].type);
-            pc.writeInt(dps[i].maxConnsTime);
-            pc.writeInt(dps[i].maxConns);
-            pc.writeInt(dps[i].waitTime);
-            pc.writeInt(dps[i].enabled ? 1 : 0);
-        }
-        return pc;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (pc == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
+    pc->WriteInt32(dps->GetLength());
+    for (Int32 i = 0; i < dps->GetLength(); i++) {
+        pc->WriteInt32(((DataProfile*) (*dps)[i])->mProfileId);
+        pc->WriteString(((DataProfile*) (*dps)[i])->mApn);
+        pc->WriteString(((DataProfile*) (*dps)[i])->mProtocol);
+        pc->WriteInt32(((DataProfile*) (*dps)[i])->mAuthType);
+        pc->WriteString(((DataProfile*) (*dps)[i])->mUser);
+        pc->WriteString(((DataProfile*) (*dps)[i])->mPassword);
+        pc->WriteInt32(((DataProfile*) (*dps)[i])->mType);
+        pc->WriteInt32(((DataProfile*) (*dps)[i])->mMaxConnsTime);
+        pc->WriteInt32(((DataProfile*) (*dps)[i])->mMaxConns);
+        pc->WriteInt32(((DataProfile*) (*dps)[i])->mWaitTime);
+        pc->WriteInt32(((DataProfile*) (*dps)[i])->mEnabled ? 1 : 0);
+    }
+    *result = pc;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode DataProfile::ToString(
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return "DataProfile " + profileId + "/" + apn + "/" + protocol + "/" + authType
-                + "/" + user + "/" + password + "/" + type + "/" + maxConnsTime
-                + "/" + maxConns + "/" + waitTime + "/" + enabled;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    String rev;
+    rev.AppendFormat("DataProfile %d//%s/%s/%d/%s/%s/%d/%d/%d/%d/%d",
+            mProfileId, mApn.string(), mProtocol.string(), mAuthType, mUser.string(),
+            mPassword.string(), mType, mMaxConnsTime, mMaxConns, mWaitTime, mEnabled);
+    *result = rev;
+    return NOERROR;
 }
 
 ECode DataProfile::Equals(
     /* [in] */ IInterface* o,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (o instanceof DataProfile == false) return false;
-        return (toString().equals(o.toString()));
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
+        *result = TRUE;
+        return NOERROR;
+    }
+
+    if (IDataProfile::Probe(o) != NULL == FALSE) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    *result = (TO_STR(TO_IINTERFACE(this)).Equals(TO_STR(o)));
+    return NOERROR;
 }
 
 ECode DataProfile::GetProfileId(

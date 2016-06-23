@@ -1,10 +1,31 @@
 
+#include "elastos/droid/internal/telephony/dataconnection/CDdsScheduler.h"
+#include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
+#include "elastos/droid/internal/telephony/dataconnection/DcSwitchState.h"
+#include "elastos/droid/internal/telephony/dataconnection/DctController.h"
 #include "elastos/droid/internal/telephony/dataconnection/DdsScheduler.h"
+#include "elastos/droid/internal/utility/StateMachine.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/provider/Telephony.h"
 #include <Elastos.Droid.Net.h>
 #include <Elastos.Droid.Telephony.h>
-#include <Elastos.CoreLibrary.Utility.h>
+#include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Internal::Telephony::IModemStackController;
+using Elastos::Droid::Internal::Telephony::ISubscriptionController;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::Provider::Telephony;
 using Elastos::Droid::Telephony::ISubscriptionManager;
+using Elastos::Core::AutoLock;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::CCollections;
+using Elastos::Utility::ICollections;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -17,7 +38,7 @@ namespace DataConnection {
 //=============================================================================
 DdsScheduler::NetworkRequestInfo::NetworkRequestInfo(
     /* [in] */ DdsScheduler* host)
-    : mAccepted(false)
+    : mAccepted(FALSE)
     , mHost(host)
 {}
 
@@ -25,21 +46,19 @@ DdsScheduler::NetworkRequestInfo::NetworkRequestInfo(
 ECode DdsScheduler::NetworkRequestInfo::constructor(
     /* [in] */ INetworkRequest* req)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                mRequest = req;
-
-#endif
+    mRequest = req;
+    return NOERROR;
 }
 
 ECode DdsScheduler::NetworkRequestInfo::ToString(
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                return mRequest + " accepted = " + mAccepted;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    String rev;
+    rev.AppendFormat("%s accepted = %d", TO_CSTR(mRequest), mAccepted);
+    *result = rev;
+    return NOERROR;
 }
 
 ECode DdsScheduler::NetworkRequestInfo::GetMRequest(
@@ -79,58 +98,70 @@ DdsScheduler::DefaultState::DefaultState(
 
 ECode DdsScheduler::DefaultState::Enter()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-
-#endif
+    return NOERROR;
 }
 
 ECode DdsScheduler::DefaultState::Exit()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-
-#endif
+    return NOERROR;
 }
 
 ECode DdsScheduler::DefaultState::ProcessMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                switch(msg.what) {
-                    case DdsSchedulerAc.EVENT_ADD_REQUEST: {
-                        NetworkRequest nr = (NetworkRequest)msg.obj;
-                        Rlog.d(TAG, "EVENT_ADD_REQUEST = " + nr);
-                        addRequest(nr);
-                        sendMessage(obtainMessage(DdsSchedulerAc.REQ_DDS_ALLOCATION, nr));
-                        break;
-                    }
-                    case DdsSchedulerAc.EVENT_REMOVE_REQUEST: {
-                        NetworkRequest nr = (NetworkRequest)msg.obj;
-                        Rlog.d(TAG, "EVENT_REMOVE_REQUEST" + nr);
-                        removeRequest(nr);
-                        sendMessage(obtainMessage(DdsSchedulerAc.REQ_DDS_FREE, nr));
-                        break;
-                    }
-                    case DdsSchedulerAc.REQ_DDS_ALLOCATION: {
-                        Rlog.d(TAG, "REQ_DDS_ALLOCATION, currentState = "
-                                + getCurrentState().getName());
-                        return HANDLED;
-                    }
-                    case DdsSchedulerAc.REQ_DDS_FREE: {
-                        Rlog.d(TAG, "REQ_DDS_FREE, currentState = " + getCurrentState().getName());
-                        return HANDLED;
-                    }
-                    default: {
-                        Rlog.d(TAG, "unknown msg = " + msg);
-                        break;
-                    }
-                }
-                return HANDLED;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 msgWhat;
+    msg->GetWhat(&msgWhat);
+    AutoPtr<IInterface> msgObj;
+    msg->GetObj((IInterface**)&msgObj);
+    switch(msgWhat) {
+        case IDdsSchedulerAc::EVENT_ADD_REQUEST: {
+            AutoPtr<INetworkRequest> nr = INetworkRequest::Probe(msgObj);
+            Logger::D(TAG, "EVENT_ADD_REQUEST = %s", TO_CSTR(nr));
+            mHost->AddRequest(nr);
+            AutoPtr<IMessage> msg;
+            mHost->ObtainMessage(IDdsSchedulerAc::REQ_DDS_ALLOCATION, nr, (IMessage**)&msg);
+            mHost->SendMessage(msg);
+            break;
+        }
+        case IDdsSchedulerAc::EVENT_REMOVE_REQUEST: {
+            AutoPtr<INetworkRequest> nr = INetworkRequest::Probe(msgObj);
+            Logger::D(TAG, "EVENT_REMOVE_REQUEST%s", TO_CSTR(nr));
+            mHost->RemoveRequest(nr);
+            AutoPtr<IMessage> msg;
+            mHost->ObtainMessage(IDdsSchedulerAc::REQ_DDS_FREE, nr, (IMessage**)&msg);
+            mHost->SendMessage(msg);
+            break;
+        }
+        case IDdsSchedulerAc::REQ_DDS_ALLOCATION: {
+            String name;
+            mHost->GetCurrentState()->GetName(&name);
+            Logger::D(TAG, "REQ_DDS_ALLOCATION, currentState = %s",
+                    name.string());
+            *result = HANDLED;
+            return NOERROR;
+        }
+        case IDdsSchedulerAc::REQ_DDS_FREE: {
+            String name;
+            mHost->GetCurrentState()->GetName(&name);
+            Logger::D(TAG, "REQ_DDS_FREE, currentState = %s", name.string());
+            *result = HANDLED;
+            return NOERROR;
+        }
+        default: {
+            Logger::D(TAG, "unknown msg = %s", TO_CSTR(msg));
+            break;
+        }
+    }
+    *result = HANDLED;
+    return NOERROR;
+}
+
+String DdsScheduler::DefaultState::GetName()
+{
+    return String("DcSwitchState::IdleState");
 }
 
 //=============================================================================
@@ -145,57 +176,65 @@ DdsScheduler::DdsIdleState::DdsIdleState(
 
 ECode DdsScheduler::DdsIdleState::Enter()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                Rlog.d(TAG, "Enter");
-                NetworkRequest nr = getFirstWaitingRequest();
-                if(nr != null) {
-                    Rlog.d(TAG, "Request pending = " + nr);
-                    if (!isDdsSwitchRequired(nr)) {
-                        transitionTo(mDdsReservedState);
-                    } else {
-                        transitionTo(mDdsSwitchState);
-                    }
-                } else {
-                    Rlog.d(TAG, "Nothing to process");
-                }
-
-#endif
+    Logger::D(TAG, "Enter");
+    AutoPtr<INetworkRequest> nr;
+    mHost->GetFirstWaitingRequest((INetworkRequest**)&nr);
+    if (nr != NULL) {
+        Logger::D(TAG, "Request pending = %s", TO_CSTR(nr));
+        Boolean isDdsSwitchRequired;
+        mHost->IsDdsSwitchRequired(nr, &isDdsSwitchRequired);
+        if (!isDdsSwitchRequired) {
+            mHost->TransitionTo(mHost->mDdsReservedState);
+        } else {
+            mHost->TransitionTo(mHost->mDdsSwitchState);
+        }
+    } else {
+        Logger::D(TAG, "Nothing to process");
+    }
+    return NOERROR;
 }
 
 ECode DdsScheduler::DdsIdleState::Exit()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                Rlog.d(TAG, "Exit");
-
-#endif
+    return Logger::D(TAG, "Exit");
 }
 
 ECode DdsScheduler::DdsIdleState::ProcessMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                switch(msg.what) {
-                    case DdsSchedulerAc.REQ_DDS_ALLOCATION: {
-                        Rlog.d(TAG, "REQ_DDS_ALLOCATION");
-                        NetworkRequest n = (NetworkRequest)msg.obj;
-                        if (!isDdsSwitchRequired(n)) {
-                            transitionTo(mDdsReservedState);
-                        } else {
-                            transitionTo(mDdsSwitchState);
-                        }
-                        return HANDLED;
-                    }
-                    default: {
-                        Rlog.d(TAG, "unknown msg = " + msg);
-                        return NOT_HANDLED;
-                    }
-                }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 msgWhat;
+    msg->GetWhat(&msgWhat);
+    AutoPtr<IInterface> msgObj;
+    msg->GetObj((IInterface**)&msgObj);
+    switch(msgWhat) {
+        case IDdsSchedulerAc::REQ_DDS_ALLOCATION: {
+            Logger::D(TAG, "REQ_DDS_ALLOCATION");
+            AutoPtr<INetworkRequest> n = INetworkRequest::Probe(msgObj);
+            Boolean isDdsSwitchRequired;
+            mHost->IsDdsSwitchRequired(n, &isDdsSwitchRequired);
+            if (!isDdsSwitchRequired) {
+                mHost->TransitionTo(mHost->mDdsReservedState);
+            } else {
+                mHost->TransitionTo(mHost->mDdsSwitchState);
+            }
+            *result = HANDLED;
+            return NOERROR;
+        }
+        default: {
+            Logger::D(TAG, "unknown msg = %s", TO_CSTR(msg));
+            *result = NOT_HANDLED;
+            return NOERROR;
+        }
+    }
+    return NOERROR;
+}
+
+String DdsScheduler::DdsIdleState::GetName()
+{
+    return String("DcSwitchState::IdleState");
 }
 
 //=============================================================================
@@ -210,94 +249,111 @@ DdsScheduler::DdsReservedState::DdsReservedState(
 
 ECode DdsScheduler::DdsReservedState::HandleOtherSubRequests()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                NetworkRequest nr = getFirstWaitingRequest();
-                if (nr == null) {
-                    Rlog.d(TAG, "No more requests to accept");
-                    transitionTo(mDdsAutoRevertState);
-                } else if (getSubIdFromNetworkRequest(nr) != getCurrentDds()) {
-                    Rlog.d(TAG, "Switch required for " + nr);
-                    transitionTo(mDdsSwitchState);
-                } else {
-                    Rlog.e(TAG, "This request could not get accepted, start over. nr = " + nr);
-                    //reset state machine to stable state.
-                    transitionTo(mDdsAutoRevertState);
-                }
-
-#endif
+    AutoPtr<INetworkRequest> nr;
+    mHost->GetFirstWaitingRequest((INetworkRequest**)&nr);
+    Int64 subIdFromNetworkRequest;
+    mHost->GetSubIdFromNetworkRequest(nr, &subIdFromNetworkRequest);
+    Int64 currentDds;
+    mHost->GetCurrentDds(&currentDds);
+    if (nr == NULL) {
+        Logger::D(TAG, "No more requests to accept");
+        mHost->TransitionTo(mHost->mDdsAutoRevertState);
+    } else if (subIdFromNetworkRequest != currentDds) {
+        Logger::D(TAG, "Switch required for %s", TO_CSTR(nr));
+        mHost->TransitionTo(mHost->mDdsSwitchState);
+    } else {
+        Logger::E(TAG, "This request could not get accepted, start over. nr = %s", TO_CSTR(nr));
+        //reset state machine to stable state.
+        mHost->TransitionTo(mHost->mDdsAutoRevertState);
+    }
+    return NOERROR;
 }
 
 ECode DdsScheduler::DdsReservedState::Enter()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                Rlog.d(TAG, "Enter");
-                if (!acceptWaitingRequest()) {
-                    handleOtherSubRequests();
-                }
-
-#endif
+    Logger::D(TAG, "Enter");
+    Boolean acceptWaitingRequest;
+    mHost->AcceptWaitingRequest(&acceptWaitingRequest);
+    if (!acceptWaitingRequest) {
+        HandleOtherSubRequests();
+    }
+    return NOERROR;
 }
 
 ECode DdsScheduler::DdsReservedState::Exit()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                Rlog.d(TAG, "Exit");
-
-#endif
+    return Logger::D(TAG, "Exit");
 }
 
 ECode DdsScheduler::DdsReservedState::ProcessMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                switch(msg.what) {
-                    case DdsSchedulerAc.REQ_DDS_ALLOCATION: {
-                        Rlog.d(TAG, "REQ_DDS_ALLOCATION");
-                        NetworkRequest n = (NetworkRequest)msg.obj;
-                        if (getSubIdFromNetworkRequest(n) == getCurrentDds()) {
-                            Rlog.d(TAG, "Accepting simultaneous request for current sub");
-                            notifyRequestAccepted(n);
-                        } else if (isMultiDataSupported()) {
-                            Rlog.d(TAG, "Incoming request is for on-demand subscription, n = " + n);
-                            requestPsAttach(n);
-                        }
-                        return HANDLED;
-                    }
-                    case DdsSchedulerAc.REQ_DDS_FREE: {
-                        Rlog.d(TAG, "REQ_DDS_FREE");
-                        if(!acceptWaitingRequest()) {
-                            Rlog.d(TAG, "Can't process next in this DDS");
-                            handleOtherSubRequests();
-                        } else {
-                            Rlog.d(TAG, "Processing next in same DDS");
-                        }
-                        return HANDLED;
-                    }
-                    case DdsSchedulerAc.EVENT_ON_DEMAND_PS_ATTACH_DONE: {
-                        AsyncResult ar = (AsyncResult) msg.obj;
-                        NetworkRequest n = (NetworkRequest)ar.result;
-                        if (ar.exception == null) {
-                            updateCurrentDds(n);
-                            transitionTo(mPsAttachReservedState);
-                        } else {
-                            Rlog.d(TAG, "Switch failed, ignore the req = " + n);
-                            //discard the request so that we can process other pending reqeusts
-                            removeRequest(n);
-                        }
-                        return HANDLED;
-                    }
-                    default: {
-                        Rlog.d(TAG, "unknown msg = " + msg);
-                        return NOT_HANDLED;
-                    }
-                }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Boolean isMultiDataSupported;
+    mHost->IsMultiDataSupported(&isMultiDataSupported);
+    Int32 msgWhat;
+    msg->GetWhat(&msgWhat);
+    AutoPtr<IInterface> msgObj;
+    msg->GetObj((IInterface**)&msgObj);
+    switch(msgWhat) {
+        case IDdsSchedulerAc::REQ_DDS_ALLOCATION: {
+            Logger::D(TAG, "REQ_DDS_ALLOCATION");
+            AutoPtr<INetworkRequest> n = INetworkRequest::Probe(msgObj);
+            Int64 subIdFromNetworkRequest;
+            mHost->GetSubIdFromNetworkRequest(n, &subIdFromNetworkRequest);
+            Int64 currentDds;
+            mHost->GetCurrentDds(&currentDds);
+            if (subIdFromNetworkRequest == currentDds) {
+                Logger::D(TAG, "Accepting simultaneous request for current sub");
+                mHost->NotifyRequestAccepted(n);
+            } else if (isMultiDataSupported) {
+                Logger::D(TAG, "Incoming request is for on-demand subscription, n = %s", TO_CSTR(n));
+                mHost->RequestPsAttach(n);
+            }
+            *result = HANDLED;
+            return NOERROR;
+        }
+        case IDdsSchedulerAc::REQ_DDS_FREE: {
+            Logger::D(TAG, "REQ_DDS_FREE");
+            Boolean acceptWaitingRequest;
+            mHost->AcceptWaitingRequest(&acceptWaitingRequest);
+            if (!acceptWaitingRequest) {
+                Logger::D(TAG, "Can't process next in this DDS");
+                HandleOtherSubRequests();
+            } else {
+                Logger::D(TAG, "Processing next in same DDS");
+            }
+            *result = HANDLED;
+            return NOERROR;
+        }
+        case IDdsSchedulerAc::EVENT_ON_DEMAND_PS_ATTACH_DONE: {
+            AutoPtr<IAsyncResult> ar = IAsyncResult::Probe(msgObj);
+            AutoPtr<INetworkRequest> n = INetworkRequest::Probe(((AsyncResult*) ar.Get())->mResult);
+            if (((AsyncResult*) ar.Get())->mException == NULL) {
+                mHost->UpdateCurrentDds(n);
+                mHost->TransitionTo(mHost->mPsAttachReservedState);
+            } else {
+                Logger::D(TAG, "Switch failed, ignore the req = %s", TO_CSTR(n));
+                //discard the request so that we can process other pending reqeusts
+                mHost->RemoveRequest(n);
+            }
+            *result = HANDLED;
+            return NOERROR;
+        }
+        default: {
+            Logger::D(TAG, "unknown msg = %s", TO_CSTR(msg));
+            *result = NOT_HANDLED;
+            return NOERROR;
+        }
+    }
+    return NOERROR;
+}
+
+String DdsScheduler::DdsReservedState::GetName()
+{
+    return String("DcSwitchState::IdleState");
 }
 
 //=============================================================================
@@ -312,82 +368,95 @@ DdsScheduler::PsAttachReservedState::PsAttachReservedState(
 
 ECode DdsScheduler::PsAttachReservedState::HandleOtherSubRequests()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                NetworkRequest nr = getFirstWaitingRequest();
-                if (nr == null) {
-                    Rlog.d(TAG, "No more requests to accept");
-                } else if (getSubIdFromNetworkRequest(nr) != getCurrentDds()) {
-                    Rlog.d(TAG, "Next request is not for current on-demand PS sub(DSDA). nr = "
-                            + nr);
-                    if (isAlreadyAccepted(nr)) {
-                        Rlog.d(TAG, "Next request is already accepted on other sub in DSDA mode. nr = "
-                                + nr);
-                        transitionTo(mDdsReservedState);
-                        return;
-                    }
-                }
-                transitionTo(mDdsAutoRevertState);
-
-#endif
+    AutoPtr<INetworkRequest> nr;
+    mHost->GetFirstWaitingRequest((INetworkRequest**)&nr);
+    if (nr == NULL) {
+        Logger::D(TAG, "No more requests to accept");
+    } else {
+        Int64 subIdFromNetworkRequest;
+        mHost->GetSubIdFromNetworkRequest(nr, &subIdFromNetworkRequest);
+        Int64 currentDds;
+        mHost->GetCurrentDds(&currentDds);
+        if (subIdFromNetworkRequest != currentDds) {
+            Logger::D(TAG, "Next request is not for current on-demand PS sub(DSDA). nr = %s", TO_CSTR(nr));
+            Boolean isAlreadyAccepted;
+            mHost->IsAlreadyAccepted(nr, &isAlreadyAccepted);
+            if (isAlreadyAccepted) {
+                Logger::D(TAG, "Next request is already accepted on other sub in DSDA mode. nr = %s", TO_CSTR(nr));
+                mHost->TransitionTo(mHost->mDdsReservedState);
+                return NOERROR;
+            }
+        }
+    }
+    mHost->TransitionTo(mHost->mDdsAutoRevertState);
+    return NOERROR;
 }
 
 ECode DdsScheduler::PsAttachReservedState::Enter()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                Rlog.d(TAG, "Enter");
-                if (!acceptWaitingRequest()) {
-                    handleOtherSubRequests();
-                }
-
-#endif
+    Logger::D(TAG, "Enter");
+    Boolean acceptWaitingRequest;
+    mHost->AcceptWaitingRequest(&acceptWaitingRequest);
+    if (!acceptWaitingRequest) {
+        HandleOtherSubRequests();
+    }
+    return NOERROR;
 }
 
 ECode DdsScheduler::PsAttachReservedState::Exit()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                Rlog.d(TAG, "Exit");
-                //Request PS Detach on currentDds.
-                requestPsDetach();
-                //Update currentDds back to defaultDataSub.
-                updateCurrentDds(null);
-
-#endif
+    Logger::D(TAG, "Exit");
+    //Request PS Detach on currentDds.
+    mHost->RequestPsDetach();
+    //Update currentDds back to defaultDataSub.
+    mHost->UpdateCurrentDds(NULL);
+    return NOERROR;
 }
 
 ECode DdsScheduler::PsAttachReservedState::ProcessMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                switch(msg.what) {
-                    case DdsSchedulerAc.REQ_DDS_ALLOCATION: {
-                        Rlog.d(TAG, "REQ_DDS_ALLOCATION");
-                        NetworkRequest n = (NetworkRequest)msg.obj;
-                        Rlog.d(TAG, "Accepting request in dual-data mode, req = " + n);
-                        notifyRequestAccepted(n);
-                        return HANDLED;
-                    }
-                    case DdsSchedulerAc.REQ_DDS_FREE: {
-                        Rlog.d(TAG, "REQ_DDS_FREE");
-                        if (!acceptWaitingRequest()) {
-                            //No more requests for current sub. If there are few accepted requests
-                            //for defaultDds then move to DdsReservedState so that on-demand PS
-                            //detach on current sub can be triggered.
-                            handleOtherSubRequests();
-                        }
-                        return HANDLED;
-                    }
-                    default: {
-                        Rlog.d(TAG, "unknown msg = " + msg);
-                        return NOT_HANDLED;
-                    }
-                }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 msgWhat;
+    msg->GetWhat(&msgWhat);
+    AutoPtr<IInterface> msgObj;
+    msg->GetObj((IInterface**)&msgObj);
+    switch(msgWhat) {
+        case IDdsSchedulerAc::REQ_DDS_ALLOCATION: {
+            Logger::D(TAG, "REQ_DDS_ALLOCATION");
+            AutoPtr<INetworkRequest> n = INetworkRequest::Probe(msgObj);
+            Logger::D(TAG, "Accepting request in dual-data mode, req = %s", TO_CSTR(n));
+            mHost->NotifyRequestAccepted(n);
+            *result = HANDLED;
+            return NOERROR;
+        }
+        case IDdsSchedulerAc::REQ_DDS_FREE: {
+            Logger::D(TAG, "REQ_DDS_FREE");
+            Boolean acceptWaitingRequest;
+            mHost->AcceptWaitingRequest(&acceptWaitingRequest);
+            if (!acceptWaitingRequest) {
+                //No more requests for current sub. If there are few accepted requests
+                //for defaultDds then move to DdsReservedState so that on-demand PS
+                //detach on current sub can be triggered.
+                HandleOtherSubRequests();
+            }
+            *result = HANDLED;
+            return NOERROR;
+        }
+        default: {
+            Logger::D(TAG, "unknown msg = %s", TO_CSTR(msg));
+            *result = NOT_HANDLED;
+            return NOERROR;
+        }
+    }
+    return NOERROR;
+}
+
+String DdsScheduler::PsAttachReservedState::GetName()
+{
+    return String("DcSwitchState::IdleState");
 }
 
 //=============================================================================
@@ -402,61 +471,65 @@ DdsScheduler::DdsSwitchState::DdsSwitchState(
 
 ECode DdsScheduler::DdsSwitchState::Enter()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                Rlog.d(TAG, "Enter");
-                NetworkRequest nr = getFirstWaitingRequest();
-                if (nr != null) {
-                    triggerSwitch(nr);
-                } else {
-                    Rlog.d(TAG, "Error");
-                }
-
-#endif
+    Logger::D(TAG, "Enter");
+    AutoPtr<INetworkRequest> nr;
+    mHost->GetFirstWaitingRequest((INetworkRequest**)&nr);
+    if (nr != NULL) {
+        mHost->TriggerSwitch(nr);
+    } else {
+        Logger::D(TAG, "Error");
+    }
+    return NOERROR;
 }
 
 ECode DdsScheduler::DdsSwitchState::Exit()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                Rlog.d(TAG, "Exit");
-
-#endif
+    return Logger::D(TAG, "Exit");
 }
 
 ECode DdsScheduler::DdsSwitchState::ProcessMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                switch(msg.what) {
-                    case DdsSchedulerAc.EVENT_ON_DEMAND_PS_ATTACH_DONE:
-                    case DdsSchedulerAc.EVENT_ON_DEMAND_DDS_SWITCH_DONE : {
-                        AsyncResult ar = (AsyncResult) msg.obj;
-                        NetworkRequest n = (NetworkRequest)ar.result;
-                        if (ar.exception == null) {
-                            updateCurrentDds(n);
-                            if (msg.what == DdsSchedulerAc.EVENT_ON_DEMAND_PS_ATTACH_DONE) {
-                                transitionTo(mPsAttachReservedState);
-                            } else {
-                                transitionTo(mDdsReservedState);
-                            }
-                        } else {
-                            Rlog.d(TAG, "Switch failed, move back to idle state");
-                            //discard the request so that we can process other pending reqeusts
-                            removeRequest(n);
-                            transitionTo(mDdsIdleState);
-                        }
-                        return HANDLED;
-                    }
-                    default: {
-                        Rlog.d(TAG, "unknown msg = " + msg);
-                        return NOT_HANDLED;
-                    }
-                }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 msgWhat;
+    msg->GetWhat(&msgWhat);
+    AutoPtr<IInterface> msgObj;
+    msg->GetObj((IInterface**)&msgObj);
+    switch(msgWhat) {
+        case IDdsSchedulerAc::EVENT_ON_DEMAND_PS_ATTACH_DONE:
+        case IDdsSchedulerAc::EVENT_ON_DEMAND_DDS_SWITCH_DONE : {
+            AutoPtr<IAsyncResult> ar = IAsyncResult::Probe(msgObj);
+            AutoPtr<INetworkRequest> n = INetworkRequest::Probe(((AsyncResult*) ar.Get())->mResult);
+            if (((AsyncResult*) ar.Get())->mException == NULL) {
+                mHost->UpdateCurrentDds(n);
+                if (msgWhat == IDdsSchedulerAc::EVENT_ON_DEMAND_PS_ATTACH_DONE) {
+                    mHost->TransitionTo(mHost->mPsAttachReservedState);
+                } else {
+                    mHost->TransitionTo(mHost->mDdsReservedState);
+                }
+            } else {
+                Logger::D(TAG, "Switch failed, move back to idle state");
+                //discard the request so that we can process other pending reqeusts
+                mHost->RemoveRequest(n);
+                mHost->TransitionTo(mHost->mDdsIdleState);
+            }
+            *result = HANDLED;
+            return NOERROR;
+        }
+        default: {
+            Logger::D(TAG, "unknown msg = %s", TO_CSTR(msg));
+            *result = NOT_HANDLED;
+            return NOERROR;
+        }
+    }
+    return NOERROR;
+}
+
+String DdsScheduler::DdsSwitchState::GetName()
+{
+    return String("DcSwitchState::IdleState");
 }
 
 //=============================================================================
@@ -471,43 +544,44 @@ DdsScheduler::DdsAutoRevertState::DdsAutoRevertState(
 
 ECode DdsScheduler::DdsAutoRevertState::Enter()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                Rlog.d(TAG, "Enter");
-                triggerSwitch(null);
-
-#endif
+    Logger::D(TAG, "Enter");
+    mHost->TriggerSwitch(NULL);
+    return NOERROR;
 }
 
 ECode DdsScheduler::DdsAutoRevertState::Exit()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                Rlog.d(TAG, "Exit");
-
-#endif
+    return Logger::D(TAG, "Exit");
 }
 
 ECode DdsScheduler::DdsAutoRevertState::ProcessMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                switch(msg.what) {
-                     case DdsSchedulerAc.EVENT_ON_DEMAND_PS_ATTACH_DONE: {
-                        Rlog.d(TAG, "SET_DDS_DONE");
-                        updateCurrentDds(null);
-                        transitionTo(mDdsIdleState);
-                        return HANDLED;
-                    }
-                    default: {
-                        Rlog.d(TAG, "unknown msg = " + msg);
-                        return NOT_HANDLED;
-                    }
-                }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 msgWhat;
+    msg->GetWhat(&msgWhat);
+    switch(msgWhat) {
+         case IDdsSchedulerAc::EVENT_ON_DEMAND_PS_ATTACH_DONE: {
+            Logger::D(TAG, "SET_DDS_DONE");
+            mHost->UpdateCurrentDds(NULL);
+            mHost->TransitionTo(mHost->mDdsIdleState);
+            *result = HANDLED;
+            return NOERROR;
+        }
+        default: {
+            Logger::D(TAG, "unknown msg = %s", TO_CSTR(msg));
+            *result = NOT_HANDLED;
+            return NOERROR;
+        }
+    }
+    return NOERROR;
+}
+
+String DdsScheduler::DdsAutoRevertState::GetName()
+{
+    return String("DcSwitchState::IdleState");
 }
 
 //=============================================================================
@@ -516,44 +590,43 @@ ECode DdsScheduler::DdsAutoRevertState::ProcessMessage(
 CAR_INTERFACE_IMPL(DdsScheduler, StateMachine, IDdsScheduler)
 
 const String DdsScheduler::TAG("DdsScheduler");
+AutoPtr<IDdsScheduler> DdsScheduler::sDdsScheduler;
 
 ECode DdsScheduler::CreateDdsScheduler(
     /* [out] */ IDdsScheduler** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        DdsScheduler ddsScheduler = new DdsScheduler();
-        ddsScheduler.start();
-        return ddsScheduler;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IDdsScheduler> ddsScheduler;
+    CDdsScheduler::New((IDdsScheduler**)&ddsScheduler);
+    IStateMachine::Probe(ddsScheduler)->Start();
+    *result = ddsScheduler;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode DdsScheduler::GetInstance(
     /* [out] */ IDdsScheduler** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (sDdsScheduler == null) {
-            sDdsScheduler = createDdsScheduler();
-        }
-        Rlog.d(TAG, "getInstance = " + sDdsScheduler);
-        return sDdsScheduler;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (sDdsScheduler == NULL) {
+        CreateDdsScheduler((IDdsScheduler**)&sDdsScheduler);
+    }
+    Logger::D(TAG, "getInstance = %s", TO_CSTR(sDdsScheduler));
+    *result = sDdsScheduler;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode DdsScheduler::Init()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (sDdsScheduler == null) {
-            sDdsScheduler = getInstance();
-        }
-        sDdsScheduler.registerCallbacks();
-        Rlog.d(TAG, "init = " + sDdsScheduler);
-
-#endif
+    if (sDdsScheduler == NULL) {
+        GetInstance((IDdsScheduler**)&sDdsScheduler);
+    }
+    ((DdsScheduler*) sDdsScheduler.Get())->RegisterCallbacks();
+    Logger::D(TAG, "init = %s", TO_CSTR(sDdsScheduler));
+    return NOERROR;
 }
 
 DdsScheduler::DdsScheduler()
@@ -563,25 +636,27 @@ DdsScheduler::DdsScheduler()
     , MODEM_DUAL_DATA_CAPABLE(2)
     , OVERRIDE_MODEM_DUAL_DATA_CAP_PROP("persist.test.msim.config")
 {
-#if 0 // TODO: Translate codes below
     mDefaultState = new DefaultState(this);
     mDdsIdleState = new DdsIdleState(this);
     mDdsReservedState = new DdsReservedState(this);
     mPsAttachReservedState = new PsAttachReservedState(this);
     mDdsSwitchState = new DdsSwitchState(this);
     mDdsAutoRevertState = new DdsAutoRevertState(this);
-    AutoPtr<IList> mInbox = Collections.synchronizedList(new ArrayList<NetworkRequestInfo>());
+    AutoPtr<IArrayList> arrayList;
+    CArrayList::New((IArrayList**)&arrayList);
+    AutoPtr<ICollections> helper;
+    CCollections::AcquireSingleton((ICollections**)&helper);
+    AutoPtr<IList> mInbox;
+    helper->SynchronizedList(IList::Probe(arrayList), (IList**)&mInbox);
 
-        super("DdsScheduler");
-        addState(mDefaultState);
-            addState(mDdsIdleState, mDefaultState);
-            addState(mDdsReservedState, mDefaultState);
-            addState(mDdsSwitchState, mDefaultState);
-            addState(mDdsAutoRevertState, mDefaultState);
-            addState(mPsAttachReservedState, mDefaultState);
-        setInitialState(mDdsIdleState);
-
-#endif
+    StateMachine::constructor(String("DdsScheduler"));
+    AddState(mDefaultState);
+    AddState(mDdsIdleState, mDefaultState);
+    AddState(mDdsReservedState, mDefaultState);
+    AddState(mDdsSwitchState, mDefaultState);
+    AddState(mDdsAutoRevertState, mDefaultState);
+    AddState(mPsAttachReservedState, mDefaultState);
+    SetInitialState(mDdsIdleState);
 }
 
 ECode DdsScheduler::constructor()
@@ -592,298 +667,314 @@ ECode DdsScheduler::constructor()
 ECode DdsScheduler::AddRequest(
     /* [in] */ INetworkRequest* req)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        synchronized(mInbox) {
-            mInbox.add(new NetworkRequestInfo(req));
-        }
-
-#endif
+    AutoLock lock(mInbox);
+    AutoPtr<NetworkRequestInfo> info = new NetworkRequestInfo(this);
+    info->constructor(req);
+    mInbox->Add(TO_IINTERFACE(info));
+    return NOERROR;
 }
 
 ECode DdsScheduler::RemoveRequest(
     /* [in] */ INetworkRequest* req)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        synchronized(mInbox) {
-            for(int i = 0; i < mInbox.size(); i++) {
-                NetworkRequestInfo tempNrInfo = mInbox.get(i);
-                if(tempNrInfo.mRequest.equals(req)) {
-                    mInbox.remove(i);
-                }
-            }
+    AutoLock lock(mInbox);
+    Int32 size;
+    mInbox->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        mInbox->Get(i, (IInterface**)&obj);
+        AutoPtr<NetworkRequestInfo> tempNrInfo = (NetworkRequestInfo*) IObject::Probe(obj);
+        Boolean isEquals;
+        IObject::Probe(tempNrInfo->mRequest)->Equals(req, &isEquals);
+        if (isEquals) {
+            mInbox->Remove(i);
         }
-
-#endif
+    }
+    return NOERROR;
 }
 
 ECode DdsScheduler::MarkAccepted(
     /* [in] */ INetworkRequest* req)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        synchronized(mInbox) {
-            for(int i = 0; i < mInbox.size(); i++) {
-                NetworkRequestInfo tempNrInfo = mInbox.get(i);
-                if(tempNrInfo.mRequest.equals(req)) {
-                    tempNrInfo.mAccepted = true;
-                }
-            }
+    AutoLock lock(mInbox);
+    Int32 size;
+    mInbox->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        mInbox->Get(i, (IInterface**)&obj);
+        AutoPtr<NetworkRequestInfo> tempNrInfo = (NetworkRequestInfo*) IObject::Probe(obj);
+        Boolean isEquals;
+        IObject::Probe(tempNrInfo->mRequest)->Equals(req, &isEquals);
+        if (isEquals) {
+            tempNrInfo->mAccepted = TRUE;
         }
-
-#endif
+    }
+    return NOERROR;
 }
 
 ECode DdsScheduler::IsAlreadyAccepted(
     /* [in] */ INetworkRequest* nr,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        synchronized(mInbox) {
-            for(int i = 0; i < mInbox.size(); i++) {
-                NetworkRequestInfo tempNrInfo = mInbox.get(i);
-                if(tempNrInfo.mRequest.equals(nr)) {
-                    return (tempNrInfo.mAccepted == true);
-                }
+    VALIDATE_NOT_NULL(result)
+
+    {
+        AutoLock lock(mInbox);
+        Int32 size;
+        mInbox->GetSize(&size);
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> obj;
+            mInbox->Get(i, (IInterface**)&obj);
+            AutoPtr<NetworkRequestInfo> tempNrInfo = (NetworkRequestInfo*) IObject::Probe(obj);
+            Boolean isEquals;
+            IObject::Probe(tempNrInfo->mRequest)->Equals(nr, &isEquals);
+            if (isEquals) {
+                *result = (tempNrInfo->mAccepted == TRUE);
+                return NOERROR;
             }
         }
-        return false;
-
-#endif
+    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode DdsScheduler::GetFirstWaitingRequest(
     /* [out] */ INetworkRequest** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        synchronized(mInbox) {
-            if(mInbox.isEmpty()) {
-                return null;
-            } else {
-                return mInbox.get(0).mRequest;
-            }
-        }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoLock lock(mInbox);
+    Boolean isEmpty;
+    mInbox->IsEmpty(&isEmpty);
+    if (isEmpty) {
+        *result = NULL;
+        return NOERROR;
+    } else {
+        AutoPtr<IInterface> obj;
+        mInbox->Get(0, (IInterface**)&obj);
+        *result = ((NetworkRequestInfo*) IObject::Probe(obj))->mRequest;
+        REFCOUNT_ADD(*result)
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode DdsScheduler::AcceptWaitingRequest(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean anyAccepted = false;
-        synchronized(mInbox) {
-            if(!mInbox.isEmpty()) {
-                for (int i =0; i < mInbox.size(); i++) {
-                    NetworkRequest nr = mInbox.get(i).mRequest;
-                    if (getSubIdFromNetworkRequest(nr) == getCurrentDds()) {
-                        notifyRequestAccepted(nr);
-                        anyAccepted = true;
-                    }
-                }
-            } else {
-                Rlog.d(TAG, "No request can be accepted for current sub");
-                return false;
-            }
-        }
-        return anyAccepted;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Boolean anyAccepted = FALSE;
+    {
+        AutoLock lock(mInbox);
+        Boolean isEmpty;
+        mInbox->IsEmpty(&isEmpty);
+        if (!isEmpty) {
+            Int32 size;
+            mInbox->GetSize(&size);
+            for (Int32 i =0; i < size; i++) {
+                AutoPtr<IInterface> obj;
+                mInbox->Get(i, (IInterface**)&obj);
+                AutoPtr<INetworkRequest> nr = ((NetworkRequestInfo*) IObject::Probe(obj))->mRequest;
+                Int64 subIdFromNetworkRequest;
+                GetSubIdFromNetworkRequest(nr, &subIdFromNetworkRequest);
+                Int64 currentDds;
+                GetCurrentDds(&currentDds);
+                if (subIdFromNetworkRequest == currentDds) {
+                    NotifyRequestAccepted(nr);
+                    anyAccepted = TRUE;
+                }
+            }
+        } else {
+            Logger::D(TAG, "No request can be accepted for current sub");
+            *result = FALSE;
+            return NOERROR;
+        }
+    }
+    *result = anyAccepted;
+    return NOERROR;
 }
 
 ECode DdsScheduler::NotifyRequestAccepted(
     /* [in] */ INetworkRequest* nr)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (!isAlreadyAccepted(nr)) {
-            markAccepted(nr);
-            Rlog.d(TAG, "Accepted req = " + nr);
-            SubscriptionController subController = SubscriptionController.getInstance();
-            subController.notifyOnDemandDataSubIdChanged(nr);
-        } else {
-            Rlog.d(TAG, "Already accepted/notified req = " + nr);
-        }
-
-#endif
+    Boolean isAlreadyAccepted;
+    IsAlreadyAccepted(nr, &isAlreadyAccepted);
+    if (!isAlreadyAccepted) {
+        MarkAccepted(nr);
+        Logger::D(TAG, "Accepted req = %s", TO_CSTR(nr));
+        assert(0 && "SubscriptionController");
+        // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+        // subController->NotifyOnDemandDataSubIdChanged(nr);
+    } else {
+        Logger::D(TAG, "Already accepted/notified req = %s", TO_CSTR(nr));
+    }
+    return NOERROR;
 }
 
 ECode DdsScheduler::IsDdsSwitchRequired(
     /* [in] */ INetworkRequest* n,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if(getSubIdFromNetworkRequest(n) != getCurrentDds()) {
-            Rlog.d(TAG, "DDS switch required for req = " + n);
-            return true;
-        } else {
-            Rlog.d(TAG, "DDS switch not required for req = " + n);
-            return false;
-        }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int64 subIdFromNetworkRequest;
+    GetSubIdFromNetworkRequest(n, &subIdFromNetworkRequest);
+    Int64 currentDds;
+    GetCurrentDds(&currentDds);
+    if (subIdFromNetworkRequest == currentDds) {
+        Logger::D(TAG, "DDS switch required for req = %s", TO_CSTR(n));
+        *result = TRUE;
+        return NOERROR;
+    } else {
+        Logger::D(TAG, "DDS switch not required for req = %s", TO_CSTR(n));
+        *result = FALSE;
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode DdsScheduler::GetCurrentDds(
     /* [out] */ Int64* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        SubscriptionController subController = SubscriptionController.getInstance();
-        if(mCurrentDds == SubscriptionManager.INVALID_SUB_ID) {
-            mCurrentDds = subController.getDefaultDataSubId();
-        }
-        Rlog.d(TAG, "mCurrentDds = " + mCurrentDds);
-        return mCurrentDds;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    assert(0 && "SubscriptionController");
+    // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+    // if (mCurrentDds == ISubscriptionManager::INVALID_SUB_ID) {
+    //     subController->GetDefaultDataSubId(&mCurrentDds);
+    // }
+    Logger::D(TAG, "mCurrentDds = %ld", mCurrentDds);
+    *result = mCurrentDds;
+    return NOERROR;
 }
 
 ECode DdsScheduler::UpdateCurrentDds(
     /* [in] */ INetworkRequest* n)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mCurrentDds = getSubIdFromNetworkRequest(n);
-        Rlog.d(TAG, "mCurrentDds = " + mCurrentDds);
-
-#endif
+    GetSubIdFromNetworkRequest(n, &mCurrentDds);
+    Logger::D(TAG, "mCurrentDds = %ld", mCurrentDds);
+    return NOERROR;
 }
 
 ECode DdsScheduler::GetSubIdFromNetworkRequest(
     /* [in] */ INetworkRequest* n,
     /* [out] */ Int64* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        SubscriptionController subController = SubscriptionController.getInstance();
-        return subController.getSubIdFromNetworkRequest(n);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    assert(0 && "SubscriptionController");
+    // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+    // return subController->GetSubIdFromNetworkRequest(n);
+    return NOERROR;
 }
 
 ECode DdsScheduler::RequestDdsSwitch(
     /* [in] */ INetworkRequest* n)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (n != null) {
-            mDctController.setOnDemandDataSubId(n);
-        } else {
-            // set DDS to user configured defaultDds SUB.
-            // requestPsAttach would make sure that OemHook api to set DDS
-            // is called as well as PS ATTACH is requested.
-            requestPsAttach(null);
-        }
-
-#endif
+    if (n != NULL) {
+        mDctController->SetOnDemandDataSubId(n);
+    } else {
+        // set DDS to user configured defaultDds SUB.
+        // requestPsAttach would make sure that OemHook api to set DDS
+        // is called as well as PS ATTACH is requested.
+        RequestPsAttach(NULL);
+    }
+    return NOERROR;
 }
 
 ECode DdsScheduler::RequestPsAttach(
     /* [in] */ INetworkRequest* n)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mDctController.doPsAttach(n);
-
-#endif
+    return mDctController->DoPsAttach(n);
 }
 
 ECode DdsScheduler::RequestPsDetach()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mDctController.doPsDetach();
-
-#endif
+    return mDctController->DoPsDetach();
 }
 
 ECode DdsScheduler::GetMaxDataAllowed(
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        ModemStackController modemStackController = ModemStackController.getInstance();
-        Rlog.d(TAG, "ModemStackController = " + modemStackController);
-        int maxData = modemStackController.getMaxDataAllowed();
-        Rlog.d(TAG, "modem value of max_data = " + maxData);
-        int override = SystemProperties.getInt(OVERRIDE_MODEM_DUAL_DATA_CAP_PROP,
-                MODEM_DATA_CAPABILITY_UNKNOWN);
-        if(override != MODEM_DATA_CAPABILITY_UNKNOWN) {
-            Rlog.d(TAG, "Overriding modem max_data_value with " + override);
-            maxData = override;
-        }
-        return maxData;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    assert(0 && "ModemStackController");
+    // AutoPtr<IModemStackController> modemStackController = ModemStackController::GetInstance();
+    // Logger::D(TAG, "ModemStackController = %s", TO_CSTR(modemStackController));
+    // Int32 maxData;
+    // modemStackController->GetMaxDataAllowed(&maxData);
+    // Logger::D(TAG, "modem value of max_data = %d", maxData);
+    // Int32 override = SystemProperties::GetInt32(OVERRIDE_MODEM_DUAL_DATA_CAP_PROP,
+    //         MODEM_DATA_CAPABILITY_UNKNOWN);
+    // if (override != MODEM_DATA_CAPABILITY_UNKNOWN) {
+    //     Logger::D(TAG, "Overriding modem max_data_value with %d", override);
+    //     maxData = override;
+    // }
+    // *result = maxData;
+    return NOERROR;
 }
 
 ECode DdsScheduler::RegisterCallbacks()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if(mDctController == null) {
-            Rlog.d(TAG, "registerCallbacks");
-            mDctController = DctController.getInstance();
-            mDctController.registerForOnDemandDataSwitchInfo(getHandler(),
-                    DdsSchedulerAc.EVENT_ON_DEMAND_DDS_SWITCH_DONE, null);
-            mDctController.registerForOnDemandPsAttach(getHandler(),
-                    DdsSchedulerAc.EVENT_ON_DEMAND_PS_ATTACH_DONE, null);
-       }
-
-#endif
+    if (mDctController == NULL) {
+        Logger::D(TAG, "registerCallbacks");
+        DctController::GetInstance((IDctController**)&mDctController);
+        AutoPtr<IHandler> handler;
+        GetHandler((IHandler**)&handler);
+        mDctController->RegisterForOnDemandDataSwitchInfo(handler,
+                IDdsSchedulerAc::EVENT_ON_DEMAND_DDS_SWITCH_DONE, NULL);
+        mDctController->RegisterForOnDemandPsAttach(handler,
+                IDdsSchedulerAc::EVENT_ON_DEMAND_PS_ATTACH_DONE, NULL);
+   }
+   return NOERROR;
 }
 
 ECode DdsScheduler::TriggerSwitch(
     /* [in] */ INetworkRequest* n)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean multiDataSupported = false;
-        if (isMultiDataSupported()) {
-            multiDataSupported = true;
-            Rlog.d(TAG, "Simultaneous dual-data supported");
-        } else {
-            Rlog.d(TAG, "Simultaneous dual-data NOT supported");
-        }
-        if ((n != null) && multiDataSupported) {
-            requestPsAttach(n);
-        } else {
-            requestDdsSwitch(n);
-        }
-
-#endif
+    Boolean multiDataSupported = FALSE;
+    Boolean isMultiDataSupported;
+    IsMultiDataSupported(&isMultiDataSupported);
+    if (isMultiDataSupported) {
+        multiDataSupported = TRUE;
+        Logger::D(TAG, "Simultaneous dual-data supported");
+    } else {
+        Logger::D(TAG, "Simultaneous dual-data NOT supported");
+    }
+    if ((n != NULL) && multiDataSupported) {
+        RequestPsAttach(n);
+    } else {
+        RequestDdsSwitch(n);
+    }
+    return NOERROR;
 }
 
 ECode DdsScheduler::IsMultiDataSupported(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean flag = false;
-        if (getMaxDataAllowed() == MODEM_DUAL_DATA_CAPABLE) {
-            flag = true;
-        }
-        return flag;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Boolean flag = FALSE;
+    Int32 maxDataAllowed;
+    GetMaxDataAllowed(&maxDataAllowed);
+    if (maxDataAllowed == MODEM_DUAL_DATA_CAPABLE) {
+        flag = TRUE;
+    }
+    *result = flag;
+    return NOERROR;
 }
 
 ECode DdsScheduler::IsAnyRequestWaiting(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        synchronized(mInbox) {
-            return !mInbox.isEmpty();
-        }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoLock lock(mInbox);
+    Boolean isEmpty;
+    mInbox->IsEmpty(&isEmpty);
+    *result = !isEmpty;
+    return NOERROR;
 }
 
 } // namespace DataConnection

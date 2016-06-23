@@ -4,7 +4,6 @@
 
 #include "_Elastos.Droid.Internal.h"
 #include <Elastos.CoreLibrary.Utility.h>
-#include <_Elastos.Droid.Core.h>
 #include <elastos/core/Object.h>
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/droid/internal/utility/State.h>
@@ -45,6 +44,8 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
+
     private:
         DcSwitchState* mHost;
     };
@@ -60,6 +61,8 @@ private:
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
 
     private:
         DcSwitchState* mHost;
@@ -77,6 +80,8 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
+
     private:
         DcSwitchState* mHost;
     };
@@ -93,6 +98,8 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
+
     private:
         DcSwitchState* mHost;
     };
@@ -108,6 +115,8 @@ private:
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+        CARAPI_(String) GetName();
 
     private:
         DcSwitchState* mHost;
@@ -146,7 +155,7 @@ public:
     CARAPI TransitToActingState();
 
     CARAPI Log(
-        /* [in] */ const String& s);
+        /* [in] */ const char *fmt, ...);
 
 private:
     CARAPI SetupConnection(

@@ -1,7 +1,15 @@
 
 #include "elastos/droid/internal/telephony/dataconnection/DcSwitchAsyncChannel.h"
+#include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
+#include "elastos/droid/internal/utility/AsyncChannel.h"
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Internal::Utility::IProtocol;
+using Elastos::Droid::Internal::Utility::IStateMachine;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -11,8 +19,8 @@ namespace DataConnection {
 
 CAR_INTERFACE_IMPL(DcSwitchAsyncChannel, AsyncChannel, IDcSwitchAsyncChannel)
 
-const Boolean DcSwitchAsyncChannel::DBG = true;
-const Boolean DcSwitchAsyncChannel::VDBG = false;
+const Boolean DcSwitchAsyncChannel::DBG = TRUE;
+const Boolean DcSwitchAsyncChannel::VDBG = FALSE;
 const String DcSwitchAsyncChannel::LOG__TAG("DcSwitchAsyncChannel");
 const Int32 DcSwitchAsyncChannel::BASE = IProtocol::BASE_DATA_CONNECTION_TRACKER + 0x00002000;
 const Int32 DcSwitchAsyncChannel::REQ_CONNECT = BASE + 0;
@@ -31,211 +39,211 @@ DcSwitchAsyncChannel::DcSwitchAsyncChannel()
 {}
 
 ECode DcSwitchAsyncChannel::CmdToString(
-    /* [in] */ Int32 cmd,
+    /* [in] */ Int32 _cmd,
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        cmd -= BASE;
-        if ((cmd >= 0) && (cmd < sCmdToString.length)) {
-            return sCmdToString[cmd];
-        } else {
-            return AsyncChannel.cmdToString(cmd + BASE);
-        }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 cmd = _cmd;
+    cmd -= BASE;
+    if ((cmd >= 0) && (cmd < sCmdToString->GetLength())) {
+        *result = (*sCmdToString)[cmd];
+        return NOERROR;
+    } else {
+        assert(0 && "AsyncChannel");
+        // return AsyncChannel::CmdToString(cmd + BASE, result);
+    }
+    return NOERROR;
 }
 
 ECode DcSwitchAsyncChannel::constructor(
     /* [in] */ IDcSwitchState* dcSwitchState,
     /* [in] */ Int32 id)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mDcSwitchState = dcSwitchState;
-        tagId = id;
-
-#endif
+    mDcSwitchState = dcSwitchState;
+    mTagId = id;
+    return NOERROR;
 }
 
 ECode DcSwitchAsyncChannel::ReqConnect(
     /* [in] */ const String& type)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        sendMessage(REQ_CONNECT, type);
-        if (DBG) log("reqConnect");
-
-#endif
+    SendMessage(REQ_CONNECT, StringUtils::ParseCharSequence(type));
+    if (DBG) Log("reqConnect");
+    return NOERROR;
 }
 
 ECode DcSwitchAsyncChannel::RspConnect(
     /* [in] */ IMessage* response,
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        int retVal = response.arg1;
-        if (DBG) log("rspConnect=" + retVal);
-        return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 retVal;
+    response->GetArg1(&retVal);
+    if (DBG) Log("rspConnect=%d", retVal);
+    *result = retVal;
+    return NOERROR;
 }
 
 ECode DcSwitchAsyncChannel::ConnectSync(
     /* [in] */ const String& type,
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Message response = sendMessageSynchronously(REQ_CONNECT, type);
-        if ((response != null) && (response.what == RSP_CONNECT)) {
-            return rspConnect(response);
-        } else {
-            log("rspConnect error response=" + response);
-            return PhoneConstants.APN_REQUEST_FAILED;
-        }
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
 
-#endif
+    AutoPtr<IMessage> response;
+    SendMessageSynchronously(REQ_CONNECT, StringUtils::ParseCharSequence(type), (IMessage**)&response);
+    Int32 what;
+    response->GetWhat(&what);
+    if ((response != NULL) && (what == RSP_CONNECT)) {
+        return RspConnect(response, result);
+    } else {
+        Log("rspConnect error response=%s", TO_CSTR(response));
+        return IPhoneConstants::APN_REQUEST_FAILED;
+    }
+    return NOERROR;
 }
 
 ECode DcSwitchAsyncChannel::ReqDisconnect(
     /* [in] */ const String& type)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        sendMessage(REQ_DISCONNECT, type);
-        if (DBG) log("reqDisconnect");
-
-#endif
+    SendMessage(REQ_DISCONNECT, StringUtils::ParseCharSequence(type));
+    if (DBG) Log("reqDisconnect");
+    return NOERROR;
 }
 
 ECode DcSwitchAsyncChannel::RspDisconnect(
     /* [in] */ IMessage* response,
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        int retVal = response.arg1;
-        if (DBG) log("rspDisconnect=" + retVal);
-        return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 retVal;
+    response->GetArg1(&retVal);
+    if (DBG) Log("rspDisconnect=%d", retVal);
+    *result = retVal;
+    return NOERROR;
 }
 
 ECode DcSwitchAsyncChannel::DisconnectSync(
     /* [in] */ const String& type,
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Message response = sendMessageSynchronously(REQ_DISCONNECT, type);
-        if ((response != null) && (response.what == RSP_DISCONNECT)) {
-            return rspDisconnect(response);
-        } else {
-            log("rspDisconnect error response=" + response);
-            return PhoneConstants.APN_REQUEST_FAILED;
-        }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IMessage> response;
+    SendMessageSynchronously(REQ_DISCONNECT, StringUtils::ParseCharSequence(type), (IMessage**)&response);
+    Int32 what;
+    response->GetWhat(&what);
+    if ((response != NULL) && (what == RSP_DISCONNECT)) {
+        return RspDisconnect(response, result);
+    } else {
+        Log("rspDisconnect error response=%s", TO_CSTR(response));
+        *result = IPhoneConstants::APN_REQUEST_FAILED;
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode DcSwitchAsyncChannel::ReqIsIdle()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        sendMessage(REQ_IS_IDLE_STATE);
-        if (DBG) log("reqIsIdle");
-
-#endif
+    SendMessage(REQ_IS_IDLE_STATE);
+    if (DBG) Log("reqIsIdle");
+    return NOERROR;
 }
 
 ECode DcSwitchAsyncChannel::RspIsIdle(
     /* [in] */ IMessage* response,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean retVal = response.arg1 == 1;
-        if (DBG) log("rspIsIdle=" + retVal);
-        return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 arg1;
+    response->GetArg1(&arg1);
+    Boolean retVal = arg1 == 1;
+    if (DBG) Log("rspIsIdle=%d", retVal);
+    *result = retVal;
+    return NOERROR;
 }
 
 ECode DcSwitchAsyncChannel::IsIdleSync(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Message response = sendMessageSynchronously(REQ_IS_IDLE_STATE);
-        if ((response != null) && (response.what == RSP_IS_IDLE_STATE)) {
-            return rspIsIdle(response);
-        } else {
-            log("rspIsIndle error response=" + response);
-            return false;
-        }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IMessage> response;
+    SendMessageSynchronously(REQ_IS_IDLE_STATE, (IMessage**)&response);
+    Int32 what;
+    response->GetWhat(&what);
+    if ((response != NULL) && (what == RSP_IS_IDLE_STATE)) {
+        return RspIsIdle(response, result);
+    } else {
+        Log("rspIsIndle error response=%s", TO_CSTR(response));
+        *result = FALSE;
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode DcSwitchAsyncChannel::ReqIsIdleOrDeacting()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        sendMessage(REQ_IS_IDLE_OR_DEACTING_STATE);
-        if (DBG) log("reqIsIdleOrDeacting");
-
-#endif
+    SendMessage(REQ_IS_IDLE_OR_DEACTING_STATE);
+    if (DBG) Log("reqIsIdleOrDeacting");
+    return NOERROR;
 }
 
 ECode DcSwitchAsyncChannel::RspIsIdleOrDeacting(
     /* [in] */ IMessage* response,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        boolean retVal = response.arg1 == 1;
-        if (DBG) log("rspIsIdleOrDeacting=" + retVal);
-        return retVal;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 arg1;
+    response->GetArg1(&arg1);
+    Boolean retVal = arg1 == 1;
+    if (DBG) Log("rspIsIdleOrDeacting=%d", retVal);
+    *result = retVal;
+    return NOERROR;
 }
 
 ECode DcSwitchAsyncChannel::IsIdleOrDeactingSync(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Message response = sendMessageSynchronously(REQ_IS_IDLE_OR_DEACTING_STATE);
-        if ((response != null) && (response.what == RSP_IS_IDLE_OR_DEACTING_STATE)) {
-            return rspIsIdleOrDeacting(response);
-        } else {
-            log("rspIsIndleOrDeacting error response=" + response);
-            return false;
-        }
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IMessage> response;
+    SendMessageSynchronously(REQ_IS_IDLE_OR_DEACTING_STATE, (IMessage**)&response);
+    Int32 what;
+    response->GetWhat(&what);
+    if ((response != NULL) && (what == RSP_IS_IDLE_OR_DEACTING_STATE)) {
+        return RspIsIdleOrDeacting(response, result);
+    } else {
+        Log("rspIsIndleOrDeacting error response=%s", TO_CSTR(response));
+        *result = FALSE;
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode DcSwitchAsyncChannel::ToString(
     /* [out] */ String* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mDcSwitchState.getName();
-
-#endif
+    return IStateMachine::Probe(mDcSwitchState)->GetName(result);
 }
 
+#define MSG_BUF_SIZE    1024
 ECode DcSwitchAsyncChannel::Log(
-    /* [in] */ const String& s)
+    /* [in] */ const char *fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        Log.d(LOG__TAG, "[DcSwitchAsyncChannel-" + tagId + "]: " + s);
+    char msgBuf[MSG_BUF_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    va_end(args);
 
-#endif
+    return Logger::D(LOG__TAG, "[DcSwitchAsyncChannel-%d]: %s", mTagId, msgBuf);
 }
 
 AutoPtr<ArrayOf<String> > DcSwitchAsyncChannel::InitCmdToString()

@@ -184,7 +184,7 @@ ECode CallManager::CallManagerHandler::HandleMessage(
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_POST_DIAL_CHARACTER)");
             for(Int32 i = 0; i < mHost->mPostDialCharacterRegistrants->GetSize(); i++) {
                 AutoPtr<IMessage> notifyMsg;
-                notifyMsg = ((Registrant*)IObject::Probe(mHost->mPostDialCharacterRegistrants->Get(i)))->MessageForRegistrant();
+                ((Registrant*)IObject::Probe(mHost->mPostDialCharacterRegistrants->Get(i)))->MessageForRegistrant((IMessage**)&notifyMsg);
                 notifyMsg->SetObj(obj);
                 Int32 arg1 = 0;
                 msg->GetArg1(&arg1);

@@ -28,7 +28,6 @@ module
 
         FreeDds(
             [in] INetworkRequest* req);
-
     }
 
     }//DataConnection
