@@ -16,6 +16,80 @@ module
      */
     interface IGsmMmiCode {
 
+        // Max Size of the Short Code (aka Short String from TS 22.030 6.5.2)
+        const Int32 MAX_LENGTH_SHORT_CODE = 2;
+
+        // TS 22.030 6.5.2 Every Short String USSD command will end with #-key
+        // (known as #-String)
+        const Char32 END_OF_USSD_COMMAND = '#';
+
+        // From TS 22.030 6.5.2
+        const String ACTION_ACTIVATE = "*";
+        const String ACTION_DEACTIVATE = "#";
+        const String ACTION_INTERROGATE = "*#";
+        const String ACTION_REGISTER = "**";
+        const String ACTION_ERASURE = "##";
+
+        // Supp Service codes from TS 22.030 Annex B
+
+        //Called line presentation
+        const String SC_CLIP    = "30";
+        const String SC_CLIR    = "31";
+
+        // Call Forwarding
+        const String SC_CFU     = "21";
+        const String SC_CFB     = "67";
+        const String SC_CFNRy   = "61";
+        const String SC_CFNR    = "62";
+
+        const String SC_CF_All = "002";
+        const String SC_CF_All_Conditional = "004";
+
+        // Call Waiting
+        const String SC_WAIT     = "43";
+
+        // Call Barring
+        const String SC_BAOC         = "33";
+        const String SC_BAOIC        = "331";
+        const String SC_BAOICxH      = "332";
+        const String SC_BAIC         = "35";
+        const String SC_BAICr        = "351";
+
+        const String SC_BA_ALL       = "330";
+        const String SC_BA_MO        = "333";
+        const String SC_BA_MT        = "353";
+
+        // Supp Service Password registration
+        const String SC_PWD          = "03";
+
+        // PIN/PIN2/PUK/PUK2
+        const String SC_PIN          = "04";
+        const String SC_PIN2         = "042";
+        const String SC_PUK          = "05";
+        const String SC_PUK2         = "052";
+
+        //***** Event Constants
+
+        const Int32 EVENT_SET_COMPLETE         = 1;
+        const Int32 EVENT_GET_CLIR_COMPLETE    = 2;
+        const Int32 EVENT_QUERY_CF_COMPLETE    = 3;
+        const Int32 EVENT_USSD_COMPLETE        = 4;
+        const Int32 EVENT_QUERY_COMPLETE       = 5;
+        const Int32 EVENT_SET_CFF_COMPLETE     = 6;
+        const Int32 EVENT_USSD_CANCEL_COMPLETE = 7;
+
+        const Int32 MATCH_GROUP_POUND_STRING = 1;
+
+        const Int32 MATCH_GROUP_ACTION = 2;
+                            //(activation/interrogation/registration/erasure)
+
+        const Int32 MATCH_GROUP_SERVICE_CODE = 3;
+        const Int32 MATCH_GROUP_SIA = 5;
+        const Int32 MATCH_GROUP_SIB = 7;
+        const Int32 MATCH_GROUP_SIC = 9;
+        const Int32 MATCH_GROUP_PWD_CONFIRM = 11;
+        const Int32 MATCH_GROUP_DIALING_NUMBER = 12;
+
         GetPhone(
             [out] IPhone** result);
 

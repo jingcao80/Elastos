@@ -12,6 +12,13 @@ module {
      * interface IConnection
      */
     interface IGsmConnection {
+        const Int32 EVENT_DTMF_DONE = 1;
+        const Int32 EVENT_PAUSE_DONE = 2;
+        const Int32 EVENT_NEXT_POST_DIAL = 3;
+        const Int32 EVENT_WAKE_LOCK_TIMEOUT = 4;
+
+        const Int32 PAUSE_DELAY_MILLIS = 3 * 1000;
+        const Int32 WAKE_LOCK_TIMEOUT_MILLIS = 60*1000;
 
         Dispose();
 

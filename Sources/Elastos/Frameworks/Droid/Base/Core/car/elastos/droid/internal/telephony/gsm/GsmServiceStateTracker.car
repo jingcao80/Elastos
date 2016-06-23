@@ -1,0 +1,36 @@
+
+module {
+
+    interface Elastos.Droid.Telephony.ICellLocation;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+    namespace Gsm {
+
+    /**
+     * @Involve
+     * interface IServiceStateTracker
+     * interface IHandler
+     */
+    interface IGsmServiceStateTracker {
+
+        /**
+         * @return the current cell location information. Prefer Gsm location
+         * information if available otherwise return LTE location information
+         */
+        GetCellLocation(
+            [out] ICellLocation** result);
+
+        SetImsRegistrationState(
+            [in] Boolean registered);
+    }
+
+    }//Gsm
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

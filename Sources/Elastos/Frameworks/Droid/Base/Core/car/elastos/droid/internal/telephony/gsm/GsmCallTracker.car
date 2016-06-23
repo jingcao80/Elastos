@@ -10,6 +10,7 @@ module {
     /**
      * @Involve
      * interface ICallTracker
+     * interface IHandler
      */
     interface IGsmCallTracker {
 

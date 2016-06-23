@@ -1,6 +1,8 @@
 
 module {
 
+    interface Elastos.Droid.Internal.Telephony.Uicc.IUsimServiceTable;
+
     namespace Elastos {
     namespace Droid {
     namespace Internal {
@@ -12,10 +14,14 @@ module {
      * interface IHandler
      */
     interface IUsimDataDownloadHandler {
-        StartDataDownload(
+        HandleUsimDataDownload(
+            [in] IUsimServiceTable* ust,
             [in] ISmsMessage* smsMessage,
             [out] Int32* result);
 
+        StartDataDownload(
+            [in] ISmsMessage* smsMessage,
+            [out] Int32* result);
     }
 
     }//Gsm

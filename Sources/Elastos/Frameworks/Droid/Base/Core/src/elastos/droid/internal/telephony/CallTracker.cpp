@@ -24,22 +24,22 @@ namespace Internal {
 namespace Telephony {
 
 const Int32 CallTracker::POLL_DELAY_MSEC = 250;
-const Int32 CallTracker::EVENT_POLL_CALLS_RESULT             = 1;
-const Int32 CallTracker::EVENT_CALL_STATE_CHANGE             = 2;
-const Int32 CallTracker::EVENT_REPOLL_AFTER_DELAY            = 3;
-const Int32 CallTracker::EVENT_OPERATION_COMPLETE            = 4;
-const Int32 CallTracker::EVENT_GET_LAST_CALL_FAIL_CAUSE      = 5;
+const Int32 CallTracker::EVENT_POLL_CALLS_RESULT;
+const Int32 CallTracker::EVENT_CALL_STATE_CHANGE;
+const Int32 CallTracker::EVENT_REPOLL_AFTER_DELAY;
+const Int32 CallTracker::EVENT_OPERATION_COMPLETE;
+const Int32 CallTracker::EVENT_GET_LAST_CALL_FAIL_CAUSE;
 
-const Int32 CallTracker::EVENT_SWITCH_RESULT                 = 8;
-const Int32 CallTracker::EVENT_RADIO_AVAILABLE               = 9;
-const Int32 CallTracker::EVENT_RADIO_NOT_AVAILABLE           = 10;
-const Int32 CallTracker::EVENT_CONFERENCE_RESULT             = 11;
-const Int32 CallTracker::EVENT_SEPARATE_RESULT               = 12;
-const Int32 CallTracker::EVENT_ECT_RESULT                    = 13;
-const Int32 CallTracker::EVENT_EXIT_ECM_RESPONSE_CDMA        = 14;
-const Int32 CallTracker::EVENT_CALL_WAITING_INFO_CDMA        = 15;
-const Int32 CallTracker::EVENT_THREE_WAY_DIAL_L2_RESULT_CDMA = 16;
-const Int32 CallTracker::EVENT_THREE_WAY_DIAL_BLANK_FLASH    = 20;
+const Int32 CallTracker::EVENT_SWITCH_RESULT;
+const Int32 CallTracker::EVENT_RADIO_AVAILABLE;
+const Int32 CallTracker::EVENT_RADIO_NOT_AVAILABLE;
+const Int32 CallTracker::EVENT_CONFERENCE_RESULT;
+const Int32 CallTracker::EVENT_SEPARATE_RESULT;
+const Int32 CallTracker::EVENT_ECT_RESULT;
+const Int32 CallTracker::EVENT_EXIT_ECM_RESPONSE_CDMA;
+const Int32 CallTracker::EVENT_CALL_WAITING_INFO_CDMA;
+const Int32 CallTracker::EVENT_THREE_WAY_DIAL_L2_RESULT_CDMA;
+const Int32 CallTracker::EVENT_THREE_WAY_DIAL_BLANK_FLASH;
 const Boolean CallTracker::DBG_POLL = FALSE;
 CallTracker::CallTracker()
     : mPendingOperations(0)

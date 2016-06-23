@@ -473,11 +473,11 @@ protected:
     static const Int32 EVENT_IMS_STATE_DONE;
 
     // other
-    static const Int32 EVENT_NEW_ICC_SMS;
-    static const Int32 EVENT_ICC_CHANGED;
+    static const Int32 EVENT_NEW_ICC_SMS = 14;
+    static const Int32 EVENT_ICC_CHANGED = 15;
 
     /** Class2 SMS  */
-    static const Int32 EVENT_SMS_ON_ICC;
+    static const Int32 EVENT_SMS_ON_ICC = 16;
 
     AutoPtr<IPhoneBase> mPhone;
     AutoPtr<IContext> mContext;

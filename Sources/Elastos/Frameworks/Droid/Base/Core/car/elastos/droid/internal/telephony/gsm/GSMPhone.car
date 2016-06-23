@@ -16,6 +16,8 @@ module
     /**
      * @Involve
      * interface IPhoneBase
+     * interface IPhone
+     * interface IHandler
      */
     interface IGSMPhone {
         // Key used to read/write current ciphering state

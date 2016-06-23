@@ -1,0 +1,34 @@
+TARGET_NAME= gsm
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = CGSMPhone.cpp
+SOURCES += CGsmCall.cpp
+SOURCES += CGsmCallTracker.cpp
+SOURCES += CGsmCellBroadcastHandler.cpp
+SOURCES += CGsmCellBroadcastHandlerHelper.cpp
+SOURCES += CGsmConnection.cpp
+SOURCES += GsmInboundSmsHandler.cpp
+SOURCES += CGsmInboundSmsHandlerHelper.cpp
+SOURCES += CGsmMmiCode.cpp
+SOURCES += CGsmSMSDispatcher.cpp
+SOURCES += CGsmServiceStateTracker.cpp
+SOURCES += CGsmSmsAddress.cpp
+SOURCES += CGsmSmsCbMessage.cpp
+SOURCES += CGsmSmsCbMessageHelper.cpp
+SOURCES += CSimPhoneBookInterfaceManager.cpp
+SOURCES += CSimTlv.cpp
+SOURCES += CSmsBroadcastConfigInfo.cpp
+SOURCES += CSmsCbHeader.cpp
+SOURCES += CSmsMessage.cpp
+SOURCES += CSmsMessageHelper.cpp
+SOURCES += CSsData.cpp
+SOURCES += CSuppServiceNotification.cpp
+SOURCES += CUsimDataDownloadHandler.cpp
+SOURCES += CUsimPhoneBookManager.cpp

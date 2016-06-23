@@ -112,7 +112,7 @@ AutoPtr<ArrayOf<String> > InboundSmsHandler::PDU_PROJECTION = InitStatic(String(
 AutoPtr<ArrayOf<String> > InboundSmsHandler::PDU_SEQUENCE_PORT_PROJECTION = InitStatic(String("PDU_SEQUENCE_PORT_PROJECTION"));
 const Int32 InboundSmsHandler::WAKELOCK_TIMEOUT = 3000;
 // TODO:
-// AutoPtr<IUri> InboundSmsHandler::sRawUri = InitRawUri();
+AutoPtr<IUri> InboundSmsHandler::sRawUri; // = InitRawUri();
 
 InboundSmsHandler::DefaultState::DefaultState(
     /* [in] */ InboundSmsHandler* host)
