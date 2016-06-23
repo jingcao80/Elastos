@@ -877,9 +877,16 @@ public:
      * counterHashCodeGenerator, but may be moved upon collisions.
      */
     class CounterHashCode
+        : public Object
     {
     public:
         Int32 mCode;
+    };
+
+    class StaticInitializer
+    {
+    public:
+        StaticInitializer();
     };
 
 public:
@@ -1035,10 +1042,11 @@ public:
         /* [in] */ IInterface* value);
 
     /** Implementation for put and putIfAbsent */
-    CARAPI_(AutoPtr<IInterface>) PutVal(
+    CARAPI PutVal(
         /* [in] */ IInterface* key,
         /* [in] */ IInterface* value,
-        /* [in] */ Boolean onlyIfAbsent);
+        /* [in] */ Boolean onlyIfAbsent,
+        /* [out] */ IInterface** oldValue);
 
     /**
      * Copies all of the mappings from the specified map to this one.
@@ -1323,8 +1331,9 @@ public:
      *
      * @hide
      */
-    CARAPI_(AutoPtr<ISet>) KeySet(
-        /* [in] */ IInterface* mappedValue);
+    CARAPI KeySet(
+        /* [in] */ IInterface* mappedValue,
+        /* [out] */ ISet** set);
 
     CARAPI_(Int64) SumCount();
 
@@ -1616,7 +1625,7 @@ public:
     /**
      * Generates initial value for per-thread CounterHashCodes.
      */
-    static const AutoPtr<IAtomicInteger32> mCounterHashCodeGenerator;
+    static const AutoPtr<IAtomicInteger32> sCounterHashCodeGenerator;
 
     /**
      * Increment for counterHashCodeGenerator. See class ThreadLocal
@@ -1627,7 +1636,7 @@ public:
     /**
      * Per-thread counter hash codes. Shared across all instances.
      */
-//    static AutoPtr<ThreadLocal> mThreadCounterHashCode;
+    static pthread_key_t sThreadCounterHashCode;
 
 private:
     /**
@@ -1677,44 +1686,7 @@ private:
     /* transient */ AutoPtr<ValuesView> mValues;
     /* transient */ AutoPtr<EntrySetView> mEntrySet;
 
-    // // Unsafe mechanics
-    // private static final sun.misc.Unsafe U;
-    // private static final long SIZECTL;
-    // private static final long TRANSFERINDEX;
-    // private static final long TRANSFERORIGIN;
-    // private static final long BASECOUNT;
-    // private static final long CELLSBUSY;
-    // private static final long CELLVALUE;
-    // private static final long ABASE;
-    // private static final int ASHIFT;
-
-    // static {
-    //     try {
-    //         U = sun.misc.Unsafe.getUnsafe();
-    //         Class<?> k = ConcurrentHashMap.class;
-    //         SIZECTL = U.objectFieldOffset
-    //             (k.getDeclaredField("sizeCtl"));
-    //         TRANSFERINDEX = U.objectFieldOffset
-    //             (k.getDeclaredField("transferIndex"));
-    //         TRANSFERORIGIN = U.objectFieldOffset
-    //             (k.getDeclaredField("transferOrigin"));
-    //         BASECOUNT = U.objectFieldOffset
-    //             (k.getDeclaredField("baseCount"));
-    //         CELLSBUSY = U.objectFieldOffset
-    //             (k.getDeclaredField("cellsBusy"));
-    //         Class<?> ck = CounterCell.class;
-    //         CELLVALUE = U.objectFieldOffset
-    //             (ck.getDeclaredField("value"));
-    //         Class<?> ak = Node[].class;
-    //         ABASE = U.arrayBaseOffset(ak);
-    //         int scale = U.arrayIndexScale(ak);
-    //         if ((scale & (scale - 1)) != 0)
-    //             throw new Error("data type scale not a power of two");
-    //         ASHIFT = 31 - Integer.numberOfLeadingZeros(scale);
-    //     } catch (Exception e) {
-    //         throw new Error(e);
-    //     }
-    // }
+    static const StaticInitializer sInitializer;
 };
 
 } // namespace Concurrent

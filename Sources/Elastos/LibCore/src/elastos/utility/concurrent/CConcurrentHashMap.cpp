@@ -1,44 +1,83 @@
 
 #include "Elastos.CoreLibrary.IO.h"
 #include "CConcurrentHashMap.h"
+#include "LockSupport.h"
 #include "Math.h"
 #include "StringBuilder.h"
 #include "CBoolean.h"
 #include "CAtomicInteger32.h"
-#include "AutoLock.h"
 #include "Arrays.h"
-
+#include "corelibrary/Atomic.h"
+#include "elastos/core/CArrayOf.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/Thread.h>
+#include <cutils/atomic.h>
+#include <cutils/atomic-inline.h>
+
 using Elastos::Core::AutoLock;
-using Elastos::IO::EIID_ISerializable;
-using Elastos::IO::IOutputStream;
-using Elastos::IO::IObjectOutputStreamPutField;
-using Elastos::Core::StringBuilder;
 using Elastos::Core::IBoolean;
 using Elastos::Core::CBoolean;
-using Elastos::Core::AutoLock;
+using Elastos::Core::CArrayOf;
 using Elastos::Core::IComparable;
+using Elastos::Core::IString;
+using Elastos::Core::EIID_IString;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::Thread;
+using Elastos::IO::IObjectInput;
+using Elastos::IO::IObjectOutput;
+using Elastos::IO::IOutputStream;
+using Elastos::IO::IObjectOutputStreamPutField;
+using Elastos::IO::EIID_ISerializable;
 using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
+using Elastos::Utility::Concurrent::Locks::LockSupport;
 using Elastos::Utility::Concurrent::Locks::EIID_IReentrantLock;
 
 namespace Elastos {
 namespace Utility {
 namespace Concurrent {
 
-const Int32 CConcurrentHashMap::MAXIMUM_CAPACITY = 1 << 30;
-const Int32 CConcurrentHashMap::DEFAULT_CAPACITY = 16;
-const Int32 CConcurrentHashMap::MAX_ARRAY_SIZE = Elastos::Core::Math::INT32_MAX_VALUE - 8;
-const Int32 CConcurrentHashMap::DEFAULT_CONCURRENCY_LEVEL = 16;
-const Float CConcurrentHashMap::LOAD_FACTOR = 0.75f;
-const Int32 CConcurrentHashMap::TREEIFY_THRESHOLD = 8;
-const Int32 CConcurrentHashMap::UNTREEIFY_THRESHOLD = 6;
-const Int32 CConcurrentHashMap::MIN_TREEIFY_CAPACITY = 64;
-const Int32 CConcurrentHashMap::MIN_TRANSFER_STRIDE = 16;
-const Int32 CConcurrentHashMap::MOVED     = 0x8fffffff; // (-1) hash for forwarding nodes
-const Int32 CConcurrentHashMap::TREEBIN   = 0x80000000; // hash for roots of trees
-const Int32 CConcurrentHashMap::RESERVED  = 0x80000001; // hash for transient reservations
-const Int32 CConcurrentHashMap::HASH_BITS = 0x7fffffff; // usable bits of normal node hash
-const Int32 CConcurrentHashMap::NCPU = 4;// = Runtime.getRuntime().availableProcessors();
+static Boolean CompareAndSwapInt32(volatile int32_t* address, Int32 expect, Int32 update)
+{
+    // Note: android_atomic_release_cas() returns 0 on success, not failure.
+    int ret = android_atomic_release_cas(expect, update, address);
+
+    return (ret == 0);
+}
+
+static Boolean CompareAndSwapInt64(volatile int64_t* address, Int64 expect, Int64 update)
+{
+    // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
+    int ret = QuasiAtomicCas64(expect, update, address);
+
+    return (ret == 0);
+}
+
+static Boolean CompareAndSwapObject(volatile int32_t* address, IInterface* expect, IInterface* update)
+{
+    // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
+    int ret = android_atomic_release_cas((int32_t)expect,
+            (int32_t)update, address);
+    if (ret == 0) {
+        REFCOUNT_ADD(update)
+        REFCOUNT_RELEASE(expect)
+    }
+    return (ret == 0);
+}
+
+static void PutOrderedInt32(volatile int32_t* address, Int32 newValue)
+{
+    ANDROID_MEMBAR_STORE();
+    *address = newValue;
+}
+
+static void PutOrderedObject(volatile int32_t* address, IInterface* newValue)
+{
+    ANDROID_MEMBAR_STORE();
+    IInterface* oldValue = reinterpret_cast<IInterface*>(*address);
+    *address = reinterpret_cast<int32_t>(newValue);
+    REFCOUNT_ADD(newValue);
+    REFCOUNT_RELEASE(oldValue);
+}
 
 //===============================================================================
 // CConcurrentHashMap::Node::
@@ -50,12 +89,11 @@ CConcurrentHashMap::Node::Node(
     /* [in] */ IInterface* key,
     /* [in] */ IInterface* val,
     /* [in] */ Node* next)
-{
-    mHash = hash;
-    mKey = key;
-    mVal = val;
-    mNext = next;
-}
+    : mHash(hash)
+    , mKey(key)
+    , mVal(val)
+    , mNext(next)
+{}
 
 ECode CConcurrentHashMap::Node::GetKey(
     /* [out] */ IInterface** key)
@@ -124,8 +162,9 @@ AutoPtr<CConcurrentHashMap::Node> CConcurrentHashMap::Node::Find(
         do {
             AutoPtr<IInterface> ek;
             if (e->mHash == h &&
-                ((ek = e->mKey).Get() == k || (ek != NULL && Object::Equals(k, ek))))
+                ((ek = e->mKey).Get() == k || (ek != NULL && Object::Equals(k, ek)))) {
                 return e;
+            }
         } while ((e = e->mNext) != NULL);
     }
     return NULL;
@@ -148,34 +187,26 @@ Int32 CConcurrentHashMap::TableSizeFor(
     /* [in] */ Int32 c)
 {
     Int32 n = c - 1;
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    n |= n >> 16;
+    n |= ((UInt32)n) >> 1;
+    n |= ((UInt32)n) >> 2;
+    n |= ((UInt32)n) >> 4;
+    n |= ((UInt32)n) >> 8;
+    n |= ((UInt32)n) >> 16;
     return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
 }
 
 InterfaceID CConcurrentHashMap::ComparableClassFor(
     /* [in] */ IInterface* x)
 {
-    assert(0 && "TODO");
-    // if (x->Probe(EIID_IComparable) != NULL) {
-    //     Class<?> c; Type[] ts, as; Type t; ParameterizedType p;
-    //     if ((c = x.getClass()) == String.class) // bypass checks
-    //         return c;
-    //     if ((ts = c.getGenericInterfaces()) != null) {
-    //         for (int i = 0; i < ts.length; ++i) {
-    //             if (((t = ts[i]) instanceof ParameterizedType) &&
-    //                 ((p = (ParameterizedType)t).getRawType() ==
-    //                  Comparable.class) &&
-    //                 (as = p.getActualTypeArguments()) != null &&
-    //                 as.length == 1 && as[0] == c) // type arg is c
-    //                 return c;
-    //         }
-    //     }
-    // }
-    return EIID_IInterface;
+    if (IComparable::Probe(x) != NULL) {
+        if (IString::Probe(x) != NULL) { // bypass checks
+            return EIID_IString;
+        }
+        if (IComparable::Probe(x) != NULL) {
+            return EIID_IComparable;
+        }
+    }
+    return EMUID_NULL;
 }
 
 Int32 CConcurrentHashMap::CompareComparables(
@@ -184,8 +215,7 @@ Int32 CConcurrentHashMap::CompareComparables(
     /* [in] */ IInterface* x)
 {
     Int32 res;
-    InterfaceID id;
-    return (x == NULL || (x->GetInterfaceID(x, &id), id != kc) ? 0 :
+    return (x == NULL || (x->Probe(kc) == NULL) ? 0 :
             (IComparable::Probe(k)->CompareTo(x, &res), res));
 }
 
@@ -193,9 +223,10 @@ AutoPtr<CConcurrentHashMap::Node> CConcurrentHashMap::TabAt(
     /* [in] */ ArrayOf<Node*>* tab,
     /* [in] */ Int32 i)
 {
-    assert(0 && "TODO");
-    return NULL;
-//    return (Node<K,V>)U.getObjectVolatile(tab, ((long)i << ASHIFT) + ABASE);
+    volatile int32_t* address =
+            (volatile int32_t*)(tab->GetPayload() + i);
+    int32_t value = android_atomic_acquire_load(address);
+    return (Node*)reinterpret_cast<IMapEntry*>(value);
 }
 
 Boolean CConcurrentHashMap::CasTabAt(
@@ -204,9 +235,8 @@ Boolean CConcurrentHashMap::CasTabAt(
     /* [in] */ Node* c,
     /* [in] */ Node* v)
 {
-    assert(0 && "TODO");
-    return FALSE;
-//    return U.compareAndSwapObject(tab, ((long)i << ASHIFT) + ABASE, c, v);
+    return CompareAndSwapObject((volatile int32_t*)(tab->GetPayload() + i),
+            (IMapEntry*)c, (IMapEntry*)v);
 }
 
 void CConcurrentHashMap::SetTabAt(
@@ -214,30 +244,37 @@ void CConcurrentHashMap::SetTabAt(
     /* [in] */ Int32 i,
     /* [in] */ Node* v)
 {
-    assert(0 && "TODO");
-//    U.putOrderedObject(tab, ((long)i << ASHIFT) + ABASE, v);
+    PutOrderedObject((volatile int32_t*)(tab->GetPayload() + i), (IMapEntry*)v);
 }
 
-AutoPtr<IInterface> CConcurrentHashMap::PutVal(
+ECode CConcurrentHashMap::PutVal(
     /* [in] */ IInterface* key,
     /* [in] */ IInterface* value,
-    /* [in] */ Boolean onlyIfAbsent)
+    /* [in] */ Boolean onlyIfAbsent,
+    /* [out] */ IInterface** oldValue)
 {
-    if (key == NULL || value == NULL) return NULL; //return E_NULL_POINTER_EXCEPTION;
+    if (key == NULL || value == NULL) {
+        *oldValue = NULL;
+        return E_NULL_POINTER_EXCEPTION;
+    }
     Int32 hc = Object::GetHashCode(key);
     Int32 hash = Spread(hc);
     Int32 binCount = 0;
     AutoPtr<ArrayOf<Node*> > tab = mTable;
     for (;;) {
         AutoPtr<Node> f; Int32 n, i, fh;
-        if (tab == NULL || (n = tab->GetLength()) == 0)
+        if (tab == NULL || (n = tab->GetLength()) == 0) {
             tab = InitTable();
-        else if ((f = TabAt(tab, i = (n - 1) & hash)) == NULL) {
-            if (CasTabAt(tab, i, NULL, new Node(hash, key, value, NULL)))
-                break;                   // no lock when adding to empty bin
         }
-        else if ((fh = f->mHash) == MOVED)
+        else if ((f = TabAt(tab, i = (n - 1) & hash)) == NULL) {
+            AutoPtr<Node> node = new Node(hash, key, value, NULL);
+            if (CasTabAt(tab, i, NULL, node)) {
+                break;                   // no lock when adding to empty bin
+            }
+        }
+        else if ((fh = f->mHash) == MOVED) {
             tab = HelpTransfer(tab, f);
+        }
         else {
             AutoPtr<IInterface> oldVal;
             {
@@ -251,8 +288,9 @@ AutoPtr<IInterface> CConcurrentHashMap::PutVal(
                                 ((ek = e->mKey).Get() == key ||
                                  (ek != NULL && Object::Equals(key, ek)))) {
                                 oldVal = e->mVal;
-                                if (!onlyIfAbsent)
+                                if (!onlyIfAbsent) {
                                     e->mVal = value;
+                                }
                                 break;
                             }
                             AutoPtr<Node> pred = e;
@@ -269,23 +307,29 @@ AutoPtr<IInterface> CConcurrentHashMap::PutVal(
                         if ((p = tb->PutTreeVal(hash, key,
                                                        value)) != NULL) {
                             oldVal = p->mVal;
-                            if (!onlyIfAbsent)
+                            if (!onlyIfAbsent) {
                                 p->mVal = value;
+                            }
                         }
                     }
                 }
             }
             if (binCount != 0) {
-                if (binCount >= TREEIFY_THRESHOLD)
+                if (binCount >= TREEIFY_THRESHOLD) {
                     TreeifyBin(tab, i);
-                if (oldVal != NULL)
-                    return oldVal;
+                }
+                if (oldVal != NULL) {
+                    *oldValue = oldVal;
+                    REFCOUNT_ADD(*oldValue);
+                    return NOERROR;
+                }
                 break;
             }
         }
     }
-    AddCount(1L, binCount);
-    return NULL;
+    AddCount(1LL, binCount);
+    *oldValue = NULL;
+    return NOERROR;
 }
 
 AutoPtr<IInterface> CConcurrentHashMap::ReplaceNode(
@@ -298,12 +342,14 @@ AutoPtr<IInterface> CConcurrentHashMap::ReplaceNode(
     for (AutoPtr<ArrayOf<Node*> > tab = mTable;;) {
         AutoPtr<Node> f; Int32 n, i, fh;
         if (tab == NULL || (n = tab->GetLength()) == 0 ||
-            (f = TabAt(tab, i = (n - 1) & hash)) == NULL)
+            (f = TabAt(tab, i = (n - 1) & hash)) == NULL) {
             break;
-        else if ((fh = f->mHash) == MOVED)
+        }
+        else if ((fh = f->mHash) == MOVED) {
             tab = HelpTransfer(tab, f);
+        }
         else {
-            AutoPtr<IInterface> oldVal = NULL;
+            AutoPtr<IInterface> oldVal;
             Boolean validated = FALSE;
             {
                 AutoLock lock(f);
@@ -319,18 +365,22 @@ AutoPtr<IInterface> CConcurrentHashMap::ReplaceNode(
                                 if (cv == NULL || cv == ev ||
                                     (ev != NULL && Object::Equals(cv, ev))) {
                                     oldVal = ev;
-                                    if (value != NULL)
+                                    if (value != NULL) {
                                         e->mVal = value;
-                                    else if (pred != NULL)
+                                    }
+                                    else if (pred != NULL) {
                                         pred->mNext = e->mNext;
-                                    else
+                                    }
+                                    else {
                                         SetTabAt(tab, i, e->mNext);
+                                    }
                                 }
                                 break;
                             }
                             pred = e;
-                            if ((e = e->mNext) == NULL)
+                            if ((e = e->mNext) == NULL) {
                                 break;
+                            }
                         }
                     }
                     else if (ITreeBin::Probe(f) != NULL) {
@@ -338,15 +388,17 @@ AutoPtr<IInterface> CConcurrentHashMap::ReplaceNode(
                         AutoPtr<TreeBin> t = (TreeBin*)ITreeBin::Probe(f);
                         AutoPtr<TreeNode> r, p;
                         if ((r = t->mRoot) != NULL &&
-                            (p = r->FindTreeNode(hash, key, EIID_IInterface)) != NULL) {
+                            (p = r->FindTreeNode(hash, key, EMUID_NULL)) != NULL) {
                             AutoPtr<IInterface> pv = p->mVal;
                             if (cv == NULL || cv == pv ||
                                 (pv != NULL && Object::Equals(cv, pv))) {
                                 oldVal = pv;
-                                if (value != NULL)
+                                if (value != NULL) {
                                     p->mVal = value;
-                                else if (t->RemoveTreeNode(p))
+                                }
+                                else if (t->RemoveTreeNode(p)) {
                                     SetTabAt(tab, i, Untreeify(t->mFirst.Get()).Get());
+                                }
                             }
                         }
                     }
@@ -354,8 +406,9 @@ AutoPtr<IInterface> CConcurrentHashMap::ReplaceNode(
             }
             if (validated) {
                 if (oldVal != NULL) {
-                    if (value == NULL)
-                        AddCount(-1L, -1);
+                    if (value == NULL) {
+                        AddCount(-1LL, -1);
+                    }
                     return oldVal;
                 }
                 break;
@@ -377,17 +430,22 @@ String CConcurrentHashMap::ToString()
         for (;;) {
             AutoPtr<IInterface> k = p->mKey;
             AutoPtr<IInterface> v = p->mVal;
-            if (Object::Equals(k, TO_IINTERFACE(this)))
+            if (Object::Equals(k, TO_IINTERFACE(this))) {
                 sb.Append("(this Map)");
-            else
+            }
+            else {
                 sb.Append(k);
+            }
             sb.AppendChar('=');
-            if (Object::Equals(v, TO_IINTERFACE(this)))
+            if (Object::Equals(v, TO_IINTERFACE(this))) {
                 sb.Append("(this Map)");
-            else
+            }
+            else {
                 sb.Append(v);
-            if ((p = it->Advance()) == NULL)
+            }
+            if ((p = it->Advance()) == NULL) {
                 break;
+            }
             sb.AppendChar(',');
             sb.AppendChar(' ');
         }
@@ -399,16 +457,16 @@ String CConcurrentHashMap::ToString()
 Int64 CConcurrentHashMap::MappingCount()
 {
     Int64 n = SumCount();
-    return (n < 0L) ? 0L : n; // ignore transient negative values
+    return (n < 0LL) ? 0LL : n; // ignore transient negative values
 }
 
 AutoPtr<CConcurrentHashMap::KeySetView> CConcurrentHashMap::NewKeySet()
 {
     AutoPtr<IBoolean> b;
     CBoolean::New(TRUE, (IBoolean**)&b);
-    AutoPtr<IConcurrentMap> m;
-    CConcurrentHashMap::New((IConcurrentMap**)&m);
-    AutoPtr<KeySetView> res = new KeySetView((CConcurrentHashMap*)m.Get(), b);
+    AutoPtr<CConcurrentHashMap> m;
+    CConcurrentHashMap::NewByFriend((CConcurrentHashMap**)&m);
+    AutoPtr<KeySetView> res = new KeySetView(m, b);
     return res;
 }
 
@@ -417,21 +475,23 @@ AutoPtr<CConcurrentHashMap::KeySetView> CConcurrentHashMap::NewKeySet(
 {
     AutoPtr<IBoolean> b;
     CBoolean::New(TRUE, (IBoolean**)&b);
-    AutoPtr<IConcurrentMap> m;
-    CConcurrentHashMap::New(initialCapacity, (IConcurrentMap**)&m);
-    AutoPtr<KeySetView> res = new KeySetView((CConcurrentHashMap*)m.Get(), b);
+    AutoPtr<CConcurrentHashMap> m;
+    CConcurrentHashMap::NewByFriend(initialCapacity, (CConcurrentHashMap**)&m);
+    AutoPtr<KeySetView> res = new KeySetView(m, b);
     return res;
 }
 
-AutoPtr<ISet> CConcurrentHashMap::KeySet(
-    /* [in] */ IInterface* mappedValue)
+ECode CConcurrentHashMap::KeySet(
+    /* [in] */ IInterface* mappedValue,
+    /* [out] */ ISet** set)
 {
-    if (mappedValue == NULL)
-        return NULL;
-//        return E_NULL_POINTER_EXCEPTION;
-    AutoPtr<KeySetView> res = new KeySetView(this, mappedValue);
-    AutoPtr<ISet> p = (ISet*)res->Probe(EIID_ISet);
-    return p;
+    if (mappedValue == NULL) {
+        *set = NULL;
+        return E_NULL_POINTER_EXCEPTION;
+    }
+    *set = new KeySetView(this, mappedValue);
+    REFCOUNT_ADD(*set);
+    return NOERROR;
 }
 
 //===============================================================================
@@ -441,10 +501,10 @@ AutoPtr<ISet> CConcurrentHashMap::KeySet(
 CAR_INTERFACE_IMPL(CConcurrentHashMap::ForwardingNode, CConcurrentHashMap::Node, IForwardingNode)
 
 CConcurrentHashMap::ForwardingNode::ForwardingNode(
-    /* [in] */ ArrayOf<Node*>* tab) : Node(MOVED, NULL, NULL, NULL)
-{
-    mNextTable = tab;
-}
+    /* [in] */ ArrayOf<Node*>* tab)
+    : Node(MOVED, NULL, NULL, NULL)
+    , mNextTable(tab)
+{}
 
 AutoPtr<CConcurrentHashMap::Node> CConcurrentHashMap::ForwardingNode::Find(
     /* [in] */ Int32 h,
@@ -457,10 +517,12 @@ AutoPtr<CConcurrentHashMap::Node> CConcurrentHashMap::ForwardingNode::Find(
         do {
             Int32 eh; AutoPtr<IInterface> ek;
             if ((eh = e->mHash) == h &&
-                ((ek = e->mKey).Get() == k || (ek != NULL && Object::Equals(k, ek))))
+                ((ek = e->mKey).Get() == k || (ek != NULL && Object::Equals(k, ek)))) {
                 return e;
-            if (eh < 0)
+            }
+            if (eh < 0) {
                 return e->Find(h, k);
+            }
         } while ((e = e->mNext) != NULL);
     }
     return NULL;
@@ -472,286 +534,305 @@ AutoPtr<CConcurrentHashMap::Node> CConcurrentHashMap::ForwardingNode::Find(
 
 AutoPtr<ArrayOf<CConcurrentHashMap::Node*> > CConcurrentHashMap::InitTable()
 {
-    assert(0 && "TODO");
-    return NULL;
-    // AutoPtr<ArrayOf<Node*> > tab; Int32 sc;
-    // while ((tab = mTable) == NULL || tab->GetLength() == 0) {
-    //     if ((sc = mSizeCtl) < 0)
-    //         Thread::Yield(); // lost initialization race; just spin
-    //     else if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {
-    //         if ((tab = mTable) == NULL || tab->GetLength() == 0) {
-    //             Int32 n = (sc > 0) ? sc : DEFAULT_CAPACITY;
-    //             AutoPtr<ArrayOf<Node*> > nt = (ArrayOf<Node*>*)new Node[n];
-    //             mTable = tab = nt;
-    //             sc = n - (n >> 2);
-    //         }
-    //         mSizeCtl = sc;
-    //         break;
-    //     }
-    // }
-    // return tab;
+    AutoPtr<ArrayOf<Node*> > tab; Int32 sc;
+    while ((tab = mTable) == NULL || tab->GetLength() == 0) {
+        if ((sc = mSizeCtl) < 0) {
+            Thread::Yield(); // lost initialization race; just spin
+        }
+        else if (CompareAndSwapInt32((volatile int32_t*)&mSizeCtl, sc, -1)) {
+            if ((tab = mTable) == NULL || tab->GetLength() == 0) {
+                Int32 n = (sc > 0) ? sc : DEFAULT_CAPACITY;
+                AutoPtr<ArrayOf<Node*> > nt = ArrayOf<Node*>::Alloc(n);
+                mTable = tab = nt;
+                sc = n - (((UInt32)n) >> 2);
+            }
+            mSizeCtl = sc;
+            break;
+        }
+    }
+    return tab;
 }
 
 void CConcurrentHashMap::AddCount(
     /* [in] */ Int64 x,
     /* [in] */ Int32 check)
 {
-    assert(0 && "TODO");
-    // AutoPtr<ArrayOf<CounterCell*> > as; Int64 b, s;
-    // if ((as = counterCells) != NULL ||
-    //     !U.compareAndSwapLong(this, BASECOUNT, b = baseCount, s = b + x)) {
-    //     AutoPtr<CounterHashCode> hc; CounterCell a; Int64 v; Int32 m;
-    //     Boolean uncontended = TRUE;
-    //     if ((hc = mThreadCounterHashCode->Get()) == NULL ||
-    //         as == NULL || (m = as->GetLength() - 1) < 0 ||
-    //         (a = (*as)[m & hc->mCode]) == NULL ||
-    //         !(uncontended =
-    //           U.compareAndSwapLong(a, CELLVALUE, v = a.value, v + x))) {
-    //         FullAddCount(x, hc, uncontended);
-    //         return;
-    //     }
-    //     if (check <= 1)
-    //         return;
-    //     s = SumCount();
-    // }
-    // if (check >= 0) {
-    //     AutoPtr<ArrayOf<Node*> > tab, nt; Int32 sc;
-    //     while (s >= (Int64)(sc = mSizeCtl) && (tab = mTable) != NULL &&
-    //            tab->GetLength() < MAXIMUM_CAPACITY) {
-    //         if (sc < 0) {
-    //             if (sc == -1 || mTransferIndex <= mTransferOrigin ||
-    //                 (nt = mNextTable) == NULL)
-    //                 break;
-    //             if (U.compareAndSwapInt(this, SIZECTL, sc, sc - 1))
-    //                 Transfer(tab, nt);
-    //         }
-    //         else if (U.compareAndSwapInt(this, SIZECTL, sc, -2))
-    //             Transfer(tab, NULL);
-    //         s = SumCount();
-    //     }
-    // }
+    AutoPtr<ArrayOf<CounterCell*> > as; Int64 b, s;
+    if ((as = mCounterCells) != NULL || (b = mBaseCount, s = b + x,
+        !CompareAndSwapInt64((volatile int64_t*)&mBaseCount, b, s))) {
+        AutoPtr<CounterHashCode> hc; AutoPtr<CounterCell> a; Int64 v; Int32 m;
+        Boolean uncontended = TRUE;
+        if ((hc = (CounterHashCode*)pthread_getspecific(sThreadCounterHashCode)) == NULL ||
+            as == NULL || (m = as->GetLength() - 1) < 0 ||
+            (a = (*as)[m & hc->mCode]) == NULL ||
+            (v = a->mValue, !(uncontended =
+                CompareAndSwapInt64((volatile int64_t*)&a->mValue, v, v + x)))) {
+            FullAddCount(x, hc, uncontended);
+            return;
+        }
+        if (check <= 1) {
+            return;
+        }
+        s = SumCount();
+    }
+    if (check >= 0) {
+        AutoPtr<ArrayOf<Node*> > tab, nt; Int32 sc;
+        while (s >= (Int64)(sc = mSizeCtl) && (tab = mTable) != NULL &&
+               tab->GetLength() < MAXIMUM_CAPACITY) {
+            if (sc < 0) {
+                if (sc == -1 || mTransferIndex <= mTransferOrigin ||
+                    (nt = mNextTable) == NULL) {
+                    break;
+                }
+                if (CompareAndSwapInt32((volatile int32_t*)&mSizeCtl, sc, sc - 1)) {
+                    Transfer(tab, nt);
+                }
+            }
+            else if (CompareAndSwapInt32((volatile int32_t*)&mSizeCtl, sc, -2)) {
+                Transfer(tab, NULL);
+            }
+            s = SumCount();
+        }
+    }
 }
 
 AutoPtr<ArrayOf<CConcurrentHashMap::Node*> > CConcurrentHashMap::HelpTransfer(
     /* [in] */ ArrayOf<Node*>* tab,
     /* [in] */ Node* f)
 {
-    assert(0 && "TODO");
-    return NULL;
-    // AutoPtr<ArrayOf<Node*> > nextTab; Int32 sc;
-    // if ((ForwardingNode::Probe(f) != NULL) &&
-    //     (nextTab = ForwardingNode::Probe(f)->mNextTable) != NULL) {
-    //     if (nextTab == mNextTable && tab == mTable &&
-    //         mTransferIndex > mTransferOrigin && (sc = mSizeCtl) < -1 &&
-    //         U.compareAndSwapInt(this, SIZECTL, sc, sc - 1))
-    //         Transfer(tab, nextTab);
-    //     return nextTab;
-    // }
-    // return mTable;
+    AutoPtr<ArrayOf<Node*> > nextTab; Int32 sc;
+    if ((IForwardingNode::Probe(f) != NULL) &&
+        (nextTab = ((ForwardingNode*)IForwardingNode::Probe(f))->mNextTable) != NULL) {
+        if (nextTab == mNextTable && tab == mTable &&
+            mTransferIndex > mTransferOrigin && (sc = mSizeCtl) < -1 &&
+            CompareAndSwapInt32((volatile int32_t*)&mSizeCtl, sc, sc - 1)) {
+            Transfer(tab, nextTab);
+        }
+        return nextTab;
+    }
+    return mTable;
 }
 
 void CConcurrentHashMap::TryPresize(
     /* [in] */ Int32 size)
 {
-    assert(0 && "TODO");
-    // Int32 c = (size >= (MAXIMUM_CAPACITY >> 1)) ? MAXIMUM_CAPACITY :
-    //     TableSizeFor(size + (size >> 1) + 1);
-    // Int32 sc;
-    // while ((sc = mSizeCtl) >= 0) {
-    //     AutoPtr<ArrayOf<Node*> > tab = mTable; Int32 n;
-    //     if (tab == NULL || (n = tab->GetLength()) == 0) {
-    //         n = (sc > c) ? sc : c;
-    //         if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {
-    //             if (mTable == tab) {
-    //                 AutoPtr<ArrayOf<Node*> > nt = (ArrayOf<Node*>*)new Node[n];
-    //                 mTable = nt;
-    //                 sc = n - (n >> 2);
-    //             }
-    //             mSizeCtl = sc;
-    //         }
-    //     }
-    //     else if (c <= sc || n >= MAXIMUM_CAPACITY)
-    //         break;
-    //     else if (tab == mTable &&
-    //              U.compareAndSwapInt(this, SIZECTL, sc, -2))
-    //         Transfer(tab, NULL);
-    // }
+    Int32 c = (size >= (((UInt32)MAXIMUM_CAPACITY) >> 1)) ? MAXIMUM_CAPACITY :
+            TableSizeFor(size + (((UInt32)size) >> 1) + 1);
+    Int32 sc;
+    while ((sc = mSizeCtl) >= 0) {
+        AutoPtr<ArrayOf<Node*> > tab = mTable;
+        Int32 n;
+        if (tab == NULL || (n = tab->GetLength()) == 0) {
+            n = (sc > c) ? sc : c;
+            if (CompareAndSwapInt32((volatile int32_t*)&mSizeCtl, sc, -1)) {
+                if (mTable == tab) {
+                    AutoPtr<ArrayOf<Node*> > nt = ArrayOf<Node*>::Alloc(n);
+                    mTable = nt;
+                    sc = n - (((UInt32)n) >> 2);
+                }
+                mSizeCtl = sc;
+            }
+        }
+        else if (c <= sc || n >= MAXIMUM_CAPACITY) {
+            break;
+        }
+        else if (tab == mTable &&
+                CompareAndSwapInt32((volatile int32_t*)&mSizeCtl, sc, -2)) {
+            Transfer(tab, NULL);
+        }
+    }
 }
 
 void CConcurrentHashMap::Transfer(
     /* [in] */ ArrayOf<Node*>* tab,
     /* [in] */ ArrayOf<Node*>* nextTab)
 {
-    assert(0 && "TODO");
-    // Int32 n = tab->GetLength(), stride;
-    // if ((stride = (NCPU > 1) ? (n >> 3) / NCPU : n) < MIN_TRANSFER_STRIDE)
-    //     stride = MIN_TRANSFER_STRIDE; // subdivide range
-    // if (nextTab == NULL) {            // initiating
-    //     // try {
-    //     AutoPtr<ArrayOf<Node*> > nt = (ArrayOf<Node*>*)new Node[n << 1];
-    //     nextTab = nt;
-    //     // } catch (Throwable ex) {      // try to cope with OOME
-    //     //     mSizeCtl = Integer.MAX_VALUE;
-    //     //     return;
-    //     // }
-    //     mNextTable = nextTab;
-    //     mTransferOrigin = n;
-    //     mTransferIndex = n;
-    //     AutoPtr<ForwardingNode> rev = new ForwardingNode(tab);
-    //     for (Int32 k = n; k > 0;) {    // progressively reveal ready slots
-    //         Int32 nextk = (k > stride) ? k - stride : 0;
-    //         for (Int32 m = nextk; m < k; ++m)
-    //             (*nextTab)[m] = rev;
-    //         for (Int32 m = n + nextk; m < n + k; ++m)
-    //             (*nextTab)[m] = rev;
-    //         U.putOrderedInt(this, TRANSFERORIGIN, k = nextk);
-    //     }
-    // }
-    // Int32 nextn = nextTab->GetLength();
-    // AutoPtr<ForwardingNode> fwd = new ForwardingNode(nextTab);
-    // Boolean advance = TRUE;
-    // for (Int32 i = 0, bound = 0;;) {
-    //     Int32 nextIndex, nextBound, fh; AutoPtr<Node> f;
-    //     while (advance) {
-    //         if (--i >= bound)
-    //             advance = FALSE;
-    //         else if ((nextIndex = mTransferIndex) <= mTransferOrigin) {
-    //             i = -1;
-    //             advance = FALSE;
-    //         }
-    //         else if (U.compareAndSwapInt
-    //                  (this, TRANSFERINDEX, nextIndex,
-    //                   nextBound = (nextIndex > stride ?
-    //                                nextIndex - stride : 0))) {
-    //             bound = nextBound;
-    //             i = nextIndex - 1;
-    //             advance = FALSE;
-    //         }
-    //     }
-    //     if (i < 0 || i >= n || i + n >= nextn) {
-    //         for (Int32 sc;;) {
-    //             if (U.compareAndSwapInt(this, SIZECTL, sc = mSizeCtl, ++sc)) {
-    //                 if (sc == -1) {
-    //                     mNextTable = NULL;
-    //                     mTable = nextTab;
-    //                     mSizeCtl = (n << 1) - (n >> 1);
-    //                 }
-    //                 return;
-    //             }
-    //         }
-    //     }
-    //     else if ((f = TabAt(tab, i)) == NULL) {
-    //         if (CasTabAt(tab, i, NULL, fwd)) {
-    //             SetTabAt(nextTab, i, NULL);
-    //             SetTabAt(nextTab, i + n, NULL);
-    //             advance = TRUE;
-    //         }
-    //     }
-    //     else if ((fh = f->mHash) == MOVED)
-    //         advance = TRUE; // already processed
-    //     else {
-    //         {    AutoLock syncLock(f);
-    //             if (TabAt(tab, i) == f) {
-    //                 AutoPtr<Node> ln, hn;
-    //                 if (fh >= 0) {
-    //                     Int32 runBit = fh & n;
-    //                     AutoPtr<Node> lastRun = f;
-    //                     for (AutoPtr<Node> p = f->mNext; p != NULL; p = p->mNext) {
-    //                         Int32 b = p->mHash & n;
-    //                         if (b != runBit) {
-    //                             runBit = b;
-    //                             lastRun = p;
-    //                         }
-    //                     }
-    //                     if (runBit == 0) {
-    //                         ln = lastRun;
-    //                         hn = NULL;
-    //                     }
-    //                     else {
-    //                         hn = lastRun;
-    //                         ln = NULL;
-    //                     }
-    //                     for (AutoPtr<Node> p = f; p != lastRun; p = p->mNext) {
-    //                         Int32 ph = p->mHash; AutoPtr<IInterface> pk = p->mKey;
-    //                         AutoPtr<IInterface> pv = p->mVal;
-    //                         if ((ph & n) == 0)
-    //                             ln = new Node(ph, pk, pv, ln);
-    //                         else
-    //                             hn = new Node(ph, pk, pv, hn);
-    //                     }
-    //                 }
-    //                 else if (TreeBin::Probe(f) != NULL) {
-    //                     AutoPtr<TreeBin> t = TreeBin::Probe(f);
-    //                     AutoPtr<TreeNode> lo = NULL, loTail = NULL;
-    //                     AutoPtr<TreeNode> hi = NULL, hiTail = NULL;
-    //                     Int32 lc = 0, hc = 0;
-    //                     for (AutoPtr<Node> e = t->mFirst; e != NULL; e = e->mNext) {
-    //                         Int32 h = e->mHash;
-    //                         AutoPtr<TreeNode> p = new TreeNode(h, e->mKey, e->mVal, NULL, NULL);
-    //                         if ((h & n) == 0) {
-    //                             if ((p->mPrev = loTail) == NULL)
-    //                                 lo = p;
-    //                             else
-    //                                 loTail->mNext = p;
-    //                             loTail = p;
-    //                             ++lc;
-    //                         }
-    //                         else {
-    //                             if ((p->mPrev = hiTail) == NULL)
-    //                                 hi = p;
-    //                             else
-    //                                 hiTail->mNext = p;
-    //                             hiTail = p;
-    //                             ++hc;
-    //                         }
-    //                     }
-    //                     ln = (lc <= UNTREEIFY_THRESHOLD) ? Untreeify(lo) :
-    //                         (hc != 0) ? new TreeBin(lo) : t;
-    //                     hn = (hc <= UNTREEIFY_THRESHOLD) ? Untreeify(hi) :
-    //                         (lc != 0) ? new TreeBin(hi) : t;
-    //                 }
-    //                 else
-    //                     ln = hn = NULL;
-    //                 SetTabAt(nextTab, i, ln);
-    //                 SetTabAt(nextTab, i + n, hn);
-    //                 SetTabAt(tab, i, fwd);
-    //                 advance = TRUE;
-    //             }
-    //         }
-    //     }
-    // }
+    Int32 n = tab->GetLength(), stride;
+    if ((stride = (NCPU > 1) ? (((UInt32)n) >> 3) / NCPU : n) < MIN_TRANSFER_STRIDE) {
+        stride = MIN_TRANSFER_STRIDE; // subdivide range
+    }
+    if (nextTab == NULL) {            // initiating
+        // try {
+        AutoPtr<ArrayOf<Node*> > nt = ArrayOf<Node*>::Alloc(n << 1);
+        nextTab = nt;
+        // } catch (Throwable ex) {      // try to cope with OOME
+        //     mSizeCtl = Integer.MAX_VALUE;
+        //     return;
+        // }
+        mNextTable = nextTab;
+        mTransferOrigin = n;
+        mTransferIndex = n;
+        AutoPtr<ForwardingNode> rev = new ForwardingNode(tab);
+        for (Int32 k = n; k > 0;) {    // progressively reveal ready slots
+            Int32 nextk = (k > stride) ? k - stride : 0;
+            for (Int32 m = nextk; m < k; ++m) {
+                nextTab->Set(m, rev);
+            }
+            for (Int32 m = n + nextk; m < n + k; ++m) {
+                nextTab->Set(m, rev);
+            }
+            PutOrderedInt32((volatile int32_t*)&mTransferOrigin, k = nextk);
+        }
+    }
+    Int32 nextn = nextTab->GetLength();
+    AutoPtr<ForwardingNode> fwd = new ForwardingNode(nextTab);
+    Boolean advance = TRUE;
+    for (Int32 i = 0, bound = 0;;) {
+        Int32 nextIndex, nextBound, fh; AutoPtr<Node> f;
+        while (advance) {
+            if (--i >= bound) {
+                advance = FALSE;
+            }
+            else if ((nextIndex = mTransferIndex) <= mTransferOrigin) {
+                i = -1;
+                advance = FALSE;
+            }
+            else if (CompareAndSwapInt32((volatile int32_t*)&mTransferIndex,
+                    nextIndex, nextBound = (nextIndex > stride ?
+                                            nextIndex - stride : 0))) {
+                bound = nextBound;
+                i = nextIndex - 1;
+                advance = FALSE;
+            }
+        }
+        if (i < 0 || i >= n || i + n >= nextn) {
+            for (Int32 sc;;) {
+                if (sc = mSizeCtl, CompareAndSwapInt32((volatile int32_t*)&mSizeCtl, mSizeCtl, ++sc)) {
+                    if (sc == -1) {
+                        mNextTable = NULL;
+                        mTable = nextTab;
+                        mSizeCtl = (n << 1) - (((UInt32)n) >> 1);
+                    }
+                    return;
+                }
+            }
+        }
+        else if ((f = TabAt(tab, i)) == NULL) {
+            if (CasTabAt(tab, i, NULL, fwd)) {
+                SetTabAt(nextTab, i, NULL);
+                SetTabAt(nextTab, i + n, NULL);
+                advance = TRUE;
+            }
+        }
+        else if ((fh = f->mHash) == MOVED) {
+            advance = TRUE; // already processed
+        }
+        else {
+            {
+                AutoLock syncLock(f);
+                if (TabAt(tab, i) == f) {
+                    AutoPtr<Node> ln, hn;
+                    if (fh >= 0) {
+                        Int32 runBit = fh & n;
+                        AutoPtr<Node> lastRun = f;
+                        for (AutoPtr<Node> p = f->mNext; p != NULL; p = p->mNext) {
+                            Int32 b = p->mHash & n;
+                            if (b != runBit) {
+                                runBit = b;
+                                lastRun = p;
+                            }
+                        }
+                        if (runBit == 0) {
+                            ln = lastRun;
+                            hn = NULL;
+                        }
+                        else {
+                            hn = lastRun;
+                            ln = NULL;
+                        }
+                        for (AutoPtr<Node> p = f; p != lastRun; p = p->mNext) {
+                            Int32 ph = p->mHash;
+                            AutoPtr<IInterface> pk = p->mKey;
+                            AutoPtr<IInterface> pv = p->mVal;
+                            if ((ph & n) == 0) {
+                                ln = new Node(ph, pk, pv, ln);
+                            }
+                            else {
+                                hn = new Node(ph, pk, pv, hn);
+                            }
+                        }
+                    }
+                    else if (ITreeBin::Probe(f) != NULL) {
+                        AutoPtr<TreeBin> t = (TreeBin*)ITreeBin::Probe(f);
+                        AutoPtr<TreeNode> lo, loTail;
+                        AutoPtr<TreeNode> hi, hiTail;
+                        Int32 lc = 0, hc = 0;
+                        for (AutoPtr<Node> e = t->mFirst; e != NULL; e = e->mNext) {
+                            Int32 h = e->mHash;
+                            AutoPtr<TreeNode> p = new TreeNode(h, e->mKey, e->mVal, NULL, NULL);
+                            if ((h & n) == 0) {
+                                if ((p->mPrev = loTail) == NULL) {
+                                    lo = p;
+                                }
+                                else {
+                                    loTail->mNext = p;
+                                }
+                                loTail = p;
+                                ++lc;
+                            }
+                            else {
+                                if ((p->mPrev = hiTail) == NULL) {
+                                    hi = p;
+                                }
+                                else {
+                                    hiTail->mNext = p;
+                                }
+                                hiTail = p;
+                                ++hc;
+                            }
+                        }
+                        ln = (lc <= UNTREEIFY_THRESHOLD) ? Untreeify(lo) :
+                            (hc != 0) ? new TreeBin(lo) : t.Get();
+                        hn = (hc <= UNTREEIFY_THRESHOLD) ? Untreeify(hi) :
+                            (lc != 0) ? new TreeBin(hi) : t.Get();
+                    }
+                    else {
+                        ln = hn = NULL;
+                    }
+                    SetTabAt(nextTab, i, ln);
+                    SetTabAt(nextTab, i + n, hn);
+                    SetTabAt(tab, i, fwd);
+                    advance = TRUE;
+                }
+            }
+        }
+    }
 }
 
 void CConcurrentHashMap::TreeifyBin(
     /* [in] */ ArrayOf<Node*>* tab,
     /* [in] */ Int32 index)
 {
-    assert(0 && "TODO");
-    // AutoPtr<Node> b; Int32 n, sc;
-    // if (tab != NULL) {
-    //     if ((n = tab->GetLength()) < MIN_TREEIFY_CAPACITY) {
-    //         if (tab == mTable && (sc = mSizeCtl) >= 0 &&
-    //             U.compareAndSwapInt(this, SIZECTL, sc, -2))
-    //             Transfer(tab, NULL);
-    //     }
-    //     else if ((b = TabAt(tab, index)) != NULL) {
-    //         {    AutoLock syncLock(b);
-    //             if (TabAt(tab, index) == b) {
-    //                 AutoPtr<TreeNode> hd = NULL, tl = NULL;
-    //                 for (AutoPtr<Node> e = b; e != NULL; e = e->mNext) {
-    //                     AutoPtr<TreeNode> p =
-    //                         new TreeNode(e->mHash, e->mKey, e->mVal, NULL, NULL);
-    //                     if ((p->mPrev = tl) == NULL)
-    //                         hd = p;
-    //                     else
-    //                         tl->mNext = p;
-    //                     tl = p;
-    //                 }
-    //                 SetTabAt(tab, index, new TreeBin(hd));
-    //             }
-    //         }
-    //     }
-    // }
+    AutoPtr<Node> b; Int32 n, sc;
+    if (tab != NULL) {
+        if ((n = tab->GetLength()) < MIN_TREEIFY_CAPACITY) {
+            if (tab == mTable && (sc = mSizeCtl) >= 0 &&
+                CompareAndSwapInt32((volatile int32_t*)&mSizeCtl, sc, -2)) {
+                Transfer(tab, NULL);
+            }
+        }
+        else if ((b = TabAt(tab, index)) != NULL) {
+            {
+                AutoLock syncLock(b);
+                if (TabAt(tab, index) == b) {
+                    AutoPtr<TreeNode> hd, tl;
+                    for (AutoPtr<Node> e = b; e != NULL; e = e->mNext) {
+                        AutoPtr<TreeNode> p =
+                                new TreeNode(e->mHash, e->mKey, e->mVal, NULL, NULL);
+                        if ((p->mPrev = tl) == NULL) {
+                            hd = p;
+                        }
+                        else {
+                            tl->mNext = p;
+                        }
+                        tl = p;
+                    }
+                    AutoPtr<Node> n = new TreeBin(hd);
+                    SetTabAt(tab, index, n);
+                }
+            }
+        }
+    }
 }
 
 AutoPtr<CConcurrentHashMap::Node> CConcurrentHashMap::Untreeify(
@@ -760,10 +841,12 @@ AutoPtr<CConcurrentHashMap::Node> CConcurrentHashMap::Untreeify(
     AutoPtr<Node> hd, tl;
     for (AutoPtr<Node> q = b; q != NULL; q = q->mNext) {
         AutoPtr<Node> p = new Node(q->mHash, q->mKey, q->mVal, NULL);
-        if (tl == NULL)
+        if (tl == NULL) {
             hd = p;
-        else
+        }
+        else {
             tl->mNext = p;
+        }
         tl = p;
     }
     return hd;
@@ -780,16 +863,16 @@ CConcurrentHashMap::TreeNode::TreeNode(
     /* [in] */ IInterface* key,
     /* [in] */ IInterface* val,
     /* [in] */ Node* next,
-    /* [in] */ TreeNode* parent) : Node(hash, key, val, next)
-{
-    mParent = parent;
-}
+    /* [in] */ TreeNode* parent)
+    : Node(hash, key, val, next)
+    , mParent(parent)
+{}
 
 AutoPtr<CConcurrentHashMap::Node> CConcurrentHashMap::TreeNode::Find(
     /* [in] */ Int32 h,
     /* [in] */ IInterface* k)
 {
-    return FindTreeNode(h, k, EIID_IInterface);
+    return FindTreeNode(h, k, EMUID_NULL);
 }
 
 AutoPtr<CConcurrentHashMap::TreeNode> CConcurrentHashMap::TreeNode::FindTreeNode(
@@ -808,14 +891,14 @@ AutoPtr<CConcurrentHashMap::TreeNode> CConcurrentHashMap::TreeNode::FindTreeNode
             else if (ph < h) {
                 p = pr;
             }
-            else if ((pk = p->mKey).Get() == k || (pk != NULL && Object::Equals(k, pk))) {
+            else if (((pk = p->mKey), pk.Get() == k) || (pk != NULL && Object::Equals(k, pk))) {
                 return p;
             }
             else if (pl == NULL && pr == NULL) {
                 break;
             }
-            else if ((kc != EIID_IInterface ||
-                    (kc = ComparableClassFor(k)) != EIID_IInterface) &&
+            else if ((kc != EMUID_NULL ||
+                    (kc = ComparableClassFor(k)) != EMUID_NULL) &&
                     (dir = CompareComparables(kc, k, pk)) != 0) {
                 p = (dir < 0) ? pl : pr;
             }
@@ -844,7 +927,8 @@ Int32 CConcurrentHashMap::TreeBin::WAITER = 2; // set when waiting for write loc
 Int32 CConcurrentHashMap::TreeBin::READER = 4; // increment value for setting read lock
 
 CConcurrentHashMap::TreeBin::TreeBin(
-    /* [in] */ TreeNode* b) : Node(TREEBIN, NULL, NULL, NULL)
+    /* [in] */ TreeNode* b)
+    : Node(TREEBIN, NULL, NULL, NULL)
 {
     mFirst = b;
     AutoPtr<TreeNode> r;
@@ -862,22 +946,28 @@ CConcurrentHashMap::TreeBin::TreeBin(
             InterfaceID kc;
             for (AutoPtr<TreeNode> p = r;;) {
                 Int32 dir, ph;
-                if ((ph = p->mHash) > hash)
+                if ((ph = p->mHash) > hash) {
                     dir = -1;
-                else if (ph < hash)
+                }
+                else if (ph < hash) {
                     dir = 1;
-                else if ((kc != EIID_IInterface ||
-                          (kc = ComparableClassFor(key)) != EIID_IInterface))
+                }
+                else if ((kc != EMUID_NULL ||
+                          (kc = ComparableClassFor(key)) != EMUID_NULL)) {
                     dir = CompareComparables(kc, key, p->mKey);
-                else
+                }
+                else {
                     dir = 0;
+                }
                 AutoPtr<TreeNode> xp = p;
                 if ((p = (dir <= 0) ? p->mLeft : p->mRight) == NULL) {
                     x->mParent = xp;
-                    if (dir <= 0)
+                    if (dir <= 0) {
                         xp->mLeft = x;
-                    else
+                    }
+                    else {
                         xp->mRight = x;
+                    }
                     r = BalanceInsertion(r, x);
                     break;
                 }
@@ -889,9 +979,9 @@ CConcurrentHashMap::TreeBin::TreeBin(
 
 void CConcurrentHashMap::TreeBin::LockRoot()
 {
-    assert(0 && "TODO");
-    // if (!U.compareAndSwapInt(this, LOCKSTATE, 0, WRITER))
-    //     ContendedLock(); // offload to separate method
+    if (!CompareAndSwapInt32((volatile int32_t*)&mLockState, 0, WRITER)) {
+        ContendedLock(); // offload to separate method
+    }
 }
 
 void CConcurrentHashMap::TreeBin::UnlockRoot()
@@ -901,57 +991,58 @@ void CConcurrentHashMap::TreeBin::UnlockRoot()
 
 void CConcurrentHashMap::TreeBin::ContendedLock()
 {
-    assert(0 && "TODO");
-    // Boolean waiting = FALSE;
-    // for (Int32 s;;) {
-    //     if (((s = mLockState) & WRITER) == 0) {
-    //         if (U.compareAndSwapInt(this, LOCKSTATE, s, WRITER)) {
-    //             if (waiting)
-    //                 mWaiter = NULL;
-    //             return;
-    //         }
-    //     }
-    //     else if ((s & WAITER) == 0) {
-    //         if (U.compareAndSwapInt(this, LOCKSTATE, s, s | WAITER)) {
-    //             waiting = TRUE;
-    //             mWaiter = Thread::GetCurrentThread();
-    //         }
-    //     }
-    //     else if (waiting)
-    //         LockSupport::Park(this);
-    // }
+    Boolean waiting = FALSE;
+    for (Int32 s;;) {
+        if (((s = mLockState) & WRITER) == 0) {
+            if (CompareAndSwapInt32((volatile int32_t*)&mLockState, s, WRITER)) {
+                if (waiting) {
+                    mWaiter = NULL;
+                }
+                return;
+            }
+        }
+        else if ((s & WAITER) == 0) {
+            if (CompareAndSwapInt32((volatile int32_t*)&mLockState, s, s | WAITER)) {
+                waiting = TRUE;
+                mWaiter = Thread::GetCurrentThread();
+            }
+        }
+        else if (waiting) {
+            LockSupport::Park((ITreeBin*)this);
+        }
+    }
 }
 
 AutoPtr<CConcurrentHashMap::Node> CConcurrentHashMap::TreeBin::Find(
     /* [in] */ Int32 h,
     /* [in] */ IInterface* k)
 {
-    assert(0 && "TODO");
-    // if (k != NULL) {
-    //     for (AutoPtr<Node> e = mFirst; e != NULL; e = e->mNext) {
-    //         Int32 s; AutoPtr<IInterface> ek;
-    //         if (((s = mLockState) & (WAITER|WRITER)) != 0) {
-    //             if (e->mHash == h &&
-    //                 ((ek = e->mKey) == k || (ek != NULL && Object::Equals(k, ek))))
-    //                 return e;
-    //         }
-    //         else if (U.compareAndSwapInt(this, LOCKSTATE, s,
-    //                                      s + READER)) {
-    //             AutoPtr<TreeNode> r, p;
-    //             p = ((r = mRoot) == NULL ? NULL :
-    //                  r->FindTreeNode(h, k, NULL));
+    if (k != NULL) {
+        for (AutoPtr<Node> e = mFirst; e != NULL; e = e->mNext) {
+            Int32 s; AutoPtr<IInterface> ek;
+            if (((s = mLockState) & (WAITER|WRITER)) != 0) {
+                if (e->mHash == h &&
+                    (((ek = e->mKey), ek.Get() == k) || (ek != NULL && Object::Equals(k, ek)))) {
+                    return e;
+                }
+            }
+            else if (CompareAndSwapInt32((volatile int32_t*)&mLockState, s,
+                                        s + READER)) {
+                AutoPtr<TreeNode> r, p;
+                p = ((r = mRoot) == NULL ? NULL :
+                        r->FindTreeNode(h, k, EMUID_NULL));
 
-    //             AutoPtr<IThread> w;
-    //             Int32 ls;
-    //             do {} while (!U.compareAndSwapInt
-    //                          (this, LOCKSTATE,
-    //                           ls = mLockState, ls - READER));
-    //             if (ls == (READER|WAITER) && (w = mWaiter) != NULL)
-    //                 LockSupport::Unpark(w);
-    //             return p;
-    //         }
-    //     }
-    // }
+                AutoPtr<IThread> w;
+                Int32 ls;
+                do {} while (ls = mLockState, !CompareAndSwapInt32((volatile int32_t*)&mLockState,
+                            ls, ls - READER));
+                if (ls == (READER|WAITER) && (w = mWaiter) != NULL) {
+                    LockSupport::Unpark(w);
+                }
+                return p;
+            }
+        }
+    }
     return NULL;
 }
 
@@ -960,7 +1051,7 @@ AutoPtr<CConcurrentHashMap::TreeNode> CConcurrentHashMap::TreeBin::PutTreeVal(
     /* [in] */ IInterface* k,
     /* [in] */ IInterface* v)
 {
-    InterfaceID kc = EIID_IInterface;
+    InterfaceID kc = EMUID_NULL;
     for (AutoPtr<TreeNode> p = mRoot;;) {
         Int32 dir, ph; AutoPtr<IInterface> pk; AutoPtr<TreeNode> q, pr;
         if (p == NULL) {
@@ -968,35 +1059,45 @@ AutoPtr<CConcurrentHashMap::TreeNode> CConcurrentHashMap::TreeBin::PutTreeVal(
             mFirst = mRoot;
             break;
         }
-        else if ((ph = p->mHash) > h)
+        else if ((ph = p->mHash) > h) {
             dir = -1;
-        else if (ph < h)
+        }
+        else if (ph < h) {
             dir = 1;
-        else if ((pk = p->mKey).Get() == k || (pk != NULL && Object::Equals(k, pk)))
+        }
+        else if ((pk = p->mKey).Get() == k || (pk != NULL && Object::Equals(k, pk))) {
             return p;
-        else if ((kc == EIID_IInterface &&
-                  (kc = ComparableClassFor(k)) == EIID_IInterface) ||
-                 (dir = CompareComparables(kc, k, pk)) == 0) {
-            if (p->mLeft == NULL)
+        }
+        else if ((kc == EMUID_NULL &&
+                (kc = ComparableClassFor(k)) == EMUID_NULL) ||
+                (dir = CompareComparables(kc, k, pk)) == 0) {
+            if (p->mLeft == NULL) {
                 dir = 1;
+            }
             else if ((pr = p->mRight) == NULL ||
-                     (q = pr->FindTreeNode(h, k, kc)) == NULL)
+                     (q = pr->FindTreeNode(h, k, kc)) == NULL) {
                 dir = -1;
-            else
+            }
+            else {
                 return q;
+            }
         }
         AutoPtr<TreeNode> xp = p;
         if ((p = (dir < 0) ? p->mLeft : p->mRight) == NULL) {
             AutoPtr<TreeNode> x, f = mFirst;
             mFirst = x = new TreeNode(h, k, v, f, xp);
-            if (f != NULL)
+            if (f != NULL) {
                 f->mPrev = x;
-            if (dir < 0)
+            }
+            if (dir < 0) {
                 xp->mLeft = x;
-            else
+            }
+            else {
                 xp->mRight = x;
-            if (!xp->mRed)
+            }
+            if (!xp->mRed) {
                 x->mRed = TRUE;
+            }
             else {
                 LockRoot();
                 mRoot = BalanceInsertion(mRoot, x);
@@ -1015,27 +1116,32 @@ Boolean CConcurrentHashMap::TreeBin::RemoveTreeNode(
     AutoPtr<TreeNode> next = (TreeNode*)ITreeNode::Probe(p->mNext);
     AutoPtr<TreeNode> pred = p->mPrev;  // unlink traversal pointers
     AutoPtr<TreeNode> r, rl;
-    if (pred == NULL)
+    if (pred == NULL) {
         mFirst = next;
-    else
+    }
+    else {
         pred->mNext = next;
-    if (next != NULL)
+    }
+    if (next != NULL) {
         next->mPrev = pred;
+    }
     if (mFirst == NULL) {
         mRoot = NULL;
         return TRUE;
     }
     if ((r = mRoot) == NULL || r->mRight == NULL || // too small
-        (rl = r->mLeft) == NULL || rl->mLeft == NULL)
+        (rl = r->mLeft) == NULL || rl->mLeft == NULL) {
         return TRUE;
+    }
     LockRoot();
     AutoPtr<TreeNode> replacement;
     AutoPtr<TreeNode> pl = p->mLeft;
     AutoPtr<TreeNode> pr = p->mRight;
     if (pl != NULL && pr != NULL) {
         AutoPtr<TreeNode> s = pr, sl;
-        while ((sl = s->mLeft) != NULL) // find successor
+        while ((sl = s->mLeft) != NULL) { // find successor
             s = sl;
+        }
         Boolean c = s->mRed; s->mRed = p->mRed; p->mRed = c; // swap colors
         AutoPtr<TreeNode> sr = s->mRight;
         AutoPtr<TreeNode> pp = p->mParent;
@@ -1046,44 +1152,60 @@ Boolean CConcurrentHashMap::TreeBin::RemoveTreeNode(
         else {
             AutoPtr<TreeNode> sp = s->mParent;
             if ((p->mParent = sp) != NULL) {
-                if (s == sp->mLeft)
+                if (s == sp->mLeft) {
                     sp->mLeft = p;
-                else
+                }
+                else {
                     sp->mRight = p;
+                }
             }
-            if ((s->mRight = pr) != NULL)
+            if ((s->mRight = pr) != NULL) {
                 pr->mParent = s;
+            }
         }
         p->mLeft = NULL;
-        if ((p->mRight = sr) != NULL)
+        if ((p->mRight = sr) != NULL) {
             sr->mParent = p;
-        if ((s->mLeft = pl) != NULL)
+        }
+        if ((s->mLeft = pl) != NULL) {
             pl->mParent = s;
-        if ((s->mParent = pp) == NULL)
+        }
+        if ((s->mParent = pp) == NULL) {
             r = s;
-        else if (p == pp->mLeft)
+        }
+        else if (p == pp->mLeft) {
             pp->mLeft = s;
-        else
+        }
+        else {
             pp->mRight = s;
-        if (sr != NULL)
+        }
+        if (sr != NULL) {
             replacement = sr;
-        else
+        }
+        else {
             replacement = p;
+        }
     }
-    else if (pl != NULL)
+    else if (pl != NULL) {
         replacement = pl;
-    else if (pr != NULL)
+    }
+    else if (pr != NULL) {
         replacement = pr;
-    else
+    }
+    else {
         replacement = p;
+    }
     if (replacement.Get() != p) {
         AutoPtr<TreeNode> pp = replacement->mParent = p->mParent;
-        if (pp == NULL)
+        if (pp == NULL) {
             r = replacement;
-        else if (p == pp->mLeft)
+        }
+        else if (p == pp->mLeft) {
             pp->mLeft = replacement;
-        else
+        }
+        else {
             pp->mRight = replacement;
+        }
         p->mLeft = p->mRight = p->mParent = NULL;
     }
 
@@ -1092,10 +1214,12 @@ Boolean CConcurrentHashMap::TreeBin::RemoveTreeNode(
     if (p == replacement) {  // detach pointers
         AutoPtr<TreeNode> pp;
         if ((pp = p->mParent) != NULL) {
-            if (p == pp->mLeft)
+            if (p == pp->mLeft) {
                 pp->mLeft = NULL;
-            else if (p == pp->mRight)
+            }
+            else if (p == pp->mRight) {
                 pp->mRight = NULL;
+            }
             p->mParent = NULL;
         }
     }
@@ -1110,14 +1234,18 @@ AutoPtr<CConcurrentHashMap::TreeNode> CConcurrentHashMap::TreeBin::RotateLeft(
 {
     AutoPtr<TreeNode> r, pp, rl;
     if (p != NULL && (r = p->mRight) != NULL) {
-        if ((rl = p->mRight = r->mLeft) != NULL)
+        if ((rl = p->mRight = r->mLeft) != NULL) {
             rl->mParent = p;
-        if ((pp = r->mParent = p->mParent) == NULL)
+        }
+        if ((pp = r->mParent = p->mParent) == NULL) {
             (root = r)->mRed = FALSE;
-        else if (pp->mLeft.Get() == p)
+        }
+        else if (pp->mLeft.Get() == p) {
             pp->mLeft = r;
-        else
+        }
+        else {
             pp->mRight = r;
+        }
         r->mLeft = p;
         p->mParent = r;
     }
@@ -1130,14 +1258,18 @@ AutoPtr<CConcurrentHashMap::TreeNode> CConcurrentHashMap::TreeBin::RotateRight(
 {
     AutoPtr<TreeNode> l, pp, lr;
     if (p != NULL && (l = p->mLeft) != NULL) {
-        if ((lr = p->mLeft = l->mRight) != NULL)
+        if ((lr = p->mLeft = l->mRight) != NULL) {
             lr->mParent = p;
-        if ((pp = l->mParent = p->mParent) == NULL)
+        }
+        if ((pp = l->mParent = p->mParent) == NULL) {
             (root = l)->mRed = FALSE;
-        else if (pp->mRight.Get() == p)
+        }
+        else if (pp->mRight.Get() == p) {
             pp->mRight = l;
-        else
+        }
+        else {
             pp->mLeft = l;
+        }
         l->mRight = p;
         p->mParent = l;
     }
@@ -1154,8 +1286,9 @@ AutoPtr<CConcurrentHashMap::TreeNode> CConcurrentHashMap::TreeBin::BalanceInsert
             x->mRed = FALSE;
             return x;
         }
-        else if (!xp->mRed || (xpp = xp->mParent) == NULL)
+        else if (!xp->mRed || (xpp = xp->mParent) == NULL) {
             return root;
+        }
         if (xp == (xppl = xpp->mLeft)) {
             if ((xppr = xpp->mRight) != NULL && xppr->mRed) {
                 xppr->mRed = FALSE;
@@ -1206,8 +1339,9 @@ AutoPtr<CConcurrentHashMap::TreeNode> CConcurrentHashMap::TreeBin::BalanceDeleti
     /* [in] */ TreeNode* x)
 {
     for (AutoPtr<TreeNode> xp, xpl, xpr;;)  {
-        if (x == NULL || x == root)
+        if (x == NULL || x == root) {
             return root;
+        }
         else if ((xp = x->mParent) == NULL) {
             x->mRed = FALSE;
             return x;
@@ -1223,8 +1357,9 @@ AutoPtr<CConcurrentHashMap::TreeNode> CConcurrentHashMap::TreeBin::BalanceDeleti
                 root = RotateLeft(root, xp);
                 xpr = (xp = x->mParent) == NULL ? NULL : xp->mRight;
             }
-            if (xpr == NULL)
+            if (xpr == NULL) {
                 x = xp;
+            }
             else {
                 AutoPtr<TreeNode> sl = xpr->mLeft, sr = xpr->mRight;
                 if ((sr == NULL || !sr->mRed) &&
@@ -1234,8 +1369,9 @@ AutoPtr<CConcurrentHashMap::TreeNode> CConcurrentHashMap::TreeBin::BalanceDeleti
                 }
                 else {
                     if (sr == NULL || !sr->mRed) {
-                        if (sl != NULL)
+                        if (sl != NULL) {
                             sl->mRed = FALSE;
+                        }
                         xpr->mRed = TRUE;
                         root = RotateRight(root, xpr);
                         xpr = (xp = x->mParent) == NULL ?
@@ -1243,8 +1379,9 @@ AutoPtr<CConcurrentHashMap::TreeNode> CConcurrentHashMap::TreeBin::BalanceDeleti
                     }
                     if (xpr != NULL) {
                         xpr->mRed = (xp == NULL) ? FALSE : xp->mRed;
-                        if ((sr = xpr->mRight) != NULL)
+                        if ((sr = xpr->mRight) != NULL) {
                             sr->mRed = FALSE;
+                        }
                     }
                     if (xp != NULL) {
                         xp->mRed = FALSE;
@@ -1261,8 +1398,9 @@ AutoPtr<CConcurrentHashMap::TreeNode> CConcurrentHashMap::TreeBin::BalanceDeleti
                 root = RotateRight(root, xp);
                 xpl = (xp = x->mParent) == NULL ? NULL : xp->mLeft;
             }
-            if (xpl == NULL)
+            if (xpl == NULL) {
                 x = xp;
+            }
             else {
                 AutoPtr<TreeNode> sl = xpl->mLeft, sr = xpl->mRight;
                 if ((sl == NULL || !sl->mRed) &&
@@ -1272,8 +1410,9 @@ AutoPtr<CConcurrentHashMap::TreeNode> CConcurrentHashMap::TreeBin::BalanceDeleti
                 }
                 else {
                     if (sl == NULL || !sl->mRed) {
-                        if (sr != NULL)
+                        if (sr != NULL) {
                             sr->mRed = FALSE;
+                        }
                         xpl->mRed = TRUE;
                         root = RotateLeft(root, xpl);
                         xpl = (xp = x->mParent) == NULL ?
@@ -1281,8 +1420,9 @@ AutoPtr<CConcurrentHashMap::TreeNode> CConcurrentHashMap::TreeBin::BalanceDeleti
                     }
                     if (xpl != NULL) {
                         xpl->mRed = (xp == NULL) ? FALSE : xp->mRed;
-                        if ((sl = xpl->mLeft) != NULL)
+                        if ((sl = xpl->mLeft) != NULL) {
                             sl->mRed = FALSE;
+                        }
                     }
                     if (xp != NULL) {
                         xp->mRed = FALSE;
@@ -1300,22 +1440,30 @@ Boolean CConcurrentHashMap::TreeBin::CheckInvariants(
 {
     AutoPtr<TreeNode> tp = t->mParent, tl = t->mLeft, tr = t->mRight,
         tb = t->mPrev, tn = (TreeNode*)ITreeNode::Probe(t->mNext);
-    if (tb != NULL && tb->mNext.Get() != t)
+    if (tb != NULL && tb->mNext.Get() != t) {
         return FALSE;
-    if (tn != NULL && tn->mPrev.Get() != t)
+    }
+    if (tn != NULL && tn->mPrev.Get() != t) {
         return FALSE;
-    if (tp != NULL && t != tp->mLeft.Get() && t != tp->mRight.Get())
+    }
+    if (tp != NULL && t != tp->mLeft.Get() && t != tp->mRight.Get()) {
         return FALSE;
-    if (tl != NULL && (tl->mParent.Get() != t || tl->mHash > t->mHash))
+    }
+    if (tl != NULL && (tl->mParent.Get() != t || tl->mHash > t->mHash)) {
         return FALSE;
-    if (tr != NULL && (tr->mParent.Get() != t || tr->mHash < t->mHash))
+    }
+    if (tr != NULL && (tr->mParent.Get() != t || tr->mHash < t->mHash)) {
         return FALSE;
-    if (t->mRed && tl != NULL && tl->mRed && tr != NULL && tr->mRed)
+    }
+    if (t->mRed && tl != NULL && tl->mRed && tr != NULL && tr->mRed) {
         return FALSE;
-    if (tl != NULL && !CheckInvariants(tl))
+    }
+    if (tl != NULL && !CheckInvariants(tl)) {
         return FALSE;
-    if (tr != NULL && !CheckInvariants(tr))
+    }
+    if (tr != NULL && !CheckInvariants(tr)) {
         return FALSE;
+    }
     return TRUE;
 }
 
@@ -1328,26 +1476,28 @@ CConcurrentHashMap::Traverser::Traverser(
     /* [in] */ Int32 size,
     /* [in] */ Int32 index,
     /* [in] */ Int32 limit)
-{
-    mTab = tab;
-    mBaseSize = size;
-    mBaseIndex = mIndex = index;
-    mBaseLimit = limit;
-    mNext = NULL;
-}
+    : mTab(tab)
+    , mIndex(index)
+    , mBaseIndex(index)
+    , mBaseLimit(limit)
+    , mBaseSize(size)
+{}
 
 AutoPtr<CConcurrentHashMap::Node> CConcurrentHashMap::Traverser::Advance()
 {
     AutoPtr<Node> e;
-    if ((e = mNext) != NULL)
+    if ((e = mNext) != NULL) {
         e = e->mNext;
+    }
     for (;;) {
         AutoPtr<ArrayOf<Node*> > t; Int32 i, n; AutoPtr<IInterface> ek;  // must use locals in checks
-        if (e != NULL)
+        if (e != NULL) {
             return mNext = e;
+        }
         if (mBaseIndex >= mBaseLimit || (t = mTab) == NULL ||
-            (n = t->GetLength()) <= (i = mIndex) || i < 0)
+            (n = t->GetLength()) <= (i = mIndex) || i < 0) {
             return mNext = NULL;
+        }
         if ((e = TabAt(t, mIndex)) != NULL && e->mHash < 0) {
             if (IForwardingNode::Probe(e) != NULL) {
                 mTab = ((ForwardingNode*)IForwardingNode::Probe(e))->mNextTable;
@@ -1362,8 +1512,9 @@ AutoPtr<CConcurrentHashMap::Node> CConcurrentHashMap::Traverser::Advance()
                 e = NULL;
             }
         }
-        if ((mIndex += mBaseSize) >= n)
+        if ((mIndex += mBaseSize) >= n) {
             mIndex = ++mBaseIndex;    // visit upper slots if present
+        }
     }
 }
 
@@ -1376,11 +1527,10 @@ CConcurrentHashMap::MapEntry::MapEntry(
     /* [in] */ IInterface* key,
     /* [in] */ IInterface* val,
     /* [in] */ CConcurrentHashMap* map)
-{
-    mKey = key;
-    mVal = val;
-    mMap = map;
-}
+    : mKey(key)
+    , mVal(val)
+    , mMap(map)
+{}
 
 ECode CConcurrentHashMap::MapEntry::GetKey(
     /* [out] */ IInterface** key)
@@ -1459,9 +1609,8 @@ String CConcurrentHashMap::CollectionView::mOomeMsg = String("Required array siz
 
 CConcurrentHashMap::CollectionView::CollectionView(
     /* [in] */ CConcurrentHashMap* map)
-{
-    mMap = map;
-}
+    : mMap(map)
+{}
 
 AutoPtr<CConcurrentHashMap> CConcurrentHashMap::CollectionView::GetMap()
 {
@@ -1495,8 +1644,9 @@ ECode CConcurrentHashMap::CollectionView::ToArray(
     VALIDATE_NOT_NULL(array)
 
     Int64 sz = mMap->MappingCount();
-    if (sz > MAX_ARRAY_SIZE)
+    if (sz > MAX_ARRAY_SIZE) {
         return E_OUT_OF_MEMORY;
+    }
     Int32 n = (Int32)sz;
     AutoPtr<ArrayOf<IInterface*> > r = ArrayOf<IInterface*>::Alloc(n);
     Int32 i = 0;
@@ -1507,13 +1657,18 @@ ECode CConcurrentHashMap::CollectionView::ToArray(
         AutoPtr<IInterface> e;
         it->GetNext((IInterface**)&e);
         if (i == n) {
-            if (n >= MAX_ARRAY_SIZE)
+            if (n >= MAX_ARRAY_SIZE) {
                 return E_OUT_OF_MEMORY;
-            if (n >= MAX_ARRAY_SIZE - (MAX_ARRAY_SIZE >> 1) - 1)
+            }
+            if (n >= MAX_ARRAY_SIZE - (((UInt32)MAX_ARRAY_SIZE) >> 1) - 1) {
                 n = MAX_ARRAY_SIZE;
-            else
-                n += (n >> 1) + 1;
-            Arrays::CopyOf(r, n, (ArrayOf<IInterface*>**)&r);
+            }
+            else {
+                n += (((UInt32)n) >> 1) + 1;
+            }
+            AutoPtr< ArrayOf<IInterface*> > rr;
+            Arrays::CopyOf(r, n, (ArrayOf<IInterface*>**)&rr);
+            r = rr;
         }
         r->Set(i++, e);
     }
@@ -1535,14 +1690,12 @@ ECode CConcurrentHashMap::CollectionView::ToArray(
     VALIDATE_NOT_NULL(outArray)
 
     Int64 sz = mMap->MappingCount();
-    if (sz > MAX_ARRAY_SIZE)
+    if (sz > MAX_ARRAY_SIZE) {
         return E_OUT_OF_MEMORY;
+    }
     Int32 m = (Int32)sz;
-    // AutoPtr<ArrayOf<IInterface*> > r = (inArray->GetLength() >= m) ? inArray :
-    //     (T[])java.lang.reflect.Array
-    //     .newInstance(inArray.getClass().getComponentType(), m);
     AutoPtr<ArrayOf<IInterface*> > r = (inArray->GetLength() >= m) ? inArray :
-        ArrayOf<IInterface*>::Alloc(m);
+            ArrayOf<IInterface*>::Alloc(m);
     Int32 n = r->GetLength();
     Int32 i = 0;
     AutoPtr<IIterator> it;
@@ -1552,18 +1705,23 @@ ECode CConcurrentHashMap::CollectionView::ToArray(
         AutoPtr<IInterface> e;
         it->GetNext((IInterface**)&e);
         if (i == n) {
-            if (n >= MAX_ARRAY_SIZE)
+            if (n >= MAX_ARRAY_SIZE) {
                 return E_OUT_OF_MEMORY;
-            if (n >= MAX_ARRAY_SIZE - (MAX_ARRAY_SIZE >> 1) - 1)
+            }
+            if (n >= MAX_ARRAY_SIZE - (((UInt32)MAX_ARRAY_SIZE) >> 1) - 1) {
                 n = MAX_ARRAY_SIZE;
-            else
-                n += (n >> 1) + 1;
-            Arrays::CopyOf(r, n, (ArrayOf<IInterface*>**)&r);
+            }
+            else {
+                n += (((UInt32)n) >> 1) + 1;
+            }
+            AutoPtr< ArrayOf<IInterface*> > rr;
+            Arrays::CopyOf(r, n, (ArrayOf<IInterface*>**)&rr);
+            r = rr;
         }
-        (*r)[i++] = e;
+        r->Set(i++, e);
     }
     if (inArray == r && i < n) {
-        (*r)[i] = NULL; // NULL-terminate
+        r->Set(i, NULL); // NULL-terminate
         *outArray = r;
         REFCOUNT_ADD(*outArray)
         return NOERROR;
@@ -1590,13 +1748,16 @@ String CConcurrentHashMap::CollectionView::ToString()
         for (;;) {
             AutoPtr<IInterface> e;
             it->GetNext((IInterface**)&e);
-            if (Object::Equals(e, TO_IINTERFACE(this)))
+            if (Object::Equals(e, TO_IINTERFACE(this))) {
                 sb.Append("(this Collection)");
-            else
+            }
+            else {
                 sb.Append(e);
+            }
             Boolean b2 = FALSE;
-            if (!(it->HasNext(&b2), b2))
+            if (!(it->HasNext(&b2), b2)) {
                 break;
+            }
             sb.AppendChar(',');
             sb.AppendChar(' ');
         }
@@ -1611,7 +1772,7 @@ ECode CConcurrentHashMap::CollectionView::ContainsAll(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (!Object::Equals(collection->Probe(EIID_IInterface), TO_IINTERFACE(this))) {
+    if (collection != (ICollection*)this) {
         AutoPtr<ArrayOf<IInterface*> > arr;
         collection->ToArray((ArrayOf<IInterface*>**)&arr);
         for (Int32 i = 0;i < arr->GetLength();i++) {
@@ -1672,110 +1833,6 @@ ECode CConcurrentHashMap::CollectionView::RetainAll(
 }
 
 //===============================================================================
-// CConcurrentHashMap::
-//===============================================================================
-Int32 CConcurrentHashMap::SEED_INCREMENT = 0x61c88647;
-
-//AutoPtr<ThreadLocal> CConcurrentHashMap::mThreadCounterHashCode = new ThreadLocal();
-
-Int64 CConcurrentHashMap::SumCount()
-{
-    AutoPtr<ArrayOf<CounterCell*> > as = mCounterCells; AutoPtr<CounterCell> a;
-    Int64 sum = mBaseCount;
-    if (as != NULL) {
-        for (Int32 i = 0; i < as->GetLength(); ++i) {
-            if ((a = (*as)[i]) != NULL)
-                sum += a->mValue;
-        }
-    }
-    return sum;
-}
-
-void CConcurrentHashMap::FullAddCount(
-    /* [in] */ Int64 x,
-    /* [in] */ CounterHashCode* hc,
-    /* [in] */ Boolean wasUncontended)
-{
-    assert(0 && "TODO");
-//     Int32 h;
-//     if (hc == NULL) {
-//         hc = new CounterHashCode();
-//         Int32 s = mCounterHashCodeGenerator->AddAndGet(SEED_INCREMENT);
-//         h = hc->mCode = (s == 0) ? 1 : s; // Avoid zero
-// //        mThreadCounterHashCode->Set(hc);
-//     }
-//     else
-//         h = hc->mCode;
-//     Boolean collide = FALSE;                // True if last slot nonempty
-//     for (;;) {
-//         AutoPtr<ArrayOf<CounterCell*> > as; AutoPtr<CounterCell> a;
-//         Int32 n; Int64 v;
-//         if ((as = mCounterCells) != NULL && (n = as->GetLength()) > 0) {
-//             if ((a = (*as)[(n - 1) & h]) == NULL) {
-//                 if (mCellsBusy == 0) {            // Try to attach new Cell
-//                     AutoPtr<CounterCell> r = new CounterCell(x); // Optimistic create
-//                     if (mCellsBusy == 0 &&
-//                         U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) {
-//                         Boolean created = FALSE;
-//                         AutoPtr<ArrayOf<CounterCell*> > rs; Int32 m, j;
-//                         if ((rs = mCounterCells) != NULL &&
-//                             (m = rs->GetLength()) > 0 &&
-//                             (*rs)[j = (m - 1) & h] == NULL) {
-//                             (*rs)[j] = r;
-//                             created = TRUE;
-//                         }
-//                         mCellsBusy = 0;
-//                         if (created)
-//                             break;
-//                         continue;           // Slot is now non-empty
-//                     }
-//                 }
-//                 collide = FALSE;
-//             }
-//             else if (!wasUncontended)       // CAS already known to fail
-//                 wasUncontended = TRUE;      // Continue after rehash
-//             else if (U.compareAndSwapLong(a, CELLVALUE, v = a.value, v + x))
-//                 break;
-//             else if (mCounterCells != as || n >= NCPU)
-//                 collide = FALSE;            // At max size or stale
-//             else if (!collide)
-//                 collide = TRUE;
-//             else if (mCellsBusy == 0 &&
-//                      U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) {
-//                 if (mCounterCells == as) {// Expand table unless stale
-//                     AutoPtr<ArrayOf<CounterCell*> > rs = new CounterCell[n << 1];
-//                     for (Int32 i = 0; i < n; ++i)
-//                         (*rs)[i] = (*as)[i];
-//                     mCounterCells = rs;
-//                 }
-//                 mCellsBusy = 0;
-//                 collide = FALSE;
-//                 continue;                   // Retry with expanded table
-//             }
-//             h ^= h << 13;                   // Rehash
-//             h ^= h >> 17;
-//             h ^= h << 5;
-//         }
-//         else if (mCellsBusy == 0 && mCounterCells == as &&
-//                  U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) {
-//             Boolean init = FALSE;
-//             if (mCounterCells == as) {
-//                 AutoPtr<ArrayOf<CounterCell*> > rs = new CounterCell[2];
-//                 (*rs)[h & 1] = new CounterCell(x);
-//                 mCounterCells = rs;
-//                 init = TRUE;
-//             }
-//             mCellsBusy = 0;
-//             if (init)
-//                 break;
-//         }
-//         else if (U.compareAndSwapLong(this, BASECOUNT, v = baseCount, v + x))
-//             break;                          // Fall back on using base
-//     }
-//     hc->mCode = h;                            // Record index for next time
-}
-
-//===============================================================================
 // CConcurrentHashMap::BaseIterator
 //===============================================================================
 CConcurrentHashMap::BaseIterator::BaseIterator(
@@ -1808,8 +1865,9 @@ ECode CConcurrentHashMap::BaseIterator::HasMoreElements(
 ECode CConcurrentHashMap::BaseIterator::Remove()
 {
     AutoPtr<Node> p;
-    if ((p = mLastReturned) == NULL)
+    if ((p = mLastReturned) == NULL) {
         return E_ILLEGAL_STATE_EXCEPTION;
+    }
     mLastReturned = NULL;
     mMap->ReplaceNode(p->mKey, NULL, NULL);
     return NOERROR;
@@ -1836,8 +1894,9 @@ ECode CConcurrentHashMap::KeyIterator::GetNext(
     VALIDATE_NOT_NULL(object)
 
     AutoPtr<Node> p;
-    if ((p = mNext) == NULL)
+    if ((p = mNext) == NULL) {
         return E_NO_SUCH_ELEMENT_EXCEPTION;
+    }
     AutoPtr<IInterface> k = p->mKey;
     mLastReturned = p;
     Advance();
@@ -1890,8 +1949,9 @@ ECode CConcurrentHashMap::ValueIterator::GetNext(
     VALIDATE_NOT_NULL(object)
 
     AutoPtr<Node> p;
-    if ((p = mNext) == NULL)
+    if ((p = mNext) == NULL) {
         return E_NO_SUCH_ELEMENT_EXCEPTION;
+    }
     AutoPtr<IInterface> v = p->mVal;
     mLastReturned = p;
     Advance();
@@ -1944,8 +2004,9 @@ ECode CConcurrentHashMap::EntryIterator::GetNext(
     VALIDATE_NOT_NULL(object)
 
     AutoPtr<Node> p;
-    if ((p = mNext) == NULL)
+    if ((p = mNext) == NULL) {
         return E_NO_SUCH_ELEMENT_EXCEPTION;
+    }
     AutoPtr<IInterface> k = p->mKey;
     AutoPtr<IInterface> v = p->mVal;
     mLastReturned = p;
@@ -2012,7 +2073,7 @@ ECode CConcurrentHashMap::KeySetView::GetIterator(
     AutoPtr<CConcurrentHashMap> m = mMap;
     Int32 f = (t = m->mTable) == NULL ? 0 : t->GetLength();
     AutoPtr<KeyIterator> res = new KeyIterator(t, f, 0, f, m);
-    *result = IIterator::Probe(res);
+    *result = (IIterator*)res.Get();
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -2024,9 +2085,12 @@ ECode CConcurrentHashMap::KeySetView::Add(
     VALIDATE_NOT_NULL(modified)
 
     AutoPtr<IInterface> v;
-    if ((v = mValue) == NULL)
+    if ((v = mValue) == NULL) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
-    *modified = mMap->PutVal(object, v, TRUE) == NULL;
+    }
+    AutoPtr<IInterface> oldValue;
+    FAIL_RETURN(mMap->PutVal(object, v, TRUE, (IInterface**)&oldValue))
+    *modified = oldValue == NULL;
     return NOERROR;
 }
 
@@ -2038,14 +2102,18 @@ ECode CConcurrentHashMap::KeySetView::AddAll(
 
     Boolean added = FALSE;
     AutoPtr<IInterface> v;
-    if ((v = mValue) == NULL)
+    if ((v = mValue) == NULL) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
+    }
     AutoPtr<ArrayOf<IInterface*> > arr;
     collection->ToArray((ArrayOf<IInterface*>**)&arr);
     for (Int32 i = 0;i < arr->GetLength();i++) {
         AutoPtr<IInterface> e = (*arr)[i];
-        if (mMap->PutVal(e, v, TRUE) == NULL)
+        AutoPtr<IInterface> oldValue;
+        FAIL_RETURN(mMap->PutVal(e, v, TRUE, (IInterface**)&oldValue))
+        if (oldValue == NULL) {
             added = TRUE;
+        }
     }
     *modified = added;
     return NOERROR;
@@ -2219,7 +2287,7 @@ ECode CConcurrentHashMap::ValuesView::GetIterator(
     AutoPtr<ArrayOf<Node*> > t;
     Int32 f = (t = m->mTable) == NULL ? 0 : t->GetLength();
     AutoPtr<ValueIterator> res = new ValueIterator(t, f, 0, f, m);
-    *result = IIterator::Probe(res);
+    *result = (IIterator*)res;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -2343,7 +2411,7 @@ ECode CConcurrentHashMap::EntrySetView::GetIterator(
     AutoPtr<ArrayOf<Node*> > t;
     Int32 f = (t = m->mTable) == NULL ? 0 : t->GetLength();
     AutoPtr<EntryIterator> res = new EntryIterator(t, f, 0, f, m);
-    *result = IIterator::Probe(res);
+    *result = (IIterator*)res;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -2358,7 +2426,9 @@ ECode CConcurrentHashMap::EntrySetView::Add(
     AutoPtr<IInterface> k,v;
     e->GetKey((IInterface**)&k);
     e->GetValue((IInterface**)&v);
-    *modified = mMap->PutVal(k, v, FALSE) == NULL;
+    AutoPtr<IInterface> oldValue;
+    FAIL_RETURN(mMap->PutVal(k, v, FALSE, (IInterface**)&oldValue))
+    *modified = oldValue == NULL;
     return NOERROR;
 }
 
@@ -2375,8 +2445,9 @@ ECode CConcurrentHashMap::EntrySetView::AddAll(
         AutoPtr<IInterface> p = (*arr)[i];
         AutoPtr<IMapEntry> e = IMapEntry::Probe(p);
         Boolean b = FALSE;
-        if ((Add(e, &b), b))
+        if ((Add(e, &b), b)) {
             added = TRUE;
+        }
     }
     *modified = added;
     return NOERROR;
@@ -2501,60 +2572,67 @@ ECode CConcurrentHashMap::EntrySetView::ToArray(
     return CollectionView::ToArray(array, result);
 }
 
+
+//====================================================================
+// CConcurrentHashMap::StaticInitializer
+//====================================================================
+static void ThreadDestructor(void* st)
+{
+    CConcurrentHashMap::CounterHashCode* handler = static_cast<CConcurrentHashMap::CounterHashCode*>(st);
+    if (handler) {
+        handler->Release();
+    }
+}
+
+CConcurrentHashMap::StaticInitializer::StaticInitializer()
+{
+    CAtomicInteger32::New(1, (IAtomicInteger32**)&sCounterHashCodeGenerator);
+    Int32 UNUSED(result) = pthread_key_create(&CConcurrentHashMap::sThreadCounterHashCode, ThreadDestructor);
+    assert(result == 0);
+}
+
 //===============================================================================
 // CConcurrentHashMap
 //===============================================================================
-static AutoPtr<IAtomicInteger32> InitmCounterHashCodeGenerator()
-{
-    AutoPtr<IAtomicInteger32> ai;
-    CAtomicInteger32::New(1, (IAtomicInteger32**)&ai);
-    return ai;
-}
 
-const AutoPtr<IAtomicInteger32> CConcurrentHashMap::mCounterHashCodeGenerator = InitmCounterHashCodeGenerator();
+const Int32 CConcurrentHashMap::MAXIMUM_CAPACITY = 1 << 30;
+const Int32 CConcurrentHashMap::DEFAULT_CAPACITY = 16;
+const Int32 CConcurrentHashMap::MAX_ARRAY_SIZE = Elastos::Core::Math::INT32_MAX_VALUE - 8;
+const Int32 CConcurrentHashMap::DEFAULT_CONCURRENCY_LEVEL = 16;
+const Float CConcurrentHashMap::LOAD_FACTOR = 0.75f;
+const Int32 CConcurrentHashMap::TREEIFY_THRESHOLD = 8;
+const Int32 CConcurrentHashMap::UNTREEIFY_THRESHOLD = 6;
+const Int32 CConcurrentHashMap::MIN_TREEIFY_CAPACITY = 64;
+const Int32 CConcurrentHashMap::MIN_TRANSFER_STRIDE = 16;
+const Int32 CConcurrentHashMap::MOVED     = 0x8fffffff; // (-1) hash for forwarding nodes
+const Int32 CConcurrentHashMap::TREEBIN   = 0x80000000; // hash for roots of trees
+const Int32 CConcurrentHashMap::RESERVED  = 0x80000001; // hash for transient reservations
+const Int32 CConcurrentHashMap::HASH_BITS = 0x7fffffff; // usable bits of normal node hash
+const Int32 CConcurrentHashMap::NCPU = 4;// = Runtime.getRuntime().availableProcessors();
+const AutoPtr<IAtomicInteger32> CConcurrentHashMap::sCounterHashCodeGenerator;
+Int32 CConcurrentHashMap::SEED_INCREMENT = 0x61c88647;
+pthread_key_t CConcurrentHashMap::sThreadCounterHashCode;
+const CConcurrentHashMap::StaticInitializer sInitializer;
 
 CAR_INTERFACE_IMPL_3(CConcurrentHashMap, AbstractMap, IConcurrentHashMap, IConcurrentMap, ISerializable)
 
 CAR_OBJECT_IMPL(CConcurrentHashMap)
 
-ECode CConcurrentHashMap::constructor(
-    /* [in] */ Int32 initialCapacity,
-    /* [in] */ Float loadFactor,
-    /* [in] */ Int32 concurrencyLevel)
+ECode CConcurrentHashMap::constructor()
 {
-    if (!(loadFactor > 0) || initialCapacity < 0 || concurrencyLevel <= 0) {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
-    if (initialCapacity < concurrencyLevel)   // Use at least as many bins
-        initialCapacity = concurrencyLevel;   // as estimated threads
-    Int64 size = (Int64)(1.0 + (Int64)initialCapacity / loadFactor);
-    Int32 cap = (size >= (Int64)MAXIMUM_CAPACITY) ?
-        MAXIMUM_CAPACITY : TableSizeFor((Int32)size);
-    mSizeCtl = cap;
     return NOERROR;
-}
-
-ECode CConcurrentHashMap::constructor(
-    /* [in] */ Int32 initialCapacity,
-    /* [in] */ Float loadFactor)
-{
-    return constructor(initialCapacity, loadFactor, 1);
 }
 
 ECode CConcurrentHashMap::constructor(
     /* [in] */ Int32 initialCapacity)
 {
-    if (initialCapacity < 0)
+    if (initialCapacity < 0) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    Int32 cap = ((initialCapacity >= (MAXIMUM_CAPACITY >> 1)) ?
+    }
+    Int32 cap = ((initialCapacity >= (((UInt32)MAXIMUM_CAPACITY) >> 1)) ?
                MAXIMUM_CAPACITY :
-               TableSizeFor(initialCapacity + (initialCapacity >> 1) + 1));
+               TableSizeFor(initialCapacity + (((UInt32)initialCapacity) >> 1) + 1));
     mSizeCtl = cap;
-    return NOERROR;
-}
-
-ECode CConcurrentHashMap::constructor()
-{
     return NOERROR;
 }
 
@@ -2566,16 +2644,38 @@ ECode CConcurrentHashMap::constructor(
     return NOERROR;
 }
 
+ECode CConcurrentHashMap::constructor(
+    /* [in] */ Int32 initialCapacity,
+    /* [in] */ Float loadFactor,
+    /* [in] */ Int32 concurrencyLevel)
+{
+    if (!(loadFactor > 0) || initialCapacity < 0 || concurrencyLevel <= 0) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (initialCapacity < concurrencyLevel) {  // Use at least as many bins
+        initialCapacity = concurrencyLevel;   // as estimated threads
+    }
+    Int64 size = (Int64)(1.0 + (Int64)initialCapacity / loadFactor);
+    Int32 cap = (size >= (Int64)MAXIMUM_CAPACITY) ?
+            MAXIMUM_CAPACITY : TableSizeFor((Int32)size);
+    mSizeCtl = cap;
+    return NOERROR;
+}
+
+ECode CConcurrentHashMap::constructor(
+    /* [in] */ Int32 initialCapacity,
+    /* [in] */ Float loadFactor)
+{
+    return constructor(initialCapacity, loadFactor, 1);
+}
+
 ECode CConcurrentHashMap::PutIfAbsent(
     /* [in] */ IInterface* key,
     /* [in] */ IInterface* value,
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface)
-    AutoPtr<IInterface> res = PutVal(key, value, TRUE);
-    *outface = res;
-    REFCOUNT_ADD(*outface)
-    return NOERROR;
+    return PutVal(key, value, TRUE, outface);
 }
 
 ECode CConcurrentHashMap::Remove(
@@ -2584,8 +2684,9 @@ ECode CConcurrentHashMap::Remove(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    if (key == NULL)
+    if (key == NULL) {
         return E_NULL_POINTER_EXCEPTION;
+    }
     *result = value != NULL && ReplaceNode(key, NULL, value) != NULL;
     return NOERROR;
 }
@@ -2598,8 +2699,9 @@ ECode CConcurrentHashMap::Replace(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (key == NULL || oldValue == NULL || newValue == NULL)
+    if (key == NULL || oldValue == NULL || newValue == NULL) {
         return E_NULL_POINTER_EXCEPTION;
+    }
     *result = ReplaceNode(key, newValue, oldValue) != NULL;
     return NOERROR;
 }
@@ -2610,8 +2712,9 @@ ECode CConcurrentHashMap::Replace(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result)
-    if (key == NULL || value == NULL)
+    if (key == NULL || value == NULL) {
         return E_NULL_POINTER_EXCEPTION;
+    }
     AutoPtr<IInterface> p = ReplaceNode(key, value, NULL);
     *result = p;
     REFCOUNT_ADD(*result);
@@ -2626,14 +2729,16 @@ ECode CConcurrentHashMap::Clear()
     while (tab != NULL && i < tab->GetLength()) {
         Int32 fh;
         AutoPtr<Node> f = TabAt(tab, i);
-        if (f == NULL)
+        if (f == NULL) {
             ++i;
+        }
         else if ((fh = f->mHash) == MOVED) {
             tab = HelpTransfer(tab, f);
             i = 0; // restart
         }
         else {
-            {    AutoLock syncLock(f);
+            {
+                AutoLock syncLock(f);
                 if (TabAt(tab, i) == f) {
                     TreeBin* tb = (TreeBin*)ITreeBin::Probe(f);
                     AutoPtr<Node> p = (fh >= 0 ? f.Get() :
@@ -2647,8 +2752,9 @@ ECode CConcurrentHashMap::Clear()
             }
         }
     }
-    if (delta != 0L)
+    if (delta != 0LL) {
         AddCount(delta, -1);
+    }
     return NOERROR;
 }
 
@@ -2670,8 +2776,9 @@ ECode CConcurrentHashMap::ContainsValue(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (value == NULL)
+    if (value == NULL) {
         return E_NULL_POINTER_EXCEPTION;
+    }
     AutoPtr<ArrayOf<Node*> > t;
     if ((t = mTable) != NULL) {
         AutoPtr<Traverser> it = new Traverser(t, t->GetLength(), 0, t->GetLength());
@@ -2811,7 +2918,7 @@ ECode CConcurrentHashMap::IsEmpty(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = SumCount() <= 0L; // ignore transient negative values
+    *result = SumCount() <= 0LL; // ignore transient negative values
     return NOERROR;
 }
 
@@ -2822,7 +2929,7 @@ ECode CConcurrentHashMap::GetKeySet(
 
     AutoPtr<KeySetView> ks = mKeySet;
     AutoPtr<KeySetView> res = (ks != NULL) ? ks : (mKeySet = new KeySetView(this, NULL));
-    *keySet = ISet::Probe(res);
+    *keySet = (ISet*)res;
     REFCOUNT_ADD(*keySet)
     return NOERROR;
 }
@@ -2833,39 +2940,35 @@ ECode CConcurrentHashMap::Put(
     /* [out] */ IInterface** oldValue)
 {
     VALIDATE_NOT_NULL(oldValue);
-    AutoPtr<IInterface> res = PutVal(key, value, FALSE);
-    *oldValue = res.Get();
-    REFCOUNT_ADD(*oldValue);
-    return NOERROR;
+    return PutVal(key, value, FALSE, oldValue);
 }
 
 ECode CConcurrentHashMap::Put(
     /* [in] */ IInterface* key,
     /* [in] */ IInterface* value)
 {
-    PutVal(key, value, FALSE);
-    return NOERROR;
+    AutoPtr<IInterface> oldValue;
+    return PutVal(key, value, FALSE, (IInterface**)&oldValue);
 }
 
 ECode CConcurrentHashMap::PutAll(
     /* [in] */ IMap* map)
 {
-    VALIDATE_NOT_NULL(map)
-
     Int32 s;
     map->GetSize(&s);
     TryPresize(s);
     AutoPtr<ISet> outset;
     map->GetEntrySet((ISet**)&outset);
     AutoPtr< ArrayOf<IInterface*> > outarr;
-    (ICollection::Probe(outset))->ToArray((ArrayOf<IInterface*>**)&outarr);
+    ICollection::Probe(outset)->ToArray((ArrayOf<IInterface*>**)&outarr);
     for (Int32 i = 0; i < outarr->GetLength(); i++) {
         AutoPtr<IMapEntry> e = IMapEntry::Probe((*outarr)[i]);
         AutoPtr<IInterface> keyface;
         AutoPtr<IInterface> valueface;
         e->GetKey((IInterface**)&keyface);
         e->GetValue((IInterface**)&valueface);
-        PutVal(keyface, valueface, FALSE);
+        AutoPtr<IInterface> oldValue;
+        PutVal(keyface, valueface, FALSE, (IInterface**)&oldValue);
     }
     return NOERROR;
 }
@@ -2950,12 +3053,14 @@ ECode CConcurrentHashMap::WriteObject(
     }
     Int32 segmentShift = 32 - sshift;
     Int32 segmentMask = ssize - 1;
-    AutoPtr<ArrayOf<Segment*> > segments = ArrayOf<Segment*>::Alloc(DEFAULT_CONCURRENCY_LEVEL);
-    for (Int32 i = 0; i < segments->GetLength(); ++i)
-        (*segments)[i] = new Segment(LOAD_FACTOR);
+    AutoPtr<IArrayOf> segments;
+    CArrayOf::New(EIID_IReentrantLock, DEFAULT_CONCURRENCY_LEVEL, (IArrayOf**)&segments);
+    for (Int32 i = 0; i < DEFAULT_CONCURRENCY_LEVEL; ++i) {
+        segments->Set(i, (IReentrantLock*)new Segment(LOAD_FACTOR));
+    }
     AutoPtr<IObjectOutputStreamPutField> field;
     s->PutFields((IObjectOutputStreamPutField**)&field);
-//    field->Put(String("segments"), segments);
+    field->Put(String("segments"), segments);
     field->Put(String("segmentShift"), segmentShift);
     field->Put(String("segmentMask"), segmentMask);
     s->WriteFields();
@@ -2964,13 +3069,12 @@ ECode CConcurrentHashMap::WriteObject(
     if ((t = mTable) != NULL) {
         AutoPtr<Traverser> it = new Traverser(t, t->GetLength(), 0, t->GetLength());
         for (AutoPtr<Node> p; (p = it->Advance()) != NULL; ) {
-            // s->WriteObject(p->mKey);
-            // s->WriteObject(p->mVal);
+            IObjectOutput::Probe(s)->WriteObject(p->mKey);
+            IObjectOutput::Probe(s)->WriteObject(p->mVal);
         }
     }
-    // s->WriteObject(NULL);
-    // s->WriteObject(NULL);
-    segments = NULL; // throw away
+    IObjectOutput::Probe(s)->WriteObject(NULL);
+    IObjectOutput::Probe(s)->WriteObject(NULL);
     return NOERROR;
 }
 
@@ -2989,41 +3093,47 @@ ECode CConcurrentHashMap::ReadObject(
     Int64 size = 0L;
     AutoPtr<Node> p;
     for (;;) {
-        AutoPtr<IInterface> k;// = s->ReadObject();
-        AutoPtr<IInterface> v;// = s->ReadObject();
+        AutoPtr<IInterface> k, v;
+        IObjectInput::Probe(s)->ReadObject((IInterface**)&k);
+        IObjectInput::Probe(s)->ReadObject((IInterface**)&v);
         if (k != NULL && v != NULL) {
             Int32 hc = Object::GetHashCode(k);
             p = new Node(Spread(hc), k, v, p);
             ++size;
         }
-        else
+        else {
             break;
+        }
     }
-    if (size == 0L)
+    if (size == 0LL) {
         mSizeCtl = 0;
+    }
     else {
         Int32 n;
-        if (size >= (Int64)(MAXIMUM_CAPACITY >> 1))
+        if (size >= (Int64)(((UInt32)MAXIMUM_CAPACITY) >> 1)) {
             n = MAXIMUM_CAPACITY;
+        }
         else {
             Int32 sz = (Int32)size;
-            n = TableSizeFor(sz + (sz >> 1) + 1);
+            n = TableSizeFor(sz + (((UInt32)sz) >> 1) + 1);
         }
         AutoPtr<ArrayOf<Node*> > tab = ArrayOf<Node*>::Alloc(n);
         Int32 mask = n - 1;
-        Int64 added = 0L;
+        Int64 added = 0LL;
         while (p != NULL) {
             Boolean insertAtFront;
             AutoPtr<Node> next = p->mNext, first;
             Int32 h = p->mHash, j = h & mask;
-            if ((first = TabAt(tab, j)) == NULL)
+            if ((first = TabAt(tab, j)) == NULL) {
                 insertAtFront = TRUE;
+            }
             else {
                 AutoPtr<IInterface> k = p->mKey;
                 if (first->mHash < 0) {
                     AutoPtr<TreeBin> t = (TreeBin*)ITreeBin::Probe(first);
-                    if (t->PutTreeVal(h, k, p->mVal) == NULL)
+                    if (t->PutTreeVal(h, k, p->mVal) == NULL) {
                         ++added;
+                    }
                     insertAtFront = FALSE;
                 }
                 else {
@@ -3046,10 +3156,12 @@ ECode CConcurrentHashMap::ReadObject(
                         AutoPtr<TreeNode> hd = NULL, tl = NULL;
                         for (q = p; q != NULL; q = q->mNext) {
                             AutoPtr<TreeNode> t = new TreeNode(q->mHash, q->mKey, q->mVal, NULL, NULL);
-                            if ((t->mPrev = tl) == NULL)
+                            if ((t->mPrev = tl) == NULL) {
                                 hd = t;
-                            else
+                            }
+                            else {
                                 tl->mNext = t;
+                            }
                             tl = t;
                         }
                         SetTabAt(tab, j, new TreeBin(hd));
@@ -3064,10 +3176,119 @@ ECode CConcurrentHashMap::ReadObject(
             p = next;
         }
         mTable = tab;
-        mSizeCtl = n - (n >> 2);
+        mSizeCtl = n - (((UInt32)n) >> 2);
         mBaseCount = added;
     }
     return NOERROR;
+}
+
+Int64 CConcurrentHashMap::SumCount()
+{
+    AutoPtr<ArrayOf<CounterCell*> > as = mCounterCells; AutoPtr<CounterCell> a;
+    Int64 sum = mBaseCount;
+    if (as != NULL) {
+        for (Int32 i = 0; i < as->GetLength(); ++i) {
+            if ((a = (*as)[i]) != NULL) {
+                sum += a->mValue;
+            }
+        }
+    }
+    return sum;
+}
+
+void CConcurrentHashMap::FullAddCount(
+    /* [in] */ Int64 x,
+    /* [in] */ CounterHashCode* _hc,
+    /* [in] */ Boolean wasUncontended)
+{
+    AutoPtr<CounterHashCode> hc = _hc;
+    Int32 h;
+    if (hc == NULL) {
+        hc = new CounterHashCode();
+        Int32 s;
+        sCounterHashCodeGenerator->AddAndGet(SEED_INCREMENT, &s);
+        h = hc->mCode = (s == 0) ? 1 : s; // Avoid zero
+        pthread_setspecific(sThreadCounterHashCode, hc.Get());
+        hc->AddRef();
+    }
+    else {
+        h = hc->mCode;
+    }
+    Boolean collide = FALSE;                // True if last slot nonempty
+    for (;;) {
+        AutoPtr<ArrayOf<CounterCell*> > as; AutoPtr<CounterCell> a;
+        Int32 n; Int64 v;
+        if ((as = mCounterCells) != NULL && (n = as->GetLength()) > 0) {
+            if ((a = (*as)[(n - 1) & h]) == NULL) {
+                if (mCellsBusy == 0) {            // Try to attach new Cell
+                    AutoPtr<CounterCell> r = new CounterCell(x); // Optimistic create
+                    if (mCellsBusy == 0 &&
+                        CompareAndSwapInt32((volatile int32_t*)&mCellsBusy, 0, 1)) {
+                        Boolean created = FALSE;
+                        AutoPtr<ArrayOf<CounterCell*> > rs; Int32 m, j;
+                        if ((rs = mCounterCells) != NULL &&
+                            (m = rs->GetLength()) > 0 &&
+                            (*rs)[j = (m - 1) & h] == NULL) {
+                            rs->Set(j, r);
+                            created = TRUE;
+                        }
+                        mCellsBusy = 0;
+                        if (created) {
+                            break;
+                        }
+                        continue;           // Slot is now non-empty
+                    }
+                }
+                collide = FALSE;
+            }
+            else if (!wasUncontended) {      // CAS already known to fail
+                wasUncontended = TRUE;      // Continue after rehash
+            }
+            else if (v = a->mValue, CompareAndSwapInt64((volatile int64_t*)&a->mValue, v, v + x)) {
+                break;
+            }
+            else if (mCounterCells != as || n >= NCPU) {
+                collide = FALSE;            // At max size or stale
+            }
+            else if (!collide) {
+                collide = TRUE;
+            }
+            else if (mCellsBusy == 0 &&
+                    CompareAndSwapInt32((volatile int32_t*)&mCellsBusy, 0, 1)) {
+                if (mCounterCells == as) {// Expand table unless stale
+                    AutoPtr<ArrayOf<CounterCell*> > rs = ArrayOf<CounterCell*>::Alloc(n << 1);
+                    for (Int32 i = 0; i < n; ++i) {
+                        rs->Set(i, (*as)[i]);
+                    }
+                    mCounterCells = rs;
+                }
+                mCellsBusy = 0;
+                collide = FALSE;
+                continue;                   // Retry with expanded table
+            }
+            h ^= h << 13;                   // Rehash
+            h ^= ((UInt32)h) >> 17;
+            h ^= h << 5;
+        }
+        else if (mCellsBusy == 0 && mCounterCells == as &&
+                CompareAndSwapInt32((volatile int32_t*)&mCellsBusy, 0, 1)) {
+            Boolean init = FALSE;
+            if (mCounterCells == as) {
+                AutoPtr<ArrayOf<CounterCell*> > rs = ArrayOf<CounterCell*>::Alloc(2);
+                rs->Set(h & 1, new CounterCell(x));
+                mCounterCells = rs;
+                init = TRUE;
+            }
+            mCellsBusy = 0;
+            if (init) {
+                break;
+            }
+        }
+        else if (v = mBaseCount, CompareAndSwapInt64((volatile int64_t*)&mBaseCount, v, v + x)) {
+            break;                          // Fall back on using base
+        }
+    }
+    hc->mCode = h;                            // Record index for next time
 }
 
 } // namespace Concurrent
