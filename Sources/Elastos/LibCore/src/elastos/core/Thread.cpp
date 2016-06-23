@@ -795,6 +795,12 @@ void Thread::NativeSuspend()
 
 void Thread::Yield()
 {
+    NativeYield();
+}
+
+void Thread::NativeYield()
+{
+    sched_yield();
 }
 
 ECode Thread::Unpark()

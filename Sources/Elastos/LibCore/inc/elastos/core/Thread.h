@@ -969,6 +969,8 @@ private:
     //@SuppressWarnings("ThrowableInstanceNeverThrown")
     ECO_LOCAL CARAPI_(void) NativeSuspend();
 
+    ECO_LOCAL static CARAPI_(void) NativeYield();
+
 public:
     static const ThreadState STATE_MAP[];
     /*volatile*/ String mName;
