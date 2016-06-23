@@ -1077,7 +1077,7 @@ ECode PreferenceActivity::LoadHeadersFromResource(
                 CBundle::New((IBundle**)&curBundle);
             }
 
-            Int32 innerDepth;
+            Int32 innerDepth, size;
             xp->GetDepth(&innerDepth);
             while ((xp->Next(&type), type != IXmlPullParser::END_DOCUMENT
                    && type != IXmlPullParser::END_TAG) || (xp->GetDepth(&depth), depth > innerDepth)) {

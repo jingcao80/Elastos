@@ -1,5 +1,6 @@
 #include "elastos/droid/systemui/recent/FadedEdgeDrawHelper.h"
 #include "elastos/droid/R.h"
+#include "elastos/droid/ext/frameworkext.h"
 #include "../R.h"
 #include <elastos/core/Math.h>
 

@@ -7,12 +7,11 @@
 #include "elastos/droid/graphics/drawable/CRotateDrawable.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/R.h"
+#include "elastos/droid/ext/frameworkext.h"
 #include <elastos/utility/logging/Logger.h>
 
-
-using Elastos::Utility::Logging::Logger;
-
 using Elastos::Droid::R;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
