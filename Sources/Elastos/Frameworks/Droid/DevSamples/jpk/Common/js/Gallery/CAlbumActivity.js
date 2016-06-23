@@ -59,7 +59,7 @@ module.exports = function(aoElastos, aoActivity){
                 }
                 else {
                     var res = oActivity.GetResources();
-                    var bitmapDrawable = Droid_New("CBitmapDrawable", res, null);
+                    var bitmapDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CBitmapDrawable", res, null);
                     itemLayout.SetBackgroundDrawable(bitmapDrawable);
 
                     var viewParent2 = viewParent.GetParentEx();
@@ -72,7 +72,7 @@ module.exports = function(aoElastos, aoActivity){
                         var lastIndex = sourcePath.lastIndexOf(DataSourceHelper.PATH_SPLITE);
                         var folderPath = sourcePath.substring(0,lastIndex);
 
-                        var intent = Droid_New("CIntent");
+                        var intent = Droid_New("Elastos.Droid.Content.CIntent");
                         intent.SetClassNameEx("JSGallery", "JSGallery.CBrowserActivity");
                         intent.PutStringExtra(DataSourceHelper.SOURCE_PATH, folderPath);
                         intent.PutStringExtra(DataSourceHelper.SOURCE_DESC, entry.desc);
@@ -461,13 +461,13 @@ module.exports = function(aoElastos, aoActivity){
                 });
 
                 if (!mAlbumPopupWindow) {
-                    mAlbumPopupWindow = Droid_New('CPopupWindow', layout, 80, 93, true);
+                    mAlbumPopupWindow = Droid_New('Elastos.Droid.Widget.CPopupWindow', layout, 80, 93, true);
                     mAlbumPopupWindow.SetTouchable(true);
                     mAlbumPopupWindow.SetOutsideTouchable(true);
                 }
 
                 var res = oActivity.GetResources();
-                var bitmapDrawable = Droid_New('CBitmapDrawable');
+                var bitmapDrawable = Droid_New('Elastos.Droid.Graphics.Drawable.CBitmapDrawable');
                 mAlbumPopupWindow.SetBackgroundDrawable(bitmapDrawable);
                 mAlbumPopupWindow.SetOnDismissListener({
                     OnDismiss : function (aoView) {
@@ -500,7 +500,7 @@ module.exports = function(aoElastos, aoActivity){
             OnClick : function (aoView) {
                 elog('================mAboutButton.OnClick.begin=======1==========');
 
-                var intent = Droid_New('CIntent');
+                var intent = Droid_New('Elastos.Droid.Content.CIntent');
                 intent.SetClassNameEx("JSGallery", "JSGallery.CAboutActivity");
                 var status = oActivity.StartActivity(intent);
             }
@@ -544,10 +544,10 @@ module.exports = function(aoElastos, aoActivity){
             elog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====5====');
         }
 
-elog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====6==== typeof oHandler:' + typeof oHandler);
-var aa = [];
-for (var pp in oHandler) aa.push(pp);
-elog('====oHandler methods:[' + aa.join('][') + ']');
+//elog('====jso_activity_cb====LoadImageInfoRunnable_Run.begin====6==== typeof oHandler:' + typeof oHandler);
+//var aa = [];
+//for (var pp in oHandler) aa.push(pp);
+//elog('====oHandler methods:[' + aa.join('][') + ']');
 
         var result = oHandler.SendEmptyMessage(MSG_LOAD_ALBUM_VIEW);
 
@@ -703,7 +703,7 @@ if (aiTimes == 4) {
                 //var oCSimpleAdapter_00 = aoElastos.Test.New_CSimpleAdapter(o.ctx, o.data, o.resource, o.from, o.to);
                 //var oCSimpleAdapter = aoInObject;
                 // elog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======3======');
-                var oCSimpleAdapter = Droid_New("CSimpleAdapter", o.ctx, o.data, o.resource, o.from, o.to);
+                var oCSimpleAdapter = Droid_New("Elastos.Droid.Widget.CSimpleAdapter", o.ctx, o.data, o.resource, o.from, o.to);
                 //var oCSimpleAdapter = aoElastos.Test.New_CSimpleAdapter(o.ctx, o.data, o.resource, o.from, o.to);
                 elog('====jso_activity_cb====OnExchangeData.New_CSimpleAdapter======4.2======');
 

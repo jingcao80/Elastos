@@ -271,8 +271,8 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         elog('====classinfo__createObject====begin==0.3==ClassName:'+sClassName);
     }
 
-    var sConstructorProtos = getConstructorProtos(oClassInfo);
-    elog("====sConstructorProtos====" + sConstructorProtos);
+    //var sConstructorProtos = getConstructorProtos(oClassInfo);
+    //elog("====sConstructorProtos====" + sConstructorProtos);
 
     var bCreateOnUIThread = getCreateOnUIThread(sClassName);
 
