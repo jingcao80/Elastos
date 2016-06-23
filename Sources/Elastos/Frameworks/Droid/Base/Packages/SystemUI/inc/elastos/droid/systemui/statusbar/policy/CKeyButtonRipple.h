@@ -125,7 +125,7 @@ public:
 protected:
     // @Override
     CARAPI_(Boolean) OnStateChange(
-        /* [in] */ const ArrayOf<Int32>* state);
+        /* [in] */ ArrayOf<Int32>* state);
 
 private:
     CARAPI_(AutoPtr<IPaint>) GetRipplePaint();

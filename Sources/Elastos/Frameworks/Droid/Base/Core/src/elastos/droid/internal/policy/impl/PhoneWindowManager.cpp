@@ -8094,7 +8094,6 @@ ECode PhoneWindowManager::HideBootMessages()
 
 ECode PhoneWindowManager::UserActivity()
 {
-    Logger::I(TAG, " >>>>>>>>>>>> UserActivity");
     // ***************************************
     // NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
     // ***************************************

@@ -1902,7 +1902,6 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
     view = NULL;
     statusBarWindow->FindViewById(R::id::quick_settings_panel, (IView**)&view);
     mQSPanel = IQSPanel::Probe(view);
-    Logger::I(TAG, " >>> Setup QSPanel: %s", TO_CSTR(mQSPanel));
     if (mQSPanel != NULL) {
         AutoPtr<IQSTileHost> qsh = new QSTileHost(mContext, this,
                 mBluetoothController, mLocationController, mRotationLockController,

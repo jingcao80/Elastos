@@ -68,7 +68,7 @@ ECode CKeyButtonView::CheckLongPressRunnable::Run()
 //                  CKeyButtonView
 //==============================================================================
 const String CKeyButtonView::TAG("CKeyButtonView");
-const Boolean CKeyButtonView::DEBUG = TRUE;
+const Boolean CKeyButtonView::DEBUG = FALSE;
 const Float CKeyButtonView::DEFAULT_QUIESCENT_ALPHA = 1.f;
 
 CAR_INTERFACE_IMPL(CKeyButtonView, ImageView, IKeyButtonView)
@@ -235,7 +235,7 @@ ECode CKeyButtonView::OnTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
-    if (DEBUG) Logger::D("CKeyButtonView", " >>>> OnTouchEvent: %s", TO_CSTR(ev));
+    VALIDATE_NOT_NULL(result)
     Int32 action;
     ev->GetAction(&action);
     Int32 x, y;
@@ -243,7 +243,6 @@ ECode CKeyButtonView::OnTouchEvent(
     Boolean tmp = FALSE;
     switch (action) {
         case IMotionEvent::ACTION_DOWN: {
-            if (DEBUG) Logger::D("CKeyButtonView", " ACTION_DOWN, mSupportsLongpress: %d", mSupportsLongpress);
             mDownTime = SystemClock::GetUptimeMillis();
             SetPressed(TRUE);
             if (mCode != 0) {
@@ -259,7 +258,6 @@ ECode CKeyButtonView::OnTouchEvent(
                 CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
                 Int32 timeout;
                 helper->GetLongPressTimeout(&timeout);
-                if (DEBUG) Logger::D("CKeyButtonView", "Post mCheckLongPress Delayed %d", timeout);
                 PostDelayed(mCheckLongPress, timeout, &tmp);
             }
             break;
@@ -286,7 +284,6 @@ ECode CKeyButtonView::OnTouchEvent(
                 SendEvent(IKeyEvent::ACTION_UP, IKeyEvent::FLAG_CANCELED);
             }
             if (mSupportsLongpress) {
-                if (DEBUG) Logger::D("CKeyButtonView", "Remove mCheckLongPress");
                 RemoveCallbacks(mCheckLongPress, &tmp);
             }
             break;
@@ -313,14 +310,12 @@ ECode CKeyButtonView::OnTouchEvent(
                 }
             }
             if (mSupportsLongpress) {
-                if (DEBUG) Logger::D("CKeyButtonView", "Remove mCheckLongPress");
                 RemoveCallbacks(mCheckLongPress, &tmp);
             }
             break;
         }
     }
 
-    if (DEBUG) Logger::D("CKeyButtonView", " <<<< OnTouchEvent: %s", TO_CSTR(ev));
     *result = TRUE;
     return NOERROR;
 }
@@ -362,8 +357,6 @@ void CKeyButtonView::SendEvent(
     helper->GetInstance((IInputManager**)&inputManager);
     Boolean result;
     inputManager->InjectInputEvent(ev, IInputManager::INJECT_INPUT_EVENT_MODE_ASYNC, &result);
-
-    if (DEBUG) Logger::D(TAG, " SendEvent %s", TO_CSTR(ev));
 }
 
 }// namespace Policy

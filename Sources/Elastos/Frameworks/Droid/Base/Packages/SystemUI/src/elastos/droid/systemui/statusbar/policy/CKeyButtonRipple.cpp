@@ -101,7 +101,6 @@ CKeyButtonRipple::constructor(
     /* [in] */ IContext* ctx,
     /* [in] */ IView* targetView)
 {
-    Logger::I(TAG, " >> CKeyButtonRipple::constructor()");
     mInterpolator = new LogInterpolator();
     mAlphaExitInterpolator = ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT);
     CHashSet::New((IHashSet**)&mRunningAnimations);
@@ -127,7 +126,6 @@ AutoPtr<IPaint> CKeyButtonRipple::GetRipplePaint()
 void CKeyButtonRipple::DrawSoftware(
     /* [in] */ ICanvas* canvas)
 {
-    Logger::I(TAG, " >> CKeyButtonRipple::DrawSoftware()");
     if (mGlowAlpha > 0.f) {
         AutoPtr<IPaint> p = GetRipplePaint();
         p->SetAlpha((Int32)(mGlowAlpha * 255.f));
@@ -156,7 +154,6 @@ void CKeyButtonRipple::DrawSoftware(
 ECode CKeyButtonRipple::Draw(
     /* [in] */ ICanvas* canvas)
 {
-    Logger::I(TAG, " >> CKeyButtonRipple::Draw()");
     canvas->IsHardwareAccelerated(&mSupportHardware);
     if (mSupportHardware) {
         DrawHardware(IHardwareCanvas::Probe(canvas));
@@ -202,7 +199,6 @@ Boolean CKeyButtonRipple::IsHorizontal()
 void CKeyButtonRipple::DrawHardware(
     /* [in] */ IHardwareCanvas* c)
 {
-    Logger::I(TAG, " >> CKeyButtonRipple::DrawHardware()");
     if (mDrawingHardwareGlow) {
         c->DrawRoundRect(mLeftProp, mTopProp, mRightProp, mBottomProp,
             mRxProp, mRyProp, mPaintProp);
@@ -242,7 +238,7 @@ ECode CKeyButtonRipple::SetGlowScale(
 }
 
 Boolean CKeyButtonRipple::OnStateChange(
-    /* [in] */ const ArrayOf<Int32>* state)
+    /* [in] */ ArrayOf<Int32>* state)
 {
     Boolean pressed = FALSE;
     for (Int32 i = 0; i < state->GetLength(); i++) {
@@ -308,7 +304,6 @@ void CKeyButtonRipple::SetPressedSoftware(
 
 void CKeyButtonRipple::EnterSoftware()
 {
-    Logger::I(TAG, " >> CKeyButtonRipple::EnterSoftware()");
     CancelAnimations();
     mGlowAlpha = GLOW_MAX_ALPHA;
 
@@ -324,13 +319,13 @@ void CKeyButtonRipple::EnterSoftware()
     animator->SetInterpolator(mInterpolator);
     animator->SetDuration(ANIMATION_DURATION_SCALE);
     animator->AddListener(mAnimatorListener);
+
     animator->Start();
-    mRunningAnimations->Add(scaleAnimator);
+    mRunningAnimations->Add(animator);
 }
 
 void CKeyButtonRipple::ExitSoftware()
 {
-    Logger::I(TAG, " >> CKeyButtonRipple::ExitSoftware()");
     AutoPtr<IObjectAnimatorHelper> helper;
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
     AutoPtr<ArrayOf<Float> > fa = ArrayOf<Float>::Alloc(2);
@@ -343,7 +338,7 @@ void CKeyButtonRipple::ExitSoftware()
     animator->SetDuration(ANIMATION_DURATION_FADE);
     animator->AddListener(mAnimatorListener);
     animator->Start();
-    mRunningAnimations->Add(alphaAnimator);
+    mRunningAnimations->Add(animator);
 }
 
 void CKeyButtonRipple::SetPressedHardware(
@@ -400,7 +395,6 @@ Int32 CKeyButtonRipple::GetExtendSize()
     else {
         bounds->GetHeight(&v);
     }
-    Logger::I(TAG, " >> CKeyButtonRipple::GetExtendSize: %d", v);
     return v;
 }
 
@@ -415,13 +409,11 @@ Int32 CKeyButtonRipple::GetRippleSize()
     else {
         bounds->GetHeight(&size);
     }
-    Logger::I(TAG, " >> CKeyButtonRipple::GetExtendSize: size:%d, mMaxWidth:%d", size, mMaxWidth);
     return Elastos::Core::Math::Min(size, mMaxWidth);
 }
 
 void CKeyButtonRipple::EnterHardware()
 {
-    Logger::I(TAG, " >> CKeyButtonRipple::EnterHardware()");
     CancelAnimations();
     mDrawingHardwareGlow = TRUE;
     SetExtendStart(CanvasProperty::CreateFloat(GetExtendSize() / 2));
@@ -476,15 +468,14 @@ void CKeyButtonRipple::EnterHardware()
 
     sa->Start();
     ea->Start();
-    mRunningAnimations->Add(startAnim);
-    mRunningAnimations->Add(endAnim);
+    mRunningAnimations->Add(sa);
+    mRunningAnimations->Add(ea);
 
     InvalidateSelf();
 }
 
 void CKeyButtonRipple::ExitHardware()
 {
-    Logger::I(TAG, " >> CKeyButtonRipple::ExitHardware()");
     mPaintProp = CanvasProperty::CreatePaint(GetRipplePaint());
     AutoPtr<IRenderNodeAnimator> opacityAnim;
     CRenderNodeAnimator::New(mPaintProp,
@@ -496,7 +487,7 @@ void CKeyButtonRipple::ExitHardware()
     opacityAnim->SetTarget(mTargetView);
 
     animator->Start();
-    mRunningAnimations->Add(opacityAnim);
+    mRunningAnimations->Add(animator);
 
     InvalidateSelf();
 }
